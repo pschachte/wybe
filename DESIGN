@@ -1,7 +1,7 @@
 Frege design document
 Copyright 2003 Peter Schachte.  All rights reserved
 
-RCS:  $Id: DESIGN,v 1.4 2003/03/24 23:28:30 schachte Exp $
+RCS:  $Id: DESIGN,v 1.5 2003/03/28 00:40:26 schachte Exp $
 
 Design of a new programming langauge
 
@@ -136,10 +136,48 @@ instantiation state for a predicate.  For example, the initial
 instantiation for the plus/3 predicate (and the +/2 function) might
 specify that two of the three arguments must be ground on call.
 
-It probably makes sense to follow Mercury in requiring the modes of
-exported predicates/functions to be declared.  Others should be
-inferrable.
+Modes need to be reflect the structure of types.  Eg, the mode for
+append(A,B,C) must say that on success, the spine of A is fully bound,
+and the spine of B is iff the spine of C is, and that the elements of
+C are fully bound iff those of both A and B are.
 
+It may make sense to follow Mercury in requiring the modes of exported
+predicates/functions to be declared.  Others should be inferrable.
+
+It should be possible to write different code for different modes of a
+predicate, though it 
+
+================================================================
+Determinism
+
+Determinism can be at least partially handled by a functional
+dependency analysis.  This could be handled by having an instantiation
+'definite', meaning ground and lacking any alternatives, which is more
+specific than 'ground'.  A predicate's determinism could then be
+specified as part of its mode.  The determinism of append(A,B,C), eg,
+could be specified as "any one is definite if the other two are."
+This, however, doesn't handle possible failure.  For nonfailure, we'd
+want to say that append(A,B,C) may fail if both B and C are bound, or
+if both A and C are bound.
+
+Note also that this doesn't really tell us everything we want to know
+about choicepoints.  For example, this doesn't tell us that
+append(A,B,C) will never leave a choicepoint if the spine of A is
+fully bound.  Whether B is bound or not is immaterial to choicepoints.
+
+However, it is more powerful than the Mercury system.  It allows us to
+consider some arguments of a predicate to be determistic.  For
+example, the first argument of
+
+	p(a, b).
+	p(a, c).
+
+is definite, while the second is not.  We do not need to store the
+first argument in a choicepoint or rebind it when we backtrack into
+p/2.  This approach also is not attached to modes; a predicate would
+have a single formula describing its determinism.  Furthermore,
+definiteness of answers is probably a more natural concept to users
+than lack of choicepoints.
 
 ================================================================
 Syntax
