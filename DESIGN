@@ -1,7 +1,7 @@
 Frege design document
 Copyright 2003 Peter Schachte.  All rights reserved
 
-RCS:  $Id: DESIGN,v 1.5 2003/03/28 00:40:26 schachte Exp $
+RCS:  $Id: DESIGN,v 1.6 2003/03/28 01:02:52 schachte Exp $
 
 Design of a new programming langauge
 
@@ -207,6 +207,14 @@ to handle defaults.
 Another approach would be to provide some kind of vararg facility.
 This could just be a special syntax for passing some or all the
 arguments of a predicate as a list.  Worth the complication?
+
+Perhaps the best way to handle user-defined operators would be to use
+a conventional grammar-based parser, but specify the nonterminals of
+the grammar, and allow users to add new productions for existing
+nonterminals.  The same could be done for the lexer, to allow a
+library to define the syntax for strings.  This approach would allow
+binary prefix operators, distfix operators, and other grammar
+extensions.
 
 Should the language syntax be C-like, for the C-ness envy factor?
 
