@@ -1,7 +1,7 @@
 Frege design document
 Copyright 2003 Peter Schachte.  All rights reserved
 
-RCS:  $Id: DESIGN,v 1.2 2003/03/23 13:32:19 schachte Exp $
+RCS:  $Id: DESIGN,v 1.3 2003/03/23 22:51:01 schachte Exp $
 
 Design of a new programming langauge
 
@@ -23,8 +23,31 @@ the integers as an enumeration!  Perhaps 42 and 3.14159 could be
 handled by the parser as identifiers?  Strings would seem like an even
 bigger problem.
 
+
 ================================================================
 Philosophy
+
+There is no reason to assume the the information available to the
+reader of a program is limited to what the writer writes.  Having type
+and mode information available no doubt makes a program easier to
+understand, but this doesn't mean the programmer must write it.  This
+could be done by listing generation tool, or even by a smart program
+editor (which would also give this information to the programmer as
+she works).
+
+Separate compilation, defined to mean the ability to explicitly
+compile one source file at a time and explicitly link together the
+object files, is *not* necessary.  The real goal is to be able to
+quickly begin testing code after a small change.  One would usually
+prefer to use a tool like 'make' to rebuild an executable than to
+manually invoke the compiler on the changed files anyway.  A
+language-aware make program could easily avoid recompiling code that
+is unchanged (by saving away the token stream of the previously
+compiled version of the file).  It could also keep track of what
+object code must be regenerated when a particular definition changes.
+Therefore, the "need" for separate compilation should not be taken as
+an excuse for not applying aggressive intermodule analysis and
+optimization.
 
 
 ================================================================
@@ -93,6 +116,32 @@ type to theirs?  But coercion seems directional, which could be a
 problem in a logic language.
 
 ================================================================
+Modes
+
+One major principle here is that modes should be simple for users to
+understand.  In particular, mode inference should be friendly and
+widely used.
+
+A predicate's modes should not be responsible for determining which
+modes of a predicate to generate code for.  This should be done by
+demand.  So modes are simply a matter of specifying the output
+instantiation pattern of arguments given the input pattern.  Eg,
+append/3 would specify that on completion, the backbone of the first
+argument is ground, and the backbone of the third is if and only if
+the backbone of the second is.  Also, the elements of the third list
+are all ground iff the elements of the second and third are.
+
+Modes may also be responsible for determining the required initial
+instantiation state for a predicate.  For example, the initial
+instantiation for the plus/3 predicate (and the +/2 function) might
+specify that two of the three arguments must be ground on call.
+
+It probably makes sense to follow Mercury in requiring the modes of
+exported predicates/functions to be declared.  Others should be
+inferrable.
+
+
+================================================================
 Syntax
 
 There should be an infix reverse order function application operator.
@@ -103,7 +152,26 @@ and b and c are deconstructor functions.  It also behaves much like a
 unix pipeline, which is why '|' might be a good choice of operator.
 But a|b|c doesn't look that good.
 
+Perhaps arity polymorphism should be renounced in favor of default
+arguments?  Note that default arguments need to be respected in either
+mode.  Eg,  reverse/3 could have a default of [] for the third
+argument; then reverse(AB, BA) would mean reverse(AB, BA, []),
+regardless of which, if either, of the arguments is bound at call
+time.  This should be OK.
+
+A motivation for this was to make higher-order code work more
+smoothly, but it wouldn't.  A higher order term like reverse(AB) is
+still ambiguous, because it's not clear whether this is expecting one
+or two more arguments.  Still, a default argument syntax might make
+code clearer and more compact when multiple arities are provided just
+to handle defaults.
+
+Another approach would be to provide some kind of vararg facility.
+This could just be a special syntax for passing some or all the
+arguments of a predicate as a list.  Worth the complication?
+
 Should the language syntax be C-like, for the C-ness envy factor?
+
 
 ================================================================
 Ideas / Notes
@@ -116,3 +184,12 @@ store.  But the store forces one to manually dereference pointers --
 it's like being back in C.  There should be some compromise, that
 allows one to to *read* such terms without worrying about
 dereferencing, but without losing the pure semantics.
+
+
+================================================================
+Problems
+
+How to reconcile mode polymorphism with subtyping?  Ie, usually one
+wants covariance for inputs and contravariance for outputs; how can
+one handle this when the decision between input and output is made at
+compile or even runtime?  The key is the Liskov substitution principle.
