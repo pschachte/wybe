@@ -1,26 +1,27 @@
 Frege design document
 Copyright 2003 Peter Schachte.  All rights reserved
 
-RCS:  $Id: DESIGN,v 1.1 2003/03/23 12:33:27 schachte Exp $
+RCS:  $Id: DESIGN,v 1.2 2003/03/23 13:32:19 schachte Exp $
 
 Design of a new programming langauge
 
 ================================================================
 Aims
 
-The aim of this project is to produce a pure, clean logic programming
-language simple and intuitive enough to be suited to teaching as a
-first or second language, yet powerful enough for serious software
-engineering.
+The aim of this project is to produce a pure, clean logic/functional
+programming language simple and intuitive enough to be suited to
+teaching as a first or second language, yet powerful enough for
+serious software engineering.
 
-The language should be simple.  There should be very little built-in;
+The language should be simple.  There should be very little built in;
 most of it should be in libraries.  Ideally, all normal datatypes
 should be provided by libraries.  Probably function and predicate
 (higher order) types would have to be built in.  This raises
 interesting issues for manifest constants.  If integers aren't built
-in, how can the compiler handle constants like 42?  Perhaps 42 and
-3.14159 could be handled by the parser as identifiers?  Strings would
-seem like an even bigger problem.
+in, how can the compiler handle constants like 42?  You can't define
+the integers as an enumeration!  Perhaps 42 and 3.14159 could be
+handled by the parser as identifiers?  Strings would seem like an even
+bigger problem.
 
 ================================================================
 Philosophy
@@ -38,20 +39,53 @@ existing type with defined constructors and deconstructors could be
 redefined with new functions implementing the previous constructors
 and deconstructors.
 
+A type can then be viewed as just the set of functions and predicates
+that operate on it.  That is, a type is just a kind of module.  It's
+not clear that any other kind of module is needed.  It should also be
+possible to define nested modules in a layered kind of way: the
+innermost layer would be just the constructor and most primitive
+operations.  Layer 1 would be built using only layer 0 facilities.
+Layer 2 would use only layer 1, etc.  This would allow maintenance on
+one layer at a time, with changes to any layer not affecting the lower
+and higher levels as long as the same interfaces can be maintained.
+
 Pushing this idea further, it should then be possible to treat any
 type as an interface that any other type could be specified to
-implement -- ie, interface inheritance.
+implement -- ie, interface inheritance, or type classes.  This should
+make it possible to redefine a list as a packed array, and have all
+list predicates and functions also work on that type.  It should even
+be possible to define input and output streams to be compatible with
+lists, so list operations should work for them too.  Read from or
+write to a stream by just appending to or from it.  Understanding
+determinism is important for this to work, though.
 
 There would have to be a mechanism for declaring mutual exclusion and
 exhaustiveness of functions (and predicates).
 
+At the lowest level, it would be necessary to be able to access the
+raw data of the type.  Most types would be defined as algebraic types,
+but sometimes something more low-level would be best.  Probably the
+most flexible primitive building block would be the packed array of
+bits.  This would allow a Boolean or character type to be 1 or 8 or 16
+bits.  There would also need to be an address type and an addressible
+array of bits, which would be aligned as necessary to make it
+efficiently addressable.  This should allow lists of characters to be
+represented as packed arrays of byes.  Note that this general approach
+makes it possible in general to treat foreign data as native types.
+
+Garbage collection would also need to be considered in the design.
+The garbage collection interface for the low level facility should be
+kept as flexible as possible to allow users to do various clever
+things with foreign data, and still allow different implementations to
+use different garbage collection strategies.
+
 Each type should be able to specify how instances should be treated
 when used in a context where a function or predicate is expected.
 This would allow Boolean-valued functions to be used as predicates,
-since true used as predicate could be defined to succeed and false to
-fail.  It also gives a nice approach to arrays, as an array type could
-be defined to apply indexing when used as a function.  That doesn't
-handle array element assignment, though.  How can this idea be
+since 'true' used as predicate could be defined to succeed and 'false'
+to fail.  It also gives a nice approach to arrays, as an array type
+could be defined to apply indexing when used as a function.  That
+doesn't handle array element assignment, though.  How can this idea be
 generalized?  Perhaps as a coercion system where users can define how
 to coerce their type to any other type, including function and
 predicate types?  Maybe they want to define how to coerce any other
@@ -61,6 +95,15 @@ problem in a logic language.
 ================================================================
 Syntax
 
+There should be an infix reverse order function application operator.
+The two most obvious choices are '.' and '|'.  For example, a.b would
+mean apply function b to object a, and a.b.c would apply b to a, and
+apply c to the value of that.  This works nicely when a is a variable
+and b and c are deconstructor functions.  It also behaves much like a
+unix pipeline, which is why '|' might be a good choice of operator.
+But a|b|c doesn't look that good.
+
+Should the language syntax be C-like, for the C-ness envy factor?
 
 ================================================================
 Ideas / Notes
