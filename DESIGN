@@ -1,0 +1,75 @@
+Frege design document
+Copyright 2003 Peter Schachte.  All rights reserved
+
+RCS:  $Id: DESIGN,v 1.1 2003/03/23 12:33:27 schachte Exp $
+
+Design of a new programming langauge
+
+================================================================
+Aims
+
+The aim of this project is to produce a pure, clean logic programming
+language simple and intuitive enough to be suited to teaching as a
+first or second language, yet powerful enough for serious software
+engineering.
+
+The language should be simple.  There should be very little built-in;
+most of it should be in libraries.  Ideally, all normal datatypes
+should be provided by libraries.  Probably function and predicate
+(higher order) types would have to be built in.  This raises
+interesting issues for manifest constants.  If integers aren't built
+in, how can the compiler handle constants like 42?  Perhaps 42 and
+3.14159 could be handled by the parser as identifiers?  Strings would
+seem like an even bigger problem.
+
+================================================================
+Philosophy
+
+
+================================================================
+Types / Classes / Modules
+
+The language should be strongly typed, with parametric polymorphism
+and type inference.
+
+All data types should be abstract.  This would be achieved by treating
+constructors (and deconstructors) as ordinary functions.  Thus an
+existing type with defined constructors and deconstructors could be
+redefined with new functions implementing the previous constructors
+and deconstructors.
+
+Pushing this idea further, it should then be possible to treat any
+type as an interface that any other type could be specified to
+implement -- ie, interface inheritance.
+
+There would have to be a mechanism for declaring mutual exclusion and
+exhaustiveness of functions (and predicates).
+
+Each type should be able to specify how instances should be treated
+when used in a context where a function or predicate is expected.
+This would allow Boolean-valued functions to be used as predicates,
+since true used as predicate could be defined to succeed and false to
+fail.  It also gives a nice approach to arrays, as an array type could
+be defined to apply indexing when used as a function.  That doesn't
+handle array element assignment, though.  How can this idea be
+generalized?  Perhaps as a coercion system where users can define how
+to coerce their type to any other type, including function and
+predicate types?  Maybe they want to define how to coerce any other
+type to theirs?  But coercion seems directional, which could be a
+problem in a logic language.
+
+================================================================
+Syntax
+
+
+================================================================
+Ideas / Notes
+
+It should be possible to ignore memory issues, such as structure
+sharing (aliasing), but also possible to address it when needed.
+Currently in pure languages like Mercury, one must either use ordinary
+terms and ignore such issues, or address such issues by using a
+store.  But the store forces one to manually dereference pointers --
+it's like being back in C.  There should be some compromise, that
+allows one to to *read* such terms without worrying about
+dereferencing, but without losing the pure semantics.
