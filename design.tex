@@ -1,6 +1,6 @@
 %  Emacs    : -*- latex -*-
 %  File     : design.tex
-%  RCS      : $Id: design.tex,v 1.3 2003/09/23 23:24:22 schachte Exp $
+%  RCS      : $Id: design.tex,v 1.4 2004/04/01 23:57:17 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Fri Mar 28 19:36:48 2003
 %  Purpose  : Discussion document on design of new language
@@ -318,9 +318,27 @@ dereferencing, but without losing the pure semantics.
 \section{Problems}
 
 How to reconcile mode polymorphism with subtyping?  Ie, usually one
-wants covariance for inputs and contravariance for outputs; how can
-one handle this when the decision between input and output is made at
-compile or even runtime?  The key is the Liskov substitution principle.
+wants subtyping for inputs (the caller may pass any supertype of the
+declared type, the callee can only use operations of the declared
+type) and supertyping for outputs (the callee may pass back any
+supertype of the declared type, the caller can only use operations of
+the declared type).  How can one handle this when the decision between
+input and output is made at compile or even runtime?  The key is the
+Liskov substitution principle.
+
+This problem arises because we presume that the code that creates the
+term must determine its type, but that is not so: the type of a newly
+created term could be decided by the caller.  In fact, each predicate
+could decide whether only the caller, or only the callee, or neither,
+is permitted to use operations of supertypes of the declared argument
+type.  For example, a predicate or function interface might specify
+one argument to be a supertype of list of char, meaning an term of any
+type which implements all the operations of list of char could be
+passed in or out.  Another argument might specify that neither the caller
+nor the predicate itself may use supertype operations.  Still another
+may permit the predicate to use supertype operations, but forbid the
+caller from doing so.
+
 
 Some predicates have multiple solutions, but some solutions are
 preferred to others.  For example, a parser may parse many different inputs to
