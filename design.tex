@@ -1,6 +1,6 @@
 %  Emacs    : -*- latex -*-
 %  File     : design.tex
-%  RCS      : $Id: design.tex,v 1.2 2003/03/30 13:42:00 schachte Exp $
+%  RCS      : $Id: design.tex,v 1.3 2003/09/23 23:24:22 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Fri Mar 28 19:36:48 2003
 %  Purpose  : Discussion document on design of new language
@@ -8,8 +8,11 @@
 %
 
 \documentclass{article}
+
+\newcommand{\frege}{\textsf{Frege}}
+
 \begin{document}
-\title{Frege Design Document}
+\title{\frege Design Document}
 \author{Peter Schachte}
 
 \maketitle
@@ -22,14 +25,19 @@ teaching as a first or second language, yet powerful enough for
 serious software engineering.
 
 The language should be simple.  There should be very little built in;
-most of it should be in libraries.  Ideally, all normal datatypes
-should be provided by libraries.  Probably function and predicate
+most of it should be in libraries.  Ideally, all datatypes that would
+normally be considered primitive would be provided by libraries.
+Probably function and predicate
 (higher order) types would have to be built in.  This raises
 interesting issues for manifest constants.  If integers aren't built
 in, how can the compiler handle constants like 42?  You can't define
 the integers as an enumeration!  Perhaps 42 and 3.14159 could be
-handled by the parser as identifiers?  Strings would seem like an even
-bigger problem.
+handled by the parser as identifiers, and coerced to the right type by
+the semantic analysis (handled by the compiler, rather than the
+lexer)?   Strings would seem like an even bigger problem.
+
+The current working name for the language is \frege, for
+\textbf{F}unctions, \textbf{RE}lations, and \textbf{GE}nerics.
 
 
 \section{Philosophy}
@@ -80,27 +88,42 @@ and higher levels as long as the same interfaces can be maintained.
 
 Pushing this idea further, it should then be possible to treat any
 type as an interface that any other type could be specified to
-implement -- ie, interface inheritance, or type classes.  This should
+implement --- ie, interface inheritance, or type classes.  This should
 make it possible to redefine a list as a packed array, and have all
 list predicates and functions also work on that type.  It should even
 be possible to define input and output streams to be compatible with
 lists, so list operations should work for them too.  Read from or
-write to a stream by just appending to or from it.  Understanding
-determinism is important for this to work, though.
+write to a stream by just appending to or from it.
 
-There would have to be a mechanism for declaring mutual exclusion and
-exhaustiveness of functions (and predicates).
+Understanding determinism is important for this to work, though.
+Therefor, There would have to be a mechanism for declaring mutual
+exclusion and exhaustiveness of functions (and predicates).
 
 At the lowest level, it would be necessary to be able to access the
 raw data of the type.  Most types would be defined as algebraic types,
-but sometimes something more low-level would be best.  Probably the
-most flexible primitive building block would be the packed array of
-bits.  This would allow a Boolean or character type to be 1 or 8 or 16
-bits.  There would also need to be an address type and an addressible
+but sometimes something more low-level would be best.
+In fact, the algebraic type facility should be defined in a
+library; users could define their own type facilities.  \emph{E.g},
+there could be a C-compatible type system in a library, which would
+lay out types compatibly with the way C does, allowing a C type to be
+treated as a native \frege type.
+
+Probably the
+most flexible primitive building block would be the \texttt{bits}($n$)
+type, specifying a packed array of $n$ bits.
+This would allow a Boolean or character type to be 1 or 8 or 16
+bits.  There would also need to be an \texttt{address} type, at least
+large enough to
+hold the address of an address, and a addressible
 array of bits, which would be aligned as necessary to make it
 efficiently addressable.  This should allow lists of characters to be
-represented as packed arrays of byes.  Note that this general approach
-makes it possible in general to treat foreign data as native types.
+represented as packed arrays of byes.
+
+There should be a sizeof function returning the size of any type.  In
+particular, this can be used to find the size of an address.  
+This needs to be
+generalized to allow different approaches for addressing characters
+and integers/addresses.
 
 Garbage collection would also need to be considered in the design.
 The garbage collection interface for the low level facility should be
@@ -134,7 +157,7 @@ instantiation pattern of arguments given the input pattern.  Eg,
 \verb@append@/3 would specify that on completion, the backbone of the first
 argument is ground, and the backbone of the third is if and only if
 the backbone of the second is.  Also, the elements of the third list
-are all ground iff the elements of the second and third are.
+are all ground iff the elements of the first and second are.
 
 Modes may also be responsible for determining the required initial
 instantiation state for a predicate.  For example, the initial
@@ -150,7 +173,36 @@ It may make sense to follow Mercury in requiring the modes of exported
 predicates/functions to be declared.  Others should be inferrable.
 
 It should be possible to write different code for different modes of a
-predicate, though it.
+predicate.
+
+Perhaps it should be possible to specify what Java would call static
+data members for types, \ie, data lexically scoped to the type but
+having the lifetime of the program.  For example, to implement a CLP
+real variable
+type, one needs a constraint store.  To do this properly, this
+constraint store needs to be threaded throughout the code.  This leads
+to the wrong interface for the primitive operations:  \texttt{+} would
+relate three real variables and two constraint stores.  From the
+standpoint of modularity, the constraint store should be considered
+local to the implementation of the real type.  This gives the
+primitive operations the desired interface.  However, we need some
+assurances that allowing this will not affect the desired properties
+of conjunction; \eg, \texttt{D = A + B, E = D + C} should behave the
+same as \texttt{E = D + C, D = A + B}.
+
+An extension of this idea would be to permit conjunction to lose the
+desired properties, but then require the use of a special syntax when
+using those predicates (perhaps calls to such predicates would have to
+be enclosed in braces).  This would give a form of hidden state
+threading.  It would be nice to use this for grammars \emph{\`a la}
+DCGs, but there would need to be a way to define types that hide state
+and make different predicates use different ones of these types.  \Eg,
+some clauses would be written as normal 2-extra-argument DCGs, but
+others may want to be written as 4-extra-argument DCGs producing an
+output text and allowing substitutions.  Perhaps type inheritance
+could do this:  define the grammar inside a type that ``extends'' the
+DCG type or the substitution grammar type.
+
 
 \section{Determinism}
 
@@ -184,6 +236,7 @@ first argument in a choicepoint or rebind it when we backtrack into
 have a single formula describing its determinism.  Furthermore,
 definiteness of answers is probably a more natural concept to users
 than lack of choicepoints.
+
 
 \section{Syntax}
 
@@ -230,6 +283,25 @@ The language should be designed with optimizing compilation in mind.  In
 particular, runtime type information should be kept to a minimum.  As much of
 the program as possible should be monoporphized during compilation.
 
+Transform nondet and multi predicates into two predicates: one that
+initializes a cursor, and one that takes a cursor as input and
+extracts the next set of bindings and next cursor.  That is, compile
+nondeterminism into coroutining.  This will allow cursors to be used
+independetly.  One example of this would be to turn a conjunction of
+nondeterministic goals into a RDBMS-style join operation when the two
+nondeterministic goals could be compiled into code that generates
+solutions in order.  In some cases, the code to find the next solution
+and next cursor could be quite efficient.  \Eg, the code find the next
+solution for between/3 would be quite simple:  just increment the
+counter.  Similarly for member/2:  take the tail of the list.
+
+The problem is: how can we handle binding of variables appearing
+deeply nested inside other terms?  Basically, terms that would need to
+be trailed.  The cursor would need to maintain them somehow.  So it
+might always be possible to compile nondeterministic code into
+\emph{impure} determinisitic, but not to \emph{pure} determinisitic
+code.
+
 
 \section{Ideas / Notes}
 
@@ -249,4 +321,18 @@ How to reconcile mode polymorphism with subtyping?  Ie, usually one
 wants covariance for inputs and contravariance for outputs; how can
 one handle this when the decision between input and output is made at
 compile or even runtime?  The key is the Liskov substitution principle.
+
+Some predicates have multiple solutions, but some solutions are
+preferred to others.  For example, a parser may parse many different inputs to
+a single parse tree; run backwards, it will produce many strings from
+a single parse tree, but one may be preferred.  One way to handle this
+would be to have an ``or else'' operator --- like or, but only
+considering the second disjunct after the first one.  In conjunction
+with some kind of commit or ``pick the first solution'' operator, this
+could handle this without losing purity.  But we still need to be
+sure that p(X, Y), Y=... does not behave differently than Y = ...,
+p(X, Y), so committment to an earlier solution of an or else operator
+must wait until it is certain that no further constraints on that
+solution.
+
 \end{document}
