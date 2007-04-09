@@ -1,6 +1,6 @@
 %  Emacs    : -*- latex -*-
 %  File     : design.tex
-%  RCS      : $Id: design.tex,v 1.4 2004/04/01 23:57:17 schachte Exp $
+%  RCS      : $Id: design.tex,v 1.5 2007/04/09 12:11:09 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Fri Mar 28 19:36:48 2003
 %  Purpose  : Discussion document on design of new language
@@ -10,6 +10,7 @@
 \documentclass{article}
 
 \newcommand{\frege}{\textsf{Frege}}
+\newcommand{\Frege}{\textsf{Frege}}
 
 \begin{document}
 \title{\frege Design Document}
@@ -24,45 +25,38 @@ programming language simple and intuitive enough to be suited to
 teaching as a first or second language, yet powerful enough for
 serious software engineering.
 
-The language should be simple.  There should be very little built in;
-most of it should be in libraries.  Ideally, all datatypes that would
-normally be considered primitive would be provided by libraries.
-Probably function and predicate
-(higher order) types would have to be built in.  This raises
-interesting issues for manifest constants.  If integers aren't built
-in, how can the compiler handle constants like 42?  You can't define
-the integers as an enumeration!  Perhaps 42 and 3.14159 could be
-handled by the parser as identifiers, and coerced to the right type by
-the semantic analysis (handled by the compiler, rather than the
-lexer)?   Strings would seem like an even bigger problem.
+From the standpoint of software engineering, the language must support
+separation of concerns:  it must be possible to define each aspect of a
+system in a separate software component.  Furthermore, each aspect should be
+separately maintainable and, where appropriate, reusable.
 
 The current working name for the language is \frege, for
-\textbf{F}unctions, \textbf{RE}lations, and \textbf{GE}nerics.
+\textbf{F}unctions, \textbf{RE}lations, and pervasive \textbf{GE}nerics.
 
 
 \section{Philosophy}
 
-There is no reason to assume the the information available to the
+There is no reason to assume the information available to the
 reader of a program is limited to what the writer writes.  Having type
 and mode information available no doubt makes a program easier to
-understand, but this doesn't mean the programmer must write it.  This
-could be done by listing generation tool, or even by a smart program
+understand, but this doesn't mean the programmer must write it.  It
+could be produced by listing generation tool, or even by a smart program
 editor (which would also give this information to the programmer as
 she works).
 
 Separate compilation, defined to mean the ability to explicitly
 compile one source file at a time and explicitly link together the
-object files, is \emph{not} necessary.  The real goal is to be able to
+object files, is not necessary.  The real goal is to be able to
 quickly begin testing code after a small change.  One would usually
-prefer to use a tool like \verb@make@ to rebuild an executable than to
+prefer to use a tool like \texttt{make} to rebuild an executable than to
 manually invoke the compiler on the changed files anyway.  A
-language-aware make program could easily avoid recompiling code that
+language-aware \texttt{make} program could easily avoid recompiling code that
 is unchanged (by saving away the token stream of the previously
 compiled version of the file).  It could also keep track of what
 object code must be regenerated when a particular definition changes.
 Therefore, the ``need'' for separate compilation should not be taken as
 an excuse for not applying aggressive intermodule analysis and
-optimization.
+optimisation.
 
 
 \section{Types / Classes / Modules}
@@ -78,13 +72,22 @@ and deconstructors.
 
 A type can then be viewed as just the set of functions and predicates
 that operate on it.  That is, a type is just a kind of module.  It's
-not clear that any other kind of module is needed.  It should also be
+not clear whether any other kind of module is needed.  It should also be
 possible to define nested modules in a layered kind of way: the
 innermost layer would be just the constructor and most primitive
 operations.  Layer 1 would be built using only layer 0 facilities.
 Layer 2 would use only layer 1, etc.  This would allow maintenance on
 one layer at a time, with changes to any layer not affecting the lower
 and higher levels as long as the same interfaces can be maintained.
+
+\Frege supports three approaches to layering:  embedding, extension, and
+delegation.  Embedding one module within another hides it from any other
+module.  When the interface of an embedded module is changed, only the
+embedding module needs to be updated.  The price of this protection is that
+no other module may directly use the inner module.
+
+Extending a module defines a new module that provides the full interface of
+the extended module, plus some extra
 
 Pushing this idea further, it should then be possible to treat any
 type as an interface that any other type could be specified to
@@ -114,7 +117,7 @@ type, specifying a packed array of $n$ bits.
 This would allow a Boolean or character type to be 1 or 8 or 16
 bits.  There would also need to be an \texttt{address} type, at least
 large enough to
-hold the address of an address, and a addressible
+hold the address of an address, and a addressable
 array of bits, which would be aligned as necessary to make it
 efficiently addressable.  This should allow lists of characters to be
 represented as packed arrays of byes.
@@ -122,7 +125,7 @@ represented as packed arrays of byes.
 There should be a sizeof function returning the size of any type.  In
 particular, this can be used to find the size of an address.  
 This needs to be
-generalized to allow different approaches for addressing characters
+generalised to allow different approaches for addressing characters
 and integers/addresses.
 
 Garbage collection would also need to be considered in the design.
@@ -134,15 +137,49 @@ use different garbage collection strategies.
 Each type should be able to specify how instances should be treated
 when used in a context where a function or predicate is expected.
 This would allow Boolean-valued functions to be used as predicates,
-since \verb@true@ used as predicate could be defined to succeed and \verb@false@
+since \texttt{true} used as predicate could be defined to succeed and \texttt{false}
 to fail.  It also gives a nice approach to arrays, as an array type
 could be defined to apply indexing when used as a function.  That
 doesn't handle array element assignment, though.  How can this idea be
-generalized?  Perhaps as a coercion system where users can define how
+generalised?  Perhaps as a coercion system where users can define how
 to coerce their type to any other type, including function and
 predicate types?  Maybe they want to define how to coerce any other
 type to theirs?  But coercion seems directional, which could be a
 problem in a logic language.
+
+The language should be simple.  There should be very little built in;
+most of it should be in libraries.  Ideally, all datatypes that would
+normally be considered primitive would be provided by libraries.
+Probably function and predicate
+(higher order) types would have to be built in.  This raises
+interesting issues for manifest constants.  If integers aren't built
+in, how can the compiler handle constants like 42?  You can't define
+the integers as an enumeration!  This could be handled by allowing each type
+to define a reader method to convert from a token to a member of the type.
+
+One solution would be to define the language lexically to consist of a
+sequence of tokens, where a token is a sequence of characters.  Each token
+would be one of the following:
+\begin{itemize}
+\item one or more alphanumeric characters (including underscore);
+\item one open or close parenthesis, bracket, or brace character;
+\item a single or double quote or backquote, followed by any number of
+  characters up to the matching quote; or
+\item a \emph{here} string, described below; or
+\item one or more punctuation characters.
+\end{itemize}
+Within a quoted token, a backslash character is treated much as in C:  if the
+following character is a letter, it is a character escape; otherwise it is
+treated literally; in particular, backslash may be used to escape a quote
+character.
+
+A \emph{here} string begins with a \emph{here quote} and ends with an
+identical here quote, with all intervening text completely uninterpreted.  A
+\emph{here quote} is any sequence of non-whitespace characters enclosed
+between backslash characters.
+
+This approach would seem to create problems for type inference:  manifest
+constants would no longer indicate their types.
 
 \section{Modes}
 
@@ -154,23 +191,23 @@ A predicate's modes should not be responsible for determining which
 modes of a predicate to generate code for.  This should be done by
 demand.  So modes are simply a matter of specifying the output
 instantiation pattern of arguments given the input pattern.  Eg,
-\verb@append@/3 would specify that on completion, the backbone of the first
+\texttt{append}/3 would specify that on completion, the backbone of the first
 argument is ground, and the backbone of the third is if and only if
 the backbone of the second is.  Also, the elements of the third list
 are all ground iff the elements of the first and second are.
 
 Modes may also be responsible for determining the required initial
 instantiation state for a predicate.  For example, the initial
-instantiation for the \verb@plus@/3 predicate (and the \verb@+@/2 function) might
+instantiation for the \texttt{plus}/3 predicate (and the \texttt{+}/2 function) might
 specify that two of the three arguments must be ground on call.
 
 Modes need to be reflect the structure of types.  Eg, the mode for
-\verb@append(A,B,C)@ must say that on success, the spine of \verb@A@ is fully bound,
-and the spine of \verb@B@ is iff the spine of \verb@C@ is, and that the elements of
-\verb@C@ are fully bound iff those of both \verb@A@ and \verb@B@ are.
+\texttt{append(A,B,C)} must say that on success, the spine of \texttt{A} is fully bound,
+and the spine of \texttt{B} is iff the spine of \texttt{C} is, and that the elements of
+\texttt{C} are fully bound iff those of both \texttt{A} and \texttt{B} are.
 
 It may make sense to follow Mercury in requiring the modes of exported
-predicates/functions to be declared.  Others should be inferrable.
+predicates/functions to be declared.  Others should be inferable.
 
 It should be possible to write different code for different modes of a
 predicate.
@@ -208,21 +245,21 @@ DCG type or the substitution grammar type.
 
 Determinism can be at least partially handled by a functional
 dependency analysis.  This could be handled by having an instantiation
-\verb@definite@, meaning ground and lacking any alternatives, which is more
-specific than \verb@ground@.  A predicate's determinism could then be
-specified as part of its mode.  The determinism of \verb@append(A,B,C)@, eg,
+\texttt{definite}, meaning ground and lacking any alternatives, which is more
+specific than \texttt{ground}.  A predicate's determinism could then be
+specified as part of its mode.  The determinism of \texttt{append(A,B,C)}, eg,
 could be specified as ``any one is definite if the other two are.''
 This, however, doesn't handle possible failure.  For nonfailure, we'd
-want to say that \verb@append(A,B,C)@ may fail if both \verb@B@ and \verb@C@ are bound, or
-if both \verb@A@ and \verb@C@ are bound.
+want to say that \texttt{append(A,B,C)} may fail if both \texttt{B} and \texttt{C} are bound, or
+if both \texttt{A} and \texttt{C} are bound.
 
 Note also that this doesn't really tell us everything we want to know
 about choicepoints.  For example, this doesn't tell us that
-\verb@append(A,B,C)@ will never leave a choicepoint if the spine of \verb@A@ is
-fully bound.  Whether \verb@B@ is bound or not is immaterial to choicepoints.
+\texttt{append(A,B,C)} will never leave a choicepoint if the spine of \texttt{A} is
+fully bound.  Whether \texttt{B} is bound or not is immaterial to choicepoints.
 
 However, it is more powerful than the Mercury system.  It allows us to
-consider some arguments of a predicate to be determistic.  For
+consider some arguments of a predicate to be deterministic.  For
 example, the first argument of
 
 \begin{verbatim}
@@ -232,7 +269,7 @@ example, the first argument of
 
 is definite, while the second is not.  We do not need to store the
 first argument in a choicepoint or rebind it when we backtrack into
-\verb@p@/2.  This approach also is not attached to modes; a predicate would
+\texttt{p}/2.  This approach also is not attached to modes; a predicate would
 have a single formula describing its determinism.  Furthermore,
 definiteness of answers is probably a more natural concept to users
 than lack of choicepoints.
@@ -248,15 +285,15 @@ and \verb@b@ and \verb@c@ are deconstructor functions.  It also behaves much lik
 unix pipeline, which is why \verb@|@ might be a good choice of operator.
 But \verb@a|b|c@ doesn't look that good.
 
-Perhaps arity polymorphism should be renounced in favor of default
+Perhaps arity polymorphism should be renounced in favour of default
 arguments?  Note that default arguments need to be respected in either
-mode.  Eg,  \verb@reverse@/3 could have a default of \verb@[]@ for the third
-argument; then \verb@reverse(AB, BA)@ would mean \verb@reverse(AB, BA, [])@,
+mode.  Eg,  \texttt{reverse}/3 could have a default of \texttt{[]} for the third
+argument; then \texttt{reverse(AB, BA)} would mean \texttt{reverse(AB, BA, [])},
 regardless of which, if either, of the arguments is bound at call
 time.  This should be OK.
 
 A motivation for this was to make higher-order code work more
-smoothly, but it wouldn't.  A higher order term like \verb@reverse(AB)@ is
+smoothly, but it wouldn't.  A higher order term like \texttt{reverse(AB)} is
 still ambiguous, because it's not clear whether this is expecting one
 or two more arguments.  Still, a default argument syntax might make
 code clearer and more compact when multiple arities are provided just
@@ -279,15 +316,15 @@ Should the language syntax be C-like, for the C-ness envy factor?
 
 \section{Compilation}
 
-The language should be designed with optimizing compilation in mind.  In
+The language should be designed with optimising compilation in mind.  In
 particular, runtime type information should be kept to a minimum.  As much of
 the program as possible should be monoporphized during compilation.
 
 Transform nondet and multi predicates into two predicates: one that
-initializes a cursor, and one that takes a cursor as input and
+initialises a cursor, and one that takes a cursor as input and
 extracts the next set of bindings and next cursor.  That is, compile
 nondeterminism into coroutining.  This will allow cursors to be used
-independetly.  One example of this would be to turn a conjunction of
+independently.  One example of this would be to turn a conjunction of
 nondeterministic goals into a RDBMS-style join operation when the two
 nondeterministic goals could be compiled into code that generates
 solutions in order.  In some cases, the code to find the next solution
@@ -299,7 +336,7 @@ The problem is: how can we handle binding of variables appearing
 deeply nested inside other terms?  Basically, terms that would need to
 be trailed.  The cursor would need to maintain them somehow.  So it
 might always be possible to compile nondeterministic code into
-\emph{impure} determinisitic, but not to \emph{pure} determinisitic
+\emph{impure} deterministic, but not to \emph{pure} deterministic
 code.
 
 
@@ -311,7 +348,7 @@ Currently in pure languages like Mercury, one must either use ordinary
 terms and ignore such issues, or address such issues by using a
 store.  But the store forces one to manually dereference pointers --
 it's like being back in C.  There should be some compromise, that
-allows one to to \emph{read} such terms without worrying about
+allows one to \emph{read} such terms without worrying about
 dereferencing, but without losing the pure semantics.
 
 
@@ -349,8 +386,11 @@ considering the second disjunct after the first one.  In conjunction
 with some kind of commit or ``pick the first solution'' operator, this
 could handle this without losing purity.  But we still need to be
 sure that p(X, Y), Y=... does not behave differently than Y = ...,
-p(X, Y), so committment to an earlier solution of an or else operator
+p(X, Y), so commitment to an earlier solution of an or else operator
 must wait until it is certain that no further constraints on that
 solution.
 
 \end{document}
+
+% LocalWords:  vararg predicate's nonfailure DCG monoporphized nondet RDBMS
+% LocalWords:  coroutining distfix ness supertyping Liskov backquote
