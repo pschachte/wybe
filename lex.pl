@@ -1,5 +1,5 @@
 %  File     : lex.pl
-%  RCS      : $Id: lex.pl,v 1.1 2007/04/09 12:11:09 schachte Exp $
+%  RCS      : $Id: lex.pl,v 1.2 2007/04/10 08:07:50 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Mon Apr  9 14:16:33 2007
 %  Purpose  : Lexical analysis for frege
@@ -102,8 +102,7 @@ read_string(Char, Stream, Chars, Term) :-
 	->  Chars = []
 	;   Char =:= 0'\\
 	->  get0(Stream, Escaped),
-	    char_escape(Escaped, Stream, Chars, Chars1),
-	    get0(Stream, Char1),
+	    char_escape(Escaped, Stream, Chars, Chars1, Char1),
 	    read_string(Char1, Stream, Chars1, Term)
 	;   Chars = [Char|Chars1],
 	    get0(Char1),
@@ -111,27 +110,41 @@ read_string(Char, Stream, Chars, Term) :-
 	).
 
 
-char_escape(0't, _, [0'\t|Chars], Chars) :- !.
-char_escape(0'v, _, [0'\v|Chars], Chars) :- !.
-char_escape(0'n, _, [0'\n|Chars], Chars) :- !.
-char_escape(0'r, _, [0'\r|Chars], Chars) :- !.
-char_escape(0'f, _, [0'\f|Chars], Chars) :- !.
-char_escape(0'b, _, [0'\b|Chars], Chars) :- !.
-char_escape(0'0, _, [0'\0|Chars], Chars) :- !.
-char_escape(0'\n, Stream, [0' |Chars], Chars) :-
-	!,
+char_escape(Char, Stream, Chars, Chars0, Char1) :-
+	(   one_char_escape(Char, Esc)
+	->  Chars = [Esc|Chars0],
+	    get0(Char1)
+	;   special_char_escape(Char, Stream, Chars, Chars0, Char1)
+	->  true
+	;   Chars = [Char|Chars0],
+	    get0(Char1)
+	).
+
+
+one_char_escape(0't, 0'\t).
+one_char_escape(0'v, 0'\v).
+one_char_escape(0'n, 0'\n).
+one_char_escape(0'r, 0'\r).
+one_char_escape(0'f, 0'\f).
+one_char_escape(0'b, 0'\b).
+one_char_escape(0'0, 0'\0).
+
+
+% backslash at end of line in a string ignores newline and all following
+% whitespace characters, so you can layout strings as you like.
+special_char_escape(0'\n, Stream, Chars, Chars, Char1) :-
 	get0(Char),
-	skip_white(Char, Stream).
-char_escape(Ch, _, [Ch|Chars], Chars).
+	skip_white(Char, Stream, Char1).
+% XXX also define an escape \( ... ) to evaluate enclosed expr
 
 
-skip_white(Char, Stream) :-
-	(   Char > 0'
-	->  true
+skip_white(Char, Stream, Char1) :-
+	(   Char > 0' % space character
+	->  Char1 = Char
 	;   Char < 0
-	->  true
-	;   get0(Char1),
-	    skip_white(Char1, Stream)
+	->  Char1 = Char
+	;   get0(Char2),
+	    skip_white(Char2, Stream, Char1)
 	).
 
 
@@ -203,6 +216,6 @@ special_char(0']).
 special_char(0'{).
 special_char(0'}).
 special_char(0'').
-special_char(0'").
+special_char(0'"). %"
 special_char(0'`).
 special_char(0'#).
