@@ -1,5 +1,5 @@
 %  File     : lex.pl
-%  RCS      : $Id: lex.pl,v 1.2 2007/04/10 08:07:50 schachte Exp $
+%  RCS      : $Id: lex.pl,v 1.3 2007/04/10 08:15:14 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Mon Apr  9 14:16:33 2007
 %  Purpose  : Lexical analysis for frege
@@ -128,6 +128,10 @@ one_char_escape(0'r, 0'\r).
 one_char_escape(0'f, 0'\f).
 one_char_escape(0'b, 0'\b).
 one_char_escape(0'0, 0'\0).
+% XXX Possibly handle alphanumeric escapes by translation to evaluation of
+% XXX special variable, eg 'escape_t' for \t?  Then substitution of pattern
+% XXX replacement could be handled by binding escape_1, etc.  But then how
+% XXX to handle regexps?
 
 
 % backslash at end of line in a string ignores newline and all following
@@ -135,7 +139,8 @@ one_char_escape(0'0, 0'\0).
 special_char_escape(0'\n, Stream, Chars, Chars, Char1) :-
 	get0(Char),
 	skip_white(Char, Stream, Char1).
-% XXX also define an escape \( ... ) to evaluate enclosed expr
+% XXX Also define an escape like \( ... ) to evaluate enclosed expr.
+% XXX This could handle formatted output pretty well.
 
 
 skip_white(Char, Stream, Char1) :-
