@@ -1,6 +1,6 @@
 %  Emacs    : -*- latex -*-
 %  File     : design.tex
-%  RCS      : $Id: design.tex,v 1.5 2007/04/09 12:11:09 schachte Exp $
+%  RCS      : $Id: design.tex,v 1.6 2007/04/10 14:22:17 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Fri Mar 28 19:36:48 2003
 %  Purpose  : Discussion document on design of new language
@@ -8,9 +8,16 @@
 %
 
 \documentclass{article}
+\usepackage{xspace}
 
-\newcommand{\frege}{\textsf{Frege}}
-\newcommand{\Frege}{\textsf{Frege}}
+\newcommand{\frege}{\textsf{Frege}\xspace}
+\newcommand{\Frege}{\textsf{Frege}\xspace}
+
+\newcommand{\ie}{\emph{i.e.}\xspace}
+\newcommand{\eg}{\emph{e.g.}\xspace}
+\newcommand{\Ie}{\emph{I.e.}\xspace}
+\newcommand{\Eg}{\emph{E.g.}\xspace}
+
 
 \begin{document}
 \title{\frege Design Document}
@@ -24,6 +31,9 @@ The aim of this project is to produce a pure, clean logic/functional
 programming language simple and intuitive enough to be suited to
 teaching as a first or second language, yet powerful enough for
 serious software engineering.
+To fit the range of audiences the language is intended for, it must
+be possible to use subsets of the language without the interference of other
+language features.
 
 From the standpoint of software engineering, the language must support
 separation of concerns:  it must be possible to define each aspect of a
@@ -32,31 +42,6 @@ separately maintainable and, where appropriate, reusable.
 
 The current working name for the language is \frege, for
 \textbf{F}unctions, \textbf{RE}lations, and pervasive \textbf{GE}nerics.
-
-
-\section{Philosophy}
-
-There is no reason to assume the information available to the
-reader of a program is limited to what the writer writes.  Having type
-and mode information available no doubt makes a program easier to
-understand, but this doesn't mean the programmer must write it.  It
-could be produced by listing generation tool, or even by a smart program
-editor (which would also give this information to the programmer as
-she works).
-
-Separate compilation, defined to mean the ability to explicitly
-compile one source file at a time and explicitly link together the
-object files, is not necessary.  The real goal is to be able to
-quickly begin testing code after a small change.  One would usually
-prefer to use a tool like \texttt{make} to rebuild an executable than to
-manually invoke the compiler on the changed files anyway.  A
-language-aware \texttt{make} program could easily avoid recompiling code that
-is unchanged (by saving away the token stream of the previously
-compiled version of the file).  It could also keep track of what
-object code must be regenerated when a particular definition changes.
-Therefore, the ``need'' for separate compilation should not be taken as
-an excuse for not applying aggressive intermodule analysis and
-optimisation.
 
 
 \section{Types / Classes / Modules}
@@ -76,7 +61,7 @@ not clear whether any other kind of module is needed.  It should also be
 possible to define nested modules in a layered kind of way: the
 innermost layer would be just the constructor and most primitive
 operations.  Layer 1 would be built using only layer 0 facilities.
-Layer 2 would use only layer 1, etc.  This would allow maintenance on
+only Layer 2 would use layer 1, etc.  This would allow maintenance on
 one layer at a time, with changes to any layer not affecting the lower
 and higher levels as long as the same interfaces can be maintained.
 
@@ -87,19 +72,35 @@ embedding module needs to be updated.  The price of this protection is that
 no other module may directly use the inner module.
 
 Extending a module defines a new module that provides the full interface of
-the extended module, plus some extra
+the extended module, possibly plus some extra features.  This is akin to
+inheritance in object oriented languages, and indeed extension allows the
+extension module to override features of the extended module by defining its
+own implementations.
 
-Pushing this idea further, it should then be possible to treat any
-type as an interface that any other type could be specified to
-implement --- ie, interface inheritance, or type classes.  This should
-make it possible to redefine a list as a packed array, and have all
-list predicates and functions also work on that type.  It should even
+Delegation permits a module to conveniently specify that features of
+related modules should also be considered features of the new module.
+
+Pushing these ideas a little further, it is also possible to treat any
+module as an interface that any other module could be specified to
+implement --- \ie, interface inheritance, or type classes.  This should
+make it possible to define a new list module that implements a list as a
+packed array, and have all predicates and functions that operate on lists
+also work on that type.  It should even
 be possible to define input and output streams to be compatible with
 lists, so list operations should work for them too.  Read from or
 write to a stream by just appending to or from it.
 
+Thus a module may declare that it \texttt{extends} or \texttt{implements}
+another module.  Also, a unary function may declare that it
+\texttt{delegates} a number of features.  These features must be members of
+the range of that function, and are thereby also made features of the current
+module.  Finally, a module may be declared inside another module, in which
+case the features of the inner module cannot be used outside of the outer
+one.  However, any features defined in the inner module, or defined through
+delegation, may be made public by the (outer) module.
+
 Understanding determinism is important for this to work, though.
-Therefor, There would have to be a mechanism for declaring mutual
+Therefore, there would have to be a mechanism for declaring mutual
 exclusion and exhaustiveness of functions (and predicates).
 
 At the lowest level, it would be necessary to be able to access the
@@ -147,9 +148,10 @@ predicate types?  Maybe they want to define how to coerce any other
 type to theirs?  But coercion seems directional, which could be a
 problem in a logic language.
 
-The language should be simple.  There should be very little built in;
+The language itself should be simple.  There should be very little built in;
 most of it should be in libraries.  Ideally, all datatypes that would
-normally be considered primitive would be provided by libraries.
+normally be considered primitive would be provided by libraries,
+which would implement them through the foreign interface.
 Probably function and predicate
 (higher order) types would have to be built in.  This raises
 interesting issues for manifest constants.  If integers aren't built
@@ -166,12 +168,14 @@ would be one of the following:
 \item a single or double quote or backquote, followed by any number of
   characters up to the matching quote; or
 \item a \emph{here} string, described below; or
-\item one or more punctuation characters.
+\item one or more punctuation characters (anything but whitespace not covered
+  above).
 \end{itemize}
 Within a quoted token, a backslash character is treated much as in C:  if the
 following character is a letter, it is a character escape; otherwise it is
 treated literally; in particular, backslash may be used to escape a quote
-character.
+character.  Also, a backslash as the last character on a line indicates that
+the end-of-line and all following whitespace characters should be ignored.
 
 A \emph{here} string begins with a \emph{here quote} and ends with an
 identical here quote, with all intervening text completely uninterpreted.  A
@@ -190,7 +194,7 @@ widely used.
 A predicate's modes should not be responsible for determining which
 modes of a predicate to generate code for.  This should be done by
 demand.  So modes are simply a matter of specifying the output
-instantiation pattern of arguments given the input pattern.  Eg,
+instantiation pattern of arguments given the input pattern.  \Eg,
 \texttt{append}/3 would specify that on completion, the backbone of the first
 argument is ground, and the backbone of the third is if and only if
 the backbone of the second is.  Also, the elements of the third list
@@ -201,7 +205,7 @@ instantiation state for a predicate.  For example, the initial
 instantiation for the \texttt{plus}/3 predicate (and the \texttt{+}/2 function) might
 specify that two of the three arguments must be ground on call.
 
-Modes need to be reflect the structure of types.  Eg, the mode for
+Modes need to be reflect the structure of types.  \Eg, the mode for
 \texttt{append(A,B,C)} must say that on success, the spine of \texttt{A} is fully bound,
 and the spine of \texttt{B} is iff the spine of \texttt{C} is, and that the elements of
 \texttt{C} are fully bound iff those of both \texttt{A} and \texttt{B} are.
@@ -247,7 +251,7 @@ Determinism can be at least partially handled by a functional
 dependency analysis.  This could be handled by having an instantiation
 \texttt{definite}, meaning ground and lacking any alternatives, which is more
 specific than \texttt{ground}.  A predicate's determinism could then be
-specified as part of its mode.  The determinism of \texttt{append(A,B,C)}, eg,
+specified as part of its mode.  The determinism of \texttt{append(A,B,C)}, \eg,
 could be specified as ``any one is definite if the other two are.''
 This, however, doesn't handle possible failure.  For nonfailure, we'd
 want to say that \texttt{append(A,B,C)} may fail if both \texttt{B} and \texttt{C} are bound, or
@@ -287,7 +291,7 @@ But \verb@a|b|c@ doesn't look that good.
 
 Perhaps arity polymorphism should be renounced in favour of default
 arguments?  Note that default arguments need to be respected in either
-mode.  Eg,  \texttt{reverse}/3 could have a default of \texttt{[]} for the third
+mode.  \Eg,  \texttt{reverse}/3 could have a default of \texttt{[]} for the third
 argument; then \texttt{reverse(AB, BA)} would mean \texttt{reverse(AB, BA, [])},
 regardless of which, if either, of the arguments is bound at call
 time.  This should be OK.
@@ -340,6 +344,31 @@ might always be possible to compile nondeterministic code into
 code.
 
 
+\section{Philosophy}
+
+There is no reason to assume the information available to the
+reader of a program is limited to what the writer writes.  Having type
+and mode information available no doubt makes a program easier to
+understand, but this doesn't mean the programmer must write it.  It
+could be produced by listing generation tool, or even by a smart program
+editor (which would also give this information to the programmer as
+she works).
+
+Separate compilation, defined to mean the ability to explicitly
+compile one source file at a time and explicitly link together the
+object files, is not necessary.  The real goal is to be able to
+quickly begin testing code after a small change.  One would usually
+prefer to use a tool like \texttt{make} to rebuild an executable than to
+manually invoke the compiler on the changed files anyway.  A
+language-aware \texttt{make} program could easily avoid recompiling code that
+is unchanged (by saving away the token stream of the previously
+compiled version of the file).  It could also keep track of what
+object code must be regenerated when a particular definition changes.
+Therefore, the ``need'' for separate compilation should not be taken as
+an excuse for not applying aggressive intermodule analysis and
+optimisation.
+
+
 \section{Ideas / Notes}
 
 It should be possible to ignore memory issues, such as structure
@@ -354,7 +383,7 @@ dereferencing, but without losing the pure semantics.
 
 \section{Problems}
 
-How to reconcile mode polymorphism with subtyping?  Ie, usually one
+How to reconcile mode polymorphism with subtyping?  \Ie, usually one
 wants subtyping for inputs (the caller may pass any supertype of the
 declared type, the callee can only use operations of the declared
 type) and supertyping for outputs (the callee may pass back any
