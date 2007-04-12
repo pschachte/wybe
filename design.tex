@@ -1,6 +1,6 @@
 %  Emacs    : -*- latex -*-
 %  File     : design.tex
-%  RCS      : $Id: design.tex,v 1.6 2007/04/10 14:22:17 schachte Exp $
+%  RCS      : $Id: design.tex,v 1.7 2007/04/13 09:10:37 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Fri Mar 28 19:36:48 2003
 %  Purpose  : Discussion document on design of new language
@@ -32,8 +32,21 @@ programming language simple and intuitive enough to be suited to
 teaching as a first or second language, yet powerful enough for
 serious software engineering.
 To fit the range of audiences the language is intended for, it must
-be possible to use subsets of the language without the interference of other
-language features.
+restrictable:  it must be possible to use subsets of the language without the
+interference of other language features.
+Likewise, the language should minimize the number of decisions the user is
+required to make, but maximize the number of decisions the user is permitted
+to make.
+
+Also in the interests of less experienced users, the language makes heavy use
+of polymorphism.  This means there is less for the user to remember:  if a
+particular operation works on one datatype, the same operation should work
+similarly on all similar types.  It also benefits the experienced programmer,
+since a single implementation will work for many types.  There is, however,
+an efficiency concern, since different types have different performance
+characteristics, suggesting different implementations.  Again, the language
+should be prepared to apply a single algorithm to different types, but should
+permit the programmer to specify a different algorithm if desired.
 
 From the standpoint of software engineering, the language must support
 separation of concerns:  it must be possible to define each aspect of a
@@ -423,3 +436,4 @@ solution.
 
 % LocalWords:  vararg predicate's nonfailure DCG monoporphized nondet RDBMS
 % LocalWords:  coroutining distfix ness supertyping Liskov backquote
+% LocalWords:  restrictable
