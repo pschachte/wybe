@@ -1,6 +1,6 @@
 %  Emacs    : -*- latex -*-
 %  File     : design.tex
-%  RCS      : $Id: design.tex,v 1.7 2007/04/13 09:10:37 schachte Exp $
+%  RCS      : $Id: design.tex,v 1.8 2007/04/16 13:05:41 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Fri Mar 28 19:36:48 2003
 %  Purpose  : Discussion document on design of new language
@@ -17,12 +17,13 @@
 \newcommand{\eg}{\emph{e.g.}\xspace}
 \newcommand{\Ie}{\emph{I.e.}\xspace}
 \newcommand{\Eg}{\emph{E.g.}\xspace}
+\newcommand{\etc}{\emph{etc}}
 
 
-\begin{document}
-\title{\frege Design Document}
+\title{\Frege Design Document}
 \author{Peter Schachte}
 
+\begin{document}
 \maketitle
 
 \section{Aims}
@@ -53,7 +54,8 @@ separation of concerns:  it must be possible to define each aspect of a
 system in a separate software component.  Furthermore, each aspect should be
 separately maintainable and, where appropriate, reusable.
 
-The current working name for the language is \frege, for
+In an egregious instance of acronym reverse engineering,
+the current working name for the language is \frege, for
 \textbf{F}unctions, \textbf{RE}lations, and pervasive \textbf{GE}nerics.
 
 
@@ -68,18 +70,28 @@ existing type with defined constructors and deconstructors could be
 redefined with new functions implementing the previous constructors
 and deconstructors.
 
-A type can then be viewed as just the set of functions and predicates
-that operate on it.  That is, a type is just a kind of module.  It's
-not clear whether any other kind of module is needed.  It should also be
-possible to define nested modules in a layered kind of way: the
-innermost layer would be just the constructor and most primitive
-operations.  Layer 1 would be built using only layer 0 facilities.
-only Layer 2 would use layer 1, etc.  This would allow maintenance on
-one layer at a time, with changes to any layer not affecting the lower
-and higher levels as long as the same interfaces can be maintained.
+A type can then be viewed as just the set of functions and predicates that
+operate on it.  That is, a type is just a kind of module.  One difficulty
+with this view is that many operations involve multiple types, so each
+operation may belong in multiple modules.  This, presumably, is why object
+oriented languages single out one argument to ``receive'' a message, with any
+other arguments just coming along for the ride.  This asymmetry is rather
+unpleasant, doesn't fit well with higher-order programming, and should be
+avoided if possible.  Naturally, each operation must belong only to the
+single module it is defined in.
 
-\Frege supports three approaches to layering:  embedding, extension, and
-delegation.  Embedding one module within another hides it from any other
+\Frege supports two kinds of modules.
+
+It should be
+possible to define nested modules in a layered kind of way: the
+innermost layer would be just the constructors or most primitive
+operations.  Only layer 1 would be able to use layer 0 operations, and
+only Layer 2 would use layer 1, \etc.  This would allow maintenance on
+one layer at a time, with changes to any layer not affecting the lower
+and higher levels, as long as the same interfaces can be maintained.
+
+\Frege supports three approaches to module composition:  layering, extension,
+and delegation.  Embedding one module within another hides it from any other
 module.  When the interface of an embedded module is changed, only the
 embedding module needs to be updated.  The price of this protection is that
 no other module may directly use the inner module.
@@ -392,6 +404,10 @@ store.  But the store forces one to manually dereference pointers --
 it's like being back in C.  There should be some compromise, that
 allows one to \emph{read} such terms without worrying about
 dereferencing, but without losing the pure semantics.
+
+A constructor for a type $t$ is simply a function whose range is $t$.  No
+need to distinguish them, except for documentation, and to specify mutual
+exclusion and exhaustiveness of constructors.
 
 
 \section{Problems}
