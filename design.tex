@@ -1,6 +1,6 @@
 %  Emacs    : -*- latex -*-
 %  File     : design.tex
-%  RCS      : $Id: design.tex,v 1.8 2007/04/16 13:05:41 schachte Exp $
+%  RCS      : $Id: design.tex,v 1.9 2007/04/28 09:43:00 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Fri Mar 28 19:36:48 2003
 %  Purpose  : Discussion document on design of new language
@@ -29,7 +29,8 @@
 \section{Aims}
 
 The aim of this project is to produce a pure, clean logic/functional
-programming language simple and intuitive enough to be suited to
+programming language with object oriented and imperative features that is
+simple and intuitive enough to be suited to 
 teaching as a first or second language, yet powerful enough for
 serious software engineering.
 To fit the range of audiences the language is intended for, it must
@@ -73,14 +74,17 @@ and deconstructors.
 A type can then be viewed as just the set of functions and predicates that
 operate on it.  That is, a type is just a kind of module.  One difficulty
 with this view is that many operations involve multiple types, so each
-operation may belong in multiple modules.  This, presumably, is why object
-oriented languages single out one argument to ``receive'' a message, with any
-other arguments just coming along for the ride.  This asymmetry is rather
+operation may belong in multiple modules, while naturally each operation must
+belong only to a single module .  This, presumably, is why object oriented
+languages single out one argument to ``receive'' a message, with any other
+arguments just coming along for the ride.  This asymmetry is rather
 unpleasant, doesn't fit well with higher-order programming, and should be
-avoided if possible.  Naturally, each operation must belong only to the
-single module it is defined in.
+avoided if possible.
 
-\Frege supports two kinds of modules.
+\Frege supports two kinds of modules:  \emph{classes} and \emph{modules}.
+A \texttt{class} defines a single public type, though it may also define
+private types.  A \texttt{module} defines no types; it only bundles a
+collection of operations.
 
 It should be
 possible to define nested modules in a layered kind of way: the
@@ -90,7 +94,7 @@ only Layer 2 would use layer 1, \etc.  This would allow maintenance on
 one layer at a time, with changes to any layer not affecting the lower
 and higher levels, as long as the same interfaces can be maintained.
 
-\Frege supports three approaches to module composition:  layering, extension,
+\Frege supports three approaches to module composition:  embedding, extension,
 and delegation.  Embedding one module within another hides it from any other
 module.  When the interface of an embedded module is changed, only the
 embedding module needs to be updated.  The price of this protection is that
@@ -102,8 +106,11 @@ inheritance in object oriented languages, and indeed extension allows the
 extension module to override features of the extended module by defining its
 own implementations.
 
-Delegation permits a module to conveniently specify that features of
-related modules should also be considered features of the new module.
+Delegation permits a module to conveniently specify that features of one
+class should also be considered features of a new class.  This can be done by
+specifying a coercion function to map an instance of the new class to the
+existing class.  Note, however, that for delegated features to be reversable,
+the coercion function must be reversible.  
 
 Pushing these ideas a little further, it is also possible to treat any
 module as an interface that any other module could be specified to
