@@ -2,8 +2,8 @@
 
 class list(t) implements sequence(t) {
 
-  public [] : ?;
-  public [ head:t | tail:? ] : ?;
+    public [] : @;
+    public [ head:t | tail:@ ] : @;
 
 
 }
