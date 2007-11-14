@@ -1,0 +1,43 @@
+Transforming nondeterministic predicates into deterministic ones
+
+det calls are left alone
+
+goal (p(In, Out), Rest) (where p(In,Out) is semidet) is transformed to:
+
+	p_det(In, Out, Bool),
+	(   Bool == 0
+	->  Result = 0
+	;   Rest
+	)
+
+goal (p(In, Out), Rest) (where p(In,Out) is multi) is transformed to:
+
+
+
+
+Transform:
+
+p(In,Out) :-
+	(    q(In, Out)		% q(+,-) deterministic
+	;    r(In, Out)		% r(+,-) deterministic
+	).
+
+into:
+
+p_det(0, 1, In, Out) :-
+	q(In, Out).
+p_det(1, -1, In, Out) :-
+	r(In, Out).
+
+
+Transform:
+
+p(In, Out) :-
+	q(In, Mid),		% q(+,-) nondeterministic
+	r(Mid, Out).		% r(+,-) nondeterministic
+
+into:
+
+p_det(0, In, Out) :-
+	q(0, In, Mid),
+	
