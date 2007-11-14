@@ -1,6 +1,6 @@
 %  Emacs    : -*- latex -*-
 %  File     : design.tex
-%  RCS      : $Id: design.tex,v 1.9 2007/04/28 09:43:00 schachte Exp $
+%  RCS      : $Id: design.tex,v 1.10 2007/11/15 06:21:15 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Fri Mar 28 19:36:48 2003
 %  Purpose  : Discussion document on design of new language
@@ -9,9 +9,10 @@
 
 \documentclass{article}
 \usepackage{xspace}
+\usepackage{ensuremath}
 
-\newcommand{\frege}{\textsf{Frege}\xspace}
-\newcommand{\Frege}{\textsf{Frege}\xspace}
+\newcommand{\frege}{\textsc{Frege}\xspace}
+\newcommand{\Frege}{\textsc{Frege}\xspace}
 
 \newcommand{\ie}{\emph{i.e.}\xspace}
 \newcommand{\eg}{\emph{e.g.}\xspace}
@@ -19,6 +20,7 @@
 \newcommand{\Eg}{\emph{E.g.}\xspace}
 \newcommand{\etc}{\emph{etc}}
 
+\newcommand{\tuple}[1]{\ensuremath{\langle#1\rangle}}
 
 \title{\Frege Design Document}
 \author{Peter Schachte}
@@ -313,13 +315,11 @@ than lack of choicepoints.
 
 \section{Syntax}
 
-There should be an infix reverse order function application operator.
-The two most obvious choices are \verb@.@ and \verb@|@.  For example, \verb@a.b@ would
-mean apply function \verb@b@ to object \verb@a@, and \verb@a.b.c@ would apply \verb@b@ to \verb@a@, and
-apply \verb@c@ to the value of that.  This works nicely when a is a variable
-and \verb@b@ and \verb@c@ are deconstructor functions.  It also behaves much like a
-unix pipeline, which is why \verb@|@ might be a good choice of operator.
-But \verb@a|b|c@ doesn't look that good.
+Since one of the aims of this language is to reconcile object oriented with
+functional and logic programming, \frege syntax treats \texttt{x.f(a,b)} as
+exactly the same as \texttt{f(x,a,b)}.  One consequence of that is that infix
+\texttt{.} is an infix reverse-order function application operator:
+\texttt{a.b.c} $\equiv$ \texttt{c(b(a))}.
 
 Perhaps arity polymorphism should be renounced in favour of default
 arguments?  Note that default arguments need to be respected in either
@@ -401,6 +401,60 @@ an excuse for not applying aggressive intermodule analysis and
 optimisation.
 
 
+\section{Multiparadigm}
+
+One principal (and principle) difference between imperative (and object
+oriented) programming and declarative programming is handling of destructive
+update:  declarative languages don't allow it, and imperative and object
+oriented languages couldn't live without it.  \Frege reconciles these by
+having it both ways:  destructive update is not permitted, but a few
+syntactic constructs are provided that provide much of the convenience of
+destructive update.
+
+Of course, one of the advantages of destructive update is efficiency.  \Frege
+regains this efficiency by generating code that actually does use destructive
+update.  This is achieved by analysing the code to look for opportunities for
+transforming non-destructive code into destructive code.  This is a
+multivariant analysis:  some uses of an operation might be destructive, while
+others are not.  In this case, two different versions of the operation will
+be compiled.
+
+The compiler transforms polymorphic operations into monomorphic ones before
+compiling.  This is akin to C++'s handling of templates, which is regarded as
+causing a significant code explosion.  \Frege avoids this in two ways.
+Firstly, the compiler avoids generating multiple copies of the same code by
+hashing the code for each procedure it generates.  Whenever it finds it has
+generated the same code twice, it throws one copy away and uses the other in
+its stead.
+
+Recursion raises a problem, however.  If code is generated bottom-up, then
+each distinct procedure can be given a unique ID as it is generated, and a
+hash table can record that a procedure with that hash has been generated, and
+what its unique ID is, and a separate table maps the procedure name to its
+ID.  When a call to a procedure is generated, its unique ID is used in
+computing the hash for the calling procedure.  However, the ID for the
+procedure currently being compiled will not have been generated yet, so it
+cannot be used when handling a recursive call.
+
+The solution is a two pass algorithm.  Firstly, we compute the hashes for all
+of the mutually recursive procedures using a hash of the procedure names, or
+some other arbitrary value, for the recursive calls.  Then these procedures
+are sorted based on their first pass hash values.  Finally, a second pass is
+performed in which the hash for recursive calls is (a hash of) each
+procedure's serial number in the ordering derived in the first pass.
+
+\section{Compilation}
+
+Since this is a very high level language, a high level of optimisation will
+be necessary for it to be practically useful.  The following optimisations
+will be important:
+
+\begin{itemize}
+\item Deforestation
+\item Structure reuse (compile-time garbage collection)
+\end{itemize}
+
+
 \section{Ideas / Notes}
 
 It should be possible to ignore memory issues, such as structure
@@ -415,6 +469,17 @@ dereferencing, but without losing the pure semantics.
 A constructor for a type $t$ is simply a function whose range is $t$.  No
 need to distinguish them, except for documentation, and to specify mutual
 exclusion and exhaustiveness of constructors.
+
+Support communication between nondeterministic alternatives by employing the
+semantics:  the meaning of a relation is a set of tuples.  So using a
+relation as a value yields a set, which can be used explicitly.  If this set
+is taken as a lazy set, then using its elements can automatically coroutine
+with generating them.  Of course, this is exactly what happens with the
+normal backtracking approach to nondeterminism in current Logic Programming
+languages.
+
+This approach also works the other way:  a set of tuples can be passed around
+and called in the program like a predicate.
 
 
 \section{Problems}
@@ -441,7 +506,6 @@ nor the predicate itself may use supertype operations.  Still another
 may permit the predicate to use supertype operations, but forbid the
 caller from doing so.
 
-
 Some predicates have multiple solutions, but some solutions are
 preferred to others.  For example, a parser may parse many different inputs to
 a single parse tree; run backwards, it will produce many strings from
@@ -454,6 +518,23 @@ sure that p(X, Y), Y=... does not behave differently than Y = ...,
 p(X, Y), so commitment to an earlier solution of an or else operator
 must wait until it is certain that no further constraints on that
 solution.
+
+How to handle tuples?  Is a triple just a pair one of whose arguments is
+another pair?  Is a 1-tuple the same as a scalar?  Do we need to have the
+concept of an empty tuple?  Is \tuple{a,\tuple{b,c}} the same as
+\tuple{\tuple{a,b},c}?  In some ways, the most convenient approach would
+consider $\tuple{a} = a$, and $\tuple{a,\tuple{b,c}} =
+\tuple{\tuple{a,b},c}$.  This means we don't need empty tuples, and don't
+need to worry about different arities of tuple construction.  Tuples
+essentially become flat, ordered, non-homogeneous collections.  But this
+means one cannot put a tuple inside another tuple without it losing its
+integrity.  Is that a problem?  Another possibility would be to make tuples
+be like LISP-style lists:  with an empty tuple constructor and a pair
+constructor, with a convention that right-recursive nested tuples are written
+as higher-arity tuples.  These could be still be implemented as a flat
+ordered, non-homogeneous collections, much the way C structs are.
+Finally, we could have different arities of tuples as separate
+non-interchangeable things.
 
 \end{document}
 
