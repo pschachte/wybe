@@ -1,21 +1,31 @@
 # frege integer type
 class int
 representation:
-    primitive bits(28);
+    primitive bits(28)
 
 syntax:
-    expr(I:@) ::= symbol(S) where
-		    to_int(S) = I ;
+    expr(to_int(num,radix):@) ::= 
+    	symbol(x)
+	(	num = x ; radix = 10
+	orelse	'r' ; symbol(num) ; radix = x
+	)
 
-    to_int(chars) = value where
-		    prefer chars[0] != '0',
-		    for c in chars as 
-		        factor from 1 by (10*) as
-		        value from 0 by (+ factor * digitval)
-		    do {
-			    digitval = code(c) - code(0),
-			    0 <= digitval < 10
-		    } ;
+
+# 5   1   2
+# 512 12  2
+
+# can we make the compiler smart enough to compile the reverse mode?
+
+def to_int(chars)
+    prefer chars[0] != '0'	# this makes inverse of to_int deterministic
+    factor = 1
+    value = 0
+    for c in reverse(chars)
+    	'0' <= c ; c <= '9'
+	value += factor * (code(c) - code(0))
+	factor *= 10
+    end
+end
 
 % divmod(Coefficient, Modulus, Residue, Number)
 % Coefficient * Modulus + Residue = Number, and 0 <= Coefficient < Modulus
