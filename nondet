@@ -5,14 +5,33 @@ det calls are left alone
 goal (p(In, Out), Rest) (where p(In,Out) is semidet) is transformed to:
 
 	p_det(In, Out, Bool),
-	(   Bool == 0
+	(   Bool = 0
 	->  Result = 0
 	;   Rest
 	)
 
-goal (p(In, Out), Rest) (where p(In,Out) is multi) is transformed to:
+goal (p(Args), Rest) (where p(In,Out) is nondet) is transformed to:
 
+	foo(0, Next, Result, In, Out) where:
 
+	foo(N0, N, Result, In, Out) :-
+		p_det(N0, N1, Bool, In, Out1),
+		(   Bool = 0
+		->  Result = 0
+		;   Rest_det(0, RN, RBool, RIn, ROut1),
+		    (	RBool = 0
+		    ->	foo(N1, N, Result, In, Out)
+		    ;	ROut = ROut1,
+		    	N = N1,
+		    	Result = 1,
+			Out = Out1
+		    )
+		).
+
+This partially handles partially instantiated terms if the work of building
+the term around the newly-instantiated variable is repeated.  Ie, any term
+that may be further instantiated by a call is considered to be an Out
+argument.
 
 
 Transform:
