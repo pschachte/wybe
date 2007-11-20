@@ -1,6 +1,6 @@
 %  Emacs    : -*- latex -*-
 %  File     : design.tex
-%  RCS      : $Id: design.tex,v 1.10 2007/11/15 06:21:15 schachte Exp $
+%  RCS      : $Id: design.tex,v 1.11 2007/11/20 12:13:19 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Fri Mar 28 19:36:48 2003
 %  Purpose  : Discussion document on design of new language
@@ -22,7 +22,7 @@
 
 \newcommand{\tuple}[1]{\ensuremath{\langle#1\rangle}}
 
-\title{\Frege Design Document}
+\title{The \Frege Programming Language}
 \author{Peter Schachte}
 
 \begin{document}
@@ -30,14 +30,14 @@
 
 \section{Aims}
 
-The aim of this project is to produce a pure, clean logic/functional
+The aim of this project is to produce a pure, clean declarative
 programming language with object oriented and imperative features that is
 simple and intuitive enough to be suited to 
 teaching as a first or second language, yet powerful enough for
 serious software engineering.
-To fit the range of audiences the language is intended for, it must
-restrictable:  it must be possible to use subsets of the language without the
-interference of other language features.
+To fit the range of intended audiences, the language must
+restrictable:  it must be possible to use subsets of its features without the
+interference of other features.
 Likewise, the language should minimize the number of decisions the user is
 required to make, but maximize the number of decisions the user is permitted
 to make.
@@ -216,33 +216,31 @@ identical here quote, with all intervening text completely uninterpreted.  A
 \emph{here quote} is any sequence of non-whitespace characters enclosed
 between backslash characters.
 
-This approach would seem to create problems for type inference:  manifest
+This approach would create problems for type inference:  manifest
 constants would no longer indicate their types.
 
 \section{Modes}
 
 One major principle here is that modes should be simple for users to
-understand.  In particular, mode inference should be friendly and
-widely used.
+understand.  Generally, the mode system should only be responsible for
+correctness, not performance.
 
-A predicate's modes should not be responsible for determining which
-modes of a predicate to generate code for.  This should be done by
-demand.  So modes are simply a matter of specifying the output
-instantiation pattern of arguments given the input pattern.  \Eg,
-\texttt{append}/3 would specify that on completion, the backbone of the first
-argument is ground, and the backbone of the third is if and only if
-the backbone of the second is.  Also, the elements of the third list
-are all ground iff the elements of the first and second are.
+In the face of CLP, the meaning of groundness and determinism become
+unclear.  What does remain clear and consistent, however, is the concept of 
+\emph{unique determination} of a value.  Thus a predicate that backtracks
+over the values of 0 and 1 for \texttt{X} is treated identically to one that
+constrains \texttt{X} to be either 0 or 1.  This permits the compiler to take
+either approach.
+
+Thus \frege's mode system is based on dependencies among unique determination
+of values.  \Eg,
+\texttt{append}/3 would specify that if any two arguments are uniquely
+determined, the so is the third.
 
 Modes may also be responsible for determining the required initial
 instantiation state for a predicate.  For example, the initial
 instantiation for the \texttt{plus}/3 predicate (and the \texttt{+}/2 function) might
 specify that two of the three arguments must be ground on call.
-
-Modes need to be reflect the structure of types.  \Eg, the mode for
-\texttt{append(A,B,C)} must say that on success, the spine of \texttt{A} is fully bound,
-and the spine of \texttt{B} is iff the spine of \texttt{C} is, and that the elements of
-\texttt{C} are fully bound iff those of both \texttt{A} and \texttt{B} are.
 
 It may make sense to follow Mercury in requiring the modes of exported
 predicates/functions to be declared.  Others should be inferable.
@@ -347,7 +345,12 @@ library to define the syntax for strings.  This approach would allow
 binary prefix operators, distfix operators, and other grammar
 extensions.
 
-Should the language syntax be C-like, for the C-ness envy factor?
+Juxtaposition should be function/relation application, like Haskell.  If
+applying to a tuple is the same as applying to each argument of the tuple,
+then p(x,y) = p(x)(y) = p x (y) = p x y.  Nice and clean.
+
+Should the language syntax be C-like, for the C-ness envy factor?  Or maybe
+python- or ruby-like, for the clean, lightweight look.
 
 
 \section{Compilation}
