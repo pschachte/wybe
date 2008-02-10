@@ -1,0 +1,35 @@
+SYNTAX
+
+How to handle goal and clause separators/terminators.  Don't like offside
+rule like Haskell and Python.  Don't like 'end' for every construct with
+multiple children like ruby.  Don't like braces like C family.
+
+Want to allow juxtaposition of predicate/function and arguments to denote
+application like Haskell.  Want to allow arguments to be separate or tupled
+(this makes parentheses around arguments optional).  But if parentheses are
+just for grouping, as is conventional, then can't use parentheses for making
+tuples, or singleton tuple is the same as its content.
+
+Want to allow syntax to be extended by adding grammar rules, but this makes
+it difficult to specify precedence because existing rules need to be changed
+if you want to introduce a precedence level between current ones.
+
+*** Solution:  generalisation of Prolog's op declarations.  Specify op
+precedence, (possibly multiple) tokens, number and positions of arguments,
+and their precedence.
+
+
+
+SEMANTICS
+
+Sometimes disjunctions generate all alternatives, once each, in the desired
+order, and this is useful for loops.  But in general you can't count on
+nondeterminism behaving that way.
+
+
+
+TYPES
+
+Want type declarations to be optional.  Thought we would make current class
+the default type, so omitted variable types refer to the current class.
+Can't do both.
