@@ -1,6 +1,6 @@
 %  Emacs    : -*- latex -*-
 %  File     : design.tex
-%  RCS      : $Id: design.tex,v 1.11 2007/11/20 12:13:19 schachte Exp $
+%  RCS      : $Id: design.tex,v 1.12 2008/02/24 05:42:34 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Fri Mar 28 19:36:48 2003
 %  Purpose  : Discussion document on design of new language
@@ -9,7 +9,7 @@
 
 \documentclass{article}
 \usepackage{xspace}
-\usepackage{ensuremath}
+%\usepackage{ensuremath}
 
 \newcommand{\frege}{\textsc{Frege}\xspace}
 \newcommand{\Frege}{\textsc{Frege}\xspace}
@@ -64,7 +64,7 @@ the current working name for the language is \frege, for
 
 \section{Types / Classes / Modules}
 
-The language should be strongly typed, with parametric polymorphism
+The language is strongly typed, with parametric polymorphism
 and type inference.
 
 All data types should be abstract.  This would be achieved by treating
@@ -77,15 +77,15 @@ A type can then be viewed as just the set of functions and predicates that
 operate on it.  That is, a type is just a kind of module.  One difficulty
 with this view is that many operations involve multiple types, so each
 operation may belong in multiple modules, while naturally each operation must
-belong only to a single module .  This, presumably, is why object oriented
+belong only to a single module.  This is, at least in part, why object oriented
 languages single out one argument to ``receive'' a message, with any other
-arguments just coming along for the ride.  This asymmetry is rather
+arguments just coming along for the ride.  But the asymmetry is rather
 unpleasant, doesn't fit well with higher-order programming, and should be
 avoided if possible.
 
 \Frege supports two kinds of modules:  \emph{classes} and \emph{modules}.
 A \texttt{class} defines a single public type, though it may also define
-private types.  A \texttt{module} defines no types; it only bundles a
+private types.  A \texttt{module} exports no types; it only bundles a
 collection of operations.
 
 It should be
