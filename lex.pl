@@ -1,90 +1,70 @@
 %  File     : lex.pl
-%  RCS      : $Id: lex.pl,v 1.4 2008/03/13 05:55:56 schachte Exp $
+%  RCS      : $Id: lex.pl,v 1.5 2008/03/13 06:13:11 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Mon Apr  9 14:16:33 2007
 %  Purpose  : Lexical analysis for frege
 %  Copyright: © 2007 Peter Schachte.  All rights reserved.
 %
 
-:- module(lex, [
-		lex_file/2,
-		lex_stream/2,
-	        get_token/2
+:- module(lex, [	        get_token/3
    ]).
 
-lex_file(Filename, Tokens) :-
-	open(Filename, read, Stream),
-	lex_stream(Stream, Tokens),
-	close(Stream).
-
-
-lex_stream(Stream, Tokens) :-
+get_token(Stream, Token, Pos) :-
+	stream_property(Stream, position(Pos0)),
 	get_code(Stream, Char),
-	lex_stream1(Char, Stream, Tokens).
+	lex_token(Char, Stream, Pos0, Token, Pos).
 
 
-get_token(Stream, Token) :-
-	get_code(Stream, Char),
-	lex_token(Char, Stream, Token).
-
-
-lex_stream1(Char, Stream, Tokens) :-
-	(   lex_token(Char, Stream, Token)
-	->  Tokens = [Token|Tokens1],
-	    get_code(Stream, Char1),
-	    lex_stream1(Char1, Stream, Tokens1)
-	;   Tokens = []
-	).
-
-
-lex_token(-1, _, _) :- !, fail.			% fail at eof
-lex_token(0'#, Stream, Token) :-
+lex_token(-1, _, _, _, _) :- !, fail.			% fail at eof
+lex_token(0'#, Stream, _, Token, Pos) :-
 	!,
 	get_code(Stream, Char1),
 	skip_line(Char1, Stream),
+	stream_property(Stream, position(Pos0)),
 	get_code(Stream, Char2),
-	lex_token(Char2, Stream, Token).
-lex_token(0'(, _, bracket(round,open)) :-
+	lex_token(Char2, Stream, Pos0, Token, Pos).
+lex_token(0'(, _, Pos, bracket(round,open), Pos) :-
 	!.
-lex_token(0'), _, bracket(round,close)) :-
+lex_token(0'), _, Pos, bracket(round,close), Pos) :-
 	!.
-lex_token(0'[, _, bracket(square,open)) :-
+lex_token(0'[, _, Pos, bracket(square,open), Pos) :-
 	!.
-lex_token(0'], _, bracket(square,close)) :-
+lex_token(0'], _, Pos, bracket(square,close), Pos) :-
 	!.
-lex_token(0'{, _, bracket(curly,open)) :-
+lex_token(0'{, _, Pos, bracket(curly,open), Pos) :-
 	!.
-lex_token(0'}, _, bracket(curly,close)) :-
+lex_token(0'}, _, Pos, bracket(curly,close), Pos) :-
 	!.
-lex_token(0'', Stream, string(Chars,single)) :-
+lex_token(0'', Stream, Pos, string(Chars,single), Pos) :-
 	!,
 	get_code(Stream, Char1),
 	read_string(Char1, Stream, Chars, 0'').
-lex_token(0'", Stream, string(Chars,double)) :-
+lex_token(0'", Stream, Pos, string(Chars,double), Pos) :-
 	!,
 	get_code(Stream, Char1),
 	read_string(Char1, Stream, Chars, 0'").
-lex_token(0'`, Stream, string(Chars,back)) :-
+lex_token(0'`, Stream, Pos, string(Chars,back), Pos) :-
 	!,
 	get_code(Stream, Char1),
 	read_string(Char1, Stream, Chars, 0'`).
-lex_token(0'\\, Stream, string(Chars,here(Term))) :-
+lex_token(0'\\, Stream, Pos, string(Chars,here(Term)), Pos) :-
 	!,
 	get_code(Stream, Char1),
 	read_terminator(Char1, Stream, Term0),
 	Term = [0'\\|Term0],
 	read_here_string(Term, Stream, Chars, Seen, Seen, Term).
-lex_token(Char0, Stream, Token) :-
+lex_token(Char0, Stream, _, Token, Pos) :-
 	Char0 =< 0' ,			% must be a whitespace character
 	!,
+	stream_property(Stream, position(Pos0)),
 	get_code(Stream, Char1),
-	lex_token(Char1, Stream, Token).
-lex_token(Char0, Stream, Token) :-
+	lex_token(Char1, Stream, Pos0, Token, Pos).
+lex_token(Char0, Stream, Pos, Token, Pos) :-
 	symbol_char(Char0),
 	!,
 	Token = symbol([Char0|Chars]),
 	symbol_chars(Stream, Chars).
-lex_token(Char0, Stream, punct([Char0|Chars])) :-
+lex_token(Char0, Stream, Pos, punct([Char0|Chars]), Pos) :-
 	nonsymbol_chars(Stream, Chars).
 
 
