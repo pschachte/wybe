@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.2 2008/03/17 13:07:28 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.3 2008/03/21 02:40:57 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -19,6 +19,116 @@
 %  This parser generator is incremental, since new grammar rules can be
 %  defined at any time.  Each time a grammar rule is added, all the tables
 %  are updated accordingly.
+%
+%  The generated parser consists of dynamic predicates of the form:
+%
+%	 item('use', _Prec, Stream, Term) :-
+%	 	get_token(Stream, Token),
+%	 	use_decl(Token, 1, Stream, Term).
+%	 item('module', _Prec, Stream, Term) :-
+%	 	get_token(Stream, Token),
+%	 	module_decl(Token, 1, Stream, Term).
+%	 item('class', _Prec, Stream, Term) :-
+%	 	get_token(Stream, Token),
+%	 	class_decl(Token, 1, Stream, Term).
+%
+%  The first argument of each clause head is a distinct token, so indexing
+%  makes the code deterministic.  To ensure this is possible, three
+%  transformations, left recursion elimination, left unfolding, and left
+%  factoring, are applied.  Grammars that cannot be made deterministic by
+%  repeated application of these transformations are rejected.
+%
+%
+%  Left Recursion Elimination
+%
+%  Left recursion elimination converts direct left recursion into right
+%  recursion.  For example, a grammar defined like:
+%
+%    a ::= a 'x' b
+%    a ::= a 'y' c
+%    a ::= 'd'
+%    a ::= 'e'
+%
+%  is automatically transformed into:
+%
+%    a ::= 'd' a_tail
+%    a ::= 'e' a_tail
+%    a_tail ::= 'x' b
+%    a_tail ::= 'y' c
+%
+%
+%  Left Unfolding
+%
+%  Each final grammar rule must begin by consuming a terminal; left unfolding
+%  replaces a leftmost nonterminal with the body of each rule for that
+%  nonterminal.  For example, a grammar defined like:
+%
+%    a ::= b c
+%    a ::= d e
+%    b ::= 'x' f
+%    b ::= 'y' g
+%    d ::= h i j
+%    d ::=
+%
+%  is automatically transformed into:
+%
+%    a ::= 'x' f c
+%    a ::= 'y' g c
+%    a ::= h i j e
+%    a ::= e
+%    b ::= 'x' f
+%    b ::= 'y' g
+%    d ::= h i j
+%    d ::=
+%
+%  This expansion is repeated until the leftmost item in the body of each
+%  grammar rule is a terminal.
+%
+%
+%  Left Factoring
+%
+%  Each resulting grammar rule must begin by consuming a distinct token;
+%  where multiple rules for the same nonterminal begin with the same token,
+%  they are combined into a single rule beginning with the initial common
+%  part, and following with a new nonterminal defined as the final, different
+%  parts of the rules.  For example, a grammar defined like: 
+%
+%    a ::= 'x' a b c
+%    a ::= 'x' a d e
+%    a ::= 'y' f
+%
+%  is automatically transformed into:
+%
+%    a ::= 'x' a a_tail
+%    a ::= 'y' f
+%    a_tail ::= b c
+%    a_tail ::= d e
+%
+%  (and then left unfolding is applied to a_tail).
+%
+%
+%  Nullable Unfolding
+%
+%  Nullable nonterminals (those that can generate the empty string) cannot be
+%  handled directly, since each resulting grammar rule must begin by
+%  consuming a token.  So every reference to a nullable nonterminal must be
+%  replaced by each body of that rule.  For example, a grammar defined like:
+%
+%    a ::= 'x' b c d e
+%    b ::=
+%    b ::= 'y' f
+%    c ::=
+%    c ::= 'z' g
+%    d ::= 'w' h
+%
+%  is automatically transformed into:
+%
+%    a ::= 'x' 'w' h e
+%    a ::= 'x' 'z' g 'w' h e
+%    a ::= 'x' 'y' f 'w' h e
+%    a ::= 'x' 'y' f 'z' g 'w' h e
+%
+%  (and then left factoring is applied to n).
 
 :- module(parser, [
 		   get_item/2
@@ -27,6 +137,7 @@
 
 
 :- use_module(lex).
+:- use_module(library(gensym)).
 
 
 % Read a top-level item (declaration or directive) from the specified stream.
@@ -49,20 +160,6 @@ undef_nonterm(item).
 %  Add new grammar rule Nonterm ::= Body to grammar.  This produces a
 %  deterministic LL(1) parser.  The code automatically left-factors the
 %  grammar, and eliminates left recursion.
-%
-%  The generated parser consists of dynamic predicates of the form:
-%
-
-item('use', _Prec, Stream, Term) :-
-	get_token(Stream, Token),
-	use_decl(Token, 1, Stream, Term).
-item('module', _Prec, Stream, Term) :-
-	get_token(Stream, Token),
-	module_decl(Token, 1, Stream, Term).
-item('class', _Prec, Stream, Term) :-
-	get_token(Stream, Token),
-	class_decl(Token, 1, Stream, Term).
-	
 
 
 add_production(Nonterm, Body) :-
@@ -73,16 +170,16 @@ add_production1((B1;B2), Nonterm) :-
 	add_production1(B1, Nonterm),
 	add_production1(B2, Nonterm).
 add_production1(Body, Nonterm) :-
-	left_recursion(Nonterm, Leftrec),
+	already_left_recursive(Nonterm, Leftrec),
 	transform(Body, Nonterm, Leftrec, Clauses, Leftrec1),
-	maybe_add_left_recursion(Leftrec1, Leftrec, Nonterm),
+	maybe_remove_left_recursion(Leftrec1, Leftrec, Nonterm),
 	add_clauses(Clauses, Nonterm, Leftrec1).
 
 
-left_recursion(Nonterm, Leftrec) :-
-	(   is_left_recursive(Nonterm)
-	->  Leftrec = true
-	;   Leftrec = false
+already_left_recursive(Nonterm, Leftrec) :-
+	(   is_left_recursive(Nonterm,Tailnonterm)
+	->  Leftrec = Tailnonterm
+	;   Leftrec = ''
 	).
 
 
@@ -105,8 +202,19 @@ transform(Nonterm1, Nonterm, Tail, Leftrec0, Clauses, Leftrec) :-
 	),
 	
 
-
 recursive_invocation(Parent, Parent) :-
 	!.
 recursive_invocation(Parent, Child) :-
 	leftmost_nonterm(Child, Parent).
+
+
+maybe_remove_left_recursion(true, false, Nonterm) :-
+	gensym('leftrec ', Tailnonterm),
+	assert(is_left_recursive(Nonterm, Tailnonterm)),
+	remove_left_recursion(Nonterm, Tailnonterm).
+
+
+remove_left_recursion(Nonterm, Tailnonterm) :-
+	Head =.. [Nonterm, Token,Prec,Stream,Term] ,
+	(   retract((Head :- Body)),
+	    
