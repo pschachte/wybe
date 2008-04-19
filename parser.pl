@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.3 2008/03/21 02:40:57 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.4 2008/04/19 23:32:59 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -107,28 +107,38 @@
 %  (and then left unfolding is applied to a_tail).
 %
 %
-%  Nullable Unfolding
+%  Final Nullable Nonterminals
 %
-%  Nullable nonterminals (those that can generate the empty string) cannot be
-%  handled directly, since each resulting grammar rule must begin by
-%  consuming a token.  So every reference to a nullable nonterminal must be
-%  replaced by each body of that rule.  For example, a grammar defined like:
+%  Nullable nonterminals (those that can generate the empty string) must be
+%  handled specially, since parsing a nullable nonterminal may not consume
+%  any tokens.  So they must return the next terminal following the parsed
+%  nonterminal.  If a nullable nonterminal is last in a production, then
+%  parsing that nonterminal must also return the following nonterminal.  Thus
+%  we call any nonterminal "final nullable" if it has any production ending a
+%  nullable or final nullable nonterminal.  We must generate slightly
+%  different code to handle final nullable nonterminals to take account of
+%  the returned terminal.
 %
-%    a ::= 'x' b c d e
-%    b ::=
-%    b ::= 'y' f
-%    c ::=
-%    c ::= 'z' g
-%    d ::= 'w' h
 %
-%  is automatically transformed into:
+%  Incremental generation
 %
-%    a ::= 'x' 'w' h e
-%    a ::= 'x' 'z' g 'w' h e
-%    a ::= 'x' 'y' f 'w' h e
-%    a ::= 'x' 'y' f 'z' g 'w' h e
+%  As each new production is added, we first unfold any nullable
+%  nonterminals, possibly generating multiple productions which are all
+%  handled as follows.  We left unfold each production until its leftmost
+%  element is either a terminal or the nonterminal this rule defines.  If it
+%  is now left-recursive, or if the nonterminal is already marked as
+%  left-recursive, then first, if the nonterminal was not already marked
+%  left-recursive, then we so mark it and re-process all existing productions
+%  for that nonterminal for left recursion, and second we process the new
+%  production for left recursion.  After all this, if the leftmost element is
+%  identical to the leftmost element of another production for this
+%  nonterminal, then we left factor it.  Finally we record all the
+%  nonterminals 
 %
-%  (and then left factoring is applied to n).
+%  
+
+
+the production is processed for left recursion.  
 
 :- module(parser, [
 		   get_item/2
@@ -158,8 +168,11 @@ undef_nonterm(item).
 
 %  add_production(Nonterm, Body)
 %  Add new grammar rule Nonterm ::= Body to grammar.  This produces a
-%  deterministic LL(1) parser.  The code automatically left-factors the
-%  grammar, and eliminates left recursion.
+%  deterministic LL(1) parser.  The code automatically incrementally performs
+%  the above-described transformations to create a deterministic parser, if
+%  possible.  Does not warn if the grammar is il-formed, since productions
+%  added later may correct the problem.  Errors are reported when they are
+%  discovered during parsing.
 
 
 add_production(Nonterm, Body) :-
