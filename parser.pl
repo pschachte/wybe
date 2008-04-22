@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.4 2008/04/19 23:32:59 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.5 2008/04/23 07:30:54 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -113,32 +113,28 @@
 %  handled specially, since parsing a nullable nonterminal may not consume
 %  any tokens.  So they must return the next terminal following the parsed
 %  nonterminal.  If a nullable nonterminal is last in a production, then
-%  parsing that nonterminal must also return the following nonterminal.  Thus
-%  we call any nonterminal "final nullable" if it has any production ending a
-%  nullable or final nullable nonterminal.  We must generate slightly
-%  different code to handle final nullable nonterminals to take account of
-%  the returned terminal.
+%  parsing the nonterminal of that production must also return the following
+%  nonterminal.  Thus we call any nonterminal "final nullable" if it has any
+%  production ending a nullable or final nullable nonterminal.  We must
+%  generate slightly different code to handle final nullable nonterminals to
+%  take account of the returned terminal.
 %
 %
 %  Incremental generation
 %
-%  As each new production is added, we first unfold any nullable
-%  nonterminals, possibly generating multiple productions which are all
-%  handled as follows.  We left unfold each production until its leftmost
-%  element is either a terminal or the nonterminal this rule defines.  If it
-%  is now left-recursive, or if the nonterminal is already marked as
+%  As each new production is added, we left unfold each production until its
+%  leftmost element is either nonexistent, a terminal, or the nonterminal
+%  this rule defines.  If it is nonexistent and this nonterminal is not
+%  already marked final nullable, we so mark it and reprocess all callers.
+%  If it is now left-recursive, or if the nonterminal is already marked as
 %  left-recursive, then first, if the nonterminal was not already marked
 %  left-recursive, then we so mark it and re-process all existing productions
 %  for that nonterminal for left recursion, and second we process the new
 %  production for left recursion.  After all this, if the leftmost element is
 %  identical to the leftmost element of another production for this
 %  nonterminal, then we left factor it.  Finally we record all the
-%  nonterminals 
-%
-%  
-
-
-the production is processed for left recursion.  
+%  nonterminals called by the production, so that we can quickly find the
+%  callers of any nonterminal.
 
 :- module(parser, [
 		   get_item/2
@@ -165,6 +161,15 @@ get_item(Stream, Item) :-
 :- dynamic undef_nonterm/1.
 undef_nonterm(item).
 
+%  Keep track of which nonterminals are left recursive
+:- dynamic left_recursive/1.
+
+%  We keep track of final nullable nonterminals.
+:- dynamic final_nullable/1.
+
+%  We keep track of which nonterminals use which.
+:- dynamic used_by/2.
+
 
 %  add_production(Nonterm, Body)
 %  Add new grammar rule Nonterm ::= Body to grammar.  This produces a
@@ -176,7 +181,23 @@ undef_nonterm(item).
 
 
 add_production(Nonterm, Body) :-
-	add_production1(Body, Nonterm).
+	(   compile_body(Body, Nonterm, true, Body1),
+	    record_production(Nonterm, Body1),
+	    fail
+	;   true
+	).
+
+compile_body((B1|B2), Nonterm, Leftmost, Body) :-
+	(   Body0 = B1
+	;   Body0 = B2),
+	compile_body(Body0, Nonterm, Leftmost, Body).
+compile_body((B1,B2), Nonterm, Leftmost, Body) :-
+	compile_body(B1, Nonterm, Leftmost, Body1),
+	compile_body(B2, Nonterm, false, Body2),
+	conjoin(Body1, Body2, Body).
+
+
+
 
 add_production1((B1;B2), Nonterm) :-
 	!,
@@ -195,8 +216,6 @@ already_left_recursive(Nonterm, Leftrec) :-
 	;   Leftrec = ''
 	).
 
-
-:- dynamic is_left_recursive/1.
 
 
 transform((L,R), Nonterm, Tail, Leftrec0, Clauses, Leftrec) :-
