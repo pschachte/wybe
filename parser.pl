@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.5 2008/04/23 07:30:54 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.6 2008/05/03 14:59:32 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -137,7 +137,7 @@
 %  callers of any nonterminal.
 
 :- module(parser, [
-		   get_item/2
+		   get_item/2,
 		   add_production/2
    ]).
 
@@ -161,8 +161,9 @@ get_item(Stream, Item) :-
 :- dynamic undef_nonterm/1.
 undef_nonterm(item).
 
-%  Keep track of which nonterminals are left recursive
-:- dynamic left_recursive/1.
+%  Keep track of which nonterminals are left recursive and what their tail
+%  predicates are
+:- dynamic left_recursive/2.
 
 %  We keep track of final nullable nonterminals.
 :- dynamic final_nullable/1.
@@ -180,73 +181,115 @@ undef_nonterm(item).
 %  discovered during parsing.
 
 
-add_production(Nonterm, Body) :-
-	(   compile_body(Body, Nonterm, true, Body1),
-	    record_production(Nonterm, Body1),
+add_production(Head, Body) :-
+	(   compile_body(Body, Head, Stream, true, true, Lead, Lrec, Nable,
+			 Body1, Terms, Args),
+	    concat_atoms(Terms, Functor),
+	    record_production(Head, Lead, Stream, Functor, Args, Lrec, Nable,
+			      Body1),
 	    fail
 	;   true
 	).
 
-compile_body((B1|B2), Nonterm, Leftmost, Body) :-
-	(   Body0 = B1
-	;   Body0 = B2),
-	compile_body(Body0, Nonterm, Leftmost, Body).
-compile_body((B1,B2), Nonterm, Leftmost, Body) :-
-	compile_body(B1, Nonterm, Leftmost, Body1),
-	compile_body(B2, Nonterm, false, Body2),
-	conjoin(Body1, Body2, Body).
 
+%  compile_body(Rule, Head, Stream, Lmost, Rmost,
+%		Lead, Lrec, Nable, Body, Terms, Args)
+%  Body is the code to parse input according to grammar rule Rule, a rule for
+%  nonterminal Head.  Lmost and Rmost are true iff Rule is the leftmost
+%  and/or rightmost part of the input rule.  Lead is the initial terminal
+%  that must be matched for this rule to match.  Lrec is true iff Rule is
+%  left-recursive, in which case Body omits the left-recursive nonterminal.
+%  Nable is true iff Rule is final nullable.
 
-
-
-add_production1((B1;B2), Nonterm) :-
+compile_body((B1|B2), Head, Stream, Lmost, Rmost, Lead, Lrec, Nable, Body, Terms, Args) :-
 	!,
-	add_production1(B1, Nonterm),
-	add_production1(B2, Nonterm).
-add_production1(Body, Nonterm) :-
-	already_left_recursive(Nonterm, Leftrec),
-	transform(Body, Nonterm, Leftrec, Clauses, Leftrec1),
-	maybe_remove_left_recursion(Leftrec1, Leftrec, Nonterm),
-	add_clauses(Clauses, Nonterm, Leftrec1).
-
-
-already_left_recursive(Nonterm, Leftrec) :-
-	(   is_left_recursive(Nonterm,Tailnonterm)
-	->  Leftrec = Tailnonterm
-	;   Leftrec = ''
+	( Body0 = B1 ; Body0 = B2 ),
+	compile_body(Body0, Head, Stream, Lmost, Rmost, Lead, Lrec, Nable, Body, Terms, Args).
+compile_body((B1,B2), Head, Stream, Lmost, Rmost, Lead, Lrec, Nable, Body, Terms, Args) :-
+	!,
+	compile_body(B1, Head, Stream, Lmost, false, Lead, Lrec, _, Body1,
+		     Terms1, Args1),
+	compile_body(B2, Head, Stream, false, Rmost, _, _, Nable, Body2,
+		     Terms2, Args2),
+	conjoin(Body1, Body2, Body),
+	append(Terms1, Terms2, Terms),
+	append(Args1, Args2, Args).
+compile_body('', _, _, _, _, '', false, true, true, [], []) :-
+	!.
+compile_body(Terminal, _, Stream, Lmost, _, Terminal, false, false, Goal,
+	     [Terminal], []) :-
+	is_terminal(Terminal),
+	!,
+	(   Lmost == true
+	->  Goal = true
+	;   terminal_goal(Terminal, Stream, Goal)
+	).
+compile_body(Nonterminal, Head, Stream, Lmost, Rmost, Lead, Lrec, Nable,
+	     Goal, [], [Arg]) :-
+	(   Lmost == true			% the left-most element
+	->  (	Nonterminal == Head		% directly recursive
+	    ->	Lrec = true,
+		Goal = true
+	    ;	Lrec = false,			% expand left nonterminal
+		recorded_production(Nonterminal, Lead, Goal)
+	    )
+	;   nonterminal_goal(Nonterminal, Stream, Arg, Goal)
+	),
+	(   Rmost = true,
+	    final_nullable(Nonterminal)
+	->  Nable = true
+	;   Nable = false
 	).
 
 
+is_terminal(bracket(_,_)).
+is_terminal(string(_,_)).
+is_terminal(symbol(_)).
+is_terminal(punct(_)).
 
-transform((L,R), Nonterm, Tail, Leftrec0, Clauses, Leftrec) :-
-	!,
-	transform_tail(R, Tail1, Tail),
-	transform(L, Nonterm, Tail1, Leftrec0, Clauses, Leftrec).
-transform(Token, Nonterm, Tail, Leftrec0, [Clause], Leftrec0) :-
-	token(Token),
-	!,
-	Head =.. [Nonterm,Token,Prec,Stream,Term],
-	generate_clause(Nonterm, Token, Tail, Leftrec0, Clause).
-transform(Nonterm1, Nonterm, Tail, Leftrec0, Clauses, Leftrec) :-
-	(   recursive_invocation(Nonterm, Nonterm1)
-	->  Leftrec = true
-	;   Leftrec = Leftrec0
-	),
+
+nonterminal_goal(Nonterm, Stream, Term, (get_token(Stream,Token),Call)) :-
+	Call =.. [Nonterm,Token,1,Stream,Term].
+
+terminal_goal(Terminal, Stream, must_get_token(Stream,Terminal)).
 	
 
-recursive_invocation(Parent, Parent) :-
+concat_atoms(Atoms, Atom) :-
+	concat_codes(Atoms, Codes),
+	atom_codes(Atom, Codes).
+
+concat_codes([], []).
+concat_codes([Atom|Atoms], Cs) :-
+	token_codes(Atom, Cs1),
+	append(Cs1, Cs2, Cs),
+	concat_codes(Atoms, Cs2).
+
+token_codes(symbol(Atom), Codes) :-
+	!,
+	atom_codes(Atom, Codes).
+token_codes(punct(Atom), Codes) :-
+	!,
+	atom_codes(Atom, Codes).
+token_codes(bracket(Shape,End), Codes) :-
+	bracket(Shape,End,Sym),
+	!,
+	atom_codes(Sym, Codes).
+
+
+conjoin((A,B), C, Conj) :-
+	!,
+	conjoin(B, C, Conj1),
+	conjoin(A, Conj1, Conj).
+conjoin(true, A, A) :-
 	!.
-recursive_invocation(Parent, Child) :-
-	leftmost_nonterm(Child, Parent).
+conjoin(A, B, Conj) :-
+	(   B == true
+	->  Conj = A
+	;   Conj = (A,B)
+	).
 
 
-maybe_remove_left_recursion(true, false, Nonterm) :-
-	gensym('leftrec ', Tailnonterm),
-	assert(is_left_recursive(Nonterm, Tailnonterm)),
-	remove_left_recursion(Nonterm, Tailnonterm).
-
-
-remove_left_recursion(Nonterm, Tailnonterm) :-
-	Head =.. [Nonterm, Token,Prec,Stream,Term] ,
-	(   retract((Head :- Body)),
-	    
+record_production(Nonterm, Lead, Stream, Functor, Args, _Lrec, _Nable, Body) :-
+	Head =.. [Nonterm, Lead, Prec, Stream, Term],
+	Term =.. [Functor|Args],
+	portray_clause((Head:-Body)).

@@ -1,13 +1,28 @@
 %  File     : lex.pl
-%  RCS      : $Id: lex.pl,v 1.5 2008/03/13 06:13:11 schachte Exp $
+%  RCS      : $Id: lex.pl,v 1.6 2008/05/03 14:59:32 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Mon Apr  9 14:16:33 2007
 %  Purpose  : Lexical analysis for frege
 %  Copyright: © 2007 Peter Schachte.  All rights reserved.
 %
 
-:- module(lex, [	        get_token/3
+
+:- module(lex, [
+	        get_token/3,
+		bracket/3
    ]).
+
+
+%  get_token(Stream, Token, Pos)
+%  Token is the next Frege token to be read from Stream, and it appears at
+%  file position Pos.  Pos is a Prolog stream position term.  Token is one of
+%  the following:
+%	bracket(Shape,End)	where Shape in {round,square,curly} and
+%				End in {open,close}
+%	string(Chars,Kind)	where Kind in {single,double,back,here}
+%				and Chars is a list of character codes
+%	symbol(Atom)		where Atom is a Prolog atom
+%	punct(Atom)		where Atom is a Prolog atom
 
 get_token(Stream, Token, Pos) :-
 	stream_property(Stream, position(Pos0)),
@@ -47,7 +62,7 @@ lex_token(0'`, Stream, Pos, string(Chars,back), Pos) :-
 	!,
 	get_code(Stream, Char1),
 	read_string(Char1, Stream, Chars, 0'`).
-lex_token(0'\\, Stream, Pos, string(Chars,here(Term)), Pos) :-
+lex_token(0'\\, Stream, Pos, string(Chars,here), Pos) :-
 	!,
 	get_code(Stream, Char1),
 	read_terminator(Char1, Stream, Term0),
@@ -62,10 +77,12 @@ lex_token(Char0, Stream, _, Token, Pos) :-
 lex_token(Char0, Stream, Pos, Token, Pos) :-
 	symbol_char(Char0),
 	!,
-	Token = symbol([Char0|Chars]),
-	symbol_chars(Stream, Chars).
-lex_token(Char0, Stream, Pos, punct([Char0|Chars]), Pos) :-
-	nonsymbol_chars(Stream, Chars).
+	Token = symbol(Atom),
+	symbol_chars(Stream, Chars),
+	atom_codes(Atom, [Char0|Chars]).
+lex_token(Char0, Stream, Pos, punct(Atom), Pos) :-
+	nonsymbol_chars(Stream, Chars),
+	atom_codes(Atom, [Char0|Chars]).
 
 
 skip_line(0'\n, _) :- !.
@@ -190,6 +207,16 @@ nonsymbol_chars(Stream, Chars) :-
 	    nonsymbol_chars(Stream, Chars1)
 	;   Chars = []
 	).
+
+
+bracket(square,  open, '[').
+bracket(square, close, ']').
+bracket(round,  open, '(').
+bracket(round, close, ')').
+bracket(curly,  open, '{').
+bracket(curly, close, '}').
+       
+
 
 special_char(0'().
 special_char(0')).
