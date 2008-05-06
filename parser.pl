@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.7 2008/05/05 14:22:38 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.8 2008/05/07 09:03:35 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -186,64 +186,38 @@ undef_nonterm(item).
 
 
 add_production(Head, Body) :-
-	(   compile_body(Body, Head, Stream, true, true, Lead, Lrec, Nable,
-			 Body1, Terms, Args),
-	    concat_atoms(Terms, Functor),
-	    record_production(Head, Lead, Stream, Functor, Args, Lrec, Nable,
-			      Body1),
+	(   compile_body(Body, Head, Stream, true, true, Lrec, Nable,
+			 Body1, Toks, Args),
+	    concat_atoms(Toks, Functor),
+	    Term =.. [Functor|Args],
+	    record_production(Head, Stream, Term, Body1),
 	    fail
 	;   true
 	).
 
 
-%  compile_body(Rule, Head, Stream, Lmost, Rmost,
-%		Lead, Lrec, Nable, Body, Terms, Args)
-%  Body is the code to parse input according to grammar rule Rule, a rule for
-%  nonterminal Head.  Lmost and Rmost are true iff Rule is the leftmost
-%  and/or rightmost part of the input rule.  Lead is the initial terminal
-%  that must be matched for this rule to match.  Lrec is true iff Rule is
-%  left-recursive, in which case Body omits the left-recursive nonterminal.
-%  Nable is true iff Rule is final nullable.
+%  compile_body(Rule, Stream, Body, Toks, Args)
+%  Body is the code to parse input according to grammar rule Rule.
 
-compile_body((B1|B2), Head, Stream, Lmost, Rmost, Lead, Lrec, Nable, Body, Terms, Args) :-
+compile_body((B1|B2), Stream, Body, Toks, Args) :-
 	!,
 	( Body0 = B1 ; Body0 = B2 ),
-	compile_body(Body0, Head, Stream, Lmost, Rmost, Lead, Lrec, Nable, Body, Terms, Args).
-compile_body((B1,B2), Head, Stream, Lmost, Rmost, Lead, Lrec, Nable, Body, Terms, Args) :-
+	compile_body(Body0, Stream, Body, Toks, Args).
+compile_body((B1,B2), Stream, Body, Toks, Args) :-
 	!,
-	compile_body(B1, Head, Stream, Lmost, false, Lead, Lrec, _, Body1,
-		     Terms1, Args1),
-	compile_body(B2, Head, Stream, false, Rmost, _, _, Nable, Body2,
-		     Terms2, Args2),
+	compile_body(B1, Stream, Body1, Toks1, Args1),
+	compile_body(B2, Stream, Body2, Toks2, Args2),
 	conjoin(Body1, Body2, Body),
-	append(Terms1, Terms2, Terms),
+	append(Toks1, Toks2, Toks),
 	append(Args1, Args2, Args).
-compile_body('', _, _, _, _, '', false, true, true, [], []) :-
+compile_body('', _, true, [], []) :-
 	!.
-compile_body(Terminal, _, Stream, Lmost, _, Symbol, false, false, Goal,
-	     [Terminal], []) :-
+compile_body(Terminal, Stream, Goal, [Terminal], []) :-
 	terminal_symbol(Terminal, Symbol),
 	!,
-	(   Lmost == true
-	->  Goal = true
-	;   terminal_goal(Symbol, Stream, Goal)
-	).
-compile_body(Nonterminal, Head, Stream, Lmost, Rmost, Lead, Lrec, Nable,
-	     Goal, [], [Arg]) :-
-	(   Lmost == true			% the left-most element
-	->  (	Nonterminal == Head		% directly recursive
-	    ->	Lrec = true,
-		Goal = true
-	    ;	Lrec = false,			% expand left nonterminal
-		recorded_production(Nonterminal, Lead, Goal)
-	    )
-	;   nonterminal_goal(Nonterminal, Stream, Arg, Goal)
-	),
-	(   Rmost = true,
-	    final_nullable(Nonterminal)
-	->  Nable = true
-	;   Nable = false
-	).
+	terminal_goal(Symbol, Stream, Goal).
+compile_body(Nonterminal, Stream, Goal, [], [Arg]) :-
+	nonterminal_goal(Nonterminal, Stream, Arg, Goal).
 
 
 is_terminal(bracket(_,_)).
@@ -255,7 +229,7 @@ is_terminal(punct(_)).
 nonterminal_goal(Nonterm, Stream, Term, nonterminal(Stream,Nonterm,1,Term)).
 
 terminal_goal(Symbol, Stream, terminal(Stream,Symbol)).
-	
+
 
 terminal_symbol(symbol(Sym), Sym).
 terminal_symbol(punct(Sym), Sym).
@@ -264,25 +238,27 @@ terminal_symbol(bracket(Kind,End), Sym) :-
 terminal_symbol(string(Chars,Kind), string(Chars,Kind)).
 
 
-concat_atoms(Atoms, Atom) :-
-	concat_codes(Atoms, Codes),
+concat_atoms(Toks, Atom) :-
+	concat_codes(Toks, Codes),
 	atom_codes(Atom, Codes).
 
-concat_codes([], []).
-concat_codes([Atom|Atoms], Cs) :-
-	token_codes(Atom, Cs1),
+concat_codes([Tok|Toks], Cs) :-
+	concat_codes1(Toks, Cs1),
+	terminal_symbol(Tok, Sym),
+	symbol_codes(Sym, Cs1),
 	append(Cs1, Cs2, Cs),
-	concat_codes(Atoms, Cs2).
 
-token_codes(symbol(Atom), Codes) :-
-	!,
-	atom_codes(Atom, Codes).
-token_codes(punct(Atom), Codes) :-
-	!,
-	atom_codes(Atom, Codes).
-token_codes(bracket(Shape,End), Codes) :-
-	bracket(Shape,End,Sym),
-	!,
+
+concat_codes1([], []).
+concat_codes1([Tok|Toks], Cs) :-
+	terminal_symbol(Tok, Sym),
+	symbol_codes(Sym, Cs1),
+	append(Cs1, [0' |Cs2], Cs),
+	concat_codes1(Toks, Cs2).
+
+symbol_codes(string(Chars,_), Chars) :-
+	!.
+symbol_codes(Sym, Codes) :-
 	atom_codes(Sym, Codes).
 
 
@@ -299,18 +275,61 @@ conjoin(A, B, Conj) :-
 	).
 
 
-record_production(Nonterm, Lead, Stream, Functor, Args, _Lrec, _Nable, Body) :-
-	Head =.. [Nonterm, Lead, Prec, Stream, Term],
-	Term =.. [Functor|Args],
-	(   clause(parse_table(Nonterm,_,_,_,_),_)
-	->  true
-	;   Generalcall =.. [Nonterm, A, B, C, D],
-	    assert(parse_table(Nonterm,A,B,C,D):-parser_rule:Generalcall)
+%  record_production(Nonterm, Stream, Term, Body)
+%  Add a new production for Nonterm with body Body.  Tokens are to be read
+%  from Stream, and the result of this grammar rule is Term.
+
+record_production(Nonterm, Stream, Term, Body) :-
+	left_unfold(Body, Nonterm, Body1),
+	(   left_recursive_body(Body1, Nonterm, Body2)
+	->  (	left_recursive_body(Body2, Nonterm, _)
+	    ->	throw(double_left_recursive(Nonterm, Body))
+	    ;	update_left_recursive(Nonterm),
+		make_lrec_production(Nonterm, Stream, Term, Body2, Realbody)
+	    )
+	;   left_recursive_nonterm(Nonterm, Stream, Term, Tailcall)
+	->  conjoin(Body2, Tailcall, Realbody)
 	),
-	Pattern =.. [Nonterm, Lead, Prec, Stream, Oldterm],
+	(   initial_goal(Realbody, terminal(Stream,Sym), Rest)
+	->  Head =.. [Nonterm, Sym, Prec, Stream, Term],
+	    add_grammar_clause(Head, Rest)
+	;   throw(left_unfolding_failed(Nonterm, Body))
+	).
+
+
+initial_goal((A,B), A, B) :-
+	!.
+initial_goal(Init, Init, true).
+
+
+
+left_unfold(Body0, Nonterm, Body) :-
+	initial_goal(Body0, Lead, Rest),
+	left_unfold1(Lead, Rest, Body0, Nonterm, Body).
+
+left_unfold1(terminal(_,_), _, Body, _, Body).
+left_unfold1(nonterminal(_,Nonterm,_,_), Rest, Body0, Parent, Body) :-
+	(   Nonterm == Parent
+	->  Body = Body0
+	;   nonterm_clause(Nonterm, Body1),
+	    conjoin(Body1, Body0, Body)
+	).
+
+
+left_recursive_body(Body, Nonterm, Rest) :-
+	initial_goal(Body, nonterm(_,Nonterm,_,_), Rest).
+
+
+left_recursive_nonterm(Nonterm, Stream, Term, Tailcall) :-
+	left_recursive(Nonterm, Tailpred),
+	Tailcall =.. [Tailpred, Stream, Term].
+
+add_grammar_clause(Head, Body) :-
+	Head =.. [Nonterm, Lead, Prec, Stream, Term],
+	add_nonterm_master_clause(Nonterm),
+	Pattern =.. [Nonterm, Lead, OldPrec, OldStream, Oldterm],
 	(   retract((parser_rule:(Pattern:-_:Oldbody)))
-	->  left_factor(Oldbody, Body, Commonbody, Newoldbody, Newbody),
-	    (	Newoldbody = Newbody
+	->  (	Newoldbody = Newbody
 	    ->	assert(parser_rule:Pattern:-Oldbody),
 		throw(redundant_rule(Nonterm,Lead,Body))
 	    ;	gensym('rule ', Newname),
@@ -325,9 +344,17 @@ record_production(Nonterm, Lead, Stream, Functor, Args, _Lrec, _Nable, Body) :-
 	assert((parser_rule:Newhead:-Newbody)).
 
 
+add_nonterm_master_clause(Nonterm) :-
+	(   clause(parse_table(Nonterm,_,_,_,_),_)
+	->  true
+	;   Generalcall =.. [Nonterm, A, B, C, D],
+	    assert(parse_table(Nonterm,A,B,C,D):-parser_rule:Generalcall)
+	).
+
+
 left_factor((Old1,Olds), New, Common, Newold, Newnew) :-
 	!,
-	split_conj(New, New1, News),
+	initial_goal(New, New1, News),
 	(   Old1 = New1
 	->  left_factor(Olds, News, Commons, Newold, Newnew),
 	    conjoin(Old1, Commons, Common)
@@ -336,7 +363,7 @@ left_factor((Old1,Olds), New, Common, Newold, Newnew) :-
 	    Newnew = New
 	).
 left_factor(Old, New, Common, Newold, Newnew) :-
-	split_conj(New, New1, News),
+	initial_goal(New, New1, News),
 	(   Old = New1
 	->  Newold = true,
 	    Newnew = News,
@@ -346,12 +373,6 @@ left_factor(Old, New, Common, Newold, Newnew) :-
 	    Newnew = New
 	).
 	
-
-split_conj((New1,News), New1, News) :-
-	!.
-split_conj(New1, New1, true).
-
-
 
 terminal(Stream, Expected) :-
 	get_token(Stream, Token, Position),
