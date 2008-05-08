@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.8 2008/05/07 09:03:35 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.9 2008/05/09 07:49:15 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -186,8 +186,7 @@ undef_nonterm(item).
 
 
 add_production(Head, Body) :-
-	(   compile_body(Body, Head, Stream, true, true, Lrec, Nable,
-			 Body1, Toks, Args),
+	(   compile_body(Body, Stream, Body1, Toks, Args),
 	    concat_atoms(Toks, Functor),
 	    Term =.. [Functor|Args],
 	    record_production(Head, Stream, Term, Body1),
@@ -243,10 +242,10 @@ concat_atoms(Toks, Atom) :-
 	atom_codes(Atom, Codes).
 
 concat_codes([Tok|Toks], Cs) :-
-	concat_codes1(Toks, Cs1),
 	terminal_symbol(Tok, Sym),
 	symbol_codes(Sym, Cs1),
-	append(Cs1, Cs2, Cs),
+	concat_codes1(Toks, Cs2),
+	append(Cs1, Cs2, Cs).
 
 
 concat_codes1([], []).
@@ -291,7 +290,7 @@ record_production(Nonterm, Stream, Term, Body) :-
 	->  conjoin(Body2, Tailcall, Realbody)
 	),
 	(   initial_goal(Realbody, terminal(Stream,Sym), Rest)
-	->  Head =.. [Nonterm, Sym, Prec, Stream, Term],
+	->  Head =.. [Nonterm, Sym, _Prec, Stream, Term],
 	    add_grammar_clause(Head, Rest)
 	;   throw(left_unfolding_failed(Nonterm, Body))
 	).
@@ -307,12 +306,12 @@ left_unfold(Body0, Nonterm, Body) :-
 	initial_goal(Body0, Lead, Rest),
 	left_unfold1(Lead, Rest, Body0, Nonterm, Body).
 
-left_unfold1(terminal(_,_), _, Body, _, Body).
+left_unfold1(terminal(_,_), Body, _, _, Body).
 left_unfold1(nonterminal(_,Nonterm,_,_), Rest, Body0, Parent, Body) :-
 	(   Nonterm == Parent
 	->  Body = Body0
 	;   nonterm_clause(Nonterm, Body1),
-	    conjoin(Body1, Body0, Body)
+	    conjoin(Body1, Rest, Body)
 	).
 
 
