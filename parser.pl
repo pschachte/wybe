@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.10 2008/05/13 14:13:28 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.11 2008/05/14 07:31:20 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -162,6 +162,8 @@ get_item(Stream, Item) :-
 
 %  Entry into the dynamic part of the parser.
 :- dynamic parse_table/4.
+:- dynamic parse_table/5.
+:- dynamic parse_table/6.
 
 
 %  Everything in the parser_rule module is dynamic; this one is mentioned here.
@@ -337,23 +339,36 @@ add_grammar_clause(Nonterm, Stream, Extras, Term, Body,
 	->  (	matching_clause(Nonterm, Sym, Stream, Extras, Oldterm,
 				Oldbody, Ref)
 	    ->	left_factor(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody,
-			    Ref, Body, Newnonterm, Newextras, Newbody),
+			    Ref, Body, Newnonterm, Newextras, Newbody,
+			    Orig_nonterm, Orig_body),
 		record_production(Newnonterm, Stream, Newextras, Term, Newbody,
 				  Orig_nonterm, Orig_body)
-	    ;	Newhead = Head,
-		Newbody = Rest
-	    ),
-	    Head =.. [Nonterm, Sym, Stream, Term | Extras],
-	    assert((parser_rule:Newhead:-Newbody)),
-	    add_nonterm_master_clause(Nonterm, Extras)
+	    ;	Newhead =.. [Nonterm, Sym, Stream, Term | Extras],
+		assert((parser_rule:Newhead:-Rest)),
+		add_nonterm_master_clause(Nonterm, Extras)
+	    )
 	;   throw(left_unfolding_failed(Nonterm, Body, Orig_nonterm, Orig_body))
 	).
 
 
 
+matching_clause(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody, Ref) :-
+	Pattern =.. [Nonterm, Sym, Stream, Oldterm | Extras],
+	parser_rule:clause(Pattern, _:Oldbody, Ref).
+	
 
-	%     Pattern =.. [Nonterm, Sym, Stream, Oldterm],
-	%     (	parser_rule:clause(Pattern, _:Oldbody, Ref)
+
+left_factor(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody, Ref, Body,
+	    Newnonterm, Newextras, Newbody, Orig_nonterm, Orig_body) :-
+	(   Body = Oldbody	% trying to add a redundant grammar rule
+	->  throw(redundant_rule(Orig_nonterm, Orig_body))
+	;   split_common_start(Oldbody, Body, Commonbody, Newold, Newbody),
+	    (	generated_nonterm(Newold, Gennonterm, Ex)
+	    ->	true
+	    ),
+	    record_production(Gennonterm, Stream, Extras, Term, Body, Orig_nonterm, Orig_body)
+
+
 	%     ->	(   Body = Oldbody
 	% 	->  throw(redundant_rule(Orig_nonterm, Orig_body))
 	% 	;   split_common_start(Oldbody, Body, Commonbody,
@@ -422,6 +437,11 @@ split_common_start(Old, New, Common, Newold, Newnew) :-
 	).
 	
 
+generated_nonterm(nonterm_0(Gennonterm, _, _), Gennonterm).
+generated_nonterm(nonterm_1(Gennonterm, _, _, _), Gennonterm).
+generated_nonterm(nonterm_2(Gennonterm, _, _, _, _), Gennonterm).
+
+
 %  Runtime code
 
 terminal(Stream, Expected) :-
@@ -440,10 +460,26 @@ nonterminal(Stream, Nonterm, Value) :-
 	;   throw(nonterminal_error(Nonterm, Symbol, Position))
 	).
 
-continuation(Stream, Nonterm, Seen, Value) :-
+nonterm_0(Stream, Nonterm, Value) :-
 	get_token(Stream, Token, Position),
 	terminal_symbol(Token, Symbol),
 	(   parse_table(Nonterm, Symbol, Stream, Value)
+	->  true
+	;   throw(nonterminal_error(Nonterm, Symbol, Position))
+	).
+
+nonterm_1(Stream, Nonterm, Value, E1) :-
+	get_token(Stream, Token, Position),
+	terminal_symbol(Token, Symbol),
+	(   parse_table(Nonterm, Symbol, Stream, Value, E1)
+	->  true
+	;   throw(nonterminal_error(Nonterm, Symbol, Position))
+	).
+
+nonterm_2(Stream, Nonterm, Value, E1, E2) :-
+	get_token(Stream, Token, Position),
+	terminal_symbol(Token, Symbol),
+	(   parse_table(Nonterm, Symbol, Stream, Value, E1, E2)
 	->  true
 	;   throw(nonterminal_error(Nonterm, Symbol, Position))
 	).
