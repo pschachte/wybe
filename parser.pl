@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.11 2008/05/14 07:31:20 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.12 2008/05/15 06:37:10 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -7,7 +7,8 @@
 
 :- module(parser, [ test/0, test2/0,
 		    get_item/2,
-		    add_production/2
+		    add_production/2,
+		    init_parser/0
 		  ]).
 
 test :-
@@ -33,22 +34,22 @@ test2 :-
 %  defined at any time.  Each time a grammar rule is added, all the tables
 %  are updated accordingly.
 %
-%  The generated parser consists of dynamic predicates of the form:
+%  The generated parser consists of a dynamic predicate for each nonterminal
+%  of the grammar, whose arguments are the next input token, the stream to
+%  read from, and the resulting abstract syntax tree.  Each clause consumes
+%  the next input token.
 %
-%	 item('use', _Prec, Stream, Term) :-
-%	 	get_token(Stream, Token),
-%	 	use_decl(Token, 1, Stream, Term).
-%	 item('module', _Prec, Stream, Term) :-
-%	 	get_token(Stream, Token),
-%	 	module_decl(Token, 1, Stream, Term).
-%	 item('class', _Prec, Stream, Term) :-
-%	 	get_token(Stream, Token),
-%	 	class_decl(Token, 1, Stream, Term).
+%	 item('use', Stream, use(Term)) :-
+%	 	nonterminal(use_decl, Stream, Term).
+%	 item('module', Stream, module(Term)) :-
+%	 	nonterminal(module_decl, Stream, Term).
+%	 item('class', Stream, Term) :-
+%	 	nonterminal(class_decl, Stream, Term).
 %
 %  The first argument of each clause head is a distinct token, so indexing
 %  makes the code deterministic.  To ensure this is possible, three
-%  transformations, left recursion elimination, left unfolding, and left
-%  factoring, are applied.  Grammars that cannot be made deterministic by
+%  transformations are applied:  left recursion elimination, left unfolding,
+%  and left factoring.  Grammars that cannot be made deterministic by
 %  repeated application of these transformations are rejected.
 %
 %
@@ -128,7 +129,7 @@ test2 :-
 %  nonterminal.  If a nullable nonterminal is last in a production, then
 %  parsing the nonterminal of that production must also return the following
 %  nonterminal.  Thus we call any nonterminal "final nullable" if it has any
-%  production ending a nullable or final nullable nonterminal.  We must
+%  production ending in a nullable or final nullable nonterminal.  We must
 %  generate slightly different code to handle final nullable nonterminals to
 %  take account of the returned terminal.
 %
@@ -183,6 +184,15 @@ undef_nonterm(item).
 
 %  We keep track of which nonterminals use which.
 :- dynamic used_by/2.
+
+
+init_parser :-
+	retractall(parser_rule:_),
+	retractall(parse_table(_,_,_,_)),
+	retractall(parse_table(_,_,_,_,_)),
+	retractall(parse_table(_,_,_,_,_,_)),
+	retractall(left_recursive(_,_)),
+	retractall(final_nullable(_)).
 
 
 %  add_production(Nonterm, Body)
@@ -300,8 +310,24 @@ record_production(Nonterm, Stream, Extras, Term, Body, Orig_nonterm, Orig_body) 
 	->  conjoin(Body2, Tailcall, Realbody)
 	;   Realbody = Body1
 	),
-	add_grammar_clause(Nonterm, Stream, Extras, Term, Realbody,
-			   Orig_nonterm, Orig_body).
+	(   initial_goal(Realbody, terminal(Stream,Sym), Rest)
+	->  add_grammar_clause(Nonterm, Stream, Extras, Term, Sym, Rest,
+			   Orig_nonterm, Orig_body)
+	;   throw(left_unfolding_failed(Nonterm, Body, Orig_nonterm, Orig_body))
+	).
+
+
+add_grammar_clause(Nonterm, Stream, Extras, Term, Sym, Body,
+		   Orig_nonterm, Orig_body) :-
+	(   matching_clause(Nonterm, Sym, Stream, Extras, Oldterm,
+			    Oldbody, Ref)
+	->  left_factor(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody,
+			Ref, Term, Body, Orig_nonterm, Orig_body)
+	;   Newhead =.. [Nonterm, Sym, Stream, Term | Extras],
+	    assert((parser_rule:Newhead:-Body)),
+	    add_nonterm_master_clause(Nonterm, Extras)
+	).
+
 
 
 initial_goal((A,B), A, B) :-
@@ -333,50 +359,40 @@ left_recursive_nonterm(Nonterm, Stream, Term, Tailcall) :-
 	Tailcall =.. [Tailpred, Stream, Term].
 
 
-add_grammar_clause(Nonterm, Stream, Extras, Term, Body,
-		   Orig_nonterm, Orig_body) :-
-	(   initial_goal(Body, terminal(Stream,Sym), Rest)
-	->  (	matching_clause(Nonterm, Sym, Stream, Extras, Oldterm,
-				Oldbody, Ref)
-	    ->	left_factor(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody,
-			    Ref, Body, Newnonterm, Newextras, Newbody,
-			    Orig_nonterm, Orig_body),
-		record_production(Newnonterm, Stream, Newextras, Term, Newbody,
-				  Orig_nonterm, Orig_body)
-	    ;	Newhead =.. [Nonterm, Sym, Stream, Term | Extras],
-		assert((parser_rule:Newhead:-Rest)),
-		add_nonterm_master_clause(Nonterm, Extras)
-	    )
-	;   throw(left_unfolding_failed(Nonterm, Body, Orig_nonterm, Orig_body))
-	).
-
-
-
 matching_clause(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody, Ref) :-
 	Pattern =.. [Nonterm, Sym, Stream, Oldterm | Extras],
 	parser_rule:clause(Pattern, _:Oldbody, Ref).
 	
 
 
-left_factor(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody, Ref, Body,
-	    Newnonterm, Newextras, Newbody, Orig_nonterm, Orig_body) :-
+left_factor(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody, Ref, Term, Body,
+	    Orig_nonterm, Orig_body) :-
 	(   Body = Oldbody	% trying to add a redundant grammar rule
 	->  throw(redundant_rule(Orig_nonterm, Orig_body))
-	;   split_common_start(Oldbody, Body, Commonbody, Newold, Newbody),
-	    (	generated_nonterm(Newold, Gennonterm, Ex)
+	;   split_common_start(Oldbody, Body, Commonbody, Newold, Newbody, Ex),
+	    append(Extras, Ex, Allextras),
+	    (	generated_nonterm(Newold, Gennonterm, Allextras)
 	    ->	true
+	    ;	erase(Ref),
+		gensym('rule ', Gennonterm),
+		Newcall =.. [gennonterm, Stream, Gennonterm,
+			     Generalterm | Allextras],
+		conjoin(Commonbody, Newcall, Factoredbody),
+		add_grammar_clause(Nonterm, Stream, Extras, Generalterm, Sym,
+				   Factoredbody, Orig_nonterm, Orig_body),
+		record_production(Gennonterm, Stream, Allextras, Oldterm,
+				  Newold, Orig_nonterm, Orig_body)
 	    ),
-	    record_production(Gennonterm, Stream, Extras, Term, Body, Orig_nonterm, Orig_body)
+	    record_production(Gennonterm, Stream, Allextras, Term,
+			      Newbody, Orig_nonterm, Orig_body)
+	).
 
 
 	%     ->	(   Body = Oldbody
 	% 	->  throw(redundant_rule(Orig_nonterm, Orig_body))
 	% 	;   split_common_start(Oldbody, Body, Commonbody,
 	% 			       Newold, Newbody),
-	% 	    gensym('rule ', Newname),
-	% 	    Newcall =.. [Newname, Sym, Stream, Term],
-	% 	    Newhead =.. [Newname, Sym, Stream, Term],
-	% 	    conjoin(Commonbody, parser_rule:Newcall, Factoredbody),
+	% 	    
 	% 	    erase(Ref),
 	% 	    Pattern1 =.. [Nonterm, Sym, Stream, Term],
 	% 	    assert(parser_rule:Pattern1:-Factoredbody),
@@ -407,39 +423,49 @@ left_factor(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody, Ref, Body,
 %     * e(Y) etail(Y, Z) [E = *(X,Z)]	% right assoc
 
 
-add_nonterm_master_clause(Nonterm) :-
-	(   clause(parse_table(Nonterm,_,_,_),_)
+add_nonterm_master_clause(Nonterm, Extras) :-
+	Head =.. [parse_table, Nonterm,A,B,C|Extras],
+	(   clause(Head,_)
 	->  true
-	;   Generalcall =.. [Nonterm, A, B, C],
-	    assert(parse_table(Nonterm,A,B,C):-parser_rule:Generalcall)
+	;   Generalcall =.. [Nonterm, A, B, C | Extras],
+	    assert(Head:-parser_rule:Generalcall)
 	).
 
 
-split_common_start((Old1,Olds), New, Common, Newold, Newnew) :-
+split_common_start((Old1,Olds), New, Common, Newold, Newnew, Extras) :-
 	!,
 	initial_goal(New, New1, News),
 	(   Old1 = New1
-	->  split_common_start(Olds, News, Commons, Newold, Newnew),
-	    conjoin(Old1, Commons, Common)
+	->  split_common_start(Olds, News, Commons, Newold, Newnew, Extras2),
+	    conjoin(Old1, Commons, Common),
+	    nonterm_goal_arg(Old1, Extras, Extras2)
 	;   Common = true,
 	    Newold = (Old1,Olds),
-	    Newnew = New
+	    Newnew = New,
+	    Extras = []
 	).
-split_common_start(Old, New, Common, Newold, Newnew) :-
+split_common_start(Old, New, Common, Newold, Newnew, Extras) :-
 	initial_goal(New, New1, News),
 	(   Old = New1
 	->  Newold = true,
 	    Newnew = News,
-	    Common = Old
+	    Common = Old,
+	    nonterm_goal_arg(Old, Extras, [])
 	;   Common = true,
 	    Newold = Old,
-	    Newnew = New
+	    Newnew = New,
+	    Extras = []
 	).
 	
+nonterm_goal_arg(terminal(_,_), Vs, Vs).
+nonterm_goal_arg(nonterminal(_,_,V), [V|Vs], Vs).
+nonterm_goal_arg(gennonterm(_,_,V), [V|Vs], Vs).
+nonterm_goal_arg(gennonterm(_,_,V,_), [V|Vs], Vs).
+nonterm_goal_arg(gennonterm(_,_,V,_,_), [V|Vs], Vs).
 
-generated_nonterm(nonterm_0(Gennonterm, _, _), Gennonterm).
-generated_nonterm(nonterm_1(Gennonterm, _, _, _), Gennonterm).
-generated_nonterm(nonterm_2(Gennonterm, _, _, _, _), Gennonterm).
+generated_nonterm(gennonterm(Gennonterm, _, _), Gennonterm, []).
+generated_nonterm(gennonterm(Gennonterm, _, _, A), Gennonterm, [A]).
+generated_nonterm(gennonterm(Gennonterm, _, _, A, B), Gennonterm, [A,B]).
 
 
 %  Runtime code
@@ -460,7 +486,7 @@ nonterminal(Stream, Nonterm, Value) :-
 	;   throw(nonterminal_error(Nonterm, Symbol, Position))
 	).
 
-nonterm_0(Stream, Nonterm, Value) :-
+gennonterm(Stream, Nonterm, Value) :-
 	get_token(Stream, Token, Position),
 	terminal_symbol(Token, Symbol),
 	(   parse_table(Nonterm, Symbol, Stream, Value)
@@ -468,7 +494,7 @@ nonterm_0(Stream, Nonterm, Value) :-
 	;   throw(nonterminal_error(Nonterm, Symbol, Position))
 	).
 
-nonterm_1(Stream, Nonterm, Value, E1) :-
+gennonterm(Stream, Nonterm, Value, E1) :-
 	get_token(Stream, Token, Position),
 	terminal_symbol(Token, Symbol),
 	(   parse_table(Nonterm, Symbol, Stream, Value, E1)
@@ -476,7 +502,7 @@ nonterm_1(Stream, Nonterm, Value, E1) :-
 	;   throw(nonterminal_error(Nonterm, Symbol, Position))
 	).
 
-nonterm_2(Stream, Nonterm, Value, E1, E2) :-
+gennonterm(Stream, Nonterm, Value, E1, E2) :-
 	get_token(Stream, Token, Position),
 	terminal_symbol(Token, Symbol),
 	(   parse_table(Nonterm, Symbol, Stream, Value, E1, E2)
