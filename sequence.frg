@@ -1,15 +1,16 @@
-class sequence(t) {
+class sequence(T) {
 
-    # Define as algebraic type
-abstract:
-	empty | sequence(first:t, rest:@) ;
+    pub syn expr ::= '[' ']'
+    pub syn expr ::= '[' expr exprlist opttail ']'
 
-    # Give custom syntax
-syntax:
-    extend expr(empty) ::= [] ;
-    extend expr(sequence(f,r)) ::= '[', expr(s), seq_tail(r), ']' ;
-    
-    seq_tail(empty) ::= '' ;
-    seq_tail(sequence(f,r)) ::= ',', expr(f), seq_tail(r) ;
+    syn exprlist ::=
+    syn exprlist ::= ',' expr exprlist
+
+    syn opttail ::=
+    syn opttail ::= '|' expr
+
+    # Constructors (ranges are implicitly exclusive & exhaustive)
+    pub abstract con []
+    pub abstract con [ first:T | rest:sequence(T) ]
 
 }
