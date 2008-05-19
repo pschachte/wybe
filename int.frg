@@ -1,11 +1,10 @@
 # frege integer type
-class int
-representation:
-    primitive bits(28)
 
-syntax:
-    expr(to_int(num,radix):@) ::= 
-    	symbol(x)
+class int
+    rep bits(28)
+
+    syn number to_int(num,radix) ::=
+    	symbol
 	(	num = x & radix = 10
 	orelse	'r' & symbol(num) ; radix = x
 	)
