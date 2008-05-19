@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.12 2008/05/15 06:37:10 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.13 2008/05/19 14:10:38 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -156,9 +156,29 @@ test2 :-
 
 % Read a top-level item (declaration or directive) from the specified stream.
 
+% get_item(Stream, Item) :-
+% 	get_token(Stream, Token, _),
+% 	parser_rule:item(Token, Stream, Item).
+
+
 get_item(Stream, Item) :-
 	get_token(Stream, Token, _),
-	parser_rule:item(Token, Stream, Item).
+	parse_nonterm(Token, item, Stream, Item).
+
+
+parse_nonterm(Token0, Nonterm, Stream, Item, Token) :-
+	terminal_symbol(Token0, Sym),
+	(   nonterm_rule(Symbol, Nonterm, Rule)
+	->  true
+	;   is_symbol(Token0),
+	    symbol_rule(Nonterm, Rule)
+	;   throw(syntax_error)
+	),
+	rule_body(Rule, Body),
+	parse_body(Body, Stream, Token0, Token).
+
+
+parse_body(
 
 
 %  Entry into the dynamic part of the parser.
@@ -247,6 +267,9 @@ is_terminal(punct(_)).
 nonterminal_goal(Nonterm, Stream, Term, nonterminal(Stream,Nonterm,Term)).
 
 terminal_goal(Symbol, Stream, terminal(Stream,Symbol)).
+
+
+is_symbol(symbol(_)).
 
 
 terminal_symbol(symbol(Sym), Sym).
