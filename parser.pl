@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.13 2008/05/19 14:10:38 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.14 2008/05/21 07:53:27 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -167,7 +167,7 @@ get_item(Stream, Item) :-
 
 
 parse_nonterm(Token0, Nonterm, Stream, Item, Token) :-
-	terminal_symbol(Token0, Sym),
+	token_symbol(Token0, Stream, Sym),
 	(   nonterm_rule(Symbol, Nonterm, Rule)
 	->  true
 	;   is_symbol(Token0),
@@ -270,6 +270,16 @@ terminal_goal(Symbol, Stream, terminal(Stream,Symbol)).
 
 
 is_symbol(symbol(_)).
+
+
+token_symbol(symbol(Sym), _, Sym).
+token_symbol(punct(Sym), _, Sym).
+token_symbol(bracket(Kind,End), _, Sym) :-
+	bracket(Kind, End, Sym).
+token_symbol(string(Chars,Kind), _, string(Chars,Kind)).
+token_symbol('', Stream, Sym) :-
+	get_token(Stream, Token, _),
+	terminal_symbol(
 
 
 terminal_symbol(symbol(Sym), Sym).
