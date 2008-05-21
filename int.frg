@@ -7,34 +7,19 @@ class int
     pub syn expr ::= number
 
     # Define a number token
-    pub lex number ::= '0x' radixnum(16)
-    pub lex number ::= '0' radixnum(8)
-    # This one's difficult, as we use the first part of the number as an
-    # argument to parse the second 
-    pub lex number ::= radix = radixnum(10) 'r' radixnum(radix)
-    pub lex number ::= radixnum(10)
+    # pub lex number ::= '0x' hexnum
+    # pub lex number ::= '0' octalnum
+    pub lex number ::= decimalnum
 
     # the function after the lexeme name is called with both nonterminal
     # parts as arguments to construct the lexeme value
     # grammar rule is left recursive, as that gets left-associative
     # construction; will be translated to right recursion
-    lex radixnum(r) makeradixnum(r) ::= 
-    	radixnum(r) radixchar(r)
-    lex radixnum(r) makeradixnum(r,0) ::= radixchar(r)
+    lex decimalnum makedecimalnum ::= decimalnum digit
+    lex decimalnum decimaldigit ::= digit
 
-    fun makeradixnum(radix, num, ch:char) = num * radix + 
-    	    if ('0' <= ch & ch <= '9') then ch - '0'
-	    elif ('a' <= ch & ch <= 'a'+radix-9) then ch - 'a' + 10
-	    elif ('A' <= ch & ch <= 'A'+radix-9) then ch - 'A' + 10
-
-    lex radixchar(r) check radixdigitcheck(r) ::= digit
-    lex radixchar(r) check radixalphacheck(r) ::= alpha
-
-    fun radixdigitcheck(radix, digit:char) = digit <= '0' + radix
-
-    fun radixalphacheck(radix, digit:char) = 
-    	digit >= 'a' & digit <= 'a' + radix |
-    	digit >= 'A' & digit <= 'A' + radix
+    fun decimaldigit(ch:char) = ch - '0'
+    fun makedecimalnum(num, ch:char) = num * 10 + decimaldigit(ch)
 
     # these should be in a common char.frg library
     public lex digit ::= '0' - '9'
