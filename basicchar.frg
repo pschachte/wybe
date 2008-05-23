@@ -1,8 +1,7 @@
 pub class basicchar
     # specify representation as foreign type, without constructors
-    foreign "char"
+    foreign c "char"
 
-    pub class smallint
-	foreign "unsigned char"
+    pub lex digit ::= '0' - '9'
 
-    pub smallint(ch):smallint = foreign \\ (unsigned char) ch \\
+    pub lex alpha ::= 'a' - 'z' | 'A' - 'Z'
