@@ -1,5 +1,5 @@
 %  File     : lex.pl
-%  RCS      : $Id: lex.pl,v 1.6 2008/05/03 14:59:32 schachte Exp $
+%  RCS      : $Id: lex.pl,v 1.7 2008/05/24 09:00:21 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Mon Apr  9 14:16:33 2007
 %  Purpose  : Lexical analysis for frege
@@ -99,7 +99,7 @@ read_string(Char, Stream, Chars, Term) :-
 	    char_escape(Escaped, Stream, Chars, Chars1, Char1),
 	    read_string(Char1, Stream, Chars1, Term)
 	;   Chars = [Char|Chars1],
-	    get_code(Char1),
+	    get_code(Stream, Char1),
 	    read_string(Char1, Stream, Chars1, Term)
 	).
 
@@ -107,11 +107,11 @@ read_string(Char, Stream, Chars, Term) :-
 char_escape(Char, Stream, Chars, Chars0, Char1) :-
 	(   one_char_escape(Char, Esc)
 	->  Chars = [Esc|Chars0],
-	    get_code(Char1)
+	    get_code(Stream, Char1)
 	;   special_char_escape(Char, Stream, Chars, Chars0, Char1)
 	->  true
 	;   Chars = [Char|Chars0],
-	    get_code(Char1)
+	    get_code(Stream, Char1)
 	).
 
 
@@ -131,7 +131,7 @@ one_char_escape(0'0, 0'\0).
 % backslash at end of line in a string ignores newline and all following
 % whitespace characters, so you can layout strings as you like.
 special_char_escape(0'\n, Stream, Chars, Chars, Char1) :-
-	get_code(Char),
+	get_code(Stream, Char),
 	skip_white(Char, Stream, Char1).
 % XXX Also define an escape like \( ... ) to evaluate enclosed expr.
 % XXX This could handle formatted output pretty well.
@@ -142,7 +142,7 @@ skip_white(Char, Stream, Char1) :-
 	->  Char1 = Char
 	;   Char < 0
 	->  Char1 = Char
-	;   get_code(Char2),
+	;   get_code(Stream, Char2),
 	    skip_white(Char2, Stream, Char1)
 	).
 
