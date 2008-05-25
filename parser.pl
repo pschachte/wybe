@@ -1,12 +1,11 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.15 2008/05/25 14:28:37 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.16 2008/05/26 08:35:47 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
 %  Copyright: © 2008 Peter Schachte.  All rights reserved.
 
 :- module(parser, [ test/0, test2/0,
-		    get_item/2,
 		    add_production/2,
 		    init_parser/0
 		  ]).
@@ -161,11 +160,6 @@ test2 :-
 % 	parser_rule:item(Token, Stream, Item).
 
 
-get_item(Stream, Item) :-
-	get_code(Stream, Ch),
-	parse_nonterm(Ch, item, Stream, Item).
-
-
 parse_nonterm(Ch0, Nonterm, Stream, Item, Ch) :-
 	(   nonterm_rule(Ch0, Nonterm, Rule)
 	->  true		% force determinism
@@ -181,22 +175,84 @@ parse_body([X|Xs], Stream, Ch0, Ch) :-
 	parse_item(X, Stream, Ch0, Ch1),
 	parse_body(Xs, Stream, Ch1, Ch).
 
-parse_item(char(Expected), Stream, Ch0, Ch) :-
-	(   Expected == Ch0
-	->  get_code(Stream, Ch)
+parse_item(symchars(Expected), Stream, Ch0, Ch) :-
+	(   parse_symchars(Expected, Stream, Ch0, Ch)
+	->  true
 	;   throw(unexpected(Ch0, Expected))
 	).
-parse_item(tokensep, Stream, Ch0, Ch) :-
-	skip_white(Ch0, Stream, Ch).
+parse_item(punctchars(Expected), Stream, Ch0, Ch) :-
+	(   parse_punctchars(Expected, Stream, Ch0, Ch)
+	->  true
+	;   throw(unexpected(Ch0, Expected))
+	).
+parse_item(chartoken(Char), Stream, Ch0, Ch) :-
+	(   Char == Ch0
+	->  get_code(Stream, Ch1),
+	    skip_white(Ch1, Stream, Ch)
+	;   throw(unexpected(Ch0, Char))
+	).
 parse_item(nonterm(Nonterm, Item), Stream, Ch0, Ch) :-
 	parse_nonterm(Ch0, Nonterm, Stream, Item, Ch).
 parse_item(cont(Nonterm, Item), Stream, Ch0, Ch) :-
 	parse_nonterm(Ch0, Nonterm, Stream, Item, Ch).
 
 
-nonterm_rule(0'i, stmt, 1).
+parse_symchars([], Stream, Ch0, Ch) :-
+	\+ symbol_char(Ch0),
+	skip_white(Ch0, Stream, Ch).
+parse_symchars([Ch0|Chs], Stream, Ch0, Ch) :-
+	get_code(Stream, Ch1),
+	parse_symchars(Chs, Stream, Ch1, Ch).
 
-rule_body(1, [char(0'f),tokensep,
+end_symchars(Ch0, Stream, Ch) :-
+
+parse_punctchars([], _, Ch0, Ch) :-
+	\+ punctuation_char(Ch0),
+	skip_white(Ch0, Stream, Ch).
+	end_punctchars(Ch0, Ch).
+parse_punctchars([Ch0|Chs], Stream, Ch0, Ch) :-
+	get_code(Stream, Ch1),
+	parse_punctchars(Chs, Stream, Ch1, Ch).
+
+
+symbol_char(Char) :-
+	(   Char >= 0'a, Char =< 0'z
+	->  true
+	;   Char >= 0'A, Char =< 0'Z
+	->  true
+	;   Char >= 0'0, Char =< 0'9
+	->  true
+	;   Char =:= 0'_
+	).
+
+
+all_symchars([]).
+all_symchars([Ch|Chs]) :-
+	symbol_char(Ch),
+	all_symchars(Chs).
+
+
+punctuation_char(Char) :-
+	Char > 0' ,
+	\+ special_char(Char),
+	\+ symbol_char(Char).
+
+all_punctchars([]).
+all_punctchars([Ch|Chs]) :-
+	punctuation_char(Ch),
+	all_punctchars(Chs).
+
+
+special_char(0'().
+special_char(0')).
+special_char(0'[).
+special_char(0']).
+special_char(0'{).
+special_char(0'}).
+special_char(0'').
+special_char(0'"). %"
+special_char(0'`).
+special_char(0',).
 
 
 skip_white(0'#, Stream, Char) :-
@@ -213,10 +269,27 @@ skip_white(Char0, Stream, Char) :-
 	).
 
 
-skip_line(0'\n, _) :- !.
-skip_line(_, Stream) :-
-	get_code(Stream, Char),
-	skip_line(Char, Stream).
+skip_line(0'\n, Stream, Ch) :-
+	!,
+	get_code(Stream, Ch).
+skip_line(_, Stream, Ch) :-
+	get_code(Stream, Ch1),
+	skip_line(Ch1, Stream, Ch).
+
+
+:- dynamic nonterm_rule/3.
+:- dynamic rule_body/4.
+
+
+% nonterm_rule(0'i, stmt, 1).
+
+% rule_body(1,
+% 	  [symchars("f"),nonterm(expr),symchars("then"),
+% 	   nonterm(stmts),symchars("end")],
+% 	  [],
+% 	  'if then else end').
+
+
 
 
 
@@ -264,37 +337,34 @@ init_parser :-
 
 
 add_production(Head, Body) :-
-	(   compile_body(Body, Stream, Body1, Toks, Args),
+	(   compile_body(Body, Stream, List, [], Args, []),
 	    concat_atoms(Toks, Functor),
 	    Term =.. [Functor|Args],
-	    record_production(Head, Stream, [], Term, Body1, Head, Body1),
+	    record_production(Head, Stream, [], Term, List, Head, Body1),
 	    fail
 	;   true
 	).
 
 
-%  compile_body(Rule, Stream, Body, Toks, Args)
-%  Body is the code to parse input according to grammar rule Rule.
+%  compile_body(Rule, List, List0, Args, Args0)
+%  List is the code to parse input according to grammar rule Rule, followed
+%  by List0.
 
-compile_body((B1|B2), Stream, Body, Toks, Args) :-
+compile_body((B1|B2), List, List0, Args, Args0) :-
 	!,
 	( Body0 = B1 ; Body0 = B2 ),
-	compile_body(Body0, Stream, Body, Toks, Args).
-compile_body((B1,B2), Stream, Body, Toks, Args) :-
+	compile_body(Body0, List, List0, Args, Args0).
+compile_body((B1,B2), List, List0, Args, Args0) :-
 	!,
-	compile_body(B1, Stream, Body1, Toks1, Args1),
-	compile_body(B2, Stream, Body2, Toks2, Args2),
-	conjoin(Body1, Body2, Body),
-	append(Toks1, Toks2, Toks),
-	append(Args1, Args2, Args).
-compile_body('', _, true, [], []) :-
+	compile_body(B1, List, List1, Args, Args1),
+	compile_body(B2, List1, List0, Args1, Args0).
+compile_body('', _, List, List, Args, Args) :-
 	!.
-compile_body(Terminal, Stream, Goal, [Terminal], []) :-
-	terminal_symbol(Terminal, Symbol),
+compile_body([Ch|Chs], [Goal|List0], List0, Args, Args) :-
 	!,
-	terminal_goal(Symbol, Stream, Goal).
-compile_body(Nonterminal, Stream, Goal, [], [Arg]) :-
-	nonterminal_goal(Nonterminal, Stream, Arg, Goal).
+	terminal_goal([Ch|Chs], Goal).
+compile_body(Nonterminal, [Goal|List], List, [Arg|Args], Args) :-
+	nonterminal_goal(Nonterminal, Arg, Goal).
 
 
 is_terminal(bracket(_,_)).
@@ -303,22 +373,20 @@ is_terminal(symbol(_)).
 is_terminal(punct(_)).
 
 
-nonterminal_goal(Nonterm, Stream, Term, nonterminal(Stream,Nonterm,Term)).
+terminal_goal(Chars, Goal) :-
+	(   Chars = [Ch],
+	    special_char(Ch)
+	->  Goal = chartoken(Ch)
+	;   all_symchars(Chars)
+	->  Goal = symchars(Chars)
+	;   all_punctchars(Chars)
+	->  Goal = punctchars(Chars)
+	;   throw(invalid_token(Chars))
+	).
 
-terminal_goal(Symbol, Stream, terminal(Stream,Symbol)).
 
+nonterminal_goal(Nonterm, Item, nonterminal(Nonterm,Item)).
 
-is_symbol(symbol(_)).
-
-
-token_symbol(symbol(Sym), _, Sym).
-token_symbol(punct(Sym), _, Sym).
-token_symbol(bracket(Kind,End), _, Sym) :-
-	bracket(Kind, End, Sym).
-token_symbol(string(Chars,Kind), _, string(Chars,Kind)).
-token_symbol('', Stream, Sym) :-
-	get_token(Stream, Token, _),
-	terminal_symbol(
 
 
 terminal_symbol(symbol(Sym), Sym).
