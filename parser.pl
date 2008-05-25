@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.14 2008/05/21 07:53:27 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.15 2008/05/25 14:28:37 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -162,23 +162,62 @@ test2 :-
 
 
 get_item(Stream, Item) :-
-	get_token(Stream, Token, _),
-	parse_nonterm(Token, item, Stream, Item).
+	get_code(Stream, Ch),
+	parse_nonterm(Ch, item, Stream, Item).
 
 
-parse_nonterm(Token0, Nonterm, Stream, Item, Token) :-
-	token_symbol(Token0, Stream, Sym),
-	(   nonterm_rule(Symbol, Nonterm, Rule)
-	->  true
-	;   is_symbol(Token0),
-	    symbol_rule(Nonterm, Rule)
+parse_nonterm(Ch0, Nonterm, Stream, Item, Ch) :-
+	(   nonterm_rule(Ch0, Nonterm, Rule)
+	->  true		% force determinism
 	;   throw(syntax_error)
 	),
-	rule_body(Rule, Body),
-	parse_body(Body, Stream, Token0, Token).
+	get_code(Stream, Ch1),
+	rule_body(Rule, Body, [], Item),
+	parse_body(Body, Stream, Ch1, Ch).
 
 
-parse_body(
+parse_body([], _, Ch, Ch).
+parse_body([X|Xs], Stream, Ch0, Ch) :-
+	parse_item(X, Stream, Ch0, Ch1),
+	parse_body(Xs, Stream, Ch1, Ch).
+
+parse_item(char(Expected), Stream, Ch0, Ch) :-
+	(   Expected == Ch0
+	->  get_code(Stream, Ch)
+	;   throw(unexpected(Ch0, Expected))
+	).
+parse_item(tokensep, Stream, Ch0, Ch) :-
+	skip_white(Ch0, Stream, Ch).
+parse_item(nonterm(Nonterm, Item), Stream, Ch0, Ch) :-
+	parse_nonterm(Ch0, Nonterm, Stream, Item, Ch).
+parse_item(cont(Nonterm, Item), Stream, Ch0, Ch) :-
+	parse_nonterm(Ch0, Nonterm, Stream, Item, Ch).
+
+
+nonterm_rule(0'i, stmt, 1).
+
+rule_body(1, [char(0'f),tokensep,
+
+
+skip_white(0'#, Stream, Char) :-
+	!,
+	get_code(Stream, Char1),
+	skip_line(Char1, Stream, Char).
+skip_white(Char0, Stream, Char) :-
+	(   Char0 > 0' % space character
+	->  Char = Char0
+	;   Char0 < 0
+	->  Char = Char0
+	;   get_code(Stream, Char1),
+	    skip_white(Char1, Stream, Char)
+	).
+
+
+skip_line(0'\n, _) :- !.
+skip_line(_, Stream) :-
+	get_code(Stream, Char),
+	skip_line(Char, Stream).
+
 
 
 %  Entry into the dynamic part of the parser.
