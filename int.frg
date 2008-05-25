@@ -2,30 +2,26 @@
 
 class int
     # says this is just a single word with no constructor
-    rep word
+    foreign c "int"
 
-    pub syn expr ::= number
+    pub syn expr ::= integer
 
     # Define a number token
     # pub lex number ::= '0x' hexnum
     # pub lex number ::= '0' octalnum
-    pub lex number ::= decimalnum
+    pub lex integer ::= decimalnum
 
     # the function after the lexeme name is called with both nonterminal
     # parts as arguments to construct the lexeme value
     # grammar rule is left recursive, as that gets left-associative
     # construction; will be translated to right recursion
+
     lex decimalnum makedecimalnum ::= decimalnum digit
     lex decimalnum decimaldigit ::= digit
 
-    fun decimaldigit(ch:char) = ch - '0'
-    fun makedecimalnum(num, ch:char) = num * 10 + decimaldigit(ch)
-
-    # these should be in a common char.frg library
-    public lex digit ::= '0' - '9'
-
-    public lex alpha ::= 'a' - 'z'
-    public lex alpha ::= 'A' - 'Z'
+    fun decimaldigit(ch:char) = foreign c \CODE\ ch - '0' \CODE\
+    fun makedecimalnum(num, ch:char) = 
+    	foreign c \CODE\ num * 10 + (ch - '0') \CODE\
 
     # This overrides an inherited version; inherited to_string calls it
     pub repr(i):string =
