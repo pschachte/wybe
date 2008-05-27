@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.16 2008/05/26 08:35:47 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.17 2008/05/27 13:43:16 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -161,40 +161,48 @@ test2 :-
 
 
 parse_nonterm(Ch0, Nonterm, Stream, Item, Ch) :-
+	parse_nonterm(Ch0, Nonterm, Stream, [], Item, Ch).
+
+
+parse_nonterm(Ch0, Nonterm, Stream, Stack0, Item, Ch) :-
 	(   nonterm_rule(Ch0, Nonterm, Rule)
 	->  true		% force determinism
 	;   throw(syntax_error)
 	),
 	get_code(Stream, Ch1),
-	rule_body(Rule, Body, [], Item),
-	parse_body(Body, Stream, Ch1, Ch).
+	rule_body(Rule, Body),
+	parse_body(Body, Stream, Ch1, Ch, Stack0, Item).
 
 
-parse_body([], _, Ch, Ch).
-parse_body([X|Xs], Stream, Ch0, Ch) :-
-	parse_item(X, Stream, Ch0, Ch1),
-	parse_body(Xs, Stream, Ch1, Ch).
+parse_body(finish(Id,Count), _, Ch, Ch, Stack0, Item) :-
+	parse_result(Id, Count, Stack0, [], Item).
+parse_body(cont(Nonterm), Stream, Ch0, Ch, Stack0, Item) :-
+	parse_nonterm(Ch0, Nonterm, Stream, Stack0, Item, Ch).
+parse_body([X|Xs], Stream, Ch0, Ch, Stack0, Item) :-
+	parse_item(X, Stream, Ch0, Ch1, Stack0, Stack),
+	parse_body(Xs, Stream, Ch1, Ch, Stack, Item).
 
-parse_item(symchars(Expected), Stream, Ch0, Ch) :-
+
+parse_item(symchars(Expected), Stream, Ch0, Ch, Stack, Stack) :-
 	(   parse_symchars(Expected, Stream, Ch0, Ch)
 	->  true
 	;   throw(unexpected(Ch0, Expected))
 	).
-parse_item(punctchars(Expected), Stream, Ch0, Ch) :-
+parse_item(punctchars(Expected), Stream, Ch0, Ch, Stack, Stack) :-
 	(   parse_punctchars(Expected, Stream, Ch0, Ch)
 	->  true
 	;   throw(unexpected(Ch0, Expected))
 	).
-parse_item(chartoken(Char), Stream, Ch0, Ch) :-
+parse_item(chartoken(Char), Stream, Ch0, Ch, Stack, Stack) :-
 	(   Char == Ch0
 	->  get_code(Stream, Ch1),
 	    skip_white(Ch1, Stream, Ch)
 	;   throw(unexpected(Ch0, Char))
 	).
-parse_item(nonterm(Nonterm, Item), Stream, Ch0, Ch) :-
+parse_item(nonterm(Nonterm), Stream, Ch0, Ch, Stack, [Item|Stack]) :-
 	parse_nonterm(Ch0, Nonterm, Stream, Item, Ch).
-parse_item(cont(Nonterm, Item), Stream, Ch0, Ch) :-
-	parse_nonterm(Ch0, Nonterm, Stream, Item, Ch).
+parse_item(finish(Id,Count), Stream, Ch, Ch, Stack0, [Item|Stack]) :-
+	parse_result(Id, Count, Stack0, Stack, Item).
 
 
 parse_symchars([], Stream, Ch0, Ch) :-
@@ -204,11 +212,9 @@ parse_symchars([Ch0|Chs], Stream, Ch0, Ch) :-
 	get_code(Stream, Ch1),
 	parse_symchars(Chs, Stream, Ch1, Ch).
 
-end_symchars(Ch0, Stream, Ch) :-
-
-parse_punctchars([], _, Ch0, Ch) :-
+parse_punctchars([], Stream, Ch0, Ch) :-
 	\+ punctuation_char(Ch0),
-	skip_white(Ch0, Stream, Ch).
+	skip_white(Ch0, Stream, Ch),
 	end_punctchars(Ch0, Ch).
 parse_punctchars([Ch0|Chs], Stream, Ch0, Ch) :-
 	get_code(Stream, Ch1),
@@ -337,34 +343,33 @@ init_parser :-
 
 
 add_production(Head, Body) :-
-	(   compile_body(Body, Stream, List, [], Args, []),
-	    concat_atoms(Toks, Functor),
-	    Term =.. [Functor|Args],
-	    record_production(Head, Stream, [], Term, List, Head, Body1),
+	(   compile_body(Body, Comp, finish(Id,Args), 0, Args),
+	    record_production(Head, Id, Comp),
 	    fail
 	;   true
 	).
 
 
-%  compile_body(Rule, List, List0, Args, Args0)
-%  List is the code to parse input according to grammar rule Rule, followed
-%  by List0.
+%  compile_body(Rule, Comp, Comp0, Args, Args0)
+%  Comp is the code to parse input according to grammar rule Rule, followed
+%  by Comp0.
 
-compile_body((B1|B2), List, List0, Args, Args0) :-
+compile_body((B1|B2), Comp, Comp0, Args0, Args) :-
 	!,
 	( Body0 = B1 ; Body0 = B2 ),
-	compile_body(Body0, List, List0, Args, Args0).
-compile_body((B1,B2), List, List0, Args, Args0) :-
+	compile_body(Body0, Comp, Comp0, Args0, Args).
+compile_body((B1,B2), Comp, Comp0, Args, Args0) :-
 	!,
-	compile_body(B1, List, List1, Args, Args1),
-	compile_body(B2, List1, List0, Args1, Args0).
-compile_body('', _, List, List, Args, Args) :-
+	compile_body(B1, Comp, Comp1, Args, Args1),
+	compile_body(B2, Comp1, Comp0, Args1, Args0).
+compile_body('', Comp, Comp, Args, Args) :-
 	!.
-compile_body([Ch|Chs], [Goal|List0], List0, Args, Args) :-
+compile_body([Ch|Chs], [Goal|Comp0], Comp0, Args, Args) :-
 	!,
 	terminal_goal([Ch|Chs], Goal).
-compile_body(Nonterminal, [Goal|List], List, [Arg|Args], Args) :-
-	nonterminal_goal(Nonterminal, Arg, Goal).
+compile_body(Nonterminal, [Goal|Comp], Comp, Args0, Args) :-
+	Args is Args0 + 1,
+	nonterminal_goal(Nonterminal, Goal).
 
 
 is_terminal(bracket(_,_)).
@@ -385,7 +390,7 @@ terminal_goal(Chars, Goal) :-
 	).
 
 
-nonterminal_goal(Nonterm, Item, nonterminal(Nonterm,Item)).
+nonterminal_goal(Nonterm, nonterminal(Nonterm)).
 
 
 
@@ -420,53 +425,50 @@ symbol_codes(Sym, Codes) :-
 	atom_codes(Sym, Codes).
 
 
-conjoin((A,B), C, Conj) :-
+conjoin_compiled([A|B], C, [A|BC]) :-
 	!,
-	conjoin(B, C, Conj1),
-	conjoin(A, Conj1, Conj).
-conjoin(true, A, A) :-
-	!.
-conjoin(A, B, Conj) :-
-	(   B == true
-	->  Conj = A
-	;   Conj = (A,B)
-	).
+	conjoin_compiled(B, C, BC).
+conjoin_compiled(A, B, [A|B]).
 
 
-%  record_production(Nonterm, Stream, Extras, Term, Body)
-%  Add a new production for Nonterm with body Body.  Tokens are to be read
+%  record_production(Nonterm, Id, Comp)
+%  Add a new production for Nonterm with body Comp.  Tokens are to be read
 %  from Stream, and the result of this grammar rule is Term, and Extras is a
 %  list of the extra inputs the grammar rule must take to construct Term.
 
-record_production(Nonterm, Stream, Extras, Term, Body, Orig_nonterm, Orig_body) :-
-	left_unfold(Body, Nonterm, Body1),
-	(   left_recursive_body(Body1, Nonterm, Body2)
-	->  (	left_recursive_body(Body2, Nonterm, _)
+record_production(Nonterm, Id, Comp) :-
+	atom_concat(Nonterm, ' ', Prefix),
+	gensym(Prefix, Id),
+	left_unfold(Comp, Nonterm, Comp1),
+	(   left_recursive_body(Comp1, Nonterm, Comp2)
+	->  (	left_recursive_body(Comp2, Nonterm, _)
 	    ->	throw(double_left_recursive(Orig_nonterm, Orig_body))
 	    ;	update_left_recursive(Nonterm),
-		make_lrec_production(Nonterm, Stream, Term, Body2, Realbody)
+		make_lrec_production(Nonterm, Stream, Term, Comp2, Realbody)
 	    )
-	;   left_recursive_nonterm(Nonterm, Stream, Term, Tailcall)
-	->  conjoin(Body2, Tailcall, Realbody)
-	;   Realbody = Body1
+	;   left_recursive_nonterm(Nonterm, Tailcall)
+	->  conjoin(Comp2, Tailcall, Realbody)
+	;   Realbody = Comp1
 	),
-	(   initial_goal(Realbody, terminal(Stream,Sym), Rest)
-	->  add_grammar_clause(Nonterm, Stream, Extras, Term, Sym, Rest,
-			   Orig_nonterm, Orig_body)
-	;   throw(left_unfolding_failed(Nonterm, Body, Orig_nonterm, Orig_body))
+	(   initial_body_char(Realbody, Char, Rest)
+	->  add_grammar_clause(Nonterm, Char, Rest, Orig_nonterm, Orig_body)
+	;   throw(left_unfolding_failed(Nonterm, Comp, Orig_nonterm, Orig_body))
 	).
 
 
-add_grammar_clause(Nonterm, Stream, Extras, Term, Sym, Body,
-		   Orig_nonterm, Orig_body) :-
-	(   matching_clause(Nonterm, Sym, Stream, Extras, Oldterm,
-			    Oldbody, Ref)
-	->  left_factor(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody,
-			Ref, Term, Body, Orig_nonterm, Orig_body)
-	;   Newhead =.. [Nonterm, Sym, Stream, Term | Extras],
-	    assert((parser_rule:Newhead:-Body)),
-	    add_nonterm_master_clause(Nonterm, Extras)
+add_grammar_clause(Nonterm, Char, Body, Orig_nonterm, Orig_body) :-
+	(   clause(nonterm_rule(Char, Nonterm, Oldbody), Ref)
+	->  left_factor(Nonterm, Char, Oldbody, Ref, Body,
+			Orig_nonterm, Orig_body)
+	;   assert(nonterm_rule(Char, Nonterm, Body))
 	).
+
+
+
+initial_body_char([symchars([Char|Chars])|Rest], Char, symchars(Chars)|Rest]).
+initial_body_char([punctchars([Char|Chars])|Rest], Char,
+		  punctchars(Chars)|Rest]).
+initial_body_char([chartoken(Char)|Rest], Char, Rest).
 
 
 
@@ -476,27 +478,23 @@ initial_goal(Init, Init, true).
 
 
 
-left_unfold(Body0, Nonterm, Body) :-
-	initial_goal(Body0, Lead, Rest),
-	left_unfold1(Lead, Rest, Body0, Nonterm, Body).
-
-left_unfold1(terminal(_,_), _, Body, _, Body).
-left_unfold1(nonterminal(_,Nonterm,_), Rest, Body0, Parent, Body) :-
-	(   Nonterm == Parent
-	->  Body = Body0
+left_unfold([nonterm(Nonterm)|Rest], Parent, Body) :-
+	!,
+	(   Nonterm == Parent		% left recursive!
+	->  Body = [nonterm(Nonterm)|Rest]
 	;   nonterm_clause(Nonterm, Body1),
-	    conjoin(Body1, Rest, Body2),
+	    conjoin_compiled(Body1, Rest, Body2),
 	    left_unfold(Body2, Nonterm, Body)
 	).
+left_unfold(Body, _, Body).
 
 
-left_recursive_body(Body, Nonterm, Rest) :-
-	initial_goal(Body, nonterm(_,Nonterm,_,_), Rest).
+
+left_recursive_body([nonterm(Parent)|Rest], Parent, Rest).
 
 
-left_recursive_nonterm(Nonterm, Stream, Term, Tailcall) :-
-	left_recursive(Nonterm, Tailpred),
-	Tailcall =.. [Tailpred, Stream, Term].
+left_recursive_nonterm(Nonterm, nonterm(Tailpred)) :-
+	left_recursive(Nonterm, Tailpred).
 
 
 matching_clause(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody, Ref) :-
@@ -505,12 +503,10 @@ matching_clause(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody, Ref) :-
 	
 
 
-left_factor(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody, Ref, Term, Body,
-	    Orig_nonterm, Orig_body) :-
-	(   Body = Oldbody	% trying to add a redundant grammar rule
+left_factor(Nonterm, Char, Oldbody, Ref, Body, Orig_nonterm, Orig_body) :-
+	(   Body = Oldbody	     % trying to add a redundant grammar rule
 	->  throw(redundant_rule(Orig_nonterm, Orig_body))
-	;   split_common_start(Oldbody, Body, Commonbody, Newold, Newbody, Ex),
-	    append(Extras, Ex, Allextras),
+	;   split_common_start(Oldbody, Body, Commonbody, Newold, Newbody),
 	    (	generated_nonterm(Newold, Gennonterm, Allextras)
 	    ->	true
 	    ;	erase(Ref),
@@ -572,31 +568,23 @@ add_nonterm_master_clause(Nonterm, Extras) :-
 	).
 
 
-split_common_start((Old1,Olds), New, Common, Newold, Newnew, Extras) :-
+split_common_start([Old1|Olds], [New1|News], Common, Common0, Newold, Newnew) :-
 	!,
-	initial_goal(New, New1, News),
 	(   Old1 = New1
-	->  split_common_start(Olds, News, Commons, Newold, Newnew, Extras2),
-	    conjoin(Old1, Commons, Common),
-	    nonterm_goal_arg(Old1, Extras, Extras2)
-	;   Common = true,
-	    Newold = (Old1,Olds),
-	    Newnew = New,
-	    Extras = []
-	).
-split_common_start(Old, New, Common, Newold, Newnew, Extras) :-
-	initial_goal(New, New1, News),
-	(   Old = New1
-	->  Newold = true,
-	    Newnew = News,
-	    Common = Old,
-	    nonterm_goal_arg(Old, Extras, [])
-	;   Common = true,
-	    Newold = Old,
-	    Newnew = New,
-	    Extras = []
+	->  Common = [Old1|Common1],
+	    split_common_start(Olds, News, Common1, Common0, Newold, Newnew)
+	;   Common = [Common1|Common0],
+	    Newold = [Old2|Olds],
+	    Newnew = [New2|News],
+	    split_common_token(Old1, Old2, New1, New2, Common1)
 	).
 	
+
+split_common_text(symchars([Ch|Olds]), symchars(Newolds), symchars([Ch|News]),
+		  symchars(Newnews), symchars([Ch|Commons])) :-
+	common_
+
+
 nonterm_goal_arg(terminal(_,_), Vs, Vs).
 nonterm_goal_arg(nonterminal(_,_,V), [V|Vs], Vs).
 nonterm_goal_arg(gennonterm(_,_,V), [V|Vs], Vs).
