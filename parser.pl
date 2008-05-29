@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.18 2008/05/28 05:38:29 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.19 2008/05/30 03:03:14 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -158,7 +158,6 @@ test2 :-
 %  nonterminals called by the production, so that we can quickly find the
 %  callers of any nonterminal.
 
-:- use_module(lex).
 :- use_module(library(gensym)).
 
 
@@ -308,7 +307,12 @@ skip_line(_, Stream, Ch) :-
 
 
 :- dynamic nonterm_rule/3.
-:- dynamic rule_body/2.
+:- dynamic meta_grammar_rule/2.
+
+
+init_parser :-
+	retractall(nonterm_rule(_,_,_)),
+	retractall(meta_grammar_rule(_,_)).
 
 
 % nonterm_rule(0'i, stmt, 1).
@@ -319,38 +323,7 @@ skip_line(_, Stream, Ch) :-
 
 
 
-
-
-%  Entry into the dynamic part of the parser.
-:- dynamic parse_table/4.
-:- dynamic parse_table/5.
-:- dynamic parse_table/6.
-
-
-%  Everything in the parser_rule module is dynamic; this one is mentioned here.
-:- dynamic parser_rule:item/4.
-
-
-%  We keep track of nonterminals used but undefined, for error reporting.
-:- dynamic undef_nonterm/1.
-undef_nonterm(item).
-
-%  Keep track of which nonterminals are left recursive and what their tail
-%  predicates are
-:- dynamic left_recursive/2.
-
-%  We keep track of final nullable nonterminals.
-:- dynamic final_nullable/1.
-
-%  We keep track of which nonterminals use which.
-:- dynamic used_by/2.
-
-
-init_parser :-
-	retractall(nonterm_rule(_,_,_)).
-
-
-%  add_production(Nonterm, Body)
+%  add_production(Nonterm, Constructor, Body)
 %  Add new grammar rule Nonterm ::= Body to grammar.  This produces a
 %  deterministic LL(1) parser.  The code automatically incrementally performs
 %  the above-described transformations to create a deterministic parser, if
@@ -360,9 +333,19 @@ init_parser :-
 
 
 add_production(Head, Body) :-
-	atom_concat(Head, ' ', Prefix),
+	add_production(functor(Head), Head, Body).
+
+add_production(functor(Constructor), Head, Body) :-
+	atom_concat(Constructor, ' ', Prefix),
 	gensym(Prefix, Id),
-	(   compile_body(Body, Comp, [finish(Id,Args)], 0, Args),
+	add_production1(Head, finish(Id,Args), Args, Body).
+add_production(call(Closure), Head, Body) :-
+	add_production1(Head, call(Closure,Args), Args, Body).
+
+add_production1(Head, Build, Args, Body) :-
+	(   compound(Head)
+	->  assert(meta_grammar_rule(Head, Body))
+	;   compile_body(Body, Comp, [Build], 0, Args),
 	    record_production(Head, Comp, Head, Body),
 	    fail
 	;   true
@@ -373,22 +356,21 @@ add_production(Head, Body) :-
 %  Comp is the code to parse input according to grammar rule Rule, followed
 %  by Comp0.
 
-compile_body((B1|B2), Comp, Comp0, Args0, Args) :-
-	!,
-	( Body0 = B1 ; Body0 = B2 ),
-	compile_body(Body0, Comp, Comp0, Args0, Args).
 compile_body((B1,B2), Comp, Comp0, Args, Args0) :-
 	!,
 	compile_body(B1, Comp, Comp1, Args, Args1),
 	compile_body(B2, Comp1, Comp0, Args1, Args0).
-compile_body('', Comp, Comp, Args, Args) :-
-	!.
 compile_body([Ch|Chs], [Goal|Comp0], Comp0, Args, Args) :-
 	!,
 	terminal_goal([Ch|Chs], Goal).
-compile_body(Nonterminal, [Goal|Comp], Comp, Args0, Args) :-
-	Args is Args0 + 1,
-	nonterminal_goal(Nonterminal, Goal).
+compile_body(Nonterminal, Comp, Comp0, Args0, Args) :-
+	(   compound(Nonterminal)
+	->  meta_grammar_rule(Nonterminal, Metabody),
+	    compile_body(Metabody, Comp, Comp0, Args0, Args)
+	;   Comp = [Goal|Comp0],
+	    Args is Args0 + 1,
+	    nonterminal_goal(Nonterminal, Goal)
+	).
 
 
 is_terminal(bracket(_,_)).
