@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.19 2008/05/30 03:03:14 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.20 2008/05/30 07:31:56 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -215,10 +215,17 @@ parse_item(chartoken(Char), Stream, Ch0, Ch, Stack, Stack) :-
 	    skip_white(Ch1, Stream, Ch)
 	;   throw(unexpected(Ch0, Char))
 	).
+parse_item(range(Ch1,Ch2), Stream, Ch0, Ch, Stack, Stack) :-
+	(   Ch1 =< Ch0, Ch0 =< Ch2
+	->  get_code(Stream, Ch1),
+	;   throw(unexpected(Ch0, Char))
+	).
 parse_item(nonterm(Nonterm), Stream, Ch0, Ch, Stack, [Item|Stack]) :-
 	parse_nonterm(Ch0, Nonterm, Stream, Item, Ch).
 parse_item(finish(Id,Count), _, Ch, Ch, Stack0, [Item|Stack]) :-
 	parse_result(Id, Count, Stack0, Stack, Item).
+parse_item(call(Pred,Count), _, Ch, Ch, Stack0, [Item|Stack]) :-
+	call_result(Count, Id, Stack0, Stack, Item).
 parse_item(continue(Nonterm), Stream, Ch0, Ch, Stack0, Item) :-
 	parse_nonterm(Ch0, Nonterm, Stream, Stack0, Item, Ch).
 
@@ -235,6 +242,20 @@ pop_args(N, Stack0, Stack, Item) :-
 	    N1 is N - 1,
 	    pop_args(N1, Stack1, Stack, Item)
 	).
+
+
+call_result(1, Id, [A|Stack], Stack, Item) :- !,
+	call(Id, A, Item).
+call_result(2, Id, [A,B|Stack], Stack, Item) :- !,
+	call(Id, B, A, Item).
+call_result(3, Id, [A,B,C|Stack], Stack, Item) :- !,
+	call(Id, C, B, A, Item).
+call_result(4, Id, [A,B,C,D|Stack], Stack, Item) :- !,
+	call(Id, D, C, B, A, Item).
+call_result(5, Id, [A,B,C,D,E|Stack], Stack, Item) :- !,
+	call(Id, E, D, C, B, A, Item).
+call_result(N, Id, [A,B,C,D,E|Stack], Stack, Item) :-
+	throw('call of constructor with too many args!').
 
 
 
@@ -323,50 +344,64 @@ init_parser :-
 
 
 
-%  add_production(Nonterm, Constructor, Body)
+%  add_production(Nonterm, Body)
+%  add_production(Nonterm, Constructor, Body, Kind)
 %  Add new grammar rule Nonterm ::= Body to grammar.  This produces a
 %  deterministic LL(1) parser.  The code automatically incrementally performs
 %  the above-described transformations to create a deterministic parser, if
 %  possible.  Does not warn if the grammar is il-formed, since productions
 %  added later may correct the problem.  Errors are reported when they are
-%  discovered during parsing.
+%  discovered during parsing.  Constructor is either functor(F), in which
+%  case the constructed parse tree will use F as root label, or
+%  call(Closure), in which case it will call Closure with the parts of the
+%  production to construct the result.  The default is functor(Nonterm).
+%  Kind is either 'syn', in which case each terminal is taken to be a
+%  discrete token (so any following whitespace is skipped), or 'lex', in
+%  which case each terminal is just taken to be characters.  The default is
+%  'syn'.
 
 
 add_production(Head, Body) :-
-	add_production(functor(Head), Head, Body).
+	add_production(functor(Head), Head, Body, syn).
 
-add_production(functor(Constructor), Head, Body) :-
+add_production(functor(Constructor), Head, Body, Kind) :-
 	atom_concat(Constructor, ' ', Prefix),
 	gensym(Prefix, Id),
-	add_production1(Head, finish(Id,Args), Args, Body).
-add_production(call(Closure), Head, Body) :-
-	add_production1(Head, call(Closure,Args), Args, Body).
+	add_production1(Head, finish(Id,Args), Args, Body, Kind).
+add_production(call(Closure), Head, Body, Kind) :-
+	add_production1(Head, call(Closure,Args), Args, Body, Kind).
 
-add_production1(Head, Build, Args, Body) :-
+add_production1(Head, Build, Args, Body, Kind) :-
 	(   compound(Head)
 	->  assert(meta_grammar_rule(Head, Body))
-	;   compile_body(Body, Comp, [Build], 0, Args),
+	;   compile_body(Body, Comp, [Build], 0, Args, Kind),
 	    record_production(Head, Comp, Head, Body),
 	    fail
 	;   true
 	).
 
 
-%  compile_body(Rule, Comp, Comp0, Args, Args0)
+%  compile_body(Rule, Comp, Comp0, Args, Args0, Kind)
 %  Comp is the code to parse input according to grammar rule Rule, followed
 %  by Comp0.
 
-compile_body((B1,B2), Comp, Comp0, Args, Args0) :-
+compile_body((B1,B2), Comp, Comp0, Args, Args0, Kind) :-
 	!,
-	compile_body(B1, Comp, Comp1, Args, Args1),
-	compile_body(B2, Comp1, Comp0, Args1, Args0).
-compile_body([Ch|Chs], [Goal|Comp0], Comp0, Args, Args) :-
+	compile_body(B1, Comp, Comp1, Args, Args1, Kind),
+	compile_body(B2, Comp1, Comp0, Args1, Args0, Kind).
+compile_body([Ch|Chs], [Goal|Comp0], Comp0, Args, Args, Kind) :-
 	!,
-	terminal_goal([Ch|Chs], Goal).
-compile_body(Nonterminal, Comp, Comp0, Args0, Args) :-
+	terminal_goal([Ch|Chs], Goal, Kind).
+compile_body(Ch1-Ch2, [range(Ch1,Ch2)|Comp0], Comp0, Args0, Args, Kind) :-
+	!,
+	(   Kind = lex
+	->  true
+	;   throw('char range only permitted in lex rules')
+	).
+compile_body(Nonterminal, Comp, Comp0, Args0, Args, Kind) :-
 	(   compound(Nonterminal)
 	->  meta_grammar_rule(Nonterminal, Metabody),
-	    compile_body(Metabody, Comp, Comp0, Args0, Args)
+	    compile_body(Metabody, Comp, Comp0, Args0, Args, Kind)
 	;   Comp = [Goal|Comp0],
 	    Args is Args0 + 1,
 	    nonterminal_goal(Nonterminal, Goal)
@@ -379,8 +414,10 @@ is_terminal(symbol(_)).
 is_terminal(punct(_)).
 
 
-terminal_goal(Chars, Goal) :-
-	(   Chars = [Ch],
+terminal_goal(Chars, Goal, Kind) :-
+	(   Kind = lex
+	->  Goal = justchars(Chars)
+	;   Chars = [Ch],
 	    special_char(Ch)
 	->  Goal = chartoken(Ch)
 	;   all_symchars(Chars)
@@ -469,8 +506,11 @@ add_grammar_clause(Nonterm, Char, Body, Orig_nonterm, Orig_body) :-
 initial_body_char([symchars([Char|Chars])|Rest], Char, [symchars(Chars)|Rest]).
 initial_body_char([punctchars([Char|Chars])|Rest], Char,
 		  [punctchars(Chars)|Rest]).
-initial_body_char([justchars([Char|Chars])|Rest], Char, [justchars(Chars)|Rest]).
+initial_body_char([justchars([Char|Chars])|Rest], Char,
+		  [justchars(Chars)|Rest]).
 initial_body_char([chartoken(Char)|Rest], Char, Rest).
+initial_body_char([range(Ch1,Ch2)|Rest], Char, Rest) :-
+	between(Ch1, Ch2, Char).
 
 
 
@@ -508,8 +548,8 @@ matching_clause(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody, Ref) :-
 left_factor(Nonterm, Char, Oldbody, Ref, Body, Orig_nonterm, Orig_body) :-
 	(   split_common_start(Oldbody, Newold, Body, Newbody,
 			       Commonbody, Commontail),
-	    (	Newold = [finish(_,_)],
-		Newbody = [finish(_,_)]
+	    (	( Newold = [finish(_,_)] ; Newold = [call(_,_)] ),
+		( Newbody = [finish(_,_)] ; Newbody = [call(_,_)] ),
 	    ->			% trying to add a redundant grammar rule
 		throw(redundant_rule(Orig_nonterm, Orig_body))
 	    ;	Newold = [continue(Gennonterm)|_]
