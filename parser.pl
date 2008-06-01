@@ -1,23 +1,25 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.21 2008/06/01 13:43:36 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.22 2008/06/02 06:22:56 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
 %  Copyright: © 2008 Peter Schachte.  All rights reserved.
 
 %% TODO:
-%%	Support lex rules
-%%	Decide whether or not to do left unfolding
-%%	Handle left recursion
-%%	Handle associativity
-%%	Handle precedence
-%%	Clean up
+%%   o	Handle mixing character and range rules
+%%   o	Incorporate constructor/builder into rule body rather than head
+%%   o	Tail recursion optimization in parser
+%%   o	Handle associativity for multi-recursive rules
+%%   o	Handle precedence
+%%   o	More efficient handling of tail-recursive construction for
+%%	right-recursive rules?
 
 
 :- module(parser, [ test/0, test2/0, test3/0, test4/0,
 		    add_production/2,
 		    add_production/4,
-		    init_parser/0
+		    init_parser/0,
+		    show_parser/0
 		  ]).
 
 test :-
@@ -34,7 +36,14 @@ test3 :-
 
 test4 :-
 	add_production(call(mkint1), int, "0"-"9", lex),
-	add_production(call(mkint2), int, ("0"-"9", int), lex).
+	add_production(call(mkint2), int, (int, "0"-"9"), lex).
+
+
+mkint1(Ch, Int) :-
+	mkint2(0, Ch, Int).
+
+mkint2(Int0, Ch, Int) :-
+	Int is Int0*10 + Ch - 0'0.
 
 
 %  This module returns abstract syntax trees (ASTs, or parse trees) as terms
@@ -85,8 +94,9 @@ test4 :-
 %
 %    a ::= 'd' a_tail
 %    a ::= 'e' a_tail
-%    a_tail ::= 'x' b
-%    a_tail ::= 'y' c
+%    a_tail ::= 'x' b a_tail
+%    a_tail ::= 'y' c a_tail
+%    a_tail ::=
 %
 %
 %  Left Unfolding
@@ -176,17 +186,17 @@ test4 :-
 ****************************************************************/
 
 %  parse_nonterm(Ch0, Nonterm, Stream, Item, Ch)
-%  parse_nonterm(Ch0, Nonterm, Stream, Stack, Item, Ch)
+%  parse_nonterm(Ch0, Nonterm, Stream, Stack0, Stack, Ch)
 %  Item is the AST derived by parsing nonterminal Nonterm beginning with
 %  character Ch0, with other chars read from Stream.  Ch is the first
 %  character following the Nonterm.  Stack is a list of ASTs from nontermals
 %  already parsed.
 
 parse_nonterm(Ch0, Nonterm, Stream, Item, Ch) :-
-	parse_nonterm(Ch0, Nonterm, Stream, [], Item, Ch).
+	parse_nonterm(Ch0, Nonterm, Stream, [], [Item], Ch).
 
 
-parse_nonterm(Ch0, Nonterm, Stream, Stack0, Item, Ch) :-
+parse_nonterm(Ch0, Nonterm, Stream, Stack0, Stack, Ch) :-
 	(   nonterm_rule(Ch0, Nonterm, Body)
 	->  Stack1 = Stack0,		% force determinism
 	    get_code(Stream, Ch1)
@@ -199,13 +209,13 @@ parse_nonterm(Ch0, Nonterm, Stream, Stack0, Item, Ch) :-
 	    Ch1 = Ch0
 	;   throw(syntax_error)
 	),
-	parse_body(Body, Stream, Ch1, Ch, Stack1, Item).
+	parse_body(Body, Stream, Ch1, Ch, Stack1, Stack).
 
 
-parse_body([], _, Ch, Ch, [Item], Item).
-parse_body([X|Xs], Stream, Ch0, Ch, Stack0, Item) :-
-	parse_item(X, Stream, Ch0, Ch1, Stack0, Stack),
-	parse_body(Xs, Stream, Ch1, Ch, Stack, Item).
+parse_body([], _, Ch, Ch, Stack, Stack).
+parse_body([X|Xs], Stream, Ch0, Ch, Stack0, Stack) :-
+	parse_item(X, Stream, Ch0, Ch1, Stack0, Stack1),
+	parse_body(Xs, Stream, Ch1, Ch, Stack1, Stack).
 
 
 parse_item(symchars(Expected), Stream, Ch0, Ch, Stack, Stack) :-
@@ -236,14 +246,12 @@ parse_item(range(Low,High), Stream, Ch0, Ch, Stack, Stack) :-
 	->  get_code(Stream, Ch)
 	;   throw(out_of_range(Ch0, Low, High))
 	).
-parse_item(nonterm(Nonterm), Stream, Ch0, Ch, Stack, [Item|Stack]) :-
-	parse_nonterm(Ch0, Nonterm, Stream, Item, Ch).
-parse_item(finish(Id,Count), _, Ch, Ch, Stack0, [Item|Stack]) :-
+parse_item(nonterminal(Nonterm), Stream, Ch0, Ch, Stack0, Stack) :-
+	parse_nonterm(Ch0, Nonterm, Stream, Stack0, Stack, Ch).
+parse_item(build(Id,Count), _, Ch, Ch, Stack0, [Item|Stack]) :-
 	parse_result(Id, Count, Stack0, Stack, Item).
 parse_item(call(Pred,Count), _, Ch, Ch, Stack0, [Item|Stack]) :-
 	call_result(Count, Pred, Stack0, Stack, Item).
-parse_item(continue(Nonterm), Stream, Ch0, Ch, Stack0, Item) :-
-	parse_nonterm(Ch0, Nonterm, Stream, Stack0, Item, Ch).
 
 
 parse_result(Id, Count, Stack0, Stack, Item) :-
@@ -353,12 +361,23 @@ skip_line(_, Stream, Ch) :-
 :- dynamic catchall_rule/2.
 :- dynamic meta_grammar_rule/2.
 :- dynamic left_recursive/2.
+:- dynamic generated_nonterminal/1.
 
 init_parser :-
 	retractall(nonterm_rule(_,_,_)),
 	retractall(range_rule(_,_,_,_)),
 	retractall(catchall_rule(_,_)),
-	retractall(meta_grammar_rule(_,_)).
+	retractall(meta_grammar_rule(_,_)),
+	retractall(left_recursive(_,_)),
+	retractall(generated_nonterminal(_)).
+
+
+
+show_parser :-
+	listing(nonterm_rule),
+	listing(range_rule),
+	listing(catchall_rule),
+	listing(meta_grammar_rule).
 
 
 
@@ -392,7 +411,7 @@ add_production(Head, Body) :-
 add_production(functor(Constructor), Head, Body, Kind) :-
 	atom_concat(Constructor, ' ', Prefix),
 	gensym(Prefix, Id),
-	add_production1(Head, finish(Id,Args), Args, Body, Kind).
+	add_production1(Head, build(Id,Args), Args, Body, Kind).
 add_production(call(Closure), Head, Body, Kind) :-
 	add_production1(Head, call(Closure,Args), Args, Body, Kind).
 
@@ -458,39 +477,42 @@ nonterminal_goal(Nonterm, nonterminal(Nonterm)).
 %  this production.
 
 record_production(Nonterm, Comp, Orig_nonterm, Orig_body) :-
-	% do we really want to do this?  I think so.
 	left_unfold(Comp, Nonterm, Comp1),
 	(   left_recursive_body(Comp1, Nonterm, Comp2)
-	->  (	left_recursive_body(Comp2, Nonterm, _)
-	    ->	throw(double_left_recursive(Orig_nonterm, Orig_body))
-	    ;	update_left_recursive(Nonterm),
-		make_lrec_production(Nonterm, Comp2, Realbody)
-	    )
-	;   left_recursive_nonterm(Nonterm, Tailcall)
-	->  append(Comp2, Tailcall, Realbody)
-	;   Realbody = Comp1
+	->  convert_left_recursive(Nonterm, Rulenonterm),
+	    append(Comp2, [nonterminal(Rulenonterm)], Body)
+	;   Body = Comp1,
+	    Rulenonterm = Nonterm
 	),
-	(   initial_body_char(Realbody, Char, Rest)
-	->  add_grammar_clause(Char, Nonterm, Rest, Orig_nonterm, Orig_body)
+	(   initial_body_char(Body, Char, Rest)
+	->  add_grammar_clause(Char, Rulenonterm, Rest, Orig_nonterm, Orig_body)
 	;   throw(left_unfolding_failed(Nonterm, Comp, Orig_nonterm, Orig_body))
 	).
 
 
-% XXX handle mixture of character ranges and specific character rules
-add_grammar_clause('', Nonterm, Body, Orig_nonterm, Orig_body) :-
+add_grammar_clause(Char, Nonterm, Body, Orig_nonterm, Orig_body) :-
+	(   left_recursive(Nonterm, Tailnonterm)
+	->  make_lrec_production(Body, Tailnonterm, Body1)
+	;   Body1 = Body
+	),
+	add_grammar_clause1(Char, Nonterm, Body1, Orig_nonterm, Orig_body).
+
+
+
+add_grammar_clause1('', Nonterm, Body, Orig_nonterm, Orig_body) :-
 	!,
 	(   clause(catchall_rule(Nonterm, _), true)
 	->  throw(multiple_catcall_rules(Orig_nonterm, Orig_body))
 	;   assert(catchall_rule(Nonterm, Body))
 	).
-add_grammar_clause(Low-High, Nonterm, Body, Orig_nonterm, Orig_body) :-
+add_grammar_clause1(Low-High, Nonterm, Body, Orig_nonterm, Orig_body) :-
 	!,
 	(   clause(range_rule(Nonterm, Low, High, Oldbody), true, Ref)
 	->  left_factor(Nonterm, Low-High, Oldbody, Ref, Body,
 			Orig_nonterm, Orig_body)
 	;   assert(range_rule(Nonterm, Low, High, Body))
 	).
-add_grammar_clause(Char, Nonterm, Body, Orig_nonterm, Orig_body) :-
+add_grammar_clause1(Char, Nonterm, Body, Orig_nonterm, Orig_body) :-
 	(   clause(nonterm_rule(Char, Nonterm, Oldbody), true, Ref)
 	->  left_factor(Nonterm, Char, Oldbody, Ref, Body,
 			Orig_nonterm, Orig_body)
@@ -509,9 +531,8 @@ initial_instr_char(punctchars([Char|Chars]), Char, Rest,
 initial_instr_char(justchars([Char|Chars]), Char, Rest, [justchars(Chars)|Rest]).
 initial_instr_char(chartoken(Char), Char, Rest, Rest).
 initial_instr_char(range(Low,High), Low-High, Rest, Rest).
-initial_instr_char(finish(_,_), '', Rest, Rest).
-initial_instr_char(call(_,_), '', Rest, Rest).
-initial_instr_char(continue(_), '', Rest, Rest).
+initial_instr_char(build(X,Y), '', Rest, [build(X,Y)|Rest]).
+initial_instr_char(call(X,Y), '', Rest, [call(X,Y)|Rest]).
 
 
 
@@ -530,10 +551,10 @@ left_unfold(Body, _, Body).
 
 
 
-left_recursive_body([nonterm(Parent)|Rest], Parent, Rest).
+left_recursive_body([nonterminal(Parent)|Rest], Parent, Rest).
 
 
-left_recursive_nonterm(Nonterm, nonterm(Tailpred)) :-
+left_recursive_nonterm(Nonterm, nonterminal(Tailpred)) :-
 	left_recursive(Nonterm, Tailpred).
 
 
@@ -546,16 +567,17 @@ matching_clause(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody, Ref) :-
 left_factor(Nonterm, Char, Oldbody, Ref, Body, Orig_nonterm, Orig_body) :-
 	(   split_common_start(Oldbody, Newold, Body, Newbody,
 			       Commonbody, Commontail),
-	    (	( Newold = [finish(_,_)] ; Newold = [call(_,_)] ),
-		( Newbody = [finish(_,_)] ; Newbody = [call(_,_)] )
-	    ->
-		throw(redundant_rule(Orig_nonterm, Orig_body))
-	    ;	Newold = [continue(Gennonterm)|_]
+	    (	( Newold = [build(_,_)] ; Newold = [call(_,_)] ),
+		( Newbody = [build(_,_)] ; Newbody = [call(_,_)] )
+	    ->	throw(redundant_rule(Orig_nonterm, Orig_body))
+	    ;	Newold = [nonterminal(Gennonterm)|_],
+		generated_nonterminal(Gennonterm)
 	    ->	true
 	    ;	erase(Ref),
 		gensym('GEN', Gennonterm),
-		Commontail = [continue(Gennonterm)],
-		add_grammar_clause(Char, Nonterm, Commonbody,
+		assert(generated_nonterminal(Gennonterm)),
+		Commontail = [nonterminal(Gennonterm)],
+		add_grammar_clause1(Char, Nonterm, Commonbody,
 				   Orig_nonterm, Orig_body),
 		record_production(Gennonterm, Newold, Orig_nonterm, Orig_body)
 	    ),
@@ -612,3 +634,33 @@ common_initial_sublist(Xs0, Ys0, Common, Xs, Ys) :-
 	    Xs = Xs0,
 	    Ys = Ys0
 	).
+
+
+convert_left_recursive(Nonterm, Tailnonterm) :-
+	(   left_recursive(Nonterm, Tailnonterm)
+	->  true			% already done
+	;   gensym('LREC', Tailnonterm),
+	    assert(left_recursive(Nonterm, Tailnonterm)),
+	    (	clause(nonterm_rule(Char, Nonterm, Body), true, Ref),
+		erase(Ref),
+		make_lrec_production(Body, Tailnonterm, Body1),
+		assertz(nonterm_rule(Char, Nonterm, Body1)),
+		fail
+	    ;	clause(range_rule(Nonterm, Low, High, Body), true, Ref),
+		erase(Ref),
+		make_lrec_production(Body, Tailnonterm, Body1),
+		assertz(range_rule(Nonterm, Low, High, Body1)),
+		fail
+	    ;	clause(catchall_rule(Nonterm, Body), true, Ref),
+		erase(Ref),
+		make_lrec_production(Body, Tailnonterm, Body1),
+		assertz(catchall_rule(Nonterm, Body1)),
+		fail
+	    ;	assertz(catchall_rule(Tailnonterm, []))
+	    )
+	).
+
+
+make_lrec_production(Body0, Tailnonterm, Body) :-
+	append(Body0, [nonterminal(Tailnonterm)], Body).
+
