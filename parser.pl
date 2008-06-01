@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.22 2008/06/02 06:22:56 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.23 2008/06/02 09:57:16 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -8,15 +8,20 @@
 %% TODO:
 %%   o	Handle mixing character and range rules
 %%   o	Incorporate constructor/builder into rule body rather than head
-%%   o	Tail recursion optimization in parser
 %%   o	Handle associativity for multi-recursive rules
 %%   o	Handle precedence
 %%   o	More efficient handling of tail-recursive construction for
 %%	right-recursive rules?
-
+%%   o	Handle separate compilation of multiple files, where each file *starts*
+%%	being parsed with the standard syntax, with additions made as
+%%	dependencies are loaded.
 
 :- module(parser, [ test/0, test2/0, test3/0, test4/0,
+		    process_file/2,
+		    process_file/3,
+		    process_stream/2,
 		    add_production/2,
+		    parse_nonterm/5,
 		    add_production/4,
 		    init_parser/0,
 		    show_parser/0
@@ -185,6 +190,40 @@ mkint2(Int0, Ch, Int) :-
 			    Parser Infrastructure
 ****************************************************************/
 
+%  process_file(+File, +Handler)
+%  process_file(+File, +Options, +Handler)
+%  Open and process File, calling Handler with each item as it is read.
+%  Options is as for open; it defaults to [].
+
+process_file(File, Handler) :-
+	process_file(File, [], Handler).
+
+process_file(File, Options, Handler) :-
+	open(File, read, Stream, Options),
+	process_stream(Stream, Handler),
+	close(Stream).
+
+
+%  process_stream(+Stream, +Handler)
+%  Call Handler with each item as it is read from Stream.
+
+process_stream(Stream, Handler) :-
+	get0(Stream, Char),
+	process_stream1(Char, Stream, Handler).
+
+
+process_stream1(-1, _, _) :-		% End of file
+	!.
+process_stream1(Char, Stream, Handler) :-
+	parse_nonterm(Char, item, Stream, Item, Char1),
+	(   call(Handler, Item)
+	->  true
+	;   write('! Handler failed !\n')
+	),
+	process_stream1(Char1, Stream, Handler).
+	
+
+
 %  parse_nonterm(Ch0, Nonterm, Stream, Item, Ch)
 %  parse_nonterm(Ch0, Nonterm, Stream, Stack0, Stack, Ch)
 %  Item is the AST derived by parsing nonterminal Nonterm beginning with
@@ -193,7 +232,11 @@ mkint2(Int0, Ch, Int) :-
 %  already parsed.
 
 parse_nonterm(Ch0, Nonterm, Stream, Item, Ch) :-
-	parse_nonterm(Ch0, Nonterm, Stream, [], [Item], Ch).
+	parse_nonterm(Ch0, Nonterm, Stream, [], [Item|Rest], Ch),
+	(   Rest == []
+	->  true
+	;   throw(internal_error('non-empty stack after parse'))
+	).
 
 
 parse_nonterm(Ch0, Nonterm, Stream, Stack0, Stack, Ch) :-
@@ -214,8 +257,12 @@ parse_nonterm(Ch0, Nonterm, Stream, Stack0, Stack, Ch) :-
 
 parse_body([], _, Ch, Ch, Stack, Stack).
 parse_body([X|Xs], Stream, Ch0, Ch, Stack0, Stack) :-
-	parse_item(X, Stream, Ch0, Ch1, Stack0, Stack1),
-	parse_body(Xs, Stream, Ch1, Ch, Stack1, Stack).
+	%  Funky code to make parsing more tail recursive
+	(   Xs == []
+	->  parse_item(X, Stream, Ch0, Ch1, Stack0, Stack)
+	;   parse_item(X, Stream, Ch0, Ch1, Stack0, Stack1),
+	    parse_body(Xs, Stream, Ch1, Ch, Stack1, Stack)
+	).
 
 
 parse_item(symchars(Expected), Stream, Ch0, Ch, Stack, Stack) :-
