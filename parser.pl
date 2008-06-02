@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.24 2008/06/02 12:15:51 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.25 2008/06/02 12:55:21 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -29,6 +29,26 @@
 		    show_parser/0,
 		    test/0, test2/0, test3/0, test4/0
 		  ]).
+
+
+
+% Thinking about left recursion, associativity, and precedence:
+%
+% e ::=
+%     e + e
+%     e * e
+%     ( e )
+%     int
+
+% e(E) ->
+%     int(X) etail(X, E)
+%     ( e(X) ) etail(X, E)
+
+% etail(X, E) ->
+%     + e(Y) etail(+(X,Y), E)		% left assoc
+%     * e(Y) etail(Y, Z) [E = *(X,Z)]	% right assoc
+
+
 
 test :-
 	add_production(cond,
@@ -493,9 +513,8 @@ compile_body(Nonterminal, Comp, Comp0, Args0, Args, Kind) :-
 	(   compound(Nonterminal)
 	->  meta_grammar_rule(Nonterminal, Metabody),
 	    compile_body(Metabody, Comp, Comp0, Args0, Args, Kind)
-	;   Comp = [Goal|Comp0],
-	    Args is Args0 + 1,
-	    nonterminal_goal(Nonterminal, Goal)
+	;   Comp = [nonterminal(Nonterminal)|Comp0],
+	    Args is Args0 + 1
 	).
 
 
@@ -513,10 +532,6 @@ terminal_goal(Chars, Goal, Kind) :-
 	).
 
 
-nonterminal_goal(Nonterm, nonterminal(Nonterm)).
-
-
-
 %  record_production(Nonterm, Comp, Orig_nonterm, Orig_body)
 %  Add a new production for Nonterm with compiled body Comp.  Orig_nonterm
 %  and Orig_body are the nonterminal and body as original written by the
@@ -525,7 +540,7 @@ nonterminal_goal(Nonterm, nonterminal(Nonterm)).
 
 record_production(Nonterm, Comp, Orig_nonterm, Orig_body) :-
 	left_unfold(Comp, Nonterm, Comp1),
-	(   left_recursive_body(Comp1, Nonterm, Comp2)
+	(   Comp = [nonterminal(Nonterm)|Comp2]
 	->  convert_left_recursive(Nonterm, Rulenonterm),
 	    append(Comp2, [nonterminal(Rulenonterm)], Body)
 	;   Body = Comp1,
@@ -598,19 +613,6 @@ left_unfold(Body, _, Body).
 
 
 
-left_recursive_body([nonterminal(Parent)|Rest], Parent, Rest).
-
-
-left_recursive_nonterm(Nonterm, nonterminal(Tailpred)) :-
-	left_recursive(Nonterm, Tailpred).
-
-
-matching_clause(Nonterm, Sym, Stream, Extras, Oldterm, Oldbody, Ref) :-
-	Pattern =.. [Nonterm, Sym, Stream, Oldterm | Extras],
-	parser_rule:clause(Pattern, _:Oldbody, Ref).
-	
-
-
 left_factor(Nonterm, Char, Oldbody, Ref, Body, Orig_nonterm, Orig_body) :-
 	(   split_common_start(Oldbody, Newold, Body, Newbody,
 			       Commonbody, Commontail),
@@ -630,23 +632,6 @@ left_factor(Nonterm, Char, Oldbody, Ref, Body, Orig_nonterm, Orig_body) :-
 	    ),
 	    record_production(Gennonterm, Newbody, Orig_nonterm, Orig_body)
 	).
-
-
-% Thinking about left recursion, associativity, and precedence:
-%
-% e ::=
-%     e + e
-%     e * e
-%     ( e )
-%     int
-
-% e(E) ->
-%     int(X) etail(X, E)
-%     ( e(X) ) etail(X, E)
-
-% etail(X, E) ->
-%     + e(Y) etail(+(X,Y), E)		% left assoc
-%     * e(Y) etail(Y, Z) [E = *(X,Z)]	% right assoc
 
 
 split_common_start([Old1|Olds], Newold, [New1|News], Newnew, Common, Common0) :-
