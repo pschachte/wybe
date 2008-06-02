@@ -16,8 +16,8 @@ class int
     # grammar rule is left recursive, as that gets left-associative
     # construction; will be translated to right recursion
 
-    lex decimalnum makedecimalnum ::= decimalnum digit
-    lex decimalnum decimaldigit ::= digit
+    lex decimalnum ::= makedecimalnum: decimalnum digit
+    lex decimalnum ::= decimaldigit:   digit
 
     fun decimaldigit(ch:char) = foreign c \CODE\ ch - '0' \CODE\
     fun makedecimalnum(num, ch:char) = 

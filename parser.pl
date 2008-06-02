@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.23 2008/06/02 09:57:16 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.24 2008/06/02 12:15:51 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -7,24 +7,27 @@
 
 %% TODO:
 %%   o	Handle mixing character and range rules
-%%   o	Incorporate constructor/builder into rule body rather than head
 %%   o	Handle associativity for multi-recursive rules
 %%   o	Handle precedence
+%%   o	Handle recursive meta-grammar rules
+%%   o	Ensure lex rules include only chars from a single class
+%%   o	After invoking lex rules from syn rules, skip whitespace
 %%   o	More efficient handling of tail-recursive construction for
 %%	right-recursive rules?
 %%   o	Handle separate compilation of multiple files, where each file *starts*
 %%	being parsed with the standard syntax, with additions made as
 %%	dependencies are loaded.
 
-:- module(parser, [ test/0, test2/0, test3/0, test4/0,
-		    process_file/2,
+:- module(parser, [ process_file/2,
 		    process_file/3,
 		    process_stream/2,
 		    add_production/2,
+		    add_production/3,
 		    parse_nonterm/5,
-		    add_production/4,
 		    init_parser/0,
-		    show_parser/0
+		    % XXX For testing:
+		    show_parser/0,
+		    test/0, test2/0, test3/0, test4/0
 		  ]).
 
 test :-
@@ -40,8 +43,8 @@ test3 :-
 
 
 test4 :-
-	add_production(call(mkint1), int, "0"-"9", lex),
-	add_production(call(mkint2), int, (int, "0"-"9"), lex).
+	add_production(int, mkint1:("0"-"9"), lex),
+	add_production(int, mkint2:(int, "0"-"9"), lex).
 
 
 mkint1(Ch, Int) :-
@@ -433,34 +436,31 @@ show_parser :-
 ****************************************************************/
 
 %  add_production(Nonterm, Body)
-%  add_production(Nonterm, Constructor, Body, Kind)
+%  add_production(Nonterm, Body, Kind)
 %  Add new grammar rule Nonterm ::= Body to grammar.  This produces a
-%  deterministic LL(1) parser.  The code automatically incrementally performs
+%  deterministic LL(n) parser.  The code automatically incrementally performs
 %  the above-described transformations to create a deterministic parser, if
 %  possible.  Does not warn if the grammar is il-formed, since productions
 %  added later may correct the problem.  Errors are reported when they are
-%  discovered during parsing.  Constructor is either functor(F), in which
-%  case the constructed parse tree will use F as root label, or
-%  call(Closure), in which case it will call Closure with the parts of the
-%  production to construct the result.  The default is functor(Nonterm).
-%  Kind is either 'syn', in which case each terminal is taken to be a
-%  discrete token (so any following whitespace is skipped), or 'lex', in
-%  which case each terminal is just taken to be characters.  The default is
-%  'syn'.
+%  discovered during parsing.  Kind is either 'syn', in which case each
+%  terminal is taken to be a discrete token (so any following whitespace is
+%  skipped), or 'lex', in which case each terminal is just taken to be
+%  characters.  The default is 'syn'.
 
 
 add_production(Head, Body) :-
+	add_production(Head, Body, syn).
+
+
+add_production(Head, Body, Kind) :-
 	(   compound(Head)
 	->  assert(meta_grammar_rule(Head, Body))
-	;   add_production(functor(Head), Head, Body, syn)
+	;   Body = Constructor:Body1
+	->  add_production1(Head, call(Constructor,Args), Args, Body1, Kind)
+	;   atom_concat(Head, ' ', Prefix),
+	    gensym(Prefix, Id),
+	    add_production1(Head, build(Id,Args), Args, Body, Kind)
 	).
-
-add_production(functor(Constructor), Head, Body, Kind) :-
-	atom_concat(Constructor, ' ', Prefix),
-	gensym(Prefix, Id),
-	add_production1(Head, build(Id,Args), Args, Body, Kind).
-add_production(call(Closure), Head, Body, Kind) :-
-	add_production1(Head, call(Closure,Args), Args, Body, Kind).
 
 add_production1(Head, Build, Args, Body, Kind) :-
 	(   compile_body(Body, Comp, [Build], 0, Args, Kind),
@@ -481,7 +481,7 @@ compile_body((B1,B2), Comp, Comp0, Args, Args0, Kind) :-
 compile_body([Ch|Chs], [Goal|Comp0], Comp0, Args, Args, Kind) :-
 	!,
 	terminal_goal([Ch|Chs], Goal, Kind).
-compile_body([], Comp0, Comp0, Args, Args, _).
+compile_body("", Comp, Comp, Args, Args, _).
 compile_body([Ch1]-[Ch2], [range(Ch1,Ch2)|Comp0], Comp0,
 	     Args0, Args, Kind) :-
 	!,
