@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.26 2008/06/03 08:43:08 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.27 2008/06/03 08:49:18 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -282,7 +282,7 @@ parse_body([], _, Ch, Ch, Stack, Stack).
 parse_body([X|Xs], Stream, Ch0, Ch, Stack0, Stack) :-
 	%  Funky code to make parsing more tail recursive
 	(   Xs == []
-	->  parse_item(X, Stream, Ch0, Ch1, Stack0, Stack)
+	->  parse_item(X, Stream, Ch0, Ch, Stack0, Stack)
 	;   parse_item(X, Stream, Ch0, Ch1, Stack0, Stack1),
 	    parse_body(Xs, Stream, Ch1, Ch, Stack1, Stack)
 	).
