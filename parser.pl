@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.25 2008/06/02 12:55:21 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.26 2008/06/03 08:43:08 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -288,28 +288,15 @@ parse_body([X|Xs], Stream, Ch0, Ch, Stack0, Stack) :-
 	).
 
 
-parse_item(symchars(Expected), Stream, Ch0, Ch, Stack, Stack) :-
-	(   match_chars(Expected, Stream, Ch0, Ch1),
-	    \+ symbol_char(Ch1)
-	->  skip_white(Ch1, Stream, Ch)
-	;   throw(unexpected(Ch0, Expected))
-	).
-parse_item(punctchars(Expected), Stream, Ch0, Ch, Stack, Stack) :-
-	(   match_chars(Expected, Stream, Ch0, Ch1),
-	    \+ punctuation_char(Ch1)
-	->  skip_white(Ch1, Stream, Ch)
-	;   throw(unexpected(Ch0, Expected))
-	).
-parse_item(justchars(Expected), Stream, Ch0, Ch, Stack, Stack) :-
+parse_item(chars(Expected), Stream, Ch0, Ch, Stack, Stack) :-
 	(   match_chars(Expected, Stream, Ch0, Ch)
 	->  true
 	;   throw(unexpected(Ch0, Expected))
 	).
-parse_item(chartoken(Char), Stream, Ch0, Ch, Stack, Stack) :-
-	(   Char == Ch0
-	->  get_code(Stream, Ch1),
-	    skip_white(Ch1, Stream, Ch)
-	;   throw(unexpected(Ch0, Char))
+parse_item(token_end(Class), Stream, Ch0, Ch, Stack, Stack) :-
+	(   token_end(Class, Ch0)
+	->  skip_white(Ch0, Stream, Ch)
+	;   throw(runtogethertokens(Ch0, Class))
 	).
 parse_item(range(Low,High), Stream, Ch0, Ch, Stack, Stack) :-
 	(   Low =< Ch0, Ch0 =< High
@@ -322,6 +309,14 @@ parse_item(build(Id,Count), _, Ch, Ch, Stack0, [Item|Stack]) :-
 	parse_result(Id, Count, Stack0, Stack, Item).
 parse_item(call(Pred,Count), _, Ch, Ch, Stack0, [Item|Stack]) :-
 	call_result(Count, Pred, Stack0, Stack, Item).
+
+
+
+token_end(special, _).
+token_end(symbol, Ch) :-
+	\+ symbol_char(Ch).
+token_end(punctuation, Ch) :-
+	\+ punctuation_char(Ch).
 
 
 parse_result(Id, Count, Stack0, Stack, Item) :-
@@ -375,21 +370,10 @@ symbol_char(Char) :-
 	).
 
 
-all_symchars([]).
-all_symchars([Ch|Chs]) :-
-	symbol_char(Ch),
-	all_symchars(Chs).
-
-
 punctuation_char(Char) :-
 	Char > 0' ,
 	\+ special_char(Char),
 	\+ symbol_char(Char).
-
-all_punctchars([]).
-all_punctchars([Ch|Chs]) :-
-	punctuation_char(Ch),
-	all_punctchars(Chs).
 
 
 special_char(0'().
@@ -498,9 +482,9 @@ compile_body((B1,B2), Comp, Comp0, Args, Args0, Kind) :-
 	!,
 	compile_body(B1, Comp, Comp1, Args, Args1, Kind),
 	compile_body(B2, Comp1, Comp0, Args1, Args0, Kind).
-compile_body([Ch|Chs], [Goal|Comp0], Comp0, Args, Args, Kind) :-
+compile_body([Ch|Chs], Comp, Comp0, Args, Args, Kind) :-
 	!,
-	terminal_goal([Ch|Chs], Goal, Kind).
+	terminal_goal([Ch|Chs], Comp, Comp0, Kind).
 compile_body("", Comp, Comp, Args, Args, _).
 compile_body([Ch1]-[Ch2], [range(Ch1,Ch2)|Comp0], Comp0,
 	     Args0, Args, Kind) :-
@@ -518,18 +502,26 @@ compile_body(Nonterminal, Comp, Comp0, Args0, Args, Kind) :-
 	).
 
 
-terminal_goal(Chars, Goal, Kind) :-
-	(   Kind = lex
-	->  Goal = justchars(Chars)
-	;   Chars = [Ch],
-	    special_char(Ch)
-	->  Goal = chartoken(Ch)
-	;   all_symchars(Chars)
-	->  Goal = symchars(Chars)
-	;   all_punctchars(Chars)
-	->  Goal = punctchars(Chars)
+terminal_goal(Chars, [chars(Chars)|Comp1], Comp0, Kind) :-
+	(   uniform_token(Chars, Class)
+	->  token_end_goal(Kind, Class, Comp1, Comp0)
 	;   throw(invalid_token(Chars))
 	).
+
+
+uniform_token([_], _).
+uniform_token([Ch], special) :-
+	special_char(Ch).
+uniform_token([Ch|Chs], symbol) :-
+	symbol_char(Ch),
+	uniform_token(Chs, symbol).
+uniform_token([Ch|Chs], punctuation) :-
+	punctuation_char(Ch),
+	uniform_token(Chs, punctuation).
+
+
+token_end_goal(lex, _, Comp, Comp).
+token_end_goal(syn, Class, [token_end(Class)|Comp0], Comp0).
 
 
 %  record_production(Nonterm, Comp, Orig_nonterm, Orig_body)
@@ -587,11 +579,8 @@ initial_body_char([Instr|Rest], Char, Body) :-
 	initial_instr_char(Instr, Char, Rest, Body).
 
 
-initial_instr_char(symchars([Char|Chars]), Char, Rest, [symchars(Chars)|Rest]).
-initial_instr_char(punctchars([Char|Chars]), Char, Rest,
-		  [punctchars(Chars)|Rest]).
-initial_instr_char(justchars([Char|Chars]), Char, Rest, [justchars(Chars)|Rest]).
-initial_instr_char(chartoken(Char), Char, Rest, Rest).
+initial_instr_char(chars([Char|Chars]), Char, Rest,
+		   [chars(Chars)|Rest]).
 initial_instr_char(range(Low,High), Low-High, Rest, Rest).
 initial_instr_char(build(X,Y), '', Rest, [build(X,Y)|Rest]).
 initial_instr_char(call(X,Y), '', Rest, [call(X,Y)|Rest]).
@@ -603,7 +592,7 @@ left_unfold([nonterminal(Nonterm)|Rest], Parent, Body) :-
 	(   Nonterm == Parent		% left recursive!
 	->  Body = [nonterminal(Nonterm)|Rest]
 	;   nonterm_rule(Ch, Nonterm, Body1),
-	    append([justchars([Ch])|Body1], Rest, Body)
+	    append([chars([Ch])|Body1], Rest, Body)
 	;   range_rule(Nonterm, Low, High, Body1),
 	    append([range(Low,High)|Body1], Rest, Body)
 	;   catchall_rule(Nonterm, Body1),
@@ -648,14 +637,12 @@ split_common_start([Old1|Olds], Newold, [New1|News], Newnew, Common, Common0) :-
 	).
 	
 
-split_common_token(Olds0, Olds, News0, News, justchars(Commonchs)) :-
+split_common_token(Olds0, Olds, News0, News, chars(Commonchs)) :-
 	token_chars(Olds0, Oldchs0, Olds, Oldchs),
 	token_chars(News0, Newchs0, News, Newchs),
 	common_initial_sublist(Oldchs0, Newchs0, Commonchs, Oldchs, Newchs).
 	
-token_chars(symchars(Chs1), Chs1, symchars(Chs2), Chs2).
-token_chars(punctchars(Chs1), Chs1, punctchars(Chs2), Chs2).
-token_chars(justchars(Chs1), Chs1, justchars(Chs2), Chs2).
+token_chars(chars(Chs1), Chs1, chars(Chs2), Chs2).
 
 common_initial_sublist(Xs0, Ys0, Common, Xs, Ys) :-
 	(   Xs0 = [X|Xs1],
