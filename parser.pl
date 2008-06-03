@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.27 2008/06/03 08:49:18 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.28 2008/06/04 08:06:33 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -7,27 +7,29 @@
 
 %% TODO:
 %%   o	Handle mixing character and range rules
+%%   o	Incremental parser generation:  handle new productions that old ones
+%%	depend on (left unfolding problem) 
 %%   o	Handle associativity for multi-recursive rules
 %%   o	Handle precedence
 %%   o	Handle recursive meta-grammar rules
-%%   o	Ensure lex rules include only chars from a single class
-%%   o	After invoking lex rules from syn rules, skip whitespace
+%%   o	Handle layout-sensitive grammar
+%%   o	After invoking lex rules from syn rules: insert token_end
 %%   o	More efficient handling of tail-recursive construction for
 %%	right-recursive rules?
 %%   o	Handle separate compilation of multiple files, where each file *starts*
 %%	being parsed with the standard syntax, with additions made as
 %%	dependencies are loaded.
+%%   o	Decide if we really want to apply left unfolding
 
 :- module(parser, [ process_file/2,
 		    process_file/3,
 		    process_stream/2,
-		    add_production/2,
-		    add_production/3,
+		    add_syn/2,
+		    add_lex/2,
 		    parse_nonterm/5,
 		    init_parser/0,
 		    % XXX For testing:
-		    show_parser/0,
-		    test/0, test2/0, test3/0, test4/0
+		    show_parser/0, test/1
 		  ]).
 
 
@@ -50,21 +52,29 @@
 
 
 
-test :-
-	add_production(cond,
-		       ("if",expr,"then",stmts,"endif")).
-test2 :-
-	add_production(cond,
-		       ("if",expr,"then",stmts,"else",stmts,"endif")).
+test(cond) :-
+	add_syn(cond, ("if",expr,"then",stmts,"endif")),
+	add_syn(cond, ("if",expr,"then",stmts,"else",stmts,"endif")).
 
-test3 :-
-	add_production((A|B), A),
-	add_production((A|B), B).
+test(alt) :-
+	add_syn((A|B), A),
+	add_syn((A|B), B).
+
+test(int) :-
+	add_lex(int, mkint1:("0"-"9")),
+	add_lex(int, mkint2:(int, "0"-"9")).
+
+test(ident) :-
+	add_lex(digit, char:("0"-"9")),
+	test(alt),
+	add_lex(alpha, char:("a"-"z" | "A"-"Z")),
+	add_lex(identchar, char:( alpha | digit | "_")),
+	add_lex(ident, mkident:( alpha, identtail )),
+	add_lex(identtail, nil:""),
+	add_lex(identtail, cons:(identchar, identtail)).
 
 
-test4 :-
-	add_production(int, mkint1:("0"-"9"), lex),
-	add_production(int, mkint2:(int, "0"-"9"), lex).
+test(stmt).
 
 
 mkint1(Ch, Int) :-
@@ -72,6 +82,13 @@ mkint1(Ch, Int) :-
 
 mkint2(Int0, Ch, Int) :-
 	Int is Int0*10 + Ch - 0'0.
+
+char(Char, Char).
+
+cons(H, T, [H|T]).
+nil([]).
+
+mkident(Char, Chars, Ident) :- atom_codes(Ident, [Char|Chars]).
 
 
 %  This module returns abstract syntax trees (ASTs, or parse trees) as terms
@@ -128,6 +145,9 @@ mkint2(Int0, Ch, Int) :-
 %
 %
 %  Left Unfolding
+%
+%  Left unfolding enables left recursion elimination to remove indirect, as
+%  well as direct, left recursion.
 %
 %  Each final grammar rule must begin by consuming a terminal; left unfolding
 %  replaces a leftmost nonterminal with the body of each rule for that
@@ -293,12 +313,18 @@ parse_item(chars(Expected), Stream, Ch0, Ch, Stack, Stack) :-
 	->  true
 	;   throw(unexpected(Ch0, Expected))
 	).
+parse_item(pushchars(Expected), Stream, Ch0, Ch, Stack0, Stack) :-
+	(   match_chars(Expected, Stream, Ch0, Ch)
+	->  reverse(Expected, Rev),
+	    append(Rev, Stack0, Stack)
+	;   throw(unexpected(Ch0, Expected))
+	).
 parse_item(token_end(Class), Stream, Ch0, Ch, Stack, Stack) :-
 	(   token_end(Class, Ch0)
 	->  skip_white(Ch0, Stream, Ch)
 	;   throw(runtogethertokens(Ch0, Class))
 	).
-parse_item(range(Low,High), Stream, Ch0, Ch, Stack, Stack) :-
+parse_item(range(Low,High), Stream, Ch0, Ch, Stack, [Ch0|Stack]) :-
 	(   Low =< Ch0, Ch0 =< High
 	->  get_code(Stream, Ch)
 	;   throw(out_of_range(Ch0, Low, High))
@@ -309,6 +335,7 @@ parse_item(build(Id,Count), _, Ch, Ch, Stack0, [Item|Stack]) :-
 	parse_result(Id, Count, Stack0, Stack, Item).
 parse_item(call(Pred,Count), _, Ch, Ch, Stack0, [Item|Stack]) :-
 	call_result(Count, Pred, Stack0, Stack, Item).
+parse_item(push(Char), _, Ch, Ch, Stack, [Char|Stack]).
 
 
 
@@ -333,6 +360,9 @@ pop_args(N, Stack0, Stack, Item) :-
 	).
 
 
+call_result(0, Id, Stack, Stack, Item) :-
+	!,
+	call(Id, Item).
 call_result(1, Id, [A|Stack], Stack, Item) :-
 	!,
 	call(Id, A, Item).
@@ -348,9 +378,17 @@ call_result(4, Id, [A,B,C,D|Stack], Stack, Item) :-
 call_result(5, Id, [A,B,C,D,E|Stack], Stack, Item) :-
 	!,
 	call(Id, E, D, C, B, A, Item).
-call_result(_, _, _, _, _) :-
-	throw('call of constructor with too many args!').
-
+call_result(N, Id, Stack0, Stack, Item) :-
+	length(Args, N),
+	(   append(Revargs, Stack, Stack0)
+	->  reverse([Item|Revargs], Args),
+	    Goal =.. [Id | Args],
+	    (	call(Goal)
+	    ->	true
+	    ;	throw(constructor_failed(Goal))
+	    )
+	;   throw(internal_error(shallow_stack, N, Stack0))
+	).
 
 
 match_chars([], _, Ch, Ch).
@@ -439,7 +477,8 @@ show_parser :-
 			    The Parser Generator
 ****************************************************************/
 
-%  add_production(Nonterm, Body)
+%  add_syn(Nonterm, Body)
+%  add_lex(Nonterm, Body)
 %  add_production(Nonterm, Body, Kind)
 %  Add new grammar rule Nonterm ::= Body to grammar.  This produces a
 %  deterministic LL(n) parser.  The code automatically incrementally performs
@@ -449,25 +488,27 @@ show_parser :-
 %  discovered during parsing.  Kind is either 'syn', in which case each
 %  terminal is taken to be a discrete token (so any following whitespace is
 %  skipped), or 'lex', in which case each terminal is just taken to be
-%  characters.  The default is 'syn'.
+%  characters.
 
 
-add_production(Head, Body) :-
+add_syn(Head, Body) :-
 	add_production(Head, Body, syn).
 
+add_lex(Head, Body) :-
+	add_production(Head, Body, lex).
 
 add_production(Head, Body, Kind) :-
 	(   compound(Head)
 	->  assert(meta_grammar_rule(Head, Body))
 	;   Body = Constructor:Body1
-	->  add_production1(Head, call(Constructor,Args), Args, Body1, Kind)
+	->  add_production1(Head, [call(Constructor,Args)], Args, Body1, Kind)
 	;   atom_concat(Head, ' ', Prefix),
 	    gensym(Prefix, Id),
-	    add_production1(Head, build(Id,Args), Args, Body, Kind)
+	    add_production1(Head, [build(Id,Args)], Args, Body, Kind)
 	).
 
-add_production1(Head, Build, Args, Body, Kind) :-
-	(   compile_body(Body, Comp, [Build], 0, Args, Kind),
+add_production1(Head, Tail, Args, Body, Kind) :-
+	(   compile_body(Body, Comp, Tail, 0, Args, Kind),
 	    record_production(Head, Comp, Head, Body),
 	    fail
 	;   true
@@ -482,9 +523,9 @@ compile_body((B1,B2), Comp, Comp0, Args, Args0, Kind) :-
 	!,
 	compile_body(B1, Comp, Comp1, Args, Args1, Kind),
 	compile_body(B2, Comp1, Comp0, Args1, Args0, Kind).
-compile_body([Ch|Chs], Comp, Comp0, Args, Args, Kind) :-
+compile_body([Ch|Chs], Comp, Comp0, Args0, Args, Kind) :-
 	!,
-	terminal_goal([Ch|Chs], Comp, Comp0, Kind).
+	terminal_goal([Ch|Chs], Comp, Comp0, Args0, Args, Kind).
 compile_body("", Comp, Comp, Args, Args, _).
 compile_body([Ch1]-[Ch2], [range(Ch1,Ch2)|Comp0], Comp0,
 	     Args0, Args, Kind) :-
@@ -495,33 +536,44 @@ compile_body([Ch1]-[Ch2], [range(Ch1,Ch2)|Comp0], Comp0,
 	).
 compile_body(Nonterminal, Comp, Comp0, Args0, Args, Kind) :-
 	(   compound(Nonterminal)
-	->  meta_grammar_rule(Nonterminal, Metabody),
-	    compile_body(Metabody, Comp, Comp0, Args0, Args, Kind)
+	->  ( \+ meta_grammar_rule(Nonterminal, Metabody)
+	    ->	throw(undefined_grammar_construct(Nonterminal))
+	    ;	meta_grammar_rule(Nonterminal, Metabody),
+		compile_body(Metabody, Comp, Comp0, Args0, Args, Kind)
+	    )
 	;   Comp = [nonterminal(Nonterminal)|Comp0],
 	    Args is Args0 + 1
 	).
 
 
-terminal_goal(Chars, [chars(Chars)|Comp1], Comp0, Kind) :-
+terminal_goal(Chars, Comp1, Comp0, Args0, Args, Kind) :-
 	(   uniform_token(Chars, Class)
-	->  token_end_goal(Kind, Class, Comp1, Comp0)
+	->  token_goal(Kind, Chars, Class, Comp1, Comp0, Args0, Args)
 	;   throw(invalid_token(Chars))
 	).
+	
 
 
-uniform_token([_], _).
-uniform_token([Ch], special) :-
-	special_char(Ch).
-uniform_token([Ch|Chs], symbol) :-
+uniform_token([], _).
+uniform_token([Ch|Chs], Kind) :-
+	char_kind(Kind, Ch),
+	uniform_token(Chs, Kind).
+
+char_kind(special, Ch) :-
+	special_char(Ch),
+	!.
+char_kind(symbol, Ch) :-
 	symbol_char(Ch),
-	uniform_token(Chs, symbol).
-uniform_token([Ch|Chs], punctuation) :-
-	punctuation_char(Ch),
-	uniform_token(Chs, punctuation).
+	!.
+char_kind(punctuation, Ch) :-
+	punctuation_char(Ch).
 
 
-token_end_goal(lex, _, Comp, Comp).
-token_end_goal(syn, Class, [token_end(Class)|Comp0], Comp0).
+token_goal(lex, Chars, _, [pushchars(Chars)|Comp], Comp, Args0, Args) :-
+	length(Chars, Count),
+	Args is Args0 + Count.
+token_goal(syn, Chars, Class, [chars(Chars),token_end(Class)|Comp0],
+	       Comp0, Args, Args).
 
 
 %  record_production(Nonterm, Comp, Orig_nonterm, Orig_body)
@@ -579,8 +631,16 @@ initial_body_char([Instr|Rest], Char, Body) :-
 	initial_instr_char(Instr, Char, Rest, Body).
 
 
-initial_instr_char(chars([Char|Chars]), Char, Rest,
-		   [chars(Chars)|Rest]).
+initial_instr_char(chars([Char|Chars]), Char, Rest, Body) :-
+	(   Chars == []
+	->  Body = Rest
+	;   Body = [chars(Chars)|Rest]
+	).
+initial_instr_char(pushchars([Char|Chars]), Char, Rest, [push(Char)|Body]) :-
+	(   Chars == []
+	->  Body = Rest
+	;   Body = [chars(Chars)|Rest]
+	).
 initial_instr_char(range(Low,High), Low-High, Rest, Rest).
 initial_instr_char(build(X,Y), '', Rest, [build(X,Y)|Rest]).
 initial_instr_char(call(X,Y), '', Rest, [call(X,Y)|Rest]).
@@ -643,6 +703,7 @@ split_common_token(Olds0, Olds, News0, News, chars(Commonchs)) :-
 	common_initial_sublist(Oldchs0, Newchs0, Commonchs, Oldchs, Newchs).
 	
 token_chars(chars(Chs1), Chs1, chars(Chs2), Chs2).
+token_chars(pushchars(Chs1), Chs1, pushchars(Chs2), Chs2).
 
 common_initial_sublist(Xs0, Ys0, Common, Xs, Ys) :-
 	(   Xs0 = [X|Xs1],
