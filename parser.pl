@@ -1,16 +1,16 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.28 2008/06/04 08:06:33 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.29 2008/06/09 13:21:36 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
 %  Copyright: © 2008 Peter Schachte.  All rights reserved.
 
 %% TODO:
-%%   o	Handle mixing character and range rules
 %%   o	Incremental parser generation:  handle new productions that old ones
 %%	depend on (left unfolding problem) 
 %%   o	Handle associativity for multi-recursive rules
 %%   o	Handle precedence
+%%   o	Better default construction for lex rules (build list)?
 %%   o	Handle recursive meta-grammar rules
 %%   o	Handle layout-sensitive grammar
 %%   o	After invoking lex rules from syn rules: insert token_end
@@ -37,18 +37,20 @@
 % Thinking about left recursion, associativity, and precedence:
 %
 % e ::=
-%     e + e
-%     e * e
-%     ( e )
+%     e '+' e
+%     e '*' e
+%     '(' e ')'
 %     int
-
-% e(E) ->
-%     int(X) etail(X, E)
-%     ( e(X) ) etail(X, E)
-
-% etail(X, E) ->
-%     + e(Y) etail(+(X,Y), E)		% left assoc
-%     * e(Y) etail(Y, Z) [E = *(X,Z)]	% right assoc
+%
+% transforms to:
+%
+% e ->
+%     int etail
+%     '(' e ')' etail
+%
+% etail ->
+%     '+' e build(plus) etail 	% left assoc
+%     '*' e etail build(times)	% right assoc
 
 
 
@@ -590,60 +592,94 @@ record_production(Nonterm, Comp, Orig_nonterm, Orig_body) :-
 	;   Body = Comp1,
 	    Rulenonterm = Nonterm
 	),
-	(   initial_body_char(Body, Char, Rest)
-	->  add_grammar_clause(Char, Rulenonterm, Rest, Orig_nonterm, Orig_body)
+	(   initial_body_range(Body, Low, High, Rest)
+	->  add_grammar_clause(Low, High, Rulenonterm, Rest,
+			       Orig_nonterm, Orig_body)
 	;   throw(left_unfolding_failed(Nonterm, Comp, Orig_nonterm, Orig_body))
 	).
 
 
-add_grammar_clause(Char, Nonterm, Body, Orig_nonterm, Orig_body) :-
+add_grammar_clause(Low, High, Nonterm, Body, Orig_nonterm, Orig_body) :-
 	(   left_recursive(Nonterm, Tailnonterm)
 	->  make_lrec_production(Body, Tailnonterm, Body1)
 	;   Body1 = Body
 	),
-	add_grammar_clause1(Char, Nonterm, Body1, Orig_nonterm, Orig_body).
+	add_grammar_clause1(Low, High, Nonterm, Body1, Orig_nonterm, Orig_body).
 
 
 
-add_grammar_clause1('', Nonterm, Body, Orig_nonterm, Orig_body) :-
-	!,
+add_grammar_clause1(Low, High, Nonterm, Body, Orig_nonterm, Orig_body) :-
+	(   High < 0
+	->  % First instruction doesn't consume a character:  catchall
+	    add_catchall(Nonterm, Body, Orig_nonterm, Orig_body)
+	;   Low > High
+	->  % Empty range:  nothing to do
+	    true
+	;   Low == High
+	->  % Single-character range
+	    add_individual(Low, Nonterm, Body, Orig_nonterm, Orig_body)
+	;   add_range(Low, High, Nonterm, Body, Orig_nonterm, Orig_body)
+	).
+
+
+add_catchall(Nonterm, Body, Orig_nonterm, Orig_body) :-
 	(   clause(catchall_rule(Nonterm, _), true)
 	->  throw(multiple_catcall_rules(Orig_nonterm, Orig_body))
 	;   assert(catchall_rule(Nonterm, Body))
 	).
-add_grammar_clause1(Low-High, Nonterm, Body, Orig_nonterm, Orig_body) :-
-	!,
-	(   clause(range_rule(Nonterm, Low, High, Oldbody), true, Ref)
-	->  left_factor(Nonterm, Low-High, Oldbody, Ref, Body,
-			Orig_nonterm, Orig_body)
-	;   assert(range_rule(Nonterm, Low, High, Body))
-	).
-add_grammar_clause1(Char, Nonterm, Body, Orig_nonterm, Orig_body) :-
+
+add_individual(Char, Nonterm, Body, Orig_nonterm, Orig_body) :-
 	(   clause(nonterm_rule(Char, Nonterm, Oldbody), true, Ref)
-	->  left_factor(Nonterm, Char, Oldbody, Ref, Body,
+	->  left_factor(Nonterm, Char, Char, Oldbody, Ref, Body,
 			Orig_nonterm, Orig_body)
 	;   assert(nonterm_rule(Char, Nonterm, Body))
 	).
 
+add_range(Low, High, Nonterm, Body, Orig_nonterm, Orig_body):-
+	(   clause(range_rule(Nonterm, Low0, High0, Oldbody), true, Ref),
+	    Low0 =< High, Low =< High0
+	->  % New range overlaps old one: split into consistent ranges
+	    CommonLo is max(Low0, Low),
+	    Below_common is CommonLo - 1,
+	    CommonHi is min(High0, High),
+	    Above_common is CommonHi + 1,
+	    left_factor(Nonterm, CommonLo, CommonHi, Oldbody, Ref, Body,
+			Orig_nonterm, Orig_body),
+	    % At most one of these two will do anything
+	    add_grammar_clause1(Low0, Below_common, Nonterm, Oldbody,
+				Orig_nonterm, Orig_body),
+	    add_grammar_clause1(Low, Below_common, Nonterm, Body,
+				Orig_nonterm, Orig_body),
+	    % At most one of these two will do anything
+	    add_grammar_clause1(Above_common, High0, Nonterm, Oldbody,
+				Orig_nonterm, Orig_body),
+	    add_grammar_clause1(Above_common, High, Nonterm, Body,
+				Orig_nonterm, Orig_body)
+	;   % No overlap:  just record it
+	    assert(range_rule(Nonterm, Low, High, Body))
+	).
 
 
-initial_body_char([Instr|Rest], Char, Body) :-
-	initial_instr_char(Instr, Char, Rest, Body).
 
 
-initial_instr_char(chars([Char|Chars]), Char, Rest, Body) :-
+initial_body_range([Instr|Rest], Low, High, Body) :-
+	initial_instr_range(Instr, Low, High, Rest, Body).
+
+
+initial_instr_range(chars([Char|Chars]), Char, Char, Rest, Body) :-
 	(   Chars == []
 	->  Body = Rest
 	;   Body = [chars(Chars)|Rest]
 	).
-initial_instr_char(pushchars([Char|Chars]), Char, Rest, [push(Char)|Body]) :-
+initial_instr_range(pushchars([Char|Chars]), Char, Char, Rest,
+		    [push(Char)|Body]) :-
 	(   Chars == []
 	->  Body = Rest
 	;   Body = [chars(Chars)|Rest]
 	).
-initial_instr_char(range(Low,High), Low-High, Rest, Rest).
-initial_instr_char(build(X,Y), '', Rest, [build(X,Y)|Rest]).
-initial_instr_char(call(X,Y), '', Rest, [call(X,Y)|Rest]).
+initial_instr_range(range(Low,High), Low, High, Rest, Rest).
+initial_instr_range(build(X,Y), 0, -1, Rest, [build(X,Y)|Rest]).
+initial_instr_range(call(X,Y), 0, -1, Rest, [call(X,Y)|Rest]).
 
 
 
@@ -662,7 +698,7 @@ left_unfold(Body, _, Body).
 
 
 
-left_factor(Nonterm, Char, Oldbody, Ref, Body, Orig_nonterm, Orig_body) :-
+left_factor(Nonterm, Low, High, Oldbody, Ref, Body, Orig_nonterm, Orig_body) :-
 	(   split_common_start(Oldbody, Newold, Body, Newbody,
 			       Commonbody, Commontail),
 	    (	( Newold = [build(_,_)] ; Newold = [call(_,_)] ),
@@ -675,7 +711,7 @@ left_factor(Nonterm, Char, Oldbody, Ref, Body, Orig_nonterm, Orig_body) :-
 		gensym('GEN', Gennonterm),
 		assert(generated_nonterminal(Gennonterm)),
 		Commontail = [nonterminal(Gennonterm)],
-		add_grammar_clause1(Char, Nonterm, Commonbody,
+		add_grammar_clause1(Low, High, Nonterm, Commonbody,
 				   Orig_nonterm, Orig_body),
 		record_production(Gennonterm, Newold, Orig_nonterm, Orig_body)
 	    ),
