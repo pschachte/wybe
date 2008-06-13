@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.29 2008/06/09 13:21:36 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.30 2008/06/13 14:44:53 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -33,24 +33,30 @@
 		  ]).
 
 
+% Recursive meta-grammar rules can be handled by generating a new nonterminal
+% for each use of a recursive meta-grammar rule, and memoizing it, so that
+% the recursive use is replaced by a reference to the same new nonterminal.
+% Eg, with definition X* ::= "" | X X* , a production foo ::= a b* is
+% translated to foo ::= a new, plus new ::= "" | b new.
+
 
 % Thinking about left recursion, associativity, and precedence:
 %
-% e ::=
-%     e '+' e
-%     e '*' e
-%     '(' e ')'
-%     int
+% pub syn expr ::= add_expr | mul_expr | exp_expr | '(' expr ')' | num | fncall
 %
-% transforms to:
+% Put parens around associative recursive nonterminal; no parens means
+% non-associative.
 %
-% e ->
-%     int etail
-%     '(' e ')' etail
+% pub syn add_expr ::= (expr) '+' expr | (expr) '-' expr | '-' expr
 %
-% etail ->
-%     '+' e build(plus) etail 	% left assoc
-%     '*' e etail build(times)	% right assoc
+% Relative precedence is specified by 'prec' rules, which must come before
+% definition of the nonterminal (good enough?).
+%
+% prec add_expr < mul_expr
+% pub syn mul_expr ::= (expr) '*' expr | (expr) '/' expr
+%
+% prec mul_expr < exp_expr
+% pub syn exp_expr ::= expr '^' expr
 
 
 
