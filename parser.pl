@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.30 2008/06/13 14:44:53 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.31 2008/06/14 15:10:22 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -8,18 +8,26 @@
 %% TODO:
 %%   o	Incremental parser generation:  handle new productions that old ones
 %%	depend on (left unfolding problem) 
+%%   o	Handle offside rule
 %%   o	Handle associativity for multi-recursive rules
 %%   o	Handle precedence
 %%   o	Better default construction for lex rules (build list)?
 %%   o	Handle recursive meta-grammar rules
 %%   o	Handle layout-sensitive grammar
-%%   o	After invoking lex rules from syn rules: insert token_end
+%%   o	Think through interface betweeen syn rules and lex rules.  Insert
+%%	token_end after each terminal in a syn rule, but not in a lex rule;
+%%	forbid calling syn rule from lex rule?
 %%   o	More efficient handling of tail-recursive construction for
 %%	right-recursive rules?
 %%   o	Handle separate compilation of multiple files, where each file *starts*
 %%	being parsed with the standard syntax, with additions made as
 %%	dependencies are loaded.
 %%   o	Decide if we really want to apply left unfolding
+%%
+%% New Ideas:
+%%   o	"Empty" programming language:  language has only meta-syntax and
+%%	parser generator.  All code generation is handled by code written in
+%%	the language itself, built on an output language (eg, C or assembler).
 
 :- module(parser, [ process_file/2,
 		    process_file/3,
@@ -33,6 +41,56 @@
 		  ]).
 
 
+% Meta-circular parser grammar:
+%
+% syn file ::= eof
+% syn file ::= processitem: file <pushindent> item <matchindent>
+%
+% syn item ::= visibility grammar_kind nonterminal '::=' grammar_body
+% syn item ::= visibility 'grammar' syn_items '::=' syn_items
+%
+% syn visibility ::=
+% syn visibility ::= 'pub'
+%
+% syn grammar_kind ::= 'syn'
+% syn grammar_kind ::= 'lex'
+%
+% syn grammar_body ::= syn_items
+% syn grammar_body ::= constructor_fn ':' syn_items
+%
+% syn syn_items ::= syn_item syn_items
+% syn syn_items ::=
+%
+% syn syn_item ::= nonterminal
+% syn syn_item ::= terminal
+% syn syn_item ::= charrange
+% syn syn_item ::= empty
+% syn syn_item ::= '(' grammar_body ')'
+%
+% syn nonterminal ::= identifier
+%
+% syn empty ::= '\'\''
+%
+% syn charrange ::= singlechar '-' singlechar
+%
+% syn singlechar ::= minchar: 'minchar'
+% syn singlechar ::= maxchar: 'maxchar'
+% syn singlechar ::= eof    : 'eof'
+% lex singlechar ::= id     : '\'' quotedchar '\'' 
+%
+% lex terminal ::= '\'' quotedchars '\''
+%
+% lex quotedchars ::= quotedchars quotedchar
+% lex quotedchars ::=
+%
+% lex quotedchar ::= '\n': '\\n'
+% lex quotedchar ::= '\r': '\\r'
+% lex quotedchar ::= '\t': '\\t'
+% lex quotedchar ::= '\a': '\\a'   # and so on....
+% lex quotedchar ::= minchar - maxchar
+
+
+
 % Recursive meta-grammar rules can be handled by generating a new nonterminal
 % for each use of a recursive meta-grammar rule, and memoizing it, so that
 % the recursive use is replaced by a reference to the same new nonterminal.
@@ -42,7 +100,7 @@
 
 % Thinking about left recursion, associativity, and precedence:
 %
-% pub syn expr ::= add_expr | mul_expr | exp_expr | '(' expr ')' | num | fncall
+% pub syn expr ::= '(' expr ')' | num | fncall | exp_expr | mul_expr | add_expr
 %
 % Put parens around associative recursive nonterminal; no parens means
 % non-associative.
