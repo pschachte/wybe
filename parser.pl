@@ -1,10 +1,17 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.31 2008/06/14 15:10:22 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.32 2008/06/21 23:48:22 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
 %  Copyright: © 2008 Peter Schachte.  All rights reserved.
 
+%% PROBLEMS:
+%%   o	Need a way to support shortest match, so you can do something like:
+%%		ident* 'foo' ...
+%%	where 'foo' matches ident.  We really want (any ident by 'foo')* 'foo'.
+%%	We always want that in such situations, since otherwise it's
+%%	difficult to parse such constructs without backtracking.
+%%
 %% TODO:
 %%   o	Incremental parser generation:  handle new productions that old ones
 %%	depend on (left unfolding problem) 
@@ -28,6 +35,8 @@
 %%   o	"Empty" programming language:  language has only meta-syntax and
 %%	parser generator.  All code generation is handled by code written in
 %%	the language itself, built on an output language (eg, C or assembler).
+%%	This is like IMP3, except it must have provisions for analysis and
+%%	optimisation.
 
 :- module(parser, [ process_file/2,
 		    process_file/3,
@@ -47,7 +56,7 @@
 % syn file ::= processitem: file <pushindent> item <matchindent>
 %
 % syn item ::= visibility grammar_kind nonterminal '::=' grammar_body
-% syn item ::= visibility 'grammar' syn_items '::=' syn_items
+% syn item ::= visibility 'metagrammar' meta '::=' syn_items
 %
 % syn visibility ::=
 % syn visibility ::= 'pub'
@@ -57,6 +66,13 @@
 %
 % syn grammar_body ::= syn_items
 % syn grammar_body ::= constructor_fn ':' syn_items
+%
+% syn meta ::= metaop metapattern
+% syn meta ::= metapattern nonterminal
+% syn meta ::= metapattern
+%
+% syn metapattern ::= metapattern nonterminal metaop
+% syn metapattern ::= nonterminal metaop
 %
 % syn syn_items ::= syn_item syn_items
 % syn syn_items ::=
@@ -69,7 +85,7 @@
 %
 % syn nonterminal ::= identifier
 %
-% syn empty ::= '\'\''
+% syn empty ::=
 %
 % syn charrange ::= singlechar '-' singlechar
 %
