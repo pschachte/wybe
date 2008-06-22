@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.32 2008/06/21 23:48:22 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.33 2008/06/23 08:37:37 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -8,7 +8,8 @@
 %% PROBLEMS:
 %%   o	Need a way to support shortest match, so you can do something like:
 %%		ident* 'foo' ...
-%%	where 'foo' matches ident.  We really want (any ident by 'foo')* 'foo'.
+%%	where 'foo' matches ident.  What we really want is
+%%	(any ident but 'foo')* 'foo'.
 %%	We always want that in such situations, since otherwise it's
 %%	difficult to parse such constructs without backtracking.
 %%
@@ -65,11 +66,14 @@
 % syn grammar_kind ::= 'lex'
 %
 % syn grammar_body ::= syn_items
-% syn grammar_body ::= constructor_fn ':' syn_items
+% syn grammar_body ::= identifier ':' syn_items
 %
 % syn meta ::= metaop metapattern
 % syn meta ::= metapattern nonterminal
 % syn meta ::= metapattern
+%
+% syn metaop ::= punctop
+% syn metaop ::= textop
 %
 % syn metapattern ::= metapattern nonterminal metaop
 % syn metapattern ::= nonterminal metaop
@@ -96,7 +100,7 @@
 %
 % lex terminal ::= '\'' quotedchars '\''
 %
-% lex quotedchars ::= quotedchars quotedchar
+% lex quotedchars ::= quotedchar quotedchars
 % lex quotedchars ::=
 %
 % lex quotedchar ::= '\n': '\\n'
@@ -104,7 +108,18 @@
 % lex quotedchar ::= '\t': '\\t'
 % lex quotedchar ::= '\a': '\\a'   # and so on....
 % lex quotedchar ::= minchar - maxchar
-
+%
+% lex specialchar ::= '('
+% lex specialchar ::= ')'
+% lex specialchar ::= '['
+% lex specialchar ::= ']'
+% lex specialchar ::= '{'
+% lex specialchar ::= '}'
+% lex specialchar ::= ','
+% lex specialchar ::= '\''
+% lex specialchar ::= '"'
+%
+% lex punctchar ::= 
 
 
 % Recursive meta-grammar rules can be handled by generating a new nonterminal
