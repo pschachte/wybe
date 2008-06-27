@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.33 2008/06/23 08:37:37 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.34 2008/06/27 13:19:52 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -12,6 +12,8 @@
 %%	(any ident but 'foo')* 'foo'.
 %%	We always want that in such situations, since otherwise it's
 %%	difficult to parse such constructs without backtracking.
+%%      Possible solution:  fuse nullable nonterminals with following grammar
+%%      bodies.
 %%
 %% TODO:
 %%   o	Incremental parser generation:  handle new productions that old ones
