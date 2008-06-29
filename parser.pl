@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.35 2008/06/29 12:30:26 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.36 2008/06/29 14:39:17 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -589,6 +589,7 @@ skip_line(_, Stream, Ch) :-
 :- dynamic meta_grammar_rule/2.
 :- dynamic left_recursive/2.
 :- dynamic generated_nonterminal/1.
+:- dynamic meta_rule_instance/3.
 
 init_parser :-
 	retractall(nonterm_rule(_,_,_)),
@@ -596,7 +597,8 @@ init_parser :-
 	retractall(catchall_rule(_,_)),
 	retractall(meta_grammar_rule(_,_)),
 	retractall(left_recursive(_,_)),
-	retractall(generated_nonterminal(_)).
+	retractall(generated_nonterminal(_)),
+	retractall(meta_rule_instance(_,_,_)).
 
 
 
@@ -671,10 +673,9 @@ compile_body([Ch1]-[Ch2], [range(Ch1,Ch2)|Comp0], Comp0,
 	).
 compile_body(Nonterminal, Comp, Comp0, Args0, Args, Kind) :-
 	(   compound(Nonterminal)
-	->  ( \+ meta_grammar_rule(Nonterminal, Metabody)
+	->  ( \+ meta_grammar_rule(Nonterminal, _)
 	    ->	throw(undefined_grammar_construct(Nonterminal))
-	    ;	meta_grammar_rule(Nonterminal, Metabody),
-		compile_body(Metabody, Comp, Comp0, Args0, Args, Kind)
+	    ;	compile_meta(Nonterminal, Comp, Comp0, Args0, Args, Kind)
 	    )
 	;   Comp = [nonterminal(Nonterminal)|Comp0],
 	    Args is Args0 + 1
@@ -687,6 +688,26 @@ terminal_goal(Chars, Comp1, Comp0, Args0, Args, Kind) :-
 	;   throw(invalid_token(Chars))
 	).
 	
+
+compile_meta(Metanonterm, Comp, Comp0, Args0, Args, Kind) :-
+	make_meta_instance(Metanonterm, Newnonterm, Kind),
+	compile_body(Newnonterm, Comp, Comp0, Args0, Args, Kind).
+
+
+make_meta_instance(Metanonterm, Head, Kind) :-
+	(   meta_rule_instance(Metanonterm, Kind, Head)
+	->  true
+	;   gensym('META', Head),
+	    assert(meta_rule_instance(Metanonterm, Kind, Head)),
+	    % generate a new concrete rule for every meta rule for this
+	    % meta nonterminal (failure driven loop)
+	    (	meta_grammar_rule(Metanonterm, Metabody),
+		add_production(Head, Metabody, Kind),
+		fail
+	    ;	true
+	    )
+	).
+
 
 
 uniform_token([], _).
