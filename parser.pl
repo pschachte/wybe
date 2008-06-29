@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.34 2008/06/27 13:19:52 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.35 2008/06/29 12:30:26 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -40,6 +40,15 @@
 %%	the language itself, built on an output language (eg, C or assembler).
 %%	This is like IMP3, except it must have provisions for analysis and
 %%	optimisation.
+%%
+%%   o	If each source file begins by listing all file dependencies, then all
+%%	grammar rules, and finally the code, then grammar rules could be
+%%	compiled to code.  Once the end of the grammar rules is found, the
+%%	parser can be generated, dynamically linked in, and used to read the
+%%	rest of the file.  This turns on the ability to merge two separately
+%%	compiled grammars, which comes down to the ability to merge two sets
+%%	of compiled grammar rules for the same nonterminal.
+
 
 :- module(parser, [ process_file/2,
 		    process_file/3,
@@ -299,14 +308,41 @@ mkident(Char, Chars, Ident) :- atom_codes(Ident, [Char|Chars]).
 %  Final Nullable Nonterminals
 %
 %  Nullable nonterminals (those that can generate the empty string) must be
-%  handled specially, since parsing a nullable nonterminal may not consume
-%  any tokens.  So they must return the next terminal following the parsed
-%  nonterminal.  If a nullable nonterminal is last in a production, then
-%  parsing the nonterminal of that production must also return the following
-%  nonterminal.  Thus we call any nonterminal "final nullable" if it has any
-%  production ending in a nullable or final nullable nonterminal.  We must
-%  generate slightly different code to handle final nullable nonterminals to
-%  take account of the returned terminal.
+%  handled specially, since it may not be possible to decide how to parse a
+%  nullable nonterminal without knowing what the following grammar rules
+%  are.  A final nullable nonterminal is either a nullable nonterminal or has
+%  an alternative that ends with a final nullable nonterminal.  We solve this
+%  problem by fusing each occurance of a final nullable nonterminal with the
+%  following part of the grammar rule it appears in.  For example, a grammar:
+%
+%    a ::=
+%    a ::= b
+%    c ::= b a d
+%
+%  is automatically transformed into:
+%
+%    a ::=
+%    a ::= b
+%    c ::= b x
+%    x ::= d
+%    x ::= b d
+%
+%  Note that after the transformation, the newly generated nonterminal may
+%  itself be final nullable.
+%
+%
+%  Meta Grammar Rules
+%
+%  In keeping with the theme of extensible programming languages, the grammar
+%  formalism itself may be extended with meta grammar rules.  These rules
+%  take the form of a grammar rule with alternating nonterminals and
+%  operators, starting with either kind and ending with either, and having at
+%  least one of each, on the left side of the ::=, and a normal body on the
+%  right.  The nonterminals on the left act as variables, and the operators
+%  serve as the form of the meta grammar construct.  Each operator either
+%  comprises only punctuation characters, or a single special character other
+%  than a parenthesis, or a sequence of alphanumerics beginning and ending
+%  with an underscore.
 %
 %
 %  Incremental generation
