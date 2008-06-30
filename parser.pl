@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.36 2008/06/29 14:39:17 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.37 2008/06/30 23:57:55 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -164,9 +164,12 @@ test(cond) :-
 	add_syn(cond, ("if",expr,"then",stmts,"endif")),
 	add_syn(cond, ("if",expr,"then",stmts,"else",stmts,"endif")).
 
-test(alt) :-
+test(meta) :-
 	add_syn((A|B), A),
-	add_syn((A|B), B).
+	add_syn((A|B), B),
+	add_syn(*(A), (""|*(A),A)),
+	add_syn(+(A), A),
+	add_syn(+(A), (+(A),A)).
 
 test(int) :-
 	add_lex(int, mkint1:("0"-"9")),
