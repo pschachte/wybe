@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.39 2008/07/01 07:27:09 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.40 2008/07/01 08:53:57 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -13,11 +13,13 @@
 %%	We always want that in such situations, since otherwise it's
 %%	difficult to parse such constructs without backtracking.
 %%      Possible solution:  fuse nullable nonterminals with following grammar
-%%      bodies.
+%%      bodies.  Careful:  for recursive nullable other than tail
+%%      recursive, will need multiple (two?) separate fusions.  Also will
+%%      need to iterate when the following is also nullable.
 %%
 %% TODO:
 %%   o	Incremental parser generation:  handle new productions that old ones
-%%	depend on (left unfolding problem) 
+%%	depend on (unfolding problem) 
 %%   o	Handle offside rule
 %%   o	Handle associativity for multi-recursive rules
 %%   o	Handle precedence
