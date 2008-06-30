@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.38 2008/07/01 03:14:25 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.39 2008/07/01 07:27:09 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -369,6 +369,19 @@ mkident(Char, Chars, Ident) :- atom_codes(Ident, [Char|Chars]).
 
 /****************************************************************
 			    Parser Infrastructure
+
+The parser is based on a stack-based abstract parsing machine with these
+instructions:
+
+	chars(Expected)		Match list of chars Expected
+	pushchars(Expected)	Match list of chars Expected and push on stack
+	token_end(Class)	Skip over separator chars following Class token
+	range(Low,High)		Match any char between Low and High, and push
+	nonterminal(Nonterm)	Match nonterminal Nonterm
+	build(Id,Count)		Pop Count items, and push term with functor ID
+	call(Pred,Count)	Pop Count items, and call constructor Pred
+	push(Char)		Push single character Char on stack
+
 ****************************************************************/
 
 %  process_file(+File, +Handler)
