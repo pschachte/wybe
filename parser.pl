@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.37 2008/06/30 23:57:55 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.38 2008/07/01 03:14:25 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -446,6 +446,9 @@ parse_body([X|Xs], Stream, Ch0, Ch, Stack0, Stack) :-
 	).
 
 
+%  NB:	IF any new abstract machine instructions are added, the code for
+%	left_unfold must also be updated.
+
 parse_item(chars(Expected), Stream, Ch0, Ch, Stack, Stack) :-
 	(   match_chars(Expected, Stream, Ch0, Ch)
 	->  true
@@ -666,7 +669,8 @@ compile_body((B1,B2), Comp, Comp0, Args, Args0, Kind) :-
 compile_body([Ch|Chs], Comp, Comp0, Args0, Args, Kind) :-
 	!,
 	terminal_goal([Ch|Chs], Comp, Comp0, Args0, Args, Kind).
-compile_body("", Comp, Comp, Args, Args, _).
+compile_body("", Comp, Comp, Args, Args, _) :-
+	!.
 compile_body([Ch1]-[Ch2], [range(Ch1,Ch2)|Comp0], Comp0,
 	     Args0, Args, Kind) :-
 	!,
@@ -840,18 +844,38 @@ initial_instr_range(call(X,Y), 0, -1, Rest, [call(X,Y)|Rest]).
 
 
 
-left_unfold([nonterminal(Nonterm)|Rest], Parent, Body) :-
+left_unfold(Body0, Parent, Body) :-
+	left_unfold1(Body0, Body0, Parent, Body).
+
+left_unfold1([First|Rest], Body0, Parent, Body) :-
+	left_unfold2(First, Rest, Body0, Parent, Body).
+left_unfold1([], _, _, []).
+
+left_unfold2(chars(_), _, Body0, _, Body0).
+left_unfold2(pushchars(Expected), Rest, _, Parent,
+	     [pushchars(Expected)|Body]) :-
+	left_unfold1(Rest, Rest, Parent, Body).
+left_unfold2(token_end(_), _, Body0, _, _) :-
+	throw(token_end_first(Body0)).
+left_unfold2(range(_,_), _, Body0, _, Body0).
+left_unfold2(nonterminal(Nonterm), Rest, Body0, Parent, Body) :-
 	!,
 	(   Nonterm == Parent		% left recursive!
-	->  Body = [nonterminal(Nonterm)|Rest]
+	->  Body = Body0
 	;   nonterm_rule(Ch, Nonterm, Body1),
 	    append([chars([Ch])|Body1], Rest, Body)
 	;   range_rule(Nonterm, Low, High, Body1),
 	    append([range(Low,High)|Body1], Rest, Body)
 	;   catchall_rule(Nonterm, Body1),
 	    append(Body1, Rest, Body)
+	;   Body = Body0		% undefined!
 	).
-left_unfold(Body, _, Body).
+left_unfold2(build(Id,Count), Rest, _, Parent, [build(Id,Count)|Body]) :-
+	left_unfold1(Rest, Rest, Parent, Body).
+left_unfold2(call(Pred,Count), Rest, _, Parent, [call(Pred,Count)|Body]) :-
+	left_unfold1(Rest, Rest, Parent, Body).
+left_unfold2(push(Char), Rest, _, Parent, [push(Char)|Body]) :-
+	left_unfold1(Rest, Rest, Parent, Body).
 
 
 
