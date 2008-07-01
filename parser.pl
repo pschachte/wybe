@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.40 2008/07/01 08:53:57 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.41 2008/07/01 23:20:06 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -310,7 +310,7 @@ mkident(Char, Chars, Ident) :- atom_codes(Ident, [Char|Chars]).
 %  (and then left unfolding is applied to a_tail).
 %
 %
-%  Final Nullable Nonterminals
+%  Final Nullable Fusion
 %
 %  Nullable nonterminals (those that can generate the empty string) must be
 %  handled specially, since it may not be possible to decide how to parse a
@@ -318,22 +318,24 @@ mkident(Char, Chars, Ident) :- atom_codes(Ident, [Char|Chars]).
 %  are.  A final nullable nonterminal is either a nullable nonterminal or has
 %  an alternative that ends with a final nullable nonterminal.  We solve this
 %  problem by fusing each occurance of a final nullable nonterminal with the
-%  following part of the grammar rule it appears in.  For example, a grammar:
+%  following terminal or nonterminal in each grammar rule it appears in.  For
+%  example, a grammar:
 %
 %    a ::=
-%    a ::= b
+%    a ::= b a
 %    c ::= b a d
 %
 %  is automatically transformed into:
 %
 %    a ::=
-%    a ::= b
-%    c ::= b x
+%    a ::= b a
+%    c ::= b x	(fusing (a d) into new nonterminal x)
 %    x ::= d
-%    x ::= b d
+%    x ::= b x	(originally (b a d), but (a d) is fused to form x again)
 %
 %  Note that after the transformation, the newly generated nonterminal may
-%  itself be final nullable.
+%  itself be final nullable.  Also note that left recursion elimination must
+%  have been previously applied.
 %
 %
 %  Meta Grammar Rules
@@ -383,6 +385,11 @@ instructions:
 	build(Id,Count)		Pop Count items, and push term with functor ID
 	call(Pred,Count)	Pop Count items, and call constructor Pred
 	push(Char)		Push single character Char on stack
+
+The abstract machine also begins each nonterminal application with a dispatch
+on the next input character, leading to the single (as it's a deterministic
+parser) sequence of instructions for that input character or range.
+
 
 ****************************************************************/
 
@@ -611,6 +618,9 @@ skip_line(_, Stream, Ch) :-
 :- dynamic left_recursive/2.
 :- dynamic generated_nonterminal/1.
 :- dynamic meta_rule_instance/3.
+:- dynamic final_called_by/2.
+:- dynamic initial_called_by/2.
+
 
 init_parser :-
 	retractall(nonterm_rule(_,_,_)),
@@ -619,15 +629,17 @@ init_parser :-
 	retractall(meta_grammar_rule(_,_)),
 	retractall(left_recursive(_,_)),
 	retractall(generated_nonterminal(_)),
-	retractall(meta_rule_instance(_,_,_)).
+	retractall(meta_rule_instance(_,_,_)),
+	retractall(final_called_by(_,_)),
+	retractall(initial_called_by(_,_)).
 
 
 
 show_parser :-
+	listing(meta_grammar_rule),
 	listing(nonterm_rule),
 	listing(range_rule),
-	listing(catchall_rule),
-	listing(meta_grammar_rule).
+	listing(catchall_rule).
 
 
 
@@ -762,7 +774,7 @@ token_goal(syn, Chars, Class, [chars(Chars),token_end(Class)|Comp0],
 
 record_production(Nonterm, Comp, Orig_nonterm, Orig_body) :-
 	left_unfold(Comp, Nonterm, Comp1),
-	(   Comp = [nonterminal(Nonterm)|Comp2]
+	(   Comp1 = [nonterminal(Nonterm)|Comp2]
 	->  convert_left_recursive(Nonterm, Rulenonterm),
 	    append(Comp2, [nonterminal(Rulenonterm)], Body)
 	;   Body = Comp1,
