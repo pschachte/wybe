@@ -1,0 +1,36 @@
+Frege notes
+
+** learn relational algebra!!!
+
+atomic terms:  symbols, numbers
+
+a term <t1, ..., tn> is a tuple of arity n
+
+a term {t1, ..., tn} is a set
+
+a relation of arity n is set of tuples of arity n
+
+tuple operations:  car, cdr, cons, nil
+
+set operations:  {}, {x} (singleton), union, intersection
+
+Partial application:  if p is a relation and x is a term,
+p x = \bigcup \{ f x t \| t \in p\} where
+f x t = if (car t) == x then {cdr t} else {}
+
+Partial application:  if p is a relation and x is a variable,
+p x = ... need to keep all of p, and remember 1st argument is x
+
+
+false = {}; true = {nil}
+
+
+
+
+
+
+A predicate definition specifies a relation
+
+A function of arity n is a relation of arity n+1 which has only one tuple for
+each initial n arguments
+
