@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.41 2008/07/01 23:20:06 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.42 2008/07/03 08:27:38 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -20,6 +20,7 @@
 %% TODO:
 %%   o	Incremental parser generation:  handle new productions that old ones
 %%	depend on (unfolding problem) 
+%%   o	Handle final nullable rules
 %%   o	Handle offside rule
 %%   o	Handle associativity for multi-recursive rules
 %%   o	Handle precedence
@@ -49,7 +50,8 @@
 %%	parser can be generated, dynamically linked in, and used to read the
 %%	rest of the file.  This turns on the ability to merge two separately
 %%	compiled grammars, which comes down to the ability to merge two sets
-%%	of compiled grammar rules for the same nonterminal.
+%%	of compiled grammar rules for the same nonterminal.  This means
+%%	parser generator does not need to be incremental.
 
 
 :- module(parser, [ process_file/2,
@@ -179,7 +181,6 @@ test(int) :-
 
 test(ident) :-
 	add_lex(digit, char:("0"-"9")),
-	test(alt),
 	add_lex(alpha, char:("a"-"z" | "A"-"Z")),
 	add_lex(identchar, char:( alpha | digit | "_")),
 	add_lex(ident, mkident:( alpha, identtail )),
@@ -611,14 +612,19 @@ skip_line(_, Stream, Ch) :-
 	skip_line(Ch1, Stream, Ch).
 
 
+/****************************************************************
+			    The Parser Generator
+****************************************************************/
+
 :- dynamic nonterm_rule/3.
 :- dynamic range_rule/4.
 :- dynamic catchall_rule/2.
+:- dynamic left_nonterm_rule/2.
 :- dynamic meta_grammar_rule/2.
 :- dynamic left_recursive/2.
 :- dynamic generated_nonterminal/1.
 :- dynamic meta_rule_instance/3.
-:- dynamic final_called_by/2.
+:- dynamic final_nullable/1.
 :- dynamic initial_called_by/2.
 
 
@@ -626,11 +632,12 @@ init_parser :-
 	retractall(nonterm_rule(_,_,_)),
 	retractall(range_rule(_,_,_,_)),
 	retractall(catchall_rule(_,_)),
+	retractall(left_nonterm_rule(_,_)),
 	retractall(meta_grammar_rule(_,_)),
 	retractall(left_recursive(_,_)),
 	retractall(generated_nonterminal(_)),
 	retractall(meta_rule_instance(_,_,_)),
-	retractall(final_called_by(_,_)),
+	retractall(final_nullable(_)),
 	retractall(initial_called_by(_,_)).
 
 
@@ -642,10 +649,6 @@ show_parser :-
 	listing(catchall_rule).
 
 
-
-/****************************************************************
-			    The Parser Generator
-****************************************************************/
 
 %  add_syn(Nonterm, Body)
 %  add_lex(Nonterm, Body)
@@ -773,17 +776,31 @@ token_goal(syn, Chars, Class, [chars(Chars),token_end(Class)|Comp0],
 %  this production.
 
 record_production(Nonterm, Comp, Orig_nonterm, Orig_body) :-
-	left_unfold(Comp, Nonterm, Comp1),
-	(   Comp1 = [nonterminal(Nonterm)|Comp2]
-	->  convert_left_recursive(Nonterm, Rulenonterm),
-	    append(Comp2, [nonterminal(Rulenonterm)], Body)
-	;   Body = Comp1,
-	    Rulenonterm = Nonterm
-	),
-	(   initial_body_range(Body, Low, High, Rest)
-	->  add_grammar_clause(Low, High, Rulenonterm, Rest,
+	Comp = [First|Rest],
+	(   First = nonterminal(Leftnonterm)
+	->  assert_new(left_nonterm_rule(Nonterm, Comp)),
+	    (	Leftnonterm == Nonterm
+	    ->	convert_left_recursive(Nonterm, Rulenonterm),
+		append(Rest, [nonterminal(Rulenonterm)], Body),
+		record_production(Rulenonterm, Body, Orig_nonterm, Orig_body)
+	    ;	% left unfold:  record a production for each rule for the
+		% left nonterminal.  Backtracking loop.
+		(   nonterm_rule(Ch, Nonterm, Body1),
+		    append([chars([Ch])|Body1], Rest, Body)
+		;   range_rule(Nonterm, Low, High, Body1),
+		    append([range(Low,High)|Body1], Rest, Body)
+		;   catchall_rule(Nonterm, Body1),
+		    append(Body1, Rest, Body)
+		),
+		record_production(Nonterm, Body, Orig_nonterm, Orig_body),
+		fail
+	    ;	true
+	    )
+	;   initial_body_range(Comp, Low, High, Rest1)
+	->  add_grammar_clause(Low, High, Nonterm, Rest1,
 			       Orig_nonterm, Orig_body)
-	;   throw(left_unfolding_failed(Nonterm, Comp, Orig_nonterm, Orig_body))
+	;   throw(unexpected_initial_instruction(Comp, Orig_nonterm,
+						 Orig_body))
 	).
 
 
@@ -823,9 +840,11 @@ add_individual(Char, Nonterm, Body, Orig_nonterm, Orig_body) :-
 	;   assert(nonterm_rule(Char, Nonterm, Body))
 	).
 
+
 add_range(Low, High, Nonterm, Body, Orig_nonterm, Orig_body):-
 	(   clause(range_rule(Nonterm, Low0, High0, Oldbody), true, Ref),
 	    Low0 =< High, Low =< High0
+% XXX this assumes there can only be one old overlapping clause.
 	->  % New range overlaps old one: split into consistent ranges
 	    CommonLo is max(Low0, Low),
 	    Below_common is CommonLo - 1,
@@ -868,42 +887,6 @@ initial_instr_range(pushchars([Char|Chars]), Char, Char, Rest,
 initial_instr_range(range(Low,High), Low, High, Rest, Rest).
 initial_instr_range(build(X,Y), 0, -1, Rest, [build(X,Y)|Rest]).
 initial_instr_range(call(X,Y), 0, -1, Rest, [call(X,Y)|Rest]).
-
-
-
-left_unfold(Body0, Parent, Body) :-
-	left_unfold1(Body0, Body0, Parent, Body).
-
-left_unfold1([First|Rest], Body0, Parent, Body) :-
-	left_unfold2(First, Rest, Body0, Parent, Body).
-left_unfold1([], _, _, []).
-
-left_unfold2(chars(_), _, Body0, _, Body0).
-left_unfold2(pushchars(Expected), Rest, _, Parent,
-	     [pushchars(Expected)|Body]) :-
-	left_unfold1(Rest, Rest, Parent, Body).
-left_unfold2(token_end(_), _, Body0, _, _) :-
-	throw(token_end_first(Body0)).
-left_unfold2(range(_,_), _, Body0, _, Body0).
-left_unfold2(nonterminal(Nonterm), Rest, Body0, Parent, Body) :-
-	!,
-	(   Nonterm == Parent		% left recursive!
-	->  Body = Body0
-	;   nonterm_rule(Ch, Nonterm, Body1),
-	    append([chars([Ch])|Body1], Rest, Body)
-	;   range_rule(Nonterm, Low, High, Body1),
-	    append([range(Low,High)|Body1], Rest, Body)
-	;   catchall_rule(Nonterm, Body1),
-	    append(Body1, Rest, Body)
-	;   Body = Body0		% undefined!
-	).
-left_unfold2(build(Id,Count), Rest, _, Parent, [build(Id,Count)|Body]) :-
-	left_unfold1(Rest, Rest, Parent, Body).
-left_unfold2(call(Pred,Count), Rest, _, Parent, [call(Pred,Count)|Body]) :-
-	left_unfold1(Rest, Rest, Parent, Body).
-left_unfold2(push(Char), Rest, _, Parent, [push(Char)|Body]) :-
-	left_unfold1(Rest, Rest, Parent, Body).
-
 
 
 left_factor(Nonterm, Low, High, Oldbody, Ref, Body, Orig_nonterm, Orig_body) :-
@@ -988,3 +971,9 @@ convert_left_recursive(Nonterm, Tailnonterm) :-
 make_lrec_production(Body0, Tailnonterm, Body) :-
 	append(Body0, [nonterminal(Tailnonterm)], Body).
 
+
+assert_new(Unit) :-
+	(   clause(Unit, _)
+	->  true
+	;   assert(Unit)
+	).
