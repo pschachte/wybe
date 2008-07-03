@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.43 2008/07/03 13:52:48 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.44 2008/07/03 15:13:53 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -18,7 +18,7 @@
 %%      need to iterate when the following is also nullable.
 %%
 %%   o	Not handling construction of lex rules correctly.  Shouldn't have
-%%   default constructors for lex rules.
+%%	default constructors for lex rules.
 %%
 %%
 %% TODO:
@@ -198,7 +198,11 @@ test(incremental) :-
 	add_syn(b, "B").
 
 
-test(stmt).
+test(nullable) :-
+	add_syn(a, ""),
+	add_syn(a, "a"),
+	add_syn(b, ("test", a)),
+	add_syn(c, (b, "c")).
 
 
 mkint1(Ch, Int) :-
@@ -626,29 +630,31 @@ skip_line(_, Stream, Ch) :-
 			    The Parser Generator
 ****************************************************************/
 
-:- dynamic nonterm_rule/3.
-:- dynamic range_rule/4.
-:- dynamic catchall_rule/2.
-:- dynamic left_nonterm_rule/3.
-:- dynamic meta_grammar_rule/2.
-:- dynamic left_recursive/2.
-:- dynamic generated_nonterminal/1.
-:- dynamic meta_rule_instance/3.
-:- dynamic final_nullable/1.
-:- dynamic initial_called_by/2.
+:- dynamic meta_grammar_rule/2.		% meta-grammar rule
+:- dynamic nonterm_rule/3.		% rule beginning with a single char
+:- dynamic range_rule/4.		% rule beginning with a char range
+:- dynamic catchall_rule/2.		% rule with empty body
+:- dynamic left_nonterm_rule/3.		% rule with nonterminal at left
+:- dynamic right_nonterm_for/2.		% nonterminal with nonterminal at right
+:- dynamic nonterm_used_by/2.		% which nonterminals use which
+:- dynamic final_nullable/1.		% nonterminal can generate empty string
+:- dynamic left_recursive/2.		% left-recursive nonterminal and rest
+:- dynamic generated_nonterminal/1.	% generated nonterminal
+:- dynamic meta_rule_instance/3.	% generated nonterm for meta application
 
 
 init_parser :-
+	retractall(meta_grammar_rule(_,_)),
 	retractall(nonterm_rule(_,_,_)),
 	retractall(range_rule(_,_,_,_)),
 	retractall(catchall_rule(_,_)),
 	retractall(left_nonterm_rule(_,_,_)),
-	retractall(meta_grammar_rule(_,_)),
+	retractall(right_nonterm_for(_,_)),
+	retractall(nonterm_used_by(_,_)),
+	retractall(final_nullable(_)),
 	retractall(left_recursive(_,_)),
 	retractall(generated_nonterminal(_)),
-	retractall(meta_rule_instance(_,_,_)),
-	retractall(final_nullable(_)),
-	retractall(initial_called_by(_,_)).
+	retractall(meta_rule_instance(_,_,_)).
 
 
 
@@ -843,13 +849,15 @@ add_grammar_clause1(Low, High, Nonterm, Body, Orig_nonterm, Orig_body) :-
 	->  % Single-character range
 	    add_individual(Low, Nonterm, Body, Orig_nonterm, Orig_body)
 	;   add_range(Low, High, Nonterm, Body, Orig_nonterm, Orig_body)
-	).
+	),
+	note_rule_properties(Body, Nonterm).
 
 
 add_catchall(Nonterm, Body, Orig_nonterm, Orig_body) :-
 	(   clause(catchall_rule(Nonterm, _), true)
 	->  throw(multiple_catcall_rules(Orig_nonterm, Orig_body))
-	;   assert(catchall_rule(Nonterm, Body))
+	;   assert(catchall_rule(Nonterm, Body)),
+	    report_final_nullable(Nonterm)
 	).
 
 add_individual(Char, Nonterm, Body, Orig_nonterm, Orig_body) :-
@@ -886,6 +894,17 @@ add_range(Low, High, Nonterm, Body, Orig_nonterm, Orig_body):-
 	).
 
 
+report_final_nullable(Nonterm) :-
+	(   final_nullable(Nonterm)		% already knew that:
+	->  true				% nothing to do
+	;   assert(final_nullable(Nonterm)),
+	    % backtrack over right users of this nonterm and note them too
+	    right_nonterm_for(Nonterm, User),
+	    report_final_nullable(User),
+	    fail
+	;   true
+	).
+	
 
 
 initial_body_range([Instr|Rest], Low, High, Body) :-
@@ -908,12 +927,45 @@ initial_instr_range(build(X,Y), 0, -1, Rest, [build(X,Y)|Rest]).
 initial_instr_range(call(X,Y), 0, -1, Rest, [call(X,Y)|Rest]).
 
 
+%  note_rule_properties(Body, Nonterm)
+%  Record what nonterminals this rule uses, and what is the rightmost
+%  nonterminal, if it's the last thing in the rule body.
+
+note_rule_properties(Body, Nonterm) :-
+	note_rule_properties(Body, Nonterm, '').
+
+note_rule_properties([], Nonterm, Finalnonterm) :-
+	(   Finalnonterm == ''		% not a nonterm:
+	->  true			% do nothing
+	;   assert_new(right_nonterm_for(Finalnonterm, Nonterm)),
+	    (	final_nullable(Finalnonterm)
+	    ->	report_final_nullable(Nonterm)
+	    ;	true
+	    )
+	).
+note_rule_properties([Instr|Instrs], Nonterm, Finalnonterm) :-
+	note_instr_properties(Instr, Nonterm, Finalnonterm, Finalnonterm1),
+	note_rule_properties(Instrs, Nonterm, Finalnonterm1).
+
+
+note_instr_properties(chars(_), _, _, '').
+note_instr_properties(pushchars(_), _, _, '').
+note_instr_properties(token_end(_), _, Final, Final).
+note_instr_properties(range(_,_), _, _, '').
+note_instr_properties(nonterminal(Nonterm), Caller, _, Nonterm) :-
+	assert_new(nonterm_used_by(Nonterm, Caller)).
+note_instr_properties(build(_,_), _, Final, Final).
+note_instr_properties(call(_,_), _, Final, Final).
+note_instr_properties(push(_), _, Final, Final).
+
+
+
 left_factor(Nonterm, Low, High, Oldbody, Ref, Body, Orig_nonterm, Orig_body) :-
 	(   split_common_start(Oldbody, Newold, Body, Newbody,
 			       Commonbody, Commontail),
 	    (	( Newold = [build(_,_)] ; Newold = [call(_,_)] ),
 		( Newbody = [build(_,_)] ; Newbody = [call(_,_)] )
-	    ->	throw(redundant_rule(Orig_nonterm, Orig_body))
+	    ->	true			% ignore redundant rules
 	    ;	Newold = [nonterminal(Gennonterm)|_],
 		generated_nonterminal(Gennonterm)
 	    ->	true
