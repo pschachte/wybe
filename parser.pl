@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.42 2008/07/03 08:27:38 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.43 2008/07/03 13:52:48 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -17,10 +17,12 @@
 %%      recursive, will need multiple (two?) separate fusions.  Also will
 %%      need to iterate when the following is also nullable.
 %%
+%%   o	Not handling construction of lex rules correctly.  Shouldn't have
+%%   default constructors for lex rules.
+%%
+%%
 %% TODO:
-%%   o	Incremental parser generation:  handle new productions that old ones
-%%	depend on (unfolding problem) 
-%%   o	Handle final nullable rules
+%%   o	Handle final nullable rules (incrementally)
 %%   o	Handle offside rule
 %%   o	Handle associativity for multi-recursive rules
 %%   o	Handle precedence
@@ -36,6 +38,7 @@
 %%	being parsed with the standard syntax, with additions made as
 %%	dependencies are loaded.
 %%   o	Decide if we really want to apply left unfolding
+%%
 %%
 %% New Ideas:
 %%   o	"Empty" programming language:  language has only meta-syntax and
@@ -180,12 +183,19 @@ test(int) :-
 	add_lex(int, mkint2:(int, "0"-"9")).
 
 test(ident) :-
+	test(meta),
 	add_lex(digit, char:("0"-"9")),
 	add_lex(alpha, char:("a"-"z" | "A"-"Z")),
 	add_lex(identchar, char:( alpha | digit | "_")),
 	add_lex(ident, mkident:( alpha, identtail )),
 	add_lex(identtail, nil:""),
 	add_lex(identtail, cons:(identchar, identtail)).
+
+
+test(incremental) :-
+	add_syn(a, (b,c,d)),
+	add_syn(b, "b"),
+	add_syn(b, "B").
 
 
 test(stmt).
@@ -619,7 +629,7 @@ skip_line(_, Stream, Ch) :-
 :- dynamic nonterm_rule/3.
 :- dynamic range_rule/4.
 :- dynamic catchall_rule/2.
-:- dynamic left_nonterm_rule/2.
+:- dynamic left_nonterm_rule/3.
 :- dynamic meta_grammar_rule/2.
 :- dynamic left_recursive/2.
 :- dynamic generated_nonterminal/1.
@@ -632,7 +642,7 @@ init_parser :-
 	retractall(nonterm_rule(_,_,_)),
 	retractall(range_rule(_,_,_,_)),
 	retractall(catchall_rule(_,_)),
-	retractall(left_nonterm_rule(_,_)),
+	retractall(left_nonterm_rule(_,_,_)),
 	retractall(meta_grammar_rule(_,_)),
 	retractall(left_recursive(_,_)),
 	retractall(generated_nonterminal(_)),
@@ -646,7 +656,8 @@ show_parser :-
 	listing(meta_grammar_rule),
 	listing(nonterm_rule),
 	listing(range_rule),
-	listing(catchall_rule).
+	listing(catchall_rule),
+	listing(left_nonterm_rule).
 
 
 
@@ -778,18 +789,18 @@ token_goal(syn, Chars, Class, [chars(Chars),token_end(Class)|Comp0],
 record_production(Nonterm, Comp, Orig_nonterm, Orig_body) :-
 	Comp = [First|Rest],
 	(   First = nonterminal(Leftnonterm)
-	->  assert_new(left_nonterm_rule(Nonterm, Comp)),
+	->  assert_new(left_nonterm_rule(Leftnonterm, Nonterm, Comp)),
 	    (	Leftnonterm == Nonterm
 	    ->	convert_left_recursive(Nonterm, Rulenonterm),
 		append(Rest, [nonterminal(Rulenonterm)], Body),
 		record_production(Rulenonterm, Body, Orig_nonterm, Orig_body)
 	    ;	% left unfold:  record a production for each rule for the
 		% left nonterminal.  Backtracking loop.
-		(   nonterm_rule(Ch, Nonterm, Body1),
+		(   nonterm_rule(Ch, Leftnonterm, Body1),
 		    append([chars([Ch])|Body1], Rest, Body)
-		;   range_rule(Nonterm, Low, High, Body1),
+		;   range_rule(Leftnonterm, Low, High, Body1),
 		    append([range(Low,High)|Body1], Rest, Body)
-		;   catchall_rule(Nonterm, Body1),
+		;   catchall_rule(Leftnonterm, Body1),
 		    append(Body1, Rest, Body)
 		),
 		record_production(Nonterm, Body, Orig_nonterm, Orig_body),
@@ -809,7 +820,15 @@ add_grammar_clause(Low, High, Nonterm, Body, Orig_nonterm, Orig_body) :-
 	->  make_lrec_production(Body, Tailnonterm, Body1)
 	;   Body1 = Body
 	),
-	add_grammar_clause1(Low, High, Nonterm, Body1, Orig_nonterm, Orig_body).
+	add_grammar_clause1(Low, High, Nonterm, Body1, Orig_nonterm, Orig_body),
+	% Add new rules as necessary for old rules that begin with this nonterm
+	(   left_nonterm_rule(Nonterm, Caller, Body2),
+	    append(Body1, Body2, Body3),
+	    add_grammar_clause(Low, High, Caller, Body3,
+			       Orig_nonterm, Orig_body),
+	    fail
+	;   true
+	).
 
 
 
