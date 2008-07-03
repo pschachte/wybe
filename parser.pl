@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.44 2008/07/03 15:13:53 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.45 2008/07/04 08:52:02 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -16,9 +16,10 @@
 %%      bodies.  Careful:  for recursive nullable other than tail
 %%      recursive, will need multiple (two?) separate fusions.  Also will
 %%      need to iterate when the following is also nullable.
+%%	Another possible solution:  don't allow it.
 %%
 %%   o	Not handling construction of lex rules correctly.  Shouldn't have
-%%	default constructors for lex rules.
+%%	default constructors for lex rules.  
 %%
 %%
 %% TODO:
@@ -53,8 +54,9 @@
 %%	parser can be generated, dynamically linked in, and used to read the
 %%	rest of the file.  This turns on the ability to merge two separately
 %%	compiled grammars, which comes down to the ability to merge two sets
-%%	of compiled grammar rules for the same nonterminal.  This means
-%%	parser generator does not need to be incremental.
+%%	of compiled grammar rules for the same nonterminal, plus the ability
+%%	to propagate new rules for a nonterminal up to the references to that
+%%	nonterminal from a different set of rules.
 
 
 :- module(parser, [ process_file/2,
@@ -72,7 +74,7 @@
 % Meta-circular parser grammar:
 %
 % syn file ::= eof
-% syn file ::= processitem: file <pushindent> item <matchindent>
+% syn file ::= processitem: file item
 %
 % syn item ::= visibility grammar_kind nonterminal '::=' grammar_body
 % syn item ::= visibility 'metagrammar' meta '::=' syn_items
@@ -172,11 +174,11 @@ test(cond) :-
 	add_syn(cond, ("if",expr,"then",stmts,"else",stmts,"endif")).
 
 test(meta) :-
-	add_syn((A|B), A),
-	add_syn((A|B), B),
-	add_syn(*(A), (""|*(A),A)),
-	add_syn(+(A), A),
-	add_syn(+(A), (+(A),A)).
+	add_meta((A|B), A),
+	add_meta((A|B), B),
+	add_meta(*(A), (""|*(A),A)),
+	add_meta(+(A), A),
+	add_meta(+(A), (+(A),A)).
 
 test(int) :-
 	add_lex(int, mkint1:("0"-"9")),
@@ -639,8 +641,9 @@ skip_line(_, Stream, Ch) :-
 :- dynamic nonterm_used_by/2.		% which nonterminals use which
 :- dynamic final_nullable/1.		% nonterminal can generate empty string
 :- dynamic left_recursive/2.		% left-recursive nonterminal and rest
-:- dynamic generated_nonterminal/1.	% generated nonterminal
-:- dynamic meta_rule_instance/3.	% generated nonterm for meta application
+:- dynamic left_factor_nonterminal/1.	% generated left factor nonterminal
+:- dynamic meta_rule_nonterminal/3.	% generated nonterm for meta application
+:- dynamic fusion_nonterminal/3.	% generated nullable fusion nonterminal
 
 
 init_parser :-
@@ -653,8 +656,8 @@ init_parser :-
 	retractall(nonterm_used_by(_,_)),
 	retractall(final_nullable(_)),
 	retractall(left_recursive(_,_)),
-	retractall(generated_nonterminal(_)),
-	retractall(meta_rule_instance(_,_,_)).
+	retractall(left_factor_nonterminal(_)),
+	retractall(meta_rule_nonterminal(_,_,_)).
 
 
 
@@ -687,10 +690,13 @@ add_syn(Head, Body) :-
 add_lex(Head, Body) :-
 	add_production(Head, Body, lex).
 
+add_meta(Head, Body) :-
+	assertion(compound(Head)),
+	assert(meta_grammar_rule(Head, Body)).
+
 add_production(Head, Body, Kind) :-
-	(   compound(Head)
-	->  assert(meta_grammar_rule(Head, Body))
-	;   Body = Constructor:Body1
+	assertion(atom(Head)),
+	(   Body = Constructor:Body1
 	->  add_production1(Head, [call(Constructor,Args)], Args, Body1, Kind)
 	;   atom_concat(Head, ' ', Prefix),
 	    gensym(Prefix, Id),
@@ -707,7 +713,7 @@ add_production1(Head, Tail, Args, Body, Kind) :-
 
 %  compile_body(Rule, Comp, Comp0, Args, Args0, Kind)
 %  Comp is the code to parse input according to grammar rule Rule, followed
-%  by Comp0.
+%  by Comp0.  Backtracks to generate multiple bodies when needed.
 
 compile_body((B1,B2), Comp, Comp0, Args, Args0, Kind) :-
 	!,
@@ -749,10 +755,10 @@ compile_meta(Metanonterm, Comp, Comp0, Args0, Args, Kind) :-
 
 
 make_meta_instance(Metanonterm, Head, Kind) :-
-	(   meta_rule_instance(Metanonterm, Kind, Head)
+	(   meta_rule_nonterminal(Metanonterm, Kind, Head)
 	->  true
 	;   gensym('META', Head),
-	    assert(meta_rule_instance(Metanonterm, Kind, Head)),
+	    assert(meta_rule_nonterminal(Metanonterm, Kind, Head)),
 	    % generate a new concrete rule for every meta rule for this
 	    % meta nonterminal (failure driven loop)
 	    (	meta_grammar_rule(Metanonterm, Metabody),
@@ -827,7 +833,7 @@ add_grammar_clause(Low, High, Nonterm, Body, Orig_nonterm, Orig_body) :-
 	;   Body1 = Body
 	),
 	add_grammar_clause1(Low, High, Nonterm, Body1, Orig_nonterm, Orig_body),
-	% Add new rules as necessary for old rules that begin with this nonterm
+	% Add new left-unfolded rules for old rules that begin with Nonterm
 	(   left_nonterm_rule(Nonterm, Caller, Body2),
 	    append(Body1, Body2, Body3),
 	    add_grammar_clause(Low, High, Caller, Body3,
@@ -838,7 +844,8 @@ add_grammar_clause(Low, High, Nonterm, Body, Orig_nonterm, Orig_body) :-
 
 
 
-add_grammar_clause1(Low, High, Nonterm, Body, Orig_nonterm, Orig_body) :-
+add_grammar_clause1(Low, High, Nonterm, Body0, Orig_nonterm, Orig_body) :-
+	handle_rule_nullables(Body0, Body, Nonterm, Orig_nonterm, Orig_body),
 	(   High < 0
 	->  % First instruction doesn't consume a character:  catchall
 	    add_catchall(Nonterm, Body, Orig_nonterm, Orig_body)
@@ -849,8 +856,7 @@ add_grammar_clause1(Low, High, Nonterm, Body, Orig_nonterm, Orig_body) :-
 	->  % Single-character range
 	    add_individual(Low, Nonterm, Body, Orig_nonterm, Orig_body)
 	;   add_range(Low, High, Nonterm, Body, Orig_nonterm, Orig_body)
-	),
-	note_rule_properties(Body, Nonterm).
+	).
 
 
 add_catchall(Nonterm, Body, Orig_nonterm, Orig_body) :-
@@ -927,14 +933,15 @@ initial_instr_range(build(X,Y), 0, -1, Rest, [build(X,Y)|Rest]).
 initial_instr_range(call(X,Y), 0, -1, Rest, [call(X,Y)|Rest]).
 
 
-%  note_rule_properties(Body, Nonterm)
+%  handle_rule_nullables(Body0, Body, Nonterm, Orig_nonterm, Orig_body)
 %  Record what nonterminals this rule uses, and what is the rightmost
 %  nonterminal, if it's the last thing in the rule body.
 
-note_rule_properties(Body, Nonterm) :-
-	note_rule_properties(Body, Nonterm, '').
+handle_rule_nullables(Body0, Body, Nonterm, Orig_nonterm, Orig_body) :-
+	handle_rule_nullables(Body0, Body, Nonterm, '',
+			      Orig_nonterm, Orig_body).
 
-note_rule_properties([], Nonterm, Finalnonterm) :-
+handle_rule_nullables([], [], Nonterm, Finalnonterm, _, _) :-
 	(   Finalnonterm == ''		% not a nonterm:
 	->  true			% do nothing
 	;   assert_new(right_nonterm_for(Finalnonterm, Nonterm)),
@@ -943,20 +950,54 @@ note_rule_properties([], Nonterm, Finalnonterm) :-
 	    ;	true
 	    )
 	).
-note_rule_properties([Instr|Instrs], Nonterm, Finalnonterm) :-
-	note_instr_properties(Instr, Nonterm, Finalnonterm, Finalnonterm1),
-	note_rule_properties(Instrs, Nonterm, Finalnonterm1).
+handle_rule_nullables([Instr0|Instrs0], [Instr|Instrs], Nonterm,
+		      Finalnonterm, Orig_nonterm, Orig_body) :-
+	handle_instr(Instr0, Instr0, Instr, Instrs0, Instrs1, Nonterm,
+		     Finalnonterm, Finalnonterm1, Orig_nonterm, Orig_body),
+	handle_rule_nullables(Instrs1, Instrs, Nonterm, Finalnonterm1,
+			      Orig_nonterm, Orig_body).
 
 
-note_instr_properties(chars(_), _, _, '').
-note_instr_properties(pushchars(_), _, _, '').
-note_instr_properties(token_end(_), _, Final, Final).
-note_instr_properties(range(_,_), _, _, '').
-note_instr_properties(nonterminal(Nonterm), Caller, _, Nonterm) :-
-	assert_new(nonterm_used_by(Nonterm, Caller)).
-note_instr_properties(build(_,_), _, Final, Final).
-note_instr_properties(call(_,_), _, Final, Final).
-note_instr_properties(push(_), _, Final, Final).
+handle_instr(chars(_), Instr, Instr, Instrs, Instrs, _, _, '', _, _).
+handle_instr(pushchars(_), Instr, Instr, Instrs, Instrs, _, _, '', _, _).
+handle_instr(token_end(_), Instr, Instr, Instrs, Instrs, _, Final, Final, _, _).
+handle_instr(range(_,_), Instr, Instr, Instrs, Instrs, _, _, '', _, _).
+handle_instr(nonterminal(Nonterm), Instr0, Instr, Instrs0, Instrs, Caller,
+		      _, Nonterm, Orig_nonterm, Orig_body) :-
+	(   final_nullable(Nonterm),
+	    Instrs0 = [Nextinstr|Instrs]
+	->  Instr = nonterminal(Newnonterm),
+	    fuse_nonterm(Nonterm, Nextinstr, Newnonterm,
+			 Orig_nonterm, Orig_body)
+	;   Instr = Instr0,
+	    Instrs = Instrs0,
+	    assert_new(nonterm_used_by(Nonterm, Caller))
+	).
+handle_instr(build(_,_), Instr, Instr, Instrs, Instrs, _, Final, Final, _, _).
+handle_instr(call(_,_), Instr, Instr, Instrs, Instrs, _, Final, Final, _, _).
+handle_instr(push(_), Instr, Instr, Instrs, Instrs, _, Final, Final, _, _).
+
+
+fuse_nonterm(Nonterm, Nextinstr, Newnonterm, Orig_nonterm, Orig_body) :-
+	(   fusion_nonterminal(Nonterm, Nextinstr, Newnonterm)
+	->  true
+	;   gensym('FUSION', Newnonterm),
+	    Rest = [Nextinstr],
+	    assert(fusion_nonterminal(Nonterm, Nextinstr, Newnonterm)),
+	    (	% Duplicate each rule for Nonterm, pasting Nextinstr on the
+		% end, and making it a rule for Newnonterm.
+		(   nonterm_rule(Ch, Nonterm, Body1),
+		    append([chars([Ch])|Body1], Rest, Body)
+		;   range_rule(Nonterm, Low, High, Body1),
+		    append([range(Low,High)|Body1], Rest, Body)
+		;   catchall_rule(Nonterm, Body1),
+		    append(Body1, Rest, Body)
+		),
+		record_production(Newnonterm, Body, Orig_nonterm, Orig_body),
+		fail
+	    ;	true
+	    )
+	).
 
 
 
@@ -967,11 +1008,11 @@ left_factor(Nonterm, Low, High, Oldbody, Ref, Body, Orig_nonterm, Orig_body) :-
 		( Newbody = [build(_,_)] ; Newbody = [call(_,_)] )
 	    ->	true			% ignore redundant rules
 	    ;	Newold = [nonterminal(Gennonterm)|_],
-		generated_nonterminal(Gennonterm)
+		left_factor_nonterminal(Gennonterm)
 	    ->	true
 	    ;	erase(Ref),
 		gensym('GEN', Gennonterm),
-		assert(generated_nonterminal(Gennonterm)),
+		assert(left_factor_nonterminal(Gennonterm)),
 		Commontail = [nonterminal(Gennonterm)],
 		add_grammar_clause1(Low, High, Nonterm, Commonbody,
 				   Orig_nonterm, Orig_body),
