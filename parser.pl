@@ -1,5 +1,5 @@
 %  File     : parser.pl
-%  RCS      : $Id: parser.pl,v 1.45 2008/07/04 08:52:02 schachte Exp $
+%  RCS      : $Id: parser.pl,v 1.46 2008/07/05 16:11:23 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Thu Mar 13 16:08:59 2008
 %  Purpose  : Parser for Frege
@@ -801,12 +801,12 @@ token_goal(syn, Chars, Class, [chars(Chars),token_end(Class)|Comp0],
 record_production(Nonterm, Comp, Orig_nonterm, Orig_body) :-
 	Comp = [First|Rest],
 	(   First = nonterminal(Leftnonterm)
-	->  assert_new(left_nonterm_rule(Leftnonterm, Nonterm, Comp)),
-	    (	Leftnonterm == Nonterm
+	->  (	Leftnonterm == Nonterm
 	    ->	convert_left_recursive(Nonterm, Rulenonterm),
 		append(Rest, [nonterminal(Rulenonterm)], Body),
 		record_production(Rulenonterm, Body, Orig_nonterm, Orig_body)
-	    ;	% left unfold:  record a production for each rule for the
+	    ;	assert_new(left_nonterm_rule(Leftnonterm, Nonterm, Comp)),
+		% left unfold:  record a production for each rule for the
 		% left nonterminal.  Backtracking loop.
 		(   nonterm_rule(Ch, Leftnonterm, Body1),
 		    append([chars([Ch])|Body1], Rest, Body)
