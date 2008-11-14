@@ -1,0 +1,191 @@
+% $Header: /home/schachte/test/cvs-conversion/CVSROOT/research/frege/intro.tex,v 1.1 2008/11/15 10:46:50 schachte Exp $
+
+\documentclass[12pt]{beamer}
+\usepackage{alltt}
+\usepackage{xspace}
+
+% \newcommand{\lxor}{\ensuremath{\oplus}}
+
+\newcommand{\frege}{\textsf{Frege}\xspace}
+
+\mode<presentation>
+{
+  % \usetheme{Singapore}
+  % \usetheme{default}
+ % \usetheme{Hannover}
+ % \usetheme{Goettingen}
+ % \usetheme{Madrid}
+% \usetheme{Copenhagen}
+
+  % or ...
+
+\useinnertheme{circles}
+%\useoutertheme{shadow}
+\setbeamercolor{normal text}{bg=yellow!25!red!3}
+\usecolortheme{seahorse}
+\usecolortheme{rose}
+
+% \setbeamertemplate{blocks}[rounded][shadow=true]
+% \setbeamertemplate{footline}{%
+%   \hspace*{2em} \insertshorttitle \hfill
+%   \insertframenumber \hfill
+%   \insertsection \hspace*{2em}
+% }
+\setbeamercovered{transparent=5}
+
+% \usepackage[english]{babel}
+% % or whatever
+
+% \usepackage[latin1]{inputenc}
+% % or whatever
+
+%\usepackage{times}
+%\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+}
+
+\title{Frege}
+
+\subtitle{\textsf{F}unctions, \textsf{RE}lations, and 
+pervasive \textsf{GE}nerics}
+
+\author{Peter Schachte}
+% % - Use the \inst{?} command only if the authors have different
+% %   affiliation.
+
+\institute[Univ.\ Melbourne] % (optional, but mostly needed)
+{
+  Department of Computer Science and Software Engineering \\
+  University of Melbourne
+}
+% - Use the \inst command only if there are several affiliations.
+% - Keep it simple, no one is interested in your street address.
+
+\date{}
+
+% \subject{}
+% This is only inserted into the PDF information catalog. Can be left
+% out. 
+
+
+
+% If you have a file called "university-logo-filename.xxx", where xxx
+% is a graphic format that can be processed by latex or pdflatex,
+% resp., then you can add a logo as follows:
+
+% \pgfdeclareimage[height=0.5cm]{university-logo}{university-logo-filename}
+% \logo{\pgfuseimage{university-logo}}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+  \titlepage
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Overview}
+  \tableofcontents
+\end{frame}
+
+% Since this a solution template for a generic talk, very little can
+% be said about how it should be structured. However, the talk length
+% of between 15min and 45min and the theme suggest that you stick to
+% the following rules:  
+
+% - Exactly two or three sections (other than the summary).
+% - At *most* three subsections per section.
+% - Talk about 30s to 2min per frame. So there should be between about
+%   15 and 30 frames, all told.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Goals}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{\LARGE Goals of the \frege language}
+  \begin{itemize}
+  \item Simple and intuitive enough to teach as a first or second language
+  \item Powerful and efficient enough for mainstream programming
+  \item Maintainable and reusable code for large scale projects
+  \item Suitable for parallel and concurrent programming
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{\large Simple and Intuitive}
+  \begin{itemize}
+  \item Simple execution model
+  \item Allow imperative expression
+    \begin{itemize}
+    \item Loops
+    \item Assignment statements
+    \item Functions
+    \item Procedures executed for side-effect
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{\large Powerful and Efficient}
+  \begin{itemize}
+  \item High-level
+  \item Powerful looping construct
+  \item Optimising compiler
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{\large Maintainable and Reusable}
+  \begin{itemize}
+  \item Abstract datatypes
+  \item Information hiding
+  \item Resistant to programming errors
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Fungible Objects}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{\LARGE Fungible Objects}
+  \begin{block}{Definition \hfill \emph{\small dictionary.com}}
+    \textbf{fungible:}
+    \emph{(esp. of goods) being of such nature or kind as
+      to be freely exchangeable or replaceable, in whole or in part, for
+      another of like nature or kind.} 
+  \end{block}
+  \begin{itemize}[<+->]
+  \item Fungible objects:  one object may be replaced with an identical one
+    without changing program behaviour
+  \item So aliasing cannot matter
+  \item No object identity
+  \item Changing an object cannot affect any other object
+  \item Safe to modify objects
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Type System}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{\LARGE Type System}
+  \begin{itemize}
+  \item \frege is strongly typed
+  \item Type system ensures callers agree with callees about arguments
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
+
+    %% \begin{itemize}
+    %% \item \emph{Prevent} many coding errors
+    %% \item Compile-time errors/warnings for many more
+    %% \end{itemize}
+
+
+% LocalWords:  insts semidet choicepoint
