@@ -1,4 +1,4 @@
-% $Header: /home/schachte/test/cvs-conversion/CVSROOT/research/frege/intro.tex,v 1.1 2008/11/15 10:46:50 schachte Exp $
+% $Header: /home/schachte/test/cvs-conversion/CVSROOT/research/frege/intro.tex,v 1.2 2008/11/19 22:50:59 schachte Exp $
 
 \documentclass[12pt]{beamer}
 \usepackage{alltt}
@@ -174,7 +174,22 @@ pervasive \textsf{GE}nerics}
 \begin{frame}{\LARGE Type System}
   \begin{itemize}
   \item \frege is strongly typed
-  \item Type system ensures callers agree with callees about arguments
+  \item Each type specifies an \emph{interface} (type class), as well as an
+    implementation
+  \item Any type may declare that it \emph{implements} other types, if it has
+    methods for all their public operations
+  \item Anywhere a specific type is needed, any type that implements it may
+    be passed
+  \item Type may \emph{override} methods of types it implements
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{\LARGE Type System (2)}
+  \begin{itemize}
+  \item Meyer's Uniform Access Principle: constructors and field
+    access/update are just methods
   \end{itemize}
 \end{frame}
 

@@ -1,6 +1,6 @@
 %  Emacs    : -*- latex -*-
 %  File     : design.tex
-%  RCS      : $Id: design.tex,v 1.13 2008/05/18 09:56:47 schachte Exp $
+%  RCS      : $Id: design.tex,v 1.14 2008/11/19 22:50:59 schachte Exp $
 %  Author   : Peter Schachte
 %  Origin   : Fri Mar 28 19:36:48 2003
 %  Purpose  : Discussion document on design of new language
@@ -235,7 +235,7 @@ either approach.
 Thus \frege's mode system is based on dependencies among unique determination
 of values.  \Eg,
 \texttt{append}/3 would specify that if any two arguments are uniquely
-determined, the so is the third.
+determined, then so is the third.
 
 Modes may also be responsible for determining the required initial
 instantiation state for a predicate.  For example, the initial
@@ -350,7 +350,7 @@ applying to a tuple is the same as applying to each argument of the tuple,
 then p(x,y) = p(x)(y) = p x (y) = p x y.  Nice and clean.
 
 Should the language syntax be C-like, for the C-ness envy factor?  Or maybe
-python- or ruby-like, for the clean, lightweight look.
+python- or ruby-like, for the clean, lightweight look?
 
 
 \section{Compilation}
@@ -367,15 +367,15 @@ independently.  One example of this would be to turn a conjunction of
 nondeterministic goals into a RDBMS-style join operation when the two
 nondeterministic goals could be compiled into code that generates
 solutions in order.  In some cases, the code to find the next solution
-and next cursor could be quite efficient.  \Eg, the code find the next
+and next cursor could be quite efficient.  \Eg, the code to find the next
 solution for between/3 would be quite simple:  just increment the
 counter.  Similarly for member/2:  take the tail of the list.
 
 The problem is: how can we handle binding of variables appearing
-deeply nested inside other terms?  Basically, terms that would need to
-be trailed.  The cursor would need to maintain them somehow.  So it
+deeply nested inside other terms?  Such bindings would need to
+be trailed.  So it
 might always be possible to compile nondeterministic code into
-\emph{impure} deterministic, but not to \emph{pure} deterministic
+\emph{impure} deterministic code, but not to \emph{pure} deterministic
 code.
 
 
@@ -502,7 +502,7 @@ created term could be decided by the caller.  In fact, each predicate
 could decide whether only the caller, or only the callee, or neither,
 is permitted to use operations of supertypes of the declared argument
 type.  For example, a predicate or function interface might specify
-one argument to be a supertype of list of char, meaning an term of any
+one argument to be a supertype of list of char, meaning a term of any
 type which implements all the operations of list of char could be
 passed in or out.  Another argument might specify that neither the caller
 nor the predicate itself may use supertype operations.  Still another
@@ -519,8 +519,8 @@ with some kind of commit or ``pick the first solution'' operator, this
 could handle this without losing purity.  But we still need to be
 sure that p(X, Y), Y=... does not behave differently than Y = ...,
 p(X, Y), so commitment to an earlier solution of an or else operator
-must wait until it is certain that no further constraints on that
-solution.
+must wait until it is certain that there will be no further constraints on
+that solution.
 
 How to handle tuples?  Is a triple just a pair one of whose arguments is
 another pair?  Is a 1-tuple the same as a scalar?  Do we need to have the
@@ -544,7 +544,8 @@ away with calling both functions (predicates are just functions returning
 Boolean)?
 
 Drop the idea that disjunction is commutative?  Disjunctions return their
-results in a certain order, and for loop traverses them in that order.
+results in a certain order, and a \texttt{for} loop traverses them in that
+order.
 
 \end{document}
 
