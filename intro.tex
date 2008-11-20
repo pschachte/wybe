@@ -1,4 +1,4 @@
-% $Header: /home/schachte/test/cvs-conversion/CVSROOT/research/frege/intro.tex,v 1.2 2008/11/19 22:50:59 schachte Exp $
+% $Header: /home/schachte/test/cvs-conversion/CVSROOT/research/frege/intro.tex,v 1.3 2008/11/20 11:27:49 schachte Exp $
 
 \documentclass[12pt]{beamer}
 \usepackage{alltt}
@@ -113,7 +113,7 @@ pervasive \textsf{GE}nerics}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{\large Simple and Intuitive}
+\begin{frame}{\LARGE Simple and Intuitive}
   \begin{itemize}
   \item Simple execution model
   \item Allow imperative expression
@@ -123,22 +123,26 @@ pervasive \textsf{GE}nerics}
     \item Functions
     \item Procedures executed for side-effect
     \end{itemize}
+  \item Objects do not change unexpectedly
+  \item Fine control over object modification
   \end{itemize}
 \end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{\large Powerful and Efficient}
+\begin{frame}{\LARGE Powerful and Efficient}
   \begin{itemize}
   \item High-level
   \item Powerful looping construct
+  \item Powerful type/module system
+  \item Low-overhead interface to low-level languages
   \item Optimising compiler
   \end{itemize}
 \end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{\large Maintainable and Reusable}
+\begin{frame}{\LARGE Maintainable and Reusable}
   \begin{itemize}
   \item Abstract datatypes
   \item Information hiding
@@ -160,10 +164,27 @@ pervasive \textsf{GE}nerics}
   \begin{itemize}[<+->]
   \item Fungible objects:  one object may be replaced with an identical one
     without changing program behaviour
-  \item So aliasing cannot matter
   \item No object identity
   \item Changing an object cannot affect any other object
-  \item Safe to modify objects
+  \item Language manages aliasing for you
+  \item Object equality always means deep equality
+  \item No need for object cloning
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{\LARGE Fungible Objects (2)}
+  \begin{itemize}
+  \item Variable assignment treated as a \textsf{let} that scopes the rest of
+    the function definition
+  \item Field assignment treated as updating variable to hold nearly
+    identical object
+  \item Objects passed by address, but generally cannot be modified by
+    function
+  \item By default, function arguments are immutable
+  \item Function can declare some arguments mutable
+  \item Function \emph{call} can permit or forbid argument modification
   \end{itemize}
 \end{frame}
 
@@ -174,22 +195,27 @@ pervasive \textsf{GE}nerics}
 \begin{frame}{\LARGE Type System}
   \begin{itemize}
   \item \frege is strongly typed
-  \item Each type specifies an \emph{interface} (type class), as well as an
-    implementation
+  \item Each type declaration specifies an \emph{interface} (type class), as
+    well as an implementation (except for abstract methods)
   \item Any type may declare that it \emph{implements} other types, if it has
     methods for all their public operations
   \item Anywhere a specific type is needed, any type that implements it may
     be passed
-  \item Type may \emph{override} methods of types it implements
+  \item Meyer's Uniform Access Principle: constructors and field
+    access/update are just methods
+  \item Types can be parametric --- generics
   \end{itemize}
 \end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{\LARGE Type System (2)}
+\begin{frame}{\LARGE Object Oriented Features}
   \begin{itemize}
-  \item Meyer's Uniform Access Principle: constructors and field
-    access/update are just methods
+  \item No direct implementation inheritance
+  \item Types may delegate messages:  convenient notation for defining
+    $f(a, b, c, \ldots) = f(g(a), b, c, \ldots)$
+  \item Must list messages to delegate
+  \item Avoids fragile base class problem
   \end{itemize}
 \end{frame}
 
