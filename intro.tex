@@ -1,4 +1,4 @@
-% $Header: /home/schachte/test/cvs-conversion/CVSROOT/research/frege/intro.tex,v 1.3 2008/11/20 11:27:49 schachte Exp $
+% $Header: /home/schachte/test/cvs-conversion/CVSROOT/research/frege/intro.tex,v 1.4 2008/11/23 11:19:34 schachte Exp $
 
 \documentclass[12pt]{beamer}
 \usepackage{alltt}
@@ -182,9 +182,8 @@ pervasive \textsf{GE}nerics}
     identical object
   \item Objects passed by address, but generally cannot be modified by
     function
-  \item By default, function arguments are immutable
-  \item Function can declare some arguments mutable
-  \item Function \emph{call} can permit or forbid argument modification
+  \item Function can offer to update some arguments
+  \item Function \emph{call} can accept or reject the offer
   \end{itemize}
 \end{frame}
 
