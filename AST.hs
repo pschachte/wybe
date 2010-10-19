@@ -8,7 +8,7 @@
 
 import Data.Map
 
-type Ident = String
+type FileContent = [Module]
 
 data Module = Module Ident      -- module name
     [ModSpec]                   -- imported modules
@@ -20,6 +20,7 @@ data Module = Module Ident      -- module name
     (Map ProcFuncName ItemDefn) -- all defined funcs and procs
     deriving Show
 
+type Ident = String
 type TypeName = Ident
 type ResourceName = Ident
 type ProcFuncName = Ident
