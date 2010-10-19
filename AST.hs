@@ -4,7 +4,8 @@
 --  Origin   : Thu Oct 14 23:30:58 2010
 --  Purpose  : Abstract Syntax Tree for Frege language
 --  Copyright: © 2010 Peter Schachte.  All rights reserved.
---
+
+module AST where
 
 import Data.Map as Map
 import Data.Set as Set
