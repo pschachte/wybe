@@ -7,6 +7,7 @@
 
 import Text.ParserCombinators.Parsec
 import Prelude hiding (lookup,catch)
+import AST
 
 fregeFile = do
   skipSpace
@@ -25,7 +26,20 @@ comment = do
   manyTill anyChar (try newline)
   return ()
 
-fregeItem = ident
+fregeItem = do
+  vis <- visibility
+  skipSpace
+  id <- ident
+  return id
+
+
+visibility =
+  do string "pub"
+     
+     return Public
+  <|>
+  return Private
+
 
 ident = do
   ch1 <- identStartChar
