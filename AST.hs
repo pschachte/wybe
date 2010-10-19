@@ -6,19 +6,25 @@
 --  Copyright: © 2010 Peter Schachte.  All rights reserved.
 --
 
-import Data.Map
+import Data.Map as Map
+import Data.Set as Set
 
 type FileContent = [Module]
 
-data Module = Module Ident      -- module name
-    [ModSpec]                   -- imported modules
-    [TypeName]                  -- exported types
-    [ResourceName]              -- exported resources
-    [ProcFuncName]              -- exported funcs and procs
-    (Map TypeName TypeDefn)     -- all defined types
-    (Map ResourceName ResourceDef) -- all defined resources
-    (Map ProcFuncName ItemDefn) -- all defined funcs and procs
-    deriving Show
+data Module = Module {
+  modName :: Ident,
+  modImports :: Set ModSpec,
+  pubTypes :: Set TypeName,
+  pubResources :: Set ResourceName,
+  pubProcs :: Set ProcFuncName,
+  modTypes :: Map TypeName TypeDefn,
+  modResources :: Map ResourceName ResourceDef,
+  modProcs :: Map ProcFuncName ItemDefn
+  }  deriving Show
+
+initModule = Module "" Set.empty Set.empty Set.empty Set.empty
+             Map.empty Map.empty Map.empty 
+
 
 type Ident = String
 type TypeName = Ident
