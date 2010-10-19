@@ -7,25 +7,39 @@
 
 import Text.ParserCombinators.Parsec
 import Prelude hiding (lookup,catch)
-import Data.Char (isSpace, isDigit, digitToInt)
-import Data.List (mapAccumL)
-import Data.Map (Map, empty, insert, lookup, (!), fromList)
-import Control.Monad.State
-import Control.Exception ()
 
-csvFile = endBy line eol
-line = sepBy cell (char ',')
-cell = many (noneOf ",\n\r")
+fregeFile = do
+  skipSpace
+  many fregeItem
 
-eol =   try (string "\n\r")
-    <|> try (string "\r\n")
-    <|> string "\n"
-    <|> string "\r"
+skipSpace = skipMany whiteSpace
+  
+whiteSpace = ignoreSpace <|> comment
 
-parseCSV :: String -> Either ParseError [[String]]
-parseCSV input = parse csvFile "(unknown)" input
+ignoreSpace = do
+  space
+  return ()
+
+comment = do
+  char '#'
+  manyTill anyChar (try newline)
+  return ()
+
+fregeItem = ident
+
+ident = do
+  ch1 <- identStartChar
+  rest <- many identChar
+  skipSpace
+  return (ch1:rest)
+
+identStartChar = letter <|> char '_'
+identChar = identStartChar <|> digit
+
+parseFrege :: String -> Either ParseError [String]
+parseFrege input = parse fregeFile "(unknown)" input
 
 main = do
   file <- getContents
-  let output = parseCSV file
+  let output = parseFrege file
   putStrLn $ show output
