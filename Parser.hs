@@ -5,55 +5,83 @@
 --  Purpose  : Parser for Frege language
 --  Copyright: © 2010 Peter Schachte.  All rights reserved.
 
+module Parser where
+
 import Text.ParserCombinators.Parsec
 import Prelude hiding (lookup,catch)
 import AST
+import Scanner
 
-fregeFile = do
-  skipSpace
-  many fregeItem
+type FrgParser = GenParser Token ()
 
-skipSpace = skipMany whiteSpace
-  
-whiteSpace = ignoreSpace <|> comment
+-- Top-level file item
+data FrgItem = FrgItem Visibility TopItem deriving (Show)
 
-ignoreSpace = do
-  space
-  return ()
+data TopItem = ModuleItem String deriving (Show)
 
-comment = do
-  char '#'
-  manyTill anyChar (try newline)
-  return ()
+
+frgtoken :: (FrgToken -> Maybe a) -> FrgParser a
+frgtoken test
+  = token showToken posToken testToken
+  where
+    showToken (Token tok pos) = show tok
+    posToken  (Token tok pos) = pos
+    testToken (Token tok pos) = test tok
+
+
+identifier :: FrgParser String
+identifier 
+  = frgtoken (\tok -> case tok of 
+                 Ident name -> Just name
+                 other      -> Nothing)
+
+keyword :: String -> FrgParser ()
+keyword key 
+  = frgtoken (\tok -> case tok of 
+                 Ident name | name == key -> Just ()
+                 other                    -> Nothing)
+
+lparen :: String -> FrgParser ()
+lparen key 
+  = frgtoken (\tok -> case tok of 
+                 LBracket Paren -> Just ()
+                 other          -> Nothing)
+
+rparen :: String -> FrgParser ()
+rparen key 
+  = frgtoken (\tok -> case tok of 
+                 RBracket Paren -> Just ()
+                 other          -> Nothing)
+
+
+
+fregeFile = many fregeItem
 
 fregeItem = do
   vis <- visibility
-  skipSpace
-  id <- ident
-  return id
+  keyword "module"
+  id <- identifier
+  return (FrgItem vis (ModuleItem id))
 
 
 visibility =
-  do string "pub"
-     
+  do keyword "export"
      return Public
   <|>
   return Private
 
 
-ident = do
-  ch1 <- identStartChar
-  rest <- many identChar
-  skipSpace
-  return (ch1:rest)
-
-identStartChar = letter <|> char '_'
-identChar = identStartChar <|> digit
-
-parseFrege :: String -> Either ParseError [String]
+parseFrege :: [Token] -> Either ParseError [FrgItem]
 parseFrege input = parse fregeFile "(unknown)" input
 
 main = do
-  file <- getContents
+  file <- inputTokens
+  let output = parseFrege file
+  putStrLn $ show output
+
+
+compileFile :: FilePath -> IO ()
+compileFile filename = do
+  file <- fileTokens filename
   let output = parseFrege file
   putStrLn $ show output

@@ -6,7 +6,7 @@
 --  Copyright: © 2010 Peter Schachte.  All rights reserved.
 
 module Scanner (Token(..), FrgToken(..), StringDelim(..), 
-                BracketStyle(..), tokenise) where
+                BracketStyle(..), fileTokens, inputTokens) where
 
 import Data.Char
 import Data.List
@@ -35,14 +35,14 @@ data BracketStyle = Paren | Bracket | Brace
                   deriving (Show)
 
 
-tokeniseFile :: FilePath -> IO [Token]
-tokeniseFile filename =
+fileTokens :: FilePath -> IO [Token]
+fileTokens filename =
   do content <- readFile filename
      return (tokenise (initialPos filename) content)
 
 
-tokeniseInput :: IO [Token]
-tokeniseInput =
+inputTokens :: IO [Token]
+inputTokens =
   do content <- getContents
      return (tokenise (initialPos "") content)
 
