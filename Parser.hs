@@ -5,7 +5,7 @@
 --  Purpose  : Parser for Frege language
 --  Copyright: © 2010 Peter Schachte.  All rights reserved.
 
-module Parser where
+module Main (main)  where
 
 import Text.ParserCombinators.Parsec
 import Prelude hiding (lookup,catch)
@@ -57,15 +57,16 @@ rparen key
 
 fregeFile = many fregeItem
 
-fregeItem = do
-  vis <- visibility
-  keyword "module"
-  id <- identifier
-  return (FrgItem vis (ModuleItem id))
-
+fregeItem = 
+  do
+    vis <- visibility
+    keyword "module"
+    id <- identifier
+    return (FrgItem vis (ModuleItem id))
+  
 
 visibility =
-  do keyword "export"
+  do keyword "pub"
      return Public
   <|>
   return Private
