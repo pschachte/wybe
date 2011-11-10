@@ -16,46 +16,41 @@ import Scanner
       '-'             { TokSymbol "-" }
       '*'             { TokSymbol "*" }
       '/'             { TokSymbol "/" }
+      var             { TokIdent $$}
       '('             { TokLBracket Paren }
       ')'             { TokRBracket Paren }
 
+%right in
+%nonassoc '>' '<'
+%left '+' '-'
+%left '*' '/'
+%left NEG
 %%
 
-Exp1  : Exp1 '+' Term           { Plus $1 $3 }
-      | Exp1 '-' Term           { Minus $1 $3 }
-      | Term                    { Term $1 }
-
-Term  : Term '*' Factor         { Times $1 $3 }
-      | Term '/' Factor         { Div $1 $3 }
-      | Factor                  { Factor $1 }
-
-Factor			  
-      : int                     { IntValue $1 }
+Exp   : Exp '+' Exp             { Plus $1 $3 }
+      | Exp '-' Exp             { Minus $1 $3 }
+      | Exp '*' Exp             { Times $1 $3 }
+      | Exp '/' Exp             { Div $1 $3 }
+      | '(' Exp ')'             { $2 }
+      | '-' Exp %prec NEG       { Negate $2 }
+      | int                     { IntValue $1 }
       | float                   { FloatValue $1 }
-      | '(' Exp1 ')'            { Brack $2 }
+      | var                     { Var $1 }
 
 
 {
 parseError :: [FrgToken] -> a
 parseError _ = error "Parse error"
 
-data Exp1 
-      = Plus Exp1 Term 
-      | Minus Exp1 Term 
-      | Term Term
-      deriving Show
-
-data Term 
-      = Times Term Factor 
-      | Div Term Factor 
-      | Factor Factor
-      deriving Show
-
-data Factor 
-      = IntValue Integer
+data Exp
+      = Plus Exp Exp
+      | Minus Exp Exp
+      | Negate Exp
+      | Times Exp Exp
+      | Div Exp Exp
+      | IntValue Integer
       | FloatValue Double
       | Var String 
-      | Brack Exp1
       deriving Show
 
 main = do
