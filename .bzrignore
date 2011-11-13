@@ -1,2 +1,9 @@
 *.hi
 Parser.hs
+intro.pdf
+*.aux
+*.log
+*.nav
+*.snm
+*.toc
+intro.out

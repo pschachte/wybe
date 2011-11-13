@@ -23,7 +23,7 @@ data FrgToken = TokFloat Double
               | TokRBracket BracketStyle
               | TokComma
               | TokSemicolon
-              | TokPoint
+              | TokColon
               | TokSymbol String   -- symbol made of non-identifier characters
               deriving (Show)
 
@@ -64,7 +64,7 @@ tokenise pos str@(c:cs)
   | otherwise = case c of
                     ',' -> singleCharTok c cs pos TokComma
                     ';' -> singleCharTok c cs pos TokSemicolon
-                    '.' -> singleCharTok c cs pos TokPoint
+                    ':' -> singleCharTok c cs pos TokColon
                     '(' -> singleCharTok c cs pos $ TokLBracket Paren
                     '[' -> singleCharTok c cs pos $ TokLBracket Bracket
                     '{' -> singleCharTok c cs pos $ TokLBracket Brace
