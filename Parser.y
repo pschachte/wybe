@@ -18,9 +18,10 @@ import Scanner
       '/'             { TokSymbol "/" }
       ','             { TokComma }
       ';'             { TokSemicolon }
-      ':'             { TokSemicolon }
+      ':'             { TokColon }
       '.'             { TokSymbol "." }
-      type            { TokIdent "type" }
+      'public'        { TokIdent "public" }
+      'type'          { TokIdent "type" }
       func            { TokIdent "func" }
       proc            { TokIdent "proc" }
       where           { TokIdent "where" }
@@ -36,16 +37,52 @@ import Scanner
 %left NEG
 %%
 
-Item  : Visibility type Idents	  { Type $1 $3 }
+Item  : Visibility 'type' TypeProto '=' Ctors
+                  { TypeDecl $1 $3 $5 }
 --      | FuncDecl                { $1 }
 --      | ProcDecl                { $1 }
 
+
+TypeProto : ident OptIdents     { TypeProto $1 $2 }
+
+Ctors : RevCtors                { reverse $1 }
+
+RevCtors : FnProto              { [$1] }
+       | RevCtors FnProto       { $2:$1 }
+
+FnProto : ident OptParamList    { FnProto $1 $2 }
+
+OptParamList : {- empty -}	{ [] }
+       | '(' Params ')'         { $2 }
+
+Params : RevParams              { reverse $1 }
+
+RevParams : Param               { [$1] }
+       | RevParams ',' Param    { $3 : $1 }
+
+Param : ident ':' Type          { Param $1 $3 }
+
+Type : ident OptTypeList        { Type $1 $2 }
+
+OptTypeList : {- empty -}	{ [] }
+       | '(' Types ')'          { $2 }
+
+Types : RevTypes                { reverse $1 }
+
+RevTypes : Type                 { [$1] }
+      | RevTypes ',' Type       { $3 : $1 }
+
+
+OptIdents : {- empty -}         { [] }
+       | '(' Idents ')'         { $2 }
 
 Idents : RevIdents              { reverse $1 }
 
 RevIdents : ident               { [$1] }
        | RevIdents ',' ident    { $3:$1 }
 
+Visibility : {- empty -}          { Private }
+       | 'public'                 { Public }
 
 Exp   : Exp '+' Exp             { Plus $1 $3 }
       | Exp '-' Exp             { Minus $1 $3 }
@@ -58,19 +95,29 @@ Exp   : Exp '+' Exp             { Plus $1 $3 }
       | ident                   { Var $1 }
 
 
-Visibility : {- empty -}        { Private }
-      | public                  { Public }
-
 
 {
 parseError :: [FrgToken] -> a
 parseError _ = error "Parse error"
 
 data Item
-      = Type Visibility Idents
+      = TypeDecl Visibility TypeProto [FnProto]
       deriving Show
 
 type Idents = [String]
+
+data TypeProto = TypeProto String [String]
+      deriving Show
+
+data Type = Type String [Type]
+      deriving Show
+
+data FnProto = FnProto String [Param]
+      deriving Show
+
+data Param = Param String Type
+      deriving Show
+
 
 data Exp
       = Plus Exp Exp
