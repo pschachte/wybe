@@ -22,10 +22,10 @@ import Scanner
       '.'             { TokSymbol "." }
       'public'        { TokIdent "public" }
       'type'          { TokIdent "type" }
-      func            { TokIdent "func" }
-      proc            { TokIdent "proc" }
-      where           { TokIdent "where" }
-      end             { TokIdent "end" }
+      'func'          { TokIdent "func" }
+      'proc'          { TokIdent "proc" }
+      'where'         { TokIdent "where" }
+      'end'           { TokIdent "end" }
       ident           { TokIdent $$}
       '('             { TokLBracket Paren }
       ')'             { TokRBracket Paren }
@@ -39,7 +39,8 @@ import Scanner
 
 Item  : Visibility 'type' TypeProto '=' Ctors
                   { TypeDecl $1 $3 $5 }
---      | FuncDecl                { $1 }
+      | Visibility 'func' FnProto '=' Exp
+                  { FuncDecl $1 $3 $5 }
 --      | ProcDecl                { $1 }
 
 
@@ -102,6 +103,7 @@ parseError _ = error "Parse error"
 
 data Item
       = TypeDecl Visibility TypeProto [FnProto]
+      | FuncDecl Visibility FnProto Exp
       deriving Show
 
 type Idents = [String]
