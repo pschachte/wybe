@@ -1,5 +1,5 @@
 {
-module Main where
+module Parser (parse) where
 
 import Scanner
 }
@@ -161,10 +161,4 @@ data Exp
       deriving Show
 
 data Visibility = Public | Private deriving Show
-  
-
-
-main = do
-  toks <- inputTokens
-  print $ parse $ map frgtoken toks
 }
