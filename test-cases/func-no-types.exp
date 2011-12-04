@@ -1,0 +1,1 @@
+[FuncDecl Public (FnProto "times" [Param "a" Unspecified,Param "b" Unspecified]) Unspecified (Times (Var "a") (Var "b"))]

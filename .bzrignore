@@ -8,3 +8,4 @@ intro.pdf
 *.toc
 intro.out
 frg
+test-cases/*.out
