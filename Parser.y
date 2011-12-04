@@ -39,8 +39,8 @@ import Scanner
 
 Item  : Visibility 'type' TypeProto '=' Ctors
                   { TypeDecl $1 $3 $5 }
-      | Visibility 'func' FnProto '=' Exp
-                  { FuncDecl $1 $3 $5 }
+      | Visibility 'func' FnProto ':' Type '=' Exp
+                  { FuncDecl $1 $3 $5 $7 }
 --      | ProcDecl                { $1 }
 
 
@@ -103,7 +103,7 @@ parseError _ = error "Parse error"
 
 data Item
       = TypeDecl Visibility TypeProto [FnProto]
-      | FuncDecl Visibility FnProto Exp
+      | FuncDecl Visibility FnProto Type Exp
       deriving Show
 
 type Idents = [String]
