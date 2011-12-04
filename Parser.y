@@ -4,7 +4,7 @@ module Main where
 import Scanner
 }
 
-%name calc
+%name parse
 %tokentype { FrgToken }
 %error { parseError }
 
@@ -37,10 +37,15 @@ import Scanner
 %left NEG
 %%
 
+Items : RevItems                { reverse $1 }
+
+RevItems : {- empty -}          { [] }
+         | RevItems Item        { $2:$1 }
+
 Item  : Visibility 'type' TypeProto '=' Ctors
                   { TypeDecl $1 $3 $5 }
-      | Visibility 'func' FnProto ':' Type '=' Exp
-                  { FuncDecl $1 $3 $5 $7 }
+      | Visibility 'func' FnProto OptType '=' Exp
+                  { FuncDecl $1 $3 $4 $6 }
 --      | ProcDecl                { $1 }
 
 
@@ -61,7 +66,11 @@ Params : RevParams              { reverse $1 }
 RevParams : Param               { [$1] }
        | RevParams ',' Param    { $3 : $1 }
 
-Param : ident ':' Type          { Param $1 $3 }
+Param : ident OptType           { Param $1 $2 }
+
+OptType : {- empty -}		{ Unspecified }
+        | ':' Type              { $2 }
+
 
 Type : ident OptTypeList        { Type $1 $2 }
 
@@ -112,6 +121,7 @@ data TypeProto = TypeProto String [String]
       deriving Show
 
 data Type = Type String [Type]
+          | Unspecified
       deriving Show
 
 data FnProto = FnProto String [Param]
@@ -138,5 +148,5 @@ data Visibility = Public | Private deriving Show
 
 main = do
   toks <- inputTokens
-  print $ calc $ map frgtoken toks
+  print $ parse $ map frgtoken toks
 }
