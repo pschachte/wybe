@@ -43,10 +43,12 @@ RevItems : {- empty -}          { [] }
          | RevItems Item        { $2:$1 }
 
 Item  : Visibility 'type' TypeProto '=' Ctors
-                  { TypeDecl $1 $3 $5 }
+                                { TypeDecl $1 $3 $5 }
       | Visibility 'func' FnProto OptType '=' Exp
-                  { FuncDecl $1 $3 $4 $6 }
---      | ProcDecl                { $1 }
+                                { FuncDecl $1 $3 $4 $6 }
+      | Visibility 'proc' ProcProto ProcBody
+                                { ProcDecl $1 $3 $4 }
+
 
 
 TypeProto : ident OptIdents     { TypeProto $1 $2 }
@@ -57,6 +59,8 @@ RevCtors : FnProto              { [$1] }
        | RevCtors FnProto       { $2:$1 }
 
 FnProto : ident OptParamList    { FnProto $1 $2 }
+
+ProcProto : ident OptParamList  { ProcProto $1 $2 }
 
 OptParamList : {- empty -}	{ [] }
        | '(' Params ')'         { $2 }
@@ -91,8 +95,13 @@ Idents : RevIdents              { reverse $1 }
 RevIdents : ident               { [$1] }
        | RevIdents ',' ident    { $3:$1 }
 
-Visibility : {- empty -}          { Private }
-       | 'public'                 { Public }
+Visibility : {- empty -}        { Private }
+       | 'public'               { Public }
+
+ProcBody : 'end'                { [] }
+      | Stmt ProcBody           { $1:$2 }
+
+Stmt  : ident '=' Exp           { Assign $1 $3 }
 
 Exp   : Exp '+' Exp             { Plus $1 $3 }
       | Exp '-' Exp             { Minus $1 $3 }
@@ -111,9 +120,10 @@ parseError :: [FrgToken] -> a
 parseError _ = error "Parse error"
 
 data Item
-      = TypeDecl Visibility TypeProto [FnProto]
-      | FuncDecl Visibility FnProto Type Exp
-      deriving Show
+     = TypeDecl Visibility TypeProto [FnProto]
+     | FuncDecl Visibility FnProto Type Exp
+     | ProcDecl Visibility ProcProto ProcBody
+    deriving Show
 
 type Idents = [String]
 
@@ -127,9 +137,17 @@ data Type = Type String [Type]
 data FnProto = FnProto String [Param]
       deriving Show
 
+data ProcProto = ProcProto String [Param]
+      deriving Show
+
 data Param = Param String Type
       deriving Show
 
+type ProcBody = [Stmt]
+
+data Stmt
+     = Assign String Exp
+    deriving Show
 
 data Exp
       = Plus Exp Exp
