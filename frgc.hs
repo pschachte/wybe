@@ -2,7 +2,7 @@
 --  RCS      : $Id$
 --  Author   : Peter Schachte
 --  Origin   : Sun Dec  4 18:39:16 2011
---  Purpose  : 
+--  Purpose  : Frege compiler main code
 --  Copyright: © 2011 Peter Schachte.  All rights reserved.
 --
 

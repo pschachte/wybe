@@ -24,12 +24,15 @@ import Scanner
       'type'          { TokIdent "type" }
       'func'          { TokIdent "func" }
       'proc'          { TokIdent "proc" }
+      'let'           { TokIdent "let" }
       'where'         { TokIdent "where" }
       'end'           { TokIdent "end" }
+      'in'            { TokIdent "in" }
       ident           { TokIdent $$}
       '('             { TokLBracket Paren }
       ')'             { TokRBracket Paren }
 
+%nonassoc 'where' 'let'
 %right in
 %nonassoc '>' '<'
 %left '+' '-'
@@ -98,8 +101,12 @@ RevIdents : ident               { [$1] }
 Visibility : {- empty -}        { Private }
        | 'public'               { Public }
 
-ProcBody : 'end'                { [] }
-      | Stmt ProcBody           { $1:$2 }
+ProcBody : Stmts 'end'          { $1 }
+
+Stmts : RevStmts                { reverse $1 }
+
+RevStmts : {- empty -}          { [] }
+         | RevStmts Stmt        { $2:$1 }
 
 Stmt  : ident '=' Exp           { Assign $1 $3 }
 
@@ -107,6 +114,8 @@ Exp   : Exp '+' Exp             { Plus $1 $3 }
       | Exp '-' Exp             { Minus $1 $3 }
       | Exp '*' Exp             { Times $1 $3 }
       | Exp '/' Exp             { Div $1 $3 }
+      | 'let' Stmts 'in' Exp    { Where $2 $4 }
+      | Exp 'where' ProcBody    { Where $3 $1 }
       | '(' Exp ')'             { $2 }
       | '-' Exp %prec NEG       { Negate $2 }
       | int                     { IntValue $1 }
@@ -122,7 +131,7 @@ parseError _ = error "Parse error"
 data Item
      = TypeDecl Visibility TypeProto [FnProto]
      | FuncDecl Visibility FnProto Type Exp
-     | ProcDecl Visibility ProcProto ProcBody
+     | ProcDecl Visibility ProcProto Stmts
     deriving Show
 
 type Idents = [String]
@@ -143,7 +152,7 @@ data ProcProto = ProcProto String [Param]
 data Param = Param String Type
       deriving Show
 
-type ProcBody = [Stmt]
+type Stmts = [Stmt]
 
 data Stmt
      = Assign String Exp
@@ -155,6 +164,7 @@ data Exp
       | Negate Exp
       | Times Exp Exp
       | Div Exp Exp
+      | Where Stmts Exp
       | IntValue Integer
       | FloatValue Double
       | Var String 

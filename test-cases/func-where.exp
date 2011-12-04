@@ -1,0 +1,1 @@
+[FuncDecl Public (FnProto "quad" [Param "x" (Type "int" [])]) (Type "int" []) (Where [Assign "d" (Plus (Var "x") (Var "x"))] (Plus (Var "d") (Var "d")))]
