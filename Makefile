@@ -16,15 +16,14 @@ all:	frg
 frg:	Parser.hs Scanner.hs
 	ghc -o $@ --make Parser.hs
 
-TESTOUTS = $(patsubst %.frg,%.out,$(wildcard test-cases/*.frg))
-
-%.out:	%.frg frg
-	./frg < $< > $@
+TESTCASES = $(wildcard test-cases/*.frg)
 
 test:
-	for f in $(TESTOUTS) ; do \
+	for f in $(TESTCASES) ; do \
 	    printf "%-40s ... " $$f ; \
-	    ./frg < $$f > $(patsubst %.frg,%.out,$$f) ; \
-	    diff -q $$f $(patsubst %.frg,%.out,$$f) && echo "PASS" ; \
-	    diff -q $$f $(patsubst %.frg,%.out,$$f) || echo "FAIL" ; \
+	    out=`echo "$$f" | sed 's/.frg$$/.out/'` ; \
+	    exp=`echo "$$f" | sed 's/.frg$$/.exp/'` ; \
+	    ./frg < $$f > $$out ; \
+	    diff -q $$exp $$out >/dev/null && echo "PASS" ; \
+	    diff -q $$exp $$out >/dev/null || echo "FAIL" ; \
 	done
