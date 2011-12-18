@@ -16,6 +16,12 @@ import Scanner
       '-'             { TokSymbol "-" }
       '*'             { TokSymbol "*" }
       '/'             { TokSymbol "/" }
+      '<'             { TokSymbol "<" }
+      '>'             { TokSymbol ">" }
+      '<='            { TokSymbol "<=" }
+      '>='            { TokSymbol ">=" }
+      '=='            { TokSymbol "==" }
+      '/='            { TokSymbol "/=" }
       ','             { TokComma }
       ';'             { TokSemicolon }
       ':'             { TokColon }
@@ -44,7 +50,7 @@ import Scanner
 
 %nonassoc 'where' 'let'
 %nonassoc 'in'
-%left '>' '<'
+%left '>' '<' '<=' '>=' '==' '/='
 %left '+' '-'
 %left '*' '/'
 %left NEG
@@ -124,6 +130,14 @@ Exp   : Exp '+' Exp             { Plus $1 $3 }
       | Exp '-' Exp             { Minus $1 $3 }
       | Exp '*' Exp             { Times $1 $3 }
       | Exp '/' Exp             { Div $1 $3 }
+      | Exp '<' Exp             { Less $1 $3 }
+      | Exp '<=' Exp            { Leq $1 $3 }
+      | Exp '>' Exp             { Less $3 $1 }
+      | Exp '>=' Exp            { Leq $3 $1 }
+      | Exp '==' Exp            { Equal $1 $3 }
+      | Exp '/=' Exp            { Neq $1 $3 }
+      | 'if' Exp 'then' Exp 'else' Exp
+                                { Cond $2 $4 $6 }
       | 'let' Stmts 'in' Exp    { Where $2 $4 }
       | Exp 'where' ProcBody    { Where $3 $1 }
       | '(' Exp ')'             { $2 }
@@ -181,7 +195,12 @@ data Exp
       | Negate Exp
       | Times Exp Exp
       | Div Exp Exp
+      | Less Exp Exp
+      | Leq Exp Exp
+      | Equal Exp Exp
+      | Neq Exp Exp
       | Where Stmts Exp
+      | Cond Exp Exp Exp
       | IntValue Integer
       | FloatValue Double
       | Fncall String [Exp]
