@@ -11,6 +11,8 @@ import Scanner
 %token 
       int             { TokInt $$ }
       float           { TokFloat $$ }
+      dstring         { TokString DoubleQuote $$ }
+      sstring         { TokString SingleQuote $$ }
       '='             { TokSymbol "=" }
       '+'             { TokSymbol "+" }
       '-'             { TokSymbol "-" }
@@ -154,6 +156,7 @@ Exp   : Exp '+' Exp             { Plus $1 $3 }
       | '-' Exp %prec NEG       { Negate $2 }
       | int                     { IntValue $1 }
       | float                   { FloatValue $1 }
+      | dstring                 { StringValue $1 }
       | ident                   { Var $1 }
       | ident ArgList           { Fncall $1 $2 }
 
@@ -216,6 +219,7 @@ data Exp
       | CondExp Exp Exp Exp
       | IntValue Integer
       | FloatValue Double
+      | StringValue String
       | Fncall String [Exp]
       | Var String
       deriving Show
