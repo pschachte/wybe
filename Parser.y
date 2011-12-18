@@ -69,6 +69,7 @@ Item  : Visibility 'type' TypeProto '=' Ctors
                                 { FuncDecl $1 $3 $4 $6 }
       | Visibility 'proc' ProcProto ProcBody
                                 { ProcDecl $1 $3 $4 }
+      | Stmt                    { StmtDecl $1 }
 
 
 
@@ -176,6 +177,7 @@ data Item
      = TypeDecl Visibility TypeProto [FnProto]
      | FuncDecl Visibility FnProto Type Exp
      | ProcDecl Visibility ProcProto Stmts
+     | StmtDecl Stmt
     deriving Show
 
 type Idents = [String]
