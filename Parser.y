@@ -28,13 +28,23 @@ import Scanner
       'where'         { TokIdent "where" }
       'end'           { TokIdent "end" }
       'in'            { TokIdent "in" }
+      'if'            { TokIdent "if" }
+      'then'          { TokIdent "then" }
+      'elseif'        { TokIdent "elseif" }
+      'else'          { TokIdent "else" }
+      'do'            { TokIdent "do" }
+      'for'           { TokIdent "for" }
+      'while'         { TokIdent "while" }
+      'until'         { TokIdent "until" }
+      'when'          { TokIdent "when" }
+      'unless'        { TokIdent "unless" }
       ident           { TokIdent $$}
       '('             { TokLBracket Paren }
       ')'             { TokRBracket Paren }
 
 %nonassoc 'where' 'let'
-%right in
-%nonassoc '>' '<'
+%nonassoc 'in'
+%left '>' '<'
 %left '+' '-'
 %left '*' '/'
 %left NEG
@@ -121,7 +131,14 @@ Exp   : Exp '+' Exp             { Plus $1 $3 }
       | int                     { IntValue $1 }
       | float                   { FloatValue $1 }
       | ident                   { Var $1 }
+      | ident ArgList           { Fncall $1 $2 }
 
+ArgList : '(' Exp ExpList ')'   { $2:$3 }
+
+ExpList : RevExpList            { reverse $1 }
+
+RevExpList : {- empty -}        { [] }
+           | RevExpList ',' Exp { $3:$1 }
 
 
 {
@@ -167,7 +184,8 @@ data Exp
       | Where Stmts Exp
       | IntValue Integer
       | FloatValue Double
-      | Var String 
+      | Fncall String [Exp]
+      | Var String
       deriving Show
 
 data Visibility = Public | Private deriving Show
