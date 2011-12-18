@@ -76,9 +76,7 @@ tokenise pos str@(c:cs)
                     '`' -> tokeniseString BackQuote pos cs
                     '#' -> tokenise (setSourceColumn pos 1)
                            $ dropWhile (not . (=='\n')) cs
-                    _   -> let (sym,rest) = span isSymbolChar cs
-                               pos' = updatePosString pos 
-                           in  multiCharTok (c:sym) rest (TokSymbol $ c:sym) pos
+                    _   -> tokeniseSymbol pos str
 
 -- XXX Still not handling backslash-delimited strings; still want them?
 
@@ -142,6 +140,12 @@ scanNumberExponent n pos cs =
   let (digits,rest) = span isDigit cs
   in (TokFloat $ n*10**(fromIntegral $ read digits), rest,
       updatePosString pos digits)
+
+
+tokeniseSymbol pos (c:cs) =
+  let (sym,rest) = span isSymbolChar cs
+      pos' = updatePosString pos 
+  in  multiCharTok (c:sym) rest (TokSymbol $ c:sym) pos
 
 isIdentChar :: Char -> Bool
 isIdentChar ch = isAlphaNum ch || ch == '_'
