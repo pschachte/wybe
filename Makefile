@@ -2,7 +2,7 @@
 #  RCS      : $Id: Makefile,v 1.1 2003/03/30 13:43:53 schachte Exp $
 #  Author   : Peter Schachte
 
-all:	frgc
+all:	test
 
 %.pdf:	%.tex
 	rubber -m pdftex $<
