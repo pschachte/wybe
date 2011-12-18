@@ -19,7 +19,7 @@ frgc:	frgc.hs Parser.hs Scanner.hs
 TESTCASES = $(wildcard test-cases/*.frg)
 
 test:	frgc
-	for f in $(TESTCASES) ; do \
+	@for f in $(TESTCASES) ; do \
 	    printf "%-40s ... " $$f ; \
 	    out=`echo "$$f" | sed 's/.frg$$/.out/'` ; \
 	    exp=`echo "$$f" | sed 's/.frg$$/.exp/'` ; \
