@@ -46,6 +46,9 @@ import Scanner
       'until'         { TokIdent "until" }
       'when'          { TokIdent "when" }
       'unless'        { TokIdent "unless" }
+      'from'          { TokIdent "from" }
+      'to'            { TokIdent "to" }
+      'by'            { TokIdent "by" }
       ident           { TokIdent $$}
       '('             { TokLBracket Paren }
       ')'             { TokRBracket Paren }
@@ -131,6 +134,19 @@ Stmt  : ident '=' Exp           { Assign $1 $3 }
       | ident OptProcArgs       { ProcCall $1 $2 }
       | 'if' Exp 'then' Stmts Condelse 'end'
                                 { Cond $2 $4 $5 }
+      | 'do' LoopBody 'end'
+                                { Loop $2 }
+
+LoopBody : RevLoopBody          { reverse $1 }
+
+RevLoopBody : {- empty -}       { [] }
+            | RevLoopBody LoopStmt
+                                { $2:$1 }
+
+LoopStmt : 'for' Generator      { For $2 }
+         | 'until' Exp          { BreakIf $2 }
+         | 'unless' Exp         { NextIf $2 }
+         | Stmt                 { NormalStmt $1 }
 
 OptProcArgs : {- empty -}       { [] }
            | '(' Exp ExpList ')'
@@ -138,6 +154,16 @@ OptProcArgs : {- empty -}       { [] }
 
 Condelse : 'else' Stmts         { $2 }
          | {- empty -}          { [] }
+
+Generator : ident 'in' Exp      { In $1 $3 }
+          | ident 'from' Exp 'to' Exp 'by' Exp
+                                { InRange $1 $3 $7 (Just $5) }
+          | ident 'from' Exp 'by' Exp 'to' Exp
+                                { InRange $1 $3 $5 (Just $7) }
+          | ident 'from' Exp 'to' Exp
+                                { InRange $1 $3 (IntValue 1) (Just $5) }
+          | ident 'from' Exp 'by' Exp
+                                { InRange $1 $3 $5 Nothing }
 
 Exp   : Exp '+' Exp             { Plus $1 $3 }
       | Exp '-' Exp             { Minus $1 $3 }
@@ -167,7 +193,6 @@ ExpList : RevExpList            { reverse $1 }
 
 RevExpList : {- empty -}        { [] }
            | RevExpList ',' Exp { $3:$1 }
-
 
 {
 parseError :: [FrgToken] -> a
@@ -202,10 +227,19 @@ type Stmts = [Stmt]
 
 data Stmt
      = Assign String Exp
-     | Cond Exp Stmts Stmts
      | ProcCall String [Exp]
+     | Cond Exp Stmts Stmts
+     | Loop [LoopStmt]
      | Nop
     deriving Show
+
+data LoopStmt
+     = For Generator
+     | BreakIf Exp
+     | NextIf Exp
+     | NormalStmt Stmt
+    deriving Show
+
 
 data Exp
       = Plus Exp Exp
@@ -227,4 +261,10 @@ data Exp
       deriving Show
 
 data Visibility = Public | Private deriving Show
+
+data Generator 
+      = In String Exp
+      | InRange String Exp Exp (Maybe Exp)
+    deriving Show
+
 }
