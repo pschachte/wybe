@@ -125,6 +125,16 @@ RevStmts : {- empty -}          { [] }
          | RevStmts Stmt        { $2:$1 }
 
 Stmt  : ident '=' Exp           { Assign $1 $3 }
+      | ident OptProcArgs       { ProcCall $1 $2 }
+      | 'if' Exp 'then' Stmts Condelse 'end'
+                                { Cond $2 $4 $5 }
+
+OptProcArgs : {- empty -}       { [] }
+           | '(' Exp ExpList ')'
+                                { $2:$3 }
+
+Condelse : 'else' Stmts         { $2 }
+         | {- empty -}          { [] }
 
 Exp   : Exp '+' Exp             { Plus $1 $3 }
       | Exp '-' Exp             { Minus $1 $3 }
@@ -137,7 +147,7 @@ Exp   : Exp '+' Exp             { Plus $1 $3 }
       | Exp '==' Exp            { Equal $1 $3 }
       | Exp '/=' Exp            { Neq $1 $3 }
       | 'if' Exp 'then' Exp 'else' Exp
-                                { Cond $2 $4 $6 }
+                                { CondExp $2 $4 $6 }
       | 'let' Stmts 'in' Exp    { Where $2 $4 }
       | Exp 'where' ProcBody    { Where $3 $1 }
       | '(' Exp ')'             { $2 }
@@ -187,6 +197,9 @@ type Stmts = [Stmt]
 
 data Stmt
      = Assign String Exp
+     | Cond Exp Stmts Stmts
+     | ProcCall String [Exp]
+     | Nop
     deriving Show
 
 data Exp
@@ -200,7 +213,7 @@ data Exp
       | Equal Exp Exp
       | Neq Exp Exp
       | Where Stmts Exp
-      | Cond Exp Exp Exp
+      | CondExp Exp Exp Exp
       | IntValue Integer
       | FloatValue Double
       | Fncall String [Exp]
