@@ -49,11 +49,17 @@ import Scanner
       'from'          { TokIdent "from" }
       'to'            { TokIdent "to" }
       'by'            { TokIdent "by" }
+      'and'           { TokIdent "and" }
+      'or'            { TokIdent "or" }
+      'not'           { TokIdent "not" }
       ident           { TokIdent $$}
       '('             { TokLBracket Paren }
       ')'             { TokRBracket Paren }
 
 %nonassoc 'where' 'let'
+%left 'or'
+%left 'and'
+%left 'not'
 %nonassoc 'in'
 %left '>' '<' '<=' '>=' '==' '/='
 %left '+' '-'
@@ -145,7 +151,9 @@ RevLoopBody : {- empty -}       { [] }
 
 LoopStmt : 'for' Generator      { For $2 }
          | 'until' Exp          { BreakIf $2 }
+         | 'while' Exp          { BreakIf (Not $2) }
          | 'unless' Exp         { NextIf $2 }
+         | 'when' Exp           { NextIf (Not $2) }
          | Stmt                 { NormalStmt $1 }
 
 OptProcArgs : {- empty -}       { [] }
@@ -175,6 +183,9 @@ Exp   : Exp '+' Exp             { Plus $1 $3 }
       | Exp '>=' Exp            { Leq $3 $1 }
       | Exp '==' Exp            { Equal $1 $3 }
       | Exp '/=' Exp            { Neq $1 $3 }
+      | 'not' Exp               { Not $2 }
+      | Exp 'and' Exp           { And $1 $3 }
+      | Exp 'or' Exp            { Or $1 $3 }
       | 'if' Exp 'then' Exp 'else' Exp
                                 { CondExp $2 $4 $6 }
       | 'let' Stmts 'in' Exp    { Where $2 $4 }
@@ -197,6 +208,7 @@ RevExpList : {- empty -}        { [] }
 {
 parseError :: [FrgToken] -> a
 parseError _ = error "Parse error"
+
 
 data Item
      = TypeDecl Visibility TypeProto [FnProto]
@@ -253,6 +265,9 @@ data Exp
       | Neq Exp Exp
       | Where Stmts Exp
       | CondExp Exp Exp Exp
+      | And Exp Exp
+      | Or Exp Exp
+      | Not Exp
       | IntValue Integer
       | FloatValue Double
       | StringValue String
