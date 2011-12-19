@@ -28,6 +28,8 @@ import Scanner
       ';'             { TokSemicolon }
       ':'             { TokColon }
       '.'             { TokSymbol "." }
+      '?'             { TokSymbol "?" }
+      '!'             { TokSymbol "!" }
       'public'        { TokIdent "public" }
       'type'          { TokIdent "type" }
       'func'          { TokIdent "func" }
@@ -91,7 +93,8 @@ RevCtors : FnProto              { [$1] }
 
 FnProto : ident OptParamList    { FnProto $1 $2 }
 
-ProcProto : ident OptParamList  { ProcProto $1 $2 }
+ProcProto : ident OptProcParamList
+                                { ProcProto $1 $2 }
 
 OptParamList : {- empty -}	{ [] }
        | '(' Params ')'         { $2 }
@@ -102,6 +105,19 @@ RevParams : Param               { [$1] }
        | RevParams ',' Param    { $3 : $1 }
 
 Param : ident OptType           { Param $1 $2 }
+
+OptProcParamList : {- empty -}	{ [] }
+       | '(' ProcParams ')'     { $2 }
+
+ProcParams : RevProcParams      { reverse $1 }
+
+RevProcParams : ProcParam       { [$1] }
+       | RevProcParams ',' ProcParam
+                                { $3 : $1 }
+
+ProcParam : ident OptType       { ProcParam $1 $2 ParamIn }
+          | '?' ident OptType   { ProcParam $2 $3 ParamOut }
+          | '!' ident OptType   { ProcParam $2 $3 ParamInOut }
 
 OptType : {- empty -}		{ Unspecified }
         | ':' Type              { $2 }
@@ -229,10 +245,16 @@ data Type = Type String [Type]
 data FnProto = FnProto String [Param]
       deriving Show
 
-data ProcProto = ProcProto String [Param]
+data ProcProto = ProcProto String [ProcParam]
       deriving Show
 
 data Param = Param String Type
+      deriving Show
+
+data ProcParam = ProcParam String Type FlowDirection
+      deriving Show
+
+data FlowDirection = ParamIn | ParamOut | ParamInOut
       deriving Show
 
 type Stmts = [Stmt]

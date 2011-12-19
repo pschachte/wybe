@@ -1,0 +1,1 @@
+[ProcDecl Public (ProcProto "print2" [ProcParam "x" (Type "int" []) ParamIn,ProcParam "y" (Type "int" []) ParamIn]) [Loop [For (InRange "count" (IntValue 99) (Negate (IntValue 1)) (Just (IntValue 0))),NormalStmt (ProcCall "print" [Var "count"]),NormalStmt (ProcCall "println" [StringValue " bottles of beer on the wall"])]]]

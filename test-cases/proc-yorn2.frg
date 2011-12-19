@@ -1,4 +1,4 @@
-public proc yorn(prompt:string)
+public proc yorn(prompt:string, ?result:bool)
     do  print(prompt)
 	print(" (y/n) ")
 	read_line(response)

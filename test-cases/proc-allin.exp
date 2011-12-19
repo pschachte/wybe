@@ -1,1 +1,1 @@
-[ProcDecl Public (ProcProto "nada" [Param "x" (Type "int" []),Param "y" (Type "int" [])]) [Assign "z" (Plus (Var "x") (Var "y"))]]
+[ProcDecl Public (ProcProto "nada" [ProcParam "x" (Type "int" []) ParamIn,ProcParam "y" (Type "int" []) ParamIn]) [Assign "z" (Plus (Var "x") (Var "y"))]]
