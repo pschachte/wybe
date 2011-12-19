@@ -3,8 +3,8 @@ public proc yorn(prompt:string, ?result:bool)
 	print(" (y/n) ")
 	read_line(response)
 	responsechar = to_upper(first(response))
-	result = responsechar == "Y"
-	until result or responsechar == "N"
+	result = responsechar == 'Y'
+	until result or responsechar == 'N'
 	println("Please answer 'yes' or 'no'.")
     end
  end

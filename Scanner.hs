@@ -18,6 +18,7 @@ data Token = Token FrgToken SourcePos
 data FrgToken = TokFloat Double
               | TokInt Integer
               | TokString StringDelim String
+              | TokChar Char
               | TokIdent String
               | TokLBracket BracketStyle
               | TokRBracket BracketStyle
@@ -31,7 +32,7 @@ data FrgToken = TokFloat Double
 frgtoken :: Token -> FrgToken
 frgtoken (Token tok _) = tok
 
-data StringDelim = SingleQuote | DoubleQuote | BackQuote | LongQuote String
+data StringDelim = DoubleQuote | BackQuote | LongQuote String
                  deriving (Show)
 
 data BracketStyle = Paren | Bracket | Brace
@@ -71,7 +72,7 @@ tokenise pos str@(c:cs)
                     ')' -> singleCharTok c cs pos $ TokRBracket Paren
                     ']' -> singleCharTok c cs pos $ TokRBracket Bracket
                     '}' -> singleCharTok c cs pos $ TokRBracket Brace
-                    '\'' -> tokeniseString SingleQuote pos cs
+                    '\'' -> tokeniseChar pos cs
                     '\"' -> tokeniseString DoubleQuote pos cs
                     '`' -> tokeniseString BackQuote pos cs
                     '#' -> tokenise (setSourceColumn pos 1)
@@ -101,10 +102,32 @@ tokeniseString delim pos cs =
                                            termchar) $ tail rest)
 
 
-delimChar SingleQuote = '\''
 delimChar DoubleQuote = '\"'
 delimChar BackQuote = '`'
 
+
+tokeniseChar :: SourcePos -> String -> [Token]
+tokeniseChar pos ('\\':c:'\'':rest) =
+  Token (TokChar $ escapedChar c) pos :
+  tokenise 
+  (updatePosChar 
+   (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\\')
+   '\'')
+  rest
+tokeniseChar pos (c:'\'':cs) =
+  (Token (TokChar c) pos):
+  tokenise (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\'') cs
+
+escapedChar :: Char -> Char
+escapedChar 'a' = '\a'
+escapedChar 'b' = '\b'
+escapedChar 'f' = '\f'
+escapedChar 'n' = '\n'
+escapedChar 'r' = '\r'
+escapedChar 't' = '\t'
+escapedChar 'v' = '\v'
+escapedChar c = c
+-- XXX must support hex unicode escapes
 
 scanNumberToken :: Integer -> Integer -> SourcePos -> String -> 
                    (FrgToken,String,SourcePos)
@@ -116,6 +139,7 @@ scanNumberToken radix n pos str@(c:cs)
                 (updatePosChar pos c) cs
   | (c == 'x' || c == 'X') && n == 0 = scanNumberToken 16 0 
                                        (updatePosChar pos c) cs
+  | c == '_' = scanNumberToken radix n (updatePosChar pos c) cs
   | c == '.' && radix == 10 = scanNumberFrac (fromIntegral n) 0.1 
                               (updatePosChar pos c) cs
   | c == 'e' || c == 'E' = scanNumberExponent (fromIntegral n) 
