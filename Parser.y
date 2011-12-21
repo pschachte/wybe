@@ -70,159 +70,193 @@ import Scanner
 %left NEG
 %%
 
-Items : RevItems                { reverse $1 }
+Items :: { [Item] }
+    : RevItems                  { reverse $1 }
 
-RevItems : {- empty -}          { [] }
-         | RevItems Item        { $2:$1 }
+RevItems :: { [Item] }
+    : {- empty -}               { [] }
+    | RevItems Item             { $2:$1 }
 
-Item  : Visibility 'type' TypeProto '=' Ctors
+
+Item  :: { Item }
+    : Visibility 'type' TypeProto '=' Ctors
                                 { TypeDecl $1 $3 $5 }
-      | Visibility 'func' FnProto OptType '=' Exp
+    | Visibility 'func' FnProto OptType '=' Exp
                                 { FuncDecl $1 $3 $4 $6 }
-      | Visibility 'proc' ProcProto ProcBody
+    | Visibility 'proc' ProcProto ProcBody
                                 { ProcDecl $1 $3 $4 }
-      | Stmt                    { StmtDecl $1 }
+    | Stmt                      { StmtDecl $1 }
 
 
 
-TypeProto : ident OptIdents     { TypeProto $1 $2 }
+TypeProto :: { TypeProto }
+    : ident OptIdents           { TypeProto $1 $2 }
 
-Ctors : RevCtors                { reverse $1 }
+Ctors :: { [FnProto] }
+    : RevCtors                  { reverse $1 }
 
-RevCtors : FnProto              { [$1] }
-       | RevCtors FnProto       { $2:$1 }
+RevCtors :: { [FnProto] }
+    : FnProto                   { [$1] }
+    | RevCtors FnProto          { $2:$1 }
 
-FnProto : ident OptParamList    { FnProto $1 $2 }
+FnProto :: { FnProto }
+    : ident OptParamList        { FnProto $1 $2 }
 
-ProcProto : ident OptProcParamList
-                                { ProcProto $1 $2 }
+ProcProto :: { ProcProto }
+    : ident OptProcParamList    { ProcProto $1 $2 }
 
-OptParamList : {- empty -}	{ [] }
-       | '(' Params ')'         { $2 }
+OptParamList :: { [Param] }
+    : {- empty -}               { [] }
+    | '(' Params ')'            { $2 }
 
-Params : RevParams              { reverse $1 }
+Params :: { [Param] }
+    : RevParams                 { reverse $1 }
 
-RevParams : Param               { [$1] }
-       | RevParams ',' Param    { $3 : $1 }
+RevParams :: { [Param] }
+    : Param                     { [$1] }
+    | RevParams ',' Param       { $3 : $1 }
 
-Param : ident OptType           { Param $1 $2 }
+Param :: { Param }
+    : ident OptType             { Param $1 $2 }
 
-OptProcParamList : {- empty -}	{ [] }
-       | '(' ProcParams ')'     { $2 }
+OptProcParamList :: { [ProcParam] }
+    : {- empty -}               { [] }
+    | '(' ProcParams ')'        { $2 }
 
-ProcParams : RevProcParams      { reverse $1 }
+ProcParams :: { [ProcParam] }
+    : RevProcParams             { reverse $1 }
 
-RevProcParams : ProcParam       { [$1] }
-       | RevProcParams ',' ProcParam
+RevProcParams :: { [ProcParam] }
+    : ProcParam                 { [$1] }
+    | RevProcParams ',' ProcParam
                                 { $3 : $1 }
 
-ProcParam : ident OptType       { ProcParam $1 $2 ParamIn }
-          | '?' ident OptType   { ProcParam $2 $3 ParamOut }
-          | '!' ident OptType   { ProcParam $2 $3 ParamInOut }
+ProcParam :: { ProcParam }
+    : ident OptType             { ProcParam $1 $2 ParamIn }
+    | '?' ident OptType         { ProcParam $2 $3 ParamOut }
+    | '!' ident OptType         { ProcParam $2 $3 ParamInOut }
 
-OptType : {- empty -}		{ Unspecified }
-        | ':' Type              { $2 }
-
-
-Type : ident OptTypeList        { Type $1 $2 }
-
-OptTypeList : {- empty -}	{ [] }
-       | '(' Types ')'          { $2 }
-
-Types : RevTypes                { reverse $1 }
-
-RevTypes : Type                 { [$1] }
-      | RevTypes ',' Type       { $3 : $1 }
+OptType :: { Type }
+    : {- empty -}               { Unspecified }
+    | ':' Type                  { $2 }
 
 
-OptIdents : {- empty -}         { [] }
-       | '(' Idents ')'         { $2 }
+Type :: { Type }
+    : ident OptTypeList         { Type $1 $2 }
 
-Idents : RevIdents              { reverse $1 }
+OptTypeList :: { [Type] }
+    : {- empty -}               { [] }
+    | '(' Types ')'             { $2 }
 
-RevIdents : ident               { [$1] }
-       | RevIdents ',' ident    { $3:$1 }
+Types :: { [Type] }
+    : RevTypes                  { reverse $1 }
 
-Visibility : {- empty -}        { Private }
-       | 'public'               { Public }
+RevTypes :: { [Type] }
+    : Type                      { [$1] }
+    | RevTypes ',' Type         { $3 : $1 }
 
-ProcBody : Stmts 'end'          { $1 }
 
-Stmts : RevStmts                { reverse $1 }
+OptIdents :: { [String] }
+    : {- empty -}               { [] }
+    | '(' Idents ')'            { $2 }
 
-RevStmts : {- empty -}          { [] }
-         | RevStmts Stmt        { $2:$1 }
+Idents :: { [String] }
+    : RevIdents                 { reverse $1 }
 
-Stmt  : ident '=' Exp           { Assign $1 $3 }
-      | ident OptProcArgs       { ProcCall $1 $2 }
-      | 'if' Exp 'then' Stmts Condelse 'end'
+RevIdents :: { [String] }
+    : ident                     { [$1] }
+    | RevIdents ',' ident       { $3:$1 }
+
+Visibility :: { Visibility }
+    : {- empty -}               { Private }
+    | 'public'                  { Public }
+
+ProcBody :: { [Stmt] }
+    : Stmts 'end'               { $1 }
+
+Stmts :: { [Stmt] }
+    : RevStmts                  { reverse $1 }
+
+RevStmts :: { [Stmt] }
+    : {- empty -}               { [] }
+    | RevStmts Stmt             { $2:$1 }
+
+Stmt :: { Stmt }
+    : ident '=' Exp             { Assign $1 $3 }
+    | ident OptProcArgs         { ProcCall $1 $2 }
+    | 'if' Exp 'then' Stmts Condelse 'end'
                                 { Cond $2 $4 $5 }
-      | 'do' LoopBody 'end'
-                                { Loop $2 }
+    | 'do' LoopBody 'end'       { Loop $2 }
 
-LoopBody : RevLoopBody          { reverse $1 }
+LoopBody :: { [LoopStmt] }
+    : RevLoopBody               { reverse $1 }
 
-RevLoopBody : {- empty -}       { [] }
-            | RevLoopBody LoopStmt
-                                { $2:$1 }
+RevLoopBody :: { [LoopStmt] }
+    : {- empty -}               { [] }
+    | RevLoopBody LoopStmt      { $2:$1 }
 
-LoopStmt : 'for' Generator      { For $2 }
-         | 'until' Exp          { BreakIf $2 }
-         | 'while' Exp          { BreakIf (Not $2) }
-         | 'unless' Exp         { NextIf $2 }
-         | 'when' Exp           { NextIf (Not $2) }
-         | Stmt                 { NormalStmt $1 }
+LoopStmt :: { LoopStmt }
+    : 'for' Generator           { For $2 }
+    | 'until' Exp               { BreakIf $2 }
+    | 'while' Exp               { BreakIf (Not $2) }
+    | 'unless' Exp              { NextIf $2 }
+    | 'when' Exp                { NextIf (Not $2) }
+    | Stmt                      { NormalStmt $1 }
 
-OptProcArgs : {- empty -}       { [] }
-           | '(' Exp ExpList ')'
-                                { $2:$3 }
+OptProcArgs :: { [Exp] }
+    : {- empty -}               { [] }
+    | '(' Exp ExpList ')'       { $2:$3 }
 
-Condelse : 'else' Stmts         { $2 }
-         | {- empty -}          { [] }
+Condelse :: { [Stmt] }
+    : 'else' Stmts              { $2 }
+    | {- empty -}               { [] }
 
-Generator : ident 'in' Exp      { In $1 $3 }
-          | ident 'from' Exp 'to' Exp 'by' Exp
+Generator :: { Generator }
+    : ident 'in' Exp            { In $1 $3 }
+    | ident 'from' Exp 'to' Exp 'by' Exp
                                 { InRange $1 $3 $7 (Just $5) }
-          | ident 'from' Exp 'by' Exp 'to' Exp
+    | ident 'from' Exp 'by' Exp 'to' Exp
                                 { InRange $1 $3 $5 (Just $7) }
-          | ident 'from' Exp 'to' Exp
-                                { InRange $1 $3 (IntValue 1) (Just $5) }
-          | ident 'from' Exp 'by' Exp
-                                { InRange $1 $3 $5 Nothing }
+    | ident 'from' Exp 'to' Exp { InRange $1 $3 (IntValue 1) (Just $5) }
+    | ident 'from' Exp 'by' Exp { InRange $1 $3 $5 Nothing }
 
-Exp   : Exp '+' Exp             { Plus $1 $3 }
-      | Exp '-' Exp             { Minus $1 $3 }
-      | Exp '*' Exp             { Times $1 $3 }
-      | Exp '/' Exp             { Div $1 $3 }
-      | Exp '<' Exp             { Less $1 $3 }
-      | Exp '<=' Exp            { Leq $1 $3 }
-      | Exp '>' Exp             { Less $3 $1 }
-      | Exp '>=' Exp            { Leq $3 $1 }
-      | Exp '==' Exp            { Equal $1 $3 }
-      | Exp '/=' Exp            { Neq $1 $3 }
-      | 'not' Exp               { Not $2 }
-      | Exp 'and' Exp           { And $1 $3 }
-      | Exp 'or' Exp            { Or $1 $3 }
-      | 'if' Exp 'then' Exp 'else' Exp
+Exp :: { Exp }
+    : Exp '+' Exp               { Plus $1 $3 }
+    | Exp '-' Exp               { Minus $1 $3 }
+    | Exp '*' Exp               { Times $1 $3 }
+    | Exp '/' Exp               { Div $1 $3 }
+    | Exp '<' Exp               { Less $1 $3 }
+    | Exp '<=' Exp              { Leq $1 $3 }
+    | Exp '>' Exp               { Less $3 $1 }
+    | Exp '>=' Exp              { Leq $3 $1 }
+    | Exp '==' Exp              { Equal $1 $3 }
+    | Exp '/=' Exp              { Neq $1 $3 }
+    | 'not' Exp                 { Not $2 }
+    | Exp 'and' Exp             { And $1 $3 }
+    | Exp 'or' Exp              { Or $1 $3 }
+    | 'if' Exp 'then' Exp 'else' Exp
                                 { CondExp $2 $4 $6 }
-      | 'let' Stmts 'in' Exp    { Where $2 $4 }
-      | Exp 'where' ProcBody    { Where $3 $1 }
-      | '(' Exp ')'             { $2 }
-      | '-' Exp %prec NEG       { Negate $2 }
-      | int                     { IntValue $1 }
-      | float                   { FloatValue $1 }
-      | char                    { CharValue $1 }
-      | dstring                 { StringValue $1 }
-      | bstring                 { StringValue $1 }
-      | ident                   { Var $1 }
-      | ident ArgList           { Fncall $1 $2 }
+    | 'let' Stmts 'in' Exp      { Where $2 $4 }
+    | Exp 'where' ProcBody      { Where $3 $1 }
+    | '(' Exp ')'               { $2 }
+    | '-' Exp %prec NEG         { Negate $2 }
+    | int                       { IntValue $1 }
+    | float                     { FloatValue $1 }
+    | char                      { CharValue $1 }
+    | dstring                   { StringValue $1 }
+    | bstring                   { StringValue $1 }
+    | ident                     { Var $1 }
+    | ident ArgList             { Fncall $1 $2 }
 
-ArgList : '(' Exp ExpList ')'   { $2:$3 }
+ArgList :: { [Exp] }
+    : '(' Exp ExpList ')'       { $2:$3 }
 
-ExpList : RevExpList            { reverse $1 }
+ExpList :: { [Exp] }
+    : RevExpList                { reverse $1 }
 
-RevExpList : {- empty -}        { [] }
-           | RevExpList ',' Exp { $3:$1 }
+RevExpList :: { [Exp] }
+    : {- empty -}               { [] }
+    | RevExpList ',' Exp        { $3:$1 }
 
 {
 parseError :: [FrgToken] -> a
