@@ -198,9 +198,9 @@ RevLoopBody :: { [LoopStmt] }
 LoopStmt :: { LoopStmt }
     : 'for' Generator           { For $2 }
     | 'until' Exp               { BreakIf $2 }
-    | 'while' Exp               { BreakIf (Not $2) }
+    | 'while' Exp               { BreakIf (Fncall "not" [$2]) }
     | 'unless' Exp              { NextIf $2 }
-    | 'when' Exp                { NextIf (Not $2) }
+    | 'when' Exp                { NextIf (Fncall "not" [$2]) }
     | Stmt                      { NormalStmt $1 }
 
 OptProcArgs :: { [Exp] }
@@ -221,25 +221,25 @@ Generator :: { Generator }
     | ident 'from' Exp 'by' Exp { InRange $1 $3 $5 Nothing }
 
 Exp :: { Exp }
-    : Exp '+' Exp               { Plus $1 $3 }
-    | Exp '-' Exp               { Minus $1 $3 }
-    | Exp '*' Exp               { Times $1 $3 }
-    | Exp '/' Exp               { Div $1 $3 }
-    | Exp '<' Exp               { Less $1 $3 }
-    | Exp '<=' Exp              { Leq $1 $3 }
-    | Exp '>' Exp               { Less $3 $1 }
-    | Exp '>=' Exp              { Leq $3 $1 }
-    | Exp '==' Exp              { Equal $1 $3 }
-    | Exp '/=' Exp              { Neq $1 $3 }
-    | 'not' Exp                 { Not $2 }
-    | Exp 'and' Exp             { And $1 $3 }
-    | Exp 'or' Exp              { Or $1 $3 }
+    : Exp '+' Exp               { Fncall "+" [$1, $3] }
+    | Exp '-' Exp               { Fncall "-" [$1, $3] }
+    | Exp '*' Exp               { Fncall "*" [$1, $3] }
+    | Exp '/' Exp               { Fncall "/" [$1, $3] }
+    | Exp '<' Exp               { Fncall "<" [$1, $3] }
+    | Exp '<=' Exp              { Fncall "<=" [$1, $3] }
+    | Exp '>' Exp               { Fncall "<" [$3, $1] }
+    | Exp '>=' Exp              { Fncall "<=" [$3, $1] }
+    | Exp '==' Exp              { Fncall "==" [$1, $3] }
+    | Exp '/=' Exp              { Fncall "+" [$1, $3] }
+    | 'not' Exp                 { Fncall "not" [$2] }
+    | Exp 'and' Exp             { Fncall "and" [$1, $3] }
+    | Exp 'or' Exp              { Fncall "or" [$1, $3] }
     | 'if' Exp 'then' Exp 'else' Exp
                                 { CondExp $2 $4 $6 }
     | 'let' Stmts 'in' Exp      { Where $2 $4 }
     | Exp 'where' ProcBody      { Where $3 $1 }
     | '(' Exp ')'               { $2 }
-    | '-' Exp %prec NEG         { Negate $2 }
+    | '-' Exp %prec NEG         { Fncall "Negate" [$2] }
     | int                       { IntValue $1 }
     | float                     { FloatValue $1 }
     | char                      { CharValue $1 }
@@ -313,20 +313,8 @@ data LoopStmt
 
 
 data Exp
-      = Plus Exp Exp
-      | Minus Exp Exp
-      | Negate Exp
-      | Times Exp Exp
-      | Div Exp Exp
-      | Less Exp Exp
-      | Leq Exp Exp
-      | Equal Exp Exp
-      | Neq Exp Exp
-      | Where Stmts Exp
+      = Where Stmts Exp
       | CondExp Exp Exp Exp
-      | And Exp Exp
-      | Or Exp Exp
-      | Not Exp
       | IntValue Integer
       | FloatValue Double
       | StringValue String

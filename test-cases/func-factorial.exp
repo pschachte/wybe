@@ -1,1 +1,1 @@
-[FuncDecl Public (FnProto "factorial" [Param "n" (Type "int" [])]) (Type "int" []) (CondExp (Leq (Var "n") (IntValue 0)) (IntValue 1) (Times (Var "n") (Fncall "factorial" [Minus (Var "n") (IntValue 1)])))]
+[FuncDecl Public (FnProto "factorial" [Param "n" (Type "int" [])]) (Type "int" []) (CondExp (Fncall "<=" [Var "n",IntValue 0]) (IntValue 1) (Fncall "*" [Var "n",Fncall "factorial" [Fncall "-" [Var "n",IntValue 1]]]))]
