@@ -11,3 +11,4 @@ frg
 test-cases/*.out
 frgc
 design.pdf
+Version.hs
