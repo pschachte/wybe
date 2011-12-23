@@ -35,55 +35,8 @@ type Idents = [String]
 data TypeProto = TypeProto String [String]
       deriving Show
 
-data Type = Type String [Type]
-          | Unspecified
-      deriving Show
-
 data FnProto = FnProto String [Param]
       deriving Show
-
-data ProcProto = ProcProto String [Param]
-      deriving Show
-
-data Param = Param String Type FlowDirection
-      deriving Show
-
-data FlowDirection = ParamIn | ParamOut | ParamInOut
-      deriving (Show,Eq)
-
-type Stmts = [Stmt]
-
-data Stmt
-     = Assign String Exp
-     | ProcCall String [Exp]
-     | Cond Exp Stmts Stmts
-     | Loop [LoopStmt]
-     | Nop
-    deriving Show
-
-data LoopStmt
-     = For Generator
-     | BreakIf Exp
-     | NextIf Exp
-     | NormalStmt Stmt
-    deriving Show
-
-
-data Exp
-      = Where Stmts Exp
-      | CondExp Exp Exp Exp
-      | IntValue Integer
-      | FloatValue Double
-      | StringValue String
-      | CharValue Char
-      | Fncall String [Exp]
-      | Var String
-      deriving Show
-
-data Generator 
-      = In String Exp
-      | InRange String Exp Exp (Maybe Exp)
-    deriving Show
 
 
 
@@ -130,6 +83,53 @@ data Constant = Int Int
               | Char Char
               | String String
                 deriving Show
+
+data ProcProto = ProcProto String [Param]
+      deriving Show
+
+data Param = Param String Type FlowDirection
+      deriving Show
+
+data Type = Type String [Type]
+          | Unspecified
+      deriving Show
+
+data FlowDirection = ParamIn | ParamOut | ParamInOut
+      deriving (Show,Eq)
+
+type Stmts = [Stmt]
+
+data Stmt
+     = Assign String Exp
+     | ProcCall String [Exp]
+     | Cond Exp Stmts Stmts
+     | Loop [LoopStmt]
+     | Nop
+    deriving Show
+
+data LoopStmt
+     = For Generator
+     | BreakIf Exp
+     | NextIf Exp
+     | NormalStmt Stmt
+    deriving Show
+
+data Exp
+      = Where Stmts Exp
+      | CondExp Exp Exp Exp
+      | IntValue Integer
+      | FloatValue Double
+      | StringValue String
+      | CharValue Char
+      | Fncall String [Exp]
+      | Var String
+      deriving Show
+
+data Generator 
+      = In String Exp
+      | InRange String Exp Exp (Maybe Exp)
+    deriving Show
+
 
 toAST :: [Item] -> Module
 toAST items = foldl toASTItem initModule items
