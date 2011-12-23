@@ -1,1 +1,1 @@
-[FuncDecl Public (FnProto "plus" [Param "a" (Type "int" []),Param "b" (Type "int" [])]) (Type "int" []) (Fncall "+" [Var "a",Var "b"])]
+[FuncDecl Public (FnProto "plus" [Param "a" (Type "int" []) ParamIn,Param "b" (Type "int" []) ParamIn]) (Type "int" []) (Fncall "+" [Var "a",Var "b"])]

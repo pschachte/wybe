@@ -1,1 +1,1 @@
-[ProcDecl Public (ProcProto "print2" [ProcParam "x" (Type "int" []) ParamIn,ProcParam "y" (Type "int" []) ParamIn]) [ProcCall "print" [Var "x"],ProcCall "print" [Var "y"]]]
+[ProcDecl Public (ProcProto "print2" [Param "x" (Type "int" []) ParamIn,Param "y" (Type "int" []) ParamIn]) [ProcCall "print" [Var "x"],ProcCall "print" [Var "y"]]]

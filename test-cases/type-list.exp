@@ -1,1 +1,1 @@
-[TypeDecl Public (TypeProto "list" ["t"]) [FnProto "nil" [],FnProto "cons" [Param "head" (Type "t" []),Param "tail" (Type "list" [Type "t" []])]]]
+[TypeDecl Public (TypeProto "list" ["t"]) [FnProto "nil" [],FnProto "cons" [Param "head" (Type "t" []) ParamIn,Param "tail" (Type "list" [Type "t" []]) ParamIn]]]

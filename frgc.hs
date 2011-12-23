@@ -65,6 +65,10 @@ processFiles opts (file:files) = do
   toks <- fileTokens file
   let parseTree = parse $ map frgtoken toks
   if (optVerbosity opts) > 0 then
-    print parseTree
+    putStrLn $ show parseTree
     else return ()
+  -- let ast = toAST parseTree
+  -- if (optVerbosity opts) > 0 then
+  --   putStrLn $ show ast
+  --   else return ()
   processFiles opts files

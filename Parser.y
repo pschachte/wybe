@@ -1,7 +1,8 @@
 {
 module Parser (parse) where
-
 import Scanner
+import AST
+
 }
 
 %name parse
@@ -117,24 +118,24 @@ RevParams :: { [Param] }
     | RevParams ',' Param       { $3 : $1 }
 
 Param :: { Param }
-    : ident OptType             { Param $1 $2 }
+    : ident OptType             { Param $1 $2 ParamIn }
 
-OptProcParamList :: { [ProcParam] }
+OptProcParamList :: { [Param] }
     : {- empty -}               { [] }
     | '(' ProcParams ')'        { $2 }
 
-ProcParams :: { [ProcParam] }
+ProcParams :: { [Param] }
     : RevProcParams             { reverse $1 }
 
-RevProcParams :: { [ProcParam] }
+RevProcParams :: { [Param] }
     : ProcParam                 { [$1] }
     | RevProcParams ',' ProcParam
                                 { $3 : $1 }
 
-ProcParam :: { ProcParam }
-    : ident OptType             { ProcParam $1 $2 ParamIn }
-    | '?' ident OptType         { ProcParam $2 $3 ParamOut }
-    | '!' ident OptType         { ProcParam $2 $3 ParamInOut }
+ProcParam :: { Param }
+    : ident OptType             { Param $1 $2 ParamIn }
+    | '?' ident OptType         { Param $2 $3 ParamOut }
+    | '!' ident OptType         { Param $2 $3 ParamInOut }
 
 OptType :: { Type }
     : {- empty -}               { Unspecified }
@@ -261,73 +262,5 @@ RevExpList :: { [Exp] }
 {
 parseError :: [FrgToken] -> a
 parseError _ = error "Parse error"
-
-
-data Item
-     = TypeDecl Visibility TypeProto [FnProto]
-     | FuncDecl Visibility FnProto Type Exp
-     | ProcDecl Visibility ProcProto Stmts
-     | StmtDecl Stmt
-    deriving Show
-
-type Idents = [String]
-
-data TypeProto = TypeProto String [String]
-      deriving Show
-
-data Type = Type String [Type]
-          | Unspecified
-      deriving Show
-
-data FnProto = FnProto String [Param]
-      deriving Show
-
-data ProcProto = ProcProto String [ProcParam]
-      deriving Show
-
-data Param = Param String Type
-      deriving Show
-
-data ProcParam = ProcParam String Type FlowDirection
-      deriving Show
-
-data FlowDirection = ParamIn | ParamOut | ParamInOut
-      deriving Show
-
-type Stmts = [Stmt]
-
-data Stmt
-     = Assign String Exp
-     | ProcCall String [Exp]
-     | Cond Exp Stmts Stmts
-     | Loop [LoopStmt]
-     | Nop
-    deriving Show
-
-data LoopStmt
-     = For Generator
-     | BreakIf Exp
-     | NextIf Exp
-     | NormalStmt Stmt
-    deriving Show
-
-
-data Exp
-      = Where Stmts Exp
-      | CondExp Exp Exp Exp
-      | IntValue Integer
-      | FloatValue Double
-      | StringValue String
-      | CharValue Char
-      | Fncall String [Exp]
-      | Var String
-      deriving Show
-
-data Visibility = Public | Private deriving Show
-
-data Generator 
-      = In String Exp
-      | InRange String Exp Exp (Maybe Exp)
-    deriving Show
 
 }
