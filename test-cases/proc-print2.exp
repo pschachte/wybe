@@ -1,1 +1,2 @@
 [ProcDecl Public (ProcProto "print2" [Param "x" (Type "int" []) ParamIn,Param "y" (Type "int" []) ParamIn]) [ProcCall "print" [Var "x"],ProcCall "print" [Var "y"]]]
+Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList [], pubProcs = fromList ["print2"], modTypes = fromList [], modResources = fromList [], modProcs = fromList [("print2",ProcDef (ProcProto "print2" [Param "x" (Type "int" []) ParamIn,Param "y" (Type "int" []) ParamIn]) [ProcCall "print" [Var "x"],ProcCall "print" [Var "y"]])]}

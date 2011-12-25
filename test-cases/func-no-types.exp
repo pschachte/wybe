@@ -1,1 +1,2 @@
 [FuncDecl Public (FnProto "times" [Param "a" Unspecified ParamIn,Param "b" Unspecified ParamIn]) Unspecified (Fncall "*" [Var "a",Var "b"])]
+Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList [], pubProcs = fromList ["times"], modTypes = fromList [], modResources = fromList [], modProcs = fromList [("times",ProcDef (ProcProto "times" [Param "a" Unspecified ParamIn,Param "b" Unspecified ParamIn,Param "$" Unspecified ParamOut]) [Assign "$" (Fncall "*" [Var "a",Var "b"])])]}

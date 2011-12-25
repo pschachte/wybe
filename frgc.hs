@@ -8,6 +8,7 @@
 
 module Main where
 
+import AST
 import Parser
 import Scanner
 import System.Environment
@@ -67,8 +68,8 @@ processFiles opts (file:files) = do
   if (optVerbosity opts) > 0 then
     putStrLn $ show parseTree
     else return ()
-  -- let ast = toAST parseTree
-  -- if (optVerbosity opts) > 0 then
-  --   putStrLn $ show ast
-  --   else return ()
+  let ast = toAST parseTree
+  if (optVerbosity opts) > 0 then
+    putStrLn $ show ast
+    else return ()
   processFiles opts files

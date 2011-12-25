@@ -1,1 +1,2 @@
 [TypeDecl Public (TypeProto "list" ["t"]) [FnProto "nil" [],FnProto "cons" [Param "head" (Type "t" []) ParamIn,Param "tail" (Type "list" [Type "t" []]) ParamIn]]]
+Module {modImports = fromList [], pubTypes = fromList ["list"], pubResources = fromList [], pubProcs = fromList [], modTypes = fromList [("list",1)], modResources = fromList [], modProcs = fromList []}

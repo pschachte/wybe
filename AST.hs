@@ -10,7 +10,9 @@ module AST (-- Types just for parsing
   ProcProto(..), Param(..), FlowDirection(..),  Stmt(..), 
   LoopStmt(..), Exp(..), Generator(..),
   -- AST types
-  Module(..), initModule, ModSpec, ProcDef(..), Ident
+  Module(..), initModule, ModSpec, ProcDef(..), Ident,
+  -- AST functions
+  toAST
   ) where
 
 import Data.Map as Map
@@ -45,27 +47,48 @@ data FnProto = FnProto String [Param]
 ----------------------------------------------------------------
 
 data Module = Module {
-  modName :: Ident,
   modImports :: Set ModSpec,
-  pubTypes :: Set TypeName,
-  pubResources :: Set ResourceName,
-  pubProcs :: Set ProcFuncName,
-  modTypes :: Map TypeName Int,
-  modResources :: Map ResourceName ResourceDef,
+  pubTypes :: Set Ident,
+  pubResources :: Set Ident,
+  pubProcs :: Set Ident,
+  modTypes :: Map Ident Int,
+  modResources :: Map Ident ResourceDef,
   modProcs :: Map Ident ProcDef
   }  deriving Show
 
-initModule = Module "" Set.empty Set.empty Set.empty Set.empty
+initModule = Module Set.empty Set.empty Set.empty Set.empty
              Map.empty Map.empty Map.empty 
 
+modAddImport :: ModSpec -> Module -> Module
+modAddImport imp mod 
+  = mod { modImports = Set.insert imp $ modImports mod }
+
+modAddPubType :: Ident -> Module -> Module
+modAddPubType typ mod 
+  = mod { pubTypes = Set.insert typ $ pubTypes mod }
+
+modAddPubProc :: Ident -> Module -> Module
+modAddPubProc proc mod 
+  = mod { pubProcs = Set.insert proc $ pubProcs mod }
+
+modAddType :: Ident -> Int -> Module -> Module
+modAddType name arity mod 
+  = mod { modTypes = Map.insert name arity $ modTypes mod }
+
+modAddProc :: Ident -> ProcDef -> Module -> Module
+modAddProc name def mod 
+  = mod { modProcs = Map.insert name def $ modProcs mod }
+
+publicise :: (Ident -> Module -> Module) -> 
+             Visibility -> Ident -> Module -> Module
+publicise insert vis id mod = applyIf (insert id) (vis == Public) mod
+
+
 type Ident = String
-type TypeName = Ident
-type ResourceName = Ident
-type ProcFuncName = Ident
 
 type ModSpec = [Ident]
 
-data ResourceDef = CompoundResource [ResourceName]
+data ResourceDef = CompoundResource [Ident]
                  | SimpleResource TypeSpec
                    deriving Show
 
@@ -87,10 +110,10 @@ data Constant = Int Int
 data ProcProto = ProcProto String [Param]
       deriving Show
 
-data Param = Param String Type FlowDirection
+data Param = Param Ident Type FlowDirection
       deriving Show
 
-data Type = Type String [Type]
+data Type = Type Ident [Type]
           | Unspecified
       deriving Show
 
@@ -136,9 +159,26 @@ toAST items = foldl toASTItem initModule items
 
 toASTItem :: Module -> Item -> Module
 toASTItem mod (TypeDecl vis (TypeProto name params) ctrs) =
-  let mod' = mod { modTypes = Map.insert name (length params) (modTypes mod) }
-  in  if vis == Public
-      then mod' { pubTypes = Set.insert name (pubTypes mod') }
-      else mod'
---toASTItem (FuncDecl vis (FnProto name params) resulttype result) mod =
-  
+  publicise modAddPubType vis name
+  mod { modTypes = Map.insert name (length params) (modTypes mod) }
+toASTItem mod (FuncDecl vis (FnProto name params) resulttype result) =
+  toASTItem mod (ProcDecl vis 
+                 (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
+                 [Assign "$" result])
+toASTItem mod (ProcDecl vis proto@(ProcProto name params) stmts) =
+  publicise modAddPubProc vis name
+  mod { modProcs = Map.insert name (ProcDef proto stmts) (modProcs mod) }
+toASTItem mod (StmtDecl stmt) =
+  case Map.lookup "" $ modProcs mod of
+    Nothing -> 
+      modAddProc "" (ProcDef (ProcProto "" []) [stmt]) mod
+    Just (ProcDef proto stmts) ->
+      modAddProc "" (ProcDef proto $ stmts ++ [stmt]) mod
+      
+
+----------------------------------------------------------------
+--                         Generally Useful
+----------------------------------------------------------------
+
+applyIf :: (a -> a) -> Bool -> a -> a
+applyIf f test val = if test then f val else val
