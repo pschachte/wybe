@@ -6,60 +6,60 @@ import AST
 }
 
 %name parse
-%tokentype { FrgToken }
+%tokentype { Token }
 %error { parseError }
 
 %token 
-      int             { TokInt $$ }
-      float           { TokFloat $$ }
-      char            { TokChar $$ }
-      dstring         { TokString DoubleQuote $$ }
-      bstring         { TokString BackQuote $$ }
-      '='             { TokSymbol "=" }
-      '+'             { TokSymbol "+" }
-      '-'             { TokSymbol "-" }
-      '*'             { TokSymbol "*" }
-      '/'             { TokSymbol "/" }
-      '<'             { TokSymbol "<" }
-      '>'             { TokSymbol ">" }
-      '<='            { TokSymbol "<=" }
-      '>='            { TokSymbol ">=" }
-      '=='            { TokSymbol "==" }
-      '/='            { TokSymbol "/=" }
-      ','             { TokComma }
-      ';'             { TokSemicolon }
-      ':'             { TokColon }
-      '.'             { TokSymbol "." }
-      '?'             { TokSymbol "?" }
-      '!'             { TokSymbol "!" }
-      'public'        { TokIdent "public" }
-      'resource'      { TokIdent "resource" }
-      'type'          { TokIdent "type" }
-      'func'          { TokIdent "func" }
-      'proc'          { TokIdent "proc" }
-      'let'           { TokIdent "let" }
-      'where'         { TokIdent "where" }
-      'end'           { TokIdent "end" }
-      'in'            { TokIdent "in" }
-      'if'            { TokIdent "if" }
-      'then'          { TokIdent "then" }
-      'elseif'        { TokIdent "elseif" }
-      'else'          { TokIdent "else" }
-      'do'            { TokIdent "do" }
-      'for'           { TokIdent "for" }
-      'while'         { TokIdent "while" }
-      'until'         { TokIdent "until" }
-      'when'          { TokIdent "when" }
-      'unless'        { TokIdent "unless" }
-      'from'          { TokIdent "from" }
-      'to'            { TokIdent "to" }
-      'by'            { TokIdent "by" }
-      'and'           { TokIdent "and" }
-      'or'            { TokIdent "or" }
-      'not'           { TokIdent "not" }
-      ident           { TokIdent $$}
-      '('             { TokLBracket Paren }
-      ')'             { TokRBracket Paren }
+      int             { TokInt $$ _ }
+      float           { TokFloat $$ _ }
+      char            { TokChar $$ _ }
+      dstring         { TokString DoubleQuote $$ _ }
+      bstring         { TokString BackQuote $$ _ }
+      '='             { TokSymbol "=" _ }
+      '+'             { TokSymbol "+" _ }
+      '-'             { TokSymbol "-" _ }
+      '*'             { TokSymbol "*" _ }
+      '/'             { TokSymbol "/" _ }
+      '<'             { TokSymbol "<" _ }
+      '>'             { TokSymbol ">" _ }
+      '<='            { TokSymbol "<=" _ }
+      '>='            { TokSymbol ">=" _ }
+      '=='            { TokSymbol "==" _ }
+      '/='            { TokSymbol "/=" _ }
+      ','             { TokComma _ }
+      ';'             { TokSemicolon _ }
+      ':'             { TokColon _ }
+      '.'             { TokSymbol "." _ }
+      '?'             { TokSymbol "?" _ }
+      '!'             { TokSymbol "!" _ }
+      'public'        { TokIdent "public" _ }
+      'resource'      { TokIdent "resource" _ }
+      'type'          { TokIdent "type" _ }
+      'func'          { TokIdent "func" _ }
+      'proc'          { TokIdent "proc" _ }
+      'let'           { TokIdent "let" _ }
+      'where'         { TokIdent "where" _ }
+      'end'           { TokIdent "end" _ }
+      'in'            { TokIdent "in" _ }
+      'if'            { TokIdent "if" _ }
+      'then'          { TokIdent "then" _ }
+      'elseif'        { TokIdent "elseif" _ }
+      'else'          { TokIdent "else" _ }
+      'do'            { TokIdent "do" _ }
+      'for'           { TokIdent "for" _ }
+      'while'         { TokIdent "while" _ }
+      'until'         { TokIdent "until" _ }
+      'when'          { TokIdent "when" _ }
+      'unless'        { TokIdent "unless" _ }
+      'from'          { TokIdent "from" _ }
+      'to'            { TokIdent "to" _ }
+      'by'            { TokIdent "by" _ }
+      'and'           { TokIdent "and" _ }
+      'or'            { TokIdent "or" _ }
+      'not'           { TokIdent "not" _ }
+      ident           { TokIdent $$ _ }
+      '('             { TokLBracket Paren _ }
+      ')'             { TokRBracket Paren _ }
 
 %nonassoc 'where' 'let'
 %left 'or'
@@ -263,7 +263,7 @@ RevExpList :: { [Exp] }
     | RevExpList ',' Exp        { $3:$1 }
 
 {
-parseError :: [FrgToken] -> a
-parseError _ = error "Parse error"
-
+parseError :: [Token] -> a
+parseError (tok:_) = error $ (showPosition (tokenPosition tok)) 
+                             ++ ": Parse error"
 }

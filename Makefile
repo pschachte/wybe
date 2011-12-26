@@ -35,7 +35,7 @@ test:	frgc
 	    printf "%-40s ... " $$f ; \
 	    out=`echo "$$f" | sed 's/.frg$$/.out/'` ; \
 	    exp=`echo "$$f" | sed 's/.frg$$/.exp/'` ; \
-	    ./frgc -v $$f > $$out ; \
+	    ./frgc -v $$f > $$out 2>&1 ; \
 	    diff -q $$exp $$out >/dev/null && echo "PASS" ; \
 	    diff -q $$exp $$out >/dev/null || echo "FAIL" ; \
 	done

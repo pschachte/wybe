@@ -64,7 +64,7 @@ processFiles :: Options -> [String] -> IO ()
 processFiles opts [] = return ()
 processFiles opts (file:files) = do
   toks <- fileTokens file
-  let parseTree = parse $ map frgtoken toks
+  let parseTree = parse toks
   if (optVerbosity opts) > 0 then
     putStrLn $ show parseTree
     else return ()

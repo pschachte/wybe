@@ -1,0 +1,3 @@
+func bogus
+bill
+mary
