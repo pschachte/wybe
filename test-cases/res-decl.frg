@@ -1,1 +1,1 @@
-resource count:int
+public resource count:int

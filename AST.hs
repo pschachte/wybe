@@ -6,7 +6,7 @@
 --  Copyright: © 2010 Peter Schachte.  All rights reserved.
 
 module AST (-- Types just for parsing
-  Item(..), Visibility(..), TypeProto(..), Type(..), FnProto(..), 
+  Item(..), Visibility(..), TypeProto(..), TypeSpec(..), FnProto(..), 
   ProcProto(..), Param(..), FlowDirection(..),  Stmt(..), 
   LoopStmt(..), Exp(..), Generator(..),
   -- AST types
@@ -24,8 +24,8 @@ import Data.Set as Set
 
 data Item
      = TypeDecl Visibility TypeProto [FnProto]
-     | ResourceDecl Visibility Ident Type
-     | FuncDecl Visibility FnProto Type Exp
+     | ResourceDecl Visibility Ident TypeSpec
+     | FuncDecl Visibility FnProto TypeSpec Exp
      | ProcDecl Visibility ProcProto Stmts
      | StmtDecl Stmt
     deriving Show
@@ -68,6 +68,10 @@ modAddPubType :: Ident -> Module -> Module
 modAddPubType typ mod 
   = mod { pubTypes = Set.insert typ $ pubTypes mod }
 
+modAddPubResource :: Ident -> Module -> Module
+modAddPubResource name mod 
+  = mod { pubResources = Set.insert name $ pubResources mod }
+
 modAddPubProc :: Ident -> Module -> Module
 modAddPubProc proc mod 
   = mod { pubProcs = Set.insert proc $ pubProcs mod }
@@ -75,6 +79,10 @@ modAddPubProc proc mod
 modAddType :: Ident -> Int -> Module -> Module
 modAddType name arity mod 
   = mod { modTypes = Map.insert name arity $ modTypes mod }
+
+modAddResource :: Ident -> ResourceDef -> Module -> Module
+modAddResource name def mod 
+  = mod { modResources = Map.insert name def $ modResources mod }
 
 modAddProc :: Ident -> ProcDef -> Module -> Module
 modAddProc name def mod 
@@ -99,7 +107,7 @@ data ProcDef = ProcDef ProcProto [Stmt]
 data Constructor = Constructor Ident [Param]
                    deriving Show
 
-data TypeSpec = TypeName Ident [TypeSpec]
+data TypeSpec = TypeSpec Ident [TypeSpec] | Unspecified
                 deriving Show
 
 data Constant = Int Int
@@ -111,11 +119,7 @@ data Constant = Int Int
 data ProcProto = ProcProto String [Param]
       deriving Show
 
-data Param = Param Ident Type FlowDirection
-      deriving Show
-
-data Type = Type Ident [Type]
-          | Unspecified
+data Param = Param Ident TypeSpec FlowDirection
       deriving Show
 
 data FlowDirection = ParamIn | ParamOut | ParamInOut
@@ -162,6 +166,9 @@ toASTItem :: Module -> Item -> Module
 toASTItem mod (TypeDecl vis (TypeProto name params) ctrs) =
   publicise modAddPubType vis name
   mod { modTypes = Map.insert name (length params) (modTypes mod) }
+toASTItem mod (ResourceDecl vis name typ) =
+  publicise modAddPubResource vis name 
+  $ modAddResource name (SimpleResource typ) mod
 toASTItem mod (FuncDecl vis (FnProto name params) resulttype result) =
   toASTItem mod (ProcDecl vis
                  (ProcProto name $ params ++ [Param "$" resulttype ParamOut])

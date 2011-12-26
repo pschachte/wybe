@@ -140,22 +140,22 @@ ProcParam :: { Param }
     | '?' ident OptType         { Param $2 $3 ParamOut }
     | '!' ident OptType         { Param $2 $3 ParamInOut }
 
-OptType :: { Type }
+OptType :: { TypeSpec }
     : {- empty -}               { Unspecified }
     | ':' Type                  { $2 }
 
 
-Type :: { Type }
-    : ident OptTypeList         { Type $1 $2 }
+Type :: { TypeSpec }
+    : ident OptTypeList         { TypeSpec $1 $2 }
 
-OptTypeList :: { [Type] }
+OptTypeList :: { [TypeSpec] }
     : {- empty -}               { [] }
     | '(' Types ')'             { $2 }
 
-Types :: { [Type] }
+Types :: { [TypeSpec] }
     : RevTypes                  { reverse $1 }
 
-RevTypes :: { [Type] }
+RevTypes :: { [TypeSpec] }
     : Type                      { [$1] }
     | RevTypes ',' Type         { $3 : $1 }
 

@@ -1,1 +1,2 @@
-[ResourceDecl Private "count" (Type "int" [])]
+[ResourceDecl Public "count" (TypeSpec "int" [])]
+Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList ["count"], pubProcs = fromList [], modTypes = fromList [], modResources = fromList [("count",SimpleResource (TypeSpec "int" []))], modProcs = fromList []}
