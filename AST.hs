@@ -165,7 +165,7 @@ toAST items = foldl toASTItem initModule items
 toASTItem :: Module -> Item -> Module
 toASTItem mod (TypeDecl vis (TypeProto name params) ctrs) =
   publicise modAddPubType vis name
-  mod { modTypes = Map.insert name (length params) (modTypes mod) }
+  $ modAddType name (length params) mod
 toASTItem mod (ResourceDecl vis name typ) =
   publicise modAddPubResource vis name 
   $ modAddResource name (SimpleResource typ) mod
@@ -175,7 +175,7 @@ toASTItem mod (FuncDecl vis (FnProto name params) resulttype result) =
                  [Assign "$" result])
 toASTItem mod (ProcDecl vis proto@(ProcProto name params) stmts) =
   publicise modAddPubProc vis name
-  mod { modProcs = Map.insert name (ProcDef proto stmts) (modProcs mod) }
+  $ modAddProc name (ProcDef proto stmts) mod
 toASTItem mod (StmtDecl stmt) =
   case Map.lookup "" $ modProcs mod of
     Nothing -> 
