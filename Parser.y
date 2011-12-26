@@ -33,6 +33,7 @@ import AST
       '?'             { TokSymbol "?" }
       '!'             { TokSymbol "!" }
       'public'        { TokIdent "public" }
+      'resource'      { TokIdent "resource" }
       'type'          { TokIdent "type" }
       'func'          { TokIdent "func" }
       'proc'          { TokIdent "proc" }
@@ -82,6 +83,8 @@ RevItems :: { [Item] }
 Item  :: { Item }
     : Visibility 'type' TypeProto '=' Ctors
                                 { TypeDecl $1 $3 $5 }
+    | Visibility 'resource' ident OptType
+                                { ResourceDecl $1 $3 $4 }
     | Visibility 'func' FnProto OptType '=' Exp
                                 { FuncDecl $1 $3 $4 $6 }
     | Visibility 'proc' ProcProto ProcBody

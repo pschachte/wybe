@@ -24,6 +24,7 @@ import Data.Set as Set
 
 data Item
      = TypeDecl Visibility TypeProto [FnProto]
+     | ResourceDecl Visibility Ident Type
      | FuncDecl Visibility FnProto Type Exp
      | ProcDecl Visibility ProcProto Stmts
      | StmtDecl Stmt
@@ -162,7 +163,7 @@ toASTItem mod (TypeDecl vis (TypeProto name params) ctrs) =
   publicise modAddPubType vis name
   mod { modTypes = Map.insert name (length params) (modTypes mod) }
 toASTItem mod (FuncDecl vis (FnProto name params) resulttype result) =
-  toASTItem mod (ProcDecl vis 
+  toASTItem mod (ProcDecl vis
                  (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
                  [Assign "$" result])
 toASTItem mod (ProcDecl vis proto@(ProcProto name params) stmts) =
