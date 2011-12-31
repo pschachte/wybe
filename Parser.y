@@ -58,7 +58,7 @@ import AST
       'and'           { TokIdent "and" _ }
       'or'            { TokIdent "or" _ }
       'not'           { TokIdent "not" _ }
-      ident           { TokIdent $$ _ }
+      ident           { TokIdent _ _ }
       '('             { TokLBracket Paren _ }
       ')'             { TokRBracket Paren _ }
 
@@ -85,19 +85,19 @@ Item  :: { Item }
     : Visibility 'type' TypeProto '=' Ctors
                                 { TypeDecl $1 $3 $5 $ Just $ tokenPosition $2 }
     | Visibility 'resource' ident OptType
-                                { ResourceDecl $1 $3 $4
+                                { ResourceDecl $1 (identName $3) $4
 				    $ Just $ tokenPosition $2 }
     | Visibility 'func' FnProto OptType '=' Exp
                                 { FuncDecl $1 $3 $4 $6
 				    $ Just $ tokenPosition $2 }
     | Visibility 'proc' ProcProto ProcBody
                                 { ProcDecl $1 $3 $4 $ Just $ tokenPosition $2 }
-    | Stmt                      { StmtDecl $1 Nothing }
+    | Stmt                      { StmtDecl (content $1) (place $1) }
 
 
 
 TypeProto :: { TypeProto }
-    : ident OptIdents           { TypeProto $1 $2 }
+    : ident OptIdents           { TypeProto (identName $1) $2 }
 
 Ctors :: { [FnProto] }
     : RevCtors                  { reverse $1 }
@@ -107,10 +107,10 @@ RevCtors :: { [FnProto] }
     | RevCtors FnProto          { $2:$1 }
 
 FnProto :: { FnProto }
-    : ident OptParamList        { FnProto $1 $2 }
+    : ident OptParamList        { FnProto (identName $1) $2 }
 
 ProcProto :: { ProcProto }
-    : ident OptProcParamList    { ProcProto $1 $2 }
+    : ident OptProcParamList    { ProcProto (identName $1) $2 }
 
 OptParamList :: { [Param] }
     : {- empty -}               { [] }
@@ -124,7 +124,7 @@ RevParams :: { [Param] }
     | RevParams ',' Param       { $3 : $1 }
 
 Param :: { Param }
-    : ident OptType             { Param $1 $2 ParamIn }
+    : ident OptType             { Param (identName $1) $2 ParamIn }
 
 OptProcParamList :: { [Param] }
     : {- empty -}               { [] }
@@ -139,9 +139,9 @@ RevProcParams :: { [Param] }
                                 { $3 : $1 }
 
 ProcParam :: { Param }
-    : ident OptType             { Param $1 $2 ParamIn }
-    | '?' ident OptType         { Param $2 $3 ParamOut }
-    | '!' ident OptType         { Param $2 $3 ParamInOut }
+    : ident OptType             { Param (identName $1) $2 ParamIn }
+    | '?' ident OptType         { Param (identName $2) $3 ParamOut }
+    | '!' ident OptType         { Param (identName $2) $3 ParamInOut }
 
 OptType :: { TypeSpec }
     : {- empty -}               { Unspecified }
@@ -149,7 +149,7 @@ OptType :: { TypeSpec }
 
 
 Type :: { TypeSpec }
-    : ident OptTypeList         { TypeSpec $1 $2 }
+    : ident OptTypeList         { TypeSpec (identName $1) $2 }
 
 OptTypeList :: { [TypeSpec] }
     : {- empty -}               { [] }
@@ -171,29 +171,29 @@ Idents :: { [String] }
     : RevIdents                 { reverse $1 }
 
 RevIdents :: { [String] }
-    : ident                     { [$1] }
-    | RevIdents ',' ident       { $3:$1 }
+    : ident                     { [identName $1] }
+    | RevIdents ',' ident       { (identName $3):$1 }
 
 Visibility :: { Visibility }
     : {- empty -}               { Private }
     | 'public'                  { Public }
 
-ProcBody :: { [Stmt] }
+ProcBody :: { [Placed Stmt] }
     : Stmts 'end'               { $1 }
 
-Stmts :: { [Stmt] }
+Stmts :: { [Placed Stmt] }
     : RevStmts                  { reverse $1 }
 
-RevStmts :: { [Stmt] }
+RevStmts :: { [Placed Stmt] }
     : {- empty -}               { [] }
     | RevStmts Stmt             { $2:$1 }
 
-Stmt :: { Stmt }
-    : ident '=' Exp             { Assign $1 $3 }
-    | ident OptProcArgs         { ProcCall $1 $2 }
+Stmt :: { Placed Stmt }
+    : ident '=' Exp             { Placed (Assign (identName $1) $3) (tokenPosition $1) }
+    | ident OptProcArgs         { Placed (ProcCall (identName $1) $2) (tokenPosition $1) }
     | 'if' Exp 'then' Stmts Condelse 'end'
-                                { Cond $2 $4 $5 }
-    | 'do' LoopBody 'end'       { Loop $2 }
+                                { Placed (Cond $2 $4 $5) (tokenPosition $1) }
+    | 'do' LoopBody 'end'       { Placed (Loop $2) (tokenPosition $1) }
 
 LoopBody :: { [LoopStmt] }
     : RevLoopBody               { reverse $1 }
@@ -208,24 +208,25 @@ LoopStmt :: { LoopStmt }
     | 'while' Exp               { BreakIf (Fncall "not" [$2]) }
     | 'unless' Exp              { NextIf $2 }
     | 'when' Exp                { NextIf (Fncall "not" [$2]) }
-    | Stmt                      { NormalStmt $1 }
+    | Stmt                      { NormalStmt (content $1) }
 
 OptProcArgs :: { [Exp] }
     : {- empty -}               { [] }
     | '(' Exp ExpList ')'       { $2:$3 }
 
-Condelse :: { [Stmt] }
+Condelse :: { [Placed Stmt] }
     : 'else' Stmts              { $2 }
     | {- empty -}               { [] }
 
 Generator :: { Generator }
-    : ident 'in' Exp            { In $1 $3 }
+    : ident 'in' Exp            { In (identName $1) $3 }
     | ident 'from' Exp 'to' Exp 'by' Exp
-                                { InRange $1 $3 $7 (Just $5) }
+                                { InRange (identName $1) $3 $7 (Just $5) }
     | ident 'from' Exp 'by' Exp 'to' Exp
-                                { InRange $1 $3 $5 (Just $7) }
-    | ident 'from' Exp 'to' Exp { InRange $1 $3 (IntValue 1) (Just $5) }
-    | ident 'from' Exp 'by' Exp { InRange $1 $3 $5 Nothing }
+                                { InRange (identName $1) $3 $5 (Just $7) }
+    | ident 'from' Exp 'to' Exp { InRange (identName $1) $3 (IntValue 1) 
+	                                  (Just $5) }
+    | ident 'from' Exp 'by' Exp { InRange (identName $1) $3 $5 Nothing }
 
 Exp :: { Exp }
     : Exp '+' Exp               { Fncall "+" [$1, $3] }
@@ -252,8 +253,8 @@ Exp :: { Exp }
     | char                      { CharValue $1 }
     | dstring                   { StringValue $1 }
     | bstring                   { StringValue $1 }
-    | ident                     { Var $1 }
-    | ident ArgList             { Fncall $1 $2 }
+    | ident                     { Var (identName $1) }
+    | ident ArgList             { Fncall (identName $1) $2 }
 
 ArgList :: { [Exp] }
     : '(' Exp ExpList ')'       { $2:$3 }

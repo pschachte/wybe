@@ -5,8 +5,9 @@
 --  Purpose  : Scanner for the Frege language
 --  Copyright: © 2010 Peter Schachte.  All rights reserved.
 
-module Scanner (Token(..), tokenPosition, showPosition, StringDelim(..), 
-                BracketStyle(..), fileTokens, inputTokens) where
+module Scanner (Token(..), tokenPosition, identName, showPosition, 
+                StringDelim(..), BracketStyle(..), fileTokens, 
+                inputTokens) where
 
 import Data.Char
 import Data.List
@@ -25,7 +26,6 @@ data Token = TokFloat Double SourcePos
               | TokSymbol String SourcePos  -- symbol of non-identifier chars
               deriving (Show)
 
-
 tokenPosition :: Token -> SourcePos
 tokenPosition (TokFloat _     pos) = pos
 tokenPosition (TokInt   _     pos) = pos
@@ -38,6 +38,10 @@ tokenPosition (TokComma       pos) = pos
 tokenPosition (TokSemicolon   pos) = pos
 tokenPosition (TokColon       pos) = pos
 tokenPosition (TokSymbol _    pos) = pos
+
+identName :: Token -> String
+identName (TokIdent str _) = str
+
 
 showPosition :: SourcePos -> String
 showPosition pos

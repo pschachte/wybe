@@ -9,6 +9,8 @@ module AST (-- Types just for parsing
   Item(..), Visibility(..), TypeProto(..), TypeSpec(..), FnProto(..), 
   ProcProto(..), Param(..), FlowDirection(..),  Stmt(..), 
   LoopStmt(..), Exp(..), Generator(..),
+  -- Source Position Types
+  Placed(..), place, content,
   -- AST types
   Module(..), initModule, ModSpec, ProcDef(..), Ident,
   -- AST functions
@@ -27,7 +29,7 @@ data Item
      = TypeDecl Visibility TypeProto [FnProto] (Maybe SourcePos)
      | ResourceDecl Visibility Ident TypeSpec (Maybe SourcePos)
      | FuncDecl Visibility FnProto TypeSpec Exp (Maybe SourcePos)
-     | ProcDecl Visibility ProcProto [Stmt] (Maybe SourcePos)
+     | ProcDecl Visibility ProcProto [Placed Stmt] (Maybe SourcePos)
      | StmtDecl Stmt (Maybe SourcePos)
     deriving Show
 
@@ -42,6 +44,28 @@ data TypeProto = TypeProto String [String]
 data FnProto = FnProto String [Param]
       deriving Show
 
+
+
+----------------------------------------------------------------
+--                    Handling Source Positions
+----------------------------------------------------------------
+
+data Placed t
+    = Placed t SourcePos
+    | Unplaced t
+      deriving Show
+
+place :: Placed t -> Maybe SourcePos
+place (Placed _ pos) = Just pos
+place (Unplaced _) = Nothing
+
+content :: Placed t -> t
+content (Placed content _) = content
+content (Unplaced content) = content
+
+maybePlace :: t -> Maybe SourcePos -> Placed t
+maybePlace t (Just pos) = Placed t pos
+maybePlace t Nothing    = Unplaced t
 
 
 ----------------------------------------------------------------
@@ -105,7 +129,7 @@ data ResourceDef = CompoundResource [Ident] (Maybe SourcePos)
                  | SimpleResource TypeSpec (Maybe SourcePos)
                    deriving Show
 
-data ProcDef = ProcDef ProcProto [Stmt] (Maybe SourcePos)
+data ProcDef = ProcDef ProcProto [Placed Stmt] (Maybe SourcePos)
                    deriving Show
 
 data TypeSpec = TypeSpec Ident [TypeSpec] | Unspecified
@@ -126,12 +150,10 @@ data Param = Param Ident TypeSpec FlowDirection
 data FlowDirection = ParamIn | ParamOut | ParamInOut
       deriving (Show,Eq)
 
-type Stmts = [Stmt]
-
 data Stmt
      = Assign String Exp
      | ProcCall String [Exp]
-     | Cond Exp Stmts Stmts
+     | Cond Exp [Placed Stmt] [Placed Stmt]
      | Loop [LoopStmt]
      | Nop
     deriving Show
@@ -144,7 +166,7 @@ data LoopStmt
     deriving Show
 
 data Exp
-      = Where Stmts Exp
+      = Where [Placed Stmt] Exp
       | CondExp Exp Exp Exp
       | IntValue Integer
       | FloatValue Double
@@ -173,18 +195,18 @@ toASTItem mod (ResourceDecl vis name typ pos) =
 toASTItem mod (FuncDecl vis (FnProto name params) resulttype result pos) =
   toASTItem mod (ProcDecl vis
                  (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
-                 [Assign "$" result] 
+                 [maybePlace (Assign "$" result) pos]
                  pos)
 toASTItem mod (ProcDecl vis proto@(ProcProto name params) stmts pos) =
   publicise modAddPubProc vis name
   $ modAddProc name (ProcDef proto stmts pos) mod
--- XXX Not handling source position correctly
-toASTItem mod (StmtDecl stmt _) =
+toASTItem mod (StmtDecl stmt pos) =
   case Map.lookup "" $ modProcs mod of
     Nothing -> 
-      modAddProc "" (ProcDef (ProcProto "" []) [stmt] Nothing) mod
+      modAddProc "" (ProcDef (ProcProto "" []) [maybePlace stmt pos] Nothing) 
+      mod
     Just (ProcDef proto stmts pos') ->
-      modAddProc "" (ProcDef proto (stmts ++ [stmt]) pos') mod
+      modAddProc "" (ProcDef proto (stmts ++ [maybePlace stmt pos]) pos') mod
       
 
 ----------------------------------------------------------------
