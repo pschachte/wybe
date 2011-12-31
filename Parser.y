@@ -195,20 +195,23 @@ Stmt :: { Placed Stmt }
                                 { Placed (Cond $2 $4 $5) (tokenPosition $1) }
     | 'do' LoopBody 'end'       { Placed (Loop $2) (tokenPosition $1) }
 
-LoopBody :: { [LoopStmt] }
+LoopBody :: { [Placed LoopStmt] }
     : RevLoopBody               { reverse $1 }
 
-RevLoopBody :: { [LoopStmt] }
+RevLoopBody :: { [Placed LoopStmt] }
     : {- empty -}               { [] }
     | RevLoopBody LoopStmt      { $2:$1 }
 
-LoopStmt :: { LoopStmt }
-    : 'for' Generator           { For $2 }
-    | 'until' Exp               { BreakIf $2 }
-    | 'while' Exp               { BreakIf (Fncall "not" [$2]) }
-    | 'unless' Exp              { NextIf $2 }
-    | 'when' Exp                { NextIf (Fncall "not" [$2]) }
-    | Stmt                      { NormalStmt (content $1) }
+LoopStmt :: { Placed LoopStmt }
+    : 'for' Generator           { Placed (For $2) (tokenPosition $1) }
+    | 'until' Exp               { Placed (BreakIf $2) (tokenPosition $1) }
+    | 'while' Exp               { Placed (BreakIf (Fncall "not" [$2]))
+	                                 (tokenPosition $1) }
+    | 'unless' Exp              { Placed (NextIf $2) (tokenPosition $1) }
+    | 'when' Exp                { Placed (NextIf (Fncall "not" [$2]))
+	                                 (tokenPosition $1) }
+    | Stmt                      { maybePlace (NormalStmt (content $1))
+	                                     (place $1) }
 
 OptProcArgs :: { [Exp] }
     : {- empty -}               { [] }

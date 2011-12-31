@@ -10,7 +10,7 @@ module AST (-- Types just for parsing
   ProcProto(..), Param(..), FlowDirection(..),  Stmt(..), 
   LoopStmt(..), Exp(..), Generator(..),
   -- Source Position Types
-  Placed(..), place, content,
+  Placed(..), place, content, maybePlace,
   -- AST types
   Module(..), initModule, ModSpec, ProcDef(..), Ident,
   -- AST functions
@@ -154,7 +154,7 @@ data Stmt
      = Assign String Exp
      | ProcCall String [Exp]
      | Cond Exp [Placed Stmt] [Placed Stmt]
-     | Loop [LoopStmt]
+     | Loop [Placed LoopStmt]
      | Nop
     deriving Show
 
