@@ -1,2 +1,2 @@
-[StmtDecl (ProcCall "println" [StringValue "hello, world"])]
-Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList [], pubProcs = fromList [], modTypes = fromList [], modResources = fromList [], modProcs = fromList [("",ProcDef (ProcProto "" []) [ProcCall "println" [StringValue "hello, world"]])]}
+[StmtDecl (ProcCall "println" [StringValue "hello, world"]) Nothing]
+Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList [], pubProcs = fromList [], modTypes = fromList [], modResources = fromList [], modProcs = fromList [("",ProcDef (ProcProto "" []) [ProcCall "println" [StringValue "hello, world"]] Nothing)]}

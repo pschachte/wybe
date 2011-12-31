@@ -17,17 +17,18 @@ module AST (-- Types just for parsing
 
 import Data.Map as Map
 import Data.Set as Set
+import Text.ParserCombinators.Parsec.Pos
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
 ----------------------------------------------------------------
 
 data Item
-     = TypeDecl Visibility TypeProto [FnProto]
-     | ResourceDecl Visibility Ident TypeSpec
-     | FuncDecl Visibility FnProto TypeSpec Exp
-     | ProcDecl Visibility ProcProto Stmts
-     | StmtDecl Stmt
+     = TypeDecl Visibility TypeProto [FnProto] (Maybe SourcePos)
+     | ResourceDecl Visibility Ident TypeSpec (Maybe SourcePos)
+     | FuncDecl Visibility FnProto TypeSpec Exp (Maybe SourcePos)
+     | ProcDecl Visibility ProcProto [Stmt] (Maybe SourcePos)
+     | StmtDecl Stmt (Maybe SourcePos)
     deriving Show
 
 data Visibility = Public | Private
@@ -52,7 +53,7 @@ data Module = Module {
   pubTypes :: Set Ident,
   pubResources :: Set Ident,
   pubProcs :: Set Ident,
-  modTypes :: Map Ident Int,
+  modTypes :: Map Ident TypeDef,
   modResources :: Map Ident ResourceDef,
   modProcs :: Map Ident ProcDef
   }  deriving Show
@@ -76,9 +77,9 @@ modAddPubProc :: Ident -> Module -> Module
 modAddPubProc proc mod 
   = mod { pubProcs = Set.insert proc $ pubProcs mod }
 
-modAddType :: Ident -> Int -> Module -> Module
-modAddType name arity mod 
-  = mod { modTypes = Map.insert name arity $ modTypes mod }
+modAddType :: Ident -> TypeDef -> Module -> Module
+modAddType name def mod
+  = mod { modTypes = Map.insert name def $ modTypes mod }
 
 modAddResource :: Ident -> ResourceDef -> Module -> Module
 modAddResource name def mod 
@@ -97,14 +98,14 @@ type Ident = String
 
 type ModSpec = [Ident]
 
-data ResourceDef = CompoundResource [Ident]
-                 | SimpleResource TypeSpec
+data TypeDef = TypeDef Int (Maybe SourcePos)
                    deriving Show
 
-data ProcDef = ProcDef ProcProto [Stmt]
+data ResourceDef = CompoundResource [Ident] (Maybe SourcePos)
+                 | SimpleResource TypeSpec (Maybe SourcePos)
                    deriving Show
 
-data Constructor = Constructor Ident [Param]
+data ProcDef = ProcDef ProcProto [Stmt] (Maybe SourcePos)
                    deriving Show
 
 data TypeSpec = TypeSpec Ident [TypeSpec] | Unspecified
@@ -163,25 +164,27 @@ toAST :: [Item] -> Module
 toAST items = foldl toASTItem initModule items
 
 toASTItem :: Module -> Item -> Module
-toASTItem mod (TypeDecl vis (TypeProto name params) ctrs) =
+toASTItem mod (TypeDecl vis (TypeProto name params) ctrs pos) =
   publicise modAddPubType vis name
-  $ modAddType name (length params) mod
-toASTItem mod (ResourceDecl vis name typ) =
+  $ modAddType name (TypeDef (length params) pos) mod
+toASTItem mod (ResourceDecl vis name typ pos) =
   publicise modAddPubResource vis name 
-  $ modAddResource name (SimpleResource typ) mod
-toASTItem mod (FuncDecl vis (FnProto name params) resulttype result) =
+  $ modAddResource name (SimpleResource typ pos) mod
+toASTItem mod (FuncDecl vis (FnProto name params) resulttype result pos) =
   toASTItem mod (ProcDecl vis
                  (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
-                 [Assign "$" result])
-toASTItem mod (ProcDecl vis proto@(ProcProto name params) stmts) =
+                 [Assign "$" result] 
+                 pos)
+toASTItem mod (ProcDecl vis proto@(ProcProto name params) stmts pos) =
   publicise modAddPubProc vis name
-  $ modAddProc name (ProcDef proto stmts) mod
-toASTItem mod (StmtDecl stmt) =
+  $ modAddProc name (ProcDef proto stmts pos) mod
+-- XXX Not handling source position correctly
+toASTItem mod (StmtDecl stmt _) =
   case Map.lookup "" $ modProcs mod of
     Nothing -> 
-      modAddProc "" (ProcDef (ProcProto "" []) [stmt]) mod
-    Just (ProcDef proto stmts) ->
-      modAddProc "" (ProcDef proto $ stmts ++ [stmt]) mod
+      modAddProc "" (ProcDef (ProcProto "" []) [stmt] Nothing) mod
+    Just (ProcDef proto stmts pos') ->
+      modAddProc "" (ProcDef proto (stmts ++ [stmt]) pos') mod
       
 
 ----------------------------------------------------------------

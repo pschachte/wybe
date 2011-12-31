@@ -2,6 +2,7 @@
 module Parser (parse) where
 import Scanner
 import AST
+-- import Text.ParserCombinators.Parsec.Pos
 
 }
 
@@ -82,14 +83,16 @@ RevItems :: { [Item] }
 
 Item  :: { Item }
     : Visibility 'type' TypeProto '=' Ctors
-                                { TypeDecl $1 $3 $5 }
+                                { TypeDecl $1 $3 $5 $ Just $ tokenPosition $2 }
     | Visibility 'resource' ident OptType
-                                { ResourceDecl $1 $3 $4 }
+                                { ResourceDecl $1 $3 $4
+				    $ Just $ tokenPosition $2 }
     | Visibility 'func' FnProto OptType '=' Exp
-                                { FuncDecl $1 $3 $4 $6 }
+                                { FuncDecl $1 $3 $4 $6
+				    $ Just $ tokenPosition $2 }
     | Visibility 'proc' ProcProto ProcBody
-                                { ProcDecl $1 $3 $4 }
-    | Stmt                      { StmtDecl $1 }
+                                { ProcDecl $1 $3 $4 $ Just $ tokenPosition $2 }
+    | Stmt                      { StmtDecl $1 Nothing }
 
 
 
