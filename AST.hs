@@ -28,7 +28,7 @@ import Text.ParserCombinators.Parsec.Pos
 data Item
      = TypeDecl Visibility TypeProto [FnProto] (Maybe SourcePos)
      | ResourceDecl Visibility Ident TypeSpec (Maybe SourcePos)
-     | FuncDecl Visibility FnProto TypeSpec Exp (Maybe SourcePos)
+     | FuncDecl Visibility FnProto TypeSpec (Placed Exp) (Maybe SourcePos)
      | ProcDecl Visibility ProcProto [Placed Stmt] (Maybe SourcePos)
      | StmtDecl Stmt (Maybe SourcePos)
     deriving Show
@@ -151,34 +151,34 @@ data FlowDirection = ParamIn | ParamOut | ParamInOut
       deriving (Show,Eq)
 
 data Stmt
-     = Assign String Exp
-     | ProcCall String [Exp]
-     | Cond Exp [Placed Stmt] [Placed Stmt]
+     = Assign String (Placed Exp)
+     | ProcCall String [Placed Exp]
+     | Cond (Placed Exp) [Placed Stmt] [Placed Stmt]
      | Loop [Placed LoopStmt]
      | Nop
     deriving Show
 
 data LoopStmt
      = For Generator
-     | BreakIf Exp
-     | NextIf Exp
-     | NormalStmt Stmt
+     | BreakIf (Placed Exp)
+     | NextIf (Placed Exp)
+     | NormalStmt (Placed Stmt)
     deriving Show
 
 data Exp
-      = Where [Placed Stmt] Exp
-      | CondExp Exp Exp Exp
+      = Where [Placed Stmt] (Placed Exp)
+      | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
       | IntValue Integer
       | FloatValue Double
       | StringValue String
       | CharValue Char
-      | Fncall String [Exp]
+      | Fncall String [(Placed Exp)]
       | Var String
       deriving Show
 
 data Generator 
-      = In String Exp
-      | InRange String Exp Exp (Maybe Exp)
+      = In String (Placed Exp)
+      | InRange String (Placed Exp) (Placed Exp) (Maybe (Placed Exp))
     deriving Show
 
 
@@ -195,7 +195,7 @@ toASTItem mod (ResourceDecl vis name typ pos) =
 toASTItem mod (FuncDecl vis (FnProto name params) resulttype result pos) =
   toASTItem mod (ProcDecl vis
                  (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
-                 [maybePlace (Assign "$" result) pos]
+                 [maybePlace (Assign "$" result) (place result)]
                  pos)
 toASTItem mod (ProcDecl vis proto@(ProcProto name params) stmts pos) =
   publicise modAddPubProc vis name

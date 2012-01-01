@@ -11,11 +11,11 @@ import AST
 %error { parseError }
 
 %token 
-      int             { TokInt $$ _ }
-      float           { TokFloat $$ _ }
-      char            { TokChar $$ _ }
-      dstring         { TokString DoubleQuote $$ _ }
-      bstring         { TokString BackQuote $$ _ }
+      int             { TokInt _ _ }
+      float           { TokFloat _ _ }
+      char            { TokChar _ _ }
+      dstring         { TokString DoubleQuote _ _ }
+      bstring         { TokString BackQuote _ _ }
       '='             { TokSymbol "=" _ }
       '+'             { TokSymbol "+" _ }
       '-'             { TokSymbol "-" _ }
@@ -205,15 +205,19 @@ RevLoopBody :: { [Placed LoopStmt] }
 LoopStmt :: { Placed LoopStmt }
     : 'for' Generator           { Placed (For $2) (tokenPosition $1) }
     | 'until' Exp               { Placed (BreakIf $2) (tokenPosition $1) }
-    | 'while' Exp               { Placed (BreakIf (Fncall "not" [$2]))
+    | 'while' Exp               { Placed (BreakIf 
+					  (maybePlace (Fncall "not" [$2])
+					   (place $2)))
 	                                 (tokenPosition $1) }
     | 'unless' Exp              { Placed (NextIf $2) (tokenPosition $1) }
-    | 'when' Exp                { Placed (NextIf (Fncall "not" [$2]))
+    | 'when' Exp                { Placed (NextIf
+					  (maybePlace (Fncall "not" [$2])
+					   (place $2)))
 	                                 (tokenPosition $1) }
-    | Stmt                      { maybePlace (NormalStmt (content $1))
+    | Stmt                      { maybePlace (NormalStmt $1)
 	                                     (place $1) }
 
-OptProcArgs :: { [Exp] }
+OptProcArgs :: { [Placed Exp] }
     : {- empty -}               { [] }
     | '(' Exp ExpList ')'       { $2:$3 }
 
@@ -227,45 +231,57 @@ Generator :: { Generator }
                                 { InRange (identName $1) $3 $7 (Just $5) }
     | ident 'from' Exp 'by' Exp 'to' Exp
                                 { InRange (identName $1) $3 $5 (Just $7) }
-    | ident 'from' Exp 'to' Exp { InRange (identName $1) $3 (IntValue 1) 
+    | ident 'from' Exp 'to' Exp { InRange (identName $1) $3 
+	                                  (Unplaced $ IntValue 1)
 	                                  (Just $5) }
     | ident 'from' Exp 'by' Exp { InRange (identName $1) $3 $5 Nothing }
 
-Exp :: { Exp }
-    : Exp '+' Exp               { Fncall "+" [$1, $3] }
-    | Exp '-' Exp               { Fncall "-" [$1, $3] }
-    | Exp '*' Exp               { Fncall "*" [$1, $3] }
-    | Exp '/' Exp               { Fncall "/" [$1, $3] }
-    | Exp '<' Exp               { Fncall "<" [$1, $3] }
-    | Exp '<=' Exp              { Fncall "<=" [$1, $3] }
-    | Exp '>' Exp               { Fncall "<" [$3, $1] }
-    | Exp '>=' Exp              { Fncall "<=" [$3, $1] }
-    | Exp '==' Exp              { Fncall "==" [$1, $3] }
-    | Exp '/=' Exp              { Fncall "+" [$1, $3] }
-    | 'not' Exp                 { Fncall "not" [$2] }
-    | Exp 'and' Exp             { Fncall "and" [$1, $3] }
-    | Exp 'or' Exp              { Fncall "or" [$1, $3] }
+Exp :: { Placed Exp }
+    : Exp '+' Exp               { maybePlace (Fncall "+" [$1, $3]) (place $1) }
+    | Exp '-' Exp               { maybePlace (Fncall "-" [$1, $3]) (place $1) }
+    | Exp '*' Exp               { maybePlace (Fncall "*" [$1, $3]) (place $1) }
+    | Exp '/' Exp               { maybePlace (Fncall "/" [$1, $3]) (place $1) }
+    | Exp '<' Exp               { maybePlace (Fncall "<" [$1, $3]) (place $1) }
+    | Exp '<=' Exp              { maybePlace (Fncall "<=" [$1, $3]) (place $1) }
+    | Exp '>' Exp               { maybePlace (Fncall "<" [$3, $1]) (place $1) }
+    | Exp '>=' Exp              { maybePlace (Fncall "<=" [$3, $1]) (place $1) }
+    | Exp '==' Exp              { maybePlace (Fncall "==" [$1, $3]) (place $1) }
+    | Exp '/=' Exp              { maybePlace (Fncall "+" [$1, $3]) (place $1) }
+    | 'not' Exp                 { Placed (Fncall "not" [$2])
+	                                 (tokenPosition $1) }
+    | Exp 'and' Exp             { maybePlace (Fncall "and" [$1, $3])
+	                                     (place $1) }
+    | Exp 'or' Exp              { maybePlace (Fncall "or" [$1, $3]) (place $1) }
     | 'if' Exp 'then' Exp 'else' Exp
-                                { CondExp $2 $4 $6 }
-    | 'let' Stmts 'in' Exp      { Where $2 $4 }
-    | Exp 'where' ProcBody      { Where $3 $1 }
-    | '(' Exp ')'               { $2 }
-    | '-' Exp %prec NEG         { Fncall "Negate" [$2] }
-    | int                       { IntValue $1 }
-    | float                     { FloatValue $1 }
-    | char                      { CharValue $1 }
-    | dstring                   { StringValue $1 }
-    | bstring                   { StringValue $1 }
-    | ident                     { Var (identName $1) }
-    | ident ArgList             { Fncall (identName $1) $2 }
+                                { Placed (CondExp $2 $4 $6)
+				         (tokenPosition $1) }
+    | 'let' Stmts 'in' Exp      { Placed (Where $2 $4) (tokenPosition $1) }
+    | Exp 'where' ProcBody      { maybePlace (Where $3 $1) (place $1) }
+    | '(' Exp ')'               { Placed (content $2) (tokenPosition $1) }
+    | '-' Exp %prec NEG         { Placed (Fncall "Negate" [$2])
+	                                 (tokenPosition $1) }
+    | int                       { Placed (IntValue $ intValue $1)
+	                                 (tokenPosition $1) }
+    | float                     { Placed (FloatValue $ floatValue $1)
+	                                 (tokenPosition $1) }
+    | char                      { Placed (CharValue $ charValue $1)
+	                                 (tokenPosition $1) }
+    | dstring                   { Placed (StringValue $ stringValue $1)
+	                                 (tokenPosition $1) }
+    | bstring                   { Placed (StringValue $ stringValue $1)
+	                                 (tokenPosition $1) }
+    | ident                     { Placed (Var (identName $1))
+	                                 (tokenPosition $1) }
+    | ident ArgList             { Placed (Fncall (identName $1) $2)
+	                                 (tokenPosition $1) }
 
-ArgList :: { [Exp] }
+ArgList :: { [Placed Exp] }
     : '(' Exp ExpList ')'       { $2:$3 }
 
-ExpList :: { [Exp] }
+ExpList :: { [Placed Exp] }
     : RevExpList                { reverse $1 }
 
-RevExpList :: { [Exp] }
+RevExpList :: { [Placed Exp] }
     : {- empty -}               { [] }
     | RevExpList ',' Exp        { $3:$1 }
 

@@ -5,7 +5,8 @@
 --  Purpose  : Scanner for the Frege language
 --  Copyright: © 2010 Peter Schachte.  All rights reserved.
 
-module Scanner (Token(..), tokenPosition, identName, showPosition, 
+module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
+                charValue, identName, symbolName, showPosition, 
                 StringDelim(..), BracketStyle(..), fileTokens, 
                 inputTokens) where
 
@@ -39,8 +40,25 @@ tokenPosition (TokSemicolon   pos) = pos
 tokenPosition (TokColon       pos) = pos
 tokenPosition (TokSymbol _    pos) = pos
 
+floatValue :: Token -> Double
+floatValue (TokFloat float _) = float
+
+intValue :: Token -> Integer
+intValue (TokInt int _) = int
+
+stringValue :: Token -> String
+stringValue (TokString _ string _) = string
+
+charValue :: Token -> Char
+charValue (TokChar char _) = char
+
 identName :: Token -> String
 identName (TokIdent str _) = str
+
+symbolName :: Token -> String
+symbolName (TokSymbol str _) = str
+
+
 
 
 showPosition :: SourcePos -> String
