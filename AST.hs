@@ -109,19 +109,24 @@ modAddResource :: Ident -> ResourceDef -> Module -> Module
 modAddResource name def mod 
   = mod { modResources = Map.insert name def $ modResources mod }
 
-modAddProc :: Ident -> ProcDef -> Module -> Module
-modAddProc name newdef@(ProcDef id proto stmts pos) mod
-  | id == 0   = let newid = 1 + procCount mod
-                    procs = modProcs mod
-                    defs  = ProcDef newid proto stmts pos:
+modAddProc :: Ident -> ProcProto -> [Placed Stmt] -> (Maybe SourcePos)
+              -> Module -> Module
+modAddProc name proto stmts pos mod
+  = let newid = 1 + procCount mod
+        procs = modProcs mod
+        defs  = ProcDef newid proto stmts pos:
                             findWithDefault [] name procs
                 in  mod { modProcs  = Map.insert name defs procs,
                           procCount = newid }
-  | otherwise = let procs   = modProcs mod
-                    olddefs = findWithDefault [] name procs
-                    (_,rest)  = List.partition (\(ProcDef oldid _ _ _) -> 
-                                                 id==oldid) olddefs
-                in  mod { modProcs  = Map.insert name (newdef:rest) procs }
+
+modReplaceProc :: Ident -> Int -> ProcProto -> [Placed Stmt]
+                  -> (Maybe SourcePos) -> Module -> Module
+modReplaceProc name id proto stmts pos mod
+  = let procs   = modProcs mod
+        olddefs = findWithDefault [] name procs
+        (_,rest)  = List.partition (\(ProcDef oldid _ _ _) -> id==oldid) olddefs
+    in  mod { modProcs  = Map.insert name (ProcDef id proto stmts pos:rest) 
+                          procs }
 
 publicise :: (Ident -> Module -> Module) -> 
              Visibility -> Ident -> Module -> Module
@@ -208,15 +213,13 @@ toASTItem mod (FuncDecl vis (FnProto name params) resulttype result pos) =
                  [maybePlace (Assign "$" result) (place result)]
                  pos)
 toASTItem mod (ProcDecl vis proto@(ProcProto name params) stmts pos) =
-  publicise modAddPubProc vis name
-  $ modAddProc name (ProcDef 0 proto stmts pos) mod
+  publicise modAddPubProc vis name $ modAddProc name proto stmts pos mod
 toASTItem mod (StmtDecl stmt pos) =
   case Map.lookup "" $ modProcs mod of
     Nothing -> 
-      modAddProc "" (ProcDef 0 (ProcProto "" []) [maybePlace stmt pos] Nothing)
-      mod
+      modAddProc "" (ProcProto "" []) [maybePlace stmt pos] Nothing mod
     Just [ProcDef id proto stmts pos'] ->
-      modAddProc "" (ProcDef id proto (stmts ++ [maybePlace stmt pos]) pos') mod
+      modReplaceProc "" id proto (stmts ++ [maybePlace stmt pos]) pos' mod
 
 
 ----------------------------------------------------------------
