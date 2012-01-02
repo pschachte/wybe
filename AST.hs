@@ -19,6 +19,7 @@ module AST (-- Types just for parsing
 
 import Data.Map as Map
 import Data.Set as Set
+import Data.List as List
 import Text.ParserCombinators.Parsec.Pos
 
 ----------------------------------------------------------------
@@ -35,8 +36,6 @@ data Item
 
 data Visibility = Public | Private
                   deriving (Eq, Show)
-
-type Idents = [String]
 
 data TypeProto = TypeProto String [String]
       deriving Show
@@ -79,11 +78,12 @@ data Module = Module {
   pubProcs :: Set Ident,
   modTypes :: Map Ident TypeDef,
   modResources :: Map Ident ResourceDef,
-  modProcs :: Map Ident ProcDef
+  modProcs :: Map Ident [ProcDef],
+  procCount :: Int
   }  deriving Show
 
 initModule = Module Set.empty Set.empty Set.empty Set.empty
-             Map.empty Map.empty Map.empty 
+             Map.empty Map.empty Map.empty 0
 
 modAddImport :: ModSpec -> Module -> Module
 modAddImport imp mod 
@@ -110,8 +110,18 @@ modAddResource name def mod
   = mod { modResources = Map.insert name def $ modResources mod }
 
 modAddProc :: Ident -> ProcDef -> Module -> Module
-modAddProc name def mod 
-  = mod { modProcs = Map.insert name def $ modProcs mod }
+modAddProc name newdef@(ProcDef id proto stmts pos) mod
+  | id == 0   = let newid = 1 + procCount mod
+                    procs = modProcs mod
+                    defs  = ProcDef newid proto stmts pos:
+                            findWithDefault [] name procs
+                in  mod { modProcs  = Map.insert name defs procs,
+                          procCount = newid }
+  | otherwise = let procs   = modProcs mod
+                    olddefs = findWithDefault [] name procs
+                    (_,rest)  = List.partition (\(ProcDef oldid _ _ _) -> 
+                                                 id==oldid) olddefs
+                in  mod { modProcs  = Map.insert name (newdef:rest) procs }
 
 publicise :: (Ident -> Module -> Module) -> 
              Visibility -> Ident -> Module -> Module
@@ -129,7 +139,7 @@ data ResourceDef = CompoundResource [Ident] (Maybe SourcePos)
                  | SimpleResource TypeSpec (Maybe SourcePos)
                    deriving Show
 
-data ProcDef = ProcDef ProcProto [Placed Stmt] (Maybe SourcePos)
+data ProcDef = ProcDef Int ProcProto [Placed Stmt] (Maybe SourcePos)
                    deriving Show
 
 data TypeSpec = TypeSpec Ident [TypeSpec] | Unspecified
@@ -199,15 +209,15 @@ toASTItem mod (FuncDecl vis (FnProto name params) resulttype result pos) =
                  pos)
 toASTItem mod (ProcDecl vis proto@(ProcProto name params) stmts pos) =
   publicise modAddPubProc vis name
-  $ modAddProc name (ProcDef proto stmts pos) mod
+  $ modAddProc name (ProcDef 0 proto stmts pos) mod
 toASTItem mod (StmtDecl stmt pos) =
   case Map.lookup "" $ modProcs mod of
     Nothing -> 
-      modAddProc "" (ProcDef (ProcProto "" []) [maybePlace stmt pos] Nothing) 
+      modAddProc "" (ProcDef 0 (ProcProto "" []) [maybePlace stmt pos] Nothing)
       mod
-    Just (ProcDef proto stmts pos') ->
-      modAddProc "" (ProcDef proto (stmts ++ [maybePlace stmt pos]) pos') mod
-      
+    Just [ProcDef id proto stmts pos'] ->
+      modAddProc "" (ProcDef id proto (stmts ++ [maybePlace stmt pos]) pos') mod
+
 
 ----------------------------------------------------------------
 --                         Generally Useful
