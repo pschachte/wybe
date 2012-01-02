@@ -246,7 +246,7 @@ Exp :: { Placed Exp }
     | Exp '>' Exp               { maybePlace (Fncall "<" [$3, $1]) (place $1) }
     | Exp '>=' Exp              { maybePlace (Fncall "<=" [$3, $1]) (place $1) }
     | Exp '==' Exp              { maybePlace (Fncall "==" [$1, $3]) (place $1) }
-    | Exp '/=' Exp              { maybePlace (Fncall "+" [$1, $3]) (place $1) }
+    | Exp '/=' Exp              { maybePlace (Fncall "/=" [$1, $3]) (place $1) }
     | 'not' Exp                 { Placed (Fncall "not" [$2])
 	                                 (tokenPosition $1) }
     | Exp 'and' Exp             { maybePlace (Fncall "and" [$1, $3])
