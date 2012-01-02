@@ -237,21 +237,32 @@ Generator :: { Generator }
     | ident 'from' Exp 'by' Exp { InRange (identName $1) $3 $5 Nothing }
 
 Exp :: { Placed Exp }
-    : Exp '+' Exp               { maybePlace (Fncall "+" [$1, $3]) (place $1) }
-    | Exp '-' Exp               { maybePlace (Fncall "-" [$1, $3]) (place $1) }
-    | Exp '*' Exp               { maybePlace (Fncall "*" [$1, $3]) (place $1) }
-    | Exp '/' Exp               { maybePlace (Fncall "/" [$1, $3]) (place $1) }
-    | Exp '<' Exp               { maybePlace (Fncall "<" [$1, $3]) (place $1) }
-    | Exp '<=' Exp              { maybePlace (Fncall "<=" [$1, $3]) (place $1) }
-    | Exp '>' Exp               { maybePlace (Fncall "<" [$3, $1]) (place $1) }
-    | Exp '>=' Exp              { maybePlace (Fncall "<=" [$3, $1]) (place $1) }
-    | Exp '==' Exp              { maybePlace (Fncall "==" [$1, $3]) (place $1) }
-    | Exp '/=' Exp              { maybePlace (Fncall "/=" [$1, $3]) (place $1) }
-    | 'not' Exp                 { Placed (Fncall "not" [$2])
-	                                 (tokenPosition $1) }
-    | Exp 'and' Exp             { maybePlace (Fncall "and" [$1, $3])
+    : Exp '+' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
 	                                     (place $1) }
-    | Exp 'or' Exp              { maybePlace (Fncall "or" [$1, $3]) (place $1) }
+    | Exp '-' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+                                             (place $1) }
+    | Exp '*' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+                                             (place $1) }
+    | Exp '/' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+                                             (place $1) }
+    | Exp '<' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+                                             (place $1) }
+    | Exp '<=' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
+                                             (place $1) }
+    | Exp '>' Exp               { maybePlace (Fncall "<" [$3, $1])
+                                             (place $1) }
+    | Exp '>=' Exp              { maybePlace (Fncall "<=" [$3, $1])
+                                             (place $1) }
+    | Exp '==' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
+                                             (place $1) }
+    | Exp '/=' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
+                                             (place $1) }
+    | 'not' Exp                 { Placed (Fncall (identName $1) [$2])
+	                                 (tokenPosition $1) }
+    | Exp 'and' Exp             { maybePlace (Fncall (identName $2) [$1, $3])
+	                                     (place $1) }
+    | Exp 'or' Exp              { maybePlace (Fncall (identName $2) [$1, $3])
+                                             (place $1) }
     | 'if' Exp 'then' Exp 'else' Exp
                                 { Placed (CondExp $2 $4 $6)
 				         (tokenPosition $1) }
