@@ -1,4 +1,10 @@
 {
+--  File     : Parser.y
+--  Author   : Peter Schachte
+--  Origin   : Tue Nov 08 22:23:55 2011
+--  Purpose  : Parser for the Frege language
+--  Copyright: © 2011-2012 Peter Schachte.  All rights reserved.
+
 module Parser (parse) where
 import Scanner
 import AST

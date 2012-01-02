@@ -1,9 +1,8 @@
 --  File     : AST.hs
---  RCS      : $Id$
 --  Author   : Peter Schachte
 --  Origin   : Thu Oct 14 23:30:58 2010
 --  Purpose  : Abstract Syntax Tree for Frege language
---  Copyright: © 2010 Peter Schachte.  All rights reserved.
+--  Copyright: © 2010-2012 Peter Schachte.  All rights reserved.
 
 module AST (-- Types just for parsing
   Item(..), Visibility(..), TypeProto(..), TypeSpec(..), FnProto(..), 

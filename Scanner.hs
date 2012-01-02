@@ -1,9 +1,8 @@
 --  File     : Scanner.hs
---  RCS      : $Id$
 --  Author   : Peter Schachte
 --  Origin   : Thu Oct 21 17:42:28 2010
 --  Purpose  : Scanner for the Frege language
---  Copyright: © 2010 Peter Schachte.  All rights reserved.
+--  Copyright: © 2010-2012 Peter Schachte.  All rights reserved.
 
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
                 charValue, identName, symbolName, showPosition, 
