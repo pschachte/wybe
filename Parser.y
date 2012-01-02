@@ -249,9 +249,9 @@ Exp :: { Placed Exp }
                                              (place $1) }
     | Exp '<=' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
                                              (place $1) }
-    | Exp '>' Exp               { maybePlace (Fncall "<" [$3, $1])
+    | Exp '>' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
                                              (place $1) }
-    | Exp '>=' Exp              { maybePlace (Fncall "<=" [$3, $1])
+    | Exp '>=' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
                                              (place $1) }
     | Exp '==' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
                                              (place $1) }
