@@ -168,8 +168,7 @@ data ProcArg = ProcArg (Placed Exp) FlowDirection
       deriving Show
 
 data Stmt
-     = Assign String (Placed Exp)
-     | ProcCall String [ProcArg]
+     = ProcCall String [ProcArg]
      | Cond (Placed Exp) [Placed Stmt] [Placed Stmt]
      | Loop [Placed LoopStmt]
      | Nop
@@ -212,7 +211,9 @@ toASTItem mod (ResourceDecl vis name typ pos) =
 toASTItem mod (FuncDecl vis (FnProto name params) resulttype result pos) =
   toASTItem mod (ProcDecl vis
                  (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
-                 [maybePlace (Assign "$" result) (place result)]
+                 [Unplaced (ProcCall "=" [ProcArg (Unplaced $ Var "$") 
+                                          ParamOut, 
+                                         ProcArg result ParamIn])]
                  pos)
 toASTItem mod (ProcDecl vis proto@(ProcProto name params) stmts pos) =
   publicise modAddPubProc vis name $ modAddProc name proto stmts pos mod

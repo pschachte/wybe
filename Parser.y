@@ -199,8 +199,9 @@ RevStmts :: { [Placed Stmt] }
     | RevStmts Stmt             { $2:$1 }
 
 Stmt :: { Placed Stmt }
-    : ident '=' Exp             { Placed (Assign (identName $1) $3)
-	                                 (tokenPosition $1) }
+    : ProcArg '=' ProcArg       { maybePlace (ProcCall (symbolName $2) [$1, $3])
+	                                     (case $1 of 
+					      (ProcArg exp _) -> place exp) }
     | ident OptProcArgs         { Placed (ProcCall (identName $1) $2)
 	                                 (tokenPosition $1) }
     | 'if' Exp 'then' Stmts Condelse 'end'
