@@ -13,7 +13,7 @@ all:	test
 	rubber -m dvips $<
 
 %.hs:	%.y
-	happy $<
+	happy -g $<
 
 frgc:	frgc.hs Parser.hs Scanner.hs Version.hs
 	ghc --make $@

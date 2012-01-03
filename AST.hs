@@ -6,7 +6,7 @@
 
 module AST (-- Types just for parsing
   Item(..), Visibility(..), TypeProto(..), TypeSpec(..), FnProto(..), 
-  ProcProto(..), Param(..), FlowDirection(..),  Stmt(..), 
+  ProcProto(..), Param(..), ProcArg(..), FlowDirection(..),  Stmt(..), 
   LoopStmt(..), Exp(..), Generator(..),
   -- Source Position Types
   Placed(..), place, content, maybePlace,
@@ -164,9 +164,12 @@ data Param = Param Ident TypeSpec FlowDirection
 data FlowDirection = ParamIn | ParamOut | ParamInOut
       deriving (Show,Eq)
 
+data ProcArg = ProcArg (Placed Exp) FlowDirection
+      deriving Show
+
 data Stmt
      = Assign String (Placed Exp)
-     | ProcCall String [Placed Exp]
+     | ProcCall String [ProcArg]
      | Cond (Placed Exp) [Placed Stmt] [Placed Stmt]
      | Loop [Placed LoopStmt]
      | Nop

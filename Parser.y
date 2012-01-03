@@ -145,9 +145,13 @@ RevProcParams :: { [Param] }
                                 { $3 : $1 }
 
 ProcParam :: { Param }
-    : ident OptType             { Param (identName $1) $2 ParamIn }
-    | '?' ident OptType         { Param (identName $2) $3 ParamOut }
-    | '!' ident OptType         { Param (identName $2) $3 ParamInOut }
+    : FlowDirection ident OptType
+                                { Param (identName $2) $3 $1 }
+
+FlowDirection :: { FlowDirection }
+    : {- empty -}               { ParamIn }
+    | '?'                       { ParamOut }
+    | '!'                       { ParamInOut }
 
 OptType :: { TypeSpec }
     : {- empty -}               { Unspecified }
@@ -195,8 +199,10 @@ RevStmts :: { [Placed Stmt] }
     | RevStmts Stmt             { $2:$1 }
 
 Stmt :: { Placed Stmt }
-    : ident '=' Exp             { Placed (Assign (identName $1) $3) (tokenPosition $1) }
-    | ident OptProcArgs         { Placed (ProcCall (identName $1) $2) (tokenPosition $1) }
+    : ident '=' Exp             { Placed (Assign (identName $1) $3)
+	                                 (tokenPosition $1) }
+    | ident OptProcArgs         { Placed (ProcCall (identName $1) $2)
+	                                 (tokenPosition $1) }
     | 'if' Exp 'then' Stmts Condelse 'end'
                                 { Placed (Cond $2 $4 $5) (tokenPosition $1) }
     | 'do' LoopBody 'end'       { Placed (Loop $2) (tokenPosition $1) }
@@ -223,9 +229,19 @@ LoopStmt :: { Placed LoopStmt }
     | Stmt                      { maybePlace (NormalStmt $1)
 	                                     (place $1) }
 
-OptProcArgs :: { [Placed Exp] }
+OptProcArgs :: { [ProcArg] }
     : {- empty -}               { [] }
-    | '(' Exp ExpList ')'       { $2:$3 }
+    | '(' ProcArg ProcArgList ')'       { $2:$3 }
+
+ProcArgList :: { [ProcArg] }
+    : RevProcArgList                { reverse $1 }
+
+RevProcArgList :: { [ProcArg] }
+    : {- empty -}               { [] }
+    | RevProcArgList ',' ProcArg        { $3:$1 }
+
+ProcArg :: { ProcArg }
+    : FlowDirection Exp         { (ProcArg $2 $1) }
 
 Condelse :: { [Placed Stmt] }
     : 'else' Stmts              { $2 }
