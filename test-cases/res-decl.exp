@@ -1,2 +1,2 @@
 [ResourceDecl Public "count" (TypeSpec "int" []) (Just "test-cases/res-decl.frg" (line 1, column 8))]
-Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList ["count"], pubProcs = fromList [], modTypes = fromList [], modResources = fromList [("count",SimpleResource (TypeSpec "int" []) (Just "test-cases/res-decl.frg" (line 1, column 8)))], modProcs = fromList [], procCount = 0}
+Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList ["count"], pubProcs = fromList [], modTypes = fromList [], modResources = fromList [("count",SimpleResource (TypeSpec "int" []) (Just "test-cases/res-decl.frg" (line 1, column 8)))], modProcs = fromList []}

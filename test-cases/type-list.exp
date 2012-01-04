@@ -1,2 +1,2 @@
 [TypeDecl Public (TypeProto "list" ["t"]) [FnProto "nil" [],FnProto "cons" [Param "head" (TypeSpec "t" []) ParamIn,Param "tail" (TypeSpec "list" [TypeSpec "t" []]) ParamIn]] (Just "test-cases/type-list.frg" (line 1, column 8))]
-Module {modImports = fromList [], pubTypes = fromList ["list"], pubResources = fromList [], pubProcs = fromList [], modTypes = fromList [("list",TypeDef 1 (Just "test-cases/type-list.frg" (line 1, column 8)))], modResources = fromList [], modProcs = fromList [], procCount = 0}
+Module {modImports = fromList [], pubTypes = fromList ["list"], pubResources = fromList [], pubProcs = fromList [], modTypes = fromList [("list",TypeDef 1 (Just "test-cases/type-list.frg" (line 1, column 8)))], modResources = fromList [], modProcs = fromList []}

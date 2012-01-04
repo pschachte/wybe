@@ -67,7 +67,8 @@ processFiles opts (file:files) = do
   if (optVerbosity opts) > 0 then
     putStrLn $ show parseTree
     else return ()
-  let ast = toAST parseTree
+  let (ast,errs) = toAST parseTree
+  mapM putStrLn errs
   if (optVerbosity opts) > 0 then
     putStrLn $ show ast
     else return ()
