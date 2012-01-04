@@ -62,7 +62,7 @@ main = do
 processFiles :: Options -> [String] -> IO ()
 processFiles opts [] = return ()
 processFiles opts (file:files) = do
-  toks <- fileTokens file
+  toks <- if file == "-" then inputTokens else fileTokens file
   let parseTree = parse toks
   if (optVerbosity opts) > 0 then
     putStrLn $ show parseTree

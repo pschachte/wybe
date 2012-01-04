@@ -82,7 +82,7 @@ fileTokens filename =
 inputTokens :: IO [Token]
 inputTokens =
   do content <- getContents
-     return (tokenise (initialPos "") content)
+     return (tokenise (initialPos "<stdin>") content)
 
 
 tokenise :: SourcePos -> String -> [Token]
