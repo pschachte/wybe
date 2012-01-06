@@ -131,14 +131,14 @@ data LoopStmt
     deriving Show
 
 data Exp
-      = Where [Placed Stmt] (Placed Exp)
-      | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
-      | IntValue Integer
+      = IntValue Integer
       | FloatValue Double
       | StringValue String
       | CharValue Char
-      | Fncall String [Placed Exp]
       | Var String
+      | Where [Placed Stmt] (Placed Exp)
+      | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
+      | Fncall String [Placed Exp]
       deriving Show
 
 data Generator 
