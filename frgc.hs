@@ -10,6 +10,7 @@ module Main where
 import AST
 import Parser
 import Scanner
+import Normalise
 import System.Environment
 import System.Console.GetOpt
 import Version
@@ -67,7 +68,7 @@ processFiles opts (file:files) = do
   if (optVerbosity opts) > 0 then
     putStrLn $ show parseTree
     else return ()
-  let (ast,errs) = toAST parseTree
+  let (ast,errs) = normalise parseTree
   mapM putStrLn errs
   if (optVerbosity opts) > 0 then
     putStrLn $ show ast
