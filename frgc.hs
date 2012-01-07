@@ -14,6 +14,7 @@ import Normalise
 import System.Environment
 import System.Console.GetOpt
 import Version
+import Printout
 
 data Options = Options
  { optVerbosity   :: Int

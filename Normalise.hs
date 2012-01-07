@@ -8,6 +8,7 @@
 module Normalise (normalise) where
 
 import AST
+import Printout
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List

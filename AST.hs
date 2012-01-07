@@ -19,6 +19,7 @@ import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
 import Text.ParserCombinators.Parsec.Pos
+import System.FilePath
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
@@ -30,17 +31,13 @@ data Item
      | FuncDecl Visibility FnProto TypeSpec (Placed Exp) (Maybe SourcePos)
      | ProcDecl Visibility ProcProto [Placed Stmt] (Maybe SourcePos)
      | StmtDecl Stmt (Maybe SourcePos)
-    deriving Show
 
 data Visibility = Public | Private
                   deriving (Eq, Show)
 
-data TypeProto = TypeProto String [String]
-      deriving Show
+data TypeProto = TypeProto Ident [Ident]
 
-data FnProto = FnProto String [Param]
-      deriving Show
-
+data FnProto = FnProto Ident [Param]
 
 
 ----------------------------------------------------------------
@@ -50,7 +47,6 @@ data FnProto = FnProto String [Param]
 data Placed t
     = Placed t SourcePos
     | Unplaced t
-      deriving Show
 
 place :: Placed t -> Maybe SourcePos
 place (Placed _ pos) = Just pos
@@ -64,7 +60,6 @@ maybePlace :: t -> Maybe SourcePos -> Placed t
 maybePlace t (Just pos) = Placed t pos
 maybePlace t Nothing    = Unplaced t
 
-
 ----------------------------------------------------------------
 --                            AST Types
 ----------------------------------------------------------------
@@ -77,7 +72,7 @@ data Module = Module {
   modTypes :: Map Ident TypeDef,
   modResources :: Map Ident ResourceDef,
   modProcs :: Map Ident [ProcDef]
-  }  deriving Show
+  }
 
 type Ident = String
 
@@ -86,17 +81,13 @@ type VarName = String
 type ModSpec = [Ident]
 
 data TypeDef = TypeDef Int (Maybe SourcePos)
-                   deriving Show
 
 data ResourceDef = CompoundResource [Ident] (Maybe SourcePos)
                  | SimpleResource TypeSpec (Maybe SourcePos)
-                   deriving Show
 
 data ProcDef = ProcDef Int ProcProto [Placed Stmt] (Maybe SourcePos)
-                   deriving Show
 
 data TypeSpec = TypeSpec Ident [TypeSpec] | Unspecified
-                deriving Show
 
 data Constant = Int Int
               | Float Double
@@ -105,30 +96,25 @@ data Constant = Int Int
                 deriving Show
 
 data ProcProto = ProcProto String [Param]
-      deriving Show
 
 data Param = Param VarName TypeSpec FlowDirection
-      deriving Show
 
 data FlowDirection = ParamIn | ParamOut | ParamInOut
       deriving (Show,Eq)
 
 data ProcArg = ProcArg (Placed Exp) FlowDirection
-      deriving Show
 
 data Stmt
-     = ProcCall String [ProcArg]
+     = ProcCall Ident [ProcArg]
      | Cond (Placed Exp) [Placed Stmt] [Placed Stmt]
      | Loop [Placed LoopStmt]
      | Nop
-    deriving Show
 
 data LoopStmt
      = For Generator
      | BreakIf (Placed Exp)
      | NextIf (Placed Exp)
      | NormalStmt (Placed Stmt)
-    deriving Show
 
 data Exp
       = IntValue Integer
@@ -139,12 +125,10 @@ data Exp
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
       | Fncall String [Placed Exp]
-      deriving Show
 
 data Generator 
       = In String (Placed Exp)
       | InRange String (Placed Exp) (Placed Exp) (Maybe (Placed Exp))
-    deriving Show
 
 data Prim
      = PrimCall String (Maybe Int) [PrimArg]
