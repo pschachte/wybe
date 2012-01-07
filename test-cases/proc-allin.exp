@@ -1,2 +1,11 @@
-[ProcDecl Public (ProcProto "nada" [Param "x" (TypeSpec "int" []) ParamIn,Param "y" (TypeSpec "int" []) ParamIn]) [Placed (ProcCall "=" [ProcArg (Placed (Var "z") "test-cases/proc-allin.frg" (line 1, column 33)) ParamOut,ProcArg (Placed (Fncall "+" [Placed (Var "x") "test-cases/proc-allin.frg" (line 1, column 35),Placed (Var "y") "test-cases/proc-allin.frg" (line 1, column 37)]) "test-cases/proc-allin.frg" (line 1, column 35)) ParamIn]) "test-cases/proc-allin.frg" (line 1, column 33)] (Just "test-cases/proc-allin.frg" (line 1, column 8))]
-Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList [], pubProcs = fromList ["nada"], modTypes = fromList [], modResources = fromList [], modProcs = fromList [("nada",[ProcDef 1 (ProcProto "nada" [Param "x" (TypeSpec "int" []) ParamIn,Param "y" (TypeSpec "int" []) ParamIn]) [Placed (ProcCall "=" [ProcArg (Placed (Var "z") "test-cases/proc-allin.frg" (line 1, column 33)) ParamOut,ProcArg (Placed (Fncall "+" [Placed (Var "x") "test-cases/proc-allin.frg" (line 1, column 35),Placed (Var "y") "test-cases/proc-allin.frg" (line 1, column 37)]) "test-cases/proc-allin.frg" (line 1, column 35)) ParamIn]) "test-cases/proc-allin.frg" (line 1, column 33)] (Just "test-cases/proc-allin.frg" (line 1, column 8))])]}
+[Public proc nada(x:int, y:int) {proc-allin:1:8}[=(?z {proc-allin:1:33}, +(x {proc-allin:1:35}, y {proc-allin:1:37}) {proc-allin:1:35}) {proc-allin:1:33}]]
+Module
+  imports         : 
+  public types    : 
+  public resources: 
+  public procs    : nada
+  types:          : 
+  resources       : 
+  procs           : nada: [proc 1: nada(x:int, y:int) {proc-allin:1:8}
+    =(?z {proc-allin:1:33}, +(x {proc-allin:1:35}, y {proc-allin:1:37}) {proc-allin:1:35}) {proc-allin:1:33}]
+

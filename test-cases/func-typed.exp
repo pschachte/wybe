@@ -1,2 +1,11 @@
-[FuncDecl Public (FnProto "plus" [Param "a" (TypeSpec "int" []) ParamIn,Param "b" (TypeSpec "int" []) ParamIn]) (TypeSpec "int" []) (Placed (Fncall "+" [Placed (Var "a") "test-cases/func-typed.frg" (line 1, column 40),Placed (Var "b") "test-cases/func-typed.frg" (line 1, column 42)]) "test-cases/func-typed.frg" (line 1, column 40)) (Just "test-cases/func-typed.frg" (line 1, column 8))]
-Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList [], pubProcs = fromList ["plus"], modTypes = fromList [], modResources = fromList [], modProcs = fromList [("plus",[ProcDef 1 (ProcProto "plus" [Param "a" (TypeSpec "int" []) ParamIn,Param "b" (TypeSpec "int" []) ParamIn,Param "$" (TypeSpec "int" []) ParamOut]) [Unplaced (ProcCall "=" [ProcArg (Unplaced (Var "$")) ParamOut,ProcArg (Placed (Fncall "+" [Placed (Var "a") "test-cases/func-typed.frg" (line 1, column 40),Placed (Var "b") "test-cases/func-typed.frg" (line 1, column 42)]) "test-cases/func-typed.frg" (line 1, column 40)) ParamIn])] (Just "test-cases/func-typed.frg" (line 1, column 8))])]}
+[Public func plus(a:int,b:int):int {func-typed:1:8} = +(a {func-typed:1:40}, b {func-typed:1:42}) {func-typed:1:40}]
+Module
+  imports         : 
+  public types    : 
+  public resources: 
+  public procs    : plus
+  types:          : 
+  resources       : 
+  procs           : plus: [proc 1: plus(a:int, b:int, ?$:int) {func-typed:1:8}
+    =(?$ {?}, +(a {func-typed:1:40}, b {func-typed:1:42}) {func-typed:1:40}) {?}]
+

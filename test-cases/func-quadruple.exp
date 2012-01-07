@@ -1,2 +1,13 @@
-[FuncDecl Public (FnProto "double" [Param "a" (TypeSpec "int" []) ParamIn]) (TypeSpec "int" []) (Placed (Fncall "+" [Placed (Var "a") "test-cases/func-quadruple.frg" (line 1, column 35),Placed (Var "a") "test-cases/func-quadruple.frg" (line 1, column 37)]) "test-cases/func-quadruple.frg" (line 1, column 35)) (Just "test-cases/func-quadruple.frg" (line 1, column 8)),FuncDecl Public (FnProto "quadruple" [Param "a" (TypeSpec "int" []) ParamIn]) (TypeSpec "int" []) (Placed (Fncall "double" [Placed (Fncall "double" [Placed (Var "a") "test-cases/func-quadruple.frg" (line 3, column 52)]) "test-cases/func-quadruple.frg" (line 3, column 45)]) "test-cases/func-quadruple.frg" (line 3, column 38)) (Just "test-cases/func-quadruple.frg" (line 3, column 8))]
-Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList [], pubProcs = fromList ["double","quadruple"], modTypes = fromList [], modResources = fromList [], modProcs = fromList [("double",[ProcDef 1 (ProcProto "double" [Param "a" (TypeSpec "int" []) ParamIn,Param "$" (TypeSpec "int" []) ParamOut]) [Unplaced (ProcCall "=" [ProcArg (Unplaced (Var "$")) ParamOut,ProcArg (Placed (Fncall "+" [Placed (Var "a") "test-cases/func-quadruple.frg" (line 1, column 35),Placed (Var "a") "test-cases/func-quadruple.frg" (line 1, column 37)]) "test-cases/func-quadruple.frg" (line 1, column 35)) ParamIn])] (Just "test-cases/func-quadruple.frg" (line 1, column 8))]),("quadruple",[ProcDef 2 (ProcProto "quadruple" [Param "a" (TypeSpec "int" []) ParamIn,Param "$" (TypeSpec "int" []) ParamOut]) [Unplaced (ProcCall "=" [ProcArg (Unplaced (Var "$")) ParamOut,ProcArg (Placed (Fncall "double" [Placed (Fncall "double" [Placed (Var "a") "test-cases/func-quadruple.frg" (line 3, column 52)]) "test-cases/func-quadruple.frg" (line 3, column 45)]) "test-cases/func-quadruple.frg" (line 3, column 38)) ParamIn])] (Just "test-cases/func-quadruple.frg" (line 3, column 8))])]}
+[Public func double(a:int):int {func-quadruple:1:8} = +(a {func-quadruple:1:35}, a {func-quadruple:1:37}) {func-quadruple:1:35},Public func quadruple(a:int):int {func-quadruple:3:8} = double(double(a {func-quadruple:3:52}) {func-quadruple:3:45}) {func-quadruple:3:38}]
+Module
+  imports         : 
+  public types    : 
+  public resources: 
+  public procs    : double, quadruple
+  types:          : 
+  resources       : 
+  procs           : double: [proc 1: double(a:int, ?$:int) {func-quadruple:1:8}
+    =(?$ {?}, +(a {func-quadruple:1:35}, a {func-quadruple:1:37}) {func-quadruple:1:35}) {?}]
+                    quadruple: [proc 2: quadruple(a:int, ?$:int) {func-quadruple:3:8}
+    =(?$ {?}, double(double(a {func-quadruple:3:52}) {func-quadruple:3:45}) {func-quadruple:3:38}) {?}]
+

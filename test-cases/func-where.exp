@@ -1,2 +1,11 @@
-[FuncDecl Public (FnProto "quad" [Param "x" (TypeSpec "int" []) ParamIn]) (TypeSpec "int" []) (Placed (Where [Placed (ProcCall "=" [ProcArg (Placed (Var "d") "test-cases/func-where.frg" (line 1, column 42)) ParamOut,ProcArg (Placed (Fncall "+" [Placed (Var "x") "test-cases/func-where.frg" (line 1, column 44),Placed (Var "x") "test-cases/func-where.frg" (line 1, column 46)]) "test-cases/func-where.frg" (line 1, column 44)) ParamIn]) "test-cases/func-where.frg" (line 1, column 42)] (Placed (Fncall "+" [Placed (Var "d") "test-cases/func-where.frg" (line 1, column 31),Placed (Var "d") "test-cases/func-where.frg" (line 1, column 33)]) "test-cases/func-where.frg" (line 1, column 31))) "test-cases/func-where.frg" (line 1, column 31)) (Just "test-cases/func-where.frg" (line 1, column 8))]
-Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList [], pubProcs = fromList ["quad"], modTypes = fromList [], modResources = fromList [], modProcs = fromList [("quad",[ProcDef 1 (ProcProto "quad" [Param "x" (TypeSpec "int" []) ParamIn,Param "$" (TypeSpec "int" []) ParamOut]) [Unplaced (ProcCall "=" [ProcArg (Unplaced (Var "$")) ParamOut,ProcArg (Placed (Where [Placed (ProcCall "=" [ProcArg (Placed (Var "d") "test-cases/func-where.frg" (line 1, column 42)) ParamOut,ProcArg (Placed (Fncall "+" [Placed (Var "x") "test-cases/func-where.frg" (line 1, column 44),Placed (Var "x") "test-cases/func-where.frg" (line 1, column 46)]) "test-cases/func-where.frg" (line 1, column 44)) ParamIn]) "test-cases/func-where.frg" (line 1, column 42)] (Placed (Fncall "+" [Placed (Var "d") "test-cases/func-where.frg" (line 1, column 31),Placed (Var "d") "test-cases/func-where.frg" (line 1, column 33)]) "test-cases/func-where.frg" (line 1, column 31))) "test-cases/func-where.frg" (line 1, column 31)) ParamIn])] (Just "test-cases/func-where.frg" (line 1, column 8))])]}
+[Public func quad(x:int):int {func-where:1:8} = +(d {func-where:1:31}, d {func-where:1:33}) {func-where:1:31} where [=(?d {func-where:1:42}, +(x {func-where:1:44}, x {func-where:1:46}) {func-where:1:44}) {func-where:1:42}] {func-where:1:31}]
+Module
+  imports         : 
+  public types    : 
+  public resources: 
+  public procs    : quad
+  types:          : 
+  resources       : 
+  procs           : quad: [proc 1: quad(x:int, ?$:int) {func-where:1:8}
+    =(?$ {?}, +(d {func-where:1:31}, d {func-where:1:33}) {func-where:1:31} where [=(?d {func-where:1:42}, +(x {func-where:1:44}, x {func-where:1:46}) {func-where:1:44}) {func-where:1:42}] {func-where:1:31}) {?}]
+

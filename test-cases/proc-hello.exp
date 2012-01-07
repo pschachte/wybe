@@ -1,2 +1,11 @@
-[ProcDecl Public (ProcProto "print2" [Param "x" (TypeSpec "int" []) ParamIn,Param "y" (TypeSpec "int" []) ParamIn]) [Placed (ProcCall "println" [ProcArg (Placed (StringValue "hello, world") "test-cases/proc-hello.frg" (line 2, column 16)) ParamIn]) "test-cases/proc-hello.frg" (line 2, column 8)] (Just "test-cases/proc-hello.frg" (line 1, column 8))]
-Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList [], pubProcs = fromList ["print2"], modTypes = fromList [], modResources = fromList [], modProcs = fromList [("print2",[ProcDef 1 (ProcProto "print2" [Param "x" (TypeSpec "int" []) ParamIn,Param "y" (TypeSpec "int" []) ParamIn]) [Placed (ProcCall "println" [ProcArg (Placed (StringValue "hello, world") "test-cases/proc-hello.frg" (line 2, column 16)) ParamIn]) "test-cases/proc-hello.frg" (line 2, column 8)] (Just "test-cases/proc-hello.frg" (line 1, column 8))])]}
+[Public proc print2(x:int, y:int) {proc-hello:1:8}[println("hello, world" {proc-hello:2:16}) {proc-hello:2:8}]]
+Module
+  imports         : 
+  public types    : 
+  public resources: 
+  public procs    : print2
+  types:          : 
+  resources       : 
+  procs           : print2: [proc 1: print2(x:int, y:int) {proc-hello:1:8}
+    println("hello, world" {proc-hello:2:16}) {proc-hello:2:8}]
+

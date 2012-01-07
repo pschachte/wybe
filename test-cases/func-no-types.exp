@@ -1,2 +1,11 @@
-[FuncDecl Public (FnProto "times" [Param "a" Unspecified ParamIn,Param "b" Unspecified ParamIn]) Unspecified (Placed (Fncall "*" [Placed (Var "a") "test-cases/func-no-types.frg" (line 1, column 26),Placed (Var "b") "test-cases/func-no-types.frg" (line 1, column 28)]) "test-cases/func-no-types.frg" (line 1, column 26)) (Just "test-cases/func-no-types.frg" (line 1, column 8))]
-Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList [], pubProcs = fromList ["times"], modTypes = fromList [], modResources = fromList [], modProcs = fromList [("times",[ProcDef 1 (ProcProto "times" [Param "a" Unspecified ParamIn,Param "b" Unspecified ParamIn,Param "$" Unspecified ParamOut]) [Unplaced (ProcCall "=" [ProcArg (Unplaced (Var "$")) ParamOut,ProcArg (Placed (Fncall "*" [Placed (Var "a") "test-cases/func-no-types.frg" (line 1, column 26),Placed (Var "b") "test-cases/func-no-types.frg" (line 1, column 28)]) "test-cases/func-no-types.frg" (line 1, column 26)) ParamIn])] (Just "test-cases/func-no-types.frg" (line 1, column 8))])]}
+[Public func times(a:?,b:?):? {func-no-types:1:8} = *(a {func-no-types:1:26}, b {func-no-types:1:28}) {func-no-types:1:26}]
+Module
+  imports         : 
+  public types    : 
+  public resources: 
+  public procs    : times
+  types:          : 
+  resources       : 
+  procs           : times: [proc 1: times(a:?, b:?, ?$:?) {func-no-types:1:8}
+    =(?$ {?}, *(a {func-no-types:1:26}, b {func-no-types:1:28}) {func-no-types:1:26}) {?}]
+

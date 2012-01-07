@@ -1,2 +1,12 @@
-[StmtDecl (ProcCall "print" [ProcArg (Placed (StringValue "hello, ") "test-cases/main-hello2.frg" (line 1, column 7)) ParamIn]) (Just "test-cases/main-hello2.frg" (line 1, column 1)),StmtDecl (ProcCall "println" [ProcArg (Placed (StringValue "world!") "test-cases/main-hello2.frg" (line 2, column 9)) ParamIn]) (Just "test-cases/main-hello2.frg" (line 2, column 1))]
-Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList [], pubProcs = fromList [], modTypes = fromList [], modResources = fromList [], modProcs = fromList [("",[ProcDef 1 (ProcProto "" []) [Placed (ProcCall "print" [ProcArg (Placed (StringValue "hello, ") "test-cases/main-hello2.frg" (line 1, column 7)) ParamIn]) "test-cases/main-hello2.frg" (line 1, column 1),Placed (ProcCall "println" [ProcArg (Placed (StringValue "world!") "test-cases/main-hello2.frg" (line 2, column 9)) ParamIn]) "test-cases/main-hello2.frg" (line 2, column 1)] Nothing])]}
+[print("hello, " {main-hello2:1:7}) {main-hello2:1:1},println("world!" {main-hello2:2:9}) {main-hello2:2:1}]
+Module
+  imports         : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  types:          : 
+  resources       : 
+  procs           : : [proc 1: () {?}
+    print("hello, " {main-hello2:1:7}) {main-hello2:1:1}
+    println("world!" {main-hello2:2:9}) {main-hello2:2:1}]
+

@@ -1,2 +1,11 @@
-[StmtDecl (ProcCall "println" [ProcArg (Placed (StringValue "hello, world") "test-cases/main-hello.frg" (line 1, column 9)) ParamIn]) (Just "test-cases/main-hello.frg" (line 1, column 1))]
-Module {modImports = fromList [], pubTypes = fromList [], pubResources = fromList [], pubProcs = fromList [], modTypes = fromList [], modResources = fromList [], modProcs = fromList [("",[ProcDef 1 (ProcProto "" []) [Placed (ProcCall "println" [ProcArg (Placed (StringValue "hello, world") "test-cases/main-hello.frg" (line 1, column 9)) ParamIn]) "test-cases/main-hello.frg" (line 1, column 1)] Nothing])]}
+[println("hello, world" {main-hello:1:9}) {main-hello:1:1}]
+Module
+  imports         : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  types:          : 
+  resources       : 
+  procs           : : [proc 1: () {?}
+    println("hello, world" {main-hello:1:9}) {main-hello:1:1}]
+
