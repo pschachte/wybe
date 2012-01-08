@@ -7,5 +7,6 @@ Module
   types:          : 
   resources       : 
   procs           : plus: [proc 1: plus(a:int, b:int, ?$:int) {func-typed:1:8}
-    =(?$ {?}, +(a {func-typed:1:40}, b {func-typed:1:42}) {func-typed:1:40}) {?}]
+    +(a {func-typed:1:40}, b {func-typed:1:42}, ?$tmp0 {?}) {func-typed:1:40}
+    =(?$ {?}, $tmp0 {?}) {?}]
 

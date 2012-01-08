@@ -7,5 +7,6 @@ Module
   types:          : 
   resources       : 
   procs           : times: [proc 1: times(a:?, b:?, ?$:?) {func-no-types:1:8}
-    =(?$ {?}, *(a {func-no-types:1:26}, b {func-no-types:1:28}) {func-no-types:1:26}) {?}]
+    *(a {func-no-types:1:26}, b {func-no-types:1:28}, ?$tmp0 {?}) {func-no-types:1:26}
+    =(?$ {?}, $tmp0 {?}) {?}]
 

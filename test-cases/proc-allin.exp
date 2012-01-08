@@ -7,5 +7,6 @@ Module
   types:          : 
   resources       : 
   procs           : nada: [proc 1: nada(x:int, y:int) {proc-allin:1:8}
-    =(?z {proc-allin:1:33}, +(x {proc-allin:1:35}, y {proc-allin:1:37}) {proc-allin:1:35}) {proc-allin:1:33}]
+    +(x {proc-allin:1:35}, y {proc-allin:1:37}, ?$tmp0 {?}) {proc-allin:1:35}
+    =(?z {proc-allin:1:33}, $tmp0 {?}) {proc-allin:1:33}]
 

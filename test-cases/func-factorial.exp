@@ -7,5 +7,14 @@ Module
   types:          : 
   resources       : 
   procs           : factorial: [proc 1: factorial(n:int, ?$:int) {func-factorial:1:8}
-    =(?$ {?}, if <=(n {func-factorial:2:11}, 0 {func-factorial:2:17}) {func-factorial:2:11} then 1 {func-factorial:2:24} else *(n {func-factorial:2:30}, factorial(-(n {func-factorial:2:44}, 1 {func-factorial:2:47}) {func-factorial:2:44}) {func-factorial:2:34}) {func-factorial:2:30} {func-factorial:2:8}) {?}]
+    <=(n {func-factorial:2:11}, 0 {func-factorial:2:17}, ?$tmp0 {?}) {func-factorial:2:11}
+    if $tmp0 then {func-factorial:2:8}
+        =(?$tmp4 {?}, 1 {func-factorial:2:24}) {?}
+    else
+        -(n {func-factorial:2:44}, 1 {func-factorial:2:47}, ?$tmp1 {?}) {func-factorial:2:44}
+        factorial($tmp1 {?}, ?$tmp2 {?}) {func-factorial:2:34}
+        *(n {func-factorial:2:30}, $tmp2 {?}, ?$tmp3 {?}) {func-factorial:2:30}
+        =(?$tmp4 {?}, $tmp3 {?}) {?}
+    end
+    =(?$ {?}, $tmp4 {?}) {?}]
 
