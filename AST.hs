@@ -133,17 +133,11 @@ data Generator
       | InRange String (Placed Exp) (Placed Exp) (Maybe (Placed Exp))
 
 data Prim
-     = PrimCall String (Maybe Int) [PrimArg]
+     = PrimCall String (Maybe ProcID) [PrimArg]
      | PrimCond VarName [Placed Prim] [Placed Prim]
      | PrimLoop [Placed Prim]
-     | PrimFor PrimGen
      | PrimBreakIf VarName
      | PrimNextIf VarName
-
-data PrimGen
-      = PrimIn VarName VarName
-      | PrimRange VarName VarName VarName (Maybe VarName)
-    deriving Show
 
 data PrimArg 
      = ArgVar VarName FlowDirection
