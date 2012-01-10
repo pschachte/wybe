@@ -85,7 +85,9 @@ data TypeDef = TypeDef Int (Maybe SourcePos)
 data ResourceDef = CompoundResource [Ident] (Maybe SourcePos)
                  | SimpleResource TypeSpec (Maybe SourcePos)
 
-data ProcDef = ProcDef Int ProcProto [Placed Stmt] (Maybe SourcePos)
+data ProcDef = ProcDef ProcID ProcProto [Placed Stmt] (Maybe SourcePos)
+
+type ProcID = Int
 
 data TypeSpec = TypeSpec Ident [TypeSpec] | Unspecified
 
