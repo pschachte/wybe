@@ -7,8 +7,8 @@ Module
   types:          : 
   resources       : 
   procs           : quad: [proc 1: quad(x:int, ?$:int) {func-where:1:8}
-    +(x {func-where:1:44}, x {func-where:1:46}, ?$tmp0 {?}) {func-where:1:44}
-    =(?d {func-where:1:42}, $tmp0 {?}) {func-where:1:42}
-    +(d {func-where:1:31}, d {func-where:1:33}, ?$tmp1 {?}) {func-where:1:31}
-    =(?$ {?}, $tmp1 {?}) {?}]
+    +(x, x, ?$tmp0) {func-where:1:44}
+    =(?d, $tmp0) {func-where:1:42}
+    +(d, d, ?$tmp1) {func-where:1:31}
+    =(?$, $tmp1) {?}]
 

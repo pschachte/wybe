@@ -7,5 +7,5 @@ Module
   types:          : 
   resources       : 
   procs           : print2: [proc 1: print2(x:int, y:int) {proc-hello:1:8}
-    println("hello, world" {proc-hello:2:16}) {proc-hello:2:8}]
+    println("hello, world") {proc-hello:2:8}]
 

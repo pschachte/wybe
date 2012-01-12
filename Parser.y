@@ -60,6 +60,7 @@ import AST
       'unless'        { TokIdent "unless" _ }
       'from'          { TokIdent "from" _ }
       'to'            { TokIdent "to" _ }
+      'downto'        { TokIdent "downto" _ }
       'by'            { TokIdent "by" _ }
       'and'           { TokIdent "and" _ }
       'or'            { TokIdent "or" _ }
@@ -250,14 +251,19 @@ Condelse :: { [Placed Stmt] }
 
 Generator :: { Generator }
     : ident 'in' Exp            { In (identName $1) $3 }
-    | ident 'from' Exp 'to' Exp 'by' Exp
-                                { InRange (identName $1) $3 $7 (Just $5) }
-    | ident 'from' Exp 'by' Exp 'to' Exp
-                                { InRange (identName $1) $3 $5 (Just $7) }
-    | ident 'from' Exp 'to' Exp { InRange (identName $1) $3 
-	                                  (Unplaced $ IntValue 1)
-	                                  (Just $5) }
-    | ident 'from' Exp 'by' Exp { InRange (identName $1) $3 $5 Nothing }
+    | ident 'from' Exp toLimit byStep
+                                { InRange (identName $1) $3 
+				    (fst $4) $5 (snd $4) }
+
+byStep :: { Placed Exp }
+    : 'by' Exp                  { $2 }
+    | {- empty -}               { Unplaced $ IntValue 1 }
+
+toLimit :: { (ProcName, Maybe (String,Placed Exp)) }
+    : 'to' Exp                  { ("+", Just (">", $2)) }
+    | 'downto' Exp              { ("-", Just ("<", $2)) }
+    | {- empty -}               { ("+", Nothing) }
+
 
 Exp :: { Placed Exp }
     : Exp '+' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])

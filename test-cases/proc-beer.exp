@@ -1,4 +1,4 @@
-[Public proc print2(x:int, y:int) {proc-beer:1:8}[do for count from 99 {proc-beer:2:29} by Negate(1 {proc-beer:2:40}) {proc-beer:2:38} to 0 {proc-beer:2:34} {proc-beer:2:12}println("$count bottles of beer on the wall" {proc-beer:3:20}) {proc-beer:3:12} {proc-beer:3:12} end {proc-beer:2:8}]]
+[Public proc print2(x:int, y:int) {proc-beer:1:8}[do for count from 99 {proc-beer:2:29} by -1 {?} to ("<",0 {proc-beer:2:38}) {proc-beer:2:12}println("$count bottles of beer on the wall" {proc-beer:3:20}) {proc-beer:3:12} {proc-beer:3:12} end {proc-beer:2:8}]]
 Module
   imports         : 
   public types    : 
@@ -7,8 +7,11 @@ Module
   types:          : 
   resources       : 
   procs           : print2: [proc 1: print2(x:int, y:int) {proc-beer:1:8}
+    =(?count, 99) {?}
     do  {proc-beer:2:8}
-        for count from 99 {proc-beer:2:29} by Negate(1 {proc-beer:2:40}) {proc-beer:2:38} to 0 {proc-beer:2:34} {proc-beer:2:12}
-        println("$count bottles of beer on the wall" {proc-beer:3:20}) {proc-beer:3:12}
+        <(count, 0, ?$tmp0) {?}
+        until $tmp0 {?}
+        println("$count bottles of beer on the wall") {proc-beer:3:12}
+        -(count, 1, ?count) {?}
     end]
 

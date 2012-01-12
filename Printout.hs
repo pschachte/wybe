@@ -117,27 +117,37 @@ flowPrefix ParamInOut = "!"
 startLine :: Int -> String
 startLine ind = "\n" ++ replicate ind ' '
 
-showBlock :: Int -> [Placed Stmt] -> String
-showBlock ind stmts = concat $ List.map (showStmt ind) stmts
+showBlock :: Int -> [Placed Prim] -> String
+showBlock ind stmts = concat $ List.map (showPrim ind) stmts
 
-showStmt :: Int -> Placed Stmt -> String
-showStmt ind stmt = showStmt' ind (content stmt) (place stmt)
+showPrim :: Int -> Placed Prim -> String
+showPrim ind stmt = showPrim' ind (content stmt) (place stmt)
 
-showStmt' :: Int -> Stmt -> Maybe SourcePos -> String
-showStmt' ind (ProcCall name args) pos =
-  startLine ind ++ name ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+showPrim' :: Int -> Prim -> Maybe SourcePos -> String
+showPrim' ind (PrimCall name id args) pos =
+  startLine ind ++ name ++ maybeShow "<" id ">"
+  ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
   ++ showMaybeSourcePos pos
-showStmt' ind (Cond exp thn els) pos =
-  startLine ind ++ "if " ++ show (content exp) ++ " then" 
+showPrim' ind (PrimCond var blocks) pos =
+  startLine ind ++ "case " ++ var ++ " of" 
   ++ showMaybeSourcePos pos
-  ++ showBlock (ind+4) thn
-  ++ startLine ind ++ "else"
-  ++ showBlock (ind+4) els
+  ++ showCases 0 (ind+2) (ind+4) blocks
   ++ startLine ind ++ "end"
-showStmt' ind (Loop lstmts) pos =
+showPrim' ind (PrimLoop block) pos =
   startLine ind ++ "do " ++ showMaybeSourcePos pos
-  ++ concat (List.map (showLStmt (ind+4)) lstmts)
+  ++ showBlock (ind+4) block
   ++ startLine ind ++ "end"
+showPrim' ind (PrimBreakIf var) pos =
+  startLine ind ++ "until " ++ var ++ showMaybeSourcePos pos
+showPrim' ind (PrimNextIf var) pos =
+  startLine ind ++ "unless " ++ var ++ showMaybeSourcePos pos
+
+showCases :: Int -> Int -> Int -> [[Placed Prim]] -> String
+showCases _ _ _ [] = ""
+showCases num labelInd blockInd (block:blocks) =
+  startLine labelInd ++ show num ++ ":"
+  ++ showBlock blockInd block
+  ++ showCases (num+1) labelInd blockInd blocks
 
 instance Show Stmt where
   show (ProcCall name args) =
@@ -151,19 +161,12 @@ instance Show Stmt where
   show (Loop lstmts) =
     "do " ++ concat (List.map show lstmts) ++ " end"
 
-
-showLStmt :: Int -> Placed LoopStmt -> String
-showLStmt ind lstmt = showLStmt' ind (content lstmt) (place lstmt)
-
-showLStmt' :: Int -> LoopStmt -> Maybe SourcePos -> String
-showLStmt' ind (For gen) pos =
-  startLine ind ++ "for " ++ show gen ++ showMaybeSourcePos pos
-showLStmt' ind (BreakIf cond) pos =
-  startLine ind ++ "until " ++ show cond ++ showMaybeSourcePos pos
-showLStmt' ind (NextIf cond) pos =
-  startLine ind ++ "unless " ++ show cond ++ showMaybeSourcePos pos
-showLStmt' ind (NormalStmt stmt) pos =
-  showStmt ind stmt
+instance Show PrimArg where
+  show (ArgVar name dir) = flowPrefix dir ++ name
+  show (ArgInt i) = show i
+  show (ArgFloat f) = show f
+  show (ArgString s) = show s
+  show (ArgChar c) = show c
 
 
 instance Show LoopStmt where
@@ -172,8 +175,6 @@ instance Show LoopStmt where
   show (NextIf cond) = "unless " ++ show cond
   show (NormalStmt stmt) = show stmt
   
-
-
 instance Show Exp where
   show (IntValue i) = show i
   show (FloatValue f) = show f
@@ -188,7 +189,16 @@ instance Show Exp where
 
 instance Show Generator where
   show (In var exp) = var ++ " in " ++ show exp
-  show (InRange var start step Nothing) =
-    var ++ " from " ++ show start ++ " by " ++ show step
-  show (InRange var start step (Just end)) =
-    show (InRange var start step Nothing) ++ " to " ++ show end
+  show (InRange var start updateOp step Nothing) =
+    var ++ " from " ++ show start ++ " by " ++ updateOp ++ show step
+  show (InRange var start updateOp step (Just end)) =
+    show (InRange var start updateOp step Nothing) ++ " to " ++ show end
+
+-- maybeShow pre maybe pos
+-- if maybe has something, show pre, the maybe payload, and post
+-- if the maybe is Nothing, don't show anything
+
+maybeShow :: Show t => String -> Maybe t -> String -> String
+maybeShow pre Nothing pos = ""
+maybeShow pre (Just something) post =
+  pre ++ show something ++ post

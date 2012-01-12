@@ -6,13 +6,14 @@
 
 module AST (-- Types just for parsing
   Item(..), Visibility(..), TypeProto(..), TypeSpec(..), FnProto(..), 
-  ProcProto(..), Param(..), ProcArg(..), FlowDirection(..),  Stmt(..), 
+  ProcProto(..), Param(..), ProcArg(..), Stmt(..), 
   LoopStmt(..), Exp(..), Generator(..),
   -- Source Position Types
   Placed(..), place, content, maybePlace,
   -- AST types
-  Module(..), ModSpec, ProcDef(..), Ident, VarName,
-  TypeDef(..), ResourceDef(..),
+  Module(..), ModSpec, ProcDef(..), Ident, VarName, ProcName,
+  TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
+  Prim(..), PrimArg(..)
   ) where
 
 import Data.Map as Map
@@ -78,6 +79,8 @@ type Ident = String
 
 type VarName = String
 
+type ProcName = String
+
 type ModSpec = [Ident]
 
 data TypeDef = TypeDef Int (Maybe SourcePos)
@@ -85,7 +88,7 @@ data TypeDef = TypeDef Int (Maybe SourcePos)
 data ResourceDef = CompoundResource [Ident] (Maybe SourcePos)
                  | SimpleResource TypeSpec (Maybe SourcePos)
 
-data ProcDef = ProcDef ProcID ProcProto [Placed Stmt] (Maybe SourcePos)
+data ProcDef = ProcDef ProcID ProcProto [Placed Prim] (Maybe SourcePos)
 
 type ProcID = Int
 
@@ -97,7 +100,7 @@ data Constant = Int Int
               | String String
                 deriving Show
 
-data ProcProto = ProcProto String [Param]
+data ProcProto = ProcProto ProcName [Param]
 
 data Param = Param VarName TypeSpec FlowDirection
 
@@ -123,18 +126,19 @@ data Exp
       | FloatValue Double
       | StringValue String
       | CharValue Char
-      | Var String
+      | Var VarName
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
       | Fncall String [Placed Exp]
 
 data Generator 
-      = In String (Placed Exp)
-      | InRange String (Placed Exp) (Placed Exp) (Maybe (Placed Exp))
+      = In VarName (Placed Exp)
+      | InRange VarName (Placed Exp) ProcName (Placed Exp) 
+        (Maybe (ProcName,Placed Exp))
 
 data Prim
-     = PrimCall String (Maybe ProcID) [PrimArg]
-     | PrimCond VarName [Placed Prim] [Placed Prim]
+     = PrimCall ProcName (Maybe ProcID) [PrimArg]
+     | PrimCond VarName [[Placed Prim]]
      | PrimLoop [Placed Prim]
      | PrimBreakIf VarName
      | PrimNextIf VarName
@@ -146,3 +150,9 @@ data PrimArg
      | ArgString String
      | ArgChar Char
 
+argFlowDirection :: PrimArg -> FlowDirection
+argFlowDirection (ArgVar _ flow) = flow
+argFlowDirection (ArgInt _) = ParamIn
+argFlowDirection (ArgFloat _) = ParamIn
+argFlowDirection (ArgString _) = ParamIn
+argFlowDirection (ArgChar _) = ParamIn

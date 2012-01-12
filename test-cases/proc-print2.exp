@@ -7,6 +7,6 @@ Module
   types:          : 
   resources       : 
   procs           : print2: [proc 1: print2(x:int, y:int) {proc-print2:1:8}
-    print(x {proc-print2:2:14}) {proc-print2:2:8}
-    print(y {proc-print2:3:14}) {proc-print2:3:8}]
+    print(x) {proc-print2:2:8}
+    print(y) {proc-print2:3:8}]
 

@@ -43,7 +43,7 @@ modAddImport :: ModSpec -> Module -> Module
 modAddImport imp mod 
   = mod { modImports = Set.insert imp $ modImports mod }
 
-modAddProc :: Ident -> (Int, ProcProto, [Placed Stmt], (Maybe SourcePos))
+modAddProc :: Ident -> (Int, ProcProto, [Placed Prim], (Maybe SourcePos))
               -> Module -> Module
 modAddProc name (newid, proto, stmts, pos) mod
   = let procs = modProcs mod
@@ -51,7 +51,7 @@ modAddProc name (newid, proto, stmts, pos) mod
                             findWithDefault [] name procs
                 in  mod { modProcs  = Map.insert name defs procs }
 
-modReplaceProc :: Ident -> (Int, ProcProto, [Placed Stmt], (Maybe SourcePos)) 
+modReplaceProc :: Ident -> (Int, ProcProto, [Placed Prim], (Maybe SourcePos)) 
                   -> Module -> Module
 modReplaceProc name (id, proto, stmts, pos) mod
   = let procs   = modProcs mod
@@ -65,10 +65,18 @@ publicise :: (Ident -> Module -> Module) ->
 publicise insert vis name mod = applyIf (insert name) (vis == Public) mod
 
 
-errMsg :: String -> Expander ()
-errMsg msg = do
+makeMessage :: String -> Maybe SourcePos -> String
+makeMessage msg Nothing = msg
+makeMessage msg (Just pos) =
+  (sourceName pos) ++ ":" ++ 
+  show (sourceLine pos) ++ ":" ++ 
+  show (sourceColumn pos) ++ ": " ++ 
+  msg
+
+errMsg :: String -> Maybe SourcePos -> Expander ()
+errMsg msg pos = do
   state <- get
-  put state { errs = (errs state) ++ [msg] }
+  put state { errs = (errs state) ++ [makeMessage msg pos] }
 
 freshVar :: Expander String
 freshVar = do
@@ -130,7 +138,7 @@ publicResource name = do
   mod <- getModule
   return $ Set.member name (pubResources mod)
 
-addProc :: Ident -> ProcProto -> [Placed Stmt] -> (Maybe SourcePos)
+addProc :: Ident -> ProcProto -> [Placed Prim] -> (Maybe SourcePos)
            -> Visibility -> Expander ()
 addProc name proto stmts pos vis = do
   newid <- nextProcId
@@ -138,7 +146,7 @@ addProc name proto stmts pos vis = do
           (\name mod -> mod { pubProcs = Set.insert name $ pubProcs mod })
           name (newid, proto, stmts, pos) vis
 
-replaceProc :: Ident -> Int -> ProcProto -> [Placed Stmt] -> (Maybe SourcePos)
+replaceProc :: Ident -> Int -> ProcProto -> [Placed Prim] -> (Maybe SourcePos)
                -> Visibility -> Expander ()
 replaceProc name oldid proto stmts pos vis =
   addItem modReplaceProc 
@@ -172,23 +180,28 @@ normaliseItem (TypeDecl vis (TypeProto name params) ctrs pos) =
 normaliseItem (ResourceDecl vis name typ pos) =
   addResource name (SimpleResource typ pos) vis
 normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
-  normaliseItem (ProcDecl vis
-             (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
-             [assign "$" result]
-             pos)
+  normaliseItem $
+  ProcDecl 
+  vis
+  (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
+  [Unplaced $
+   ProcCall "=" [ProcArg (Unplaced $ Var "$") ParamOut, 
+                 ProcArg result ParamIn]]
+  pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
   stmts' <- normaliseStmts stmts
   addProc name proto stmts' pos vis
 normaliseItem (StmtDecl stmt pos) = do
+  stmts <- normaliseStmt stmt pos
   oldproc <- lookupProc ""
   case oldproc of
     Nothing -> 
-      addProc "" (ProcProto "" []) [maybePlace stmt pos] Nothing Private
-    Just [ProcDef id proto stmts pos'] ->
-      replaceProc "" id proto (stmts ++ [maybePlace stmt pos]) pos' Private
+      addProc "" (ProcProto "" []) stmts Nothing Private
+    Just [ProcDef id proto stmts' pos'] ->
+      replaceProc "" id proto (stmts' ++ stmts) pos' Private
 
 
-normaliseStmts :: [Placed Stmt] -> Expander [Placed Stmt]
+normaliseStmts :: [Placed Stmt] -> Expander [Placed Prim]
 normaliseStmts [] = return []
 normaliseStmts (stmt:stmts) = do
   front <- case stmt of
@@ -197,98 +210,167 @@ normaliseStmts (stmt:stmts) = do
   back <- normaliseStmts stmts
   return $ front ++ back
 
-normaliseStmt :: Stmt -> Maybe SourcePos -> Expander [Placed Stmt]
+normaliseStmt :: Stmt -> Maybe SourcePos -> Expander [Placed Prim]
 normaliseStmt (ProcCall name args) pos = do
   (args',stmts) <- normaliseArgs args
-  return $ stmts ++ [maybePlace (ProcCall name args') pos]
+  return $ stmts ++ [maybePlace (PrimCall name Nothing args') pos]
 normaliseStmt (Cond exp thn els) pos = do
-  (exp',stmts) <- normaliseExp exp
+  (exp',condstmts) <- normaliseExp exp ParamIn
   thn' <- normaliseStmts thn
   els' <- normaliseStmts els
-  return $ stmts ++ [maybePlace (Cond exp' thn' els') pos]
+  stmts <- makeCond exp' [thn',els'] pos
+  return $ condstmts ++ stmts
 normaliseStmt (Loop loop) pos = do
-  loop' <- normaliseLoopStmts loop
-  return $ [maybePlace (Loop loop') pos]
+  (init,body,update) <- normaliseLoopStmts loop
+  return $ init ++ [maybePlace (PrimLoop $ body++update) pos]
 normaliseStmt Nop pos = do
-  return $ [maybePlace Nop pos]
+  return $ []
 
-normaliseLoopStmts :: [Placed LoopStmt] -> Expander [Placed LoopStmt]
-normaliseLoopStmts [] = return []
+normaliseLoopStmts :: [Placed LoopStmt] -> 
+                      Expander ([Placed Prim],[Placed Prim],[Placed Prim])
+normaliseLoopStmts [] = return ([],[],[])
 normaliseLoopStmts (stmt:stmts) = do
-  front <- case stmt of
+  (backinit,backbody,backupdate) <- normaliseLoopStmts stmts
+  (frontinit,frontbody,frontupdate) <- case stmt of
     Placed stmt' pos -> normaliseLoopStmt stmt' $ Just pos
     Unplaced stmt'   -> normaliseLoopStmt stmt' Nothing
-  back <- normaliseLoopStmts stmts
-  return $ front ++ back
+  return $ (frontinit ++ backinit, 
+            frontbody ++ backbody,
+            frontupdate ++ backupdate)
 
-normaliseLoopStmt :: LoopStmt -> Maybe SourcePos -> Expander [Placed LoopStmt]
-normaliseLoopStmt (For gen) pos = do
-  return $ [maybePlace (For gen) pos]
+normaliseLoopStmt :: LoopStmt -> Maybe SourcePos -> 
+                     Expander ([Placed Prim],[Placed Prim],[Placed Prim])
+normaliseLoopStmt (For gen) pos = normaliseGenerator gen pos
 normaliseLoopStmt (BreakIf exp) pos = do
-  (exp',stmts) <- normaliseExp exp
-  return $ (List.map (\s -> maybePlace (NormalStmt s) (place s)) stmts) ++ 
-    [maybePlace (BreakIf exp') pos]
+  (exp',stmts) <- normaliseExp exp ParamIn
+  cond <- freshVar
+  return $ ([],stmts ++ [assign cond exp',maybePlace (PrimBreakIf cond) pos],[])
 normaliseLoopStmt (NextIf exp) pos = do
-  (exp',stmts) <- normaliseExp exp
-  return $ (List.map (\s -> maybePlace (NormalStmt s) (place s)) stmts) ++
-    [maybePlace (NextIf exp') pos]
+  (exp',stmts) <- normaliseExp exp ParamIn
+  cond <- freshVar
+  return ([],stmts ++ [assign cond exp',maybePlace (PrimNextIf cond) pos],[])
 normaliseLoopStmt (NormalStmt stmt) pos = do
   stmts <- normaliseStmt (content stmt) pos
-  return $ (List.map (\s -> maybePlace (NormalStmt s) (place s)) stmts)
+  return ([],stmts,[])
 
 
-normaliseArgs :: [ProcArg] -> Expander ([ProcArg],[Placed Stmt])
+normaliseGenerator :: Generator -> Maybe SourcePos ->
+                      Expander ([Placed Prim],[Placed Prim],[Placed Prim])
+normaliseGenerator (In var exp) pos = do
+  (arg,init) <- normaliseExp exp ParamIn
+  stateVar <- freshVar
+  testVar <- freshVar
+  let update = procCall "next" [ArgVar stateVar ParamInOut,
+                                ArgVar var ParamInOut,
+                                ArgVar testVar ParamOut]
+  return (init++[assign stateVar arg,update],
+          [update],[Unplaced $ PrimBreakIf testVar])
+normaliseGenerator (InRange var exp updateOp inc limit) pos = do
+  (arg,init1) <- normaliseExp exp ParamIn
+  (incArg,init2) <- normaliseExp inc ParamIn
+  let update = [procCall updateOp 
+                [ArgVar var ParamIn,incArg,ArgVar var ParamOut]]
+  (init,test) <- case limit of
+    Nothing -> return (init1++init2,[])
+    Just (comp,limit') -> do
+      testVar <- freshVar
+      (limitArg,init3) <- normaliseExp limit' ParamIn
+      return (init1++init2++init3,
+              [procCall comp [ArgVar var ParamIn,limitArg,
+                              ArgVar testVar ParamOut],
+               Unplaced $ PrimBreakIf testVar])
+  return (init++[assign var arg],test,update)
+
+
+normaliseArgs :: [ProcArg] -> Expander ([PrimArg],[Placed Prim])
 normaliseArgs [] = return ([],[])
 normaliseArgs (ProcArg pexp dir:args) = do
   let pos = place pexp
-  (exp',stmts) <- normaliseExp pexp
-  let arg' = ProcArg exp' dir
+  (arg,stmts) <- normaliseExp pexp dir
   (args',stmts') <- normaliseArgs args
-  return (arg':args', stmts ++ stmts')
+  return (arg:args', stmts ++ stmts')
 
-normaliseExp :: Placed Exp -> Expander (Placed Exp,[Placed Stmt])
-normaliseExp exp = normaliseExp' (content exp) (place exp)
+normaliseExp :: Placed Exp -> FlowDirection -> Expander (PrimArg,[Placed Prim])
+normaliseExp exp dir = normaliseExp' (content exp) (place exp) dir
 
-normaliseExp' :: Exp -> Maybe SourcePos -> Expander (Placed Exp,[Placed Stmt])
-normaliseExp' exp@(IntValue i) pos = return (maybePlace exp pos, [])
-normaliseExp' exp@(FloatValue i) pos = return (maybePlace exp pos, [])
-normaliseExp' exp@(StringValue i) pos = return (maybePlace exp pos, [])
-normaliseExp' exp@(CharValue i) pos = return (maybePlace exp pos, [])
-normaliseExp' exp@(Var name) pos = return (maybePlace exp pos, [])
-normaliseExp' (Where stmts exp) _ = do
+normaliseExp' :: Exp -> Maybe SourcePos -> FlowDirection ->
+                 Expander (PrimArg,[Placed Prim])
+normaliseExp' (IntValue a) pos dir = do
+  mustBeIn dir pos
+  return (ArgInt a, [])
+normaliseExp' (FloatValue a) pos dir = do
+  mustBeIn dir pos
+  return (ArgFloat a, [])
+normaliseExp' (StringValue a) pos dir = do
+  mustBeIn dir pos
+  return (ArgString a, [])
+normaliseExp' (CharValue a) pos dir = do
+  mustBeIn dir pos
+  return (ArgChar a, [])
+normaliseExp' (Var name) pos dir = do
+  return (ArgVar name dir, [])
+normaliseExp' (Where stmts exp) pos dir = do
+  mustBeIn dir pos
   stmts1 <- normaliseStmts stmts
-  (exp',stmts2) <- normaliseExp exp
+  (exp',stmts2) <- normaliseExp exp ParamIn
   return (exp', stmts1++stmts2)
-normaliseExp' (CondExp cond thn els) pos = do
-  (cond',stmtscond) <- normaliseExp cond
-  (thn',stmtsthn) <-normaliseExp thn
-  (els',stmtsels) <-normaliseExp els
+normaliseExp' (CondExp cond thn els) pos dir = do
+  mustBeIn dir pos
+  (cond',stmtscond) <- normaliseExp cond ParamIn
+  (thn',stmtsthn) <-normaliseExp thn ParamIn
+  (els',stmtsels) <-normaliseExp els ParamIn
   result <- freshVar
-  return (Unplaced $ Var result, 
-          stmtscond++[maybePlace (Cond cond'
-                                  (stmtsthn++[assign result thn'])
-                                  (stmtsels++[assign result els']))
-                      pos])
-normaliseExp' (Fncall name exps) pos = do
+  prims <- makeCond cond' 
+           [stmtsthn++[assign result thn'], stmtsels++[assign result els']]
+           pos
+  return (ArgVar result ParamIn, stmtscond++prims)
+normaliseExp' (Fncall name exps) pos dir = do
+  mustBeIn dir pos
   (exps',stmts) <- normaliseExps exps
   result <- freshVar
-  return (Unplaced $ Var result, 
-          stmts++[maybePlace 
-                  (ProcCall name 
-                   (exps'++[ProcArg (Unplaced $ Var result) ParamOut])) 
+  return (ArgVar result ParamIn, 
+          stmts++[maybePlace
+                  (PrimCall name Nothing 
+                   (exps'++[ArgVar result ParamOut])) 
                   pos])
 
-assign :: String -> Placed Exp -> Placed Stmt
-assign var val = 
-  Unplaced (ProcCall "=" [ProcArg (Unplaced $ Var var) ParamOut, 
-                          ProcArg val ParamIn])
+mustBeIn :: FlowDirection -> Maybe SourcePos -> Expander ()
+mustBeIn ParamIn _ = return ()
+mustBeIn ParamOut pos = do
+  errMsg "Flow error:  invalid output argument" pos
+mustBeIn ParamInOut pos = do
+  errMsg "Flow error:  invalid input/output argument" pos
 
-normaliseExps :: [Placed Exp] -> Expander ([ProcArg],[Placed Stmt])
+
+assign :: VarName -> PrimArg -> Placed Prim
+assign var val = procCall "=" [ArgVar var ParamOut, val]
+
+procCall :: ProcName -> [PrimArg] -> Placed Prim
+procCall proc args = Unplaced $ PrimCall proc Nothing args
+
+makeCond :: PrimArg -> [[Placed Prim]] -> Maybe SourcePos -> 
+            Expander [Placed Prim]
+makeCond cond branches pos = do
+  case cond of
+    ArgVar name ParamIn -> do
+      result <- freshVar
+      return [maybePlace (PrimCond name branches) pos]
+    ArgInt n ->
+      if n >= 0 && n <= fromIntegral (length branches) then
+        return $ branches !! (fromInteger n)
+      else
+        return $ head branches
+    _ -> do
+      errMsg "Can't use a non-integer type as a Boolean" pos
+      return $ head branches -- XXX has the right type, but probably not good
+
+
+normaliseExps :: [Placed Exp] -> Expander ([PrimArg],[Placed Prim])
 normaliseExps [] = return ([],[])
 normaliseExps (exp:exps) = do
   (args',stmts2) <- normaliseExps exps
-  (exp',stmts1) <- normaliseExp exp
-  return  (ProcArg exp' ParamIn:args', stmts1 ++ stmts2)
+  (exp',stmts1) <- normaliseExp exp ParamIn
+  return  (exp':args', stmts1 ++ stmts2)
 
 {- LValues:
 

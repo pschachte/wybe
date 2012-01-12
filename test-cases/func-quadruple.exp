@@ -7,10 +7,10 @@ Module
   types:          : 
   resources       : 
   procs           : double: [proc 1: double(a:int, ?$:int) {func-quadruple:1:8}
-    +(a {func-quadruple:1:35}, a {func-quadruple:1:37}, ?$tmp0 {?}) {func-quadruple:1:35}
-    =(?$ {?}, $tmp0 {?}) {?}]
+    +(a, a, ?$tmp0) {func-quadruple:1:35}
+    =(?$, $tmp0) {?}]
                     quadruple: [proc 2: quadruple(a:int, ?$:int) {func-quadruple:3:8}
-    double(a {func-quadruple:3:52}, ?$tmp1 {?}) {func-quadruple:3:45}
-    double($tmp1 {?}, ?$tmp2 {?}) {func-quadruple:3:38}
-    =(?$ {?}, $tmp2 {?}) {?}]
+    double(a, ?$tmp1) {func-quadruple:3:45}
+    double($tmp1, ?$tmp2) {func-quadruple:3:38}
+    =(?$, $tmp2) {?}]
 

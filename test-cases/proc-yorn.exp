@@ -8,15 +8,17 @@ Module
   resources       : 
   procs           : yorn: [proc 1: yorn(prompt:string, ?result:bool) {proc-yorn:1:8}
     do  {proc-yorn:2:8}
-        print(prompt {proc-yorn:2:18}) {proc-yorn:2:12}
-        print(" (y/n) " {proc-yorn:3:18}) {proc-yorn:3:12}
-        read_char(?response {proc-yorn:4:23}) {proc-yorn:4:12}
-        is_yes(response {proc-yorn:5:29}, ?$tmp0 {?}) {proc-yorn:5:22}
-        =(?result {proc-yorn:5:13}, $tmp0 {?}) {proc-yorn:5:13}
-        is_yes_or_no(response {proc-yorn:6:32}, ?$tmp1 {?}) {proc-yorn:6:19}
-        unless $tmp1 {?} {proc-yorn:6:12}
-        println("Please answer 'yes' or 'no'." {proc-yorn:7:20}) {proc-yorn:7:12}
-        is_yes_or_no(response {proc-yorn:8:31}, ?$tmp2 {?}) {proc-yorn:8:18}
-        until $tmp2 {?} {proc-yorn:8:12}
+        print(prompt) {proc-yorn:2:12}
+        print(" (y/n) ") {proc-yorn:3:12}
+        read_char(?response) {proc-yorn:4:12}
+        is_yes(response, ?$tmp4) {proc-yorn:5:22}
+        =(?result, $tmp4) {proc-yorn:5:13}
+        is_yes_or_no(response, ?$tmp2) {proc-yorn:6:19}
+        =(?$tmp3, $tmp2) {?}
+        unless $tmp3 {proc-yorn:6:12}
+        println("Please answer 'yes' or 'no'.") {proc-yorn:7:12}
+        is_yes_or_no(response, ?$tmp0) {proc-yorn:8:18}
+        =(?$tmp1, $tmp0) {?}
+        until $tmp1 {proc-yorn:8:12}
     end]
 
