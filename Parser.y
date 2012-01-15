@@ -89,7 +89,7 @@ RevItems :: { [Item] }
 
 
 Item  :: { Item }
-    : Visibility 'type' TypeProto '=' Ctors
+    : Visibility 'type' TypeProto '=' Ctors 'end'
                                 { TypeDecl $1 $3 $5 $ Just $ tokenPosition $2 }
     | Visibility 'resource' ident OptType
                                 { ResourceDecl $1 (identName $3) $4
