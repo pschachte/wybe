@@ -17,9 +17,15 @@ import System.FilePath
 
 instance Show Item where
   show (TypeDecl vis name ctrs pos) =
-    show vis ++ " type " ++ show name ++ " = " 
-    ++ intercalate " | " (List.map show ctrs)
+    show vis ++ " type " ++ show name ++ " =" 
     ++ showMaybeSourcePos pos
+    ++ "\n  " ++ intercalate "\n  " (List.map show ctrs)
+    ++ "\nend\n"
+  show (NonAlgType vis name items pos) =
+    show vis ++ " type " ++ show name ++ " is" 
+    ++ showMaybeSourcePos pos ++ "\n  "
+    ++ intercalate "\n  " (List.map show items)
+    ++ "\nend\n"
   show (ResourceDecl vis name typ pos) =
     show vis ++ " resource " ++ show name ++ ":" ++ show typ
     ++ showMaybeSourcePos pos

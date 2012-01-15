@@ -49,6 +49,7 @@ import AST
       'end'           { TokIdent "end" _ }
       'in'            { TokIdent "in" _ }
       'if'            { TokIdent "if" _ }
+      'is'            { TokIdent "is" _ }
       'then'          { TokIdent "then" _ }
       'elseif'        { TokIdent "elseif" _ }
       'else'          { TokIdent "else" _ }
@@ -68,6 +69,10 @@ import AST
       ident           { TokIdent _ _ }
       '('             { TokLBracket Paren _ }
       ')'             { TokRBracket Paren _ }
+      '['             { TokLBracket Bracket _ }
+      ']'             { TokRBracket Bracket _ }
+      '{'             { TokLBracket Brace _ }
+      '}'             { TokRBracket Brace _ }
 
 %nonassoc 'where' 'let'
 %left 'or'
@@ -78,6 +83,7 @@ import AST
 %left '+' '-'
 %left '*' '/'
 %left NEG
+%left '.'
 %%
 
 Items :: { [Item] }
@@ -91,6 +97,9 @@ RevItems :: { [Item] }
 Item  :: { Item }
     : Visibility 'type' TypeProto '=' Ctors 'end'
                                 { TypeDecl $1 $3 $5 $ Just $ tokenPosition $2 }
+    | Visibility 'type' TypeProto 'is' Items 'end'
+                                { NonAlgType $1 $3 $5 $ 
+				    Just $ tokenPosition $2 }
     | Visibility 'resource' ident OptType
                                 { ResourceDecl $1 (identName $3) $4
 				    $ Just $ tokenPosition $2 }

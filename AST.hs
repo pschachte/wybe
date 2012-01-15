@@ -28,6 +28,7 @@ import System.FilePath
 
 data Item
      = TypeDecl Visibility TypeProto [FnProto] (Maybe SourcePos)
+     | NonAlgType Visibility TypeProto [Item] (Maybe SourcePos)
      | ResourceDecl Visibility Ident TypeSpec (Maybe SourcePos)
      | FuncDecl Visibility FnProto TypeSpec (Placed Exp) (Maybe SourcePos)
      | ProcDecl Visibility ProcProto [Placed Stmt] (Maybe SourcePos)

@@ -177,6 +177,8 @@ normaliseItems (item:items) = do
 normaliseItem :: Item -> Expander ()
 normaliseItem (TypeDecl vis (TypeProto name params) ctrs pos) =
   addType name (TypeDef (length params) pos) vis
+normaliseItem (NonAlgType vis (TypeProto name params) items pos) =
+  addType name (TypeDef (length params) pos) vis
 normaliseItem (ResourceDecl vis name typ pos) =
   addResource name (SimpleResource typ pos) vis
 normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
