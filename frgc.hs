@@ -15,6 +15,7 @@ import System.Environment
 import System.Console.GetOpt
 import Version
 import Printout
+import Data.List
 
 data Options = Options
  { optVerbosity   :: Int
@@ -67,7 +68,7 @@ processFiles opts (file:files) = do
   toks <- if file == "-" then inputTokens else fileTokens file
   let parseTree = parse toks
   if (optVerbosity opts) > 0 then
-    putStrLn $ show parseTree
+    putStrLn $ intercalate "\n" $ map show parseTree
     else return ()
   let (ast,errs) = normalise parseTree
   mapM putStrLn errs

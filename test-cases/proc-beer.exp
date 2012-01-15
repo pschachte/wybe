@@ -1,4 +1,4 @@
-[Public proc print2(x:int, y:int) {proc-beer:1:8}[do for count from 99 {proc-beer:2:29} by -1 {?} to ("<",0 {proc-beer:2:38}) {proc-beer:2:12}println("$count bottles of beer on the wall" {proc-beer:3:20}) {proc-beer:3:12} {proc-beer:3:12} end {proc-beer:2:8}]]
+Public proc print2(x:int, y:int) {proc-beer:1:8}[do for count from 99 {proc-beer:2:29} by -1 {?} to ("<",0 {proc-beer:2:38}) {proc-beer:2:12}println("$count bottles of beer on the wall" {proc-beer:3:20}) {proc-beer:3:12} {proc-beer:3:12} end {proc-beer:2:8}]
 Module
   imports         : 
   public types    : 
