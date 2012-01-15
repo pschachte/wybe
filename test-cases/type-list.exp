@@ -1,5 +1,5 @@
 Public type list(t) = {type-list:1:8}
-  nil
+  []
   cons(head:t,tail:list(t))
 end
 

@@ -1,8 +1,8 @@
 Public type int is {type-int:1:8}
-  Public func plus(x:int,y:int):int {type-int:2:12} = +(x {type-int:2:41}, y {type-int:2:43}) {type-int:2:41}
-  Public func minus(x:int,y:int):int {type-int:3:12} = -(x {type-int:3:42}, y {type-int:3:44}) {type-int:3:42}
-  Public func times(x:int,y:int):int {type-int:4:12} = *(x {type-int:4:42}, y {type-int:4:44}) {type-int:4:42}
-  Public func divide(x:int,y:int):int {type-int:5:12} = /(x {type-int:5:43}, y {type-int:5:45}) {type-int:5:43}
+  Public func +(x:int,y:int):int {type-int:2:12} = +(x {type-int:2:38}, y {type-int:2:40}) {type-int:2:38}
+  Public func -(x:int,y:int):int {type-int:3:12} = -(x {type-int:3:38}, y {type-int:3:40}) {type-int:3:38}
+  Public func *(x:int,y:int):int {type-int:4:12} = *(x {type-int:4:38}, y {type-int:4:40}) {type-int:4:38}
+  Public func /(x:int,y:int):int {type-int:5:12} = /(x {type-int:5:38}, y {type-int:5:40}) {type-int:5:38}
 end
 
 Module

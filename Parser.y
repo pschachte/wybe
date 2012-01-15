@@ -33,6 +33,8 @@ import AST
       '>='            { TokSymbol ">=" _ }
       '=='            { TokSymbol "==" _ }
       '/='            { TokSymbol "/=" _ }
+-- If any other symbol tokens that can be used as funcs or procs are
+-- defined here, they need to be added to the defintion of Symbol below
       ','             { TokComma _ }
       ';'             { TokSemicolon _ }
       ':'             { TokColon _ }
@@ -73,6 +75,8 @@ import AST
       ']'             { TokRBracket Bracket _ }
       '{'             { TokLBracket Brace _ }
       '}'             { TokRBracket Brace _ }
+      symbol          { TokSymbol _ _ }
+
 
 %nonassoc 'where' 'let'
 %left 'or'
@@ -124,6 +128,24 @@ RevCtors :: { [FnProto] }
 
 FnProto :: { FnProto }
     : ident OptParamList        { FnProto (identName $1) $2 }
+    | Symbol OptParamList       { FnProto (symbolName $1) $2 }
+    | '[' ']'                   { FnProto "[]" [] }
+    | '{' '}'                   { FnProto "{}" [] }
+
+Symbol :: { Token }
+    : '='             { $1 }
+    | '+'             { $1 }
+    | '-'             { $1 }
+    | '*'             { $1 }
+    | '/'             { $1 }
+    | '<'             { $1 }
+    | '>'             { $1 }
+    | '<='            { $1 }
+    | '>='            { $1 }
+    | '=='            { $1 }
+    | '/='            { $1 }
+    | symbol          { $1 }
+
 
 ProcProto :: { ProcProto }
     : ident OptProcParamList    { ProcProto (identName $1) $2 }
@@ -323,6 +345,11 @@ Exp :: { Placed Exp }
 	                                 (tokenPosition $1) }
     | ident ArgList             { Placed (Fncall (identName $1) $2)
 	                                 (tokenPosition $1) }
+    | '[' ']'                   { Placed (Fncall "[]" [])
+	                                 (tokenPosition $1) }
+    | '{' '}'                   { Placed (Fncall "[]" [])
+	                                 (tokenPosition $1) }
+
 
 ArgList :: { [Placed Exp] }
     : '(' Exp ExpList ')'       { $2:$3 }
