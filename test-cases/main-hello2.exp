@@ -5,9 +5,10 @@ Module
   public types    : 
   public resources: 
   public procs    : 
-  types:          : 
+  types           : 
   resources       : 
-  procs           : : [proc 1: () {?}
+  procs           : : [
+proc () (id 1):  {?}
     print("hello, ") {main-hello2:1:1}
     println("world!") {main-hello2:2:1}]
 

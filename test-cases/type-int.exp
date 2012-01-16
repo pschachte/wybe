@@ -10,7 +10,7 @@ Module
   public types    : int
   public resources: 
   public procs    : 
-  types:          : int: arity 0  {type-int:1:8}
+  types           : int: arity 0  {type-int:1:8}
   resources       : 
   procs           : 
 

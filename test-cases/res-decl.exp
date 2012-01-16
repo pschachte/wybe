@@ -4,7 +4,7 @@ Module
   public types    : 
   public resources: count
   public procs    : 
-  types:          : 
+  types           : 
   resources       : count: int {res-decl:1:8}
   procs           : 
 

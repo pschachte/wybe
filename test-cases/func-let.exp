@@ -4,9 +4,10 @@ Module
   public types    : 
   public resources: 
   public procs    : quad
-  types:          : 
+  types           : 
   resources       : 
-  procs           : quad: [proc 1: quad(x:int, ?$:int) {func-let:1:8}
+  procs           : quad: [
+proc quad(x:int, ?$:int) (id 1):  {func-let:1:8}
     +(x, x, ?$tmp0) {func-let:1:40}
     =(?d, $tmp0) {func-let:1:36}
     +(d, d, ?$tmp1) {func-let:1:47}

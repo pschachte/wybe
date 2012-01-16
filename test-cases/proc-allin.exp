@@ -4,9 +4,10 @@ Module
   public types    : 
   public resources: 
   public procs    : nada
-  types:          : 
+  types           : 
   resources       : 
-  procs           : nada: [proc 1: nada(x:int, y:int) {proc-allin:1:8}
+  procs           : nada: [
+proc nada(x:int, y:int) (id 1):  {proc-allin:1:8}
     +(x, y, ?$tmp0) {proc-allin:1:35}
     =(?z, $tmp0) {proc-allin:1:33}]
 

@@ -5,12 +5,14 @@ Module
   public types    : 
   public resources: 
   public procs    : double, quadruple
-  types:          : 
+  types           : 
   resources       : 
-  procs           : double: [proc 1: double(a:int, ?$:int) {func-quadruple:1:8}
+  procs           : double: [
+proc double(a:int, ?$:int) (id 1):  {func-quadruple:1:8}
     +(a, a, ?$tmp0) {func-quadruple:1:35}
     =(?$, $tmp0) {?}]
-                    quadruple: [proc 2: quadruple(a:int, ?$:int) {func-quadruple:3:8}
+                    quadruple: [
+proc quadruple(a:int, ?$:int) (id 2):  {func-quadruple:3:8}
     double(a, ?$tmp1) {func-quadruple:3:45}
     double($tmp1, ?$tmp2) {func-quadruple:3:38}
     =(?$, $tmp2) {?}]

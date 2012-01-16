@@ -66,7 +66,7 @@ instance Show Module where
     "\n  public types    : " ++ showIdSet (pubTypes mod) ++
     "\n  public resources: " ++ showIdSet (pubResources mod) ++
     "\n  public procs    : " ++ showIdSet (pubProcs mod) ++
-    "\n  types:          : " ++ showMap (modTypes mod) ++
+    "\n  types           : " ++ showMap (modTypes mod) ++
     "\n  resources       : " ++ showMap (modResources mod) ++
     "\n  procs           : " ++ showMap (modProcs mod) ++ "\n"
 
@@ -94,7 +94,8 @@ instance Show ResourceDef where
 
 instance Show ProcDef where
   show (ProcDef i proto def pos) =
-    "proc " ++ show i ++ ": " ++ show proto ++ showMaybeSourcePos pos 
+    "\nproc " ++ show proto ++ " (id " ++ show i ++ "): " 
+    ++ showMaybeSourcePos pos 
     ++ showBlock 4 def
 
 instance Show TypeSpec where

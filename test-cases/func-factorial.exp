@@ -4,9 +4,10 @@ Module
   public types    : 
   public resources: 
   public procs    : factorial
-  types:          : 
+  types           : 
   resources       : 
-  procs           : factorial: [proc 1: factorial(n:int, ?$:int) {func-factorial:1:8}
+  procs           : factorial: [
+proc factorial(n:int, ?$:int) (id 1):  {func-factorial:1:8}
     <=(n, 0, ?$tmp0) {func-factorial:2:11}
     case $tmp0 of {func-factorial:2:8}
       0:

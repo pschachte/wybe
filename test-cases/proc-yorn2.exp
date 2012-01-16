@@ -4,9 +4,10 @@ Module
   public types    : 
   public resources: 
   public procs    : yorn
-  types:          : 
+  types           : 
   resources       : 
-  procs           : yorn: [proc 1: yorn(prompt:string, ?result:bool) {proc-yorn2:1:8}
+  procs           : yorn: [
+proc yorn(prompt:string, ?result:bool) (id 1):  {proc-yorn2:1:8}
     do  {proc-yorn2:2:5}
         print(prompt) {proc-yorn2:2:9}
         print(" (y/n) ") {proc-yorn2:3:9}

@@ -9,9 +9,10 @@ Module
   public types    : list
   public resources: 
   public procs    : ++, [], [|]
-  types:          : list: arity 1  {type-list:1:8}
+  types           : list: arity 1  {type-list:1:8}
   resources       : 
-  procs           : ++: [proc 3: ++(x:list(t), y:list(t), ?$:?) {type-list:6:8}
+  procs           : ++: [
+proc ++(x:list(t), y:list(t), ?$:?) (id 3):  {type-list:6:8}
     [](?$tmp4) {type-list:7:13}
     ==(x, $tmp4, ?$tmp5) {type-list:7:8}
     case $tmp5 of {type-list:7:5}
@@ -25,10 +26,12 @@ Module
         =(?$tmp10, $tmp9) {?}
     end
     =(?$, $tmp10) {?}]
-                    []: [proc 1: [](?$:list(t)) {?}
+                    []: [
+proc [](?$:list(t)) (id 1):  {?}
     $alloc([], ?$tmp0) {?}
     =(?$, $tmp0) {?}]
-                    [|]: [proc 2: [|](head:t, tail:list(t), ?$:list(t)) {?}
+                    [|]: [
+proc [|](head:t, tail:list(t), ?$:list(t)) (id 2):  {?}
     $alloc([|], ?$tmp1) {?}
     update$head(head, $tmp1, ?$tmp2) {?}
     update$tail(tail, $tmp2, ?$tmp3) {?}

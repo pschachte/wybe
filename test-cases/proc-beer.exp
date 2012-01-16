@@ -4,9 +4,10 @@ Module
   public types    : 
   public resources: 
   public procs    : print2
-  types:          : 
+  types           : 
   resources       : 
-  procs           : print2: [proc 1: print2(x:int, y:int) {proc-beer:1:8}
+  procs           : print2: [
+proc print2(x:int, y:int) (id 1):  {proc-beer:1:8}
     =(?count, 99) {?}
     do  {proc-beer:2:8}
         <(count, 0, ?$tmp0) {?}
