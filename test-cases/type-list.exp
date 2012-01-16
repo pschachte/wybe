@@ -1,14 +1,28 @@
 Public type list(t) = {type-list:1:8}
   []
-  cons(head:t,tail:list(t))
+  [|](head:t,tail:list(t))
 end
 
+Public func ++(x:list(t),y:list(t)):? {type-list:6:8} = if ==(x {type-list:7:8}, []() {type-list:7:13}) {type-list:7:8} then y {type-list:8:10} else [|](head(x {type-list:9:16}) {type-list:9:11}, ++(tail(x {type-list:9:24}) {type-list:9:19}, y {type-list:9:28}) {type-list:9:19}) {type-list:9:10} {type-list:7:5}
 Module
   imports         : 
   public types    : list
   public resources: 
-  public procs    : 
+  public procs    : ++
   types:          : list: arity 1  {type-list:1:8}
   resources       : 
-  procs           : 
+  procs           : ++: [proc 1: ++(x:list(t), y:list(t), ?$:?) {type-list:6:8}
+    [](?$tmp0) {type-list:7:13}
+    ==(x, $tmp0, ?$tmp1) {type-list:7:8}
+    case $tmp1 of {type-list:7:5}
+      0:
+        =(?$tmp6, y) {?}
+      1:
+        head(x, ?$tmp4) {type-list:9:11}
+        tail(x, ?$tmp2) {type-list:9:19}
+        ++($tmp2, y, ?$tmp3) {type-list:9:19}
+        [|]($tmp4, $tmp3, ?$tmp5) {type-list:9:10}
+        =(?$tmp6, $tmp5) {?}
+    end
+    =(?$, $tmp6) {?}]
 

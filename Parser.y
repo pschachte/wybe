@@ -27,12 +27,14 @@ import AST
       '-'             { TokSymbol "-" _ }
       '*'             { TokSymbol "*" _ }
       '/'             { TokSymbol "/" _ }
+      '++'            { TokSymbol "++" _ }
       '<'             { TokSymbol "<" _ }
       '>'             { TokSymbol ">" _ }
       '<='            { TokSymbol "<=" _ }
       '>='            { TokSymbol ">=" _ }
       '=='            { TokSymbol "==" _ }
       '/='            { TokSymbol "/=" _ }
+      '|'             { TokSymbol "|" _ }
 -- If any other symbol tokens that can be used as funcs or procs are
 -- defined here, they need to be added to the defintion of Symbol below
       ','             { TokComma _ }
@@ -84,6 +86,7 @@ import AST
 %left 'not'
 %nonassoc 'in'
 %left '>' '<' '<=' '>=' '==' '/='
+%right '++'
 %left '+' '-'
 %left '*' '/'
 %left NEG
@@ -129,8 +132,6 @@ RevCtors :: { [FnProto] }
 FnProto :: { FnProto }
     : ident OptParamList        { FnProto (identName $1) $2 }
     | Symbol OptParamList       { FnProto (symbolName $1) $2 }
-    | '[' ']'                   { FnProto "[]" [] }
-    | '{' '}'                   { FnProto "{}" [] }
 
 Symbol :: { Token }
     : '='             { $1 }
@@ -138,12 +139,17 @@ Symbol :: { Token }
     | '-'             { $1 }
     | '*'             { $1 }
     | '/'             { $1 }
+    | '++'            { $1 }
     | '<'             { $1 }
     | '>'             { $1 }
     | '<='            { $1 }
     | '>='            { $1 }
     | '=='            { $1 }
     | '/='            { $1 }
+    | '|'             { $1 }
+    | '[' ']'         { TokSymbol "[]"  (symbolPos $1) }
+    | '[' '|' ']'     { TokSymbol "[|]" (symbolPos $1) }
+    | '{' '}'         { TokSymbol "{}"  (symbolPos $1) }
     | symbol          { $1 }
 
 
@@ -305,6 +311,8 @@ Exp :: { Placed Exp }
                                              (place $1) }
     | Exp '/' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
                                              (place $1) }
+    | Exp '++' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
+                                             (place $1) }
     | Exp '<' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
                                              (place $1) }
     | Exp '<=' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
@@ -347,8 +355,15 @@ Exp :: { Placed Exp }
 	                                 (tokenPosition $1) }
     | '[' ']'                   { Placed (Fncall "[]" [])
 	                                 (tokenPosition $1) }
-    | '{' '}'                   { Placed (Fncall "[]" [])
+    | '[' Exp ListTail          { Placed (Fncall "[|]" [$2, $3])
 	                                 (tokenPosition $1) }
+    | '{' '}'                   { Placed (Fncall "{}" [])
+	                                 (tokenPosition $1) }
+
+ListTail :: { Placed Exp }
+    : ']'                       { Unplaced (Fncall "[]" []) }
+    | ',' Exp ListTail          { Unplaced (Fncall "[|]" [$2,$3]) }
+    | '|' Exp ']'               { $2 }
 
 
 ArgList :: { [Placed Exp] }

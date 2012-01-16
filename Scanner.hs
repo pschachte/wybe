@@ -5,7 +5,7 @@
 --  Copyright: © 2010-2012 Peter Schachte.  All rights reserved.
 
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
-                charValue, identName, symbolName, showPosition, 
+                charValue, identName, symbolName, symbolPos, showPosition, 
                 StringDelim(..), BracketStyle(..), fileTokens, 
                 inputTokens) where
 
@@ -56,6 +56,9 @@ identName (TokIdent str _) = str
 
 symbolName :: Token -> String
 symbolName (TokSymbol str _) = str
+
+symbolPos :: Token -> SourcePos
+symbolPos (TokSymbol _ pos) = pos
 
 
 
