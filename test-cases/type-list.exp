@@ -8,21 +8,29 @@ Module
   imports         : 
   public types    : list
   public resources: 
-  public procs    : ++
+  public procs    : ++, [], [|]
   types:          : list: arity 1  {type-list:1:8}
   resources       : 
-  procs           : ++: [proc 1: ++(x:list(t), y:list(t), ?$:?) {type-list:6:8}
-    [](?$tmp0) {type-list:7:13}
-    ==(x, $tmp0, ?$tmp1) {type-list:7:8}
-    case $tmp1 of {type-list:7:5}
+  procs           : ++: [proc 3: ++(x:list(t), y:list(t), ?$:?) {type-list:6:8}
+    [](?$tmp4) {type-list:7:13}
+    ==(x, $tmp4, ?$tmp5) {type-list:7:8}
+    case $tmp5 of {type-list:7:5}
       0:
-        =(?$tmp6, y) {?}
+        =(?$tmp10, y) {?}
       1:
-        head(x, ?$tmp4) {type-list:9:11}
-        tail(x, ?$tmp2) {type-list:9:19}
-        ++($tmp2, y, ?$tmp3) {type-list:9:19}
-        [|]($tmp4, $tmp3, ?$tmp5) {type-list:9:10}
-        =(?$tmp6, $tmp5) {?}
+        head(x, ?$tmp8) {type-list:9:11}
+        tail(x, ?$tmp6) {type-list:9:19}
+        ++($tmp6, y, ?$tmp7) {type-list:9:19}
+        [|]($tmp8, $tmp7, ?$tmp9) {type-list:9:10}
+        =(?$tmp10, $tmp9) {?}
     end
-    =(?$, $tmp6) {?}]
+    =(?$, $tmp10) {?}]
+                    []: [proc 1: [](?$:list(t)) {?}
+    $alloc([], ?$tmp0) {?}
+    =(?$, $tmp0) {?}]
+                    [|]: [proc 2: [|](head:t, tail:list(t), ?$:list(t)) {?}
+    $alloc([|], ?$tmp1) {?}
+    update$head(head, $tmp1, ?$tmp2) {?}
+    update$tail(tail, $tmp2, ?$tmp3) {?}
+    =(?$, $tmp3) {?}]
 

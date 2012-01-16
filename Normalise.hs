@@ -175,8 +175,13 @@ normaliseItems (item:items) = do
   normaliseItems items
 
 normaliseItem :: Item -> Expander ()
-normaliseItem (TypeDecl vis (TypeProto name params) ctrs pos) =
+normaliseItem (TypeDecl vis (TypeProto name params) ctrs pos) = do
   addType name (TypeDef (length params) pos) vis
+  if vis == Public then
+      mapM_ (addCtr $ TypeSpec name $ 
+             List.map (\var -> TypeSpec var []) params) ctrs
+    else
+    return ()
 normaliseItem (NonAlgType vis (TypeProto name params) items pos) =
   addType name (TypeDef (length params) pos) vis
 normaliseItem (ResourceDecl vis name typ pos) =
@@ -201,6 +206,19 @@ normaliseItem (StmtDecl stmt pos) = do
       addProc "" (ProcProto "" []) stmts Nothing Private
     Just [ProcDef id proto stmts' pos'] ->
       replaceProc "" id proto (stmts' ++ stmts) pos' Private
+
+
+addCtr :: TypeSpec -> FnProto -> Expander ()
+addCtr resultType (FnProto ctorName params) =
+  normaliseItem (FuncDecl Public (FnProto ctorName params) resultType 
+                 (List.foldr
+                  (\(Param var _ _) struct ->
+                    (Unplaced $ Fncall 
+                     ("update$"++var) 
+                     [Unplaced $ Var var,struct]))
+                  (Unplaced $ Fncall "$alloc" [Unplaced $ Var ctorName])
+                  $ List.reverse params) 
+                 Nothing)
 
 
 normaliseStmts :: [Placed Stmt] -> Expander [Placed Prim]
