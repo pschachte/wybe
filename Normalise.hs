@@ -236,18 +236,36 @@ normaliseItem (StmtDecl stmt pos) = do
 
 
 addCtor :: Ident -> [Ident] -> FnProto -> Expander ()
-addCtor typeName typeParams (FnProto ctorName params) =
-  normaliseItem (FuncDecl Public (FnProto ctorName params)
-                 (TypeSpec typeName $ List.map (\n->(TypeSpec n [])) typeParams)
-                 (List.foldr
-                  (\(Param var _ _) struct ->
-                    (Unplaced $ Fncall 
-                     ("update$"++var) 
-                     [Unplaced $ Var var,struct]))
-                  (Unplaced $ Fncall "$alloc" [Unplaced $ Var ctorName])
-                  $ List.reverse params) 
-                 Nothing)
+addCtor typeName typeParams (FnProto ctorName params) = do
+    let typespec = TypeSpec typeName $ List.map (\n->TypeSpec n []) typeParams
+    normaliseItem (FuncDecl Public (FnProto ctorName params)
+                   typespec
+                   (List.foldr
+                    (\(Param var _ _) struct ->
+                      (Unplaced $ Fncall 
+                       ("update$"++var) 
+                       [Unplaced $ Var var,struct]))
+                    (Unplaced $ Fncall "$alloc" [Unplaced $ Var ctorName])
+                    $ List.reverse params) 
+                   Nothing)
+    mapM_ (addGetterSetter typespec ctorName) params
 
+addGetterSetter :: TypeSpec -> Ident -> Param -> Expander ()
+addGetterSetter rectype ctorName (Param field fieldtype _) = do
+    addProc field 
+      (ProcProto field [Param "$rec" rectype ParamIn,
+                        Param "$field" fieldtype ParamOut])
+      [Unplaced $ PrimForeign "" "access" Nothing [ArgVar ctorName ParamIn,
+                                                   ArgVar "$rec" ParamIn,
+                                                   ArgVar "$field" ParamOut]]
+      Nothing Public
+    addProc field 
+      (ProcProto field [Param "$rec" rectype ParamInOut,
+                        Param "$field" fieldtype ParamIn])
+      [Unplaced $ PrimForeign "" "mutate" Nothing [ArgVar ctorName ParamIn,
+                                                   ArgVar "$rec" ParamInOut,
+                                                   ArgVar "$field" ParamIn]]
+      Nothing Public
 
 normaliseStmts :: [Placed Stmt] -> Expander [Placed Prim]
 normaliseStmts [] = return []

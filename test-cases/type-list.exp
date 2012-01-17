@@ -36,7 +36,7 @@ list:
   public submods  : 
   public types    : list
   public resources: 
-  public procs    : [], [|]
+  public procs    : [], [|], head, tail
   types           : list: arity 1  {type-list:1:8}
   resources       : 
   procs           : []: [
@@ -49,6 +49,16 @@ proc [|](head:t, tail:list(t), ?$:list(t)) (id 2):  {?}
     update$head(head, $tmp1, ?$tmp2) {?}
     update$tail(tail, $tmp2, ?$tmp3) {?}
     =(?$, $tmp3) {?}]
+                    head: [
+proc head(!$rec:list(t), $field:t) (id 4):  {?}
+    foreign  mutate([|], !$rec, $field) {?},
+proc head($rec:list(t), ?$field:t) (id 3):  {?}
+    foreign  access([|], $rec, ?$field) {?}]
+                    tail: [
+proc tail(!$rec:list(t), $field:list(t)) (id 6):  {?}
+    foreign  mutate([|], !$rec, $field) {?},
+proc tail($rec:list(t), ?$field:list(t)) (id 5):  {?}
+    foreign  access([|], $rec, ?$field) {?}]
 
 Submodules of list:
 
