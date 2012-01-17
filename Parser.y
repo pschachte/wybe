@@ -48,6 +48,7 @@ import AST
       'type'          { TokIdent "type" _ }
       'func'          { TokIdent "func" _ }
       'proc'          { TokIdent "proc" _ }
+      'ctor'          { TokIdent "ctor" _ }
       'let'           { TokIdent "let" _ }
       'where'         { TokIdent "where" _ }
       'end'           { TokIdent "end" _ }
@@ -103,10 +104,8 @@ RevItems :: { [Item] }
 
 
 Item  :: { Item }
-    : Visibility 'type' TypeProto '=' Ctors 'end'
-                                { TypeDecl $1 $3 $5 $ Just $ tokenPosition $2 }
-    | Visibility 'type' TypeProto 'is' Items 'end'
-                                { NonAlgType $1 $3 $5 $ 
+    : Visibility 'type' TypeProto 'is' Items 'end'
+                                { TypeDecl $1 $3 $5 $ 
 				    Just $ tokenPosition $2 }
     | Visibility 'resource' ident OptType
                                 { ResourceDecl $1 (identName $3) $4
@@ -116,6 +115,8 @@ Item  :: { Item }
 				    $ Just $ tokenPosition $2 }
     | Visibility 'proc' ProcProto ProcBody
                                 { ProcDecl $1 $3 $4 $ Just $ tokenPosition $2 }
+    | Visibility 'ctor' FnProto { CtorDecl $1 $3
+				    $ Just $ tokenPosition $2 }
     | Stmt                      { StmtDecl (content $1) (place $1) }
 
 

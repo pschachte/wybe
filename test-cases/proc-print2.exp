@@ -1,6 +1,8 @@
 Public proc print2(x:int, y:int) {proc-print2:1:8}[print(x {proc-print2:2:14}) {proc-print2:2:8},print(y {proc-print2:3:14}) {proc-print2:3:8}]
-Module
+
+ Module proc-print2
   imports         : 
+  public submods  : 
   public types    : 
   public resources: 
   public procs    : print2
@@ -10,4 +12,6 @@ Module
 proc print2(x:int, y:int) (id 1):  {proc-print2:1:8}
     print(x) {proc-print2:2:8}
     print(y) {proc-print2:3:8}]
+
+Submodules of proc-print2:
 

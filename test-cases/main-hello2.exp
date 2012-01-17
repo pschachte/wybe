@@ -1,7 +1,9 @@
 print("hello, " {main-hello2:1:7}) {main-hello2:1:1}
 println("world!" {main-hello2:2:9}) {main-hello2:2:1}
-Module
+
+ Module main-hello2
   imports         : 
+  public submods  : 
   public types    : 
   public resources: 
   public procs    : 
@@ -11,4 +13,6 @@ Module
 proc () (id 1):  {?}
     print("hello, ") {main-hello2:1:1}
     println("world!") {main-hello2:2:1}]
+
+Submodules of main-hello2:
 

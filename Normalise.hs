@@ -30,14 +30,25 @@ data ExpanderState = Expander {
 
 type Expander = State ExpanderState
 
-initExpander :: ExpanderState
-initExpander = Expander 0 0 (Module Set.empty Set.empty Set.empty Set.empty
-                             Map.empty Map.empty Map.empty) []
+initExpander :: Ident -> Maybe [Ident] -> ExpanderState
+initExpander name params = 
+    Expander 0 0 (Module name params Set.empty Set.empty Set.empty Set.empty 
+                  Set.empty Map.empty Map.empty Map.empty Map.empty) []
 
 getModule :: Expander Module
 getModule = do
   state <- get
   return $ modul state
+
+getModuleName :: Expander Ident
+getModuleName = do
+  modl <- getModule
+  return $ modName modl
+
+getModuleParams :: Expander (Maybe [Ident])
+getModuleParams = do
+  modl <- getModule
+  return $ modParams modl
 
 modAddImport :: ModSpec -> Module -> Module
 modAddImport imp mod 
@@ -74,9 +85,12 @@ makeMessage msg (Just pos) =
   msg
 
 errMsg :: String -> Maybe SourcePos -> Expander ()
-errMsg msg pos = do
-  state <- get
-  put state { errs = (errs state) ++ [makeMessage msg pos] }
+errMsg msg pos = addErrMsgs [makeMessage msg pos]
+
+addErrMsgs :: [String] -> Expander ()
+addErrMsgs msgs = do
+    state <- get
+    put state { errs = (errs state) ++ msgs }
 
 freshVar :: Expander String
 freshVar = do
@@ -110,6 +124,12 @@ addType =
   addItem (\name def mod -> 
             mod { modTypes = Map.insert name def $ modTypes mod })
           (\name mod -> mod { pubTypes = Set.insert name $ pubTypes mod })
+
+addSubmod :: Ident -> Module -> Visibility -> Expander ()
+addSubmod = 
+  addItem (\name submod mod -> 
+            mod { modSubmods = Map.insert name submod $ modSubmods mod })
+          (\name mod -> mod { pubSubmods = Set.insert name $ pubSubmods mod })
 
 lookupType :: Ident -> Expander (Maybe TypeDef)
 lookupType name = do
@@ -164,9 +184,17 @@ publicProc name = do
   return $ Set.member name (pubProcs mod)
 
 
-normalise :: [Item] -> (Module,[String])
-normalise items = (modul result, errs result) where
-  (_,result) = runState (normaliseItems items) initExpander
+normalise :: Ident -> Maybe [Ident] -> Maybe SourcePos -> [Item] -> 
+             (Module,[String])
+normalise name params pos items = (modul result, errs result) where
+  (_,result) = runState (
+      do
+          case params of
+              Nothing -> return ()
+              Just params' -> 
+                  addType name (TypeDef (List.length params') pos) Public
+          normaliseItems items
+      ) $ initExpander name params
 
 normaliseItems :: [Item] -> Expander ()
 normaliseItems [] = return ()
@@ -175,15 +203,10 @@ normaliseItems (item:items) = do
   normaliseItems items
 
 normaliseItem :: Item -> Expander ()
-normaliseItem (TypeDecl vis (TypeProto name params) ctrs pos) = do
-  addType name (TypeDef (length params) pos) vis
-  if vis == Public then
-      mapM_ (addCtr $ TypeSpec name $ 
-             List.map (\var -> TypeSpec var []) params) ctrs
-    else
-    return ()
-normaliseItem (NonAlgType vis (TypeProto name params) items pos) =
-  addType name (TypeDef (length params) pos) vis
+normaliseItem (TypeDecl vis (TypeProto name params) items pos) = do
+    let (newmod,errs) = normalise name (Just params) pos items
+    addErrMsgs errs
+    addSubmod name newmod vis
 normaliseItem (ResourceDecl vis name typ pos) =
   addResource name (SimpleResource typ pos) vis
 normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
@@ -198,6 +221,10 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
   stmts' <- normaliseStmts stmts
   addProc name proto stmts' pos vis
+normaliseItem (CtorDecl vis proto pos) = do
+    modname <- getModuleName
+    Just modparams <- getModuleParams
+    addCtor modname modparams proto
 normaliseItem (StmtDecl stmt pos) = do
   stmts <- normaliseStmt stmt pos
   oldproc <- lookupProc ""
@@ -208,9 +235,10 @@ normaliseItem (StmtDecl stmt pos) = do
       replaceProc "" id proto (stmts' ++ stmts) pos' Private
 
 
-addCtr :: TypeSpec -> FnProto -> Expander ()
-addCtr resultType (FnProto ctorName params) =
-  normaliseItem (FuncDecl Public (FnProto ctorName params) resultType 
+addCtor :: Ident -> [Ident] -> FnProto -> Expander ()
+addCtor typeName typeParams (FnProto ctorName params) =
+  normaliseItem (FuncDecl Public (FnProto ctorName params)
+                 (TypeSpec typeName $ List.map (\n->(TypeSpec n [])) typeParams)
                  (List.foldr
                   (\(Param var _ _) struct ->
                     (Unplaced $ Fncall 

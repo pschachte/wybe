@@ -1,6 +1,6 @@
-public type list(t) =
-	[]
-	[|](head:t, tail:list(t))
+public type list(t) is
+    public ctor []
+    public ctor [|](head:t, tail:list(t))
 end
 
 public func ++(x:list(t), y:list(t)) =

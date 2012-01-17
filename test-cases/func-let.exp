@@ -1,6 +1,8 @@
 Public func quad(x:int):int {func-let:1:8} = +(d {func-let:1:47}, d {func-let:1:49}) {func-let:1:47} where [=(?d {func-let:1:36}, +(x {func-let:1:40}, x {func-let:1:42}) {func-let:1:40}) {func-let:1:36}] {func-let:1:31}
-Module
+
+ Module func-let
   imports         : 
+  public submods  : 
   public types    : 
   public resources: 
   public procs    : quad
@@ -12,4 +14,6 @@ proc quad(x:int, ?$:int) (id 1):  {func-let:1:8}
     =(?d, $tmp0) {func-let:1:36}
     +(d, d, ?$tmp1) {func-let:1:47}
     =(?$, $tmp1) {?}]
+
+Submodules of func-let:
 

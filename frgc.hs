@@ -13,6 +13,7 @@ import Scanner
 import Normalise
 import System.Environment
 import System.Console.GetOpt
+import System.FilePath (takeBaseName)
 import Version
 import Printout
 import Data.List
@@ -66,11 +67,12 @@ processFiles :: Options -> [String] -> IO ()
 processFiles opts [] = return ()
 processFiles opts (file:files) = do
   toks <- if file == "-" then inputTokens else fileTokens file
+  let modname = if file == "-" then "stdin" else takeBaseName file
   let parseTree = parse toks
   if (optVerbosity opts) > 0 then
     putStrLn $ intercalate "\n" $ map show parseTree
     else return ()
-  let (ast,errs) = normalise parseTree
+  let (ast,errs) = normalise modname Nothing Nothing parseTree
   mapM putStrLn errs
   if (optVerbosity opts) > 0 then
     putStrLn $ show ast

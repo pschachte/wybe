@@ -27,11 +27,11 @@ import System.FilePath
 ----------------------------------------------------------------
 
 data Item
-     = TypeDecl Visibility TypeProto [FnProto] (Maybe SourcePos)
-     | NonAlgType Visibility TypeProto [Item] (Maybe SourcePos)
+     = TypeDecl Visibility TypeProto [Item] (Maybe SourcePos)
      | ResourceDecl Visibility Ident TypeSpec (Maybe SourcePos)
      | FuncDecl Visibility FnProto TypeSpec (Placed Exp) (Maybe SourcePos)
      | ProcDecl Visibility ProcProto [Placed Stmt] (Maybe SourcePos)
+     | CtorDecl Visibility FnProto (Maybe SourcePos)
      | StmtDecl Stmt (Maybe SourcePos)
 
 data Visibility = Public | Private
@@ -67,10 +67,14 @@ maybePlace t Nothing    = Unplaced t
 ----------------------------------------------------------------
 
 data Module = Module {
+  modName :: Ident,
+  modParams :: Maybe [Ident],
   modImports :: Set ModSpec,
+  pubSubmods :: Set Ident,
   pubTypes :: Set Ident,
   pubResources :: Set Ident,
   pubProcs :: Set Ident,
+  modSubmods :: Map Ident Module,
   modTypes :: Map Ident TypeDef,
   modResources :: Map Ident ResourceDef,
   modProcs :: Map Ident [ProcDef]

@@ -16,12 +16,7 @@ import Text.ParserCombinators.Parsec.Pos
 import System.FilePath
 
 instance Show Item where
-  show (TypeDecl vis name ctrs pos) =
-    show vis ++ " type " ++ show name ++ " =" 
-    ++ showMaybeSourcePos pos
-    ++ "\n  " ++ intercalate "\n  " (List.map show ctrs)
-    ++ "\nend\n"
-  show (NonAlgType vis name items pos) =
+  show (TypeDecl vis name items pos) =
     show vis ++ " type " ++ show name ++ " is" 
     ++ showMaybeSourcePos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
@@ -37,6 +32,9 @@ instance Show Item where
     show vis ++ " proc " ++ show proto
     ++ showMaybeSourcePos pos
     ++ show stmts
+  show (CtorDecl vis proto pos) =
+    show vis ++ " ctor " ++ show proto
+    ++ showMaybeSourcePos pos
   show (StmtDecl stmt pos) =
     show stmt ++ showMaybeSourcePos pos
 
@@ -61,14 +59,16 @@ showMaybeSourcePos Nothing = " {?}"
 
 instance Show Module where
   show mod =
-    "Module" ++ 
+    "\n Module " ++ modName mod ++ maybeShow "(" (modParams mod) ")" ++
     "\n  imports         : " ++ showModSpecSet (modImports mod) ++ 
+    "\n  public submods  : " ++ showIdSet (pubSubmods mod) ++
     "\n  public types    : " ++ showIdSet (pubTypes mod) ++
     "\n  public resources: " ++ showIdSet (pubResources mod) ++
     "\n  public procs    : " ++ showIdSet (pubProcs mod) ++
     "\n  types           : " ++ showMap (modTypes mod) ++
     "\n  resources       : " ++ showMap (modResources mod) ++
-    "\n  procs           : " ++ showMap (modProcs mod) ++ "\n"
+    "\n  procs           : " ++ showMap (modProcs mod) ++ "\n" ++
+    "\nSubmodules of " ++ modName mod ++ ":\n" ++ showMap (modSubmods mod)
 
 showModSpecSet :: Set ModSpec -> String
 showModSpecSet set = intercalate ", " 

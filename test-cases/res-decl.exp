@@ -1,10 +1,14 @@
 Public resource "count":int {res-decl:1:8}
-Module
+
+ Module res-decl
   imports         : 
+  public submods  : 
   public types    : 
   public resources: count
   public procs    : 
   types           : 
   resources       : count: int {res-decl:1:8}
   procs           : 
+
+Submodules of res-decl:
 

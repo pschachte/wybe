@@ -1,6 +1,8 @@
 Public func times(a:?,b:?):? {func-no-types:1:8} = *(a {func-no-types:1:26}, b {func-no-types:1:28}) {func-no-types:1:26}
-Module
+
+ Module func-no-types
   imports         : 
+  public submods  : 
   public types    : 
   public resources: 
   public procs    : times
@@ -10,4 +12,6 @@ Module
 proc times(a:?, b:?, ?$:?) (id 1):  {func-no-types:1:8}
     *(a, b, ?$tmp0) {func-no-types:1:26}
     =(?$, $tmp0) {?}]
+
+Submodules of func-no-types:
 

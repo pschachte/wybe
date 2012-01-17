@@ -1,6 +1,8 @@
 Public proc print2(x:int, y:int) {proc-hello:1:8}[println("hello, world" {proc-hello:2:16}) {proc-hello:2:8}]
-Module
+
+ Module proc-hello
   imports         : 
+  public submods  : 
   public types    : 
   public resources: 
   public procs    : print2
@@ -9,4 +11,6 @@ Module
   procs           : print2: [
 proc print2(x:int, y:int) (id 1):  {proc-hello:1:8}
     println("hello, world") {proc-hello:2:8}]
+
+Submodules of proc-hello:
 

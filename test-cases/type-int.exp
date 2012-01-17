@@ -11,12 +11,67 @@ Public type int is {type-int:1:8}
   Public func >=(x:int,y:int):bool {type-int:11:12} = foreign llvm icmp(sge {type-int:11:58}, x {type-int:11:62}, y {type-int:11:64}) {type-int:11:40}
 end
 
-Module
+
+ Module type-int
   imports         : 
-  public types    : int
+  public submods  : int
+  public types    : 
   public resources: 
   public procs    : 
-  types           : int: arity 0  {type-int:1:8}
+  types           : 
   resources       : 
   procs           : 
+
+Submodules of type-int:
+int: 
+ Module int([])
+  imports         : 
+  public submods  : 
+  public types    : int
+  public resources: 
+  public procs    : *, +, -, /, /=, <, <=, ==, >, >=
+  types           : int: arity 0  {type-int:1:8}
+  resources       : 
+  procs           : *: [
+proc *(x:int, y:int, ?$:int) (id 3):  {type-int:4:12}
+    foreign llvm mul(x, y, ?$tmp2) {type-int:4:38}
+    =(?$, $tmp2) {?}]
+                    +: [
+proc +(x:int, y:int, ?$:int) (id 1):  {type-int:2:12}
+    foreign llvm add(x, y, ?$tmp0) {type-int:2:38}
+    =(?$, $tmp0) {?}]
+                    -: [
+proc -(x:int, y:int, ?$:int) (id 2):  {type-int:3:12}
+    foreign llvm sub(x, y, ?$tmp1) {type-int:3:38}
+    =(?$, $tmp1) {?}]
+                    /: [
+proc /(x:int, y:int, ?$:int) (id 4):  {type-int:5:12}
+    foreign llvm sdiv(x, y, ?$tmp3) {type-int:5:38}
+    =(?$, $tmp3) {?}]
+                    /=: [
+proc /=(x:int, y:int, ?$:bool) (id 6):  {type-int:7:12}
+    foreign llvm icmp(ne, x, y, ?$tmp5) {type-int:7:40}
+    =(?$, $tmp5) {?}]
+                    <: [
+proc <(x:int, y:int, ?$:bool) (id 7):  {type-int:8:12}
+    foreign llvm icmp(slt, x, y, ?$tmp6) {type-int:8:39}
+    =(?$, $tmp6) {?}]
+                    <=: [
+proc <=(x:int, y:int, ?$:bool) (id 8):  {type-int:9:12}
+    foreign llvm icmp(sle, x, y, ?$tmp7) {type-int:9:40}
+    =(?$, $tmp7) {?}]
+                    ==: [
+proc ==(x:int, y:int, ?$:bool) (id 5):  {type-int:6:12}
+    foreign llvm icmp(eq, x, y, ?$tmp4) {type-int:6:40}
+    =(?$, $tmp4) {?}]
+                    >: [
+proc >(x:int, y:int, ?$:bool) (id 9):  {type-int:10:12}
+    foreign llvm icmp(sgt, x, y, ?$tmp8) {type-int:10:39}
+    =(?$, $tmp8) {?}]
+                    >=: [
+proc >=(x:int, y:int, ?$:bool) (id 10):  {type-int:11:12}
+    foreign llvm icmp(sge, x, y, ?$tmp9) {type-int:11:40}
+    =(?$, $tmp9) {?}]
+
+Submodules of int:
 
