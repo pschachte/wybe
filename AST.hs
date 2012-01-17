@@ -112,6 +112,7 @@ data ProcArg = ProcArg (Placed Exp) FlowDirection
 
 data Stmt
      = ProcCall Ident [ProcArg]
+     | ForeignCall Ident Ident [ProcArg]
      | Cond (Placed Exp) [Placed Stmt] [Placed Stmt]
      | Loop [Placed LoopStmt]
      | Nop
@@ -131,6 +132,7 @@ data Exp
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
       | Fncall String [Placed Exp]
+      | ForeignFn String String [Placed Exp]
 
 data Generator 
       = In VarName (Placed Exp)
@@ -139,6 +141,7 @@ data Generator
 
 data Prim
      = PrimCall ProcName (Maybe ProcID) [PrimArg]
+     | PrimForeign String ProcName (Maybe ProcID) [PrimArg]
      | PrimCond VarName [[Placed Prim]]
      | PrimLoop [Placed Prim]
      | PrimBreakIf VarName

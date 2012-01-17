@@ -1,8 +1,8 @@
 Public type int is {type-int:1:8}
-  Public func +(x:int,y:int):int {type-int:2:12} = +(x {type-int:2:38}, y {type-int:2:40}) {type-int:2:38}
-  Public func -(x:int,y:int):int {type-int:3:12} = -(x {type-int:3:38}, y {type-int:3:40}) {type-int:3:38}
-  Public func *(x:int,y:int):int {type-int:4:12} = *(x {type-int:4:38}, y {type-int:4:40}) {type-int:4:38}
-  Public func /(x:int,y:int):int {type-int:5:12} = /(x {type-int:5:38}, y {type-int:5:40}) {type-int:5:38}
+  Public func +(x:int,y:int):int {type-int:2:12} = foreign llvm add(x {type-int:2:55}, y {type-int:2:57}) {type-int:2:38}
+  Public func -(x:int,y:int):int {type-int:3:12} = foreign llvm sub(x {type-int:3:55}, y {type-int:3:57}) {type-int:3:38}
+  Public func *(x:int,y:int):int {type-int:4:12} = foreign llvm mul(x {type-int:4:55}, y {type-int:4:57}) {type-int:4:38}
+  Public func /(x:int,y:int):int {type-int:5:12} = foreign llvm sdiv(x {type-int:5:56}, y {type-int:5:58}) {type-int:5:38}
 end
 
 Module

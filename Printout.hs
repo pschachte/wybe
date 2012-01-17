@@ -135,6 +135,10 @@ showPrim' ind (PrimCall name id args) pos =
   startLine ind ++ name ++ maybeShow "<" id ">"
   ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
   ++ showMaybeSourcePos pos
+showPrim' ind (PrimForeign lang name id args) pos =
+  startLine ind ++ "foreign " ++ lang ++ " " ++ name ++ maybeShow "<" id ">"
+  ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+  ++ showMaybeSourcePos pos
 showPrim' ind (PrimCond var blocks) pos =
   startLine ind ++ "case " ++ var ++ " of" 
   ++ showMaybeSourcePos pos
@@ -193,6 +197,9 @@ instance Show Exp where
     "if " ++ show cond ++ " then " ++ show thn ++ " else " ++ show els
   show (Fncall fn args) = 
     fn ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+  show (ForeignFn lang fn args) = 
+    "foreign " ++ lang ++ " " ++ fn 
+    ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
 
 instance Show Generator where
   show (In var exp) = var ++ " in " ++ show exp

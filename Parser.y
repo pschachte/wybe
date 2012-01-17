@@ -70,6 +70,7 @@ import AST
       'and'           { TokIdent "and" _ }
       'or'            { TokIdent "or" _ }
       'not'           { TokIdent "not" _ }
+      'foreign'       { TokIdent "foreign" _ }
       ident           { TokIdent _ _ }
       '('             { TokLBracket Paren _ }
       ')'             { TokRBracket Paren _ }
@@ -242,6 +243,10 @@ Stmt :: { Placed Stmt }
 					      (ProcArg exp _) -> place exp) }
     | ident OptProcArgs         { Placed (ProcCall (identName $1) $2)
 	                                 (tokenPosition $1) }
+    | 'foreign' ident ident OptProcArgs
+                                { Placed (ForeignCall (identName $2)
+					  (identName $3) $4)
+                                         (tokenPosition $1) }
     | 'if' Exp 'then' Stmts Condelse 'end'
                                 { Placed (Cond $2 $4 $5) (tokenPosition $1) }
     | 'do' LoopBody 'end'       { Placed (Loop $2) (tokenPosition $1) }
@@ -270,14 +275,16 @@ LoopStmt :: { Placed LoopStmt }
 
 OptProcArgs :: { [ProcArg] }
     : {- empty -}               { [] }
-    | '(' ProcArg ProcArgList ')'       { $2:$3 }
+    | '(' ProcArg ProcArgList ')'
+                                { $2:$3 }
 
 ProcArgList :: { [ProcArg] }
-    : RevProcArgList                { reverse $1 }
+    : RevProcArgList            { reverse $1 }
 
 RevProcArgList :: { [ProcArg] }
     : {- empty -}               { [] }
-    | RevProcArgList ',' ProcArg        { $3:$1 }
+    | RevProcArgList ',' ProcArg
+                                { $3:$1 }
 
 ProcArg :: { ProcArg }
     : FlowDirection Exp         { (ProcArg $2 $1) }
@@ -353,6 +360,10 @@ Exp :: { Placed Exp }
 	                                 (tokenPosition $1) }
     | ident ArgList             { Placed (Fncall (identName $1) $2)
 	                                 (tokenPosition $1) }
+    | 'foreign' ident ident ArgList
+                                { Placed (ForeignFn (identName $2)
+					  (identName $3) $4)
+                                         (tokenPosition $1) }
     | '[' ']'                   { Placed (Fncall "[]" [])
 	                                 (tokenPosition $1) }
     | '[' Exp ListTail          { Placed (Fncall "[|]" [$2, $3])

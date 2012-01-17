@@ -234,6 +234,9 @@ normaliseStmt :: Stmt -> Maybe SourcePos -> Expander [Placed Prim]
 normaliseStmt (ProcCall name args) pos = do
   (args',stmts) <- normaliseArgs args
   return $ stmts ++ [maybePlace (PrimCall name Nothing args') pos]
+normaliseStmt (ForeignCall lang name args) pos = do
+  (args',stmts) <- normaliseArgs args
+  return $ stmts ++ [maybePlace (PrimForeign lang name Nothing args') pos]
 normaliseStmt (Cond exp thn els) pos = do
   (exp',condstmts) <- normaliseExp exp ParamIn
   thn' <- normaliseStmts thn
@@ -351,6 +354,15 @@ normaliseExp' (Fncall name exps) pos dir = do
   return (ArgVar result ParamIn, 
           stmts++[maybePlace
                   (PrimCall name Nothing 
+                   (exps'++[ArgVar result ParamOut])) 
+                  pos])
+normaliseExp' (ForeignFn lang name exps) pos dir = do
+  mustBeIn dir pos
+  (exps',stmts) <- normaliseExps exps
+  result <- freshVar
+  return (ArgVar result ParamIn, 
+          stmts++[maybePlace
+                  (PrimForeign lang name Nothing 
                    (exps'++[ArgVar result ParamOut])) 
                   pos])
 
