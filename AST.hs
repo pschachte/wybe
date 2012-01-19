@@ -283,10 +283,7 @@ optionallyPutStr :: (Options -> Bool) -> (CompilerState -> String) ->
 optionallyPutStr opt selector = do
     check <- option opt
     state <- get
-    if check then
-        liftIO . putStrLn $ selector state
-    else return ()
-
+    when check (liftIO . putStrLn $ selector state)
 
 
 reportErrors :: Compiler ()
