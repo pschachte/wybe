@@ -20,7 +20,8 @@ module AST (-- Types just for parsing
   errMsg, addErrMsgs, initVars, freshVar, nextProcId,
   addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
-  addProc, replaceProc, lookupProc, publicProc
+  addProc, replaceProc, lookupProc, publicProc,
+  reportErrors
   ) where
 
 import Options
@@ -29,6 +30,7 @@ import Data.Set as Set
 import Data.List as List
 import Text.ParserCombinators.Parsec.Pos
 import System.FilePath
+import Control.Monad
 import Control.Monad.Trans.State
 import Control.Monad.Trans (liftIO)
 
@@ -285,6 +287,13 @@ optionallyPutStr opt selector = do
         liftIO . putStrLn $ selector state
     else return ()
 
+
+
+reportErrors :: Compiler ()
+reportErrors = do
+    errs <- getState errs
+    unless (List.null errs) (liftIO . putStrLn $ intercalate "\n" errs)
+
 ----------------------------------------------------------------
 --                            AST Types
 ----------------------------------------------------------------
@@ -388,9 +397,6 @@ argFlowDirection (ArgFloat _) = ParamIn
 argFlowDirection (ArgString _) = ParamIn
 argFlowDirection (ArgChar _) = ParamIn
 
-----------------------------------------------------------------
---                         Generally Useful
-----------------------------------------------------------------
 
 applyIf :: (a -> a) -> Bool -> a -> a
 applyIf f test val = if test then f val else val

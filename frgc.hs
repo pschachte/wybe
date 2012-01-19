@@ -35,4 +35,5 @@ compiler = do
       $ intercalate "\n" . map show . parseTree
     normalise
     optionallyPutStr ((>0) . optVerbosity) (show . modul)
+    reportErrors
     return ()
