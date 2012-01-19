@@ -8,205 +8,19 @@
 module Normalise (normalise) where
 
 import AST
-import Printout
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
 import Text.ParserCombinators.Parsec.Pos
-import Control.Monad.State
 
-----------------------------------------------------------------
---                    Monad used for normalising
---
--- While expanding items to an AST, monad holds the following data:
-----------------------------------------------------------------
+normalise :: Compiler ()
+normalise = do
+    items <- getState parseTree
+    mapM_ normaliseItem items
 
-data ExpanderState = Expander {
-  varCount :: Int,      -- a counter for introduced variables (per proc)
-  procCount :: Int,     -- a counter for gensym-ed proc names
-  modul :: Module,      -- the module being produced
-  errs :: [String]      -- error messages
-  } deriving Show
-
-type Expander = State ExpanderState
-
-initExpander :: Ident -> Maybe [Ident] -> ExpanderState
-initExpander name params = 
-    Expander 0 0 (Module name params Set.empty Set.empty Set.empty Set.empty 
-                  Set.empty Map.empty Map.empty Map.empty Map.empty) []
-
-getModule :: Expander Module
-getModule = do
-  state <- get
-  return $ modul state
-
-getModuleName :: Expander Ident
-getModuleName = do
-  modl <- getModule
-  return $ modName modl
-
-getModuleParams :: Expander (Maybe [Ident])
-getModuleParams = do
-  modl <- getModule
-  return $ modParams modl
-
-modAddImport :: ModSpec -> Module -> Module
-modAddImport imp mod 
-  = mod { modImports = Set.insert imp $ modImports mod }
-
-modAddProc :: Ident -> (Int, ProcProto, [Placed Prim], (Maybe SourcePos))
-              -> Module -> Module
-modAddProc name (newid, proto, stmts, pos) mod
-  = let procs = modProcs mod
-        defs  = ProcDef newid proto stmts pos:
-                            findWithDefault [] name procs
-                in  mod { modProcs  = Map.insert name defs procs }
-
-modReplaceProc :: Ident -> (Int, ProcProto, [Placed Prim], (Maybe SourcePos)) 
-                  -> Module -> Module
-modReplaceProc name (id, proto, stmts, pos) mod
-  = let procs   = modProcs mod
-        olddefs = findWithDefault [] name procs
-        (_,rest)  = List.partition (\(ProcDef oldid _ _ _) -> id==oldid) olddefs
-    in  mod { modProcs  = Map.insert name (ProcDef id proto stmts pos:rest) 
-                          procs }
-
-publicise :: (Ident -> Module -> Module) -> 
-             Visibility -> Ident -> Module -> Module
-publicise insert vis name mod = applyIf (insert name) (vis == Public) mod
-
-
-makeMessage :: String -> Maybe SourcePos -> String
-makeMessage msg Nothing = msg
-makeMessage msg (Just pos) =
-  (sourceName pos) ++ ":" ++ 
-  show (sourceLine pos) ++ ":" ++ 
-  show (sourceColumn pos) ++ ": " ++ 
-  msg
-
-errMsg :: String -> Maybe SourcePos -> Expander ()
-errMsg msg pos = addErrMsgs [makeMessage msg pos]
-
-addErrMsgs :: [String] -> Expander ()
-addErrMsgs msgs = do
-    state <- get
-    put state { errs = (errs state) ++ msgs }
-
-freshVar :: Expander String
-freshVar = do
-  state <- get
-  let ctr = varCount state
-  put state { varCount = ctr + 1 }
-  return $ "$tmp" ++ (show ctr)
-
-initVars :: Expander ()
-initVars = do
-  state <- get
-  put state { varCount = 0 }
-
-nextProcId :: Expander Int
-nextProcId = do
-  state <- get
-  let ctr = 1 + procCount state
-  put state { procCount = ctr }
-  return ctr
-
-addItem :: (Ident -> t -> Module -> Module) ->
-           (Ident -> Module -> Module) ->
-           Ident -> t -> Visibility -> Expander ()
-addItem inserter publisher name def visibility = do
-  state <- get
-  put state { modul = publicise publisher visibility name $
-                      inserter name def $ modul state }
-
-addType :: Ident -> TypeDef -> Visibility -> Expander ()
-addType = 
-  addItem (\name def mod -> 
-            mod { modTypes = Map.insert name def $ modTypes mod })
-          (\name mod -> mod { pubTypes = Set.insert name $ pubTypes mod })
-
-addSubmod :: Ident -> Module -> Visibility -> Expander ()
-addSubmod = 
-  addItem (\name submod mod -> 
-            mod { modSubmods = Map.insert name submod $ modSubmods mod })
-          (\name mod -> mod { pubSubmods = Set.insert name $ pubSubmods mod })
-
-lookupType :: Ident -> Expander (Maybe TypeDef)
-lookupType name = do
-  mod <- getModule
-  return $ Map.lookup name (modTypes mod)
-
-publicType :: Ident -> Expander Bool
-publicType name = do
-  mod <- getModule
-  return $ Set.member name (pubTypes mod)
-
-addResource :: Ident -> ResourceDef -> Visibility -> Expander ()
-addResource = 
-  addItem (\name def mod -> 
-            mod { modResources = Map.insert name def $ modResources mod })
-          (\name mod ->
-            mod { pubResources = Set.insert name $ pubResources mod })
-
-lookupResource :: Ident -> Expander (Maybe ResourceDef)
-lookupResource name = do
-  mod <- getModule
-  return $ Map.lookup name (modResources mod)
-
-publicResource :: Ident -> Expander Bool
-publicResource name = do
-  mod <- getModule
-  return $ Set.member name (pubResources mod)
-
-addProc :: Ident -> ProcProto -> [Placed Prim] -> (Maybe SourcePos)
-           -> Visibility -> Expander ()
-addProc name proto stmts pos vis = do
-  newid <- nextProcId
-  addItem modAddProc
-          (\name mod -> mod { pubProcs = Set.insert name $ pubProcs mod })
-          name (newid, proto, stmts, pos) vis
-
-replaceProc :: Ident -> Int -> ProcProto -> [Placed Prim] -> (Maybe SourcePos)
-               -> Visibility -> Expander ()
-replaceProc name oldid proto stmts pos vis =
-  addItem modReplaceProc 
-          (\name mod -> mod { pubProcs = Set.insert name $ pubProcs mod })
-          name (oldid, proto, stmts, pos) vis
-
-lookupProc :: Ident -> Expander (Maybe [ProcDef])
-lookupProc name = do
-  mod <- getModule
-  return $ Map.lookup name (modProcs mod)
-
-publicProc :: Ident -> Expander Bool
-publicProc name = do
-  mod <- getModule
-  return $ Set.member name (pubProcs mod)
-
-
-normalise :: Ident -> Maybe [Ident] -> Maybe SourcePos -> [Item] -> 
-             (Module,[String])
-normalise name params pos items = (modul result, errs result) where
-  (_,result) = runState (
-      do
-          case params of
-              Nothing -> return ()
-              Just params' -> 
-                  addType name (TypeDef (List.length params') pos) Public
-          normaliseItems items
-      ) $ initExpander name params
-
-normaliseItems :: [Item] -> Expander ()
-normaliseItems [] = return ()
-normaliseItems (item:items) = do
-  normaliseItem item
-  normaliseItems items
-
-normaliseItem :: Item -> Expander ()
+normaliseItem :: Item -> Compiler ()
 normaliseItem (TypeDecl vis (TypeProto name params) items pos) = do
-    let (newmod,errs) = normalise name (Just params) pos items
-    addErrMsgs errs
-    addSubmod name newmod vis
+    compileSubmodule items name (Just params) pos vis normalise
 normaliseItem (ResourceDecl vis name typ pos) =
   addResource name (SimpleResource typ pos) vis
 normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
@@ -235,7 +49,7 @@ normaliseItem (StmtDecl stmt pos) = do
       replaceProc "" id proto (stmts' ++ stmts) pos' Private
 
 
-addCtor :: Ident -> [Ident] -> FnProto -> Expander ()
+addCtor :: Ident -> [Ident] -> FnProto -> Compiler ()
 addCtor typeName typeParams (FnProto ctorName params) = do
     let typespec = TypeSpec typeName $ List.map (\n->TypeSpec n []) typeParams
     normaliseItem (FuncDecl Public (FnProto ctorName params)
@@ -250,7 +64,7 @@ addCtor typeName typeParams (FnProto ctorName params) = do
                    Nothing)
     mapM_ (addGetterSetter typespec ctorName) params
 
-addGetterSetter :: TypeSpec -> Ident -> Param -> Expander ()
+addGetterSetter :: TypeSpec -> Ident -> Param -> Compiler ()
 addGetterSetter rectype ctorName (Param field fieldtype _) = do
     addProc field 
       (ProcProto field [Param "$rec" rectype ParamIn,
@@ -267,7 +81,7 @@ addGetterSetter rectype ctorName (Param field fieldtype _) = do
                                                    ArgVar "$field" ParamIn]]
       Nothing Public
 
-normaliseStmts :: [Placed Stmt] -> Expander [Placed Prim]
+normaliseStmts :: [Placed Stmt] -> Compiler [Placed Prim]
 normaliseStmts [] = return []
 normaliseStmts (stmt:stmts) = do
   front <- case stmt of
@@ -276,7 +90,7 @@ normaliseStmts (stmt:stmts) = do
   back <- normaliseStmts stmts
   return $ front ++ back
 
-normaliseStmt :: Stmt -> Maybe SourcePos -> Expander [Placed Prim]
+normaliseStmt :: Stmt -> Maybe SourcePos -> Compiler [Placed Prim]
 normaliseStmt (ProcCall name args) pos = do
   (args',stmts) <- normaliseArgs args
   return $ stmts ++ [maybePlace (PrimCall name Nothing args') pos]
@@ -296,7 +110,7 @@ normaliseStmt Nop pos = do
   return $ []
 
 normaliseLoopStmts :: [Placed LoopStmt] -> 
-                      Expander ([Placed Prim],[Placed Prim],[Placed Prim])
+                      Compiler ([Placed Prim],[Placed Prim],[Placed Prim])
 normaliseLoopStmts [] = return ([],[],[])
 normaliseLoopStmts (stmt:stmts) = do
   (backinit,backbody,backupdate) <- normaliseLoopStmts stmts
@@ -308,7 +122,7 @@ normaliseLoopStmts (stmt:stmts) = do
             frontupdate ++ backupdate)
 
 normaliseLoopStmt :: LoopStmt -> Maybe SourcePos -> 
-                     Expander ([Placed Prim],[Placed Prim],[Placed Prim])
+                     Compiler ([Placed Prim],[Placed Prim],[Placed Prim])
 normaliseLoopStmt (For gen) pos = normaliseGenerator gen pos
 normaliseLoopStmt (BreakIf exp) pos = do
   (exp',stmts) <- normaliseExp exp ParamIn
@@ -324,7 +138,7 @@ normaliseLoopStmt (NormalStmt stmt) pos = do
 
 
 normaliseGenerator :: Generator -> Maybe SourcePos ->
-                      Expander ([Placed Prim],[Placed Prim],[Placed Prim])
+                      Compiler ([Placed Prim],[Placed Prim],[Placed Prim])
 normaliseGenerator (In var exp) pos = do
   (arg,init) <- normaliseExp exp ParamIn
   stateVar <- freshVar
@@ -351,7 +165,7 @@ normaliseGenerator (InRange var exp updateOp inc limit) pos = do
   return (init++[assign var arg],test,update)
 
 
-normaliseArgs :: [ProcArg] -> Expander ([PrimArg],[Placed Prim])
+normaliseArgs :: [ProcArg] -> Compiler ([PrimArg],[Placed Prim])
 normaliseArgs [] = return ([],[])
 normaliseArgs (ProcArg pexp dir:args) = do
   let pos = place pexp
@@ -359,11 +173,11 @@ normaliseArgs (ProcArg pexp dir:args) = do
   (args',stmts') <- normaliseArgs args
   return (arg:args', stmts ++ stmts')
 
-normaliseExp :: Placed Exp -> FlowDirection -> Expander (PrimArg,[Placed Prim])
+normaliseExp :: Placed Exp -> FlowDirection -> Compiler (PrimArg,[Placed Prim])
 normaliseExp exp dir = normaliseExp' (content exp) (place exp) dir
 
 normaliseExp' :: Exp -> Maybe SourcePos -> FlowDirection ->
-                 Expander (PrimArg,[Placed Prim])
+                 Compiler (PrimArg,[Placed Prim])
 normaliseExp' (IntValue a) pos dir = do
   mustBeIn dir pos
   return (ArgInt a, [])
@@ -412,7 +226,7 @@ normaliseExp' (ForeignFn lang name exps) pos dir = do
                    (exps'++[ArgVar result ParamOut])) 
                   pos])
 
-mustBeIn :: FlowDirection -> Maybe SourcePos -> Expander ()
+mustBeIn :: FlowDirection -> Maybe SourcePos -> Compiler ()
 mustBeIn ParamIn _ = return ()
 mustBeIn ParamOut pos = do
   errMsg "Flow error:  invalid output argument" pos
@@ -427,7 +241,7 @@ procCall :: ProcName -> [PrimArg] -> Placed Prim
 procCall proc args = Unplaced $ PrimCall proc Nothing args
 
 makeCond :: PrimArg -> [[Placed Prim]] -> Maybe SourcePos -> 
-            Expander [Placed Prim]
+            Compiler [Placed Prim]
 makeCond cond branches pos = do
   case cond of
     ArgVar name ParamIn -> do
@@ -443,7 +257,7 @@ makeCond cond branches pos = do
       return $ head branches -- XXX has the right type, but probably not good
 
 
-normaliseExps :: [Placed Exp] -> Expander ([PrimArg],[Placed Prim])
+normaliseExps :: [Placed Exp] -> Compiler ([PrimArg],[Placed Prim])
 normaliseExps [] = return ([],[])
 normaliseExps (exp:exps) = do
   (args',stmts2) <- normaliseExps exps
@@ -464,9 +278,3 @@ f(t3, ?t4)    # evaluate f(t3) into fresh t4
 
 -}
 
-----------------------------------------------------------------
---                         Generally Useful
-----------------------------------------------------------------
-
-applyIf :: (a -> a) -> Bool -> a -> a
-applyIf f test val = if test then f val else val

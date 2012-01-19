@@ -13,14 +13,24 @@ module AST (-- Types just for parsing
   -- AST types
   Module(..), ModSpec, ProcDef(..), Ident, VarName, ProcName,
   TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
-  Prim(..), PrimArg(..)
+  Prim(..), PrimArg(..),
+  -- Stateful monad for the compilation process
+  CompilerState(..), Compiler, runCompiler, compileSubmodule, getState,
+  getModuleName, getModuleParams, option, optionallyPutStr,
+  errMsg, addErrMsgs, initVars, freshVar, nextProcId,
+  addType, addSubmod, lookupType, publicType,
+  addResource, lookupResource, publicResource,
+  addProc, replaceProc, lookupProc, publicProc
   ) where
 
+import Options
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
 import Text.ParserCombinators.Parsec.Pos
 import System.FilePath
+import Control.Monad.Trans.State
+import Control.Monad.Trans (liftIO)
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
@@ -61,6 +71,219 @@ content (Unplaced content) = content
 maybePlace :: t -> Maybe SourcePos -> Placed t
 maybePlace t (Just pos) = Placed t pos
 maybePlace t Nothing    = Unplaced t
+
+
+----------------------------------------------------------------
+--                    Compiler monad
+----------------------------------------------------------------
+
+data CompilerState = Compiler {
+  options :: Options,   -- compiler options specified on the command line
+  parseTree :: [Item],  -- the current module's parse tree
+  varCount :: Int,      -- a counter for introduced variables (per proc)
+  procCount :: Int,     -- a counter for gensym-ed proc names
+  errs :: [String],     -- error messages
+  modul :: Module       -- the module being produced
+  } deriving Show
+
+type Compiler = StateT CompilerState IO
+
+runCompiler :: Options -> [Item] -> Ident -> Maybe [Ident] -> 
+              Maybe SourcePos -> Compiler () -> IO (Module,[String])
+runCompiler opts parse modname params pos comp = do
+    final <- execStateT comp $ initCompiler opts parse modname params pos
+    return $ (modul final,errs final)
+
+compileSubmodule :: [Item] -> Ident -> Maybe [Ident] -> Maybe SourcePos -> 
+                   Visibility -> Compiler () -> Compiler ()
+compileSubmodule items modname params pos vis comp = do
+    state <- get
+    let opts = options state
+    (submod,errs) <- liftIO . runCompiler opts items modname params pos $ comp
+    addErrMsgs errs
+    addSubmod modname submod vis
+    
+
+initCompiler :: Options -> [Item] -> Ident -> Maybe [Ident] -> 
+               Maybe SourcePos -> CompilerState
+initCompiler opts parse name params pos = 
+    let (typs,pubtyps) =
+            case params of
+                Nothing -> (Map.empty, Set.empty)
+                Just params' ->
+                    (Map.insert name 
+                     (TypeDef (List.length params') pos) Map.empty,
+                     Set.singleton name)
+    in Compiler opts parse 0 0 [] $
+       Module name params Set.empty Set.empty pubtyps Set.empty 
+       Set.empty Map.empty typs Map.empty Map.empty
+
+getState :: (CompilerState -> t) -> Compiler t
+getState selector = do
+    state <- get
+    return $ selector state
+
+getModule :: Compiler Module
+getModule = getState modul
+
+getModuleName :: Compiler Ident
+getModuleName = do
+  modl <- getModule
+  return $ modName modl
+
+getModuleParams :: Compiler (Maybe [Ident])
+getModuleParams = do
+  modl <- getModule
+  return $ modParams modl
+
+modAddImport :: ModSpec -> Module -> Module
+modAddImport imp mod 
+  = mod { modImports = Set.insert imp $ modImports mod }
+
+modAddProc :: Ident -> (Int, ProcProto, [Placed Prim], (Maybe SourcePos))
+              -> Module -> Module
+modAddProc name (newid, proto, stmts, pos) mod
+  = let procs = modProcs mod
+        defs  = ProcDef newid proto stmts pos:
+                            findWithDefault [] name procs
+                in  mod { modProcs  = Map.insert name defs procs }
+
+modReplaceProc :: Ident -> (Int, ProcProto, [Placed Prim], (Maybe SourcePos)) 
+                  -> Module -> Module
+modReplaceProc name (id, proto, stmts, pos) mod
+  = let procs   = modProcs mod
+        olddefs = findWithDefault [] name procs
+        (_,rest)  = List.partition (\(ProcDef oldid _ _ _) -> id==oldid) olddefs
+    in  mod { modProcs  = Map.insert name (ProcDef id proto stmts pos:rest) 
+                          procs }
+
+errMsg :: String -> Maybe SourcePos -> Compiler ()
+errMsg msg pos = addErrMsgs [makeMessage msg pos]
+
+addErrMsgs :: [String] -> Compiler ()
+addErrMsgs msgs = do
+    state <- get
+    put state { errs = (errs state) ++ msgs }
+
+makeMessage :: String -> Maybe SourcePos -> String
+makeMessage msg Nothing = msg
+makeMessage msg (Just pos) =
+  (sourceName pos) ++ ":" ++ 
+  show (sourceLine pos) ++ ":" ++ 
+  show (sourceColumn pos) ++ ": " ++ 
+  msg
+
+initVars :: Compiler ()
+initVars = do
+  state <- get
+  put state { varCount = 0 }
+
+freshVar :: Compiler String
+freshVar = do
+  state <- get
+  let ctr = varCount state
+  put state { varCount = ctr + 1 }
+  return $ "$tmp" ++ (show ctr)
+
+nextProcId :: Compiler Int
+nextProcId = do
+  state <- get
+  let ctr = 1 + procCount state
+  put state { procCount = ctr }
+  return ctr
+
+publicise :: (Ident -> Module -> Module) -> 
+             Visibility -> Ident -> Module -> Module
+publicise insert vis name mod = applyIf (insert name) (vis == Public) mod
+
+
+addItem :: (Ident -> t -> Module -> Module) ->
+           (Ident -> Module -> Module) ->
+           Ident -> t -> Visibility -> Compiler ()
+addItem inserter publisher name def visibility = do
+  state <- get
+  put state { modul = publicise publisher visibility name $
+                      inserter name def $ modul state }
+
+addType :: Ident -> TypeDef -> Visibility -> Compiler ()
+addType = 
+  addItem (\name def mod -> 
+            mod { modTypes = Map.insert name def $ modTypes mod })
+          (\name mod -> mod { pubTypes = Set.insert name $ pubTypes mod })
+
+addSubmod :: Ident -> Module -> Visibility -> Compiler ()
+addSubmod = 
+  addItem (\name submod mod -> 
+            mod { modSubmods = Map.insert name submod $ modSubmods mod })
+          (\name mod -> mod { pubSubmods = Set.insert name $ pubSubmods mod })
+
+lookupType :: Ident -> Compiler (Maybe TypeDef)
+lookupType name = do
+  mod <- getModule
+  return $ Map.lookup name (modTypes mod)
+
+publicType :: Ident -> Compiler Bool
+publicType name = do
+  mod <- getModule
+  return $ Set.member name (pubTypes mod)
+
+addResource :: Ident -> ResourceDef -> Visibility -> Compiler ()
+addResource = 
+  addItem (\name def mod -> 
+            mod { modResources = Map.insert name def $ modResources mod })
+          (\name mod ->
+            mod { pubResources = Set.insert name $ pubResources mod })
+
+lookupResource :: Ident -> Compiler (Maybe ResourceDef)
+lookupResource name = do
+  mod <- getModule
+  return $ Map.lookup name (modResources mod)
+
+publicResource :: Ident -> Compiler Bool
+publicResource name = do
+  mod <- getModule
+  return $ Set.member name (pubResources mod)
+
+addProc :: Ident -> ProcProto -> [Placed Prim] -> (Maybe SourcePos)
+           -> Visibility -> Compiler ()
+addProc name proto stmts pos vis = do
+  newid <- nextProcId
+  addItem modAddProc
+          (\name mod -> mod { pubProcs = Set.insert name $ pubProcs mod })
+          name (newid, proto, stmts, pos) vis
+
+replaceProc :: Ident -> Int -> ProcProto -> [Placed Prim] -> (Maybe SourcePos)
+               -> Visibility -> Compiler ()
+replaceProc name oldid proto stmts pos vis =
+  addItem modReplaceProc 
+          (\name mod -> mod { pubProcs = Set.insert name $ pubProcs mod })
+          name (oldid, proto, stmts, pos) vis
+
+lookupProc :: Ident -> Compiler (Maybe [ProcDef])
+lookupProc name = do
+  mod <- getModule
+  return $ Map.lookup name (modProcs mod)
+
+publicProc :: Ident -> Compiler Bool
+publicProc name = do
+  mod <- getModule
+  return $ Set.member name (pubProcs mod)
+
+
+option :: (Options -> t) -> Compiler t
+option opt = do
+    opts <- getState options
+    return $ opt opts
+
+
+optionallyPutStr :: (Options -> Bool) -> (CompilerState -> String) ->
+                   Compiler ()
+optionallyPutStr opt selector = do
+    check <- option opt
+    state <- get
+    if check then
+        liftIO . putStrLn $ selector state
+    else return ()
 
 ----------------------------------------------------------------
 --                            AST Types
@@ -164,3 +387,217 @@ argFlowDirection (ArgInt _) = ParamIn
 argFlowDirection (ArgFloat _) = ParamIn
 argFlowDirection (ArgString _) = ParamIn
 argFlowDirection (ArgChar _) = ParamIn
+
+----------------------------------------------------------------
+--                         Generally Useful
+----------------------------------------------------------------
+
+applyIf :: (a -> a) -> Bool -> a -> a
+applyIf f test val = if test then f val else val
+
+
+----------------------------------------------------------------
+--                      Showing Compiler State
+----------------------------------------------------------------
+
+instance Show Item where
+  show (TypeDecl vis name items pos) =
+    show vis ++ " type " ++ show name ++ " is" 
+    ++ showMaybeSourcePos pos ++ "\n  "
+    ++ intercalate "\n  " (List.map show items)
+    ++ "\nend\n"
+  show (ResourceDecl vis name typ pos) =
+    show vis ++ " resource " ++ show name ++ ":" ++ show typ
+    ++ showMaybeSourcePos pos
+  show (FuncDecl vis proto typ exp pos) =
+    show vis ++ " func " ++ show proto ++ ":" ++ show typ
+    ++ showMaybeSourcePos pos
+    ++ " = " ++ show exp
+  show (ProcDecl vis proto stmts pos) =
+    show vis ++ " proc " ++ show proto
+    ++ showMaybeSourcePos pos
+    ++ show stmts
+  show (CtorDecl vis proto pos) =
+    show vis ++ " ctor " ++ show proto
+    ++ showMaybeSourcePos pos
+  show (StmtDecl stmt pos) =
+    show stmt ++ showMaybeSourcePos pos
+
+instance Show TypeProto where
+  show (TypeProto name []) = name
+  show (TypeProto name args) = name ++ "(" ++ intercalate "," args ++ ")"
+
+
+instance Show FnProto where
+  show (FnProto name []) = name
+  show (FnProto name params) = 
+    name ++ "(" ++ intercalate "," (List.map show params) ++ ")"
+
+instance Show t => Show (Placed t) where
+  show pl = show (content pl) ++ showMaybeSourcePos (place pl)
+    
+showMaybeSourcePos :: Maybe SourcePos -> String
+showMaybeSourcePos (Just pos) = 
+  " {" ++ takeBaseName (sourceName pos) ++ ":" 
+  ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos) ++ "}"
+showMaybeSourcePos Nothing = " {?}"
+
+instance Show Module where
+  show mod =
+    "\n Module " ++ modName mod ++ maybeShow "(" (modParams mod) ")" ++
+    "\n  imports         : " ++ showModSpecSet (modImports mod) ++ 
+    "\n  public submods  : " ++ showIdSet (pubSubmods mod) ++
+    "\n  public types    : " ++ showIdSet (pubTypes mod) ++
+    "\n  public resources: " ++ showIdSet (pubResources mod) ++
+    "\n  public procs    : " ++ showIdSet (pubProcs mod) ++
+    "\n  types           : " ++ showMap (modTypes mod) ++
+    "\n  resources       : " ++ showMap (modResources mod) ++
+    "\n  procs           : " ++ showMap (modProcs mod) ++ "\n" ++
+    "\nSubmodules of " ++ modName mod ++ ":\n" ++ showMap (modSubmods mod)
+
+showModSpecSet :: Set ModSpec -> String
+showModSpecSet set = intercalate ", " 
+                     $ List.map (intercalate ".") 
+                     $ Set.elems set
+
+showIdSet :: Set Ident -> String
+showIdSet set = intercalate ", " $ Set.elems set
+
+showMap :: Show v => Map Ident v -> String
+showMap m = intercalate "\n                    " 
+            $ List.map (\(k,v) -> k ++ ": " ++ show v) $ Map.assocs m
+
+instance Show TypeDef where
+  show (TypeDef arity pos) = 
+    "arity " ++ show arity ++ " " ++ showMaybeSourcePos pos
+
+instance Show ResourceDef where
+  show (CompoundResource ids pos) =
+    intercalate ", " ids ++ showMaybeSourcePos pos
+  show (SimpleResource typ pos) =
+    show typ ++ showMaybeSourcePos pos
+
+instance Show ProcDef where
+  show (ProcDef i proto def pos) =
+    "\nproc " ++ show proto ++ " (id " ++ show i ++ "): " 
+    ++ showMaybeSourcePos pos 
+    ++ showBlock 4 def
+
+instance Show TypeSpec where
+  show Unspecified = "?"
+  show (TypeSpec ident []) = ident
+  show (TypeSpec ident args) = 
+    ident ++ "(" ++ (intercalate "," $ List.map show args) ++ ")"
+
+instance Show ProcProto where
+  show (ProcProto name params) = 
+    name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")"
+
+instance Show Param where
+  show (Param name typ dir) =
+    flowPrefix dir ++ name ++ ":" ++ show typ
+
+instance Show ProcArg where
+  show (ProcArg exp dir) =
+    flowPrefix dir ++ show (content exp) ++ showMaybeSourcePos (place exp)
+
+flowPrefix :: FlowDirection -> String
+flowPrefix ParamIn    = ""
+flowPrefix ParamOut   = "?"
+flowPrefix ParamInOut = "!"
+
+startLine :: Int -> String
+startLine ind = "\n" ++ replicate ind ' '
+
+showBlock :: Int -> [Placed Prim] -> String
+showBlock ind stmts = concat $ List.map (showPrim ind) stmts
+
+showPrim :: Int -> Placed Prim -> String
+showPrim ind stmt = showPrim' ind (content stmt) (place stmt)
+
+showPrim' :: Int -> Prim -> Maybe SourcePos -> String
+showPrim' ind (PrimCall name id args) pos =
+  startLine ind ++ name ++ maybeShow "<" id ">"
+  ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+  ++ showMaybeSourcePos pos
+showPrim' ind (PrimForeign lang name id args) pos =
+  startLine ind ++ "foreign " ++ lang ++ " " ++ name ++ maybeShow "<" id ">"
+  ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+  ++ showMaybeSourcePos pos
+showPrim' ind (PrimCond var blocks) pos =
+  startLine ind ++ "case " ++ var ++ " of" 
+  ++ showMaybeSourcePos pos
+  ++ showCases 0 (ind+2) (ind+4) blocks
+  ++ startLine ind ++ "end"
+showPrim' ind (PrimLoop block) pos =
+  startLine ind ++ "do " ++ showMaybeSourcePos pos
+  ++ showBlock (ind+4) block
+  ++ startLine ind ++ "end"
+showPrim' ind (PrimBreakIf var) pos =
+  startLine ind ++ "until " ++ var ++ showMaybeSourcePos pos
+showPrim' ind (PrimNextIf var) pos =
+  startLine ind ++ "unless " ++ var ++ showMaybeSourcePos pos
+
+showCases :: Int -> Int -> Int -> [[Placed Prim]] -> String
+showCases _ _ _ [] = ""
+showCases num labelInd blockInd (block:blocks) =
+  startLine labelInd ++ show num ++ ":"
+  ++ showBlock blockInd block
+  ++ showCases (num+1) labelInd blockInd blocks
+
+instance Show Stmt where
+  show (ProcCall name args) =
+    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+  show (Cond exp thn els) =
+    "if" ++ show (content exp) ++ " then"
+    ++ show thn
+    ++ " else "
+    ++ show els
+    ++ " end"
+  show (Loop lstmts) =
+    "do " ++ concat (List.map show lstmts) ++ " end"
+
+instance Show PrimArg where
+  show (ArgVar name dir) = flowPrefix dir ++ name
+  show (ArgInt i) = show i
+  show (ArgFloat f) = show f
+  show (ArgString s) = show s
+  show (ArgChar c) = show c
+
+
+instance Show LoopStmt where
+  show (For gen) = "for " ++ show gen
+  show (BreakIf cond) = "until " ++ show cond
+  show (NextIf cond) = "unless " ++ show cond
+  show (NormalStmt stmt) = show stmt
+  
+instance Show Exp where
+  show (IntValue i) = show i
+  show (FloatValue f) = show f
+  show (StringValue s) = show s
+  show (CharValue c) = show c
+  show (Var name) = name
+  show (Where stmts exp) = show exp ++ " where " ++ show stmts
+  show (CondExp cond thn els) = 
+    "if " ++ show cond ++ " then " ++ show thn ++ " else " ++ show els
+  show (Fncall fn args) = 
+    fn ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+  show (ForeignFn lang fn args) = 
+    "foreign " ++ lang ++ " " ++ fn 
+    ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+
+instance Show Generator where
+  show (In var exp) = var ++ " in " ++ show exp
+  show (InRange var start updateOp step Nothing) =
+    var ++ " from " ++ show start ++ " by " ++ updateOp ++ show step
+  show (InRange var start updateOp step (Just end)) =
+    show (InRange var start updateOp step Nothing) ++ " to " ++ show end
+
+-- maybeShow pre maybe pos
+-- if maybe has something, show pre, the maybe payload, and post
+-- if the maybe is Nothing, don't show anything
+
+maybeShow :: Show t => String -> Maybe t -> String -> String
+maybeShow pre Nothing pos = ""
+maybeShow pre (Just something) post =
+  pre ++ show something ++ post
