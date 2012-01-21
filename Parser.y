@@ -86,8 +86,8 @@ import AST
 %left 'or'
 %left 'and'
 %left 'not'
-%nonassoc 'in'
-%left '>' '<' '<=' '>=' '==' '/='
+%nonassoc 'in' '==' '/='
+%left '>' '<' '<=' '>='
 %right '++'
 %left '+' '-'
 %left '*' '/'
@@ -157,6 +157,7 @@ Symbol :: { Token }
 
 ProcProto :: { ProcProto }
     : ident OptProcParamList    { ProcProto (identName $1) $2 }
+    | Symbol OptProcParamList   { ProcProto (symbolName $1) $2 }
 
 OptParamList :: { [Param] }
     : {- empty -}               { [] }
@@ -243,6 +244,8 @@ Stmt :: { Placed Stmt }
 	                                     (case $1 of 
 					      (ProcArg exp _) -> place exp) }
     | ident OptProcArgs         { Placed (ProcCall (identName $1) $2)
+	                                 (tokenPosition $1) }
+    | symbol OptProcArgs         { Placed (ProcCall (symbolName $1) $2)
 	                                 (tokenPosition $1) }
     | 'foreign' ident ident OptProcArgs
                                 { Placed (ForeignCall (identName $2)
@@ -360,6 +363,8 @@ Exp :: { Placed Exp }
     | ident                     { Placed (Var (identName $1))
 	                                 (tokenPosition $1) }
     | ident ArgList             { Placed (Fncall (identName $1) $2)
+	                                 (tokenPosition $1) }
+    | symbol ArgList             { Placed (Fncall (symbolName $1) $2)
 	                                 (tokenPosition $1) }
     | 'foreign' ident ident ArgList
                                 { Placed (ForeignFn (identName $2)
