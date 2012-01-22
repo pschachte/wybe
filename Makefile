@@ -36,6 +36,11 @@ test:	frgc
 	    out=`echo "$$f" | sed 's/.frg$$/.out/'` ; \
 	    exp=`echo "$$f" | sed 's/.frg$$/.exp/'` ; \
 	    ./frgc -v $$f > $$out 2>&1 ; \
-	    diff -q $$exp $$out >/dev/null && echo "PASS" ; \
-	    diff -q $$exp $$out >/dev/null || printf "[31mFAIL[39m\n" ; \
+	    if [ ! -r $$exp ] ; then \
+		printf "[31mNEW TEST[39m\n" ; \
+	    elif diff -q $$exp $$out >/dev/null 2>&1 ; then \
+		printf "PASS\n" ; \
+	    else \
+		printf "[31mFAIL[39m\n" ; \
+	    fi \
 	done
