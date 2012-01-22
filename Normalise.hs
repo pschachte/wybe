@@ -98,7 +98,7 @@ normaliseStmt (ForeignCall lang name args) pos = do
   (args',stmts) <- normaliseArgs args
   return $ stmts ++ [maybePlace (PrimForeign lang name Nothing args') pos]
 normaliseStmt (Cond exp thn els) pos = do
-  (exp',condstmts) <- normaliseExp exp ParamIn
+  (exp',condstmts) <- normalisePlacedExp exp ParamIn
   thn' <- normaliseStmts thn
   els' <- normaliseStmts els
   stmts <- makeCond exp' [thn',els'] pos
@@ -125,11 +125,11 @@ normaliseLoopStmt :: LoopStmt -> Maybe SourcePos ->
                      Compiler ([Placed Prim],[Placed Prim],[Placed Prim])
 normaliseLoopStmt (For gen) pos = normaliseGenerator gen pos
 normaliseLoopStmt (BreakIf exp) pos = do
-  (exp',stmts) <- normaliseExp exp ParamIn
+  (exp',stmts) <- normalisePlacedExp exp ParamIn
   cond <- freshVar
   return $ ([],stmts ++ [assign cond exp',maybePlace (PrimBreakIf cond) pos],[])
 normaliseLoopStmt (NextIf exp) pos = do
-  (exp',stmts) <- normaliseExp exp ParamIn
+  (exp',stmts) <- normalisePlacedExp exp ParamIn
   cond <- freshVar
   return ([],stmts ++ [assign cond exp',maybePlace (PrimNextIf cond) pos],[])
 normaliseLoopStmt (NormalStmt stmt) pos = do
@@ -140,7 +140,7 @@ normaliseLoopStmt (NormalStmt stmt) pos = do
 normaliseGenerator :: Generator -> Maybe SourcePos ->
                       Compiler ([Placed Prim],[Placed Prim],[Placed Prim])
 normaliseGenerator (In var exp) pos = do
-  (arg,init) <- normaliseExp exp ParamIn
+  (arg,init) <- normalisePlacedExp exp ParamIn
   stateVar <- freshVar
   testVar <- freshVar
   let update = procCall "next" [ArgVar stateVar ParamInOut,
@@ -149,15 +149,15 @@ normaliseGenerator (In var exp) pos = do
   return (init++[assign stateVar arg,update],
           [update],[Unplaced $ PrimBreakIf testVar])
 normaliseGenerator (InRange var exp updateOp inc limit) pos = do
-  (arg,init1) <- normaliseExp exp ParamIn
-  (incArg,init2) <- normaliseExp inc ParamIn
+  (arg,init1) <- normalisePlacedExp exp ParamIn
+  (incArg,init2) <- normalisePlacedExp inc ParamIn
   let update = [procCall updateOp 
                 [ArgVar var ParamIn,incArg,ArgVar var ParamOut]]
   (init,test) <- case limit of
     Nothing -> return (init1++init2,[])
     Just (comp,limit') -> do
       testVar <- freshVar
-      (limitArg,init3) <- normaliseExp limit' ParamIn
+      (limitArg,init3) <- normalisePlacedExp limit' ParamIn
       return (init1++init2++init3,
               [procCall comp [ArgVar var ParamIn,limitArg,
                               ArgVar testVar ParamOut],
@@ -169,56 +169,57 @@ normaliseArgs :: [ProcArg] -> Compiler ([PrimArg],[Placed Prim])
 normaliseArgs [] = return ([],[])
 normaliseArgs (ProcArg pexp dir:args) = do
   let pos = place pexp
-  (arg,stmts) <- normaliseExp pexp dir
+  (arg,stmts) <- normalisePlacedExp pexp dir
   (args',stmts') <- normaliseArgs args
   return (arg:args', stmts ++ stmts')
 
-normaliseExp :: Placed Exp -> FlowDirection -> Compiler (PrimArg,[Placed Prim])
-normaliseExp exp dir = normaliseExp' (content exp) (place exp) dir
+normalisePlacedExp :: Placed Exp -> FlowDirection -> Compiler (PrimArg,[Placed Prim])
+normalisePlacedExp exp dir = normaliseExp (content exp) (place exp) dir
 
-normaliseExp' :: Exp -> Maybe SourcePos -> FlowDirection ->
+
+normaliseExp :: Exp -> Maybe SourcePos -> FlowDirection ->
                  Compiler (PrimArg,[Placed Prim])
-normaliseExp' (IntValue a) pos dir = do
+normaliseExp (IntValue a) pos dir = do
   mustBeIn dir pos
   return (ArgInt a, [])
-normaliseExp' (FloatValue a) pos dir = do
+normaliseExp (FloatValue a) pos dir = do
   mustBeIn dir pos
   return (ArgFloat a, [])
-normaliseExp' (StringValue a) pos dir = do
+normaliseExp (StringValue a) pos dir = do
   mustBeIn dir pos
   return (ArgString a, [])
-normaliseExp' (CharValue a) pos dir = do
+normaliseExp (CharValue a) pos dir = do
   mustBeIn dir pos
   return (ArgChar a, [])
-normaliseExp' (Var name) pos dir = do
+normaliseExp (Var name) pos dir = do
   return (ArgVar name dir, [])
-normaliseExp' (Where stmts exp) pos dir = do
+normaliseExp (Where stmts exp) pos dir = do
   mustBeIn dir pos
   stmts1 <- normaliseStmts stmts
-  (exp',stmts2) <- normaliseExp exp ParamIn
+  (exp',stmts2) <- normalisePlacedExp exp ParamIn
   return (exp', stmts1++stmts2)
-normaliseExp' (CondExp cond thn els) pos dir = do
+normaliseExp (CondExp cond thn els) pos dir = do
   mustBeIn dir pos
-  (cond',stmtscond) <- normaliseExp cond ParamIn
-  (thn',stmtsthn) <-normaliseExp thn ParamIn
-  (els',stmtsels) <-normaliseExp els ParamIn
+  (cond',stmtscond) <- normalisePlacedExp cond ParamIn
+  (thn',stmtsthn) <-normalisePlacedExp thn ParamIn
+  (els',stmtsels) <-normalisePlacedExp els ParamIn
   result <- freshVar
   prims <- makeCond cond' 
            [stmtsthn++[assign result thn'], stmtsels++[assign result els']]
            pos
   return (ArgVar result ParamIn, stmtscond++prims)
-normaliseExp' (Fncall name exps) pos dir = do
+normaliseExp (Fncall name exps) pos dir = do
   mustBeIn dir pos
-  (exps',stmts) <- normaliseExps exps
+  (exps',stmts) <- normalisePlacedExps exps
   result <- freshVar
   return (ArgVar result ParamIn, 
           stmts++[maybePlace
                   (PrimCall name Nothing 
                    (exps'++[ArgVar result ParamOut])) 
                   pos])
-normaliseExp' (ForeignFn lang name exps) pos dir = do
+normaliseExp (ForeignFn lang name exps) pos dir = do
   mustBeIn dir pos
-  (exps',stmts) <- normaliseExps exps
+  (exps',stmts) <- normalisePlacedExps exps
   result <- freshVar
   return (ArgVar result ParamIn, 
           stmts++[maybePlace
@@ -257,11 +258,11 @@ makeCond cond branches pos = do
       return $ head branches -- XXX has the right type, but probably not good
 
 
-normaliseExps :: [Placed Exp] -> Compiler ([PrimArg],[Placed Prim])
-normaliseExps [] = return ([],[])
-normaliseExps (exp:exps) = do
-  (args',stmts2) <- normaliseExps exps
-  (exp',stmts1) <- normaliseExp exp ParamIn
+normalisePlacedExps :: [Placed Exp] -> Compiler ([PrimArg],[Placed Prim])
+normalisePlacedExps [] = return ([],[])
+normalisePlacedExps (exp:exps) = do
+  (args',stmts2) <- normalisePlacedExps exps
+  (exp',stmts1) <- normalisePlacedExp exp ParamIn
   return  (exp':args', stmts1 ++ stmts2)
 
 {- LValues:
