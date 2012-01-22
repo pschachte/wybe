@@ -34,7 +34,7 @@ for f in $(make test | awk '$2 == "..." && $3 != "PASS" {print $1}') ; do
 	echo 'Output:'
 	cat "$out"
 	echo
-	if agree "Is this this output appropriate? " ; then
+	if agree "Is this output appropriate? " ; then
 	    mv "$out" "$exp"
 	    echo "This output is now expected"
 	else
