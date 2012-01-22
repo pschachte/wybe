@@ -132,32 +132,36 @@ RevCtors :: { [FnProto] }
     | RevCtors FnProto          { $2:$1 }
 
 FnProto :: { FnProto }
-    : ident OptParamList        { FnProto (identName $1) $2 }
-    | Symbol OptParamList       { FnProto (symbolName $1) $2 }
+    : FuncProcName OptParamList { FnProto $1 $2 }
+
+FuncProcName :: { String }
+    : ident                     { identName $1 }
+    | Symbol                    { symbolName $1 }
+
 
 Symbol :: { Token }
-    : '='             { $1 }
-    | '+'             { $1 }
-    | '-'             { $1 }
-    | '*'             { $1 }
-    | '/'             { $1 }
-    | '++'            { $1 }
-    | '<'             { $1 }
-    | '>'             { $1 }
-    | '<='            { $1 }
-    | '>='            { $1 }
-    | '=='            { $1 }
-    | '/='            { $1 }
-    | '|'             { $1 }
-    | '[' ']'         { TokSymbol "[]"  (symbolPos $1) }
-    | '[' '|' ']'     { TokSymbol "[|]" (symbolPos $1) }
-    | '{' '}'         { TokSymbol "{}"  (symbolPos $1) }
-    | symbol          { $1 }
+    : '='                       { $1 }
+    | '+'                       { $1 }
+    | '-'                       { $1 }
+    | '*'                       { $1 }
+    | '/'                       { $1 }
+    | '++'                      { $1 }
+    | '<'                       { $1 }
+    | '>'                       { $1 }
+    | '<='                      { $1 }
+    | '>='                      { $1 }
+    | '=='                      { $1 }
+    | '/='                      { $1 }
+    | '|'                       { $1 }
+    | '[' ']'                   { TokSymbol "[]"  (symbolPos $1) }
+    | '[' '|' ']'               { TokSymbol "[|]" (symbolPos $1) }
+    | '{' '}'                   { TokSymbol "{}"  (symbolPos $1) }
+    | symbol                    { $1 }
 
 
 ProcProto :: { ProcProto }
-    : ident OptProcParamList    { ProcProto (identName $1) $2 }
-    | Symbol OptProcParamList   { ProcProto (symbolName $1) $2 }
+    : FuncProcName OptProcParamList
+                                { ProcProto $1 $2 }
 
 OptParamList :: { [Param] }
     : {- empty -}               { [] }
@@ -364,8 +368,12 @@ Exp :: { Placed Exp }
 	                                 (tokenPosition $1) }
     | ident ArgList             { Placed (Fncall (identName $1) $2)
 	                                 (tokenPosition $1) }
-    | symbol ArgList             { Placed (Fncall (symbolName $1) $2)
+    | symbol ArgList            { Placed (Fncall (symbolName $1) $2)
 	                                 (tokenPosition $1) }
+    | Exp '.' ident             { maybePlace (Fncall (identName $3) [$1])
+	                                     (place $1) }
+    | Exp '.' ident ArgList     { maybePlace (Fncall (identName $3) ($1:$4))
+	                                     (place $1) }
     | 'foreign' ident ident ArgList
                                 { Placed (ForeignFn (identName $2)
 					  (identName $3) $4)

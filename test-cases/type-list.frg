@@ -6,4 +6,4 @@ end
 public func ++(x:list(t), y:list(t)) =
     if x == []
     then y
-    else [head(x)|tail(x)++y]
+    else [x.head|x.tail++y]
