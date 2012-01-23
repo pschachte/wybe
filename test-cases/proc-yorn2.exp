@@ -1,4 +1,4 @@
-Public proc yorn(prompt:string, ?result:bool) {proc-yorn2:1:8}[do print(prompt {proc-yorn2:2:15}) {proc-yorn2:2:9} {proc-yorn2:2:9}print(" (y/n) " {proc-yorn2:3:15}) {proc-yorn2:3:9} {proc-yorn2:3:9}read_line(?response {proc-yorn2:4:20}) {proc-yorn2:4:9} {proc-yorn2:4:9}=(?responsechar {proc-yorn2:5:10}, to_upper(first(response {proc-yorn2:5:40}) {proc-yorn2:5:34}) {proc-yorn2:5:25}) {proc-yorn2:5:10} {proc-yorn2:5:10}=(?result {proc-yorn2:6:10}, ==(responsechar {proc-yorn2:6:19}, 'Y' {proc-yorn2:6:35}) {proc-yorn2:6:19}) {proc-yorn2:6:10} {proc-yorn2:6:10}until or(result {proc-yorn2:7:15}, ==(responsechar {proc-yorn2:7:25}, 'N' {proc-yorn2:7:41}) {proc-yorn2:7:25}) {proc-yorn2:7:15} {proc-yorn2:7:9}println("Please answer 'yes' or 'no'." {proc-yorn2:8:17}) {proc-yorn2:8:9} {proc-yorn2:8:9} end {proc-yorn2:2:5}]
+Public proc yorn(prompt:string, ?result:bool) {proc-yorn2:1:8}[do print(prompt {proc-yorn2:2:15}) {proc-yorn2:2:9} {proc-yorn2:2:9}print(" (y/n) " {proc-yorn2:3:15}) {proc-yorn2:3:9} {proc-yorn2:3:9}read_line(?response {proc-yorn2:4:19}) {proc-yorn2:4:9} {proc-yorn2:4:9}=(?responsechar {proc-yorn2:5:9}, to_upper(first(response {proc-yorn2:5:40}) {proc-yorn2:5:34}) {proc-yorn2:5:25}) {proc-yorn2:5:9} {proc-yorn2:5:9}=(?result {proc-yorn2:6:9}, ==(responsechar {proc-yorn2:6:19}, 'Y' {proc-yorn2:6:35}) {proc-yorn2:6:19}) {proc-yorn2:6:9} {proc-yorn2:6:9}until or(result {proc-yorn2:7:15}, ==(responsechar {proc-yorn2:7:25}, 'N' {proc-yorn2:7:41}) {proc-yorn2:7:25}) {proc-yorn2:7:15} {proc-yorn2:7:9}println("Please answer 'yes' or 'no'." {proc-yorn2:8:17}) {proc-yorn2:8:9} {proc-yorn2:8:9} end {proc-yorn2:2:5}]
 
  Module proc-yorn2
   imports         : 
@@ -16,9 +16,9 @@ proc yorn(prompt:string, ?result:bool) (id 1):  {proc-yorn2:1:8}
         read_line(?response) {proc-yorn2:4:9}
         first(response, ?$tmp4) {proc-yorn2:5:34}
         to_upper($tmp4, ?$tmp5) {proc-yorn2:5:25}
-        =(?responsechar, $tmp5) {proc-yorn2:5:10}
+        =(?responsechar, $tmp5) {proc-yorn2:5:9}
         ==(responsechar, 'Y', ?$tmp3) {proc-yorn2:6:19}
-        =(?result, $tmp3) {proc-yorn2:6:10}
+        =(?result, $tmp3) {proc-yorn2:6:9}
         ==(responsechar, 'N', ?$tmp0) {proc-yorn2:7:25}
         or(result, $tmp0, ?$tmp1) {proc-yorn2:7:15}
         =(?$tmp2, $tmp1) {?}

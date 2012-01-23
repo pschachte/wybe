@@ -244,17 +244,8 @@ RevStmts :: { [Placed Stmt] }
     | RevStmts Stmt             { $2:$1 }
 
 Stmt :: { Placed Stmt }
-    : ProcArg '=' ProcArg       { maybePlace (ProcCall (symbolName $2) [$1, $3])
-	                                     (case $1 of 
-					      (ProcArg exp _) -> place exp) }
-    | ident OptProcArgs         { Placed (ProcCall (identName $1) $2)
-	                                 (tokenPosition $1) }
-    | symbol OptProcArgs         { Placed (ProcCall (symbolName $1) $2)
-	                                 (tokenPosition $1) }
-    | 'foreign' ident ident OptProcArgs
-                                { Placed (ForeignCall (identName $2)
-					  (identName $3) $4)
-                                         (tokenPosition $1) }
+    : Exp                       { maybePlace (expToStmt $ content $1) 
+	                          (place $1) }
     | 'if' Exp 'then' Stmts Condelse 'end'
                                 { Placed (Cond $2 $4 $5) (tokenPosition $1) }
     | 'do' LoopBody 'end'       { Placed (Loop $2) (tokenPosition $1) }
@@ -281,21 +272,21 @@ LoopStmt :: { Placed LoopStmt }
     | Stmt                      { maybePlace (NormalStmt $1)
 	                                     (place $1) }
 
-OptProcArgs :: { [ProcArg] }
+OptProcArgs :: { [Placed Exp] }
     : {- empty -}               { [] }
     | '(' ProcArg ProcArgList ')'
                                 { $2:$3 }
 
-ProcArgList :: { [ProcArg] }
+ProcArgList :: { [Placed Exp] }
     : RevProcArgList            { reverse $1 }
 
-RevProcArgList :: { [ProcArg] }
+RevProcArgList :: { [Placed Exp] }
     : {- empty -}               { [] }
     | RevProcArgList ',' ProcArg
                                 { $3:$1 }
 
-ProcArg :: { ProcArg }
-    : FlowDirection Exp         { (ProcArg $2 $1) }
+ProcArg :: { Placed Exp }
+    : Exp         { ($1) }
 
 Condelse :: { [Placed Stmt] }
     : 'else' Stmts              { $2 }
@@ -317,7 +308,7 @@ toLimit :: { (ProcName, Maybe (String,Placed Exp)) }
     | {- empty -}               { ("+", Nothing) }
 
 
-Exp :: { Placed Exp }
+SimpleExp :: { Placed Exp }
     : Exp '+' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
 	                                     (place $1) }
     | Exp '-' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
@@ -338,6 +329,8 @@ Exp :: { Placed Exp }
                                              (place $1) }
     | Exp '==' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
                                              (place $1) }
+    | Exp '=' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+                                             (place $1) }
     | Exp '/=' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
                                              (place $1) }
     | 'not' Exp                 { Placed (Fncall (identName $1) [$2])
@@ -346,11 +339,6 @@ Exp :: { Placed Exp }
 	                                     (place $1) }
     | Exp 'or' Exp              { maybePlace (Fncall (identName $2) [$1, $3])
                                              (place $1) }
-    | 'if' Exp 'then' Exp 'else' Exp
-                                { Placed (CondExp $2 $4 $6)
-				         (tokenPosition $1) }
-    | 'let' Stmts 'in' Exp      { Placed (Where $2 $4) (tokenPosition $1) }
-    | Exp 'where' ProcBody      { maybePlace (Where $3 $1) (place $1) }
     | '(' Exp ')'               { Placed (content $2) (tokenPosition $1) }
     | '-' Exp %prec NEG         { Placed (Fncall "Negate" [$2])
 	                                 (tokenPosition $1) }
@@ -364,7 +352,11 @@ Exp :: { Placed Exp }
 	                                 (tokenPosition $1) }
     | bstring                   { Placed (StringValue $ stringValue $1)
 	                                 (tokenPosition $1) }
-    | ident                     { Placed (Var (identName $1))
+    | ident                     { Placed (Var (identName $1) ParamIn)
+	                                 (tokenPosition $1) }
+    | '?' ident                 { Placed (Var (identName $2) ParamOut)
+	                                 (tokenPosition $1) }
+    | '!' ident                 { Placed (Var (identName $2) ParamInOut)
 	                                 (tokenPosition $1) }
     | ident ArgList             { Placed (Fncall (identName $1) $2)
 	                                 (tokenPosition $1) }
@@ -384,6 +376,15 @@ Exp :: { Placed Exp }
 	                                 (tokenPosition $1) }
     | '{' '}'                   { Placed (Fncall "{}" [])
 	                                 (tokenPosition $1) }
+
+Exp :: { Placed Exp }
+    : 'if' Exp 'then' Exp 'else' Exp
+                                { Placed (CondExp $2 $4 $6)
+				         (tokenPosition $1) }
+    | 'let' Stmts 'in' Exp      { Placed (Where $2 $4) (tokenPosition $1) }
+    | Exp 'where' ProcBody      { maybePlace (Where $3 $1) (place $1) }
+    | SimpleExp                 { $1 }
+
 
 ListTail :: { Placed Exp }
     : ']'                       { Unplaced (Fncall "[]" []) }

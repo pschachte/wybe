@@ -18,6 +18,13 @@ all:	test
 frgc:	frgc.hs Parser.hs Scanner.hs Version.hs
 	ghc --make $@
 
+.PHONY:	info
+
+info:  Parser.info
+
+%.info:	%.y
+	happy -i -g $<
+
 .PHONY: Version.hs
 
 Version.hs:

@@ -6,14 +6,14 @@
 
 module AST (-- Types just for parsing
   Item(..), Visibility(..), TypeProto(..), TypeSpec(..), FnProto(..), 
-  ProcProto(..), Param(..), ProcArg(..), Stmt(..), 
+  ProcProto(..), Param(..), Stmt(..), 
   LoopStmt(..), Exp(..), Generator(..),
   -- Source Position Types
   Placed(..), place, content, maybePlace,
   -- AST types
   Module(..), ModSpec, ProcDef(..), Ident, VarName, ProcName,
   TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
-  Prim(..), PrimArg(..),
+  expToStmt, Prim(..), PrimArg(..),
   -- Stateful monad for the compilation process
   CompilerState(..), Compiler, runCompiler, compileSubmodule, getState,
   getModuleName, getModuleParams, option, optionallyPutStr,
@@ -338,14 +338,12 @@ data ProcProto = ProcProto ProcName [Param]
 
 data Param = Param VarName TypeSpec FlowDirection
 
-data FlowDirection = ParamIn | ParamOut | ParamInOut
+data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow
       deriving (Show,Eq)
 
-data ProcArg = ProcArg (Placed Exp) FlowDirection
-
 data Stmt
-     = ProcCall Ident [ProcArg]
-     | ForeignCall Ident Ident [ProcArg]
+     = ProcCall Ident [Placed Exp]
+     | ForeignCall Ident Ident [Placed Exp]
      | Cond (Placed Exp) [Placed Stmt] [Placed Stmt]
      | Loop [Placed LoopStmt]
      | Nop
@@ -361,10 +359,10 @@ data Exp
       | FloatValue Double
       | StringValue String
       | CharValue Char
-      | Var VarName
+      | Var VarName FlowDirection
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
-      | Fncall String [Placed Exp]
+      | Fncall Ident [Placed Exp]
       | ForeignFn String String [Placed Exp]
 
 data Generator 
@@ -398,6 +396,9 @@ argFlowDirection (ArgChar _) = ParamIn
 applyIf :: (a -> a) -> Bool -> a -> a
 applyIf f test val = if test then f val else val
 
+expToStmt :: Exp -> Stmt
+expToStmt (Fncall name args) = ProcCall name args
+expToStmt (ForeignFn lang name args) = ForeignCall lang name args
 
 ----------------------------------------------------------------
 --                      Showing Compiler State
@@ -500,11 +501,8 @@ instance Show Param where
   show (Param name typ dir) =
     flowPrefix dir ++ name ++ ":" ++ show typ
 
-instance Show ProcArg where
-  show (ProcArg exp dir) =
-    flowPrefix dir ++ show (content exp) ++ showMaybeSourcePos (place exp)
-
 flowPrefix :: FlowDirection -> String
+flowPrefix NoFlow     = ""
 flowPrefix ParamIn    = ""
 flowPrefix ParamOut   = "?"
 flowPrefix ParamInOut = "!"
@@ -579,7 +577,7 @@ instance Show Exp where
   show (FloatValue f) = show f
   show (StringValue s) = show s
   show (CharValue c) = show c
-  show (Var name) = name
+  show (Var name dir) = (flowPrefix dir) ++ name
   show (Where stmts exp) = show exp ++ " where " ++ show stmts
   show (CondExp cond thn els) = 
     "if " ++ show cond ++ " then " ++ show thn ++ " else " ++ show els
