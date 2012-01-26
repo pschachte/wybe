@@ -1,0 +1,133 @@
+%  Emacs    : -*- latex -*-
+%  File     : design.tex
+%  RCS      : $Id: design.tex,v 1.14 2008/11/19 22:50:59 schachte Exp $
+%  Author   : Peter Schachte
+%  Origin   : Fri Mar 28 19:36:48 2003
+%  Purpose  : Discussion document on design of new language
+%  Copyright: © 2003 Peter Schachte.  All rights reserved.
+%
+
+\documentclass{article}
+\usepackage{xspace}
+%\usepackage{ensuremath}
+
+\newcommand{\lang}{\textsc{Frege}\xspace}
+\newcommand{\Lang}{\textsc{Frege}\xspace}
+
+\newcommand{\ie}{\emph{i.e.}\xspace}
+\newcommand{\eg}{\emph{e.g.}\xspace}
+\newcommand{\Ie}{\emph{I.e.}\xspace}
+\newcommand{\Eg}{\emph{E.g.}\xspace}
+\newcommand{\etc}{\emph{etc}}
+
+\newcommand{\tuple}[1]{\ensuremath{\langle#1\rangle}}
+
+\title{The \Lang Programming Language}
+\author{Peter Schachte}
+
+\begin{document}
+\maketitle
+
+\section{Aims}
+
+The aim of this project is to produce a clean, easy-to-learn,
+easy-to-use programming language suitable for large teams to produce
+maintainable programs.  It should be suitable as a first programming
+language, and should be efficient enough for serious use.
+
+
+\section{Modules}
+
+Each source file is a module, and may contain any number of the
+following things, in any order:
+\begin{itemize}
+\item Type definitions
+\item (Sub-)modules
+\item Module imports
+\item Function definitions
+\item Procedure definitions
+\item Statements
+\end{itemize}
+
+\subsection{Imports}
+\Lang supports the following varieties of module importation:
+\begin{itemize}
+\item Members may be imported such that they may be used as if they
+  were members of the importing module (the \texttt{import}
+  directive), or may be imported such that they must be specified with
+  fully qualified names (the \texttt{use} directive).
+\item A full module may be imported (\texttt{import} or \texttt{use}
+  \emph{modulename}), or only certain specified members
+  may be imported (\texttt{from} \emph{modulename} \emph{import}
+  \emph{items} or \texttt{from} \emph{modulename} \emph{use}
+  \emph{items}).
+\item Members may be imported such that they become public members of
+  the \emph{importing} module, visible to any module that imports it
+  (by preceding the \texttt{import} or \texttt{use} directive with
+  \texttt{public}) or not.
+\end{itemize}
+This gives the following eight varieties of importation:
+\begin{center}
+  \begin{tabular}{|p{4cm}|p{7.5cm}|}
+    \hline
+    \texttt{import} \emph{modulename}
+    & Imports everything from \emph{modulename} so that it can be used
+    without module qualification.
+    \\ \hline
+    \texttt{use} \emph{modulename}
+    & Imports everything from \emph{modulename} so that it can only be used
+    with module qualification.
+    \\ \hline
+    \texttt{from} \emph{modulename} \texttt{import} \emph{items}
+    & Imports the specified items from \emph{modulename} so that they
+    can be used without module qualification.
+    \\ \hline
+    \texttt{from} \emph{modulename} \texttt{use} \emph{items}
+    & Imports the specified items from \emph{modulename} so that they
+    can only be used with module qualification.
+    \\ \hline
+    \texttt{public import} \emph{modulename}
+    & Imports everything from \emph{modulename} so that it can be used
+    without module qualification, and reexport it from the importing module.
+    \\ \hline
+    \texttt{public use} \emph{modulename}
+    & Imports everything from \emph{modulename} so that it can only be used
+    with module qualification, and reexport it from the importing module.
+    \\ \hline
+    \texttt{public from} \emph{modulename} \texttt{import} \emph{items}
+    & Imports the specified items from \emph{modulename} so that they
+    can be used without module qualification, and reexport them from the
+    importing module.
+    \\ \hline
+    \texttt{public from} \emph{modulename} \texttt{use} \emph{items}
+    & Imports the specified items from \emph{modulename} so that they
+    can only be used with module qualification, and reexport them from the
+    importing module.
+    \\ \hline
+  \end{tabular}
+\end{center}
+
+\section{Types}
+
+The language is strongly typed, with parametric polymorphism
+and type inference.
+
+All data types are effectively abstract.  That means
+constructors (and deconstructors) are ordinary functions.  Thus an
+existing type with defined constructors and deconstructors can be
+redefined with new functions implementing the previous constructors
+and deconstructors.
+
+A type can then be viewed as just the set of functions and predicates that
+operate on it.  That is, a type is just a special kind of module that
+provides at least one constructor.
+
+
+\section{Explicit dataflow indicators}
+
+
+\end{document}
+
+% LocalWords:  vararg predicate's nonfailure DCG monoporphized nondet RDBMS
+% LocalWords:  coroutining distfix ness supertyping Liskov backquote
+% LocalWords:  restrictable

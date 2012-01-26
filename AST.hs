@@ -41,6 +41,8 @@ import Control.Monad.Trans (liftIO)
 data Item
      = TypeDecl Visibility TypeProto [Item] (Maybe SourcePos)
      | ModuleDecl Visibility Ident [Item] (Maybe SourcePos)
+     | ImportMods Visibility Bool [ModSpec] (Maybe SourcePos)
+     | ImportItems Visibility Bool ModSpec [Ident] (Maybe SourcePos)
      | ResourceDecl Visibility Ident TypeSpec (Maybe SourcePos)
      | FuncDecl Visibility FnProto TypeSpec (Placed Exp) (Maybe SourcePos)
      | ProcDecl Visibility ProcProto [Placed Stmt] (Maybe SourcePos)
@@ -411,6 +413,13 @@ instance Show Item where
     ++ showMaybeSourcePos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\nend\n"
+  show (ImportMods vis unqualified mods pos) =
+      show vis ++ (if unqualified then " import " else " use ") ++ 
+      showModSpecs mods ++ showMaybeSourcePos pos ++ "\n  "
+  show (ImportItems vis unqualified mod specs pos) =
+      show vis ++ " from " ++ showModSpec mod ++
+      (if unqualified then " import " else " use ") ++ intercalate ", " specs
+      ++ showMaybeSourcePos pos ++ "\n  "
   show (ModuleDecl vis name items pos) =
     show vis ++ " module " ++ show name ++ " is" 
     ++ showMaybeSourcePos pos ++ "\n  "
@@ -432,6 +441,14 @@ instance Show Item where
     ++ showMaybeSourcePos pos
   show (StmtDecl stmt pos) =
     show stmt ++ showMaybeSourcePos pos
+
+showModSpec :: ModSpec -> String
+showModSpec spec = intercalate "." spec
+
+showModSpecs :: [ModSpec] -> String
+showModSpecs specs = intercalate ", " $ List.map showModSpec specs
+
+
 
 instance Show TypeProto where
   show (TypeProto name []) = name
@@ -455,7 +472,7 @@ showMaybeSourcePos Nothing = " {?}"
 instance Show Module where
   show mod =
     "\n Module " ++ modName mod ++ maybeShow "(" (modParams mod) ")" ++
-    "\n  imports         : " ++ showModSpecSet (modImports mod) ++ 
+    "\n  imports         : " ++ showModSpecs (Set.elems $ modImports mod) ++
     "\n  public submods  : " ++ showIdSet (pubSubmods mod) ++
     "\n  public types    : " ++ showIdSet (pubTypes mod) ++
     "\n  public resources: " ++ showIdSet (pubResources mod) ++
@@ -464,11 +481,6 @@ instance Show Module where
     "\n  resources       : " ++ showMap (modResources mod) ++
     "\n  procs           : " ++ showMap (modProcs mod) ++ "\n" ++
     "\nSubmodules of " ++ modName mod ++ ":\n" ++ showMap (modSubmods mod)
-
-showModSpecSet :: Set ModSpec -> String
-showModSpecSet set = intercalate ", " 
-                     $ List.map (intercalate ".") 
-                     $ Set.elems set
 
 showIdSet :: Set Ident -> String
 showIdSet set = intercalate ", " $ Set.elems set

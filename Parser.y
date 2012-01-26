@@ -47,6 +47,8 @@ import AST
       'resource'      { TokIdent "resource" _ }
       'type'          { TokIdent "type" _ }
       'module'        { TokIdent "module" _ }
+      'import'        { TokIdent "import" _ }
+      'use'           { TokIdent "use" _ }
       'func'          { TokIdent "func" _ }
       'proc'          { TokIdent "proc" _ }
       'ctor'          { TokIdent "ctor" _ }
@@ -111,6 +113,11 @@ Item  :: { Item }
     | Visibility 'module' ident 'is' Items 'end'
                                 { ModuleDecl $1 (identName $3) $5 $ 
 				    Just $ tokenPosition $2 }
+    | Visibility ImportType ModSpecs
+                                { ImportMods $1 (content $2) $3 $ place $2 }
+    | Visibility 'from' ModSpec ImportType Idents
+                                { ImportItems $1 (content $4) $3 $5 $ 
+				    Just $ tokenPosition $2 }
     | Visibility 'resource' ident OptType
                                 { ResourceDecl $1 (identName $3) $4
 				    $ Just $ tokenPosition $2 }
@@ -124,7 +131,6 @@ Item  :: { Item }
     | Stmt                      { StmtDecl (content $1) (place $1) }
 
 
-
 TypeProto :: { TypeProto }
     : ident OptIdents           { TypeProto (identName $1) $2 }
 
@@ -134,6 +140,25 @@ Ctors :: { [FnProto] }
 RevCtors :: { [FnProto] }
     : FnProto                   { [$1] }
     | RevCtors FnProto          { $2:$1 }
+
+ImportType :: { Placed Bool }
+    : 'import'                  { Placed True (tokenPosition $1) }
+    | 'use'                     { Placed False (tokenPosition $1) }
+
+ModSpecs :: { [ModSpec] }
+    : ModSpec RevModSpecList
+                                { $1 : reverse $2 }
+RevModSpecList :: { [ModSpec] }
+    : {- empty -}               { [] }
+    | RevModSpecList ',' ModSpec
+                                { $3:$1 }
+
+ModSpec :: { ModSpec }
+    : ident RevModuleTail       { identName $1:reverse $2 }
+
+RevModuleTail :: { ModSpec }
+    : {- empty -}               { [] }
+    | RevModuleTail '.' ident   { identName $3:$1}
 
 FnProto :: { FnProto }
     : FuncProcName OptParamList { FnProto $1 $2 }

@@ -1,0 +1,18 @@
+Private import mod1 {imports:1:1}
+  
+Private use mod2 {imports:2:1}
+  
+Private from mod3 import fn1 {imports:3:1}
+  
+Private from mod4 use fn2 {imports:4:1}
+  
+Public import mod5 {imports:5:8}
+  
+Public use mod6 {imports:6:8}
+  
+Public from mod7 import fn3 {imports:7:8}
+  
+Public from mod8 use fn4 {imports:8:8}
+  
+frgc: Normalise.hs:(22,1)-(50,60): Non-exhaustive patterns in function Normalise.normaliseItem
+
