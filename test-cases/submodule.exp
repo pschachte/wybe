@@ -1,0 +1,58 @@
+Private module "privatetest" is {submodule:1:1}
+  Private proc hidden() {submodule:2:5}[print("private proc in a private module" {submodule:2:23}) {submodule:2:17}]
+  Public proc semi_hidden() {submodule:3:12}[print("public proc in a private module" {submodule:3:35}) {submodule:3:29}]
+end
+
+Public module "publictest" is {submodule:6:8}
+  Private proc semi_visible() {submodule:7:5}[print("private proc in a public module" {submodule:7:29}) {submodule:7:23}]
+  Public proc visible() {submodule:8:12}[print("public proc in a public module" {submodule:8:31}) {submodule:8:25}]
+end
+
+
+ Module submodule
+  imports         : 
+  public submods  : publictest
+  public types    : 
+  public resources: 
+  public procs    : 
+  types           : 
+  resources       : 
+  procs           : 
+
+Submodules of submodule:
+privatetest: 
+ Module privatetest
+  imports         : 
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : semi_hidden
+  types           : 
+  resources       : 
+  procs           : hidden: [
+proc hidden() (id 1):  {submodule:2:5}
+    print("private proc in a private module") {submodule:2:17}]
+                    semi_hidden: [
+proc semi_hidden() (id 2):  {submodule:3:12}
+    print("public proc in a private module") {submodule:3:29}]
+
+Submodules of privatetest:
+
+                    publictest: 
+ Module publictest
+  imports         : 
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : visible
+  types           : 
+  resources       : 
+  procs           : semi_visible: [
+proc semi_visible() (id 1):  {submodule:7:5}
+    print("private proc in a public module") {submodule:7:23}]
+                    visible: [
+proc visible() (id 2):  {submodule:8:12}
+    print("public proc in a public module") {submodule:8:25}]
+
+Submodules of publictest:
+
