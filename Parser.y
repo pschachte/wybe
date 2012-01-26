@@ -46,6 +46,7 @@ import AST
       'public'        { TokIdent "public" _ }
       'resource'      { TokIdent "resource" _ }
       'type'          { TokIdent "type" _ }
+      'module'        { TokIdent "module" _ }
       'func'          { TokIdent "func" _ }
       'proc'          { TokIdent "proc" _ }
       'ctor'          { TokIdent "ctor" _ }
@@ -106,6 +107,9 @@ RevItems :: { [Item] }
 Item  :: { Item }
     : Visibility 'type' TypeProto 'is' Items 'end'
                                 { TypeDecl $1 $3 $5 $ 
+				    Just $ tokenPosition $2 }
+    | Visibility 'module' ident 'is' Items 'end'
+                                { ModuleDecl $1 (identName $3) $5 $ 
 				    Just $ tokenPosition $2 }
     | Visibility 'resource' ident OptType
                                 { ResourceDecl $1 (identName $3) $4

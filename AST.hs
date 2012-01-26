@@ -40,6 +40,7 @@ import Control.Monad.Trans (liftIO)
 
 data Item
      = TypeDecl Visibility TypeProto [Item] (Maybe SourcePos)
+     | ModuleDecl Visibility Ident [Item] (Maybe SourcePos)
      | ResourceDecl Visibility Ident TypeSpec (Maybe SourcePos)
      | FuncDecl Visibility FnProto TypeSpec (Placed Exp) (Maybe SourcePos)
      | ProcDecl Visibility ProcProto [Placed Stmt] (Maybe SourcePos)
@@ -407,6 +408,11 @@ expToStmt (ForeignFn lang name args) = ForeignCall lang name args
 instance Show Item where
   show (TypeDecl vis name items pos) =
     show vis ++ " type " ++ show name ++ " is" 
+    ++ showMaybeSourcePos pos ++ "\n  "
+    ++ intercalate "\n  " (List.map show items)
+    ++ "\nend\n"
+  show (ModuleDecl vis name items pos) =
+    show vis ++ " module " ++ show name ++ " is" 
     ++ showMaybeSourcePos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\nend\n"

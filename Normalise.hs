@@ -21,6 +21,8 @@ normalise = do
 normaliseItem :: Item -> Compiler ()
 normaliseItem (TypeDecl vis (TypeProto name params) items pos) = do
     compileSubmodule items name (Just params) pos vis normalise
+normaliseItem (ModuleDecl vis name items pos) = do
+    compileSubmodule items name Nothing pos vis normalise
 normaliseItem (ResourceDecl vis name typ pos) =
   addResource name (SimpleResource typ pos) vis
 normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
