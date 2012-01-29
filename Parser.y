@@ -27,6 +27,7 @@ import AST
       '-'             { TokSymbol "-" _ }
       '*'             { TokSymbol "*" _ }
       '/'             { TokSymbol "/" _ }
+      '^'             { TokSymbol "^" _ }
       '++'            { TokSymbol "++" _ }
       '<'             { TokSymbol "<" _ }
       '>'             { TokSymbol ">" _ }
@@ -75,6 +76,7 @@ import AST
       'or'            { TokIdent "or" _ }
       'not'           { TokIdent "not" _ }
       'foreign'       { TokIdent "foreign" _ }
+      'mod'           { TokIdent "mod" _ }
       ident           { TokIdent _ _ }
       '('             { TokLBracket Paren _ }
       ')'             { TokRBracket Paren _ }
@@ -93,7 +95,8 @@ import AST
 %left '>' '<' '<=' '>='
 %right '++'
 %left '+' '-'
-%left '*' '/'
+%left '*' '/' 'mod'
+%left '^'
 %left NEG
 %left '.'
 %%
@@ -345,6 +348,10 @@ SimpleExp :: { Placed Exp }
     | Exp '*' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
                                              (place $1) }
     | Exp '/' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+                                             (place $1) }
+    | Exp 'mod' Exp             { maybePlace (Fncall (identName $2) [$1, $3])
+                                             (place $1) }
+    | Exp '^' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
                                              (place $1) }
     | Exp '++' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
                                              (place $1) }
