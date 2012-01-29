@@ -1,0 +1,44 @@
+Public type position is {position:1:8}
+  Public ctor position(x:int,y:int) {position:2:12}
+end
+
+
+ Module position
+  imports         : 
+  public submods  : position
+  public types    : 
+  public resources: 
+  public procs    : 
+  types           : 
+  resources       : 
+  procs           : 
+
+Submodules of position:
+position: 
+ Module position([])
+  imports         : 
+  public submods  : 
+  public types    : position
+  public resources: 
+  public procs    : position, x, y
+  types           : position: arity 0  {position:1:8}
+  resources       : 
+  procs           : position: [
+proc position(x:int, y:int, ?$:position) (id 1):  {?}
+    $alloc(position, ?$tmp0) {?}
+    update$x(x, $tmp0, ?$tmp1) {?}
+    update$y(y, $tmp1, ?$tmp2) {?}
+    =(?$, $tmp2) {?}]
+                    x: [
+proc x(!$rec:position, $field:int) (id 3):  {?}
+    foreign  mutate(position, !$rec, $field) {?},
+proc x($rec:position, ?$field:int) (id 2):  {?}
+    foreign  access(position, $rec, ?$field) {?}]
+                    y: [
+proc y(!$rec:position, $field:int) (id 5):  {?}
+    foreign  mutate(position, !$rec, $field) {?},
+proc y($rec:position, ?$field:int) (id 4):  {?}
+    foreign  access(position, $rec, ?$field) {?}]
+
+Submodules of position:
+

@@ -1,0 +1,28 @@
+Private import position {import:1:1}
+  
+Public func distance(p1:position,p2:position):? {import:3:8} = sqrt(+(^(-(x(p2 {import:4:11}) {import:4:11}, x(p1 {import:4:16}) {import:4:16}) {import:4:10}, 2 {import:4:23}) {import:4:10}, ^(-(y(p2 {import:4:27}) {import:4:27}, y(p1 {import:4:32}) {import:4:32}) {import:4:26}, 2 {import:4:39}) {import:4:26}) {import:4:10}) {import:4:5}
+
+ Module import
+  imports         : import position 
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : distance
+  types           : 
+  resources       : 
+  procs           : distance: [
+proc distance(p1:position, p2:position, ?$:?) (id 1):  {import:3:8}
+    x(p2, ?$tmp5) {import:4:11}
+    x(p1, ?$tmp4) {import:4:16}
+    -($tmp5, $tmp4, ?$tmp6) {import:4:10}
+    ^($tmp6, 2, ?$tmp7) {import:4:10}
+    y(p2, ?$tmp1) {import:4:27}
+    y(p1, ?$tmp0) {import:4:32}
+    -($tmp1, $tmp0, ?$tmp2) {import:4:26}
+    ^($tmp2, 2, ?$tmp3) {import:4:26}
+    +($tmp7, $tmp3, ?$tmp8) {import:4:10}
+    sqrt($tmp8, ?$tmp9) {import:4:5}
+    =(?$, $tmp9) {?}]
+
+Submodules of import:
+

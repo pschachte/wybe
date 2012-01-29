@@ -5,7 +5,8 @@
 --  Copyright: © 2010-2012 Peter Schachte.  All rights reserved.
 
 module AST (-- Types just for parsing
-  Item(..), Visibility(..), TypeProto(..), TypeSpec(..), FnProto(..), 
+  Item(..), Visibility(..), maxVisibility, minVisibility,
+  TypeProto(..), TypeSpec(..), FnProto(..),
   ProcProto(..), Param(..), Stmt(..), 
   LoopStmt(..), Exp(..), Generator(..),
   -- Source Position Types
@@ -17,7 +18,7 @@ module AST (-- Types just for parsing
   -- Stateful monad for the compilation process
   CompilerState(..), Compiler, runCompiler, compileSubmodule, getState,
   getModuleName, getModuleParams, option, optionallyPutStr,
-  errMsg, addErrMsgs, initVars, freshVar, nextProcId,
+  errMsg, addErrMsgs, initVars, freshVar, nextProcId, addImport,
   addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
@@ -51,6 +52,16 @@ data Item
 
 data Visibility = Public | Private
                   deriving (Eq, Show)
+
+maxVisibility :: Visibility -> Visibility -> Visibility
+maxVisibility Public _ = Public
+maxVisibility _ Public = Public
+maxVisibility _      _ = Private
+
+minVisibility :: Visibility -> Visibility -> Visibility
+minVisibility Private _ = Private
+minVisibility _ Private = Private
+minVisibility _       _ = Public
 
 data TypeProto = TypeProto Ident [Ident]
 
@@ -120,7 +131,7 @@ initCompiler opts parse name params pos =
                      (TypeDef (List.length params') pos) Map.empty,
                      Set.singleton name)
     in Compiler opts parse 0 0 [] $
-       Module name params Set.empty Set.empty pubtyps Set.empty 
+       Module name params Map.empty Set.empty pubtyps Set.empty 
        Set.empty Map.empty typs Map.empty Map.empty
 
 getState :: (CompilerState -> t) -> Compiler t
@@ -130,6 +141,11 @@ getState selector = do
 
 getModule :: Compiler Module
 getModule = getState modul
+
+setModule :: Module -> Compiler ()
+setModule mod = do
+    state <- get
+    put state { modul = mod }
 
 getModuleName :: Compiler Ident
 getModuleName = do
@@ -141,9 +157,15 @@ getModuleParams = do
   modl <- getModule
   return $ modParams modl
 
-modAddImport :: ModSpec -> Module -> Module
-modAddImport imp mod 
-  = mod { modImports = Set.insert imp $ modImports mod }
+modAddImport :: ModSpec -> Bool -> (Maybe [Ident]) -> Visibility -> Module -> Module
+modAddImport modspec imp specific vis mod
+  = mod { modImports = Map.insert modspec (ModDependency uses' imps') allimps }
+      where allimps = modImports mod
+            (ModDependency uses imps) = 
+                Map.findWithDefault (ModDependency ImportNothing ImportNothing)
+                modspec allimps
+            uses' = if imp then uses else addImports specific vis uses
+            imps' = if imp then addImports specific vis imps else imps
 
 modAddProc :: Ident -> (Int, ProcProto, [Placed Prim], (Maybe SourcePos))
               -> Module -> Module
@@ -249,6 +271,11 @@ publicResource name = do
   mod <- getModule
   return $ Set.member name (pubResources mod)
 
+addImport :: ModSpec -> Bool -> (Maybe [Ident]) -> Visibility -> Compiler ()
+addImport modspec imp specific vis = do
+    mod <- getModule
+    setModule $ modAddImport modspec imp specific vis mod
+
 addProc :: Ident -> ProcProto -> [Placed Prim] -> (Maybe SourcePos)
            -> Visibility -> Compiler ()
 addProc name proto stmts pos vis = do
@@ -301,7 +328,7 @@ reportErrors = do
 data Module = Module {
   modName :: Ident,
   modParams :: Maybe [Ident],
-  modImports :: Set ModSpec,
+  modImports :: Map ModSpec ModDependency,
   pubSubmods :: Set Ident,
   pubTypes :: Set Ident,
   pubResources :: Set Ident,
@@ -319,6 +346,22 @@ type VarName = String
 type ProcName = String
 
 type ModSpec = [Ident]
+
+data ModDependency = ModDependency ImportSpec ImportSpec -- (uses, imports)
+
+data ImportSpec = ImportNothing
+                | ImportSpec (Map Ident Visibility) (Maybe Visibility)
+
+addImports :: (Maybe [Ident]) -> Visibility -> ImportSpec -> ImportSpec
+addImports Nothing vis ImportNothing = ImportSpec Map.empty $ Just vis
+addImports Nothing vis (ImportSpec map Nothing) = 
+    ImportSpec map $ Just vis
+addImports Nothing vis (ImportSpec map (Just vis')) = 
+    ImportSpec map $ Just $ maxVisibility vis vis'
+addImports (Just imps) vis (ImportSpec map vis') = 
+    ImportSpec (List.foldr (\k -> Map.insert k vis) map imps) vis'
+addImports (Just imps) vis ImportNothing = 
+    ImportSpec (List.foldr (\k -> Map.insert k vis) Map.empty imps) Nothing
 
 data TypeDef = TypeDef Int (Maybe SourcePos)
 
@@ -448,12 +491,35 @@ showModSpec spec = intercalate "." spec
 showModSpecs :: [ModSpec] -> String
 showModSpecs specs = intercalate ", " $ List.map showModSpec specs
 
+showModDependency :: ModSpec -> ModDependency -> String
+showModDependency mod (ModDependency uses imports) =
+     showImportOrUse "import" mod imports
+     ++ showImportOrUse "use" mod uses
 
+visibilityPrefix :: Visibility -> String
+visibilityPrefix Public = "public "
+visibilityPrefix Private = ""
+
+showImportOrUse :: String -> ModSpec -> ImportSpec -> String
+showImportOrUse _ _ ImportNothing = ""
+showImportOrUse directive mod (ImportSpec map vis) =
+    (case vis of
+        Just vis' -> visibilityPrefix vis' ++ directive ++ " " ++ 
+                    showModSpec mod ++ " "
+        Nothing -> "") ++
+    (let mapKVs = assocs map
+         pubs = [k | (k,v) <- mapKVs, v==Public]
+         privs = [k | (k,v) <- mapKVs, v==Private]
+     in (if List.null pubs then "" else 
+             "public from " ++ showModSpec mod ++ " " ++ directive ++ " " ++
+             intercalate ", " pubs) ++
+        (if List.null privs then "" else 
+             "from " ++ showModSpec mod ++ " " ++ directive ++ " " ++
+             intercalate ", " privs))
 
 instance Show TypeProto where
   show (TypeProto name []) = name
   show (TypeProto name args) = name ++ "(" ++ intercalate "," args ++ ")"
-
 
 instance Show FnProto where
   show (FnProto name []) = name
@@ -472,7 +538,9 @@ showMaybeSourcePos Nothing = " {?}"
 instance Show Module where
   show mod =
     "\n Module " ++ modName mod ++ maybeShow "(" (modParams mod) ")" ++
-    "\n  imports         : " ++ showModSpecs (Set.elems $ modImports mod) ++
+    "\n  imports         : " ++ 
+    intercalate "\n                    " 
+    [showModDependency mod dep | (mod,dep) <- Map.assocs $ modImports mod] ++
     "\n  public submods  : " ++ showIdSet (pubSubmods mod) ++
     "\n  public types    : " ++ showIdSet (pubTypes mod) ++
     "\n  public resources: " ++ showIdSet (pubResources mod) ++
