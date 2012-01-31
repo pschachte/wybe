@@ -16,21 +16,26 @@ import System.Environment
 import System.Exit
 import Version
 
-data Options = Options
- { optVerbosity   :: Int
- , optShowVersion :: Bool
- , optShowHelp    :: Bool
- } deriving Show
+data Options = Options{  
+    optForce         :: Bool
+    , optVerbosity   :: Int
+    , optShowVersion :: Bool
+    , optShowHelp    :: Bool
+    } deriving Show
 
 defaultOptions    = Options
- { optVerbosity   = 0
+ { optForce       = False
+ , optVerbosity   = 0
  , optShowVersion = False
  , optShowHelp    = False
  }
 
 options :: [OptDescr (Options -> Options)]
 options =
- [ Option ['v'] ["verbose"]
+ [ Option ['f'] ["force"]
+     (NoArg (\ opts -> opts { optForce = True }))
+   "force compilation even when unnecessary"
+ , Option ['v'] ["verbose"]
      (NoArg (\ opts -> opts { optVerbosity = 1 + optVerbosity opts }))
      "verbose output on stderr"
  , Option ['V'] ["version"]

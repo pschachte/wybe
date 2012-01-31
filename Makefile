@@ -41,7 +41,7 @@ test:	frgc
 	    printf "%-40s ... " $$f ; \
 	    out=`echo "$$f" | sed 's/.frg$$/.out/'` ; \
 	    exp=`echo "$$f" | sed 's/.frg$$/.exp/'` ; \
-	    ./frgc -v $$f > $$out 2>&1 ; \
+	    ./frgc -v -f $$f > $$out 2>&1 ; \
 	    if [ ! -r $$exp ] ; then \
 		printf "[31mNEW TEST[39m\n" ; \
 	    elif diff -q $$exp $$out >/dev/null 2>&1 ; then \
