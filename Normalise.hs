@@ -20,9 +20,11 @@ normalise = do
 
 normaliseItem :: Item -> Compiler ()
 normaliseItem (TypeDecl vis (TypeProto name params) items pos) = do
-    compileSubmodule items name (Just params) pos vis normalise
+    fname <- getDirectory
+    compileSubmodule items fname name (Just params) pos vis normalise
 normaliseItem (ModuleDecl vis name items pos) = do
-    compileSubmodule items name Nothing pos vis normalise
+    fname <- getDirectory
+    compileSubmodule items fname name Nothing pos vis normalise
 normaliseItem (ImportMods vis imp modspecs pos) = do
     mapM_ (\spec -> addImport spec imp Nothing vis) modspecs
 normaliseItem (ImportItems vis imp modspec imports pos) = do

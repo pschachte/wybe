@@ -12,14 +12,14 @@ module AST (-- Types just for parsing
   -- Source Position Types
   Placed(..), place, content, maybePlace,
   -- AST types
-  Module(..), ModSpec, ProcDef(..), Ident, VarName, ProcName,
-  TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
-  expToStmt, Prim(..), PrimArg(..),
+  Module(..), ModuleInterface(..), ModSpec, ProcDef(..), Ident, VarName, 
+  ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
+  expToStmt, Prim(..), PrimArg(..), extractInterface,
   -- Stateful monad for the compilation process
-  CompilerState(..), Compiler, runCompiler, compileSubmodule, getState,
-  getModuleName, getModuleParams, option, optionallyPutStr,
-  errMsg, addErrMsgs, initVars, freshVar, nextProcId, addImport,
-  addType, addSubmod, lookupType, publicType,
+  CompilerState(..), Compiler, runCompiler, compileSubmodule, compileImport,
+  getState, getDirectory, getModuleName, getModuleParams, option, 
+  optionallyPutStr, errMsg, addErrMsgs, initVars, freshVar, nextProcId, 
+  addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
   reportErrors
@@ -104,25 +104,34 @@ data CompilerState = Compiler {
 
 type Compiler = StateT CompilerState IO
 
-runCompiler :: Options -> [Item] -> Ident -> Maybe [Ident] -> 
+runCompiler :: Options -> [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
               Maybe SourcePos -> Compiler () -> IO (Module,[String])
-runCompiler opts parse modname params pos comp = do
-    final <- execStateT comp $ initCompiler opts parse modname params pos
+runCompiler opts parse dir modname params pos comp = do
+    final <- execStateT comp $ initCompiler opts parse dir modname 
+            params pos
     return $ (modul final,errs final)
 
-compileSubmodule :: [Item] -> Ident -> Maybe [Ident] -> Maybe SourcePos -> 
-                   Visibility -> Compiler () -> Compiler ()
-compileSubmodule items modname params pos vis comp = do
-    state <- get
-    let opts = options state
-    (submod,errs) <- liftIO . runCompiler opts items modname params pos $ comp
-    addErrMsgs errs
+compileSubmodule :: [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
+                   Maybe SourcePos -> Visibility -> Compiler () -> Compiler ()
+compileSubmodule items dir modname params pos vis comp = do
+    submod <- compileImport items dir modname params pos vis comp
     addSubmod modname submod vis
     
 
-initCompiler :: Options -> [Item] -> Ident -> Maybe [Ident] -> 
+compileImport :: [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
+                   Maybe SourcePos -> Visibility -> Compiler () -> Compiler Module
+compileImport items dir modname params pos vis comp = do
+    state <- get
+    let opts = options state
+    (submod,errs) <- liftIO . runCompiler opts items dir modname 
+                    params pos $ comp
+    addErrMsgs errs
+    return submod
+    
+
+initCompiler :: Options -> [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
                Maybe SourcePos -> CompilerState
-initCompiler opts parse name params pos = 
+initCompiler opts parse dir name params pos = 
     let (typs,pubtyps) =
             case params of
                 Nothing -> (Map.empty, Set.empty)
@@ -131,8 +140,9 @@ initCompiler opts parse name params pos =
                      (TypeDef (List.length params') pos) Map.empty,
                      Set.singleton name)
     in Compiler opts parse 0 0 [] $
-       Module name params Map.empty Set.empty pubtyps Set.empty 
+       Module dir name params Map.empty Set.empty pubtyps Set.empty 
        Set.empty Map.empty typs Map.empty Map.empty
+
 
 getState :: (CompilerState -> t) -> Compiler t
 getState selector = do
@@ -146,6 +156,11 @@ setModule :: Module -> Compiler ()
 setModule mod = do
     state <- get
     put state { modul = mod }
+
+getDirectory :: Compiler FilePath
+getDirectory = do
+    modl <- getModule
+    return $ modDirectory modl
 
 getModuleName :: Compiler Ident
 getModuleName = do
@@ -325,7 +340,9 @@ reportErrors = do
 --                            AST Types
 ----------------------------------------------------------------
 
+-- Holds everything needed to compile a module
 data Module = Module {
+  modDirectory :: FilePath,
   modName :: Ident,
   modParams :: Maybe [Ident],
   modImports :: Map ModSpec ModDependency,
@@ -338,6 +355,29 @@ data Module = Module {
   modResources :: Map Ident ResourceDef,
   modProcs :: Map Ident [ProcDef]
   }
+
+-- Holds everything needed to compile code that uses a module
+data ModuleInterface = ModuleInterface {
+    modSpec :: ModSpec,
+    visibleTypes :: Map Ident Int,
+    visibleResources :: Set Ident,       -- XXX not handling resources properly
+    visibleProcs :: Map Ident [ProcCallInfo]
+    }
+
+extractInterface :: Module -> ModuleInterface
+extractInterface mod =
+    ModuleInterface {
+        modSpec = [ modName mod ],
+        visibleTypes = Map.fromList 
+                       [(typ, typeDefArity $ (modTypes mod) ! typ) 
+                       | typ <- Set.elems $ pubTypes mod],
+        visibleResources = pubResources mod,
+        visibleProcs = Map.fromList
+                       [(name, List.map procCallInfo 
+                               $ (modProcs mod) ! name)
+                       | name <- Set.elems $ pubProcs mod]
+                    }
+    
 
 type Ident = String
 
@@ -365,10 +405,20 @@ addImports (Just imps) vis ImportNothing =
 
 data TypeDef = TypeDef Int (Maybe SourcePos)
 
+typeDefArity :: TypeDef -> Int
+typeDefArity (TypeDef arity _) = arity
+
+
 data ResourceDef = CompoundResource [Ident] (Maybe SourcePos)
                  | SimpleResource TypeSpec (Maybe SourcePos)
 
 data ProcDef = ProcDef ProcID ProcProto [Placed Prim] (Maybe SourcePos)
+
+data ProcCallInfo = ProcCallInfo ProcID ProcProto
+
+procCallInfo :: ProcDef -> ProcCallInfo
+procCallInfo (ProcDef id proto _ _) = ProcCallInfo id proto
+
 
 type ProcID = Int
 
