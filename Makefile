@@ -15,7 +15,7 @@ all:	test
 %.hs:	%.y
 	happy -g $<
 
-frgc:	frgc.hs Parser.hs Scanner.hs Version.hs
+frgc:	*.hs Version.lhs
 	ghc --make $@
 
 .PHONY:	info
@@ -25,15 +25,14 @@ info:  Parser.info
 %.info:	%.y
 	happy -i -g $<
 
-.PHONY: Version.hs
-
-Version.hs:
+Version.lhs:	*.hs
+	@echo "Generating Version.lhs for version $(VERSION)"
 	@rm -f $@
-	@printf "{- Version.hs automatically generated:  DO NOT EDIT -}\n" > $@
+	@printf "Version.hs automatically generated:  DO NOT EDIT\n" > $@
 	@printf "\n" >> $@
-	@printf "module Version (version,buildDate) where\n" >> $@
-	@printf "version :: String\nversion = \"%s\"\n" "$(VERSION)" >> $@
-	@printf "buildDate :: String\nbuildDate = \"%s\"\n" "`date`" >> $@
+	@printf ">> module Version (version,buildDate) where\n" >> $@
+	@printf ">> version :: String\nversion = \"%s\"\n" "$(VERSION)" >> $@
+	@printf ">> buildDate :: String\nbuildDate = \"%s\"\n" "`date`" >> $@
 
 TESTCASES = $(wildcard test-cases/*.frg)
 
