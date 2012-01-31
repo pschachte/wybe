@@ -8,14 +8,16 @@
 
 module Compiler (processFile, compiler) where
 
-import Options
-import AST
-import Parser
-import Scanner
-import Normalise
-import Types
-import System.FilePath (takeBaseName)
-import Data.List
+import Options   (Options, optVerbosity)
+import AST       (Compiler, runCompiler, parseTree, modul, 
+                  optionallyPutStr, reportErrors)
+import Parser    (parse)
+import Scanner   (inputTokens, fileTokens)
+import Normalise (normalise)
+import Types     (typeCheck)
+import System.FilePath 
+                 (takeBaseName)
+import Data.List (intercalate)
 
 processFile :: Options -> String -> IO ()
 processFile opts file = do
@@ -24,6 +26,8 @@ processFile opts file = do
   let parseTree = parse toks
   modul <- runCompiler opts parseTree modname Nothing Nothing compiler
   return ()
+
+
 
 compiler :: Compiler ()
 compiler = do
