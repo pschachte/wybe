@@ -57,9 +57,9 @@ following things, in any order:
   directive), or may be imported such that they must be specified with
   fully qualified names (the \texttt{use} directive).
 \item A full module may be imported (\texttt{import} or \texttt{use}
-  \emph{modulename}), or only certain specified members
-  may be imported (\texttt{from} \emph{modulename} \emph{import}
-  \emph{items} or \texttt{from} \emph{modulename} \emph{use}
+  \emph{module}), or only certain specified members
+  may be imported (\texttt{from} \emph{module} \texttt{import}
+  \emph{items} or \texttt{from} \emph{module} \texttt{use}
   \emph{items}).
 \item Members may be imported such that they become public members of
   the \emph{importing} module, visible to any module that imports it
@@ -68,41 +68,42 @@ following things, in any order:
 \end{itemize}
 This gives the following eight varieties of importation:
 \begin{center}
-  \begin{tabular}{|p{4cm}|p{7.5cm}|}
+  \begin{tabular}{|p{2.4cm}|p{8.5cm}|}
     \hline
-    \texttt{import} \emph{modulename}
-    & Imports everything from \emph{modulename} so that it can be used
-    without module qualification.
+    \texttt{import} \emph{module}
+    & Imports everything from \emph{module} so that it can be used
+    with or without module qualification.
     \\ \hline
-    \texttt{use} \emph{modulename}
-    & Imports everything from \emph{modulename} so that it can only be used
+    \texttt{use} \emph{module}
+    & Imports everything from \emph{module} so that it can only be used
     with module qualification.
     \\ \hline
-    \texttt{from} \emph{modulename} \texttt{import} \emph{items}
-    & Imports the specified items from \emph{modulename} so that they
-    can be used without module qualification.
+    \texttt{from} \emph{module} \texttt{import} \emph{items}
+    & Imports the specified items from \emph{module} so that they
+    can be used with or without module qualification.
     \\ \hline
-    \texttt{from} \emph{modulename} \texttt{use} \emph{items}
-    & Imports the specified items from \emph{modulename} so that they
+    \texttt{from} \emph{module} \texttt{use} \emph{items}
+    & Imports the specified items from \emph{module} so that they
     can only be used with module qualification.
     \\ \hline
-    \texttt{public import} \emph{modulename}
-    & Imports everything from \emph{modulename} so that it can be used
-    without module qualification, and reexport it from the importing module.
+    \texttt{public import} \emph{module}
+    & Imports everything from \emph{module} so that it can be used
+    with or without module qualification, and reexport it from the
+    importing module as if it were defined there.
     \\ \hline
-    \texttt{public use} \emph{modulename}
-    & Imports everything from \emph{modulename} so that it can only be used
-    with module qualification, and reexport it from the importing module.
+    \texttt{public use} \emph{module}
+    & Imports everything from \emph{module} so that it can only be used
+    with module qualification, and reexport it as a member of a submodule.
     \\ \hline
-    \texttt{public from} \emph{modulename} \texttt{import} \emph{items}
-    & Imports the specified items from \emph{modulename} so that they
-    can be used without module qualification, and reexport them from the
-    importing module.
+    \texttt{public from} \emph{module} \texttt{import} \emph{items}
+    & Imports the specified items from \emph{module} so that they
+    can be used with or without module qualification, and reexport
+    them from the importing module as if they were defined there.
     \\ \hline
-    \texttt{public from} \emph{modulename} \texttt{use} \emph{items}
-    & Imports the specified items from \emph{modulename} so that they
-    can only be used with module qualification, and reexport them from the
-    importing module.
+    \texttt{public from} \emph{module} \texttt{use} \emph{items}
+    & Imports the specified items from \emph{module} so that they
+    can only be used with module qualification, and reexport them as
+    members of a submodule.
     \\ \hline
   \end{tabular}
 \end{center}
