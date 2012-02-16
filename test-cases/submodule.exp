@@ -10,7 +10,7 @@ end
 
 
  Module submodule
-  public submods  : publictest
+  public submods  : publictest {submodule:6:8}
   public types    : 
   public resources: 
   public procs    : 

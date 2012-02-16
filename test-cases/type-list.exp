@@ -6,7 +6,7 @@ end
 Public func ++(x:list(t),y:list(t)):? {type-list:6:8} = if ==(x {type-list:7:8}, []() {type-list:7:13}) {type-list:7:8} then y {type-list:8:10} else [|](head(x {type-list:9:11}) {type-list:9:11}, ++(tail(x {type-list:9:18}) {type-list:9:18}, y {type-list:9:26}) {type-list:9:18}) {type-list:9:10} {type-list:7:5}
 
  Module type-list
-  public submods  : list
+  public submods  : list {type-list:1:8}
   public types    : 
   public resources: 
   public procs    : ++(x:list(t), y:list(t), ?$:?) <1> {type-list:6:8}

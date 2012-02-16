@@ -116,7 +116,7 @@ compileSubmodule :: [Item] -> FilePath -> Ident -> Maybe [Ident] ->
                    Maybe SourcePos -> Visibility -> Compiler () -> Compiler ()
 compileSubmodule items dir modname params pos vis comp = do
     submod <- compileImport items dir modname params pos vis comp
-    addSubmod modname submod vis
+    addSubmod modname submod pos vis
     
 
 compileImport :: [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
@@ -141,7 +141,7 @@ initCompiler opts parse dir name params pos =
                 Just params' -> (typedef params', typedef params')
     in Compiler opts parse 0 0 [] $
        Module dir name params 
-       (ModuleInterface pubtyps Map.empty Map.empty Set.empty Set.empty) 
+       (ModuleInterface pubtyps Map.empty Map.empty Map.empty Set.empty) 
        (Just $ ModuleImplementation Map.empty Map.empty typs 
         Map.empty Map.empty)
 
@@ -260,10 +260,10 @@ addType name def@(TypeDef arity _) vis = do
     updateImplementation (updateModTypes (Map.insert name def))
     updateInterface vis (updatePubTypes (Map.insert name def))
 
-addSubmod :: Ident -> Module -> Visibility -> Compiler ()
-addSubmod name modl vis = do
+addSubmod :: Ident -> Module -> Maybe SourcePos -> Visibility -> Compiler ()
+addSubmod name modl pos vis = do
     updateImplementation (updateModSubmods (Map.insert name modl))
-    updateInterface vis (updatePubDependencies (Set.insert name))
+    updateInterface vis (updatePubDependencies (Map.insert name pos))
 
 lookupType :: Ident -> Compiler (Maybe TypeDef)
 lookupType name = 
@@ -397,7 +397,8 @@ data ModuleInterface = ModuleInterface {
     pubResources :: Map Ident (Maybe SourcePos),       
                                     -- The resources this module exports
     pubProcs :: Map Ident [ProcCallInfo], -- The procs this module exports
-    pubDependencies :: Set Ident,    -- The other modules this module exports
+    pubDependencies :: Map Ident (Maybe SourcePos),    
+                                    -- The other modules this module exports
     dependencies :: Set Ident        -- The other modules that must be linked
     }                               -- in by modules that depend on this one
 
@@ -415,8 +416,9 @@ updatePubProcs :: (Map Ident [ProcCallInfo] -> Map Ident [ProcCallInfo]) ->
                  ModuleInterface -> ModuleInterface
 updatePubProcs fn modint = modint {pubProcs = fn $ pubProcs modint}
 
-updatePubDependencies :: (Set Ident -> Set Ident) -> 
-                        ModuleInterface -> ModuleInterface
+updatePubDependencies :: 
+    (Map Ident (Maybe SourcePos) -> Map Ident (Maybe SourcePos)) -> 
+    ModuleInterface -> ModuleInterface
 updatePubDependencies fn modint = 
     modint {pubDependencies = fn $ pubDependencies modint}
 
@@ -673,10 +675,9 @@ instance Show Module where
         let int  = modInterface mod
             maybeimpl = modImplementation mod
         in "\n Module " ++ modName mod ++ maybeShow "(" (modParams mod) ")" ++
-           "\n  public submods  : " ++ showIdSet (pubDependencies int) ++
+           "\n  public submods  : " ++ showMapPoses (pubDependencies int) ++
            "\n  public types    : " ++ showMapTypes (pubTypes int) ++
-           "\n  public resources: " ++ 
-           showMap ", " "" showMaybeSourcePos (pubResources int) ++
+           "\n  public resources: " ++ showMapPoses (pubResources int) ++
            "\n  public procs    : " ++ 
            intercalate "\n                    " 
            [show proto ++ " <" ++ show id ++ ">" ++ showMaybeSourcePos pos | 
@@ -705,6 +706,9 @@ showMapLines = showMap "\n                    " ": " show
 
 showMapTypes :: Map Ident TypeDef -> String
 showMapTypes = showMap ", " "/" show
+
+showMapPoses :: Map Ident (Maybe SourcePos) -> String
+showMapPoses = showMap ", " "" showMaybeSourcePos
 
 showMap :: String -> String -> (v -> String) -> Map Ident v -> String
 showMap outersep innersep fn m = intercalate outersep

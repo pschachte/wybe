@@ -4,7 +4,7 @@ end
 
 
  Module position
-  public submods  : position
+  public submods  : position {position:1:8}
   public types    : 
   public resources: 
   public procs    : 
