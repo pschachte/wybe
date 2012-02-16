@@ -26,6 +26,7 @@ module AST (-- Types just for parsing
   ) where
 
 import Options
+import Data.Maybe
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
@@ -134,14 +135,16 @@ initCompiler :: Options -> [Item] -> FilePath -> Ident -> Maybe [Ident] ->
 initCompiler opts parse dir name params pos = 
     let (typs,pubtyps) =
             case params of
-                Nothing -> (Map.empty, Set.empty)
+                Nothing -> (Map.empty, Map.empty)
                 Just params' ->
                     (Map.insert name 
                      (TypeDef (List.length params') pos) Map.empty,
-                     Set.singleton name)
+                     Map.insert name (List.length params') Map.empty)
     in Compiler opts parse 0 0 [] $
-       Module dir name params Map.empty Set.empty pubtyps Set.empty 
-       Set.empty Map.empty typs Map.empty Map.empty
+       Module dir name params 
+       (ModuleInterface pubtyps Set.empty Map.empty Set.empty Set.empty) 
+       (Just $ ModuleImplementation Map.empty Map.empty typs 
+        Map.empty Map.empty)
 
 
 getState :: (CompilerState -> t) -> Compiler t
@@ -172,32 +175,33 @@ getModuleParams = do
   modl <- getModule
   return $ modParams modl
 
-modAddImport :: ModSpec -> Bool -> (Maybe [Ident]) -> Visibility -> Module -> Module
-modAddImport modspec imp specific vis mod
-  = mod { modImports = Map.insert modspec (ModDependency uses' imps') allimps }
-      where allimps = modImports mod
-            (ModDependency uses imps) = 
-                Map.findWithDefault (ModDependency ImportNothing ImportNothing)
-                modspec allimps
-            uses' = if imp then uses else addImports specific vis uses
-            imps' = if imp then addImports specific vis imps else imps
+getModuleInterface :: Compiler ModuleInterface
+getModuleInterface = do
+  modl <- getModule
+  return $ modInterface modl
 
-modAddProc :: Ident -> (Int, ProcProto, [Placed Prim], (Maybe SourcePos))
-              -> Module -> Module
-modAddProc name (newid, proto, stmts, pos) mod
-  = let procs = modProcs mod
-        defs  = ProcDef newid proto stmts pos:
-                            findWithDefault [] name procs
-                in  mod { modProcs  = Map.insert name defs procs }
+getModuleImplementation :: Compiler (Maybe ModuleImplementation)
+getModuleImplementation = do
+  modl <- getModule
+  return $ modImplementation modl
 
-modReplaceProc :: Ident -> (Int, ProcProto, [Placed Prim], (Maybe SourcePos)) 
-                  -> Module -> Module
-modReplaceProc name (id, proto, stmts, pos) mod
-  = let procs   = modProcs mod
-        olddefs = findWithDefault [] name procs
-        (_,rest)  = List.partition (\(ProcDef oldid _ _ _) -> id==oldid) olddefs
-    in  mod { modProcs  = Map.insert name (ProcDef id proto stmts pos:rest) 
-                          procs }
+getModuleImplementationField :: (ModuleImplementation -> t) ->
+                               Compiler (Maybe t)
+getModuleImplementationField fn = do
+  imp <- getModuleImplementation
+  case imp of
+      Nothing -> return Nothing
+      Just imp' -> return $ Just $ fn imp'
+
+getModuleImplementationMaybe :: (ModuleImplementation -> Maybe t) ->
+                               Compiler (Maybe t)
+getModuleImplementationMaybe fn = do
+  imp <- getModuleImplementation
+  case imp of
+      Nothing -> return Nothing
+      Just imp' -> return $ fn imp'
+
+
 
 errMsg :: String -> Maybe SourcePos -> Compiler ()
 errMsg msg pos = addErrMsgs [makeMessage msg pos]
@@ -234,87 +238,110 @@ nextProcId = do
   put state { procCount = ctr }
   return ctr
 
-publicise :: (Ident -> Module -> Module) -> 
-             Visibility -> Ident -> Module -> Module
-publicise insert vis name mod = applyIf (insert name) (vis == Public) mod
+
+updateInterface :: Visibility -> (ModuleInterface -> ModuleInterface) -> 
+                  Compiler ()
+updateInterface Private interfaceOp = return ()  -- do nothing
+updateInterface Public interfaceOp = do         -- update the interface
+    oldmod <- getModule
+    setModule oldmod { modInterface = interfaceOp $ modInterface oldmod }
 
 
-addItem :: (Ident -> t -> Module -> Module) ->
-           (Ident -> Module -> Module) ->
-           Ident -> t -> Visibility -> Compiler ()
-addItem inserter publisher name def visibility = do
-  state <- get
-  put state { modul = publicise publisher visibility name $
-                      inserter name def $ modul state }
+updateImplementation :: (ModuleImplementation -> ModuleImplementation) -> 
+                       Compiler ()
+updateImplementation implOp = do
+    oldmod <- getModule
+    case modImplementation oldmod of
+        Nothing -> return ()
+        Just impl -> setModule oldmod { modImplementation = Just $ implOp impl }
+
 
 addType :: Ident -> TypeDef -> Visibility -> Compiler ()
-addType = 
-  addItem (\name def mod -> 
-            mod { modTypes = Map.insert name def $ modTypes mod })
-          (\name mod -> mod { pubTypes = Set.insert name $ pubTypes mod })
+addType name def@(TypeDef arity _) vis = do
+    updateImplementation (updateModTypes (Map.insert name def))
+    updateInterface vis (updatePubTypes (Map.insert name arity))
 
 addSubmod :: Ident -> Module -> Visibility -> Compiler ()
-addSubmod = 
-  addItem (\name submod mod -> 
-            mod { modSubmods = Map.insert name submod $ modSubmods mod })
-          (\name mod -> mod { pubSubmods = Set.insert name $ pubSubmods mod })
+addSubmod name modl vis = do
+    updateImplementation (updateModSubmods (Map.insert name modl))
+    updateInterface vis (updatePubDependencies (Set.insert name))
 
 lookupType :: Ident -> Compiler (Maybe TypeDef)
-lookupType name = do
-  mod <- getModule
-  return $ Map.lookup name (modTypes mod)
+lookupType name = 
+    getModuleImplementationMaybe (\imp -> Map.lookup name $ modTypes imp)
+
 
 publicType :: Ident -> Compiler Bool
 publicType name = do
-  mod <- getModule
-  return $ Set.member name (pubTypes mod)
+  int <- getModuleInterface
+  return $ Map.member name (pubTypes int)
 
 addResource :: Ident -> ResourceDef -> Visibility -> Compiler ()
-addResource = 
-  addItem (\name def mod -> 
-            mod { modResources = Map.insert name def $ modResources mod })
-          (\name mod ->
-            mod { pubResources = Set.insert name $ pubResources mod })
+addResource name def vis = do
+    updateImplementation (updateModResources (Map.insert name def))
+    updateInterface vis (updatePubResources (Set.insert name))
 
 lookupResource :: Ident -> Compiler (Maybe ResourceDef)
-lookupResource name = do
-  mod <- getModule
-  return $ Map.lookup name (modResources mod)
+lookupResource name =
+    getModuleImplementationMaybe (\imp -> Map.lookup name $ modResources imp)
 
 publicResource :: Ident -> Compiler Bool
 publicResource name = do
   mod <- getModule
-  return $ Set.member name (pubResources mod)
+  return $ Set.member name (pubResources $ modInterface mod)
 
 addImport :: ModSpec -> Bool -> (Maybe [Ident]) -> Visibility -> Compiler ()
 addImport modspec imp specific vis = do
-    mod <- getModule
-    setModule $ modAddImport modspec imp specific vis mod
+    updateImplementation
+      (updateModImports
+       (\moddeps -> 
+         let (ModDependency uses imps) = 
+                 Map.findWithDefault 
+                 (ModDependency ImportNothing ImportNothing) 
+                 modspec moddeps
+             uses' = if imp then uses else addImports specific vis uses
+             imps' = if imp then addImports specific vis imps else imps
+         in Map.insert modspec (ModDependency uses' imps') moddeps))
+    updateInterface vis (updateDependencies (Set.insert $ last modspec))
 
 addProc :: Ident -> ProcProto -> [Placed Prim] -> (Maybe SourcePos)
            -> Visibility -> Compiler ()
 addProc name proto stmts pos vis = do
-  newid <- nextProcId
-  addItem modAddProc
-          (\name mod -> mod { pubProcs = Set.insert name $ pubProcs mod })
-          name (newid, proto, stmts, pos) vis
+    newid <- nextProcId
+    updateImplementation
+      (updateModProcs
+       (\procs ->
+         let defs  = ProcDef newid proto stmts pos:findWithDefault [] name procs
+         in  Map.insert name defs procs))
+    updateInterface vis
+      (updatePubProcs (mapListInsert name (ProcCallInfo newid proto)))
+
+mapListInsert :: Ord a => a -> b -> Map a [b] -> Map a [b]
+mapListInsert key elt =
+    Map.alter (\maybe -> Just $ elt:fromMaybe [] maybe) key
+
 
 replaceProc :: Ident -> Int -> ProcProto -> [Placed Prim] -> (Maybe SourcePos)
                -> Visibility -> Compiler ()
-replaceProc name oldid proto stmts pos vis =
-  addItem modReplaceProc 
-          (\name mod -> mod { pubProcs = Set.insert name $ pubProcs mod })
-          name (oldid, proto, stmts, pos) vis
+replaceProc name id proto stmts pos vis = do
+    updateImplementation
+      (updateModProcs
+       (\procs -> 
+         let olddefs = findWithDefault [] name procs
+             (_,rest) = List.partition (\(ProcDef oldid _ _ _) -> id==oldid) 
+                        olddefs
+         in Map.insert name (ProcDef id proto stmts pos:rest) procs))
+
 
 lookupProc :: Ident -> Compiler (Maybe [ProcDef])
-lookupProc name = do
-  mod <- getModule
-  return $ Map.lookup name (modProcs mod)
+lookupProc name = 
+    getModuleImplementationMaybe (\imp -> Map.lookup name $ modProcs imp)
+
 
 publicProc :: Ident -> Compiler Bool
 publicProc name = do
-  mod <- getModule
-  return $ Set.member name (pubProcs mod)
+  int <- getModuleInterface
+  return $ Map.member name $ pubProcs int
 
 
 option :: (Options -> t) -> Compiler t
@@ -342,41 +369,92 @@ reportErrors = do
 
 -- Holds everything needed to compile a module
 data Module = Module {
-  modDirectory :: FilePath,
-  modName :: Ident,
-  modParams :: Maybe [Ident],
-  modImports :: Map ModSpec ModDependency,
-  pubSubmods :: Set Ident,
-  pubTypes :: Set Ident,
-  pubResources :: Set Ident,
-  pubProcs :: Set Ident,
-  modSubmods :: Map Ident Module,
-  modTypes :: Map Ident TypeDef,
-  modResources :: Map Ident ResourceDef,
-  modProcs :: Map Ident [ProcDef]
+  modDirectory :: FilePath,              -- The directory the module is in
+  modName :: Ident,                      -- The module name
+  modParams :: Maybe [Ident],            -- The type parameters, if a type
+  modInterface :: ModuleInterface,       -- The public face of this module
+  modImplementation :: Maybe ModuleImplementation -- the module's implementation
   }
+
+-- hack around Haskell's terrible setter syntax
+updateModImplementation :: (ModuleImplementation -> ModuleImplementation) ->
+                          Module -> Module
+updateModImplementation fn mod =
+    case modImplementation mod of
+        Nothing -> mod
+        Just impl -> 
+            mod { modImplementation = Just $ fn impl }
+
+updateModInterface :: (ModuleInterface -> ModuleInterface) ->
+                     Module -> Module
+updateModInterface fn mod =
+    mod { modInterface = fn $ modInterface mod }
+
 
 -- Holds everything needed to compile code that uses a module
 data ModuleInterface = ModuleInterface {
-    modSpec :: ModSpec,
-    visibleTypes :: Map Ident Int,
-    visibleResources :: Set Ident,       -- XXX not handling resources properly
-    visibleProcs :: Map Ident [ProcCallInfo]
-    }
+    pubTypes :: Map Ident Int,       -- The types this module exports
+    pubResources :: Set Ident,       -- XXX not handling resources properly
+    pubProcs :: Map Ident [ProcCallInfo], -- The procs this module exports
+    pubDependencies :: Set Ident,    -- The other modules this module exports
+    dependencies :: Set Ident            -- The other modules that must be linked
+    }                                   -- in by modules that depend on this one
+
+-- hack around Haskell's terrible setter syntax
+updatePubTypes :: (Map Ident Int -> Map Ident Int) -> 
+                 ModuleInterface -> ModuleInterface
+updatePubTypes fn modint = modint {pubTypes = fn $ pubTypes modint}
+
+updatePubResources :: (Set Ident -> Set Ident) -> ModuleInterface -> ModuleInterface
+updatePubResources fn modint = modint {pubResources = fn $ pubResources modint}
+
+updatePubProcs :: (Map Ident [ProcCallInfo] -> Map Ident [ProcCallInfo]) -> 
+                 ModuleInterface -> ModuleInterface
+updatePubProcs fn modint = modint {pubProcs = fn $ pubProcs modint}
+
+updatePubDependencies :: (Set Ident -> Set Ident) -> 
+                        ModuleInterface -> ModuleInterface
+updatePubDependencies fn modint = 
+    modint {pubDependencies = fn $ pubDependencies modint}
+
+updateDependencies :: (Set Ident -> Set Ident) -> ModuleInterface -> ModuleInterface
+updateDependencies fn modint = modint {dependencies = fn $ dependencies modint}
+
+
+-- Holds everything needed to compile the module itself
+data ModuleImplementation = ModuleImplementation {
+    modImports :: Map ModSpec ModDependency, -- All modules this module imports
+    modSubmods :: Map Ident Module,        -- All submodules
+    modTypes :: Map Ident TypeDef,         -- All types defined by this module
+    modResources :: Map Ident ResourceDef, -- All resources defined by this module
+    modProcs :: Map Ident [ProcDef]        -- All procs defined by this module
+    }                                   -- in by modules that depend on this one
+
+
+-- hack around Haskell's terrible setter syntax
+updateModImports :: (Map ModSpec ModDependency -> Map ModSpec ModDependency) -> 
+                   ModuleImplementation -> ModuleImplementation
+updateModImports fn modimp = modimp {modImports = fn $ modImports modimp}
+
+updateModSubmods :: (Map Ident Module -> Map Ident Module) -> 
+                   ModuleImplementation -> ModuleImplementation
+updateModSubmods fn modimp = modimp {modSubmods = fn $ modSubmods modimp}
+
+updateModTypes :: (Map Ident TypeDef -> Map Ident TypeDef) -> 
+                 ModuleImplementation -> ModuleImplementation
+updateModTypes fn modimp = modimp {modTypes = fn $ modTypes modimp}
+
+updateModResources :: (Map Ident ResourceDef -> Map Ident ResourceDef) -> 
+                     ModuleImplementation -> ModuleImplementation
+updateModResources fn modimp = modimp {modResources = fn $ modResources modimp}
+
+updateModProcs :: (Map Ident [ProcDef] -> Map Ident [ProcDef]) -> 
+                 ModuleImplementation -> ModuleImplementation
+updateModProcs fn modimp = modimp {modProcs = fn $ modProcs modimp}
+
 
 extractInterface :: Module -> ModuleInterface
-extractInterface mod =
-    ModuleInterface {
-        modSpec = [ modName mod ],
-        visibleTypes = Map.fromList 
-                       [(typ, typeDefArity $ (modTypes mod) ! typ) 
-                       | typ <- Set.elems $ pubTypes mod],
-        visibleResources = pubResources mod,
-        visibleProcs = Map.fromList
-                       [(name, List.map procCallInfo 
-                               $ (modProcs mod) ! name)
-                       | name <- Set.elems $ pubProcs mod]
-                    }
+extractInterface = modInterface
     
 
 type Ident = String
@@ -489,12 +567,10 @@ argFlowDirection (ArgString _) = ParamIn
 argFlowDirection (ArgChar _) = ParamIn
 
 
-applyIf :: (a -> a) -> Bool -> a -> a
-applyIf f test val = if test then f val else val
-
 expToStmt :: Exp -> Stmt
 expToStmt (Fncall name args) = ProcCall name args
 expToStmt (ForeignFn lang name args) = ForeignCall lang name args
+
 
 ----------------------------------------------------------------
 --                      Showing Compiler State
@@ -586,19 +662,32 @@ showMaybeSourcePos (Just pos) =
 showMaybeSourcePos Nothing = " {?}"
 
 instance Show Module where
-  show mod =
-    "\n Module " ++ modName mod ++ maybeShow "(" (modParams mod) ")" ++
-    "\n  imports         : " ++ 
-    intercalate "\n                    " 
-    [showModDependency mod dep | (mod,dep) <- Map.assocs $ modImports mod] ++
-    "\n  public submods  : " ++ showIdSet (pubSubmods mod) ++
-    "\n  public types    : " ++ showIdSet (pubTypes mod) ++
-    "\n  public resources: " ++ showIdSet (pubResources mod) ++
-    "\n  public procs    : " ++ showIdSet (pubProcs mod) ++
-    "\n  types           : " ++ showMap (modTypes mod) ++
-    "\n  resources       : " ++ showMap (modResources mod) ++
-    "\n  procs           : " ++ showMap (modProcs mod) ++ "\n" ++
-    "\nSubmodules of " ++ modName mod ++ ":\n" ++ showMap (modSubmods mod)
+    show mod =
+        let int  = modInterface mod
+            maybeimpl = modImplementation mod
+        in "\n Module " ++ modName mod ++ maybeShow "(" (modParams mod) ")" ++
+           "\n  public submods  : " ++ showIdSet (pubDependencies int) ++
+           "\n  public types    : " ++ 
+           intercalate ", " 
+           [n ++ "/" ++ show a | (n,a) <- Map.assocs $ pubTypes int] ++
+           "\n  public resources: " ++ showIdSet (pubResources int) ++
+           "\n  public procs    : " ++ 
+           intercalate "\n                    " 
+           [show proto ++ " <" ++ show id ++ ">" | 
+            (ProcCallInfo id proto) <- 
+                List.concat $ Map.elems $ pubProcs int] ++
+           if isNothing maybeimpl then "\n  implementation not available"
+           else let impl = fromJust maybeimpl
+                in
+                 "\n  imports         : " ++
+                 intercalate "\n                    " 
+                 [showModDependency mod dep | 
+                  (mod,dep) <- Map.assocs $ modImports impl] ++
+                 "\n  types           : " ++ showMap (modTypes impl) ++
+                 "\n  resources       : " ++ showMap (modResources impl) ++
+                 "\n  procs           : " ++ showMap (modProcs impl) ++ "\n" ++
+                 "\nSubmodules of " ++ modName mod ++ ":\n" ++ 
+                 showMap (modSubmods impl)
 
 showIdSet :: Set Ident -> String
 showIdSet set = intercalate ", " $ Set.elems set

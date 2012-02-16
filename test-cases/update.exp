@@ -2,11 +2,12 @@ Public func second(x:list(t)):t {update:1:8} = head(tail(x {update:1:35}) {updat
 Public proc second(!x:list(t), y:t) {update:3:8}[=(head(tail(!x {update:4:5}) {update:4:5}) {update:4:5}, y {update:4:20}) {update:4:5}]
 
  Module update
-  imports         : 
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : second
+  public procs    : second(!x:list(t), y:t) <2>
+                    second(x:list(t), ?$:t) <1>
+  imports         : 
   types           : 
   resources       : 
   procs           : second: [

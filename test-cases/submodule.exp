@@ -10,11 +10,11 @@ end
 
 
  Module submodule
-  imports         : 
   public submods  : publictest
   public types    : 
   public resources: 
   public procs    : 
+  imports         : 
   types           : 
   resources       : 
   procs           : 
@@ -22,11 +22,11 @@ end
 Submodules of submodule:
 privatetest: 
  Module privatetest
-  imports         : 
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : semi_hidden
+  public procs    : semi_hidden() <2>
+  imports         : 
   types           : 
   resources       : 
   procs           : hidden: [
@@ -40,11 +40,11 @@ Submodules of privatetest:
 
                     publictest: 
  Module publictest
-  imports         : 
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : visible
+  public procs    : visible() <2>
+  imports         : 
   types           : 
   resources       : 
   procs           : semi_visible: [

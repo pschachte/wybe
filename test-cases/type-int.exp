@@ -17,11 +17,11 @@ end
 
 
  Module type-int
-  imports         : 
   public submods  : int
   public types    : 
   public resources: 
   public procs    : 
+  imports         : 
   types           : 
   resources       : 
   procs           : 
@@ -29,11 +29,24 @@ end
 Submodules of type-int:
 int: 
  Module int([])
-  imports         : 
   public submods  : 
-  public types    : int
+  public types    : int/0
   public resources: 
-  public procs    : *, +, -, /, /=, <, <=, ==, >, >=
+  public procs    : *(x:int, y:int, ?$:int) <7>
+                    +(x:int, ?y:int, z:int) <3>
+                    +(?x:int, y:int, z:int) <2>
+                    +(x:int, y:int, ?$:int) <1>
+                    -(x:int, ?y:int, z:int) <6>
+                    -(?x:int, y:int, z:int) <5>
+                    -(x:int, y:int, ?$:int) <4>
+                    /(x:int, y:int, ?$:int) <8>
+                    /=(x:int, y:int, ?$:bool) <10>
+                    <(x:int, y:int, ?$:bool) <11>
+                    <=(x:int, y:int, ?$:bool) <12>
+                    ==(x:int, y:int, ?$:bool) <9>
+                    >(x:int, y:int, ?$:bool) <13>
+                    >=(x:int, y:int, ?$:bool) <14>
+  imports         : 
   types           : int: arity 0  {type-int:1:8}
   resources       : 
   procs           : *: [

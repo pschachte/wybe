@@ -16,6 +16,10 @@ Public from mod8 use fn4 {imports:8:8}
   
 
  Module imports
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
   imports         : import mod1 
                     use mod2 
                     from mod3 import fn1
@@ -24,10 +28,6 @@ Public from mod8 use fn4 {imports:8:8}
                     public use mod6 
                     public from mod7 import fn3
                     public from mod8 use fn4
-  public submods  : 
-  public types    : 
-  public resources: 
-  public procs    : 
   types           : 
   resources       : 
   procs           : 

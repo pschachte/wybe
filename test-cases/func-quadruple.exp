@@ -2,11 +2,12 @@ Public func double(a:int):int {func-quadruple:1:8} = +(a {func-quadruple:1:35}, 
 Public func quadruple(a:int):int {func-quadruple:3:8} = double(double(a {func-quadruple:3:52}) {func-quadruple:3:45}) {func-quadruple:3:38}
 
  Module func-quadruple
-  imports         : 
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : double, quadruple
+  public procs    : double(a:int, ?$:int) <1>
+                    quadruple(a:int, ?$:int) <2>
+  imports         : 
   types           : 
   resources       : 
   procs           : double: [

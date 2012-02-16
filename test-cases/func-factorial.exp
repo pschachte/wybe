@@ -1,11 +1,11 @@
 Public func factorial(n:int):int {func-factorial:1:8} = if <=(n {func-factorial:2:11}, 0 {func-factorial:2:17}) {func-factorial:2:11} then 1 {func-factorial:2:24} else *(n {func-factorial:2:30}, factorial(-(n {func-factorial:2:44}, 1 {func-factorial:2:47}) {func-factorial:2:44}) {func-factorial:2:34}) {func-factorial:2:30} {func-factorial:2:8}
 
  Module func-factorial
-  imports         : 
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : factorial
+  public procs    : factorial(n:int, ?$:int) <1>
+  imports         : 
   types           : 
   resources       : 
   procs           : factorial: [

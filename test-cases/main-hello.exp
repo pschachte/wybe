@@ -1,11 +1,11 @@
 println("hello, world" {main-hello:1:9}) {main-hello:1:1}
 
  Module main-hello
-  imports         : 
   public submods  : 
   public types    : 
   public resources: 
   public procs    : 
+  imports         : 
   types           : 
   resources       : 
   procs           : : [

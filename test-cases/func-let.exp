@@ -1,11 +1,11 @@
 Public func quad(x:int):int {func-let:1:8} = +(d {func-let:1:47}, d {func-let:1:49}) {func-let:1:47} where [=(?d {func-let:1:35}, +(x {func-let:1:40}, x {func-let:1:42}) {func-let:1:40}) {func-let:1:35}] {func-let:1:31}
 
  Module func-let
-  imports         : 
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : quad
+  public procs    : quad(x:int, ?$:int) <1>
+  imports         : 
   types           : 
   resources       : 
   procs           : quad: [

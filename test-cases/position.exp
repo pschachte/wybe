@@ -4,11 +4,11 @@ end
 
 
  Module position
-  imports         : 
   public submods  : position
   public types    : 
   public resources: 
   public procs    : 
+  imports         : 
   types           : 
   resources       : 
   procs           : 
@@ -16,11 +16,15 @@ end
 Submodules of position:
 position: 
  Module position([])
-  imports         : 
   public submods  : 
-  public types    : position
+  public types    : position/0
   public resources: 
-  public procs    : position, x, y
+  public procs    : position(x:int, y:int, ?$:position) <1>
+                    x(!$rec:position, $field:int) <3>
+                    x($rec:position, ?$field:int) <2>
+                    y(!$rec:position, $field:int) <5>
+                    y($rec:position, ?$field:int) <4>
+  imports         : 
   types           : position: arity 0  {position:1:8}
   resources       : 
   procs           : position: [

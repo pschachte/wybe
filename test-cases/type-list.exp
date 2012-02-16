@@ -6,11 +6,11 @@ end
 Public func ++(x:list(t),y:list(t)):? {type-list:6:8} = if ==(x {type-list:7:8}, []() {type-list:7:13}) {type-list:7:8} then y {type-list:8:10} else [|](head(x {type-list:9:11}) {type-list:9:11}, ++(tail(x {type-list:9:18}) {type-list:9:18}, y {type-list:9:26}) {type-list:9:18}) {type-list:9:10} {type-list:7:5}
 
  Module type-list
-  imports         : 
   public submods  : list
   public types    : 
   public resources: 
-  public procs    : ++
+  public procs    : ++(x:list(t), y:list(t), ?$:?) <1>
+  imports         : 
   types           : 
   resources       : 
   procs           : ++: [
@@ -32,11 +32,16 @@ proc ++(x:list(t), y:list(t), ?$:?) (id 1):  {type-list:6:8}
 Submodules of type-list:
 list: 
  Module list(["t"])
-  imports         : 
   public submods  : 
-  public types    : list
+  public types    : list/1
   public resources: 
-  public procs    : [], [|], head, tail
+  public procs    : [](?$:list(t)) <1>
+                    [|](head:t, tail:list(t), ?$:list(t)) <2>
+                    head(!$rec:list(t), $field:t) <4>
+                    head($rec:list(t), ?$field:t) <3>
+                    tail(!$rec:list(t), $field:list(t)) <6>
+                    tail($rec:list(t), ?$field:list(t)) <5>
+  imports         : 
   types           : list: arity 1  {type-list:1:8}
   resources       : 
   procs           : []: [
