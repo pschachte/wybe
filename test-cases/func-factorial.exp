@@ -4,7 +4,7 @@ Public func factorial(n:int):int {func-factorial:1:8} = if <=(n {func-factorial:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : factorial(n:int, ?$:int) <1>
+  public procs    : factorial(n:int, ?$:int) <1> {func-factorial:1:8}
   imports         : 
   types           : 
   resources       : 

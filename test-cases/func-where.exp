@@ -4,7 +4,7 @@ Public func quad(x:int):int {func-where:1:8} = +(d {func-where:1:31}, d {func-wh
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : quad(x:int, ?$:int) <1>
+  public procs    : quad(x:int, ?$:int) <1> {func-where:1:8}
   imports         : 
   types           : 
   resources       : 

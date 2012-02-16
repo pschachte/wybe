@@ -4,7 +4,7 @@ Public func quad(x:int):int {func-let:1:8} = +(d {func-let:1:47}, d {func-let:1:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : quad(x:int, ?$:int) <1>
+  public procs    : quad(x:int, ?$:int) <1> {func-let:1:8}
   imports         : 
   types           : 
   resources       : 

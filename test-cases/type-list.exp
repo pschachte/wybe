@@ -9,7 +9,7 @@ Public func ++(x:list(t),y:list(t)):? {type-list:6:8} = if ==(x {type-list:7:8},
   public submods  : list
   public types    : 
   public resources: 
-  public procs    : ++(x:list(t), y:list(t), ?$:?) <1>
+  public procs    : ++(x:list(t), y:list(t), ?$:?) <1> {type-list:6:8}
   imports         : 
   types           : 
   resources       : 
@@ -35,12 +35,12 @@ list:
   public submods  : 
   public types    : list/1 {type-list:1:8}
   public resources: 
-  public procs    : [](?$:list(t)) <1>
-                    [|](head:t, tail:list(t), ?$:list(t)) <2>
-                    head(!$rec:list(t), $field:t) <4>
-                    head($rec:list(t), ?$field:t) <3>
-                    tail(!$rec:list(t), $field:list(t)) <6>
-                    tail($rec:list(t), ?$field:list(t)) <5>
+  public procs    : [](?$:list(t)) <1> {?}
+                    [|](head:t, tail:list(t), ?$:list(t)) <2> {?}
+                    head(!$rec:list(t), $field:t) <4> {?}
+                    head($rec:list(t), ?$field:t) <3> {?}
+                    tail(!$rec:list(t), $field:list(t)) <6> {?}
+                    tail($rec:list(t), ?$field:list(t)) <5> {?}
   imports         : 
   types           : list/1 {type-list:1:8}
   resources       : 

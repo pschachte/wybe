@@ -6,7 +6,7 @@ Public func distance(p1:position,p2:position):? {import:3:8} = sqrt(+(^(-(x(p2 {
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : distance(p1:position, p2:position, ?$:?) <1>
+  public procs    : distance(p1:position, p2:position, ?$:?) <1> {import:3:8}
   imports         : import position 
   types           : 
   resources       : 

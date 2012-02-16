@@ -4,7 +4,7 @@ Public proc yorn(prompt:string, ?result:bool) {proc-yorn2:1:8}[do print(prompt {
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : yorn(prompt:string, ?result:bool) <1>
+  public procs    : yorn(prompt:string, ?result:bool) <1> {proc-yorn2:1:8}
   imports         : 
   types           : 
   resources       : 

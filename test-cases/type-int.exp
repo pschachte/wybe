@@ -32,20 +32,20 @@ int:
   public submods  : 
   public types    : int/0 {type-int:1:8}
   public resources: 
-  public procs    : *(x:int, y:int, ?$:int) <7>
-                    +(x:int, ?y:int, z:int) <3>
-                    +(?x:int, y:int, z:int) <2>
-                    +(x:int, y:int, ?$:int) <1>
-                    -(x:int, ?y:int, z:int) <6>
-                    -(?x:int, y:int, z:int) <5>
-                    -(x:int, y:int, ?$:int) <4>
-                    /(x:int, y:int, ?$:int) <8>
-                    /=(x:int, y:int, ?$:bool) <10>
-                    <(x:int, y:int, ?$:bool) <11>
-                    <=(x:int, y:int, ?$:bool) <12>
-                    ==(x:int, y:int, ?$:bool) <9>
-                    >(x:int, y:int, ?$:bool) <13>
-                    >=(x:int, y:int, ?$:bool) <14>
+  public procs    : *(x:int, y:int, ?$:int) <7> {type-int:8:12}
+                    +(x:int, ?y:int, z:int) <3> {type-int:4:12}
+                    +(?x:int, y:int, z:int) <2> {type-int:3:12}
+                    +(x:int, y:int, ?$:int) <1> {type-int:2:12}
+                    -(x:int, ?y:int, z:int) <6> {type-int:7:12}
+                    -(?x:int, y:int, z:int) <5> {type-int:6:12}
+                    -(x:int, y:int, ?$:int) <4> {type-int:5:12}
+                    /(x:int, y:int, ?$:int) <8> {type-int:9:12}
+                    /=(x:int, y:int, ?$:bool) <10> {type-int:11:12}
+                    <(x:int, y:int, ?$:bool) <11> {type-int:12:12}
+                    <=(x:int, y:int, ?$:bool) <12> {type-int:13:12}
+                    ==(x:int, y:int, ?$:bool) <9> {type-int:10:12}
+                    >(x:int, y:int, ?$:bool) <13> {type-int:14:12}
+                    >=(x:int, y:int, ?$:bool) <14> {type-int:15:12}
   imports         : 
   types           : int/0 {type-int:1:8}
   resources       : 

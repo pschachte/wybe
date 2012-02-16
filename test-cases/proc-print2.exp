@@ -4,7 +4,7 @@ Public proc print2(x:int, y:int) {proc-print2:1:8}[print(x {proc-print2:2:14}) {
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : print2(x:int, y:int) <1>
+  public procs    : print2(x:int, y:int) <1> {proc-print2:1:8}
   imports         : 
   types           : 
   resources       : 

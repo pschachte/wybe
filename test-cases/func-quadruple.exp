@@ -5,8 +5,8 @@ Public func quadruple(a:int):int {func-quadruple:3:8} = double(double(a {func-qu
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : double(a:int, ?$:int) <1>
-                    quadruple(a:int, ?$:int) <2>
+  public procs    : double(a:int, ?$:int) <1> {func-quadruple:1:8}
+                    quadruple(a:int, ?$:int) <2> {func-quadruple:3:8}
   imports         : 
   types           : 
   resources       : 

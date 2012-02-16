@@ -314,7 +314,7 @@ addProc name proto stmts pos vis = do
          let defs  = ProcDef newid proto stmts pos:findWithDefault [] name procs
          in  Map.insert name defs procs))
     updateInterface vis
-      (updatePubProcs (mapListInsert name (ProcCallInfo newid proto)))
+      (updatePubProcs (mapListInsert name (ProcCallInfo newid proto pos)))
 
 mapListInsert :: Ord a => a -> b -> Map a [b] -> Map a [b]
 mapListInsert key elt =
@@ -499,10 +499,10 @@ resourceDefPosition (SimpleResource _ pos) = pos
 
 data ProcDef = ProcDef ProcID ProcProto [Placed Prim] (Maybe SourcePos)
 
-data ProcCallInfo = ProcCallInfo ProcID ProcProto
+data ProcCallInfo = ProcCallInfo ProcID ProcProto (Maybe SourcePos)
 
 procCallInfo :: ProcDef -> ProcCallInfo
-procCallInfo (ProcDef id proto _ _) = ProcCallInfo id proto
+procCallInfo (ProcDef id proto _ pos) = ProcCallInfo id proto pos
 
 
 type ProcID = Int
@@ -679,8 +679,8 @@ instance Show Module where
            showMap ", " "" showMaybeSourcePos (pubResources int) ++
            "\n  public procs    : " ++ 
            intercalate "\n                    " 
-           [show proto ++ " <" ++ show id ++ ">" | 
-            (ProcCallInfo id proto) <- 
+           [show proto ++ " <" ++ show id ++ ">" ++ showMaybeSourcePos pos | 
+            (ProcCallInfo id proto pos) <- 
                 List.concat $ Map.elems $ pubProcs int] ++
            if isNothing maybeimpl then "\n  implementation not available"
            else let impl = fromJust maybeimpl

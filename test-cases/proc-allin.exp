@@ -4,7 +4,7 @@ Public proc nada(x:int, y:int) {proc-allin:1:8}[=(?z {proc-allin:1:32}, +(x {pro
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : nada(x:int, y:int) <1>
+  public procs    : nada(x:int, y:int) <1> {proc-allin:1:8}
   imports         : 
   types           : 
   resources       : 

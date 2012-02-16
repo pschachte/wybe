@@ -4,7 +4,7 @@ Public proc print2(x:int, y:int) {proc-beer:1:8}[do for count from 99 {proc-beer
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : print2(x:int, y:int) <1>
+  public procs    : print2(x:int, y:int) <1> {proc-beer:1:8}
   imports         : 
   types           : 
   resources       : 

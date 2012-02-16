@@ -4,7 +4,7 @@ Public proc print2(x:int, y:int) {proc-hello:1:8}[println("hello, world" {proc-h
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : print2(x:int, y:int) <1>
+  public procs    : print2(x:int, y:int) <1> {proc-hello:1:8}
   imports         : 
   types           : 
   resources       : 
