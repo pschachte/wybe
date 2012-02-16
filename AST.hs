@@ -133,13 +133,12 @@ compileImport items dir modname params pos vis comp = do
 initCompiler :: Options -> [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
                Maybe SourcePos -> CompilerState
 initCompiler opts parse dir name params pos = 
-    let (typs,pubtyps) =
+    let typedef params' = Map.insert name 
+                          (TypeDef (List.length params') pos) Map.empty
+        (typs,pubtyps) =
             case params of
                 Nothing -> (Map.empty, Map.empty)
-                Just params' ->
-                    (Map.insert name 
-                     (TypeDef (List.length params') pos) Map.empty,
-                     Map.insert name (List.length params') Map.empty)
+                Just params' -> (typedef params', typedef params')
     in Compiler opts parse 0 0 [] $
        Module dir name params 
        (ModuleInterface pubtyps Set.empty Map.empty Set.empty Set.empty) 
@@ -259,7 +258,7 @@ updateImplementation implOp = do
 addType :: Ident -> TypeDef -> Visibility -> Compiler ()
 addType name def@(TypeDef arity _) vis = do
     updateImplementation (updateModTypes (Map.insert name def))
-    updateInterface vis (updatePubTypes (Map.insert name arity))
+    updateInterface vis (updatePubTypes (Map.insert name def))
 
 addSubmod :: Ident -> Module -> Visibility -> Compiler ()
 addSubmod name modl vis = do
@@ -393,15 +392,15 @@ updateModInterface fn mod =
 
 -- Holds everything needed to compile code that uses a module
 data ModuleInterface = ModuleInterface {
-    pubTypes :: Map Ident Int,       -- The types this module exports
+    pubTypes :: Map Ident TypeDef,   -- The types this module exports
     pubResources :: Set Ident,       -- XXX not handling resources properly
     pubProcs :: Map Ident [ProcCallInfo], -- The procs this module exports
     pubDependencies :: Set Ident,    -- The other modules this module exports
-    dependencies :: Set Ident            -- The other modules that must be linked
-    }                                   -- in by modules that depend on this one
+    dependencies :: Set Ident        -- The other modules that must be linked
+    }                               -- in by modules that depend on this one
 
 -- hack around Haskell's terrible setter syntax
-updatePubTypes :: (Map Ident Int -> Map Ident Int) -> 
+updatePubTypes :: (Map Ident TypeDef -> Map Ident TypeDef) -> 
                  ModuleInterface -> ModuleInterface
 updatePubTypes fn modint = modint {pubTypes = fn $ pubTypes modint}
 
@@ -667,9 +666,7 @@ instance Show Module where
             maybeimpl = modImplementation mod
         in "\n Module " ++ modName mod ++ maybeShow "(" (modParams mod) ")" ++
            "\n  public submods  : " ++ showIdSet (pubDependencies int) ++
-           "\n  public types    : " ++ 
-           intercalate ", " 
-           [n ++ "/" ++ show a | (n,a) <- Map.assocs $ pubTypes int] ++
+           "\n  public types    : " ++ showMapTypes (pubTypes int) ++
            "\n  public resources: " ++ showIdSet (pubResources int) ++
            "\n  public procs    : " ++ 
            intercalate "\n                    " 
@@ -683,22 +680,29 @@ instance Show Module where
                  intercalate "\n                    " 
                  [showModDependency mod dep | 
                   (mod,dep) <- Map.assocs $ modImports impl] ++
-                 "\n  types           : " ++ showMap (modTypes impl) ++
-                 "\n  resources       : " ++ showMap (modResources impl) ++
-                 "\n  procs           : " ++ showMap (modProcs impl) ++ "\n" ++
+                 "\n  types           : " ++ showMapTypes (modTypes impl) ++
+                 "\n  resources       : " ++ showMapLines (modResources impl) ++
+                 "\n  procs           : " ++ showMapLines (modProcs impl) ++ "\n" ++
                  "\nSubmodules of " ++ modName mod ++ ":\n" ++ 
-                 showMap (modSubmods impl)
+                 showMapLines (modSubmods impl)
+
+--showTypeMap :: Map Ident TypeDef -> String
 
 showIdSet :: Set Ident -> String
 showIdSet set = intercalate ", " $ Set.elems set
 
-showMap :: Show v => Map Ident v -> String
-showMap m = intercalate "\n                    " 
-            $ List.map (\(k,v) -> k ++ ": " ++ show v) $ Map.assocs m
+showMapLines :: Show v => Map Ident v -> String
+showMapLines = showMap "\n                    " ": "
+
+showMapTypes :: Map Ident TypeDef -> String
+showMapTypes = showMap ", " "/"
+
+showMap :: Show v => String -> String -> Map Ident v -> String
+showMap outersep innersep m = intercalate outersep
+            $ List.map (\(k,v) -> k ++ innersep ++ show v) $ Map.assocs m
 
 instance Show TypeDef where
-  show (TypeDef arity pos) = 
-    "arity " ++ show arity ++ " " ++ showMaybeSourcePos pos
+  show (TypeDef arity pos) = show arity ++ showMaybeSourcePos pos
 
 instance Show ResourceDef where
   show (CompoundResource ids pos) =

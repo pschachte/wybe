@@ -30,7 +30,7 @@ Submodules of type-int:
 int: 
  Module int([])
   public submods  : 
-  public types    : int/0
+  public types    : int/0 {type-int:1:8}
   public resources: 
   public procs    : *(x:int, y:int, ?$:int) <7>
                     +(x:int, ?y:int, z:int) <3>
@@ -47,7 +47,7 @@ int:
                     >(x:int, y:int, ?$:bool) <13>
                     >=(x:int, y:int, ?$:bool) <14>
   imports         : 
-  types           : int: arity 0  {type-int:1:8}
+  types           : int/0 {type-int:1:8}
   resources       : 
   procs           : *: [
 proc *(x:int, y:int, ?$:int) (id 7):  {type-int:8:12}

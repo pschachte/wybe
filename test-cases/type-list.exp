@@ -33,7 +33,7 @@ Submodules of type-list:
 list: 
  Module list(["t"])
   public submods  : 
-  public types    : list/1
+  public types    : list/1 {type-list:1:8}
   public resources: 
   public procs    : [](?$:list(t)) <1>
                     [|](head:t, tail:list(t), ?$:list(t)) <2>
@@ -42,7 +42,7 @@ list:
                     tail(!$rec:list(t), $field:list(t)) <6>
                     tail($rec:list(t), ?$field:list(t)) <5>
   imports         : 
-  types           : list: arity 1  {type-list:1:8}
+  types           : list/1 {type-list:1:8}
   resources       : 
   procs           : []: [
 proc [](?$:list(t)) (id 1):  {?}
