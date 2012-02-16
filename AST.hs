@@ -141,7 +141,7 @@ initCompiler opts parse dir name params pos =
                 Just params' -> (typedef params', typedef params')
     in Compiler opts parse 0 0 [] $
        Module dir name params 
-       (ModuleInterface pubtyps Set.empty Map.empty Set.empty Set.empty) 
+       (ModuleInterface pubtyps Map.empty Map.empty Set.empty Set.empty) 
        (Just $ ModuleImplementation Map.empty Map.empty typs 
         Map.empty Map.empty)
 
@@ -278,7 +278,8 @@ publicType name = do
 addResource :: Ident -> ResourceDef -> Visibility -> Compiler ()
 addResource name def vis = do
     updateImplementation (updateModResources (Map.insert name def))
-    updateInterface vis (updatePubResources (Set.insert name))
+    updateInterface vis (updatePubResources 
+                         (Map.insert name $ resourceDefPosition def))
 
 lookupResource :: Ident -> Compiler (Maybe ResourceDef)
 lookupResource name =
@@ -287,7 +288,7 @@ lookupResource name =
 publicResource :: Ident -> Compiler Bool
 publicResource name = do
   mod <- getModule
-  return $ Set.member name (pubResources $ modInterface mod)
+  return $ Map.member name (pubResources $ modInterface mod)
 
 addImport :: ModSpec -> Bool -> (Maybe [Ident]) -> Visibility -> Compiler ()
 addImport modspec imp specific vis = do
@@ -393,7 +394,8 @@ updateModInterface fn mod =
 -- Holds everything needed to compile code that uses a module
 data ModuleInterface = ModuleInterface {
     pubTypes :: Map Ident TypeDef,   -- The types this module exports
-    pubResources :: Set Ident,       -- XXX not handling resources properly
+    pubResources :: Map Ident (Maybe SourcePos),       
+                                    -- The resources this module exports
     pubProcs :: Map Ident [ProcCallInfo], -- The procs this module exports
     pubDependencies :: Set Ident,    -- The other modules this module exports
     dependencies :: Set Ident        -- The other modules that must be linked
@@ -404,7 +406,9 @@ updatePubTypes :: (Map Ident TypeDef -> Map Ident TypeDef) ->
                  ModuleInterface -> ModuleInterface
 updatePubTypes fn modint = modint {pubTypes = fn $ pubTypes modint}
 
-updatePubResources :: (Set Ident -> Set Ident) -> ModuleInterface -> ModuleInterface
+updatePubResources :: 
+    (Map Ident (Maybe SourcePos) -> Map Ident (Maybe SourcePos)) -> 
+    ModuleInterface -> ModuleInterface
 updatePubResources fn modint = modint {pubResources = fn $ pubResources modint}
 
 updatePubProcs :: (Map Ident [ProcCallInfo] -> Map Ident [ProcCallInfo]) -> 
@@ -488,6 +492,10 @@ typeDefArity (TypeDef arity _) = arity
 
 data ResourceDef = CompoundResource [Ident] (Maybe SourcePos)
                  | SimpleResource TypeSpec (Maybe SourcePos)
+
+resourceDefPosition :: ResourceDef -> Maybe SourcePos
+resourceDefPosition (CompoundResource _ pos) = pos
+resourceDefPosition (SimpleResource _ pos) = pos
 
 data ProcDef = ProcDef ProcID ProcProto [Placed Prim] (Maybe SourcePos)
 
@@ -667,7 +675,8 @@ instance Show Module where
         in "\n Module " ++ modName mod ++ maybeShow "(" (modParams mod) ")" ++
            "\n  public submods  : " ++ showIdSet (pubDependencies int) ++
            "\n  public types    : " ++ showMapTypes (pubTypes int) ++
-           "\n  public resources: " ++ showIdSet (pubResources int) ++
+           "\n  public resources: " ++ 
+           showMap ", " "" showMaybeSourcePos (pubResources int) ++
            "\n  public procs    : " ++ 
            intercalate "\n                    " 
            [show proto ++ " <" ++ show id ++ ">" | 
@@ -692,14 +701,14 @@ showIdSet :: Set Ident -> String
 showIdSet set = intercalate ", " $ Set.elems set
 
 showMapLines :: Show v => Map Ident v -> String
-showMapLines = showMap "\n                    " ": "
+showMapLines = showMap "\n                    " ": " show
 
 showMapTypes :: Map Ident TypeDef -> String
-showMapTypes = showMap ", " "/"
+showMapTypes = showMap ", " "/" show
 
-showMap :: Show v => String -> String -> Map Ident v -> String
-showMap outersep innersep m = intercalate outersep
-            $ List.map (\(k,v) -> k ++ innersep ++ show v) $ Map.assocs m
+showMap :: String -> String -> (v -> String) -> Map Ident v -> String
+showMap outersep innersep fn m = intercalate outersep
+            $ List.map (\(k,v) -> k ++ innersep ++ fn v) $ Map.assocs m
 
 instance Show TypeDef where
   show (TypeDef arity pos) = show arity ++ showMaybeSourcePos pos
