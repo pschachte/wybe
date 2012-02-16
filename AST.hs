@@ -41,15 +41,15 @@ import Control.Monad.Trans (liftIO)
 ----------------------------------------------------------------
 
 data Item
-     = TypeDecl Visibility TypeProto [Item] (Maybe SourcePos)
-     | ModuleDecl Visibility Ident [Item] (Maybe SourcePos)
-     | ImportMods Visibility Bool [ModSpec] (Maybe SourcePos)
-     | ImportItems Visibility Bool ModSpec [Ident] (Maybe SourcePos)
-     | ResourceDecl Visibility Ident TypeSpec (Maybe SourcePos)
-     | FuncDecl Visibility FnProto TypeSpec (Placed Exp) (Maybe SourcePos)
-     | ProcDecl Visibility ProcProto [Placed Stmt] (Maybe SourcePos)
-     | CtorDecl Visibility FnProto (Maybe SourcePos)
-     | StmtDecl Stmt (Maybe SourcePos)
+     = TypeDecl Visibility TypeProto [Item] OptPos
+     | ModuleDecl Visibility Ident [Item] OptPos
+     | ImportMods Visibility Bool [ModSpec] OptPos
+     | ImportItems Visibility Bool ModSpec [Ident] OptPos
+     | ResourceDecl Visibility Ident TypeSpec OptPos
+     | FuncDecl Visibility FnProto TypeSpec (Placed Exp) OptPos
+     | ProcDecl Visibility ProcProto [Placed Stmt] OptPos
+     | CtorDecl Visibility FnProto OptPos
+     | StmtDecl Stmt OptPos
 
 data Visibility = Public | Private
                   deriving (Eq, Show)
@@ -73,11 +73,13 @@ data FnProto = FnProto Ident [Param]
 --                    Handling Source Positions
 ----------------------------------------------------------------
 
+type OptPos = Maybe SourcePos
+
 data Placed t
     = Placed t SourcePos
     | Unplaced t
 
-place :: Placed t -> Maybe SourcePos
+place :: Placed t -> OptPos
 place (Placed _ pos) = Just pos
 place (Unplaced _) = Nothing
 
@@ -85,7 +87,7 @@ content :: Placed t -> t
 content (Placed content _) = content
 content (Unplaced content) = content
 
-maybePlace :: t -> Maybe SourcePos -> Placed t
+maybePlace :: t -> OptPos -> Placed t
 maybePlace t (Just pos) = Placed t pos
 maybePlace t Nothing    = Unplaced t
 
@@ -106,21 +108,21 @@ data CompilerState = Compiler {
 type Compiler = StateT CompilerState IO
 
 runCompiler :: Options -> [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
-              Maybe SourcePos -> Compiler () -> IO (Module,[String])
+              OptPos -> Compiler () -> IO (Module,[String])
 runCompiler opts parse dir modname params pos comp = do
     final <- execStateT comp $ initCompiler opts parse dir modname 
             params pos
     return $ (modul final,errs final)
 
 compileSubmodule :: [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
-                   Maybe SourcePos -> Visibility -> Compiler () -> Compiler ()
+                   OptPos -> Visibility -> Compiler () -> Compiler ()
 compileSubmodule items dir modname params pos vis comp = do
     submod <- compileImport items dir modname params pos vis comp
     addSubmod modname submod pos vis
     
 
 compileImport :: [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
-                   Maybe SourcePos -> Visibility -> Compiler () -> Compiler Module
+                   OptPos -> Visibility -> Compiler () -> Compiler Module
 compileImport items dir modname params pos vis comp = do
     state <- get
     let opts = options state
@@ -131,7 +133,7 @@ compileImport items dir modname params pos vis comp = do
     
 
 initCompiler :: Options -> [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
-               Maybe SourcePos -> CompilerState
+               OptPos -> CompilerState
 initCompiler opts parse dir name params pos = 
     let typedef params' = Map.insert name 
                           (TypeDef (List.length params') pos) Map.empty
@@ -202,7 +204,7 @@ getModuleImplementationMaybe fn = do
 
 
 
-errMsg :: String -> Maybe SourcePos -> Compiler ()
+errMsg :: String -> OptPos -> Compiler ()
 errMsg msg pos = addErrMsgs [makeMessage msg pos]
 
 addErrMsgs :: [String] -> Compiler ()
@@ -210,7 +212,7 @@ addErrMsgs msgs = do
     state <- get
     put state { errs = (errs state) ++ msgs }
 
-makeMessage :: String -> Maybe SourcePos -> String
+makeMessage :: String -> OptPos -> String
 makeMessage msg Nothing = msg
 makeMessage msg (Just pos) =
   (sourceName pos) ++ ":" ++ 
@@ -260,7 +262,7 @@ addType name def@(TypeDef arity _) vis = do
     updateImplementation (updateModTypes (Map.insert name def))
     updateInterface vis (updatePubTypes (Map.insert name def))
 
-addSubmod :: Ident -> Module -> Maybe SourcePos -> Visibility -> Compiler ()
+addSubmod :: Ident -> Module -> OptPos -> Visibility -> Compiler ()
 addSubmod name modl pos vis = do
     updateImplementation (updateModSubmods (Map.insert name modl))
     updateInterface vis (updatePubDependencies (Map.insert name pos))
@@ -304,7 +306,7 @@ addImport modspec imp specific vis = do
          in Map.insert modspec (ModDependency uses' imps') moddeps))
     updateInterface vis (updateDependencies (Set.insert $ last modspec))
 
-addProc :: Ident -> ProcProto -> [Placed Prim] -> (Maybe SourcePos)
+addProc :: Ident -> ProcProto -> [Placed Prim] -> OptPos
            -> Visibility -> Compiler ()
 addProc name proto stmts pos vis = do
     newid <- nextProcId
@@ -321,7 +323,7 @@ mapListInsert key elt =
     Map.alter (\maybe -> Just $ elt:fromMaybe [] maybe) key
 
 
-replaceProc :: Ident -> Int -> ProcProto -> [Placed Prim] -> (Maybe SourcePos)
+replaceProc :: Ident -> Int -> ProcProto -> [Placed Prim] -> OptPos
                -> Visibility -> Compiler ()
 replaceProc name id proto stmts pos vis = do
     updateImplementation
@@ -394,10 +396,10 @@ updateModInterface fn mod =
 -- Holds everything needed to compile code that uses a module
 data ModuleInterface = ModuleInterface {
     pubTypes :: Map Ident TypeDef,   -- The types this module exports
-    pubResources :: Map Ident (Maybe SourcePos),       
+    pubResources :: Map Ident OptPos,       
                                     -- The resources this module exports
     pubProcs :: Map Ident [ProcCallInfo], -- The procs this module exports
-    pubDependencies :: Map Ident (Maybe SourcePos),    
+    pubDependencies :: Map Ident OptPos,    
                                     -- The other modules this module exports
     dependencies :: Set Ident        -- The other modules that must be linked
     }                               -- in by modules that depend on this one
@@ -408,7 +410,7 @@ updatePubTypes :: (Map Ident TypeDef -> Map Ident TypeDef) ->
 updatePubTypes fn modint = modint {pubTypes = fn $ pubTypes modint}
 
 updatePubResources :: 
-    (Map Ident (Maybe SourcePos) -> Map Ident (Maybe SourcePos)) -> 
+    (Map Ident OptPos -> Map Ident OptPos) -> 
     ModuleInterface -> ModuleInterface
 updatePubResources fn modint = modint {pubResources = fn $ pubResources modint}
 
@@ -417,7 +419,7 @@ updatePubProcs :: (Map Ident [ProcCallInfo] -> Map Ident [ProcCallInfo]) ->
 updatePubProcs fn modint = modint {pubProcs = fn $ pubProcs modint}
 
 updatePubDependencies :: 
-    (Map Ident (Maybe SourcePos) -> Map Ident (Maybe SourcePos)) -> 
+    (Map Ident OptPos -> Map Ident OptPos) -> 
     ModuleInterface -> ModuleInterface
 updatePubDependencies fn modint = 
     modint {pubDependencies = fn $ pubDependencies modint}
@@ -486,22 +488,22 @@ addImports (Just imps) vis (ImportSpec map vis') =
 addImports (Just imps) vis ImportNothing = 
     ImportSpec (List.foldr (\k -> Map.insert k vis) Map.empty imps) Nothing
 
-data TypeDef = TypeDef Int (Maybe SourcePos)
+data TypeDef = TypeDef Int OptPos
 
 typeDefArity :: TypeDef -> Int
 typeDefArity (TypeDef arity _) = arity
 
 
-data ResourceDef = CompoundResource [Ident] (Maybe SourcePos)
-                 | SimpleResource TypeSpec (Maybe SourcePos)
+data ResourceDef = CompoundResource [Ident] OptPos
+                 | SimpleResource TypeSpec OptPos
 
-resourceDefPosition :: ResourceDef -> Maybe SourcePos
+resourceDefPosition :: ResourceDef -> OptPos
 resourceDefPosition (CompoundResource _ pos) = pos
 resourceDefPosition (SimpleResource _ pos) = pos
 
-data ProcDef = ProcDef ProcID ProcProto [Placed Prim] (Maybe SourcePos)
+data ProcDef = ProcDef ProcID ProcProto [Placed Prim] OptPos
 
-data ProcCallInfo = ProcCallInfo ProcID ProcProto (Maybe SourcePos)
+data ProcCallInfo = ProcCallInfo ProcID ProcProto OptPos
 
 procCallInfo :: ProcDef -> ProcCallInfo
 procCallInfo (ProcDef id proto _ pos) = ProcCallInfo id proto pos
@@ -664,7 +666,7 @@ instance Show FnProto where
 instance Show t => Show (Placed t) where
   show pl = show (content pl) ++ showMaybeSourcePos (place pl)
     
-showMaybeSourcePos :: Maybe SourcePos -> String
+showMaybeSourcePos :: OptPos -> String
 showMaybeSourcePos (Just pos) = 
   " {" ++ takeBaseName (sourceName pos) ++ ":" 
   ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos) ++ "}"
@@ -707,7 +709,7 @@ showMapLines = showMap "\n                    " ": " show
 showMapTypes :: Map Ident TypeDef -> String
 showMapTypes = showMap ", " "/" show
 
-showMapPoses :: Map Ident (Maybe SourcePos) -> String
+showMapPoses :: Map Ident OptPos -> String
 showMapPoses = showMap ", " "" showMaybeSourcePos
 
 showMap :: String -> String -> (v -> String) -> Map Ident v -> String
@@ -758,7 +760,7 @@ showBlock ind stmts = concat $ List.map (showPrim ind) stmts
 showPrim :: Int -> Placed Prim -> String
 showPrim ind stmt = showPrim' ind (content stmt) (place stmt)
 
-showPrim' :: Int -> Prim -> Maybe SourcePos -> String
+showPrim' :: Int -> Prim -> OptPos -> String
 showPrim' ind (PrimCall name id args) pos =
   startLine ind ++ name ++ maybeShow "<" id ">"
   ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
