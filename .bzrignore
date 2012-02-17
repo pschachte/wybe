@@ -9,8 +9,8 @@ intro.pdf
 intro.out
 frg
 test-cases/*.out
-frgc
 design.pdf
 Version.hs
 redesign.pdf
 Version.lhs
+frgmk

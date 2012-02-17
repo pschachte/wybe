@@ -18,6 +18,7 @@ import Version
 
 data Options = Options{  
     optForce         :: Bool
+    , optForceAll    :: Bool
     , optVerbosity   :: Int
     , optShowVersion :: Bool
     , optShowHelp    :: Bool
@@ -25,6 +26,7 @@ data Options = Options{
 
 defaultOptions    = Options
  { optForce       = False
+ , optForceAll    = False
  , optVerbosity   = 0
  , optShowVersion = False
  , optShowHelp    = False
@@ -34,7 +36,10 @@ options :: [OptDescr (Options -> Options)]
 options =
  [ Option ['f'] ["force"]
      (NoArg (\ opts -> opts { optForce = True }))
-   "force compilation even when unnecessary"
+   "force compilation of specified files"
+ , Option [] ["force-all"]
+     (NoArg (\ opts -> opts { optForceAll = True }))
+   "force compilation of all dependencies"
  , Option ['v'] ["verbose"]
      (NoArg (\ opts -> opts { optVerbosity = 1 + optVerbosity opts }))
      "verbose output on stderr"
@@ -48,7 +53,7 @@ options =
 
 
 header :: String
-header = "Usage: frgc [OPTION...] files..."
+header = "Usage: frgc [OPTION...] targets..."
 
 compilerOpts :: [String] -> IO (Options, [String])
 compilerOpts argv = 

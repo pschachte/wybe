@@ -12,6 +12,7 @@ module AST (-- Types just for parsing
   -- Source Position Types
   Placed(..), place, content, maybePlace,
   -- AST types
+  TargetType(..), targetType,
   Module(..), ModuleInterface(..), ModSpec, ProcDef(..), Ident, VarName, 
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
   expToStmt, Prim(..), PrimArg(..), extractInterface,
@@ -35,6 +36,7 @@ import System.FilePath
 import Control.Monad
 import Control.Monad.Trans.State
 import Control.Monad.Trans (liftIO)
+import Config
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
@@ -108,8 +110,8 @@ data CompilerState = Compiler {
 type Compiler = StateT CompilerState IO
 
 runCompiler :: Options -> [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
-              OptPos -> Compiler () -> IO (Module,[String])
-runCompiler opts parse dir modname params pos comp = do
+              OptPos -> TargetType -> Compiler () -> IO (Module,[String])
+runCompiler opts parse dir modname params pos tType comp = do
     final <- execStateT comp $ initCompiler opts parse dir modname 
             params pos
     return $ (modul final,errs final)
@@ -127,7 +129,7 @@ compileImport items dir modname params pos vis comp = do
     state <- get
     let opts = options state
     (submod,errs) <- liftIO . runCompiler opts items dir modname 
-                    params pos $ comp
+                    params pos Object $ comp
     addErrMsgs errs
     return submod
     
@@ -368,6 +370,16 @@ reportErrors = do
 ----------------------------------------------------------------
 --                            AST Types
 ----------------------------------------------------------------
+
+data TargetType = Interface | Object | Executable
+
+targetType :: String -> Maybe TargetType
+targetType ext =
+    let ext' = dropWhile (=='.') ext
+    in if ext' == interfaceExtension then Just Interface
+       else if ext' == objectExtension then Just Object
+            else if ext' == executableExtension then Just Executable
+                 else Nothing
 
 -- Holds everything needed to compile a module
 data Module = Module {

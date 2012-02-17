@@ -13,4 +13,4 @@ import Compiler
 main :: IO ()
 main = do
     (opts, files) <- handleCmdline
-    mapM_ (processFile opts) files
+    mapM_ (makeTarget opts) files
