@@ -6,7 +6,7 @@
 --  Copyright: © 2012 Peter Schachte.  All rights reserved.
 --
 ----------------------------------------------------------------
---                      Compiler Optionsa
+--                      Compiler Options
 ----------------------------------------------------------------
 
 module Options (Options(..), handleCmdline) where
