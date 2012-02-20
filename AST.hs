@@ -17,14 +17,14 @@ module AST (-- Types just for parsing
   expToStmt, Prim(..), PrimArg(..), extractInterface,
   -- Stateful monad for the compilation process
   MessageLevel(..), BuilderState(..), Builder(..),
+  getBuilder, getCompiler, errs,
   CompilerState(..), Compiler, runCompiler, compileSubmodule,
   getState, getDirectory, getModuleName, getModuleParams, option, 
   optionallyPutStr, message, errMsg, warn, inform, 
   initVars, freshVar, nextProcId, 
   addImport, compileImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
-  addProc, replaceProc, lookupProc, publicProc,
-  reportErrors
+  addProc, replaceProc, lookupProc, publicProc
   ) where
 
 import Options
@@ -116,6 +116,8 @@ type Builder = StateT BuilderState IO
 
 data CompilerState = Compiler {
   builderState :: BuilderState,
+  thisLoadNum :: Int,    -- the loadCount when loading this file
+  minDependencyNum :: Int, -- the smallest loadNum of all dependencies
   varCount :: Int,      -- a counter for introduced variables (per proc)
   procCount :: Int,     -- a counter for gensym-ed proc names
   modul :: Module       -- the module being produced
@@ -149,8 +151,10 @@ updateBuilder updater =
 runCompiler :: BuilderState -> FilePath -> Ident -> Maybe [Ident] -> 
               OptPos -> Compiler () -> IO (Module,BuilderState)
 runCompiler bState dir modname params pos comp = do
+    let loadNum = loadCount bState
+    let bState' = bState { loadCount = 1 + loadNum }
     final <- execStateT 
-            comp $ initCompiler bState dir modname params pos
+            comp $ initCompiler bState' dir modname params pos
     return $ (modul final,builderState final)
 
 compileSubmodule :: FilePath -> Ident -> Maybe [Ident] -> 
@@ -178,7 +182,8 @@ initCompiler bState dir name params pos =
             case params of
                 Nothing -> (Map.empty, Map.empty)
                 Just params' -> (typedef params', typedef params')
-    in Compiler bState 0 0 $
+        loadId = loadCount bState
+    in Compiler bState loadId loadId 0 0 $
        Module dir name params 
        (ModuleInterface pubtyps Map.empty Map.empty Map.empty Set.empty) 
        (Just $ ModuleImplementation Map.empty Map.empty typs 
@@ -403,11 +408,6 @@ optionallyPutStr opt selector = do
     state <- get
     when check (liftIO . putStrLn $ selector state)
 
-
-reportErrors :: Compiler ()
-reportErrors = do
-    errs <- getState errs
-    unless (List.null errs) (liftIO . putStrLn $ intercalate "\n" errs)
 
 ----------------------------------------------------------------
 --                            AST Types

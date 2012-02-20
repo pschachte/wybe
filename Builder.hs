@@ -25,6 +25,7 @@ import Control.Monad.Trans
 import System.Time     (ClockTime)
 import System.Directory (getModificationTime, doesFileExist, 
                          getCurrentDirectory)
+import System.Exit (exitFailure)
 import Config
 
 getBuilderField :: (BuilderState -> t) -> Builder t
@@ -54,10 +55,11 @@ getLoadedModule modspec = do
 
 buildTargets :: Options -> [FilePath] -> IO ()
 buildTargets opts targets = do
-    execStateT 
-      (mapM_ (buildTarget $ optForce opts || optForceAll opts) targets)
-      (Builder opts [] False Map.empty 0)
-    return ()
+    final <- execStateT 
+            (mapM_ (buildTarget $ optForce opts || optForceAll opts) targets)
+            (Builder opts [] False Map.empty 0)
+    putStr $ intercalate "\n" $ msgs final
+    when (errorState final) exitFailure
 
 
 buildTarget :: Bool -> FilePath -> Builder ()
@@ -153,7 +155,6 @@ compiler items = do
 --    when (modname /= "") generateInterface 
 --    flowCheck
     typeCheck
-    reportErrors
 
 
 moduleFilePath :: ModSpec -> FilePath -> IO FilePath
