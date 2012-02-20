@@ -8,9 +8,9 @@
 module Main where
 
 import Options
-import Compiler
+import Builder
 
 main :: IO ()
 main = do
     (opts, files) <- handleCmdline
-    mapM_ (makeTarget opts) files
+    buildTargets opts files

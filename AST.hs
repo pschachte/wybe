@@ -12,12 +12,11 @@ module AST (-- Types just for parsing
   -- Source Position Types
   Placed(..), place, content, maybePlace,
   -- AST types
-  TargetType(..), targetType,
   Module(..), ModuleInterface(..), ModSpec, ProcDef(..), Ident, VarName, 
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
   expToStmt, Prim(..), PrimArg(..), extractInterface,
   -- Stateful monad for the compilation process
-  CompilerState(..), Compiler, runCompiler, compileSubmodule, compileImport,
+  CompilerState(..), Compiler, runCompiler, compileSubmodule,
   getState, getDirectory, getModuleName, getModuleParams, option, 
   optionallyPutStr, errMsg, addErrMsgs, initVars, freshVar, nextProcId, 
   addImport, addType, addSubmod, lookupType, publicType,
@@ -110,8 +109,8 @@ data CompilerState = Compiler {
 type Compiler = StateT CompilerState IO
 
 runCompiler :: Options -> [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
-              OptPos -> TargetType -> Compiler () -> IO (Module,[String])
-runCompiler opts parse dir modname params pos tType comp = do
+              OptPos -> Compiler () -> IO (Module,[String])
+runCompiler opts parse dir modname params pos comp = do
     final <- execStateT comp $ initCompiler opts parse dir modname 
             params pos
     return $ (modul final,errs final)
@@ -119,6 +118,7 @@ runCompiler opts parse dir modname params pos tType comp = do
 compileSubmodule :: [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
                    OptPos -> Visibility -> Compiler () -> Compiler ()
 compileSubmodule items dir modname params pos vis comp = do
+    return ()
     submod <- compileImport items dir modname params pos vis comp
     addSubmod modname submod pos vis
     
@@ -128,8 +128,8 @@ compileImport :: [Item] -> FilePath -> Ident -> Maybe [Ident] ->
 compileImport items dir modname params pos vis comp = do
     state <- get
     let opts = options state
-    (submod,errs) <- liftIO . runCompiler opts items dir modname 
-                    params pos Object $ comp
+    (submod,errs) <- (liftIO . runCompiler opts items dir modname 
+                     params pos) comp
     addErrMsgs errs
     return submod
     
@@ -370,16 +370,6 @@ reportErrors = do
 ----------------------------------------------------------------
 --                            AST Types
 ----------------------------------------------------------------
-
-data TargetType = Interface | Object | Executable
-
-targetType :: String -> Maybe TargetType
-targetType ext =
-    let ext' = dropWhile (=='.') ext
-    in if ext' == interfaceExtension then Just Interface
-       else if ext' == objectExtension then Just Object
-            else if ext' == executableExtension then Just Executable
-                 else Nothing
 
 -- Holds everything needed to compile a module
 data Module = Module {
