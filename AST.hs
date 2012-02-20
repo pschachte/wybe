@@ -16,10 +16,12 @@ module AST (-- Types just for parsing
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
   expToStmt, Prim(..), PrimArg(..), extractInterface,
   -- Stateful monad for the compilation process
+  MessageLevel(..), BuilderState(..), Builder(..),
   CompilerState(..), Compiler, runCompiler, compileSubmodule,
   getState, getDirectory, getModuleName, getModuleParams, option, 
-  optionallyPutStr, errMsg, addErrMsgs, initVars, freshVar, nextProcId, 
-  addImport, addType, addSubmod, lookupType, publicType,
+  optionallyPutStr, message, errMsg, warn, inform, 
+  initVars, freshVar, nextProcId, 
+  addImport, compileImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
   reportErrors
@@ -97,53 +99,86 @@ maybePlace t Nothing    = Unplaced t
 --                    Compiler monad
 ----------------------------------------------------------------
 
+data MessageLevel = Informational | Warning | Error
+                  deriving (Eq, Ord, Show)
+
+
+data BuilderState = Builder {
+  builderOptions :: Options, -- compiler options specified on the command line
+  msgs :: [String],        -- warnings, error messages, and info messages
+  errorState :: Bool,    -- whether or not we've seen any errors
+  modules :: Map ModSpec Module, -- interfaces of known modules
+  loadCount :: Int         -- counter of module load order
+  } deriving Show
+
+type Builder = StateT BuilderState IO
+
+
 data CompilerState = Compiler {
-  options :: Options,   -- compiler options specified on the command line
-  parseTree :: [Item],  -- the current module's parse tree
+  builderState :: BuilderState,
   varCount :: Int,      -- a counter for introduced variables (per proc)
   procCount :: Int,     -- a counter for gensym-ed proc names
-  errs :: [String],     -- error messages
   modul :: Module       -- the module being produced
   } deriving Show
 
 type Compiler = StateT CompilerState IO
 
-runCompiler :: Options -> [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
-              OptPos -> Compiler () -> IO (Module,[String])
-runCompiler opts parse dir modname params pos comp = do
-    final <- execStateT comp $ initCompiler opts parse dir modname 
-            params pos
-    return $ (modul final,errs final)
+options :: CompilerState -> Options
+options = builderOptions . builderState
 
-compileSubmodule :: [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
-                   OptPos -> Visibility -> Compiler () -> Compiler ()
-compileSubmodule items dir modname params pos vis comp = do
-    return ()
-    submod <- compileImport items dir modname params pos vis comp
-    addSubmod modname submod pos vis
-    
+errs :: CompilerState -> [String]
+errs = msgs . builderState
 
-compileImport :: [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
-                   OptPos -> Visibility -> Compiler () -> Compiler Module
-compileImport items dir modname params pos vis comp = do
+getCompiler :: (CompilerState -> t) -> Compiler t
+getCompiler getter = do
     state <- get
-    let opts = options state
-    (submod,errs) <- (liftIO . runCompiler opts items dir modname 
-                     params pos) comp
-    addErrMsgs errs
+    return $ getter state
+
+updateCompiler :: (CompilerState -> CompilerState) -> Compiler ()
+updateCompiler updater = do
+    state <- get
+    put $ updater state
+
+getBuilder :: (BuilderState -> t) -> Compiler t
+getBuilder getter = getCompiler (getter . builderState)
+
+updateBuilder :: (BuilderState -> BuilderState) -> Compiler ()
+updateBuilder updater = 
+    updateCompiler (\cs -> cs { builderState = updater $ builderState cs })
+
+runCompiler :: BuilderState -> FilePath -> Ident -> Maybe [Ident] -> 
+              OptPos -> Compiler () -> IO (Module,BuilderState)
+runCompiler bState dir modname params pos comp = do
+    final <- execStateT 
+            comp $ initCompiler bState dir modname params pos
+    return $ (modul final,builderState final)
+
+compileSubmodule :: FilePath -> Ident -> Maybe [Ident] -> 
+                   OptPos -> Visibility -> Compiler () -> Compiler ()
+compileSubmodule dir modname params pos vis comp = do
+    submod <- compileImport dir modname params pos vis comp
+    addSubmod modname submod pos vis
+
+
+compileImport :: FilePath -> Ident -> Maybe [Ident] -> 
+                   OptPos -> Visibility -> Compiler () -> Compiler Module
+compileImport dir modname params pos vis comp = do
+    bState <- getCompiler builderState
+    (submod,bstate') <- (liftIO . runCompiler bState dir modname params pos) comp
+    updateBuilder $ const bstate'
     return submod
     
 
-initCompiler :: Options -> [Item] -> FilePath -> Ident -> Maybe [Ident] -> 
+initCompiler :: BuilderState -> FilePath -> Ident -> Maybe [Ident] -> 
                OptPos -> CompilerState
-initCompiler opts parse dir name params pos = 
+initCompiler bState dir name params pos = 
     let typedef params' = Map.insert name 
                           (TypeDef (List.length params') pos) Map.empty
         (typs,pubtyps) =
             case params of
                 Nothing -> (Map.empty, Map.empty)
                 Just params' -> (typedef params', typedef params')
-    in Compiler opts parse 0 0 [] $
+    in Compiler bState 0 0 $
        Module dir name params 
        (ModuleInterface pubtyps Map.empty Map.empty Map.empty Set.empty) 
        (Just $ ModuleImplementation Map.empty Map.empty typs 
@@ -206,13 +241,20 @@ getModuleImplementationMaybe fn = do
 
 
 
-errMsg :: String -> OptPos -> Compiler ()
-errMsg msg pos = addErrMsgs [makeMessage msg pos]
+message :: MessageLevel -> String -> OptPos -> Compiler ()
+message lvl msg pos = do
+    updateBuilder (\bldr -> bldr { msgs = (msgs bldr) ++ [makeMessage msg pos]})
+    when (lvl == Error) (updateBuilder (\bldr -> bldr { errorState = True }))
 
-addErrMsgs :: [String] -> Compiler ()
-addErrMsgs msgs = do
-    state <- get
-    put state { errs = (errs state) ++ msgs }
+errMsg :: String -> OptPos -> Compiler ()
+errMsg = message Error
+
+warn :: String -> OptPos -> Compiler ()
+warn = message Warning
+
+inform :: String -> OptPos -> Compiler ()
+inform = message Informational
+
 
 makeMessage :: String -> OptPos -> String
 makeMessage msg Nothing = msg

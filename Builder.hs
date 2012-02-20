@@ -27,16 +27,6 @@ import System.Directory (getModificationTime, doesFileExist,
                          getCurrentDirectory)
 import Config
 
-data BuilderState = Builder {
-  builderOptions :: Options, -- compiler options specified on the command line
-  msgs :: [String],        -- warnings, error messages, and info messages
-  errorState :: Bool,      -- whether or not we've seen any errors
-  modules :: Map ModSpec Module, -- interfaces of known modules
-  loadCount :: Int         -- counter of module load order
-  } deriving Show
-
-type Builder = StateT BuilderState IO
-
 getBuilderField :: (BuilderState -> t) -> Builder t
 getBuilderField selector = do
     state <- get
@@ -111,11 +101,6 @@ buildModule force modname objfile srcfile = do
                            return (modl,False)
 
 
-loadModule :: FilePath -> Builder Module
-loadModule objfile =
-    error "Can't handle pre-compiled files yet"
-
-
 buildModule' :: Ident -> FilePath -> FilePath -> Builder Module
 buildModule' modname objfile srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
@@ -123,20 +108,27 @@ buildModule' modname objfile srcfile = do
     processTokens dir modname tokens
 
 
--- XXX Build executable from object file
-buildExecutable :: FilePath -> Module -> Builder ()
-buildExecutable _ _ = return ()
-
-
 processTokens :: FilePath -> String -> [Token] -> Builder Module
 processTokens dir modname tokens = do
     let parseTree = parse tokens
-    opts <- getBuilderField builderOptions
-    (modl,errs) <- (liftIO . runCompiler opts parseTree dir modname 
-                   Nothing Nothing) compiler
-    updateBuilderField (\bState -> bState { msgs = (msgs bState)++errs})
+    bldr <- get
+    (modl,bldr') <- (liftIO . runCompiler bldr dir modname Nothing Nothing) 
+                   (compiler parseTree)
+    put bldr'
     return modl
     
+
+-- XXX Build executable from object file
+buildExecutable :: FilePath -> Module -> Builder ()
+buildExecutable _ _ =
+    error "Can't build executables yet"
+
+
+-- XXX Load module export info from compiled file
+loadModule :: FilePath -> Builder Module
+loadModule objfile =
+    error "Can't handle pre-compiled files yet"
+
 
 -- getModuleImports :: ModSpec -> Visibility -> Builder Module
 -- getModuleImports modspec vis = do
@@ -150,11 +142,11 @@ processTokens dir modname tokens = do
 --     return $ extractInterface modul
 
 
-compiler :: Compiler ()
-compiler = do
+compiler :: [Item] -> Compiler ()
+compiler items = do
     optionallyPutStr ((>0) . optVerbosity)
-      $ intercalate "\n" . List.map show . parseTree
-    Normalise.normalise
+      $ const (intercalate "\n" $ List.map show items)
+    Normalise.normalise items
     optionallyPutStr ((>0) . optVerbosity) (show . modul)
 --    handleImports
     modname <- getModuleName

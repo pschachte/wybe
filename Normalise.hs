@@ -13,18 +13,17 @@ import Data.Set as Set
 import Data.List as List
 import Text.ParserCombinators.Parsec.Pos
 
-normalise :: Compiler ()
-normalise = do
-    items <- getState parseTree
+normalise :: [Item] -> Compiler ()
+normalise items = do
     mapM_ normaliseItem items
 
 normaliseItem :: Item -> Compiler ()
 normaliseItem (TypeDecl vis (TypeProto name params) items pos) = do
     fname <- getDirectory
-    compileSubmodule items fname name (Just params) pos vis normalise
+    compileSubmodule fname name (Just params) pos vis (normalise items)
 normaliseItem (ModuleDecl vis name items pos) = do
     fname <- getDirectory
-    compileSubmodule items fname name Nothing pos vis normalise
+    compileSubmodule fname name Nothing pos vis (normalise items)
 normaliseItem (ImportMods vis imp modspecs pos) = do
     mapM_ (\spec -> addImport spec imp Nothing vis) modspecs
 normaliseItem (ImportItems vis imp modspec imports pos) = do
