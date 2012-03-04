@@ -21,7 +21,7 @@ end
 
 Submodules of submodule:
 privatetest: 
- Module privatetest
+ Module submodule.privatetest
   public submods  : 
   public types    : 
   public resources: 
@@ -36,10 +36,10 @@ proc hidden() (id 1):  {submodule:2:5}
 proc semi_hidden() (id 2):  {submodule:3:12}
     print("public proc in a private module") {submodule:3:29}]
 
-Submodules of privatetest:
+Submodules of submodule.privatetest:
 
                     publictest: 
- Module publictest
+ Module submodule.publictest
   public submods  : 
   public types    : 
   public resources: 
@@ -54,5 +54,5 @@ proc semi_visible() (id 1):  {submodule:7:5}
 proc visible() (id 2):  {submodule:8:12}
     print("public proc in a public module") {submodule:8:25}]
 
-Submodules of publictest:
+Submodules of submodule.publictest:
 

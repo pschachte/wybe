@@ -12,14 +12,16 @@ module AST (-- Types just for parsing
   -- Source Position Types
   Placed(..), place, content, maybePlace,
   -- AST types
-  Module(..), ModuleInterface(..), ModSpec, ProcDef(..), Ident, VarName, 
+  Module(..), ModuleInterface(..), ModuleImplementation(..),
+  ModSpec, ProcDef(..), Ident, VarName, 
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
   expToStmt, Prim(..), PrimArg(..), extractInterface,
   -- Stateful monad for the compilation process
   MessageLevel(..), BuilderState(..), Builder(..),
   getBuilder, getCompiler, errs,
   CompilerState(..), Compiler, runCompiler, compileSubmodule,
-  getState, getDirectory, getModuleName, getModuleParams, option, 
+  updateModules, getModuleImplementationField, getModule, 
+  getState, getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, message, errMsg, warn, inform, 
   initVars, freshVar, nextProcId, 
   addImport, compileImport, addType, addSubmod, lookupType, publicType,
@@ -148,35 +150,41 @@ updateBuilder :: (BuilderState -> BuilderState) -> Compiler ()
 updateBuilder updater = 
     updateCompiler (\cs -> cs { builderState = updater $ builderState cs })
 
-runCompiler :: BuilderState -> FilePath -> Ident -> Maybe [Ident] -> 
+updateModules :: (Map ModSpec Module -> Map ModSpec Module) -> Compiler ()
+updateModules updater = do
+    updateBuilder (\bs -> bs { modules = updater $ modules bs })
+
+
+runCompiler :: BuilderState -> FilePath -> ModSpec -> Maybe [Ident] -> 
               OptPos -> Compiler () -> IO (Module,BuilderState)
-runCompiler bState dir modname params pos comp = do
+runCompiler bState dir spec params pos comp = do
     let loadNum = loadCount bState
     let bState' = bState { loadCount = 1 + loadNum }
     final <- execStateT 
-            comp $ initCompiler bState' dir modname params pos
+            comp $ initCompiler bState' dir spec params pos
     return $ (modul final,builderState final)
 
 compileSubmodule :: FilePath -> Ident -> Maybe [Ident] -> 
                    OptPos -> Visibility -> Compiler () -> Compiler ()
 compileSubmodule dir modname params pos vis comp = do
-    submod <- compileImport dir modname params pos vis comp
+    thismod <- getModuleSpec
+    submod <- compileImport dir (thismod++[modname]) params pos vis comp
     addSubmod modname submod pos vis
 
 
-compileImport :: FilePath -> Ident -> Maybe [Ident] -> 
-                   OptPos -> Visibility -> Compiler () -> Compiler Module
-compileImport dir modname params pos vis comp = do
+compileImport :: FilePath -> ModSpec -> Maybe [Ident] -> 
+                OptPos -> Visibility -> Compiler () -> Compiler Module
+compileImport dir spec params pos vis comp = do
     bState <- getCompiler builderState
-    (submod,bstate') <- (liftIO . runCompiler bState dir modname params pos) comp
+    (submod,bstate') <- (liftIO . runCompiler bState dir spec params pos) comp
     updateBuilder $ const bstate'
     return submod
     
 
-initCompiler :: BuilderState -> FilePath -> Ident -> Maybe [Ident] -> 
+initCompiler :: BuilderState -> FilePath -> ModSpec -> Maybe [Ident] -> 
                OptPos -> CompilerState
-initCompiler bState dir name params pos = 
-    let typedef params' = Map.insert name 
+initCompiler bState dir spec params pos = 
+    let typedef params' = Map.insert (last spec)
                           (TypeDef (List.length params') pos) Map.empty
         (typs,pubtyps) =
             case params of
@@ -184,7 +192,7 @@ initCompiler bState dir name params pos =
                 Just params' -> (typedef params', typedef params')
         loadId = loadCount bState
     in Compiler bState loadId loadId 0 0 $
-       Module dir name params 
+       Module dir spec params 
        (ModuleInterface pubtyps Map.empty Map.empty Map.empty Set.empty) 
        (Just $ ModuleImplementation Map.empty Map.empty typs 
         Map.empty Map.empty)
@@ -208,10 +216,10 @@ getDirectory = do
     modl <- getModule
     return $ modDirectory modl
 
-getModuleName :: Compiler Ident
-getModuleName = do
+getModuleSpec :: Compiler ModSpec
+getModuleSpec = do
   modl <- getModule
-  return $ modName modl
+  return $ modSpec modl
 
 getModuleParams :: Compiler (Maybe [Ident])
 getModuleParams = do
@@ -416,7 +424,7 @@ optionallyPutStr opt selector = do
 -- Holds everything needed to compile a module
 data Module = Module {
   modDirectory :: FilePath,              -- The directory the module is in
-  modName :: Ident,                      -- The module name
+  modSpec :: ModSpec,                    -- The module path name 
   modParams :: Maybe [Ident],            -- The type parameters, if a type
   modInterface :: ModuleInterface,       -- The public face of this module
   modImplementation :: Maybe ModuleImplementation -- the module's implementation
@@ -720,7 +728,8 @@ instance Show Module where
     show mod =
         let int  = modInterface mod
             maybeimpl = modImplementation mod
-        in "\n Module " ++ modName mod ++ maybeShow "(" (modParams mod) ")" ++
+        in "\n Module " ++ showModSpec (modSpec mod) ++ 
+           maybeShow "(" (modParams mod) ")" ++
            "\n  public submods  : " ++ showMapPoses (pubDependencies int) ++
            "\n  public types    : " ++ showMapTypes (pubTypes int) ++
            "\n  public resources: " ++ showMapPoses (pubResources int) ++
@@ -739,7 +748,7 @@ instance Show Module where
                  "\n  types           : " ++ showMapTypes (modTypes impl) ++
                  "\n  resources       : " ++ showMapLines (modResources impl) ++
                  "\n  procs           : " ++ showMapLines (modProcs impl) ++ "\n" ++
-                 "\nSubmodules of " ++ modName mod ++ ":\n" ++ 
+                 "\nSubmodules of " ++ showModSpec (modSpec mod) ++ ":\n" ++ 
                  showMapLines (modSubmods impl)
 
 --showTypeMap :: Map Ident TypeDef -> String

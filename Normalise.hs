@@ -44,9 +44,9 @@ normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
   stmts' <- normaliseStmts stmts
   addProc name proto stmts' pos vis
 normaliseItem (CtorDecl vis proto pos) = do
-    modname <- getModuleName
+    modspec <- getModuleSpec
     Just modparams <- getModuleParams
-    addCtor modname modparams proto
+    addCtor (last modspec) modparams proto
 normaliseItem (StmtDecl stmt pos) = do
   stmts <- normaliseStmt stmt pos
   oldproc <- lookupProc ""

@@ -15,7 +15,7 @@ end
 
 Submodules of position:
 position: 
- Module position([])
+ Module position.position([])
   public submods  : 
   public types    : position/0 {position:1:8}
   public resources: 
@@ -44,5 +44,5 @@ proc y(!$rec:position, $field:int) (id 5):  {?}
 proc y($rec:position, ?$field:int) (id 4):  {?}
     foreign  access(position, $rec, ?$field) {?}]
 
-Submodules of position:
+Submodules of position.position:
 

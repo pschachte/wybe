@@ -31,7 +31,7 @@ proc ++(x:list(t), y:list(t), ?$:?) (id 1):  {type-list:6:8}
 
 Submodules of type-list:
 list: 
- Module list(["t"])
+ Module type-list.list(["t"])
   public submods  : 
   public types    : list/1 {type-list:1:8}
   public resources: 
@@ -65,5 +65,5 @@ proc tail(!$rec:list(t), $field:list(t)) (id 6):  {?}
 proc tail($rec:list(t), ?$field:list(t)) (id 5):  {?}
     foreign  access([|], $rec, ?$field) {?}]
 
-Submodules of list:
+Submodules of type-list.list:
 

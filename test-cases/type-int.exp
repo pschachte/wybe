@@ -28,7 +28,7 @@ end
 
 Submodules of type-int:
 int: 
- Module int([])
+ Module type-int.int([])
   public submods  : 
   public types    : int/0 {type-int:1:8}
   public resources: 
@@ -102,5 +102,5 @@ proc >=(x:int, y:int, ?$:bool) (id 14):  {type-int:15:12}
     foreign llvm icmp(sge, x, y, ?$tmp13) {type-int:15:40}
     =(?$, $tmp13) {?}]
 
-Submodules of int:
+Submodules of type-int.int:
 

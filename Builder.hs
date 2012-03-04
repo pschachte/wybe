@@ -24,7 +24,7 @@ import Control.Monad.Trans.State
 import Control.Monad.Trans
 import System.Time     (ClockTime)
 import System.Directory (getModificationTime, doesFileExist, 
-                         getCurrentDirectory)
+                         getCurrentDirectory, canonicalizePath)
 import System.Exit (exitFailure)
 import Config
 
@@ -114,7 +114,7 @@ processTokens :: FilePath -> String -> [Token] -> Builder Module
 processTokens dir modname tokens = do
     let parseTree = parse tokens
     bldr <- get
-    (modl,bldr') <- (liftIO . runCompiler bldr dir modname Nothing Nothing) 
+    (modl,bldr') <- (liftIO . runCompiler bldr dir [modname] Nothing Nothing) 
                    (compiler parseTree)
     put bldr'
     return modl
@@ -150,8 +150,7 @@ compiler items = do
       $ const (intercalate "\n" $ List.map show items)
     Normalise.normalise items
     optionallyPutStr ((>0) . optVerbosity) (show . modul)
---    handleImports
-    modname <- getModuleName
+    handleImports
 --    when (modname /= "") generateInterface 
 --    flowCheck
     typeCheck
@@ -166,6 +165,15 @@ moduleFilePath spec dir = do
       else
         error ("Can't find module " ++ show spec)
 
+
+------------------------ Handling Imports ------------------------
+
+handleImports :: Compiler ()
+handleImports = do
+    imports <- getModuleImplementationField (keys . modImports)
+    modspec <- getModuleSpec
+    mod <- getModule
+    updateModules (Map.insert modspec mod)
 
 ------------------------ Filename Handling ------------------------
 
