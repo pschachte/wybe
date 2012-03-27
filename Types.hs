@@ -4,6 +4,7 @@
 --  Purpose  : Type checker/inferencer for Frege
 --  Copyright: © 2012 Peter Schachte.  All rights reserved.
 
+-- |Support type checking/inference.
 module Types (typeCheck
              ) where
 
