@@ -13,8 +13,7 @@ import Data.Set as Set
 import Data.List as List
 import Control.Monad.State
 
-
-
+-- |Type check the current module.
 typeCheck :: Compiler ()
 typeCheck = do
     return ()

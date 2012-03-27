@@ -5,6 +5,8 @@
 --  Purpose  : Convert parse tree into AST
 --  Copyright: © 2012 Peter Schachte.  All rights reserved.
 
+-- |Support for normalising frege code as parsed to a simpler form
+--  to make compiling easier.
 module Normalise (normalise) where
 
 import AST
@@ -12,11 +14,14 @@ import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
 import Text.ParserCombinators.Parsec.Pos
-
+import Control.Monad
+  
+-- |Normalise a list of file items, storing the results in the current module.
 normalise :: [Item] -> Compiler ()
 normalise items = do
     mapM_ normaliseItem items
 
+-- |Normalise a single file item, storing the result in the current module.
 normaliseItem :: Item -> Compiler ()
 normaliseItem (TypeDecl vis (TypeProto name params) items pos) = do
     dir <- getDirectory
@@ -39,8 +44,6 @@ normaliseItem (ImportMods vis imp modspecs pos) = do
     mapM_ (\spec -> addImport spec imp Nothing vis) modspecs
 normaliseItem (ImportItems vis imp modspec imports pos) = do
     addImport modspec imp (Just imports) vis
-
-
 normaliseItem (ResourceDecl vis name typ pos) =
   addResource name (SimpleResource typ pos) vis
 normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
@@ -67,7 +70,7 @@ normaliseItem (StmtDecl stmt pos) = do
     Just [ProcDef id proto stmts' pos'] ->
       replaceProc "" id proto (stmts' ++ stmts) pos' Private
 
-
+-- |Add a contructor for the specified type.
 addCtor :: Ident -> [Ident] -> FnProto -> Compiler ()
 addCtor typeName typeParams (FnProto ctorName params) = do
     let typespec = TypeSpec typeName $ List.map (\n->TypeSpec n []) typeParams
@@ -84,6 +87,7 @@ addCtor typeName typeParams (FnProto ctorName params) = do
                    Nothing)
     mapM_ (addGetterSetter typespec ctorName) params
 
+-- |Add a getter and setter for the specified type.
 addGetterSetter :: TypeSpec -> Ident -> Param -> Compiler ()
 addGetterSetter rectype ctorName (Param field fieldtype _) = do
     addProc field 
@@ -101,6 +105,7 @@ addGetterSetter rectype ctorName (Param field fieldtype _) = do
                                                    ArgVar "$field" ParamIn]]
       Nothing Public
 
+-- |Normalise the specified statements to primitive statements.
 normaliseStmts :: [Placed Stmt] -> Compiler [Placed Prim]
 normaliseStmts [] = return []
 normaliseStmts (stmt:stmts) = do
@@ -110,6 +115,7 @@ normaliseStmts (stmt:stmts) = do
   back <- normaliseStmts stmts
   return $ front ++ back
 
+-- |Normalise the specified statement to a list of primitive statements.
 normaliseStmt :: Stmt -> Maybe SourcePos -> Compiler [Placed Prim]
 normaliseStmt (ProcCall name args) pos = do
   (args',pre,post) <- normaliseArgs args
@@ -129,6 +135,7 @@ normaliseStmt (Loop loop) pos = do
 normaliseStmt Nop pos = do
   return $ []
 
+-- |Normalise the specified loop statements to primitive statements.
 normaliseLoopStmts :: [Placed LoopStmt] -> 
                       Compiler ([Placed Prim],[Placed Prim],[Placed Prim])
 normaliseLoopStmts [] = return ([],[],[])
@@ -141,6 +148,8 @@ normaliseLoopStmts (stmt:stmts) = do
             frontbody ++ backbody,
             frontupdate ++ backupdate)
 
+-- |Normalise a single loop statement to three list of primitive statements:
+--  statements to execute before, during, and afte the loop.p
 normaliseLoopStmt :: LoopStmt -> Maybe SourcePos -> 
                      Compiler ([Placed Prim],[Placed Prim],[Placed Prim])
 normaliseLoopStmt (For gen) pos = normaliseGenerator gen pos
@@ -157,6 +166,8 @@ normaliseLoopStmt (NormalStmt stmt) pos = do
   return ([],stmts,[])
 
 
+-- |Normalise a loop generator to three list of primitive statements:
+--  statements to execute before, during, and afte the loop.p
 normaliseGenerator :: Generator -> Maybe SourcePos ->
                       Compiler ([Placed Prim],[Placed Prim],[Placed Prim])
 normaliseGenerator (In var exp) pos = do
@@ -185,6 +196,10 @@ normaliseGenerator (InRange var exp updateOp inc limit) pos = do
   return (init++[assign var arg],test,update)
 
 
+-- |Normalise a list of expressions as proc call arguments to a list of 
+--  primitive arguments, a list of statements to execute before the 
+--  call to bind those arguments, and a list of statements to execute 
+--  after the call to store the results appropriately.
 normaliseArgs :: [Placed Exp] -> Compiler ([PrimArg],[Placed Prim],[Placed Prim])
 normaliseArgs [] = return ([],[],[])
 normaliseArgs (pexp:args) = do
@@ -194,12 +209,18 @@ normaliseArgs (pexp:args) = do
   return (arg:args', pre ++ pres, post ++ posts)
 
 
+-- |Normalise a single read-only expression to a primitve argument 
+--  and a list of primitive statements to bind that argument.
 normaliseOuterExp :: Placed Exp -> Compiler (PrimArg,[Placed Prim])
 normaliseOuterExp exp = do
     (arg,_,pre,post) <- normaliseExp (content exp) (place exp) ParamIn
     return (arg,pre++post)
 
 
+-- |Normalise a single expressions with specified flow direction to a
+--  primitive argument, a list of statements to execute
+--  to bind it, and a list of statements to execute 
+--  after the call to store the result appropriately.
 normaliseExp :: Exp -> Maybe SourcePos -> FlowDirection ->
                  Compiler (PrimArg,FlowDirection,[Placed Prim],[Placed Prim])
 normaliseExp (IntValue a) pos dir = do
@@ -257,38 +278,55 @@ normaliseExp (ForeignFn lang name exps) pos dir = do
                      pos]
   return (ArgVar result ParamIn, ParamIn, pre', post)
 
+-- |Normalise a list of expressions as function call arguments to a list of 
+--  primitive arguments; a flow direction summarising whether there 
+--  are any inputs and any outputs among the function arguments;
+--  a list of statements to execute before the 
+--  call to bind those arguments, and a list of statements to execute 
+--  after the call to store the results appropriately.
+normalisePlacedExps :: [Placed Exp] -> 
+                      Compiler ([PrimArg],FlowDirection,
+                                [Placed Prim],[Placed Prim])
+normalisePlacedExps [] = return ([],NoFlow,[],[])
+normalisePlacedExps (exp:exps) = do
+  (args',flow',pres,posts) <- normalisePlacedExps exps
+  (exp',flow,pre,post) <- normaliseExp (content exp) (place exp) ParamIn
+  return  (exp':args', flow `flowJoin` flow', pre ++ pres, post ++ posts)
 
+-- | Report an error if the specified flow direction has output.
 mustBeIn :: FlowDirection -> Maybe SourcePos -> Compiler ()
-mustBeIn NoFlow  _ = return ()
-mustBeIn ParamIn _ = return ()
-mustBeIn ParamOut pos = do
-  message Error "Flow error:  invalid output argument" pos
-mustBeIn ParamInOut pos = do
-  message Error "Flow error:  invalid input/output argument" pos
+mustBeIn flow pos =
+    when (flowsOut flow)
+    $ message Error "Flow error:  invalid output argument" pos
 
-
+-- |Does the specified flow direction flow in?
 flowsIn :: FlowDirection -> Bool
 flowsIn NoFlow     = False
 flowsIn ParamIn    = True
 flowsIn ParamOut   = False
 flowsIn ParamInOut = True
 
+-- |Does the specified flow direction flow out?
 flowsOut :: FlowDirection -> Bool
 flowsOut NoFlow     = False
 flowsOut ParamIn = False
 flowsOut ParamOut = True
 flowsOut ParamInOut = True
 
+-- |Transform the specified primitive argument to an input parameter.
 argAsInput :: PrimArg -> PrimArg
 argAsInput (ArgVar var _) = ArgVar var ParamIn
 argAsInput other = other
 
+-- |Generate a primitive assignment statement.
 assign :: VarName -> PrimArg -> Placed Prim
 assign var val = procCall "=" [ArgVar var ParamOut, val]
 
+-- |Generate a primitive proc call
 procCall :: ProcName -> [PrimArg] -> Placed Prim
 procCall proc args = Unplaced $ PrimCall proc Nothing args
 
+-- |Generate a primitive conditional.
 makeCond :: PrimArg -> [[Placed Prim]] -> Maybe SourcePos -> 
             Compiler [Placed Prim]
 makeCond cond branches pos = do
@@ -306,16 +344,8 @@ makeCond cond branches pos = do
       return $ head branches -- XXX has the right type, but probably not good
 
 
-normalisePlacedExps :: [Placed Exp] -> 
-                      Compiler ([PrimArg],FlowDirection,
-                                [Placed Prim],[Placed Prim])
-normalisePlacedExps [] = return ([],NoFlow,[],[])
-normalisePlacedExps (exp:exps) = do
-  (args',flow',pres,posts) <- normalisePlacedExps exps
-  (exp',flow,pre,post) <- normaliseExp (content exp) (place exp) ParamIn
-  return  (exp':args', flow `flowJoin` flow', pre ++ pres, post ++ posts)
-
--- Join on the lattice of flow directions
+-- |Join on the lattice of flow directions (NoFlow is bottom, 
+--  ParamInOut is top, and the others are incomparable in between).
 flowJoin :: FlowDirection -> FlowDirection -> FlowDirection
 flowJoin NoFlow     x          = x
 flowJoin x          NoFlow     = x

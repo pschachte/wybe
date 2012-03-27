@@ -9,21 +9,24 @@
 --                      Compiler Options
 ----------------------------------------------------------------
 
-module Options (Options(..), handleCmdline) where
+-- |The frege compiler command line options.
+module Options (Options(..), handleCmdline, verbose) where
 
 import System.Console.GetOpt
 import System.Environment
 import System.Exit
 import Version
 
+-- |Command line options for the frege compiler.
 data Options = Options{  
-    optForce         :: Bool
-    , optForceAll    :: Bool
-    , optVerbosity   :: Int
-    , optShowVersion :: Bool
-    , optShowHelp    :: Bool
+    optForce         :: Bool     -- ^Compile specified files even if up to date
+    , optForceAll    :: Bool     -- ^Compile all files even if up to date
+    , optVerbosity   :: Int      -- ^How much debugging and progress output
+    , optShowVersion :: Bool     -- ^Print compiler version and exit
+    , optShowHelp    :: Bool     -- ^Print compiler help and exit
     } deriving Show
 
+-- |Defaults for all compiler options
 defaultOptions    = Options
  { optForce       = False
  , optForceAll    = False
@@ -32,6 +35,7 @@ defaultOptions    = Options
  , optShowHelp    = False
  }
 
+-- |Command line option parser and help text
 options :: [OptDescr (Options -> Options)]
 options =
  [ Option ['f'] ["force"]
@@ -52,15 +56,23 @@ options =
  ]
 
 
+-- |Help text header string
 header :: String
 header = "Usage: frgc [OPTION...] targets..."
 
+-- |Parse command line arguments
 compilerOpts :: [String] -> IO (Options, [String])
 compilerOpts argv = 
   case getOpt Permute options argv of
     (o,n,[]  ) -> return (foldl (flip id) defaultOptions o, n)
     (_,_,errs) -> ioError (userError (concat errs ++ usageInfo header options))
 
+-- |Was the specified verbosity level (or greater) specified?
+verbose :: Int -> Options -> Bool
+verbose n opts = optVerbosity opts >= n
+
+-- |Parse the command line and handle all options asking to print 
+--  something and exit.
 handleCmdline :: IO (Options, [String])
 handleCmdline = do
     argv <- getArgs

@@ -6,9 +6,10 @@
 --  Copyright: © 2012 Peter Schachte.  All rights reserved.
 --
 
-module Builder (buildTargets, compiler) where
+-- |Code to oversee the compilation process.
+module Builder (buildTargets, compileModule, compile) where
 
-import Options         (Options, optVerbosity, optForce, optForceAll)
+import Options         (Options, verbose, optForce, optForceAll)
 import AST
 import Parser          (parse)
 import Scanner         (inputTokens, fileTokens, Token)
@@ -29,6 +30,7 @@ import System.Exit (exitFailure)
 import Config
 
 
+-- |Build the specified targets with the specified options.
 buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
@@ -38,6 +40,8 @@ buildTargets opts targets = do
     when errored $ liftIO exitFailure
 
 
+-- |Build a single target; flag specifies to re-compile even if the 
+--  target is up-to-date.
 buildTarget :: Bool -> FilePath -> Compiler ()
 buildTarget force target = do
     let tType = targetType target
@@ -53,7 +57,13 @@ buildTarget force target = do
             when (tType == ExecutableFile) (buildExecutable target modname)
 
 
-buildModule :: Bool -> Ident -> FilePath -> FilePath -> Compiler Bool
+-- |Compile a single module to an object file.
+buildModule :: Bool        -- ^Force compilation of this module
+              -> Ident     -- ^Module name
+              -> FilePath  -- ^Object file to generate
+              -> FilePath  -- ^Source file to compile if necessary
+              -> Compiler Bool -- ^Returns whether or not file was
+                              --  actually compiled
 buildModule force modname objfile srcfile = do
     maybemod <- getLoadedModule [modname]
     case maybemod of
@@ -79,7 +89,7 @@ buildModule force modname objfile srcfile = do
                            loadModule objfile
                            return False
 
-
+-- |Actually load and compile the module
 buildModule' :: Ident -> FilePath -> FilePath -> Compiler ()
 buildModule' modname objfile srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
@@ -87,23 +97,24 @@ buildModule' modname objfile srcfile = do
     let dir = takeDirectory objfile
     compileModule objfile [modname] Nothing parseTree
     
-
-
+-- |Compile a module given the parsed source file contents.
 compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
 compileModule dir modspec params parseTree = do
     enterModule dir modspec params
-    compiler parseTree
+    compile parseTree
     exitModule
     return ()
 
 
--- XXX Build executable from object file
+-- |XXX Build executable from object file
+--   XXX not yet implemented
 buildExecutable :: FilePath -> Ident -> Compiler ()
 buildExecutable _ _ =
     error "Can't build executables yet"
 
 
--- XXX Load module export info from compiled file
+-- | Load module export info from compiled file
+--   XXX not yet implemented
 loadModule :: FilePath -> Compiler ()
 loadModule objfile =
     error "Can't handle pre-compiled files yet"
@@ -117,25 +128,27 @@ loadModule objfile =
 --     let modname = takeBaseName file
 --     tokens <- (liftIO . fileTokens) file
 --     let parseTree = parse tokens
---     modul <- compileImport parseTree dir' modname Nothing Nothing vis compiler
+--     modul <- compileImport parseTree dir' modname Nothing Nothing vis compile
 --     return $ extractInterface modul
 
 
-compiler :: [Item] -> Compiler ()
-compiler items = do
-    optionallyPutStr ((>0) . optVerbosity)
+-- |Actually compile a list of file items, assuming the Compiler has
+--  been set up for the new module.
+compile :: [Item] -> Compiler ()
+compile items = do
+    optionallyPutStr (verbose 1)
       $ const (intercalate "\n" $ List.map show items)
     Normalise.normalise items
-    optionallyPutStr ((>0) . optVerbosity) 
+    optionallyPutStr (verbose 1)
       ((intercalate ("\n" ++ replicate 50 '-' ++ "\n")) .
-       (List.map show) . 
-       underCompilation)
+       (List.map show) . underCompilation)
     handleImports
---    when (modname /= "") generateInterface 
 --    flowCheck
     typeCheck
 
 
+-- |Find the file path for the specified module spec relative to the
+--  specified file path for the referencing module.
 moduleFilePath :: ModSpec -> FilePath -> IO FilePath
 moduleFilePath spec dir = do
     let file = addExtension (joinPath $ (splitDirectories dir) ++ spec) 
@@ -148,6 +161,7 @@ moduleFilePath spec dir = do
 
 ------------------------ Handling Imports ------------------------
 
+-- |Handle all the imports of the current module.
 handleImports :: Compiler ()
 handleImports = do
     imports <- getModuleImplementationField (keys . modImports)
@@ -157,9 +171,14 @@ handleImports = do
 
 ------------------------ Filename Handling ------------------------
 
+-- |The different sorts of files that could be specified on the 
+--  command line.
 data TargetType = InterfaceFile | ObjectFile | ExecutableFile | UnknownFile
                 deriving (Show,Eq)
 
+
+-- |Given a file specification, return what sort of file it is.  The 
+--  file need not exist.
 targetType :: FilePath -> TargetType
 targetType filename
   | ext' == interfaceExtension  = InterfaceFile
@@ -168,8 +187,12 @@ targetType filename
   | otherwise                  = UnknownFile
       where ext' = dropWhile (=='.') $ takeExtension filename
 
+-- |Given a source or executable file path, return the file path of 
+--  the corresponding object file.
 fileObjFile :: FilePath -> FilePath
 fileObjFile filename = replaceExtension filename objectExtension
 
+-- |Given an object or executable file path, return the file path of 
+--  the corresponding source file.
 fileSourceFile :: FilePath -> FilePath
 fileSourceFile filename = replaceExtension filename sourceExtension

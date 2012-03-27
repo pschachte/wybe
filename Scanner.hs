@@ -4,8 +4,9 @@
 --  Purpose  : Scanner for the Frege language
 --  Copyright: © 2010-2012 Peter Schachte.  All rights reserved.
 
+-- |The tokeniser for frege.
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
-                charValue, identName, symbolName, symbolPos, showPosition, 
+                charValue, identName, symbolName, showPosition, 
                 StringDelim(..), BracketStyle(..), fileTokens, 
                 inputTokens) where
 
@@ -13,19 +14,25 @@ import Data.Char
 import Data.List
 import Text.ParserCombinators.Parsec.Pos
 
-data Token = TokFloat Double SourcePos
-              | TokInt Integer SourcePos
+-- |The tokens of the frege language, each carrying its source position.
+data Token = TokFloat Double SourcePos          -- ^A floating point number
+              | TokInt Integer SourcePos        -- ^An integer
               | TokString StringDelim String SourcePos
-              | TokChar Char SourcePos
-              | TokIdent String SourcePos
+                                                -- ^A string with its delimiter
+              | TokChar Char SourcePos          -- ^A character constant
+              | TokIdent String SourcePos       -- ^An identifier
               | TokLBracket BracketStyle SourcePos
+                                                -- ^Some kind of left bracket
               | TokRBracket BracketStyle SourcePos
-              | TokComma SourcePos
-              | TokSemicolon SourcePos
-              | TokColon SourcePos
-              | TokSymbol String SourcePos  -- symbol of non-identifier chars
+                                                -- ^Some kind of right bracket
+              | TokComma SourcePos              -- ^A comma
+              | TokSemicolon SourcePos          -- ^A semicolon
+              | TokColon SourcePos              -- ^A colon
+              | TokSymbol String SourcePos      -- ^A symbol of made up of
+                                                --  non-identifier chars
               deriving (Show)
 
+-- |Returns the source position of a token.
 tokenPosition :: Token -> SourcePos
 tokenPosition (TokFloat _     pos) = pos
 tokenPosition (TokInt   _     pos) = pos
@@ -39,55 +46,62 @@ tokenPosition (TokSemicolon   pos) = pos
 tokenPosition (TokColon       pos) = pos
 tokenPosition (TokSymbol _    pos) = pos
 
+-- |Returns the value of a float token.
 floatValue :: Token -> Double
 floatValue (TokFloat float _) = float
 
+-- |Returns the value of an int token.
 intValue :: Token -> Integer
 intValue (TokInt int _) = int
 
+-- |Returns the value of a string token.
 stringValue :: Token -> String
 stringValue (TokString _ string _) = string
 
+-- |Returns the value of a character constant token.
 charValue :: Token -> Char
 charValue (TokChar char _) = char
 
+-- |Returns the name of an identifier token.
 identName :: Token -> String
 identName (TokIdent str _) = str
 
+-- |Returns the name of a symbol token.
 symbolName :: Token -> String
 symbolName (TokSymbol str _) = str
 
-symbolPos :: Token -> SourcePos
-symbolPos (TokSymbol _ pos) = pos
-
-
-
-
+-- |How to display a source position.
 showPosition :: SourcePos -> String
 showPosition pos
   = sourceName pos ++ ":" 
     ++ show (sourceLine pos) ++ ":"
     ++ show (sourceColumn pos)
 
+-- |The different string delimiters.
 data StringDelim = DoubleQuote | BackQuote | LongQuote String
                  deriving (Show)
 
+-- |The different kinds of brackets.
 data BracketStyle = Paren | Bracket | Brace
                   deriving (Show)
 
 
+-- |The contents of a file as a list of tokens.
 fileTokens :: FilePath -> IO [Token]
 fileTokens filename =
   do content <- readFile filename
      return (tokenise (initialPos filename) content)
 
 
+-- |The contents of stdin as a list of tokens.
 inputTokens :: IO [Token]
 inputTokens =
   do content <- getContents
      return (tokenise (initialPos "<stdin>") content)
 
 
+-- |Convert a sequence of characters to a sequence of tokens.
+-- XXX Still not handling backslash-delimited strings; still want them?
 tokenise :: SourcePos -> String -> [Token]
 tokenise _ [] = []
 tokenise pos str@(c:cs)
@@ -116,32 +130,15 @@ tokenise pos str@(c:cs)
                            $ dropWhile (not . (=='\n')) cs
                     _   -> tokeniseSymbol pos str
 
--- XXX Still not handling backslash-delimited strings; still want them?
-
+-- |Handle a single character token and tokenize the rest of the input.
 singleCharTok :: Char -> String -> SourcePos -> Token -> [Token]
 singleCharTok c cs pos tok = tok:(tokenise (updatePosChar pos c) cs)
 
+-- |Handle a mult-character token and tokenize the rest of the input.
 multiCharTok :: String -> String -> Token -> SourcePos -> [Token]
 multiCharTok str cs tok pos = tok:(tokenise (updatePosString pos str) cs)
 
-
--- XXX This doesn't handle escapes within strings
-tokeniseString :: StringDelim -> SourcePos -> String -> [Token]
-tokeniseString delim pos cs =
-  let termchar = delimChar delim
-      (str,rest) = span (/= termchar) cs
-  in  (TokString delim str pos):
-      (if null rest then [] else tokenise (updatePosChar 
-                                           (updatePosString
-                                            (updatePosChar pos termchar)
-                                            str)
-                                           termchar) $ tail rest)
-
-
-delimChar DoubleQuote = '\"'
-delimChar BackQuote = '`'
-
-
+-- |Handle a character constant token and tokenize the rest of the input.
 tokeniseChar :: SourcePos -> String -> [Token]
 tokeniseChar pos ('\\':c:'\'':rest) =
   (TokChar (escapedChar c) pos) :
@@ -154,6 +151,32 @@ tokeniseChar pos (c:'\'':cs) =
   (TokChar c pos):
   tokenise (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\'') cs
 
+-- |Handle a symbol token and tokenize the rest of the input.
+tokeniseSymbol :: SourcePos -> String -> [Token]
+tokeniseSymbol pos (c:cs) =
+  let (sym,rest) = span isSymbolChar cs
+      pos' = updatePosString pos 
+  in  multiCharTok (c:sym) rest (TokSymbol (c:sym) pos) pos
+
+-- |Tokenise a delimited string and tokenize the rest of the input..
+-- XXX This doesn't handle escapes within strings
+tokeniseString :: StringDelim -> SourcePos -> String -> [Token]
+tokeniseString delim pos cs =
+  let termchar = delimChar delim
+      (str,rest) = span (/= termchar) cs
+  in  (TokString delim str pos):
+      (if null rest then [] else tokenise (updatePosChar 
+                                           (updatePosString
+                                            (updatePosChar pos termchar)
+                                            str)
+                                           termchar) $ tail rest)
+
+-- |Is the specified char the expected final delimiter?
+delimChar DoubleQuote = '\"'
+delimChar BackQuote = '`'
+
+-- |Recognise an escaped character constant.
+-- XXX doesn't currently support unicode escapes
 escapedChar :: Char -> Char
 escapedChar 'a' = '\a'
 escapedChar 'b' = '\b'
@@ -163,9 +186,10 @@ escapedChar 'r' = '\r'
 escapedChar 't' = '\t'
 escapedChar 'v' = '\v'
 escapedChar c = c
--- XXX must support hex unicode escapes
 
--- XXX doesn't put position of *start* of number in token
+-- |Scan a number token.  Handles decimal and hex ints, floats with
+--  decimal point and/or e notation, and ignores embedded underscores.
+-- XXX doesn't put position of *start* of number in token.
 scanNumberToken :: Integer -> Integer -> SourcePos -> String -> 
                    (Token,String,SourcePos)
 scanNumberToken _ n pos "" = (TokInt n pos, "",pos)
@@ -184,6 +208,7 @@ scanNumberToken radix n pos str@(c:cs)
   | otherwise = (TokInt n pos, str, pos)
 
 
+-- |Scan the fractional part of a float.
 scanNumberFrac :: Double -> Double -> SourcePos -> String -> 
                   (Token,String,SourcePos)
 scanNumberFrac n weight pos "" = (TokFloat n pos, "",pos)
@@ -195,6 +220,7 @@ scanNumberFrac n weight pos str@(c:cs)
   | otherwise = (TokFloat n pos, str,pos)
 
 
+-- |Scan the exponent part of a float.
 scanNumberExponent :: Double -> SourcePos -> String -> 
                       (Token,String,SourcePos)
 scanNumberExponent n pos cs =
@@ -202,15 +228,11 @@ scanNumberExponent n pos cs =
   in (TokFloat (n*10**(fromIntegral $ read digits)) pos, rest,
       updatePosString pos digits)
 
-
-tokeniseSymbol pos (c:cs) =
-  let (sym,rest) = span isSymbolChar cs
-      pos' = updatePosString pos 
-  in  multiCharTok (c:sym) rest (TokSymbol (c:sym) pos) pos
-
+-- |Is this a character that can appear in an identifier?
 isIdentChar :: Char -> Bool
 isIdentChar ch = isAlphaNum ch || ch == '_'
 
+-- |Is this a character that can appear in a symbol?
 isSymbolChar :: Char -> Bool
 isSymbolChar ch = not (isAlphaNum ch || isSpace ch || isControl ch 
                        || ch `elem` ",;.([{)]}#'\"\\")

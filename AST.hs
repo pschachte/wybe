@@ -4,20 +4,26 @@
 --  Purpose  : Abstract Syntax Tree for Frege language
 --  Copyright: © 2010-2012 Peter Schachte.  All rights reserved.
 
-module AST (-- Types just for parsing
+-- |The abstract syntax tree, and supporting types and functions.
+--  This includes the parse tree, as well as the AST types, which
+--  are normalised versions of the parse tree types.
+--
+--  This also includes the Compiler monad and the Module types.
+module AST (
+  -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility,
   TypeProto(..), TypeSpec(..), FnProto(..),
   ProcProto(..), Param(..), Stmt(..), 
   LoopStmt(..), Exp(..), Generator(..),
-  -- Source Position Types
+  -- *Source Position Types
   Placed(..), place, content, maybePlace,
-  -- AST types
+  -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   enterModule, exitModule, emptyInterface, emptyImplementation,
   ModSpec, ProcDef(..), Ident, VarName, 
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
   expToStmt, Prim(..), PrimArg(..),
-  -- Stateful monad for the compilation process
+  -- *Stateful monad for the compilation process
   MessageLevel(..), getCompiler,
   CompilerState(..), Compiler, runCompiler,
   updateModules, getModuleImplementationField, getLoadedModule, getModule, 
@@ -131,12 +137,12 @@ data MessageLevel = Informational | Warning | Error
 --  that module's strongly-connected component collected while 
 --  compiling the module's dependencies.
 data CompilerState = Compiler {
-  options :: Options,      -- compiler options specified on the command line
-  msgs :: [String],        -- warnings, error messages, and info messages
-  errorState :: Bool,      -- whether or not we've seen any errors
-  modules :: Map ModSpec Module, -- all known modules
-  loadCount :: Int,        -- counter of module load order
-  underCompilation :: [Module] -- the modules in the process of being compiled
+  options :: Options,      -- ^compiler options specified on the command line
+  msgs :: [String],        -- ^warnings, error messages, and info messages
+  errorState :: Bool,      -- ^whether or not we've seen any errors
+  modules :: Map ModSpec Module, -- ^all known modules
+  loadCount :: Int,        -- ^counter of module load order
+  underCompilation :: [Module] -- ^the modules in the process of being compiled
   } deriving Show
 
 -- |The compiler monad is a state transformer monad carrying the 
@@ -431,17 +437,17 @@ optionallyPutStr opt selector = do
 
 -- |Holds everything needed to compile a module
 data Module = Module {
-  modDirectory :: FilePath,      -- The directory the module is in
-  modSpec :: ModSpec,            -- The module path name 
-  modParams :: Maybe [Ident],    -- The type parameters, if a type
-  modInterface :: ModuleInterface, -- The public face of this module
+  modDirectory :: FilePath,      -- ^The directory the module is in
+  modSpec :: ModSpec,            -- ^The module path name 
+  modParams :: Maybe [Ident],    -- ^The type parameters, if a type
+  modInterface :: ModuleInterface, -- ^The public face of this module
   modImplementation :: Maybe ModuleImplementation, 
-                                -- the module's implementation
---  internalSubmods :: [Module], -- modules defined inside this one
-  thisLoadNum :: Int,            -- the loadCount when loading this module
-  minDependencyNum :: Int,       -- the smallest loadNum of all dependencies
-  varCount :: Int,               -- a counter for introduced variables (per proc)
-  procCount :: Int               -- a counter for gensym-ed proc names
+                                -- ^the module's implementation
+--  internalSubmods :: [Module], -- ^modules defined inside this one
+  thisLoadNum :: Int,            -- ^the loadCount when loading this module
+  minDependencyNum :: Int,       -- ^the smallest loadNum of all dependencies
+  varCount :: Int,               -- ^a per proc counter for introduced variables
+  procCount :: Int               -- ^a counter for gensym-ed proc names
   }
 
 -- |Apply the given function to the current module implementation.
@@ -460,16 +466,16 @@ updateModInterface :: (ModuleInterface -> ModuleInterface) ->
 updateModInterface fn =
     updateModule (\mod -> mod { modInterface = fn $ modInterface mod })
 
--- Holds everything needed to compile code that uses a module
+-- |Holds everything needed to compile code that uses a module
 data ModuleInterface = ModuleInterface {
-    pubTypes :: Map Ident TypeDef,   -- The types this module exports
+    pubTypes :: Map Ident TypeDef,   -- ^The types this module exports
     pubResources :: Map Ident OptPos,       
-                                    -- The resources this module exports
-    pubProcs :: Map Ident [ProcCallInfo], -- The procs this module exports
+                                    -- ^The resources this module exports
+    pubProcs :: Map Ident [ProcCallInfo], -- ^The procs this module exports
     pubDependencies :: Map Ident OptPos,    
-                                    -- The other modules this module exports
-    dependencies :: Set Ident        -- The other modules that must be linked
-    }                               -- in by modules that depend on this one
+                                    -- ^The other modules this module exports
+    dependencies :: Set Ident        -- ^The other modules that must be linked
+    }                               --  in by modules that depend on this one
 
 emptyInterface :: ModuleInterface
 emptyInterface = 
@@ -507,11 +513,11 @@ updateDependencies fn modint = modint {dependencies = fn $ dependencies modint}
 
 -- |Holds everything needed to compile the module itself
 data ModuleImplementation = ModuleImplementation {
-    modImports :: Map ModSpec ModDependency, -- All modules this module imports
-    modSubmods :: Map Ident Module,        -- All submodules
-    modTypes :: Map Ident TypeDef,         -- All types defined by this module
-    modResources :: Map Ident ResourceDef, -- All resources defined by this mod
-    modProcs :: Map Ident [ProcDef]        -- All procs defined by this module
+    modImports :: Map ModSpec ModDependency, -- ^All modules this module imports
+    modSubmods :: Map Ident Module,        -- ^All submodules
+    modTypes :: Map Ident TypeDef,         -- ^All types defined by this module
+    modResources :: Map Ident ResourceDef, -- ^All resources defined by this mod
+    modProcs :: Map Ident [ProcDef]        -- ^All procs defined by this module
     }
 
 emptyImplementation :: ModuleImplementation

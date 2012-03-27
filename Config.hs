@@ -5,18 +5,24 @@
 --  Purpose  : Configuration for frege compiler
 --  Copyright: © 2012 Peter Schachte.  All rights reserved.
 
+-- |Compiler configuration parameters.  These may vary between
+--  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
                interfaceExtension) where
 
+-- |The file extension for source files.
 sourceExtension :: String
 sourceExtension = "frg"
 
+-- |The file extension for object files.
 objectExtension :: String
 objectExtension = "o"
 
+-- |The file extension for executable files.
 executableExtension :: String
 executableExtension = ""
 
+-- |The file extension for interface files.
 interfaceExtension :: String
 interfaceExtension = "int"
 
