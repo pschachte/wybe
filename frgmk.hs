@@ -9,8 +9,9 @@ module Main where
 
 import Options
 import Builder
+import AST
 
 main :: IO ()
 main = do
     (opts, files) <- handleCmdline
-    buildTargets opts files
+    runCompiler opts (buildTargets opts files) 

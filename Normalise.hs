@@ -19,11 +19,22 @@ normalise items = do
 
 normaliseItem :: Item -> Compiler ()
 normaliseItem (TypeDecl vis (TypeProto name params) items pos) = do
-    fname <- getDirectory
-    compileSubmodule fname name (Just params) pos vis (normalise items)
+    dir <- getDirectory
+    parentmod <- getModuleSpec
+    enterModule dir (parentmod ++ [name]) (Just params)
+    addType name (TypeDef (length params) pos) vis
+    normalise items
+    mod <- exitModule
+    addSubmod name mod pos vis
+    return ()
 normaliseItem (ModuleDecl vis name items pos) = do
-    fname <- getDirectory
-    compileSubmodule fname name Nothing pos vis (normalise items)
+    dir <- getDirectory
+    parentmod <- getModuleSpec
+    enterModule dir (parentmod ++ [name]) Nothing
+    normalise items
+    mod <- exitModule
+    addSubmod name mod pos vis
+    return ()
 normaliseItem (ImportMods vis imp modspecs pos) = do
     mapM_ (\spec -> addImport spec imp Nothing vis) modspecs
 normaliseItem (ImportItems vis imp modspec imports pos) = do
@@ -251,9 +262,9 @@ mustBeIn :: FlowDirection -> Maybe SourcePos -> Compiler ()
 mustBeIn NoFlow  _ = return ()
 mustBeIn ParamIn _ = return ()
 mustBeIn ParamOut pos = do
-  errMsg "Flow error:  invalid output argument" pos
+  message Error "Flow error:  invalid output argument" pos
 mustBeIn ParamInOut pos = do
-  errMsg "Flow error:  invalid input/output argument" pos
+  message Error "Flow error:  invalid input/output argument" pos
 
 
 flowsIn :: FlowDirection -> Bool
@@ -291,7 +302,7 @@ makeCond cond branches pos = do
       else
         return $ head branches
     _ -> do
-      errMsg "Can't use a non-integer type as a Boolean" pos
+      message Error "Can't use a non-integer type as a Boolean" pos
       return $ head branches -- XXX has the right type, but probably not good
 
 

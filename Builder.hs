@@ -28,59 +28,36 @@ import System.Directory (getModificationTime, doesFileExist,
 import System.Exit (exitFailure)
 import Config
 
-getBuilderField :: (BuilderState -> t) -> Builder t
-getBuilderField selector = do
-    state <- get
-    return $ selector state
 
-
-updateBuilderField :: (BuilderState -> BuilderState) -> Builder ()
-updateBuilderField updater = do
-    state <- get
-    put $ updater state
-
-
-getOpt :: (Options -> t) -> Builder t
-getOpt opt = do
-    opts <- getBuilderField builderOptions
-    return $ opt opts
-
-
--- Return Just the specified module, if already loaded; else return Nothing
-getLoadedModule :: ModSpec -> Builder (Maybe Module)
-getLoadedModule modspec = do
-    bstate <- get
-    return $ Map.lookup modspec (modules bstate)
-
-
-buildTargets :: Options -> [FilePath] -> IO ()
+buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
-    final <- execStateT 
-            (mapM_ (buildTarget $ optForce opts || optForceAll opts) targets)
-            (Builder opts [] False Map.empty 0)
-    putStr $ intercalate "\n" $ msgs final
-    when (errorState final) exitFailure
+    mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
+    messages <- getCompiler msgs
+    (liftIO . putStr) $ intercalate "\n" messages
+    errored <- getCompiler errorState
+    when errored $ liftIO exitFailure
 
 
-buildTarget :: Bool -> FilePath -> Builder ()
+buildTarget :: Bool -> FilePath -> Compiler ()
 buildTarget force target = do
     let tType = targetType target
     if tType == UnknownFile
       then error ("Unknown target file type " ++ target)
       else do
-        (modl,built) <- buildModule force (takeBaseName target) 
-                       (fileObjFile target) (fileSourceFile target)
+        let modname = takeBaseName target
+        built <- buildModule force modname (fileObjFile target) 
+                (fileSourceFile target)
         if (built==False) 
           then (liftIO . putStrLn) $ "Nothing to be done for " ++ target
           else
-            when (tType == ExecutableFile) (buildExecutable target modl)
+            when (tType == ExecutableFile) (buildExecutable target modname)
 
 
-buildModule :: Bool -> Ident -> FilePath -> FilePath -> Builder (Module,Bool)
+buildModule :: Bool -> Ident -> FilePath -> FilePath -> Compiler Bool
 buildModule force modname objfile srcfile = do
     maybemod <- getLoadedModule [modname]
     case maybemod of
-        Just modl -> return (modl,False)
+        Just modl -> return False
         Nothing -> do
             exists <- (liftIO . doesFileExist) srcfile
             objExists <- (liftIO . doesFileExist) objfile
@@ -89,50 +66,50 @@ buildModule force modname objfile srcfile = do
                 error ("Source file " ++ srcfile ++ " does not exist")
               else if not objExists || force 
                    then do
-                       modl <- buildModule' modname objfile srcfile
-                       return (modl,True)
+                       buildModule' modname objfile srcfile
+                       return True
                    else do
                        srcDate <- (liftIO . getModificationTime) srcfile
                        dstDate <- (liftIO . getModificationTime) objfile
                        if srcDate > dstDate
                          then do 
-                           modl <- buildModule' modname objfile srcfile
-                           return (modl,True)
+                           buildModule' modname objfile srcfile
+                           return True
                          else do
-                           modl <- loadModule objfile
-                           return (modl,False)
+                           loadModule objfile
+                           return False
 
 
-buildModule' :: Ident -> FilePath -> FilePath -> Builder Module
+buildModule' :: Ident -> FilePath -> FilePath -> Compiler ()
 buildModule' modname objfile srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
-    let dir = takeDirectory objfile
-    processTokens dir modname tokens
-
-
-processTokens :: FilePath -> String -> [Token] -> Builder Module
-processTokens dir modname tokens = do
     let parseTree = parse tokens
-    bldr <- get
-    (modl,bldr') <- (liftIO . runCompiler bldr dir [modname] Nothing Nothing) 
-                   (compiler parseTree)
-    put bldr'
-    return modl
+    let dir = takeDirectory objfile
+    compileModule objfile [modname] Nothing parseTree
     
 
+
+compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
+compileModule dir modspec params parseTree = do
+    enterModule dir modspec params
+    compiler parseTree
+    exitModule
+    return ()
+
+
 -- XXX Build executable from object file
-buildExecutable :: FilePath -> Module -> Builder ()
+buildExecutable :: FilePath -> Ident -> Compiler ()
 buildExecutable _ _ =
     error "Can't build executables yet"
 
 
 -- XXX Load module export info from compiled file
-loadModule :: FilePath -> Builder Module
+loadModule :: FilePath -> Compiler ()
 loadModule objfile =
     error "Can't handle pre-compiled files yet"
 
 
--- getModuleImports :: ModSpec -> Visibility -> Builder Module
+-- getModuleImports :: ModSpec -> Visibility -> Compiler Module
 -- getModuleImports modspec vis = do
 --     dir <- getDirectory
 --     file <- (liftIO . moduleFilePath modspec) dir
@@ -149,7 +126,10 @@ compiler items = do
     optionallyPutStr ((>0) . optVerbosity)
       $ const (intercalate "\n" $ List.map show items)
     Normalise.normalise items
-    optionallyPutStr ((>0) . optVerbosity) (show . modul)
+    optionallyPutStr ((>0) . optVerbosity) 
+      ((intercalate ("\n" ++ replicate 50 '-' ++ "\n")) .
+       (List.map show) . 
+       underCompilation)
     handleImports
 --    when (modname /= "") generateInterface 
 --    flowCheck
@@ -172,7 +152,7 @@ handleImports :: Compiler ()
 handleImports = do
     imports <- getModuleImplementationField (keys . modImports)
     modspec <- getModuleSpec
-    mod <- getModule
+    mod <- getModule id
     updateModules (Map.insert modspec mod)
 
 ------------------------ Filename Handling ------------------------
