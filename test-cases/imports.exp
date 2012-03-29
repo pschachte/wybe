@@ -15,6 +15,118 @@ Public from mod7 import fn3 {imports:7:8}
 Public from mod8 use fn4 {imports:8:8}
   
 
+
+ Module mod1
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : 
+
+Submodules of mod1:
+
+
+
+ Module mod2
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : 
+
+Submodules of mod2:
+
+
+
+ Module mod3
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : 
+
+Submodules of mod3:
+
+
+
+ Module mod4
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : 
+
+Submodules of mod4:
+
+
+
+ Module mod5
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : 
+
+Submodules of mod5:
+
+
+
+ Module mod6
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : 
+
+Submodules of mod6:
+
+
+
+ Module mod7
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : 
+
+Submodules of mod7:
+
+
+
+ Module mod8
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : 
+
+Submodules of mod8:
+
+
  Module imports
   public submods  : 
   public types    : 

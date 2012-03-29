@@ -1,6 +1,54 @@
 Private import position {import:1:1}
   
 Public func distance(p1:position,p2:position):? {import:3:8} = sqrt(+(^(-(x(p2 {import:4:11}) {import:4:11}, x(p1 {import:4:16}) {import:4:16}) {import:4:10}, 2 {import:4:23}) {import:4:10}, ^(-(y(p2 {import:4:27}) {import:4:27}, y(p1 {import:4:32}) {import:4:32}) {import:4:26}, 2 {import:4:39}) {import:4:26}) {import:4:10}) {import:4:5}
+Public type position is {position:1:8}
+  Public ctor position(x:int,y:int) {position:2:12}
+end
+
+
+ Module position
+  public submods  : position {position:1:8}
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : 
+
+Submodules of position:
+position: 
+ Module position.position([])
+  public submods  : 
+  public types    : position/0 {position:1:8}
+  public resources: 
+  public procs    : position(x:int, y:int, ?$:position) <1> {?}
+                    x(!$rec:position, $field:int) <3> {?}
+                    x($rec:position, ?$field:int) <2> {?}
+                    y(!$rec:position, $field:int) <5> {?}
+                    y($rec:position, ?$field:int) <4> {?}
+  imports         : 
+  types           : position/0 {position:1:8}
+  resources       : 
+  procs           : position: [
+proc position(x:int, y:int, ?$:position) (id 1):  {?}
+    $alloc(position, ?$tmp0) {?}
+    update$x(x, $tmp0, ?$tmp1) {?}
+    update$y(y, $tmp1, ?$tmp2) {?}
+    =(?$, $tmp2) {?}]
+                    x: [
+proc x(!$rec:position, $field:int) (id 3):  {?}
+    foreign  mutate(position, !$rec, $field) {?},
+proc x($rec:position, ?$field:int) (id 2):  {?}
+    foreign  access(position, $rec, ?$field) {?}]
+                    y: [
+proc y(!$rec:position, $field:int) (id 5):  {?}
+    foreign  mutate(position, !$rec, $field) {?},
+proc y($rec:position, ?$field:int) (id 4):  {?}
+    foreign  access(position, $rec, ?$field) {?}]
+
+Submodules of position.position:
+
 
  Module import
   public submods  : 

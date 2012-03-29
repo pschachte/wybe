@@ -29,7 +29,7 @@ module AST (
   updateModules, getModuleImplementationField, getLoadedModule, getModule, 
   updateModImplementation, updateModInterface,
   getDirectory, getModuleSpec, getModuleParams, option, 
-  optionallyPutStr, message, freshVar, nextProcId, 
+  optionallyPutStr, verboseMsg, message, freshVar, nextProcId, 
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc
@@ -433,12 +433,15 @@ option opt = do
 
 -- |If the specified Boolean option is selected, print out the result 
 --  of applying the compiler state state output function.
-optionallyPutStr :: (Options -> Bool) -> (CompilerState -> String) ->
+optionallyPutStr :: (Options -> Bool) -> String ->
                    Compiler ()
-optionallyPutStr opt selector = do
+optionallyPutStr opt str = do
     check <- option opt
-    state <- get
-    when check (liftIO . putStrLn $ selector state)
+    when check ((liftIO . putStrLn) str)
+
+verboseMsg :: Int -> String -> Compiler ()
+verboseMsg verbosity = optionallyPutStr ((>= verbosity) . optVerbosity)
+  
 
 
 ----------------------------------------------------------------

@@ -57,11 +57,22 @@ buildTarget force target = do
             when (tType == ExecutableFile) (buildExecutable target modname)
 
 
+-- |Compile or load a module dependency.
+buildDependency :: ModSpec -> Compiler ()
+buildDependency modspec = do
+    dir <- getDirectory
+    let srcfile = moduleFilePath sourceExtension dir modspec
+    let objfile = moduleFilePath objectExtension dir modspec
+    let modname = takeBaseName srcfile
+    force <- option optForceAll
+    buildModule force modname objfile srcfile
+    return ()
+
 -- |Compile a single module to an object file.
-buildModule :: Bool        -- ^Force compilation of this module
-              -> Ident     -- ^Module name
-              -> FilePath  -- ^Object file to generate
-              -> FilePath  -- ^Source file to compile if necessary
+buildModule :: Bool            -- ^Force compilation of this module
+              -> Ident         -- ^Module name
+              -> FilePath      -- ^Object file to generate
+              -> FilePath      -- ^Source file to compile if necessary
               -> Compiler Bool -- ^Returns whether or not file was
                               --  actually compiled
 buildModule force modname objfile srcfile = do
@@ -95,7 +106,7 @@ buildModule' modname objfile srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
     let parseTree = parse tokens
     let dir = takeDirectory objfile
-    compileModule objfile [modname] Nothing parseTree
+    compileModule dir [modname] Nothing parseTree
     
 -- |Compile a module given the parsed source file contents.
 compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
@@ -119,29 +130,13 @@ loadModule objfile =
     error "Can't handle pre-compiled files yet"
 
 
--- getModuleImports :: ModSpec -> Visibility -> Compiler Module
--- getModuleImports modspec vis = do
---     dir <- getDirectory
---     file <- (liftIO . moduleFilePath modspec) dir
---     let dir' = takeDirectory file
---     let modname = takeBaseName file
---     tokens <- (liftIO . fileTokens) file
---     let parseTree = parse tokens
---     modul <- compileImport parseTree dir' modname Nothing Nothing vis compile
---     return $ extractInterface modul
-
-
 -- |Set up a new module for compilation.  Assumes that a fresh module 
 --  has already been entered.  Normalises and installs the given list 
 --  of file items, and handles any required imports.
 setUpModule :: [Item] -> Compiler ()
 setUpModule items = do
-    optionallyPutStr (verbose 1)
-      $ const (intercalate "\n" $ List.map show items)
+    verboseMsg 1 (intercalate "\n" $ List.map show items)
     Normalise.normalise items
-    optionallyPutStr (verbose 1)
-      ((intercalate ("\n" ++ replicate 50 '-' ++ "\n")) .
-       (List.map show) . underCompilation)
     handleImports
 
 
@@ -149,21 +144,11 @@ setUpModule items = do
 --  been set up for the new module.
 compile :: [Module] -> Compiler ()
 compile mods = do
+    verboseMsg 1 (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
+                  (List.map show mods))
 --    flowCheck
     typeCheck
     return ()
-
-
--- |Find the file path for the specified module spec relative to the
---  specified file path for the referencing module.
-moduleFilePath :: ModSpec -> FilePath -> IO FilePath
-moduleFilePath spec dir = do
-    let file = addExtension (joinPath $ (splitDirectories dir) ++ spec) 
-               sourceExtension
-    exists <- doesFileExist file
-    if exists then return file
-      else
-        error ("Can't find module " ++ show spec)
 
 
 ------------------------ Handling Imports ------------------------
@@ -172,9 +157,10 @@ moduleFilePath spec dir = do
 handleImports :: Compiler ()
 handleImports = do
     imports <- getModuleImplementationField (keys . modImports)
-    modspec <- getModuleSpec
-    mod <- getModule id
-    updateModules (Map.insert modspec mod)
+    mapM_ buildDependency $ fromJust imports
+    -- modspec <- getModuleSpec
+    -- mod <- getModule id
+    -- updateModules (Map.insert modspec mod)
 
 ------------------------ Filename Handling ------------------------
 
@@ -203,3 +189,9 @@ fileObjFile filename = replaceExtension filename objectExtension
 --  the corresponding source file.
 fileSourceFile :: FilePath -> FilePath
 fileSourceFile filename = replaceExtension filename sourceExtension
+
+-- |Find the file path for the specified module spec relative to the
+--  specified file path for the referencing module.
+moduleFilePath :: String -> FilePath -> ModSpec -> FilePath
+moduleFilePath extension dir spec = do
+    addExtension (joinPath $ (splitDirectories dir) ++ spec) extension
