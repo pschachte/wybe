@@ -29,7 +29,7 @@ normaliseItem (TypeDecl vis (TypeProto name params) items pos) = do
     enterModule dir (parentmod ++ [name]) (Just params)
     addType name (TypeDef (length params) pos) vis
     normalise items
-    mod <- exitModule
+    mod <- finishModule
     addSubmod name mod pos vis
     return ()
 normaliseItem (ModuleDecl vis name items pos) = do
@@ -37,7 +37,7 @@ normaliseItem (ModuleDecl vis name items pos) = do
     parentmod <- getModuleSpec
     enterModule dir (parentmod ++ [name]) Nothing
     normalise items
-    mod <- exitModule
+    mod <- finishModule
     addSubmod name mod pos vis
     return ()
 normaliseItem (ImportMods vis imp modspecs pos) = do

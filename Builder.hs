@@ -7,7 +7,7 @@
 --
 
 -- |Code to oversee the compilation process.
-module Builder (buildTargets, compileModule, compile) where
+module Builder (buildTargets, compileModule) where
 
 import Options         (Options, verbose, optForce, optForceAll)
 import AST
@@ -101,19 +101,18 @@ buildModule' modname objfile srcfile = do
 compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
 compileModule dir modspec params parseTree = do
     enterModule dir modspec params
-    compile parseTree
-    exitModule
-    return ()
+    setUpModule parseTree
+    mods <- exitModule
+    compile mods
 
-
--- |XXX Build executable from object file
+-- |Build executable from object file
 --   XXX not yet implemented
 buildExecutable :: FilePath -> Ident -> Compiler ()
 buildExecutable _ _ =
     error "Can't build executables yet"
 
 
--- | Load module export info from compiled file
+-- |Load module export info from compiled file
 --   XXX not yet implemented
 loadModule :: FilePath -> Compiler ()
 loadModule objfile =
@@ -132,10 +131,11 @@ loadModule objfile =
 --     return $ extractInterface modul
 
 
--- |Actually compile a list of file items, assuming the Compiler has
---  been set up for the new module.
-compile :: [Item] -> Compiler ()
-compile items = do
+-- |Set up a new module for compilation.  Assumes that a fresh module 
+--  has already been entered.  Normalises and installs the given list 
+--  of file items, and handles any required imports.
+setUpModule :: [Item] -> Compiler ()
+setUpModule items = do
     optionallyPutStr (verbose 1)
       $ const (intercalate "\n" $ List.map show items)
     Normalise.normalise items
@@ -143,8 +143,15 @@ compile items = do
       ((intercalate ("\n" ++ replicate 50 '-' ++ "\n")) .
        (List.map show) . underCompilation)
     handleImports
+
+
+-- |Actually compile a list of file items, assuming the Compiler has
+--  been set up for the new module.
+compile :: [Module] -> Compiler ()
+compile mods = do
 --    flowCheck
     typeCheck
+    return ()
 
 
 -- |Find the file path for the specified module spec relative to the

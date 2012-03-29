@@ -19,7 +19,7 @@ module AST (
   Placed(..), place, content, maybePlace,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
-  enterModule, exitModule, emptyInterface, emptyImplementation,
+  enterModule, exitModule, finishModule, emptyInterface, emptyImplementation,
   ModSpec, ProcDef(..), Ident, VarName, 
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
   expToStmt, Prim(..), PrimArg(..),
@@ -142,7 +142,8 @@ data CompilerState = Compiler {
   errorState :: Bool,      -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules
   loadCount :: Int,        -- ^counter of module load order
-  underCompilation :: [Module] -- ^the modules in the process of being compiled
+  underCompilation :: [Module], -- ^the modules in the process of being compiled
+  deferred :: [Module]          -- ^modules in the same SCC as the current one
   } deriving Show
 
 -- |The compiler monad is a state transformer monad carrying the 
@@ -152,7 +153,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp 
-                        (Compiler opts [] False Map.empty 0 [])
+                        (Compiler opts [] False Map.empty 0 [] [])
 
 
 -- initCompiler :: Options -> FilePath -> ModSpec -> Maybe [Ident] -> 
@@ -214,16 +215,25 @@ enterModule dir modspec params = do
                                        : underCompilation comp
                             in  comp { underCompilation = mods })
 
-exitModule :: Compiler Module
+exitModule :: Compiler [Module]
 exitModule = do
-    mod <- getModule id
-    if (minDependencyNum mod < thisLoadNum mod) 
-      then
-        error "circular dependency"
+    mod <- finishModule
+    let num = thisLoadNum mod
+    if (minDependencyNum mod < num) 
+      then do
+        updateCompiler (\comp -> comp { deferred = mod:deferred comp })
+        return []
       else do
-        updateCompiler 
-          (\comp -> comp { underCompilation = tail (underCompilation comp) })
-        updateModules (Map.insert (modSpec mod) mod)
+        deferred <- getCompiler deferred
+        let (bonus,rest) = span ((==num) . minDependencyNum) deferred
+        updateCompiler (\comp -> comp { deferred = rest })
+        return $ mod:bonus
+
+finishModule :: Compiler Module
+finishModule = do
+    mod <- getModule id
+    updateCompiler 
+      (\comp -> comp { underCompilation = tail (underCompilation comp) })
     return mod
 
 -- |Return the directory of the current module.
