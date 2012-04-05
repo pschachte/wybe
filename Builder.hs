@@ -19,7 +19,7 @@ import System.FilePath
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
-import Data.Maybe      (isNothing, fromJust)
+import Data.Maybe      (isNothing, fromJust, catMaybes)
 import Control.Monad
 import Control.Monad.Trans.State
 import Control.Monad.Trans
@@ -135,18 +135,22 @@ loadModule objfile =
 --  of file items, and handles any required imports.
 setUpModule :: [Item] -> Compiler ()
 setUpModule items = do
-    verboseMsg 1 (intercalate "\n" $ List.map show items)
+    verboseMsg 1 $ return (intercalate "\n" $ List.map show items)
     Normalise.normalise items
     handleImports
 
 
--- |Actually compile a list of file items, assuming the Compiler has
---  been set up for the new module.
-compile :: [Module] -> Compiler ()
-compile mods = do
-    verboseMsg 1 (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
-                  (List.map show mods))
---    flowCheck
+-- |Actually compile a list of modules that form an SCC in the module
+--  dependency graph.  This is called in a way that guarantees that
+--  all proc calls will be to procs that either have already been
+--  compiled or are defined in modules on this list.
+compile :: [ModSpec] -> Compiler ()
+compile specs = do
+    verboseMsg 1 $ do
+        mods <- mapM getLoadedModule specs
+        return (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
+                (List.map show $ catMaybes mods))
+    -- flowCheck mods
     typeCheck
     return ()
 

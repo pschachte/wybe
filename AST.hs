@@ -215,7 +215,7 @@ enterModule dir modspec params = do
                                        : underCompilation comp
                             in  comp { underCompilation = mods })
 
-exitModule :: Compiler [Module]
+exitModule :: Compiler [ModSpec]
 exitModule = do
     mod <- finishModule
     let num = thisLoadNum mod
@@ -227,13 +227,14 @@ exitModule = do
         deferred <- getCompiler deferred
         let (bonus,rest) = span ((==num) . minDependencyNum) deferred
         updateCompiler (\comp -> comp { deferred = rest })
-        return $ mod:bonus
+        return $ List.map modSpec $ mod:bonus
 
 finishModule :: Compiler Module
 finishModule = do
     mod <- getModule id
     updateCompiler 
       (\comp -> comp { underCompilation = tail (underCompilation comp) })
+    updateModules $ Map.insert (modSpec mod) mod
     return mod
 
 -- |Return the directory of the current module.
@@ -433,15 +434,15 @@ option opt = do
 
 -- |If the specified Boolean option is selected, print out the result 
 --  of applying the compiler state state output function.
-optionallyPutStr :: (Options -> Bool) -> String ->
-                   Compiler ()
-optionallyPutStr opt str = do
+optionallyPutStr :: (Options -> Bool) -> Compiler String -> Compiler ()
+optionallyPutStr opt strcomp = do
     check <- option opt
+    str <- strcomp
     when check ((liftIO . putStrLn) str)
 
-verboseMsg :: Int -> String -> Compiler ()
+verboseMsg :: Int -> Compiler String -> Compiler ()
 verboseMsg verbosity = optionallyPutStr ((>= verbosity) . optVerbosity)
-  
+
 
 
 ----------------------------------------------------------------
@@ -456,7 +457,6 @@ data Module = Module {
   modInterface :: ModuleInterface, -- ^The public face of this module
   modImplementation :: Maybe ModuleImplementation, 
                                 -- ^the module's implementation
---  internalSubmods :: [Module], -- ^modules defined inside this one
   thisLoadNum :: Int,            -- ^the loadCount when loading this module
   minDependencyNum :: Int,       -- ^the smallest loadNum of all dependencies
   varCount :: Int,               -- ^a per proc counter for introduced variables
