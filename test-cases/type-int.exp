@@ -1,18 +1,18 @@
 Public type int is {type-int:1:8}
-  Public func +(x:int,y:int):int {type-int:2:12} = foreign llvm add(x {type-int:2:55}, y {type-int:2:57}) {type-int:2:38}
-  Public proc +(?x:int, y:int, z:int) {type-int:3:12}[=(?x {type-int:3:39}, foreign llvm sub(z {type-int:3:61}, y {type-int:3:63}) {type-int:3:44}) {type-int:3:39}]
-  Public proc +(x:int, ?y:int, z:int) {type-int:4:12}[=(?y {type-int:4:39}, foreign llvm sub(z {type-int:4:61}, x {type-int:4:63}) {type-int:4:44}) {type-int:4:39}]
-  Public func -(x:int,y:int):int {type-int:5:12} = foreign llvm sub(x {type-int:5:55}, y {type-int:5:57}) {type-int:5:38}
-  Public proc -(?x:int, y:int, z:int) {type-int:6:12}[=(?x {type-int:6:39}, foreign llvm add(z {type-int:6:61}, y {type-int:6:63}) {type-int:6:44}) {type-int:6:39}]
-  Public proc -(x:int, ?y:int, z:int) {type-int:7:12}[=(?y {type-int:7:39}, foreign llvm sub(z {type-int:7:61}, x {type-int:7:63}) {type-int:7:44}) {type-int:7:39}]
-  Public func *(x:int,y:int):int {type-int:8:12} = foreign llvm mul(x {type-int:8:55}, y {type-int:8:57}) {type-int:8:38}
-  Public func /(x:int,y:int):int {type-int:9:12} = foreign llvm sdiv(x {type-int:9:56}, y {type-int:9:58}) {type-int:9:38}
-  Public func ==(x:int,y:int):bool {type-int:10:12} = foreign llvm icmp(eq {type-int:10:58}, x {type-int:10:61}, y {type-int:10:63}) {type-int:10:40}
-  Public func /=(x:int,y:int):bool {type-int:11:12} = foreign llvm icmp(ne {type-int:11:58}, x {type-int:11:61}, y {type-int:11:63}) {type-int:11:40}
-  Public func <(x:int,y:int):bool {type-int:12:12} = foreign llvm icmp(slt {type-int:12:57}, x {type-int:12:61}, y {type-int:12:63}) {type-int:12:39}
-  Public func <=(x:int,y:int):bool {type-int:13:12} = foreign llvm icmp(sle {type-int:13:58}, x {type-int:13:62}, y {type-int:13:64}) {type-int:13:40}
-  Public func >(x:int,y:int):bool {type-int:14:12} = foreign llvm icmp(sgt {type-int:14:57}, x {type-int:14:61}, y {type-int:14:63}) {type-int:14:39}
-  Public func >=(x:int,y:int):bool {type-int:15:12} = foreign llvm icmp(sge {type-int:15:58}, x {type-int:15:62}, y {type-int:15:64}) {type-int:15:40}
+  Public func +(x:int,y:int):int {type-int:2:12} = foreign llvm add(32 {type-int:2:57}, x {type-int:2:58}, y {type-int:2:60}) {type-int:2:38}
+  Public proc +(?x:int, y:int, z:int) {type-int:3:12}[=(?x {type-int:3:39}, foreign llvm sub(32 {type-int:3:63}, z {type-int:3:64}, y {type-int:3:66}) {type-int:3:44}) {type-int:3:39}]
+  Public proc +(x:int, ?y:int, z:int) {type-int:4:12}[=(?y {type-int:4:39}, foreign llvm sub(32 {type-int:4:63}, z {type-int:4:64}, x {type-int:4:66}) {type-int:4:44}) {type-int:4:39}]
+  Public func -(x:int,y:int):int {type-int:5:12} = foreign llvm sub(32 {type-int:5:57}, x {type-int:5:58}, y {type-int:5:60}) {type-int:5:38}
+  Public proc -(?x:int, y:int, z:int) {type-int:6:12}[=(?x {type-int:6:39}, foreign llvm add(32 {type-int:6:63}, z {type-int:6:64}, y {type-int:6:66}) {type-int:6:44}) {type-int:6:39}]
+  Public proc -(x:int, ?y:int, z:int) {type-int:7:12}[=(?y {type-int:7:39}, foreign llvm sub(32 {type-int:7:63}, z {type-int:7:64}, x {type-int:7:66}) {type-int:7:44}) {type-int:7:39}]
+  Public func *(x:int,y:int):int {type-int:8:12} = foreign llvm mul(32 {type-int:8:57}, x {type-int:8:58}, y {type-int:8:60}) {type-int:8:38}
+  Public func /(x:int,y:int):int {type-int:9:12} = foreign llvm sdiv(32 {type-int:9:58}, x {type-int:9:59}, y {type-int:9:61}) {type-int:9:38}
+  Public func ==(x:int,y:int):bool {type-int:10:12} = foreign llvm icmp(eq {type-int:10:58}, 32 {type-int:10:63}, x {type-int:10:64}, y {type-int:10:66}) {type-int:10:40}
+  Public func /=(x:int,y:int):bool {type-int:11:12} = foreign llvm icmp(ne {type-int:11:58}, 32 {type-int:11:63}, x {type-int:11:64}, y {type-int:11:66}) {type-int:11:40}
+  Public func <(x:int,y:int):bool {type-int:12:12} = foreign llvm icmp(slt {type-int:12:57}, 32 {type-int:12:63}, x {type-int:12:64}, y {type-int:12:66}) {type-int:12:39}
+  Public func <=(x:int,y:int):bool {type-int:13:12} = foreign llvm icmp(sle {type-int:13:58}, 32 {type-int:13:64}, x {type-int:13:65}, y {type-int:13:67}) {type-int:13:40}
+  Public func >(x:int,y:int):bool {type-int:14:12} = foreign llvm icmp(sgt {type-int:14:57}, 32 {type-int:14:63}, x {type-int:14:64}, y {type-int:14:66}) {type-int:14:39}
+  Public func >=(x:int,y:int):bool {type-int:15:12} = foreign llvm icmp(sge {type-int:15:58}, 32 {type-int:15:64}, x {type-int:15:65}, y {type-int:15:67}) {type-int:15:40}
 end
 
 
@@ -32,75 +32,75 @@ int:
   public submods  : 
   public types    : int/0 {type-int:1:8}
   public resources: 
-  public procs    : *(x:int, y:int, ?$:int) <7> {type-int:8:12}
-                    +(x:int, ?y:int, z:int) <3> {type-int:4:12}
-                    +(?x:int, y:int, z:int) <2> {type-int:3:12}
-                    +(x:int, y:int, ?$:int) <1> {type-int:2:12}
-                    -(x:int, ?y:int, z:int) <6> {type-int:7:12}
-                    -(?x:int, y:int, z:int) <5> {type-int:6:12}
-                    -(x:int, y:int, ?$:int) <4> {type-int:5:12}
-                    /(x:int, y:int, ?$:int) <8> {type-int:9:12}
-                    /=(x:int, y:int, ?$:bool) <10> {type-int:11:12}
-                    <(x:int, y:int, ?$:bool) <11> {type-int:12:12}
-                    <=(x:int, y:int, ?$:bool) <12> {type-int:13:12}
-                    ==(x:int, y:int, ?$:bool) <9> {type-int:10:12}
-                    >(x:int, y:int, ?$:bool) <13> {type-int:14:12}
-                    >=(x:int, y:int, ?$:bool) <14> {type-int:15:12}
+  public procs    : *(x:int, y:int, ?$:int) <0> {type-int:8:12}
+                    +(x:int, ?y:int, z:int) <2> {type-int:4:12}
+                    +(?x:int, y:int, z:int) <1> {type-int:3:12}
+                    +(x:int, y:int, ?$:int) <0> {type-int:2:12}
+                    -(x:int, ?y:int, z:int) <2> {type-int:7:12}
+                    -(?x:int, y:int, z:int) <1> {type-int:6:12}
+                    -(x:int, y:int, ?$:int) <0> {type-int:5:12}
+                    /(x:int, y:int, ?$:int) <0> {type-int:9:12}
+                    /=(x:int, y:int, ?$:bool) <0> {type-int:11:12}
+                    <(x:int, y:int, ?$:bool) <0> {type-int:12:12}
+                    <=(x:int, y:int, ?$:bool) <0> {type-int:13:12}
+                    ==(x:int, y:int, ?$:bool) <0> {type-int:10:12}
+                    >(x:int, y:int, ?$:bool) <0> {type-int:14:12}
+                    >=(x:int, y:int, ?$:bool) <0> {type-int:15:12}
   imports         : 
   types           : int/0 {type-int:1:8}
   resources       : 
-  procs           : *: [
-proc *(x:int, y:int, ?$:int) (id 7):  {type-int:8:12}
-    foreign llvm mul(x, y, ?$tmp6) {type-int:8:38}
-    =(?$, $tmp6) {?}]
-                    +: [
-proc +(x:int, ?y:int, z:int) (id 3):  {type-int:4:12}
-    foreign llvm sub(z, x, ?$tmp2) {type-int:4:44}
-    =(?y, $tmp2) {type-int:4:39},
-proc +(?x:int, y:int, z:int) (id 2):  {type-int:3:12}
-    foreign llvm sub(z, y, ?$tmp1) {type-int:3:44}
-    =(?x, $tmp1) {type-int:3:39},
-proc +(x:int, y:int, ?$:int) (id 1):  {type-int:2:12}
-    foreign llvm add(x, y, ?$tmp0) {type-int:2:38}
-    =(?$, $tmp0) {?}]
-                    -: [
-proc -(x:int, ?y:int, z:int) (id 6):  {type-int:7:12}
-    foreign llvm sub(z, x, ?$tmp5) {type-int:7:44}
-    =(?y, $tmp5) {type-int:7:39},
-proc -(?x:int, y:int, z:int) (id 5):  {type-int:6:12}
-    foreign llvm add(z, y, ?$tmp4) {type-int:6:44}
-    =(?x, $tmp4) {type-int:6:39},
-proc -(x:int, y:int, ?$:int) (id 4):  {type-int:5:12}
-    foreign llvm sub(x, y, ?$tmp3) {type-int:5:38}
-    =(?$, $tmp3) {?}]
-                    /: [
-proc /(x:int, y:int, ?$:int) (id 8):  {type-int:9:12}
-    foreign llvm sdiv(x, y, ?$tmp7) {type-int:9:38}
-    =(?$, $tmp7) {?}]
-                    /=: [
-proc /=(x:int, y:int, ?$:bool) (id 10):  {type-int:11:12}
-    foreign llvm icmp(ne, x, y, ?$tmp9) {type-int:11:40}
-    =(?$, $tmp9) {?}]
-                    <: [
-proc <(x:int, y:int, ?$:bool) (id 11):  {type-int:12:12}
-    foreign llvm icmp(slt, x, y, ?$tmp10) {type-int:12:39}
-    =(?$, $tmp10) {?}]
-                    <=: [
-proc <=(x:int, y:int, ?$:bool) (id 12):  {type-int:13:12}
-    foreign llvm icmp(sle, x, y, ?$tmp11) {type-int:13:40}
-    =(?$, $tmp11) {?}]
-                    ==: [
-proc ==(x:int, y:int, ?$:bool) (id 9):  {type-int:10:12}
-    foreign llvm icmp(eq, x, y, ?$tmp8) {type-int:10:40}
-    =(?$, $tmp8) {?}]
-                    >: [
-proc >(x:int, y:int, ?$:bool) (id 13):  {type-int:14:12}
-    foreign llvm icmp(sgt, x, y, ?$tmp12) {type-int:14:39}
-    =(?$, $tmp12) {?}]
-                    >=: [
-proc >=(x:int, y:int, ?$:bool) (id 14):  {type-int:15:12}
-    foreign llvm icmp(sge, x, y, ?$tmp13) {type-int:15:40}
-    =(?$, $tmp13) {?}]
+  procs           : *:
+proc *(x:int, y:int, ?$:int) (id 0):  {type-int:8:12}
+    foreign llvm mul(32, x, y, ?$tmp6) {type-int:8:38}
+    =(?$, $tmp6) {?}
+                    +:
+proc +(x:int, y:int, ?$:int) (id 0):  {type-int:2:12}
+    foreign llvm add(32, x, y, ?$tmp0) {type-int:2:38}
+    =(?$, $tmp0) {?}
+proc +(?x:int, y:int, z:int) (id 1):  {type-int:3:12}
+    foreign llvm sub(32, z, y, ?$tmp1) {type-int:3:44}
+    =(?x, $tmp1) {type-int:3:39}
+proc +(x:int, ?y:int, z:int) (id 2):  {type-int:4:12}
+    foreign llvm sub(32, z, x, ?$tmp2) {type-int:4:44}
+    =(?y, $tmp2) {type-int:4:39}
+                    -:
+proc -(x:int, y:int, ?$:int) (id 0):  {type-int:5:12}
+    foreign llvm sub(32, x, y, ?$tmp3) {type-int:5:38}
+    =(?$, $tmp3) {?}
+proc -(?x:int, y:int, z:int) (id 1):  {type-int:6:12}
+    foreign llvm add(32, z, y, ?$tmp4) {type-int:6:44}
+    =(?x, $tmp4) {type-int:6:39}
+proc -(x:int, ?y:int, z:int) (id 2):  {type-int:7:12}
+    foreign llvm sub(32, z, x, ?$tmp5) {type-int:7:44}
+    =(?y, $tmp5) {type-int:7:39}
+                    /:
+proc /(x:int, y:int, ?$:int) (id 0):  {type-int:9:12}
+    foreign llvm sdiv(32, x, y, ?$tmp7) {type-int:9:38}
+    =(?$, $tmp7) {?}
+                    /=:
+proc /=(x:int, y:int, ?$:bool) (id 0):  {type-int:11:12}
+    foreign llvm icmp(ne, 32, x, y, ?$tmp9) {type-int:11:40}
+    =(?$, $tmp9) {?}
+                    <:
+proc <(x:int, y:int, ?$:bool) (id 0):  {type-int:12:12}
+    foreign llvm icmp(slt, 32, x, y, ?$tmp10) {type-int:12:39}
+    =(?$, $tmp10) {?}
+                    <=:
+proc <=(x:int, y:int, ?$:bool) (id 0):  {type-int:13:12}
+    foreign llvm icmp(sle, 32, x, y, ?$tmp11) {type-int:13:40}
+    =(?$, $tmp11) {?}
+                    ==:
+proc ==(x:int, y:int, ?$:bool) (id 0):  {type-int:10:12}
+    foreign llvm icmp(eq, 32, x, y, ?$tmp8) {type-int:10:40}
+    =(?$, $tmp8) {?}
+                    >:
+proc >(x:int, y:int, ?$:bool) (id 0):  {type-int:14:12}
+    foreign llvm icmp(sgt, 32, x, y, ?$tmp12) {type-int:14:39}
+    =(?$, $tmp12) {?}
+                    >=:
+proc >=(x:int, y:int, ?$:bool) (id 0):  {type-int:15:12}
+    foreign llvm icmp(sge, 32, x, y, ?$tmp13) {type-int:15:40}
+    =(?$, $tmp13) {?}
 
 Submodules of type-int.int:
 
