@@ -22,30 +22,30 @@ position:
   public submods  : 
   public types    : position/0 {position:1:8}
   public resources: 
-  public procs    : position(x:int, y:int, ?$:position) <1> {?}
-                    x(!$rec:position, $field:int) <3> {?}
-                    x($rec:position, ?$field:int) <2> {?}
-                    y(!$rec:position, $field:int) <5> {?}
-                    y($rec:position, ?$field:int) <4> {?}
+  public procs    : position(x:int, y:int, ?$:position) <0> {?}
+                    x(!$rec:position, $field:int) <1> {?}
+                    x($rec:position, ?$field:int) <0> {?}
+                    y(!$rec:position, $field:int) <1> {?}
+                    y($rec:position, ?$field:int) <0> {?}
   imports         : 
   types           : position/0 {position:1:8}
   resources       : 
-  procs           : position: [
-proc position(x:int, y:int, ?$:position) (id 1):  {?}
+  procs           : position:
+proc position(x:int, y:int, ?$:position) (id 0):  {?}
     $alloc(position, ?$tmp0) {?}
     update$x(x, $tmp0, ?$tmp1) {?}
     update$y(y, $tmp1, ?$tmp2) {?}
-    =(?$, $tmp2) {?}]
-                    x: [
-proc x(!$rec:position, $field:int) (id 3):  {?}
-    foreign  mutate(position, !$rec, $field) {?},
-proc x($rec:position, ?$field:int) (id 2):  {?}
-    foreign  access(position, $rec, ?$field) {?}]
-                    y: [
-proc y(!$rec:position, $field:int) (id 5):  {?}
-    foreign  mutate(position, !$rec, $field) {?},
-proc y($rec:position, ?$field:int) (id 4):  {?}
-    foreign  access(position, $rec, ?$field) {?}]
+    =(?$, $tmp2) {?}
+                    x:
+proc x($rec:position, ?$field:int) (id 0):  {?}
+    foreign  access(position, $rec, ?$field) {?}
+proc x(!$rec:position, $field:int) (id 1):  {?}
+    foreign  mutate(position, !$rec, $field) {?}
+                    y:
+proc y($rec:position, ?$field:int) (id 0):  {?}
+    foreign  access(position, $rec, ?$field) {?}
+proc y(!$rec:position, $field:int) (id 1):  {?}
+    foreign  mutate(position, !$rec, $field) {?}
 
 Submodules of position.position:
 
@@ -54,12 +54,12 @@ Submodules of position.position:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : distance(p1:position, p2:position, ?$:?) <1> {import:3:8}
+  public procs    : distance(p1:position, p2:position, ?$:?) <0> {import:3:8}
   imports         : import position 
   types           : 
   resources       : 
-  procs           : distance: [
-proc distance(p1:position, p2:position, ?$:?) (id 1):  {import:3:8}
+  procs           : distance:
+proc distance(p1:position, p2:position, ?$:?) (id 0):  {import:3:8}
     x(p2, ?$tmp5) {import:4:11}
     x(p1, ?$tmp4) {import:4:16}
     -($tmp5, $tmp4, ?$tmp6) {import:4:10}
@@ -70,7 +70,7 @@ proc distance(p1:position, p2:position, ?$:?) (id 1):  {import:3:8}
     ^($tmp2, 2, ?$tmp3) {import:4:26}
     +($tmp7, $tmp3, ?$tmp8) {import:4:10}
     sqrt($tmp8, ?$tmp9) {import:4:5}
-    =(?$, $tmp9) {?}]
+    =(?$, $tmp9) {?}
 
 Submodules of import:
 

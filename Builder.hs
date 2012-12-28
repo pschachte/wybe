@@ -14,7 +14,7 @@ import AST
 import Parser          (parse)
 import Scanner         (inputTokens, fileTokens, Token)
 import Normalise       (normalise)
-import Types           (typeCheck)
+import Types           (typeCheckModSCC)
 import System.FilePath
 import Data.Map as Map
 import Data.Set as Set
@@ -114,7 +114,7 @@ compileModule dir modspec params parseTree = do
     enterModule dir modspec params
     setUpModule parseTree
     mods <- exitModule
-    compile mods
+    compileModSCC mods
 
 -- |Build executable from object file
 --   XXX not yet implemented
@@ -144,20 +144,53 @@ setUpModule items = do
 --  dependency graph.  This is called in a way that guarantees that
 --  all proc calls will be to procs that either have already been
 --  compiled or are defined in modules on this list.
-compile :: [ModSpec] -> Compiler ()
-compile specs = do
+compileModSCC :: [ModSpec] -> Compiler ()
+compileModSCC specs = do
     verboseMsg 1 $ do
         mods <- mapM getLoadedModule specs
         return (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
                 (List.map show $ catMaybes mods))
-    -- flowCheck mods
-    typeCheck
+    -- mapM_ resolveOverloading specs
+    -- callgraph <- mapM (\m -> getSpecModule m
+    --                        (Map.toAscList . modProcs . 
+    --                         fromJust . modImplementation))
+    typeCheckModSCC specs
+    return ()
+
+---------------------- Resolving Overloading -----------------------
+
+-- resolveOverloading :: ModSpec -> Compiler ()
+-- -- resolveOverloading spec = do
+-- --     (liftIO . putStrLn) (show spec)
+-- --     return ()
+-- resolveOverloading spec = do
+--     updateModImplementationM
+--       (updateModProcsM 
+--        (\m -> do
+--              processed <- mapM (\(k,p) -> do
+--                                     p' <- mapM resolveProc p
+--                                     return (k,p'))
+--                          (Map.toAscList m)
+--              return $ Map.fromAscList processed))
+
+-- resolveProc :: ProcDef -> Compiler ProcDef
+-- resolveProc (ProcDef id proto def pos) = do
+--     def' <- mapM (updatePlacedM resolvePrim) def
+--     return $ ProcDef id proto def' pos
+
+-- resolvePrim :: Prim -> Compiler Prim
+-- resolvePrim prim = return prim
+
+---------------------- Purely Local Checks -----------------------
+
+localCheckMod :: ModSpec -> Compiler ()
+localCheckMod spec = do
     return ()
 
 
 ------------------------ Handling Imports ------------------------
 
--- |Handle all the imports of the current module.
+-- |Handle all the imports of the current module.a
 handleImports :: Compiler ()
 handleImports = do
     imports <- getModuleImplementationField (keys . modImports)

@@ -4,12 +4,12 @@ Public proc yorn(prompt:string, ?result:bool) {proc-yorn2:1:8}[do print(prompt {
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : yorn(prompt:string, ?result:bool) <1> {proc-yorn2:1:8}
+  public procs    : yorn(prompt:string, ?result:bool) <0> {proc-yorn2:1:8}
   imports         : 
   types           : 
   resources       : 
-  procs           : yorn: [
-proc yorn(prompt:string, ?result:bool) (id 1):  {proc-yorn2:1:8}
+  procs           : yorn:
+proc yorn(prompt:string, ?result:bool) (id 0):  {proc-yorn2:1:8}
     do  {proc-yorn2:2:5}
         print(prompt) {proc-yorn2:2:9}
         print(" (y/n) ") {proc-yorn2:3:9}
@@ -24,7 +24,7 @@ proc yorn(prompt:string, ?result:bool) (id 1):  {proc-yorn2:1:8}
         =(?$tmp2, $tmp1) {?}
         until $tmp2 {proc-yorn2:7:9}
         println("Please answer 'yes' or 'no'.") {proc-yorn2:8:9}
-    end]
+    end
 
 Submodules of proc-yorn2:
 

@@ -4,16 +4,16 @@ Public func quad(x:int):int {func-let:1:8} = +(d {func-let:1:47}, d {func-let:1:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : quad(x:int, ?$:int) <1> {func-let:1:8}
+  public procs    : quad(x:int, ?$:int) <0> {func-let:1:8}
   imports         : 
   types           : 
   resources       : 
-  procs           : quad: [
-proc quad(x:int, ?$:int) (id 1):  {func-let:1:8}
+  procs           : quad:
+proc quad(x:int, ?$:int) (id 0):  {func-let:1:8}
     +(x, x, ?$tmp0) {func-let:1:40}
     =(?d, $tmp0) {func-let:1:35}
     +(d, d, ?$tmp1) {func-let:1:47}
-    =(?$, $tmp1) {?}]
+    =(?$, $tmp1) {?}
 
 Submodules of func-let:
 

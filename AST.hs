@@ -16,23 +16,26 @@ module AST (
   ProcProto(..), Param(..), Stmt(..), 
   LoopStmt(..), Exp(..), Generator(..),
   -- *Source Position Types
-  Placed(..), place, content, maybePlace,
+  OptPos, Placed(..), place, content, maybePlace, rePlace, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   enterModule, exitModule, finishModule, emptyInterface, emptyImplementation,
   ModSpec, ProcDef(..), Ident, VarName, 
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
-  expToStmt, Prim(..), PrimArg(..),
+  flowIn, expToStmt, Prim(..), PrimArg(..),
   -- *Stateful monad for the compilation process
   MessageLevel(..), getCompiler,
   CompilerState(..), Compiler, runCompiler,
-  updateModules, getModuleImplementationField, getLoadedModule, getModule, 
-  updateModImplementation, updateModInterface,
+  updateModules, getModuleImplementationField, getLoadedModule,
+  getModule, updateModule, getSpecModule, updateSpecModule,
+  updateModImplementation, updateModImplementationM, 
+  updateModInterface, updateModProcsM,
   getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, verboseMsg, message, freshVar, nextProcId, 
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
-  addProc, replaceProc, lookupProc, publicProc
+  addProc, replaceProc, lookupProc, publicProc,
+  showProcDefs
   ) where
 
 import Options
@@ -98,6 +101,7 @@ type OptPos = Maybe SourcePos
 data Placed t
     = Placed t SourcePos
     | Unplaced t
+    deriving Eq
 
 -- |Return the optional position attached to a Placed value.
 place :: Placed t -> OptPos
@@ -114,6 +118,19 @@ maybePlace :: t -> OptPos -> Placed t
 maybePlace t (Just pos) = Placed t pos
 maybePlace t Nothing    = Unplaced t
 
+-- |Attach a source position to a data value, if one is available.
+rePlace :: t -> Placed t -> Placed t
+rePlace t (Placed _ pos) = Placed t pos
+rePlace t (Unplaced _)   = Unplaced t
+
+-- |Apply a monadic function to the payload of a Placed thing
+updatePlacedM :: (t -> Compiler t) -> Placed t -> Compiler (Placed t)
+updatePlacedM fn (Placed content pos) = do
+    content' <- fn content
+    return $ Placed content' pos
+updatePlacedM fn (Unplaced content) = do
+    content' <- fn content
+    return $ Unplaced content'
 
 ----------------------------------------------------------------
 --                    Compiler monad
@@ -141,6 +158,7 @@ data CompilerState = Compiler {
   msgs :: [String],        -- ^warnings, error messages, and info messages
   errorState :: Bool,      -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules
+  types :: Map VarName TypeSpec, -- ^the types of variables
   loadCount :: Int,        -- ^counter of module load order
   underCompilation :: [Module], -- ^the modules in the process of being compiled
   deferred :: [Module]          -- ^modules in the same SCC as the current one
@@ -153,7 +171,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp 
-                        (Compiler opts [] False Map.empty 0 [] [])
+                        (Compiler opts [] False Map.empty Map.empty 0 [] [])
 
 
 -- initCompiler :: Options -> FilePath -> ModSpec -> Maybe [Ident] -> 
@@ -183,6 +201,13 @@ updateCompiler updater = do
     state <- get
     put $ updater state
 
+-- |Apply a monadic transformation function to the compiler state.
+updateCompilerM :: (CompilerState -> Compiler CompilerState) -> Compiler ()
+updateCompilerM updater = do
+    state <- get
+    state' <- updater state
+    put state'
+
 -- |Return Just the specified module, if already loaded; else return Nothing.
 getLoadedModule :: ModSpec -> Compiler (Maybe Module)
 getLoadedModule modspec = getCompiler (Map.lookup modspec . modules)
@@ -192,15 +217,48 @@ updateModules :: (Map ModSpec Module -> Map ModSpec Module) -> Compiler ()
 updateModules updater = do
     updateCompiler (\bs -> bs { modules = updater $ modules bs })
 
--- |Return the module currently being compiled.
+-- |Return some function of the module currently being compiled.
 getModule :: (Module -> t) -> Compiler t
 getModule getter = getCompiler (getter . head . underCompilation)
 
+-- |Transform the module currently being compiled.
 updateModule :: (Module -> Module) -> Compiler ()
 updateModule updater = do
     updateCompiler (\comp -> let mods = underCompilation comp
                             in  comp { underCompilation =
                                             updater (head mods):tail mods })
+
+-- |Transform the module currently being compiled.
+updateModuleM :: (Module -> Compiler Module) -> Compiler ()
+updateModuleM updater = do
+    updateCompilerM (\comp -> do
+                          let mods = underCompilation comp
+                          mod' <- updater $ head mods
+                          return comp { underCompilation = mod':tail mods })
+
+-- |Return some function of the specified module.
+getSpecModule :: ModSpec -> (Module -> t) -> Compiler (Maybe t)
+getSpecModule spec getter = 
+    getCompiler (maybeApply getter . Map.lookup spec . modules)
+
+-- |Transform the specified module.  Does nothing if it does not exist.
+updateSpecModule :: ModSpec -> (Module -> Module) -> Compiler ()
+updateSpecModule spec updater = do
+    updateCompiler 
+      (\comp -> comp { modules = Map.adjust updater spec (modules comp) })
+
+-- |Transform the specified module.  An error if it does not exist.
+updateSpecModuleM :: (Module -> Compiler Module) -> ModSpec -> Compiler ()
+updateSpecModuleM updater spec = do
+    updateCompilerM
+      (\comp -> do
+            let mods = modules comp
+            let mod = Map.lookup spec mods
+            case mod of
+                Nothing -> error ("nonexistent module " ++ show spec)
+                Just m -> do
+                    m' <- updater m
+                    return $ comp {modules = Map.insert spec m' mods})
 
 -- |Prepare to compile a module by setting up a new Module on the 
 --  front of the list of modules underCompilation. 
@@ -384,14 +442,17 @@ addImport modspec imp specific vis = do
 addProc :: Ident -> ProcProto -> [Placed Prim] -> OptPos
            -> Visibility -> Compiler ()
 addProc name proto stmts pos vis = do
-    newid <- nextProcId
     updateImplementation
       (updateModProcs
        (\procs ->
-         let defs  = ProcDef newid proto stmts pos:findWithDefault [] name procs
-         in  Map.insert name defs procs))
+         let defs = findWithDefault [] name procs
+             defs' = defs ++ [ProcDef name proto stmts pos]
+         in  Map.insert name defs' procs))
+    newid <- getModuleImplementationField 
+            (((-1)+) . length . fromJust . Map.lookup name . modProcs)
     updateInterface vis
-      (updatePubProcs (mapListInsert name (ProcCallInfo newid proto pos)))
+      (updatePubProcs (mapListInsert name 
+                       (ProcCallInfo (fromJust newid) proto pos)))
 
 -- |Prepend the provided elt to mapping for the specified key in the map.
 mapListInsert :: Ord a => a -> b -> Map a [b] -> Map a [b]
@@ -407,9 +468,9 @@ replaceProc name id proto stmts pos vis = do
       (updateModProcs
        (\procs -> 
          let olddefs = findWithDefault [] name procs
-             (_,rest) = List.partition (\(ProcDef oldid _ _ _) -> id==oldid) 
-                        olddefs
-         in Map.insert name (ProcDef id proto stmts pos:rest) procs))
+             (front,back) = List.splitAt id olddefs
+         in Map.insert name (front ++ (ProcDef name proto stmts pos:tail back)) 
+            procs))
 
 
 -- |Return the definition of the specified proc in the current module.
@@ -431,7 +492,6 @@ option opt = do
     opts <- getCompiler options
     return $ opt opts
 
-
 -- |If the specified Boolean option is selected, print out the result 
 --  of applying the compiler state state output function.
 optionallyPutStr :: (Options -> Bool) -> Compiler String -> Compiler ()
@@ -440,10 +500,30 @@ optionallyPutStr opt strcomp = do
     str <- strcomp
     when check ((liftIO . putStrLn) str)
 
+-- |If a high enough verbosity level was specified, execute the given 
+--  computation to produce a string, and print it out.
 verboseMsg :: Int -> Compiler String -> Compiler ()
 verboseMsg verbosity = optionallyPutStr ((>= verbosity) . optVerbosity)
 
+-- -- |Initialise the compiler state's type map to empty.
+-- initialiseTypes :: Compiler ()
+-- initialiseTypes = updateCompiler (\st -> st {types = Map.empty})
 
+-- -- |Update type information to add a type constraint.
+-- addTypeConstraint :: VarName -> TypeSpec -> Compiler ()
+-- addTypeConstraint var typ = do
+--     updateCompiler (\st -> st {types = Map.insertWith meetTypes 
+--                                       var typ $ types st})
+
+-- -- |Return the type spec for the specified variable.
+-- varType :: VarName -> Compiler TypeSpec
+-- varType var = do
+--     getCompiler (Map.findWithDefault Unspecified var . types)
+
+-- -- |Combine two type constraints.
+-- meetTypes :: TypeSpec -> TypeSpec -> TypeSpec
+-- -- XXX Need to return the most general type that satisfies *both* constraints!
+-- meetTypes typ _ = typ
 
 ----------------------------------------------------------------
 --                            AST Types
@@ -472,6 +552,17 @@ updateModImplementation fn =
             Nothing -> mod
             Just impl -> 
                 mod { modImplementation = Just $ fn impl })
+
+-- |Apply the given monadic function to the current module implementation.
+updateModImplementationM :: 
+    (ModuleImplementation -> Compiler ModuleImplementation) -> Compiler ()
+updateModImplementationM fn =
+    updateModuleM
+      (\mod -> case modImplementation mod of
+            Nothing -> return mod
+            Just impl -> do
+                impl' <- fn impl
+                return $ mod { modImplementation = Just impl' })
 
 -- |Apply the given function to the current module interface.
 updateModInterface :: (ModuleInterface -> ModuleInterface) ->
@@ -566,6 +657,13 @@ updateModProcs :: (Map Ident [ProcDef] -> Map Ident [ProcDef]) ->
                  ModuleImplementation -> ModuleImplementation
 updateModProcs fn modimp = modimp {modProcs = fn $ modProcs modimp}
 
+-- |Update the map of proc definitions of a module implementation.
+updateModProcsM :: (Map Ident [ProcDef] -> Compiler (Map Ident [ProcDef])) -> 
+                 ModuleImplementation -> Compiler ModuleImplementation
+updateModProcsM fn modimp = do
+    procs' <- fn $ modProcs modimp
+    return $ modimp {modProcs = procs'}
+
 -- |An identifier.
 type Ident = String
 
@@ -575,7 +673,8 @@ type VarName = String
 -- |A proc name.
 type ProcName = String
 
--- |A module specification, like a.b.c.
+-- |A module specification, as a list of module names; module a.b.c would
+--  be represented as ["a","b","c"].
 type ModSpec = [Ident]
 
 -- |The dependencies of one module on another, as a pair of uses and imports.
@@ -623,15 +722,20 @@ resourceDefPosition (SimpleResource _ pos) = pos
 -- |A proc definition, including the ID, prototype, the body, 
 --  normalised to a list of primitives, and an optional source 
 --  position. 
-data ProcDef = ProcDef ProcID ProcProto [Placed Prim] OptPos
+data ProcDef = ProcDef {
+    procName :: Ident, 
+    procProto :: ProcProto, 
+    procBody :: [Placed Prim], 
+    procPos :: OptPos}
+             deriving Eq
 
 -- |Info about a proc call, including the ID, prototype, and an 
 --  optional source position. 
 data ProcCallInfo = ProcCallInfo ProcID ProcProto OptPos
 
--- |Make a ProcCallInfo from a ProcDef
-procCallInfo :: ProcDef -> ProcCallInfo
-procCallInfo (ProcDef id proto _ pos) = ProcCallInfo id proto pos
+-- -- |Make a ProcCallInfo from a ProcDef
+-- procCallInfo :: ProcDef -> ProcCallInfo
+-- procCallInfo (ProcDef _ proto _ pos) = ProcCallInfo id proto pos
 
 -- |An ID for a proc.
 type ProcID = Int
@@ -639,23 +743,32 @@ type ProcID = Int
 -- |A type specification:  the type name and type parameters.  Also 
 --  could be Unspecified, meaning a type to be inferred.
 data TypeSpec = TypeSpec Ident [TypeSpec] | Unspecified
+              deriving Eq
 
 -- |A manifest constant.
 data Constant = Int Int
               | Float Double
               | Char Char
               | String String
-                deriving Show
+                deriving (Show,Eq)
 
 -- |A proc prototype, including name and formal parameters.
 data ProcProto = ProcProto ProcName [Param]
+               deriving Eq
 
 -- |A formal parameter, including name, type, and flow direction.
 data Param = Param VarName TypeSpec FlowDirection
+           deriving Eq
 
 -- |A dataflow direction:  in, out, both, or neither.
 data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow
-      deriving (Show,Eq)
+                   deriving (Show,Eq)
+
+-- |Does this flow direction include input?
+flowIn :: FlowDirection -> Bool
+flowIn ParamIn = True
+flowIn ParamInOut = True
+flowIn _ = False
 
 -- |Possible program statements.  These will be normalised into 
 --  Prims.
@@ -696,12 +809,14 @@ data Generator
 -- |A primitive statment, including those that can only appear in a 
 --  loop.
 data Prim
+     -- XXX PrimCall should optionally contain a module spec.
      = PrimCall ProcName (Maybe ProcID) [PrimArg]
      | PrimForeign String ProcName (Maybe ProcID) [PrimArg]
      | PrimCond VarName [[Placed Prim]]
      | PrimLoop [Placed Prim]
      | PrimBreakIf VarName
      | PrimNextIf VarName
+     deriving Eq
 
 -- |The allowed arguments in primitive proc or foreign proc calls, 
 --  just variables and constants.
@@ -711,6 +826,7 @@ data PrimArg
      | ArgFloat Double
      | ArgString String
      | ArgChar Char
+     deriving Eq
 
 -- |The dataflow direction of an actual argument.
 argFlowDirection :: PrimArg -> FlowDirection
@@ -725,6 +841,15 @@ expToStmt :: Exp -> Stmt
 expToStmt (Fncall name args) = ProcCall name args
 expToStmt (ForeignFn lang name args) = ForeignCall lang name args
 
+
+
+----------------------------------------------------------------
+--                            Utilities
+----------------------------------------------------------------
+
+maybeApply :: (a -> b) -> Maybe a -> Maybe b
+maybeApply f (Just x) = Just $ f x
+maybeApply f Nothing = Nothing
 
 
 ----------------------------------------------------------------
@@ -850,7 +975,10 @@ instance Show Module where
                   (mod,dep) <- Map.assocs $ modImports impl] ++
                  "\n  types           : " ++ showMapTypes (modTypes impl) ++
                  "\n  resources       : " ++ showMapLines (modResources impl) ++
-                 "\n  procs           : " ++ showMapLines (modProcs impl) ++ "\n" ++
+                 "\n  procs           : " ++ 
+                 (showMap "\n                    " ":" (showProcDefs 0)
+                  (modProcs impl)) 
+                 ++ "\n" ++
                  "\nSubmodules of " ++ showModSpec (modSpec mod) ++ ":\n" ++ 
                  showMapLines (modSubmods impl)
 
@@ -890,12 +1018,25 @@ instance Show ResourceDef where
   show (SimpleResource typ pos) =
     show typ ++ showMaybeSourcePos pos
 
+-- |How to show a list of proc definitions.
+showProcDefs :: Int -> [ProcDef] -> String
+showProcDefs _ [] = ""
+showProcDefs firstID (def:defs) =
+    showProcDef firstID def ++ showProcDefs (1+firstID) defs
+    
 -- |How to show a proc definition.
-instance Show ProcDef where
-  show (ProcDef i proto def pos) =
-    "\nproc " ++ show proto ++ " (id " ++ show i ++ "): " 
+showProcDef :: Int -> ProcDef -> String
+showProcDef thisID (ProcDef _ proto def pos) =
+    "\nproc " ++ show proto ++ " (id " ++ show thisID ++ "): "
     ++ showMaybeSourcePos pos 
     ++ showBlock 4 def
+
+-- -- |How to show a proc definition.
+-- instance Show ProcDef where
+--   show (ProcDef _ proto def pos) =
+--     "\nproc " ++ show proto ++ " (id ?): " -- XXX fix id
+--     ++ showMaybeSourcePos pos 
+--     ++ showBlock 4 def
 
 -- |How to show a type specification.
 instance Show TypeSpec where

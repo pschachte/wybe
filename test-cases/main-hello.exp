@@ -8,9 +8,9 @@ println("hello, world" {main-hello:1:9}) {main-hello:1:1}
   imports         : 
   types           : 
   resources       : 
-  procs           : : [
-proc () (id 1):  {?}
-    println("hello, world") {main-hello:1:1}]
+  procs           : :
+proc () (id 0):  {?}
+    println("hello, world") {main-hello:1:1}
 
 Submodules of main-hello:
 

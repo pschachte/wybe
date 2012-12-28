@@ -4,14 +4,14 @@ Public func plus(a:int,b:int):int {func-typed:1:8} = +(a {func-typed:1:40}, b {f
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : plus(a:int, b:int, ?$:int) <1> {func-typed:1:8}
+  public procs    : plus(a:int, b:int, ?$:int) <0> {func-typed:1:8}
   imports         : 
   types           : 
   resources       : 
-  procs           : plus: [
-proc plus(a:int, b:int, ?$:int) (id 1):  {func-typed:1:8}
+  procs           : plus:
+proc plus(a:int, b:int, ?$:int) (id 0):  {func-typed:1:8}
     +(a, b, ?$tmp0) {func-typed:1:40}
-    =(?$, $tmp0) {?}]
+    =(?$, $tmp0) {?}
 
 Submodules of func-typed:
 

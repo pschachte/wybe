@@ -67,8 +67,8 @@ normaliseItem (StmtDecl stmt pos) = do
   case oldproc of
     Nothing -> 
       addProc "" (ProcProto "" []) stmts Nothing Private
-    Just [ProcDef id proto stmts' pos'] ->
-      replaceProc "" id proto (stmts' ++ stmts) pos' Private
+    Just [ProcDef _ proto stmts' pos'] ->
+      replaceProc "" 0 proto (stmts' ++ stmts) pos' Private
 
 -- |Add a contructor for the specified type.
 addCtor :: Ident -> [Ident] -> FnProto -> Compiler ()

@@ -9,12 +9,12 @@ Public func ++(x:list(t),y:list(t)):? {type-list:6:8} = if ==(x {type-list:7:8},
   public submods  : list {type-list:1:8}
   public types    : 
   public resources: 
-  public procs    : ++(x:list(t), y:list(t), ?$:?) <1> {type-list:6:8}
+  public procs    : ++(x:list(t), y:list(t), ?$:?) <0> {type-list:6:8}
   imports         : 
   types           : 
   resources       : 
-  procs           : ++: [
-proc ++(x:list(t), y:list(t), ?$:?) (id 1):  {type-list:6:8}
+  procs           : ++:
+proc ++(x:list(t), y:list(t), ?$:?) (id 0):  {type-list:6:8}
     [](?$tmp0) {type-list:7:13}
     ==(x, $tmp0, ?$tmp1) {type-list:7:8}
     case $tmp1 of {type-list:7:5}
@@ -27,7 +27,7 @@ proc ++(x:list(t), y:list(t), ?$:?) (id 1):  {type-list:6:8}
         [|]($tmp4, $tmp3, ?$tmp5) {type-list:9:10}
         =(?$tmp6, $tmp5) {?}
     end
-    =(?$, $tmp6) {?}]
+    =(?$, $tmp6) {?}
 
 Submodules of type-list:
 list: 
@@ -35,35 +35,35 @@ list:
   public submods  : 
   public types    : list/1 {type-list:1:8}
   public resources: 
-  public procs    : [](?$:list(t)) <1> {?}
-                    [|](head:t, tail:list(t), ?$:list(t)) <2> {?}
-                    head(!$rec:list(t), $field:t) <4> {?}
-                    head($rec:list(t), ?$field:t) <3> {?}
-                    tail(!$rec:list(t), $field:list(t)) <6> {?}
-                    tail($rec:list(t), ?$field:list(t)) <5> {?}
+  public procs    : [](?$:list(t)) <0> {?}
+                    [|](head:t, tail:list(t), ?$:list(t)) <0> {?}
+                    head(!$rec:list(t), $field:t) <1> {?}
+                    head($rec:list(t), ?$field:t) <0> {?}
+                    tail(!$rec:list(t), $field:list(t)) <1> {?}
+                    tail($rec:list(t), ?$field:list(t)) <0> {?}
   imports         : 
   types           : list/1 {type-list:1:8}
   resources       : 
-  procs           : []: [
-proc [](?$:list(t)) (id 1):  {?}
+  procs           : []:
+proc [](?$:list(t)) (id 0):  {?}
     $alloc([], ?$tmp0) {?}
-    =(?$, $tmp0) {?}]
-                    [|]: [
-proc [|](head:t, tail:list(t), ?$:list(t)) (id 2):  {?}
+    =(?$, $tmp0) {?}
+                    [|]:
+proc [|](head:t, tail:list(t), ?$:list(t)) (id 0):  {?}
     $alloc([|], ?$tmp1) {?}
     update$head(head, $tmp1, ?$tmp2) {?}
     update$tail(tail, $tmp2, ?$tmp3) {?}
-    =(?$, $tmp3) {?}]
-                    head: [
-proc head(!$rec:list(t), $field:t) (id 4):  {?}
-    foreign  mutate([|], !$rec, $field) {?},
-proc head($rec:list(t), ?$field:t) (id 3):  {?}
-    foreign  access([|], $rec, ?$field) {?}]
-                    tail: [
-proc tail(!$rec:list(t), $field:list(t)) (id 6):  {?}
-    foreign  mutate([|], !$rec, $field) {?},
-proc tail($rec:list(t), ?$field:list(t)) (id 5):  {?}
-    foreign  access([|], $rec, ?$field) {?}]
+    =(?$, $tmp3) {?}
+                    head:
+proc head($rec:list(t), ?$field:t) (id 0):  {?}
+    foreign  access([|], $rec, ?$field) {?}
+proc head(!$rec:list(t), $field:t) (id 1):  {?}
+    foreign  mutate([|], !$rec, $field) {?}
+                    tail:
+proc tail($rec:list(t), ?$field:list(t)) (id 0):  {?}
+    foreign  access([|], $rec, ?$field) {?}
+proc tail(!$rec:list(t), $field:list(t)) (id 1):  {?}
+    foreign  mutate([|], !$rec, $field) {?}
 
 Submodules of type-list.list:
 

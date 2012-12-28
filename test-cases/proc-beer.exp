@@ -4,19 +4,19 @@ Public proc print2(x:int, y:int) {proc-beer:1:8}[do for count from 99 {proc-beer
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : print2(x:int, y:int) <1> {proc-beer:1:8}
+  public procs    : print2(x:int, y:int) <0> {proc-beer:1:8}
   imports         : 
   types           : 
   resources       : 
-  procs           : print2: [
-proc print2(x:int, y:int) (id 1):  {proc-beer:1:8}
+  procs           : print2:
+proc print2(x:int, y:int) (id 0):  {proc-beer:1:8}
     =(?count, 99) {?}
     do  {proc-beer:2:8}
         <(count, 0, ?$tmp0) {?}
         until $tmp0 {?}
         println("$count bottles of beer on the wall") {proc-beer:3:12}
         -(count, 1, ?count) {?}
-    end]
+    end
 
 Submodules of proc-beer:
 
