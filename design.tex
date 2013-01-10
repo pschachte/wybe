@@ -11,8 +11,8 @@
 \usepackage{xspace}
 %\usepackage{ensuremath}
 
-\newcommand{\frege}{\textsc{Frege}\xspace}
-\newcommand{\Frege}{\textsc{Frege}\xspace}
+\newcommand{\wybe}{\textsc{Wybe}\xspace}
+\newcommand{\Wybe}{\textsc{Wybe}\xspace}
 
 \newcommand{\ie}{\emph{i.e.}\xspace}
 \newcommand{\eg}{\emph{e.g.}\xspace}
@@ -22,7 +22,7 @@
 
 \newcommand{\tuple}[1]{\ensuremath{\langle#1\rangle}}
 
-\title{The \Frege Programming Language}
+\title{The \Wybe Programming Language}
 \author{Peter Schachte}
 
 \begin{document}
@@ -58,7 +58,7 @@ system in a separate software component.  Furthermore, each aspect should be
 separately maintainable and, where appropriate, reusable.
 
 In an egregious instance of acronym reverse engineering,
-the current working name for the language is \frege, for
+the current working name for the language is \wybe, for
 \textbf{F}unctions, \textbf{RE}lations, and pervasive \textbf{GE}nerics.
 
 
@@ -83,7 +83,7 @@ arguments just coming along for the ride.  But the asymmetry is rather
 unpleasant, doesn't fit well with higher-order programming, and should be
 avoided if possible.
 
-\Frege supports two kinds of modules:  \emph{classes} and \emph{modules}.
+\Wybe supports two kinds of modules:  \emph{classes} and \emph{modules}.
 A \texttt{class} defines a single public type, though it may also define
 private types.  A \texttt{module} exports no types; it only bundles a
 collection of operations.
@@ -96,7 +96,7 @@ only Layer 2 would use layer 1, \etc.  This would allow maintenance on
 one layer at a time, with changes to any layer not affecting the lower
 and higher levels, as long as the same interfaces can be maintained.
 
-\Frege supports three approaches to module composition:  embedding, extension,
+\Wybe supports three approaches to module composition:  embedding, extension,
 and delegation.  Embedding one module within another hides it from any other
 module.  When the interface of an embedded module is changed, only the
 embedding module needs to be updated.  The price of this protection is that
@@ -144,7 +144,7 @@ In fact, the algebraic type facility should be defined in a
 library; users could define their own type facilities.  \emph{E.g},
 there could be a C-compatible type system in a library, which would
 lay out types compatibly with the way C does, allowing a C type to be
-treated as a native \frege type.
+treated as a native \wybe type.
 
 Probably the
 most flexible primitive building block would be the \texttt{bits}($n$)
@@ -232,7 +232,7 @@ over the values of 0 and 1 for \texttt{X} is treated identically to one that
 constrains \texttt{X} to be either 0 or 1.  This permits the compiler to take
 either approach.
 
-Thus \frege's mode system is based on dependencies among unique determination
+Thus \wybe's mode system is based on dependencies among unique determination
 of values.  \Eg,
 \texttt{append}/3 would specify that if any two arguments are uniquely
 determined, then so is the third.
@@ -314,7 +314,7 @@ than lack of choicepoints.
 \section{Syntax}
 
 Since one of the aims of this language is to reconcile object oriented with
-functional and logic programming, \frege syntax treats \texttt{x.f(a,b)} as
+functional and logic programming, \wybe syntax treats \texttt{x.f(a,b)} as
 exactly the same as \texttt{f(x,a,b)}.  One consequence of that is that infix
 \texttt{.} is an infix reverse-order function application operator:
 \texttt{a.b.c} $\equiv$ \texttt{c(b(a))}.
@@ -409,12 +409,12 @@ optimisation.
 One principal (and principle) difference between imperative (and object
 oriented) programming and declarative programming is handling of destructive
 update:  declarative languages don't allow it, and imperative and object
-oriented languages couldn't live without it.  \Frege reconciles these by
+oriented languages couldn't live without it.  \Wybe reconciles these by
 having it both ways:  destructive update is not permitted, but a few
 syntactic constructs are provided that provide much of the convenience of
 destructive update.
 
-Of course, one of the advantages of destructive update is efficiency.  \Frege
+Of course, one of the advantages of destructive update is efficiency.  \Wybe
 regains this efficiency by generating code that actually does use destructive
 update.  This is achieved by analysing the code to look for opportunities for
 transforming non-destructive code into destructive code.  This is a
@@ -424,7 +424,7 @@ be compiled.
 
 The compiler transforms polymorphic operations into monomorphic ones before
 compiling.  This is akin to C++'s handling of templates, which is regarded as
-causing a significant code explosion.  \Frege avoids this in two ways.
+causing a significant code explosion.  \Wybe avoids this in two ways.
 Firstly, the compiler avoids generating multiple copies of the same code by
 hashing the code for each procedure it generates.  Whenever it finds it has
 generated the same code twice, it throws one copy away and uses the other in

@@ -15,7 +15,7 @@ all:	test
 %.hs:	%.y
 	happy -g $<
 
-frgmk:	*.hs Version.lhs
+wybemk:	*.hs Version.lhs
 	ghc --make $@
 
 .PHONY:	info
@@ -38,15 +38,15 @@ Version.lhs:	*.hs
 	@printf "> version :: String\n> version = \"%s\"\n" "$(VERSION)" >> $@
 	@printf "> buildDate :: String\n> buildDate = \"%s\"\n" "`date`" >> $@
 
-TESTCASES = $(wildcard test-cases/*.frg)
+TESTCASES = $(wildcard test-cases/*.wybe)
 
-test:	frgmk
+test:	wybemk
 	@for f in $(TESTCASES) ; do \
 	    printf "%-40s ... " $$f ; \
-	    out=`echo "$$f" | sed 's/.frg$$/.out/'` ; \
-	    exp=`echo "$$f" | sed 's/.frg$$/.exp/'` ; \
-	    targ=`echo "$$f" | sed 's/.frg$$/.o/'` ; \
-	    ./frgmk -v -f $$targ > $$out 2>&1 ; \
+	    out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
+	    exp=`echo "$$f" | sed 's/.wybe$$/.exp/'` ; \
+	    targ=`echo "$$f" | sed 's/.wybe$$/.o/'` ; \
+	    ./wybemk -v -f $$targ > $$out 2>&1 ; \
 	    if [ ! -r $$exp ] ; then \
 		printf "[31mNEW TEST[39m\n" ; \
 	    elif diff -q $$exp $$out >/dev/null 2>&1 ; then \

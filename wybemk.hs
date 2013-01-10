@@ -1,7 +1,7 @@
---  File     : frgc.hs
+--  File     : wybemk.hs
 --  Author   : Peter Schachte
 --  Origin   : Sun Dec  4 18:39:16 2011
---  Purpose  : Frege compiler main code
+--  Purpose  : Wybe compiler/builder main code
 --  Copyright: © 2011-2012 Peter Schachte.  All rights reserved.
 --
 
@@ -13,7 +13,7 @@ import Options
 import Builder
 import AST
 
--- |The main frege compiler command line.
+-- |The main wybe compiler command line.
 main :: IO ()
 main = do
     (opts, files) <- handleCmdline

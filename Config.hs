@@ -2,7 +2,7 @@
 --  RCS      : $Id$
 --  Author   : Peter Schachte
 --  Origin   : Sat Feb 18 00:38:48 2012
---  Purpose  : Configuration for frege compiler
+--  Purpose  : Configuration for wybe compiler
 --  Copyright: © 2012 Peter Schachte.  All rights reserved.
 
 -- |Compiler configuration parameters.  These may vary between
@@ -12,7 +12,7 @@ module Config (sourceExtension, objectExtension, executableExtension,
 
 -- |The file extension for source files.
 sourceExtension :: String
-sourceExtension = "frg"
+sourceExtension = "wybe"
 
 -- |The file extension for object files.
 objectExtension :: String

@@ -9,7 +9,7 @@
 --                      Compiler Options
 ----------------------------------------------------------------
 
--- |The frege compiler command line options.
+-- |The wybe compiler command line options.
 module Options (Options(..), handleCmdline, verbose) where
 
 import System.Console.GetOpt
@@ -17,7 +17,7 @@ import System.Environment
 import System.Exit
 import Version
 
--- |Command line options for the frege compiler.
+-- |Command line options for the wybe compiler.
 data Options = Options{  
     optForce         :: Bool     -- ^Compile specified files even if up to date
     , optForceAll    :: Bool     -- ^Compile all files even if up to date
@@ -58,7 +58,7 @@ options =
 
 -- |Help text header string
 header :: String
-header = "Usage: frgc [OPTION...] targets..."
+header = "Usage: wybemk [OPTION...] targets..."
 
 -- |Parse command line arguments
 compilerOpts :: [String] -> IO (Options, [String])
@@ -81,6 +81,6 @@ handleCmdline = do
         putStrLn $ usageInfo header options
         exitSuccess
       else if optShowVersion opts then do
-               putStrLn $ "frgc " ++ version ++ "\nBuilt " ++ buildDate
+               putStrLn $ "wybemk " ++ version ++ "\nBuilt " ++ buildDate
                exitSuccess
            else return (opts,files)

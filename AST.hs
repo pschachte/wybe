@@ -1,7 +1,7 @@
 --  File     : AST.hs
 --  Author   : Peter Schachte
 --  Origin   : Thu Oct 14 23:30:58 2010
---  Purpose  : Abstract Syntax Tree for Frege language
+--  Purpose  : Abstract Syntax Tree for Wybe language
 --  Copyright: © 2010-2012 Peter Schachte.  All rights reserved.
 
 -- |The abstract syntax tree, and supporting types and functions.

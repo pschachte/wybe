@@ -1,10 +1,10 @@
 --  File     : Scanner.hs
 --  Author   : Peter Schachte
 --  Origin   : Thu Oct 21 17:42:28 2010
---  Purpose  : Scanner for the Frege language
+--  Purpose  : Scanner for the Wybe language
 --  Copyright: © 2010-2012 Peter Schachte.  All rights reserved.
 
--- |The tokeniser for frege.
+-- |The tokeniser for wybe.
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
                 charValue, identName, symbolName, showPosition, 
                 StringDelim(..), BracketStyle(..), fileTokens, 
@@ -14,7 +14,7 @@ import Data.Char
 import Data.List
 import Text.ParserCombinators.Parsec.Pos
 
--- |The tokens of the frege language, each carrying its source position.
+-- |The tokens of the wybe language, each carrying its source position.
 data Token = TokFloat Double SourcePos          -- ^A floating point number
               | TokInt Integer SourcePos        -- ^An integer
               | TokString StringDelim String SourcePos
