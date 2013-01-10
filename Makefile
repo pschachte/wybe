@@ -15,7 +15,7 @@ all:	test
 %.hs:	%.y
 	happy -g $<
 
-wybemk:	*.hs Version.lhs
+wybemk:	*.hs Version.lhs Parser.hs
 	ghc --make $@
 
 .PHONY:	info
