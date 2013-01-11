@@ -29,20 +29,20 @@ position:
   resources       : 
   procs           : position:
 proc position(x:int, y:int, ?$:position) (id 0):  {?}
-    $alloc(position, ?$tmp0) {?}
-    update$x(x, $tmp0, ?$tmp1) {?}
-    update$y(y, $tmp1, ?$tmp2) {?}
-    =(?$, $tmp2) {?}
+    $alloc(position:0, ?$tmp0:0) {?}
+    update$x(x:0, $tmp0:0, ?$tmp1:0) {?}
+    update$y(y:0, $tmp1:0, ?$tmp2:0) {?}
+    =(?$:0, $tmp2:0) {?}
                     x:
 proc x($rec:position, ?$field:int) (id 0):  {?}
-    foreign  access(position, $rec, ?$field) {?}
+    foreign  access(position:0, $rec:0, ?$field:0) {?}
 proc x(!$rec:position, $field:int) (id 1):  {?}
-    foreign  mutate(position, !$rec, $field) {?}
+    foreign  mutate(position:0, $rec:0, ?$rec:0, $field:0) {?}
                     y:
 proc y($rec:position, ?$field:int) (id 0):  {?}
-    foreign  access(position, $rec, ?$field) {?}
+    foreign  access(position:0, $rec:0, ?$field:0) {?}
 proc y(!$rec:position, $field:int) (id 1):  {?}
-    foreign  mutate(position, !$rec, $field) {?}
+    foreign  mutate(position:0, $rec:0, ?$rec:0, $field:0) {?}
 
 Submodules of position.position:
 

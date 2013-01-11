@@ -10,12 +10,12 @@ Public proc print2(x:int, y:int) {proc-beer:1:8}[do for count from 99 {proc-beer
   resources       : 
   procs           : print2:
 proc print2(x:int, y:int) (id 0):  {proc-beer:1:8}
-    =(?count, 99) {?}
+    =(?count:0, 99) {?}
     do  {proc-beer:2:8}
-        <(count, 0, ?$tmp0) {?}
-        until $tmp0 {?}
+        <(count:0, 0, ?$tmp0:0) {?}
+        until $tmp0:0 {?}
         println("$count bottles of beer on the wall") {proc-beer:3:12}
-        -(count, 1, ?count) {?}
+        -(count:0, 1, ?count:0) {?}
     end
 
 Submodules of proc-beer:

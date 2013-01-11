@@ -10,8 +10,8 @@ Public proc nada(x:int, y:int) {proc-allin:1:8}[=(?z {proc-allin:1:32}, +(x {pro
   resources       : 
   procs           : nada:
 proc nada(x:int, y:int) (id 0):  {proc-allin:1:8}
-    +(x, y, ?$tmp0) {proc-allin:1:35}
-    =(?z, $tmp0) {proc-allin:1:32}
+    +(x:0, y:0, ?$tmp0:0) {proc-allin:1:35}
+    =(?z:0, $tmp0:0) {proc-allin:1:32}
 
 Submodules of proc-allin:
 

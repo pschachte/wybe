@@ -10,8 +10,8 @@ Public proc print2(x:int, y:int) {proc-print2:1:8}[print(x {proc-print2:2:14}) {
   resources       : 
   procs           : print2:
 proc print2(x:int, y:int) (id 0):  {proc-print2:1:8}
-    print(x) {proc-print2:2:8}
-    print(y) {proc-print2:3:8}
+    print(x:0) {proc-print2:2:8}
+    print(y:0) {proc-print2:3:8}
 
 Submodules of proc-print2:
 

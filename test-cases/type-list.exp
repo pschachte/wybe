@@ -15,19 +15,19 @@ Public func ++(x:list(t),y:list(t)):? {type-list:6:8} = if ==(x {type-list:7:8},
   resources       : 
   procs           : ++:
 proc ++(x:list(t), y:list(t), ?$:?) (id 0):  {type-list:6:8}
-    [](?$tmp0) {type-list:7:13}
-    ==(x, $tmp0, ?$tmp1) {type-list:7:8}
-    case $tmp1 of {type-list:7:5}
+    [](?$tmp0:0) {type-list:7:13}
+    ==(x:0, $tmp0:0, ?$tmp1:0) {type-list:7:8}
+    case $tmp1:0 of {type-list:7:5}
       0:
-        =(?$tmp6, y) {?}
+        =(?$tmp2:0, y:0) {?}
       1:
-        head(x, ?$tmp4) {type-list:9:11}
-        tail(x, ?$tmp2) {type-list:9:18}
-        ++($tmp2, y, ?$tmp3) {type-list:9:18}
-        [|]($tmp4, $tmp3, ?$tmp5) {type-list:9:10}
-        =(?$tmp6, $tmp5) {?}
+        head(x:0, ?$tmp5:0) {type-list:9:11}
+        tail(x:0, ?$tmp3:0) {type-list:9:18}
+        ++($tmp3:0, y:0, ?$tmp4:0) {type-list:9:18}
+        [|]($tmp5:0, $tmp4:0, ?$tmp6:0) {type-list:9:10}
+        =(?$tmp2:0, $tmp6:0) {?}
     end
-    =(?$, $tmp6) {?}
+    =(?$:0, $tmp2:0) {?}
 
 Submodules of type-list:
 list: 
@@ -46,24 +46,24 @@ list:
   resources       : 
   procs           : []:
 proc [](?$:list(t)) (id 0):  {?}
-    $alloc([], ?$tmp0) {?}
-    =(?$, $tmp0) {?}
+    $alloc([]:0, ?$tmp0:0) {?}
+    =(?$:0, $tmp0:0) {?}
                     [|]:
 proc [|](head:t, tail:list(t), ?$:list(t)) (id 0):  {?}
-    $alloc([|], ?$tmp1) {?}
-    update$head(head, $tmp1, ?$tmp2) {?}
-    update$tail(tail, $tmp2, ?$tmp3) {?}
-    =(?$, $tmp3) {?}
+    $alloc([|]:0, ?$tmp1:0) {?}
+    update$head(head:0, $tmp1:0, ?$tmp2:0) {?}
+    update$tail(tail:0, $tmp2:0, ?$tmp3:0) {?}
+    =(?$:0, $tmp3:0) {?}
                     head:
 proc head($rec:list(t), ?$field:t) (id 0):  {?}
-    foreign  access([|], $rec, ?$field) {?}
+    foreign  access([|]:0, $rec:0, ?$field:0) {?}
 proc head(!$rec:list(t), $field:t) (id 1):  {?}
-    foreign  mutate([|], !$rec, $field) {?}
+    foreign  mutate([|]:0, $rec:0, ?$rec:0, $field:0) {?}
                     tail:
 proc tail($rec:list(t), ?$field:list(t)) (id 0):  {?}
-    foreign  access([|], $rec, ?$field) {?}
+    foreign  access([|]:0, $rec:0, ?$field:0) {?}
 proc tail(!$rec:list(t), $field:list(t)) (id 1):  {?}
-    foreign  mutate([|], !$rec, $field) {?}
+    foreign  mutate([|]:0, $rec:0, ?$rec:0, $field:0) {?}
 
 Submodules of type-list.list:
 

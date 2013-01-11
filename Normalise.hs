@@ -90,19 +90,22 @@ addCtor typeName typeParams (FnProto ctorName params) = do
 -- |Add a getter and setter for the specified type.
 addGetterSetter :: TypeSpec -> Ident -> Param -> Compiler ()
 addGetterSetter rectype ctorName (Param field fieldtype _) = do
+    ctorVar <- inVar ctorName
+    recVar <- inVar "$rec"
+    inOutRec <- inOutVar "$rec"
+    fieldOutVar <- outVar "$field"
+    fieldInVar <- inVar "$field"
     addProc field 
       (ProcProto field [Param "$rec" rectype ParamIn,
                         Param "$field" fieldtype ParamOut])
-      [Unplaced $ PrimForeign "" "access" Nothing [ArgVar ctorName ParamIn,
-                                                   ArgVar "$rec" ParamIn,
-                                                   ArgVar "$field" ParamOut]]
+      [Unplaced $ PrimForeign "" "access" Nothing 
+       (ctorVar ++ recVar ++ fieldOutVar)]
       Nothing Public
     addProc field 
       (ProcProto field [Param "$rec" rectype ParamInOut,
                         Param "$field" fieldtype ParamIn])
-      [Unplaced $ PrimForeign "" "mutate" Nothing [ArgVar ctorName ParamIn,
-                                                   ArgVar "$rec" ParamInOut,
-                                                   ArgVar "$field" ParamIn]]
+      [Unplaced $ PrimForeign "" "mutate" Nothing 
+       (ctorVar ++ inOutRec ++ fieldInVar)]
       Nothing Public
 
 -- |Normalise the specified statements to primitive statements.
@@ -155,12 +158,16 @@ normaliseLoopStmt :: LoopStmt -> Maybe SourcePos ->
 normaliseLoopStmt (For gen) pos = normaliseGenerator gen pos
 normaliseLoopStmt (BreakIf exp) pos = do
   (exp',stmts) <- normaliseOuterExp exp
-  cond <- freshVar
-  return $ ([],stmts ++ [assign cond exp',maybePlace (PrimBreakIf cond) pos],[])
+  condVarName <- freshVar
+  condAssign <- assign condVarName exp'
+  condExp <- getVar condVarName
+  return ([],stmts ++ [condAssign, maybePlace (PrimBreakIf condExp) pos],[])
 normaliseLoopStmt (NextIf exp) pos = do
   (exp',stmts) <- normaliseOuterExp exp
-  cond <- freshVar
-  return ([],stmts ++ [assign cond exp',maybePlace (PrimNextIf cond) pos],[])
+  condVarName <- freshVar
+  condAssign <- assign condVarName exp'
+  condExp <- getVar condVarName
+  return ([],stmts ++ [condAssign, maybePlace (PrimNextIf condExp) pos],[])
 normaliseLoopStmt (NormalStmt stmt) pos = do
   stmts <- normaliseStmt (content stmt) pos
   return ([],stmts,[])
@@ -173,27 +180,34 @@ normaliseGenerator :: Generator -> Maybe SourcePos ->
 normaliseGenerator (In var exp) pos = do
   (arg,init) <- normaliseOuterExp exp
   stateVar <- freshVar
-  testVar <- freshVar
-  let update = procCall "next" [ArgVar stateVar ParamInOut,
-                                ArgVar var ParamInOut,
-                                ArgVar testVar ParamOut]
-  return (init++[assign stateVar arg,update],
+  testVarName <- freshVar
+  asn <- assign stateVar arg
+  stateArg <- inOutVar stateVar
+  varArg <- inOutVar var
+  testArg <- outVar testVarName
+  testVar <- getVar testVarName
+  let update = procCall "next" (stateArg ++ varArg ++ testArg)
+  return (init++[asn,update],
           [update],[Unplaced $ PrimBreakIf testVar])
 normaliseGenerator (InRange var exp updateOp inc limit) pos = do
   (arg,init1) <- normaliseOuterExp exp
   (incArg,init2) <- normaliseOuterExp inc
-  let update = [procCall updateOp 
-                [ArgVar var ParamIn,incArg,ArgVar var ParamOut]]
+  varIn <- inVar var
+  varOut <- outVar var
+  let update = [procCall updateOp (varIn ++ [incArg] ++ varOut)]
+  asn <- assign var arg
   (init,test) <- case limit of
     Nothing -> return (init1++init2,[])
     Just (comp,limit') -> do
-      testVar <- freshVar
+      testVarName <- freshVar
+      testArg <- outVar testVarName
+      testVar <- getVar testVarName
       (limitArg,init3) <- normaliseOuterExp limit'
+      varArg <- inVar var
       return (init1++init2++init3,
-              [procCall comp [ArgVar var ParamIn,limitArg,
-                              ArgVar testVar ParamOut],
+              [procCall comp (varArg ++ [limitArg] ++ testArg),
                Unplaced $ PrimBreakIf testVar])
-  return (init++[assign var arg],test,update)
+  return (init++[asn],test,update)
 
 
 -- |Normalise a list of expressions as proc call arguments to a list of 
@@ -206,77 +220,87 @@ normaliseArgs (pexp:args) = do
   let pos = place pexp
   (arg,_,pre,post) <- normaliseExp (content pexp) (place pexp) ParamIn
   (args',pres,posts) <- normaliseArgs args
-  return (arg:args', pre ++ pres, post ++ posts)
+  return (arg ++ args', pre ++ pres, post ++ posts)
 
 
 -- |Normalise a single read-only expression to a primitve argument 
 --  and a list of primitive statements to bind that argument.
 normaliseOuterExp :: Placed Exp -> Compiler (PrimArg,[Placed Prim])
 normaliseOuterExp exp = do
-    (arg,_,pre,post) <- normaliseExp (content exp) (place exp) ParamIn
+    ([arg],_,pre,post) <- normaliseExp (content exp) (place exp) ParamIn
     return (arg,pre++post)
 
 
--- |Normalise a single expressions with specified flow direction to a
---  primitive argument, a list of statements to execute
+-- |Normalise a single expressions with specified flow direction to
+--  primitive argument(s), a list of statements to execute
 --  to bind it, and a list of statements to execute 
 --  after the call to store the result appropriately.
 normaliseExp :: Exp -> Maybe SourcePos -> FlowDirection ->
-                 Compiler (PrimArg,FlowDirection,[Placed Prim],[Placed Prim])
+                 Compiler ([PrimArg],FlowDirection,[Placed Prim],[Placed Prim])
 normaliseExp (IntValue a) pos dir = do
   mustBeIn dir pos
-  return (ArgInt a, ParamIn, [], [])
+  return ([ArgInt a], ParamIn, [], [])
 normaliseExp (FloatValue a) pos dir = do
   mustBeIn dir pos
-  return (ArgFloat a, ParamIn, [], [])
+  return ([ArgFloat a], ParamIn, [], [])
 normaliseExp (StringValue a) pos dir = do
   mustBeIn dir pos
-  return (ArgString a, ParamIn, [], [])
+  return ([ArgString a], ParamIn, [], [])
 normaliseExp (CharValue a) pos dir = do
   mustBeIn dir pos
-  return (ArgChar a, ParamIn, [], [])
+  return ([ArgChar a], ParamIn, [], [])
 normaliseExp (Var name dir) pos _ = do
-  return (ArgVar name dir, dir, [], [])
+  args <- flowVar name dir -- XXX shouldn't ignore list tail
+  return (args, dir, [], [])
 normaliseExp (Where stmts exp) pos dir = do
   mustBeIn dir pos
   stmts1 <- normaliseStmts stmts
   (exp',stmts2) <- normaliseOuterExp exp
-  return (exp', ParamIn, stmts1++stmts2, [])
+  return ([exp'], ParamIn, stmts1++stmts2, [])
 normaliseExp (CondExp cond thn els) pos dir = do
   mustBeIn dir pos
   (cond',stmtscond) <- normaliseOuterExp cond
   (thn',stmtsthn) <- normaliseOuterExp thn
+  resultVar <- freshVar
+  thnAssign <- assign resultVar thn'
   (els',stmtsels) <- normaliseOuterExp els
-  result <- freshVar
+  elsAssign <- assign resultVar els'
+  result <- inVar resultVar
   prims <- makeCond cond' 
-           [stmtsthn++[assign result thn'], stmtsels++[assign result els']]
+           [stmtsthn++[thnAssign], stmtsels++[elsAssign]]
            pos
-  return (ArgVar result ParamIn, ParamIn, stmtscond++prims, [])
+  return (result, ParamIn, stmtscond++prims, [])
 normaliseExp (Fncall name exps) pos dir = do
   mustBeIn dir pos
   (exps',dir',pre,post) <- normalisePlacedExps exps
-  let inexps = List.map argAsInput exps'
-  result <- freshVar
+  let inexps = List.filter argIsInput exps'
+  resultName <- freshVar
   let dir'' = dir `flowJoin` dir'
-  let pre' = if flowsIn dir'' then
-                 pre ++ [maybePlace (PrimCall name Nothing 
-                                     (inexps++[ArgVar result ParamOut])) 
-                         pos]
-             else pre
-  let post' = if flowsOut dir'' then
-                  maybePlace 
-                  (PrimCall name Nothing (exps'++[ArgVar result ParamIn]))
-                  pos:post
-              else post
-  return (ArgVar result dir'', dir'', pre', post')
+  pre' <- if flowsIn dir'' 
+          then do
+              resultOut <- outVar resultName
+              let args = inexps++resultOut
+              let instr = maybePlace (PrimCall name Nothing args) pos
+              return $ pre ++ [instr]
+          else return pre
+  post' <- if flowsOut dir''
+           then do
+               resultIn <- inVar resultName
+               let args = exps'++resultIn
+               let instr = maybePlace (PrimCall name Nothing args) pos
+               return $ instr:post
+           else return post
+  result <- flowVar resultName dir'' -- XXX shouldn't ignore list tail
+  return (result, dir'', pre', post')
 normaliseExp (ForeignFn lang name exps) pos dir = do
   mustBeIn dir pos
   (exps',_,pre,post) <- normalisePlacedExps exps
-  result <- freshVar
-  let pre' = pre ++ [maybePlace (PrimForeign lang name Nothing 
-                                 (exps'++[ArgVar result ParamOut])) 
-                     pos]
-  return (ArgVar result ParamIn, ParamIn, pre', post)
+  resultName <- freshVar
+  resultIn <- inVar resultName
+  resultOut <- outVar resultName
+  let args = exps'++resultOut
+  let pre' = pre ++ [maybePlace (PrimForeign lang name Nothing args) pos]
+  return (resultIn, ParamIn, pre', post)
 
 -- |Normalise a list of expressions as function call arguments to a list of 
 --  primitive arguments; a flow direction summarising whether there 
@@ -291,7 +315,7 @@ normalisePlacedExps [] = return ([],NoFlow,[],[])
 normalisePlacedExps (exp:exps) = do
   (args',flow',pres,posts) <- normalisePlacedExps exps
   (exp',flow,pre,post) <- normaliseExp (content exp) (place exp) ParamIn
-  return  (exp':args', flow `flowJoin` flow', pre ++ pres, post ++ posts)
+  return  (exp' ++ args', flow `flowJoin` flow', pre ++ pres, post ++ posts)
 
 -- | Report an error if the specified flow direction has output.
 mustBeIn :: FlowDirection -> Maybe SourcePos -> Compiler ()
@@ -314,13 +338,15 @@ flowsOut ParamOut = True
 flowsOut ParamInOut = True
 
 -- |Transform the specified primitive argument to an input parameter.
-argAsInput :: PrimArg -> PrimArg
-argAsInput (ArgVar var _) = ArgVar var ParamIn
-argAsInput other = other
+argIsInput :: PrimArg -> Bool
+argIsInput (ArgVar var dir) = dir == ParamIn
+argIsInput _ = True
 
 -- |Generate a primitive assignment statement.
-assign :: VarName -> PrimArg -> Placed Prim
-assign var val = procCall "=" [ArgVar var ParamOut, val]
+assign :: VarName -> PrimArg -> Compiler (Placed Prim)
+assign var val = do
+  lval <- outVar var
+  return $ procCall "=" (lval ++ [val])
 
 -- |Generate a primitive proc call
 procCall :: ProcName -> [PrimArg] -> Placed Prim

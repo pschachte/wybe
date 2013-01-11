@@ -31,7 +31,8 @@ module AST (
   updateModImplementation, updateModImplementationM, 
   updateModInterface, updateModProcsM,
   getDirectory, getModuleSpec, getModuleParams, option, 
-  optionallyPutStr, verboseMsg, message, freshVar, nextProcId, 
+  optionallyPutStr, verboseMsg, message, freshVar, nextProcId,
+  getVar, getNextVar, flowVar, inVar, outVar, inOutVar,
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
@@ -357,6 +358,48 @@ freshVar = do
   ctr <- getModule varCount
   updateModule (\mod -> mod {varCount = ctr + 1 })
   return $ "$tmp" ++ (show ctr)
+
+-- |Return the current PrimVarName for a given name string; ie, find 
+--  the current suffix for the specified name
+getVar :: String -> Compiler PrimVarName
+-- XXX Just for now, always use suffix 0
+getVar name = return $ PrimVarName name 0
+
+-- |Return the next PrimVarName for a given name string; ie, find 
+--  the next suffix for the specified name
+getNextVar :: String -> Compiler PrimVarName
+-- XXX Just for now, always use suffix 0
+getNextVar name = return $ PrimVarName name 0
+
+-- |Return the primitive procedure call input argument(s) for the 
+--  specified variable name and flow direction
+flowVar :: String -> FlowDirection -> Compiler [PrimArg]
+flowVar name ParamIn = inVar name
+flowVar name ParamOut = outVar name
+flowVar name ParamInOut = inOutVar name
+flowVar name NoFlow = return []
+
+-- |Return the primitive procedure call input argument for the 
+--  specified variable name.
+inVar :: String -> Compiler [PrimArg]
+inVar name = do
+    primvar <- getVar name
+    return [ArgVar primvar ParamIn]
+
+-- |Return the primitive procedure call output argument for the 
+--  specified variable name.
+outVar :: String -> Compiler [PrimArg]
+outVar name = do
+    primvar <- getNextVar name
+    return [ArgVar primvar ParamOut]
+
+-- |Return the primitive procedure call input and output arguments for the 
+--  specified variable name.
+inOutVar :: String -> Compiler [PrimArg]
+inOutVar name = do
+    primvar <- getVar name
+    primvar' <- getNextVar name
+    return [ArgVar primvar ParamIn,ArgVar primvar' ParamOut]
 
 -- |Return a new, unused proc ID.
 nextProcId :: Compiler Int
@@ -806,22 +849,28 @@ data Generator
       | InRange VarName (Placed Exp) ProcName (Placed Exp) 
         (Maybe (ProcName,Placed Exp))
 
+-- |A variable name in SSA form, ie, a name and an natural number suffix,
+--  where the suffix is used to specify which assignment defines the value.
+
+data PrimVarName = PrimVarName VarName Int
+     deriving Eq
+
 -- |A primitive statment, including those that can only appear in a 
 --  loop.
 data Prim
      -- XXX PrimCall should optionally contain a module spec.
      = PrimCall ProcName (Maybe ProcID) [PrimArg]
      | PrimForeign String ProcName (Maybe ProcID) [PrimArg]
-     | PrimCond VarName [[Placed Prim]]
+     | PrimCond PrimVarName [[Placed Prim]]
      | PrimLoop [Placed Prim]
-     | PrimBreakIf VarName
-     | PrimNextIf VarName
+     | PrimBreakIf PrimVarName
+     | PrimNextIf PrimVarName
      deriving Eq
 
 -- |The allowed arguments in primitive proc or foreign proc calls, 
 --  just variables and constants.
 data PrimArg 
-     = ArgVar VarName FlowDirection
+     = ArgVar PrimVarName FlowDirection
      | ArgInt Integer
      | ArgFloat Double
      | ArgString String
@@ -1087,7 +1136,7 @@ showPrim' ind (PrimForeign lang name id args) pos =
   ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
   ++ showMaybeSourcePos pos
 showPrim' ind (PrimCond var blocks) pos =
-  startLine ind ++ "case " ++ var ++ " of" 
+  startLine ind ++ "case " ++ show var ++ " of" 
   ++ showMaybeSourcePos pos
   ++ showCases 0 (ind+2) (ind+4) blocks
   ++ startLine ind ++ "end"
@@ -1096,9 +1145,13 @@ showPrim' ind (PrimLoop block) pos =
   ++ showBlock (ind+4) block
   ++ startLine ind ++ "end"
 showPrim' ind (PrimBreakIf var) pos =
-  startLine ind ++ "until " ++ var ++ showMaybeSourcePos pos
+  startLine ind ++ "until " ++ show var ++ showMaybeSourcePos pos
 showPrim' ind (PrimNextIf var) pos =
-  startLine ind ++ "unless " ++ var ++ showMaybeSourcePos pos
+  startLine ind ++ "unless " ++ show var ++ showMaybeSourcePos pos
+
+-- |Show a variable, with its suffix
+instance Show PrimVarName where
+    show (PrimVarName var suffix) = var ++ ":" ++ show suffix
 
 -- |Show the cases, numbered from the specified case counter, of a 
 --  case primitive, with the specified indent and indent for the 
@@ -1125,7 +1178,7 @@ instance Show Stmt where
 
 -- |Show a primitive argument.
 instance Show PrimArg where
-  show (ArgVar name dir) = flowPrefix dir ++ name
+  show (ArgVar name dir) = flowPrefix dir ++ show name
   show (ArgInt i) = show i
   show (ArgFloat f) = show f
   show (ArgString s) = show s

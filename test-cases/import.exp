@@ -32,20 +32,20 @@ position:
   resources       : 
   procs           : position:
 proc position(x:int, y:int, ?$:position) (id 0):  {?}
-    $alloc(position, ?$tmp0) {?}
-    update$x(x, $tmp0, ?$tmp1) {?}
-    update$y(y, $tmp1, ?$tmp2) {?}
-    =(?$, $tmp2) {?}
+    $alloc(position:0, ?$tmp0:0) {?}
+    update$x(x:0, $tmp0:0, ?$tmp1:0) {?}
+    update$y(y:0, $tmp1:0, ?$tmp2:0) {?}
+    =(?$:0, $tmp2:0) {?}
                     x:
 proc x($rec:position, ?$field:int) (id 0):  {?}
-    foreign  access(position, $rec, ?$field) {?}
+    foreign  access(position:0, $rec:0, ?$field:0) {?}
 proc x(!$rec:position, $field:int) (id 1):  {?}
-    foreign  mutate(position, !$rec, $field) {?}
+    foreign  mutate(position:0, $rec:0, ?$rec:0, $field:0) {?}
                     y:
 proc y($rec:position, ?$field:int) (id 0):  {?}
-    foreign  access(position, $rec, ?$field) {?}
+    foreign  access(position:0, $rec:0, ?$field:0) {?}
 proc y(!$rec:position, $field:int) (id 1):  {?}
-    foreign  mutate(position, !$rec, $field) {?}
+    foreign  mutate(position:0, $rec:0, ?$rec:0, $field:0) {?}
 
 Submodules of position.position:
 
@@ -60,17 +60,17 @@ Submodules of position.position:
   resources       : 
   procs           : distance:
 proc distance(p1:position, p2:position, ?$:?) (id 0):  {import:3:8}
-    x(p2, ?$tmp5) {import:4:11}
-    x(p1, ?$tmp4) {import:4:16}
-    -($tmp5, $tmp4, ?$tmp6) {import:4:10}
-    ^($tmp6, 2, ?$tmp7) {import:4:10}
-    y(p2, ?$tmp1) {import:4:27}
-    y(p1, ?$tmp0) {import:4:32}
-    -($tmp1, $tmp0, ?$tmp2) {import:4:26}
-    ^($tmp2, 2, ?$tmp3) {import:4:26}
-    +($tmp7, $tmp3, ?$tmp8) {import:4:10}
-    sqrt($tmp8, ?$tmp9) {import:4:5}
-    =(?$, $tmp9) {?}
+    x(p2:0, ?$tmp5:0) {import:4:11}
+    x(p1:0, ?$tmp4:0) {import:4:16}
+    -($tmp5:0, $tmp4:0, ?$tmp6:0) {import:4:10}
+    ^($tmp6:0, 2, ?$tmp7:0) {import:4:10}
+    y(p2:0, ?$tmp1:0) {import:4:27}
+    y(p1:0, ?$tmp0:0) {import:4:32}
+    -($tmp1:0, $tmp0:0, ?$tmp2:0) {import:4:26}
+    ^($tmp2:0, 2, ?$tmp3:0) {import:4:26}
+    +($tmp7:0, $tmp3:0, ?$tmp8:0) {import:4:10}
+    sqrt($tmp8:0, ?$tmp9:0) {import:4:5}
+    =(?$:0, $tmp9:0) {?}
 
 Submodules of import:
 

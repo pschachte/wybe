@@ -41,6 +41,7 @@ Version.lhs:	*.hs
 TESTCASES = $(wildcard test-cases/*.wybe)
 
 test:	wybemk
+	@rm -f ERRS ; touch ERRS
 	@for f in $(TESTCASES) ; do \
 	    printf "%-40s ... " $$f ; \
 	    out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
@@ -49,9 +50,13 @@ test:	wybemk
 	    ./wybemk -v -f $$targ > $$out 2>&1 ; \
 	    if [ ! -r $$exp ] ; then \
 		printf "[31mNEW TEST[39m\n" ; \
-	    elif diff -q $$exp $$out >/dev/null 2>&1 ; then \
+	    elif diff -u $$exp $$out >> ERRS 2>&1 ; then \
 		printf "PASS\n" ; \
 	    else \
 		printf "[31mFAIL[39m\n" ; \
 	    fi \
 	done
+	@if [ -s ERRS ] ; \
+	 then less ERRS ; \
+	 else echo "ALL TESTS PASS" ; \
+	 fi

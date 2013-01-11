@@ -11,18 +11,18 @@ Public proc yorn(prompt:string, ?result:bool) {proc-yorn2:1:8}[do print(prompt {
   procs           : yorn:
 proc yorn(prompt:string, ?result:bool) (id 0):  {proc-yorn2:1:8}
     do  {proc-yorn2:2:5}
-        print(prompt) {proc-yorn2:2:9}
+        print(prompt:0) {proc-yorn2:2:9}
         print(" (y/n) ") {proc-yorn2:3:9}
-        read_line(?response) {proc-yorn2:4:9}
-        first(response, ?$tmp4) {proc-yorn2:5:34}
-        to_upper($tmp4, ?$tmp5) {proc-yorn2:5:25}
-        =(?responsechar, $tmp5) {proc-yorn2:5:9}
-        ==(responsechar, 'Y', ?$tmp3) {proc-yorn2:6:19}
-        =(?result, $tmp3) {proc-yorn2:6:9}
-        ==(responsechar, 'N', ?$tmp0) {proc-yorn2:7:25}
-        or(result, $tmp0, ?$tmp1) {proc-yorn2:7:15}
-        =(?$tmp2, $tmp1) {?}
-        until $tmp2 {proc-yorn2:7:9}
+        read_line(?response:0) {proc-yorn2:4:9}
+        first(response:0, ?$tmp4:0) {proc-yorn2:5:34}
+        to_upper($tmp4:0, ?$tmp5:0) {proc-yorn2:5:25}
+        =(?responsechar:0, $tmp5:0) {proc-yorn2:5:9}
+        ==(responsechar:0, 'Y', ?$tmp3:0) {proc-yorn2:6:19}
+        =(?result:0, $tmp3:0) {proc-yorn2:6:9}
+        ==(responsechar:0, 'N', ?$tmp0:0) {proc-yorn2:7:25}
+        or(result:0, $tmp0:0, ?$tmp1:0) {proc-yorn2:7:15}
+        =(?$tmp2:0, $tmp1:0) {?}
+        until $tmp2:0 {proc-yorn2:7:9}
         println("Please answer 'yes' or 'no'.") {proc-yorn2:8:9}
     end
 

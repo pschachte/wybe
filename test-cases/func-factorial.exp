@@ -10,17 +10,17 @@ Public func factorial(n:int):int {func-factorial:1:8} = if <=(n {func-factorial:
   resources       : 
   procs           : factorial:
 proc factorial(n:int, ?$:int) (id 0):  {func-factorial:1:8}
-    <=(n, 0, ?$tmp0) {func-factorial:2:11}
-    case $tmp0 of {func-factorial:2:8}
+    <=(n:0, 0, ?$tmp0:0) {func-factorial:2:11}
+    case $tmp0:0 of {func-factorial:2:8}
       0:
-        =(?$tmp4, 1) {?}
+        =(?$tmp1:0, 1) {?}
       1:
-        -(n, 1, ?$tmp1) {func-factorial:2:44}
-        factorial($tmp1, ?$tmp2) {func-factorial:2:34}
-        *(n, $tmp2, ?$tmp3) {func-factorial:2:30}
-        =(?$tmp4, $tmp3) {?}
+        -(n:0, 1, ?$tmp2:0) {func-factorial:2:44}
+        factorial($tmp2:0, ?$tmp3:0) {func-factorial:2:34}
+        *(n:0, $tmp3:0, ?$tmp4:0) {func-factorial:2:30}
+        =(?$tmp1:0, $tmp4:0) {?}
     end
-    =(?$, $tmp4) {?}
+    =(?$:0, $tmp1:0) {?}
 
 Submodules of func-factorial:
 
