@@ -58,5 +58,5 @@ test:	wybemk
 	done
 	@if [ -s ERRS ] ; \
 	 then less ERRS ; \
-	 else echo "ALL TESTS PASS" ; \
+	 else echo "ALL TESTS PASS" ; rm -f ERRS ; \
 	 fi

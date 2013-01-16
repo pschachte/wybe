@@ -22,7 +22,7 @@ module AST (
   enterModule, exitModule, finishModule, emptyInterface, emptyImplementation,
   ModSpec, ProcDef(..), Ident, VarName, 
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
-  flowIn, expToStmt, Prim(..), PrimArg(..),
+  flowIn, expToStmt, Prim(..), PrimArg(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
   MessageLevel(..), getCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -384,14 +384,14 @@ flowVar name NoFlow = return []
 inVar :: String -> Compiler [PrimArg]
 inVar name = do
     primvar <- getVar name
-    return [ArgVar primvar ParamIn]
+    return [ArgVar primvar ParamIn Ordinary]
 
 -- |Return the primitive procedure call output argument for the 
 --  specified variable name.
 outVar :: String -> Compiler [PrimArg]
 outVar name = do
     primvar <- getNextVar name
-    return [ArgVar primvar ParamOut]
+    return [ArgVar primvar ParamOut Ordinary]
 
 -- |Return the primitive procedure call input and output arguments for the 
 --  specified variable name.
@@ -399,7 +399,8 @@ inOutVar :: String -> Compiler [PrimArg]
 inOutVar name = do
     primvar <- getVar name
     primvar' <- getNextVar name
-    return [ArgVar primvar ParamIn,ArgVar primvar' ParamOut]
+    return [ArgVar primvar ParamIn FirstHalf,
+            ArgVar primvar' ParamOut SecondHalf]
 
 -- |Return a new, unused proc ID.
 nextProcId :: Compiler Int
@@ -870,16 +871,19 @@ data Prim
 -- |The allowed arguments in primitive proc or foreign proc calls, 
 --  just variables and constants.
 data PrimArg 
-     = ArgVar PrimVarName FlowDirection
+     = ArgVar PrimVarName FlowDirection ArgFlowType
      | ArgInt Integer
      | ArgFloat Double
      | ArgString String
      | ArgChar Char
      deriving Eq
 
+data ArgFlowType = Ordinary | FirstHalf | SecondHalf | Implicit
+     deriving (Eq, Show)
+
 -- |The dataflow direction of an actual argument.
 argFlowDirection :: PrimArg -> FlowDirection
-argFlowDirection (ArgVar _ flow) = flow
+argFlowDirection (ArgVar _ flow _) = flow
 argFlowDirection (ArgInt _) = ParamIn
 argFlowDirection (ArgFloat _) = ParamIn
 argFlowDirection (ArgString _) = ParamIn
@@ -1178,7 +1182,7 @@ instance Show Stmt where
 
 -- |Show a primitive argument.
 instance Show PrimArg where
-  show (ArgVar name dir) = flowPrefix dir ++ show name
+  show (ArgVar name dir _) = flowPrefix dir ++ show name
   show (ArgInt i) = show i
   show (ArgFloat f) = show f
   show (ArgString s) = show s
