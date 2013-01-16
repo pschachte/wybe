@@ -808,6 +808,10 @@ data Param = Param VarName TypeSpec FlowDirection ArgFlowType
 data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow
                    deriving (Show,Eq)
 
+-- |A primitive dataflow direction:  in or out
+data PrimFlow = FlowIn | FlowOut
+                   deriving (Show,Eq)
+
 -- |Does this flow direction include input?
 flowIn :: FlowDirection -> Bool
 flowIn ParamIn = True

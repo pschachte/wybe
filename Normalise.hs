@@ -102,6 +102,8 @@ addGetterSetter rectype ctorName (Param field fieldtype _ _) = do
        (ctorVar ++ recVar ++ fieldOutVar)]
       Nothing Public
     addProc field 
+      -- (ProcProto field [Param "$rec" rectype ParamIn FirstHalf,
+      --                   Param "$rec" rectype ParamOut SecondHalf,
       (ProcProto field [Param "$rec" rectype ParamInOut Ordinary,
                         Param "$field" fieldtype ParamIn Ordinary])
       [Unplaced $ PrimForeign "" "mutate" Nothing 
