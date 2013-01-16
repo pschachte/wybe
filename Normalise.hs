@@ -341,7 +341,7 @@ flowsOut ParamInOut = True
 
 -- |Transform the specified primitive argument to an input parameter.
 argIsInput :: PrimArg -> Bool
-argIsInput (ArgVar var dir _) = dir == ParamIn
+argIsInput (ArgVar var dir _) = dir == FlowIn
 argIsInput _ = True
 
 -- |Generate a primitive assignment statement.
@@ -359,7 +359,7 @@ makeCond :: PrimArg -> [[Placed Prim]] -> Maybe SourcePos ->
             Compiler [Placed Prim]
 makeCond cond branches pos = do
   case cond of
-    ArgVar name ParamIn _ -> do
+    ArgVar name FlowIn _ -> do
       result <- freshVar
       return [maybePlace (PrimCond name branches) pos]
     ArgInt n ->
