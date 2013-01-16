@@ -208,7 +208,7 @@ RevParams :: { [Param] }
     | RevParams ',' Param       { $3 : $1 }
 
 Param :: { Param }
-    : ident OptType             { Param (identName $1) $2 ParamIn }
+    : ident OptType             { Param (identName $1) $2 ParamIn Ordinary }
 
 OptProcParamList :: { [Param] }
     : {- empty -}               { [] }
@@ -224,7 +224,7 @@ RevProcParams :: { [Param] }
 
 ProcParam :: { Param }
     : FlowDirection ident OptType
-                                { Param (identName $2) $3 $1 }
+                                { Param (identName $2) $3 $1 Ordinary }
 
 FlowDirection :: { FlowDirection }
     : {- empty -}               { ParamIn }

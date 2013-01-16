@@ -801,7 +801,7 @@ data ProcProto = ProcProto ProcName [Param]
                deriving Eq
 
 -- |A formal parameter, including name, type, and flow direction.
-data Param = Param VarName TypeSpec FlowDirection
+data Param = Param VarName TypeSpec FlowDirection ArgFlowType
            deriving Eq
 
 -- |A dataflow direction:  in, out, both, or neither.
@@ -1105,7 +1105,7 @@ instance Show ProcProto where
 
 -- |How to show a formal parameter.
 instance Show Param where
-  show (Param name typ dir) =
+  show (Param name typ dir _) =
     flowPrefix dir ++ name ++ ":" ++ show typ
 
 -- |How to show a dataflow direction.
