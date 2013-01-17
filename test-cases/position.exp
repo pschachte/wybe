@@ -36,12 +36,12 @@ proc position(x:int, y:int, ?$:position) (id 0):  {?}
                     x:
 proc x($rec:position, ?$field:int) (id 0):  {?}
     foreign  access(position:0, $rec:0, ?$field:0) {?}
-proc x(!$rec:position, $field:int) (id 1):  {?}
+proc x($rec:position, ?$rec:position, $field:int) (id 1):  {?}
     foreign  mutate(position:0, $rec:0, ?$rec:0, $field:0) {?}
                     y:
 proc y($rec:position, ?$field:int) (id 0):  {?}
     foreign  access(position:0, $rec:0, ?$field:0) {?}
-proc y(!$rec:position, $field:int) (id 1):  {?}
+proc y($rec:position, ?$rec:position, $field:int) (id 1):  {?}
     foreign  mutate(position:0, $rec:0, ?$rec:0, $field:0) {?}
 
 Submodules of position.position:

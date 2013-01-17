@@ -57,12 +57,12 @@ proc [|](head:t, tail:list(t), ?$:list(t)) (id 0):  {?}
                     head:
 proc head($rec:list(t), ?$field:t) (id 0):  {?}
     foreign  access([|]:0, $rec:0, ?$field:0) {?}
-proc head(!$rec:list(t), $field:t) (id 1):  {?}
+proc head($rec:list(t), ?$rec:list(t), $field:t) (id 1):  {?}
     foreign  mutate([|]:0, $rec:0, ?$rec:0, $field:0) {?}
                     tail:
 proc tail($rec:list(t), ?$field:list(t)) (id 0):  {?}
     foreign  access([|]:0, $rec:0, ?$field:0) {?}
-proc tail(!$rec:list(t), $field:list(t)) (id 1):  {?}
+proc tail($rec:list(t), ?$rec:list(t), $field:list(t)) (id 1):  {?}
     foreign  mutate([|]:0, $rec:0, ?$rec:0, $field:0) {?}
 
 Submodules of type-list.list:

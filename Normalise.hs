@@ -50,7 +50,8 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   normaliseItem $
   ProcDecl 
   vis
-  (ProcProto name $ params ++ [Param "$" resulttype ParamOut Implicit])
+  (ProcProto name $ params ++ 
+   [Param "$" resulttype ParamOut])
   [Unplaced $
    ProcCall "=" [Unplaced $ Var "$" ParamOut, result]]
   pos
@@ -77,7 +78,7 @@ addCtor typeName typeParams (FnProto ctorName params) = do
     normaliseItem (FuncDecl Public (FnProto ctorName params)
                    typespec
                    (List.foldr
-                    (\(Param var _ dir _) struct ->
+                    (\(Param var _ dir) struct ->
                       (Unplaced $ Fncall 
                        ("update$"++var) 
                        [Unplaced $ Var var dir,struct]))
@@ -89,23 +90,23 @@ addCtor typeName typeParams (FnProto ctorName params) = do
 
 -- |Add a getter and setter for the specified type.
 addGetterSetter :: TypeSpec -> Ident -> Param -> Compiler ()
-addGetterSetter rectype ctorName (Param field fieldtype _ _) = do
+addGetterSetter rectype ctorName (Param field fieldtype _) = do
     ctorVar <- inVar ctorName
     recVar <- inVar "$rec"
     inOutRec <- inOutVar "$rec"
     fieldOutVar <- outVar "$field"
     fieldInVar <- inVar "$field"
     addProc field 
-      (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
-                        Param "$field" fieldtype ParamOut Implicit])
+      (ProcProto field [Param "$rec" rectype ParamIn,
+                        Param "$field" fieldtype ParamOut])
       [Unplaced $ PrimForeign "" "access" Nothing 
        (ctorVar ++ recVar ++ fieldOutVar)]
       Nothing Public
     addProc field 
       -- (ProcProto field [Param "$rec" rectype ParamIn FirstHalf,
       --                   Param "$rec" rectype ParamOut SecondHalf,
-      (ProcProto field [Param "$rec" rectype ParamInOut Ordinary,
-                        Param "$field" fieldtype ParamIn Ordinary])
+      (ProcProto field [Param "$rec" rectype ParamInOut,
+                        Param "$field" fieldtype ParamIn])
       [Unplaced $ PrimForeign "" "mutate" Nothing 
        (ctorVar ++ inOutRec ++ fieldInVar)]
       Nothing Public

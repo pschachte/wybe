@@ -19,10 +19,13 @@ module AST (
   OptPos, Placed(..), place, content, maybePlace, rePlace, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
-  enterModule, exitModule, finishModule, emptyInterface, emptyImplementation,
+  enterModule, exitModule, finishModule, 
+  emptyInterface, emptyImplementation,
   ModSpec, ProcDef(..), Ident, VarName, 
-  ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..),  argFlowDirection,
-  flowIn, expToStmt, Prim(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
+  ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
+  argFlowDirection, flowIn, 
+  expToStmt, Prim(..), PrimProto(..), primProto, PrimParam(..), 
+  PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
   MessageLevel(..), getCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -490,7 +493,7 @@ addProc name proto stmts pos vis = do
       (updateModProcs
        (\procs ->
          let defs = findWithDefault [] name procs
-             defs' = defs ++ [ProcDef name proto stmts pos]
+             defs' = defs ++ [ProcDef name (primProto proto) stmts pos]
          in  Map.insert name defs' procs))
     newid <- getModuleImplementationField 
             (((-1)+) . length . fromJust . Map.lookup name . modProcs)
@@ -505,7 +508,7 @@ mapListInsert key elt =
 
 
 -- |Replace the specified proc definition in the current module.
-replaceProc :: Ident -> Int -> ProcProto -> [Placed Prim] -> OptPos
+replaceProc :: Ident -> Int -> PrimProto -> [Placed Prim] -> OptPos
                -> Visibility -> Compiler ()
 replaceProc name id proto stmts pos vis = do
     updateImplementation
@@ -513,7 +516,8 @@ replaceProc name id proto stmts pos vis = do
        (\procs -> 
          let olddefs = findWithDefault [] name procs
              (front,back) = List.splitAt id olddefs
-         in Map.insert name (front ++ (ProcDef name proto stmts pos:tail back)) 
+         in Map.insert name (front ++ 
+                             (ProcDef name proto stmts pos:tail back)) 
             procs))
 
 
@@ -768,7 +772,7 @@ resourceDefPosition (SimpleResource _ pos) = pos
 --  position. 
 data ProcDef = ProcDef {
     procName :: Ident, 
-    procProto :: ProcProto, 
+    procProto :: PrimProto, 
     procBody :: [Placed Prim], 
     procPos :: OptPos}
              deriving Eq
@@ -801,7 +805,7 @@ data ProcProto = ProcProto ProcName [Param]
                deriving Eq
 
 -- |A formal parameter, including name, type, and flow direction.
-data Param = Param VarName TypeSpec FlowDirection ArgFlowType
+data Param = Param VarName TypeSpec FlowDirection
            deriving Eq
 
 -- |A dataflow direction:  in, out, both, or neither.
@@ -856,6 +860,38 @@ data Generator
 
 -- |A variable name in SSA form, ie, a name and an natural number suffix,
 --  where the suffix is used to specify which assignment defines the value.
+
+-- |A primitive proc prototype, including name and formal parameters.
+data PrimProto = PrimProto ProcName [PrimParam]
+               deriving Eq
+
+instance Show PrimProto where
+    show (PrimProto name params) =
+        name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")"
+
+primProto :: ProcProto -> PrimProto
+primProto (ProcProto name params) =
+    PrimProto name (concat $ List.map primParam params)
+
+-- |A formal parameter, including name, type, and flow direction.
+data PrimParam = PrimParam VarName TypeSpec PrimFlow ArgFlowType
+           deriving Eq
+
+-- |Convert a single Param to up to two PrimParams
+primParam :: Param -> [PrimParam]
+primParam (Param name typ ParamIn) = 
+    [PrimParam name typ FlowIn Ordinary]
+primParam (Param name typ ParamOut) = 
+    [PrimParam name typ FlowOut Ordinary]
+primParam (Param name typ NoFlow) = []
+primParam (Param name typ ParamInOut) = 
+    [PrimParam name typ FlowIn FirstHalf,
+     PrimParam name typ FlowOut SecondHalf]
+
+-- |How to show a formal parameter.
+instance Show PrimParam where
+  show (PrimParam name typ dir _) =
+    primFlowPrefix dir ++ name ++ ":" ++ show typ
 
 data PrimVarName = PrimVarName VarName Int
      deriving Eq
@@ -1109,7 +1145,7 @@ instance Show ProcProto where
 
 -- |How to show a formal parameter.
 instance Show Param where
-  show (Param name typ dir _) =
+  show (Param name typ dir) =
     flowPrefix dir ++ name ++ ":" ++ show typ
 
 -- |How to show a dataflow direction.
