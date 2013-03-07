@@ -63,7 +63,7 @@ normaliseItem (CtorDecl vis proto pos) = do
     Just modparams <- getModuleParams
     addCtor (last modspec) modparams proto
 normaliseItem (StmtDecl stmt pos) = do
-  stmts <- normaliseStmt stmt pos
+  stmts <- normaliseStmts' stmt [] pos
   oldproc <- lookupProc ""
   case oldproc of
     Nothing -> 
@@ -114,32 +114,34 @@ addGetterSetter rectype ctorName (Param field fieldtype _) = do
 -- |Normalise the specified statements to primitive statements.
 normaliseStmts :: [Placed Stmt] -> Compiler [Placed Prim]
 normaliseStmts [] = return []
-normaliseStmts (stmt:stmts) = do
-  front <- case stmt of
-    Placed stmt' pos -> normaliseStmt stmt' $ Just pos
-    Unplaced stmt'   -> normaliseStmt stmt' Nothing
-  back <- normaliseStmts stmts
-  return $ front ++ back
+normaliseStmts (stmt:stmts) =
+    case stmt of
+        Placed stmt' pos -> normaliseStmts' stmt' stmts $ Just pos
+        Unplaced stmt'   -> normaliseStmts' stmt' stmts Nothing
 
--- |Normalise the specified statement to a list of primitive statements.
-normaliseStmt :: Stmt -> Maybe SourcePos -> Compiler [Placed Prim]
-normaliseStmt (ProcCall name args) pos = do
+-- |Normalise the specified statement, plus the list of following statements, 
+--  to a list of primitive statements.
+normaliseStmts' :: Stmt -> [Placed Stmt] -> Maybe SourcePos -> Compiler [Placed Prim]
+normaliseStmts' (ProcCall name args) stmts pos = do
   (args',pre,post) <- normaliseArgs args
-  return $ pre ++ maybePlace (PrimCall name Nothing args') pos:post
-normaliseStmt (ForeignCall lang name args) pos = do
+  back <- normaliseStmts stmts
+  return $ pre ++ [maybePlace (PrimCall name Nothing args') pos] ++ post ++ back
+normaliseStmts' (ForeignCall lang name args) stmts pos = do
   (args',pre,post) <- normaliseArgs args
-  return $ pre ++ maybePlace (PrimForeign lang name Nothing args') pos:post
-normaliseStmt (Cond exp thn els) pos = do
+  back <- normaliseStmts stmts
+  return $ pre ++ [maybePlace (PrimForeign lang name Nothing args') pos] ++ post ++ back
+normaliseStmts' (Cond exp thn els) stmts pos = do
   (exp',condstmts) <- normaliseOuterExp exp
   thn' <- normaliseStmts thn
   els' <- normaliseStmts els
-  stmts <- makeCond exp' [thn',els'] pos
-  return $ condstmts ++ stmts
-normaliseStmt (Loop loop) pos = do
+  condstmts <- makeCond exp' [thn',els'] pos
+  back <- normaliseStmts stmts
+  return $ condstmts ++ condstmts ++ back
+normaliseStmts' (Loop loop) stmts pos = do
   (init,body,update) <- normaliseLoopStmts loop
-  return $ init ++ [maybePlace (PrimLoop $ body++update) pos]
-normaliseStmt Nop pos = do
-  return $ []
+  back <- normaliseStmts stmts
+  return $ init ++ [maybePlace (PrimLoop $ body++update) pos] ++ back
+normaliseStmts' Nop stmts pos = normaliseStmts stmts
 
 -- |Normalise the specified loop statements to primitive statements.
 normaliseLoopStmts :: [Placed LoopStmt] -> 
@@ -172,7 +174,7 @@ normaliseLoopStmt (NextIf exp) pos = do
   condExp <- getVar condVarName
   return ([],stmts ++ [condAssign, maybePlace (PrimNextIf condExp) pos],[])
 normaliseLoopStmt (NormalStmt stmt) pos = do
-  stmts <- normaliseStmt (content stmt) pos
+  stmts <- normaliseStmts' (content stmt) [] pos
   return ([],stmts,[])
 
 
