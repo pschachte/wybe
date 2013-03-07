@@ -486,14 +486,14 @@ addImport modspec imp specific vis = do
     updateInterface vis (updateDependencies (Set.insert $ last modspec))
 
 -- |Add the specified proc definition to the current module.
-addProc :: Ident -> ProcProto -> [Placed Prim] -> OptPos
+addProc :: Ident -> ProcProto -> [[Placed Prim]] -> OptPos
            -> Visibility -> Compiler ()
-addProc name proto stmts pos vis = do
+addProc name proto clauses pos vis = do
     updateImplementation
       (updateModProcs
        (\procs ->
          let defs = findWithDefault [] name procs
-             defs' = defs ++ [ProcDef name (primProto proto) stmts pos]
+             defs' = defs ++ [ProcDef name (primProto proto) clauses pos]
          in  Map.insert name defs' procs))
     newid <- getModuleImplementationField 
             (((-1)+) . length . fromJust . Map.lookup name . modProcs)
@@ -508,16 +508,16 @@ mapListInsert key elt =
 
 
 -- |Replace the specified proc definition in the current module.
-replaceProc :: Ident -> Int -> PrimProto -> [Placed Prim] -> OptPos
+replaceProc :: Ident -> Int -> PrimProto -> [[Placed Prim]] -> OptPos
                -> Visibility -> Compiler ()
-replaceProc name id proto stmts pos vis = do
+replaceProc name id proto clauses pos vis = do
     updateImplementation
       (updateModProcs
        (\procs -> 
          let olddefs = findWithDefault [] name procs
              (front,back) = List.splitAt id olddefs
          in Map.insert name (front ++ 
-                             (ProcDef name proto stmts pos:tail back)) 
+                             (ProcDef name proto clauses pos:tail back)) 
             procs))
 
 
@@ -773,7 +773,7 @@ resourceDefPosition (SimpleResource _ pos) = pos
 data ProcDef = ProcDef {
     procName :: Ident, 
     procProto :: PrimProto, 
-    procBody :: [Placed Prim], 
+    procBody :: [[Placed Prim]],
     procPos :: OptPos}
              deriving Eq
 
@@ -902,6 +902,7 @@ data Prim
      -- XXX PrimCall should optionally contain a module spec.
      = PrimCall ProcName (Maybe ProcID) [PrimArg]
      | PrimForeign String ProcName (Maybe ProcID) [PrimArg]
+     | PrimGuard PrimVarName Integer
      | PrimCond PrimVarName [[Placed Prim]]
      | PrimLoop [Placed Prim]
      | PrimBreakIf PrimVarName
@@ -1122,7 +1123,7 @@ showProcDef :: Int -> ProcDef -> String
 showProcDef thisID (ProcDef _ proto def pos) =
     "\nproc " ++ show proto ++ " (id " ++ show thisID ++ "): "
     ++ showMaybeSourcePos pos 
-    ++ showBlock 4 def
+    ++ intercalate "\n" (List.map (showBlock 4) def)
 
 -- -- |How to show a proc definition.
 -- instance Show ProcDef where
@@ -1189,6 +1190,9 @@ showPrim' ind (PrimCond var blocks) pos =
   ++ showMaybeSourcePos pos
   ++ showCases 0 (ind+2) (ind+4) blocks
   ++ startLine ind ++ "end"
+showPrim' ind (PrimGuard var val) pos =
+  startLine ind ++ "guard " ++ show var ++ " = " ++ show val
+  ++ showMaybeSourcePos pos
 showPrim' ind (PrimLoop block) pos =
   startLine ind ++ "do " ++ showMaybeSourcePos pos
   ++ showBlock (ind+4) block

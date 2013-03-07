@@ -35,6 +35,7 @@ typeCheckMod scc modspec = do
             [((name,procs),name,localCalledProcs 
                                 $ List.map content
                                 $ concat
+                                $ concat
                                 $ List.map procBody procs) 
             | (name,procs) <- fromJust procs]
     mapM_ (typecheckProcSCC modspec) ordered

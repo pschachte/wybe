@@ -57,7 +57,7 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
   stmts' <- normaliseStmts stmts
-  addProc name proto stmts' pos vis
+  addProc name proto [stmts'] pos vis
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
     Just modparams <- getModuleParams
@@ -67,9 +67,9 @@ normaliseItem (StmtDecl stmt pos) = do
   oldproc <- lookupProc ""
   case oldproc of
     Nothing -> 
-      addProc "" (ProcProto "" []) stmts Nothing Private
-    Just [ProcDef _ proto stmts' pos'] ->
-      replaceProc "" 0 proto (stmts' ++ stmts) pos' Private
+      addProc "" (ProcProto "" []) [stmts] Nothing Private
+    Just [ProcDef _ proto [stmts'] pos'] ->
+      replaceProc "" 0 proto [(stmts' ++ stmts)] pos' Private
 
 -- |Add a contructor for the specified type.
 addCtor :: Ident -> [Ident] -> FnProto -> Compiler ()
@@ -99,16 +99,16 @@ addGetterSetter rectype ctorName (Param field fieldtype _) = do
     addProc field 
       (ProcProto field [Param "$rec" rectype ParamIn,
                         Param "$field" fieldtype ParamOut])
-      [Unplaced $ PrimForeign "" "access" Nothing 
-       (ctorVar ++ recVar ++ fieldOutVar)]
+      [[Unplaced $ PrimForeign "" "access" Nothing 
+       (ctorVar ++ recVar ++ fieldOutVar)]]
       Nothing Public
     addProc field 
       -- (ProcProto field [Param "$rec" rectype ParamIn FirstHalf,
       --                   Param "$rec" rectype ParamOut SecondHalf,
       (ProcProto field [Param "$rec" rectype ParamInOut,
                         Param "$field" fieldtype ParamIn])
-      [Unplaced $ PrimForeign "" "mutate" Nothing 
-       (ctorVar ++ inOutRec ++ fieldInVar)]
+      [[Unplaced $ PrimForeign "" "mutate" Nothing 
+       (ctorVar ++ inOutRec ++ fieldInVar)]]
       Nothing Public
 
 -- |Normalise the specified statements to primitive statements.
