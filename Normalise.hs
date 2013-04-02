@@ -133,10 +133,20 @@ normaliseStmts' (Cond exp thn els) stmts pos = do
   (exp',condstmts) <- normaliseOuterExp exp
   thn' <- normaliseStmts thn
   els' <- normaliseStmts els
-  condstmts <- makeCond exp' [thn',els'] pos
-  confluence <- genProcName
+  condproc <- genProcName
   back <- normaliseStmts stmts
-  -- addProc confluence proto [back] Nothing Private
+  confluence <- genProcName
+  let continuation = if List.null back then [] 
+                     else [Unplaced $ PrimCall confluence Nothing []]
+  thenGuard <- makeGuard exp' 1 pos
+  elseGuard <- makeGuard exp' 0 pos
+  let thn'' = condstmts ++ thenGuard ++ thn' ++ continuation
+  let els'' = condstmts ++ elseGuard ++ els' ++ continuation
+  addProc condproc (PrimProto condproc []) [thn'',els''] Nothing Private
+  if List.null back then 
+      return () 
+    else 
+      addProc confluence (PrimProto confluence []) [back] Nothing Private
   return $ condstmts ++ condstmts ++ back
 normaliseStmts' (Loop loop) stmts pos = do
   (init,body,update) <- normaliseLoopStmts loop
@@ -374,6 +384,22 @@ makeCond cond branches pos = do
     _ -> do
       message Error "Can't use a non-integer type as a Boolean" pos
       return $ head branches -- XXX has the right type, but probably not good
+
+
+-- |Generate a primitive conditional.
+makeGuard :: PrimArg -> Integer -> Maybe SourcePos -> Compiler [Placed Prim]
+makeGuard arg val pos = do
+  case arg of
+    ArgVar name FlowIn _ -> do
+      return [maybePlace (PrimGuard name val) pos]
+    ArgInt n ->
+      if n == val then
+        return []
+      else
+        return [maybePlace PrimFail pos]
+    _ -> do
+      message Error "Can't use a non-integer type as a Boolean" pos
+      return [maybePlace PrimFail pos]
 
 
 -- |Join on the lattice of flow directions (NoFlow is bottom, 

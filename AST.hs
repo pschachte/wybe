@@ -903,6 +903,7 @@ data Prim
      = PrimCall ProcName (Maybe ProcID) [PrimArg]
      | PrimForeign String ProcName (Maybe ProcID) [PrimArg]
      | PrimGuard PrimVarName Integer
+     | PrimFail
      | PrimCond PrimVarName [[Placed Prim]]
      | PrimLoop [Placed Prim]
      | PrimBreakIf PrimVarName
