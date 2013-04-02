@@ -5,7 +5,7 @@ Public proc second(!x:list(t), y:t) {update:3:8}[=(head(tail(!x {update:4:5}) {u
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : second(!x:list(t), y:t) <1> {update:3:8}
+  public procs    : second(x:list(t), ?x:list(t), y:t) <1> {update:3:8}
                     second(x:list(t), ?$:t) <0> {update:1:8}
   imports         : 
   types           : 

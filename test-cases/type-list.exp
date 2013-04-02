@@ -37,9 +37,9 @@ list:
   public resources: 
   public procs    : [](?$:list(t)) <0> {?}
                     [|](head:t, tail:list(t), ?$:list(t)) <0> {?}
-                    head(!$rec:list(t), $field:t) <1> {?}
+                    head($rec:list(t), ?$rec:list(t), $field:t) <1> {?}
                     head($rec:list(t), ?$field:t) <0> {?}
-                    tail(!$rec:list(t), $field:list(t)) <1> {?}
+                    tail($rec:list(t), ?$rec:list(t), $field:list(t)) <1> {?}
                     tail($rec:list(t), ?$field:list(t)) <0> {?}
   imports         : 
   types           : list/1 {type-list:1:8}

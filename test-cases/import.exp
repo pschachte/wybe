@@ -23,9 +23,9 @@ position:
   public types    : position/0 {position:1:8}
   public resources: 
   public procs    : position(x:int, y:int, ?$:position) <0> {?}
-                    x(!$rec:position, $field:int) <1> {?}
+                    x($rec:position, ?$rec:position, $field:int) <1> {?}
                     x($rec:position, ?$field:int) <0> {?}
-                    y(!$rec:position, $field:int) <1> {?}
+                    y($rec:position, ?$rec:position, $field:int) <1> {?}
                     y($rec:position, ?$field:int) <0> {?}
   imports         : 
   types           : position/0 {position:1:8}

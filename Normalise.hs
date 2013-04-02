@@ -57,7 +57,7 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
   stmts' <- normaliseStmts stmts
-  addProc name proto [stmts'] pos vis
+  addProc name (primProto proto) [stmts'] pos vis
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
     Just modparams <- getModuleParams
@@ -67,7 +67,7 @@ normaliseItem (StmtDecl stmt pos) = do
   oldproc <- lookupProc ""
   case oldproc of
     Nothing -> 
-      addProc "" (ProcProto "" []) [stmts] Nothing Private
+      addProc "" (PrimProto "" []) [stmts] Nothing Private
     Just [ProcDef _ proto [stmts'] pos'] ->
       replaceProc "" 0 proto [(stmts' ++ stmts)] pos' Private
 
@@ -97,16 +97,15 @@ addGetterSetter rectype ctorName (Param field fieldtype _) = do
     fieldOutVar <- outVar "$field"
     fieldInVar <- inVar "$field"
     addProc field 
-      (ProcProto field [Param "$rec" rectype ParamIn,
-                        Param "$field" fieldtype ParamOut])
+      (PrimProto field [PrimParam "$rec" rectype FlowIn Ordinary,
+                        PrimParam "$field" fieldtype FlowOut Implicit])
       [[Unplaced $ PrimForeign "" "access" Nothing 
        (ctorVar ++ recVar ++ fieldOutVar)]]
       Nothing Public
     addProc field 
-      -- (ProcProto field [Param "$rec" rectype ParamIn FirstHalf,
-      --                   Param "$rec" rectype ParamOut SecondHalf,
-      (ProcProto field [Param "$rec" rectype ParamInOut,
-                        Param "$field" fieldtype ParamIn])
+      (PrimProto field [PrimParam "$rec" rectype FlowIn FirstHalf,
+                        PrimParam "$rec" rectype FlowOut SecondHalf,
+                        PrimParam "$field" fieldtype FlowIn Ordinary])
       [[Unplaced $ PrimForeign "" "mutate" Nothing 
        (ctorVar ++ inOutRec ++ fieldInVar)]]
       Nothing Public
@@ -135,7 +134,9 @@ normaliseStmts' (Cond exp thn els) stmts pos = do
   thn' <- normaliseStmts thn
   els' <- normaliseStmts els
   condstmts <- makeCond exp' [thn',els'] pos
+  confluence <- genProcName
   back <- normaliseStmts stmts
+  -- addProc confluence proto [back] Nothing Private
   return $ condstmts ++ condstmts ++ back
 normaliseStmts' (Loop loop) stmts pos = do
   (init,body,update) <- normaliseLoopStmts loop

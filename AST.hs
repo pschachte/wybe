@@ -34,7 +34,7 @@ module AST (
   updateModImplementation, updateModImplementationM, 
   updateModInterface, updateModProcsM,
   getDirectory, getModuleSpec, getModuleParams, option, 
-  optionallyPutStr, verboseMsg, message, freshVar, nextProcId,
+  optionallyPutStr, verboseMsg, message, freshVar, genProcName,
   getVar, getNextVar, flowVar, inVar, outVar, inOutVar,
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
@@ -406,11 +406,11 @@ inOutVar name = do
             ArgVar primvar' FlowOut SecondHalf]
 
 -- |Return a new, unused proc ID.
-nextProcId :: Compiler Int
-nextProcId = do
+genProcName :: Compiler ProcName
+genProcName = do
   ctr <- getModule procCount
   updateModule (\mod -> mod {procCount = ctr + 1 })
-  return $ ctr + 1
+  return $ "gen$" ++ show (ctr + 1)
 
 -- |Apply the given function to the current module interface if the 
 --  specified visibility is Public.
@@ -486,14 +486,14 @@ addImport modspec imp specific vis = do
     updateInterface vis (updateDependencies (Set.insert $ last modspec))
 
 -- |Add the specified proc definition to the current module.
-addProc :: Ident -> ProcProto -> [[Placed Prim]] -> OptPos
+addProc :: Ident -> PrimProto -> [[Placed Prim]] -> OptPos
            -> Visibility -> Compiler ()
 addProc name proto clauses pos vis = do
     updateImplementation
       (updateModProcs
        (\procs ->
          let defs = findWithDefault [] name procs
-             defs' = defs ++ [ProcDef name (primProto proto) clauses pos]
+             defs' = defs ++ [ProcDef name proto clauses pos]
          in  Map.insert name defs' procs))
     newid <- getModuleImplementationField 
             (((-1)+) . length . fromJust . Map.lookup name . modProcs)
@@ -779,7 +779,7 @@ data ProcDef = ProcDef {
 
 -- |Info about a proc call, including the ID, prototype, and an 
 --  optional source position. 
-data ProcCallInfo = ProcCallInfo ProcID ProcProto OptPos
+data ProcCallInfo = ProcCallInfo ProcID PrimProto OptPos
 
 -- -- |Make a ProcCallInfo from a ProcDef
 -- procCallInfo :: ProcDef -> ProcCallInfo
