@@ -47,9 +47,6 @@ typeCheckMod scc modspec = do
 localCalledProcs :: [Prim] -> [Ident]
 localCalledProcs [] = []
 localCalledProcs (PrimCall name _ _:rest) = name:localCalledProcs rest
-localCalledProcs (PrimCond _ cases:rest) = 
-    (concat $ List.map (localCalledProcs . List.map content) cases) 
-    ++ localCalledProcs rest
 localCalledProcs (PrimLoop body:rest) = 
     (localCalledProcs $ List.map content body) ++ localCalledProcs rest
 localCalledProcs (_:rest) = localCalledProcs rest

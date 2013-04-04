@@ -904,7 +904,6 @@ data Prim
      | PrimForeign String ProcName (Maybe ProcID) [PrimArg]
      | PrimGuard PrimVarName Integer
      | PrimFail
-     | PrimCond PrimVarName [[Placed Prim]]
      | PrimLoop [Placed Prim]
      | PrimBreakIf PrimVarName
      | PrimNextIf PrimVarName
@@ -1186,11 +1185,6 @@ showPrim' ind (PrimForeign lang name id args) pos =
   startLine ind ++ "foreign " ++ lang ++ " " ++ name ++ maybeShow "<" id ">"
   ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
   ++ showMaybeSourcePos pos
-showPrim' ind (PrimCond var blocks) pos =
-  startLine ind ++ "case " ++ show var ++ " of" 
-  ++ showMaybeSourcePos pos
-  ++ showCases 0 (ind+2) (ind+4) blocks
-  ++ startLine ind ++ "end"
 showPrim' ind (PrimGuard var val) pos =
   startLine ind ++ "guard " ++ show var ++ " = " ++ show val
   ++ showMaybeSourcePos pos

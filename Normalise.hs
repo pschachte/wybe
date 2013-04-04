@@ -133,6 +133,26 @@ normaliseStmts' (Cond exp thn els) stmts pos = do
   (exp',condstmts) <- normaliseOuterExp exp []
   thn' <- normaliseStmts thn
   els' <- normaliseStmts els
+  stmts' <- normaliseStmts stmts
+  normaliseCond exp' condstmts thn' els' stmts' pos
+normaliseStmts' (Loop loop) stmts pos = do
+  (init,body,update) <- normaliseLoopStmts loop
+  back <- normaliseStmts stmts
+  return $ init ++ [maybePlace (PrimLoop $ body++update) pos] ++ back
+normaliseStmts' Nop stmts pos = normaliseStmts stmts
+
+
+-- |Normalise a conditional, generating a call to a two-clause proc, 
+--  where each clause ends with a call to another new proc that 
+--  handles the rest of the computation after the conditional
+normaliseCond :: PrimArg 
+                 -> [Placed Prim] 
+                 -> [Placed Prim] 
+                 -> [Placed Prim] 
+                 -> [Placed Prim] 
+                 -> Maybe SourcePos 
+                 -> Compiler [Placed Prim]
+normaliseCond exp' condstmts thn' els' stmts pos = do
   condproc <- genProcName
   confluence <- genProcName
   let continuation = if List.null stmts then [] 
@@ -142,17 +162,13 @@ normaliseStmts' (Cond exp thn els) stmts pos = do
   let thn'' = condstmts ++ thenGuard ++ thn' ++ continuation
   let els'' = condstmts ++ elseGuard ++ els' ++ continuation
   addProc condproc (PrimProto condproc []) [thn'',els''] Nothing Private
-  stmts' <- normaliseStmts stmts
   if List.null stmts then 
       return () 
     else 
-      addProc confluence (PrimProto confluence []) [stmts'] Nothing Private
+      addProc confluence (PrimProto confluence []) [stmts] Nothing Private
   return $ condstmts ++ [Unplaced $ PrimCall condproc Nothing []]
-normaliseStmts' (Loop loop) stmts pos = do
-  (init,body,update) <- normaliseLoopStmts loop
-  back <- normaliseStmts stmts
-  return $ init ++ [maybePlace (PrimLoop $ body++update) pos] ++ back
-normaliseStmts' Nop stmts pos = normaliseStmts stmts
+
+
 
 -- |Normalise the specified loop statements to primitive statements.
 normaliseLoopStmts :: [Placed LoopStmt] -> 
@@ -283,11 +299,9 @@ normaliseExp (CondExp cond thn els) pos dir rest = do
   (els',stmtsels) <- normaliseOuterExp els []
   elsAssign <- assign resultVar els'
   result <- inVar resultVar
-  prims <- makeCond cond' 
-           [stmtsthn++[thnAssign], stmtsels++[elsAssign]]
-           rest
-           pos
-  return (result, ParamIn, stmtscond++prims, [])
+  body <- normaliseCond cond' stmtscond 
+          (stmtsthn++[thnAssign]) (stmtsels++[elsAssign]) rest pos
+  return (result, ParamIn, body, [])
 normaliseExp (Fncall name exps) pos dir rest = do
   mustBeIn dir pos
   (exps',dir',pre,post) <- normalisePlacedExps exps rest
@@ -369,24 +383,6 @@ assign var val = do
 -- |Generate a primitive proc call
 procCall :: ProcName -> [PrimArg] -> Placed Prim
 procCall proc args = Unplaced $ PrimCall proc Nothing args
-
--- |Generate a primitive conditional.
-makeCond :: PrimArg -> [[Placed Prim]] -> [Placed Prim] -> Maybe SourcePos -> 
-            Compiler [Placed Prim]
-makeCond cond branches rest pos = do
-  case cond of
-    ArgVar name FlowIn _ -> do
-      result <- freshVar
-      return $ [maybePlace (PrimCond name branches) pos] ++ rest
-    ArgInt n ->
-      if n >= 0 && n <= fromIntegral (length branches) then
-        return $ (branches !! (fromInteger n)) ++ rest
-      else
-        return $ head branches ++ rest
-    _ -> do
-      message Error "Can't use a non-integer type as a Boolean" pos
-      return $ head branches ++ rest -- XXX has the right type, but probably not good
-
 
 -- |Generate a primitive conditional.
 makeGuard :: PrimArg -> Integer -> Maybe SourcePos -> Compiler [Placed Prim]
