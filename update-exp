@@ -13,8 +13,8 @@ agree () {
 }
 
 for f in $(make test | awk '$2 == "..." && $3 != "PASS" {print $1}') ; do
-    exp=$(echo "$f" | sed 's/\.frg/.exp/')
-    out=$(echo "$f" | sed 's/\.frg/.out/')
+    exp=$(echo "$f" | sed 's/\.wybe/.exp/')
+    out=$(echo "$f" | sed 's/\.wybe/.out/')
     echo
     echo '======='
     echo $f:
