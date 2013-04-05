@@ -25,7 +25,7 @@ module AST (
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
   argFlowDirection, flowIn, 
   expToStmt, Prim(..), PrimProto(..), primProto, PrimParam(..), 
-  PrimArg(..), PrimFlow(..), ArgFlowType(..),
+  PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
   MessageLevel(..), getCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -874,27 +874,30 @@ primProto (ProcProto name params) =
     PrimProto name (concat $ List.map primParam params)
 
 -- |A formal parameter, including name, type, and flow direction.
-data PrimParam = PrimParam VarName TypeSpec PrimFlow ArgFlowType
+data PrimParam = PrimParam PrimVarName TypeSpec PrimFlow ArgFlowType
            deriving Eq
 
 -- |Convert a single Param to up to two PrimParams
 primParam :: Param -> [PrimParam]
 primParam (Param name typ ParamIn) = 
-    [PrimParam name typ FlowIn Ordinary]
+    [PrimParam (PrimVarName name 0) typ FlowIn Ordinary]
 primParam (Param name typ ParamOut) = 
-    [PrimParam name typ FlowOut Ordinary]
+    [PrimParam (PrimVarName name (-1)) typ FlowOut Ordinary]
 primParam (Param name typ NoFlow) = []
 primParam (Param name typ ParamInOut) = 
-    [PrimParam name typ FlowIn FirstHalf,
-     PrimParam name typ FlowOut SecondHalf]
+    [PrimParam (PrimVarName name 0) typ FlowIn FirstHalf,
+     PrimParam (PrimVarName name (-1)) typ FlowOut SecondHalf]
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
   show (PrimParam name typ dir _) =
-    primFlowPrefix dir ++ name ++ ":" ++ show typ
+    primFlowPrefix dir ++ show name ++ ":" ++ show typ
 
+-- A variable name with an integer suffix to distinguish different 
+-- values for the same name.  As a special case, a suffix of -1 
+-- specifies the ultimate, final value for that name.
 data PrimVarName = PrimVarName VarName Int
-     deriving Eq
+     deriving (Eq, Ord)
 
 -- |A primitive statment, including those that can only appear in a 
 --  loop.
@@ -935,6 +938,50 @@ expToStmt :: Exp -> Stmt
 expToStmt (Fncall name args) = ProcCall name args
 expToStmt (ForeignFn lang name args) = ForeignCall lang name args
 
+
+
+----------------------------------------------------------------
+--                      Variables (Uses and Defs)
+--
+-- Finding uses and defines of primitive bodies is made a lot easier 
+-- by single assignment form:  we just need to find all variable uses
+-- or definitions.
+----------------------------------------------------------------
+
+varsInPrims :: PrimFlow -> [Prim] -> Set PrimVarName
+varsInPrims dir prims =
+    List.foldr Set.union Set.empty $ List.map (varsInPrim dir) prims
+
+varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
+varsInPrim dir (PrimCall _ _ args)      = varsInPrimArgs dir args
+varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
+varsInPrim dir (PrimGuard var _)        = Set.singleton var
+varsInPrim dir (PrimFail)               = Set.empty
+varsInPrim dir (PrimLoop prims)         = varsInPrims dir 
+                                          $ List.map content prims
+varsInPrim dir (PrimBreakIf var)        = Set.singleton var
+varsInPrim dir (PrimNextIf var)         = Set.singleton var
+
+varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
+varsInPrimArgs dir args = 
+    List.foldr Set.union Set.empty $ List.map (varsInPrimArg dir) args
+
+varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
+varsInPrimArg dir (ArgVar var dir' _) = 
+  if dir == dir' then Set.singleton var else Set.empty
+varsInPrimArg _ (ArgInt _)            = Set.empty
+varsInPrimArg _ (ArgFloat _)          = Set.empty
+varsInPrimArg _ (ArgString _)         = Set.empty
+varsInPrimArg _ (ArgChar _)           = Set.empty
+
+varsInProto :: PrimFlow -> PrimProto -> Set PrimVarName
+varsInProto dir (PrimProto _ params) =
+    List.foldr Set.union Set.empty $ List.map (varsInParam dir) params
+
+varsInParam :: PrimFlow -> PrimParam -> Set PrimVarName
+varsInParam dir (PrimParam var _ dir' _) =
+  -- invert the flow for prototypes, since the direction is opposite
+  if dir == dir' then Set.empty else Set.singleton var
 
 
 ----------------------------------------------------------------

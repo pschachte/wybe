@@ -4,12 +4,12 @@ Public proc print2(x:int, y:int) {proc-hello:1:8}[println("hello, world" {proc-h
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : print2(x:int, y:int) <0> {proc-hello:1:8}
+  public procs    : print2(x:0:int, y:0:int) <0> {proc-hello:1:8}
   imports         : 
   types           : 
   resources       : 
   procs           : print2:
-proc print2(x:int, y:int) (id 0):  {proc-hello:1:8}
+proc print2(x:0:int, y:0:int) (id 0):  {proc-hello:1:8}
     println("hello, world") {proc-hello:2:8}
 
 Submodules of proc-hello:

@@ -97,15 +97,17 @@ addGetterSetter rectype ctorName (Param field fieldtype _) = do
     fieldOutVar <- outVar "$field"
     fieldInVar <- inVar "$field"
     addProc field 
-      (PrimProto field [PrimParam "$rec" rectype FlowIn Ordinary,
-                        PrimParam "$field" fieldtype FlowOut Implicit])
+      (PrimProto field 
+       [PrimParam (PrimVarName "$rec" 0) rectype FlowIn Ordinary,
+        PrimParam (PrimVarName "$field" (-1)) fieldtype FlowOut Implicit])
       [[Unplaced $ PrimForeign "" "access" Nothing 
        (ctorVar ++ recVar ++ fieldOutVar)]]
       Nothing Public
     addProc field 
-      (PrimProto field [PrimParam "$rec" rectype FlowIn FirstHalf,
-                        PrimParam "$rec" rectype FlowOut SecondHalf,
-                        PrimParam "$field" fieldtype FlowIn Ordinary])
+      (PrimProto field 
+       [PrimParam (PrimVarName "$rec" 0) rectype FlowIn FirstHalf,
+        PrimParam (PrimVarName "$rec" (-1)) rectype FlowOut SecondHalf,
+        PrimParam (PrimVarName "$field" 0) fieldtype FlowIn Ordinary])
       [[Unplaced $ PrimForeign "" "mutate" Nothing 
        (ctorVar ++ inOutRec ++ fieldInVar)]]
       Nothing Public

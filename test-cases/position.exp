@@ -19,29 +19,29 @@ position:
   public submods  : 
   public types    : position/0 {position:1:8}
   public resources: 
-  public procs    : position(x:int, y:int, ?$:position) <0> {?}
-                    x($rec:position, ?$rec:position, $field:int) <1> {?}
-                    x($rec:position, ?$field:int) <0> {?}
-                    y($rec:position, ?$rec:position, $field:int) <1> {?}
-                    y($rec:position, ?$field:int) <0> {?}
+  public procs    : position(x:0:int, y:0:int, ?$:-1:position) <0> {?}
+                    x($rec:0:position, ?$rec:-1:position, $field:0:int) <1> {?}
+                    x($rec:0:position, ?$field:-1:int) <0> {?}
+                    y($rec:0:position, ?$rec:-1:position, $field:0:int) <1> {?}
+                    y($rec:0:position, ?$field:-1:int) <0> {?}
   imports         : 
   types           : position/0 {position:1:8}
   resources       : 
   procs           : position:
-proc position(x:int, y:int, ?$:position) (id 0):  {?}
+proc position(x:0:int, y:0:int, ?$:-1:position) (id 0):  {?}
     $alloc(position:0, ?$tmp0:0) {?}
     update$x(x:0, $tmp0:0, ?$tmp1:0) {?}
     update$y(y:0, $tmp1:0, ?$tmp2:0) {?}
     =(?$:0, $tmp2:0) {?}
                     x:
-proc x($rec:position, ?$field:int) (id 0):  {?}
+proc x($rec:0:position, ?$field:-1:int) (id 0):  {?}
     foreign  access(position:0, $rec:0, ?$field:0) {?}
-proc x($rec:position, ?$rec:position, $field:int) (id 1):  {?}
+proc x($rec:0:position, ?$rec:-1:position, $field:0:int) (id 1):  {?}
     foreign  mutate(position:0, $rec:0, ?$rec:0, $field:0) {?}
                     y:
-proc y($rec:position, ?$field:int) (id 0):  {?}
+proc y($rec:0:position, ?$field:-1:int) (id 0):  {?}
     foreign  access(position:0, $rec:0, ?$field:0) {?}
-proc y($rec:position, ?$rec:position, $field:int) (id 1):  {?}
+proc y($rec:0:position, ?$rec:-1:position, $field:0:int) (id 1):  {?}
     foreign  mutate(position:0, $rec:0, ?$rec:0, $field:0) {?}
 
 Submodules of position.position:

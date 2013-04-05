@@ -4,12 +4,12 @@ Public proc yorn(prompt:string, ?result:bool) {proc-yorn2:1:8}[do print(prompt {
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : yorn(prompt:string, ?result:bool) <0> {proc-yorn2:1:8}
+  public procs    : yorn(prompt:0:string, ?result:-1:bool) <0> {proc-yorn2:1:8}
   imports         : 
   types           : 
   resources       : 
   procs           : yorn:
-proc yorn(prompt:string, ?result:bool) (id 0):  {proc-yorn2:1:8}
+proc yorn(prompt:0:string, ?result:-1:bool) (id 0):  {proc-yorn2:1:8}
     do  {proc-yorn2:2:5}
         print(prompt:0) {proc-yorn2:2:9}
         print(" (y/n) ") {proc-yorn2:3:9}

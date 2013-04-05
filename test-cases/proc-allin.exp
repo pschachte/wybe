@@ -4,12 +4,12 @@ Public proc nada(x:int, y:int) {proc-allin:1:8}[=(?z {proc-allin:1:32}, +(x {pro
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : nada(x:int, y:int) <0> {proc-allin:1:8}
+  public procs    : nada(x:0:int, y:0:int) <0> {proc-allin:1:8}
   imports         : 
   types           : 
   resources       : 
   procs           : nada:
-proc nada(x:int, y:int) (id 0):  {proc-allin:1:8}
+proc nada(x:0:int, y:0:int) (id 0):  {proc-allin:1:8}
     +(x:0, y:0, ?$tmp0:0) {proc-allin:1:35}
     =(?z:0, $tmp0:0) {proc-allin:1:32}
 

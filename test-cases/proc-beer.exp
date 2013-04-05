@@ -4,12 +4,12 @@ Public proc print2(x:int, y:int) {proc-beer:1:8}[do for count from 99 {proc-beer
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : print2(x:int, y:int) <0> {proc-beer:1:8}
+  public procs    : print2(x:0:int, y:0:int) <0> {proc-beer:1:8}
   imports         : 
   types           : 
   resources       : 
   procs           : print2:
-proc print2(x:int, y:int) (id 0):  {proc-beer:1:8}
+proc print2(x:0:int, y:0:int) (id 0):  {proc-beer:1:8}
     =(?count:0, 99) {?}
     do  {proc-beer:2:8}
         <(count:0, 0, ?$tmp0:0) {?}
