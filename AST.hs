@@ -29,6 +29,7 @@ module AST (
   -- *Stateful monad for the compilation process
   MessageLevel(..), getCompiler,
   CompilerState(..), Compiler, runCompiler,
+  ClauseCompState(..), ClauseComp, runClauseComp,
   updateModules, getModuleImplementationField, getLoadedModule,
   getModule, updateModule, getSpecModule, updateSpecModule,
   updateModImplementation, updateModImplementationM, 
@@ -355,28 +356,49 @@ makeMessage msg (Just pos) =
   show (sourceColumn pos) ++ ": " ++ 
   msg
 
+
+
+----------------------------------------------------------------
+--                 Clause compiler monad
+----------------------------------------------------------------
+
+-- |The state of compilation of a clause; used by the ClauseComp
+-- monad.
+data ClauseCompState = ClauseComp {
+  vars :: Map VarName Int,    -- ^the latest var number for each var
+  tmpCount :: Int             -- ^the number of temp vars so far in this clause
+  } deriving Show
+
+-- |The clause compiler monad is a state transformer monad carrying the 
+--  clause compiler state over the compiler monad.
+type ClauseComp = StateT ClauseCompState Compiler
+
+-- |Run a clause compiler function from the Compiler monad.
+runClauseComp :: ClauseComp t -> Compiler t
+runClauseComp clcomp = evalStateT clcomp (ClauseComp Map.empty 0)
+
 -- |Return a fresh variable name.
-freshVar :: Compiler String
+freshVar :: ClauseComp String
 freshVar = do
-  ctr <- getModule varCount
-  updateModule (\mod -> mod {varCount = ctr + 1 })
+  ctr <- gets tmpCount
+  modify (\st -> st {tmpCount = ctr + 1 })
   return $ "$tmp" ++ (show ctr)
 
 -- |Return the current PrimVarName for a given name string; ie, find 
 --  the current suffix for the specified name
-getVar :: String -> Compiler PrimVarName
+getVar :: String -> ClauseComp PrimVarName
 -- XXX Just for now, always use suffix 0
 getVar name = return $ PrimVarName name 0
 
 -- |Return the next PrimVarName for a given name string; ie, find 
 --  the next suffix for the specified name
-getNextVar :: String -> Compiler PrimVarName
+getNextVar :: String -> ClauseComp PrimVarName
 -- XXX Just for now, always use suffix 0
 getNextVar name = return $ PrimVarName name 0
 
 -- |Return the primitive procedure call input argument(s) for the 
 --  specified variable name and flow direction
-flowVar :: String -> FlowDirection -> Compiler [PrimArg]
+flowVar :: String -> FlowDirection -> ClauseComp [PrimArg]
 flowVar name ParamIn = inVar name
 flowVar name ParamOut = outVar name
 flowVar name ParamInOut = inOutVar name
@@ -384,21 +406,21 @@ flowVar name NoFlow = return []
 
 -- |Return the primitive procedure call input argument for the 
 --  specified variable name.
-inVar :: String -> Compiler [PrimArg]
+inVar :: String -> ClauseComp [PrimArg]
 inVar name = do
     primvar <- getVar name
     return [ArgVar primvar FlowIn Ordinary]
 
 -- |Return the primitive procedure call output argument for the 
 --  specified variable name.
-outVar :: String -> Compiler [PrimArg]
+outVar :: String -> ClauseComp [PrimArg]
 outVar name = do
     primvar <- getNextVar name
     return [ArgVar primvar FlowOut Ordinary]
 
 -- |Return the primitive procedure call input and output arguments for the 
 --  specified variable name.
-inOutVar :: String -> Compiler [PrimArg]
+inOutVar :: String -> ClauseComp [PrimArg]
 inOutVar name = do
     primvar <- getVar name
     primvar' <- getNextVar name

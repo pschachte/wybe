@@ -51,56 +51,56 @@ int:
   resources       : 
   procs           : *:
 proc *(x:0:int, y:0:int, ?$:-1:int) (id 0):  {type-int:8:12}
-    foreign llvm mul(32, x:0, y:0, ?$tmp6:0) {type-int:8:38}
-    =(?$:0, $tmp6:0) {?}
+    foreign llvm mul(32, x:0, y:0, ?$tmp0:0) {type-int:8:38}
+    =(?$:0, $tmp0:0) {?}
                     +:
 proc +(x:0:int, y:0:int, ?$:-1:int) (id 0):  {type-int:2:12}
     foreign llvm add(32, x:0, y:0, ?$tmp0:0) {type-int:2:38}
     =(?$:0, $tmp0:0) {?}
 proc +(?x:-1:int, y:0:int, z:0:int) (id 1):  {type-int:3:12}
-    foreign llvm sub(32, z:0, y:0, ?$tmp1:0) {type-int:3:44}
-    =(?x:0, $tmp1:0) {type-int:3:39}
+    foreign llvm sub(32, z:0, y:0, ?$tmp0:0) {type-int:3:44}
+    =(?x:0, $tmp0:0) {type-int:3:39}
 proc +(x:0:int, ?y:-1:int, z:0:int) (id 2):  {type-int:4:12}
-    foreign llvm sub(32, z:0, x:0, ?$tmp2:0) {type-int:4:44}
-    =(?y:0, $tmp2:0) {type-int:4:39}
+    foreign llvm sub(32, z:0, x:0, ?$tmp0:0) {type-int:4:44}
+    =(?y:0, $tmp0:0) {type-int:4:39}
                     -:
 proc -(x:0:int, y:0:int, ?$:-1:int) (id 0):  {type-int:5:12}
-    foreign llvm sub(32, x:0, y:0, ?$tmp3:0) {type-int:5:38}
-    =(?$:0, $tmp3:0) {?}
+    foreign llvm sub(32, x:0, y:0, ?$tmp0:0) {type-int:5:38}
+    =(?$:0, $tmp0:0) {?}
 proc -(?x:-1:int, y:0:int, z:0:int) (id 1):  {type-int:6:12}
-    foreign llvm add(32, z:0, y:0, ?$tmp4:0) {type-int:6:44}
-    =(?x:0, $tmp4:0) {type-int:6:39}
+    foreign llvm add(32, z:0, y:0, ?$tmp0:0) {type-int:6:44}
+    =(?x:0, $tmp0:0) {type-int:6:39}
 proc -(x:0:int, ?y:-1:int, z:0:int) (id 2):  {type-int:7:12}
-    foreign llvm sub(32, z:0, x:0, ?$tmp5:0) {type-int:7:44}
-    =(?y:0, $tmp5:0) {type-int:7:39}
+    foreign llvm sub(32, z:0, x:0, ?$tmp0:0) {type-int:7:44}
+    =(?y:0, $tmp0:0) {type-int:7:39}
                     /:
 proc /(x:0:int, y:0:int, ?$:-1:int) (id 0):  {type-int:9:12}
-    foreign llvm sdiv(32, x:0, y:0, ?$tmp7:0) {type-int:9:38}
-    =(?$:0, $tmp7:0) {?}
+    foreign llvm sdiv(32, x:0, y:0, ?$tmp0:0) {type-int:9:38}
+    =(?$:0, $tmp0:0) {?}
                     /=:
 proc /=(x:0:int, y:0:int, ?$:-1:bool) (id 0):  {type-int:11:12}
-    foreign llvm icmp(ne:0, 32, x:0, y:0, ?$tmp9:0) {type-int:11:40}
-    =(?$:0, $tmp9:0) {?}
+    foreign llvm icmp(ne:0, 32, x:0, y:0, ?$tmp0:0) {type-int:11:40}
+    =(?$:0, $tmp0:0) {?}
                     <:
 proc <(x:0:int, y:0:int, ?$:-1:bool) (id 0):  {type-int:12:12}
-    foreign llvm icmp(slt:0, 32, x:0, y:0, ?$tmp10:0) {type-int:12:39}
-    =(?$:0, $tmp10:0) {?}
+    foreign llvm icmp(slt:0, 32, x:0, y:0, ?$tmp0:0) {type-int:12:39}
+    =(?$:0, $tmp0:0) {?}
                     <=:
 proc <=(x:0:int, y:0:int, ?$:-1:bool) (id 0):  {type-int:13:12}
-    foreign llvm icmp(sle:0, 32, x:0, y:0, ?$tmp11:0) {type-int:13:40}
-    =(?$:0, $tmp11:0) {?}
+    foreign llvm icmp(sle:0, 32, x:0, y:0, ?$tmp0:0) {type-int:13:40}
+    =(?$:0, $tmp0:0) {?}
                     ==:
 proc ==(x:0:int, y:0:int, ?$:-1:bool) (id 0):  {type-int:10:12}
-    foreign llvm icmp(eq:0, 32, x:0, y:0, ?$tmp8:0) {type-int:10:40}
-    =(?$:0, $tmp8:0) {?}
+    foreign llvm icmp(eq:0, 32, x:0, y:0, ?$tmp0:0) {type-int:10:40}
+    =(?$:0, $tmp0:0) {?}
                     >:
 proc >(x:0:int, y:0:int, ?$:-1:bool) (id 0):  {type-int:14:12}
-    foreign llvm icmp(sgt:0, 32, x:0, y:0, ?$tmp12:0) {type-int:14:39}
-    =(?$:0, $tmp12:0) {?}
+    foreign llvm icmp(sgt:0, 32, x:0, y:0, ?$tmp0:0) {type-int:14:39}
+    =(?$:0, $tmp0:0) {?}
                     >=:
 proc >=(x:0:int, y:0:int, ?$:-1:bool) (id 0):  {type-int:15:12}
-    foreign llvm icmp(sge:0, 32, x:0, y:0, ?$tmp13:0) {type-int:15:40}
-    =(?$:0, $tmp13:0) {?}
+    foreign llvm icmp(sge:0, 32, x:0, y:0, ?$tmp0:0) {type-int:15:40}
+    =(?$:0, $tmp0:0) {?}
 
 Submodules of type-int.int:
 

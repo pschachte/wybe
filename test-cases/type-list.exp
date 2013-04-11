@@ -56,10 +56,10 @@ proc [](?$:-1:list(t)) (id 0):  {?}
     =(?$:0, $tmp0:0) {?}
                     [|]:
 proc [|](head:0:t, tail:0:list(t), ?$:-1:list(t)) (id 0):  {?}
-    $alloc([|]:0, ?$tmp1:0) {?}
-    update$head(head:0, $tmp1:0, ?$tmp2:0) {?}
-    update$tail(tail:0, $tmp2:0, ?$tmp3:0) {?}
-    =(?$:0, $tmp3:0) {?}
+    $alloc([|]:0, ?$tmp0:0) {?}
+    update$head(head:0, $tmp0:0, ?$tmp1:0) {?}
+    update$tail(tail:0, $tmp1:0, ?$tmp2:0) {?}
+    =(?$:0, $tmp2:0) {?}
                     head:
 proc head($rec:0:list(t), ?$field:-1:t) (id 0):  {?}
     foreign  access([|]:0, $rec:0, ?$field:0) {?}

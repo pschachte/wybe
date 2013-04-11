@@ -15,7 +15,8 @@ import Data.Set as Set
 import Data.List as List
 import Text.ParserCombinators.Parsec.Pos
 import Control.Monad
-  
+import Control.Monad.Trans.Class
+
 -- |Normalise a list of file items, storing the results in the current module.
 normalise :: [Item] -> Compiler ()
 normalise items = do
@@ -56,14 +57,14 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
    ProcCall "=" [Unplaced $ Var "$" ParamOut, result]]
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
-  stmts' <- normaliseStmts stmts
+  stmts' <- runClauseComp $ normaliseStmts stmts
   addProc name (primProto proto) [stmts'] pos vis
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
     Just modparams <- getModuleParams
     addCtor (last modspec) modparams proto
 normaliseItem (StmtDecl stmt pos) = do
-  stmts <- normaliseStmts' stmt [] pos
+  stmts <- runClauseComp $ normaliseStmts' stmt [] pos
   oldproc <- lookupProc ""
   case oldproc of
     Nothing -> 
@@ -90,20 +91,20 @@ addCtor typeName typeParams (FnProto ctorName params) = do
 
 -- |Add a getter and setter for the specified type.
 addGetterSetter :: TypeSpec -> Ident -> Param -> Compiler ()
-addGetterSetter rectype ctorName (Param field fieldtype _) = do
+addGetterSetter rectype ctorName (Param field fieldtype _) = runClauseComp $ do
     ctorVar <- inVar ctorName
     recVar <- inVar "$rec"
     inOutRec <- inOutVar "$rec"
     fieldOutVar <- outVar "$field"
     fieldInVar <- inVar "$field"
-    addProc field 
+    lift $ addProc field 
       (PrimProto field 
        [PrimParam (PrimVarName "$rec" 0) rectype FlowIn Ordinary,
         PrimParam (PrimVarName "$field" (-1)) fieldtype FlowOut Implicit])
       [[Unplaced $ PrimForeign "" "access" Nothing 
        (ctorVar ++ recVar ++ fieldOutVar)]]
       Nothing Public
-    addProc field 
+    lift $ addProc field 
       (PrimProto field 
        [PrimParam (PrimVarName "$rec" 0) rectype FlowIn FirstHalf,
         PrimParam (PrimVarName "$rec" (-1)) rectype FlowOut SecondHalf,
@@ -113,16 +114,13 @@ addGetterSetter rectype ctorName (Param field fieldtype _) = do
       Nothing Public
 
 -- |Normalise the specified statements to primitive statements.
-normaliseStmts :: [Placed Stmt] -> Compiler [Placed Prim]
+normaliseStmts :: [Placed Stmt] -> ClauseComp [Placed Prim]
 normaliseStmts [] = return []
-normaliseStmts (stmt:stmts) =
-    case stmt of
-        Placed stmt' pos -> normaliseStmts' stmt' stmts $ Just pos
-        Unplaced stmt'   -> normaliseStmts' stmt' stmts Nothing
+normaliseStmts (stmt:stmts) = normaliseStmts' (content stmt) stmts $ place stmt
 
 -- |Normalise the specified statement, plus the list of following statements, 
 --  to a list of primitive statements.
-normaliseStmts' :: Stmt -> [Placed Stmt] -> Maybe SourcePos -> Compiler [Placed Prim]
+normaliseStmts' :: Stmt -> [Placed Stmt] -> Maybe SourcePos -> ClauseComp [Placed Prim]
 normaliseStmts' (ProcCall name args) stmts pos = do
   (args',pre,post) <- normaliseArgs args
   back <- normaliseStmts stmts
@@ -153,20 +151,21 @@ normaliseCond :: PrimArg
                  -> [Placed Prim] 
                  -> [Placed Prim] 
                  -> Maybe SourcePos 
-                 -> Compiler [Placed Prim]
+                 -> ClauseComp [Placed Prim]
 normaliseCond exp' condstmts thn' els' stmts pos = do
-  condproc <- genProcName
-  confluence <- genProcName
+  condproc <- lift $ genProcName
+  confluence <- lift $ genProcName
   let continuation = if List.null stmts then [] 
                      else [Unplaced $ PrimCall confluence Nothing []]
-  thenGuard <- makeGuard exp' 1 pos
-  elseGuard <- makeGuard exp' 0 pos
+  thenGuard <- lift $ makeGuard exp' 1 pos
+  elseGuard <- lift $ makeGuard exp' 0 pos
   let thn'' = condstmts ++ thenGuard ++ thn' ++ continuation
   let els'' = condstmts ++ elseGuard ++ els' ++ continuation
-  addProc condproc (PrimProto condproc []) [thn'',els''] Nothing Private
+  lift $ addProc condproc (PrimProto condproc []) [thn'',els''] Nothing Private
   if List.null stmts then 
       return () 
     else 
+      lift $ 
       addProc confluence (PrimProto confluence []) [stmts] Nothing Private
   return $ condstmts ++ [Unplaced $ PrimCall condproc Nothing []]
 
@@ -174,7 +173,7 @@ normaliseCond exp' condstmts thn' els' stmts pos = do
 
 -- |Normalise the specified loop statements to primitive statements.
 normaliseLoopStmts :: [Placed LoopStmt] -> 
-                      Compiler ([Placed Prim],[Placed Prim],[Placed Prim])
+                      ClauseComp ([Placed Prim],[Placed Prim],[Placed Prim])
 normaliseLoopStmts [] = return ([],[],[])
 normaliseLoopStmts (stmt:stmts) = do
   (backinit,backbody,backupdate) <- normaliseLoopStmts stmts
@@ -188,7 +187,7 @@ normaliseLoopStmts (stmt:stmts) = do
 -- |Normalise a single loop statement to three list of primitive statements:
 --  statements to execute before, during, and afte the loop.p
 normaliseLoopStmt :: LoopStmt -> Maybe SourcePos -> 
-                     Compiler ([Placed Prim],[Placed Prim],[Placed Prim])
+                     ClauseComp ([Placed Prim],[Placed Prim],[Placed Prim])
 normaliseLoopStmt (For gen) pos = normaliseGenerator gen pos
 normaliseLoopStmt (BreakIf exp) pos = do
   (exp',stmts) <- normaliseOuterExp exp []
@@ -210,7 +209,7 @@ normaliseLoopStmt (NormalStmt stmt) pos = do
 -- |Normalise a loop generator to three list of primitive statements:
 --  statements to execute before, during, and afte the loop.p
 normaliseGenerator :: Generator -> Maybe SourcePos ->
-                      Compiler ([Placed Prim],[Placed Prim],[Placed Prim])
+                      ClauseComp ([Placed Prim],[Placed Prim],[Placed Prim])
 normaliseGenerator (In var exp) pos = do
   (arg,init) <- normaliseOuterExp exp []
   stateVar <- freshVar
@@ -248,7 +247,8 @@ normaliseGenerator (InRange var exp updateOp inc limit) pos = do
 --  primitive arguments, a list of statements to execute before the 
 --  call to bind those arguments, and a list of statements to execute 
 --  after the call to store the results appropriately.
-normaliseArgs :: [Placed Exp] -> Compiler ([PrimArg],[Placed Prim],[Placed Prim])
+normaliseArgs :: [Placed Exp] 
+                 -> ClauseComp ([PrimArg],[Placed Prim],[Placed Prim])
 normaliseArgs [] = return ([],[],[])
 normaliseArgs (pexp:args) = do
   let pos = place pexp
@@ -260,7 +260,7 @@ normaliseArgs (pexp:args) = do
 -- |Normalise a single read-only expression to a primitve argument 
 --  and a list of primitive statements to bind that argument.
 normaliseOuterExp :: Placed Exp -> [Placed Prim] -> 
-                     Compiler (PrimArg,[Placed Prim])
+                     ClauseComp (PrimArg,[Placed Prim])
 normaliseOuterExp exp stmts = do
     ([arg],_,pre,post) <- normaliseExp (content exp) (place exp) ParamIn stmts
     return (arg,pre++post)
@@ -271,7 +271,7 @@ normaliseOuterExp exp stmts = do
 --  to bind it, and a list of statements to execute 
 --  after the call to store the result appropriately.
 normaliseExp :: Exp -> Maybe SourcePos -> FlowDirection -> [Placed Prim] ->
-                 Compiler ([PrimArg],FlowDirection,[Placed Prim],[Placed Prim])
+                ClauseComp ([PrimArg],FlowDirection,[Placed Prim],[Placed Prim])
 normaliseExp (IntValue a) pos dir rest = do
   mustBeIn dir pos
   return ([ArgInt a], ParamIn, [], rest)
@@ -343,8 +343,8 @@ normaliseExp (ForeignFn lang name exps) pos dir rest = do
 --  call to bind those arguments, and a list of statements to execute 
 --  after the call to store the results appropriately.
 normalisePlacedExps :: [Placed Exp] -> [Placed Prim] ->
-                      Compiler ([PrimArg],FlowDirection,
-                                [Placed Prim],[Placed Prim])
+                      ClauseComp ([PrimArg],FlowDirection,
+                                  [Placed Prim],[Placed Prim])
 normalisePlacedExps [] rest = return ([],NoFlow,[],rest)
 normalisePlacedExps (exp:exps) rest = do
   (args',flow',pres,posts) <- normalisePlacedExps exps rest
@@ -352,10 +352,10 @@ normalisePlacedExps (exp:exps) rest = do
   return  (exp' ++ args', flow `flowJoin` flow', pre ++ pres, post ++ posts)
 
 -- | Report an error if the specified flow direction has output.
-mustBeIn :: FlowDirection -> Maybe SourcePos -> Compiler ()
+mustBeIn :: FlowDirection -> Maybe SourcePos -> ClauseComp ()
 mustBeIn flow pos =
     when (flowsOut flow)
-    $ message Error "Flow error:  invalid output argument" pos
+    $ lift $ message Error "Flow error:  invalid output argument" pos
 
 -- |Does the specified flow direction flow in?
 flowsIn :: FlowDirection -> Bool
@@ -377,7 +377,7 @@ argIsInput (ArgVar var dir _) = dir == FlowIn
 argIsInput _ = True
 
 -- |Generate a primitive assignment statement.
-assign :: VarName -> PrimArg -> Compiler (Placed Prim)
+assign :: VarName -> PrimArg -> ClauseComp (Placed Prim)
 assign var val = do
   lval <- outVar var
   return $ procCall "=" (lval ++ [val])
