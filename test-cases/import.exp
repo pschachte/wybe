@@ -24,28 +24,30 @@ position:
   public resources: 
   public procs    : position(x:0:int, y:0:int, ?$:-1:position) <0> {?}
                     x($rec:0:position, ?$rec:-1:position, $field:0:int) <1> {?}
-                    x($rec:0:position, ?$field:-1:int) <0> {?}
+                    x($rec:0:position, ?$:-1:int) <0> {?}
                     y($rec:0:position, ?$rec:-1:position, $field:0:int) <1> {?}
-                    y($rec:0:position, ?$field:-1:int) <0> {?}
+                    y($rec:0:position, ?$:-1:int) <0> {?}
   imports         : 
   types           : position/0 {position:1:8}
   resources       : 
   procs           : position:
 proc position(x:0:int, y:0:int, ?$:-1:position) (id 0):  {?}
-    $alloc(position:0, ?$tmp0:0) {?}
-    update$x(x:0, $tmp0:0, ?$tmp1:0) {?}
-    update$y(y:0, $tmp1:0, ?$tmp2:0) {?}
-    =(?$:0, $tmp2:0) {?}
+    foreign  alloc("position", "position", ?$rec:0) {?}
+    foreign  mutate("position", "position", "x", $rec:0, ?$rec:1, x:0) {?}
+    foreign  mutate("position", "position", "y", $rec:1, ?$rec:2, y:0) {?}
+    =(?$:0, $rec:2) {?}
                     x:
-proc x($rec:0:position, ?$field:-1:int) (id 0):  {?}
-    foreign  access(position:0, $rec:0, ?$field:0) {?}
+proc x($rec:0:position, ?$:-1:int) (id 0):  {?}
+    foreign  access("position", "position", "x", $rec:0, ?$tmp0:0) {?}
+    =(?$:0, $tmp0:0) {?}
 proc x($rec:0:position, ?$rec:-1:position, $field:0:int) (id 1):  {?}
-    foreign  mutate(position:0, $rec:0, ?$rec:0, $field:0) {?}
+    foreign  mutate("position", "position", "x", $rec:0, ?$rec:1, $field:0) {?}
                     y:
-proc y($rec:0:position, ?$field:-1:int) (id 0):  {?}
-    foreign  access(position:0, $rec:0, ?$field:0) {?}
+proc y($rec:0:position, ?$:-1:int) (id 0):  {?}
+    foreign  access("position", "position", "y", $rec:0, ?$tmp0:0) {?}
+    =(?$:0, $tmp0:0) {?}
 proc y($rec:0:position, ?$rec:-1:position, $field:0:int) (id 1):  {?}
-    foreign  mutate(position:0, $rec:0, ?$rec:0, $field:0) {?}
+    foreign  mutate("position", "position", "y", $rec:0, ?$rec:1, $field:0) {?}
 
 Submodules of position.position:
 
@@ -74,3 +76,5 @@ proc distance(p1:0:position, p2:0:position, ?$:-1:?) (id 0):  {import:3:8}
 
 Submodules of import:
 
+uninitialised variable $tmp0
+uninitialised variable $tmp0

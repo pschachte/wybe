@@ -57,14 +57,15 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
    ProcCall "=" [Unplaced $ Var "$" ParamOut, result]]
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
-  stmts' <- runClauseComp $ normaliseStmts stmts
-  addProc name (primProto proto) [stmts'] pos vis
+    let proto'@(PrimProto _ params') = primProto proto
+    stmts' <- runClauseComp params' $ normaliseStmts stmts
+    addProc name proto' [stmts'] pos vis
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
     Just modparams <- getModuleParams
-    addCtor (last modspec) modparams proto
+    addCtor vis (last modspec) modparams proto
 normaliseItem (StmtDecl stmt pos) = do
-  stmts <- runClauseComp $ normaliseStmts' stmt [] pos
+  stmts <- runClauseComp [] $ normaliseStmts' stmt [] pos
   oldproc <- lookupProc ""
   case oldproc of
     Nothing -> 
@@ -73,45 +74,51 @@ normaliseItem (StmtDecl stmt pos) = do
       replaceProc "" 0 proto [(stmts' ++ stmts)] pos' Private
 
 -- |Add a contructor for the specified type.
-addCtor :: Ident -> [Ident] -> FnProto -> Compiler ()
-addCtor typeName typeParams (FnProto ctorName params) = do
+addCtor :: Visibility -> Ident -> [Ident] -> FnProto -> Compiler ()
+addCtor vis typeName typeParams (FnProto ctorName params) = do
     let typespec = TypeSpec typeName $ List.map (\n->TypeSpec n []) typeParams
-    normaliseItem (FuncDecl Public (FnProto ctorName params)
-                   typespec
-                   (List.foldr
-                    (\(Param var _ dir) struct ->
-                      (Unplaced $ Fncall 
-                       ("update$"++var) 
-                       [Unplaced $ Var var dir,struct]))
-                    (Unplaced $ Fncall "$alloc" [Unplaced $ 
-                                                 Var ctorName ParamIn])
-                    $ List.reverse params) 
-                   Nothing)
-    mapM_ (addGetterSetter typespec ctorName) params
+    normaliseItem 
+      (FuncDecl Public (FnProto ctorName params) typespec
+       (Unplaced $ Where 
+        ([Unplaced $ ForeignCall "" "alloc" [Unplaced $ StringValue typeName,
+                                             Unplaced $ StringValue ctorName,
+                                             Unplaced $ Var "$rec" ParamOut]]
+         ++
+         (List.map (\(Param var _ dir) ->
+                     (Unplaced $ ForeignCall "" "mutate"
+                      [Unplaced $ StringValue $ typeName,
+                       Unplaced $ StringValue ctorName,
+                       Unplaced $ StringValue var,
+                       Unplaced $ Var "$rec" ParamInOut,
+                       Unplaced $ Var var ParamIn]))
+          params))
+        (Unplaced $ Var "$rec" ParamIn))
+       Nothing)
+    mapM_ (addGetterSetter vis typespec ctorName) params
 
 -- |Add a getter and setter for the specified type.
-addGetterSetter :: TypeSpec -> Ident -> Param -> Compiler ()
-addGetterSetter rectype ctorName (Param field fieldtype _) = runClauseComp $ do
-    ctorVar <- inVar ctorName
-    recVar <- inVar "$rec"
-    inOutRec <- inOutVar "$rec"
-    fieldOutVar <- outVar "$field"
-    fieldInVar <- inVar "$field"
-    lift $ addProc field 
-      (PrimProto field 
-       [PrimParam (PrimVarName "$rec" 0) rectype FlowIn Ordinary,
-        PrimParam (PrimVarName "$field" (-1)) fieldtype FlowOut Implicit])
-      [[Unplaced $ PrimForeign "" "access" Nothing 
-       (ctorVar ++ recVar ++ fieldOutVar)]]
-      Nothing Public
-    lift $ addProc field 
-      (PrimProto field 
-       [PrimParam (PrimVarName "$rec" 0) rectype FlowIn FirstHalf,
-        PrimParam (PrimVarName "$rec" (-1)) rectype FlowOut SecondHalf,
-        PrimParam (PrimVarName "$field" 0) fieldtype FlowIn Ordinary])
-      [[Unplaced $ PrimForeign "" "mutate" Nothing 
-       (ctorVar ++ inOutRec ++ fieldInVar)]]
-      Nothing Public
+addGetterSetter :: Visibility -> TypeSpec -> Ident -> Param -> Compiler ()
+addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
+    normaliseItem $ FuncDecl vis 
+      (FnProto field [Param "$rec" rectype ParamIn])
+      fieldtype 
+      (Unplaced $ ForeignFn "" "access" 
+       [Unplaced $ StringValue $ typeName rectype,
+        Unplaced $ StringValue ctorName,
+        Unplaced $ StringValue field,
+        Unplaced $ Var "$rec" ParamIn])
+      Nothing
+    normaliseItem $ ProcDecl vis 
+      (ProcProto field 
+       [Param "$rec" rectype ParamInOut,
+        Param "$field" fieldtype ParamIn])
+      [Unplaced $ ForeignCall "" "mutate" 
+       [Unplaced $ StringValue $ typeName rectype,
+        Unplaced $ StringValue ctorName,
+        Unplaced $ StringValue field,
+        Unplaced $ Var "$rec" ParamInOut,
+        Unplaced $ Var "$field" ParamIn]]
+       Nothing
 
 -- |Normalise the specified statements to primitive statements.
 normaliseStmts :: [Placed Stmt] -> ClauseComp [Placed Prim]
@@ -285,7 +292,7 @@ normaliseExp (CharValue a) pos dir rest = do
   mustBeIn dir pos
   return ([ArgChar a], ParamIn, [], rest)
 normaliseExp (Var name dir) pos _ rest = do
-  args <- flowVar name dir -- XXX shouldn't ignore list tail
+  args <- flowVar name dir
   return (args, dir, [], rest)
 normaliseExp (Where stmts exp) pos dir rest = do
   mustBeIn dir pos

@@ -52,7 +52,7 @@ import Text.ParserCombinators.Parsec.Pos
 import System.FilePath
 import Control.Monad
 import Control.Monad.Trans.State
-import Control.Monad.Trans (liftIO)
+import Control.Monad.Trans (lift,liftIO)
 import Config
 
 ----------------------------------------------------------------
@@ -365,17 +365,29 @@ makeMessage msg (Just pos) =
 -- |The state of compilation of a clause; used by the ClauseComp
 -- monad.
 data ClauseCompState = ClauseComp {
-  vars :: Map VarName Int,    -- ^the latest var number for each var
-  tmpCount :: Int             -- ^the number of temp vars so far in this clause
-  } deriving Show
+  vars :: Map VarName VarInfo, -- ^the latest var number for each var
+  tmpCount :: Int              -- ^the number of temp vars so far in this clause
+  }
+
+data VarInfo = VarInfo {
+    ordinal :: Int,            -- ^ordinal number of distinct var for this name
+    typ :: Maybe TypeSpec      -- ^type of this var
+    }
 
 -- |The clause compiler monad is a state transformer monad carrying the 
 --  clause compiler state over the compiler monad.
 type ClauseComp = StateT ClauseCompState Compiler
 
 -- |Run a clause compiler function from the Compiler monad.
-runClauseComp :: ClauseComp t -> Compiler t
-runClauseComp clcomp = evalStateT clcomp (ClauseComp Map.empty 0)
+runClauseComp :: [PrimParam] -> ClauseComp t -> Compiler t
+runClauseComp params clcomp = 
+    let symtab = List.foldr insertInputParam Map.empty params
+    in  evalStateT clcomp $ ClauseComp symtab 0
+
+insertInputParam :: PrimParam -> Map VarName VarInfo -> Map VarName VarInfo
+insertInputParam (PrimParam (PrimVarName var num) typ FlowIn _) symtab =
+    Map.insert var (VarInfo num $ Just typ) symtab
+insertInputParam (PrimParam _ _ FlowOut _) symtab = symtab    
 
 -- |Return a fresh variable name.
 freshVar :: ClauseComp String
@@ -386,15 +398,28 @@ freshVar = do
 
 -- |Return the current PrimVarName for a given name string; ie, find 
 --  the current suffix for the specified name
-getVar :: String -> ClauseComp PrimVarName
+getVar :: VarName -> ClauseComp PrimVarName
 -- XXX Just for now, always use suffix 0
-getVar name = return $ PrimVarName name 0
+getVar name = do
+    currver <- gets (Map.lookup name . vars)
+    case currver of
+        Nothing -> do
+            -- XXX pass position of variable into getVar for error message
+            lift $ message Error ("uninitialised variable "++name) Nothing
+            return $ PrimVarName name 0
+        Just (VarInfo num _) -> return $ PrimVarName name num
 
 -- |Return the next PrimVarName for a given name string; ie, find 
 --  the next suffix for the specified name
 getNextVar :: String -> ClauseComp PrimVarName
 -- XXX Just for now, always use suffix 0
-getNextVar name = return $ PrimVarName name 0
+getNextVar name = do
+    info <- gets (Map.lookup name . vars)
+    let (num,typ) = case info of
+            Nothing -> (0,Nothing)
+            Just (VarInfo num typ) -> ((num + 1), typ)
+    modify (\s -> s {vars = Map.insert name (VarInfo num typ) $ vars s})
+    return $ PrimVarName name num
 
 -- |Return the primitive procedure call input argument(s) for the 
 --  specified variable name and flow direction
@@ -812,7 +837,10 @@ type ProcID = Int
 
 -- |A type specification:  the type name and type parameters.  Also 
 --  could be Unspecified, meaning a type to be inferred.
-data TypeSpec = TypeSpec Ident [TypeSpec] | Unspecified
+data TypeSpec = TypeSpec {
+    typeName::Ident,
+    typeParams::[TypeSpec] 
+    } | Unspecified
               deriving Eq
 
 -- |A manifest constant.
@@ -1193,13 +1221,6 @@ showProcDef thisID (ProcDef _ proto def pos) =
     "\nproc " ++ show proto ++ " (id " ++ show thisID ++ "): "
     ++ showMaybeSourcePos pos 
     ++ intercalate "\n" (List.map (showBlock 4) def)
-
--- -- |How to show a proc definition.
--- instance Show ProcDef where
---   show (ProcDef _ proto def pos) =
---     "\nproc " ++ show proto ++ " (id ?): " -- XXX fix id
---     ++ showMaybeSourcePos pos 
---     ++ showBlock 4 def
 
 -- |How to show a type specification.
 instance Show TypeSpec where
