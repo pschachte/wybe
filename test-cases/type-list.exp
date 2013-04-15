@@ -52,26 +52,26 @@ list:
   resources       : 
   procs           : []:
 proc [](?$:-1:list(t)) (id 0):  {?}
-    foreign  alloc("list", "[]", ?$rec:0) {?}
+    foreign $ alloc("list", "[]", ?$rec:0) {?}
     =(?$:0, $rec:0) {?}
                     [|]:
 proc [|](head:0:t, tail:0:list(t), ?$:-1:list(t)) (id 0):  {?}
-    foreign  alloc("list", "[|]", ?$rec:0) {?}
-    foreign  mutate("list", "[|]", "head", $rec:0, ?$rec:1, head:0) {?}
-    foreign  mutate("list", "[|]", "tail", $rec:1, ?$rec:2, tail:0) {?}
+    foreign $ alloc("list", "[|]", ?$rec:0) {?}
+    foreign $ mutate("list", "[|]", "head", $rec:0, ?$rec:1, head:0) {?}
+    foreign $ mutate("list", "[|]", "tail", $rec:1, ?$rec:2, tail:0) {?}
     =(?$:0, $rec:2) {?}
                     head:
 proc head($rec:0:list(t), ?$:-1:t) (id 0):  {?}
-    foreign  access("list", "[|]", "head", $rec:0, ?$tmp0:0) {?}
+    foreign $ access("list", "[|]", "head", $rec:0, ?$tmp0:0) {?}
     =(?$:0, $tmp0:0) {?}
 proc head($rec:0:list(t), ?$rec:-1:list(t), $field:0:t) (id 1):  {?}
-    foreign  mutate("list", "[|]", "head", $rec:0, ?$rec:1, $field:0) {?}
+    foreign $ mutate("list", "[|]", "head", $rec:0, ?$rec:1, $field:0) {?}
                     tail:
 proc tail($rec:0:list(t), ?$:-1:list(t)) (id 0):  {?}
-    foreign  access("list", "[|]", "tail", $rec:0, ?$tmp0:0) {?}
+    foreign $ access("list", "[|]", "tail", $rec:0, ?$tmp0:0) {?}
     =(?$:0, $tmp0:0) {?}
 proc tail($rec:0:list(t), ?$rec:-1:list(t), $field:0:list(t)) (id 1):  {?}
-    foreign  mutate("list", "[|]", "tail", $rec:0, ?$rec:1, $field:0) {?}
+    foreign $ mutate("list", "[|]", "tail", $rec:0, ?$rec:1, $field:0) {?}
 
 Submodules of type-list.list:
 
