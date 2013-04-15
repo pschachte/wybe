@@ -24,12 +24,12 @@ module AST (
   ModSpec, ProcDef(..), Ident, VarName, 
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
   argFlowDirection, flowIn, 
-  expToStmt, Prim(..), PrimProto(..), primProto, PrimParam(..), 
+  expToStmt, Prim(..), PrimProto(..), primProto, PrimParam(..), primParam,
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
   MessageLevel(..), getCompiler,
   CompilerState(..), Compiler, runCompiler,
-  ClauseCompState(..), ClauseComp, runClauseComp,
+  ClauseCompState(..), ClauseComp, runClauseComp, buildProc,
   updateModules, getModuleImplementationField, getLoadedModule,
   getModule, updateModule, getSpecModule, updateSpecModule,
   updateModImplementation, updateModImplementationM, 
@@ -365,8 +365,9 @@ makeMessage msg (Just pos) =
 -- |The state of compilation of a clause; used by the ClauseComp
 -- monad.
 data ClauseCompState = ClauseComp {
-  vars :: Map VarName VarInfo, -- ^the latest var number for each var
-  tmpCount :: Int              -- ^the number of temp vars so far in this clause
+    body :: [Placed Prim],       -- ^body of the clause being generated, reversed
+    vars :: Map VarName VarInfo, -- ^latest var number for each var
+    tmpCount :: Int              -- ^number of temp vars so far in this clause
   }
 
 data VarInfo = VarInfo {
@@ -378,11 +379,19 @@ data VarInfo = VarInfo {
 --  clause compiler state over the compiler monad.
 type ClauseComp = StateT ClauseCompState Compiler
 
+-- |Define a proc by building its clauses
+buildProc :: ProcName -> [PrimParam] -> OptPos -> Visibility -> [ClauseComp ()] 
+             -> Compiler ()
+buildProc name params pos vis bodycomps = do
+    states <- mapM (runClauseComp params) bodycomps
+    let bodies = List.map (body . snd) states
+    addProc name (PrimProto name params) bodies pos vis
+
 -- |Run a clause compiler function from the Compiler monad.
-runClauseComp :: [PrimParam] -> ClauseComp t -> Compiler t
+runClauseComp :: [PrimParam] -> ClauseComp t -> Compiler (t, ClauseCompState)
 runClauseComp params clcomp = 
     let symtab = List.foldr insertInputParam Map.empty params
-    in  evalStateT clcomp $ ClauseComp symtab 0
+    in  runStateT clcomp $ ClauseComp [] symtab 0
 
 insertInputParam :: PrimParam -> Map VarName VarInfo -> Map VarName VarInfo
 insertInputParam (PrimParam (PrimVarName var num) typ FlowIn _) symtab =

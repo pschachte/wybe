@@ -58,14 +58,14 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     let proto'@(PrimProto _ params') = primProto proto
-    stmts' <- runClauseComp params' $ normaliseStmts stmts
+    (stmts',_) <- runClauseComp params' $ normaliseStmts stmts
     addProc name proto' [stmts'] pos vis
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
     Just modparams <- getModuleParams
     addCtor vis (last modspec) modparams proto
 normaliseItem (StmtDecl stmt pos) = do
-  stmts <- runClauseComp [] $ normaliseStmts' stmt [] pos
+  (stmts,_) <- runClauseComp [] $ normaliseStmts' stmt [] pos
   oldproc <- lookupProc ""
   case oldproc of
     Nothing -> 
