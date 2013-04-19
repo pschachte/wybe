@@ -16,9 +16,9 @@ proc double(a:0:int, ?$:-1:int) (id 0):  {func-quadruple:1:8}
     =(?$:0, $tmp0:0) {?}
                     quadruple:
 proc quadruple(a:0:int, ?$:-1:int) (id 0):  {func-quadruple:3:8}
-    double(a:0, ?$tmp0:0) {func-quadruple:3:45}
-    double($tmp0:0, ?$tmp1:0) {func-quadruple:3:38}
-    =(?$:0, $tmp1:0) {?}
+    double(a:0, ?$tmp1:0) {func-quadruple:3:45}
+    double($tmp1:0, ?$tmp0:0) {func-quadruple:3:38}
+    =(?$:0, $tmp0:0) {?}
 
 Submodules of func-quadruple:
 

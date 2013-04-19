@@ -27,9 +27,9 @@ module AST (
   expToStmt, Prim(..), PrimProto(..), primProto, PrimParam(..), primParam,
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
-  MessageLevel(..), getCompiler,
+  MessageLevel(..), getCompiler, updateCompiler,
   CompilerState(..), Compiler, runCompiler,
-  ClauseCompState(..), ClauseComp, runClauseComp, buildProc,
+  ClauseCompState(..), ClauseComp, runClauseComp, buildProc, instr,
   updateModules, getModuleImplementationField, getLoadedModule,
   getModule, updateModule, getSpecModule, updateSpecModule,
   updateModImplementation, updateModImplementationM, 
@@ -40,7 +40,10 @@ module AST (
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
-  showProcDefs
+
+  -- temporary
+  showProcDefs, showBlock
+
   ) where
 
 import Options
@@ -163,11 +166,12 @@ data CompilerState = Compiler {
   msgs :: [String],        -- ^warnings, error messages, and info messages
   errorState :: Bool,      -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules
-  types :: Map VarName TypeSpec, -- ^the types of variables
   loadCount :: Int,        -- ^counter of module load order
   underCompilation :: [Module], -- ^the modules in the process of being compiled
-  deferred :: [Module]          -- ^modules in the same SCC as the current one
-  } deriving Show
+  deferred :: [Module],         -- ^modules in the same SCC as the current one
+  mainClauseSt :: ClauseCompState
+                           -- ^stores the main proc being compiled
+  }
 
 -- |The compiler monad is a state transformer monad carrying the 
 --  compiler state over the IO monad.
@@ -176,7 +180,8 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp 
-                        (Compiler opts [] False Map.empty Map.empty 0 [] [])
+                        (Compiler opts [] False Map.empty 0 [] [] 
+                         initClauseComp)
 
 
 -- initCompiler :: Options -> FilePath -> ModSpec -> Maybe [Ident] -> 
@@ -367,13 +372,18 @@ makeMessage msg (Just pos) =
 data ClauseCompState = ClauseComp {
     body :: [Placed Prim],       -- ^body of the clause being generated, reversed
     vars :: Map VarName VarInfo, -- ^latest var number for each var
+    defs :: Set VarName,         -- ^all variables defined by this code
+    uses :: Map VarName OptPos,  -- ^where variables are used before defined
     tmpCount :: Int              -- ^number of temp vars so far in this clause
   }
+
+initClauseComp :: ClauseCompState
+initClauseComp = ClauseComp [] Map.empty Set.empty Map.empty 0
 
 data VarInfo = VarInfo {
     ordinal :: Int,            -- ^ordinal number of distinct var for this name
     typ :: Maybe TypeSpec      -- ^type of this var
-    }
+    } deriving Show
 
 -- |The clause compiler monad is a state transformer monad carrying the 
 --  clause compiler state over the compiler monad.
@@ -388,10 +398,22 @@ buildProc name params pos vis bodycomps = do
     addProc name (PrimProto name params) bodies pos vis
 
 -- |Run a clause compiler function from the Compiler monad.
+extendClauseComp :: ClauseCompState -> ClauseComp t 
+                    -> Compiler (t, ClauseCompState)
+extendClauseComp st clcomp = runStateT clcomp st
+
+-- |Run a clause compiler function from the Compiler monad.
 runClauseComp :: [PrimParam] -> ClauseComp t -> Compiler (t, ClauseCompState)
 runClauseComp params clcomp = 
     let symtab = List.foldr insertInputParam Map.empty params
-    in  runStateT clcomp $ ClauseComp [] symtab 0
+    in runStateT clcomp $ ClauseComp [] symtab Set.empty Map.empty 0
+
+
+-- |Generate a single instruction for the clause currently being compiled
+instr :: Prim -> OptPos -> ClauseComp ()
+instr prim pos = do
+  bdy <- gets body
+  modify (\st -> st {body = (maybePlace prim pos):bdy})
 
 insertInputParam :: PrimParam -> Map VarName VarInfo -> Map VarName VarInfo
 insertInputParam (PrimParam (PrimVarName var num) typ FlowIn _) symtab =
@@ -981,6 +1003,7 @@ data PrimArg
      | ArgChar Char
      deriving Eq
 
+-- |Relates a primitive argument to the corresponding source argument
 data ArgFlowType = Ordinary | FirstHalf | SecondHalf | Implicit
      deriving (Eq, Show)
 
@@ -1267,7 +1290,7 @@ startLine ind = "\n" ++ replicate ind ' '
 -- |Show a code block (list of primitive statements) with the
 --  specified indent.
 showBlock :: Int -> [Placed Prim] -> String
-showBlock ind stmts = concat $ List.map (showPrim ind) stmts
+showBlock ind stmts = concat (List.map (showPrim ind) stmts)
 
 -- |Show a single primitive statement with the specified indent.
 showPrim :: Int -> Placed Prim -> String

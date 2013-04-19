@@ -48,5 +48,3 @@ proc y($rec:0:position, ?$rec:-1:position, $field:0:int) (id 1):  {?}
 
 Submodules of position.position:
 
-uninitialised variable $tmp0
-uninitialised variable $tmp0

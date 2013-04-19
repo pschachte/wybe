@@ -16,11 +16,17 @@ import Data.List as List
 import Text.ParserCombinators.Parsec.Pos
 import Control.Monad
 import Control.Monad.Trans.Class
+import Control.Monad.Trans.State
+import Control.Monad.Trans (lift,liftIO)
 
 -- |Normalise a list of file items, storing the results in the current module.
 normalise :: [Item] -> Compiler ()
 normalise items = do
     mapM_ normaliseItem items
+    bdy <- getCompiler (body . mainClauseSt)
+    unless (List.null bdy) 
+      $ addProc "" (PrimProto "" []) [List.reverse bdy] Nothing Private
+    
 
 -- |Normalise a single file item, storing the result in the current module.
 normaliseItem :: Item -> Compiler ()
@@ -58,20 +64,18 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     let proto'@(PrimProto _ params') = primProto proto
-    (stmts',_) <- runClauseComp params' $ normaliseStmts stmts
-    addProc name proto' [stmts'] pos vis
+    (_,procstate) <- runClauseComp params' $ compileStmts stmts
+    addProc name proto' [List.reverse $ body procstate] pos vis
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
     Just modparams <- getModuleParams
     addCtor vis (last modspec) modparams proto
 normaliseItem (StmtDecl stmt pos) = do
-  (stmts,_) <- runClauseComp [] $ normaliseStmts' stmt [] pos
-  oldproc <- lookupProc ""
-  case oldproc of
-    Nothing -> 
-      addProc "" (PrimProto "" []) [stmts] Nothing Private
-    Just [ProcDef _ proto [stmts'] pos'] ->
-      replaceProc "" 0 proto [(stmts' ++ stmts)] pos' Private
+  clauseState <- getCompiler mainClauseSt
+  (_,clauseState') <- runStateT 
+                      (compileClause (return ()) [maybePlace stmt pos]) 
+                      clauseState
+  updateCompiler (\m -> m { mainClauseSt = clauseState'})
 
 -- |Add a contructor for the specified type.
 addCtor :: Visibility -> Ident -> [Ident] -> FnProto -> Compiler ()
@@ -120,243 +124,363 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
         Unplaced $ Var "$field" ParamIn]]
        Nothing
 
--- |Normalise the specified statements to primitive statements.
-normaliseStmts :: [Placed Stmt] -> ClauseComp [Placed Prim]
-normaliseStmts [] = return []
-normaliseStmts (stmt:stmts) = normaliseStmts' (content stmt) stmts $ place stmt
+-- -- |Normalise the specified statements to primitive statements.
+-- normaliseStmts :: [Placed Stmt] -> ClauseComp [Placed Prim]
+-- normaliseStmts [] = return []
+-- normaliseStmts (stmt:stmts) = normaliseStmts' (content stmt) stmts $ place stmt
 
--- |Normalise the specified statement, plus the list of following statements, 
---  to a list of primitive statements.
-normaliseStmts' :: Stmt -> [Placed Stmt] -> Maybe SourcePos -> ClauseComp [Placed Prim]
-normaliseStmts' (ProcCall name args) stmts pos = do
-  (args',pre,post) <- normaliseArgs args
-  back <- normaliseStmts stmts
-  return $ pre ++ [maybePlace (PrimCall name Nothing args') pos] ++ post ++ back
-normaliseStmts' (ForeignCall lang name args) stmts pos = do
-  (args',pre,post) <- normaliseArgs args
-  back <- normaliseStmts stmts
-  return $ pre ++ [maybePlace (PrimForeign lang name Nothing args') pos] ++ post ++ back
-normaliseStmts' (Cond exp thn els) stmts pos = do
-  (exp',condstmts) <- normaliseOuterExp exp []
-  thn' <- normaliseStmts thn
-  els' <- normaliseStmts els
-  stmts' <- normaliseStmts stmts
-  normaliseCond exp' condstmts thn' els' stmts' pos
-normaliseStmts' (Loop loop) stmts pos = do
-  (init,body,update) <- normaliseLoopStmts loop
-  back <- normaliseStmts stmts
-  return $ init ++ [maybePlace (PrimLoop $ body++update) pos] ++ back
-normaliseStmts' Nop stmts pos = normaliseStmts stmts
-
-
--- |Normalise a conditional, generating a call to a two-clause proc, 
---  where each clause ends with a call to another new proc that 
---  handles the rest of the computation after the conditional
-normaliseCond :: PrimArg 
-                 -> [Placed Prim] 
-                 -> [Placed Prim] 
-                 -> [Placed Prim] 
-                 -> [Placed Prim] 
-                 -> Maybe SourcePos 
-                 -> ClauseComp [Placed Prim]
-normaliseCond exp' condstmts thn' els' stmts pos = do
-  condproc <- lift $ genProcName
-  confluence <- lift $ genProcName
-  let continuation = if List.null stmts then [] 
-                     else [Unplaced $ PrimCall confluence Nothing []]
-  thenGuard <- lift $ makeGuard exp' 1 pos
-  elseGuard <- lift $ makeGuard exp' 0 pos
-  let thn'' = condstmts ++ thenGuard ++ thn' ++ continuation
-  let els'' = condstmts ++ elseGuard ++ els' ++ continuation
-  lift $ addProc condproc (PrimProto condproc []) [thn'',els''] Nothing Private
-  if List.null stmts then 
-      return () 
-    else 
-      lift $ 
-      addProc confluence (PrimProto confluence []) [stmts] Nothing Private
-  return $ condstmts ++ [Unplaced $ PrimCall condproc Nothing []]
+-- -- |Normalise the specified statement, plus the list of following statements, 
+-- --  to a list of primitive statements.
+-- normaliseStmts' :: Stmt -> [Placed Stmt] -> Maybe SourcePos -> ClauseComp [Placed Prim]
+-- normaliseStmts' (ProcCall name args) stmts pos = do
+--   (args',pre,post) <- normaliseArgs args
+--   back <- normaliseStmts stmts
+--   return $ pre ++ [maybePlace (PrimCall name Nothing args') pos] ++ post ++ back
+-- normaliseStmts' (ForeignCall lang name args) stmts pos = do
+--   (args',pre,post) <- normaliseArgs args
+--   back <- normaliseStmts stmts
+--   return $ pre ++ [maybePlace (PrimForeign lang name Nothing args') pos] ++ post ++ back
+-- normaliseStmts' (Cond exp thn els) stmts pos = do
+--   (exp',condstmts) <- normaliseOuterExp exp []
+--   thn' <- normaliseStmts thn
+--   els' <- normaliseStmts els
+--   stmts' <- normaliseStmts stmts
+--   normaliseCond exp' condstmts thn' els' stmts' pos
+-- normaliseStmts' (Loop loop) stmts pos = do
+--   (init,body,update) <- normaliseLoopStmts loop
+--   back <- normaliseStmts stmts
+--   return $ init ++ [maybePlace (PrimLoop $ body++update) pos] ++ back
+-- normaliseStmts' Nop stmts pos = normaliseStmts stmts
 
 
-
--- |Normalise the specified loop statements to primitive statements.
-normaliseLoopStmts :: [Placed LoopStmt] -> 
-                      ClauseComp ([Placed Prim],[Placed Prim],[Placed Prim])
-normaliseLoopStmts [] = return ([],[],[])
-normaliseLoopStmts (stmt:stmts) = do
-  (backinit,backbody,backupdate) <- normaliseLoopStmts stmts
-  (frontinit,frontbody,frontupdate) <- case stmt of
-    Placed stmt' pos -> normaliseLoopStmt stmt' $ Just pos
-    Unplaced stmt'   -> normaliseLoopStmt stmt' Nothing
-  return $ (frontinit ++ backinit, 
-            frontbody ++ backbody,
-            frontupdate ++ backupdate)
-
--- |Normalise a single loop statement to three list of primitive statements:
---  statements to execute before, during, and afte the loop.p
-normaliseLoopStmt :: LoopStmt -> Maybe SourcePos -> 
-                     ClauseComp ([Placed Prim],[Placed Prim],[Placed Prim])
-normaliseLoopStmt (For gen) pos = normaliseGenerator gen pos
-normaliseLoopStmt (BreakIf exp) pos = do
-  (exp',stmts) <- normaliseOuterExp exp []
-  condVarName <- freshVar
-  condAssign <- assign condVarName exp'
-  condExp <- getVar condVarName
-  return ([],stmts ++ [condAssign, maybePlace (PrimBreakIf condExp) pos],[])
-normaliseLoopStmt (NextIf exp) pos = do
-  (exp',stmts) <- normaliseOuterExp exp []
-  condVarName <- freshVar
-  condAssign <- assign condVarName exp'
-  condExp <- getVar condVarName
-  return ([],stmts ++ [condAssign, maybePlace (PrimNextIf condExp) pos],[])
-normaliseLoopStmt (NormalStmt stmt) pos = do
-  stmts <- normaliseStmts' (content stmt) [] pos
-  return ([],stmts,[])
+-- -- |Normalise a conditional, generating a call to a two-clause proc, 
+-- --  where each clause ends with a call to another new proc that 
+-- --  handles the rest of the computation after the conditional
+-- normaliseCond :: PrimArg 
+--                  -> [Placed Prim] 
+--                  -> [Placed Prim] 
+--                  -> [Placed Prim] 
+--                  -> [Placed Prim] 
+--                  -> Maybe SourcePos 
+--                  -> ClauseComp [Placed Prim]
+-- normaliseCond exp' condstmts thn' els' stmts pos = do
+--   condproc <- lift $ genProcName
+--   confluence <- lift $ genProcName
+--   let continuation = if List.null stmts then [] 
+--                      else [Unplaced $ PrimCall confluence Nothing []]
+--   thenGuard <- lift $ makeGuard exp' 1 pos
+--   elseGuard <- lift $ makeGuard exp' 0 pos
+--   let thn'' = condstmts ++ thenGuard ++ thn' ++ continuation
+--   let els'' = condstmts ++ elseGuard ++ els' ++ continuation
+--   lift $ addProc condproc (PrimProto condproc []) [thn'',els''] Nothing Private
+--   if List.null stmts then 
+--       return () 
+--     else 
+--       lift $ 
+--       addProc confluence (PrimProto confluence []) [stmts] Nothing Private
+--   return $ condstmts ++ [Unplaced $ PrimCall condproc Nothing []]
 
 
--- |Normalise a loop generator to three list of primitive statements:
---  statements to execute before, during, and afte the loop.p
-normaliseGenerator :: Generator -> Maybe SourcePos ->
-                      ClauseComp ([Placed Prim],[Placed Prim],[Placed Prim])
-normaliseGenerator (In var exp) pos = do
-  (arg,init) <- normaliseOuterExp exp []
-  stateVar <- freshVar
-  testVarName <- freshVar
-  asn <- assign stateVar arg
-  stateArg <- inOutVar stateVar
-  varArg <- inOutVar var
-  testArg <- outVar testVarName
-  testVar <- getVar testVarName
-  let update = procCall "next" (stateArg ++ varArg ++ testArg)
-  return (init++[asn,update],
-          [update],[Unplaced $ PrimBreakIf testVar])
-normaliseGenerator (InRange var exp updateOp inc limit) pos = do
-  (arg,init1) <- normaliseOuterExp exp []
-  (incArg,init2) <- normaliseOuterExp inc []
-  varIn <- inVar var
-  varOut <- outVar var
-  let update = [procCall updateOp (varIn ++ [incArg] ++ varOut)]
-  asn <- assign var arg
-  (init,test) <- case limit of
-    Nothing -> return (init1++init2,[])
-    Just (comp,limit') -> do
-      testVarName <- freshVar
-      testArg <- outVar testVarName
-      testVar <- getVar testVarName
-      (limitArg,init3) <- normaliseOuterExp limit' []
-      varArg <- inVar var
-      return (init1++init2++init3,
-              [procCall comp (varArg ++ [limitArg] ++ testArg),
-               Unplaced $ PrimBreakIf testVar])
-  return (init++[asn],test,update)
+
+-- -- |Normalise the specified loop statements to primitive statements.
+-- normaliseLoopStmts :: [Placed LoopStmt] -> 
+--                       ClauseComp ([Placed Prim],[Placed Prim],[Placed Prim])
+-- normaliseLoopStmts [] = return ([],[],[])
+-- normaliseLoopStmts (stmt:stmts) = do
+--   (backinit,backbody,backupdate) <- normaliseLoopStmts stmts
+--   (frontinit,frontbody,frontupdate) <- case stmt of
+--     Placed stmt' pos -> normaliseLoopStmt stmt' $ Just pos
+--     Unplaced stmt'   -> normaliseLoopStmt stmt' Nothing
+--   return $ (frontinit ++ backinit, 
+--             frontbody ++ backbody,
+--             frontupdate ++ backupdate)
+
+-- -- |Normalise a single loop statement to three list of primitive statements:
+-- --  statements to execute before, during, and afte the loop.p
+-- normaliseLoopStmt :: LoopStmt -> Maybe SourcePos -> 
+--                      ClauseComp ([Placed Prim],[Placed Prim],[Placed Prim])
+-- normaliseLoopStmt (For gen) pos = normaliseGenerator gen pos
+-- normaliseLoopStmt (BreakIf exp) pos = do
+--   (exp',stmts) <- normaliseOuterExp exp []
+--   condVarName <- freshVar
+--   condAssign <- assign condVarName exp'
+--   condExp <- getVar condVarName
+--   return ([],stmts ++ [condAssign, maybePlace (PrimBreakIf condExp) pos],[])
+-- normaliseLoopStmt (NextIf exp) pos = do
+--   (exp',stmts) <- normaliseOuterExp exp []
+--   condVarName <- freshVar
+--   condAssign <- assign condVarName exp'
+--   condExp <- getVar condVarName
+--   return ([],stmts ++ [condAssign, maybePlace (PrimNextIf condExp) pos],[])
+-- normaliseLoopStmt (NormalStmt stmt) pos = do
+--   stmts <- normaliseStmts' (content stmt) [] pos
+--   return ([],stmts,[])
 
 
--- |Normalise a list of expressions as proc call arguments to a list of 
+-- -- |Normalise a loop generator to three list of primitive statements:
+-- --  statements to execute before, during, and afte the loop.p
+-- normaliseGenerator :: Generator -> Maybe SourcePos ->
+--                       ClauseComp ([Placed Prim],[Placed Prim],[Placed Prim])
+-- normaliseGenerator (In var exp) pos = do
+--   (arg,init) <- normaliseOuterExp exp []
+--   stateVar <- freshVar
+--   testVarName <- freshVar
+--   asn <- assign stateVar arg
+--   stateArg <- inOutVar stateVar
+--   varArg <- inOutVar var
+--   testArg <- outVar testVarName
+--   testVar <- getVar testVarName
+--   let update = procCall "next" (stateArg ++ varArg ++ testArg)
+--   return (init++[asn,update],
+--           [update],[Unplaced $ PrimBreakIf testVar])
+-- normaliseGenerator (InRange var exp updateOp inc limit) pos = do
+--   (arg,init1) <- normaliseOuterExp exp []
+--   (incArg,init2) <- normaliseOuterExp inc []
+--   varIn <- inVar var
+--   varOut <- outVar var
+--   let update = [procCall updateOp (varIn ++ [incArg] ++ varOut)]
+--   asn <- assign var arg
+--   (init,test) <- case limit of
+--     Nothing -> return (init1++init2,[])
+--     Just (comp,limit') -> do
+--       testVarName <- freshVar
+--       testArg <- outVar testVarName
+--       testVar <- getVar testVarName
+--       (limitArg,init3) <- normaliseOuterExp limit' []
+--       varArg <- inVar var
+--       return (init1++init2++init3,
+--               [procCall comp (varArg ++ [limitArg] ++ testArg),
+--                Unplaced $ PrimBreakIf testVar])
+--   return (init++[asn],test,update)
+
+
+-- -- |Normalise a list of expressions as proc call arguments to a list of 
+-- --  primitive arguments, a list of statements to execute before the 
+-- --  call to bind those arguments, and a list of statements to execute 
+-- --  after the call to store the results appropriately.
+-- normaliseArgs :: [Placed Exp] 
+--                  -> ClauseComp ([PrimArg],[Placed Prim],[Placed Prim])
+-- normaliseArgs [] = return ([],[],[])
+-- normaliseArgs (pexp:args) = do
+--   let pos = place pexp
+--   (arg,_,pre,post) <- normaliseExp (content pexp) (place pexp) ParamIn []
+--   (args',pres,posts) <- normaliseArgs args
+--   return (arg ++ args', pre ++ pres, post ++ posts)
+
+
+-- -- |Normalise a single read-only expression to a primitve argument 
+-- --  and a list of primitive statements to bind that argument.
+-- normaliseOuterExp :: Placed Exp -> [Placed Prim] -> 
+--                      ClauseComp (PrimArg,[Placed Prim])
+-- normaliseOuterExp exp stmts = do
+--     ([arg],_,pre,post) <- normaliseExp (content exp) (place exp) ParamIn stmts
+--     return (arg,pre++post)
+
+
+-- -- |Normalise a single expressions with specified flow direction to
+-- --  primitive argument(s), a list of statements to execute
+-- --  to bind it, and a list of statements to execute 
+-- --  after the call to store the result appropriately.
+-- normaliseExp :: Exp -> Maybe SourcePos -> FlowDirection -> [Placed Prim] ->
+--                 ClauseComp ([PrimArg],FlowDirection,[Placed Prim],[Placed Prim])
+-- normaliseExp (IntValue a) pos dir rest = do
+--   mustBeIn dir pos
+--   return ([ArgInt a], ParamIn, [], rest)
+-- normaliseExp (FloatValue a) pos dir rest = do
+--   mustBeIn dir pos
+--   return ([ArgFloat a], ParamIn, [], rest)
+-- normaliseExp (StringValue a) pos dir rest = do
+--   mustBeIn dir pos
+--   return ([ArgString a], ParamIn, [], rest)
+-- normaliseExp (CharValue a) pos dir rest = do
+--   mustBeIn dir pos
+--   return ([ArgChar a], ParamIn, [], rest)
+-- normaliseExp (Var name dir) pos _ rest = do
+--   args <- flowVar name dir
+--   return (args, dir, [], rest)
+-- normaliseExp (Where stmts exp) pos dir rest = do
+--   mustBeIn dir pos
+--   stmts1 <- normaliseStmts stmts
+--   (exp',stmts2) <- normaliseOuterExp exp []
+--   return ([exp'], ParamIn, stmts1++stmts2, rest)
+-- normaliseExp (CondExp cond thn els) pos dir rest = do
+--   mustBeIn dir pos
+--   (cond',stmtscond) <- normaliseOuterExp cond []
+--   (thn',stmtsthn) <- normaliseOuterExp thn []
+--   resultVar <- freshVar
+--   thnAssign <- assign resultVar thn'
+--   (els',stmtsels) <- normaliseOuterExp els []
+--   elsAssign <- assign resultVar els'
+--   result <- inVar resultVar
+--   body <- normaliseCond cond' stmtscond 
+--           (stmtsthn++[thnAssign]) (stmtsels++[elsAssign]) rest pos
+--   return (result, ParamIn, body, [])
+-- normaliseExp (Fncall name exps) pos dir rest = do
+--   mustBeIn dir pos
+--   (exps',dir',pre,post) <- normalisePlacedExps exps rest
+--   let inexps = List.filter argIsInput exps'
+--   resultName <- freshVar
+--   let dir'' = dir `flowJoin` dir'
+--   pre' <- if flowsIn dir'' 
+--           then do
+--               resultOut <- outVar resultName
+--               let args = inexps++resultOut
+--               let instr = maybePlace (PrimCall name Nothing args) pos
+--               return $ pre ++ [instr]
+--           else return pre
+--   post' <- if flowsOut dir''
+--            then do
+--                resultIn <- inVar resultName
+--                let args = exps'++resultIn
+--                let instr = maybePlace (PrimCall name Nothing args) pos
+--                return $ instr:post
+--            else return $ post
+--   result <- flowVar resultName dir'' -- XXX shouldn't ignore list tail
+--   return (result, dir'', pre', post')
+-- normaliseExp (ForeignFn lang name exps) pos dir rest = do
+--   mustBeIn dir pos
+--   (exps',_,pre,post) <- normalisePlacedExps exps rest
+--   resultName <- freshVar
+--   resultIn <- inVar resultName
+--   resultOut <- outVar resultName
+--   let args = exps'++resultOut
+--   let pre' = pre ++ [maybePlace (PrimForeign lang name Nothing args) pos]
+--   return (resultIn, ParamIn, pre', post)
+
+----------------------------------------------------------------
+-- |Make a fresh proc with a fresh name
+compileFreshProc :: [[Placed Stmt]] -> Set VarName 
+                    -> ClauseComp () -> ClauseComp Prim
+compileFreshProc clauses outs rest = do
+  name <- lift $ genProcName
+  results <- mapM (compileClause rest) clauses
+  let clauses' = List.map body results
+  -- let ins = List.foldl Set.union Set.empty 
+  --           $ List.map (Map.keysSet . uses) results
+  -- let inParams = List.map (\n->PrimParam n TypeSpec PrimFlow ArgFlowType
+  -- let params = ins ++ outs
+  lift $ addProc name (PrimProto name []) clauses' Nothing Private
+  return (PrimCall name Nothing [])
+
+-- |Compile a single complete clause, using a fresh ClauseComp monad
+compileClause :: ClauseComp () -> [Placed Stmt] -> ClauseComp ClauseCompState
+compileClause rest clause = do
+  (_,state) <- lift $ runClauseComp []
+               (do
+                   compileStmts clause
+                   rest
+               )
+  return state
+
+-- |Compile the specified statements to primitive statements.
+compileStmts :: [Placed Stmt] -> ClauseComp ()
+compileStmts [] = do
+  -- instr (PrimCall "Something!" Nothing []) Nothing
+  return ()
+compileStmts (stmt:stmts) = compileStmts' (content stmt) stmts $ place stmt
+
+-- |Compile the specified statement, plus the list of following statements
+compileStmts' :: Stmt -> [Placed Stmt] -> Maybe SourcePos 
+                 -> ClauseComp ()
+compileStmts' (ProcCall name args) stmts pos = do
+  compileArgs args (\args->instr (PrimCall name Nothing args) pos)
+  compileStmts stmts
+compileStmts' (ForeignCall lang name args) stmts pos = do
+  compileArgs args (\args->instr (PrimForeign lang name Nothing args) pos)
+  compileStmts stmts
+compileStmts' (Cond exp thn els) stmts pos = do
+  var <- compilePlacedExp exp
+  confluence <- compileFreshProc [stmts] Set.empty $ return ()
+  compileFreshProc [thn,els] Set.empty $ instr confluence Nothing
+  return ()
+-- compileStmts' (Loop loop) stmts pos = do
+--   (init,body,update) <- compileLoopStmts loop
+--   back <- compileStmts stmts
+--   return $ init ++ [maybePlace (PrimLoop $ body++update) pos] ++ back
+compileStmts' Nop stmts pos = compileStmts stmts
+
+
+-- |Compile a list of expressions as proc call arguments to a list of 
 --  primitive arguments, a list of statements to execute before the 
 --  call to bind those arguments, and a list of statements to execute 
 --  after the call to store the results appropriately.
-normaliseArgs :: [Placed Exp] 
-                 -> ClauseComp ([PrimArg],[Placed Prim],[Placed Prim])
-normaliseArgs [] = return ([],[],[])
-normaliseArgs (pexp:args) = do
-  let pos = place pexp
-  (arg,_,pre,post) <- normaliseExp (content pexp) (place pexp) ParamIn []
-  (args',pres,posts) <- normaliseArgs args
-  return (arg ++ args', pre ++ pres, post ++ posts)
+compileArgs :: [Placed Exp] -> ([PrimArg] -> ClauseComp t) -> ClauseComp t
+compileArgs exps finalfn = do
+  argsResults <- mapM compilePlacedExp exps
+  let (args,later,flow) = 
+        List.foldr (\(a1,l1,f1)(a2,l2,f2)->(a1++a2,l1++l2,f1 `flowJoin` f2))
+        ([],[],NoFlow) argsResults
+  result <- finalfn args
+  mapM_ id later
+  return result
 
+compilePlacedExp :: Placed Exp 
+                    -> ClauseComp ([PrimArg],[ClauseComp ()],FlowDirection)
+compilePlacedExp pexp = compileExp (content pexp) (place pexp)
 
--- |Normalise a single read-only expression to a primitve argument 
---  and a list of primitive statements to bind that argument.
-normaliseOuterExp :: Placed Exp -> [Placed Prim] -> 
-                     ClauseComp (PrimArg,[Placed Prim])
-normaliseOuterExp exp stmts = do
-    ([arg],_,pre,post) <- normaliseExp (content exp) (place exp) ParamIn stmts
-    return (arg,pre++post)
-
-
--- |Normalise a single expressions with specified flow direction to
+-- |Compile a single expressions with specified flow direction to
 --  primitive argument(s), a list of statements to execute
 --  to bind it, and a list of statements to execute 
 --  after the call to store the result appropriately.
-normaliseExp :: Exp -> Maybe SourcePos -> FlowDirection -> [Placed Prim] ->
-                ClauseComp ([PrimArg],FlowDirection,[Placed Prim],[Placed Prim])
-normaliseExp (IntValue a) pos dir rest = do
-  mustBeIn dir pos
-  return ([ArgInt a], ParamIn, [], rest)
-normaliseExp (FloatValue a) pos dir rest = do
-  mustBeIn dir pos
-  return ([ArgFloat a], ParamIn, [], rest)
-normaliseExp (StringValue a) pos dir rest = do
-  mustBeIn dir pos
-  return ([ArgString a], ParamIn, [], rest)
-normaliseExp (CharValue a) pos dir rest = do
-  mustBeIn dir pos
-  return ([ArgChar a], ParamIn, [], rest)
-normaliseExp (Var name dir) pos _ rest = do
-  args <- flowVar name dir
-  return (args, dir, [], rest)
-normaliseExp (Where stmts exp) pos dir rest = do
-  mustBeIn dir pos
-  stmts1 <- normaliseStmts stmts
-  (exp',stmts2) <- normaliseOuterExp exp []
-  return ([exp'], ParamIn, stmts1++stmts2, rest)
-normaliseExp (CondExp cond thn els) pos dir rest = do
-  mustBeIn dir pos
-  (cond',stmtscond) <- normaliseOuterExp cond []
-  (thn',stmtsthn) <- normaliseOuterExp thn []
-  resultVar <- freshVar
-  thnAssign <- assign resultVar thn'
-  (els',stmtsels) <- normaliseOuterExp els []
-  elsAssign <- assign resultVar els'
-  result <- inVar resultVar
-  body <- normaliseCond cond' stmtscond 
-          (stmtsthn++[thnAssign]) (stmtsels++[elsAssign]) rest pos
-  return (result, ParamIn, body, [])
-normaliseExp (Fncall name exps) pos dir rest = do
-  mustBeIn dir pos
-  (exps',dir',pre,post) <- normalisePlacedExps exps rest
-  let inexps = List.filter argIsInput exps'
+compileExp :: Exp -> Maybe SourcePos 
+              -> ClauseComp ([PrimArg],[ClauseComp ()],FlowDirection)
+compileExp (IntValue a) pos = do
+  return ([ArgInt a],[],ParamIn)
+compileExp (FloatValue a) pos = do
+  return ([ArgFloat a],[],ParamIn)
+compileExp (StringValue a) pos = do
+  return ([ArgString a],[],ParamIn)
+compileExp (CharValue a) pos = do
+  return ([ArgChar a],[],ParamIn)
+compileExp (Var name dir) pos = do
+  vars <- flowVar name dir
+  return (vars,[],dir)
+compileExp (Where stmts exp) pos = do
+  compileStmts stmts
+  compileExp (content exp) (place exp)
+-- compileExp (CondExp cond thn els) pos = do
+--   mustBeIn dir pos
+--   (cond',stmtscond) <- normaliseOuterExp cond []
+--   (thn',stmtsthn) <- normaliseOuterExp thn []
+--   resultVar <- freshVar
+--   thnAssign <- assign resultVar thn'
+--   (els',stmtsels) <- normaliseOuterExp els []
+--   elsAssign <- assign resultVar els'
+--   result <- inVar resultVar
+--   body <- normaliseCond cond' stmtscond 
+--           (stmtsthn++[thnAssign]) (stmtsels++[elsAssign]) rest pos
+--   return (result, ParamIn, body, [])
+compileExp (Fncall name exps) pos = do
   resultName <- freshVar
-  let dir'' = dir `flowJoin` dir'
-  pre' <- if flowsIn dir'' 
-          then do
-              resultOut <- outVar resultName
-              let args = inexps++resultOut
-              let instr = maybePlace (PrimCall name Nothing args) pos
-              return $ pre ++ [instr]
-          else return pre
-  post' <- if flowsOut dir''
-           then do
-               resultIn <- inVar resultName
-               let args = exps'++resultIn
-               let instr = maybePlace (PrimCall name Nothing args) pos
-               return $ instr:post
-           else return $ post
-  result <- flowVar resultName dir'' -- XXX shouldn't ignore list tail
-  return (result, dir'', pre', post')
-normaliseExp (ForeignFn lang name exps) pos dir rest = do
-  mustBeIn dir pos
-  (exps',_,pre,post) <- normalisePlacedExps exps rest
-  resultName <- freshVar
-  resultIn <- inVar resultName
   resultOut <- outVar resultName
-  let args = exps'++resultOut
-  let pre' = pre ++ [maybePlace (PrimForeign lang name Nothing args) pos]
-  return (resultIn, ParamIn, pre', post)
+  resultIn <- inVar resultName
+  compileArgs exps 
+    (\args'->instr (PrimCall name Nothing $ args'++resultOut) pos)
+  return (resultIn,[],ParamIn)
+compileExp (ForeignFn lang name exps) pos = do
+  resultName <- freshVar
+  resultOut <- outVar resultName
+  resultIn <- inVar resultName
+  compileArgs exps 
+    (\args'->instr (PrimForeign lang name Nothing $ args'++resultOut) pos)
+  return (resultIn,[],ParamIn)
 
--- |Normalise a list of expressions as function call arguments to a list of 
---  primitive arguments; a flow direction summarising whether there 
---  are any inputs and any outputs among the function arguments;
---  a list of statements to execute before the 
---  call to bind those arguments, and a list of statements to execute 
---  after the call to store the results appropriately.
-normalisePlacedExps :: [Placed Exp] -> [Placed Prim] ->
-                      ClauseComp ([PrimArg],FlowDirection,
-                                  [Placed Prim],[Placed Prim])
-normalisePlacedExps [] rest = return ([],NoFlow,[],rest)
-normalisePlacedExps (exp:exps) rest = do
-  (args',flow',pres,posts) <- normalisePlacedExps exps rest
-  (exp',flow,pre,post) <- normaliseExp (content exp) (place exp) ParamIn []
-  return  (exp' ++ args', flow `flowJoin` flow', pre ++ pres, post ++ posts)
+----------------------------------------------------------------
+
+-- -- |Normalise a list of expressions as function call arguments to a list of 
+-- --  primitive arguments; a flow direction summarising whether there 
+-- --  are any inputs and any outputs among the function arguments;
+-- --  a list of statements to execute before the 
+-- --  call to bind those arguments, and a list of statements to execute 
+-- --  after the call to store the results appropriately.
+-- normalisePlacedExps :: [Placed Exp] -> [Placed Prim] ->
+--                       ClauseComp ([PrimArg],FlowDirection,
+--                                   [Placed Prim],[Placed Prim])
+-- normalisePlacedExps [] rest = return ([],NoFlow,[],rest)
+-- normalisePlacedExps (exp:exps) rest = do
+--   (args',flow',pres,posts) <- normalisePlacedExps exps rest
+--   (exp',flow,pre,post) <- normaliseExp (content exp) (place exp) ParamIn []
+--   return  (exp' ++ args', flow `flowJoin` flow', pre ++ pres, post ++ posts)
 
 -- | Report an error if the specified flow direction has output.
 mustBeIn :: FlowDirection -> Maybe SourcePos -> ClauseComp ()

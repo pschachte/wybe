@@ -62,19 +62,17 @@ Submodules of position.position:
   resources       : 
   procs           : distance:
 proc distance(p1:0:position, p2:0:position, ?$:-1:?) (id 0):  {import:3:8}
-    x(p2:0, ?$tmp5:0) {import:4:11}
-    x(p1:0, ?$tmp4:0) {import:4:16}
-    -($tmp5:0, $tmp4:0, ?$tmp6:0) {import:4:10}
-    ^($tmp6:0, 2, ?$tmp7:0) {import:4:10}
-    y(p2:0, ?$tmp1:0) {import:4:27}
-    y(p1:0, ?$tmp0:0) {import:4:32}
-    -($tmp1:0, $tmp0:0, ?$tmp2:0) {import:4:26}
-    ^($tmp2:0, 2, ?$tmp3:0) {import:4:26}
-    +($tmp7:0, $tmp3:0, ?$tmp8:0) {import:4:10}
-    sqrt($tmp8:0, ?$tmp9:0) {import:4:5}
-    =(?$:0, $tmp9:0) {?}
+    x(p2:0, ?$tmp4:0) {import:4:11}
+    x(p1:0, ?$tmp5:0) {import:4:16}
+    -($tmp4:0, $tmp5:0, ?$tmp3:0) {import:4:10}
+    ^($tmp3:0, 2, ?$tmp2:0) {import:4:10}
+    y(p2:0, ?$tmp8:0) {import:4:27}
+    y(p1:0, ?$tmp9:0) {import:4:32}
+    -($tmp8:0, $tmp9:0, ?$tmp7:0) {import:4:26}
+    ^($tmp7:0, 2, ?$tmp6:0) {import:4:26}
+    +($tmp2:0, $tmp6:0, ?$tmp1:0) {import:4:10}
+    sqrt($tmp1:0, ?$tmp0:0) {import:4:5}
+    =(?$:0, $tmp0:0) {?}
 
 Submodules of import:
 
-uninitialised variable $tmp0
-uninitialised variable $tmp0
