@@ -72,8 +72,7 @@ normaliseItem (CtorDecl vis proto pos) = do
     addCtor vis (last modspec) modparams proto
 normaliseItem (StmtDecl stmt pos) = do
   clauseState <- getCompiler mainClauseSt
-  (_,clauseState') <- runStateT 
-                      (compileClause (return ()) [maybePlace stmt pos]) 
+  (_,clauseState') <- runStateT (compileStmts [maybePlace stmt pos])
                       clauseState
   updateCompiler (\m -> m { mainClauseSt = clauseState'})
 
