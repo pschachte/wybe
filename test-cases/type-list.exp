@@ -15,25 +15,23 @@ Public func ++(x:list(t),y:list(t)):? {type-list:6:8} = if ==(x {type-list:7:8},
   resources       : 
   procs           : ++:
 proc ++(x:0:list(t), y:0:list(t), ?$:-1:?) (id 0):  {type-list:6:8}
-    [](?$tmp0:0) {type-list:7:13}
-    ==(x:0, $tmp0:0, ?$tmp1:0) {type-list:7:8}
-    gen$1() {?}
-    =(?$:0, $tmp2:1) {?}
+    gen$1(x:0, y:0) {?}
+    =(?$:0, $tmp0:0) {?}
                     gen$1:
-proc gen$1() (id 0):  {?}
-    [](?$tmp0:0) {type-list:7:13}
-    ==(x:0, $tmp0:0, ?$tmp1:0) {type-list:7:8}
-    guard $tmp1:0 = 1 {type-list:7:5}
-    =(?$tmp2:0, y:0) {?}
+proc gen$1(x:0:list(t), y:0:list(t)) (id 0):  {?}
+    [](?$tmp1:0) {type-list:7:13}
+    ==(x:0, $tmp1:0, ?$tmp0:0) {type-list:7:8}
+    guard $tmp0:0 = 1 {?}
+    =(?$tmp0:1, y:0) {?}
 
-    [](?$tmp0:0) {type-list:7:13}
-    ==(x:0, $tmp0:0, ?$tmp1:0) {type-list:7:8}
-    guard $tmp1:0 = 0 {type-list:7:5}
-    head(x:0, ?$tmp5:0) {type-list:9:11}
-    tail(x:0, ?$tmp3:0) {type-list:9:18}
-    ++($tmp3:0, y:0, ?$tmp4:0) {type-list:9:18}
-    [|]($tmp5:0, $tmp4:0, ?$tmp6:0) {type-list:9:10}
-    =(?$tmp2:1, $tmp6:0) {?}
+    [](?$tmp1:0) {type-list:7:13}
+    ==(x:0, $tmp1:0, ?$tmp0:0) {type-list:7:8}
+    guard $tmp0:0 = 0 {?}
+    head(x:0, ?$tmp3:0) {type-list:9:11}
+    tail(x:0, ?$tmp5:0) {type-list:9:18}
+    ++($tmp5:0, y:0, ?$tmp4:0) {type-list:9:18}
+    [|]($tmp3:0, $tmp4:0, ?$tmp2:0) {type-list:9:10}
+    =(?$tmp0:1, $tmp2:0) {?}
 
 Submodules of type-list:
 list: 
@@ -75,5 +73,3 @@ proc tail($rec:0:list(t), ?$rec:-1:list(t), $field:0:list(t)) (id 1):  {?}
 
 Submodules of type-list.list:
 
-uninitialised variable $tmp0
-uninitialised variable $tmp0

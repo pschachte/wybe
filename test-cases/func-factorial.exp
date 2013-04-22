@@ -10,21 +10,20 @@ Public func factorial(n:int):int {func-factorial:1:8} = if <=(n {func-factorial:
   resources       : 
   procs           : factorial:
 proc factorial(n:0:int, ?$:-1:int) (id 0):  {func-factorial:1:8}
-    <=(n:0, 0, ?$tmp0:0) {func-factorial:2:11}
-    gen$1() {?}
-    =(?$:0, $tmp1:1) {?}
+    gen$1(n:0) {?}
+    =(?$:0, $tmp0:0) {?}
                     gen$1:
-proc gen$1() (id 0):  {?}
+proc gen$1(n:0:int) (id 0):  {?}
     <=(n:0, 0, ?$tmp0:0) {func-factorial:2:11}
-    guard $tmp0:0 = 1 {func-factorial:2:8}
-    =(?$tmp1:0, 1) {?}
+    guard $tmp0:0 = 1 {?}
+    =(?$tmp0:1, 1) {?}
 
     <=(n:0, 0, ?$tmp0:0) {func-factorial:2:11}
-    guard $tmp0:0 = 0 {func-factorial:2:8}
-    -(n:0, 1, ?$tmp2:0) {func-factorial:2:44}
-    factorial($tmp2:0, ?$tmp3:0) {func-factorial:2:34}
-    *(n:0, $tmp3:0, ?$tmp4:0) {func-factorial:2:30}
-    =(?$tmp1:1, $tmp4:0) {?}
+    guard $tmp0:0 = 0 {?}
+    -(n:0, 1, ?$tmp3:0) {func-factorial:2:44}
+    factorial($tmp3:0, ?$tmp2:0) {func-factorial:2:34}
+    *(n:0, $tmp2:0, ?$tmp1:0) {func-factorial:2:30}
+    =(?$tmp0:1, $tmp1:0) {?}
 
 Submodules of func-factorial:
 

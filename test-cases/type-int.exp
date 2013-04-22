@@ -104,9 +104,3 @@ proc >=(x:0:int, y:0:int, ?$:-1:bool) (id 0):  {type-int:15:12}
 
 Submodules of type-int.int:
 
-uninitialised variable eq
-uninitialised variable ne
-uninitialised variable slt
-uninitialised variable sle
-uninitialised variable sgt
-uninitialised variable sge
