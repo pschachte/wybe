@@ -13,6 +13,7 @@ import AST
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
+import Data.Maybe
 import Text.ParserCombinators.Parsec.Pos
 import Control.Monad
 import Control.Monad.Trans.Class
@@ -23,6 +24,7 @@ import Control.Monad.Trans (lift,liftIO)
 normalise :: [Item] -> Compiler ()
 normalise items = do
     mapM_ normaliseItem items
+    -- Now generate main proc if needed
     bdy <- getCompiler (body . mainClauseSt)
     unless (List.null bdy) 
       $ addProc "" (PrimProto "" []) [List.reverse bdy] Nothing Private
@@ -351,15 +353,30 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
 compileFreshProc :: [[Placed Stmt]] -> Set VarName 
                     -> ClauseComp () -> ClauseComp Prim
 compileFreshProc clauses outs rest = do
-  name <- lift $ genProcName
   results <- mapM (compileClause rest) clauses
-  let clauses' = List.map body results
-  -- let ins = List.foldl Set.union Set.empty 
-  --           $ List.map (Map.keysSet . uses) results
-  -- let inParams = List.map (\n->PrimParam n TypeSpec PrimFlow ArgFlowType
-  -- let params = ins ++ outs
-  lift $ addProc name (PrimProto name []) clauses' Nothing Private
-  return (PrimCall name Nothing [])
+  let clauses' = List.map (List.reverse . body) results
+  if List.all List.null clauses'
+     then
+      return PrimNop
+    else do
+      let inMap = Map.unions $ List.map uses results
+      let inVars = Map.keys inMap
+      let outVars = Set.elems outs
+      inParams <- mapM 
+                  (\n -> do 
+                        inf <- gets (Map.lookup n . vars)
+                        let thistype = maybe Unspecified typ inf
+                        let num = maybe 0 ordinal inf
+                        return $ PrimParam (PrimVarName n num) thistype 
+                          FlowIn Ordinary)
+                  inVars
+      let outParams = []
+      inArgs <- mapM compileVarRef $ assocs inMap
+      let outArgs = []
+      name <- lift $ genProcName
+      lift $ addProc name (PrimProto name (inParams++outParams)) 
+        clauses' Nothing Private
+      return $ PrimCall name Nothing (inArgs++outArgs)
 
 -- |Compile a single complete clause, using a fresh ClauseComp monad
 compileClause :: ClauseComp () -> [Placed Stmt] -> ClauseComp ClauseCompState
@@ -373,10 +390,8 @@ compileClause rest clause = do
 
 -- |Compile the specified statements to primitive statements.
 compileStmts :: [Placed Stmt] -> ClauseComp ()
-compileStmts [] = do
-  -- instr (PrimCall "Something!" Nothing []) Nothing
-  return ()
-compileStmts (stmt:stmts) = compileStmts' (content stmt) stmts $ place stmt
+compileStmts [] = return ()
+compileStmts (stmt:stmts) = compileStmts' (content stmt) stmts (place stmt)
 
 -- |Compile the specified statement, plus the list of following statements
 compileStmts' :: Stmt -> [Placed Stmt] -> Maybe SourcePos 
@@ -388,14 +403,20 @@ compileStmts' (ForeignCall lang name args) stmts pos = do
   compileArgs args (\args->instr (PrimForeign lang name Nothing args) pos)
   compileStmts stmts
 compileStmts' (Cond exp thn els) stmts pos = do
-  var <- compilePlacedExp exp
   confluence <- compileFreshProc [stmts] Set.empty $ return ()
-  compileFreshProc [thn,els] Set.empty $ instr confluence Nothing
+  switch <- compileFreshProc [(Unplaced $ Guard exp 1):thn,
+                              (Unplaced $ Guard exp 0):els] Set.empty 
+            $ instr confluence Nothing
+  instr switch Nothing
   return ()
 -- compileStmts' (Loop loop) stmts pos = do
 --   (init,body,update) <- compileLoopStmts loop
 --   back <- compileStmts stmts
 --   return $ init ++ [maybePlace (PrimLoop $ body++update) pos] ++ back
+compileStmts' (Guard exp val) stmts pos = do
+    ([arg],_,_) <- compilePlacedExp exp []
+    makeGuard arg val pos
+    compileStmts stmts
 compileStmts' Nop stmts pos = compileStmts stmts
 
 
@@ -405,15 +426,15 @@ compileStmts' Nop stmts pos = compileStmts stmts
 --  after the call to store the results appropriately.
 compileArgs :: [Placed Exp] -> ([PrimArg] -> ClauseComp t) -> ClauseComp t
 compileArgs exps finalfn = do
-  argsResults <- mapM compilePlacedExp exps
+  argsResults <- mapM (\e->compilePlacedExp e []) exps
   let (args,later,flow) = 
-        List.foldr (\(a1,l1,f1)(a2,l2,f2)->(a1++a2,l1++l2,f1 `flowJoin` f2))
+        List.foldr (\(a1,l1,f1)(a2,l2,f2)->(a1++a2,l2++l1,f1 `flowJoin` f2))
         ([],[],NoFlow) argsResults
   result <- finalfn args
   mapM_ id later
   return result
 
-compilePlacedExp :: Placed Exp 
+compilePlacedExp :: Placed Exp -> [Placed Stmt]
                     -> ClauseComp ([PrimArg],[ClauseComp ()],FlowDirection)
 compilePlacedExp pexp = compileExp (content pexp) (place pexp)
 
@@ -421,23 +442,40 @@ compilePlacedExp pexp = compileExp (content pexp) (place pexp)
 --  primitive argument(s), a list of statements to execute
 --  to bind it, and a list of statements to execute 
 --  after the call to store the result appropriately.
-compileExp :: Exp -> Maybe SourcePos 
+compileExp :: Exp -> Maybe SourcePos -> [Placed Stmt]
               -> ClauseComp ([PrimArg],[ClauseComp ()],FlowDirection)
-compileExp (IntValue a) pos = do
+compileExp (IntValue a) pos rest = do
+  compileStmts rest
   return ([ArgInt a],[],ParamIn)
-compileExp (FloatValue a) pos = do
+compileExp (FloatValue a) pos rest = do
+  compileStmts rest
   return ([ArgFloat a],[],ParamIn)
-compileExp (StringValue a) pos = do
+compileExp (StringValue a) pos rest = do
+  compileStmts rest
   return ([ArgString a],[],ParamIn)
-compileExp (CharValue a) pos = do
+compileExp (CharValue a) pos rest = do
+  compileStmts rest
   return ([ArgChar a],[],ParamIn)
-compileExp (Var name dir) pos = do
-  vars <- flowVar name dir
+compileExp (Var name dir) pos rest = do
+  vars <- flowVar name dir pos
+  compileStmts rest
   return (vars,[],dir)
-compileExp (Where stmts exp) pos = do
+compileExp (Where stmts exp) pos rest = do
   compileStmts stmts
-  compileExp (content exp) (place exp)
--- compileExp (CondExp cond thn els) pos = do
+  compileExp (content exp) (place exp) rest
+compileExp (CondExp cond thn els) pos rest = do
+  resultName <- freshVar
+  resultIn <- inVar resultName Nothing
+  compileStmts 
+    (maybePlace (Cond cond
+                  [Unplaced $ ProcCall "=" 
+                   [Unplaced $ Var resultName ParamOut,thn]]
+                  [Unplaced $ ProcCall "=" 
+                   [Unplaced $ Var resultName ParamOut,els]]) pos
+     :rest)
+  return (resultIn,[],ParamIn)
+
+
 --   mustBeIn dir pos
 --   (cond',stmtscond) <- normaliseOuterExp cond []
 --   (thn',stmtsthn) <- normaliseOuterExp thn []
@@ -449,20 +487,32 @@ compileExp (Where stmts exp) pos = do
 --   body <- normaliseCond cond' stmtscond 
 --           (stmtsthn++[thnAssign]) (stmtsels++[elsAssign]) rest pos
 --   return (result, ParamIn, body, [])
-compileExp (Fncall name exps) pos = do
+
+
+compileExp (Fncall name exps) pos stmts = do
   resultName <- freshVar
-  resultOut <- outVar resultName
-  resultIn <- inVar resultName
+  resultOut <- outVar resultName Nothing
+  resultIn <- inVar resultName Nothing
   compileArgs exps 
     (\args'->instr (PrimCall name Nothing $ args'++resultOut) pos)
   return (resultIn,[],ParamIn)
-compileExp (ForeignFn lang name exps) pos = do
+compileExp (ForeignFn lang name exps) pos stmts = do
   resultName <- freshVar
-  resultOut <- outVar resultName
-  resultIn <- inVar resultName
+  resultOut <- outVar resultName Nothing
+  resultIn <- inVar resultName Nothing
   compileArgs exps 
     (\args'->instr (PrimForeign lang name Nothing $ args'++resultOut) pos)
   return (resultIn,[],ParamIn)
+
+compileVarRef :: (VarName,OptPos) -> ClauseComp PrimArg
+compileVarRef (var,pos) = do
+    inf <- gets (Map.lookup var . vars)
+    case inf of
+        Nothing -> do
+            lift $ message Error ("Undefined variable " ++ var) pos
+            return $ ArgVar (PrimVarName var 0) FlowIn Ordinary
+        Just (VarInfo num _) ->
+            return $ ArgVar (PrimVarName var num) FlowIn Ordinary
 
 ----------------------------------------------------------------
 
@@ -506,30 +556,26 @@ argIsInput :: PrimArg -> Bool
 argIsInput (ArgVar var dir _) = dir == FlowIn
 argIsInput _ = True
 
--- |Generate a primitive assignment statement.
-assign :: VarName -> PrimArg -> ClauseComp (Placed Prim)
-assign var val = do
-  lval <- outVar var
-  return $ procCall "=" (lval ++ [val])
+-- -- |Generate a primitive assignment statement.
+-- assign :: VarName -> PrimArg -> ClauseComp (Placed Prim)
+-- assign var val = do
+--   lval <- outVar var
+--   return $ procCall "=" (lval ++ [val])
 
--- |Generate a primitive proc call
-procCall :: ProcName -> [PrimArg] -> Placed Prim
-procCall proc args = Unplaced $ PrimCall proc Nothing args
+-- -- |Generate a primitive proc call
+-- procCall :: ProcName -> [PrimArg] -> Placed Prim
+-- procCall proc args = Unplaced $ PrimCall proc Nothing args
 
 -- |Generate a primitive conditional.
-makeGuard :: PrimArg -> Integer -> Maybe SourcePos -> Compiler [Placed Prim]
+makeGuard :: PrimArg -> Integer -> Maybe SourcePos -> ClauseComp ()
 makeGuard arg val pos = do
   case arg of
-    ArgVar name FlowIn _ -> do
-      return [maybePlace (PrimGuard name val) pos]
+    ArgVar name FlowIn _ -> instr (PrimGuard name val) pos
     ArgInt n ->
-      if n == val then
-        return []
-      else
-        return [maybePlace PrimFail pos]
+      when (n /= val) $ instr PrimFail pos
     _ -> do
-      message Error "Can't use a non-integer type as a Boolean" pos
-      return [maybePlace PrimFail pos]
+      lift $ message Error "Can't use a non-integer type as a Boolean" pos
+      instr PrimFail pos
 
 
 -- |Join on the lattice of flow directions (NoFlow is bottom, 

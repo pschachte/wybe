@@ -21,7 +21,7 @@ module AST (
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   enterModule, exitModule, finishModule, 
   emptyInterface, emptyImplementation,
-  ModSpec, ProcDef(..), Ident, VarName, 
+  ModSpec, ProcDef(..), Ident, VarName, VarInfo(..),
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
   argFlowDirection, flowIn, 
   expToStmt, Prim(..), PrimProto(..), primProto, PrimParam(..), primParam,
@@ -372,17 +372,16 @@ makeMessage msg (Just pos) =
 data ClauseCompState = ClauseComp {
     body :: [Placed Prim],       -- ^body of the clause being generated, reversed
     vars :: Map VarName VarInfo, -- ^latest var number for each var
-    defs :: Set VarName,         -- ^all variables defined by this code
     uses :: Map VarName OptPos,  -- ^where variables are used before defined
     tmpCount :: Int              -- ^number of temp vars so far in this clause
   }
 
 initClauseComp :: ClauseCompState
-initClauseComp = ClauseComp [] Map.empty Set.empty Map.empty 0
+initClauseComp = ClauseComp [] Map.empty Map.empty 0
 
 data VarInfo = VarInfo {
     ordinal :: Int,            -- ^ordinal number of distinct var for this name
-    typ :: Maybe TypeSpec      -- ^type of this var
+    typ :: TypeSpec            -- ^type of this var
     } deriving Show
 
 -- |The clause compiler monad is a state transformer monad carrying the 
@@ -406,18 +405,19 @@ extendClauseComp st clcomp = runStateT clcomp st
 runClauseComp :: [PrimParam] -> ClauseComp t -> Compiler (t, ClauseCompState)
 runClauseComp params clcomp = 
     let symtab = List.foldr insertInputParam Map.empty params
-    in runStateT clcomp $ ClauseComp [] symtab Set.empty Map.empty 0
+    in runStateT clcomp $ ClauseComp [] symtab Map.empty 0
 
 
 -- |Generate a single instruction for the clause currently being compiled
 instr :: Prim -> OptPos -> ClauseComp ()
+instr PrimNop _ = return ()      -- Don't bother to generate Nops
 instr prim pos = do
   bdy <- gets body
   modify (\st -> st {body = (maybePlace prim pos):bdy})
 
 insertInputParam :: PrimParam -> Map VarName VarInfo -> Map VarName VarInfo
 insertInputParam (PrimParam (PrimVarName var num) typ FlowIn _) symtab =
-    Map.insert var (VarInfo num $ Just typ) symtab
+    Map.insert var (VarInfo num typ) symtab
 insertInputParam (PrimParam _ _ FlowOut _) symtab = symtab    
 
 -- |Return a fresh variable name.
@@ -428,58 +428,57 @@ freshVar = do
   return $ "$tmp" ++ (show ctr)
 
 -- |Return the current PrimVarName for a given name string; ie, find 
---  the current suffix for the specified name
-getVar :: VarName -> ClauseComp PrimVarName
+--  the current suffix for the specified name.
+getVar :: VarName -> OptPos -> ClauseComp PrimVarName
 -- XXX Just for now, always use suffix 0
-getVar name = do
+getVar name pos = do
     currver <- gets (Map.lookup name . vars)
     case currver of
         Nothing -> do
-            -- XXX pass position of variable into getVar for error message
-            lift $ message Error ("uninitialised variable "++name) Nothing
+            -- lift $ message Error ("uninitialised variable "++name) Nothing
+            modify (\s -> s {uses = Map.insert name pos $ uses s})
             return $ PrimVarName name 0
         Just (VarInfo num _) -> return $ PrimVarName name num
 
 -- |Return the next PrimVarName for a given name string; ie, find 
 --  the next suffix for the specified name
-getNextVar :: String -> ClauseComp PrimVarName
--- XXX Just for now, always use suffix 0
-getNextVar name = do
+getNextVar :: String -> OptPos -> ClauseComp PrimVarName
+getNextVar name pos = do
     info <- gets (Map.lookup name . vars)
     let (num,typ) = case info of
-            Nothing -> (0,Nothing)
+            Nothing -> (0,Unspecified)
             Just (VarInfo num typ) -> ((num + 1), typ)
     modify (\s -> s {vars = Map.insert name (VarInfo num typ) $ vars s})
     return $ PrimVarName name num
 
 -- |Return the primitive procedure call input argument(s) for the 
 --  specified variable name and flow direction
-flowVar :: String -> FlowDirection -> ClauseComp [PrimArg]
-flowVar name ParamIn = inVar name
-flowVar name ParamOut = outVar name
-flowVar name ParamInOut = inOutVar name
-flowVar name NoFlow = return []
+flowVar :: String -> FlowDirection -> OptPos -> ClauseComp [PrimArg]
+flowVar name ParamIn pos = inVar name pos
+flowVar name ParamOut pos = outVar name pos
+flowVar name ParamInOut pos = inOutVar name pos
+flowVar name NoFlow _ = return []
 
 -- |Return the primitive procedure call input argument for the 
 --  specified variable name.
-inVar :: String -> ClauseComp [PrimArg]
-inVar name = do
-    primvar <- getVar name
+inVar :: String -> OptPos -> ClauseComp [PrimArg]
+inVar name pos = do
+    primvar <- getVar name pos
     return [ArgVar primvar FlowIn Ordinary]
 
 -- |Return the primitive procedure call output argument for the 
 --  specified variable name.
-outVar :: String -> ClauseComp [PrimArg]
-outVar name = do
-    primvar <- getNextVar name
+outVar :: String -> OptPos -> ClauseComp [PrimArg]
+outVar name pos = do
+    primvar <- getNextVar name pos
     return [ArgVar primvar FlowOut Ordinary]
 
 -- |Return the primitive procedure call input and output arguments for the 
 --  specified variable name.
-inOutVar :: String -> ClauseComp [PrimArg]
-inOutVar name = do
-    primvar <- getVar name
-    primvar' <- getNextVar name
+inOutVar :: String -> OptPos -> ClauseComp [PrimArg]
+inOutVar name pos = do
+    primvar <- getVar name pos
+    primvar' <- getNextVar name pos
     return [ArgVar primvar FlowIn FirstHalf,
             ArgVar primvar' FlowOut SecondHalf]
 
@@ -910,6 +909,7 @@ data Stmt
      | ForeignCall Ident Ident [Placed Exp]
      | Cond (Placed Exp) [Placed Stmt] [Placed Stmt]
      | Loop [Placed LoopStmt]
+     | Guard (Placed Exp) Integer
      | Nop
 
 -- |The kinds of statements that can appear in a loop, including 
@@ -988,6 +988,7 @@ data Prim
      | PrimForeign String ProcName (Maybe ProcID) [PrimArg]
      | PrimGuard PrimVarName Integer
      | PrimFail
+     | PrimNop
      | PrimLoop [Placed Prim]
      | PrimBreakIf PrimVarName
      | PrimNextIf PrimVarName
@@ -1039,6 +1040,7 @@ varsInPrim dir (PrimCall _ _ args)      = varsInPrimArgs dir args
 varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
 varsInPrim dir (PrimGuard var _)        = Set.singleton var
 varsInPrim dir (PrimFail)               = Set.empty
+varsInPrim dir (PrimNop)                = Set.empty
 varsInPrim dir (PrimLoop prims)         = varsInPrims dir 
                                           $ List.map content prims
 varsInPrim dir (PrimBreakIf var)        = Set.singleton var
@@ -1310,6 +1312,12 @@ showPrim' ind (PrimForeign lang name id args) pos =
 showPrim' ind (PrimGuard var val) pos =
   startLine ind ++ "guard " ++ show var ++ " = " ++ show val
   ++ showMaybeSourcePos pos
+showPrim' ind (PrimNop) pos =
+  startLine ind ++ "NOP"
+  ++ showMaybeSourcePos pos
+showPrim' ind (PrimFail) pos =
+  startLine ind ++ "FAIL"
+  ++ showMaybeSourcePos pos
 showPrim' ind (PrimLoop block) pos =
   startLine ind ++ "do " ++ showMaybeSourcePos pos
   ++ showBlock (ind+4) block
@@ -1345,6 +1353,8 @@ instance Show Stmt where
     ++ " end"
   show (Loop lstmts) =
     "do " ++ concat (List.map show lstmts) ++ " end"
+  show (Guard exp val) =
+    "guard " ++ show (content exp) ++ " " ++ show val
 
 -- |Show a primitive argument.
 instance Show PrimArg where
