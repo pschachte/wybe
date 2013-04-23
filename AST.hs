@@ -181,7 +181,7 @@ type Compiler = StateT CompilerState IO
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp 
                         (Compiler opts [] False Map.empty 0 [] [] 
-                         initClauseComp)
+                         freshClauseComp)
 
 
 -- initCompiler :: Options -> FilePath -> ModSpec -> Maybe [Ident] -> 
@@ -373,11 +373,15 @@ data ClauseCompState = ClauseComp {
     body :: [Placed Prim],       -- ^body of the clause being generated, reversed
     vars :: Map VarName VarInfo, -- ^latest var number for each var
     uses :: Map VarName OptPos,  -- ^where variables are used before defined
+    needs:: Set VarName,         -- ^variables that must be defined by clause
     tmpCount :: Int              -- ^number of temp vars so far in this clause
   }
 
-initClauseComp :: ClauseCompState
-initClauseComp = ClauseComp [] Map.empty Map.empty 0
+initClauseComp :: Map VarName VarInfo -> Set VarName -> ClauseCompState
+initClauseComp symtab needs = ClauseComp [] symtab Map.empty needs 0
+
+freshClauseComp :: ClauseCompState
+freshClauseComp = initClauseComp Map.empty Set.empty
 
 data VarInfo = VarInfo {
     ordinal :: Int,            -- ^ordinal number of distinct var for this name
@@ -405,7 +409,8 @@ extendClauseComp st clcomp = runStateT clcomp st
 runClauseComp :: [PrimParam] -> ClauseComp t -> Compiler (t, ClauseCompState)
 runClauseComp params clcomp = 
     let symtab = List.foldr insertInputParam Map.empty params
-    in runStateT clcomp $ ClauseComp [] symtab Map.empty 0
+        needs = List.foldr insertOutputParam Set.empty params
+    in runStateT clcomp $ initClauseComp symtab needs
 
 
 -- |Generate a single instruction for the clause currently being compiled
@@ -419,6 +424,11 @@ insertInputParam :: PrimParam -> Map VarName VarInfo -> Map VarName VarInfo
 insertInputParam (PrimParam (PrimVarName var num) typ FlowIn _) symtab =
     Map.insert var (VarInfo num typ) symtab
 insertInputParam (PrimParam _ _ FlowOut _) symtab = symtab    
+
+insertOutputParam :: PrimParam -> Set VarName -> Set VarName
+insertOutputParam (PrimParam (PrimVarName var num) typ FlowOut _) needs =
+    Set.insert var needs
+insertOutputParam (PrimParam _ _ FlowIn _) needs = needs
 
 -- |Return a fresh variable name.
 freshVar :: ClauseComp String

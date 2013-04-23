@@ -350,9 +350,8 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
 
 ----------------------------------------------------------------
 -- |Make a fresh proc with a fresh name
-compileFreshProc :: [[Placed Stmt]] -> Set VarName 
-                    -> ClauseComp () -> ClauseComp Prim
-compileFreshProc clauses outs rest = do
+compileFreshProc :: [[Placed Stmt]] -> ClauseComp () -> ClauseComp Prim
+compileFreshProc clauses rest = do
   results <- mapM (compileClause rest) clauses
   let clauses' = List.map (List.reverse . body) results
   if List.all List.null clauses'
@@ -361,7 +360,7 @@ compileFreshProc clauses outs rest = do
     else do
       let inMap = Map.unions $ List.map uses results
       let inVars = Map.keys inMap
-      let outVars = Set.elems outs
+      outVars <- gets (Set.elems . needs)
       inParams <- mapM 
                   (\n -> do 
                         inf <- gets (Map.lookup n . vars)
@@ -370,9 +369,16 @@ compileFreshProc clauses outs rest = do
                         return $ PrimParam (PrimVarName n num) thistype 
                           FlowIn Ordinary)
                   inVars
-      let outParams = []
+      outParams <- mapM
+                  (\n -> do 
+                        inf <- gets (Map.lookup n . vars)
+                        let thistype = maybe Unspecified typ inf
+                        let num = maybe 0 ordinal inf
+                        return $ PrimParam (PrimVarName n num) thistype 
+                          FlowOut Ordinary)
+                  outVars
       inArgs <- mapM compileVarRef $ assocs inMap
-      let outArgs = []
+      outArgs <- mapM compileVarDef outVars
       name <- lift $ genProcName
       lift $ addProc name (PrimProto name (inParams++outParams)) 
         clauses' Nothing Private
@@ -403,9 +409,9 @@ compileStmts' (ForeignCall lang name args) stmts pos = do
   compileArgs args (\args->instr (PrimForeign lang name Nothing args) pos)
   compileStmts stmts
 compileStmts' (Cond exp thn els) stmts pos = do
-  confluence <- compileFreshProc [stmts] Set.empty $ return ()
+  confluence <- compileFreshProc [stmts] $ return ()
   switch <- compileFreshProc [(Unplaced $ Guard exp 1):thn,
-                              (Unplaced $ Guard exp 0):els] Set.empty 
+                              (Unplaced $ Guard exp 0):els]
             $ instr confluence Nothing
   instr switch Nothing
   return ()
@@ -513,6 +519,16 @@ compileVarRef (var,pos) = do
             return $ ArgVar (PrimVarName var 0) FlowIn Ordinary
         Just (VarInfo num _) ->
             return $ ArgVar (PrimVarName var num) FlowIn Ordinary
+
+compileVarDef :: VarName -> ClauseComp PrimArg
+compileVarDef var = do
+    inf <- gets (Map.lookup var . vars)
+    case inf of
+        Nothing -> do
+            lift $ message Error ("Undefined variable " ++ var) Nothing
+            return $ ArgVar (PrimVarName var 0) FlowOut Ordinary
+        Just (VarInfo num _) ->
+            return $ ArgVar (PrimVarName var num) FlowOut Ordinary
 
 ----------------------------------------------------------------
 
