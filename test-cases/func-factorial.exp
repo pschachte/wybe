@@ -10,10 +10,10 @@ Public func factorial(n:int):int {func-factorial:1:8} = if <=(n {func-factorial:
   resources       : 
   procs           : factorial:
 proc factorial(n:0:int, ?$:-1:int) (id 0):  {func-factorial:1:8}
-    gen$1(n:0) {?}
+    gen$1(n:0, ?$:0) {?}
     =(?$:0, $tmp0:0) {?}
                     gen$1:
-proc gen$1(n:0:int) (id 0):  {?}
+proc gen$1(n:0:int, ?$:0:?) (id 0):  {?}
     <=(n:0, 0, ?$tmp0:0) {func-factorial:2:11}
     guard $tmp0:0 = 1 {?}
     =(?$tmp0:1, 1) {?}
