@@ -373,15 +373,15 @@ data ClauseCompState = ClauseComp {
     body :: [Placed Prim],       -- ^body of the clause being generated, reversed
     vars :: Map VarName VarInfo, -- ^latest var number for each var
     uses :: Map VarName OptPos,  -- ^where variables are used before defined
-    needs:: Set VarName,         -- ^variables that must be defined by clause
+    outParams:: [PrimParam],     -- ^variables that must be defined by clause
     tmpCount :: Int              -- ^number of temp vars so far in this clause
   }
 
-initClauseComp :: Map VarName VarInfo -> Set VarName -> ClauseCompState
-initClauseComp symtab needs = ClauseComp [] symtab Map.empty needs 0
+initClauseComp :: Map VarName VarInfo -> [PrimParam] -> ClauseCompState
+initClauseComp symtab outParams = ClauseComp [] symtab Map.empty outParams 0
 
 freshClauseComp :: ClauseCompState
-freshClauseComp = initClauseComp Map.empty Set.empty
+freshClauseComp = initClauseComp Map.empty []
 
 data VarInfo = VarInfo {
     ordinal :: Int,            -- ^ordinal number of distinct var for this name
@@ -409,8 +409,8 @@ extendClauseComp st clcomp = runStateT clcomp st
 runClauseComp :: [PrimParam] -> ClauseComp t -> Compiler (t, ClauseCompState)
 runClauseComp params clcomp = 
     let symtab = List.foldr insertInputParam Map.empty params
-        needs = List.foldr insertOutputParam Set.empty params
-    in runStateT clcomp $ initClauseComp symtab needs
+        outs = List.filter (\p->paramFlow p==FlowOut) params
+    in runStateT clcomp $ initClauseComp symtab outs
 
 
 -- |Generate a single instruction for the clause currently being compiled
@@ -424,11 +424,6 @@ insertInputParam :: PrimParam -> Map VarName VarInfo -> Map VarName VarInfo
 insertInputParam (PrimParam (PrimVarName var num) typ FlowIn _) symtab =
     Map.insert var (VarInfo num typ) symtab
 insertInputParam (PrimParam _ _ FlowOut _) symtab = symtab    
-
-insertOutputParam :: PrimParam -> Set VarName -> Set VarName
-insertOutputParam (PrimParam (PrimVarName var num) typ FlowOut _) needs =
-    Set.insert var needs
-insertOutputParam (PrimParam _ _ FlowIn _) needs = needs
 
 -- |Return a fresh variable name.
 freshVar :: ClauseComp String
@@ -965,8 +960,13 @@ primProto (ProcProto name params) =
     PrimProto name (concat $ List.map primParam params)
 
 -- |A formal parameter, including name, type, and flow direction.
-data PrimParam = PrimParam PrimVarName TypeSpec PrimFlow ArgFlowType
-           deriving Eq
+data PrimParam =
+  PrimParam {
+    paramName :: PrimVarName, 
+    paramType :: TypeSpec, 
+    paramFlow :: PrimFlow, 
+    paramFlowType :: ArgFlowType
+    } deriving Eq
 
 -- |Convert a single Param to up to two PrimParams
 primParam :: Param -> [PrimParam]
@@ -987,8 +987,11 @@ instance Show PrimParam where
 -- A variable name with an integer suffix to distinguish different 
 -- values for the same name.  As a special case, a suffix of -1 
 -- specifies the ultimate, final value for that name.
-data PrimVarName = PrimVarName VarName Int
-     deriving (Eq, Ord)
+data PrimVarName = 
+  PrimVarName {
+    primVarName :: VarName, 
+    primVarNum :: Int
+    } deriving (Eq, Ord)
 
 -- |A primitive statment, including those that can only appear in a 
 --  loop.

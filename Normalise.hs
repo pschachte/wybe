@@ -360,7 +360,7 @@ compileFreshProc clauses rest = do
     else do
       let inMap = Map.unions $ List.map uses results
       let inVars = Map.keys inMap
-      outVars <- gets (Set.elems . needs)
+      outParams <- gets outParams
       inParams <- mapM 
                   (\n -> do 
                         inf <- gets (Map.lookup n . vars)
@@ -369,16 +369,9 @@ compileFreshProc clauses rest = do
                         return $ PrimParam (PrimVarName n num) thistype 
                           FlowIn Ordinary)
                   inVars
-      outParams <- mapM
-                  (\n -> do 
-                        inf <- gets (Map.lookup n . vars)
-                        let thistype = maybe Unspecified typ inf
-                        let num = maybe 0 ordinal inf
-                        return $ PrimParam (PrimVarName n num) thistype 
-                          FlowOut Ordinary)
-                  outVars
       inArgs <- mapM compileVarRef $ assocs inMap
-      outArgs <- mapM compileVarDef outVars
+      outArgs <- mapM compileVarDef 
+                 $ List.map (primVarName . paramName) outParams
       name <- lift $ genProcName
       lift $ addProc name (PrimProto name (inParams++outParams)) 
         clauses' Nothing Private
