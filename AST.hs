@@ -16,7 +16,8 @@ module AST (
   ProcProto(..), Param(..), Stmt(..), 
   LoopStmt(..), Exp(..), Generator(..),
   -- *Source Position Types
-  OptPos, Placed(..), place, content, maybePlace, rePlace, updatePlacedM,
+  OptPos, Placed(..), place, content, maybePlace, rePlace, mapPlaced,
+  updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   enterModule, exitModule, finishModule, 
@@ -29,7 +30,7 @@ module AST (
   -- *Stateful monad for the compilation process
   MessageLevel(..), getCompiler, updateCompiler,
   CompilerState(..), Compiler, runCompiler,
-  ClauseCompState(..), ClauseComp, runClauseComp, buildProc, instr,
+  ClauseCompState(..), ClauseComp, runClauseComp, instr,
   updateModules, getModuleImplementationField, getLoadedModule,
   getModule, updateModule, getSpecModule, updateSpecModule,
   updateModImplementation, updateModImplementationM, 
@@ -130,6 +131,10 @@ maybePlace t Nothing    = Unplaced t
 rePlace :: t -> Placed t -> Placed t
 rePlace t (Placed _ pos) = Placed t pos
 rePlace t (Unplaced _)   = Unplaced t
+
+mapPlaced :: (a -> b) -> Placed a -> Placed b
+mapPlaced f (Placed x pos) = Placed (f x) pos
+mapPlaced f (Unplaced x) = Unplaced $ f x
 
 -- |Apply a monadic function to the payload of a Placed thing
 updatePlacedM :: (t -> Compiler t) -> Placed t -> Compiler (Placed t)
@@ -377,11 +382,12 @@ data ClauseCompState = ClauseComp {
     tmpCount :: Int              -- ^number of temp vars so far in this clause
   }
 
-initClauseComp :: Map VarName VarInfo -> [PrimParam] -> ClauseCompState
-initClauseComp symtab outParams = ClauseComp [] symtab Map.empty outParams 0
+initClauseComp :: Map VarName VarInfo -> [PrimParam] -> Int -> ClauseCompState
+initClauseComp symtab outParams tmpNum = 
+    ClauseComp [] symtab Map.empty outParams tmpNum
 
 freshClauseComp :: ClauseCompState
-freshClauseComp = initClauseComp Map.empty []
+freshClauseComp = initClauseComp Map.empty [] 0
 
 data VarInfo = VarInfo {
     ordinal :: Int,            -- ^ordinal number of distinct var for this name
@@ -392,25 +398,17 @@ data VarInfo = VarInfo {
 --  clause compiler state over the compiler monad.
 type ClauseComp = StateT ClauseCompState Compiler
 
--- |Define a proc by building its clauses
-buildProc :: ProcName -> [PrimParam] -> OptPos -> Visibility -> [ClauseComp ()] 
-             -> Compiler ()
-buildProc name params pos vis bodycomps = do
-    states <- mapM (runClauseComp params) bodycomps
-    let bodies = List.map (body . snd) states
-    addProc name (PrimProto name params) bodies pos vis
-
 -- |Run a clause compiler function from the Compiler monad.
 extendClauseComp :: ClauseCompState -> ClauseComp t 
                     -> Compiler (t, ClauseCompState)
 extendClauseComp st clcomp = runStateT clcomp st
 
 -- |Run a clause compiler function from the Compiler monad.
-runClauseComp :: [PrimParam] -> ClauseComp t -> Compiler (t, ClauseCompState)
-runClauseComp params clcomp = 
+runClauseComp :: [PrimParam] -> Int -> ClauseComp t -> Compiler (t, ClauseCompState)
+runClauseComp params tmpNum clcomp =
     let symtab = List.foldr insertInputParam Map.empty params
         outs = List.filter (\p->paramFlow p==FlowOut) params
-    in runStateT clcomp $ initClauseComp symtab outs
+    in runStateT clcomp $ initClauseComp symtab outs tmpNum
 
 
 -- |Generate a single instruction for the clause currently being compiled

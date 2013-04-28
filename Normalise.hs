@@ -59,14 +59,12 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   normaliseItem $
   ProcDecl 
   vis
-  (ProcProto name $ params ++ 
-   [Param "$" resulttype ParamOut])
-  [Unplaced $
-   ProcCall "=" [Unplaced $ Var "$" ParamOut, result]]
+  (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
+  [Unplaced $ ProcCall "=" [Unplaced $ Var "$" ParamOut, result]]
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     let proto'@(PrimProto _ params') = primProto proto
-    (_,procstate) <- runClauseComp params' $ compileStmts stmts
+    (_,procstate) <- runClauseComp params' 0 $ compileStmts stmts
     addProc name proto' [List.reverse $ body procstate] pos vis
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
@@ -349,7 +347,8 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
 -- |Make a fresh proc with a fresh name
 compileFreshProc :: [[Placed Stmt]] -> ClauseComp () -> ClauseComp Prim
 compileFreshProc clauses rest = do
-  results <- mapM (compileClause rest) clauses
+  tmpNum <- gets tmpCount
+  results <- mapM (compileClause rest tmpNum) clauses
   let clauses' = List.map (List.reverse . body) results
   if List.all List.null clauses'
      then
@@ -375,9 +374,9 @@ compileFreshProc clauses rest = do
       return $ PrimCall name Nothing (inArgs++outArgs)
 
 -- |Compile a single complete clause, using a fresh ClauseComp monad
-compileClause :: ClauseComp () -> [Placed Stmt] -> ClauseComp ClauseCompState
-compileClause rest clause = do
-  (_,state) <- lift $ runClauseComp []
+compileClause :: ClauseComp () -> Int -> [Placed Stmt] -> ClauseComp ClauseCompState
+compileClause rest tmpNum clause = do
+  (_,state) <- lift $ runClauseComp [] tmpNum
                (do
                    compileStmts clause
                    rest
@@ -414,6 +413,9 @@ compileStmts' (ForeignCall lang name args) rest pos = do
       compileStmts $ 
         pre ++ [maybePlace (ForeignCall lang name args'') pos] ++ post ++ rest
 compileStmts' (Cond exp thn els) rest pos = do
+  -- XXX bug:  reports uninitialised variables for many vars 
+  -- referenced in confluence, because they are not known to outer 
+  -- monad.  Will need to report errors here, not in compileVarRef.
   confluence <- compileFreshProc [rest] $ return ()
   switch <- compileFreshProc [(Unplaced $ Guard exp 1):thn,
                               (Unplaced $ Guard exp 0):els]
@@ -475,6 +477,8 @@ normalisePlacedExp pexp = normaliseExp (content pexp) (place pexp)
 --  primitive argument(s), a list of statements to execute
 --  to bind it, and a list of statements to execute 
 --  after the call to store the result appropriately.
+--  The first part of the output (a Placed Exp) will always be a list
+--  of only atomic Exps and Var references (in any direction).
 normaliseExp :: Exp -> Maybe SourcePos
               -> ClauseComp ([Placed Exp],[Placed Stmt],[Placed Stmt],
                              FlowDirection)
@@ -506,14 +510,15 @@ normaliseExp (Fncall name exps) pos = do
   let pres' = if flowsIn flow then 
                 pres++[maybePlace 
                        (ProcCall name $
-                       args++[Unplaced $ Var resultName ParamOut])
+                        List.map (mapPlaced inputArg) args
+                        ++[Unplaced $ Var resultName ParamOut])
                        pos]
               else pres
   let posts' = if flowsOut flow then 
-                 posts++[maybePlace
-                         (ProcCall name $
-                          args++[Unplaced $ Var resultName ParamIn])
-                          pos]
+                 [maybePlace
+                  (ProcCall name $
+                   args++[Unplaced $ Var resultName ParamIn])
+                  pos]++posts
                else posts
   return ([Unplaced $ Var resultName flow],pres',posts',flow)
 normaliseExp (ForeignFn lang name exps) pos = do
@@ -538,7 +543,7 @@ compileVarRef (var,pos) = do
     inf <- gets (Map.lookup var . vars)
     case inf of
         Nothing -> do
-            lift $ message Error ("Undefined variable " ++ var) pos
+            lift $ message Error ("Unintitialised variable " ++ var) pos
             return $ ArgVar (PrimVarName var 0) FlowIn Ordinary
         Just (VarInfo num _) ->
             return $ ArgVar (PrimVarName var num) FlowIn Ordinary
@@ -590,10 +595,21 @@ flowsOut ParamIn = False
 flowsOut ParamOut = True
 flowsOut ParamInOut = True
 
+inFlow :: FlowDirection -> FlowDirection
+inFlow NoFlow     = NoFlow
+inFlow ParamIn = ParamIn
+inFlow ParamOut = NoFlow
+inFlow ParamInOut = ParamIn
+
+inputArg :: Exp -> Exp
+inputArg (Var name dir) = Var name $ inFlow dir
+inputArg exp = exp
+
 -- |Transform the specified primitive argument to an input parameter.
-argIsInput :: PrimArg -> Bool
-argIsInput (ArgVar var dir _) = dir == FlowIn
-argIsInput _ = True
+expIsInput :: Exp -> Bool
+expIsInput (Var var dir) = flowsIn dir
+-- XXX Shouldn't assume everything but variables are inputs
+expIsInput _ = True
 
 -- -- |Generate a primitive assignment statement.
 -- assign :: VarName -> PrimArg -> ClauseComp (Placed Prim)
