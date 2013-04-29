@@ -35,17 +35,17 @@ proc position(x:0:int, y:0:int, ?$:-1:position) (id 0):  {?}
     foreign $ alloc("position", "position", ?$rec:0) {?}
     foreign $ mutate("position", "position", "x", $rec:0, ?$rec:1, x:0) {?}
     foreign $ mutate("position", "position", "y", $rec:1, ?$rec:2, y:0) {?}
-    =(?$:0, $rec:2) {?}
+    =(?$:1, $rec:2) {?}
                     x:
 proc x($rec:0:position, ?$:-1:int) (id 0):  {?}
     foreign $ access("position", "position", "x", $rec:0, ?$tmp0:0) {?}
-    =(?$:0, $tmp0:0) {?}
+    =(?$:1, $tmp0:0) {?}
 proc x($rec:0:position, ?$rec:-1:position, $field:0:int) (id 1):  {?}
     foreign $ mutate("position", "position", "x", $rec:0, ?$rec:1, $field:0) {?}
                     y:
 proc y($rec:0:position, ?$:-1:int) (id 0):  {?}
     foreign $ access("position", "position", "y", $rec:0, ?$tmp0:0) {?}
-    =(?$:0, $tmp0:0) {?}
+    =(?$:1, $tmp0:0) {?}
 proc y($rec:0:position, ?$rec:-1:position, $field:0:int) (id 1):  {?}
     foreign $ mutate("position", "position", "y", $rec:0, ?$rec:1, $field:0) {?}
 
@@ -72,7 +72,7 @@ proc distance(p1:0:position, p2:0:position, ?$:-1:?) (id 0):  {import:3:8}
     ^($tmp7:0, 2, ?$tmp6:0) {import:4:26}
     +($tmp2:0, $tmp6:0, ?$tmp1:0) {import:4:10}
     sqrt($tmp1:0, ?$tmp0:0) {import:4:5}
-    =(?$:0, $tmp0:0) {?}
+    =(?$:1, $tmp0:0) {?}
 
 Submodules of import:
 
