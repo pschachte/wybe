@@ -351,7 +351,7 @@ compileFreshProc clauses rest = do
   results <- mapM (compileClause rest tmpNum) clauses
   let clauses' = List.map (List.reverse . body) results
   if List.all List.null clauses'
-     then
+    then
       return PrimNop
     else do
       let inMap = Map.unions $ List.map uses results
@@ -422,10 +422,11 @@ compileStmts' (Cond exp thn els) rest pos = do
             $ instr confluence Nothing
   instr switch Nothing
   return ()
--- compileStmts' (Loop loop) rest pos = do
---   (init,body,update) <- compileLoopStmts loop
---   back <- compileStmts rest
---   return $ init ++ [maybePlace (PrimLoop $ body++update) pos] ++ back
+compileStmts' (Loop loop) rest pos = do
+  after <- compileFreshProc [rest] $ return ()
+  loop <- compileFreshProc [loop] $ instr after Nothing
+  instr loop Nothing
+  return ()
 compileStmts' (Guard exp val) rest pos = do
   parg <- primArg (content exp) (place exp)
   if isJust parg then do
@@ -442,6 +443,9 @@ compileStmts' (Guard exp val) rest pos = do
     compileStmts $ 
       pre ++ [maybePlace (Guard exp' val) pos] ++ post ++ rest
 compileStmts' Nop rest pos = compileStmts rest
+compileStmts' (For gen) rest pos = return ()
+compileStmts' (BreakIf cond) rest pos = return ()
+compileStmts' (NextIf cond) rest pos = return ()
 
 
 -- |Compile an argument into a PrimArg if it's flattened; if not, return Nothing

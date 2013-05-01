@@ -14,7 +14,7 @@ module AST (
   Item(..), Visibility(..), maxVisibility, minVisibility,
   TypeProto(..), TypeSpec(..), FnProto(..),
   ProcProto(..), Param(..), Stmt(..), 
-  LoopStmt(..), Exp(..), Generator(..),
+  Exp(..), Generator(..),
   -- *Source Position Types
   OptPos, Placed(..), place, content, maybePlace, rePlace, mapPlaced,
   updatePlacedM,
@@ -911,17 +911,13 @@ data Stmt
      = ProcCall Ident [Placed Exp]
      | ForeignCall Ident Ident [Placed Exp]
      | Cond (Placed Exp) [Placed Stmt] [Placed Stmt]
-     | Loop [Placed LoopStmt]
+     | Loop [Placed Stmt]
      | Guard (Placed Exp) Integer
      | Nop
-
--- |The kinds of statements that can appear in a loop, including 
---  normal statements.
-data LoopStmt
-     = For Generator
+       -- These are only valid in a loop
+     | For Generator
      | BreakIf (Placed Exp)
      | NextIf (Placed Exp)
-     | NormalStmt (Placed Stmt)
 
 -- |An expression.  These are all normalised into statements.
 data Exp
@@ -1366,6 +1362,9 @@ instance Show Stmt where
     "do " ++ concat (List.map show lstmts) ++ " end"
   show (Guard exp val) =
     "guard " ++ show (content exp) ++ " " ++ show val
+  show (For gen) = "for " ++ show gen
+  show (BreakIf cond) = "until " ++ show cond
+  show (NextIf cond) = "unless " ++ show cond
 
 -- |Show a primitive argument.
 instance Show PrimArg where
@@ -1376,12 +1375,6 @@ instance Show PrimArg where
   show (ArgChar c) = show c
 
 
--- |Show a single loop statement.
-instance Show LoopStmt where
-  show (For gen) = "for " ++ show gen
-  show (BreakIf cond) = "until " ++ show cond
-  show (NextIf cond) = "unless " ++ show cond
-  show (NormalStmt stmt) = show stmt
   
 -- |Show a single expression.
 instance Show Exp where
