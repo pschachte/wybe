@@ -41,10 +41,6 @@ module AST (
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
-
-  -- temporary
-  showProcDefs, showBlock
-
   ) where
 
 import Options
