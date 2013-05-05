@@ -375,12 +375,13 @@ data ClauseCompState = ClauseComp {
     vars :: Map VarName VarInfo, -- ^latest var number for each var
     uses :: Map VarName OptPos,  -- ^where variables are used before defined
     outParams:: [PrimParam],     -- ^variables that must be defined by clause
-    tmpCount :: Int              -- ^number of temp vars so far in this clause
+    tmpCount :: Int,             -- ^number of temp vars so far in this clause
+    loopInfo :: LoopInfo         -- ^info about the loop we're in
   }
 
 initClauseComp :: Map VarName VarInfo -> [PrimParam] -> Int -> ClauseCompState
 initClauseComp symtab outParams tmpNum = 
-    ClauseComp [] symtab Map.empty outParams tmpNum
+    ClauseComp [] symtab Map.empty outParams tmpNum NoLoop
 
 freshClauseComp :: ClauseCompState
 freshClauseComp = initClauseComp Map.empty [] 0
@@ -389,6 +390,12 @@ data VarInfo = VarInfo {
     ordinal :: Int,            -- ^ordinal number of distinct var for this name
     typ :: TypeSpec            -- ^type of this var
     } deriving Show
+
+data LoopInfo = LoopInfo {
+    continuePrim :: Prim,      -- ^primitive to continue the loop
+    breakPrim :: Prim }        -- ^primitive to break out of the loop
+    | NoLoop
+
 
 -- |The clause compiler monad is a state transformer monad carrying the 
 --  clause compiler state over the compiler monad.
