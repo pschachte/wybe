@@ -345,8 +345,9 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
 
 ----------------------------------------------------------------
 -- |Make a fresh proc with a fresh name
-compileFreshProc :: [[Placed Stmt]] -> ClauseComp () -> ClauseComp Prim
-compileFreshProc clauses rest = do
+compileFreshProc :: ClauseComp () -> [[Placed Stmt]] -> ClauseComp () 
+                    -> ClauseComp Prim
+compileFreshProc init clauses rest = do
   tmpNum <- gets tmpCount
   results <- mapM (compileClause rest tmpNum) clauses
   let clauses' = List.map (List.reverse . body) results
@@ -374,9 +375,10 @@ compileFreshProc clauses rest = do
       return $ PrimCall name Nothing (inArgs++outArgs)
 
 -- |Compile a single complete clause, using a fresh ClauseComp monad
-compileClause :: ClauseComp () -> Int -> [Placed Stmt] -> ClauseComp ClauseCompState
+compileClause :: ClauseComp () -> Int -> [Placed Stmt] 
+                 -> ClauseComp ClauseCompState
 compileClause rest tmpNum clause = do
-  (_,state) <- lift $ runClauseComp [] tmpNum
+  (_,state) <- extendClauseComp
                (do
                    compileStmts clause
                    rest
@@ -416,15 +418,15 @@ compileStmts' (Cond exp thn els) rest pos = do
   -- XXX bug:  reports uninitialised variables for many vars 
   -- referenced in confluence, because they are not known to outer 
   -- monad.  Will need to report errors here, not in compileVarRef.
-  confluence <- compileFreshProc [rest] $ return ()
-  switch <- compileFreshProc [(Unplaced $ Guard exp 1):thn,
-                              (Unplaced $ Guard exp 0):els]
+  confluence <- compileFreshProc (return ()) [rest] $ return ()
+  switch <- compileFreshProc (return ())[(Unplaced $ Guard exp 1):thn,
+                                         (Unplaced $ Guard exp 0):els]
             $ instr confluence Nothing
   instr switch Nothing
   return ()
 compileStmts' (Loop loop) rest pos = do
-  after <- compileFreshProc [rest] $ return ()
-  loop <- compileFreshProc [loop] $ instr after Nothing
+  after <- compileFreshProc (return ()) [rest] $ return ()
+  loop <- compileFreshProc (initLoop PrimNop after) [loop] $ instr after Nothing
   instr loop Nothing
   return ()
 compileStmts' (Guard exp val) rest pos = do
@@ -561,6 +563,11 @@ compileVarDef var = do
             return $ ArgVar (PrimVarName var 0) FlowOut Ordinary
         Just (VarInfo num _) ->
             return $ ArgVar (PrimVarName var num) FlowOut Ordinary
+
+-- |Set up a loop with the specified continuation and break calls
+initLoop :: Prim -> Prim -> ClauseComp ()
+initLoop cont brk = modify (\st -> st { loopInfo = LoopInfo cont brk })
+
 
 ----------------------------------------------------------------
 

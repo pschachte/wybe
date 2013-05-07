@@ -30,7 +30,8 @@ module AST (
   -- *Stateful monad for the compilation process
   MessageLevel(..), getCompiler, updateCompiler,
   CompilerState(..), Compiler, runCompiler,
-  ClauseCompState(..), ClauseComp, runClauseComp, instr,
+  ClauseCompState(..), ClauseComp, runClauseComp, extendClauseComp,
+  instr, LoopInfo(..),
   updateModules, getModuleImplementationField, getLoadedModule,
   getModule, updateModule, getSpecModule, updateSpecModule,
   updateModImplementation, updateModImplementationM, 
@@ -402,9 +403,10 @@ data LoopInfo = LoopInfo {
 type ClauseComp = StateT ClauseCompState Compiler
 
 -- |Run a clause compiler function from the Compiler monad.
-extendClauseComp :: ClauseCompState -> ClauseComp t 
-                    -> Compiler (t, ClauseCompState)
-extendClauseComp st clcomp = runStateT clcomp st
+extendClauseComp :: ClauseComp t -> ClauseComp (t, ClauseCompState)
+extendClauseComp clcomp = do
+    oldState <- get
+    lift $ runStateT clcomp ( oldState { body = [] } )
 
 -- |Run a clause compiler function from the Compiler monad.
 runClauseComp :: [PrimParam] -> Int -> ClauseComp t -> Compiler (t, ClauseCompState)
