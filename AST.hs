@@ -393,8 +393,8 @@ data VarInfo = VarInfo {
     } deriving Show
 
 data LoopInfo = LoopInfo {
-    continuePrim :: Prim,      -- ^primitive to continue the loop
-    breakPrim :: Prim }        -- ^primitive to break out of the loop
+    continue :: Stmt,         -- ^stmt to continue the loop
+    break :: Stmt}            -- ^stmt to break out of the loop
     | NoLoop
 
 

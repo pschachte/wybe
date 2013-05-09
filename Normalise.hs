@@ -346,14 +346,14 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
 ----------------------------------------------------------------
 -- |Make a fresh proc with a fresh name
 compileFreshProc :: ClauseComp () -> [[Placed Stmt]] -> ClauseComp () 
-                    -> ClauseComp Prim
+                    -> ClauseComp Stmt
 compileFreshProc init clauses rest = do
   tmpNum <- gets tmpCount
-  results <- mapM (compileClause rest tmpNum) clauses
+  results <- mapM (compileClause init rest tmpNum) clauses
   let clauses' = List.map (List.reverse . body) results
   if List.all List.null clauses'
     then
-      return PrimNop
+      return Nop
     else do
       let inMap = Map.unions $ List.map uses results
       let inVars = Map.keys inMap
@@ -366,24 +366,25 @@ compileFreshProc init clauses rest = do
                         return $ PrimParam (PrimVarName n num) thistype 
                           FlowIn Ordinary)
                   inVars
-      inArgs <- mapM compileVarRef $ assocs inMap
-      outArgs <- mapM compileVarDef 
-                 $ List.map (primVarName . paramName) outParams
+      let inArgs = List.map (\(n,_) -> Unplaced $ Var n ParamIn) $ assocs inMap
+      let outArgs = List.map (\n -> Unplaced $ Var n ParamOut)
+                    $ List.map (primVarName . paramName) outParams
       name <- lift $ genProcName
       lift $ addProc name (PrimProto name (inParams++outParams)) 
         clauses' Nothing Private
-      return $ PrimCall name Nothing (inArgs++outArgs)
+      return $ ProcCall name (inArgs++outArgs)
 
 -- |Compile a single complete clause, using a fresh ClauseComp monad
-compileClause :: ClauseComp () -> Int -> [Placed Stmt] 
+compileClause :: ClauseComp () -> ClauseComp () -> Int -> [Placed Stmt] 
                  -> ClauseComp ClauseCompState
-compileClause rest tmpNum clause = do
-  (_,state) <- extendClauseComp
-               (do
-                   compileStmts clause
-                   rest
-               )
-  return state
+compileClause init finish tmpNum clause = do
+    (_,state) <- extendClauseComp
+                 (do                     
+                       init
+                       compileStmts clause
+                       finish
+                 )
+    return state
 
 -- |Compile the specified statements to primitive statements.
 compileStmts :: [Placed Stmt] -> ClauseComp ()
@@ -419,16 +420,18 @@ compileStmts' (Cond exp thn els) rest pos = do
   -- referenced in confluence, because they are not known to outer 
   -- monad.  Will need to report errors here, not in compileVarRef.
   confluence <- compileFreshProc (return ()) [rest] $ return ()
-  switch <- compileFreshProc (return ())[(Unplaced $ Guard exp 1):thn,
-                                         (Unplaced $ Guard exp 0):els]
-            $ instr confluence Nothing
-  instr switch Nothing
-  return ()
+  switch <- compileFreshProc (return ()) [(Unplaced $ Guard exp 1):thn,
+                                          (Unplaced $ Guard exp 0):els]
+            $ compileStmts' confluence [] Nothing
+  compileStmts' switch [] Nothing
 compileStmts' (Loop loop) rest pos = do
   after <- compileFreshProc (return ()) [rest] $ return ()
-  loop <- compileFreshProc (initLoop PrimNop after) [loop] $ instr after Nothing
-  instr loop Nothing
-  return ()
+  loopName <- lift $ genProcName
+  let loopProc = ProcCall loopName []
+  loop <- compileFreshProc (initLoop loopProc after) 
+          [loop++[Unplaced loopProc]] 
+          $ compileStmts' after [] Nothing
+  compileStmts' loop [] Nothing
 compileStmts' (Guard exp val) rest pos = do
   parg <- primArg (content exp) (place exp)
   if isJust parg then do
@@ -446,8 +449,28 @@ compileStmts' (Guard exp val) rest pos = do
       pre ++ [maybePlace (Guard exp' val) pos] ++ post ++ rest
 compileStmts' Nop rest pos = compileStmts rest
 compileStmts' (For gen) rest pos = return ()
-compileStmts' (BreakIf cond) rest pos = return ()
-compileStmts' (NextIf cond) rest pos = return ()
+compileStmts' (BreakIf cond) rest pos = do
+    inf <- gets loopInfo
+    case inf of
+        NoLoop -> lift $ message Error "Loop op outside of a loop" pos
+        LoopInfo cont _ -> do
+            switch <- compileFreshProc (return ()) 
+                      [[Unplaced (Guard cond 1), 
+                        maybePlace cont pos],
+                       (Unplaced $ Guard cond 0):rest]
+                      $ return ()
+            compileStmts' switch [] Nothing
+compileStmts' (NextIf cond) rest pos = do
+    inf <- gets loopInfo
+    case inf of
+        NoLoop -> lift $ message Error "Loop op outside of a loop" pos
+        LoopInfo _ brk -> do
+            switch <- compileFreshProc (return ()) 
+                      [[Unplaced (Guard cond 1), 
+                        maybePlace brk pos],
+                       (Unplaced $ Guard cond 0):rest]
+                      $ return ()
+            compileStmts' switch [] Nothing
 
 
 -- |Compile an argument into a PrimArg if it's flattened; if not, return Nothing
@@ -565,8 +588,9 @@ compileVarDef var = do
             return $ ArgVar (PrimVarName var num) FlowOut Ordinary
 
 -- |Set up a loop with the specified continuation and break calls
-initLoop :: Prim -> Prim -> ClauseComp ()
-initLoop cont brk = modify (\st -> st { loopInfo = LoopInfo cont brk })
+initLoop :: Stmt -> Stmt -> ClauseComp ()
+initLoop cont brk = 
+    modify (\st -> st { loopInfo = LoopInfo cont brk })
 
 
 ----------------------------------------------------------------
