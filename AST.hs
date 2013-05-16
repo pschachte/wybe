@@ -394,7 +394,9 @@ data VarInfo = VarInfo {
 
 data LoopInfo = LoopInfo {
     continue :: Stmt,         -- ^stmt to continue the loop
-    break :: Stmt}            -- ^stmt to break out of the loop
+    break :: Stmt,            -- ^stmt to break out of the loop
+    loopInit :: [Placed Stmt],    -- ^code to initialise before enterring loop
+    loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
     | NoLoop
 
 
@@ -429,7 +431,7 @@ insertInputParam (PrimParam (PrimVarName var num) typ FlowIn _) symtab =
 insertInputParam (PrimParam _ _ FlowOut _) symtab = symtab    
 
 -- |Return a fresh variable name.
-freshVar :: ClauseComp String
+freshVar :: ClauseComp VarName
 freshVar = do
   ctr <- gets tmpCount
   modify (\st -> st {tmpCount = ctr + 1 })

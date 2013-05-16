@@ -425,13 +425,19 @@ compileStmts' (Cond exp thn els) rest pos = do
             $ compileStmts' confluence [] Nothing
   compileStmts' switch [] Nothing
 compileStmts' (Loop loop) rest pos = do
-  after <- compileFreshProc (return ()) [rest] $ return ()
+  afterName <- lift $ genProcName
+  let afterProc = ProcCall afterName []
   loopName <- lift $ genProcName
   let loopProc = ProcCall loopName []
-  loop <- compileFreshProc (initLoop loopProc after) 
-          [loop++[Unplaced loopProc]] 
-          $ compileStmts' after [] Nothing
-  compileStmts' loop [] Nothing
+  tmpNum <- gets tmpCount
+  bodyComp <- compileClause (initLoop loopProc afterProc) (return ()) tmpNum
+             (loop++[Unplaced loopProc]) 
+  lift $ addProc loopName (PrimProto loopName []) 
+        [(List.reverse $ body bodyComp)] Nothing Private
+  let init = loopInit $ loopInfo bodyComp
+  let term = loopTerm $ loopInfo bodyComp
+  after <- compileFreshProc (return ()) [term++rest] (return ())
+  compileStmts (init ++ [Unplaced loopProc])
 compileStmts' (Guard exp val) rest pos = do
   parg <- primArg (content exp) (place exp)
   if isJust parg then do
@@ -448,15 +454,26 @@ compileStmts' (Guard exp val) rest pos = do
     compileStmts $ 
       pre ++ [maybePlace (Guard exp' val) pos] ++ post ++ rest
 compileStmts' Nop rest pos = compileStmts rest
-compileStmts' (For gen) rest pos = return ()
+compileStmts' (For gen) rest pos = do
+    inf <- gets loopInfo
+    case inf of
+        NoLoop -> lift $ message Error "Loop op outside of a loop" pos
+        LoopInfo _ brk _ _ -> do
+            cond <- compileGenerator gen pos
+            switch <- compileFreshProc (return ()) 
+                      [Unplaced (Guard cond 1):rest,
+                       [(Unplaced $ Guard cond 0),
+                        maybePlace brk pos]]
+                      $ return ()
+            compileStmts' switch [] Nothing
 compileStmts' (BreakIf cond) rest pos = do
     inf <- gets loopInfo
     case inf of
         NoLoop -> lift $ message Error "Loop op outside of a loop" pos
-        LoopInfo cont _ -> do
+        LoopInfo _ brk _ _ -> do
             switch <- compileFreshProc (return ()) 
                       [[Unplaced (Guard cond 1), 
-                        maybePlace cont pos],
+                        maybePlace brk pos],
                        (Unplaced $ Guard cond 0):rest]
                       $ return ()
             compileStmts' switch [] Nothing
@@ -464,10 +481,10 @@ compileStmts' (NextIf cond) rest pos = do
     inf <- gets loopInfo
     case inf of
         NoLoop -> lift $ message Error "Loop op outside of a loop" pos
-        LoopInfo _ brk -> do
+        LoopInfo cont _ _ _ -> do
             switch <- compileFreshProc (return ()) 
                       [[Unplaced (Guard cond 1), 
-                        maybePlace brk pos],
+                        maybePlace cont pos],
                        (Unplaced $ Guard cond 0):rest]
                       $ return ()
             compileStmts' switch [] Nothing
@@ -567,6 +584,59 @@ normaliseExp (ForeignFn lang name exps) pos = do
                else posts
   return ([Unplaced $ Var resultName flow],pres',posts',flow)
 
+
+
+-- |Compile a loop generator to three list of primitive statements:
+--  statements to execute before, during, and afte the loop.p
+compileGenerator :: Generator -> Maybe SourcePos -> ClauseComp (Placed Exp)
+compileGenerator (In var exp) pos = do
+    (args,init,_,_) <- normalisePlacedExp exp
+    stateVarName <- freshVar
+    let asn = Unplaced $ ProcCall "=" 
+              (Unplaced (Var stateVarName ParamOut):args)
+    modify (\st -> st { loopInfo = 
+                             (loopInfo st) {loopInit = 
+                                                 (loopInit $ loopInfo st)
+                                                 ++init++[asn]}})
+    let stateArg = Unplaced $ Var stateVarName ParamInOut
+    let varArg = Unplaced $ Var var ParamOut
+    testVarName <- freshVar
+    let testArg = Unplaced $ Var testVarName ParamOut
+    compileStmts' (ProcCall "next" [stateArg,varArg,testArg]) [] Nothing
+    return $ Unplaced $ Var testVarName ParamIn
+compileGenerator (InRange var exp updateOp inc limit) pos = do
+    (args,init1,_,_) <- normalisePlacedExp exp
+    (incArgs,init2,_,_) <- normalisePlacedExp inc
+    let asn = Unplaced $ ProcCall "=" 
+              (Unplaced (Var var ParamOut):args)
+    let varIn = Unplaced $ Var var ParamIn
+    let varOut = Unplaced $ Var var ParamOut
+    compileStmts' (ProcCall updateOp ([varIn]++incArgs++[varOut])) [] Nothing
+    case limit of
+        Nothing -> do
+            modify (\st -> st { loopInfo = 
+                                     (loopInfo st) {loopInit = 
+                                                         (loopInit 
+                                                          $ loopInfo st)
+                                                         ++init1++init2++[asn]}
+                              })
+            return $ Unplaced $ IntValue 1
+        Just (comp,limit') -> do
+            testVarName <- freshVar
+            let testArg = Unplaced $ Var testVarName ParamOut
+            (limitArgs,init3,_,_) <- normalisePlacedExp limit'
+            modify (\st -> st { loopInfo = 
+                                     (loopInfo st) {loopInit = 
+                                                         (loopInit 
+                                                          $ loopInfo st)
+                                                         ++init1++init2
+                                                         ++init3++[asn]}
+                              })
+            compileStmts' (ProcCall comp ([varIn]++limitArgs++[testArg])) [] 
+              Nothing
+            return $ Unplaced $ Var testVarName ParamIn
+
+
 compileVarRef :: (VarName,OptPos) -> ClauseComp PrimArg
 compileVarRef (var,pos) = do
     inf <- gets (Map.lookup var . vars)
@@ -590,7 +660,7 @@ compileVarDef var = do
 -- |Set up a loop with the specified continuation and break calls
 initLoop :: Stmt -> Stmt -> ClauseComp ()
 initLoop cont brk = 
-    modify (\st -> st { loopInfo = LoopInfo cont brk })
+    modify (\st -> st { loopInfo = LoopInfo cont brk [] [] })
 
 
 ----------------------------------------------------------------
