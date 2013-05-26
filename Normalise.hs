@@ -348,16 +348,22 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
 compileFreshProc :: ClauseComp () -> [[Placed Stmt]] -> ClauseComp () 
                     -> ClauseComp Stmt
 compileFreshProc init clauses rest = do
+  liftIO $ putStrLn $ "compiling separate proc:  " ++ show clauses
   tmpNum <- gets tmpCount
   results <- mapM (compileClause init rest tmpNum) clauses
   let clauses' = List.map (List.reverse . body) results
+  liftIO $ putStrLn $ "compiled code:  " ++ show clauses'
   if List.all List.null clauses'
     then
       return Nop
     else do
+      name <- lift $ genProcName
+      liftIO $ putStrLn $ "generating proc " ++ name
       let inMap = Map.unions $ List.map uses results
       let inVars = Map.keys inMap
+      liftIO $ putStrLn $ "used vars:  " ++ show inVars
       outParams <- gets outParams
+      liftIO $ putStrLn $ "out params:  " ++ show outParams
       inParams <- mapM 
                   (\n -> do 
                         inf <- gets (Map.lookup n . vars)
@@ -369,7 +375,6 @@ compileFreshProc init clauses rest = do
       let inArgs = List.map (\(n,_) -> Unplaced $ Var n ParamIn) $ assocs inMap
       let outArgs = List.map (\n -> Unplaced $ Var n ParamOut)
                     $ List.map (primVarName . paramName) outParams
-      name <- lift $ genProcName
       lift $ addProc name (PrimProto name (inParams++outParams)) 
         clauses' Nothing Private
       return $ ProcCall name (inArgs++outArgs)
