@@ -1309,6 +1309,28 @@ startLine ind = "\n" ++ replicate ind ' '
 showBlock :: Int -> [Placed Prim] -> String
 showBlock ind stmts = concat (List.map (showPrim ind) stmts)
 
+instance Show Prim where
+    show (PrimCall name id args) =
+        name ++ maybeShow "<" id ">"
+        ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+    show (PrimForeign lang name id args) =
+        "foreign " ++ lang ++ " " ++ name ++ maybeShow "<" id ">"
+        ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+    show (PrimGuard var val) =
+        "guard " ++ show var ++ " = " ++ show val
+    show (PrimNop) =
+        "NOP"
+    show (PrimFail) =
+        "FAIL"
+    show (PrimLoop block) =
+        "do "
+        ++ showBlock 4 block
+        ++ "end"
+    show (PrimBreakIf var) =
+        "until " ++ show var
+    show (PrimNextIf var) =
+        "unless " ++ show var
+
 -- |Show a single primitive statement with the specified indent.
 showPrim :: Int -> Placed Prim -> String
 showPrim ind stmt = showPrim' ind (content stmt) (place stmt)
@@ -1316,31 +1338,8 @@ showPrim ind stmt = showPrim' ind (content stmt) (place stmt)
 -- |Show a single primitive statement with the specified indent and 
 --  optional source position.
 showPrim' :: Int -> Prim -> OptPos -> String
-showPrim' ind (PrimCall name id args) pos =
-  startLine ind ++ name ++ maybeShow "<" id ">"
-  ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
-  ++ showMaybeSourcePos pos
-showPrim' ind (PrimForeign lang name id args) pos =
-  startLine ind ++ "foreign " ++ lang ++ " " ++ name ++ maybeShow "<" id ">"
-  ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
-  ++ showMaybeSourcePos pos
-showPrim' ind (PrimGuard var val) pos =
-  startLine ind ++ "guard " ++ show var ++ " = " ++ show val
-  ++ showMaybeSourcePos pos
-showPrim' ind (PrimNop) pos =
-  startLine ind ++ "NOP"
-  ++ showMaybeSourcePos pos
-showPrim' ind (PrimFail) pos =
-  startLine ind ++ "FAIL"
-  ++ showMaybeSourcePos pos
-showPrim' ind (PrimLoop block) pos =
-  startLine ind ++ "do " ++ showMaybeSourcePos pos
-  ++ showBlock (ind+4) block
-  ++ startLine ind ++ "end"
-showPrim' ind (PrimBreakIf var) pos =
-  startLine ind ++ "until " ++ show var ++ showMaybeSourcePos pos
-showPrim' ind (PrimNextIf var) pos =
-  startLine ind ++ "unless " ++ show var ++ showMaybeSourcePos pos
+showPrim' ind prim pos =
+  startLine ind ++ show prim ++ showMaybeSourcePos pos
 
 -- |Show a variable, with its suffix
 instance Show PrimVarName where
