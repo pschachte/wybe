@@ -1,4 +1,4 @@
-println("hello, world" {main-hello:1:9}) {main-hello:1:1}
+println("hello, world" @main-hello:1:9) @main-hello:1:1
 
  Module main-hello
   public submods  : 
@@ -9,8 +9,8 @@ println("hello, world" {main-hello:1:9}) {main-hello:1:1}
   types           : 
   resources       : 
   procs           : :
-proc () (id 0):  {?}
-    println("hello, world") {main-hello:1:1}
+proc () (id 0): 
+    println("hello, world") @main-hello:1:1
 
 Submodules of main-hello:
 

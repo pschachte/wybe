@@ -1186,9 +1186,10 @@ instance Show t => Show (Placed t) where
 -- |How to show an optional source position
 showMaybeSourcePos :: OptPos -> String
 showMaybeSourcePos (Just pos) = 
-  " {" ++ takeBaseName (sourceName pos) ++ ":" 
-  ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos) ++ "}"
-showMaybeSourcePos Nothing = " {?}"
+  " @" ++ takeBaseName (sourceName pos) ++ ":" 
+  ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos)
+-- showMaybeSourcePos Nothing = " {?}"
+showMaybeSourcePos Nothing = ""
 
 -- |How to show a module.
 instance Show Module where

@@ -1,5 +1,5 @@
-print("hello, " {main-hello2:1:7}) {main-hello2:1:1}
-println("world!" {main-hello2:2:9}) {main-hello2:2:1}
+print("hello, " @main-hello2:1:7) @main-hello2:1:1
+println("world!" @main-hello2:2:9) @main-hello2:2:1
 
  Module main-hello2
   public submods  : 
@@ -10,9 +10,9 @@ println("world!" {main-hello2:2:9}) {main-hello2:2:1}
   types           : 
   resources       : 
   procs           : :
-proc () (id 0):  {?}
-    print("hello, ") {main-hello2:1:1}
-    println("world!") {main-hello2:2:1}
+proc () (id 0): 
+    print("hello, ") @main-hello2:1:1
+    println("world!") @main-hello2:2:1
 
 Submodules of main-hello2:
 
