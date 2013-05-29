@@ -408,7 +408,9 @@ type ClauseComp = StateT ClauseCompState Compiler
 extendClauseComp :: ClauseComp t -> ClauseComp (t, ClauseCompState)
 extendClauseComp clcomp = do
     oldState <- get
-    lift $ runStateT clcomp ( oldState { body = [] } )
+    lift $ runStateT clcomp ( oldState { body = [], 
+                                         uses = Map.empty, 
+                                         vars = Map.empty } )
 
 -- |Run a clause compiler function from the Compiler monad.
 runClauseComp :: [PrimParam] -> Int -> ClauseComp t -> Compiler (t, ClauseCompState)
@@ -443,12 +445,14 @@ getVar :: VarName -> OptPos -> ClauseComp PrimVarName
 -- XXX Just for now, always use suffix 0
 getVar name pos = do
     currver <- gets (Map.lookup name . vars)
+--    liftIO $ putStrLn $ "Look up var " ++ name ++ " = " ++ show currver
     case currver of
         Nothing -> do
             -- lift $ message Error ("uninitialised variable "++name) Nothing
             modify (\s -> s {uses = Map.insert name pos $ uses s})
             return $ PrimVarName name 0
-        Just (VarInfo num _) -> return $ PrimVarName name num
+        Just (VarInfo num _) -> 
+            return $ PrimVarName name num
 
 -- |Return the next PrimVarName for a given name string; ie, find 
 --  the next suffix for the specified name
