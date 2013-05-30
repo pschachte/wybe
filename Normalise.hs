@@ -592,6 +592,45 @@ normaliseExp (ForeignFn lang name exps) pos = do
 
 
 
+----------------------------------------------------------------
+-- |Return the set of variables used as inputs to the given code, other
+--  than those in the supplied set of variables.
+codeDefsUses :: [Placed Stmt] -> (Set VarName,Set VarName)
+codeDefsUses stmts =
+  List.foldr combineDefUse initDefUse
+  $ List.map stmtDefsUses stmts
+
+combineDefUse :: (Set VarName,Set VarName) -> (Set VarName,Set VarName) ->
+                 (Set VarName,Set VarName)
+combineDefUse (d1,u1) (d2,u2) =
+  (d1 `Set.union` (d2 \\ u1), u1 `Set.union` (u2 \\ d1))
+
+initDefUse :: (Set VarName,Set VarName)
+initDefUse = (Set.empty, Set.empty)
+
+stmtDefsUses (ProcCall _ args) = expListDefsUses args
+stmtDefsUses (ForeignCall _ _ args) = expListDefsUses args
+stmtDefsUses (Cond exp thn els) =
+  let uses1         = expUses exp
+      (defs2a,uses2a) = stmtDefsUses thn
+      (defs2b,uses2b) = stmtDefsUses els
+      defs2 = defs2a `Set.intersection` defs2b
+      uses2 = uses2a `Set.union` uses2b
+  in  ((defs2 \\ uses1, uses1 `Set.union` uses2)
+stmtDefsUses (Loop loop) = stmtDefsUses loop
+stmtDefsUses (Guard exp val) = (Set.empty, expUses exp)
+stmtDefsUses (Nop:rest) = (Set.empty, Set.empty)
+stmtDefsUses (For gen) = genDefsUses gen
+stmtDefsUses (BreakIf cond) = (Set.empty, expUses exp)
+stmtDefsUses (NextIf cond) = (Set.empty, expUses exp)
+
+
+
+----------------------------------------------------------------
+
+
+
+
 -- |Compile a loop generator to three list of primitive statements:
 --  statements to execute before, during, and afte the loop.p
 compileGenerator :: Generator -> Maybe SourcePos -> ClauseComp (Placed Exp)
