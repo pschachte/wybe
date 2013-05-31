@@ -433,18 +433,22 @@ compileStmts' (Cond exp thn els) rest pos = do
   compileStmts' switch [] Nothing
 compileStmts' (Loop loop) rest pos = do
   afterName <- lift $ genProcName
-  let afterProc = ProcCall afterName []
+  let (_,afterUsed) = pstmtsDefUse rest
+  let afterCall = ProcCall afterName 
+                  $ [Unplaced $ Var name ParamIn | name <- Set.elems afterUsed]
   loopName <- lift $ genProcName
-  let loopProc = ProcCall loopName []
+  let (_,loopUsed) = pstmtsDefUse loop
+  let loopCall = ProcCall loopName 
+                 $ [Unplaced $ Var name ParamIn | name <- Set.elems loopUsed]
   tmpNum <- gets tmpCount
-  bodyComp <- compileClause (initLoop loopProc afterProc) (return ()) tmpNum
-             (loop++[Unplaced loopProc]) 
+  bodyComp <- compileClause (initLoop loopCall afterCall) (return ()) tmpNum
+             (loop++[Unplaced loopCall]) 
   lift $ addProc loopName (PrimProto loopName []) 
         [(List.reverse $ body bodyComp)] Nothing Private
   let init = loopInit $ loopInfo bodyComp
   let term = loopTerm $ loopInfo bodyComp
   after <- compileFreshProc (return ()) [term++rest] (return ())
-  compileStmts (init ++ [Unplaced loopProc])
+  compileStmts (init ++ [Unplaced loopCall])
 compileStmts' (Guard exp val) rest pos = do
   parg <- primArg (content exp) (place exp)
   if isJust parg then do
