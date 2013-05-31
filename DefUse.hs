@@ -9,15 +9,8 @@
 module DefUse (DefUse, pstmtsDefUse) where
 
 import AST
--- import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
--- import Data.Maybe
--- import Text.ParserCombinators.Parsec.Pos
--- import Control.Monad
--- import Control.Monad.Trans.Class
--- import Control.Monad.Trans.State
--- import Control.Monad.Trans (lift,liftIO)
 
 type DefUse = (Set VarName,Set VarName)
 
