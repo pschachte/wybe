@@ -52,12 +52,12 @@ stmtDefUse (Cond exp thn els) =
 stmtDefUse (Loop loop) = pstmtsDefUse loop
 stmtDefUse (Guard exp val) = pexpDefUse exp
 stmtDefUse Nop = noDefUse
-stmtDefUse (For gen) = genDefUse gen
+stmtDefUse (For gen) = generatorDefUse gen
 stmtDefUse (BreakIf cond) = pexpDefUse cond
 stmtDefUse (NextIf cond) = pexpDefUse cond
 
-genDefUse (In var exp) = pexpDefUse exp `sequentialDefUse` defVar var
-genDefUse (InRange var exp updateOp inc limit) =
+generatorDefUse (In var exp) = pexpDefUse exp `sequentialDefUse` defVar var
+generatorDefUse (InRange var exp updateOp inc limit) =
     -- XXX This handles the initialisation expr in the wrong place;
     --     it should be handled at the top of the loop
     ((pexpDefUse exp `sequentialDefUse` pexpDefUse inc) `sequentialDefUse`
