@@ -56,7 +56,11 @@ stmtDefUse (For gen) = generatorDefUse gen
 stmtDefUse (BreakIf cond) = pexpDefUse cond
 stmtDefUse (NextIf cond) = pexpDefUse cond
 
-generatorDefUse (In var exp) = pexpDefUse exp `sequentialDefUse` defVar var
+-- |Return the DefUse info for a generator.  This is a bit different than
+--  you would expect.  It is *not* considered to define the 
+--  quantified variable, because that is not defined at the place the 
+--  generator appears in the loop, but at the loop top.
+generatorDefUse (In var exp) = pexpDefUse exp
 generatorDefUse (InRange var exp updateOp inc limit) =
     -- XXX This handles the initialisation expr in the wrong place;
     --     it should be handled at the top of the loop
@@ -64,7 +68,7 @@ generatorDefUse (InRange var exp updateOp inc limit) =
      case limit of
          Nothing -> noDefUse
          Just (_,pexp) -> pexpDefUse pexp) 
-    `sequentialDefUse` defVar var
+--    `sequentialDefUse` defVar var
 
 pexpsDefUse :: [Placed Exp] -> DefUse
 pexpsDefUse exps = List.foldr parallelDefUse noDefUse $

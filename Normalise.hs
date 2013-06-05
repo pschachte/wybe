@@ -346,9 +346,9 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
 
 ----------------------------------------------------------------
 -- |Make a fresh proc with a fresh name
-compileFreshProc :: ClauseComp () -> [[Placed Stmt]] -> ClauseComp () 
+compileFreshProc :: ProcName -> ClauseComp () -> [[Placed Stmt]] -> ClauseComp () 
                     -> ClauseComp Stmt
-compileFreshProc init clauses rest = do
+compileFreshProc name init clauses rest = do
   -- liftIO $ putStrLn $ "compiling separate proc:  " ++ show clauses
   tmpNum <- gets tmpCount
   results <- mapM (compileClause init rest tmpNum) clauses
@@ -358,7 +358,6 @@ compileFreshProc init clauses rest = do
     then
       return Nop
     else do
-      name <- lift $ genProcName
       let inMap = Map.unions $ List.map uses results
       -- liftIO $ putStrLn $ "generating proc " ++ name 
       --   ++ " with args " ++ show inMap
@@ -426,9 +425,11 @@ compileStmts' (Cond exp thn els) rest pos = do
   -- XXX bug:  reports uninitialised variables for many vars 
   -- referenced in confluence, because they are not known to outer 
   -- monad.  Will need to report errors here, not in compileVarRef.
-  confluence <- compileFreshProc (return ()) [rest] $ return ()
-  switch <- compileFreshProc (return ()) [(Unplaced $ Guard exp 1):thn,
-                                          (Unplaced $ Guard exp 0):els]
+  confName <- lift $ genProcName
+  confluence <- compileFreshProc confName (return ()) [rest] $ return ()
+  switchName <- lift $ genProcName
+  switch <- compileFreshProc switchName (return ()) 
+            [(Unplaced $ Guard exp 1):thn, (Unplaced $ Guard exp 0):els]
             $ compileStmts' confluence [] Nothing
   compileStmts' switch [] Nothing
 compileStmts' (Loop loop) rest pos = do
@@ -438,16 +439,22 @@ compileStmts' (Loop loop) rest pos = do
                   $ [Unplaced $ Var name ParamIn | name <- Set.elems afterUsed]
   loopName <- lift $ genProcName
   let (_,loopUsed) = pstmtsDefUse loop
+  liftIO $ putStrLn $ "Loop " ++ loopName ++ " body = " ++ show loop
+  liftIO $ putStrLn $ "Loop vars = " ++ show loopUsed
   let loopCall = ProcCall loopName 
                  $ [Unplaced $ Var name ParamIn | name <- Set.elems loopUsed]
   tmpNum <- gets tmpCount
   bodyComp <- compileClause (initLoop loopCall afterCall) (return ()) tmpNum
              (loop++[Unplaced loopCall]) 
-  lift $ addProc loopName (PrimProto loopName []) 
+  -- XXX need to specify type of params
+  lift $ addProc loopName (PrimProto loopName 
+                           [PrimParam (PrimVarName name 0) Unspecified 
+                            FlowIn Ordinary
+                           | name <- Set.elems afterUsed])
         [(List.reverse $ body bodyComp)] Nothing Private
   let init = loopInit $ loopInfo bodyComp
   let term = loopTerm $ loopInfo bodyComp
-  after <- compileFreshProc (return ()) [term++rest] (return ())
+  after <- compileFreshProc afterName (return ()) [term++rest] (return ())
   compileStmts (init ++ [Unplaced loopCall])
 compileStmts' (Guard exp val) rest pos = do
   parg <- primArg (content exp) (place exp)
@@ -471,7 +478,8 @@ compileStmts' (For gen) rest pos = do
         NoLoop -> lift $ message Error "Loop op outside of a loop" pos
         LoopInfo _ brk _ _ -> do
             cond <- compileGenerator gen pos
-            switch <- compileFreshProc (return ()) 
+            switchName <- lift $ genProcName
+            switch <- compileFreshProc switchName (return ()) 
                       [Unplaced (Guard cond 1):rest,
                        [(Unplaced $ Guard cond 0),
                         maybePlace brk pos]]
@@ -482,7 +490,8 @@ compileStmts' (BreakIf cond) rest pos = do
     case inf of
         NoLoop -> lift $ message Error "Loop op outside of a loop" pos
         LoopInfo _ brk _ _ -> do
-            switch <- compileFreshProc (return ()) 
+            switchName <- lift $ genProcName
+            switch <- compileFreshProc switchName (return ()) 
                       [[Unplaced (Guard cond 1), 
                         maybePlace brk pos],
                        (Unplaced $ Guard cond 0):rest]
@@ -493,7 +502,8 @@ compileStmts' (NextIf cond) rest pos = do
     case inf of
         NoLoop -> lift $ message Error "Loop op outside of a loop" pos
         LoopInfo cont _ _ _ -> do
-            switch <- compileFreshProc (return ()) 
+            switchName <- lift $ genProcName
+            switch <- compileFreshProc switchName (return ()) 
                       [[Unplaced (Guard cond 1), 
                         maybePlace cont pos],
                        (Unplaced $ Guard cond 0):rest]
