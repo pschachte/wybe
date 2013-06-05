@@ -150,6 +150,10 @@ tokeniseChar pos ('\\':c:'\'':rest) =
 tokeniseChar pos (c:'\'':cs) =
   (TokChar c pos):
   tokenise (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\'') cs
+tokeniseChar pos chars =
+    error $ showPosition pos 
+    ++ ": Syntax error in single character constant beginning '" 
+    ++ take 3 chars ++ "..."
 
 -- |Handle a symbol token and tokenize the rest of the input.
 tokeniseSymbol :: SourcePos -> String -> [Token]
