@@ -606,12 +606,8 @@ normaliseExp (ForeignFn lang name exps) pos = do
   return ([Unplaced $ Var resultName flow],pres',posts',flow)
 
 
-
-
-
-
--- |Compile a loop generator to three list of primitive statements:
---  statements to execute before, during, and afte the loop.p
+-- |Compile a loop generator to three lists of primitive statements:
+--  statements to execute before, during, and after the loop.
 compileGenerator :: Generator -> Maybe SourcePos -> ClauseComp (Placed Exp)
 compileGenerator (In var exp) pos = do
     (args,init,_,_) <- normalisePlacedExp exp
