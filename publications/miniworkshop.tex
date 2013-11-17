@@ -1,0 +1,450 @@
+\documentclass[12pt]{beamer}
+\mode<presentation>
+\usetheme{Boadilla}
+%\usepackage{beamerthemeGoettingen}
+%\usepackage{beamerthemeDresden}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% If true  then we have a longer  version for a 40 minutes talk
+% If false then we have a shorter version for a 25 minutes talk
+\newcommand{\longflag}{false}       
+\newcommand{\includelongversion}[2]{\ifthenelse{\equal{\longflag}{true}}{#1}{#2}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{graphicx}
+\usepackage{latexsym}
+\usepackage{amssymb, amsmath, stmaryrd}
+\usepackage{hhline}
+\usepackage{subfig}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{minibox}
+\usepackage{ifthen}
+\usepackage{xspace}
+\usepackage{mathabx}
+\usepackage{url}
+
+\usetikzlibrary{arrows,shapes,calc,decorations.pathreplacing}
+\definecolor{pinegreen}{rgb}{0,0.55,0.45}
+
+% don't bother me with fulsome warning messages
+\tolerance=100000
+
+\renewcommand{\topfraction}{.9}
+\renewcommand{\bottomfraction}{.9}
+\renewcommand{\textfraction}{0.1}
+
+
+
+\newcommand{\sys}[1]{\textsc{#1}}
+\newcommand{\re}[1]{\ensuremath{\mathtt{#1}}}
+\newcommand{\svar}[1]{\ensuremath{\left \llbracket #1 \right \rrbracket}}
+
+\DeclareMathOperator{\pl}{\!+}
+
+\newcommand{\ceil}[1]{\left\lceil#1\right\rceil}
+\newcommand{\bexists}{\overline{\exists}}
+\newcommand{\entails}{\vDash}
+\newcommand{\essential}[1]{\left \llbracket #1 \right \rrbracket}
+\newcommand{\fail}{\bf fail}
+\newcommand{\lra}{\leftrightarrow}
+\newcommand{\lu}{{L\overline{U}}}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\fff}{{\cal F}}
+\newcommand{\ttt}{{\cal T}}
+\providecommand{\abs}[1]{\lvert#1\rvert}
+
+\newcommand{\pset}[1]{{\cal P}(#1)}
+
+%% Wrapping a tabular environment in a macro,
+%% so it doesn't conflict with Tikz stuff.
+\newcommand{\wtab}[1]{
+  \begin{tabular}{c}
+    #1
+  \end{tabular}
+}
+
+
+%\xyoption{ps}
+%\xyoption{color}
+%\UseCrayolaColors
+%\newcommand{\xyo}[1]{*+[o][F-]{#1}}
+%\newcommand{\xyco}[2]{*+[o][F-:#1]{#2}}
+
+
+%-----------------------------------------------------------------------%
+\title[Introducing Wybe]{Introducing Wybe --- a language for everyone}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Abstract:
+%
+% We present Wybe, a new language in the early stages of development.
+% Wybe combines the best of declarative and imperative programming in
+% a principled way.  It is intended to be easy to learn for beginner
+% programmers, and also to scale up to large projects through good
+% support for software engineering principles.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\author[Peter Schachte]
+{\textbf{Peter Schachte}  \\
+  \small joint work with Matthew Giuca}
+
+\institute[Melbourne]{The University of Melbourne \\ Department of
+  Computing and Information Systems}
+
+\date{4 December 2013}
+
+%% \ignore{
+%%   \AtBeginSection[]
+%%   {
+%%      \begin{frame}<beamer>
+%%      \frametitle{Outline}
+%%      \tableofcontents[currentsection]
+%%      \end{frame}
+%%   }
+%% }
+
+\begin{document}
+
+\frame{\titlepage}
+
+%=======================================================================%
+\section{Introduction}
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Motivation}
+\begin{itemize}
+\item Many students have difficulty learning to program
+\item Python is simple and easy to learn, but:
+  \begin{itemize}
+  \item It's not efficient enough for many uses
+  \item Lack of static type checking hampers its use in large projects
+  \end{itemize}
+\item Java is efficient and scales well, but:
+  \begin{itemize}
+  \item It is rather complex
+  \item It has numerous pitfalls
+  \end{itemize}
+\item Haskell is efficient and fairly simple, but:
+  \begin{itemize}
+  \item Students have trouble with some of its concepts
+  \item It's not suitable for many textbook algorithms
+  \end{itemize}
+\item Need a language to take us from learning through to practice
+\end{itemize}
+\end{frame}
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Student issues with Java}
+\begin{itemize}
+\item Aliasing and its dangers, defensive copying, immutability
+\item Deep \emph{vs.} shallow copying and equality
+\item How to define an \texttt{equals} method
+\item Difference between primitives, objects, and arrays
+\item Static variables/methods and static classes
+\item Privacy, inheritance, late binding, static members
+\item Packages and build systems
+\item Multiple outputs from methods
+\end{itemize}
+
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Student issues with Haskell}
+\begin{itemize}
+\item Recursion
+\item Monads
+\item Lack of destructive update
+\item Types of partially applied functions
+\item Some of the error messages
+\item The number type classes (a bit)
+\item Taking advantage of algebraic types
+\item Multiple outputs from functions
+\end{itemize}
+
+\end{frame}
+
+
+%=======================================================================%
+\section{Interface Integrity}
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Action at a distance}
+\begin{itemize}
+\item Several of the problems students have with Java stem from
+  \emph{action at a distance} --- change happens for no apparent reason
+\item This is also a problem Java practitioners work to avoid
+\item For code to be maintainable, callers and callees should be
+  able to change their code independently
+\item This requires a formal \emph{interface} between callers and callees
+\item The \emph{effective interface} between callers and callees is
+  the information that passes between them
+\item The \emph{apparent interface} is what appears in declaration or
+  call syntax
+\end{itemize}
+
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Interface integrity}
+
+A function exhibits \emph{Interface integrity} if its apparent and
+effective interfaces coincide.
+
+\begin{itemize}
+\item This rules out:
+  \begin{itemize}
+  \item Destructive update of aliased structures, since this would allow
+    information flow not reflected in the apparent interface
+  \item Global variables, which would allow information flow from
+    assignment to reference not reflected in the apparent interfaces
+  \item I/O (information flow into/out of the environment) without
+    indication in the apparent interfaces
+  \item Action at a distance
+  \end{itemize}
+\item This does not rule out:
+  \begin{itemize}
+  \item Variable reassignment
+  \item Looping constructs
+  \end{itemize}
+\item Do what you like \emph{inside} a function --- as long as it's not
+  observable \emph{outside}
+\end{itemize}
+
+\end{frame}
+
+
+%=======================================================================%
+\section{Wybe Basics}
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Wybe basics}
+\begin{quotation}
+Simplicity is prerequisite for reliability. \\
+\hspace*{3em}--- Edsger Wybe Dijkstra
+\end{quotation}
+
+\begin{itemize}
+\item Wybe is designed to:
+  \begin{itemize}
+  \item Enforce interface integrity
+  \item Be easy to learn
+  \item Scale to large applications
+  \item Allow efficient implementation
+  \item Support functional programming
+  \item Support imperative programming
+  \end{itemize}
+\item Wybe is in the early design stages
+\item The syntax is not settled yet; take the following as an early conception
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Information flow}
+\begin{itemize}
+\item Direction of information flow (\emph{mode}) is explicit
+\item Unadorned variable name denotes variable value (call by value)
+\item Question mark (\texttt{?}) in front of variable name indicates
+  variable assignment (call by result)
+\item Exclamation point (\texttt{!}) indicates both (call by value-result)
+\item \texttt{?x = x + 1} increments x
+\item so does \texttt{incr(!x)}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Procedures}
+\begin{itemize}
+\item Same adornments are used in formal parameters
+\item \texttt{def foo(w, x, ?y, !z):} \ldots\ defines procedure with two
+  inputs, one output, and one in-out parameter
+\item Procedure arguments can be procedure calls with final argument omitted
+\item \texttt{foo(bar(x,y),?z)} \quad means \quad
+  \begin{minipage}[c]{0.4\linewidth}
+  \texttt{bar(x,y,?temp)} \\
+  \texttt{foo(temp,?z)}
+  \end{minipage}
+\item \texttt{def foo(x) = bar(x,x)} means the same as \\
+\texttt{def foo(x,?result): bar(x,x,?result)}
+\item Can use \texttt{foo} with either syntax regardless of which
+  definition was used
+\item \texttt{def \_(?x):} means can use \texttt{\_} as a ``don't
+  care'' output
+\item \texttt{a.b(c,\ldots)} is syntactic sugar for
+  \texttt{b(a,c,\ldots)}, to allow dot notation for member access and update
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Reversibility}
+\begin{itemize}
+\item Procedures can be overloaded based on mode
+\item \texttt{def cons(head,tail,?list):}  \ldots\ constructs \\
+\texttt{def cons(?head,?tail,list):}  \ldots\ deconstructs \\
+\item \texttt{def head(list,?val):}  \ldots\ accesses list head \\
+\texttt{def head(!list,val):}  \ldots\ replaces list head
+\item head(tail(!x), y) replaces head of tail of x with y
+\item head(tail(!x), y) \quad transforms to \quad
+  \begin{minipage}[c]{0.4\linewidth}
+  \texttt{tail(x,?temp)} \\
+  \texttt{head(!temp,y)} \\
+  \texttt{tail(!x, temp)}
+  \end{minipage}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Compile-time garbage collection}
+\begin{itemize}
+\item Wybe has value semantics:  aliasing is not significant
+\item \texttt{head(!list,val)} does \emph{not} mean \texttt{RPLACA}
+\item Equivalent to \texttt{list = cons(val,tail(list))}
+\item Gives the feeling of changing things without action at a distance
+\item May be surprising to experienced programmers\ldots
+\item But (hopefully) natural for beginners
+\item When safe, compiler transforms this (back) into destructive
+  modification
+\item Can this be made predictable enough for programmers
+  to have a good performance model and to write efficient code?
+\item Can this make declarative programming with arrays \texttt{etc.} practical?
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Tests}
+\begin{itemize}
+\item Some procedure calls, called \emph{tests}, can succeed or fail
+\item Depends on mode
+\item Definition specifies if call can fail (by default it can't)
+\item \texttt{def cons(?head,?tail,list)?:} \ldots
+\item Sequence of tests and normal calls fails if any of the tests fail
+\item Like logic programming or the Maybe monad
+\item If body can fail, procedure must be declared with \texttt{?}
+\item Test can be used as an expression:  it is reified into a bool
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{If statement}
+\begin{itemize}
+\item Tests can be used in \texttt{if} and \texttt{case} statements
+\item \texttt{if} \emph{test1}\texttt{:} \emph{statements} \ldots \\
+\hspace*{1em} \emph{test2}\texttt{:} \emph{statements} \ldots \\
+\hspace*{1em} \ldots \\
+\item A Boolean expression \emph{e} is de-reified into a test \emph{e}
+  \texttt{= true}
+\item \texttt{def else = true}
+\item Variables bound in tests are scoped to the corresponding statements
+\item \texttt{if} can also be used as an expression if bodies
+  following colons end with expressions
+\item An if statement not guaranteed to succeed is itself a test
+\item How smart can we be about what's guaranteed to succeed?
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Case statement}
+\begin{itemize}
+\item \texttt{case} \emph{expr} \texttt{of} \\
+\hspace*{1em} \emph{case1}\texttt{:} \emph{statements1} \ldots \\
+\hspace*{1em} \emph{case2}\texttt{:} \emph{statements2} \ldots \\
+\hspace*{1em} \ldots \\[2ex]
+is equivalent to \\[2ex]
+ \texttt{if} \emph{case1(expr)}\texttt{:} \emph{statements1} \ldots \\
+\hspace*{1em} \emph{case2(expr)}\texttt{:} \emph{statements2} \ldots \\
+\hspace*{1em} \ldots
+\item \emph{E.g.:}\\
+  \texttt{def ++(x,y) = case x of} \\
+\hspace*{3em}
+\begin{tabular}{rl}
+\texttt{[]:} & \texttt{y}\\
+\texttt{[?h|?t]:} & \texttt{[h|t++y]}\\
+\end{tabular}
+\item \texttt{def default(\_)?:}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Types}
+\begin{itemize}
+\item Type system is not designed yet; much work to be done
+\item These are the main goals:
+  \begin{itemize}
+  \item Strongly typed
+  \item Type inference for private procedure parameters and local variables
+  \item Parametric polymorphism
+  \item Subtyping to unify types with type classes
+  \item Declaration of algebraic types
+  \item Ability to directly implement types
+  \item \emph{E.g.,} allow list processing functions to work on arrays
+    by defining \texttt{car}, \texttt{cdr}, and \texttt{cons} for them
+  \item Declarative delegation to simulate inheritance
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Resources}
+\begin{itemize}
+\item A \emph{resource} is data that is available to be used and/or
+  defined in parts of the program
+\item Similar to State and IO monads
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Loops}
+\begin{itemize}
+\item One looping construct: \texttt{do} \emph{loop-statements} \ldots
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Delegation}
+\begin{itemize}
+\item 
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Type classes}
+\begin{itemize}
+\item 
+\end{itemize}
+\end{frame}
+
+
+
+\end{document}
