@@ -149,21 +149,24 @@
 \item Multiple outputs from methods
 \end{itemize}
 
+But they can write non-trivial programs --- build-and-fix works
+
 \end{frame}
 
 
 %-----------------------------------------------------------------------%
 \begin{frame}
-\frametitle{Student issues with Haskell}
+\frametitle{Student issues with Haskell and Mercury}
 \begin{itemize}
 \item Recursion
-\item Monads
 \item Lack of destructive update
 \item Types of partially applied functions
+\item Nondeterminism
 \item Some of the error messages
-\item The number type classes (a bit)
-\item Taking advantage of algebraic types
-\item Multiple outputs from functions
+\item Lack of a good IDE, debugger, REPL
+\item Monads
+\item The numeric type classes (a bit)
+\item How (or why?) to take advantage of algebraic types
 \end{itemize}
 
 \end{frame}
@@ -178,14 +181,30 @@
 \begin{itemize}
 \item Several of the problems students have with Java stem from
   \emph{action at a distance} --- change happens for no apparent reason
-\item This is also a problem Java practitioners work to avoid
-\item For code to be maintainable, callers and callees should be
+\item Reason is destructive update of shared structure
+\item Students must have a mental model of computer memory
+\item This is also a practical problem for software engineers
+\item Difficult to maintain a \emph{global} understanding of aliasing
+
+\end{itemize}
+
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Software Engineering}
+\begin{itemize}
+\item For code to be \emph{maintainable}, callers and callees should be
   able to change their code independently
 \item This requires a formal \emph{interface} between callers and callees
-\item The \emph{effective interface} between callers and callees is
-  the information that passes between them
-\item The \emph{apparent interface} is what appears in declaration or
-  call syntax
+\item But there are really two interfaces:
+  \begin{itemize}
+  \item The \textbf{effective interface} between callers and
+    callees is the information that passes between them
+  \item The \textbf{apparent interface} is what appears in declaration
+    or call syntax
+  \end{itemize}
 \end{itemize}
 
 \end{frame}
@@ -195,7 +214,7 @@
 \begin{frame}
 \frametitle{Interface integrity}
 
-A function exhibits \emph{Interface integrity} if its apparent and
+A function exhibits \textbf{Interface integrity} if its apparent and
 effective interfaces coincide.
 
 \begin{itemize}
@@ -270,18 +289,27 @@ Simplicity is prerequisite for reliability. \\
 \item Same adornments are used in formal parameters
 \item \texttt{def foo(w, x, ?y, !z):} \ldots\ defines procedure with two
   inputs, one output, and one in-out parameter
-\item Procedure arguments can be procedure calls with final argument omitted
+\item Body of a procedure definition is a sequence of
+  procedure calls
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Expressions}
+\begin{itemize}
+\item Procedure arguments can be expressions
+\item a function call is just a procedure call with the final argument omitted
 \item \texttt{foo(bar(x,y),?z)} \quad means \quad
   \begin{minipage}[c]{0.4\linewidth}
   \texttt{bar(x,y,?temp)} \\
   \texttt{foo(temp,?z)}
   \end{minipage}
-\item \texttt{def foo(x) = bar(x,x)} means the same as \\
+\item \texttt{def foo(x) = bar(x,x)} is syntactic sugar for \\
 \texttt{def foo(x,?result): bar(x,x,?result)}
 \item Can use \texttt{foo} with either syntax regardless of which
   definition was used
-\item \texttt{def \_(?x):} means can use \texttt{\_} as a ``don't
-  care'' output
 \item \texttt{a.b(c,\ldots)} is syntactic sugar for
   \texttt{b(a,c,\ldots)}, to allow dot notation for member access and update
 \end{itemize}
@@ -292,6 +320,8 @@ Simplicity is prerequisite for reliability. \\
 \begin{frame}
 \frametitle{Reversibility}
 \begin{itemize}
+\item \texttt{def \_(?x):} means can use \texttt{\_} as a ``don't
+  care'' output
 \item Procedures can be overloaded based on mode
 \item \texttt{def cons(head,tail,?list):}  \ldots\ constructs \\
 \texttt{def cons(?head,?tail,list):}  \ldots\ deconstructs \\
