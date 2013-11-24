@@ -141,12 +141,10 @@
 \begin{itemize}
 \item Aliasing and its dangers, defensive copying, immutability
 \item Deep \emph{vs.} shallow copying and equality
-\item How to define an \texttt{equals} method
-\item Difference between primitives, objects, and arrays
+\item Difference between primitive, object, and array types
 \item Static variables/methods and static classes
 \item Privacy, inheritance, late binding, static members
 \item Packages and build systems
-\item Multiple outputs from methods
 \end{itemize}
 
 But they can write non-trivial programs --- build-and-fix works
@@ -161,10 +159,10 @@ But they can write non-trivial programs --- build-and-fix works
 \item Recursion
 \item Lack of destructive update
 \item Types of partially applied functions
+\item Monads
 \item Nondeterminism
 \item Some of the error messages
 \item Lack of a good IDE, debugger, REPL
-\item Monads
 \item The numeric type classes (a bit)
 \item How (or why?) to take advantage of algebraic types
 \end{itemize}
@@ -196,14 +194,15 @@ But they can write non-trivial programs --- build-and-fix works
 \frametitle{Software Engineering}
 \begin{itemize}
 \item For code to be \emph{maintainable}, callers and callees should be
-  able to change their code independently
+  able to develop and maintain their code independently
+\item A \emph{local} understanding of each unit of code must be sufficient
 \item This requires a formal \emph{interface} between callers and callees
 \item But there are really two interfaces:
   \begin{itemize}
-  \item The \textbf{effective interface} between callers and
-    callees is the information that passes between them
   \item The \textbf{apparent interface} is what appears in declaration
     or call syntax
+  \item The \textbf{effective interface} between callers and
+    callees is the information that passes between them
   \end{itemize}
 \end{itemize}
 
@@ -226,7 +225,7 @@ effective interfaces coincide.
     assignment to reference not reflected in the apparent interfaces
   \item I/O (information flow into/out of the environment) without
     indication in the apparent interfaces
-  \item Action at a distance
+  \item Unchecked exceptions
   \end{itemize}
 \item This does not rule out:
   \begin{itemize}
@@ -272,6 +271,7 @@ Simplicity is prerequisite for reliability. \\
 \frametitle{Information flow}
 \begin{itemize}
 \item Direction of information flow (\emph{mode}) is explicit
+\item A bit like Ada's \texttt{in}, \texttt{out}, and \texttt{in out}
 \item Unadorned variable name denotes variable value (call by value)
 \item Question mark (\texttt{?}) in front of variable name indicates
   variable assignment (call by result)
@@ -289,6 +289,7 @@ Simplicity is prerequisite for reliability. \\
 \item Same adornments are used in formal parameters
 \item \texttt{def foo(w, x, ?y, !z):} \ldots\ defines procedure with two
   inputs, one output, and one in-out parameter
+\item Adornments in definition and call must agree (but see below\ldots)
 \item Body of a procedure definition is a sequence of
   procedure calls
 \end{itemize}
@@ -320,13 +321,12 @@ Simplicity is prerequisite for reliability. \\
 \begin{frame}
 \frametitle{Reversibility}
 \begin{itemize}
-\item \texttt{def \_(?x):} means can use \texttt{\_} as a ``don't
-  care'' output
 \item Procedures can be overloaded based on mode
-\item \texttt{def cons(head,tail,?list):}  \ldots\ constructs \\
-\texttt{def cons(?head,?tail,list):}  \ldots\ deconstructs \\
-\item \texttt{def head(list,?val):}  \ldots\ accesses list head \\
-\texttt{def head(!list,val):}  \ldots\ replaces list head
+\item \texttt{cons(head,tail,?list)}  constructs \\
+\texttt{cons(?head,?tail,list)}  deconstructs \\
+\item Expressions can be \emph{outputs} as well as inputs
+\item Expression \texttt{cons(h,t)} constructs list \\
+Expression \texttt{cons(?h,?t)} deconstructs
 \item head(tail(!x), y) replaces head of tail of x with y
 \item head(tail(!x), y) \quad transforms to \quad
   \begin{minipage}[c]{0.4\linewidth}
@@ -334,6 +334,8 @@ Simplicity is prerequisite for reliability. \\
   \texttt{head(!temp,y)} \\
   \texttt{tail(!x, temp)}
   \end{minipage}
+\item \texttt{def \_(?x):} means can use \texttt{\_} as a ``don't
+  care'' output
 \end{itemize}
 \end{frame}
 
@@ -381,12 +383,10 @@ Simplicity is prerequisite for reliability. \\
 \item \texttt{if} \emph{test1}\texttt{:} \emph{statements} \ldots \\
 \hspace*{1em} \emph{test2}\texttt{:} \emph{statements} \ldots \\
 \hspace*{1em} \ldots \\
-\item A Boolean expression \emph{e} is de-reified into a test \emph{e}
+\item Boolean expression \emph{e} is de-reified into the test \emph{e}
   \texttt{= true}
 \item \texttt{def else = true}
-\item Variables bound in tests are scoped to the corresponding statements
-\item \texttt{if} can also be used as an expression if bodies
-  following colons end with expressions
+% \item Variables bound in tests are scoped to the corresponding statements
 \item An if statement not guaranteed to succeed is itself a test
 \item How smart can we be about what's guaranteed to succeed?
 \end{itemize}
@@ -412,7 +412,6 @@ is equivalent to \\[2ex]
 \texttt{[]:} & \texttt{y}\\
 \texttt{[?h|?t]:} & \texttt{[h|t++y]}\\
 \end{tabular}
-\item \texttt{def default(\_)?:}
 \end{itemize}
 \end{frame}
 
@@ -422,17 +421,18 @@ is equivalent to \\[2ex]
 \frametitle{Types}
 \begin{itemize}
 \item Type system is not designed yet; much work to be done
-\item These are the main goals:
+\item Strongly typed
+\item Type inference for private procedure parameters and local variables
+\item Declaration of algebraic types
+\item Constructors/deconstructors are just normal procedures, so one can
+  directly implement types by defining primitive operations
+\item \emph{E.g.,} allow list processing functions to work on arrays
+  by defining \texttt{car}, \texttt{cdr}, and \texttt{cons} for them
+\item Some ideas/plans:
   \begin{itemize}
-  \item Strongly typed
-  \item Type inference for private procedure parameters and local variables
-  \item Parametric polymorphism
-  \item Subtyping to unify types with type classes
-  \item Declaration of algebraic types
-  \item Ability to directly implement types
-  \item \emph{E.g.,} allow list processing functions to work on arrays
-    by defining \texttt{car}, \texttt{cdr}, and \texttt{cons} for them
-  \item Declarative delegation to simulate inheritance
+  \item Look into Dependent Object Types
+  \item Unify types with type classes
+  \item Declarative delegation/coercion to simulate inheritance
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -445,6 +445,15 @@ is equivalent to \\[2ex]
 \item A \emph{resource} is data that is available to be used and/or
   defined in parts of the program
 \item Similar to State and IO monads
+\item Not explicitly passed as parameters
+\item But specified in procedure declaration
+\item And calls to procedures that use resources must be marked to
+  signify that they use some resources
+\item Useful for data that is widely used/modified in a module
+\item I/O, command line arguments are resources
+\item \texttt{def hello(name) with io:} \\
+\hspace*{2em}\texttt{!write("Hello, ")} \\
+\hspace*{2em}\texttt{!write(name)} \\
 \end{itemize}
 \end{frame}
 
@@ -453,7 +462,14 @@ is equivalent to \\[2ex]
 \begin{frame}
 \frametitle{Loops}
 \begin{itemize}
-\item One looping construct: \texttt{do} \emph{loop-statements} \ldots
+\item One modular looping construct: \texttt{do} \emph{loop-statements} \ldots
+\item \emph{loop-statements} are any normal statements plus any
+  special looping statements, including:
+  \begin{itemize}
+  \item \texttt{while} \emph{test} and \texttt{until} \emph{test}
+  \item \texttt{when} \emph{test} and \texttt{unless} \emph{test}
+  \item \texttt{for} \emph{generator}
+  \end{itemize}
 \end{itemize}
 \end{frame}
 
