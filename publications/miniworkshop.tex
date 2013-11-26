@@ -129,7 +129,7 @@
 \item Haskell is efficient and fairly simple, but:
   \begin{itemize}
   \item Students have trouble with some of its concepts
-  \item It's not suitable for many textbook algorithms
+  \item Many students don't find it intuitive
   \end{itemize}
 \item Need a language to take us from learning through to practice
 \end{itemize}
@@ -179,10 +179,10 @@ But they can write non-trivial programs --- build-and-fix works
 \begin{itemize}
 \item Several of the problems students have with Java stem from
   \emph{action at a distance} --- change happens for no apparent reason
-\item Reason is destructive update of shared structure
-\item Students must have a mental model of computer memory
+\item The problem:  destructive update of aliased structures
 \item This is also a practical problem for software engineers
-\item Difficult to maintain a \emph{global} understanding of aliasing
+\item Must have a mental model of computer memory
+\item Must have a \emph{global} understanding of aliasing
 
 \end{itemize}
 
@@ -268,6 +268,22 @@ Simplicity is prerequisite for reliability. \\
 
 %-----------------------------------------------------------------------%
 \begin{frame}
+\frametitle{Hello World}
+\begin{itemize}
+\item Comments introduced by hash (\texttt{\#})
+\item Hello World in Wybe: \\[3ex]
+\begin{alltt}
+    \hspace*{5em}\texttt{\#!/usr/bin/env wybe}\\
+    \hspace*{5em}\texttt{!println("Hello, World")}
+\end{alltt} \\[3ex]
+\item Like a scripting language, top-level statements become main
+\item I'll explain the \texttt{!} later
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
 \frametitle{Information flow}
 \begin{itemize}
 \item Direction of information flow (\emph{mode}) is explicit
@@ -276,8 +292,9 @@ Simplicity is prerequisite for reliability. \\
 \item Question mark (\texttt{?}) in front of variable name indicates
   variable assignment (call by result)
 \item Exclamation point (\texttt{!}) indicates both (call by value-result)
-\item \texttt{?x = x + 1} increments x
+\item \texttt{?x = x + 1} or \texttt{x + 1 = ?x} increments x
 \item so does \texttt{incr(!x)}
+\item \texttt{=} and \texttt{incr} are library procedures
 \end{itemize}
 \end{frame}
 
@@ -289,7 +306,7 @@ Simplicity is prerequisite for reliability. \\
 \item Same adornments are used in formal parameters
 \item \texttt{def foo(w, x, ?y, !z):} \ldots\ defines procedure with two
   inputs, one output, and one in-out parameter
-\item Adornments in definition and call must agree (but see below\ldots)
+\item Adornments in call must match definition (but see below\ldots)
 \item Body of a procedure definition is a sequence of
   procedure calls
 \end{itemize}
@@ -301,7 +318,8 @@ Simplicity is prerequisite for reliability. \\
 \frametitle{Expressions}
 \begin{itemize}
 \item Procedure arguments can be expressions
-\item a function call is just a procedure call with the final argument omitted
+\item A function call is just a procedure call with the final argument omitted
+\item Call stands for value of final argument
 \item \texttt{foo(bar(x,y),?z)} \quad means \quad
   \begin{minipage}[c]{0.4\linewidth}
   \texttt{bar(x,y,?temp)} \\
@@ -328,13 +346,14 @@ Simplicity is prerequisite for reliability. \\
 \item Expression \texttt{cons(h,t)} constructs list \\
 Expression \texttt{cons(?h,?t)} deconstructs
 \item head(tail(!x), y) replaces head of tail of x with y
+\item head(tail(!x)) = y is exactly the same
 \item head(tail(!x), y) \quad transforms to \quad
   \begin{minipage}[c]{0.4\linewidth}
   \texttt{tail(x,?temp)} \\
   \texttt{head(!temp,y)} \\
   \texttt{tail(!x, temp)}
   \end{minipage}
-\item \texttt{def \_(?x):} means can use \texttt{\_} as a ``don't
+\item \texttt{def \_(?x):} defines \texttt{\_} as a ``don't
   care'' output
 \end{itemize}
 \end{frame}
@@ -347,7 +366,7 @@ Expression \texttt{cons(?h,?t)} deconstructs
 \item Wybe has value semantics:  aliasing is not significant
 \item \texttt{head(!list,val)} does \emph{not} mean \texttt{RPLACA}
 \item Equivalent to \texttt{list = cons(val,tail(list))}
-\item Gives the feeling of changing things without action at a distance
+\item Gives the feeling of changing values without action at a distance
 \item May be surprising to experienced programmers\ldots
 \item But (hopefully) natural for beginners
 \item When safe, compiler transforms this (back) into destructive
@@ -371,6 +390,7 @@ Expression \texttt{cons(?h,?t)} deconstructs
 \item Like logic programming or the Maybe monad
 \item If body can fail, procedure must be declared with \texttt{?}
 \item Test can be used as an expression:  it is reified into a bool
+\item Probably must give up currying and overloading based on arity
 \end{itemize}
 \end{frame}
 
@@ -389,6 +409,9 @@ Expression \texttt{cons(?h,?t)} deconstructs
 % \item Variables bound in tests are scoped to the corresponding statements
 \item An if statement not guaranteed to succeed is itself a test
 \item How smart can we be about what's guaranteed to succeed?
+\item Like Mercury's switch detection
+\item Also allow declaration of disjunctive tautologies, \emph{e.g.}:\\
+  \centerline{\texttt{x < y or x = y or x > y}}
 \end{itemize}
 \end{frame}
 
@@ -422,7 +445,8 @@ is equivalent to \\[2ex]
 \begin{itemize}
 \item Type system is not designed yet; much work to be done
 \item Strongly typed
-\item Type inference for private procedure parameters and local variables
+\item Type inference for local variables and formal parameters of
+  private procedures
 \item Declaration of algebraic types
 \item Constructors/deconstructors are just normal procedures, so one can
   directly implement types by defining primitive operations
@@ -447,13 +471,13 @@ is equivalent to \\[2ex]
 \item Similar to State and IO monads
 \item Not explicitly passed as parameters
 \item But specified in procedure declaration
-\item And calls to procedures that use resources must be marked to
-  signify that they use some resources
 \item Useful for data that is widely used/modified in a module
+\item And calls to procedures that use resources must be preceded with
+  \texttt{!} to signify that they use some resources
 \item I/O, command line arguments are resources
 \item \texttt{def hello(name) with io:} \\
-\hspace*{2em}\texttt{!write("Hello, ")} \\
-\hspace*{2em}\texttt{!write(name)} \\
+\hspace*{2em}\texttt{!print("Hello, ")} \\
+\hspace*{2em}\texttt{!print(name)} \\
 \end{itemize}
 \end{frame}
 
