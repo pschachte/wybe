@@ -257,8 +257,7 @@ Simplicity is prerequisite for reliability. \\
   \item Be easy to learn
   \item Scale to large applications
   \item Allow efficient implementation
-  \item Support functional programming
-  \item Support imperative programming
+  \item Support both functional and imperative programming
   \end{itemize}
 \item Wybe is in the early design stages
 \item The syntax is not settled yet; take the following as an early conception
@@ -342,7 +341,8 @@ Simplicity is prerequisite for reliability. \\
 \item Procedures can be overloaded based on mode
 \item \texttt{cons(head,tail,?list)}  constructs \\
 \texttt{cons(?head,?tail,list)}  deconstructs \\
-\item Expressions can be \emph{outputs} as well as inputs
+\item Expressions can be \emph{outputs} (patterns) as well as inputs
+\item Mode of final parameter must be determined by the others
 \item Expression \texttt{cons(h,t)} constructs list \\
 Expression \texttt{cons(?h,?t)} deconstructs
 \item head(tail(!x), y) replaces head of tail of x with y
@@ -353,24 +353,24 @@ Expression \texttt{cons(?h,?t)} deconstructs
   \texttt{head(!temp,y)} \\
   \texttt{tail(!x, temp)}
   \end{minipage}
-\item \texttt{def \_(?x):} defines \texttt{\_} as a ``don't
-  care'' output
+% \item \texttt{def \_(x):} defines \texttt{\_} as a ``don't
+%   care'' output
 \end{itemize}
 \end{frame}
 
 
 %-----------------------------------------------------------------------%
 \begin{frame}
-\frametitle{Compile-time garbage collection}
+\frametitle{Value semantics}
 \begin{itemize}
-\item Wybe has value semantics:  aliasing is not significant
+\item Wybe has value semantics:  aliasing is not semantically significant
 \item \texttt{head(!list,val)} does \emph{not} mean \texttt{RPLACA}
-\item Equivalent to \texttt{list = cons(val,tail(list))}
+\item Equivalent to \texttt{?list = cons(val,tail(list))}
 \item Gives the feeling of changing values without action at a distance
 \item May be surprising to experienced programmers\ldots
 \item But (hopefully) natural for beginners
-\item When safe, compiler transforms this (back) into destructive
-  modification
+\item Compile-time garbage collection:  when safe, compiler transforms
+  this (back) into destructive modification
 \item Can this be made predictable enough for programmers
   to have a good performance model and to write efficient code?
 \item Can this make declarative programming with arrays \texttt{etc.} practical?
@@ -384,11 +384,14 @@ Expression \texttt{cons(?h,?t)} deconstructs
 \begin{itemize}
 \item Some procedure calls, called \emph{tests}, can succeed or fail
 \item Depends on mode
-\item Definition specifies if call can fail (by default it can't)
-\item \texttt{def cons(?head,?tail,list)?:} \ldots
+\item Definition specifies that call can fail with \texttt{?} at end
+  of signature
+\item Without \texttt{?} it cannot fail
+\item \emph{e.g.,} \texttt{def cons(?head,?tail,list)\textbf{?}:} \ldots
 \item Sequence of tests and normal calls fails if any of the tests fail
 \item Like logic programming or the Maybe monad
 \item If body can fail, procedure must be declared with \texttt{?}
+  before \texttt{:}
 \item Test can be used as an expression:  it is reified into a bool
 \item Probably must give up currying and overloading based on arity
 \end{itemize}
@@ -441,22 +444,92 @@ is equivalent to \\[2ex]
 
 %-----------------------------------------------------------------------%
 \begin{frame}
+\frametitle{Loops}
+\begin{itemize}
+\item One modular looping construct: \texttt{do} \emph{loop-statements} \ldots
+\item \emph{loop-statements} are any normal statements plus any
+  special looping statements, including:
+  \begin{itemize}
+  \item \texttt{while} \emph{test} and \texttt{until} \emph{test}
+    \begin{itemize}
+    \item like conditional \texttt{break}
+    \end{itemize}
+  \item \texttt{when} \emph{test} and \texttt{unless} \emph{test}
+    \begin{itemize}
+    \item like conditional \texttt{continue}
+    \end{itemize}
+  \item \texttt{for} \emph{generator}
+  \end{itemize}
+\item Include as many of these constructs as you like in the loop,
+  wherever you like, \emph{e.g.:} \\
+\begin{alltt}
+\hspace*{2em}do  !print(prompt) \\
+\hspace*{3em}    !readln(?answer) \\
+\hspace*{3em}    until answer in ["y","n"] \\
+\hspace*{3em}    !println("Please answer 'y' or 'n'.") \\
+\end{alltt}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Generators}
+\begin{itemize}
+\item Generators are procedures that return a multiple times
+\item Like \texttt{multi} predicates in Mercury; similar to the list monad
+\item A procedure that calls a generator outside of a \texttt{for}
+  construct is itself a generator
+\item Generators call \texttt{yield} to return current values of outputs
+\item Generators can call other generators, and produce all
+  combinations of outputs
+\item Generators can call tests; if test fails, skip that result
+\item Generators are declared with a \texttt{*} after the signature
+\item \emph{E.g.,} \\
+  \hspace*{2em}\texttt{def in(?elt,list)*:} \\
+  \hspace*{4em}\texttt{?elt = list.head} \\
+  \hspace*{4em}\texttt{yield} \\
+  \hspace*{4em}\texttt{?elt in list.tail} \\
+
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
 \frametitle{Types}
 \begin{itemize}
 \item Type system is not designed yet; much work to be done
+\item These are some goals
 \item Strongly typed
 \item Type inference for local variables and formal parameters of
   private procedures
-\item Declaration of algebraic types
-\item Constructors/deconstructors are just normal procedures, so one can
-  directly implement types by defining primitive operations
-\item \emph{E.g.,} allow list processing functions to work on arrays
-  by defining \texttt{car}, \texttt{cdr}, and \texttt{cons} for them
-\item Some ideas/plans:
+\item Declaration of algebraic types produces
+  constructors, deconstructors, accessors, mutators
+\item Also possible to define all these as normal procedures, so one can
+  directly implement types by defining their primitive operations
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Types}
+\begin{itemize}
+\item Unify types with type classes
   \begin{itemize}
-  \item Look into Dependent Object Types
-  \item Unify types with type classes
-  \item Declarative delegation/coercion to simulate inheritance
+  \item Abstract type $\equiv$ type class
+  \item Allow a type $A$ to ``implement'' another type $B$, by
+    defining all $B$'s primitive operation for type $A$
+  \item Then a $A$ \emph{is-a} $B$: pass an $A$ where a $B$ is expected
+  \item \emph{E.g.,} allow list processing functions to work on arrays
+  by defining \texttt{car}, \texttt{cdr}, and \texttt{cons} for arrays
+\end{itemize}
+\item Declarative delegation/coercion to simulate inheritance
+  \begin{itemize}
+  \item Declare a function $f: a \to b$ to convert an $a$ to a $b$
+    when calling specific procedures
+  \item Gives restricted form of inheritance in
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -478,22 +551,6 @@ is equivalent to \\[2ex]
 \item \texttt{def hello(name) with io:} \\
 \hspace*{2em}\texttt{!print("Hello, ")} \\
 \hspace*{2em}\texttt{!print(name)} \\
-\end{itemize}
-\end{frame}
-
-
-%-----------------------------------------------------------------------%
-\begin{frame}
-\frametitle{Loops}
-\begin{itemize}
-\item One modular looping construct: \texttt{do} \emph{loop-statements} \ldots
-\item \emph{loop-statements} are any normal statements plus any
-  special looping statements, including:
-  \begin{itemize}
-  \item \texttt{while} \emph{test} and \texttt{until} \emph{test}
-  \item \texttt{when} \emph{test} and \texttt{unless} \emph{test}
-  \item \texttt{for} \emph{generator}
-  \end{itemize}
 \end{itemize}
 \end{frame}
 
