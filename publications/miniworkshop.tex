@@ -118,7 +118,7 @@
 \item Many students have difficulty learning to program
 \item Python is simple and easy to learn, but:
   \begin{itemize}
-  \item It's not efficient enough for many uses
+  \item It's not efficient enough for some uses
   \item Lack of static type checking hampers its use in large projects
   \end{itemize}
 \item Java is efficient and scales well, but:
@@ -131,7 +131,7 @@
   \item Students have trouble with some of its concepts
   \item Many students don't find it intuitive
   \end{itemize}
-\item Need a language to take us from learning through to practice
+\item Need a language that can span from learning through to practice
 \end{itemize}
 \end{frame}
 
@@ -141,9 +141,9 @@
 \begin{itemize}
 \item Aliasing and its dangers, defensive copying, immutability
 \item Deep \emph{vs.} shallow copying and equality
-\item Difference between primitive, object, and array types
+\item Differences between primitive, object, and array types
 \item Static variables/methods and static classes
-\item Privacy, inheritance, late binding, static members
+\item Combinations of privacy, inheritance, static members
 \item Packages and build systems
 \end{itemize}
 
@@ -182,7 +182,9 @@ But they can write non-trivial programs --- build-and-fix works
 \item The problem:  destructive update of aliased structures
 \item This is also a practical problem for software engineers
 \item Must have a mental model of computer memory
-\item Must have a \emph{global} understanding of aliasing
+\item Must have (and maintain!) a \emph{global} understanding of aliasing
+\item Because this is impossible, lots of deep copying is recommended
+\item Because this is inefficient, lots of code lives dangerously
 
 \end{itemize}
 
@@ -202,7 +204,7 @@ But they can write non-trivial programs --- build-and-fix works
   \item The \textbf{apparent interface} is what appears in declaration
     or call syntax
   \item The \textbf{effective interface} between callers and
-    callees is the information that passes between them
+    callees is the information that passes into and out of callees
   \end{itemize}
 \end{itemize}
 
@@ -214,7 +216,7 @@ But they can write non-trivial programs --- build-and-fix works
 \frametitle{Interface integrity}
 
 A function exhibits \textbf{Interface integrity} if its apparent and
-effective interfaces coincide.
+effective interfaces are identical.
 
 \begin{itemize}
 \item This rules out:
@@ -273,9 +275,9 @@ Simplicity is prerequisite for reliability. \\
 \item Hello World in Wybe: \\[3ex]
 \begin{alltt}
     \hspace*{5em}\texttt{\#!/usr/bin/env wybe}\\
-    \hspace*{5em}\texttt{!println("Hello, World")}
+    \hspace*{5em}\texttt{!println("Hello, World!")}
 \end{alltt} \\[3ex]
-\item Like a scripting language, top-level statements become main
+\item Like a scripting language, top-level statements are executed
 \item I'll explain the \texttt{!} later
 \end{itemize}
 \end{frame}
@@ -316,9 +318,9 @@ Simplicity is prerequisite for reliability. \\
 \begin{frame}
 \frametitle{Expressions}
 \begin{itemize}
-\item Procedure arguments can be expressions
+\item Procedure call arguments can be expressions
 \item A function call is just a procedure call with the final argument omitted
-\item Call stands for value of final argument
+\item Call stands for value of its omitted argument
 \item \texttt{foo(bar(x,y),?z)} \quad means \quad
   \begin{minipage}[c]{0.4\linewidth}
   \texttt{bar(x,y,?temp)} \\
@@ -328,8 +330,8 @@ Simplicity is prerequisite for reliability. \\
 \texttt{def foo(x,?result): bar(x,x,?result)}
 \item Can use \texttt{foo} with either syntax regardless of which
   definition was used
-\item \texttt{a.b(c,\ldots)} is syntactic sugar for
-  \texttt{b(a,c,\ldots)}, to allow dot notation for member access and update
+% \item \texttt{a.b(c,\ldots)} is syntactic sugar for
+%   \texttt{b(a,c,\ldots)}, to allow dot notation for member access and update
 \end{itemize}
 \end{frame}
 
@@ -369,11 +371,31 @@ Expression \texttt{cons(?h,?t)} deconstructs
 \item Gives the feeling of changing values without action at a distance
 \item May be surprising to experienced programmers\ldots
 \item But (hopefully) natural for beginners
-\item Compile-time garbage collection:  when safe, compiler transforms
-  this (back) into destructive modification
+\item Compile-time garbage collection:  when unique (unaliased),
+  compiler transforms this (back) into destructive modification
 \item Can this be made predictable enough for programmers
   to have a good performance model and to write efficient code?
 \item Can this make declarative programming with arrays \texttt{etc.} practical?
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Resources}
+\begin{itemize}
+\item A \emph{resource} is data that is available to be used and/or
+  defined in parts of the program
+\item Similar to State and IO monads
+\item Not explicitly passed as parameters
+\item But specified in procedure declaration
+\item Useful for data that is widely used/modified in a module
+\item And calls to procedures that use resources must be preceded with
+  \texttt{!} to signify that they use some resources
+\item I/O, command line arguments are resources
+\item \texttt{def hello(name) with io:} \\
+\hspace*{2em}\texttt{!print("Hello, ")} \\
+\hspace*{2em}\texttt{!print(name)} \\
 \end{itemize}
 \end{frame}
 
@@ -386,14 +408,12 @@ Expression \texttt{cons(?h,?t)} deconstructs
 \item Depends on mode
 \item Definition specifies that call can fail with \texttt{?} at end
   of signature
-\item Without \texttt{?} it cannot fail
 \item \emph{e.g.,} \texttt{def cons(?head,?tail,list)\textbf{?}:} \ldots
 \item Sequence of tests and normal calls fails if any of the tests fail
 \item Like logic programming or the Maybe monad
 \item If body can fail, procedure must be declared with \texttt{?}
   before \texttt{:}
 \item Test can be used as an expression:  it is reified into a bool
-\item Probably must give up currying and overloading based on arity
 \end{itemize}
 \end{frame}
 
@@ -402,7 +422,7 @@ Expression \texttt{cons(?h,?t)} deconstructs
 \begin{frame}
 \frametitle{If statement}
 \begin{itemize}
-\item Tests can be used in \texttt{if} and \texttt{case} statements
+\item Tests can be used in \texttt{if} statements
 \item \texttt{if} \emph{test1}\texttt{:} \emph{statements} \ldots \\
 \hspace*{1em} \emph{test2}\texttt{:} \emph{statements} \ldots \\
 \hspace*{1em} \ldots \\
@@ -410,8 +430,9 @@ Expression \texttt{cons(?h,?t)} deconstructs
   \texttt{= true}
 \item \texttt{def else = true}
 % \item Variables bound in tests are scoped to the corresponding statements
-\item An if statement not guaranteed to succeed is itself a test
-\item How smart can we be about what's guaranteed to succeed?
+\item An if statement is itself a test if it is not guaranteed that
+  one test will succeed
+\item \ldots or if any enclosed statement is a test
 \item Like Mercury's switch detection
 \item Also allow declaration of disjunctive tautologies, \emph{e.g.}:\\
   \centerline{\texttt{x < y or x = y or x > y}}
@@ -476,21 +497,38 @@ is equivalent to \\[2ex]
 \begin{frame}
 \frametitle{Generators}
 \begin{itemize}
-\item Generators are procedures that return a multiple times
+\item Generators are procedures that return multiple times
 \item Like \texttt{multi} predicates in Mercury; similar to the list monad
-\item A procedure that calls a generator outside of a \texttt{for}
-  construct is itself a generator
-\item Generators call \texttt{yield} to return current values of outputs
-\item Generators can call other generators, and produce all
-  combinations of outputs
-\item Generators can call tests; if test fails, skip that result
 \item Generators are declared with a \texttt{*} after the signature
+\item Generators use \texttt{generate} statements to specify
+  multiple results
+\item Each \texttt{generate} encloses multiple statements producing
+  results from initial state
+\item Results are produced in the specified order
+\item Generators can call tests; if test fails, skip to next \texttt{generate}
 \item \emph{E.g.,} \\
   \hspace*{2em}\texttt{def in(?elt,list)*:} \\
-  \hspace*{4em}\texttt{?elt = list.head} \\
-  \hspace*{4em}\texttt{yield} \\
-  \hspace*{4em}\texttt{?elt in list.tail} \\
+  \hspace*{4em}\texttt{generate ?elt = head(list)} \\
+  \hspace*{4em}\texttt{generate ?elt in tail(list)} \\
 
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Generators}
+\begin{itemize}
+\item A procedure that calls a generator outside of a \texttt{for}
+  construct is also a generator
+\item A sequence of calls to generators generates the cross-product of
+  their results
+\item A test is like a generator restricted to at most one result
+\item Generators can be used for logic programming-like coding
+\item \texttt{for} statements allow iteration over generators,
+  accumulating results
+\item \texttt{do} loop can have multiple \texttt{for} statements to
+  support lock-step iteration
 \end{itemize}
 \end{frame}
 
@@ -516,20 +554,19 @@ is equivalent to \\[2ex]
 \begin{frame}
 \frametitle{Types}
 \begin{itemize}
-\item Unify types with type classes
+\item Interface inheritance: unify types with type classes
   \begin{itemize}
   \item Abstract type $\equiv$ type class
   \item Allow a type $A$ to ``implement'' another type $B$, by
     defining all $B$'s primitive operation for type $A$
-  \item Then a $A$ \emph{is-a} $B$: pass an $A$ where a $B$ is expected
+  \item Then an $A$ \emph{is-a} $B$: pass an $A$ where a $B$ is expected
   \item \emph{E.g.,} allow list processing functions to work on arrays
   by defining \texttt{car}, \texttt{cdr}, and \texttt{cons} for arrays
 \end{itemize}
-\item Declarative delegation/coercion to simulate inheritance
+\item Implementation inheritance: declarative delegation
   \begin{itemize}
-  \item Declare a function $f: a \to b$ to convert an $a$ to a $b$
-    when calling specific procedures
-  \item Gives restricted form of inheritance in
+  \item For a specified set of procedures, 
+    declare a function $f: a \to b$ to convert an $a$ argument to a $b$
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -537,40 +574,33 @@ is equivalent to \\[2ex]
 
 %-----------------------------------------------------------------------%
 \begin{frame}
-\frametitle{Resources}
+\frametitle{Conclusion}
+\begin{quotation}
+\noindent
+Simplicity does not precede complexity, but follows it.
+\hspace*{3em}--- Alan Perlis
+\end{quotation}
+\vspace{3ex}
 \begin{itemize}
-\item A \emph{resource} is data that is available to be used and/or
-  defined in parts of the program
-\item Similar to State and IO monads
-\item Not explicitly passed as parameters
-\item But specified in procedure declaration
-\item Useful for data that is widely used/modified in a module
-\item And calls to procedures that use resources must be preceded with
-  \texttt{!} to signify that they use some resources
-\item I/O, command line arguments are resources
-\item \texttt{def hello(name) with io:} \\
-\hspace*{2em}\texttt{!print("Hello, ")} \\
-\hspace*{2em}\texttt{!print(name)} \\
+\item Looking for ways to simplify Wybe while satisfying its goals
+\item More to add, too (in libraries?):
+  \begin{itemize}
+  \item Support lightweight parallelism
+  \item Support ``identities'' and relations among them, to allow
+    networks of objects to be navigated and mutated OO-style
+  \end{itemize}
+
 \end{itemize}
 \end{frame}
 
 
-%-----------------------------------------------------------------------%
-\begin{frame}
-\frametitle{Delegation}
-\begin{itemize}
-\item 
-\end{itemize}
-\end{frame}
-
-
-%-----------------------------------------------------------------------%
-\begin{frame}
-\frametitle{Type classes}
-\begin{itemize}
-\item 
-\end{itemize}
-\end{frame}
+% %-----------------------------------------------------------------------%
+% \begin{frame}
+% \frametitle{Type classes}
+% \begin{itemize}
+% \item 
+% \end{itemize}
+% \end{frame}
 
 
 
