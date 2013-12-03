@@ -290,12 +290,11 @@ Simplicity is prerequisite for reliability. \\
 \item Direction of information flow (\emph{mode}) is explicit
 \item A bit like Ada's \texttt{in}, \texttt{out}, and \texttt{in out}
 \item Unadorned variable name denotes variable value (call by value)
-\item Question mark (\texttt{?}) in front of variable name indicates
-  variable assignment (call by result)
+\item Caret (\texttt{\^}) in front of variable name indicates
+  variable (re-)assignment (call by result)
 \item Exclamation point (\texttt{!}) indicates both (call by value-result)
-\item \texttt{?x = x + 1} or \texttt{x + 1 = ?x} increments x
+\item \texttt{\^{ }x = x + 1} or \texttt{x + 1 = \^{ }x} increments x
 \item so does \texttt{incr(!x)}
-\item \texttt{=} and \texttt{incr} are library procedures
 \end{itemize}
 \end{frame}
 
@@ -305,13 +304,14 @@ Simplicity is prerequisite for reliability. \\
 \frametitle{Procedures}
 \begin{itemize}
 \item Same adornments are used in formal parameters
-\item \texttt{def foo(w, x, ?y, !z):} \ldots\ defines procedure with two
+\item \texttt{def foo(w, x, \^{ }y, !z):} \ldots\ defines procedure with two
   inputs, one output, and one in-out parameter
 \item Adornments in call must match definition (but see below\ldots)
 \item Body of a procedure definition is a sequence of
   statements
 \item There are a few built-in statement types, discussed below
 \item Procedure calls are statements
+\item \texttt{=} and \texttt{incr} are library procedures
 \end{itemize}
 \end{frame}
 
@@ -325,15 +325,15 @@ Simplicity is prerequisite for reliability. \\
 \item The value of such an expression is the value that would be assigned
   to its omitted argument
 \item \emph{E.g.,} \texttt{bar(x,y)} as an expression means call
-  \texttt{bar(x,y,?temp)} and use \texttt{temp} as the value of
+  \texttt{bar(x,y,\^{ }temp)} and use \texttt{temp} as the value of
   \texttt{bar(x,y)}
-\item \texttt{foo(bar(x,y),?z)} \quad means \quad
+\item \texttt{foo(bar(x,y),\^{ }z)} \quad means \quad
   \begin{minipage}[c]{0.4\linewidth}
-  \texttt{bar(x,y,?temp)} \\
-  \texttt{foo(temp,?z)}
+  \texttt{bar(x,y,\^{ }temp)} \\
+  \texttt{foo(temp,\^{ }z)}
   \end{minipage}
 \item \texttt{def foo(x) = bar(x,x)} is syntactic sugar for \\
-\texttt{def foo(x,?result): bar(x,x,?result)}
+\texttt{def foo(x,\^{ }result): bar(x,x,\^{ }result)}
 \item Can use \texttt{foo} with either syntax regardless of which
   definition was used
 \item A few built-in expressions like \texttt{let} \emph{stmts}
@@ -349,21 +349,21 @@ Simplicity is prerequisite for reliability. \\
 \frametitle{Reversibility}
 \begin{itemize}
 \item Procedures can be overloaded based on mode
-\item \texttt{cons(head,tail,?list)}  constructs \\
-\texttt{cons(?head,?tail,list)}  deconstructs \\
+\item \texttt{cons(head,tail,\^{ }list)}  constructs \\
+\texttt{cons(\^{ }head,\^{ }tail,list)}  deconstructs \\
 \item Expressions can be \emph{outputs} (patterns) as well as inputs
 \item Expression \texttt{cons(h,t)} constructs list \\
-Expression \texttt{cons(?h,?t)} deconstructs
-\item Modes of all parameters but the last must uniquely determine the
-  mode of the last
+Expression \texttt{cons(\^{ }h,\^{ }t)} deconstructs
 \item tail(!x, y) replaces tail of x with y
 \item tail(!x) = y is exactly the same
 \item head(tail(!x), y) \quad transforms to \quad
   \begin{minipage}[c]{0.4\linewidth}
-  \texttt{tail(x,?temp)} \\
+  \texttt{tail(x,\^{ }temp)} \\
   \texttt{head(!temp,y)} \\
   \texttt{tail(!x, temp)}
   \end{minipage}
+\item Modes of all parameters but the last must uniquely determine the
+  mode of the last
 % \item \texttt{def \_(x):} defines \texttt{\_} as a ``don't
 %   care'' output
 \end{itemize}
@@ -376,7 +376,7 @@ Expression \texttt{cons(?h,?t)} deconstructs
 \begin{itemize}
 \item Wybe has value semantics:  aliasing is not semantically significant
 \item \texttt{head(!list,val)} does \emph{not} mean \texttt{RPLACA}
-\item Equivalent to \texttt{?list = cons(val,tail(list))}
+\item Equivalent to \texttt{\^{ }list = cons(val,tail(list))}
 \item Gives the feeling of changing values without action at a distance
 \item May be surprising to experienced programmers\ldots
 \item But (hopefully) natural for beginners
@@ -396,14 +396,16 @@ Expression \texttt{cons(?h,?t)} deconstructs
 \item A \emph{resource} is data that can be used and/or defined
   without being explicitly passed as a parameter
 \item Similar to State and IO monads
-\item Must be specified in procedure declaration
-\item Useful for data that is widely used/modified in a module
-\item Procedures can use as many resources as they declare
+\item Specified in procedure declaration, but not in call
 \item Calls to procedures that use resources must be preceded with
   \texttt{!} to signify that they use some resources
-\item I/O, command line arguments are resources
+\item Procedures can use as many resources as they want to declare
+\item Resource can be declared as a name for several other resources
+\item Useful for data that is widely used/modified in a module
+\item I/O, command line arguments are resources visible at top level
 \item \texttt{def hello(name) with io:} \\
 \hspace*{2em}\texttt{!print("Hello, ")} \\
+\hspace*{2em}\texttt{!command\_line([\^{ }name])} \\
 \hspace*{2em}\texttt{!print(name)} \\
 \end{itemize}
 \end{frame}
@@ -414,15 +416,16 @@ Expression \texttt{cons(?h,?t)} deconstructs
 \frametitle{Tests}
 \begin{itemize}
 \item Some procedure calls, called \emph{tests}, can succeed or fail
-\item Depends on mode
-\item Definition specifies that call can fail with \texttt{?} at end
+\item Some modes of a procedure can be tests while others are not
+\item Definition specifies that call can fail with \texttt{?} at left
   of signature
-\item \emph{e.g.,} \texttt{def cons(?head,?tail,list)\textbf{?}:} \ldots
-\item Sequence of tests and normal calls fails if any of the tests fail
-\item Like logic programming or the Maybe monad
-\item If body can fail, procedure must be declared with \texttt{?}
-  before \texttt{:}
-\item Test can be used as an expression:  it is reified into a bool
+\item A test can also produce output: use it in place of a Maybe
+\item \emph{e.g.,} \texttt{def ?cons(\^{ }head,\^{ }tail,list):} \ldots
+\item A test with no outputs can be used as an expression:  it is
+  reified into a \texttt{bool}
+\item A call supplying an input where an output is expected is
+  automatically a test that compares the output with the supplied input
+(like Mercury's implied modes)
 \end{itemize}
 \end{frame}
 
@@ -435,38 +438,56 @@ Expression \texttt{cons(?h,?t)} deconstructs
 \item \texttt{if} \emph{test1}\texttt{:} \emph{statements} \ldots \\
 \hspace*{1em} \emph{test2}\texttt{:} \emph{statements} \ldots \\
 \hspace*{1em} \ldots \\
+\item Tests are tried in order; body of first to succeed is executed
+\item If none succeeds, none is executed
 \item Boolean expression \emph{e} is de-reified into the test \emph{e}
   \texttt{= true}
-\item \texttt{def else = true}
+\item \texttt{def ?else:}
+\item Also an expression version of \texttt{if}, where
+  \emph{statements} are replaced with \emph{expressions}
+\item Tests of an \texttt{if} expression must be exhaustive
 % \item Variables bound in tests are scoped to the corresponding statements
-\item An if statement is itself a test if it is not guaranteed that
-  one test will succeed
-\item \ldots or if any enclosed statement is a test
-\item Like Mercury's switch detection
-\item Also allow declaration of disjunctive tautologies, \emph{e.g.}:\\
-  \centerline{\texttt{x < y or x = y or x > y}}
 \end{itemize}
 \end{frame}
 
 
 %-----------------------------------------------------------------------%
 \begin{frame}
-\frametitle{Case statement}
+\frametitle{Tests as statements}
+\begin{itemize}
+\item A test can be used as a statement
+\item Call must be preceded with \texttt{?}
+\item Sequence of statements is a test if one of them is a test
+\item Procedure is a test if its body is a test
+\item All tests must be declared with \texttt{?} at left
+\item Statement sequence fails if any of the tests fail
+\item Like logic programming or the Maybe monad
+\item If test fails, its effects are rolled back
+\item I/O is not allowed in tests
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}
+\frametitle{Case statement and expression}
 \begin{itemize}
 \item \texttt{case} \emph{expr} \texttt{of} \\
-\hspace*{1em} \emph{case1}\texttt{:} \emph{statements1} \ldots \\
-\hspace*{1em} \emph{case2}\texttt{:} \emph{statements2} \ldots \\
+\hspace*{1em} \emph{case1}\texttt{:} \emph{body1} \ldots \\
+\hspace*{1em} \emph{case2}\texttt{:} \emph{body2} \ldots \\
 \hspace*{1em} \ldots \\[2ex]
 is equivalent to \\[2ex]
- \texttt{if} \emph{case1(expr)}\texttt{:} \emph{statements1} \ldots \\
-\hspace*{1em} \emph{case2(expr)}\texttt{:} \emph{statements2} \ldots \\
+ \texttt{if} \emph{case1(expr)}\texttt{:} \emph{body1} \ldots \\
+\hspace*{1em} \emph{case2(expr)}\texttt{:} \emph{body2} \ldots \\
 \hspace*{1em} \ldots
+\item Except that tests must be exhaustive: checked at compile-time
+\item Can declare sets of exhaustive tests
 \item \emph{E.g.:}\\
   \texttt{def ++(x,y) = case x of} \\
 \hspace*{3em}
 \begin{tabular}{rl}
 \texttt{[]:} & \texttt{y}\\
-\texttt{[?h|?t]:} & \texttt{[h|t++y]}\\
+\texttt{[\^{ }h|\^{ }t]:} & \texttt{[h|t++y]}\\
 \end{tabular}
 \end{itemize}
 \end{frame}
@@ -494,7 +515,7 @@ is equivalent to \\[2ex]
   wherever you like, \emph{e.g.:} \\
 \begin{alltt}
 \hspace*{2em}do  !print(prompt) \\
-\hspace*{3em}    !readln(?answer) \\
+\hspace*{3em}    !readln(\^{ }answer) \\
 \hspace*{3em}    until answer in ["y","n"] \\
 \hspace*{3em}    !println("Please answer 'y' or 'n'.") \\
 \end{alltt}
@@ -506,9 +527,9 @@ is equivalent to \\[2ex]
 \begin{frame}
 \frametitle{Generators}
 \begin{itemize}
-\item Generators are procedures that return multiple times
-\item Like \texttt{multi} predicates in Mercury; similar to the list monad
-\item Generators are declared with a \texttt{*} after the signature
+\item Generators are procedures that return any number of times
+\item Like \texttt{nondet} predicates in Mercury; similar to the list monad
+\item Generators are declared with a \texttt{*} before the signature
 \item Generators use \texttt{generate} statements to specify
   multiple results
 \item Each \texttt{generate} encloses multiple statements producing
@@ -516,9 +537,9 @@ is equivalent to \\[2ex]
 \item Results are produced in the specified order
 \item Generators can call tests; if test fails, skip to next \texttt{generate}
 \item \emph{E.g.,} \\
-  \hspace*{2em}\texttt{def in(?elt,list)*:} \\
-  \hspace*{4em}\texttt{generate ?elt = head(list)} \\
-  \hspace*{4em}\texttt{generate ?elt in tail(list)} \\
+  \hspace*{2em}\texttt{def *in(\^{ }elt,list):} \\
+  \hspace*{4em}\texttt{generate ?\^{ }elt = head(list)} \\
+  \hspace*{4em}\texttt{generate *\^{ }elt in tail(list)} \\
 
 \end{itemize}
 \end{frame}
@@ -547,14 +568,20 @@ is equivalent to \\[2ex]
 \frametitle{Types}
 \begin{itemize}
 \item Type system is not designed yet; much work to be done
-\item These are some goals
-\item Strongly typed
-\item Type inference for local variables and formal parameters of
-  private procedures
-\item Declaration of algebraic types produces
-  constructors, deconstructors, accessors, mutators
-\item Also possible to define all these as normal procedures, so one can
-  directly implement types by defining their primitive operations
+\item These are some goals:
+  \begin{itemize}
+  \item Strongly typed
+  \item Type inference for local variables and formal parameters of
+    private procedures
+  \item Parametric polymorphism
+  \item Declaration of algebraic types produces constructors,
+    deconstructors, accessors, mutators
+  \item Also possible to define all these as normal procedures, so one
+    can directly implement types by defining their primitive
+    operations
+  \item \emph{E.g.,} can generate  constructors, deconstructors,
+    accessors, mutators for C structs passed through foreign interface
+  \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -567,7 +594,7 @@ is equivalent to \\[2ex]
   \begin{itemize}
   \item Abstract type $\equiv$ type class
   \item Allow a type $A$ to ``implement'' another type $B$, by
-    defining all $B$'s primitive operation for type $A$
+    defining all $B$'s primitive operations for type $A$
   \item Then an $A$ \emph{is-a} $B$: pass an $A$ where a $B$ is expected
   \item \emph{E.g.,} allow list processing functions to work on arrays
   by defining \texttt{car}, \texttt{cdr}, and \texttt{cons} for arrays
@@ -576,6 +603,10 @@ is equivalent to \\[2ex]
   \begin{itemize}
   \item For a specified set of procedures, 
     declare a function $f: a \to b$ to convert an $a$ argument to a $b$
+  \item Allows passing an $a$ for any $b$ type parameter to these procedures
+  \item Controlled coercion, or easy overloading
+  \item Allows composition to substitute for (multiple) inheritance
+  \item But no overriding
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -592,10 +623,12 @@ Simplicity does not precede complexity, but follows it.
 \vspace{3ex}
 \begin{itemize}
 \item Looking for ways to simplify Wybe while satisfying its goals
-\item More to add, too (in libraries?):
+\item More to add, too:
   \begin{itemize}
-  \item Support lightweight parallelism
-  \item Support ``identities'' and relations among them, to allow
+  \item Higher order
+  \item Declared non-strict parameters
+  \item Lightweight parallelism (generators can support this)
+  \item ``Identities'' and relations among them, to allow
     networks of objects to be navigated and mutated OO-style
   \end{itemize}
 
