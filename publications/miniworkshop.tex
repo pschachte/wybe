@@ -215,7 +215,7 @@ But they can write non-trivial programs --- build-and-fix works
 \begin{frame}
 \frametitle{Interface integrity}
 
-A function exhibits \textbf{Interface integrity} if its apparent and
+A function exhibits \textbf{interface integrity} if its apparent and
 effective interfaces are identical.
 
 \begin{itemize}
@@ -309,7 +309,9 @@ Simplicity is prerequisite for reliability. \\
   inputs, one output, and one in-out parameter
 \item Adornments in call must match definition (but see below\ldots)
 \item Body of a procedure definition is a sequence of
-  procedure calls
+  statements
+\item There are a few built-in statement types, discussed below
+\item Procedure calls are statements
 \end{itemize}
 \end{frame}
 
@@ -319,8 +321,12 @@ Simplicity is prerequisite for reliability. \\
 \frametitle{Expressions}
 \begin{itemize}
 \item Procedure call arguments can be expressions
-\item A function call is just a procedure call with the final argument omitted
-\item Call stands for value of its omitted argument
+\item An expression can be a procedure call with the final argument omitted
+\item The value of such an expression is the value that would be assigned
+  to its omitted argument
+\item \emph{E.g.,} \texttt{bar(x,y)} as an expression means call
+  \texttt{bar(x,y,?temp)} and use \texttt{temp} as the value of
+  \texttt{bar(x,y)}
 \item \texttt{foo(bar(x,y),?z)} \quad means \quad
   \begin{minipage}[c]{0.4\linewidth}
   \texttt{bar(x,y,?temp)} \\
@@ -330,6 +336,8 @@ Simplicity is prerequisite for reliability. \\
 \texttt{def foo(x,?result): bar(x,x,?result)}
 \item Can use \texttt{foo} with either syntax regardless of which
   definition was used
+\item A few built-in expressions like \texttt{let} \emph{stmts}
+  \texttt{in} \emph{expr} and \emph{expr} \texttt{where} \emph{stmts}
 % \item \texttt{a.b(c,\ldots)} is syntactic sugar for
 %   \texttt{b(a,c,\ldots)}, to allow dot notation for member access and update
 \end{itemize}
@@ -344,11 +352,12 @@ Simplicity is prerequisite for reliability. \\
 \item \texttt{cons(head,tail,?list)}  constructs \\
 \texttt{cons(?head,?tail,list)}  deconstructs \\
 \item Expressions can be \emph{outputs} (patterns) as well as inputs
-\item Mode of final parameter must be determined by the others
 \item Expression \texttt{cons(h,t)} constructs list \\
 Expression \texttt{cons(?h,?t)} deconstructs
-\item head(tail(!x), y) replaces head of tail of x with y
-\item head(tail(!x)) = y is exactly the same
+\item Modes of all parameters but the last must uniquely determine the
+  mode of the last
+\item tail(!x, y) replaces tail of x with y
+\item tail(!x) = y is exactly the same
 \item head(tail(!x), y) \quad transforms to \quad
   \begin{minipage}[c]{0.4\linewidth}
   \texttt{tail(x,?temp)} \\
@@ -384,13 +393,13 @@ Expression \texttt{cons(?h,?t)} deconstructs
 \begin{frame}
 \frametitle{Resources}
 \begin{itemize}
-\item A \emph{resource} is data that is available to be used and/or
-  defined in parts of the program
+\item A \emph{resource} is data that can be used and/or defined
+  without being explicitly passed as a parameter
 \item Similar to State and IO monads
-\item Not explicitly passed as parameters
-\item But specified in procedure declaration
+\item Must be specified in procedure declaration
 \item Useful for data that is widely used/modified in a module
-\item And calls to procedures that use resources must be preceded with
+\item Procedures can use as many resources as they declare
+\item Calls to procedures that use resources must be preceded with
   \texttt{!} to signify that they use some resources
 \item I/O, command line arguments are resources
 \item \texttt{def hello(name) with io:} \\
