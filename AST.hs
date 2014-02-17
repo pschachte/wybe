@@ -864,7 +864,7 @@ resourceDefPosition (SimpleResource _ pos) = pos
 data ProcDef = ProcDef {
     procName :: Ident, 
     procProto :: PrimProto, 
-    procBody :: [[Placed Prim]],
+    procBody :: [[Placed Prim]],      -- list of clauses, each a list of Prims
     procPos :: OptPos}
              deriving Eq
 
@@ -1007,9 +1007,9 @@ data Prim
      | PrimGuard PrimVarName Integer
      | PrimFail
      | PrimNop
-     | PrimLoop [Placed Prim]
-     | PrimBreakIf PrimVarName
-     | PrimNextIf PrimVarName
+     | PrimLoop [Placed Prim]           -- depricated
+     | PrimBreakIf PrimVarName          -- depricated
+     | PrimNextIf PrimVarName           -- depricated
      deriving Eq
 
 -- |The allowed arguments in primitive proc or foreign proc calls, 
