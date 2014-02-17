@@ -425,13 +425,11 @@ compileStmts' (Cond exp thn els) rest pos = do
   -- XXX bug:  reports uninitialised variables for many vars 
   -- referenced in confluence, because they are not known to outer 
   -- monad.  Will need to report errors here, not in compileVarRef.
-  confName <- lift $ genProcName
-  confluence <- compileFreshProc confName (return ()) [rest] $ return ()
   switchName <- lift $ genProcName
   switch <- compileFreshProc switchName (return ()) 
             [(Unplaced $ Guard exp 1):thn, (Unplaced $ Guard exp 0):els]
-            $ compileStmts' confluence [] Nothing
-  compileStmts' switch [] Nothing
+            $ return ()
+  compileStmts' switch rest Nothing
 compileStmts' (Loop loop) rest pos = do
   afterName <- lift $ genProcName
   let (_,afterUsed) = pstmtsDefUse rest
