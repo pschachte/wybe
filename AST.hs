@@ -395,7 +395,6 @@ data VarInfo = VarInfo {
 
 data LoopInfo = LoopInfo {
     continue :: Stmt,         -- ^stmt to continue the loop
-    break :: Stmt,            -- ^stmt to break out of the loop
     loopInit :: [Placed Stmt],    -- ^code to initialise before enterring loop
     loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
     | NoLoop

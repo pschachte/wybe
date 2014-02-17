@@ -431,10 +431,10 @@ compileStmts' (Cond exp thn els) rest pos = do
             $ return ()
   compileStmts' switch rest Nothing
 compileStmts' (Loop loop) rest pos = do
-  afterName <- lift $ genProcName
-  let (_,afterUsed) = pstmtsDefUse rest
-  let afterCall = ProcCall afterName 
-                  $ [Unplaced $ Var name ParamIn | name <- Set.elems afterUsed]
+  -- afterName <- lift $ genProcName
+  -- let (_,afterUsed) = pstmtsDefUse rest
+  -- let afterCall = ProcCall afterName 
+  --                 $ [Unplaced $ Var name ParamIn | name <- Set.elems afterUsed]
   loopName <- lift $ genProcName
   let (_,loopUsed) = pstmtsDefUse loop
   liftIO $ putStrLn $ "Loop " ++ loopName ++ " body = " ++ show loop
@@ -442,18 +442,20 @@ compileStmts' (Loop loop) rest pos = do
   let loopCall = ProcCall loopName 
                  $ [Unplaced $ Var name ParamIn | name <- Set.elems loopUsed]
   tmpNum <- gets tmpCount
-  bodyComp <- compileClause (initLoop loopCall afterCall) (return ()) tmpNum
+  bodyComp <- compileClause (initLoop loopCall) (return ()) tmpNum
              (loop++[Unplaced loopCall]) 
   -- XXX need to specify type of params
   lift $ addProc loopName (PrimProto loopName 
-                           [PrimParam (PrimVarName name 0) Unspecified 
-                            FlowIn Ordinary
-                           | name <- Set.elems afterUsed])
+-- XXX need to specify params
+                           -- [PrimParam (PrimVarName name 0) Unspecified 
+                           --  FlowIn Ordinary
+                           -- | name <- Set.elems afterUsed])
+                           [])
         [(List.reverse $ body bodyComp)] Nothing Private
   let init = loopInit $ loopInfo bodyComp
   let term = loopTerm $ loopInfo bodyComp
-  after <- compileFreshProc afterName (return ()) [term++rest] (return ())
-  compileStmts (init ++ [Unplaced loopCall])
+  -- after <- compileFreshProc afterName (return ()) [term++rest] (return ())
+  compileStmts (init ++ [Unplaced loopCall] ++ term ++ rest)
 compileStmts' (Guard exp val) rest pos = do
   parg <- primArg (content exp) (place exp)
   if isJust parg then do
@@ -474,24 +476,22 @@ compileStmts' (For gen) rest pos = do
     inf <- gets loopInfo
     case inf of
         NoLoop -> lift $ message Error "Loop op outside of a loop" pos
-        LoopInfo _ brk _ _ -> do
+        LoopInfo _ _ _ -> do
             cond <- compileGenerator gen pos
             switchName <- lift $ genProcName
             switch <- compileFreshProc switchName (return ()) 
                       [Unplaced (Guard cond 1):rest,
-                       [(Unplaced $ Guard cond 0),
-                        maybePlace brk pos]]
+                       [Unplaced $ Guard cond 0]]
                       $ return ()
             compileStmts' switch [] Nothing
 compileStmts' (BreakIf cond) rest pos = do
     inf <- gets loopInfo
     case inf of
         NoLoop -> lift $ message Error "Loop op outside of a loop" pos
-        LoopInfo _ brk _ _ -> do
+        LoopInfo _ _ _ -> do
             switchName <- lift $ genProcName
             switch <- compileFreshProc switchName (return ()) 
-                      [[Unplaced (Guard cond 1), 
-                        maybePlace brk pos],
+                      [[Unplaced (Guard cond 1)],
                        (Unplaced $ Guard cond 0):rest]
                       $ return ()
             compileStmts' switch [] Nothing
@@ -499,7 +499,7 @@ compileStmts' (NextIf cond) rest pos = do
     inf <- gets loopInfo
     case inf of
         NoLoop -> lift $ message Error "Loop op outside of a loop" pos
-        LoopInfo cont _ _ _ -> do
+        LoopInfo cont _ _ -> do
             switchName <- lift $ genProcName
             switch <- compileFreshProc switchName (return ()) 
                       [[Unplaced (Guard cond 1), 
@@ -676,9 +676,9 @@ compileVarDef var = do
             return $ ArgVar (PrimVarName vname num) FlowOut Ordinary
 
 -- |Set up a loop with the specified continuation and break calls
-initLoop :: Stmt -> Stmt -> ClauseComp ()
-initLoop cont brk = 
-    modify (\st -> st { loopInfo = LoopInfo cont brk [] [] })
+initLoop :: Stmt -> ClauseComp ()
+initLoop cont = 
+    modify (\st -> st { loopInfo = LoopInfo cont [] [] })
 
 
 ----------------------------------------------------------------
