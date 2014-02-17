@@ -1,32 +1,44 @@
-Public proc yorn(prompt:string, ?result:bool) {proc-yorn:1:8}[do print(prompt {proc-yorn:2:18}) {proc-yorn:2:12} {proc-yorn:2:12}print(" (y/n) " {proc-yorn:3:18}) {proc-yorn:3:12} {proc-yorn:3:12}read_char(?response {proc-yorn:4:22}) {proc-yorn:4:12} {proc-yorn:4:12}=(?result {proc-yorn:5:12}, is_yes(response {proc-yorn:5:29}) {proc-yorn:5:22}) {proc-yorn:5:12} {proc-yorn:5:12}unless is_yes_or_no(response {proc-yorn:6:32}) {proc-yorn:6:19} {proc-yorn:6:12}println("Please answer 'yes' or 'no'." {proc-yorn:7:20}) {proc-yorn:7:12} {proc-yorn:7:12}until is_yes_or_no(response {proc-yorn:8:31}) {proc-yorn:8:18} {proc-yorn:8:12} end {proc-yorn:2:8}]
+Public proc yorn(prompt:string, ?result:bool) @proc-yorn:1:8[do print(prompt @proc-yorn:2:18) @proc-yorn:2:12print(" (y/n) " @proc-yorn:3:18) @proc-yorn:3:12read_char(?response @proc-yorn:4:22) @proc-yorn:4:12=(?result @proc-yorn:5:12, is_yes(response @proc-yorn:5:29) @proc-yorn:5:22) @proc-yorn:5:12unless is_yes_or_no(response @proc-yorn:6:32) @proc-yorn:6:19 @proc-yorn:6:12println("Please answer 'yes' or 'no'." @proc-yorn:7:20) @proc-yorn:7:12until is_yes_or_no(response @proc-yorn:8:31) @proc-yorn:8:18 @proc-yorn:8:12 end @proc-yorn:2:8]
+Loop gen$1 body = [print(prompt @proc-yorn:2:18) @proc-yorn:2:12,print(" (y/n) " @proc-yorn:3:18) @proc-yorn:3:12,read_char(?response @proc-yorn:4:22) @proc-yorn:4:12,=(?result @proc-yorn:5:12, is_yes(response @proc-yorn:5:29) @proc-yorn:5:22) @proc-yorn:5:12,unless is_yes_or_no(response @proc-yorn:6:32) @proc-yorn:6:19 @proc-yorn:6:12,println("Please answer 'yes' or 'no'." @proc-yorn:7:20) @proc-yorn:7:12,until is_yes_or_no(response @proc-yorn:8:31) @proc-yorn:8:18 @proc-yorn:8:12]
+Loop vars = fromList ["prompt"]
 
  Module proc-yorn
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : yorn(prompt:0:string, ?result:-1:bool) <0> {proc-yorn:1:8}
+  public procs    : yorn(prompt:0:string, ?result:-1:bool) <0> @proc-yorn:1:8
   imports         : 
   types           : 
   resources       : 
-  procs           : yorn:
-proc yorn(prompt:0:string, ?result:-1:bool) (id 0):  {proc-yorn:1:8}
-    do  {proc-yorn:2:8}
-        print(prompt:0) {proc-yorn:2:12}
-        print(" (y/n) ") {proc-yorn:3:12}
-        read_char(?response:0) {proc-yorn:4:12}
-        is_yes(response:0, ?$tmp4:0) {proc-yorn:5:22}
-        =(?result:0, $tmp4:0) {proc-yorn:5:12}
-        is_yes_or_no(response:0, ?$tmp2:0) {proc-yorn:6:19}
-        =(?$tmp3:0, $tmp2:0) {?}
-        unless $tmp3:0 {proc-yorn:6:12}
-        println("Please answer 'yes' or 'no'.") {proc-yorn:7:12}
-        is_yes_or_no(response:0, ?$tmp0:0) {proc-yorn:8:18}
-        =(?$tmp1:0, $tmp0:0) {?}
-        until $tmp1:0 {proc-yorn:8:12}
-    end
+  procs           : gen$1:
+proc gen$1(prompt:0:?, ?result:2:?) (id 0): 
+    print(prompt:0) @proc-yorn:2:12
+    print(" (y/n) ") @proc-yorn:3:12
+    read_char(?response:0) @proc-yorn:4:12
+    is_yes(response:0, ?$tmp0:0) @proc-yorn:5:22
+    =(?result:1, $tmp0:0) @proc-yorn:5:12
+    gen$2(prompt:0, response:0, ?result:2)
+                    gen$2:
+proc gen$2(prompt:0:?, response:0:?, ?result:-1:bool) (id 0): 
+    is_yes_or_no(response:0, ?$tmp1:0) @proc-yorn:6:19
+    guard $tmp1:0 = 1
+    gen$1(prompt:0) @proc-yorn:6:12
+
+    is_yes_or_no(response:0, ?$tmp1:0) @proc-yorn:6:19
+    guard $tmp1:0 = 0
+    println("Please answer 'yes' or 'no'.") @proc-yorn:7:12
+    gen$3(prompt:0, response:0, ?result:-1)
+                    gen$3:
+proc gen$3(prompt:0:?, response:0:?, ?result:-1:bool) (id 0): 
+    is_yes_or_no(response:0, ?$tmp2:0) @proc-yorn:8:18
+    guard $tmp2:0 = 1
+
+    is_yes_or_no(response:0, ?$tmp2:0) @proc-yorn:8:18
+    guard $tmp2:0 = 0
+    gen$1(prompt:0, ?result:-1:bool)
+                    yorn:
+proc yorn(prompt:0:string, ?result:-1:bool) (id 0):  @proc-yorn:1:8
+    gen$1(prompt:0)
 
 Submodules of proc-yorn:
 
-uninitialised variable response
-uninitialised variable response
-uninitialised variable response
