@@ -388,6 +388,7 @@ freshClauseComp :: ClauseCompState
 freshClauseComp = initClauseComp Map.empty [] 0
 
 data VarInfo = VarInfo {
+    name    :: VarName,        -- ^the var name to use
     ordinal :: Int,            -- ^ordinal number of distinct var for this name
     typ :: TypeSpec            -- ^type of this var
     } deriving Show
@@ -429,7 +430,7 @@ instr prim pos = do
 
 insertInputParam :: PrimParam -> Map VarName VarInfo -> Map VarName VarInfo
 insertInputParam (PrimParam (PrimVarName var num) typ FlowIn _) symtab =
-    Map.insert var (VarInfo num typ) symtab
+    Map.insert var (VarInfo var num typ) symtab
 insertInputParam (PrimParam _ _ FlowOut _) symtab = symtab    
 
 -- |Return a fresh variable name.
@@ -451,8 +452,8 @@ getVar name pos = do
             -- lift $ message Error ("uninitialised variable "++name) Nothing
             modify (\s -> s {uses = Map.insert name pos $ uses s})
             return $ PrimVarName name 0
-        Just (VarInfo num _) -> 
-            return $ PrimVarName name num
+        Just (VarInfo var num _) -> 
+            return $ PrimVarName var num
 
 -- |Return the next PrimVarName for a given name string; ie, find 
 --  the next suffix for the specified name
@@ -461,8 +462,8 @@ getNextVar name pos = do
     info <- gets (Map.lookup name . vars)
     let (num,typ) = case info of
             Nothing -> (0,Unspecified)
-            Just (VarInfo num typ) -> ((num + 1), typ)
-    modify (\s -> s {vars = Map.insert name (VarInfo num typ) $ vars s})
+            Just (VarInfo _ num typ) -> ((num + 1), typ)
+    modify (\s -> s {vars = Map.insert name (VarInfo name num typ) $ vars s})
     return $ PrimVarName name num
 
 -- |Return the primitive procedure call input argument(s) for the 

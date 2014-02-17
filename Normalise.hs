@@ -664,8 +664,8 @@ compileVarRef (var,pos) = do
         Nothing -> do
             lift $ message Error ("Unintitialised variable " ++ var) pos
             return $ ArgVar (PrimVarName var 0) FlowIn Ordinary
-        Just (VarInfo num _) ->
-            return $ ArgVar (PrimVarName var num) FlowIn Ordinary
+        Just (VarInfo vname num _) ->
+            return $ ArgVar (PrimVarName vname num) FlowIn Ordinary
 
 compileVarDef :: VarName -> ClauseComp PrimArg
 compileVarDef var = do
@@ -674,8 +674,8 @@ compileVarDef var = do
         Nothing -> do
             lift $ message Error ("Undefined variable " ++ var) Nothing
             return $ ArgVar (PrimVarName var 0) FlowOut Ordinary
-        Just (VarInfo num _) ->
-            return $ ArgVar (PrimVarName var num) FlowOut Ordinary
+        Just (VarInfo vname num _) ->
+            return $ ArgVar (PrimVarName vname num) FlowOut Ordinary
 
 -- |Set up a loop with the specified continuation and break calls
 initLoop :: Stmt -> Stmt -> ClauseComp ()
