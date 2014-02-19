@@ -442,12 +442,11 @@ compileStmts' (Loop loop) rest pos = do
   bodyComp <- compileClause (initLoop loopCall) tmpNum
              (loop++[Unplaced loopCall]) 
   -- XXX need to specify type of params
-  lift $ addProc loopName (PrimProto loopName 
+  lift $ addProc loopName (PrimProto loopName [])
 -- XXX need to specify params
                            -- [PrimParam (PrimVarName name 0) Unspecified 
                            --  FlowIn Ordinary
                            -- | name <- Set.elems afterUsed])
-                           [])
         [(List.reverse $ body bodyComp)] Nothing Private
   let init = loopInit $ loopInfo bodyComp
   let term = loopTerm $ loopInfo bodyComp
