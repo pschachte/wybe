@@ -396,8 +396,7 @@ compileStmts [] = return ()
 compileStmts (stmt:stmts) = compileStmts' (content stmt) stmts (place stmt)
 
 -- |Compile the specified statement, plus the list of following statements
-compileStmts' :: Stmt -> [Placed Stmt] -> Maybe SourcePos 
-                 -> ClauseComp ()
+compileStmts' :: Stmt -> [Placed Stmt] -> Maybe SourcePos -> ClauseComp ()
 compileStmts' (ProcCall name args) rest pos = do
   primArgs <- mapM (\a->primArg (content a) (place a)) args
   if List.all isJust primArgs
@@ -427,31 +426,11 @@ compileStmts' (Cond exp thn els) rest pos = do
   switch <- compileFreshProc switchName
             [(Unplaced $ Guard exp 1):thn, (Unplaced $ Guard exp 0):els]
   compileStmts' switch rest Nothing
-compileStmts' (Loop loop) rest pos = do
-  -- afterName <- lift $ genProcName
-  -- let (_,afterUsed) = pstmtsDefUse rest
-  -- let afterCall = ProcCall afterName 
-  --                 $ [Unplaced $ Var name ParamIn | name <- Set.elems afterUsed]
+compileStmts' (Loop loopBody) rest pos = do
   loopName <- lift $ genProcName
-  let (_,loopUsed) = pstmtsDefUse loop
-  liftIO $ putStrLn $ "Loop " ++ loopName ++ " body = " ++ show loop
-  liftIO $ putStrLn $ "Loop vars = " ++ show loopUsed
-  let loopCall = ProcCall loopName 
-                 $ [Unplaced $ Var name ParamIn | name <- Set.elems loopUsed]
-  tmpNum <- gets tmpCount
-  bodyComp <- compileClause (initLoop loopCall) tmpNum
-             (loop++[Unplaced loopCall]) 
-  -- XXX need to specify type of params
-  lift $ addProc loopName (PrimProto loopName [])
--- XXX need to specify params
-                           -- [PrimParam (PrimVarName name 0) Unspecified 
-                           --  FlowIn Ordinary
-                           -- | name <- Set.elems afterUsed])
-        [(List.reverse $ body bodyComp)] Nothing Private
-  let init = loopInit $ loopInfo bodyComp
-  let term = loopTerm $ loopInfo bodyComp
-  -- after <- compileFreshProc afterName [term++rest]
-  compileStmts (init ++ [Unplaced loopCall] ++ term ++ rest)
+  loop <- compileFreshProc loopName 
+              [loopBody++[Unplaced $ NextIf $ Unplaced $ IntValue 1]]
+  compileStmts' loop rest Nothing
 compileStmts' (Guard exp val) rest pos = do
   parg <- primArg (content exp) (place exp)
   if isJust parg then do
