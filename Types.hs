@@ -47,8 +47,6 @@ typeCheckMod scc modspec = do
 localCalledProcs :: [Prim] -> [Ident]
 localCalledProcs [] = []
 localCalledProcs (PrimCall name _ _:rest) = name:localCalledProcs rest
-localCalledProcs (PrimLoop body:rest) = 
-    (localCalledProcs $ List.map content body) ++ localCalledProcs rest
 localCalledProcs (_:rest) = localCalledProcs rest
 
 -- |Type check one strongly connected component in the local call graph

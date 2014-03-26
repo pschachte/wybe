@@ -283,17 +283,18 @@ Stmt :: { Placed Stmt }
                                 { Placed (Cond $2 $4 $5) (tokenPosition $1) }
     | 'do' Stmts 'end'          { Placed (Loop $2) (tokenPosition $1) }
     | 'for' Generator           { Placed (For $2) (tokenPosition $1) }
-    | 'until' Exp               { Placed (BreakIf $2) (tokenPosition $1) }
-    | 'while' Exp               { Placed (BreakIf 
-					  (maybePlace (Fncall "not" [$2])
-					   (place $2)))
-	                                 (tokenPosition $1) }
-    | 'unless' Exp              { Placed (NextIf $2) (tokenPosition $1) }
-    | 'when' Exp                { Placed (NextIf
-					  (maybePlace (Fncall "not" [$2])
-					   (place $2)))
-	                                 (tokenPosition $1) }
-
+    | 'until' Exp               { Placed (Cond $2 [Unplaced Break]
+                                                  [Unplaced Nop])
+                                         (tokenPosition $1) }
+    | 'while' Exp               { Placed (Cond $2 [Unplaced Nop]
+                                                  [Unplaced Break])
+                                         (tokenPosition $1) }
+    | 'unless' Exp              { Placed (Cond $2 [Unplaced Next]
+                                                  [Unplaced Nop])
+                                         (tokenPosition $1) }
+    | 'when' Exp                { Placed (Cond $2 [Unplaced Nop]
+					          [Unplaced Next])
+                                         (tokenPosition $1) }
 OptProcArgs :: { [Placed Exp] }
     : {- empty -}               { [] }
     | '(' ProcArg ProcArgList ')'

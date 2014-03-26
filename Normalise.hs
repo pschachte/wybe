@@ -429,7 +429,7 @@ compileStmts' (Cond exp thn els) rest pos = do
 compileStmts' (Loop loopBody) rest pos = do
   loopName <- lift $ genProcName
   loop <- compileFreshProc loopName 
-              [loopBody++[Unplaced $ NextIf $ Unplaced $ IntValue 1]]
+              [loopBody++[Unplaced Next]]
   compileStmts' loop rest Nothing
 compileStmts' (Guard exp val) rest pos = do
   parg <- primArg (content exp) (place exp)
@@ -458,27 +458,23 @@ compileStmts' (For gen) rest pos = do
                       [Unplaced (Guard cond 1):rest,
                        [Unplaced $ Guard cond 0]]
             compileStmts' switch [] Nothing
-compileStmts' (BreakIf cond) rest pos = do
+compileStmts' Break rest pos = do
     inf <- gets loopInfo
     case inf of
         NoLoop -> lift $ message Error "Loop op outside of a loop" pos
-        LoopInfo _ _ _ -> do
-            switchName <- lift $ genProcName
-            switch <- compileFreshProc switchName
-                      [[Unplaced (Guard cond 1)],
-                       (Unplaced $ Guard cond 0):rest]
-            compileStmts' switch [] Nothing
-compileStmts' (NextIf cond) rest pos = do
+        LoopInfo _ _ _ -> return ()
+compileStmts' Next rest pos = do
     inf <- gets loopInfo
     case inf of
         NoLoop -> lift $ message Error "Loop op outside of a loop" pos
-        LoopInfo cont _ _ -> do
-            switchName <- lift $ genProcName
-            switch <- compileFreshProc switchName
-                      [[Unplaced (Guard cond 1), 
-                        maybePlace cont pos],
-                       (Unplaced $ Guard cond 0):rest]
-            compileStmts' switch [] Nothing
+        LoopInfo _ _ _ -> return ()
+        -- LoopInfo cont _ _ -> do
+        --     switchName <- lift $ genProcName
+        --     switch <- compileFreshProc switchName
+        --               [[Unplaced (Guard cond 1), 
+        --                 maybePlace cont pos],
+        --                (Unplaced $ Guard cond 0):rest]
+        --     compileStmts' switch [] Nothing
 
 
 -- |Compile an argument into a PrimArg if it's flattened; if not, return Nothing

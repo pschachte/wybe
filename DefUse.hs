@@ -53,8 +53,8 @@ stmtDefUse (Loop loop) = pstmtsDefUse loop
 stmtDefUse (Guard exp val) = pexpDefUse exp
 stmtDefUse Nop = noDefUse
 stmtDefUse (For gen) = generatorDefUse gen
-stmtDefUse (BreakIf cond) = pexpDefUse cond
-stmtDefUse (NextIf cond) = pexpDefUse cond
+stmtDefUse Break = noDefUse
+stmtDefUse Next = noDefUse
 
 -- |Return the DefUse info for a generator.  This is a bit different than
 --  you would expect.  It is *not* considered to define the 

@@ -927,8 +927,8 @@ data Stmt
      | Nop
        -- These are only valid in a loop
      | For Generator
-     | BreakIf (Placed Exp)
-     | NextIf (Placed Exp)
+     | Break
+     | Next
 
 -- |An expression.  These are all normalised into statements.
 data Exp
@@ -1007,9 +1007,6 @@ data Prim
      | PrimGuard PrimVarName Integer
      | PrimFail
      | PrimNop
-     | PrimLoop [Placed Prim]           -- depricated
-     | PrimBreakIf PrimVarName          -- depricated
-     | PrimNextIf PrimVarName           -- depricated
      deriving Eq
 
 -- |The allowed arguments in primitive proc or foreign proc calls, 
@@ -1059,10 +1056,6 @@ varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
 varsInPrim dir (PrimGuard var _)        = Set.singleton var
 varsInPrim dir (PrimFail)               = Set.empty
 varsInPrim dir (PrimNop)                = Set.empty
-varsInPrim dir (PrimLoop prims)         = varsInPrims dir 
-                                          $ List.map content prims
-varsInPrim dir (PrimBreakIf var)        = Set.singleton var
-varsInPrim dir (PrimNextIf var)         = Set.singleton var
 
 varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
 varsInPrimArgs dir args = 
@@ -1326,14 +1319,6 @@ instance Show Prim where
         "NOP"
     show (PrimFail) =
         "FAIL"
-    show (PrimLoop block) =
-        "do "
-        ++ showBlock 4 block
-        ++ "end"
-    show (PrimBreakIf var) =
-        "until " ++ show var
-    show (PrimNextIf var) =
-        "unless " ++ show var
 
 -- |Show a single primitive statement with the specified indent.
 showPrim :: Int -> Placed Prim -> String
@@ -1374,8 +1359,8 @@ instance Show Stmt where
   show (Guard exp val) =
     "guard " ++ show (content exp) ++ " " ++ show val
   show (For gen) = "for " ++ show gen
-  show (BreakIf cond) = "until " ++ show cond
-  show (NextIf cond) = "unless " ++ show cond
+  show Break = "break"
+  show Next = "next"
 
 -- |Show a primitive argument.
 instance Show PrimArg where
