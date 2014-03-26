@@ -30,7 +30,7 @@ module AST (
   -- *Stateful monad for the compilation process
   MessageLevel(..), getCompiler, updateCompiler,
   CompilerState(..), Compiler, runCompiler,
-  ClauseCompState(..), ClauseComp, runClauseComp, extendClauseComp,
+  ClauseCompState(..), ClauseComp, userClauseComp, runClauseComp,
   instr, LoopInfo(..),
   updateModules, getModuleImplementationField, getLoadedModule,
   getModule, updateModule, getSpecModule, updateSpecModule,
@@ -183,7 +183,7 @@ type Compiler = StateT CompilerState IO
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp 
                         (Compiler opts [] False Map.empty 0 [] [] 
-                         freshClauseComp)
+                         (initClauseComp Map.empty [] 0 NoLoop))
 
 
 -- initCompiler :: Options -> FilePath -> ModSpec -> Maybe [Ident] -> 
@@ -380,12 +380,10 @@ data ClauseCompState = ClauseComp {
     loopInfo :: LoopInfo         -- ^info about the loop we're in
   }
 
-initClauseComp :: Map VarName VarInfo -> [PrimParam] -> Int -> ClauseCompState
-initClauseComp symtab outParams tmpNum = 
-    ClauseComp [] symtab Map.empty outParams tmpNum NoLoop
-
-freshClauseComp :: ClauseCompState
-freshClauseComp = initClauseComp Map.empty [] 0
+initClauseComp :: Map VarName VarInfo -> [PrimParam] -> Int -> LoopInfo ->
+                  ClauseCompState
+initClauseComp symtab outParams tmpNum loopInfo = 
+    ClauseComp [] symtab Map.empty outParams tmpNum loopInfo
 
 data VarInfo = VarInfo {
     name    :: VarName,        -- ^the var name to use
@@ -394,7 +392,7 @@ data VarInfo = VarInfo {
     } deriving Show
 
 data LoopInfo = LoopInfo {
-    continue :: Stmt,         -- ^stmt to continue the loop
+    continue :: Stmt,             -- ^stmt to continue the loop
     loopInit :: [Placed Stmt],    -- ^code to initialise before enterring loop
     loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
     | NoLoop
@@ -404,20 +402,21 @@ data LoopInfo = LoopInfo {
 --  clause compiler state over the compiler monad.
 type ClauseComp = StateT ClauseCompState Compiler
 
--- |Run a clause compiler function from the Compiler monad.
-extendClauseComp :: ClauseComp t -> ClauseComp (t, ClauseCompState)
-extendClauseComp clcomp = do
-    oldState <- get
-    lift $ runStateT clcomp ( oldState { body = [], 
-                                         uses = Map.empty, 
-                                         vars = Map.empty } )
 
 -- |Run a clause compiler function from the Compiler monad.
-runClauseComp :: [PrimParam] -> Int -> ClauseComp t -> Compiler (t, ClauseCompState)
-runClauseComp params tmpNum clcomp =
+userClauseComp :: [PrimParam] -> ClauseComp t 
+                 -> Compiler (t, ClauseCompState)
+userClauseComp params clcomp  =
     let symtab = List.foldr insertInputParam Map.empty params
         outs = List.filter (\p->paramFlow p==FlowOut) params
-    in runStateT clcomp $ initClauseComp symtab outs tmpNum
+    in runClauseComp symtab outs 0 NoLoop clcomp
+
+
+-- |Run a clause compiler function from the Compiler monad.
+runClauseComp :: Map VarName VarInfo -> [PrimParam] -> Int -> LoopInfo ->
+                 ClauseComp t -> Compiler (t, ClauseCompState)
+runClauseComp symtab outs tmpNum loopInfo clcomp =
+    runStateT clcomp $ initClauseComp symtab outs tmpNum loopInfo
 
 
 -- |Generate a single instruction for the clause currently being compiled
@@ -427,10 +426,12 @@ instr prim pos = do
   bdy <- gets body
   modify (\st -> st {body = (maybePlace prim pos):bdy})
 
+
 insertInputParam :: PrimParam -> Map VarName VarInfo -> Map VarName VarInfo
 insertInputParam (PrimParam (PrimVarName var num) typ FlowIn _) symtab =
     Map.insert var (VarInfo var num typ) symtab
 insertInputParam (PrimParam _ _ FlowOut _) symtab = symtab    
+
 
 -- |Return a fresh variable name.
 freshVar :: ClauseComp VarName
@@ -458,12 +459,12 @@ getVar name pos = do
 --  the next suffix for the specified name
 getNextVar :: String -> OptPos -> ClauseComp PrimVarName
 getNextVar name pos = do
-    info <- gets (Map.lookup name . vars)
-    let (num,typ) = case info of
-            Nothing -> (0,Unspecified)
-            Just (VarInfo _ num typ) -> ((num + 1), typ)
-    modify (\s -> s {vars = Map.insert name (VarInfo name num typ) $ vars s})
-    return $ PrimVarName name num
+    maybeInfo <- gets (Map.lookup name . vars)
+    let newInfo = case maybeInfo of
+            Nothing -> VarInfo name 0 Unspecified
+            Just (VarInfo _ num typ) -> VarInfo name (num + 1) typ
+    modify (\s -> s {vars = Map.insert name newInfo $ vars s})
+    return $ PrimVarName name $ ordinal newInfo
 
 -- |Return the primitive procedure call input argument(s) for the 
 --  specified variable name and flow direction

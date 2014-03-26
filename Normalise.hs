@@ -65,7 +65,7 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     let proto'@(PrimProto _ params') = primProto proto
-    (_,procstate) <- runClauseComp params' 0 $ compileStmts stmts
+    (_,procstate) <- userClauseComp params' $ compileStmts stmts
     addProc name proto' [List.reverse $ body procstate] pos vis
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
@@ -346,11 +346,12 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
 
 ----------------------------------------------------------------
 -- |Make a fresh proc with a fresh name
-compileFreshProc :: ProcName -> [[Placed Stmt]] -> ClauseComp Stmt
-compileFreshProc name clauses = do
+compileFreshProc :: ProcName -> LoopInfo -> [[Placed Stmt]] -> ClauseComp Stmt
+compileFreshProc name loopInfo clauses = do
   -- liftIO $ putStrLn $ "compiling separate proc:  " ++ show clauses
-  tmpNum <- gets tmpCount
-  results <- mapM (compileClause (return ()) tmpNum) clauses
+  -- XXX get list of defined variables; this becomes list of inParams
+  -- XXX outParams is this list plus variables defined by all clauses
+  results <- mapM (genClauseComp loopInfo) clauses
   let clauses' = List.map (List.reverse . body) results
   -- liftIO $ putStrLn $ "compiled code:  " ++ show clauses'
   if List.all List.null clauses'
@@ -364,7 +365,7 @@ compileFreshProc name clauses = do
       -- liftIO $ putStrLn $ "used vars:  " ++ show inVars
       outParams <- gets outParams
       -- liftIO $ putStrLn $ "out params:  " ++ show outParams
-      inParams <- mapM 
+      inParams <- mapM
                   (\n -> do 
                         inf <- gets (Map.lookup n . vars)
                         let thistype = maybe Unspecified typ inf
@@ -372,7 +373,8 @@ compileFreshProc name clauses = do
                         return $ PrimParam (PrimVarName n num) thistype 
                           FlowIn Ordinary)
                   inVars
-      let inArgs = List.map (\(n,_) -> Unplaced $ Var n ParamIn) $ assocs inMap
+      let inArgs = List.map (\n -> Unplaced $ Var n ParamIn) $ keys inMap
+      -- XXX Not right:  shouldn't depend on outParams
       let outArgs = List.map (\n -> Unplaced $ Var n ParamOut)
                     $ List.map (primVarName . paramName) outParams
       lift $ addProc name (PrimProto name (inParams++outParams)) 
@@ -380,14 +382,16 @@ compileFreshProc name clauses = do
       return $ ProcCall name (inArgs++outArgs)
 
 -- |Compile a single complete clause, using a fresh ClauseComp monad
-compileClause :: ClauseComp () -> Int -> [Placed Stmt] 
-                 -> ClauseComp ClauseCompState
-compileClause init tmpNum clause = do
-    (_,state) <- extendClauseComp
-                 (do                     
-                       init
-                       compileStmts clause
-                 )
+genClauseComp :: LoopInfo -> [Placed Stmt] -> ClauseComp ClauseCompState
+genClauseComp loopInfo1 clause = do
+    tmpNum <- gets tmpCount
+    symtab <- gets vars
+    loopInfo0 <- gets loopInfo
+    let loopInfo1 = case loopInfo1 of
+            NoLoop -> loopInfo0
+            _ -> loopInfo1
+    let outs = List.map (\(VarInfo n i t)->PrimParam (PrimVarName n i) t FlowOut Ordinary) $ Map.elems symtab
+    (_,state) <- lift $ runClauseComp symtab outs tmpNum loopInfo1 $ compileStmts clause
     return state
 
 -- |Compile the specified statements to primitive statements.
@@ -423,12 +427,12 @@ compileStmts' (Cond exp thn els) rest pos = do
   -- referenced in confluence, because they are not known to outer 
   -- monad.  Will need to report errors here, not in compileVarRef.
   switchName <- lift $ genProcName
-  switch <- compileFreshProc switchName
+  switch <- compileFreshProc switchName NoLoop
             [(Unplaced $ Guard exp 1):thn, (Unplaced $ Guard exp 0):els]
   compileStmts' switch rest Nothing
 compileStmts' (Loop loopBody) rest pos = do
   loopName <- lift $ genProcName
-  loop <- compileFreshProc loopName 
+  loop <- compileFreshProc loopName NoLoop 
               [loopBody++[Unplaced Next]]
   compileStmts' loop rest Nothing
 compileStmts' (Guard exp val) rest pos = do
@@ -454,7 +458,7 @@ compileStmts' (For gen) rest pos = do
         LoopInfo _ _ _ -> do
             cond <- compileGenerator gen pos
             switchName <- lift $ genProcName
-            switch <- compileFreshProc switchName
+            switch <- compileFreshProc switchName NoLoop
                       [Unplaced (Guard cond 1):rest,
                        [Unplaced $ Guard cond 0]]
             compileStmts' switch [] Nothing
