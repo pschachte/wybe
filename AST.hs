@@ -16,7 +16,7 @@ module AST (
   ProcProto(..), Param(..), Stmt(..), 
   Exp(..), Generator(..),
   -- *Source Position Types
-  OptPos, Placed(..), place, content, maybePlace, rePlace, mapPlaced,
+  OptPos, Placed(..), place, content, maybePlace, rePlace,
   updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
@@ -129,9 +129,9 @@ rePlace :: t -> Placed t -> Placed t
 rePlace t (Placed _ pos) = Placed t pos
 rePlace t (Unplaced _)   = Unplaced t
 
-mapPlaced :: (a -> b) -> Placed a -> Placed b
-mapPlaced f (Placed x pos) = Placed (f x) pos
-mapPlaced f (Unplaced x) = Unplaced $ f x
+instance Functor Placed where
+  fmap f (Placed x pos) = Placed (f x) pos
+  fmap f (Unplaced x) = Unplaced $ f x
 
 -- |Apply a monadic function to the payload of a Placed thing
 updatePlacedM :: (t -> Compiler t) -> Placed t -> Compiler (Placed t)

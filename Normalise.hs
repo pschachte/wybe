@@ -547,7 +547,7 @@ normaliseExp (Fncall name exps) pos = do
   let pres' = if flowsIn flow then 
                 pres++[maybePlace 
                        (ProcCall name $
-                        List.map (mapPlaced inputArg) args
+                        List.map (fmap inputArg) args
                         ++[Unplaced $ Var resultName ParamOut])
                        pos]
               else pres
