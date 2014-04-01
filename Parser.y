@@ -10,7 +10,7 @@ module Parser (parse) where
 import Scanner
 import AST
 -- import Text.ParserCombinators.Parsec.Pos
-
+import Data.Set as Set
 }
 
 %name parse
@@ -280,20 +280,24 @@ Stmt :: { Placed Stmt }
     : Exp                       { maybePlace (expToStmt $ content $1) 
 	                          (place $1) }
     | 'if' Exp 'then' Stmts Condelse 'end'
-                                { Placed (Cond $2 $4 $5) (tokenPosition $1) }
-    | 'do' Stmts 'end'          { Placed (Loop $2) (tokenPosition $1) }
-    | 'for' Generator           { Placed (For $2) (tokenPosition $1) }
+                                { Placed (Cond $2 $4 $5 Set.empty Set.empty) (tokenPosition $1) }
+    | 'do' Stmts 'end'          { Placed (Loop $2 Set.empty Set.empty) (tokenPosition $1) }
+    | 'for' Generator           { Placed (For $2 Set.empty Set.empty) (tokenPosition $1) }
     | 'until' Exp               { Placed (Cond $2 [Unplaced Break]
-                                                  [Unplaced Nop])
+                                                  [Unplaced Nop]
+					  Set.empty Set.empty)
                                          (tokenPosition $1) }
     | 'while' Exp               { Placed (Cond $2 [Unplaced Nop]
-                                                  [Unplaced Break])
+                                                  [Unplaced Break]
+					  Set.empty Set.empty)
                                          (tokenPosition $1) }
     | 'unless' Exp              { Placed (Cond $2 [Unplaced Next]
-                                                  [Unplaced Nop])
+                                                  [Unplaced Nop]
+					  Set.empty Set.empty)
                                          (tokenPosition $1) }
     | 'when' Exp                { Placed (Cond $2 [Unplaced Nop]
-					          [Unplaced Next])
+					          [Unplaced Next]
+					  Set.empty Set.empty)
                                          (tokenPosition $1) }
 OptProcArgs :: { [Placed Exp] }
     : {- empty -}               { [] }

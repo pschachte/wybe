@@ -44,15 +44,15 @@ pstmtDefUse :: Placed Stmt -> DefUse
 pstmtDefUse placed = stmtDefUse $ content placed
 
 stmtDefUse :: Stmt -> DefUse
-stmtDefUse (ProcCall _ args) = pexpsDefUse args
-stmtDefUse (ForeignCall _ _ args) = pexpsDefUse args
-stmtDefUse (Cond exp thn els) =
+stmtDefUse (ProcCall _ args _ _) = pexpsDefUse args
+stmtDefUse (ForeignCall _ _ args _ _) = pexpsDefUse args
+stmtDefUse (Cond exp thn els _ _) =
     pexpDefUse exp `sequentialDefUse`
     (pstmtsDefUse thn `joinDefUse` pstmtsDefUse els)
-stmtDefUse (Loop loop) = pstmtsDefUse loop
-stmtDefUse (Guard exp val) = pexpDefUse exp
+stmtDefUse (Loop loop _ _) = pstmtsDefUse loop
+stmtDefUse (Guard exp val _ _) = pexpDefUse exp
 stmtDefUse Nop = noDefUse
-stmtDefUse (For gen) = generatorDefUse gen
+stmtDefUse (For gen _ _) = generatorDefUse gen
 stmtDefUse Break = noDefUse
 stmtDefUse Next = noDefUse
 

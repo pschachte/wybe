@@ -922,14 +922,14 @@ flowIn _ = False
 -- |Possible program statements.  These will be normalised into 
 --  Prims.
 data Stmt
-     = ProcCall Ident [Placed Exp]
-     | ForeignCall Ident Ident [Placed Exp]
-     | Cond (Placed Exp) [Placed Stmt] [Placed Stmt]
-     | Loop [Placed Stmt]
-     | Guard (Placed Exp) Integer
+     = ProcCall Ident [Placed Exp] (Set VarName) (Set VarName)
+     | ForeignCall Ident Ident [Placed Exp] (Set VarName) (Set VarName)
+     | Cond (Placed Exp) [Placed Stmt] [Placed Stmt] (Set VarName) (Set VarName)
+     | Loop [Placed Stmt] (Set VarName) (Set VarName)
+     | Guard (Placed Exp) Integer (Set VarName) (Set VarName)
      | Nop
        -- These are only valid in a loop
-     | For Generator
+     | For Generator (Set VarName) (Set VarName)
      | Break
      | Next
 
@@ -1036,8 +1036,9 @@ argFlowDirection (ArgChar _) = FlowIn
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
-expToStmt (Fncall name args) = ProcCall name args
-expToStmt (ForeignFn lang name args) = ForeignCall lang name args
+expToStmt (Fncall name args) = ProcCall name args Set.empty Set.empty
+expToStmt (ForeignFn lang name args) = 
+  ForeignCall lang name args Set.empty Set.empty
 
 
 
@@ -1349,19 +1350,19 @@ showCases num labelInd blockInd (block:blocks) =
 
 -- |Show a single statement.
 instance Show Stmt where
-  show (ProcCall name args) =
+  show (ProcCall name args _ _) =
     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
-  show (Cond exp thn els) =
+  show (Cond exp thn els _ _) =
     "if" ++ show (content exp) ++ " then"
     ++ show thn
     ++ " else "
     ++ show els
     ++ " end"
-  show (Loop lstmts) =
+  show (Loop lstmts _ _) =
     "do " ++ concat (List.map show lstmts) ++ " end"
-  show (Guard exp val) =
+  show (Guard exp val _ _) =
     "guard " ++ show (content exp) ++ " " ++ show val
-  show (For gen) = "for " ++ show gen
+  show (For gen _ _) = "for " ++ show gen
   show Break = "break"
   show Next = "next"
 
