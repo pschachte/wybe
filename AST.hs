@@ -403,7 +403,8 @@ data LoopInfo = LoopInfo {
 type ClauseComp = StateT ClauseCompState Compiler
 
 
--- |Run a clause compiler function from the Compiler monad.
+-- |Run a clause compiler function from the Compiler monad to compile
+--  a top-level procedure.
 userClauseComp :: [PrimParam] -> ClauseComp t 
                  -> Compiler (t, ClauseCompState)
 userClauseComp params clcomp  =
@@ -412,7 +413,8 @@ userClauseComp params clcomp  =
     in runClauseComp symtab outs 0 NoLoop clcomp
 
 
--- |Run a clause compiler function from the Compiler monad.
+-- |Run a clause compiler function from the Compiler monad to compile
+--  a generated procedure.
 runClauseComp :: Map VarName VarInfo -> [PrimParam] -> Int -> LoopInfo ->
                  ClauseComp t -> Compiler (t, ClauseCompState)
 runClauseComp symtab outs tmpNum loopInfo clcomp =
