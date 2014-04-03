@@ -374,6 +374,11 @@ makeMessage msg (Just pos) =
 --                 Clause compiler monad
 ----------------------------------------------------------------
 
+-- |The clause compiler monad is a state transformer monad carrying the 
+--  clause compiler state over the compiler monad.
+type ClauseComp = StateT ClauseCompState Compiler
+
+
 -- |The state of compilation of a clause; used by the ClauseComp
 -- monad.
 data ClauseCompState = ClauseComp {
@@ -401,11 +406,6 @@ data LoopInfo = LoopInfo {
     loopInit :: [Placed Stmt],    -- ^code to initialise before enterring loop
     loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
     | NoLoop
-
-
--- |The clause compiler monad is a state transformer monad carrying the 
---  clause compiler state over the compiler monad.
-type ClauseComp = StateT ClauseCompState Compiler
 
 
 -- |Run a clause compiler function from the Compiler monad to compile
@@ -1179,10 +1179,11 @@ instance Show t => Show (Placed t) where
     
 -- |How to show an optional source position
 showMaybeSourcePos :: OptPos -> String
+-- turn off annoying source positions
+-- showMaybeSourcePos _ = ""
 showMaybeSourcePos (Just pos) = 
   " @" ++ takeBaseName (sourceName pos) ++ ":" 
   ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos)
--- showMaybeSourcePos Nothing = " {?}"
 showMaybeSourcePos Nothing = ""
 
 -- |How to show a module.

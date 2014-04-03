@@ -19,6 +19,7 @@ import Control.Monad
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
+import Flatten
 import NumberVars
 
 -- |Normalise a list of file items, storing the results in the current module.
@@ -65,9 +66,12 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
    noVars noVars]
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
-    (initVars,stmts',finalVars) <- numberVars params stmts pos
+    let (stmts',tempCtr) = flattenBody stmts
+    -- liftIO $ putStrLn $ "Flattened body = " ++ show stmts'
+    (initVars,stmts'',finalVars) <- numberVars params stmts' pos
+    -- liftIO $ putStrLn $ "Numbered body = " ++ show stmts''
     proto' <- primProto initVars finalVars proto
-    (_,procstate) <- userClauseComp $ compileStmts stmts'
+    (_,procstate) <- userClauseComp $ compileStmts stmts''
     addProc name proto' [List.reverse $ body procstate] pos vis
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
@@ -145,9 +149,10 @@ compileFreshProc name loopInfo initVars finalVars clauses = do
       return Nop
     else do
       let inVars = Map.keys initVars
-      let outVars = Map.keys finalVars
-      let inParams = inferredParams initVars FlowIn
-      let outParams = inferredParams finalVars FlowOut
+      let outVars = List.filter (not . (sameAtKey initVars finalVars))
+                    $ Map.keys finalVars
+      let inParams = inferredParams initVars FlowIn inVars
+      let outParams = inferredParams finalVars FlowOut outVars
       -- XXX
       let inArgs = inferredArgs initVars ParamIn
       let outArgs = inferredArgs finalVars ParamOut
@@ -155,15 +160,19 @@ compileFreshProc name loopInfo initVars finalVars clauses = do
         clauses' Nothing Private
       return $ ProcCall name (inArgs++outArgs) initVars finalVars
 
-inferredParams :: VarVers -> PrimFlow -> [PrimParam]
-inferredParams vars flow = do
-    List.map (\(v,i) -> PrimParam (PrimVarName v i) Unspecified flow Ordinary)
-    $ Map.assocs vars
+inferredParams :: VarVers -> PrimFlow -> [VarName] -> [PrimParam]
+inferredParams vars flow included =
+    List.map (\v -> PrimParam (PrimVarName v (vars!v)) Unspecified flow Ordinary)
+    included
 
 
 inferredArgs :: VarVers -> FlowDirection -> [Placed Exp]
 inferredArgs vars flow = do
     List.map (\v -> Unplaced $ Var v flow) $ Map.keys vars
+
+
+sameAtKey :: (Eq b, Ord a) => Map a b -> Map a b -> a -> Bool
+sameAtKey m1 m2 k = (Map.lookup k m1) == (Map.lookup k m2)
 
 
 -- |Compile a single complete clause, using a fresh ClauseComp monad
