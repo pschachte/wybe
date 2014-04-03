@@ -19,7 +19,8 @@ import Control.Monad
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
-import DefUse
+-- import DefUse
+import NumberVars
 
 -- |Normalise a list of file items, storing the results in the current module.
 normalise :: [Item] -> Compiler ()
@@ -62,11 +63,12 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   vis
   (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
   [Unplaced $ ProcCall "=" [Unplaced $ Var "$" ParamOut, result]
-   Set.empty Set.empty]
+   noVars noVars]
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
-    let proto'@(PrimProto _ params') = primProto proto
-    (_,procstate) <- userClauseComp params' $ compileStmts stmts
+    (initVars,stmts',finalVars) <- numberVars params stmts pos
+    proto'@(PrimProto _ params') <- primProto initVars finalVars proto
+    (_,procstate) <- userClauseComp params' $ compileStmts stmts'
     addProc name proto' [List.reverse $ body procstate] pos vis
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
@@ -88,7 +90,7 @@ addCtor vis typeName typeParams (FnProto ctorName params) = do
         ([Unplaced $ ForeignCall "$" "alloc" [Unplaced $ StringValue typeName,
                                               Unplaced $ StringValue ctorName,
                                               Unplaced $ Var "$rec" ParamOut]
-           Set.empty Set.empty]
+           noVars noVars]
          ++
          (List.map (\(Param var _ dir) ->
                      (Unplaced $ ForeignCall "$" "mutate"
@@ -97,7 +99,7 @@ addCtor vis typeName typeParams (FnProto ctorName params) = do
                        Unplaced $ StringValue var,
                        Unplaced $ Var "$rec" ParamInOut,
                        Unplaced $ Var var ParamIn]
-                       Set.empty Set.empty))
+                       noVars noVars))
           params))
         (Unplaced $ Var "$rec" ParamIn))
        Nothing)
@@ -125,7 +127,7 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
         Unplaced $ StringValue field,
         Unplaced $ Var "$rec" ParamInOut,
         Unplaced $ Var "$field" ParamIn]
-       Set.empty Set.empty]
+       noVars noVars]
        Nothing
 
 -- -- |Normalise the specified statements to primitive statements.
@@ -350,8 +352,9 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
 
 ----------------------------------------------------------------
 -- |Make a fresh proc with a fresh name
-compileFreshProc :: ProcName -> LoopInfo -> [[Placed Stmt]] -> ClauseComp Stmt
-compileFreshProc name loopInfo clauses = do
+compileFreshProc :: ProcName -> LoopInfo -> VarVers -> VarVers -> 
+                    [[Placed Stmt]] -> ClauseComp Stmt
+compileFreshProc name loopInfo initVars finalVars clauses = do
   -- liftIO $ putStrLn $ "compiling separate proc:  " ++ show clauses
   -- XXX get list of defined variables; this becomes list of inParams
   -- XXX outParams is this list plus variables defined by all clauses
@@ -362,40 +365,37 @@ compileFreshProc name loopInfo clauses = do
     then
       return Nop
     else do
-      let inMap = Map.unions $ List.map uses results
-      -- liftIO $ putStrLn $ "generating proc " ++ name 
-      --   ++ " with args " ++ show inMap
-      let inVars = Map.keys inMap
-      -- liftIO $ putStrLn $ "used vars:  " ++ show inVars
-      outParams <- gets outParams
-      -- liftIO $ putStrLn $ "out params:  " ++ show outParams
-      inParams <- mapM
-                  (\n -> do 
-                        inf <- gets (Map.lookup n . vars)
-                        let thistype = maybe Unspecified typ inf
-                        let num = maybe 0 ordinal inf
-                        return $ PrimParam (PrimVarName n num) thistype 
-                          FlowIn Ordinary)
-                  inVars
-      let inArgs = List.map (\n -> Unplaced $ Var n ParamIn) $ keys inMap
-      -- XXX Not right:  shouldn't depend on outParams
-      let outArgs = List.map (\n -> Unplaced $ Var n ParamOut)
-                    $ List.map (primVarName . paramName) outParams
+      let inVars = Map.keys initVars
+      let outVars = Map.keys finalVars
+      let inParams = inferredParams initVars FlowIn
+      let outParams = inferredParams finalVars FlowOut
+      -- XXX
+      let inArgs = inferredArgs initVars ParamIn
+      let outArgs = inferredArgs finalVars ParamOut
       lift $ addProc name (PrimProto name (inParams++outParams)) 
         clauses' Nothing Private
-      return $ ProcCall name (inArgs++outArgs) Set.empty Set.empty
+      return $ ProcCall name (inArgs++outArgs) initVars finalVars
+
+inferredParams :: VarVers -> PrimFlow -> [PrimParam]
+inferredParams vars flow = do
+    List.map (\(v,i) -> PrimParam (PrimVarName v i) Unspecified flow Ordinary)
+    $ Map.assocs vars
+
+
+inferredArgs :: VarVers -> FlowDirection -> [Placed Exp]
+inferredArgs vars flow = do
+    List.map (\v -> Unplaced $ Var v flow) $ Map.keys vars
+
 
 -- |Compile a single complete clause, using a fresh ClauseComp monad
 genClauseComp :: LoopInfo -> [Placed Stmt] -> ClauseComp ClauseCompState
 genClauseComp loopInfo1 clause = do
     tmpNum <- gets tmpCount
-    symtab <- gets vars
     loopInfo0 <- gets loopInfo
-    let loopInfo1 = case loopInfo1 of
+    let loopInfo = case loopInfo1 of
             NoLoop -> loopInfo0
             _ -> loopInfo1
-    let outs = List.map (\(VarInfo n i t)->PrimParam (PrimVarName n i) t FlowOut Ordinary) $ Map.elems symtab
-    (_,state) <- lift $ runClauseComp symtab outs tmpNum loopInfo1 $ compileStmts clause
+    (_,state) <- lift $ runClauseComp tmpNum loopInfo $ compileStmts clause
     return state
 
 -- |Compile the specified statements to primitive statements.
@@ -405,8 +405,9 @@ compileStmts (stmt:stmts) = compileStmts' (content stmt) stmts (place stmt)
 
 -- |Compile the specified statement, plus the list of following statements
 compileStmts' :: Stmt -> [Placed Stmt] -> Maybe SourcePos -> ClauseComp ()
-compileStmts' (ProcCall name args _ _) rest pos = do
-  primArgs <- mapM (\a->primArg (content a) (place a)) args
+compileStmts' (ProcCall name args initVars finalVars) rest pos = do
+  primArgs <- mapM (\a->primArg (content a) (place a) initVars finalVars) 
+              args
   if List.all isJust primArgs
     then do
       instr (PrimCall name Nothing $ concat $ List.map fromJust primArgs) pos
@@ -414,9 +415,11 @@ compileStmts' (ProcCall name args _ _) rest pos = do
     else do
       (args'',pre,post,_) <- normaliseArgs args
       compileStmts $ 
-        pre ++ [maybePlace (ProcCall name args'' Set.empty Set.empty) pos] ++ post ++ rest
-compileStmts' (ForeignCall lang name args before after) rest pos = do
-  primArgs <- mapM (\a->primArg (content a) (place a)) args
+        pre ++ [maybePlace (ProcCall name args'' initVars finalVars) pos] 
+        ++ post ++ rest
+compileStmts' (ForeignCall lang name args initVars finalVars) rest pos = do
+  primArgs <- mapM (\a->primArg (content a) (place a) initVars finalVars) 
+              args
   if List.all isJust primArgs
     then do
       instr (PrimForeign lang name Nothing 
@@ -425,23 +428,22 @@ compileStmts' (ForeignCall lang name args before after) rest pos = do
     else do
       (args'',pre,post,_) <- normaliseArgs args
       compileStmts $ 
-        pre ++ [maybePlace (ForeignCall lang name args'' before after) pos] ++ post ++ rest
-compileStmts' (Cond exp thn els before after) rest pos = do
-  -- XXX bug:  reports uninitialised variables for many vars 
-  -- referenced in confluence, because they are not known to outer 
-  -- monad.  Will need to report errors here, not in compileVarRef.
+        pre 
+        ++ [maybePlace (ForeignCall lang name args'' initVars finalVars) pos] 
+        ++ post ++ rest
+compileStmts' (Cond exp thn els initVars finalVars) rest pos = do
   switchName <- lift $ genProcName
-  switch <- compileFreshProc switchName NoLoop
-            [(Unplaced $ Guard exp 1 before after):thn, 
-             (Unplaced $ Guard exp 0 before after):els]
+  switch <- compileFreshProc switchName NoLoop initVars finalVars
+            [(Unplaced $ Guard exp 1 initVars finalVars):thn, 
+             (Unplaced $ Guard exp 0 initVars finalVars):els]
   compileStmts' switch rest Nothing
-compileStmts' (Loop loopBody _ _) rest pos = do
+compileStmts' (Loop loopBody initVars finalVars) rest pos = do
   loopName <- lift $ genProcName
-  loop <- compileFreshProc loopName NoLoop 
+  loop <- compileFreshProc loopName NoLoop initVars finalVars
               [loopBody++[Unplaced Next]]
   compileStmts' loop rest Nothing
-compileStmts' (Guard exp val before after) rest pos = do
-  parg <- primArg (content exp) (place exp)
+compileStmts' (Guard exp val initVars finalVars) rest pos = do
+  parg <- primArg (content exp) (place exp) initVars finalVars
   if isJust parg then do
     case fromJust parg of
       [ArgVar name FlowIn _] -> instr (PrimGuard name val) pos
@@ -454,18 +456,18 @@ compileStmts' (Guard exp val before after) rest pos = do
     else do
     ([exp'],pre,post,_) <- normalisePlacedExp exp
     compileStmts $ 
-      pre ++ [maybePlace (Guard exp' val before after) pos] ++ post ++ rest
+      pre ++ [maybePlace (Guard exp' val initVars finalVars) pos] ++ post ++ rest
 compileStmts' Nop rest pos = compileStmts rest
-compileStmts' (For gen before after) rest pos = do
+compileStmts' (For gen initVars finalVars) rest pos = do
     inf <- gets loopInfo
     case inf of
         NoLoop -> lift $ message Error "Loop op outside of a loop" pos
         LoopInfo _ _ _ -> do
             cond <- compileGenerator gen pos
             switchName <- lift $ genProcName
-            switch <- compileFreshProc switchName NoLoop
-                      [Unplaced (Guard cond 1 before after):rest,
-                       [Unplaced $ Guard cond 0 before after]]
+            switch <- compileFreshProc switchName NoLoop initVars finalVars
+                      [Unplaced (Guard cond 1 initVars finalVars):rest,
+                       [Unplaced $ Guard cond 0 initVars finalVars]]
             compileStmts' switch [] Nothing
 compileStmts' Break rest pos = do
     inf <- gets loopInfo
@@ -487,15 +489,15 @@ compileStmts' Next rest pos = do
 
 
 -- |Compile an argument into a PrimArg if it's flattened; if not, return Nothing
-primArg :: Exp -> OptPos -> ClauseComp (Maybe [PrimArg])
-primArg (IntValue a) pos = return $ Just [ArgInt a]
-primArg (FloatValue a) pos = return $ Just [ArgFloat a]
-primArg (StringValue a) pos = return $ Just [ArgString a]
-primArg (CharValue a) pos = return $ Just [ArgChar a]
-primArg (Var name dir) pos = do
-  var <- flowVar name dir pos
+primArg :: Exp -> OptPos -> VarVers -> VarVers -> ClauseComp (Maybe [PrimArg])
+primArg (IntValue a) pos initVars finalVars = return $ Just [ArgInt a]
+primArg (FloatValue a) pos initVars finalVars = return $ Just [ArgFloat a]
+primArg (StringValue a) pos initVars finalVars = return $ Just [ArgString a]
+primArg (CharValue a) pos initVars finalVars = return $ Just [ArgChar a]
+primArg (Var name dir) pos initVars finalVars = do
+  var <- lift $ flowVar name dir pos initVars finalVars
   return $ Just var
-primArg _ pos = return Nothing
+primArg _ pos initVars finalVars = return Nothing
 
 
 -- |Compile a list of expressions as proc call arguments to a list of 
@@ -542,10 +544,10 @@ normaliseExp (CondExp cond thn els) pos = do
   return ([Unplaced $ Var resultName ParamIn],
           [maybePlace (Cond cond
                   [Unplaced $ ProcCall "=" 
-                   [Unplaced $ Var resultName ParamOut,thn] Set.empty Set.empty]
+                   [Unplaced $ Var resultName ParamOut,thn] noVars noVars]
                   [Unplaced $ ProcCall "=" 
-                   [Unplaced $ Var resultName ParamOut,els] Set.empty Set.empty]
-                  Set.empty Set.empty) pos],
+                   [Unplaced $ Var resultName ParamOut,els] noVars noVars]
+                  noVars noVars) pos],
           [],ParamIn)
 normaliseExp (Fncall name exps) pos = do
   resultName <- freshVar
@@ -555,14 +557,14 @@ normaliseExp (Fncall name exps) pos = do
                        (ProcCall name
                         (List.map (fmap inputArg) args
                         ++[Unplaced $ Var resultName ParamOut])
-                        Set.empty Set.empty)
+                        noVars noVars)
                        pos]
               else pres
   let posts' = if flowsOut flow then 
                  [maybePlace
                   (ProcCall name
                    (args++[Unplaced $ Var resultName ParamIn])
-                   Set.empty Set.empty)
+                   noVars noVars)
                   pos]++posts
                else posts
   return ([Unplaced $ Var resultName flow],pres',posts',flow)
@@ -573,14 +575,14 @@ normaliseExp (ForeignFn lang name exps) pos = do
                 pres++[maybePlace 
                        (ForeignCall lang name
                         (args++[Unplaced $ Var resultName ParamOut])
-                        Set.empty Set.empty)
+                        noVars noVars)
                        pos]
               else pres
   let posts' = if flowsOut flow then 
                  posts++[maybePlace 
                          (ForeignCall lang name
                                 (args++[Unplaced $ Var resultName ParamIn])
-                                Set.empty Set.empty)
+                                noVars noVars)
                          pos]
                else posts
   return ([Unplaced $ Var resultName flow],pres',posts',flow)
@@ -593,7 +595,7 @@ compileGenerator (In var exp) pos = do
     (args,init,_,_) <- normalisePlacedExp exp
     stateVarName <- freshVar
     let asn = Unplaced $ ProcCall "=" 
-              (Unplaced (Var stateVarName ParamOut):args) Set.empty Set.empty
+              (Unplaced (Var stateVarName ParamOut):args) noVars noVars
     modify (\st -> st { loopInfo = 
                              (loopInfo st) {loopInit = 
                                                  (loopInit $ loopInfo st)
@@ -602,16 +604,16 @@ compileGenerator (In var exp) pos = do
     let varArg = Unplaced $ Var var ParamOut
     testVarName <- freshVar
     let testArg = Unplaced $ Var testVarName ParamOut
-    compileStmts' (ProcCall "next" [stateArg,varArg,testArg] Set.empty Set.empty) [] Nothing
+    compileStmts' (ProcCall "next" [stateArg,varArg,testArg] noVars noVars) [] Nothing
     return $ Unplaced $ Var testVarName ParamIn
 compileGenerator (InRange var exp updateOp inc limit) pos = do
     (args,init1,_,_) <- normalisePlacedExp exp
     (incArgs,init2,_,_) <- normalisePlacedExp inc
     let asn = Unplaced $ ProcCall "=" 
-              (Unplaced (Var var ParamOut):args) Set.empty Set.empty
+              (Unplaced (Var var ParamOut):args) noVars noVars
     let varIn = Unplaced $ Var var ParamIn
     let varOut = Unplaced $ Var var ParamOut
-    compileStmts' (ProcCall updateOp ([varIn]++incArgs++[varOut]) Set.empty Set.empty) [] Nothing
+    compileStmts' (ProcCall updateOp ([varIn]++incArgs++[varOut]) noVars noVars) [] Nothing
     case limit of
         Nothing -> do
             modify (\st -> st { loopInfo = 
@@ -633,30 +635,30 @@ compileGenerator (InRange var exp updateOp inc limit) pos = do
                                                          ++init3++[asn]}
                               })
             compileStmts' (ProcCall comp
-                           ([varIn]++limitArgs++[testArg]) Set.empty Set.empty) [] 
+                           ([varIn]++limitArgs++[testArg]) noVars noVars) [] 
               Nothing
             return $ Unplaced $ Var testVarName ParamIn
 
 
-compileVarRef :: (VarName,OptPos) -> ClauseComp PrimArg
-compileVarRef (var,pos) = do
-    inf <- gets (Map.lookup var . vars)
-    case inf of
-        Nothing -> do
-            lift $ message Error ("Unintitialised variable " ++ var) pos
-            return $ ArgVar (PrimVarName var 0) FlowIn Ordinary
-        Just (VarInfo vname num _) ->
-            return $ ArgVar (PrimVarName vname num) FlowIn Ordinary
+-- compileVarRef :: (VarName,OptPos) -> ClauseComp PrimArg
+-- compileVarRef (var,pos) = do
+--     inf <- gets (Map.lookup var . vars)
+--     case inf of
+--         Nothing -> do
+--             lift $ message Error ("Unintitialised variable " ++ var) pos
+--             return $ ArgVar (PrimVarName var 0) FlowIn Ordinary
+--         Just (VarInfo vname num _) ->
+--             return $ ArgVar (PrimVarName vname num) FlowIn Ordinary
 
-compileVarDef :: VarName -> ClauseComp PrimArg
-compileVarDef var = do
-    inf <- gets (Map.lookup var . vars)
-    case inf of
-        Nothing -> do
-            lift $ message Error ("Undefined variable " ++ var) Nothing
-            return $ ArgVar (PrimVarName var 0) FlowOut Ordinary
-        Just (VarInfo vname num _) ->
-            return $ ArgVar (PrimVarName vname num) FlowOut Ordinary
+-- compileVarDef :: VarName -> ClauseComp PrimArg
+-- compileVarDef var = do
+--     inf <- gets (Map.lookup var . vars)
+--     case inf of
+--         Nothing -> do
+--             lift $ message Error ("Undefined variable " ++ var) Nothing
+--             return $ ArgVar (PrimVarName var 0) FlowOut Ordinary
+--         Just (VarInfo vname num _) ->
+--             return $ ArgVar (PrimVarName vname num) FlowOut Ordinary
 
 -- |Set up a loop with the specified continuation and break calls
 initLoop :: Stmt -> ClauseComp ()

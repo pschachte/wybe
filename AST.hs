@@ -13,10 +13,10 @@ module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility,
   TypeProto(..), TypeSpec(..), FnProto(..),
-  ProcProto(..), Param(..), Stmt(..), 
+  ProcProto(..), Param(..), Stmt(..), VarVers, noVars,
   Exp(..), Generator(..),
   -- *Source Position Types
-  OptPos, Placed(..), place, content, maybePlace, rePlace,
+  OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
@@ -24,8 +24,8 @@ module AST (
   emptyInterface, emptyImplementation,
   ModSpec, ProcDef(..), Ident, VarName, VarInfo(..),
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
-  argFlowDirection, flowIn, 
-  expToStmt, Prim(..), PrimProto(..), primProto, PrimParam(..), primParam,
+  argFlowDirection, flowIn, flowOut,
+  expToStmt, Prim(..), PrimProto(..), primProto, PrimParam(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
   MessageLevel(..), getCompiler, updateCompiler,
@@ -38,7 +38,7 @@ module AST (
   updateModInterface, updateModProcsM,
   getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, verboseMsg, message, freshVar, genProcName,
-  getVar, getNextVar, flowVar, inVar, outVar, inOutVar,
+  flowVar,
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
@@ -114,6 +114,11 @@ place :: Placed t -> OptPos
 place (Placed _ pos) = Just pos
 place (Unplaced _) = Nothing
 
+-- |Return the optional position attached to a Placed value.
+betterPlace :: OptPos -> Placed t -> OptPos
+betterPlace _ (Placed _ pos) = Just pos
+betterPlace pos (Unplaced _) = pos
+
 -- |Return the content of a Placed value.
 content :: Placed t -> t
 content (Placed content _) = content
@@ -183,7 +188,7 @@ type Compiler = StateT CompilerState IO
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp 
                         (Compiler opts [] False Map.empty 0 [] [] 
-                         (initClauseComp Map.empty [] 0 NoLoop))
+                         (initClauseComp 0 NoLoop))
 
 
 -- initCompiler :: Options -> FilePath -> ModSpec -> Maybe [Ident] -> 
@@ -373,17 +378,17 @@ makeMessage msg (Just pos) =
 -- monad.
 data ClauseCompState = ClauseComp {
     body :: [Placed Prim],       -- ^body of the clause being generated, reversed
-    vars :: Map VarName VarInfo, -- ^latest var number for each var
-    uses :: Map VarName OptPos,  -- ^where variables are used before defined
-    outParams:: [PrimParam],     -- ^variables that must be defined by clause
+    -- vars :: Map VarName VarInfo, -- ^latest var number for each var
+    -- uses :: Map VarName OptPos,  -- ^where variables are used before defined
+    -- outParams:: [PrimParam],     -- ^variables that must be defined by clause
     tmpCount :: Int,             -- ^number of temp vars so far in this clause
     loopInfo :: LoopInfo         -- ^info about the loop we're in
   }
 
-initClauseComp :: Map VarName VarInfo -> [PrimParam] -> Int -> LoopInfo ->
-                  ClauseCompState
-initClauseComp symtab outParams tmpNum loopInfo = 
-    ClauseComp [] symtab Map.empty outParams tmpNum loopInfo
+
+initClauseComp :: Int -> LoopInfo -> ClauseCompState
+initClauseComp tmpNum loopInfo = ClauseComp [] tmpNum loopInfo
+
 
 data VarInfo = VarInfo {
     name    :: VarName,        -- ^the var name to use
@@ -410,15 +415,14 @@ userClauseComp :: [PrimParam] -> ClauseComp t
 userClauseComp params clcomp  =
     let symtab = List.foldr insertInputParam Map.empty params
         outs = List.filter (\p->paramFlow p==FlowOut) params
-    in runClauseComp symtab outs 0 NoLoop clcomp
+    in runClauseComp 0 NoLoop clcomp
 
 
 -- |Run a clause compiler function from the Compiler monad to compile
 --  a generated procedure.
-runClauseComp :: Map VarName VarInfo -> [PrimParam] -> Int -> LoopInfo ->
-                 ClauseComp t -> Compiler (t, ClauseCompState)
-runClauseComp symtab outs tmpNum loopInfo clcomp =
-    runStateT clcomp $ initClauseComp symtab outs tmpNum loopInfo
+runClauseComp :: Int -> LoopInfo -> ClauseComp t -> Compiler (t, ClauseCompState)
+runClauseComp tmpNum loopInfo clcomp =
+    runStateT clcomp $ initClauseComp tmpNum loopInfo
 
 
 -- |Generate a single instruction for the clause currently being compiled
@@ -444,60 +448,32 @@ freshVar = do
 
 -- |Return the current PrimVarName for a given name string; ie, find 
 --  the current suffix for the specified name.
-getVar :: VarName -> OptPos -> ClauseComp PrimVarName
--- XXX Just for now, always use suffix 0
-getVar name pos = do
-    currver <- gets (Map.lookup name . vars)
---    liftIO $ putStrLn $ "Look up var " ++ name ++ " = " ++ show currver
-    case currver of
+getVar :: VarName -> OptPos -> VarVers -> Compiler PrimVarName
+getVar name pos vars = do
+    case Map.lookup name vars of
         Nothing -> do
-            -- lift $ message Error ("uninitialised variable "++name) Nothing
-            modify (\s -> s {uses = Map.insert name pos $ uses s})
+            message Error ("uninitialised variable '"++name++"'") pos
             return $ PrimVarName name 0
-        Just (VarInfo var num _) -> 
-            return $ PrimVarName var num
-
--- |Return the next PrimVarName for a given name string; ie, find 
---  the next suffix for the specified name
-getNextVar :: String -> OptPos -> ClauseComp PrimVarName
-getNextVar name pos = do
-    maybeInfo <- gets (Map.lookup name . vars)
-    let newInfo = case maybeInfo of
-            Nothing -> VarInfo name 0 Unspecified
-            Just (VarInfo _ num typ) -> VarInfo name (num + 1) typ
-    modify (\s -> s {vars = Map.insert name newInfo $ vars s})
-    return $ PrimVarName name $ ordinal newInfo
+        Just num -> 
+            return $ PrimVarName name num
 
 -- |Return the primitive procedure call input argument(s) for the 
 --  specified variable name and flow direction
-flowVar :: String -> FlowDirection -> OptPos -> ClauseComp [PrimArg]
-flowVar name ParamIn pos = inVar name pos
-flowVar name ParamOut pos = outVar name pos
-flowVar name ParamInOut pos = inOutVar name pos
-flowVar name NoFlow _ = return []
-
--- |Return the primitive procedure call input argument for the 
---  specified variable name.
-inVar :: String -> OptPos -> ClauseComp [PrimArg]
-inVar name pos = do
-    primvar <- getVar name pos
+flowVar :: VarName -> FlowDirection -> OptPos -> VarVers -> VarVers -> 
+           Compiler [PrimArg]
+flowVar name ParamIn pos inVars outVars = do
+    primvar <- getVar name pos inVars
     return [ArgVar primvar FlowIn Ordinary]
-
--- |Return the primitive procedure call output argument for the 
---  specified variable name.
-outVar :: String -> OptPos -> ClauseComp [PrimArg]
-outVar name pos = do
-    primvar <- getNextVar name pos
+flowVar name ParamOut pos inVars outVars = do
+    primvar <- getVar name pos outVars
     return [ArgVar primvar FlowOut Ordinary]
-
--- |Return the primitive procedure call input and output arguments for the 
---  specified variable name.
-inOutVar :: String -> OptPos -> ClauseComp [PrimArg]
-inOutVar name pos = do
-    primvar <- getVar name pos
-    primvar' <- getNextVar name pos
+flowVar name ParamInOut pos inVars outVars = do
+    primvar <- getVar name pos inVars
+    primvar' <- getVar name pos outVars
     return [ArgVar primvar FlowIn FirstHalf,
             ArgVar primvar' FlowOut SecondHalf]
+flowVar name NoFlow _ _ _ = return []
+
 
 -- |Return a new, unused proc ID.
 genProcName :: Compiler ProcName
@@ -919,17 +895,32 @@ flowIn ParamIn = True
 flowIn ParamInOut = True
 flowIn _ = False
 
--- |Possible program statements.  These will be normalised into 
+-- |Does this flow direction include input?
+flowOut :: FlowDirection -> Bool
+flowOut ParamOut = True
+flowOut ParamInOut = True
+flowOut _ = False
+
+-- |Variable Versions.  Tells what variables are in scope (either 
+--  before or after a statement), and gives for each a version 
+--  number, to distinguish different definitions for a variable in 
+--  the same proc.
+type VarVers = Map VarName Int
+
+noVars :: Map VarName Int
+noVars = Map.empty
+
+-- |Source program statements.  These will be normalised into 
 --  Prims.
 data Stmt
-     = ProcCall Ident [Placed Exp] (Set VarName) (Set VarName)
-     | ForeignCall Ident Ident [Placed Exp] (Set VarName) (Set VarName)
-     | Cond (Placed Exp) [Placed Stmt] [Placed Stmt] (Set VarName) (Set VarName)
-     | Loop [Placed Stmt] (Set VarName) (Set VarName)
-     | Guard (Placed Exp) Integer (Set VarName) (Set VarName)
+     = ProcCall Ident [Placed Exp] VarVers VarVers
+     | ForeignCall Ident Ident [Placed Exp] VarVers VarVers
+     | Cond (Placed Exp) [Placed Stmt] [Placed Stmt] VarVers VarVers
+     | Loop [Placed Stmt] VarVers VarVers
+     | Guard (Placed Exp) Integer VarVers VarVers
      | Nop
        -- These are only valid in a loop
-     | For Generator (Set VarName) (Set VarName)
+     | For Generator VarVers VarVers
      | Break
      | Next
 
@@ -963,29 +954,34 @@ instance Show PrimProto where
     show (PrimProto name params) =
         name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")"
 
-primProto :: ProcProto -> PrimProto
-primProto (ProcProto name params) =
-    PrimProto name (concat $ List.map primParam params)
+primProto :: VarVers -> VarVers -> ProcProto -> Compiler PrimProto
+primProto initVars finalVars (ProcProto name params) = do
+    params' <- mapM (primParam initVars finalVars) params
+    return $ PrimProto name (concat params')
 
 -- |A formal parameter, including name, type, and flow direction.
 data PrimParam =
   PrimParam {
-    paramName :: PrimVarName, 
+    paramName :: PrimVarName,
     paramType :: TypeSpec, 
     paramFlow :: PrimFlow, 
     paramFlowType :: ArgFlowType
     } deriving Eq
 
 -- |Convert a single Param to up to two PrimParams
-primParam :: Param -> [PrimParam]
-primParam (Param name typ ParamIn) = 
-    [PrimParam (PrimVarName name 0) typ FlowIn Ordinary]
-primParam (Param name typ ParamOut) = 
-    [PrimParam (PrimVarName name (-1)) typ FlowOut Ordinary]
-primParam (Param name typ NoFlow) = []
-primParam (Param name typ ParamInOut) = 
-    [PrimParam (PrimVarName name 0) typ FlowIn FirstHalf,
-     PrimParam (PrimVarName name (-1)) typ FlowOut SecondHalf]
+primParam :: VarVers -> VarVers -> Param -> Compiler [PrimParam]
+primParam initVars finalVars (Param name typ ParamIn) = do
+    var <- getVar name Nothing initVars
+    return [PrimParam var typ FlowIn Ordinary]
+primParam initVars finalVars (Param name typ ParamOut) = do
+    var <- getVar name Nothing finalVars
+    return [PrimParam var typ FlowOut Ordinary]
+primParam initVars finalVars (Param name typ NoFlow) = return []
+primParam initVars finalVars (Param name typ ParamInOut) = do
+    var <- getVar name Nothing initVars
+    var' <- getVar name Nothing finalVars
+    return [PrimParam var typ FlowIn FirstHalf,
+            PrimParam var' typ FlowOut SecondHalf]
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
@@ -1036,9 +1032,9 @@ argFlowDirection (ArgChar _) = FlowIn
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
-expToStmt (Fncall name args) = ProcCall name args Set.empty Set.empty
+expToStmt (Fncall name args) = ProcCall name args noVars noVars
 expToStmt (ForeignFn lang name args) = 
-  ForeignCall lang name args Set.empty Set.empty
+  ForeignCall lang name args noVars noVars
 
 
 
@@ -1350,16 +1346,19 @@ showCases num labelInd blockInd (block:blocks) =
 
 -- |Show a single statement.
 instance Show Stmt where
-  show (ProcCall name args _ _) =
-    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
-  show (Cond exp thn els _ _) =
-    "if" ++ show (content exp) ++ " then"
+  show (ProcCall name args before after) =
+    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" ++
+    " <" ++ show before ++ " -> " ++ show after ++ ">"
+  show (Cond exp thn els before after) =
+    "if" ++ show (content exp) ++ " then "
     ++ show thn
     ++ " else "
     ++ show els
-    ++ " end"
-  show (Loop lstmts _ _) =
-    "do " ++ concat (List.map show lstmts) ++ " end"
+    ++ " end" ++
+    " <" ++ show before ++ " -> " ++ show after ++ ">"
+  show (Loop lstmts before after) =
+    "do " ++ concat (List.map show lstmts) ++ " end" ++
+    " <" ++ show before ++ " -> " ++ show after ++ ">"
   show (Guard exp val _ _) =
     "guard " ++ show (content exp) ++ " " ++ show val
   show (For gen _ _) = "for " ++ show gen
