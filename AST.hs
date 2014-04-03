@@ -410,12 +410,9 @@ type ClauseComp = StateT ClauseCompState Compiler
 
 -- |Run a clause compiler function from the Compiler monad to compile
 --  a top-level procedure.
-userClauseComp :: [PrimParam] -> ClauseComp t 
-                 -> Compiler (t, ClauseCompState)
-userClauseComp params clcomp  =
-    let symtab = List.foldr insertInputParam Map.empty params
-        outs = List.filter (\p->paramFlow p==FlowOut) params
-    in runClauseComp 0 NoLoop clcomp
+userClauseComp :: ClauseComp t -> Compiler (t, ClauseCompState)
+userClauseComp clcomp  =
+    runClauseComp 0 NoLoop clcomp
 
 
 -- |Run a clause compiler function from the Compiler monad to compile

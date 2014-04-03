@@ -66,8 +66,8 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     (initVars,stmts',finalVars) <- numberVars params stmts pos
-    proto'@(PrimProto _ params') <- primProto initVars finalVars proto
-    (_,procstate) <- userClauseComp params' $ compileStmts stmts'
+    proto' <- primProto initVars finalVars proto
+    (_,procstate) <- userClauseComp $ compileStmts stmts'
     addProc name proto' [List.reverse $ body procstate] pos vis
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
