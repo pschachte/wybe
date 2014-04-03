@@ -5,20 +5,20 @@ Public func quadruple(a:int):int @func-quadruple:3:8 = double(double(a @func-qua
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : double(a:0:int, ?$:-1:int) <0> @func-quadruple:1:8
-                    quadruple(a:0:int, ?$:-1:int) <0> @func-quadruple:3:8
+  public procs    : double(a:0:int, ?$:0:int) <0> @func-quadruple:1:8
+                    quadruple(a:0:int, ?$:0:int) <0> @func-quadruple:3:8
   imports         : 
   types           : 
   resources       : 
   procs           : double:
-proc double(a:0:int, ?$:-1:int) (id 0):  @func-quadruple:1:8
+proc double(a:0:int, ?$:0:int) (id 0):  @func-quadruple:1:8
     +(a:0, a:0, ?$tmp0:0) @func-quadruple:1:35
-    =(?$:1, $tmp0:0)
+    =(?$:0, $tmp0:0)
                     quadruple:
-proc quadruple(a:0:int, ?$:-1:int) (id 0):  @func-quadruple:3:8
+proc quadruple(a:0:int, ?$:0:int) (id 0):  @func-quadruple:3:8
     double(a:0, ?$tmp1:0) @func-quadruple:3:45
     double($tmp1:0, ?$tmp0:0) @func-quadruple:3:38
-    =(?$:1, $tmp0:0)
+    =(?$:0, $tmp0:0)
 
 Submodules of func-quadruple:
 

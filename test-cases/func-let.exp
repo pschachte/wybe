@@ -1,19 +1,19 @@
-Public func quad(x:int):int @func-let:1:8 = +(d @func-let:1:47, d @func-let:1:49) @func-let:1:47 where [=(?d @func-let:1:35, +(x @func-let:1:40, x @func-let:1:42) @func-let:1:40) @func-let:1:35] @func-let:1:31
+Public func quad(x:int):int @func-let:1:8 = +(d @func-let:1:47, d @func-let:1:49) @func-let:1:47 where [=(?d @func-let:1:35, +(x @func-let:1:40, x @func-let:1:42) @func-let:1:40) <fromList [] -> fromList []> @func-let:1:35] @func-let:1:31
 
  Module func-let
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : quad(x:0:int, ?$:-1:int) <0> @func-let:1:8
+  public procs    : quad(x:0:int, ?$:0:int) <0> @func-let:1:8
   imports         : 
   types           : 
   resources       : 
   procs           : quad:
-proc quad(x:0:int, ?$:-1:int) (id 0):  @func-let:1:8
-    +(x:0, x:0, ?$tmp1:0) @func-let:1:40
-    =(?d:1, $tmp1:0) @func-let:1:35
-    +(d:1, d:1, ?$tmp0:0) @func-let:1:47
-    =(?$:1, $tmp0:0)
+proc quad(x:0:int, ?$:0:int) (id 0):  @func-let:1:8
+    +(x:0, x:0, ?$tmp0:0) @func-let:1:40
+    =(?d:0, $tmp0:0) @func-let:1:35
+    +(d:0, d:0, ?$tmp1:0) @func-let:1:47
+    =(?$:0, $tmp1:0)
 
 Submodules of func-let:
 

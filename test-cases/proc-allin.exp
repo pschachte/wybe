@@ -1,4 +1,4 @@
-Public proc nada(x:int, y:int) @proc-allin:1:8[=(?z @proc-allin:1:32, +(x @proc-allin:1:35, y @proc-allin:1:37) @proc-allin:1:35) @proc-allin:1:32]
+Public proc nada(x:int, y:int) @proc-allin:1:8[=(?z @proc-allin:1:32, +(x @proc-allin:1:35, y @proc-allin:1:37) @proc-allin:1:35) <fromList [] -> fromList []> @proc-allin:1:32]
 
  Module proc-allin
   public submods  : 
@@ -11,7 +11,7 @@ Public proc nada(x:int, y:int) @proc-allin:1:8[=(?z @proc-allin:1:32, +(x @proc-
   procs           : nada:
 proc nada(x:0:int, y:0:int) (id 0):  @proc-allin:1:8
     +(x:0, y:0, ?$tmp0:0) @proc-allin:1:35
-    =(?z:1, $tmp0:0) @proc-allin:1:32
+    =(?z:0, $tmp0:0) @proc-allin:1:32
 
 Submodules of proc-allin:
 

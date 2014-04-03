@@ -1,4 +1,4 @@
-Public proc print2(x:int, y:int) @proc-hello:1:8[println("hello, world" @proc-hello:2:16) @proc-hello:2:8]
+Public proc print2(x:int, y:int) @proc-hello:1:8[println("hello, world" @proc-hello:2:16) <fromList [] -> fromList []> @proc-hello:2:8]
 
  Module proc-hello
   public submods  : 
