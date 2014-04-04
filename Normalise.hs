@@ -196,29 +196,13 @@ compileStmts' :: Stmt -> [Placed Stmt] -> Maybe SourcePos -> ClauseComp ()
 compileStmts' (ProcCall name args initVars finalVars) rest pos = do
   primArgs <- mapM (\a->primArg (content a) (place a) initVars finalVars) 
               args
-  if List.all isJust primArgs
-    then do
-      instr (PrimCall name Nothing $ concat $ List.map fromJust primArgs) pos
-      compileStmts rest
-    else do
-      (args'',pre,post,_) <- normaliseArgs args
-      compileStmts $ 
-        pre ++ [maybePlace (ProcCall name args'' initVars finalVars) pos] 
-        ++ post ++ rest
+  instr (PrimCall name Nothing $ concat primArgs) pos
+  compileStmts rest
 compileStmts' (ForeignCall lang name args initVars finalVars) rest pos = do
   primArgs <- mapM (\a->primArg (content a) (place a) initVars finalVars) 
               args
-  if List.all isJust primArgs
-    then do
-      instr (PrimForeign lang name Nothing 
-             $ concat $ List.map fromJust primArgs) pos
-      compileStmts rest
-    else do
-      (args'',pre,post,_) <- normaliseArgs args
-      compileStmts $ 
-        pre 
-        ++ [maybePlace (ForeignCall lang name args'' initVars finalVars) pos] 
-        ++ post ++ rest
+  instr (PrimForeign lang name Nothing $ concat primArgs) pos
+  compileStmts rest
 compileStmts' (Cond exp thn els initVars finalVars) rest pos = do
   switchName <- lift $ genProcName
   switch <- compileFreshProc switchName NoLoop initVars finalVars
@@ -232,19 +216,14 @@ compileStmts' (Loop loopBody initVars finalVars) rest pos = do
   compileStmts' loop rest Nothing
 compileStmts' (Guard exp val initVars finalVars) rest pos = do
   parg <- primArg (content exp) (place exp) initVars finalVars
-  if isJust parg then do
-    case fromJust parg of
-      [ArgVar name FlowIn _] -> instr (PrimGuard name val) pos
-      [ArgInt n] ->
-        when (n /= val) $ instr PrimFail pos
-      _ -> do
-        lift $ message Error "Can't use a non-integer type as a Boolean" pos
-        instr PrimFail pos
-    compileStmts rest
-    else do
-    ([exp'],pre,post,_) <- normalisePlacedExp exp
-    compileStmts $ 
-      pre ++ [maybePlace (Guard exp' val initVars finalVars) pos] ++ post ++ rest
+  case parg of
+    [ArgVar name FlowIn _] -> instr (PrimGuard name val) pos
+    [ArgInt n] ->
+      when (n /= val) $ instr PrimFail pos
+    _ -> do
+      lift $ message Error "Can't use a non-integer type as a Boolean" pos
+      instr PrimFail pos
+  compileStmts rest
 compileStmts' Nop rest pos = compileStmts rest
 compileStmts' (For gen initVars finalVars) rest pos = do
     inf <- gets loopInfo
@@ -277,15 +256,17 @@ compileStmts' Next rest pos = do
 
 
 -- |Compile an argument into a PrimArg if it's flattened; if not, return Nothing
-primArg :: Exp -> OptPos -> VarVers -> VarVers -> ClauseComp (Maybe [PrimArg])
-primArg (IntValue a) pos initVars finalVars = return $ Just [ArgInt a]
-primArg (FloatValue a) pos initVars finalVars = return $ Just [ArgFloat a]
-primArg (StringValue a) pos initVars finalVars = return $ Just [ArgString a]
-primArg (CharValue a) pos initVars finalVars = return $ Just [ArgChar a]
+primArg :: Exp -> OptPos -> VarVers -> VarVers -> ClauseComp [PrimArg]
+primArg (IntValue a) pos initVars finalVars = return [ArgInt a]
+primArg (FloatValue a) pos initVars finalVars = return [ArgFloat a]
+primArg (StringValue a) pos initVars finalVars = return [ArgString a]
+primArg (CharValue a) pos initVars finalVars = return [ArgChar a]
 primArg (Var name dir) pos initVars finalVars = do
   var <- lift $ flowVar name dir pos initVars finalVars
-  return $ Just var
-primArg _ pos initVars finalVars = return Nothing
+  return var
+primArg exp pos initVars finalVars =
+  error $ "Internal error: " ++ show (maybePlace exp pos) ++ 
+  " remains after flattening"
 
 
 -- |Compile a list of expressions as proc call arguments to a list of 
