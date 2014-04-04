@@ -417,12 +417,6 @@ initLoop cont =
 
 ----------------------------------------------------------------
 
--- | Report an error if the specified flow direction has output.
-mustBeIn :: FlowDirection -> Maybe SourcePos -> ClauseComp ()
-mustBeIn flow pos =
-    when (flowsOut flow)
-    $ lift $ message Error "Flow error:  invalid output argument" pos
-
 -- |Does the specified flow direction flow in?
 flowsIn :: FlowDirection -> Bool
 flowsIn NoFlow     = False
