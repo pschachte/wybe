@@ -25,10 +25,6 @@ p x = ... need to keep all of p, and remember 1st argument is x
 false = {}; true = {nil}
 
 
-
-
-
-
 A predicate definition specifies a relation
 
 A function of arity n is a relation of arity n+1 which has only one tuple for
