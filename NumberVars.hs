@@ -92,12 +92,24 @@ numberStmtVars vars (Guard test val _ _) pos = do
     vars' <- defineVars vars defs
     return (Guard test' val vars vars',vars')
 numberStmtVars vars (Nop) pos = return (Nop,vars)
-numberStmtVars vars (For gen _ _) pos = do
-    -- XXX bug:  need to number generator
-    return (For gen vars vars, vars)
+-- numberStmtVars vars (For name args_ _) pos = do
+--     (gen',vars') <- numberGeneratorVars vars gen pos
+--     return (For name args vars vars, vars)
 numberStmtVars vars (Break) pos = return (Break,vars)
 numberStmtVars vars (Next) pos = return (Next,vars)
+numberStmtVars vars stmt pos = do
+    error $ "flattening error:  " ++ show stmt
 
+
+numberGeneratorVars :: VarVers -> Generator -> OptPos -> 
+                       Compiler (Generator,VarVers)
+-- numberGeneratorVars vars (In var pexp) pos = do
+--     let vars' = addVarDef vars var [pos]
+    
+-- numberGeneratorVars vars (InRange var start update step end) pos = do
+    
+numberGeneratorVars vars gen pos = do
+    return (gen,vars)
 
 defineVars :: VarVers -> VarDefs -> Compiler VarVers
 defineVars vars defs = do

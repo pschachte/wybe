@@ -23,20 +23,28 @@ import Control.Monad.Trans (lift,liftIO)
 
 flattenBody :: [Placed Stmt] -> ([Placed Stmt],Int)
 flattenBody stmts =
-    let (revStmts,postponed,tempCtr) = 
-            execState (flattenStmts stmts) ([], [], 0)
-    in  (List.reverse revStmts ++ postponed, tempCtr)
+    let (revInit,revStmts,postponed,tempCtr) = 
+            execState (flattenStmts stmts) ([], [], [], 0)
+    in  (List.reverse revInit ++ List.reverse revStmts ++ postponed, tempCtr)
 
 
 -- |The clause compiler monad is a state transformer monad carrying the 
 --  clause compiler state over the compiler monad.
-type Flattener = State ([Placed Stmt],[Placed Stmt],Int)
+type Flattener = State ([Placed Stmt],[Placed Stmt],[Placed Stmt],Int)
+
+
+newTemp :: Flattener VarName
+newTemp = do
+    (loopinit,stmts,postponed,ctr) <- get
+    put (loopinit,stmts,postponed,ctr+1)
+    return $ "generator$" ++ show ctr
+    
 
 
 emit :: OptPos -> Stmt -> Flattener ()
 emit pos stmt = do
-    (stmts,postponed,ctr) <- get
-    put (maybePlace stmt pos:stmts,postponed,ctr)
+    (loopinit,stmts,postponed,ctr) <- get
+    put (loopinit,maybePlace stmt pos:stmts,postponed,ctr)
 
 
 emitNoVars :: OptPos -> (VarVers -> VarVers -> Stmt) -> Flattener ()
@@ -45,31 +53,42 @@ emitNoVars pos stmt = emit pos (stmt noVars noVars)
 
 postpone :: OptPos -> Stmt -> Flattener ()
 postpone pos stmt = do
-    (stmts,postponed,ctr) <- get
-    put (stmts,maybePlace stmt pos:postponed,ctr)
+    (loopinit,stmts,postponed,ctr) <- get
+    put (loopinit,stmts,maybePlace stmt pos:postponed,ctr)
+
+
+saveInit :: OptPos -> Stmt -> Flattener ()
+saveInit pos stmt = do
+    (loopinit,stmts,postponed,ctr) <- get
+    put (maybePlace stmt pos:loopinit,stmts,postponed,ctr)
 
 
 emitPostponed :: Flattener ()
 emitPostponed = do
-    (stmts,postponed,ctr) <- get
-    put (postponed++stmts,[],ctr)
+    (loopinit,stmts,postponed,ctr) <- get
+    put (loopinit,postponed++stmts,[],ctr)
 
 
 -- |Return a fresh variable name.
 tempVar :: Flattener VarName
 tempVar = do
-    (stmts,postponed,ctr) <- get
-    put (stmts,postponed,ctr+1)
+    (loopinit,stmts,postponed,ctr) <- get
+    put (loopinit,stmts,postponed,ctr+1)
     return $ "$tmp" ++ (show ctr)
 
 
-flattenInner :: [Placed Stmt] -> Flattener [Placed Stmt]
-flattenInner stmts = do
-    (oldStmts,oldPostponed,oldCtr) <- get
-    let (innerStmts,innerPostponed,newCtr) = 
-            execState (flattenStmts stmts) ([],[],oldCtr)
-    put (oldStmts,oldPostponed,newCtr)
-    return $ reverse innerStmts ++ innerPostponed
+flattenInner :: Bool -> [Placed Stmt] -> Flattener [Placed Stmt]
+flattenInner isLoop stmts = do
+    (oldInit,oldStmts,oldPostponed,oldCtr) <- get
+    let (innerInit,innerStmts,innerPostponed,newCtr) = 
+            execState (flattenStmts stmts) 
+            (if isLoop then [] else oldInit,[],[],oldCtr)
+    if isLoop
+      then do
+        put (oldInit,oldStmts,oldPostponed,newCtr)
+        flattenStmts innerInit
+      else put (innerInit,oldStmts,oldPostponed,newCtr)
+    return $ List.reverse innerStmts
 
 
 -- |Flatten the specified statements to primitive statements.
@@ -90,19 +109,24 @@ flattenStmt (ForeignCall lang name args initVars finalVars) pos = do
     emitPostponed
 flattenStmt (Cond exp thn els initVars finalVars) pos = do
     exp' <- flattenPExp exp
-    thn' <- flattenInner thn
-    els' <- flattenInner els
+    thn' <- flattenInner False thn
+    els' <- flattenInner False els
     emitNoVars pos $ Cond exp thn' els'
 flattenStmt (Loop body initVars finalVars) pos = do
-    body' <- flattenInner body
-    emitNoVars pos $ Loop body
+    body' <- flattenInner True body
+    emitNoVars pos $ Loop body'
 flattenStmt (Guard exp val initVars finalVars) pos = do
     exp' <- flattenPExp exp
     emitNoVars pos $ Guard exp' val
 flattenStmt Nop pos =
     emit pos Nop
-flattenStmt (For gen initVars finalVars) pos = do
-    emitNoVars pos $ For gen
+flattenStmt (For itr gen initVars finalVars) pos = do
+    genVar <- newTemp
+    saveInit pos $ 
+      ProcCall "init_seq" [gen, Unplaced $ Var genVar ParamOut] noVars noVars
+    args' <- flattenArgs [itr, Unplaced $ Var genVar ParamInOut]
+    emitNoVars pos $ ProcCall "in" args'
+    emitPostponed
 flattenStmt Break pos = do
     emit pos Break
 flattenStmt Next pos = do

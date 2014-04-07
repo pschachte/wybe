@@ -917,7 +917,7 @@ data Stmt
      | Guard (Placed Exp) Integer VarVers VarVers
      | Nop
        -- These are only valid in a loop
-     | For Generator VarVers VarVers
+     | For (Placed Exp) (Placed Exp) VarVers VarVers
      | Break
      | Next
 
@@ -1346,22 +1346,33 @@ showCases num labelInd blockInd (block:blocks) =
 instance Show Stmt where
   show (ProcCall name args before after) =
     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" ++
-    " <" ++ show before ++ " -> " ++ show after ++ ">"
+    showVarMaps before after
+  show (ForeignCall lang name args before after) =
+    "foreign " ++ lang ++ " " ++ 
+    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" ++
+    showVarMaps before after
   show (Cond exp thn els before after) =
     "if" ++ show (content exp) ++ " then "
     ++ show thn
     ++ " else "
     ++ show els
     ++ " end" ++
-    " <" ++ show before ++ " -> " ++ show after ++ ">"
+    showVarMaps before after
   show (Loop lstmts before after) =
     "do " ++ concat (List.map show lstmts) ++ " end" ++
-    " <" ++ show before ++ " -> " ++ show after ++ ">"
+    showVarMaps before after
   show (Guard exp val _ _) =
     "guard " ++ show (content exp) ++ " " ++ show val
-  show (For gen _ _) = "for " ++ show gen
+  show Nop = "nop"
+  show (For itr gen _ _) = "for " ++ show itr ++ " in " ++ show gen
   show Break = "break"
   show Next = "next"
+
+-- |Show start and end variable maps
+showVarMaps :: VarVers -> VarVers -> String
+showVarMaps before after =
+    if Map.null before && Map.null after then ""
+    else " <" ++ show before ++ " -> " ++ show after ++ ">"
 
 -- |Show a primitive argument.
 instance Show PrimArg where

@@ -67,7 +67,7 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     let (stmts',tempCtr) = flattenBody stmts
-    -- liftIO $ putStrLn $ "Flattened body = " ++ show stmts'
+    liftIO $ putStrLn $ "Flattened body = " ++ show stmts'
     (initVars,stmts'',finalVars) <- numberVars params stmts' pos
     -- liftIO $ putStrLn $ "Numbered body = " ++ show stmts''
     proto' <- primProto initVars finalVars proto
@@ -225,26 +225,26 @@ compileStmts' (Guard exp val initVars finalVars) rest pos = do
       instr PrimFail pos
   compileStmts rest
 compileStmts' Nop rest pos = compileStmts rest
-compileStmts' (For gen initVars finalVars) rest pos = do
-    inf <- gets loopInfo
-    case inf of
-        NoLoop -> lift $ message Error "Loop op outside of a loop" pos
-        LoopInfo _ _ _ -> do
-            cond <- compileGenerator gen pos
-            switchName <- lift $ genProcName
-            switch <- compileFreshProc switchName NoLoop initVars finalVars
-                      [Unplaced (Guard cond 1 initVars finalVars):rest,
-                       [Unplaced $ Guard cond 0 initVars finalVars]]
-            compileStmts' switch [] Nothing
+-- compileStmts' (For gen initVars finalVars) rest pos = do
+--     inf <- gets loopInfo
+--     case inf of
+--         NoLoop -> lift $ message Error "Loop op outside of a loop" pos
+--         LoopInfo _ _ _ -> do
+--             cond <- compileGenerator gen pos
+--             switchName <- lift $ genProcName
+--             switch <- compileFreshProc switchName NoLoop initVars finalVars
+--                       [Unplaced (Guard cond 1 initVars finalVars):rest,
+--                        [Unplaced $ Guard cond 0 initVars finalVars]]
+--             compileStmts' switch [] Nothing
 compileStmts' Break rest pos = do
     inf <- gets loopInfo
     case inf of
-        NoLoop -> lift $ message Error "Loop op outside of a loop" pos
+        NoLoop -> lift $ message Error "Break outside of a loop" pos
         LoopInfo _ _ _ -> return ()
 compileStmts' Next rest pos = do
     inf <- gets loopInfo
     case inf of
-        NoLoop -> lift $ message Error "Loop op outside of a loop" pos
+        NoLoop -> lift $ message Error "Next outside of a loop" pos
         LoopInfo _ _ _ -> return ()
         -- LoopInfo cont _ _ -> do
         --     switchName <- lift $ genProcName
@@ -253,6 +253,8 @@ compileStmts' Next rest pos = do
         --                 maybePlace cont pos],
         --                (Unplaced $ Guard cond 0):rest]
         --     compileStmts' switch [] Nothing
+compileStmts' stmt rest pos =
+    error $ "Normalise error:  " ++ show stmt
 
 
 -- |Compile an argument into a PrimArg if it's flattened; if not, return Nothing

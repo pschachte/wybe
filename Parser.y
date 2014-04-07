@@ -36,6 +36,7 @@ import AST
       '=='            { TokSymbol "==" _ }
       '/='            { TokSymbol "/=" _ }
       '|'             { TokSymbol "|" _ }
+      '..'            { TokSymbol ".." _ }
 -- If any other symbol tokens that can be used as funcs or procs are
 -- defined here, they need to be added to the defintion of Symbol below
       ','             { TokComma _ }
@@ -93,6 +94,8 @@ import AST
 %left 'not'
 %nonassoc 'in' '==' '/='
 %left '>' '<' '<=' '>='
+%nonassoc 'by'
+%nonassoc '..'
 %right '++'
 %left '+' '-'
 %left '*' '/' 'mod'
@@ -185,6 +188,8 @@ Symbol :: { Token }
     | '=='                      { $1 }
     | '/='                      { $1 }
     | '|'                       { $1 }
+-- XXX this doesn't work:
+--    | '..'                      { $1 }
     | '[' ']'                   { TokSymbol "[]"  (tokenPosition $1) }
     | '[' '|' ']'               { TokSymbol "[|]" (tokenPosition $1) }
     | '{' '}'                   { TokSymbol "{}"  (tokenPosition $1) }
@@ -279,17 +284,20 @@ Stmt :: { Placed Stmt }
     : Exp                       { maybePlace (expToStmt $ content $1) 
 	                          (place $1) }
     | 'if' Exp 'then' Stmts Condelse 'end'
-                                { Placed (Cond $2 $4 $5 noVars noVars) (tokenPosition $1) }
-    | 'do' Stmts 'end'          { Placed (Loop $2 noVars noVars) (tokenPosition $1) }
-    | 'for' Generator           { Placed (For $2 noVars noVars) (tokenPosition $1) }
+                                { Placed (Cond $2 $4 $5 noVars noVars)
+                                 (tokenPosition $1) }
+    | 'do' Stmts 'end'          { Placed (Loop $2 noVars noVars)
+                                  (tokenPosition $1) }
+    | 'for' Exp 'in' Exp        { Placed (For $2 $4 noVars noVars)
+                                  (tokenPosition $1) }
     | 'until' Exp               { Placed (Cond $2 [Unplaced Break]
                                                   [Unplaced Nop]
 					  noVars noVars)
-                                         (tokenPosition $1) }
+                                  (tokenPosition $1) }
     | 'while' Exp               { Placed (Cond $2 [Unplaced Nop]
                                                   [Unplaced Break]
 					  noVars noVars)
-                                         (tokenPosition $1) }
+                                  (tokenPosition $1) }
     | 'unless' Exp              { Placed (Cond $2 [Unplaced Next]
                                                   [Unplaced Nop]
 					  noVars noVars)
@@ -298,6 +306,7 @@ Stmt :: { Placed Stmt }
 					          [Unplaced Next]
 					  noVars noVars)
                                          (tokenPosition $1) }
+
 OptProcArgs :: { [Placed Exp] }
     : {- empty -}               { [] }
     | '(' ProcArg ProcArgList ')'
@@ -318,20 +327,21 @@ Condelse :: { [Placed Stmt] }
     : 'else' Stmts              { $2 }
     | {- empty -}               { [] }
 
-Generator :: { Generator }
-    : ident 'in' Exp            { In (identName $1) $3 }
-    | ident 'from' Exp toLimit byStep
-                                { InRange (identName $1) $3 
-				    (fst $4) $5 (snd $4) }
 
-byStep :: { Placed Exp }
-    : 'by' Exp                  { $2 }
-    | {- empty -}               { Unplaced $ IntValue 1 }
-
-toLimit :: { (ProcName, Maybe (String,Placed Exp)) }
-    : 'to' Exp                  { ("+", Just (">", $2)) }
-    | 'downto' Exp              { ("-", Just ("<", $2)) }
-    | {- empty -}               { ("+", Nothing) }
+-- Generator :: { Generator }
+--     : ident 'in' Exp            { In (identName $1) $3 }
+--     | ident 'from' Exp toLimit byStep
+--                                 { InRange (identName $1) $3 
+-- 				    (fst $4) $5 (snd $4) }
+-- 
+-- byStep :: { Placed Exp }
+--     : 'by' Exp                  { $2 }
+--     | {- empty -}               { Unplaced $ IntValue 1 }
+-- 
+-- toLimit :: { (ProcName, Maybe (String,Placed Exp)) }
+--     : 'to' Exp                  { ("+", Just (">", $2)) }
+--     | 'downto' Exp              { ("-", Just ("<", $2)) }
+--     | {- empty -}               { ("+", Nothing) }
 
 
 SimpleExp :: { Placed Exp }
@@ -368,6 +378,9 @@ SimpleExp :: { Placed Exp }
     | Exp 'and' Exp             { maybePlace (Fncall (identName $2) [$1, $3])
 	                                     (place $1) }
     | Exp 'or' Exp              { maybePlace (Fncall (identName $2) [$1, $3])
+                                             (place $1) }
+    | Exp '..' Exp              { maybePlace (Fncall (symbolName $2) 
+					      [$1, $3, Unplaced $ IntValue 1])
                                              (place $1) }
     | '(' Exp ')'               { Placed (content $2) (tokenPosition $1) }
     | '-' Exp %prec NEG         { Placed (Fncall "Negate" [$2])
@@ -434,6 +447,7 @@ RevExpList :: { [Placed Exp] }
 
 {
 parseError :: [Token] -> a
+parseError [] = error $ "Parse error at end of file"
 parseError (tok:_) = error $ (showPosition (tokenPosition tok)) 
                              ++ ": Parse error"
 }

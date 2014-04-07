@@ -1,3 +1,16 @@
+GENERATORS
+
+for in(?x, lst)  ===>  init_seq(lst, ?gen)  ...  in(?x, !gen)
+
+for in(?x, tree) ===>  init_seq(tree, ?gen) ...  in(?x, !gen)
+
+for in(?x, range(1,10)) ===>  init_seq(range(1,10), ?gen) ...  in(?x, !gen)
+
+summary:  for gen(e1,...en) turns to initialisation init$gen(i1,...im,gen)
+where i1,...im are all the INPUT arguments in e1,...en, plus a loop
+statement gen(o1,...oq,gen,?gen) where o1,...oq are the OUTPUTS in e1,...en.
+
+
 SYNTAX
 
 How to handle goal and clause separators/terminators.  Don't like offside
