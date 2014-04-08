@@ -42,6 +42,7 @@ module AST (
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
+  showBody, showStmt
   ) where
 
 import Options
@@ -937,8 +938,8 @@ data Exp
 --  generalised, allowing them to be user-defined.
 data Generator
       = In VarName (Placed Exp)
-      | InRange VarName (Placed Exp) ProcName (Placed Exp) 
-        (Maybe (ProcName,Placed Exp))
+      -- | InRange VarName (Placed Exp) ProcName (Placed Exp) 
+      --   (Maybe (ProcName,Placed Exp))
 
 -- |A variable name in SSA form, ie, a name and an natural number suffix,
 --  where the suffix is used to specify which assignment defines the value.
@@ -1118,12 +1119,12 @@ instance Show Item where
   show (ProcDecl vis proto stmts pos) =
     show vis ++ " proc " ++ show proto
     ++ showMaybeSourcePos pos
-    ++ show stmts
+    ++ showBody 4 stmts
   show (CtorDecl vis proto pos) =
     show vis ++ " ctor " ++ show proto
     ++ showMaybeSourcePos pos
   show (StmtDecl stmt pos) =
-    show stmt ++ showMaybeSourcePos pos
+    showStmt 4 stmt ++ showMaybeSourcePos pos
 
 -- |How to show a ModSpec.
 showModSpec :: ModSpec -> String
@@ -1180,11 +1181,11 @@ instance Show t => Show (Placed t) where
 -- |How to show an optional source position
 showMaybeSourcePos :: OptPos -> String
 -- turn off annoying source positions
--- showMaybeSourcePos _ = ""
-showMaybeSourcePos (Just pos) = 
-  " @" ++ takeBaseName (sourceName pos) ++ ":" 
-  ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos)
-showMaybeSourcePos Nothing = ""
+showMaybeSourcePos _ = ""
+-- showMaybeSourcePos (Just pos) = 
+--   " @" ++ takeBaseName (sourceName pos) ++ ":" 
+--   ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos)
+-- showMaybeSourcePos Nothing = ""
 
 -- |How to show a module.
 instance Show Module where
@@ -1342,37 +1343,78 @@ showCases num labelInd blockInd (block:blocks) =
   ++ showBlock blockInd block
   ++ showCases (num+1) labelInd blockInd blocks
 
--- |Show a single statement.
-instance Show Stmt where
-  show (ProcCall name args before after) =
-    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" ++
-    showVarMaps before after
-  show (ForeignCall lang name args before after) =
+-- -- |Show a single statement.
+-- instance Show Stmt where
+--   show (ProcCall name args before after) =
+--     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" ++
+--     showVarMaps before after
+--   show (ForeignCall lang name args before after) =
+--     "foreign " ++ lang ++ " " ++ 
+--     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" ++
+--     showVarMaps before after
+--   show (Cond exp thn els before after) =
+--     "if" ++ show (content exp) ++ " then "
+--     ++ show thn
+--     ++ " else "
+--     ++ show els
+--     ++ " end" ++
+--     showVarMaps before after
+--   show (Loop lstmts before after) =
+--     "do " ++ concat (List.map show lstmts) ++ " end" ++
+--     showVarMaps before after
+--   show (Guard exp val _ _) =
+--     "guard " ++ show (content exp) ++ " " ++ show val
+--   show Nop = "nop"
+--   show (For itr gen _ _) = "for " ++ show itr ++ " in " ++ show gen
+--   show Break = "break"
+--   show Next = "next"
+
+showStmt :: Int -> Stmt -> String
+showStmt _ (ProcCall name args before after) =
+    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" 
+    ++ showVarMaps before after
+    ++ "\n"
+showStmt _ (ForeignCall lang name args before after) =
     "foreign " ++ lang ++ " " ++ 
-    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" ++
-    showVarMaps before after
-  show (Cond exp thn els before after) =
-    "if" ++ show (content exp) ++ " then "
-    ++ show thn
-    ++ " else "
-    ++ show els
-    ++ " end" ++
-    showVarMaps before after
-  show (Loop lstmts before after) =
-    "do " ++ concat (List.map show lstmts) ++ " end" ++
-    showVarMaps before after
-  show (Guard exp val _ _) =
+    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" 
+    ++ showVarMaps before after
+    ++ "\n"
+showStmt indent (Cond exp thn els before after) =
+    let leadIn = List.replicate indent ' '
+    in "if " ++ show (content exp) ++ ":\n"
+       ++ showBody (indent+4) thn
+       ++ leadIn ++ "else:\n"
+       ++ showBody (indent+4) els
+       ++ leadIn ++ "end " 
+       ++ showVarMaps before after
+       ++ "\n"
+showStmt indent (Loop lstmts before after) =
+    "do\n" ++  showBody (indent + 4) lstmts
+    ++ List.replicate indent ' ' ++ " end "
+    ++ showVarMaps before after
+       ++ "\n"
+showStmt _ (Guard exp val _ _) =
     "guard " ++ show (content exp) ++ " " ++ show val
-  show Nop = "nop"
-  show (For itr gen _ _) = "for " ++ show itr ++ " in " ++ show gen
-  show Break = "break"
-  show Next = "next"
+    ++ "\n"
+showStmt _ Nop = "nop\n"
+showStmt _ (For itr gen _ _) =
+    "for " ++ show itr ++ " in " ++ show gen
+    ++ "\n"
+showStmt _ Break = "break\n"
+showStmt _ Next = "next\n"
+
+
+showBody :: Int -> [Placed Stmt] -> String
+showBody indent stmts =
+  List.concatMap (\s -> List.replicate indent ' ' 
+                        ++ showStmt indent (content s)) stmts
+
 
 -- |Show start and end variable maps
 showVarMaps :: VarVers -> VarVers -> String
 showVarMaps before after =
     if Map.null before && Map.null after then ""
-    else " <" ++ show before ++ " -> " ++ show after ++ ">"
+    else " <" ++ showVarVers before ++ " -> " ++ showVarVers after ++ ">"
 
 -- |Show a primitive argument.
 instance Show PrimArg where
@@ -1391,7 +1433,7 @@ instance Show Exp where
   show (StringValue s) = show s
   show (CharValue c) = show c
   show (Var name dir) = (flowPrefix dir) ++ name
-  show (Where stmts exp) = show exp ++ " where " ++ show stmts
+  show (Where stmts exp) = show exp ++ " where\n" ++ showBody 8 stmts
   show (CondExp cond thn els) = 
     "if " ++ show cond ++ " then " ++ show thn ++ " else " ++ show els
   show (Fncall fn args) = 
@@ -1400,13 +1442,19 @@ instance Show Exp where
     "foreign " ++ lang ++ " " ++ fn 
     ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
 
+showVarVers vmap = 
+  "{" 
+  ++ List.intercalate ", " 
+  (List.map (\(k,v) -> show k ++ ":" ++ show v) $ Map.assocs vmap)
+  ++ "}"
+
 -- |Show a single generator.
-instance Show Generator where
-  show (In var exp) = var ++ " in " ++ show exp
-  show (InRange var start updateOp step Nothing) =
-    var ++ " from " ++ show start ++ " by " ++ updateOp ++ show step
-  show (InRange var start updateOp step (Just end)) =
-    show (InRange var start updateOp step Nothing) ++ " to " ++ show end
+-- instance Show Generator where
+--   show (In var exp) = var ++ " in " ++ show exp
+--   show (InRange var start updateOp step Nothing) =
+--     var ++ " from " ++ show start ++ " by " ++ updateOp ++ show step
+--   show (InRange var start updateOp step (Just end)) =
+--     show (InRange var start updateOp step Nothing) ++ " to " ++ show end
 
 -- |maybeShow pre maybe pos
 --  if maybe has something, show pre, the maybe payload, and post

@@ -67,9 +67,9 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     let (stmts',tempCtr) = flattenBody stmts
-    liftIO $ putStrLn $ "Flattened body = " ++ show stmts'
+    liftIO $ putStrLn $ "Flattened body:\n" ++ showBody 4 stmts'
     (initVars,stmts'',finalVars) <- numberVars params stmts' pos
-    -- liftIO $ putStrLn $ "Numbered body = " ++ show stmts''
+    liftIO $ putStrLn $ "Numbered body:\n" ++ showBody 4 stmts''
     proto' <- primProto initVars finalVars proto
     (_,procstate) <- userClauseComp $ compileStmts stmts''
     addProc name proto' [List.reverse $ body procstate] pos vis
@@ -211,8 +211,9 @@ compileStmts' (Cond exp thn els initVars finalVars) rest pos = do
   compileStmts' switch rest Nothing
 compileStmts' (Loop loopBody initVars finalVars) rest pos = do
   loopName <- lift $ genProcName
-  loop <- compileFreshProc loopName NoLoop initVars finalVars
-              [loopBody++[Unplaced Next]]
+  loop <- compileFreshProc loopName 
+          (LoopInfo (ProcCall loopName [] noVars noVars) [] [])
+          initVars finalVars [loopBody++[Unplaced Next]]
   compileStmts' loop rest Nothing
 compileStmts' (Guard exp val initVars finalVars) rest pos = do
   parg <- primArg (content exp) (place exp) initVars finalVars
@@ -254,7 +255,7 @@ compileStmts' Next rest pos = do
         --                (Unplaced $ Guard cond 0):rest]
         --     compileStmts' switch [] Nothing
 compileStmts' stmt rest pos =
-    error $ "Normalise error:  " ++ show stmt
+    error $ "Normalise error:  " ++ showStmt 4 stmt
 
 
 -- |Compile an argument into a PrimArg if it's flattened; if not, return Nothing
@@ -377,38 +378,38 @@ compileGenerator (In var exp) pos = do
     let testArg = Unplaced $ Var testVarName ParamOut
     compileStmts' (ProcCall "next" [stateArg,varArg,testArg] noVars noVars) [] Nothing
     return $ Unplaced $ Var testVarName ParamIn
-compileGenerator (InRange var exp updateOp inc limit) pos = do
-    (args,init1,_,_) <- normalisePlacedExp exp
-    (incArgs,init2,_,_) <- normalisePlacedExp inc
-    let asn = Unplaced $ ProcCall "=" 
-              (Unplaced (Var var ParamOut):args) noVars noVars
-    let varIn = Unplaced $ Var var ParamIn
-    let varOut = Unplaced $ Var var ParamOut
-    compileStmts' (ProcCall updateOp ([varIn]++incArgs++[varOut]) noVars noVars) [] Nothing
-    case limit of
-        Nothing -> do
-            modify (\st -> st { loopInfo = 
-                                     (loopInfo st) {loopInit = 
-                                                         (loopInit 
-                                                          $ loopInfo st)
-                                                         ++init1++init2++[asn]}
-                              })
-            return $ Unplaced $ IntValue 1
-        Just (comp,limit') -> do
-            testVarName <- freshVar
-            let testArg = Unplaced $ Var testVarName ParamOut
-            (limitArgs,init3,_,_) <- normalisePlacedExp limit'
-            modify (\st -> st { loopInfo = 
-                                     (loopInfo st) {loopInit = 
-                                                         (loopInit 
-                                                          $ loopInfo st)
-                                                         ++init1++init2
-                                                         ++init3++[asn]}
-                              })
-            compileStmts' (ProcCall comp
-                           ([varIn]++limitArgs++[testArg]) noVars noVars) [] 
-              Nothing
-            return $ Unplaced $ Var testVarName ParamIn
+-- compileGenerator (InRange var exp updateOp inc limit) pos = do
+--     (args,init1,_,_) <- normalisePlacedExp exp
+--     (incArgs,init2,_,_) <- normalisePlacedExp inc
+--     let asn = Unplaced $ ProcCall "=" 
+--               (Unplaced (Var var ParamOut):args) noVars noVars
+--     let varIn = Unplaced $ Var var ParamIn
+--     let varOut = Unplaced $ Var var ParamOut
+--     compileStmts' (ProcCall updateOp ([varIn]++incArgs++[varOut]) noVars noVars) [] Nothing
+--     case limit of
+--         Nothing -> do
+--             modify (\st -> st { loopInfo = 
+--                                      (loopInfo st) {loopInit = 
+--                                                          (loopInit 
+--                                                           $ loopInfo st)
+--                                                          ++init1++init2++[asn]}
+--                               })
+--             return $ Unplaced $ IntValue 1
+--         Just (comp,limit') -> do
+--             testVarName <- freshVar
+--             let testArg = Unplaced $ Var testVarName ParamOut
+--             (limitArgs,init3,_,_) <- normalisePlacedExp limit'
+--             modify (\st -> st { loopInfo = 
+--                                      (loopInfo st) {loopInit = 
+--                                                          (loopInit 
+--                                                           $ loopInfo st)
+--                                                          ++init1++init2
+--                                                          ++init3++[asn]}
+--                               })
+--             compileStmts' (ProcCall comp
+--                            ([varIn]++limitArgs++[testArg]) noVars noVars) [] 
+--               Nothing
+--             return $ Unplaced $ Var testVarName ParamIn
 
 
 -- |Set up a loop with the specified continuation and break calls

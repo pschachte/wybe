@@ -111,22 +111,26 @@ flattenStmt (Cond exp thn els initVars finalVars) pos = do
     exp' <- flattenPExp exp
     thn' <- flattenInner False thn
     els' <- flattenInner False els
-    emitNoVars pos $ Cond exp thn' els'
+    emitNoVars pos $ Cond exp' thn' els'
 flattenStmt (Loop body initVars finalVars) pos = do
     body' <- flattenInner True body
     emitNoVars pos $ Loop body'
-flattenStmt (Guard exp val initVars finalVars) pos = do
-    exp' <- flattenPExp exp
-    emitNoVars pos $ Guard exp' val
+-- flattenStmt (Guard exp val initVars finalVars) pos = do
+--     exp' <- flattenPExp exp
+--     emitNoVars pos $ Guard exp' val
 flattenStmt Nop pos =
     emit pos Nop
 flattenStmt (For itr gen initVars finalVars) pos = do
     genVar <- newTemp
     saveInit pos $ 
       ProcCall "init_seq" [gen, Unplaced $ Var genVar ParamOut] noVars noVars
-    args' <- flattenArgs [itr, Unplaced $ Var genVar ParamInOut]
-    emitNoVars pos $ ProcCall "in" args'
-    emitPostponed
+    flattenStmt (Cond (maybePlace 
+                       (Fncall "in" [itr,Unplaced $ Var genVar ParamOut])
+                       pos)
+                 [Unplaced Nop]
+                 [Unplaced Break]
+                 initVars finalVars)
+      pos
 flattenStmt Break pos = do
     emit pos Break
 flattenStmt Next pos = do

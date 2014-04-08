@@ -98,7 +98,7 @@ numberStmtVars vars (Nop) pos = return (Nop,vars)
 numberStmtVars vars (Break) pos = return (Break,vars)
 numberStmtVars vars (Next) pos = return (Next,vars)
 numberStmtVars vars stmt pos = do
-    error $ "flattening error:  " ++ show stmt
+    error $ "flattening error:  " ++ showStmt 4 stmt
 
 
 numberGeneratorVars :: VarVers -> Generator -> OptPos -> 
