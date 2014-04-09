@@ -68,10 +68,9 @@ numberStmtVars vars (ForeignCall lang name args _ _) pos = do
 numberStmtVars vars (Cond test thn els _ _) pos = do
     -- liftIO $ putStrLn $ "Handling if-then-else"
     -- liftIO $ putStrLn $ "Incoming vars = " ++ show vars
-    (test',defs) <- numberPExpVars vars test pos
-    vars' <- defineVars vars defs
+    (test',testVars) <- numberPStmtsVars vars test pos
     -- liftIO $ putStrLn $ "Vars after condition = " ++ show vars'
-    (thn',thnVars) <- numberPStmtsVars vars' thn pos
+    (thn',thnVars) <- numberPStmtsVars testVars thn pos
     -- liftIO $ putStrLn $ "Numbered then = " ++ show thn'
     -- liftIO $ putStrLn $ "then vars = " ++ show thnVars
     -- NB:  thn can use vars defined in test, but els can't
@@ -87,10 +86,9 @@ numberStmtVars vars (Loop body _ _) pos = do
     (body',vars') <- numberPStmtsVars vars body pos
     -- XXX bug: only include variables in scope for every loop exit
     return (Loop body' vars vars',vars')
-numberStmtVars vars (Guard test val _ _) pos = do
-    (test',defs) <- numberPExpVars vars test pos
-    vars' <- defineVars vars defs
-    return (Guard test' val vars vars',vars')
+numberStmtVars vars (Guard tests val _ _) pos = do
+    (tests',vars') <- numberPStmtsVars vars tests pos
+    return (Guard tests' val vars vars',vars')
 numberStmtVars vars (Nop) pos = return (Nop,vars)
 -- numberStmtVars vars (For name args_ _) pos = do
 --     (gen',vars') <- numberGeneratorVars vars gen pos
@@ -117,6 +115,8 @@ defineVars vars defs = do
     return $ Map.foldlWithKey addVarDef vars defs
 
 addVarDef :: VarVers -> VarName -> [OptPos] -> VarVers
+addVarDef vars v [] = 
+    error $ "Internal error: variable with no definitions: " ++ v
 addVarDef vars v (pos:_) =
     Map.alter (\old -> case old of
                     Just n -> Just $ n+1

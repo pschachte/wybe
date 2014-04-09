@@ -67,9 +67,9 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     let (stmts',tempCtr) = flattenBody stmts
-    liftIO $ putStrLn $ "Flattened body:\n" ++ showBody 4 stmts'
+    -- liftIO $ putStrLn $ "Flattened body:\n" ++ showBody 4 stmts'
     (initVars,stmts'',finalVars) <- numberVars params stmts' pos
-    liftIO $ putStrLn $ "Numbered body:\n" ++ showBody 4 stmts''
+    -- liftIO $ putStrLn $ "Numbered body:\n" ++ showBody 4 stmts''
     proto' <- primProto initVars finalVars proto
     (_,procstate) <- userClauseComp $ compileStmts stmts''
     addProc name proto' [List.reverse $ body procstate] pos vis
@@ -203,11 +203,11 @@ compileStmts' (ForeignCall lang name args initVars finalVars) rest pos = do
               args
   instr (PrimForeign lang name Nothing $ concat primArgs) pos
   compileStmts rest
-compileStmts' (Cond exp thn els initVars finalVars) rest pos = do
+compileStmts' (Cond tests thn els initVars finalVars) rest pos = do
   switchName <- lift $ genProcName
   switch <- compileFreshProc switchName NoLoop initVars finalVars
-            [(Unplaced $ Guard exp 1 initVars finalVars):thn, 
-             (Unplaced $ Guard exp 0 initVars finalVars):els]
+            [Unplaced (Guard tests 1 initVars noVars):thn,
+             Unplaced (Guard tests 0 initVars noVars):els]
   compileStmts' switch rest Nothing
 compileStmts' (Loop loopBody initVars finalVars) rest pos = do
   loopName <- lift $ genProcName
@@ -215,15 +215,9 @@ compileStmts' (Loop loopBody initVars finalVars) rest pos = do
           (LoopInfo (ProcCall loopName [] noVars noVars) [] [])
           initVars finalVars [loopBody++[Unplaced Next]]
   compileStmts' loop rest Nothing
-compileStmts' (Guard exp val initVars finalVars) rest pos = do
-  parg <- primArg (content exp) (place exp) initVars finalVars
-  case parg of
-    [ArgVar name FlowIn _] -> instr (PrimGuard name val) pos
-    [ArgInt n] ->
-      when (n /= val) $ instr PrimFail pos
-    _ -> do
-      lift $ message Error "Can't use a non-integer type as a Boolean" pos
-      instr PrimFail pos
+compileStmts' (Guard guarded val initVars finalVars) rest pos = do
+  state <- genClauseComp NoLoop guarded
+  instr (PrimGuard (body state) val) pos
   compileStmts rest
 compileStmts' Nop rest pos = compileStmts rest
 -- compileStmts' (For gen initVars finalVars) rest pos = do

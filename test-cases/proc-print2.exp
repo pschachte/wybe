@@ -1,4 +1,6 @@
-Public proc print2(x:int, y:int) @proc-print2:1:8[print(x @proc-print2:2:14) <fromList [] -> fromList []> @proc-print2:2:8,print(y @proc-print2:3:14) <fromList [] -> fromList []> @proc-print2:3:8]
+Public proc print2(x:int, y:int) @proc-print2:1:8    print(x @proc-print2:2:14)
+    print(y @proc-print2:3:14)
+
 
  Module proc-print2
   public submods  : 

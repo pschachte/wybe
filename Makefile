@@ -16,7 +16,7 @@ all:	test
 	happy -g $<
 
 wybemk:	*.hs Version.lhs Parser.hs
-	ghc --make $@
+	ghc -fwarn-incomplete-patterns --make $@
 
 .PHONY:	info
 

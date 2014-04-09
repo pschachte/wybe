@@ -1,4 +1,5 @@
-println("hello, world" @main-hello:1:9) <fromList [] -> fromList []> @main-hello:1:1
+println("hello, world" @main-hello:1:9)
+ @main-hello:1:1
 
  Module main-hello
   public submods  : 

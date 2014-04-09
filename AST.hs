@@ -913,9 +913,9 @@ noVars = Map.empty
 data Stmt
      = ProcCall Ident [Placed Exp] VarVers VarVers
      | ForeignCall Ident Ident [Placed Exp] VarVers VarVers
-     | Cond (Placed Exp) [Placed Stmt] [Placed Stmt] VarVers VarVers
+     | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt] VarVers VarVers
      | Loop [Placed Stmt] VarVers VarVers
-     | Guard (Placed Exp) Integer VarVers VarVers
+     | Guard [Placed Stmt] Integer VarVers VarVers
      | Nop
        -- These are only valid in a loop
      | For (Placed Exp) (Placed Exp) VarVers VarVers
@@ -930,7 +930,7 @@ data Exp
       | CharValue Char
       | Var VarName FlowDirection
       | Where [Placed Stmt] (Placed Exp)
-      | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
+      | CondExp [Placed Stmt] (Placed Exp) (Placed Exp)
       | Fncall Ident [Placed Exp]
       | ForeignFn String String [Placed Exp]
 
@@ -1001,7 +1001,7 @@ data Prim
      -- XXX PrimCall should optionally contain a module spec.
      = PrimCall ProcName (Maybe ProcID) [PrimArg]
      | PrimForeign String ProcName (Maybe ProcID) [PrimArg]
-     | PrimGuard PrimVarName Integer
+     | PrimGuard [Placed Prim] Integer
      | PrimFail
      | PrimNop
      deriving Eq
@@ -1033,7 +1033,7 @@ expToStmt :: Exp -> Stmt
 expToStmt (Fncall name args) = ProcCall name args noVars noVars
 expToStmt (ForeignFn lang name args) = 
   ForeignCall lang name args noVars noVars
-
+expToStmt exp = error $ "Internal error: non-Fncall expr " ++ show exp
 
 
 ----------------------------------------------------------------
@@ -1051,7 +1051,8 @@ varsInPrims dir prims =
 varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
 varsInPrim dir (PrimCall _ _ args)      = varsInPrimArgs dir args
 varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
-varsInPrim dir (PrimGuard var _)        = Set.singleton var
+varsInPrim dir (PrimGuard prims _)      =
+    List.foldr (Set.union . varsInPrim dir . content) Set.empty prims
 varsInPrim dir (PrimFail)               = Set.empty
 varsInPrim dir (PrimNop)                = Set.empty
 
@@ -1181,11 +1182,11 @@ instance Show t => Show (Placed t) where
 -- |How to show an optional source position
 showMaybeSourcePos :: OptPos -> String
 -- turn off annoying source positions
-showMaybeSourcePos _ = ""
--- showMaybeSourcePos (Just pos) = 
---   " @" ++ takeBaseName (sourceName pos) ++ ":" 
---   ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos)
--- showMaybeSourcePos Nothing = ""
+-- showMaybeSourcePos _ = ""
+showMaybeSourcePos (Just pos) = 
+  " @" ++ takeBaseName (sourceName pos) ++ ":" 
+  ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos)
+showMaybeSourcePos Nothing = ""
 
 -- |How to show a module.
 instance Show Module where
@@ -1303,31 +1304,33 @@ startLine ind = "\n" ++ replicate ind ' '
 -- |Show a code block (list of primitive statements) with the
 --  specified indent.
 showBlock :: Int -> [Placed Prim] -> String
-showBlock ind stmts = concat (List.map (showPrim ind) stmts)
-
-instance Show Prim where
-    show (PrimCall name id args) =
-        name ++ maybeShow "<" id ">"
-        ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
-    show (PrimForeign lang name id args) =
-        "foreign " ++ lang ++ " " ++ name ++ maybeShow "<" id ">"
-        ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
-    show (PrimGuard var val) =
-        "guard " ++ show var ++ " = " ++ show val
-    show (PrimNop) =
-        "NOP"
-    show (PrimFail) =
-        "FAIL"
+showBlock ind stmts = List.concatMap (showPlacedPrim ind) stmts
 
 -- |Show a single primitive statement with the specified indent.
-showPrim :: Int -> Placed Prim -> String
-showPrim ind stmt = showPrim' ind (content stmt) (place stmt)
+showPlacedPrim :: Int -> Placed Prim -> String
+showPlacedPrim ind stmt = showPlacedPrim' ind (content stmt) (place stmt)
 
 -- |Show a single primitive statement with the specified indent and 
 --  optional source position.
-showPrim' :: Int -> Prim -> OptPos -> String
-showPrim' ind prim pos =
-  startLine ind ++ show prim ++ showMaybeSourcePos pos
+showPlacedPrim' :: Int -> Prim -> OptPos -> String
+showPlacedPrim' ind prim pos =
+  startLine ind ++ showPrim ind prim ++ showMaybeSourcePos pos
+
+showPrim :: Int -> Prim -> String
+showPrim _ (PrimCall name id args) =
+        name ++ maybeShow "<" id ">"
+        ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+showPrim _ (PrimForeign lang name id args) =
+        "foreign " ++ lang ++ " " ++ name ++ maybeShow "<" id ">"
+        ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+showPrim ind (PrimGuard body val) =
+        "begin guard " ++ show val ++
+        showBlock (ind+4) body ++
+        startLine ind ++ "end guard "
+showPrim _ (PrimNop) =
+        "NOP"
+showPrim _ (PrimFail) =
+        "FAIL"
 
 -- |Show a variable, with its suffix
 instance Show PrimVarName where
@@ -1379,9 +1382,10 @@ showStmt _ (ForeignCall lang name args before after) =
     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" 
     ++ showVarMaps before after
     ++ "\n"
-showStmt indent (Cond exp thn els before after) =
+showStmt indent (Cond cond thn els before after) =
     let leadIn = List.replicate indent ' '
-    in "if " ++ show (content exp) ++ ":\n"
+    in "if:\n" ++ showBody (indent+4) cond
+       ++ leadIn ++ "then:\n"
        ++ showBody (indent+4) thn
        ++ leadIn ++ "else:\n"
        ++ showBody (indent+4) els
@@ -1393,8 +1397,8 @@ showStmt indent (Loop lstmts before after) =
     ++ List.replicate indent ' ' ++ " end "
     ++ showVarMaps before after
        ++ "\n"
-showStmt _ (Guard exp val _ _) =
-    "guard " ++ show (content exp) ++ " " ++ show val
+showStmt indent (Guard guarded val _ _) =
+    "guard " ++ showBody (indent+4) guarded ++ " " ++ show val
     ++ "\n"
 showStmt _ Nop = "nop\n"
 showStmt _ (For itr gen _ _) =
@@ -1435,7 +1439,7 @@ instance Show Exp where
   show (Var name dir) = (flowPrefix dir) ++ name
   show (Where stmts exp) = show exp ++ " where\n" ++ showBody 8 stmts
   show (CondExp cond thn els) = 
-    "if " ++ show cond ++ " then " ++ show thn ++ " else " ++ show els
+    "if\n" ++ showBody 4 cond ++ "then " ++ show thn ++ " else " ++ show els
   show (Fncall fn args) = 
     fn ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
   show (ForeignFn lang fn args) = 

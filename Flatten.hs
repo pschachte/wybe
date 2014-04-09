@@ -77,11 +77,11 @@ tempVar = do
     return $ "$tmp" ++ (show ctr)
 
 
-flattenInner :: Bool -> [Placed Stmt] -> Flattener [Placed Stmt]
-flattenInner isLoop stmts = do
+flattenInner :: Bool -> Flattener () -> Flattener [Placed Stmt]
+flattenInner isLoop inner = do
     (oldInit,oldStmts,oldPostponed,oldCtr) <- get
     let (innerInit,innerStmts,innerPostponed,newCtr) = 
-            execState (flattenStmts stmts) 
+            execState inner
             (if isLoop then [] else oldInit,[],[],oldCtr)
     if isLoop
       then do
@@ -107,26 +107,27 @@ flattenStmt (ForeignCall lang name args initVars finalVars) pos = do
     args' <- flattenArgs args
     emitNoVars pos $ ForeignCall lang name args'
     emitPostponed
-flattenStmt (Cond exp thn els initVars finalVars) pos = do
-    exp' <- flattenPExp exp
-    thn' <- flattenInner False thn
-    els' <- flattenInner False els
-    emitNoVars pos $ Cond exp' thn' els'
+flattenStmt (Cond tst thn els initVars finalVars) pos = do
+    tst' <- flattenInner False (flattenStmts tst)
+    thn' <- flattenInner False (flattenStmts thn)
+    els' <- flattenInner False (flattenStmts els)
+    emitNoVars pos $ Cond tst' thn' els'
 flattenStmt (Loop body initVars finalVars) pos = do
-    body' <- flattenInner True body
+    body' <- flattenInner True (flattenStmts body)
     emitNoVars pos $ Loop body'
--- flattenStmt (Guard exp val initVars finalVars) pos = do
---     exp' <- flattenPExp exp
---     emitNoVars pos $ Guard exp' val
+flattenStmt (Guard tests val initVars finalVars) pos = do
+    tests' <- flattenInner False (flattenStmts tests)
+    emitNoVars pos $ Guard tests' val
 flattenStmt Nop pos =
     emit pos Nop
 flattenStmt (For itr gen initVars finalVars) pos = do
     genVar <- newTemp
     saveInit pos $ 
       ProcCall "init_seq" [gen, Unplaced $ Var genVar ParamOut] noVars noVars
-    flattenStmt (Cond (maybePlace 
-                       (Fncall "in" [itr,Unplaced $ Var genVar ParamOut])
-                       pos)
+    flattenStmt (Cond [maybePlace 
+                       (ProcCall "in" [itr,Unplaced $ Var genVar ParamOut]
+                        noVars noVars)
+                       pos]
                  [Unplaced Nop]
                  [Unplaced Break]
                  initVars finalVars)
@@ -170,9 +171,8 @@ flattenExp (Where stmts pexp) _ = do
     flattenStmts stmts
     flattenPExp pexp
 flattenExp (CondExp cond thn els) pos = do
-    cond' <- flattenPExp cond
     resultName <- tempVar
-    flattenStmt (Cond cond'
+    flattenStmt (Cond cond
                  [Unplaced $ ProcCall "=" 
                   [Unplaced $ Var resultName ParamOut,thn] noVars noVars]
                  [Unplaced $ ProcCall "=" 
