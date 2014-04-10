@@ -90,9 +90,6 @@ numberStmtVars vars (Guard tests val _ _) pos = do
     (tests',vars') <- numberPStmtsVars vars tests pos
     return (Guard tests' val vars vars',vars')
 numberStmtVars vars (Nop) pos = return (Nop,vars)
--- numberStmtVars vars (For name args_ _) pos = do
---     (gen',vars') <- numberGeneratorVars vars gen pos
---     return (For name args vars vars, vars)
 numberStmtVars vars (Break) pos = return (Break,vars)
 numberStmtVars vars (Next) pos = return (Next,vars)
 numberStmtVars vars stmt pos = do
@@ -159,28 +156,6 @@ numberExpVars vars exp@(Var name dir) pos =
     return (exp,if flowOut dir then Map.singleton name [pos] else noVarDefs)
 numberExpVars vars exp _ =
     error $ "flattening error:  " ++ show exp
--- numberExpVars vars (Where stmts exp) pos = do
---     -- bindings made by the statements are scoped to the statements
---     (stmts',vars') <- numberPStmtsVars vars stmts pos
---     (exp',defs) <- numberPExpVars vars' exp pos
---     -- XXX Bug: must keep track of highest number used for each var, not
---     -- just the current number.  Here we forget if we've used higher
---     -- numbers for some vars.  Or should that be forbidden?
---     return (Where stmts' exp',defs)
--- numberExpVars vars exp@(CondExp cond thn els) pos = do
---     (cond',condDefs) <- numberPExpVars vars cond pos
---     vars' <- defineVars vars condDefs
---     -- XXX Either report error if then or else branch define vars, or else
---     -- allow it.
---     (thn',thndefs) <- numberPExpVars vars' thn pos
---     (els',elsdefs) <- numberPExpVars vars els pos
---     return (CondExp cond' thn' els',noVarDefs)
--- numberExpVars vars exp@(Fncall fn exps) pos = do
---     (exps',defs) <- numberPExpsVars vars exps pos
---     return (Fncall fn (List.reverse exps'),defs)
--- numberExpVars vars exp@(ForeignFn lang fn exps) pos = do
---     (exps',defs) <- numberPExpsVars vars exps pos
---     return (ForeignFn lang fn (List.reverse exps'),defs)
 
 
 joinVars :: VarVers -> VarVers -> VarVers

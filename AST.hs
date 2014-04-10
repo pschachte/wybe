@@ -192,21 +192,6 @@ runCompiler opts comp = evalStateT comp
                          (initClauseComp 0 NoLoop))
 
 
--- initCompiler :: Options -> FilePath -> ModSpec -> Maybe [Ident] -> 
---                OptPos -> CompilerState
--- initCompiler opts dir spec params pos = 
---     let typedef params' = Map.insert (last spec)
---                           (TypeDef (List.length params') pos) Map.empty
---         (typs,pubtyps) =
---             case params of
---                 Nothing -> (Map.empty, Map.empty)
---                 Just params' -> (typedef params', typedef params')
---     in Compiler opts [] False Map.empty 0 0 0 0 0 $
---        Module dir spec params 
---        (ModuleInterface pubtyps Map.empty Map.empty Map.empty Set.empty) 
---        (Just $ ModuleImplementation Map.empty Map.empty typs 
---         Map.empty Map.empty)
-
 -- |Return some function of the current compiler state.
 getCompiler :: (CompilerState -> t) -> Compiler t
 getCompiler getter = do
@@ -622,25 +607,6 @@ optionallyPutStr opt strcomp = do
 verboseMsg :: Int -> Compiler String -> Compiler ()
 verboseMsg verbosity = optionallyPutStr ((>= verbosity) . optVerbosity)
 
--- -- |Initialise the compiler state's type map to empty.
--- initialiseTypes :: Compiler ()
--- initialiseTypes = updateCompiler (\st -> st {types = Map.empty})
-
--- -- |Update type information to add a type constraint.
--- addTypeConstraint :: VarName -> TypeSpec -> Compiler ()
--- addTypeConstraint var typ = do
---     updateCompiler (\st -> st {types = Map.insertWith meetTypes 
---                                       var typ $ types st})
-
--- -- |Return the type spec for the specified variable.
--- varType :: VarName -> Compiler TypeSpec
--- varType var = do
---     getCompiler (Map.findWithDefault Unspecified var . types)
-
--- -- |Combine two type constraints.
--- meetTypes :: TypeSpec -> TypeSpec -> TypeSpec
--- -- XXX Need to return the most general type that satisfies *both* constraints!
--- meetTypes typ _ = typ
 
 ----------------------------------------------------------------
 --                            AST Types
@@ -941,8 +907,6 @@ data Exp
 --  generalised, allowing them to be user-defined.
 data Generator
       = In VarName (Placed Exp)
-      -- | InRange VarName (Placed Exp) ProcName (Placed Exp) 
-      --   (Maybe (ProcName,Placed Exp))
 
 -- |A variable name in SSA form, ie, a name and an natural number suffix,
 --  where the suffix is used to specify which assignment defines the value.
@@ -1349,31 +1313,6 @@ showCases num labelInd blockInd (block:blocks) =
   ++ showBlock blockInd block
   ++ showCases (num+1) labelInd blockInd blocks
 
--- -- |Show a single statement.
--- instance Show Stmt where
---   show (ProcCall name args before after) =
---     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" ++
---     showVarMaps before after
---   show (ForeignCall lang name args before after) =
---     "foreign " ++ lang ++ " " ++ 
---     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" ++
---     showVarMaps before after
---   show (Cond exp thn els before after) =
---     "if" ++ show (content exp) ++ " then "
---     ++ show thn
---     ++ " else "
---     ++ show els
---     ++ " end" ++
---     showVarMaps before after
---   show (Loop lstmts before after) =
---     "do " ++ concat (List.map show lstmts) ++ " end" ++
---     showVarMaps before after
---   show (Guard exp val _ _) =
---     "guard " ++ show (content exp) ++ " " ++ show val
---   show Nop = "nop"
---   show (For itr gen _ _) = "for " ++ show itr ++ " in " ++ show gen
---   show Break = "break"
---   show Next = "next"
 
 showStmt :: Int -> Stmt -> String
 showStmt _ (ProcCall name args before after) =
@@ -1455,13 +1394,6 @@ showVarVers vmap =
   (List.map (\(k,v) -> show k ++ ":" ++ show v) $ Map.assocs vmap)
   ++ "}"
 
--- |Show a single generator.
--- instance Show Generator where
---   show (In var exp) = var ++ " in " ++ show exp
---   show (InRange var start updateOp step Nothing) =
---     var ++ " from " ++ show start ++ " by " ++ updateOp ++ show step
---   show (InRange var start updateOp step (Just end)) =
---     show (InRange var start updateOp step Nothing) ++ " to " ++ show end
 
 -- |maybeShow pre maybe pos
 --  if maybe has something, show pre, the maybe payload, and post
