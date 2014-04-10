@@ -38,14 +38,14 @@ proc position(x:0:int, y:0:int, ?$:0:position) (id 0):
     =(?$:0, $rec:2)
                     x:
 proc x($rec:0:position, ?$:0:int) (id 0): 
-    foreign $ access("position", "position", "x", $rec:0, ?$tmp0:0)
-    =(?$:0, $tmp0:0)
+    foreign $ access("position", "position", "x", $rec:0, ?tmp$0:0)
+    =(?$:0, tmp$0:0)
 proc x($rec:0:position, ?$rec:1:position, $field:0:int) (id 1): 
     foreign $ mutate("position", "position", "x", $rec:0, ?$rec:1, $field:0)
                     y:
 proc y($rec:0:position, ?$:0:int) (id 0): 
-    foreign $ access("position", "position", "y", $rec:0, ?$tmp0:0)
-    =(?$:0, $tmp0:0)
+    foreign $ access("position", "position", "y", $rec:0, ?tmp$0:0)
+    =(?$:0, tmp$0:0)
 proc y($rec:0:position, ?$rec:1:position, $field:0:int) (id 1): 
     foreign $ mutate("position", "position", "y", $rec:0, ?$rec:1, $field:0)
 
@@ -62,17 +62,17 @@ Submodules of position.position:
   resources       : 
   procs           : distance:
 proc distance(p1:0:position, p2:0:position, ?$:0:?) (id 0):  @import:3:8
-    x(p2:0, ?$tmp4:0) @import:4:11
-    x(p1:0, ?$tmp5:0) @import:4:16
-    -($tmp4:0, $tmp5:0, ?$tmp3:0) @import:4:10
-    ^($tmp3:0, 2, ?$tmp2:0) @import:4:10
-    y(p2:0, ?$tmp8:0) @import:4:27
-    y(p1:0, ?$tmp9:0) @import:4:32
-    -($tmp8:0, $tmp9:0, ?$tmp7:0) @import:4:26
-    ^($tmp7:0, 2, ?$tmp6:0) @import:4:26
-    +($tmp2:0, $tmp6:0, ?$tmp1:0) @import:4:10
-    sqrt($tmp1:0, ?$tmp0:0) @import:4:5
-    =(?$:0, $tmp0:0)
+    x(p2:0, ?tmp$4:0) @import:4:11
+    x(p1:0, ?tmp$5:0) @import:4:16
+    -(tmp$4:0, tmp$5:0, ?tmp$3:0) @import:4:10
+    ^(tmp$3:0, 2, ?tmp$2:0) @import:4:10
+    y(p2:0, ?tmp$8:0) @import:4:27
+    y(p1:0, ?tmp$9:0) @import:4:32
+    -(tmp$8:0, tmp$9:0, ?tmp$7:0) @import:4:26
+    ^(tmp$7:0, 2, ?tmp$6:0) @import:4:26
+    +(tmp$2:0, tmp$6:0, ?tmp$1:0) @import:4:10
+    sqrt(tmp$1:0, ?tmp$0:0) @import:4:5
+    =(?$:0, tmp$0:0)
 
 Submodules of import:
 

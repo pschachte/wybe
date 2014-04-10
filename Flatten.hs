@@ -74,7 +74,7 @@ tempVar :: Flattener VarName
 tempVar = do
     (loopinit,stmts,postponed,ctr) <- get
     put (loopinit,stmts,postponed,ctr+1)
-    return $ "$tmp" ++ (show ctr)
+    return $ "tmp$" ++ (show ctr)
 
 
 flattenInner :: Bool -> Flattener () -> Flattener [Placed Stmt]

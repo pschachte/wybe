@@ -3,33 +3,39 @@ Public type list(t) is @type-list:1:8
   Public ctor [|](head:t,tail:list(t)) @type-list:3:12
 end
 
-Public func ++(x:list(t),y:list(t)):? @type-list:6:8 = if ==(x @type-list:7:8, []() @type-list:7:13) @type-list:7:8 then y @type-list:8:10 else [|](head(x @type-list:9:11) @type-list:9:11, ++(tail(x @type-list:9:18) @type-list:9:18, y @type-list:9:26) @type-list:9:18) @type-list:9:10 @type-list:7:5
+Public func ++(x:list(t),y:list(t)):? @type-list:6:8 = if
+    ==(x @type-list:7:8, []() @type-list:7:13)
+then y @type-list:8:10 else [|](head(x @type-list:9:11) @type-list:9:11, ++(tail(x @type-list:9:18) @type-list:9:18, y @type-list:9:26) @type-list:9:18) @type-list:9:10 @type-list:7:5
 
  Module type-list
   public submods  : list @type-list:1:8
   public types    : 
   public resources: 
-  public procs    : ++(x:0:list(t), y:0:list(t), ?$:-1:?) <0> @type-list:6:8
+  public procs    : ++(x:0:list(t), y:0:list(t), ?$:0:?) <0> @type-list:6:8
   imports         : 
   types           : 
   resources       : 
   procs           : ++:
-proc ++(x:0:list(t), y:0:list(t), ?$:-1:?) (id 0):  @type-list:6:8
-    gen$1(x:0, y:0, ?$:1)
-    =(?$:2, $tmp0:0)
+proc ++(x:0:list(t), y:0:list(t), ?$:0:?) (id 0):  @type-list:6:8
+    gen$1(x:0, y:0, ?tmp$0:0)
+    =(?$:0, tmp$0:0)
                     gen$1:
-proc gen$1(x:0:list(t), y:0:list(t), ?$:-1:?) (id 0): 
-    ==(x:0, ?$tmp1:0) @type-list:7:8
-    guard $tmp1:0 = 1
-    =(?$tmp0:0, y:0)
+proc gen$1(x:0:?, y:0:?, ?tmp$0:0:?) (id 0): 
+    begin guard 1
+        ==(x:0, tmp$1:0) @type-list:7:8
+        [](?tmp$1:0) @type-list:7:13
+    end guard 
+    =(?tmp$0:0, y:0)
 
-    ==(x:0, ?$tmp1:0) @type-list:7:8
-    guard $tmp1:0 = 0
-    head(x:0, ?$tmp4:0) @type-list:9:11
-    tail(x:0, ?$tmp6:0) @type-list:9:18
-    ++($tmp6:0, y:0, ?$tmp5:0) @type-list:9:18
-    [|]($tmp4:0, $tmp5:0, ?$tmp3:0) @type-list:9:10
-    =(?$tmp0:1, $tmp3:0)
+    begin guard 0
+        ==(x:0, tmp$1:0) @type-list:7:8
+        [](?tmp$1:0) @type-list:7:13
+    end guard 
+    head(x:0, ?tmp$3:0) @type-list:9:11
+    tail(x:0, ?tmp$5:0) @type-list:9:18
+    ++(tmp$5:0, y:0, ?tmp$4:0) @type-list:9:18
+    [|](tmp$3:0, tmp$4:0, ?tmp$2:0) @type-list:9:10
+    =(?tmp$0:0, tmp$2:0)
 
 Submodules of type-list:
 list: 
@@ -37,36 +43,36 @@ list:
   public submods  : 
   public types    : list/1 @type-list:1:8
   public resources: 
-  public procs    : [](?$:-1:list(t)) <0>
-                    [|](head:0:t, tail:0:list(t), ?$:-1:list(t)) <0>
-                    head($rec:0:list(t), ?$rec:-1:list(t), $field:0:t) <1>
-                    head($rec:0:list(t), ?$:-1:t) <0>
-                    tail($rec:0:list(t), ?$rec:-1:list(t), $field:0:list(t)) <1>
-                    tail($rec:0:list(t), ?$:-1:list(t)) <0>
+  public procs    : [](?$:0:list(t)) <0>
+                    [|](head:0:t, tail:0:list(t), ?$:0:list(t)) <0>
+                    head($rec:0:list(t), ?$rec:1:list(t), $field:0:t) <1>
+                    head($rec:0:list(t), ?$:0:t) <0>
+                    tail($rec:0:list(t), ?$rec:1:list(t), $field:0:list(t)) <1>
+                    tail($rec:0:list(t), ?$:0:list(t)) <0>
   imports         : 
   types           : list/1 @type-list:1:8
   resources       : 
   procs           : []:
-proc [](?$:-1:list(t)) (id 0): 
+proc [](?$:0:list(t)) (id 0): 
     foreign $ alloc("list", "[]", ?$rec:0)
-    =(?$:1, $rec:0)
+    =(?$:0, $rec:0)
                     [|]:
-proc [|](head:0:t, tail:0:list(t), ?$:-1:list(t)) (id 0): 
+proc [|](head:0:t, tail:0:list(t), ?$:0:list(t)) (id 0): 
     foreign $ alloc("list", "[|]", ?$rec:0)
     foreign $ mutate("list", "[|]", "head", $rec:0, ?$rec:1, head:0)
     foreign $ mutate("list", "[|]", "tail", $rec:1, ?$rec:2, tail:0)
-    =(?$:1, $rec:2)
+    =(?$:0, $rec:2)
                     head:
-proc head($rec:0:list(t), ?$:-1:t) (id 0): 
-    foreign $ access("list", "[|]", "head", $rec:0, ?$tmp0:0)
-    =(?$:1, $tmp0:0)
-proc head($rec:0:list(t), ?$rec:-1:list(t), $field:0:t) (id 1): 
+proc head($rec:0:list(t), ?$:0:t) (id 0): 
+    foreign $ access("list", "[|]", "head", $rec:0, ?tmp$0:0)
+    =(?$:0, tmp$0:0)
+proc head($rec:0:list(t), ?$rec:1:list(t), $field:0:t) (id 1): 
     foreign $ mutate("list", "[|]", "head", $rec:0, ?$rec:1, $field:0)
                     tail:
-proc tail($rec:0:list(t), ?$:-1:list(t)) (id 0): 
-    foreign $ access("list", "[|]", "tail", $rec:0, ?$tmp0:0)
-    =(?$:1, $tmp0:0)
-proc tail($rec:0:list(t), ?$rec:-1:list(t), $field:0:list(t)) (id 1): 
+proc tail($rec:0:list(t), ?$:0:list(t)) (id 0): 
+    foreign $ access("list", "[|]", "tail", $rec:0, ?tmp$0:0)
+    =(?$:0, tmp$0:0)
+proc tail($rec:0:list(t), ?$rec:1:list(t), $field:0:list(t)) (id 1): 
     foreign $ mutate("list", "[|]", "tail", $rec:0, ?$rec:1, $field:0)
 
 Submodules of type-list.list:

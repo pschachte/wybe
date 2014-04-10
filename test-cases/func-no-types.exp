@@ -10,8 +10,8 @@ Public func times(a:?,b:?):? @func-no-types:1:8 = *(a @func-no-types:1:26, b @fu
   resources       : 
   procs           : times:
 proc times(a:0:?, b:0:?, ?$:0:?) (id 0):  @func-no-types:1:8
-    *(a:0, b:0, ?$tmp0:0) @func-no-types:1:26
-    =(?$:0, $tmp0:0)
+    *(a:0, b:0, ?tmp$0:0) @func-no-types:1:26
+    =(?$:0, tmp$0:0)
 
 Submodules of func-no-types:
 
