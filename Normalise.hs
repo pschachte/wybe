@@ -148,17 +148,18 @@ compileFreshProc name loopInfo initVars finalVars clauses = do
     then
       return Nop
     else do
-      let inVars = Map.keys initVars
-      let outVars = List.filter (not . (sameAtKey initVars finalVars))
-                    $ Map.keys finalVars
+      let (inVars,outVars) = allArgs initVars finalVars
       let inParams = inferredParams initVars FlowIn inVars
       let outParams = inferredParams finalVars FlowOut outVars
-      -- XXX
-      let inArgs = inferredArgs initVars ParamIn
-      let outArgs = inferredArgs finalVars ParamOut
       lift $ addProc name (PrimProto name (inParams++outParams)) 
         clauses' Nothing Private
-      return $ ProcCall name (inArgs++outArgs) initVars finalVars
+      return $ generatedCall name inVars outVars initVars finalVars
+
+allArgs :: VarVers -> VarVers -> ([VarName],[VarName])
+allArgs initVars finalVars =           
+    (Map.keys initVars,
+     List.filter (not . (sameAtKey initVars finalVars)) $ Map.keys finalVars)
+
 
 inferredParams :: VarVers -> PrimFlow -> [VarName] -> [PrimParam]
 inferredParams vars flow included =
@@ -166,9 +167,11 @@ inferredParams vars flow included =
     included
 
 
-inferredArgs :: VarVers -> FlowDirection -> [Placed Exp]
-inferredArgs vars flow = do
-    List.map (\v -> Unplaced $ Var v flow) $ Map.keys vars
+generatedCall :: ProcName -> [VarName] -> [VarName] -> VarVers -> VarVers -> Stmt
+generatedCall name inNames outNames initVars finalVars =
+    let inArgs  = List.map (\v -> Unplaced $ Var v ParamIn) inNames
+        outArgs = List.map (\v -> Unplaced $ Var v ParamOut) outNames
+    in  ProcCall name (inArgs++outArgs) initVars finalVars
 
 
 sameAtKey :: (Eq b, Ord a) => Map a b -> Map a b -> a -> Bool
@@ -204,15 +207,29 @@ compileStmts' (ForeignCall lang name args initVars finalVars) rest pos = do
   instr (PrimForeign lang name Nothing $ concat primArgs) pos
   compileStmts rest
 compileStmts' (Cond tests thn els initVars finalVars) rest pos = do
+  inf <- gets loopInfo
   switchName <- lift $ genProcName
-  switch <- compileFreshProc switchName NoLoop initVars finalVars
-            [Unplaced (Guard tests 1 initVars noVars):thn,
-             Unplaced (Guard tests 0 initVars noVars):els]
-  compileStmts' switch rest Nothing
+  if inf == NoLoop
+     then do
+      switch <- compileFreshProc switchName NoLoop initVars finalVars
+                [Unplaced (Guard tests 1 initVars noVars):thn,
+                 Unplaced (Guard tests 0 initVars noVars):els]
+      compileStmts' switch rest Nothing
+    else do
+      contName <- lift $ genProcName
+      continuation <- compileFreshProc contName inf initVars finalVars [rest]
+      switch <- compileFreshProc switchName inf initVars finalVars
+                [Unplaced (Guard tests 1 initVars noVars):thn ++
+                 [Unplaced continuation],
+                 Unplaced (Guard tests 0 initVars noVars):els ++ 
+                 [Unplaced continuation]]
+      compileStmts' switch [] Nothing
 compileStmts' (Loop loopBody initVars finalVars) rest pos = do
   loopName <- lift $ genProcName
+  let (inVars,outVars) = allArgs initVars finalVars
   loop <- compileFreshProc loopName 
-          (LoopInfo (ProcCall loopName [] noVars noVars) [] [])
+          (LoopInfo (generatedCall loopName inVars outVars initVars finalVars) 
+           [] [])
           initVars finalVars [loopBody++[Unplaced Next]]
   compileStmts' loop rest Nothing
 compileStmts' (Guard guarded val initVars finalVars) rest pos = do
@@ -240,7 +257,9 @@ compileStmts' Next rest pos = do
     inf <- gets loopInfo
     case inf of
         NoLoop -> lift $ message Error "Next outside of a loop" pos
-        LoopInfo _ _ _ -> return ()
+        LoopInfo cont _ _ -> do
+            compileStmts' cont [] Nothing
+            return ()
         -- LoopInfo cont _ _ -> do
         --     switchName <- lift $ genProcName
         --     switch <- compileFreshProc switchName

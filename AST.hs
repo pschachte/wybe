@@ -407,6 +407,7 @@ data LoopInfo = LoopInfo {
     loopInit :: [Placed Stmt],    -- ^code to initialise before enterring loop
     loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
     | NoLoop
+    deriving (Eq)
 
 
 -- |Run a clause compiler function from the Compiler monad to compile
@@ -921,6 +922,7 @@ data Stmt
      | For (Placed Exp) (Placed Exp) VarVers VarVers
      | Break
      | Next
+     deriving (Eq)
 
 -- |An expression.  These are all normalised into statements.
 data Exp
@@ -933,6 +935,7 @@ data Exp
       | CondExp [Placed Stmt] (Placed Exp) (Placed Exp)
       | Fncall Ident [Placed Exp]
       | ForeignFn String String [Placed Exp]
+     deriving (Eq)
 
 -- |A loop generator (ie, an iterator).  These need to be 
 --  generalised, allowing them to be user-defined.
