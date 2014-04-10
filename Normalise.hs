@@ -67,9 +67,9 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     let (stmts',tempCtr) = flattenBody stmts
-    -- liftIO $ putStrLn $ "Flattened body:\n" ++ showBody 4 stmts'
+    -- liftIO $ putStrLn $ "Flattened body:\n" ++ show (ProcDecl vis proto stmts pos)
     (initVars,stmts'',finalVars) <- numberVars params stmts' pos
-    -- liftIO $ putStrLn $ "Numbered body:\n" ++ showBody 4 stmts''
+    -- liftIO $ putStrLn $ "Numbered body:\n" ++ show (ProcDecl vis proto stmts'' pos)
     proto' <- primProto initVars finalVars proto
     (_,procstate) <- userClauseComp $ compileStmts stmts''
     addProc name proto' [List.reverse $ body procstate] pos vis
@@ -237,11 +237,13 @@ compileStmts' (Guard guarded val initVars finalVars) rest pos = do
   instr (PrimGuard (body state) val) pos
   compileStmts rest
 compileStmts' Nop rest pos = compileStmts rest
-compileStmts' Break rest pos = do
+compileStmts' (Break initVars) rest pos = do
     inf <- gets loopInfo
     case inf of
         NoLoop -> lift $ message Error "Break outside of a loop" pos
-        LoopInfo _ _ _ -> return ()
+        LoopInfo _ _ _ -> do -- Must bind outputs as necessary
+            
+            return ()
 compileStmts' Next rest pos = do
     inf <- gets loopInfo
     case inf of

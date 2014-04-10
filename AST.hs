@@ -875,8 +875,9 @@ type VarVers = Map VarName Int
 noVars :: Map VarName Int
 noVars = Map.empty
 
--- |Source program statements.  These will be normalised into 
---  Prims.
+-- |Source program statements.  These will be normalised into Prims.
+--  The two VarVers included with most of these contructors record
+--  the latest version of each variable before and after each statement.
 data Stmt
      = ProcCall Ident [Placed Exp] VarVers VarVers
      | ForeignCall Ident Ident [Placed Exp] VarVers VarVers
@@ -886,7 +887,7 @@ data Stmt
      | Nop
        -- These are only valid in a loop
      | For (Placed Exp) (Placed Exp) VarVers VarVers
-     | Break
+     | Break VarVers  -- holds the variable versions before the break
      | Next
      deriving (Eq)
 
@@ -1346,7 +1347,9 @@ showStmt _ Nop = "nop\n"
 showStmt _ (For itr gen _ _) =
     "for " ++ show itr ++ " in " ++ show gen
     ++ "\n"
-showStmt _ Break = "break\n"
+showStmt _ (Break before) =
+    "break" ++ showVarMaps before before
+    ++ "\n"
 showStmt _ Next = "next\n"
 
 

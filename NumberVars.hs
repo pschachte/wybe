@@ -83,17 +83,36 @@ numberStmtVars vars (Cond test thn els _ _) pos = do
     let els'' = els' ++ reconcilingAssignments elsVars jointVars
     return (Cond test' thn'' els'' vars jointVars,jointVars)
 numberStmtVars vars (Loop body _ _) pos = do
-    (body',vars') <- numberPStmtsVars vars body pos
-    -- XXX bug: only include variables in scope for every loop exit
+    (body',_) <- numberPStmtsVars vars body pos
+    -- liftIO $ putStrLn $ "loop entry vars = " ++ show vars
+    let varsvers = loopBreakVars body'
+    -- liftIO $ putStrLn $ "loop exit vars = " ++ show varsvers
+    let vars' = if varsvers == [] then noVars
+                else List.foldr1 joinVars varsvers
+    -- liftIO $ putStrLn $ "all exit vars = " ++ show vars'
     return (Loop body' vars vars',vars')
 numberStmtVars vars (Guard tests val _ _) pos = do
     (tests',vars') <- numberPStmtsVars vars tests pos
     return (Guard tests' val vars vars',vars')
 numberStmtVars vars (Nop) pos = return (Nop,vars)
-numberStmtVars vars (Break) pos = return (Break,vars)
+numberStmtVars vars (Break _) pos = return (Break vars,vars)
 numberStmtVars vars (Next) pos = return (Next,vars)
 numberStmtVars vars stmt pos = do
     error $ "flattening error:  " ++ showStmt 4 stmt
+
+
+loopBreakVars :: [Placed Stmt] -> [VarVers]
+loopBreakVars = List.concatMap (stmtBreakVars . content)
+
+stmtBreakVars :: Stmt -> [VarVers]
+stmtBreakVars (Cond test thn els _ _) =
+    -- Break should never appear in the test
+    loopBreakVars thn ++ loopBreakVars els
+-- Don't count breaks in inner loops    
+stmtBreakVars (Loop body _ _) = []
+stmtBreakVars (Break vars) = [vars]
+-- No Breaks in any other statements
+stmtBreakVars _ = []
 
 
 numberGeneratorVars :: VarVers -> Generator -> OptPos -> 

@@ -290,12 +290,12 @@ Stmt :: { Placed Stmt }
                                   (tokenPosition $1) }
     | 'for' Exp 'in' Exp        { Placed (For $2 $4 noVars noVars)
                                   (tokenPosition $1) }
-    | 'until' Stmt              { Placed (Cond [$2] [Unplaced Break]
+    | 'until' Stmt              { Placed (Cond [$2] [Unplaced $ Break noVars]
                                                   [Unplaced Nop]
 					  noVars noVars)
                                   (tokenPosition $1) }
     | 'while' Stmt              { Placed (Cond [$2] [Unplaced Nop]
-                                                  [Unplaced Break]
+                                                  [Unplaced $ Break noVars]
 					  noVars noVars)
                                   (tokenPosition $1) }
     | 'unless' Stmt             { Placed (Cond [$2] [Unplaced Next]

@@ -125,15 +125,16 @@ flattenStmt (For itr gen initVars finalVars) pos = do
     saveInit pos $ 
       ProcCall "init_seq" [gen, Unplaced $ Var genVar ParamOut] noVars noVars
     flattenStmt (Cond [maybePlace 
-                       (ProcCall "in" [itr,Unplaced $ Var genVar ParamOut]
+                       (ProcCall "in" [itr,Unplaced $ Var genVar ParamIn,
+                                       Unplaced $ Var genVar ParamOut]
                         noVars noVars)
                        pos]
                  [Unplaced Nop]
-                 [Unplaced Break]
+                 [Unplaced $ Break noVars]
                  initVars finalVars)
       pos
-flattenStmt Break pos = do
-    emit pos Break
+flattenStmt (Break initVars) pos = do
+    emit pos (Break initVars)
 flattenStmt Next pos = do
     emit pos Next
 
