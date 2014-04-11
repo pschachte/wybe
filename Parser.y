@@ -291,19 +291,19 @@ Stmt :: { Placed Stmt }
     | 'for' Exp 'in' Exp        { Placed (For $2 $4 noVars noVars)
                                   (tokenPosition $1) }
     | 'until' Stmt              { Placed (Cond [$2] [Unplaced $ Break noVars]
-                                                  [Unplaced Nop]
+                                                  [Unplaced $ Nop noVars]
 					  noVars noVars)
                                   (tokenPosition $1) }
-    | 'while' Stmt              { Placed (Cond [$2] [Unplaced Nop]
+    | 'while' Stmt              { Placed (Cond [$2] [Unplaced $ Nop noVars]
                                                   [Unplaced $ Break noVars]
 					  noVars noVars)
                                   (tokenPosition $1) }
-    | 'unless' Stmt             { Placed (Cond [$2] [Unplaced Next]
-                                                  [Unplaced Nop]
+    | 'unless' Stmt             { Placed (Cond [$2] [Unplaced $ Next noVars]
+                                                  [Unplaced $ Nop noVars]
 					  noVars noVars)
                                          (tokenPosition $1) }
-    | 'when' Stmt               { Placed (Cond [$2] [Unplaced Nop]
-					          [Unplaced Next]
+    | 'when' Stmt               { Placed (Cond [$2] [Unplaced $ Nop noVars]
+					          [Unplaced $ Next noVars]
 					  noVars noVars)
                                          (tokenPosition $1) }
 

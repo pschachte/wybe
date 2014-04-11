@@ -31,13 +31,15 @@ numberVars params stmts pos = do
 -- |Gives a VarVers value assigning an initial variable number to 
 --  each of the formal parameters of a proc.
 addParamVers :: OptPos -> VarVers -> Param -> Compiler VarVers
-addParamVers pos vars (Param name _ flow) =
+addParamVers pos BottomVarVers (Param name _ flow) =
+  error "Internal error: unreachable parameter"
+addParamVers pos vars@(VarVers m) (Param name _ flow) =
     if flow == ParamIn || flow == ParamInOut
-    then if Map.member name vars 
+    then if Map.member name m
          then do 
              message Error ("repeated input parameter " ++ name) pos
              return vars
-         else return $  Map.insert name 0 vars
+         else return $ VarVers $ Map.insert name 0 m
     else return vars
 
 
@@ -66,54 +68,69 @@ numberStmtVars vars (ForeignCall lang name args _ _) pos = do
     vars' <- defineVars vars defs
     return (ForeignCall lang name args' vars vars', vars')
 numberStmtVars vars (Cond test thn els _ _) pos = do
-    -- liftIO $ putStrLn $ "Handling if-then-else"
-    -- liftIO $ putStrLn $ "Incoming vars = " ++ show vars
+    liftIO $ putStrLn $ "Handling if-then-else"
+    liftIO $ putStrLn $ "Incoming vars = " ++ show vars
     (test',testVars) <- numberPStmtsVars vars test pos
-    -- liftIO $ putStrLn $ "Vars after condition = " ++ show vars'
+    liftIO $ putStrLn $ "Vars after condition = " ++ show testVars
     (thn',thnVars) <- numberPStmtsVars testVars thn pos
-    -- liftIO $ putStrLn $ "Numbered then = " ++ show thn'
-    -- liftIO $ putStrLn $ "then vars = " ++ show thnVars
+    liftIO $ putStrLn $ "Numbered then =\n" ++ showBody 4 thn'
+    liftIO $ putStrLn $ "then vars = " ++ show thnVars
     -- NB:  thn can use vars defined in test, but els can't
     (els',elsVars) <- numberPStmtsVars vars els pos 
-    -- liftIO $ putStrLn $ "Numbered else = " ++ show els'
-    -- liftIO $ putStrLn $ "else vars = " ++ show elsVars
+    liftIO $ putStrLn $ "Numbered else =\n" ++ showBody 4 els'
+    liftIO $ putStrLn $ "else vars = " ++ show elsVars
     let jointVars = joinVars thnVars elsVars
-    -- liftIO $ putStrLn $ "joined    = " ++ show jointVars
+    liftIO $ putStrLn $ "joined    = " ++ show jointVars
     let thn'' = thn' ++ reconcilingAssignments thnVars jointVars
     let els'' = els' ++ reconcilingAssignments elsVars jointVars
     return (Cond test' thn'' els'' vars jointVars,jointVars)
 numberStmtVars vars (Loop body _ _) pos = do
     (body',_) <- numberPStmtsVars vars body pos
-    -- liftIO $ putStrLn $ "loop entry vars = " ++ show vars
-    let varsvers = loopBreakVars body'
-    -- liftIO $ putStrLn $ "loop exit vars = " ++ show varsvers
-    let vars' = if varsvers == [] then noVars
-                else List.foldr1 joinVars varsvers
-    -- liftIO $ putStrLn $ "all exit vars = " ++ show vars'
-    return (Loop body' vars vars',vars')
+    liftIO $ putStrLn $ "loop entry vars = " ++ show vars
+    let (breakVars,nextVars) = loopBreakNextVars body'
+    liftIO $ putStrLn $ "loop exit vars = " ++ show nextVars
+    let vars' = if nextVars == [] then BottomVarVers
+                else List.foldr1 joinVars $ nextVars
+    -- vars' is the VarVers after one iteration; allow for other
+    -- iterations by incrementing versions of all changed vars
+    let vars'' = case (vars,vars') of
+          (VarVers init, VarVers final) ->
+            VarVers $
+            Map.intersectionWith 
+            (\old new -> if old == new then new else new + 1)
+            init final
+          (_, _) -> vars'
+    -- Need some kind of fixed point to find the output variables?
+    liftIO $ putStrLn $ "all exit vars = " ++ show vars''
+    return (Loop body' vars vars'',vars'')
 numberStmtVars vars (Guard tests val _ _) pos = do
     (tests',vars') <- numberPStmtsVars vars tests pos
     return (Guard tests' val vars vars',vars')
-numberStmtVars vars (Nop) pos = return (Nop,vars)
-numberStmtVars vars (Break _) pos = return (Break vars,vars)
-numberStmtVars vars (Next) pos = return (Next,vars)
+numberStmtVars vars (Nop _) pos = return (Nop vars,vars)
+numberStmtVars vars (Break _) pos = return (Break vars,BottomVarVers)
+-- XXX Something wrong here.  BottomVarVers isn't right?
+numberStmtVars vars (Next _) pos = return (Next vars,BottomVarVers)
 numberStmtVars vars stmt pos = do
     error $ "flattening error:  " ++ showStmt 4 stmt
 
 
-loopBreakVars :: [Placed Stmt] -> [VarVers]
-loopBreakVars = List.concatMap (stmtBreakVars . content)
+loopBreakNextVars :: [Placed Stmt] -> ([VarVers],[VarVers])
+loopBreakNextVars stmts = List.foldr concatPair  ([],[]) $
+                          List.map (stmtBreakVars . content) stmts
 
-stmtBreakVars :: Stmt -> [VarVers]
+stmtBreakVars :: Stmt -> ([VarVers],[VarVers])
 stmtBreakVars (Cond test thn els _ _) =
     -- Break should never appear in the test
-    loopBreakVars thn ++ loopBreakVars els
+    loopBreakNextVars thn `concatPair` loopBreakNextVars els
 -- Don't count breaks in inner loops    
-stmtBreakVars (Loop body _ _) = []
-stmtBreakVars (Break vars) = [vars]
+stmtBreakVars (Loop body _ _) = ([],[])
+stmtBreakVars (Break vars) = ([vars],[])
+stmtBreakVars (Next vars) = ([],[vars])
 -- No Breaks in any other statements
-stmtBreakVars _ = []
+stmtBreakVars _ = ([],[])
 
+concatPair :: ([a],[b]) -> ([a],[b]) -> ([a],[b])
+concatPair (a1,a2) (b1,b2) = (a1++b1, a2++b2)
 
 numberGeneratorVars :: VarVers -> Generator -> OptPos -> 
                        Compiler (Generator,VarVers)
@@ -133,10 +150,11 @@ defineVars vars defs = do
 addVarDef :: VarVers -> VarName -> [OptPos] -> VarVers
 addVarDef vars v [] = 
     error $ "Internal error: variable with no definitions: " ++ v
-addVarDef vars v (pos:_) =
-    Map.alter (\old -> case old of
-                    Just n -> Just $ n+1
-                    Nothing -> Just 0) v vars
+addVarDef BottomVarVers _ _ = BottomVarVers
+addVarDef (VarVers vars) v (pos:_) =
+    VarVers (Map.alter (\old -> case old of
+                           Just n -> Just $ n+1
+                           Nothing -> Just 0) v vars)
 
 
 type VarDefs = Map VarName [OptPos]
@@ -178,7 +196,9 @@ numberExpVars vars exp _ =
 
 
 joinVars :: VarVers -> VarVers -> VarVers
-joinVars = Map.intersectionWith max
+joinVars BottomVarVers vars = vars
+joinVars vars BottomVarVers = vars
+joinVars (VarVers m1) (VarVers m2) = VarVers $ Map.intersectionWith max m1 m2
 
 
 reportMultiDefinitions :: VarDefs -> Compiler ()
@@ -195,16 +215,21 @@ reportMultiDefn (name,defs) =
 
 
 reconcilingAssignments :: VarVers -> VarVers -> [Placed Stmt]
-reconcilingAssignments caseVars jointVars =
-    let vars = List.filter (\v -> caseVars ! v /= jointVars ! v) $ keys jointVars
+reconcilingAssignments BottomVarVers _ = []
+reconcilingAssignments _ BottomVarVers = 
+  error "Internal error: reconciling assignments"
+reconcilingAssignments (VarVers caseVars) (VarVers jointVars) =
+    let vars = 
+          List.filter (\v -> caseVars ! v /= jointVars ! v) $ keys jointVars
     in  snd $ mapAccumL (reconcileOne jointVars) caseVars vars
 
 
-reconcileOne :: VarVers -> VarVers -> VarName -> (VarVers,Placed Stmt)        
+reconcileOne :: (Map VarName Int) -> (Map VarName Int) -> VarName -> 
+                ((Map VarName Int),Placed Stmt)        
 reconcileOne targetVars vars var =
     let varVer = targetVars ! var
         vars'  = Map.insert var varVer vars
     in (vars',
         Unplaced $
         ProcCall "=" [Unplaced $ Var var ParamOut, Unplaced $ Var var ParamIn]
-        vars vars')
+        (VarVers vars) (VarVers vars'))

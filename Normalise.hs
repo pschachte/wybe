@@ -67,9 +67,9 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     let (stmts',tempCtr) = flattenBody stmts
-    -- liftIO $ putStrLn $ "Flattened body:\n" ++ show (ProcDecl vis proto stmts pos)
+    liftIO $ putStrLn $ "Flattened body:\n" ++ show (ProcDecl vis proto stmts pos)
     (initVars,stmts'',finalVars) <- numberVars params stmts' pos
-    -- liftIO $ putStrLn $ "Numbered body:\n" ++ show (ProcDecl vis proto stmts'' pos)
+    liftIO $ putStrLn $ "Numbered body:\n" ++ show (ProcDecl vis proto stmts'' pos)
     proto' <- primProto initVars finalVars proto
     (_,procstate) <- userClauseComp $ compileStmts stmts''
     addProc name proto' [List.reverse $ body procstate] pos vis
@@ -146,7 +146,7 @@ compileFreshProc name loopInfo initVars finalVars clauses = do
   -- liftIO $ putStrLn $ "compiled code:  " ++ show clauses'
   if List.all List.null clauses'
     then
-      return Nop
+      return $ Nop initVars
     else do
       let (inVars,outVars) = allArgs initVars finalVars
       let inParams = inferredParams initVars FlowIn inVars
@@ -156,14 +156,17 @@ compileFreshProc name loopInfo initVars finalVars clauses = do
       return $ generatedCall name inVars outVars initVars finalVars
 
 allArgs :: VarVers -> VarVers -> ([VarName],[VarName])
-allArgs initVars finalVars =           
+allArgs BottomVarVers _ = ([],[])
+allArgs (VarVers initVars) BottomVarVers = (Map.keys initVars,[])
+allArgs (VarVers initVars) (VarVers finalVars) =
     (Map.keys initVars,
      List.filter (not . (sameAtKey initVars finalVars)) $ Map.keys finalVars)
 
 
 inferredParams :: VarVers -> PrimFlow -> [VarName] -> [PrimParam]
-inferredParams vars flow included =
-    List.map (\v -> PrimParam (PrimVarName v (vars!v)) Unspecified flow Ordinary)
+inferredParams BottomVarVers _ _ = []
+inferredParams (VarVers m) flow included =
+    List.map (\v -> PrimParam (PrimVarName v (m!v)) Unspecified flow Ordinary)
     included
 
 
@@ -209,7 +212,7 @@ compileStmts' (ForeignCall lang name args initVars finalVars) rest pos = do
 compileStmts' (Cond tests thn els initVars finalVars) rest pos = do
   inf <- gets loopInfo
   switchName <- lift $ genProcName
-  if inf == NoLoop
+  if inf == NoLoop || rest == []
      then do
       switch <- compileFreshProc switchName NoLoop initVars finalVars
                 [Unplaced (Guard tests 1 initVars noVars):thn,
@@ -217,7 +220,8 @@ compileStmts' (Cond tests thn els initVars finalVars) rest pos = do
       compileStmts' switch rest Nothing
     else do
       contName <- lift $ genProcName
-      continuation <- compileFreshProc contName inf initVars finalVars [rest]
+      continuation <- compileFreshProc contName inf finalVars  
+                      (lastFinalVars rest) [rest]
       switch <- compileFreshProc switchName inf initVars finalVars
                 [Unplaced (Guard tests 1 initVars noVars):thn ++
                  [Unplaced continuation],
@@ -228,32 +232,40 @@ compileStmts' (Loop loopBody initVars finalVars) rest pos = do
   loopName <- lift $ genProcName
   let (inVars,outVars) = allArgs initVars finalVars
   loop <- compileFreshProc loopName 
+          -- The noVars below will be replaced for each Next goal, but all
+          -- will share the outVars.
           (LoopInfo (generatedCall loopName inVars outVars initVars finalVars) 
            [] [])
-          initVars finalVars [loopBody++[Unplaced Next]]
+          initVars finalVars [loopBody]
   compileStmts' loop rest Nothing
 compileStmts' (Guard guarded val initVars finalVars) rest pos = do
   state <- genClauseComp NoLoop guarded
   instr (PrimGuard (body state) val) pos
   compileStmts rest
-compileStmts' Nop rest pos = compileStmts rest
+compileStmts' (Nop _) rest pos = compileStmts rest
 compileStmts' (Break initVars) rest pos = do
     inf <- gets loopInfo
     case inf of
         NoLoop -> lift $ message Error "Break outside of a loop" pos
         LoopInfo _ _ _ -> do -- Must bind outputs as necessary
-            
+            -- XXX what should I do here?
             return ()
-compileStmts' Next rest pos = do
+compileStmts' (Next initVars) rest pos = do
     inf <- gets loopInfo
     case inf of
         NoLoop -> lift $ message Error "Next outside of a loop" pos
         LoopInfo cont _ _ -> do
-            compileStmts' cont [] Nothing
+            compileStmts' (replaceCallInittVars cont initVars) [] Nothing
             return ()
 compileStmts' stmt rest pos =
     error $ "Normalise error:  " ++ showStmt 4 stmt
 
+
+replaceCallInittVars :: Stmt -> VarVers -> Stmt
+replaceCallInittVars (ProcCall name args _ finalVars) initVars =
+    ProcCall name args initVars finalVars
+replaceCallInittVars _ _ =
+    shouldnt "expected 'next' statement to be a call"
 
 -- |Compile an argument into a PrimArg if it's flattened; if not, return Nothing
 primArg :: Exp -> OptPos -> VarVers -> VarVers -> ClauseComp [PrimArg]
@@ -265,8 +277,7 @@ primArg (Var name dir) pos initVars finalVars = do
   var <- lift $ flowVar name dir pos initVars finalVars
   return var
 primArg exp pos initVars finalVars =
-  error $ "Internal error: " ++ show (maybePlace exp pos) ++ 
-  " remains after flattening"
+  shouldnt $ show (maybePlace exp pos) ++ " remains after flattening"
 
 
 -- |Compile a list of expressions as proc call arguments to a list of 
@@ -426,3 +437,18 @@ flowJoin ParamIn    ParamOut   = ParamInOut
 flowJoin ParamIn    ParamIn    = ParamIn
 flowJoin ParamOut   ParamOut   = ParamOut
 flowJoin ParamOut   ParamIn    = ParamInOut
+
+
+lastFinalVars :: [Placed Stmt] -> VarVers
+lastFinalVars = stmtFinalVars . content . last
+
+stmtFinalVars :: Stmt -> VarVers
+stmtFinalVars (ProcCall _ _ _ vars) = vars
+stmtFinalVars (ForeignCall _ _ _ _ vars) = vars
+stmtFinalVars (Cond _ _ _ _ vars) = vars
+stmtFinalVars (Loop _ _ vars) = vars
+stmtFinalVars (Guard _ _ _ vars) = vars
+stmtFinalVars (Nop vars) = vars
+stmtFinalVars (For _ _ _ vars) = vars
+stmtFinalVars (Break vars) = vars
+stmtFinalVars (Next vars) = vars

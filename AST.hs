@@ -13,7 +13,7 @@ module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility,
   TypeProto(..), TypeSpec(..), FnProto(..),
-  ProcProto(..), Param(..), Stmt(..), VarVers, noVars,
+  ProcProto(..), Param(..), Stmt(..), VarVers(..), noVars,
   Exp(..), Generator(..),
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
@@ -42,7 +42,8 @@ module AST (
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
-  showBody, showStmt
+  showBody, showStmt,
+  shouldnt
   ) where
 
 import Options
@@ -433,7 +434,9 @@ freshVar = do
 -- |Return the current PrimVarName for a given name string; ie, find 
 --  the current suffix for the specified name.
 getVar :: VarName -> OptPos -> VarVers -> Compiler PrimVarName
-getVar name pos vars = do
+getVar name pos BottomVarVers =
+    shouldnt "getting variable in error context"
+getVar name pos (VarVers vars) = do
     case Map.lookup name vars of
         Nothing -> do
             message Error ("uninitialised variable '"++name++"'") pos
@@ -870,10 +873,11 @@ flowOut _ = False
 --  before or after a statement), and gives for each a version 
 --  number, to distinguish different definitions for a variable in 
 --  the same proc.
-type VarVers = Map VarName Int
+data VarVers = VarVers (Map VarName Int) | BottomVarVers
+             deriving (Eq, Show)
 
-noVars :: Map VarName Int
-noVars = Map.empty
+noVars :: VarVers
+noVars = VarVers Map.empty
 
 -- |Source program statements.  These will be normalised into Prims.
 --  The two VarVers included with most of these contructors record
@@ -884,11 +888,11 @@ data Stmt
      | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt] VarVers VarVers
      | Loop [Placed Stmt] VarVers VarVers
      | Guard [Placed Stmt] Integer VarVers VarVers
-     | Nop
+     | Nop VarVers -- Nop doesn't do anything so before and after are the same
        -- These are only valid in a loop
      | For (Placed Exp) (Placed Exp) VarVers VarVers
      | Break VarVers  -- holds the variable versions before the break
-     | Next
+     | Next VarVers  -- holds the variable versions before the next
      deriving (Eq)
 
 -- |An expression.  These are all normalised into statements.
@@ -1343,14 +1347,15 @@ showStmt indent (Loop lstmts before after) =
 showStmt indent (Guard guarded val _ _) =
     "guard " ++ showBody (indent+4) guarded ++ " " ++ show val
     ++ "\n"
-showStmt _ Nop = "nop\n"
+showStmt _ (Nop _) = "nop\n"
 showStmt _ (For itr gen _ _) =
     "for " ++ show itr ++ " in " ++ show gen
     ++ "\n"
 showStmt _ (Break before) =
-    "break" ++ showVarMaps before before
+    "break" ++ showVarMaps before BottomVarVers
     ++ "\n"
-showStmt _ Next = "next\n"
+showStmt _ (Next before) = "next" ++ showVarMaps before BottomVarVers
+    ++ "\n"
 
 
 showBody :: Int -> [Placed Stmt] -> String
@@ -1362,7 +1367,7 @@ showBody indent stmts =
 -- |Show start and end variable maps
 showVarMaps :: VarVers -> VarVers -> String
 showVarMaps before after =
-    if Map.null before && Map.null after then ""
+    if before == noVars && after == noVars then ""
     else " <" ++ showVarVers before ++ " -> " ++ showVarVers after ++ ">"
 
 -- |Show a primitive argument.
@@ -1391,10 +1396,12 @@ instance Show Exp where
     "foreign " ++ lang ++ " " ++ fn 
     ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
 
-showVarVers vmap = 
+showVarVers :: VarVers -> String
+showVarVers (BottomVarVers) = "BottomVarVers"
+showVarVers (VarVers vars) = 
   "{" 
   ++ List.intercalate ", " 
-  (List.map (\(k,v) -> show k ++ ":" ++ show v) $ Map.assocs vmap)
+  (List.map (\(k,v) -> k ++ ":" ++ show v) $ Map.assocs vars)
   ++ "}"
 
 
@@ -1405,3 +1412,8 @@ maybeShow :: Show t => String -> Maybe t -> String -> String
 maybeShow pre Nothing pos = ""
 maybeShow pre (Just something) post =
   pre ++ show something ++ post
+
+
+-- |Report an internal error and abort
+shouldnt :: String -> a
+shouldnt what = error $ "Internal error: " ++ what

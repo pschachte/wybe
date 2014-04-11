@@ -113,13 +113,12 @@ flattenStmt (Cond tst thn els initVars finalVars) pos = do
     els' <- flattenInner False (flattenStmts els)
     emitNoVars pos $ Cond tst' thn' els'
 flattenStmt (Loop body initVars finalVars) pos = do
-    body' <- flattenInner True (flattenStmts body)
+    body' <- flattenInner True 
+             (flattenStmts $ body ++ [Unplaced $ Next noVars])
     emitNoVars pos $ Loop body'
 flattenStmt (Guard tests val initVars finalVars) pos = do
     tests' <- flattenInner False (flattenStmts tests)
     emitNoVars pos $ Guard tests' val
-flattenStmt Nop pos =
-    emit pos Nop
 flattenStmt (For itr gen initVars finalVars) pos = do
     genVar <- newTemp
     saveInit pos $ 
@@ -129,14 +128,16 @@ flattenStmt (For itr gen initVars finalVars) pos = do
                                        Unplaced $ Var genVar ParamOut]
                         noVars noVars)
                        pos]
-                 [Unplaced Nop]
+                 [Unplaced $ Nop noVars]
                  [Unplaced $ Break noVars]
                  initVars finalVars)
       pos
-flattenStmt (Break initVars) pos = do
-    emit pos (Break initVars)
-flattenStmt Next pos = do
-    emit pos Next
+flattenStmt stmt@(Nop _) pos =
+    emit pos stmt
+flattenStmt stmt@(Break _) pos = do
+    emit pos stmt
+flattenStmt stmt@(Next _) pos = do
+    emit pos stmt
 
 
 -- |Compile a list of expressions as proc call arguments to a list of 
