@@ -21,18 +21,20 @@ import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 
 
-flattenBody :: [Placed Stmt] -> ([Placed Stmt],Int)
-flattenBody stmts =
-    let finalState = 
-            execState (flattenStmts stmts) initFlattenerState
-    in  (List.reverse (prefixStmts finalState) ++ 
-         List.reverse (flattened finalState) ++ 
-         postponed finalState, tempCtr finalState)
+flattenBody :: [Placed Stmt] -> 
+               Compiler ([Placed Stmt],[(ProcProto,[Placed Stmt])])
+flattenBody stmts = do
+    -- (_,finalState) <- runStateT (return ()) initFlattenerState
+    finalState <- execStateT (flattenStmts stmts) initFlattenerState
+    return (
+        List.reverse (prefixStmts finalState) ++ 
+        List.reverse (flattened finalState) ++ 
+        postponed finalState, [])
 
 
--- |The clause compiler monad is a state transformer monad carrying the 
---  clause compiler state over the compiler monad.
-type Flattener = State FlattenerState
+-- |The Flattener monad is a state transformer monad carrying the 
+--  flattener state over the compiler monad.
+type Flattener = StateT FlattenerState Compiler
 
 
 data FlattenerState = Flattener {
@@ -85,11 +87,11 @@ tempVar = do
 flattenInner :: Bool -> Flattener () -> Flattener [Placed Stmt]
 flattenInner isLoop inner = do
     oldState <- get
-    let innerState =
-            execState inner 
-            (initFlattenerState {
-                  tempCtr = (tempCtr oldState),
-                  prefixStmts = if isLoop then [] else prefixStmts oldState})
+    innerState <-
+        execStateT (lift inner)
+        (initFlattenerState {
+              tempCtr = (tempCtr oldState),
+              prefixStmts = if isLoop then [] else prefixStmts oldState})
     put $ oldState { tempCtr = tempCtr innerState }
     if isLoop
       then flattenStmts $ prefixStmts innerState

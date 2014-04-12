@@ -66,13 +66,15 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
    noVars noVars]
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
-    let (stmts',tempCtr) = flattenBody stmts
+    (stmts',genProcs) <- flattenBody stmts
     -- liftIO $ putStrLn $ "Flattened body:\n" ++ show (ProcDecl vis proto stmts pos)
     (initVars,stmts'',finalVars) <- numberVars params stmts' pos
     -- liftIO $ putStrLn $ "Numbered body:\n" ++ show (ProcDecl vis proto stmts'' pos)
     proto' <- primProto initVars finalVars proto
     (_,procstate) <- userClauseComp $ compileStmts stmts''
     addProc name proto' [List.reverse $ body procstate] pos vis
+    mapM_ normaliseItem [ProcDecl Private proto body Nothing |
+                         (proto,body) <- genProcs]
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
     Just modparams <- getModuleParams
