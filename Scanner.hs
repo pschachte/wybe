@@ -10,6 +10,7 @@ module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
                 StringDelim(..), BracketStyle(..), fileTokens, 
                 inputTokens) where
 
+import AST
 import Data.Char
 import Data.List
 import Text.ParserCombinators.Parsec.Pos
@@ -49,26 +50,32 @@ tokenPosition (TokSymbol _    pos) = pos
 -- |Returns the value of a float token.
 floatValue :: Token -> Double
 floatValue (TokFloat float _) = float
+floatValue _ = shouldnt "not a float"
 
 -- |Returns the value of an int token.
 intValue :: Token -> Integer
 intValue (TokInt int _) = int
+intValue _ = shouldnt "not an int"
 
 -- |Returns the value of a string token.
 stringValue :: Token -> String
 stringValue (TokString _ string _) = string
+stringValue _ = shouldnt "not a string"
 
 -- |Returns the value of a character constant token.
 charValue :: Token -> Char
 charValue (TokChar char _) = char
+charValue _ = shouldnt "not a char"
 
 -- |Returns the name of an identifier token.
 identName :: Token -> String
 identName (TokIdent str _) = str
+identName _ = shouldnt "not an ident"
 
 -- |Returns the name of a symbol token.
 symbolName :: Token -> String
 symbolName (TokSymbol str _) = str
+symbolName _ = shouldnt "not a symbol"
 
 -- |How to display a source position.
 showPosition :: SourcePos -> String
@@ -161,6 +168,7 @@ tokeniseSymbol pos (c:cs) =
   let (sym,rest) = span isSymbolChar cs
       pos' = updatePosString pos 
   in  multiCharTok (c:sym) rest (TokSymbol (c:sym) pos) pos
+tokeniseSymbol _ [] = shouldnt "empty symbol does not exist"
 
 -- |Tokenise a delimited string and tokenize the rest of the input..
 -- XXX This doesn't handle escapes within strings
@@ -178,6 +186,7 @@ tokeniseString delim pos cs =
 -- |Is the specified char the expected final delimiter?
 delimChar DoubleQuote = '\"'
 delimChar BackQuote = '`'
+delimChar _ = shouldnt "not a delimiter character"
 
 -- |Recognise an escaped character constant.
 -- XXX doesn't currently support unicode escapes
