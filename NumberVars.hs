@@ -68,27 +68,27 @@ numberStmtVars vars (ForeignCall lang name args _ _) pos = do
     vars' <- defineVars vars defs
     return (ForeignCall lang name args' vars vars', vars')
 numberStmtVars vars (Cond test thn els _ _) pos = do
-    liftIO $ putStrLn $ "Handling if-then-else"
-    liftIO $ putStrLn $ "Incoming vars = " ++ show vars
+    -- liftIO $ putStrLn $ "Handling if-then-else"
+    -- liftIO $ putStrLn $ "Incoming vars = " ++ show vars
     (test',testVars) <- numberPStmtsVars vars test pos
-    liftIO $ putStrLn $ "Vars after condition = " ++ show testVars
+    -- liftIO $ putStrLn $ "Vars after condition = " ++ show testVars
     (thn',thnVars) <- numberPStmtsVars testVars thn pos
-    liftIO $ putStrLn $ "Numbered then =\n" ++ showBody 4 thn'
-    liftIO $ putStrLn $ "then vars = " ++ show thnVars
+    -- liftIO $ putStrLn $ "Numbered then =\n" ++ showBody 4 thn'
+    -- liftIO $ putStrLn $ "then vars = " ++ show thnVars
     -- NB:  thn can use vars defined in test, but els can't
     (els',elsVars) <- numberPStmtsVars vars els pos 
-    liftIO $ putStrLn $ "Numbered else =\n" ++ showBody 4 els'
-    liftIO $ putStrLn $ "else vars = " ++ show elsVars
+    -- liftIO $ putStrLn $ "Numbered else =\n" ++ showBody 4 els'
+    -- liftIO $ putStrLn $ "else vars = " ++ show elsVars
     let jointVars = joinVars thnVars elsVars
-    liftIO $ putStrLn $ "joined    = " ++ show jointVars
+    -- liftIO $ putStrLn $ "joined    = " ++ show jointVars
     let thn'' = thn' ++ reconcilingAssignments thnVars jointVars
     let els'' = els' ++ reconcilingAssignments elsVars jointVars
     return (Cond test' thn'' els'' vars jointVars,jointVars)
 numberStmtVars vars (Loop body _ _) pos = do
     (body',_) <- numberPStmtsVars vars body pos
-    liftIO $ putStrLn $ "loop entry vars = " ++ show vars
+    -- liftIO $ putStrLn $ "loop entry vars = " ++ show vars
     let (breakVars,nextVars) = loopBreakNextVars body'
-    liftIO $ putStrLn $ "loop exit vars = " ++ show nextVars
+    -- liftIO $ putStrLn $ "loop exit vars = " ++ show nextVars
     let vars' = if nextVars == [] then BottomVarVers
                 else List.foldr1 joinVars $ nextVars
     -- vars' is the VarVers after one iteration; allow for other
@@ -101,7 +101,7 @@ numberStmtVars vars (Loop body _ _) pos = do
             init final
           (_, _) -> vars'
     -- Need some kind of fixed point to find the output variables?
-    liftIO $ putStrLn $ "all exit vars = " ++ show vars''
+    -- liftIO $ putStrLn $ "all exit vars = " ++ show vars''
     return (Loop body' vars vars'',vars'')
 numberStmtVars vars (Guard tests val _ _) pos = do
     (tests',vars') <- numberPStmtsVars vars tests pos
