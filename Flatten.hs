@@ -23,28 +23,32 @@ import Control.Monad.Trans (lift,liftIO)
 
 flattenBody :: [Placed Stmt] -> ([Placed Stmt],Int)
 flattenBody stmts =
-    let (revInit,revStmts,postponed,tempCtr) = 
-            execState (flattenStmts stmts) ([], [], [], 0)
-    in  (List.reverse revInit ++ List.reverse revStmts ++ postponed, tempCtr)
+    let finalState = 
+            execState (flattenStmts stmts) initFlattenerState
+    in  (List.reverse (prefixStmts finalState) ++ 
+         List.reverse (flattened finalState) ++ 
+         postponed finalState, tempCtr finalState)
 
 
 -- |The clause compiler monad is a state transformer monad carrying the 
 --  clause compiler state over the compiler monad.
-type Flattener = State ([Placed Stmt],[Placed Stmt],[Placed Stmt],Int)
+type Flattener = State FlattenerState
 
 
-newTemp :: Flattener VarName
-newTemp = do
-    (loopinit,stmts,postponed,ctr) <- get
-    put (loopinit,stmts,postponed,ctr+1)
-    return $ "generator$" ++ show ctr
-    
+data FlattenerState = Flattener {
+    prefixStmts :: [Placed Stmt],   -- ^Init stmts for current loop, reversed
+    flattened   :: [Placed Stmt],   -- ^Flattened code generated, reversed
+    postponed   :: [Placed Stmt],   -- ^Code to be generated later
+    tempCtr     :: Int              -- ^Temp variable counter
+    }
 
+initFlattenerState :: FlattenerState
+initFlattenerState = Flattener [] [] [] 0
 
 emit :: OptPos -> Stmt -> Flattener ()
 emit pos stmt = do
-    (loopinit,stmts,postponed,ctr) <- get
-    put (loopinit,maybePlace stmt pos:stmts,postponed,ctr)
+    stmts <- gets flattened
+    modify (\s -> s { flattened = maybePlace stmt pos:stmts })
 
 
 emitNoVars :: OptPos -> (VarVers -> VarVers -> Stmt) -> Flattener ()
@@ -53,42 +57,46 @@ emitNoVars pos stmt = emit pos (stmt noVars noVars)
 
 postpone :: OptPos -> Stmt -> Flattener ()
 postpone pos stmt = do
-    (loopinit,stmts,postponed,ctr) <- get
-    put (loopinit,stmts,maybePlace stmt pos:postponed,ctr)
+    stmts <- gets postponed
+    modify (\s -> s { postponed = maybePlace stmt pos:stmts })
 
 
 saveInit :: OptPos -> Stmt -> Flattener ()
 saveInit pos stmt = do
-    (loopinit,stmts,postponed,ctr) <- get
-    put (maybePlace stmt pos:loopinit,stmts,postponed,ctr)
+    stmts <- gets prefixStmts
+    modify (\s -> s { prefixStmts = maybePlace stmt pos:stmts })
 
 
 emitPostponed :: Flattener ()
 emitPostponed = do
-    (loopinit,stmts,postponed,ctr) <- get
-    put (loopinit,postponed++stmts,[],ctr)
+    stmts <- gets flattened
+    stmts' <- gets postponed
+    modify (\s -> s { flattened = stmts ++ stmts', postponed = [] })
 
 
 -- |Return a fresh variable name.
 tempVar :: Flattener VarName
 tempVar = do
-    (loopinit,stmts,postponed,ctr) <- get
-    put (loopinit,stmts,postponed,ctr+1)
-    return $ "tmp$" ++ (show ctr)
+    ctr <- gets tempCtr
+    modify (\s -> s { tempCtr = ctr + 1 })
+    return $ "generator$" ++ show ctr
 
 
 flattenInner :: Bool -> Flattener () -> Flattener [Placed Stmt]
 flattenInner isLoop inner = do
-    (oldInit,oldStmts,oldPostponed,oldCtr) <- get
-    let (innerInit,innerStmts,innerPostponed,newCtr) = 
-            execState inner
-            (if isLoop then [] else oldInit,[],[],oldCtr)
+    oldState <- get
+    let innerState =
+            execState inner 
+            (initFlattenerState {
+                  tempCtr = (tempCtr oldState),
+                  prefixStmts = if isLoop then [] else prefixStmts oldState})
+    let newState = oldState { tempCtr = tempCtr innerState }
     if isLoop
       then do
-        put (oldInit,oldStmts,oldPostponed,newCtr)
-        flattenStmts innerInit
-      else put (innerInit,oldStmts,oldPostponed,newCtr)
-    return $ List.reverse innerStmts
+        put $ newState
+        flattenStmts $ prefixStmts innerState
+    else put $ newState { prefixStmts = prefixStmts innerState }
+    return $ List.reverse $ flattened innerState
 
 
 -- |Flatten the specified statements to primitive statements.
@@ -120,7 +128,7 @@ flattenStmt (Guard tests val initVars finalVars) pos = do
     tests' <- flattenInner False (flattenStmts tests)
     emitNoVars pos $ Guard tests' val
 flattenStmt (For itr gen initVars finalVars) pos = do
-    genVar <- newTemp
+    genVar <- tempVar
     saveInit pos $ 
       ProcCall "init_seq" [gen, Unplaced $ Var genVar ParamOut] noVars noVars
     flattenStmt (Cond [maybePlace 
