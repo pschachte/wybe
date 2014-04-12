@@ -79,7 +79,7 @@ tempVar :: Flattener VarName
 tempVar = do
     ctr <- gets tempCtr
     modify (\s -> s { tempCtr = ctr + 1 })
-    return $ "generator$" ++ show ctr
+    return $ "tmp$" ++ show ctr
 
 
 flattenInner :: Bool -> Flattener () -> Flattener [Placed Stmt]
@@ -90,12 +90,10 @@ flattenInner isLoop inner = do
             (initFlattenerState {
                   tempCtr = (tempCtr oldState),
                   prefixStmts = if isLoop then [] else prefixStmts oldState})
-    let newState = oldState { tempCtr = tempCtr innerState }
+    put $ oldState { tempCtr = tempCtr innerState }
     if isLoop
-      then do
-        put $ newState
-        flattenStmts $ prefixStmts innerState
-    else put $ newState { prefixStmts = prefixStmts innerState }
+      then flattenStmts $ prefixStmts innerState
+      else modify (\s -> s { prefixStmts = prefixStmts innerState })
     return $ List.reverse $ flattened innerState
 
 
@@ -142,9 +140,9 @@ flattenStmt (For itr gen initVars finalVars) pos = do
       pos
 flattenStmt stmt@(Nop _) pos =
     emit pos stmt
-flattenStmt stmt@(Break _) pos = do
+flattenStmt stmt@(Break _) pos =
     emit pos stmt
-flattenStmt stmt@(Next _) pos = do
+flattenStmt stmt@(Next _) pos =
     emit pos stmt
 
 
