@@ -27,7 +27,7 @@ normalise :: [Item] -> Compiler ()
 normalise items = do
     mapM_ normaliseItem items
     -- Now generate main proc if needed
-    bdy <- getCompiler (body . mainClauseSt)
+    bdy <- gets (body . mainClauseSt)
     unless (List.null bdy) 
       $ addProc "" (PrimProto "" []) [List.reverse bdy] Nothing Private
     
@@ -78,10 +78,10 @@ normaliseItem (CtorDecl vis proto pos) = do
     Just modparams <- getModuleParams
     addCtor vis (last modspec) modparams proto
 normaliseItem (StmtDecl stmt pos) = do
-  clauseState <- getCompiler mainClauseSt
+  clauseState <- gets mainClauseSt
   (_,clauseState') <- runStateT (compileStmts [maybePlace stmt pos])
                       clauseState
-  updateCompiler (\m -> m { mainClauseSt = clauseState'})
+  modify (\m -> m { mainClauseSt = clauseState'})
 
 -- |Add a contructor for the specified type.
 addCtor :: Visibility -> Ident -> [Ident] -> FnProto -> Compiler ()

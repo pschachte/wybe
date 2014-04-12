@@ -34,9 +34,9 @@ import Config
 buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
-    messages <- getCompiler msgs
+    messages <- gets msgs
     (liftIO . putStr) $ intercalate "\n" messages
-    errored <- getCompiler errorState
+    errored <- gets errorState
     when errored $ liftIO exitFailure
 
 

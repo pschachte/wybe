@@ -28,7 +28,7 @@ module AST (
   expToStmt, Prim(..), PrimProto(..), primProto, PrimParam(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
-  MessageLevel(..), getCompiler, updateCompiler,
+  MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
   ClauseCompState(..), ClauseComp, userClauseComp, runClauseComp,
   instr, LoopInfo(..),
@@ -193,12 +193,6 @@ runCompiler opts comp = evalStateT comp
                          (initClauseComp 0 NoLoop))
 
 
--- |Return some function of the current compiler state.
-getCompiler :: (CompilerState -> t) -> Compiler t
-getCompiler getter = do
-    state <- get
-    return $ getter state
-
 -- |Apply some transformation function to the compiler state.
 updateCompiler :: (CompilerState -> CompilerState) -> Compiler ()
 updateCompiler updater = do
@@ -214,21 +208,21 @@ updateCompilerM updater = do
 
 -- |Return Just the specified module, if already loaded; else return Nothing.
 getLoadedModule :: ModSpec -> Compiler (Maybe Module)
-getLoadedModule modspec = getCompiler (Map.lookup modspec . modules)
+getLoadedModule modspec = gets (Map.lookup modspec . modules)
 
 -- |Apply some transformation to the map of compiled modules.
 updateModules :: (Map ModSpec Module -> Map ModSpec Module) -> Compiler ()
 updateModules updater = do
-    updateCompiler (\bs -> bs { modules = updater $ modules bs })
+    modify (\bs -> bs { modules = updater $ modules bs })
 
 -- |Return some function of the module currently being compiled.
 getModule :: (Module -> t) -> Compiler t
-getModule getter = getCompiler (getter . head . underCompilation)
+getModule getter = gets (getter . head . underCompilation)
 
 -- |Transform the module currently being compiled.
 updateModule :: (Module -> Module) -> Compiler ()
 updateModule updater = do
-    updateCompiler (\comp -> let mods = underCompilation comp
+    modify (\comp -> let mods = underCompilation comp
                             in  comp { underCompilation =
                                             updater (head mods):tail mods })
 
@@ -243,12 +237,12 @@ updateModuleM updater = do
 -- |Return some function of the specified module.
 getSpecModule :: ModSpec -> (Module -> t) -> Compiler (Maybe t)
 getSpecModule spec getter = 
-    getCompiler (maybeApply getter . Map.lookup spec . modules)
+    gets (maybeApply getter . Map.lookup spec . modules)
 
 -- |Transform the specified module.  Does nothing if it does not exist.
 updateSpecModule :: ModSpec -> (Module -> Module) -> Compiler ()
 updateSpecModule spec updater = do
-    updateCompiler 
+    modify 
       (\comp -> comp { modules = Map.adjust updater spec (modules comp) })
 
 -- |Transform the specified module.  An error if it does not exist.
@@ -268,10 +262,10 @@ updateSpecModuleM updater spec = do
 --  front of the list of modules underCompilation. 
 enterModule :: FilePath -> ModSpec -> Maybe [Ident] -> Compiler ()
 enterModule dir modspec params = do
-    count0 <- getCompiler loadCount
+    count0 <- gets loadCount
     let count = 1 + count0
-    updateCompiler (\comp -> comp { loadCount = count })
-    updateCompiler (\comp -> let mods = Module dir modspec params 
+    modify (\comp -> comp { loadCount = count })
+    modify (\comp -> let mods = Module dir modspec params 
                                        emptyInterface (Just emptyImplementation)
                                        count count 0 0
                                        : underCompilation comp
@@ -283,18 +277,18 @@ exitModule = do
     let num = thisLoadNum mod
     if (minDependencyNum mod < num) 
       then do
-        updateCompiler (\comp -> comp { deferred = mod:deferred comp })
+        modify (\comp -> comp { deferred = mod:deferred comp })
         return []
       else do
-        deferred <- getCompiler deferred
+        deferred <- gets deferred
         let (bonus,rest) = span ((==num) . minDependencyNum) deferred
-        updateCompiler (\comp -> comp { deferred = rest })
+        modify (\comp -> comp { deferred = rest })
         return $ List.map modSpec $ mod:bonus
 
 finishModule :: Compiler Module
 finishModule = do
     mod <- getModule id
-    updateCompiler 
+    modify 
       (\comp -> comp { underCompilation = tail (underCompilation comp) })
     updateModules $ Map.insert (modSpec mod) mod
     return mod
@@ -343,8 +337,8 @@ getModuleImplementationMaybe fn = do
 --  collected compiler output messages. 
 message :: MessageLevel -> String -> OptPos -> Compiler ()
 message lvl msg pos = do
-    updateCompiler (\bldr -> bldr { msgs = (msgs bldr) ++ [makeMessage msg pos]})
-    when (lvl == Error) (updateCompiler (\bldr -> bldr { errorState = True }))
+    modify (\bldr -> bldr { msgs = (msgs bldr) ++ [makeMessage msg pos]})
+    when (lvl == Error) (modify (\bldr -> bldr { errorState = True }))
 
 -- |Construct a message string from the specified text and location.
 makeMessage :: String -> OptPos -> String
@@ -594,7 +588,7 @@ publicProc name = do
 -- |Return some function applied to the user's specified compiler options.
 option :: (Options -> t) -> Compiler t
 option opt = do
-    opts <- getCompiler options
+    opts <- gets options
     return $ opt opts
 
 -- |If the specified Boolean option is selected, print out the result 
