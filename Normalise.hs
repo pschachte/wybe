@@ -66,7 +66,7 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
    noVars noVars]
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
-    (stmts',genProcs) <- flattenBody stmts
+    (stmts',genProcs) <- flattenBody params stmts
     -- liftIO $ putStrLn $ "Flattened body:\n" ++ show (ProcDecl vis proto stmts pos)
     (initVars,stmts'',finalVars) <- numberVars params stmts' pos
     -- liftIO $ putStrLn $ "Numbered body:\n" ++ show (ProcDecl vis proto stmts'' pos)
@@ -334,7 +334,7 @@ normaliseExp (CondExp cond thn els) pos = do
 normaliseExp (Fncall name exps) pos = do
   resultName <- freshVar
   (args,pres,posts,flow) <- normaliseArgs exps
-  let pres' = if flowsIn flow then 
+  let pres' = if flowIn flow then 
                 pres++[maybePlace 
                        (ProcCall name
                         (List.map (fmap inputArg) args
@@ -342,7 +342,7 @@ normaliseExp (Fncall name exps) pos = do
                         noVars noVars)
                        pos]
               else pres
-  let posts' = if flowsOut flow then 
+  let posts' = if flowOut flow then 
                  [maybePlace
                   (ProcCall name
                    (args++[Unplaced $ Var resultName ParamIn])
@@ -353,14 +353,14 @@ normaliseExp (Fncall name exps) pos = do
 normaliseExp (ForeignFn lang name exps) pos = do
   resultName <- freshVar
   (args,pres,posts,flow) <- normaliseArgs exps
-  let pres' = if flowsIn flow then 
+  let pres' = if flowIn flow then 
                 pres++[maybePlace 
                        (ForeignCall lang name
                         (args++[Unplaced $ Var resultName ParamOut])
                         noVars noVars)
                        pos]
               else pres
-  let posts' = if flowsOut flow then 
+  let posts' = if flowOut flow then 
                  posts++[maybePlace 
                          (ForeignCall lang name
                                 (args++[Unplaced $ Var resultName ParamIn])
@@ -398,20 +398,6 @@ initLoop cont =
 
 ----------------------------------------------------------------
 
--- |Does the specified flow direction flow in?
-flowsIn :: FlowDirection -> Bool
-flowsIn NoFlow     = False
-flowsIn ParamIn    = True
-flowsIn ParamOut   = False
-flowsIn ParamInOut = True
-
--- |Does the specified flow direction flow out?
-flowsOut :: FlowDirection -> Bool
-flowsOut NoFlow     = False
-flowsOut ParamIn = False
-flowsOut ParamOut = True
-flowsOut ParamInOut = True
-
 inFlow :: FlowDirection -> FlowDirection
 inFlow NoFlow     = NoFlow
 inFlow ParamIn = ParamIn
@@ -424,7 +410,7 @@ inputArg exp = exp
 
 -- |Transform the specified primitive argument to an input parameter.
 expIsInput :: Exp -> Bool
-expIsInput (Var var dir) = flowsIn dir
+expIsInput (Var var dir) = flowIn dir
 -- XXX Shouldn't assume everything but variables are inputs
 expIsInput _ = True
 

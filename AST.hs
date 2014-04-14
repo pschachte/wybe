@@ -851,6 +851,20 @@ data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow
 data PrimFlow = FlowIn | FlowOut
                    deriving (Show,Eq)
 
+-- |Does the specified flow direction flow in?
+flowsIn :: FlowDirection -> Bool
+flowsIn NoFlow     = False
+flowsIn ParamIn    = True
+flowsIn ParamOut   = False
+flowsIn ParamInOut = True
+
+-- |Does the specified flow direction flow out?
+flowsOut :: FlowDirection -> Bool
+flowsOut NoFlow     = False
+flowsOut ParamIn = False
+flowsOut ParamOut = True
+flowsOut ParamInOut = True
+
 -- |Does this flow direction include input?
 flowIn :: FlowDirection -> Bool
 flowIn ParamIn = True

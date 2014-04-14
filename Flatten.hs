@@ -13,6 +13,7 @@ import AST
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
+import Data.Set as Set
 import Data.Maybe
 import Text.ParserCombinators.Parsec.Pos
 import Control.Monad
@@ -21,11 +22,15 @@ import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 
 
-flattenBody :: [Placed Stmt] -> 
+flattenBody :: [Param] -> [Placed Stmt] -> 
                Compiler ([Placed Stmt],[(ProcProto,[Placed Stmt])])
-flattenBody stmts = do
-    -- (_,finalState) <- runStateT (return ()) initFlattenerState
-    finalState <- execStateT (flattenStmts stmts) initFlattenerState
+flattenBody params stmts = do
+    let vars = List.foldr 
+               (\(Param v _ dir) set ->
+                 if flowIn dir then Set.insert v set else set)
+               Set.empty
+               params
+    finalState <- execStateT (flattenStmts stmts) $ initFlattenerState vars
     return (
         List.reverse (prefixStmts finalState) ++ 
         List.reverse (flattened finalState) ++ 
@@ -41,11 +46,14 @@ data FlattenerState = Flattener {
     prefixStmts :: [Placed Stmt],   -- ^Init stmts for current loop, reversed
     flattened   :: [Placed Stmt],   -- ^Flattened code generated, reversed
     postponed   :: [Placed Stmt],   -- ^Code to be generated later
-    tempCtr     :: Int              -- ^Temp variable counter
+    tempCtr     :: Int,             -- ^Temp variable counter
+    knownVars   :: Set VarName      -- ^Variables defined up to here
     }
 
-initFlattenerState :: FlattenerState
-initFlattenerState = Flattener [] [] [] 0
+
+initFlattenerState :: Set VarName -> FlattenerState
+initFlattenerState vars = Flattener [] [] [] 0 vars
+
 
 emit :: OptPos -> Stmt -> Flattener ()
 emit pos stmt = do
@@ -76,6 +84,11 @@ emitPostponed = do
     modify (\s -> s { flattened = stmts ++ stmts', postponed = [] })
 
 
+registerVar :: VarName -> Flattener ()
+registerVar var =
+    modify (\s -> s { knownVars = Set.insert var $ knownVars s })
+
+
 -- |Return a fresh variable name.
 tempVar :: Flattener VarName
 tempVar = do
@@ -89,7 +102,7 @@ flattenInner isLoop inner = do
     oldState <- get
     innerState <-
         execStateT (lift inner)
-        (initFlattenerState {
+        ((initFlattenerState Set.empty) {
               tempCtr = (tempCtr oldState),
               prefixStmts = if isLoop then [] else prefixStmts oldState})
     put $ oldState { tempCtr = tempCtr innerState }
@@ -175,7 +188,8 @@ flattenExp exp@(StringValue a) pos =
     return $ maybePlace exp pos
 flattenExp exp@(CharValue a) pos =
     return $ maybePlace exp pos
-flattenExp exp@(Var name dir) pos =
+flattenExp exp@(Var name dir) pos = do
+    when (flowOut dir) $ registerVar name
     return $ maybePlace exp pos
 flattenExp (Where stmts pexp) _ = do
     flattenStmts stmts
