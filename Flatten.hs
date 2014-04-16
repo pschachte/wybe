@@ -22,6 +22,17 @@ import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 
 
+----------------------------------------------------------------
+--         Turning function calls into procedure calls
+--
+--  Here we transform in-out arguments, like p(!x), into separate
+--  input and output arguments, like p(x, ?x).  We also transform
+--  calls of the form p(f(x)) into calls of the form f(x,?t) p(t).  We
+--  transform calls with outputs like p(f(?x)) into calls like p(?t)
+--  f(?x, t).  Finally, we transform calls like p(f(!x)) into calls
+--  like f(x, ?t) p(t, ?t) f(?x, t).
+----------------------------------------------------------------
+
 flattenBody :: [Param] -> [Placed Stmt] -> 
                Compiler ([Placed Stmt],[(ProcProto,[Placed Stmt])])
 flattenBody params stmts = do
@@ -215,3 +226,43 @@ flattenExp (ForeignFn lang name exps) pos = do
     emitNoVars pos $ ForeignCall lang name $
       exps' ++ [Unplaced $ Var resultName ParamOut]
     return $ Unplaced $ Var resultName ParamIn
+
+
+----------------------------------------------------------------
+--   turning loops and conditionals into separate procedures
+--
+--  This code transforms conditionals and loops into calls to freshly
+--  generated procedures.  For example, if a: b else: c end would be
+--  transformed to a call to gen with gen defined as two separate
+--  clauses with guards: def gen: guard a 1 b guard a 0 c end.  This
+--  syntax is not valid wybe, but is used as an intermediate step, as
+--  it is similar to the AST we will ultimately generate.
+--
+--  Loops are a little more complicated.  do a b end c d would be
+--  transformed into next1, where next1 is defined as def next1: a b
+--  next1 end, and break1 is defined as def break1 c d end.  Then Next
+--  and Break are handled so that they cancel all the following code
+--  in their clause body.  For example, Next a b would be transformed
+--  to just next1, where next1 is the next procedure for that loop.
+--  Similarly Break a b would be transformed to just break1, where
+--  break1 is the break procedure for that loop.  Inside a loop, a
+--  conditional must be handled specially, to support breaking out of
+--  the loop.  Inside a loop, if a: b else: c end d would be
+--  transformed to a call to gen1, where gen2 is defined as def gen2:
+--  d end, and gen1 is defined as def gen1: guard a 1 b gen2 guard a 0
+--  c gen2 end.  So for example do a if b: Break end c end d would be 
+--  transformed into next1, which is defined as def next1 a gen1 end,
+--  gen1 is defined as def gen1 guard b 1 break1  guard b 0 gen2 end, 
+--  gen2 is defined as def gen2 c next1, and break1 is defined as def 
+--  break1 d end.
+--
+--  The tricky part of all this is handling the arguments to these
+--  generated procedures.  For each generated procedure, the input
+--  parameters must be a superset of the variables used in the body of
+--  the procedure, and must be a subset of the variables defined prior
+--  to the generated call.  Similarly, the output parameters must be a
+--  a subset of the variables defined in the generated procedure, and
+--  must be superset of the variables that will be used following the 
+--  generated call.
+----------------------------------------------------------------
+
