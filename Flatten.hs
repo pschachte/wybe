@@ -2,11 +2,17 @@
 --  RCS      : $Id$
 --  Author   : Peter Schachte
 --  Origin   : Fri Jan  6 11:28:23 2012
---  Purpose  : Convert parse tree into AST
---  Copyright: © 2012 Peter Schachte.  All rights reserved.
+--  Purpose  : Flatten function calls (expressions) into procedure calls
+--  Copyright: © 2014 Peter Schachte.  All rights reserved.
+--
+--  Here we transform in-out arguments, like p(!x), into separate
+--  input and output arguments, like p(x, ?x).  We also transform
+--  calls of the form p(f(x)) into calls of the form f(x,?t) p(t).  We
+--  transform calls with outputs like p(f(?x)) into calls like p(?t)
+--  f(?x, t).  Finally, we transform calls like p(f(!x)) into calls
+--  like f(x, ?t) p(t, ?t) f(?x, t).
+----------------------------------------------------------------
 
--- |Support for normalising wybe code as parsed to a simpler form
---  to make compiling easier.
 module Flatten (flattenBody) where
 
 import AST
@@ -22,30 +28,13 @@ import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 
 
-----------------------------------------------------------------
---         Turning function calls into procedure calls
---
---  Here we transform in-out arguments, like p(!x), into separate
---  input and output arguments, like p(x, ?x).  We also transform
---  calls of the form p(f(x)) into calls of the form f(x,?t) p(t).  We
---  transform calls with outputs like p(f(?x)) into calls like p(?t)
---  f(?x, t).  Finally, we transform calls like p(f(!x)) into calls
---  like f(x, ?t) p(t, ?t) f(?x, t).
-----------------------------------------------------------------
-
-flattenBody :: [Param] -> [Placed Stmt] -> 
-               Compiler ([Placed Stmt],[(ProcProto,[Placed Stmt])])
-flattenBody params stmts = do
-    let vars = List.foldr 
-               (\(Param v _ dir) set ->
-                 if flowIn dir then Set.insert v set else set)
-               Set.empty
-               params
-    finalState <- execStateT (flattenStmts stmts) $ initFlattenerState vars
-    return (
-        List.reverse (prefixStmts finalState) ++ 
-        List.reverse (flattened finalState) ++ 
-        postponed finalState, [])
+flattenBody :: [Placed Stmt] -> Compiler [Placed Stmt]
+flattenBody stmts = do
+    finalState <- execStateT (flattenStmts stmts) $ initFlattenerState
+    return $
+      List.reverse (prefixStmts finalState) ++ 
+      List.reverse (flattened finalState) ++ 
+      postponed finalState
 
 
 -- |The Flattener monad is a state transformer monad carrying the 
@@ -57,17 +46,17 @@ data FlattenerState = Flattener {
     prefixStmts :: [Placed Stmt],   -- ^Init stmts for current loop, reversed
     flattened   :: [Placed Stmt],   -- ^Flattened code generated, reversed
     postponed   :: [Placed Stmt],   -- ^Code to be generated later
-    tempCtr     :: Int,             -- ^Temp variable counter
-    knownVars   :: Set VarName      -- ^Variables defined up to here
+    tempCtr     :: Int              -- ^Temp variable counter
     }
 
 
-initFlattenerState :: Set VarName -> FlattenerState
-initFlattenerState vars = Flattener [] [] [] 0 vars
+initFlattenerState :: FlattenerState
+initFlattenerState = Flattener [] [] [] 0
 
 
 emit :: OptPos -> Stmt -> Flattener ()
 emit pos stmt = do
+    -- liftIO $ putStrLn $ "** Emitting:  " ++ showStmt 14 stmt
     stmts <- gets flattened
     modify (\s -> s { flattened = maybePlace stmt pos:stmts })
 
@@ -95,11 +84,6 @@ emitPostponed = do
     modify (\s -> s { flattened = stmts ++ stmts', postponed = [] })
 
 
-registerVar :: VarName -> Flattener ()
-registerVar var =
-    modify (\s -> s { knownVars = Set.insert var $ knownVars s })
-
-
 -- |Return a fresh variable name.
 tempVar :: Flattener VarName
 tempVar = do
@@ -112,10 +96,16 @@ flattenInner :: Bool -> Flattener () -> Flattener [Placed Stmt]
 flattenInner isLoop inner = do
     oldState <- get
     innerState <-
-        execStateT (lift inner)
-        ((initFlattenerState Set.empty) {
-              tempCtr = (tempCtr oldState),
-              prefixStmts = if isLoop then [] else prefixStmts oldState})
+        lift (execStateT inner
+              (initFlattenerState {
+                    tempCtr = (tempCtr oldState),
+                    prefixStmts = if isLoop then [] else prefixStmts oldState}))
+    -- liftIO $ putStrLn $ "** Prefix:\n" ++ 
+    --   showBody 4 (prefixStmts innerState)
+    -- liftIO $ putStrLn $ "** Flattened:\n" ++ 
+    --   showBody 4 (flattened innerState)
+    -- liftIO $ putStrLn $ "** Postponed:\n" ++ 
+    --   showBody 4 (postponed innerState)
     put $ oldState { tempCtr = tempCtr innerState }
     if isLoop
       then flattenStmts $ prefixStmts innerState
@@ -140,7 +130,9 @@ flattenStmt (ForeignCall lang name args initVars finalVars) pos = do
     emitNoVars pos $ ForeignCall lang name args'
     emitPostponed
 flattenStmt (Cond tst thn els initVars finalVars) pos = do
+    -- liftIO $ putStrLn $ "** Flattening test:\n" ++ showBody 4 tst
     tst' <- flattenInner False (flattenStmts tst)
+    -- liftIO $ putStrLn $ "** Result:\n" ++ showBody 4 tst'
     thn' <- flattenInner False (flattenStmts thn)
     els' <- flattenInner False (flattenStmts els)
     emitNoVars pos $ Cond tst' thn' els'
@@ -200,7 +192,6 @@ flattenExp exp@(StringValue a) pos =
 flattenExp exp@(CharValue a) pos =
     return $ maybePlace exp pos
 flattenExp exp@(Var name dir) pos = do
-    when (flowOut dir) $ registerVar name
     return $ maybePlace exp pos
 flattenExp (Where stmts pexp) _ = do
     flattenStmts stmts
@@ -226,43 +217,3 @@ flattenExp (ForeignFn lang name exps) pos = do
     emitNoVars pos $ ForeignCall lang name $
       exps' ++ [Unplaced $ Var resultName ParamOut]
     return $ Unplaced $ Var resultName ParamIn
-
-
-----------------------------------------------------------------
---   turning loops and conditionals into separate procedures
---
---  This code transforms conditionals and loops into calls to freshly
---  generated procedures.  For example, if a: b else: c end would be
---  transformed to a call to gen with gen defined as two separate
---  clauses with guards: def gen: guard a 1 b guard a 0 c end.  This
---  syntax is not valid wybe, but is used as an intermediate step, as
---  it is similar to the AST we will ultimately generate.
---
---  Loops are a little more complicated.  do a b end c d would be
---  transformed into next1, where next1 is defined as def next1: a b
---  next1 end, and break1 is defined as def break1 c d end.  Then Next
---  and Break are handled so that they cancel all the following code
---  in their clause body.  For example, Next a b would be transformed
---  to just next1, where next1 is the next procedure for that loop.
---  Similarly Break a b would be transformed to just break1, where
---  break1 is the break procedure for that loop.  Inside a loop, a
---  conditional must be handled specially, to support breaking out of
---  the loop.  Inside a loop, if a: b else: c end d would be
---  transformed to a call to gen1, where gen2 is defined as def gen2:
---  d end, and gen1 is defined as def gen1: guard a 1 b gen2 guard a 0
---  c gen2 end.  So for example do a if b: Break end c end d would be 
---  transformed into next1, which is defined as def next1 a gen1 end,
---  gen1 is defined as def gen1 guard b 1 break1  guard b 0 gen2 end, 
---  gen2 is defined as def gen2 c next1, and break1 is defined as def 
---  break1 d end.
---
---  The tricky part of all this is handling the arguments to these
---  generated procedures.  For each generated procedure, the input
---  parameters must be a superset of the variables used in the body of
---  the procedure, and must be a subset of the variables defined prior
---  to the generated call.  Similarly, the output parameters must be a
---  a subset of the variables defined in the generated procedure, and
---  must be superset of the variables that will be used following the 
---  generated call.
-----------------------------------------------------------------
-

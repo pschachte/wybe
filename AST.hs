@@ -24,7 +24,7 @@ module AST (
   emptyInterface, emptyImplementation,
   ModSpec, ProcDef(..), Ident, VarName, VarInfo(..),
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
-  argFlowDirection, flowIn, flowOut,
+  argFlowDirection, flowsIn, flowsOut,
   expToStmt, Prim(..), PrimProto(..), primProto, PrimParam(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
@@ -383,7 +383,8 @@ data VarInfo = VarInfo {
     } deriving Show
 
 data LoopInfo = LoopInfo {
-    continue :: Stmt,             -- ^stmt to continue the loop
+    next     :: Placed Stmt,      -- ^stmt to go to the next loop iteration
+    break    :: Placed Stmt,      -- ^stmt to break out of the loop
     loopInit :: [Placed Stmt],    -- ^code to initialise before enterring loop
     loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
     | NoLoop
@@ -836,12 +837,17 @@ data Constant = Int Int
                 deriving (Show,Eq)
 
 -- |A proc prototype, including name and formal parameters.
-data ProcProto = ProcProto ProcName [Param]
-               deriving Eq
+data ProcProto = ProcProto {
+    procProtoName::ProcName,
+    procProtoParams::[Param]
+    } deriving Eq
 
 -- |A formal parameter, including name, type, and flow direction.
-data Param = Param VarName TypeSpec FlowDirection
-           deriving Eq
+data Param = Param {
+    paramName:: VarName, 
+    paramType::TypeSpec, 
+    paramFlow::FlowDirection
+    } deriving Eq
 
 -- |A dataflow direction:  in, out, both, or neither.
 data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow
@@ -851,12 +857,14 @@ data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow
 data PrimFlow = FlowIn | FlowOut
                    deriving (Show,Eq)
 
+
 -- |Does the specified flow direction flow in?
 flowsIn :: FlowDirection -> Bool
 flowsIn NoFlow     = False
 flowsIn ParamIn    = True
 flowsIn ParamOut   = False
 flowsIn ParamInOut = True
+
 
 -- |Does the specified flow direction flow out?
 flowsOut :: FlowDirection -> Bool
@@ -865,17 +873,6 @@ flowsOut ParamIn = False
 flowsOut ParamOut = True
 flowsOut ParamInOut = True
 
--- |Does this flow direction include input?
-flowIn :: FlowDirection -> Bool
-flowIn ParamIn = True
-flowIn ParamInOut = True
-flowIn _ = False
-
--- |Does this flow direction include input?
-flowOut :: FlowDirection -> Bool
-flowOut ParamOut = True
-flowOut ParamInOut = True
-flowOut _ = False
 
 -- |Variable Versions.  Tells what variables are in scope (either 
 --  before or after a statement), and gives for each a version 
@@ -940,10 +937,10 @@ primProto initVars finalVars (ProcProto name params) = do
 -- |A formal parameter, including name, type, and flow direction.
 data PrimParam =
   PrimParam {
-    paramName :: PrimVarName,
-    paramType :: TypeSpec, 
-    paramFlow :: PrimFlow, 
-    paramFlowType :: ArgFlowType
+    primParamName :: PrimVarName,
+    primParamType :: TypeSpec, 
+    primParamFlow :: PrimFlow, 
+    primParamFlowType :: ArgFlowType
     } deriving Eq
 
 -- |Convert a single Param to up to two PrimParams
@@ -1098,9 +1095,9 @@ instance Show Item where
     ++ showMaybeSourcePos pos
     ++ " = " ++ show exp
   show (ProcDecl vis proto stmts pos) =
-    show vis ++ " proc " ++ show proto
+    visibilityPrefix vis ++ "proc " ++ show proto
     ++ showMaybeSourcePos pos
-    ++ showBody 4 stmts
+    ++ "\n" ++ showBody 4 stmts
   show (CtorDecl vis proto pos) =
     show vis ++ " ctor " ++ show proto
     ++ showMaybeSourcePos pos

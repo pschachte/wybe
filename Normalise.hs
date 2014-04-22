@@ -20,6 +20,7 @@ import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 import Flatten
+import Unbranch
 import NumberVars
 
 -- |Normalise a list of file items, storing the results in the current module.
@@ -66,15 +67,20 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
    noVars noVars]
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
-    (stmts',genProcs) <- flattenBody params stmts
-    -- liftIO $ putStrLn $ "Flattened body:\n" ++ show (ProcDecl vis proto stmts pos)
-    (initVars,stmts'',finalVars) <- numberVars params stmts' pos
+    stmts' <- flattenBody stmts
+    liftIO $ putStrLn $ "Flattened body:\n" ++ show (ProcDecl vis proto stmts' pos)
+    (stmts'',genProcs) <- unbranchBody params stmts'
+    let procs = (proto,stmts''):genProcs
+    liftIO $ mapM_ (\(pr,bdy) -> 
+                     putStrLn $ show (ProcDecl Private pr bdy Nothing)) procs
+    -- (initVars,stmts'',finalVars) <- numberVars params stmts' pos
     -- liftIO $ putStrLn $ "Numbered body:\n" ++ show (ProcDecl vis proto stmts'' pos)
-    proto' <- primProto initVars finalVars proto
-    (_,procstate) <- userClauseComp $ compileStmts stmts''
-    addProc name proto' [List.reverse $ body procstate] pos vis
-    mapM_ normaliseItem [ProcDecl Private proto body Nothing |
-                         (proto,body) <- genProcs]
+    -- proto' <- primProto initVars finalVars proto
+    -- (_,procstate) <- userClauseComp $ compileStmts stmts''
+    -- addProc name proto' [List.reverse $ body procstate] pos vis
+    -- mapM_ (\(proto,body) -> 
+    --         addProc (procProtoName proto) proto body Nothing Private)
+    --   genProcs
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
     Just modparams <- getModuleParams
@@ -211,54 +217,54 @@ compileStmts' (ForeignCall lang name args initVars finalVars) rest pos = do
               args
   instr (PrimForeign lang name Nothing $ concat primArgs) pos
   compileStmts rest
-compileStmts' (Cond tests thn els initVars finalVars) rest pos = do
-  inf <- gets loopInfo
-  switchName <- lift $ genProcName
-  if inf == NoLoop || rest == []
-     then do
-      switch <- compileFreshProc switchName NoLoop initVars finalVars
-                [Unplaced (Guard tests 1 initVars noVars):thn,
-                 Unplaced (Guard tests 0 initVars noVars):els]
-      compileStmts' switch rest Nothing
-    else do
-      contName <- lift $ genProcName
-      continuation <- compileFreshProc contName inf finalVars  
-                      (lastFinalVars rest) [rest]
-      switch <- compileFreshProc switchName inf initVars finalVars
-                [Unplaced (Guard tests 1 initVars noVars):thn ++
-                 [Unplaced continuation],
-                 Unplaced (Guard tests 0 initVars noVars):els ++ 
-                 [Unplaced continuation]]
-      compileStmts' switch [] Nothing
-compileStmts' (Loop loopBody initVars finalVars) rest pos = do
-  loopName <- lift $ genProcName
-  let (inVars,outVars) = allArgs initVars finalVars
-  loop <- compileFreshProc loopName 
-          -- The noVars below will be replaced for each Next goal, but all
-          -- will share the outVars.
-          (LoopInfo (generatedCall loopName inVars outVars initVars finalVars) 
-           [] [])
-          initVars finalVars [loopBody]
-  compileStmts' loop rest Nothing
+-- compileStmts' (Cond tests thn els initVars finalVars) rest pos = do
+--   inf <- gets loopInfo
+--   switchName <- lift $ genProcName
+--   if inf == NoLoop || rest == []
+--      then do
+--       switch <- compileFreshProc switchName NoLoop initVars finalVars
+--                 [Unplaced (Guard tests 1 initVars noVars):thn,
+--                  Unplaced (Guard tests 0 initVars noVars):els]
+--       compileStmts' switch rest Nothing
+--     else do
+--       contName <- lift $ genProcName
+--       continuation <- compileFreshProc contName inf finalVars  
+--                       (lastFinalVars rest) [rest]
+--       switch <- compileFreshProc switchName inf initVars finalVars
+--                 [Unplaced (Guard tests 1 initVars noVars):thn ++
+--                  [Unplaced continuation],
+--                  Unplaced (Guard tests 0 initVars noVars):els ++ 
+--                  [Unplaced continuation]]
+--       compileStmts' switch [] Nothing
+-- compileStmts' (Loop loopBody initVars finalVars) rest pos = do
+--   loopName <- lift $ genProcName
+--   let (inVars,outVars) = allArgs initVars finalVars
+--   loop <- compileFreshProc loopName 
+--           -- The noVars below will be replaced for each Next goal, but all
+--           -- will share the outVars.
+--           (LoopInfo (generatedCall loopName inVars outVars initVars finalVars) 
+--            [] [])
+--           initVars finalVars [loopBody]
+--   compileStmts' loop rest Nothing
 compileStmts' (Guard guarded val initVars finalVars) rest pos = do
   state <- genClauseComp NoLoop guarded
   instr (PrimGuard (body state) val) pos
   compileStmts rest
 compileStmts' (Nop _) rest pos = compileStmts rest
-compileStmts' (Break initVars) rest pos = do
-    inf <- gets loopInfo
-    case inf of
-        NoLoop -> lift $ message Error "Break outside of a loop" pos
-        LoopInfo _ _ _ -> do -- Must bind outputs as necessary
-            -- XXX what should I do here?
-            return ()
-compileStmts' (Next initVars) rest pos = do
-    inf <- gets loopInfo
-    case inf of
-        NoLoop -> lift $ message Error "Next outside of a loop" pos
-        LoopInfo cont _ _ -> do
-            compileStmts' (replaceCallInittVars cont initVars) [] Nothing
-            return ()
+-- compileStmts' (Break initVars) rest pos = do
+--     inf <- gets loopInfo
+--     case inf of
+--         NoLoop -> lift $ message Error "Break outside of a loop" pos
+--         LoopInfo _ _ _ -> do -- Must bind outputs as necessary
+--             -- XXX what should I do here?
+--             return ()
+-- compileStmts' (Next initVars) rest pos = do
+--     inf <- gets loopInfo
+--     case inf of
+--         NoLoop -> lift $ message Error "Next outside of a loop" pos
+--         LoopInfo cont _ _ -> do
+--             compileStmts' (replaceCallInittVars cont initVars) [] Nothing
+--             return ()
 compileStmts' stmt rest pos =
     error $ "Normalise error:  " ++ showStmt 4 stmt
 
@@ -334,7 +340,7 @@ normaliseExp (CondExp cond thn els) pos = do
 normaliseExp (Fncall name exps) pos = do
   resultName <- freshVar
   (args,pres,posts,flow) <- normaliseArgs exps
-  let pres' = if flowIn flow then 
+  let pres' = if flowsIn flow then 
                 pres++[maybePlace 
                        (ProcCall name
                         (List.map (fmap inputArg) args
@@ -342,7 +348,7 @@ normaliseExp (Fncall name exps) pos = do
                         noVars noVars)
                        pos]
               else pres
-  let posts' = if flowOut flow then 
+  let posts' = if flowsOut flow then 
                  [maybePlace
                   (ProcCall name
                    (args++[Unplaced $ Var resultName ParamIn])
@@ -353,14 +359,14 @@ normaliseExp (Fncall name exps) pos = do
 normaliseExp (ForeignFn lang name exps) pos = do
   resultName <- freshVar
   (args,pres,posts,flow) <- normaliseArgs exps
-  let pres' = if flowIn flow then 
+  let pres' = if flowsIn flow then 
                 pres++[maybePlace 
                        (ForeignCall lang name
                         (args++[Unplaced $ Var resultName ParamOut])
                         noVars noVars)
                        pos]
               else pres
-  let posts' = if flowOut flow then 
+  let posts' = if flowsOut flow then 
                  posts++[maybePlace 
                          (ForeignCall lang name
                                 (args++[Unplaced $ Var resultName ParamIn])
@@ -393,7 +399,7 @@ compileGenerator (In var exp) pos = do
 -- |Set up a loop with the specified continuation and break calls
 initLoop :: Stmt -> ClauseComp ()
 initLoop cont = 
-    modify (\st -> st { loopInfo = LoopInfo cont [] [] })
+    modify (\st -> st { loopInfo = LoopInfo (Unplaced cont) (Unplaced cont) [] [] })
 
 
 ----------------------------------------------------------------
@@ -410,7 +416,7 @@ inputArg exp = exp
 
 -- |Transform the specified primitive argument to an input parameter.
 expIsInput :: Exp -> Bool
-expIsInput (Var var dir) = flowIn dir
+expIsInput (Var var dir) = flowsIn dir
 -- XXX Shouldn't assume everything but variables are inputs
 expIsInput _ = True
 

@@ -190,7 +190,7 @@ numberExpVars vars exp@(FloatValue a) _ = return (exp,noVarDefs)
 numberExpVars vars exp@(StringValue a) _ = return (exp,noVarDefs)
 numberExpVars vars exp@(CharValue a) _ = return (exp,noVarDefs)
 numberExpVars vars exp@(Var name dir) pos =
-    return (exp,if flowOut dir then Map.singleton name [pos] else noVarDefs)
+    return (exp,if flowsOut dir then Map.singleton name [pos] else noVarDefs)
 numberExpVars vars exp _ =
     error $ "flattening error:  " ++ show exp
 

@@ -1,3 +1,12 @@
+GROWABLE LANGUAGE
+
+Wybe should be designed to grow.  This means to the extent possible,
+things users implement and put into libraries should be
+indistinguishable from primitive language features.  See Guy Steele's
+great  OOPSLA 1998 keynote talk:
+https://www.youtube.com/watch?v=_ahvzDzKdB0#t=3169
+
+
 GENERATORS
 
 for in(?x, lst)  ===>  init_seq(lst, ?gen)  ...  in(?x, !gen)
