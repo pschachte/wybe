@@ -22,7 +22,7 @@ module AST (
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   enterModule, exitModule, finishModule, 
   emptyInterface, emptyImplementation,
-  ModSpec, ProcDef(..), Ident, VarName, VarInfo(..),
+  ModSpec, ProcDef(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
   argFlowDirection, flowsIn, flowsOut,
   expToStmt, Prim(..), PrimProto(..), primProto, PrimParam(..),
@@ -30,14 +30,12 @@ module AST (
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
-  ClauseCompState(..), ClauseComp, userClauseComp, runClauseComp,
-  instr, LoopInfo(..),
   updateModules, getModuleImplementationField, getLoadedModule,
   getModule, updateModule, getSpecModule, updateSpecModule,
   updateModImplementation, updateModImplementationM, 
   updateModInterface, updateModProcsM,
   getDirectory, getModuleSpec, getModuleParams, option, 
-  optionallyPutStr, verboseMsg, message, freshVar, genProcName,
+  optionallyPutStr, verboseMsg, message, genProcName,
   flowVar,
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
@@ -171,15 +169,14 @@ data MessageLevel = Informational | Warning | Error
 --  that module's strongly-connected component collected while 
 --  compiling the module's dependencies.
 data CompilerState = Compiler {
-  options :: Options,      -- ^compiler options specified on the command line
-  msgs :: [String],        -- ^warnings, error messages, and info messages
-  errorState :: Bool,      -- ^whether or not we've seen any errors
+  options :: Options,            -- ^compiler options specified on command line
+  msgs :: [String],              -- ^warnings, error messages, and info messages
+  errorState :: Bool,            -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules
-  loadCount :: Int,        -- ^counter of module load order
-  underCompilation :: [Module], -- ^the modules in the process of being compiled
-  deferred :: [Module],         -- ^modules in the same SCC as the current one
-  mainClauseSt :: ClauseCompState
-                           -- ^stores the main proc being compiled
+  loadCount :: Int,              -- ^counter of module load order
+  underCompilation :: [Module],  -- ^the modules in the process of being compiled
+  deferred :: [Module],          -- ^modules in the same SCC as the current one
+  stmtDecls :: [Placed Stmt]     -- ^top-level statements in current module
   }
 
 -- |The compiler monad is a state transformer monad carrying the 
@@ -189,8 +186,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp 
-                        (Compiler opts [] False Map.empty 0 [] [] 
-                         (initClauseComp 0 NoLoop))
+                        (Compiler opts [] False Map.empty 0 [] [] [])
 
 
 -- |Apply some transformation function to the compiler state.
@@ -350,81 +346,6 @@ makeMessage msg (Just pos) =
   msg
 
 
-
-----------------------------------------------------------------
---                 Clause compiler monad
-----------------------------------------------------------------
-
--- |The clause compiler monad is a state transformer monad carrying the 
---  clause compiler state over the compiler monad.
-type ClauseComp = StateT ClauseCompState Compiler
-
-
--- |The state of compilation of a clause; used by the ClauseComp
--- monad.
-data ClauseCompState = ClauseComp {
-    body :: [Placed Prim],       -- ^body of the clause being generated, reversed
-    -- vars :: Map VarName VarInfo, -- ^latest var number for each var
-    -- uses :: Map VarName OptPos,  -- ^where variables are used before defined
-    -- outParams:: [PrimParam],     -- ^variables that must be defined by clause
-    tmpCount :: Int,             -- ^number of temp vars so far in this clause
-    loopInfo :: LoopInfo         -- ^info about the loop we're in
-  }
-
-
-initClauseComp :: Int -> LoopInfo -> ClauseCompState
-initClauseComp tmpNum loopInfo = ClauseComp [] tmpNum loopInfo
-
-
-data VarInfo = VarInfo {
-    name    :: VarName,        -- ^the var name to use
-    ordinal :: Int,            -- ^ordinal number of distinct var for this name
-    typ :: TypeSpec            -- ^type of this var
-    } deriving Show
-
-data LoopInfo = LoopInfo {
-    next     :: Placed Stmt,      -- ^stmt to go to the next loop iteration
-    break    :: Placed Stmt,      -- ^stmt to break out of the loop
-    loopInit :: [Placed Stmt],    -- ^code to initialise before enterring loop
-    loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
-    | NoLoop
-    deriving (Eq)
-
-
--- |Run a clause compiler function from the Compiler monad to compile
---  a top-level procedure.
-userClauseComp :: ClauseComp t -> Compiler (t, ClauseCompState)
-userClauseComp clcomp  =
-    runClauseComp 0 NoLoop clcomp
-
-
--- |Run a clause compiler function from the Compiler monad to compile
---  a generated procedure.
-runClauseComp :: Int -> LoopInfo -> ClauseComp t -> Compiler (t, ClauseCompState)
-runClauseComp tmpNum loopInfo clcomp =
-    runStateT clcomp $ initClauseComp tmpNum loopInfo
-
-
--- |Generate a single instruction for the clause currently being compiled
-instr :: Prim -> OptPos -> ClauseComp ()
-instr PrimNop _ = return ()      -- Don't bother to generate Nops
-instr prim pos = do
-  bdy <- gets body
-  modify (\st -> st {body = (maybePlace prim pos):bdy})
-
-
-insertInputParam :: PrimParam -> Map VarName VarInfo -> Map VarName VarInfo
-insertInputParam (PrimParam (PrimVarName var num) typ FlowIn _) symtab =
-    Map.insert var (VarInfo var num typ) symtab
-insertInputParam (PrimParam _ _ FlowOut _) symtab = symtab    
-
-
--- |Return a fresh variable name.
-freshVar :: ClauseComp VarName
-freshVar = do
-  ctr <- gets tmpCount
-  modify (\st -> st {tmpCount = ctr + 1 })
-  return $ "$tmp" ++ (show ctr)
 
 -- |Return the current PrimVarName for a given name string; ie, find 
 --  the current suffix for the specified name.

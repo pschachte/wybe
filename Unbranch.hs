@@ -86,6 +86,15 @@ data UnbrancherState = Unbrancher {
     }
 
 
+data LoopInfo = LoopInfo {
+    next     :: Placed Stmt,      -- ^stmt to go to the next loop iteration
+    break    :: Placed Stmt,      -- ^stmt to break out of the loop
+    loopInit :: [Placed Stmt],    -- ^code to initialise before enterring loop
+    loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
+    | NoLoop
+    deriving (Eq)
+
+
 initUnbrancherState :: Set VarName -> UnbrancherState
 initUnbrancherState vars = Unbrancher NoLoop vars False [] False
 
@@ -267,7 +276,7 @@ unbranchStmt  (Break _) pos stmts = do
     inLoop <- gets ((/= NoLoop) . brLoopInfo)
     if inLoop 
       then do
-        break <- gets (AST.break . brLoopInfo)
+        break <- gets (Unbranch.break . brLoopInfo)
         setTerminated True
         return [break]
       else do
