@@ -70,9 +70,8 @@ normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     stmts' <- flattenBody stmts
     liftIO $ putStrLn $ "Flattened body:\n" ++ show (ProcDecl vis proto stmts' pos)
     (stmts'',genProcs) <- unbranchBody params stmts'
-    let procs = (proto,stmts''):genProcs
-    liftIO $ mapM_ (\(pr,bdy) -> 
-                     putStrLn $ show (ProcDecl Private pr bdy Nothing)) procs
+    let procs = ProcDecl vis proto stmts'' pos:genProcs
+    liftIO $ mapM_ (\item -> putStrLn $ show item) procs
     -- (initVars,stmts'',finalVars) <- numberVars params stmts' pos
     -- liftIO $ putStrLn $ "Numbered body:\n" ++ show (ProcDecl vis proto stmts'' pos)
     -- proto' <- primProto initVars finalVars proto

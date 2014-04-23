@@ -58,7 +58,7 @@ import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 
 unbranchBody :: [Param] -> [Placed Stmt] -> 
-                Compiler ([Placed Stmt],[(ProcProto,[Placed Stmt])])
+                Compiler ([Placed Stmt],[Item])
 unbranchBody params stmts = do
     let vars = inputParamNames params
     (stmts',st) <- runStateT (unbranchStmts stmts) $ initUnbrancherState vars
@@ -80,8 +80,7 @@ data UnbrancherState = Unbrancher {
     -- brExitVars   :: Set VarName,  -- ^Variables defined up to loop exit
     brTerminated :: Bool,         -- ^Whether code so far included a Break or
                                  --  Next, which terminate execution
-    brNewDefs    :: [(ProcProto,[Placed Stmt])],
-                                 -- ^Generated auxilliary procedures
+    brNewDefs    :: [Item],       -- ^Generated auxilliary procedures
     brNoGenerate :: Bool          -- ^Surpress generating auxilliary procedures?
                                  -- Used when just computing variable sets
     }
@@ -140,7 +139,8 @@ genProc proto stmts = do
       else do
         -- dbgPrintLn $ "** Generating proc:\n" 
         --   ++ show (ProcDecl Private proto stmts Nothing)
-        modify (\s -> s { brNewDefs = (proto,stmts):brNewDefs s })
+        let item = ProcDecl Private proto stmts Nothing
+        modify (\s -> s { brNewDefs = item:brNewDefs s })
 
 
 withoutGeneration :: Unbrancher t -> Unbrancher t
