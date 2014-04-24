@@ -25,7 +25,7 @@ module AST (
   ModSpec, ProcDef(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
   argFlowDirection, flowsIn, flowsOut,
-  expToStmt, Prim(..), PrimProto(..), primProto, PrimParam(..),
+  expToStmt, Prim(..), PrimProto(..), PrimParam(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
@@ -850,10 +850,10 @@ instance Show PrimProto where
     show (PrimProto name params) =
         name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")"
 
-primProto :: VarVers -> VarVers -> ProcProto -> Compiler PrimProto
-primProto initVars finalVars (ProcProto name params) = do
-    params' <- mapM (primParam initVars finalVars) params
-    return $ PrimProto name (concat params')
+-- primProto :: VarVers -> VarVers -> ProcProto -> Compiler PrimProto
+-- primProto initVars finalVars (ProcProto name params) = do
+--     params' <- mapM (primParam initVars finalVars) params
+--     return $ PrimProto name (concat params')
 
 -- |A formal parameter, including name, type, and flow direction.
 data PrimParam =
@@ -863,21 +863,6 @@ data PrimParam =
     primParamFlow :: PrimFlow, 
     primParamFlowType :: ArgFlowType
     } deriving Eq
-
--- |Convert a single Param to up to two PrimParams
-primParam :: VarVers -> VarVers -> Param -> Compiler [PrimParam]
-primParam initVars finalVars (Param name typ ParamIn) = do
-    var <- getVar name Nothing initVars
-    return [PrimParam var typ FlowIn Ordinary]
-primParam initVars finalVars (Param name typ ParamOut) = do
-    var <- getVar name Nothing finalVars
-    return [PrimParam var typ FlowOut Ordinary]
-primParam initVars finalVars (Param name typ NoFlow) = return []
-primParam initVars finalVars (Param name typ ParamInOut) = do
-    var <- getVar name Nothing initVars
-    var' <- getVar name Nothing finalVars
-    return [PrimParam var typ FlowIn FirstHalf,
-            PrimParam var' typ FlowOut SecondHalf]
 
 -- |How to show a formal parameter.
 instance Show PrimParam where

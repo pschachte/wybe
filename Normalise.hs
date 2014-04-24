@@ -69,11 +69,11 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     stmts' <- flattenBody stmts
-    liftIO $ putStrLn $ "Flattened body:\n" ++ show (ProcDecl vis proto stmts' pos)
+    -- liftIO $ putStrLn $ "Flattened body:\n" ++ show (ProcDecl vis proto stmts' pos)
     (stmts'',genProcs) <- unbranchBody params stmts'
     let procs = ProcDecl vis proto stmts'' pos:genProcs
-    liftIO $ mapM_ (\item -> putStrLn $ show item) procs
-    -- mapM_ compileProc procs
+    -- liftIO $ mapM_ (\item -> putStrLn $ show item) procs
+    mapM_ compileProc procs
     -- (initVars,stmts'',finalVars) <- numberVars params stmts' pos
     -- liftIO $ putStrLn $ "Numbered body:\n" ++ show (ProcDecl vis proto stmts'' pos)
     -- proto' <- primProto initVars finalVars proto
@@ -144,39 +144,154 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
 --                 Clause compiler monad
 ----------------------------------------------------------------
 
--- -- |The clause compiler monad is a state transformer monad carrying the 
--- --  clause compiler state over the compiler monad.
--- type ClauseComp = StateT ClauseCompState Compiler
+-- |The clause compiler monad is a state transformer monad carrying the 
+--  clause compiler state over the compiler monad.
+type ClauseComp = StateT ClauseCompState Compiler
 
 
--- -- |The state of compilation of a clause; used by the ClauseComp
--- -- monad.
--- data ClauseCompState = ClauseComp {
---     body :: [Placed Prim],       -- ^body of the clause being generated, reversed
---     -- vars :: Map VarName VarInfo, -- ^latest var number for each var
---     -- uses :: Map VarName OptPos,  -- ^where variables are used before defined
---     -- outParams:: [PrimParam],     -- ^variables that must be defined by clause
---     tmpCount :: Int,             -- ^number of temp vars so far in this clause
---     loopInfo :: LoopInfo         -- ^info about the loop we're in
---   }
+-- |The state of compilation of a clause; used by the ClauseComp
+-- monad.
+data ClauseCompState = ClauseComp {
+    vars :: Map VarName Int    -- ^current var number for each var
+  }
 
 
--- initClauseComp :: Int -> LoopInfo -> ClauseCompState
--- initClauseComp tmpNum loopInfo = ClauseComp [] tmpNum loopInfo
+initClauseComp :: ClauseCompState
+initClauseComp = ClauseComp Map.empty
 
 
--- -- |Run a clause compiler function from the Compiler monad to compile
--- --  a top-level procedure.
--- userClauseComp :: ClauseComp t -> Compiler (t, ClauseCompState)
--- userClauseComp clcomp  =
---     runClauseComp 0 NoLoop clcomp
+nextVar :: String -> ClauseComp PrimVarName
+nextVar name = do
+    modify (\s -> s { vars = Map.alter incrMaybe name $ vars s })
+    currVar name
 
 
--- -- |Run a clause compiler function from the Compiler monad to compile
--- --  a generated procedure.
--- runClauseComp :: Int -> LoopInfo -> ClauseComp t -> Compiler (t, ClauseCompState)
--- runClauseComp tmpNum loopInfo clcomp =
---     runStateT clcomp $ initClauseComp tmpNum loopInfo
+currVar :: String -> ClauseComp PrimVarName
+currVar name = do
+    dict <- gets vars
+    return $ mkPrimVarName dict name
+
+
+mkPrimVarName :: Map String Int -> String -> PrimVarName
+mkPrimVarName dict name =
+    case Map.lookup name dict of
+        Nothing -> shouldnt $ "Referred to undefined variable '" ++ name ++ "'"
+        Just n  -> PrimVarName name n
+
+
+incrMaybe :: Maybe Int -> Maybe Int
+incrMaybe Nothing = Just 0
+incrMaybe (Just n) = Just $ n + 1
+
+
+-- |Run a clause compiler function from the Compiler monad to compile
+--  a generated procedure.
+evalClauseComp :: ClauseComp t -> Compiler t
+evalClauseComp clcomp =
+    evalStateT clcomp initClauseComp
+
+
+compileProc :: Item -> Compiler ()
+compileProc (ProcDecl vis (ProcProto name params) body pos) = do
+    (params',body') <- evalClauseComp $ do
+        mapM_ nextVar $ List.map paramName $ 
+          List.filter (flowsIn . paramFlow) params
+        startVars <- gets vars
+        compiled <- compileBody body
+        endVars <- gets vars
+        return (List.map (primParam startVars endVars) params, compiled)
+    addProc name (PrimProto name params') body' pos vis
+    return ()
+compileProc decl =
+    shouldnt $ "compileProc applied to non-proc " ++ show decl
+
+
+-- |Convert a Param to single PrimParam.  Only ParamIn and ParamOut 
+--  params should still exist at this point. 
+primParam :: Map VarName Int -> Map VarName Int -> Param -> PrimParam
+primParam initVars finalVars (Param name typ ParamIn) =
+    PrimParam (mkPrimVarName initVars name) typ FlowIn Ordinary
+primParam initVars finalVars (Param name typ ParamOut) = do
+    PrimParam (mkPrimVarName finalVars name) typ FlowOut Ordinary
+primparam _ _ param =
+    shouldnt $ "Flattening error: param '" ++ show param ++ "' remains"
+
+
+
+-- |Compile a proc body to LPVM form.  By the time we get here, the 
+--  form of the body is very limited:  it is either a single Cond 
+--  statement, or it is a list of ProcCalls and ForeignCalls.  
+--  Everything else has already been transformed away.
+compileBody :: [Placed Stmt] -> ClauseComp [[Placed Prim]]
+compileBody [placed]
+  | case content placed of
+      Cond _ _ _ _ _ -> True
+      _ -> False
+ = do
+      let Cond tst thn els _ _  = content placed
+      initial <- gets vars
+      tst' <- mapM compileSimpleStmt tst
+      thn' <- mapM compileSimpleStmt thn
+      afterThen <- gets vars
+      modify (\s -> s { vars = initial })
+      els' <- mapM compileSimpleStmt els
+      afterElse <- gets vars
+      let final = Map.intersectionWith max afterThen afterElse
+      modify (\s -> s { vars = final })
+      let thn'' = thn' ++ reconcilingAssignments afterThen final
+      let els'' = els' ++ reconcilingAssignments afterElse final
+      return [Unplaced (PrimGuard tst' 1):thn'',
+              Unplaced (PrimGuard tst' 0):els'']
+compileBody stmts = do
+    prims <- mapM compileSimpleStmt stmts
+    return [prims]
+
+compileSimpleStmt :: Placed Stmt -> ClauseComp (Placed Prim)
+compileSimpleStmt stmt = do
+    stmt' <- compileSimpleStmt' (content stmt)
+    return $ maybePlace stmt' (place stmt)
+
+compileSimpleStmt' :: Stmt -> ClauseComp Prim
+compileSimpleStmt' (ProcCall name args _ _) = do
+    args' <- mapM (compileArg . content) args
+    return $ PrimCall name Nothing args'
+compileSimpleStmt' (ForeignCall lang name args _ _) = do
+    args' <- mapM (compileArg . content) args
+    return $ PrimForeign lang name Nothing args'
+compileSimpleStmt' (Nop _) = do
+    return $ PrimNop
+compileSimpleStmt' stmt =
+    shouldnt $ "Normalisation left complex statement:\n" ++ showStmt 4 stmt
+
+
+compileArg :: Exp -> ClauseComp PrimArg
+compileArg (IntValue int) = return $ ArgInt int
+compileArg (FloatValue float) = return $ ArgFloat float
+compileArg (StringValue string) = return $ ArgString string
+compileArg (CharValue char) = return $ ArgChar char
+compileArg (Var name ParamIn) = do
+    name' <- currVar name
+    return $ ArgVar name' FlowIn Ordinary
+compileArg (Var name ParamOut) = do
+    name' <- nextVar name
+    return $ ArgVar name' FlowOut Ordinary
+compileArg arg =
+    shouldnt $ "Normalisation left complex argument: " ++ show arg
+
+
+reconcilingAssignments :: Map VarName Int -> Map VarName Int -> [Placed Prim]
+reconcilingAssignments caseVars jointVars =
+    let vars =
+          List.filter (\v -> caseVars ! v /= jointVars ! v) $ keys jointVars
+    in  List.map (reconcileOne caseVars jointVars) vars
+
+
+reconcileOne :: (Map VarName Int) -> (Map VarName Int) -> VarName -> Placed Prim
+reconcileOne caseVars jointVars var =
+    Unplaced $
+    PrimCall "=" Nothing [
+        ArgVar (mkPrimVarName jointVars var) FlowOut Ordinary,
+        ArgVar (mkPrimVarName caseVars var) FlowIn Ordinary]
 
 
 -- -- |Generate a single instruction for the clause currently being compiled
@@ -249,7 +364,7 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
 --     let loopInfo = case loopInfo1 of
 --             NoLoop -> loopInfo0
 --             _ -> loopInfo1
---     (_,state) <- lift $ runClauseComp tmpNum loopInfo $ compileStmts clause
+--     (_,state) <- lift $ evalClauseComp tmpNum loopInfo $ compileStmts clause
 --     return state
 
 
