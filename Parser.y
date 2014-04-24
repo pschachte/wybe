@@ -284,27 +284,23 @@ Stmt :: { Placed Stmt }
     : Exp                       { maybePlace (expToStmt $ content $1) 
 	                          (place $1) }
     | 'if' Stmt 'then' Stmts Condelse 'end'
-                                { Placed (Cond [$2] $4 $5 noVars noVars)
+                                { Placed (Cond [$2] $4 $5)
                                  (tokenPosition $1) }
-    | 'do' Stmts 'end'          { Placed (Loop $2 noVars noVars)
+    | 'do' Stmts 'end'          { Placed (Loop $2)
                                   (tokenPosition $1) }
-    | 'for' Exp 'in' Exp        { Placed (For $2 $4 noVars noVars)
+    | 'for' Exp 'in' Exp        { Placed (For $2 $4)
                                   (tokenPosition $1) }
-    | 'until' Stmt              { Placed (Cond [$2] [Unplaced $ Break noVars]
-                                                  [Unplaced $ Nop noVars]
-					  noVars noVars)
+    | 'until' Stmt              { Placed (Cond [$2] [Unplaced $ Break]
+                                                  [Unplaced $ Nop])
                                   (tokenPosition $1) }
-    | 'while' Stmt              { Placed (Cond [$2] [Unplaced $ Nop noVars]
-                                                  [Unplaced $ Break noVars]
-					  noVars noVars)
+    | 'while' Stmt              { Placed (Cond [$2] [Unplaced $ Nop]
+                                                  [Unplaced $ Break])
                                   (tokenPosition $1) }
-    | 'unless' Stmt             { Placed (Cond [$2] [Unplaced $ Next noVars]
-                                                  [Unplaced $ Nop noVars]
-					  noVars noVars)
+    | 'unless' Stmt             { Placed (Cond [$2] [Unplaced $ Next]
+                                                  [Unplaced $ Nop])
                                          (tokenPosition $1) }
-    | 'when' Stmt               { Placed (Cond [$2] [Unplaced $ Nop noVars]
-					          [Unplaced $ Next noVars]
-					  noVars noVars)
+    | 'when' Stmt               { Placed (Cond [$2] [Unplaced $ Nop]
+					          [Unplaced $ Next])
                                          (tokenPosition $1) }
 
 OptProcArgs :: { [Placed Exp] }

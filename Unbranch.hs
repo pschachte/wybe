@@ -177,15 +177,15 @@ unbranchStmts (stmt:stmts) = do
 
 
 unbranchStmt :: Stmt -> OptPos -> [Placed Stmt] -> Unbrancher [Placed Stmt]
-unbranchStmt stmt@(ProcCall _ args _ _) pos stmts = do
+unbranchStmt stmt@(ProcCall _ args) pos stmts = do
     defArgs args
     stmts' <- unbranchStmts stmts
     return $ (maybePlace stmt pos):stmts'
-unbranchStmt stmt@(ForeignCall _ _ args _ _) pos stmts = do
+unbranchStmt stmt@(ForeignCall _ _ args) pos stmts = do
     defArgs args
     stmts' <- unbranchStmts stmts
     return $ (maybePlace stmt pos):stmts'
-unbranchStmt (Cond tst thn els _ _) pos stmts = do
+unbranchStmt (Cond tst thn els) pos stmts = do
     beforeVars <- gets brVars
     dbgPrintLn $ "* test: " ++ showBody 8 tst
     dbgPrintLn $ "* Vars before test: " ++ show beforeVars
@@ -211,7 +211,7 @@ unbranchStmt (Cond tst thn els _ _) pos stmts = do
     if lp == NoLoop || stmts == []
       then do
         switch <- factorFreshProc switchName beforeVars afterVars pos
-                  [maybePlace (Cond tst' thn' els' noVars noVars) pos]
+                  [maybePlace (Cond tst' thn' els') pos]
         setVars beforeVars
         unbranchStmts (switch:stmts)
       else do
@@ -228,8 +228,7 @@ unbranchStmt (Cond tst thn els _ _) pos stmts = do
                   [maybePlace 
                    (Cond tst' 
                     (if thnTerm then thn' else thn' ++ [cont]) 
-                    (if elsTerm then els' else els' ++ [cont]) 
-                    noVars noVars) pos]
+                    (if elsTerm then els' else els' ++ [cont])) pos]
         dbgPrintLn $ "* Generated switch proc " ++ showStmt 4 
           (content switch)
         return [switch]
@@ -239,7 +238,7 @@ unbranchStmt (Cond tst thn els _ _) pos stmts = do
 -- code following the loop is the the intersection of the sets of
 -- variables defined after 0, 1, 2, etc iterations, which = the set
 -- defined up to the first (possibly conditional) loop break.
-unbranchStmt (Loop body _ _) pos stmts = do
+unbranchStmt (Loop body) pos stmts = do
     dbgPrintLn $ "* Handling loop:\n" ++ showBody 4 body
     beforeVars <- gets brVars
     dbgPrintLn $ "* Vars before loop: " ++ show beforeVars
@@ -264,15 +263,11 @@ unbranchStmt (Loop body _ _) pos stmts = do
     setVars finalVars
     -- dbgPrintLn $ "* Finished handling loop"
     return [next]
--- unbranchStmt (Guard tests val _ _) pos stmts = do
---     tests' <- unbranchStmts tests
---     stmts' <- unbranchStmts stmts
---     return $ Guard tests' val noVars noVars : stmts'
-unbranchStmt (For itr gen initVars finalVars) pos stmts =
+unbranchStmt (For itr gen) pos stmts =
     shouldnt "flattening should have removed For statements"
-unbranchStmt  (Nop _) pos stmts =
+unbranchStmt (Nop) pos stmts =
     unbranchStmts stmts         -- might as well filter out Nops
-unbranchStmt  (Break _) pos stmts = do
+unbranchStmt (Break) pos stmts = do
     inLoop <- gets ((/= NoLoop) . brLoopInfo)
     if inLoop 
       then do
@@ -282,7 +277,7 @@ unbranchStmt  (Break _) pos stmts = do
       else do
         lift $ message Error "Break outside a loop" pos
         return []
-unbranchStmt (Next _) pos stmts = do
+unbranchStmt (Next) pos stmts = do
     inLoop <- gets ((/= NoLoop) . brLoopInfo)
     if inLoop 
       then do
@@ -340,7 +335,7 @@ newProcCall :: ProcName -> Set VarName -> Set VarName -> OptPos -> Placed Stmt
 newProcCall name inVars outVars pos =
     let inArgs  = [Unplaced $ Var v ParamIn | v <- Set.elems inVars] 
         outArgs = [Unplaced $ Var v ParamOut | v <- Set.elems outVars]
-    in maybePlace (ProcCall name (inArgs ++ outArgs) noVars noVars) pos
+    in maybePlace (ProcCall name (inArgs ++ outArgs)) pos
 
 
 newProcProto :: ProcName -> Set VarName -> Set VarName -> ProcProto
@@ -357,11 +352,11 @@ loopExitVars vars (stmt:stmts) =
 
 
 stmtLoopExitVars :: Set VarName -> Stmt -> [Placed Stmt] -> (Set VarName, Bool)
-stmtLoopExitVars  vars (ProcCall _ args _ _) stmts =
+stmtLoopExitVars  vars (ProcCall _ args) stmts =
     loopExitVars (outputVars vars args) stmts
-stmtLoopExitVars vars (ForeignCall _ _ args _ _) stmts = do
+stmtLoopExitVars vars (ForeignCall _ _ args) stmts = do
     loopExitVars (outputVars vars args) stmts
-stmtLoopExitVars vars (Cond tst thn els _ _) stmts =
+stmtLoopExitVars vars (Cond tst thn els) stmts =
     let (tstVars,tstExit) = loopExitVars vars tst
     in  if tstExit then (tstVars,True)
         else let (thnVars,thnExit) = loopExitVars tstVars thn
@@ -373,20 +368,16 @@ stmtLoopExitVars vars (Cond tst thn els _ _) stmts =
                  else if thnExit then (thnVars, True)
                       else if elsExit then (elsVars, True)
                            else loopExitVars condVars stmts
-stmtLoopExitVars vars (Loop body _ _) stmts =
+stmtLoopExitVars vars (Loop body) stmts =
     let (bodyVars,bodyExit) = loopExitVars vars body
     in  if bodyExit then loopExitVars bodyVars stmts
         else -- it's an infinite loop: stmts unreachable
             (Set.empty,False)
--- stmtLoopExitVars vars (Guard tests val _ _) stmts = do
---     tests' <- loopExitVars tests
---     stmts' <- loopExitVars stmts
---     return $ Guard tests' val noVars noVars : stmts'
-stmtLoopExitVars vars (For itr gen initVars finalVars) stmts =
+stmtLoopExitVars vars (For itr gen) stmts =
     shouldnt "flattening should have removed For statements"
-stmtLoopExitVars vars  (Nop _) stmts =
+stmtLoopExitVars vars  (Nop) stmts =
     loopExitVars vars stmts
-stmtLoopExitVars vars  (Break _) stmts = do
+stmtLoopExitVars vars  (Break) stmts = do
     (vars, True)
-stmtLoopExitVars vars (Next _) stmts = do
+stmtLoopExitVars vars (Next) stmts = do
     (vars, False)

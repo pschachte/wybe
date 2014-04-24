@@ -2,7 +2,7 @@ public proc print2(x:int, y:int) @proc-beer:1:8
     do
         for ?count @proc-beer:2:16 in range(99 @proc-beer:2:34, 0 @proc-beer:2:36, Negate(1 @proc-beer:2:39) @proc-beer:2:37) @proc-beer:2:26
         println(++(count @proc-beer:3:20, " bottles of beer on the wall" @proc-beer:3:27) @proc-beer:3:20)
-     end 
+     end
 
 
  Module proc-beer

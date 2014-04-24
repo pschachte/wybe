@@ -66,8 +66,8 @@ emit pos stmt = do
     modify (\s -> s { flattened = maybePlace stmt pos:stmts })
 
 
-emitNoVars :: OptPos -> (VarVers -> VarVers -> Stmt) -> Flattener ()
-emitNoVars pos stmt = emit pos (stmt noVars noVars)
+emitNoVars :: OptPos -> Stmt -> Flattener ()
+emitNoVars pos stmt = emit pos stmt
 
 
 postpone :: OptPos -> Stmt -> Flattener ()
@@ -126,43 +126,41 @@ flattenStmts stmts =
 
 -- |Flatten the specified statement
 flattenStmt :: Stmt -> OptPos -> Flattener ()
-flattenStmt (ProcCall name args _ _) pos = do
+flattenStmt (ProcCall name args) pos = do
     args' <- flattenArgs args
     emitNoVars pos $ ProcCall name args'
     emitPostponed
-flattenStmt (ForeignCall lang name args initVars finalVars) pos = do
+flattenStmt (ForeignCall lang name args) pos = do
     args' <- flattenArgs args
     emitNoVars pos $ ForeignCall lang name args'
     emitPostponed
-flattenStmt (Cond tst thn els initVars finalVars) pos = do
+flattenStmt (Cond tst thn els) pos = do
     -- liftIO $ putStrLn $ "** Flattening test:\n" ++ showBody 4 tst
     tst' <- flattenInner False (flattenStmts tst)
     -- liftIO $ putStrLn $ "** Result:\n" ++ showBody 4 tst'
     thn' <- flattenInner False (flattenStmts thn)
     els' <- flattenInner False (flattenStmts els)
     emitNoVars pos $ Cond tst' thn' els'
-flattenStmt (Loop body initVars finalVars) pos = do
+flattenStmt (Loop body) pos = do
     body' <- flattenInner True 
-             (flattenStmts $ body ++ [Unplaced $ Next noVars])
+             (flattenStmts $ body ++ [Unplaced $ Next])
     emitNoVars pos $ Loop body'
-flattenStmt (For itr gen initVars finalVars) pos = do
+flattenStmt (For itr gen) pos = do
     genVar <- tempVar
     saveInit pos $ 
-      ProcCall "init_seq" [gen, Unplaced $ Var genVar ParamOut] noVars noVars
+      ProcCall "init_seq" [gen, Unplaced $ Var genVar ParamOut]
     flattenStmt (Cond [maybePlace 
                        (ProcCall "in" [itr,Unplaced $ Var genVar ParamIn,
-                                       Unplaced $ Var genVar ParamOut]
-                        noVars noVars)
+                                       Unplaced $ Var genVar ParamOut])
                        pos]
-                 [Unplaced $ Nop noVars]
-                 [Unplaced $ Break noVars]
-                 initVars finalVars)
+                 [Unplaced $ Nop]
+                 [Unplaced $ Break])
       pos
-flattenStmt stmt@(Nop _) pos =
+flattenStmt stmt@(Nop) pos =
     emit pos stmt
-flattenStmt stmt@(Break _) pos =
+flattenStmt stmt@(Break) pos =
     emit pos stmt
-flattenStmt stmt@(Next _) pos =
+flattenStmt stmt@(Next) pos =
     emit pos stmt
 
 
@@ -205,10 +203,9 @@ flattenExp (CondExp cond thn els) pos = do
     resultName <- tempVar
     flattenStmt (Cond cond
                  [Unplaced $ ProcCall "=" 
-                  [Unplaced $ Var resultName ParamOut,thn] noVars noVars]
+                  [Unplaced $ Var resultName ParamOut,thn]]
                  [Unplaced $ ProcCall "=" 
-                  [Unplaced $ Var resultName ParamOut,els] noVars noVars]
-                 noVars noVars) pos
+                  [Unplaced $ Var resultName ParamOut,els]]) pos
     return $ [Unplaced $ Var resultName ParamIn]
 flattenExp (Fncall name exps) pos = do
     resultName <- tempVar

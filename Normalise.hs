@@ -63,8 +63,7 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   ProcDecl 
   vis
   (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
-  [Unplaced $ ProcCall "=" [Unplaced $ Var "$" ParamOut, result]
-   noVars noVars]
+  [Unplaced $ ProcCall "=" [Unplaced $ Var "$" ParamOut, result]]
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     proto' <- flattenProto proto
@@ -91,8 +90,7 @@ addCtor vis typeName typeParams (FnProto ctorName params) = do
        (Unplaced $ Where 
         ([Unplaced $ ForeignCall "$" "alloc" [Unplaced $ StringValue typeName,
                                               Unplaced $ StringValue ctorName,
-                                              Unplaced $ Var "$rec" ParamOut]
-           noVars noVars]
+                                              Unplaced $ Var "$rec" ParamOut]]
          ++
          (List.map (\(Param var _ dir) ->
                      (Unplaced $ ForeignCall "$" "mutate"
@@ -100,8 +98,7 @@ addCtor vis typeName typeParams (FnProto ctorName params) = do
                        Unplaced $ StringValue ctorName,
                        Unplaced $ StringValue var,
                        Unplaced $ Var "$rec" ParamInOut,
-                       Unplaced $ Var var ParamIn]
-                       noVars noVars))
+                       Unplaced $ Var var ParamIn]))
           params))
         (Unplaced $ Var "$rec" ParamIn))
        Nothing)
@@ -128,8 +125,7 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
         Unplaced $ StringValue ctorName,
         Unplaced $ StringValue field,
         Unplaced $ Var "$rec" ParamInOut,
-        Unplaced $ Var "$field" ParamIn]
-       noVars noVars]
+        Unplaced $ Var "$field" ParamIn]]
        Nothing
 
 ----------------------------------------------------------------
@@ -217,10 +213,10 @@ primParam _ _ param =
 compileBody :: [Placed Stmt] -> ClauseComp [[Placed Prim]]
 compileBody [placed]
   | case content placed of
-      Cond _ _ _ _ _ -> True
+      Cond _ _ _ -> True
       _ -> False
  = do
-      let Cond tst thn els _ _  = content placed
+      let Cond tst thn els = content placed
       initial <- gets vars
       tst' <- mapM compileSimpleStmt tst
       thn' <- mapM compileSimpleStmt thn
@@ -244,13 +240,13 @@ compileSimpleStmt stmt = do
     return $ maybePlace stmt' (place stmt)
 
 compileSimpleStmt' :: Stmt -> ClauseComp Prim
-compileSimpleStmt' (ProcCall name args _ _) = do
+compileSimpleStmt' (ProcCall name args) = do
     args' <- mapM (compileArg . content) args
     return $ PrimCall name Nothing args'
-compileSimpleStmt' (ForeignCall lang name args _ _) = do
+compileSimpleStmt' (ForeignCall lang name args) = do
     args' <- mapM (compileArg . content) args
     return $ PrimForeign lang name Nothing args'
-compileSimpleStmt' (Nop _) = do
+compileSimpleStmt' (Nop) = do
     return $ PrimNop
 compileSimpleStmt' stmt =
     shouldnt $ "Normalisation left complex statement:\n" ++ showStmt 4 stmt

@@ -13,7 +13,7 @@ module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility,
   TypeProto(..), TypeSpec(..), FnProto(..),
-  ProcProto(..), Param(..), Stmt(..), VarVers(..), noVars,
+  ProcProto(..), Param(..), Stmt(..),
   Exp(..), Generator(..),
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
@@ -36,7 +36,6 @@ module AST (
   updateModInterface, updateModProcsM,
   getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, verboseMsg, message, genProcName,
-  flowVar,
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
@@ -345,37 +344,6 @@ makeMessage msg (Just pos) =
   show (sourceColumn pos) ++ ": " ++ 
   msg
 
-
-
--- |Return the current PrimVarName for a given name string; ie, find 
---  the current suffix for the specified name.
-getVar :: VarName -> OptPos -> VarVers -> Compiler PrimVarName
-getVar name pos BottomVarVers =
-    shouldnt "getting variable in error context"
-getVar name pos (VarVers vars) = do
-    case Map.lookup name vars of
-        Nothing -> do
-            message Error ("uninitialised variable '"++name++"'") pos
-            return $ PrimVarName name 0
-        Just num -> 
-            return $ PrimVarName name num
-
--- |Return the primitive procedure call input argument(s) for the 
---  specified variable name and flow direction
-flowVar :: VarName -> FlowDirection -> OptPos -> VarVers -> VarVers -> 
-           Compiler [PrimArg]
-flowVar name ParamIn pos inVars outVars = do
-    primvar <- getVar name pos inVars
-    return [ArgVar primvar FlowIn Ordinary]
-flowVar name ParamOut pos inVars outVars = do
-    primvar <- getVar name pos outVars
-    return [ArgVar primvar FlowOut Ordinary]
-flowVar name ParamInOut pos inVars outVars = do
-    primvar <- getVar name pos inVars
-    primvar' <- getVar name pos outVars
-    return [ArgVar primvar FlowIn FirstHalf,
-            ArgVar primvar' FlowOut SecondHalf]
-flowVar name NoFlow _ _ _ = return []
 
 
 -- |Return a new, unused proc ID.
@@ -795,29 +763,17 @@ flowsOut ParamOut = True
 flowsOut ParamInOut = True
 
 
--- |Variable Versions.  Tells what variables are in scope (either 
---  before or after a statement), and gives for each a version 
---  number, to distinguish different definitions for a variable in 
---  the same proc.
-data VarVers = VarVers (Map VarName Int) | BottomVarVers
-             deriving (Eq, Show)
-
-noVars :: VarVers
-noVars = VarVers Map.empty
-
 -- |Source program statements.  These will be normalised into Prims.
---  The two VarVers included with most of these contructors record
---  the latest version of each variable before and after each statement.
 data Stmt
-     = ProcCall Ident [Placed Exp] VarVers VarVers
-     | ForeignCall Ident Ident [Placed Exp] VarVers VarVers
-     | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt] VarVers VarVers
-     | Loop [Placed Stmt] VarVers VarVers
-     | Nop VarVers -- Nop doesn't do anything so before and after are the same
+     = ProcCall Ident [Placed Exp]
+     | ForeignCall Ident Ident [Placed Exp]
+     | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt]
+     | Loop [Placed Stmt]
+     | Nop -- Nop doesn't do anything so before and after are the same
        -- These are only valid in a loop
-     | For (Placed Exp) (Placed Exp) VarVers VarVers
-     | Break VarVers  -- holds the variable versions before the break
-     | Next VarVers  -- holds the variable versions before the next
+     | For (Placed Exp) (Placed Exp)
+     | Break  -- holds the variable versions before the break
+     | Next  -- holds the variable versions before the next
      deriving (Eq)
 
 -- |An expression.  These are all normalised into statements.
@@ -907,9 +863,9 @@ argFlowDirection (ArgChar _) = FlowIn
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
-expToStmt (Fncall name args) = ProcCall name args noVars noVars
+expToStmt (Fncall name args) = ProcCall name args
 expToStmt (ForeignFn lang name args) = 
-  ForeignCall lang name args noVars noVars
+  ForeignCall lang name args
 expToStmt exp = error $ "Internal error: non-Fncall expr " ++ show exp
 
 
@@ -1225,39 +1181,28 @@ showCases num labelInd blockInd (block:blocks) =
 
 
 showStmt :: Int -> Stmt -> String
-showStmt _ (ProcCall name args before after) =
-    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" 
-    ++ showVarMaps before after
-    ++ "\n"
-showStmt _ (ForeignCall lang name args before after) =
+showStmt _ (ProcCall name args) =
+    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")\n"
+showStmt _ (ForeignCall lang name args) =
     "foreign " ++ lang ++ " " ++ 
-    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")" 
-    ++ showVarMaps before after
-    ++ "\n"
-showStmt indent (Cond cond thn els before after) =
+    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")\n"
+showStmt indent (Cond cond thn els) =
     let leadIn = List.replicate indent ' '
     in "if:\n" ++ showBody (indent+4) cond
        ++ leadIn ++ "then:\n"
        ++ showBody (indent+4) thn
        ++ leadIn ++ "else:\n"
        ++ showBody (indent+4) els
-       ++ leadIn ++ "end " 
-       ++ showVarMaps before after
-       ++ "\n"
-showStmt indent (Loop lstmts before after) =
+       ++ leadIn ++ "end\n"
+showStmt indent (Loop lstmts) =
     "do\n" ++  showBody (indent + 4) lstmts
-    ++ List.replicate indent ' ' ++ " end "
-    ++ showVarMaps before after
-       ++ "\n"
-showStmt _ (Nop _) = "nop\n"
-showStmt _ (For itr gen _ _) =
+    ++ List.replicate indent ' ' ++ " end\n"
+showStmt _ (Nop) = "nop\n"
+showStmt _ (For itr gen) =
     "for " ++ show itr ++ " in " ++ show gen
     ++ "\n"
-showStmt _ (Break before) =
-    "break" ++ showVarMaps before BottomVarVers
-    ++ "\n"
-showStmt _ (Next before) = "next" ++ showVarMaps before BottomVarVers
-    ++ "\n"
+showStmt _ (Break) = "break\n"
+showStmt _ (Next) = "next\n"
 
 
 showBody :: Int -> [Placed Stmt] -> String
@@ -1265,12 +1210,6 @@ showBody indent stmts =
   List.concatMap (\s -> List.replicate indent ' ' 
                         ++ showStmt indent (content s)) stmts
 
-
--- |Show start and end variable maps
-showVarMaps :: VarVers -> VarVers -> String
-showVarMaps before after =
-    if before == noVars && after == noVars then ""
-    else " <" ++ showVarVers before ++ " -> " ++ showVarVers after ++ ">"
 
 -- |Show a primitive argument.
 instance Show PrimArg where
@@ -1297,15 +1236,6 @@ instance Show Exp where
   show (ForeignFn lang fn args) = 
     "foreign " ++ lang ++ " " ++ fn 
     ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
-
-showVarVers :: VarVers -> String
-showVarVers (BottomVarVers) = "BottomVarVers"
-showVarVers (VarVers vars) = 
-  "{" 
-  ++ List.intercalate ", " 
-  (List.map (\(k,v) -> k ++ ":" ++ show v) $ Map.assocs vars)
-  ++ "}"
-
 
 -- |maybeShow pre maybe pos
 --  if maybe has something, show pre, the maybe payload, and post
