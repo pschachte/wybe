@@ -67,10 +67,11 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
    noVars noVars]
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
+    proto' <- flattenProto proto
     stmts' <- flattenBody stmts
-    -- liftIO $ putStrLn $ "Flattened body:\n" ++ show (ProcDecl vis proto stmts' pos)
+    -- liftIO $ putStrLn $ "Flattened proc:\n" ++ show (ProcDecl vis proto' stmts' pos)
     (stmts'',genProcs) <- unbranchBody params stmts'
-    let procs = ProcDecl vis proto stmts'' pos:genProcs
+    let procs = ProcDecl vis proto' stmts'' pos:genProcs
     -- liftIO $ mapM_ (\item -> putStrLn $ show item) procs
     mapM_ compileProc procs
 normaliseItem (CtorDecl vis proto pos) = do
@@ -204,7 +205,7 @@ primParam initVars finalVars (Param name typ ParamIn) =
     PrimParam (mkPrimVarName initVars name) typ FlowIn Ordinary
 primParam initVars finalVars (Param name typ ParamOut) = do
     PrimParam (mkPrimVarName finalVars name) typ FlowOut Ordinary
-primparam _ _ param =
+primParam _ _ param =
     shouldnt $ "Flattening error: param '" ++ show param ++ "' remains"
 
 

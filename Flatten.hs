@@ -13,7 +13,7 @@
 --  like f(x, ?t) p(t, ?t) f(?x, t).
 ----------------------------------------------------------------
 
-module Flatten (flattenBody) where
+module Flatten (flattenProto, flattenBody) where
 
 import AST
 import Data.Map as Map
@@ -26,6 +26,11 @@ import Control.Monad
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
+
+
+flattenProto :: ProcProto -> Compiler ProcProto
+flattenProto (ProcProto name params) = do
+    return $ ProcProto name $ concatMap flattenParam params
 
 
 flattenBody :: [Placed Stmt] -> Compiler [Placed Stmt]
@@ -166,10 +171,11 @@ flattenStmt stmt@(Next _) pos =
 --  call to bind those arguments, and a list of statements to execute 
 --  after the call to store the results appropriately.
 flattenArgs :: [Placed Exp] -> Flattener [Placed Exp]
-flattenArgs = mapM flattenPExp
+flattenArgs args = do
+    argListList <- mapM flattenPExp args
+    return $ concat argListList
 
-
-flattenPExp :: Placed Exp -> Flattener (Placed Exp)
+flattenPExp :: Placed Exp -> Flattener [Placed Exp]
 flattenPExp pexp = flattenExp (content pexp) (place pexp)
 
 
@@ -179,17 +185,19 @@ flattenPExp pexp = flattenExp (content pexp) (place pexp)
 --  after the call to store the result appropriately.
 --  The first part of the output (a Placed Exp) will always be a list
 --  of only atomic Exps and Var references (in any direction).
-flattenExp :: Exp -> OptPos -> Flattener (Placed Exp)
+flattenExp :: Exp -> OptPos -> Flattener [Placed Exp]
 flattenExp exp@(IntValue a) pos =
-    return $ maybePlace exp pos
+    return $ [maybePlace exp pos]
 flattenExp exp@(FloatValue a) pos =
-    return $ maybePlace exp pos
+    return $ [maybePlace exp pos]
 flattenExp exp@(StringValue a) pos =
-    return $ maybePlace exp pos
+    return $ [maybePlace exp pos]
 flattenExp exp@(CharValue a) pos =
-    return $ maybePlace exp pos
+    return $ [maybePlace exp pos]
 flattenExp exp@(Var name dir) pos = do
-    return $ maybePlace exp pos
+    return $ 
+      (if flowsIn dir then [maybePlace (Var name ParamIn) pos] else []) ++
+      (if flowsOut dir then [maybePlace (Var name ParamOut) pos] else [])
 flattenExp (Where stmts pexp) _ = do
     flattenStmts stmts
     flattenPExp pexp
@@ -201,16 +209,23 @@ flattenExp (CondExp cond thn els) pos = do
                  [Unplaced $ ProcCall "=" 
                   [Unplaced $ Var resultName ParamOut,els] noVars noVars]
                  noVars noVars) pos
-    return $ Unplaced $ Var resultName ParamIn
+    return $ [Unplaced $ Var resultName ParamIn]
 flattenExp (Fncall name exps) pos = do
     resultName <- tempVar
     exps' <- flattenArgs exps
     emitNoVars pos $ ProcCall name $
       exps' ++ [Unplaced $ Var resultName ParamOut]
-    return $ Unplaced $ Var resultName ParamIn
+    return $ [Unplaced $ Var resultName ParamIn]
 flattenExp (ForeignFn lang name exps) pos = do
     resultName <- tempVar
     exps' <- flattenArgs exps
     emitNoVars pos $ ForeignCall lang name $
       exps' ++ [Unplaced $ Var resultName ParamOut]
-    return $ Unplaced $ Var resultName ParamIn
+    return $ [Unplaced $ Var resultName ParamIn]
+
+
+flattenParam :: Param -> [Param]
+flattenParam (Param name typ dir) =
+    (if flowsIn dir then [Param name typ ParamIn] else []) ++
+    (if flowsOut dir then [Param name typ ParamOut] else [])
+    
