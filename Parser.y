@@ -296,11 +296,11 @@ Stmt :: { Placed Stmt }
     | 'while' Stmt              { Placed (Cond [$2] [Unplaced $ Nop]
                                                   [Unplaced $ Break])
                                   (tokenPosition $1) }
-    | 'unless' Stmt             { Placed (Cond [$2] [Unplaced $ Next]
-                                                  [Unplaced $ Nop])
+    | 'unless' Stmt             { Placed (Cond [$2] [Unplaced $ Nop]
+                                                  [Unplaced $ Next])
                                          (tokenPosition $1) }
-    | 'when' Stmt               { Placed (Cond [$2] [Unplaced $ Nop]
-					          [Unplaced $ Next])
+    | 'when' Stmt               { Placed (Cond [$2] [Unplaced $ Next]
+					          [Unplaced $ Nop])
                                          (tokenPosition $1) }
 
 OptProcArgs :: { [Placed Exp] }
