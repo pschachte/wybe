@@ -7,10 +7,10 @@ public type int is
     public proc -(x:int,?y:int,z:int) ?y = foreign llvm sub(32,z,x) end
     public func *(x:int,y:int):int = foreign llvm mul(32,x,y)
     public func /(x:int,y:int):int = foreign llvm sdiv(32,x,y)
-    public func ==(x:int,y:int):bool = foreign llvm icmp(eq,32,x,y)
-    public func /=(x:int,y:int):bool = foreign llvm icmp(ne,32,x,y)
-    public func <(x:int,y:int):bool = foreign llvm icmp(slt,32,x,y)
-    public func <=(x:int,y:int):bool = foreign llvm icmp(sle,32,x,y)
-    public func >(x:int,y:int):bool = foreign llvm icmp(sgt,32,x,y)
-    public func >=(x:int,y:int):bool = foreign llvm icmp(sge,32,x,y)
+    public func ==(x:int,y:int):bool = foreign llvm icmp_eq(32,x,y)
+    public func /=(x:int,y:int):bool = foreign llvm icmp_ne(32,x,y)
+    public func <(x:int,y:int):bool = foreign llvm icmp_slt(32,x,y)
+    public func <=(x:int,y:int):bool = foreign llvm icmp_sle(32,x,y)
+    public func >(x:int,y:int):bool = foreign llvm icmp_sgt(32,x,y)
+    public func >=(x:int,y:int):bool = foreign llvm icmp_sge(32,x,y)
 end
