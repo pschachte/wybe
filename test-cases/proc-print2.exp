@@ -1,4 +1,5 @@
-Public proc print2(x:int, y:int) @proc-print2:1:8    print(x @proc-print2:2:14)
+public proc print2(x:int, y:int) @proc-print2:1:8
+    print(x @proc-print2:2:14)
     print(y @proc-print2:3:14)
 
 
