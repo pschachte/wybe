@@ -813,7 +813,6 @@ data Stmt
      | ForeignCall Ident Ident [Placed Exp] VarVers VarVers
      | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt] VarVers VarVers
      | Loop [Placed Stmt] VarVers VarVers
-     | Guard [Placed Stmt] Integer VarVers VarVers
      | Nop VarVers -- Nop doesn't do anything so before and after are the same
        -- These are only valid in a loop
      | For (Placed Exp) (Placed Exp) VarVers VarVers
@@ -849,11 +848,6 @@ data PrimProto = PrimProto ProcName [PrimParam]
 instance Show PrimProto where
     show (PrimProto name params) =
         name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")"
-
--- primProto :: VarVers -> VarVers -> ProcProto -> Compiler PrimProto
--- primProto initVars finalVars (ProcProto name params) = do
---     params' <- mapM (primParam initVars finalVars) params
---     return $ PrimProto name (concat params')
 
 -- |A formal parameter, including name, type, and flow direction.
 data PrimParam =
@@ -1255,9 +1249,6 @@ showStmt indent (Loop lstmts before after) =
     ++ List.replicate indent ' ' ++ " end "
     ++ showVarMaps before after
        ++ "\n"
-showStmt indent (Guard guarded val _ _) =
-    "guard " ++ showBody (indent+4) guarded ++ " " ++ show val
-    ++ "\n"
 showStmt _ (Nop _) = "nop\n"
 showStmt _ (For itr gen _ _) =
     "for " ++ show itr ++ " in " ++ show gen

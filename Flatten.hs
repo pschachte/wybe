@@ -140,9 +140,6 @@ flattenStmt (Loop body initVars finalVars) pos = do
     body' <- flattenInner True 
              (flattenStmts $ body ++ [Unplaced $ Next noVars])
     emitNoVars pos $ Loop body'
-flattenStmt (Guard tests val initVars finalVars) pos = do
-    tests' <- flattenInner False (flattenStmts tests)
-    emitNoVars pos $ Guard tests' val
 flattenStmt (For itr gen initVars finalVars) pos = do
     genVar <- tempVar
     saveInit pos $ 
