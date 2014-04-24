@@ -163,7 +163,8 @@ currVar name = do
 mkPrimVarName :: Map String Int -> String -> PrimVarName
 mkPrimVarName dict name =
     case Map.lookup name dict of
-        Nothing -> shouldnt $ "Referred to undefined variable '" ++ name ++ "'"
+        -- Nothing -> shouldnt $ "Referred to undefined variable '" ++ name ++ "'"
+        Nothing -> PrimVarName name (-1)
         Just n  -> PrimVarName name n
 
 
