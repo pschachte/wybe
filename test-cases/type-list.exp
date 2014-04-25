@@ -17,8 +17,7 @@ then y @type-list:8:10 else [|](head(x @type-list:9:11) @type-list:9:11, ++(tail
   resources       : 
   procs           : ++:
 proc ++(x:0:list(t), y:0:list(t), ?$:0:?) (id 0):  @type-list:6:8
-    gen$1(x:0, y:0, ?tmp$0:0, ?x:1, ?y:1) @type-list:7:5
-    =(?$:0, tmp$0:0)
+    gen$1(x:0, y:0, ?$:0, ?x:1, ?y:1) @type-list:7:5
                     gen$1:
 proc gen$1(x:0:?, y:0:?, ?tmp$0:0:?, ?x:0:?, ?y:0:?) (id 0): 
     begin guard 1
@@ -34,8 +33,7 @@ proc gen$1(x:0:?, y:0:?, ?tmp$0:0:?, ?x:0:?, ?y:0:?) (id 0):
     head(x:0, ?tmp$3:0) @type-list:9:11
     tail(x:0, ?tmp$5:0) @type-list:9:18
     ++(tmp$5:0, y:0, ?tmp$4:0) @type-list:9:18
-    [|](tmp$3:0, tmp$4:0, ?tmp$2:0) @type-list:9:10
-    =(?tmp$0:0, tmp$2:0)
+    [|](tmp$3:0, tmp$4:0, ?tmp$0:0) @type-list:9:10
 
 Submodules of type-list:
 list: 
@@ -54,24 +52,20 @@ list:
   resources       : 
   procs           : []:
 proc [](?$:0:list(t)) (id 0): 
-    foreign $ alloc("list", "[]", ?$rec:0)
-    =(?$:0, $rec:0)
+    foreign $ alloc("list", "[]", ?$:0)
                     [|]:
 proc [|](head:0:t, tail:0:list(t), ?$:0:list(t)) (id 0): 
     foreign $ alloc("list", "[|]", ?$rec:0)
     foreign $ mutate("list", "[|]", "head", $rec:0, ?$rec:1, head:0)
-    foreign $ mutate("list", "[|]", "tail", $rec:1, ?$rec:2, tail:0)
-    =(?$:0, $rec:2)
+    foreign $ mutate("list", "[|]", "tail", $rec:1, ?$:0, tail:0)
                     head:
 proc head($rec:0:list(t), ?$:0:t) (id 0): 
-    foreign $ access("list", "[|]", "head", $rec:0, ?tmp$0:0)
-    =(?$:0, tmp$0:0)
+    foreign $ access("list", "[|]", "head", $rec:0, ?$:0)
 proc head($rec:0:list(t), ?$rec:1:list(t), $field:0:t) (id 1): 
     foreign $ mutate("list", "[|]", "head", $rec:0, ?$rec:1, $field:0)
                     tail:
 proc tail($rec:0:list(t), ?$:0:list(t)) (id 0): 
-    foreign $ access("list", "[|]", "tail", $rec:0, ?tmp$0:0)
-    =(?$:0, tmp$0:0)
+    foreign $ access("list", "[|]", "tail", $rec:0, ?$:0)
 proc tail($rec:0:list(t), ?$rec:1:list(t), $field:0:list(t)) (id 1): 
     foreign $ mutate("list", "[|]", "tail", $rec:0, ?$rec:1, $field:0)
 

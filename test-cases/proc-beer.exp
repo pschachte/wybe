@@ -26,10 +26,9 @@ proc gen$3(tmp$0:0:?, tmp$2:0:?, tmp$3:0:?, x:0:?, y:0:?, ?tmp$0:2:?, ?tmp$2:1:?
     gen$4(count:0, tmp$0:1, tmp$2:0, tmp$3:0, x:0, y:0, ?count:1, ?tmp$0:2, ?tmp$1:0, ?tmp$2:1, ?tmp$3:1, ?x:1, ?y:1)
 
     begin guard 0
-        in(?count:0, tmp$0:0, ?tmp$0:1) @proc-beer:2:12
+        in(?count:0, tmp$0:0, ?tmp$0:2) @proc-beer:2:12
     end guard 
-    gen$1(tmp$0:0, tmp$2:0, tmp$3:0, x:0, y:0, ?tmp$0:1, ?tmp$2:1, ?tmp$3:1, ?x:1, ?y:1)
-    =(?tmp$0:2, tmp$0:1)
+    gen$1(tmp$0:0, tmp$2:0, tmp$3:0, x:0, y:0, ?tmp$0:2, ?tmp$2:1, ?tmp$3:1, ?x:1, ?y:1)
                     gen$4:
 proc gen$4(count:0:?, tmp$0:0:?, tmp$2:0:?, tmp$3:0:?, x:0:?, y:0:?, ?count:0:?, ?tmp$0:1:?, ?tmp$1:0:?, ?tmp$2:1:?, ?tmp$3:1:?, ?x:1:?, ?y:1:?) (id 0): 
     ++(count:0, " bottles of beer on the wall", ?tmp$1:0) @proc-beer:3:20

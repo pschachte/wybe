@@ -13,7 +13,6 @@ public proc nada(x:int, y:int) @proc-allin:1:8
   procs           : nada:
 proc nada(x:0:int, y:0:int) (id 0):  @proc-allin:1:8
     +(x:0, y:0, ?tmp$0:0) @proc-allin:1:35
-    =(?z:0, tmp$0:0) @proc-allin:1:32
 
 Submodules of proc-allin:
 

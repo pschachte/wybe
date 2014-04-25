@@ -59,56 +59,42 @@ int:
   resources       : 
   procs           : *:
 proc *(x:0:int, y:0:int, ?$:0:int) (id 0):  @type-int:8:12
-    foreign llvm mul(32, x:0, y:0, ?tmp$0:0) @type-int:8:38
-    =(?$:0, tmp$0:0)
+    foreign llvm mul(32, x:0, y:0, ?$:0) @type-int:8:38
                     +:
 proc +(x:0:int, y:0:int, ?$:0:int) (id 0):  @type-int:2:12
-    foreign llvm add(32, x:0, y:0, ?tmp$0:0) @type-int:2:38
-    =(?$:0, tmp$0:0)
+    foreign llvm add(32, x:0, y:0, ?$:0) @type-int:2:38
 proc +(?x:0:int, y:0:int, z:0:int) (id 1):  @type-int:3:12
-    foreign llvm sub(32, z:0, y:0, ?tmp$0:0) @type-int:3:44
-    =(?x:0, tmp$0:0) @type-int:3:39
+    foreign llvm sub(32, z:0, y:0, ?x:0) @type-int:3:44
 proc +(x:0:int, ?y:0:int, z:0:int) (id 2):  @type-int:4:12
-    foreign llvm sub(32, z:0, x:0, ?tmp$0:0) @type-int:4:44
-    =(?y:0, tmp$0:0) @type-int:4:39
+    foreign llvm sub(32, z:0, x:0, ?y:0) @type-int:4:44
                     -:
 proc -(x:0:int, y:0:int, ?$:0:int) (id 0):  @type-int:5:12
-    foreign llvm sub(32, x:0, y:0, ?tmp$0:0) @type-int:5:38
-    =(?$:0, tmp$0:0)
+    foreign llvm sub(32, x:0, y:0, ?$:0) @type-int:5:38
 proc -(?x:0:int, y:0:int, z:0:int) (id 1):  @type-int:6:12
-    foreign llvm add(32, z:0, y:0, ?tmp$0:0) @type-int:6:44
-    =(?x:0, tmp$0:0) @type-int:6:39
+    foreign llvm add(32, z:0, y:0, ?x:0) @type-int:6:44
 proc -(x:0:int, ?y:0:int, z:0:int) (id 2):  @type-int:7:12
-    foreign llvm sub(32, z:0, x:0, ?tmp$0:0) @type-int:7:44
-    =(?y:0, tmp$0:0) @type-int:7:39
+    foreign llvm sub(32, z:0, x:0, ?y:0) @type-int:7:44
                     /:
 proc /(x:0:int, y:0:int, ?$:0:int) (id 0):  @type-int:9:12
-    foreign llvm sdiv(32, x:0, y:0, ?tmp$0:0) @type-int:9:38
-    =(?$:0, tmp$0:0)
+    foreign llvm sdiv(32, x:0, y:0, ?$:0) @type-int:9:38
                     /=:
 proc /=(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type-int:11:12
-    foreign llvm icmp_ne(32, x:0, y:0, ?tmp$0:0) @type-int:11:40
-    =(?$:0, tmp$0:0)
+    foreign llvm icmp_ne(32, x:0, y:0, ?$:0) @type-int:11:40
                     <:
 proc <(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type-int:12:12
-    foreign llvm icmp_slt(32, x:0, y:0, ?tmp$0:0) @type-int:12:39
-    =(?$:0, tmp$0:0)
+    foreign llvm icmp_slt(32, x:0, y:0, ?$:0) @type-int:12:39
                     <=:
 proc <=(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type-int:13:12
-    foreign llvm icmp_sle(32, x:0, y:0, ?tmp$0:0) @type-int:13:40
-    =(?$:0, tmp$0:0)
+    foreign llvm icmp_sle(32, x:0, y:0, ?$:0) @type-int:13:40
                     ==:
 proc ==(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type-int:10:12
-    foreign llvm icmp_eq(32, x:0, y:0, ?tmp$0:0) @type-int:10:40
-    =(?$:0, tmp$0:0)
+    foreign llvm icmp_eq(32, x:0, y:0, ?$:0) @type-int:10:40
                     >:
 proc >(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type-int:14:12
-    foreign llvm icmp_sgt(32, x:0, y:0, ?tmp$0:0) @type-int:14:39
-    =(?$:0, tmp$0:0)
+    foreign llvm icmp_sgt(32, x:0, y:0, ?$:0) @type-int:14:39
                     >=:
 proc >=(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type-int:15:12
-    foreign llvm icmp_sge(32, x:0, y:0, ?tmp$0:0) @type-int:15:40
-    =(?$:0, tmp$0:0)
+    foreign llvm icmp_sge(32, x:0, y:0, ?$:0) @type-int:15:40
 
 Submodules of type-int.int:
 

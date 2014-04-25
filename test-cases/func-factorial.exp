@@ -12,8 +12,7 @@ then 1 @func-factorial:2:24 else *(n @func-factorial:2:30, factorial(-(n @func-f
   resources       : 
   procs           : factorial:
 proc factorial(n:0:int, ?$:0:int) (id 0):  @func-factorial:1:8
-    gen$1(n:0, ?n:1, ?tmp$0:0) @func-factorial:2:8
-    =(?$:0, tmp$0:0)
+    gen$1(n:0, ?n:1, ?$:0) @func-factorial:2:8
                     gen$1:
 proc gen$1(n:0:?, ?n:0:?, ?tmp$0:0:?) (id 0): 
     begin guard 1
@@ -26,8 +25,7 @@ proc gen$1(n:0:?, ?n:0:?, ?tmp$0:0:?) (id 0):
     end guard 
     -(n:0, 1, ?tmp$3:0) @func-factorial:2:44
     factorial(tmp$3:0, ?tmp$2:0) @func-factorial:2:34
-    *(n:0, tmp$2:0, ?tmp$1:0) @func-factorial:2:30
-    =(?tmp$0:0, tmp$1:0)
+    *(n:0, tmp$2:0, ?tmp$0:0) @func-factorial:2:30
 
 Submodules of func-factorial:
 

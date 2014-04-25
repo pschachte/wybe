@@ -13,9 +13,7 @@ public func quad(x:int):int @func-where:1:8 = +(d @func-where:1:31, d @func-wher
   procs           : quad:
 proc quad(x:0:int, ?$:0:int) (id 0):  @func-where:1:8
     +(x:0, x:0, ?tmp$0:0) @func-where:1:44
-    =(?d:0, tmp$0:0) @func-where:1:41
-    +(d:0, d:0, ?tmp$1:0) @func-where:1:31
-    =(?$:0, tmp$1:0)
+    +(tmp$0:0, tmp$0:0, ?$:0) @func-where:1:31
 
 Submodules of func-where:
 

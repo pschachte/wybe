@@ -38,8 +38,7 @@ proc gen$2(prompt:0:?, ?prompt:1:?, ?response:1:?, ?result:1:?, ?tmp$0:1:?) (id 
     print(" (y/n) ") @proc-yorn:3:12
     read_char(?response:0) @proc-yorn:4:12
     is_yes(response:0, ?tmp$0:0) @proc-yorn:5:22
-    =(?result:0, tmp$0:0) @proc-yorn:5:12
-    gen$3(prompt:0, response:0, result:0, tmp$0:0, ?prompt:1, ?response:1, ?result:1, ?tmp$0:1) @proc-yorn:6:12
+    gen$3(prompt:0, response:0, tmp$0:0, tmp$0:0, ?prompt:1, ?response:1, ?result:1, ?tmp$0:1) @proc-yorn:6:12
                     gen$3:
 proc gen$3(prompt:0:?, response:0:?, result:0:?, tmp$0:0:?, ?prompt:1:?, ?response:1:?, ?result:1:?, ?tmp$0:1:?) (id 0): 
     begin guard 1

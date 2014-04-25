@@ -30,10 +30,11 @@ module AST (
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
-  updateModules, getModuleImplementationField, getLoadedModule,
+  updateModules, updateImplementations,
+  getModuleImplementationField, getLoadedModule,
   getModule, updateModule, getSpecModule, updateSpecModule,
   updateModImplementation, updateModImplementationM, 
-  updateModInterface, updateModProcsM,
+  updateModInterface, updateModProcsM, updateAllProcs,
   getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, verboseMsg, message, genProcName,
   addImport, addType, addSubmod, lookupType, publicType,
@@ -201,6 +202,11 @@ updateCompilerM updater = do
     state' <- updater state
     put state'
 
+updateAllProcs :: (ProcDef -> ProcDef) -> Compiler ()
+updateAllProcs fn =
+    updateImplementations
+    (\imp -> imp { modProcs = Map.map (List.map fn) $ modProcs imp })
+
 -- |Return Just the specified module, if already loaded; else return Nothing.
 getLoadedModule :: ModSpec -> Compiler (Maybe Module)
 getLoadedModule modspec = gets (Map.lookup modspec . modules)
@@ -209,6 +215,14 @@ getLoadedModule modspec = gets (Map.lookup modspec . modules)
 updateModules :: (Map ModSpec Module -> Map ModSpec Module) -> Compiler ()
 updateModules updater = do
     modify (\bs -> bs { modules = updater $ modules bs })
+
+-- |Apply some transformation to the map of compiled modules.
+updateImplementations :: (ModuleImplementation -> ModuleImplementation) ->
+                         Compiler ()
+updateImplementations updater = do
+    updateModules (Map.map (\m -> m { modImplementation = 
+                                           (fmap updater) $ 
+                                           modImplementation m }))
 
 -- |Return some function of the module currently being compiled.
 getModule :: (Module -> t) -> Compiler t
