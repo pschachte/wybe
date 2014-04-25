@@ -427,14 +427,13 @@ addImport modspec imp specific vis = do
     updateInterface vis (updateDependencies (Set.insert $ last modspec))
 
 -- |Add the specified proc definition to the current module.
-addProc :: Ident -> PrimProto -> [[Placed Prim]] -> OptPos
-           -> Visibility -> Compiler ()
-addProc name proto clauses pos vis = do
+addProc :: ProcDef -> Visibility -> Compiler ()
+addProc procDef@(ProcDef name proto clauses pos) vis = do
     updateImplementation
       (updateModProcs
        (\procs ->
          let defs = findWithDefault [] name procs
-             defs' = defs ++ [ProcDef name proto clauses pos]
+             defs' = defs ++ [procDef]
          in  Map.insert name defs' procs))
     newid <- getModuleImplementationField 
             (((-1)+) . length . fromJust . Map.lookup name . modProcs)
