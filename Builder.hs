@@ -190,7 +190,7 @@ localCheckMod spec = do
 
 ------------------------ Handling Imports ------------------------
 
--- |Handle all the imports of the current module.a
+-- |Handle all the imports of the current module.
 handleImports :: Compiler ()
 handleImports = do
     imports <- getModuleImplementationField (keys . modImports)

@@ -1,5 +1,5 @@
-Public type position is @position:1:8
-  Public ctor position(x:int,y:int) @position:2:12
+public type position is @position:1:8
+  public ctor position(x:int,y:int) @position:2:12
 end
 
 

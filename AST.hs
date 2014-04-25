@@ -927,27 +927,27 @@ maybeApply f Nothing = Nothing
 -- |How to show an Item.
 instance Show Item where
   show (TypeDecl vis name items pos) =
-    show vis ++ " type " ++ show name ++ " is" 
+    visibilityPrefix vis ++ "type " ++ show name ++ " is" 
     ++ showMaybeSourcePos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\nend\n"
   show (ImportMods vis unqualified mods pos) =
-      show vis ++ (if unqualified then " import " else " use ") ++ 
+      visibilityPrefix vis ++ (if unqualified then "import " else "use ") ++ 
       showModSpecs mods ++ showMaybeSourcePos pos ++ "\n  "
   show (ImportItems vis unqualified mod specs pos) =
-      show vis ++ " from " ++ showModSpec mod ++
+      visibilityPrefix vis ++ "from " ++ showModSpec mod ++
       (if unqualified then " import " else " use ") ++ intercalate ", " specs
       ++ showMaybeSourcePos pos ++ "\n  "
   show (ModuleDecl vis name items pos) =
-    show vis ++ " module " ++ show name ++ " is" 
+    visibilityPrefix vis ++ "module " ++ show name ++ " is" 
     ++ showMaybeSourcePos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\nend\n"
   show (ResourceDecl vis name typ pos) =
-    show vis ++ " resource " ++ show name ++ ":" ++ show typ
+    visibilityPrefix vis ++ "resource " ++ show name ++ ":" ++ show typ
     ++ showMaybeSourcePos pos
   show (FuncDecl vis proto typ exp pos) =
-    show vis ++ " func " ++ show proto ++ ":" ++ show typ
+    visibilityPrefix vis ++ "func " ++ show proto ++ ":" ++ show typ
     ++ showMaybeSourcePos pos
     ++ " = " ++ show exp
   show (ProcDecl vis proto stmts pos) =
@@ -955,7 +955,7 @@ instance Show Item where
     ++ showMaybeSourcePos pos
     ++ "\n" ++ showBody 4 stmts
   show (CtorDecl vis proto pos) =
-    show vis ++ " ctor " ++ show proto
+    visibilityPrefix vis ++ "ctor " ++ show proto
     ++ showMaybeSourcePos pos
   show (StmtDecl stmt pos) =
     showStmt 4 stmt ++ showMaybeSourcePos pos
