@@ -1,4 +1,3 @@
-public func times(a:?,b:?):? @func-no-types:1:8 = *(a @func-no-types:1:26, b @func-no-types:1:28) @func-no-types:1:26
 
  Module func-no-types
   public submods  : 

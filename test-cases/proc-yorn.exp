@@ -1,26 +1,3 @@
-public proc yorn(prompt:string, ?result:bool) @proc-yorn:1:8
-    do
-        print(prompt @proc-yorn:2:18)
-        print(" (y/n) " @proc-yorn:3:18)
-        read_char(?response @proc-yorn:4:22)
-        =(?result @proc-yorn:5:12, is_yes(response @proc-yorn:5:29) @proc-yorn:5:22)
-        if:
-            is_yes_or_no(response @proc-yorn:6:32)
-        then:
-            nop
-        else:
-            next
-        end
-        println("Please answer 'yes' or 'no'." @proc-yorn:7:20)
-        if:
-            is_yes_or_no(response @proc-yorn:8:31)
-        then:
-            break
-        else:
-            nop
-        end
-     end
-
 
  Module proc-yorn
   public submods  : 

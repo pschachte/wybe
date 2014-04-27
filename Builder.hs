@@ -135,7 +135,7 @@ loadModule objfile =
 --  of file items, and handles any required imports.
 setUpModule :: [Item] -> Compiler ()
 setUpModule items = do
-    verboseMsg 1 $ return (intercalate "\n" $ List.map show items)
+    -- verboseMsg 1 $ return (intercalate "\n" $ List.map show items)
     Normalise.normalise items
     handleImports
 

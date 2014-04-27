@@ -1,21 +1,3 @@
-module "privatetest" is @submodule:1:1
-  proc hidden() @submodule:2:5
-    print("private proc in a private module" @submodule:2:23)
-
-  public proc semi_hidden() @submodule:3:12
-    print("public proc in a private module" @submodule:3:35)
-
-end
-
-public module "publictest" is @submodule:6:8
-  proc semi_visible() @submodule:7:5
-    print("private proc in a public module" @submodule:7:29)
-
-  public proc visible() @submodule:8:12
-    print("public proc in a public module" @submodule:8:31)
-
-end
-
 
  Module submodule
   public submods  : publictest @submodule:6:8

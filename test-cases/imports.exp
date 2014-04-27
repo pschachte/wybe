@@ -1,20 +1,3 @@
-import mod1 @imports:1:1
-  
-use mod2 @imports:2:1
-  
-from mod3 import fn1 @imports:3:1
-  
-from mod4 use fn2 @imports:4:1
-  
-public import mod5 @imports:5:8
-  
-public use mod6 @imports:6:8
-  
-public from mod7 import fn3 @imports:7:8
-  
-public from mod8 use fn4 @imports:8:8
-  
-
 
  Module mod1
   public submods  : 
@@ -27,7 +10,6 @@ public from mod8 use fn4 @imports:8:8
   procs           : 
 
 Submodules of mod1:
-
 
 
  Module mod2
@@ -43,7 +25,6 @@ Submodules of mod1:
 Submodules of mod2:
 
 
-
  Module mod3
   public submods  : 
   public types    : 
@@ -55,7 +36,6 @@ Submodules of mod2:
   procs           : 
 
 Submodules of mod3:
-
 
 
  Module mod4
@@ -71,7 +51,6 @@ Submodules of mod3:
 Submodules of mod4:
 
 
-
  Module mod5
   public submods  : 
   public types    : 
@@ -83,7 +62,6 @@ Submodules of mod4:
   procs           : 
 
 Submodules of mod5:
-
 
 
  Module mod6
@@ -99,7 +77,6 @@ Submodules of mod5:
 Submodules of mod6:
 
 
-
  Module mod7
   public submods  : 
   public types    : 
@@ -111,7 +88,6 @@ Submodules of mod6:
   procs           : 
 
 Submodules of mod7:
-
 
 
  Module mod8

@@ -1,4 +1,3 @@
-public func plus(a:int,b:int):int @func-typed:1:8 = +(a @func-typed:1:40, b @func-typed:1:42) @func-typed:1:40
 
  Module func-typed
   public submods  : 

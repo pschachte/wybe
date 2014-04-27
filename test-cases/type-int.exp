@@ -1,28 +1,3 @@
-public type int is @type-int:1:8
-  public func +(x:int,y:int):int @type-int:2:12 = foreign llvm add(32 @type-int:2:57, x @type-int:2:58, y @type-int:2:60) @type-int:2:38
-  public proc +(?x:int, y:int, z:int) @type-int:3:12
-    =(?x @type-int:3:39, foreign llvm sub(32 @type-int:3:63, z @type-int:3:64, y @type-int:3:66) @type-int:3:44)
-
-  public proc +(x:int, ?y:int, z:int) @type-int:4:12
-    =(?y @type-int:4:39, foreign llvm sub(32 @type-int:4:63, z @type-int:4:64, x @type-int:4:66) @type-int:4:44)
-
-  public func -(x:int,y:int):int @type-int:5:12 = foreign llvm sub(32 @type-int:5:57, x @type-int:5:58, y @type-int:5:60) @type-int:5:38
-  public proc -(?x:int, y:int, z:int) @type-int:6:12
-    =(?x @type-int:6:39, foreign llvm add(32 @type-int:6:63, z @type-int:6:64, y @type-int:6:66) @type-int:6:44)
-
-  public proc -(x:int, ?y:int, z:int) @type-int:7:12
-    =(?y @type-int:7:39, foreign llvm sub(32 @type-int:7:63, z @type-int:7:64, x @type-int:7:66) @type-int:7:44)
-
-  public func *(x:int,y:int):int @type-int:8:12 = foreign llvm mul(32 @type-int:8:57, x @type-int:8:58, y @type-int:8:60) @type-int:8:38
-  public func /(x:int,y:int):int @type-int:9:12 = foreign llvm sdiv(32 @type-int:9:58, x @type-int:9:59, y @type-int:9:61) @type-int:9:38
-  public func ==(x:int,y:int):bool @type-int:10:12 = foreign llvm icmp_eq(32 @type-int:10:63, x @type-int:10:64, y @type-int:10:66) @type-int:10:40
-  public func /=(x:int,y:int):bool @type-int:11:12 = foreign llvm icmp_ne(32 @type-int:11:63, x @type-int:11:64, y @type-int:11:66) @type-int:11:40
-  public func <(x:int,y:int):bool @type-int:12:12 = foreign llvm icmp_slt(32 @type-int:12:63, x @type-int:12:64, y @type-int:12:66) @type-int:12:39
-  public func <=(x:int,y:int):bool @type-int:13:12 = foreign llvm icmp_sle(32 @type-int:13:64, x @type-int:13:65, y @type-int:13:67) @type-int:13:40
-  public func >(x:int,y:int):bool @type-int:14:12 = foreign llvm icmp_sgt(32 @type-int:14:63, x @type-int:14:64, y @type-int:14:66) @type-int:14:39
-  public func >=(x:int,y:int):bool @type-int:15:12 = foreign llvm icmp_sge(32 @type-int:15:64, x @type-int:15:65, y @type-int:15:67) @type-int:15:40
-end
-
 
  Module type-int
   public submods  : int @type-int:1:8

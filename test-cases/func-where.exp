@@ -1,6 +1,3 @@
-public func quad(x:int):int @func-where:1:8 = +(d @func-where:1:31, d @func-where:1:33) @func-where:1:31 where
-        =(?d @func-where:1:41, +(x @func-where:1:44, x @func-where:1:46) @func-where:1:44)
- @func-where:1:31
 
  Module func-where
   public submods  : 
