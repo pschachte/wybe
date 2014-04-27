@@ -2,9 +2,32 @@
 --  RCS      : $Id$
 --  Author   : Peter Schachte
 --  Origin   : Tue Jan 31 16:37:48 2012
---  Purpose  : 
+--  Purpose  : Handles compilation at the module level.
 --  Copyright: © 2012 Peter Schachte.  All rights reserved.
 --
+--  The wybe compiler handles module dependencies, and builds
+--  executables by itself, without the need for build tools like 
+--  make.  To keep compile times manageable while supporting 
+--  optimisation, we build bottom-up, ensuring that all a module's 
+--  imports are compiled before compling the module itself.  In the 
+--  case of circular module dependencies, each strongly-connected 
+--  component in the module dependency graph is compiled as a unit.
+--
+--  One shortcoming of the bottom-up approach is that some analyses 
+--  are best performed top-down.  For example, we can only eliminate 
+--  unneeded procedures when we've seen all the calls to all 
+--  procedures in the module.  By compiling bottom-up, we do not have 
+--  access to this information.  Our solution to this problem is to 
+--  perform the top-down analysis after the bottom-up compilation, 
+--  generating results that we can use for the next compilation.  If 
+--  the top-down analysis produces results that conflict with the 
+--  previous top-down analysis, so that the compilation produced 
+--  invalid results, then we must re-compile enough of the program to 
+--  fix the problem.  It is hoped that this will happen infrequently 
+--  enough that the time saved by not usually having to make separate 
+--  traversals for analysis and compilation will more than make up 
+--  for the few times we need to recompile.
+
 
 -- |Code to oversee the compilation process.
 module Builder (buildTargets, compileModule) where
@@ -26,7 +49,7 @@ import Control.Monad.Trans
 import System.Time     (ClockTime)
 import System.Directory (getModificationTime, doesFileExist, 
                          getCurrentDirectory, canonicalizePath)
-import System.Exit (exitFailure)
+import System.Exit (exitFailure, exitSuccess)
 import Config
 
 
@@ -37,7 +60,7 @@ buildTargets opts targets = do
     messages <- gets msgs
     (liftIO . putStr) $ intercalate "\n" messages
     errored <- gets errorState
-    when errored $ liftIO exitFailure
+    if errored then liftIO exitFailure else liftIO exitSuccess
 
 
 -- |Build a single target; flag specifies to re-compile even if the 
@@ -49,7 +72,7 @@ buildTarget force target = do
       then error ("Unknown target file type " ++ target)
       else do
         let modname = takeBaseName target
-        built <- buildModule force modname (fileObjFile target) 
+        built <- buildModuleIfNeeded force modname (fileObjFile target) 
                 (fileSourceFile target)
         if (built==False) 
           then (liftIO . putStrLn) $ "Nothing to be done for " ++ target
@@ -65,17 +88,18 @@ buildDependency modspec = do
     let objfile = moduleFilePath objectExtension dir modspec
     let modname = takeBaseName srcfile
     force <- option optForceAll
-    buildModule force modname objfile srcfile
+    buildModuleIfNeeded force modname objfile srcfile
     return ()
 
+
 -- |Compile a single module to an object file.
-buildModule :: Bool            -- ^Force compilation of this module
+buildModuleIfNeeded :: Bool            -- ^Force compilation of this module
               -> Ident         -- ^Module name
               -> FilePath      -- ^Object file to generate
               -> FilePath      -- ^Source file to compile if necessary
               -> Compiler Bool -- ^Returns whether or not file was
                               --  actually compiled
-buildModule force modname objfile srcfile = do
+buildModuleIfNeeded force modname objfile srcfile = do
     maybemod <- getLoadedModule [modname]
     case maybemod of
         Just modl -> return False
@@ -87,27 +111,29 @@ buildModule force modname objfile srcfile = do
                 error ("Source file " ++ srcfile ++ " does not exist")
               else if not objExists || force 
                    then do
-                       buildModule' modname objfile srcfile
+                       buildModule modname objfile srcfile
                        return True
                    else do
                        srcDate <- (liftIO . getModificationTime) srcfile
                        dstDate <- (liftIO . getModificationTime) objfile
                        if srcDate > dstDate
                          then do 
-                           buildModule' modname objfile srcfile
+                           buildModule modname objfile srcfile
                            return True
                          else do
                            loadModule objfile
                            return False
 
+
 -- |Actually load and compile the module
-buildModule' :: Ident -> FilePath -> FilePath -> Compiler ()
-buildModule' modname objfile srcfile = do
+buildModule :: Ident -> FilePath -> FilePath -> Compiler ()
+buildModule modname objfile srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
     let parseTree = parse tokens
     let dir = takeDirectory objfile
     compileModule dir [modname] Nothing parseTree
     
+
 -- |Compile a module given the parsed source file contents.
 compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
 compileModule dir modspec params parseTree = do
@@ -115,6 +141,7 @@ compileModule dir modspec params parseTree = do
     setUpModule parseTree
     mods <- exitModule
     compileModSCC mods
+
 
 -- |Build executable from object file
 --   XXX not yet implemented
@@ -146,6 +173,7 @@ setUpModule items = do
 --  compiled or are defined in modules on this list.
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC specs = do
+    typeCheckModSCC specs
     verboseMsg 1 $ do
         mods <- mapM getLoadedModule specs
         return (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
@@ -154,7 +182,6 @@ compileModSCC specs = do
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs . 
     --                         fromJust . modImplementation))
-    typeCheckModSCC specs
     return ()
 
 ---------------------- Resolving Overloading -----------------------

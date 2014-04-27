@@ -271,8 +271,7 @@ updateSpecModuleM updater spec = do
 --  front of the list of modules underCompilation. 
 enterModule :: FilePath -> ModSpec -> Maybe [Ident] -> Compiler ()
 enterModule dir modspec params = do
-    count0 <- gets loadCount
-    let count = 1 + count0
+    count <- gets ((1+) . loadCount)
     modify (\comp -> comp { loadCount = count })
     modify (\comp -> let mods = Module dir modspec params 
                                        emptyInterface (Just emptyImplementation)
