@@ -9,7 +9,8 @@
   resources       : 
   procs           : :
 proc () (id 0): 
-    println(1) @chain-assign:4:1
+    =(?x:0, 1) @chain-assign:1:1
+    println(x:0) @chain-assign:4:1
 
 Submodules of chain-assign:
 

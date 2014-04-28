@@ -40,7 +40,7 @@ module AST (
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
-  showBody, showStmt, showBlock,
+  showBody, showStmt, showBlock, showProcDef,
   shouldnt
   ) where
 

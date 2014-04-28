@@ -190,7 +190,9 @@ compileProc (ProcDecl vis (ProcProto name params) body pos) = do
         compiled <- compileBody body
         endVars <- gets vars
         return (List.map (primParam startVars endVars) params, compiled)
-    addProc (assignElim $ ProcDef name (PrimProto name params') body' pos) vis
+    let def = ProcDef name (PrimProto name params') body' pos
+    -- liftIO $ putStrLn $ "Compiled version:\n" ++ showProcDef 0 def
+    addProc (assignElim def) vis
     return ()
 compileProc decl =
     shouldnt $ "compileProc applied to non-proc " ++ show decl
