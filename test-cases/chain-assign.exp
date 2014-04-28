@@ -1,0 +1,15 @@
+
+ Module chain-assign
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : :
+proc () (id 0): 
+    println(1) @chain-assign:4:1
+
+Submodules of chain-assign:
+
