@@ -68,12 +68,12 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     proto' <- flattenProto proto
-    stmts' <- flattenBody stmts
+    (stmts',tmpCtr) <- flattenBody stmts
     -- liftIO $ putStrLn $ "Flattened proc:\n" ++ show (ProcDecl vis proto' stmts' pos)
     (stmts'',genProcs) <- unbranchBody params stmts'
     let procs = ProcDecl vis proto' stmts'' pos:genProcs
     -- liftIO $ mapM_ (\item -> putStrLn $ show item) procs
-    mapM_ compileProc procs
+    mapM_ (compileProc tmpCtr) procs
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
     Just modparams <- getModuleParams
@@ -181,8 +181,8 @@ evalClauseComp clcomp =
     evalStateT clcomp initClauseComp
 
 
-compileProc :: Item -> Compiler ()
-compileProc (ProcDecl vis (ProcProto name params) body pos) = do
+compileProc :: Int -> Item -> Compiler ()
+compileProc tmpCtr (ProcDecl vis (ProcProto name params) body pos) = do
     (params',body') <- evalClauseComp $ do
         mapM_ nextVar $ List.map paramName $ 
           List.filter (flowsIn . paramFlow) params
@@ -190,11 +190,11 @@ compileProc (ProcDecl vis (ProcProto name params) body pos) = do
         compiled <- compileBody body
         endVars <- gets vars
         return (List.map (primParam startVars endVars) params, compiled)
-    let def = ProcDef name (PrimProto name params') body' pos
+    let def = ProcDef name (PrimProto name params') body' pos tmpCtr
     -- liftIO $ putStrLn $ "Compiled version:\n" ++ showProcDef 0 def
     addProc (assignElim def) vis
     return ()
-compileProc decl =
+compileProc _ decl =
     shouldnt $ "compileProc applied to non-proc " ++ show decl
 
 

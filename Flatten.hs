@@ -49,13 +49,13 @@ flattenProto (ProcProto name params) = do
     return $ ProcProto name $ concatMap flattenParam params
 
 
-flattenBody :: [Placed Stmt] -> Compiler [Placed Stmt]
+flattenBody :: [Placed Stmt] -> Compiler ([Placed Stmt],Int)
 flattenBody stmts = do
     finalState <- execStateT (flattenStmts stmts) $ initFlattenerState
-    return $
-      List.reverse (prefixStmts finalState) ++ 
-      List.reverse (flattened finalState) ++ 
-      postponed finalState
+    return (List.reverse (prefixStmts finalState) ++ 
+            List.reverse (flattened finalState) ++ 
+            postponed finalState,
+            tempCtr finalState)
 
 
 -- |The Flattener monad is a state transformer monad carrying the 

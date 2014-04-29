@@ -174,8 +174,8 @@ setUpModule items = do
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC specs = do
     typeCheckModSCC specs
-    verboseMsg 1 $ do
-        mods <- mapM getLoadedModule specs
+    mods <- mapM getLoadedModule specs
+    verboseMsg 1 $
         return (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
                 (List.map show $ catMaybes mods))
     -- mapM_ resolveOverloading specs

@@ -275,7 +275,7 @@ enterModule dir modspec params = do
     modify (\comp -> comp { loadCount = count })
     modify (\comp -> let mods = Module dir modspec params 
                                        emptyInterface (Just emptyImplementation)
-                                       count count 0 0
+                                       count count 0
                                        : underCompilation comp
                             in  comp { underCompilation = mods })
 
@@ -441,7 +441,7 @@ addImport modspec imp specific vis = do
 
 -- |Add the specified proc definition to the current module.
 addProc :: ProcDef -> Visibility -> Compiler ()
-addProc procDef@(ProcDef name proto clauses pos) vis = do
+addProc procDef@(ProcDef name proto clauses pos _) vis = do
     updateImplementation
       (updateModProcs
        (\procs ->
@@ -461,16 +461,17 @@ mapListInsert key elt =
 
 
 -- |Replace the specified proc definition in the current module.
-replaceProc :: Ident -> Int -> PrimProto -> [[Placed Prim]] -> OptPos
-               -> Visibility -> Compiler ()
-replaceProc name id proto clauses pos vis = do
+replaceProc :: Ident -> Int -> PrimProto -> [[Placed Prim]] -> OptPos ->
+               Int -> Visibility -> Compiler ()
+replaceProc name id proto clauses pos tmpCount vis = do
     updateImplementation
       (updateModProcs
        (\procs -> 
          let olddefs = findWithDefault [] name procs
              (front,back) = List.splitAt id olddefs
          in Map.insert name (front ++ 
-                             (ProcDef name proto clauses pos:tail back)) 
+                             (ProcDef name proto clauses pos tmpCount:
+                              tail back)) 
             procs))
 
 
@@ -521,7 +522,6 @@ data Module = Module {
                                 -- ^the module's implementation
   thisLoadNum :: Int,            -- ^the loadCount when loading this module
   minDependencyNum :: Int,       -- ^the smallest loadNum of all dependencies
-  varCount :: Int,               -- ^a per proc counter for introduced variables
   procCount :: Int               -- ^a counter for gensym-ed proc names
   }
 
@@ -708,7 +708,9 @@ data ProcDef = ProcDef {
     procName :: Ident, 
     procProto :: PrimProto, 
     procBody :: [[Placed Prim]],      -- list of clauses, each a list of Prims
-    procPos :: OptPos}
+    procPos :: OptPos,
+    procTmpCount :: Int               -- the next temp variable number to use
+}
              deriving Eq
 
 -- |Info about a proc call, including the ID, prototype, and an 
@@ -1108,7 +1110,7 @@ showProcDefs firstID (def:defs) =
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID (ProcDef _ proto def pos) =
+showProcDef thisID (ProcDef _ proto def pos _) =
     "\nproc " ++ show proto ++ " (id " ++ show thisID ++ "): "
     ++ showMaybeSourcePos pos 
     ++ intercalate "\n" (List.map (showBlock 4) def)

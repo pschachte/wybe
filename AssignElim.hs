@@ -26,7 +26,9 @@ type Renaming = Map PrimVarName (Maybe PrimVarName)
 
 
 assignElim :: ProcDef -> ProcDef
-assignElim (ProcDef name proto body pos) = ProcDef name proto body' pos where
+assignElim (ProcDef name proto body pos tmpCtr) = 
+    ProcDef name proto body' pos tmpCtr
+    where
     PrimProto _ params = proto
     renaming = List.foldr (flip Map.insert Nothing) Map.empty $ 
                List.map primParamName params
