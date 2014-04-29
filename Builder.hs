@@ -38,6 +38,7 @@ import Parser          (parse)
 import Scanner         (inputTokens, fileTokens, Token)
 import Normalise       (normalise)
 import Types           (typeCheckModSCC)
+import Optimise        (optimise)
 import System.FilePath
 import Data.Map as Map
 import Data.Set as Set
@@ -175,9 +176,11 @@ compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC specs = do
     typeCheckModSCC specs
     mods <- mapM getLoadedModule specs
+    let compMods = catMaybes mods
+    compMods' <- mapM optimise compMods
     verboseMsg 1 $
         return (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
-                (List.map show $ catMaybes mods))
+                (List.map show compMods'))
     -- mapM_ resolveOverloading specs
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs . 
