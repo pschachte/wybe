@@ -38,7 +38,7 @@ import Parser          (parse)
 import Scanner         (inputTokens, fileTokens, Token)
 import Normalise       (normalise)
 import Types           (typeCheckModSCC)
-import Optimise        (optimise)
+import Optimise        (optimiseMod)
 import System.FilePath
 import Data.Map as Map
 import Data.Set as Set
@@ -75,6 +75,8 @@ buildTarget force target = do
         let modname = takeBaseName target
         built <- buildModuleIfNeeded force modname (fileObjFile target) 
                 (fileSourceFile target)
+        -- XXX prints nothing to be done even when dependencies were built
+        -- XXX doesn't build executable even when dependencies were built
         if (built==False) 
           then (liftIO . putStrLn) $ "Nothing to be done for " ++ target
           else
@@ -98,8 +100,8 @@ buildModuleIfNeeded :: Bool            -- ^Force compilation of this module
               -> Ident         -- ^Module name
               -> FilePath      -- ^Object file to generate
               -> FilePath      -- ^Source file to compile if necessary
-              -> Compiler Bool -- ^Returns whether or not file was
-                              --  actually compiled
+              -> Compiler Bool -- ^Returns whether or not file 
+                              -- actually needed to be compiled
 buildModuleIfNeeded force modname objfile srcfile = do
     maybemod <- getLoadedModule [modname]
     case maybemod of
@@ -167,6 +169,15 @@ loadModule objfile =
 setUpModule :: [Item] -> Compiler ()
 setUpModule items = do
     -- verboseMsg 1 $ return (intercalate "\n" $ List.map show items)
+    -- XXX This means we generate LPVM code for a module before 
+    -- considering dependencies.  This will need to change if we 
+    -- really need dependency info to do initial LPVM translation, or 
+    -- if it's too memory-intensive to load all code to be compiled 
+    -- into memory at once.  Note that this does not do a proper 
+    -- top-down traversal, because we may not visit *all* users of a 
+    -- module before handling the module.  If we decide we need to do 
+    -- that, then we'll need to handle the full dependency 
+    -- relationship explicitly before doing any compilation.
     Normalise.normalise items
     handleImports
 
@@ -178,12 +189,11 @@ setUpModule items = do
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC specs = do
     typeCheckModSCC specs
+    mapM_ optimiseMod specs
     mods <- mapM getLoadedModule specs
-    let compMods = catMaybes mods
-    compMods' <- mapM optimise compMods
     verboseMsg 1 $
         return (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
-                (List.map show compMods'))
+                (List.map show $ catMaybes mods))
     -- mapM_ resolveOverloading specs
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs . 

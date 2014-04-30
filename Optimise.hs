@@ -5,10 +5,10 @@
 --  Purpose  : Framework to optimise a single module
 --  Copyright: © 2014 Peter Schachte.  All rights reserved.
 
-module Optimise (optimise) where
+module Optimise (optimiseMod) where
 
 import AST
 
 -- For now, just a placeholder
-optimise :: Module -> Compiler Module
-optimise mod = return mod
+optimiseMod :: ModSpec -> Compiler ()
+optimiseMod mod = return ()
