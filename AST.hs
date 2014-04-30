@@ -262,7 +262,7 @@ updateSpecModuleM updater spec = do
             let mods = modules comp
             let mod = Map.lookup spec mods
             case mod of
-                Nothing -> error ("nonexistent module " ++ show spec)
+                Nothing -> shouldnt $ "nonexistent module " ++ show spec
                 Just m -> do
                     m' <- updater m
                     return $ comp {modules = Map.insert spec m' mods})

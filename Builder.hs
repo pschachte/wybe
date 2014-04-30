@@ -59,7 +59,7 @@ buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     messages <- gets msgs
-    (liftIO . putStr) $ intercalate "\n" messages
+    (liftIO . putStr) $ unlines messages
     errored <- gets errorState
     if errored then liftIO exitFailure else liftIO exitSuccess
 
@@ -70,7 +70,7 @@ buildTarget :: Bool -> FilePath -> Compiler ()
 buildTarget force target = do
     let tType = targetType target
     if tType == UnknownFile
-      then error ("Unknown target file type " ++ target)
+      then message Error ("Unknown target file type " ++ target) Nothing
       else do
         let modname = takeBaseName target
         built <- buildModuleIfNeeded force modname (fileObjFile target) 
@@ -108,8 +108,10 @@ buildModuleIfNeeded force modname objfile srcfile = do
             exists <- (liftIO . doesFileExist) srcfile
             objExists <- (liftIO . doesFileExist) objfile
             if not exists 
-              then
-                error ("Source file " ++ srcfile ++ " does not exist")
+              then do
+                message Error ("Source file " ++ srcfile ++ " does not exist")
+                  Nothing
+                return False
               else if not objExists || force 
                    then do
                        buildModule modname objfile srcfile
@@ -140,22 +142,23 @@ compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
 compileModule dir modspec params parseTree = do
     enterModule dir modspec params
     setUpModule parseTree
-    mods <- exitModule
+    mods <- exitModule -- may be empty list if module is mutually dependent
     compileModSCC mods
 
 
 -- |Build executable from object file
 --   XXX not yet implemented
 buildExecutable :: FilePath -> Ident -> Compiler ()
-buildExecutable _ _ =
-    error "Can't build executables yet"
+buildExecutable file _ =
+    message Error ("can't build executable " ++ file ++ " yet") Nothing
 
 
 -- |Load module export info from compiled file
 --   XXX not yet implemented
 loadModule :: FilePath -> Compiler ()
 loadModule objfile =
-    error "Can't handle pre-compiled files yet"
+    message Error ("Can't handle pre-compiled file " ++ objfile ++ " yet") 
+    Nothing
 
 
 -- |Set up a new module for compilation.  Assumes that a fresh module 
