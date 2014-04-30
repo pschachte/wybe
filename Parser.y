@@ -70,9 +70,6 @@ import AST
       'when'          { TokIdent "when" _ }
       'unless'        { TokIdent "unless" _ }
       'from'          { TokIdent "from" _ }
-      'to'            { TokIdent "to" _ }
-      'downto'        { TokIdent "downto" _ }
-      'by'            { TokIdent "by" _ }
       'and'           { TokIdent "and" _ }
       'or'            { TokIdent "or" _ }
       'not'           { TokIdent "not" _ }
@@ -281,8 +278,7 @@ RevStmts :: { [Placed Stmt] }
     | RevStmts Stmt             { $2:$1 }
 
 Stmt :: { Placed Stmt }
-    : Exp                       { maybePlace (expToStmt $ content $1) 
-	                          (place $1) }
+    : Exp                       { fmap expToStmt $1 }
     | 'if' Stmt 'then' Stmts Condelse 'end'
                                 { Placed (Cond [$2] $4 $5)
                                  (tokenPosition $1) }
@@ -322,22 +318,6 @@ ProcArg :: { Placed Exp }
 Condelse :: { [Placed Stmt] }
     : 'else' Stmts              { $2 }
     | {- empty -}               { [] }
-
-
--- Generator :: { Generator }
---     : ident 'in' Exp            { In (identName $1) $3 }
---     | ident 'from' Exp toLimit byStep
---                                 { InRange (identName $1) $3 
--- 				    (fst $4) $5 (snd $4) }
--- 
--- byStep :: { Placed Exp }
---     : 'by' Exp                  { $2 }
---     | {- empty -}               { Unplaced $ IntValue 1 }
--- 
--- toLimit :: { (ProcName, Maybe (String,Placed Exp)) }
---     : 'to' Exp                  { ("+", Just (">", $2)) }
---     | 'downto' Exp              { ("-", Just ("<", $2)) }
---     | {- empty -}               { ("+", Nothing) }
 
 
 SimpleExp :: { Placed Exp }
@@ -415,12 +395,12 @@ SimpleExp :: { Placed Exp }
 	                                 (tokenPosition $1) }
     | ident ArgList             { Placed (Fncall Nothing (identName $1) $2)
 	                                 (tokenPosition $1) }
-    | symbol ArgList            { Placed (Fncall Nothing (symbolName $1) $2)
-	                                 (tokenPosition $1) }
-    | Exp '.' ident             { maybePlace (Fncall Nothing (identName $3) [$1])
-	                                     (place $1) }
     | Exp '.' ident ArgList     { maybePlace (Fncall Nothing (identName $3) ($1:$4))
 	                                     (place $1) }
+    | Exp '.' ident             { maybePlace (Fncall Nothing (identName $3) [$1])
+	                                     (place $1) }
+    | optMod symbol ArgList     { Placed (Fncall $1 (symbolName $2) $3)
+	                                 (tokenPosition $2) }
     | 'foreign' ident ident ArgList
                                 { Placed (ForeignFn (identName $2)
 					  (identName $3) $4)
@@ -439,6 +419,16 @@ Exp :: { Placed Exp }
     | 'let' Stmts 'in' Exp      { Placed (Where $2 $4) (tokenPosition $1) }
     | Exp 'where' ProcBody      { maybePlace (Where $3 $1) (place $1) }
     | SimpleExp                 { $1 }
+
+
+optMod :: { Maybe ModSpec }
+    : {- empty -}               { Nothing }
+--    | modSpecRev '.'            { Just $ reverse $1 }
+
+
+modSpecRev :: { ModSpec }
+    : ident                     { [identName $1] }
+    | modSpecRev ident          { identName $2:$1 }
 
 
 ListTail :: { Placed Exp }
