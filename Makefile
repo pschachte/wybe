@@ -13,7 +13,7 @@ all:	test
 	rubber -m dvips $<
 
 %.hs:	%.y
-	happy -g $<
+	happy -a -g $<
 
 wybemk:	*.hs Version.lhs Parser.hs
 	ghc -fwarn-incomplete-patterns --make $@
@@ -23,7 +23,7 @@ wybemk:	*.hs Version.lhs Parser.hs
 info:  Parser.info
 
 %.info:	%.y
-	happy -i -g $<
+	happy -i -a -g $<
 
 doc:	*.hs
 	rm -rf $@
