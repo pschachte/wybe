@@ -8,7 +8,7 @@
   types           : 
   resources       : 
   procs           : nada:
-proc nada(x:0:int, y:0:int) (id 0):  @proc-allin:1:8
+public proc nada(x:0:int, y:0:int) (id 0):  @proc-allin:1:8
     +(x:0, y:0, ?tmp$0:0) @proc-allin:1:35
 
 Submodules of proc-allin:

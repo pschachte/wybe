@@ -24,19 +24,19 @@ position:
   types           : position/0 @position:1:8
   resources       : 
   procs           : position:
-proc position(x:0:int, y:0:int, ?$:0:position) (id 0): 
+public proc position(x:0:int, y:0:int, ?$:0:position) (id 0): 
     foreign $ alloc("position", "position", ?$rec:0)
     foreign $ mutate("position", "position", "x", $rec:0, ?$rec:1, x:0)
     foreign $ mutate("position", "position", "y", $rec:1, ?$:0, y:0)
                     x:
-proc x($rec:0:position, ?$:0:int) (id 0): 
+public proc x($rec:0:position, ?$:0:int) (id 0): 
     foreign $ access("position", "position", "x", $rec:0, ?$:0)
-proc x($rec:0:position, ?$rec:1:position, $field:0:int) (id 1): 
+public proc x($rec:0:position, ?$rec:1:position, $field:0:int) (id 1): 
     foreign $ mutate("position", "position", "x", $rec:0, ?$rec:1, $field:0)
                     y:
-proc y($rec:0:position, ?$:0:int) (id 0): 
+public proc y($rec:0:position, ?$:0:int) (id 0): 
     foreign $ access("position", "position", "y", $rec:0, ?$:0)
-proc y($rec:0:position, ?$rec:1:position, $field:0:int) (id 1): 
+public proc y($rec:0:position, ?$rec:1:position, $field:0:int) (id 1): 
     foreign $ mutate("position", "position", "y", $rec:0, ?$rec:1, $field:0)
 
 Submodules of position.position:
@@ -51,7 +51,7 @@ Submodules of position.position:
   types           : 
   resources       : 
   procs           : distance:
-proc distance(p1:0:position, p2:0:position, ?$:0:?) (id 0):  @import:3:8
+public proc distance(p1:0:position, p2:0:position, ?$:0:?) (id 0):  @import:3:8
     x(p2:0, ?tmp$4:0) @import:4:11
     x(p1:0, ?tmp$5:0) @import:4:16
     -(tmp$4:0, tmp$5:0, ?tmp$3:0) @import:4:10

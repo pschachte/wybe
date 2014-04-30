@@ -8,7 +8,7 @@
   types           : 
   resources       : 
   procs           : plus:
-proc plus(a:0:int, b:0:int, ?$:0:int) (id 0):  @func-typed:1:8
+public proc plus(a:0:int, b:0:int, ?$:0:int) (id 0):  @func-typed:1:8
     +(a:0, b:0, ?$:0) @func-typed:1:40
 
 Submodules of func-typed:

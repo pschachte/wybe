@@ -8,7 +8,7 @@
   types           : 
   resources       : 
   procs           : print2:
-proc print2(x:0:int, y:0:int) (id 0):  @proc-print2:1:8
+public proc print2(x:0:int, y:0:int) (id 0):  @proc-print2:1:8
     print(x:0) @proc-print2:2:8
     print(y:0) @proc-print2:3:8
 

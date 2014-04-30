@@ -46,7 +46,7 @@ proc gen$6(prompt:0:?, response:0:?, result:0:?, tmp$0:0:?, ?prompt:1:?, ?respon
     println("Please answer 'yes' or 'no'.") @proc-yorn:7:12
     gen$4(prompt:0, response:0, result:0, tmp$0:0, ?prompt:1, ?response:1, ?result:1, ?tmp$0:1) @proc-yorn:8:12
                     yorn:
-proc yorn(prompt:0:string, ?result:0:bool) (id 0):  @proc-yorn:1:8
+public proc yorn(prompt:0:string, ?result:0:bool) (id 0):  @proc-yorn:1:8
     gen$2(prompt:0, ?prompt:1, ?response:0, ?result:0, ?tmp$0:0) @proc-yorn:2:8
 
 Submodules of proc-yorn:

@@ -8,7 +8,7 @@
   types           : 
   resources       : 
   procs           : times:
-proc times(a:0:?, b:0:?, ?$:0:?) (id 0):  @func-no-types:1:8
+public proc times(a:0:?, b:0:?, ?$:0:?) (id 0):  @func-no-types:1:8
     *(a:0, b:0, ?$:0) @func-no-types:1:26
 
 Submodules of func-no-types:

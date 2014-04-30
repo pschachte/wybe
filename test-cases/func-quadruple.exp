@@ -9,10 +9,10 @@
   types           : 
   resources       : 
   procs           : double:
-proc double(a:0:int, ?$:0:int) (id 0):  @func-quadruple:1:8
+public proc double(a:0:int, ?$:0:int) (id 0):  @func-quadruple:1:8
     +(a:0, a:0, ?$:0) @func-quadruple:1:35
                     quadruple:
-proc quadruple(a:0:int, ?$:0:int) (id 0):  @func-quadruple:3:8
+public proc quadruple(a:0:int, ?$:0:int) (id 0):  @func-quadruple:3:8
     double(a:0, ?tmp$1:0) @func-quadruple:3:45
     double(tmp$1:0, ?$:0) @func-quadruple:3:38
 

@@ -8,7 +8,7 @@
   types           : 
   resources       : 
   procs           : print2:
-proc print2(x:0:int, y:0:int) (id 0):  @proc-hello:1:8
+public proc print2(x:0:int, y:0:int) (id 0):  @proc-hello:1:8
     println("hello, world") @proc-hello:2:8
 
 Submodules of proc-hello:

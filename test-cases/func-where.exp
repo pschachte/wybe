@@ -8,7 +8,7 @@
   types           : 
   resources       : 
   procs           : quad:
-proc quad(x:0:int, ?$:0:int) (id 0):  @func-where:1:8
+public proc quad(x:0:int, ?$:0:int) (id 0):  @func-where:1:8
     +(x:0, x:0, ?tmp$0:0) @func-where:1:44
     +(tmp$0:0, tmp$0:0, ?$:0) @func-where:1:31
 

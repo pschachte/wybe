@@ -8,7 +8,7 @@
   types           : 
   resources       : 
   procs           : ++:
-proc ++(x:0:list(t), y:0:list(t), ?$:0:?) (id 0):  @type-list:6:8
+public proc ++(x:0:list(t), y:0:list(t), ?$:0:?) (id 0):  @type-list:6:8
     gen$1(x:0, y:0, ?$:0, ?x:1, ?y:1) @type-list:7:5
                     gen$1:
 proc gen$1(x:0:?, y:0:?, ?tmp$0:0:?, ?x:0:?, ?y:0:?) (id 0): 
@@ -43,22 +43,22 @@ list:
   types           : list/1 @type-list:1:8
   resources       : 
   procs           : []:
-proc [](?$:0:list(t)) (id 0): 
+public proc [](?$:0:list(t)) (id 0): 
     foreign $ alloc("list", "[]", ?$:0)
                     [|]:
-proc [|](head:0:t, tail:0:list(t), ?$:0:list(t)) (id 0): 
+public proc [|](head:0:t, tail:0:list(t), ?$:0:list(t)) (id 0): 
     foreign $ alloc("list", "[|]", ?$rec:0)
     foreign $ mutate("list", "[|]", "head", $rec:0, ?$rec:1, head:0)
     foreign $ mutate("list", "[|]", "tail", $rec:1, ?$:0, tail:0)
                     head:
-proc head($rec:0:list(t), ?$:0:t) (id 0): 
+public proc head($rec:0:list(t), ?$:0:t) (id 0): 
     foreign $ access("list", "[|]", "head", $rec:0, ?$:0)
-proc head($rec:0:list(t), ?$rec:1:list(t), $field:0:t) (id 1): 
+public proc head($rec:0:list(t), ?$rec:1:list(t), $field:0:t) (id 1): 
     foreign $ mutate("list", "[|]", "head", $rec:0, ?$rec:1, $field:0)
                     tail:
-proc tail($rec:0:list(t), ?$:0:list(t)) (id 0): 
+public proc tail($rec:0:list(t), ?$:0:list(t)) (id 0): 
     foreign $ access("list", "[|]", "tail", $rec:0, ?$:0)
-proc tail($rec:0:list(t), ?$rec:1:list(t), $field:0:list(t)) (id 1): 
+public proc tail($rec:0:list(t), ?$rec:1:list(t), $field:0:list(t)) (id 1): 
     foreign $ mutate("list", "[|]", "tail", $rec:0, ?$rec:1, $field:0)
 
 Submodules of type-list.list:

@@ -440,8 +440,8 @@ addImport modspec imp specific vis = do
     updateInterface vis (updateDependencies (Set.insert $ last modspec))
 
 -- |Add the specified proc definition to the current module.
-addProc :: ProcDef -> Visibility -> Compiler ()
-addProc procDef@(ProcDef name proto clauses pos _) vis = do
+addProc :: ProcDef -> Compiler ()
+addProc procDef@(ProcDef name proto clauses pos _ vis) = do
     updateImplementation
       (updateModProcs
        (\procs ->
@@ -470,7 +470,7 @@ replaceProc name id proto clauses pos tmpCount vis = do
          let olddefs = findWithDefault [] name procs
              (front,back) = List.splitAt id olddefs
          in Map.insert name (front ++ 
-                             (ProcDef name proto clauses pos tmpCount:
+                             (ProcDef name proto clauses pos tmpCount vis:
                               tail back)) 
             procs))
 
@@ -709,7 +709,8 @@ data ProcDef = ProcDef {
     procProto :: PrimProto, 
     procBody :: [[Placed Prim]],      -- list of clauses, each a list of Prims
     procPos :: OptPos,
-    procTmpCount :: Int               -- the next temp variable number to use
+    procTmpCount :: Int,              -- the next temp variable number to use
+    procVis :: Visibility
 }
              deriving Eq
 
@@ -1110,8 +1111,9 @@ showProcDefs firstID (def:defs) =
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID (ProcDef _ proto def pos _) =
-    "\nproc " ++ show proto ++ " (id " ++ show thisID ++ "): "
+showProcDef thisID (ProcDef _ proto def pos _ vis) =
+    "\n" ++ visibilityPrefix vis ++
+    "proc " ++ show proto ++ " (id " ++ show thisID ++ "): "
     ++ showMaybeSourcePos pos 
     ++ intercalate "\n" (List.map (showBlock 4) def)
 
