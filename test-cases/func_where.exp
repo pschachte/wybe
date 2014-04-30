@@ -1,0 +1,16 @@
+
+ Module func_where
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : quad(x:0:int, ?$:0:int) <0> @func_where:1:8
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : quad:
+public proc quad(x:0:int, ?$:0:int) (id 0):  @func_where:1:8
+    +(x:0, x:0, ?tmp$0:0) @func_where:1:44
+    +(tmp$0:0, tmp$0:0, ?$:0) @func_where:1:31
+
+Submodules of func_where:
+

@@ -46,7 +46,7 @@ typeCheckMod scc modspec = do
 --  XXX Looks like it collects non-local called procs, too.
 localCalledProcs :: [Prim] -> [Ident]
 localCalledProcs [] = []
-localCalledProcs (PrimCall name _ _:rest) = name:localCalledProcs rest
+localCalledProcs (PrimCall _ name _ _:rest) = name:localCalledProcs rest
 localCalledProcs (_:rest) = localCalledProcs rest
 
 -- |Type check one strongly connected component in the local call graph

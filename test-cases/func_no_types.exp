@@ -1,0 +1,15 @@
+
+ Module func_no_types
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : times(a:0:?, b:0:?, ?$:0:?) <0> @func_no_types:1:8
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : times:
+public proc times(a:0:?, b:0:?, ?$:0:?) (id 0):  @func_no_types:1:8
+    *(a:0, b:0, ?$:0) @func_no_types:1:26
+
+Submodules of func_no_types:
+

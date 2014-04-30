@@ -1,0 +1,43 @@
+
+ Module proc_yorn2
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : yorn(prompt:0:string, ?result:0:bool) <0> @proc_yorn2:1:8
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : gen$1:
+proc gen$1(prompt:0:?, response:0:?, responsechar:0:?, result:0:?, tmp$0:0:?, tmp$1:0:?, tmp$2:0:?, tmp$3:0:?, ?prompt:0:?, ?response:0:?, ?responsechar:0:?, ?result:0:?, ?tmp$0:0:?, ?tmp$1:0:?, ?tmp$2:0:?, ?tmp$3:0:?) (id 0): 
+                    gen$2:
+proc gen$2(prompt:0:?, ?prompt:1:?, ?response:1:?, ?responsechar:1:?, ?result:1:?, ?tmp$0:1:?, ?tmp$1:1:?, ?tmp$2:1:?, ?tmp$3:-1:?) (id 0): 
+    print(prompt:0) @proc_yorn2:2:9
+    print(" (y/n) ") @proc_yorn2:3:9
+    read_line(?response:0) @proc_yorn2:4:9
+    first(response:0, ?tmp$1:0) @proc_yorn2:5:34
+    to_upper(tmp$1:0, ?tmp$0:0) @proc_yorn2:5:25
+    ==(tmp$0:0, 'Y', ?tmp$2:0) @proc_yorn2:6:19
+    proc_yorn2.gen$3(prompt:0, response:0, tmp$0:0, tmp$2:0, tmp$0:0, tmp$1:0, tmp$2:0, ?prompt:1, ?response:1, ?responsechar:1, ?result:1, ?tmp$0:1, ?tmp$1:1, ?tmp$2:1) @proc_yorn2:7:9
+                    gen$3:
+proc gen$3(prompt:0:?, response:0:?, responsechar:0:?, result:0:?, tmp$0:0:?, tmp$1:0:?, tmp$2:0:?, ?prompt:1:?, ?response:1:?, ?responsechar:1:?, ?result:1:?, ?tmp$0:1:?, ?tmp$1:1:?, ?tmp$2:1:?) (id 0): 
+    begin guard 1
+        ==(responsechar:0, 'N', ?tmp$3:0) @proc_yorn2:7:25
+        or(result:0, tmp$3:0) @proc_yorn2:7:15
+    end guard 
+    proc_yorn2.gen$1(prompt:0, response:0, responsechar:0, result:0, tmp$0:0, tmp$1:0, tmp$2:0, tmp$3:0, ?prompt:1, ?response:1, ?responsechar:1, ?result:1, ?tmp$0:1, ?tmp$1:1, ?tmp$2:1, ?tmp$3:1)
+
+    begin guard 0
+        ==(responsechar:0, 'N', ?tmp$3:0) @proc_yorn2:7:25
+        or(result:0, tmp$3:0) @proc_yorn2:7:15
+    end guard 
+    proc_yorn2.gen$4(prompt:0, response:0, responsechar:0, result:0, tmp$0:0, tmp$1:0, tmp$2:0, ?prompt:1, ?response:1, ?responsechar:1, ?result:1, ?tmp$0:1, ?tmp$1:1, ?tmp$2:1)
+                    gen$4:
+proc gen$4(prompt:0:?, response:0:?, responsechar:0:?, result:0:?, tmp$0:0:?, tmp$1:0:?, tmp$2:0:?, ?prompt:1:?, ?response:1:?, ?responsechar:1:?, ?result:1:?, ?tmp$0:1:?, ?tmp$1:1:?, ?tmp$2:1:?) (id 0): 
+    println("Please answer 'yes' or 'no'.") @proc_yorn2:8:9
+    proc_yorn2.gen$2(prompt:0, ?prompt:1, ?response:1, ?responsechar:1, ?result:1, ?tmp$0:1, ?tmp$1:1, ?tmp$2:1, ?tmp$3:0) @proc_yorn2:2:5
+                    yorn:
+public proc yorn(prompt:0:string, ?result:0:bool) (id 0):  @proc_yorn2:1:8
+    proc_yorn2.gen$2(prompt:0, ?prompt:1, ?response:0, ?responsechar:0, ?result:0, ?tmp$0:0, ?tmp$1:0, ?tmp$2:0, ?tmp$3:0) @proc_yorn2:2:5
+
+Submodules of proc_yorn2:
+

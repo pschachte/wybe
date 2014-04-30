@@ -1,0 +1,20 @@
+
+ Module func_quadruple
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : double(a:0:int, ?$:0:int) <0> @func_quadruple:1:8
+                    quadruple(a:0:int, ?$:0:int) <0> @func_quadruple:3:8
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : double:
+public proc double(a:0:int, ?$:0:int) (id 0):  @func_quadruple:1:8
+    +(a:0, a:0, ?$:0) @func_quadruple:1:35
+                    quadruple:
+public proc quadruple(a:0:int, ?$:0:int) (id 0):  @func_quadruple:3:8
+    double(a:0, ?tmp$1:0) @func_quadruple:3:45
+    double(tmp$1:0, ?$:0) @func_quadruple:3:38
+
+Submodules of func_quadruple:
+

@@ -1,5 +1,5 @@
 
- Module main-hello
+ Module main_hello2
   public submods  : 
   public types    : 
   public resources: 
@@ -9,7 +9,8 @@
   resources       : 
   procs           : :
 proc () (id 0): 
-    println("hello, world") @main-hello:1:1
+    print("hello, ") @main_hello2:1:1
+    println("world!") @main_hello2:2:1
 
-Submodules of main-hello:
+Submodules of main_hello2:
 

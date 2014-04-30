@@ -64,7 +64,7 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   ProcDecl 
   vis
   (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
-  [Unplaced $ ProcCall "=" [Unplaced $ Var "$" ParamOut, result]]
+  [Unplaced $ ProcCall Nothing "=" [Unplaced $ Var "$" ParamOut, result]]
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     proto' <- flattenProto proto
@@ -244,9 +244,9 @@ compileSimpleStmt stmt = do
     return $ maybePlace stmt' (place stmt)
 
 compileSimpleStmt' :: Stmt -> ClauseComp Prim
-compileSimpleStmt' (ProcCall name args) = do
+compileSimpleStmt' (ProcCall maybeMod name args) = do
     args' <- mapM (compileArg . content) args
-    return $ PrimCall name Nothing args'
+    return $ PrimCall maybeMod name Nothing args'
 compileSimpleStmt' (ForeignCall lang name args) = do
     args' <- mapM (compileArg . content) args
     return $ PrimForeign lang name Nothing args'
@@ -281,6 +281,6 @@ reconcilingAssignments caseVars jointVars =
 reconcileOne :: (Map VarName Int) -> (Map VarName Int) -> VarName -> Placed Prim
 reconcileOne caseVars jointVars var =
     Unplaced $
-    PrimCall "=" Nothing [
+    PrimCall Nothing "=" Nothing [
         ArgVar (mkPrimVarName jointVars var) FlowOut Ordinary,
         ArgVar (mkPrimVarName caseVars var) FlowIn Ordinary]

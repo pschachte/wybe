@@ -1,0 +1,28 @@
+
+ Module func_factorial
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : factorial(n:0:int, ?$:0:int) <0> @func_factorial:1:8
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : factorial:
+public proc factorial(n:0:int, ?$:0:int) (id 0):  @func_factorial:1:8
+    func_factorial.gen$1(n:0, ?n:1, ?$:0) @func_factorial:2:8
+                    gen$1:
+proc gen$1(n:0:?, ?n:0:?, ?tmp$0:0:?) (id 0): 
+    begin guard 1
+        <=(n:0, 0) @func_factorial:2:11
+    end guard 
+    =(?tmp$0:0, 1)
+
+    begin guard 0
+        <=(n:0, 0) @func_factorial:2:11
+    end guard 
+    -(n:0, 1, ?tmp$3:0) @func_factorial:2:44
+    factorial(tmp$3:0, ?tmp$2:0) @func_factorial:2:34
+    *(n:0, tmp$2:0, ?tmp$0:0) @func_factorial:2:30
+
+Submodules of func_factorial:
+

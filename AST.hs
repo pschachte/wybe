@@ -780,7 +780,7 @@ flowsOut ParamInOut = True
 
 -- |Source program statements.  These will be normalised into Prims.
 data Stmt
-     = ProcCall Ident [Placed Exp]
+     = ProcCall (Maybe ModSpec) Ident [Placed Exp]
      | ForeignCall Ident Ident [Placed Exp]
      | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt]
      | Loop [Placed Stmt]
@@ -800,7 +800,7 @@ data Exp
       | Var VarName FlowDirection
       | Where [Placed Stmt] (Placed Exp)
       | CondExp [Placed Stmt] (Placed Exp) (Placed Exp)
-      | Fncall Ident [Placed Exp]
+      | Fncall (Maybe ModSpec) Ident [Placed Exp]
       | ForeignFn String String [Placed Exp]
      deriving (Eq)
 
@@ -847,7 +847,7 @@ data PrimVarName =
 --  loop.
 data Prim
      -- XXX PrimCall should optionally contain a module spec.
-     = PrimCall ProcName (Maybe ProcID) [PrimArg]
+     = PrimCall (Maybe ModSpec) ProcName (Maybe ProcID) [PrimArg]
      | PrimForeign String ProcName (Maybe ProcID) [PrimArg]
      | PrimGuard [Placed Prim] Integer
      | PrimFail
@@ -878,7 +878,7 @@ argFlowDirection (ArgChar _) = FlowIn
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
-expToStmt (Fncall name args) = ProcCall name args
+expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name args
 expToStmt (ForeignFn lang name args) = 
   ForeignCall lang name args
 expToStmt exp = error $ "Internal error: non-Fncall expr " ++ show exp
@@ -897,7 +897,7 @@ varsInPrims dir prims =
     List.foldr Set.union Set.empty $ List.map (varsInPrim dir) prims
 
 varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
-varsInPrim dir (PrimCall _ _ args)      = varsInPrimArgs dir args
+varsInPrim dir (PrimCall _ _ _ args)      = varsInPrimArgs dir args
 varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
 varsInPrim dir (PrimGuard prims _)      =
     List.foldr (Set.union . varsInPrim dir . content) Set.empty prims
@@ -982,6 +982,12 @@ showModSpec spec = intercalate "." spec
 -- |How to show a list of ModSpecs.
 showModSpecs :: [ModSpec] -> String
 showModSpecs specs = intercalate ", " $ List.map showModSpec specs
+
+-- |Show a module prefix if specified
+maybeModPrefix :: Maybe ModSpec -> String
+maybeModPrefix Nothing = ""
+maybeModPrefix (Just modSpec) = showModSpec modSpec ++ "."
+
 
 -- |How to show a module dependency.
 showModDependency :: ModSpec -> ModDependency -> String
@@ -1166,12 +1172,14 @@ showPlacedPrim' ind prim pos =
   startLine ind ++ showPrim ind prim ++ showMaybeSourcePos pos
 
 showPrim :: Int -> Prim -> String
-showPrim _ (PrimCall name id args) =
-        name ++ maybeShow "<" id ">"
-        ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+showPrim _ (PrimCall maybeMod name id args) =
+        maybeModPrefix maybeMod ++
+        name ++ maybeShow "<" id ">" ++
+        "(" ++ intercalate ", " (List.map show args) ++ ")"
 showPrim _ (PrimForeign lang name id args) =
-        "foreign " ++ lang ++ " " ++ name ++ maybeShow "<" id ">"
-        ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+        "foreign " ++ lang ++ " " ++ 
+        name ++ maybeShow "<" id ">" ++
+        "(" ++ intercalate ", " (List.map show args) ++ ")"
 showPrim ind (PrimGuard body val) =
         "begin guard " ++ show val ++
         showBlock (ind+4) body ++
@@ -1197,7 +1205,8 @@ showCases num labelInd blockInd (block:blocks) =
 
 
 showStmt :: Int -> Stmt -> String
-showStmt _ (ProcCall name args) =
+showStmt _ (ProcCall maybeMod name args) =
+    maybeModPrefix maybeMod ++
     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")\n"
 showStmt _ (ForeignCall lang name args) =
     "foreign " ++ lang ++ " " ++ 
@@ -1247,7 +1256,8 @@ instance Show Exp where
   show (Where stmts exp) = show exp ++ " where\n" ++ showBody 8 stmts
   show (CondExp cond thn els) = 
     "if\n" ++ showBody 4 cond ++ "then " ++ show thn ++ " else " ++ show els
-  show (Fncall fn args) = 
+  show (Fncall maybeMod fn args) = 
+    maybeModPrefix maybeMod ++
     fn ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
   show (ForeignFn lang fn args) = 
     "foreign " ++ lang ++ " " ++ fn 

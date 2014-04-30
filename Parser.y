@@ -341,45 +341,61 @@ Condelse :: { [Placed Stmt] }
 
 
 SimpleExp :: { Placed Exp }
-    : Exp '+' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+    : Exp '+' Exp               { maybePlace (Fncall Nothing (symbolName $2)
+                                              [$1, $3])
 	                                     (place $1) }
-    | Exp '-' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+    | Exp '-' Exp               { maybePlace (Fncall Nothing (symbolName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | Exp '*' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+    | Exp '*' Exp               { maybePlace (Fncall Nothing (symbolName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | Exp '/' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+    | Exp '/' Exp               { maybePlace (Fncall Nothing (symbolName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | Exp 'mod' Exp             { maybePlace (Fncall (identName $2) [$1, $3])
+    | Exp 'mod' Exp             { maybePlace (Fncall Nothing (identName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | Exp '^' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+    | Exp '^' Exp               { maybePlace (Fncall Nothing (symbolName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | Exp '++' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
+    | Exp '++' Exp              { maybePlace (Fncall Nothing (symbolName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | Exp '<' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+    | Exp '<' Exp               { maybePlace (Fncall Nothing (symbolName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | Exp '<=' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
+    | Exp '<=' Exp              { maybePlace (Fncall Nothing (symbolName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | Exp '>' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+    | Exp '>' Exp               { maybePlace (Fncall Nothing (symbolName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | Exp '>=' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
+    | Exp '>=' Exp              { maybePlace (Fncall Nothing (symbolName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | Exp '==' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
+    | Exp '==' Exp              { maybePlace (Fncall Nothing (symbolName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | Exp '=' Exp               { maybePlace (Fncall (symbolName $2) [$1, $3])
+    | Exp '=' Exp               { maybePlace (Fncall Nothing (symbolName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | Exp '/=' Exp              { maybePlace (Fncall (symbolName $2) [$1, $3])
+    | Exp '/=' Exp              { maybePlace (Fncall Nothing (symbolName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | 'not' Exp                 { Placed (Fncall (identName $1) [$2])
+    | 'not' Exp                 { Placed (Fncall Nothing (identName $1) [$2])
 	                                 (tokenPosition $1) }
-    | Exp 'and' Exp             { maybePlace (Fncall (identName $2) [$1, $3])
+    | Exp 'and' Exp             { maybePlace (Fncall Nothing (identName $2)
+                                              [$1, $3])
 	                                     (place $1) }
-    | Exp 'or' Exp              { maybePlace (Fncall (identName $2) [$1, $3])
+    | Exp 'or' Exp              { maybePlace (Fncall Nothing (identName $2)
+                                              [$1, $3])
                                              (place $1) }
-    | Exp '..' Exp              { maybePlace (Fncall (symbolName $2) 
+    | Exp '..' Exp              { maybePlace (Fncall Nothing (symbolName $2) 
 					      [$1, $3, Unplaced $ IntValue 1])
                                              (place $1) }
     | '(' Exp ')'               { Placed (content $2) (tokenPosition $1) }
-    | '-' Exp %prec NEG         { Placed (Fncall "Negate" [$2])
+    | '-' Exp %prec NEG         { Placed (Fncall Nothing "Negate" [$2])
 	                                 (tokenPosition $1) }
     | int                       { Placed (IntValue $ intValue $1)
 	                                 (tokenPosition $1) }
@@ -397,23 +413,23 @@ SimpleExp :: { Placed Exp }
 	                                 (tokenPosition $1) }
     | '!' ident                 { Placed (Var (identName $2) ParamInOut)
 	                                 (tokenPosition $1) }
-    | ident ArgList             { Placed (Fncall (identName $1) $2)
+    | ident ArgList             { Placed (Fncall Nothing (identName $1) $2)
 	                                 (tokenPosition $1) }
-    | symbol ArgList            { Placed (Fncall (symbolName $1) $2)
+    | symbol ArgList            { Placed (Fncall Nothing (symbolName $1) $2)
 	                                 (tokenPosition $1) }
-    | Exp '.' ident             { maybePlace (Fncall (identName $3) [$1])
+    | Exp '.' ident             { maybePlace (Fncall Nothing (identName $3) [$1])
 	                                     (place $1) }
-    | Exp '.' ident ArgList     { maybePlace (Fncall (identName $3) ($1:$4))
+    | Exp '.' ident ArgList     { maybePlace (Fncall Nothing (identName $3) ($1:$4))
 	                                     (place $1) }
     | 'foreign' ident ident ArgList
                                 { Placed (ForeignFn (identName $2)
 					  (identName $3) $4)
                                          (tokenPosition $1) }
-    | '[' ']'                   { Placed (Fncall "[]" [])
+    | '[' ']'                   { Placed (Fncall Nothing "[]" [])
 	                                 (tokenPosition $1) }
-    | '[' Exp ListTail          { Placed (Fncall "[|]" [$2, $3])
+    | '[' Exp ListTail          { Placed (Fncall Nothing "[|]" [$2, $3])
 	                                 (tokenPosition $1) }
-    | '{' '}'                   { Placed (Fncall "{}" [])
+    | '{' '}'                   { Placed (Fncall Nothing "{}" [])
 	                                 (tokenPosition $1) }
 
 Exp :: { Placed Exp }
@@ -426,8 +442,8 @@ Exp :: { Placed Exp }
 
 
 ListTail :: { Placed Exp }
-    : ']'                       { Unplaced (Fncall "[]" []) }
-    | ',' Exp ListTail          { Unplaced (Fncall "[|]" [$2,$3]) }
+    : ']'                       { Unplaced (Fncall Nothing "[]" []) }
+    | ',' Exp ListTail          { Unplaced (Fncall Nothing "[|]" [$2,$3]) }
     | '|' Exp ']'               { $2 }
 
 

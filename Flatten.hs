@@ -180,9 +180,9 @@ flattenStmts stmts =
 
 -- |Flatten the specified statement
 flattenStmt :: Stmt -> OptPos -> Flattener ()
-flattenStmt (ProcCall name args) pos = do
+flattenStmt (ProcCall maybeMod name args) pos = do
     args' <- flattenStmtArgs args pos
-    emit pos $ ProcCall name args'
+    emit pos $ ProcCall maybeMod name args'
     emitPostponed
 flattenStmt (ForeignCall lang name args) pos = do
     args' <- flattenStmtArgs args pos
@@ -202,10 +202,11 @@ flattenStmt (Loop body) pos = do
 flattenStmt (For itr gen) pos = do
     genVar <- tempVar
     saveInit pos $ 
-      ProcCall "init_seq" [gen, Unplaced $ Var genVar ParamOut]
+      ProcCall Nothing "init_seq" [gen, Unplaced $ Var genVar ParamOut]
     flattenStmt (Cond [maybePlace 
-                       (ProcCall "in" [itr,Unplaced $ Var genVar ParamIn,
-                                       Unplaced $ Var genVar ParamOut])
+                       (ProcCall Nothing "in" [itr,
+                                               Unplaced $ Var genVar ParamIn,
+                                               Unplaced $ Var genVar ParamOut])
                        pos]
                  [Unplaced $ Nop]
                  [Unplaced $ Break])
@@ -258,13 +259,13 @@ flattenExp (Where stmts pexp) _ = do
 flattenExp (CondExp cond thn els) pos = do
     resultName <- tempVar
     flattenStmt (Cond cond
-                 [Unplaced $ ProcCall "=" 
+                 [Unplaced $ ProcCall Nothing "=" 
                   [Unplaced $ Var resultName ParamOut,thn]]
-                 [Unplaced $ ProcCall "=" 
+                 [Unplaced $ ProcCall Nothing "=" 
                   [Unplaced $ Var resultName ParamOut,els]]) pos
     return $ [Unplaced $ Var resultName ParamIn]
-flattenExp (Fncall name exps) pos = do
-    flattenCall (ProcCall name) pos exps
+flattenExp (Fncall maybeMod name exps) pos = do
+    flattenCall (ProcCall maybeMod name) pos exps
 flattenExp (ForeignFn lang name exps) pos = do
     flattenCall (ForeignCall lang name) pos exps
 

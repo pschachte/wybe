@@ -1,37 +1,37 @@
 
- Module type-list
-  public submods  : list @type-list:1:8
+ Module type_list
+  public submods  : list @type_list:1:8
   public types    : 
   public resources: 
-  public procs    : ++(x:0:list(t), y:0:list(t), ?$:0:?) <0> @type-list:6:8
+  public procs    : ++(x:0:list(t), y:0:list(t), ?$:0:?) <0> @type_list:6:8
   imports         : 
   types           : 
   resources       : 
   procs           : ++:
-public proc ++(x:0:list(t), y:0:list(t), ?$:0:?) (id 0):  @type-list:6:8
-    gen$1(x:0, y:0, ?$:0, ?x:1, ?y:1) @type-list:7:5
+public proc ++(x:0:list(t), y:0:list(t), ?$:0:?) (id 0):  @type_list:6:8
+    type_list.gen$1(x:0, y:0, ?$:0, ?x:1, ?y:1) @type_list:7:5
                     gen$1:
 proc gen$1(x:0:?, y:0:?, ?tmp$0:0:?, ?x:0:?, ?y:0:?) (id 0): 
     begin guard 1
-        [](?tmp$1:0) @type-list:7:13
-        ==(x:0, tmp$1:0) @type-list:7:8
+        [](?tmp$1:0) @type_list:7:13
+        ==(x:0, tmp$1:0) @type_list:7:8
     end guard 
     =(?tmp$0:0, y:0)
 
     begin guard 0
-        [](?tmp$1:0) @type-list:7:13
-        ==(x:0, tmp$1:0) @type-list:7:8
+        [](?tmp$1:0) @type_list:7:13
+        ==(x:0, tmp$1:0) @type_list:7:8
     end guard 
-    head(x:0, ?tmp$3:0) @type-list:9:11
-    tail(x:0, ?tmp$5:0) @type-list:9:18
-    ++(tmp$5:0, y:0, ?tmp$4:0) @type-list:9:18
-    [|](tmp$3:0, tmp$4:0, ?tmp$0:0) @type-list:9:10
+    head(x:0, ?tmp$3:0) @type_list:9:11
+    tail(x:0, ?tmp$5:0) @type_list:9:18
+    ++(tmp$5:0, y:0, ?tmp$4:0) @type_list:9:18
+    [|](tmp$3:0, tmp$4:0, ?tmp$0:0) @type_list:9:10
 
-Submodules of type-list:
+Submodules of type_list:
 list: 
- Module type-list.list(["t"])
+ Module type_list.list(["t"])
   public submods  : 
-  public types    : list/1 @type-list:1:8
+  public types    : list/1 @type_list:1:8
   public resources: 
   public procs    : [](?$:0:list(t)) <0>
                     [|](head:0:t, tail:0:list(t), ?$:0:list(t)) <0>
@@ -40,7 +40,7 @@ list:
                     tail($rec:0:list(t), ?$rec:1:list(t), $field:0:list(t)) <1>
                     tail($rec:0:list(t), ?$:0:list(t)) <0>
   imports         : 
-  types           : list/1 @type-list:1:8
+  types           : list/1 @type_list:1:8
   resources       : 
   procs           : []:
 public proc [](?$:0:list(t)) (id 0): 
@@ -61,5 +61,5 @@ public proc tail($rec:0:list(t), ?$:0:list(t)) (id 0):
 public proc tail($rec:0:list(t), ?$rec:1:list(t), $field:0:list(t)) (id 1): 
     foreign $ mutate("list", "[|]", "tail", $rec:0, ?$rec:1, $field:0)
 
-Submodules of type-list.list:
+Submodules of type_list.list:
 

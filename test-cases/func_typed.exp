@@ -1,0 +1,15 @@
+
+ Module func_typed
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : plus(a:0:int, b:0:int, ?$:0:int) <0> @func_typed:1:8
+  imports         : 
+  types           : 
+  resources       : 
+  procs           : plus:
+public proc plus(a:0:int, b:0:int, ?$:0:int) (id 0):  @func_typed:1:8
+    +(a:0, b:0, ?$:0) @func_typed:1:40
+
+Submodules of func_typed:
+
