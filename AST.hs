@@ -40,6 +40,7 @@ module AST (
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
+  importedFrom, callTargets,
   showBody, showStmt, showBlock, showProcDef,
   shouldnt
   ) where
@@ -434,10 +435,10 @@ addImport modspec imp specific vis = do
                  Map.findWithDefault 
                  (ModDependency ImportNothing ImportNothing) 
                  modspec moddeps
-             uses' = if imp then uses else addImports specific vis uses
+             uses' = addImports specific vis uses
              imps' = if imp then addImports specific vis imps else imps
          in Map.insert modspec (ModDependency uses' imps') moddeps))
-    updateInterface vis (updateDependencies (Set.insert $ last modspec))
+    updateInterface vis (updateDependencies (Set.insert modspec))
 
 -- |Add the specified proc definition to the current module.
 addProc :: ProcDef -> Compiler ()
@@ -527,14 +528,49 @@ data Module = Module {
   }
 
 
+-- |The list of modules from which the specified module imports the 
+--  given name (whether proc, type, submodule, etc) with optional 
+--  module spec. 
+importedFrom :: ModuleImplementation -> Maybe ModSpec -> Ident -> 
+              Compiler [ModSpec]
+importedFrom impl modspec name = do
+    let imports = case modspec of
+            Nothing -> List.map (\(spec,dep) -> (spec,modDepImports dep)) $
+                       assocs $ modImports impl
+            Just spec -> maybe [] (\dep -> [(spec,modDepUses dep)]) $
+                         Map.lookup spec $ modImports impl
+    listlist <- mapM (\(mspec,ispec) -> case ispec of
+                           ImportNothing -> return []
+                           ImportSpec _ (Just _) -> do -- everything imported
+                               maybeIface <- getSpecModule mspec modInterface
+                               case maybeIface of
+                                   Just iface ->
+                                       if Map.member name (pubTypes iface) ||
+                                          Map.member name 
+                                          (pubResources iface) ||
+                                          Map.member name (pubProcs iface) ||
+                                          Map.member name 
+                                          (pubDependencies iface)
+                                       then return [mspec]
+                                       else return []
+                                   Nothing -> return []
+                           ImportSpec exports _ ->
+                               if Map.member name exports
+                               then return [mspec]
+                               else return [])
+                imports
+    return $ concat listlist
+
+
 -- |Returns a list of the potential targets of a proc call.
--- callTargets :: Module -> Maybe ModSpec -> ProcName -> Maybe ProcID -> 
---                [(ModSpec,ProcSpec)]
--- callTargets mod modspec name id =
---     case modImplementation mod of
---         Nothing -> shouldnt $ 
---                    "looking up call in module without implementation" ++
---                    show 
+callTargets :: ModuleImplementation -> Maybe ModSpec -> ProcName -> 
+               Compiler [ProcSpec]
+callTargets impl modspec name = do
+    modSpecs <- importedFrom impl modspec name
+    maybes <- mapM (flip getSpecModule 
+                    (Map.lookup name . pubProcs . modInterface)) 
+              modSpecs
+    return $ concat $ catMaybes $ catMaybes maybes
 
 
 -- |Apply the given function to the current module implementation.
@@ -572,8 +608,9 @@ data ModuleInterface = ModuleInterface {
     pubProcs :: Map Ident [ProcSpec], -- ^The procs this module exports
     pubDependencies :: Map Ident OptPos,    
                                     -- ^The other modules this module exports
-    dependencies :: Set Ident        -- ^The other modules that must be linked
+    dependencies :: Set ModSpec      -- ^The other modules that must be linked
     }                               --  in by modules that depend on this one
+
 
 emptyInterface :: ModuleInterface
 emptyInterface = 
@@ -605,7 +642,8 @@ updatePubDependencies fn modint =
     modint {pubDependencies = fn $ pubDependencies modint}
 
 -- |Update the set of all dependencies of a module interface.
-updateDependencies :: (Set Ident -> Set Ident) -> ModuleInterface -> ModuleInterface
+updateDependencies :: (Set ModSpec -> Set ModSpec) -> 
+                      ModuleInterface -> ModuleInterface
 updateDependencies fn modint = modint {dependencies = fn $ dependencies modint}
 
 
@@ -672,7 +710,10 @@ type ProcName = String
 type ModSpec = [Ident]
 
 -- |The dependencies of one module on another, as a pair of uses and imports.
-data ModDependency = ModDependency ImportSpec ImportSpec
+data ModDependency = ModDependency {
+    modDepUses    :: ImportSpec,
+    modDepImports ::  ImportSpec
+    }
 
 -- |The uses or imports of one module on another.  Either nothing, or
 --  all the item names to be imported and whether they are to be 
@@ -682,7 +723,7 @@ data ImportSpec = ImportNothing
                 | ImportSpec (Map Ident Visibility) (Maybe Visibility)
 
 -- |Add a single import to an ImportSpec.
-addImports :: (Maybe [Ident]) -> Visibility -> ImportSpec -> ImportSpec
+addImports :: Maybe [Ident] -> Visibility -> ImportSpec -> ImportSpec
 addImports Nothing vis ImportNothing = ImportSpec Map.empty $ Just vis
 addImports Nothing vis (ImportSpec map Nothing) = 
     ImportSpec map $ Just vis
