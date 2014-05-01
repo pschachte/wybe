@@ -25,7 +25,7 @@ module AST (
   ModSpec, ProcDef(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
   argFlowDirection, flowsIn, flowsOut,
-  expToStmt, Prim(..), PrimProto(..), PrimParam(..),
+  expToStmt, Prim(..), PrimProto(..), PrimParam(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
@@ -450,9 +450,10 @@ addProc procDef@(ProcDef name proto clauses pos _ vis) = do
          in  Map.insert name defs' procs))
     newid <- getModuleImplementationField 
             (((-1)+) . length . fromJust . Map.lookup name . modProcs)
+    spec <- getModuleSpec
     updateInterface vis
       (updatePubProcs (mapListInsert name 
-                       (ProcCallInfo (fromJust newid) proto pos)))
+                       (ProcSpec spec name (fromJust newid) )))
 
 -- |Prepend the provided elt to mapping for the specified key in the map.
 mapListInsert :: Ord a => a -> b -> Map a [b] -> Map a [b]
@@ -525,6 +526,17 @@ data Module = Module {
   procCount :: Int               -- ^a counter for gensym-ed proc names
   }
 
+
+-- |Returns a list of the potential targets of a proc call.
+-- callTargets :: Module -> Maybe ModSpec -> ProcName -> Maybe ProcID -> 
+--                [(ModSpec,ProcSpec)]
+-- callTargets mod modspec name id =
+--     case modImplementation mod of
+--         Nothing -> shouldnt $ 
+--                    "looking up call in module without implementation" ++
+--                    show 
+
+
 -- |Apply the given function to the current module implementation.
 updateModImplementation :: (ModuleImplementation -> ModuleImplementation) ->
                           Compiler ()
@@ -557,7 +569,7 @@ data ModuleInterface = ModuleInterface {
     pubTypes :: Map Ident TypeDef,   -- ^The types this module exports
     pubResources :: Map Ident OptPos,       
                                     -- ^The resources this module exports
-    pubProcs :: Map Ident [ProcCallInfo], -- ^The procs this module exports
+    pubProcs :: Map Ident [ProcSpec], -- ^The procs this module exports
     pubDependencies :: Map Ident OptPos,    
                                     -- ^The other modules this module exports
     dependencies :: Set Ident        -- ^The other modules that must be linked
@@ -581,7 +593,7 @@ updatePubResources ::
 updatePubResources fn modint = modint {pubResources = fn $ pubResources modint}
 
 -- |Update the public procs of a module interface.
-updatePubProcs :: (Map Ident [ProcCallInfo] -> Map Ident [ProcCallInfo]) -> 
+updatePubProcs :: (Map Ident [ProcSpec] -> Map Ident [ProcSpec]) -> 
                  ModuleInterface -> ModuleInterface
 updatePubProcs fn modint = modint {pubProcs = fn $ pubProcs modint}
 
@@ -716,11 +728,16 @@ data ProcDef = ProcDef {
 
 -- |Info about a proc call, including the ID, prototype, and an 
 --  optional source position. 
-data ProcCallInfo = ProcCallInfo ProcID PrimProto OptPos
+data ProcSpec = ProcSpec ModSpec ProcName ProcID
+              deriving (Eq)
 
--- -- |Make a ProcCallInfo from a ProcDef
--- procCallInfo :: ProcDef -> ProcCallInfo
--- procCallInfo (ProcDef _ proto _ pos) = ProcCallInfo id proto pos
+instance Show ProcSpec where
+    show (ProcSpec mod name pid) =
+        showModSpec mod ++ "." ++ name ++ "<" ++ show pid ++ ">"
+
+-- -- |Make a ProcSpec from a ProcDef
+-- procCallInfo :: ProcDef -> ProcSpec
+-- procCallInfo (ProcDef _ proto _ pos) = ProcSpec id proto pos
 
 -- |An ID for a proc.
 type ProcID = Int
@@ -847,12 +864,15 @@ data PrimVarName =
 --  loop.
 data Prim
      -- XXX PrimCall should optionally contain a module spec.
-     = PrimCall (Maybe ModSpec) ProcName (Maybe ProcID) [PrimArg]
+     = PrimCall (Maybe ModSpec) ProcName (Maybe ProcSpec) [PrimArg]
      | PrimForeign String ProcName (Maybe ProcID) [PrimArg]
      | PrimGuard [Placed Prim] Integer
      | PrimFail
      | PrimNop
      deriving Eq
+
+instance Show Prim where
+    show prim = showPrim 0 prim
 
 -- |The allowed arguments in primitive proc or foreign proc calls, 
 --  just variables and constants.
@@ -1054,9 +1074,7 @@ instance Show Module where
            "\n  public resources: " ++ showMapPoses (pubResources int) ++
            "\n  public procs    : " ++ 
            intercalate "\n                    " 
-           [show proto ++ " <" ++ show id ++ ">" ++ showMaybeSourcePos pos | 
-            (ProcCallInfo id proto pos) <- 
-                List.concat $ Map.elems $ pubProcs int] ++
+           (List.map show $ List.concat $ Map.elems $ pubProcs int) ++
            if isNothing maybeimpl then "\n  implementation not available"
            else let impl = fromJust maybeimpl
                 in
@@ -1173,8 +1191,7 @@ showPlacedPrim' ind prim pos =
 
 showPrim :: Int -> Prim -> String
 showPrim _ (PrimCall maybeMod name id args) =
-        maybeModPrefix maybeMod ++
-        name ++ maybeShow "<" id ">" ++
+        maybe (maybeModPrefix maybeMod ++ name) show id ++
         "(" ++ intercalate ", " (List.map show args) ++ ")"
 showPrim _ (PrimForeign lang name id args) =
         "foreign " ++ lang ++ " " ++ 
