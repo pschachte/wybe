@@ -3,7 +3,7 @@
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : times(a:0:?, b:0:?, ?$:0:?) <0> @func_no_types:1:8
+  public procs    : func_no_types.times<0>
   imports         : 
   types           : 
   resources       : 

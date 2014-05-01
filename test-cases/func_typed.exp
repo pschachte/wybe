@@ -3,7 +3,7 @@
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : plus(a:0:int, b:0:int, ?$:0:int) <0> @func_typed:1:8
+  public procs    : func_typed.plus<0>
   imports         : 
   types           : 
   resources       : 

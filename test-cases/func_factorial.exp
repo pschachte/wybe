@@ -3,7 +3,7 @@
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : factorial(n:0:int, ?$:0:int) <0> @func_factorial:1:8
+  public procs    : func_factorial.factorial<0>
   imports         : 
   types           : 
   resources       : 

@@ -3,7 +3,7 @@
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : quad(x:0:int, ?$:0:int) <0> @func_where:1:8
+  public procs    : func_where.quad<0>
   imports         : 
   types           : 
   resources       : 

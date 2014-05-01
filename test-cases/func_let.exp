@@ -3,7 +3,7 @@
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : quad(x:0:int, ?$:0:int) <0> @func_let:1:8
+  public procs    : func_let.quad<0>
   imports         : 
   types           : 
   resources       : 

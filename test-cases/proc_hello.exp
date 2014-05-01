@@ -3,7 +3,7 @@
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : print2(x:0:int, y:0:int) <0> @proc_hello:1:8
+  public procs    : proc_hello.print2<0>
   imports         : 
   types           : 
   resources       : 

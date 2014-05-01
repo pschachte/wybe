@@ -15,11 +15,11 @@ position:
   public submods  : 
   public types    : position/0 @position:1:8
   public resources: 
-  public procs    : position(x:0:int, y:0:int, ?$:0:position) <0>
-                    x($rec:0:position, ?$rec:1:position, $field:0:int) <1>
-                    x($rec:0:position, ?$:0:int) <0>
-                    y($rec:0:position, ?$rec:1:position, $field:0:int) <1>
-                    y($rec:0:position, ?$:0:int) <0>
+  public procs    : position.position.position<0>
+                    position.position.x<1>
+                    position.position.x<0>
+                    position.position.y<1>
+                    position.position.y<0>
   imports         : 
   types           : position/0 @position:1:8
   resources       : 
@@ -46,7 +46,7 @@ Submodules of position.position:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : distance(p1:0:position, p2:0:position, ?$:0:?) <0> @import:3:8
+  public procs    : import.distance<0>
   imports         : import position 
   types           : 
   resources       : 

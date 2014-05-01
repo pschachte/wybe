@@ -3,7 +3,7 @@
   public submods  : list @type_list:1:8
   public types    : 
   public resources: 
-  public procs    : ++(x:0:list(t), y:0:list(t), ?$:0:?) <0> @type_list:6:8
+  public procs    : type_list.++<0>
   imports         : 
   types           : 
   resources       : 
@@ -33,12 +33,12 @@ list:
   public submods  : 
   public types    : list/1 @type_list:1:8
   public resources: 
-  public procs    : [](?$:0:list(t)) <0>
-                    [|](head:0:t, tail:0:list(t), ?$:0:list(t)) <0>
-                    head($rec:0:list(t), ?$rec:1:list(t), $field:0:t) <1>
-                    head($rec:0:list(t), ?$:0:t) <0>
-                    tail($rec:0:list(t), ?$rec:1:list(t), $field:0:list(t)) <1>
-                    tail($rec:0:list(t), ?$:0:list(t)) <0>
+  public procs    : type_list.list.[]<0>
+                    type_list.list.[|]<0>
+                    type_list.list.head<1>
+                    type_list.list.head<0>
+                    type_list.list.tail<1>
+                    type_list.list.tail<0>
   imports         : 
   types           : list/1 @type_list:1:8
   resources       : 

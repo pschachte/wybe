@@ -3,8 +3,8 @@
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : double(a:0:int, ?$:0:int) <0> @func_quadruple:1:8
-                    quadruple(a:0:int, ?$:0:int) <0> @func_quadruple:3:8
+  public procs    : func_quadruple.double<0>
+                    func_quadruple.quadruple<0>
   imports         : 
   types           : 
   resources       : 

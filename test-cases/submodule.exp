@@ -15,7 +15,7 @@ privatetest:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : semi_hidden() <0> @submodule:3:12
+  public procs    : submodule.privatetest.semi_hidden<0>
   imports         : 
   types           : 
   resources       : 
@@ -33,7 +33,7 @@ Submodules of submodule.privatetest:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : visible() <0> @submodule:8:12
+  public procs    : submodule.publictest.visible<0>
   imports         : 
   types           : 
   resources       : 

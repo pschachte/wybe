@@ -3,8 +3,8 @@
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : second(x:0:list(t), ?x:1:list(t), y:0:t) <1> @update:3:8
-                    second(x:0:list(t), ?$:0:t) <0> @update:1:8
+  public procs    : update.second<1>
+                    update.second<0>
   imports         : 
   types           : 
   resources       : 
