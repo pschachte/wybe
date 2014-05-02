@@ -144,6 +144,7 @@ compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
 compileModule dir modspec params parseTree = do
     enterModule dir modspec params
     setUpModule parseTree
+    underComp <- gets underCompilation
     mods <- exitModule -- may be empty list if module is mutually dependent
     compileModSCC mods
 

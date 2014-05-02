@@ -17,11 +17,11 @@ module AST (
   Exp(..), Generator(..),
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
-  updatePlacedM,
+  makeMessage, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
-  enterModule, exitModule, finishModule, 
-  emptyInterface, emptyImplementation,
+  enterModule, reenterModule, exitModule, finishModule, 
+  emptyInterface, emptyImplementation, getParams,
   ModSpec, ProcDef(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
   argFlowDirection, flowsIn, flowsOut,
@@ -40,7 +40,7 @@ module AST (
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
-  importedFrom, callTargets,
+  usedFrom, callTargets,
   showBody, showStmt, showBlock, showProcDef,
   shouldnt
   ) where
@@ -280,6 +280,14 @@ enterModule dir modspec params = do
                                        : underCompilation comp
                             in  comp { underCompilation = mods })
 
+-- |Go back to compiling a module we have previously finished with.
+-- Trusts that the modspec really does specify a module.
+reenterModule :: ModSpec -> Compiler ()
+reenterModule modspec = do
+    Just mod <- getSpecModule modspec id
+    modify (\comp -> comp { underCompilation = mod : underCompilation comp })
+
+
 exitModule :: Compiler [ModSpec]
 exitModule = do
     mod <- finishModule
@@ -346,13 +354,13 @@ getModuleImplementationMaybe fn = do
 --  collected compiler output messages. 
 message :: MessageLevel -> String -> OptPos -> Compiler ()
 message lvl msg pos = do
-    modify (\bldr -> bldr { msgs = (msgs bldr) ++ [makeMessage msg pos]})
+    modify (\bldr -> bldr { msgs = (msgs bldr) ++ [makeMessage pos msg]})
     when (lvl == Error) (modify (\bldr -> bldr { errorState = True }))
 
 -- |Construct a message string from the specified text and location.
-makeMessage :: String -> OptPos -> String
-makeMessage msg Nothing = msg
-makeMessage msg (Just pos) =
+makeMessage :: OptPos -> String -> String
+makeMessage Nothing msg = msg
+makeMessage (Just pos) msg =
   (sourceName pos) ++ ":" ++ 
   show (sourceLine pos) ++ ":" ++ 
   show (sourceColumn pos) ++ ": " ++ 
@@ -360,7 +368,7 @@ makeMessage msg (Just pos) =
 
 
 
--- |Return a new, unused proc ID.
+-- |Return a new, unused proc name.
 genProcName :: Compiler ProcName
 genProcName = do
   ctr <- getModule procCount
@@ -456,6 +464,16 @@ addProc procDef@(ProcDef name proto clauses pos _ vis) = do
       (updatePubProcs (mapListInsert name 
                        (ProcSpec spec name (fromJust newid) )))
 
+getParams :: ProcSpec -> Compiler [PrimParam]
+getParams (ProcSpec modSpec procName procID) = do
+    mod <- getLoadedModule modSpec
+    -- XXX shouldn't have to grovel in implementation to find prototype
+    let impl = fromJust $ modImplementation $ fromJust mod
+    let def = (modProcs impl ! procName) !! procID
+    let PrimProto _ params = procProto def
+    return params
+
+
 -- |Prepend the provided elt to mapping for the specified key in the map.
 mapListInsert :: Ord a => a -> b -> Map a [b] -> Map a [b]
 mapListInsert key elt =
@@ -528,15 +546,18 @@ data Module = Module {
   }
 
 
--- |The list of modules from which the specified module imports the 
---  given name (whether proc, type, submodule, etc) with optional 
---  module spec. 
-importedFrom :: ModuleImplementation -> Maybe ModSpec -> Ident -> 
-              Compiler [ModSpec]
-importedFrom impl modspec name = do
+-- |The list of modules from which the specified module can use the 
+--  given (possibly module-qualified) name (whether proc, type,
+--  submodule, etc).  This may include the module itself, or any
+--  module it may be imported from.
+usedFrom :: Maybe ModSpec -> Ident -> Compiler [ModSpec]
+usedFrom modspec name = do
+    currMod <- getModuleSpec
+    impl <- getModule (fromJust . modImplementation)
     let imports = case modspec of
-            Nothing -> List.map (\(spec,dep) -> (spec,modDepImports dep)) $
-                       assocs $ modImports impl
+            Nothing -> (currMod,ImportSpec Map.empty (Just Private)) :
+                       (List.map (\(spec,dep) -> (spec,modDepImports dep)) $
+                        assocs $ modImports impl)
             Just spec -> maybe [] (\dep -> [(spec,modDepUses dep)]) $
                          Map.lookup spec $ modImports impl
     listlist <- mapM (\(mspec,ispec) -> case ispec of
@@ -563,10 +584,9 @@ importedFrom impl modspec name = do
 
 
 -- |Returns a list of the potential targets of a proc call.
-callTargets :: ModuleImplementation -> Maybe ModSpec -> ProcName -> 
-               Compiler [ProcSpec]
-callTargets impl modspec name = do
-    modSpecs <- importedFrom impl modspec name
+callTargets :: Maybe ModSpec -> ProcName -> Compiler [ProcSpec]
+callTargets modspec name = do
+    modSpecs <- usedFrom modspec name
     maybes <- mapM (flip getSpecModule 
                     (Map.lookup name . pubProcs . modInterface)) 
               modSpecs
