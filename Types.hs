@@ -55,13 +55,6 @@ addOneType reason (PrimVarName name _) typ valid@(ValidTyping types) =
 addOneType _ _ _ invalid = invalid
 
 
--- checkCompatibleType :: TypeReason -> TypeSpec -> TypeSpec -> Typing -> Typing
--- checkCompatibleType reason sub super typing =
---     if sub `subtypeOf` super 
---     then typing
---     else InvalidTyping 
-
-
 -- |Returns the first argument restricted to the variables appearing 
 --  in the second.
 projectTyping :: Typing -> Typing -> Typing
@@ -96,6 +89,7 @@ typeCheckModSCC scc = do        -- must find fixpoint
 -- |Type check a single module named in the second argument; the 
 --  first argument is a list of all the modules in this module 
 -- dependency SCC.
+-- XXX must check submodules, too.
 typeCheckMod :: [ModSpec] -> ModSpec -> Compiler Bool
 typeCheckMod scc thisMod = do
     reenterModule thisMod
@@ -368,43 +362,3 @@ typecheckArg pos pspec (argNum,param,arg) typing =
                                (primParamType param)
                         then typing
                         else InvalidTyping1 reason
-
-        
--- checkOrInferParamTypes :: Typing -> OptPos -> PrimProto 
---                          -> Compiler PrimProto
--- checkOrInferParamTypes dict pos (PrimProto name params) = do
---     params' <- mapM (checkOrInferParamType dict name pos) params
---     return $ PrimProto name params'
-
--- checkOrInferParamType :: Typing -> Ident -> OptPos -> Param 
---                         -> Compiler Param
--- checkOrInferParamType dict proc pos (Param var typ flow) = do
---     let typ' = Map.findWithDefault Unspecified var dict
---     -- XXX wrong test; must allow declared type to be more specific, but not 
---     -- more general, than actual type
---     typ'' <- meetTypes typ' typ
---     when (isNothing typ'' || typ' /= (fromJust typ''))
---       (message Error 
---        ("Type error in " ++ proc ++ ":  " 
---         ++ var ++ " declared " ++ show typ 
---         ++ " but actually " ++ show typ')
---        pos)
---     return $ Param var typ' flow
-
--- -- -- |Find all possibilities for the argument types for a proc.  
--- -- procTypes :: ModSpec -> Ident -> Maybe Int -> [PrimArg] -> Compiler [[Type]]
--- -- --  Specified proc is imported from a different module, and so 
--- -- --  its type is known (all exported procs must have types declared), 
--- -- --  or it is defined in the current module.  In the latter case, if 
--- -- --  its types are not declared and not yet inferred, we must do so now.  
--- -- procTypes thisMod name num args = do
-
--- -- |Find the most specific generalisation of two types.
--- meetTypes :: TypeSpec -> TypeSpec -> Compiler (Maybe TypeSpec)
--- meetTypes Unspecified typ = return $ Just typ
--- meetTypes typ Unspecified = return $ Just typ
--- meetTypes t1 t2 =
---     if t1 == t2 then 
---         return $ Just t1
---     else
---         return Nothing
