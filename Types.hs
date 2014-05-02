@@ -293,7 +293,7 @@ typecheckSingle m mods call@(PrimCall cm name id args) pos typing = do
         Just spec -> return [spec]
     if List.null procs 
     then do
-      message Error "Call to unknown procedure or function" pos
+      message Error ("Call to unknown procedure or function " ++ name) pos
       return [(typing,PrimCall cm name id args)]
     else do
       pairsList <- mapM (\p -> do
