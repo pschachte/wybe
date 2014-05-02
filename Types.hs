@@ -300,8 +300,7 @@ typecheckSingle m mods call@(PrimCall cm name id args) pos typing = do
                            params <- getParams p
                            if length params == length args
                            then do
-                             let typing' = List.foldr (typecheckArg pos $
-                                                       fromJust id) 
+                             let typing' = List.foldr (typecheckArg pos p) 
                                            typing $ zip3 [1..] params args
                              return [(typing',PrimCall cm name (Just p) args)]
                            else
