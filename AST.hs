@@ -40,7 +40,7 @@ module AST (
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
-  usedFrom, callTargets,
+  refersTo, callTargets,
   showBody, showStmt, showBlock, showProcDef,
   shouldnt
   ) where
@@ -443,7 +443,7 @@ addImport modspec imp specific vis = do
                  Map.findWithDefault 
                  (ModDependency ImportNothing ImportNothing) 
                  modspec moddeps
-             uses' = addImports specific vis uses
+             uses' = if imp then uses else addImports specific vis uses
              imps' = if imp then addImports specific vis imps else imps
          in Map.insert modspec (ModDependency uses' imps') moddeps))
     updateInterface vis (updateDependencies (Set.insert modspec))
@@ -546,47 +546,51 @@ data Module = Module {
   }
 
 
--- |The list of modules from which the specified module can use the 
---  given (possibly module-qualified) name (whether proc, type,
---  submodule, etc).  This may include the module itself, or any
---  module it may be imported from.
-usedFrom :: Maybe ModSpec -> Ident -> Compiler [ModSpec]
-usedFrom modspec name = do
+-- |The list of defining modules that the given (possibly
+--  module-qualified) name (whether proc, type, submodule, etc) could
+--  possibly refer to.  This may include the module itself, or any
+--  module it may be imported from.  The reference to this name occurs
+--  in the current module.
+refersTo :: Maybe ModSpec -> Ident -> Compiler [ModSpec]
+refersTo modspec name = do
     currMod <- getModuleSpec
-    impl <- getModule (fromJust . modImplementation)
-    let imports = case modspec of
-            Nothing -> (currMod,ImportSpec Map.empty (Just Private)) :
-                       (List.map (\(spec,dep) -> (spec,modDepImports dep)) $
-                        assocs $ modImports impl)
-            Just spec -> maybe [] (\dep -> [(spec,modDepUses dep)]) $
-                         Map.lookup spec $ modImports impl
-    listlist <- mapM (\(mspec,ispec) -> case ispec of
-                           ImportNothing -> return []
-                           ImportSpec _ (Just _) -> do -- everything imported
-                               maybeIface <- getSpecModule mspec modInterface
-                               case maybeIface of
-                                   Just iface ->
-                                       if Map.member name (pubTypes iface) ||
-                                          Map.member name 
-                                          (pubResources iface) ||
-                                          Map.member name (pubProcs iface) ||
-                                          Map.member name 
-                                          (pubDependencies iface)
-                                       then return [mspec]
-                                       else return []
-                                   Nothing -> return []
-                           ImportSpec exports _ ->
-                               if Map.member name exports
-                               then return [mspec]
-                               else return [])
-                imports
-    return $ concat listlist
+    imports <- getModule (modImports . fromJust . modImplementation)
+    case modspec of
+        Nothing -> do
+            listlist <-
+                mapM (\(spec,dep) -> do
+                           vis <- makesVisible name spec $ modDepImports dep
+                           return $ if vis then [spec] else [])
+                $ assocs imports
+            return $ currMod:concat listlist
+        Just spec -> do
+            case Map.lookup spec imports of
+                Nothing -> return []
+                Just dep -> do
+                    isImported <- makesVisible name spec $ modDepImports dep
+                    isUsed <- makesVisible name spec $ modDepUses dep
+                    return $ if isImported || isUsed then [spec] else []
 
+
+-- |Does the specified import spec of the module with the specified
+--  interface make the specified identifier visible?
+makesVisible :: Ident -> ModSpec -> ImportSpec -> Compiler Bool
+makesVisible _ _ ImportNothing = return False
+makesVisible name mspec (ImportSpec imports maybeEverything) = do
+    maybeIface <- getSpecModule mspec modInterface
+    let iface = fromJust maybeIface
+    return $ Map.member name imports ||  -- either explicitly imported
+      (isJust maybeEverything &&         -- or everything imported and
+       (Map.member name (pubProcs iface) ||       -- it's exported as a proc
+        Map.member name (pubTypes iface) ||       -- or a type
+        Map.member name (pubResources iface) ||   -- or a resource
+        Map.member name (pubDependencies iface))) -- or a submodule
+    
 
 -- |Returns a list of the potential targets of a proc call.
 callTargets :: Maybe ModSpec -> ProcName -> Compiler [ProcSpec]
 callTargets modspec name = do
-    modSpecs <- usedFrom modspec name
+    modSpecs <- refersTo modspec name
     maybes <- mapM (flip getSpecModule 
                     (Map.lookup name . pubProcs . modInterface)) 
               modSpecs
