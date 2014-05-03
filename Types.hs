@@ -132,12 +132,12 @@ typecheckProcSCC :: ModSpec -> [ModSpec] -> SCC (Ident,[ProcDef]) ->
                     Compiler Bool
 typecheckProcSCC m mods (AcyclicSCC (name,defs)) = do
     -- A single pass is always enough for non-cyclic SCCs
-    liftIO $ putStrLn $ "Type checking non-recursive proc " ++ name
+    -- liftIO $ putStrLn $ "Type checking non-recursive proc " ++ name
     (_,allAgain) <- typecheckProcDefs m mods name defs
     return allAgain
 typecheckProcSCC m mods (CyclicSCC list) = do
-    liftIO $ putStrLn $ "Type checking recursive procs " ++ 
-      intercalate ", " (List.map fst list)
+    -- liftIO $ putStrLn $ "Type checking recursive procs " ++ 
+    --   intercalate ", " (List.map fst list)
     (modAgain,allAgain) <- 
         foldM (\(modAgain,allAgain) (name,defs) -> do
                     (modAgain',allAgain') <- typecheckProcDefs m mods name defs
@@ -178,15 +178,15 @@ typecheckProcDef m mods pd@(ProcDef name proto@(PrimProto pn params)
     let typing = List.foldr addDeclaredType initTyping $ zip params [1..]
     if validTyping typing
       then do
-        liftIO $ putStrLn $ "** Type checking " ++ name ++
-          ": " ++ show typing
+        -- liftIO $ putStrLn $ "** Type checking " ++ name ++
+        --   ": " ++ show typing
         (typing',def') <- typecheckBody m mods typing def
-        liftIO $ putStrLn $ "*resulting types " ++ name ++
-          ": " ++ show typing'
+        -- liftIO $ putStrLn $ "*resulting types " ++ name ++
+        --   ": " ++ show typing'
         let params' = updateParamTypes typing' params
         let modAgain = typing /= typing'
-        liftIO $ putStrLn $ "** check again   " ++ name ++
-          ": " ++ show modAgain
+        -- liftIO $ putStrLn $ "** check again   " ++ name ++
+        --   ": " ++ show modAgain
         return (ProcDef name (PrimProto pn params') def' pos tmpCnt vis,
                 modAgain,modAgain && vis == Public)
       else
@@ -257,10 +257,10 @@ typecheckPrims m mods clause (types,clauses) = do
 typecheckPlacedPrim :: ModSpec -> [ModSpec] -> [(Typing,[Placed Prim])] ->
                        Placed Prim -> Compiler [(Typing,[Placed Prim])]
 typecheckPlacedPrim m mods possibilities pprim = do
-    liftIO $ putStrLn $ "Type checking prim " ++ show pprim
+    -- liftIO $ putStrLn $ "Type checking prim " ++ show pprim
     possposs <- mapM (typecheckPrim m mods (content pprim) (place pprim)) 
                 possibilities
-    liftIO $ putStrLn $ "Done checking prim " ++ show pprim
+    -- liftIO $ putStrLn $ "Done checking prim " ++ show pprim
     return $ concat possposs
     
 
@@ -270,8 +270,8 @@ typecheckPrim :: ModSpec -> [ModSpec] -> Prim -> OptPos ->
                  (Typing,[Placed Prim]) ->
                  Compiler [(Typing,[Placed Prim])]
 typecheckPrim m mods prim pos (typing,body) = do
-    liftIO $ putStrLn $ "Type checking prim " ++ show prim
-    liftIO $ putStrLn $ "   with types " ++ show typing
+    -- liftIO $ putStrLn $ "Type checking prim " ++ show prim
+    -- liftIO $ putStrLn $ "   with types " ++ show typing
     possibilities <- typecheckSingle m mods prim pos typing
     return $ List.map (\(typing',prim') -> 
                         (typing',maybePlace prim' pos:body)) possibilities
@@ -287,7 +287,7 @@ typecheckSingle m mods call@(PrimCall cm name id args) pos typing = do
         Just spec -> return [spec]
     if List.null procs 
     then do
-      message Error ("Call to unknown procedure or function " ++ name) pos
+      -- message Error ("Call to unknown " ++ name) pos
       return [(typing,PrimCall cm name id args)]
     else do
       pairsList <- mapM (\p -> do

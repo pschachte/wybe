@@ -401,9 +401,9 @@ SimpleExp :: { Placed Exp }
 	                                     (place $1) }
     | optMod symbol ArgList     { Placed (Fncall $1 (symbolName $2) $3)
 	                                 (tokenPosition $2) }
-    | 'foreign' ident ident ArgList
+    | 'foreign' ident ident flags ArgList
                                 { Placed (ForeignFn (identName $2)
-					  (identName $3) $4)
+					  (identName $3) $4 $5)
                                          (tokenPosition $1) }
     | '[' ']'                   { Placed (Fncall Nothing "[]" [])
 	                                 (tokenPosition $1) }
@@ -419,6 +419,14 @@ Exp :: { Placed Exp }
     | 'let' Stmts 'in' Exp      { Placed (Where $2 $4) (tokenPosition $1) }
     | Exp 'where' ProcBody      { maybePlace (Where $3 $1) (place $1) }
     | SimpleExp                 { $1 }
+
+
+flags :: { [Ident] }
+    : revFlags                  { reverse $1 }
+
+revFlags :: { [Ident] }
+    : {- empty -}               { [] }
+    | revFlags ident            { identName $2:$1 }
 
 
 optMod :: { Maybe ModSpec }

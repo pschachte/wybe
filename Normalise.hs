@@ -89,12 +89,12 @@ addCtor vis typeName typeParams (FnProto ctorName params) = do
     normaliseItem 
       (FuncDecl Public (FnProto ctorName params) typespec
        (Unplaced $ Where 
-        ([Unplaced $ ForeignCall "$" "alloc" [Unplaced $ StringValue typeName,
-                                              Unplaced $ StringValue ctorName,
-                                              Unplaced $ Var "$rec" ParamOut]]
+        ([Unplaced $ ForeignCall "$" "alloc" []
+          [Unplaced $ StringValue typeName, Unplaced $ StringValue ctorName,
+           Unplaced $ Var "$rec" ParamOut]]
          ++
          (List.map (\(Param var _ dir) ->
-                     (Unplaced $ ForeignCall "$" "mutate"
+                     (Unplaced $ ForeignCall "$" "mutate" []
                       [Unplaced $ StringValue $ typeName,
                        Unplaced $ StringValue ctorName,
                        Unplaced $ StringValue var,
@@ -111,7 +111,7 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
     normaliseItem $ FuncDecl vis 
       (FnProto field [Param "$rec" rectype ParamIn])
       fieldtype 
-      (Unplaced $ ForeignFn "$" "access" 
+      (Unplaced $ ForeignFn "$" "access" []
        [Unplaced $ StringValue $ typeName rectype,
         Unplaced $ StringValue ctorName,
         Unplaced $ StringValue field,
@@ -121,7 +121,7 @@ addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
       (ProcProto field 
        [Param "$rec" rectype ParamInOut,
         Param "$field" fieldtype ParamIn])
-      [Unplaced $ ForeignCall "$" "mutate"
+      [Unplaced $ ForeignCall "$" "mutate" []
        [Unplaced $ StringValue $ typeName rectype,
         Unplaced $ StringValue ctorName,
         Unplaced $ StringValue field,
@@ -247,9 +247,9 @@ compileSimpleStmt' :: Stmt -> ClauseComp Prim
 compileSimpleStmt' (ProcCall maybeMod name args) = do
     args' <- mapM (compileArg . content) args
     return $ PrimCall maybeMod name Nothing args'
-compileSimpleStmt' (ForeignCall lang name args) = do
+compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- mapM (compileArg . content) args
-    return $ PrimForeign lang name Nothing args'
+    return $ PrimForeign lang name flags args'
 compileSimpleStmt' (Nop) = do
     return $ PrimNop
 compileSimpleStmt' stmt =

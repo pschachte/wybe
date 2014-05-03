@@ -181,7 +181,7 @@ unbranchStmt stmt@(ProcCall _ _ args) pos stmts = do
     defArgs args
     stmts' <- unbranchStmts stmts
     return $ (maybePlace stmt pos):stmts'
-unbranchStmt stmt@(ForeignCall _ _ args) pos stmts = do
+unbranchStmt stmt@(ForeignCall _ _ _ args) pos stmts = do
     defArgs args
     stmts' <- unbranchStmts stmts
     return $ (maybePlace stmt pos):stmts'
@@ -356,7 +356,7 @@ loopExitVars vars (stmt:stmts) =
 stmtLoopExitVars :: Set VarName -> Stmt -> [Placed Stmt] -> (Set VarName, Bool)
 stmtLoopExitVars  vars (ProcCall _ _ args) stmts =
     loopExitVars (outputVars vars args) stmts
-stmtLoopExitVars vars (ForeignCall _ _ args) stmts = do
+stmtLoopExitVars vars (ForeignCall _ _ _ args) stmts = do
     loopExitVars (outputVars vars args) stmts
 stmtLoopExitVars vars (Cond tst thn els) stmts =
     let (tstVars,tstExit) = loopExitVars vars tst

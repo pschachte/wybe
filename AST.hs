@@ -863,7 +863,7 @@ flowsOut ParamInOut = True
 -- |Source program statements.  These will be normalised into Prims.
 data Stmt
      = ProcCall (Maybe ModSpec) Ident [Placed Exp]
-     | ForeignCall Ident Ident [Placed Exp]
+     | ForeignCall Ident Ident [Ident] [Placed Exp]
      | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt]
      | Loop [Placed Stmt]
      | Nop -- Nop doesn't do anything so before and after are the same
@@ -883,7 +883,7 @@ data Exp
       | Where [Placed Stmt] (Placed Exp)
       | CondExp [Placed Stmt] (Placed Exp) (Placed Exp)
       | Fncall (Maybe ModSpec) Ident [Placed Exp]
-      | ForeignFn String String [Placed Exp]
+      | ForeignFn String String [Ident] [Placed Exp]
      deriving (Eq)
 
 -- |A loop generator (ie, an iterator).  These need to be 
@@ -930,7 +930,7 @@ data PrimVarName =
 data Prim
      -- XXX PrimCall should optionally contain a module spec.
      = PrimCall (Maybe ModSpec) ProcName (Maybe ProcSpec) [PrimArg]
-     | PrimForeign String ProcName (Maybe ProcID) [PrimArg]
+     | PrimForeign String ProcName [Ident] [PrimArg]
      | PrimGuard [Placed Prim] Integer
      | PrimFail
      | PrimNop
@@ -964,8 +964,8 @@ argFlowDirection (ArgChar _) = FlowIn
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
 expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name args
-expToStmt (ForeignFn lang name args) = 
-  ForeignCall lang name args
+expToStmt (ForeignFn lang name flags args) = 
+  ForeignCall lang name flags args
 expToStmt exp = error $ "Internal error: non-Fncall expr " ++ show exp
 
 
@@ -1258,9 +1258,9 @@ showPrim :: Int -> Prim -> String
 showPrim _ (PrimCall maybeMod name id args) =
         maybe (maybeModPrefix maybeMod ++ name) show id ++
         "(" ++ intercalate ", " (List.map show args) ++ ")"
-showPrim _ (PrimForeign lang name id args) =
+showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++ 
-        name ++ maybeShow "<" id ">" ++
+        name ++ (if List.null flags then "" else " " ++ unwords flags) ++
         "(" ++ intercalate ", " (List.map show args) ++ ")"
 showPrim ind (PrimGuard body val) =
         "begin guard " ++ show val ++
@@ -1290,9 +1290,10 @@ showStmt :: Int -> Stmt -> String
 showStmt _ (ProcCall maybeMod name args) =
     maybeModPrefix maybeMod ++
     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")\n"
-showStmt _ (ForeignCall lang name args) =
-    "foreign " ++ lang ++ " " ++ 
-    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")\n"
+showStmt _ (ForeignCall lang name flags args) =
+    "foreign " ++ lang ++ " " ++ name ++ 
+    (if List.null flags then "" else " " ++ unwords flags) ++
+    "(" ++ intercalate ", " (List.map show args) ++ ")\n"
 showStmt indent (Cond cond thn els) =
     let leadIn = List.replicate indent ' '
     in "if:\n" ++ showBody (indent+4) cond
@@ -1341,9 +1342,12 @@ instance Show Exp where
   show (Fncall maybeMod fn args) = 
     maybeModPrefix maybeMod ++
     fn ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
-  show (ForeignFn lang fn args) = 
+  show (ForeignFn lang fn flags args) = 
     "foreign " ++ lang ++ " " ++ fn 
+    ++ (if List.null flags then "" else " " ++ unwords flags)
     ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+  -- show (Typed exp typ) =
+  --     show exp ++ showTypeSuffix typ
 
 -- |maybeShow pre maybe pos
 --  if maybe has something, show pre, the maybe payload, and post

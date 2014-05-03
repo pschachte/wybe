@@ -184,9 +184,9 @@ flattenStmt (ProcCall maybeMod name args) pos = do
     args' <- flattenStmtArgs args pos
     emit pos $ ProcCall maybeMod name args'
     emitPostponed
-flattenStmt (ForeignCall lang name args) pos = do
+flattenStmt (ForeignCall lang name flags args) pos = do
     args' <- flattenStmtArgs args pos
-    emit pos $ ForeignCall lang name args'
+    emit pos $ ForeignCall lang name flags args'
     emitPostponed
 flattenStmt (Cond tst thn els) pos = do
     -- liftIO $ putStrLn $ "** Flattening test:\n" ++ showBody 4 tst
@@ -266,8 +266,8 @@ flattenExp (CondExp cond thn els) pos = do
     return $ [Unplaced $ Var resultName ParamIn]
 flattenExp (Fncall maybeMod name exps) pos = do
     flattenCall (ProcCall maybeMod name) pos exps
-flattenExp (ForeignFn lang name exps) pos = do
-    flattenCall (ForeignCall lang name) pos exps
+flattenExp (ForeignFn lang name flags exps) pos = do
+    flattenCall (ForeignCall lang name flags) pos exps
 
 
 flattenCall :: ([Placed Exp] -> Stmt) -> OptPos -> [Placed Exp] ->
