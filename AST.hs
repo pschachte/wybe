@@ -469,7 +469,7 @@ getParams (ProcSpec modSpec procName procID) = do
     mod <- getLoadedModule modSpec
     -- XXX shouldn't have to grovel in implementation to find prototype
     let impl = fromJust $ modImplementation $ fromJust mod
-    let def = (modProcs impl ! procName) !! procID
+    let def = (modProcs impl ! procName) !! (procID - 1)
     let PrimProto _ params = procProto def
     return params
 
@@ -547,54 +547,74 @@ data Module = Module {
 
 
 -- |The list of defining modules that the given (possibly
---  module-qualified) name (whether proc, type, submodule, etc) could
---  possibly refer to.  This may include the module itself, or any
---  module it may be imported from.  The reference to this name occurs
---  in the current module.
-refersTo :: Maybe ModSpec -> Ident -> Compiler [ModSpec]
-refersTo modspec name = do
+--  module-qualified) name could possibly refer to from the current
+--  module.  This may include the current module, or any module it may
+--  be imported from.  The ifaceMapFn is a Module selector function that
+--  produces a map that tells whether that module exports that name,
+--  and implMapFn tells whether a module implementation defines that
+--  name.  The reference to this name occurs in the current module.
+refersTo :: Maybe ModSpec -> Ident -> (ModuleImplementation -> Map Ident b) ->
+            (ModuleInterface -> Map Ident a) -> Compiler [ModSpec]
+refersTo modspec name implMapFn ifaceMapFn = do
     currMod <- getModuleSpec
-    imports <- getModule (modImports . fromJust . modImplementation)
-    case modspec of
-        Nothing -> do
-            listlist <-
-                mapM (\(spec,dep) -> do
-                           vis <- makesVisible name spec $ modDepImports dep
+    imports <- getModule (keys . modImports . fromJust . modImplementation)
+    let candidates = maybe (currMod:imports) (:[]) modspec
+    listlist <- mapM (\spec -> do
+                           vis <- makesVisible spec modspec name 
+                                  implMapFn ifaceMapFn
                            return $ if vis then [spec] else [])
-                $ assocs imports
-            return $ currMod:concat listlist
-        Just spec -> do
-            case Map.lookup spec imports of
-                Nothing -> return []
-                Just dep -> do
-                    isImported <- makesVisible name spec $ modDepImports dep
-                    isUsed <- makesVisible name spec $ modDepUses dep
-                    return $ if isImported || isUsed then [spec] else []
+                candidates
+    return $ concat listlist
 
 
--- |Does the specified import spec of the module with the specified
---  interface make the specified identifier visible?
-makesVisible :: Ident -> ModSpec -> ImportSpec -> Compiler Bool
-makesVisible _ _ ImportNothing = return False
-makesVisible name mspec (ImportSpec imports maybeEverything) = do
-    maybeIface <- getSpecModule mspec modInterface
-    let iface = fromJust maybeIface
-    return $ Map.member name imports ||  -- either explicitly imported
-      (isJust maybeEverything &&         -- or everything imported and
-       (Map.member name (pubProcs iface) ||       -- it's exported as a proc
-        Map.member name (pubTypes iface) ||       -- or a type
-        Map.member name (pubResources iface) ||   -- or a resource
-        Map.member name (pubDependencies iface))) -- or a submodule
+-- |Can current module access the given name in the given defining
+-- module?  The ifaceMapFn is a Module selector function that produces a
+-- map that tells whether that module exports that name, and implMapFn
+-- tells whether a module implementation defines that name.
+makesVisible :: ModSpec -> Maybe ModSpec ->Ident ->
+                (ModuleImplementation -> Map Ident a) ->
+                (ModuleInterface -> Map Ident b) -> Compiler Bool
+makesVisible defMod modRef name implMapFn ifaceMapFn = do
+    currMod <- getModuleSpec
+    if currMod == defMod
+      then do -- use of local module:  name only needs to be defined
+        maybeMap <- getModuleImplementationField implMapFn
+        when (isNothing maybeMap) $
+          error "current module missing implementation"
+        return $ Map.member name $ fromJust maybeMap
+      else do -- use of other module:  name must be exported or used
+        impln <- getSpecModule defMod modImplementation
+        if not $ Map.member name $ implMapFn $ fromJust $ fromJust impln
+          then return False -- target doesn't even define it
+          else do
+            maybeImports <- getModuleImplementationField modImports
+            when (isNothing maybeImports) $
+              error "current module missing implementation"
+            maybe 
+              (return False) 
+              (\(ModDependency uses imports) -> 
+                return (makesNameVisible imports name ||
+                        (isJust modRef && makesNameVisible uses name)))
+              (Map.lookup defMod $ fromJust maybeImports)
     
+
+makesNameVisible :: ImportSpec -> Ident -> Bool
+makesNameVisible ImportNothing _ = False
+makesNameVisible (ImportSpec nameVis _) name = Map.member name nameVis
+
 
 -- |Returns a list of the potential targets of a proc call.
 callTargets :: Maybe ModSpec -> ProcName -> Compiler [ProcSpec]
 callTargets modspec name = do
-    modSpecs <- refersTo modspec name
-    maybes <- mapM (flip getSpecModule 
-                    (Map.lookup name . pubProcs . modInterface)) 
-              modSpecs
-    return $ concat $ catMaybes $ catMaybes maybes
+    mods <- refersTo modspec name modProcs pubProcs
+    listlist <- mapM (\m -> do
+                           count <- getSpecModule m
+                                    (maybe 0 length . Map.lookup name . 
+                                     modProcs . fromJust . modImplementation)
+                           return [ProcSpec m name id | 
+                                   id <- [1..fromJust count]])
+                mods
+    return $ concat listlist
 
 
 -- |Apply the given function to the current module implementation.
@@ -883,7 +903,8 @@ data Exp
       | Where [Placed Stmt] (Placed Exp)
       | CondExp [Placed Stmt] (Placed Exp) (Placed Exp)
       | Fncall (Maybe ModSpec) Ident [Placed Exp]
-      | ForeignFn String String [Ident] [Placed Exp]
+      | ForeignFn Ident Ident [Ident] [Placed Exp]
+      | Typed Exp TypeSpec
      deriving (Eq)
 
 -- |A loop generator (ie, an iterator).  These need to be 
@@ -942,11 +963,11 @@ instance Show Prim where
 -- |The allowed arguments in primitive proc or foreign proc calls, 
 --  just variables and constants.
 data PrimArg 
-     = ArgVar PrimVarName PrimFlow ArgFlowType
-     | ArgInt Integer
-     | ArgFloat Double
-     | ArgString String
-     | ArgChar Char
+     = ArgVar PrimVarName TypeSpec PrimFlow ArgFlowType
+     | ArgInt Integer TypeSpec
+     | ArgFloat Double TypeSpec
+     | ArgString String TypeSpec
+     | ArgChar Char TypeSpec
      deriving Eq
 
 -- |Relates a primitive argument to the corresponding source argument
@@ -955,11 +976,11 @@ data ArgFlowType = Ordinary | FirstHalf | SecondHalf | Implicit
 
 -- |The dataflow direction of an actual argument.
 argFlowDirection :: PrimArg -> PrimFlow
-argFlowDirection (ArgVar _ flow _) = flow
-argFlowDirection (ArgInt _) = FlowIn
-argFlowDirection (ArgFloat _) = FlowIn
-argFlowDirection (ArgString _) = FlowIn
-argFlowDirection (ArgChar _) = FlowIn
+argFlowDirection (ArgVar _ _ flow _) = flow
+argFlowDirection (ArgInt _ _) = FlowIn
+argFlowDirection (ArgFloat _ _) = FlowIn
+argFlowDirection (ArgString _ _) = FlowIn
+argFlowDirection (ArgChar _ _) = FlowIn
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
@@ -994,12 +1015,12 @@ varsInPrimArgs dir args =
     List.foldr Set.union Set.empty $ List.map (varsInPrimArg dir) args
 
 varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
-varsInPrimArg dir (ArgVar var dir' _) = 
+varsInPrimArg dir (ArgVar var _ dir' _) = 
   if dir == dir' then Set.singleton var else Set.empty
-varsInPrimArg _ (ArgInt _)            = Set.empty
-varsInPrimArg _ (ArgFloat _)          = Set.empty
-varsInPrimArg _ (ArgString _)         = Set.empty
-varsInPrimArg _ (ArgChar _)           = Set.empty
+varsInPrimArg _ (ArgInt _ _)            = Set.empty
+varsInPrimArg _ (ArgFloat _ _)          = Set.empty
+varsInPrimArg _ (ArgString _ _)         = Set.empty
+varsInPrimArg _ (ArgChar _ _)           = Set.empty
 
 varsInProto :: PrimFlow -> PrimProto -> Set PrimVarName
 varsInProto dir (PrimProto _ params) =
@@ -1221,7 +1242,12 @@ instance Show ProcProto where
 -- |How to show a formal parameter.
 instance Show Param where
   show (Param name typ dir) =
-    flowPrefix dir ++ name ++ ":" ++ show typ
+    flowPrefix dir ++ name ++ showTypeSuffix typ
+
+showTypeSuffix :: TypeSpec -> String
+showTypeSuffix Unspecified = ""
+showTypeSuffix typ = ":" ++ show typ
+
 
 -- |How to show a dataflow direction.
 flowPrefix :: FlowDirection -> String
@@ -1321,14 +1347,14 @@ showBody indent stmts =
 
 -- |Show a primitive argument.
 instance Show PrimArg where
-  show (ArgVar name dir _) = primFlowPrefix dir ++ show name
-  show (ArgInt i) = show i
-  show (ArgFloat f) = show f
-  show (ArgString s) = show s
-  show (ArgChar c) = show c
+  show (ArgVar name typ dir _) = 
+      primFlowPrefix dir ++ show name ++ showTypeSuffix typ
+  show (ArgInt i typ)    = show i ++ showTypeSuffix typ
+  show (ArgFloat f typ)  = show f ++ showTypeSuffix typ
+  show (ArgString s typ) = show s ++ showTypeSuffix typ
+  show (ArgChar c typ)   = show c ++ showTypeSuffix typ
 
-
-  
+-- |Show a single typed expression.
 -- |Show a single expression.
 instance Show Exp where
   show (IntValue i) = show i
@@ -1346,8 +1372,8 @@ instance Show Exp where
     "foreign " ++ lang ++ " " ++ fn 
     ++ (if List.null flags then "" else " " ++ unwords flags)
     ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
-  -- show (Typed exp typ) =
-  --     show exp ++ showTypeSuffix typ
+  show (Typed exp typ) =
+      show exp ++ showTypeSuffix typ
 
 -- |maybeShow pre maybe pos
 --  if maybe has something, show pre, the maybe payload, and post

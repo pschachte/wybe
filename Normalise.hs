@@ -257,17 +257,21 @@ compileSimpleStmt' stmt =
 
 
 compileArg :: Exp -> ClauseComp PrimArg
-compileArg (IntValue int) = return $ ArgInt int
-compileArg (FloatValue float) = return $ ArgFloat float
-compileArg (StringValue string) = return $ ArgString string
-compileArg (CharValue char) = return $ ArgChar char
-compileArg (Var name ParamIn) = do
+compileArg = compileArg' Unspecified
+
+compileArg' :: TypeSpec -> Exp -> ClauseComp PrimArg
+compileArg' typ (IntValue int) = return $ ArgInt int typ
+compileArg' typ (FloatValue float) = return $ ArgFloat float typ
+compileArg' typ (StringValue string) = return $ ArgString string typ
+compileArg' typ (CharValue char) = return $ ArgChar char typ
+compileArg' typ (Var name ParamIn) = do
     name' <- currVar name
-    return $ ArgVar name' FlowIn Ordinary
-compileArg (Var name ParamOut) = do
+    return $ ArgVar name' typ FlowIn Ordinary
+compileArg' typ (Var name ParamOut) = do
     name' <- nextVar name
-    return $ ArgVar name' FlowOut Ordinary
-compileArg arg =
+    return $ ArgVar name' typ FlowOut Ordinary
+compileArg' _ (Typed exp typ) = compileArg' typ exp
+compileArg' _ arg =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 
 
@@ -282,5 +286,5 @@ reconcileOne :: (Map VarName Int) -> (Map VarName Int) -> VarName -> Placed Prim
 reconcileOne caseVars jointVars var =
     Unplaced $
     PrimCall Nothing "=" Nothing [
-        ArgVar (mkPrimVarName jointVars var) FlowOut Ordinary,
-        ArgVar (mkPrimVarName caseVars var) FlowIn Ordinary]
+        ArgVar (mkPrimVarName jointVars var) Unspecified FlowOut Ordinary,
+        ArgVar (mkPrimVarName caseVars var) Unspecified FlowIn Ordinary]

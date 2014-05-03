@@ -411,6 +411,8 @@ SimpleExp :: { Placed Exp }
 	                                 (tokenPosition $1) }
     | '{' '}'                   { Placed (Fncall Nothing "{}" [])
 	                                 (tokenPosition $1) }
+    | Exp ':' Type              { maybePlace (Typed (content $1) $3)
+	                                 (place $1) }
 
 Exp :: { Placed Exp }
     : 'if' Stmt 'then' Exp 'else' Exp
