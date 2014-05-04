@@ -47,10 +47,10 @@ planRenaming naming clause =
 
 
 planPrimRenaming :: Renaming -> Prim -> Renaming
-planPrimRenaming naming (PrimCall Nothing "=" _ [ArgVar name1 _ FlowOut _, 
+planPrimRenaming naming (PrimCall [] "=" _ [ArgVar name1 _ FlowOut _, 
                                                  ArgVar name2 _ FlowIn _]) =
     planAssignRenaming naming name1 name2
-planPrimRenaming naming (PrimCall Nothing "=" _ [ArgVar name1 _ FlowIn _, 
+planPrimRenaming naming (PrimCall [] "=" _ [ArgVar name1 _ FlowIn _, 
                                                  ArgVar name2 _ FlowOut _]) =
     planAssignRenaming naming name2 name1
 planPrimRenaming naming _ = naming
@@ -86,7 +86,7 @@ executePrimRenaming naming placed =
 
 
 renamePrim :: Renaming -> Prim -> [Prim]
-renamePrim naming (PrimCall Nothing "=" _ 
+renamePrim naming (PrimCall [] "=" _ 
                    [ArgVar name1 _ _ _, ArgVar name2 _ _ _])
   | ultimateTarget naming name1 == ultimateTarget naming name2 = []
 renamePrim naming (PrimCall maybeMod name id args) =

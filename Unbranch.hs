@@ -337,7 +337,7 @@ newProcCall name inVars outVars pos = do
     let inArgs  = [Unplaced $ Var v ParamIn | v <- Set.elems inVars] 
     let outArgs = [Unplaced $ Var v ParamOut | v <- Set.elems outVars]
     currMod <- lift getModuleSpec
-    return $ maybePlace (ProcCall (Just currMod) name (inArgs ++ outArgs)) pos
+    return $ maybePlace (ProcCall currMod name (inArgs ++ outArgs)) pos
 
 
 newProcProto :: ProcName -> Set VarName -> Set VarName -> ProcProto

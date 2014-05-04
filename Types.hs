@@ -113,9 +113,9 @@ typeCheckMod scc thisMod = do
 --  list of prims.  
 localCalledProcs :: ModSpec -> [Prim] -> [Ident]
 localCalledProcs _ [] = []
-localCalledProcs thisMod (PrimCall Nothing name _ _:rest) =
+localCalledProcs thisMod (PrimCall [] name _ _:rest) =
     name:localCalledProcs thisMod rest
-localCalledProcs thisMod (PrimCall (Just m) name _ _:rest)
+localCalledProcs thisMod (PrimCall m name _ _:rest)
   | m == thisMod = name:localCalledProcs thisMod rest
 localCalledProcs thisMod (_:rest) = localCalledProcs thisMod rest
 

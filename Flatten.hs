@@ -202,9 +202,9 @@ flattenStmt (Loop body) pos = do
 flattenStmt (For itr gen) pos = do
     genVar <- tempVar
     saveInit pos $ 
-      ProcCall Nothing "init_seq" [gen, Unplaced $ Var genVar ParamOut]
+      ProcCall [] "init_seq" [gen, Unplaced $ Var genVar ParamOut]
     flattenStmt (Cond [maybePlace 
-                       (ProcCall Nothing "in" [itr,
+                       (ProcCall [] "in" [itr,
                                                Unplaced $ Var genVar ParamIn,
                                                Unplaced $ Var genVar ParamOut])
                        pos]
@@ -259,9 +259,9 @@ flattenExp (Where stmts pexp) _ = do
 flattenExp (CondExp cond thn els) pos = do
     resultName <- tempVar
     flattenStmt (Cond cond
-                 [Unplaced $ ProcCall Nothing "=" 
+                 [Unplaced $ ProcCall [] "=" 
                   [Unplaced $ Var resultName ParamOut,thn]]
-                 [Unplaced $ ProcCall Nothing "=" 
+                 [Unplaced $ ProcCall [] "=" 
                   [Unplaced $ Var resultName ParamOut,els]]) pos
     return $ [Unplaced $ Var resultName ParamIn]
 flattenExp (Fncall maybeMod name exps) pos = do

@@ -553,12 +553,12 @@ data Module = Module {
 --  produces a map that tells whether that module exports that name,
 --  and implMapFn tells whether a module implementation defines that
 --  name.  The reference to this name occurs in the current module.
-refersTo :: Maybe ModSpec -> Ident -> (ModuleImplementation -> Map Ident b) ->
+refersTo :: ModSpec -> Ident -> (ModuleImplementation -> Map Ident b) ->
             (ModuleInterface -> Map Ident a) -> Compiler [ModSpec]
 refersTo modspec name implMapFn ifaceMapFn = do
     currMod <- getModuleSpec
     imports <- getModule (keys . modImports . fromJust . modImplementation)
-    let candidates = maybe (currMod:imports) (:[]) modspec
+    let candidates = if List.null modspec then currMod:imports else [modspec]
     listlist <- mapM (\spec -> do
                            vis <- makesVisible spec modspec name 
                                   implMapFn ifaceMapFn
@@ -571,7 +571,7 @@ refersTo modspec name implMapFn ifaceMapFn = do
 -- module?  The ifaceMapFn is a Module selector function that produces a
 -- map that tells whether that module exports that name, and implMapFn
 -- tells whether a module implementation defines that name.
-makesVisible :: ModSpec -> Maybe ModSpec ->Ident ->
+makesVisible :: ModSpec -> ModSpec ->Ident ->
                 (ModuleImplementation -> Map Ident a) ->
                 (ModuleInterface -> Map Ident b) -> Compiler Bool
 makesVisible defMod modRef name implMapFn ifaceMapFn = do
@@ -594,7 +594,7 @@ makesVisible defMod modRef name implMapFn ifaceMapFn = do
               (return False) 
               (\(ModDependency uses imports) -> 
                 return (makesNameVisible imports name ||
-                        (isJust modRef && makesNameVisible uses name)))
+                        (modRef /= [] && makesNameVisible uses name)))
               (Map.lookup defMod $ fromJust maybeImports)
     
 
@@ -604,7 +604,7 @@ makesNameVisible (ImportSpec nameVis _) name = Map.member name nameVis
 
 
 -- |Returns a list of the potential targets of a proc call.
-callTargets :: Maybe ModSpec -> ProcName -> Compiler [ProcSpec]
+callTargets :: ModSpec -> ProcName -> Compiler [ProcSpec]
 callTargets modspec name = do
     mods <- refersTo modspec name modProcs pubProcs
     listlist <- mapM (\m -> do
@@ -830,6 +830,7 @@ type ProcID = Int
 -- |A type specification:  the type name and type parameters.  Also 
 --  could be Unspecified, meaning a type to be inferred.
 data TypeSpec = TypeSpec {
+    typeMod::ModSpec,
     typeName::Ident,
     typeParams::[TypeSpec] 
     } | Unspecified
@@ -882,7 +883,7 @@ flowsOut ParamInOut = True
 
 -- |Source program statements.  These will be normalised into Prims.
 data Stmt
-     = ProcCall (Maybe ModSpec) Ident [Placed Exp]
+     = ProcCall ModSpec Ident [Placed Exp]
      | ForeignCall Ident Ident [Ident] [Placed Exp]
      | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt]
      | Loop [Placed Stmt]
@@ -902,7 +903,7 @@ data Exp
       | Var VarName FlowDirection
       | Where [Placed Stmt] (Placed Exp)
       | CondExp [Placed Stmt] (Placed Exp) (Placed Exp)
-      | Fncall (Maybe ModSpec) Ident [Placed Exp]
+      | Fncall ModSpec Ident [Placed Exp]
       | ForeignFn Ident Ident [Ident] [Placed Exp]
       | Typed Exp TypeSpec
      deriving (Eq)
@@ -950,7 +951,7 @@ data PrimVarName =
 --  loop.
 data Prim
      -- XXX PrimCall should optionally contain a module spec.
-     = PrimCall (Maybe ModSpec) ProcName (Maybe ProcSpec) [PrimArg]
+     = PrimCall ModSpec ProcName (Maybe ProcSpec) [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
      | PrimGuard [Placed Prim] Integer
      | PrimFail
@@ -1090,9 +1091,9 @@ showModSpecs :: [ModSpec] -> String
 showModSpecs specs = intercalate ", " $ List.map showModSpec specs
 
 -- |Show a module prefix if specified
-maybeModPrefix :: Maybe ModSpec -> String
-maybeModPrefix Nothing = ""
-maybeModPrefix (Just modSpec) = showModSpec modSpec ++ "."
+maybeModPrefix :: ModSpec -> String
+maybeModPrefix modSpec = 
+    if List.null modSpec then [] else showModSpec modSpec ++ "."
 
 
 -- |How to show a module dependency.
@@ -1230,9 +1231,10 @@ showProcDef thisID (ProcDef _ proto def pos _ vis) =
 -- |How to show a type specification.
 instance Show TypeSpec where
   show Unspecified = "?"
-  show (TypeSpec ident []) = ident
-  show (TypeSpec ident args) = 
-    ident ++ "(" ++ (intercalate "," $ List.map show args) ++ ")"
+  show (TypeSpec optmod ident args) = 
+      maybeModPrefix optmod ++ ident ++
+      if List.null args then ""
+      else "(" ++ (intercalate "," $ List.map show args) ++ ")"
 
 -- |How to show a proc prototype.
 instance Show ProcProto where

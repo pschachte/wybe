@@ -64,7 +64,7 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   ProcDecl 
   vis
   (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
-  [Unplaced $ ProcCall Nothing "=" [Unplaced $ Var "$" ParamOut, result]]
+  [Unplaced $ ProcCall [] "=" [Unplaced $ Var "$" ParamOut, result]]
   pos
 normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
     proto' <- flattenProto proto
@@ -85,7 +85,8 @@ normaliseItem (StmtDecl stmt pos) = do
 -- |Add a contructor for the specified type.
 addCtor :: Visibility -> Ident -> [Ident] -> FnProto -> Compiler ()
 addCtor vis typeName typeParams (FnProto ctorName params) = do
-    let typespec = TypeSpec typeName $ List.map (\n->TypeSpec n []) typeParams
+    let typespec = TypeSpec [] typeName $ 
+                   List.map (\n->TypeSpec [] n []) typeParams
     normaliseItem 
       (FuncDecl Public (FnProto ctorName params) typespec
        (Unplaced $ Where 
@@ -285,6 +286,6 @@ reconcilingAssignments caseVars jointVars =
 reconcileOne :: (Map VarName Int) -> (Map VarName Int) -> VarName -> Placed Prim
 reconcileOne caseVars jointVars var =
     Unplaced $
-    PrimCall Nothing "=" Nothing [
+    PrimCall [] "=" Nothing [
         ArgVar (mkPrimVarName jointVars var) Unspecified FlowOut Ordinary,
         ArgVar (mkPrimVarName caseVars var) Unspecified FlowIn Ordinary]
