@@ -39,8 +39,8 @@ normaliseItem :: Item -> Compiler ()
 normaliseItem (TypeDecl vis (TypeProto name params) items pos) = do
     dir <- getDirectory
     parentmod <- getModuleSpec
-    enterModule dir (parentmod ++ [name]) (Just params)
     addType name (TypeDef (length params) pos) vis
+    enterModule dir (parentmod ++ [name]) (Just params)
     normalise items
     mod <- finishModule
     addSubmod name mod pos vis
