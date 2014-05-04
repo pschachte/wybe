@@ -433,12 +433,7 @@ revFlags :: { [Ident] }
 
 optMod :: { ModSpec }
     : {- empty -}               { [] }
---    | modSpecRev '.'            { reverse $1 }
-
-
-modSpecRev :: { ModSpec }
-    : ident                     { [identName $1] }
-    | modSpecRev '.' ident      { identName $2:$1 }
+--    | ModSpec '.'               { $1 }
 
 
 ListTail :: { Placed Exp }
