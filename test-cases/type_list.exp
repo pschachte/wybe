@@ -1,11 +1,11 @@
 
  Module type_list
   public submods  : list @type_list:1:8
-  public types    : 
+  public types    : list/1 @type_list:1:8
   public resources: 
   public procs    : type_list.++<0>
   imports         : 
-  types           : 
+  types           : list/1 @type_list:1:8
   resources       : 
   procs           : ++:
 public proc ++(x:0:list(t), y:0:list(t), ?$:0:?) (id 0):  @type_list:6:8
@@ -31,7 +31,7 @@ Submodules of type_list:
 list: 
  Module type_list.list(["t"])
   public submods  : 
-  public types    : list/1 @type_list:1:8
+  public types    : 
   public resources: 
   public procs    : type_list.list.[]<0>
                     type_list.list.[|]<0>
@@ -40,7 +40,7 @@ list:
                     type_list.list.tail<1>
                     type_list.list.tail<0>
   imports         : 
-  types           : list/1 @type_list:1:8
+  types           : 
   resources       : 
   procs           : []:
 public proc [](?$:0:list(t)) (id 0): 

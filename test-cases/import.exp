@@ -1,11 +1,11 @@
 
  Module position
   public submods  : position @position:1:8
-  public types    : 
+  public types    : position/0 @position:1:8
   public resources: 
   public procs    : 
   imports         : 
-  types           : 
+  types           : position/0 @position:1:8
   resources       : 
   procs           : 
 
@@ -13,7 +13,7 @@ Submodules of position:
 position: 
  Module position.position([])
   public submods  : 
-  public types    : position/0 @position:1:8
+  public types    : 
   public resources: 
   public procs    : position.position.position<0>
                     position.position.x<1>
@@ -21,7 +21,7 @@ position:
                     position.position.y<1>
                     position.position.y<0>
   imports         : 
-  types           : position/0 @position:1:8
+  types           : 
   resources       : 
   procs           : position:
 public proc position(x:0:int, y:0:int, ?$:0:position) (id 0): 

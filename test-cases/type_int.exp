@@ -1,11 +1,11 @@
 
  Module type_int
   public submods  : int @type_int:1:8
-  public types    : 
+  public types    : int/0 @type_int:1:8
   public resources: 
   public procs    : 
   imports         : 
-  types           : 
+  types           : int/0 @type_int:1:8
   resources       : 
   procs           : 
 
@@ -13,7 +13,7 @@ Submodules of type_int:
 int: 
  Module type_int.int([])
   public submods  : 
-  public types    : int/0 @type_int:1:8
+  public types    : 
   public resources: 
   public procs    : type_int.int.*<0>
                     type_int.int.+<2>
@@ -30,7 +30,7 @@ int:
                     type_int.int.><0>
                     type_int.int.>=<0>
   imports         : 
-  types           : int/0 @type_int:1:8
+  types           : 
   resources       : 
   procs           : *:
 public proc *(x:0:int, y:0:int, ?$:0:int) (id 0):  @type_int:8:12
