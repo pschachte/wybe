@@ -15,6 +15,9 @@ module Options (Options(..), handleCmdline, verbose) where
 import System.Console.GetOpt
 import System.Environment
 import System.Exit
+import Data.List as List
+import Data.List.Split
+import Data.Map as Map
 import Version
 
 -- |Command line options for the wybe compiler.
@@ -24,6 +27,7 @@ data Options = Options{
     , optVerbosity   :: Int      -- ^How much debugging and progress output
     , optShowVersion :: Bool     -- ^Print compiler version and exit
     , optShowHelp    :: Bool     -- ^Print compiler help and exit
+    , optLibDirs     :: [String] -- ^Directories where library files live
     } deriving Show
 
 -- |Defaults for all compiler options
@@ -33,6 +37,7 @@ defaultOptions    = Options
  , optVerbosity   = 0
  , optShowVersion = False
  , optShowHelp    = False
+ , optLibDirs     = []
  }
 
 -- |Command line option parser and help text
@@ -44,6 +49,9 @@ options =
  , Option [] ["force-all"]
      (NoArg (\ opts -> opts { optForceAll = True }))
    "force compilation of all dependencies"
+ , Option ['L']     ["libdir"]
+   (ReqArg (\ d opts -> opts { optLibDirs = optLibDirs opts ++ [d] }) "DIR")
+         "specify a library directory [default $WYBELIBS]"
  , Option ['v'] ["verbose"]
      (NoArg (\ opts -> opts { optVerbosity = 1 + optVerbosity opts }))
      "verbose output on stderr"
@@ -64,7 +72,7 @@ header = "Usage: wybemk [OPTION...] targets..."
 compilerOpts :: [String] -> IO (Options, [String])
 compilerOpts argv = 
   case getOpt Permute options argv of
-    (o,n,[]  ) -> return (foldl (flip id) defaultOptions o, n)
+    (o,n,[]  ) -> return (List.foldl (flip id) defaultOptions o, n)
     (_,_,errs) -> ioError (userError (concat errs ++ usageInfo header options))
 
 -- |Was the specified verbosity level (or greater) specified?
@@ -76,11 +84,28 @@ verbose n opts = optVerbosity opts >= n
 handleCmdline :: IO (Options, [String])
 handleCmdline = do
     argv <- getArgs
-    (opts,files) <- compilerOpts argv
-    if optShowHelp opts then do
+    assocList <- getEnvironment
+    let env = Map.fromList assocList
+    (opts0,files) <- compilerOpts argv
+    let opts = if List.null $ optLibDirs opts0
+                then maybe (opts0  { optLibDirs = ["."] })
+                     (\l -> opts0 { optLibDirs = splitOn ":" l }) $
+                     Map.lookup "WYBELIBS" env
+                else opts0
+    if optShowHelp opts 
+      then do
         putStrLn $ usageInfo header options
         exitSuccess
-      else if optShowVersion opts then do
+      else if optShowVersion opts 
+           then do
                putStrLn $ "wybemk " ++ version ++ "\nBuilt " ++ buildDate
+               putStrLn $ "Using " ++ show (length (optLibDirs opts)) ++
+                 " library directories:\n    " ++
+                 intercalate "\n    " (optLibDirs opts)
                exitSuccess
-           else return (opts,files)
+           else if List.null files 
+                then do
+                    putStrLn $ usageInfo header options
+                    exitFailure
+                else do
+                    return (opts,files)
