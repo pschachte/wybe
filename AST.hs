@@ -41,7 +41,7 @@ module AST (
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
   refersTo, callTargets,
-  showBody, showStmt, showBlock, showProcDef,
+  showBody, showStmt, showBlock, showProcDef, showModSpec,
   shouldnt
   ) where
 
@@ -173,7 +173,7 @@ data CompilerState = Compiler {
   options :: Options,            -- ^compiler options specified on command line
   msgs :: [String],              -- ^warnings, error messages, and info messages
   errorState :: Bool,            -- ^whether or not we've seen any errors
-  modules :: Map ModSpec Module, -- ^all known modules
+  modules :: Map ModSpec Module, -- ^all known modules except what we're loading
   loadCount :: Int,              -- ^counter of module load order
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
   deferred :: [Module],          -- ^modules in the same SCC as the current one

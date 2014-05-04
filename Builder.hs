@@ -32,7 +32,7 @@
 -- |Code to oversee the compilation process.
 module Builder (buildTargets, compileModule) where
 
-import Options         (Options, verbose, optForce, optForceAll)
+import Options         (Options, verbose, optForce, optForceAll, optLibDirs)
 import AST
 import Parser          (parse)
 import Scanner         (inputTokens, fileTokens, Token)
@@ -73,8 +73,8 @@ buildTarget force target = do
       then message Error ("Unknown target file type " ++ target) Nothing
       else do
         let modname = takeBaseName target
-        built <- buildModuleIfNeeded force modname (fileObjFile target) 
-                (fileSourceFile target)
+        let dir = takeDirectory target
+        built <- buildModuleIfNeeded force [modname] [dir]
         -- XXX prints nothing to be done even when dependencies were built
         -- XXX doesn't build executable even when dependencies were built
         if (built==False) 
@@ -86,48 +86,79 @@ buildTarget force target = do
 -- |Compile or load a module dependency.
 buildDependency :: ModSpec -> Compiler ()
 buildDependency modspec = do
-    dir <- getDirectory
-    let srcfile = moduleFilePath sourceExtension dir modspec
-    let objfile = moduleFilePath objectExtension dir modspec
-    let modname = takeBaseName srcfile
     force <- option optForceAll
-    buildModuleIfNeeded force modname objfile srcfile
+    possDirs <- gets (optLibDirs . options)
+    buildModuleIfNeeded force modspec possDirs
     return ()
 
 
 -- |Compile a single module to an object file.
-buildModuleIfNeeded :: Bool            -- ^Force compilation of this module
-              -> Ident         -- ^Module name
-              -> FilePath      -- ^Object file to generate
-              -> FilePath      -- ^Source file to compile if necessary
+buildModuleIfNeeded :: Bool    -- ^Force compilation of this module
+              -> ModSpec       -- ^Module name
+              -> [FilePath]    -- ^Directories to look in
               -> Compiler Bool -- ^Returns whether or not file 
                               -- actually needed to be compiled
-buildModuleIfNeeded force modname objfile srcfile = do
-    maybemod <- getLoadedModule [modname]
-    case maybemod of
-        Just modl -> return False
-        Nothing -> do
-            exists <- (liftIO . doesFileExist) srcfile
-            objExists <- (liftIO . doesFileExist) objfile
-            if not exists 
-              then do
-                message Error ("Source file " ++ srcfile ++ " does not exist")
-                  Nothing
-                return False
-              else if not objExists || force 
-                   then do
-                       buildModule modname objfile srcfile
-                       return True
-                   else do
-                       srcDate <- (liftIO . getModificationTime) srcfile
-                       dstDate <- (liftIO . getModificationTime) objfile
-                       if srcDate > dstDate
-                         then do 
-                           buildModule modname objfile srcfile
-                           return True
-                         else do
-                           loadModule objfile
-                           return False
+buildModuleIfNeeded force modspec possDirs = do
+    loading <- gets (List.elem modspec . List.map modSpec . underCompilation)
+    if loading
+      then return False
+      else do
+        maybemod <- getLoadedModule modspec
+        case maybemod of
+            Just modl -> return False -- nothing to do
+            Nothing -> do
+                srcOb <- srcObjFiles modspec possDirs
+                case srcOb of
+                    Nothing -> do
+                        message Error ("Could not find module " ++ 
+                                       showModSpec modspec) Nothing
+                        return False
+                    Just (_,False,objfile,True,_) -> do 
+                        -- only object file exists
+                        loadModule objfile
+                        return False
+                    Just (srcfile,True,objfile,False,modname) -> do 
+                        -- only source file exists
+                        buildModule modname objfile srcfile
+                        return True
+                    Just (srcfile,True,objfile,True,modname) -> do
+                        srcDate <- (liftIO . getModificationTime) srcfile
+                        dstDate <- (liftIO . getModificationTime) objfile
+                        if force || srcDate > dstDate
+                          then do
+                            buildModule modname objfile srcfile
+                            return True
+                          else
+                            return False
+                    Just (_,False,_,False,_) ->
+                        shouldnt "inconsistent file existence"
+
+
+-- |Find the source and/or object files for the specified module.  We
+-- search the library search path for the files.  
+srcObjFiles :: ModSpec -> [FilePath] -> 
+               Compiler (Maybe (FilePath,Bool,FilePath,Bool,Ident))
+srcObjFiles modspec possDirs = do
+    let splits = List.map (flip take modspec) [1..length modspec]
+    dirs <- mapM (\d -> do
+                       mapM (\ms -> do
+                                  let srcfile = moduleFilePath sourceExtension 
+                                                d ms
+                                  let objfile = moduleFilePath objectExtension 
+                                                d ms
+                                  let modname = List.last ms
+                                  srcExists <- (liftIO . doesFileExist) srcfile
+                                  objExists <- (liftIO . doesFileExist) objfile
+                                  return $ if srcExists || objExists 
+                                           then [(srcfile,srcExists,
+                                                  objfile,objExists,modname)]
+                                           else [])
+                         splits)
+            possDirs
+    let validDirs = concat $ concat dirs
+    if List.null validDirs
+      then return Nothing
+      else return $ Just $ head validDirs
 
 
 -- |Actually load and compile the module
@@ -194,7 +225,9 @@ compileModSCC specs = do
     mods <- mapM getLoadedModule specs
     verboseMsg 1 $
         return (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
-                (List.map show $ catMaybes mods))
+                (List.map show $ 
+                 List.filter ((/=["wybe"]) . modSpec) $
+                 catMaybes mods))
     -- mapM_ resolveOverloading specs
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs . 
@@ -238,7 +271,7 @@ localCheckMod spec = do
 handleImports :: Compiler ()
 handleImports = do
     imports <- getModuleImplementationField (keys . modImports)
-    mapM_ buildDependency $ fromJust imports
+    mapM_ buildDependency $ fromJust imports ++ [["wybe"]]
     -- modspec <- getModuleSpec
     -- mod <- getModule id
     -- updateModules (Map.insert modspec mod)

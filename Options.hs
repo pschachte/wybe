@@ -15,6 +15,7 @@ module Options (Options(..), handleCmdline, verbose) where
 import System.Console.GetOpt
 import System.Environment
 import System.Exit
+import System.FilePath
 import Data.List as List
 import Data.List.Split
 import Data.Map as Map
@@ -89,7 +90,7 @@ handleCmdline = do
     (opts0,files) <- compilerOpts argv
     let opts = if List.null $ optLibDirs opts0
                 then maybe (opts0  { optLibDirs = ["."] })
-                     (\l -> opts0 { optLibDirs = splitOn ":" l }) $
+                     (\l -> opts0 { optLibDirs = splitSearchPath l }) $
                      Map.lookup "WYBELIBS" env
                 else opts0
     if optShowHelp opts 
