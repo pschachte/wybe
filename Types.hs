@@ -307,8 +307,8 @@ typecheckSingle m mods call@(PrimCall cm name id args) pos typing = do
       let validPairs = List.filter (validTyping . fst) pairs
       if List.null validPairs 
       then do
-        message Error ("Error in call:\n" ++ 
-                       reportTypeErrors (List.map fst pairs)) pos
+        -- message Error ("Error in call:\n" ++ 
+        --                reportTypeErrors (List.map fst pairs)) pos
         return [(typing,PrimCall cm name id args)]
       else
           return validPairs
