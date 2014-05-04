@@ -1,0 +1,45 @@
+# The Wybe standard library (built-ins)
+
+public type int is
+    public func +(x:int,y:int):int = foreign llvm add(32,x,y)
+    public proc +(?x:int,y:int,z:int) ?x = foreign llvm sub(32,z,y) end
+    public proc +(x:int,?y:int,z:int) ?y = foreign llvm sub(32,z,x) end
+    public func -(x:int,y:int):int = foreign llvm sub(32,x,y)
+    public proc -(?x:int,y:int,z:int) ?x = foreign llvm add(32,z,y) end
+    public proc -(x:int,?y:int,z:int) ?y = foreign llvm sub(32,z,x) end
+    public func *(x:int,y:int):int = foreign llvm mul(32,x,y)
+    public func /(x:int,y:int):int = foreign llvm sdiv(32,x,y)
+    public func ==(x:int,y:int):bool = foreign llvm icmp eq(32,x,y)
+    public func /=(x:int,y:int):bool = foreign llvm icmp ne(32,x,y)
+    public func <(x:int,y:int):bool = foreign llvm icmp slt(32,x,y)
+    public func <=(x:int,y:int):bool = foreign llvm icmp sle(32,x,y)
+    public func >(x:int,y:int):bool = foreign llvm icmp sgt(32,x,y)
+    public func >=(x:int,y:int):bool = foreign llvm icmp sge(32,x,y)
+end
+
+
+public type float is
+    public func +(x:float,y:float):float = foreign llvm fadd(64,x,y)
+    public proc +(?x:float,y:float,z:float) ?x = foreign llvm fsub(64,z,y) end
+    public proc +(x:float,?y:float,z:float) ?y = foreign llvm fsub(64,z,x) end
+    public func -(x:float,y:float):float = foreign llvm fsub(64,x,y)
+    public proc -(?x:float,y:float,z:float) ?x = foreign llvm fadd(64,z,y) end
+    public proc -(x:float,?y:float,z:float) ?y = foreign llvm fsub(64,z,x) end
+    public func *(x:float,y:float):float = foreign llvm fmul(64,x,y)
+    public func /(x:float,y:float):float = foreign llvm fdiv(64,x,y)
+    public func ==(x:float,y:float):bool = foreign llvm fcmp eq(64,x,y)
+    public func /=(x:float,y:float):bool = foreign llvm fcmp ne(64,x,y)
+    public func <(x:float,y:float):bool = foreign llvm fcmp slt(64,x,y)
+    public func <=(x:float,y:float):bool = foreign llvm fcmp sle(64,x,y)
+    public func >(x:float,y:float):bool = foreign llvm fcmp sgt(64,x,y)
+    public func >=(x:float,y:float):bool = foreign llvm fcmp sge(64,x,y)
+end
+
+
+public type bool is
+    public func true:bool = 1
+    public func false:bool = 0
+    # public func and(p:bool, q:bool):bool = foreign llvm and(p,q)
+    # public func or(p:bool, q:bool):bool = foreign llvm or(p,q)
+    # public func not(p:bool):bool = foreign xor(p,1)
+end
