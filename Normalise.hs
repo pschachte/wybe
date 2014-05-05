@@ -27,6 +27,7 @@ import AssignElim
 normalise :: [Item] -> Compiler ()
 normalise items = do
     mapM_ normaliseItem items
+    addImport ["wybe"] True Nothing Private -- every module imports stdlib
     -- Now generate main proc if needed
     stmts <- gets stmtDecls
     unless (List.null stmts)

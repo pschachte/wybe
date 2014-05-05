@@ -92,7 +92,9 @@ typeCheckModSCC scc = do        -- must find fixpoint
 -- XXX must check submodules, too.
 typeCheckMod :: [ModSpec] -> ModSpec -> Compiler Bool
 typeCheckMod scc thisMod = do
+    liftIO $ putStrLn $ "Type checking module " ++ showModSpec thisMod
     reenterModule thisMod
+    t <- getModuleSpec
     procs <- getSpecModule thisMod
             (Map.toList . modProcs . fromJust . modImplementation)
     let ordered =
@@ -105,7 +107,8 @@ typeCheckMod scc thisMod = do
                                 $ List.map procBody procs) 
             | (name,procs) <- fromJust procs]
     changed <- mapM (typecheckProcSCC thisMod scc) ordered
-    exitModule
+    finishModule
+    t' <- getModuleSpec
     return $ or changed
 
 
@@ -132,12 +135,12 @@ typecheckProcSCC :: ModSpec -> [ModSpec] -> SCC (Ident,[ProcDef]) ->
                     Compiler Bool
 typecheckProcSCC m mods (AcyclicSCC (name,defs)) = do
     -- A single pass is always enough for non-cyclic SCCs
-    -- liftIO $ putStrLn $ "Type checking non-recursive proc " ++ name
+    liftIO $ putStrLn $ "Type checking non-recursive proc " ++ name
     (_,allAgain) <- typecheckProcDefs m mods name defs
     return allAgain
 typecheckProcSCC m mods (CyclicSCC list) = do
-    -- liftIO $ putStrLn $ "Type checking recursive procs " ++ 
-    --   intercalate ", " (List.map fst list)
+    liftIO $ putStrLn $ "Type checking recursive procs " ++ 
+      intercalate ", " (List.map fst list)
     (modAgain,allAgain) <- 
         foldM (\(modAgain,allAgain) (name,defs) -> do
                     (modAgain',allAgain') <- typecheckProcDefs m mods name defs
@@ -171,22 +174,21 @@ typecheckProcDefs m mods name defs = do
 -- |Type check a single procedure definition.
 typecheckProcDef :: ModSpec -> [ModSpec] -> ProcDef ->
                     Compiler (ProcDef,Bool,Bool)
--- typecheckProcDef _ _ def = return def
 typecheckProcDef m mods pd@(ProcDef name proto@(PrimProto pn params) 
                          def pos tmpCnt vis) 
   = do
     let typing = List.foldr addDeclaredType initTyping $ zip params [1..]
     if validTyping typing
       then do
-        -- liftIO $ putStrLn $ "** Type checking " ++ name ++
-        --   ": " ++ show typing
+        liftIO $ putStrLn $ "** Type checking " ++ name ++
+          ": " ++ show typing
         (typing',def') <- typecheckBody m mods typing def
-        -- liftIO $ putStrLn $ "*resulting types " ++ name ++
-        --   ": " ++ show typing'
+        liftIO $ putStrLn $ "*resulting types " ++ name ++
+          ": " ++ show typing'
         let params' = updateParamTypes typing' params
         let modAgain = typing /= typing'
-        -- liftIO $ putStrLn $ "** check again   " ++ name ++
-        --   ": " ++ show modAgain
+        liftIO $ putStrLn $ "** check again   " ++ name ++
+          ": " ++ show modAgain
         return (ProcDef name (PrimProto pn params') def' pos tmpCnt vis,
                 modAgain,modAgain && vis == Public)
       else
@@ -280,15 +282,15 @@ typecheckPrim m mods prim pos (typing,body) = do
 typecheckSingle :: ModSpec -> [ModSpec] -> Prim -> OptPos -> Typing ->
                  Compiler [(Typing,Prim)]
 typecheckSingle m mods call@(PrimCall cm name id args) pos typing = do
-    -- liftIO $ putStrLn $ "Type checking " ++ show call
-    -- liftIO $ putStrLn $ "   with types " ++ show typing
+    liftIO $ putStrLn $ "Type checking call " ++ show call
+    liftIO $ putStrLn $ "   with types " ++ show typing
     procs <- case id of
         Nothing   -> callTargets cm name
         Just spec -> return [spec]
-    -- liftIO $ putStrLn $ "   " ++ show (length procs) ++ " matching procs"
+    liftIO $ putStrLn $ "   " ++ show (length procs) ++ " matching procs"
     if List.null procs 
     then do
-      -- message Error ("Call to unknown " ++ name) pos
+      message Error ("Call to unknown " ++ name) pos
       return [(typing,PrimCall cm name id args)]
     else do
       pairsList <- mapM (\p -> do
@@ -305,10 +307,11 @@ typecheckSingle m mods call@(PrimCall cm name id args) pos typing = do
                    procs
       let pairs = concat pairsList
       let validPairs = List.filter (validTyping . fst) pairs
+      liftIO $ putStrLn $ "   valid typings: " ++ show validPairs
       if List.null validPairs 
       then do
-        -- message Error ("Error in call:\n" ++ 
-        --                reportTypeErrors (List.map fst pairs)) pos
+        message Error ("Error in call:\n" ++ 
+                       reportTypeErrors (List.map fst pairs)) pos
         return [(typing,PrimCall cm name id args)]
       else
           return validPairs

@@ -15,6 +15,9 @@ public type int is
     public func <=(x:int,y:int):bool = foreign llvm icmp sle(32,x,y)
     public func >(x:int,y:int):bool = foreign llvm icmp sgt(32,x,y)
     public func >=(x:int,y:int):bool = foreign llvm icmp sge(32,x,y)
+    public proc =(?y:int, x:int) foreign llvm move(x, y) end
+    public proc =(x:int, ?y:int) foreign llvm move(x, y) end
+    public func =(x:int, y:int) = foreign llvm cmp eq(x, y)
 end
 
 
@@ -33,6 +36,9 @@ public type float is
     public func <=(x:float,y:float):bool = foreign llvm fcmp sle(64,x,y)
     public func >(x:float,y:float):bool = foreign llvm fcmp sgt(64,x,y)
     public func >=(x:float,y:float):bool = foreign llvm fcmp sge(64,x,y)
+    public proc =(?y:float, x:float) foreign llvm move(x, y) end
+    public proc =(x:float, ?y:float) foreign llvm move(x, y) end
+    public func =(x:float, y:float) = foreign llvm cmp eq(x, y)
 end
 
 
@@ -42,4 +48,27 @@ public type bool is
     # public func and(p:bool, q:bool):bool = foreign llvm and(p,q)
     # public func or(p:bool, q:bool):bool = foreign llvm or(p,q)
     # public func not(p:bool):bool = foreign xor(p,1)
+    public proc =(?y:bool, x:bool) foreign llvm move(x, y) end
+    public proc =(x:bool, ?y:bool) foreign llvm move(x, y) end
+    public func =(x:bool, y:bool) = foreign llvm cmp eq(x, y)
+end
+
+
+public type string is
+    # this implementation is completely wrong, but will do for n
+    public func ++(x:string, y:string) = foreign c strcat(x,y)
+    public proc =(?y:string, x:string) foreign llvm move(x, y) end
+    public proc =(x:string, ?y:string) foreign llvm move(x, y) end
+    public func =(x:string, y:string) = foreign llvm cmp eq(x, y)
+end
+
+
+
+
+public module io is
+    public proc print(x:int) foreign c printf("%d", x) end
+    public proc println(x:int) foreign c printf("%d\n", x) end
+
+    public proc print(x:string) foreign c printf("%s", x) end
+    public proc println(x:string) foreign c printf("%s\n", x) end
 end

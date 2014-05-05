@@ -405,6 +405,9 @@ addSubmod :: Ident -> Module -> OptPos -> Visibility -> Compiler ()
 addSubmod name modl pos vis = do
     updateImplementation (updateModSubmods (Map.insert name modl))
     updateInterface vis (updatePubDependencies (Map.insert name pos))
+    updateInterface vis (updatePubProcs (Map.unionWith (++) 
+                                                (pubProcs $ 
+                                                 modInterface modl)))
 
 -- |Find the definition of the specified type in the current module.
 lookupType :: Ident -> Compiler (Maybe TypeDef)
@@ -469,7 +472,7 @@ getParams (ProcSpec modSpec procName procID) = do
     mod <- getLoadedModule modSpec
     -- XXX shouldn't have to grovel in implementation to find prototype
     let impl = fromJust $ modImplementation $ fromJust mod
-    let def = (modProcs impl ! procName) !! (procID - 1)
+    let def = (modProcs impl ! procName) !! procID
     let PrimProto _ params = procProto def
     return params
 
@@ -583,24 +586,27 @@ makesVisible defMod modRef name implMapFn ifaceMapFn = do
           error "current module missing implementation"
         return $ Map.member name $ fromJust maybeMap
       else do -- use of other module:  name must be exported or used
-        impln <- getSpecModule defMod modImplementation
-        if not $ Map.member name $ implMapFn $ fromJust $ fromJust impln
-          then return False -- target doesn't even define it
+        specSpec <- getSpecModule defMod modSpec
+        iface <- getSpecModule defMod modInterface
+        if not $ Map.member name $ ifaceMapFn $ fromJust iface
+          then do
+            return False -- target doesn't even define it
           else do
             maybeImports <- getModuleImplementationField modImports
             when (isNothing maybeImports) $
               error "current module missing implementation"
-            maybe 
-              (return False) 
-              (\(ModDependency uses imports) -> 
-                return (makesNameVisible imports name ||
-                        (modRef /= [] && makesNameVisible uses name)))
-              (Map.lookup defMod $ fromJust maybeImports)
+            let maybeImport = Map.lookup defMod $ fromJust maybeImports
+            when (isNothing maybeImport) $
+              error "imported module seems not to be imported"
+            let (ModDependency uses imports) = fromJust maybeImport
+            return (makesNameVisible imports name ||
+                    (modRef /= [] && makesNameVisible uses name))
     
 
 makesNameVisible :: ImportSpec -> Ident -> Bool
 makesNameVisible ImportNothing _ = False
-makesNameVisible (ImportSpec nameVis _) name = Map.member name nameVis
+makesNameVisible (ImportSpec nameVis allVis) name =
+    isJust allVis || Map.member name nameVis
 
 
 -- |Returns a list of the potential targets of a proc call.
@@ -608,11 +614,10 @@ callTargets :: ModSpec -> ProcName -> Compiler [ProcSpec]
 callTargets modspec name = do
     mods <- refersTo modspec name modProcs pubProcs
     listlist <- mapM (\m -> do
-                           count <- getSpecModule m
-                                    (maybe 0 length . Map.lookup name . 
-                                     modProcs . fromJust . modImplementation)
-                           return [ProcSpec m name id | 
-                                   id <- [1..fromJust count]])
+                           maybeProcs <- 
+                               getSpecModule m
+                               (Map.lookup name . pubProcs . modInterface)
+                           return $ fromJust $ fromJust maybeProcs)
                 mods
     return $ concat listlist
 
@@ -757,7 +762,7 @@ type ModSpec = [Ident]
 data ModDependency = ModDependency {
     modDepUses    :: ImportSpec,
     modDepImports ::  ImportSpec
-    }
+    } deriving Show
 
 -- |The uses or imports of one module on another.  Either nothing, or
 --  all the item names to be imported and whether they are to be 
@@ -765,6 +770,7 @@ data ModDependency = ModDependency {
 --  imported, and whether publicly or not.
 data ImportSpec = ImportNothing
                 | ImportSpec (Map Ident Visibility) (Maybe Visibility)
+                  deriving Show
 
 -- |Add a single import to an ImportSpec.
 addImports :: Maybe [Ident] -> Visibility -> ImportSpec -> ImportSpec

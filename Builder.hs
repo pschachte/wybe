@@ -229,7 +229,6 @@ compileModSCC specs = do
                 (List.map show $ 
                  List.filter ((/=["wybe"]) . modSpec) $
                  catMaybes mods))
-    -- mapM_ resolveOverloading specs
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs . 
     --                         fromJust . modImplementation))
@@ -272,7 +271,7 @@ localCheckMod spec = do
 handleImports :: Compiler ()
 handleImports = do
     imports <- getModuleImplementationField (keys . modImports)
-    mapM_ buildDependency $ fromJust imports ++ [["wybe"]]
+    mapM_ buildDependency $ fromJust imports -- ++ [["wybe"]]
     -- modspec <- getModuleSpec
     -- mod <- getModule id
     -- updateModules (Map.insert modspec mod)
