@@ -1,0 +1,12 @@
+
+ Module missing_dep
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : import does_not_exist 
+  types           : 
+  resources       : 
+  procs           : 
+
+Could not find module does_not_exist
