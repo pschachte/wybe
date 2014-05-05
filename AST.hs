@@ -1175,8 +1175,11 @@ instance Show Module where
                  (showMap "\n                    " (++":") (showProcDefs 0)
                   (modProcs impl)) 
                  ++ "\n" ++
-                 "\nSubmodules of " ++ showModSpec (modSpec mod) ++ ":\n" ++ 
-                 showMap "\n" (const "") show (modSubmods impl)
+                 (if Map.null (modSubmods impl)
+                  then ""
+                  else "\nSubmodules of " ++ showModSpec (modSpec mod) ++
+                           ":\n" ++ 
+                           showMap "\n" (const "") show (modSubmods impl))
 
 --showTypeMap :: Map Ident TypeDef -> String
 

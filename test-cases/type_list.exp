@@ -60,5 +60,3 @@ public proc tail($rec:0:list(t), ?$:0:list(t)) (id 0):
 public proc tail($rec:0:list(t), ?$rec:1:list(t), $field:0:list(t)) (id 1): 
     foreign $ mutate("list", "[|]", "tail", $rec:0, ?$rec:1, $field:0)
 
-Submodules of type_list.list:
-

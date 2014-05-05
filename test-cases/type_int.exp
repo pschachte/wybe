@@ -70,5 +70,3 @@ public proc >(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type_int:14:12
 public proc >=(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type_int:15:12
     foreign llvm icmp sge(32, x:0, y:0, ?$:0) @type_int:15:40
 
-Submodules of type_int.int:
-

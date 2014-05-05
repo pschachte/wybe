@@ -11,5 +11,3 @@
 public proc print2(x:0:int, y:0:int) (id 0):  @proc_hello:1:8
     println("hello, world") @proc_hello:2:8
 
-Submodules of proc_hello:
-

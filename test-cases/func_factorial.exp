@@ -24,5 +24,3 @@ proc gen$1(n:0:?, ?n:0:?, ?tmp$0:0:?) (id 0):
     factorial(tmp$3:0, ?tmp$2:0) @func_factorial:2:34
     *(n:0, tmp$2:0, ?tmp$0:0) @func_factorial:2:30
 
-Submodules of func_factorial:
-

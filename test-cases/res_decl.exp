@@ -9,5 +9,3 @@
   resources       : count: int @res_decl:1:8
   procs           : 
 
-Submodules of res_decl:
-

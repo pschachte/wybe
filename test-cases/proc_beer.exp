@@ -35,5 +35,3 @@ public proc print2(x:0:int, y:0:int) (id 0):  @proc_beer:1:8
     init_seq(tmp$2:0, ?tmp$0:0) @proc_beer:2:12
     proc_beer.gen$2(tmp$0:0, tmp$2:0, tmp$3:0, x:0, y:0, ?tmp$0:1, ?tmp$2:1, ?tmp$3:1, ?x:1, ?y:1) @proc_beer:2:9
 
-Submodules of proc_beer:
-

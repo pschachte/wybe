@@ -12,5 +12,3 @@ proc () (id 0):
     print("hello, ") @main_hello2:1:1
     println("world!") @main_hello2:2:1
 
-Submodules of main_hello2:
-

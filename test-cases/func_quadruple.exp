@@ -16,5 +16,3 @@ public proc quadruple(a:0:int, ?$:0:int) (id 0):  @func_quadruple:3:8
     double(a:0, ?tmp$1:0) @func_quadruple:3:45
     double(tmp$1:0, ?$:0) @func_quadruple:3:38
 
-Submodules of func_quadruple:
-

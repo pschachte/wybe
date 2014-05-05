@@ -39,5 +39,3 @@ proc gen$4(prompt:0:?, response:0:?, responsechar:0:?, result:0:?, tmp$0:0:?, tm
 public proc yorn(prompt:0:string, ?result:0:bool) (id 0):  @proc_yorn2:1:8
     proc_yorn2.gen$2(prompt:0, ?prompt:1, ?response:0, ?responsechar:0, ?result:0, ?tmp$0:0, ?tmp$1:0, ?tmp$2:0, ?tmp$3:0) @proc_yorn2:2:5
 
-Submodules of proc_yorn2:
-

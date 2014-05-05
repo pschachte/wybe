@@ -38,5 +38,3 @@ public proc y($rec:0:position, ?$:0:int) (id 0):
 public proc y($rec:0:position, ?$rec:1:position, $field:0:int) (id 1): 
     foreign $ mutate("position", "position", "y", $rec:0, ?$rec:1, $field:0)
 
-Submodules of position.position:
-

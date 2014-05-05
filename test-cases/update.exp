@@ -19,5 +19,3 @@ public proc second(x:0:list(t), ?x:1:list(t), y:0:t) (id 1):  @update:3:8
     head(tmp$1:0, ?tmp$1:1, tmp$0:1) @update:4:5
     tail(x:0, ?x:1, tmp$1:1) @update:4:5
 
-Submodules of update:
-
