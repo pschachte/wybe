@@ -10,7 +10,6 @@
   procs           : 
 
 Submodules of submodule:
-privatetest: 
  Module submodule.privatetest
   public submods  : 
   public types    : 
@@ -28,7 +27,6 @@ public proc semi_hidden() (id 0):  @submodule:3:12
 
 Submodules of submodule.privatetest:
 
-                    publictest: 
  Module submodule.publictest
   public submods  : 
   public types    : 

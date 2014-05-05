@@ -10,7 +10,6 @@
   procs           : 
 
 Submodules of type_int:
-int: 
  Module type_int.int([])
   public submods  : 
   public types    : 

@@ -1154,7 +1154,7 @@ instance Show Module where
     show mod =
         let int  = modInterface mod
             maybeimpl = modImplementation mod
-        in "\n Module " ++ showModSpec (modSpec mod) ++ 
+        in " Module " ++ showModSpec (modSpec mod) ++ 
            maybeShow "(" (modParams mod) ")" ++
            "\n  public submods  : " ++ showMapPoses (pubDependencies int) ++
            "\n  public types    : " ++ showMapTypes (pubTypes int) ++
@@ -1172,11 +1172,11 @@ instance Show Module where
                  "\n  types           : " ++ showMapTypes (modTypes impl) ++
                  "\n  resources       : " ++ showMapLines (modResources impl) ++
                  "\n  procs           : " ++ 
-                 (showMap "\n                    " ":" (showProcDefs 0)
+                 (showMap "\n                    " (++":") (showProcDefs 0)
                   (modProcs impl)) 
                  ++ "\n" ++
                  "\nSubmodules of " ++ showModSpec (modSpec mod) ++ ":\n" ++ 
-                 showMapLines (modSubmods impl)
+                 showMap "\n" (const "") show (modSubmods impl)
 
 --showTypeMap :: Map Ident TypeDef -> String
 
@@ -1186,22 +1186,23 @@ showIdSet set = intercalate ", " $ Set.elems set
 
 -- |How to show a map, one line per item.
 showMapLines :: Show v => Map Ident v -> String
-showMapLines = showMap "\n                    " ": " show
+showMapLines = showMap "\n                    " (++": ") show
 
 -- |How to show a map, items separated by commas.
 showMapTypes :: Map Ident TypeDef -> String
-showMapTypes = showMap ", " "/" show
+showMapTypes = showMap ", " (++ "/") show
 
 -- |How to show a map to source positions, one line per item.
 showMapPoses :: Map Ident OptPos -> String
-showMapPoses = showMap ", " "" showMaybeSourcePos
+showMapPoses = showMap ", " id showMaybeSourcePos
 
 -- |How to show a map from identifiers to values, given a separator 
 --  for items, and a separator for keys from values, and a function 
 --  to show the values.
-showMap :: String -> String -> (v -> String) -> Map Ident v -> String
-showMap outersep innersep fn m = intercalate outersep
-            $ List.map (\(k,v) -> k ++ innersep ++ fn v) $ Map.assocs m
+showMap :: String -> (k -> String) -> (v -> String) -> Map k v -> String
+showMap outersep keyFn valFn m =
+    intercalate outersep $ List.map (\(k,v) -> keyFn k ++ valFn v) $
+    Map.assocs m
 
 -- |How to show a type definition.
 instance Show TypeDef where

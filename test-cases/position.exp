@@ -10,7 +10,6 @@
   procs           : 
 
 Submodules of position:
-position: 
  Module position.position([])
   public submods  : 
   public types    : 

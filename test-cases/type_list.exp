@@ -28,7 +28,6 @@ proc gen$1(x:0:?, y:0:?, ?tmp$0:0:?, ?x:0:?, ?y:0:?) (id 0):
     [|](tmp$3:0, tmp$4:0, ?tmp$0:0) @type_list:9:10
 
 Submodules of type_list:
-list: 
  Module type_list.list(["t"])
   public submods  : 
   public types    : 
