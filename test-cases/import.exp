@@ -10,7 +10,6 @@
   procs           : 
 
 Submodules of position:
-position: 
  Module position.position([])
   public submods  : 
   public types    : 
@@ -39,9 +38,6 @@ public proc y($rec:0:position, ?$:0:int) (id 0):
 public proc y($rec:0:position, ?$rec:1:position, $field:0:int) (id 1): 
     foreign $ mutate("position", "position", "y", $rec:0, ?$rec:1, $field:0)
 
-Submodules of position.position:
-
-
  Module import
   public submods  : 
   public types    : 
@@ -62,6 +58,4 @@ public proc distance(p1:0:position, p2:0:position, ?$:0:?) (id 0):  @import:3:8
     ^(tmp$7:0, 2, ?tmp$6:0) @import:4:26
     +(tmp$2:0, tmp$6:0, ?tmp$1:0) @import:4:10
     sqrt(tmp$1:0, ?$:0) @import:4:5
-
-Submodules of import:
 

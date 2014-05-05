@@ -88,7 +88,8 @@ buildDependency :: ModSpec -> Compiler ()
 buildDependency modspec = do
     force <- option optForceAll
     possDirs <- gets (optLibDirs . options)
-    buildModuleIfNeeded force modspec possDirs
+    localDir <- getModule modDirectory
+    buildModuleIfNeeded force modspec (localDir:possDirs)
     return ()
 
 
