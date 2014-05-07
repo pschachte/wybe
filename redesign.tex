@@ -33,7 +33,25 @@
 The aim of this project is to produce a clean, easy-to-learn,
 easy-to-use programming language suitable for large teams to produce
 maintainable programs.  It should be suitable as a first programming
-language, and should be efficient enough for serious use.
+language, and should be powerful and efficient enough for serious use.
+
+
+\section{Explicit dataflow indicators}
+
+In \Lang, each variable use may either read, write, or modify
+(\ie, both read and write) the variable.
+
+
+Thus \lang is at heart a relational language.
+
+
+
+\section{Functions, procedures and explicit dataflow}
+
+\Lang supports both functions and procedures; in fact a function is
+simply a procedure called with one argument fewer.
+
+
 
 
 \section{Modules}
@@ -71,37 +89,42 @@ This gives the following eight varieties of importation:
   \begin{tabular}{|p{2.4cm}|p{8.5cm}|}
     \hline
     \texttt{import} \emph{module}
-    & Imports everything from \emph{module} so that it can be used
+    & Imports everything made public by \emph{module} so that it can be used
     with or without module qualification.
     \\ \hline
     \texttt{use} \emph{module}
-    & Imports everything from \emph{module} so that it can only be used
-    with module qualification.
+    & Imports everything made public by \emph{module} so that it can
+    only be used with module qualification.
     \\ \hline
     \texttt{from} \emph{module} \texttt{import} \emph{items}
-    & Imports the specified items from \emph{module} so that they
+    & Imports the specified items, which must all be made public
+    by\emph{module}, so that they
     can be used with or without module qualification.
     \\ \hline
     \texttt{from} \emph{module} \texttt{use} \emph{items}
-    & Imports the specified items from \emph{module} so that they
+    & Imports the specified items, which must all be made public by
+    \emph{module}, so that they
     can only be used with module qualification.
     \\ \hline
     \texttt{public import} \emph{module}
-    & Imports everything from \emph{module} so that it can be used
+    & Imports everything made public by \emph{module} so that it can be used
     with or without module qualification, and reexport it from the
     importing module as if it were defined there.
     \\ \hline
     \texttt{public use} \emph{module}
-    & Imports everything from \emph{module} so that it can only be used
-    with module qualification, and reexport it as a member of a submodule.
+    & Imports everything made public by \emph{module} so that it can
+    only be used with module qualification, and reexport it as a
+    member of a submodule.
     \\ \hline
     \texttt{public from} \emph{module} \texttt{import} \emph{items}
-    & Imports the specified items from \emph{module} so that they
-    can be used with or without module qualification, and reexport
+    & Imports the specified items, which must all be made public by
+    \emph{module}, so that they
+    can only be used with module qualification, and reexport
     them from the importing module as if they were defined there.
     \\ \hline
     \texttt{public from} \emph{module} \texttt{use} \emph{items}
-    & Imports the specified items from \emph{module} so that they
+    & Imports the specified items, which must all be made public by
+    \emph{module}, so that they
     can only be used with module qualification, and reexport them as
     members of a submodule.
     \\ \hline
@@ -110,25 +133,48 @@ This gives the following eight varieties of importation:
 
 \section{Types}
 
-The language is strongly typed, with parametric polymorphism
-and type inference.
+\Lang is strongly typed, with parametric polymorphism (generics),
+type inference, and Liskov substitution.
+All data types are effectively abstract data types.
+That means that,
+as in object oriented languages, any type may be ``extended'' by
+another type, and instances of that other type my be used wherever
+instances of the extended type can be.
+This provides similar functionality to type classes, but without the
+need to decide ahead which things should be types and which should be
+type classes.
 
-All data types are effectively abstract.  That means
-constructors (and deconstructors) are ordinary functions.  Thus an
-existing type with defined constructors and deconstructors can be
-redefined with new functions implementing the previous constructors
-and deconstructors.
+The language also supports Myer's uniform access principle.
+Every type is simply a module whose name may be used as a type name.
+The primitive operations (methods) of the type are the operations
+exported by the module.
 
-A type can then be viewed as just the set of functions and predicates that
-operate on it.  That is, a type is just a special kind of module that
-provides at least one constructor.
+Constructors (and deconstructors) are ordinary functions.
+A type's constructors may be explicitly declared using the
+\texttt{ctor} declaration.
+This looks like a function declaration, except that the return type
+and function body are omitted.
+The compiler automatically generates the implementation of the
+constructor and deconstructor.
+However, constructors and deconstructors are ordinary functions, so
+an existing type with defined constructors and deconstructors can be
+redefined with new functions implementing the same interface as the
+previous constructors and deconstructors.
 
+Functions and procedures can be declared to be \texttt{abstract}, in
+which case their implementations are omitted.
+The compiler will not permit abstract operations to be invoked; the
+value must be known to be of a subtype that implements the operation for
+it to be used.
 
-\section{Explicit dataflow indicators}
-
+There is a type \texttt{data} that serves as the root of the hierarchy
+of data types.  This type has several useful abstract operations such
+as equality testing, and printing.  All types declared with
+constructors, as well as all the primitive types such as integer,
+float, and char, implement this type.
 
 \end{document}
 
 % LocalWords:  vararg predicate's nonfailure DCG monoporphized nondet RDBMS
 % LocalWords:  coroutining distfix ness supertyping Liskov backquote
-% LocalWords:  restrictable
+% LocalWords:  restrictable ctor

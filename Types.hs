@@ -180,15 +180,15 @@ typecheckProcDef m mods pd@(ProcDef name proto@(PrimProto pn params)
     let typing = List.foldr addDeclaredType initTyping $ zip params [1..]
     if validTyping typing
       then do
-        liftIO $ putStrLn $ "** Type checking " ++ name ++
-          ": " ++ show typing
+        -- liftIO $ putStrLn $ "** Type checking " ++ name ++
+        --   ": " ++ show typing
         (typing',def') <- typecheckBody m mods typing def
-        liftIO $ putStrLn $ "*resulting types " ++ name ++
-          ": " ++ show typing'
+        -- liftIO $ putStrLn $ "*resulting types " ++ name ++
+        --   ": " ++ show typing'
         let params' = updateParamTypes typing' params
         let modAgain = typing /= typing'
-        liftIO $ putStrLn $ "** check again   " ++ name ++
-          ": " ++ show modAgain
+        -- liftIO $ putStrLn $ "** check again   " ++ name ++
+        --   ": " ++ show modAgain
         return (ProcDef name (PrimProto pn params') def' pos tmpCnt vis,
                 modAgain,modAgain && vis == Public)
       else
@@ -209,18 +209,6 @@ updateParamTypes (ValidTyping dict) params =
 updateParamTypes _ params = params
 
 
-    -- case alternatives of
-    --     [] -> do
-    --         if invalidTyping typing1
-    --           then message Error ("type error in proc " ++ name) pos
-    --           else message Error ("ambiguous type in definition of " ++ name) 
-    --                pos
-    --         return (pd,False,False)
-    --     Just uniq -> do
-    --         let (params',changed) = updateParamTypes uniq params
-    --         return (ProcDef name (PrimProto pn params') def' pos tmpCnt vis,
-    --                 changed,changed && vis==Public)
-
 -- |Type check the body of a single proc definition by type checking 
 --  each clause in turn using the declared parameter typing plus the 
 --  typing of all parameters inferred from previous clauses.  We can 
@@ -229,8 +217,23 @@ typecheckBody :: ModSpec -> [ModSpec] -> Typing -> [[Placed Prim]] ->
                     Compiler (Typing,[[Placed Prim]])
 typecheckBody m mods paramTypes body = do
     bodyTypes <- foldM (typecheckClause m mods) [(paramTypes,[])] body
-    return (paramTypes,body)
-    -- return (reconcileClauseTypes $ List.map fst pairs,List.map snd pairs)
+    case bodyTypes of
+      [] -> do
+        liftIO $ putStrLn $ "   no valid type"
+        message Error ("No valid type") Nothing
+        return (paramTypes,body)
+      [(typing,body')] -> do
+        liftIO $ putStrLn $ "   final typing: " ++ show typing
+        liftIO $ putStrLn $ "   final body: " ++ show body'
+        when (projectTyping typing paramTypes /= typing)
+                   (error "Typing not projected onto parameters!")
+             
+        return (projectTyping typing paramTypes, body')
+      _ -> do
+        liftIO $ putStrLn $ "   ambiguous: " ++ show (length bodyTypes) ++
+               " typings:\n" ++ show bodyTypes
+        message Error ("Ambiguous types") Nothing
+        return (paramTypes,body)
 
 
 -- |Type check a single clause starting with each possible parameter 
@@ -251,7 +254,7 @@ typecheckPrims :: ModSpec -> [ModSpec] -> [Placed Prim] ->
 typecheckPrims m mods clause (types,clauses) = do
     clauseTypes <- foldM (typecheckPlacedPrim m mods) [(types,[])] clause
     return $ List.map (\(clTyping,cl) ->
-                        (projectTyping clTyping types, cl:clauses))
+                        (projectTyping clTyping types, reverse cl:clauses))
       clauseTypes
 
 -- |Type check a single placed primitive operation given a list of 
@@ -287,7 +290,7 @@ typecheckSingle m mods call@(PrimCall cm name id args) pos typing = do
     procs <- case id of
         Nothing   -> callTargets cm name
         Just spec -> return [spec]
-    liftIO $ putStrLn $ "   " ++ show (length procs) ++ " matching procs"
+    liftIO $ putStrLn $ "   " ++ show (length procs) ++ " potential procs"
     if List.null procs 
     then do
       message Error ("Call to unknown " ++ name) pos
@@ -301,13 +304,13 @@ typecheckSingle m mods call@(PrimCall cm name id args) pos typing = do
                                      List.foldr (typecheckArg pos p) 
                                      (typing,[]) $ zip3 [1..] params args
                              return [(typing',
-                                      PrimCall cm name (Just p) (reverse args))]
+                                      PrimCall cm name (Just p) revArgs)]
                            else
                                return [])
                    procs
       let pairs = concat pairsList
       let validPairs = List.filter (validTyping . fst) pairs
-      liftIO $ putStrLn $ "   valid typings: " ++ show validPairs
+      liftIO $ putStrLn $ "   " ++ show (length validPairs) ++ " matching procs"
       if List.null validPairs 
       then do
         message Error ("Error in call:\n" ++ 
@@ -367,19 +370,25 @@ typecheckArg' (ArgVar var _ flow ftype) paramType typing args reason =
     (addOneType reason var paramType typing, 
      ArgVar var paramType flow ftype:args)
 typecheckArg' (ArgInt val callType) paramType typing args reason =
-    typecheckArg'' callType paramType typing args reason $ ArgInt val
+    typecheckArg'' callType paramType (TypeSpec ["wybe"] "int" [])
+                   typing args reason $ ArgInt val
 typecheckArg' (ArgFloat val callType) paramType typing args reason =
-    typecheckArg'' callType paramType typing args reason $ ArgFloat val
+    typecheckArg'' callType paramType (TypeSpec ["wybe"] "float" [])
+                   typing args reason $ ArgFloat val
 typecheckArg' (ArgString val callType) paramType typing args reason =
-    typecheckArg'' callType paramType typing args reason $ ArgString val
+    typecheckArg'' callType paramType (TypeSpec ["wybe"] "string" [])
+                   typing args reason $ ArgString val
 typecheckArg' (ArgChar val callType) paramType typing args reason =
-    typecheckArg'' callType paramType typing args reason $ ArgChar val
+    typecheckArg'' callType paramType (TypeSpec ["wybe"] "char" [])
+                   typing args reason $ ArgChar val
                         
 
-typecheckArg'' :: TypeSpec -> TypeSpec -> Typing -> [PrimArg] ->
+typecheckArg'' :: TypeSpec -> TypeSpec -> TypeSpec -> Typing -> [PrimArg] ->
                   TypeReason -> (TypeSpec -> PrimArg) -> (Typing,[PrimArg])
-typecheckArg'' callType paramType typing args reason mkArg =
-    (if paramType `subtypeOf` callType
-     then typing
-     else InvalidTyping1 reason,
-     mkArg paramType:args)
+typecheckArg'' callType paramType constType typing args reason mkArg =
+    let realType =
+            if constType `subtypeOf` callType then constType else callType
+    in (if paramType `subtypeOf` realType
+        then typing
+        else InvalidTyping1 reason,
+        mkArg paramType:args)
