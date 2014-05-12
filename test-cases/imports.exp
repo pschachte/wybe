@@ -4,7 +4,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : 
@@ -14,7 +14,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : 
@@ -24,7 +24,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : 
@@ -34,7 +34,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : 
@@ -44,7 +44,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : 
@@ -54,7 +54,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : 
@@ -64,7 +64,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : 
@@ -74,7 +74,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : 
@@ -92,6 +92,7 @@
                     public use mod6 
                     public from mod7 import fn3
                     public from mod8 use fn4
+                    import wybe 
   types           : 
   resources       : 
   procs           : 

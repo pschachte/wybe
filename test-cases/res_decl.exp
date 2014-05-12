@@ -4,7 +4,7 @@
   public types    : 
   public resources: count @res_decl:1:8
   public procs    : 
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : count: int @res_decl:1:8
   procs           : 

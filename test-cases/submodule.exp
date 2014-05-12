@@ -3,8 +3,8 @@
   public submods  : publictest @submodule:6:8
   public types    : 
   public resources: 
-  public procs    : 
-  imports         : 
+  public procs    : submodule.publictest.visible<0>
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : 
@@ -15,7 +15,7 @@ Submodules of submodule:
   public types    : 
   public resources: 
   public procs    : submodule.privatetest.semi_hidden<0>
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : hidden:
@@ -30,7 +30,7 @@ public proc semi_hidden() (id 0):  @submodule:3:12
   public types    : 
   public resources: 
   public procs    : submodule.publictest.visible<0>
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : semi_visible:

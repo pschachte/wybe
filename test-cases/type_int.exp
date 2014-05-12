@@ -3,8 +3,21 @@
   public submods  : int @type_int:1:8
   public types    : int/0 @type_int:1:8
   public resources: 
-  public procs    : 
-  imports         : 
+  public procs    : type_int.int.*<0>
+                    type_int.int.+<2>
+                    type_int.int.+<1>
+                    type_int.int.+<0>
+                    type_int.int.-<2>
+                    type_int.int.-<1>
+                    type_int.int.-<0>
+                    type_int.int./<0>
+                    type_int.int./=<0>
+                    type_int.int.<<0>
+                    type_int.int.<=<0>
+                    type_int.int.==<0>
+                    type_int.int.><0>
+                    type_int.int.>=<0>
+  imports         : import wybe 
   types           : int/0 @type_int:1:8
   resources       : 
   procs           : 
@@ -28,7 +41,7 @@ Submodules of type_int:
                     type_int.int.==<0>
                     type_int.int.><0>
                     type_int.int.>=<0>
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : *:

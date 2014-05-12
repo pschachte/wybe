@@ -3,8 +3,12 @@
   public submods  : position @position:1:8
   public types    : position/0 @position:1:8
   public resources: 
-  public procs    : 
-  imports         : 
+  public procs    : position.position.position<0>
+                    position.position.x<1>
+                    position.position.x<0>
+                    position.position.y<1>
+                    position.position.y<0>
+  imports         : import wybe 
   types           : position/0 @position:1:8
   resources       : 
   procs           : 
@@ -19,7 +23,7 @@ Submodules of position:
                     position.position.x<0>
                     position.position.y<1>
                     position.position.y<0>
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : position:

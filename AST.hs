@@ -176,8 +176,7 @@ data CompilerState = Compiler {
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
   loadCount :: Int,              -- ^counter of module load order
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
-  deferred :: [Module],          -- ^modules in the same SCC as the current one
-  stmtDecls :: [Placed Stmt]     -- ^top-level statements in current module
+  deferred :: [Module]           -- ^modules in the same SCC as the current one
   }
 
 -- |The compiler monad is a state transformer monad carrying the 
@@ -187,7 +186,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp 
-                        (Compiler opts [] False Map.empty 0 [] [] [])
+                        (Compiler opts [] False Map.empty 0 [] [])
 
 
 -- |Apply some transformation function to the compiler state.
@@ -276,7 +275,7 @@ enterModule dir modspec params = do
     modify (\comp -> comp { loadCount = count })
     modify (\comp -> let mods = Module dir modspec params 
                                        emptyInterface (Just emptyImplementation)
-                                       count count 0
+                                       count count 0 []
                                        : underCompilation comp
                             in  comp { underCompilation = mods })
 
@@ -545,7 +544,8 @@ data Module = Module {
                                 -- ^the module's implementation
   thisLoadNum :: Int,            -- ^the loadCount when loading this module
   minDependencyNum :: Int,       -- ^the smallest loadNum of all dependencies
-  procCount :: Int               -- ^a counter for gensym-ed proc names
+  procCount :: Int,              -- ^a counter for gensym-ed proc names
+  stmtDecls :: [Placed Stmt]     -- ^top-level statements in this module
   }
 
 
@@ -567,6 +567,8 @@ refersTo modspec name implMapFn ifaceMapFn = do
                                   implMapFn ifaceMapFn
                            return $ if vis then [spec] else [])
                 candidates
+    -- liftIO $ putStrLn $ "   could refer to module(s): " ++
+    --        intercalate ", " (List.map showModSpec $ concat listlist)
     return $ concat listlist
 
 

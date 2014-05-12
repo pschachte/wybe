@@ -29,7 +29,7 @@ normalise items = do
     mapM_ normaliseItem items
     addImport ["wybe"] True Nothing Private -- every module imports stdlib
     -- Now generate main proc if needed
-    stmts <- gets stmtDecls
+    stmts <- getModule stmtDecls 
     unless (List.null stmts)
       $ normaliseItem (ProcDecl Private (ProcProto "" []) (List.reverse stmts) 
                        Nothing)
@@ -80,7 +80,7 @@ normaliseItem (CtorDecl vis proto pos) = do
     Just modparams <- getModuleParams
     addCtor vis (last modspec) modparams proto
 normaliseItem (StmtDecl stmt pos) = do
-    modify (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
+    updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
 
 
 -- |Add a contructor for the specified type.

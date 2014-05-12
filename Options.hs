@@ -10,7 +10,7 @@
 ----------------------------------------------------------------
 
 -- |The wybe compiler command line options.
-module Options (Options(..), handleCmdline, verbose) where
+module Options (Options(..), handleCmdline, verbose, defaultOptions) where
 
 import System.Console.GetOpt
 import System.Environment

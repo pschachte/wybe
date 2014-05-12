@@ -18,3 +18,8 @@ main :: IO ()
 main = do
     (opts, files) <- handleCmdline
     runCompiler opts (buildTargets opts files) 
+
+
+testFile :: String -> IO ()
+testFile file =
+    runCompiler defaultOptions (buildTargets defaultOptions [file]) 

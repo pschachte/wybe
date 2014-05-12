@@ -5,6 +5,7 @@
   public resources: 
   public procs    : 
   imports         : import does_not_exist 
+                    import wybe 
   types           : 
   resources       : 
   procs           : 

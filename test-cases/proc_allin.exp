@@ -4,7 +4,7 @@
   public types    : 
   public resources: 
   public procs    : proc_allin.nada<0>
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : nada:
