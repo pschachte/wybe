@@ -95,21 +95,14 @@ typeCheckMod :: [ModSpec] -> ModSpec -> Compiler Bool
 typeCheckMod scc thisMod = do
     -- liftIO $ putStrLn $ "Type checking module " ++ showModSpec thisMod
     reenterModule thisMod
-    t <- getModuleSpec
-    procs <- getSpecModule thisMod
-            (Map.toList . modProcs . fromJust . modImplementation)
+    procs <- getModule (Map.toList . modProcs . fromJust . modImplementation)
     let ordered =
             stronglyConnComp
-            [((name,procs),name,nub
-                                $ localCalledProcs thisMod
-                                $ List.map content
-                                $ concat
-                                $ concat
-                                $ List.map procBody procs) 
-            | (name,procs) <- fromJust procs]
+            [(name,name,nub $ localCalledProcs thisMod $ List.map content
+                      $ concat $ concat $ List.map procBody procs) 
+             | (name,procs) <- procs]
     changed <- mapM (typecheckProcSCC thisMod scc) ordered
     finishModule
-    t' <- getModuleSpec
     return $ or changed
 
 
@@ -132,19 +125,19 @@ localCalledProcs thisMod (_:rest) = localCalledProcs thisMod rest
 --  SCC depend on procs in the list of mods.  In this case, we will 
 --  have to rerun the typecheck after typechecking the other modules 
 --  on that list. 
-typecheckProcSCC :: ModSpec -> [ModSpec] -> SCC (Ident,[ProcDef]) ->
+typecheckProcSCC :: ModSpec -> [ModSpec] -> SCC ProcName ->
                     Compiler Bool
-typecheckProcSCC m mods (AcyclicSCC (name,defs)) = do
+typecheckProcSCC m mods (AcyclicSCC name) = do
     -- A single pass is always enough for non-cyclic SCCs
     -- liftIO $ putStrLn $ "Type checking non-recursive proc " ++ name
-    (_,allAgain) <- typecheckProcDefs m mods name defs
+    (_,allAgain) <- typecheckProcDefs m mods name
     return allAgain
 typecheckProcSCC m mods (CyclicSCC list) = do
     -- liftIO $ putStrLn $ "Type checking recursive procs " ++ 
-    --   intercalate ", " (List.map fst list)
-    (modAgain,allAgain) <- 
-        foldM (\(modAgain,allAgain) (name,defs) -> do
-                    (modAgain',allAgain') <- typecheckProcDefs m mods name defs
+    --   intercalate ", " list
+    (modAgain,allAgain) <-
+        foldM (\(modAgain,allAgain) name -> do
+                    (modAgain',allAgain') <- typecheckProcDefs m mods name
                     return (modAgain || modAgain', allAgain || allAgain'))
         (False, False) list
     if modAgain
@@ -157,9 +150,11 @@ typecheckProcSCC m mods (CyclicSCC list) = do
 --  Bools, the first saying whether any defnition has been udpated, 
 --  and the second saying whether any public defnition has been 
 --  updated.
-typecheckProcDefs :: ModSpec -> [ModSpec] -> ProcName -> [ProcDef] ->
-                     Compiler (Bool,Bool)
-typecheckProcDefs m mods name defs = do
+typecheckProcDefs :: ModSpec -> [ModSpec] -> ProcName -> Compiler (Bool,Bool)
+typecheckProcDefs m mods name = do
+    
+    defs <- getModule (Map.findWithDefault (error "missing proc definition")
+                       name . modProcs . fromJust . modImplementation)
     (revdefs,modAgain,allAgain) <- 
         foldM (\(ds,modAgain,allAgain) def -> do
                     (d,mA,aA) <- typecheckProcDef m mods def
@@ -187,11 +182,13 @@ typecheckProcDef m mods pd@(ProcDef name proto@(PrimProto pn params)
         -- liftIO $ putStrLn $ "*resulting types " ++ name ++
         --   ": " ++ show typing'
         let params' = updateParamTypes typing' params
-        let modAgain = typing /= typing'
-        -- liftIO $ putStrLn $ "** check again   " ++ name ++
-        --   ": " ++ show modAgain
-        return (ProcDef name (PrimProto pn params') def' pos tmpCnt vis,
-                modAgain,modAgain && vis == Public)
+        let pd' = ProcDef name (PrimProto pn params') def' pos tmpCnt vis
+        let modAgain = pd' /= pd
+        -- when modAgain
+        --      (liftIO $ putStrLn $ "** check again " ++ name ++
+        --              "\n-----------------OLD:" ++ showProcDef 4 pd ++
+        --              "\n-----------------NEW:" ++ showProcDef 4 pd' ++ "\n")
+        return (pd',modAgain,modAgain && vis == Public)
       else
         shouldnt $ "Inconsistent param typing for proc " ++ name
 
@@ -220,7 +217,7 @@ typecheckBody m mods paramTypes body = do
     bodyTypes <- foldM (typecheckClause m mods) [(paramTypes,[])] body
     case bodyTypes of
       [] -> do
-        liftIO $ putStrLn $ "   no valid type"
+        -- liftIO $ putStrLn $ "   no valid type"
         message Error ("No valid type") Nothing
         return (paramTypes,body)
       [(typing,body')] -> do
@@ -229,10 +226,10 @@ typecheckBody m mods paramTypes body = do
         when (projectTyping typing paramTypes /= typing)
                    (error "Typing not projected onto parameters!")
              
-        return (projectTyping typing paramTypes, body')
+        return (projectTyping typing paramTypes, List.reverse body')
       _ -> do
-        liftIO $ putStrLn $ "   ambiguous: " ++ show (length bodyTypes) ++
-               " typings:\n" ++ show bodyTypes
+        -- liftIO $ putStrLn $ "   ambiguous: " ++ show (length bodyTypes) ++
+        --        " typings:\n" ++ show bodyTypes
         message Error ("Ambiguous types") Nothing
         return (paramTypes,body)
 

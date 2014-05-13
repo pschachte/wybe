@@ -9,6 +9,6 @@
   resources       : 
   procs           : :
 proc () (id 0): 
-    print("hello, ") @main_hello2:1:1
-    println("world!") @main_hello2:2:1
+    wybe.io.print<1>("hello, ":string) @main_hello2:1:1
+    wybe.io.println<1>("world!":string) @main_hello2:2:1
 

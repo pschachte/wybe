@@ -243,10 +243,16 @@ updateModuleM updater = do
                           mod' <- updater $ head mods
                           return comp { underCompilation = mod':tail mods })
 
--- |Return some function of the specified module.
-getSpecModule :: ModSpec -> (Module -> t) -> Compiler (Maybe t)
-getSpecModule spec getter = 
-    gets (maybeApply getter . Map.lookup spec . modules)
+-- |Return some function of the specified module.  Error if it's not a module.
+getSpecModule :: String -> ModSpec -> (Module -> t) -> Compiler t
+getSpecModule context spec getter = do
+    let msg = context ++ " looking up missing module " ++ show spec
+    gets (maybe (error msg) getter . Map.lookup spec . modules)
+
+-- |Return some function of the specified module; returns a Maybe
+findSpecModule :: ModSpec -> (Module -> t) -> Compiler (Maybe t)
+findSpecModule spec getter = 
+    gets (fmap getter . Map.lookup spec . modules)
 
 -- |Transform the specified module.  Does nothing if it does not exist.
 updateSpecModule :: ModSpec -> (Module -> Module) -> Compiler ()
@@ -283,7 +289,7 @@ enterModule dir modspec params = do
 -- Trusts that the modspec really does specify a module.
 reenterModule :: ModSpec -> Compiler ()
 reenterModule modspec = do
-    Just mod <- getSpecModule modspec id
+    mod <- getSpecModule "reenterModule" modspec id
     modify (\comp -> comp { underCompilation = mod : underCompilation comp })
 
 
@@ -588,9 +594,9 @@ makesVisible defMod modRef name implMapFn ifaceMapFn = do
           error "current module missing implementation"
         return $ Map.member name $ fromJust maybeMap
       else do -- use of other module:  name must be exported or used
-        specSpec <- getSpecModule defMod modSpec
-        iface <- getSpecModule defMod modInterface
-        if not $ Map.member name $ ifaceMapFn $ fromJust iface
+        -- specSpec <- getSpecModule "makesVisible" defMod modSpec
+        iface <- getSpecModule "makesVisible" defMod modInterface
+        if not $ Map.member name $ ifaceMapFn iface
           then do
             return False -- target doesn't even define it
           else do
@@ -615,11 +621,21 @@ makesNameVisible (ImportSpec nameVis allVis) name =
 callTargets :: ModSpec -> ProcName -> Compiler [ProcSpec]
 callTargets modspec name = do
     mods <- refersTo modspec name modProcs pubProcs
+    let msg = "using private proc from module with no implementation"
     listlist <- mapM (\m -> do
-                           maybeProcs <- 
-                               getSpecModule m
-                               (Map.lookup name . pubProcs . modInterface)
-                           return $ fromJust $ fromJust maybeProcs)
+                        mod <- getSpecModule "callTargets" m id
+                        let maybeProcs = Map.lookup name $ 
+                                    pubProcs $ modInterface mod
+                        case maybeProcs of
+                          Just procs  -> return procs
+                          Nothing     -> do
+                              let imp = fromMaybe (error msg) $ 
+                                        modImplementation mod
+                              case Map.lookup name $ modProcs imp of
+                                Nothing -> (shouldnt $ "missing proc " ++ name)
+                                Just defs ->
+                                    return [ProcSpec modspec name i |
+                                            i <- [0..length defs - 1]])
                 mods
     return $ concat listlist
 

@@ -9,5 +9,5 @@
   resources       : 
   procs           : nada:
 public proc nada(x:0:int, y:0:int) (id 0):  @proc_allin:1:8
-    +(x:0, y:0, ?tmp$0:0) @proc_allin:1:35
+    wybe.int.+<0>(x:0:int, y:0:int, ?tmp$0:0:int) @proc_allin:1:35
 

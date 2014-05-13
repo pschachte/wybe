@@ -9,6 +9,6 @@
   resources       : 
   procs           : :
 proc () (id 0): 
-    =(?x:0, 1) @chain_assign:1:1
-    println(x:0) @chain_assign:4:1
+    wybe.int.=<0>(?x:0:int, 1:int) @chain_assign:1:1
+    wybe.io.println<0>(x:0:int) @chain_assign:4:1
 

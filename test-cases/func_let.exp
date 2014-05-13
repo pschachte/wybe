@@ -9,6 +9,6 @@
   resources       : 
   procs           : quad:
 public proc quad(x:0:int, ?$:0:int) (id 0):  @func_let:1:8
-    +(x:0, x:0, ?tmp$0:0) @func_let:1:40
-    +(tmp$0:0, tmp$0:0, ?$:0) @func_let:1:47
+    wybe.int.+<0>(x:0:int, x:0:int, ?tmp$0:0:int) @func_let:1:40
+    wybe.int.+<0>(tmp$0:0:int, tmp$0:0:int, ?$:0:int) @func_let:1:47
 
