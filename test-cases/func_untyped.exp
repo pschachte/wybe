@@ -1,0 +1,13 @@
+
+ Module func_untyped
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : func_untyped.incr<0>
+  imports         : import wybe 
+  types           : 
+  resources       : 
+  procs           : incr:
+public proc incr(a:0:int, ?$:0:int) (id 0):  @func_untyped:1:8
+    wybe.int.+<0>(a:0:int, 1:int, ?$:0:int) @func_untyped:1:29
+
