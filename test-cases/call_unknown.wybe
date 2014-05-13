@@ -1,0 +1,1 @@
+proc foo(x:int) nonexistent_proc(x) end

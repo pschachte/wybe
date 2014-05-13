@@ -1,0 +1,14 @@
+
+ Module call_unknown
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : import wybe 
+  types           : 
+  resources       : 
+  procs           : foo:
+proc foo(x:0:int) (id 0):  @call_unknown:1:1
+    nonexistent_proc(x:0) @call_unknown:1:17
+
+test-cases/call_unknown.wybe:1:17: Call to unknown nonexistent_proc from foo
