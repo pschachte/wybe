@@ -837,8 +837,11 @@ data ProcDef = ProcDef {
 
 -- |Info about a proc call, including the ID, prototype, and an 
 --  optional source position. 
-data ProcSpec = ProcSpec ModSpec ProcName ProcID
-              deriving (Eq)
+data ProcSpec = ProcSpec {
+      procSpecMod::ModSpec,
+      procSpecName::ProcName,
+      procSpecID::ProcID}
+                deriving (Eq)
 
 instance Show ProcSpec where
     show (ProcSpec mod name pid) =

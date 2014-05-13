@@ -1,0 +1,1 @@
+proc ambig(x) print(x) end

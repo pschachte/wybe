@@ -18,20 +18,28 @@ import Data.Graph
 import Debug.Trace
 
 -- |The reason a variable is given a certain type
-data TypeReason = ReasonParam Int     -- Specified by param type/flow
-                | ReasonArg OptPos ProcSpec Int
-                                      -- Specified by call type/flow
+data TypeReason = ReasonParam ProcName Int OptPos
+                                      -- Formal param type/flow inconsistent
+                | ReasonArg ProcName Int OptPos
+                                      -- Actual param type/flow inconsistent
+                | ReasonAmbig ProcName ProcName OptPos
+                                      -- Proc call is ambiguous
                 deriving (Eq)
 
 instance Show TypeReason where
-    show (ReasonParam num) = "Parameter " ++ show num
-    show (ReasonArg pos pspec num) =
+    show (ReasonParam name num pos) =
         makeMessage pos $
-        "Argument " ++ show num ++ " of call to " ++ show pspec
+            "Type/flow error in definition of " ++ name ++
+            ", parameter " ++ show num
+    show (ReasonArg name num pos) =
+        makeMessage pos $
+            "Type/flow error in call to " ++ name ++ ", argument " ++ show num
+    show (ReasonAmbig callFrom callTo pos) =
+        makeMessage pos $
+            "Ambiguous call to " ++ callTo ++ " from " ++ callFrom
 
-data Typing = ValidTyping (Map VarName (TypeSpec,TypeReason))
-            | InvalidTyping2 TypeReason TypeReason   -- conflicting var uses
-            | InvalidTyping1 TypeReason              -- conflict w/callee
+data Typing = ValidTyping (Map VarName TypeSpec)
+            | InvalidTyping TypeReason   -- call type conflicts w/callee
             deriving (Show,Eq)
 
 initTyping :: Typing
@@ -46,13 +54,13 @@ validTyping _ = False
 addOneType :: TypeReason -> PrimVarName -> TypeSpec -> Typing -> Typing
 addOneType reason (PrimVarName name _) typ valid@(ValidTyping types) =
     case Map.lookup name types of
-        Nothing -> ValidTyping $ Map.insert name (typ,reason) types
-        Just (oldTyp,oldReason) ->
+        Nothing -> ValidTyping $ Map.insert name typ types
+        Just oldTyp ->
             if typ == oldTyp 
             then valid
             else if typ `properSubtypeOf` oldTyp
-                 then ValidTyping $ Map.insert name (typ,reason) types
-                 else InvalidTyping2 oldReason reason
+                 then ValidTyping $ Map.insert name typ types
+                 else InvalidTyping reason
 addOneType _ _ _ invalid = invalid
 
 
@@ -92,7 +100,7 @@ typeCheckModSCC scc = do        -- must find fixpoint
 -- dependency SCC.
 -- XXX must check submodules, too.
 typeCheckMod :: [ModSpec] -> ModSpec -> Compiler Bool
-typeCheckMod scc thisMod = do
+typeCheckMod modSCC thisMod = do
     -- liftIO $ putStrLn $ "Type checking module " ++ showModSpec thisMod
     reenterModule thisMod
     procs <- getModule (Map.toList . modProcs . fromJust . modImplementation)
@@ -101,9 +109,16 @@ typeCheckMod scc thisMod = do
             [(name,name,nub $ localCalledProcs thisMod $ List.map content
                       $ concat $ concat $ List.map procBody procs) 
              | (name,procs) <- procs]
-    changed <- mapM (typecheckProcSCC thisMod scc) ordered
+    (changed,reasons) <-
+        foldM (\(chg,rs) scc -> do
+                 (chg1,rs1) <- typecheckProcSCC thisMod modSCC scc
+                 return (chg1 || chg, rs1++rs))
+        (False,[])
+        ordered
     finishModule
-    return $ or changed
+    unless changed
+        (mapM_ (\r -> message Error (show r) Nothing) reasons)
+    return changed
 
 
 -- |The list of procs in the current module called in the specified 
@@ -126,23 +141,26 @@ localCalledProcs thisMod (_:rest) = localCalledProcs thisMod rest
 --  have to rerun the typecheck after typechecking the other modules 
 --  on that list. 
 typecheckProcSCC :: ModSpec -> [ModSpec] -> SCC ProcName ->
-                    Compiler Bool
+                    Compiler (Bool,[TypeReason])
 typecheckProcSCC m mods (AcyclicSCC name) = do
     -- A single pass is always enough for non-cyclic SCCs
     -- liftIO $ putStrLn $ "Type checking non-recursive proc " ++ name
-    (_,allAgain) <- typecheckProcDefs m mods name
-    return allAgain
+    (_,allAgain,reasons) <- typecheckProcDefs m mods name
+    return (allAgain,reasons)
 typecheckProcSCC m mods (CyclicSCC list) = do
     -- liftIO $ putStrLn $ "Type checking recursive procs " ++ 
     --   intercalate ", " list
-    (modAgain,allAgain) <-
-        foldM (\(modAgain,allAgain) name -> do
-                    (modAgain',allAgain') <- typecheckProcDefs m mods name
-                    return (modAgain || modAgain', allAgain || allAgain'))
-        (False, False) list
+    (modAgain,allAgain,reasons) <-
+        foldM (\(modAgain,allAgain,rs) name -> do
+                    (modAgain',allAgain',reasons) 
+                        <- typecheckProcDefs m mods name
+                    return (modAgain || modAgain', 
+                            allAgain || allAgain',
+                           reasons++rs))
+        (False, False, []) list
     if modAgain
       then typecheckProcSCC m mods $ CyclicSCC list
-      else return allAgain
+      else return (allAgain,reasons)
 
 
 -- |Type check a list of procedure definitions and update the 
@@ -150,35 +168,37 @@ typecheckProcSCC m mods (CyclicSCC list) = do
 --  Bools, the first saying whether any defnition has been udpated, 
 --  and the second saying whether any public defnition has been 
 --  updated.
-typecheckProcDefs :: ModSpec -> [ModSpec] -> ProcName -> Compiler (Bool,Bool)
+typecheckProcDefs :: ModSpec -> [ModSpec] -> ProcName -> 
+                     Compiler (Bool,Bool,[TypeReason])
 typecheckProcDefs m mods name = do
     
     defs <- getModule (Map.findWithDefault (error "missing proc definition")
                        name . modProcs . fromJust . modImplementation)
-    (revdefs,modAgain,allAgain) <- 
-        foldM (\(ds,modAgain,allAgain) def -> do
-                    (d,mA,aA) <- typecheckProcDef m mods def
-                    return (d:ds,modAgain || mA,allAgain || aA))
-        ([],False,False) defs
+    (revdefs,modAgain,allAgain,reasons) <- 
+        foldM (\(ds,modAgain,allAgain,rs) def -> do
+                    (d,mA,aA,rs') <- typecheckProcDef m mods def
+                    return (d:ds,modAgain || mA,allAgain || aA,rs'++rs))
+        ([],False,False,[]) defs
     when modAgain $
       updateModImplementation
       (\imp -> imp { modProcs = Map.insert name (reverse revdefs) 
                                 $ modProcs imp })
-    return (modAgain,allAgain)
+    return (modAgain,allAgain,reasons)
     
 
 -- |Type check a single procedure definition.
 typecheckProcDef :: ModSpec -> [ModSpec] -> ProcDef ->
-                    Compiler (ProcDef,Bool,Bool)
+                    Compiler (ProcDef,Bool,Bool,[TypeReason])
 typecheckProcDef m mods pd@(ProcDef name proto@(PrimProto pn params) 
                          def pos tmpCnt vis) 
   = do
-    let typing = List.foldr addDeclaredType initTyping $ zip params [1..]
+    let typing = List.foldr (addDeclaredType name pos)
+                 initTyping $ zip params [1..]
     if validTyping typing
       then do
         -- liftIO $ putStrLn $ "** Type checking " ++ name ++
         --   ": " ++ show typing
-        (typing',def') <- typecheckBody m mods typing def
+        (typing',def') <- typecheckBody m mods name pos typing def
         -- liftIO $ putStrLn $ "*resulting types " ++ name ++
         --   ": " ++ show typing'
         let params' = updateParamTypes typing' params
@@ -188,14 +208,17 @@ typecheckProcDef m mods pd@(ProcDef name proto@(PrimProto pn params)
         --      (liftIO $ putStrLn $ "** check again " ++ name ++
         --              "\n-----------------OLD:" ++ showProcDef 4 pd ++
         --              "\n-----------------NEW:" ++ showProcDef 4 pd' ++ "\n")
-        return (pd',modAgain,modAgain && vis == Public)
+        return (pd',modAgain,modAgain && vis == Public,
+                   case typing' of
+                     ValidTyping _ -> []
+                     InvalidTyping r -> [r])
       else
         shouldnt $ "Inconsistent param typing for proc " ++ name
 
 
-addDeclaredType :: (PrimParam,Int) -> Typing -> Typing
-addDeclaredType (PrimParam name typ _ _,argNum) typs =
-     addOneType (ReasonParam argNum) name typ typs
+addDeclaredType :: ProcName -> OptPos -> (PrimParam,Int) -> Typing -> Typing
+addDeclaredType procname pos (PrimParam name typ _ _,argNum) typs =
+     addOneType (ReasonParam procname argNum pos) name typ typs
 
 
 updateParamTypes :: Typing -> [PrimParam] -> [PrimParam]
@@ -203,7 +226,7 @@ updateParamTypes (ValidTyping dict) params =
     List.map (\p@(PrimParam name@(PrimVarName n _) typ fl afl) ->
                case Map.lookup n dict of
                    Nothing -> p
-                   Just (newTyp,_) -> (PrimParam name newTyp fl afl)) params
+                   Just newTyp -> (PrimParam name newTyp fl afl)) params
 updateParamTypes _ params = params
 
 
@@ -211,9 +234,9 @@ updateParamTypes _ params = params
 --  each clause in turn using the declared parameter typing plus the 
 --  typing of all parameters inferred from previous clauses.  We can 
 --  stop once we've found a contradiction.
-typecheckBody :: ModSpec -> [ModSpec] -> Typing -> [[Placed Prim]] -> 
-                    Compiler (Typing,[[Placed Prim]])
-typecheckBody m mods paramTypes body = do
+typecheckBody :: ModSpec -> [ModSpec] -> ProcName -> OptPos -> Typing ->
+                 [[Placed Prim]] -> Compiler (Typing,[[Placed Prim]])
+typecheckBody m mods name pos paramTypes body = do
     bodyTypes <- foldM (typecheckClause m mods) [(paramTypes,[])] body
     case bodyTypes of
       [] -> do
@@ -227,11 +250,25 @@ typecheckBody m mods paramTypes body = do
                    (error "Typing not projected onto parameters!")
              
         return (projectTyping typing paramTypes, List.reverse body')
-      _ -> do
-        -- liftIO $ putStrLn $ "   ambiguous: " ++ show (length bodyTypes) ++
-        --        " typings:\n" ++ show bodyTypes
-        message Error ("Ambiguous types") Nothing
-        return (paramTypes,body)
+      ((_,b1):(_,b2):_) -> do
+        case catMaybes $ List.map (uncurry diffCall) $ List.zip b1 b2 of
+          [] -> shouldnt "ambiguity with no difference"
+          ((callee,callPos):_) ->
+              return (InvalidTyping $ ReasonAmbig name callee callPos,body)
+
+
+diffCall :: [Placed Prim] -> [Placed Prim] -> Maybe (ProcName,OptPos)
+diffCall [] _ = Nothing
+diffCall _ [] = Nothing
+diffCall (c1:c1s) (c2:c2s)
+    | c1 == c2  = diffCall c1s c2s
+    | otherwise = callDifference (place c1) (content c1) (content c2)
+
+callDifference :: OptPos -> Prim -> Prim -> Maybe (ProcName,OptPos)
+callDifference pos (PrimCall _ name _ _) _ = Just (name,pos)
+callDifference pos (PrimGuard prims1 _) (PrimGuard prims2 _) =
+    diffCall prims1 prims2
+callDifference _ _ _ = shouldnt "impossible ambiguity"
 
 
 -- |Type check a single clause starting with each possible parameter 
@@ -290,8 +327,7 @@ typecheckSingle m mods call@(PrimCall cm name id args) pos typing = do
         Just spec -> return [spec]
     -- liftIO $ putStrLn $ "   " ++ show (length procs) ++ " potential procs"
     if List.null procs 
-    then do
-      message Error ("Call to unknown " ++ name) pos
+    then
       return [(typing,PrimCall cm name id args)]
     else do
       pairsList <- mapM (\p -> do
@@ -302,7 +338,8 @@ typecheckSingle m mods call@(PrimCall cm name id args) pos typing = do
                              --        show args ++ " against params " ++
                              --        show params
                              let (typing',revArgs) =
-                                     List.foldr (typecheckArg pos p) 
+                                     List.foldr (typecheckArg pos $
+                                                 procSpecName p) 
                                      (typing,[]) $ zip3 [1..] params args
                              return [(typing',
                                       PrimCall cm name (Just p) revArgs)]
@@ -313,9 +350,7 @@ typecheckSingle m mods call@(PrimCall cm name id args) pos typing = do
       let validPairs = List.filter (validTyping . fst) pairs
       -- liftIO $ putStrLn $ "   " ++ show (length validPairs) ++ " matching procs"
       if List.null validPairs 
-      then do
-        message Error ("Error in call:\n" ++ 
-                       reportTypeErrors (List.map fst pairs)) pos
+      then
         return [(typing,PrimCall cm name id args)]
       else
           return validPairs
@@ -330,21 +365,9 @@ typecheckSingle _ _ PrimFail pos typing = return [(typing,PrimFail)]
 typecheckSingle _ _ PrimNop pos typing = return [(typing,PrimNop)]
 
 
-reportTypeErrors :: [Typing] -> String
-reportTypeErrors reasons = intercalate "\n" $ List.map reportError reasons
-
-
-reportError :: Typing -> String
-reportError (InvalidTyping2 reason1 reason2) =
-    "    " ++ show reason1 ++ " conflicts with\n     " ++ show reason2
-reportError (InvalidTyping1 reason) =
-    "    " ++ show reason ++ " conflicts with definition"
-reportError nonerr = shouldnt $ "Reporting non-type error " ++ show nonerr
-
-
 argType :: Typing -> PrimArg -> TypeSpec
 argType (ValidTyping dict) (ArgVar (PrimVarName var _) typ _ _) = 
-    maybe typ fst (Map.lookup var dict)
+    fromMaybe typ (Map.lookup var dict)
 argType _ (ArgVar _ typ _ _) = typ
 argType _ (ArgInt _ _)     = (TypeSpec ["wybe"] "int" [])
 argType _ (ArgFloat _ _)   = (TypeSpec ["wybe"] "float" [])
@@ -352,17 +375,17 @@ argType _ (ArgString _ _)  = (TypeSpec ["wybe"] "string" [])
 argType _ (ArgChar _ _)    = (TypeSpec ["wybe"] "char" [])
 
 
-typecheckArg :: OptPos -> ProcSpec -> (Int,PrimParam,PrimArg) ->
+typecheckArg :: OptPos -> ProcName -> (Int,PrimParam,PrimArg) ->
                 (Typing,[PrimArg]) -> (Typing,[PrimArg])
-typecheckArg pos pspec (argNum,param,arg) (typing,args) =
+typecheckArg pos pname (argNum,param,arg) (typing,args) =
     let actualFlow = argFlowDirection arg
         formalFlow = primParamFlow param
-        reason = ReasonArg pos pspec argNum
+        reason = ReasonArg pname argNum pos
     in  if not $ validTyping typing
         then (typing,args)
         else if formalFlow /= actualFlow
              then -- trace ("wrong flow: " ++ show arg ++ " against " ++ show param) 
-                      (InvalidTyping1 reason,args)
+                      (InvalidTyping reason,args)
              else -- trace ("OK flow: " ++ show arg ++ " against " ++ show param)
                   typecheckArg' arg (primParamType param) typing args reason
 
@@ -395,5 +418,5 @@ typecheckArg'' callType paramType constType typing args reason mkArg =
     in -- trace ("check call type " ++ show callType ++ " against param type " ++ show paramType ++ " for const type " ++ show constType)
            (if paramType `subtypeOf` realType
             then typing
-            else InvalidTyping1 reason,
+            else InvalidTyping reason,
             mkArg paramType:args)

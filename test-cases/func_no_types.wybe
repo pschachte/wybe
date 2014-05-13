@@ -1,1 +1,1 @@
-public func times(a,b) = a*b
+public func double(a) = a*2

@@ -3,11 +3,11 @@
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : func_no_types.times<0>
-  imports         : 
+  public procs    : func_no_types.double<0>
+  imports         : import wybe 
   types           : 
   resources       : 
-  procs           : times:
-public proc times(a:0:?, b:0:?, ?$:0:?) (id 0):  @func_no_types:1:8
-    *(a:0, b:0, ?$:0) @func_no_types:1:26
+  procs           : double:
+public proc double(a:0:int, ?$:0:int) (id 0):  @func_no_types:1:8
+    wybe.int.*<0>(a:0:int, 2:int, ?$:0:int) @func_no_types:1:25
 

@@ -1,0 +1,14 @@
+
+ Module type_ambig
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : import wybe 
+  types           : 
+  resources       : 
+  procs           : ambig:
+proc ambig(x:0:?) (id 0):  @type_ambig:1:1
+    print(x:0) @type_ambig:1:15
+
+test-cases/type_ambig.wybe:1:15: Ambiguous call to print from ambig

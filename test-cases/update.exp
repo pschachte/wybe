@@ -5,7 +5,7 @@
   public resources: 
   public procs    : update.second<1>
                     update.second<0>
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : second:
