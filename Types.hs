@@ -26,6 +26,8 @@ data TypeReason = ReasonParam ProcName Int OptPos
                                       -- Proc call is ambiguous
                 | ReasonUndef ProcName ProcName OptPos
                                       -- Call to unknown proc
+                | ReasonArity ProcName ProcName OptPos Int Int
+                                      -- Call to proc with wrong arity
                 deriving (Eq)
 
 instance Show TypeReason where
@@ -38,10 +40,14 @@ instance Show TypeReason where
             "Type/flow error in call to " ++ name ++ ", argument " ++ show num
     show (ReasonAmbig callFrom callTo pos) =
         makeMessage pos $
-            "Ambiguous call to " ++ callTo ++ " from " ++ callFrom
+            "Ambiguous call to overloaded " ++ callTo ++ " from " ++ callFrom
     show (ReasonUndef callFrom callTo pos) =
         makeMessage pos $
             "Call to unknown " ++ callTo ++ " from " ++ callFrom
+    show (ReasonArity callFrom callTo pos callArity procArity) =
+        makeMessage pos $
+            "Call from " ++ callFrom ++ " to " ++ callTo ++ " with " ++
+            show callArity ++ " arguments, expected " ++ show procArity
 
 data Typing = ValidTyping (Map VarName TypeSpec)
             | InvalidTyping TypeReason   -- call type conflicts w/callee
@@ -246,8 +252,7 @@ typecheckBody m mods name pos paramTypes body = do
     case bodyTypes of
       [] -> do
         -- liftIO $ putStrLn $ "   no valid type"
-        message Error ("No valid type") Nothing
-        return (paramTypes,body)
+        return (InvalidTyping $ ReasonAmbig name "nothing" pos,body)
       [(typing,body')] -> do
         -- liftIO $ putStrLn $ "   final typing: " ++ show typing
         -- liftIO $ putStrLn $ "   final body: " ++ show body'
@@ -341,11 +346,12 @@ typecheckSingle m mods caller call@(PrimCall cm name id args) pos typing = do
     else do
       pairsList <- mapM (\p -> do
                            params <- getParams p
+                           -- liftIO $ putStrLn $ "   checking call to " ++
+                           --        show p ++ " args " ++
+                           --        show args ++ " against params " ++
+                           --        show params
                            if length params == length args
                            then do
-                             -- liftIO $ putStrLn $ "   checking args " ++
-                             --        show args ++ " against params " ++
-                             --        show params
                              let (typing',revArgs) =
                                      List.foldr (typecheckArg pos $
                                                  procSpecName p) 
@@ -353,19 +359,23 @@ typecheckSingle m mods caller call@(PrimCall cm name id args) pos typing = do
                              return [(typing',
                                       PrimCall cm name (Just p) revArgs)]
                            else
-                               return [])
+                               return [(InvalidTyping $ 
+                                        ReasonArity caller name pos
+                                        (length args) (length params),
+                                        call)])
                    procs
       let pairs = concat pairsList
+      -- liftIO $ putStrLn $ "candidates: " ++ show pairs
       let validPairs = List.filter (validTyping . fst) pairs
       -- liftIO $ putStrLn $ "   " ++ show (length validPairs) ++ " matching procs"
       if List.null validPairs 
-      then
-        -- return $ List.head pairsList
-          return [(typing,PrimCall cm name id args)]
+      then do
+          return $ [(fst $ List.head pairs,call)]
+          -- return [(typing,PrimCall cm name id args)]
       else
           return validPairs
 typecheckSingle _ _ _ (PrimForeign lang name id args) pos typing = do
-    -- XXX must get type and flow from foreign calls
+    -- XXX? must get type and flow from foreign calls?
     return [(typing,PrimForeign lang name id args)]
 typecheckSingle m mods caller (PrimGuard body val) pos typing = do
     checked <- foldM (typecheckPlacedPrim m mods caller) [(typing,[])] body
