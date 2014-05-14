@@ -53,7 +53,6 @@ primExpansion subst (PrimForeign lang name id args) =
     [PrimForeign lang name id $ List.map (renameArg subst) args]
 primExpansion subst (PrimGuard guard val) =
     [PrimGuard (executeSubstitution subst guard) val]
-primExpansion subst (PrimFail) = [PrimFail]
 primExpansion subst (PrimNop) = [PrimNop]
 
 

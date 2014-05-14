@@ -981,7 +981,6 @@ data Prim
      = PrimCall ModSpec ProcName (Maybe ProcSpec) [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
      | PrimGuard [Placed Prim] Integer
-     | PrimFail
      | PrimNop
      deriving Eq
 
@@ -1035,7 +1034,6 @@ varsInPrim dir (PrimCall _ _ _ args)      = varsInPrimArgs dir args
 varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
 varsInPrim dir (PrimGuard prims _)      =
     List.foldr (Set.union . varsInPrim dir . content) Set.empty prims
-varsInPrim dir (PrimFail)               = Set.empty
 varsInPrim dir (PrimNop)                = Set.empty
 
 varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
@@ -1327,8 +1325,6 @@ showPrim ind (PrimGuard body val) =
         startLine ind ++ "end guard "
 showPrim _ (PrimNop) =
         "NOP"
-showPrim _ (PrimFail) =
-        "FAIL"
 
 -- |Show a variable, with its suffix
 instance Show PrimVarName where

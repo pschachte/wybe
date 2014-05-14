@@ -95,7 +95,6 @@ renamePrim naming (PrimForeign lang name id args) =
     [PrimForeign lang name id $ List.map (renameArg naming) args]
 renamePrim naming (PrimGuard guard val) =
     [PrimGuard (executeRenaming naming guard) val]
-renamePrim naming (PrimFail) = [PrimFail]
 renamePrim naming (PrimNop) = [PrimNop]
 
 

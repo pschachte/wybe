@@ -381,7 +381,6 @@ typecheckSingle m mods caller (PrimGuard body val) pos typing = do
     checked <- foldM (typecheckPlacedPrim m mods caller) [(typing,[])] body
     return $ List.map (\(ty,body') -> (ty,PrimGuard (reverse body') val))
       checked
-typecheckSingle _ _ _ PrimFail pos typing = return [(typing,PrimFail)]
 typecheckSingle _ _ _ PrimNop pos typing = return [(typing,PrimNop)]
 
 
