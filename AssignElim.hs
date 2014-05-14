@@ -32,18 +32,21 @@ assignElim (ProcDef name proto body pos tmpCtr vis) =
     PrimProto _ params = proto
     renaming = List.foldr (flip Map.insert Nothing) Map.empty $ 
                List.map primParamName params
-    body' = List.map (assignElim' renaming) body
+    body' = assignElimBody renaming body
 
 
-assignElim' :: Renaming -> [Placed Prim] -> [Placed Prim]
-assignElim' initNaming clause =
-    let renaming = planRenaming initNaming clause
-    in  executeRenaming renaming clause
+assignElimBody :: Renaming -> ProcBody -> ProcBody
+assignElimBody initNaming body =
+    let renaming = planRenaming initNaming body
+    in  executeRenaming renaming body
 
 
-planRenaming :: Renaming -> [Placed Prim] -> Renaming
-planRenaming naming clause = 
-    List.foldl planPrimRenaming naming $ List.map content clause
+planRenaming :: Renaming -> ProcBody -> Renaming
+planRenaming naming (ProcBody prims _) = 
+    -- Ignore the forks for now, as we can only rename variables
+    -- initially assigned in a fork, which means we need to keep track
+    -- of which variables are assigned before entering a fork.
+    List.foldl planPrimRenaming naming $ List.map content prims
 
 
 planPrimRenaming :: Renaming -> Prim -> Renaming
@@ -74,9 +77,16 @@ ultimateTarget naming name =
       Nothing           -> (name, True)
 
 
-executeRenaming :: Renaming -> [Placed Prim] -> [Placed Prim]
-executeRenaming naming clause =
-    List.concatMap (executePrimRenaming naming) clause
+executeRenaming :: Renaming -> ProcBody -> ProcBody
+executeRenaming naming (ProcBody prims fork) =
+    ProcBody (List.concatMap (executePrimRenaming naming) prims)
+             (executeForkRenaming naming fork)
+
+
+executeForkRenaming :: Renaming -> PrimFork -> PrimFork
+executeForkRenaming _ NoFork = NoFork
+executeForkRenaming naming (PrimFork var bodies) =
+    PrimFork var $ List.map (executeRenaming naming) bodies
 
 
 executePrimRenaming :: Renaming -> Placed Prim -> [Placed Prim]
@@ -93,8 +103,6 @@ renamePrim naming (PrimCall maybeMod name id args) =
     [PrimCall maybeMod name id $ List.map (renameArg naming) args]
 renamePrim naming (PrimForeign lang name id args) = 
     [PrimForeign lang name id $ List.map (renameArg naming) args]
-renamePrim naming (PrimGuard guard val) =
-    [PrimGuard (executeRenaming naming guard) val]
 renamePrim naming (PrimNop) = [PrimNop]
 
 

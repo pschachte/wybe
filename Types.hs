@@ -117,8 +117,8 @@ typeCheckMod modSCC thisMod = do
     procs <- getModule (Map.toList . modProcs . fromJust . modImplementation)
     let ordered =
             stronglyConnComp
-            [(name,name,nub $ localCalledProcs thisMod $ List.map content
-                      $ concat $ concat $ List.map procBody procs) 
+            [(name,name,
+              nub $ concatMap (localBodyProcs thisMod . procBody) procs)
              | (name,procs) <- procs]
     (changed,reasons) <-
         foldM (\(chg,rs) scc -> do
@@ -132,6 +132,12 @@ typeCheckMod modSCC thisMod = do
     return changed
 
 
+localBodyProcs :: ModSpec -> ProcBody -> [Ident]
+localBodyProcs thisMod (ProcBody prims fork) =
+    localCalledProcs thisMod (List.map content prims) ++
+    localForkProcs thisMod fork
+
+
 -- |The list of procs in the current module called in the specified 
 --  list of prims.  
 localCalledProcs :: ModSpec -> [Prim] -> [Ident]
@@ -141,6 +147,12 @@ localCalledProcs thisMod (PrimCall [] name _ _:rest) =
 localCalledProcs thisMod (PrimCall m name _ _:rest)
   | m == thisMod = name:localCalledProcs thisMod rest
 localCalledProcs thisMod (_:rest) = localCalledProcs thisMod rest
+
+
+localForkProcs :: ModSpec -> PrimFork -> [Ident]
+localForkProcs _ NoFork = []
+localForkProcs thisMod (PrimFork _ bodies) =
+    concatMap (localBodyProcs thisMod) bodies
 
 
 -- |Type check one strongly connected component in the local call graph
@@ -161,6 +173,7 @@ typecheckProcSCC m mods (AcyclicSCC name) = do
 typecheckProcSCC m mods (CyclicSCC list) = do
     -- liftIO $ putStrLn $ "Type checking recursive procs " ++ 
     --   intercalate ", " list
+    -- liftIO $ putStrLn $ "type checking " ++ show list ++ "..."
     (modAgain,allAgain,reasons) <-
         foldM (\(modAgain,allAgain,rs) name -> do
                     (modAgain',allAgain',reasons) 
@@ -246,24 +259,25 @@ updateParamTypes _ params = params
 --  typing of all parameters inferred from previous clauses.  We can 
 --  stop once we've found a contradiction.
 typecheckBody :: ModSpec -> [ModSpec] -> ProcName -> OptPos -> Typing ->
-                 [[Placed Prim]] -> Compiler (Typing,[[Placed Prim]])
-typecheckBody m mods name pos paramTypes body = do
-    bodyTypes <- foldM (typecheckClause m mods name) [(paramTypes,[])] body
+                 ProcBody -> Compiler (Typing,ProcBody)
+typecheckBody m mods name pos paramTypes body@(ProcBody prims fork) = do
+    bodyTypes <- typecheckPrims m mods name paramTypes prims
     case bodyTypes of
       [] -> do
         -- liftIO $ putStrLn $ "   no valid type"
         return (InvalidTyping $ ReasonAmbig name "nothing" pos,body)
-      [(typing,body')] -> do
+      [(typing,prims')] -> do
         -- liftIO $ putStrLn $ "   final typing: " ++ show typing
-        -- liftIO $ putStrLn $ "   final body: " ++ show body'
-        when (projectTyping typing paramTypes /= typing)
+        -- liftIO $ putStrLn $ "   final body: " ++ show prims'
+        let typing' = projectTyping typing paramTypes
+        when (typing' /= typing)
                    (error "Typing not projected onto parameters!")
-             
-        return (projectTyping typing paramTypes, List.reverse body')
+        -- XXX must typecheck fork
+        return (typing', ProcBody prims' fork)
       ((_,b1):(_,b2):_) -> do
-        case catMaybes $ List.map (uncurry diffCall) $ List.zip b1 b2 of
-          [] -> shouldnt "ambiguity with no difference"
-          ((callee,callPos):_) ->
+        case diffCall b1 b2 of
+          Nothing -> shouldnt "ambiguity with no difference"
+          Just (callee,callPos) ->
               return (InvalidTyping $ ReasonAmbig name callee callPos,body)
 
 
@@ -276,31 +290,18 @@ diffCall (c1:c1s) (c2:c2s)
 
 callDifference :: OptPos -> Prim -> Prim -> Maybe (ProcName,OptPos)
 callDifference pos (PrimCall _ name _ _) _ = Just (name,pos)
-callDifference pos (PrimGuard prims1 _) (PrimGuard prims2 _) =
-    diffCall prims1 prims2
 callDifference _ _ _ = shouldnt "impossible ambiguity"
-
-
--- |Type check a single clause starting with each possible parameter 
---  typing. 
-typecheckClause :: ModSpec -> [ModSpec] -> ProcName -> 
-                   [(Typing, [[Placed Prim]])] -> 
-                   [Placed Prim] -> Compiler [(Typing,[[Placed Prim]])]
-typecheckClause m mods caller possibles prims = do
-    possibles' <- mapM (typecheckPrims m mods caller prims) possibles
-    return $ concat possibles'
 
 
 -- |Type all prims in a clause starting with one possible parameter 
 --  typing and producing all possible typings and the corresponding 
 --  clause body.  The clause is returned in reverse.
-typecheckPrims :: ModSpec -> [ModSpec] -> ProcName -> [Placed Prim] ->
-                  (Typing, [[Placed Prim]]) ->
-                  Compiler [(Typing,[[Placed Prim]])]
-typecheckPrims m mods caller clause (types,clauses) = do
-    clauseTypes <- foldM (typecheckPlacedPrim m mods caller) [(types,[])] clause
+typecheckPrims :: ModSpec -> [ModSpec] -> ProcName -> Typing ->
+                  [Placed Prim] -> Compiler [(Typing,[Placed Prim])]
+typecheckPrims m mods caller types prims = do
+    clauseTypes <- foldM (typecheckPlacedPrim m mods caller) [(types,[])] prims
     return $ List.map (\(clTyping,cl) ->
-                        (projectTyping clTyping types, reverse cl:clauses))
+                        (projectTyping clTyping types, reverse cl))
       clauseTypes
 
 -- |Type check a single placed primitive operation given a list of 
@@ -377,10 +378,6 @@ typecheckSingle m mods caller call@(PrimCall cm name id args) pos typing = do
 typecheckSingle _ _ _ (PrimForeign lang name id args) pos typing = do
     -- XXX? must get type and flow from foreign calls?
     return [(typing,PrimForeign lang name id args)]
-typecheckSingle m mods caller (PrimGuard body val) pos typing = do
-    checked <- foldM (typecheckPlacedPrim m mods caller) [(typing,[])] body
-    return $ List.map (\(ty,body') -> (ty,PrimGuard (reverse body') val))
-      checked
 typecheckSingle _ _ _ PrimNop pos typing = return [(typing,PrimNop)]
 
 

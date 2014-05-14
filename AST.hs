@@ -22,7 +22,7 @@ module AST (
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   enterModule, reenterModule, exitModule, finishModule, 
   emptyInterface, emptyImplementation, getParams,
-  ModSpec, ProcDef(..), Ident, VarName,
+  ModSpec, ProcDef(..), ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
   argFlowDirection, flowsIn, flowsOut,
   expToStmt, Prim(..), PrimProto(..), PrimParam(..), ProcSpec(..),
@@ -41,7 +41,7 @@ module AST (
   addResource, lookupResource, publicResource,
   addProc, replaceProc, lookupProc, publicProc,
   refersTo, callTargets,
-  showBody, showStmt, showBlock, showProcDef, showModSpec,
+  showBody, showStmt, showBlock, showProcDef, showModSpec, showModSpecs,
   shouldnt
   ) where
 
@@ -489,7 +489,7 @@ mapListInsert key elt =
 
 
 -- |Replace the specified proc definition in the current module.
-replaceProc :: Ident -> Int -> PrimProto -> [[Placed Prim]] -> OptPos ->
+replaceProc :: Ident -> Int -> PrimProto -> ProcBody -> OptPos ->
                Int -> Visibility -> Compiler ()
 replaceProc name id proto clauses pos tmpCount vis = do
     updateImplementation
@@ -828,12 +828,48 @@ resourceDefPosition (SimpleResource _ pos) = pos
 data ProcDef = ProcDef {
     procName :: Ident, 
     procProto :: PrimProto, 
-    procBody :: [[Placed Prim]],      -- list of clauses, each a list of Prims
+    procBody :: ProcBody,
+--    procBody :: [[Placed Prim]],      -- list of clauses, each a list of Prims
     procPos :: OptPos,
     procTmpCount :: Int,              -- the next temp variable number to use
     procVis :: Visibility
 }
              deriving Eq
+
+-- |A procedure body.  In principle, a body is a set of clauses, each
+-- possibly containg some guards.  Each guard is a test that succeeds
+-- iff the specified variable holds the specified value.  For each
+-- guard in a clause, it is required that there are other clauses that
+-- are identical up to that guard, and specify each of the other
+-- possible values for that variable.  This ensures that the clauses
+-- are exhaustive.  It is also required that any two clauses contain
+-- guards specifying distinct values, up to which the two clauses are
+-- identical.  This ensures the set of clauses is mutually exclusive.
+--
+-- In practice, we adopt a structure that ensures these constraints,
+-- and avoids duplicating the initial code that is common to a number
+-- of claues.  Thus a procedure body contains a list of primitives
+-- (the common code) followed by a fork, where the code splits into
+-- multiple different clauses, one for each possible value of a
+-- specified unsigned integer variable.  If the value of the variable
+-- is equal or greater than the number of clauses, behaviour is
+-- undefined.  To allow clauses to support multiple guards, each of
+-- the clauses is itself a procedure body.
+
+data ProcBody = ProcBody {
+      bodyPrims::[Placed Prim],
+      bodyFork::PrimFork}
+              deriving (Eq)
+
+data PrimFork =
+    NoFork |
+    PrimFork {
+      forkVar::VarName,
+      forkBodies::[ProcBody]
+    }
+    deriving (Eq)
+
+
 
 -- |Info about a proc call, including the ID, prototype, and an 
 --  optional source position. 
@@ -980,7 +1016,6 @@ data Prim
      -- XXX PrimCall should optionally contain a module spec.
      = PrimCall ModSpec ProcName (Maybe ProcSpec) [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
-     | PrimGuard [Placed Prim] Integer
      | PrimNop
      deriving Eq
 
@@ -1032,8 +1067,6 @@ varsInPrims dir prims =
 varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
 varsInPrim dir (PrimCall _ _ _ args)      = varsInPrimArgs dir args
 varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
-varsInPrim dir (PrimGuard prims _)      =
-    List.foldr (Set.union . varsInPrim dir . content) Set.empty prims
 varsInPrim dir (PrimNop)                = Set.empty
 
 varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
@@ -1254,8 +1287,8 @@ showProcDef :: Int -> ProcDef -> String
 showProcDef thisID (ProcDef _ proto def pos _ vis) =
     "\n" ++ visibilityPrefix vis ++
     "proc " ++ show proto ++ " (id " ++ show thisID ++ "): "
-    ++ showMaybeSourcePos pos 
-    ++ intercalate "\n" (List.map (showBlock 4) def)
+    ++ showMaybeSourcePos pos
+    ++ showBlock 4 def
 
 -- |How to show a type specification.
 instance Show TypeSpec where
@@ -1298,8 +1331,20 @@ startLine ind = "\n" ++ replicate ind ' '
 
 -- |Show a code block (list of primitive statements) with the
 --  specified indent.
-showBlock :: Int -> [Placed Prim] -> String
-showBlock ind stmts = List.concatMap (showPlacedPrim ind) stmts
+showBlock :: Int -> ProcBody -> String
+showBlock ind (ProcBody stmts fork) =
+    List.concatMap (showPlacedPrim ind) stmts ++
+    showFork ind fork
+
+showFork :: Int -> PrimFork -> String
+showFork ind NoFork = ""
+showFork ind (PrimFork var bodies) =
+    startLine ind ++ "case " ++ show var ++ " of" ++
+    List.concatMap (\(val,body) ->
+                        startLine ind ++ show val ++ ":" ++
+                        showBlock (ind+4) body ++ "\n")
+    (zip [0..] bodies)
+
 
 -- |Show a single primitive statement with the specified indent.
 showPlacedPrim :: Int -> Placed Prim -> String
@@ -1319,26 +1364,12 @@ showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++ 
         name ++ (if List.null flags then "" else " " ++ unwords flags) ++
         "(" ++ intercalate ", " (List.map show args) ++ ")"
-showPrim ind (PrimGuard body val) =
-        "begin guard " ++ show val ++
-        showBlock (ind+4) body ++
-        startLine ind ++ "end guard "
 showPrim _ (PrimNop) =
         "NOP"
 
 -- |Show a variable, with its suffix
 instance Show PrimVarName where
     show (PrimVarName var suffix) = var ++ ":" ++ show suffix
-
--- |Show the cases, numbered from the specified case counter, of a 
---  case primitive, with the specified indent and indent for the 
---  cases.
-showCases :: Int -> Int -> Int -> [[Placed Prim]] -> String
-showCases _ _ _ [] = ""
-showCases num labelInd blockInd (block:blocks) =
-  startLine labelInd ++ show num ++ ":"
-  ++ showBlock blockInd block
-  ++ showCases (num+1) labelInd blockInd blocks
 
 
 showStmt :: Int -> Stmt -> String

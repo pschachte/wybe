@@ -221,7 +221,9 @@ setUpModule items = do
 --  compiled or are defined in modules on this list.
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC specs = do
+    -- liftIO $ putStrLn $ "type checking module SCC " ++ showModSpecs specs ++ "..."
     typeCheckModSCC specs
+    -- liftIO $ putStrLn $ "type checked"
     mapM_ optimiseMod specs
     mods <- mapM getLoadedModule specs
     verboseMsg 1 $

@@ -27,6 +27,7 @@ import AssignElim
 normalise :: [Item] -> Compiler ()
 normalise items = do
     mapM_ normaliseItem items
+    -- liftIO $ putStrLn "File compiled"
     addImport ["wybe"] True Nothing Private -- every module imports stdlib
     -- Now generate main proc if needed
     stmts <- getModule stmtDecls 
@@ -189,7 +190,9 @@ compileProc tmpCtr (ProcDecl vis (ProcProto name params) body pos) = do
         mapM_ nextVar $ List.map paramName $ 
           List.filter (flowsIn . paramFlow) params
         startVars <- gets vars
+        -- liftIO $ putStrLn $ "Compiling body of " ++ name ++ "..."
         compiled <- compileBody body
+        -- liftIO $ putStrLn $ "Compiled"
         endVars <- gets vars
         return (List.map (primParam startVars endVars) params, compiled)
     let def = ProcDef name (PrimProto name params') body' pos tmpCtr vis
@@ -216,7 +219,7 @@ primParam _ _ param =
 --  form of the body is very limited:  it is either a single Cond 
 --  statement, or it is a list of ProcCalls and ForeignCalls.  
 --  Everything else has already been transformed away.
-compileBody :: [Placed Stmt] -> ClauseComp [[Placed Prim]]
+compileBody :: [Placed Stmt] -> ClauseComp ProcBody
 compileBody [placed]
   | case content placed of
       Cond _ _ _ -> True
@@ -234,11 +237,11 @@ compileBody [placed]
       modify (\s -> s { vars = final })
       let thn'' = thn' ++ reconcilingAssignments afterThen final
       let els'' = els' ++ reconcilingAssignments afterElse final
-      return [Unplaced (PrimGuard tst' 1):thn'',
-              Unplaced (PrimGuard tst' 0):els'']
+      return $ ProcBody tst' $
+             PrimFork "???" [ProcBody els'' NoFork,ProcBody thn'' NoFork]
 compileBody stmts = do
     prims <- mapM compileSimpleStmt stmts
-    return [prims]
+    return $ ProcBody prims NoFork
 
 compileSimpleStmt :: Placed Stmt -> ClauseComp (Placed Prim)
 compileSimpleStmt stmt = do
