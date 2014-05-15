@@ -24,7 +24,7 @@ module AST (
   emptyInterface, emptyImplementation, getParams,
   ModSpec, ProcDef(..), ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
-  argFlowDirection, flowsIn, flowsOut,
+  argFlowDirection, argType, flowsIn, flowsOut,
   expToStmt, Prim(..), PrimProto(..), PrimParam(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
@@ -42,7 +42,7 @@ module AST (
   addProc, replaceProc, lookupProc, publicProc,
   refersTo, callTargets,
   showBody, showStmt, showBlock, showProcDef, showModSpec, showModSpecs,
-  shouldnt
+  shouldnt, checkError, checkValue
   ) where
 
 import Options
@@ -870,7 +870,6 @@ data PrimFork =
     deriving (Eq)
 
 
-
 -- |Info about a proc call, including the ID, prototype, and an 
 --  optional source position. 
 data ProcSpec = ProcSpec {
@@ -1013,7 +1012,6 @@ data PrimVarName =
 -- |A primitive statment, including those that can only appear in a 
 --  loop.
 data Prim
-     -- XXX PrimCall should optionally contain a module spec.
      = PrimCall ModSpec ProcName (Maybe ProcSpec) [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
      | PrimNop
@@ -1043,6 +1041,16 @@ argFlowDirection (ArgInt _ _) = FlowIn
 argFlowDirection (ArgFloat _ _) = FlowIn
 argFlowDirection (ArgString _ _) = FlowIn
 argFlowDirection (ArgChar _ _) = FlowIn
+
+
+argType :: PrimArg -> TypeSpec
+argType (ArgVar _ typ _ _) = typ
+argType (ArgInt _ typ) = typ
+argType (ArgFloat _ typ) = typ
+argType (ArgString _ typ) = typ
+argType (ArgChar _ typ) = typ
+
+
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
@@ -1447,3 +1455,13 @@ maybeShow pre (Just something) post =
 -- |Report an internal error and abort
 shouldnt :: String -> a
 shouldnt what = error $ "Internal error: " ++ what
+
+
+-- |Check that all is well, else abort
+checkError :: Monad m => String -> Bool -> m ()
+checkError msg bad = when bad $ shouldnt msg
+
+
+-- |Check that a value is OK; if so, return it, else abort
+checkValue :: (t -> Bool) -> String -> t -> t
+checkValue tst msg val = if tst val then val else shouldnt msg
