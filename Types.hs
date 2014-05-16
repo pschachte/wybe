@@ -112,7 +112,7 @@ typeCheckModSCC scc = do        -- must find fixpoint
 -- XXX must check submodules, too.
 typeCheckMod :: [ModSpec] -> ModSpec -> Compiler Bool
 typeCheckMod modSCC thisMod = do
-    -- liftIO $ putStrLn $ "Type checking module " ++ showModSpec thisMod
+    -- liftIO $ putStrLn $ "**** Type checking module " ++ showModSpec thisMod
     reenterModule thisMod
     procs <- getModule (Map.toList . modProcs . fromJust . modImplementation)
     let ordered =
@@ -171,9 +171,8 @@ typecheckProcSCC m mods (AcyclicSCC name) = do
     (_,allAgain,reasons) <- typecheckProcDecls m mods name
     return (allAgain,reasons)
 typecheckProcSCC m mods (CyclicSCC list) = do
-    -- liftIO $ putStrLn $ "Type checking recursive procs " ++ 
+    -- liftIO $ putStrLn $ "**** Type checking recursive procs " ++ 
     --   intercalate ", " list
-    -- liftIO $ putStrLn $ "type checking " ++ show list ++ "..."
     (modAgain,allAgain,reasons) <-
         foldM (\(modAgain,allAgain,rs) name -> do
                     (modAgain',allAgain',reasons) 
@@ -183,8 +182,12 @@ typecheckProcSCC m mods (CyclicSCC list) = do
                            reasons++rs))
         (False, False, []) list
     if modAgain
-      then typecheckProcSCC m mods $ CyclicSCC list
-      else return (allAgain,reasons)
+    then typecheckProcSCC m mods $ CyclicSCC list
+    else do
+      -- liftIO $ putStrLn $ "**** Completed checking of " ++
+      --        intercalate ", " list ++
+      --        " with " ++ show (length reasons) ++ " errors"
+      return (allAgain,reasons)
 
 
 -- |Type check a list of procedure definitions and update the 
@@ -227,7 +230,11 @@ typecheckProcDecl m mods pd@(ProcDef name proto@(PrimProto pn params)
         --   ": " ++ show typing'
         let params' = updateParamTypes typing' params
         let pd' = ProcDef name (PrimProto pn params') def' pos tmpCnt vis
+        -- liftIO $ putStrLn $ "===== Old definition" ++ showProcDef 4 pd
+        -- liftIO $ putStrLn $ "===== New definition" ++ showProcDef 4 pd'
         let modAgain = pd' /= pd
+        -- liftIO $ putStrLn $ "===== Definition is " ++ 
+        --        (if modAgain then "" else "un") ++ "changed"
         -- when modAgain
         --      (liftIO $ putStrLn $ "** check again " ++ name ++
         --              "\n-----------------OLD:" ++ showProcDef 4 pd ++
@@ -437,7 +444,9 @@ typecheckArg'' callType paramType constType typing reason =
     in -- trace ("check call type " ++ show callType ++ " against param type " ++ show paramType ++ " for const type " ++ show constType)
            if paramType `subtypeOf` realType
            then typing
-           else InvalidTyping reason
+           else -- trace ("type error with constant: " ++ show realType ++ 
+                --       " vs. " ++ show paramType)
+                InvalidTyping reason
 
 
 diffBody :: ProcBody -> ProcBody -> Maybe (ProcName,OptPos)

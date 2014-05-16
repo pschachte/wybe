@@ -210,7 +210,12 @@ updateAllProcs fn =
 
 -- |Return Just the specified module, if already loaded; else return Nothing.
 getLoadedModule :: ModSpec -> Compiler (Maybe Module)
-getLoadedModule modspec = gets (Map.lookup modspec . modules)
+getLoadedModule modspec = do
+    underComp <- gets underCompilation
+    case find ((==modspec) . modSpec) underComp of
+      Just mod -> return $ Just mod
+      Nothing  -> gets (Map.lookup modspec . modules)
+                 
 
 -- |Apply some transformation to the map of compiled modules.
 updateModules :: (Map ModSpec Module -> Map ModSpec Module) -> Compiler ()
