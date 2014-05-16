@@ -375,7 +375,7 @@ SimpleExp :: { Placed Exp }
 					      [$1, $3, Unplaced $ IntValue 1])
                                              (place $1) }
     | '(' Exp ')'               { Placed (content $2) (tokenPosition $1) }
-    | '-' Exp %prec NEG         { Placed (Fncall [] "Negate" [$2])
+    | '-' Exp %prec NEG         { Placed (Fncall [] "-" [$2])
 	                                 (tokenPosition $1) }
     | int                       { Placed (IntValue $ intValue $1)
 	                                 (tokenPosition $1) }

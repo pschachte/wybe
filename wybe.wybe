@@ -7,6 +7,8 @@ public type int is
     public func -(x:int,y:int):int = foreign llvm sub(32,x,y)
     public proc -(?x:int,y:int,z:int) ?x = foreign llvm add(32,z,y) end
     public proc -(x:int,?y:int,z:int) ?y = foreign llvm sub(32,z,x) end
+    public func -(x:int):int = foreign llvm sub(32,0,x)
+    public proc -(?x:int,y:int) ?x = foreign llvm sub(32,0,x) end
     public func *(x:int,y:int):int = foreign llvm mul(32,x,y)
     public func /(x:int,y:int):int = foreign llvm sdiv(32,x,y)
     public func ==(x:int,y:int):bool = foreign llvm icmp eq(32,x,y)
@@ -18,6 +20,8 @@ public type int is
     public proc =(?y:int, x:int) foreign llvm move(x, y) end
     public proc =(x:int, ?y:int) foreign llvm move(x, y) end
     public func =(x:int, y:int) = foreign llvm cmp eq(x, y)
+    public func sqrt(x:int) = foreign C isqrt(x)
+    public func power(x:int,y:int) = foreign C ipow(x,y)
 end
 
 
@@ -28,6 +32,8 @@ public type float is
     public func -(x:float,y:float):float = foreign llvm fsub(64,x,y)
     public proc -(?x:float,y:float,z:float) ?x = foreign llvm fadd(64,z,y) end
     public proc -(x:float,?y:float,z:float) ?y = foreign llvm fsub(64,z,x) end
+    public func -(x:float):float = foreign llvm sub(32,0,x)
+    public proc -(?x:float,y:float) ?x = foreign llvm sub(32,0,x) end
     public func *(x:float,y:float):float = foreign llvm fmul(64,x,y)
     public func /(x:float,y:float):float = foreign llvm fdiv(64,x,y)
     public func ==(x:float,y:float):bool = foreign llvm fcmp eq(64,x,y)
@@ -39,6 +45,8 @@ public type float is
     public proc =(?y:float, x:float) foreign llvm move(x, y) end
     public proc =(x:float, ?y:float) foreign llvm move(x, y) end
     public func =(x:float, y:float) = foreign llvm cmp eq(x, y)
+    public func sqrt(x:float) = foreign C sqrt(x)
+    public func power(x:float,y:float) = foreign C pow(x,y)
 end
 
 
