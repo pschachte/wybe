@@ -285,90 +285,30 @@ typecheckProcDef m mods name pos paramTypes body = do
                 return (typing',body')
       (t1:t2:_) -> do
           -- XXX report ambiguity in a useful way!
-          liftIO $ putStrLn $ name ++ " has " ++ show (length types) ++ 
-            " typings, of which " ++
-            show (length (List.filter validTyping types)) ++
-            " are valid"
+          -- liftIO $ putStrLn $ name ++ " has " ++ show (length types) ++ 
+          --   " typings, of which " ++
+          --   show (length (List.filter validTyping types)) ++
+          --   " are valid"
           return (InvalidTyping $ ReasonAmbig name "???" Nothing,body)
-
-
-applyBodyTyping :: Map VarName TypeSpec -> ProcBody -> Compiler ProcBody
-applyBodyTyping dict (ProcBody prims fork) = do
-    prims' <- mapM (applyPlacedPrimTyping dict) prims
-    fork' <- case fork of
-        NoFork -> return NoFork
-        (PrimFork v bodies) -> do
-            bodies' <- mapM (applyBodyTyping dict) bodies
-            return $ PrimFork v bodies'
-    return $ ProcBody prims' fork'
-
-
-applyPlacedPrimTyping :: Map VarName TypeSpec -> Placed Prim -> 
-                         Compiler (Placed Prim)
-applyPlacedPrimTyping dict pprim = do
-    prim <- applyPrimTyping dict $ content pprim
-    return $ maybePlace prim $ place pprim
-
-
-applyPrimTyping :: Map VarName TypeSpec -> Prim -> Compiler Prim
-applyPrimTyping dict call@(PrimCall cm name id args) = do
-    let args' = List.map (applyArgTyping dict) args
-    procs <- case id of
-        Nothing   -> callTargets cm name
-        Just spec -> return [spec]
-    -- liftIO $ putStrLn $ "   " ++ show (length procs) ++ " potential procs"
-    matches <- filterM (\p -> do
-                             params <- getParams p
-                             -- liftIO $ putStrLn $ "   checking call to " ++
-                             --        show p ++ " args " ++
-                             --        show args' ++ " against params " ++
-                             --        show params
-                             return 
-                              (length params == length args' &&
-                               all (uncurry subtypeOf)
-                               (zip (List.map argType args')
-                                (List.map primParamType params)) &&
-                               all (uncurry (==))
-                               (zip (List.map argFlowDirection args')
-                                (List.map primParamFlow params))))
-               procs
-    checkError "not exactly one matching proc" (1 /= length matches)
-    let proc = head matches
-    return $ PrimCall (procSpecMod proc) (procSpecName proc) (Just proc) args'
-applyPrimTyping dict (PrimForeign lang name id args) = do
-    let args' = List.map (applyArgTyping dict) args
-    return $ PrimForeign lang name id args'
-applyPrimTyping dict (PrimNop) = return PrimNop
-
-
-applyArgTyping :: Map VarName TypeSpec -> PrimArg -> PrimArg
-applyArgTyping dict (ArgVar var@(PrimVarName nm _) typ flow ftype) =
-    ArgVar var (fromMaybe typ $ Map.lookup nm dict) flow ftype
--- XXX the module for these types should be ["wybe"]
-applyArgTyping dict (ArgInt val _) = ArgInt val (TypeSpec [] "int" [])
-applyArgTyping dict (ArgFloat val _) = ArgFloat val (TypeSpec [] "float" [])
-applyArgTyping dict (ArgChar val _) = ArgChar val (TypeSpec [] "char" [])
-applyArgTyping dict (ArgString val _) = ArgString val (TypeSpec [] "string" [])
-
-primArg = primArg
 
 
 -- |Like a monadic foldl over a list, where each application produces 
 --  a list of values, and for each element of the folded list, the 
 --  function is applied to every result from the previous element, 
 --  finally producing the list of all the results.
-chainApplyTyping :: (Typing -> t -> Compiler [Typing]) -> [Typing] -> [t] -> 
+typecheckSequence :: (Typing -> t -> Compiler [Typing]) -> [Typing] -> [t] -> 
                     Compiler [Typing]
-chainApplyTyping f typings [] = return typings
-chainApplyTyping f typings (t:ts) = do
+typecheckSequence f typings [] = return typings
+typecheckSequence f typings (t:ts) = do
+    -- liftIO $ putStrLn $ "Type checking " ++ show (1 + length ts) ++ " things with " ++ show (length typings) ++ " typings, " ++ show (length $ List.filter validTyping typings) ++ " of them valid"
     typings' <- mapM (flip f t) typings
     let typings'' = pruneTypings  $concat typings'
     if List.null typings'
       then return []
-      else if List.null typings''
+      else if List.null typings'' || not (validTyping $ List.head typings'')
               -- No point going further if it's already invalid
            then return [List.head $ concat typings']
-           else chainApplyTyping f typings'' ts
+           else typecheckSequence f typings'' ts
 
 
 pruneTypings :: [Typing] -> [Typing]
@@ -383,10 +323,12 @@ pruneTypings typings =
 typecheckBody :: ModSpec -> [ModSpec] -> ProcName -> Typing -> ProcBody -> 
                  Compiler [Typing]
 typecheckBody m mods name typing body@(ProcBody prims fork) = do
-    typings' <- chainApplyTyping (typecheckPlacedPrim m mods name) [typing] prims
-    typecheckFork m mods name typings' fork
-
-
+    -- liftIO $ putStrLn $ "Entering typecheckSequence from typecheckBody"
+    typings' <- typecheckSequence (typecheckPlacedPrim m mods name)
+                [typing] prims
+    if List.null typings' || not (validTyping $ List.head typings')
+    then return typings'
+    else typecheckFork m mods name typings' fork
 
 
 typecheckFork :: ModSpec -> [ModSpec] -> ProcName -> [Typing] -> PrimFork ->
@@ -394,13 +336,14 @@ typecheckFork :: ModSpec -> [ModSpec] -> ProcName -> [Typing] -> PrimFork ->
 typecheckFork m mods name typings NoFork = do
     return typings
 typecheckFork m mods name typings (PrimFork var bodies) = do
-    chainApplyTyping (typecheckBody m mods name) typings bodies
+    -- liftIO $ putStrLn $ "Entering typecheckSequence from typecheckFork"
+    typecheckSequence (typecheckBody m mods name) typings bodies
 
 
 -- |Type check a single placed primitive operation given a list of 
 --  possible starting typings and corresponding clauses up to this prim.
-typecheckPlacedPrim :: ModSpec -> [ModSpec] -> ProcName -> Typing -> Placed Prim -> 
-                       Compiler [Typing]
+typecheckPlacedPrim :: ModSpec -> [ModSpec] -> ProcName -> Typing ->
+                       Placed Prim -> Compiler [Typing]
 typecheckPlacedPrim m mods caller typing pprim = do
     typecheckPrim m mods caller (content pprim) (place pprim) typing
     
@@ -474,21 +417,21 @@ typecheckArg' (ArgVar var _ flow ftype) paramType typing reason =
 -- XXX type specs below should include "wybe" module
 typecheckArg' (ArgInt val callType) paramType typing reason =
     typecheckArg'' callType paramType (TypeSpec [] "int" [])
-                   typing reason $ ArgInt val
+                   typing reason
 typecheckArg' (ArgFloat val callType) paramType typing reason =
     typecheckArg'' callType paramType (TypeSpec [] "float" [])
-                   typing reason $ ArgFloat val
+                   typing reason
 typecheckArg' (ArgString val callType) paramType typing reason =
     typecheckArg'' callType paramType (TypeSpec [] "string" [])
-                   typing reason $ ArgString val
+                   typing reason
 typecheckArg' (ArgChar val callType) paramType typing reason =
     typecheckArg'' callType paramType (TypeSpec [] "char" [])
-                   typing reason $ ArgChar val
+                   typing reason
                         
 
 typecheckArg'' :: TypeSpec -> TypeSpec -> TypeSpec -> Typing -> TypeReason ->
-                  (TypeSpec -> PrimArg) -> Typing
-typecheckArg'' callType paramType constType typing reason mkArg =
+                  Typing
+typecheckArg'' callType paramType constType typing reason =
     let realType =
             if constType `subtypeOf` callType then constType else callType
     in -- trace ("check call type " ++ show callType ++ " against param type " ++ show paramType ++ " for const type " ++ show constType)
@@ -525,3 +468,63 @@ firstJust :: [Maybe a] -> Maybe a
 firstJust [] = Nothing
 firstJust (j@(Just _):_) = j
 firstJust (Nothing:rest) = firstJust rest
+
+
+
+applyBodyTyping :: Map VarName TypeSpec -> ProcBody -> Compiler ProcBody
+applyBodyTyping dict (ProcBody prims fork) = do
+    prims' <- mapM (applyPlacedPrimTyping dict) prims
+    fork' <- case fork of
+        NoFork -> return NoFork
+        (PrimFork v bodies) -> do
+            bodies' <- mapM (applyBodyTyping dict) bodies
+            return $ PrimFork v bodies'
+    return $ ProcBody prims' fork'
+
+
+applyPlacedPrimTyping :: Map VarName TypeSpec -> Placed Prim -> 
+                         Compiler (Placed Prim)
+applyPlacedPrimTyping dict pprim = do
+    prim <- applyPrimTyping dict $ content pprim
+    return $ maybePlace prim $ place pprim
+
+
+applyPrimTyping :: Map VarName TypeSpec -> Prim -> Compiler Prim
+applyPrimTyping dict call@(PrimCall cm name id args) = do
+    let args' = List.map (applyArgTyping dict) args
+    procs <- case id of
+        Nothing   -> callTargets cm name
+        Just spec -> return [spec]
+    -- liftIO $ putStrLn $ "   " ++ show (length procs) ++ " potential procs"
+    matches <- filterM (\p -> do
+                             params <- getParams p
+                             -- liftIO $ putStrLn $ "   checking call to " ++
+                             --        show p ++ " args " ++
+                             --        show args' ++ " against params " ++
+                             --        show params
+                             return 
+                              (length params == length args' &&
+                               all (uncurry subtypeOf)
+                               (zip (List.map argType args')
+                                (List.map primParamType params)) &&
+                               all (uncurry (==))
+                               (zip (List.map argFlowDirection args')
+                                (List.map primParamFlow params))))
+               procs
+    checkError "not exactly one matching proc" (1 /= length matches)
+    let proc = head matches
+    return $ PrimCall (procSpecMod proc) (procSpecName proc) (Just proc) args'
+applyPrimTyping dict (PrimForeign lang name id args) = do
+    let args' = List.map (applyArgTyping dict) args
+    return $ PrimForeign lang name id args'
+applyPrimTyping dict (PrimNop) = return PrimNop
+
+
+applyArgTyping :: Map VarName TypeSpec -> PrimArg -> PrimArg
+applyArgTyping dict (ArgVar var@(PrimVarName nm _) typ flow ftype) =
+    ArgVar var (fromMaybe typ $ Map.lookup nm dict) flow ftype
+-- XXX the module for these types should be ["wybe"]
+applyArgTyping dict (ArgInt val _) = ArgInt val (TypeSpec [] "int" [])
+applyArgTyping dict (ArgFloat val _) = ArgFloat val (TypeSpec [] "float" [])
+applyArgTyping dict (ArgChar val _) = ArgChar val (TypeSpec [] "char" [])
+applyArgTyping dict (ArgString val _) = ArgString val (TypeSpec [] "string" [])
