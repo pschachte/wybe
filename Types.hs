@@ -114,6 +114,13 @@ typeCheckMod :: [ModSpec] -> ModSpec -> Compiler Bool
 typeCheckMod modSCC thisMod = do
     -- liftIO $ putStrLn $ "**** Type checking module " ++ showModSpec thisMod
     reenterModule thisMod
+    -- First typecheck submodules
+    submods <- getModuleImplementationField modSubmods
+    -- liftIO $ putStrLn $ "getModuleImplementationField completed"
+    submodChg <- do
+      let modspecs = maybe [] (List.map modSpec . Map.elems) submods
+      -- liftIO $ putStrLn $ "  Submodules: " ++ showModSpecs modspecs
+      mapM (typeCheckMod modSCC) modspecs
     procs <- getModule (Map.toList . modProcs . fromJust . modImplementation)
     let ordered =
             stronglyConnComp
@@ -124,11 +131,12 @@ typeCheckMod modSCC thisMod = do
         foldM (\(chg,rs) scc -> do
                  (chg1,rs1) <- typecheckProcSCC thisMod modSCC scc
                  return (chg1 || chg, rs1++rs))
-        (False,[])
+        (or submodChg,[])
         ordered
     finishModule
     unless changed
         (mapM_ (\r -> message Error (show r) Nothing) reasons)
+    -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
     return changed
 
 
@@ -309,7 +317,7 @@ typecheckSequence f typings [] = return typings
 typecheckSequence f typings (t:ts) = do
     -- liftIO $ putStrLn $ "Type checking " ++ show (1 + length ts) ++ " things with " ++ show (length typings) ++ " typings, " ++ show (length $ List.filter validTyping typings) ++ " of them valid"
     typings' <- mapM (flip f t) typings
-    let typings'' = pruneTypings  $concat typings'
+    let typings'' = pruneTypings $ concat typings'
     if List.null typings'
       then return []
       else if List.null typings'' || not (validTyping $ List.head typings'')
@@ -521,7 +529,7 @@ applyPrimTyping dict call@(PrimCall cm name id args) = do
                                 (List.map primParamFlow params))))
                procs
     checkError "not exactly one matching proc" (1 /= length matches)
-    let proc = head matches
+    let proc = List.head matches
     return $ PrimCall (procSpecMod proc) (procSpecName proc) (Just proc) args'
 applyPrimTyping dict (PrimForeign lang name id args) = do
     let args' = List.map (applyArgTyping dict) args
