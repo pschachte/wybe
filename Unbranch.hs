@@ -185,11 +185,11 @@ unbranchStmt stmt@(ForeignCall _ _ _ args) pos stmts = do
     defArgs args
     stmts' <- unbranchStmts stmts
     return $ (maybePlace stmt pos):stmts'
-unbranchStmt (Cond tst thn els) pos stmts = do
+unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     beforeVars <- gets brVars
-    dbgPrintLn $ "* test: " ++ showBody 8 tst
+    dbgPrintLn $ "* test (" ++ show tstVar ++ "): " ++ showBody 8 tstStmts
     dbgPrintLn $ "* Vars before test: " ++ show beforeVars
-    tst' <- unbranchStmts tst
+    tstStmts' <- unbranchStmts tstStmts
     thn' <- unbranchStmts thn
     thnVars <- gets brVars
     dbgPrintLn $ "* Vars after then branch: " ++ show thnVars
@@ -211,7 +211,7 @@ unbranchStmt (Cond tst thn els) pos stmts = do
     if lp == NoLoop || stmts == []
       then do
         switch <- factorFreshProc switchName beforeVars afterVars pos
-                  [maybePlace (Cond tst' thn' els') pos]
+                  [maybePlace (Cond tstStmts' tstVar thn' els') pos]
         setVars beforeVars
         unbranchStmts (switch:stmts)
       else do
@@ -226,7 +226,7 @@ unbranchStmt (Cond tst thn els) pos stmts = do
         let loopExitVars = Set.intersection thnVars elsVars
         switch <- factorFreshProc switchName beforeVars loopExitVars pos
                   [maybePlace 
-                   (Cond tst' 
+                   (Cond tstStmts' tstVar
                     (if thnTerm then thn' else thn' ++ [cont]) 
                     (if elsTerm then els' else els' ++ [cont])) pos]
         dbgPrintLn $ "* Generated switch proc " ++ showStmt 4 
@@ -358,8 +358,8 @@ stmtLoopExitVars  vars (ProcCall _ _ args) stmts =
     loopExitVars (outputVars vars args) stmts
 stmtLoopExitVars vars (ForeignCall _ _ _ args) stmts = do
     loopExitVars (outputVars vars args) stmts
-stmtLoopExitVars vars (Cond tst thn els) stmts =
-    let (tstVars,tstExit) = loopExitVars vars tst
+stmtLoopExitVars vars (Cond tstStmts tstVar thn els) stmts =
+    let (tstVars,tstExit) = loopExitVars vars tstStmts
     in  if tstExit then (tstVars,True)
         else let (thnVars,thnExit) = loopExitVars tstVars thn
                  -- else branch doesn't get to use test vars

@@ -115,7 +115,8 @@ place :: Placed t -> OptPos
 place (Placed _ pos) = Just pos
 place (Unplaced _) = Nothing
 
--- |Return the optional position attached to a Placed value.
+-- |Return the optional position attached to a Placed value, if
+-- present, or the provided optional pos otherwise.
 betterPlace :: OptPos -> Placed t -> OptPos
 betterPlace _ (Placed _ pos) = Just pos
 betterPlace pos (Unplaced _) = pos
@@ -864,7 +865,7 @@ data ProcBody = ProcBody {
 data PrimFork =
     NoFork |
     PrimFork {
-      forkVar::VarName,
+      forkVar::PrimVarName,
       forkBodies::[ProcBody]
     }
     deriving (Eq)
@@ -947,7 +948,10 @@ flowsOut ParamInOut = True
 data Stmt
      = ProcCall ModSpec Ident [Placed Exp]
      | ForeignCall Ident Ident [Ident] [Placed Exp]
-     | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt]
+     -- The first stmt list is empty and the Exp is anything until
+     -- flattening.  After that, the stmt list contains the body of
+     -- the test, and the Exp is primitive.
+     | Cond [Placed Stmt] (Placed Exp) [Placed Stmt] [Placed Stmt]
      | Loop [Placed Stmt]
      | Nop -- Nop doesn't do anything so before and after are the same
        -- These are only valid in a loop
@@ -964,7 +968,7 @@ data Exp
       | CharValue Char
       | Var VarName FlowDirection
       | Where [Placed Stmt] (Placed Exp)
-      | CondExp [Placed Stmt] (Placed Exp) (Placed Exp)
+      | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
       | Fncall ModSpec Ident [Placed Exp]
       | ForeignFn Ident Ident [Ident] [Placed Exp]
       | Typed Exp TypeSpec
@@ -1388,9 +1392,10 @@ showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ name ++ 
     (if List.null flags then "" else " " ++ unwords flags) ++
     "(" ++ intercalate ", " (List.map show args) ++ ")\n"
-showStmt indent (Cond cond thn els) =
+showStmt indent (Cond condstmts cond thn els) =
     let leadIn = List.replicate indent ' '
-    in "if:\n" ++ showBody (indent+4) cond
+    in "if:\n" ++ showBody (indent+2) condstmts ++ "\n"
+       ++ leadIn ++ show cond ++ "\n"
        ++ leadIn ++ "then:\n"
        ++ showBody (indent+4) thn
        ++ leadIn ++ "else:\n"
@@ -1432,7 +1437,7 @@ instance Show Exp where
   show (Var name dir) = (flowPrefix dir) ++ name
   show (Where stmts exp) = show exp ++ " where\n" ++ showBody 8 stmts
   show (CondExp cond thn els) = 
-    "if\n" ++ showBody 4 cond ++ "then " ++ show thn ++ " else " ++ show els
+    "if\n" ++ show cond ++ "then " ++ show thn ++ " else " ++ show els
   show (Fncall maybeMod fn args) = 
     maybeModPrefix maybeMod ++
     fn ++ "(" ++ intercalate ", " (List.map show args) ++ ")"

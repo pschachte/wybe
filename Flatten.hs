@@ -117,11 +117,11 @@ tempVar = do
     return $ "tmp$" ++ show ctr
 
 
-flattenInner :: Bool -> Flattener () -> Flattener [Placed Stmt]
+flattenInner :: Bool -> Flattener t -> Flattener (t,[Placed Stmt])
 flattenInner isLoop inner = do
     oldState <- get
-    innerState <-
-        lift (execStateT inner
+    (val,innerState) <-
+        lift (runStateT inner
               (initFlattenerState {
                     tempCtr = (tempCtr oldState),
                     prefixStmts = if isLoop then [] else prefixStmts oldState}))
@@ -135,7 +135,7 @@ flattenInner isLoop inner = do
     if isLoop
       then flattenStmts $ prefixStmts innerState
       else modify (\s -> s { prefixStmts = prefixStmts innerState })
-    return $ List.reverse $ flattened innerState
+    return (val,List.reverse $ flattened innerState)
 
 
 flattenStmtArgs :: [Placed Exp] -> OptPos -> Flattener [Placed Exp]
@@ -188,26 +188,32 @@ flattenStmt (ForeignCall lang name flags args) pos = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
     emitPostponed
-flattenStmt (Cond tst thn els) pos = do
+flattenStmt (Cond tstStmts tst thn els) pos = do
     -- liftIO $ putStrLn $ "** Flattening test:\n" ++ showBody 4 tst
-    tst' <- flattenInner False (flattenStmts tst)
+    (vars,tst') <- flattenInner False (flattenPExp tst)
     -- liftIO $ putStrLn $ "** Result:\n" ++ showBody 4 tst'
-    thn' <- flattenInner False (flattenStmts thn)
-    els' <- flattenInner False (flattenStmts els)
-    emit pos $ Cond tst' thn' els'
+    (_,thn') <- flattenInner False (flattenStmts thn)
+    (_,els') <- flattenInner False (flattenStmts els)
+    let errPos = betterPlace pos tst
+    case vars of
+      [] -> lift $ message Error "Condition with no flow" errPos
+      [var] -> emit pos $ Cond (tstStmts++tst') var thn' els'
+      [_,_] -> lift $ message Error "Condition with in-out flow" errPos
+      _ -> shouldnt "Single expression expanded to more than 2 args"
 flattenStmt (Loop body) pos = do
-    body' <- flattenInner True 
+    (_,body') <- flattenInner True 
              (flattenStmts $ body ++ [Unplaced $ Next])
     emit pos $ Loop body'
 flattenStmt (For itr gen) pos = do
     genVar <- tempVar
     saveInit pos $ 
       ProcCall [] "init_seq" [gen, Unplaced $ Var genVar ParamOut]
-    flattenStmt (Cond [maybePlace 
-                       (ProcCall [] "in" [itr,
-                                               Unplaced $ Var genVar ParamIn,
-                                               Unplaced $ Var genVar ParamOut])
-                       pos]
+    flattenStmt (Cond [] 
+                 (maybePlace 
+                  (Fncall [] "in" [itr,
+                                   Unplaced $ Var genVar ParamIn,
+                                   Unplaced $ Var genVar ParamOut])
+                  pos)
                  [Unplaced $ Nop]
                  [Unplaced $ Break])
       pos
@@ -258,7 +264,7 @@ flattenExp (Where stmts pexp) _ = do
     flattenPExp pexp
 flattenExp (CondExp cond thn els) pos = do
     resultName <- tempVar
-    flattenStmt (Cond cond
+    flattenStmt (Cond [] cond
                  [Unplaced $ ProcCall [] "=" 
                   [Unplaced $ Var resultName ParamOut,thn]]
                  [Unplaced $ ProcCall [] "=" 

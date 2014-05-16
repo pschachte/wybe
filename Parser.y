@@ -279,24 +279,24 @@ RevStmts :: { [Placed Stmt] }
 
 Stmt :: { Placed Stmt }
     : Exp                       { fmap expToStmt $1 }
-    | 'if' Stmt 'then' Stmts Condelse 'end'
-                                { Placed (Cond [$2] $4 $5)
+    | 'if' Exp 'then' Stmts Condelse 'end'
+                                { Placed (Cond [] $2 $4 $5)
                                  (tokenPosition $1) }
     | 'do' Stmts 'end'          { Placed (Loop $2)
                                   (tokenPosition $1) }
     | 'for' Exp 'in' Exp        { Placed (For $2 $4)
                                   (tokenPosition $1) }
-    | 'until' Stmt              { Placed (Cond [$2] [Unplaced $ Break]
-                                                  [Unplaced $ Nop])
+    | 'until' Exp               { Placed (Cond [] $2 [Unplaced $ Break]
+                                                     [Unplaced $ Nop])
                                   (tokenPosition $1) }
-    | 'while' Stmt              { Placed (Cond [$2] [Unplaced $ Nop]
-                                                  [Unplaced $ Break])
+    | 'while' Exp               { Placed (Cond [] $2 [Unplaced $ Nop]
+                                                     [Unplaced $ Break])
                                   (tokenPosition $1) }
-    | 'unless' Stmt             { Placed (Cond [$2] [Unplaced $ Nop]
-                                                  [Unplaced $ Next])
+    | 'unless' Exp              { Placed (Cond [] $2 [Unplaced $ Nop]
+                                                     [Unplaced $ Next])
                                          (tokenPosition $1) }
-    | 'when' Stmt               { Placed (Cond [$2] [Unplaced $ Next]
-					          [Unplaced $ Nop])
+    | 'when' Exp                { Placed (Cond [] $2 [Unplaced $ Next]
+					             [Unplaced $ Nop])
                                          (tokenPosition $1) }
 
 OptProcArgs :: { [Placed Exp] }
@@ -415,8 +415,8 @@ SimpleExp :: { Placed Exp }
 	                                 (place $1) }
 
 Exp :: { Placed Exp }
-    : 'if' Stmt 'then' Exp 'else' Exp
-                                { Placed (CondExp [$2] $4 $6)
+    : 'if' Exp 'then' Exp 'else' Exp
+                                { Placed (CondExp $2 $4 $6)
 				         (tokenPosition $1) }
     | 'let' Stmts 'in' Exp      { Placed (Where $2 $4) (tokenPosition $1) }
     | Exp 'where' ProcBody      { maybePlace (Where $3 $1) (place $1) }

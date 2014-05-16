@@ -222,12 +222,13 @@ primParam _ _ param =
 compileBody :: [Placed Stmt] -> ClauseComp ProcBody
 compileBody [placed]
   | case content placed of
-      Cond _ _ _ -> True
+      Cond _ _ _ _ -> True
       _ -> False
  = do
-      let Cond tst thn els = content placed
+      let Cond tstStmts tstVar thn els = content placed
       initial <- gets vars
-      tst' <- mapM compileSimpleStmt tst
+      tstStmts' <- mapM compileSimpleStmt tstStmts
+      tstVar' <- compileArg $ content tstVar
       thn' <- mapM compileSimpleStmt thn
       afterThen <- gets vars
       modify (\s -> s { vars = initial })
@@ -237,8 +238,19 @@ compileBody [placed]
       modify (\s -> s { vars = final })
       let thn'' = thn' ++ reconcilingAssignments afterThen final
       let els'' = els' ++ reconcilingAssignments afterElse final
-      return $ ProcBody tst' $
-             PrimFork "???" [ProcBody els'' NoFork,ProcBody thn'' NoFork]
+      case tstVar' of
+        ArgVar var _ FlowIn Ordinary ->
+            return $ ProcBody tstStmts' $
+                   PrimFork var [ProcBody els'' NoFork,
+                                 ProcBody thn'' NoFork]
+        ArgInt n _ ->
+            return $ ProcBody (if n/=0 then tstStmts'++thn'' else els'') NoFork
+        _ -> do
+            lift $ message Error "Condition is a non-bool constant" $
+                 betterPlace (place placed) tstVar
+            return $ ProcBody [] NoFork
+
+
 compileBody stmts = do
     prims <- mapM compileSimpleStmt stmts
     return $ ProcBody prims NoFork
