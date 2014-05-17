@@ -902,7 +902,7 @@ data TypeSpec = TypeSpec {
     typeName::Ident,
     typeParams::[TypeSpec] 
     } | Unspecified
-              deriving Eq
+              deriving (Eq,Ord)
 
 -- |A manifest constant.
 data Constant = Int Int

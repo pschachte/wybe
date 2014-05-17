@@ -1,4 +1,3 @@
-o Fix useless ambiguity error message
 o Ensure every variable gets a type
 o Fix bug in typing proc_beer, proc_yorn, proc_yorn2
 o Fix test cases with undefined procs

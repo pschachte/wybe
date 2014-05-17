@@ -24,8 +24,8 @@ data TypeReason = ReasonParam ProcName Int OptPos
                                       -- Call to unknown proc
                 | ReasonArg ProcName Int OptPos
                                       -- Actual param type/flow inconsistent
-                | ReasonAmbig ProcName ProcName OptPos
-                                      -- Proc call is ambiguous
+                | ReasonAmbig ProcName OptPos [(VarName,[TypeSpec])]
+                                      -- Proc defn has ambiguous types
                 | ReasonArity ProcName ProcName OptPos Int Int
                                       -- Call to proc with wrong arity
                 deriving (Eq, Ord)
@@ -38,9 +38,12 @@ instance Show TypeReason where
     show (ReasonArg name num pos) =
         makeMessage pos $
             "Type/flow error in call to " ++ name ++ ", argument " ++ show num
-    show (ReasonAmbig callFrom callTo pos) =
+    show (ReasonAmbig procName pos varAmbigs) =
         makeMessage pos $
-            "Ambiguous call to overloaded " ++ callTo ++ " from " ++ callFrom
+            "Type ambiguity in defn of " ++ procName ++ ":" ++
+            concat ["\n    Variable '" ++ v ++ "' could be: " ++
+                    intercalate ", " (List.map show typs)
+                   | (v,typs) <- varAmbigs]
     show (ReasonUndef callFrom callTo pos) =
         makeMessage pos $
             "Call to unknown " ++ callTo ++ " from " ++ callFrom
@@ -52,6 +55,11 @@ instance Show TypeReason where
 data Typing = ValidTyping (Map VarName TypeSpec)
             | InvalidTyping TypeReason   -- call type conflicts w/callee
             deriving (Show,Eq)
+
+typingDict :: Typing -> Map VarName TypeSpec
+typingDict (ValidTyping dict) = dict
+typingDict (InvalidTyping _) = error "no typingDict for InvalidTyping"
+
 
 initTyping :: Typing
 initTyping = ValidTyping Map.empty
@@ -283,7 +291,7 @@ typecheckProcDef m mods name pos paramTypes body = do
       [] -> do
         -- liftIO $ putStrLn $ "   no valid type"
           -- XXX This is the wrong reason
-        return (InvalidTyping $ ReasonAmbig name "nothing" pos,body)
+        return (InvalidTyping $ ReasonAmbig name pos [],body)
       [typing] -> do
         -- liftIO $ putStrLn $ "   final typing: " ++ show typing
         -- liftIO $ putStrLn $ "   final body: " ++ show prims'
@@ -293,13 +301,17 @@ typecheckProcDef m mods name pos paramTypes body = do
             ValidTyping dict -> do
                 body' <- applyBodyTyping dict body
                 return (typing',body')
-      (t1:t2:_) -> do
+      typings -> do
           -- XXX report ambiguity in a useful way!
           -- liftIO $ putStrLn $ name ++ " has " ++ show (length types) ++ 
           --   " typings, of which " ++
           --   show (length (List.filter validTyping types)) ++
           --   " are valid"
-          return (InvalidTyping $ ReasonAmbig name "???" Nothing,body)
+          let typingSets = List.map (Map.map Set.singleton . typingDict) typings
+          let merged = Map.filter ((>1).Set.size) $
+                       Map.unionsWith Set.union typingSets
+          let ambigs = List.map (\(v,ts) -> (v,Set.toAscList ts)) $ assocs merged
+          return (InvalidTyping $ ReasonAmbig name pos ambigs, body)
 
 
 -- |Like a monadic foldl over a list, where each application produces 
