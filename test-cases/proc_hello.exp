@@ -9,5 +9,5 @@
   resources       : 
   procs           : print2:
 public proc print2(x:0:int, y:0:int) (id 0):  @proc_hello:1:8
-    wybe.io.println<1>("hello, world":string) @proc_hello:2:8
+    wybe.io.println<3>("hello, world":string) @proc_hello:2:8
 

@@ -53,6 +53,7 @@ end
 public type bool is
     public func true:bool = 1
     public func false:bool = 0
+    # These are syntax errors because they are operators:
     # public func and(p:bool, q:bool):bool = foreign llvm and(p,q)
     # public func or(p:bool, q:bool):bool = foreign llvm or(p,q)
     # public func not(p:bool):bool = foreign xor(p,1)
@@ -71,12 +72,22 @@ public type string is
 end
 
 
-
-
 public module io is
-    public proc print(x:int) foreign c printf("%d", x) end
-    public proc println(x:int) foreign c printf("%d\n", x) end
+    public proc nl foreign c putc('\n') end
 
-    public proc print(x:string) foreign c printf("%s", x) end
-    public proc println(x:string) foreign c printf("%s\n", x) end
+    public proc print(x:int) foreign c print_int(x) end
+    public proc println(x:int) print(x) nl end
+    public proc read(?x:int) foreign c read_int(?x) end
+
+    public proc print(x:float) foreign c print_float(x) end
+    public proc println(x:float) print(x) nl end
+    public proc read(?x:float) foreign c read_float(?x) end
+
+    public proc print(x:char) foreign c putchar(x) end
+    public proc println(x:char) print(x) nl end
+    public proc read(?x:char) foreign c read_char(?x) end
+
+    public proc print(x:string) foreign c print_string(x) end
+    public proc println(x:string) print(x) nl end
+    public proc read(?x:string) foreign c read_line(?x) end
 end
