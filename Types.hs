@@ -109,7 +109,6 @@ typeCheckModSCC scc = do        -- must find fixpoint
 -- |Type check a single module named in the second argument; the 
 --  first argument is a list of all the modules in this module 
 -- dependency SCC.
--- XXX must check submodules, too.
 typeCheckMod :: [ModSpec] -> ModSpec -> Compiler Bool
 typeCheckMod modSCC thisMod = do
     -- liftIO $ putStrLn $ "**** Type checking module " ++ showModSpec thisMod
@@ -273,10 +272,6 @@ updateParamTypes _ params = params
 --  each clause in turn using the declared parameter typing plus the 
 --  typing of all parameters inferred from previous clauses.  We can 
 --  stop once we've found a contradiction.
---
--- XXX refactor this to use a two-pass implementation:  first 
--- determine all variable types, and then transform the code to 
--- include type annotations.
 typecheckProcDef :: ModSpec -> [ModSpec] -> ProcName -> OptPos -> Typing ->
                      ProcBody -> Compiler (Typing,ProcBody)
 typecheckProcDef m mods name pos paramTypes body = do
