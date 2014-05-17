@@ -1,0 +1,18 @@
+o Fix useless ambiguity error message
+o Ensure every variable gets a type
+o Fix bug in typing proc_beer, proc_yorn, proc_yorn2
+o Fix test cases with undefined procs
+o Fix bug in type_list
+o Remove unneeded input and unchanged output arguments
+
+o Implement algebraic types
+o Code generation   
+
+o Implement resources
+o Support polymorphism
+o Support subtypes
+o Support higher-order programming
+o Support declared laziness
+o Support optional and named arguments
+
+o Implement destructive update transformation (CTGC)
