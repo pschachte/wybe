@@ -1,12 +1,14 @@
+Bug fixing:
 o Ensure every variable gets a type
 o Fix bug in typing proc_beer, proc_yorn, proc_yorn2
 o Fix test cases with undefined procs
 o Fix bug in type_list
-o Remove unneeded input and unchanged output arguments
 
+Completing the implementation
 o Implement algebraic types
 o Code generation   
 
+Completing the language
 o Implement resources
 o Support polymorphism
 o Support subtypes
@@ -14,4 +16,11 @@ o Support higher-order programming
 o Support declared laziness
 o Support optional and named arguments
 
-o Implement destructive update transformation (CTGC)
+Optimisation:
+o Remove unneeded input and unchanged output arguments
+o Inline trivial procs
+o Inline local procs with only one call
+o Common sub-expression elimination
+o Constant folding
+o Destructive update transformation (CTGC)
+
