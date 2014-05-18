@@ -22,8 +22,10 @@ data TypeReason = ReasonParam ProcName Int OptPos
                                       -- Formal param type/flow inconsistent
                 | ReasonUndef ProcName ProcName OptPos
                                       -- Call to unknown proc
-                | ReasonArg ProcName Int OptPos
-                                      -- Actual param type/flow inconsistent
+                | ReasonArgType ProcName Int OptPos
+                                      -- Actual param type inconsistent
+                | ReasonArgFlow ProcName Int OptPos
+                                      -- Actual param flow inconsistent
                 | ReasonAmbig ProcName OptPos [(VarName,[TypeSpec])]
                                       -- Proc defn has ambiguous types
                 | ReasonArity ProcName ProcName OptPos Int Int
@@ -35,9 +37,12 @@ instance Show TypeReason where
         makeMessage pos $
             "Type/flow error in definition of " ++ name ++
             ", parameter " ++ show num
-    show (ReasonArg name num pos) =
+    show (ReasonArgType name num pos) =
         makeMessage pos $
-            "Type/flow error in call to " ++ name ++ ", argument " ++ show num
+            "Type error in call to " ++ name ++ ", argument " ++ show num
+    show (ReasonArgFlow name num pos) =
+        makeMessage pos $
+            "Flow error in call to " ++ name ++ ", argument " ++ show num
     show (ReasonAmbig procName pos varAmbigs) =
         makeMessage pos $
             "Type ambiguity in defn of " ++ procName ++ ":" ++
@@ -423,19 +428,23 @@ typecheckArg :: OptPos -> ProcName -> (Int,PrimParam,PrimArg) ->
 typecheckArg pos pname (argNum,param,arg) typing =
     let actualFlow = argFlowDirection arg
         formalFlow = primParamFlow param
-        reason = ReasonArg pname argNum pos
+        reasonType = ReasonArgType pname argNum pos
+        reasonFlow = ReasonArgFlow pname argNum pos
     in  if not $ validTyping typing
         then typing
         else if formalFlow /= actualFlow
              then -- trace ("wrong flow: " ++ show arg ++ " against " ++ show param) 
-                      InvalidTyping reason
+                      InvalidTyping reasonFlow
              else -- trace ("OK flow: " ++ show arg ++ " against " ++ show param)
-                  typecheckArg' arg (primParamType param) typing reason
+                  typecheckArg' arg (primParamType param) typing reasonType
 
 
 typecheckArg' :: PrimArg -> TypeSpec -> Typing -> TypeReason -> Typing
-typecheckArg' (ArgVar var _ flow ftype) paramType typing reason =
-    addOneType reason var paramType typing
+typecheckArg' (ArgVar var decType flow ftype) paramType typing reason =
+-- XXX should out flow typing be contravariant?
+    if paramType `subtypeOf` decType then
+        addOneType reason var paramType typing
+    else InvalidTyping reason
 -- XXX type specs below should include "wybe" module
 typecheckArg' (ArgInt val callType) paramType typing reason =
     typecheckArg'' callType paramType (TypeSpec [] "int" [])
