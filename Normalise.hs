@@ -68,12 +68,14 @@ normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
   (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
   [Unplaced $ ProcCall [] "=" [Unplaced $ Var "$" ParamOut, result]]
   pos
-normaliseItem (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
-    proto' <- flattenProto proto
-    (stmts',tmpCtr) <- flattenBody stmts
-    -- liftIO $ putStrLn $ "Flattened proc:\n" ++ show (ProcDecl vis proto' stmts' pos)
-    (stmts'',genProcs) <- unbranchBody params stmts'
-    let procs = ProcDecl vis proto' stmts'' pos:genProcs
+normaliseItem decl@(ProcDecl _ _ _ _) = do
+    (ProcDecl vis proto@(ProcProto _ params) stmts pos,tmpCtr) <- 
+        flattenProcDecl decl
+    -- (proto' <- flattenProto proto
+    -- (stmts,tmpCtr) <- flattenBody stmts
+    -- liftIO $ putStrLn $ "Flattened proc:\n" ++ show (ProcDecl vis proto' stmts pos)
+    (stmts',genProcs) <- unbranchBody params stmts
+    let procs = ProcDecl vis proto stmts' pos:genProcs
     -- liftIO $ mapM_ (\item -> putStrLn $ show item) procs
     mapM_ (compileProc tmpCtr) procs
 normaliseItem (CtorDecl vis proto pos) = do

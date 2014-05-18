@@ -25,7 +25,7 @@
 --
 ----------------------------------------------------------------
 
-module Flatten (flattenProto, flattenBody) where
+module Flatten (flattenProcDecl) where
 
 import AST
 import Data.Map as Map
@@ -44,14 +44,27 @@ import Control.Monad.Trans (lift,liftIO)
 --                        Exported Functions
 ----------------------------------------------------------------
 
+flattenProcDecl :: Item -> Compiler (Item,Int)
+flattenProcDecl (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
+    proto' <- flattenProto proto
+    let inParams = Set.fromList $
+                   List.map paramName $ 
+                   List.filter (flowsIn . paramFlow) $
+                   procProtoParams proto'
+    (stmts',tmpCtr) <- flattenBody stmts inParams
+    return (ProcDecl vis proto' stmts' pos,tmpCtr)
+flattenProcDecl _ =
+    shouldnt "flattening a non-proc"
+
+
 flattenProto :: ProcProto -> Compiler ProcProto
 flattenProto (ProcProto name params) = do
     return $ ProcProto name $ concatMap flattenParam params
 
 
-flattenBody :: [Placed Stmt] -> Compiler ([Placed Stmt],Int)
-flattenBody stmts = do
-    finalState <- execStateT (flattenStmts stmts) $ initFlattenerState
+flattenBody :: [Placed Stmt] -> Set VarName -> Compiler ([Placed Stmt],Int)
+flattenBody stmts varSet = do
+    finalState <- execStateT (flattenStmts stmts) $ initFlattenerState varSet
     return (List.reverse (prefixStmts finalState) ++ 
             List.reverse (flattened finalState) ++ 
             postponed finalState,
@@ -74,12 +87,14 @@ data FlattenerState = Flattener {
     tempCtr     :: Int,             -- ^Temp variable counter
     currPos     :: OptPos,          -- ^Position of current statement
     stmtDefs    :: Set VarName,     -- ^Variables defined by this statement
-    stmtUses    :: Set VarName      -- ^Variables used by this statement
+    stmtUses    :: Set VarName,     -- ^Variables used by this statement
+    defdVars    :: Set VarName      -- ^Variables defined before this stmt
     }
 
 
-initFlattenerState :: FlattenerState
-initFlattenerState = Flattener [] [] [] 0 Nothing Set.empty Set.empty
+initFlattenerState :: Set VarName -> FlattenerState
+initFlattenerState varSet = 
+    Flattener [] [] [] 0 Nothing Set.empty Set.empty varSet
 
 
 emit :: OptPos -> Stmt -> Flattener ()
@@ -122,7 +137,7 @@ flattenInner isLoop inner = do
     oldState <- get
     (val,innerState) <-
         lift (runStateT inner
-              (initFlattenerState {
+              ((initFlattenerState (defdVars oldState)) {
                     tempCtr = (tempCtr oldState),
                     prefixStmts = if isLoop then [] else prefixStmts oldState}))
     -- liftIO $ putStrLn $ "** Prefix:\n" ++ 
@@ -178,17 +193,26 @@ flattenStmts stmts =
     mapM_ (\pstmt -> flattenStmt (content pstmt) (place pstmt)) stmts
 
 
--- |Flatten the specified statement
 flattenStmt :: Stmt -> OptPos -> Flattener ()
-flattenStmt (ProcCall maybeMod name args) pos = do
+flattenStmt stmt pos = do
+    modify (\s -> s { stmtUses = Set.empty, stmtDefs = Set.empty, currPos = pos})
+    -- defd <- gets defdVars
+    -- liftIO $ putStrLn $ "flattening stmt " ++ showStmt 4 stmt ++
+    --   " with defined vars " ++ show defd
+    flattenStmt' stmt pos
+    modify (\s -> s { defdVars = defdVars s `Set.union` stmtDefs s })
+
+-- |Flatten the specified statement
+flattenStmt' :: Stmt -> OptPos -> Flattener ()
+flattenStmt' (ProcCall maybeMod name args) pos = do
     args' <- flattenStmtArgs args pos
     emit pos $ ProcCall maybeMod name args'
     emitPostponed
-flattenStmt (ForeignCall lang name flags args) pos = do
+flattenStmt' (ForeignCall lang name flags args) pos = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
     emitPostponed
-flattenStmt (Cond tstStmts tst thn els) pos = do
+flattenStmt' (Cond tstStmts tst thn els) pos = do
     -- liftIO $ putStrLn $ "** Flattening test:\n" ++ showBody 4 tst
     (vars,tst') <- flattenInner False (flattenPExp tst)
     -- liftIO $ putStrLn $ "** Result:\n" ++ showBody 4 tst'
@@ -200,12 +224,13 @@ flattenStmt (Cond tstStmts tst thn els) pos = do
       [var] -> emit pos $ Cond (tstStmts++tst') var thn' els'
       [_,_] -> lift $ message Error "Condition with in-out flow" errPos
       _ -> shouldnt "Single expression expanded to more than 2 args"
-flattenStmt (Loop body) pos = do
+flattenStmt' (Loop body) pos = do
     (_,body') <- flattenInner True 
              (flattenStmts $ body ++ [Unplaced $ Next])
     emit pos $ Loop body'
-flattenStmt (For itr gen) pos = do
+flattenStmt' (For itr gen) pos = do
     genVar <- tempVar
+    -- XXX looks like we never flatten the generator
     saveInit pos $ 
       ProcCall [] "init_seq" [gen, Unplaced $ Var genVar ParamOut]
     flattenStmt (Cond [] 
@@ -218,7 +243,7 @@ flattenStmt (For itr gen) pos = do
                  [Unplaced $ Break])
       pos
 -- other kinds of statements (Nop, Break, Next) are left as is.
-flattenStmt stmt pos =
+flattenStmt' stmt pos =
     emit pos stmt
 
 
@@ -255,10 +280,16 @@ flattenExp exp@(StringValue a) pos =
 flattenExp exp@(CharValue a) pos =
     return $ [maybePlace exp pos]
 flattenExp exp@(Var name dir) pos = do
-    noteVarMention name dir
-    return $ 
-      (if flowsIn dir then [maybePlace (Var name ParamIn) pos] else []) ++
-      (if flowsOut dir then [maybePlace (Var name ParamOut) pos] else [])
+    defd <- gets (Set.member name . defdVars)
+    if (dir == ParamIn && (not defd)) 
+      then -- Reference to an undefined variable: assume it's meant to be
+           -- a niladic function instead of a variable reference
+        flattenCall (ProcCall [] name) pos []
+      else do
+        noteVarMention name dir
+        return $ 
+            (if flowsIn dir then [maybePlace (Var name ParamIn) pos] else []) ++
+            (if flowsOut dir then [maybePlace (Var name ParamOut) pos] else [])
 flattenExp (Where stmts pexp) _ = do
     flattenStmts stmts
     flattenPExp pexp
