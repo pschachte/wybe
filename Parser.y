@@ -238,7 +238,7 @@ OptType :: { TypeSpec }
 
 
 Type :: { TypeSpec }
-    : optMod ident OptTypeList         { TypeSpec $1 (identName $2) $3 }
+    : ident OptTypeList         { TypeSpec [] (identName $1) $2 }
 
 OptTypeList :: { [TypeSpec] }
     : {- empty -}               { [] }
@@ -433,7 +433,7 @@ revFlags :: { [Ident] }
 
 optMod :: { ModSpec }
     : {- empty -}               { [] }
---    | ModSpec '.'               { $1 }
+    | ModSpec '.'               { $1 }
 
 
 ListTail :: { Placed Exp }
