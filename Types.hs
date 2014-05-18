@@ -84,7 +84,11 @@ addOneType reason (PrimVarName name _) typ valid@(ValidTyping types) =
             then valid
             else if typ `properSubtypeOf` oldTyp
                  then ValidTyping $ Map.insert name typ types
-                 else InvalidTyping reason
+                 else if oldTyp `properSubtypeOf` typ
+                      then valid -- we already have a stronger type, keep it
+                      else --trace ("addOneType " ++ name ++ ":" ++ show typ ++ 
+                           --       " vs. " ++ show oldTyp ++ " FAILED") $
+                           InvalidTyping reason
 addOneType _ _ _ invalid = invalid
 
 
@@ -442,9 +446,16 @@ typecheckArg pos pname (argNum,param,arg) typing =
 typecheckArg' :: PrimArg -> TypeSpec -> Typing -> TypeReason -> Typing
 typecheckArg' (ArgVar var decType flow ftype) paramType typing reason =
 -- XXX should out flow typing be contravariant?
-    if paramType `subtypeOf` decType then
+    if --trace (if paramType `subtypeOf` decType || paramType == Unspecified
+       --       then "" 
+       --       else
+       --           "CHECK VAR " ++ show var ++ ":" ++ show decType ++ " vs. " ++
+       --           show paramType ++ " FAILED") $
+       paramType `subtypeOf` decType then
         addOneType reason var paramType typing
-    else InvalidTyping reason
+    else if paramType == Unspecified -- may be type checking recursion
+         then typing
+         else InvalidTyping reason
 -- XXX type specs below should include "wybe" module
 typecheckArg' (ArgInt val callType) paramType typing reason =
     typecheckArg'' callType paramType (TypeSpec [] "int" [])
