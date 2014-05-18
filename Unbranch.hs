@@ -57,6 +57,8 @@ import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 
+import Debug.Trace
+
 unbranchBody :: [Param] -> [Placed Stmt] -> 
                 Compiler ([Placed Stmt],[Item])
 unbranchBody params stmts = do
@@ -162,9 +164,9 @@ withoutGeneration unbr = do
 
 
 dbgPrintLn :: String -> Unbrancher ()
-dbgPrintLn s = return ()
-               -- liftIO $ putStrLn s
-
+dbgPrintLn s = do
+    -- liftIO $ putStrLn s
+    return ()
 
 ----------------------------------------------------------------
 --                 Unbranching statement sequences
@@ -173,6 +175,9 @@ dbgPrintLn s = return ()
 unbranchStmts :: [Placed Stmt] -> Unbrancher [Placed Stmt]
 unbranchStmts [] = return []
 unbranchStmts (stmt:stmts) = do
+    -- vars <- gets brVars
+    -- liftIO $ putStrLn $ "unbranching stmt\n    " ++ showStmt 4 (content stmt) ++
+    --   "\n  with vars " ++ show vars
     ifTerminated (return []) (unbranchStmt (content stmt) (place stmt) stmts)
 
 
@@ -313,6 +318,7 @@ defArg = ifIsVarDef defVar (return ())
 -- |Apply the function if the expression as a variable assignment,
 --  otherwise just take the second argument.
 ifIsVarDef :: (VarName -> t) -> t -> Exp -> t
+ifIsVarDef f v (Typed exp _) = ifIsVarDef f v exp
 ifIsVarDef f v (Var name dir) =
     if flowsOut dir then f name else v
 ifIsVarDef f v _ = v
@@ -356,11 +362,12 @@ loopExitVars vars (stmt:stmts) =
 stmtLoopExitVars :: Set VarName -> Stmt -> [Placed Stmt] -> (Set VarName, Bool)
 stmtLoopExitVars  vars (ProcCall _ _ args) stmts =
     loopExitVars (outputVars vars args) stmts
-stmtLoopExitVars vars (ForeignCall _ _ _ args) stmts = do
+stmtLoopExitVars vars (ForeignCall _ _ _ args) stmts =
     loopExitVars (outputVars vars args) stmts
 stmtLoopExitVars vars (Cond tstStmts tstVar thn els) stmts =
     let (tstVars,tstExit) = loopExitVars vars tstStmts
-    in  if tstExit then (tstVars,True)
+    in  if tstExit 
+        then (tstVars,True)
         else let (thnVars,thnExit) = loopExitVars tstVars thn
                  -- else branch doesn't get to use test vars
                  (elsVars,elsExit) = loopExitVars vars els
