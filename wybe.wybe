@@ -60,15 +60,25 @@ public type bool is
     public proc =(?y:bool, x:bool) foreign llvm move(x, ?y) end
     public proc =(x:bool, ?y:bool) foreign llvm move(x, ?y) end
     public func =(x:bool, y:bool) = foreign llvm cmp eq(x, y)
+    public func /=(x:bool,y:bool):bool = foreign llvm icmp ne(1,x,y)
 end
 
 
 public type string is
-    # this implementation is completely wrong, but will do for n
+    # this implementation is completely wrong, but will do for now
     public func ++(x:string, y:string) = foreign c strcat(x,y)
     public proc =(?y:string, x:string) foreign llvm move(x, ?y) end
     public proc =(x:string, ?y:string) foreign llvm move(x, ?y) end
     public func =(x:string, y:string) = foreign llvm cmp eq(x, y)
+    public func /=(x:string,y:string):bool = foreign c strcmp(x,y)
+end
+
+
+public type char is
+    public proc =(?y:char, x:char) foreign llvm move(x, ?y) end
+    public proc =(x:char, ?y:char) foreign llvm move(x, ?y) end
+    public func =(x:char, y:char) = foreign llvm cmp eq(x, y)
+    public func /=(x:char,y:char):bool = foreign llvm icmp ne(32,x,y)
 end
 
 
@@ -91,5 +101,5 @@ public module io is
     public proc println(x:string) print(x) nl end
     public proc read(?x:string) foreign c read_line(?x) end
 
-    public func eof = -1
+    public func eof:char = '.' # XXX completely wrong!!!
 end
