@@ -90,4 +90,6 @@ public module io is
     public proc print(x:string) foreign c print_string(x) end
     public proc println(x:string) print(x) nl end
     public proc read(?x:string) foreign c read_line(?x) end
+
+    public func eof = -1
 end
