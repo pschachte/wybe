@@ -1,0 +1,4 @@
+do read(?c:char)
+   while (c /= eof)
+   print(c)
+end
