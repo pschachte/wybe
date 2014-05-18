@@ -8,7 +8,7 @@ public type int is
     public proc -(?x:int,y:int,z:int) ?x = foreign llvm add(32,z,y) end
     public proc -(x:int,?y:int,z:int) ?y = foreign llvm sub(32,z,x) end
     public func -(x:int):int = foreign llvm sub(32,0,x)
-    public proc -(?x:int,y:int) ?x = foreign llvm sub(32,0,x) end
+    public proc -(?x:int,y:int) ?x = foreign llvm sub(32,0,y) end
     public func *(x:int,y:int):int = foreign llvm mul(32,x,y)
     public func /(x:int,y:int):int = foreign llvm sdiv(32,x,y)
     public func ==(x:int,y:int):bool = foreign llvm icmp eq(32,x,y)
@@ -17,8 +17,8 @@ public type int is
     public func <=(x:int,y:int):bool = foreign llvm icmp sle(32,x,y)
     public func >(x:int,y:int):bool = foreign llvm icmp sgt(32,x,y)
     public func >=(x:int,y:int):bool = foreign llvm icmp sge(32,x,y)
-    public proc =(?y:int, x:int) foreign llvm move(x, y) end
-    public proc =(x:int, ?y:int) foreign llvm move(x, y) end
+    public proc =(?y:int, x:int) foreign llvm move(x, ?y) end
+    public proc =(x:int, ?y:int) foreign llvm move(x, ?y) end
     public func =(x:int, y:int) = foreign llvm cmp eq(x, y)
     public func sqrt(x:int) = foreign C isqrt(x)
     public func power(x:int,y:int) = foreign C ipow(x,y)
@@ -33,7 +33,7 @@ public type float is
     public proc -(?x:float,y:float,z:float) ?x = foreign llvm fadd(64,z,y) end
     public proc -(x:float,?y:float,z:float) ?y = foreign llvm fsub(64,z,x) end
     public func -(x:float):float = foreign llvm sub(32,0,x)
-    public proc -(?x:float,y:float) ?x = foreign llvm sub(32,0,x) end
+    public proc -(?x:float,y:float) ?x = foreign llvm sub(32,0,y) end
     public func *(x:float,y:float):float = foreign llvm fmul(64,x,y)
     public func /(x:float,y:float):float = foreign llvm fdiv(64,x,y)
     public func ==(x:float,y:float):bool = foreign llvm fcmp eq(64,x,y)
@@ -42,8 +42,8 @@ public type float is
     public func <=(x:float,y:float):bool = foreign llvm fcmp sle(64,x,y)
     public func >(x:float,y:float):bool = foreign llvm fcmp sgt(64,x,y)
     public func >=(x:float,y:float):bool = foreign llvm fcmp sge(64,x,y)
-    public proc =(?y:float, x:float) foreign llvm move(x, y) end
-    public proc =(x:float, ?y:float) foreign llvm move(x, y) end
+    public proc =(?y:float, x:float) foreign llvm move(x, ?y) end
+    public proc =(x:float, ?y:float) foreign llvm move(x, ?y) end
     public func =(x:float, y:float) = foreign llvm cmp eq(x, y)
     public func sqrt(x:float) = foreign C sqrt(x)
     public func power(x:float,y:float) = foreign C pow(x,y)
@@ -57,8 +57,8 @@ public type bool is
     # public func and(p:bool, q:bool):bool = foreign llvm and(p,q)
     # public func or(p:bool, q:bool):bool = foreign llvm or(p,q)
     # public func not(p:bool):bool = foreign xor(p,1)
-    public proc =(?y:bool, x:bool) foreign llvm move(x, y) end
-    public proc =(x:bool, ?y:bool) foreign llvm move(x, y) end
+    public proc =(?y:bool, x:bool) foreign llvm move(x, ?y) end
+    public proc =(x:bool, ?y:bool) foreign llvm move(x, ?y) end
     public func =(x:bool, y:bool) = foreign llvm cmp eq(x, y)
 end
 
@@ -66,8 +66,8 @@ end
 public type string is
     # this implementation is completely wrong, but will do for n
     public func ++(x:string, y:string) = foreign c strcat(x,y)
-    public proc =(?y:string, x:string) foreign llvm move(x, y) end
-    public proc =(x:string, ?y:string) foreign llvm move(x, y) end
+    public proc =(?y:string, x:string) foreign llvm move(x, ?y) end
+    public proc =(x:string, ?y:string) foreign llvm move(x, ?y) end
     public func =(x:string, y:string) = foreign llvm cmp eq(x, y)
 end
 
