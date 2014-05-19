@@ -82,6 +82,31 @@ public type char is
 end
 
 
+public type int_seq is
+    public ctor sequence(start:int, finish:int, incr:int)
+    public proc [|](?next:int, ?rest:int_seq, curr:int_seq, ?succeed:bool)
+    	# if curr.incr > 0 then
+	#     ?succeed = curr.start > curr.finish
+	# else
+	#     ?succeed = curr.start < curr.finish
+	# end
+	# if succeeded then
+	    ?next = curr.start
+	    ?rest = sequence(curr.start+curr.incr, curr.finish, curr.incr)
+	# end
+    end
+end
+
+public type list(t) is
+    public ctor []
+    public ctor [|](head:t, tail:list(t))
+end
+
+public func ++(x:list(t), y:list(t)) =
+    if x == []
+    then y
+    else [x.head|x.tail++y]
+
 public module io is
     public proc nl foreign c putc('\n') end
 
