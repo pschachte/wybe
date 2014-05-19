@@ -83,7 +83,7 @@ end
 
 
 public type int_seq is
-    public ctor sequence(start:int, finish:int, incr:int)
+    public ctor range(start:int, finish:int, incr:int)
     public proc [|](?next:int, ?rest:int_seq, curr:int_seq, ?succeed:bool)
     	# if curr.incr > 0 then
 	#     ?succeed = curr.start > curr.finish
@@ -95,6 +95,7 @@ public type int_seq is
 	    ?rest = sequence(curr.start+curr.incr, curr.finish, curr.incr)
 	# end
     end
+    public func empty(seq:int_seq) = true
 end
 
 public type list(t) is

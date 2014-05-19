@@ -213,7 +213,7 @@ flattenStmt' (ForeignCall lang name flags args) pos = do
     emit pos $ ForeignCall lang name flags args'
     emitPostponed
 flattenStmt' (Cond tstStmts tst thn els) pos = do
-    -- liftIO $ putStrLn $ "** Flattening test:\n" ++ showBody 4 tst
+    -- liftIO $ putStrLn $ "** Flattening test:" ++ show tst
     (vars,tst') <- flattenInner False (flattenPExp tst)
     -- liftIO $ putStrLn $ "** Result:\n" ++ showBody 4 tst'
     (_,thn') <- flattenInner False (flattenStmts thn)
@@ -222,7 +222,8 @@ flattenStmt' (Cond tstStmts tst thn els) pos = do
     case vars of
       [] -> lift $ message Error "Condition with no flow" errPos
       [var] -> emit pos $ Cond (tstStmts++tst') var thn' els'
-      [_,_] -> lift $ message Error "Condition with in-out flow" errPos
+      [_,_] -> lift $ message Error
+              ("Condition with in-out flow: " ++ show vars) errPos
       _ -> shouldnt "Single expression expanded to more than 2 args"
 flattenStmt' (Loop body) pos = do
     (_,body') <- flattenInner True 
@@ -230,21 +231,19 @@ flattenStmt' (Loop body) pos = do
     emit pos $ Loop body'
 flattenStmt' (For itr gen) pos = do
     genVar <- tempVar
-    -- XXX looks like we never flatten the generator
-    saveInit pos $ 
-      ProcCall [] "init_seq" [gen, Unplaced $ Var genVar ParamOut]
+    flattenStmt (ProcCall [] "=" [Unplaced $ Var genVar ParamOut, gen]) Nothing
     flattenStmt (Cond [] 
-                 (maybePlace 
-                  (Fncall [] "in" [itr,
-                                   Unplaced $ Var genVar ParamIn,
-                                   Unplaced $ Var genVar ParamOut])
-                  pos)
-                 [Unplaced $ Nop]
-                 [Unplaced $ Break])
-      pos
--- other kinds of statements (Nop, Break, Next) are left as is.
-flattenStmt' stmt pos =
-    emit pos stmt
+                 (maybePlace (Fncall [] "empty"
+                                         [Unplaced $ Var genVar ParamIn]) pos)
+                 [Unplaced $ Break]
+                 [maybePlace
+                  (ProcCall [] "[|]" [itr,
+                                      Unplaced $ Var genVar ParamOut,
+                                      Unplaced $ Var genVar ParamIn])
+                  pos]) pos
+flattenStmt' Nop pos = emit pos Nop
+flattenStmt' Break pos = emit pos Break
+flattenStmt' Next pos = emit pos Next
 
 
 ----------------------------------------------------------------
@@ -261,7 +260,13 @@ flattenArgs args = do
     return $ concat argListList
 
 flattenPExp :: Placed Exp -> Flattener [Placed Exp]
-flattenPExp pexp = flattenExp (content pexp) (place pexp)
+flattenPExp pexp = do
+    -- vs <- gets defdVars
+    -- liftIO $ putStrLn $ "  Flattening exp " ++ show pexp ++ ", with vars " ++
+    --        show vs
+    result <- flattenExp (content pexp) (place pexp)
+    -- liftIO $ putStrLn $ "  Result =   " ++ show result
+    return result
 
 
 -- |Flatten a single expressions with specified flow direction to
@@ -320,7 +325,8 @@ flattenCall stmtBuilder pos exps = do
     oldPos <- gets currPos
     uses <- gets stmtUses
     defs <- gets stmtDefs
-    modify (\s -> s { stmtUses = Set.empty, stmtDefs = Set.empty, currPos = pos})
+    modify (\s -> s { stmtUses = Set.empty, stmtDefs = Set.empty, 
+                      currPos = pos})
     exps' <- flattenArgs exps
     let exps'' = List.filter (isInExp . content) exps'
     uses' <- gets stmtUses

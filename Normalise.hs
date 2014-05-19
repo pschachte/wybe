@@ -248,7 +248,9 @@ compileBody [placed]
         ArgInt n _ ->
             return $ ProcBody (if n/=0 then tstStmts'++thn'' else els'') NoFork
         _ -> do
-            lift $ message Error "Condition is a non-bool constant" $
+            lift $ message Error 
+                   ("Condition is non-bool constant or output '" ++
+                    show tstVar' ++ "'") $
                  betterPlace (place placed) tstVar
             return $ ProcBody [] NoFork
 
