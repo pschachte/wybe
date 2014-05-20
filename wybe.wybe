@@ -11,7 +11,6 @@ public type int is
     public proc -(?x:int,y:int) ?x = foreign llvm sub(32,0,y) end
     public func *(x:int,y:int):int = foreign llvm mul(32,x,y)
     public func /(x:int,y:int):int = foreign llvm sdiv(32,x,y)
-    public func ==(x:int,y:int):bool = foreign llvm icmp eq(32,x,y)
     public func /=(x:int,y:int):bool = foreign llvm icmp ne(32,x,y)
     public func <(x:int,y:int):bool = foreign llvm icmp slt(32,x,y)
     public func <=(x:int,y:int):bool = foreign llvm icmp sle(32,x,y)
@@ -19,7 +18,7 @@ public type int is
     public func >=(x:int,y:int):bool = foreign llvm icmp sge(32,x,y)
     public proc =(?y:int, x:int) foreign llvm move(x, ?y) end
     public proc =(x:int, ?y:int) foreign llvm move(x, ?y) end
-    public func =(x:int, y:int) = foreign llvm cmp eq(x, y)
+    public func =(x:int, y:int):bool = foreign llvm icmp eq(32,x,y)
     public func sqrt(x:int):int = foreign C isqrt(x)
     public func power(x:int,y:int):int = foreign C ipow(x,y)
 end
@@ -36,7 +35,6 @@ public type float is
     public proc -(?x:float,y:float) ?x = foreign llvm sub(32,0,y) end
     public func *(x:float,y:float):float = foreign llvm fmul(64,x,y)
     public func /(x:float,y:float):float = foreign llvm fdiv(64,x,y)
-    public func ==(x:float,y:float):bool = foreign llvm fcmp eq(64,x,y)
     public func /=(x:float,y:float):bool = foreign llvm fcmp ne(64,x,y)
     public func <(x:float,y:float):bool = foreign llvm fcmp slt(64,x,y)
     public func <=(x:float,y:float):bool = foreign llvm fcmp sle(64,x,y)
@@ -44,32 +42,32 @@ public type float is
     public func >=(x:float,y:float):bool = foreign llvm fcmp sge(64,x,y)
     public proc =(?y:float, x:float) foreign llvm move(x, ?y) end
     public proc =(x:float, ?y:float) foreign llvm move(x, ?y) end
-    public func =(x:float, y:float):bool = foreign llvm cmp eq(x, y)
+    public func =(x:float, y:float):bool = foreign llvm fcmp eq(64,x,y)
     public func sqrt(x:float):float = foreign C sqrt(x)
     public func power(x:float,y:float):float = foreign C pow(x,y)
 end
 
 
 public type bool is
-    public func true:bool = 1
-    public func false:bool = 0
+    public ctor false
+    public ctor true
     # These are syntax errors because they are operators:
     # public func and(p:bool, q:bool):bool = foreign llvm and(p,q)
     # public func or(p:bool, q:bool):bool = foreign llvm or(p,q)
     # public func not(p:bool):bool = foreign xor(p,1)
     public proc =(?y:bool, x:bool) foreign llvm move(x, ?y) end
     public proc =(x:bool, ?y:bool) foreign llvm move(x, ?y) end
-    public func =(x:bool, y:bool):bool = foreign llvm cmp eq(x, y)
+    public func =(x:bool, y:bool):bool = foreign llvm icmp eq(1,x,y)
     public func /=(x:bool,y:bool):bool = foreign llvm icmp ne(1,x,y)
 end
 
 
 public type string is
-    # this implementation is completely wrong, but will do for now
+    # this whole implementation is completely wrong, but will do for now
     public func ++(x:string, y:string):string = foreign c strcat(x,y)
     public proc =(?y:string, x:string) foreign llvm move(x, ?y) end
     public proc =(x:string, ?y:string) foreign llvm move(x, ?y) end
-    public func =(x:string, y:string):bool = foreign llvm cmp eq(x, y)
+    public func =(x:string, y:string):bool = foreign llvm icmp eq(64,x,y)
     public func /=(x:string,y:string):bool = foreign c strcmp(x,y)
 end
 
@@ -77,7 +75,7 @@ end
 public type char is
     public proc =(?y:char, x:char) foreign llvm move(x, ?y) end
     public proc =(x:char, ?y:char) foreign llvm move(x, ?y) end
-    public func =(x:char, y:char) = foreign llvm cmp eq(x, y)
+    public func =(x:char, y:char):bool = foreign llvm icmp eq(32,x,y)
     public func /=(x:char,y:char):bool = foreign llvm icmp ne(32,x,y)
 end
 
@@ -85,6 +83,7 @@ end
 public type int_seq is
     public ctor range(start:int, finish:int, incr:int)
     public proc [|](?next:int, ?rest:int_seq, curr:int_seq, ?succeed:bool)
+    	# XXX commented out because it won't even parse!
     	# if curr.incr > 0 then
 	#     ?succeed = curr.start > curr.finish
 	# else
@@ -92,21 +91,31 @@ public type int_seq is
 	# end
 	# if succeeded then
 	    ?next = curr.start
-	    ?rest = sequence(curr.start+curr.incr, curr.finish, curr.incr)
+	    ?rest = range(curr.start+curr.incr, curr.finish, curr.incr)
 	# end
     end
+    # this should just be []:
     public func empty(seq:int_seq):bool = true
+
+    # we really need to generate these automatically
+    public proc =(?y:int_seq, x:int_seq) foreign llvm move(x, ?y) end
+    public proc =(x:int_seq, ?y:int_seq) foreign llvm move(x, ?y) end
 end
 
-public type list(t) is
-    public ctor []
-    public ctor [|](head:t, tail:list(t))
-end
+# public type list(t) is
+#     public ctor []
+#     public ctor [|](head:t, tail:list(t))
 
-public func ++(x:list(t), y:list(t)) =
-    if x == []
-    then y
-    else [x.head|x.tail++y]
+#     public func ++(x:list(t), y:list(t)) =
+#         if x = []
+#         then y
+#         else [x.head|x.tail++y]
+
+#     # we really need to generate these automatically
+#     public proc =(?y:list(t), x:list(t)) foreign llvm move(x, ?y) end
+#     public proc =(x:list(t), ?y:list(t)) foreign llvm move(x, ?y) end
+#     public func =(x:list(t), y:list(t)) = false
+# end
 
 public module io is
     public proc nl foreign c putc('\n') end
