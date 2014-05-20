@@ -627,6 +627,7 @@ makesNameVisible (ImportSpec nameVis allVis) name =
 callTargets :: ModSpec -> ProcName -> Compiler [ProcSpec]
 callTargets modspec name = do
     mods <- refersTo modspec name modProcs pubProcs
+    -- liftIO $ putStrLn $ "  Matching mods: " ++ intercalate ", " (List.map show mods)
     let msg = "using private proc from module with no implementation"
     listlist <- mapM (\m -> do
                         mod <- getSpecModule "callTargets" m id
@@ -643,7 +644,7 @@ callTargets modspec name = do
                                     return [ProcSpec modspec name i |
                                             i <- [0..length defs - 1]])
                 mods
-    return $ concat listlist
+    return $ nub $ concat listlist
 
 
 -- |Apply the given function to the current module implementation.
@@ -882,7 +883,7 @@ data ProcSpec = ProcSpec {
       procSpecMod::ModSpec,
       procSpecName::ProcName,
       procSpecID::ProcID}
-                deriving (Eq)
+                deriving (Eq,Ord)
 
 instance Show ProcSpec where
     show (ProcSpec mod name pid) =
