@@ -42,21 +42,27 @@ TESTCASES = $(wildcard test-cases/*.wybe)
 
 test:	wybemk
 	@rm -f ERRS ; touch ERRS
+	@printf "testing"
 	@for f in $(TESTCASES) ; do \
-	    printf "%-40s ... " $$f ; \
 	    out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
 	    exp=`echo "$$f" | sed 's/.wybe$$/.exp/'` ; \
 	    targ=`echo "$$f" | sed 's/.wybe$$/.o/'` ; \
 	    ./wybemk -v -f $$targ > $$out 2>&1 ; \
 	    if [ ! -r $$exp ] ; then \
-		printf "[31mNEW TEST[39m\n" ; \
+		printf "[31m?[39m" ; \
+		NEW="$${NEW}\n    $$out" ; \
 	    elif diff -u $$exp $$out >> ERRS 2>&1 ; then \
-		printf "PASS\n" ; \
+		printf "." ; \
 	    else \
-		printf "[31mFAIL[39m\n" ; \
+		printf "[31mX[39m" ; \
+		FAILS="$${FAILS}\n    $$out" ; \
 	    fi \
-	done
-	@if [ -s ERRS ] ; \
-	 then less ERRS ; \
-	 else echo "ALL TESTS PASS" ; rm -f ERRS ; \
-	 fi
+	done ; \
+	echo ; \
+	if [ -n "$$FAILS" ] ; \
+	    then echo "Failed: $$FAILS\nSee ERRS for differences." ; \
+	    else echo "ALL TESTS PASS" ; rm -f ERRS ; \
+	fi ; \
+	if [ -n "$$NEW" ] ; \
+	    then echo "New tests: $$NEW\nDo .\update-exp to specify expected output" ; \
+	fi
