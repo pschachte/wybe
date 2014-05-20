@@ -1257,13 +1257,11 @@ instance Show Module where
                  "\n  resources       : " ++ showMapLines (modResources impl) ++
                  "\n  procs           : " ++ 
                  (showMap "\n                    " (++":") (showProcDefs 0)
-                  (modProcs impl)) 
-                 ++ "\n" ++
+                  (modProcs impl)) ++
                  (if Map.null (modSubmods impl)
                   then ""
-                  else "\nSubmodules of " ++ showModSpec (modSpec mod) ++
-                           ":" ++ 
-                           showMap ", " (const "") show (modSubmods impl))
+                  else "\n  submodules      : " ++ 
+                       showMap ", " (const "") showModSpec (modSubmods impl))
 
 --showTypeMap :: Map Ident TypeDef -> String
 

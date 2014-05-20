@@ -15,7 +15,6 @@
   types           : 
   resources       : 
   procs           : 
-
 --------------------------------------------------
  Module mod1
   public submods  : 
@@ -26,7 +25,6 @@
   types           : 
   resources       : 
   procs           : 
-
 --------------------------------------------------
  Module mod2
   public submods  : 
@@ -37,7 +35,6 @@
   types           : 
   resources       : 
   procs           : 
-
 --------------------------------------------------
  Module mod3
   public submods  : 
@@ -48,7 +45,6 @@
   types           : 
   resources       : 
   procs           : 
-
 --------------------------------------------------
  Module mod4
   public submods  : 
@@ -59,7 +55,6 @@
   types           : 
   resources       : 
   procs           : 
-
 --------------------------------------------------
  Module mod5
   public submods  : 
@@ -70,7 +65,6 @@
   types           : 
   resources       : 
   procs           : 
-
 --------------------------------------------------
  Module mod6
   public submods  : 
@@ -81,7 +75,6 @@
   types           : 
   resources       : 
   procs           : 
-
 --------------------------------------------------
  Module mod7
   public submods  : 
@@ -92,7 +85,6 @@
   types           : 
   resources       : 
   procs           : 
-
 --------------------------------------------------
  Module mod8
   public submods  : 
@@ -103,4 +95,3 @@
   types           : 
   resources       : 
   procs           : 
-

@@ -9,4 +9,3 @@
   procs           : :
 proc () (id 0): 
     wybe.io.println<3>("hello, world":string) @main_hello:1:1
-

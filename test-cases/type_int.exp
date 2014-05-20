@@ -21,8 +21,7 @@
   types           : int/0 @type_int:1:8
   resources       : 
   procs           : 
-
-Submodules of type_int:["type_int","int"]
+  submodules      : type_int.int
 --------------------------------------------------
  Module type_int.int([])
   public submods  : 
@@ -83,4 +82,3 @@ public proc >(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type_int:14:12
                     >=:
 public proc >=(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type_int:15:12
     foreign llvm icmp sge(32:int, x:0:int, y:0:int, ?$:0:bool) @type_int:15:40
-

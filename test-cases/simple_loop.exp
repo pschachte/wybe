@@ -30,4 +30,3 @@ proc gen$3(c:0:char, ?c:1:char) (id 0):
 proc gen$4(c:0:char, tmp$0:0:?, tmp$1:0:?, ?c:1:char, ?tmp$0:0:?, ?tmp$1:0:?) (id 0): 
     wybe.io.print<2>(c:0:char) @simple_loop:3:4
     simple_loop.gen$2<0>(?c:1:char) @simple_loop:1:1
-

@@ -22,4 +22,3 @@ proc gen$1(n:0:int, ?n:0:int, ?tmp$0:0:int) (id 0):
     1:
         wybe.int.=<0>(?tmp$0:0:int, 1:int)
 
-

@@ -10,4 +10,3 @@
 proc () (id 0): 
     wybe.int.=<0>(?x:0:int, 1:int) @chain_assign:1:1
     wybe.io.println<0>(x:0:int) @chain_assign:4:1
-

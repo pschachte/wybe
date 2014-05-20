@@ -11,4 +11,3 @@ test-cases/type_ambig.wybe:1:1: Type ambiguity in defn of ambig:
   procs           : ambig:
 proc ambig(x:0:?) (id 0):  @type_ambig:1:1
     print(x:0) @type_ambig:1:15
-

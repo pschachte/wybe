@@ -10,4 +10,3 @@ test-cases/call_unknown.wybe:1:17: Call to unknown nonexistent_proc from foo
   procs           : foo:
 proc foo(x:0:int) (id 0):  @call_unknown:1:1
     nonexistent_proc(x:0) @call_unknown:1:17
-

@@ -9,4 +9,3 @@
   procs           : plus:
 public proc plus(a:0:int, b:0:int, ?$:0:int) (id 0):  @func_typed:1:8
     wybe.int.+<0>(a:0:int, b:0:int, ?$:0:int) @func_typed:1:40
-

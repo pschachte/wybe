@@ -14,4 +14,3 @@ public proc double(a:0:int, ?$:0:int) (id 0):  @func_quadruple:1:8
 public proc quadruple(a:0:int, ?$:0:int) (id 0):  @func_quadruple:3:8
     func_quadruple.double<0>(a:0:int, ?tmp$1:0:int) @func_quadruple:3:45
     func_quadruple.double<0>(tmp$1:0:int, ?$:0:int) @func_quadruple:3:38
-
