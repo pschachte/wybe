@@ -414,7 +414,9 @@ addType name def@(TypeDef arity _) vis = do
 -- |Add the specified submodule to the current module.
 addSubmod :: Ident -> Module -> OptPos -> Visibility -> Compiler ()
 addSubmod name modl pos vis = do
-    updateImplementation (updateModSubmods (Map.insert name modl))
+    let modspec = modSpec modl
+    updateImplementation (updateModSubmods (Map.insert name modspec))
+    addImport modspec True Nothing vis
     updateInterface vis (updatePubDependencies (Map.insert name pos))
     updateInterface vis (updatePubProcs (Map.unionWith (++) 
                                                 (pubProcs $ 
@@ -572,8 +574,13 @@ refersTo :: ModSpec -> Ident -> (ModuleImplementation -> Map Ident b) ->
             (ModuleInterface -> Map Ident a) -> Compiler [ModSpec]
 refersTo modspec name implMapFn ifaceMapFn = do
     currMod <- getModuleSpec
-    imports <- getModule (keys . modImports . fromJust . modImplementation)
-    let candidates = if List.null modspec then currMod:imports else [modspec]
+    imports <- getModule (Map.keys . modImports . fromJust . modImplementation)
+    submods <- getModule (Map.elems . modSubmods . fromJust . modImplementation)
+    let candidates = if List.null modspec 
+                     then currMod:submods++imports
+                     else [modspec]
+    -- liftIO $ putStrLn $ "   candidate module(s): " ++
+    --        intercalate ", " (List.map showModSpec $ candidates)
     listlist <- mapM (\spec -> do
                            vis <- makesVisible spec modspec name 
                                   implMapFn ifaceMapFn
@@ -724,7 +731,7 @@ updateDependencies fn modint = modint {dependencies = fn $ dependencies modint}
 -- |Holds everything needed to compile the module itself
 data ModuleImplementation = ModuleImplementation {
     modImports :: Map ModSpec ModDependency, -- ^All modules this module imports
-    modSubmods :: Map Ident Module,        -- ^All submodules
+    modSubmods :: Map Ident ModSpec,       -- ^All submodules
     modTypes :: Map Ident TypeDef,         -- ^All types defined by this module
     modResources :: Map Ident ResourceDef, -- ^All resources defined by this mod
     modProcs :: Map Ident [ProcDef]        -- ^All procs defined by this module
@@ -744,7 +751,7 @@ updateModImports :: (Map ModSpec ModDependency -> Map ModSpec ModDependency) ->
 updateModImports fn modimp = modimp {modImports = fn $ modImports modimp}
 
 -- |Update the map of submodules of a module implementation.
-updateModSubmods :: (Map Ident Module -> Map Ident Module) -> 
+updateModSubmods :: (Map Ident ModSpec -> Map Ident ModSpec) -> 
                    ModuleImplementation -> ModuleImplementation
 updateModSubmods fn modimp = modimp {modSubmods = fn $ modSubmods modimp}
 
@@ -1255,8 +1262,8 @@ instance Show Module where
                  (if Map.null (modSubmods impl)
                   then ""
                   else "\nSubmodules of " ++ showModSpec (modSpec mod) ++
-                           ":\n" ++ 
-                           showMap "\n" (const "") show (modSubmods impl))
+                           ":" ++ 
+                           showMap ", " (const "") show (modSubmods impl))
 
 --showTypeMap :: Map Ident TypeDef -> String
 

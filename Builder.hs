@@ -61,6 +61,11 @@ buildTargets opts targets = do
     messages <- gets msgs
     (liftIO . putStr) $ unlines messages
     errored <- gets errorState
+    modList <- gets (Map.elems . modules)
+    verboseMsg 1 $
+        return (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
+                (List.map show $ 
+                 List.filter ((/="wybe"). List.head . modSpec) modList))
     if errored then liftIO exitFailure else liftIO exitSuccess
 
 
@@ -226,11 +231,6 @@ compileModSCC specs = do
     -- liftIO $ putStrLn $ "type checked"
     mapM_ optimiseMod specs
     mods <- mapM getLoadedModule specs
-    verboseMsg 1 $
-        return (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
-                (List.map show $ 
-                 List.filter ((/=["wybe"]) . modSpec) $
-                 catMaybes mods))
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs . 
     --                         fromJust . modImplementation))
