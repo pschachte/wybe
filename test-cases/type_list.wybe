@@ -1,9 +1,9 @@
-public type list(t) is
+public type intlist is
     public ctor []
-    public ctor [|](head:t, tail:list(t))
+    public ctor [|](head:int, tail:intlist)
 end
 
-public func ++(x:list(t), y:list(t)) =
-    if x == []
+public func ++(x:intlist, y:intlist) =
+    if x = []
     then y
     else [x.head|x.tail++y]
