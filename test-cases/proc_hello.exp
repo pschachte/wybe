@@ -1,4 +1,3 @@
-
  Module proc_hello
   public submods  : 
   public types    : 

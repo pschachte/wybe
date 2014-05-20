@@ -1,15 +1,17 @@
-
  Module submodule
   public submods  : publictest @submodule:6:8
   public types    : 
   public resources: 
   public procs    : submodule.publictest.visible<0>
-  imports         : import wybe 
+  imports         : import submodule.privatetest 
+                    public import submodule.publictest 
+                    import wybe 
   types           : 
   resources       : 
   procs           : 
 
-Submodules of submodule:
+Submodules of submodule:["submodule","privatetest"], ["submodule","publictest"]
+--------------------------------------------------
  Module submodule.privatetest
   public submods  : 
   public types    : 
@@ -20,11 +22,12 @@ Submodules of submodule:
   resources       : 
   procs           : hidden:
 proc hidden() (id 0):  @submodule:2:5
-    print("private proc in a private module") @submodule:2:17
+    wybe.io.print<3>("private proc in a private module":string) @submodule:2:17
                     semi_hidden:
 public proc semi_hidden() (id 0):  @submodule:3:12
-    print("public proc in a private module") @submodule:3:29
+    wybe.io.print<3>("public proc in a private module":string) @submodule:3:29
 
+--------------------------------------------------
  Module submodule.publictest
   public submods  : 
   public types    : 
@@ -35,8 +38,8 @@ public proc semi_hidden() (id 0):  @submodule:3:12
   resources       : 
   procs           : semi_visible:
 proc semi_visible() (id 0):  @submodule:7:5
-    print("private proc in a public module") @submodule:7:23
+    wybe.io.print<3>("private proc in a public module":string) @submodule:7:23
                     visible:
 public proc visible() (id 0):  @submodule:8:12
-    print("public proc in a public module") @submodule:8:25
+    wybe.io.print<3>("public proc in a public module":string) @submodule:8:25
 

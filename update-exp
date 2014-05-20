@@ -12,25 +12,29 @@ agree () {
     done
 }
 
-for f in $(make test | awk '$2 == "..." && $3 != "PASS" {print $1}') ; do
+make test
+for f in test-cases/*.wybe ; do
     exp=$(echo "$f" | sed 's/\.wybe/.exp/')
     out=$(echo "$f" | sed 's/\.wybe/.out/')
-    echo
-    echo '======='
-    echo $f:
-    cat $f
     if [ -r "$exp" ] ; then
-	echo '-------'
-	echo 'Output changes:'
-	dwdiff -c "$exp" "$out"
-	echo
-	if agree "Is the green version appropriate? " ; then
-	    mv "$out" "$exp"
-	    echo "Green version now expected"
-	else
-	    echo "OK, expected output not changed"
+	if ! diff -q $exp $out > /dev/null ; then
+	    echo
+	    echo '======='
+	    echo $f:
+	    cat $f
+	    echo '-------'
+	    echo 'Output changes:'
+	    dwdiff -c "$exp" "$out"
+	    echo
+	    if agree "Is the green version appropriate? " ; then
+		mv "$out" "$exp"
+		echo "Green version now expected"
+	    else
+		echo "OK, expected output not changed"
+	    fi
 	fi
     else
+	echo "New test case $f"
 	echo 'Output:'
 	cat "$out"
 	echo

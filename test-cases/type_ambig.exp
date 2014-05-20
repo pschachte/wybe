@@ -1,4 +1,5 @@
-
+test-cases/type_ambig.wybe:1:1: Type ambiguity in defn of ambig:
+    Variable 'x' could be: char, float, int, string
  Module type_ambig
   public submods  : 
   public types    : 
@@ -11,5 +12,3 @@
 proc ambig(x:0:?) (id 0):  @type_ambig:1:1
     print(x:0) @type_ambig:1:15
 
-test-cases/type_ambig.wybe:1:1: Type ambiguity in defn of ambig:
-    Variable 'x' could be: char, float, int, string

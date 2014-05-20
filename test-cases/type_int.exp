@@ -1,4 +1,3 @@
-
  Module type_int
   public submods  : int @type_int:1:8
   public types    : int/0 @type_int:1:8
@@ -17,12 +16,14 @@
                     type_int.int.==<0>
                     type_int.int.><0>
                     type_int.int.>=<0>
-  imports         : import wybe 
+  imports         : public import type_int.int 
+                    import wybe 
   types           : int/0 @type_int:1:8
   resources       : 
   procs           : 
 
-Submodules of type_int:
+Submodules of type_int:["type_int","int"]
+--------------------------------------------------
  Module type_int.int([])
   public submods  : 
   public types    : 
@@ -46,40 +47,40 @@ Submodules of type_int:
   resources       : 
   procs           : *:
 public proc *(x:0:int, y:0:int, ?$:0:int) (id 0):  @type_int:8:12
-    foreign llvm mul(32, x:0, y:0, ?$:0) @type_int:8:38
+    foreign llvm mul(32:int, x:0:int, y:0:int, ?$:0:int) @type_int:8:38
                     +:
 public proc +(x:0:int, y:0:int, ?$:0:int) (id 0):  @type_int:2:12
-    foreign llvm add(32, x:0, y:0, ?$:0) @type_int:2:38
+    foreign llvm add(32:int, x:0:int, y:0:int, ?$:0:int) @type_int:2:38
 public proc +(?x:0:int, y:0:int, z:0:int) (id 1):  @type_int:3:12
-    foreign llvm sub(32, z:0, y:0, ?x:0) @type_int:3:44
+    foreign llvm sub(32:int, z:0:int, y:0:int, ?x:0:int) @type_int:3:44
 public proc +(x:0:int, ?y:0:int, z:0:int) (id 2):  @type_int:4:12
-    foreign llvm sub(32, z:0, x:0, ?y:0) @type_int:4:44
+    foreign llvm sub(32:int, z:0:int, x:0:int, ?y:0:int) @type_int:4:44
                     -:
 public proc -(x:0:int, y:0:int, ?$:0:int) (id 0):  @type_int:5:12
-    foreign llvm sub(32, x:0, y:0, ?$:0) @type_int:5:38
+    foreign llvm sub(32:int, x:0:int, y:0:int, ?$:0:int) @type_int:5:38
 public proc -(?x:0:int, y:0:int, z:0:int) (id 1):  @type_int:6:12
-    foreign llvm add(32, z:0, y:0, ?x:0) @type_int:6:44
+    foreign llvm add(32:int, z:0:int, y:0:int, ?x:0:int) @type_int:6:44
 public proc -(x:0:int, ?y:0:int, z:0:int) (id 2):  @type_int:7:12
-    foreign llvm sub(32, z:0, x:0, ?y:0) @type_int:7:44
+    foreign llvm sub(32:int, z:0:int, x:0:int, ?y:0:int) @type_int:7:44
                     /:
 public proc /(x:0:int, y:0:int, ?$:0:int) (id 0):  @type_int:9:12
-    foreign llvm sdiv(32, x:0, y:0, ?$:0) @type_int:9:38
+    foreign llvm sdiv(32:int, x:0:int, y:0:int, ?$:0:int) @type_int:9:38
                     /=:
 public proc /=(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type_int:11:12
-    foreign llvm icmp ne(32, x:0, y:0, ?$:0) @type_int:11:40
+    foreign llvm icmp ne(32:int, x:0:int, y:0:int, ?$:0:bool) @type_int:11:40
                     <:
 public proc <(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type_int:12:12
-    foreign llvm icmp slt(32, x:0, y:0, ?$:0) @type_int:12:39
+    foreign llvm icmp slt(32:int, x:0:int, y:0:int, ?$:0:bool) @type_int:12:39
                     <=:
 public proc <=(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type_int:13:12
-    foreign llvm icmp sle(32, x:0, y:0, ?$:0) @type_int:13:40
+    foreign llvm icmp sle(32:int, x:0:int, y:0:int, ?$:0:bool) @type_int:13:40
                     ==:
 public proc ==(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type_int:10:12
-    foreign llvm icmp eq(32, x:0, y:0, ?$:0) @type_int:10:40
+    foreign llvm icmp eq(32:int, x:0:int, y:0:int, ?$:0:bool) @type_int:10:40
                     >:
 public proc >(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type_int:14:12
-    foreign llvm icmp sgt(32, x:0, y:0, ?$:0) @type_int:14:39
+    foreign llvm icmp sgt(32:int, x:0:int, y:0:int, ?$:0:bool) @type_int:14:39
                     >=:
 public proc >=(x:0:int, y:0:int, ?$:0:bool) (id 0):  @type_int:15:12
-    foreign llvm icmp sge(32, x:0, y:0, ?$:0) @type_int:15:40
+    foreign llvm icmp sge(32:int, x:0:int, y:0:int, ?$:0:bool) @type_int:15:40
 
