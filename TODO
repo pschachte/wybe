@@ -1,11 +1,10 @@
 Bug fixing:
 o Ensure every variable gets a type
 o Fix bug in typing proc_beer, proc_yorn, proc_yorn2
-o Fix test cases with undefined procs
 o Fix bug in type_list
 
 Completing the implementation
-o Implement algebraic types
+o Fix algebraic type implementation to use tags
 o Code generation   
 
 Completing the language

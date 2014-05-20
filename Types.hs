@@ -26,6 +26,8 @@ data TypeReason = ReasonParam ProcName Int OptPos
                                       -- Actual param type inconsistent
                 | ReasonArgFlow ProcName Int OptPos
                                       -- Actual param flow inconsistent
+                | ReasonOverload [ProcSpec] OptPos
+                                      -- Multiple procs with same types/flows
                 | ReasonAmbig ProcName OptPos [(VarName,[TypeSpec])]
                                       -- Proc defn has ambiguous types
                 | ReasonArity ProcName ProcName OptPos Int Int
@@ -43,6 +45,10 @@ instance Show TypeReason where
     show (ReasonArgFlow name num pos) =
         makeMessage pos $
             "Flow error in call to " ++ name ++ ", argument " ++ show num
+    show (ReasonOverload pspecs pos) =
+        makeMessage pos $
+            "Ambiguous overloading: call could refer to:" ++
+            List.concatMap (("\n    "++) . show) (reverse pspecs)
     show (ReasonAmbig procName pos varAmbigs) =
         makeMessage pos $
             "Type ambiguity in defn of " ++ procName ++ ":" ++
@@ -59,7 +65,7 @@ instance Show TypeReason where
 
 data Typing = ValidTyping (Map VarName TypeSpec)
             | InvalidTyping TypeReason   -- call type conflicts w/callee
-            deriving (Show,Eq)
+            deriving (Show,Eq,Ord)
 
 typingDict :: Typing -> Map VarName TypeSpec
 typingDict (ValidTyping dict) = dict
@@ -116,27 +122,39 @@ subtypeOf sub super = sub == super || sub `properSubtypeOf` super
 --  This code assumes that all lower sccs have already been checked.
 typeCheckModSCC :: [ModSpec] -> Compiler ()
 typeCheckModSCC [modspec] = do  -- immediate fixpoint when no mutual dependency
-    typeCheckMod [modspec] modspec
+    (_,reasons) <- typeCheckMod [modspec] modspec
+    mapM_ (\r -> message Error (show r) Nothing) reasons
     return ()
 typeCheckModSCC scc = do        -- must find fixpoint
-    changed <- mapM (typeCheckMod scc) scc
-    when (or changed) $ typeCheckModSCC scc
+    (changed,reasons) <- foldMChangeReasons (typeCheckMod scc) False [] scc
+    if changed
+    then typeCheckModSCC scc
+    else mapM_ (\r -> message Error (show r) Nothing) reasons
+
+
+foldMChangeReasons :: (a -> Compiler (Bool,[TypeReason])) -> Bool ->
+                      [TypeReason] -> [a] -> Compiler (Bool,[TypeReason])
+foldMChangeReasons f chg0 reasons0 xs =
+    foldM (\(chg,rs) x -> do
+             (chg1,rs1) <- f x
+             return (chg1||chg, rs1++rs))
+          (chg0,reasons0) xs
 
 
 -- |Type check a single module named in the second argument; the 
 --  first argument is a list of all the modules in this module 
 -- dependency SCC.
-typeCheckMod :: [ModSpec] -> ModSpec -> Compiler Bool
+typeCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[TypeReason])
 typeCheckMod modSCC thisMod = do
     -- liftIO $ putStrLn $ "**** Type checking module " ++ showModSpec thisMod
     reenterModule thisMod
     -- First typecheck submodules
     submods <- getModuleImplementationField modSubmods
     -- liftIO $ putStrLn $ "getModuleImplementationField completed"
-    submodChg <- do
-      let modspecs = maybe [] (List.map modSpec . Map.elems) submods
+    let modspecs = maybe [] (List.map modSpec . Map.elems) submods
       -- liftIO $ putStrLn $ "  Submodules: " ++ showModSpecs modspecs
-      mapM (typeCheckMod modSCC) modspecs
+    (changed0,reasons0) <- 
+        foldMChangeReasons (typeCheckMod modSCC) False [] modspecs
     procs <- getModule (Map.toList . modProcs . fromJust . modImplementation)
     let ordered =
             stronglyConnComp
@@ -144,16 +162,11 @@ typeCheckMod modSCC thisMod = do
               nub $ concatMap (localBodyProcs thisMod . procBody) procs)
              | (name,procs) <- procs]
     (changed,reasons) <-
-        foldM (\(chg,rs) scc -> do
-                 (chg1,rs1) <- typecheckProcSCC thisMod modSCC scc
-                 return (chg1 || chg, rs1++rs))
-        (or submodChg,[])
-        ordered
+        foldMChangeReasons (typecheckProcSCC thisMod modSCC) 
+                           changed0 reasons0 ordered
     finishModule
-    unless changed
-        (mapM_ (\r -> message Error (show r) Nothing) reasons)
     -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
-    return changed
+    return (changed,reasons)
 
 
 localBodyProcs :: ModSpec -> ProcBody -> [Ident]
@@ -291,10 +304,10 @@ typecheckProcDef :: ModSpec -> [ModSpec] -> ProcName -> OptPos -> Typing ->
                      ProcBody -> Compiler (Typing,ProcBody)
 typecheckProcDef m mods name pos paramTypes body = do
     -- liftIO $ putStrLn $ "\ntype checking: " ++ name
-    types <- typecheckBody m mods name paramTypes body
+    typings <- typecheckBody m mods name paramTypes body
     -- liftIO $ putStrLn $ "typings:  " ++
-    --   intercalate "\n          " (List.map show types) ++ "\n"
-    case types of
+    --   intercalate "\n          " (List.map show typings) ++ "\n"
+    case typings of
       [] -> do
         -- liftIO $ putStrLn $ "   no valid type"
           -- XXX This is the wrong reason
@@ -309,10 +322,9 @@ typecheckProcDef m mods name pos paramTypes body = do
                 body' <- applyBodyTyping dict body
                 return (typing',body')
       typings -> do
-          -- XXX report ambiguity in a useful way!
-          -- liftIO $ putStrLn $ name ++ " has " ++ show (length types) ++ 
+          -- liftIO $ putStrLn $ name ++ " has " ++ show (length typings) ++ 
           --   " typings, of which " ++
-          --   show (length (List.filter validTyping types)) ++
+          --   show (length (List.filter validTyping typings)) ++
           --   " are valid"
           let typingSets = List.map (Map.map Set.singleton . typingDict) typings
           let merged = Map.filter ((>1).Set.size) $
@@ -343,7 +355,7 @@ typecheckSequence f typings (t:ts) = do
 pruneTypings :: [Typing] -> [Typing]
 pruneTypings [] = []
 pruneTypings typings =
-    let pruned = List.filter validTyping typings
+    let pruned = nub $ List.filter validTyping typings
     in  if List.null pruned
         then typings
         else pruned
@@ -355,6 +367,7 @@ typecheckBody m mods name typing body@(ProcBody prims fork) = do
     -- liftIO $ putStrLn $ "Entering typecheckSequence from typecheckBody"
     typings' <- typecheckSequence (typecheckPlacedPrim m mods name)
                 [typing] prims
+    -- liftIO $ putStrLn $ "Body types: " ++ show typings'
     if List.null typings' || not (validTyping $ List.head typings')
     then return typings'
     else typecheckFork m mods name typings' fork
@@ -387,7 +400,8 @@ typecheckPrim m mods caller call@(PrimCall cm name id args) pos typing = do
     procs <- case id of
         Nothing   -> callTargets cm name
         Just spec -> return [spec]
-    -- liftIO $ putStrLn $ "   " ++ show (length procs) ++ " potential procs"
+    -- liftIO $ putStrLn $ "   potential procs: " ++
+    --        List.intercalate ", " (List.map show procs)
     if List.null procs 
       then
         return [InvalidTyping $ ReasonUndef caller name pos]
@@ -408,9 +422,25 @@ typecheckPrim m mods caller call@(PrimCall cm name id args) pos typing = do
                                           ReasonArity caller name pos
                                           (length args) (length params)])
                    procs
-        -- liftIO $ putStrLn $ "Resulting types: " ++ 
-        --        show (List.filter validTyping (concat typList))
-        return $ concat typList
+        let typList' = concat typList
+        let typList'' = List.filter validTyping typList'
+        let dups = snd $ List.foldr
+                   (\elt (s,l) ->
+                        if Set.member elt s 
+                        then (s,if List.elem elt l then l else elt:l)
+                        else (Set.insert elt s,l))
+                   (Set.empty,[]) typList''
+        -- liftIO $ putStrLn $ "Resulting types: " ++ show typList''
+        if List.null dups
+        then if List.null typList''
+             then return typList'
+             else return typList''
+        else return [InvalidTyping $ ReasonOverload
+                                   (List.map fst $
+                                    List.filter 
+                                      (List.any (flip List.elem dups) . snd) $
+                                    zip procs typList)
+                                   pos]
 typecheckPrim _ _ _ (PrimForeign lang name id args) pos typing = do
     -- XXX? must get type and flow from foreign calls?
     return [typing]
@@ -539,7 +569,8 @@ applyPrimTyping dict call@(PrimCall cm name id args) = do
     procs <- case id of
         Nothing   -> callTargets cm name
         Just spec -> return [spec]
-    -- liftIO $ putStrLn $ "   " ++ show (length procs) ++ " potential procs"
+    -- liftIO $ putStrLn $ "   " ++ show (length procs) ++ " potential procs: "
+    --        ++ intercalate ", " (List.map show procs)
     matches <- filterM (\p -> do
                              params <- getParams p
                              -- liftIO $ putStrLn $ "   checking call to " ++
