@@ -1,6 +1,9 @@
 public type intlist is
     public ctor []
     public ctor [|](head:int, tail:intlist)
+    public proc =(?y:intlist, x:intlist) foreign llvm move(x, ?y) end
+    public proc =(x:intlist, ?y:intlist) foreign llvm move(x, ?y) end
+    public func =(x:intlist, y:intlist) = false
 end
 
 public func ++(x:intlist, y:intlist) =
