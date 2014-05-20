@@ -3,8 +3,12 @@
   public submods  : position @position:1:8
   public types    : position/0 @position:1:8
   public resources: 
-  public procs    : 
-  imports         : 
+  public procs    : position.position.position<0>
+                    position.position.x<1>
+                    position.position.x<0>
+                    position.position.y<1>
+                    position.position.y<0>
+  imports         : import wybe 
   types           : position/0 @position:1:8
   resources       : 
   procs           : 
@@ -19,7 +23,7 @@ Submodules of position:
                     position.position.x<0>
                     position.position.y<1>
                     position.position.y<0>
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : position:
@@ -44,18 +48,19 @@ public proc y($rec:0:position, ?$rec:1:position, $field:0:int) (id 1):
   public resources: 
   public procs    : import.distance<0>
   imports         : import position 
+                    import wybe 
   types           : 
   resources       : 
   procs           : distance:
-public proc distance(p1:0:position, p2:0:position, ?$:0:?) (id 0):  @import:3:8
-    x(p2:0, ?tmp$4:0) @import:4:11
-    x(p1:0, ?tmp$5:0) @import:4:16
-    -(tmp$4:0, tmp$5:0, ?tmp$3:0) @import:4:10
-    ^(tmp$3:0, 2, ?tmp$2:0) @import:4:10
-    y(p2:0, ?tmp$8:0) @import:4:27
-    y(p1:0, ?tmp$9:0) @import:4:32
-    -(tmp$8:0, tmp$9:0, ?tmp$7:0) @import:4:26
-    ^(tmp$7:0, 2, ?tmp$6:0) @import:4:26
-    +(tmp$2:0, tmp$6:0, ?tmp$1:0) @import:4:10
-    sqrt(tmp$1:0, ?$:0) @import:4:5
+public proc distance(p1:0:position, p2:0:position, ?$:0:int) (id 0):  @import:3:8
+    position.position.x<0>(p2:0:position, ?tmp$4:0:int) @import:4:17
+    position.position.x<0>(p1:0:position, ?tmp$5:0:int) @import:4:22
+    wybe.int.-<0>(tmp$4:0:int, tmp$5:0:int, ?tmp$3:0:int) @import:4:16
+    wybe.int.power<0>(tmp$3:0:int, 2:int, ?tmp$2:0:int) @import:4:10
+    position.position.y<0>(p2:0:position, ?tmp$8:0:int) @import:4:40
+    position.position.y<0>(p1:0:position, ?tmp$9:0:int) @import:4:45
+    wybe.int.-<0>(tmp$8:0:int, tmp$9:0:int, ?tmp$7:0:int) @import:4:39
+    wybe.int.power<0>(tmp$7:0:int, 2:int, ?tmp$6:0:int) @import:4:33
+    wybe.int.+<0>(tmp$2:0:int, tmp$6:0:int, ?tmp$1:0:int) @import:4:10
+    wybe.int.sqrt<0>(tmp$1:0:int, ?$:0:int) @import:4:5
 

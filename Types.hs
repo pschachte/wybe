@@ -254,8 +254,6 @@ typecheckProcDecl m mods pd@(ProcDef name proto@(PrimProto pn params)
         --   ": " ++ show typing'
         let params' = updateParamTypes typing' params
         let pd' = ProcDef name (PrimProto pn params') def' pos tmpCnt vis
-        -- liftIO $ putStrLn $ "===== Old definition" ++ showProcDef 4 pd
-        -- liftIO $ putStrLn $ "===== New definition" ++ showProcDef 4 pd'
         let modAgain = pd' /= pd
         -- liftIO $ putStrLn $ "===== Definition is " ++ 
         --        (if modAgain then "" else "un") ++ "changed"
@@ -410,6 +408,8 @@ typecheckPrim m mods caller call@(PrimCall cm name id args) pos typing = do
                                           ReasonArity caller name pos
                                           (length args) (length params)])
                    procs
+        -- liftIO $ putStrLn $ "Resulting types: " ++ 
+        --        show (List.filter validTyping (concat typList))
         return $ concat typList
 typecheckPrim _ _ _ (PrimForeign lang name id args) pos typing = do
     -- XXX? must get type and flow from foreign calls?
