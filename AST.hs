@@ -483,7 +483,7 @@ addProc procDef@(ProcDef name proto clauses pos _ vis) = do
 
 
 getParams :: ProcSpec -> Compiler [PrimParam]
-getParams ProcSpec modSpec procName procID = do
+getParams (ProcSpec modSpec procName procID) = do
     mod <- trustFromJustM ("no such module " ++ showModSpec modSpec) $ 
            getLoadedModule modSpec
     -- XXX shouldn't have to grovel in implementation to find prototype
