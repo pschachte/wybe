@@ -155,7 +155,7 @@ typeCheckMod modSCC thisMod = do
       -- liftIO $ putStrLn $ "  Submodules: " ++ showModSpecs modspecs
     (changed0,reasons0) <- 
         foldMChangeReasons (typeCheckMod modSCC) False [] modspecs
-    procs <- getModule (Map.toList . modProcs . fromJust . modImplementation)
+    procs <- getModuleImplementationField (Map.toList . modProcs)
     let ordered =
             stronglyConnComp
             [(name,name,
@@ -236,8 +236,9 @@ typecheckProcDecls :: ModSpec -> [ModSpec] -> ProcName ->
                      Compiler (Bool,Bool,[TypeReason])
 typecheckProcDecls m mods name = do
     
-    defs <- getModule (Map.findWithDefault (error "missing proc definition")
-                       name . modProcs . fromJust . modImplementation)
+    defs <- getModuleImplementationField 
+            (Map.findWithDefault (error "missing proc definition")
+             name . modProcs)
     (revdefs,modAgain,allAgain,reasons) <- 
         foldM (\(ds,modAgain,allAgain,rs) def -> do
                     (d,mA,aA,rs') <- typecheckProcDecl m mods def

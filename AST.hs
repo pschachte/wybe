@@ -42,7 +42,7 @@ module AST (
   addProc, replaceProc, lookupProc, publicProc,
   refersTo, callTargets,
   showBody, showStmt, showBlock, showProcDef, showModSpec, showModSpecs,
-  shouldnt, checkError, checkValue
+  shouldnt, checkError, checkValue, trustFromJust, trustFromJustM
   ) where
 
 import Options
@@ -473,17 +473,22 @@ addProc procDef@(ProcDef name proto clauses pos _ vis) = do
              defs' = defs ++ [procDef]
          in  Map.insert name defs' procs))
     newid <- getModuleImplementationField 
-            (((-1)+) . length . fromJust . Map.lookup name . modProcs)
+            (((-1)+) . length . 
+             Map.findWithDefault (shouldnt $ "undefined proc " ++ name) name . 
+             modProcs)
     spec <- getModuleSpec
     updateInterface vis
       (updatePubProcs (mapListInsert name 
                        (ProcSpec spec name newid)))
 
+
 getParams :: ProcSpec -> Compiler [PrimParam]
-getParams (ProcSpec modSpec procName procID) = do
-    mod <- getLoadedModule modSpec
+getParams ProcSpec modSpec procName procID = do
+    mod <- trustFromJustM ("no such module " ++ showModSpec modSpec) $ 
+           getLoadedModule modSpec
     -- XXX shouldn't have to grovel in implementation to find prototype
-    let impl = fromJust $ modImplementation $ fromJust mod
+    let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $ 
+               modImplementation mod
     let def = (modProcs impl ! procName) !! procID
     let PrimProto _ params = procProto def
     return params
@@ -1477,3 +1482,16 @@ checkError msg bad = when bad $ shouldnt msg
 -- |Check that a value is OK; if so, return it, else abort
 checkValue :: (t -> Bool) -> String -> t -> t
 checkValue tst msg val = if tst val then val else shouldnt msg
+
+
+-- |Like fromJust, but with its own error message
+trustFromJust :: String -> (Maybe t) -> t
+trustFromJust msg Nothing = shouldnt msg
+trustFromJust _ (Just val) = val
+
+
+-- |Monadic version of trustFromJust
+trustFromJustM :: Monad m => String -> (m (Maybe t)) -> m t
+trustFromJustM msg computation = do
+    maybe <- computation
+    return $ trustFromJust msg maybe
