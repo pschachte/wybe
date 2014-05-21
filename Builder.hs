@@ -273,7 +273,7 @@ localCheckMod spec = do
 handleImports :: Compiler ()
 handleImports = do
     imports <- getModuleImplementationField (keys . modImports)
-    mapM_ buildDependency $ fromJust imports -- ++ [["wybe"]]
+    mapM_ buildDependency imports -- ++ [["wybe"]]
     -- modspec <- getModuleSpec
     -- mod <- getModule id
     -- updateModules (Map.insert modspec mod)

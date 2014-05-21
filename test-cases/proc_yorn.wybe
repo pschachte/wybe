@@ -1,10 +1,13 @@
 public proc yorn(prompt:string, ?result:bool)
        do  print(prompt)
        	   print(" (y/n) ")
-           read_char(?response)
+           read(?response)
 	   ?result = is_yes(response)
 	   unless is_yes_or_no(response)
 	   println("Please answer 'yes' or 'no'.")
 	   until is_yes_or_no(response)
 	end
  end
+
+func is_yes(ch) = or(ch='y',ch='Y')
+func is_yes_or_no(ch) = or(is_yes(ch),(or(ch='n',ch='N')))

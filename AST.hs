@@ -342,13 +342,12 @@ getModuleImplementation :: Compiler (Maybe ModuleImplementation)
 getModuleImplementation = getModule modImplementation
 
 -- |Return some function applied to the implementation of the current module.
-getModuleImplementationField :: (ModuleImplementation -> t) ->
-                               Compiler (Maybe t)
+getModuleImplementationField :: (ModuleImplementation -> t) -> Compiler t
 getModuleImplementationField getter = do
   imp <- getModuleImplementation
   case imp of
-      Nothing -> return Nothing
-      Just imp' -> return $ Just $ getter imp'
+      Nothing -> shouldnt "current module missing implementation"
+      Just imp' -> return $ getter imp'
 
 -- |Return some function applied to the implementation of the current module
 getModuleImplementationMaybe :: (ModuleImplementation -> Maybe t) ->
@@ -478,7 +477,7 @@ addProc procDef@(ProcDef name proto clauses pos _ vis) = do
     spec <- getModuleSpec
     updateInterface vis
       (updatePubProcs (mapListInsert name 
-                       (ProcSpec spec name (fromJust newid) )))
+                       (ProcSpec spec name newid)))
 
 getParams :: ProcSpec -> Compiler [PrimParam]
 getParams (ProcSpec modSpec procName procID) = do
@@ -602,10 +601,8 @@ makesVisible defMod modRef name implMapFn ifaceMapFn = do
     currMod <- getModuleSpec
     if currMod == defMod
       then do -- use of local module:  name only needs to be defined
-        maybeMap <- getModuleImplementationField implMapFn
-        when (isNothing maybeMap) $
-          error "current module missing implementation"
-        return $ Map.member name $ fromJust maybeMap
+        implMap <- getModuleImplementationField implMapFn
+        return $ Map.member name implMap
       else do -- use of other module:  name must be exported or used
         -- specSpec <- getSpecModule "makesVisible" defMod modSpec
         iface <- getSpecModule "makesVisible" defMod modInterface
@@ -613,13 +610,11 @@ makesVisible defMod modRef name implMapFn ifaceMapFn = do
           then do
             return False -- target doesn't even define it
           else do
-            maybeImports <- getModuleImplementationField modImports
-            when (isNothing maybeImports) $
-              error "current module missing implementation"
-            let maybeImport = Map.lookup defMod $ fromJust maybeImports
-            when (isNothing maybeImport) $
-              error "imported module seems not to be imported"
-            let (ModDependency uses imports) = fromJust maybeImport
+            usesImports <- getModuleImplementationField modImports
+            let (ModDependency uses imports) = 
+                    fromMaybe 
+                    (error "imported module seems not to be imported") $
+                    Map.lookup defMod usesImports
             return (makesNameVisible imports name ||
                     (modRef /= [] && makesNameVisible uses name))
     

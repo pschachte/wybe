@@ -151,7 +151,7 @@ typeCheckMod modSCC thisMod = do
     -- First typecheck submodules
     submods <- getModuleImplementationField modSubmods
     -- liftIO $ putStrLn $ "getModuleImplementationField completed"
-    let modspecs = maybe [] Map.elems submods
+    let modspecs = Map.elems submods
       -- liftIO $ putStrLn $ "  Submodules: " ++ showModSpecs modspecs
     (changed0,reasons0) <- 
         foldMChangeReasons (typeCheckMod modSCC) False [] modspecs
