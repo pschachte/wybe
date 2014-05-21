@@ -50,11 +50,11 @@ planRenaming naming (ProcBody prims _) =
 
 
 planPrimRenaming :: Renaming -> Prim -> Renaming
-planPrimRenaming naming (PrimCall [] "=" _ [ArgVar name1 _ FlowOut _, 
-                                                 ArgVar name2 _ FlowIn _]) =
+planPrimRenaming naming (PrimCall [] "=" _ [ArgVar name1 _ FlowOut _ _, 
+                                            ArgVar name2 _ FlowIn _ _]) =
     planAssignRenaming naming name1 name2
-planPrimRenaming naming (PrimCall [] "=" _ [ArgVar name1 _ FlowIn _, 
-                                                 ArgVar name2 _ FlowOut _]) =
+planPrimRenaming naming (PrimCall [] "=" _ [ArgVar name1 _ FlowIn _ _, 
+                                            ArgVar name2 _ FlowOut _ _]) =
     planAssignRenaming naming name2 name1
 planPrimRenaming naming _ = naming
 
@@ -97,7 +97,7 @@ executePrimRenaming naming placed =
 
 renamePrim :: Renaming -> Prim -> [Prim]
 renamePrim naming (PrimCall [] "=" _ 
-                   [ArgVar name1 _ _ _, ArgVar name2 _ _ _])
+                   [ArgVar name1 _ _ _ _, ArgVar name2 _ _ _ _])
   | ultimateTarget naming name1 == ultimateTarget naming name2 = []
 renamePrim naming (PrimCall maybeMod name id args) =
     [PrimCall maybeMod name id $ List.map (renameArg naming) args]
@@ -107,6 +107,6 @@ renamePrim naming (PrimNop) = [PrimNop]
 
 
 renameArg :: Renaming -> PrimArg -> PrimArg
-renameArg naming (ArgVar name typ dir flowType) =
-    ArgVar (fst $ ultimateTarget naming name) typ dir flowType
+renameArg naming (ArgVar name typ dir flowType final) =
+    ArgVar (fst $ ultimateTarget naming name) typ dir flowType final
 renameArg naming primArg = primArg

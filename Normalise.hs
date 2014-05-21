@@ -62,12 +62,13 @@ normaliseItem (ImportItems vis imp modspec imports pos) = do
 normaliseItem (ResourceDecl vis name typ pos) =
   addResource name (SimpleResource typ pos) vis
 normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
-  normaliseItem $
-  ProcDecl 
-  vis
-  (ProcProto name $ params ++ [Param "$" resulttype ParamOut])
-  [Unplaced $ ProcCall [] "=" [Unplaced $ Var "$" ParamOut, result]]
-  pos
+  let flowType = Implicit pos
+  in  normaliseItem
+   (ProcDecl
+    vis
+    (ProcProto name $ params ++ [Param "$" resulttype ParamOut flowType])
+    [Unplaced $ ProcCall [] "=" [Unplaced $ Var "$" ParamOut flowType, result]]
+    pos)
 normaliseItem decl@(ProcDecl _ _ _ _) = do
     (ProcDecl vis proto@(ProcProto _ params) stmts pos,tmpCtr) <- 
         flattenProcDecl decl
@@ -81,58 +82,59 @@ normaliseItem decl@(ProcDecl _ _ _ _) = do
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
     Just modparams <- getModuleParams
-    addCtor vis (last modspec) modparams proto
+    addCtor vis (last modspec) modparams proto pos
 normaliseItem (StmtDecl stmt pos) = do
     updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
 
 
 -- |Add a contructor for the specified type.
-addCtor :: Visibility -> Ident -> [Ident] -> FnProto -> Compiler ()
-addCtor vis typeName typeParams (FnProto ctorName params) = do
+addCtor :: Visibility -> Ident -> [Ident] -> FnProto -> OptPos -> Compiler ()
+addCtor vis typeName typeParams (FnProto ctorName params) pos = do
     let typespec = TypeSpec [] typeName $ 
                    List.map (\n->TypeSpec [] n []) typeParams
-    normaliseItem 
+    let flowType = Implicit pos
+    normaliseItem
       (FuncDecl Public (FnProto ctorName params) typespec
-       (Unplaced $ Where 
+       (Unplaced $ Where
         ([Unplaced $ ForeignCall "$" "alloc" []
           [Unplaced $ StringValue typeName, Unplaced $ StringValue ctorName,
-           Unplaced $ Var "$rec" ParamOut]]
+           Unplaced $ Var "$rec" ParamOut flowType]]
          ++
-         (List.map (\(Param var _ dir) ->
+         (List.map (\(Param var _ dir paramFlowType) ->
                      (Unplaced $ ForeignCall "$" "mutate" []
                       [Unplaced $ StringValue $ typeName,
                        Unplaced $ StringValue ctorName,
                        Unplaced $ StringValue var,
-                       Unplaced $ Var "$rec" ParamInOut,
-                       Unplaced $ Var var ParamIn]))
+                       Unplaced $ Var "$rec" ParamInOut flowType,
+                       Unplaced $ Var var ParamIn paramFlowType]))
           params))
-        (Unplaced $ Var "$rec" ParamIn))
+        (Unplaced $ Var "$rec" ParamIn flowType))
        Nothing)
-    mapM_ (addGetterSetter vis typespec ctorName) params
+    mapM_ (addGetterSetter vis typespec ctorName pos) params
 
 -- |Add a getter and setter for the specified type.
-addGetterSetter :: Visibility -> TypeSpec -> Ident -> Param -> Compiler ()
-addGetterSetter vis rectype ctorName (Param field fieldtype _) = do
-    normaliseItem $ FuncDecl vis 
-      (FnProto field [Param "$rec" rectype ParamIn])
+addGetterSetter :: Visibility -> TypeSpec -> Ident -> OptPos -> Param -> Compiler ()
+addGetterSetter vis rectype ctorName pos (Param field fieldtype _ _) = do
+    normaliseItem $ FuncDecl vis
+      (FnProto field [Param "$rec" rectype ParamIn Ordinary])
       fieldtype 
       (Unplaced $ ForeignFn "$" "access" []
        [Unplaced $ StringValue $ typeName rectype,
         Unplaced $ StringValue ctorName,
         Unplaced $ StringValue field,
-        Unplaced $ Var "$rec" ParamIn])
-      Nothing
+        Unplaced $ Var "$rec" ParamIn Ordinary])
+      pos
     normaliseItem $ ProcDecl vis 
       (ProcProto field 
-       [Param "$rec" rectype ParamInOut,
-        Param "$field" fieldtype ParamIn])
+       [Param "$rec" rectype ParamInOut Ordinary,
+        Param "$field" fieldtype ParamIn Ordinary])
       [Unplaced $ ForeignCall "$" "mutate" []
        [Unplaced $ StringValue $ typeName rectype,
         Unplaced $ StringValue ctorName,
         Unplaced $ StringValue field,
-        Unplaced $ Var "$rec" ParamInOut,
-        Unplaced $ Var "$field" ParamIn]]
-       Nothing
+        Unplaced $ Var "$rec" ParamInOut Ordinary,
+        Unplaced $ Var "$field" ParamIn Ordinary]]
+       pos
 
 ----------------------------------------------------------------
 --                 Clause compiler monad
@@ -208,10 +210,10 @@ compileProc _ decl =
 -- |Convert a Param to single PrimParam.  Only ParamIn and ParamOut 
 --  params should still exist at this point. 
 primParam :: Map VarName Int -> Map VarName Int -> Param -> PrimParam
-primParam initVars finalVars (Param name typ ParamIn) =
-    PrimParam (mkPrimVarName initVars name) typ FlowIn Ordinary
-primParam initVars finalVars (Param name typ ParamOut) = do
-    PrimParam (mkPrimVarName finalVars name) typ FlowOut Ordinary
+primParam initVars finalVars (Param name typ ParamIn flowType) =
+    PrimParam (mkPrimVarName initVars name) typ FlowIn flowType
+primParam initVars finalVars (Param name typ ParamOut flowType) = do
+    PrimParam (mkPrimVarName finalVars name) typ FlowOut flowType
 primParam _ _ param =
     shouldnt $ "Flattening error: param '" ++ show param ++ "' remains"
 
@@ -241,7 +243,7 @@ compileBody [placed]
       let thn'' = thn' ++ reconcilingAssignments afterThen final
       let els'' = els' ++ reconcilingAssignments afterElse final
       case tstVar' of
-        ArgVar var _ FlowIn Ordinary ->
+        ArgVar var _ FlowIn _ _ ->
             return $ ProcBody tstStmts' $
                    PrimFork var [ProcBody els'' NoFork,
                                  ProcBody thn'' NoFork]
@@ -285,12 +287,12 @@ compileArg' typ (IntValue int) = return $ ArgInt int typ
 compileArg' typ (FloatValue float) = return $ ArgFloat float typ
 compileArg' typ (StringValue string) = return $ ArgString string typ
 compileArg' typ (CharValue char) = return $ ArgChar char typ
-compileArg' typ (Var name ParamIn) = do
+compileArg' typ (Var name ParamIn flowType) = do
     name' <- currVar name
-    return $ ArgVar name' typ FlowIn Ordinary
-compileArg' typ (Var name ParamOut) = do
+    return $ ArgVar name' typ FlowIn flowType False
+compileArg' typ (Var name ParamOut flowType) = do
     name' <- nextVar name
-    return $ ArgVar name' typ FlowOut Ordinary
+    return $ ArgVar name' typ FlowOut flowType False
 compileArg' _ (Typed exp typ) = compileArg' typ exp
 compileArg' _ arg =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
@@ -307,5 +309,5 @@ reconcileOne :: (Map VarName Int) -> (Map VarName Int) -> VarName -> Placed Prim
 reconcileOne caseVars jointVars var =
     Unplaced $
     PrimCall [] "=" Nothing [
-        ArgVar (mkPrimVarName jointVars var) Unspecified FlowOut Ordinary,
-        ArgVar (mkPrimVarName caseVars var) Unspecified FlowIn Ordinary]
+        ArgVar (mkPrimVarName jointVars var) Unspecified FlowOut Ordinary False,
+        ArgVar (mkPrimVarName caseVars var) Unspecified FlowIn Ordinary False]

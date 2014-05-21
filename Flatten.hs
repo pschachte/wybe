@@ -230,17 +230,25 @@ flattenStmt' (Loop body) pos = do
              (flattenStmts $ body ++ [Unplaced $ Next])
     emit pos $ Loop body'
 flattenStmt' (For itr gen) pos = do
-    genVar <- tempVar
-    flattenStmt (ProcCall [] "=" [Unplaced $ Var genVar ParamOut, gen]) Nothing
-    flattenStmt (Cond [] 
-                 (maybePlace (Fncall [] "empty"
-                                         [Unplaced $ Var genVar ParamIn]) pos)
-                 [Unplaced $ Break]
-                 [maybePlace
+    vars <- flattenPExp gen
+    case vars of
+        [] -> lift $
+              message Error "'for' generator does not produce a value" 
+              (place gen)
+        (_:_:_) -> lift $
+                   message Error "'for' generator has invalid flow" (place gen)
+        [genVar@(Unplaced (Var genVarName ParamIn flowType))] -> do
+            -- XXX not generating the right code until we have polymorphism
+            flattenStmt 
+              (Cond [] (maybePlace (Fncall [] "empty" [genVar]) pos)
+               [Unplaced $ Break]
+               [maybePlace
                   (ProcCall [] "[|]" [itr,
-                                      Unplaced $ Var genVar ParamOut,
-                                      Unplaced $ Var genVar ParamIn])
+                                      Unplaced $ 
+                                      Var genVarName ParamOut flowType,
+                                      genVar])
                   pos]) pos
+        _ -> shouldnt "Generator expression producing unexpected vars"
 flattenStmt' Nop pos = emit pos Nop
 flattenStmt' Break pos = emit pos Break
 flattenStmt' Next pos = emit pos Next
@@ -284,28 +292,36 @@ flattenExp exp@(StringValue a) pos =
     return $ [maybePlace exp pos]
 flattenExp exp@(CharValue a) pos =
     return $ [maybePlace exp pos]
-flattenExp exp@(Var name dir) pos = do
+flattenExp exp@(Var name dir flowType) pos = do
+    let isIn  = flowsIn dir
+    let isOut = flowsOut dir
+    let flowType' = if isIn && isOut then HalfUpdate else flowType
     defd <- gets (Set.member name . defdVars)
-    if (dir == ParamIn && (not defd)) 
+    if (dir == ParamIn && (not defd))
       then -- Reference to an undefined variable: assume it's meant to be
            -- a niladic function instead of a variable reference
         flattenCall (ProcCall [] name) pos []
       else do
         noteVarMention name dir
         return $ 
-            (if flowsIn dir then [maybePlace (Var name ParamIn) pos] else []) ++
-            (if flowsOut dir then [maybePlace (Var name ParamOut) pos] else [])
+            (if isIn
+             then [maybePlace (Var name ParamIn flowType') pos] 
+             else []) ++
+            (if isOut
+             then [maybePlace (Var name ParamOut flowType') pos] 
+             else [])
 flattenExp (Where stmts pexp) _ = do
     flattenStmts stmts
     flattenPExp pexp
 flattenExp (CondExp cond thn els) pos = do
     resultName <- tempVar
+    let flowType = Implicit pos
     flattenStmt (Cond [] cond
                  [Unplaced $ ProcCall [] "=" 
-                  [Unplaced $ Var resultName ParamOut,thn]]
+                  [Unplaced $ Var resultName ParamOut flowType,thn]]
                  [Unplaced $ ProcCall [] "=" 
-                  [Unplaced $ Var resultName ParamOut,els]]) pos
-    return $ [Unplaced $ Var resultName ParamIn]
+                  [Unplaced $ Var resultName ParamOut flowType,els]]) pos
+    return $ [Unplaced $ Var resultName ParamIn flowType]
 flattenExp (Fncall maybeMod name exps) pos = do
     flattenCall (ProcCall maybeMod name) pos exps
 flattenExp (ForeignFn lang name flags exps) pos = do
@@ -339,21 +355,27 @@ flattenCall stmtBuilder pos exps = do
     -- liftIO $ putStrLn $ "** defines:  " ++ show defs'
     -- liftIO $ putStrLn $ "** uses   :  " ++ show uses'
     -- liftIO $ putStrLn $ "** in = " ++ show isIn ++ "; out = " ++ show isOut
+    let flowType = Implicit pos
     when isIn $ 
-      emit pos $ stmtBuilder $ exps'' ++ [Unplaced $ Var resultName ParamOut]
+      emit pos $ stmtBuilder $ 
+      exps'' ++ [Unplaced $ Var resultName ParamOut flowType]
     when isOut $ 
-      postpone pos $ stmtBuilder $ exps' ++ [Unplaced $ Var resultName ParamIn]
+      postpone pos $ stmtBuilder $ 
+      exps' ++ [Unplaced $ Var resultName ParamIn flowType]
     return $
-      (if isIn then [Unplaced $ Var resultName ParamIn] else []) ++
-      (if isOut then [Unplaced $ Var resultName ParamOut] else [])
+      (if isIn then [Unplaced $ Var resultName ParamIn flowType] else []) ++
+      (if isOut then [Unplaced $ Var resultName ParamOut flowType] else [])
 
 
 isInExp :: Exp -> Bool
-isInExp (Var _ dir) = flowsIn dir
+isInExp (Var _ dir _) = flowsIn dir
 isInExp _ = True
 
 flattenParam :: Param -> [Param]
-flattenParam (Param name typ dir) =
-    (if flowsIn dir then [Param name typ ParamIn] else []) ++
-    (if flowsOut dir then [Param name typ ParamOut] else [])
+flattenParam (Param name typ dir flowType) =
+    let isIn  = flowsIn dir
+        isOut = flowsOut dir
+        flowType' = if isIn && isOut then HalfUpdate else flowType
+    in  (if isIn then [Param name typ ParamIn flowType'] else []) ++
+        (if isOut then [Param name typ ParamOut flowType'] else [])
     

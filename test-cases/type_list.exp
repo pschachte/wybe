@@ -68,12 +68,12 @@ public proc [|](head:0:int, tail:0:intlist, ?$:0:intlist) (id 0):
     foreign $ mutate("intlist":string, "[|]":string, "head":string, $rec:0, ?$rec:1, head:0:int)
     foreign $ mutate("intlist":string, "[|]":string, "tail":string, $rec:1, ?$:0:intlist, tail:0:intlist)
                     head:
-public proc head($rec:0:intlist, ?$:0:int) (id 0): 
+public proc head($rec:0:intlist, ?$:0:int) (id 0):  @type_list:3:12
     foreign $ access("intlist":string, "[|]":string, "head":string, $rec:0:intlist, ?$:0:int)
-public proc head($rec:0:intlist, ?$rec:1:intlist, $field:0:int) (id 1): 
+public proc head($rec:0:intlist, ?$rec:1:intlist, $field:0:int) (id 1):  @type_list:3:12
     foreign $ mutate("intlist":string, "[|]":string, "head":string, $rec:0:intlist, ?$rec:1:intlist, $field:0:int)
                     tail:
-public proc tail($rec:0:intlist, ?$:0:intlist) (id 0): 
+public proc tail($rec:0:intlist, ?$:0:intlist) (id 0):  @type_list:3:12
     foreign $ access("intlist":string, "[|]":string, "tail":string, $rec:0:intlist, ?$:0:intlist)
-public proc tail($rec:0:intlist, ?$rec:1:intlist, $field:0:intlist) (id 1): 
+public proc tail($rec:0:intlist, ?$rec:1:intlist, $field:0:intlist) (id 1):  @type_list:3:12
     foreign $ mutate("intlist":string, "[|]":string, "tail":string, $rec:0:intlist, ?$rec:1:intlist, $field:0:intlist)

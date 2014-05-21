@@ -257,7 +257,7 @@ typecheckProcDecl :: ModSpec -> [ModSpec] -> ProcDef ->
 typecheckProcDecl m mods pd@(ProcDef name proto@(PrimProto pn params) 
                          def pos tmpCnt vis) 
   = do
-    let typing = List.foldr (addDeclaredType name pos)
+    let typing = List.foldr (addDeclaredType name pos params)
                  initTyping $ zip params [1..]
     if validTyping typing
       then do
@@ -283,9 +283,13 @@ typecheckProcDecl m mods pd@(ProcDef name proto@(PrimProto pn params)
         shouldnt $ "Inconsistent param typing for proc " ++ name
 
 
-addDeclaredType :: ProcName -> OptPos -> (PrimParam,Int) -> Typing -> Typing
-addDeclaredType procname pos (PrimParam name typ _ _,argNum) typs =
-     addOneType (ReasonParam procname argNum pos) name typ typs
+addDeclaredType :: ProcName -> OptPos -> [PrimParam] -> (PrimParam,Int) -> 
+                   Typing -> Typing
+addDeclaredType procname pos params (PrimParam name typ _ _,argNum) typs =
+     addOneType 
+     (ReasonParam procname (listArity primParamFlowType primParamFlow params)
+      pos) 
+     name typ typs
 
 
 updateParamTypes :: Typing -> [PrimParam] -> [PrimParam]
@@ -415,13 +419,15 @@ typecheckPrim m mods caller call@(PrimCall cm name id args) pos typing = do
                               --        show params
                               if length params == length args
                                 then return $ 
-                                     [List.foldr (typecheckArg pos $ 
+                                     [List.foldr (typecheckArg pos params $
                                                   procSpecName p)
                                       typing $ zip3 [1..] params args]
                                 else
                                   return [InvalidTyping $ 
                                           ReasonArity caller name pos
-                                          (length args) (length params)])
+                                          (listArity argFlowType argFlow args)
+                                          (listArity primParamFlowType 
+                                           primParamFlow params)])
                    procs
         let typList' = concat typList
         let typList'' = List.filter validTyping typList'
@@ -448,23 +454,22 @@ typecheckPrim _ _ _ (PrimForeign lang name id args) pos typing = do
 typecheckPrim _ _ _ PrimNop pos typing = return [typing]
 
 
--- argType :: Typing -> PrimArg -> TypeSpec
--- argType (ValidTyping dict) (ArgVar (PrimVarName var _) typ _ _) = 
---     fromMaybe typ (Map.lookup var dict)
--- argType _ (ArgVar _ typ _ _) = typ
--- argType _ (ArgInt _ _)     = (TypeSpec ["wybe"] "int" [])
--- argType _ (ArgFloat _ _)   = (TypeSpec ["wybe"] "float" [])
--- argType _ (ArgString _ _)  = (TypeSpec ["wybe"] "string" [])
--- argType _ (ArgChar _ _)    = (TypeSpec ["wybe"] "char" [])
+argFlowType (ArgVar _ _ _ ft _) = ft
+argFlowType _ = Ordinary
+
+argFlow (ArgVar _ _ flow _ _) = flow
+argFlow _ = FlowIn
 
 
-typecheckArg :: OptPos -> ProcName -> (Int,PrimParam,PrimArg) ->
-                Typing -> Typing
-typecheckArg pos pname (argNum,param,arg) typing =
+typecheckArg :: OptPos -> [PrimParam] -> ProcName ->
+                (Int,PrimParam,PrimArg) -> Typing -> Typing
+typecheckArg pos params pname (argNum,param,arg) typing =
     let actualFlow = argFlowDirection arg
         formalFlow = primParamFlow param
-        reasonType = ReasonArgType pname argNum pos
-        reasonFlow = ReasonArgFlow pname argNum pos
+        argNum' = listArity primParamFlowType primParamFlow $
+                  take argNum params
+        reasonType = ReasonArgType pname argNum' pos
+        reasonFlow = ReasonArgFlow pname argNum' pos
     in  if not $ validTyping typing
         then typing
         else if formalFlow /= actualFlow
@@ -475,7 +480,7 @@ typecheckArg pos pname (argNum,param,arg) typing =
 
 
 typecheckArg' :: PrimArg -> TypeSpec -> Typing -> TypeReason -> Typing
-typecheckArg' (ArgVar var decType flow ftype) paramType typing reason =
+typecheckArg' (ArgVar var decType flow ftype _) paramType typing reason =
 -- XXX should out flow typing be contravariant?
     if --trace (if paramType `subtypeOf` decType || paramType == Unspecified
        --       then "" 
@@ -545,6 +550,11 @@ firstJust (j@(Just _):_) = j
 firstJust (Nothing:rest) = firstJust rest
 
 
+listArity :: (t -> ArgFlowType) -> (t -> PrimFlow) -> [t] -> Int
+listArity toFType toDirection lst =
+    sum $ [if toFType e == HalfUpdate && toDirection e == FlowOut then 0 else 1 
+          | e <- lst]
+
 
 applyBodyTyping :: Map VarName TypeSpec -> ProcBody -> Compiler ProcBody
 applyBodyTyping dict (ProcBody prims fork) = do
@@ -597,8 +607,8 @@ applyPrimTyping dict (PrimNop) = return PrimNop
 
 
 applyArgTyping :: Map VarName TypeSpec -> PrimArg -> PrimArg
-applyArgTyping dict (ArgVar var@(PrimVarName nm _) typ flow ftype) =
-    ArgVar var (fromMaybe typ $ Map.lookup nm dict) flow ftype
+applyArgTyping dict (ArgVar var@(PrimVarName nm _) typ flow ftype final) =
+    ArgVar var (fromMaybe typ $ Map.lookup nm dict) flow ftype final
 -- XXX the module for these types should be ["wybe"]
 applyArgTyping dict (ArgInt val _) = ArgInt val (TypeSpec [] "int" [])
 applyArgTyping dict (ArgFloat val _) = ArgFloat val (TypeSpec [] "float" [])

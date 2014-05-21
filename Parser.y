@@ -202,7 +202,7 @@ RevParams :: { [Param] }
     | RevParams ',' Param       { $3 : $1 }
 
 Param :: { Param }
-    : ident OptType             { Param (identName $1) $2 ParamIn }
+    : ident OptType             { Param (identName $1) $2 ParamIn Ordinary }
 
 OptProcParamList :: { [Param] }
     : {- empty -}               { [] }
@@ -218,7 +218,7 @@ RevProcParams :: { [Param] }
 
 ProcParam :: { Param }
     : FlowDirection ident OptType
-                                { Param (identName $2) $3 $1 }
+                                { Param (identName $2) $3 $1 Ordinary}
 
 FlowDirection :: { FlowDirection }
     : {- empty -}               { ParamIn }
@@ -361,9 +361,10 @@ SimpleExp :: { Placed Exp }
 	                                 (tokenPosition $1) }
     | bstring                   { Placed (StringValue $ stringValue $1)
 	                                 (tokenPosition $1) }
-    | '?' ident                 { Placed (Var (identName $2) ParamOut)
+    | '?' ident                 { Placed (Var (identName $2) ParamOut Ordinary)
 	                                 (tokenPosition $1) }
-    | '!' ident                 { Placed (Var (identName $2) ParamInOut)
+    | '!' ident                 { Placed (Var (identName $2) 
+					  ParamInOut Ordinary)
 	                                 (tokenPosition $1) }
     | '[' ']'                   { Placed (Fncall [] "[]" [])
 	                                 (tokenPosition $1) }
@@ -385,7 +386,7 @@ Exp :: { Placed Exp }
 
 
 StmtExp :: { Placed Exp }
-    : ident                     { Placed (Var (identName $1) ParamIn)
+    : ident                     { Placed (Var (identName $1) ParamIn Ordinary)
 	                                 (tokenPosition $1) }
     | Exp '=' Exp               { maybePlace (Fncall [] (symbolName $2)
                                               [$1, $3])

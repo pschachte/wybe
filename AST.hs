@@ -843,7 +843,6 @@ data ProcDef = ProcDef {
     procName :: Ident, 
     procProto :: PrimProto, 
     procBody :: ProcBody,
---    procBody :: [[Placed Prim]],      -- list of clauses, each a list of Prims
     procPos :: OptPos,
     procTmpCount :: Int,              -- the next temp variable number to use
     procVis :: Visibility
@@ -929,7 +928,8 @@ data ProcProto = ProcProto {
 data Param = Param {
     paramName:: VarName, 
     paramType::TypeSpec, 
-    paramFlow::FlowDirection
+    paramFlow::FlowDirection,
+    paramFlowType::ArgFlowType
     } deriving Eq
 
 -- |A dataflow direction:  in, out, both, or neither.
@@ -979,7 +979,7 @@ data Exp
       | FloatValue Double
       | StringValue String
       | CharValue Char
-      | Var VarName FlowDirection
+      | Var VarName FlowDirection ArgFlowType
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
       | Fncall ModSpec Ident [Placed Exp]
@@ -1040,7 +1040,9 @@ instance Show Prim where
 -- |The allowed arguments in primitive proc or foreign proc calls, 
 --  just variables and constants.
 data PrimArg 
-     = ArgVar PrimVarName TypeSpec PrimFlow ArgFlowType
+     = ArgVar PrimVarName TypeSpec PrimFlow ArgFlowType Bool 
+       -- ^Bool indicates definite last use (one use in the last 
+       --  statement to use the variable) 
      | ArgInt Integer TypeSpec
      | ArgFloat Double TypeSpec
      | ArgString String TypeSpec
@@ -1048,12 +1050,15 @@ data PrimArg
      deriving Eq
 
 -- |Relates a primitive argument to the corresponding source argument
-data ArgFlowType = Ordinary | FirstHalf | SecondHalf | Implicit
+data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
+                 | HalfUpdate      -- ^One half of a variable update (!var)
+                 | Implicit OptPos -- ^Temp var for expression at that position
      deriving (Eq, Show)
+
 
 -- |The dataflow direction of an actual argument.
 argFlowDirection :: PrimArg -> PrimFlow
-argFlowDirection (ArgVar _ _ flow _) = flow
+argFlowDirection (ArgVar _ _ flow _ _) = flow
 argFlowDirection (ArgInt _ _) = FlowIn
 argFlowDirection (ArgFloat _ _) = FlowIn
 argFlowDirection (ArgString _ _) = FlowIn
@@ -1061,7 +1066,7 @@ argFlowDirection (ArgChar _ _) = FlowIn
 
 
 argType :: PrimArg -> TypeSpec
-argType (ArgVar _ typ _ _) = typ
+argType (ArgVar _ typ _ _ _) = typ
 argType (ArgInt _ typ) = typ
 argType (ArgFloat _ typ) = typ
 argType (ArgString _ typ) = typ
@@ -1074,7 +1079,7 @@ expToStmt :: Exp -> Stmt
 expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name args
 expToStmt (ForeignFn lang name flags args) = 
   ForeignCall lang name flags args
-expToStmt (Var name ParamIn) = ProcCall [] name []
+expToStmt (Var name ParamIn _) = ProcCall [] name []
 expToStmt exp = shouldnt $ "non-Fncall expr " ++ show exp
 
 
@@ -1100,7 +1105,7 @@ varsInPrimArgs dir args =
     List.foldr Set.union Set.empty $ List.map (varsInPrimArg dir) args
 
 varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
-varsInPrimArg dir (ArgVar var _ dir' _) = 
+varsInPrimArg dir (ArgVar var _ dir' _ _) = 
   if dir == dir' then Set.singleton var else Set.empty
 varsInPrimArg _ (ArgInt _ _)            = Set.empty
 varsInPrimArg _ (ArgFloat _ _)          = Set.empty
@@ -1329,7 +1334,7 @@ instance Show ProcProto where
 
 -- |How to show a formal parameter.
 instance Show Param where
-  show (Param name typ dir) =
+  show (Param name typ dir _) =
     flowPrefix dir ++ name ++ showTypeSuffix typ
 
 showTypeSuffix :: TypeSpec -> String
@@ -1432,12 +1437,13 @@ showBody indent stmts =
 
 -- |Show a primitive argument.
 instance Show PrimArg where
-  show (ArgVar name typ dir _) = 
+  show (ArgVar name typ dir _ _) = 
       primFlowPrefix dir ++ show name ++ showTypeSuffix typ
   show (ArgInt i typ)    = show i ++ showTypeSuffix typ
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ
   show (ArgString s typ) = show s ++ showTypeSuffix typ
   show (ArgChar c typ)   = show c ++ showTypeSuffix typ
+
 
 -- |Show a single typed expression.
 -- |Show a single expression.
@@ -1446,7 +1452,7 @@ instance Show Exp where
   show (FloatValue f) = show f
   show (StringValue s) = show s
   show (CharValue c) = show c
-  show (Var name dir) = (flowPrefix dir) ++ name
+  show (Var name dir _) = (flowPrefix dir) ++ name
   show (Where stmts exp) = show exp ++ " where\n" ++ showBody 8 stmts
   show (CondExp cond thn els) = 
     "if\n" ++ show cond ++ "then " ++ show thn ++ " else " ++ show els

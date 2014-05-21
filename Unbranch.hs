@@ -298,7 +298,7 @@ unbranchStmt (Next) pos stmts = do
 inputParamNames :: [Param] -> Set VarName
 inputParamNames params =
     List.foldr 
-    (\(Param v _ dir) set -> if flowsIn dir then Set.insert v set else set)
+    (\(Param v _ dir _) set -> if flowsIn dir then Set.insert v set else set)
     Set.empty params    
 
 
@@ -319,7 +319,7 @@ defArg = ifIsVarDef defVar (return ())
 --  otherwise just take the second argument.
 ifIsVarDef :: (VarName -> t) -> t -> Exp -> t
 ifIsVarDef f v (Typed exp _) = ifIsVarDef f v exp
-ifIsVarDef f v (Var name dir) =
+ifIsVarDef f v (Var name dir _) =
     if flowsOut dir then f name else v
 ifIsVarDef f v _ = v
 
@@ -340,16 +340,18 @@ factorFreshProc procName inVars outVars pos body = do
 newProcCall :: ProcName -> Set VarName -> Set VarName -> OptPos -> 
                Unbrancher (Placed Stmt)
 newProcCall name inVars outVars pos = do
-    let inArgs  = [Unplaced $ Var v ParamIn | v <- Set.elems inVars] 
-    let outArgs = [Unplaced $ Var v ParamOut | v <- Set.elems outVars]
+    let inArgs  = [Unplaced $ Var v ParamIn Ordinary | v <- Set.elems inVars] 
+    let outArgs = [Unplaced $ Var v ParamOut Ordinary | v <- Set.elems outVars]
     currMod <- lift getModuleSpec
     return $ maybePlace (ProcCall currMod name (inArgs ++ outArgs)) pos
 
 
 newProcProto :: ProcName -> Set VarName -> Set VarName -> ProcProto
 newProcProto name inVars outVars =
-    let inParams  = [Param v Unspecified ParamIn | v <- Set.elems inVars]
-        outParams = [Param v Unspecified ParamOut | v <- Set.elems outVars]
+    let inParams  = [Param v Unspecified ParamIn Ordinary
+                    | v <- Set.elems inVars]
+        outParams = [Param v Unspecified ParamOut Ordinary
+                    | v <- Set.elems outVars]
     in  ProcProto name $ inParams ++ outParams
 
 
