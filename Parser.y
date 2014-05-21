@@ -70,9 +70,9 @@ import AST
       'when'          { TokIdent "when" _ }
       'unless'        { TokIdent "unless" _ }
       'from'          { TokIdent "from" _ }
-      'and'           { TokIdent "and" _ }
-      'or'            { TokIdent "or" _ }
-      'not'           { TokIdent "not" _ }
+--      'and'           { TokIdent "and" _ }
+--      'or'            { TokIdent "or" _ }
+--      'not'           { TokIdent "not" _ }
       'foreign'       { TokIdent "foreign" _ }
       'mod'           { TokIdent "mod" _ }
       ident           { TokIdent _ _ }
@@ -178,7 +178,7 @@ Symbol :: { Token }
     | '=='                      { $1 }
     | '/='                      { $1 }
     | '|'                       { $1 }
--- XXX this doesn't work:
+-- XXX this does not work:
 --    | '..'                      { $1 }
     | '[' ']'                   { TokSymbol "[]"  (tokenPosition $1) }
     | '[' '|' ']'               { TokSymbol "[|]" (tokenPosition $1) }
@@ -337,17 +337,17 @@ SimpleExp :: { Placed Exp }
     | Exp '/=' Exp              { maybePlace (Fncall [] (symbolName $2)
                                               [$1, $3])
                                              (place $1) }
-    | 'not' Exp                 { Placed (Fncall [] (identName $1) [$2])
-	                                 (tokenPosition $1) }
-    | Exp 'and' Exp             { maybePlace (Fncall [] (identName $2)
-                                              [$1, $3])
-	                                     (place $1) }
-    | Exp 'or' Exp              { maybePlace (Fncall [] (identName $2)
-                                              [$1, $3])
-                                             (place $1) }
-    | Exp '..' Exp              { maybePlace (Fncall [] (symbolName $2) 
-					      [$1, $3, Unplaced $ IntValue 1])
-                                             (place $1) }
+--    | 'not' Exp                 { Placed (Fncall [] (identName $1) [$2])
+--	                                 (tokenPosition $1) }
+--    | Exp 'and' Exp             { maybePlace (Fncall [] (identName $2)
+--                                              [$1, $3])
+--	                                     (place $1) }
+--    | Exp 'or' Exp              { maybePlace (Fncall [] (identName $2)
+--                                              [$1, $3])
+--                                             (place $1) }
+--    | Exp '..' Exp              { maybePlace (Fncall [] (symbolName $2) 
+--					      [$1, $3, Unplaced $ IntValue 1])
+--                                             (place $1) }
     | '(' Exp ')'               { Placed (content $2) (tokenPosition $1) }
     | '-' Exp %prec NEG         { Placed (Fncall [] "-" [$2])
 	                                 (tokenPosition $1) }
@@ -398,9 +398,9 @@ StmtExp :: { Placed Exp }
 	                                     (place $1) }
     | symbol ArgList            { Placed (Fncall [] (symbolName $1) $2)
 	                                 (tokenPosition $1) }
-    | 'foreign' ident ident flags ArgList
+    | 'foreign' ident FuncProcName flags ArgList
                                 { Placed (ForeignFn (identName $2)
-					  (identName $3) $4 $5)
+					  $3 $4 $5)
                                          (tokenPosition $1) }
 
 flags :: { [Ident] }

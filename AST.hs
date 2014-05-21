@@ -1075,7 +1075,7 @@ expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name args
 expToStmt (ForeignFn lang name flags args) = 
   ForeignCall lang name flags args
 expToStmt (Var name ParamIn) = ProcCall [] name []
-expToStmt exp = error $ "Internal error: non-Fncall expr " ++ show exp
+expToStmt exp = shouldnt $ "non-Fncall expr " ++ show exp
 
 
 ----------------------------------------------------------------

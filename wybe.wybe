@@ -52,9 +52,9 @@ public type bool is
     public ctor false
     public ctor true
     # These are syntax errors because they are operators:
-    # public func and(p:bool, q:bool):bool = foreign llvm and(p,q)
-    # public func or(p:bool, q:bool):bool = foreign llvm or(p,q)
-    # public func not(p:bool):bool = foreign xor(p,1)
+    public func and(p:bool, q:bool):bool = foreign llvm and(p,q)
+    public func or(p:bool, q:bool):bool = foreign llvm or(p,q)
+    public func not(p:bool):bool = foreign llvm xor(p,1)
     public proc =(?y:bool, x:bool) foreign llvm move(x, ?y) end
     public proc =(x:bool, ?y:bool) foreign llvm move(x, ?y) end
     public func =(x:bool, y:bool):bool = foreign llvm icmp eq(1,x,y)
