@@ -1,13 +1,20 @@
-Bug fixing:
+Fix bugs:
 o Ensure every variable gets a type
-o Fix bug in typing proc_beer, proc_yorn, proc_yorn2
-o Fix bug in type_list
+o Propagate types down to generated procs
+o Allow use of !var where ?var is expected
 
-Completing the implementation
+
+Complete the implementation:
 o Fix algebraic type implementation to use tags
-o Code generation   
+o Code generation
 
-Completing the language
+
+Improve error handling:
+o Attach expression reference to generated variables for use in error messages
+o Give meaningful message for errors detected in generated procs
+
+
+Complete the language:
 o Implement resources
 o Support polymorphism
 o Support subtypes
@@ -15,11 +22,11 @@ o Support higher-order programming
 o Support declared laziness
 o Support optional and named arguments
 
-Optimisation:
+
+Optimise:
 o Remove unneeded input and unchanged output arguments
 o Inline trivial procs
 o Inline local procs with only one call
 o Common sub-expression elimination
 o Constant folding
 o Destructive update transformation (CTGC)
-
