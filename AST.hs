@@ -648,7 +648,7 @@ callTargets modspec name = do
                               case Map.lookup name $ modProcs imp of
                                 Nothing -> (shouldnt $ "missing proc " ++ name)
                                 Just defs ->
-                                    return [ProcSpec modspec name i |
+                                    return [ProcSpec m name i |
                                             i <- [0..length defs - 1]])
                 mods
     return $ nub $ concat listlist
