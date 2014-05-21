@@ -1,37 +1,33 @@
-
  Module proc_beer
   public submods  : 
   public types    : 
   public resources: 
   public procs    : proc_beer.print2<0>
-  imports         : 
+  imports         : import wybe 
   types           : 
   resources       : 
   procs           : gen$1:
-proc gen$1(tmp$0:0:?, tmp$2:0:?, tmp$3:0:?, x:0:?, y:0:?, ?tmp$0:0:?, ?tmp$2:0:?, ?tmp$3:0:?, ?x:0:?, ?y:0:?) (id 0): 
+proc gen$1(count:0:?, ?count:0:?) (id 0): 
                     gen$2:
-proc gen$2(tmp$0:0:?, tmp$2:0:?, tmp$3:0:?, x:0:?, y:0:?, ?tmp$0:1:?, ?tmp$2:1:?, ?tmp$3:1:?, ?x:1:?, ?y:1:?) (id 0): 
-    proc_beer.gen$3(tmp$0:0, tmp$2:0, tmp$3:0, x:0, y:0, ?tmp$0:1, ?tmp$2:1, ?tmp$3:1, ?x:1, ?y:1) @proc_beer:2:12
+proc gen$2(count:0:int, ?count:1:int) (id 0): 
+    proc_beer.gen$3<0>(count:0:int, ?count:1:int) @proc_beer:5:9
                     gen$3:
-proc gen$3(tmp$0:0:?, tmp$2:0:?, tmp$3:0:?, x:0:?, y:0:?, ?tmp$0:2:?, ?tmp$2:1:?, ?tmp$3:1:?, ?x:1:?, ?y:1:?) (id 0): 
-    begin guard 1
-        in(?count:0, tmp$0:0, ?tmp$0:1) @proc_beer:2:12
-    end guard 
-    proc_beer.gen$4(count:0, tmp$0:1, tmp$2:0, tmp$3:0, x:0, y:0, ?count:1, ?tmp$0:2, ?tmp$1:0, ?tmp$2:1, ?tmp$3:1, ?x:1, ?y:1)
+proc gen$3(count:0:int, ?count:1:int) (id 0): 
+    wybe.int.>=<0>(count:0:int, 0:int, ?tmp$0:0:bool) @proc_beer:5:15
+    case tmp$0:0 of
+    0:
+        proc_beer.gen$1<0>(count:0:int, ?count:1:int)
 
-    begin guard 0
-        in(?count:0, tmp$0:0, ?tmp$0:2) @proc_beer:2:12
-    end guard 
-    proc_beer.gen$1(tmp$0:0, tmp$2:0, tmp$3:0, x:0, y:0, ?tmp$0:2, ?tmp$2:1, ?tmp$3:1, ?x:1, ?y:1)
+    1:
+        proc_beer.gen$4<0>(count:0:int, tmp$0:0:bool, ?count:1:int, ?tmp$0:1:bool, ?tmp$1:0:int)
+
                     gen$4:
-proc gen$4(count:0:?, tmp$0:0:?, tmp$2:0:?, tmp$3:0:?, x:0:?, y:0:?, ?count:0:?, ?tmp$0:1:?, ?tmp$1:0:?, ?tmp$2:1:?, ?tmp$3:1:?, ?x:1:?, ?y:1:?) (id 0): 
-    ++(count:0, " bottles of beer on the wall", ?tmp$1:0) @proc_beer:3:20
-    println(tmp$1:0) @proc_beer:3:12
-    proc_beer.gen$2(tmp$0:0, tmp$2:0, tmp$3:0, x:0, y:0, ?tmp$0:1, ?tmp$2:1, ?tmp$3:1, ?x:1, ?y:1) @proc_beer:2:9
+proc gen$4(count:0:int, tmp$0:0:?, ?count:2:int, ?tmp$0:0:?, ?tmp$1:0:int) (id 0): 
+    wybe.io.print<0>(count:0:int) @proc_beer:6:9
+    wybe.io.println<3>(" bottles of beer on the wall":string) @proc_beer:7:9
+    wybe.int.-<0>(count:0:int, 1:int, ?tmp$1:0:int) @proc_beer:8:18
+    proc_beer.gen$2<0>(tmp$1:0:int, ?count:2:int) @proc_beer:5:5
                     print2:
-public proc print2(x:0:int, y:0:int) (id 0):  @proc_beer:1:8
-    Negate(1, ?tmp$3:0) @proc_beer:2:37
-    range(99, 0, tmp$3:0, ?tmp$2:0) @proc_beer:2:26
-    init_seq(tmp$2:0, ?tmp$0:0) @proc_beer:2:12
-    proc_beer.gen$2(tmp$0:0, tmp$2:0, tmp$3:0, x:0, y:0, ?tmp$0:1, ?tmp$2:1, ?tmp$3:1, ?x:1, ?y:1) @proc_beer:2:9
-
+public proc print2() (id 0):  @proc_beer:1:8
+    wybe.int.=<0>(?count:0:int, 99:int) @proc_beer:4:5
+    proc_beer.gen$2<0>(count:0:int, ?count:1:int) @proc_beer:5:5
