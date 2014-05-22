@@ -7,5 +7,5 @@
   types           : 
   resources       : 
   procs           : double:
-public proc double(a:0:int, ?$:0:int) (id 0):  @func_no_types:1:8
-    wybe.int.*<0>(a:0:int, 2:int, ?$:0:int) @func_no_types:1:25
+public proc double(a:0:int, ?~$:0:int) (id 0):  @func_no_types:1:8
+    wybe.int.*<0>(a:0:int, 2:int, ?~$:0:int) @func_no_types:1:25

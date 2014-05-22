@@ -13,12 +13,12 @@ proc gen$2(prompt:0:string, ?prompt:1:string, ?response:1:char, ?result:1:bool, 
     wybe.io.print<3>(prompt:0:string) @proc_yorn2:2:9
     wybe.io.print<3>(" (y/n) ":string) @proc_yorn2:3:9
     wybe.io.read<2>(?response:0:char) @proc_yorn2:4:9
-    wybe.char.=<2>(response:0:char, 'Y':char, ?tmp$0:0:bool) @proc_yorn2:5:19
+    wybe.char.=<2>(response:0:char, 'Y':char, ?~tmp$0:0:bool) @proc_yorn2:5:19
     proc_yorn2.gen$3<0>(prompt:0:string, response:0:char, tmp$0:0:bool, tmp$0:0:bool, ?prompt:1:string, ?response:1:char, ?result:1:bool, ?tmp$0:1:bool) @proc_yorn2:6:9
                     gen$3:
 proc gen$3(prompt:0:string, response:0:char, result:0:bool, tmp$0:0:bool, ?prompt:1:string, ?response:1:char, ?result:1:bool, ?tmp$0:1:bool) (id 0): 
-    wybe.char.=<2>(response:0:char, 'N':char, ?tmp$2:0:bool) @proc_yorn2:6:26
-    wybe.bool.or<0>(result:0:bool, tmp$2:0:bool, ?tmp$1:0:bool) @proc_yorn2:6:15
+    wybe.char.=<2>(response:0:char, 'N':char, ?~tmp$2:0:bool) @proc_yorn2:6:26
+    wybe.bool.or<0>(result:0:bool, ~tmp$2:0:bool, ?~tmp$1:0:bool) @proc_yorn2:6:15
     case tmp$1:0 of
     0:
         proc_yorn2.gen$4<0>(prompt:0:string, response:0:char, result:0:bool, tmp$0:0:bool, ?prompt:1:string, ?response:1:char, ?result:1:bool, ?tmp$0:1:bool)

@@ -17,8 +17,8 @@ proc gen$2(?c:1:char) (id 0):
     simple_loop.gen$3<0>(c:0:char, ?c:1:char) @simple_loop:2:4
                     gen$3:
 proc gen$3(c:0:char, ?c:1:char) (id 0): 
-    wybe.io.eof<0>(?tmp$1:0:char) @simple_loop:2:16
-    wybe.char./=<0>(c:0:char, tmp$1:0:char, ?tmp$0:0:bool) @simple_loop:2:10
+    wybe.io.eof<0>(?~tmp$1:0:char) @simple_loop:2:16
+    wybe.char./=<0>(c:0:char, ~tmp$1:0:char, ?~tmp$0:0:bool) @simple_loop:2:10
     case tmp$0:0 of
     0:
         simple_loop.gen$1<0>(c:0:char, ?c:1:char)

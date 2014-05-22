@@ -1,21 +1,19 @@
-
  Module update
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : update.second<1>
-                    update.second<0>
+  public procs    : update.inc2<1>
+                    update.inc2<0>
   imports         : import wybe 
   types           : 
   resources       : 
-  procs           : second:
-public proc second(x:0:list(t), ?$:0:t) (id 0):  @update:1:8
-    tail(x:0, ?tmp$1:0) @update:1:35
-    head(tmp$1:0, ?$:0) @update:1:35
-public proc second(x:0:list(t), ?x:1:list(t), y:0:t) (id 1):  @update:3:8
-    tail(x:0, ?tmp$1:0) @update:4:5
-    head(tmp$1:0, ?tmp$0:0) @update:4:5
-    =(tmp$0:0, ?tmp$0:1, y:0) @update:4:5
-    head(tmp$1:0, ?tmp$1:1, tmp$0:1) @update:4:5
-    tail(x:0, ?x:1, tmp$1:1) @update:4:5
-
+  procs           : inc2:
+public proc inc2(x:0:int, ?~$:0:int) (id 0):  @update:1:8
+    wybe.int.+<0>(x:0:int, 1:int, ?~tmp$1:0:int) @update:1:23
+    wybe.int.+<0>(~tmp$1:0:int, 1:int, ?~$:0:int) @update:1:23
+public proc inc2(%x:0:int, ?%x:1:int, y:0:int) (id 1):  @update:3:8
+    wybe.int.+<0>(%x:0:int, 1:int, ?%tmp$1:0:int) @update:5:6
+    wybe.int.+<0>(%tmp$1:0:int, 1:int, ?%tmp$0:0:int) @update:5:5
+    wybe.int.=<0>(?%tmp$0:1:int, y:0:int) @update:5:5
+    wybe.int.+<1>(?%tmp$1:1:int, 1:int, %tmp$0:1:int) @update:5:5
+    wybe.int.+<1>(?%x:1:int, 1:int, %tmp$1:1:int) @update:5:6

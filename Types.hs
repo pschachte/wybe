@@ -8,6 +8,7 @@
 module Types (typeCheckModSCC) where
 
 import AST
+import Util
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
@@ -413,21 +414,25 @@ typecheckPrim m mods caller call@(PrimCall cm name id args) pos typing = do
       else do
         typList <- mapM (\p -> do
                               params <- getParams p
-                              -- liftIO $ putStrLn $ "   checking call to " ++
+                              -- liftIO $ putStr $ "   checking call to " ++
                               --        show p ++ " args " ++
                               --        show args ++ " against params " ++
-                              --        show params
-                              if length params == length args
-                                then return $ 
-                                     [List.foldr (typecheckArg pos params $
-                                                  procSpecName p)
-                                      typing $ zip3 [1..] params args]
-                                else
-                                  return [InvalidTyping $ 
-                                          ReasonArity caller name pos
-                                          (listArity argFlowType argFlow args)
-                                          (listArity primParamFlowType 
-                                           primParamFlow params)])
+                              --        show params ++ "..."
+                              case reconcileArgFlows params args of
+                                  Just args' -> do
+                                      -- liftIO $ putStrLn "MATCHES"
+                                      return $ 
+                                         [List.foldr (typecheckArg pos params $
+                                                      procSpecName p)
+                                          typing $ zip3 [1..] params args']
+                                  Nothing -> do
+                                      -- liftIO $ putStrLn "fails"
+                                      return [InvalidTyping $ 
+                                              ReasonArity caller name pos
+                                              (listArity argFlowType 
+                                               argFlow args)
+                                              (listArity primParamFlowType 
+                                               primParamFlow params)])
                    procs
         let typList' = concat typList
         let typList'' = List.filter validTyping typList'
@@ -459,6 +464,33 @@ argFlowType _ = Ordinary
 
 argFlow (ArgVar _ _ flow _ _) = flow
 argFlow _ = FlowIn
+
+
+-- |Match up params to args based only on flow, returning Nothing if 
+--  they don't match, and Just a possibly updated arglist if they 
+--  do.  The purpose is to handle passing an in-out argument pair 
+--  where only an output is expected.  This is permitted, and the 
+--  input half is just ignored.  This means the following 
+--  combinations of parameter/argument flow are OK:
+--      FlowIn  / FlowIn
+--      FlowOut / FlowOut
+--      FlowOut / FlowIn (Half) FlowOut (Half)
+
+reconcileArgFlows :: [PrimParam] -> [PrimArg] -> Maybe [PrimArg]
+reconcileArgFlows [] [] = Just []
+reconcileArgFlows _ [] = Nothing
+reconcileArgFlows [] _ = Nothing
+reconcileArgFlows (PrimParam _ _ pflow _:params) 
+  (arg@(ArgVar _ _ aflow _ _):args)
+  | pflow == aflow   = fmap (arg:) $ reconcileArgFlows params args
+reconcileArgFlows (PrimParam _ _ FlowOut _:params) 
+  (ArgVar _ _ FlowIn HalfUpdate _:arg@(ArgVar _ _ FlowOut HalfUpdate _):args)
+  = fmap (arg:) $ reconcileArgFlows params args
+reconcileArgFlows (PrimParam _ _ FlowOut _:_) _ = Nothing
+reconcileArgFlows (PrimParam _ _ FlowIn _:params) (ArgVar _ _ FlowOut _ _:args)
+  = Nothing
+reconcileArgFlows (PrimParam _ _ FlowIn _:params) (arg:args) -- constant arg
+  = fmap (arg:) $ reconcileArgFlows params args
 
 
 typecheckArg :: OptPos -> [PrimParam] -> ProcName ->
@@ -582,24 +614,24 @@ applyPrimTyping dict call@(PrimCall cm name id args) = do
         Just spec -> return [spec]
     -- liftIO $ putStrLn $ "   " ++ show (length procs) ++ " potential procs: "
     --        ++ intercalate ", " (List.map show procs)
-    matches <- filterM (\p -> do
-                             params <- getParams p
-                             -- liftIO $ putStrLn $ "   checking call to " ++
-                             --        show p ++ " args " ++
-                             --        show args' ++ " against params " ++
-                             --        show params
-                             return 
-                              (length params == length args' &&
-                               all (uncurry subtypeOf)
-                               (zip (List.map argType args')
-                                (List.map primParamType params)) &&
-                               all (uncurry (==))
-                               (zip (List.map argFlowDirection args')
-                                (List.map primParamFlow params))))
+    matches <- fmap catMaybes $
+               mapM (\p -> do
+                          params <- getParams p
+                          -- liftIO $ putStrLn $ "   checking call to " ++
+                          --        show p ++ " args " ++
+                          --        show args' ++ " against params " ++
+                          --        show params
+                          return $
+                            fmap (\as -> (as,p)) $
+                            checkMaybe (\as -> all (uncurry subtypeOf)
+                                               (zip (List.map argType as)
+                                                (List.map 
+                                                 primParamType params))) $
+                            reconcileArgFlows params args')
                procs
     checkError "not exactly one matching proc" (1 /= length matches)
-    let proc = List.head matches
-    return $ PrimCall (procSpecMod proc) (procSpecName proc) (Just proc) args'
+    let (args'',proc) = List.head matches
+    return $ PrimCall (procSpecMod proc) (procSpecName proc) (Just proc) args''
 applyPrimTyping dict (PrimForeign lang name id args) = do
     let args' = List.map (applyArgTyping dict) args
     return $ PrimForeign lang name id args'

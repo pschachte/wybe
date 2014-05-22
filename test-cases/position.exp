@@ -27,17 +27,17 @@
   types           : 
   resources       : 
   procs           : position:
-public proc position(x:0:int, y:0:int, ?$:0:position) (id 0): 
-    foreign $ alloc("position":string, "position":string, ?$rec:0)
-    foreign $ mutate("position":string, "position":string, "x":string, $rec:0, ?$rec:1, x:0:int)
-    foreign $ mutate("position":string, "position":string, "y":string, $rec:1, ?$:0:position, y:0:int)
+public proc position(x:0:int, y:0:int, ?~$:0:position) (id 0): 
+    foreign $ alloc("position":string, "position":string, ?~$rec:0)
+    foreign $ mutate("position":string, "position":string, "x":string, %$rec:0, ?%$rec:1, x:0:int)
+    foreign $ mutate("position":string, "position":string, "y":string, %$rec:1, ?%$:0:position, y:0:int)
                     x:
-public proc x($rec:0:position, ?$:0:int) (id 0):  @position:2:12
-    foreign $ access("position":string, "position":string, "x":string, $rec:0:position, ?$:0:int)
-public proc x($rec:0:position, ?$rec:1:position, $field:0:int) (id 1):  @position:2:12
-    foreign $ mutate("position":string, "position":string, "x":string, $rec:0:position, ?$rec:1:position, $field:0:int)
+public proc x($rec:0:position, ?~$:0:int) (id 0):  @position:2:12
+    foreign $ access("position":string, "position":string, "x":string, $rec:0:position, ?~$:0:int)
+public proc x(%$rec:0:position, ?%$rec:1:position, $field:0:int) (id 1):  @position:2:12
+    foreign $ mutate("position":string, "position":string, "x":string, %$rec:0:position, ?%$rec:1:position, $field:0:int)
                     y:
-public proc y($rec:0:position, ?$:0:int) (id 0):  @position:2:12
-    foreign $ access("position":string, "position":string, "y":string, $rec:0:position, ?$:0:int)
-public proc y($rec:0:position, ?$rec:1:position, $field:0:int) (id 1):  @position:2:12
-    foreign $ mutate("position":string, "position":string, "y":string, $rec:0:position, ?$rec:1:position, $field:0:int)
+public proc y($rec:0:position, ?~$:0:int) (id 0):  @position:2:12
+    foreign $ access("position":string, "position":string, "y":string, $rec:0:position, ?~$:0:int)
+public proc y(%$rec:0:position, ?%$rec:1:position, $field:0:int) (id 1):  @position:2:12
+    foreign $ mutate("position":string, "position":string, "y":string, %$rec:0:position, ?%$rec:1:position, $field:0:int)

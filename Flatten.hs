@@ -264,7 +264,9 @@ flattenStmt' Next pos = emit pos Next
 --  after the call to store the results appropriately.
 flattenArgs :: [Placed Exp] -> Flattener [Placed Exp]
 flattenArgs args = do
+    -- liftIO $ putStrLn $ "  Flattening arglist " ++ show args
     argListList <- mapM flattenPExp args
+    -- liftIO $ putStrLn $ "  Flattened =   " ++ show (concat argListList)
     return $ concat argListList
 
 flattenPExp :: Placed Exp -> Flattener [Placed Exp]
@@ -293,9 +295,12 @@ flattenExp exp@(StringValue a) pos =
 flattenExp exp@(CharValue a) pos =
     return $ [maybePlace exp pos]
 flattenExp exp@(Var name dir flowType) pos = do
+    -- liftIO $ putStrLn $ "  Flattening arg " ++ show exp
     let isIn  = flowsIn dir
     let isOut = flowsOut dir
+    -- liftIO $ putStrLn $ "  isIn = " ++ show isIn ++ " isOut = " ++ show isOut
     let flowType' = if isIn && isOut then HalfUpdate else flowType
+    -- liftIO $ putStrLn $ "  flowType' = " ++ show flowType'
     defd <- gets (Set.member name . defdVars)
     if (dir == ParamIn && (not defd))
       then -- Reference to an undefined variable: assume it's meant to be
@@ -303,13 +308,15 @@ flattenExp exp@(Var name dir flowType) pos = do
         flattenCall (ProcCall [] name) pos []
       else do
         noteVarMention name dir
-        return $ 
-            (if isIn
-             then [maybePlace (Var name ParamIn flowType') pos] 
-             else []) ++
-            (if isOut
-             then [maybePlace (Var name ParamOut flowType') pos] 
-             else [])
+        let inPart = if isIn
+                     then [maybePlace (Var name ParamIn flowType') pos] 
+                     else []
+        let outPart = if isOut
+                      then [maybePlace (Var name ParamOut flowType') pos] 
+                      else []
+        
+        -- liftIO $ putStrLn $ "  Arg flattened to " ++ show (inPart ++ outPart)
+        return $ inPart ++ outPart
 flattenExp (Where stmts pexp) _ = do
     flattenStmts stmts
     flattenPExp pexp
@@ -355,7 +362,7 @@ flattenCall stmtBuilder pos exps = do
     -- liftIO $ putStrLn $ "** defines:  " ++ show defs'
     -- liftIO $ putStrLn $ "** uses   :  " ++ show uses'
     -- liftIO $ putStrLn $ "** in = " ++ show isIn ++ "; out = " ++ show isOut
-    let flowType = Implicit pos
+    let flowType = if isIn && isOut then HalfUpdate else Implicit pos
     when isIn $ 
       emit pos $ stmtBuilder $ 
       exps'' ++ [Unplaced $ Var resultName ParamOut flowType]

@@ -1014,8 +1014,13 @@ data PrimParam =
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
-  show (PrimParam name typ dir _) =
-    primFlowPrefix dir ++ show name ++ ":" ++ show typ
+  show (PrimParam name typ dir ftype) =
+    primFlowPrefix dir ++ 
+    (case ftype of
+          HalfUpdate -> "%"
+          Implicit _ -> "~"
+          Ordinary -> "") ++
+    show name ++ ":" ++ show typ
 
 -- A variable name with an integer suffix to distinguish different 
 -- values for the same name.  As a special case, a suffix of -1 
@@ -1437,8 +1442,14 @@ showBody indent stmts =
 
 -- |Show a primitive argument.
 instance Show PrimArg where
-  show (ArgVar name typ dir _ _) = 
-      primFlowPrefix dir ++ show name ++ showTypeSuffix typ
+  show (ArgVar name typ dir ftype final) = 
+      (if final then "%" else "") ++
+      primFlowPrefix dir ++ 
+      (case ftype of
+            HalfUpdate -> "%"
+            Implicit _ -> "~"
+            Ordinary -> "") ++
+      show name ++ showTypeSuffix typ
   show (ArgInt i typ)    = show i ++ showTypeSuffix typ
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ
   show (ArgString s typ) = show s ++ showTypeSuffix typ
