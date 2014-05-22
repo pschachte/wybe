@@ -38,7 +38,7 @@ import Parser          (parse)
 import Scanner         (inputTokens, fileTokens, Token)
 import Normalise       (normalise)
 import Types           (typeCheckModSCC)
-import Optimise        (optimiseMod)
+import Optimise        (optimiseModSCCBottomUp)
 import System.FilePath
 import Data.Map as Map
 import Data.Set as Set
@@ -229,7 +229,7 @@ compileModSCC specs = do
     -- liftIO $ putStrLn $ "type checking module SCC " ++ showModSpecs specs ++ "..."
     typeCheckModSCC specs
     -- liftIO $ putStrLn $ "type checked"
-    mapM_ optimiseMod specs
+    optimiseModSCCBottomUp specs
     mods <- mapM getLoadedModule specs
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs . 
