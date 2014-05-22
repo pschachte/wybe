@@ -10,20 +10,22 @@
 --  This code operates on LPVM (Prim) form.
 
 module Expansion (CallExpansion, identityExpansion, addExpansion,
-                  bodyExpansion, Substitution, identitySubstitution,
+                  Substitution, identitySubstitution,
                   ) where
 
 import AST
 import Data.Map as Map
 import Data.List as List
-
+import Data.Set as Set
+import Data.Maybe
+import Control.Monad.Trans.State
 
 -- |Type to remember proc call expansions.  For each proc, we remember
 -- the parameters of the call, to bind to the actual arguments, and
 -- the body of the definition.  We also store a set of the variable
 -- names used in the body, so that they can be renamed if necessary to
 -- avoid variable capture.
-type CallExpansion = Map ProcSpec ([PrimParam],ProcBody)
+type CallExpansion = Map ProcSpec ([PrimParam],[Placed Prim])
 
 
 -- |A CallExpansion that doesn't expand anything
@@ -31,7 +33,7 @@ identityExpansion :: CallExpansion
 identityExpansion = Map.empty
 
 
-addExpansion :: ProcSpec -> [PrimParam] -> ProcBody -> CallExpansion ->
+addExpansion :: ProcSpec -> [PrimParam] -> [Placed Prim] -> CallExpansion ->
                 CallExpansion
 addExpansion proc params body expn = Map.insert proc (params,body) expn
 
@@ -49,32 +51,133 @@ addSubstitution :: PrimVarName -> PrimArg -> Substitution -> Substitution
 addSubstitution = Map.insert
 
 
-procExpansion :: Substitution -> CallExpansion -> ProcDef -> ProcDef
-procExpansion subst expn (ProcDef n proto (ProcBody body fork) pos tmp vis) =
-    (ProcDef n proto (ProcBody body' fork') pos tmp' vis) where
-      
+meetSubsts :: Substitution -> Substitution -> Substitution
+meetSubsts = Map.mergeWithKey
+             (\k v1 v2 -> if v1 == v2 then Just v1 else Nothing)
+             (const Map.empty) 
+             (const Map.empty) 
 
 
-placedPrimExpansion :: Substitution -> CallExpansion -> Bool -> 
-    Placed Prim -> [Placed Prim]
-placedPrimExpansion subst expn oneClause placed =
-    List.map (flip maybePlace (place placed)) $
-    primExpansion subst expn oneClause (content placed)
+projectSubst :: Set PrimVarName -> Substitution -> Substitution
+projectSubst protected subst = 
+    Map.fromAscList $
+    List.filter (flip Set.member protected . fst) $
+    Map.toAscList subst
 
 
-primExpansion :: Substitution -> Prim -> [Prim]
-primExpansion subst (PrimCall "=" _ [ArgVar name1 _ _, ArgVar name2 _ _])
-  | ultimateTarget subst name1 == ultimateTarget subst name2 = []
-primExpansion subst (PrimCall name id args) =
-    [PrimCall name id $ List.map (renameArg subst) args]
-primExpansion subst (PrimForeign lang name id args) = 
-    [PrimForeign lang name id $ List.map (renameArg subst) args]
-primExpansion subst (PrimGuard guard val) =
-    [PrimGuard (executeSubstitution subst guard) val]
-primExpansion subst (PrimNop) = [PrimNop]
+procExpansion :: CallExpansion -> Int -> ProcDef -> ProcDef
+procExpansion expn id def = def { procProto = proto', procBody = body' }
+  where
+    body  = procBody def
+    proto = procProto def
+    outputs = List.map primParamName $
+              List.filter ((==FlowOut) . primParamFlow) $
+              primProtoParams proto
+    (body',paramSubst) = evalState (expandBody body) $
+                         initExpanderState expn $ Set.fromList outputs
+    proto' = proto { primProtoParams =
+                          List.map (renameParam paramSubst) $
+                          primProtoParams proto }
+
+
+----------------------------------------------------------------
+--                       The Expansion Monad
+----------------------------------------------------------------
+
+data ExpanderState = Expander {
+    substitution :: Substitution,     -- ^The current variable substitution
+    expansion    :: CallExpansion,    -- ^The expansions in effect (read-only)
+    protected    :: Set PrimVarName       -- ^Variables that cannot be renamed
+    }
+
+
+type Expander = State ExpanderState
+
+
+initExpanderState :: CallExpansion -> Set PrimVarName -> ExpanderState
+initExpanderState expn varSet = 
+    Expander identitySubstitution expn varSet
+
+
+expandBody :: ProcBody -> Expander (ProcBody,Substitution)
+expandBody (ProcBody prims fork) = do
+    prims' <- fmap concat $ mapM (placedApply expandPrim) prims
+    (fork',substs) <- expandFork fork
+    state <- get
+    let baseSubst = projectSubst (protected state) (substitution state)
+    let subst = List.foldr meetSubsts baseSubst substs
+    return (ProcBody prims' fork', subst)
+                                
+
+expandFork :: PrimFork -> Expander (PrimFork,[Substitution])
+expandFork NoFork = return (NoFork,[])
+expandFork (PrimFork var bodies) = do
+    state <- get
+    let pairs = List.map (\b -> evalState (expandBody b) state) bodies
+    let bodies' = List.map fst pairs
+    return (PrimFork var bodies',List.map snd pairs)
+
+
+expandPrim :: Prim -> OptPos -> Expander [Placed Prim]
+expandPrim asn@(PrimCall _ "=" _ [ArgVar var _ FlowOut _ _, val]) pos = do
+    expandAssign var val $ maybePlace asn pos
+expandPrim asn@(PrimCall _ "=" _ [val, ArgVar var _ FlowOut _ _]) pos = do
+    expandAssign var val $ maybePlace asn pos
+expandPrim (PrimCall md nm pspec args) pos = do
+    args' <- mapM expandArg args
+    expn <- gets expansion
+    case pspec >>= flip Map.lookup expn of
+        Nothing -> return [maybePlace (PrimCall md nm pspec args') pos]
+        Just (params,body) -> 
+            return $ List.map (fmap (applySubst $ paramSubst params args')) body
+expandPrim (PrimForeign lang nm flags args) pos = do
+    subst <- gets substitution
+    return $ [maybePlace 
+              (PrimForeign lang nm flags $ List.map (renameArg subst) args) 
+              pos]
+expandPrim PrimNop pos = return $ [maybePlace PrimNop pos]
+
+
+expandAssign :: PrimVarName -> PrimArg -> Placed Prim -> Expander [Placed Prim]
+expandAssign var val pprim = do
+    modify (\s -> s { substitution = Map.insert var val $ substitution s })
+    noSubst <- gets (Set.member var . protected)
+    return $ if noSubst then [pprim] else []
+
+
+expandArg :: PrimArg -> Expander PrimArg
+expandArg arg@(ArgVar var _ _ _ _) = do
+    noSubst <- gets (Set.member var . protected)
+    if noSubst 
+      then return arg
+      else gets (fromMaybe arg . Map.lookup var . substitution)
+
+
+paramSubst :: [PrimParam] -> [PrimArg] -> Substitution
+paramSubst params args = 
+    List.foldr (\(PrimParam k _ dir _,v) subst -> Map.insert k v subst)
+    identitySubstitution $ zip params args
+             
+               
+
+
+renameParam :: Substitution -> PrimParam -> PrimParam
+renameParam subst param@(PrimParam name typ dir ftype) = 
+    maybe param 
+    (\arg -> case arg of
+          ArgVar name' _ _ _ _ -> PrimParam name' typ dir ftype
+          _ -> param) $
+    Map.lookup name subst
+
+applySubst :: Substitution -> Prim -> Prim
+applySubst subst (PrimCall md nm pspec args) =
+    PrimCall md nm pspec $ List.map (renameArg subst) args
+applySubst subst (PrimForeign lang nm flags args) =
+    PrimForeign lang nm flags $ List.map (renameArg subst) args
+applySubst subst PrimNop = PrimNop
 
 
 renameArg :: Substitution -> PrimArg -> PrimArg
-renameArg subst (ArgVar name dir flowType) =
-    ArgVar (fst $ ultimateTarget subst name) dir flowType
+renameArg subst var@(ArgVar name _ FlowIn _ _) =
+    fromMaybe var $ Map.lookup name subst
 renameArg subst primArg = primArg

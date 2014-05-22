@@ -17,14 +17,14 @@ module AST (
   Exp(..), Generator(..),
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
-  makeMessage, updatePlacedM,
+  placedApply, makeMessage, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   enterModule, reenterModule, exitModule, finishModule, 
   emptyInterface, emptyImplementation, getParams,
   ModSpec, ProcDef(..), ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
-  argFlowDirection, argType, flowsIn, flowsOut,
+  argFlowDirection, argType, flowsIn, flowsOut, mapBodyPrims,
   expToStmt, Prim(..), PrimProto(..), PrimParam(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
@@ -135,6 +135,13 @@ maybePlace t Nothing    = Unplaced t
 rePlace :: t -> Placed t -> Placed t
 rePlace t (Placed _ pos) = Placed t pos
 rePlace t (Unplaced _)   = Unplaced t
+
+
+-- |Apply a function that takes a thing and an optional place to a 
+--  placed thing.
+placedApply :: (a -> OptPos -> b) -> (Placed a) -> b
+placedApply f placed = f (content placed) (place placed)
+
 
 instance Functor Placed where
   fmap f (Placed x pos) = Placed (f x) pos
@@ -884,6 +891,15 @@ data PrimFork =
     deriving (Eq)
 
 
+mapBodyPrims :: (Prim -> [a]) -> ProcBody -> [a]
+mapBodyPrims primFn (ProcBody pprims fork) =
+    List.concatMap (primFn . content) pprims ++
+    case fork of
+        NoFork -> []
+        PrimFork _ bodies ->
+            List.concatMap (mapBodyPrims primFn) bodies
+
+
 -- |Info about a proc call, including the ID, prototype, and an 
 --  optional source position. 
 data ProcSpec = ProcSpec {
@@ -997,7 +1013,10 @@ data Generator
 --  where the suffix is used to specify which assignment defines the value.
 
 -- |A primitive proc prototype, including name and formal parameters.
-data PrimProto = PrimProto ProcName [PrimParam]
+data PrimProto = PrimProto {
+    primProtoName   :: ProcName, 
+    primProtoParams :: [PrimParam]
+    }
                deriving Eq
 
 instance Show PrimProto where

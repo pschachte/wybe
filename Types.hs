@@ -171,26 +171,13 @@ typeCheckMod modSCC thisMod = do
 
 
 localBodyProcs :: ModSpec -> ProcBody -> [Ident]
-localBodyProcs thisMod (ProcBody prims fork) =
-    localCalledProcs thisMod (List.map content prims) ++
-    localForkProcs thisMod fork
+localBodyProcs thisMod body =
+    mapBodyPrims (localPrimCalls thisMod) body
 
-
--- |The list of procs in the current module called in the specified 
---  list of prims.  
-localCalledProcs :: ModSpec -> [Prim] -> [Ident]
-localCalledProcs _ [] = []
-localCalledProcs thisMod (PrimCall [] name _ _:rest) =
-    name:localCalledProcs thisMod rest
-localCalledProcs thisMod (PrimCall m name _ _:rest)
-  | m == thisMod = name:localCalledProcs thisMod rest
-localCalledProcs thisMod (_:rest) = localCalledProcs thisMod rest
-
-
-localForkProcs :: ModSpec -> PrimFork -> [Ident]
-localForkProcs _ NoFork = []
-localForkProcs thisMod (PrimFork _ bodies) =
-    concatMap (localBodyProcs thisMod) bodies
+localPrimCalls :: ModSpec -> Prim -> [Ident]
+localPrimCalls thisMod (PrimCall m name _ _)
+  | m == [] || m == thisMod = [name]
+localPrimCalls _ _ = []
 
 
 -- |Type check one strongly connected component in the local call graph
