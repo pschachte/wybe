@@ -26,6 +26,7 @@ import Data.List as List
 type CallExpansion = Map ProcSpec ([PrimParam],ProcBody)
 
 
+-- |A CallExpansion that doesn't expand anything
 identityExpansion :: CallExpansion
 identityExpansion = Map.empty
 
@@ -39,6 +40,7 @@ addExpansion proc params body expn = Map.insert proc (params,body) expn
 type Substitution = Map PrimVarName PrimArg
 
 
+-- |A Substitution that doesn't substitute anything
 identitySubstitution :: Substitution
 identitySubstitution = Map.empty
 

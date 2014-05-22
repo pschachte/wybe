@@ -7,5 +7,5 @@
   types           : 
   resources       : 
   procs           : incr:
-public proc incr(a:0:int, ?~$:0:int) (id 0):  @func_untyped:1:8
+public proc incr(a:0:int, ?~$:0:int)<0>  @func_untyped:1:8 (0 calls)
     wybe.int.+<0>(a:0:int, 1:int, ?~$:0:int) @func_untyped:1:29

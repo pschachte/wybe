@@ -8,10 +8,10 @@
   types           : 
   resources       : 
   procs           : inc2:
-public proc inc2(x:0:int, ?~$:0:int) (id 0):  @update:1:8
+public proc inc2(x:0:int, ?~$:0:int)<0>  @update:1:8 (0 calls)
     wybe.int.+<0>(x:0:int, 1:int, ?~tmp$1:0:int) @update:1:23
     wybe.int.+<0>(~tmp$1:0:int, 1:int, ?~$:0:int) @update:1:23
-public proc inc2(%x:0:int, ?%x:1:int, y:0:int) (id 1):  @update:3:8
+public proc inc2(%x:0:int, ?%x:1:int, y:0:int)<1>  @update:3:8 (0 calls)
     wybe.int.+<0>(%x:0:int, 1:int, ?%tmp$1:0:int) @update:5:6
     wybe.int.+<0>(%tmp$1:0:int, 1:int, ?%tmp$0:0:int) @update:5:5
     wybe.int.=<0>(?%tmp$0:1:int, y:0:int) @update:5:5

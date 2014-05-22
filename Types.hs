@@ -256,7 +256,7 @@ typecheckProcDecls m mods name = do
 typecheckProcDecl :: ModSpec -> [ModSpec] -> ProcDef ->
                     Compiler (ProcDef,Bool,Bool,[TypeReason])
 typecheckProcDecl m mods pd@(ProcDef name proto@(PrimProto pn params) 
-                         def pos tmpCnt vis) 
+                         def pos tmpCnt calls vis) 
   = do
     let typing = List.foldr (addDeclaredType name pos params)
                  initTyping $ zip params [1..]
@@ -268,7 +268,8 @@ typecheckProcDecl m mods pd@(ProcDef name proto@(PrimProto pn params)
         -- liftIO $ putStrLn $ "*resulting types " ++ name ++
         --   ": " ++ show typing'
         let params' = updateParamTypes typing' params
-        let pd' = ProcDef name (PrimProto pn params') def' pos tmpCnt vis
+        let pd' = ProcDef name (PrimProto pn params') def' pos tmpCnt 
+                  calls vis
         let modAgain = pd' /= pd
         -- liftIO $ putStrLn $ "===== Definition is " ++ 
         --        (if modAgain then "" else "un") ++ "changed"

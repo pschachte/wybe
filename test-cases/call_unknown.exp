@@ -8,5 +8,5 @@ test-cases/call_unknown.wybe:1:17: Call to unknown nonexistent_proc from foo
   types           : 
   resources       : 
   procs           : foo:
-proc foo(x:0:int) (id 0):  @call_unknown:1:1
+proc foo(x:0:int)<0>  @call_unknown:1:1 (0 calls)
     nonexistent_proc(x:0) @call_unknown:1:17

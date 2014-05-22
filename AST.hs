@@ -465,7 +465,7 @@ addImport modspec imp specific vis = do
 
 -- |Add the specified proc definition to the current module.
 addProc :: ProcDef -> Compiler ()
-addProc procDef@(ProcDef name proto clauses pos _ vis) = do
+addProc procDef@(ProcDef name proto clauses pos _ calls vis) = do
     updateImplementation
       (updateModProcs
        (\procs ->
@@ -502,15 +502,15 @@ mapListInsert key elt =
 
 -- |Replace the specified proc definition in the current module.
 replaceProc :: Ident -> Int -> PrimProto -> ProcBody -> OptPos ->
-               Int -> Visibility -> Compiler ()
-replaceProc name id proto clauses pos tmpCount vis = do
+               Int -> Int -> Visibility -> Compiler ()
+replaceProc name id proto clauses pos tmpCount calls vis = do
     updateImplementation
       (updateModProcs
        (\procs -> 
          let olddefs = findWithDefault [] name procs
              (front,back) = List.splitAt id olddefs
          in Map.insert name (front ++ 
-                             (ProcDef name proto clauses pos tmpCount vis:
+                             (ProcDef name proto clauses pos tmpCount calls vis:
                               tail back)) 
             procs))
 
@@ -844,7 +844,8 @@ data ProcDef = ProcDef {
     procProto :: PrimProto, 
     procBody :: ProcBody,
     procPos :: OptPos,
-    procTmpCount :: Int,              -- the next temp variable number to use
+    procTmpCount :: Int,        -- the next temp variable number to use
+    procCallCount :: Int,       -- the number of calls to it statically in prog
     procVis :: Visibility
 }
              deriving Eq
@@ -1318,10 +1319,11 @@ showProcDefs firstID (def:defs) =
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID (ProcDef _ proto def pos _ vis) =
+showProcDef thisID (ProcDef _ proto def pos _ calls vis) =
     "\n" ++ visibilityPrefix vis ++
-    "proc " ++ show proto ++ " (id " ++ show thisID ++ "): "
+    "proc " ++ show proto ++ "<" ++ show thisID ++ "> "
     ++ showMaybeSourcePos pos
+    ++ " (" ++ show calls ++ " calls)"
     ++ showBlock 4 def
 
 -- |How to show a type specification.

@@ -7,5 +7,5 @@
   types           : 
   resources       : 
   procs           : :
-proc () (id 0): 
+proc ()<0>  (0 calls)
     wybe.io.println<3>("hello, world":string) @main_hello:1:1

@@ -7,5 +7,5 @@
   types           : 
   resources       : 
   procs           : print2:
-public proc print2(x:0:int, y:0:int) (id 0):  @proc_hello:1:8
+public proc print2(x:0:int, y:0:int)<0>  @proc_hello:1:8 (0 calls)
     wybe.io.println<3>("hello, world":string) @proc_hello:2:8

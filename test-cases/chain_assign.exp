@@ -7,6 +7,6 @@
   types           : 
   resources       : 
   procs           : :
-proc () (id 0): 
+proc ()<0>  (0 calls)
     wybe.int.=<0>(?x:0:int, 1:int) @chain_assign:1:1
     wybe.io.println<0>(x:0:int) @chain_assign:4:1

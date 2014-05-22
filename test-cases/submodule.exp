@@ -20,10 +20,10 @@
   types           : 
   resources       : 
   procs           : hidden:
-proc hidden() (id 0):  @submodule:2:5
+proc hidden()<0>  @submodule:2:5 (0 calls)
     wybe.io.print<3>("private proc in a private module":string) @submodule:2:17
                     semi_hidden:
-public proc semi_hidden() (id 0):  @submodule:3:12
+public proc semi_hidden()<0>  @submodule:3:12 (0 calls)
     wybe.io.print<3>("public proc in a private module":string) @submodule:3:29
 --------------------------------------------------
  Module submodule.publictest
@@ -35,8 +35,8 @@ public proc semi_hidden() (id 0):  @submodule:3:12
   types           : 
   resources       : 
   procs           : semi_visible:
-proc semi_visible() (id 0):  @submodule:7:5
+proc semi_visible()<0>  @submodule:7:5 (0 calls)
     wybe.io.print<3>("private proc in a public module":string) @submodule:7:23
                     visible:
-public proc visible() (id 0):  @submodule:8:12
+public proc visible()<0>  @submodule:8:12 (0 calls)
     wybe.io.print<3>("public proc in a public module":string) @submodule:8:25

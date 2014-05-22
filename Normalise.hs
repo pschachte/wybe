@@ -199,7 +199,7 @@ compileProc tmpCtr (ProcDecl vis (ProcProto name params) body pos) = do
         -- liftIO $ putStrLn $ "Compiled"
         endVars <- gets vars
         return (List.map (primParam startVars endVars) params, compiled)
-    let def = ProcDef name (PrimProto name params') body' pos tmpCtr vis
+    let def = ProcDef name (PrimProto name params') body' pos tmpCtr 0 vis
     -- liftIO $ putStrLn $ "Compiled version:\n" ++ showProcDef 0 def
     addProc (assignElim def)
     return ()
