@@ -12,6 +12,7 @@ import Expansion
 import Data.List as List
 import Data.Map as Map
 import Data.Graph
+import Control.Monad.Trans.State
 
 -- For now, just a placeholder
 optimiseModSCCBottomUp :: [ModSpec] -> Compiler ()
@@ -52,7 +53,7 @@ optimiseSCCBottomUp (CyclicSCC pspecs) = do
 
 optimiseProc :: ProcSpec -> Compiler ()
 optimiseProc pspec = do
-    updateProcDef (procExpansion identityExpansion) pspec
+    updateProcDefM procExpansion pspec
 
 
 localBodyCallees :: ModSpec -> ProcBody -> [ProcSpec]

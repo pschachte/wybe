@@ -21,7 +21,8 @@ module AST (
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   enterModule, reenterModule, exitModule, finishModule, 
-  emptyInterface, emptyImplementation, getProcDef, updateProcDef, getParams,
+  emptyInterface, emptyImplementation, 
+  getProcDef, updateProcDef, updateProcDefM, getParams,
   ModSpec, ProcDef(..), ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
   argFlowDirection, argType, flowsIn, flowsOut, mapBodyPrims,
@@ -31,15 +32,17 @@ module AST (
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
   updateModules, updateImplementations,
-  getModuleImplementationField, getLoadedModule, updateLoadedModule,
-  getLoadedModuleImpln, updateLoadedModuleImpln,
+  getModuleImplementationField, 
+  getLoadedModule, updateLoadedModule, updateLoadedModuleM,
+  getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, updateModule, getSpecModule, updateSpecModule,
   updateModImplementation, updateModImplementationM, 
   updateModInterface, updateModProcsM, updateAllProcs,
   getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, verboseMsg, message, genProcName,
   addImport, addType, addSubmod, lookupType, publicType,
-  addResource, lookupResource, publicResource,
+  addResource, lookupResource, publicResource, 
+  CallExpansion, addExpansion,
   addProc, replaceProc, lookupProc, publicProc,
   refersTo, callTargets,
   showBody, showStmt, showBlock, showProcDef, showModSpec, showModSpecs,
@@ -185,7 +188,8 @@ data CompilerState = Compiler {
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
   loadCount :: Int,              -- ^counter of module load order
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
-  deferred :: [Module]           -- ^modules in the same SCC as the current one
+  deferred :: [Module],          -- ^modules in the same SCC as the current one
+  expansion :: CallExpansion     -- ^the proc expansions to perform
   }
 
 -- |The compiler monad is a state transformer monad carrying the 
@@ -195,7 +199,8 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp 
-                        (Compiler opts [] False Map.empty 0 [] [])
+                        (Compiler opts [] False Map.empty 0 [] [] 
+                         identityExpansion)
 
 
 -- |Apply some transformation function to the compiler state.
@@ -244,6 +249,30 @@ updateLoadedModule updater modspec = do
                                                modules st })
 
 
+-- |Apply the given function to the specified module, if it has been loaded;
+-- does nothing if not.  Takes care to handle it if the specified
+-- module is under compilation.
+updateLoadedModuleM :: (Module -> Compiler Module) -> ModSpec -> Compiler ()
+updateLoadedModuleM updater modspec = do
+    underComp <- gets underCompilation
+    let (before,rest) = span ((/=modspec) . modSpec) underComp
+    case rest of
+      (mod:tail) -> do
+                mod' <- updater mod
+                let underComp' = before ++ (mod':tail)
+                updateCompiler (\st -> st { underCompilation = underComp' })
+      [] ->
+          updateCompilerM (\st -> do
+                             let mods = modules st
+                             let maybeMod = Map.lookup modspec mods
+                             case maybeMod of
+                               Nothing -> return st
+                               Just mod -> do
+                                 mod' <- updater mod
+                                 return $ st { modules = Map.insert
+                                                         modspec mod' mods})
+
+
 -- |Return the ModuleImplementation of the specified module.  An error
 -- if the module is not loaded or does not have an implementation.
 getLoadedModuleImpln :: ModSpec -> Compiler ModuleImplementation
@@ -262,6 +291,22 @@ updateLoadedModuleImpln :: (ModuleImplementation -> ModuleImplementation) ->
 updateLoadedModuleImpln updater modspec =
     updateLoadedModule (\m -> m { modImplementation =
                                       fmap updater $ modImplementation m })
+    modspec
+
+
+-- |Return the ModuleImplementation of the specified module.  An error
+-- if the module is not loaded or does not have an implementation.
+updateLoadedModuleImplnM :: 
+    (ModuleImplementation -> Compiler ModuleImplementation) ->
+    ModSpec -> Compiler ()
+updateLoadedModuleImplnM updater modspec =
+    updateLoadedModuleM (\m -> do
+                           let maybeImpln = modImplementation m
+                           case maybeImpln of
+                             Nothing -> return m
+                             Just imp -> do
+                               updated <- updater imp
+                               return $ m { modImplementation = Just updated })
     modspec
 
 
@@ -561,6 +606,22 @@ updateProcDef updater (ProcSpec modspec procName procID) =
     modspec
     
 
+updateProcDefM :: (ProcDef -> Compiler ProcDef) -> ProcSpec -> Compiler ()
+updateProcDefM updater (ProcSpec modspec procName procID) =
+    updateLoadedModuleImplnM
+    (\imp -> do
+       let procs = modProcs imp
+       case Map.lookup procName procs of
+         Nothing -> return imp
+         Just defs -> do
+           let (front,back) = List.splitAt (procID - 1) defs
+           updated <- updater $ head back
+           let defs' = front ++ updated:tail back
+           let procs' = Map.insert procName defs' procs
+           return $ imp { modProcs = procs' })
+    modspec
+    
+
 
 -- |Prepend the provided elt to mapping for the specified key in the map.
 mapListInsert :: Ord a => a -> b -> Map a [b] -> Map a [b]
@@ -594,6 +655,23 @@ publicProc :: Ident -> Compiler Bool
 publicProc name = do
   int <- getModuleInterface
   return $ Map.member name $ pubProcs int
+
+
+-- |Type to remember proc call expansions.  For each proc, we remember
+-- the parameters of the call, to bind to the actual arguments, and
+-- the body of the definition.  We also store a set of the variable
+-- names used in the body, so that they can be renamed if necessary to
+-- avoid variable capture.
+type CallExpansion = Map ProcSpec ([PrimParam],[Placed Prim])
+
+-- |A CallExpansion that doesn't expand anything
+identityExpansion :: CallExpansion
+identityExpansion = Map.empty
+
+addExpansion :: ProcSpec -> [PrimParam] -> [Placed Prim] -> Compiler ()
+addExpansion proc params body = do
+  modify (\cs -> cs { expansion = Map.insert proc (params,body) $
+                                  expansion cs })
 
 
 -- |Return some function applied to the user's specified compiler options.

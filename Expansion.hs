@@ -9,50 +9,33 @@
 --  transformations.  As part of this, variables are also renamed.
 --  This code operates on LPVM (Prim) form.
 
-module Expansion (CallExpansion, identityExpansion, addExpansion,
-                  Substitution, identitySubstitution,
-                  procExpansion) where
+module Expansion (Substitution, identitySubstitution, procExpansion) where
 
 import AST
 import Data.Map as Map
 import Data.List as List
 import Data.Set as Set
 import Data.Maybe
+import Control.Monad.Trans (lift,liftIO)
 import Control.Monad.Trans.State
 
 import Debug.Trace
 
-procExpansion :: CallExpansion -> ProcDef -> ProcDef
-procExpansion expn def = def { procProto = proto', procBody = body' }
-  where
-    body  = procBody def
-    proto = procProto def
-    outputs = List.map primParamName $
-              List.filter ((==FlowOut) . primParamFlow) $
-              primProtoParams proto
-    (body',paramSubst) = evalState (expandBody body) $
-                         initExpanderState expn $ Set.fromList outputs
-    proto' = proto { primProtoParams =
-                          List.map (renameParam paramSubst) $
-                          primProtoParams proto }
+procExpansion :: ProcDef -> Compiler ProcDef
+procExpansion def = do
+    let body  = procBody def
+    let proto = procProto def
+    let outputs = List.map primParamName $
+                  List.filter ((==FlowOut) . primParamFlow) $
+                    primProtoParams proto
+    (body',paramSubst) <- evalStateT (expandBody body) $
+                          initExpanderState $ Set.fromList outputs
+    let proto' = proto { primProtoParams =
+                             List.map (renameParam paramSubst) $
+                                 primProtoParams proto }
+    return $ def { procProto = proto', procBody = body' }
 
 
--- |Type to remember proc call expansions.  For each proc, we remember
--- the parameters of the call, to bind to the actual arguments, and
--- the body of the definition.  We also store a set of the variable
--- names used in the body, so that they can be renamed if necessary to
--- avoid variable capture.
-type CallExpansion = Map ProcSpec ([PrimParam],[Placed Prim])
-
-
--- |A CallExpansion that doesn't expand anything
-identityExpansion :: CallExpansion
-identityExpansion = Map.empty
-
-
-addExpansion :: ProcSpec -> [PrimParam] -> [Placed Prim] -> CallExpansion ->
-                CallExpansion
-addExpansion proc params body expn = Map.insert proc (params,body) expn
 
 -- |Type to remember the variable renamings.  A variable that maps to 
 --  Nothing is not permitted to be renamed, because it is a parameter. 
@@ -88,17 +71,15 @@ projectSubst protected subst =
 
 data ExpanderState = Expander {
     substitution :: Substitution,     -- ^The current variable substitution
-    expansion    :: CallExpansion,    -- ^The expansions in effect (read-only)
-    protected    :: Set PrimVarName       -- ^Variables that cannot be renamed
+    protected    :: Set PrimVarName   -- ^Variables that cannot be renamed
     }
 
 
-type Expander = State ExpanderState
+type Expander = StateT ExpanderState Compiler
 
 
-initExpanderState :: CallExpansion -> Set PrimVarName -> ExpanderState
-initExpanderState expn varSet = 
-    Expander identitySubstitution expn varSet
+initExpanderState :: Set PrimVarName -> ExpanderState
+initExpanderState varSet = Expander identitySubstitution varSet
 
 
 expandBody :: ProcBody -> Expander (ProcBody,Substitution)
@@ -115,7 +96,7 @@ expandFork :: PrimFork -> Expander (PrimFork,[Substitution])
 expandFork NoFork = return (NoFork,[])
 expandFork (PrimFork var bodies) = do
     state <- get
-    let pairs = List.map (\b -> evalState (expandBody b) state) bodies
+    pairs <- lift $ mapM (\b -> evalStateT (expandBody b) state) bodies
     let bodies' = List.map fst pairs
     return (PrimFork var bodies',List.map snd pairs)
 
@@ -129,7 +110,7 @@ expandPrim asn@(PrimCall md nm pspec args) pos = do
       ("=",[val, ArgVar var _ FlowOut _ _]) ->
           expandAssign var val $ maybePlace asn pos
       _ -> do
-        expn <- gets expansion
+        expn <- lift $ gets expansion
         case pspec >>= flip Map.lookup expn of
           Nothing -> return [maybePlace (PrimCall md nm pspec args') pos]
           Just (params,body) -> 
