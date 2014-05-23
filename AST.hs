@@ -21,7 +21,7 @@ module AST (
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   enterModule, reenterModule, exitModule, finishModule, 
-  emptyInterface, emptyImplementation, getParams,
+  emptyInterface, emptyImplementation, getProcDef, updateProcDef, getParams,
   ModSpec, ProcDef(..), ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
   argFlowDirection, argType, flowsIn, flowsOut, mapBodyPrims,
@@ -31,7 +31,8 @@ module AST (
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
   updateModules, updateImplementations,
-  getModuleImplementationField, getLoadedModule,
+  getModuleImplementationField, getLoadedModule, updateLoadedModule,
+  getLoadedModuleImpln, updateLoadedModuleImpln,
   getModule, updateModule, getSpecModule, updateSpecModule,
   updateModImplementation, updateModImplementationM, 
   updateModInterface, updateModProcsM, updateAllProcs,
@@ -215,7 +216,9 @@ updateAllProcs fn =
     updateImplementations
     (\imp -> imp { modProcs = Map.map (List.map fn) $ modProcs imp })
 
--- |Return Just the specified module, if already loaded; else return Nothing.
+-- |Return Just the specified module, if already loaded; else return
+-- Nothing.  Takes care to handle it if the specified module is under
+-- compilation.
 getLoadedModule :: ModSpec -> Compiler (Maybe Module)
 getLoadedModule modspec = do
     underComp <- gets underCompilation
@@ -223,6 +226,46 @@ getLoadedModule modspec = do
       Just mod -> return $ Just mod
       Nothing  -> gets (Map.lookup modspec . modules)
                  
+
+-- |Apply the given function to the specified module, if it has been loaded;
+-- does nothing if not.  Takes care to handle it if the specified
+-- module is under compilation.
+updateLoadedModule :: (Module -> Module) -> ModSpec -> Compiler ()
+updateLoadedModule updater modspec = do
+    underComp <- gets underCompilation
+    let (found,underComp') = 
+            mapAccumL (\found m -> if (not found) && modSpec m == modspec
+                                   then (True, updater m)
+                                   else (found, m))
+            False underComp
+    if found 
+    then updateCompiler (\st -> st { underCompilation = underComp' })
+    else updateCompiler (\st -> st { modules = Map.adjust updater modspec $
+                                               modules st })
+
+
+-- |Return the ModuleImplementation of the specified module.  An error
+-- if the module is not loaded or does not have an implementation.
+getLoadedModuleImpln :: ModSpec -> Compiler ModuleImplementation
+getLoadedModuleImpln modspec = do
+    mod <- trustFromJustM ("unknown module " ++ showModSpec modspec) $
+           getLoadedModule modspec
+    return $ trustFromJust ("unimplemented module " ++ showModSpec modspec) $ 
+           modImplementation mod
+
+
+
+-- |Return the ModuleImplementation of the specified module.  An error
+-- if the module is not loaded or does not have an implementation.
+updateLoadedModuleImpln :: (ModuleImplementation -> ModuleImplementation) ->
+                           ModSpec -> Compiler ()
+updateLoadedModuleImpln updater modspec =
+    updateLoadedModule (\m -> m { modImplementation =
+                                      fmap updater $ modImplementation m })
+    modspec
+
+
+
 
 -- |Apply some transformation to the map of compiled modules.
 updateModules :: (Map ModSpec Module -> Map ModSpec Module) -> Compiler ()
@@ -240,6 +283,7 @@ updateImplementations updater = do
 -- |Return some function of the module currently being compiled.
 getModule :: (Module -> t) -> Compiler t
 getModule getter = gets (getter . head . underCompilation)
+
 
 -- |Transform the module currently being compiled.
 updateModule :: (Module -> Module) -> Compiler ()
@@ -490,15 +534,32 @@ addProc procDef@(ProcDef name proto clauses pos _ calls vis) = do
 
 
 getParams :: ProcSpec -> Compiler [PrimParam]
-getParams (ProcSpec modSpec procName procID) = do
+getParams pspec = do
+    -- XXX shouldn't have to grovel in implementation to find prototype
+    PrimProto _ params <- fmap procProto $ getProcDef pspec
+    return params
+
+
+getProcDef :: ProcSpec -> Compiler ProcDef
+getProcDef (ProcSpec modSpec procName procID) = do
     mod <- trustFromJustM ("no such module " ++ showModSpec modSpec) $ 
            getLoadedModule modSpec
-    -- XXX shouldn't have to grovel in implementation to find prototype
     let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $ 
                modImplementation mod
-    let def = (modProcs impl ! procName) !! procID
-    let PrimProto _ params = procProto def
-    return params
+    return $ (modProcs impl ! procName) !! procID
+
+
+updateProcDef :: (ProcDef -> ProcDef) -> ProcSpec -> Compiler ()
+updateProcDef updater (ProcSpec modspec procName procID) =
+    updateLoadedModuleImpln
+    (\imp -> imp { modProcs =
+                       Map.adjust
+                       (\l -> let (front,back) = List.splitAt (procID - 1) l
+                                  updated = updater $ head back
+                              in  front ++ updated:tail back)
+                       procName (modProcs imp) })
+    modspec
+    
 
 
 -- |Prepend the provided elt to mapping for the specified key in the map.
@@ -891,13 +952,23 @@ data PrimFork =
     deriving (Eq)
 
 
-mapBodyPrims :: (Prim -> [a]) -> ProcBody -> [a]
-mapBodyPrims primFn (ProcBody pprims fork) =
-    List.concatMap (primFn . content) pprims ++
+-- |Map over a ProcBody applying the primFn to each Prim, and
+-- combining the results for a sequence of Prims with the abConj
+-- function, and combining the results for the arms of a fork with the
+-- abDisj function.
+mapBodyPrims :: (Prim -> a) -> (a -> a -> a) -> a -> (a -> a -> a) -> a -> 
+                ProcBody -> a
+mapBodyPrims primFn abConj emptyConj abDisj emptyDisj (ProcBody pprims fork) =
+    abConj (List.foldl (\a pp -> abConj a $ primFn $ content pp)
+                emptyConj pprims) $
     case fork of
-        NoFork -> []
-        PrimFork _ bodies ->
-            List.concatMap (mapBodyPrims primFn) bodies
+      NoFork -> emptyDisj
+      PrimFork _ bodies ->
+          List.foldl 
+              (\a b -> abDisj a $
+                       mapBodyPrims primFn abConj emptyConj abDisj emptyDisj b)
+                 emptyDisj
+                 bodies
 
 
 -- |Info about a proc call, including the ID, prototype, and an 

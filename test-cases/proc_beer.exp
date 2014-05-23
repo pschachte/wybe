@@ -26,8 +26,7 @@ proc gen$4(count:0:int, tmp$0:0:?, ?count:2:int, ?tmp$0:0:?, ?tmp$1:0:int)<0>  (
     wybe.io.print<0>(count:0:int) @proc_beer:6:9
     wybe.io.println<3>(" bottles of beer on the wall":string) @proc_beer:7:9
     wybe.int.-<0>(count:0:int, 1:int, ?~tmp$1:0:int) @proc_beer:8:18
-    proc_beer.gen$2<0>(tmp$1:0:int, ?count:2:int) @proc_beer:5:5
+    proc_beer.gen$2<0>(~tmp$1:0:int, ?count:2:int) @proc_beer:5:5
                     print2:
 public proc print2()<0>  @proc_beer:1:8 (0 calls)
-    wybe.int.=<0>(?count:0:int, 99:int) @proc_beer:4:5
-    proc_beer.gen$2<0>(count:0:int, ?count:1:int) @proc_beer:5:5
+    proc_beer.gen$2<0>(99:int, ?count:1:int) @proc_beer:5:5

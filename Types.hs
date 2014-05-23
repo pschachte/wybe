@@ -160,8 +160,8 @@ typeCheckMod modSCC thisMod = do
     let ordered =
             stronglyConnComp
             [(name,name,
-              nub $ concatMap (localBodyProcs thisMod . procBody) procs)
-             | (name,procs) <- procs]
+              nub $ concatMap (localBodyProcs thisMod . procBody) procDefs)
+             | (name,procDefs) <- procs]
     (changed,reasons) <-
         foldMChangeReasons (typecheckProcSCC thisMod modSCC) 
                            changed0 reasons0 ordered
@@ -172,7 +172,8 @@ typeCheckMod modSCC thisMod = do
 
 localBodyProcs :: ModSpec -> ProcBody -> [Ident]
 localBodyProcs thisMod body =
-    mapBodyPrims (localPrimCalls thisMod) body
+    mapBodyPrims (localPrimCalls thisMod) (++) [] (++) [] body
+
 
 localPrimCalls :: ModSpec -> Prim -> [Ident]
 localPrimCalls thisMod (PrimCall m name _ _)

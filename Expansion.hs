@@ -11,7 +11,7 @@
 
 module Expansion (CallExpansion, identityExpansion, addExpansion,
                   Substitution, identitySubstitution,
-                  ) where
+                  procExpansion) where
 
 import AST
 import Data.Map as Map
@@ -19,6 +19,23 @@ import Data.List as List
 import Data.Set as Set
 import Data.Maybe
 import Control.Monad.Trans.State
+
+import Debug.Trace
+
+procExpansion :: CallExpansion -> ProcDef -> ProcDef
+procExpansion expn def = def { procProto = proto', procBody = body' }
+  where
+    body  = procBody def
+    proto = procProto def
+    outputs = List.map primParamName $
+              List.filter ((==FlowOut) . primParamFlow) $
+              primProtoParams proto
+    (body',paramSubst) = evalState (expandBody body) $
+                         initExpanderState expn $ Set.fromList outputs
+    proto' = proto { primProtoParams =
+                          List.map (renameParam paramSubst) $
+                          primProtoParams proto }
+
 
 -- |Type to remember proc call expansions.  For each proc, we remember
 -- the parameters of the call, to bind to the actual arguments, and
@@ -65,21 +82,6 @@ projectSubst protected subst =
     Map.toAscList subst
 
 
-procExpansion :: CallExpansion -> Int -> ProcDef -> ProcDef
-procExpansion expn id def = def { procProto = proto', procBody = body' }
-  where
-    body  = procBody def
-    proto = procProto def
-    outputs = List.map primParamName $
-              List.filter ((==FlowOut) . primParamFlow) $
-              primProtoParams proto
-    (body',paramSubst) = evalState (expandBody body) $
-                         initExpanderState expn $ Set.fromList outputs
-    proto' = proto { primProtoParams =
-                          List.map (renameParam paramSubst) $
-                          primProtoParams proto }
-
-
 ----------------------------------------------------------------
 --                       The Expansion Monad
 ----------------------------------------------------------------
@@ -119,17 +121,20 @@ expandFork (PrimFork var bodies) = do
 
 
 expandPrim :: Prim -> OptPos -> Expander [Placed Prim]
-expandPrim asn@(PrimCall _ "=" _ [ArgVar var _ FlowOut _ _, val]) pos = do
-    expandAssign var val $ maybePlace asn pos
-expandPrim asn@(PrimCall _ "=" _ [val, ArgVar var _ FlowOut _ _]) pos = do
-    expandAssign var val $ maybePlace asn pos
-expandPrim (PrimCall md nm pspec args) pos = do
+expandPrim asn@(PrimCall md nm pspec args) pos = do
     args' <- mapM expandArg args
-    expn <- gets expansion
-    case pspec >>= flip Map.lookup expn of
-        Nothing -> return [maybePlace (PrimCall md nm pspec args') pos]
-        Just (params,body) -> 
-            return $ List.map (fmap (applySubst $ paramSubst params args')) body
+    case (nm,args') of  -- special case handling of assignment
+      ("=",[ArgVar var _ FlowOut _ _, val]) ->
+          expandAssign var val $ maybePlace asn pos
+      ("=",[val, ArgVar var _ FlowOut _ _]) ->
+          expandAssign var val $ maybePlace asn pos
+      _ -> do
+        expn <- gets expansion
+        case pspec >>= flip Map.lookup expn of
+          Nothing -> return [maybePlace (PrimCall md nm pspec args') pos]
+          Just (params,body) -> 
+              return $ List.map (fmap (applySubst $ paramSubst params args'))
+                     body
 expandPrim (PrimForeign lang nm flags args) pos = do
     subst <- gets substitution
     return $ [maybePlace 
@@ -147,10 +152,13 @@ expandAssign var val pprim = do
 
 expandArg :: PrimArg -> Expander PrimArg
 expandArg arg@(ArgVar var _ _ _ _) = do
-    noSubst <- gets (Set.member var . protected)
-    if noSubst 
-      then return arg
-      else gets (fromMaybe arg . Map.lookup var . substitution)
+    gets (fromMaybe arg . Map.lookup var . substitution)
+-- expandArg arg@(ArgVar var _ _ _ _) = do
+--     noSubst <- gets (Set.member var . protected)
+--     if noSubst 
+--       then return arg
+--       else gets (fromMaybe arg . Map.lookup var . substitution)
+expandArg arg = return arg
 
 
 paramSubst :: [PrimParam] -> [PrimArg] -> Substitution

@@ -21,7 +21,7 @@ import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 import Flatten
 import Unbranch
-import AssignElim
+
 
 -- |Normalise a list of file items, storing the results in the current module.
 normalise :: [Item] -> Compiler ()
@@ -201,7 +201,7 @@ compileProc tmpCtr (ProcDecl vis (ProcProto name params) body pos) = do
         return (List.map (primParam startVars endVars) params, compiled)
     let def = ProcDef name (PrimProto name params') body' pos tmpCtr 0 vis
     -- liftIO $ putStrLn $ "Compiled version:\n" ++ showProcDef 0 def
-    addProc (assignElim def)
+    addProc def
     return ()
 compileProc _ decl =
     shouldnt $ "compileProc applied to non-proc " ++ show decl

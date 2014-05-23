@@ -8,9 +8,11 @@
   types           : 
   resources       : 
   procs           : double:
-public proc double(a:0:int, ?~$:0:int)<0>  @func_quadruple:1:8 (0 calls)
-    wybe.int.+<0>(a:0:int, a:0:int, ?~$:0:int) @func_quadruple:1:35
+public proc double(a:0:int, ?~tmp$0:0:int)<0>  @func_quadruple:1:8 (0 calls)
+    wybe.int.+<0>(a:0:int, a:0:int, ?~tmp$0:0:int) @func_quadruple:1:35
+    wybe.int.=<0>(?~$:0:int, ~tmp$0:0:int)
                     quadruple:
-public proc quadruple(a:0:int, ?~$:0:int)<0>  @func_quadruple:3:8 (0 calls)
+public proc quadruple(a:0:int, ?~tmp$0:0:int)<0>  @func_quadruple:3:8 (0 calls)
     func_quadruple.double<0>(a:0:int, ?~tmp$1:0:int) @func_quadruple:3:45
-    func_quadruple.double<0>(~tmp$1:0:int, ?~$:0:int) @func_quadruple:3:38
+    func_quadruple.double<0>(~tmp$1:0:int, ?~tmp$0:0:int) @func_quadruple:3:38
+    wybe.int.=<0>(?~$:0:int, ~tmp$0:0:int)
