@@ -9,7 +9,7 @@
 --  transformations.  As part of this, variables are also renamed.
 --  This code operates on LPVM (Prim) form.
 
-module Expansion (Substitution, identitySubstitution, procExpansion) where
+module Expansion (procExpansion) where
 
 import AST
 import Data.Map as Map
@@ -102,18 +102,20 @@ expandFork (PrimFork var bodies) = do
 
 
 expandPrim :: Prim -> OptPos -> Expander [Placed Prim]
-expandPrim asn@(PrimCall md nm pspec args) pos = do
+expandPrim call@(PrimCall md nm pspec args) pos = do
+    -- liftIO $ putStrLn $ "Try to expand " ++ show call
     args' <- mapM expandArg args
     case (nm,args') of  -- special case handling of assignment
       ("=",[ArgVar var _ FlowOut _ _, val]) ->
-          expandAssign var val $ maybePlace asn pos
+          expandAssign var val $ maybePlace call pos
       ("=",[val, ArgVar var _ FlowOut _ _]) ->
-          expandAssign var val $ maybePlace asn pos
+          expandAssign var val $ maybePlace call pos
       _ -> do
         expn <- lift $ gets expansion
         case pspec >>= flip Map.lookup expn of
           Nothing -> return [maybePlace (PrimCall md nm pspec args') pos]
-          Just (params,body) -> 
+          Just (params,body) -> do
+              -- liftIO $ putStrLn $ "Found expansion: " ++ show body
               return $ List.map (fmap (applySubst $ paramSubst params args'))
                      body
 expandPrim (PrimForeign lang nm flags args) pos = do
@@ -134,6 +136,7 @@ expandAssign var val pprim = do
 expandArg :: PrimArg -> Expander PrimArg
 expandArg arg@(ArgVar var _ _ _ _) = do
     gets (fromMaybe arg . Map.lookup var . substitution)
+-- XXX Is this the right code:
 -- expandArg arg@(ArgVar var _ _ _ _) = do
 --     noSubst <- gets (Set.member var . protected)
 --     if noSubst 
@@ -167,6 +170,12 @@ applySubst subst PrimNop = PrimNop
 
 
 renameArg :: Substitution -> PrimArg -> PrimArg
-renameArg subst var@(ArgVar name _ FlowIn _ _) =
-    fromMaybe var $ Map.lookup name subst
+renameArg subst var@(ArgVar name _ flow _ _) =
+    maybe var (setPrimArgFlow flow) $ Map.lookup name subst
 renameArg subst primArg = primArg
+
+setPrimArgFlow :: PrimFlow -> PrimArg -> PrimArg
+setPrimArgFlow flow (ArgVar n t _ ft lst) = (ArgVar n t flow ft lst)
+setPrimArgFlow FlowIn arg = arg
+setPrimArgFlow FlowOut arg = 
+    shouldnt $ "trying to make " ++ show arg ++ " an output argument"

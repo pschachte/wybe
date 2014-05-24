@@ -8,5 +8,5 @@
   resources       : 
   procs           : plus:
 public proc plus(a:0:int, b:0:int, ?~tmp$0:0:int)<0>  @func_typed:1:8 (0 calls)
-    wybe.int.+<0>(a:0:int, b:0:int, ?~tmp$0:0:int) @func_typed:1:40
+    foreign llvm add(32:int, a:0:int, b:0:int, ?~tmp$0:0:int) @wybe:4:38
     wybe.int.=<0>(?~$:0:int, ~tmp$0:0:int)

@@ -8,5 +8,5 @@
   resources       : 
   procs           : incr:
 public proc incr(a:0:int, ?~tmp$0:0:int)<0>  @func_untyped:1:8 (0 calls)
-    wybe.int.+<0>(a:0:int, 1:int, ?~tmp$0:0:int) @func_untyped:1:29
+    foreign llvm add(32:int, a:0:int, 1:int, ?~tmp$0:0:int) @wybe:4:38
     wybe.int.=<0>(?~$:0:int, ~tmp$0:0:int)

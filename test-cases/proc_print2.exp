@@ -8,5 +8,5 @@
   resources       : 
   procs           : print2:
 public proc print2(x:0:int, y:0:int)<0>  @proc_print2:1:8 (0 calls)
-    wybe.io.print<0>(x:0:int) @proc_print2:2:8
-    wybe.io.print<0>(y:0:int) @proc_print2:3:8
+    foreign c print_int(x:0:int) @wybe:123:30
+    foreign c print_int(y:0:int) @wybe:123:30

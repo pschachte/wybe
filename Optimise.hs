@@ -12,7 +12,9 @@ import Expansion
 import Data.List as List
 import Data.Map as Map
 import Data.Graph
+import Control.Monad
 import Control.Monad.Trans.State
+import Control.Monad.Trans
 
 -- For now, just a placeholder
 optimiseModSCCBottomUp :: [ModSpec] -> Compiler ()
@@ -36,7 +38,7 @@ optimiseModBottomUp mods thisMod = do
             [(pspec,pspec,
               nub $ concatMap (localBodyCallees thisMod . procBody) procDefs)
              | (name,procDefs) <- procs,
-               (n,def) <- zip [1..] procDefs,
+               (n,def) <- zip [0..] procDefs,
                let pspec = ProcSpec thisMod name n
              ]
     mapM_ optimiseSCCBottomUp ordered
@@ -53,9 +55,48 @@ optimiseSCCBottomUp (CyclicSCC pspecs) = do
 
 optimiseProc :: ProcSpec -> Compiler ()
 optimiseProc pspec = do
-    updateProcDefM procExpansion pspec
+    updateProcDefM (optimiseProcDef pspec) pspec
 
 
+optimiseProcDef :: ProcSpec -> ProcDef -> Compiler ProcDef
+optimiseProcDef pspec def = do
+    def' <- procExpansion def
+    when (inlineable def') $ requestInline pspec def'
+    return def'
+
+
+----------------------------------------------------------------
+--                               Inlining
+----------------------------------------------------------------
+
+inlineable :: ProcDef -> Bool
+inlineable (ProcDef _ (PrimProto _ params) (ProcBody body NoFork) _ _ _ _) =
+    let benefit = 1 + length params
+        cost = sum $ List.map (primCost . content) body
+    in  benefit >= cost - 2
+inlineable (ProcDef _ _ (ProcBody _ (PrimFork _ _)) _ _ _ _) = False
+
+
+primCost :: Prim -> Int
+primCost (PrimCall _ _ _ args) = 1 + length args
+primCost (PrimForeign "llvm" _ _ _) = 1
+primCost (PrimForeign _ _ _ args) = 1 + length args
+primCost (PrimNop) = 0
+
+
+requestInline :: ProcSpec -> ProcDef -> Compiler ()
+requestInline pspec 
+  (ProcDef _ proto@(PrimProto _ params) (ProcBody body _) _ _ _ _) = do
+    -- liftIO $ putStrLn $ "Request expand " ++ show pspec ++ " " ++ show proto ++
+    --   " to:" ++ showBlock 8 (ProcBody body NoFork)
+    addExpansion pspec params body
+
+----------------------------------------------------------------
+--                     Handling the call graph
+----------------------------------------------------------------
+
+
+-- |Finding all procs called by a given proc body
 localBodyCallees :: ModSpec -> ProcBody -> [ProcSpec]
 localBodyCallees modspec body =
     mapBodyPrims (localCallees modspec) (++) [] (++) [] body

@@ -8,4 +8,5 @@
   resources       : 
   procs           : :
 proc ()<0>  (0 calls)
-    wybe.io.println<0>(1:int) @chain_assign:4:1
+    foreign c print_int(1:int) @wybe:123:30
+    foreign c putc('\n':char) @wybe:121:20
