@@ -10,10 +10,10 @@
   procs           : double:
 public proc double(a:0:int, ?~tmp$0:0:int)<0>  @func_quadruple:1:8 (0 calls)
     foreign llvm add(32:int, a:0:int, a:0:int, ?~tmp$0:0:int) @wybe:4:38
-    wybe.int.=<0>(?~$:0:int, ~tmp$0:0:int)
-    wybe.int.=<0>(?~$:0:int, ~tmp$0:0:int)
+    foreign llvm move(~tmp$0:0:int, ?~$:0:int) @wybe:19:34
                     quadruple:
 public proc quadruple(a:0:int, ?~tmp$0:0:int)<0>  @func_quadruple:3:8 (0 calls)
-    func_quadruple.double<0>(a:0:int, ?~tmp$1:0:int) @func_quadruple:3:45
-    func_quadruple.double<0>(~tmp$1:0:int, ?~tmp$0:0:int) @func_quadruple:3:38
-    wybe.int.=<0>(?~$:0:int, ~tmp$0:0:int)
+    foreign llvm add(32:int, a:0:int, a:0:int, ?~tmp$1:0:int) @wybe:4:38
+    foreign llvm move(~tmp$1:0:int, ?~$:0:int) @wybe:19:34
+    foreign llvm add(32:int, ~tmp$1:0:int, ~tmp$1:0:int, ?~tmp$0:0:int) @wybe:4:38
+    foreign llvm move(~tmp$0:0:int, ?~$:0:int) @wybe:19:34

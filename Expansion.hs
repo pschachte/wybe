@@ -105,23 +105,17 @@ expandPrim :: Prim -> OptPos -> Expander [Placed Prim]
 expandPrim call@(PrimCall md nm pspec args) pos = do
     -- liftIO $ putStrLn $ "Try to expand " ++ show call
     args' <- mapM expandArg args
-    case (nm,args') of  -- special case handling of assignment
-      ("=",[ArgVar var _ FlowOut _ _, val]) ->
-          expandAssign var val $ maybePlace call pos
-      ("=",[val, ArgVar var _ FlowOut _ _]) ->
-          expandAssign var val $ maybePlace call pos
-      _ -> do
-        expn <- lift $ gets expansion
-        case pspec >>= flip Map.lookup expn of
-          Nothing -> return [maybePlace (PrimCall md nm pspec args') pos]
-          Just (params,body) -> do
-              -- liftIO $ putStrLn $ "Found expansion: " ++ show body
-              -- XXX must also rename local vars in body to avoid variable
-              -- capture
-              -- XXX Also process assignments in body in cases where 
-              -- expansion body contains an assignment.
-              return $ List.map (fmap (applySubst $ paramSubst params args'))
-                     body
+    expn <- lift $ gets expansion
+    prims <- case pspec >>= flip Map.lookup expn of
+        Nothing -> return [maybePlace (PrimCall md nm pspec args') pos]
+        Just (params,body) -> do
+            -- liftIO $ putStrLn $ "Found expansion: " ++ show body
+            -- XXX must also rename local vars in body to avoid variable
+            -- capture
+            return $ List.map (fmap (applySubst $ paramSubst params args'))
+              body
+    primsList <- mapM (\p -> expandIfAssign (content p) p) prims
+    return $ concat primsList
 expandPrim (PrimForeign lang nm flags args) pos = do
     subst <- gets substitution
     return $ [maybePlace 
@@ -130,11 +124,17 @@ expandPrim (PrimForeign lang nm flags args) pos = do
 expandPrim PrimNop pos = return $ [maybePlace PrimNop pos]
 
 
-expandAssign :: PrimVarName -> PrimArg -> Placed Prim -> Expander [Placed Prim]
-expandAssign var val pprim = do
+-- |Record the substitution if the Prim is an assignment, and remove 
+--  the assignment if permitted.  Assignments are turned into move 
+--  primitives, because that's what they expand to, so that's what we 
+--  look for here.
+expandIfAssign :: Prim -> Placed Prim -> Expander [Placed Prim]
+expandIfAssign (PrimForeign "llvm" "move" [] 
+                [val, ArgVar var _ FlowOut _ _]) pprim = do
     modify (\s -> s { substitution = Map.insert var val $ substitution s })
     noSubst <- gets (Set.member var . protected)
     return $ if noSubst then [pprim] else []
+expandIfAssign _ pprim = return [pprim]
 
 
 expandArg :: PrimArg -> Expander PrimArg

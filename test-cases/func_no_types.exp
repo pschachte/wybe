@@ -9,5 +9,4 @@
   procs           : double:
 public proc double(a:0:int, ?~tmp$0:0:int)<0>  @func_no_types:1:8 (0 calls)
     foreign llvm mul(32:int, a:0:int, 2:int, ?~tmp$0:0:int) @wybe:12:38
-    wybe.int.=<0>(?~$:0:int, ~tmp$0:0:int)
-    wybe.int.=<0>(?~$:0:int, ~tmp$0:0:int)
+    foreign llvm move(~tmp$0:0:int, ?~$:0:int) @wybe:19:34

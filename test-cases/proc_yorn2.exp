@@ -14,14 +14,11 @@ proc gen$2(prompt:0:string, ?prompt:1:string, ?response:1:char, ?result:1:bool, 
     foreign c print_string(" (y/n) ":string) @wybe:135:33
     foreign c read_char(?response:0:char) @wybe:133:31
     foreign llvm icmp eq(32:int, response:0:char, 'Y':char, ?~tmp$0:0:bool) @wybe:78:42
-    wybe.bool.=<0>(?~$:0:bool, ~tmp$0:0:bool)
     proc_yorn2.gen$3<0>(prompt:0:string, response:0:char, ~tmp$0:0:bool, tmp$0:0:bool, ?prompt:1:string, ?response:1:char, ?result:1:bool, ?tmp$0:1:bool) @proc_yorn2:6:9
                     gen$3:
 proc gen$3(prompt:0:string, response:0:char, result:0:bool, tmp$0:0:bool, ?prompt:1:string, ?response:1:char, ?result:1:bool, ?tmp$0:1:bool)<0>  (0 calls)
     foreign llvm icmp eq(32:int, response:0:char, 'N':char, ?~tmp$2:0:bool) @wybe:78:42
-    wybe.bool.=<0>(?~$:0:bool, ~tmp$2:0:bool)
     foreign llvm or(result:0:bool, ~tmp$2:0:bool, ?~tmp$1:0:bool) @wybe:56:43
-    wybe.bool.=<0>(?~$:0:bool, ~tmp$1:0:bool)
     case tmp$1:0 of
     0:
         proc_yorn2.gen$4<0>(prompt:0:string, response:0:char, result:0:bool, tmp$0:0:bool, ?prompt:1:string, ?response:1:char, ?result:1:bool, ?tmp$0:1:bool)

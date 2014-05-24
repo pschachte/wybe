@@ -24,7 +24,6 @@ o Support optional and named arguments
 
 Optimise:
 o Remove unneeded input and unchanged output arguments
-o Inline trivial procs
 o Inline local procs with only one call
 o Common sub-expression elimination
 o Constant folding

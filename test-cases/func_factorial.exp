@@ -9,20 +9,17 @@
   procs           : factorial:
 public proc factorial(n:0:int, ?~tmp$0:0:int)<0>  @func_factorial:1:8 (0 calls)
     func_factorial.gen$1<0>(n:0:int, ?n:1:int, ?tmp$0:0:int) @func_factorial:2:8
-    wybe.int.=<0>(?~$:0:int, ~tmp$0:0:int)
+    foreign llvm move(~tmp$0:0:int, ?~$:0:int) @wybe:19:34
                     gen$1:
 proc gen$1(n:0:int, ?n:0:int, ?tmp$0:0:int)<0>  (0 calls)
     foreign llvm icmp sle(32:int, n:0:int, 0:int, ?~tmp$1:0:bool) @wybe:16:40
-    wybe.bool.=<0>(?~$:0:bool, ~tmp$1:0:bool)
     case tmp$1:0 of
     0:
         foreign llvm sub(32:int, n:0:int, 1:int, ?~tmp$4:0:int) @wybe:7:38
-        wybe.int.=<0>(?~$:0:int, ~tmp$4:0:int)
-        func_factorial.factorial<0>(~tmp$4:0:int, ?~tmp$3:0:int) @func_factorial:2:34
+        func_factorial.gen$1<0>(~tmp$4:0:int, ?n:1:int, ?~tmp$3:0:int) @func_factorial:2:8
         foreign llvm mul(32:int, n:0:int, ~tmp$3:0:int, ?~tmp$2:0:int) @wybe:12:38
-        wybe.int.=<0>(?~$:0:int, ~tmp$2:0:int)
-        wybe.int.=<0>(?~tmp$0:0:int, ~tmp$2:0:int)
+        foreign llvm move(~tmp$2:0:int, ?~tmp$0:0:int) @wybe:19:34
 
     1:
-        wybe.int.=<0>(?~tmp$0:0:int, 1:int)
+        foreign llvm move(1:int, ?~tmp$0:0:int) @wybe:19:34
 
