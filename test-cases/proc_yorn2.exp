@@ -10,25 +10,28 @@
 proc gen$1(prompt:0:?, response:0:?, result:0:?, tmp$0:0:?, tmp$1:0:?, tmp$2:0:?, ?prompt:0:?, ?response:0:?, ?result:0:?, ?tmp$0:0:?, ?tmp$1:0:?, ?tmp$2:0:?)<0>  (0 calls)
                     gen$2:
 proc gen$2(prompt:0:string, ?prompt:1:string, ?response:1:char, ?result:1:bool, ?tmp$0:1:bool, ?tmp$1:-1:?, ?tmp$2:-1:?)<0>  (0 calls)
-    wybe.io.print<3>(prompt:0:string) @proc_yorn2:2:9
-    wybe.io.print<3>(" (y/n) ":string) @proc_yorn2:3:9
-    wybe.io.read<2>(?response:0:char) @proc_yorn2:4:9
-    wybe.char.=<2>(response:0:char, 'Y':char, ?~tmp$0:0:bool) @proc_yorn2:5:19
+    foreign c print_string(prompt:0:string) @wybe:135:33
+    foreign c print_string(" (y/n) ":string) @wybe:135:33
+    foreign c read_char(?response:0:char) @wybe:133:31
+    foreign llvm icmp eq(32:int, response:0:char, 'Y':char, ?~tmp$0:0:bool) @wybe:78:42
+    wybe.bool.=<0>(?~$:0:bool, ~tmp$0:0:bool)
     proc_yorn2.gen$3<0>(prompt:0:string, response:0:char, ~tmp$0:0:bool, tmp$0:0:bool, ?prompt:1:string, ?response:1:char, ?result:1:bool, ?tmp$0:1:bool) @proc_yorn2:6:9
                     gen$3:
 proc gen$3(prompt:0:string, response:0:char, result:0:bool, tmp$0:0:bool, ?prompt:1:string, ?response:1:char, ?result:1:bool, ?tmp$0:1:bool)<0>  (0 calls)
-    wybe.char.=<2>(response:0:char, 'N':char, ?~tmp$2:0:bool) @proc_yorn2:6:26
-    wybe.bool.or<0>(result:0:bool, ~tmp$2:0:bool, ?~tmp$1:0:bool) @proc_yorn2:6:15
+    foreign llvm icmp eq(32:int, response:0:char, 'N':char, ?~tmp$2:0:bool) @wybe:78:42
+    wybe.bool.=<0>(?~$:0:bool, ~tmp$2:0:bool)
+    foreign llvm or(result:0:bool, ~tmp$2:0:bool, ?~tmp$1:0:bool) @wybe:56:43
+    wybe.bool.=<0>(?~$:0:bool, ~tmp$1:0:bool)
     case tmp$1:0 of
     0:
         proc_yorn2.gen$4<0>(prompt:0:string, response:0:char, result:0:bool, tmp$0:0:bool, ?prompt:1:string, ?response:1:char, ?result:1:bool, ?tmp$0:1:bool)
 
     1:
-        proc_yorn2.gen$1<0>(prompt:0:string, response:0:char, result:0:bool, tmp$0:0:bool, tmp$1:0:bool, tmp$2:0:bool, ?prompt:1:string, ?response:1:char, ?result:1:bool, ?tmp$0:1:bool, ?tmp$1:1:bool, ?tmp$2:1:bool)
 
                     gen$4:
 proc gen$4(prompt:0:string, response:0:char, result:0:bool, tmp$0:0:bool, ?prompt:1:string, ?response:1:char, ?result:1:bool, ?tmp$0:1:bool)<0>  (0 calls)
-    wybe.io.println<3>("Please answer 'yes' or 'no'.":string) @proc_yorn2:7:9
+    foreign c print_string("Please answer 'yes' or 'no'.":string) @wybe:135:33
+    foreign c putc('\n':char) @wybe:121:20
     proc_yorn2.gen$2<0>(prompt:0:string, ?prompt:1:string, ?response:1:char, ?result:1:bool, ?tmp$0:1:bool, ?tmp$1:0, ?tmp$2:0) @proc_yorn2:2:5
                     yorn:
 public proc yorn(prompt:0:string, ?result:0:bool)<0>  @proc_yorn2:1:8 (0 calls)

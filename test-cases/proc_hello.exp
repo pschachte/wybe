@@ -8,4 +8,5 @@
   resources       : 
   procs           : print2:
 public proc print2(x:0:int, y:0:int)<0>  @proc_hello:1:8 (0 calls)
-    wybe.io.println<3>("hello, world":string) @proc_hello:2:8
+    foreign c print_string("hello, world":string) @wybe:135:33
+    foreign c putc('\n':char) @wybe:121:20

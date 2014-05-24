@@ -13,20 +13,22 @@ proc gen$2(count:0:int, ?count:1:int)<0>  (0 calls)
     proc_beer.gen$3<0>(count:0:int, ?count:1:int) @proc_beer:5:9
                     gen$3:
 proc gen$3(count:0:int, ?count:1:int)<0>  (0 calls)
-    wybe.int.>=<0>(count:0:int, 0:int, ?~tmp$0:0:bool) @proc_beer:5:15
+    foreign llvm icmp sge(32:int, count:0:int, 0:int, ?~tmp$0:0:bool) @wybe:18:40
+    wybe.bool.=<0>(?~$:0:bool, ~tmp$0:0:bool)
     case tmp$0:0 of
     0:
-        proc_beer.gen$1<0>(count:0:int, ?count:1:int)
 
     1:
         proc_beer.gen$4<0>(count:0:int, tmp$0:0:bool, ?count:1:int, ?tmp$0:1:bool, ?tmp$1:0:int)
 
                     gen$4:
 proc gen$4(count:0:int, tmp$0:0:?, ?count:2:int, ?tmp$0:0:?, ?tmp$1:0:int)<0>  (0 calls)
-    wybe.io.print<0>(count:0:int) @proc_beer:6:9
-    wybe.io.println<3>(" bottles of beer on the wall":string) @proc_beer:7:9
-    wybe.int.-<0>(count:0:int, 1:int, ?~tmp$1:0:int) @proc_beer:8:18
+    foreign c print_int(count:0:int) @wybe:123:30
+    foreign c print_string(" bottles of beer on the wall":string) @wybe:135:33
+    foreign c putc('\n':char) @wybe:121:20
+    foreign llvm sub(32:int, count:0:int, 1:int, ?~tmp$1:0:int) @wybe:7:38
+    wybe.int.=<0>(?~$:0:int, ~tmp$1:0:int)
     proc_beer.gen$2<0>(~tmp$1:0:int, ?count:2:int) @proc_beer:5:5
                     print2:
 public proc print2()<0>  @proc_beer:1:8 (0 calls)
-    proc_beer.gen$2<0>(99:int, ?count:1:int) @proc_beer:5:5
+    proc_beer.gen$3<0>(99:int, ?count:1:int) @proc_beer:5:9

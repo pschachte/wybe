@@ -116,6 +116,10 @@ expandPrim call@(PrimCall md nm pspec args) pos = do
           Nothing -> return [maybePlace (PrimCall md nm pspec args') pos]
           Just (params,body) -> do
               -- liftIO $ putStrLn $ "Found expansion: " ++ show body
+              -- XXX must also rename local vars in body to avoid variable
+              -- capture
+              -- XXX Also process assignments in body in cases where 
+              -- expansion body contains an assignment.
               return $ List.map (fmap (applySubst $ paramSubst params args'))
                      body
 expandPrim (PrimForeign lang nm flags args) pos = do

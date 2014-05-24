@@ -13,20 +13,20 @@ proc ()<0>  (0 calls)
 proc gen$1(c:0:?, ?c:0:?)<0>  (0 calls)
                     gen$2:
 proc gen$2(?c:1:char)<0>  (0 calls)
-    wybe.io.read<2>(?c:0:char) @simple_loop:1:4
+    foreign c read_char(?c:0:char) @wybe:133:31
     simple_loop.gen$3<0>(c:0:char, ?c:1:char) @simple_loop:2:4
                     gen$3:
 proc gen$3(c:0:char, ?c:1:char)<0>  (0 calls)
-    wybe.io.eof<0>(?~tmp$1:0:char) @simple_loop:2:16
-    wybe.char./=<0>(c:0:char, ~tmp$1:0:char, ?~tmp$0:0:bool) @simple_loop:2:10
+    wybe.char.=<0>(?~tmp$1:0:char, '.':char)
+    foreign llvm icmp ne(32:int, c:0:char, ~tmp$1:0:char, ?~tmp$0:0:bool) @wybe:79:42
+    wybe.bool.=<0>(?~$:0:bool, ~tmp$0:0:bool)
     case tmp$0:0 of
     0:
-        simple_loop.gen$1<0>(c:0:char, ?c:1:char)
 
     1:
         simple_loop.gen$4<0>(c:0:char, tmp$0:0:bool, tmp$1:0:char, ?c:1:char, ?tmp$0:1:bool, ?tmp$1:1:char)
 
                     gen$4:
 proc gen$4(c:0:char, tmp$0:0:?, tmp$1:0:?, ?c:1:char, ?tmp$0:0:?, ?tmp$1:0:?)<0>  (0 calls)
-    wybe.io.print<2>(c:0:char) @simple_loop:3:4
+    foreign c putchar(c:0:char) @wybe:131:31
     simple_loop.gen$2<0>(?c:1:char) @simple_loop:1:1

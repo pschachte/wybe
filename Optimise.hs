@@ -55,6 +55,7 @@ optimiseSCCBottomUp (CyclicSCC pspecs) = do
 
 optimiseProc :: ProcSpec -> Compiler ()
 optimiseProc pspec = do
+    -- liftIO $ putStrLn $ ">>> Optimise " ++ show pspec
     updateProcDefM (optimiseProcDef pspec) pspec
 
 
@@ -87,8 +88,8 @@ primCost (PrimNop) = 0
 requestInline :: ProcSpec -> ProcDef -> Compiler ()
 requestInline pspec 
   (ProcDef _ proto@(PrimProto _ params) (ProcBody body _) _ _ _ _) = do
-    -- liftIO $ putStrLn $ "Request expand " ++ show pspec ++ " " ++ show proto ++
-    --   " to:" ++ showBlock 8 (ProcBody body NoFork)
+    -- liftIO $ putStrLn $ "Request expand " ++ show pspec ++ " " ++ 
+    --   show proto ++ " to:" ++ showBlock 8 (ProcBody body NoFork)
     addExpansion pspec params body
 
 ----------------------------------------------------------------

@@ -45,7 +45,8 @@ module AST (
   CallExpansion, addExpansion,
   addProc, replaceProc, lookupProc, publicProc,
   refersTo, callTargets,
-  showBody, showStmt, showBlock, showProcDef, showModSpec, showModSpecs,
+  verboseDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
+  showModSpecs, 
   shouldnt, checkError, checkValue, trustFromJust, trustFromJustM
   ) where
 
@@ -595,27 +596,35 @@ getProcDef (ProcSpec modSpec procName procID) = do
 
 
 updateProcDef :: (ProcDef -> ProcDef) -> ProcSpec -> Compiler ()
-updateProcDef updater (ProcSpec modspec procName procID) =
+updateProcDef updater pspec@(ProcSpec modspec procName procID) =
     updateLoadedModuleImpln
     (\imp -> imp { modProcs =
                        Map.adjust
-                       (\l -> let (front,back) = List.splitAt (procID - 1) l
-                                  updated = updater $ head back
+                       (\l -> let (front,back) = List.splitAt procID l
+                                  updated = 
+                                      if List.null back
+                                      then shouldnt $ "invalid proc spec " ++
+                                           show pspec
+                                      else updater $ head back
                               in  front ++ updated:tail back)
                        procName (modProcs imp) })
     modspec
     
 
 updateProcDefM :: (ProcDef -> Compiler ProcDef) -> ProcSpec -> Compiler ()
-updateProcDefM updater (ProcSpec modspec procName procID) =
+updateProcDefM updater pspec@(ProcSpec modspec procName procID) =
     updateLoadedModuleImplnM
     (\imp -> do
        let procs = modProcs imp
        case Map.lookup procName procs of
          Nothing -> return imp
          Just defs -> do
-           let (front,back) = List.splitAt (procID - 1) defs
-           updated <- updater $ head back
+           let (front,back) = List.splitAt procID defs
+           updated <- 
+               if List.null back
+               then shouldnt $ "invalid proc spec " ++
+                    show pspec
+               else updater $ head back
            let defs' = front ++ updated:tail back
            let procs' = Map.insert procName defs' procs
            return $ imp { modProcs = procs' })
@@ -1308,6 +1317,15 @@ maybeApply f Nothing = Nothing
 ----------------------------------------------------------------
 --                      Showing Compiler State
 ----------------------------------------------------------------
+
+verboseDump :: Compiler ()
+verboseDump = do
+    modList <- gets (Map.elems . modules)
+    verboseMsg 1 $
+        return (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
+                (List.map show $ 
+                 List.filter ((/="wybe"). List.head . modSpec) modList))
+
 
 -- |How to show an Item.
 instance Show Item where

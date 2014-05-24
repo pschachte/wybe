@@ -23,7 +23,8 @@ public proc ++(x:0:intlist, y:0:intlist, ?~tmp$0:0:intlist)<0>  @type_list:9:8 (
                     gen$1:
 proc gen$1(x:0:intlist, y:0:intlist, ?tmp$0:0:intlist, ?x:0:intlist, ?y:0:intlist)<0>  (0 calls)
     type_list.intlist.[]<0>(?~tmp$2:0:intlist) @type_list:10:12
-    type_list.intlist.=<2>(x:0:intlist, ~tmp$2:0:intlist, ?~tmp$1:0:bool) @type_list:10:8
+    wybe.bool.false<0>(?~tmp$1:0:bool) @type_list:6:43
+    wybe.bool.=<0>(?~$:0:bool, ~tmp$1:0:bool)
     case tmp$1:0 of
     0:
         type_list.intlist.head<0>(x:0:intlist, ?~tmp$4:0:int) @type_list:12:11
