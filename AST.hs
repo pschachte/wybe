@@ -22,7 +22,7 @@ module AST (
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   enterModule, reenterModule, exitModule, finishModule, 
   emptyInterface, emptyImplementation, 
-  getProcDef, updateProcDef, updateProcDefM, getParams,
+  getProcDef, mkTempName, updateProcDef, updateProcDefM, getParams,
   ModSpec, ProcDef(..), ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), FlowDirection(..), 
   argFlowDirection, argType, flowsIn, flowsOut, mapBodyPrims,
@@ -669,9 +669,10 @@ publicProc name = do
 -- |Type to remember proc call expansions.  For each proc, we remember
 -- the parameters of the call, to bind to the actual arguments, and
 -- the body of the definition.  We also store a set of the variable
--- names used in the body, so that they can be renamed if necessary to
--- avoid variable capture.
-type CallExpansion = Map ProcSpec ([PrimParam],[Placed Prim])
+-- names used only in the body, so that they can be renamed to avoid
+-- variable capture.
+type CallExpansion = 
+    Map ProcSpec ([PrimParam],[Placed Prim], Map PrimVarName TypeSpec)
 
 -- |A CallExpansion that doesn't expand anything
 identityExpansion :: CallExpansion
@@ -679,9 +680,23 @@ identityExpansion = Map.empty
 
 addExpansion :: ProcSpec -> [PrimParam] -> [Placed Prim] -> Compiler ()
 addExpansion proc params body = do
-  modify (\cs -> cs { expansion = Map.insert proc (params,body) $
-                                  expansion cs })
+    let bodyVars = mapBodyPrims primVars Map.union Map.empty
+                   Map.union Map.empty (ProcBody body NoFork)
+    modify (\cs -> cs { expansion = Map.insert proc (params,body,bodyVars) $
+                                                    expansion cs })
 
+
+primVars :: Prim -> Map PrimVarName TypeSpec
+primVars (PrimCall _ _ _ args) = argsVars args
+primVars (PrimForeign _ _ _ args) = argsVars args
+primVars (PrimNop) = Map.empty
+
+argsVars :: [PrimArg] -> Map PrimVarName TypeSpec
+argsVars = List.foldr (Map.union . argVars) Map.empty
+
+argVars :: PrimArg -> Map PrimVarName TypeSpec
+argVars (ArgVar name typ FlowOut _ _) = Map.singleton name typ
+argVars _ = Map.empty
 
 -- |Return some function applied to the user's specified compiler options.
 option :: (Options -> t) -> Compiler t
@@ -1004,6 +1019,9 @@ data ProcDef = ProcDef {
     procVis :: Visibility
 }
              deriving Eq
+
+mkTempName :: Int -> String
+mkTempName ctr = "tmp$" ++ show ctr
 
 -- |A procedure body.  In principle, a body is a set of clauses, each
 -- possibly containg some guards.  Each guard is a test that succeeds

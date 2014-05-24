@@ -129,7 +129,7 @@ tempVar :: Flattener VarName
 tempVar = do
     ctr <- gets tempCtr
     modify (\s -> s { tempCtr = ctr + 1 })
-    return $ "tmp$" ++ show ctr
+    return $ mkTempName ctr
 
 
 flattenInner :: Bool -> Flattener t -> Flattener (t,[Placed Stmt])

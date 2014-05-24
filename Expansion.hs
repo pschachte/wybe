@@ -25,15 +25,17 @@ procExpansion :: ProcDef -> Compiler ProcDef
 procExpansion def = do
     let body  = procBody def
     let proto = procProto def
+    let tmp = procTmpCount def
     let outputs = List.map primParamName $
                   List.filter ((==FlowOut) . primParamFlow) $
                     primProtoParams proto
-    (body',paramSubst) <- evalStateT (expandBody body) $
-                          initExpanderState $ Set.fromList outputs
+    (body',expander) <- runStateT (expandBody body) $
+                          initExpanderState tmp $ Set.fromList outputs
     let proto' = proto { primProtoParams =
-                             List.map (renameParam paramSubst) $
-                                 primProtoParams proto }
-    return $ def { procProto = proto', procBody = body' }
+                              List.map (renameParam $ substitution expander) $
+                              primProtoParams proto }
+    return $ def { procProto = proto', procBody = body', 
+                   procTmpCount = tmpCount expander }
 
 
 
@@ -71,34 +73,36 @@ projectSubst protected subst =
 
 data ExpanderState = Expander {
     substitution :: Substitution,     -- ^The current variable substitution
-    protected    :: Set PrimVarName   -- ^Variables that cannot be renamed
+    protected    :: Set PrimVarName,  -- ^Variables that cannot be renamed
+    tmpCount     :: Int               -- ^Next available tmp variable number
     }
 
 
 type Expander = StateT ExpanderState Compiler
 
 
-initExpanderState :: Set PrimVarName -> ExpanderState
-initExpanderState varSet = Expander identitySubstitution varSet
+initExpanderState :: Int -> Set PrimVarName -> ExpanderState
+initExpanderState tmpCount varSet = 
+    Expander identitySubstitution varSet tmpCount
 
 
-expandBody :: ProcBody -> Expander (ProcBody,Substitution)
+expandBody :: ProcBody -> Expander ProcBody
 expandBody (ProcBody prims fork) = do
     prims' <- fmap concat $ mapM (placedApply expandPrim) prims
-    (fork',substs) <- expandFork fork
-    state <- get
-    let baseSubst = projectSubst (protected state) (substitution state)
-    let subst = List.foldr meetSubsts baseSubst substs
-    return (ProcBody prims' fork', subst)
+    fork' <- expandFork fork
+    return $ ProcBody prims' fork'
                                 
 
-expandFork :: PrimFork -> Expander (PrimFork,[Substitution])
-expandFork NoFork = return (NoFork,[])
+expandFork :: PrimFork -> Expander PrimFork
+expandFork NoFork = return NoFork
 expandFork (PrimFork var bodies) = do
     state <- get
-    pairs <- lift $ mapM (\b -> evalStateT (expandBody b) state) bodies
-    let bodies' = List.map fst pairs
-    return (PrimFork var bodies',List.map snd pairs)
+    let baseSubst = projectSubst (protected state) (substitution state)
+    pairs <- lift $ mapM (\b -> runStateT (expandBody b) state) bodies
+    let subst = List.foldr meetSubsts baseSubst $
+                List.map (substitution . snd) pairs
+    modify (\s -> s { substitution = subst })
+    return $ PrimFork var $ List.map fst pairs
 
 
 expandPrim :: Prim -> OptPos -> Expander [Placed Prim]
@@ -108,12 +112,19 @@ expandPrim call@(PrimCall md nm pspec args) pos = do
     expn <- lift $ gets expansion
     prims <- case pspec >>= flip Map.lookup expn of
         Nothing -> return [maybePlace (PrimCall md nm pspec args') pos]
-        Just (params,body) -> do
+        Just (params,body,bodyMap) -> do
             -- liftIO $ putStrLn $ "Found expansion: " ++ show body
-            -- XXX must also rename local vars in body to avoid variable
-            -- capture
-            return $ List.map (fmap (applySubst $ paramSubst params args'))
-              body
+            let subst = paramSubst params args'
+            tmp <- gets tmpCount
+            let (tmp',subst') =
+                    mapAccumWithKey
+                    (\n v t -> (n+1,
+                                ArgVar (PrimVarName (mkTempName n) 0)
+                                t FlowIn Ordinary False))
+                    tmp' bodyMap
+            let subst'' = Map.union subst subst'
+            modify (\s -> s { tmpCount = tmp' })
+            return $ List.map (fmap (applySubst subst)) body
     primsList <- mapM (\p -> expandIfAssign (content p) p) prims
     return $ concat primsList
 expandPrim (PrimForeign lang nm flags args) pos = do
@@ -140,12 +151,6 @@ expandIfAssign _ pprim = return [pprim]
 expandArg :: PrimArg -> Expander PrimArg
 expandArg arg@(ArgVar var _ _ _ _) = do
     gets (fromMaybe arg . Map.lookup var . substitution)
--- XXX Is this the right code:
--- expandArg arg@(ArgVar var _ _ _ _) = do
---     noSubst <- gets (Set.member var . protected)
---     if noSubst 
---       then return arg
---       else gets (fromMaybe arg . Map.lookup var . substitution)
 expandArg arg = return arg
 
 
@@ -154,16 +159,16 @@ paramSubst params args =
     List.foldr (\(PrimParam k _ dir _,v) subst -> Map.insert k v subst)
     identitySubstitution $ zip params args
              
-               
-
 
 renameParam :: Substitution -> PrimParam -> PrimParam
-renameParam subst param@(PrimParam name typ dir ftype) = 
+renameParam subst param@(PrimParam name typ FlowOut ftype) = 
     maybe param 
     (\arg -> case arg of
-          ArgVar name' _ _ _ _ -> PrimParam name' typ dir ftype
+          ArgVar name' _ _ _ _ -> PrimParam name' typ FlowOut ftype
           _ -> param) $
     Map.lookup name subst
+renameParam _ param = param
+
 
 applySubst :: Substitution -> Prim -> Prim
 applySubst subst (PrimCall md nm pspec args) =
