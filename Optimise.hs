@@ -9,6 +9,7 @@ module Optimise (optimiseModSCCBottomUp) where
 
 import AST
 import Expansion
+import LastUse
 import Data.List as List
 import Data.Map as Map
 import Data.Graph
@@ -62,8 +63,13 @@ optimiseProc pspec = do
 optimiseProcDef :: ProcSpec -> ProcDef -> Compiler ProcDef
 optimiseProcDef pspec def = do
     def' <- procExpansion def
-    when (inlineable def') $ requestInline pspec def'
-    return def'
+    (def'',maybeMacro) <- markLastUse def'
+    case maybeMacro of
+        Just macro -> do
+            requestInline pspec macro
+        Nothing -> do
+            when (inlineable def'') $ requestInline pspec def''
+    return def''
 
 
 ----------------------------------------------------------------
