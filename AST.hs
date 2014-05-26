@@ -42,7 +42,7 @@ module AST (
   optionallyPutStr, verboseMsg, message, genProcName,
   addImport, addType, addSubmod, lookupType, publicType,
   addResource, lookupResource, publicResource, 
-  CallExpansion, addExpansion,
+  CallExpansion,
   addProc, replaceProc, lookupProc, publicProc,
   refersTo, callTargets,
   verboseDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
@@ -562,7 +562,7 @@ addImport modspec imp specific vis = do
 
 -- |Add the specified proc definition to the current module.
 addProc :: ProcDef -> Compiler ()
-addProc procDef@(ProcDef name proto clauses pos _ calls vis) = do
+addProc procDef@(ProcDef name proto clauses pos _ calls vis _) = do
     updateImplementation
       (updateModProcs
        (\procs ->
@@ -640,16 +640,16 @@ mapListInsert key elt =
 
 -- |Replace the specified proc definition in the current module.
 replaceProc :: Ident -> Int -> PrimProto -> ProcBody -> OptPos ->
-               Int -> Int -> Visibility -> Compiler ()
-replaceProc name id proto clauses pos tmpCount calls vis = do
+               Int -> Int -> Visibility -> Bool -> Compiler ()
+replaceProc name id proto clauses pos tmpCount calls vis inline = do
     updateImplementation
       (updateModProcs
        (\procs -> 
          let olddefs = findWithDefault [] name procs
              (front,back) = List.splitAt id olddefs
          in Map.insert name (front ++ 
-                             (ProcDef name proto clauses pos tmpCount calls vis:
-                              tail back)) 
+                             (ProcDef name proto clauses pos tmpCount calls
+                                      vis inline:tail back)) 
             procs))
 
 
@@ -678,25 +678,6 @@ type CallExpansion =
 identityExpansion :: CallExpansion
 identityExpansion = Map.empty
 
-addExpansion :: ProcSpec -> [PrimParam] -> [Placed Prim] -> Compiler ()
-addExpansion proc params body = do
-    let bodyVars = mapBodyPrims primVars Map.union Map.empty
-                   Map.union Map.empty (ProcBody body NoFork)
-    modify (\cs -> cs { expansion = Map.insert proc (params,body,bodyVars) $
-                                                    expansion cs })
-
-
-primVars :: Prim -> Map PrimVarName TypeSpec
-primVars (PrimCall _ _ _ args) = argsVars args
-primVars (PrimForeign _ _ _ args) = argsVars args
-primVars (PrimNop) = Map.empty
-
-argsVars :: [PrimArg] -> Map PrimVarName TypeSpec
-argsVars = List.foldr (Map.union . argVars) Map.empty
-
-argVars :: PrimArg -> Map PrimVarName TypeSpec
-argVars (ArgVar name typ FlowOut _ _) = Map.singleton name typ
-argVars _ = Map.empty
 
 -- |Return some function applied to the user's specified compiler options.
 option :: (Options -> t) -> Compiler t
@@ -1016,7 +997,8 @@ data ProcDef = ProcDef {
     procPos :: OptPos,
     procTmpCount :: Int,        -- the next temp variable number to use
     procCallCount :: Int,       -- the number of calls to it statically in prog
-    procVis :: Visibility
+    procVis :: Visibility,
+    procInline :: Bool          -- inline calls to this proc
 }
              deriving Eq
 
@@ -1206,18 +1188,21 @@ data PrimParam =
     primParamName :: PrimVarName,
     primParamType :: TypeSpec, 
     primParamFlow :: PrimFlow, 
-    primParamFlowType :: ArgFlowType
+    primParamFlowType :: ArgFlowType,
+    primParamNeeded :: Bool
     } deriving Eq
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
-  show (PrimParam name typ dir ftype) =
-    primFlowPrefix dir ++ 
+  show (PrimParam name typ dir ftype needed) =
+    (if needed then "" else "[") ++
+    primFlowPrefix dir ++
     (case ftype of
           HalfUpdate -> "%"
           Implicit _ -> ""
           Ordinary -> "") ++
-    show name ++ ":" ++ show typ
+    show name ++ ":" ++ show typ ++
+    (if needed then "" else "]")
 
 -- A variable name with an integer suffix to distinguish different 
 -- values for the same name.  As a special case, a suffix of -1 
@@ -1319,7 +1304,7 @@ varsInProto dir (PrimProto _ params) =
     List.foldr Set.union Set.empty $ List.map (varsInParam dir) params
 
 varsInParam :: PrimFlow -> PrimParam -> Set PrimVarName
-varsInParam dir (PrimParam var _ dir' _) =
+varsInParam dir (PrimParam var _ dir' _ _) =
   -- invert the flow for prototypes, since the direction is opposite
   if dir == dir' then Set.empty else Set.singleton var
 
@@ -1524,11 +1509,12 @@ showProcDefs firstID (def:defs) =
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID (ProcDef _ proto def pos _ calls vis) =
+showProcDef thisID (ProcDef _ proto def pos _ calls vis inline) =
     "\n" ++ visibilityPrefix vis ++
     "proc " ++ show proto ++ "<" ++ show thisID ++ "> "
     ++ showMaybeSourcePos pos
     ++ " (" ++ show calls ++ " calls)"
+    ++ (if inline then " (inline)" else "")
     ++ showBlock 4 def
 
 -- |How to show a type specification.

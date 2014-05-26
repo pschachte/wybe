@@ -15,12 +15,21 @@ import Control.Monad.Trans.State
 import Control.Monad.Trans
 import Control.Monad
 
-markLastUse :: ProcDef -> Compiler (ProcDef, Maybe ProcDef)
-markLastUse (ProcDef nm proto@(PrimProto _ params) body pos tmp ccount vis) = do
+markLastUse :: ProcSpec -> ProcDef -> Compiler ProcDef
+markLastUse ps (ProcDef nm proto@(PrimProto pn params) 
+                     body pos tmp ccount vis inline) = do
     let outputs = List.filter ((==FlowOut) . primParamFlow) params
     let outSet = List.foldr (Set.insert . primParamName) Set.empty outputs
     (body',needed) <- runStateT (bodyLastUse body) outSet
-    return (ProcDef nm proto body' pos tmp ccount vis, Nothing)
+    let params' = List.map 
+                  (\p -> p { primParamNeeded = neededIfInput needed p }) 
+                  params
+    return $ ProcDef nm (PrimProto pn params') body' pos tmp ccount vis inline
+
+
+neededIfInput :: Set PrimVarName -> PrimParam -> Bool
+neededIfInput needed param =
+    primParamFlow param == FlowOut || Set.member (primParamName param) needed
 
 
 ----------------------------------------------------------------

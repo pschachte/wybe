@@ -34,8 +34,12 @@ procExpansion def = do
     let proto' = proto { primProtoParams =
                               List.map (renameParam $ substitution expander) $
                               primProtoParams proto }
-    return $ def { procProto = proto', procBody = body', 
-                   procTmpCount = tmpCount expander }
+    let def' = def { procProto = proto', procBody = body', 
+                     procTmpCount = tmpCount expander }
+    -- liftIO $ putStrLn $
+    --        "Expanded:\n" ++ showProcDef 4 def ++
+    --                 "\nTo:\n" ++ showProcDef 4 def'
+    return def'
 
 
 
@@ -106,25 +110,29 @@ expandFork (PrimFork var last bodies) = do
 
 
 expandPrim :: Prim -> OptPos -> Expander [Placed Prim]
-expandPrim call@(PrimCall md nm pspec args) pos = do
+expandPrim call@(PrimCall md nm (Just pspec) args) pos = do
     -- liftIO $ putStrLn $ "Try to expand " ++ show call
     args' <- mapM expandArg args
-    expn <- lift $ gets expansion
-    prims <- case pspec >>= flip Map.lookup expn of
-        Nothing -> return [maybePlace (PrimCall md nm pspec args') pos]
-        Just (params,body,bodyMap) -> do
-            -- liftIO $ putStrLn $ "Found expansion: " ++ show body
-            let subst = paramSubst params args'
-            tmp <- gets tmpCount
-            let (tmp',subst') =
-                    mapAccumWithKey
-                    (\n v t -> (n+1,
-                                ArgVar (PrimVarName (mkTempName n) 0)
-                                t FlowIn Ordinary False))
-                    tmp' bodyMap
-            let subst'' = Map.union subst subst'
-            modify (\s -> s { tmpCount = tmp' })
-            return $ List.map (fmap (applySubst subst)) body
+    def <- lift $ getProcDef pspec
+    prims <- if procInline def
+             then do
+                 -- liftIO $ putStrLn $ "Found expansion: " ++ show body
+                 let subst = paramSubst (primProtoParams $ procProto def) args'
+                 let body = procBody def
+                 let bodyMap = bodyVars body
+                 tmp <- gets tmpCount
+                 let (tmp',subst') =
+                         mapAccumWithKey
+                         (\n v t -> (n+1,
+                                     ArgVar (PrimVarName (mkTempName n) 0)
+                                     t FlowIn Ordinary False))
+                         tmp bodyMap
+                 let subst'' = Map.union subst subst'
+                 modify (\s -> s { tmpCount = tmp' })
+                 return $ List.map (fmap (applySubst subst))
+                            (bodyPrims $ procBody def)
+             else return [maybePlace (PrimCall md nm (Just pspec) args') pos]
+
     primsList <- mapM (\p -> expandIfAssign (content p) p) prims
     return $ concat primsList
 expandPrim (PrimForeign lang nm flags args) pos = do
@@ -132,7 +140,7 @@ expandPrim (PrimForeign lang nm flags args) pos = do
     return $ [maybePlace 
               (PrimForeign lang nm flags $ List.map (renameArg subst) args) 
               pos]
-expandPrim PrimNop pos = return $ [maybePlace PrimNop pos]
+expandPrim prim pos = return $ [maybePlace prim pos]
 
 
 -- |Record the substitution if the Prim is an assignment, and remove 
@@ -156,15 +164,15 @@ expandArg arg = return arg
 
 paramSubst :: [PrimParam] -> [PrimArg] -> Substitution
 paramSubst params args = 
-    List.foldr (\(PrimParam k _ dir _,v) subst -> Map.insert k v subst)
+    List.foldr (\(PrimParam k _ dir _ _,v) subst -> Map.insert k v subst)
     identitySubstitution $ zip params args
              
 
 renameParam :: Substitution -> PrimParam -> PrimParam
-renameParam subst param@(PrimParam name typ FlowOut ftype) = 
+renameParam subst param@(PrimParam name typ FlowOut ftype needed) = 
     maybe param 
     (\arg -> case arg of
-          ArgVar name' _ _ _ _ -> PrimParam name' typ FlowOut ftype
+          ArgVar name' _ _ _ _ -> PrimParam name' typ FlowOut ftype needed
           _ -> param) $
     Map.lookup name subst
 renameParam _ param = param
@@ -188,3 +196,21 @@ setPrimArgFlow flow (ArgVar n t _ ft lst) = (ArgVar n t flow ft lst)
 setPrimArgFlow FlowIn arg = arg
 setPrimArgFlow FlowOut arg = 
     shouldnt $ "trying to make " ++ show arg ++ " an output argument"
+
+
+bodyVars :: ProcBody -> Map PrimVarName TypeSpec
+bodyVars body = mapBodyPrims primVars Map.union Map.empty
+                Map.union Map.empty body
+
+
+primVars :: Prim -> Map PrimVarName TypeSpec
+primVars (PrimCall _ _ _ args) = argsVars args
+primVars (PrimForeign _ _ _ args) = argsVars args
+primVars (PrimNop) = Map.empty
+
+argsVars :: [PrimArg] -> Map PrimVarName TypeSpec
+argsVars = List.foldr (Map.union . argVars) Map.empty
+
+argVars :: PrimArg -> Map PrimVarName TypeSpec
+argVars (ArgVar name typ FlowOut _ _) = Map.singleton name typ
+argVars _ = Map.empty

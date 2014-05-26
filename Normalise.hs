@@ -199,7 +199,7 @@ compileProc tmpCtr (ProcDecl vis (ProcProto name params) body pos) = do
         -- liftIO $ putStrLn $ "Compiled"
         endVars <- gets vars
         return (List.map (primParam startVars endVars) params, compiled)
-    let def = ProcDef name (PrimProto name params') body' pos tmpCtr 0 vis
+    let def = ProcDef name (PrimProto name params') body' pos tmpCtr 0 vis False
     -- liftIO $ putStrLn $ "Compiled version:\n" ++ showProcDef 0 def
     addProc def
     return ()
@@ -211,9 +211,9 @@ compileProc _ decl =
 --  params should still exist at this point. 
 primParam :: Map VarName Int -> Map VarName Int -> Param -> PrimParam
 primParam initVars finalVars (Param name typ ParamIn flowType) =
-    PrimParam (mkPrimVarName initVars name) typ FlowIn flowType
-primParam initVars finalVars (Param name typ ParamOut flowType) = do
-    PrimParam (mkPrimVarName finalVars name) typ FlowOut flowType
+    PrimParam (mkPrimVarName initVars name) typ FlowIn flowType True
+primParam initVars finalVars (Param name typ ParamOut flowType) =
+    PrimParam (mkPrimVarName finalVars name) typ FlowOut flowType True
 primParam _ _ param =
     shouldnt $ "Flattening error: param '" ++ show param ++ "' remains"
 

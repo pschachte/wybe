@@ -61,7 +61,10 @@ instance Show TypeReason where
             "Call to unknown " ++ callTo ++ " from " ++ callFrom
     show (ReasonArity callFrom callTo pos callArity procArity) =
         makeMessage pos $
-            "Call from " ++ callFrom ++ " to " ++ callTo ++ " with " ++
+            (if callFrom == "" 
+             then "Toplevel call" 
+             else "Call from " ++ callFrom) ++
+            " to " ++ callTo ++ " with " ++
             show callArity ++ " arguments, expected " ++ show procArity
 
 data Typing = ValidTyping (Map VarName TypeSpec)
@@ -244,7 +247,7 @@ typecheckProcDecls m mods name = do
 typecheckProcDecl :: ModSpec -> [ModSpec] -> ProcDef ->
                     Compiler (ProcDef,Bool,Bool,[TypeReason])
 typecheckProcDecl m mods pd@(ProcDef name proto@(PrimProto pn params) 
-                         def pos tmpCnt calls vis) 
+                         def pos tmpCnt calls vis inline) 
   = do
     let typing = List.foldr (addDeclaredType name pos params)
                  initTyping $ zip params [1..]
@@ -257,7 +260,7 @@ typecheckProcDecl m mods pd@(ProcDef name proto@(PrimProto pn params)
         --   ": " ++ show typing'
         let params' = updateParamTypes typing' params
         let pd' = ProcDef name (PrimProto pn params') def' pos tmpCnt 
-                  calls vis
+                  calls vis inline
         let modAgain = pd' /= pd
         -- liftIO $ putStrLn $ "===== Definition is " ++ 
         --        (if modAgain then "" else "un") ++ "changed"
@@ -275,7 +278,7 @@ typecheckProcDecl m mods pd@(ProcDef name proto@(PrimProto pn params)
 
 addDeclaredType :: ProcName -> OptPos -> [PrimParam] -> (PrimParam,Int) -> 
                    Typing -> Typing
-addDeclaredType procname pos params (PrimParam name typ _ _,argNum) typs =
+addDeclaredType procname pos params (PrimParam name typ _ _ _,argNum) typs =
      addOneType 
      (ReasonParam procname (listArity primParamFlowType primParamFlow params)
       pos) 
@@ -284,10 +287,10 @@ addDeclaredType procname pos params (PrimParam name typ _ _,argNum) typs =
 
 updateParamTypes :: Typing -> [PrimParam] -> [PrimParam]
 updateParamTypes (ValidTyping dict) params =
-    List.map (\p@(PrimParam name@(PrimVarName n _) typ fl afl) ->
+    List.map (\p@(PrimParam name@(PrimVarName n _) typ fl afl nd) ->
                case Map.lookup n dict of
                    Nothing -> p
-                   Just newTyp -> (PrimParam name newTyp fl afl)) params
+                   Just newTyp -> (PrimParam name newTyp fl afl nd)) params
 updateParamTypes _ params = params
 
 
@@ -464,22 +467,28 @@ argFlow _ = FlowIn
 --      FlowIn  / FlowIn
 --      FlowOut / FlowOut
 --      FlowOut / FlowIn (Half) FlowOut (Half)
+--  We also filter out any arguments where the corresponding param is
+--  marked as unneeded.
 
 reconcileArgFlows :: [PrimParam] -> [PrimArg] -> Maybe [PrimArg]
 reconcileArgFlows [] [] = Just []
 reconcileArgFlows _ [] = Nothing
 reconcileArgFlows [] _ = Nothing
-reconcileArgFlows (PrimParam _ _ pflow _:params) 
+reconcileArgFlows (PrimParam _ _ pflow _ needed:params) 
   (arg@(ArgVar _ _ aflow _ _):args)
-  | pflow == aflow   = fmap (arg:) $ reconcileArgFlows params args
-reconcileArgFlows (PrimParam _ _ FlowOut _:params) 
+  | pflow == aflow = 
+      let tail = reconcileArgFlows params args
+      in  if needed then fmap (arg:) tail else tail
+reconcileArgFlows (PrimParam _ _ FlowOut _ needed:params) 
   (ArgVar _ _ FlowIn HalfUpdate _:arg@(ArgVar _ _ FlowOut HalfUpdate _):args)
-  = fmap (arg:) $ reconcileArgFlows params args
-reconcileArgFlows (PrimParam _ _ FlowOut _:_) _ = Nothing
-reconcileArgFlows (PrimParam _ _ FlowIn _:params) (ArgVar _ _ FlowOut _ _:args)
-  = Nothing
-reconcileArgFlows (PrimParam _ _ FlowIn _:params) (arg:args) -- constant arg
-  = fmap (arg:) $ reconcileArgFlows params args
+  = let tail = reconcileArgFlows params args
+    in  if needed then fmap (arg:) tail else tail
+reconcileArgFlows (PrimParam _ _ FlowOut _ _:_) _ = Nothing
+reconcileArgFlows (PrimParam _ _ FlowIn _ _:params)
+                      (ArgVar _ _ FlowOut _ _:args) = Nothing
+reconcileArgFlows (PrimParam _ _ FlowIn _ needed:params) (arg:args)
+  = let tail = reconcileArgFlows params args    -- constant arg
+    in  if needed then fmap (arg:) tail else tail
 
 
 typecheckArg :: OptPos -> [PrimParam] -> ProcName ->
@@ -625,6 +634,9 @@ applyPrimTyping dict (PrimForeign lang name id args) = do
     let args' = List.map (applyArgTyping dict) args
     return $ PrimForeign lang name id args'
 applyPrimTyping dict (PrimNop) = return PrimNop
+
+
+
 
 
 applyArgTyping :: Map VarName TypeSpec -> PrimArg -> PrimArg

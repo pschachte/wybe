@@ -7,6 +7,6 @@
   types           : 
   resources       : 
   procs           : quad:
-public proc quad(x:0:int, ?tmp$1:0:int)<0>  @func_where:1:8 (0 calls)
+public proc quad(x:0:int, ?tmp$1:0:int)<0>  @func_where:1:8 (0 calls) (inline)
     foreign llvm add(32:int, ~x:0:int, ~x:0:int, ?tmp$0:0:int) @wybe:4:38
     foreign llvm add(32:int, ~tmp$0:0:int, ~tmp$0:0:int, ?tmp$1:0:int) @wybe:4:38

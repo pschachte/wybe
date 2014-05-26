@@ -62,26 +62,22 @@ optimiseProc pspec = do
 
 optimiseProcDef :: ProcSpec -> ProcDef -> Compiler ProcDef
 optimiseProcDef pspec def = do
-    def' <- procExpansion def
-    (def'',maybeMacro) <- markLastUse def'
-    case maybeMacro of
-        Just macro -> do
-            requestInline pspec macro
-        Nothing -> do
-            when (inlineable def'') $ requestInline pspec def''
-    return def''
+    procExpansion def >>= markLastUse pspec >>= inlineIfWanted
 
 
 ----------------------------------------------------------------
 --                               Inlining
 ----------------------------------------------------------------
 
-inlineable :: ProcDef -> Bool
-inlineable (ProcDef _ (PrimProto _ params) (ProcBody body NoFork) _ _ _ _) =
+inlineIfWanted :: ProcDef -> Compiler ProcDef
+inlineIfWanted def@(ProcDef _ (PrimProto _ params) (ProcBody body NoFork)
+                    _ _ _ _ False) = do
     let benefit = 1 + length params
-        cost = sum $ List.map (primCost . content) body
-    in  benefit >= cost - 2
-inlineable (ProcDef _ _ (ProcBody _ (PrimFork _ _ _)) _ _ _ _) = False
+    let cost = sum $ List.map (primCost . content) body
+    if  benefit >= cost - 2
+    then return $ def { procInline = True }
+    else return def
+inlineIfWanted def = return def
 
 
 primCost :: Prim -> Int
@@ -91,12 +87,6 @@ primCost (PrimForeign _ _ _ args) = 1 + length args
 primCost (PrimNop) = 0
 
 
-requestInline :: ProcSpec -> ProcDef -> Compiler ()
-requestInline pspec 
-  (ProcDef _ proto@(PrimProto _ params) (ProcBody body _) _ _ _ _) = do
-    -- liftIO $ putStrLn $ "Request expand " ++ show pspec ++ " " ++ 
-    --   show proto ++ " to:" ++ showBlock 8 (ProcBody body NoFork)
-    addExpansion pspec params body
 
 ----------------------------------------------------------------
 --                     Handling the call graph
