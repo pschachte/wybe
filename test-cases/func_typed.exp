@@ -8,5 +8,4 @@
   resources       : 
   procs           : plus:
 public proc plus(a:0:int, b:0:int, ?~tmp$0:0:int)<0>  @func_typed:1:8 (0 calls)
-    foreign llvm add(32:int, a:0:int, b:0:int, ?~tmp$0:0:int) @wybe:4:38
-    foreign llvm move(~tmp$0:0:int, ?~$:0:int) @wybe:19:34
+    foreign llvm add(32:int, %a:0:int, %b:0:int, ?~tmp$0:0:int) @wybe:4:38

@@ -1,1 +1,1 @@
-proc foo(x:int) nonexistent_proc(x) end
+proc foo(x:int,?y:int) nonexistent_proc(x,?y) end

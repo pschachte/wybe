@@ -1,6 +1,9 @@
 Fix bugs:
 o Ensure every variable gets a type
 o Propagate types down to generated procs
+   Plan:  (a) ensure generated procs are in same SCC as their other part
+          (b) where different parts of a proc call each other,
+              propagate type info both ways
 
 
 Complete the implementation:
@@ -15,6 +18,8 @@ o Give meaningful message for errors detected in generated procs
 
 Complete the language:
 o Implement resources
+  Plan: Do type inference ignoring resources, then do separate
+        resource-intro pass
 o Support polymorphism
 o Support subtypes
 o Support higher-order programming

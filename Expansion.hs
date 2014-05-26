@@ -95,14 +95,14 @@ expandBody (ProcBody prims fork) = do
 
 expandFork :: PrimFork -> Expander PrimFork
 expandFork NoFork = return NoFork
-expandFork (PrimFork var bodies) = do
+expandFork (PrimFork var last bodies) = do
     state <- get
     let baseSubst = projectSubst (protected state) (substitution state)
     pairs <- lift $ mapM (\b -> runStateT (expandBody b) state) bodies
     let subst = List.foldr meetSubsts baseSubst $
                 List.map (substitution . snd) pairs
     modify (\s -> s { substitution = subst })
-    return $ PrimFork var $ List.map fst pairs
+    return $ PrimFork var last $ List.map fst pairs
 
 
 expandPrim :: Prim -> OptPos -> Expander [Placed Prim]

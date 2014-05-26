@@ -9,12 +9,8 @@
   resources       : 
   procs           : inc2:
 public proc inc2(x:0:int, ?~tmp$0:0:int)<0>  @update:1:8 (0 calls)
-    foreign llvm add(32:int, x:0:int, 1:int, ?~tmp$1:0:int) @wybe:4:38
-    foreign llvm move(~tmp$1:0:int, ?~$:0:int) @wybe:19:34
-    foreign llvm add(32:int, ~tmp$1:0:int, 1:int, ?~tmp$0:0:int) @wybe:4:38
-    foreign llvm move(~tmp$0:0:int, ?~$:0:int) @wybe:19:34
+    foreign llvm add(32:int, %x:0:int, 1:int, ?~tmp$1:0:int) @wybe:4:38
+    foreign llvm add(32:int, %~tmp$1:0:int, 1:int, ?~tmp$0:0:int) @wybe:4:38
 public proc inc2(%x:0:int, ?%x:1:int, y:0:int)<1>  @update:3:8 (0 calls)
-    foreign llvm add(32:int, %x:0:int, 1:int, ?%tmp$1:0:int) @wybe:4:38
-    foreign llvm add(32:int, %tmp$1:0:int, 1:int, ?%tmp$0:0:int) @wybe:4:38
-    foreign llvm sub(32:int, y:0:int, 1:int, ?%tmp$1:1:int) @wybe:5:44
-    foreign llvm sub(32:int, %tmp$1:1:int, 1:int, ?%x:1:int) @wybe:5:44
+    foreign llvm sub(32:int, %y:0:int, 1:int, ?%tmp$1:1:int) @wybe:5:44
+    foreign llvm sub(32:int, %%tmp$1:1:int, 1:int, ?%x:1:int) @wybe:5:44

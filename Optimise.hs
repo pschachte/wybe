@@ -81,7 +81,7 @@ inlineable (ProcDef _ (PrimProto _ params) (ProcBody body NoFork) _ _ _ _) =
     let benefit = 1 + length params
         cost = sum $ List.map (primCost . content) body
     in  benefit >= cost - 2
-inlineable (ProcDef _ _ (ProcBody _ (PrimFork _ _)) _ _ _ _) = False
+inlineable (ProcDef _ _ (ProcBody _ (PrimFork _ _ _)) _ _ _ _) = False
 
 
 primCost :: Prim -> Int

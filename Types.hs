@@ -372,7 +372,7 @@ typecheckFork :: ModSpec -> [ModSpec] -> ProcName -> [Typing] -> PrimFork ->
                   Compiler [Typing]
 typecheckFork m mods name typings NoFork = do
     return typings
-typecheckFork m mods name typings (PrimFork var bodies) = do
+typecheckFork m mods name typings (PrimFork _ _ bodies) = do
     -- liftIO $ putStrLn $ "Entering typecheckSequence from typecheckFork"
     typecheckSequence (typecheckBody m mods name) typings bodies
 
@@ -549,7 +549,7 @@ diffBody (ProcBody prims1 fork1) (ProcBody prims2 fork2) =
 diffFork :: PrimFork -> PrimFork -> Maybe (ProcName,OptPos)
 diffFork NoFork _ = Nothing
 diffFork _ NoFork = Nothing
-diffFork (PrimFork _ bodies1) (PrimFork _ bodies2) =
+diffFork (PrimFork _ _ bodies1) (PrimFork _ _ bodies2) =
     firstJust $ List.map (uncurry diffBody) $ zip bodies1 bodies2
 
 
@@ -582,9 +582,9 @@ applyBodyTyping dict (ProcBody prims fork) = do
     prims' <- mapM (applyPlacedPrimTyping dict) prims
     fork' <- case fork of
         NoFork -> return NoFork
-        (PrimFork v bodies) -> do
+        (PrimFork v last bodies) -> do
             bodies' <- mapM (applyBodyTyping dict) bodies
-            return $ PrimFork v bodies'
+            return $ PrimFork v last bodies'
     return $ ProcBody prims' fork'
 
 

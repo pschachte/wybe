@@ -245,8 +245,8 @@ compileBody [placed]
       case tstVar' of
         ArgVar var _ FlowIn _ _ ->
             return $ ProcBody tstStmts' $
-                   PrimFork var [ProcBody els'' NoFork,
-                                 ProcBody thn'' NoFork]
+                   PrimFork var False [ProcBody els'' NoFork,
+                                       ProcBody thn'' NoFork]
         ArgInt n _ ->
             return $ ProcBody (if n/=0 then tstStmts'++thn'' else els'') NoFork
         _ -> do

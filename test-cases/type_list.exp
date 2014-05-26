@@ -18,19 +18,17 @@
   resources       : 
   procs           : ++:
 public proc ++(x:0:intlist, y:0:intlist, ?~tmp$0:0:intlist)<0>  @type_list:9:8 (0 calls)
-    type_list.gen$1<0>(x:0:intlist, y:0:intlist, ?tmp$0:0:intlist, ?x:1:intlist, ?y:1:intlist) @type_list:10:5
-    foreign llvm move(~tmp$0:0:intlist, ?~$:0:intlist) @type_list:4:42
+    type_list.gen$1<0>(%x:0:intlist, %y:0:intlist, ?tmp$0:0:intlist, ?x:1:intlist, ?y:1:intlist) @type_list:10:5
                     gen$1:
 proc gen$1(x:0:intlist, y:0:intlist, ?tmp$0:0:intlist, ?x:0:intlist, ?y:0:intlist)<0>  (0 calls)
-    type_list.intlist.[]<0>(?~tmp$2:0:intlist) @type_list:10:12
-    wybe.bool.false<0>(?~tmp$1:0:bool) @type_list:6:43
-    case tmp$1:0 of
+    foreign $ alloc("bool":string, "false":string, ?~tmp$1:0:bool)
+    case %tmp$1:0 of
     0:
         type_list.intlist.head<0>(x:0:intlist, ?~tmp$4:0:int) @type_list:12:11
         type_list.intlist.tail<0>(x:0:intlist, ?~tmp$6:0:intlist) @type_list:12:18
-        type_list.++<0>(~tmp$6:0:intlist, y:0:intlist, ?~tmp$5:0:intlist) @type_list:12:18
-        type_list.intlist.[|]<0>(~tmp$4:0:int, ~tmp$5:0:intlist, ?~tmp$3:0:intlist) @type_list:12:10
-        foreign llvm move(~tmp$3:0:intlist, ?~tmp$0:0:intlist) @type_list:4:42
+        type_list.gen$1<0>(%~tmp$6:0:intlist, y:0:intlist, ?~tmp$5:0:intlist, ?x:1:intlist, ?y:1:intlist) @type_list:10:5
+        type_list.intlist.[|]<0>(%~tmp$4:0:int, %~tmp$5:0:intlist, ?~tmp$3:0:intlist) @type_list:12:10
+        foreign llvm move(%~tmp$3:0:intlist, ?~tmp$0:0:intlist) @type_list:4:42
 
     1:
         foreign llvm move(y:0:intlist, ?~tmp$0:0:intlist) @type_list:4:42
@@ -55,31 +53,26 @@ proc gen$1(x:0:intlist, y:0:intlist, ?tmp$0:0:intlist, ?x:0:intlist, ?y:0:intlis
   resources       : 
   procs           : =:
 public proc =(?y:0:intlist, x:0:intlist)<0>  @type_list:4:12 (0 calls)
-    foreign llvm move(x:0:intlist, ?y:0:intlist) @type_list:4:42
+    foreign llvm move(%x:0:intlist, ?y:0:intlist) @type_list:4:42
 public proc =(x:0:intlist, ?y:0:intlist)<1>  @type_list:5:12 (0 calls)
-    foreign llvm move(x:0:intlist, ?y:0:intlist) @type_list:5:42
+    foreign llvm move(%x:0:intlist, ?y:0:intlist) @type_list:5:42
 public proc =(x:0:intlist, y:0:intlist, ?~tmp$0:0:bool)<2>  @type_list:6:12 (0 calls)
-    wybe.bool.false<0>(?~tmp$0:0:bool) @type_list:6:43
-    foreign llvm move(~tmp$0:0:bool, ?~$:0:bool) @wybe:58:36
+    foreign $ alloc("bool":string, "false":string, ?~tmp$0:0:bool)
                     []:
 public proc [](?~$rec:0:intlist)<0>  (0 calls)
     foreign $ alloc("intlist":string, "[]":string, ?~$rec:0:intlist)
-    foreign llvm move(~$rec:0:intlist, ?~$:0:intlist) @type_list:4:42
                     [|]:
 public proc [|](head:0:int, tail:0:intlist, ?~$rec:2:intlist)<0>  (0 calls)
     foreign $ alloc("intlist":string, "[|]":string, ?~$rec:0:intlist)
-    foreign $ mutate("intlist":string, "[|]":string, "head":string, %$rec:0:intlist, ?%$rec:1:intlist, head:0:int)
-    foreign $ mutate("intlist":string, "[|]":string, "tail":string, %$rec:1:intlist, ?%$rec:2:intlist, tail:0:intlist)
-    foreign llvm move(~$rec:2:intlist, ?~$:0:intlist) @type_list:4:42
+    foreign $ mutate("intlist":string, "[|]":string, "head":string, %%$rec:0:intlist, ?%$rec:1:intlist, %head:0:int)
+    foreign $ mutate("intlist":string, "[|]":string, "tail":string, %%$rec:1:intlist, ?%$rec:2:intlist, %tail:0:intlist)
                     head:
 public proc head($rec:0:intlist, ?~tmp$0:0:int)<0>  @type_list:3:12 (0 calls)
-    foreign $ access("intlist":string, "[|]":string, "head":string, $rec:0:intlist, ?~tmp$0:0:int)
-    foreign llvm move(~tmp$0:0:int, ?~$:0:int) @wybe:19:34
+    foreign $ access("intlist":string, "[|]":string, "head":string, %$rec:0:intlist, ?~tmp$0:0:int)
 public proc head(%$rec:0:intlist, ?%$rec:1:intlist, $field:0:int)<1>  @type_list:3:12 (0 calls)
-    foreign $ mutate("intlist":string, "[|]":string, "head":string, %$rec:0:intlist, ?%$rec:1:intlist, $field:0:int)
+    foreign $ mutate("intlist":string, "[|]":string, "head":string, %%$rec:0:intlist, ?%$rec:1:intlist, %$field:0:int)
                     tail:
 public proc tail($rec:0:intlist, ?~tmp$0:0:intlist)<0>  @type_list:3:12 (0 calls)
-    foreign $ access("intlist":string, "[|]":string, "tail":string, $rec:0:intlist, ?~tmp$0:0:intlist)
-    foreign llvm move(~tmp$0:0:intlist, ?~$:0:intlist) @type_list:4:42
+    foreign $ access("intlist":string, "[|]":string, "tail":string, %$rec:0:intlist, ?~tmp$0:0:intlist)
 public proc tail(%$rec:0:intlist, ?%$rec:1:intlist, $field:0:intlist)<1>  @type_list:3:12 (0 calls)
-    foreign $ mutate("intlist":string, "[|]":string, "tail":string, %$rec:0:intlist, ?%$rec:1:intlist, $field:0:intlist)
+    foreign $ mutate("intlist":string, "[|]":string, "tail":string, %%$rec:0:intlist, ?%$rec:1:intlist, %$field:0:intlist)

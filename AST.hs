@@ -1052,6 +1052,7 @@ data PrimFork =
     NoFork |
     PrimFork {
       forkVar::PrimVarName,
+      forkVarLast::Bool,
       forkBodies::[ProcBody]
     }
     deriving (Eq)
@@ -1068,7 +1069,7 @@ mapBodyPrims primFn abConj emptyConj abDisj emptyDisj (ProcBody pprims fork) =
                 emptyConj pprims) $
     case fork of
       NoFork -> emptyDisj
-      PrimFork _ bodies ->
+      PrimFork _ _ bodies ->
           List.foldl 
               (\a b -> abDisj a $
                        mapBodyPrims primFn abConj emptyConj abDisj emptyDisj b)
@@ -1578,8 +1579,9 @@ showBlock ind (ProcBody stmts fork) =
 
 showFork :: Int -> PrimFork -> String
 showFork ind NoFork = ""
-showFork ind (PrimFork var bodies) =
-    startLine ind ++ "case " ++ show var ++ " of" ++
+showFork ind (PrimFork var last bodies) =
+    startLine ind ++ "case " ++ (if last then "%" else "") ++ show var ++
+                  " of" ++
     List.concatMap (\(val,body) ->
                         startLine ind ++ show val ++ ":" ++
                         showBlock (ind+4) body ++ "\n")
