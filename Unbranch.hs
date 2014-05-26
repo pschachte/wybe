@@ -59,11 +59,12 @@ import Control.Monad.Trans (lift,liftIO)
 
 import Debug.Trace
 
-unbranchBody :: [Param] -> [Placed Stmt] -> 
+unbranchBody :: [Param] -> [ResourceFlowSpec] -> [Placed Stmt] -> 
                 Compiler ([Placed Stmt],[Item])
-unbranchBody params stmts = do
+unbranchBody params resources stmts = do
     let vars = inputParamNames params
-    (stmts',st) <- runStateT (unbranchStmts stmts) $ initUnbrancherState vars
+    (stmts',st) <- runStateT (unbranchStmts stmts) $ 
+                   initUnbrancherState vars resources
     return (stmts',brNewDefs st)
 
 
@@ -79,6 +80,7 @@ type Unbrancher = StateT UnbrancherState Compiler
 data UnbrancherState = Unbrancher {
     brLoopInfo   :: LoopInfo,     -- ^If in a loop, the break and continue stmts
     brVars       :: Set VarName,  -- ^Variables defined up to here
+    brResources  :: [ResourceFlowSpec], -- ^Resources available in this context
     -- brExitVars   :: Set VarName,  -- ^Variables defined up to loop exit
     brTerminated :: Bool,         -- ^Whether code so far included a Break or
                                  --  Next, which terminate execution
@@ -97,8 +99,9 @@ data LoopInfo = LoopInfo {
     deriving (Eq)
 
 
-initUnbrancherState :: Set VarName -> UnbrancherState
-initUnbrancherState vars = Unbrancher NoLoop vars False [] False
+initUnbrancherState :: Set VarName -> [ResourceFlowSpec] -> UnbrancherState
+initUnbrancherState vars resources =
+    Unbrancher NoLoop vars resources False [] False
 
 
 setLoopInfo :: Placed Stmt -> Placed Stmt -> Unbrancher ()
@@ -330,10 +333,11 @@ outputVars =
 
 
 -- |Generate a fresh proc 
-factorFreshProc :: ProcName -> (Set VarName) -> (Set VarName) -> 
+factorFreshProc :: ProcName -> (Set VarName) -> (Set VarName) ->
                    OptPos -> [Placed Stmt] -> Unbrancher (Placed Stmt)
 factorFreshProc procName inVars outVars pos body = do
-    genProc (newProcProto procName inVars outVars) body
+    proto <- newProcProto procName inVars outVars
+    genProc proto body
     newProcCall procName inVars outVars pos
 
 
@@ -346,13 +350,14 @@ newProcCall name inVars outVars pos = do
     return $ maybePlace (ProcCall currMod name (inArgs ++ outArgs)) pos
 
 
-newProcProto :: ProcName -> Set VarName -> Set VarName -> ProcProto
-newProcProto name inVars outVars =
+newProcProto :: ProcName -> Set VarName -> Set VarName -> Unbrancher ProcProto
+newProcProto name inVars outVars = do
     let inParams  = [Param v Unspecified ParamIn Ordinary
                     | v <- Set.elems inVars]
-        outParams = [Param v Unspecified ParamOut Ordinary
+    let outParams = [Param v Unspecified ParamOut Ordinary
                     | v <- Set.elems outVars]
-    in  ProcProto name $ inParams ++ outParams
+    resources <- gets brResources
+    return $ ProcProto name (inParams ++ outParams) resources
 
 
 loopExitVars :: Set VarName -> [Placed Stmt] -> (Set VarName, Bool)

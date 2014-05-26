@@ -45,7 +45,8 @@ import Control.Monad.Trans (lift,liftIO)
 ----------------------------------------------------------------
 
 flattenProcDecl :: Item -> Compiler (Item,Int)
-flattenProcDecl (ProcDecl vis proto@(ProcProto name params) stmts pos) = do
+flattenProcDecl (ProcDecl vis proto@(ProcProto name params resources) 
+                 stmts pos) = do
     proto' <- flattenProto proto
     let inParams = Set.fromList $
                    List.map paramName $ 
@@ -58,8 +59,8 @@ flattenProcDecl _ =
 
 
 flattenProto :: ProcProto -> Compiler ProcProto
-flattenProto (ProcProto name params) = do
-    return $ ProcProto name $ concatMap flattenParam params
+flattenProto (ProcProto name params resources) = do
+    return $ ProcProto name (concatMap flattenParam params) resources
 
 
 flattenBody :: [Placed Stmt] -> Set VarName -> Compiler ([Placed Stmt],Int)

@@ -32,9 +32,14 @@ normalise items = do
     -- Now generate main proc if needed
     stmts <- getModule stmtDecls 
     unless (List.null stmts)
-      $ normaliseItem (ProcDecl Private (ProcProto "" []) (List.reverse stmts) 
-                       Nothing)
-    
+      $ normaliseItem (ProcDecl Private (ProcProto "" [] initResources) 
+                       (List.reverse stmts) Nothing)
+
+-- |The resources available at the top level
+-- XXX this should be all resources with initial values
+initResources :: [ResourceFlowSpec]
+initResources = [ResourceFlowSpec (ResourceSpec ["wybe"] "io") ParamInOut]
+
 
 -- |Normalise a single file item, storing the result in the current module.
 normaliseItem :: Item -> Compiler ()
@@ -59,23 +64,25 @@ normaliseItem (ImportMods vis imp modspecs pos) = do
     mapM_ (\spec -> addImport spec imp Nothing vis) modspecs
 normaliseItem (ImportItems vis imp modspec imports pos) = do
     addImport modspec imp (Just imports) vis
-normaliseItem (ResourceDecl vis name typ pos) =
-  addResource name (SimpleResource typ pos) vis
-normaliseItem (FuncDecl vis (FnProto name params) resulttype result pos) =
+normaliseItem (ResourceDecl vis name typ init pos) =
+  addResource name (SimpleResource typ init pos) vis
+normaliseItem (FuncDecl vis (FnProto name params resources) 
+               resulttype result pos) =
   let flowType = Implicit pos
   in  normaliseItem
    (ProcDecl
     vis
-    (ProcProto name $ params ++ [Param "$" resulttype ParamOut flowType])
+    (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType]) 
+     resources)
     [Unplaced $ ProcCall [] "=" [Unplaced $ Var "$" ParamOut flowType, result]]
     pos)
 normaliseItem decl@(ProcDecl _ _ _ _) = do
-    (ProcDecl vis proto@(ProcProto _ params) stmts pos,tmpCtr) <- 
+    (ProcDecl vis proto@(ProcProto _ params resources) stmts pos,tmpCtr) <- 
         flattenProcDecl decl
     -- (proto' <- flattenProto proto
     -- (stmts,tmpCtr) <- flattenBody stmts
     -- liftIO $ putStrLn $ "Flattened proc:\n" ++ show (ProcDecl vis proto' stmts pos)
-    (stmts',genProcs) <- unbranchBody params stmts
+    (stmts',genProcs) <- unbranchBody params resources stmts
     let procs = ProcDecl vis proto stmts' pos:genProcs
     -- liftIO $ mapM_ (\item -> putStrLn $ show item) procs
     mapM_ (compileProc tmpCtr) procs
@@ -89,12 +96,12 @@ normaliseItem (StmtDecl stmt pos) = do
 
 -- |Add a contructor for the specified type.
 addCtor :: Visibility -> Ident -> [Ident] -> FnProto -> OptPos -> Compiler ()
-addCtor vis typeName typeParams (FnProto ctorName params) pos = do
+addCtor vis typeName typeParams (FnProto ctorName params _) pos = do
     let typespec = TypeSpec [] typeName $ 
                    List.map (\n->TypeSpec [] n []) typeParams
     let flowType = Implicit pos
     normaliseItem
-      (FuncDecl Public (FnProto ctorName params) typespec
+      (FuncDecl Public (FnProto ctorName params []) typespec
        (Unplaced $ Where
         ([Unplaced $ ForeignCall "$" "alloc" []
           [Unplaced $ StringValue typeName, Unplaced $ StringValue ctorName,
@@ -116,7 +123,7 @@ addCtor vis typeName typeParams (FnProto ctorName params) pos = do
 addGetterSetter :: Visibility -> TypeSpec -> Ident -> OptPos -> Param -> Compiler ()
 addGetterSetter vis rectype ctorName pos (Param field fieldtype _ _) = do
     normaliseItem $ FuncDecl vis
-      (FnProto field [Param "$rec" rectype ParamIn Ordinary])
+      (FnProto field [Param "$rec" rectype ParamIn Ordinary] [])
       fieldtype 
       (Unplaced $ ForeignFn "$" "access" []
        [Unplaced $ StringValue $ typeName rectype,
@@ -127,7 +134,7 @@ addGetterSetter vis rectype ctorName pos (Param field fieldtype _ _) = do
     normaliseItem $ ProcDecl vis 
       (ProcProto field 
        [Param "$rec" rectype ParamInOut Ordinary,
-        Param "$field" fieldtype ParamIn Ordinary])
+        Param "$field" fieldtype ParamIn Ordinary] [])
       [Unplaced $ ForeignCall "$" "mutate" []
        [Unplaced $ StringValue $ typeName rectype,
         Unplaced $ StringValue ctorName,
@@ -148,7 +155,7 @@ type ClauseComp = StateT ClauseCompState Compiler
 -- |The state of compilation of a clause; used by the ClauseComp
 -- monad.
 data ClauseCompState = ClauseComp {
-    vars :: Map VarName Int    -- ^current var number for each var
+    vars :: Map VarName Int       -- ^current var number for each var
   }
 
 
@@ -171,9 +178,14 @@ currVar name = do
 mkPrimVarName :: Map String Int -> String -> PrimVarName
 mkPrimVarName dict name =
     case Map.lookup name dict of
+        -- XXX This is the proper code:
         -- Nothing -> shouldnt $ "Referred to undefined variable '" ++ name ++ "'"
         Nothing -> PrimVarName name (-1)
         Just n  -> PrimVarName name n
+
+
+resourceVar :: ResourceSpec -> String
+resourceVar (ResourceSpec mod name) = intercalate "." mod ++ name
 
 
 incrMaybe :: Maybe Int -> Maybe Int
@@ -189,10 +201,13 @@ evalClauseComp clcomp =
 
 
 compileProc :: Int -> Item -> Compiler ()
-compileProc tmpCtr (ProcDecl vis (ProcProto name params) body pos) = do
+compileProc tmpCtr (ProcDecl vis (ProcProto name params resources) body pos) 
+  = do
     (params',body') <- evalClauseComp $ do
         mapM_ nextVar $ List.map paramName $ 
           List.filter (flowsIn . paramFlow) params
+        mapM_ nextVar $ List.map (resourceVar . resourceFlowRes) $
+          List.filter (flowsIn . resourceFlowFlow) resources
         startVars <- gets vars
         -- liftIO $ putStrLn $ "Compiling body of " ++ name ++ "..."
         compiled <- compileBody body

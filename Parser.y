@@ -121,8 +121,8 @@ Item  :: { Item }
     | Visibility 'from' ModSpec ImportType Idents
                                 { ImportItems $1 (content $4) $3 $5 $ 
 				    Just $ tokenPosition $2 }
-    | Visibility 'resource' ident OptType
-                                { ResourceDecl $1 (identName $3) $4
+    | Visibility 'resource' ident OptType OptInit
+                                { ResourceDecl $1 (identName $3) $4 $5
 				    $ Just $ tokenPosition $2 }
     | Visibility 'func' FnProto OptType '=' Exp
                                 { FuncDecl $1 $3 $4 $6
@@ -157,7 +157,8 @@ RevModuleTail :: { ModSpec }
     | RevModuleTail '.' ident   { identName $3:$1}
 
 FnProto :: { FnProto }
-    : FuncProcName OptParamList { FnProto $1 $2 }
+    : FuncProcName OptParamList UseResources
+                                { FnProto $1 $2 $3 }
 
 FuncProcName :: { String }
     : ident                     { identName $1 }
@@ -187,8 +188,8 @@ Symbol :: { Token }
 
 
 ProcProto :: { ProcProto }
-    : FuncProcName OptProcParamList
-                                { ProcProto $1 $2 }
+    : FuncProcName OptProcParamList UseResources
+                                { ProcProto $1 $2 $3 }
 
 OptParamList :: { [Param] }
     : {- empty -}               { [] }
@@ -252,13 +253,43 @@ OptIdents :: { [String] }
 Idents :: { [String] }
     : RevIdents                 { reverse $1 }
 
-RevIdents :: { [String] }
+RevIdents :: { [Ident] }
     : ident                     { [identName $1] }
     | RevIdents ',' ident       { (identName $3):$1 }
 
 Visibility :: { Visibility }
     : {- empty -}               { Private }
     | 'public'                  { Public }
+
+UseResources :: { [ResourceFlowSpec] }
+    : {- empty -}               { [] }
+    | 'use' ResourceFlowSpecs       { $2 }
+
+
+ResourceFlowSpecs :: { [ResourceFlowSpec] }
+    : ResourceFlowSpec RevResourceFlowSpecs
+                                { $1 : reverse $2 }
+
+RevResourceFlowSpecs :: { [ResourceFlowSpec] }
+    : {- empty -}               { [] }
+    | RevResourceFlowSpecs ',' ResourceFlowSpec
+                                { $3:$1 }
+
+ResourceFlowSpec :: { ResourceFlowSpec }
+    : FlowDirection modIdent    { ResourceFlowSpec 
+	                          (ResourceSpec (fst $2) (snd $2))
+                                  $1 }
+
+
+modIdent :: { (ModSpec,Ident) }
+    : revDottedIdents ident     { (reverse $1,identName $2) }
+
+
+revDottedIdents :: { [Ident] }
+    : {- empty -}               { [] }
+    | revDottedIdents '.' ident
+                                { (identName $2:$1) }
+
 
 ProcBody :: { [Placed Stmt] }
     : Stmts 'end'               { $1 }
@@ -295,6 +326,12 @@ Stmt :: { Placed Stmt }
 Condelse :: { [Placed Stmt] }
     : 'else' Stmts 'end'        { $2 }
     |  'end'                    { [] }
+
+
+OptInit :: { Maybe (Placed Exp) }
+    : {- empty -}               { Nothing }
+    | '=' Exp                   { Just $2 }
+
 
 
 SimpleExp :: { Placed Exp }

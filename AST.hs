@@ -41,12 +41,13 @@ module AST (
   getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, verboseMsg, message, genProcName,
   addImport, addType, addSubmod, lookupType, publicType,
+  ResourceSpec(..), ResourceFlowSpec(..), 
   addResource, lookupResource, publicResource, 
   CallExpansion,
   addProc, replaceProc, lookupProc, publicProc,
   refersTo, callTargets,
   verboseDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
-  showModSpecs, 
+  showModSpecs, showResources,
   shouldnt, checkError, checkValue, trustFromJust, trustFromJustM
   ) where
 
@@ -72,7 +73,7 @@ data Item
      | ModuleDecl Visibility Ident [Item] OptPos
      | ImportMods Visibility Bool [ModSpec] OptPos
      | ImportItems Visibility Bool ModSpec [Ident] OptPos
-     | ResourceDecl Visibility Ident TypeSpec OptPos
+     | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
      | FuncDecl Visibility FnProto TypeSpec (Placed Exp) OptPos
      | ProcDecl Visibility ProcProto [Placed Stmt] OptPos
      | CtorDecl Visibility FnProto OptPos
@@ -99,7 +100,7 @@ data TypeProto = TypeProto Ident [Ident]
 
 -- |A function prototype consists of a function name and zero or more formal 
 --  parameters.
-data FnProto = FnProto Ident [Param]
+data FnProto = FnProto Ident [Param] [ResourceFlowSpec]
 
 
 ----------------------------------------------------------------
@@ -530,7 +531,7 @@ publicType name = do
   return $ Map.member name (pubTypes int)
 
 -- |Add the specified resource to the current module.
-addResource :: Ident -> ResourceDef -> Visibility -> Compiler ()
+addResource :: ResourceName -> ResourceDef -> Visibility -> Compiler ()
 addResource name def vis = do
     updateImplementation (updateModResources (Map.insert name def))
     updateInterface vis (updatePubResources 
@@ -932,10 +933,13 @@ updateModProcsM fn modimp = do
 type Ident = String
 
 -- |A variable name.
-type VarName = String
+type VarName = Ident
 
 -- |A proc name.
-type ProcName = String
+type ProcName = Ident
+
+-- |A resource name.
+type ResourceName = Ident
 
 -- |A module specification, as a list of module names; module a.b.c would
 --  be represented as ["a","b","c"].
@@ -979,20 +983,20 @@ typeDefArity (TypeDef arity _) = arity
 -- |A resource definition.  For a normal resource, its type; for a 
 --  compound resource, a list of other resources.  In both cases, 
 --  there may be an optional source position.
-data ResourceDef = CompoundResource [Ident] OptPos
-                 | SimpleResource TypeSpec OptPos
+data ResourceDef = CompoundResource [ResourceName] OptPos
+                 | SimpleResource TypeSpec (Maybe (Placed Exp)) OptPos
 
 -- |The optional position of a resource definition.
 resourceDefPosition :: ResourceDef -> OptPos
 resourceDefPosition (CompoundResource _ pos) = pos
-resourceDefPosition (SimpleResource _ pos) = pos
+resourceDefPosition (SimpleResource _ _ pos) = pos
 
 -- |A proc definition, including the ID, prototype, the body, 
 --  normalised to a list of primitives, and an optional source 
 --  position. 
 data ProcDef = ProcDef {
     procName :: Ident, 
-    procProto :: PrimProto, 
+    procProto :: PrimProto,
     procBody :: ProcBody,
     procPos :: OptPos,
     procTmpCount :: Int,        -- the next temp variable number to use
@@ -1071,10 +1075,6 @@ instance Show ProcSpec where
     show (ProcSpec mod name pid) =
         showModSpec mod ++ "." ++ name ++ "<" ++ show pid ++ ">"
 
--- -- |Make a ProcSpec from a ProcDef
--- procCallInfo :: ProcDef -> ProcSpec
--- procCallInfo (ProcDef _ proto _ pos) = ProcSpec id proto pos
-
 -- |An ID for a proc.
 type ProcID = Int
 
@@ -1087,6 +1087,25 @@ data TypeSpec = TypeSpec {
     } | Unspecified
               deriving (Eq,Ord)
 
+data ResourceSpec = ResourceSpec {
+    resourceMod::ModSpec,
+    resourceName::ResourceName
+    } deriving (Eq, Ord)
+               
+instance Show ResourceSpec where
+    show (ResourceSpec mod name) = 
+        maybeModPrefix mod ++ show name
+
+data ResourceFlowSpec = ResourceFlowSpec {
+    resourceFlowRes::ResourceSpec,
+    resourceFlowFlow::FlowDirection
+    } deriving (Eq, Ord)
+               
+instance Show ResourceFlowSpec where
+    show (ResourceFlowSpec resource dir) = 
+        flowPrefix dir ++ show resource
+        
+
 -- |A manifest constant.
 data Constant = Int Int
               | Float Double
@@ -1097,7 +1116,8 @@ data Constant = Int Int
 -- |A proc prototype, including name and formal parameters.
 data ProcProto = ProcProto {
     procProtoName::ProcName,
-    procProtoParams::[Param]
+    procProtoParams::[Param],
+    procProtoResources::[ResourceFlowSpec]
     } deriving Eq
 
 -- |A formal parameter, including name, type, and flow direction.
@@ -1110,7 +1130,7 @@ data Param = Param {
 
 -- |A dataflow direction:  in, out, both, or neither.
 data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow
-                   deriving (Show,Eq)
+                   deriving (Show,Eq,Ord)
 
 -- |A primitive dataflow direction:  in or out
 data PrimFlow = FlowIn | FlowOut
@@ -1197,12 +1217,11 @@ instance Show PrimParam where
   show (PrimParam name typ dir ftype needed) =
     (if needed then "" else "[") ++
     primFlowPrefix dir ++
-    (case ftype of
-          HalfUpdate -> "%"
-          Implicit _ -> ""
-          Ordinary -> "") ++
+    show ftype ++
     show name ++ ":" ++ show typ ++
     (if needed then "" else "]")
+
+
 
 -- A variable name with an integer suffix to distinguish different 
 -- values for the same name.  As a special case, a suffix of -1 
@@ -1240,7 +1259,14 @@ data PrimArg
 data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
                  | HalfUpdate      -- ^One half of a variable update (!var)
                  | Implicit OptPos -- ^Temp var for expression at that position
-     deriving (Eq, Show)
+                 | Resource ResourceSpec -- ^An argument to pass a resource
+     deriving (Eq)
+
+instance Show ArgFlowType where
+    show Ordinary = ""
+    show HalfUpdate = "%"
+    show (Implicit _) = ""
+    show (Resource res) = show res ++ "#"
 
 
 -- |The dataflow direction of an actual argument.
@@ -1350,8 +1376,9 @@ instance Show Item where
     ++ showMaybeSourcePos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\nend\n"
-  show (ResourceDecl vis name typ pos) =
+  show (ResourceDecl vis name typ init pos) =
     visibilityPrefix vis ++ "resource " ++ show name ++ ":" ++ show typ
+    ++ maybeShow " = " init " "
     ++ showMaybeSourcePos pos
   show (FuncDecl vis proto typ exp pos) =
     visibilityPrefix vis ++ "func " ++ show proto ++ ":" ++ show typ
@@ -1417,9 +1444,10 @@ instance Show TypeProto where
 
 -- |How to show a function prototype.
 instance Show FnProto where
-  show (FnProto name []) = name
-  show (FnProto name params) = 
-    name ++ "(" ++ intercalate "," (List.map show params) ++ ")"
+  show (FnProto name [] resources) = name ++ showResources resources
+  show (FnProto name params resources) = 
+    name ++ "(" ++ intercalate "," (List.map show params) ++ ")" ++
+    showResources resources
 
 -- |How to show something that may have a source position
 instance Show t => Show (Placed t) where
@@ -1498,8 +1526,8 @@ instance Show TypeDef where
 instance Show ResourceDef where
   show (CompoundResource ids pos) =
     intercalate ", " ids ++ showMaybeSourcePos pos
-  show (SimpleResource typ pos) =
-    show typ ++ showMaybeSourcePos pos
+  show (SimpleResource typ init pos) =
+    show typ ++ showMaybeSourcePos pos ++ maybeShow " = " init ""
 
 -- |How to show a list of proc definitions.
 showProcDefs :: Int -> [ProcDef] -> String
@@ -1525,10 +1553,17 @@ instance Show TypeSpec where
       if List.null args then ""
       else "(" ++ (intercalate "," $ List.map show args) ++ ")"
 
+showResources :: [ResourceFlowSpec] -> String
+showResources [] = ""
+showResources resources = 
+    " use " ++ intercalate ", " (List.map show resources)
+
+
 -- |How to show a proc prototype.
 instance Show ProcProto where
-  show (ProcProto name params) = 
-    name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")"
+  show (ProcProto name params resources) = 
+    name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")" ++
+    showResources resources
 
 -- |How to show a formal parameter.
 instance Show Param where
@@ -1639,10 +1674,7 @@ instance Show PrimArg where
   show (ArgVar name typ dir ftype final) = 
       (if final then "~" else "") ++
       primFlowPrefix dir ++ 
-      (case ftype of
-            HalfUpdate -> "%"
-            Implicit _ -> ""
-            Ordinary -> "") ++
+      show ftype ++
       show name ++ showTypeSuffix typ
   show (ArgInt i typ)    = show i ++ showTypeSuffix typ
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ
@@ -1675,7 +1707,7 @@ instance Show Exp where
 --  if maybe has something, show pre, the maybe payload, and post
 --  if the maybe is Nothing, don't show anything
 maybeShow :: Show t => String -> Maybe t -> String -> String
-maybeShow pre Nothing pos = ""
+maybeShow pre Nothing post = ""
 maybeShow pre (Just something) post =
   pre ++ show something ++ post
 
