@@ -7,5 +7,5 @@
   types           : 
   resources       : 
   procs           : incr:
-public proc incr(a:0:int, ?~tmp$0:0:int)<0>  @func_untyped:1:8 (0 calls)
-    foreign llvm add(32:int, %a:0:int, 1:int, ?~tmp$0:0:int) @wybe:4:38
+public proc incr(a:0:int, ?tmp$0:0:int)<0>  @func_untyped:1:8 (0 calls)
+    foreign llvm add(32:int, ~a:0:int, 1:int, ?tmp$0:0:int) @wybe:4:38

@@ -8,6 +8,6 @@ test-cases/type_error.wybe:1:31: Type error in call to *, argument 1
   types           : 
   resources       : 
   procs           : messup:
-proc messup(x:0:int, y:0:float, ?~$:0:?)<0>  @type_error:1:1 (0 calls)
-    *(%x:0, %y:0, ?~tmp$0:0) @type_error:1:31
-    =(?~$:0, %~tmp$0:0)
+proc messup(x:0:int, y:0:float, ?$:0:?)<0>  @type_error:1:1 (0 calls)
+    *(~x:0, ~y:0, ?tmp$0:0) @type_error:1:31
+    =(?$:0, ~tmp$0:0)

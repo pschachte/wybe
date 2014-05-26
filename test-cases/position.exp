@@ -28,18 +28,18 @@ Call from position to = with 2 arguments, expected 2
   types           : 
   resources       : 
   procs           : position:
-public proc position(x:0:int, y:0:int, ?~$:0:position)<0>  (0 calls)
-    foreign $ alloc("position", "position", ?~$rec:0)
-    foreign $ mutate("position", "position", "x", %%$rec:0, ?%$rec:1, %x:0)
-    foreign $ mutate("position", "position", "y", %%$rec:1, ?%$rec:2, %y:0)
-    =(?~$:0, %~$rec:2)
+public proc position(x:0:int, y:0:int, ?$:0:position)<0>  (0 calls)
+    foreign $ alloc("position", "position", ?$rec:0)
+    foreign $ mutate("position", "position", "x", ~%$rec:0, ?%$rec:1, ~x:0)
+    foreign $ mutate("position", "position", "y", ~%$rec:1, ?%$rec:2, ~y:0)
+    =(?$:0, ~$rec:2)
                     x:
-public proc x($rec:0:position, ?~tmp$0:0:int)<0>  @position:2:12 (0 calls)
-    foreign $ access("position":string, "position":string, "x":string, %$rec:0:position, ?~tmp$0:0:int)
+public proc x($rec:0:position, ?tmp$0:0:int)<0>  @position:2:12 (0 calls)
+    foreign $ access("position":string, "position":string, "x":string, ~$rec:0:position, ?tmp$0:0:int)
 public proc x(%$rec:0:position, ?%$rec:1:position, $field:0:int)<1>  @position:2:12 (0 calls)
-    foreign $ mutate("position":string, "position":string, "x":string, %%$rec:0:position, ?%$rec:1:position, %$field:0:int)
+    foreign $ mutate("position":string, "position":string, "x":string, ~%$rec:0:position, ?%$rec:1:position, ~$field:0:int)
                     y:
-public proc y($rec:0:position, ?~tmp$0:0:int)<0>  @position:2:12 (0 calls)
-    foreign $ access("position":string, "position":string, "y":string, %$rec:0:position, ?~tmp$0:0:int)
+public proc y($rec:0:position, ?tmp$0:0:int)<0>  @position:2:12 (0 calls)
+    foreign $ access("position":string, "position":string, "y":string, ~$rec:0:position, ?tmp$0:0:int)
 public proc y(%$rec:0:position, ?%$rec:1:position, $field:0:int)<1>  @position:2:12 (0 calls)
-    foreign $ mutate("position":string, "position":string, "y":string, %%$rec:0:position, ?%$rec:1:position, %$field:0:int)
+    foreign $ mutate("position":string, "position":string, "y":string, ~%$rec:0:position, ?%$rec:1:position, ~$field:0:int)

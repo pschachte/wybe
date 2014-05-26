@@ -1215,7 +1215,7 @@ instance Show PrimParam where
     primFlowPrefix dir ++ 
     (case ftype of
           HalfUpdate -> "%"
-          Implicit _ -> "~"
+          Implicit _ -> ""
           Ordinary -> "") ++
     show name ++ ":" ++ show typ
 
@@ -1651,11 +1651,11 @@ showBody indent stmts =
 -- |Show a primitive argument.
 instance Show PrimArg where
   show (ArgVar name typ dir ftype final) = 
-      (if final then "%" else "") ++
+      (if final then "~" else "") ++
       primFlowPrefix dir ++ 
       (case ftype of
             HalfUpdate -> "%"
-            Implicit _ -> "~"
+            Implicit _ -> ""
             Ordinary -> "") ++
       show name ++ showTypeSuffix typ
   show (ArgInt i typ)    = show i ++ showTypeSuffix typ
