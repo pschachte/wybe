@@ -179,13 +179,9 @@ mkPrimVarName :: Map String Int -> String -> PrimVarName
 mkPrimVarName dict name =
     case Map.lookup name dict of
         -- XXX This is the proper code:
-        -- Nothing -> shouldnt $ "Referred to undefined variable '" ++ name ++ "'"
+        -- Nothing -> shouldnt $ "Undefined variable '" ++ name ++ "'"
         Nothing -> PrimVarName name (-1)
         Just n  -> PrimVarName name n
-
-
-resourceVar :: ResourceSpec -> String
-resourceVar (ResourceSpec mod name) = intercalate "." mod ++ name
 
 
 incrMaybe :: Maybe Int -> Maybe Int
@@ -206,15 +202,14 @@ compileProc tmpCtr (ProcDecl vis (ProcProto name params resources) body pos)
     (params',body') <- evalClauseComp $ do
         mapM_ nextVar $ List.map paramName $ 
           List.filter (flowsIn . paramFlow) params
-        mapM_ nextVar $ List.map (resourceVar . resourceFlowRes) $
-          List.filter (flowsIn . resourceFlowFlow) resources
         startVars <- gets vars
         -- liftIO $ putStrLn $ "Compiling body of " ++ name ++ "..."
         compiled <- compileBody body
         -- liftIO $ putStrLn $ "Compiled"
         endVars <- gets vars
         return (List.map (primParam startVars endVars) params, compiled)
-    let def = ProcDef name (PrimProto name params') body' pos tmpCtr 0 vis False
+    let def = ProcDef name (PrimProto name params') resources body' pos
+              tmpCtr 0 vis False
     -- liftIO $ putStrLn $ "Compiled version:\n" ++ showProcDef 0 def
     addProc def
     return ()

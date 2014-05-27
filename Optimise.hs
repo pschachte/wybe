@@ -70,8 +70,10 @@ optimiseProcDef pspec def = do
 ----------------------------------------------------------------
 
 inlineIfWanted :: ProcDef -> Compiler ProcDef
-inlineIfWanted def@(ProcDef _ (PrimProto _ params) (ProcBody body NoFork)
-                    _ _ _ _ False) = do
+inlineIfWanted def
+    |  NoFork == bodyFork (procBody def) && not (procInline def) = do
+    let params = primProtoParams $ procProto def
+    let body =  bodyPrims $ procBody def
     let benefit = 1 + length params
     let cost = sum $ List.map (primCost . content) body
     if  benefit >= cost - 2

@@ -351,7 +351,11 @@ updateModuleM updater = do
 getSpecModule :: String -> ModSpec -> (Module -> t) -> Compiler t
 getSpecModule context spec getter = do
     let msg = context ++ " looking up missing module " ++ show spec
-    gets (maybe (error msg) getter . Map.lookup spec . modules)
+    curr <- gets (List.filter ((==spec) . modSpec) . underCompilation)
+    case curr of
+        []    -> gets (maybe (error msg) getter . Map.lookup spec . modules)
+        [mod] -> return $ getter mod
+        _     -> shouldnt "getSpecModule: multiple modules with same spec"
 
 -- |Return some function of the specified module; returns a Maybe
 findSpecModule :: ModSpec -> (Module -> t) -> Compiler (Maybe t)
@@ -534,13 +538,26 @@ publicType name = do
 addResource :: ResourceName -> ResourceDef -> Visibility -> Compiler ()
 addResource name def vis = do
     updateImplementation (updateModResources (Map.insert name def))
-    updateInterface vis (updatePubResources 
-                         (Map.insert name $ resourceDefPosition def))
+    updateInterface vis (updatePubResources (Map.insert name def))
 
 -- |Find the definition of the specified resource in the current module.
-lookupResource :: Ident -> Compiler (Maybe ResourceDef)
-lookupResource name =
-    getModuleImplementationMaybe (\imp -> Map.lookup name $ modResources imp)
+lookupResource :: ResourceSpec -> OptPos -> Compiler (Maybe ResourceDef)
+lookupResource res@(ResourceSpec mod name) pos = do
+    mods <- refersTo mod name modResources pubResources
+    case mods of
+        []  -> do
+                  message Error ("Unknown resource " ++ show res) pos
+                  return Nothing
+        [m] -> do
+                  mod <- getSpecModule "lookupResource" m id
+                  return $ Map.lookup name $ modResources $
+                         trustFromJust "lookupResource" $ modImplementation mod
+        _   -> do
+                  message Error ("Ambiguous resource " ++ show res ++
+                                 " could refer to: " ++
+                                 intercalate "," (List.map show mods)) pos
+                  return Nothing
+
 
 -- |Is the specified resource exported by the current module.
 publicResource :: Ident -> Compiler Bool
@@ -563,7 +580,7 @@ addImport modspec imp specific vis = do
 
 -- |Add the specified proc definition to the current module.
 addProc :: ProcDef -> Compiler ()
-addProc procDef@(ProcDef name proto clauses pos _ calls vis _) = do
+addProc procDef@(ProcDef name proto resources clauses pos _ calls vis _) = do
     updateImplementation
       (updateModProcs
        (\procs ->
@@ -640,17 +657,17 @@ mapListInsert key elt =
 
 
 -- |Replace the specified proc definition in the current module.
-replaceProc :: Ident -> Int -> PrimProto -> ProcBody -> OptPos ->
-               Int -> Int -> Visibility -> Bool -> Compiler ()
-replaceProc name id proto clauses pos tmpCount calls vis inline = do
+replaceProc :: Ident -> Int -> PrimProto -> [ResourceFlowSpec] -> ProcBody ->
+               OptPos -> Int -> Int -> Visibility -> Bool -> Compiler ()
+replaceProc name id proto resources clauses pos tmpCount calls vis inline = do
     updateImplementation
       (updateModProcs
        (\procs -> 
          let olddefs = findWithDefault [] name procs
              (front,back) = List.splitAt id olddefs
          in Map.insert name (front ++ 
-                             (ProcDef name proto clauses pos tmpCount calls
-                                      vis inline:tail back)) 
+                             (ProcDef name proto resources clauses pos
+                                      tmpCount calls vis inline:tail back)) 
             procs))
 
 
@@ -836,7 +853,7 @@ updateModInterface fn =
 -- |Holds everything needed to compile code that uses a module
 data ModuleInterface = ModuleInterface {
     pubTypes :: Map Ident TypeDef,   -- ^The types this module exports
-    pubResources :: Map Ident OptPos,       
+    pubResources :: Map Ident ResourceDef,       
                                     -- ^The resources this module exports
     pubProcs :: Map Ident [ProcSpec], -- ^The procs this module exports
     pubDependencies :: Map Ident OptPos,    
@@ -858,7 +875,7 @@ updatePubTypes fn modint = modint {pubTypes = fn $ pubTypes modint}
 
 -- |Update the public resources of a module interface.
 updatePubResources :: 
-    (Map Ident OptPos -> Map Ident OptPos) -> 
+    (Map Ident ResourceDef -> Map Ident ResourceDef) -> 
     ModuleInterface -> ModuleInterface
 updatePubResources fn modint = modint {pubResources = fn $ pubResources modint}
 
@@ -980,10 +997,11 @@ typeDefArity :: TypeDef -> Int
 typeDefArity (TypeDef arity _) = arity
 
 
--- |A resource definition.  For a normal resource, its type; for a 
---  compound resource, a list of other resources.  In both cases, 
---  there may be an optional source position.
-data ResourceDef = CompoundResource [ResourceName] OptPos
+-- |A resource definition.  For a normal resource, its type and
+-- optionally an initial value; for a compound resource, a list of
+-- other resources.  In both cases, there may be an optional source
+-- position.
+data ResourceDef = CompoundResource [ResourceSpec] OptPos
                  | SimpleResource TypeSpec (Maybe (Placed Exp)) OptPos
 
 -- |The optional position of a resource definition.
@@ -997,6 +1015,7 @@ resourceDefPosition (SimpleResource _ _ pos) = pos
 data ProcDef = ProcDef {
     procName :: Ident, 
     procProto :: PrimProto,
+    procResources :: [ResourceFlowSpec], -- Resources used by this proc
     procBody :: ProcBody,
     procPos :: OptPos,
     procTmpCount :: Int,        -- the next temp variable number to use
@@ -1094,7 +1113,7 @@ data ResourceSpec = ResourceSpec {
                
 instance Show ResourceSpec where
     show (ResourceSpec mod name) = 
-        maybeModPrefix mod ++ show name
+        maybeModPrefix mod ++ name
 
 data ResourceFlowSpec = ResourceFlowSpec {
     resourceFlowRes::ResourceSpec,
@@ -1471,7 +1490,8 @@ instance Show Module where
            maybeShow "(" (modParams mod) ")" ++
            "\n  public submods  : " ++ showMapPoses (pubDependencies int) ++
            "\n  public types    : " ++ showMapTypes (pubTypes int) ++
-           "\n  public resources: " ++ showMapPoses (pubResources int) ++
+           "\n  public resources: " ++
+           intercalate ", " (List.map show $ Map.elems $ pubResources int) ++
            "\n  public procs    : " ++ 
            intercalate "\n                    " 
            (List.map show $ List.concat $ Map.elems $ pubProcs int) ++
@@ -1524,8 +1544,8 @@ instance Show TypeDef where
 
 -- |How to show a resource definition.
 instance Show ResourceDef where
-  show (CompoundResource ids pos) =
-    intercalate ", " ids ++ showMaybeSourcePos pos
+  show (CompoundResource specs pos) =
+    intercalate ", " (List.map show specs) ++ showMaybeSourcePos pos
   show (SimpleResource typ init pos) =
     show typ ++ showMaybeSourcePos pos ++ maybeShow " = " init ""
 
@@ -1537,9 +1557,10 @@ showProcDefs firstID (def:defs) =
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID (ProcDef _ proto def pos _ calls vis inline) =
+showProcDef thisID (ProcDef _ proto resources def pos _ calls vis inline) =
     "\n" ++ visibilityPrefix vis ++
     "proc " ++ show proto ++ "<" ++ show thisID ++ "> "
+    ++ showResources resources
     ++ showMaybeSourcePos pos
     ++ " (" ++ show calls ++ " calls)"
     ++ (if inline then " (inline)" else "")

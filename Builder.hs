@@ -59,7 +59,7 @@ buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     messages <- gets msgs
-    (liftIO . putStr) $ unlines messages
+    (liftIO . putStr) $ unlines $ reverse messages
     errored <- gets errorState
     verboseDump
     if errored then liftIO exitFailure else liftIO exitSuccess
@@ -177,7 +177,7 @@ compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
 compileModule dir modspec params parseTree = do
     enterModule dir modspec params
     setUpModule parseTree
-    underComp <- gets underCompilation
+    -- underComp <- gets underCompilation
     mods <- exitModule -- may be empty list if module is mutually dependent
     compileModSCC mods
 
@@ -232,7 +232,7 @@ compileModSCC specs = do
     optimiseModSCCBottomUp specs
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER OPTIMISATION:\n"
     -- verboseDump
-    mods <- mapM getLoadedModule specs
+    -- mods <- mapM getLoadedModule specs
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs . 
     --                         fromJust . modImplementation))

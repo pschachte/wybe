@@ -8,6 +8,7 @@
 module Types (typeCheckModSCC) where
 
 import AST
+import Resources
 import Util
 import Data.Map as Map
 import Data.Set as Set
@@ -246,9 +247,13 @@ typecheckProcDecls m mods name = do
 -- |Type check a single procedure definition.
 typecheckProcDecl :: ModSpec -> [ModSpec] -> ProcDef ->
                     Compiler (ProcDef,Bool,Bool,[TypeReason])
-typecheckProcDecl m mods pd@(ProcDef name proto@(PrimProto pn params) 
-                         def pos tmpCnt calls vis inline) 
-  = do
+typecheckProcDecl m mods pd = do
+    let name = procName pd
+    let proto = procProto pd
+    let params = primProtoParams proto
+    let def = procBody pd
+    let pos = procPos pd
+    let vis = procVis pd
     let typing = List.foldr (addDeclaredType name pos params)
                  initTyping $ zip params [1..]
     if validTyping typing
@@ -259,9 +264,10 @@ typecheckProcDecl m mods pd@(ProcDef name proto@(PrimProto pn params)
         -- liftIO $ putStrLn $ "*resulting types " ++ name ++
         --   ": " ++ show typing'
         let params' = updateParamTypes typing' params
-        let pd' = ProcDef name (PrimProto pn params') def' pos tmpCnt 
-                  calls vis inline
+        let proto' = proto { primProtoParams = params' }
+        let pd' = pd { procProto = proto', procBody = def' }
         let modAgain = pd' /= pd
+        pd'' <- if modAgain then return pd' else resourceCheck pd'
         -- liftIO $ putStrLn $ "===== Definition is " ++ 
         --        (if modAgain then "" else "un") ++ "changed"
         -- when modAgain
