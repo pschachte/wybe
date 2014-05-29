@@ -31,7 +31,8 @@ markLastUse ps def = do
 
 neededIfInput :: Set PrimVarName -> PrimParam -> Bool
 neededIfInput needed param =
-    primParamFlow param == FlowOut || Set.member (primParamName param) needed
+    (typeName $ primParamType param) == "phantom" ||
+    (primParamFlow param == FlowOut || Set.member (primParamName param) needed)
 
 
 ----------------------------------------------------------------

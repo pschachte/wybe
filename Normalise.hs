@@ -65,7 +65,7 @@ normaliseItem (ImportMods vis imp modspecs pos) = do
 normaliseItem (ImportItems vis imp modspec imports pos) = do
     addImport modspec imp (Just imports) vis
 normaliseItem (ResourceDecl vis name typ init pos) =
-  addResource name (SimpleResource typ init pos) vis
+  addSimpleResource name (SimpleResource typ init pos) vis
 normaliseItem (FuncDecl vis (FnProto name params resources) 
                resulttype result pos) =
   let flowType = Implicit pos

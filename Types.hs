@@ -5,7 +5,7 @@
 --  Copyright: © 2012 Peter Schachte.  All rights reserved.
 
 -- |Support for type checking/inference.
-module Types (typeCheckModSCC) where
+module Types (typeCheckMod) where
 
 import AST
 import Resources
@@ -123,55 +123,57 @@ subtypeOf :: TypeSpec -> TypeSpec -> Bool
 subtypeOf sub super = sub == super || sub `properSubtypeOf` super
 
 
--- |Type check a strongly connected component in the module dependency graph.
---  This code assumes that all lower sccs have already been checked.
-typeCheckModSCC :: [ModSpec] -> Compiler ()
-typeCheckModSCC [modspec] = do  -- immediate fixpoint when no mutual dependency
-    (_,reasons) <- typeCheckMod [modspec] modspec
-    mapM_ (\r -> message Error (show r) Nothing) reasons
-    return ()
-typeCheckModSCC scc = do        -- must find fixpoint
-    (changed,reasons) <- foldMChangeReasons (typeCheckMod scc) False [] scc
-    if changed
-    then typeCheckModSCC scc
-    else mapM_ (\r -> message Error (show r) Nothing) reasons
+-- -- |Type check a strongly connected component in the module dependency graph.
+-- --  This code assumes that all lower sccs have already been checked.
+-- typeCheckModSCC :: [ModSpec] -> Compiler ()
+-- typeCheckModSCC [modspec] = do  -- immediate fixpoint when no mutual dependency
+--     (_,reasons) <- typeCheckMod [modspec] modspec
+--     mapM_ (\r -> message Error (show r) Nothing) reasons
+--     return ()
+-- typeCheckModSCC scc = do        -- must find fixpoint
+--     (changed,reasons) <- foldMChangeReasons (typeCheckMod scc) False [] scc
+--     if changed
+--     then typeCheckModSCC scc
+--     else mapM_ (\r -> message Error (show r) Nothing) reasons
 
 
-foldMChangeReasons :: (a -> Compiler (Bool,[TypeReason])) -> Bool ->
-                      [TypeReason] -> [a] -> Compiler (Bool,[TypeReason])
-foldMChangeReasons f chg0 reasons0 xs =
-    foldM (\(chg,rs) x -> do
-             (chg1,rs1) <- f x
-             return (chg1||chg, rs1++rs))
-          (chg0,reasons0) xs
+-- foldMChangeReasons :: (a -> Compiler (Bool,[TypeReason])) -> Bool ->
+--                       [TypeReason] -> [a] -> Compiler (Bool,[TypeReason])
+-- foldMChangeReasons f chg0 reasons0 xs =
+--     foldM (\(chg,rs) x -> do
+--              (chg1,rs1) <- f x
+--              return (chg1||chg, rs1++rs))
+--           (chg0,reasons0) xs
 
 
 -- |Type check a single module named in the second argument; the 
 --  first argument is a list of all the modules in this module 
 -- dependency SCC.
-typeCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[TypeReason])
+typeCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 typeCheckMod modSCC thisMod = do
     -- liftIO $ putStrLn $ "**** Type checking module " ++ showModSpec thisMod
     reenterModule thisMod
     -- First typecheck submodules
-    submods <- getModuleImplementationField modSubmods
-    -- liftIO $ putStrLn $ "getModuleImplementationField completed"
-    let modspecs = Map.elems submods
-      -- liftIO $ putStrLn $ "  Submodules: " ++ showModSpecs modspecs
-    (changed0,reasons0) <- 
-        foldMChangeReasons (typeCheckMod modSCC) False [] modspecs
+    -- submods <- getModuleImplementationField modSubmods
+    -- -- liftIO $ putStrLn $ "getModuleImplementationField completed"
+    -- let modspecs = Map.elems submods
+    --   -- liftIO $ putStrLn $ "  Submodules: " ++ showModSpecs modspecs
+    -- (changed0,reasons0) <- 
+    --     foldMChangeReasons (typeCheckMod modSCC) False [] modspecs
     procs <- getModuleImplementationField (Map.toList . modProcs)
     let ordered =
             stronglyConnComp
             [(name,name,
               nub $ concatMap (localBodyProcs thisMod . procBody) procDefs)
              | (name,procDefs) <- procs]
-    (changed,reasons) <-
-        foldMChangeReasons (typecheckProcSCC thisMod modSCC) 
-                           changed0 reasons0 ordered
+    (changed,errors) <-
+        foldM (\(chg,errs) procSCC -> do
+             (chg1,reasons) <- typecheckProcSCC thisMod modSCC procSCC
+             return (chg||chg1, List.map (\r->(show r,Nothing)) reasons++errs))
+        (False,[]) ordered
     finishModule
     -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
-    return (changed,reasons)
+    return (changed,errors)
 
 
 localBodyProcs :: ModSpec -> ProcBody -> [Ident]
@@ -266,15 +268,16 @@ typecheckProcDecl m mods pd = do
         let params' = updateParamTypes typing' params
         let proto' = proto { primProtoParams = params' }
         let pd' = pd { procProto = proto', procBody = def' }
-        let modAgain = pd' /= pd
-        pd'' <- if modAgain then return pd' else resourceCheck pd'
+        pd'' <- resourceCheckProc pd'
+        let modAgain = pd'' /= pd
+        -- pd'' <- if modAgain then return pd' else resourceCheck pd'
         -- liftIO $ putStrLn $ "===== Definition is " ++ 
         --        (if modAgain then "" else "un") ++ "changed"
         -- when modAgain
         --      (liftIO $ putStrLn $ "** check again " ++ name ++
         --              "\n-----------------OLD:" ++ showProcDef 4 pd ++
         --              "\n-----------------NEW:" ++ showProcDef 4 pd' ++ "\n")
-        return (pd',modAgain,modAgain && vis == Public,
+        return (pd'',modAgain,modAgain && vis == Public,
                    case typing' of
                      ValidTyping _ -> []
                      InvalidTyping r -> [r])
@@ -321,8 +324,11 @@ typecheckProcDef m mods name pos paramTypes body = do
         -- liftIO $ putStrLn $ "   final body: " ++ show prims'
         let typing' = projectTyping typing paramTypes
         case typing of
-            InvalidTyping _ -> return (typing', body)
+            InvalidTyping _ -> do
+                -- liftIO $ putStrLn $ "invalid: no body typing" ++ showBlock 4 body
+                return (typing', body)
             ValidTyping dict -> do
+                -- liftIO $ putStrLn $ "apply body typing" ++ showBlock 4 body
                 body' <- applyBodyTyping dict body
                 return (typing',body')
       typings -> do
@@ -398,7 +404,7 @@ typecheckPlacedPrim m mods caller typing pprim = do
 --  possible typings.
 typecheckPrim :: ModSpec -> [ModSpec] -> ProcName -> Prim -> OptPos -> Typing ->
                  Compiler [Typing]
-typecheckPrim m mods caller call@(PrimCall cm name id args) pos typing = do
+typecheckPrim m mods caller call@(PrimCall cm name id args0) pos typing = do
     -- liftIO $ putStrLn $ "Type checking call " ++ show call
     -- liftIO $ putStrLn $ "   with types " ++ show typing
     procs <- case id of
@@ -406,19 +412,24 @@ typecheckPrim m mods caller call@(PrimCall cm name id args) pos typing = do
         Just spec -> return [spec]
     -- liftIO $ putStrLn $ "   potential procs: " ++
     --        List.intercalate ", " (List.map show procs)
+    let args = List.filter (not . resourceArg) args0
     if List.null procs 
       then
         return [InvalidTyping $ ReasonUndef caller name pos]
       else do
         typList <- mapM (\p -> do
-                              params <- getParams p
-                              -- liftIO $ putStr $ "   checking call to " ++
-                              --        show p ++ " args " ++
-                              --        show args ++ " against params " ++
-                              --        show params ++ "..."
+                              params0 <- getParams p
+                              let params = List.filter (not . resourceParam)
+                                           params0
+                              -- liftIO $ putStr $ 
+                              --   "\n   checking flow of call to " ++
+                              --   show p ++ " args " ++
+                              --   show args ++ " against params " ++
+                              --   show params ++ "..."
                               case reconcileArgFlows params args of
                                   Just args' -> do
-                                      -- liftIO $ putStrLn "MATCHES"
+                                      -- liftIO $ putStrLn $ 
+                                      --   "MATCHES: args = " ++ show args'
                                       return $ 
                                          [List.foldr (typecheckArg pos params $
                                                       procSpecName p)
@@ -484,17 +495,20 @@ reconcileArgFlows (PrimParam _ _ pflow _ needed:params)
   (arg@(ArgVar _ _ aflow _ _):args)
   | pflow == aflow = 
       let tail = reconcileArgFlows params args
-      in  if needed then fmap (arg:) tail else tail
+      in fmap (arg:) tail
+      -- in  if needed then fmap (arg:) tail else tail
 reconcileArgFlows (PrimParam _ _ FlowOut _ needed:params) 
   (ArgVar _ _ FlowIn HalfUpdate _:arg@(ArgVar _ _ FlowOut HalfUpdate _):args)
   = let tail = reconcileArgFlows params args
-    in  if needed then fmap (arg:) tail else tail
+    in  fmap (arg:) tail
+    -- in  if needed then fmap (arg:) tail else tail
 reconcileArgFlows (PrimParam _ _ FlowOut _ _:_) _ = Nothing
 reconcileArgFlows (PrimParam _ _ FlowIn _ _:params)
                       (ArgVar _ _ FlowOut _ _:args) = Nothing
 reconcileArgFlows (PrimParam _ _ FlowIn _ needed:params) (arg:args)
   = let tail = reconcileArgFlows params args    -- constant arg
-    in  if needed then fmap (arg:) tail else tail
+    in fmap (arg:) tail
+    -- in  if needed then fmap (arg:) tail else tail
 
 
 typecheckArg :: OptPos -> [PrimParam] -> ProcName ->
@@ -548,12 +562,11 @@ typecheckArg'' :: TypeSpec -> TypeSpec -> TypeSpec -> Typing -> TypeReason ->
 typecheckArg'' callType paramType constType typing reason =
     let realType =
             if constType `subtypeOf` callType then constType else callType
-    in -- trace ("check call type " ++ show callType ++ " against param type " ++ show paramType ++ " for const type " ++ show constType)
-           if paramType `subtypeOf` realType
-           then typing
-           else -- trace ("type error with constant: " ++ show realType ++ 
-                --       " vs. " ++ show paramType)
-                InvalidTyping reason
+    in -- trace ("check call type " ++ show callType ++ " against param type " ++ show paramType ++ " for const type " ++ show constType) $
+       if paramType `subtypeOf` realType
+       then typing
+       else -- trace ("type error with constant: " ++ show realType ++ " vs. " ++ show paramType)
+            InvalidTyping reason
 
 
 diffBody :: ProcBody -> ProcBody -> Maybe (ProcName,OptPos)
@@ -612,7 +625,9 @@ applyPlacedPrimTyping dict pprim = do
 
 applyPrimTyping :: Map VarName TypeSpec -> Prim -> Compiler Prim
 applyPrimTyping dict call@(PrimCall cm name id args) = do
-    let args' = List.map (applyArgTyping dict) args
+    -- liftIO $ putStrLn $ "typing call " ++ show call
+    let args' = List.map (applyArgTyping dict) $
+                List.filter (not . resourceArg) args
     procs <- case id of
         Nothing   -> callTargets cm name
         Just spec -> return [spec]
@@ -620,7 +635,8 @@ applyPrimTyping dict call@(PrimCall cm name id args) = do
     --        ++ intercalate ", " (List.map show procs)
     matches <- fmap catMaybes $
                mapM (\p -> do
-                          params <- getParams p
+                          params <- fmap (List.filter (not . resourceParam)) $
+                                    getParams p
                           -- liftIO $ putStrLn $ "   checking call to " ++
                           --        show p ++ " args " ++
                           --        show args' ++ " against params " ++
@@ -635,9 +651,13 @@ applyPrimTyping dict call@(PrimCall cm name id args) = do
                procs
     checkError "not exactly one matching proc" (1 /= length matches)
     let (args'',proc) = List.head matches
+--     liftIO $ putStrLn $ "typed call = " ++ show (PrimCall (procSpecMod proc) (pr
+-- ocSpecName proc) (Just proc) args'')
     return $ PrimCall (procSpecMod proc) (procSpecName proc) (Just proc) args''
-applyPrimTyping dict (PrimForeign lang name id args) = do
+applyPrimTyping dict call@(PrimForeign lang name id args) = do
+    -- liftIO $ putStrLn $ "typing call " ++ show call
     let args' = List.map (applyArgTyping dict) args
+    -- liftIO $ putStrLn $ "typed call = " ++ show (PrimForeign lang name id args')
     return $ PrimForeign lang name id args'
 applyPrimTyping dict (PrimNop) = return PrimNop
 

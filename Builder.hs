@@ -37,7 +37,8 @@ import AST
 import Parser          (parse)
 import Scanner         (inputTokens, fileTokens, Token)
 import Normalise       (normalise)
-import Types           (typeCheckModSCC)
+import Types           (typeCheckMod)
+import Resources       (resourceCheckMod)
 import Optimise        (optimiseModSCCBottomUp)
 import System.FilePath
 import Data.Map as Map
@@ -174,11 +175,24 @@ buildModule modname objfile srcfile = do
 
 -- |Compile a module given the parsed source file contents.
 compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
-compileModule dir modspec params parseTree = do
+compileModule dir modspec params items = do
+    -- liftIO $ putStrLn $ "===> Compiling module " ++ showModSpec modspec
     enterModule dir modspec params
-    setUpModule parseTree
+    -- verboseMsg 1 $ return (intercalate "\n" $ List.map show items)
+    -- XXX This means we generate LPVM code for a module before 
+    -- considering dependencies.  This will need to change if we 
+    -- really need dependency info to do initial LPVM translation, or 
+    -- if it's too memory-intensive to load all code to be compiled 
+    -- into memory at once.  Note that this does not do a proper 
+    -- top-down traversal, because we may not visit *all* users of a 
+    -- module before handling the module.  If we decide we need to do 
+    -- that, then we'll need to handle the full dependency 
+    -- relationship explicitly before doing any compilation.
+    Normalise.normalise items
+    handleImports
     -- underComp <- gets underCompilation
     mods <- exitModule -- may be empty list if module is mutually dependent
+    -- liftIO $ putStrLn $ "<=== finished compling module " ++ showModSpec modspec
     compileModSCC mods
 
 
@@ -197,76 +211,63 @@ loadModule objfile =
     Nothing
 
 
--- |Set up a new module for compilation.  Assumes that a fresh module 
---  has already been entered.  Normalises and installs the given list 
---  of file items, and handles any required imports.
-setUpModule :: [Item] -> Compiler ()
-setUpModule items = do
-    -- verboseMsg 1 $ return (intercalate "\n" $ List.map show items)
-    -- XXX This means we generate LPVM code for a module before 
-    -- considering dependencies.  This will need to change if we 
-    -- really need dependency info to do initial LPVM translation, or 
-    -- if it's too memory-intensive to load all code to be compiled 
-    -- into memory at once.  Note that this does not do a proper 
-    -- top-down traversal, because we may not visit *all* users of a 
-    -- module before handling the module.  If we decide we need to do 
-    -- that, then we'll need to handle the full dependency 
-    -- relationship explicitly before doing any compilation.
-    Normalise.normalise items
-    handleImports
-
-
 -- |Actually compile a list of modules that form an SCC in the module
 --  dependency graph.  This is called in a way that guarantees that
 --  all proc calls will be to procs that either have already been
 --  compiled or are defined in modules on this list.
 compileModSCC :: [ModSpec] -> Compiler ()
-compileModSCC specs = do
-    -- liftIO $ putStrLn $ "type checking module SCC " ++ showModSpecs specs ++ "..."
+compileModSCC mods = do
+    mapM_ (\m -> do
+                imp <- getLoadedModuleImpln m
+                let subMods = Map.elems $ modSubmods imp
+                mapM_ (compileModSCC . (:[])) subMods)
+      mods
+    -- liftIO $ putStrLn $ "type checking module SCC " ++ showModSpecs mods ++ "..."
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER NORMALISATION:\n"
     -- verboseDump
-    typeCheckModSCC specs
+    fixpointProcessSCC resourceCheckMod mods
+    fixpointProcessSCC typeCheckMod mods
     -- liftIO $ putStrLn $ "type checked"
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER TYPE CHECK:\n"
     -- verboseDump
-    optimiseModSCCBottomUp specs
+    optimiseModSCCBottomUp mods
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER OPTIMISATION:\n"
     -- verboseDump
-    -- mods <- mapM getLoadedModule specs
+    -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs . 
     --                         fromJust . modImplementation))
     return ()
 
----------------------- Resolving Overloading -----------------------
 
--- resolveOverloading :: ModSpec -> Compiler ()
--- -- resolveOverloading spec = do
--- --     (liftIO . putStrLn) (show spec)
--- --     return ()
--- resolveOverloading spec = do
---     updateModImplementationM
---       (updateModProcsM 
---        (\m -> do
---              processed <- mapM (\(k,p) -> do
---                                     p' <- mapM resolveProc p
---                                     return (k,p'))
---                          (Map.toAscList m)
---              return $ Map.fromAscList processed))
+-- |A Processor processes the specified module one iteration in a 
+--  context of mutual dependency among the list of modules.  It 
+--  produces a flag indicating that processing made some change (so a 
+--  fixed point has not been reached), and a list of error messages, 
+--  each with its associated optional source position.  The error 
+--  messages will only be printed after a fixed point is reached.
+--  A processor is expected to find a fixed point within a single 
+--  module by itself.
+type Processor = [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 
--- resolveProc :: ProcDef -> Compiler ProcDef
--- resolveProc (ProcDef id proto def pos) = do
---     def' <- mapM (updatePlacedM resolvePrim) def
---     return $ ProcDef id proto def' pos
 
--- resolvePrim :: Prim -> Compiler Prim
--- resolvePrim prim = return prim
-
----------------------- Purely Local Checks -----------------------
-
-localCheckMod :: ModSpec -> Compiler ()
-localCheckMod spec = do
+-- |Type check a strongly connected component in the module dependency graph.
+--  This code assumes that all lower sccs have already been checked.
+fixpointProcessSCC :: Processor -> [ModSpec] -> Compiler ()
+fixpointProcessSCC processor [modspec] = do
+    (_,errors) <- processor [modspec] modspec
+    -- immediate fixpoint if no mutual dependency
+    mapM_ (\(msg,pos) -> message Error msg pos) errors
     return ()
+fixpointProcessSCC processor scc = do        -- must find fixpoint
+    (changed,errors) <- 
+        foldM (\(chg,errs) mod -> do
+                    (chg1,errs1) <- processor scc mod
+                    return (chg1||chg, errs1++errs))
+        (False,[]) scc
+    if changed
+    then fixpointProcessSCC processor scc
+    else mapM_ (\(msg,pos) -> message Error msg pos) errors
 
 
 ------------------------ Handling Imports ------------------------
@@ -275,7 +276,9 @@ localCheckMod spec = do
 handleImports :: Compiler ()
 handleImports = do
     imports <- getModuleImplementationField (keys . modImports)
-    mapM_ buildDependency imports -- ++ [["wybe"]]
+    -- liftIO $ putStrLn $ "building dependencies: " ++ showModSpecs imports
+    mapM_ buildDependency imports
+    -- 
     -- modspec <- getModuleSpec
     -- mod <- getModule id
     -- updateModules (Map.insert modspec mod)
