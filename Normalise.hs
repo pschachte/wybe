@@ -165,28 +165,26 @@ initClauseComp = ClauseComp Map.empty
 
 nextVar :: String -> ClauseComp PrimVarName
 nextVar name = do
-    modify (\s -> s { vars = Map.alter incrMaybe name $ vars s })
-    currVar name
+    modify (\s -> s { vars = Map.alter (Just . maybe 0 (+1)) name $ vars s })
+    currVar name Nothing
 
 
-currVar :: String -> ClauseComp PrimVarName
-currVar name = do
+currVar :: String -> OptPos -> ClauseComp PrimVarName
+currVar name pos = do
     dict <- gets vars
-    return $ mkPrimVarName dict name
+    case Map.lookup name dict of
+        Nothing -> do
+                   lift $ message Error
+                            ("Uninitialised variable '" ++ name ++ "'") pos
+                   return $ PrimVarName name (-1)
+        Just n -> return $ PrimVarName name n
 
 
 mkPrimVarName :: Map String Int -> String -> PrimVarName
 mkPrimVarName dict name =
     case Map.lookup name dict of
-        -- XXX This is the proper code:
-        -- Nothing -> shouldnt $ "Undefined variable '" ++ name ++ "'"
-        Nothing -> PrimVarName name (-1)
+        Nothing -> shouldnt $ "Undefined variable '" ++ name ++ "'"
         Just n  -> PrimVarName name n
-
-
-incrMaybe :: Maybe Int -> Maybe Int
-incrMaybe Nothing = Just 0
-incrMaybe (Just n) = Just $ n + 1
 
 
 -- |Run a clause compiler function from the Compiler monad to compile
@@ -242,7 +240,7 @@ compileBody [placed]
       let Cond tstStmts tstVar thn els = content placed
       initial <- gets vars
       tstStmts' <- mapM compileSimpleStmt tstStmts
-      tstVar' <- compileArg $ content tstVar
+      tstVar' <- placedApplyM compileArg tstVar
       thn' <- mapM compileSimpleStmt thn
       afterThen <- gets vars
       modify (\s -> s { vars = initial })
@@ -278,10 +276,10 @@ compileSimpleStmt stmt = do
 
 compileSimpleStmt' :: Stmt -> ClauseComp Prim
 compileSimpleStmt' (ProcCall maybeMod name args) = do
-    args' <- mapM (compileArg . content) args
+    args' <- mapM (placedApply compileArg) args
     return $ PrimCall maybeMod name Nothing args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
-    args' <- mapM (compileArg . content) args
+    args' <- mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
 compileSimpleStmt' (Nop) = do
     return $ PrimNop
@@ -289,22 +287,22 @@ compileSimpleStmt' stmt =
     shouldnt $ "Normalisation left complex statement:\n" ++ showStmt 4 stmt
 
 
-compileArg :: Exp -> ClauseComp PrimArg
+compileArg :: Exp -> OptPos -> ClauseComp PrimArg
 compileArg = compileArg' Unspecified
 
-compileArg' :: TypeSpec -> Exp -> ClauseComp PrimArg
-compileArg' typ (IntValue int) = return $ ArgInt int typ
-compileArg' typ (FloatValue float) = return $ ArgFloat float typ
-compileArg' typ (StringValue string) = return $ ArgString string typ
-compileArg' typ (CharValue char) = return $ ArgChar char typ
-compileArg' typ (Var name ParamIn flowType) = do
-    name' <- currVar name
+compileArg' :: TypeSpec -> Exp -> OptPos -> ClauseComp PrimArg
+compileArg' typ (IntValue int) _ = return $ ArgInt int typ
+compileArg' typ (FloatValue float) _ = return $ ArgFloat float typ
+compileArg' typ (StringValue string) _ = return $ ArgString string typ
+compileArg' typ (CharValue char) _ = return $ ArgChar char typ
+compileArg' typ (Var name ParamIn flowType) pos = do
+    name' <- currVar name pos
     return $ ArgVar name' typ FlowIn flowType False
-compileArg' typ (Var name ParamOut flowType) = do
+compileArg' typ (Var name ParamOut flowType) _ = do
     name' <- nextVar name
     return $ ArgVar name' typ FlowOut flowType False
-compileArg' _ (Typed exp typ) = compileArg' typ exp
-compileArg' _ arg =
+compileArg' _ (Typed exp typ) pos = compileArg' typ exp pos
+compileArg' _ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 
 

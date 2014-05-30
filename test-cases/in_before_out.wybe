@@ -1,3 +1,3 @@
 public proc test(?result:int)
-       ?result = result + 1
+       incr(!result)
 end

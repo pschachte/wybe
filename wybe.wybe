@@ -21,6 +21,8 @@ public type int is
     public func =(x:int, y:int):bool = foreign llvm icmp eq(32,x,y)
     public func sqrt(x:int):int = foreign C isqrt(x)
     public func power(x:int,y:int):int = foreign C ipow(x,y)
+    public proc incr(!x:int) ?x = x + 1 end
+    public proc decr(!x:int) ?x = x + 1 end
 end
 
 
@@ -89,7 +91,8 @@ public type int_seq is
 	# else
 	#     ?succeed = curr.start < curr.finish
 	# end
-	# if succeeded then
+	?succeed = true
+	# if succeed then
 	    ?next = curr.start
 	    ?rest = range(curr.start+curr.incr, curr.finish, curr.incr)
 	# end
