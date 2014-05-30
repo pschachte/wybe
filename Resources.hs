@@ -4,7 +4,8 @@
 --  Purpose  : Resource checker for Wybe
 --  Copyright: © 2012 Peter Schachte.  All rights reserved.
 
-module Resources (resourceCheckMod, resourceCheckProc, resourceArg, resourceParam) where
+module Resources (resourceCheckMod, resourceCheckProc, resourceVar,
+                  resourceArg, resourceParam) where
 
 import AST
 import Util
@@ -22,12 +23,14 @@ import Debug.Trace
 -- |Check a module's resource declarations.
 resourceCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 resourceCheckMod modSCC thisMod = do
+    -- XXX Must check validity of declared types and initial values
+    -- for resources, and declared resources for procs.
     return (False,[])
 
 
 
--- |Check use of resources in a single a single procedure definition,
--- updating parameters and body to thread extra arguments as needed.
+-- |Check use of resources in a single procedure definition, updating
+-- parameters and body to thread extra arguments as needed.
 resourceCheckProc :: ProcDef -> Compiler ProcDef
 resourceCheckProc pd =
     evalStateT 
@@ -119,7 +122,7 @@ resourceParams pos (ResourceFlowSpec res flow, typ) = do
 
 
 resourceVar :: ResourceSpec -> String
-resourceVar (ResourceSpec mod name) = intercalate "." mod ++ name ++ "$"
+resourceVar (ResourceSpec mod name) = intercalate "." mod ++ "$" ++ name
 
 
 transformBody :: ProcBody -> Resourcer ProcBody
