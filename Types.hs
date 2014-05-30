@@ -130,13 +130,6 @@ typeCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 typeCheckMod modSCC thisMod = do
     -- liftIO $ putStrLn $ "**** Type checking module " ++ showModSpec thisMod
     reenterModule thisMod
-    -- First typecheck submodules
-    -- submods <- getModuleImplementationField modSubmods
-    -- -- liftIO $ putStrLn $ "getModuleImplementationField completed"
-    -- let modspecs = Map.elems submods
-    --   -- liftIO $ putStrLn $ "  Submodules: " ++ showModSpecs modspecs
-    -- (changed0,reasons0) <- 
-    --     foldMChangeReasons (typeCheckMod modSCC) False [] modspecs
     procs <- getModuleImplementationField (Map.toList . modProcs)
     let ordered =
             stronglyConnComp
