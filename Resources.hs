@@ -70,7 +70,16 @@ resourceParam = resourceFlowType . primParamFlowType
 
 
 
-type ResourceDict = Map ResourceSpec (Int,TypeSpec)
+----------------------------------------------------------------
+--                         The Resourcer monad
+----------------------------------------------------------------
+
+-- |For each resource, we remember the current variable number, the
+-- offset to add to the variable number of any explicit references,
+-- and its type.  Existing explicit references are treated as ordinary
+-- variables before we know which procs we call use which resources,
+-- so they need to be renumbered.
+type ResourceDict = Map ResourceSpec (Int,Int,TypeSpec)
 
 type Resourcer = StateT ResourceDict Compiler
 
@@ -89,20 +98,18 @@ simpleResourceFlows pos (ResourceFlowSpec spec flow) = do
             [(ResourceFlowSpec sp flow,ty) |
              (sp,ty) <- Map.toList iface]
 
-            
-
 
 initResource :: (ResourceFlowSpec,TypeSpec) -> Resourcer ()
 initResource (res,ty) = do
     when (flowsIn $ resourceFlowFlow res) $
-      modify (Map.insert (resourceFlowRes res) (1,ty))
+      modify (Map.insert (resourceFlowRes res) (0,0,ty))
 
 
 resourceParams :: OptPos -> (ResourceFlowSpec,TypeSpec) -> Resourcer [PrimParam]
 resourceParams pos (ResourceFlowSpec res flow, typ) = do
     let varName = resourceVar res
     inParam <- if flowsIn flow
-               then return [PrimParam (PrimVarName varName 1) typ FlowIn 
+               then return [PrimParam (PrimVarName varName 0) typ FlowIn 
                             (Resource res) True]
                else return []
     outParam <- if flowsOut flow
@@ -114,7 +121,7 @@ resourceParams pos (ResourceFlowSpec res flow, typ) = do
                               ("Resource " ++ show res ++
                                " might not be assigned") pos
                             return []
-                        Just (n,_) -> 
+                        Just (n,_,_) -> 
                             return [PrimParam (PrimVarName varName n) typ 
                                     FlowOut (Resource res) True]
                 else return []
@@ -147,10 +154,38 @@ transformPrim :: Prim -> OptPos -> Resourcer (Placed Prim)
 transformPrim (PrimCall m n (Just pspec) args) pos = do
     resources <- fmap procResources $ lift $ getProcDef pspec
     let args' = List.filter (not . resourceArg) args
-    args'' <- fmap concat $ mapM (resourceArgs pos) resources
-    return $ maybePlace (PrimCall m n (Just pspec) (args'++args'')) pos
+    args'' <- mapM transformArg args'
+    resArgs <- fmap concat $ mapM (resourceArgs pos) resources
+    mapM_ (accountExplictResources resources) args'
+    return $ maybePlace (PrimCall m n (Just pspec) (args''++resArgs)) pos
+transformPrim (PrimForeign lang name flags args) pos = do
+    args' <- mapM transformArg args
+    mapM_ (accountExplictResources []) args
+    return $ maybePlace (PrimForeign lang name flags args') pos
 transformPrim prim pos = return $ maybePlace prim pos
 
+
+transformArg :: PrimArg -> Resourcer PrimArg
+transformArg arg@(ArgVar (PrimVarName name num) ty flow ftype final) = do
+    -- XXX this is dubious.  We don't handle explict use of
+    -- module-qualified resource specs
+    let spec = ResourceSpec [] name
+    maybeTuple <- gets (Map.lookup spec)
+    case maybeTuple of
+        Nothing -> return arg
+        Just (num,offset,typ) -> do
+            let newVarName = PrimVarName (resourceVar spec) (num+offset)
+            return $ ArgVar newVarName ty flow ftype final
+transformArg arg = return arg
+    
+
+accountExplictResources :: [ResourceFlowSpec] -> PrimArg -> Resourcer ()
+accountExplictResources specs (ArgVar (PrimVarName name _) _ FlowOut _ _) = do
+    let spec = ResourceSpec [] name
+    modify $ Map.adjust (\(num,offset,ty) -> (num+1,offset+1,ty)) spec
+    -- XXX also need to report error if the resource is on the list of specs
+accountExplictResources _ _ = return ()
+    
 
 resourceArgs ::  OptPos -> ResourceFlowSpec -> Resourcer [PrimArg]
 resourceArgs pos rflow = do
@@ -160,14 +195,14 @@ resourceArgs pos rflow = do
 
 simpleResourceArgs :: OptPos -> (ResourceFlowSpec,TypeSpec) -> Resourcer [PrimArg]
 simpleResourceArgs pos ((ResourceFlowSpec res flow),typ) = do
-    maybePair <- gets (Map.lookup res)
+    maybeTuple <- gets (Map.lookup res)
     let varName = resourceVar res
-    case maybePair of
+    case maybeTuple of
         Nothing -> do
                    lift $ message Error
                      ("Proc needs unavailable resource " ++ show res) pos
                    return []
-        Just (num,typ) -> do
+        Just (num,offset,typ) -> do
             inArg <- if flowsIn flow
                      then return [ArgVar (PrimVarName varName num) typ FlowIn 
                                   (Resource res) False]
@@ -175,7 +210,7 @@ simpleResourceArgs pos ((ResourceFlowSpec res flow),typ) = do
             outArg <- if flowsOut flow
                       then do
                           let newNum = num+1
-                          modify $ Map.insert res (newNum,typ)
+                          modify $ Map.insert res (newNum,offset,typ)
                           return [ArgVar (PrimVarName varName (num+1)) typ 
                                   FlowOut (Resource res) False]
                       else return []

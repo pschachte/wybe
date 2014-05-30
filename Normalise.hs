@@ -155,29 +155,43 @@ type ClauseComp = StateT ClauseCompState Compiler
 -- |The state of compilation of a clause; used by the ClauseComp
 -- monad.
 data ClauseCompState = ClauseComp {
-    vars :: Map VarName Int       -- ^current var number for each var
+    varMap :: Map VarName Int,   -- ^current var number for each var
+    resourceMap :: Map ResourceName Int
+                                    -- ^var number and type for each resource
   }
 
 
 initClauseComp :: ClauseCompState
-initClauseComp = ClauseComp Map.empty
+initClauseComp = ClauseComp Map.empty Map.empty
 
 
 nextVar :: String -> ClauseComp PrimVarName
 nextVar name = do
-    modify (\s -> s { vars = Map.alter (Just . maybe 0 (+1)) name $ vars s })
+    resMap <- gets resourceMap
+    case Map.lookup name resMap of
+        Nothing -> do
+            modify (\s -> s { varMap = Map.alter (Just . maybe 0 (+1)) name $ 
+                                       varMap s })
+        Just n ->
+            modify (\s -> s { resourceMap = Map.insert name (n+1) $
+                                            resourceMap s})
     currVar name Nothing
 
 
 currVar :: String -> OptPos -> ClauseComp PrimVarName
 currVar name pos = do
-    dict <- gets vars
-    case Map.lookup name dict of
+    resMap <- gets resourceMap
+    case Map.lookup name resMap of
         Nothing -> do
-                   lift $ message Error
-                            ("Uninitialised variable '" ++ name ++ "'") pos
-                   return $ PrimVarName name (-1)
+            dict <- gets varMap
+            case Map.lookup name dict of
+                Nothing -> do
+                       lift $ message Error
+                           ("Uninitialised variable '" ++ name ++ "'") pos
+                       return $ PrimVarName name (-1)
+                Just n -> return $ PrimVarName name n
         Just n -> return $ PrimVarName name n
+
 
 
 mkPrimVarName :: Map String Int -> String -> PrimVarName
@@ -200,11 +214,22 @@ compileProc tmpCtr (ProcDecl vis (ProcProto name params resources) body pos)
     (params',body') <- evalClauseComp $ do
         mapM_ nextVar $ List.map paramName $ 
           List.filter (flowsIn . paramFlow) params
-        startVars <- gets vars
+        startVars <- gets varMap
         -- liftIO $ putStrLn $ "Compiling body of " ++ name ++ "..."
+        let resMap = List.foldr (\r m -> 
+                                     Map.insert (resourceName
+                                                 (resourceFlowRes r)) 0 m)
+                     Map.empty resources
+        -- resMap <- fmap (Map.mapKeys resourceName .
+        --                   Map.map (\typ -> (0,typ)) . 
+        --                   List.foldr Map.union Map.empty .
+        --                   catMaybes) $
+        --             lift $ mapM (flip lookupResource pos) $
+        --             List.map resourceFlowRes $ resources
+        modify (\s -> s { resourceMap = resMap })
         compiled <- compileBody body
         -- liftIO $ putStrLn $ "Compiled"
-        endVars <- gets vars
+        endVars <- gets varMap
         return (List.map (primParam startVars endVars) params, compiled)
     let def = ProcDef name (PrimProto name params') resources body' pos
               tmpCtr 0 vis False
@@ -238,16 +263,16 @@ compileBody [placed]
       _ -> False
  = do
       let Cond tstStmts tstVar thn els = content placed
-      initial <- gets vars
+      initial <- gets varMap
       tstStmts' <- mapM compileSimpleStmt tstStmts
       tstVar' <- placedApplyM compileArg tstVar
       thn' <- mapM compileSimpleStmt thn
-      afterThen <- gets vars
-      modify (\s -> s { vars = initial })
+      afterThen <- gets varMap
+      modify (\s -> s { varMap = initial })
       els' <- mapM compileSimpleStmt els
-      afterElse <- gets vars
+      afterElse <- gets varMap
       let final = Map.intersectionWith max afterThen afterElse
-      modify (\s -> s { vars = final })
+      modify (\s -> s { varMap = final })
       let thn'' = thn' ++ reconcilingAssignments afterThen final
       let els'' = els' ++ reconcilingAssignments afterElse final
       case tstVar' of

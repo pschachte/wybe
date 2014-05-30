@@ -41,7 +41,7 @@ module AST (
   getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, verboseMsg, message, genProcName,
   addImport, addType, addSubmod, lookupType, publicType,
-  ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
+  ResourceName(..), ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource, 
   CallExpansion,
   addProc, replaceProc, lookupProc, publicProc,
