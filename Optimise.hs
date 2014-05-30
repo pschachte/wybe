@@ -5,7 +5,7 @@
 --  Purpose  : Framework to optimise a single module
 --  Copyright: © 2014 Peter Schachte.  All rights reserved.
 
-module Optimise (optimiseModSCCBottomUp) where
+module Optimise (optimiseMod) where
 
 import AST
 import Expansion
@@ -17,22 +17,9 @@ import Control.Monad
 import Control.Monad.Trans.State
 import Control.Monad.Trans
 
--- For now, just a placeholder
-optimiseModSCCBottomUp :: [ModSpec] -> Compiler ()
-optimiseModSCCBottomUp mods = do
-    -- XXX Probably need to repeat this to a fixed point
-    mapM_ (optimiseModBottomUp mods) mods
-
-
-optimiseModBottomUp :: [ModSpec] -> ModSpec -> Compiler ()
-optimiseModBottomUp mods thisMod = do
+optimiseMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
+optimiseMod mods thisMod = do
     reenterModule thisMod
-    -- First handle submodules
-    submods <- getModuleImplementationField modSubmods
-    -- liftIO $ putStrLn $ "getModuleImplementationField completed"
-    let modspecs = Map.elems submods
-      -- liftIO $ putStrLn $ "  Submodules: " ++ showModSpecs modspecs
-    mapM_ (optimiseModBottomUp mods) modspecs
     procs <- getModuleImplementationField (Map.toList . modProcs)
     let ordered =
             stronglyConnComp
@@ -44,7 +31,7 @@ optimiseModBottomUp mods thisMod = do
              ]
     mapM_ optimiseSCCBottomUp ordered
     finishModule
-    return ()
+    return (False,[])
 
 
 optimiseSCCBottomUp :: SCC ProcSpec -> Compiler ()

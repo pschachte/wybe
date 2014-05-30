@@ -39,7 +39,7 @@ import Scanner         (inputTokens, fileTokens, Token)
 import Normalise       (normalise)
 import Types           (typeCheckMod)
 import Resources       (resourceCheckMod)
-import Optimise        (optimiseModSCCBottomUp)
+import Optimise        (optimiseMod)
 import System.FilePath
 import Data.Map as Map
 import Data.Set as Set
@@ -213,10 +213,12 @@ loadModule objfile =
 
 -- |Actually compile a list of modules that form an SCC in the module
 --  dependency graph.  This is called in a way that guarantees that
---  all proc calls will be to procs that either have already been
---  compiled or are defined in modules on this list.
+--  all modules on which this module depends, other than those on the
+--  mods list, will have been processed when this list of modules is
+--  reached.
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mods = do
+    -- First compile submodules
     mapM_ (\m -> do
                 imp <- getLoadedModuleImpln m
                 let subMods = Map.elems $ modSubmods imp
@@ -230,7 +232,7 @@ compileModSCC mods = do
     -- liftIO $ putStrLn $ "type checked"
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER TYPE CHECK:\n"
     -- verboseDump
-    optimiseModSCCBottomUp mods
+    fixpointProcessSCC optimiseMod mods
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER OPTIMISATION:\n"
     -- verboseDump
     -- mods <- mapM getLoadedModule mods
