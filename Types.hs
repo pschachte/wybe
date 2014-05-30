@@ -24,6 +24,8 @@ data TypeReason = ReasonParam ProcName Int OptPos
                                       -- Formal param type/flow inconsistent
                 | ReasonUndef ProcName ProcName OptPos
                                       -- Call to unknown proc
+                | ReasonUninit ProcName VarName OptPos
+                                      -- Use of uninitialised variable
                 | ReasonArgType ProcName Int OptPos
                                       -- Actual param type inconsistent
                 | ReasonArgFlow ProcName Int OptPos
@@ -59,7 +61,10 @@ instance Show TypeReason where
                    | (v,typs) <- varAmbigs]
     show (ReasonUndef callFrom callTo pos) =
         makeMessage pos $
-            "Call to unknown " ++ callTo ++ " from " ++ callFrom
+            "Call to unknown '" ++ callTo ++ "' from " ++ callFrom
+    show (ReasonUninit callFrom var pos) =
+        makeMessage pos $
+            "Uninitialised variable '" ++ var ++ "'"
     show (ReasonArity callFrom callTo pos callArity procArity) =
         makeMessage pos $
             (if callFrom == "" 
@@ -384,8 +389,9 @@ typecheckPrim m mods caller call@(PrimCall cm name id args0) pos typing = do
     --        List.intercalate ", " (List.map show procs)
     let args = List.filter (not . resourceArg) args0
     if List.null procs 
-      then
-        return [InvalidTyping $ ReasonUndef caller name pos]
+      then if 1 == length args
+           then return [InvalidTyping $ ReasonUninit caller name pos]
+           else return [InvalidTyping $ ReasonUndef caller name pos]
       else do
         typList <- mapM (\p -> do
                               params0 <- getParams p

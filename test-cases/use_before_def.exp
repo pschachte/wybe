@@ -1,0 +1,14 @@
+test-cases/use_before_def.wybe:2:18: Uninitialised variable 'result'
+ Module use_before_def
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : use_before_def.test<0>
+  imports         : import wybe 
+  types           : 
+  resources       : 
+  procs           : test:
+public proc test(?result:0:int)<0>  @use_before_def:1:8 (0 calls)
+    result(?tmp$1:0) @use_before_def:2:18
+    +(~tmp$1:0, 1, ?tmp$0:0) @use_before_def:2:18
+    =(?result:0, ~tmp$0:0) @use_before_def:2:8
