@@ -1326,7 +1326,7 @@ instance Show ArgFlowType where
     show Ordinary = ""
     show HalfUpdate = "%"
     show (Implicit _) = ""
-    show (Resource res) = show res ++ "#"
+    show (Resource res) = "#"
 
 
 -- |The dataflow direction of an actual argument.
