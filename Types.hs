@@ -123,29 +123,6 @@ subtypeOf :: TypeSpec -> TypeSpec -> Bool
 subtypeOf sub super = sub == super || sub `properSubtypeOf` super
 
 
--- -- |Type check a strongly connected component in the module dependency graph.
--- --  This code assumes that all lower sccs have already been checked.
--- typeCheckModSCC :: [ModSpec] -> Compiler ()
--- typeCheckModSCC [modspec] = do  -- immediate fixpoint when no mutual dependency
---     (_,reasons) <- typeCheckMod [modspec] modspec
---     mapM_ (\r -> message Error (show r) Nothing) reasons
---     return ()
--- typeCheckModSCC scc = do        -- must find fixpoint
---     (changed,reasons) <- foldMChangeReasons (typeCheckMod scc) False [] scc
---     if changed
---     then typeCheckModSCC scc
---     else mapM_ (\r -> message Error (show r) Nothing) reasons
-
-
--- foldMChangeReasons :: (a -> Compiler (Bool,[TypeReason])) -> Bool ->
---                       [TypeReason] -> [a] -> Compiler (Bool,[TypeReason])
--- foldMChangeReasons f chg0 reasons0 xs =
---     foldM (\(chg,rs) x -> do
---              (chg1,rs1) <- f x
---              return (chg1||chg, rs1++rs))
---           (chg0,reasons0) xs
-
-
 -- |Type check a single module named in the second argument; the 
 --  first argument is a list of all the modules in this module 
 -- dependency SCC.
