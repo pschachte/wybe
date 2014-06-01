@@ -59,23 +59,39 @@ optimiseProcDef pspec def = do
 inlineIfWanted :: ProcDef -> Compiler ProcDef
 inlineIfWanted def
     |  NoFork == bodyFork (procBody def) && not (procInline def) = do
-    let params = primProtoParams $ procProto def
-    let body =  bodyPrims $ procBody def
-    let benefit = 1 + length params
-    let cost = sum $ List.map (primCost . content) body
-    if  benefit >= cost - 2
+    let benefit = 2 + (procCost $ procProto def) -- add 2 for time saving
+    let cost = bodyCost $ bodyPrims $ procBody def
+    if  benefit >= cost
     then return $ def { procInline = True }
     else return def
 inlineIfWanted def = return def
 
 
+procCost :: PrimProto -> Int
+procCost proto = 
+    1 + (length $ List.filter (not . phantomParam) $ primProtoParams proto)
+
+bodyCost :: [Placed Prim] -> Int
+bodyCost pprims = sum $ List.map (primCost . content) pprims
+
 primCost :: Prim -> Int
-primCost (PrimCall _ _ _ args) = 1 + length args
-primCost (PrimForeign "llvm" _ _ _) = 1
-primCost (PrimForeign _ _ _ args) = 1 + length args
+primCost (PrimCall _ _ _ args) = 1 + (sum $ List.map argCost args)
+primCost (PrimForeign "llvm" _ _ _) = 1 -- single instuction, so cost = 1
+primCost (PrimForeign _ _ _ args) = 1 + (sum $ List.map argCost args)
 primCost (PrimNop) = 0
 
+argCost :: PrimArg -> Int
+argCost arg = if phantomArg arg then 0 else 1
 
+phantomParam :: PrimParam -> Bool
+phantomParam param = phantomType $ primParamType param
+
+phantomArg :: PrimArg -> Bool
+phantomArg (ArgVar _ ty _ _ _) = phantomType ty
+phantomArg _ = False -- Nothing but a var can be a phantom
+
+phantomType Unspecified = False
+phantomType ty = "phantom" == typeName ty
 
 ----------------------------------------------------------------
 --                     Handling the call graph

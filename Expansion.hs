@@ -16,6 +16,7 @@ import Data.Map as Map
 import Data.List as List
 import Data.Set as Set
 import Data.Maybe
+import Control.Monad
 import Control.Monad.Trans (lift,liftIO)
 import Control.Monad.Trans.State
 
@@ -85,6 +86,19 @@ data ExpanderState = Expander {
 type Expander = StateT ExpanderState Compiler
 
 
+tmpVar :: Expander PrimVarName
+tmpVar = do
+    tmp <- gets tmpCount
+    modify (\s -> s { tmpCount = tmp+1 })
+    return $ PrimVarName (mkTempName tmp) 0
+
+
+addSubst :: PrimVarName -> PrimArg -> Expander ()
+addSubst var val = do
+    modify (\s -> s { substitution = Map.insert var val $ substitution s })
+    return ()
+
+
 initExpanderState :: Int -> Set PrimVarName -> ExpanderState
 initExpanderState tmpCount varSet = 
     Expander identitySubstitution varSet tmpCount
@@ -92,7 +106,7 @@ initExpanderState tmpCount varSet =
 
 expandBody :: ProcBody -> Expander ProcBody
 expandBody (ProcBody prims fork) = do
-    prims' <- fmap concat $ mapM (placedApply expandPrim) prims
+    prims' <- expandPrims False False prims
     fork' <- expandFork fork
     return $ ProcBody prims' fork'
                                 
@@ -109,38 +123,43 @@ expandFork (PrimFork var last bodies) = do
     return $ PrimFork var last $ List.map fst pairs
 
 
-expandPrim :: Prim -> OptPos -> Expander [Placed Prim]
-expandPrim call@(PrimCall md nm (Just pspec) args) pos = do
-    -- liftIO $ putStrLn $ "Try to expand " ++ show call
-    args' <- mapM expandArg args
-    def <- lift $ getProcDef pspec
-    prims <- if procInline def
-             then do
-                 -- liftIO $ putStrLn $ "Found expansion: " ++ show body
-                 let subst = paramSubst (primProtoParams $ procProto def) args'
-                 let body = procBody def
-                 let bodyMap = bodyVars body
-                 tmp <- gets tmpCount
-                 let (tmp',subst') =
-                         mapAccumWithKey
-                         (\n v t -> (n+1,
-                                     ArgVar (PrimVarName (mkTempName n) 0)
-                                     t FlowIn Ordinary False))
-                         tmp bodyMap
-                 let subst'' = Map.union subst subst'
-                 modify (\s -> s { tmpCount = tmp' })
-                 return $ List.map (fmap (applySubst subst))
-                            (bodyPrims $ procBody def)
-             else return [maybePlace (PrimCall md nm (Just pspec) args') pos]
+expandPrims :: Bool -> Bool -> [Placed Prim] -> Expander [Placed Prim]
+expandPrims noInline renameAll pprims = do
+    fmap concat $ mapM (placedApply (expandPrim noInline renameAll)) pprims
 
+
+expandPrim :: Bool -> Bool -> Prim -> OptPos -> Expander [Placed Prim]
+expandPrim noInline renameAll call@(PrimCall md nm (Just pspec) args) pos = do
+    -- liftIO $ putStrLn $ "Try to expand " ++ show call
+    args' <- mapM (expandArg renameAll) args
+    def <- lift $ getProcDef pspec
+    prims <- if (not noInline) && procInline def
+             then do
+                 saved <- get
+                 modify (\s -> s { substitution = identitySubstitution, 
+                                   protected = Set.empty })
+                 mapM_ addParamSubst $ 
+                   zip (primProtoParams $ procProto def) args'
+                 let body = procBody def
+                 unless (NoFork == bodyFork body) $
+                   shouldnt $ "Inlined proc with non-empty fork" ++ show pspec
+                 -- liftIO $ putStrLn $ "Found expansion: " ++ showBlock 4 body
+                 let defPrims = bodyPrims body
+                 defPrims' <- expandPrims True True defPrims
+                 tmp' <- gets tmpCount
+                 put saved
+                 modify (\s -> s { tmpCount = tmp' })
+                 -- liftIO $ putStrLn $ "After subst " ++
+                 --   showBlock 4 (ProcBody defPrims' NoFork)
+                 return defPrims'
+             else return [maybePlace (PrimCall md nm (Just pspec) args') pos]
     primsList <- mapM (\p -> expandIfAssign (content p) p) prims
     return $ concat primsList
-expandPrim (PrimForeign lang nm flags args) pos = do
+expandPrim _ renameAll (PrimForeign lang nm flags args) pos = do
     subst <- gets substitution
-    return $ [maybePlace 
-              (PrimForeign lang nm flags $ List.map (renameArg subst) args) 
-              pos]
-expandPrim prim pos = return $ [maybePlace prim pos]
+    args' <- mapM (expandArg renameAll) args
+    return $ [maybePlace (PrimForeign lang nm flags args') pos]
+expandPrim _ _ prim pos = return $ [maybePlace prim pos]
 
 
 -- |Record the substitution if the Prim is an assignment, and remove 
@@ -150,22 +169,40 @@ expandPrim prim pos = return $ [maybePlace prim pos]
 expandIfAssign :: Prim -> Placed Prim -> Expander [Placed Prim]
 expandIfAssign (PrimForeign "llvm" "move" [] 
                 [val, ArgVar var _ FlowOut _ _]) pprim = do
-    modify (\s -> s { substitution = Map.insert var val $ substitution s })
+    addSubst var val
     noSubst <- gets (Set.member var . protected)
     return $ if noSubst then [pprim] else []
 expandIfAssign _ pprim = return [pprim]
 
 
-expandArg :: PrimArg -> Expander PrimArg
-expandArg arg@(ArgVar var _ _ _ _) = do
-    gets (fromMaybe arg . Map.lookup var . substitution)
-expandArg arg = return arg
+expandArg :: Bool -> PrimArg -> Expander PrimArg
+expandArg renameAll arg@(ArgVar var typ flow ftype _) = do
+    -- liftIO $ putStr $ "  expanding " ++ show arg
+    maybeArg <- gets (Map.lookup var . substitution)
+    arg' <- case (maybeArg,renameAll,flow) of
+        (Just a,_,_) -> do return $ setPrimArgFlow flow ftype a
+        (Nothing,False,_) -> return arg
+        (Nothing,True,FlowIn) -> 
+            shouldnt $ "variable " ++ show var ++ " used before defined"
+        (Nothing,True,FlowOut) -> do
+            freshVar <- tmpVar
+            addSubst var $ ArgVar freshVar typ FlowIn ftype False
+            return $ ArgVar freshVar typ FlowOut ftype False
+    -- liftIO $ putStrLn $ " to " ++ show arg'
+    return arg'
+expandArg _ arg = return arg
 
 
-paramSubst :: [PrimParam] -> [PrimArg] -> Substitution
-paramSubst params args = 
-    List.foldr (\(PrimParam k _ dir _ _,v) subst -> Map.insert k v subst)
-    identitySubstitution $ zip params args
+setPrimArgFlow :: PrimFlow -> ArgFlowType -> PrimArg -> PrimArg
+setPrimArgFlow flow ftype (ArgVar n t _ _ lst) = (ArgVar n t flow ftype lst)
+setPrimArgFlow FlowIn _ arg = arg
+setPrimArgFlow FlowOut _ arg = 
+    shouldnt $ "trying to make " ++ show arg ++ " an output argument"
+
+
+addParamSubst :: (PrimParam,PrimArg) -> Expander ()
+addParamSubst (PrimParam k _ dir _ _,v) =
+    addSubst k v
              
 
 renameParam :: Substitution -> PrimParam -> PrimParam
@@ -176,41 +213,3 @@ renameParam subst param@(PrimParam name typ FlowOut ftype needed) =
           _ -> param) $
     Map.lookup name subst
 renameParam _ param = param
-
-
-applySubst :: Substitution -> Prim -> Prim
-applySubst subst (PrimCall md nm pspec args) =
-    PrimCall md nm pspec $ List.map (renameArg subst) args
-applySubst subst (PrimForeign lang nm flags args) =
-    PrimForeign lang nm flags $ List.map (renameArg subst) args
-applySubst subst PrimNop = PrimNop
-
-
-renameArg :: Substitution -> PrimArg -> PrimArg
-renameArg subst var@(ArgVar name _ flow _ _) =
-    maybe var (setPrimArgFlow flow) $ Map.lookup name subst
-renameArg subst primArg = primArg
-
-setPrimArgFlow :: PrimFlow -> PrimArg -> PrimArg
-setPrimArgFlow flow (ArgVar n t _ ft lst) = (ArgVar n t flow ft lst)
-setPrimArgFlow FlowIn arg = arg
-setPrimArgFlow FlowOut arg = 
-    shouldnt $ "trying to make " ++ show arg ++ " an output argument"
-
-
-bodyVars :: ProcBody -> Map PrimVarName TypeSpec
-bodyVars body = mapBodyPrims primVars Map.union Map.empty
-                Map.union Map.empty body
-
-
-primVars :: Prim -> Map PrimVarName TypeSpec
-primVars (PrimCall _ _ _ args) = argsVars args
-primVars (PrimForeign _ _ _ args) = argsVars args
-primVars (PrimNop) = Map.empty
-
-argsVars :: [PrimArg] -> Map PrimVarName TypeSpec
-argsVars = List.foldr (Map.union . argVars) Map.empty
-
-argVars :: PrimArg -> Map PrimVarName TypeSpec
-argVars (ArgVar name typ FlowOut _ _) = Map.singleton name typ
-argVars _ = Map.empty

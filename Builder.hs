@@ -108,7 +108,7 @@ buildModuleIfNeeded force modspec possDirs = do
       else do
         maybemod <- getLoadedModule modspec
         case maybemod of
-            Just modl -> return False -- nothing to do
+            Just modl -> return False -- already loaded:  nothing more to do
             Nothing -> do
                 srcOb <- srcObjFiles modspec possDirs
                 case srcOb of

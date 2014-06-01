@@ -7,6 +7,6 @@
   types           : 
   resources       : 
   procs           : print2:
-public proc print2(x:0:int, y:0:int)<0>  @proc_hello:1:8 (0 calls)
-    foreign c print_string("hello, world":string) @wybe:135:33
-    foreign c putc('\n':char) @wybe:121:20
+public proc print2([x:0:int], [y:0:int], #wybe.io$io:0:phantom, ?#wybe.io$io:1:phantom)<0>  use !io @proc_hello:1:8 (0 calls) (inline)
+    foreign c print_string("hello, world":string, ~#wybe.io$io:0:phantom, ?#tmp$0:0:phantom) @wybe:140:41
+    wybe.io.nl<0>(~#tmp$0:0:phantom, ?#wybe.io$io:1:phantom) @wybe:141:52

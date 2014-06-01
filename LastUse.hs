@@ -31,6 +31,7 @@ markLastUse ps def = do
 
 neededIfInput :: Set PrimVarName -> PrimParam -> Bool
 neededIfInput needed param =
+    -- XXX still need to consider phantom arguments to be needed?
     (typeName $ primParamType param) == "phantom" ||
     (primParamFlow param == FlowOut || Set.member (primParamName param) needed)
 

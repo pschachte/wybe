@@ -9,4 +9,4 @@ test-cases/in_before_out.wybe:2:13: Uninitialised variable 'result'
   resources       : 
   procs           : test:
 public proc test(?result:0:int)<0>  @in_before_out:1:8 (0 calls) (inline)
-    foreign llvm add(32:int, ~%result:-1:int, 1:int, ?%result:0:int) @wybe:4:38
+    foreign llvm add(32:int, ~result:-1:int, 1:int, ?result:0:int) @wybe:4:38
