@@ -59,11 +59,9 @@ import Config
 buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
-    messages <- gets msgs
-    (liftIO . putStr) $ unlines $ reverse messages
-    errored <- gets errorState
+    stopOnError
     verboseDump
-    if errored then liftIO exitFailure else liftIO exitSuccess
+    showMessages
 
 
 -- |Build a single target; flag specifies to re-compile even if the 
@@ -189,7 +187,9 @@ compileModule dir modspec params items = do
     -- that, then we'll need to handle the full dependency 
     -- relationship explicitly before doing any compilation.
     Normalise.normalise items
+    stopOnError
     handleImports
+    stopOnError
     -- underComp <- gets underCompilation
     mods <- exitModule -- may be empty list if module is mutually dependent
     -- liftIO $ putStrLn $ "<=== finished compling module " ++ showModSpec modspec
@@ -224,6 +224,7 @@ compileModSCC mods = do
                 let subMods = Map.elems $ modSubmods imp
                 mapM_ (compileModSCC . (:[])) subMods)
       mods
+    stopOnError
     -- liftIO $ putStrLn $ "type checking module SCC " ++ showModSpecs mods ++ "..."
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER NORMALISATION:\n"
     -- verboseDump

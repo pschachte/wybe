@@ -48,7 +48,8 @@ module AST (
   refersTo, callTargets,
   verboseDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
   showModSpecs, showResources,
-  shouldnt, checkError, checkValue, trustFromJust, trustFromJustM
+  shouldnt, checkError, checkValue, trustFromJust, trustFromJustM,
+  showMessages, stopOnError
   ) where
 
 import Options
@@ -62,6 +63,7 @@ import Control.Monad
 import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 import Config
+import System.Exit
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
@@ -1803,3 +1805,18 @@ trustFromJustM :: Monad m => String -> (m (Maybe t)) -> m t
 trustFromJustM msg computation = do
     maybe <- computation
     return $ trustFromJust msg maybe
+
+
+showMessages :: Compiler ()
+showMessages = do
+    messages <- gets msgs
+    (liftIO . putStr) $ unlines $ reverse messages
+    return ()
+
+
+stopOnError :: Compiler ()
+stopOnError = do
+    err <- gets errorState
+    when err $ do
+        showMessages
+        liftIO exitFailure

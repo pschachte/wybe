@@ -147,6 +147,7 @@ typeCheckMod modSCC thisMod = do
              return (chg||chg1, List.map (\r->(show r,Nothing)) reasons++errs))
         (False,[]) ordered
     finishModule
+    stopOnError
     -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
     return (changed,errors)
 
