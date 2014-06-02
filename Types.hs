@@ -128,82 +128,6 @@ subtypeOf :: TypeSpec -> TypeSpec -> Bool
 subtypeOf sub super = sub == super || sub `properSubtypeOf` super
 
 
--- |Type check a single module named in the second argument; the 
---  first argument is a list of all the modules in this module 
--- dependency SCC.
-typeCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
-typeCheckMod modSCC thisMod = do
-    -- liftIO $ putStrLn $ "**** Type checking module " ++ showModSpec thisMod
-    reenterModule thisMod
-    procs <- getModuleImplementationField (Map.toList . modProcs)
-    let ordered =
-            stronglyConnComp
-            [(name,name,
-              nub $ concatMap (localBodyProcs thisMod . procBody) procDefs)
-             | (name,procDefs) <- procs]
-    (changed,errors) <-
-        foldM (\(chg,errs) procSCC -> do
-             (chg1,reasons) <- typecheckProcSCC thisMod modSCC procSCC
-             return (chg||chg1, List.map (\r->(show r,Nothing)) reasons++errs))
-        (False,[]) ordered
-    finishModule
-    -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
-    return (changed,errors)
-
-
--- |Sanity check: make sure all args and params of all procs in the 
--- current module are fully typed.  If not, report an internal error. 
-checkFullyTyped :: Compiler ()
-checkFullyTyped = do
-    procs <- getModuleImplementationField (concat . Map.elems . modProcs)
-    mapM_ checkProcDefFullytyped procs
-
-
--- |Make sure all args and params in the specified proc def are typed.
-checkProcDefFullytyped :: ProcDef -> Compiler ()
-checkProcDefFullytyped def = do
-    let name = procName def
-    let pos = procPos def
-    mapM_ (checkParamTyped name pos) $
-      zip [1..] $ primProtoParams $ procProto def
-    checkBodyTyped name pos $ procBody def
-    
-
-checkParamTyped :: ProcName -> OptPos -> (Int,PrimParam) -> Compiler ()
-checkParamTyped name pos (num,param) = do
-    when (Unspecified == primParamType param) $
-      reportUntyped name pos (" parameter " ++ show num)
-      
-checkBodyTyped :: ProcName -> OptPos -> ProcBody -> Compiler ()
-checkBodyTyped name pos (ProcBody prims fork) = do
-    mapM_ (placedApplyM $ checkPrimTyped name pos) $ prims
-    case fork of
-        NoFork -> return ()
-        PrimFork _ _ bodies -> mapM_ (checkBodyTyped name pos) bodies
-
-
-checkPrimTyped :: ProcName -> OptPos -> Prim -> OptPos -> Compiler ()
-checkPrimTyped name pos (PrimCall _ pname _ args) ppos = do
-    mapM_ (checkArgTyped name pos pname ppos) args
-checkPrimTyped name pos (PrimForeign _ pname _ args) ppos = do
-    mapM_ (checkArgTyped name pos pname ppos) args
-checkPrimTyped name pos PrimNop ppos = return ()
-
-
-checkArgTyped :: ProcName -> OptPos -> ProcName -> OptPos -> PrimArg ->
-                 Compiler ()
-checkArgTyped callerName callerPos calleeName callPos arg = do
-    when (Unspecified == argType arg) $
-      reportUntyped callerName callerPos $
-      "call to " ++ calleeName ++ ", " ++ argDescription arg
-
-
-reportUntyped :: ProcName -> OptPos -> String -> Compiler ()
-reportUntyped procname pos msg = do
-    liftIO $ putStrLn $ "Internal error: In " ++ procname ++ 
-      showMaybeSourcePos pos ++ ", " ++ msg ++ " left untyped"
-
-
 localBodyProcs :: ModSpec -> ProcBody -> [Ident]
 localBodyProcs thisMod body =
     mapBodyPrims (localPrimCalls thisMod) (++) [] (++) [] body
@@ -703,3 +627,83 @@ applyArgTyping dict (ArgInt val _) = ArgInt val (TypeSpec [] "int" [])
 applyArgTyping dict (ArgFloat val _) = ArgFloat val (TypeSpec [] "float" [])
 applyArgTyping dict (ArgChar val _) = ArgChar val (TypeSpec [] "char" [])
 applyArgTyping dict (ArgString val _) = ArgString val (TypeSpec [] "string" [])
+
+
+----------------------------------------------------------------
+--                           Sanity Checking
+----------------------------------------------------------------
+
+-- |Type check a single module named in the second argument; the 
+--  first argument is a list of all the modules in this module 
+-- dependency SCC.
+typeCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
+typeCheckMod modSCC thisMod = do
+    -- liftIO $ putStrLn $ "**** Type checking module " ++ showModSpec thisMod
+    reenterModule thisMod
+    procs <- getModuleImplementationField (Map.toList . modProcs)
+    let ordered =
+            stronglyConnComp
+            [(name,name,
+              nub $ concatMap (localBodyProcs thisMod . procBody) procDefs)
+             | (name,procDefs) <- procs]
+    (changed,errors) <-
+        foldM (\(chg,errs) procSCC -> do
+             (chg1,reasons) <- typecheckProcSCC thisMod modSCC procSCC
+             return (chg||chg1, List.map (\r->(show r,Nothing)) reasons++errs))
+        (False,[]) ordered
+    finishModule
+    -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
+    return (changed,errors)
+
+
+-- |Sanity check: make sure all args and params of all procs in the 
+-- current module are fully typed.  If not, report an internal error. 
+checkFullyTyped :: Compiler ()
+checkFullyTyped = do
+    procs <- getModuleImplementationField (concat . Map.elems . modProcs)
+    mapM_ checkProcDefFullytyped procs
+
+
+-- |Make sure all args and params in the specified proc def are typed.
+checkProcDefFullytyped :: ProcDef -> Compiler ()
+checkProcDefFullytyped def = do
+    let name = procName def
+    let pos = procPos def
+    mapM_ (checkParamTyped name pos) $
+      zip [1..] $ primProtoParams $ procProto def
+    checkBodyTyped name pos $ procBody def
+    
+
+checkParamTyped :: ProcName -> OptPos -> (Int,PrimParam) -> Compiler ()
+checkParamTyped name pos (num,param) = do
+    when (Unspecified == primParamType param) $
+      reportUntyped name pos (" parameter " ++ show num)
+      
+checkBodyTyped :: ProcName -> OptPos -> ProcBody -> Compiler ()
+checkBodyTyped name pos (ProcBody prims fork) = do
+    mapM_ (placedApplyM $ checkPrimTyped name pos) $ prims
+    case fork of
+        NoFork -> return ()
+        PrimFork _ _ bodies -> mapM_ (checkBodyTyped name pos) bodies
+
+
+checkPrimTyped :: ProcName -> OptPos -> Prim -> OptPos -> Compiler ()
+checkPrimTyped name pos (PrimCall _ pname _ args) ppos = do
+    mapM_ (checkArgTyped name pos pname ppos) args
+checkPrimTyped name pos (PrimForeign _ pname _ args) ppos = do
+    mapM_ (checkArgTyped name pos pname ppos) args
+checkPrimTyped name pos PrimNop ppos = return ()
+
+
+checkArgTyped :: ProcName -> OptPos -> ProcName -> OptPos -> PrimArg ->
+                 Compiler ()
+checkArgTyped callerName callerPos calleeName callPos arg = do
+    when (Unspecified == argType arg) $
+      reportUntyped callerName callerPos $
+      "call to " ++ calleeName ++ ", " ++ argDescription arg
+
+
+reportUntyped :: ProcName -> OptPos -> String -> Compiler ()
+reportUntyped procname pos msg = do
+    liftIO $ putStrLn $ "Internal error: In " ++ procname ++ 
+      showMaybeSourcePos pos ++ ", " ++ msg ++ " left untyped"
