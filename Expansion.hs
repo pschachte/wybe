@@ -201,7 +201,11 @@ setPrimArgFlow FlowOut _ arg =
 
 
 addParamSubst :: (PrimParam,PrimArg) -> Expander ()
-addParamSubst (PrimParam k _ dir _ _,v) =
+addParamSubst param@(PrimParam k ty dir _ _,v) = do
+    when (Unspecified == ty) $
+      liftIO $ putStrLn $ "Danger: untyped param: " ++ show param
+    when (Unspecified == argType v) $
+      liftIO $ putStrLn $ "Danger: untyped argument: " ++ show v
     addSubst k v
              
 

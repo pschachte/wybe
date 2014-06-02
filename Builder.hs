@@ -229,7 +229,9 @@ compileModSCC mods = do
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER NORMALISATION:\n"
     -- verboseDump
     fixpointProcessSCC resourceCheckMod mods
+    stopOnError
     fixpointProcessSCC typeCheckMod mods
+    stopOnError
     -- liftIO $ putStrLn $ "type checked"
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER TYPE CHECK:\n"
     -- verboseDump
@@ -254,7 +256,7 @@ compileModSCC mods = do
 type Processor = [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 
 
--- |Type check a strongly connected component in the module dependency graph.
+-- |Process a strongly connected component in the module dependency graph.
 --  This code assumes that all lower sccs have already been checked.
 fixpointProcessSCC :: Processor -> [ModSpec] -> Compiler ()
 fixpointProcessSCC processor [modspec] = do

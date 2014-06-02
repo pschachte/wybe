@@ -25,7 +25,7 @@ module AST (
   getProcDef, mkTempName, updateProcDef, updateProcDefM, getParams,
   ModSpec, ProcDef(..), ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceIFace(..), FlowDirection(..), 
-  argFlowDirection, argType, flowsIn, flowsOut, mapBodyPrims,
+  argFlowDirection, argType, argDescription, flowsIn, flowsOut, mapBodyPrims,
   expToStmt, Prim(..), PrimProto(..), PrimParam(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
@@ -47,7 +47,7 @@ module AST (
   addProc, replaceProc, lookupProc, publicProc,
   refersTo, callTargets,
   verboseDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
-  showModSpecs, showResources,
+  showModSpecs, showResources, showMaybeSourcePos,
   shouldnt, checkError, checkValue, trustFromJust, trustFromJustM,
   showMessages, stopOnError
   ) where
@@ -1323,6 +1323,7 @@ data PrimArg
      | ArgChar Char TypeSpec
      deriving Eq
 
+
 -- |Relates a primitive argument to the corresponding source argument
 data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
                  | HalfUpdate      -- ^One half of a variable update (!var)
@@ -1352,6 +1353,22 @@ argType (ArgInt _ typ) = typ
 argType (ArgFloat _ typ) = typ
 argType (ArgString _ typ) = typ
 argType (ArgChar _ typ) = typ
+
+
+argDescription :: PrimArg -> String
+argDescription (ArgVar var _ flow ftype _) =
+    (case flow of
+          FlowIn -> "input "
+          FlowOut -> "output ") ++
+    (case ftype of
+        Ordinary -> "variable " ++ primVarName var
+        HalfUpdate -> "update of variable " ++ primVarName var
+        Implicit pos -> "expression" ++ showMaybeSourcePos pos
+        Resource rspec -> "resource " ++ show rspec)
+argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
+argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
+argDescription (ArgString val _) = "constant argument '" ++ show val ++ "'"
+argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
 
 
 
@@ -1422,7 +1439,8 @@ verboseDump = do
     verboseMsg 1 $
         return (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
                 (List.map show $ 
-                 List.filter ((/="wybe"). List.head . modSpec) modList))
+                 List.filter ((/="wybe"). List.head . modSpec) 
+                 modList))
 
 
 -- |How to show an Item.

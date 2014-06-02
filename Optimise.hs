@@ -8,6 +8,7 @@
 module Optimise (optimiseMod) where
 
 import AST
+import Types
 import Expansion
 import LastUse
 import Data.List as List
@@ -20,6 +21,7 @@ import Control.Monad.Trans
 optimiseMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 optimiseMod mods thisMod = do
     reenterModule thisMod
+    -- checkFullyTyped -- Sanity check: be sure everything is fully typed
     procs <- getModuleImplementationField (Map.toList . modProcs)
     let ordered =
             stronglyConnComp

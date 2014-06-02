@@ -223,7 +223,7 @@ transformArg arg@(ArgVar (PrimVarName name num) ty flow ftype final) = do
             return arg
         Just (name', currNum, offset, res, typ) -> do
             let newVarName = PrimVarName name' (num+offset)
-            let arg' = ArgVar newVarName ty flow (Resource res) final
+            let arg' = ArgVar newVarName typ flow (Resource res) final
             -- liftIO $ putStrLn $ "Translated to: " ++ show arg'
             return arg'
 transformArg arg = return arg
