@@ -246,8 +246,7 @@ getLoadingModule modspec = do
 -- |Return Just the specified module, if already fully loaded; else return
 -- Nothing.
 getLoadedModule :: ModSpec -> Compiler (Maybe Module)
-getLoadedModule modspec = do
-    gets (Map.lookup modspec . modules)
+getLoadedModule modspec = gets (Map.lookup modspec . modules)
 
 
 -- |Apply the given function to the specified module, if it has been loaded;
@@ -421,6 +420,9 @@ exitModule :: Compiler [ModSpec]
 exitModule = do
     mod <- finishModule
     let num = thisLoadNum mod
+    -- liftIO $ putStrLn $ "Finishing module " ++ showModSpec (modSpec mod)
+    -- liftIO $ putStrLn $ "    loadNum = " ++ show num ++
+    --        ", minDependencyNum = " ++ show (minDependencyNum mod)
     if (minDependencyNum mod < num) 
       then do
         modify (\comp -> comp { deferred = mod:deferred comp })
@@ -438,6 +440,7 @@ finishModule = do
       (\comp -> comp { underCompilation = tail (underCompilation comp) })
     updateModules $ Map.insert (modSpec mod) mod
     return mod
+
 
 -- |Return the directory of the current module.
 getDirectory :: Compiler FilePath
@@ -612,6 +615,7 @@ lookupResource res@(ResourceSpec mod name) pos = do
 publicResource :: Ident -> Compiler Bool
 publicResource name = getModule (Map.member name . pubResources . modInterface)
 
+
 -- |Add the specified module spec as an import of the current module.
 addImport :: ModSpec -> Bool -> (Maybe [Ident]) -> Visibility -> Compiler ()
 addImport modspec imp specific vis = do
@@ -626,6 +630,19 @@ addImport modspec imp specific vis = do
              imps' = if imp then addImports specific vis imps else imps
          in Map.insert modspec (ModDependency uses' imps') moddeps))
     updateInterface vis (updateDependencies (Set.insert modspec))
+    maybeMod <- gets (List.find ((==modspec) . modSpec) . underCompilation)
+    -- liftIO $ putStrLn $ "Noting import of " ++ showModSpec modspec ++
+    --        ", which is " ++ (if isNothing maybeMod then "NOT " else "") ++
+    --        "currently being loaded"
+    case maybeMod of
+        Nothing -> return ()  -- not currently loading dependency
+        Just mod -> do
+            -- liftIO $ putStrLn $ "Limiting minDependencyNum to " ++
+            --         show (thisLoadNum mod)
+            updateModule (\m -> m { minDependencyNum =
+                                        min (thisLoadNum mod)
+                                            (minDependencyNum m) })
+
 
 
 -- |Add the specified proc definition, with the list of proc defs, to

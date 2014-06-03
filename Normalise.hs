@@ -24,16 +24,17 @@ import Unbranch
 
 
 -- |Normalise a list of file items, storing the results in the current module.
-normalise :: [Item] -> Compiler ()
-normalise items = do
-    mapM_ normaliseItem items
+normalise :: ([ModSpec] -> Compiler ()) -> [Item] -> Compiler ()
+normalise modCompiler items = do
+    mapM_ (normaliseItem modCompiler) items
     -- liftIO $ putStrLn "File compiled"
     addImport ["wybe"] True Nothing Private -- every module imports stdlib
     -- Now generate main proc if needed
     stmts <- getModule stmtDecls 
     unless (List.null stmts)
-      $ normaliseItem (ProcDecl Private (ProcProto "" [] initResources) 
-                       (List.reverse stmts) Nothing)
+      $ normaliseItem modCompiler 
+            (ProcDecl Private (ProcProto "" [] initResources) 
+                          (List.reverse stmts) Nothing)
 
 -- |The resources available at the top level
 -- XXX this should be all resources with initial values
@@ -42,34 +43,22 @@ initResources = [ResourceFlowSpec (ResourceSpec ["wybe"] "io") ParamInOut]
 
 
 -- |Normalise a single file item, storing the result in the current module.
-normaliseItem :: Item -> Compiler ()
-normaliseItem (TypeDecl vis (TypeProto name params) items pos) = do
-    dir <- getDirectory
-    parentmod <- getModuleSpec
+normaliseItem :: ([ModSpec] -> Compiler ()) -> Item -> Compiler ()
+normaliseItem modCompiler (TypeDecl vis (TypeProto name params) items pos) = do
     addType name (TypeDef (length params) pos) vis
-    enterModule dir (parentmod ++ [name]) (Just params)
-    normalise items
-    mod <- finishModule
-    addSubmod name mod pos vis
-    return ()
-normaliseItem (ModuleDecl vis name items pos) = do
-    dir <- getDirectory
-    parentmod <- getModuleSpec
-    enterModule dir (parentmod ++ [name]) Nothing
-    normalise items
-    mod <- finishModule
-    addSubmod name mod pos vis
-    return ()
-normaliseItem (ImportMods vis imp modspecs pos) = do
+    normaliseSubmodule modCompiler name (Just params) vis pos items
+normaliseItem modCompiler (ModuleDecl vis name items pos) = do
+    normaliseSubmodule modCompiler name Nothing vis pos items
+normaliseItem _ (ImportMods vis imp modspecs pos) = do
     mapM_ (\spec -> addImport spec imp Nothing vis) modspecs
-normaliseItem (ImportItems vis imp modspec imports pos) = do
+normaliseItem _ (ImportItems vis imp modspec imports pos) = do
     addImport modspec imp (Just imports) vis
-normaliseItem (ResourceDecl vis name typ init pos) =
+normaliseItem _ (ResourceDecl vis name typ init pos) =
   addSimpleResource name (SimpleResource typ init pos) vis
-normaliseItem (FuncDecl vis (FnProto name params resources) 
+normaliseItem modCompiler (FuncDecl vis (FnProto name params resources) 
                resulttype result pos) =
   let flowType = Implicit pos
-  in  normaliseItem
+  in  normaliseItem modCompiler
    (ProcDecl
     vis
     (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType]) 
@@ -77,7 +66,7 @@ normaliseItem (FuncDecl vis (FnProto name params resources)
     [maybePlace (ProcCall [] "=" [Unplaced $ Var "$" ParamOut flowType, result])
      pos]
     pos)
-normaliseItem decl@(ProcDecl _ _ _ _) = do
+normaliseItem _ decl@(ProcDecl _ _ _ _) = do
     (ProcDecl vis proto@(ProcProto _ params resources) stmts pos,tmpCtr) <- 
         flattenProcDecl decl
     -- (proto' <- flattenProto proto
@@ -87,21 +76,37 @@ normaliseItem decl@(ProcDecl _ _ _ _) = do
     mainProc <- compileProc tmpCtr $ ProcDecl vis proto stmts' pos
     auxProcs <- mapM (compileProc tmpCtr) genProcs
     addProc mainProc auxProcs
-normaliseItem (CtorDecl vis proto pos) = do
+normaliseItem modCompiler (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
     Just modparams <- getModuleParams
-    addCtor vis (last modspec) modparams proto pos
-normaliseItem (StmtDecl stmt pos) = do
+    addCtor modCompiler vis (last modspec) modparams proto pos
+normaliseItem _ (StmtDecl stmt pos) = do
     updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
 
 
+normaliseSubmodule :: ([ModSpec] -> Compiler ()) -> Ident -> 
+                      Maybe [Ident] -> Visibility -> OptPos -> 
+                      [Item] -> Compiler ()
+normaliseSubmodule modCompiler name typeParams vis pos items = do
+    dir <- getDirectory
+    parentModSpec <- getModuleSpec
+    let subModSpec = parentModSpec ++ [name]
+    addImport subModSpec True Nothing vis
+    enterModule dir subModSpec typeParams
+    normalise modCompiler items
+    mods <- exitModule
+    unless (List.null mods) $ modCompiler mods
+    return ()
+
+
 -- |Add a contructor for the specified type.
-addCtor :: Visibility -> Ident -> [Ident] -> FnProto -> OptPos -> Compiler ()
-addCtor vis typeName typeParams (FnProto ctorName params _) pos = do
+addCtor :: ([ModSpec] -> Compiler ()) -> Visibility -> Ident -> [Ident] ->
+           FnProto -> OptPos -> Compiler ()
+addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
     let typespec = TypeSpec [] typeName $ 
                    List.map (\n->TypeSpec [] n []) typeParams
     let flowType = Implicit pos
-    normaliseItem
+    normaliseItem modCompiler
       (FuncDecl Public (FnProto ctorName params []) typespec
        (Unplaced $ Where
         ([Unplaced $ ForeignCall "$" "alloc" []
@@ -118,12 +123,14 @@ addCtor vis typeName typeParams (FnProto ctorName params _) pos = do
           params))
         (Unplaced $ Var "$rec" ParamIn flowType))
        Nothing)
-    mapM_ (addGetterSetter vis typespec ctorName pos) params
+    mapM_ (addGetterSetter modCompiler vis typespec ctorName pos) params
 
 -- |Add a getter and setter for the specified type.
-addGetterSetter :: Visibility -> TypeSpec -> Ident -> OptPos -> Param -> Compiler ()
-addGetterSetter vis rectype ctorName pos (Param field fieldtype _ _) = do
-    normaliseItem $ FuncDecl vis
+addGetterSetter :: ([ModSpec] -> Compiler ()) -> Visibility -> TypeSpec ->
+                   Ident -> OptPos -> Param -> Compiler ()
+addGetterSetter modCompiler vis rectype ctorName pos
+                    (Param field fieldtype _ _) = do
+    normaliseItem modCompiler $ FuncDecl vis
       (FnProto field [Param "$rec" rectype ParamIn Ordinary] [])
       fieldtype 
       (Unplaced $ ForeignFn "$" "access" []
@@ -132,7 +139,7 @@ addGetterSetter vis rectype ctorName pos (Param field fieldtype _ _) = do
         Unplaced $ StringValue field,
         Unplaced $ Var "$rec" ParamIn Ordinary])
       pos
-    normaliseItem $ ProcDecl vis 
+    normaliseItem modCompiler $ ProcDecl vis 
       (ProcProto field 
        [Param "$rec" rectype ParamInOut Ordinary,
         Param "$field" fieldtype ParamIn Ordinary] [])

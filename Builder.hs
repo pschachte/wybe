@@ -59,8 +59,8 @@ import Config
 buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
-    verboseDump
     showMessages
+    verboseDump
 
 
 -- |Build a single target; flag specifies to re-compile even if the 
@@ -85,7 +85,7 @@ buildTarget force target = do
 -- |Compile or load a module dependency.
 buildDependency :: ModSpec -> Compiler ()
 buildDependency modspec = do
-    liftIO $ putStrLn $ "Load dependency: " ++ showModSpec modspec
+    -- liftIO $ putStrLn $ "Load dependency: " ++ showModSpec modspec
     force <- option optForceAll
     possDirs <- gets (optLibDirs . options)
     localDir <- getModule modDirectory
@@ -102,12 +102,13 @@ buildModuleIfNeeded :: Bool    -- ^Force compilation of this module
 buildModuleIfNeeded force modspec possDirs = do
     loading <- gets (List.elem modspec . List.map modSpec . underCompilation)
     if loading
-      then return False
+      then do
+          return False -- Already loading it; we'll handle it later
       else do
         maybemod <- getLoadedModule modspec
-        liftIO $ putStrLn $ "module " ++ showModSpec modspec ++ " is " ++
-          (if isNothing maybemod then "not yet" else "already") ++
-          " loaded"
+        -- liftIO $ putStrLn $ "module " ++ showModSpec modspec ++ " is " ++
+        --   (if isNothing maybemod then "not yet" else "already") ++
+        --   " loaded"
         if isJust maybemod
           then return False -- already loaded:  nothing more to do
           else do
@@ -189,7 +190,7 @@ compileModule dir modspec params items = do
     -- module before handling the module.  If we decide we need to do 
     -- that, then we'll need to handle the full dependency 
     -- relationship explicitly before doing any compilation.
-    Normalise.normalise items
+    Normalise.normalise compileModSCC items
     stopOnError $ "preliminary processing of module " ++ show modspec
     loadImports
     stopOnError $ "handling imports for module " ++ show modspec
@@ -290,7 +291,7 @@ fixpointProcessSCC processor scc = do        -- must find fixpoint
 loadImports :: Compiler ()
 loadImports = do
     imports <- getModuleImplementationField (keys . modImports)
-    liftIO $ putStrLn $ "building dependencies: " ++ showModSpecs imports
+    -- liftIO $ putStrLn $ "building dependencies: " ++ showModSpecs imports
     mapM_ buildDependency imports
     -- modspec <- getModuleSpec
     -- mod <- getModule id
