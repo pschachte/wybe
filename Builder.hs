@@ -44,7 +44,7 @@ import System.FilePath
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
-import Data.Maybe      (isNothing, fromJust, catMaybes)
+import Data.Maybe
 import Control.Monad
 import Control.Monad.Trans.State
 import Control.Monad.Trans
@@ -59,7 +59,6 @@ import Config
 buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
-    stopOnError
     verboseDump
     showMessages
 
@@ -86,6 +85,7 @@ buildTarget force target = do
 -- |Compile or load a module dependency.
 buildDependency :: ModSpec -> Compiler ()
 buildDependency modspec = do
+    liftIO $ putStrLn $ "Load dependency: " ++ showModSpec modspec
     force <- option optForceAll
     possDirs <- gets (optLibDirs . options)
     localDir <- getModule modDirectory
@@ -105,34 +105,37 @@ buildModuleIfNeeded force modspec possDirs = do
       then return False
       else do
         maybemod <- getLoadedModule modspec
-        case maybemod of
-            Just modl -> return False -- already loaded:  nothing more to do
-            Nothing -> do
-                srcOb <- srcObjFiles modspec possDirs
-                case srcOb of
-                    Nothing -> do
-                        message Error ("Could not find module " ++ 
-                                       showModSpec modspec) Nothing
-                        return False
-                    Just (_,False,objfile,True,_) -> do 
-                        -- only object file exists
-                        loadModule objfile
-                        return False
-                    Just (srcfile,True,objfile,False,modname) -> do 
-                        -- only source file exists
+        liftIO $ putStrLn $ "module " ++ showModSpec modspec ++ " is " ++
+          (if isNothing maybemod then "not yet" else "already") ++
+          " loaded"
+        if isJust maybemod
+          then return False -- already loaded:  nothing more to do
+          else do
+            srcOb <- srcObjFiles modspec possDirs
+            case srcOb of
+                Nothing -> do
+                    message Error ("Could not find module " ++ 
+                                   showModSpec modspec) Nothing
+                    return False
+                Just (_,False,objfile,True,_) -> do 
+                    -- only object file exists
+                    loadModule objfile
+                    return False
+                Just (srcfile,True,objfile,False,modname) -> do 
+                    -- only source file exists
+                    buildModule modname objfile srcfile
+                    return True
+                Just (srcfile,True,objfile,True,modname) -> do
+                    srcDate <- (liftIO . getModificationTime) srcfile
+                    dstDate <- (liftIO . getModificationTime) objfile
+                    if force || srcDate > dstDate
+                      then do
                         buildModule modname objfile srcfile
                         return True
-                    Just (srcfile,True,objfile,True,modname) -> do
-                        srcDate <- (liftIO . getModificationTime) srcfile
-                        dstDate <- (liftIO . getModificationTime) objfile
-                        if force || srcDate > dstDate
-                          then do
-                            buildModule modname objfile srcfile
-                            return True
-                          else
-                            return False
-                    Just (_,False,_,False,_) ->
-                        shouldnt "inconsistent file existence"
+                      else
+                        return False
+                Just (_,False,_,False,_) ->
+                    shouldnt "inconsistent file existence"
 
 
 -- |Find the source and/or object files for the specified module.  We
@@ -187,9 +190,9 @@ compileModule dir modspec params items = do
     -- that, then we'll need to handle the full dependency 
     -- relationship explicitly before doing any compilation.
     Normalise.normalise items
-    stopOnError
-    handleImports
-    stopOnError
+    stopOnError $ "preliminary processing of module " ++ show modspec
+    loadImports
+    stopOnError $ "handling imports for module " ++ show modspec
     -- underComp <- gets underCompilation
     mods <- exitModule -- may be empty list if module is mutually dependent
     -- liftIO $ putStrLn $ "<=== finished compling module " ++ showModSpec modspec
@@ -211,31 +214,37 @@ loadModule objfile =
     Nothing
 
 
+descendantModules :: ModSpec -> Compiler [ModSpec]
+descendantModules mspec = do
+    subMods <- fmap (Map.elems . modSubmods) $ getLoadedModuleImpln mspec
+    desc <- fmap concat $ mapM descendantModules subMods
+    return $ subMods ++ desc
+
+
 -- |Actually compile a list of modules that form an SCC in the module
 --  dependency graph.  This is called in a way that guarantees that
 --  all modules on which this module depends, other than those on the
 --  mods list, will have been processed when this list of modules is
 --  reached.
 compileModSCC :: [ModSpec] -> Compiler ()
-compileModSCC mods = do
-    -- First compile submodules
-    mapM_ (\m -> do
-                imp <- getLoadedModuleImpln m
-                let subMods = Map.elems $ modSubmods imp
-                mapM_ (compileModSCC . (:[])) subMods)
-      mods
-    stopOnError
-    -- liftIO $ putStrLn $ "type checking module SCC " ++ showModSpecs mods ++ "..."
-    -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER NORMALISATION:\n"
-    -- verboseDump
-    fixpointProcessSCC resourceCheckMod mods
-    stopOnError
-    fixpointProcessSCC typeCheckMod mods
-    stopOnError
+compileModSCC mspecs = do
+    stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
+    -- mspecs' <- fmap ((mspecs++) . concat) $ mapM descendantModules mspecs
+    let mspecs' = mspecs
+    liftIO $ putStrLn $ "type checking module SCC " ++ showModSpecs mspecs' ++ "..."
+    liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER NORMALISATION:\n"
+    verboseDump
+    -- fixpointProcessSCC recordModImports mspecs'
+    fixpointProcessSCC resourceCheckMod mspecs'
+    stopOnError $ "processing resources for modules " ++
+      showModSpecs mspecs'
+    fixpointProcessSCC typeCheckMod mspecs'
+    stopOnError $ "type checking of modules " ++
+      showModSpecs mspecs'
     -- liftIO $ putStrLn $ "type checked"
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER TYPE CHECK:\n"
     -- verboseDump
-    fixpointProcessSCC optimiseMod mods
+    fixpointProcessSCC optimiseMod mspecs'
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER OPTIMISATION:\n"
     -- verboseDump
     -- mods <- mapM getLoadedModule mods
@@ -275,15 +284,14 @@ fixpointProcessSCC processor scc = do        -- must find fixpoint
     else mapM_ (\(msg,pos) -> message Error msg pos) errors
 
 
------------------------- Handling Imports ------------------------
+------------------------ Loading Imports ------------------------
 
 -- |Handle all the imports of the current module.
-handleImports :: Compiler ()
-handleImports = do
+loadImports :: Compiler ()
+loadImports = do
     imports <- getModuleImplementationField (keys . modImports)
-    -- liftIO $ putStrLn $ "building dependencies: " ++ showModSpecs imports
+    liftIO $ putStrLn $ "building dependencies: " ++ showModSpecs imports
     mapM_ buildDependency imports
-    -- 
     -- modspec <- getModuleSpec
     -- mod <- getModule id
     -- updateModules (Map.insert modspec mod)

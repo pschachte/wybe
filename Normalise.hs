@@ -74,7 +74,8 @@ normaliseItem (FuncDecl vis (FnProto name params resources)
     vis
     (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType]) 
      resources)
-    [Unplaced $ ProcCall [] "=" [Unplaced $ Var "$" ParamOut flowType, result]]
+    [maybePlace (ProcCall [] "=" [Unplaced $ Var "$" ParamOut flowType, result])
+     pos]
     pos)
 normaliseItem decl@(ProcDecl _ _ _ _) = do
     (ProcDecl vis proto@(ProcProto _ params resources) stmts pos,tmpCtr) <- 
@@ -83,9 +84,9 @@ normaliseItem decl@(ProcDecl _ _ _ _) = do
     -- (stmts,tmpCtr) <- flattenBody stmts
     -- liftIO $ putStrLn $ "Flattened proc:\n" ++ show (ProcDecl vis proto' stmts pos)
     (stmts',genProcs) <- unbranchBody params resources stmts
-    let procs = ProcDecl vis proto stmts' pos:genProcs
-    -- liftIO $ mapM_ (\item -> putStrLn $ show item) procs
-    mapM_ (compileProc tmpCtr) procs
+    mainProc <- compileProc tmpCtr $ ProcDecl vis proto stmts' pos
+    auxProcs <- mapM (compileProc tmpCtr) genProcs
+    addProc mainProc auxProcs
 normaliseItem (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
     Just modparams <- getModuleParams
@@ -208,7 +209,7 @@ evalClauseComp clcomp =
     evalStateT clcomp initClauseComp
 
 
-compileProc :: Int -> Item -> Compiler ()
+compileProc :: Int -> Item -> Compiler ProcDef
 compileProc tmpCtr (ProcDecl vis (ProcProto name params resources) body pos) 
   = do
     (params',body') <- evalClauseComp $ do
@@ -220,22 +221,15 @@ compileProc tmpCtr (ProcDecl vis (ProcProto name params resources) body pos)
                                      Map.insert (resourceName
                                                  (resourceFlowRes r)) 0 m)
                      Map.empty resources
-        -- resMap <- fmap (Map.mapKeys resourceName .
-        --                   Map.map (\typ -> (0,typ)) . 
-        --                   List.foldr Map.union Map.empty .
-        --                   catMaybes) $
-        --             lift $ mapM (flip lookupResource pos) $
-        --             List.map resourceFlowRes $ resources
         modify (\s -> s { resourceMap = resMap })
         compiled <- compileBody body
         -- liftIO $ putStrLn $ "Compiled"
         endVars <- gets varMap
         return (List.map (primParam startVars endVars) params, compiled)
     let def = ProcDef name (PrimProto name params') resources body' pos
-              tmpCtr 0 vis False
+              tmpCtr 0 vis False Nothing []
     -- liftIO $ putStrLn $ "Compiled version:\n" ++ showProcDef 0 def
-    addProc def
-    return ()
+    return def
 compileProc _ decl =
     shouldnt $ "compileProc applied to non-proc " ++ show decl
 

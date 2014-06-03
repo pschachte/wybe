@@ -33,18 +33,18 @@ module AST (
   CompilerState(..), Compiler, runCompiler,
   updateModules, updateImplementations,
   getModuleImplementationField, 
-  getLoadedModule, updateLoadedModule, updateLoadedModuleM,
+  getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, updateModule, getSpecModule, updateSpecModule,
   updateModImplementation, updateModImplementationM, 
-  updateModInterface, updateModProcsM, updateAllProcs,
+  updateModInterface, updateAllProcs,
   getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, verboseMsg, message, genProcName,
   addImport, addType, addSubmod, lookupType, publicType,
   ResourceName(..), ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource, 
   CallExpansion,
-  addProc, replaceProc, lookupProc, publicProc,
+  addProc, lookupProc, publicProc,
   refersTo, callTargets,
   verboseDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
   showModSpecs, showResources, showMaybeSourcePos,
@@ -63,6 +63,7 @@ import Control.Monad
 import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 import Config
+import Util
 import System.Exit
 
 ----------------------------------------------------------------
@@ -231,16 +232,23 @@ updateAllProcs fn =
     updateImplementations
     (\imp -> imp { modProcs = Map.map (List.map fn) $ modProcs imp })
 
--- |Return Just the specified module, if already loaded; else return
--- Nothing.  Takes care to handle it if the specified module is under
--- compilation.
-getLoadedModule :: ModSpec -> Compiler (Maybe Module)
-getLoadedModule modspec = do
+-- |Return Just the specified module, if already loaded or currently
+-- being loaded, otherwise Nothing.  Takes care to handle it if the
+-- specified module is under compilation.
+getLoadingModule :: ModSpec -> Compiler (Maybe Module)
+getLoadingModule modspec = do
     underComp <- gets underCompilation
     case find ((==modspec) . modSpec) underComp of
       Just mod -> return $ Just mod
-      Nothing  -> gets (Map.lookup modspec . modules)
+      Nothing  -> getLoadedModule modspec
                  
+
+-- |Return Just the specified module, if already fully loaded; else return
+-- Nothing.
+getLoadedModule :: ModSpec -> Compiler (Maybe Module)
+getLoadedModule modspec = do
+    gets (Map.lookup modspec . modules)
+
 
 -- |Apply the given function to the specified module, if it has been loaded;
 -- does nothing if not.  Takes care to handle it if the specified
@@ -517,7 +525,13 @@ updateImplementation implOp = do
 -- |Add the specified type definition to the current module.
 addType :: Ident -> TypeDef -> Visibility -> Compiler ()
 addType name def@(TypeDef arity _) vis = do
-    updateImplementation (updateModTypes (Map.insert name def))
+    currMod <- getModuleSpec
+    updateImplementation 
+      (\imp ->
+        let spec = TypeSpec currMod name [] -- XXX what about type params?
+            set = findWithDefault Set.empty name $ modKnownTypes imp
+        in imp { modTypes = Map.insert name def $ modTypes imp, 
+                 modKnownTypes = Map.insert name set $ modKnownTypes imp })
     updateInterface vis (updatePubTypes (Map.insert name def))
 
 -- |Add the specified submodule to the current module.
@@ -554,12 +568,15 @@ addSimpleResource name impln vis = do
     let rspec = ResourceSpec currMod name
     let rdef = maybePlace (Map.singleton rspec $ Just impln) $
                resourcePos impln
-    updateImplementation $ updateModResources $ 
-      Map.insert name rdef
+    updateImplementation 
+      (\imp -> imp { modResources = Map.insert name rdef $ modResources imp,
+                     modKnownResources = setMapInsert name rspec $
+                                         modKnownResources imp })
     updateInterface vis $ updatePubResources $
       Map.insert name $ Map.singleton rspec $ resourceType impln
 
--- |Find the definition of the specified resource in the current module.
+
+-- |Find the definition of the specified resource visible in the current module.
 lookupResource :: ResourceSpec -> OptPos -> Compiler (Maybe ResourceIFace)
 lookupResource res@(ResourceSpec mod name) pos = do
     mods <- refersTo mod name modResources pubResources
@@ -610,23 +627,36 @@ addImport modspec imp specific vis = do
          in Map.insert modspec (ModDependency uses' imps') moddeps))
     updateInterface vis (updateDependencies (Set.insert modspec))
 
--- |Add the specified proc definition to the current module.
-addProc :: ProcDef -> Compiler ()
-addProc procDef@(ProcDef name proto resources clauses pos _ calls vis _) = do
+
+-- |Add the specified proc definition, with the list of proc defs, to
+-- the current module, noting that the list of defs define procs that
+-- are spin-offs of the first proc def.
+addProc :: ProcDef -> [ProcDef] -> Compiler ()
+addProc procDef defs = do
+    mod <- getModuleSpec
+    let spinOffs = [ProcSpec mod (procName def) 0 | def <- defs]
+    let procDef' = procDef { procSpinOffs = spinOffs }
+    mainSpec <- addProc' procDef'
+    let defs' = [d { procSpinOffFrom = Just mainSpec } | d <- defs]
+    mapM_ addProc' defs'
+
+
+addProc' :: ProcDef -> Compiler ProcSpec
+addProc' procDef@(ProcDef name proto resources body pos _ calls vis _ _ _) = do
+    currMod <- getModuleSpec
+    procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
+    let procs' = procs ++ [procDef]
+    let spec = ProcSpec currMod name (length procs)
     updateImplementation
-      (updateModProcs
-       (\procs ->
-         let defs = findWithDefault [] name procs
-             defs' = defs ++ [procDef]
-         in  Map.insert name defs' procs))
-    newid <- getModuleImplementationField 
-            (((-1)+) . length . 
-             Map.findWithDefault (shouldnt $ "undefined proc " ++ name) name . 
-             modProcs)
-    spec <- getModuleSpec
-    updateInterface vis
-      (updatePubProcs (mapListInsert name 
-                       (ProcSpec spec name newid)))
+      (\imp ->
+        let known = findWithDefault Set.empty name $ modKnownProcs imp
+            known' = Set.insert spec $ known
+        in imp { modProcs = Map.insert name procs' $ modProcs imp,
+                 modKnownProcs = Map.insert name known' $ modKnownProcs imp })
+    updateInterface vis (updatePubProcs (mapListInsert name spec))
+    -- liftIO $ putStrLn $ "Adding defnintion for " ++ show spec ++ ":" ++
+    --   showProcDef 4 procDef
+    return spec
 
 
 getParams :: ProcSpec -> Compiler [PrimParam]
@@ -686,21 +716,6 @@ updateProcDefM updater pspec@(ProcSpec modspec procName procID) =
 mapListInsert :: Ord a => a -> b -> Map a [b] -> Map a [b]
 mapListInsert key elt =
     Map.alter (\maybe -> Just $ elt:fromMaybe [] maybe) key
-
-
--- |Replace the specified proc definition in the current module.
-replaceProc :: Ident -> Int -> PrimProto -> [ResourceFlowSpec] -> ProcBody ->
-               OptPos -> Int -> Int -> Visibility -> Bool -> Compiler ()
-replaceProc name id proto resources clauses pos tmpCount calls vis inline = do
-    updateImplementation
-      (updateModProcs
-       (\procs -> 
-         let olddefs = findWithDefault [] name procs
-             (front,back) = List.splitAt id olddefs
-         in Map.insert name (front ++ 
-                             (ProcDef name proto resources clauses pos
-                                      tmpCount calls vis inline:tail back)) 
-            procs))
 
 
 -- |Return the definition of the specified proc in the current module.
@@ -768,6 +783,13 @@ data Module = Module {
   }
 
 
+descendantModuleOf :: ModSpec -> ModSpec -> Bool
+descendantModuleOf sub [] = True
+descendantModuleOf (a:as) (b:bs)
+  | a == b = descendantModuleOf as bs
+descendantModuleOf _ _ = False
+
+
 -- |The list of defining modules that the given (possibly
 --  module-qualified) name could possibly refer to from the current
 --  module.  This may include the current module, or any module it may
@@ -779,22 +801,22 @@ refersTo :: ModSpec -> Ident -> (ModuleImplementation -> Map Ident b) ->
             (ModuleInterface -> Map Ident a) -> Compiler [ModSpec]
 refersTo modspec name implMapFn ifaceMapFn = do
     currMod <- getModuleSpec
-    -- liftIO $ putStrLn $ "Finding visible symbol " ++ maybeModPrefix modspec ++
-    --   name ++ " from module " ++ showModSpec currMod
+    liftIO $ putStrLn $ "Finding visible symbol " ++ maybeModPrefix modspec ++
+      name ++ " from module " ++ showModSpec currMod
     imports <- getModule (Map.keys . modImports . fromJust . modImplementation)
     submods <- getModule (Map.elems . modSubmods . fromJust . modImplementation)
     let candidates = if List.null modspec 
                      then currMod:submods++imports
-                     else [modspec]
-    -- liftIO $ putStrLn $ "   candidate module(s): " ++
-    --        intercalate ", " (List.map showModSpec $ candidates)
+                     else [modspec] 
+        -- XXX should be the unique module with modspec as a tail, or error
+    liftIO $ putStrLn $ "   candidate module(s): " ++ showModSpecs candidates
     listlist <- mapM (\spec -> do
                            vis <- makesVisible spec modspec name 
                                   implMapFn ifaceMapFn
                            return $ if vis then [spec] else [])
                 candidates
-    -- liftIO $ putStrLn $ "   could refer to module(s): " ++
-    --        intercalate ", " (List.map showModSpec $ concat listlist)
+    liftIO $ putStrLn $ "   could refer to module(s): " ++
+           intercalate ", " (List.map showModSpec $ concat listlist)
     return $ concat listlist
 
 
@@ -802,22 +824,30 @@ refersTo modspec name implMapFn ifaceMapFn = do
 -- module?  The ifaceMapFn is a Module selector function that produces a
 -- map that tells whether that module exports that name, and implMapFn
 -- tells whether a module implementation defines that name.
-makesVisible :: ModSpec -> ModSpec ->Ident ->
+makesVisible :: ModSpec -> ModSpec -> Ident ->
                 (ModuleImplementation -> Map Ident a) ->
                 (ModuleInterface -> Map Ident b) -> Compiler Bool
 makesVisible defMod modRef name implMapFn ifaceMapFn = do
     currMod <- getModuleSpec
-    if currMod == defMod
+    liftIO $ putStrLn $ "     does module '" ++ showModSpec defMod ++
+      "' make '" ++ name ++ "' visible to module '" ++ 
+      showModSpec currMod ++ "'?"
+    if currMod `descendantModuleOf` defMod
       then do -- use of local module:  name only needs to be defined
-        implMap <- getModuleImplementationField implMapFn
-        return $ Map.member name implMap
+        impln <- getLoadedModuleImpln defMod
+        liftIO $ putStrLn $ "   It defines: " ++ show (Map.keys $ implMapFn impln)
+        let result = Map.member name $ implMapFn impln
+        liftIO $ putStrLn $ show result
+        return result
       else do -- use of other module:  name must be exported or used
         -- specSpec <- getSpecModule "makesVisible" defMod modSpec
         iface <- getSpecModule "makesVisible" defMod modInterface
         if not $ Map.member name $ ifaceMapFn iface
           then do
+            liftIO $ putStrLn $ "nope"
             return False -- target doesn't even define it
           else do
+            liftIO $ putStrLn $ "maybe"
             usesImports <- getModuleImplementationField modImports
             let (ModDependency uses imports) = 
                     fromMaybe 
@@ -837,7 +867,7 @@ makesNameVisible (ImportSpec nameVis allVis) name =
 callTargets :: ModSpec -> ProcName -> Compiler [ProcSpec]
 callTargets modspec name = do
     mods <- refersTo modspec name modProcs pubProcs
-    -- liftIO $ putStrLn $ "  Matching mods: " ++ intercalate ", " (List.map show mods)
+    liftIO $ putStrLn $ "   name '" ++ name ++ "' for module spec '" ++ showModSpec modspec ++ "' matches mods: " ++ showModSpecs mods
     let msg = "using private proc from module with no implementation"
     listlist <- mapM (\m -> do
                         mod <- getSpecModule "callTargets" m id
@@ -930,19 +960,24 @@ updateDependencies :: (Set ModSpec -> Set ModSpec) ->
                       ModuleInterface -> ModuleInterface
 updateDependencies fn modint = modint {dependencies = fn $ dependencies modint}
 
-
 -- |Holds everything needed to compile the module itself
 data ModuleImplementation = ModuleImplementation {
-    modImports :: Map ModSpec ModDependency, -- ^All modules this module imports
-    modSubmods :: Map Ident ModSpec,       -- ^All submodules
-    modTypes :: Map Ident TypeDef,         -- ^All types defined by this module
-    modResources :: Map Ident ResourceDef, -- ^All resources defined by this mod
-    modProcs :: Map Ident [ProcDef]        -- ^All procs defined by this module
+    modImports   :: Map ModSpec ModDependency,
+                                             -- ^This module's imports
+    modSubmods   :: Map Ident ModSpec,        -- ^This module's submodules
+    modTypes     :: Map Ident TypeDef,        -- ^Types defined by this module
+    modResources :: Map Ident ResourceDef,    -- ^Resources defined by this mod
+    modProcs     :: Map Ident [ProcDef],      -- ^Procs defined by this module
+    modKnownTypes:: Map Ident (Set TypeSpec), -- ^Type visible to this module
+    modKnownResources :: Map Ident (Set ResourceSpec),
+                                             -- ^Resources visible to this mod
+    modKnownProcs:: Map Ident (Set ProcSpec)  -- ^Procs visible to this module
     }
 
 emptyImplementation :: ModuleImplementation
 emptyImplementation =
     ModuleImplementation Map.empty Map.empty Map.empty Map.empty Map.empty
+                         Map.empty Map.empty Map.empty
 
 
 
@@ -957,11 +992,6 @@ updateModImports fn modimp = modimp {modImports = fn $ modImports modimp}
 updateModSubmods :: (Map Ident ModSpec -> Map Ident ModSpec) -> 
                    ModuleImplementation -> ModuleImplementation
 updateModSubmods fn modimp = modimp {modSubmods = fn $ modSubmods modimp}
-
--- |Update the map of types of a module implementation.
-updateModTypes :: (Map Ident TypeDef -> Map Ident TypeDef) -> 
-                 ModuleImplementation -> ModuleImplementation
-updateModTypes fn modimp = modimp {modTypes = fn $ modTypes modimp}
 
 -- |Update the map of resources of a module implementation.
 updateModResources :: (Map Ident ResourceDef -> Map Ident ResourceDef) -> 
@@ -1070,7 +1100,10 @@ data ProcDef = ProcDef {
     procTmpCount :: Int,        -- the next temp variable number to use
     procCallCount :: Int,       -- the number of calls to it statically in prog
     procVis :: Visibility,
-    procInline :: Bool          -- inline calls to this proc
+    procInline :: Bool,         -- inline calls to this proc
+    procSpinOffFrom :: Maybe ProcSpec, 
+                               -- the proc this was generated as part of
+    procSpinOffs :: [ProcSpec]  -- the procs generated as part of this one
 }
              deriving Eq
 
@@ -1421,15 +1454,6 @@ varsInParam dir (PrimParam var _ dir' _ _) =
 
 
 ----------------------------------------------------------------
---                            Utilities
-----------------------------------------------------------------
-
-maybeApply :: (a -> b) -> Maybe a -> Maybe b
-maybeApply f (Just x) = Just $ f x
-maybeApply f Nothing = Nothing
-
-
-----------------------------------------------------------------
 --                      Showing Compiler State
 ----------------------------------------------------------------
 
@@ -1439,7 +1463,7 @@ verboseDump = do
     verboseMsg 1 $
         return (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
                 (List.map show $ 
-                 List.filter ((/="wybe"). List.head . modSpec) 
+                 -- List.filter ((/="wybe"). List.head . modSpec) 
                  modList))
 
 
@@ -1621,12 +1645,17 @@ showProcDefs firstID (def:defs) =
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID (ProcDef _ proto resources def pos _ calls vis inline) =
+showProcDef thisID 
+  (ProcDef _ proto resources def pos _ calls vis inline partOf parts) =
     "\n" ++ visibilityPrefix vis ++
     "proc " ++ show proto ++ "<" ++ show thisID ++ "> "
     ++ showResources resources
     ++ showMaybeSourcePos pos
+    ++ maybeShow "(part of " partOf ")"
     ++ " (" ++ show calls ++ " calls)"
+    ++ (if List.null parts 
+        then "" 
+        else "\nParts: " ++ intercalate ", " (List.map show parts))
     ++ (if inline then " (inline)" else "")
     ++ showBlock 4 def
 
@@ -1832,9 +1861,10 @@ showMessages = do
     return ()
 
 
-stopOnError :: Compiler ()
-stopOnError = do
+stopOnError :: String -> Compiler ()
+stopOnError incident = do
     err <- gets errorState
     when err $ do
+        liftIO $ putStrLn $ "Error detected during " ++ incident
         showMessages
         liftIO exitFailure

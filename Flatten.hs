@@ -325,11 +325,11 @@ flattenExp (CondExp cond thn els) pos = do
     resultName <- tempVar
     let flowType = Implicit pos
     flattenStmt (Cond [] cond
-                 [Unplaced $ ProcCall [] "=" 
-                  [Unplaced $ Var resultName ParamOut flowType,thn]]
-                 [Unplaced $ ProcCall [] "=" 
-                  [Unplaced $ Var resultName ParamOut flowType,els]]) pos
-    return $ [Unplaced $ Var resultName ParamIn flowType]
+                 [maybePlace (ProcCall [] "=" 
+                  [Unplaced $ Var resultName ParamOut flowType,thn]) pos]
+                 [maybePlace (ProcCall [] "=" 
+                  [Unplaced $ Var resultName ParamOut flowType,els]) pos]) pos
+    return $ [maybePlace (Var resultName ParamIn flowType) pos]
 flattenExp (Fncall maybeMod name exps) pos = do
     flattenCall (ProcCall maybeMod name) pos exps
 flattenExp (ForeignFn lang name flags exps) pos = do

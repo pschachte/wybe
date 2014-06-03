@@ -19,6 +19,35 @@ import Data.Graph
 
 import Debug.Trace
 
+
+-- |Type check a single module named in the second argument; the 
+--  first argument is a list of all the modules in this module 
+-- dependency SCC.
+typeCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
+typeCheckMod modSCC thisMod = do
+    -- liftIO $ putStrLn $ "**** Type checking module " ++ showModSpec thisMod
+    reenterModule thisMod
+    procs <- getModuleImplementationField (Map.toList . modProcs)
+    let ordered =
+            stronglyConnComp
+            [(name,name,
+              nub $ concatMap (localBodyProcs thisMod . procBody) procDefs)
+             | (name,procDefs) <- procs]
+    (changed,errors) <-
+        foldM (\(chg,errs) procSCC -> do
+             (chg1,reasons) <- typecheckProcSCC thisMod modSCC procSCC
+             return (chg||chg1, List.map (\r->(show r,Nothing)) reasons++errs))
+        (False,[]) ordered
+    finishModule
+    -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
+    return (changed,errors)
+
+
+----------------------------------------------------------------
+--                           Supporting types
+----------------------------------------------------------------
+
+
 -- |The reason a variable is given a certain type
 data TypeReason = ReasonParam ProcName Int OptPos
                                       -- Formal param type/flow inconsistent
@@ -64,14 +93,16 @@ instance Show TypeReason where
             "Call to unknown '" ++ callTo ++ "' from " ++ callFrom
     show (ReasonUninit callFrom var pos) =
         makeMessage pos $
-            "Uninitialised variable '" ++ var ++ "'"
+            "Unknown variable/constant '" ++ var ++ "'"
     show (ReasonArity callFrom callTo pos callArity procArity) =
         makeMessage pos $
             (if callFrom == "" 
              then "Toplevel call" 
              else "Call from " ++ callFrom) ++
             " to " ++ callTo ++ " with " ++
-            show callArity ++ " arguments, expected " ++ show procArity
+            (if callArity == procArity
+             then "unsupported argument flow"
+             else show callArity ++ " arguments, expected " ++ show procArity)
 
 data Typing = ValidTyping (Map VarName TypeSpec)
             | InvalidTyping TypeReason   -- call type conflicts w/callee
@@ -138,6 +169,11 @@ localPrimCalls thisMod (PrimCall m name _ _)
   | m == [] || m == thisMod = [name]
 localPrimCalls _ _ = []
 
+
+
+----------------------------------------------------------------
+--                         Type checking procs
+----------------------------------------------------------------
 
 -- |Type check one strongly connected component in the local call graph
 --  of a module.  The call graph contains only procs in the one module,
@@ -274,7 +310,6 @@ typecheckProcDef m mods name pos paramTypes body = do
         return (InvalidTyping $ ReasonAmbig name pos [],body)
       [typing] -> do
         -- liftIO $ putStrLn $ "   final typing: " ++ show typing
-        -- liftIO $ putStrLn $ "   final body: " ++ show prims'
         let typing' = projectTyping typing paramTypes
         case typing of
             InvalidTyping _ -> do
@@ -358,7 +393,8 @@ typecheckPlacedPrim m mods caller typing pprim = do
 typecheckPrim :: ModSpec -> [ModSpec] -> ProcName -> Prim -> OptPos -> Typing ->
                  Compiler [Typing]
 typecheckPrim m mods caller call@(PrimCall cm name id args0) pos typing = do
-    -- liftIO $ putStrLn $ "Type checking call " ++ show call
+    -- liftIO $ putStrLn $ "Type checking call " ++ show call ++ 
+    --   showMaybeSourcePos pos
     -- liftIO $ putStrLn $ "   with types " ++ show typing
     procs <- case id of
         Nothing   -> callTargets cm name
@@ -408,7 +444,10 @@ typecheckPrim m mods caller call@(PrimCall cm name id args0) pos typing = do
         -- liftIO $ putStrLn $ "Resulting types: " ++ show typList''
         if List.null dups
         then if List.null typList''
-             then return typList'
+             then do
+                -- liftIO $ putStrLn $ "Type error detected: " ++
+                --     unlines (List.map show typList')
+                return typList'
              else return typList''
         else return [InvalidTyping $ ReasonOverload
                                    (List.map fst $
@@ -630,31 +669,8 @@ applyArgTyping dict (ArgString val _) = ArgString val (TypeSpec [] "string" [])
 
 
 ----------------------------------------------------------------
---                           Sanity Checking
+--                    Check that everything is typed
 ----------------------------------------------------------------
-
--- |Type check a single module named in the second argument; the 
---  first argument is a list of all the modules in this module 
--- dependency SCC.
-typeCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
-typeCheckMod modSCC thisMod = do
-    -- liftIO $ putStrLn $ "**** Type checking module " ++ showModSpec thisMod
-    reenterModule thisMod
-    procs <- getModuleImplementationField (Map.toList . modProcs)
-    let ordered =
-            stronglyConnComp
-            [(name,name,
-              nub $ concatMap (localBodyProcs thisMod . procBody) procDefs)
-             | (name,procDefs) <- procs]
-    (changed,errors) <-
-        foldM (\(chg,errs) procSCC -> do
-             (chg1,reasons) <- typecheckProcSCC thisMod modSCC procSCC
-             return (chg||chg1, List.map (\r->(show r,Nothing)) reasons++errs))
-        (False,[]) ordered
-    finishModule
-    -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
-    return (changed,errors)
-
 
 -- |Sanity check: make sure all args and params of all procs in the 
 -- current module are fully typed.  If not, report an internal error. 
