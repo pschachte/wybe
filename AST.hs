@@ -19,7 +19,7 @@ module AST (
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
   -- *AST types
-  Module(..), ModuleInterface(..), ModuleImplementation(..),
+  Module(..), ModuleInterface(..), ModuleImplementation(..), ModDependency(..),
   enterModule, reenterModule, exitModule, finishModule, 
   emptyInterface, emptyImplementation, 
   getProcDef, mkTempName, updateProcDef, updateProcDefM, getParams,
@@ -31,16 +31,15 @@ module AST (
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
-  updateModules, updateImplementations,
-  getModuleImplementationField, 
+  updateModules, updateImplementations, getModuleImplementationField, 
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
-  getModule, updateModule, getSpecModule, updateSpecModule,
+  getModule, getModuleInterface, updateModule, getSpecModule, updateSpecModule,
   updateModImplementation, updateModImplementationM, 
   updateModInterface, updateAllProcs,
   getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, verboseMsg, message, genProcName,
-  addImport, addType, addSubmod, lookupType, publicType,
+  addImport, doImport, addType, addSubmod, lookupType, publicType,
   ResourceName(..), ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource, 
   CallExpansion,
@@ -941,7 +940,7 @@ data ModuleInterface = ModuleInterface {
                                     -- ^The other modules this module exports
     dependencies :: Set ModSpec      -- ^The other modules that must be linked
     }                               --  in by modules that depend on this one
-
+    deriving (Eq)
 
 emptyInterface :: ModuleInterface
 emptyInterface = 
@@ -1069,9 +1068,33 @@ addImports (Just imps) vis (ImportSpec map vis') =
 addImports (Just imps) vis ImportNothing = 
     ImportSpec (List.foldr (\k -> Map.insert k vis) Map.empty imps) Nothing
 
+
+-- |Actually import/use from fromMod into the current module.  The
+-- ModDependency says what to import and what to use.
+doImport :: ModSpec -> ModDependency -> Compiler ()
+doImport mod dep@(ModDependency uses imports) = do
+    currMod <- getModuleSpec
+    liftIO $ putStrLn $ "Handle importation into " ++ 
+           showModSpec currMod ++ ": " ++
+           showModDependency mod dep
+    doImport' mod uses False
+    doImport' mod imports True
+    return ()
+
+
+doImport' :: ModSpec -> ImportSpec -> Bool -> Compiler ()
+doImport' _ ImportNothing _ = return ()
+doImport' modspec (ImportSpec whichVis allVis) unqualified = do
+    fromIFace <- fmap (modInterface . trustFromJust "doImport") $ 
+                 getLoadedModule modspec
+    let allTypes = pubTypes fromIFace
+    let allResources = pubResources fromIFace
+    let allProcs = pubProcs fromIFace
+    return ()
+
 -- |A type definition, including the number of type parameters and an 
 --  optional source position.
-data TypeDef = TypeDef Int OptPos
+data TypeDef = TypeDef Int OptPos deriving (Eq)
 
 -- |The arity of a type definition.
 typeDefArity :: TypeDef -> Int

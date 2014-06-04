@@ -230,22 +230,21 @@ descendantModules mspec = do
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
-    -- mspecs' <- fmap ((mspecs++) . concat) $ mapM descendantModules mspecs
-    let mspecs' = mspecs
-    liftIO $ putStrLn $ "type checking module SCC " ++ showModSpecs mspecs' ++ "..."
     liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER NORMALISATION:\n"
     verboseDump
-    -- fixpointProcessSCC recordModImports mspecs'
-    fixpointProcessSCC resourceCheckMod mspecs'
+    fixpointProcessSCC handleModImports mspecs
+    liftIO $ putStrLn $ replicate 70 '='
+    liftIO $ putStrLn $ "resource and type checking modules " ++ showModSpecs mspecs ++ "..."
+    fixpointProcessSCC resourceCheckMod mspecs
     stopOnError $ "processing resources for modules " ++
-      showModSpecs mspecs'
-    fixpointProcessSCC typeCheckMod mspecs'
+      showModSpecs mspecs
+    fixpointProcessSCC typeCheckMod mspecs
     stopOnError $ "type checking of modules " ++
-      showModSpecs mspecs'
+      showModSpecs mspecs
     -- liftIO $ putStrLn $ "type checked"
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER TYPE CHECK:\n"
     -- verboseDump
-    fixpointProcessSCC optimiseMod mspecs'
+    fixpointProcessSCC optimiseMod mspecs
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER OPTIMISATION:\n"
     -- verboseDump
     -- mods <- mapM getLoadedModule mods
@@ -287,7 +286,7 @@ fixpointProcessSCC processor scc = do        -- must find fixpoint
 
 ------------------------ Loading Imports ------------------------
 
--- |Handle all the imports of the current module.
+-- |Load all the imports of the current module.
 loadImports :: Compiler ()
 loadImports = do
     imports <- getModuleImplementationField (keys . modImports)
@@ -296,6 +295,31 @@ loadImports = do
     -- modspec <- getModuleSpec
     -- mod <- getModule id
     -- updateModules (Map.insert modspec mod)
+
+------------------------ Handling Imports ------------------------
+
+-- |Handle all the imports of the current module.  When called, all
+-- modules imported by all the listed modules have been loaded, so we
+-- can finally work out what is exported by, and what is visible in,
+-- each of these modules. 
+handleModImports :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
+handleModImports modSCC mod = do
+    reenterModule mod
+    imports <- getModuleImplementationField modImports
+    kTypes <- getModuleImplementationField modKnownTypes
+    kResources <- getModuleImplementationField modKnownResources
+    kProcs <- getModuleImplementationField modKnownProcs
+    iface <- getModuleInterface
+    mapM (uncurry doImport) $ Map.toList imports
+    kTypes' <- getModuleImplementationField modKnownTypes
+    kResources' <- getModuleImplementationField modKnownResources
+    kProcs' <- getModuleImplementationField modKnownProcs
+    iface' <- getModuleInterface
+    finishModule
+    return (kTypes/=kTypes' || kResources/=kResources' ||
+            kProcs/=kProcs' || iface/=iface',[])
+
+
 
 ------------------------ Filename Handling ------------------------
 
