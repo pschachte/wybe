@@ -663,7 +663,7 @@ getParams pspec = do
 getProcDef :: ProcSpec -> Compiler ProcDef
 getProcDef (ProcSpec modSpec procName procID) = do
     mod <- trustFromJustM ("no such module " ++ showModSpec modSpec) $ 
-           getLoadedModule modSpec
+           getLoadingModule modSpec
     let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $ 
                modImplementation mod
     return $ (modProcs impl ! procName) !! procID
@@ -997,7 +997,7 @@ doImport mod imports = do
     --   let modStr = showModSpec currMod
     --   in modStr ++ ":  " ++ showUse (27 + length modStr) mod imports
     fromIFace <- fmap (modInterface . trustFromJust "doImport") $ 
-                 getLoadedModule mod
+                 getLoadingModule mod
     let pubImports = importPublic imports
     let allImports = combineImportPart pubImports $ importPrivate imports
     let importedTypes = importsSelected allImports $ pubTypes fromIFace

@@ -38,8 +38,8 @@ procExpansion def = do
     let def' = def { procProto = proto', procBody = body', 
                      procTmpCount = tmpCount expander }
     -- liftIO $ putStrLn $
-    --        "Expanded:\n" ++ showProcDef 4 def ++
-    --                 "\nTo:\n" ++ showProcDef 4 def'
+    --        "\nExpanded:" ++ showProcDef 4 def ++
+    --                 "\nTo:" ++ showProcDef 4 def'
     return def'
 
 
@@ -134,6 +134,7 @@ expandPrim noInline renameAll call@(PrimCall md nm (Just pspec) args) pos = do
     --   (if noInline then "" else "and inline ") ++ show call
     args' <- mapM (expandArg renameAll) args
     def <- lift $ getProcDef pspec
+    -- liftIO $ putStrLn $ "Definition:" ++ showProcDef 4 def
     prims <- if (not noInline) && procInline def
              then do
                  saved <- get
@@ -143,7 +144,8 @@ expandPrim noInline renameAll call@(PrimCall md nm (Just pspec) args) pos = do
                    zip (primProtoParams $ procProto def) args'
                  let body = procBody def
                  unless (NoFork == bodyFork body) $
-                   shouldnt $ "Inlined proc with non-empty fork" ++ show pspec
+                   shouldnt $ "Inlined proc with non-empty fork" ++
+                              show pspec
                  -- liftIO $ putStrLn $ "Found expansion: " ++ showBlock 4 body
                  let defPrims = bodyPrims body
                  defPrims' <- expandPrims True True defPrims

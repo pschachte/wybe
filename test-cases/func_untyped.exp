@@ -3,7 +3,7 @@
   public types    : 
   public resources: 
   public procs    : func_untyped.incr<0>
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : incr:

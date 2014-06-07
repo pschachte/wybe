@@ -3,7 +3,7 @@
   public types    : 
   public resources: 
   public procs    : func_typed.plus<0>
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : plus:

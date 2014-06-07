@@ -318,6 +318,7 @@ typecheckProcDef m mods name pos paramTypes body = do
             ValidTyping dict -> do
                 -- liftIO $ putStrLn $ "apply body typing" ++ showBlock 4 body
                 body' <- applyBodyTyping dict body
+                -- liftIO $ putStrLn $ "After body typing:" ++ showBlock 4 body'
                 return (typing',body')
       typings -> do
           -- liftIO $ putStrLn $ name ++ " has " ++ show (length typings) ++ 
@@ -456,7 +457,6 @@ typecheckPrim m mods caller call@(PrimCall cm name id args0) pos typing = do
                                     zip procs typList)
                                    pos]
 typecheckPrim _ _ _ (PrimForeign lang name id args) pos typing = do
-    -- XXX? must get type and flow from foreign calls?
     return [typing]
 typecheckPrim _ _ _ PrimNop pos typing = return [typing]
 
@@ -644,8 +644,7 @@ applyPrimTyping dict call@(PrimCall cm name id args) = do
                procs
     checkError "not exactly one matching proc" (1 /= length matches)
     let (args'',proc) = List.head matches
---     liftIO $ putStrLn $ "typed call = " ++ show (PrimCall (procSpecMod proc) (pr
--- ocSpecName proc) (Just proc) args'')
+    -- liftIO $ putStrLn $ "typed call = " ++ show (PrimCall (procSpecMod proc) (procSpecName proc) (Just proc) args'')
     return $ PrimCall (procSpecMod proc) (procSpecName proc) (Just proc) args''
 applyPrimTyping dict call@(PrimForeign lang name id args) = do
     -- liftIO $ putStrLn $ "typing call " ++ show call

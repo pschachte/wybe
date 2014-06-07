@@ -2,9 +2,9 @@
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : update.inc2<1>
-                    update.inc2<0>
-  imports         : import wybe 
+  public procs    : update.inc2<0>
+                    update.inc2<1>
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : inc2:

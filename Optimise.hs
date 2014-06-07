@@ -31,10 +31,14 @@ optimiseMod mods thisMod = do
                (n,def) <- zip [0..] procDefs,
                let pspec = ProcSpec thisMod name n
              ]
+    -- liftIO $ putStrLn $ "Optimise SCCs:\n" ++ unlines (List.map (show . sccElts) ordered)
     mapM_ optimiseSCCBottomUp ordered
     finishModule
     return (False,[])
 
+
+sccElts (AcyclicSCC single) = [single]
+sccElts (CyclicSCC multi) = multi
 
 optimiseSCCBottomUp :: SCC ProcSpec -> Compiler ()
 optimiseSCCBottomUp (AcyclicSCC pspec) = do
@@ -51,7 +55,12 @@ optimiseProc pspec = do
 
 optimiseProcDef :: ProcSpec -> ProcDef -> Compiler ProcDef
 optimiseProcDef pspec def = do
-    procExpansion def >>= markLastUse pspec >>= inlineIfWanted
+    -- liftIO $ putStrLn $ "Definition of " ++ show pspec ++
+    --   " before optimisation:" ++ showProcDef 4 def
+    def' <- procExpansion def >>= markLastUse pspec >>= inlineIfWanted
+    -- liftIO $ putStrLn $ "Definition of " ++ show pspec ++
+    --   " after optimisation:" ++ showProcDef 4 def'
+    return def'
 
 
 ----------------------------------------------------------------

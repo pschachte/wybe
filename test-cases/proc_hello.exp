@@ -3,7 +3,7 @@
   public types    : 
   public resources: 
   public procs    : proc_hello.print2<0>
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : print2:

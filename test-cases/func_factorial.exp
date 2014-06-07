@@ -3,14 +3,15 @@
   public types    : 
   public resources: 
   public procs    : func_factorial.factorial<0>
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : factorial:
-public proc factorial(n:0:int, ?tmp$0:0:int)<0>  @func_factorial:1:8 (0 calls) (inline)
+public proc factorial(n:0:int, ?tmp$0:0:int)<0>  @func_factorial:1:8 (0 calls)
+Parts: func_factorial.gen$1<0> (inline)
     func_factorial.gen$1<0>(~n:0:int, ?n:1:int, ?tmp$0:0:int) @func_factorial:2:8
                     gen$1:
-proc gen$1(n:0:int, ?n:0:int, ?tmp$0:0:int)<0>  (0 calls)
+proc gen$1(n:0:int, ?n:0:int, ?tmp$0:0:int)<0> (part of func_factorial.factorial<0>) (0 calls)
     foreign llvm icmp sle(32:int, n:0:int, 0:int, ?tmp$1:0:bool) @wybe:16:40
     case %tmp$1:0 of
     0:
