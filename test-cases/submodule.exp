@@ -1,22 +1,21 @@
  Module submodule
-  public submods  : publictest @submodule:6:8
+  public submods  : 
   public types    : 
   public resources: 
   public procs    : submodule.publictest.visible<0>
-  imports         : import submodule.privatetest 
-                    public import submodule.publictest 
-                    import wybe 
+  imports         : use submodule.privatetest
+                    public use submodule.publictest
+                    use wybe
   types           : 
   resources       : 
   procs           : 
-  submodules      : submodule.privatetest, submodule.publictest
 --------------------------------------------------
  Module submodule.privatetest
   public submods  : 
   public types    : 
   public resources: 
   public procs    : submodule.privatetest.semi_hidden<0>
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : hidden:
@@ -31,7 +30,7 @@ public proc semi_hidden(#wybe.io$io:0:phantom, ?#wybe.io$io:1:phantom)<0>  use !
   public types    : 
   public resources: 
   public procs    : submodule.publictest.visible<0>
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : semi_visible:

@@ -58,6 +58,8 @@ import Config
 -- |Build the specified targets with the specified options.
 buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
+    possDirs <- gets (optLibDirs . options)
+    buildModuleIfNeeded False ["wybe"] possDirs -- load library first
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     showMessages
     verboseDump

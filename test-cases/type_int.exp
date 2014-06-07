@@ -1,14 +1,14 @@
  Module type_int
-  public submods  : int @type_int:1:8
-  public types    : int/0 @type_int:1:8
+  public submods  : 
+  public types    : int: type_int.int
   public resources: 
   public procs    : type_int.int.*<0>
-                    type_int.int.+<2>
-                    type_int.int.+<1>
                     type_int.int.+<0>
-                    type_int.int.-<2>
-                    type_int.int.-<1>
+                    type_int.int.+<1>
+                    type_int.int.+<2>
                     type_int.int.-<0>
+                    type_int.int.-<1>
+                    type_int.int.-<2>
                     type_int.int./<0>
                     type_int.int./=<0>
                     type_int.int.<<0>
@@ -16,24 +16,23 @@
                     type_int.int.==<0>
                     type_int.int.><0>
                     type_int.int.>=<0>
-  imports         : public import type_int.int 
-                    import wybe 
+  imports         : public use type_int.int
+                    use wybe
   types           : int/0 @type_int:1:8
   resources       : 
   procs           : 
-  submodules      : type_int.int
 --------------------------------------------------
  Module type_int.int([])
   public submods  : 
   public types    : 
   public resources: 
   public procs    : type_int.int.*<0>
-                    type_int.int.+<2>
-                    type_int.int.+<1>
                     type_int.int.+<0>
-                    type_int.int.-<2>
-                    type_int.int.-<1>
+                    type_int.int.+<1>
+                    type_int.int.+<2>
                     type_int.int.-<0>
+                    type_int.int.-<1>
+                    type_int.int.-<2>
                     type_int.int./<0>
                     type_int.int./=<0>
                     type_int.int.<<0>
@@ -41,7 +40,7 @@
                     type_int.int.==<0>
                     type_int.int.><0>
                     type_int.int.>=<0>
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : *:

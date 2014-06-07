@@ -1,26 +1,27 @@
  Module type_list
-  public submods  : intlist @type_list:1:8
-  public types    : intlist/0 @type_list:1:8
+  public submods  : 
+  public types    : intlist: type_list.intlist
   public resources: 
   public procs    : type_list.++<0>
-                    type_list.intlist.=<2>
-                    type_list.intlist.=<1>
                     type_list.intlist.=<0>
+                    type_list.intlist.=<1>
+                    type_list.intlist.=<2>
                     type_list.intlist.[]<0>
                     type_list.intlist.[|]<0>
-                    type_list.intlist.head<1>
                     type_list.intlist.head<0>
-                    type_list.intlist.tail<1>
+                    type_list.intlist.head<1>
                     type_list.intlist.tail<0>
-  imports         : public import type_list.intlist 
-                    import wybe 
+                    type_list.intlist.tail<1>
+  imports         : public use type_list.intlist
+                    use wybe
   types           : intlist/0 @type_list:1:8
   resources       : 
   procs           : ++:
-public proc ++(x:0:intlist, y:0:intlist, ?tmp$0:0:intlist)<0>  @type_list:9:8 (0 calls) (inline)
+public proc ++(x:0:intlist, y:0:intlist, ?tmp$0:0:intlist)<0>  @type_list:9:8 (0 calls)
+Parts: type_list.gen$1<0> (inline)
     type_list.gen$1<0>(~x:0:intlist, ~y:0:intlist, ?tmp$0:0:intlist, ?x:1:intlist, ?y:1:intlist) @type_list:10:5
                     gen$1:
-proc gen$1(x:0:intlist, y:0:intlist, ?tmp$0:0:intlist, ?x:0:intlist, ?y:0:intlist)<0>  (0 calls)
+proc gen$1(x:0:intlist, y:0:intlist, ?tmp$0:0:intlist, ?x:0:intlist, ?y:0:intlist)<0> (part of type_list.++<0>) (0 calls)
     foreign $ alloc("bool":string, "false":string, ?tmp$1:0:bool)
     case %tmp$1:0 of
     0:
@@ -33,22 +34,21 @@ proc gen$1(x:0:intlist, y:0:intlist, ?tmp$0:0:intlist, ?x:0:intlist, ?y:0:intlis
     1:
         foreign llvm move(y:0:intlist, ?tmp$0:0:intlist) @type_list:4:42
 
-  submodules      : type_list.intlist
 --------------------------------------------------
  Module type_list.intlist([])
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : type_list.intlist.=<2>
+  public procs    : type_list.intlist.=<0>
                     type_list.intlist.=<1>
-                    type_list.intlist.=<0>
+                    type_list.intlist.=<2>
                     type_list.intlist.[]<0>
                     type_list.intlist.[|]<0>
-                    type_list.intlist.head<1>
                     type_list.intlist.head<0>
-                    type_list.intlist.tail<1>
+                    type_list.intlist.head<1>
                     type_list.intlist.tail<0>
-  imports         : import wybe 
+                    type_list.intlist.tail<1>
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : =:

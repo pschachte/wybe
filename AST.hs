@@ -246,8 +246,11 @@ getLoadingModule modspec = do
 -- |Return Just the specified module, if already fully loaded; else return
 -- Nothing.
 getLoadedModule :: ModSpec -> Compiler (Maybe Module)
-getLoadedModule modspec = gets (Map.lookup modspec . modules)
-
+getLoadedModule modspec = do
+    -- liftIO $ putStr $ "Get loaded module " ++ showModSpec modspec
+    maybeMod <- gets (Map.lookup modspec . modules)
+    -- liftIO $ putStrLn $ if isNothing maybeMod then " got nothing!" else " worked"
+    return maybeMod
 
 -- |Apply the given function to the specified module, if it has been loaded;
 -- does nothing if not.  Takes care to handle it if the specified
@@ -402,11 +405,12 @@ enterModule :: FilePath -> ModSpec -> Maybe [Ident] -> Compiler ()
 enterModule dir modspec params = do
     count <- gets ((1+) . loadCount)
     modify (\comp -> comp { loadCount = count })
+    -- liftIO $ putStrLn $ "Entering module " ++ showModSpec modspec
     modify (\comp -> let mods = Module dir modspec params 
                                        emptyInterface (Just emptyImplementation)
                                        count count 0 []
                                        : underCompilation comp
-                            in  comp { underCompilation = mods })
+                     in  comp { underCompilation = mods })
 
 -- |Go back to compiling a module we have previously finished with.
 -- Trusts that the modspec really does specify a module.
@@ -993,7 +997,8 @@ doImport :: ModSpec -> ImportSpec -> Compiler ()
 doImport mod imports = do
     currMod <- getModuleSpec
     impl <- getModuleImplementationField id
-    -- liftIO $ putStrLn $ "Handle importation into " ++ 
+    -- liftIO $ putStrLn $ "Handle importation from " ++ showModSpec mod ++
+    --   " into " ++ 
     --   let modStr = showModSpec currMod
     --   in modStr ++ ":  " ++ showUse (27 + length modStr) mod imports
     fromIFace <- fmap (modInterface . trustFromJust "doImport") $ 
