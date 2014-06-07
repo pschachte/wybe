@@ -49,7 +49,6 @@ import AST
       'resource'      { TokIdent "resource" _ }
       'type'          { TokIdent "type" _ }
       'module'        { TokIdent "module" _ }
-      'import'        { TokIdent "import" _ }
       'use'           { TokIdent "use" _ }
       'func'          { TokIdent "func" _ }
       'proc'          { TokIdent "proc" _ }
@@ -116,10 +115,10 @@ Item  :: { Item }
     | Visibility 'module' ident 'is' Items 'end'
                                 { ModuleDecl $1 (identName $3) $5 $ 
 				    Just $ tokenPosition $2 }
-    | Visibility ImportType ModSpecs
-                                { ImportMods $1 (content $2) $3 $ place $2 }
-    | Visibility 'from' ModSpec ImportType Idents
-                                { ImportItems $1 (content $4) $3 $5 $ 
+    | Visibility 'use' ModSpecs
+                                { ImportMods $1 $3 $ Just $ tokenPosition $2 }
+    | Visibility 'from' ModSpec 'use' Idents
+                                { ImportItems $1 $3 $5 $
 				    Just $ tokenPosition $2 }
     | Visibility 'resource' ident OptType OptInit
                                 { ResourceDecl $1 (identName $3) $4 $5
@@ -136,10 +135,6 @@ Item  :: { Item }
 
 TypeProto :: { TypeProto }
     : ident OptIdents           { TypeProto (identName $1) $2 }
-
-ImportType :: { Placed Bool }
-    : 'import'                  { Placed True (tokenPosition $1) }
-    | 'use'                     { Placed False (tokenPosition $1) }
 
 ModSpecs :: { [ModSpec] }
     : ModSpec RevModSpecList

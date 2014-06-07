@@ -1,1 +1,2 @@
-test-cases/use_before_def.wybe:2:18: Uninitialised variable 'result'
+Error detected during type checking of modules use_before_def
+test-cases/use_before_def.wybe:2:18: Unknown variable/constant 'result'

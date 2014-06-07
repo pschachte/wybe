@@ -3,7 +3,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : 

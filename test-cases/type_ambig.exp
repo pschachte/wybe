@@ -1,2 +1,3 @@
+Error detected during type checking of modules type_ambig
 test-cases/type_ambig.wybe:1:1: Type ambiguity in defn of ambig:
     Variable 'x' could be: char, float, int, string

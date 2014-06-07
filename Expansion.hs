@@ -130,7 +130,8 @@ expandPrims noInline renameAll pprims = do
 
 expandPrim :: Bool -> Bool -> Prim -> OptPos -> Expander [Placed Prim]
 expandPrim noInline renameAll call@(PrimCall md nm (Just pspec) args) pos = do
-    -- liftIO $ putStrLn $ "Try to expand " ++ show call
+    -- liftIO $ putStrLn $ "Try to expand " ++ 
+    --   (if noInline then "" else "and inline ") ++ show call
     args' <- mapM (expandArg renameAll) args
     def <- lift $ getProcDef pspec
     prims <- if (not noInline) && procInline def

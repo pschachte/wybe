@@ -41,22 +41,36 @@ language, and should be powerful and efficient enough for serious use.
 In \Lang, each variable use may either read, write, or modify
 (\ie, both read and write) the variable.
 
-
 Thus \lang is at heart a relational language.
 
 
 
-\section{Functions, procedures and explicit dataflow}
+\section{Functions and procedures}
 
-\Lang supports both functions and procedures; in fact a function is
-simply a procedure called with one argument fewer.
+\Lang supports both functions and procedures.
+The top level of a procedure definition, and the top level of a
+module, are statement contexts.
+Calls written there are taken to be procedure calls.
+The arguments of a procedure or function call, and the body of a
+function definition, are expressions.
+Calls written as parts of expressions are taken to be function calls.
 
+However, procedures and functions are, in fact, the same thing called
+with a different syntax.
+A function call is merely a procedure call whose value whose final
+argument is omitted; the value of that argument after the call is
+taken to be the value of the function call.
+A procedure call is merely a function call with one extra argument
+whose value is the value of the function call.
+So regardless of whether something is defined as procedure or
+function, it may be called as either an expression or a statement.
 
 
 
 \section{Modules}
 
-Each source file is a module, and may contain any number of the
+Each source file is a module, whose name is taken from the file name.
+Modules may contain any number of the
 following things, in any order:
 \begin{itemize}
 \item Type definitions
@@ -67,66 +81,55 @@ following things, in any order:
 \item Statements
 \end{itemize}
 
+A module may also be an operating system directory, in which case all
+modules in that directory are taken to be its public submodules.  If
+the directory contains a \lang source file with the same base name as
+the directory, this overrides the public importation, allowing the
+module to chose which submodules to export, as well as to define its
+own top-level procedures, functions, and initialization statements.
+
+\subsection{Exports}
+Each type, submodule, function, and procedure definition may be
+preceded with the modifier '\texttt{public}', in which case, that
+element is exported.  Lacking such a modifier, it is private, and
+cannot be used outside that module.
+
+
 \subsection{Imports}
 \Lang supports the following varieties of module importation:
 \begin{itemize}
-\item Members may be imported such that they may be used as if they
-  were members of the importing module (the \texttt{import}
-  directive), or may be imported such that they must be specified with
-  fully qualified names (the \texttt{use} directive).
-\item A full module may be imported (\texttt{import} or \texttt{use}
+\item A full module may be imported (\texttt{use}
   \emph{module}), or only certain specified members
-  may be imported (\texttt{from} \emph{module} \texttt{import}
-  \emph{items} or \texttt{from} \emph{module} \texttt{use}
+  may be imported (\texttt{from} \emph{module} \texttt{use}
   \emph{items}).
 \item Members may be imported such that they become public members of
   the \emph{importing} module, visible to any module that imports it
-  (by preceding the \texttt{import} or \texttt{use} directive with
+  (by preceding the \texttt{use} directive with
   \texttt{public}) or not.
 \end{itemize}
-This gives the following eight varieties of importation:
+This gives the following four varieties of importation:
 \begin{center}
-  \begin{tabular}{|p{2.4cm}|p{8.5cm}|}
-    \hline
-    \texttt{import} \emph{module}
+  \begin{tabular}{|p{20mm}|p{90mm}|}
+    \hline \raggedright
+    \texttt{use} \emph{module}
     & Imports everything made public by \emph{module} so that it can be used
     with or without module qualification.
-    \\ \hline
-    \texttt{use} \emph{module}
-    & Imports everything made public by \emph{module} so that it can
-    only be used with module qualification.
-    \\ \hline
-    \texttt{from} \emph{module} \texttt{import} \emph{items}
-    & Imports the specified items, which must all be made public
-    by\emph{module}, so that they
-    can be used with or without module qualification.
-    \\ \hline
+    \\ \hline \raggedright
     \texttt{from} \emph{module} \texttt{use} \emph{items}
-    & Imports the specified items, which must all be made public by
-    \emph{module}, so that they
-    can only be used with module qualification.
-    \\ \hline
-    \texttt{public import} \emph{module}
+    & Imports the specified items, which must all be made public
+    by \emph{module}, so that they
+    can be used with or without module qualification.
+    \\ \hline \raggedright
+    \texttt{public use} \emph{module}
     & Imports everything made public by \emph{module} so that it can be used
     with or without module qualification, and reexport it from the
     importing module as if it were defined there.
-    \\ \hline
-    \texttt{public use} \emph{module}
-    & Imports everything made public by \emph{module} so that it can
-    only be used with module qualification, and reexport it as a
-    member of a submodule.
-    \\ \hline
-    \texttt{public from} \emph{module} \texttt{import} \emph{items}
+    \\ \hline \raggedright
+    \texttt{public from} \emph{module} \texttt{use} \emph{items}
     & Imports the specified items, which must all be made public by
     \emph{module}, so that they
     can only be used with module qualification, and reexport
     them from the importing module as if they were defined there.
-    \\ \hline
-    \texttt{public from} \emph{module} \texttt{use} \emph{items}
-    & Imports the specified items, which must all be made public by
-    \emph{module}, so that they
-    can only be used with module qualification, and reexport them as
-    members of a submodule.
     \\ \hline
   \end{tabular}
 \end{center}
@@ -143,6 +146,8 @@ instances of the extended type can be.
 This provides similar functionality to type classes, but without the
 need to decide ahead which things should be types and which should be
 type classes.
+\Lang ensures that all programs follow Martin's dictum:
+``Depend upon Abstractions. Do not depend upon concretions.''
 
 The language also supports Myer's uniform access principle.
 Every type is simply a module whose name may be used as a type name.
@@ -155,7 +160,7 @@ A type's constructors may be explicitly declared using the
 This looks like a function declaration, except that the return type
 and function body are omitted.
 The compiler automatically generates the implementation of the
-constructor and deconstructor.
+constructor and deconstructor functions.
 However, constructors and deconstructors are ordinary functions, so
 an existing type with defined constructors and deconstructors can be
 redefined with new functions implementing the same interface as the

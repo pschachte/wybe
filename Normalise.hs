@@ -28,7 +28,8 @@ normalise :: ([ModSpec] -> Compiler ()) -> [Item] -> Compiler ()
 normalise modCompiler items = do
     mapM_ (normaliseItem modCompiler) items
     -- liftIO $ putStrLn "File compiled"
-    addImport ["wybe"] True Nothing Private -- every module imports stdlib
+    -- every module imports stdlib
+    addImport ["wybe"] (ImportSpec (Just Set.empty) Nothing)
     -- Now generate main proc if needed
     stmts <- getModule stmtDecls 
     unless (List.null stmts)
@@ -49,10 +50,10 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) items pos) = do
     normaliseSubmodule modCompiler name (Just params) vis pos items
 normaliseItem modCompiler (ModuleDecl vis name items pos) = do
     normaliseSubmodule modCompiler name Nothing vis pos items
-normaliseItem _ (ImportMods vis imp modspecs pos) = do
-    mapM_ (\spec -> addImport spec imp Nothing vis) modspecs
-normaliseItem _ (ImportItems vis imp modspec imports pos) = do
-    addImport modspec imp (Just imports) vis
+normaliseItem _ (ImportMods vis modspecs pos) = do
+    mapM_ (\spec -> addImport spec (importSpec Nothing vis)) modspecs
+normaliseItem _ (ImportItems vis modspec imports pos) = do
+    addImport modspec (importSpec (Just imports) vis)
 normaliseItem _ (ResourceDecl vis name typ init pos) =
   addSimpleResource name (SimpleResource typ init pos) vis
 normaliseItem modCompiler (FuncDecl vis (FnProto name params resources) 
@@ -91,7 +92,7 @@ normaliseSubmodule modCompiler name typeParams vis pos items = do
     dir <- getDirectory
     parentModSpec <- getModuleSpec
     let subModSpec = parentModSpec ++ [name]
-    addImport subModSpec True Nothing vis
+    addImport subModSpec (importSpec Nothing vis)
     enterModule dir subModSpec typeParams
     normalise modCompiler items
     mods <- exitModule

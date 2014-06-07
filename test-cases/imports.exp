@@ -3,15 +3,15 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : import mod1 
-                    use mod2 
-                    from mod3 import fn1
+  imports         : use mod1
+                    use mod2
+                    from mod3 use fn1
                     from mod4 use fn2
-                    public import mod5 
-                    public use mod6 
-                    public from mod7 import fn3
+                    public use mod5
+                    public use mod6
+                    public from mod7 use fn3
                     public from mod8 use fn4
-                    import wybe 
+                    use wybe
   types           : 
   resources       : 
   procs           : 
@@ -21,7 +21,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : 
@@ -31,7 +31,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : 
@@ -41,7 +41,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : 
@@ -51,7 +51,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : 
@@ -61,7 +61,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : 
@@ -71,7 +71,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : 
@@ -81,7 +81,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : 
@@ -91,7 +91,7 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : 
