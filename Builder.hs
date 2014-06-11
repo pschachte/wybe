@@ -193,9 +193,9 @@ compileModule dir modspec params items = do
     -- that, then we'll need to handle the full dependency 
     -- relationship explicitly before doing any compilation.
     Normalise.normalise compileModSCC items
-    stopOnError $ "preliminary processing of module " ++ show modspec
+    stopOnError $ "preliminary processing of module " ++ showModSpec modspec
     loadImports
-    stopOnError $ "handling imports for module " ++ show modspec
+    stopOnError $ "handling imports for module " ++ showModSpec modspec
     -- underComp <- gets underCompilation
     mods <- exitModule -- may be empty list if module is mutually dependent
     -- liftIO $ putStrLn $ "<=== finished compling module " ++ showModSpec modspec

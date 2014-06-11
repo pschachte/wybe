@@ -1,2 +1,2 @@
-Error detected during preliminary processing of module ["in_before_out"]
+Error detected during preliminary processing of module in_before_out
 test-cases/in_before_out.wybe:2:13: Uninitialised variable 'result'
