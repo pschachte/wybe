@@ -40,7 +40,8 @@ normalise modCompiler items = do
 -- |The resources available at the top level
 -- XXX this should be all resources with initial values
 initResources :: [ResourceFlowSpec]
-initResources = [ResourceFlowSpec (ResourceSpec ["wybe"] "io") ParamInOut]
+-- initResources = [ResourceFlowSpec (ResourceSpec ["wybe"] "io") ParamInOut]
+initResources = [ResourceFlowSpec (ResourceSpec ["wybe","io"] "io") ParamInOut]
 
 
 -- |Normalise a single file item, storing the result in the current module.
@@ -206,7 +207,9 @@ currVar name pos = do
 mkPrimVarName :: Map String Int -> String -> PrimVarName
 mkPrimVarName dict name =
     case Map.lookup name dict of
-        Nothing -> shouldnt $ "Undefined variable '" ++ name ++ "'"
+        Nothing -> PrimVarName name 0
+        -- must have been introduced in resource expansion, which always uses 0
+        -- Nothing -> shouldnt $ "Undefined variable '" ++ name ++ "'"
         Just n  -> PrimVarName name n
 
 

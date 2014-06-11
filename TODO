@@ -1,9 +1,12 @@
 Fix bugs:
-o Ensure every variable gets a type
 o Propagate types down to generated procs
    Plan:  (a) ensure generated procs are in same SCC as their other part
           (b) where different parts of a proc call each other,
               propagate type info both ways
+o Module qualification doesn't work right.  Currently any module
+   qualifier must give the module that defines the item, not the
+   module it was imported from.  This is currently masked by the fact
+   that the parser can't handle module specs at all.   
 
 
 Complete the implementation:

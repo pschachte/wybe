@@ -571,7 +571,9 @@ addSimpleResource name impln vis = do
 -- |Find the definition of the specified resource visible in the current module.
 lookupResource :: ResourceSpec -> OptPos -> Compiler (Maybe ResourceIFace)
 lookupResource res@(ResourceSpec mod name) pos = do
+    -- liftIO $ putStrLn $ "Looking up resource " ++ show res
     rspecs <- refersTo mod name modKnownResources resourceMod
+    -- liftIO $ putStrLn $ "Candidates: " ++ show rspecs
     case Set.size rspecs of
         0 -> do
             message Error ("Unknown resource " ++ show res) pos
@@ -798,12 +800,11 @@ descendantModuleOf _ _ = False
 refersTo :: ModSpec -> Ident -> (ModuleImplementation -> Map Ident (Set b)) ->
             (b -> ModSpec) -> Compiler (Set b)
 refersTo modspec name implMapFn specModFn = do
-    currMod <- getModuleSpec
+    -- currMod <- getModuleSpec
     -- liftIO $ putStrLn $ "Finding visible symbol " ++ maybeModPrefix modspec ++
     --   name ++ " from module " ++ showModSpec currMod
     visible <- getModule (Map.findWithDefault Set.empty name . implMapFn . 
                           fromJust . modImplementation)
-    
     return $ Set.filter ((modspec `isSuffixOf`). specModFn) visible
 
 

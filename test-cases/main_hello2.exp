@@ -3,11 +3,11 @@
   public types    : 
   public resources: 
   public procs    : 
-  imports         : import wybe 
+  imports         : use wybe
   types           : 
   resources       : 
   procs           : :
-proc (#wybe.io$io:0:phantom, ?#wybe.io$io:2:phantom)<0>  use !wybe.io (0 calls)
+proc (#wybe.io$io:0:phantom, ?#wybe.io$io:2:phantom)<0>  use !wybe.io.io (0 calls)
     foreign c print_string("hello, ":string, ~#wybe.io$io:0:phantom, ?#wybe.io$io:1:phantom) @wybe:140:41
     foreign c print_string("world!":string, ~#wybe.io$io:1:phantom, ?#tmp$0:0:phantom) @wybe:140:41
     foreign c putc('\n':char, ~#tmp$0:0:phantom, ?#wybe.io$io:2:phantom) @wybe:126:28
