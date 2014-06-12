@@ -31,7 +31,12 @@ typeCheckMod modSCC thisMod = do
     let ordered =
             stronglyConnComp
             [(name,name,
-              nub $ concatMap (localBodyProcs thisMod . procBody) procDefs)
+              nub $ concatMap 
+                      (\def -> (maybeToList $
+                                fmap procSpecName $
+                                procSpinOffFrom def) ++
+                       localBodyProcs thisMod (procBody def))
+              procDefs)
              | (name,procDefs) <- procs]
     (changed,errors) <-
         foldM (\(chg,errs) procSCC -> do
