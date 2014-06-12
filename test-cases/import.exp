@@ -1,11 +1,10 @@
-Call from position to = with 2 arguments, expected 2
  Module import
   public submods  : 
   public types    : 
   public resources: 
   public procs    : import.distance<0>
-  imports         : import position 
-                    import wybe 
+  imports         : use position
+                    use wybe
   types           : 
   resources       : 
   procs           : distance:
@@ -13,48 +12,55 @@ public proc distance(p1:0:position, p2:0:position, ?tmp$0:0:int)<0>  @import:3:8
     position.position.x<0>(p2:0:position, ?tmp$4:0:int) @import:4:17
     position.position.x<0>(p1:0:position, ?tmp$5:0:int) @import:4:22
     foreign llvm sub(32:int, ~tmp$4:0:int, ~tmp$5:0:int, ?tmp$3:0:int) @wybe:7:38
-    foreign C ipow(~tmp$3:0:int, 2:int, ?tmp$2:0:int) @wybe:23:42
+    foreign C ipow(~tmp$3:0:int, 2:int, ?tmp$2:0:int) @wybe:21:42
     position.position.y<0>(~p2:0:position, ?tmp$8:0:int) @import:4:40
     position.position.y<0>(~p1:0:position, ?tmp$9:0:int) @import:4:45
     foreign llvm sub(32:int, ~tmp$8:0:int, ~tmp$9:0:int, ?tmp$7:0:int) @wybe:7:38
-    foreign C ipow(~tmp$7:0:int, 2:int, ?tmp$6:0:int) @wybe:23:42
+    foreign C ipow(~tmp$7:0:int, 2:int, ?tmp$6:0:int) @wybe:21:42
     foreign llvm add(32:int, ~tmp$2:0:int, ~tmp$6:0:int, ?tmp$1:0:int) @wybe:4:38
-    foreign C isqrt(~tmp$1:0:int, ?tmp$0:0:int) @wybe:22:35
+    foreign C isqrt(~tmp$1:0:int, ?tmp$0:0:int) @wybe:20:35
 --------------------------------------------------
  Module position
-  public submods  : position @position:1:8
-  public types    : position/0 @position:1:8
+  public submods  : 
+  public types    : position: position.position
   public resources: 
-  public procs    : position.position.position<0>
-                    position.position.x<1>
+  public procs    : position.position.=<0>
+                    position.position.=<1>
+                    position.position.position<0>
                     position.position.x<0>
-                    position.position.y<1>
+                    position.position.x<1>
                     position.position.y<0>
-  imports         : public import position.position 
-                    import wybe 
+                    position.position.y<1>
+  imports         : public use position.position
+                    use wybe
   types           : position/0 @position:1:8
   resources       : 
   procs           : 
-  submodules      : position.position
 --------------------------------------------------
  Module position.position([])
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : position.position.position<0>
-                    position.position.x<1>
+  public procs    : position.position.=<0>
+                    position.position.=<1>
+                    position.position.position<0>
                     position.position.x<0>
-                    position.position.y<1>
+                    position.position.x<1>
                     position.position.y<0>
-  imports         : import wybe 
+                    position.position.y<1>
+  imports         : use wybe
   types           : 
   resources       : 
-  procs           : position:
-public proc position(x:0:int, y:0:int, ?$:0:position)<0>  (0 calls)
-    foreign $ alloc("position", "position", ?$rec:0)
-    foreign $ mutate("position", "position", "x", ~%$rec:0, ?%$rec:1, ~x:0)
-    foreign $ mutate("position", "position", "y", ~%$rec:1, ?%$rec:2, ~y:0)
-    =(?$:0, ~$rec:2)
+  procs           : =:
+public proc =(?x:0:position, y:0:position)<0>  (0 calls) (inline)
+    foreign llvm move(~y:0:position, ?x:0:position)
+public proc =(y:0:position, ?x:0:position)<1>  (0 calls) (inline)
+    foreign llvm move(~y:0:position, ?x:0:position)
+                    position:
+public proc position(x:0:int, y:0:int, ?$rec:2:position)<0>  (0 calls)
+    foreign $ alloc("position":string, "position":string, ?$rec:0:position)
+    foreign $ mutate("position":string, "position":string, "x":string, ~%$rec:0:position, ?%$rec:1:position, ~x:0:int)
+    foreign $ mutate("position":string, "position":string, "y":string, ~%$rec:1:position, ?%$rec:2:position, ~y:0:int)
                     x:
 public proc x($rec:0:position, ?tmp$0:0:int)<0>  @position:2:12 (0 calls)
     foreign $ access("position":string, "position":string, "x":string, ~$rec:0:position, ?tmp$0:0:int)

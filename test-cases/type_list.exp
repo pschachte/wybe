@@ -17,22 +17,22 @@
   types           : intlist/0 @type_list:1:8
   resources       : 
   procs           : ++:
-public proc ++(x:0:intlist, y:0:intlist, ?tmp$0:0:intlist)<0>  @type_list:9:8 (0 calls)
+public proc ++(x:0:intlist, y:0:intlist, ?tmp$0:0:intlist)<0>  @type_list:7:8 (0 calls)
 Parts: type_list.gen$1<0> (inline)
-    type_list.gen$1<0>(~x:0:intlist, ~y:0:intlist, ?tmp$0:0:intlist, ?x:1:intlist, ?y:1:intlist) @type_list:10:5
+    type_list.gen$1<0>(~x:0:intlist, ~y:0:intlist, ?tmp$0:0:intlist, ?x:1:intlist, ?y:1:intlist) @type_list:8:5
                     gen$1:
 proc gen$1(x:0:intlist, y:0:intlist, ?tmp$0:0:intlist, ?x:0:intlist, ?y:0:intlist)<0> (part of type_list.++<0>) (0 calls)
     foreign $ alloc("bool":string, "false":string, ?tmp$1:0:bool)
     case %tmp$1:0 of
     0:
-        type_list.intlist.head<0>(x:0:intlist, ?tmp$4:0:int) @type_list:12:11
-        type_list.intlist.tail<0>(x:0:intlist, ?tmp$6:0:intlist) @type_list:12:18
-        type_list.gen$1<0>(~tmp$6:0:intlist, y:0:intlist, ?tmp$5:0:intlist, ?tmp$7:0:intlist, ?tmp$8:0:intlist) @type_list:10:5
-        type_list.intlist.[|]<0>(~tmp$4:0:int, ~tmp$5:0:intlist, ?tmp$3:0:intlist) @type_list:12:10
-        foreign llvm move(~tmp$3:0:intlist, ?tmp$0:0:intlist) @type_list:4:42
+        type_list.intlist.head<0>(x:0:intlist, ?tmp$4:0:int) @type_list:10:11
+        type_list.intlist.tail<0>(x:0:intlist, ?tmp$6:0:intlist) @type_list:10:18
+        type_list.gen$1<0>(~tmp$6:0:intlist, y:0:intlist, ?tmp$5:0:intlist, ?tmp$7:0:intlist, ?tmp$8:0:intlist) @type_list:8:5
+        type_list.intlist.[|]<0>(~tmp$4:0:int, ~tmp$5:0:intlist, ?tmp$3:0:intlist) @type_list:10:10
+        foreign llvm move(~tmp$3:0:intlist, ?tmp$0:0:intlist)
 
     1:
-        foreign llvm move(y:0:intlist, ?tmp$0:0:intlist) @type_list:4:42
+        foreign llvm move(y:0:intlist, ?tmp$0:0:intlist)
 
 --------------------------------------------------
  Module type_list.intlist([])
@@ -52,11 +52,11 @@ proc gen$1(x:0:intlist, y:0:intlist, ?tmp$0:0:intlist, ?x:0:intlist, ?y:0:intlis
   types           : 
   resources       : 
   procs           : =:
-public proc =(?y:0:intlist, x:0:intlist)<0>  @type_list:4:12 (0 calls) (inline)
-    foreign llvm move(~x:0:intlist, ?y:0:intlist) @type_list:4:42
-public proc =(x:0:intlist, ?y:0:intlist)<1>  @type_list:5:12 (0 calls) (inline)
-    foreign llvm move(~x:0:intlist, ?y:0:intlist) @type_list:5:42
-public proc =([x:0:intlist], [y:0:intlist], ?tmp$0:0:bool)<2>  @type_list:6:12 (0 calls) (inline)
+public proc =(?x:0:intlist, y:0:intlist)<0>  (0 calls) (inline)
+    foreign llvm move(~y:0:intlist, ?x:0:intlist)
+public proc =(y:0:intlist, ?x:0:intlist)<1>  (0 calls) (inline)
+    foreign llvm move(~y:0:intlist, ?x:0:intlist)
+public proc =([x:0:intlist], [y:0:intlist], ?tmp$0:0:bool)<2>  @type_list:4:12 (0 calls) (inline)
     foreign $ alloc("bool":string, "false":string, ?tmp$0:0:bool)
                     []:
 public proc [](?$rec:0:intlist)<0>  (0 calls) (inline)

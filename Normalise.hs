@@ -48,7 +48,26 @@ initResources = [ResourceFlowSpec (ResourceSpec ["wybe","io"] "io") ParamInOut]
 normaliseItem :: ([ModSpec] -> Compiler ()) -> Item -> Compiler ()
 normaliseItem modCompiler (TypeDecl vis (TypeProto name params) items pos) = do
     addType name (TypeDef (length params) pos) vis
-    normaliseSubmodule modCompiler name (Just params) vis pos items
+    let ty = TypeSpec [] name []
+    let eq1 = ProcDecl Public
+              (ProcProto "=" [Param "x" ty ParamOut Ordinary,
+                              Param "y" ty ParamIn Ordinary] [])
+              [Unplaced $
+               ForeignCall "llvm" "move" [] [Unplaced $
+                                             Var "y" ParamIn Ordinary,
+                                             Unplaced $
+                                             Var "x" ParamOut Ordinary]]
+              Nothing
+    let eq2 = ProcDecl Public
+              (ProcProto "=" [Param "y" ty ParamIn Ordinary,
+                              Param "x" ty ParamOut Ordinary] [])
+              [Unplaced $
+               ForeignCall "llvm" "move" [] [Unplaced $
+                                             Var "y" ParamIn Ordinary,
+                                             Unplaced $
+                                             Var "x" ParamOut Ordinary]]
+              Nothing
+    normaliseSubmodule modCompiler name (Just params) vis pos (eq1:eq2:items)
 normaliseItem modCompiler (ModuleDecl vis name items pos) = do
     normaliseSubmodule modCompiler name Nothing vis pos items
 normaliseItem _ (ImportMods vis modspecs pos) = do

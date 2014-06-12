@@ -8,4 +8,4 @@
   resources       : 
   procs           : chain:
 public proc chain(?z:0:int)<0>  @chain_assign:1:8 (0 calls) (inline)
-    foreign llvm move(1:int, ?z:0:int) @wybe:19:34
+    foreign llvm move(1:int, ?z:0:int)

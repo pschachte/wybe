@@ -18,8 +18,8 @@ proc gen$1(n:0:int, ?n:0:int, ?tmp$0:0:int)<0> (part of func_factorial.factorial
         foreign llvm sub(32:int, n:0:int, 1:int, ?tmp$4:0:int) @wybe:7:38
         func_factorial.gen$1<0>(~tmp$4:0:int, ?tmp$5:0:int, ?tmp$3:0:int) @func_factorial:2:8
         foreign llvm mul(32:int, n:0:int, ~tmp$3:0:int, ?tmp$2:0:int) @wybe:12:38
-        foreign llvm move(~tmp$2:0:int, ?tmp$0:0:int) @wybe:19:34
+        foreign llvm move(~tmp$2:0:int, ?tmp$0:0:int)
 
     1:
-        foreign llvm move(1:int, ?tmp$0:0:int) @wybe:19:34
+        foreign llvm move(1:int, ?tmp$0:0:int)
 

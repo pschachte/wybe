@@ -8,5 +8,5 @@
   resources       : 
   procs           : print2:
 public proc print2(x:0:int, y:0:int, #wybe.io$io:0:phantom, ?#wybe.io$io:2:phantom)<0>  use !io @proc_print2:1:8 (0 calls) (inline)
-    foreign c print_int(~x:0:int, ~#wybe.io$io:0:phantom, ?#wybe.io$io:1:phantom) @wybe:128:38
-    foreign c print_int(~y:0:int, ~#wybe.io$io:1:phantom, ?#wybe.io$io:2:phantom) @wybe:128:38
+    foreign c print_int(~x:0:int, ~#wybe.io$io:0:phantom, ?#wybe.io$io:1:phantom) @wybe:110:38
+    foreign c print_int(~y:0:int, ~#wybe.io$io:1:phantom, ?#wybe.io$io:2:phantom) @wybe:110:38
