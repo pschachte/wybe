@@ -15,14 +15,10 @@ o Code generation
 
 
 Improve error handling:
-o Attach expression reference to generated variables for use in error messages
 o Give meaningful message for errors detected in generated procs
 
 
 Complete the language:
-o Implement resources
-  Plan: Do type inference ignoring resources, then do separate
-        resource-intro pass
 o Support polymorphism
 o Support subtypes
 o Support higher-order programming
