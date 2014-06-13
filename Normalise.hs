@@ -143,7 +143,7 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
                        Unplaced $ Var var ParamIn paramFlowType]))
           params))
         (Unplaced $ Var "$rec" ParamIn flowType))
-       Nothing)
+       pos)
     mapM_ (addGetterSetter modCompiler vis typespec ctorName pos) params
 
 -- |Add a getter and setter for the specified type.
