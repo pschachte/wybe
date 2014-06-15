@@ -84,7 +84,7 @@ normaliseItem modCompiler (FuncDecl vis (FnProto name params resources)
     vis
     (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType]) 
      resources)
-    [maybePlace (ProcCall [] "=" [Unplaced $ Var "$" ParamOut flowType, result])
+    [maybePlace (ProcCall [] "=" Nothing [Unplaced $ Var "$" ParamOut flowType, result])
      pos]
     pos)
 normaliseItem _ decl@(ProcDecl _ _ _ _) = do
@@ -324,7 +324,7 @@ compileSimpleStmt stmt = do
     return $ maybePlace stmt' (place stmt)
 
 compileSimpleStmt' :: Stmt -> ClauseComp Prim
-compileSimpleStmt' (ProcCall maybeMod name args) = do
+compileSimpleStmt' (ProcCall maybeMod name procID args) = do
     args' <- mapM (placedApply compileArg) args
     return $ PrimCall maybeMod name Nothing args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do

@@ -185,7 +185,7 @@ unbranchStmts (stmt:stmts) = do
 
 
 unbranchStmt :: Stmt -> OptPos -> [Placed Stmt] -> Unbrancher [Placed Stmt]
-unbranchStmt stmt@(ProcCall _ _ args) pos stmts = do
+unbranchStmt stmt@(ProcCall _ _ _ args) pos stmts = do
     defArgs args
     stmts' <- unbranchStmts stmts
     return $ (maybePlace stmt pos):stmts'
@@ -347,7 +347,7 @@ newProcCall name inVars outVars pos = do
     let inArgs  = [Unplaced $ Var v ParamIn Ordinary | v <- Set.elems inVars] 
     let outArgs = [Unplaced $ Var v ParamOut Ordinary | v <- Set.elems outVars]
     currMod <- lift getModuleSpec
-    return $ maybePlace (ProcCall currMod name (inArgs ++ outArgs)) pos
+    return $ maybePlace (ProcCall currMod name Nothing (inArgs ++ outArgs)) pos
 
 
 newProcProto :: ProcName -> Set VarName -> Set VarName -> Unbrancher ProcProto
@@ -367,7 +367,7 @@ loopExitVars vars (stmt:stmts) =
 
 
 stmtLoopExitVars :: Set VarName -> Stmt -> [Placed Stmt] -> (Set VarName, Bool)
-stmtLoopExitVars  vars (ProcCall _ _ args) stmts =
+stmtLoopExitVars  vars (ProcCall _ _ _ args) stmts =
     loopExitVars (outputVars vars args) stmts
 stmtLoopExitVars vars (ForeignCall _ _ _ args) stmts =
     loopExitVars (outputVars vars args) stmts

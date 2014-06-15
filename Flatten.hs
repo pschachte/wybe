@@ -205,9 +205,9 @@ flattenStmt stmt pos = do
 
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Flattener ()
-flattenStmt' (ProcCall maybeMod name args) pos = do
+flattenStmt' (ProcCall maybeMod name procID args) pos = do
     args' <- flattenStmtArgs args pos
-    emit pos $ ProcCall maybeMod name args'
+    emit pos $ ProcCall maybeMod name procID args'
     emitPostponed
 flattenStmt' (ForeignCall lang name flags args) pos = do
     args' <- flattenStmtArgs args pos
@@ -244,10 +244,11 @@ flattenStmt' (For itr gen) pos = do
               (Cond [] (maybePlace (Fncall [] "empty" [genVar]) pos)
                [Unplaced $ Break]
                [maybePlace
-                  (ProcCall [] "[|]" [itr,
-                                      Unplaced $ 
-                                      Var genVarName ParamOut flowType,
-                                      genVar])
+                  (ProcCall [] "[|]" Nothing
+                   [itr,
+                    Unplaced $ 
+                    Var genVarName ParamOut flowType,
+                    genVar])
                   pos]) pos
         _ -> shouldnt "Generator expression producing unexpected vars"
 flattenStmt' Nop pos = emit pos Nop
@@ -306,7 +307,7 @@ flattenExp exp@(Var name dir flowType) pos = do
     if (dir == ParamIn && (not defd))
       then -- Reference to an undefined variable: assume it's meant to be
            -- a niladic function instead of a variable reference
-        flattenCall (ProcCall [] name) pos []
+        flattenCall (ProcCall [] name Nothing) pos []
       else do
         noteVarMention name dir
         let inPart = if isIn
@@ -325,13 +326,13 @@ flattenExp (CondExp cond thn els) pos = do
     resultName <- tempVar
     let flowType = Implicit pos
     flattenStmt (Cond [] cond
-                 [maybePlace (ProcCall [] "=" 
+                 [maybePlace (ProcCall [] "=" Nothing
                   [Unplaced $ Var resultName ParamOut flowType,thn]) pos]
-                 [maybePlace (ProcCall [] "=" 
+                 [maybePlace (ProcCall [] "=" Nothing
                   [Unplaced $ Var resultName ParamOut flowType,els]) pos]) pos
     return $ [maybePlace (Var resultName ParamIn flowType) pos]
 flattenExp (Fncall maybeMod name exps) pos = do
-    flattenCall (ProcCall maybeMod name) pos exps
+    flattenCall (ProcCall maybeMod name Nothing) pos exps
 flattenExp (ForeignFn lang name flags exps) pos = do
     flattenCall (ForeignCall lang name flags) pos exps
 flattenExp (Typed exp Unspecified) pos = do

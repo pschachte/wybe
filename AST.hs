@@ -1241,7 +1241,7 @@ flowsOut ParamInOut = True
 
 -- |Source program statements.  These will be normalised into Prims.
 data Stmt
-     = ProcCall ModSpec Ident [Placed Exp]
+     = ProcCall ModSpec Ident (Maybe Int) [Placed Exp]
      | ForeignCall Ident Ident [Ident] [Placed Exp]
      -- The first stmt list is empty and the Exp is anything until
      -- flattening.  After that, the stmt list contains the body of
@@ -1392,10 +1392,10 @@ argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
-expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name args
+expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name Nothing args
 expToStmt (ForeignFn lang name flags args) = 
   ForeignCall lang name flags args
-expToStmt (Var name ParamIn _) = ProcCall [] name []
+expToStmt (Var name ParamIn _) = ProcCall [] name Nothing []
 expToStmt exp = shouldnt $ "non-Fncall expr " ++ show exp
 
 
@@ -1745,8 +1745,8 @@ instance Show PrimVarName where
 
 
 showStmt :: Int -> Stmt -> String
-showStmt _ (ProcCall maybeMod name args) =
-    maybeModPrefix maybeMod ++
+showStmt _ (ProcCall maybeMod name procID args) =
+    maybeModPrefix maybeMod ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")\n"
 showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ name ++ 
