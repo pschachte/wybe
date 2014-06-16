@@ -8,7 +8,7 @@
 module Types (typeCheckMod, checkFullyTyped) where
 
 import AST
-import Resources
+-- import Resources
 import Util
 import Data.Map as Map
 import Data.Set as Set
@@ -23,29 +23,20 @@ import Debug.Trace
 -- |Type check a single module named in the second argument; the 
 --  first argument is a list of all the modules in this module 
 -- dependency SCC.
-typeCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
-typeCheckMod modSCC thisMod = do
+typeCheckMod :: ModSpec -> Compiler ()
+typeCheckMod thisMod = do
     -- liftIO $ putStrLn $ "**** Type checking module " ++ showModSpec thisMod
     reenterModule thisMod
     procs <- getModuleImplementationField (Map.toList . modProcs)
     let ordered =
             stronglyConnComp
-            [(name,name,
-              nub $ concatMap 
-                      (\def -> (maybeToList $
-                                fmap procSpecName $
-                                procSpinOffFrom def) ++
-                       localBodyProcs thisMod (procBody def))
-              procDefs)
+            [(name, name, nub $ concatMap (localBodyProcs thisMod . procImpln) procDefs)
              | (name,procDefs) <- procs]
-    (changed,errors) <-
-        foldM (\(chg,errs) procSCC -> do
-             (chg1,reasons) <- typecheckProcSCC thisMod modSCC procSCC
-             return (chg||chg1, List.map (\r->(show r,Nothing)) reasons++errs))
-        (False,[]) ordered
+    errs <- mapM (typecheckProcSCC thisMod) ordered
+    mapM_ (flip message Error Nothing) $ concat $ reverse errs
     finishModule
     -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
-    return (changed,errors)
+    return ()
 
 
 ----------------------------------------------------------------
@@ -70,6 +61,8 @@ data TypeReason = ReasonParam ProcName Int OptPos
                                       -- Proc defn has ambiguous types
                 | ReasonArity ProcName ProcName OptPos Int Int
                                       -- Call to proc with wrong arity
+                | ReasonUndeclared ProcName OptPos
+                                      -- Public proc with some undeclared argument types
                 deriving (Eq, Ord)
 
 instance Show TypeReason where
@@ -108,6 +101,9 @@ instance Show TypeReason where
             (if callArity == procArity
              then "unsupported argument flow"
              else show callArity ++ " arguments, expected " ++ show procArity)
+    show (ReasonUndeclared name pos) =
+        makeMessage pos $
+        "Public definition of '" ++ name ++ "' with some undeclared types."
 
 data Typing = ValidTyping (Map VarName TypeSpec)
             | InvalidTyping TypeReason   -- call type conflicts w/callee
@@ -164,15 +160,15 @@ subtypeOf :: TypeSpec -> TypeSpec -> Bool
 subtypeOf sub super = sub == super || sub `properSubtypeOf` super
 
 
-localBodyProcs :: ModSpec -> ProcBody -> [Ident]
-localBodyProcs thisMod body =
-    mapBodyPrims (localPrimCalls thisMod) (++) [] (++) [] body
+localBodyProcs :: ModSpec -> ProcImpln -> [Ident]
+localBodyProcs thisMod (ProcDefSrc body) =
+    foldProcCalls (localCalls thisMod) (++) [] body
 
 
-localPrimCalls :: ModSpec -> Prim -> [Ident]
-localPrimCalls thisMod (PrimCall m name _ _)
+localCalls :: ModSpec -> ModSpec -> Ident -> (Maybe Int) -> [Placed Exp] -> [Ident]
+localCalls thisMod m name _ _
   | m == [] || m == thisMod = [name]
-localPrimCalls _ _ = []
+localCalls _ _ _ _ _ = []
 
 
 
@@ -188,31 +184,27 @@ localPrimCalls _ _ = []
 --  SCC depend on procs in the list of mods.  In this case, we will 
 --  have to rerun the typecheck after typechecking the other modules 
 --  on that list. 
-typecheckProcSCC :: ModSpec -> [ModSpec] -> SCC ProcName ->
-                    Compiler (Bool,[TypeReason])
-typecheckProcSCC m mods (AcyclicSCC name) = do
+typecheckProcSCC :: ModSpec -> SCC ProcName -> Compiler ([TypeReason])
+typecheckProcSCC m (AcyclicSCC name) = do
     -- A single pass is always enough for non-cyclic SCCs
     -- liftIO $ putStrLn $ "Type checking non-recursive proc " ++ name
-    (_,allAgain,reasons) <- typecheckProcDecls m mods name
-    return (allAgain,reasons)
+    (_,reasons) <- typecheckProcDecls m name
+    return (reasons)
 typecheckProcSCC m mods (CyclicSCC list) = do
     -- liftIO $ putStrLn $ "**** Type checking recursive procs " ++ 
     --   intercalate ", " list
-    (modAgain,allAgain,reasons) <-
-        foldM (\(modAgain,allAgain,rs) name -> do
-                    (modAgain',allAgain',reasons) 
-                        <- typecheckProcDecls m mods name
-                    return (modAgain || modAgain', 
-                            allAgain || allAgain',
-                           reasons++rs))
-        (False, False, []) list
-    if modAgain
-    then typecheckProcSCC m mods $ CyclicSCC list
+    (sccAgain,reasons) <-
+        foldM (\(sccAgain,rs) name -> do
+                    (sccAgain',reasons) <- typecheckProcDecls m name
+                    return (sccAgain || sccAgain', reasons++rs))
+        (False, []) list
+    if sccAgain
+    then typecheckProcSCC m $ CyclicSCC list
     else do
       -- liftIO $ putStrLn $ "**** Completed checking of " ++
       --        intercalate ", " list ++
       --        " with " ++ show (length reasons) ++ " errors"
-      return (allAgain,reasons)
+      return (reasons)
 
 
 -- |Type check a list of procedure definitions and update the 
@@ -221,71 +213,68 @@ typecheckProcSCC m mods (CyclicSCC list) = do
 --  and the second saying whether any public defnition has been 
 --  updated.
 typecheckProcDecls :: ModSpec -> [ModSpec] -> ProcName -> 
-                     Compiler (Bool,Bool,[TypeReason])
+                     Compiler (Bool,[TypeReason])
 typecheckProcDecls m mods name = do
     defs <- getModuleImplementationField 
             (Map.findWithDefault (error "missing proc definition")
              name . modProcs)
-    (revdefs,modAgain,allAgain,reasons) <- 
-        foldM (\(ds,modAgain,allAgain,rs) def -> do
-                    (d,mA,aA,rs') <- typecheckProcDecl m mods def
-                    return (d:ds,modAgain || mA,allAgain || aA,rs'++rs))
-        ([],False,False,[]) defs
-    when modAgain $
-      updateModImplementation
+    (revdefs,sccAgain,reasons) <- 
+        foldM (\(ds,sccAgain,rs) def -> do
+                    (d,again,rs') <- typecheckProcDecl m def
+                    return (d:ds,sccAgain || again,rs'++rs))
+        ([],False,[]) defs
+    updateModImplementation
       (\imp -> imp { modProcs = Map.insert name (reverse revdefs) 
                                 $ modProcs imp })
-    unless (modAgain || allAgain || not (List.null reasons)) $ do
+    unless (sccAgain || not (List.null reasons)) $ do
         mapM_ checkProcDefFullytyped revdefs
-    return (modAgain,allAgain,reasons)
+    return (sccAgain,reasons)
     
 
 -- |Type check a single procedure definition.
-typecheckProcDecl :: ModSpec -> [ModSpec] -> ProcDef ->
-                    Compiler (ProcDef,Bool,Bool,[TypeReason])
-typecheckProcDecl m mods pd = do
+typecheckProcDecl :: ModSpec -> ProcDef -> Compiler (ProcDef,Bool,[TypeReason])
+typecheckProcDecl m pd = do
     let name = procName pd
     let proto = procProto pd
-    let params = primProtoParams proto
-    let def = procBody pd
+    let params = procProtoParams proto
+    let (ProcDefSrc def) = procImpln pd
     let pos = procPos pd
     let vis = procVis pd
-    let typing = List.foldr (addDeclaredType name pos params)
-                 initTyping $ zip params [1..]
-    if validTyping typing
-      then do
-        -- liftIO $ putStrLn $ "** Type checking " ++ name ++
-        --   ": " ++ show typing
-        (typing',def') <- typecheckProcDef m mods name pos typing def
-        -- liftIO $ putStrLn $ "*resulting types " ++ name ++
-        --   ": " ++ show typing'
-        let params' = updateParamTypes typing' params
-        let proto' = proto { primProtoParams = params' }
-        let pd' = pd { procProto = proto', procBody = def' }
-        pd'' <- resourceCheckProc pd'
-        let modAgain = pd'' /= pd
-        -- pd'' <- if modAgain then return pd' else resourceCheck pd'
-        -- liftIO $ putStrLn $ "===== Definition is " ++ 
-        --        (if modAgain then "" else "un") ++ "changed"
-        -- when modAgain
-        --      (liftIO $ putStrLn $ "** check again " ++ name ++
-        --              "\n-----------------OLD:" ++ showProcDef 4 pd ++
-        --              "\n-----------------NEW:" ++ showProcDef 4 pd' ++ "\n")
-        return (pd'',modAgain,modAgain && vis == Public,
-                   case typing' of
-                     ValidTyping _ -> []
-                     InvalidTyping r -> [r])
-      else
-        shouldnt $ "Inconsistent param typing for proc " ++ name
+    if vis == Public && any ((==Unspecified). paramType) params
+      then return (pd,False,[ReasonUndeclared name pos])
+      else do
+        let typing = List.foldr (addDeclaredType name pos (length params))
+                     initTyping $ zip params [1..]
+        if validTyping typing
+          then do
+            -- liftIO $ putStrLn $ "** Type checking " ++ name ++
+            --   ": " ++ show typing
+            (typing',def') <- typecheckProcDef m name pos typing def
+            -- liftIO $ putStrLn $ "*resulting types " ++ name ++
+            --   ": " ++ show typing'
+            let params' = updateParamTypes typing' params
+            let proto' = proto { primProtoParams = params' }
+            let pd' = pd { procProto = proto', procImpln = ProcDefSrc def' }
+            let pd'' = pd'
+            let sccAgain = pd'' /= pd
+            -- pd'' <- if sccAgain then return pd' else resourceCheck pd'
+            -- liftIO $ putStrLn $ "===== Definition is " ++ 
+            --        (if sccAgain then "" else "un") ++ "changed"
+            -- when sccAgain
+            --      (liftIO $ putStrLn $ "** check again " ++ name ++
+            --              "\n-----------------OLD:" ++ showProcDef 4 pd ++
+            --              "\n-----------------NEW:" ++ showProcDef 4 pd' ++ "\n")
+            return (pd'',sccAgain,
+                    case typing' of
+                        ValidTyping _ -> []
+                        InvalidTyping r -> [r])
+          else
+            shouldnt $ "Inconsistent param typing for proc " ++ name
 
 
-addDeclaredType :: ProcName -> OptPos -> [PrimParam] -> (PrimParam,Int) -> 
-                   Typing -> Typing
-addDeclaredType procname pos params (PrimParam name typ _ _ _,argNum) typs =
-     addOneType 
-     (ReasonParam procname (listArity primParamFlowType primParamFlow params)
-      pos) 
-     name typ typs
+addDeclaredType :: ProcName -> OptPos -> Int -> (Param,Int) -> Typing -> Typing
+addDeclaredType procname pos arity (Param name typ _ _,argNum) typs =
+     addOneType (ReasonParam procname arity pos) name typ typs
 
 
 updateParamTypes :: Typing -> [PrimParam] -> [PrimParam]
@@ -301,8 +290,8 @@ updateParamTypes _ params = params
 --  each clause in turn using the declared parameter typing plus the 
 --  typing of all parameters inferred from previous clauses.  We can 
 --  stop once we've found a contradiction.
-typecheckProcDef :: ModSpec -> [ModSpec] -> ProcName -> OptPos -> Typing ->
-                     ProcBody -> Compiler (Typing,ProcBody)
+typecheckProcDef :: ModSpec -> ProcName -> OptPos -> Typing ->
+                     [Placed Stmt] -> Compiler (Typing,[Placed Stmt])
 typecheckProcDef m mods name pos paramTypes body = do
     -- liftIO $ putStrLn $ "\ntype checking: " ++ name
     typings <- typecheckBody m mods name paramTypes body
@@ -407,7 +396,7 @@ typecheckPrim m mods caller call@(PrimCall cm name id args0) pos typing = do
         Just spec -> return [spec]
     -- liftIO $ putStrLn $ "   potential procs: " ++
     --        List.intercalate ", " (List.map show procs)
-    let args = List.filter (not . resourceArg) args0
+    let args = args0
     if List.null procs 
       then if 1 == length args
            then return [InvalidTyping $ ReasonUninit caller name pos]

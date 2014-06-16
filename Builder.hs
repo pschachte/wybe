@@ -240,7 +240,7 @@ compileModSCC mspecs = do
     fixpointProcessSCC resourceCheckMod mspecs
     stopOnError $ "processing resources for modules " ++
       showModSpecs mspecs
-    fixpointProcessSCC typeCheckMod mspecs
+    mapM_ typeCheckMod mspecs
     stopOnError $ "type checking of modules " ++
       showModSpecs mspecs
     -- liftIO $ putStrLn $ "type checked"

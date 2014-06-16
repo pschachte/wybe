@@ -23,10 +23,11 @@ module AST (
   ImportSpec(..), importSpec,
   enterModule, reenterModule, exitModule, finishModule, 
   emptyInterface, emptyImplementation, 
-  getProcDef, mkTempName, updateProcDef, updateProcDefM, getParams,
-  ModSpec, ProcDef(..), ProcBody(..), PrimFork(..), Ident, VarName,
+  getProcDef, mkTempName, updateProcDef, updateProcDefM,
+  ModSpec, ProcImpln(..), ProcDef(..), ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceIFace(..), FlowDirection(..), 
-  argFlowDirection, argType, argDescription, flowsIn, flowsOut, mapBodyPrims,
+  argFlowDirection, argType, argDescription, flowsIn, flowsOut,
+  mapBodyPrims, foldProcCalls,
   expToStmt, Prim(..), PrimProto(..), PrimParam(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
@@ -631,18 +632,8 @@ addImport modspec imports = do
 -- |Add the specified proc definition, with the list of proc defs, to
 -- the current module, noting that the list of defs define procs that
 -- are spin-offs of the first proc def.
-addProc :: ProcDef -> [ProcDef] -> Compiler ()
-addProc procDef defs = do
-    mod <- getModuleSpec
-    let spinOffs = [ProcSpec mod (procName def) 0 | def <- defs]
-    let procDef' = procDef { procSpinOffs = spinOffs }
-    mainSpec <- addProc' procDef'
-    let defs' = [d { procSpinOffFrom = Just mainSpec } | d <- defs]
-    mapM_ addProc' defs'
-
-
-addProc' :: ProcDef -> Compiler ProcSpec
-addProc' procDef@(ProcDef name proto resources body pos _ calls vis _ _ _) = do
+addProc :: ProcDef -> Compiler ()
+addProc procDef@(ProcDef name proto _ pos _ calls vis _) = do
     currMod <- getModuleSpec
     procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
     let procs' = procs ++ [procDef]
@@ -656,14 +647,14 @@ addProc' procDef@(ProcDef name proto resources body pos _ calls vis _ _ _) = do
     updateInterface vis (updatePubProcs (mapSetInsert name spec))
     -- liftIO $ putStrLn $ "Adding defnintion for " ++ show spec ++ ":" ++
     --   showProcDef 4 procDef
-    return spec
+    return ()
 
 
-getParams :: ProcSpec -> Compiler [PrimParam]
-getParams pspec = do
-    -- XXX shouldn't have to grovel in implementation to find prototype
-    PrimProto _ params <- fmap procProto $ getProcDef pspec
-    return params
+-- getParams :: ProcSpec -> Compiler [PrimParam]
+-- getParams pspec = do
+--     -- XXX shouldn't have to grovel in implementation to find prototype
+--     PrimProto _ params <- fmap procProto $ getProcDef pspec
+--     return params
 
 
 getProcDef :: ProcSpec -> Compiler ProcDef
@@ -1078,24 +1069,37 @@ data ResourceImpln =
 --  position. 
 data ProcDef = ProcDef {
     procName :: Ident, 
-    procProto :: PrimProto,
-    procResources :: [ResourceFlowSpec], -- Resources used by this proc
-    procBody :: ProcBody,
+    procProto :: ProcProto,
+    procImpln :: ProcImpln,
     procPos :: OptPos,
     procTmpCount :: Int,        -- the next temp variable number to use
     procCallCount :: Int,       -- the number of calls to it statically in prog
     procVis :: Visibility,
-    procInline :: Bool,         -- inline calls to this proc
-    procSpinOffFrom :: Maybe ProcSpec, 
-                               -- the proc this was generated as part of
-    procSpinOffs :: [ProcSpec]  -- the procs generated as part of this one
+    procInline :: Bool          -- inline calls to this proc
+    -- procSpinOffFrom :: Maybe ProcSpec, 
+    --                            -- the proc this was generated as part of
+    -- procSpinOffs :: [ProcSpec]  -- the procs generated as part of this one
 }
              deriving Eq
 
-mkTempName :: Int -> String
-mkTempName ctr = "tmp$" ++ show ctr
+-- |A procedure defintion body.  Initially, this is in a form similar
+-- to what is read in from the source file.  As compilation procedes,
+-- this is gradually refined and constrained, until it is converted
+-- into a ProcBody, which is a clausal, logic programming form.
 
--- |A procedure body.  In principle, a body is a set of clauses, each
+data ProcImpln
+    = ProcDefSrc [Placed Stmt]
+    | ProcDefPrim PrimProto ProcBody
+    deriving (Eq)
+
+instance Show ProcImpln where
+    show (ProcDefSrc stmts) = showBody 4 stmts
+    show (ProcDefPrim _ body) = showBlock 4 body
+
+
+      
+
+-- |A Primitve procedure body.  In principle, a body is a set of clauses, each
 -- possibly containg some guards.  Each guard is a test that succeeds
 -- iff the specified variable holds the specified value.  For each
 -- guard in a clause, it is required that there are other clauses that
@@ -1128,6 +1132,36 @@ data PrimFork =
       forkBodies::[ProcBody]
     }
     deriving (Eq)
+
+
+-- |The variable name for the temporary variable whose number is given.
+mkTempName :: Int -> String
+mkTempName ctr = "tmp$" ++ show ctr
+
+
+-- |Fold over a list of Placed Stmts applying the fn to each ProcCall, and
+-- applying comb, which must be associative, to combine results.
+foldProcCalls :: (ModSpec -> Ident -> (Maybe Int) -> [Placed Exp] -> a) ->
+                 (a -> a -> a) -> a -> [Placed Stmt] -> a
+foldProcCalls fn comb val [] = val
+foldProcCalls fn comb val (s:ss) = foldProcCalls' fn comb val (content s) ss
+
+foldProcCalls' :: (ModSpec -> Ident -> (Maybe Int) -> [Placed Exp] -> a) ->
+                 (a -> a -> a) -> a -> Stmt -> [Placed Stmt] -> a
+foldProcCalls' fn comb val (ProcCall m name procID args) ss =
+    foldProcCalls fn comb (comb val $ fn m name procID args) ss
+foldProcCalls' fn comb val (Cond tst _ thn els) ss =
+    foldProcCalls fn comb
+    (foldProcCalls fn comb
+     (foldProcCalls fn comb
+      (foldProcCalls fn comb val els)
+      thn)
+     tst)
+    ss
+foldProcCalls' fn comb val (Loop body) ss =
+    foldProcCalls fn comb (foldProcCalls fn comb val body) ss
+foldProcCalls' fn comb val (_) ss =
+    foldProcCalls fn comb val ss
 
 
 -- |Map over a ProcBody applying the primFn to each Prim, and
@@ -1321,7 +1355,7 @@ data PrimVarName =
 -- |A primitive statment, including those that can only appear in a 
 --  loop.
 data Prim
-     = PrimCall ModSpec ProcName (Maybe ProcSpec) [PrimArg]
+     = PrimCall ProcSpec [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
      | PrimNop
      deriving Eq
@@ -1412,7 +1446,7 @@ varsInPrims dir prims =
     List.foldr Set.union Set.empty $ List.map (varsInPrim dir) prims
 
 varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
-varsInPrim dir (PrimCall _ _ _ args)      = varsInPrimArgs dir args
+varsInPrim dir (PrimCall _ args)      = varsInPrimArgs dir args
 varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
 varsInPrim dir (PrimNop)                = Set.empty
 
@@ -1641,18 +1675,13 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID 
-  (ProcDef _ proto resources def pos _ calls vis inline partOf parts) =
+  (ProcDef _ proto def pos _ calls vis inline) =
     "\n" ++ visibilityPrefix vis ++
     "proc " ++ show proto ++ "<" ++ show thisID ++ "> "
-    ++ showResources resources
     ++ showMaybeSourcePos pos
-    ++ maybeShow "(part of " partOf ")"
     ++ " (" ++ show calls ++ " calls)"
-    ++ (if List.null parts 
-        then "" 
-        else "\nParts: " ++ intercalate ", " (List.map show parts))
     ++ (if inline then " (inline)" else "")
-    ++ showBlock 4 def
+    ++ show def
 
 -- |How to show a type specification.
 instance Show TypeSpec where
@@ -1729,9 +1758,8 @@ showPlacedPrim' ind prim pos =
   startLine ind ++ showPrim ind prim ++ showMaybeSourcePos pos
 
 showPrim :: Int -> Prim -> String
-showPrim _ (PrimCall maybeMod name id args) =
-        maybe (maybeModPrefix maybeMod ++ name) show id ++
-        "(" ++ intercalate ", " (List.map show args) ++ ")"
+showPrim _ (PrimCall pspec args) =
+        show pspec ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
 showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++ 
         name ++ (if List.null flags then "" else " " ++ unwords flags) ++

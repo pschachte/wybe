@@ -37,19 +37,19 @@ resourceCheckProc pd =
     (do
        -- liftIO $ putStrLn $ "--------------------------------------\n"
        -- liftIO $ putStrLn $ "Adding resources to:" ++ showProcDef 4 pd
-       let resources = procResources pd
+       let resources = procProtoResources $ procProto pd
        let proto = procProto pd
-       let params = primProtoParams proto
-       let body = procBody pd
+       let params = procProtoParams proto
+       let (ProcDefSrc body) = procImpln pd
        let pos = procPos pd
        resFlows <- fmap concat $ lift $ mapM (simpleResourceFlows pos) resources
        mapM_ initResource resFlows
        body' <- transformBody body
-       let params' = List.filter (not . resourceParam)
-                     params
-       resParams <- fmap concat $ mapM (resourceParams pos) resFlows
-       let proto' = proto { primProtoParams = params' ++ resParams }
-       let pd' = pd { procProto = proto', procBody = body' }
+       -- let params' = List.filter (not . resourceParam)
+       --               params
+       -- resParams <- fmap concat $ mapM (resourceParams pos) resFlows
+       -- let proto' = proto { primProtoParams = params' ++ resParams }
+       let pd' = pd { procImpln = ProcDefSrc body' }
        -- liftIO $ putStrLn $ "Adding resources results in:" ++ showProcDef 4 pd'
        return pd')
     Map.empty
@@ -163,23 +163,9 @@ resourceVar (ResourceSpec [] name) = name
 resourceVar (ResourceSpec mod name) = intercalate "." mod ++ "$" ++ name
 
 
-transformBody :: ProcBody -> Resourcer ProcBody
-transformBody body = do
-    prims <- mapM (placedApply transformPrim) $ bodyPrims body
-    fork <- transformFork $ bodyFork body
-    return $ body { bodyPrims = prims, bodyFork = fork }
+transformBody :: [Placed Stmt] -> Resourcer [Placed Stmt]
+transformBody body = mapM (placedApply transformStmt) body
     
-
-transformFork :: PrimFork -> Resourcer PrimFork
-transformFork NoFork = return NoFork
-transformFork fork = do
-    dict <- get
-    pairs <- mapM (\b -> lift $ runStateT (transformBody b) dict) $ 
-             forkBodies fork
-    put $ foldr1 (Map.intersectionWith joinInfo) $ List.map snd pairs
-    bodies' <- mapM (uncurry addReconciliation) pairs
-    return $ fork { forkBodies = bodies' }
-
 
 -- |Combine the ResourceInfos from two arms of a fork into one for 
 --  the fork as a whole.
@@ -193,19 +179,19 @@ joinInfo inf1 inf2 =
     show inf1 ++ " vs. " ++ show inf2
     
 
-transformPrim :: Prim -> OptPos -> Resourcer (Placed Prim)
-transformPrim (PrimCall m n (Just pspec) args) pos = do
-    resources <- fmap procResources $ lift $ getProcDef pspec
+transformStmt :: Stmt -> OptPos -> Resourcer (Placed Stmt)
+transformStmt (ProcCall m n (Just procID) args) pos = do
+    resources <- fmap (procProtoResources . procProto) $ lift $ getProcDef (ProcSpec m n procID)
     let args' = List.filter (not . resourceArg) args
     args'' <- mapM transformArg args'
     resArgs <- fmap concat $ mapM (resourceArgs pos) resources
     mapM_ (accountResourceArgs resources) args'
     return $ maybePlace (PrimCall m n (Just pspec) (args''++resArgs)) pos
-transformPrim (PrimForeign lang name flags args) pos = do
+transformStmt (ForeignCall lang name flags args) pos = do
     args' <- mapM transformArg args
     mapM_ (accountResourceArgs []) args
     return $ maybePlace (PrimForeign lang name flags args') pos
-transformPrim prim pos = return $ maybePlace prim pos
+transformStmt prim pos = return $ maybePlace prim pos
 
 
 -- |Transform any explicit arguments that are actually references to 
