@@ -292,9 +292,9 @@ updateParamTypes _ params = params
 --  stop once we've found a contradiction.
 typecheckProcDef :: ModSpec -> ProcName -> OptPos -> Typing ->
                      [Placed Stmt] -> Compiler (Typing,[Placed Stmt])
-typecheckProcDef m mods name pos paramTypes body = do
+typecheckProcDef m name pos paramTypes body = do
     -- liftIO $ putStrLn $ "\ntype checking: " ++ name
-    typings <- typecheckBody m mods name paramTypes body
+    typings <- typecheckBody m name paramTypes body
     -- liftIO $ putStrLn $ "typings:  " ++
     --   intercalate "\n          " (List.map show typings) ++ "\n"
     case typings of
@@ -354,58 +354,44 @@ pruneTypings typings =
         else pruned
 
 
-typecheckBody :: ModSpec -> [ModSpec] -> ProcName -> Typing -> ProcBody -> 
+typecheckBody :: ModSpec -> ProcName -> Typing -> [Placed Stmt] ->
                  Compiler [Typing]
-typecheckBody m mods name typing body@(ProcBody prims fork) = do
+typecheckBody m name typing body = do
     -- liftIO $ putStrLn $ "Entering typecheckSequence from typecheckBody"
-    typings' <- typecheckSequence (typecheckPlacedPrim m mods name)
+    typings' <- typecheckSequence (typecheckPlacedStmt m name)
                 [typing] prims
     -- liftIO $ putStrLn $ "Body types: " ++ show typings'
-    if List.null typings' || not (validTyping $ List.head typings')
-    then return typings'
-    else typecheckFork m mods name typings' fork
-
-
-typecheckFork :: ModSpec -> [ModSpec] -> ProcName -> [Typing] -> PrimFork ->
-                  Compiler [Typing]
-typecheckFork m mods name typings NoFork = do
-    return typings
-typecheckFork m mods name typings (PrimFork _ _ bodies) = do
-    -- liftIO $ putStrLn $ "Entering typecheckSequence from typecheckFork"
-    typecheckSequence (typecheckBody m mods name) typings bodies
+    return typings'
 
 
 -- |Type check a single placed primitive operation given a list of 
 --  possible starting typings and corresponding clauses up to this prim.
-typecheckPlacedPrim :: ModSpec -> [ModSpec] -> ProcName -> Typing ->
-                       Placed Prim -> Compiler [Typing]
-typecheckPlacedPrim m mods caller typing pprim = do
-    typecheckPrim m mods caller (content pprim) (place pprim) typing
+typecheckPlacedStmt :: ModSpec -> ProcName -> Typing -> Placed Stmt ->
+                       Compiler [Typing]
+typecheckPlacedStmt m caller typing pstmt = do
+    typecheckStmt m caller (content pstmt) (place pstmt) typing
     
 
 -- |Type check a single primitive operation, producing a list of 
 --  possible typings.
-typecheckPrim :: ModSpec -> [ModSpec] -> ProcName -> Prim -> OptPos -> Typing ->
+typecheckStmt :: ModSpec -> ProcName -> Prim -> OptPos -> Typing ->
                  Compiler [Typing]
-typecheckPrim m mods caller call@(PrimCall cm name id args0) pos typing = do
+typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
     -- liftIO $ putStrLn $ "Type checking call " ++ show call ++ 
     --   showMaybeSourcePos pos
     -- liftIO $ putStrLn $ "   with types " ++ show typing
     procs <- case id of
         Nothing   -> callTargets cm name
-        Just spec -> return [spec]
+        Just pid -> return [ProcSpec cm name spec] -- XXX just ignore it?
     -- liftIO $ putStrLn $ "   potential procs: " ++
     --        List.intercalate ", " (List.map show procs)
-    let args = args0
     if List.null procs 
       then if 1 == length args
            then return [InvalidTyping $ ReasonUninit caller name pos]
            else return [InvalidTyping $ ReasonUndef caller name pos]
       else do
         typList <- mapM (\p -> do
-                              params0 <- getParams p
-                              let params = List.filter (not . resourceParam)
-                                           params0
+                              params <- getParams p
                               -- liftIO $ putStr $ 
                               --   "\n   checking flow of call to " ++
                               --   show p ++ " args " ++
@@ -450,9 +436,9 @@ typecheckPrim m mods caller call@(PrimCall cm name id args0) pos typing = do
                                       (List.any (flip List.elem dups) . snd) $
                                     zip procs typList)
                                    pos]
-typecheckPrim _ _ _ (PrimForeign lang name id args) pos typing = do
+typecheckStmt _ _ _ (PrimForeign lang name id args) pos typing = do
     return [typing]
-typecheckPrim _ _ _ PrimNop pos typing = return [typing]
+typecheckStmt _ _ _ PrimNop pos typing = return [typing]
 
 
 argFlowType (ArgVar _ _ _ ft _) = ft
@@ -474,32 +460,23 @@ argFlow _ = FlowIn
 --  We also filter out any arguments where the corresponding param is
 --  marked as unneeded.
 
-reconcileArgFlows :: [PrimParam] -> [PrimArg] -> Maybe [PrimArg]
+reconcileArgFlows :: [Param] -> [Exp] -> Maybe [Exp]
 reconcileArgFlows [] [] = Just []
 reconcileArgFlows _ [] = Nothing
 reconcileArgFlows [] _ = Nothing
-reconcileArgFlows (PrimParam _ _ pflow _ needed:params) 
-  (arg@(ArgVar _ _ aflow _ _):args)
-  | pflow == aflow = 
-      let tail = reconcileArgFlows params args
-      in fmap (arg:) tail
-      -- in  if needed then fmap (arg:) tail else tail
-reconcileArgFlows (PrimParam _ _ FlowOut _ needed:params) 
-  (ArgVar _ _ FlowIn HalfUpdate _:arg@(ArgVar _ _ FlowOut HalfUpdate _):args)
-  = let tail = reconcileArgFlows params args
-    in  fmap (arg:) tail
-    -- in  if needed then fmap (arg:) tail else tail
-reconcileArgFlows (PrimParam _ _ FlowOut _ _:_) _ = Nothing
-reconcileArgFlows (PrimParam _ _ FlowIn _ _:params)
-                      (ArgVar _ _ FlowOut _ _:args) = Nothing
-reconcileArgFlows (PrimParam _ _ FlowIn _ needed:params) (arg:args)
-  = let tail = reconcileArgFlows params args    -- constant arg
-    in fmap (arg:) tail
-    -- in  if needed then fmap (arg:) tail else tail
+reconcileArgFlows (Param _ _ ParamOut _:params) (Var v ParamInOut fty):args)
+    = fmap (Var v ParamOut fty:) $ reconcileArgFlows params args
+reconcileArgFlows (Param _ _ pflow _:params) (arg@(Var _ aflow _):args)
+    = if pflow == aflow
+      then fmap (arg:) $ reconcileArgFlows params args
+      else Nothing
+reconcileArgFlows (Param _ _ ParamIn _:params) (arg:args)
+    = fmap (arg:) $ reconcileArgFlows params args
+reconcileArgFlows _ _ = Nothing
 
 
-typecheckArg :: OptPos -> [PrimParam] -> ProcName ->
-                (Int,PrimParam,PrimArg) -> Typing -> Typing
+typecheckArg :: OptPos -> [Param] -> ProcName ->
+                (Int,Param,Exp) -> Typing -> Typing
 typecheckArg pos params pname (argNum,param,arg) typing =
     let actualFlow = argFlowDirection arg
         formalFlow = primParamFlow param

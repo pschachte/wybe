@@ -23,7 +23,7 @@ module AST (
   ImportSpec(..), importSpec,
   enterModule, reenterModule, exitModule, finishModule, 
   emptyInterface, emptyImplementation, 
-  getProcDef, mkTempName, updateProcDef, updateProcDefM,
+  getParams, getProcDef, mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceIFace(..), FlowDirection(..), 
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
@@ -650,11 +650,10 @@ addProc procDef@(ProcDef name proto _ pos _ calls vis _) = do
     return ()
 
 
--- getParams :: ProcSpec -> Compiler [PrimParam]
--- getParams pspec = do
---     -- XXX shouldn't have to grovel in implementation to find prototype
---     PrimProto _ params <- fmap procProto $ getProcDef pspec
---     return params
+getParams :: ProcSpec -> Compiler [Param]
+getParams pspec = do
+    -- XXX shouldn't have to grovel in implementation to find prototype
+    fmap (procProtoParams . procProto) $ getProcDef pspec
 
 
 getProcDef :: ProcSpec -> Compiler ProcDef
