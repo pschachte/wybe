@@ -359,7 +359,7 @@ typecheckBody :: ModSpec -> ProcName -> Typing -> [Placed Stmt] ->
 typecheckBody m name typing body = do
     -- liftIO $ putStrLn $ "Entering typecheckSequence from typecheckBody"
     typings' <- typecheckSequence (typecheckPlacedStmt m name)
-                [typing] prims
+                [typing] body
     -- liftIO $ putStrLn $ "Body types: " ++ show typings'
     return typings'
 
@@ -382,7 +382,9 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
     -- liftIO $ putStrLn $ "   with types " ++ show typing
     procs <- case id of
         Nothing   -> callTargets cm name
-        Just pid -> return [ProcSpec cm name spec] -- XXX just ignore it?
+        Just pid -> return [ProcSpec cm name pid] -- XXX check modspec
+                                                  -- is valid; or just
+                                                  -- ignore pid?
     -- liftIO $ putStrLn $ "   potential procs: " ++
     --        List.intercalate ", " (List.map show procs)
     if List.null procs 
@@ -390,30 +392,30 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
            then return [InvalidTyping $ ReasonUninit caller name pos]
            else return [InvalidTyping $ ReasonUndef caller name pos]
       else do
-        typList <- mapM (\p -> do
-                              params <- getParams p
-                              -- liftIO $ putStr $ 
-                              --   "\n   checking flow of call to " ++
-                              --   show p ++ " args " ++
-                              --   show args ++ " against params " ++
-                              --   show params ++ "..."
-                              case reconcileArgFlows params args of
-                                  Just args' -> do
-                                      -- liftIO $ putStrLn $ 
-                                      --   "MATCHES: args = " ++ show args'
-                                      return $ 
-                                         [List.foldr (typecheckArg pos params $
-                                                      procSpecName p)
-                                          typing $ zip3 [1..] params args']
-                                  Nothing -> do
-                                      -- liftIO $ putStrLn "fails"
-                                      return [InvalidTyping $ 
-                                              ReasonArity caller name pos
-                                              (listArity argFlowType 
-                                               argFlow args)
-                                              (listArity primParamFlowType 
-                                               primParamFlow params)])
-                   procs
+        typList <- 
+            mapM 
+            (\p -> do
+                 params <- getParams p
+                 -- liftIO $ putStr $ 
+                 --   "\n   checking flow of call to " ++
+                 --   show p ++ " args " ++
+                 --   show args ++ " against params " ++
+                 --   show params ++ "..."
+                 case reconcileArgFlows params args of
+                     Just args' -> do
+                         -- liftIO $ putStrLn $ 
+                         --   "MATCHES: args = " ++ show args'
+                         return [List.foldr 
+                                 (typecheckArg pos params $ procSpecName p)
+                                 typing $ zip3 [1..] params args']
+                     Nothing -> do
+                         -- liftIO $ putStrLn "fails"
+                         return [InvalidTyping $ 
+                                 ReasonArity caller name pos
+                                 (listArity argFlowType argFlow args)
+                                 (listArity primParamFlowType
+                                            primParamFlow params)])
+            procs
         let typList' = concat typList
         let typList'' = List.filter validTyping typList'
         let dups = snd $ List.foldr
@@ -441,13 +443,6 @@ typecheckStmt _ _ _ (PrimForeign lang name id args) pos typing = do
 typecheckStmt _ _ _ PrimNop pos typing = return [typing]
 
 
-argFlowType (ArgVar _ _ _ ft _) = ft
-argFlowType _ = Ordinary
-
-argFlow (ArgVar _ _ flow _ _) = flow
-argFlow _ = FlowIn
-
-
 -- |Match up params to args based only on flow, returning Nothing if 
 --  they don't match, and Just a possibly updated arglist if they 
 --  do.  The purpose is to handle passing an in-out argument pair 
@@ -460,14 +455,15 @@ argFlow _ = FlowIn
 --  We also filter out any arguments where the corresponding param is
 --  marked as unneeded.
 
-reconcileArgFlows :: [Param] -> [Exp] -> Maybe [Exp]
+reconcileArgFlows :: [Param] -> [Placed Exp] -> Maybe [Placed Exp]
 reconcileArgFlows [] [] = Just []
 reconcileArgFlows _ [] = Nothing
 reconcileArgFlows [] _ = Nothing
-reconcileArgFlows (Param _ _ ParamOut _:params) (Var v ParamInOut fty):args)
-    = fmap (Var v ParamOut fty:) $ reconcileArgFlows params args
-reconcileArgFlows (Param _ _ pflow _:params) (arg@(Var _ aflow _):args)
-    = if pflow == aflow
+reconcileArgFlows (Param _ _ ParamOut _:params) (arg:args)
+    | ParamInOut == expFlow (content arg)
+    = fmap (fmap (setExpFlow ParamOut) arg:) $ reconcileArgFlows params args
+reconcileArgFlows (Param _ _ pflow _:params) (arg:args)
+    = if pflow == expFlow (content arg)
       then fmap (arg:) $ reconcileArgFlows params args
       else Nothing
 reconcileArgFlows (Param _ _ ParamIn _:params) (arg:args)
@@ -490,11 +486,11 @@ typecheckArg pos params pname (argNum,param,arg) typing =
              then -- trace ("wrong flow: " ++ show arg ++ " against " ++ show param) 
                       InvalidTyping reasonFlow
              else -- trace ("OK flow: " ++ show arg ++ " against " ++ show param)
-                  typecheckArg' arg (primParamType param) typing reasonType
+                  typecheckArg' arg (paramType param) typing reasonType
 
 
-typecheckArg' :: PrimArg -> TypeSpec -> Typing -> TypeReason -> Typing
-typecheckArg' (ArgVar var decType flow ftype _) paramType typing reason =
+typecheckArg' :: Exp -> TypeSpec -> Typing -> TypeReason -> Typing
+typecheckArg' (Var var flow ftype) paramType typing reason =
 -- XXX should out flow typing be contravariant?
     if --trace (if paramType `subtypeOf` decType || paramType == Unspecified
        --       then "" 
@@ -533,28 +529,25 @@ typecheckArg'' callType paramType constType typing reason =
             InvalidTyping reason
 
 
-diffBody :: ProcBody -> ProcBody -> Maybe (ProcName,OptPos)
-diffBody (ProcBody prims1 fork1) (ProcBody prims2 fork2) =
-    firstJust [diffFork fork1 fork2, diffCall prims1 prims2]
+-- diffBody :: ProcBody -> ProcBody -> Maybe (ProcName,OptPos)
+-- diffBody (ProcBody prims1 fork1) (ProcBody prims2 fork2) =
+--     firstJust [diffFork fork1 fork2, diffCall prims1 prims2]
 
 
-diffFork :: PrimFork -> PrimFork -> Maybe (ProcName,OptPos)
-diffFork NoFork _ = Nothing
-diffFork _ NoFork = Nothing
-diffFork (PrimFork _ _ bodies1) (PrimFork _ _ bodies2) =
-    firstJust $ List.map (uncurry diffBody) $ zip bodies1 bodies2
+-- diffCall :: [Placed Prim] -> [Placed Prim] -> Maybe (ProcName,OptPos)
+-- diffCall [] _ = Nothing
+-- diffCall _ [] = Nothing
+-- diffCall (c1:c1s) (c2:c2s)
+--     | c1 == c2  = diffCall c1s c2s
+--     | otherwise = callDifference (place c1) (content c1) (content c2)
+
+-- callDifference :: OptPos -> Prim -> Prim -> Maybe (ProcName,OptPos)
+-- callDifference pos (PrimCall _ name _ _) _ = Just (name,pos)
+-- callDifference _ _ _ = shouldnt "impossible ambiguity"
 
 
-diffCall :: [Placed Prim] -> [Placed Prim] -> Maybe (ProcName,OptPos)
-diffCall [] _ = Nothing
-diffCall _ [] = Nothing
-diffCall (c1:c1s) (c2:c2s)
-    | c1 == c2  = diffCall c1s c2s
-    | otherwise = callDifference (place c1) (content c1) (content c2)
+expType :: Exp -> Typing -> Maybe TypeSpec
 
-callDifference :: OptPos -> Prim -> Prim -> Maybe (ProcName,OptPos)
-callDifference pos (PrimCall _ name _ _) _ = Just (name,pos)
-callDifference _ _ _ = shouldnt "impossible ambiguity"
 
 
 firstJust :: [Maybe a] -> Maybe a
@@ -569,38 +562,25 @@ listArity toFType toDirection lst =
           | e <- lst]
 
 
-applyBodyTyping :: Map VarName TypeSpec -> ProcBody -> Compiler ProcBody
-applyBodyTyping dict (ProcBody prims fork) = do
-    prims' <- mapM (applyPlacedPrimTyping dict) prims
-    fork' <- case fork of
-        NoFork -> return NoFork
-        (PrimFork v last bodies) -> do
-            bodies' <- mapM (applyBodyTyping dict) bodies
-            return $ PrimFork v last bodies'
-    return $ ProcBody prims' fork'
+applyBodyTyping :: Map VarName TypeSpec -> [Placed Stmt] ->
+                   Compiler [Placed Stmt]
+applyBodyTyping dict body = do
+    mapM (placedApplyM (applyStmtTyping dict)) $ body
 
 
-applyPlacedPrimTyping :: Map VarName TypeSpec -> Placed Prim -> 
-                         Compiler (Placed Prim)
-applyPlacedPrimTyping dict pprim = do
-    prim <- applyPrimTyping dict $ content pprim
-    return $ maybePlace prim $ place pprim
-
-
-applyPrimTyping :: Map VarName TypeSpec -> Prim -> Compiler Prim
-applyPrimTyping dict call@(PrimCall cm name id args) = do
+applyStmtTyping :: Map VarName TypeSpec -> Stmt -> OptPos -> 
+                   Compiler (Placed Stmt)
+applyStmtTyping dict call@(ProcCall cm name id args) pos = do
     -- liftIO $ putStrLn $ "typing call " ++ show call
-    let args' = List.map (applyArgTyping dict) $
-                List.filter (not . resourceArg) args
+    let args' = List.map (fmap $ applyExpTyping dict) args
     procs <- case id of
         Nothing   -> callTargets cm name
-        Just spec -> return [spec]
+        Just n -> return [ProcSpec cm name n]
     -- liftIO $ putStrLn $ "   " ++ show (length procs) ++ " potential procs: "
     --        ++ intercalate ", " (List.map show procs)
     matches <- fmap catMaybes $
                mapM (\p -> do
-                          params <- fmap (List.filter (not . resourceParam)) $
-                                    getParams p
+                          params <- getParams p
                           -- liftIO $ putStrLn $ "   checking call to " ++
                           --        show p ++ " args " ++
                           --        show args' ++ " against params " ++
@@ -608,34 +588,59 @@ applyPrimTyping dict call@(PrimCall cm name id args) = do
                           return $
                             fmap (\as -> (as,p)) $
                             checkMaybe (\as -> all (uncurry subtypeOf)
-                                               (zip (List.map argType as)
+                                               (zip (List.map 
+                                                     (expType . content) as)
                                                 (List.map 
-                                                 primParamType params))) $
+                                                 paramType params))) $
                             reconcileArgFlows params args')
                procs
     checkError "not exactly one matching proc" (1 /= length matches)
     let (args'',proc) = List.head matches
     -- liftIO $ putStrLn $ "typed call = " ++ show (PrimCall (procSpecMod proc) (procSpecName proc) (Just proc) args'')
-    return $ PrimCall (procSpecMod proc) (procSpecName proc) (Just proc) args''
-applyPrimTyping dict call@(PrimForeign lang name id args) = do
+    return $ maybePlace
+           (ProcCall (procSpecMod proc) (procSpecName proc) 
+                         (Just (procSpecID proc)) args'')
+           pos
+applyStmtTyping dict call@(ForeignCall lang name flags args) pos = do
     -- liftIO $ putStrLn $ "typing call " ++ show call
-    let args' = List.map (applyArgTyping dict) args
+    let args' = List.map (fmap $ applyExpTyping dict) args
     -- liftIO $ putStrLn $ "typed call = " ++ show (PrimForeign lang name id args')
-    return $ PrimForeign lang name id args'
-applyPrimTyping dict (PrimNop) = return PrimNop
+    return $ maybePlace (ForeignCall lang name flags args') pos
+applyStmtTyping dict (Cond test cond thn els) pos = do
+    test' <- applyBodyTyping dict test
+    let cond' = fmap (applyExpTyping dict) cond
+    thn' <- applyBodyTyping dict thn
+    els' <- applyBodyTyping dict els
+    return $ maybePlace (Cond test' cond' thn' els') pos
+applyStmtTyping dict (Loop body) pos = do
+    body' <- applyBodyTyping dict body
+    return $ maybePlace (Loop body') pos
+applyStmtTyping dict (Nop) pos = return $ maybePlace Nop pos
+applyStmtTyping dict (For itr gen) pos = do
+    let itr' = fmap (applyExpTyping dict) itr
+    let gen' = fmap (applyExpTyping dict) gen
+    return $ maybePlace (For itr' gen') pos
+applyStmtTyping dict (Break) pos = return $ maybePlace Break pos
+applyStmtTyping dict (Next) pos = return $ maybePlace Next pos
 
 
-
-
-
-applyArgTyping :: Map VarName TypeSpec -> PrimArg -> PrimArg
-applyArgTyping dict (ArgVar var@(PrimVarName nm _) typ flow ftype final) =
-    ArgVar var (fromMaybe typ $ Map.lookup nm dict) flow ftype final
--- XXX the module for these types should be ["wybe"]
-applyArgTyping dict (ArgInt val _) = ArgInt val (TypeSpec [] "int" [])
-applyArgTyping dict (ArgFloat val _) = ArgFloat val (TypeSpec [] "float" [])
-applyArgTyping dict (ArgChar val _) = ArgChar val (TypeSpec [] "char" [])
-applyArgTyping dict (ArgString val _) = ArgString val (TypeSpec [] "string" [])
+applyExpTyping :: Map VarName TypeSpec -> Exp -> Exp
+applyExpTyping _ exp@(IntValue _) =
+    Typed exp (TypeSpec ["wybe"] "int" [])
+applyExpTyping _ exp@(FloatValue _) =
+    Typed exp (TypeSpec ["wybe"] "float" [])
+applyExpTyping _ exp@(StringValue _) =
+    Typed exp (TypeSpec ["wybe"] "string" [])
+applyExpTyping _ exp@(CharValue _) =
+    Typed exp (TypeSpec ["wybe"] "char" [])
+applyExpTyping dict exp@(Var nm flow ftype) =
+    case Map.lookup nm dict of
+        Nothing -> shouldnt $ "variable '" ++ nm ++ "' left untyped"
+        Just typ -> Typed exp typ
+applyExpTyping dict (Typed exp _) =
+    applyExpTyping dict exp
+applyExpTyping _ exp = 
+    shouldnt $ "Expression '" ++ show exp ++ "' left after flattening"
 
 
 ----------------------------------------------------------------
@@ -656,37 +661,69 @@ checkProcDefFullytyped def = do
     let name = procName def
     let pos = procPos def
     mapM_ (checkParamTyped name pos) $
-      zip [1..] $ primProtoParams $ procProto def
-    checkBodyTyped name pos $ procBody def
-    
+      zip [1..] $ procProtoParams $ procProto def
+    mapM_ (placedApplyM (checkStmtTyped name pos)) $
+          procDefSrc $ procImpln def
 
-checkParamTyped :: ProcName -> OptPos -> (Int,PrimParam) -> Compiler ()
+
+procDefSrc :: ProcImpln -> [Placed Stmt]
+procDefSrc (ProcDefSrc def) = def
+procDefSrc (ProcDefPrim _ _) = shouldnt $ "procDefSrc applied to ProcDefPrim"
+
+
+expType :: Exp -> TypeSpec
+expType (Typed _ typ) = typ
+expType exp = shouldnt $ "expType of untyped expression " ++ show exp
+
+
+checkParamTyped :: ProcName -> OptPos -> (Int,Param) -> Compiler ()
 checkParamTyped name pos (num,param) = do
-    when (Unspecified == primParamType param) $
+    when (Unspecified == paramType param) $
       reportUntyped name pos (" parameter " ++ show num)
-      
-checkBodyTyped :: ProcName -> OptPos -> ProcBody -> Compiler ()
-checkBodyTyped name pos (ProcBody prims fork) = do
-    mapM_ (placedApplyM $ checkPrimTyped name pos) $ prims
-    case fork of
-        NoFork -> return ()
-        PrimFork _ _ bodies -> mapM_ (checkBodyTyped name pos) bodies
 
 
-checkPrimTyped :: ProcName -> OptPos -> Prim -> OptPos -> Compiler ()
-checkPrimTyped name pos (PrimCall _ pname _ args) ppos = do
-    mapM_ (checkArgTyped name pos pname ppos) args
-checkPrimTyped name pos (PrimForeign _ pname _ args) ppos = do
-    mapM_ (checkArgTyped name pos pname ppos) args
-checkPrimTyped name pos PrimNop ppos = return ()
+checkStmtTyped :: ProcName -> OptPos -> Stmt -> OptPos -> Compiler ()
+checkStmtTyped name pos (ProcCall pmod pname pid args) ppos = do
+    when (isNothing pid || List.null pmod) $
+         shouldnt $ "Call to " ++ pname ++ showMaybeSourcePos ppos ++
+                  " left unresolved"
+    mapM_ (checkArgTyped name pos pname ppos) $
+          zip [1..] $ List.map content args
+checkStmtTyped name pos (ForeignCall _ pname _ args) ppos = do
+    mapM_ (checkArgTyped name pos pname ppos) $
+          zip [1..] $ List.map content args
+checkStmtTyped name pos (Cond ifstmts cond thenstmts elsestmts) ppos = do
+    mapM_ (placedApplyM (checkStmtTyped name pos)) ifstmts
+    checkExpTyped name pos ("condition" ++ showMaybeSourcePos ppos) $
+                  content cond
+    mapM_ (placedApplyM (checkStmtTyped name pos)) thenstmts
+    mapM_ (placedApplyM (checkStmtTyped name pos)) elsestmts
+checkStmtTyped name pos (Loop stmts) ppos = do
+    mapM_ (placedApplyM (checkStmtTyped name pos)) stmts
+checkStmtTyped name pos (For itr gen) ppos = do
+    checkExpTyped name pos ("for iterator" ++ showMaybeSourcePos ppos) $
+                  content itr
+    checkExpTyped name pos ("for generator" ++ showMaybeSourcePos ppos) $
+                  content itr
+checkStmtTyped _ _ Nop _ = return ()
+checkStmtTyped _ _ Break _ = return ()
+checkStmtTyped _ _ Next _ = return ()
 
 
-checkArgTyped :: ProcName -> OptPos -> ProcName -> OptPos -> PrimArg ->
+checkArgTyped :: ProcName -> OptPos -> ProcName -> OptPos ->
+                 (Int, Exp) -> Compiler ()
+checkArgTyped callerName callerPos calleeName callPos (n,arg) = do
+    checkExpTyped callerName callerPos
+                      ("in call to " ++ calleeName ++
+                       showMaybeSourcePos callPos ++
+                       ", arg " ++ show n) arg
+
+
+checkExpTyped :: ProcName -> OptPos -> String -> Exp ->
                  Compiler ()
-checkArgTyped callerName callerPos calleeName callPos arg = do
-    when (Unspecified == argType arg) $
-      reportUntyped callerName callerPos $
-      "call to " ++ calleeName ++ ", " ++ argDescription arg
+checkExpTyped _ _ _ (Typed _ _) = return ()
+checkExpTyped callerName callerPos msg _ =
+    reportUntyped callerName callerPos msg
 
 
 reportUntyped :: ProcName -> OptPos -> String -> Compiler ()

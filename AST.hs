@@ -28,7 +28,8 @@ module AST (
   ProcName, TypeDef(..), ResourceIFace(..), FlowDirection(..), 
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
   mapBodyPrims, foldProcCalls,
-  expToStmt, Prim(..), PrimProto(..), PrimParam(..), ProcSpec(..),
+  expToStmt, expFlow, setExpFlow,
+  Prim(..), PrimProto(..), PrimParam(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
@@ -1096,8 +1097,6 @@ instance Show ProcImpln where
     show (ProcDefPrim _ body) = showBlock 4 body
 
 
-      
-
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
 -- possibly containg some guards.  Each guard is a test that succeeds
 -- iff the specified variable holds the specified value.  For each
@@ -1276,13 +1275,14 @@ flowsOut ParamInOut = True
 data Stmt
      = ProcCall ModSpec Ident (Maybe Int) [Placed Exp]
      | ForeignCall Ident Ident [Ident] [Placed Exp]
+     | Nop -- Nop doesn't do anything so before and after are the same
+     -- All the following are eliminated during unbranching
      -- The first stmt list is empty and the Exp is anything until
      -- flattening.  After that, the stmt list contains the body of
      -- the test, and the Exp is primitive.
      | Cond [Placed Stmt] (Placed Exp) [Placed Stmt] [Placed Stmt]
      | Loop [Placed Stmt]
-     | Nop -- Nop doesn't do anything so before and after are the same
-       -- These are only valid in a loop
+     -- These are only valid in a loop
      | For (Placed Exp) (Placed Exp)
      | Break  -- holds the variable versions before the break
      | Next  -- holds the variable versions before the next
@@ -1295,11 +1295,12 @@ data Exp
       | StringValue String
       | CharValue Char
       | Var VarName FlowDirection ArgFlowType
+      | Typed Exp TypeSpec
+      -- The following are eliminated during flattening
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
       | Fncall ModSpec Ident [Placed Exp]
       | ForeignFn Ident Ident [Ident] [Placed Exp]
-      | Typed Exp TypeSpec
      deriving (Eq)
 
 -- |A loop generator (ie, an iterator).  These need to be 
@@ -1430,6 +1431,20 @@ expToStmt (ForeignFn lang name flags args) =
   ForeignCall lang name flags args
 expToStmt (Var name ParamIn _) = ProcCall [] name Nothing []
 expToStmt exp = shouldnt $ "non-Fncall expr " ++ show exp
+
+
+expFlow :: Exp -> FlowDirection
+expFlow (Typed exp _) = expFlow exp
+expFlow (Var _ flow _) = flow
+expFlow _ = ParamIn
+
+
+setExpFlow :: FlowDirection -> Exp -> Exp
+setExpFlow flow (Typed exp ty) = Typed (setExpFlow flow exp) ty
+setExpFlow flow (Var name _ ftype) = Var name flow ftype
+setExpFlow ParamIn exp = exp
+setExpFlow flow exp = 
+    shouldnt $ "Cannot set flow of " ++ show exp ++ " to " ++ show flow
 
 
 ----------------------------------------------------------------
