@@ -25,17 +25,23 @@ import Debug.Trace
 -- dependency SCC.
 typeCheckMod :: ModSpec -> Compiler ()
 typeCheckMod thisMod = do
-    -- liftIO $ putStrLn $ "**** Type checking module " ++ showModSpec thisMod
+    liftIO $ putStrLn $ "**** Type checking module " ++ showModSpec thisMod
     reenterModule thisMod
     procs <- getModuleImplementationField (Map.toList . modProcs)
     let ordered =
             stronglyConnComp
             [(name, name, nub $ concatMap (localBodyProcs thisMod . procImpln) procDefs)
              | (name,procDefs) <- procs]
+    liftIO $ putStrLn $ "**** Strongly connected components:\n" ++
+      (intercalate "\n" $ 
+       List.map (\scc -> "    " ++ intercalate ", "
+                         (case scc of
+                             AcyclicSCC name -> [name]
+                             CyclicSCC list -> list)) ordered)
     errs <- mapM (typecheckProcSCC thisMod) ordered
     mapM_ (\e -> message Error (show e) Nothing) $ concat $ reverse errs
     finishModule
-    -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
+    liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
     return ()
 
 
@@ -138,8 +144,8 @@ addOneType reason name typ valid@(ValidTyping types) =
                  then ValidTyping $ Map.insert name typ types
                  else if oldTyp `properSubtypeOf` typ
                       then valid -- we already have a stronger type, keep it
-                      else --trace ("addOneType " ++ name ++ ":" ++ show typ ++ 
-                           --       " vs. " ++ show oldTyp ++ " FAILED") $
+                      else trace ("addOneType " ++ name ++ ":" ++ show typ ++ 
+                                  " vs. " ++ show oldTyp ++ " FAILED") $
                            InvalidTyping reason
 addOneType _ _ _ invalid = invalid
 
@@ -193,12 +199,12 @@ localCalls _ _ _ _ _ = []
 typecheckProcSCC :: ModSpec -> SCC ProcName -> Compiler ([TypeReason])
 typecheckProcSCC m (AcyclicSCC name) = do
     -- A single pass is always enough for non-cyclic SCCs
-    -- liftIO $ putStrLn $ "Type checking non-recursive proc " ++ name
+    liftIO $ putStrLn $ "Type checking non-recursive proc " ++ name
     (_,reasons) <- typecheckProcDecls m name
     return (reasons)
 typecheckProcSCC m (CyclicSCC list) = do
-    -- liftIO $ putStrLn $ "**** Type checking recursive procs " ++ 
-    --   intercalate ", " list
+    liftIO $ putStrLn $ "**** Type checking recursive procs " ++ 
+      intercalate ", " list
     (sccAgain,reasons) <-
         foldM (\(sccAgain,rs) name -> do
                     (sccAgain',reasons) <- typecheckProcDecls m name
@@ -207,9 +213,9 @@ typecheckProcSCC m (CyclicSCC list) = do
     if sccAgain
     then typecheckProcSCC m $ CyclicSCC list
     else do
-      -- liftIO $ putStrLn $ "**** Completed checking of " ++
-      --        intercalate ", " list ++
-      --        " with " ++ show (length reasons) ++ " errors"
+      liftIO $ putStrLn $ "**** Completed checking of " ++
+             intercalate ", " list ++
+             " with " ++ show (length reasons) ++ " errors"
       return (reasons)
 
 
@@ -221,6 +227,7 @@ typecheckProcSCC m (CyclicSCC list) = do
 typecheckProcDecls :: ModSpec -> ProcName -> 
                      Compiler (Bool,[TypeReason])
 typecheckProcDecls m name = do
+    liftIO $ putStrLn $ "** Type checking " ++ name
     defs <- getModuleImplementationField 
             (Map.findWithDefault (error "missing proc definition")
              name . modProcs)
@@ -232,6 +239,9 @@ typecheckProcDecls m name = do
     updateModImplementation
       (\imp -> imp { modProcs = Map.insert name (reverse revdefs) 
                                 $ modProcs imp })
+    liftIO $ putStrLn $ "** New definition of " ++ name ++ ":"
+    liftIO $ putStrLn $ intercalate "\n" $ List.map (showProcDef 4) (reverse revdefs)
+    -- XXX this shouldn't be necessary anymore, but keep it for now for safety
     unless (sccAgain || not (List.null reasons)) $ do
         mapM_ checkProcDefFullytyped revdefs
     return (sccAgain,reasons)
@@ -249,8 +259,8 @@ typecheckProcDecl m pd = do
     if vis == Public && any ((==Unspecified). paramType) params
       then return (pd,False,[ReasonUndeclared name pos])
       else do
-        let typing = List.foldr (addDeclaredType name pos (length params))
-                     initTyping $ zip params [1..]
+        typing <- foldM (addDeclaredType name pos (length params))
+                  initTyping $ zip params [1..]
         if validTyping typing
           then do
             -- liftIO $ putStrLn $ "** Type checking " ++ name ++
@@ -263,7 +273,6 @@ typecheckProcDecl m pd = do
             let pd' = pd { procProto = proto', procImpln = ProcDefSrc def' }
             let pd'' = pd'
             let sccAgain = pd'' /= pd
-            -- pd'' <- if sccAgain then return pd' else resourceCheck pd'
             -- liftIO $ putStrLn $ "===== Definition is " ++ 
             --        (if sccAgain then "" else "un") ++ "changed"
             -- when sccAgain
@@ -278,9 +287,12 @@ typecheckProcDecl m pd = do
             shouldnt $ "Inconsistent param typing for proc " ++ name
 
 
-addDeclaredType :: ProcName -> OptPos -> Int -> (Param,Int) -> Typing -> Typing
-addDeclaredType procname pos arity (Param name typ _ _,argNum) typs =
-     addOneType (ReasonParam procname arity pos) name typ typs
+addDeclaredType :: ProcName -> OptPos -> Int -> Typing -> (Param,Int) ->
+                   Compiler Typing
+addDeclaredType procname pos arity typs (Param name typ _ _,argNum) = do
+    typ' <- fmap (fromMaybe Unspecified) $ lookupType typ pos
+    liftIO $ putStrLn $ "    type of '" ++ name ++ "' is " ++ show typ'
+    return $ addOneType (ReasonParam procname arity pos) name typ' typs
 
 
 updateParamTypes :: Typing -> [Param] -> [Param]
@@ -300,32 +312,32 @@ updateParamTypes _ params = params
 typecheckProcDef :: ModSpec -> ProcName -> OptPos -> Typing ->
                      [Placed Stmt] -> Compiler (Typing,[Placed Stmt])
 typecheckProcDef m name pos paramTypes body = do
-    -- liftIO $ putStrLn $ "\ntype checking: " ++ name
+    liftIO $ putStrLn $ "\ntype checking: " ++ name
     typings <- typecheckBody m name paramTypes body
-    -- liftIO $ putStrLn $ "typings:  " ++
-    --   intercalate "\n          " (List.map show typings) ++ "\n"
+    liftIO $ putStrLn $ "typings:  " ++
+      intercalate "\n          " (List.map show typings) ++ "\n"
     case typings of
       [] -> do
-        -- liftIO $ putStrLn $ "   no valid type"
+        liftIO $ putStrLn $ "   no valid type"
           -- XXX This is the wrong reason
         return (InvalidTyping $ ReasonAmbig name pos [],body)
       [typing] -> do
-        -- liftIO $ putStrLn $ "   final typing: " ++ show typing
+        liftIO $ putStrLn $ "   final typing: " ++ show typing
         let typing' = projectTyping typing paramTypes
         case typing of
             InvalidTyping _ -> do
-                -- liftIO $ putStrLn $ "invalid: no body typing" ++ showBlock 4 body
+                liftIO $ putStrLn $ "invalid: no body typing" ++ showBody 4 body
                 return (typing', body)
             ValidTyping dict -> do
-                -- liftIO $ putStrLn $ "apply body typing" ++ showBlock 4 body
+                liftIO $ putStrLn $ "apply body typing" ++ showBody 4 body
                 body' <- applyBodyTyping dict body
-                -- liftIO $ putStrLn $ "After body typing:" ++ showBlock 4 body'
+                liftIO $ putStrLn $ "After body typing:" ++ showBody 4 body'
                 return (typing',body')
       typings -> do
-          -- liftIO $ putStrLn $ name ++ " has " ++ show (length typings) ++ 
-          --   " typings, of which " ++
-          --   show (length (List.filter validTyping typings)) ++
-          --   " are valid"
+          liftIO $ putStrLn $ name ++ " has " ++ show (length typings) ++ 
+            " typings, of which " ++
+            show (length (List.filter validTyping typings)) ++
+            " are valid"
           let typingSets = List.map (Map.map Set.singleton . typingDict) typings
           let merged = Map.filter ((>1).Set.size) $
                        Map.unionsWith Set.union typingSets
@@ -384,16 +396,16 @@ typecheckPlacedStmt m caller typing pstmt = do
 typecheckStmt :: ModSpec -> ProcName -> Stmt -> OptPos -> Typing ->
                  Compiler [Typing]
 typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
-    -- liftIO $ putStrLn $ "Type checking call " ++ show call ++ 
-    --   showMaybeSourcePos pos
-    -- liftIO $ putStrLn $ "   with types " ++ show typing
+    liftIO $ putStrLn $ "Type checking call " ++ showStmt 4 call ++ 
+      showMaybeSourcePos pos
+    liftIO $ putStrLn $ "   with types " ++ show typing
     procs <- case id of
         Nothing   -> callTargets cm name
         Just pid -> return [ProcSpec cm name pid] -- XXX check modspec
                                                   -- is valid; or just
                                                   -- ignore pid?
-    -- liftIO $ putStrLn $ "   potential procs: " ++
-    --        List.intercalate ", " (List.map show procs)
+    liftIO $ putStrLn $ "   potential procs: " ++
+           List.intercalate ", " (List.map show procs)
     if List.null procs 
       then if 1 == length args
            then return [InvalidTyping $ ReasonUninit caller name pos]
@@ -412,9 +424,9 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
                      Just args' -> do
                          -- liftIO $ putStrLn $ 
                          --   "MATCHES: args = " ++ show args'
-                         return [List.foldr 
-                                 (typecheckArg pos params $ procSpecName p)
-                                 typing $ zip3 [1..] params args']
+                         typing <- foldM (typecheckArg pos params $ procSpecName p)
+                                   typing $ zip3 [1..] params args'
+                         return [typing]
                      Nothing -> do
                          -- liftIO $ putStrLn "fails"
                          return [InvalidTyping $ 
@@ -429,12 +441,12 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
                         then (s,if List.elem elt l then l else elt:l)
                         else (Set.insert elt s,l))
                    (Set.empty,[]) typList''
-        -- liftIO $ putStrLn $ "Resulting types: " ++ show typList''
+        liftIO $ putStrLn $ "Resulting valid types: " ++ show typList''
         if List.null dups
         then if List.null typList''
              then do
-                -- liftIO $ putStrLn $ "Type error detected: " ++
-                --     unlines (List.map show typList')
+                liftIO $ putStrLn $ "Type error detected:\n" ++
+                    unlines (List.map show typList')
                 return typList'
              else return typList''
         else return [InvalidTyping $ ReasonOverload
@@ -448,10 +460,10 @@ typecheckStmt _ _ (ForeignCall lang name flags args) pos typing = do
 typecheckStmt _ _ Nop pos typing = return [typing]
 typecheckStmt m caller (Cond test exp thn els) pos typing = do
     typings <- typecheckSequence (typecheckPlacedStmt m caller) [typing] test
-    let typings' = List.map
-                   (\t -> typecheckArg' (content exp) Unspecified
-                          (TypeSpec ["wybe"] "bool" []) t (ReasonCond pos))
-                   typings
+    typings' <- mapM (\t -> do
+                           typecheckArg' (content exp) (place exp) Unspecified
+                             (TypeSpec ["wybe"] "bool" []) t (ReasonCond pos))
+                typings
     typings'' <- typecheckSequence (typecheckPlacedStmt m caller) typings' thn
     typecheckSequence (typecheckPlacedStmt m caller) typings'' thn
 typecheckStmt m caller (Loop body) pos typing = do
@@ -490,51 +502,56 @@ reconcileArgFlows (Param _ _ pflow _:params) (arg:args)
 
 
 typecheckArg :: OptPos -> [Param] -> ProcName ->
-                (Int,Param,Placed Exp) -> Typing -> Typing
-typecheckArg pos params pname (argNum,param,arg) typing =
+                Typing -> (Int,Param,Placed Exp) -> Compiler Typing
+typecheckArg pos params pname typing (argNum,param,arg) = do
     let actualFlow = expFlow (content arg)
-        formalFlow = paramFlow param
-        reasonType = ReasonArgType pname argNum pos
-        reasonFlow = ReasonArgFlow pname argNum pos
-    in  if not $ validTyping typing
-        then typing
-        else if formalFlow /= actualFlow
-             then -- trace ("wrong flow: " ++ show arg ++ " against " ++ show param) 
-                      InvalidTyping reasonFlow
-             else -- trace ("OK flow: " ++ show arg ++ " against " ++ show param)
-                  typecheckArg' (content arg) Unspecified (paramType param)
-                  typing reasonType
+    let formalFlow = paramFlow param
+    let reasonType = ReasonArgType pname argNum pos
+    let reasonFlow = ReasonArgFlow pname argNum pos
+    if not $ validTyping typing
+      then return typing
+      else if formalFlow /= actualFlow
+             then do
+               liftIO $ putStrLn $
+                 "wrong flow: " ++ show arg ++ " against " ++ show param
+               return $ InvalidTyping reasonFlow
+             else do
+               liftIO $ putStrLn $
+                 "OK flow: " ++ show arg ++ " against " ++ show param
+               typecheckArg' (content arg) (place arg) Unspecified
+                 (paramType param) typing reasonType
 
 
-typecheckArg' :: Exp -> TypeSpec -> TypeSpec -> Typing -> TypeReason -> Typing
-typecheckArg' (Typed exp typ) _ paramType typing reason =
-    typecheckArg' exp typ paramType typing reason
-typecheckArg' (Var var _ _) declType paramType typing reason =
+typecheckArg' :: Exp -> OptPos -> TypeSpec -> TypeSpec -> Typing -> TypeReason ->
+                 Compiler Typing
+typecheckArg' (Typed exp typ) pos _ paramType typing reason = do
+    typ' <- fmap (fromMaybe Unspecified) $ lookupType typ pos
+    typecheckArg' exp pos typ' paramType typing reason
+typecheckArg' (Var var _ _) _ declType paramType typing reason = do
     -- XXX should out flow typing be contravariant?
-    if --trace (if paramType `subtypeOf` decType || paramType == Unspecified
-       --       then "" 
-       --       else
-       --           "CHECK VAR " ++ show var ++ ":" ++ show decType ++ " vs. " ++
-       --           show paramType ++ " FAILED") $
-       paramType `subtypeOf` declType then
-        addOneType reason var paramType typing
-    else if paramType == Unspecified -- may be type checking recursion
-         then typing
-         else InvalidTyping reason
--- XXX type specs below should include "wybe" module
-typecheckArg' (IntValue val) declType paramType typing reason =
-    typecheckArg'' declType paramType (TypeSpec ["wybe"] "int" [])
-                   typing reason
-typecheckArg' (FloatValue val) declType paramType typing reason =
-    typecheckArg'' declType paramType (TypeSpec ["wybe"] "float" [])
-                   typing reason
-typecheckArg' (StringValue val) declType paramType typing reason =
-    typecheckArg'' declType paramType (TypeSpec ["wybe"] "string" [])
-                   typing reason
-typecheckArg' (CharValue val) declType paramType typing reason =
-    typecheckArg'' declType paramType (TypeSpec ["wybe"] "char" [])
-                   typing reason
-typecheckArg' exp _ _ _ _ =
+    unless (paramType == Unspecified) $ do
+        liftIO $ putStrLn $
+          "Check Var " ++ var ++ ":" ++ show declType ++ " vs. " ++
+          show paramType ++
+          (if paramType `subtypeOf` declType then " succeeded" else " FAILED")
+    if paramType `subtypeOf` declType
+      then return $ addOneType reason var paramType typing
+      else if paramType == Unspecified -- may be type checking recursion
+           then return typing
+           else return $ InvalidTyping reason
+typecheckArg' (IntValue val) _ declType paramType typing reason = do
+    return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "int" [])
+      typing reason
+typecheckArg' (FloatValue val) _ declType paramType typing reason = do
+    return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "float" [])
+      typing reason
+typecheckArg' (StringValue val) _ declType paramType typing reason = do
+    return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "string" [])
+      typing reason
+typecheckArg' (CharValue val) _ declType paramType typing reason = do
+    return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "char" [])
+      typing reason
+typecheckArg' exp _ _ _ _ _ = do
     shouldnt $ "trying to type check expression " ++ show exp ++ "."
 
 

@@ -546,10 +546,44 @@ addType name def@(TypeDef arity _) vis = do
     updateInterface vis (updatePubTypes (Map.insert name spec))
 
 
--- |Find the definition of the specified type in the current module.
-lookupType :: Ident -> Compiler (Maybe TypeDef)
-lookupType name = 
-    getModuleImplementationMaybe (\imp -> Map.lookup name $ modTypes imp)
+-- |Find the definition of the specified type visible from the current module.
+
+lookupType :: TypeSpec -> OptPos -> Compiler (Maybe TypeSpec)
+lookupType Unspecified _ = return $ Just Unspecified
+lookupType ty@(TypeSpec mod name args) pos = do
+    -- liftIO $ putStrLn $ "Looking up type " ++ show ty
+    tspecs <- refersTo mod name modKnownTypes typeMod
+    -- liftIO $ putStrLn $ "Candidates: " ++ show tspecs
+    case Set.size tspecs of
+        0 -> do
+            message Error ("Unknown type " ++ show ty) pos
+            return Nothing
+        1 -> do
+            let tspec = Set.findMin tspecs
+            maybeMod <- getLoadingModule $ typeMod tspec
+            let maybeDef = maybeMod >>= modImplementation >>=
+                        (Map.lookup (typeName tspec) . modTypes)
+            let def = trustFromJust "lookupType" maybeDef
+            if typeDefArity def == length args
+              then do
+                args' <- fmap catMaybes $ mapM (flip lookupType pos) args
+                return $
+                  Just $
+                  TypeSpec (maybe (shouldnt "lookupType") modSpec maybeMod) name args'
+              else do
+                message Error
+                  ("Type '" ++ name ++ "' expects " ++ (show $ typeDefArity def) ++
+                   " arguments, but " ++ (show $ length args) ++ " were given")
+                  pos
+                return Nothing
+        _   -> do
+            message Error ("Ambiguous type " ++ show ty ++
+                           " defined in modules: " ++ 
+                           showModSpecs (List.map typeMod $
+                                         Set.toList tspecs))
+              pos
+            return Nothing
+
 
 -- |Is the specified type exported by the current module.
 publicType :: Ident -> Compiler Bool
