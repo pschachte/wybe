@@ -39,7 +39,7 @@ import Scanner         (inputTokens, fileTokens, Token)
 import Normalise       (normalise)
 import Types           (typeCheckMod)
 import Resources       (resourceCheckMod)
-import Optimise        (optimiseMod)
+-- import Optimise        (optimiseMod)
 import System.FilePath
 import Data.Map as Map
 import Data.Set as Set
@@ -246,7 +246,8 @@ compileModSCC mspecs = do
     -- liftIO $ putStrLn $ "type checked"
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER TYPE CHECK:\n"
     -- verboseDump
-    fixpointProcessSCC optimiseMod mspecs
+    -- XXX must optimise
+    --- fixpointProcessSCC optimiseMod mspecs
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER OPTIMISATION:\n"
     -- verboseDump
     -- mods <- mapM getLoadedModule mods

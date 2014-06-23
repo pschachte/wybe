@@ -328,7 +328,9 @@ compileSimpleStmt stmt = do
 compileSimpleStmt' :: Stmt -> ClauseComp Prim
 compileSimpleStmt' (ProcCall maybeMod name procID args) = do
     args' <- mapM (placedApply compileArg) args
-    return $ PrimCall maybeMod name Nothing args'
+    return $ PrimCall (ProcSpec maybeMod name $
+                       trustFromJust "compileSimpleStmt'" procID)
+      args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
@@ -367,6 +369,6 @@ reconcilingAssignments caseVars jointVars =
 reconcileOne :: (Map VarName Int) -> (Map VarName Int) -> VarName -> Placed Prim
 reconcileOne caseVars jointVars var =
     Unplaced $
-    PrimCall [] "=" Nothing [
-        ArgVar (mkPrimVarName jointVars var) Unspecified FlowOut Ordinary False,
-        ArgVar (mkPrimVarName caseVars var) Unspecified FlowIn Ordinary False]
+    PrimForeign "wybe" "move" []
+    [ArgVar (mkPrimVarName jointVars var) Unspecified FlowOut Ordinary False,
+     ArgVar (mkPrimVarName caseVars var) Unspecified FlowIn Ordinary False]

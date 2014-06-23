@@ -164,6 +164,7 @@ instance Functor Placed where
   fmap f (Placed x pos) = Placed (f x) pos
   fmap f (Unplaced x) = Unplaced $ f x
 
+
 -- |Apply a monadic function to the payload of a Placed thing
 updatePlacedM :: (t -> Compiler t) -> Placed t -> Compiler (Placed t)
 updatePlacedM fn (Placed content pos) = do
@@ -1275,7 +1276,7 @@ flowsOut ParamInOut = True
 data Stmt
      = ProcCall ModSpec Ident (Maybe Int) [Placed Exp]
      | ForeignCall Ident Ident [Ident] [Placed Exp]
-     | Nop -- Nop doesn't do anything so before and after are the same
+     | Nop
      -- All the following are eliminated during unbranching
      -- The first stmt list is empty and the Exp is anything until
      -- flattening.  After that, the stmt list contains the body of
