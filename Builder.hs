@@ -37,7 +37,7 @@ import AST
 import Parser          (parse)
 import Scanner         (inputTokens, fileTokens, Token)
 import Normalise       (normalise)
-import Types           (typeCheckMod)
+import Types           (validateModExportTypes, typeCheckMod)
 import Resources       (resourceCheckMod)
 -- import Optimise        (optimiseMod)
 import System.FilePath
@@ -235,10 +235,14 @@ compileModSCC mspecs = do
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER NORMALISATION:\n"
     -- verboseDump
     fixpointProcessSCC handleModImports mspecs
-    -- liftIO $ putStrLn $ replicate 70 '='
-    -- liftIO $ putStrLn $ "resource and type checking modules " ++ showModSpecs mspecs ++ "..."
+    liftIO $ putStrLn $ replicate 70 '='
+    liftIO $ putStrLn $ "resource and type checking modules " ++ showModSpecs mspecs ++ "..."
+    verboseDump
     fixpointProcessSCC resourceCheckMod mspecs
     stopOnError $ "processing resources for modules " ++
+      showModSpecs mspecs
+    mapM_ validateModExportTypes mspecs
+    stopOnError $ "public proc declared types in modules " ++
       showModSpecs mspecs
     mapM_ typeCheckMod mspecs
     stopOnError $ "type checking of modules " ++

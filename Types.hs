@@ -5,7 +5,7 @@
 --  Copyright: © 2012 Peter Schachte.  All rights reserved.
 
 -- |Support for type checking/inference.
-module Types (typeCheckMod, checkFullyTyped) where
+module Types (validateModExportTypes, typeCheckMod, checkFullyTyped) where
 
 import AST
 -- import Resources
@@ -20,7 +20,44 @@ import Data.Graph
 import Debug.Trace
 
 
--- |Type check a single module named in the second argument; the 
+-- |Check declared types of exported procs for the specified module.
+-- This doesn't check that the types are correct vis-a-vis the
+-- definition, just that the declared types are valid types, and it
+-- updates the types to their fully-module-qualified versions.
+validateModExportTypes :: ModSpec -> Compiler ()
+validateModExportTypes thisMod = do
+    liftIO $ putStrLn $ "**** Validating public parameter types in module " ++
+           showModSpec thisMod
+    reenterModule thisMod
+    iface <- getModuleInterface
+    procs <- getModuleImplementationField (Map.toAscList . modProcs)
+    procs' <- mapM (uncurry validateProcDefsTypes) procs
+    finishModule
+    liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
+    updateModImplementation (\imp -> imp { modProcs = Map.fromAscList procs'})
+    return ()
+
+
+validateProcDefsTypes :: Ident -> [ProcDef] -> Compiler (Ident,[ProcDef])
+validateProcDefsTypes name defs = do
+    defs' <- mapM (validateProcDefTypes name) defs
+    return (name, defs')
+
+validateProcDefTypes :: Ident -> ProcDef -> Compiler ProcDef
+validateProcDefTypes name def = do
+    let public = procVis def == Public
+    let pos = procPos def
+    let proto = procProto def
+    let params = procProtoParams proto
+    params' <- mapM (validateParamType name pos public) params
+    return $ def { procProto = proto { procProtoParams = params' }}
+
+validateParamType :: Ident -> OptPos -> Bool -> Param -> Compiler Param
+validateParamType pname ppos public param = do
+    -- XXX actually check it
+    return param
+
+-- |Type check a single module named in the second argument; the
 --  first argument is a list of all the modules in this module 
 -- dependency SCC.
 typeCheckMod :: ModSpec -> Compiler ()
