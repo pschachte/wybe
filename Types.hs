@@ -572,8 +572,8 @@ typecheckArg pos params pname typing (argNum,param,arg) = do
                  (paramType param) typing reasonType
 
 
-typecheckArg' :: Exp -> OptPos -> TypeSpec -> TypeSpec -> Typing -> TypeReason ->
-                 Compiler Typing
+typecheckArg' :: Exp -> OptPos -> TypeSpec -> TypeSpec -> Typing ->
+                 TypeReason -> Compiler Typing
 typecheckArg' (Typed exp typ) pos _ paramType typing reason = do
     typ' <- fmap (fromMaybe Unspecified) $ lookupType typ pos
     typecheckArg' exp pos typ' paramType typing reason
