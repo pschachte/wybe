@@ -342,7 +342,7 @@ typecheckProcDecl m pd = do
 
 addDeclaredType :: ProcName -> OptPos -> Int -> Typing -> (Param,Int) ->
                    Compiler Typing
-addDeclaredType procname pos arity typs (Param name typ _ _,argNum) = do
+addDeclaredType procname pos arity typs (Param name typ flow _,argNum) = do
     typ' <- fmap (fromMaybe Unspecified) $ lookupType typ pos
     -- liftIO $ putStrLn $ "    type of '" ++ name ++ "' is " ++ show typ'
     return $ addOneType (ReasonParam procname arity pos) name typ' typs
@@ -617,23 +617,6 @@ typecheckArg'' callType paramType constType typing reason =
             InvalidTyping reason
 
 
--- diffBody :: ProcBody -> ProcBody -> Maybe (ProcName,OptPos)
--- diffBody (ProcBody prims1 fork1) (ProcBody prims2 fork2) =
---     firstJust [diffFork fork1 fork2, diffCall prims1 prims2]
-
-
--- diffCall :: [Placed Prim] -> [Placed Prim] -> Maybe (ProcName,OptPos)
--- diffCall [] _ = Nothing
--- diffCall _ [] = Nothing
--- diffCall (c1:c1s) (c2:c2s)
---     | c1 == c2  = diffCall c1s c2s
---     | otherwise = callDifference (place c1) (content c1) (content c2)
-
--- callDifference :: OptPos -> Prim -> Prim -> Maybe (ProcName,OptPos)
--- callDifference pos (PrimCall _ name _ _) _ = Just (name,pos)
--- callDifference _ _ _ = shouldnt "impossible ambiguity"
-
-
 firstJust :: [Maybe a] -> Maybe a
 firstJust [] = Nothing
 firstJust (j@(Just _):_) = j
@@ -757,11 +740,6 @@ procDefSrc (ProcDefPrim _ _) = shouldnt $ "procDefSrc applied to ProcDefPrim"
 
 expType :: Exp -> TypeSpec
 expType (Typed _ typ)     = typ
--- XXX shouldn't be needed:
--- expType (IntValue val)    = TypeSpec ["wybe"] "int" []
--- expType (FloatValue val)  = TypeSpec ["wybe"] "float" []
--- expType (StringValue val) = TypeSpec ["wybe"] "string" []
--- expType (CharValue val)   = TypeSpec ["wybe"] "char" []
 expType exp = shouldnt $ "expType of untyped expression " ++ show exp
 
 
