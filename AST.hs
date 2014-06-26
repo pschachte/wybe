@@ -350,29 +350,36 @@ updateImplementations updater = do
 
 -- |Return some function of the module currently being compiled.
 getModule :: (Module -> t) -> Compiler t
-getModule getter = gets (getter . head . underCompilation)
+getModule getter = gets (getter . List.head . underCompilation)
 
 
 -- |Transform the module currently being compiled.
 updateModule :: (Module -> Module) -> Compiler ()
 updateModule updater = do
     modify (\comp -> let mods = underCompilation comp
-                            in  comp { underCompilation =
-                                            updater (head mods):tail mods })
+                     in  if List.null mods
+                         then shouldnt "updateModule with no current module"
+                         else comp { underCompilation =
+                                          updater (List.head mods):List.tail mods })
 
 -- |Transform the module currently being compiled.
 updateModuleM :: (Module -> Compiler Module) -> Compiler ()
 updateModuleM updater = do
     updateCompilerM (\comp -> do
                           let mods = underCompilation comp
-                          mod' <- updater $ head mods
-                          return comp { underCompilation = mod':tail mods })
+                          when (List.null mods) $
+                            shouldnt "updateModuleM with no current module"
+                          mod' <- updater $ List.head mods
+                          return comp { underCompilation = mod':List.tail mods })
+
 
 -- |Return some function of the specified module.  Error if it's not a module.
 getSpecModule :: String -> ModSpec -> (Module -> t) -> Compiler t
 getSpecModule context spec getter = do
     let msg = context ++ " looking up missing module " ++ show spec
     curr <- gets (List.filter ((==spec) . modSpec) . underCompilation)
+    -- liftIO $ putStrLn $ "found " ++ (show $ length curr) ++
+    --   " matching modules under compilation"
     case curr of
         []    -> gets (maybe (error msg) getter . Map.lookup spec . modules)
         [mod] -> return $ getter mod
@@ -419,7 +426,9 @@ enterModule dir modspec params = do
 -- Trusts that the modspec really does specify a module.
 reenterModule :: ModSpec -> Compiler ()
 reenterModule modspec = do
+    -- liftIO $ putStrLn $ "finding module " ++ showModSpec modspec
     mod <- getSpecModule "reenterModule" modspec id
+    -- liftIO $ putStrLn $ "found it"
     modify (\comp -> comp { underCompilation = mod : underCompilation comp })
 
 
@@ -444,7 +453,7 @@ finishModule :: Compiler Module
 finishModule = do
     mod <- getModule id
     modify 
-      (\comp -> comp { underCompilation = tail (underCompilation comp) })
+      (\comp -> comp { underCompilation = List.tail (underCompilation comp) })
     updateModules $ Map.insert (modSpec mod) mod
     return mod
 
@@ -711,8 +720,8 @@ updateProcDef updater pspec@(ProcSpec modspec procName procID) =
                                       if List.null back
                                       then shouldnt $ "invalid proc spec " ++
                                            show pspec
-                                      else updater $ head back
-                              in  front ++ updated:tail back)
+                                      else updater $ List.head back
+                              in  front ++ updated:List.tail back)
                        procName (modProcs imp) })
     modspec
     
@@ -730,8 +739,8 @@ updateProcDefM updater pspec@(ProcSpec modspec procName procID) =
                if List.null back
                then shouldnt $ "invalid proc spec " ++
                     show pspec
-               else updater $ head back
-           let defs' = front ++ updated:tail back
+               else updater $ List.head back
+           let defs' = front ++ updated:List.tail back
            let procs' = Map.insert procName defs' procs
            return $ imp { modProcs = procs' })
     modspec

@@ -165,7 +165,7 @@ srcObjFiles modspec possDirs = do
     let validDirs = concat $ concat dirs
     if List.null validDirs
       then return Nothing
-      else return $ Just $ head validDirs
+      else return $ Just $ List.head validDirs
 
 
 -- |Actually load and compile the module
@@ -235,14 +235,14 @@ compileModSCC mspecs = do
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER NORMALISATION:\n"
     -- verboseDump
     fixpointProcessSCC handleModImports mspecs
-    liftIO $ putStrLn $ replicate 70 '='
-    liftIO $ putStrLn $ "resource and type checking modules " ++ showModSpecs mspecs ++ "..."
-    verboseDump
+    -- liftIO $ putStrLn $ replicate 70 '='
+    -- liftIO $ putStrLn $ "resource and type checking modules " ++ showModSpecs mspecs ++ "..."
+    -- verboseDump
     fixpointProcessSCC resourceCheckMod mspecs
     stopOnError $ "processing resources for modules " ++
       showModSpecs mspecs
     mapM_ validateModExportTypes mspecs
-    stopOnError $ "public proc declared types in modules " ++
+    stopOnError $ "checking parameter type declarations in modules " ++
       showModSpecs mspecs
     mapM_ typeCheckMod mspecs
     stopOnError $ "type checking of modules " ++

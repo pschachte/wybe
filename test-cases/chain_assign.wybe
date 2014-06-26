@@ -1,4 +1,4 @@
-public proc chain(?z)
+proc chain(?z)
     ?x = 1
     ?y = x
     ?z = y
