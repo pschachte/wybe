@@ -232,7 +232,7 @@ descendantModules mspec = do
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
-    -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER NORMALISATION:\n"
+    -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER FLATTENING:\n"
     -- verboseDump
     fixpointProcessSCC handleModImports mspecs
     -- liftIO $ putStrLn $ replicate 70 '='

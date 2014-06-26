@@ -28,7 +28,7 @@ module AST (
   ProcName, TypeDef(..), ResourceIFace(..), FlowDirection(..), 
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
   mapBodyPrims, foldProcCalls,
-  expToStmt, expFlow, setExpFlow,
+  expToStmt, expFlow, setExpFlow, isHalfUpdate,
   Prim(..), PrimProto(..), PrimParam(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
@@ -1490,6 +1490,11 @@ setExpFlow ParamIn exp = exp
 setExpFlow flow exp = 
     shouldnt $ "Cannot set flow of " ++ show exp ++ " to " ++ show flow
 
+
+isHalfUpdate :: FlowDirection -> Exp -> Bool
+isHalfUpdate flow (Typed exp _) = isHalfUpdate flow exp
+isHalfUpdate flow (Var _ flow' HalfUpdate) = flow == flow'
+isHalfUpdate _ _ = False
 
 ----------------------------------------------------------------
 --                      Variables (Uses and Defs)

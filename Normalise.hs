@@ -93,7 +93,8 @@ normaliseItem _ decl@(ProcDecl _ _ _ _) = do
     -- (proto' <- flattenProto proto
     -- (stmts,tmpCtr) <- flattenBody stmts
     -- liftIO $ putStrLn $ "Flattened proc:\n" ++ show (ProcDecl vis proto' stmts pos)
-    (stmts',genProcs) <- unbranchBody params resources stmts
+    -- XXX need to unbranch elsewhere (after typecheck)
+    -- (stmts',genProcs) <- unbranchBody params resources stmts
     let mainProc = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 vis False
 
     -- mainProc <- compileProc tmpCtr $ ProcDecl vis proto stmts' pos

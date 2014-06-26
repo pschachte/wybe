@@ -533,21 +533,18 @@ typecheckStmt _ _ Next pos typing = return [typing]
 --  they don't match, and Just a possibly updated arglist if they 
 --  do.  The purpose is to handle passing an in-out argument pair 
 --  where only an output is expected.  This is permitted, and the 
---  input half is just ignored.  This means the following 
---  combinations of parameter/argument flow are OK:
---      FlowIn  / FlowIn
---      FlowOut / FlowOut
---      FlowOut / FlowIn (Half) FlowOut (Half)
---  We also filter out any arguments where the corresponding param is
---  marked as unneeded.
-
+--  input half is just ignored.  This is performed after the code has 
+--  been flattened, so ParamInOut have already been turned into 
+--  adjacent pairs of ParamIn and ParamOut parameters.
 reconcileArgFlows :: [Param] -> [Placed Exp] -> Maybe [Placed Exp]
 reconcileArgFlows [] [] = Just []
 reconcileArgFlows _ [] = Nothing
 reconcileArgFlows [] _ = Nothing
-reconcileArgFlows (Param _ _ ParamOut _:params) (arg:args)
-    | ParamInOut == expFlow (content arg)
-    = fmap (fmap (setExpFlow ParamOut) arg:) $ reconcileArgFlows params args
+reconcileArgFlows (Param _ _ ParamOut _:params)
+  (arg1:arg2:args)
+    | isHalfUpdate ParamIn (content arg1) &&
+      isHalfUpdate ParamOut (content arg2)
+    = fmap (arg2:) $ reconcileArgFlows params args
 reconcileArgFlows (Param _ _ pflow _:params) (arg:args)
     = if pflow == expFlow (content arg)
       then fmap (arg:) $ reconcileArgFlows params args
