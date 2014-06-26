@@ -238,12 +238,15 @@ compileModSCC mspecs = do
     -- liftIO $ putStrLn $ replicate 70 '='
     -- liftIO $ putStrLn $ "resource and type checking modules " ++ showModSpecs mspecs ++ "..."
     -- verboseDump
-    fixpointProcessSCC resourceCheckMod mspecs
-    stopOnError $ "processing resources for modules " ++
-      showModSpecs mspecs
     mapM_ validateModExportTypes mspecs
     stopOnError $ "checking parameter type declarations in modules " ++
       showModSpecs mspecs
+    -- Fixed point needed because eventually resources can bundle 
+    -- resources from other modules
+    fixpointProcessSCC resourceCheckMod mspecs
+    stopOnError $ "processing resources for modules " ++
+      showModSpecs mspecs
+    -- No fixed point needed because public procs must have types declared
     mapM_ typeCheckMod mspecs
     stopOnError $ "type checking of modules " ++
       showModSpecs mspecs

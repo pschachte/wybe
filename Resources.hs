@@ -22,10 +22,38 @@ import Debug.Trace
 -- |Check a module's resource declarations.
 resourceCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 resourceCheckMod modSCC thisMod = do
-    -- XXX Must check validity of declared types and initial values
-    -- for resources, and declared resources for procs.
-    return (False,[])
+    reenterModule thisMod
+    resources <- getModuleImplementationField (Map.toAscList . modResources)
+    (chg,errs,resources') <-
+        fmap unzip3 $ mapM (uncurry checkResourceDef) resources
+    updateModImplementation (\imp -> imp { modResources = 
+                                              Map.fromAscList resources'})
+    finishModule
+    -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
+    return (or chg,concat errs)
 
+
+checkResourceDef :: Ident -> ResourceDef ->
+                    Compiler (Bool,[(String,OptPos)],(Ident,ResourceDef))
+checkResourceDef name def = do
+    (chg,errs,m) <-
+        fmap unzip3 $ mapM (uncurry checkOneResource) $ Map.toList $ content def
+    return (or chg, concat errs, (name,rePlace (Map.fromList m) def))
+
+
+checkOneResource :: ResourceSpec -> Maybe ResourceImpln ->
+                    Compiler (Bool,[(String,OptPos)],
+                              (ResourceSpec,Maybe ResourceImpln))
+checkOneResource rspec impln@(Just (SimpleResource ty init pos)) = do
+    ty' <- lookupType ty pos
+    case ty' of
+        -- lookupType reports any undefined types
+        Nothing -> return (False,[],(rspec,impln))
+        Just ty'' ->
+          return (ty'' /= ty,[],(rspec,Just (SimpleResource ty'' init pos)))
+checkOneResource rspec Nothing = do
+    -- XXX don't currently handle compound resources
+    nyi "compound resources"
 
 
 -- |Check use of resources in a single procedure definition, updating

@@ -1,24 +1,22 @@
 Fix bugs:
-o Propagate types down to generated procs
-   Plan:  (a) ensure generated procs are in same SCC as their other part
-          (b) where different parts of a proc call each other,
-              propagate type info both ways
-o Module qualification doesn't work right.  Currently any module
-   qualifier must give the module that defines the item, not the
-   module it was imported from.  This is currently masked by the fact
-   that the parser can't handle module specs at all.   
-
 
 Complete the implementation:
+o Resource checking
+o Unbranching
+o Generate LPVM
+o Optimisations
 o Fix algebraic type implementation to use tags
 o Code generation
 
 
 Improve error handling:
 o Give meaningful message for errors detected in generated procs
+o Detect and report use of uninitialised variables, including update
+   of uninitialised variables
 
 
 Complete the language:
+o Fix the syntax!
 o Support polymorphism
 o Support subtypes
 o Support higher-order programming
@@ -30,5 +28,7 @@ Optimise:
 o Remove unneeded input and unchanged output arguments
 o Inline local procs with only one call
 o Common sub-expression elimination
+o Inter-procedure common sub-expression elimination
+o Code hoisting
 o Constant folding
 o Destructive update transformation (CTGC)

@@ -25,7 +25,7 @@ module AST (
   emptyInterface, emptyImplementation, 
   getParams, getProcDef, mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), ProcBody(..), PrimFork(..), Ident, VarName,
-  ProcName, TypeDef(..), ResourceIFace(..), FlowDirection(..), 
+  ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..), 
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
   mapBodyPrims, foldProcCalls,
   expToStmt, expFlow, setExpFlow, isHalfUpdate,
@@ -50,7 +50,7 @@ module AST (
   refersTo, callTargets,
   verboseDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
   showModSpecs, showResources, showMaybeSourcePos,
-  shouldnt, checkError, checkValue, trustFromJust, trustFromJustM,
+  shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
   showMessages, stopOnError
   ) where
 
@@ -559,6 +559,8 @@ addType name def@(TypeDef arity _) vis = do
 
 lookupType :: TypeSpec -> OptPos -> Compiler (Maybe TypeSpec)
 lookupType Unspecified _ = return $ Just Unspecified
+lookupType ty@(TypeSpec _ "phantom" []) pos =
+    return $ Just $ TypeSpec ["wybe"] "phantom" []
 lookupType ty@(TypeSpec mod name args) pos = do
     -- liftIO $ putStrLn $ "Looking up type " ++ show ty
     tspecs <- refersTo mod name modKnownTypes typeMod
@@ -1916,6 +1918,9 @@ maybeShow pre (Just something) post =
 shouldnt :: String -> a
 shouldnt what = error $ "Internal error: " ++ what
 
+
+nyi :: String -> a
+nyi what = error $ "Not yet implemented: " ++ what
 
 -- |Check that all is well, else abort
 checkError :: Monad m => String -> Bool -> m ()
