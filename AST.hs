@@ -1746,7 +1746,7 @@ showProcDef thisID
     ++ showMaybeSourcePos pos
     ++ " (" ++ show calls ++ " calls)"
     ++ (if inline then " (inline)" else "")
-    ++ show def
+    ++ "\n" ++ show def
 
 -- |How to show a type specification.
 instance Show TypeSpec where
