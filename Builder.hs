@@ -38,7 +38,7 @@ import Parser          (parse)
 import Scanner         (inputTokens, fileTokens, Token)
 import Normalise       (normalise)
 import Types           (validateModExportTypes, typeCheckMod)
-import Resources       (resourceCheckMod)
+import Resources       (resourceCheckMod, resourceCheckProc)
 -- import Optimise        (optimiseMod)
 import System.FilePath
 import Data.Map as Map
@@ -253,6 +253,9 @@ compileModSCC mspecs = do
     -- liftIO $ putStrLn $ "type checked"
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER TYPE CHECK:\n"
     -- verboseDump
+    mapM_ (transformModuleProcs resourceCheckProc)  mspecs
+    stopOnError $ "resource checking of modules " ++
+      showModSpecs mspecs
     -- XXX must optimise
     --- fixpointProcessSCC optimiseMod mspecs
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER OPTIMISATION:\n"
@@ -292,6 +295,21 @@ fixpointProcessSCC processor scc = do        -- must find fixpoint
     if changed
     then fixpointProcessSCC processor scc
     else mapM_ (\(msg,pos) -> message Error msg pos) errors
+
+
+transformModuleProcs :: (ProcDef -> Compiler ProcDef) -> ModSpec ->
+                        Compiler ()
+transformModuleProcs trans thisMod = do
+    reenterModule thisMod
+    (names,procs) <- fmap unzip $
+                     getModuleImplementationField (Map.toList . modProcs)
+    -- for each name we have a list of procdefs, so we must double map
+    procs' <- mapM (mapM trans) procs
+    updateImplementation (\imp -> imp { modProcs = Map.fromList $
+                                                   zip names procs' })
+    finishModule
+    -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
+    return ()
 
 
 ------------------------ Loading Imports ------------------------

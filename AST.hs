@@ -34,7 +34,8 @@ module AST (
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
-  updateModules, updateImplementations, getModuleImplementationField, 
+  updateModules, updateImplementations, updateImplementation,
+  getModuleImplementationField, 
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, getModuleInterface, updateModule, getSpecModule, updateSpecModule,

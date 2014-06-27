@@ -8,7 +8,7 @@
 module Types (validateModExportTypes, typeCheckMod, checkFullyTyped) where
 
 import AST
--- import Resources
+import Resources
 import Util
 import Data.Map as Map
 import Data.Set as Set
@@ -106,6 +106,8 @@ typeCheckMod thisMod = do
 -- |The reason a variable is given a certain type
 data TypeReason = ReasonParam ProcName Int OptPos
                                       -- Formal param type/flow inconsistent
+                | ReasonResource ProcName Ident OptPos
+                                      -- Declared resource inconsistent
                 | ReasonUndef ProcName ProcName OptPos
                                       -- Call to unknown proc
                 | ReasonUninit ProcName VarName OptPos
@@ -130,6 +132,9 @@ instance Show TypeReason where
         makeMessage pos $
             "Type/flow error in definition of " ++ name ++
             ", parameter " ++ show num
+    show (ReasonResource name resName pos) =
+            "Type/flow error in definition of " ++ name ++
+            ", resource " ++ resName
     show (ReasonArgType name num pos) =
         makeMessage pos $
             "Type error in call to " ++ name ++ ", argument " ++ show num
@@ -306,6 +311,7 @@ typecheckProcDecl m pd = do
     let name = procName pd
     let proto = procProto pd
     let params = procProtoParams proto
+    let resources = procProtoResources proto
     let (ProcDefSrc def) = procImpln pd
     let pos = procPos pd
     let vis = procVis pd
@@ -314,13 +320,16 @@ typecheckProcDecl m pd = do
       else do
         typing <- foldM (addDeclaredType name pos (length params))
                   initTyping $ zip params [1..]
+        typing' <- foldM (addResourceType name pos)
+                   typing resources
         if validTyping typing
           then do
             -- liftIO $ putStrLn $ "** Type checking " ++ name ++
-            --   ": " ++ show typing
-            (typing',def') <- typecheckProcDef m name pos typing def
-            -- liftIO $ putStrLn $ "*resulting types " ++ name ++
             --   ": " ++ show typing'
+            -- liftIO $ putStrLn $ "   with resources: " ++ show resources
+            (typing'',def') <- typecheckProcDef m name pos typing' def
+            -- liftIO $ putStrLn $ "*resulting types " ++ name ++
+            --   ": " ++ show typing''
             let params' = updateParamTypes typing' params
             let proto' = proto { procProtoParams = params' }
             let pd' = pd { procProto = proto', procImpln = ProcDefSrc def' }
@@ -333,7 +342,7 @@ typecheckProcDecl m pd = do
             --              "\n-----------------OLD:" ++ showProcDef 4 pd ++
             --              "\n-----------------NEW:" ++ showProcDef 4 pd' ++ "\n")
             return (pd'',sccAgain,
-                    case typing' of
+                    case typing'' of
                         ValidTyping _ -> []
                         InvalidTyping r -> [r])
           else
@@ -346,6 +355,21 @@ addDeclaredType procname pos arity typs (Param name typ flow _,argNum) = do
     typ' <- fmap (fromMaybe Unspecified) $ lookupType typ pos
     -- liftIO $ putStrLn $ "    type of '" ++ name ++ "' is " ++ show typ'
     return $ addOneType (ReasonParam procname arity pos) name typ' typs
+
+
+addResourceType :: ProcName -> OptPos -> Typing -> ResourceFlowSpec ->
+                   Compiler Typing
+addResourceType procname pos typs rfspec = do
+    let rspec = resourceFlowRes rfspec
+    resIface <- lookupResource rspec pos
+    let (rspecs,types) = unzip $ maybe [] Map.toList resIface
+    let names = List.map resourceName rspecs
+    let typs' = List.foldr 
+                (\(n,t) typs ->
+                     addOneType 
+                     (ReasonResource procname n pos) n t typs)
+                typs $ zip names types
+    return typs'
 
 
 updateParamTypes :: Typing -> [Param] -> [Param]
@@ -467,7 +491,8 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
         typList <- 
             mapM 
             (\p -> do
-                 params <- getParams p
+                 params <- fmap (List.filter nonResourceParam) $ 
+                           getParams p
                  -- liftIO $ putStr $ 
                  --   "\n   checking flow of call to " ++
                  --   show p ++ " args " ++
@@ -549,6 +574,12 @@ reconcileArgFlows (Param _ _ pflow _:params) (arg:args)
     = if pflow == expFlow (content arg)
       then fmap (arg:) $ reconcileArgFlows params args
       else Nothing
+
+
+-- |Doe this parameter *not* correspond to a resource?
+nonResourceParam :: Param -> Bool
+nonResourceParam (Param _ _ _ (Resource _)) = False
+nonResourceParam _ = True
 
 
 typecheckArg :: OptPos -> [Param] -> ProcName ->
@@ -647,7 +678,8 @@ applyStmtTyping dict call@(ProcCall cm name id args) pos = do
     --        ++ intercalate ", " (List.map show procs)
     matches <- fmap catMaybes $
                mapM (\p -> do
-                          params <- getParams p
+                          params <- fmap (List.filter nonResourceParam) $ 
+                                    getParams p
                           -- liftIO $ putStrLn $ "   checking call to " ++
                           --        show p ++ " args " ++
                           --        show args' ++ " against params " ++
