@@ -275,7 +275,7 @@ unbranchProc :: ProcDef -> Compiler ProcDef
 unbranchProc proc = do
     let ProcDefSrc body = procImpln proc
     let params = procProtoParams $ procProto proc
-    (body',newProcs) <- unbranchBody params [] body
+    (body',newProcs) <- unbranchBody params body
     let proc' = proc { procImpln = ProcDefSrc body' }
     mapM_ (normaliseItem compileModSCC) newProcs
     return proc'

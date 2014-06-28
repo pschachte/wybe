@@ -59,12 +59,11 @@ import Control.Monad.Trans (lift,liftIO)
 
 import Debug.Trace
 
-unbranchBody :: [Param] -> [ResourceFlowSpec] -> [Placed Stmt] -> 
-                Compiler ([Placed Stmt],[Item])
-unbranchBody params resources stmts = do
+unbranchBody :: [Param] -> [Placed Stmt] -> Compiler ([Placed Stmt],[Item])
+unbranchBody params stmts = do
     let vars = inputParamNames params
     (stmts',st) <- runStateT (unbranchStmts stmts) $ 
-                   initUnbrancherState vars resources
+                   initUnbrancherState vars
     return (stmts',brNewDefs st)
 
 
@@ -80,13 +79,10 @@ type Unbrancher = StateT UnbrancherState Compiler
 data UnbrancherState = Unbrancher {
     brLoopInfo   :: LoopInfo,     -- ^If in a loop, the break and continue stmts
     brVars       :: Set VarName,  -- ^Variables defined up to here
-    brResources  :: [ResourceFlowSpec], -- ^Resources available in this context
     -- brExitVars   :: Set VarName,  -- ^Variables defined up to loop exit
     brTerminated :: Bool,         -- ^Whether code so far included a Break or
-                                 --  Next, which terminate execution
-    brNewDefs    :: [Item],       -- ^Generated auxilliary procedures
-    brNoGenerate :: Bool          -- ^Surpress generating auxilliary procedures?
-                                 -- Used when just computing variable sets
+                                  --  Next, which terminate execution
+    brNewDefs    :: [Item]        -- ^Generated auxilliary procedures
     }
 
 
@@ -99,9 +95,9 @@ data LoopInfo = LoopInfo {
     deriving (Eq)
 
 
-initUnbrancherState :: Set VarName -> [ResourceFlowSpec] -> UnbrancherState
-initUnbrancherState vars resources =
-    Unbrancher NoLoop vars resources False [] False
+initUnbrancherState :: Set VarName -> UnbrancherState
+initUnbrancherState vars =
+    Unbrancher NoLoop vars False []
 
 
 setLoopInfo :: Placed Stmt -> Placed Stmt -> Unbrancher ()
@@ -137,33 +133,15 @@ setTerminated term = modify (\s -> s { brTerminated = term })
 
 newProcName :: Unbrancher String
 newProcName = do
-    surpress <- gets brNoGenerate
-    if surpress 
-      then return "INVALID_PROC"
-      else lift genProcName
+    lift genProcName
 
 
 genProc :: ProcProto -> [Placed Stmt] -> Unbrancher ()
 genProc proto stmts = do
-    surpress <- gets brNoGenerate
-    if surpress 
-      then do
-        dbgPrintLn $ "** Surpressing proc generation: " ++ show proto
-        return ()
-      else do
-        -- dbgPrintLn $ "** Generating proc:\n" 
-        --   ++ show (ProcDecl Private proto stmts Nothing)
-        let item = ProcDecl Private proto stmts Nothing
-        modify (\s -> s { brNewDefs = item:brNewDefs s })
-
-
-withoutGeneration :: Unbrancher t -> Unbrancher t
-withoutGeneration unbr = do
-    surpressing <- gets brNoGenerate
-    modify (\s -> s { brNoGenerate = True })
-    result <- unbr
-    modify (\s -> s { brNoGenerate = surpressing })
-    return result
+    -- dbgPrintLn $ "** Generating proc:\n" 
+    --   ++ show (ProcDecl Private proto stmts Nothing)
+    let item = ProcDecl Private proto stmts Nothing
+    modify (\s -> s { brNewDefs = item:brNewDefs s })
 
 
 dbgPrintLn :: String -> Unbrancher ()
@@ -251,9 +229,6 @@ unbranchStmt (Loop body) pos stmts = do
     beforeVars <- gets brVars
     dbgPrintLn $ "* Vars before loop: " ++ show beforeVars
     let (afterVars,loopTerm) = loopExitVars beforeVars body
-    -- This is just to work out the afterVars, so turn off proc generation
-    -- _ <- withoutGeneration $ unbranchStmts body
-    -- afterVars <- gets brVars
     dbgPrintLn $ "* Vars after loop: " ++ show afterVars
     setVars afterVars
     stmts' <- unbranchStmts stmts
@@ -356,8 +331,7 @@ newProcProto name inVars outVars = do
                     | v <- Set.elems inVars]
     let outParams = [Param v Unspecified ParamOut Ordinary
                     | v <- Set.elems outVars]
-    resources <- gets brResources
-    return $ ProcProto name (inParams ++ outParams) resources
+    return $ ProcProto name (inParams ++ outParams) []
 
 
 loopExitVars :: Set VarName -> [Placed Stmt] -> (Set VarName, Bool)
