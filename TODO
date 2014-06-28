@@ -1,8 +1,6 @@
 Fix bugs:
 
 Complete the implementation:
-o Resource checking
-o Unbranching
 o Generate LPVM
 o Optimisations
 o Fix algebraic type implementation to use tags
