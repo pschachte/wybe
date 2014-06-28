@@ -49,7 +49,6 @@ import AST
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
-import Data.Set as Set
 import Data.Maybe
 import Text.ParserCombinators.Parsec.Pos
 import Control.Monad
@@ -75,11 +74,13 @@ unbranchBody params stmts = do
 --  flattener state over the compiler monad.
 type Unbrancher = StateT UnbrancherState Compiler
 
+type VarDict = Map VarName TypeSpec
+
 
 data UnbrancherState = Unbrancher {
     brLoopInfo   :: LoopInfo,     -- ^If in a loop, the break and continue stmts
-    brVars       :: Set VarName,  -- ^Variables defined up to here
-    -- brExitVars   :: Set VarName,  -- ^Variables defined up to loop exit
+    brVars       :: VarDict,      -- ^Variables defined up to here
+    -- brExitVars   :: VarDict,  -- ^Variables defined up to loop exit
     brTerminated :: Bool,         -- ^Whether code so far included a Break or
                                   --  Next, which terminate execution
     brNewDefs    :: [Item]        -- ^Generated auxilliary procedures
@@ -95,7 +96,7 @@ data LoopInfo = LoopInfo {
     deriving (Eq)
 
 
-initUnbrancherState :: Set VarName -> UnbrancherState
+initUnbrancherState :: VarDict -> UnbrancherState
 initUnbrancherState vars =
     Unbrancher NoLoop vars False []
 
@@ -111,12 +112,12 @@ setNoLoop :: Unbrancher ()
 setNoLoop = modify (\s -> s { brLoopInfo = NoLoop })
 
 
-defVar :: VarName -> Unbrancher ()
-defVar var =
-    modify (\s -> s { brVars = Set.insert var $ brVars s })
+defVar :: VarName -> TypeSpec -> Unbrancher ()
+defVar var ty =
+    modify (\s -> s { brVars = Map.insert var ty $ brVars s })
 
 
-setVars :: Set VarName -> Unbrancher ()
+setVars :: VarDict -> Unbrancher ()
 setVars vs =
     modify (\s -> s { brVars = vs })
 
@@ -190,7 +191,7 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     let afterVars =
             if thnTerm then elsVars  -- result doesn't matter when both true
             else if elsTerm then thnVars
-                 else Set.intersection thnVars elsVars
+                 else Map.intersection thnVars elsVars
     dbgPrintLn $ "* Vars after conditional: " ++ show afterVars
     switchName <- newProcName
     lp <- gets brLoopInfo
@@ -209,7 +210,7 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
         dbgPrintLn $ "* Loop body outputs = " ++ show finalVars
         contName <- newProcName
         cont <- factorFreshProc contName afterVars finalVars Nothing stmts'
-        let loopExitVars = Set.intersection thnVars elsVars
+        let loopExitVars = Map.intersection thnVars elsVars
         switch <- factorFreshProc switchName beforeVars loopExitVars pos
                   [maybePlace 
                    (Cond tstStmts' tstVar
@@ -273,11 +274,12 @@ unbranchStmt (Next) pos stmts = do
 
 
 -- |The set of names of the input parameters
-inputParamNames :: [Param] -> Set VarName
+inputParamNames :: [Param] -> VarDict
 inputParamNames params =
     List.foldr 
-    (\(Param v _ dir _) set -> if flowsIn dir then Set.insert v set else set)
-    Set.empty params    
+    (\(Param v ty dir _) vdict -> 
+         if flowsIn dir then Map.insert v ty vdict else vdict)
+    Map.empty params    
 
 
 -- |The set of variables defined by the list of expressions.
@@ -295,20 +297,23 @@ defArg = ifIsVarDef defVar (return ())
 
 -- |Apply the function if the expression as a variable assignment,
 --  otherwise just take the second argument.
-ifIsVarDef :: (VarName -> t) -> t -> Exp -> t
-ifIsVarDef f v (Typed exp _) = ifIsVarDef f v exp
-ifIsVarDef f v (Var name dir _) =
-    if flowsOut dir then f name else v
-ifIsVarDef f v _ = v
+ifIsVarDef :: (VarName -> TypeSpec -> t) -> t -> Exp -> t
+ifIsVarDef f v exp = ifIsVarDef' f v exp Unspecified
+
+ifIsVarDef' :: (VarName -> TypeSpec -> t) -> t -> Exp -> TypeSpec -> t
+ifIsVarDef' f v (Typed exp ty) _ = ifIsVarDef' f v exp ty
+ifIsVarDef' f v (Var name dir _) ty =
+    if flowsOut dir then f name ty else v
+ifIsVarDef' f v _ _ = v
 
 
-outputVars :: Set VarName -> [Placed Exp] -> Set VarName
+outputVars :: VarDict -> [Placed Exp] -> VarDict
 outputVars = 
-    List.foldr ((ifIsVarDef Set.insert id)  . content)
+    List.foldr ((ifIsVarDef Map.insert id)  . content)
 
 
 -- |Generate a fresh proc 
-factorFreshProc :: ProcName -> (Set VarName) -> (Set VarName) ->
+factorFreshProc :: ProcName -> (VarDict) -> (VarDict) ->
                    OptPos -> [Placed Stmt] -> Unbrancher (Placed Stmt)
 factorFreshProc procName inVars outVars pos body = do
     proto <- newProcProto procName inVars outVars
@@ -316,31 +321,35 @@ factorFreshProc procName inVars outVars pos body = do
     newProcCall procName inVars outVars pos
 
 
-newProcCall :: ProcName -> Set VarName -> Set VarName -> OptPos -> 
+varExp :: FlowDirection -> VarName -> TypeSpec -> Placed Exp
+varExp flow var ty = Unplaced $ Typed (Var var flow Ordinary) ty
+
+
+newProcCall :: ProcName -> VarDict -> VarDict -> OptPos -> 
                Unbrancher (Placed Stmt)
 newProcCall name inVars outVars pos = do
-    let inArgs  = [Unplaced $ Var v ParamIn Ordinary | v <- Set.elems inVars] 
-    let outArgs = [Unplaced $ Var v ParamOut Ordinary | v <- Set.elems outVars]
+    let inArgs  = List.map (uncurry $ varExp ParamIn) $ Map.toList inVars
+    let outArgs = List.map (uncurry $ varExp ParamOut) $ Map.toList outVars
     currMod <- lift getModuleSpec
     return $ maybePlace (ProcCall currMod name Nothing (inArgs ++ outArgs)) pos
 
 
-newProcProto :: ProcName -> Set VarName -> Set VarName -> Unbrancher ProcProto
+newProcProto :: ProcName -> VarDict -> VarDict -> Unbrancher ProcProto
 newProcProto name inVars outVars = do
-    let inParams  = [Param v Unspecified ParamIn Ordinary
-                    | v <- Set.elems inVars]
-    let outParams = [Param v Unspecified ParamOut Ordinary
-                    | v <- Set.elems outVars]
+    let inParams  = [Param v ty ParamIn Ordinary
+                    | (v,ty) <- Map.toList inVars]
+    let outParams = [Param v ty ParamOut Ordinary
+                    | (v,ty) <- Map.toList outVars]
     return $ ProcProto name (inParams ++ outParams) []
 
 
-loopExitVars :: Set VarName -> [Placed Stmt] -> (Set VarName, Bool)
+loopExitVars :: VarDict -> [Placed Stmt] -> (VarDict, Bool)
 loopExitVars vars [] = (vars, False)
 loopExitVars vars (stmt:stmts) =
     stmtLoopExitVars vars (content stmt) stmts
 
 
-stmtLoopExitVars :: Set VarName -> Stmt -> [Placed Stmt] -> (Set VarName, Bool)
+stmtLoopExitVars :: VarDict -> Stmt -> [Placed Stmt] -> (VarDict, Bool)
 stmtLoopExitVars  vars (ProcCall _ _ _ args) stmts =
     loopExitVars (outputVars vars args) stmts
 stmtLoopExitVars vars (ForeignCall _ _ _ args) stmts =
@@ -352,7 +361,7 @@ stmtLoopExitVars vars (Cond tstStmts tstVar thn els) stmts =
         else let (thnVars,thnExit) = loopExitVars tstVars thn
                  -- else branch doesn't get to use test vars
                  (elsVars,elsExit) = loopExitVars vars els
-                 condVars = Set.intersection thnVars elsVars
+                 condVars = Map.intersection thnVars elsVars
              in  if thnExit && elsExit
                  then (condVars, True)
                  else if thnExit then (thnVars, True)
@@ -362,7 +371,7 @@ stmtLoopExitVars vars (Loop body) stmts =
     let (bodyVars,bodyExit) = loopExitVars vars body
     in  if bodyExit then loopExitVars bodyVars stmts
         else -- it's an infinite loop: stmts unreachable
-            (Set.empty,False)
+            (Map.empty,False)
 stmtLoopExitVars vars (For itr gen) stmts =
     shouldnt "flattening should have removed For statements"
 stmtLoopExitVars vars  (Nop) stmts =
