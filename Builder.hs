@@ -40,6 +40,7 @@ import Normalise       (normalise, normaliseItem)
 import Types           (validateModExportTypes, typeCheckMod)
 import Resources       (resourceCheckMod, resourceCheckProc)
 import Unbranch        (unbranchBody)
+import Clause          (compileBody)
 -- import Optimise        (optimiseMod)
 import System.FilePath
 import Data.Map as Map
