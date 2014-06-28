@@ -46,7 +46,6 @@ module AST (
   addImport, doImport, addType, lookupType, publicType,
   ResourceName(..), ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource, 
-  CallExpansion,
   addProc, lookupProc, publicProc,
   refersTo, callTargets,
   verboseDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
@@ -203,8 +202,7 @@ data CompilerState = Compiler {
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
   loadCount :: Int,              -- ^counter of module load order
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
-  deferred :: [Module],          -- ^modules in the same SCC as the current one
-  expansion :: CallExpansion     -- ^the proc expansions to perform
+  deferred :: [Module]          -- ^modules in the same SCC as the current one
   }
 
 -- |The compiler monad is a state transformer monad carrying the 
@@ -214,8 +212,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp 
-                        (Compiler opts [] False Map.empty 0 [] [] 
-                         identityExpansion)
+                        (Compiler opts [] False Map.empty 0 [] [])
 
 
 -- |Apply some transformation function to the compiler state.
@@ -765,19 +762,6 @@ publicProc :: Ident -> Compiler Bool
 publicProc name = do
   int <- getModuleInterface
   return $ Map.member name $ pubProcs int
-
-
--- |Type to remember proc call expansions.  For each proc, we remember
--- the parameters of the call, to bind to the actual arguments, and
--- the body of the definition.  We also store a set of the variable
--- names used only in the body, so that they can be renamed to avoid
--- variable capture.
-type CallExpansion = 
-    Map ProcSpec ([PrimParam],[Placed Prim], Map PrimVarName TypeSpec)
-
--- |A CallExpansion that doesn't expand anything
-identityExpansion :: CallExpansion
-identityExpansion = Map.empty
 
 
 -- |Return some function applied to the user's specified compiler options.
