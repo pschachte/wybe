@@ -29,7 +29,7 @@ module AST (
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
   mapBodyPrims, foldProcCalls,
   expToStmt, expFlow, setExpFlow, isHalfUpdate,
-  Prim(..), PrimProto(..), PrimParam(..), ProcSpec(..),
+  Prim(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
@@ -1118,12 +1118,12 @@ data ProcDef = ProcDef {
 
 data ProcImpln
     = ProcDefSrc [Placed Stmt]
-    | ProcDefPrim PrimProto ProcBody
+    | ProcDefPrim ProcBody
     deriving (Eq)
 
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
-    show (ProcDefPrim _ body) = showBlock 4 body
+    show (ProcDefPrim body) = showBlock 4 body
 
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
@@ -1340,38 +1340,6 @@ data Generator
 -- |A variable name in SSA form, ie, a name and an natural number suffix,
 --  where the suffix is used to specify which assignment defines the value.
 
--- |A primitive proc prototype, including name and formal parameters.
-data PrimProto = PrimProto {
-    primProtoName   :: ProcName, 
-    primProtoParams :: [PrimParam]
-    }
-               deriving Eq
-
-instance Show PrimProto where
-    show (PrimProto name params) =
-        name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")"
-
--- |A formal parameter, including name, type, and flow direction.
-data PrimParam =
-  PrimParam {
-    primParamName :: PrimVarName,
-    primParamType :: TypeSpec, 
-    primParamFlow :: PrimFlow, 
-    primParamFlowType :: ArgFlowType,
-    primParamNeeded :: Bool
-    } deriving Eq
-
--- |How to show a formal parameter.
-instance Show PrimParam where
-  show (PrimParam name typ dir ftype needed) =
-    (if needed then "" else "[") ++
-    primFlowPrefix dir ++
-    show ftype ++
-    show name ++ ":" ++ show typ ++
-    (if needed then "" else "]")
-
-
-
 -- A variable name with an integer suffix to distinguish different 
 -- values for the same name.  As a special case, a suffix of -1 
 -- specifies the ultimate, final value for that name.
@@ -1509,15 +1477,6 @@ varsInPrimArg _ (ArgInt _ _)            = Set.empty
 varsInPrimArg _ (ArgFloat _ _)          = Set.empty
 varsInPrimArg _ (ArgString _ _)         = Set.empty
 varsInPrimArg _ (ArgChar _ _)           = Set.empty
-
-varsInProto :: PrimFlow -> PrimProto -> Set PrimVarName
-varsInProto dir (PrimProto _ params) =
-    List.foldr Set.union Set.empty $ List.map (varsInParam dir) params
-
-varsInParam :: PrimFlow -> PrimParam -> Set PrimVarName
-varsInParam dir (PrimParam var _ dir' _ _) =
-  -- invert the flow for prototypes, since the direction is opposite
-  if dir == dir' then Set.empty else Set.singleton var
 
 
 ----------------------------------------------------------------

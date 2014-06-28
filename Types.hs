@@ -231,7 +231,7 @@ subtypeOf sub super = sub == super || sub `properSubtypeOf` super
 localBodyProcs :: ModSpec -> ProcImpln -> [Ident]
 localBodyProcs thisMod (ProcDefSrc body) =
     foldProcCalls (localCalls thisMod) (++) [] body
-localBodyProcs thisMod (ProcDefPrim _ _) =
+localBodyProcs thisMod (ProcDefPrim _) =
     shouldnt "Type checking compiled code"
 
 
@@ -767,7 +767,7 @@ checkProcDefFullytyped def = do
 
 procDefSrc :: ProcImpln -> [Placed Stmt]
 procDefSrc (ProcDefSrc def) = def
-procDefSrc (ProcDefPrim _ _) = shouldnt $ "procDefSrc applied to ProcDefPrim"
+procDefSrc (ProcDefPrim _) = shouldnt $ "procDefSrc applied to ProcDefPrim"
 
 
 expType :: Exp -> TypeSpec
