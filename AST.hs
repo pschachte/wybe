@@ -677,9 +677,7 @@ addImport modspec imports = do
 
 
 
--- |Add the specified proc definition, with the list of proc defs, to
--- the current module, noting that the list of defs define procs that
--- are spin-offs of the first proc def.
+-- |Add the specified proc definition to the current module.
 addProc :: ProcDef -> Compiler ()
 addProc procDef@(ProcDef name proto _ pos _ calls vis _) = do
     currMod <- getModuleSpec

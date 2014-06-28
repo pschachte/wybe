@@ -36,9 +36,10 @@ import Options         (Options, verbose, optForce, optForceAll, optLibDirs)
 import AST
 import Parser          (parse)
 import Scanner         (inputTokens, fileTokens, Token)
-import Normalise       (normalise)
+import Normalise       (normalise, normaliseItem)
 import Types           (validateModExportTypes, typeCheckMod)
 import Resources       (resourceCheckMod, resourceCheckProc)
+import Unbranch        (unbranchBody)
 -- import Optimise        (optimiseMod)
 import System.FilePath
 import Data.Map as Map
@@ -256,6 +257,9 @@ compileModSCC mspecs = do
     mapM_ (transformModuleProcs resourceCheckProc)  mspecs
     stopOnError $ "resource checking of modules " ++
       showModSpecs mspecs
+    mapM_ (transformModuleProcs unbranchProc)  mspecs
+    stopOnError $ "handling loops and conditionals in modules " ++
+      showModSpecs mspecs
     -- XXX must optimise
     --- fixpointProcessSCC optimiseMod mspecs
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER OPTIMISATION:\n"
@@ -265,6 +269,17 @@ compileModSCC mspecs = do
     --                        (Map.toAscList . modProcs . 
     --                         fromJust . modImplementation))
     return ()
+
+
+unbranchProc :: ProcDef -> Compiler ProcDef
+unbranchProc proc = do
+    let ProcDefSrc body = procImpln proc
+    let params = procProtoParams $ procProto proc
+    (body',newProcs) <- unbranchBody params [] body
+    let proc' = proc { procImpln = ProcDefSrc body' }
+    mapM_ (normaliseItem compileModSCC) newProcs
+    return proc'
+
 
 
 -- |A Processor processes the specified module one iteration in a 
@@ -305,8 +320,10 @@ transformModuleProcs trans thisMod = do
                      getModuleImplementationField (Map.toList . modProcs)
     -- for each name we have a list of procdefs, so we must double map
     procs' <- mapM (mapM trans) procs
-    updateImplementation (\imp -> imp { modProcs = Map.fromList $
-                                                   zip names procs' })
+    updateImplementation
+        (\imp -> imp { modProcs = Map.union
+                                  (Map.fromList $ zip names procs')
+                                  (modProcs imp) })
     finishModule
     -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
     return ()

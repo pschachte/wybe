@@ -5,15 +5,15 @@
 --  Purpose  : Turn loops and conditionals into separate procedures
 --  Copyright: © 2014 Peter Schachte.  All rights reserved.
 --
---  This code transforms loops and conditionals into calls to freshly
---  generated procedures, leaving the code without any branching
---  constructs except procedure calls and procedures defined by
---  multiple clauses with guards.  For example, if a: b else: c end
---  would be transformed to a call to gen with gen defined as two
---  separate clauses with guards: def gen: guard a 1 b guard a 0 c
---  end.  This syntax is not valid wybe, but is used as an
---  intermediate step, as it is similar to the AST we will ultimately
---  generate.
+--  This code transforms loops into fresh recursive procs, and ensures
+--  that all conditionals are the last statements in their respective
+--  bodies.  Note that conditionals can be nested, but at the end of
+--  the conditional, they must return to the caller.  This is handled
+--  by introducing a fresh proc for any code that follows the
+--  conditional.  The reason for this transformation is that a later
+--  pass will convert to a logic programming form which implements
+--  conditionals with separate clauses, each of which returns on
+--  completion.
 --
 --  Loops are a little more complicated.  do a b end c d would be
 --  transformed into next1, where next1 is defined as def next1: a b
@@ -93,7 +93,7 @@ data UnbrancherState = Unbrancher {
 data LoopInfo = LoopInfo {
     next     :: Placed Stmt,      -- ^stmt to go to the next loop iteration
     break    :: Placed Stmt,      -- ^stmt to break out of the loop
-    loopInit :: [Placed Stmt],    -- ^code to initialise before enterring loop
+    loopInit :: [Placed Stmt],    -- ^code to initialise before entering loop
     loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
     | NoLoop
     deriving (Eq)

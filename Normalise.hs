@@ -7,7 +7,7 @@
 
 -- |Support for normalising wybe code as parsed to a simpler form
 --  to make compiling easier.
-module Normalise (normalise) where
+module Normalise (normalise, normaliseItem) where
 
 import AST
 import Data.Map as Map
