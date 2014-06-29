@@ -84,19 +84,9 @@ normaliseItem modCompiler (FuncDecl vis (FnProto name params resources)
     [maybePlace (ProcCall [] "=" Nothing [Unplaced $ Var "$" ParamOut flowType, result])
      pos]
     pos)
-normaliseItem _ decl@(ProcDecl _ _ _ _) = do
-    (ProcDecl vis proto@(ProcProto name params resources) stmts pos,tmpCtr) <- 
-        flattenProcDecl decl
-    -- (proto' <- flattenProto proto
-    -- (stmts,tmpCtr) <- flattenBody stmts
-    -- liftIO $ putStrLn $ "Flattened proc:\n" ++ show (ProcDecl vis proto' stmts pos)
-    -- XXX need to unbranch elsewhere (after typecheck)
-    -- (stmts',genProcs) <- unbranchBody params resources stmts
-    let mainProc = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 vis False
-
-    -- mainProc <- compileProc tmpCtr $ ProcDecl vis proto stmts' pos
-    -- auxProcs <- mapM (compileProc tmpCtr) genProcs
-    addProc mainProc
+normaliseItem _ item@(ProcDecl _ _ _ _) = do
+    (item',tmpCtr) <- flattenProcDecl item
+    addProc tmpCtr item'
 normaliseItem modCompiler (CtorDecl vis proto pos) = do
     modspec <- getModuleSpec
     Just modparams <- getModuleParams

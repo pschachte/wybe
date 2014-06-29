@@ -43,7 +43,7 @@
 --  generated call.
 ----------------------------------------------------------------
 
-module Unbranch (unbranchBody) where
+module Unbranch (unbranchProc, unbranchBody) where
 
 import AST
 import Data.Map as Map
@@ -57,6 +57,19 @@ import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 
 import Debug.Trace
+
+-- |Transform away all loops, and conditionals other than as the only
+-- statement in their block.
+unbranchProc :: ProcDef -> Compiler ProcDef
+unbranchProc proc = do
+    let ProcDefSrc body = procImpln proc
+    let params = procProtoParams $ procProto proc
+    (body',newProcs) <- unbranchBody params body
+    let proc' = proc { procImpln = ProcDefSrc body' }
+    let tmpCount = procTmpCount proc
+    mapM_ (addProc tmpCount) newProcs
+    return proc'
+
 
 unbranchBody :: [Param] -> [Placed Stmt] -> Compiler ([Placed Stmt],[Item])
 unbranchBody params stmts = do
@@ -139,8 +152,8 @@ newProcName = do
 
 genProc :: ProcProto -> [Placed Stmt] -> Unbrancher ()
 genProc proto stmts = do
-    -- dbgPrintLn $ "** Generating proc:\n" 
-    --   ++ show (ProcDecl Private proto stmts Nothing)
+    dbgPrintLn $ "** Generating proc:\n"
+      ++ show (ProcDecl Private proto stmts Nothing)
     let item = ProcDecl Private proto stmts Nothing
     modify (\s -> s { brNewDefs = item:brNewDefs s })
 
@@ -199,6 +212,8 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
       then do
         switch <- factorFreshProc switchName beforeVars afterVars pos
                   [maybePlace (Cond tstStmts' tstVar thn' els') pos]
+        dbgPrintLn $ "* Generated switch proc " ++ showStmt 4 
+          (content switch)
         setVars beforeVars
         unbranchStmts (switch:stmts)
       else do
@@ -331,7 +346,7 @@ newProcCall name inVars outVars pos = do
     let inArgs  = List.map (uncurry $ varExp ParamIn) $ Map.toList inVars
     let outArgs = List.map (uncurry $ varExp ParamOut) $ Map.toList outVars
     currMod <- lift getModuleSpec
-    return $ maybePlace (ProcCall currMod name Nothing (inArgs ++ outArgs)) pos
+    return $ maybePlace (ProcCall currMod name (Just 0) (inArgs ++ outArgs)) pos
 
 
 newProcProto :: ProcName -> VarDict -> VarDict -> Unbrancher ProcProto

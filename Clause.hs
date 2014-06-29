@@ -6,11 +6,7 @@
 --  Copyright: © 2014 Peter Schachte.  All rights reserved.
 --
 
-----------------------------------------------------------------
---                 Clause compiler monad
-----------------------------------------------------------------
-
-module Clause (compileBody) where
+module Clause (compileProc) where
 
 import AST
 import Data.Map as Map
@@ -24,6 +20,10 @@ import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 
 
+----------------------------------------------------------------
+--                 Clause compiler monad
+----------------------------------------------------------------
+
 -- |The clause compiler monad is a state transformer monad carrying the 
 --  clause compiler state over the compiler monad.
 type ClauseComp = StateT ClauseCompState Compiler
@@ -31,44 +31,28 @@ type ClauseComp = StateT ClauseCompState Compiler
 
 -- |The state of compilation of a clause; used by the ClauseComp
 -- monad.
-data ClauseCompState = ClauseComp {
-    varMap :: Map VarName Int,   -- ^current var number for each var
-    resourceMap :: Map ResourceName Int
-                                    -- ^var number and type for each resource
-  }
+type ClauseCompState = Map VarName Int   -- ^current var number for each var
 
 
 initClauseComp :: ClauseCompState
-initClauseComp = ClauseComp Map.empty Map.empty
+initClauseComp = Map.empty
 
 
 nextVar :: String -> ClauseComp PrimVarName
 nextVar name = do
-    resMap <- gets resourceMap
-    case Map.lookup name resMap of
-        Nothing -> do
-            modify (\s -> s { varMap = Map.alter (Just . maybe 0 (+1)) name $ 
-                                       varMap s })
-        Just n ->
-            modify (\s -> s { resourceMap = Map.insert name (n+1) $
-                                            resourceMap s})
+    modify (Map.alter (Just . maybe 0 (+1)) name)
     currVar name Nothing
 
 
 currVar :: String -> OptPos -> ClauseComp PrimVarName
 currVar name pos = do
-    resMap <- gets resourceMap
-    case Map.lookup name resMap of
+    dict <- get
+    case Map.lookup name dict of
         Nothing -> do
-            dict <- gets varMap
-            case Map.lookup name dict of
-                Nothing -> do
-                       lift $ message Error
-                           ("Uninitialised variable '" ++ name ++ "'") pos
-                       return $ PrimVarName name (-1)
-                Just n -> return $ PrimVarName name n
+            lift $ message Error
+                     ("Uninitialised variable '" ++ name ++ "'") pos
+            return $ PrimVarName name (-1)
         Just n -> return $ PrimVarName name n
-
 
 
 mkPrimVarName :: Map String Int -> String -> PrimVarName
@@ -87,29 +71,28 @@ evalClauseComp clcomp =
     evalStateT clcomp initClauseComp
 
 
--- compileProc :: Int -> Item -> Compiler ProcDef
--- compileProc tmpCtr (ProcDecl vis (ProcProto name params resources) body pos) 
---   = do
---     (params',body') <- evalClauseComp $ do
---         mapM_ nextVar $ List.map paramName $ 
---           List.filter (flowsIn . paramFlow) params
---         startVars <- gets varMap
---         -- liftIO $ putStrLn $ "Compiling body of " ++ name ++ "..."
---         let resMap = List.foldr (\r m -> 
---                                      Map.insert (resourceName
---                                                  (resourceFlowRes r)) 0 m)
---                      Map.empty resources
---         modify (\s -> s { resourceMap = resMap })
---         compiled <- compileBody body
---         -- liftIO $ putStrLn $ "Compiled"
---         endVars <- gets varMap
---         return (List.map (primParam startVars endVars) params, compiled)
---     let def = ProcDef name (PrimProto name params') resources body' pos
---               tmpCtr 0 vis False Nothing []
---     -- liftIO $ putStrLn $ "Compiled version:\n" ++ showProcDef 0 def
---     return def
--- compileProc _ decl =
---     shouldnt $ "compileProc applied to non-proc " ++ show decl
+compileProc :: ProcDef -> Compiler ProcDef
+compileProc proc = do
+    evalClauseComp $ do
+        let ProcDefSrc body = procImpln proc
+        let params = procProtoParams $ procProto proc
+        mapM_ nextVar $ List.map paramName $ 
+          List.filter (flowsIn . paramFlow) params
+        startVars <- get
+        -- liftIO $ putStrLn $ "Compiling body of " ++ name ++ "..."
+        compiled <- compileBody body
+        -- liftIO $ putStrLn $ "Compiled"
+        endVars <- get
+        let proc' = proc { procImpln = ProcDefPrim compiled }
+        return proc'
+
+        -- return (List.map (Param startVars endVars) params, compiled)
+
+    -- let def = ProcDef name (PrimProto name params') resources body' pos
+    --           tmpCtr 0 vis False Nothing []
+    -- -- liftIO $ putStrLn $ "Compiled version:\n" ++ showProcDef 0 def
+    -- return def
+
 
 
 -- |Compile a proc body to LPVM form.  By the time we get here, the 
@@ -123,16 +106,16 @@ compileBody [placed]
       _ -> False
  = do
       let Cond tstStmts tstVar thn els = content placed
-      initial <- gets varMap
+      initial <- get
       tstStmts' <- mapM compileSimpleStmt tstStmts
       tstVar' <- placedApplyM compileArg tstVar
       thn' <- mapM compileSimpleStmt thn
-      afterThen <- gets varMap
-      modify (\s -> s { varMap = initial })
+      afterThen <- get
+      put initial
       els' <- mapM compileSimpleStmt els
-      afterElse <- gets varMap
+      afterElse <- get
       let final = Map.intersectionWith max afterThen afterElse
-      modify (\s -> s { varMap = final })
+      put final
       let thn'' = thn' ++ reconcilingAssignments afterThen final
       let els'' = els' ++ reconcilingAssignments afterElse final
       case tstVar' of
@@ -156,11 +139,13 @@ compileBody stmts = do
 
 compileSimpleStmt :: Placed Stmt -> ClauseComp (Placed Prim)
 compileSimpleStmt stmt = do
+    -- liftIO $ putStrLn $ "Compiling " ++ showStmt 4 (content stmt)
     stmt' <- compileSimpleStmt' (content stmt)
     return $ maybePlace stmt' (place stmt)
 
 compileSimpleStmt' :: Stmt -> ClauseComp Prim
-compileSimpleStmt' (ProcCall maybeMod name procID args) = do
+compileSimpleStmt' call@(ProcCall maybeMod name procID args) = do
+    -- liftIO $ putStrLn $ "Compiling call " ++ showStmt 4 call
     args' <- mapM (placedApply compileArg) args
     return $ PrimCall (ProcSpec maybeMod name $
                        trustFromJust "compileSimpleStmt'" procID)

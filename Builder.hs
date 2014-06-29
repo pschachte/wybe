@@ -39,8 +39,8 @@ import Scanner         (inputTokens, fileTokens, Token)
 import Normalise       (normalise, normaliseItem)
 import Types           (validateModExportTypes, typeCheckMod)
 import Resources       (resourceCheckMod, resourceCheckProc)
-import Unbranch        (unbranchBody)
-import Clause          (compileBody)
+import Unbranch        (unbranchProc)
+import Clause          (compileProc)
 -- import Optimise        (optimiseMod)
 import System.FilePath
 import Data.Map as Map
@@ -252,7 +252,6 @@ compileModSCC mspecs = do
     mapM_ typeCheckMod mspecs
     stopOnError $ "type checking of modules " ++
       showModSpecs mspecs
-    -- liftIO $ putStrLn $ "type checked"
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER TYPE CHECK:\n"
     -- verboseDump
     mapM_ (transformModuleProcs resourceCheckProc)  mspecs
@@ -260,6 +259,11 @@ compileModSCC mspecs = do
       showModSpecs mspecs
     mapM_ (transformModuleProcs unbranchProc)  mspecs
     stopOnError $ "handling loops and conditionals in modules " ++
+      showModSpecs mspecs
+    -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER UNBRANCHING:\n"
+    -- verboseDump
+    mapM_ (transformModuleProcs compileProc)  mspecs
+    stopOnError $ "generating low level code" ++
       showModSpecs mspecs
     -- XXX must optimise
     --- fixpointProcessSCC optimiseMod mspecs
@@ -270,17 +274,6 @@ compileModSCC mspecs = do
     --                        (Map.toAscList . modProcs . 
     --                         fromJust . modImplementation))
     return ()
-
-
-unbranchProc :: ProcDef -> Compiler ProcDef
-unbranchProc proc = do
-    let ProcDefSrc body = procImpln proc
-    let params = procProtoParams $ procProto proc
-    (body',newProcs) <- unbranchBody params body
-    let proc' = proc { procImpln = ProcDefSrc body' }
-    mapM_ (normaliseItem compileModSCC) newProcs
-    return proc'
-
 
 
 -- |A Processor processes the specified module one iteration in a 

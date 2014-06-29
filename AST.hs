@@ -675,8 +675,10 @@ addImport modspec imports = do
 
 
 -- |Add the specified proc definition to the current module.
-addProc :: ProcDef -> Compiler ()
-addProc procDef@(ProcDef name proto _ pos _ calls vis _) = do
+addProc :: Int -> Item -> Compiler ()
+addProc tmpCtr (ProcDecl vis proto stmts pos) = do
+    let ProcProto name params resources = proto
+    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 vis False
     currMod <- getModuleSpec
     procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
     let procs' = procs ++ [procDef]
@@ -691,6 +693,8 @@ addProc procDef@(ProcDef name proto _ pos _ calls vis _) = do
     -- liftIO $ putStrLn $ "Adding defnintion for " ++ show spec ++ ":" ++
     --   showProcDef 4 procDef
     return ()
+addProc _ item =
+    shouldnt $ "addProc given non-Proc item " ++ show item
 
 
 getParams :: ProcSpec -> Compiler [Param]
@@ -1789,8 +1793,8 @@ showStmt _ (ForeignCall lang name flags args) =
     "(" ++ intercalate ", " (List.map show args) ++ ")\n"
 showStmt indent (Cond condstmts cond thn els) =
     let leadIn = List.replicate indent ' '
-    in "if:\n" ++ showBody (indent+2) condstmts ++ "\n"
-       ++ leadIn ++ show cond ++ "\n"
+    in "if\n" ++ showBody (indent+2) condstmts ++ "\n"
+       ++ leadIn ++ "  test " ++ show cond ++ "\n"
        ++ leadIn ++ "then:\n"
        ++ showBody (indent+4) thn
        ++ leadIn ++ "else:\n"
@@ -1876,7 +1880,7 @@ checkValue tst msg val = if tst val then val else shouldnt msg
 
 -- |Like fromJust, but with its own error message
 trustFromJust :: String -> (Maybe t) -> t
-trustFromJust msg Nothing = shouldnt msg
+trustFromJust msg Nothing = shouldnt $ "trustFromJust in " ++ msg
 trustFromJust _ (Just val) = val
 
 
