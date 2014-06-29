@@ -1527,7 +1527,7 @@ instance Show Item where
   show (ProcDecl vis proto stmts pos) =
     visibilityPrefix vis ++ "proc " ++ show proto
     ++ showMaybeSourcePos pos
-    ++ "\n" ++ showBody 4 stmts
+    ++ showBody 4 stmts
   show (CtorDecl vis proto pos) =
     visibilityPrefix vis ++ "ctor " ++ show proto
     ++ showMaybeSourcePos pos
@@ -1692,7 +1692,7 @@ showProcDef thisID
     ++ showMaybeSourcePos pos
     ++ " (" ++ show calls ++ " calls)"
     ++ (if inline then " (inline)" else "")
-    ++ "\n" ++ show def
+    ++ show def
 
 -- |How to show a type specification.
 instance Show TypeSpec where
@@ -1793,15 +1793,15 @@ showStmt _ (ForeignCall lang name flags args) =
     "(" ++ intercalate ", " (List.map show args) ++ ")\n"
 showStmt indent (Cond condstmts cond thn els) =
     let leadIn = List.replicate indent ' '
-    in "if\n" ++ showBody (indent+2) condstmts ++ "\n"
+    in "if" ++ showBody (indent+2) condstmts ++ "\n"
        ++ leadIn ++ "  test " ++ show cond ++ "\n"
-       ++ leadIn ++ "then:\n"
+       ++ leadIn ++ "then:"
        ++ showBody (indent+4) thn
-       ++ leadIn ++ "else:\n"
+       ++ leadIn ++ "else:"
        ++ showBody (indent+4) els
        ++ leadIn ++ "end\n"
 showStmt indent (Loop lstmts) =
-    "do\n" ++  showBody (indent + 4) lstmts
+    "do" ++  showBody (indent + 4) lstmts
     ++ List.replicate indent ' ' ++ " end\n"
 showStmt _ (Nop) = "nop\n"
 showStmt _ (For itr gen) =
@@ -1813,7 +1813,7 @@ showStmt _ (Next) = "next\n"
 
 showBody :: Int -> [Placed Stmt] -> String
 showBody indent stmts =
-  List.concatMap (\s -> List.replicate indent ' ' 
+  List.concatMap (\s -> "\n" ++ List.replicate indent ' ' 
                         ++ showStmt indent (content s)) stmts
 
 
@@ -1838,7 +1838,7 @@ instance Show Exp where
   show (StringValue s) = show s
   show (CharValue c) = show c
   show (Var name dir _) = (flowPrefix dir) ++ name
-  show (Where stmts exp) = show exp ++ " where\n" ++ showBody 8 stmts
+  show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
   show (CondExp cond thn els) = 
     "if\n" ++ show cond ++ "then " ++ show thn ++ " else " ++ show els
   show (Fncall maybeMod fn args) = 
