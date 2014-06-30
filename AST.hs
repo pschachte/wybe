@@ -1128,6 +1128,11 @@ data ProcImpln
     deriving (Eq)
 
 
+isCompiled :: ProcImpln -> Bool
+isCompiled (ProcDefPrim _ _) = True
+isCompiled (ProcDefSrc _) = False
+
+
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
     show (ProcDefPrim proto body) = show proto ++ ":" ++ showBlock 4 body
@@ -1653,7 +1658,7 @@ instance Show Module where
                  --  showSetMapItems $ modKnownProcs impl) ++
                  "\n  types           : " ++ showMapTypes (modTypes impl) ++
                  "\n  resources       : " ++ showMapLines (modResources impl) ++
-                 "\n  procs           : " ++ 
+                 "\n  procs           : " ++ "\n" ++
                  (showMap "\n\n" (const "") (showProcDefs 0)
                   (modProcs impl)) ++
                  (if Map.null (modSubmods impl)
@@ -1712,11 +1717,13 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID 
-  (ProcDef _ _ def pos _ calls vis inline) =
+  (ProcDef _ proto def pos _ calls vis inline) =
     "(" ++ show calls ++ " calls)"
     ++ (if inline then " (inline)" else "")
     ++ "\n" ++ visibilityPrefix vis
-    ++ "<" ++ show thisID ++ "> " ++ show def
+    ++ show thisID ++ ": "
+    ++ (if isCompiled def then "" else show proto ++ ":")
+    ++ show def
 
 
 -- |How to show a type specification.
