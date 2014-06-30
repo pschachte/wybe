@@ -8,5 +8,5 @@
   resources       : 
   procs           : 
 (0 calls) (inline)
-0: incr(a#0, ?tmp$0#0:wybe.int):
+0: incr(a#0:wybe.int, ?tmp$0#0:wybe.int):
     foreign llvm add(32:wybe.int, ~a#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @wybe:4:38
