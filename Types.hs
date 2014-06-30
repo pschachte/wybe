@@ -333,7 +333,7 @@ typecheckProcDecl m pd = do
             (typing'',def') <- typecheckProcDef m name pos typing' def
             -- liftIO $ putStrLn $ "*resulting types " ++ name ++
             --   ": " ++ show typing''
-            let params' = updateParamTypes typing' params
+            let params' = updateParamTypes typing'' params
             let proto' = proto { procProtoParams = params' }
             let pd' = pd { procProto = proto', procImpln = ProcDefSrc def' }
             let pd'' = pd'

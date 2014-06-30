@@ -2,10 +2,11 @@
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : chain_assign.chain<0>
+  public procs    : 
   imports         : use wybe
   types           : 
   resources       : 
-  procs           : chain:
-public proc chain(?z:0:int)<0>  @chain_assign:1:8 (0 calls) (inline)
-    foreign llvm move(1:int, ?z:0:int)
+  procs           : 
+(0 calls) (inline)
+0: chain(?z#0:wybe.int):
+    foreign llvm move(1:wybe.int, ?z#0:wybe.int)
