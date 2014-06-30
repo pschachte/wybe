@@ -75,7 +75,8 @@ compileProc :: ProcDef -> Compiler ProcDef
 compileProc proc = do
     evalClauseComp $ do
         let ProcDefSrc body = procImpln proc
-        let params = procProtoParams $ procProto proc
+        let proto = procProto proc
+        let params = procProtoParams proto
         mapM_ nextVar $ List.map paramName $ 
           List.filter (flowsIn . paramFlow) params
         startVars <- get
@@ -83,15 +84,9 @@ compileProc proc = do
         compiled <- compileBody body
         -- liftIO $ putStrLn $ "Compiled"
         endVars <- get
-        let proc' = proc { procImpln = ProcDefPrim compiled }
-        return proc'
-
-        -- return (List.map (Param startVars endVars) params, compiled)
-
-    -- let def = ProcDef name (PrimProto name params') resources body' pos
-    --           tmpCtr 0 vis False Nothing []
-    -- -- liftIO $ putStrLn $ "Compiled version:\n" ++ showProcDef 0 def
-    -- return def
+        let params' = List.map (compileParam startVars endVars) params
+        let proto' = PrimProto (procProtoName proto) params'
+        return $ proc { procImpln = ProcDefPrim proto' compiled }
 
 
 
@@ -131,8 +126,6 @@ compileBody [placed]
                     show tstVar' ++ "'") $
                  betterPlace (place placed) tstVar
             return $ ProcBody [] NoFork
-
-
 compileBody stmts = do
     prims <- mapM compileSimpleStmt stmts
     return $ ProcBody prims NoFork
@@ -191,3 +184,13 @@ reconcileOne caseVars jointVars var =
     PrimForeign "wybe" "move" []
     [ArgVar (mkPrimVarName jointVars var) Unspecified FlowOut Ordinary False,
      ArgVar (mkPrimVarName caseVars var) Unspecified FlowIn Ordinary False]
+
+
+compileParam :: ClauseCompState -> ClauseCompState -> Param -> PrimParam
+compileParam startVars endVars (Param name ty flow ftype) =
+    let (pflow,num) =
+            case flow of
+                ParamIn -> (FlowIn, startVars ! name)
+                ParamOut -> (FlowOut, endVars ! name)
+                _ -> shouldnt "non-simple parameter flow in compileParam"
+    in PrimParam (PrimVarName name num) ty pflow ftype

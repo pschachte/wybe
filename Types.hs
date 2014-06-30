@@ -59,18 +59,21 @@ validateProcDefTypes name def = do
     params' <- mapM (validateParamType name pos public) params
     return $ def { procProto = proto { procProtoParams = params' }}
 
+
 validateParamType :: Ident -> OptPos -> Bool -> Param -> Compiler Param
 validateParamType pname ppos public param = do
     let ty = paramType param
-    if public && ty == Unspecified
-      then do
-        message Error ("Public proc '" ++ pname ++
-                       "' with undeclared parameter or return type") ppos
-        return param
-      else do
-        ty' <- fmap (fromMaybe Unspecified) $ lookupType ty ppos
-        let param' = param { paramType = ty' }
-        return param'
+    checkDeclIfPublic pname ppos public ty
+    ty' <- fmap (fromMaybe Unspecified) $ lookupType ty ppos
+    let param' = param { paramType = ty' }
+    return param'
+
+
+checkDeclIfPublic :: Ident -> OptPos -> Bool -> TypeSpec -> Compiler ()
+checkDeclIfPublic pname ppos public ty = do
+    when (public && ty == Unspecified) $
+         message Error ("Public proc '" ++ pname ++
+                        "' with undeclared parameter or return type") ppos
 
 
 -- |Type check a single module named in the second argument; the
@@ -231,7 +234,7 @@ subtypeOf sub super = sub == super || sub `properSubtypeOf` super
 localBodyProcs :: ModSpec -> ProcImpln -> [Ident]
 localBodyProcs thisMod (ProcDefSrc body) =
     foldProcCalls (localCalls thisMod) (++) [] body
-localBodyProcs thisMod (ProcDefPrim _) =
+localBodyProcs thisMod (ProcDefPrim _ _) =
     shouldnt "Type checking compiled code"
 
 
@@ -767,7 +770,7 @@ checkProcDefFullytyped def = do
 
 procDefSrc :: ProcImpln -> [Placed Stmt]
 procDefSrc (ProcDefSrc def) = def
-procDefSrc (ProcDefPrim _) = shouldnt $ "procDefSrc applied to ProcDefPrim"
+procDefSrc (ProcDefPrim _ _) = shouldnt $ "procDefSrc applied to ProcDefPrim"
 
 
 expType :: Exp -> TypeSpec

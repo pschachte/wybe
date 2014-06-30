@@ -13,7 +13,7 @@ module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility,
   TypeProto(..), TypeSpec(..), FnProto(..),
-  ProcProto(..), Param(..), Stmt(..),
+  ProcProto(..), Param(..), Stmt(..), PrimProto(..), PrimParam(..),
   Exp(..), Generator(..),
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
@@ -24,7 +24,8 @@ module AST (
   enterModule, reenterModule, exitModule, finishModule, 
   emptyInterface, emptyImplementation, 
   getParams, getProcDef, mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, ProcImpln(..), ProcDef(..), ProcBody(..), PrimFork(..), Ident, VarName,
+  ModSpec, ProcImpln(..), ProcDef(..),
+  ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..), 
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
   mapBodyPrims, foldProcCalls,
@@ -1115,6 +1116,7 @@ data ProcDef = ProcDef {
 }
              deriving Eq
 
+
 -- |A procedure defintion body.  Initially, this is in a form similar
 -- to what is read in from the source file.  As compilation procedes,
 -- this is gradually refined and constrained, until it is converted
@@ -1122,12 +1124,13 @@ data ProcDef = ProcDef {
 
 data ProcImpln
     = ProcDefSrc [Placed Stmt]
-    | ProcDefPrim ProcBody
+    | ProcDefPrim PrimProto ProcBody
     deriving (Eq)
+
 
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
-    show (ProcDefPrim body) = showBlock 4 body
+    show (ProcDefPrim proto body) = show proto ++ ":" ++ showBlock 4 body
 
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
@@ -1271,13 +1274,36 @@ data ProcProto = ProcProto {
     procProtoResources::[ResourceFlowSpec]
     } deriving Eq
 
+
+-- |A proc prototype, including name and formal parameters.
+data PrimProto = PrimProto {
+    primProtoName::ProcName,
+    primProtoParams::[PrimParam]
+    } deriving Eq
+
+
+instance Show PrimProto where
+  show (PrimProto name params) = 
+    name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")"
+
+
 -- |A formal parameter, including name, type, and flow direction.
 data Param = Param {
-    paramName:: VarName, 
+    paramName::VarName, 
     paramType::TypeSpec, 
     paramFlow::FlowDirection,
     paramFlowType::ArgFlowType
     } deriving Eq
+
+
+-- |A formal parameter, including name, type, and flow direction.
+data PrimParam = PrimParam {
+    primParamName::PrimVarName,
+    primParamType::TypeSpec, 
+    primParamFlow::PrimFlow,
+    primParamFlowType::ArgFlowType -- XXX Not sure this is still needed
+    } deriving Eq
+
 
 -- |A dataflow direction:  in, out, both, or neither.
 data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow
@@ -1628,7 +1654,7 @@ instance Show Module where
                  "\n  types           : " ++ showMapTypes (modTypes impl) ++
                  "\n  resources       : " ++ showMapLines (modResources impl) ++
                  "\n  procs           : " ++ 
-                 (showMap "\n                    " (++":") (showProcDefs 0)
+                 (showMap "\n\n" (const "") (showProcDefs 0)
                   (modProcs impl)) ++
                  (if Map.null (modSubmods impl)
                   then ""
@@ -1686,13 +1712,12 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID 
-  (ProcDef _ proto def pos _ calls vis inline) =
-    "\n" ++ visibilityPrefix vis ++
-    "proc " ++ show proto ++ "<" ++ show thisID ++ "> "
-    ++ showMaybeSourcePos pos
-    ++ " (" ++ show calls ++ " calls)"
+  (ProcDef _ _ def pos _ calls vis inline) =
+    "(" ++ show calls ++ " calls)"
     ++ (if inline then " (inline)" else "")
-    ++ show def
+    ++ "\n" ++ visibilityPrefix vis
+    ++ "<" ++ show thisID ++ "> " ++ show def
+
 
 -- |How to show a type specification.
 instance Show TypeSpec where
@@ -1718,6 +1743,11 @@ instance Show ProcProto where
 instance Show Param where
   show (Param name typ dir _) =
     flowPrefix dir ++ name ++ showTypeSuffix typ
+
+-- |How to show a formal parameter.
+instance Show PrimParam where
+  show (PrimParam name typ dir _) =
+    primFlowPrefix dir ++ show name ++ showTypeSuffix typ
 
 showTypeSuffix :: TypeSpec -> String
 showTypeSuffix Unspecified = ""
@@ -1780,7 +1810,7 @@ showPrim _ (PrimNop) =
 
 -- |Show a variable, with its suffix
 instance Show PrimVarName where
-    show (PrimVarName var suffix) = var ++ ":" ++ show suffix
+    show (PrimVarName var suffix) = var ++ "#" ++ show suffix
 
 
 showStmt :: Int -> Stmt -> String
