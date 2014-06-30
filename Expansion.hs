@@ -24,8 +24,7 @@ import Debug.Trace
 
 procExpansion :: ProcDef -> Compiler ProcDef
 procExpansion def = do
-    let body  = procBody def
-    let proto = procProto def
+    let ProcDefPrim proto body  = procImpln def
     let tmp = procTmpCount def
     let outputs = List.map primParamName $
                   List.filter ((==FlowOut) . primParamFlow) $
@@ -35,7 +34,7 @@ procExpansion def = do
     let proto' = proto { primProtoParams =
                               List.map (renameParam $ substitution expander) $
                               primProtoParams proto }
-    let def' = def { procProto = proto', procBody = body', 
+    let def' = def { procImpln = ProcDefPrim proto' body',
                      procTmpCount = tmpCount expander }
     -- liftIO $ putStrLn $
     --        "\nExpanded:" ++ showProcDef 4 def ++
@@ -129,7 +128,7 @@ expandPrims noInline renameAll pprims = do
 
 
 expandPrim :: Bool -> Bool -> Prim -> OptPos -> Expander [Placed Prim]
-expandPrim noInline renameAll call@(PrimCall md nm (Just pspec) args) pos = do
+expandPrim noInline renameAll call@(PrimCall pspec args) pos = do
     -- liftIO $ putStrLn $ "Try to expand " ++ 
     --   (if noInline then "" else "and inline ") ++ show call
     args' <- mapM (expandArg renameAll) args
@@ -140,9 +139,8 @@ expandPrim noInline renameAll call@(PrimCall md nm (Just pspec) args) pos = do
                  saved <- get
                  modify (\s -> s { substitution = identitySubstitution, 
                                    protected = Set.empty })
-                 mapM_ addParamSubst $ 
-                   zip (primProtoParams $ procProto def) args'
-                 let body = procBody def
+                 let ProcDefPrim proto body = procImpln def
+                 mapM_ addParamSubst $ zip (primProtoParams proto) args'
                  unless (NoFork == bodyFork body) $
                    shouldnt $ "Inlined proc with non-empty fork" ++
                               show pspec
@@ -155,7 +153,7 @@ expandPrim noInline renameAll call@(PrimCall md nm (Just pspec) args) pos = do
                  -- liftIO $ putStrLn $ "After subst " ++
                  --   showBlock 4 (ProcBody defPrims' NoFork)
                  return defPrims'
-             else return [maybePlace (PrimCall md nm (Just pspec) args') pos]
+             else return [maybePlace (PrimCall pspec args') pos]
     primsList <- mapM (\p -> expandIfAssign (content p) p) prims
     return $ concat primsList
 expandPrim _ renameAll (PrimForeign lang nm flags args) pos = do
@@ -204,7 +202,7 @@ setPrimArgFlow FlowOut _ arg =
 
 
 addParamSubst :: (PrimParam,PrimArg) -> Expander ()
-addParamSubst param@(PrimParam k ty dir _ _,v) = do
+addParamSubst param@(PrimParam k ty dir _,v) = do
     when (Unspecified == ty) $
       liftIO $ putStrLn $ "Danger: untyped param: " ++ show param
     when (Unspecified == argType v) $
@@ -213,10 +211,10 @@ addParamSubst param@(PrimParam k ty dir _ _,v) = do
              
 
 renameParam :: Substitution -> PrimParam -> PrimParam
-renameParam subst param@(PrimParam name typ FlowOut ftype needed) = 
+renameParam subst param@(PrimParam name typ FlowOut ftype) = 
     maybe param 
     (\arg -> case arg of
-          ArgVar name' _ _ _ _ -> PrimParam name' typ FlowOut ftype needed
+          ArgVar name' _ _ _ _ -> PrimParam name' typ FlowOut ftype
           _ -> param) $
     Map.lookup name subst
 renameParam _ param = param

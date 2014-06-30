@@ -1716,11 +1716,11 @@ showProcDefs firstID (def:defs) =
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID 
-  (ProcDef _ proto def pos _ calls vis inline) =
-    "(" ++ show calls ++ " calls)"
+showProcDef thisID (ProcDef _ proto def pos _ calls vis inline) =
+    visibilityPrefix vis
+    ++ "(" ++ show calls ++ " calls)"
     ++ (if inline then " (inline)" else "")
-    ++ "\n" ++ visibilityPrefix vis
+    ++ "\n"
     ++ show thisID ++ ": "
     ++ (if isCompiled def then "" else show proto ++ ":")
     ++ show def

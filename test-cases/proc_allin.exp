@@ -6,5 +6,6 @@
   imports         : use wybe
   types           : 
   resources       : 
-  procs           : nada:
-public proc nada([x:0:int], [y:0:int])<0>  @proc_allin:1:8 (0 calls) (inline)
+  procs           : 
+public (0 calls) (inline)
+0: nada(x#0:wybe.int, y#0:wybe.int):

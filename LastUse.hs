@@ -17,16 +17,17 @@ import Control.Monad
 
 markLastUse :: ProcSpec -> ProcDef -> Compiler ProcDef
 markLastUse ps def = do
-    let params = primProtoParams $ procProto def
-    let body = procBody def
+    let ProcDefPrim proto body = procImpln def
+    let params = primProtoParams proto
     let outputs = List.filter ((==FlowOut) . primParamFlow) params
     let outSet = List.foldr (Set.insert . primParamName) Set.empty outputs
     (body',needed) <- runStateT (bodyLastUse body) outSet
-    let params' = List.map 
-                  (\p -> p { primParamNeeded = neededIfInput needed p }) 
-                  params
-    let proto' = (procProto def) { primProtoParams = params' }
-    return $ def { procProto = proto', procBody = body' }
+    -- let params' = List.map 
+    --               (\p -> p { primParamNeeded = neededIfInput needed p }) 
+    --               params
+    let params' = params
+    let proto' = proto { primProtoParams = params' }
+    return $ def { procImpln = ProcDefPrim proto' body' }
 
 
 neededIfInput :: Set PrimVarName -> PrimParam -> Bool
@@ -86,8 +87,8 @@ pprimsLastUse (pprim:pprims) = do
     return $ prim' ++ pprims'
 
 primLastUse :: Prim -> OptPos -> NeededVars [Placed Prim]
-primLastUse (PrimCall md pr sp args) pos = do
-    noteLastUses args pos $ PrimCall md pr sp
+primLastUse (PrimCall sp args) pos = do
+    noteLastUses args pos $ PrimCall sp
 primLastUse (PrimForeign ln pr tg args) pos = do
     noteLastUses args pos $ PrimForeign ln pr tg
 primLastUse (PrimNop) pos = return [maybePlace PrimNop pos]

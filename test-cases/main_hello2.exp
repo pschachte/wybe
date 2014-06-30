@@ -6,8 +6,9 @@
   imports         : use wybe
   types           : 
   resources       : 
-  procs           : :
-proc (#wybe.io$io:0:phantom, ?#wybe.io$io:2:phantom)<0>  use !wybe.io.io (0 calls)
-    foreign c print_string("hello, ":string, ~#wybe.io$io:0:phantom, ?#wybe.io$io:1:phantom) @wybe:122:41
-    foreign c print_string("world!":string, ~#wybe.io$io:1:phantom, ?#tmp$0:0:phantom) @wybe:122:41
-    foreign c putc('\n':char, ~#tmp$0:0:phantom, ?#wybe.io$io:2:phantom) @wybe:108:28
+  procs           : 
+(0 calls)
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
+    foreign c print_string("hello, ":wybe.string, ~%wybe.io$io#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:122:41
+    foreign c print_string("world!":wybe.string, ~%wybe.io$io#1:wybe.phantom, ?%tmp$0#0:wybe.phantom) @wybe:122:41
+    foreign c putc('\n':wybe.char, ~%tmp$0#0:wybe.phantom, ?%wybe.io$io#2:wybe.phantom) @wybe:108:28

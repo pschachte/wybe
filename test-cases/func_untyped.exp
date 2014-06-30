@@ -2,10 +2,11 @@
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : func_untyped.incr<0>
+  public procs    : 
   imports         : use wybe
   types           : 
   resources       : 
-  procs           : incr:
-public proc incr(a:0:int, ?tmp$0:0:int)<0>  @func_untyped:1:8 (0 calls) (inline)
-    foreign llvm add(32:int, ~a:0:int, 1:int, ?tmp$0:0:int) @wybe:4:38
+  procs           : 
+(0 calls) (inline)
+0: incr(a#0, ?tmp$0#0:wybe.int):
+    foreign llvm add(32:wybe.int, ~a#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @wybe:4:38

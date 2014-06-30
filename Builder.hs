@@ -41,7 +41,7 @@ import Types           (validateModExportTypes, typeCheckMod)
 import Resources       (resourceCheckMod, resourceCheckProc)
 import Unbranch        (unbranchProc)
 import Clause          (compileProc)
--- import Optimise        (optimiseMod)
+import Optimise        (optimiseMod)
 import System.FilePath
 import Data.Map as Map
 import Data.Set as Set
@@ -263,10 +263,8 @@ compileModSCC mspecs = do
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER UNBRANCHING:\n"
     -- verboseDump
     mapM_ (transformModuleProcs compileProc)  mspecs
-    stopOnError $ "generating low level code" ++
-      showModSpecs mspecs
-    -- XXX must optimise
-    --- fixpointProcessSCC optimiseMod mspecs
+    stopOnError $ "generating low level code in " ++ showModSpecs mspecs
+    fixpointProcessSCC optimiseMod mspecs
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER OPTIMISATION:\n"
     -- verboseDump
     -- mods <- mapM getLoadedModule mods

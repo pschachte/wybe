@@ -37,8 +37,16 @@ optimiseMod mods thisMod = do
     return (False,[])
 
 
+procBody :: ProcDef -> ProcBody
+procBody def =
+    case procImpln def of
+        ProcDefSrc _ -> shouldnt "Optimising un-compiled code"
+        ProcDefPrim _ body -> body
+
+
 sccElts (AcyclicSCC single) = [single]
 sccElts (CyclicSCC multi) = multi
+
 
 optimiseSCCBottomUp :: SCC ProcSpec -> Compiler ()
 optimiseSCCBottomUp (AcyclicSCC pspec) = do
@@ -51,6 +59,7 @@ optimiseProc :: ProcSpec -> Compiler ()
 optimiseProc pspec = do
     -- liftIO $ putStrLn $ ">>> Optimise " ++ show pspec
     updateProcDefM (optimiseProcDef pspec) pspec
+    return ()
 
 
 optimiseProcDef :: ProcSpec -> ProcDef -> Compiler ProcDef
@@ -64,17 +73,21 @@ optimiseProcDef pspec def = do
 
 
 ----------------------------------------------------------------
---                               Inlining
+--                       Deciding what to inline
 ----------------------------------------------------------------
 
 inlineIfWanted :: ProcDef -> Compiler ProcDef
 inlineIfWanted def
-    |  NoFork == bodyFork (procBody def) && not (procInline def) = do
-    let benefit = 2 + (procCost $ procProto def) -- add 2 for time saving
-    let cost = bodyCost $ bodyPrims $ procBody def
+    |  NoFork == bodyFork body && not (procInline def) = do
+    -- liftIO $ putStrLn $ "Considering inline of " ++ procName def
+    let benefit = 2 + procCost proto -- add 2 for time saving
+    -- liftIO $ putStrLn $ "  benefit = " ++ show benefit
+    let cost = bodyCost $ bodyPrims body
+    -- liftIO $ putStrLn $ "  cost = " ++ show cost
     if  benefit >= cost
     then return $ def { procInline = True }
     else return def
+    where ProcDefPrim proto body = procImpln def
 inlineIfWanted def = return def
 
 
@@ -86,7 +99,7 @@ bodyCost :: [Placed Prim] -> Int
 bodyCost pprims = sum $ List.map (primCost . content) pprims
 
 primCost :: Prim -> Int
-primCost (PrimCall _ _ _ args) = 1 + (sum $ List.map argCost args)
+primCost (PrimCall _ args) = 1 + (sum $ List.map argCost args)
 primCost (PrimForeign "llvm" _ _ _) = 1 -- single instuction, so cost = 1
 primCost (PrimForeign _ _ _ args) = 1 + (sum $ List.map argCost args)
 primCost (PrimNop) = 0
@@ -116,7 +129,6 @@ localBodyCallees modspec body =
 
 
 localCallees :: ModSpec -> Prim -> [ProcSpec]
-localCallees modspec (PrimCall m name (Just pspec) _)
-    | m == modspec = [pspec]
+localCallees modspec (PrimCall pspec _) = [pspec]
 localCallees _ _ = []
 
