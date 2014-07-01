@@ -264,6 +264,8 @@ compileModSCC mspecs = do
     -- verboseDump
     mapM_ (transformModuleProcs compileProc)  mspecs
     stopOnError $ "generating low level code in " ++ showModSpecs mspecs
+    -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER COMPILATION TO LPVM:\n"
+    -- verboseDump
     fixpointProcessSCC optimiseMod mspecs
     -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER OPTIMISATION:\n"
     -- verboseDump

@@ -80,12 +80,16 @@ compileProc proc = do
         mapM_ nextVar $ List.map paramName $ 
           List.filter (flowsIn . paramFlow) params
         startVars <- get
-        -- liftIO $ putStrLn $ "Compiling body of " ++ name ++ "..."
+        -- liftIO $ putStrLn $ "Compiling body:\n" ++ showBody 4 body
         compiled <- compileBody body
-        -- liftIO $ putStrLn $ "Compiled"
+        -- liftIO $ putStrLn $ "Compiled to:\n"  ++ showBlock 4 compiled
         endVars <- get
+        -- liftIO $ putStrLn $ "startVars: " ++ show startVars
+        -- liftIO $ putStrLn $ "endVars  : " ++ show endVars
+        -- liftIO $ putStrLn $ "params   : " ++ show params
         let params' = List.map (compileParam startVars endVars) params
         let proto' = PrimProto (procProtoName proto) params'
+        -- liftIO $ putStrLn $ "comparams: " ++ show params'
         return $ proc { procImpln = ProcDefPrim proto' compiled }
 
 
@@ -187,10 +191,14 @@ reconcileOne caseVars jointVars var =
 
 
 compileParam :: ClauseCompState -> ClauseCompState -> Param -> PrimParam
-compileParam startVars endVars (Param name ty flow ftype) =
+compileParam startVars endVars param@(Param name ty flow ftype) =
     let (pflow,num) =
             case flow of
-                ParamIn -> (FlowIn, startVars ! name)
-                ParamOut -> (FlowOut, endVars ! name)
+                ParamIn -> (FlowIn, Map.lookup name startVars)
+                ParamOut -> (FlowOut, Map.lookup name endVars)
                 _ -> shouldnt "non-simple parameter flow in compileParam"
-    in PrimParam (PrimVarName name num) ty pflow ftype
+    in PrimParam (PrimVarName name $
+                  -- XXX this is wrong, but I can't see how the error case ever happens.
+                  -- fromMaybe 0 num)
+                  trustFromJust ("compileParam for param " ++ show param) num)
+       ty pflow ftype
