@@ -7,18 +7,19 @@
                     use wybe
   types           : 
   resources       : 
-  procs           : distance:
-public proc distance(p1:0:position, p2:0:position, ?tmp$0:0:int)<0>  @import:3:8 (0 calls)
-    position.position.x<0>(p2:0:position, ?tmp$4:0:int) @import:4:17
-    position.position.x<0>(p1:0:position, ?tmp$5:0:int) @import:4:22
-    foreign llvm sub(32:int, ~tmp$4:0:int, ~tmp$5:0:int, ?tmp$3:0:int) @wybe:7:38
-    foreign C ipow(~tmp$3:0:int, 2:int, ?tmp$2:0:int) @wybe:21:42
-    position.position.y<0>(~p2:0:position, ?tmp$8:0:int) @import:4:40
-    position.position.y<0>(~p1:0:position, ?tmp$9:0:int) @import:4:45
-    foreign llvm sub(32:int, ~tmp$8:0:int, ~tmp$9:0:int, ?tmp$7:0:int) @wybe:7:38
-    foreign C ipow(~tmp$7:0:int, 2:int, ?tmp$6:0:int) @wybe:21:42
-    foreign llvm add(32:int, ~tmp$2:0:int, ~tmp$6:0:int, ?tmp$1:0:int) @wybe:4:38
-    foreign C isqrt(~tmp$1:0:int, ?tmp$0:0:int) @wybe:20:35
+  procs           : 
+public (0 calls)
+0: distance(p1#0:position.position, p2#0:position.position, ?tmp$0#0:wybe.int):
+    position.position.x<0>(p2#0:position.position, ?tmp$4#0:wybe.int) @import:4:17
+    position.position.x<0>(p1#0:position.position, ?tmp$5#0:wybe.int) @import:4:22
+    foreign llvm sub(32:wybe.int, ~tmp$4#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$3#0:wybe.int) @wybe:7:38
+    foreign C ipow(~tmp$3#0:wybe.int, 2:wybe.int, ?tmp$2#0:wybe.int) @wybe:21:42
+    position.position.y<0>(~p2#0:position.position, ?tmp$8#0:wybe.int) @import:4:40
+    position.position.y<0>(~p1#0:position.position, ?tmp$9#0:wybe.int) @import:4:45
+    foreign llvm sub(32:wybe.int, ~tmp$8#0:wybe.int, ~tmp$9#0:wybe.int, ?tmp$7#0:wybe.int) @wybe:7:38
+    foreign C ipow(~tmp$7#0:wybe.int, 2:wybe.int, ?tmp$6#0:wybe.int) @wybe:21:42
+    foreign llvm add(32:wybe.int, ~tmp$2#0:wybe.int, ~tmp$6#0:wybe.int, ?tmp$1#0:wybe.int) @wybe:4:38
+    foreign C isqrt(~tmp$1#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:20:35
 --------------------------------------------------
  Module position
   public submods  : 
@@ -36,6 +37,7 @@ public proc distance(p1:0:position, p2:0:position, ?tmp$0:0:int)<0>  @import:3:8
   types           : position/0 @position:1:8
   resources       : 
   procs           : 
+
 --------------------------------------------------
  Module position.position([])
   public submods  : 
@@ -51,23 +53,27 @@ public proc distance(p1:0:position, p2:0:position, ?tmp$0:0:int)<0>  @import:3:8
   imports         : use wybe
   types           : 
   resources       : 
-  procs           : =:
-public proc =(?x:0:position, y:0:position)<0>  (0 calls) (inline)
-    foreign llvm move(~y:0:position, ?x:0:position)
-public proc =(y:0:position, ?x:0:position)<1>  (0 calls) (inline)
-    foreign llvm move(~y:0:position, ?x:0:position)
-                    position:
-public proc position(x:0:int, y:0:int, ?$rec:2:position)<0>  @position:2:12 (0 calls)
-    foreign $ alloc("position":string, "position":string, ?$rec:0:position)
-    foreign $ mutate("position":string, "position":string, "x":string, ~%$rec:0:position, ?%$rec:1:position, ~x:0:int)
-    foreign $ mutate("position":string, "position":string, "y":string, ~%$rec:1:position, ?%$rec:2:position, ~y:0:int)
-                    x:
-public proc x($rec:0:position, ?tmp$0:0:int)<0>  @position:2:12 (0 calls)
-    foreign $ access("position":string, "position":string, "x":string, ~$rec:0:position, ?tmp$0:0:int)
-public proc x(%$rec:0:position, ?%$rec:1:position, $field:0:int)<1>  @position:2:12 (0 calls)
-    foreign $ mutate("position":string, "position":string, "x":string, ~%$rec:0:position, ?%$rec:1:position, ~$field:0:int)
-                    y:
-public proc y($rec:0:position, ?tmp$0:0:int)<0>  @position:2:12 (0 calls)
-    foreign $ access("position":string, "position":string, "y":string, ~$rec:0:position, ?tmp$0:0:int)
-public proc y(%$rec:0:position, ?%$rec:1:position, $field:0:int)<1>  @position:2:12 (0 calls)
-    foreign $ mutate("position":string, "position":string, "y":string, ~%$rec:0:position, ?%$rec:1:position, ~$field:0:int)
+  procs           : 
+public (0 calls) (inline)
+0: =(?x#0:position.position, y#0:position.position):
+    foreign llvm move(~y#0:position.position, ?x#0:position.position)public (0 calls) (inline)
+1: =(y#0:position.position, ?x#0:position.position):
+    foreign llvm move(~y#0:position.position, ?x#0:position.position)
+
+public (0 calls)
+0: position(x#0:wybe.int, y#0:wybe.int, ?$rec#2:position.position):
+    foreign $ alloc("position":wybe.string, "position":wybe.string, ?$rec#0:position.position)
+    foreign $ mutate("position":wybe.string, "position":wybe.string, "x":wybe.string, ~%$rec#0:position.position, ?%$rec#1:position.position, ~x#0:wybe.int)
+    foreign $ mutate("position":wybe.string, "position":wybe.string, "y":wybe.string, ~%$rec#1:position.position, ?%$rec#2:position.position, ~y#0:wybe.int)
+
+public (0 calls)
+0: x($rec#0:position.position, ?tmp$0#0:wybe.int):
+    foreign $ access("position":wybe.string, "position":wybe.string, "x":wybe.string, ~$rec#0:position.position, ?tmp$0#0:wybe.int)public (0 calls)
+1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
+    foreign $ mutate("position":wybe.string, "position":wybe.string, "x":wybe.string, ~%$rec#0:position.position, ?%$rec#1:position.position, ~$field#0:wybe.int)
+
+public (0 calls)
+0: y($rec#0:position.position, ?tmp$0#0:wybe.int):
+    foreign $ access("position":wybe.string, "position":wybe.string, "y":wybe.string, ~$rec#0:position.position, ?tmp$0#0:wybe.int)public (0 calls)
+1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
+    foreign $ mutate("position":wybe.string, "position":wybe.string, "y":wybe.string, ~%$rec#0:position.position, ?%$rec#1:position.position, ~$field#0:wybe.int)

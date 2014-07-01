@@ -542,7 +542,7 @@ updateImplementation implOp = do
             updateModule (\mod -> mod { modImplementation = Just $ implOp impl })
 
 -- |Add the specified type definition to the current module.
-addType :: Ident -> TypeDef -> Visibility -> Compiler ()
+addType :: Ident -> TypeDef -> Visibility -> Compiler (TypeSpec)
 addType name def@(TypeDef arity _) vis = do
     currMod <- getModuleSpec
     let spec = TypeSpec currMod name [] -- XXX what about type params?
@@ -552,6 +552,8 @@ addType name def@(TypeDef arity _) vis = do
         in imp { modTypes = Map.insert name def $ modTypes imp, 
                  modKnownTypes = Map.insert name set $ modKnownTypes imp })
     updateInterface vis (updatePubTypes (Map.insert name spec))
+    return spec
+
 
 
 -- |Find the definition of the specified type visible from the current module.
@@ -830,7 +832,7 @@ refersTo modspec name implMapFn specModFn = do
     --   name ++ " from module " ++ showModSpec currMod
     visible <- getModule (Map.findWithDefault Set.empty name . implMapFn . 
                           fromJust . modImplementation)
-    return $ Set.filter ((modspec `isSuffixOf`). specModFn) visible
+    return $ Set.filter ((modspec `isSuffixOf`) . specModFn) visible
 
 
 -- |Returns a list of the potential targets of a proc call.

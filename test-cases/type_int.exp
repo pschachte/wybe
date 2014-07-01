@@ -23,6 +23,7 @@
   types           : myint/0 @type_int:1:8
   resources       : 
   procs           : 
+
 --------------------------------------------------
  Module type_int.myint([])
   public submods  : 
@@ -47,46 +48,57 @@
   imports         : use wybe
   types           : 
   resources       : 
-  procs           : *:
-public proc *(x:0:myint, y:0:myint, ?tmp$0:0:myint)<0>  @type_int:8:12 (0 calls) (inline)
-    foreign llvm mul(32:int, ~x:0:myint, ~y:0:myint, ?tmp$0:0:myint) @type_int:8:44
-                    +:
-public proc +(x:0:myint, y:0:myint, ?tmp$0:0:myint)<0>  @type_int:2:12 (0 calls) (inline)
-    foreign llvm add(32:int, ~x:0:myint, ~y:0:myint, ?tmp$0:0:myint) @type_int:2:44
-public proc +(?tmp$0:0:myint, y:0:myint, z:0:myint)<1>  @type_int:3:12 (0 calls) (inline)
-    foreign llvm sub(32:int, ~z:0:myint, ~y:0:myint, ?tmp$0:0:myint) @type_int:3:50
-public proc +(x:0:myint, ?tmp$0:0:myint, z:0:myint)<2>  @type_int:4:12 (0 calls) (inline)
-    foreign llvm sub(32:int, ~z:0:myint, ~x:0:myint, ?tmp$0:0:myint) @type_int:4:50
-                    -:
-public proc -(x:0:myint, y:0:myint, ?tmp$0:0:myint)<0>  @type_int:5:12 (0 calls) (inline)
-    foreign llvm sub(32:int, ~x:0:myint, ~y:0:myint, ?tmp$0:0:myint) @type_int:5:44
-public proc -(?tmp$0:0:myint, y:0:myint, z:0:myint)<1>  @type_int:6:12 (0 calls) (inline)
-    foreign llvm add(32:int, ~z:0:myint, ~y:0:myint, ?tmp$0:0:myint) @type_int:6:50
-public proc -(x:0:myint, ?tmp$0:0:myint, z:0:myint)<2>  @type_int:7:12 (0 calls) (inline)
-    foreign llvm sub(32:int, ~z:0:myint, ~x:0:myint, ?tmp$0:0:myint) @type_int:7:50
-                    /:
-public proc /(x:0:myint, y:0:myint, ?tmp$0:0:myint)<0>  @type_int:9:12 (0 calls) (inline)
-    foreign llvm sdiv(32:int, ~x:0:myint, ~y:0:myint, ?tmp$0:0:myint) @type_int:9:44
-                    /=:
-public proc /=(x:0:myint, y:0:myint, ?tmp$0:0:bool)<0>  @type_int:11:12 (0 calls) (inline)
-    foreign llvm icmp ne(32:int, ~x:0:myint, ~y:0:myint, ?tmp$0:0:bool) @type_int:11:44
-                    <:
-public proc <(x:0:myint, y:0:myint, ?tmp$0:0:bool)<0>  @type_int:12:12 (0 calls) (inline)
-    foreign llvm icmp slt(32:int, ~x:0:myint, ~y:0:myint, ?tmp$0:0:bool) @type_int:12:43
-                    <=:
-public proc <=(x:0:myint, y:0:myint, ?tmp$0:0:bool)<0>  @type_int:13:12 (0 calls) (inline)
-    foreign llvm icmp sle(32:int, ~x:0:myint, ~y:0:myint, ?tmp$0:0:bool) @type_int:13:44
-                    =:
-public proc =(?x:0:myint, y:0:myint)<0>  (0 calls) (inline)
-    foreign llvm move(~y:0:myint, ?x:0:myint)
-public proc =(y:0:myint, ?x:0:myint)<1>  (0 calls) (inline)
-    foreign llvm move(~y:0:myint, ?x:0:myint)
-                    ==:
-public proc ==(x:0:myint, y:0:myint, ?tmp$0:0:bool)<0>  @type_int:10:12 (0 calls) (inline)
-    foreign llvm icmp eq(32:int, ~x:0:myint, ~y:0:myint, ?tmp$0:0:bool) @type_int:10:44
-                    >:
-public proc >(x:0:myint, y:0:myint, ?tmp$0:0:bool)<0>  @type_int:14:12 (0 calls) (inline)
-    foreign llvm icmp sgt(32:int, ~x:0:myint, ~y:0:myint, ?tmp$0:0:bool) @type_int:14:43
-                    >=:
-public proc >=(x:0:myint, y:0:myint, ?tmp$0:0:bool)<0>  @type_int:15:12 (0 calls) (inline)
-    foreign llvm icmp sge(32:int, ~x:0:myint, ~y:0:myint, ?tmp$0:0:bool) @type_int:15:44
+  procs           : 
+public (0 calls) (inline)
+0: *(x#0:type_int.myint, y#0:type_int.myint, ?tmp$0#0:type_int.myint):
+    foreign llvm mul(32:wybe.int, ~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:8:44
+
+public (0 calls) (inline)
+0: +(x#0:type_int.myint, y#0:type_int.myint, ?tmp$0#0:type_int.myint):
+    foreign llvm add(32:wybe.int, ~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:2:44public (0 calls) (inline)
+1: +(?tmp$0#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint):
+    foreign llvm sub(32:wybe.int, ~z#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:3:50public (0 calls) (inline)
+2: +(x#0:type_int.myint, ?tmp$0#0:type_int.myint, z#0:type_int.myint):
+    foreign llvm sub(32:wybe.int, ~z#0:type_int.myint, ~x#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:4:50
+
+public (0 calls) (inline)
+0: -(x#0:type_int.myint, y#0:type_int.myint, ?tmp$0#0:type_int.myint):
+    foreign llvm sub(32:wybe.int, ~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:5:44public (0 calls) (inline)
+1: -(?tmp$0#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint):
+    foreign llvm add(32:wybe.int, ~z#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:6:50public (0 calls) (inline)
+2: -(x#0:type_int.myint, ?tmp$0#0:type_int.myint, z#0:type_int.myint):
+    foreign llvm sub(32:wybe.int, ~z#0:type_int.myint, ~x#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:7:50
+
+public (0 calls) (inline)
+0: /(x#0:type_int.myint, y#0:type_int.myint, ?tmp$0#0:type_int.myint):
+    foreign llvm sdiv(32:wybe.int, ~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:9:44
+
+public (0 calls) (inline)
+0: /=(x#0:type_int.myint, y#0:type_int.myint, ?tmp$0#0:wybe.bool):
+    foreign llvm icmp ne(32:wybe.int, ~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:wybe.bool) @type_int:11:44
+
+public (0 calls) (inline)
+0: <(x#0:type_int.myint, y#0:type_int.myint, ?tmp$0#0:wybe.bool):
+    foreign llvm icmp slt(32:wybe.int, ~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:wybe.bool) @type_int:12:43
+
+public (0 calls) (inline)
+0: <=(x#0:type_int.myint, y#0:type_int.myint, ?tmp$0#0:wybe.bool):
+    foreign llvm icmp sle(32:wybe.int, ~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:wybe.bool) @type_int:13:44
+
+public (0 calls) (inline)
+0: =(?x#0:type_int.myint, y#0:type_int.myint):
+    foreign llvm move(~y#0:type_int.myint, ?x#0:type_int.myint)public (0 calls) (inline)
+1: =(y#0:type_int.myint, ?x#0:type_int.myint):
+    foreign llvm move(~y#0:type_int.myint, ?x#0:type_int.myint)
+
+public (0 calls) (inline)
+0: ==(x#0:type_int.myint, y#0:type_int.myint, ?tmp$0#0:wybe.bool):
+    foreign llvm icmp eq(32:wybe.int, ~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:wybe.bool) @type_int:10:44
+
+public (0 calls) (inline)
+0: >(x#0:type_int.myint, y#0:type_int.myint, ?tmp$0#0:wybe.bool):
+    foreign llvm icmp sgt(32:wybe.int, ~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:wybe.bool) @type_int:14:43
+
+public (0 calls) (inline)
+0: >=(x#0:type_int.myint, y#0:type_int.myint, ?tmp$0#0:wybe.bool):
+    foreign llvm icmp sge(32:wybe.int, ~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:wybe.bool) @type_int:15:44

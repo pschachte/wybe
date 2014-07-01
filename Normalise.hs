@@ -44,8 +44,7 @@ initResources = [ResourceFlowSpec (ResourceSpec ["wybe","io"] "io") ParamInOut]
 -- |Normalise a single file item, storing the result in the current module.
 normaliseItem :: ([ModSpec] -> Compiler ()) -> Item -> Compiler ()
 normaliseItem modCompiler (TypeDecl vis (TypeProto name params) items pos) = do
-    addType name (TypeDef (length params) pos) vis
-    let ty = TypeSpec [] name []
+    ty <- addType name (TypeDef (length params) pos) vis
     let eq1 = ProcDecl Public
               (ProcProto "=" [Param "x" ty ParamOut Ordinary,
                               Param "y" ty ParamIn Ordinary] [])
@@ -104,6 +103,13 @@ normaliseSubmodule modCompiler name typeParams vis pos items = do
     let subModSpec = parentModSpec ++ [name]
     addImport subModSpec (importSpec Nothing vis)
     enterModule dir subModSpec typeParams
+    case typeParams of
+      Nothing -> return ()
+      Just _ ->
+        updateImplementation 
+        (\imp ->
+          let set = Set.singleton $ TypeSpec parentModSpec name []
+          in imp { modKnownTypes = Map.insert name set $ modKnownTypes imp })
     normalise modCompiler items
     mods <- exitModule
     unless (List.null mods) $ modCompiler mods
