@@ -1823,29 +1823,28 @@ instance Show PrimVarName where
 showStmt :: Int -> Stmt -> String
 showStmt _ (ProcCall maybeMod name procID args) =
     maybeModPrefix maybeMod ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
-    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")\n"
+    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
 showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ name ++ 
     (if List.null flags then "" else " " ++ unwords flags) ++
-    "(" ++ intercalate ", " (List.map show args) ++ ")\n"
+    "(" ++ intercalate ", " (List.map show args) ++ ")"
 showStmt indent (Cond condstmts cond thn els) =
     let leadIn = List.replicate indent ' '
     in "if" ++ showBody (indent+2) condstmts ++ "\n"
        ++ leadIn ++ "  test " ++ show cond ++ "\n"
        ++ leadIn ++ "then:"
-       ++ showBody (indent+4) thn
+       ++ showBody (indent+4) thn ++ "\n"
        ++ leadIn ++ "else:"
-       ++ showBody (indent+4) els
-       ++ leadIn ++ "end\n"
+       ++ showBody (indent+4) els ++ "\n"
+       ++ leadIn ++ "end"
 showStmt indent (Loop lstmts) =
     "do" ++  showBody (indent + 4) lstmts
-    ++ List.replicate indent ' ' ++ " end\n"
-showStmt _ (Nop) = "nop\n"
+    ++ List.replicate indent ' ' ++ " end"
+showStmt _ (Nop) = "nop"
 showStmt _ (For itr gen) =
     "for " ++ show itr ++ " in " ++ show gen
-    ++ "\n"
-showStmt _ (Break) = "break\n"
-showStmt _ (Next) = "next\n"
+showStmt _ (Break) = "break"
+showStmt _ (Next) = "next"
 
 
 showBody :: Int -> [Placed Stmt] -> String
