@@ -1,10 +1,10 @@
 public type intlist is
     public ctor []
     public ctor [|](head:int, tail:intlist)
-    public func =(x:intlist, y:intlist) = false
+    public func =(x:intlist, y:intlist):bool = false
 end
 
-public func ++(x:intlist, y:intlist) =
+public func ++(x:intlist, y:intlist):intlist =
     if x = []
     then y
     else [x.head|x.tail++y]
