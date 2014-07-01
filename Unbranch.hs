@@ -47,16 +47,10 @@ module Unbranch (unbranchProc, unbranchBody) where
 
 import AST
 import Data.Map as Map
-import Data.Set as Set
 import Data.List as List
-import Data.Maybe
-import Text.ParserCombinators.Parsec.Pos
-import Control.Monad
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
-
-import Debug.Trace
 
 -- |Transform away all loops, and conditionals other than as the only
 -- statement in their block.
@@ -101,8 +95,8 @@ data UnbrancherState = Unbrancher {
 
 
 data LoopInfo = LoopInfo {
-    next     :: Placed Stmt,      -- ^stmt to go to the next loop iteration
-    break    :: Placed Stmt,      -- ^stmt to break out of the loop
+    loopNext :: Placed Stmt,      -- ^stmt to go to the next loop iteration
+    loopBreak    :: Placed Stmt,      -- ^stmt to break out of the loop
     loopInit :: [Placed Stmt],    -- ^code to initialise before entering loop
     loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
     | NoLoop
@@ -194,17 +188,22 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     thnVars <- gets brVars
     dbgPrintLn $ "* Vars after then branch: " ++ show thnVars
     thnTerm <- gets brTerminated
+    dbgPrintLn $
+      "* Then branch is" ++ (if thnTerm then "" else " NOT") ++ " terminal"
     setVars beforeVars
     setTerminated False
     els' <- unbranchStmts els
     elsVars <- gets brVars
     dbgPrintLn $ "* Vars after else branch: " ++ show elsVars
     elsTerm <- gets brTerminated
+    dbgPrintLn $
+      "* Else branch is" ++ (if elsTerm then "" else " NOT") ++ " terminal"
     setTerminated False
-    let afterVars =
-            if thnTerm then elsVars  -- result doesn't matter when both true
-            else if elsTerm then thnVars
-                 else Map.intersection thnVars elsVars
+    let afterVars = case (thnTerm,elsTerm) of
+          (True ,True ) -> Map.intersection thnVars elsVars
+          (True ,False) -> thnVars
+          (False,True ) -> elsVars
+          (False,False) -> Map.intersection thnVars elsVars
     dbgPrintLn $ "* Vars after conditional: " ++ show afterVars
     switchName <- newProcName
     lp <- gets brLoopInfo
@@ -212,7 +211,7 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
       then do
         switch <- factorFreshProc switchName beforeVars afterVars pos
                   [maybePlace (Cond tstStmts' tstVar thn' els') pos]
-        dbgPrintLn $ "* Generated switch proc " ++ showStmt 4 
+        dbgPrintLn $ "* Generated switch " ++ showStmt 4 
           (content switch)
         setVars beforeVars
         unbranchStmts (switch:stmts)
@@ -224,63 +223,66 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
         dbgPrintLn $ "* Loop body inputs = " ++ show afterVars
         dbgPrintLn $ "* Loop body outputs = " ++ show finalVars
         contName <- newProcName
-        cont <- factorFreshProc contName afterVars finalVars Nothing stmts'
-        let loopExitVars = Map.intersection thnVars elsVars
-        switch <- factorFreshProc switchName beforeVars loopExitVars pos
+        let exitVs = Map.intersection thnVars elsVars
+        cont <- factorFreshProc contName exitVs finalVars Nothing stmts'
+        dbgPrintLn $ "* Generated continuation " ++ showStmt 4 (content cont)
+        switch <- factorFreshProc switchName beforeVars finalVars pos
                   [maybePlace 
                    (Cond tstStmts' tstVar
                     (if thnTerm then thn' else thn' ++ [cont]) 
                     (if elsTerm then els' else els' ++ [cont])) pos]
-        dbgPrintLn $ "* Generated switch proc " ++ showStmt 4 
-          (content switch)
+        dbgPrintLn $ "* Generated loop switch " ++ showStmt 4 (content switch)
         return [switch]
 -- Determining the set of variables (certain to be) defined after a
 -- loop is a bit tricky, because we transform a loop together with the
 -- following statements.  The variables available at the start of the
 -- code following the loop is the the intersection of the sets of
--- variables defined after 0, 1, 2, etc iterations, which = the set
--- defined up to the first (possibly conditional) loop break.
+-- variables defined after 0, 1, 2, etc iterations, which = the 
+-- intersection of the sets of variables defined at each (usually 
+-- conditional) loop break.
 unbranchStmt (Loop body) pos stmts = do
     dbgPrintLn $ "* Handling loop:\n" ++ showBody 4 body
     beforeVars <- gets brVars
     dbgPrintLn $ "* Vars before loop: " ++ show beforeVars
-    let (afterVars,loopTerm) = loopExitVars beforeVars body
+    let (afterVars,_) = loopExitVars beforeVars body
     dbgPrintLn $ "* Vars after loop: " ++ show afterVars
     setVars afterVars
     stmts' <- unbranchStmts stmts
     finalVars <- gets brVars
     dbgPrintLn $ "* Vars after body: " ++ show finalVars
     breakName <- newProcName
-    break <- factorFreshProc breakName afterVars finalVars Nothing stmts'
+    brk <- factorFreshProc breakName afterVars finalVars Nothing stmts'
+    dbgPrintLn $ "* Generated break " ++ showStmt 4 (content brk)
     loopName <- newProcName
     next <- newProcCall loopName beforeVars afterVars pos
-    setLoopInfo next break
+    setLoopInfo next brk
     setVars beforeVars
     body' <- unbranchStmts $ body ++ [next]
     _ <- factorFreshProc loopName beforeVars afterVars pos body'
+    dbgPrintLn $ "* Generated loop " ++ showStmt 4 (content next)
     setNoLoop
     setVars finalVars
     -- dbgPrintLn $ "* Finished handling loop"
     return [next]
-unbranchStmt (For itr gen) pos stmts =
+unbranchStmt (For _ _) _ _ =
     shouldnt "flattening should have removed For statements"
-unbranchStmt (Nop) pos stmts =
+unbranchStmt (Nop) _ stmts =
     unbranchStmts stmts         -- might as well filter out Nops
-unbranchStmt (Break) pos stmts = do
+unbranchStmt (Break) pos _ = do
     inLoop <- gets ((/= NoLoop) . brLoopInfo)
     if inLoop 
       then do
-        break <- gets (Unbranch.break . brLoopInfo)
+        brk <- gets (Unbranch.loopBreak . brLoopInfo)
         setTerminated True
-        return [break]
+        return [brk]
       else do
         lift $ message Error "Break outside a loop" pos
         return []
-unbranchStmt (Next) pos stmts = do
+unbranchStmt (Next) pos _ = do
     inLoop <- gets ((/= NoLoop) . brLoopInfo)
     if inLoop 
       then do
-        next <- gets (next . brLoopInfo)
+        next <- gets (loopNext . brLoopInfo)
         setTerminated True
         return [next]
       else do
@@ -313,13 +315,13 @@ defArg = ifIsVarDef defVar (return ())
 -- |Apply the function if the expression as a variable assignment,
 --  otherwise just take the second argument.
 ifIsVarDef :: (VarName -> TypeSpec -> t) -> t -> Exp -> t
-ifIsVarDef f v exp = ifIsVarDef' f v exp Unspecified
+ifIsVarDef f v expr = ifIsVarDef' f v expr Unspecified
 
 ifIsVarDef' :: (VarName -> TypeSpec -> t) -> t -> Exp -> TypeSpec -> t
-ifIsVarDef' f v (Typed exp ty) _ = ifIsVarDef' f v exp ty
+ifIsVarDef' f v (Typed expr ty) _ = ifIsVarDef' f v expr ty
 ifIsVarDef' f v (Var name dir _) ty =
     if flowsOut dir then f name ty else v
-ifIsVarDef' f v _ _ = v
+ifIsVarDef' _ v _ _ = v
 
 
 outputVars :: VarDict -> [Placed Exp] -> VarDict
@@ -330,10 +332,10 @@ outputVars =
 -- |Generate a fresh proc 
 factorFreshProc :: ProcName -> (VarDict) -> (VarDict) ->
                    OptPos -> [Placed Stmt] -> Unbrancher (Placed Stmt)
-factorFreshProc procName inVars outVars pos body = do
-    proto <- newProcProto procName inVars outVars
+factorFreshProc pname inVars outVars pos body = do
+    proto <- newProcProto pname inVars outVars
     genProc proto body
-    newProcCall procName inVars outVars pos
+    newProcCall pname inVars outVars pos
 
 
 varExp :: FlowDirection -> VarName -> TypeSpec -> Placed Exp
@@ -369,7 +371,7 @@ stmtLoopExitVars  vars (ProcCall _ _ _ args) stmts =
     loopExitVars (outputVars vars args) stmts
 stmtLoopExitVars vars (ForeignCall _ _ _ args) stmts =
     loopExitVars (outputVars vars args) stmts
-stmtLoopExitVars vars (Cond tstStmts tstVar thn els) stmts =
+stmtLoopExitVars vars (Cond tstStmts _ thn els) stmts =
     let (tstVars,tstExit) = loopExitVars vars tstStmts
     in  if tstExit 
         then (tstVars,True)
@@ -387,11 +389,11 @@ stmtLoopExitVars vars (Loop body) stmts =
     in  if bodyExit then loopExitVars bodyVars stmts
         else -- it's an infinite loop: stmts unreachable
             (Map.empty,False)
-stmtLoopExitVars vars (For itr gen) stmts =
-    shouldnt "flattening should have removed For statements"
 stmtLoopExitVars vars  (Nop) stmts =
     loopExitVars vars stmts
-stmtLoopExitVars vars  (Break) stmts = do
+stmtLoopExitVars _ (For _ _) _ =
+    shouldnt "flattening should have removed For statements"
+stmtLoopExitVars vars  (Break) _ = do
     (vars, True)
-stmtLoopExitVars vars (Next) stmts = do
+stmtLoopExitVars vars (Next) _ = do
     (vars, False)
