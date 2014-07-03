@@ -13,8 +13,9 @@ module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility,
   TypeProto(..), TypeSpec(..), FnProto(..),
-  ProcProto(..), Param(..), Stmt(..), PrimProto(..), PrimParam(..),
-  Exp(..), Generator(..),
+  ProcProto(..), Param(..),
+  PrimProto(..), PrimParam(..), ParamInfo(..),
+  Exp(..), Generator(..), Stmt(..), 
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
@@ -1308,9 +1309,15 @@ data PrimParam = PrimParam {
     primParamName::PrimVarName,
     primParamType::TypeSpec, 
     primParamFlow::PrimFlow,
-    primParamFlowType::ArgFlowType -- XXX Not sure this is still needed
+    primParamFlowType::ArgFlowType, -- XXX Not sure this is still needed
+    primParamInfo::ParamInfo  -- ^What we've inferred about this param
     } deriving Eq
 
+
+-- |Info inferred about a single proc parameter
+data ParamInfo = ParamInfo {
+        paramInfoUnneeded::Bool       -- ^Can this parameter be eliminated?
+    } deriving Eq
 
 -- |A dataflow direction:  in, out, both, or neither.
 data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow
@@ -1755,8 +1762,9 @@ instance Show Param where
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
-  show (PrimParam name typ dir _) =
-    primFlowPrefix dir ++ show name ++ showTypeSuffix typ
+  show (PrimParam name typ dir _ (ParamInfo unneeded)) =
+      let (pre,post) = if unneeded then ("[","]") else ("","")
+      in  pre ++ primFlowPrefix dir ++ show name ++ showTypeSuffix typ ++ post
 
 showTypeSuffix :: TypeSpec -> String
 showTypeSuffix Unspecified = ""

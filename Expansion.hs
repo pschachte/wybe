@@ -202,7 +202,7 @@ setPrimArgFlow FlowOut _ arg =
 
 
 addParamSubst :: (PrimParam,PrimArg) -> Expander ()
-addParamSubst param@(PrimParam k ty dir _,v) = do
+addParamSubst param@(PrimParam k ty dir _ _,v) = do
     when (Unspecified == ty) $
       liftIO $ putStrLn $ "Danger: untyped param: " ++ show param
     when (Unspecified == argType v) $
@@ -211,10 +211,10 @@ addParamSubst param@(PrimParam k ty dir _,v) = do
              
 
 renameParam :: Substitution -> PrimParam -> PrimParam
-renameParam subst param@(PrimParam name typ FlowOut ftype) = 
+renameParam subst param@(PrimParam name typ FlowOut ftype inf ) = 
     maybe param 
     (\arg -> case arg of
-          ArgVar name' _ _ _ _ -> PrimParam name' typ FlowOut ftype
+          ArgVar name' _ _ _ _ -> PrimParam name' typ FlowOut ftype inf
           _ -> param) $
     Map.lookup name subst
 renameParam _ param = param

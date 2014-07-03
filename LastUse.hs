@@ -19,20 +19,29 @@ markLastUse :: ProcSpec -> ProcDef -> Compiler ProcDef
 markLastUse ps def = do
     let ProcDefPrim proto body = procImpln def
     let params = primProtoParams proto
-    let outputs = List.filter ((==FlowOut) . primParamFlow) params
+    let (inputs,outputs) = List.partition ((==FlowIn) . primParamFlow) params
+    let inSet = List.foldr (Set.insert . primParamName) Set.empty inputs
     let outSet = List.foldr (Set.insert . primParamName) Set.empty outputs
     (body',needed) <- runStateT (bodyLastUse body) outSet
-    -- let params' = List.map 
-    --               (\p -> p { primParamNeeded = neededIfInput needed p }) 
-    --               params
+    let params' = List.map 
+                  (\p -> p { primParamInfo = ParamInfo $ 
+                                             unneededParam needed inSet p })
+                  params
     let params' = params
     let proto' = proto { primProtoParams = params' }
     return $ def { procImpln = ProcDefPrim proto' body' }
 
 
-neededIfInput :: Set PrimVarName -> PrimParam -> Bool
-neededIfInput needed param =
-    (primParamFlow param == FlowOut || Set.member (primParamName param) needed)
+-- |Returns whether this parameter is strictly superfluous.  For input
+-- params, that means it is never used; for outputs, that means its
+-- value is alwas identical to one of the inputs, which we detect by
+-- the fact that parameter name (including version) is the same as a
+-- input parameter.
+unneededParam :: Set PrimVarName -> Set PrimVarName -> PrimParam -> Bool
+unneededParam needed inSet param =
+    if primParamFlow param == FlowIn
+    then not $ Set.member (primParamName param) needed
+    else Set.member (primParamName param) inSet
 
 
 ----------------------------------------------------------------
@@ -83,7 +92,11 @@ pprimsLastUse :: [Placed Prim] -> NeededVars [Placed Prim]
 pprimsLastUse [] = return []
 pprimsLastUse (pprim:pprims) = do
     pprims' <- pprimsLastUse pprims   -- Do tail first, for backward traversal
+    -- liftIO $ putStrLn $ "\nfinding last uses in " ++ show pprim
     prim' <- primLastUse (content pprim) (place pprim)
+    -- liftIO $ putStrLn $ "           result is " ++ show pprim
+    -- needed <- get
+    -- liftIO $ putStrLn $ "            needed = " ++ show needed
     return $ prim' ++ pprims'
 
 primLastUse :: Prim -> OptPos -> NeededVars [Placed Prim]

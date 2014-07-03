@@ -198,7 +198,5 @@ compileParam startVars endVars param@(Param name ty flow ftype) =
                 ParamOut -> (FlowOut, Map.lookup name endVars)
                 _ -> shouldnt "non-simple parameter flow in compileParam"
     in PrimParam (PrimVarName name $
-                  -- XXX this is wrong, but I can't see how the error case ever happens.
-                  -- fromMaybe 0 num)
                   trustFromJust ("compileParam for param " ++ show param) num)
-       ty pflow ftype
+       ty pflow ftype (ParamInfo False)
