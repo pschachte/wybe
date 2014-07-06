@@ -22,12 +22,14 @@ markLastUse ps def = do
     let (inputs,outputs) = List.partition ((==FlowIn) . primParamFlow) params
     let inSet = List.foldr (Set.insert . primParamName) Set.empty inputs
     let outSet = List.foldr (Set.insert . primParamName) Set.empty outputs
+    -- liftIO $ putStrLn $ "\nMarking last uses in:" ++ showBlock 4 body
     (body',needed) <- runStateT (bodyLastUse body) outSet
+    -- liftIO $ putStrLn $ "Result:" ++ showBlock 4 body'
+    -- liftIO $ putStrLn $ "Needed: " ++ show needed
     let params' = List.map 
                   (\p -> p { primParamInfo = ParamInfo $ 
                                              unneededParam needed inSet p })
                   params
-    let params' = params
     let proto' = proto { primProtoParams = params' }
     return $ def { procImpln = ProcDefPrim proto' body' }
 

@@ -12,6 +12,6 @@ public (0 calls) (inline)
 0: inc2(x#0:wybe.int, ?tmp$0#0:wybe.int):
     foreign llvm add(32:wybe.int, ~x#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:4:38
     foreign llvm add(32:wybe.int, ~tmp$1#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @wybe:4:38public (0 calls) (inline)
-1: inc2(x#0:wybe.int, ?x#1:wybe.int, y#0:wybe.int):
+1: inc2([x#0:wybe.int], ?x#1:wybe.int, y#0:wybe.int):
     foreign llvm sub(32:wybe.int, ~y#0:wybe.int, 1:wybe.int, ?tmp$1#1:wybe.int) @wybe:5:44
     foreign llvm sub(32:wybe.int, ~tmp$1#1:wybe.int, 1:wybe.int, ?x#1:wybe.int) @wybe:5:44

@@ -8,4 +8,4 @@
   resources       : 
   procs           : 
 public (0 calls) (inline)
-0: nada(x#0:wybe.int, y#0:wybe.int):
+0: nada([x#0:wybe.int], [y#0:wybe.int]):

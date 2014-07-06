@@ -22,7 +22,7 @@ public (0 calls) (inline)
     type_list.gen$1<0>(~x#0:type_list.intlist, ~y#0:type_list.intlist, ?tmp$0#0:type_list.intlist, ?x#1:type_list.intlist, ?y#1:type_list.intlist) @type_list:8:5
 
 (0 calls)
-0: gen$1(x#0:type_list.intlist, y#0:type_list.intlist, ?tmp$0#0:type_list.intlist, ?x#0:type_list.intlist, ?y#0:type_list.intlist):
+0: gen$1(x#0:type_list.intlist, y#0:type_list.intlist, ?tmp$0#0:type_list.intlist, [?x#0:type_list.intlist], [?y#0:type_list.intlist]):
     foreign $ alloc("bool":wybe.string, "false":wybe.string, ?tmp$1#0:wybe.bool)
     case %tmp$1#0 of
     0:
@@ -58,7 +58,7 @@ public (0 calls) (inline)
     foreign llvm move(~y#0:type_list.intlist, ?x#0:type_list.intlist)public (0 calls) (inline)
 1: =(y#0:type_list.intlist, ?x#0:type_list.intlist):
     foreign llvm move(~y#0:type_list.intlist, ?x#0:type_list.intlist)public (0 calls) (inline)
-2: =(x#0:type_list.intlist, y#0:type_list.intlist, ?tmp$0#0:wybe.bool):
+2: =([x#0:type_list.intlist], [y#0:type_list.intlist], ?tmp$0#0:wybe.bool):
     foreign $ alloc("bool":wybe.string, "false":wybe.string, ?tmp$0#0:wybe.bool)
 
 public (0 calls) (inline)
