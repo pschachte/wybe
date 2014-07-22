@@ -378,8 +378,6 @@ Expression \texttt{cons(\^{ }h,\^{ }t)} deconstructs
 \item \texttt{head(!list,val)} does \emph{not} mean \texttt{RPLACA}
 \item Equivalent to \texttt{\^{ }list = cons(val,tail(list))}
 \item Gives the feeling of changing values without action at a distance
-\item May be surprising to experienced programmers\ldots
-\item But (hopefully) natural for beginners
 \item Compile-time garbage collection:  when unique (unaliased),
   compiler transforms this (back) into destructive modification
 \item Can this be made predictable enough for programmers
@@ -438,11 +436,12 @@ Expression \texttt{cons(\^{ }h,\^{ }t)} deconstructs
 \item \texttt{if} \emph{test1}\texttt{:} \emph{statements} \ldots \\
 \hspace*{1em} \emph{test2}\texttt{:} \emph{statements} \ldots \\
 \hspace*{1em} \ldots \\
+\texttt{end}
 \item Tests are tried in order; body of first to succeed is executed
 \item If none succeeds, none is executed
 \item Boolean expression \emph{e} is de-reified into the test \emph{e}
   \texttt{= true}
-\item \texttt{def ?else:}
+\item \texttt{else} is a test that always succeeds
 \item Also an expression version of \texttt{if}, where
   \emph{statements} are replaced with \emph{expressions}
 \item Tests of an \texttt{if} expression must be exhaustive
@@ -457,7 +456,7 @@ Expression \texttt{cons(\^{ }h,\^{ }t)} deconstructs
 \begin{itemize}
 \item A test can be used as a statement
 \item Call must be preceded with \texttt{?}
-\item Sequence of statements is a test if one of them is a test
+\item Sequence of statements is a test if any of them are tests
 \item Procedure is a test if its body is a test
 \item All tests must be declared with \texttt{?} at left
 \item Statement sequence fails if any of the tests fail
