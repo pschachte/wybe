@@ -24,7 +24,7 @@
     wybe.char.=<0>(?tmp$1#0:wybe.char, '.':wybe.char) @wybe:126:12
     foreign llvm icmp ne(32:wybe.int, c#0:wybe.char, ~tmp$1#0:wybe.char, ?tmp$2#0:wybe.bool) @wybe:71:42
     wybe.bool.=<0>(?tmp$0#0:wybe.bool, ~tmp$2#0:wybe.bool) @wybe:71:12
-    case %tmp$0#0 of
+    case ~tmp$0#0 of
     0:
 
     1:

@@ -1797,7 +1797,7 @@ showBlock ind (ProcBody stmts fork) =
 showFork :: Int -> PrimFork -> String
 showFork ind NoFork = ""
 showFork ind (PrimFork var last bodies) =
-    startLine ind ++ "case " ++ (if last then "%" else "") ++ show var ++
+    startLine ind ++ "case " ++ (if last then "~" else "") ++ show var ++
                   " of" ++
     List.concatMap (\(val,body) ->
                         startLine ind ++ show val ++ ":" ++
