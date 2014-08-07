@@ -199,11 +199,7 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     dbgPrintLn $
       "* Else branch is" ++ (if elsTerm then "" else " NOT") ++ " terminal"
     setTerminated False
-    let afterVars = case (thnTerm,elsTerm) of
-          (True ,True ) -> Map.intersection thnVars elsVars
-          (True ,False) -> thnVars
-          (False,True ) -> elsVars
-          (False,False) -> Map.intersection thnVars elsVars
+    let afterVars = varsAfterITE thnVars thnTerm elsVars elsTerm
     dbgPrintLn $ "* Vars after conditional: " ++ show afterVars
     switchName <- newProcName
     lp <- gets brLoopInfo
@@ -211,8 +207,7 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
       then do
         switch <- factorFreshProc switchName beforeVars afterVars pos
                   [maybePlace (Cond tstStmts' tstVar thn' els') pos]
-        dbgPrintLn $ "* Generated switch " ++ showStmt 4 
-          (content switch)
+        dbgPrintLn $ "* Generated switch " ++ showStmt 4 (content switch)
         setVars beforeVars
         unbranchStmts (switch:stmts)
       else do
@@ -237,7 +232,7 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
 -- loop is a bit tricky, because we transform a loop together with the
 -- following statements.  The variables available at the start of the
 -- code following the loop is the the intersection of the sets of
--- variables defined after 0, 1, 2, etc iterations, which = the 
+-- variables defined after 0, 1, 2, etc iterations, which is the 
 -- intersection of the sets of variables defined at each (usually 
 -- conditional) loop break.
 unbranchStmt (Loop body) pos stmts = do
@@ -288,6 +283,13 @@ unbranchStmt (Next) pos _ = do
       else do
         lift $ message Error "Next outside a loop" pos
         return []
+
+
+varsAfterITE :: VarDict -> Bool -> VarDict -> Bool -> VarDict
+varsAfterITE thnVars True elsVars True   = Map.intersection thnVars elsVars
+varsAfterITE thnVars True elsVars False  = thnVars
+varsAfterITE thnVars False elsVars True  = elsVars
+varsAfterITE thnVars False elsVars False = Map.intersection thnVars elsVars
 
 
 -- |The set of names of the input parameters
