@@ -21,7 +21,7 @@
 (0 calls)
 0: gen$3(prompt#0:wybe.string, response#0:wybe.char, result#0:wybe.bool, tmp$0#0:wybe.bool, wybe.io$io#0:wybe.phantom, ?prompt#1:wybe.string, ?response#1:wybe.char, ?result#1:wybe.bool, ?tmp$0#1:wybe.bool, ?tmp$2#0:wybe.bool, ?wybe.io$io#1:wybe.phantom):
     proc_yorn.is_yes_or_no<0>(response#0:wybe.char, ?tmp$1#0:wybe.bool) @proc_yorn:6:19
-    case %tmp$1#0 of
+    case ~tmp$1#0 of
     0:
         proc_yorn.gen$2<0>(~prompt#0:wybe.string, ~wybe.io$io#0:wybe.phantom, ?prompt#1:wybe.string, ?response#1:wybe.char, ?result#1:wybe.bool, ?tmp$0#1:wybe.bool, ?tmp$2#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_yorn:2:8
 
