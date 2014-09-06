@@ -455,6 +455,10 @@ ListTail :: { Placed Exp }
     | '|' Exp ']'               { $2 }
 
 
+OptArgList :: { [Placed Exp] }
+    : {- empty -}               { [] }
+    | '(' Exp ExpList ')'       { $2:$3 }
+
 ArgList :: { [Placed Exp] }
     : '(' Exp ExpList ')'       { $2:$3 }
 
