@@ -40,8 +40,10 @@ language, and should be powerful and efficient enough for serious use.
 
 In \Lang, each variable use may either read, write, or modify
 (\ie, both read and write) the variable.
-
-Thus \lang is at heart a relational language.
+Variable names prefixed with a \verb+^+ operator specify that the
+variable will be written (without being read); variable names prefixed
+with a \verb+!+ operator signify that it will be read and written.
+Unadorned variable names indicate read-only usage.
 
 
 
@@ -57,7 +59,7 @@ Calls written as parts of expressions are taken to be function calls.
 
 However, procedures and functions are, in fact, the same thing called
 with a different syntax.
-A function call is merely a procedure call whose value whose final
+A function call is merely a procedure call whose final
 argument is omitted; the value of that argument after the call is
 taken to be the value of the function call.
 A procedure call is merely a function call with one extra argument
@@ -65,7 +67,80 @@ whose value is the value of the function call.
 So regardless of whether something is defined as procedure or
 function, it may be called as either an expression or a statement.
 
+Each procedure argument, may be input, output, or both, according
+to the \verb+^+ and \verb+!+ annotations on its declaration.
+A particular ordering of inputs, outputs, and in/out arguments is
+called a procedure \emph{mode}.
+A given procedure name may have any number of different declarations
+with the same argument types and different modes, but may not have
+more than one declaration with the same types and modes.
+There are some restrictions on modes specific to functions:
+\begin{enumerate}
+\item if the last argument is output, at least one other argument must
+  be input; and
+\item if the last argument is input, at least one other argument must
+  be output or in/out; and
+\item the last argument must not be in/out.
+\end{enumerate}
+If any of these restrictions are not met, the procedure cannot be used
+with a functional syntax in that mode.
+These restrictions are imposed to ensure functional syntax is only
+used for procedures that behave functionally.
 
+
+\section{Syntax}
+
+\Lang procedure and function names can be used as prefix or infix
+operators, regardless of whether they are alphabetic or symbolic.
+Their precedence and associativity are determined by the first
+character of the operator name, as follows:
+\begin{center}
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+    \textbf{lead character} &
+    \textbf{arity} &
+    \textbf{associativity} &
+    \textbf{precedence} \\
+    \hline
+    \verb'.' (period) &
+    infix &
+    left &
+    10 (tightest) \\
+    \hline
+    \verb'^', \verb'!' &
+    unary (prefix) &
+    non-associative &
+    9 \\
+    \hline
+    \verb'~', \verb'@', \verb'$', \verb'%', \verb'&', \verb'=',
+    \verb'*', \verb'/', \verb'-', \verb'+' &
+    unary (prefix) &
+    non-associative &
+    8 \\
+    \hline
+    \verb'*', \verb'/', \verb'%' &
+    binary (infix) &
+    left &
+    7 \\
+    \hline
+    \verb'-', \verb'+' &
+    binary (infix) &
+    left &
+    6 \\
+    % \hline
+    % \verb'~', \verb'@', \verb'$', \verb'%', \verb'&', \verb'=',
+    % \verb'*', \verb'/', \verb'-', \verb'+' &
+    % binary (infix) &
+    % left &
+    % 8 \\
+    \hline
+    \verb'a'--\verb'z', \verb'A'--\verb'Z' &
+    unary (prefix) &
+    non-associative &
+    7 \\
+    \hline
+  \end{tabular}
+\end{center}
 
 \section{Modules}
 
