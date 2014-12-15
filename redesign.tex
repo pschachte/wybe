@@ -8,7 +8,9 @@
 %
 
 \documentclass{article}
+\usepackage{a4wide}
 \usepackage{xspace}
+\usepackage{fancyvrb}
 %\usepackage{ensuremath}
 
 \newcommand{\lang}{\textsc{Wybe}\xspace}
@@ -90,6 +92,37 @@ used for procedures that behave functionally.
 
 \section{Syntax}
 
+\subsubsection*{Definition}
+\begin{Verbatim}
+def foo(x int, y int) use io:
+        !bar(x)
+        !baz(y)
+\end{Verbatim}
+
+\begin{Verbatim}
+def foo(x int, y int) int = sqrt(x**2 + y**2)
+\end{Verbatim}
+
+\subsubsection*{Selection}
+\begin{Verbatim}
+        if prime(x):
+            !bar(x)
+            !baz(y)
+           else:
+            !baz(y)
+            !bar(x)
+\end{Verbatim}
+
+\begin{Verbatim}
+        case x of
+          0:  !bar(x)
+              !baz(y)
+          1:  !baz(y)
+              !bar(x)
+          _:  nop
+
+\end{Verbatim}
+
 \Lang procedure and function names can be used as prefix or infix
 operators, regardless of whether they are alphabetic or symbolic.
 Their precedence and associativity are determined by the first
@@ -127,20 +160,26 @@ character of the operator name, as follows:
     binary (infix) &
     left &
     6 \\
-    % \hline
-    % \verb'~', \verb'@', \verb'$', \verb'%', \verb'&', \verb'=',
-    % \verb'*', \verb'/', \verb'-', \verb'+' &
-    % binary (infix) &
-    % left &
-    % 8 \\
     \hline
-    \verb'a'--\verb'z', \verb'A'--\verb'Z' &
+    \verb':' &
+    binary (infix) &
+    non-associative &
+    5 \\
+    \hline
+    \verb'a'--\verb'z', \verb'A'--\verb'Z', \verb'_' &
+    binary (infix) &
+    right &
+    4 \\
+    \hline
+    \verb'a'--\verb'z', \verb'A'--\verb'Z', \verb'_' &
     unary (prefix) &
     non-associative &
-    7 \\
+    3 \\
     \hline
   \end{tabular}
 \end{center}
+By allowing any name to be an operator, we avoid the need for a lot of
+special syntax.  In particular, we want to allow the following forms:
 
 \section{Modules}
 
