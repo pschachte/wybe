@@ -92,15 +92,30 @@ used for procedures that behave functionally.
 
 \section{Syntax}
 
+The new syntax philosophy is conceptual parsimony, built on relatively
+few syntactic elements.
+
+At the highest (tightest) precedence, \lang has manifest constants, identifiers,
+and calls.  A call is written as an identifier followed by an open
+parenthesis, a comma-separated argument list, and a close parenthesis.
+
+At the loosest precedence, \lang supports ``interfix'' operators:
+alternating identifiers and terms of higher precedence.  These are
+parsed as a term whose constructor is the concatenation of the
+identifiers, separated by underscores, with the subterms, in order, as
+arguments.
+
+
+
 \subsubsection*{Definition}
 \begin{Verbatim}
-def foo(x int, y int) use io:
-        !bar(x)
-        !baz(y)
+    def foo(x int, y int) use io:
+            !bar(x)
+            !baz(y)
 \end{Verbatim}
 
 \begin{Verbatim}
-def foo(x int, y int) int = sqrt(x**2 + y**2)
+    def hypot(x int, y int) int = sqrt(x**2 + y**2)
 \end{Verbatim}
 
 \subsubsection*{Selection}
@@ -122,6 +137,14 @@ def foo(x int, y int) int = sqrt(x**2 + y**2)
           _:  nop
 
 \end{Verbatim}
+
+\subsubsection*{Looping}
+\begin{Verbatim}
+        do  stmt1
+            while test
+            stmt2
+\end{Verbatim}
+
 
 \Lang procedure and function names can be used as prefix or infix
 operators, regardless of whether they are alphabetic or symbolic.
