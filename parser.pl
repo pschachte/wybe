@@ -2,8 +2,34 @@
 
 items([]) --> ""
 items([Item|Items]) -->
-	item(Item),
+	item1(Item),
 	items(Items).
+
+item1(Term) -->
+	ident(Id),
+	item2(Term1),
+	(   terminator1
+	->  { Term =.. [Id,Term1] }
+	;   item1(Term2),
+	    { [Fn|Args] =.. Term2,
+	      atomic_list_concat([Id,'_',Fn],Fn1),
+	      [Fn1,Term1|Args] =.. Term }
+	).
+item1(Term) -->
+	item2(Term).
+
+terminator1 --> ";".
+
+
+item2(Term) -->
+	item3(Term1),
+	(   ":",
+	    item3(Term2)
+	->  { Term = Term1 : Term2 }
+	;   { Term = Term1 }
+	).
+
+
 
 item(typedecl(Vis, Typ, Items)) -->
 	visibility(Vis),
