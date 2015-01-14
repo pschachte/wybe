@@ -1525,6 +1525,28 @@ varsInPrimArg _ (ArgChar _ _)           = Set.empty
 
 ----------------------------------------------------------------
 --                      Showing Compiler State
+--
+-- Each module is shown listing submodules, types, resources and procs
+-- it exports, then listing the module imports, and the types,
+-- resources and procs it defines, including definitions.  Functions
+-- are converted to procs.
+--
+-- Each proc is show including whether it is public, how many calls to
+-- it appear statically in that module, and whether calls to it
+-- shoulds be inlined.  Proc signatures are preceded by a number
+-- indicating which overloaded version of the proc is defined.  Formal
+-- parameters are preceded by ? to indicate an output; in-out
+-- parameters have been converted to a single in and a single out.
+-- A parameter not used in the proc body is surrounded with [] braces.
+-- Each variable name is suffixed by a # and a number, indicating
+-- which static version of the variable is meant.  The body of a proc
+-- is a sequence of proc calls.  Arguments are constant literals or
+-- variable references.  Variable references preceded with ? indicate
+-- an output argument.  References preceded with ~ indicate that this
+-- is the last proc call to refer to this variable (ie, it's dead
+-- after this call).
+
+
 ----------------------------------------------------------------
 
 verboseDump :: Compiler ()
