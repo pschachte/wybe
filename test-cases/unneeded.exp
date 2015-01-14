@@ -1,0 +1,12 @@
+ Module unneeded
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  types           : 
+  resources       : 
+  procs           : 
+(0 calls) (inline)
+0: unneeded(x#0:wybe.int, [y#0:wybe.int], ?tmp$0#0:wybe.int, q#0:wybe.int, [?q#0:wybe.int]):
+    foreign llvm add(32:wybe.int, ~x#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @wybe:4:38
