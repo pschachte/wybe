@@ -71,6 +71,8 @@ evalClauseComp clcomp =
     evalStateT clcomp initClauseComp
 
 
+-- |Compile a ProcDefSrc to a ProcDefPrim, ie, compile a proc 
+--  definition in source form to one in clausal form.
 compileProc :: ProcDef -> Compiler ProcDef
 compileProc proc = do
     evalClauseComp $ do
