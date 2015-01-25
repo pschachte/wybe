@@ -184,21 +184,9 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     dbgPrintLn $ "* test (" ++ show tstVar ++ "): " ++ showBody 8 tstStmts
     dbgPrintLn $ "* Vars before test: " ++ show beforeVars
     tstStmts' <- unbranchStmts tstStmts
-    thn' <- unbranchStmts thn
-    thnVars <- gets brVars
-    dbgPrintLn $ "* Vars after then branch: " ++ show thnVars
-    thnTerm <- gets brTerminated
-    dbgPrintLn $
-      "* Then branch is" ++ (if thnTerm then "" else " NOT") ++ " terminal"
+    (thn',thnVars,thnTerm) <- unbranchBranch thn
     setVars beforeVars
-    setTerminated False
-    els' <- unbranchStmts els
-    elsVars <- gets brVars
-    dbgPrintLn $ "* Vars after else branch: " ++ show elsVars
-    elsTerm <- gets brTerminated
-    dbgPrintLn $
-      "* Else branch is" ++ (if elsTerm then "" else " NOT") ++ " terminal"
-    setTerminated False
+    (els',elsVars,elsTerm) <- unbranchBranch els
     let afterVars = varsAfterITE thnVars thnTerm elsVars elsTerm
     dbgPrintLn $ "* Vars after conditional: " ++ show afterVars
     switchName <- newProcName
@@ -213,7 +201,9 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
       else do
         setVars afterVars
         stmts' <- unbranchStmts stmts
-        finalVars <- gets brVars
+        finalVars <- if thnTerm || elsTerm 
+                     then return afterVars
+                     else gets brVars
         dbgPrintLn $ "* Loop body:\n" ++ showBody 4 stmts
         dbgPrintLn $ "* Loop body inputs = " ++ show afterVars
         dbgPrintLn $ "* Loop body outputs = " ++ show finalVars
@@ -221,7 +211,7 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
         let exitVs = Map.intersection thnVars elsVars
         cont <- factorFreshProc contName exitVs finalVars Nothing stmts'
         dbgPrintLn $ "* Generated continuation " ++ showStmt 4 (content cont)
-        switch <- factorFreshProc switchName beforeVars finalVars pos
+        switch <- factorFreshProc switchName beforeVars finalVars {- afterVars -} pos
                   [maybePlace 
                    (Cond tstStmts' tstVar
                     (if thnTerm then thn' else thn' ++ [cont]) 
@@ -283,6 +273,18 @@ unbranchStmt (Next) pos _ = do
       else do
         lift $ message Error "Next outside a loop" pos
         return []
+
+
+unbranchBranch ::  [Placed Stmt] -> Unbrancher ([Placed Stmt],VarDict,Bool)
+unbranchBranch branch = do
+    branch' <- unbranchStmts branch
+    branchVars <- gets brVars
+    dbgPrintLn $ "* Vars after then branch: " ++ show branchVars
+    branchTerm <- gets brTerminated
+    dbgPrintLn $
+      "* Then branch is" ++ (if branchTerm then "" else " NOT") ++ " terminal"
+    setTerminated False
+    return (branch', branchVars,branchTerm)
 
 
 varsAfterITE :: VarDict -> Bool -> VarDict -> Bool -> VarDict
