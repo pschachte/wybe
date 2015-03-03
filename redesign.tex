@@ -315,6 +315,26 @@ as equality testing, and printing.  All types declared with
 constructors, as well as all the primitive types such as integer,
 float, and char, implement this type.
 
+\section{Code Transformation}
+
+\Lang code is transformed into deterministic clausal form as the
+compiler's intermediate representation.
+In this form, each procedure body is represented as a (possibly empty)
+list of primitive operations (comprising the common initial operations
+for all clauses), and optionally a variable on which to switch and a
+list of procedure bodies.
+The value of the variable then determines which (exactly one)
+of the bodies is executed.
+
+Each operation in a body may have any number of inputs and any number
+of outputs, but not in/out variables.
+Inputs may be either variables or manifest constants; outputs must
+always be distinct fresh variables.
+For convenience, variable names have an explicit ``version'' number
+suffix, similar to the common variable naming scheme used in SSA
+languages.
+
+
 \end{document}
 
 % LocalWords:  vararg predicate's nonfailure DCG monoporphized nondet RDBMS

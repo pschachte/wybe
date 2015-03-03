@@ -154,7 +154,7 @@ genProc proto stmts = do
 
 dbgPrintLn :: String -> Unbrancher ()
 dbgPrintLn s = do
-    -- liftIO $ putStrLn s
+--    liftIO $ putStrLn s
     return ()
 
 ----------------------------------------------------------------
@@ -363,41 +363,39 @@ newProcProto name inVars outVars = do
                     | (v,ty) <- Map.toList outVars]
     return $ ProcProto name (inParams ++ outParams) []
 
+-- Given the specified environment and a statement sequence, returns the
+-- environment following the statements and the loop exit environment.
+-- The loop exit environment is Just the intersection of the environments
+-- at all the breaks in the scope of the loop, or Nothing if there are no
+-- such breaks.
+loopExitVars :: VarDict -> [Placed Stmt] -> (VarDict, Maybe VarDict)
+loopExitVars vars pstmts =
+  List.foldl stmtExitVars (vars,Nothing) $ List.map content pstmts
 
-loopExitVars :: VarDict -> [Placed Stmt] -> (VarDict, Bool)
-loopExitVars vars [] = (vars, False)
-loopExitVars vars (stmt:stmts) =
-    stmtLoopExitVars vars (content stmt) stmts
 
-
-stmtLoopExitVars :: VarDict -> Stmt -> [Placed Stmt] -> (VarDict, Bool)
-stmtLoopExitVars  vars (ProcCall _ _ _ args) stmts =
-    loopExitVars (outputVars vars args) stmts
-stmtLoopExitVars vars (ForeignCall _ _ _ args) stmts =
-    loopExitVars (outputVars vars args) stmts
-stmtLoopExitVars vars (Cond tstStmts _ thn els) stmts =
+stmtExitVars :: (VarDict, Maybe VarDict) -> Stmt -> (VarDict, Maybe VarDict)
+stmtExitVars  (vars,exits) (ProcCall _ _ _ args) =
+    (outputVars vars args, exits)
+stmtExitVars (vars,exits) (ForeignCall _ _ _ args) =
+    (outputVars vars args, exits)
+stmtExitVars (vars,_) (Cond tstStmts _ thn els) =
     let (tstVars,tstExit) = loopExitVars vars tstStmts
-    in  if tstExit 
-        then (tstVars,True)
-        else let (thnVars,thnExit) = loopExitVars tstVars thn
-                 -- else branch doesn't get to use test vars
-                 (elsVars,elsExit) = loopExitVars vars els
-                 condVars = Map.intersection thnVars elsVars
-             in  if thnExit && elsExit
-                 then (condVars, True)
-                 else if thnExit then (thnVars, True)
-                      else if elsExit then (elsVars, True)
-                           else loopExitVars condVars stmts
-stmtLoopExitVars vars (Loop body) stmts =
+        (thnVars,thnExit) = loopExitVars tstVars thn
+        (elsVars,elsExit) = loopExitVars vars els
+    in  (Map.intersection thnVars elsVars, intersectExit thnExit elsExit)
+stmtExitVars (vars,exits) (Loop body) =
     let (bodyVars,bodyExit) = loopExitVars vars body
-    in  if bodyExit then loopExitVars bodyVars stmts
-        else -- it's an infinite loop: stmts unreachable
-            (Map.empty,False)
-stmtLoopExitVars vars  (Nop) stmts =
-    loopExitVars vars stmts
-stmtLoopExitVars _ (For _ _) _ =
+    in  case bodyExit of 
+      Nothing -> (Map.empty, exits)
+      Just exits' -> (exits', exits)
+stmtExitVars (vars,exits)  (Nop) = (vars,exits)
+stmtExitVars _ (For _ _) =
     shouldnt "flattening should have removed For statements"
-stmtLoopExitVars vars  (Break) _ = do
-    (vars, True)
-stmtLoopExitVars vars (Next) _ = do
-    (vars, False)
+stmtExitVars (vars,exits)  (Break) = 
+  (Map.empty, intersectExit (Just vars) exits)
+stmtExitVars (vars,exits) (Next) = (Map.empty, exits)
+
+
+intersectExit (Just v1) (Just v2) = Just $ Map.intersection v1 v2
+intersectExit Nothing x = x
+intersectExit x Nothing = x
