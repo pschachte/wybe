@@ -1,10 +1,11 @@
 Fix bugs:
+o Wrong live variable sets for conditionals in loops
+
 
 Complete the implementation:
 o Generate LPVM
 o Optimisations
 o Fix algebraic type implementation to use tags
-o Code generation
 
 
 Improve error handling:
