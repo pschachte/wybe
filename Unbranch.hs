@@ -48,6 +48,7 @@ module Unbranch (unbranchProc, unbranchBody) where
 import AST
 import Data.Map as Map
 import Data.List as List
+import Data.Maybe
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
@@ -154,7 +155,7 @@ genProc proto stmts = do
 
 dbgPrintLn :: String -> Unbrancher ()
 dbgPrintLn s = do
---    liftIO $ putStrLn s
+    -- liftIO $ putStrLn s
     return ()
 
 ----------------------------------------------------------------
@@ -164,9 +165,9 @@ dbgPrintLn s = do
 unbranchStmts :: [Placed Stmt] -> Unbrancher [Placed Stmt]
 unbranchStmts [] = return []
 unbranchStmts (stmt:stmts) = do
-    -- vars <- gets brVars
-    -- liftIO $ putStrLn $ "unbranching stmt\n    " ++ showStmt 4 (content stmt) ++
-    --   "\n  with vars " ++ show vars
+    vars <- gets brVars
+    dbgPrintLn $ "unbranching stmt\n    " ++ showStmt 4 (content stmt) ++
+      "\n  with vars " ++ show vars
     ifTerminated (return []) (unbranchStmt (content stmt) (place stmt) stmts)
 
 
@@ -229,7 +230,7 @@ unbranchStmt (Loop body) pos stmts = do
     dbgPrintLn $ "* Handling loop:\n" ++ showBody 4 body
     beforeVars <- gets brVars
     dbgPrintLn $ "* Vars before loop: " ++ show beforeVars
-    let (afterVars,_) = loopExitVars beforeVars body
+    let afterVars = fromMaybe Map.empty $ snd $ loopExitVars beforeVars body
     dbgPrintLn $ "* Vars after loop: " ++ show afterVars
     setVars afterVars
     stmts' <- unbranchStmts stmts
