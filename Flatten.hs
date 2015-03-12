@@ -197,7 +197,7 @@ flattenStmts stmts =
 flattenStmt :: Stmt -> OptPos -> Flattener ()
 flattenStmt stmt pos = do
     modify (\s -> s { stmtUses = Set.empty, stmtDefs = Set.empty, currPos = pos})
-    -- defd <- gets defdVars
+    defd <- gets defdVars
     -- liftIO $ putStrLn $ "flattening stmt " ++ showStmt 4 stmt ++
     --   " with defined vars " ++ show defd
     flattenStmt' stmt pos

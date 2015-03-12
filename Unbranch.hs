@@ -88,7 +88,6 @@ type VarDict = Map VarName TypeSpec
 data UnbrancherState = Unbrancher {
     brLoopInfo   :: LoopInfo,     -- ^If in a loop, the break and continue stmts
     brVars       :: VarDict,      -- ^Variables defined up to here
-    -- brExitVars   :: VarDict,  -- ^Variables defined up to loop exit
     brTerminated :: Bool,         -- ^Whether code so far included a Break or
                                   --  Next, which terminate execution
     brNewDefs    :: [Item]        -- ^Generated auxilliary procedures
@@ -97,7 +96,7 @@ data UnbrancherState = Unbrancher {
 
 data LoopInfo = LoopInfo {
     loopNext :: Placed Stmt,      -- ^stmt to go to the next loop iteration
-    loopBreak    :: Placed Stmt,      -- ^stmt to break out of the loop
+    loopBreak    :: Placed Stmt,  -- ^stmt to break out of the loop
     loopInit :: [Placed Stmt],    -- ^code to initialise before entering loop
     loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
     | NoLoop
@@ -227,7 +226,7 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
 -- intersection of the sets of variables defined at each (usually 
 -- conditional) loop break.
 unbranchStmt (Loop body) pos stmts = do
-    dbgPrintLn $ "* Handling loop:\n" ++ showBody 4 body
+    dbgPrintLn $ "* Handling loop:" ++ showBody 4 body
     beforeVars <- gets brVars
     dbgPrintLn $ "* Vars before loop: " ++ show beforeVars
     let afterVars = fromMaybe Map.empty $ snd $ loopExitVars beforeVars body
@@ -248,7 +247,7 @@ unbranchStmt (Loop body) pos stmts = do
     dbgPrintLn $ "* Generated loop " ++ showStmt 4 (content next)
     setNoLoop
     setVars finalVars
-    -- dbgPrintLn $ "* Finished handling loop"
+    dbgPrintLn $ "* Finished handling loop"
     return [next]
 unbranchStmt (For _ _) _ _ =
     shouldnt "flattening should have removed For statements"
@@ -260,7 +259,7 @@ unbranchStmt (Break) pos _ = do
       then do
         brk <- gets (Unbranch.loopBreak . brLoopInfo)
         setTerminated True
-        return [brk]
+        return [Unplaced Nop]
       else do
         lift $ message Error "Break outside a loop" pos
         return []
@@ -382,7 +381,7 @@ stmtExitVars (vars,exits) (ForeignCall _ _ _ args) =
 stmtExitVars (vars,_) (Cond tstStmts _ thn els) =
     let (tstVars,tstExit) = loopExitVars vars tstStmts
         (thnVars,thnExit) = loopExitVars tstVars thn
-        (elsVars,elsExit) = loopExitVars vars els
+        (elsVars,elsExit) = loopExitVars tstVars els
     in  (Map.intersection thnVars elsVars, intersectExit thnExit elsExit)
 stmtExitVars (vars,exits) (Loop body) =
     let (bodyVars,bodyExit) = loopExitVars vars body
