@@ -22,10 +22,10 @@ markLastUse ps def = do
     let (inputs,outputs) = List.partition ((==FlowIn) . primParamFlow) params
     let inSet = List.foldr (Set.insert . primParamName) Set.empty inputs
     let outSet = List.foldr (Set.insert . primParamName) Set.empty outputs
-    -- liftIO $ putStrLn $ "\nMarking last uses in:" ++ showBlock 4 body
+    logMsg "lastuse" $ "\nMarking last uses in:" ++ showBlock 4 body
     (body',needed) <- runStateT (bodyLastUse body) outSet
-    -- liftIO $ putStrLn $ "Result:" ++ showBlock 4 body'
-    -- liftIO $ putStrLn $ "Needed: " ++ show needed
+    logMsg "lastuse" $ "Result:" ++ showBlock 4 body'
+    logMsg "lastuse" $ "Needed: " ++ show needed
     let params' = List.map 
                   (\p -> p { primParamInfo = ParamInfo $ 
                                              unneededParam needed inSet p })
@@ -94,11 +94,11 @@ pprimsLastUse :: [Placed Prim] -> NeededVars [Placed Prim]
 pprimsLastUse [] = return []
 pprimsLastUse (pprim:pprims) = do
     pprims' <- pprimsLastUse pprims   -- Do tail first, for backward traversal
-    -- liftIO $ putStrLn $ "\nfinding last uses in " ++ show pprim
+    logLastUse $ "\nfinding last uses in " ++ show pprim
     prim' <- primLastUse (content pprim) (place pprim)
-    -- liftIO $ putStrLn $ "           result is " ++ show pprim
-    -- needed <- get
-    -- liftIO $ putStrLn $ "            needed = " ++ show needed
+    logLastUse $ "           result is " ++ show pprim
+    needed <- get
+    logLastUse $ "            needed = " ++ show needed
     return $ prim' ++ pprims'
 
 primLastUse :: Prim -> OptPos -> NeededVars [Placed Prim]
@@ -139,3 +139,8 @@ argNoteUse :: PrimArg -> NeededVars ()
 argNoteUse (ArgVar var _ FlowIn _ _) = do
     needVar var
 argNoteUse _ = return ()
+
+
+-- |Log a message, if we are logging unbrancher activity.
+logLastUse :: String -> NeededVars ()
+logLastUse s = lift $ logMsg "unbranch" s

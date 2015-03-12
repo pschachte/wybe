@@ -51,7 +51,7 @@ import Data.List as List
 import Data.Maybe
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
-import Control.Monad.Trans (lift,liftIO)
+import Control.Monad.Trans (lift)
 
 -- |Transform away all loops, and conditionals other than as the only
 -- statement in their block.
@@ -110,8 +110,8 @@ initUnbrancherState vars =
 
 setLoopInfo :: Placed Stmt -> Placed Stmt -> Unbrancher ()
 setLoopInfo next break = do
-    dbgPrintLn $ "** next call: " ++ showStmt 14 (content next)
-    dbgPrintLn $ "** break call: " ++ showStmt 15 (content break)
+    logUnbranch $ "next call: " ++ showStmt 14 (content next)
+    logUnbranch $ "break call: " ++ showStmt 15 (content break)
     modify (\s -> s { brLoopInfo = LoopInfo next break [] [] })
 
 
@@ -146,18 +146,17 @@ newProcName = do
 
 genProc :: ProcProto -> [Placed Stmt] -> Unbrancher ()
 genProc proto stmts = do
-    dbgPrintLn $ "** Generating proc:\n"
+    logUnbranch $ "Generating proc:\n"
       ++ show (ProcDecl Private proto stmts Nothing)
     let item = ProcDecl Private proto stmts Nothing
     modify (\s -> s { brNewDefs = item:brNewDefs s })
 
 
-dbgPrintLn :: String -> Unbrancher ()
-dbgPrintLn s = do
-    -- liftIO $ putStrLn s
-    return ()
+-- |Log a message, if we are logging unbrancher activity.
+logUnbranch :: String -> Unbrancher ()
+logUnbranch s = lift $ logMsg "unbranch" s
 
-----------------------------------------------------------------
+
 --                 Unbranching statement sequences
 ----------------------------------------------------------------
 
@@ -165,7 +164,7 @@ unbranchStmts :: [Placed Stmt] -> Unbrancher [Placed Stmt]
 unbranchStmts [] = return []
 unbranchStmts (stmt:stmts) = do
     vars <- gets brVars
-    dbgPrintLn $ "unbranching stmt\n    " ++ showStmt 4 (content stmt) ++
+    logUnbranch $ "unbranching stmt\n    " ++ showStmt 4 (content stmt) ++
       "\n  with vars " ++ show vars
     ifTerminated (return []) (unbranchStmt (content stmt) (place stmt) stmts)
 
@@ -181,21 +180,21 @@ unbranchStmt stmt@(ForeignCall _ _ _ args) pos stmts = do
     return $ (maybePlace stmt pos):stmts'
 unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     beforeVars <- gets brVars
-    dbgPrintLn $ "* test (" ++ show tstVar ++ "): " ++ showBody 8 tstStmts
-    dbgPrintLn $ "* Vars before test: " ++ show beforeVars
+    logUnbranch $ "test (" ++ show tstVar ++ "): " ++ showBody 8 tstStmts
+    logUnbranch $ "Vars before test: " ++ show beforeVars
     tstStmts' <- unbranchStmts tstStmts
     (thn',thnVars,thnTerm) <- unbranchBranch thn
     setVars beforeVars
     (els',elsVars,elsTerm) <- unbranchBranch els
     let afterVars = varsAfterITE thnVars thnTerm elsVars elsTerm
-    dbgPrintLn $ "* Vars after conditional: " ++ show afterVars
+    logUnbranch $ "Vars after conditional: " ++ show afterVars
     switchName <- newProcName
     lp <- gets brLoopInfo
     if lp == NoLoop || stmts == []
       then do
         switch <- factorFreshProc switchName beforeVars afterVars pos
                   [maybePlace (Cond tstStmts' tstVar thn' els') pos]
-        dbgPrintLn $ "* Generated switch " ++ showStmt 4 (content switch)
+        logUnbranch $ "Generated switch " ++ showStmt 4 (content switch)
         setVars beforeVars
         unbranchStmts (switch:stmts)
       else do
@@ -204,19 +203,19 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
         finalVars <- if thnTerm || elsTerm 
                      then return afterVars
                      else gets brVars
-        dbgPrintLn $ "* Loop body:\n" ++ showBody 4 stmts
-        dbgPrintLn $ "* Loop body inputs = " ++ show afterVars
-        dbgPrintLn $ "* Loop body outputs = " ++ show finalVars
+        logUnbranch $ "Loop body:\n" ++ showBody 4 stmts
+        logUnbranch $ "Loop body inputs = " ++ show afterVars
+        logUnbranch $ "Loop body outputs = " ++ show finalVars
         contName <- newProcName
         let exitVs = Map.intersection thnVars elsVars
         cont <- factorFreshProc contName exitVs finalVars Nothing stmts'
-        dbgPrintLn $ "* Generated continuation " ++ showStmt 4 (content cont)
+        logUnbranch $ "Generated continuation " ++ showStmt 4 (content cont)
         switch <- factorFreshProc switchName beforeVars finalVars {- afterVars -} pos
                   [maybePlace 
                    (Cond tstStmts' tstVar
                     (if thnTerm then thn' else thn' ++ [cont]) 
                     (if elsTerm then els' else els' ++ [cont])) pos]
-        dbgPrintLn $ "* Generated loop switch " ++ showStmt 4 (content switch)
+        logUnbranch $ "Generated loop switch " ++ showStmt 4 (content switch)
         return [switch]
 -- Determining the set of variables (certain to be) defined after a
 -- loop is a bit tricky, because we transform a loop together with the
@@ -226,28 +225,28 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
 -- intersection of the sets of variables defined at each (usually 
 -- conditional) loop break.
 unbranchStmt (Loop body) pos stmts = do
-    dbgPrintLn $ "* Handling loop:" ++ showBody 4 body
+    logUnbranch $ "Handling loop:" ++ showBody 4 body
     beforeVars <- gets brVars
-    dbgPrintLn $ "* Vars before loop: " ++ show beforeVars
+    logUnbranch $ "Vars before loop: " ++ show beforeVars
     let afterVars = fromMaybe Map.empty $ snd $ loopExitVars beforeVars body
-    dbgPrintLn $ "* Vars after loop: " ++ show afterVars
+    logUnbranch $ "Vars after loop: " ++ show afterVars
     setVars afterVars
     stmts' <- unbranchStmts stmts
     finalVars <- gets brVars
-    dbgPrintLn $ "* Vars after body: " ++ show finalVars
+    logUnbranch $ "Vars after body: " ++ show finalVars
     breakName <- newProcName
     brk <- factorFreshProc breakName afterVars finalVars Nothing stmts'
-    dbgPrintLn $ "* Generated break " ++ showStmt 4 (content brk)
+    logUnbranch $ "Generated break " ++ showStmt 4 (content brk)
     loopName <- newProcName
     next <- newProcCall loopName beforeVars afterVars pos
     setLoopInfo next brk
     setVars beforeVars
     body' <- unbranchStmts $ body ++ [next]
     _ <- factorFreshProc loopName beforeVars afterVars pos body'
-    dbgPrintLn $ "* Generated loop " ++ showStmt 4 (content next)
+    logUnbranch $ "Generated loop " ++ showStmt 4 (content next)
     setNoLoop
     setVars finalVars
-    dbgPrintLn $ "* Finished handling loop"
+    logUnbranch $ "Finished handling loop"
     return [next]
 unbranchStmt (For _ _) _ _ =
     shouldnt "flattening should have removed For statements"
@@ -279,10 +278,10 @@ unbranchBranch ::  [Placed Stmt] -> Unbrancher ([Placed Stmt],VarDict,Bool)
 unbranchBranch branch = do
     branch' <- unbranchStmts branch
     branchVars <- gets brVars
-    dbgPrintLn $ "* Vars after then branch: " ++ show branchVars
+    logUnbranch $ "Vars after then branch: " ++ show branchVars
     branchTerm <- gets brTerminated
-    dbgPrintLn $
-      "* Then branch is" ++ (if branchTerm then "" else " NOT") ++ " terminal"
+    logUnbranch $
+      "Then branch is" ++ (if branchTerm then "" else " NOT") ++ " terminal"
     setTerminated False
     return (branch', branchVars,branchTerm)
 

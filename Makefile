@@ -39,15 +39,17 @@ Version.lhs:	*.hs
 	@printf "> buildDate :: String\n> buildDate = \"%s\"\n" "`date`" >> $@
 
 TESTCASES = $(wildcard test-cases/*.wybe)
+#DEBUG=--log=unbranch
 
 test:	wybemk
 	@rm -f ERRS ; touch ERRS
 	@printf "testing"
 	@for f in $(TESTCASES) ; do \
 	    out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
+	    log=`echo "$$f" | sed 's/.wybe$$/.log/'` ; \
 	    exp=`echo "$$f" | sed 's/.wybe$$/.exp/'` ; \
 	    targ=`echo "$$f" | sed 's/.wybe$$/.o/'` ; \
-	    ./wybemk -v -f $$targ > $$out 2>&1 ; \
+	    ./wybemk -v $(DEBUG) -f $$targ > $$out 2> $$log ; \
 	    if [ ! -r $$exp ] ; then \
 		printf "[31m?[39m" ; \
 		NEW="$${NEW}\n    $$out" ; \

@@ -36,9 +36,9 @@ procExpansion def = do
                               primProtoParams proto }
     let def' = def { procImpln = ProcDefPrim proto' body',
                      procTmpCount = tmpCount expander }
-    -- liftIO $ putStrLn $
-    --        "\nExpanded:" ++ showProcDef 4 def ++
-    --                 "\nTo:" ++ showProcDef 4 def'
+    logMsg "expansion" $
+           "\nExpanded:" ++ showProcDef 4 def ++
+                    "\nTo:" ++ showProcDef 4 def'
     return def'
 
 
@@ -129,11 +129,11 @@ expandPrims noInline renameAll pprims = do
 
 expandPrim :: Bool -> Bool -> Prim -> OptPos -> Expander [Placed Prim]
 expandPrim noInline renameAll call@(PrimCall pspec args) pos = do
-    -- liftIO $ putStrLn $ "Try to expand " ++ 
-    --   (if noInline then "" else "and inline ") ++ show call
+    logExpansion $ "Try to expand " ++ 
+      (if noInline then "" else "and inline ") ++ show call
     args' <- mapM (expandArg renameAll) args
     def <- lift $ getProcDef pspec
-    -- liftIO $ putStrLn $ "Definition:" ++ showProcDef 4 def
+    logExpansion $ "Definition:" ++ showProcDef 4 def
     prims <- if (not noInline) && procInline def
              then do
                  saved <- get
@@ -144,14 +144,14 @@ expandPrim noInline renameAll call@(PrimCall pspec args) pos = do
                  unless (NoFork == bodyFork body) $
                    shouldnt $ "Inlined proc with non-empty fork" ++
                               show pspec
-                 -- liftIO $ putStrLn $ "Found expansion: " ++ showBlock 4 body
+                 logExpansion $ "Found expansion: " ++ showBlock 4 body
                  let defPrims = bodyPrims body
                  defPrims' <- expandPrims True True defPrims
                  tmp' <- gets tmpCount
                  put saved
                  modify (\s -> s { tmpCount = tmp' })
-                 -- liftIO $ putStrLn $ "After subst " ++
-                 --   showBlock 4 (ProcBody defPrims' NoFork)
+                 logExpansion $ "After subst " ++
+                   showBlock 4 (ProcBody defPrims' NoFork)
                  return defPrims'
              else return [maybePlace (PrimCall pspec args') pos]
     primsList <- mapM (\p -> expandIfAssign (content p) p) prims
@@ -178,7 +178,7 @@ expandIfAssign _ pprim = return [pprim]
 
 expandArg :: Bool -> PrimArg -> Expander PrimArg
 expandArg renameAll arg@(ArgVar var typ flow ftype _) = do
-    -- liftIO $ putStr $ "  expanding " ++ show arg
+    logExpansion $ "expanding " ++ show arg
     maybeArg <- gets (Map.lookup var . substitution)
     arg' <- case (maybeArg,renameAll,flow) of
         (Just a,_,_) -> do return $ setPrimArgFlow flow ftype a
@@ -189,7 +189,7 @@ expandArg renameAll arg@(ArgVar var typ flow ftype _) = do
             freshVar <- tmpVar
             addSubst var $ ArgVar freshVar typ FlowIn ftype False
             return $ ArgVar freshVar typ FlowOut ftype False
-    -- liftIO $ putStrLn $ " to " ++ show arg'
+    logExpansion $ " to " ++ show arg'
     return arg'
 expandArg _ arg = return arg
 
@@ -218,3 +218,8 @@ renameParam subst param@(PrimParam name typ FlowOut ftype inf ) =
           _ -> param) $
     Map.lookup name subst
 renameParam _ param = param
+
+
+-- |Log a message, if we are logging unbrancher activity.
+logExpansion :: String -> Expander ()
+logExpansion s = lift $ logMsg "expansion" s

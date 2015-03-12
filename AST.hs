@@ -53,7 +53,7 @@ module AST (
   verboseDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
   showModSpecs, showResources, showMaybeSourcePos,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
-  showMessages, stopOnError
+  showMessages, stopOnError, logMsg
   ) where
 
 import Options
@@ -62,13 +62,14 @@ import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
 import Text.ParserCombinators.Parsec.Pos
+import System.IO
 import System.FilePath
+import System.Exit
 import Control.Monad
 import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 import Config
 import Util
-import System.Exit
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
@@ -250,9 +251,9 @@ getLoadingModule modspec = do
 -- Nothing.
 getLoadedModule :: ModSpec -> Compiler (Maybe Module)
 getLoadedModule modspec = do
-    -- liftIO $ putStr $ "Get loaded module " ++ showModSpec modspec
+    logAST $ "Get loaded module " ++ showModSpec modspec
     maybeMod <- gets (Map.lookup modspec . modules)
-    -- liftIO $ putStrLn $ if isNothing maybeMod then " got nothing!" else " worked"
+    logAST $ if isNothing maybeMod then " got nothing!" else " worked"
     return maybeMod
 
 -- |Apply the given function to the specified module, if it has been loaded;
@@ -378,8 +379,8 @@ getSpecModule :: String -> ModSpec -> (Module -> t) -> Compiler t
 getSpecModule context spec getter = do
     let msg = context ++ " looking up missing module " ++ show spec
     curr <- gets (List.filter ((==spec) . modSpec) . underCompilation)
-    -- liftIO $ putStrLn $ "found " ++ (show $ length curr) ++
-    --   " matching modules under compilation"
+    logAST $ "found " ++ (show $ length curr) ++
+      " matching modules under compilation"
     case curr of
         []    -> gets (maybe (error msg) getter . Map.lookup spec . modules)
         [mod] -> return $ getter mod
@@ -415,7 +416,7 @@ enterModule :: FilePath -> ModSpec -> Maybe [Ident] -> Compiler ()
 enterModule dir modspec params = do
     count <- gets ((1+) . loadCount)
     modify (\comp -> comp { loadCount = count })
-    -- liftIO $ putStrLn $ "Entering module " ++ showModSpec modspec
+    logAST $ "Entering module " ++ showModSpec modspec
     modify (\comp -> let mods = Module dir modspec params 
                                        emptyInterface (Just emptyImplementation)
                                        count count 0 []
@@ -426,9 +427,9 @@ enterModule dir modspec params = do
 -- Trusts that the modspec really does specify a module.
 reenterModule :: ModSpec -> Compiler ()
 reenterModule modspec = do
-    -- liftIO $ putStrLn $ "finding module " ++ showModSpec modspec
+    logAST $ "finding module " ++ showModSpec modspec
     mod <- getSpecModule "reenterModule" modspec id
-    -- liftIO $ putStrLn $ "found it"
+    logAST $ "found it"
     modify (\comp -> comp { underCompilation = mod : underCompilation comp })
 
 
@@ -436,9 +437,9 @@ exitModule :: Compiler [ModSpec]
 exitModule = do
     mod <- finishModule
     let num = thisLoadNum mod
-    -- liftIO $ putStrLn $ "Finishing module " ++ showModSpec (modSpec mod)
-    -- liftIO $ putStrLn $ "    loadNum = " ++ show num ++
-    --        ", minDependencyNum = " ++ show (minDependencyNum mod)
+    logAST $ "Finishing module " ++ showModSpec (modSpec mod)
+    logAST $ "    loadNum = " ++ show num ++
+           ", minDependencyNum = " ++ show (minDependencyNum mod)
     if (minDependencyNum mod < num) 
       then do
         modify (\comp -> comp { deferred = mod:deferred comp })
@@ -564,9 +565,9 @@ lookupType Unspecified _ = return $ Just Unspecified
 lookupType ty@(TypeSpec _ "phantom" []) pos =
     return $ Just $ TypeSpec ["wybe"] "phantom" []
 lookupType ty@(TypeSpec mod name args) pos = do
-    -- liftIO $ putStrLn $ "Looking up type " ++ show ty
+    logAST $ "Looking up type " ++ show ty
     tspecs <- refersTo mod name modKnownTypes typeMod
-    -- liftIO $ putStrLn $ "Candidates: " ++ show tspecs
+    logAST $ "Candidates: " ++ show tspecs
     case Set.size tspecs of
         0 -> do
             message Error ("Unknown type " ++ show ty) pos
@@ -621,9 +622,9 @@ addSimpleResource name impln vis = do
 -- |Find the definition of the specified resource visible in the current module.
 lookupResource :: ResourceSpec -> OptPos -> Compiler (Maybe ResourceIFace)
 lookupResource res@(ResourceSpec mod name) pos = do
-    -- liftIO $ putStrLn $ "Looking up resource " ++ show res
+    logAST $ "Looking up resource " ++ show res
     rspecs <- refersTo mod name modKnownResources resourceMod
-    -- liftIO $ putStrLn $ "Candidates: " ++ show rspecs
+    logAST $ "Candidates: " ++ show rspecs
     case Set.size rspecs of
         0 -> do
             message Error ("Unknown resource " ++ show res) pos
@@ -664,14 +665,14 @@ addImport modspec imports = do
     when (isNothing $ importPublic imports) $
       updateInterface Public (updateDependencies (Set.insert modspec))
     maybeMod <- gets (List.find ((==modspec) . modSpec) . underCompilation)
-    -- liftIO $ putStrLn $ "Noting import of " ++ showModSpec modspec ++
-    --        ", which is " ++ (if isNothing maybeMod then "NOT " else "") ++
-    --        "currently being loaded"
+    logAST $ "Noting import of " ++ showModSpec modspec ++
+           ", which is " ++ (if isNothing maybeMod then "NOT " else "") ++
+           "currently being loaded"
     case maybeMod of
         Nothing -> return ()  -- not currently loading dependency
         Just mod -> do
-            -- liftIO $ putStrLn $ "Limiting minDependencyNum to " ++
-            --         show (thisLoadNum mod)
+            logAST $ "Limiting minDependencyNum to " ++
+                    show (thisLoadNum mod)
             updateModule (\m -> m { minDependencyNum =
                                         min (thisLoadNum mod)
                                             (minDependencyNum m) })
@@ -694,8 +695,8 @@ addProc tmpCtr (ProcDecl vis proto stmts pos) = do
         in imp { modProcs = Map.insert name procs' $ modProcs imp,
                  modKnownProcs = Map.insert name known' $ modKnownProcs imp })
     updateInterface vis (updatePubProcs (mapSetInsert name spec))
-    -- liftIO $ putStrLn $ "Adding defnintion for " ++ show spec ++ ":" ++
-    --   showProcDef 4 procDef
+    logAST $ "Adding defnintion for " ++ show spec ++ ":" ++
+      showProcDef 4 procDef
     return ()
 addProc _ item =
     shouldnt $ "addProc given non-Proc item " ++ show item
@@ -828,9 +829,9 @@ descendantModuleOf _ _ = False
 refersTo :: ModSpec -> Ident -> (ModuleImplementation -> Map Ident (Set b)) ->
             (b -> ModSpec) -> Compiler (Set b)
 refersTo modspec name implMapFn specModFn = do
-    -- currMod <- getModuleSpec
-    -- liftIO $ putStrLn $ "Finding visible symbol " ++ maybeModPrefix modspec ++
-    --   name ++ " from module " ++ showModSpec currMod
+    currMod <- getModuleSpec
+    logAST $ "Finding visible symbol " ++ maybeModPrefix modspec ++
+      name ++ " from module " ++ showModSpec currMod
     visible <- getModule (Map.findWithDefault Set.empty name . implMapFn . 
                           fromJust . modImplementation)
     return $ Set.filter ((modspec `isSuffixOf`) . specModFn) visible
@@ -840,9 +841,9 @@ refersTo modspec name implMapFn specModFn = do
 callTargets :: ModSpec -> ProcName -> Compiler [ProcSpec]
 callTargets modspec name = do
     pspecs <- fmap Set.toList $ refersTo modspec name modKnownProcs procSpecMod
-    -- liftIO $ putStrLn $ "   name '" ++ name ++ "' for module spec '" ++
-    --   showModSpec modspec ++ "' matches: " ++ 
-    --   intercalate ", " (List.map show pspecs)
+    logAST $ "   name '" ++ name ++ "' for module spec '" ++
+      showModSpec modspec ++ "' matches: " ++ 
+      intercalate ", " (List.map show pspecs)
     return pspecs
 
 
@@ -1026,10 +1027,10 @@ doImport :: ModSpec -> ImportSpec -> Compiler ()
 doImport mod imports = do
     currMod <- getModuleSpec
     impl <- getModuleImplementationField id
-    -- liftIO $ putStrLn $ "Handle importation from " ++ showModSpec mod ++
-    --   " into " ++ 
-    --   let modStr = showModSpec currMod
-    --   in modStr ++ ":  " ++ showUse (27 + length modStr) mod imports
+    logAST $ "Handle importation from " ++ showModSpec mod ++
+      " into " ++ 
+      let modStr = showModSpec currMod
+      in modStr ++ ":  " ++ showUse (27 + length modStr) mod imports
     fromIFace <- fmap (modInterface . trustFromJust "doImport") $ 
                  getLoadingModule mod
     let pubImports = importPublic imports
@@ -1973,3 +1974,19 @@ stopOnError incident = do
         liftIO $ putStrLn $ "Error detected during " ++ incident
         showMessages
         liftIO exitFailure
+
+-- |Write a log message indicating some aspect of the working of the compiler
+logMsg :: String          -- ^ The aspect of the compiler being logged,
+                          -- ^ used to decide whether to log the message
+          -> String       -- ^ The log message
+          -> Compiler ()  -- ^ Works in the Compiler monad
+logMsg selector msg = do
+    loggingSet <- gets (optLogAspects . options)
+    when (maybe True (Set.member selector) loggingSet)
+         (liftIO $ hPutStrLn stderr $ selector ++ ": " ++ msg)
+    return ()
+
+
+-- |Log a message, if we are logging unbrancher activity.
+logAST :: String -> Compiler ()
+logAST s = logMsg "unbranch" s

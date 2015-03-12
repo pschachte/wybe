@@ -100,7 +100,7 @@ initFlattenerState varSet =
 
 emit :: OptPos -> Stmt -> Flattener ()
 emit pos stmt = do
-    -- liftIO $ putStrLn $ "** Emitting:  " ++ showStmt 14 stmt
+    -- logFlatten $ "** Emitting:  " ++ showStmt 14 stmt
     stmts <- gets flattened
     modify (\s -> s { flattened = maybePlace stmt pos:stmts })
 
@@ -141,12 +141,12 @@ flattenInner isLoop inner = do
               ((initFlattenerState (defdVars oldState)) {
                     tempCtr = (tempCtr oldState),
                     prefixStmts = if isLoop then [] else prefixStmts oldState}))
-    -- liftIO $ putStrLn $ "** Prefix:\n" ++ 
-    --   showBody 4 (prefixStmts innerState)
-    -- liftIO $ putStrLn $ "** Flattened:\n" ++ 
-    --   showBody 4 (flattened innerState)
-    -- liftIO $ putStrLn $ "** Postponed:\n" ++ 
-    --   showBody 4 (postponed innerState)
+    logFlatten $ "** Prefix:\n" ++ 
+      showBody 4 (prefixStmts innerState)
+    logFlatten $ "** Flattened:\n" ++ 
+      showBody 4 (flattened innerState)
+    logFlatten $ "** Postponed:\n" ++ 
+      showBody 4 (postponed innerState)
     put $ oldState { tempCtr = tempCtr innerState }
     if isLoop
       then flattenStmts $ prefixStmts innerState
@@ -198,8 +198,8 @@ flattenStmt :: Stmt -> OptPos -> Flattener ()
 flattenStmt stmt pos = do
     modify (\s -> s { stmtUses = Set.empty, stmtDefs = Set.empty, currPos = pos})
     defd <- gets defdVars
-    -- liftIO $ putStrLn $ "flattening stmt " ++ showStmt 4 stmt ++
-    --   " with defined vars " ++ show defd
+    logFlatten $ "flattening stmt " ++ showStmt 4 stmt ++
+      " with defined vars " ++ show defd
     flattenStmt' stmt pos
     modify (\s -> s { defdVars = defdVars s `Set.union` stmtDefs s })
 
@@ -214,9 +214,9 @@ flattenStmt' (ForeignCall lang name flags args) pos = do
     emit pos $ ForeignCall lang name flags args'
     emitPostponed
 flattenStmt' (Cond tstStmts tst thn els) pos = do
-    -- liftIO $ putStrLn $ "** Flattening test:" ++ show tst
+    logFlatten $ "** Flattening test:" ++ show tst
     (vars,tst') <- flattenInner False (flattenPExp tst)
-    -- liftIO $ putStrLn $ "** Result:\n" ++ showBody 4 tst'
+    logFlatten $ "** Result:\n" ++ showBody 4 tst'
     (_,thn') <- flattenInner False (flattenStmts thn)
     (_,els') <- flattenInner False (flattenStmts els)
     let errPos = betterPlace pos tst
@@ -266,18 +266,18 @@ flattenStmt' Next pos = emit pos Next
 --  after the call to store the results appropriately.
 flattenArgs :: [Placed Exp] -> Flattener [Placed Exp]
 flattenArgs args = do
-    -- liftIO $ putStrLn $ "  Flattening arglist " ++ show args
+    logFlatten $ "  Flattening arglist " ++ show args
     argListList <- mapM flattenPExp args
-    -- liftIO $ putStrLn $ "  Flattened =   " ++ show (concat argListList)
+    logFlatten $ "  Flattened =   " ++ show (concat argListList)
     return $ concat argListList
 
 flattenPExp :: Placed Exp -> Flattener [Placed Exp]
 flattenPExp pexp = do
-    -- vs <- gets defdVars
-    -- liftIO $ putStrLn $ "  Flattening exp " ++ show pexp ++ ", with vars " ++
-    --        show vs
+    vs <- gets defdVars
+    logFlatten $ "  Flattening exp " ++ show pexp ++ ", with vars " ++
+           show vs
     result <- flattenExp (content pexp) (place pexp)
-    -- liftIO $ putStrLn $ "  Result =   " ++ show result
+    logFlatten $ "  Result =   " ++ show result
     return result
 
 
@@ -297,12 +297,12 @@ flattenExp exp@(StringValue a) pos =
 flattenExp exp@(CharValue a) pos =
     return $ [maybePlace exp pos]
 flattenExp exp@(Var name dir flowType) pos = do
-    -- liftIO $ putStrLn $ "  Flattening arg " ++ show exp
+    logFlatten $ "  Flattening arg " ++ show exp
     let isIn  = flowsIn dir
     let isOut = flowsOut dir
-    -- liftIO $ putStrLn $ "  isIn = " ++ show isIn ++ " isOut = " ++ show isOut
+    logFlatten $ "  isIn = " ++ show isIn ++ " isOut = " ++ show isOut
     let flowType' = if isIn && isOut then HalfUpdate else flowType
-    -- liftIO $ putStrLn $ "  flowType' = " ++ show flowType'
+    logFlatten $ "  flowType' = " ++ show flowType'
     defd <- gets (Set.member name . defdVars)
     if (dir == ParamIn && (not defd))
       then -- Reference to an undefined variable: assume it's meant to be
@@ -317,7 +317,7 @@ flattenExp exp@(Var name dir flowType) pos = do
                       then [maybePlace (Var name ParamOut flowType') pos] 
                       else []
         
-        -- liftIO $ putStrLn $ "  Arg flattened to " ++ show (inPart ++ outPart)
+        logFlatten $ "  Arg flattened to " ++ show (inPart ++ outPart)
         return $ inPart ++ outPart
 flattenExp (Where stmts pexp) _ = do
     flattenStmts stmts
@@ -345,7 +345,7 @@ flattenExp (Typed exp typ) pos = do
 flattenCall :: ([Placed Exp] -> Stmt) -> OptPos -> [Placed Exp] ->
                Flattener [Placed Exp]
 flattenCall stmtBuilder pos exps = do
-    -- liftIO $ putStrLn $ "** flattening args:  " ++ show exps
+    logFlatten $ "** flattening args:  " ++ show exps
     resultName <- tempVar
     oldPos <- gets currPos
     uses <- gets stmtUses
@@ -361,9 +361,9 @@ flattenCall stmtBuilder pos exps = do
                       currPos = oldPos})
     let isOut = not $ Set.null defs'
     let isIn = not (isOut && Set.null (defs' `Set.intersection` uses'))
-    -- liftIO $ putStrLn $ "** defines:  " ++ show defs'
-    -- liftIO $ putStrLn $ "** uses   :  " ++ show uses'
-    -- liftIO $ putStrLn $ "** in = " ++ show isIn ++ "; out = " ++ show isOut
+    logFlatten $ "** defines:  " ++ show defs'
+    logFlatten $ "** uses   :  " ++ show uses'
+    logFlatten $ "** in = " ++ show isIn ++ "; out = " ++ show isOut
     let flowType = if isIn && isOut then HalfUpdate else Implicit pos
     when isIn $ 
       emit pos $ stmtBuilder $ 
@@ -388,3 +388,7 @@ flattenParam (Param name typ dir flowType) =
     in  (if isIn then [Param name typ ParamIn flowType'] else []) ++
         (if isOut then [Param name typ ParamOut flowType'] else [])
     
+
+-- |Log a message, if we are logging unbrancher activity.
+logFlatten :: String -> Flattener ()
+logFlatten s = lift $ logMsg "unbranch" s

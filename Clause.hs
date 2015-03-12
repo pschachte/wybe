@@ -82,16 +82,16 @@ compileProc proc = do
         mapM_ nextVar $ List.map paramName $ 
           List.filter (flowsIn . paramFlow) params
         startVars <- get
-        -- liftIO $ putStrLn $ "Compiling body:\n" ++ showBody 4 body
+        logClause $ "Compiling body:\n" ++ showBody 4 body
         compiled <- compileBody body
-        -- liftIO $ putStrLn $ "Compiled to:\n"  ++ showBlock 4 compiled
+        logClause $ "Compiled to:\n"  ++ showBlock 4 compiled
         endVars <- get
-        -- liftIO $ putStrLn $ "startVars: " ++ show startVars
-        -- liftIO $ putStrLn $ "endVars  : " ++ show endVars
-        -- liftIO $ putStrLn $ "params   : " ++ show params
+        logClause $ "startVars: " ++ show startVars
+        logClause $ "endVars  : " ++ show endVars
+        logClause $ "params   : " ++ show params
         let params' = List.map (compileParam startVars endVars) params
         let proto' = PrimProto (procProtoName proto) params'
-        -- liftIO $ putStrLn $ "comparams: " ++ show params'
+        logClause $ "comparams: " ++ show params'
         return $ proc { procImpln = ProcDefPrim proto' compiled }
 
 
@@ -138,13 +138,13 @@ compileBody stmts = do
 
 compileSimpleStmt :: Placed Stmt -> ClauseComp (Placed Prim)
 compileSimpleStmt stmt = do
-    -- liftIO $ putStrLn $ "Compiling " ++ showStmt 4 (content stmt)
+    logClause $ "Compiling " ++ showStmt 4 (content stmt)
     stmt' <- compileSimpleStmt' (content stmt)
     return $ maybePlace stmt' (place stmt)
 
 compileSimpleStmt' :: Stmt -> ClauseComp Prim
 compileSimpleStmt' call@(ProcCall maybeMod name procID args) = do
-    -- liftIO $ putStrLn $ "Compiling call " ++ showStmt 4 call
+    logClause $ "Compiling call " ++ showStmt 4 call
     args' <- mapM (placedApply compileArg) args
     return $ PrimCall (ProcSpec maybeMod name $
                        trustFromJust "compileSimpleStmt'" procID)
@@ -204,3 +204,8 @@ compileParam startVars endVars param@(Param name ty flow ftype) =
                 _ -> shouldnt "non-simple parameter flow in compileParam"
     in PrimParam (PrimVarName name num)
        ty pflow ftype (ParamInfo False)
+
+
+-- |Log a message, if we are logging unbrancher activity.
+logClause :: String -> ClauseComp ()
+logClause s = lift $ logMsg "clause" s

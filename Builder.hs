@@ -89,7 +89,7 @@ buildTarget force target = do
 -- |Compile or load a module dependency.
 buildDependency :: ModSpec -> Compiler ()
 buildDependency modspec = do
-    -- liftIO $ putStrLn $ "Load dependency: " ++ showModSpec modspec
+    logBuild $ "Load dependency: " ++ showModSpec modspec
     force <- option optForceAll
     possDirs <- gets (optLibDirs . options)
     localDir <- getModule modDirectory
@@ -110,9 +110,9 @@ buildModuleIfNeeded force modspec possDirs = do
           return False -- Already loading it; we'll handle it later
       else do
         maybemod <- getLoadedModule modspec
-        -- liftIO $ putStrLn $ "module " ++ showModSpec modspec ++ " is " ++
-        --   (if isNothing maybemod then "not yet" else "already") ++
-        --   " loaded"
+        logBuild $ "module " ++ showModSpec modspec ++ " is " ++
+          (if isNothing maybemod then "not yet" else "already") ++
+          " loaded"
         if isJust maybemod
           then return False -- already loaded:  nothing more to do
           else do
@@ -182,7 +182,7 @@ buildModule modname objfile srcfile = do
 -- |Compile a module given the parsed source file contents.
 compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
 compileModule dir modspec params items = do
-    -- liftIO $ putStrLn $ "===> Compiling module " ++ showModSpec modspec
+    logBuild $ "===> Compiling module " ++ showModSpec modspec
     enterModule dir modspec params
     -- verboseMsg 1 $ return (intercalate "\n" $ List.map show items)
     -- XXX This means we generate LPVM code for a module before 
@@ -198,9 +198,9 @@ compileModule dir modspec params items = do
     stopOnError $ "preliminary processing of module " ++ showModSpec modspec
     loadImports
     stopOnError $ "handling imports for module " ++ showModSpec modspec
-    -- underComp <- gets underCompilation
+    underComp <- gets underCompilation
     mods <- exitModule -- may be empty list if module is mutually dependent
-    -- liftIO $ putStrLn $ "<=== finished compling module " ++ showModSpec modspec
+    logBuild $ "<=== finished compling module " ++ showModSpec modspec
     compileModSCC mods
 
 
@@ -234,11 +234,11 @@ descendantModules mspec = do
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
-    -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER FLATTENING:\n"
+    logBuild $ replicate 70 '=' ++ "\nAFTER FLATTENING:\n"
     -- verboseDump
     fixpointProcessSCC handleModImports mspecs
-    -- liftIO $ putStrLn $ replicate 70 '='
-    -- liftIO $ putStrLn $ "resource and type checking modules " ++ showModSpecs mspecs ++ "..."
+    logBuild $ replicate 70 '='
+    logBuild $ "resource and type checking modules " ++ showModSpecs mspecs ++ "..."
     -- verboseDump
     mapM_ validateModExportTypes mspecs
     stopOnError $ "checking parameter type declarations in modules " ++
@@ -252,7 +252,7 @@ compileModSCC mspecs = do
     mapM_ typeCheckMod mspecs
     stopOnError $ "type checking of modules " ++
       showModSpecs mspecs
-    -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER TYPE CHECK:\n"
+    logBuild $ replicate 70 '=' ++ "\nAFTER TYPE CHECK:\n"
     -- verboseDump
     mapM_ (transformModuleProcs resourceCheckProc)  mspecs
     stopOnError $ "resource checking of modules " ++
@@ -260,14 +260,14 @@ compileModSCC mspecs = do
     mapM_ (transformModuleProcs unbranchProc)  mspecs
     stopOnError $ "handling loops and conditionals in modules " ++
       showModSpecs mspecs
-    -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER UNBRANCHING:\n"
+    logBuild $ replicate 70 '=' ++ "\nAFTER UNBRANCHING:\n"
     -- verboseDump
     mapM_ (transformModuleProcs compileProc)  mspecs
     stopOnError $ "generating low level code in " ++ showModSpecs mspecs
-    -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER COMPILATION TO LPVM:\n"
+    logBuild $ replicate 70 '=' ++ "\nAFTER COMPILATION TO LPVM:\n"
     -- verboseDump
     fixpointProcessSCC optimiseMod mspecs
-    -- liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER OPTIMISATION:\n"
+    logBuild $ replicate 70 '=' ++ "\nAFTER OPTIMISATION:\n"
     -- verboseDump
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
@@ -319,7 +319,7 @@ transformModuleProcs trans thisMod = do
                                   (Map.fromList $ zip names procs')
                                   (modProcs imp) })
     finishModule
-    -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
+    logBuild $ "**** Exiting module " ++ showModSpec thisMod
     return ()
 
 
@@ -329,7 +329,7 @@ transformModuleProcs trans thisMod = do
 loadImports :: Compiler ()
 loadImports = do
     imports <- getModuleImplementationField (keys . modImports)
-    -- liftIO $ putStrLn $ "building dependencies: " ++ showModSpecs imports
+    logBuild $ "building dependencies: " ++ showModSpecs imports
     mapM_ buildDependency imports
     -- modspec <- getModuleSpec
     -- mod <- getModule id
@@ -393,3 +393,8 @@ fileSourceFile filename = replaceExtension filename sourceExtension
 moduleFilePath :: String -> FilePath -> ModSpec -> FilePath
 moduleFilePath extension dir spec = do
     addExtension (joinPath $ (splitDirectories dir) ++ spec) extension
+
+
+-- |Log a message, if we are logging unbrancher activity.
+logBuild :: String -> Compiler ()
+logBuild s = logMsg "builder" s

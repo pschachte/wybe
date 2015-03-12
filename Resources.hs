@@ -29,7 +29,7 @@ resourceCheckMod modSCC thisMod = do
     updateModImplementation (\imp -> imp { modResources = 
                                               Map.fromAscList resources'})
     finishModule
-    -- liftIO $ putStrLn $ "**** Exiting module " ++ showModSpec thisMod
+    logResources $ "**** Exiting module " ++ showModSpec thisMod
     return (or chg,concat errs)
 
 
@@ -45,10 +45,10 @@ checkOneResource :: ResourceSpec -> Maybe ResourceImpln ->
                     Compiler (Bool,[(String,OptPos)],
                               (ResourceSpec,Maybe ResourceImpln))
 checkOneResource rspec impln@(Just (SimpleResource ty init pos)) = do
-    -- liftIO $ putStrLn $ "Check resource " ++ show rspec ++
-    --        " with implementation " ++ show impln
+    logResources $ "Check resource " ++ show rspec ++
+           " with implementation " ++ show impln
     ty' <- lookupType ty pos
-    -- liftIO $ putStrLn $ "Actual type is " ++ show ty'
+    logResources $ "Actual type is " ++ show ty'
     case ty' of
         -- lookupType reports any undefined types
         Nothing -> return (False,[],(rspec,impln))
@@ -63,8 +63,8 @@ checkOneResource rspec Nothing = do
 -- parameters and body to thread extra arguments as needed.
 resourceCheckProc :: ProcDef -> Compiler ProcDef
 resourceCheckProc pd = do
-    -- liftIO $ putStrLn $ "--------------------------------------\n"
-    -- liftIO $ putStrLn $ "Adding resources to:" ++ showProcDef 4 pd
+    logResources $ "--------------------------------------\n"
+    logResources $ "Adding resources to:" ++ showProcDef 4 pd
     let proto = procProto pd
     let resources = procProtoResources proto
     let params = procProtoParams proto
@@ -77,7 +77,7 @@ resourceCheckProc pd = do
     resParams <- fmap concat $ mapM (resourceParams pos) resFlows
     let proto' = proto { procProtoParams = params ++ resParams }
     let pd' = pd { procProto = proto', procImpln = ProcDefSrc body' }
-    -- liftIO $ putStrLn $ "Adding resources results in:" ++ showProcDef 4 pd'
+    logResources $ "Adding resources results in:" ++ showProcDef 4 pd'
     return pd'
 
 
@@ -172,3 +172,8 @@ resourceArgs pos rflow = do
                                 else []
                    return $ inExp ++ outExp)
          simpleSpecs
+
+
+-- |Log a message, if we are logging unbrancher activity.
+logResources :: String -> Compiler ()
+logResources s = logMsg "resources" s

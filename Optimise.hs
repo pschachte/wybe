@@ -31,7 +31,8 @@ optimiseMod mods thisMod = do
                (n,def) <- zip [0..] procDefs,
                let pspec = ProcSpec thisMod name n
              ]
-    -- liftIO $ putStrLn $ "Optimise SCCs:\n" ++ unlines (List.map (show . sccElts) ordered)
+    logOptimise $ "Optimise SCCs:\n" ++ 
+      unlines (List.map (show . sccElts) ordered)
     mapM_ optimiseSCCBottomUp ordered
     finishModule
     return (False,[])
@@ -57,18 +58,18 @@ optimiseSCCBottomUp (CyclicSCC pspecs) = do
 
 optimiseProc :: ProcSpec -> Compiler ()
 optimiseProc pspec = do
-    -- liftIO $ putStrLn $ ">>> Optimise " ++ show pspec
+    logOptimise $ ">>> Optimise " ++ show pspec
     updateProcDefM (optimiseProcDef pspec) pspec
     return ()
 
 
 optimiseProcDef :: ProcSpec -> ProcDef -> Compiler ProcDef
 optimiseProcDef pspec def = do
-    -- liftIO $ putStrLn $ "Definition of " ++ show pspec ++
-    --   " before optimisation:" ++ showProcDef 4 def
+    logOptimise $ "Definition of " ++ show pspec ++
+      " before optimisation:" ++ showProcDef 4 def
     def' <- procExpansion def >>= markLastUse pspec >>= inlineIfWanted
-    -- liftIO $ putStrLn $ "Definition of " ++ show pspec ++
-    --   " after optimisation:" ++ showProcDef 4 def'
+    logOptimise $ "Definition of " ++ show pspec ++
+      " after optimisation:" ++ showProcDef 4 def'
     return def'
 
 
@@ -79,11 +80,11 @@ optimiseProcDef pspec def = do
 inlineIfWanted :: ProcDef -> Compiler ProcDef
 inlineIfWanted def
     |  NoFork == bodyFork body && not (procInline def) = do
-    -- liftIO $ putStrLn $ "Considering inline of " ++ procName def
+    logOptimise $ "Considering inline of " ++ procName def
     let benefit = 2 + procCost proto -- add 2 for time saving
-    -- liftIO $ putStrLn $ "  benefit = " ++ show benefit
+    logOptimise $ "  benefit = " ++ show benefit
     let cost = bodyCost $ bodyPrims body
-    -- liftIO $ putStrLn $ "  cost = " ++ show cost
+    logOptimise $ "  cost = " ++ show cost
     if  benefit >= cost
     then return $ def { procInline = True }
     else return def
@@ -132,3 +133,7 @@ localCallees :: ModSpec -> Prim -> [ProcSpec]
 localCallees modspec (PrimCall pspec _) = [pspec]
 localCallees _ _ = []
 
+
+-- |Log a message, if we are logging unbrancher activity.
+logOptimise :: String -> Compiler ()
+logOptimise s = logMsg "optimise" s

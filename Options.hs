@@ -19,6 +19,7 @@ import System.FilePath
 import Data.List as List
 import Data.List.Split
 import Data.Map as Map
+import Data.Set as Set
 import Version
 
 -- |Command line options for the wybe compiler.
@@ -29,6 +30,8 @@ data Options = Options{
     , optShowVersion :: Bool     -- ^Print compiler version and exit
     , optShowHelp    :: Bool     -- ^Print compiler help and exit
     , optLibDirs     :: [String] -- ^Directories where library files live
+    , optLogAspects  :: Maybe (Set String)
+                                 -- ^Which aspects to log, Nothing to log all
     } deriving Show
 
 -- |Defaults for all compiler options
@@ -39,6 +42,7 @@ defaultOptions    = Options
  , optShowVersion = False
  , optShowHelp    = False
  , optLibDirs     = []
+ , optLogAspects  = Just Set.empty
  }
 
 -- |Command line option parser and help text
@@ -53,6 +57,11 @@ options =
  , Option ['L']     ["libdir"]
    (ReqArg (\ d opts -> opts { optLibDirs = optLibDirs opts ++ [d] }) "DIR")
          "specify a library directory [default $WYBELIBS]"
+ , Option ['l']     ["log"]
+   (ReqArg (\ a opts -> opts { optLogAspects = addLogRequest
+                                               (optLogAspects opts) 
+                                               a }) "ASPECT")
+         "add comma-separated aspects to log, or 'all'"
  , Option ['v'] ["verbose"]
      (NoArg (\ opts -> opts { optVerbosity = 1 + optVerbosity opts }))
      "verbose output on stderr"
@@ -110,3 +119,22 @@ handleCmdline = do
                     exitFailure
                 else do
                     return (opts,files)
+
+-- | Add 
+addLogRequest :: Maybe (Set String) -> String -> Maybe (Set String)
+addLogRequest Nothing _ = Nothing  -- Nothing means log everything
+addLogRequest (Just set) aspectsCommaSep =
+  let set' = Set.union set $ Set.fromList $ separate ',' aspectsCommaSep
+  in  if Set.member "all" set'
+      then Nothing
+      else Just set'
+
+-- |The inverse of intercalate:  split up a list into sublists separated 
+--  by the separator list.
+separate :: Eq a => a -> [a] -> [[a]]
+separate separator [] = [[]]
+separate separator (e:es) =
+  if e == separator
+  then []:separate separator es
+  else let (s:ss) = separate separator es
+       in  (e:s):ss
