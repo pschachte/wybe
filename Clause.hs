@@ -197,10 +197,10 @@ compileParam startVars endVars param@(Param name ty flow ftype) =
     let (pflow,num) =
             case flow of
                 ParamIn -> (FlowIn, Map.findWithDefault 0 name startVars)
-                ParamOut -> (FlowOut, 
-                             trustFromJust
-                             ("compileParam for param " ++ show param)
-                             $ Map.lookup name endVars)
+                ParamOut -> (FlowOut, Map.findWithDefault 0 name endVars)
+                             -- trustFromJust
+                             -- ("compileParam for param " ++ show param)
+                             -- $ Map.lookup name endVars)
                 _ -> shouldnt "non-simple parameter flow in compileParam"
     in PrimParam (PrimVarName name num)
        ty pflow ftype (ParamInfo False)
