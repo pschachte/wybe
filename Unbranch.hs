@@ -79,7 +79,7 @@ unbranchBody params stmts = do
 ----------------------------------------------------------------
 
 -- |The Unbrancher monad is a state transformer monad carrying the 
---  flattener state over the compiler monad.
+--  unbrancher state over the compiler monad.
 type Unbrancher = StateT UnbrancherState Compiler
 
 type VarDict = Map VarName TypeSpec
