@@ -39,7 +39,7 @@ Version.lhs:	*.hs
 	@printf "> buildDate :: String\n> buildDate = \"%s\"\n" "`date`" >> $@
 
 TESTCASES = $(wildcard test-cases/*.wybe)
-#DEBUG=--log=unbranch
+DEBUG=--log=Unbranch
 
 test:	wybemk
 	@rm -f ERRS ; touch ERRS
