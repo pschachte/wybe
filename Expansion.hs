@@ -12,6 +12,7 @@
 module Expansion (procExpansion) where
 
 import AST
+import Options (LogSelection(Expansion))
 import Data.Map as Map
 import Data.List as List
 import Data.Set as Set
@@ -36,7 +37,7 @@ procExpansion def = do
                               primProtoParams proto }
     let def' = def { procImpln = ProcDefPrim proto' body',
                      procTmpCount = tmpCount expander }
-    logMsg "expansion" $
+    logMsg Expansion $
            "\nExpanded:" ++ showProcDef 4 def ++
                     "\nTo:" ++ showProcDef 4 def'
     return def'
@@ -222,4 +223,4 @@ renameParam _ param = param
 
 -- |Log a message, if we are logging unbrancher activity.
 logExpansion :: String -> Expander ()
-logExpansion s = lift $ logMsg "expansion" s
+logExpansion s = lift $ logMsg Expansion s

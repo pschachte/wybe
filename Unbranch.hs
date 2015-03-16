@@ -46,6 +46,7 @@
 module Unbranch (unbranchProc, unbranchBody) where
 
 import AST
+import Options (LogSelection(Unbranch))
 import Data.Map as Map
 import Data.List as List
 import Data.Maybe
@@ -154,7 +155,7 @@ genProc proto stmts = do
 
 -- |Log a message, if we are logging unbrancher activity.
 logUnbranch :: String -> Unbrancher ()
-logUnbranch s = lift $ logMsg "unbranch" s
+logUnbranch s = lift $ logMsg Unbranch s
 
 
 --                 Unbranching statement sequences

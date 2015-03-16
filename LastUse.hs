@@ -9,6 +9,7 @@
 module LastUse (markLastUse) where
 
 import AST
+import Options (LogSelection(LastUse))
 import Data.Set as Set
 import Data.List as List
 import Control.Monad.Trans.State
@@ -22,10 +23,10 @@ markLastUse ps def = do
     let (inputs,outputs) = List.partition ((==FlowIn) . primParamFlow) params
     let inSet = List.foldr (Set.insert . primParamName) Set.empty inputs
     let outSet = List.foldr (Set.insert . primParamName) Set.empty outputs
-    logMsg "lastuse" $ "\nMarking last uses in:" ++ showBlock 4 body
+    logMsg LastUse $ "\nMarking last uses in:" ++ showBlock 4 body
     (body',needed) <- runStateT (bodyLastUse body) outSet
-    logMsg "lastuse" $ "Result:" ++ showBlock 4 body'
-    logMsg "lastuse" $ "Needed: " ++ show needed
+    logMsg LastUse $ "Result:" ++ showBlock 4 body'
+    logMsg LastUse $ "Needed: " ++ show needed
     let params' = List.map 
                   (\p -> p { primParamInfo = ParamInfo $ 
                                              unneededParam needed inSet p })
@@ -143,4 +144,4 @@ argNoteUse _ = return ()
 
 -- |Log a message, if we are logging unbrancher activity.
 logLastUse :: String -> NeededVars ()
-logLastUse s = lift $ logMsg "unbranch" s
+logLastUse s = lift $ logMsg LastUse s

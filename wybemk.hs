@@ -2,11 +2,15 @@
 --  Author   : Peter Schachte
 --  Origin   : Sun Dec  4 18:39:16 2011
 --  Purpose  : Wybe compiler/builder main code
---  Copyright: © 2011-2012 Peter Schachte.  All rights reserved.
+--  Copyright: © 2011-2015 Peter Schachte.  All rights reserved.
 --
 
 -- |The top level of the compiler.  Delegates the compilation process 
---  to the Builder module.
+--  to the Builder module.  The Options module handles the compiler
+--  command line, and the AST module handles the abstract syntax tree
+--  and program intermediate representation.
+
+
 module Main where
 
 import Options

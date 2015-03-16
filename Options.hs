@@ -10,7 +10,7 @@
 ----------------------------------------------------------------
 
 -- |The wybe compiler command line options.
-module Options (Options(..), handleCmdline, verbose, defaultOptions) where
+module Options (Options(..), LogSelection(..), handleCmdline, verbose, defaultOptions) where
 
 import System.Console.GetOpt
 import System.Environment
@@ -28,11 +28,13 @@ data Options = Options{
     , optForceAll    :: Bool     -- ^Compile all files even if up to date
     , optVerbosity   :: Int      -- ^How much debugging and progress output
     , optShowVersion :: Bool     -- ^Print compiler version and exit
+    , optHelpLog     :: Bool     -- ^Print log option help and exit
     , optShowHelp    :: Bool     -- ^Print compiler help and exit
     , optLibDirs     :: [String] -- ^Directories where library files live
-    , optLogAspects  :: Maybe (Set String)
-                                 -- ^Which aspects to log, Nothing to log all
+    , optLogAspects  :: Set LogSelection
+                                 -- ^Which aspects to log
     } deriving Show
+
 
 -- |Defaults for all compiler options
 defaultOptions    = Options
@@ -40,10 +42,42 @@ defaultOptions    = Options
  , optForceAll    = False
  , optVerbosity   = 0
  , optShowVersion = False
+ , optHelpLog     = False
  , optShowHelp    = False
  , optLibDirs     = []
- , optLogAspects  = Just Set.empty
+ , optLogAspects  = Set.empty
  }
+
+-- |All compiler features we may want to log
+data LogSelection =
+  All | AST | Builder | Clause | Expansion | Flatten | LastUse | Optimise 
+  | Resources | Types | Unbranch
+  deriving (Eq, Ord, Bounded, Enum, Show, Read)
+
+
+logSelectionDescription :: LogSelection -> String
+logSelectionDescription All
+    = "Log all aspects of the compilation process"
+logSelectionDescription AST
+    = "Log operations on the AST or IR"
+logSelectionDescription Builder
+    = "Log the build process"
+logSelectionDescription Clause
+    = "Log generation of clausal form"
+logSelectionDescription Expansion
+    = "Log inlining and similar optimisations"
+logSelectionDescription Flatten
+    = "Log flattening of expressions"
+logSelectionDescription LastUse
+    = "Log determination of last variable uses"
+logSelectionDescription Optimise
+    = "Log optimisation"
+logSelectionDescription Resources 
+    = "Log handling of resources"
+logSelectionDescription Types
+    = "Log type checking"
+logSelectionDescription Unbranch
+    = "Log transformation of loops and selections into clausal form"
 
 -- |Command line option parser and help text
 options :: [OptDescr (Options -> Options)]
@@ -62,6 +96,9 @@ options =
                                                (optLogAspects opts) 
                                                a }) "ASPECT")
          "add comma-separated aspects to log, or 'all'"
+ , Option [] ["log-help"]
+     (NoArg (\ opts -> opts { optHelpLog = True }))
+     "display help on logging options and exit"
  , Option ['v'] ["verbose"]
      (NoArg (\ opts -> opts { optVerbosity = 1 + optVerbosity opts }))
      "verbose output on stderr"
@@ -106,6 +143,13 @@ handleCmdline = do
       then do
         putStrLn $ usageInfo header options
         exitSuccess
+      else if optHelpLog opts
+           then do
+             putStrLn "Use the -l or --log option to select loggin to stdout."
+             putStrLn "The argument to this option should be a comma-separated"
+             putStrLn "list (with no spaces) of these options:"
+             putStr $ formatMapping logSelectionDescription
+             exitSuccess
       else if optShowVersion opts 
            then do
                putStrLn $ "wybemk " ++ version ++ "\nBuilt " ++ buildDate
@@ -121,13 +165,13 @@ handleCmdline = do
                     return (opts,files)
 
 -- | Add 
-addLogRequest :: Maybe (Set String) -> String -> Maybe (Set String)
-addLogRequest Nothing _ = Nothing  -- Nothing means log everything
-addLogRequest (Just set) aspectsCommaSep =
-  let set' = Set.union set $ Set.fromList $ separate ',' aspectsCommaSep
-  in  if Set.member "all" set'
-      then Nothing
-      else Just set'
+addLogRequest :: Set LogSelection -> String -> Set LogSelection
+addLogRequest set aspectsCommaSep =
+  let set' = Set.union set $ Set.fromList $ List.map read $ 
+             separate ',' aspectsCommaSep
+  in  if Set.member All set'
+      then Set.fromList [minBound .. maxBound]
+      else set'
 
 -- |The inverse of intercalate:  split up a list into sublists separated 
 --  by the separator list.
@@ -138,3 +182,15 @@ separate separator (e:es) =
   then []:separate separator es
   else let (s:ss) = separate separator es
        in  (e:s):ss
+
+
+-- |Produce a table showing the domain and range of the input function and
+formatMapping :: (Bounded a, Enum a, Show a) => (a -> String) -> String
+formatMapping mapping =
+    let domain = [minBound .. maxBound]
+        width = 2 + (maximum $ List.map (length . show) domain)
+    in  unlines $
+        [ let t = show elt
+          in  (replicate (width - length t) ' ') ++ t ++ " : " ++ mapping elt
+        | elt <- domain]
+

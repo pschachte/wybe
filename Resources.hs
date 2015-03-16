@@ -7,6 +7,7 @@
 module Resources (resourceCheckMod, resourceCheckProc) where
 
 import AST
+import Options (LogSelection(Resources))
 import Util
 import Data.Map as Map
 import Data.Set as Set
@@ -176,4 +177,4 @@ resourceArgs pos rflow = do
 
 -- |Log a message, if we are logging unbrancher activity.
 logResources :: String -> Compiler ()
-logResources s = logMsg "resources" s
+logResources s = logMsg Resources s

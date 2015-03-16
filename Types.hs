@@ -8,6 +8,7 @@
 module Types (validateModExportTypes, typeCheckMod, checkFullyTyped) where
 
 import AST
+import Options (LogSelection(Types))
 import Resources
 import Util
 import Data.Map as Map
@@ -837,5 +838,5 @@ reportUntyped procname pos msg = do
 
 -- |Log a message, if we are logging type checker activity.
 logTypes :: String -> Compiler ()
-logTypes s = logMsg "types" s
+logTypes s = logMsg Types s
 

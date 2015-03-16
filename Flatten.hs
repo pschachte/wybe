@@ -28,6 +28,7 @@
 module Flatten (flattenProcDecl) where
 
 import AST
+import Options (LogSelection(Flatten))
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
@@ -391,4 +392,4 @@ flattenParam (Param name typ dir flowType) =
 
 -- |Log a message, if we are logging unbrancher activity.
 logFlatten :: String -> Flattener ()
-logFlatten s = lift $ logMsg "unbranch" s
+logFlatten s = lift $ logMsg Flatten s

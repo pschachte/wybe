@@ -8,6 +8,7 @@
 module Optimise (optimiseMod) where
 
 import AST
+import Options (LogSelection(Optimise))
 import Types
 import Expansion
 import LastUse
@@ -136,4 +137,4 @@ localCallees _ _ = []
 
 -- |Log a message, if we are logging unbrancher activity.
 logOptimise :: String -> Compiler ()
-logOptimise s = logMsg "optimise" s
+logOptimise s = logMsg Optimise s

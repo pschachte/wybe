@@ -9,6 +9,7 @@
 module Clause (compileProc) where
 
 import AST
+import Options (LogSelection(Clause))
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
@@ -208,4 +209,4 @@ compileParam startVars endVars param@(Param name ty flow ftype) =
 
 -- |Log a message, if we are logging unbrancher activity.
 logClause :: String -> ClauseComp ()
-logClause s = lift $ logMsg "clause" s
+logClause s = lift $ logMsg Clause s

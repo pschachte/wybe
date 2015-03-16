@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Tue Jan 31 16:37:48 2012
 --  Purpose  : Handles compilation at the module level.
---  Copyright: © 2012 Peter Schachte.  All rights reserved.
+--  Copyright: © 2012-2015 Peter Schachte.  All rights reserved.
 --
 --  The wybe compiler handles module dependencies, and builds
 --  executables by itself, without the need for build tools like 
@@ -32,7 +32,8 @@
 -- |Code to oversee the compilation process.
 module Builder (buildTargets, compileModule) where
 
-import Options         (Options, verbose, optForce, optForceAll, optLibDirs)
+import Options         (Options, LogSelection(Builder), verbose, optForce, 
+                        optForceAll, optLibDirs)
 import AST
 import Parser          (parse)
 import Scanner         (inputTokens, fileTokens, Token)
@@ -397,4 +398,4 @@ moduleFilePath extension dir spec = do
 
 -- |Log a message, if we are logging unbrancher activity.
 logBuild :: String -> Compiler ()
-logBuild s = logMsg "builder" s
+logBuild s = logMsg Builder s

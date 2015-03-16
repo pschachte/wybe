@@ -1975,18 +1975,20 @@ stopOnError incident = do
         showMessages
         liftIO exitFailure
 
+
+-- |Log a message, if we are logging unbrancher activity.
+logAST :: String -> Compiler ()
+logAST s = logMsg AST s
+
+
 -- |Write a log message indicating some aspect of the working of the compiler
-logMsg :: String          -- ^ The aspect of the compiler being logged,
+logMsg :: LogSelection    -- ^ The aspect of the compiler being logged,
                           -- ^ used to decide whether to log the message
           -> String       -- ^ The log message
           -> Compiler ()  -- ^ Works in the Compiler monad
 logMsg selector msg = do
     loggingSet <- gets (optLogAspects . options)
-    when (maybe True (Set.member selector) loggingSet)
-         (liftIO $ hPutStrLn stderr $ selector ++ ": " ++ msg)
+    when (Set.member selector loggingSet)
+         (liftIO $ hPutStrLn stderr $ show selector ++ ": " ++ msg)
     return ()
 
-
--- |Log a message, if we are logging unbrancher activity.
-logAST :: String -> Compiler ()
-logAST s = logMsg "unbranch" s
