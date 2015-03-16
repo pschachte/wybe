@@ -2,16 +2,20 @@
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : proc_beer.print2<0>
+  public procs    : proc_beer.beer99<0>
   imports         : use wybe
   types           : 
   resources       : 
   procs           : 
-(0 calls) (inline)
-0: gen$1(count#0:wybe.int, wybe.io$io#0:wybe.phantom, [?count#0:wybe.int], [?wybe.io$io#0:wybe.phantom]):
+public (0 calls) (inline)
+0: beer99(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+    proc_beer.gen$3<0>(99:wybe.int, ~wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:9
 
 (0 calls) (inline)
-0: gen$2(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom):
+0: gen$1(count#0:wybe.int, tmp$0#0:wybe.bool, wybe.io$io#0:wybe.phantom, [?count#0:wybe.int], [?tmp$0#0:wybe.bool], [?wybe.io$io#0:wybe.phantom]):
+
+(0 calls) (inline)
+0: gen$2(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?tmp$0#0:wybe.bool, ?wybe.io$io#1:wybe.phantom):
     proc_beer.gen$3<0>(~count#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:9
 
 (0 calls)
@@ -19,6 +23,9 @@
     foreign llvm icmp sge(32:wybe.int, count#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:18:40
     case ~tmp$0#0 of
     0:
+        NOP
+        foreign wybe move(?count#1, ~count#0)
+        foreign wybe move(?wybe.io$io#1, ~wybe.io$io#0)
 
     1:
         proc_beer.gen$4<0>(~count#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom)
@@ -30,8 +37,4 @@
     foreign c print_string(" bottles of beer on the wall":wybe.string, ~%wybe.io$io#1:wybe.phantom, ?%tmp$2#0:wybe.phantom) @wybe:122:41
     foreign c putc('\n':wybe.char, ~%tmp$2#0:wybe.phantom, ?%wybe.io$io#2:wybe.phantom) @wybe:108:28
     foreign llvm sub(32:wybe.int, ~count#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:7:38
-    proc_beer.gen$2<0>(~tmp$1#0:wybe.int, ~wybe.io$io#2:wybe.phantom, ?count#2:wybe.int, ?wybe.io$io#3:wybe.phantom) @proc_beer:5:5
-
-public (0 calls) (inline)
-0: print2(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    proc_beer.gen$3<0>(99:wybe.int, ~wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:9
+    proc_beer.gen$3<0>(~tmp$1#0:wybe.int, ~wybe.io$io#2:wybe.phantom, ?count#2:wybe.int, ?wybe.io$io#3:wybe.phantom) @proc_beer:5:9
