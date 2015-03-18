@@ -28,8 +28,8 @@
     case ~tmp$0#0 of
     0:
         NOP
-        foreign wybe move(?c#1, ~c#0)
-        foreign wybe move(?wybe.io$io#1, ~wybe.io$io#0)
+        foreign wybe move(~c#0, ?c#1)
+        foreign wybe move(~wybe.io$io#0, ?wybe.io$io#1)
 
     1:
         simple_loop.gen$4<0>(~c#0:wybe.char, ~wybe.io$io#0:wybe.phantom, ?c#1:wybe.char, ?wybe.io$io#1:wybe.phantom)

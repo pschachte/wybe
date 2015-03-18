@@ -24,8 +24,8 @@ public (0 calls) (inline)
     case ~tmp$0#0 of
     0:
         NOP
-        foreign wybe move(?count#1, ~count#0)
-        foreign wybe move(?wybe.io$io#1, ~wybe.io$io#0)
+        foreign wybe move(~count#0, ?count#1)
+        foreign wybe move(~wybe.io$io#0, ?wybe.io$io#1)
 
     1:
         proc_beer.gen$4<0>(~count#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom)

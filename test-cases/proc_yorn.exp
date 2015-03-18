@@ -24,10 +24,10 @@
     case ~tmp$1#0 of
     0:
         proc_yorn.gen$2<0>(prompt#0:wybe.string, ~wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_yorn:2:8
-        foreign wybe move(?prompt#1, ~prompt#0)
-        foreign wybe move(?response#1, ~response#0)
-        foreign wybe move(?result#1, ~result#0)
-        foreign wybe move(?tmp$0#1, ~tmp$0#0)
+        foreign wybe move(~prompt#0, ?prompt#1)
+        foreign wybe move(~response#0, ?response#1)
+        foreign wybe move(~result#0, ?result#1)
+        foreign wybe move(~tmp$0#0, ?tmp$0#1)
 
     1:
         proc_yorn.gen$6<0>(~prompt#0:wybe.string, ~response#0:wybe.char, ~result#0:wybe.bool, ~tmp$0#0:wybe.bool, ~wybe.io$io#0:wybe.phantom, ?prompt#1:wybe.string, ?response#1:wybe.char, ?result#1:wybe.bool, ?tmp$0#1:wybe.bool, ?wybe.io$io#1:wybe.phantom)
@@ -42,11 +42,11 @@
 
     1:
         NOP
-        foreign wybe move(?prompt#1, ~prompt#0)
-        foreign wybe move(?response#1, ~response#0)
-        foreign wybe move(?result#1, ~result#0)
-        foreign wybe move(?tmp$0#1, ~tmp$0#0)
-        foreign wybe move(?wybe.io$io#1, ~wybe.io$io#0)
+        foreign wybe move(~prompt#0, ?prompt#1)
+        foreign wybe move(~response#0, ?response#1)
+        foreign wybe move(~result#0, ?result#1)
+        foreign wybe move(~tmp$0#0, ?tmp$0#1)
+        foreign wybe move(~wybe.io$io#0, ?wybe.io$io#1)
 
 
 (0 calls) (inline)

@@ -30,11 +30,11 @@
 
     1:
         NOP
-        foreign wybe move(?prompt#1, ~prompt#0)
-        foreign wybe move(?response#1, ~response#0)
-        foreign wybe move(?result#1, ~result#0)
-        foreign wybe move(?tmp$0#1, ~tmp$0#0)
-        foreign wybe move(?wybe.io$io#1, ~wybe.io$io#0)
+        foreign wybe move(~prompt#0, ?prompt#1)
+        foreign wybe move(~response#0, ?response#1)
+        foreign wybe move(~result#0, ?result#1)
+        foreign wybe move(~tmp$0#0, ?tmp$0#1)
+        foreign wybe move(~wybe.io$io#0, ?wybe.io$io#1)
 
 
 (0 calls) (inline)
