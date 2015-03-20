@@ -44,13 +44,13 @@ module AST (
   updateModImplementation, updateModImplementationM, 
   updateModInterface, updateAllProcs,
   getDirectory, getModuleSpec, getModuleParams, option, 
-  optionallyPutStr, verboseMsg, message, genProcName,
+  optionallyPutStr, message, genProcName,
   addImport, doImport, addType, lookupType, publicType,
   ResourceName(..), ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource, 
   addProc, lookupProc, publicProc,
   refersTo, callTargets,
-  verboseDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
+  logDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
   showModSpecs, showResources, showMaybeSourcePos,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
   showMessages, stopOnError, logMsg
@@ -786,11 +786,6 @@ optionallyPutStr opt strcomp = do
     check <- option opt
     str <- strcomp
     when check ((liftIO . putStrLn) str)
-
--- |If a high enough verbosity level was specified, execute the given 
---  computation to produce a string, and print it out.
-verboseMsg :: Int -> Compiler String -> Compiler ()
-verboseMsg verbosity = optionallyPutStr ((>= verbosity) . optVerbosity)
 
 
 ----------------------------------------------------------------
@@ -1547,14 +1542,13 @@ varsInPrimArg _ (ArgChar _ _)           = Set.empty
 
 ----------------------------------------------------------------
 
-verboseDump :: Compiler ()
-verboseDump = do
-    modList <- gets (Map.elems . modules)
-    verboseMsg 1 $
-        return (intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
-                (List.map show $ 
-                 List.filter ((/="wybe"). List.head . modSpec) 
-                 modList))
+logDump :: LogSelection -> LogSelection -> String -> Compiler ()
+logDump selector1 selector2 pass = do
+    whenLogging2 selector1 selector2 $ do
+      modList <- gets (Map.elems . modules)
+      liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER " ++ pass ++ ":\n" ++
+        intercalate ("\n" ++ replicate 50 '-' ++ "\n") 
+        (List.map show $ List.filter ((/="wybe"). List.head . modSpec) modList)
 
 
 -- |How to show an Item.
@@ -1978,14 +1972,25 @@ logAST :: String -> Compiler ()
 logAST s = logMsg AST s
 
 
+whenLogging :: LogSelection -> Compiler () -> Compiler ()
+whenLogging selector action = do
+    loggingSet <- gets (optLogAspects . options)
+    when (Set.member selector loggingSet)
+      action
+
+
+whenLogging2 :: LogSelection -> LogSelection -> Compiler () -> Compiler ()
+whenLogging2 selector1 selector2 action = do
+    loggingSet <- gets (optLogAspects . options)
+    when (Set.member selector1 loggingSet || Set.member selector2 loggingSet)
+      action
+
+
 -- |Write a log message indicating some aspect of the working of the compiler
 logMsg :: LogSelection    -- ^ The aspect of the compiler being logged,
                           -- ^ used to decide whether to log the message
           -> String       -- ^ The log message
           -> Compiler ()  -- ^ Works in the Compiler monad
 logMsg selector msg = do
-    loggingSet <- gets (optLogAspects . options)
-    when (Set.member selector loggingSet)
-         (liftIO $ hPutStrLn stderr $ show selector ++ ": " ++ msg)
-    return ()
-
+    whenLogging selector $
+      liftIO $ hPutStrLn stderr $ show selector ++ ": " ++ msg

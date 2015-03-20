@@ -10,7 +10,7 @@
 ----------------------------------------------------------------
 
 -- |The wybe compiler command line options.
-module Options (Options(..), LogSelection(..), handleCmdline, verbose, defaultOptions) where
+module Options (Options(..), LogSelection(..), handleCmdline, defaultOptions) where
 
 import System.Console.GetOpt
 import System.Environment
@@ -26,7 +26,6 @@ import Version
 data Options = Options{  
     optForce         :: Bool     -- ^Compile specified files even if up to date
     , optForceAll    :: Bool     -- ^Compile all files even if up to date
-    , optVerbosity   :: Int      -- ^How much debugging and progress output
     , optShowVersion :: Bool     -- ^Print compiler version and exit
     , optHelpLog     :: Bool     -- ^Print log option help and exit
     , optShowHelp    :: Bool     -- ^Print compiler help and exit
@@ -40,7 +39,6 @@ data Options = Options{
 defaultOptions    = Options
  { optForce       = False
  , optForceAll    = False
- , optVerbosity   = 0
  , optShowVersion = False
  , optHelpLog     = False
  , optShowHelp    = False
@@ -50,8 +48,8 @@ defaultOptions    = Options
 
 -- |All compiler features we may want to log
 data LogSelection =
-  All | AST | Builder | Clause | Expansion | Flatten | LastUse | Optimise 
-  | Resources | Types | Unbranch
+  All | AST | Builder | Clause | Expansion | FinalDump | Flatten | LastUse 
+  | Optimise | Resources | Types | Unbranch
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
 
@@ -68,6 +66,8 @@ logSelectionDescription Expansion
     = "Log inlining and similar optimisations"
 logSelectionDescription Flatten
     = "Log flattening of expressions"
+logSelectionDescription FinalDump
+    = "Log a dump of the final AST produced"
 logSelectionDescription LastUse
     = "Log determination of last variable uses"
 logSelectionDescription Optimise
@@ -99,9 +99,6 @@ options =
  , Option [] ["log-help"]
      (NoArg (\ opts -> opts { optHelpLog = True }))
      "display help on logging options and exit"
- , Option ['v'] ["verbose"]
-     (NoArg (\ opts -> opts { optVerbosity = 1 + optVerbosity opts }))
-     "verbose output on stderr"
  , Option ['V'] ["version"]
      (NoArg (\ opts -> opts { optShowVersion = True }))
      "show version number"
@@ -121,10 +118,6 @@ compilerOpts argv =
   case getOpt Permute options argv of
     (o,n,[]  ) -> return (List.foldl (flip id) defaultOptions o, n)
     (_,_,errs) -> ioError (userError (concat errs ++ usageInfo header options))
-
--- |Was the specified verbosity level (or greater) specified?
-verbose :: Int -> Options -> Bool
-verbose n opts = optVerbosity opts >= n
 
 -- |Parse the command line and handle all options asking to print 
 --  something and exit.

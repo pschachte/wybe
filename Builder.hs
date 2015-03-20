@@ -44,8 +44,8 @@
 -- |Code to oversee the compilation process.
 module Builder (buildTargets, compileModule) where
 
-import Options         (Options, LogSelection(Builder), verbose, optForce, 
-                        optForceAll, optLibDirs)
+import Options         (Options, LogSelection(..), 
+                        optForce, optForceAll, optLibDirs)
 import AST
 import Parser          (parse)
 import Scanner         (inputTokens, fileTokens, Token)
@@ -80,7 +80,7 @@ buildTargets opts targets = do
     buildModuleIfNeeded False ["wybe"] possDirs -- load library first
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     showMessages
-    verboseDump
+    logDump FinalDump FinalDump "EVERYTHING"
 
 
 -- |Build a single target; flag specifies to re-compile even if the 
@@ -251,12 +251,10 @@ descendantModules mspec = do
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
-    logBuild $ replicate 70 '=' ++ "\nAFTER FLATTENING:\n"
-    -- verboseDump
+    logDump Flatten Types "FLATTENING"
     fixpointProcessSCC handleModImports mspecs
     logBuild $ replicate 70 '='
     logBuild $ "resource and type checking modules " ++ showModSpecs mspecs ++ "..."
-    -- verboseDump
     mapM_ validateModExportTypes mspecs
     stopOnError $ "checking parameter type declarations in modules " ++
       showModSpecs mspecs
@@ -269,23 +267,19 @@ compileModSCC mspecs = do
     mapM_ typeCheckMod mspecs
     stopOnError $ "type checking of modules " ++
       showModSpecs mspecs
-    logBuild $ replicate 70 '=' ++ "\nAFTER TYPE CHECK:\n"
-    -- verboseDump
+    logDump Types Unbranch "TYPE CHECK"
     mapM_ (transformModuleProcs resourceCheckProc)  mspecs
     stopOnError $ "resource checking of modules " ++
       showModSpecs mspecs
     mapM_ (transformModuleProcs unbranchProc)  mspecs
     stopOnError $ "handling loops and conditionals in modules " ++
       showModSpecs mspecs
-    logBuild $ replicate 70 '=' ++ "\nAFTER UNBRANCHING:\n"
-    -- verboseDump
+    logDump Unbranch Clause "UNBRANCHING"
     mapM_ (transformModuleProcs compileProc)  mspecs
     stopOnError $ "generating low level code in " ++ showModSpecs mspecs
-    logBuild $ replicate 70 '=' ++ "\nAFTER COMPILATION TO LPVM:\n"
-    -- verboseDump
+    logDump Clause Optimise "COMPILATION TO LPVM"
     fixpointProcessSCC optimiseMod mspecs
-    logBuild $ replicate 70 '=' ++ "\nAFTER OPTIMISATION:\n"
-    -- verboseDump
+    logDump Optimise Optimise "OPTIMISATION"
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs . 
