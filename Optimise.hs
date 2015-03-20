@@ -34,7 +34,8 @@ optimiseMod mods thisMod = do
              ]
     logOptimise $ "Optimise SCCs:\n" ++ 
       unlines (List.map (show . sccElts) ordered)
-    mapM_ optimiseSCCBottomUp ordered
+    mapM_ (mapM_ optimiseProcTopDown .  sccElts) $ reverse ordered
+    mapM_ (mapM_ optimiseProcBottomUp .  sccElts) ordered
     finishModule
     return (False,[])
 
@@ -50,22 +51,27 @@ sccElts (AcyclicSCC single) = [single]
 sccElts (CyclicSCC multi) = multi
 
 
-optimiseSCCBottomUp :: SCC ProcSpec -> Compiler ()
-optimiseSCCBottomUp (AcyclicSCC pspec) = do
-    optimiseProc pspec
-optimiseSCCBottomUp (CyclicSCC pspecs) = do
-    mapM_ optimiseProc pspecs
-
-
-optimiseProc :: ProcSpec -> Compiler ()
-optimiseProc pspec = do
-    logOptimise $ ">>> Optimise " ++ show pspec
-    updateProcDefM (optimiseProcDef pspec) pspec
+optimiseProcTopDown :: ProcSpec -> Compiler ()
+optimiseProcTopDown pspec = do
+    logOptimise $ ">>> Optimise (Top-down) " ++ show pspec
+    updateProcDefM (optimiseProcDefTD pspec) pspec
     return ()
 
 
-optimiseProcDef :: ProcSpec -> ProcDef -> Compiler ProcDef
-optimiseProcDef pspec def = do
+optimiseProcDefTD :: ProcSpec -> ProcDef -> Compiler ProcDef
+optimiseProcDefTD pspec def = do
+    return def
+
+
+optimiseProcBottomUp :: ProcSpec -> Compiler ()
+optimiseProcBottomUp pspec = do
+    logOptimise $ ">>> Optimise (Bottom-up) " ++ show pspec
+    updateProcDefM (optimiseProcDefBU pspec) pspec
+    return ()
+
+
+optimiseProcDefBU :: ProcSpec -> ProcDef -> Compiler ProcDef
+optimiseProcDefBU pspec def = do
     logOptimise $ "Definition of " ++ show pspec ++
       " before optimisation:" ++ showProcDef 4 def
     def' <- procExpansion def >>= markLastUse pspec >>= inlineIfWanted
