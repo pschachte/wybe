@@ -1111,12 +1111,9 @@ data ProcDef = ProcDef {
     procImpln :: ProcImpln,
     procPos :: OptPos,
     procTmpCount :: Int,        -- the next temp variable number to use
-    procCallCount :: Int,       -- the number of calls to it statically in prog
+    procCallCount :: Int,       -- the number of calls to it statically in mod
     procVis :: Visibility,
     procInline :: Bool          -- inline calls to this proc
-    -- procSpinOffFrom :: Maybe ProcSpec, 
-    --                            -- the proc this was generated as part of
-    -- procSpinOffs :: [ProcSpec]  -- the procs generated as part of this one
 }
              deriving Eq
 
