@@ -27,7 +27,19 @@
 --  enough that the time saved by not usually having to make separate 
 --  traversals for analysis and compilation will more than make up 
 --  for the few times we need to recompile.
-
+--
+--  The build process makes these steps for each SCC in the module 
+--  dependency graph (with responsible modules):
+--    o  The code is read and flattened (happens before this module is invoked)
+--    o  Imported modules are loaded, building if needed (this module)
+--    o  The types of exported procs are validated (Types)
+--    o  Resource imports and exports are checked (Resources)
+--    o  Proc argument types are checked (Types)
+--    o  Proc resources are checked and transformed to args (Resources)
+--    o  Branches and loops are transformed away (Unbranch)
+--    o  Procs are compiled to clausal form (Clause)
+--    o  Procs are optimised (Optimise)
+--  This is the responsibility of the compileModSCC function.
 
 -- |Code to oversee the compilation process.
 module Builder (buildTargets, compileModule) where
@@ -57,6 +69,9 @@ import System.Directory (getModificationTime, doesFileExist,
 import System.Exit (exitFailure, exitSuccess)
 import Config
 
+
+
+------------------------ Handling dependencies ------------------------
 
 -- |Build the specified targets with the specified options.
 buildTargets :: Options -> [FilePath] -> Compiler ()
@@ -212,7 +227,7 @@ buildExecutable file _ =
     message Error ("can't build executable " ++ file ++ " yet") Nothing
 
 
--- |Load module export info from compiled file
+  -- |Load module export info from compiled file
 --   XXX not yet implemented
 loadModule :: FilePath -> Compiler ()
 loadModule objfile =
@@ -226,6 +241,7 @@ descendantModules mspec = do
     desc <- fmap concat $ mapM descendantModules subMods
     return $ subMods ++ desc
 
+-------------------- Actually compiling some modues --------------------
 
 -- |Actually compile a list of modules that form an SCC in the module
 --  dependency graph.  This is called in a way that guarantees that
