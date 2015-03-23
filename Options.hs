@@ -17,7 +17,6 @@ import System.Environment
 import System.Exit
 import System.FilePath
 import Data.List as List
-import Data.List.Split
 import Data.Map as Map
 import Data.Set as Set
 import Version

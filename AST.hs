@@ -2,7 +2,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Thu Oct 14 23:30:58 2010
 --  Purpose  : Abstract Syntax Tree for Wybe language
---  Copyright: © 2010-2012 Peter Schachte.  All rights reserved.
+--  Copyright: © 2010-2015 Peter Schachte.  All rights reserved.
 
 -- |The abstract syntax tree, and supporting types and functions.
 --  This includes the parse tree, as well as the AST types, which
@@ -1119,20 +1119,22 @@ data ProcDef = ProcDef {
 -- into a ProcBody, which is a clausal, logic programming form.
 
 data ProcImpln
-    = ProcDefSrc [Placed Stmt]
-    | ProcDefPrim PrimProto ProcBody
+    = ProcDefSrc [Placed Stmt]           -- defn in source-like form
+    | ProcDefPrim PrimProto ProcBody     -- defn in LPVM (clausal) form
+    | ProcDefBlocks PrimProto [LLBlock]  -- defn in SSA (LLVM) form
     deriving (Eq)
 
 
 isCompiled :: ProcImpln -> Bool
 isCompiled (ProcDefPrim _ _) = True
 isCompiled (ProcDefSrc _) = False
-
+isCompiled (ProcDefBlocks _ _) = True
 
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
     show (ProcDefPrim proto body) = show proto ++ ":" ++ showBlock 4 body
-
+    show (ProcDefBlocks proto blocks) = 
+      show proto ++ ":" ++ concatMap show blocks
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
 -- possibly containg some guards.  Each guard is a test that succeeds
@@ -1168,6 +1170,23 @@ data PrimFork =
     }
     deriving (Eq)
 
+
+data LLBlock = LLBlock {
+    llInstrs::[LLInstr],
+    llTerm::LLTerm
+    } deriving (Eq, Show)
+
+
+data LLInstr = LLNop
+  -- LLInstr {
+  --   llTarget::Maybe PrimVarName,
+  --   llOpr::[String],
+  --   llOperands::[(PrimVar,PrimType)]
+             deriving (Eq, Show)
+
+
+data LLTerm = TermNop
+            deriving (Eq, Show)
 
 -- |The variable name for the temporary variable whose number is given.
 mkTempName :: Int -> String
