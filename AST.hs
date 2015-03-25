@@ -11,7 +11,7 @@
 --  This also includes the Compiler monad and the Module types.
 module AST (
   -- *Types just for parsing
-  Item(..), Visibility(..), maxVisibility, minVisibility,
+  Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
   TypeProto(..), TypeSpec(..), FnProto(..),
   ProcProto(..), Param(..),
   PrimProto(..), PrimParam(..), ParamInfo(..),
@@ -102,6 +102,11 @@ minVisibility :: Visibility -> Visibility -> Visibility
 minVisibility Private _ = Private
 minVisibility _ Private = Private
 minVisibility _       _ = Public
+
+-- |Does the specified visibility make the item public?
+isPublic :: Visibility -> Bool
+isPublic = (==Public)
+
 
 -- |A type prototype consists of a type name and zero or more type parameters.
 data TypeProto = TypeProto Ident [Ident]
@@ -684,6 +689,7 @@ addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis proto stmts pos) = do
     let ProcProto name params resources = proto
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 vis False
+                  $ initSubprocSpec vis
     currMod <- getModuleSpec
     procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
     let procs' = procs ++ [procDef]
@@ -1101,22 +1107,49 @@ data ResourceImpln =
 --  normalised to a list of primitives, and an optional source 
 --  position. 
 data ProcDef = ProcDef {
-    procName :: Ident, 
-    procProto :: ProcProto,
-    procImpln :: ProcImpln,
-    procPos :: OptPos,
+    procName :: Ident,          -- the proc's name
+    procProto :: ProcProto,     -- the proc's prototype
+    procImpln :: ProcImpln,     -- the actual implementation
+    procPos :: OptPos,          -- where this proce is defined
     procTmpCount :: Int,        -- the next temp variable number to use
-    procCallCount :: Int,       -- the number of calls to it statically in mod
-    procVis :: Visibility,
-    procInline :: Bool          -- inline calls to this proc
+    procCallCount :: Int,       -- number of calls to this proc in this mod
+    procVis :: Visibility,      -- what modules should be able to see this?
+    procInline :: Bool,         -- should we inline calls to this proc?
+    procSubprocOf :: SubprocSpec -- the proc this should be part of, if any
 }
              deriving Eq
 
 
+-- |LLVM block structure allows many blocks per procedure, where blocks can 
+--  jump to one another in complex ways.  When converting our LPVM format 
+--  to blocks, we want to merge any proc that is only called from one proc, 
+--  and only called as a tail call, into its caller.  We determine this by 
+--  scanning every proc definition; this type is used to hold intermediate 
+--  and final subproc info for each proc.  MaybeSubprocOf p means we have 
+--  seen only tail calls to this proc, and only from p.  NotSubproc means 
+--  this proc is public, or we have seen calls from multiple callers, or in 
+--  positions.
+data SubprocSpec
+    = NotSubproc             -- Cannot be a subproc
+    | MaybeSubproc           -- Could be a subproc of any proc
+    | MaybeSubprocOf Ident   -- May only be a subproc of specified proc
+    deriving (Eq, Show)
 -- |A procedure defintion body.  Initially, this is in a form similar
 -- to what is read in from the source file.  As compilation procedes,
 -- this is gradually refined and constrained, until it is converted
 -- into a ProcBody, which is a clausal, logic programming form.
+
+-- |The appropriate initial SubprocSpec given the proc's visibility
+initSubprocSpec :: Visibility -> SubprocSpec
+initSubprocSpec vis = if isPublic vis then NotSubproc else MaybeSubproc
+
+-- |How to dump a SubprocSpec
+showSuperProc :: SubprocSpec -> String
+showSuperProc NotSubproc = ""
+showSuperProc MaybeSubproc = ""
+showSuperProc (MaybeSubprocOf super) =
+  "(maybe part of " ++ super ++ ")"
+
 
 data ProcImpln
     = ProcDefSrc [Placed Stmt]           -- defn in source-like form
@@ -1758,10 +1791,11 @@ showProcDefs firstID (def:defs) =
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID (ProcDef _ proto def pos _ calls vis inline) =
+showProcDef thisID (ProcDef _ proto def pos _ calls vis inline sub) =
     visibilityPrefix vis
     ++ "(" ++ show calls ++ " calls)"
     ++ (if inline then " (inline)" else "")
+    ++ showSuperProc sub
     ++ "\n"
     ++ show thisID ++ ": "
     ++ (if isCompiled def then "" else show proto ++ ":")
