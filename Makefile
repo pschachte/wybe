@@ -9,9 +9,6 @@ all:	test
 %.pdf:	%.tex
 	rubber -m pdftex $<
 
-%.ps:	%.tex
-	rubber -m dvips $<
-
 %.hs:	%.y
 	happy -a -g $<
 
@@ -68,3 +65,6 @@ test:	wybemk
 	if [ -n "$$NEW" ] ; \
 	    then echo "New tests: $$NEW\nDo .\update-exp to specify expected output" ; \
 	fi
+
+clean:
+	rm -f *.o *.hi Parser.hs Version.lhs *.pdf *.aux
