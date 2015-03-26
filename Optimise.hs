@@ -45,6 +45,7 @@ procBody def =
     case procImpln def of
         ProcDefSrc _ -> shouldnt "Optimising un-compiled code"
         ProcDefPrim _ body -> body
+        ProcDefBlocks _ _ -> shouldnt "Optimising generated code"
 
 
 sccElts (AcyclicSCC single) = [single]
