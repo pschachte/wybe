@@ -29,10 +29,11 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..), 
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
-  mapBodyPrims, foldProcCalls,
+  foldBodyPrims, foldProcCalls,
   expToStmt, expFlow, setExpFlow, isHalfUpdate,
   Prim(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
+  SubprocSpec(..), initSubprocSpec, addSubprocSpec,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -1139,9 +1140,19 @@ data SubprocSpec
 -- this is gradually refined and constrained, until it is converted
 -- into a ProcBody, which is a clausal, logic programming form.
 
+
 -- |The appropriate initial SubprocSpec given the proc's visibility
 initSubprocSpec :: Visibility -> SubprocSpec
 initSubprocSpec vis = if isPublic vis then NotSubproc else MaybeSubproc
+
+
+-- |Note a tail call to a proc
+addSubprocSpec :: Ident -> SubprocSpec -> SubprocSpec
+addSubprocSpec _ (NotSubproc) = NotSubproc
+addSubprocSpec pname (MaybeSubproc) = MaybeSubprocOf pname
+addSubprocSpec pname1 (MaybeSubprocOf pname2) =
+  if pname1 == pname2 then MaybeSubprocOf pname1 else NotSubproc
+
 
 -- |How to dump a SubprocSpec
 showSuperProc :: SubprocSpec -> String
@@ -1251,21 +1262,29 @@ foldProcCalls' fn comb val (_) ss =
     foldProcCalls fn comb val ss
 
 
--- |Map over a ProcBody applying the primFn to each Prim, and
+-- |Fold over a ProcBody applying the primFn to each Prim, and
 -- combining the results for a sequence of Prims with the abConj
 -- function, and combining the results for the arms of a fork with the
--- abDisj function.
-mapBodyPrims :: (Prim -> a) -> (a -> a -> a) -> a -> (a -> a -> a) -> a -> 
-                ProcBody -> a
-mapBodyPrims primFn abConj emptyConj abDisj emptyDisj (ProcBody pprims fork) =
-    abConj (List.foldl (\a pp -> abConj a $ primFn $ content pp)
-                emptyConj pprims) $
+-- abDisj function.  This assumes that abstract conjunction distributes
+-- over abstract disjunction.  emptyConj and emptyDisj are the identities 
+-- for abstract conjunction and disjunction, respectively.  The first
+-- argument to the abstract primitive operation is a boolean indicating
+-- whether the primitive is the last one in the clause.
+foldBodyPrims :: (Bool -> Prim -> a) -> (a -> a -> a) -> a -> 
+                 (a -> a -> a) -> a -> ProcBody -> a
+foldBodyPrims primFn abConj emptyConj abDisj emptyDisj (ProcBody pprims fork) =
+    abConj (List.foldl (\a tl -> abConj a $
+                                 case tl of
+                                      []       -> emptyConj
+                                      (pp:pps) -> primFn (List.null pps) 
+                                                  $ content pp)
+                emptyConj $ tails pprims) $
     case fork of
       NoFork -> emptyDisj
       PrimFork _ _ bodies ->
           List.foldl 
               (\a b -> abDisj a $
-                       mapBodyPrims primFn abConj emptyConj abDisj emptyDisj b)
+                       foldBodyPrims primFn abConj emptyConj abDisj emptyDisj b)
                  emptyDisj
                  bodies
 

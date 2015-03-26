@@ -55,6 +55,7 @@ import Resources       (resourceCheckMod, resourceCheckProc)
 import Unbranch        (unbranchProc)
 import Clause          (compileProc)
 import Optimise        (optimiseMod)
+import Blocks          (blockTransformModule)
 import System.FilePath
 import Data.Map as Map
 import Data.Set as Set
@@ -279,7 +280,9 @@ compileModSCC mspecs = do
     stopOnError $ "generating low level code in " ++ showModSpecs mspecs
     logDump Clause Optimise "COMPILATION TO LPVM"
     fixpointProcessSCC optimiseMod mspecs
+    stopOnError $ "optimising " ++ showModSpecs mspecs    
     logDump Optimise Optimise "OPTIMISATION"
+    mapM_ blockTransformModule mspecs
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs . 
