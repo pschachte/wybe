@@ -29,11 +29,11 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..), 
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
-  foldBodyPrims, foldProcCalls,
+  foldBodyPrims, foldBodyDistrib, foldProcCalls,
   expToStmt, expFlow, setExpFlow, isHalfUpdate,
   Prim(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
-  SubprocSpec(..), initSubprocSpec, addSubprocSpec,
+  SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -690,7 +690,7 @@ addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis proto stmts pos) = do
     let ProcProto name params resources = proto
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 vis False
-                  $ initSubprocSpec vis
+                  $ initSuperprocSpec vis
     currMod <- getModuleSpec
     procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
     let procs' = procs ++ [procDef]
@@ -1116,7 +1116,8 @@ data ProcDef = ProcDef {
     procCallCount :: Int,       -- number of calls to this proc in this mod
     procVis :: Visibility,      -- what modules should be able to see this?
     procInline :: Bool,         -- should we inline calls to this proc?
-    procSubprocOf :: SubprocSpec -- the proc this should be part of, if any
+    procSuperproc :: SuperprocSpec 
+                                -- the proc this should be part of, if any
 }
              deriving Eq
 
@@ -1126,42 +1127,35 @@ data ProcDef = ProcDef {
 --  to blocks, we want to merge any proc that is only called from one proc, 
 --  and only called as a tail call, into its caller.  We determine this by 
 --  scanning every proc definition; this type is used to hold intermediate 
---  and final subproc info for each proc.  MaybeSubprocOf p means we have 
---  seen only tail calls to this proc, and only from p.  NotSubproc means 
+--  and final subproc info for each proc.  SuperprocIs p means we have 
+--  seen only tail calls to this proc, and only from p.  NoSuperproc means 
 --  this proc is public, or we have seen calls from multiple callers, or in 
 --  positions.
-data SubprocSpec
-    = NotSubproc             -- Cannot be a subproc
-    | MaybeSubproc           -- Could be a subproc of any proc
-    | MaybeSubprocOf Ident   -- May only be a subproc of specified proc
+data SuperprocSpec
+    = NoSuperproc             -- Cannot be a subproc
+    | AnySuperproc            -- Could be a subproc of any proc
+    | SuperprocIs ProcSpec    -- May only be a subproc of specified proc
     deriving (Eq, Show)
+
+
+-- |The appropriate initial SuperprocSpec given the proc's visibility
+initSuperprocSpec :: Visibility -> SuperprocSpec
+initSuperprocSpec vis = if isPublic vis then NoSuperproc else AnySuperproc
+
+
+-- |How to dump a SuperprocSpec
+showSuperProc :: SuperprocSpec -> String
+showSuperProc NoSuperproc = ""
+showSuperProc AnySuperproc = ""
+showSuperProc (SuperprocIs super) =
+  "(maybe part of " ++ show super ++ ")"
+
+
 -- |A procedure defintion body.  Initially, this is in a form similar
 -- to what is read in from the source file.  As compilation procedes,
 -- this is gradually refined and constrained, until it is converted
 -- into a ProcBody, which is a clausal, logic programming form.
-
-
--- |The appropriate initial SubprocSpec given the proc's visibility
-initSubprocSpec :: Visibility -> SubprocSpec
-initSubprocSpec vis = if isPublic vis then NotSubproc else MaybeSubproc
-
-
--- |Note a tail call to a proc
-addSubprocSpec :: Ident -> SubprocSpec -> SubprocSpec
-addSubprocSpec _ (NotSubproc) = NotSubproc
-addSubprocSpec pname (MaybeSubproc) = MaybeSubprocOf pname
-addSubprocSpec pname1 (MaybeSubprocOf pname2) =
-  if pname1 == pname2 then MaybeSubprocOf pname1 else NotSubproc
-
-
--- |How to dump a SubprocSpec
-showSuperProc :: SubprocSpec -> String
-showSuperProc NotSubproc = ""
-showSuperProc MaybeSubproc = ""
-showSuperProc (MaybeSubprocOf super) =
-  "(maybe part of " ++ super ++ ")"
-
-
+-- Finally it is turned into SSA form (LLVM).
 data ProcImpln
     = ProcDefSrc [Placed Stmt]           -- defn in source-like form
     | ProcDefPrim PrimProto ProcBody     -- defn in LPVM (clausal) form
@@ -1265,14 +1259,12 @@ foldProcCalls' fn comb val (_) ss =
 -- |Fold over a ProcBody applying the primFn to each Prim, and
 -- combining the results for a sequence of Prims with the abConj
 -- function, and combining the results for the arms of a fork with the
--- abDisj function.  emptyDisj is the left identity for abstract
--- disjunction.  The first argument to the abstract primitive
+-- abDisj function.  The first argument to the abstract primitive
 -- operation is a boolean indicating whether the primitive is the last
 -- one in the clause.
-
 foldBodyPrims :: (Bool -> Prim -> a -> a) -> a ->
-                 (a -> a -> a) -> a -> ProcBody -> a
-foldBodyPrims primFn emptyConj abDisj emptyDisj (ProcBody pprims fork) =
+                 (a -> a -> a) -> ProcBody -> a
+foldBodyPrims primFn emptyConj abDisj (ProcBody pprims fork) =
     let final  = fork == NoFork
         common = List.foldl
                  (\a tl -> case tl of
@@ -1281,11 +1273,40 @@ foldBodyPrims primFn emptyConj abDisj emptyDisj (ProcBody pprims fork) =
                  emptyConj $ tails pprims
     in case fork of
       NoFork -> common
-      PrimFork _ _ bodies ->
+      PrimFork _ _ [] -> shouldnt "empty clause list in a PrimFork"
+      PrimFork _ _ (body:bodies) ->
           List.foldl
-          (\a b -> abDisj a $ foldBodyPrims primFn common abDisj emptyDisj b)
-          emptyDisj
+          (\a b -> abDisj a $ foldBodyPrims primFn common abDisj b)
+          (foldBodyPrims primFn common abDisj body)
           bodies
+
+
+-- |Similar to foldBodyPrims, except that it assumes that abstract
+-- conjunction distributes over abstract disjunction.  It also ensures
+-- that each primitive in the body is abstracted only once by
+-- respecting the tree structure of a ProcBody.  The common prims in
+-- the body are processed first; then each alternative in the fork is
+-- processed, the results are combined with abstract disjunction, and
+-- this result is combined with abstraction of the body prims using
+-- the abstract conjunction operation.
+foldBodyDistrib :: (Bool -> Prim -> a -> a) -> a -> (a -> a -> a) ->
+                 (a -> a -> a) -> ProcBody -> a
+foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
+    let final  = fork == NoFork
+        common = List.foldl
+                 (\a tl -> case tl of
+                     []       -> a
+                     (pp:pps) -> primFn (final && List.null pps) (content pp) a)
+                 emptyConj $ tails pprims
+    in case fork of
+      NoFork -> common
+      PrimFork _ _ [] -> shouldnt "empty clause list in a PrimFork"
+      PrimFork _ _ (body:bodies) ->
+        abConj common $
+        List.foldl
+        (\a b -> abDisj a $ foldBodyDistrib primFn common abDisj abConj b)
+        (foldBodyPrims primFn common abDisj body)
+        bodies
 
 
 -- |Info about a proc call, including the ID, prototype, and an
