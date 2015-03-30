@@ -1265,32 +1265,31 @@ foldProcCalls' fn comb val (_) ss =
 -- |Fold over a ProcBody applying the primFn to each Prim, and
 -- combining the results for a sequence of Prims with the abConj
 -- function, and combining the results for the arms of a fork with the
--- abDisj function.  This assumes that abstract conjunction distributes
--- over abstract disjunction.  emptyConj and emptyDisj are the identities 
--- for abstract conjunction and disjunction, respectively.  The first
--- argument to the abstract primitive operation is a boolean indicating
--- whether the primitive is the last one in the clause.
-foldBodyPrims :: (Bool -> Prim -> a) -> (a -> a -> a) -> a -> 
+-- abDisj function.  emptyDisj is the left identity for abstract
+-- disjunction.  The first argument to the abstract primitive
+-- operation is a boolean indicating whether the primitive is the last
+-- one in the clause.
+
+foldBodyPrims :: (Bool -> Prim -> a -> a) -> a ->
                  (a -> a -> a) -> a -> ProcBody -> a
-foldBodyPrims primFn abConj emptyConj abDisj emptyDisj (ProcBody pprims fork) =
-    abConj (List.foldl (\a tl -> abConj a $
-                                 case tl of
-                                      []       -> emptyConj
-                                      (pp:pps) -> primFn (List.null pps) 
-                                                  $ content pp)
-                emptyConj $ tails pprims) $
-    case fork of
-      NoFork -> emptyDisj
+foldBodyPrims primFn emptyConj abDisj emptyDisj (ProcBody pprims fork) =
+    let final  = fork == NoFork
+        common = List.foldl
+                 (\a tl -> case tl of
+                     []       -> a
+                     (pp:pps) -> primFn (final && List.null pps) (content pp) a)
+                 emptyConj $ tails pprims
+    in case fork of
+      NoFork -> common
       PrimFork _ _ bodies ->
-          List.foldl 
-              (\a b -> abDisj a $
-                       foldBodyPrims primFn abConj emptyConj abDisj emptyDisj b)
-                 emptyDisj
-                 bodies
+          List.foldl
+          (\a b -> abDisj a $ foldBodyPrims primFn common abDisj emptyDisj b)
+          emptyDisj
+          bodies
 
 
--- |Info about a proc call, including the ID, prototype, and an 
---  optional source position. 
+-- |Info about a proc call, including the ID, prototype, and an
+--  optional source position.
 data ProcSpec = ProcSpec {
       procSpecMod::ModSpec,
       procSpecName::ProcName,

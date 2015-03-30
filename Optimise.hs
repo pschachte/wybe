@@ -134,7 +134,8 @@ phantomType ty = "phantom" == typeName ty
 -- |Finding all procs called by a given proc body
 localBodyCallees :: ModSpec -> ProcBody -> [ProcSpec]
 localBodyCallees modspec body =
-    foldBodyPrims (\_ -> localCallees modspec) (++) [] (++) [] body
+    foldBodyPrims (\_ prim callees -> 
+                    localCallees modspec prim ++ callees) [] (++) [] body
 
 
 localCallees :: ModSpec -> Prim -> [ProcSpec]
