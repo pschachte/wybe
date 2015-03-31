@@ -18,6 +18,7 @@ blockTransformModule mod = do
   reenterModule mod
   procs <- getModuleImplementationField modProcs
   let procs' = Map.foldr noteProcsSuperprocs procs procs
+  updateImplementation (\imp -> imp {modProcs = procs'})
   exitModule
   return ()
 
@@ -43,11 +44,19 @@ type CallRec = Map ProcSpec (Int,SuperprocSpec)
 
 
 noteCall :: ProcSpec -> Bool -> Prim -> CallRec -> CallRec
-noteCall caller final (PrimCall spec _) rec = rec
+noteCall caller final (PrimCall spec _) rec = 
+  Map.alter (Just . updateCallInfo caller final) spec rec
 noteCall caller final (PrimNop) rec = rec
 noteCall caller final (PrimForeign _ _ _ _) rec = rec
-  
 
+
+updateCallInfo :: ProcSpec -> Bool ->
+                  Maybe (Int,SuperprocSpec) -> (Int,SuperprocSpec)
+updateCallInfo caller final Nothing = (1,SuperprocIs caller)
+updateCallInfo caller final (Just (n,NoSuperproc)) = (n+1,NoSuperproc)
+updateCallInfo caller final (Just (n,AnySuperproc)) = (n+1,SuperprocIs caller)
+updateCallInfo caller final (Just (n,sup@(SuperprocIs oldcaller))) = 
+  (n+1, if oldcaller == caller then sup else NoSuperproc)
 
 mergeCallers :: CallRec -> CallRec -> CallRec
 mergeCallers rec1 rec2 = 
