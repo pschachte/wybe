@@ -23,7 +23,7 @@ public (0 calls) (inline)
 0: ++(x#0:type_list.intlist, y#0:type_list.intlist, ?tmp$0#0:type_list.intlist):
     type_list.gen$1<0>(~x#0:type_list.intlist, ~y#0:type_list.intlist, ?tmp$0#0:type_list.intlist, ?x#1:type_list.intlist, ?y#1:type_list.intlist) @type_list:8:5
 
-(0 calls)
+(2 calls)
 0: gen$1(x#0:type_list.intlist, y#0:type_list.intlist, ?tmp$0#0:type_list.intlist, [?x#0:type_list.intlist], [?y#0:type_list.intlist]):
     foreign $ alloc("bool":wybe.string, "false":wybe.string, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0 of

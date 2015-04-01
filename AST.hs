@@ -1148,7 +1148,7 @@ showSuperProc :: SuperprocSpec -> String
 showSuperProc NoSuperproc = ""
 showSuperProc AnySuperproc = ""
 showSuperProc (SuperprocIs super) =
-  "(maybe part of " ++ show super ++ ")"
+  "(subproc of " ++ show super ++ ")"
 
 
 -- |A procedure defintion body.  Initially, this is in a form similar

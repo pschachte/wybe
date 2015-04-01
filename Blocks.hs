@@ -17,25 +17,29 @@ blockTransformModule :: ModSpec -> Compiler ()
 blockTransformModule mod = do
   reenterModule mod
   procs <- getModuleImplementationField modProcs
-  let procs' = Map.foldr noteProcsSuperprocs procs procs
+  let procs' = Map.foldrWithKey (noteProcsSuperprocs mod) procs procs
   updateImplementation (\imp -> imp {modProcs = procs'})
   exitModule
   return ()
 
 
-noteProcsSuperprocs :: [ProcDef] -> Map Ident [ProcDef] -> Map Ident [ProcDef]
-noteProcsSuperprocs defs procs =
-  List.foldr (noteImplnSuperprocs . procImpln) procs defs
+noteProcsSuperprocs :: ModSpec -> ProcName -> [ProcDef] -> 
+                       Map Ident [ProcDef] -> Map Ident [ProcDef]
+noteProcsSuperprocs mod name defs procs =
+  List.foldr (\(def,n) ->
+               noteImplnSuperprocs (ProcSpec mod name n) (procImpln def)) 
+  procs $ zip defs [0..]
 
-noteImplnSuperprocs :: ProcImpln -> Map Ident [ProcDef] -> Map Ident [ProcDef]
-noteImplnSuperprocs (ProcDefSrc _) _ =
+noteImplnSuperprocs :: ProcSpec -> ProcImpln -> 
+                       Map Ident [ProcDef] -> Map Ident [ProcDef]
+noteImplnSuperprocs _ (ProcDefSrc _) _ =
   shouldnt "scanning unprocessed code for calls"
-noteImplnSuperprocs (ProcDefPrim _ body) procs =
-  let callers = foldBodyDistrib (noteCall undefined) 
+noteImplnSuperprocs caller (ProcDefPrim _ body) procs =
+  let callers = foldBodyDistrib (noteCall caller) 
                 Map.empty mergeCallers mergeCallers
                 body
   in  registerCallers callers procs
-noteImplnSuperprocs (ProcDefBlocks _ _) _ =
+noteImplnSuperprocs _ (ProcDefBlocks _ _) _ =
   shouldnt "scanning already compiled code for calls"
 
 -- |Compute for each proc a total count of calls and determine if it
