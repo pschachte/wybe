@@ -28,10 +28,12 @@ public (0 calls) (inline)
     foreign $ alloc("bool":wybe.string, "false":wybe.string, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0 of
     0:
-        type_list.intlist.head<0>(x#0:type_list.intlist, ?tmp$4#0:wybe.int) @type_list:10:11
-        type_list.intlist.tail<0>(x#0:type_list.intlist, ?tmp$6#0:type_list.intlist) @type_list:10:18
+        foreign $ access("intlist":wybe.string, "[|]":wybe.string, "head":wybe.string, x#0:type_list.intlist, ?tmp$4#0:wybe.int)
+        foreign $ access("intlist":wybe.string, "[|]":wybe.string, "tail":wybe.string, x#0:type_list.intlist, ?tmp$6#0:type_list.intlist)
         type_list.gen$1<0>(~tmp$6#0:type_list.intlist, y#0:type_list.intlist, ?tmp$5#0:type_list.intlist, ?tmp$7#0:type_list.intlist, ?tmp$8#0:type_list.intlist) @type_list:8:5
-        type_list.intlist.[|]<0>(~tmp$4#0:wybe.int, ~tmp$5#0:type_list.intlist, ?tmp$3#0:type_list.intlist) @type_list:10:10
+        foreign $ alloc("intlist":wybe.string, "[|]":wybe.string, ?tmp$9#0:type_list.intlist)
+        foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "head":wybe.string, ~%tmp$9#0:type_list.intlist, ?%tmp$10#0:type_list.intlist, ~tmp$4#0:wybe.int)
+        foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "tail":wybe.string, ~%tmp$10#0:type_list.intlist, ?%tmp$3#0:type_list.intlist, ~tmp$5#0:type_list.intlist)
         foreign llvm move(~tmp$3#0:type_list.intlist, ?tmp$0#0:type_list.intlist)
 
     1:
@@ -67,20 +69,20 @@ public (0 calls) (inline)
 0: [](?$rec#0:type_list.intlist):
     foreign $ alloc("intlist":wybe.string, "[]":wybe.string, ?$rec#0:type_list.intlist)
 
-public (0 calls)
+public (0 calls) (inline)
 0: [|](head#0:wybe.int, tail#0:type_list.intlist, ?$rec#2:type_list.intlist):
     foreign $ alloc("intlist":wybe.string, "[|]":wybe.string, ?$rec#0:type_list.intlist)
     foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "head":wybe.string, ~%$rec#0:type_list.intlist, ?%$rec#1:type_list.intlist, ~head#0:wybe.int)
     foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "tail":wybe.string, ~%$rec#1:type_list.intlist, ?%$rec#2:type_list.intlist, ~tail#0:type_list.intlist)
 
-public (0 calls)
+public (0 calls) (inline)
 0: head($rec#0:type_list.intlist, ?tmp$0#0:wybe.int):
-    foreign $ access("intlist":wybe.string, "[|]":wybe.string, "head":wybe.string, ~$rec#0:type_list.intlist, ?tmp$0#0:wybe.int)public (0 calls)
+    foreign $ access("intlist":wybe.string, "[|]":wybe.string, "head":wybe.string, ~$rec#0:type_list.intlist, ?tmp$0#0:wybe.int)public (0 calls) (inline)
 1: head($rec#0:type_list.intlist, ?$rec#1:type_list.intlist, $field#0:wybe.int):
     foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "head":wybe.string, ~%$rec#0:type_list.intlist, ?%$rec#1:type_list.intlist, ~$field#0:wybe.int)
 
-public (0 calls)
+public (0 calls) (inline)
 0: tail($rec#0:type_list.intlist, ?tmp$0#0:type_list.intlist):
-    foreign $ access("intlist":wybe.string, "[|]":wybe.string, "tail":wybe.string, ~$rec#0:type_list.intlist, ?tmp$0#0:type_list.intlist)public (0 calls)
+    foreign $ access("intlist":wybe.string, "[|]":wybe.string, "tail":wybe.string, ~$rec#0:type_list.intlist, ?tmp$0#0:type_list.intlist)public (0 calls) (inline)
 1: tail($rec#0:type_list.intlist, ?$rec#1:type_list.intlist, $field#0:type_list.intlist):
     foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "tail":wybe.string, ~%$rec#0:type_list.intlist, ?%$rec#1:type_list.intlist, ~$field#0:type_list.intlist)

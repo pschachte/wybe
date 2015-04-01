@@ -93,7 +93,8 @@ inlineIfWanted def
     logOptimise $ "  benefit = " ++ show benefit
     let cost = bodyCost $ bodyPrims body
     logOptimise $ "  cost = " ++ show cost
-    if  benefit >= cost
+    if -- procCallCount def <= 1 || 
+      benefit >= cost
     then return $ def { procInline = True }
     else return def
     where ProcDefPrim proto body = procImpln def
@@ -110,6 +111,7 @@ bodyCost pprims = sum $ List.map (primCost . content) pprims
 primCost :: Prim -> Int
 primCost (PrimCall _ args) = 1 + (sum $ List.map argCost args)
 primCost (PrimForeign "llvm" _ _ _) = 1 -- single instuction, so cost = 1
+primCost (PrimForeign "$" _ _ _) = 1    -- single instuction, so cost = 1
 primCost (PrimForeign _ _ _ args) = 1 + (sum $ List.map argCost args)
 primCost (PrimNop) = 0
 
