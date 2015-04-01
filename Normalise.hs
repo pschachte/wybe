@@ -31,7 +31,7 @@ normalise modCompiler items = do
     stmts <- getModule stmtDecls 
     unless (List.null stmts)
       $ normaliseItem modCompiler 
-            (ProcDecl Private (ProcProto "" [] initResources) 
+            (ProcDecl Public (ProcProto "" [] initResources) 
                           (List.reverse stmts) Nothing)
 
 -- |The resources available at the top level

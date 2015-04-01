@@ -4,12 +4,12 @@ AFTER EVERYTHING:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : 
+  public procs    : main_hello.<0>
   imports         : use wybe
   types           : 
   resources       : 
   procs           : 
-(0 calls)
+public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     foreign c print_string("hello, world":wybe.string, ~%wybe.io$io#0:wybe.phantom, ?%tmp$0#0:wybe.phantom) @wybe:122:41
     foreign c putc('\n':wybe.char, ~%tmp$0#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:108:28

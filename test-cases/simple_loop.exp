@@ -4,12 +4,12 @@ AFTER EVERYTHING:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : 
+  public procs    : simple_loop.<0>
   imports         : use wybe
   types           : 
   resources       : 
   procs           : 
-(0 calls)
+public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     foreign c read_char(?tmp$2#0:wybe.char, ~%wybe.io$io#0:wybe.phantom, ?%tmp$3#0:wybe.phantom) @wybe:120:39
     simple_loop.gen$3<0>(~tmp$2#0:wybe.char, ~tmp$3#0:wybe.phantom, ?c#0:wybe.char, ?wybe.io$io#1:wybe.phantom) @simple_loop:2:4
