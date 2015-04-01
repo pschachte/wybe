@@ -33,7 +33,7 @@ public (0 calls) (inline)
         proc_beer.gen$4<0>(~count#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom)
 
 
-(1 calls)(subproc of proc_beer.gen$3<0>)
+(1 calls) (inline)(subproc of proc_beer.gen$3<0>)
 0: gen$4(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?count#2:wybe.int, ?wybe.io$io#3:wybe.phantom):
     foreign c print_int(count#0:wybe.int, ~%wybe.io$io#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:110:38
     foreign c print_string(" bottles of beer on the wall":wybe.string, ~%wybe.io$io#1:wybe.phantom, ?%tmp$2#0:wybe.phantom) @wybe:122:41
