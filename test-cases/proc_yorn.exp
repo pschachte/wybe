@@ -57,7 +57,7 @@ AFTER EVERYTHING:
         proc_yorn.gen$6<0>(~prompt#0:wybe.string, ~response#0:wybe.char, ~result#0:wybe.bool, ~tmp$0#0:wybe.bool, ~wybe.io$io#0:wybe.phantom, ?prompt#1:wybe.string, ?response#1:wybe.char, ?result#1:wybe.bool, ?tmp$0#1:wybe.bool, ?wybe.io$io#1:wybe.phantom)
 
 
-(1 calls)(subproc of proc_yorn.gen$6<0>)
+(1 calls)
 0: gen$4(prompt#0:wybe.string, response#0:wybe.char, result#0:wybe.bool, tmp$0#0:wybe.bool, wybe.io$io#0:wybe.phantom, ?prompt#1:wybe.string, ?response#1:wybe.char, ?result#1:wybe.bool, ?tmp$0#1:wybe.bool, ?tmp$2#0:wybe.bool, ?wybe.io$io#1:wybe.phantom):
     foreign llvm icmp eq(32:wybe.int, response#0:wybe.char, 'y':wybe.char, ?tmp$3#0:wybe.bool) @wybe:70:42
     wybe.bool.=<0>(?tmp$4#0:wybe.bool, ~tmp$3#0:wybe.bool) @wybe:70:12
@@ -83,7 +83,7 @@ AFTER EVERYTHING:
         foreign wybe move(~wybe.io$io#0, ?wybe.io$io#1)
 
 
-(1 calls) (inline)(subproc of proc_yorn.gen$4<0>)
+(1 calls) (inline)
 0: gen$5(prompt#0:wybe.string, response#0:wybe.char, result#0:wybe.bool, tmp$0#0:wybe.bool, wybe.io$io#0:wybe.phantom, [?prompt#0:wybe.string], [?response#0:wybe.char], [?result#0:wybe.bool], [?tmp$0#0:wybe.bool], ?tmp$2#0:wybe.bool, ?wybe.io$io#1:wybe.phantom):
     foreign c print_string(prompt#0:wybe.string, ~%wybe.io$io#0:wybe.phantom, ?%tmp$3#0:wybe.phantom) @wybe:122:41
     foreign c print_string(" (y/n) ":wybe.string, ~%tmp$3#0:wybe.phantom, ?%tmp$4#0:wybe.phantom) @wybe:122:41
@@ -95,7 +95,7 @@ AFTER EVERYTHING:
     foreign llvm or(~tmp$8#0:wybe.bool, ~tmp$10#0:wybe.bool, ?tmp$11#0:wybe.bool) @wybe:54:43
     proc_yorn.gen$3<0>(prompt#0:wybe.string, ~tmp$5#0:wybe.char, ~tmp$11#0:wybe.bool, ~tmp$11#0:wybe.bool, ~tmp$6#0:wybe.phantom, ?tmp$12#0:wybe.string, ?tmp$13#0:wybe.char, ?tmp$14#0:wybe.bool, ?tmp$15#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_yorn:6:12
 
-(1 calls) (inline)(subproc of proc_yorn.gen$3<0>)
+(1 calls) (inline)
 0: gen$6(prompt#0:wybe.string, response#0:wybe.char, result#0:wybe.bool, tmp$0#0:wybe.bool, wybe.io$io#0:wybe.phantom, ?prompt#1:wybe.string, ?response#1:wybe.char, ?result#1:wybe.bool, ?tmp$0#1:wybe.bool, ?wybe.io$io#2:wybe.phantom):
     foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~%wybe.io$io#0:wybe.phantom, ?%tmp$3#0:wybe.phantom) @wybe:122:41
     foreign c putc('\n':wybe.char, ~%tmp$3#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:108:28

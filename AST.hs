@@ -25,7 +25,7 @@ module AST (
   enterModule, reenterModule, exitModule, finishModule, 
   emptyInterface, emptyImplementation, 
   getParams, getProcDef, mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, ProcImpln(..), ProcDef(..),
+  ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..), 
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
@@ -689,7 +689,7 @@ addImport modspec imports = do
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis proto stmts pos) = do
     let ProcProto name params resources = proto
-    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 vis False
+    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr Map.empty vis False
                   $ initSuperprocSpec vis
     currMod <- getModuleSpec
     procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
@@ -1113,13 +1113,17 @@ data ProcDef = ProcDef {
     procImpln :: ProcImpln,     -- the actual implementation
     procPos :: OptPos,          -- where this proce is defined
     procTmpCount :: Int,        -- the next temp variable number to use
-    procCallCount :: Int,       -- number of calls to this proc in this mod
+    procCallers :: Map ProcSpec Int,
+                                -- number of calls to this proc in this mod
     procVis :: Visibility,      -- what modules should be able to see this?
     procInline :: Bool,         -- should we inline calls to this proc?
     procSuperproc :: SuperprocSpec 
                                 -- the proc this should be part of, if any
 }
              deriving Eq
+
+procCallCount :: ProcDef -> Int
+procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 
 
 -- |LLVM block structure allows many blocks per procedure, where blocks can 
@@ -1830,9 +1834,9 @@ showProcDefs firstID (def:defs) =
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID (ProcDef _ proto def pos _ calls vis inline sub) =
+showProcDef thisID procdef@(ProcDef _ proto def pos _ _ vis inline sub) =
     visibilityPrefix vis
-    ++ "(" ++ show calls ++ " calls)"
+    ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ (if inline then " (inline)" else "")
     ++ showSuperProc sub
     ++ "\n"

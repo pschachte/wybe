@@ -93,7 +93,8 @@ inlineIfWanted def
     logOptimise $ "  benefit = " ++ show benefit
     let cost = bodyCost $ bodyPrims body
     logOptimise $ "  cost = " ++ show cost
-    if procCallCount def <= 1 && procVis def == Private || benefit >= cost
+    if procCallCount def <= 1 && procVis def == Private
+       || benefit >= cost
     then return $ def { procInline = True }
     else return def
     where ProcDefPrim proto body = procImpln def

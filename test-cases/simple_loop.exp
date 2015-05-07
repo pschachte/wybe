@@ -37,7 +37,7 @@ public (0 calls)
         simple_loop.gen$4<0>(~c#0:wybe.char, ~wybe.io$io#0:wybe.phantom, ?c#1:wybe.char, ?wybe.io$io#1:wybe.phantom)
 
 
-(1 calls) (inline)(subproc of simple_loop.gen$3<0>)
+(1 calls) (inline)
 0: gen$4(c#0:wybe.char, wybe.io$io#0:wybe.phantom, ?c#1:wybe.char, ?wybe.io$io#2:wybe.phantom):
     foreign c putchar(~c#0:wybe.char, ~%wybe.io$io#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:118:39
     foreign c read_char(?tmp$2#0:wybe.char, ~%wybe.io$io#1:wybe.phantom, ?%tmp$3#0:wybe.phantom) @wybe:120:39
