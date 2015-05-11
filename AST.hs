@@ -1206,9 +1206,9 @@ data ProcBody = ProcBody {
 data PrimFork =
     NoFork |
     PrimFork {
-      forkVar::PrimVarName,
-      forkVarLast::Bool,
-      forkBodies::[ProcBody]
+      forkVar::PrimVarName,     -- ^The variable that selects branch to take
+      forkVarLast::Bool,        -- ^Is this the last occurrence of forkVar
+      forkBodies::[ProcBody]    -- ^one branch for each value of forkVar
     }
     deriving (Eq)
 

@@ -23,6 +23,8 @@ import Control.Monad.Trans.State
 
 import Debug.Trace
 
+
+-- | Expand the supplied ProcDef, inlining as desired.
 procExpansion :: ProcDef -> Compiler ProcDef
 procExpansion def = do
     let ProcDefPrim proto body  = procImpln def
@@ -44,8 +46,7 @@ procExpansion def = do
 
 
 
--- |Type to remember the variable renamings.  A variable that maps to 
---  Nothing is not permitted to be renamed, because it is a parameter. 
+-- |Type to remember the variable renamings.
 type Substitution = Map PrimVarName PrimArg
 
 
@@ -73,7 +74,14 @@ projectSubst protected subst =
 
 
 ----------------------------------------------------------------
---                       The Expansion Monad
+--                       The Expander Monad
+--
+-- This monad keeps track of variable renaming needed to keep inlining
+-- hygenic.  To do this, we rename all the input parameters of the proc to 
+-- be inlined, and when expanding the body, we rename any variables when 
+-- first assigned.  The exception to this is the proc's output parameters.  
+-- These are kept as a set.  We also maintain a counter for temporary 
+-- variable names.
 ----------------------------------------------------------------
 
 data ExpanderState = Expander {
