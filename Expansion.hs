@@ -87,7 +87,8 @@ projectSubst protected subst =
 data ExpanderState = Expander {
     substitution :: Substitution,     -- ^The current variable substitution
     protected    :: Set PrimVarName,  -- ^Variables that cannot be renamed
-    tmpCount     :: Int               -- ^Next available tmp variable number
+    tmpCount     :: Int,              -- ^Next available tmp variable number
+    finalFork    :: PrimFork          -- ^The fork ending this body
     }
 
 
@@ -107,16 +108,33 @@ addSubst var val = do
     return ()
 
 
+insertFinalFork :: PrimFork -> Expander ()
+insertFinalFork fork = do
+    currFork <- gets finalFork
+    checkError "Forks are piling up" (fork /= NoFork && currFork /= NoFork)
+    when (fork /= NoFork) $ modify (\s -> s { finalFork = fork })
+    return ()
+
+
+resetFinalFork :: Expander PrimFork
+resetFinalFork = do
+    fork <- gets finalFork
+    modify (\s -> s { finalFork = NoFork })
+    return fork
+
+
 initExpanderState :: Int -> Set PrimVarName -> ExpanderState
 initExpanderState tmpCount varSet = 
-    Expander identitySubstitution varSet tmpCount
+    Expander identitySubstitution varSet tmpCount NoFork
 
 
 expandBody :: ProcBody -> Expander ProcBody
 expandBody (ProcBody prims fork) = do
+    insertFinalFork fork
     prims' <- expandPrims False False prims
-    fork' <- expandFork fork
-    return $ ProcBody prims' fork'
+    fork' <- resetFinalFork
+    fork'' <- expandFork fork'
+    return $ ProcBody prims' fork''
                                 
 
 expandFork :: PrimFork -> Expander PrimFork
@@ -133,26 +151,29 @@ expandFork (PrimFork var last bodies) = do
 
 expandPrims :: Bool -> Bool -> [Placed Prim] -> Expander [Placed Prim]
 expandPrims noInline renameAll pprims = do
-    fmap concat $ mapM (placedApply (expandPrim noInline renameAll)) pprims
+    fmap concat $ mapM 
+      (\(p:rest) ->
+        expandPrim noInline renameAll (content p) (place p) (List.null rest))
+      $ init $ tails pprims
 
 
-expandPrim :: Bool -> Bool -> Prim -> OptPos -> Expander [Placed Prim]
-expandPrim noInline renameAll call@(PrimCall pspec args) pos = do
+expandPrim :: Bool -> Bool -> Prim -> OptPos -> Bool -> Expander [Placed Prim]
+expandPrim noInline renameAll call@(PrimCall pspec args) pos last = do
     logExpansion $ "Try to expand " ++ 
       (if noInline then "" else "and inline ") ++ show call
     args' <- mapM (expandArg renameAll) args
     def <- lift $ getProcDef pspec
     logExpansion $ "Definition:" ++ showProcDef 4 def
-    prims <- if (not noInline) && procInline def
+    noFork <- gets ((== NoFork) . finalFork)
+    prims <- if (not noInline) && ( procInline def || 
+                                    (last && singleCaller def && noFork))
              then do
                  saved <- get
                  modify (\s -> s { substitution = identitySubstitution, 
                                    protected = Set.empty })
                  let ProcDefPrim proto body = procImpln def
                  mapM_ addParamSubst $ zip (primProtoParams proto) args'
-                 unless (NoFork == bodyFork body) $
-                   shouldnt $ "Inlined proc with non-empty fork" ++
-                              show pspec
+                 insertFinalFork $ bodyFork body
                  logExpansion $ "Found expansion: " ++ showBlock 4 body
                  let defPrims = bodyPrims body
                  defPrims' <- expandPrims True True defPrims
@@ -165,11 +186,11 @@ expandPrim noInline renameAll call@(PrimCall pspec args) pos = do
              else return [maybePlace (PrimCall pspec args') pos]
     primsList <- mapM (\p -> expandIfAssign (content p) p) prims
     return $ concat primsList
-expandPrim _ renameAll (PrimForeign lang nm flags args) pos = do
+expandPrim _ renameAll (PrimForeign lang nm flags args) pos _ = do
     subst <- gets substitution
     args' <- mapM (expandArg renameAll) args
     return $ [maybePlace (PrimForeign lang nm flags args') pos]
-expandPrim _ _ prim pos = return $ [maybePlace prim pos]
+expandPrim _ _ prim pos _ = return $ [maybePlace prim pos]
 
 
 -- |Record the substitution if the Prim is an assignment, and remove 
@@ -227,6 +248,12 @@ renameParam subst param@(PrimParam name typ FlowOut ftype inf ) =
           _ -> param) $
     Map.lookup name subst
 renameParam _ param = param
+
+
+singleCaller :: ProcDef -> Bool
+singleCaller def =
+    let m = procCallers def
+    in  Map.size m == 1 && (snd . Map.findMin) m == 1
 
 
 -- |Log a message, if we are logging unbrancher activity.
