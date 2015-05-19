@@ -41,7 +41,7 @@ TESTCASES = $(wildcard test-cases/*.wybe)
 test:	wybemk
 	@rm -f ERRS ; touch ERRS
 	@printf "testing"
-	@for f in $(TESTCASES) ; do \
+	@ time ( for f in $(TESTCASES) ; do \
 	    out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
 	    log=`echo "$$f" | sed 's/.wybe$$/.log/'` ; \
 	    exp=`echo "$$f" | sed 's/.wybe$$/.exp/'` ; \
@@ -56,8 +56,7 @@ test:	wybemk
 		printf "[31mX[39m" ; \
 		FAILS="$${FAILS}\n    $$out" ; \
 	    fi \
-	done ; \
-	echo ; \
+	done ) ; \
 	if [ -n "$$FAILS" ] ; \
 	    then echo "Failed: $$FAILS\nSee ERRS for differences." ; \
 	    else echo "ALL TESTS PASS" ; rm -f ERRS ; \
