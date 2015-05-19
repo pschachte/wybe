@@ -56,14 +56,15 @@ test:	wybemk
 		printf "[31mX[39m" ; \
 		FAILS="$${FAILS}\n    $$out" ; \
 	    fi \
-	done ) ; \
+	done ; \
+	echo ; \
 	if [ -n "$$FAILS" ] ; \
 	    then echo "Failed: $$FAILS\nSee ERRS for differences." ; \
 	    else echo "ALL TESTS PASS" ; rm -f ERRS ; \
 	fi ; \
 	if [ -n "$$NEW" ] ; \
 	    then echo "New tests: $$NEW\nDo .\update-exp to specify expected output" ; \
-	fi
+	fi )
 
 clean:
 	rm -f *.o *.hi Parser.hs Version.lhs *.pdf *.aux
