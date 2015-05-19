@@ -1114,7 +1114,9 @@ data ProcDef = ProcDef {
     procPos :: OptPos,          -- where this proce is defined
     procTmpCount :: Int,        -- the next temp variable number to use
     procCallers :: Map ProcSpec Int,
-                                -- number of calls to this proc in this mod
+                                -- callers to this proc from this mod in the source
+                                -- code (before inlining) and the count of calls 
+                                -- for each caller
     procVis :: Visibility,      -- what modules should be able to see this?
     procInline :: Bool,         -- should we inline calls to this proc?
     procSuperproc :: SuperprocSpec 
@@ -1625,7 +1627,7 @@ varsInPrimArg _ (ArgChar _ _)           = Set.empty
 -- indicating which overloaded version of the proc is defined.  Formal
 -- parameters are preceded by ? to indicate an output; in-out
 -- parameters have been converted to a single in and a single out.
--- A parameter not used in the proc body is surrounded with [] braces.
+-- A parameter not used in the proc body is surrounded with [] brackets.
 -- Each variable name is suffixed by a # and a number, indicating
 -- which static version of the variable is meant.  The body of a proc
 -- is a sequence of proc calls.  Arguments are constant literals or

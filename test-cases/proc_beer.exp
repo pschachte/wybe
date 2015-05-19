@@ -16,11 +16,11 @@ public (0 calls) (inline)
 (0 calls) (inline)
 0: gen$1(count#0:wybe.int, tmp$0#0:wybe.bool, wybe.io$io#0:wybe.phantom, [?count#0:wybe.int], [?tmp$0#0:wybe.bool], [?wybe.io$io#0:wybe.phantom]):
 
-(0 calls) (inline)
+(2 calls) (inline)
 0: gen$2(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?tmp$0#0:wybe.bool, ?wybe.io$io#1:wybe.phantom):
     proc_beer.gen$3<0>(~count#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:9
 
-(3 calls)
+(1 calls)
 0: gen$3(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom):
     foreign llvm icmp sge(32:wybe.int, count#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:18:40
     case ~tmp$0#0 of

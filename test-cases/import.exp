@@ -56,7 +56,7 @@ public (0 calls)
   types           : 
   resources       : 
   procs           : 
-public (0 calls) (inline)
+public (3 calls) (inline)
 0: =(?x#0:position.position, y#0:position.position):
     foreign llvm move(~y#0:position.position, ?x#0:position.position)public (0 calls) (inline)
 1: =(y#0:position.position, ?x#0:position.position):

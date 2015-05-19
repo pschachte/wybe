@@ -9,11 +9,11 @@ AFTER EVERYTHING:
   types           : 
   resources       : 
   procs           : 
-public (0 calls) (inline)
+public (1 calls) (inline)
 0: factorial(n#0:wybe.int, ?tmp$0#0:wybe.int):
     func_factorial.gen$1<0>(~n#0:wybe.int, ?n#1:wybe.int, ?tmp$0#0:wybe.int) @func_factorial:2:8
 
-(2 calls)
+(1 calls)
 0: gen$1(n#0:wybe.int, [?n#0:wybe.int], ?tmp$0#0:wybe.int):
     foreign llvm icmp sle(32:wybe.int, n#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:16:40
     case ~tmp$1#0 of

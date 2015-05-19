@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   types           : 
   resources       : 
   procs           : 
-public (0 calls) (inline)
+public (2 calls) (inline)
 0: double(a#0:wybe.int, ?tmp$0#0:wybe.int):
     foreign llvm add(32:wybe.int, ~a#0:wybe.int, ~a#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:4:38
 

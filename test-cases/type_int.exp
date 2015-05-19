@@ -87,7 +87,7 @@ public (0 calls) (inline)
 0: <=(x#0:type_int.myint, y#0:type_int.myint, ?tmp$0#0:wybe.bool):
     foreign llvm icmp sle(32:wybe.int, ~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:wybe.bool) @type_int:13:44
 
-public (0 calls) (inline)
+public (14 calls) (inline)
 0: =(?x#0:type_int.myint, y#0:type_int.myint):
     foreign llvm move(~y#0:type_int.myint, ?x#0:type_int.myint)public (0 calls) (inline)
 1: =(y#0:type_int.myint, ?x#0:type_int.myint):
