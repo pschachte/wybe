@@ -9,16 +9,28 @@ AFTER EVERYTHING:
   types           : 
   resources       : 
   procs           : 
-public (0 calls) (inline)
+public (0 calls)
 0: beer99(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    proc_beer.gen$3<0>(99:wybe.int, ~wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:9
+    proc_beer.gen$2<0>(99:wybe.int, ~wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?tmp$0#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:5
 
 (0 calls) (inline)
 0: gen$1(count#0:wybe.int, tmp$0#0:wybe.bool, wybe.io$io#0:wybe.phantom, [?count#0:wybe.int], [?tmp$0#0:wybe.bool], [?wybe.io$io#0:wybe.phantom]):
 
-(2 calls) (inline)
+(2 calls)
 0: gen$2(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?tmp$0#0:wybe.bool, ?wybe.io$io#1:wybe.phantom):
-    proc_beer.gen$3<0>(~count#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:9
+    case tmp$0#0 of
+    0:
+        NOP
+        foreign wybe move(~count#0, ?count#1)
+        foreign wybe move(~wybe.io$io#0, ?wybe.io$io#1)
+
+    1:
+        wybe.io.print<0>(count#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#tmp$3#0:wybe.phantom) @proc_beer:6:9
+        wybe.io.println<3>(" bottles of beer on the wall":wybe.string, ~#tmp$3#0:wybe.phantom, ?#tmp$4#0:wybe.phantom) @proc_beer:7:9
+        wybe.int.-<0>(~count#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.int) @proc_beer:8:18
+        wybe.int.=<0>(?tmp$6#0:wybe.int, ~tmp$5#0:wybe.int) @proc_beer:8:9
+        proc_beer.gen$2<0>(~tmp$6#0:wybe.int, ~tmp$4#0:wybe.phantom, ?count#1:wybe.int, ?tmp$7#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:5
+
 
 (1 calls)
 0: gen$3(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom):
@@ -30,7 +42,11 @@ public (0 calls) (inline)
         foreign wybe move(~wybe.io$io#0, ?wybe.io$io#1)
 
     1:
-        proc_beer.gen$4<0>(~count#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom)
+        wybe.io.print<0>(count#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#tmp$2#0:wybe.phantom) @proc_beer:6:9
+        wybe.io.println<3>(" bottles of beer on the wall":wybe.string, ~#tmp$2#0:wybe.phantom, ?#tmp$3#0:wybe.phantom) @proc_beer:7:9
+        wybe.int.-<0>(~count#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @proc_beer:8:18
+        wybe.int.=<0>(?tmp$5#0:wybe.int, ~tmp$4#0:wybe.int) @proc_beer:8:9
+        proc_beer.gen$2<0>(~tmp$5#0:wybe.int, ~tmp$3#0:wybe.phantom, ?count#1:wybe.int, ?tmp$6#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:5
 
 
 (1 calls) (inline)
@@ -39,4 +55,4 @@ public (0 calls) (inline)
     foreign c print_string(" bottles of beer on the wall":wybe.string, ~%wybe.io$io#1:wybe.phantom, ?%tmp$2#0:wybe.phantom) @wybe:122:41
     foreign c putc('\n':wybe.char, ~%tmp$2#0:wybe.phantom, ?%wybe.io$io#2:wybe.phantom) @wybe:108:28
     foreign llvm sub(32:wybe.int, ~count#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:7:38
-    proc_beer.gen$3<0>(~tmp$1#0:wybe.int, ~wybe.io$io#2:wybe.phantom, ?count#2:wybe.int, ?wybe.io$io#3:wybe.phantom) @proc_beer:5:9
+    proc_beer.gen$2<0>(~tmp$1#0:wybe.int, ~wybe.io$io#2:wybe.phantom, ?count#2:wybe.int, ?tmp$0#0:wybe.bool, ?wybe.io$io#3:wybe.phantom) @proc_beer:5:5

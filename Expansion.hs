@@ -165,25 +165,31 @@ expandPrim noInline renameAll call@(PrimCall pspec args) pos last = do
     def <- lift $ getProcDef pspec
     logExpansion $ "Definition:" ++ showProcDef 4 def
     noFork <- gets ((== NoFork) . finalFork)
-    prims <- if (not noInline) && ( procInline def || 
-                                    (last && singleCaller def && noFork))
+    prims <- if (not noInline) && 
+                ( procInline def || 
+                  (last && singleCaller def && 
+                   procVis def == Private && noFork))
              then do
                  saved <- get
                  modify (\s -> s { substitution = identitySubstitution, 
                                    protected = Set.empty })
                  let ProcDefPrim proto body = procImpln def
                  mapM_ addParamSubst $ zip (primProtoParams proto) args'
-                 insertFinalFork $ bodyFork body
                  logExpansion $ "Found expansion: " ++ showBlock 4 body
                  let defPrims = bodyPrims body
                  defPrims' <- expandPrims True True defPrims
                  tmp' <- gets tmpCount
                  put saved
                  modify (\s -> s { tmpCount = tmp' })
+                 insertFinalFork $ bodyFork body
+                 -- Record that it is being inlined
+                 lift $ updateProcDef (\d -> d {procInline = True}) pspec
                  logExpansion $ "After subst " ++
                    showBlock 4 (ProcBody defPrims' NoFork)
                  return defPrims'
-             else return [maybePlace (PrimCall pspec args') pos]
+             else do
+               logExpansion $ " cannot expand."
+               return [maybePlace (PrimCall pspec args') pos]
     primsList <- mapM (\p -> expandIfAssign (content p) p) prims
     return $ concat primsList
 expandPrim _ renameAll (PrimForeign lang nm flags args) pos _ = do

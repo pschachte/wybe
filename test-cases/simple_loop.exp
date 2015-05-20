@@ -11,16 +11,23 @@ AFTER EVERYTHING:
   procs           : 
 public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c read_char(?tmp$2#0:wybe.char, ~%wybe.io$io#0:wybe.phantom, ?%tmp$3#0:wybe.phantom) @wybe:120:39
-    simple_loop.gen$3<0>(~tmp$2#0:wybe.char, ~tmp$3#0:wybe.phantom, ?c#0:wybe.char, ?wybe.io$io#1:wybe.phantom) @simple_loop:2:4
+    simple_loop.gen$2<0>(~wybe.io$io#0:wybe.phantom, ?c#0:wybe.char, ?tmp$0#0:wybe.bool, ?tmp$1#0:wybe.char, ?wybe.io$io#1:wybe.phantom) @simple_loop:1:1
 
 (0 calls) (inline)
 0: gen$1(c#0:wybe.char, tmp$0#0:wybe.bool, tmp$1#0:wybe.char, wybe.io$io#0:wybe.phantom, [?c#0:wybe.char], [?tmp$0#0:wybe.bool], [?tmp$1#0:wybe.char], [?wybe.io$io#0:wybe.phantom]):
 
-(2 calls) (inline)
+(2 calls)
 0: gen$2(wybe.io$io#0:wybe.phantom, ?c#1:wybe.char, ?tmp$0#0:wybe.bool, ?tmp$1#0:wybe.char, ?wybe.io$io#2:wybe.phantom):
-    foreign c read_char(?c#0:wybe.char, ~%wybe.io$io#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:120:39
-    simple_loop.gen$3<0>(~c#0:wybe.char, ~wybe.io$io#1:wybe.phantom, ?c#1:wybe.char, ?wybe.io$io#2:wybe.phantom) @simple_loop:2:4
+    foreign c read_char(?c#0:wybe.char, %wybe.io$io#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:120:39
+    case tmp$0#0 of
+    0:
+        NOP
+        foreign wybe move(~c#0, ?c#1)
+
+    1:
+        wybe.io.print<2>(~c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#tmp$4#0:wybe.phantom) @simple_loop:3:4
+        simple_loop.gen$2<0>(~tmp$4#0:wybe.phantom, ?c#1:wybe.char, ?tmp$5#0:wybe.bool, ?tmp$6#0:wybe.char, ?wybe.io$io#1:wybe.phantom) @simple_loop:1:1
+
 
 (1 calls)
 0: gen$3(c#0:wybe.char, wybe.io$io#0:wybe.phantom, ?c#1:wybe.char, ?wybe.io$io#1:wybe.phantom):
@@ -34,11 +41,11 @@ public (0 calls)
         foreign wybe move(~wybe.io$io#0, ?wybe.io$io#1)
 
     1:
-        simple_loop.gen$4<0>(~c#0:wybe.char, ~wybe.io$io#0:wybe.phantom, ?c#1:wybe.char, ?wybe.io$io#1:wybe.phantom)
+        wybe.io.print<2>(~c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#tmp$3#0:wybe.phantom) @simple_loop:3:4
+        simple_loop.gen$2<0>(~tmp$3#0:wybe.phantom, ?c#1:wybe.char, ?tmp$4#0:wybe.bool, ?tmp$5#0:wybe.char, ?wybe.io$io#1:wybe.phantom) @simple_loop:1:1
 
 
 (1 calls) (inline)
 0: gen$4(c#0:wybe.char, wybe.io$io#0:wybe.phantom, ?c#1:wybe.char, ?wybe.io$io#2:wybe.phantom):
     foreign c putchar(~c#0:wybe.char, ~%wybe.io$io#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:118:39
-    foreign c read_char(?tmp$2#0:wybe.char, ~%wybe.io$io#1:wybe.phantom, ?%tmp$3#0:wybe.phantom) @wybe:120:39
-    simple_loop.gen$3<0>(~tmp$2#0:wybe.char, ~tmp$3#0:wybe.phantom, ?c#1:wybe.char, ?wybe.io$io#2:wybe.phantom) @simple_loop:2:4
+    simple_loop.gen$2<0>(~wybe.io$io#1:wybe.phantom, ?c#1:wybe.char, ?tmp$0#0:wybe.bool, ?tmp$1#0:wybe.char, ?wybe.io$io#2:wybe.phantom) @simple_loop:1:1
