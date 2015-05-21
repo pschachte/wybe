@@ -20,7 +20,6 @@ public (0 calls)
 0: gen$2(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?tmp$0#0:wybe.bool, ?wybe.io$io#1:wybe.phantom):
     case tmp$0#0 of
     0:
-        NOP
         foreign wybe move(~count#0, ?count#1)
         foreign wybe move(~wybe.io$io#0, ?wybe.io$io#1)
 
@@ -37,7 +36,6 @@ public (0 calls)
     foreign llvm icmp sge(32:wybe.int, count#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:18:40
     case ~tmp$0#0 of
     0:
-        NOP
         foreign wybe move(~count#0, ?count#1)
         foreign wybe move(~wybe.io$io#0, ?wybe.io$io#1)
 

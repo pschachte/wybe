@@ -21,7 +21,6 @@ public (0 calls)
     foreign c read_char(?c#0:wybe.char, %wybe.io$io#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:120:39
     case tmp$0#0 of
     0:
-        NOP
         foreign wybe move(~c#0, ?c#1)
 
     1:
@@ -36,7 +35,6 @@ public (0 calls)
     wybe.bool.=<0>(?tmp$0#0:wybe.bool, ~tmp$2#0:wybe.bool) @wybe:71:12
     case ~tmp$0#0 of
     0:
-        NOP
         foreign wybe move(~c#0, ?c#1)
         foreign wybe move(~wybe.io$io#0, ?wybe.io$io#1)
 

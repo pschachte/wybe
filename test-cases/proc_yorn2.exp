@@ -27,7 +27,6 @@ AFTER EVERYTHING:
         proc_yorn2.gen$2<0>(~prompt#0:wybe.string, ~tmp$4#0:wybe.phantom, ?prompt#1:wybe.string, ?response#1:wybe.char, ?result#1:wybe.bool, ?tmp$0#1:wybe.bool, ?tmp$1#0:wybe.bool, ?tmp$2#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_yorn2:2:5
 
     1:
-        NOP
         foreign wybe move(~prompt#0, ?prompt#1)
         foreign wybe move(~response#0, ?response#1)
         foreign wybe move(tmp$0#0:wybe.bool, ?result#1)
@@ -45,7 +44,6 @@ AFTER EVERYTHING:
         proc_yorn2.gen$2<0>(~prompt#0:wybe.string, ~tmp$4#0:wybe.phantom, ?prompt#1:wybe.string, ?response#1:wybe.char, ?result#1:wybe.bool, ?tmp$0#1:wybe.bool, ?tmp$1#0:wybe.bool, ?tmp$2#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_yorn2:2:5
 
     1:
-        NOP
         foreign wybe move(~prompt#0, ?prompt#1)
         foreign wybe move(~response#0, ?response#1)
         foreign wybe move(~result#0, ?result#1)
