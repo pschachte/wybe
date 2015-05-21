@@ -15,6 +15,11 @@ o Detect and report use of uninitialised variables, including update
 
 Complete the language:
 o Fix the syntax!
+    o At statement level, support interleaved operator value syntax,
+      eg, "f v g w h x", which would be read as f_f_f(v,w,x)
+    o At expression level, support infix ops, where the ops are sequences of
+      operator characters
+    o At statement level, support brace-enclosed statement sequence as statement
 o Support polymorphism
 o Support subtypes
 o Support higher-order programming
