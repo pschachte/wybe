@@ -34,7 +34,19 @@ optimiseMod mods thisMod = do
              ]
     logOptimise $ "Optimise SCCs:\n" ++ 
       unlines (List.map (show . sccElts) ordered)
+    -- XXX this is wrong:  it does not do a proper top-down 
+    -- traversal, as it is not guaranteed to vist all callers before 
+    -- visiting the called proc.  Need to construct inverse graph instead.
     mapM_ (mapM_ optimiseProcTopDown .  sccElts) $ reverse ordered
+    procs <- getModuleImplementationField (Map.toList . modProcs)
+    let ordered =
+            stronglyConnComp
+            [(pspec,pspec,
+              nub $ concatMap (localBodyCallees thisMod . procBody) procDefs)
+             | (name,procDefs) <- procs,
+               (n,def) <- zip [0..] procDefs,
+               let pspec = ProcSpec thisMod name n
+             ]
     mapM_ (mapM_ optimiseProcBottomUp .  sccElts) ordered
     finishModule
     return (False,[])
