@@ -2090,5 +2090,6 @@ logMsg :: LogSelection    -- ^ The aspect of the compiler being logged,
           -> String       -- ^ The log message
           -> Compiler ()  -- ^ Works in the Compiler monad
 logMsg selector msg = do
+    let prefix = show selector ++ ": "
     whenLogging selector $
-      liftIO $ hPutStrLn stderr $ show selector ++ ": " ++ msg
+      liftIO $ hPutStrLn stderr (prefix ++ List.intercalate ('\n':prefix) (lines msg))
