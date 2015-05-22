@@ -1203,7 +1203,7 @@ instance Show ProcImpln where
 data ProcBody = ProcBody {
       bodyPrims::[Placed Prim],
       bodyFork::PrimFork}
-              deriving (Eq)
+              deriving (Eq, Show)
 
 data PrimFork =
     NoFork |
@@ -1212,7 +1212,7 @@ data PrimFork =
       forkVarLast::Bool,        -- ^Is this the last occurrence of forkVar
       forkBodies::[ProcBody]    -- ^one branch for each value of forkVar
     }
-    deriving (Eq)
+    deriving (Eq, Show)
 
 
 data LLBlock = LLBlock {
