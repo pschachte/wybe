@@ -6,7 +6,9 @@
 --  Copyright: © 2015 Peter Schachte.  All rights reserved.
 --
 
-module BodyBuilder (BodyBuilder(..)) where
+module BodyBuilder (
+  BodyBuilder, buildBody, instr, beginFork, nextBranch, finishFork
+  ) where
 
 import AST
 import Options (LogSelection(Expansion))
@@ -31,16 +33,77 @@ import Debug.Trace
 -- variable names.
 ----------------------------------------------------------------
 
-data BodyBuilder = BodyBuilder {
-    substitution :: Substitution,     -- ^The current variable substitution
-    protected    :: Set PrimVarName,  -- ^Variables that cannot be renamed
-    tmpCount     :: Int,              -- ^Next available tmp variable number
-    finalFork    :: PrimFork,         -- ^The fork ending this body
-    doInline     :: Bool,             -- ^Whether currently expanding inlined code
-    doInlineFork :: Bool              -- ^Whether final fork is being inlined
-    }
+type BodyBuilder = StateT BodyState Compiler
+
+data BodyState = BodyState {
+    currBody     :: Maybe [Placed Prim], -- ^The body we're building, reversed
+                                      -- If nothing, history holds current node
+    history      :: [ProcBody]        -- ^Tree nodes back to the root
+    } deriving Show
 
 
-type Expander = StateT ExpanderState Compiler
+buildBody :: BodyBuilder () -> Compiler ProcBody
+buildBody builder = do
+    ((),final) <- runStateT builder $ BodyState (Just []) []
+    return $ stateBody final
 
 
+----------------------------------------------------------------
+--                      BodyBuilder Primitive Operations
+----------------------------------------------------------------
+
+-- |Add an instruction to the current body
+instr :: Placed Prim -> BodyBuilder ()
+instr x = do
+    (BodyState curr hist) <- get
+    case curr of
+      Nothing -> shouldnt "adding an instr after a fork"
+      Just l  -> put $ BodyState (Just (x : l)) hist
+
+
+beginFork :: PrimVarName -> Bool -> BodyBuilder ()
+beginFork var last = do
+    bodies <- gets stateCurrBodies
+    case bodies of
+      (ProcBody prims NoFork : history) ->
+        put $ BodyState (Just []) 
+              (ProcBody prims (PrimFork var last []) : history)
+      _ -> shouldnt "Inconsistent BodyState"
+
+
+nextBranch :: BodyBuilder ()
+nextBranch = do
+    bodies <- gets stateCurrBodies
+    case bodies of
+      (curr : (ProcBody prims (PrimFork var last branches)) : history) ->
+        put $ BodyState (Just []) 
+              (ProcBody prims (PrimFork var last (branches++[curr])) : history)
+      _ -> shouldnt "nextBranch without beginFork"
+
+
+finishFork :: BodyBuilder ()
+finishFork = do
+    bodies <- gets stateCurrBodies
+    case bodies of
+      (curr : (ProcBody prims (PrimFork var last branches)) : history) ->
+        put $ BodyState Nothing
+              (ProcBody prims (PrimFork var last (branches++[curr])) : history)
+      _ -> shouldnt "nextBranch without beginFork"
+
+
+----------------------------------------------------------------
+--                          Building the Actual Body
+----------------------------------------------------------------
+
+stateCurrBodies :: BodyState -> [ProcBody]
+stateCurrBodies (BodyState Nothing bodies) = bodies
+stateCurrBodies (BodyState (Just prims) bodies) =
+    ProcBody (reverse prims) NoFork : bodies
+
+
+stateBody :: BodyState -> ProcBody
+stateBody state =
+    case stateCurrBodies state of
+      [] -> shouldnt "Inconsistent BodyState"
+      [body] -> body
+      _ -> shouldnt "BodyBuilder with unfinished fork"
