@@ -20,6 +20,12 @@ o Fix the syntax!
     o At expression level, support infix ops, where the ops are sequences of
       operator characters
     o At statement level, support brace-enclosed statement sequence as statement
+    o Interpolation (string and array)
+        o "...@foo..." = "..." ++ foo ++ "..."
+	o "...@(foo(bar,baz))..." = "..." ++ foo(bar,baz) ++ "..."
+	o [foo,@bar(baz),zip] = [foo] ++ bar(baz) ++ zip
+	o if ++ can run backwards, then [?foo,@?bar] and [@?foo,bar] can be patterns
+	o with this, no need for [ ... | ...] syntax
 o Support polymorphism
 o Support subtypes
 o Support higher-order programming
