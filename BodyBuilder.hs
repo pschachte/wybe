@@ -42,10 +42,10 @@ data BodyState = BodyState {
     } deriving Show
 
 
-buildBody :: BodyBuilder () -> Compiler ProcBody
+buildBody :: BodyBuilder a -> Compiler (a,ProcBody)
 buildBody builder = do
-    ((),final) <- runStateT builder $ BodyState (Just []) []
-    return $ stateBody final
+    (a,final) <- runStateT builder $ BodyState (Just []) []
+    return (a,stateBody final)
 
 
 ----------------------------------------------------------------

@@ -8,10 +8,14 @@
 --  This code is used for inlining procedures and other similar
 --  transformations.  As part of this, variables are also renamed.
 --  This code operates on LPVM (Prim) form.
+--
+--  This code is used bottom-up, ie, callees are expanded before 
+--  their callers, so it does not need to recursively expand calls.
 
 module Expansion (procExpansion) where
 
 import AST
+import BodyBuilder
 import Options (LogSelection(Expansion))
 import Data.Map as Map
 import Data.List as List
@@ -27,21 +31,23 @@ import Debug.Trace
 -- | Expand the supplied ProcDef, inlining as desired.
 procExpansion :: ProcDef -> Compiler ProcDef
 procExpansion def = do
-    let ProcDefPrim proto body  = procImpln def
+    logMsg Expansion $ "\nTry to expand proc " ++ show (procName def)
+    let ProcDefPrim proto body = procImpln def
     let tmp = procTmpCount def
     let outputs = List.map primParamName $
                   List.filter ((==FlowOut) . primParamFlow) $
                     primProtoParams proto
-    (body',expander) <- runStateT (expandBody body) $
+    (expander,body') <- buildBody $ execStateT (expandBody body) $
                           initExpanderState tmp $ Set.fromList outputs
     let proto' = proto { primProtoParams =
                               List.map (renameParam $ substitution expander) $
                               primProtoParams proto }
-    let def' = def { procImpln = ProcDefPrim proto' body',
+    let def' = def { procImpln = ProcDefPrim proto body',
                      procTmpCount = tmpCount expander }
-    logMsg Expansion $
-           "\nExpanded:" ++ showProcDef 4 def ++
-                    "\nTo:" ++ showProcDef 4 def'
+    when (def /= def') $
+      logMsg Expansion $
+        "Expanded:" ++ showProcDef 4 def ++
+        "\nTo:" ++ showProcDef 4 def'
     return def'
 
 
@@ -59,18 +65,18 @@ addSubstitution :: PrimVarName -> PrimArg -> Substitution -> Substitution
 addSubstitution = Map.insert
 
 
-meetSubsts :: Substitution -> Substitution -> Substitution
-meetSubsts = Map.mergeWithKey
-             (\k v1 v2 -> if v1 == v2 then Just v1 else Nothing)
-             (const Map.empty) 
-             (const Map.empty) 
+-- meetSubsts :: Substitution -> Substitution -> Substitution
+-- meetSubsts = Map.mergeWithKey
+--              (\k v1 v2 -> if v1 == v2 then Just v1 else Nothing)
+--              (const Map.empty) 
+--              (const Map.empty) 
 
 
-projectSubst :: Set PrimVarName -> Substitution -> Substitution
-projectSubst protected subst = 
-    Map.fromAscList $
-    List.filter (flip Set.member protected . fst) $
-    Map.toAscList subst
+-- projectSubst :: Set PrimVarName -> Substitution -> Substitution
+-- projectSubst protected subst = 
+--     Map.fromAscList $
+--     List.filter (flip Set.member protected . fst) $
+--     Map.toAscList subst
 
 
 ----------------------------------------------------------------
@@ -88,11 +94,13 @@ data ExpanderState = Expander {
     substitution :: Substitution,     -- ^The current variable substitution
     protected    :: Set PrimVarName,  -- ^Variables that cannot be renamed
     tmpCount     :: Int,              -- ^Next available tmp variable number
-    finalFork    :: PrimFork          -- ^The fork ending this body
+    finalFork    :: PrimFork,         -- ^The fork ending this body
+    doInline     :: Bool,             -- ^Whether to inline code
+    doInlineFork :: Bool              -- ^Whether to inline the finalFork
     }
 
 
-type Expander = StateT ExpanderState Compiler
+type Expander = StateT ExpanderState BodyBuilder
 
 
 tmpVar :: Expander PrimVarName
@@ -108,11 +116,32 @@ addSubst var val = do
     return ()
 
 
+addInstr :: Prim -> OptPos -> Expander ()
+addInstr (PrimForeign "llvm" "move" [] 
+          [val, argvar@(ArgVar var _ FlowOut _ _)]) pos = do
+    val' <- expandArg val
+    addSubst var val'
+    noSubst <- gets (Set.member var . protected)
+    if noSubst -- do we need to keep this assignment (to an output)?
+      then lift $ instr $ maybePlace (PrimForeign "llvm" "move" [] [val, argvar])  pos
+      else return ()
+addInstr (PrimForeign lang nm flags args) pos = do
+    args' <- mapM expandArg args
+    lift $ instr $ maybePlace (PrimForeign lang nm flags args')  pos
+addInstr (PrimCall pspec args) pos = do
+    args' <- mapM expandArg args
+    lift $ instr $ maybePlace (PrimCall pspec args')  pos
+addInstr PrimNop _ = do
+    -- Filter out NOPs
+    return ()
+
+
 insertFinalFork :: PrimFork -> Expander ()
 insertFinalFork fork = do
     currFork <- gets finalFork
     checkError "Forks are piling up" (fork /= NoFork && currFork /= NoFork)
-    when (fork /= NoFork) $ modify (\s -> s { finalFork = fork })
+    when (fork /= NoFork) $ 
+      modify (\s -> s { finalFork = fork })
     return ()
 
 
@@ -125,78 +154,81 @@ resetFinalFork = do
 
 initExpanderState :: Int -> Set PrimVarName -> ExpanderState
 initExpanderState tmpCount varSet = 
-    Expander identitySubstitution varSet tmpCount NoFork
+    Expander identitySubstitution varSet tmpCount NoFork True True
 
 
-expandBody :: ProcBody -> Expander ProcBody
+----------------------------------------------------------------
+--                        Expanding Proc Bodies
+----------------------------------------------------------------
+
+expandBody :: ProcBody -> Expander ()
 expandBody (ProcBody prims fork) = do
     insertFinalFork fork
-    prims' <- expandPrims False False prims
-    fork' <- resetFinalFork
-    fork'' <- expandFork fork'
-    return $ ProcBody prims' fork''
-                                
-
-expandFork :: PrimFork -> Expander PrimFork
-expandFork NoFork = return NoFork
-expandFork (PrimFork var last bodies) = do
+    expandPrims prims
     state <- get
-    let baseSubst = projectSubst (protected state) (substitution state)
-    pairs <- lift $ mapM (\b -> runStateT (expandBody b) state) bodies
-    let subst = List.foldr meetSubsts baseSubst $
-                List.map (substitution . snd) pairs
-    modify (\s -> s { substitution = subst })
-    return $ PrimFork var last $ List.map fst pairs
+    case finalFork state of
+      NoFork -> return ()
+      PrimFork var last bodies -> do
+        logExpansion $ "Now expanding fork (" ++ 
+          (if doInlineFork state then "WITH" else "without") ++ " inlining)"
+        let var' = case Map.lookup var $ substitution state of
+              Nothing -> var
+              Just (ArgVar v _ _ _ _) -> v 
+              Just _ -> shouldnt "expansion led to non-var conditional"
+        let state' = state { doInline = doInlineFork state, finalFork = NoFork }
+        pairs <- lift $ mapM (\b -> runStateT (expandBody b) state') bodies
+        logExpansion $ "Finished expanding fork"
+        -- Don't actually need this:
+        -- let baseSubst = projectSubst (protected state) (substitution state)
+        -- let subst = List.foldr meetSubsts baseSubst $
+        --             List.map (substitution . snd) pairs
+        return ()
 
-
-expandPrims :: Bool -> Bool -> [Placed Prim] -> Expander [Placed Prim]
-expandPrims noInline renameAll pprims = do
-    fmap concat $ mapM 
-      (\(p:rest) ->
-        expandPrim noInline renameAll (content p) (place p) (List.null rest))
+                                
+expandPrims :: [Placed Prim] -> Expander ()
+expandPrims pprims = do
+    mapM_ (\(p:rest) -> expandPrim (content p) (place p) (List.null rest))
       $ init $ tails pprims
 
 
-expandPrim :: Bool -> Bool -> Prim -> OptPos -> Bool -> Expander [Placed Prim]
-expandPrim noInline renameAll call@(PrimCall pspec args) pos last = do
-    logExpansion $ "Try to expand " ++ 
-      (if noInline then "" else "and inline ") ++ show call
-    args' <- mapM (expandArg renameAll) args
-    def <- lift $ getProcDef pspec
-    logExpansion $ "Definition:" ++ showProcDef 4 def
-    noFork <- gets ((== NoFork) . finalFork)
-    prims <- if (not noInline) && 
-                ( procInline def || 
-                  (last && singleCaller def && 
-                   procVis def == Private && noFork))
-             then do
-                 saved <- get
-                 modify (\s -> s { substitution = identitySubstitution, 
-                                   protected = Set.empty })
-                 let ProcDefPrim proto body = procImpln def
-                 mapM_ addParamSubst $ zip (primProtoParams proto) args'
-                 logExpansion $ "Found expansion: " ++ showBlock 4 body
-                 let defPrims = bodyPrims body
-                 defPrims' <- expandPrims True True defPrims
-                 tmp' <- gets tmpCount
-                 put saved
-                 modify (\s -> s { tmpCount = tmp' })
-                 insertFinalFork $ bodyFork body
-                 -- Record that it is being inlined
-                 lift $ updateProcDef (\d -> d {procInline = True}) pspec
-                 logExpansion $ "After subst " ++
-                   showBlock 4 (ProcBody defPrims' NoFork)
-                 return defPrims'
-             else do
-               logExpansion $ " cannot expand."
-               return [maybePlace (PrimCall pspec args') pos]
-    primsList <- mapM (\p -> expandIfAssign (content p) p) prims
-    return $ concat primsList
-expandPrim _ renameAll (PrimForeign lang nm flags args) pos _ = do
-    subst <- gets substitution
-    args' <- mapM (expandArg renameAll) args
-    return $ [maybePlace (PrimForeign lang nm flags args') pos]
-expandPrim _ _ prim pos _ = return $ [maybePlace prim pos]
+expandPrim :: Prim -> OptPos -> Bool -> Expander ()
+expandPrim call@(PrimCall pspec args) pos last = do
+    doInline <- gets doInline
+    logExpansion $
+      (if doInline then " Try to inline " else "  Expanding ") ++ "call " ++ show call
+    def <- lift $ lift $ getProcDef pspec
+    inlinableLast <- gets (((last && singleCaller def && 
+                             procVis def == Private) &&) . (== NoFork) . finalFork)
+
+    -- addInstr call pos
+
+    if doInline && ( procInline def || inlinableLast)
+    then do
+        let ProcDefPrim proto body = procImpln def
+        let thisFork = bodyFork body
+        when inlinableLast $ do
+          insertFinalFork thisFork
+          modify (\s -> s { doInlineFork = False })
+        saved <- get
+        modify (\s -> s { substitution = identitySubstitution, 
+                          protected = Set.empty, 
+                          doInline = False })
+        mapM_ addParamSubst $ zip (primProtoParams proto) args
+        logExpansion $ " Inlining defn: " ++ showBlock 4 body
+        expandPrims $ bodyPrims body
+        tmp' <- gets tmpCount
+        put saved
+        modify (\s -> s { tmpCount = tmp' })
+        -- Record that it is being inlined
+        -- XXX this doesn't work:
+        -- lift $ updateProcDef (\d -> d {procInline = True}) pspec
+        -- logExpansion $ "  After subst:" ++
+        --   showBlock 4 (ProcBody defPrims' NoFork)
+    else do
+      when doInline $ logExpansion $ " Cannot inline."
+      addInstr call pos
+expandPrim prim pos _ = do
+    addInstr prim pos
 
 
 -- |Record the substitution if the Prim is an assignment, and remove 
@@ -212,22 +244,24 @@ expandIfAssign (PrimForeign "llvm" "move" []
 expandIfAssign _ pprim = return [pprim]
 
 
-expandArg :: Bool -> PrimArg -> Expander PrimArg
-expandArg renameAll arg@(ArgVar var typ flow ftype _) = do
-    logExpansion $ "expanding " ++ show arg
+expandArg :: PrimArg -> Expander PrimArg
+expandArg arg@(ArgVar var typ flow ftype _) = do
+    -- logExpansion $ "expanding " ++ show arg
+    renameAll <- gets (not . doInline)
     maybeArg <- gets (Map.lookup var . substitution)
     arg' <- case (maybeArg,renameAll,flow) of
-        (Just a,_,_) -> do return $ setPrimArgFlow flow ftype a
+        (Just a,_,_) -> return $ setPrimArgFlow flow ftype a
         (Nothing,False,_) -> return arg
-        (Nothing,True,FlowIn) -> 
-            shouldnt $ "variable " ++ show var ++ " used before defined"
+        (Nothing,True,FlowIn) ->
+            -- shouldnt $ "variable " ++ show var ++ " used before defined"
+            return arg
         (Nothing,True,FlowOut) -> do
             freshVar <- tmpVar
             addSubst var $ ArgVar freshVar typ FlowIn ftype False
             return $ ArgVar freshVar typ FlowOut ftype False
-    logExpansion $ " to " ++ show arg'
+    -- logExpansion $ " to " ++ show arg'
     return arg'
-expandArg _ arg = return arg
+expandArg arg = return arg
 
 
 setPrimArgFlow :: PrimFlow -> ArgFlowType -> PrimArg -> PrimArg
@@ -264,4 +298,4 @@ singleCaller def =
 
 -- |Log a message, if we are logging unbrancher activity.
 logExpansion :: String -> Expander ()
-logExpansion s = lift $ logMsg Expansion s
+logExpansion s = lift $ lift $ logMsg Expansion s
