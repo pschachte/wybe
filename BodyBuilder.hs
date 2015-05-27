@@ -42,15 +42,16 @@ data BodyState = BodyState {
     } deriving Show
 
 
+----------------------------------------------------------------
+--                      BodyBuilder Primitive Operations
+----------------------------------------------------------------
+
+-- |Run a BodyBuilder monad and extract the final proc body
 buildBody :: BodyBuilder a -> Compiler (a,ProcBody)
 buildBody builder = do
     (a,final) <- runStateT builder $ BodyState (Just []) []
     return (a,stateBody final)
 
-
-----------------------------------------------------------------
---                      BodyBuilder Primitive Operations
-----------------------------------------------------------------
 
 -- |Add an instruction to the current body
 instr :: Placed Prim -> BodyBuilder ()
@@ -61,6 +62,7 @@ instr x = do
       Just l  -> put $ BodyState (Just (x : l)) hist
 
 
+-- |Start a new fork at the end of a body
 beginFork :: PrimVarName -> Bool -> BodyBuilder ()
 beginFork var last = do
     bodies <- gets stateCurrBodies
@@ -71,6 +73,7 @@ beginFork var last = do
       _ -> shouldnt "Inconsistent BodyState"
 
 
+-- |Finish one branch of a fork and prepare to start the next
 nextBranch :: BodyBuilder ()
 nextBranch = do
     bodies <- gets stateCurrBodies
@@ -81,6 +84,7 @@ nextBranch = do
       _ -> shouldnt "nextBranch without beginFork"
 
 
+-- |Finish the whole fork
 finishFork :: BodyBuilder ()
 finishFork = do
     bodies <- gets stateCurrBodies
@@ -92,7 +96,7 @@ finishFork = do
 
 
 ----------------------------------------------------------------
---                          Building the Actual Body
+--                          Extracting the Actual Body
 ----------------------------------------------------------------
 
 stateCurrBodies :: BodyState -> [ProcBody]
