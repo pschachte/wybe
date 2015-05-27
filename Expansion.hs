@@ -118,12 +118,22 @@ addSubst var val = do
 
 addInstr :: Prim -> OptPos -> Expander ()
 addInstr (PrimForeign "llvm" "move" [] 
-          [val, argvar@(ArgVar var _ FlowOut _ _)]) pos = do
+          [val, argvar]) pos = do
     val' <- expandArg val
+    argvar'@(ArgVar var _ flow _ _) <- expandArg argvar
+    unless (flow == FlowOut) $
+      shouldnt "move instruction with wrong mode"
     addSubst var val'
     noSubst <- gets (Set.member var . protected)
+    logExpansion $ "  Expanding move(" ++ show val' ++ ", ?" ++ show var 
+      ++ "); protected = " ++ show noSubst
+    state <- get
+    logExpansion $ "    subst = " ++ show (substitution state)
+    logExpansion $ "    prot  = " ++ show (protected state)
     if noSubst -- do we need to keep this assignment (to an output)?
-      then lift $ instr $ maybePlace (PrimForeign "llvm" "move" [] [val, argvar])  pos
+      then lift $ instr $ maybePlace 
+           (PrimForeign "llvm" "move" [] [val', argvar'])  
+           pos
       else return ()
 addInstr (PrimForeign lang nm flags args) pos = do
     args' <- mapM expandArg args
@@ -195,7 +205,7 @@ expandPrim :: Prim -> OptPos -> Bool -> Expander ()
 expandPrim call@(PrimCall pspec args) pos last = do
     doInline <- gets doInline
     logExpansion $
-      (if doInline then " Try to inline " else "  Expanding ") ++ "call " ++ show call
+      (if doInline then "  Try to inline " else "  Expanding ") ++ "call " ++ show call
     def <- lift $ lift $ getProcDef pspec
     inlinableLast <- gets (((last && singleCaller def && 
                              procVis def == Private) &&) . (== NoFork) . finalFork)
@@ -214,7 +224,7 @@ expandPrim call@(PrimCall pspec args) pos last = do
                           protected = Set.empty, 
                           doInline = False })
         mapM_ addParamSubst $ zip (primProtoParams proto) args
-        logExpansion $ " Inlining defn: " ++ showBlock 4 body
+        logExpansion $ "  Inlining defn: " ++ showBlock 4 body
         expandPrims $ bodyPrims body
         tmp' <- gets tmpCount
         put saved
@@ -225,7 +235,7 @@ expandPrim call@(PrimCall pspec args) pos last = do
         -- logExpansion $ "  After subst:" ++
         --   showBlock 4 (ProcBody defPrims' NoFork)
     else do
-      when doInline $ logExpansion $ " Cannot inline."
+      when doInline $ logExpansion $ "  Cannot inline."
       addInstr call pos
 expandPrim prim pos _ = do
     addInstr prim pos
