@@ -28,7 +28,7 @@ module AST (
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..), 
-  argFlowDirection, argType, argDescription, flowsIn, flowsOut,
+  argFlowDirection, argType, outArgVar, argDescription, flowsIn, flowsOut,
   foldBodyPrims, foldBodyDistrib, foldProcCalls,
   expToStmt, expFlow, setExpFlow, isHalfUpdate,
   Prim(..), ProcSpec(..),
@@ -1536,6 +1536,11 @@ argType (ArgInt _ typ) = typ
 argType (ArgFloat _ typ) = typ
 argType (ArgString _ typ) = typ
 argType (ArgChar _ typ) = typ
+
+
+outArgVar:: PrimArg -> PrimVarName
+outArgVar (ArgVar var _ flow _ _) | flow == FlowOut = var
+outArgVar _ = shouldnt "outArgVar of input argument"
 
 
 argDescription :: PrimArg -> String
