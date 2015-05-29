@@ -166,19 +166,26 @@ expandBody (ProcBody prims fork) = do
       PrimFork var last bodies -> do
         logExpansion $ "Now expanding fork (" ++ 
           (if inliningFork state then "without" else "WITH") ++ " inlining)"
+        lift $ beginFork var last
         let var' = case Map.lookup var $ substitution state of
               Nothing -> var
               Just (ArgVar v _ _ _ _) -> v 
               Just _ -> shouldnt "expansion led to non-var conditional"
         let state' = state { inlining = inliningFork state, finalFork = NoFork }
-        pairs <- lift $ mapM (\b -> runStateT (expandBody b) state') bodies
+        pairs <- lift $ mapM (\b -> runStateT (expandBranch b) state') bodies
         logExpansion $ "Finished expanding fork"
+        lift $ finishFork
         -- Don't actually need this:
         -- let baseSubst = projectSubst (protected state) (substitution state)
         -- let subst = List.foldr meetSubsts baseSubst $
         --             List.map (substitution . snd) pairs
         return ()
 
+
+expandBranch :: ProcBody -> Expander ()
+expandBranch body = do
+    lift nextBranch
+    expandBody body
                                 
 expandPrims :: [Placed Prim] -> Expander ()
 expandPrims pprims = do
