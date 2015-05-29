@@ -11,7 +11,7 @@ module BodyBuilder (
   ) where
 
 import AST
-import Options (LogSelection(Expansion))
+import Options (LogSelection(BodyBuilder))
 import Data.Map as Map
 import Data.List as List
 import Data.Set as Set
@@ -49,7 +49,9 @@ data BodyState = BodyState {
 -- |Run a BodyBuilder monad and extract the final proc body
 buildBody :: BodyBuilder a -> Compiler (a,ProcBody)
 buildBody builder = do
+    logMsg BodyBuilder "<<<< Beginning to build a proc body"
     (a,final) <- runStateT builder $ BodyState (Just []) []
+    logMsg BodyBuilder ">>>> Finished  building a proc body"
     return (a,stateBody final)
 
 
@@ -59,12 +61,15 @@ instr x = do
     (BodyState curr hist) <- get
     case curr of
       Nothing -> shouldnt "adding an instr after a fork"
-      Just l  -> put $ BodyState (Just (x : l)) hist
+      Just l  -> do
+        logBuild $ "---- adding instruction " ++ show x
+        put $ BodyState (Just (x : l)) hist
 
 
 -- |Start a new fork at the end of a body
 beginFork :: PrimVarName -> Bool -> BodyBuilder ()
 beginFork var last = do
+    logBuild $ "---- <<<< beginning to build a new fork"
     bodies <- gets stateCurrBodies
     case bodies of
       (ProcBody prims NoFork : history) ->
@@ -76,6 +81,7 @@ beginFork var last = do
 -- |Finish one branch of a fork and prepare to start the next
 nextBranch :: BodyBuilder ()
 nextBranch = do
+    logBuild $ "==== starting new branch of the fork (ending previous one)"
     bodies <- gets stateCurrBodies
     case bodies of
       (curr : (ProcBody prims (PrimFork var last branches)) : history) ->
@@ -87,6 +93,7 @@ nextBranch = do
 -- |Finish the whole fork
 finishFork :: BodyBuilder ()
 finishFork = do
+    logBuild $ "---- <<<< finished building a new fork"
     bodies <- gets stateCurrBodies
     case bodies of
       (curr : (ProcBody prims (PrimFork var last branches)) : history) ->
@@ -111,3 +118,12 @@ stateBody state =
       [] -> shouldnt "Inconsistent BodyState"
       [body] -> body
       _ -> shouldnt "BodyBuilder with unfinished fork"
+
+
+----------------------------------------------------------------
+--                                  Logging
+----------------------------------------------------------------
+
+-- |Log a message, if we are logging unbrancher activity.
+logBuild :: String -> BodyBuilder ()
+logBuild s = lift $ logMsg BodyBuilder s

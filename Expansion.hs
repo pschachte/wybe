@@ -111,13 +111,6 @@ addSubst :: PrimVarName -> PrimArg -> Expander ()
 addSubst var val = do
     logExpansion $ "      adding subst " ++ show var ++ " -> " ++ show val
     modify (\s -> s { substitution = Map.insert var val $ substitution s })
-    noSubst <- gets (Set.member var . protected)
-    if noSubst -- do we need to keep this assignment (to an output)?
-      then lift $ instr $ maybePlace
-           (PrimForeign "llvm" "move" []
-            [val, ArgVar var (argType val) FlowOut Ordinary False])
-           Nothing
-      else return ()
 
 
 addInstr :: Prim -> OptPos -> Expander ()
@@ -126,6 +119,12 @@ addInstr (PrimForeign "llvm" "move" [] [val, argvar@(ArgVar var _ flow _ _)]) po
     unless (flow == FlowOut) $
       shouldnt "move instruction with wrong mode"
     addSubst var val
+    noSubst <- gets (Set.member var . protected)
+    when noSubst $ -- do we need to keep this assignment (to an output)?
+      lift $ instr $ maybePlace
+      (PrimForeign "llvm" "move" [] 
+       [val, ArgVar var (argType val) FlowOut Ordinary False])
+      Nothing
 addInstr PrimNop _ = do
     -- Filter out NOPs
     return ()

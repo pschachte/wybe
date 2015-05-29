@@ -10,6 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 public (0 calls) (inline)
-0: quad(x#0:wybe.int, ?tmp$1#0:wybe.int):
-    foreign llvm add(32:wybe.int, ~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:4:38
-    foreign llvm add(32:wybe.int, ~tmp$0#0:wybe.int, ~tmp$0#0:wybe.int, ?tmp$1#0:wybe.int) @wybe:4:38
+0: quad(x#0:wybe.int, ?$#0:wybe.int):
+    foreign llvm add(32:wybe.int, ~x#0:wybe.int, ~x#0:wybe.int, ?tmp$2#0:wybe.int) @wybe:4:38
+    foreign llvm add(32:wybe.int, ~tmp$2#0:wybe.int, ~tmp$2#0:wybe.int, ?tmp$3#0:wybe.int) @wybe:4:38
+    foreign llvm move(~tmp$3#0:wybe.int, ?$#0:wybe.int)

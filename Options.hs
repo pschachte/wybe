@@ -47,8 +47,8 @@ defaultOptions    = Options
 
 -- |All compiler features we may want to log
 data LogSelection =
-  All | AST | Builder | Clause | Expansion | FinalDump | Flatten | LastUse 
-  | Optimise | Resources | Types | Unbranch
+  All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump 
+  | Flatten | LastUse | Optimise | Resources | Types | Unbranch
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
 
@@ -57,6 +57,8 @@ logSelectionDescription All
     = "Log all aspects of the compilation process"
 logSelectionDescription AST
     = "Log operations on the AST or IR"
+logSelectionDescription BodyBuilder
+    = "Log building up of proc bodies"
 logSelectionDescription Builder
     = "Log the build process"
 logSelectionDescription Clause
