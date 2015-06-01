@@ -36,9 +36,9 @@ procExpansion def = do
     let tmp = procTmpCount def
     (expander,body') <- buildBody $ execStateT (expandBody body) $
                           initExpanderState tmp $ outputParams proto
-    let proto' = proto { primProtoParams =
-                              List.map (renameParam $ substitution expander) $
-                              primProtoParams proto }
+    -- let proto' = proto { primProtoParams =
+    --                           List.map (renameParam $ substitution expander) $
+    --                           primProtoParams proto }
     let def' = def { procImpln = ProcDefPrim proto body',
                      procTmpCount = tmpCount expander }
     when (def /= def') $
@@ -166,15 +166,18 @@ expandBody (ProcBody prims fork) = do
       PrimFork var last bodies -> do
         logExpansion $ "Now expanding fork (" ++ 
           (if inliningFork state then "without" else "WITH") ++ " inlining)"
-        lift $ beginFork var last
         let var' = case Map.lookup var $ substitution state of
               Nothing -> var
               Just (ArgVar v _ _ _ _) -> v 
+              -- XXX should handle case of switch on int constant
               Just _ -> shouldnt "expansion led to non-var conditional"
+        -- lift $ beginFork var' last
         let state' = state { inlining = inliningFork state, finalFork = NoFork }
-        pairs <- lift $ mapM (\b -> runStateT (expandBranch b) state') bodies
+        lift $ buildFork var' last 
+          $ List.map (\b -> fmap fst $ runStateT (expandBody b) state') bodies
+        -- pairs <- lift $ mapM (\b -> runStateT (expandBranch b) state') bodies
         logExpansion $ "Finished expanding fork"
-        lift $ finishFork
+        -- lift $ finishFork
         -- Don't actually need this:
         -- let baseSubst = projectSubst (protected state) (substitution state)
         -- let subst = List.foldr meetSubsts baseSubst $
@@ -182,10 +185,10 @@ expandBody (ProcBody prims fork) = do
         return ()
 
 
-expandBranch :: ProcBody -> Expander ()
-expandBranch body = do
-    lift nextBranch
-    expandBody body
+-- expandBranch :: ProcBody -> Expander ()
+-- expandBranch body = do
+--     -- lift nextBranch
+--     expandBody body
                                 
 expandPrims :: [Placed Prim] -> Expander ()
 expandPrims pprims = do
@@ -199,12 +202,13 @@ expandPrims pprims = do
 expandPrim :: Prim -> OptPos -> Bool -> Expander ()
 expandPrim call@(PrimCall pspec args) pos last = do
     args' <- mapM expandArg args
-    logExpansion $ "  Try to inline call " ++ show call
+    let call' = PrimCall pspec args'
+    logExpansion $ "  Try to inline call " ++ show call'
     inlining <- gets inlining
     if inlining
       then do
         logExpansion $ "  Cannot inline:  already inlining"
-        addInstr call pos
+        addInstr call' pos
       else do
         def <- lift $ lift $ getProcDef pspec
         let ProcDefPrim proto body = procImpln def
@@ -259,21 +263,15 @@ inlineCall proto args body = do
 
 expandArg :: PrimArg -> Expander PrimArg
 expandArg arg@(ArgVar var typ flow ftype _) = do
-    -- logExpansion $ "expanding " ++ show arg
     renameAll <- gets inlining
     maybeArg <- gets (Map.lookup var . substitution)
-    arg' <- case (maybeArg,renameAll,flow) of
-        (Just a,_,_) -> return $ setPrimArgFlow flow ftype a
-        (Nothing,False,_) -> return arg
-        (Nothing,True,FlowIn) ->
-            -- shouldnt $ "variable " ++ show var ++ " used before defined"
-            return arg
-        (Nothing,True,FlowOut) -> do
-            freshVar <- tmpVar
-            addSubst var $ ArgVar freshVar typ FlowIn ftype False
-            return $ ArgVar freshVar typ FlowOut ftype False
-    -- logExpansion $ " to " ++ show arg'
-    return arg'
+    case (maybeArg,renameAll,flow) of
+      (Just a,_,_) -> return $ setPrimArgFlow flow ftype a
+      (Nothing,True,FlowOut) -> do
+        freshVar <- tmpVar
+        addSubst var $ ArgVar freshVar typ FlowIn ftype False
+        return $ ArgVar freshVar typ FlowOut ftype False
+      (Nothing,_,_) -> return arg
 expandArg arg = return arg
 
 
