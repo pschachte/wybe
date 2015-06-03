@@ -225,7 +225,7 @@ expandPrim call@(PrimCall pspec args) pos last = do
                 inlineCall proto args' body
               else do
                 logExpansion $ "  Not inlinable"
-                addInstr call pos
+                addInstr call' pos
 
 expandPrim (PrimForeign lang nm flags args) pos _ = do
     args' <- mapM expandArg args
