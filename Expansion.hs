@@ -106,12 +106,12 @@ tmpVar = do
 
 -- |Add a binding for a variable.  If that variable is an output for the proc being
 --  defined, also add an explicit assignment to that variable.
--- XXX No point adding identity substitutions
 addSubst :: PrimVarName -> PrimArg -> Expander ()
 addSubst var val = do
     logExpansion $ "      adding subst " ++ show var ++ " -> " ++ show val
     modify (\s -> s { substitution = Map.insert var val $ substitution s })
-
+-- Need to add substitution even if it's an identity, because substitutions 
+-- are used to tell which variables shoudn't be renamed.
 
 addInstr :: Prim -> OptPos -> Expander ()
 addInstr (PrimForeign "llvm" "move" [] [val, argvar@(ArgVar var _ flow _ _)]) pos = do
