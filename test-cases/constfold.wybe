@@ -1,0 +1,3 @@
+public func fortytwo : int = 42
+public func fold_add : int = 21 + 21
+public func fold_mult : int = 6 * 7

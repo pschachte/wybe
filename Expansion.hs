@@ -196,7 +196,10 @@ expandPrim call@(PrimCall pspec args) pos last = do
                 addInstr call' pos
 expandPrim (PrimForeign lang nm flags args) pos _ = do
     args' <- mapM expandArg args
-    addInstr (PrimForeign lang nm flags args')  pos
+    logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args')
+    addInstr (constantFold lang nm flags args')  pos
+    state <- get
+    logExpansion $ "    subst = " ++ show (substitution state)
 expandPrim prim pos _ = do
     addInstr prim pos
 
@@ -268,14 +271,14 @@ addParamSubst param@(PrimParam k ty dir _ _,v) = do
     addSubst k v
              
 
-renameParam :: Substitution -> PrimParam -> PrimParam
-renameParam subst param@(PrimParam name typ FlowOut ftype inf ) = 
-    maybe param 
-    (\arg -> case arg of
-          ArgVar name' _ _ _ _ -> PrimParam name' typ FlowOut ftype inf
-          _ -> param) $
-    Map.lookup name subst
-renameParam _ param = param
+-- renameParam :: Substitution -> PrimParam -> PrimParam
+-- renameParam subst param@(PrimParam name typ FlowOut ftype inf ) = 
+--     maybe param 
+--     (\arg -> case arg of
+--           ArgVar name' _ _ _ _ -> PrimParam name' typ FlowOut ftype inf
+--           _ -> param) $
+--     Map.lookup name subst
+-- renameParam _ param = param
 
 
 singleCaller :: ProcDef -> Bool
@@ -287,3 +290,26 @@ singleCaller def =
 -- |Log a message, if we are logging unbrancher activity.
 logExpansion :: String -> Expander ()
 logExpansion s = lift $ lift $ logMsg Expansion s
+
+
+----------------------------------------------------------------
+--                              Constant Folding
+----------------------------------------------------------------
+
+-- |
+constantFold ::  String -> ProcName -> [Ident] -> [PrimArg] -> Prim
+constantFold "llvm" op flags args
+  | all constIfInput args = simplifyOp op flags args
+constantFold lang op flags args = PrimForeign lang op flags args
+
+
+-- |If the specified argument is an input, then it is a constant
+constIfInput :: PrimArg -> Bool
+constIfInput (ArgVar _ _ FlowIn _ _) = False
+constIfInput _ = True
+
+
+simplifyOp :: ProcName -> [Ident] -> [PrimArg] -> Prim
+simplifyOp "add" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (n1+n2) ty, output]
+simplifyOp name flags args = PrimForeign "llvm" name flags args
