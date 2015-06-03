@@ -107,6 +107,7 @@ tmpVar = do
 
 -- |Add a binding for a variable.  If that variable is an output for the proc being
 --  defined, also add an explicit assignment to that variable.
+-- XXX No point adding identity substitutions
 addSubst :: PrimVarName -> PrimArg -> Expander ()
 addSubst var val = do
     logExpansion $ "      adding subst " ++ show var ++ " -> " ++ show val
@@ -171,7 +172,6 @@ expandBody (ProcBody prims fork) = do
               Just (ArgVar v _ _ _ _) -> v 
               -- XXX should handle case of switch on int constant
               Just _ -> shouldnt "expansion led to non-var conditional"
-        -- lift $ beginFork var' last
         let state' = state { inlining = inliningFork state, finalFork = NoFork }
         lift $ buildFork var' last 
           $ List.map (\b -> fmap fst $ runStateT (expandBody b) state') bodies
@@ -203,7 +203,7 @@ expandPrim :: Prim -> OptPos -> Bool -> Expander ()
 expandPrim call@(PrimCall pspec args) pos last = do
     args' <- mapM expandArg args
     let call' = PrimCall pspec args'
-    logExpansion $ "  Try to inline call " ++ show call'
+    logExpansion $ "  Expand call " ++ show call'
     inlining <- gets inlining
     if inlining
       then do
@@ -226,6 +226,8 @@ expandPrim call@(PrimCall pspec args) pos last = do
               else do
                 logExpansion $ "  Not inlinable"
                 addInstr call' pos
+    state <- get
+    logExpansion $ "  After expansion, subst = " ++ show (substitution state)
 
 expandPrim (PrimForeign lang nm flags args) pos _ = do
     args' <- mapM expandArg args
@@ -257,8 +259,6 @@ inlineCall proto args body = do
     state <- get
     logExpansion $ "  After inlining:"
     logExpansion $ "    subst = " ++ show (substitution state)
-    -- Now assign outputs
-    -- mapM_ flip addInstr Nothing $ PrimForeign "llvm" "move" [] [val, argvar]
 
 
 expandArg :: PrimArg -> Expander PrimArg
