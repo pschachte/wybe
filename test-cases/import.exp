@@ -14,13 +14,13 @@ public (0 calls)
 0: distance(p1#0:position.position, p2#0:position.position, ?$#0:wybe.int):
     foreign $ access("position":wybe.string, "position":wybe.string, "x":wybe.string, p2#0:position.position, ?tmp$10#0:wybe.int)
     foreign $ access("position":wybe.string, "position":wybe.string, "x":wybe.string, p1#0:position.position, ?tmp$11#0:wybe.int)
-    foreign llvm sub(32:wybe.int, ~tmp$10#0:wybe.int, ~tmp$11#0:wybe.int, ?tmp$12#0:wybe.int) @wybe:7:38
+    foreign llvm sub(~tmp$10#0:wybe.int, ~tmp$11#0:wybe.int, ?tmp$12#0:wybe.int) @wybe:7:38
     foreign C ipow(~tmp$12#0:wybe.int, 2:wybe.int, ?tmp$13#0:wybe.int) @wybe:21:42
     foreign $ access("position":wybe.string, "position":wybe.string, "y":wybe.string, ~p2#0:position.position, ?tmp$14#0:wybe.int)
     foreign $ access("position":wybe.string, "position":wybe.string, "y":wybe.string, ~p1#0:position.position, ?tmp$15#0:wybe.int)
-    foreign llvm sub(32:wybe.int, ~tmp$14#0:wybe.int, ~tmp$15#0:wybe.int, ?tmp$16#0:wybe.int) @wybe:7:38
+    foreign llvm sub(~tmp$14#0:wybe.int, ~tmp$15#0:wybe.int, ?tmp$16#0:wybe.int) @wybe:7:38
     foreign C ipow(~tmp$16#0:wybe.int, 2:wybe.int, ?tmp$17#0:wybe.int) @wybe:21:42
-    foreign llvm add(32:wybe.int, ~tmp$13#0:wybe.int, ~tmp$17#0:wybe.int, ?tmp$18#0:wybe.int) @wybe:4:38
+    foreign llvm add(~tmp$13#0:wybe.int, ~tmp$17#0:wybe.int, ?tmp$18#0:wybe.int) @wybe:4:38
     foreign C isqrt(~tmp$18#0:wybe.int, ?tmp$19#0:wybe.int) @wybe:20:35
     foreign llvm move(~tmp$19#0:wybe.int, ?$#0:wybe.int)
 --------------------------------------------------

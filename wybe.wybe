@@ -1,22 +1,22 @@
 # The Wybe standard library (built-ins)
 
 public type int is
-    public func +(x:int,y:int):int = foreign llvm add(32,x,y)
-    public proc +(?x:int,y:int,z:int) ?x = foreign llvm sub(32,z,y) end
-    public proc +(x:int,?y:int,z:int) ?y = foreign llvm sub(32,z,x) end
-    public func -(x:int,y:int):int = foreign llvm sub(32,x,y)
-    public proc -(?x:int,y:int,z:int) ?x = foreign llvm add(32,z,y) end
-    public proc -(x:int,?y:int,z:int) ?y = foreign llvm sub(32,z,x) end
-    public func -(x:int):int = foreign llvm sub(32,0,x)
-    public proc -(?x:int,y:int) ?x = foreign llvm sub(32,0,y) end
-    public func *(x:int,y:int):int = foreign llvm mul(32,x,y)
-    public func /(x:int,y:int):int = foreign llvm sdiv(32,x,y)
-    public func /=(x:int,y:int):bool = foreign llvm icmp ne(32,x,y)
-    public func <(x:int,y:int):bool = foreign llvm icmp slt(32,x,y)
-    public func <=(x:int,y:int):bool = foreign llvm icmp sle(32,x,y)
-    public func >(x:int,y:int):bool = foreign llvm icmp sgt(32,x,y)
-    public func >=(x:int,y:int):bool = foreign llvm icmp sge(32,x,y)
-    public func =(x:int, y:int):bool = foreign llvm icmp eq(32,x,y)
+    public func +(x:int,y:int):int = foreign llvm add(x,y)
+    public proc +(?x:int,y:int,z:int) ?x = foreign llvm sub(z,y) end
+    public proc +(x:int,?y:int,z:int) ?y = foreign llvm sub(z,x) end
+    public func -(x:int,y:int):int = foreign llvm sub(x,y)
+    public proc -(?x:int,y:int,z:int) ?x = foreign llvm add(z,y) end
+    public proc -(x:int,?y:int,z:int) ?y = foreign llvm sub(z,x) end
+    public func -(x:int):int = foreign llvm sub(0,x)
+    public proc -(?x:int,y:int) ?x = foreign llvm sub(0,y) end
+    public func *(x:int,y:int):int = foreign llvm mul(x,y)
+    public func /(x:int,y:int):int = foreign llvm sdiv(x,y)
+    public func /=(x:int,y:int):bool = foreign llvm icmp ne(x,y)
+    public func <(x:int,y:int):bool = foreign llvm icmp slt(x,y)
+    public func <=(x:int,y:int):bool = foreign llvm icmp sle(x,y)
+    public func >(x:int,y:int):bool = foreign llvm icmp sgt(x,y)
+    public func >=(x:int,y:int):bool = foreign llvm icmp sge(x,y)
+    public func =(x:int, y:int):bool = foreign llvm icmp eq(x,y)
     public func sqrt(x:int):int = foreign C isqrt(x)
     public func power(x:int,y:int):int = foreign C ipow(x,y)
     public proc incr(!x:int) ?x = x + 1 end
@@ -25,22 +25,22 @@ end
 
 
 public type float is
-    public func +(x:float,y:float):float = foreign llvm fadd(64,x,y)
-    public proc +(?x:float,y:float,z:float) ?x = foreign llvm fsub(64,z,y) end
-    public proc +(x:float,?y:float,z:float) ?y = foreign llvm fsub(64,z,x) end
-    public func -(x:float,y:float):float = foreign llvm fsub(64,x,y)
-    public proc -(?x:float,y:float,z:float) ?x = foreign llvm fadd(64,z,y) end
-    public proc -(x:float,?y:float,z:float) ?y = foreign llvm fsub(64,z,x) end
-    public func -(x:float):float = foreign llvm sub(32,0,x)
-    public proc -(?x:float,y:float) ?x = foreign llvm sub(32,0,y) end
-    public func *(x:float,y:float):float = foreign llvm fmul(64,x,y)
-    public func /(x:float,y:float):float = foreign llvm fdiv(64,x,y)
-    public func /=(x:float,y:float):bool = foreign llvm fcmp ne(64,x,y)
-    public func <(x:float,y:float):bool = foreign llvm fcmp slt(64,x,y)
-    public func <=(x:float,y:float):bool = foreign llvm fcmp sle(64,x,y)
-    public func >(x:float,y:float):bool = foreign llvm fcmp sgt(64,x,y)
-    public func >=(x:float,y:float):bool = foreign llvm fcmp sge(64,x,y)
-    public func =(x:float, y:float):bool = foreign llvm fcmp eq(64,x,y)
+    public func +(x:float,y:float):float = foreign llvm fadd(x,y)
+    public proc +(?x:float,y:float,z:float) ?x = foreign llvm fsub(z,y) end
+    public proc +(x:float,?y:float,z:float) ?y = foreign llvm fsub(z,x) end
+    public func -(x:float,y:float):float = foreign llvm fsub(x,y)
+    public proc -(?x:float,y:float,z:float) ?x = foreign llvm fadd(z,y) end
+    public proc -(x:float,?y:float,z:float) ?y = foreign llvm fsub(z,x) end
+    public func -(x:float):float = foreign llvm sub(0,x)
+    public proc -(?x:float,y:float) ?x = foreign llvm sub(0,y) end
+    public func *(x:float,y:float):float = foreign llvm fmul(x,y)
+    public func /(x:float,y:float):float = foreign llvm fdiv(x,y)
+    public func /=(x:float,y:float):bool = foreign llvm fcmp ne(x,y)
+    public func <(x:float,y:float):bool = foreign llvm fcmp slt(x,y)
+    public func <=(x:float,y:float):bool = foreign llvm fcmp sle(x,y)
+    public func >(x:float,y:float):bool = foreign llvm fcmp sgt(x,y)
+    public func >=(x:float,y:float):bool = foreign llvm fcmp sge(x,y)
+    public func =(x:float, y:float):bool = foreign llvm fcmp eq(x,y)
     public func sqrt(x:float):float = foreign C sqrt(x)
     public func power(x:float,y:float):float = foreign C pow(x,y)
 end
@@ -61,14 +61,14 @@ end
 public type string is
     # this whole implementation is completely wrong, but will do for now
     public func ++(x:string, y:string):string = foreign c strcat(x,y)
-    public func =(x:string, y:string):bool = foreign llvm icmp eq(64,x,y)
+    public func =(x:string, y:string):bool = foreign llvm icmp eq(x,y)
     public func /=(x:string,y:string):bool = foreign c strcmp(x,y)
 end
 
 
 public type char is
-    public func =(x:char, y:char):bool = foreign llvm icmp eq(32,x,y)
-    public func /=(x:char,y:char):bool = foreign llvm icmp ne(32,x,y)
+    public func =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
+    public func /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
 end
 
 
