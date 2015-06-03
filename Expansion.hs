@@ -87,10 +87,9 @@ data ExpanderState = Expander {
     substitution :: Substitution,     -- ^The current variable substitution
     protected    :: Set PrimVarName,  -- ^Variables that cannot be renamed
     tmpCount     :: Int,              -- ^Next available tmp variable number
-    finalFork    :: PrimFork,         -- ^The fork ending this body
-    inlining     :: Bool,             -- ^Whether we are currently inlining (and
+    noFork       :: Bool,             -- ^There's no fork at the end of this body
+    inlining     :: Bool              -- ^Whether we are currently inlining (and
                                       --  therefore should not inline calls)
-    inliningFork :: Bool              -- ^Whether the finalFork results from inlining
     }
 
 
@@ -132,25 +131,9 @@ addInstr PrimNop _ = do
 addInstr prim pos = lift $ instr $ maybePlace prim pos
 
 
-insertFinalFork :: PrimFork -> Expander ()
-insertFinalFork fork = do
-    currFork <- gets finalFork
-    checkError "Forks are piling up" (fork /= NoFork && currFork /= NoFork)
-    when (fork /= NoFork) $ 
-      modify (\s -> s { finalFork = fork })
-    return ()
-
-
-resetFinalFork :: Expander PrimFork
-resetFinalFork = do
-    fork <- gets finalFork
-    modify (\s -> s { finalFork = NoFork })
-    return fork
-
-
 initExpanderState :: Int -> Set PrimVarName -> ExpanderState
 initExpanderState tmpCount varSet = 
-    Expander identitySubstitution varSet tmpCount NoFork False False
+    Expander identitySubstitution varSet tmpCount True False
 
 
 ----------------------------------------------------------------
@@ -159,37 +142,24 @@ initExpanderState tmpCount varSet =
 
 expandBody :: ProcBody -> Expander ()
 expandBody (ProcBody prims fork) = do
-    insertFinalFork fork
+    modify (\s -> s { noFork = fork == NoFork })
     expandPrims prims
     state <- get
-    case finalFork state of
+    case fork of
       NoFork -> return ()
       PrimFork var last bodies -> do
         logExpansion $ "Now expanding fork (" ++ 
-          (if inliningFork state then "without" else "WITH") ++ " inlining)"
+          (if inlining state then "without" else "WITH") ++ " inlining)"
         let var' = case Map.lookup var $ substitution state of
               Nothing -> var
               Just (ArgVar v _ _ _ _) -> v 
               -- XXX should handle case of switch on int constant
               Just _ -> shouldnt "expansion led to non-var conditional"
-        let state' = state { inlining = inliningFork state, finalFork = NoFork }
         lift $ buildFork var' last 
-          $ List.map (\b -> fmap fst $ runStateT (expandBody b) state') bodies
-        -- pairs <- lift $ mapM (\b -> runStateT (expandBranch b) state') bodies
+          $ List.map (\b -> fmap fst $ runStateT (expandBody b) state) bodies
         logExpansion $ "Finished expanding fork"
-        -- lift $ finishFork
-        -- Don't actually need this:
-        -- let baseSubst = projectSubst (protected state) (substitution state)
-        -- let subst = List.foldr meetSubsts baseSubst $
-        --             List.map (substitution . snd) pairs
-        return ()
 
 
--- expandBranch :: ProcBody -> Expander ()
--- expandBranch body = do
---     -- lift nextBranch
---     expandBody body
-                                
 expandPrims :: [Placed Prim] -> Expander ()
 expandPrims pprims = do
     mapM_ (\(p:rest) -> expandPrim (content p) (place p) (List.null rest))
@@ -217,18 +187,13 @@ expandPrim call@(PrimCall pspec args) pos last = do
           else do
             inlinableLast <- gets (((last && singleCaller def 
                                      && procVis def == Private) &&) 
-                                   . (== NoFork) . finalFork)
+                                   . noFork)
             if inlinableLast
               then do
-                insertFinalFork $ bodyFork body
-                modify (\s -> s { inliningFork = True })
                 inlineCall proto args' body
               else do
                 logExpansion $ "  Not inlinable"
                 addInstr call' pos
-    state <- get
-    logExpansion $ "  After expansion, subst = " ++ show (substitution state)
-
 expandPrim (PrimForeign lang nm flags args) pos _ = do
     args' <- mapM expandArg args
     addInstr (PrimForeign lang nm flags args')  pos
@@ -247,7 +212,7 @@ inlineCall proto args body = do
                       inlining = True })
     mapM_ addParamSubst $ zip (primProtoParams proto) args
     logExpansion $ "  Inlining defn: " ++ showBlock 4 body
-    expandPrims $ bodyPrims body
+    expandBody body
     tmp' <- gets tmpCount
     subst <- gets ((Map.filterWithKey (\k _ -> List.elem k $ outputArgs args)) 
                    . substitution)

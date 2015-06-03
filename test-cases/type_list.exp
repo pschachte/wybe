@@ -24,15 +24,22 @@ public (1 calls)
     type_list.gen$1<0>(~x#0:type_list.intlist, ~y#0:type_list.intlist, ?tmp$0#0:type_list.intlist, ?x#1:type_list.intlist, ?y#1:type_list.intlist) @type_list:8:5
     foreign llvm move(~tmp$0#0:type_list.intlist, ?$#0:type_list.intlist)
 
-(1 calls) (inline)
+(1 calls)
 0: gen$1(x#0:type_list.intlist, y#0:type_list.intlist, ?tmp$0#0:type_list.intlist, [?x#0:type_list.intlist], [?y#0:type_list.intlist]):
-    foreign $ access("intlist":wybe.string, "[|]":wybe.string, "head":wybe.string, x#0:type_list.intlist, ?tmp$9#0:wybe.int)
-    type_list.++<0>(~tmp$6#0:type_list.intlist, y#0:type_list.intlist, ?tmp$5#0:type_list.intlist) @type_list:10:18
-    foreign $ alloc("intlist":wybe.string, "[|]":wybe.string, ?tmp$11#0:type_list.intlist)
-    foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "head":wybe.string, ~%tmp$11#0:type_list.intlist, ?%tmp$12#0:type_list.intlist, ~tmp$9#0:wybe.int)
-    foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "tail":wybe.string, ~%tmp$12#0:type_list.intlist, ?%tmp$13#0:type_list.intlist, ~tmp$5#0:type_list.intlist)
-    foreign llvm move(~tmp$13#0:type_list.intlist, ?tmp$0#0:type_list.intlist)
-    foreign llvm move(y#0:type_list.intlist, ?tmp$0#0:type_list.intlist)
+    foreign $ alloc("bool":wybe.string, "false":wybe.string, ?tmp$8#0:wybe.bool)
+    case ~tmp$8#0 of
+    0:
+        foreign $ access("intlist":wybe.string, "[|]":wybe.string, "head":wybe.string, x#0:type_list.intlist, ?tmp$9#0:wybe.int)
+        foreign $ access("intlist":wybe.string, "[|]":wybe.string, "tail":wybe.string, x#0:type_list.intlist, ?tmp$10#0:type_list.intlist)
+        type_list.++<0>(~tmp$10#0:type_list.intlist, y#0:type_list.intlist, ?tmp$5#0:type_list.intlist) @type_list:10:18
+        foreign $ alloc("intlist":wybe.string, "[|]":wybe.string, ?tmp$11#0:type_list.intlist)
+        foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "head":wybe.string, ~%tmp$11#0:type_list.intlist, ?%tmp$12#0:type_list.intlist, ~tmp$9#0:wybe.int)
+        foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "tail":wybe.string, ~%tmp$12#0:type_list.intlist, ?%tmp$13#0:type_list.intlist, ~tmp$5#0:type_list.intlist)
+        foreign llvm move(~tmp$13#0:type_list.intlist, ?tmp$0#0:type_list.intlist)
+
+    1:
+        foreign llvm move(y#0:type_list.intlist, ?tmp$0#0:type_list.intlist)
+
 --------------------------------------------------
  Module type_list.intlist([])
   public submods  : 
