@@ -180,7 +180,7 @@ expandPrim (PrimForeign lang nm flags args) pos _ = do
     logExpansion $ "    with renaming = " ++ show (renaming state)
     args' <- mapM expandArg args
     logExpansion $ "  --> " ++ show (PrimForeign lang nm flags args')
-    addInstr (constantFold lang nm flags args')  pos
+    addInstr (PrimForeign lang nm flags args')  pos
     state <- get
     logExpansion $ "    renaming = " ++ show (renaming state)
 expandPrim prim pos _ = do
@@ -281,28 +281,3 @@ singleCaller def =
 -- |Log a message, if we are logging unbrancher activity.
 logExpansion :: String -> Expander ()
 logExpansion s = lift $ lift $ logMsg Expansion s
-
-
-----------------------------------------------------------------
---                              Constant Folding
-----------------------------------------------------------------
-
--- |Transform primitives with all inputs known into a move instruction by performing
---  the operation at compile-time.
-constantFold ::  String -> ProcName -> [Ident] -> [PrimArg] -> Prim
-constantFold "llvm" op flags args
-  | all constIfInput args = simplifyOp op flags args
--- XXX finish this for remaining primitives
-constantFold lang op flags args = PrimForeign lang op flags args
-
-
--- |If the specified argument is an input, then it is a constant
-constIfInput :: PrimArg -> Bool
-constIfInput (ArgVar _ _ FlowIn _ _) = False
-constIfInput _ = True
-
-
-simplifyOp :: ProcName -> [Ident] -> [PrimArg] -> Prim
-simplifyOp "add" _ [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (n1+n2) ty, output]
-simplifyOp name flags args = PrimForeign "llvm" name flags args

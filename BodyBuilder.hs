@@ -68,22 +68,31 @@ buildBody prot builder = do
     return (a,ProcBody (reverse revPrims) fork)
 
 
--- XXX Ensure forks with only one branch are turned into straight-line code.
 buildFork :: PrimVarName -> Bool -> [BodyBuilder ()] -> BodyBuilder ()
 buildFork var last branchBuilders = do
     logBuild $ "<<<< beginning to build a new fork on " ++ show var 
       ++ " (last=" ++ show last ++ ")"
+    var' <- expandArg $ ArgVar var (TypeSpec ["wybe"] "int" []) FlowIn Ordinary False
     ProcBody revPrims fork <- gets currBody
-    case fork of
-      PrimFork _ _ _ -> shouldnt "Building a fork while building a fork"
-      NoFork -> modify (\s -> s {currBody = ProcBody revPrims $ PrimFork var last [] })
-    mapM buildBranch branchBuilders
-    ProcBody revPrims' fork' <- gets currBody
-    case fork' of
-      NoFork -> shouldnt "Building a fork produced and empty fork"
-      PrimFork v l revBranches ->
-        modify (\s -> s { currBody = ProcBody revPrims' $ 
-                                     PrimFork v l $ reverse revBranches })
+    case var' of
+      ArgInt n _ -> -- condition result known at compile-time:  only compile winner
+        case drop (fromIntegral n) branchBuilders of
+          [] -> shouldnt "branch constant greater than number of cases"
+          (winner:_) -> do
+            logBuild $ "**** condition result is " ++ show n
+            winner
+      _ -> do -- normal condition with unknown result
+        case fork of
+          PrimFork _ _ _ -> shouldnt "Building a fork while building a fork"
+          NoFork -> 
+            modify (\s -> s {currBody = ProcBody revPrims $ PrimFork var last [] })
+        mapM buildBranch branchBuilders
+        ProcBody revPrims' fork' <- gets currBody
+        case fork' of
+          NoFork -> shouldnt "Building a fork produced an empty fork"
+          PrimFork v l revBranches ->
+            modify (\s -> s { currBody = ProcBody revPrims' $ 
+                                         PrimFork v l $ reverse revBranches })
     logBuild $ ">>>> Finished building a fork"
 
 
@@ -115,21 +124,26 @@ instr :: Prim -> OptPos -> BodyBuilder ()
 instr (PrimCall pspec args) pos = do
     args' <- mapM expandArg args
     rawInstr (PrimCall pspec args') pos
-instr (PrimForeign "llvm" "move" [] [val, argvar@(ArgVar var _ flow _ _)]) pos = do
-    val' <- expandArg val
-    logBuild $ "  Expanding move(" ++ show val' ++ ", " ++ show argvar ++ ")"
-    unless (flow == FlowOut && argFlowDirection val' == FlowIn) $ 
-      shouldnt "move instruction with wrong flow"
-    addSubst var val'
-    noSubst <- gets (Set.member var . protected)
-    -- keep this assignment if we need to
-    when noSubst $ rawInstr (PrimForeign "llvm" "move" [] [val', argvar]) pos
 instr (PrimForeign  lang nm flags args) pos = do
     args' <- mapM expandArg args
-    rawInstr (PrimForeign  lang nm flags args') pos
+    foreignInstr (constantFold lang nm flags args') pos
 instr PrimNop _ = do
     -- Filter out NOPs
     return ()
+
+
+-- |Add an instr, unless it's a move to a non-protected variable, which is treated as
+--  a new substitution.
+foreignInstr (PrimForeign "llvm" "move" [] [val, argvar@(ArgVar var _ flow _ _)]) pos 
+  = do
+    logBuild $ "  Expanding move(" ++ show val ++ ", " ++ show argvar ++ ")"
+    unless (flow == FlowOut && argFlowDirection val == FlowIn) $ 
+      shouldnt "move instruction with wrong flow"
+    addSubst var val
+    noSubst <- gets (Set.member var . protected)
+    -- keep this assignment if we need to
+    when noSubst $ rawInstr (PrimForeign "llvm" "move" [] [val, argvar]) pos
+foreignInstr prim pos = rawInstr prim pos
 
 
 -- |Add a binding for a variable.  If that variable is an output for the proc being
@@ -170,6 +184,73 @@ setPrimArgFlow FlowOut _ arg =
 ----------------------------------------------------------------
 --                          Extracting the Actual Body
 ----------------------------------------------------------------
+
+----------------------------------------------------------------
+--                              Constant Folding
+----------------------------------------------------------------
+
+-- |Transform primitives with all inputs known into a move instruction by performing
+--  the operation at compile-time.
+constantFold ::  String -> ProcName -> [Ident] -> [PrimArg] -> Prim
+constantFold "llvm" op flags args
+  | all constIfInput args = simplifyOp op flags args
+constantFold lang op flags args = PrimForeign lang op flags args
+
+
+-- |If the specified argument is an input, then it is a constant
+constIfInput :: PrimArg -> Bool
+constIfInput (ArgVar _ _ FlowIn _ _) = False
+constIfInput _ = True
+
+
+simplifyOp :: ProcName -> [Ident] -> [PrimArg] -> Prim
+simplifyOp "add" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (n1+n2) ty, output]
+simplifyOp "sub" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (n1-n2) ty, output]
+simplifyOp "mul" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (n1*n2) ty, output]
+simplifyOp "div" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (n1 `div` n2) ty, output]
+simplifyOp "icmp" ["eq"] [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1==n2) ty, output]
+simplifyOp "icmp" ["ne"] [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1/=n2) ty, output]
+simplifyOp "icmp" ["slt"] [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1<n2) ty, output]
+simplifyOp "icmp" ["sle"] [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1<=n2) ty, output]
+simplifyOp "icmp" ["sgt"] [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1>n2) ty, output]
+simplifyOp "icmp" ["sge"] [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1>=n2) ty, output]
+simplifyOp "fadd" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgFloat (n1+n2) ty, output]
+simplifyOp "fsub" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgFloat (n1-n2) ty, output]
+simplifyOp "fmul" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgFloat (n1*n2) ty, output]
+simplifyOp "fdiv" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgFloat (n1/n2) ty, output]
+simplifyOp "fcmp" ["eq"] [ArgFloat n1 ty, ArgFloat n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1==n2) ty, output]
+simplifyOp "fcmp" ["ne"] [ArgFloat n1 ty, ArgFloat n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1/=n2) ty, output]
+simplifyOp "fcmp" ["slt"] [ArgFloat n1 ty, ArgFloat n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1<n2) ty, output]
+simplifyOp "fcmp" ["sle"] [ArgFloat n1 ty, ArgFloat n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1<=n2) ty, output]
+simplifyOp "fcmp" ["sgt"] [ArgFloat n1 ty, ArgFloat n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1>n2) ty, output]
+simplifyOp "fcmp" ["sge"] [ArgFloat n1 ty, ArgFloat n2 _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1>=n2) ty, output]
+simplifyOp name flags args = PrimForeign "llvm" name flags args
+
+
+integerOfBool :: Bool -> Integer
+integerOfBool False = 0
+integerOfBool True  = 1
+
 
 ----------------------------------------------------------------
 --                                  Logging
