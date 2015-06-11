@@ -131,13 +131,15 @@ expandBody (ProcBody prims fork) = do
       PrimFork var last bodies -> do
         logExpansion $ "Now expanding fork (" ++ 
           (if inlining state then "without" else "WITH") ++ " inlining)"
+        logExpansion $ "  with renaming = " ++ show (renaming state)
         let var' = case Map.lookup var $ renaming state of
               Nothing -> var
               Just (ArgVar v _ _ _ _) -> v 
               -- XXX should handle case of switch on int constant
               Just _ -> shouldnt "expansion led to non-var conditional"
+        logExpansion $ "  fork on " ++ show var'
         lift $ buildFork var' last 
-          $ List.map (\b -> fmap fst $ runStateT (expandBody b) state) bodies
+          $ List.map (\b -> evalStateT (expandBody b) state) bodies
         logExpansion $ "Finished expanding fork"
 
 

@@ -70,22 +70,22 @@ buildBody prot builder = do
 
 buildFork :: PrimVarName -> Bool -> [BodyBuilder ()] -> BodyBuilder ()
 buildFork var last branchBuilders = do
-    logBuild $ "<<<< beginning to build a new fork on " ++ show var 
+    arg' <- expandArg $ ArgVar var (TypeSpec ["wybe"] "int" []) FlowIn Ordinary False
+    logBuild $ "<<<< beginning to build a new fork on " ++ show arg'
       ++ " (last=" ++ show last ++ ")"
-    var' <- expandArg $ ArgVar var (TypeSpec ["wybe"] "int" []) FlowIn Ordinary False
     ProcBody revPrims fork <- gets currBody
-    case var' of
+    case arg' of
       ArgInt n _ -> -- condition result known at compile-time:  only compile winner
         case drop (fromIntegral n) branchBuilders of
           [] -> shouldnt "branch constant greater than number of cases"
           (winner:_) -> do
             logBuild $ "**** condition result is " ++ show n
             winner
-      _ -> do -- normal condition with unknown result
+      ArgVar var' _ _ _ _ -> do -- normal condition with unknown result
         case fork of
           PrimFork _ _ _ -> shouldnt "Building a fork while building a fork"
           NoFork -> 
-            modify (\s -> s {currBody = ProcBody revPrims $ PrimFork var last [] })
+            modify (\s -> s {currBody = ProcBody revPrims $ PrimFork var' last [] })
         mapM buildBranch branchBuilders
         ProcBody revPrims' fork' <- gets currBody
         case fork' of
