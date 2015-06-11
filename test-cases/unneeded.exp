@@ -11,5 +11,5 @@ AFTER EVERYTHING:
   procs           : 
 (0 calls) (inline)
 0: unneeded(x#0:wybe.int, [y#0:wybe.int], ?z#0:wybe.int, q#0:wybe.int, [?q#0:wybe.int]):
-    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:4:38
-    foreign llvm move(~tmp$1#0:wybe.int, ?z#0:wybe.int)
+    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:4:38
+    foreign llvm move(~tmp$3#0:wybe.int, ?z#0:wybe.int) @unneeded:2:5

@@ -44,18 +44,18 @@ public (0 calls) (inline)
     foreign $ alloc("position":wybe.string, "position":wybe.string, ?$rec#0:position.position)
     foreign $ mutate("position":wybe.string, "position":wybe.string, "x":wybe.string, ~%$rec#0:position.position, ?%$rec#1:position.position, ~x#0:wybe.int)
     foreign $ mutate("position":wybe.string, "position":wybe.string, "y":wybe.string, ~%$rec#1:position.position, ?%$rec#2:position.position, ~y#0:wybe.int)
-    foreign llvm move(~$rec#2:position.position, ?$#0:position.position)
+    foreign llvm move(~$rec#2:position.position, ?$#0:position.position) @position:2:12
 
 public (0 calls) (inline)
 0: x($rec#0:position.position, ?$#0:wybe.int):
     foreign $ access("position":wybe.string, "position":wybe.string, "x":wybe.string, ~$rec#0:position.position, ?tmp$0#0:wybe.int)
-    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)public (0 calls) (inline)
+    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int) @position:2:12public (0 calls) (inline)
 1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
     foreign $ mutate("position":wybe.string, "position":wybe.string, "x":wybe.string, ~%$rec#0:position.position, ?%$rec#1:position.position, ~$field#0:wybe.int)
 
 public (0 calls) (inline)
 0: y($rec#0:position.position, ?$#0:wybe.int):
     foreign $ access("position":wybe.string, "position":wybe.string, "y":wybe.string, ~$rec#0:position.position, ?tmp$0#0:wybe.int)
-    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)public (0 calls) (inline)
+    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int) @position:2:12public (0 calls) (inline)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
     foreign $ mutate("position":wybe.string, "position":wybe.string, "y":wybe.string, ~%$rec#0:position.position, ?%$rec#1:position.position, ~$field#0:wybe.int)

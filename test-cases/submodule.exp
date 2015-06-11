@@ -24,11 +24,13 @@ AFTER EVERYTHING:
   procs           : 
 (0 calls) (inline)
 0: hidden(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_string("private proc in a private module":wybe.string, ~%wybe.io$io#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:122:41
+    foreign c print_string("private proc in a private module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:122:41
+    foreign llvm move(~tmp$2#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @submodule:2:25
 
 public (0 calls) (inline)
 0: semi_hidden(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_string("public proc in a private module":wybe.string, ~%wybe.io$io#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:122:41
+    foreign c print_string("public proc in a private module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:122:41
+    foreign llvm move(~tmp$2#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @submodule:3:37
 --------------------------------------------------
  Module submodule.publictest
   public submods  : 
@@ -41,8 +43,10 @@ public (0 calls) (inline)
   procs           : 
 (0 calls) (inline)
 0: semi_visible(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_string("private proc in a public module":wybe.string, ~%wybe.io$io#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:122:41
+    foreign c print_string("private proc in a public module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:122:41
+    foreign llvm move(~tmp$2#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @submodule:7:31
 
 public (0 calls) (inline)
 0: visible(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_string("public proc in a public module":wybe.string, ~%wybe.io$io#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:122:41
+    foreign c print_string("public proc in a public module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:122:41
+    foreign llvm move(~tmp$2#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @submodule:8:33

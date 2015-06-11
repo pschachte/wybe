@@ -12,10 +12,10 @@ AFTER EVERYTHING:
   procs           : 
 public (0 calls) (inline)
 0: inc2(x#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:4:38
-    foreign llvm add(~tmp$2#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:4:38
-    foreign llvm move(~tmp$3#0:wybe.int, ?$#0:wybe.int)public (0 calls) (inline)
+    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @wybe:4:38
+    foreign llvm add(~tmp$4#0:wybe.int, 1:wybe.int, ?tmp$8#0:wybe.int) @wybe:4:38
+    foreign llvm move(~tmp$8#0:wybe.int, ?$#0:wybe.int) @update:1:8public (0 calls) (inline)
 1: inc2([x#0:wybe.int], ?x#1:wybe.int, y#0:wybe.int):
-    foreign llvm sub(~y#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @wybe:5:44
-    foreign llvm sub(~tmp$4#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.int) @wybe:5:44
-    foreign llvm move(~tmp$5#0:wybe.int, ?x#1:wybe.int)
+    foreign llvm sub(~y#0:wybe.int, 1:wybe.int, ?tmp$14#0:wybe.int) @wybe:5:44
+    foreign llvm sub(~tmp$14#0:wybe.int, 1:wybe.int, ?tmp$18#0:wybe.int) @wybe:5:44
+    foreign llvm move(~tmp$18#0:wybe.int, ?%x#1:wybe.int) @update:5:6

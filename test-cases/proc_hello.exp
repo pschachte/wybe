@@ -11,5 +11,4 @@ AFTER EVERYTHING:
   procs           : 
 public (0 calls) (inline)
 0: print2([x#0:wybe.int], [y#0:wybe.int], wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_string("hello, world":wybe.string, ~%wybe.io$io#0:wybe.phantom, ?%tmp$0#0:wybe.phantom) @wybe:122:41
-    foreign c putc('\n':wybe.char, ~%tmp$0#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:108:28
+    wybe.io.println<3>("hello, world":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @proc_hello:2:8

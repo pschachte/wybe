@@ -34,11 +34,9 @@ procExpansion def = do
     logMsg Expansion $ "\nTry to expand proc " ++ show (procName def)
     let ProcDefPrim proto body = procImpln def
     let tmp = procTmpCount def
-    (expander,body') <- buildBody $ execStateT (expandBody body) $
+    (expander,body') <- buildBody (outputParams proto) $ 
+                        execStateT (expandBody body) $
                           initExpanderState tmp $ outputParams proto
-    -- let proto' = proto { primProtoParams =
-    --                           List.map (renameParam $ substitution expander) $
-    --                           primProtoParams proto }
     let def' = def { procImpln = ProcDefPrim proto body',
                      procTmpCount = tmpCount expander }
     when (def /= def') $
@@ -50,26 +48,12 @@ procExpansion def = do
 
 
 -- |Type to remember the variable renamings.
-type Substitution = Map PrimVarName PrimArg
+type Renaming = Map PrimVarName PrimArg
 
 
--- |A Substitution that doesn't substitute anything
-identitySubstitution :: Substitution
-identitySubstitution = Map.empty
-
-
--- meetSubsts :: Substitution -> Substitution -> Substitution
--- meetSubsts = Map.mergeWithKey
---              (\k v1 v2 -> if v1 == v2 then Just v1 else Nothing)
---              (const Map.empty) 
---              (const Map.empty) 
-
-
--- projectSubst :: Set PrimVarName -> Substitution -> Substitution
--- projectSubst protected subst = 
---     Map.fromAscList $
---     List.filter (flip Set.member protected . fst) $
---     Map.toAscList subst
+-- |A Renaming that doesn't substitute anything
+identityRenaming :: Renaming
+identityRenaming = Map.empty
 
 
 ----------------------------------------------------------------
@@ -84,12 +68,11 @@ identitySubstitution = Map.empty
 ----------------------------------------------------------------
 
 data ExpanderState = Expander {
-    substitution :: Substitution,     -- ^The current variable substitution
-    protected    :: Set PrimVarName,  -- ^Variables that cannot be renamed
-    tmpCount     :: Int,              -- ^Next available tmp variable number
-    noFork       :: Bool,             -- ^There's no fork at the end of this body
-    inlining     :: Bool              -- ^Whether we are currently inlining (and
-                                      --  therefore should not inline calls)
+    inlining     :: Bool,         -- ^Whether we are currently inlining (and
+                                  --  therefore should not inline calls)
+    renaming     :: Renaming,     -- ^The current variable renaming
+    tmpCount     :: Int,          -- ^Next available tmp variable number
+    noFork       :: Bool          -- ^There's no fork at the end of this body
     }
 
 
@@ -104,36 +87,34 @@ tmpVar = do
     modify (\s -> s { tmpCount = tmp+1 })
     return $ PrimVarName (mkTempName tmp) 0
 
+
+-- |Substitute a fresh temp variable for the specified variable
+freshVar :: PrimVarName -> TypeSpec -> Expander PrimArg
+freshVar oldVar typ = do
+    tmp <- gets tmpCount
+    modify (\s -> s { tmpCount = tmp+1 })
+    let newVar = PrimVarName (mkTempName tmp) 0
+    addRenaming oldVar $ ArgVar newVar typ FlowIn Ordinary False
+    return $ ArgVar newVar typ FlowOut Ordinary False
+
+
 -- |Add a binding for a variable.  If that variable is an output for the proc being
 --  defined, also add an explicit assignment to that variable.
-addSubst :: PrimVarName -> PrimArg -> Expander ()
-addSubst var val = do
-    logExpansion $ "      adding subst " ++ show var ++ " -> " ++ show val
-    modify (\s -> s { substitution = Map.insert var val $ substitution s })
--- Need to add substitution even if it's an identity, because substitutions 
+addRenaming :: PrimVarName -> PrimArg -> Expander ()
+addRenaming var val = do
+    logExpansion $ "      adding renaming " ++ show var ++ " -> " ++ show val
+    modify (\s -> s { renaming = Map.insert var val $ renaming s })
+-- Need to add renaming even if it's an identity, because renamings 
 -- are used to tell which variables shoudn't be renamed.
 
+
 addInstr :: Prim -> OptPos -> Expander ()
-addInstr (PrimForeign "llvm" "move" [] [val, argvar@(ArgVar var _ flow _ _)]) pos = do
-    logExpansion $ "  Expanding move(" ++ show val ++ ", ?" ++ show var ++ ")"
-    unless (flow == FlowOut) $
-      shouldnt "move instruction with wrong mode"
-    addSubst var val
-    noSubst <- gets (Set.member var . protected)
-    when noSubst $ -- do we need to keep this assignment (to an output)?
-      lift $ instr $ maybePlace
-      (PrimForeign "llvm" "move" [] 
-       [val, ArgVar var (argType val) FlowOut Ordinary False])
-      Nothing
-addInstr PrimNop _ = do
-    -- Filter out NOPs
-    return ()
-addInstr prim pos = lift $ instr $ maybePlace prim pos
+addInstr prim pos = lift $ instr prim pos
 
 
 initExpanderState :: Int -> Set PrimVarName -> ExpanderState
 initExpanderState tmpCount varSet = 
-    Expander identitySubstitution varSet tmpCount True False
+    Expander False identityRenaming tmpCount True
 
 
 ----------------------------------------------------------------
@@ -150,7 +131,7 @@ expandBody (ProcBody prims fork) = do
       PrimFork var last bodies -> do
         logExpansion $ "Now expanding fork (" ++ 
           (if inlining state then "without" else "WITH") ++ " inlining)"
-        let var' = case Map.lookup var $ substitution state of
+        let var' = case Map.lookup var $ renaming state of
               Nothing -> var
               Just (ArgVar v _ _ _ _) -> v 
               -- XXX should handle case of switch on int constant
@@ -165,10 +146,9 @@ expandPrims pprims = do
     mapM_ (\(p:rest) -> expandPrim (content p) (place p) (List.null rest))
       $ init $ tails pprims
 
--- XXX allow this to handle primitives with all inputs known, such as addition
 -- XXX allow this to handle primitives that can fail with all inputs known, like 
 --     less than, removing ops that succeed and killing branches that fail.
--- XXX Ensure forks with only one branch are turned into straight-line code.
+-- XXX allow this to handle non-primitives with all inputs known by inlining.
 expandPrim :: Prim -> OptPos -> Bool -> Expander ()
 expandPrim call@(PrimCall pspec args) pos last = do
     args' <- mapM expandArg args
@@ -183,72 +163,66 @@ expandPrim call@(PrimCall pspec args) pos last = do
         def <- lift $ lift $ getProcDef pspec
         let ProcDefPrim proto body = procImpln def
         if procInline def
-          then inlineCall proto args' body
+          then inlineCall proto args' body pos
           else do
             inlinableLast <- gets (((last && singleCaller def 
                                      && procVis def == Private) &&) 
                                    . noFork)
             if inlinableLast
               then do
-                inlineCall proto args' body
+                inlineCall proto args' body pos
               else do
                 logExpansion $ "  Not inlinable"
                 addInstr call' pos
 expandPrim (PrimForeign lang nm flags args) pos _ = do
+    state <- get
+    logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)
+    logExpansion $ "    with renaming = " ++ show (renaming state)
     args' <- mapM expandArg args
-    logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args')
+    logExpansion $ "  --> " ++ show (PrimForeign lang nm flags args')
     addInstr (constantFold lang nm flags args')  pos
     state <- get
-    logExpansion $ "    subst = " ++ show (substitution state)
+    logExpansion $ "    renaming = " ++ show (renaming state)
 expandPrim prim pos _ = do
     addInstr prim pos
 
 
-inlineCall :: PrimProto -> [PrimArg] -> ProcBody -> Expander ()
-inlineCall proto args body = do
+inlineCall :: PrimProto -> [PrimArg] -> ProcBody -> OptPos -> Expander ()
+inlineCall proto args body pos = do
     saved <- get
     logExpansion $ "  Before inlining:"
-    logExpansion $ "    subst = " ++ show (substitution saved)
-    logExpansion $ "    prot  = " ++ show (protected saved)
-    modify (\s -> s { substitution = identitySubstitution, 
-                      -- protected = Set.empty,
+    logExpansion $ "    renaming = " ++ show (renaming saved)
+    modify (\s -> s { renaming = identityRenaming, 
                       inlining = True })
-    mapM_ addParamSubst $ zip (primProtoParams proto) args
+    mapM_ (addInputAssign pos) $ zip (primProtoParams proto) args
     logExpansion $ "  Inlining defn: " ++ showBlock 4 body
     expandBody body
     tmp' <- gets tmpCount
     subst <- gets ((Map.filterWithKey (\k _ -> List.elem k $ outputArgs args)) 
-                   . substitution)
+                   . renaming)
+    mapM_ (addOutputAssign pos) $ zip (primProtoParams proto) args
     -- Throw away state after inlining, except ...
     put saved
-    -- ... put back temp count and output substitutions
-    modify (\s -> s { tmpCount = tmp', 
-                      substitution = Map.union subst $ substitution s})
+    -- ... put back temp count
+    modify (\s -> s { tmpCount = tmp' })
+                      -- renaming = Map.union subst $ renaming s})
     state <- get
     logExpansion $ "  After inlining:"
-    logExpansion $ "    subst = " ++ show (substitution state)
+    logExpansion $ "    renaming = " ++ show (renaming state)
 
 
 expandArg :: PrimArg -> Expander PrimArg
-expandArg arg@(ArgVar var typ flow ftype _) = do
+expandArg arg@(ArgVar var typ flow _ _) = do
     renameAll <- gets inlining
-    maybeArg <- gets (Map.lookup var . substitution)
-    case (maybeArg,renameAll,flow) of
-      (Just a,_,_) -> return $ setPrimArgFlow flow ftype a
-      (Nothing,True,FlowOut) -> do
-        freshVar <- tmpVar
-        addSubst var $ ArgVar freshVar typ FlowIn ftype False
-        return $ ArgVar freshVar typ FlowOut ftype False
-      (Nothing,_,_) -> return arg
+    if renameAll
+      then case flow of
+      FlowOut -> freshVar var typ
+      FlowIn ->
+        gets (Map.findWithDefault 
+              (shouldnt $ "inlining: reference to unassigned variable " ++ show var) 
+              var . renaming)
+      else return arg
 expandArg arg = return arg
-
-
-setPrimArgFlow :: PrimFlow -> ArgFlowType -> PrimArg -> PrimArg
-setPrimArgFlow flow ftype (ArgVar n t _ _ lst) = (ArgVar n t flow ftype lst)
-setPrimArgFlow FlowIn _ arg = arg
-setPrimArgFlow FlowOut _ arg =
-    -- XXX eventually want this to generate a comparison, once we allow failure
-    shouldnt $ "trying to make " ++ show arg ++ " an output argument"
 
 
 outputParams :: PrimProto -> Set PrimVarName
@@ -261,23 +235,40 @@ outputArgs :: [PrimArg] -> [PrimVarName]
 outputArgs args =
     List.map outArgVar $ List.filter ((FlowOut ==) . argFlowDirection) args
 
-
-addParamSubst :: (PrimParam,PrimArg) -> Expander ()
-addParamSubst param@(PrimParam k ty dir _ _,v) = do
+-- |Add an assignment of input argument to parameter in preparation for inlining
+--  a call.  The parameter name must be substituted with a new name; the argument
+--  has already been renamed as appropriate for the calling context.
+addInputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
+addInputAssign _ (PrimParam k ty FlowOut _ _,v) = return ()
+addInputAssign pos (param@(PrimParam name ty FlowIn _ _),v) = do
     when (Unspecified == ty) $
-      liftIO $ putStrLn $ "Danger: untyped param: " ++ show param
+      shouldnt $ "Danger: untyped param: " ++ show param
     when (Unspecified == argType v) $
-      liftIO $ putStrLn $ "Danger: untyped argument: " ++ show v
-    addSubst k v
+      shouldnt $ "Danger: untyped argument: " ++ show v
+    newVar <- freshVar name ty
+    addInstr (PrimForeign "llvm" "move" [] [v,newVar]) pos
              
 
--- renameParam :: Substitution -> PrimParam -> PrimParam
--- renameParam subst param@(PrimParam name typ FlowOut ftype inf ) = 
+-- |Add an assignment of output parameter to argument following inlining of
+--  a call.  The parameter has been substituted with a new name, but the
+--  argument should be interpreted without renaming.
+addOutputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
+addOutputAssign _ (PrimParam k ty FlowIn _ _,v) = return ()
+addOutputAssign pos (param@(PrimParam pname ty FlowOut _ _), v) = do
+    when (Unspecified == ty) $
+      shouldnt $ "Danger: untyped param: " ++ show param
+    when (Unspecified == argType v) $
+      shouldnt $ "Danger: untyped argument: " ++ show v
+    oldVar <- expandArg (ArgVar pname ty FlowIn Ordinary False)
+    addInstr (PrimForeign "llvm" "move" [] [oldVar,v]) pos
+
+-- renameParam :: Renaming -> PrimParam -> PrimParam
+-- renameParam renaming param@(PrimParam name typ FlowOut ftype inf ) = 
 --     maybe param 
 --     (\arg -> case arg of
 --           ArgVar name' _ _ _ _ -> PrimParam name' typ FlowOut ftype inf
 --           _ -> param) $
---     Map.lookup name subst
+--     Map.lookup name renaming
 -- renameParam _ param = param
 
 
@@ -296,10 +287,12 @@ logExpansion s = lift $ lift $ logMsg Expansion s
 --                              Constant Folding
 ----------------------------------------------------------------
 
--- |
+-- |Transform primitives with all inputs known into a move instruction by performing
+--  the operation at compile-time.
 constantFold ::  String -> ProcName -> [Ident] -> [PrimArg] -> Prim
 constantFold "llvm" op flags args
   | all constIfInput args = simplifyOp op flags args
+-- XXX finish this for remaining primitives
 constantFold lang op flags args = PrimForeign lang op flags args
 
 
