@@ -19,3 +19,17 @@ ERRS
 Parser.hs
 Version.lhs
 wybemk
+*.aux
+*.bbl
+*.log
+*.dvi
+*.blg
+*.lof
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.synctex.gz
+design.pdf
+redesign.pdf
