@@ -1,0 +1,31 @@
+Compiler for the Wybe language
+
+To build and test the compiler, do
+
+   make
+
+The source files have these purposes:
+
+AST.hs			Types and functions for the abstract syntax tree
+Blocks.hs			Transform a clausal form (LPVM) module to LLVM
+BodyBuilder.hs		A monad to build up a procedure Body, with copy propagation
+Builder.hs		Handles compilation at the module level
+Callers.hs		Find all callers for each proc and count static calls per caller
+Clause.hs		Convert Wybe code to clausal (LPVM) form
+Config.hs		Configuration for wybe compiler
+DefUse.hs		Compute defined and used variables for statements and exprs
+Expansion.hs		Replace certain procedure calls with others
+Flatten.hs		Flatten function calls (expressions) into procedure calls
+LastUse.hs		Mark last use of each variable and remove unneeded parameters
+Normalise.hs		Convert parse tree into AST
+Optimise.hs		Framework to optimise a single module
+Options.hs		Handle compiler options/switches
+Parser.y			Parser for the Wybe language
+Resources.hs		Resource checker/transformer for Wybe
+Scanner.hs		Scanner for the Wybe language
+Types.hs			Type checker/inferencer for Wybe
+Unbranch.hs		Turn loops and conditionals into separate procedures
+Util.hs			Various small utility functions
+wybe.wybe		The Wybe standard library (built-ins)
+wybemk.hs		Wybe compiler/builder main code
+test-cases		Directory of test cases and the code they should generate
