@@ -48,9 +48,9 @@ defaultOptions    = Options
 -- |All compiler features we may want to log
 data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump 
-  | Flatten | LastUse | Optimise | Resources | Types | Unbranch
+  | Flatten | LastUse | Optimise | Resources | Types | Unbranch | Blocks
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
-
+           
 
 logSelectionDescription :: LogSelection -> String
 logSelectionDescription All
@@ -79,6 +79,9 @@ logSelectionDescription Types
     = "Log type checking"
 logSelectionDescription Unbranch
     = "Log transformation of loops and selections into clausal form"
+logSelectionDescription Blocks
+    = "Log translation of LPVM procedures into LLVM "
+
 
 -- |Command line option parser and help text
 options :: [OptDescr (Options -> Options)]
@@ -160,12 +163,13 @@ handleCmdline = do
 
 -- | Add 
 addLogRequest :: Set LogSelection -> String -> Set LogSelection
-addLogRequest set aspectsCommaSep =
-  let set' = Set.union set $ Set.fromList $ List.map read $ 
-             separate ',' aspectsCommaSep
+addLogRequest set aspectsCommaSep =  
+  let logList = (List.map read $ separate ',' aspectsCommaSep) :: [LogSelection]
+      set' = Set.union set $ Set.fromList logList
   in  if Set.member All set'
       then Set.fromList [minBound .. maxBound]
       else set'
+           
 
 -- |The inverse of intercalate:  split up a list into sublists separated 
 --  by the separator list.
