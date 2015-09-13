@@ -56,7 +56,7 @@ import Unbranch        (unbranchProc)
 import Clause          (compileProc)
 import Callers         (collectCallers)
 import Optimise        (optimiseMod)
-import Blocks          (blockTransformModule)
+import Blocks          (blockTransformModule, translateProc)
 import System.FilePath
 import Data.Map as Map
 import Data.Set as Set
@@ -286,6 +286,9 @@ compileModSCC mspecs = do
     stopOnError $ "optimising " ++ showModSpecs mspecs    
     logDump Optimise Optimise "OPTIMISATION"
     -- mapM_ blockTransformModule mspecs
+    mapM_ (transformModuleProcs translateProc) mspecs
+    stopOnError $ "translating " ++ showModSpecs mspecs
+    -- logDump Blocks Blocks "TRANSLATING TO LLVM"
 
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
@@ -324,10 +327,12 @@ fixpointProcessSCC processor scc = do        -- must find fixpoint
     else mapM_ (\(msg,pos) -> message Error msg pos) errors
 
 
+         
 transformModuleProcs :: (ProcDef -> Compiler ProcDef) -> ModSpec ->
                         Compiler ()
 transformModuleProcs trans thisMod = do
     reenterModule thisMod
+    -- (names, procs) <- :: StateT CompilerState IO ([Ident], [[ProcDef]])
     (names,procs) <- fmap unzip $
                      getModuleImplementationField (Map.toList . modProcs)
     -- for each name we have a list of procdefs, so we must double map
