@@ -54,7 +54,9 @@ module AST (
   logDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
   showModSpecs, showResources, showMaybeSourcePos,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
-  showMessages, stopOnError, logMsg
+  showMessages, stopOnError, logMsg,
+  -- *Helper functions
+  defaultBlock                           
   ) where
 
 import Options
@@ -1235,6 +1237,10 @@ data LLTerm = TermNop
 -- |The variable name for the temporary variable whose number is given.
 mkTempName :: Int -> String
 mkTempName ctr = "tmp$" ++ show ctr
+
+-- |Make a default LLBlock
+defaultBlock :: LLBlock
+defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 
 
 -- |Fold over a list of Placed Stmts applying the fn to each ProcCall, and
