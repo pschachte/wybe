@@ -64,11 +64,11 @@ blockTransformModule mod = do
 -- TODO: wrap around Codegen/LLVM state monad from Codegen module
 -- XXX: This is just scaffolding for now
 translateProc :: ProcDef -> Compiler ProcDef
-translateProc proc = do
-  evalLLVMComp $ do
-    let (ProcDefPrim proto _) = procImpln proc
-    logBlocks $ "Test Proto Name: " ++ show proto
-    return proc
+translateProc proc =
+    evalLLVMComp $ do
+      let def@(ProcDefPrim proto _) = procImpln proc
+      logBlocks $ "Proc: " ++ (showProcDef 0 proc)
+      return proc
 
 
 noteProcsSuperprocs :: ModSpec -> ProcName -> [ProcDef] ->

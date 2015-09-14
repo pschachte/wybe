@@ -10,9 +10,11 @@ module Codegen where
 
 import           Control.Applicative
 import           Control.Monad.State
-import qualified Data.Map                as Map
+import qualified Data.Map                  as Map
+import           Data.Word
 import           LLVM.General.AST
-import qualified LLVM.General.AST        as LLVMAST
+import qualified LLVM.General.AST          as LLVMAST
+import qualified LLVM.General.AST.Constant as C
 import           LLVM.General.AST.Global
 
 
@@ -26,6 +28,10 @@ type SymbolTable = [(String, Operand)]
 type Names = Map.Map String Int
 
 
+-- Test type
+int :: Type
+int = IntegerType 32
+
 ----------------------------------------------------------------------------
 -- Codegen State                                                          --
 ----------------------------------------------------------------------------
@@ -38,7 +44,7 @@ data CodegenState
       , blocks       :: Map.Map Name BlockState -- ^ Blocks for function
       , symtab       :: SymbolTable             -- ^ Local symbol table of a function
       , blockCount   :: Int                     -- ^ Incrementing count of basic blocks
-      , count        :: Word                    -- ^ Count for unnamed instruction names
+      , count        :: Word                    -- ^ Count for temporary operands
       , names        :: Names                   -- ^ Name supply
       } deriving Show
 
@@ -56,6 +62,14 @@ data BlockState
 -- That is, a map of block names to their 'BlockState' representation
 newtype Codegen a = Codegen { runCodegen :: State CodegenState a }
     deriving (Functor, Applicative, Monad, MonadState CodegenState)
+
+
+-- | Gets a new count suffix for a temporary local operands
+fresh :: Codegen Word
+fresh = do
+  ix <- gets count
+  modify $ \s -> s { count = 1 + ix }
+  return (ix + 1)
 
 
 ----------------------------------------------------------------------------
@@ -170,3 +184,110 @@ uniqueName nm ns =
     case Map.lookup nm ns of
       Nothing -> (nm, Map.insert nm 1 ns)
       Just ix -> (nm ++ show ix, Map.insert nm (ix + 1) ns)
+
+
+----------------------------------------------------------------------------
+-- Name Referencing                                                       --
+----------------------------------------------------------------------------
+
+-- | Local references (prefixed with % in LLVM)
+local :: Name -> Operand
+local = LocalReference int
+
+-- | Refer to toplevel functions (prefixed with @ in LLVM)
+externf :: Name -> Operand
+externf = ConstantOperand . C.GlobalReference int
+
+
+----------------------------------------------------------------------------
+-- Symbol Table                                                           --
+----------------------------------------------------------------------------
+
+assign :: String -> Operand -> Codegen ()
+assign var x = do
+  lcls <- gets symtab
+  modify $ \s -> s { symtab = (var, x) : lcls }
+
+getVar :: String -> Codegen Operand
+getVar var = do
+  lcls <- gets symtab
+  case lookup var lcls of
+    Just x -> return x
+    Nothing -> error $ "Local variable not in scope: " ++ show var
+
+----------------------------------------------------------------------------
+-- Instructions                                                           --
+----------------------------------------------------------------------------
+
+-- | 'instr' pushes a new LLVMAST.Instruction to the current basic block
+-- instruction stack. This action produces the left hand side value
+-- of the instruction (of the type Operand).
+instr :: Instruction -> Codegen Operand
+instr ins = do
+  n <- fresh
+  let ref = UnName n
+  blk <- current
+  let i = stack blk
+  modifyBlock $ blk { stack = i ++ [ref := ins] }
+  return $ local ref
+
+
+-- | 'terminator' provides the last instruction of a basic block.
+terminator :: Named Terminator -> Codegen (Named Terminator)
+terminator trm = do
+  blk <- current
+  modifyBlock $ blk { term = Just trm }
+  return trm
+
+
+-- Some basic instructions
+
+-- * Integer arithmetic operations
+
+iadd :: Operand -> Operand -> Codegen Operand
+iadd a b = instr $ Add False False a b []
+
+isub :: Operand -> Operand -> Codegen Operand
+isub a b = instr $ Sub False False a b []
+
+imul :: Operand -> Operand -> Codegen Operand
+imul a b = instr $ Mul False False a b []
+
+-- TODO: Look into all the arithmetic instructions and what they actually do.
+
+-- * Effect instructions
+
+-- | The 'call' instruction represents a simple function call.
+-- TODO: Look into and make a TCO version of the function
+-- TODO: Look into calling conventions (is fast cc alright?)
+call :: Operand -> [Operand] -> Codegen Operand
+call fn args = instr $ Call False CC.C [] (Right fn) (toArgs args) [] []
+
+-- | The ‘alloca‘ instruction allocates memory on the stack frame of the
+-- currently executing function, to be automatically released when this
+-- function returns to its caller. The object is always allocated in the
+-- generic address space (address space zero).
+alloca :: Type -> Codegen Operand
+alloca ty = instr $ Alloca ty Nothing 0 []
+
+-- | The 'store' instruction is used to write to write to memory.
+store :: Operand -> Operand -> Codegen Operand
+store ptr val = instr $ Store False ptr val Nothing 0 []
+
+
+load :: Operand -> Codegen
+load ptr = instr $ Load False ptr Nothing 0 []
+
+
+-- * Control Flow operations
+
+-- TODO: These have to be wrapped according to how LPVM functions
+
+br :: Name -> Codegen (Named Terminator)
+br val = terminator $ Do $ Br val []
+
+cbr :: Operand -> Name -> Name -> Codegen (Named Terminator)
+cbr cond tr fl = terminator $ Do $ CondBr cond tr fl []
+
+ret :: Operand -> Codegen (Named Terminator)
+ret val = terminator $ Do $ Ret (Just val) []
