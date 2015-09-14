@@ -2,7 +2,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Sun Jan 15 16:00:18 2012
 --  Purpose  : Resource checker for Wybe
---  Copyright: © 2012 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
 
 module Resources (resourceCheckMod, resourceCheckProc) where
 

@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Sat Jun 28 22:40:58 2014
 --  Purpose  : Convert Wybe code to clausal (LPVM) form
---  Copyright: © 2014 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
 --
 
 module Clause (compileProc) where

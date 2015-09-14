@@ -2,7 +2,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Thu Oct 21 17:42:28 2010
 --  Purpose  : Scanner for the Wybe language
---  Copyright: © 2010-2012 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2010-2012 Peter Schachte.  All rights reserved.
 
 -- |The tokeniser for wybe.
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,

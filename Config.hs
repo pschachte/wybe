@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Sat Feb 18 00:38:48 2012
 --  Purpose  : Configuration for wybe compiler
---  Copyright: © 2012 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
 
 -- |Compiler configuration parameters.  These may vary between
 --  OSes.

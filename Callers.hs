@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Thu Mar 26 14:25:37 AEDT 2015
 --  Purpose  : Find all callers for each proc and count static calls per caller
---  Copyright: © 2015 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
 --
 
 module Callers ( collectCallers ) where

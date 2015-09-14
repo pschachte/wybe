@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Thu Mar 26 14:25:37 AEDT 2015
 --  Purpose  : Transform a clausal form (LPVM) module to LLVM
---  Copyright: © 2015 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
 --
 
 module Blocks ( blockTransformModule
@@ -11,6 +11,7 @@ module Blocks ( blockTransformModule
        where
 
 import           AST
+import           Codegen
 import           Control.Monad
 import           Control.Monad.Trans       (lift, liftIO)
 import           Control.Monad.Trans.Class
@@ -19,7 +20,6 @@ import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Maybe
 import           Options                   (LogSelection (Blocks))
-
 
 ----------------------------------------------------------------------------
 -- LLVM Compiler Monad                                                    --

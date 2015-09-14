@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Fri 22 May 2015 10:59:56 AEST
 --  Purpose  : A monad to build up a procedure Body, with copy propagation
---  Copyright: © 2015 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
 --
 
 module BodyBuilder (

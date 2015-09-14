@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Thu Jan 19 17:15:01 2012
 --  Purpose  : Handle compiler options/switches
---  Copyright: © 2012 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
 --
 ----------------------------------------------------------------
 --                      Compiler Options

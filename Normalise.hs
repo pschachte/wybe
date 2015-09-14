@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Fri Jan  6 11:28:23 2012
 --  Purpose  : Convert parse tree into AST
---  Copyright: © 2012 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
 
 -- |Support for normalising wybe code as parsed to a simpler form
 --  to make compiling easier.

@@ -2,7 +2,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Thu Oct 14 23:30:58 2010
 --  Purpose  : Abstract Syntax Tree for Wybe language
---  Copyright: © 2010-2015 Peter Schachte.  All rights reserved.
+--  Copyright:  2010-2015 Peter Schachte.  All rights reserved.
 
 -- |The abstract syntax tree, and supporting types and functions.
 --  This includes the parse tree, as well as the AST types, which

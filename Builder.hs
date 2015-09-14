@@ -3,32 +3,32 @@
 --  Author   : Peter Schachte
 --  Origin   : Tue Jan 31 16:37:48 2012
 --  Purpose  : Handles compilation at the module level.
---  Copyright: © 2012-2015 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2012-2015 Peter Schachte.  All rights reserved.
 --
 --  The wybe compiler handles module dependencies, and builds
---  executables by itself, without the need for build tools like 
---  make.  To keep compile times manageable while supporting 
---  optimisation, we build bottom-up, ensuring that all a module's 
---  imports are compiled before compling the module itself.  In the 
---  case of circular module dependencies, each strongly-connected 
+--  executables by itself, without the need for build tools like
+--  make.  To keep compile times manageable while supporting
+--  optimisation, we build bottom-up, ensuring that all a module's
+--  imports are compiled before compling the module itself.  In the
+--  case of circular module dependencies, each strongly-connected
 --  component in the module dependency graph is compiled as a unit.
 --
---  One shortcoming of the bottom-up approach is that some analyses 
---  are best performed top-down.  For example, we can only eliminate 
---  unneeded procedures when we've seen all the calls to all 
---  procedures in the module.  By compiling bottom-up, we do not have 
---  access to this information.  Our solution to this problem is to 
---  perform the top-down analysis after the bottom-up compilation, 
---  generating results that we can use for the next compilation.  If 
---  the top-down analysis produces results that conflict with the 
---  previous top-down analysis, so that the compilation produced 
---  invalid results, then we must re-compile enough of the program to 
---  fix the problem.  It is hoped that this will happen infrequently 
---  enough that the time saved by not usually having to make separate 
---  traversals for analysis and compilation will more than make up 
+--  One shortcoming of the bottom-up approach is that some analyses
+--  are best performed top-down.  For example, we can only eliminate
+--  unneeded procedures when we've seen all the calls to all
+--  procedures in the module.  By compiling bottom-up, we do not have
+--  access to this information.  Our solution to this problem is to
+--  perform the top-down analysis after the bottom-up compilation,
+--  generating results that we can use for the next compilation.  If
+--  the top-down analysis produces results that conflict with the
+--  previous top-down analysis, so that the compilation produced
+--  invalid results, then we must re-compile enough of the program to
+--  fix the problem.  It is hoped that this will happen infrequently
+--  enough that the time saved by not usually having to make separate
+--  traversals for analysis and compilation will more than make up
 --  for the few times we need to recompile.
 --
---  The build process makes these steps for each SCC in the module 
+--  The build process makes these steps for each SCC in the module
 --  dependency graph (with responsible modules):
 --    o  The code is read and flattened (happens before this module is invoked)
 --    o  Imported modules are loaded, building if needed (this module)
@@ -44,32 +44,34 @@
 -- |Code to oversee the compilation process.
 module Builder (buildTargets, compileModule) where
 
-import Options         (Options, LogSelection(..), 
-                        optForce, optForceAll, optLibDirs)
-import AST
-import Parser          (parse)
-import Scanner         (inputTokens, fileTokens, Token)
-import Normalise       (normalise, normaliseItem)
-import Types           (validateModExportTypes, typeCheckMod)
-import Resources       (resourceCheckMod, resourceCheckProc)
-import Unbranch        (unbranchProc)
-import Clause          (compileProc)
-import Callers         (collectCallers)
-import Optimise        (optimiseMod)
-import Blocks          (blockTransformModule, translateProc)
-import System.FilePath
-import Data.Map as Map
-import Data.Set as Set
-import Data.List as List
-import Data.Maybe
-import Control.Monad
-import Control.Monad.Trans.State
-import Control.Monad.Trans
-import System.Time     (ClockTime)
-import System.Directory (getModificationTime, doesFileExist, 
-                         getCurrentDirectory, canonicalizePath)
-import System.Exit (exitFailure, exitSuccess)
-import Config
+import           AST
+import           Blocks                    (blockTransformModule, translateProc)
+import           Callers                   (collectCallers)
+import           Clause                    (compileProc)
+import           Config
+import           Control.Monad
+import           Control.Monad.Trans
+import           Control.Monad.Trans.State
+import           Data.List                 as List
+import           Data.Map                  as Map
+import           Data.Maybe
+import           Data.Set                  as Set
+import           Normalise                 (normalise, normaliseItem)
+import           Optimise                  (optimiseMod)
+import           Options                   (LogSelection (..), Options,
+                                            optForce, optForceAll, optLibDirs)
+import           Parser                    (parse)
+import           Resources                 (resourceCheckMod, resourceCheckProc)
+import           Scanner                   (Token, fileTokens, inputTokens)
+import           System.Directory          (canonicalizePath, doesFileExist,
+                                            getCurrentDirectory,
+                                            getModificationTime)
+import           System.Exit               (exitFailure, exitSuccess)
+import           System.FilePath
+import           System.Time               (ClockTime)
+import           Types                     (typeCheckMod,
+                                            validateModExportTypes)
+import           Unbranch                  (unbranchProc)
 
 
 
@@ -85,7 +87,7 @@ buildTargets opts targets = do
     logDump FinalDump FinalDump "EVERYTHING"
 
 
--- |Build a single target; flag specifies to re-compile even if the 
+-- |Build a single target; flag specifies to re-compile even if the
 --  target is up-to-date.
 buildTarget :: Bool -> FilePath -> Compiler ()
 buildTarget force target = do
@@ -98,7 +100,7 @@ buildTarget force target = do
         built <- buildModuleIfNeeded force [modname] [dir]
         -- XXX prints nothing to be done even when dependencies were built
         -- XXX doesn't build executable even when dependencies were built
-        if (built==False) 
+        if (built==False)
           then (liftIO . putStrLn) $ "Nothing to be done for " ++ target
           else
             when (tType == ExecutableFile) (buildExecutable target modname)
@@ -119,7 +121,7 @@ buildDependency modspec = do
 buildModuleIfNeeded :: Bool    -- ^Force compilation of this module
               -> ModSpec       -- ^Module name
               -> [FilePath]    -- ^Directories to look in
-              -> Compiler Bool -- ^Returns whether or not file 
+              -> Compiler Bool -- ^Returns whether or not file
                               -- actually needed to be compiled
 buildModuleIfNeeded force modspec possDirs = do
     loading <- gets (List.elem modspec . List.map modSpec . underCompilation)
@@ -137,14 +139,14 @@ buildModuleIfNeeded force modspec possDirs = do
             srcOb <- srcObjFiles modspec possDirs
             case srcOb of
                 Nothing -> do
-                    message Error ("Could not find module " ++ 
+                    message Error ("Could not find module " ++
                                    showModSpec modspec) Nothing
                     return False
-                Just (_,False,objfile,True,_) -> do 
+                Just (_,False,objfile,True,_) -> do
                     -- only object file exists
                     loadModule objfile
                     return False
-                Just (srcfile,True,objfile,False,modname) -> do 
+                Just (srcfile,True,objfile,False,modname) -> do
                     -- only source file exists
                     buildModule modname objfile srcfile
                     return True
@@ -162,21 +164,21 @@ buildModuleIfNeeded force modspec possDirs = do
 
 
 -- |Find the source and/or object files for the specified module.  We
--- search the library search path for the files.  
-srcObjFiles :: ModSpec -> [FilePath] -> 
+-- search the library search path for the files.
+srcObjFiles :: ModSpec -> [FilePath] ->
                Compiler (Maybe (FilePath,Bool,FilePath,Bool,Ident))
 srcObjFiles modspec possDirs = do
     let splits = List.map (flip take modspec) [1..length modspec]
     dirs <- mapM (\d -> do
                        mapM (\ms -> do
-                                  let srcfile = moduleFilePath sourceExtension 
+                                  let srcfile = moduleFilePath sourceExtension
                                                 d ms
-                                  let objfile = moduleFilePath objectExtension 
+                                  let objfile = moduleFilePath objectExtension
                                                 d ms
                                   let modname = List.last ms
                                   srcExists <- (liftIO . doesFileExist) srcfile
                                   objExists <- (liftIO . doesFileExist) objfile
-                                  return $ if srcExists || objExists 
+                                  return $ if srcExists || objExists
                                            then [(srcfile,srcExists,
                                                   objfile,objExists,modname)]
                                            else [])
@@ -195,7 +197,7 @@ buildModule modname objfile srcfile = do
     let parseTree = parse tokens
     let dir = takeDirectory objfile
     compileModule dir [modname] Nothing parseTree
-    
+
 
 -- |Compile a module given the parsed source file contents.
 compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
@@ -203,14 +205,14 @@ compileModule dir modspec params items = do
     logBuild $ "===> Compiling module " ++ showModSpec modspec
     enterModule dir modspec params
     -- verboseMsg 1 $ return (intercalate "\n" $ List.map show items)
-    -- XXX This means we generate LPVM code for a module before 
-    -- considering dependencies.  This will need to change if we 
-    -- really need dependency info to do initial LPVM translation, or 
-    -- if it's too memory-intensive to load all code to be compiled 
-    -- into memory at once.  Note that this does not do a proper 
-    -- top-down traversal, because we may not visit *all* users of a 
-    -- module before handling the module.  If we decide we need to do 
-    -- that, then we'll need to handle the full dependency 
+    -- XXX This means we generate LPVM code for a module before
+    -- considering dependencies.  This will need to change if we
+    -- really need dependency info to do initial LPVM translation, or
+    -- if it's too memory-intensive to load all code to be compiled
+    -- into memory at once.  Note that this does not do a proper
+    -- top-down traversal, because we may not visit *all* users of a
+    -- module before handling the module.  If we decide we need to do
+    -- that, then we'll need to handle the full dependency
     -- relationship explicitly before doing any compilation.
     Normalise.normalise compileModSCC items
     stopOnError $ "preliminary processing of module " ++ showModSpec modspec
@@ -233,7 +235,7 @@ buildExecutable file _ =
 --   XXX not yet implemented
 loadModule :: FilePath -> Compiler ()
 loadModule objfile =
-    message Error ("Can't handle pre-compiled file " ++ objfile ++ " yet") 
+    message Error ("Can't handle pre-compiled file " ++ objfile ++ " yet")
     Nothing
 
 
@@ -256,12 +258,12 @@ compileModSCC mspecs = do
     logDump Flatten Types "FLATTENING"
     fixpointProcessSCC handleModImports mspecs
     logBuild $ replicate 70 '='
-    logBuild $ "resource and type checking modules " 
+    logBuild $ "resource and type checking modules "
       ++ showModSpecs mspecs ++ "..."
     mapM_ validateModExportTypes mspecs
     stopOnError $ "checking parameter type declarations in modules " ++
       showModSpecs mspecs
-    -- Fixed point needed because eventually resources can bundle 
+    -- Fixed point needed because eventually resources can bundle
     -- resources from other modules
     fixpointProcessSCC resourceCheckMod mspecs
     stopOnError $ "processing resources for modules " ++
@@ -283,7 +285,7 @@ compileModSCC mspecs = do
     mapM_ collectCallers mspecs
     logDump Clause Optimise "COMPILATION TO LPVM"
     fixpointProcessSCC optimiseMod mspecs
-    stopOnError $ "optimising " ++ showModSpecs mspecs    
+    stopOnError $ "optimising " ++ showModSpecs mspecs
     logDump Optimise Optimise "OPTIMISATION"
     -- mapM_ blockTransformModule mspecs
     mapM_ (transformModuleProcs translateProc) mspecs
@@ -292,18 +294,18 @@ compileModSCC mspecs = do
 
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
-    --                        (Map.toAscList . modProcs . 
+    --                        (Map.toAscList . modProcs .
     --                         fromJust . modImplementation))
     return ()
 
 
--- |A Processor processes the specified module one iteration in a 
---  context of mutual dependency among the list of modules.  It 
---  produces a flag indicating that processing made some change (so a 
---  fixed point has not been reached), and a list of error messages, 
---  each with its associated optional source position.  The error 
+-- |A Processor processes the specified module one iteration in a
+--  context of mutual dependency among the list of modules.  It
+--  produces a flag indicating that processing made some change (so a
+--  fixed point has not been reached), and a list of error messages,
+--  each with its associated optional source position.  The error
 --  messages will only be printed after a fixed point is reached.
---  A processor is expected to find a fixed point within a single 
+--  A processor is expected to find a fixed point within a single
 --  module by itself.
 type Processor = [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 
@@ -317,7 +319,7 @@ fixpointProcessSCC processor [modspec] = do
     mapM_ (\(msg,pos) -> message Error msg pos) errors
     return ()
 fixpointProcessSCC processor scc = do        -- must find fixpoint
-    (changed,errors) <- 
+    (changed,errors) <-
         foldM (\(chg,errs) mod -> do
                     (chg1,errs1) <- processor scc mod
                     return (chg1||chg, errs1++errs))
@@ -327,7 +329,7 @@ fixpointProcessSCC processor scc = do        -- must find fixpoint
     else mapM_ (\(msg,pos) -> message Error msg pos) errors
 
 
-         
+
 transformModuleProcs :: (ProcDef -> Compiler ProcDef) -> ModSpec ->
                         Compiler ()
 transformModuleProcs trans thisMod = do
@@ -363,7 +365,7 @@ loadImports = do
 -- |Handle all the imports of the current module.  When called, all
 -- modules imported by all the listed modules have been loaded, so we
 -- can finally work out what is exported by, and what is visible in,
--- each of these modules. 
+-- each of these modules.
 handleModImports :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 handleModImports modSCC mod = do
     reenterModule mod
@@ -385,13 +387,13 @@ handleModImports modSCC mod = do
 
 ------------------------ Filename Handling ------------------------
 
--- |The different sorts of files that could be specified on the 
+-- |The different sorts of files that could be specified on the
 --  command line.
 data TargetType = InterfaceFile | ObjectFile | ExecutableFile | UnknownFile
                 deriving (Show,Eq)
 
 
--- |Given a file specification, return what sort of file it is.  The 
+-- |Given a file specification, return what sort of file it is.  The
 --  file need not exist.
 targetType :: FilePath -> TargetType
 targetType filename
@@ -401,12 +403,12 @@ targetType filename
   | otherwise                  = UnknownFile
       where ext' = dropWhile (=='.') $ takeExtension filename
 
--- |Given a source or executable file path, return the file path of 
+-- |Given a source or executable file path, return the file path of
 --  the corresponding object file.
 fileObjFile :: FilePath -> FilePath
 fileObjFile filename = replaceExtension filename objectExtension
 
--- |Given an object or executable file path, return the file path of 
+-- |Given an object or executable file path, return the file path of
 --  the corresponding source file.
 fileSourceFile :: FilePath -> FilePath
 fileSourceFile filename = replaceExtension filename sourceExtension
