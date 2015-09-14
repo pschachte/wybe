@@ -1847,8 +1847,8 @@ showProcDefs firstID (def:defs) =
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID procdef@(ProcDef _ proto def pos _ _ vis inline sub) =
-    visibilityPrefix vis
+showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis inline sub) =
+    n ++ " > " ++ visibilityPrefix vis
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ (if inline then " (inline)" else "")
     ++ showSuperProc sub
