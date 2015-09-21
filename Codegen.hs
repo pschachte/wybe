@@ -19,9 +19,9 @@ module Codegen (
   -- * Instructions
   instr, namedInstr,
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv,
-  cons, uitofp, fptoui,
+  cons, uitofp, fptoui
   -- * Testing
-  showSymbolTable
+
   ) where
 
 import           Data.Function
@@ -48,14 +48,7 @@ import qualified LLVM.General.AST.IntegerPredicate       as IP
 import           LLVM.General.Context
 import           LLVM.General.Module
 
--- A LLVM function consists of a sequence of basic blocks containing a
--- sequence of instructions and assignment to local values. During
--- compilation basic blocks will roughly correspond to labels in the
--- native assembly output.
 
--- Some simple type synonyms
-type SymbolTable = [(String, Operand)]
-type Names = Map.Map String Int
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
@@ -79,9 +72,15 @@ char_t = IntegerType 8
 ----------------------------------------------------------------------------
 -- Codegen State                                                          --
 ----------------------------------------------------------------------------
+-- | 'SymbolTable' is a simple mapping of scope variable names and their
+-- representation as an LLVM.General.AST.Operand.Operand.
+type SymbolTable = [(String, Operand)]
+
+-- | A Map of all the assigned names to assist in supllying new unique names.
+type Names = Map.Map String Int
 
 
--- | 'CodegenState' will generate the toplevel module code
+-- | 'CodegenState' will hold a global Definition level code.
 data CodegenState
     = CodegenState {
         currentBlock :: Name                    -- ^ Name of the active block to append to
@@ -93,7 +92,10 @@ data CodegenState
       } deriving Show
 
 -- | 'BlockState' will generate the code for basic blocks inside of
--- function definitions
+-- function definitions.
+-- A LLVM function consists of a sequence of basic blocks containing a
+-- stack of Named/Unnamed instructions. During compilation basic blocks
+-- will roughly correspond to labels in the native assembly output.
 data BlockState
     = BlockState {
         idx   :: Int -- ^ Block
@@ -107,19 +109,16 @@ data BlockState
 newtype Codegen a = Codegen { runCodegen :: State CodegenState a }
     deriving (Functor, Applicative, Monad, MonadState CodegenState)
 
+execCodegen :: Codegen a -> CodegenState
+execCodegen m = execState (runCodegen m) emptyCodegen
 
--- | Gets a new count suffix for a temporary local operands
+-- | Gets a new incremental word suffix for a temporary local operands
 fresh :: Codegen Word
 fresh = do
   ix <- gets count
   modify $ \s -> s { count = 1 + ix }
   return (ix + 1)
 
-
-showSymbolTable :: Codegen String
-showSymbolTable =
-    do tab <- gets symtab
-       return (show tab)
 
 ----------------------------------------------------------------------------
 -- LLVM State Monad                                                       --
@@ -133,6 +132,8 @@ newtype LLVM a = LLVM { unLLVM :: State LLVMAST.Module a }
 runLLVM :: LLVMAST.Module -> LLVM a -> LLVMAST.Module
 runLLVM = flip (execState . unLLVM)
 
+-- | Create an empty LLVMAST.Module which would be converted into
+-- LLVM IR once the moduleDefinitions field is filled.
 emptyModule :: String -> LLVMAST.Module
 emptyModule label = defaultModule { moduleName = label }
 
@@ -143,8 +144,9 @@ addDefn d = do
   defs <- gets moduleDefinitions
   modify $ \s -> s { moduleDefinitions = defs ++ [d] }
 
-
-
+-- | Create a global Function Definition to store in the LLVMAST.Module.
+-- A Definition body is a list of BasicBlocks. A LPVM procedure roughly correspond
+-- to this global function definition.
 globalDefine :: Type -> String -> [(Type, Name)] -> [BasicBlock] -> Definition
 globalDefine rettype label argtypes body
              = GlobalDefinition $ functionDefaults {
@@ -154,7 +156,7 @@ globalDefine rettype label argtypes body
                , basicBlocks = body
                }
 
--- | 'external' records extern definitions
+-- | 'external' records extern definitions in the module.
 external :: Type -> String -> [(Type, Name)] -> [BasicBlock] -> LLVM ()
 external rettype label argtypes body
     = addDefn $ GlobalDefinition $ functionDefaults {
@@ -172,6 +174,7 @@ external rettype label argtypes body
 entry :: Codegen Name
 entry = gets currentBlock
 
+-- | Sample name for the 'entry' block. (Usually 'entry')
 entryBlockName :: String
 entryBlockName = "entry"
 
@@ -179,12 +182,9 @@ entryBlockName = "entry"
 emptyBlock :: Int -> BlockState
 emptyBlock i = BlockState i [] Nothing
 
+-- | Initialize an empty CodegenState for a new Definition.
 emptyCodegen :: CodegenState
 emptyCodegen = CodegenState (Name entryBlockName) Map.empty [] 1 0 Map.empty
-
-execCodegen :: Codegen a -> CodegenState
-execCodegen m = execState (runCodegen m) emptyCodegen
-
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name
@@ -202,12 +202,13 @@ addBlock bname = do
                    }
   return (Name qname)
 
+-- | Set the current block label.
 setBlock :: Name -> Codegen Name
 setBlock bname =
     do modify $ \s -> s { currentBlock = bname }
        return bname
 
--- | Get the current block.
+-- | Get the current block being written to.
 getBlock :: Codegen Name
 getBlock = gets currentBlock
 
@@ -229,15 +230,21 @@ current = do
     Nothing -> error $ "No such block found: " ++ show curr
 
 
+-- | Generate the list of BasicBlocks added to the CodegenState for a global
+-- definition. This list would be in order of execution. This list forms the body
+-- of a global function definition.
 createBlocks :: CodegenState -> [BasicBlock]
 createBlocks m = map makeBlock $ sortBlocks $ Map.toList (blocks m)
 
+-- | Convert our BlockState to the LLVM BasicBlock Type.
 makeBlock :: (Name, BlockState) -> BasicBlock
 makeBlock (l, (BlockState _ s t)) = BasicBlock l s (maketerm t)
   where
     maketerm (Just x) = x
     maketerm Nothing = error $ "Block has no terminator: " ++ (show l)
 
+-- | Sort the blocks on their ids. Blocks do get out of order since any block
+-- can be brought to be the 'currentBlock'.
 sortBlocks :: [(Name, BlockState)] -> [(Name, BlockState)]
 sortBlocks = sortBy (compare `on` (idx . snd))
 
@@ -259,28 +266,30 @@ uniqueName nm ns =
 -- Name Referencing                                                       --
 ----------------------------------------------------------------------------
 
--- | Local references (prefixed with % in LLVM)
-local :: Type -> Name -> Operand
-local ty nm = LocalReference ty nm
-
-
--- | Refer to toplevel functions (prefixed with @ in LLVM)
+-- | Create an extern referencing Operand
 externf :: Type -> Name -> Operand
 externf ty = ConstantOperand . (C.GlobalReference ty)
 
--- | Create a local variable of the given type
+-- | Create a new Local Operand (prefixed with % in LLVM)
 localVar :: Type -> String -> Operand
 localVar t s =  (LocalReference t ) $ LLVMAST.Name s
+
+local :: Type -> LLVMAST.Name -> Operand
+local ty nm = LocalReference ty nm
 
 ----------------------------------------------------------------------------
 -- Symbol Table                                                           --
 ----------------------------------------------------------------------------
 
+-- | Store a local variable on the front of the symbol table.
 assign :: String -> Operand -> Codegen ()
 assign var x = do
   lcls <- gets symtab
   modify $ \s -> s { symtab = (var, x) : lcls }
 
+-- | Find and return the local operand by its given name from the symbol
+-- table. Only the first find will be returned so new names can shadow
+-- the same older names.
 getVar :: String -> Codegen Operand
 getVar var = do
   lcls <- gets symtab
@@ -324,12 +333,7 @@ terminator trm = do
   return trm
 
 
--- Some basic instructions
-
-toArgs :: [Operand] -> [(Operand, [A.ParameterAttribute])]
-toArgs xs = map (\x -> (x, [])) xs
-
--- * Integer arithmetic operations
+-- * Integer arithmetic operations (Binary)
 
 iadd :: Operand -> Operand -> Instruction
 iadd a b = Add False False a b []
@@ -346,7 +350,7 @@ idiv a b = UDiv True a b []
 sdiv :: Operand -> Operand -> Instruction
 sdiv a b = SDiv True a b []
 
--- * Floating point arithmetic operations
+-- * Floating point arithmetic operations (Binary)
 
 fadd :: Operand -> Operand -> Instruction
 fadd a b = FAdd NoFastMathFlags a b []
@@ -376,20 +380,21 @@ uitofp a = UIToFP a float_t []
 fptoui :: Operand -> Instruction
 fptoui a = FPToUI a int_t []
 
+-- | Create a constant operand (function parameters).
 cons :: C.Constant -> Operand
 cons = ConstantOperand
 
-
-
--- TODO: Look into all the arithmetic instructions and what they actually do.
-
--- * Effect instructions
+-- * Memory effecting instructions
 
 -- | The 'call' instruction represents a simple function call.
 -- TODO: Look into and make a TCO version of the function
 -- TODO: Look into calling conventions (is fast cc alright?)
 call :: Operand -> [Operand] -> Instruction
 call fn args = Call False CC.C [] (Right fn) (toArgs args) [] []
+
+toArgs :: [Operand] -> [(Operand, [A.ParameterAttribute])]
+toArgs xs = map (\x -> (x, [])) xs
+
 
 -- | The ‘alloca‘ function wraps LLVM's alloca instruction. The 'alloca'
 -- instruction is pushed on the instruction stack (unnamed) and referenced with
@@ -410,8 +415,6 @@ load ptr = Load False ptr Nothing 0 []
 
 
 -- * Control Flow operations
-
--- TODO: These have to be wrapped according to how LPVM functions
 
 br :: Name -> Codegen (Named Terminator)
 br val = terminator $ Do $ Br val []
