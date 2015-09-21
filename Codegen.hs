@@ -6,17 +6,47 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
 
-module Codegen where
+module Codegen (
+  Codegen(..), LLVM(..), CodegenState(..), BlockState(..),
+  emptyModule, runLLVM, execCodegen,
+  -- * Blocks
+  createBlocks, setBlock, addBlock, entryBlockName,
+  call, externf, ret, globalDefine,
+  -- * Symbol storage
+  alloca, store, local, assign, load, getVar, localVar,
+  -- * Types
+  int_t, phantom_t, float_t, char_t, ptr_t,
+  -- * Instructions
+  instr, namedInstr,
+  iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv,
+  cons, uitofp, fptoui,
+  -- * Testing
+  showSymbolTable
+  ) where
+
+import           Data.Function
+import           Data.List
+import qualified Data.Map                                as Map
+import           Data.String
+import           Data.Word
 
 import           Control.Applicative
+import           Control.Monad.Except
 import           Control.Monad.State
-import qualified Data.Map                  as Map
-import           Data.Word
+
 import           LLVM.General.AST
-import qualified LLVM.General.AST          as LLVMAST
-import qualified LLVM.General.AST.Constant as C
+import qualified LLVM.General.AST                        as LLVMAST
 import           LLVM.General.AST.Global
 
+import           LLVM.General.AST.AddrSpace
+import qualified LLVM.General.AST.Attribute              as A
+import qualified LLVM.General.AST.CallingConvention      as CC
+import qualified LLVM.General.AST.Constant               as C
+import qualified LLVM.General.AST.FloatingPointPredicate as FP
+import qualified LLVM.General.AST.IntegerPredicate       as IP
+
+import           LLVM.General.Context
+import           LLVM.General.Module
 
 -- A LLVM function consists of a sequence of basic blocks containing a
 -- sequence of instructions and assignment to local values. During
@@ -27,10 +57,24 @@ import           LLVM.General.AST.Global
 type SymbolTable = [(String, Operand)]
 type Names = Map.Map String Int
 
+----------------------------------------------------------------------------
+-- Types                                                                  --
+----------------------------------------------------------------------------
 
--- Test type
-int :: Type
-int = IntegerType 32
+int_t :: Type
+int_t = IntegerType 32
+
+ptr_t :: Type -> Type
+ptr_t ty = PointerType ty (AddrSpace 0)
+
+phantom_t :: Type
+phantom_t = VoidType
+
+float_t :: Type
+float_t = FloatingPointType 32 IEEE
+
+char_t :: Type
+char_t = IntegerType 8
 
 ----------------------------------------------------------------------------
 -- Codegen State                                                          --
@@ -72,6 +116,11 @@ fresh = do
   return (ix + 1)
 
 
+showSymbolTable :: Codegen String
+showSymbolTable =
+    do tab <- gets symtab
+       return (show tab)
+
 ----------------------------------------------------------------------------
 -- LLVM State Monad                                                       --
 ----------------------------------------------------------------------------
@@ -96,15 +145,14 @@ addDefn d = do
 
 
 
--- | 'define' records local function definitions in the module
-define :: Type -> String -> [(Type, Name)] -> [BasicBlock] -> LLVM ()
-define rettype label argtypes body
-    = addDefn $ GlobalDefinition $ functionDefaults {
-        name = Name label
-      , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes], False)
-      , returnType = rettype
-      , basicBlocks = body
-      }
+globalDefine :: Type -> String -> [(Type, Name)] -> [BasicBlock] -> Definition
+globalDefine rettype label argtypes body
+             = GlobalDefinition $ functionDefaults {
+                 name = Name label
+               , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes], False)
+               , returnType = rettype
+               , basicBlocks = body
+               }
 
 -- | 'external' records extern definitions
 external :: Type -> String -> [(Type, Name)] -> [BasicBlock] -> LLVM ()
@@ -124,9 +172,19 @@ external rettype label argtypes body
 entry :: Codegen Name
 entry = gets currentBlock
 
+entryBlockName :: String
+entryBlockName = "entry"
+
 -- | Initializes an empty new block
 emptyBlock :: Int -> BlockState
 emptyBlock i = BlockState i [] Nothing
+
+emptyCodegen :: CodegenState
+emptyCodegen = CodegenState (Name entryBlockName) Map.empty [] 1 0 Map.empty
+
+execCodegen :: Codegen a -> CodegenState
+execCodegen m = execState (runCodegen m) emptyCodegen
+
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name
@@ -171,6 +229,17 @@ current = do
     Nothing -> error $ "No such block found: " ++ show curr
 
 
+createBlocks :: CodegenState -> [BasicBlock]
+createBlocks m = map makeBlock $ sortBlocks $ Map.toList (blocks m)
+
+makeBlock :: (Name, BlockState) -> BasicBlock
+makeBlock (l, (BlockState _ s t)) = BasicBlock l s (maketerm t)
+  where
+    maketerm (Just x) = x
+    maketerm Nothing = error $ "Block has no terminator: " ++ (show l)
+
+sortBlocks :: [(Name, BlockState)] -> [(Name, BlockState)]
+sortBlocks = sortBy (compare `on` (idx . snd))
 
 ----------------------------------------------------------------------------
 -- Names supply                                                           --
@@ -191,13 +260,17 @@ uniqueName nm ns =
 ----------------------------------------------------------------------------
 
 -- | Local references (prefixed with % in LLVM)
-local :: Name -> Operand
-local = LocalReference int
+local :: Type -> Name -> Operand
+local ty nm = LocalReference ty nm
+
 
 -- | Refer to toplevel functions (prefixed with @ in LLVM)
-externf :: Name -> Operand
-externf = ConstantOperand . C.GlobalReference int
+externf :: Type -> Name -> Operand
+externf ty = ConstantOperand . (C.GlobalReference ty)
 
+-- | Create a local variable of the given type
+localVar :: Type -> String -> Operand
+localVar t s =  (LocalReference t ) $ LLVMAST.Name s
 
 ----------------------------------------------------------------------------
 -- Symbol Table                                                           --
@@ -215,21 +288,32 @@ getVar var = do
     Just x -> return x
     Nothing -> error $ "Local variable not in scope: " ++ show var
 
+
 ----------------------------------------------------------------------------
 -- Instructions                                                           --
 ----------------------------------------------------------------------------
 
--- | 'instr' pushes a new LLVMAST.Instruction to the current basic block
--- instruction stack. This action produces the left hand side value
--- of the instruction (of the type Operand).
-instr :: Instruction -> Codegen Operand
-instr ins = do
-  n <- fresh
-  let ref = UnName n
-  blk <- current
-  let i = stack blk
-  modifyBlock $ blk { stack = i ++ [ref := ins] }
-  return $ local ref
+-- | The `namedInstr` function appends a named instruction into the instruction
+-- stack of the current BasicBlock. This action also produces a Operand value
+-- of the given type (this will be the result type of performing that instruction).
+namedInstr :: Type -> String -> Instruction -> Codegen Operand
+namedInstr ty nm ins =
+    do let ref = Name nm
+       blk <- current
+       let i = stack blk
+       modifyBlock $ blk { stack = i ++ [ref := ins] }
+       return $ local ty ref
+
+-- | The `instr` function appends an unnamed instruction intp the instruction stack
+-- of the current BasicBlock. The temp name is generated using a fresh word counter.
+instr :: Type -> Instruction -> Codegen Operand
+instr ty ins =
+    do n <- fresh
+       let ref = UnName n
+       blk <- current
+       let i = stack blk
+       modifyBlock $ blk { stack = i ++ [ref := ins] }
+       return $ local ty ref
 
 
 -- | 'terminator' provides the last instruction of a basic block.
@@ -242,16 +326,60 @@ terminator trm = do
 
 -- Some basic instructions
 
+toArgs :: [Operand] -> [(Operand, [A.ParameterAttribute])]
+toArgs xs = map (\x -> (x, [])) xs
+
 -- * Integer arithmetic operations
 
-iadd :: Operand -> Operand -> Codegen Operand
-iadd a b = instr $ Add False False a b []
+iadd :: Operand -> Operand -> Instruction
+iadd a b = Add False False a b []
 
-isub :: Operand -> Operand -> Codegen Operand
-isub a b = instr $ Sub False False a b []
+isub :: Operand -> Operand -> Instruction
+isub a b = Sub False False a b []
 
-imul :: Operand -> Operand -> Codegen Operand
-imul a b = instr $ Mul False False a b []
+imul :: Operand -> Operand -> Instruction
+imul a b = Mul False False a b []
+
+idiv :: Operand -> Operand -> Instruction
+idiv a b = UDiv True a b []
+
+sdiv :: Operand -> Operand -> Instruction
+sdiv a b = SDiv True a b []
+
+-- * Floating point arithmetic operations
+
+fadd :: Operand -> Operand -> Instruction
+fadd a b = FAdd NoFastMathFlags a b []
+
+fsub :: Operand -> Operand -> Instruction
+fsub a b = FSub NoFastMathFlags a b []
+
+fmul :: Operand -> Operand -> Instruction
+fmul a b = FMul NoFastMathFlags a b []
+
+fdiv :: Operand -> Operand -> Instruction
+fdiv a b = FDiv NoFastMathFlags a b []
+
+-- * Comparisions
+
+fcmp :: FP.FloatingPointPredicate -> Operand -> Operand -> Instruction
+fcmp p a b = FCmp p a b []
+
+icmp :: IP.IntegerPredicate -> Operand -> Operand -> Instruction
+icmp p a b = ICmp p a b []
+
+-- * Unary
+
+uitofp :: Operand -> Instruction
+uitofp a = UIToFP a float_t []
+
+fptoui :: Operand -> Instruction
+fptoui a = FPToUI a int_t []
+
+cons :: C.Constant -> Operand
+cons = ConstantOperand
+
+
 
 -- TODO: Look into all the arithmetic instructions and what they actually do.
 
@@ -260,23 +388,25 @@ imul a b = instr $ Mul False False a b []
 -- | The 'call' instruction represents a simple function call.
 -- TODO: Look into and make a TCO version of the function
 -- TODO: Look into calling conventions (is fast cc alright?)
-call :: Operand -> [Operand] -> Codegen Operand
-call fn args = instr $ Call False CC.C [] (Right fn) (toArgs args) [] []
+call :: Operand -> [Operand] -> Instruction
+call fn args = Call False CC.C [] (Right fn) (toArgs args) [] []
 
--- | The ‘alloca‘ instruction allocates memory on the stack frame of the
+-- | The ‘alloca‘ function wraps LLVM's alloca instruction. The 'alloca'
+-- instruction is pushed on the instruction stack (unnamed) and referenced with
+-- a *type operand.
+-- The Alloca LLVM instruction allocates memory on the stack frame of the
 -- currently executing function, to be automatically released when this
--- function returns to its caller. The object is always allocated in the
--- generic address space (address space zero).
-alloca :: Type -> Codegen Operand
-alloca ty = instr $ Alloca ty Nothing 0 []
+-- function returns to its caller.
+alloca :: Type -> Instruction
+alloca ty = Alloca ty Nothing 0 []
 
--- | The 'store' instruction is used to write to write to memory.
+-- | The 'store' instruction is used to write to write to memory. yields void.
 store :: Operand -> Operand -> Codegen Operand
-store ptr val = instr $ Store False ptr val Nothing 0 []
+store ptr val = instr phantom_t $ Store False ptr val Nothing 0 []
 
-
-load :: Operand -> Codegen
-load ptr = instr $ Load False ptr Nothing 0 []
+-- | The 'load' function wraps LLVM's load instruction with defaults.
+load :: Operand -> Instruction
+load ptr = Load False ptr Nothing 0 []
 
 
 -- * Control Flow operations
