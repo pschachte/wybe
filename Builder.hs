@@ -45,7 +45,7 @@
 module Builder (buildTargets, compileModule) where
 
 import           AST
-import           Blocks                    (blockTransformModule, translateProc)
+import           Blocks                    (blockTransformModule)
 import           Callers                   (collectCallers)
 import           Clause                    (compileProc)
 import           Config
@@ -56,6 +56,7 @@ import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Maybe
 import           Data.Set                  as Set
+import           Emit
 import           Normalise                 (normalise, normaliseItem)
 import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
@@ -287,9 +288,10 @@ compileModSCC mspecs = do
     fixpointProcessSCC optimiseMod mspecs
     stopOnError $ "optimising " ++ showModSpecs mspecs
     logDump Optimise Optimise "OPTIMISATION"
-    -- mapM_ blockTransformModule mspecs
-    mapM_ (transformModuleProcs translateProc) mspecs
+    mapM_ blockTransformModule mspecs
     stopOnError $ "translating " ++ showModSpecs mspecs
+    -- mapM_ llvmEmitModule mspecs
+    -- stopOnError $ "emitting " ++ showModSpecs mspecs
     -- logDump Blocks Blocks "TRANSLATING TO LLVM"
 
     -- mods <- mapM getLoadedModule mods
