@@ -58,7 +58,8 @@ evalLLVMComp llcomp =
 
 
 -- | Transofrorm the module's procedures (in LPVM by now) into LLVM function
--- definitions. Store extra information about the module, like externs, too.
+-- definitions. A LLVMAST.Module is built up using these global definitions and then
+-- stored in the modLLVM field of 'ModuleImplementation'.
 blockTransformModule :: ModSpec -> Compiler ()
 blockTransformModule thisMod =
     do reenterModule thisMod
@@ -68,10 +69,10 @@ blockTransformModule thisMod =
        (names, procs) <- fmap unzip $
                          getModuleImplementationField (Map.toList . modProcs)
        procs' <- mapM (mapM translateProc) procs
-       updateImplementation
-        (\imp -> imp { modProcs = Map.union
-                                  (Map.fromList $ zip names procs')
-                                  (modProcs imp) })
+       -- updateImplementation
+       --  (\imp -> imp { modProcs = Map.union
+       --                            (Map.fromList $ zip names procs')
+       --                            (modProcs imp) })
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (show thisMod) procs'
        updateImplementation (\imp -> imp { modLLVM = Just llmod })

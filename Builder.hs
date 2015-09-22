@@ -223,6 +223,7 @@ compileModule dir modspec params items = do
     mods <- exitModule -- may be empty list if module is mutually dependent
     logBuild $ "<=== finished compling module " ++ showModSpec modspec
     compileModSCC mods
+    codegenModSCC mods
 
 
 -- |Build executable from object file
@@ -288,10 +289,10 @@ compileModSCC mspecs = do
     fixpointProcessSCC optimiseMod mspecs
     stopOnError $ "optimising " ++ showModSpecs mspecs
     logDump Optimise Optimise "OPTIMISATION"
-    mapM_ blockTransformModule mspecs
-    stopOnError $ "translating " ++ showModSpecs mspecs
-    mapM_ llvmEmitModule mspecs
-    stopOnError $ "emitting " ++ showModSpecs mspecs
+    -- mapM_ blockTransformModule mspecs
+    -- stopOnError $ "translating " ++ showModSpecs mspecs
+    -- mapM_ llvmEmitModule mspecs
+    -- stopOnError $ "emitting " ++ showModSpecs mspecs
     -- logDump Blocks Blocks "TRANSLATING TO LLVM"
 
     -- mods <- mapM getLoadedModule mods
@@ -299,6 +300,15 @@ compileModSCC mspecs = do
     --                        (Map.toAscList . modProcs .
     --                         fromJust . modImplementation))
     return ()
+
+codegenModSCC :: [ModSpec] -> Compiler ()
+codegenModSCC mspecs =
+  do mapM_ blockTransformModule mspecs
+     stopOnError $ "translating " ++ showModSpecs mspecs
+     mapM_ llvmEmitModule mspecs
+     stopOnError $ "emitting " ++ showModSpecs mspecs
+     logDump Blocks Blocks "TRANSLATING TO LLVM"
+     return ()
 
 
 -- |A Processor processes the specified module one iteration in a
