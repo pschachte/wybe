@@ -8,10 +8,10 @@
 
 module Codegen (
   Codegen(..), LLVM(..), CodegenState(..), BlockState(..),
-  emptyModule, runLLVM, execCodegen,
+  emptyModule, runLLVM, execCodegen, addExtern,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
-  call, externf, ret, globalDefine,
+  call, externf, ret, globalDefine, external,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, localVar,
   -- * Types
@@ -45,9 +45,9 @@ import qualified LLVM.General.AST.Constant               as C
 import qualified LLVM.General.AST.FloatingPointPredicate as FP
 import qualified LLVM.General.AST.IntegerPredicate       as IP
 
+import           AST                                     (Prim)
 import           LLVM.General.Context
 import           LLVM.General.Module
-
 
 
 ----------------------------------------------------------------------------
@@ -89,6 +89,7 @@ data CodegenState
       , blockCount   :: Int                     -- ^ Incrementing count of basic blocks
       , count        :: Word                    -- ^ Count for temporary operands
       , names        :: Names                   -- ^ Name supply
+      , externs      :: [Prim] -- ^ Primitives which need to be declared
       } deriving Show
 
 -- | 'BlockState' will generate the code for basic blocks inside of
@@ -119,6 +120,12 @@ fresh = do
   modify $ \s -> s { count = 1 + ix }
   return (ix + 1)
 
+
+addExtern :: Prim -> Codegen ()
+addExtern p =
+    do ex <- gets externs
+       modify $ \s -> s { externs = p : ex }
+       return ()
 
 ----------------------------------------------------------------------------
 -- LLVM State Monad                                                       --
@@ -156,14 +163,14 @@ globalDefine rettype label argtypes body
                , basicBlocks = body
                }
 
--- | 'external' records extern definitions in the module.
-external :: Type -> String -> [(Type, Name)] -> [BasicBlock] -> LLVM ()
-external rettype label argtypes body
-    = addDefn $ GlobalDefinition $ functionDefaults {
+-- | 'external' creates a global declaration of an external function
+external :: Type -> String -> [(Type, Name)] -> Definition
+external rettype label argtypes
+    = GlobalDefinition $ functionDefaults {
         name = Name label
       , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes], False)
       , returnType = rettype
-      , basicBlocks = body
+      , basicBlocks = []
       }
 
 
@@ -184,7 +191,8 @@ emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
 emptyCodegen :: CodegenState
-emptyCodegen = CodegenState (Name entryBlockName) Map.empty [] 1 0 Map.empty
+emptyCodegen
+    = CodegenState (Name entryBlockName) Map.empty [] 1 0 Map.empty []
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name

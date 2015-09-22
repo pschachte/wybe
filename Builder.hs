@@ -307,7 +307,6 @@ codegenModSCC mspecs =
      stopOnError $ "translating " ++ showModSpecs mspecs
      mapM_ llvmEmitModule mspecs
      stopOnError $ "emitting " ++ showModSpecs mspecs
-     logDump Blocks Blocks "TRANSLATING TO LLVM"
      return ()
 
 

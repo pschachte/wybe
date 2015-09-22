@@ -1169,19 +1169,20 @@ showSuperProc (SuperprocIs super) =
 data ProcImpln 
     = ProcDefSrc [Placed Stmt]           -- defn in source-like form
     | ProcDefPrim PrimProto ProcBody     -- defn in LPVM (clausal) form
-    | ProcDefBlocks PrimProto LLVMAST.Definition  -- defn in SSA (LLVM) form    
+    | ProcDefBlocks PrimProto LLVMAST.Definition  [LLVMAST.Definition]
+      -- defn in SSA (LLVM) form along with any needed extern definitions 
     deriving (Eq)
 
 
 isCompiled :: ProcImpln -> Bool
 isCompiled (ProcDefPrim _ _) = True
 isCompiled (ProcDefSrc _) = False
-isCompiled (ProcDefBlocks _ _ ) = True
+isCompiled (ProcDefBlocks _ _ _) = True
 
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
     show (ProcDefPrim proto body) = show proto ++ ":" ++ showBlock 4 body
-    show (ProcDefBlocks proto _ ) = show proto
+    show (ProcDefBlocks proto _ _ ) = show proto
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
 -- possibly containg some guards.  Each guard is a test that succeeds

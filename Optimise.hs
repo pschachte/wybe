@@ -7,17 +7,17 @@
 
 module Optimise (optimiseMod) where
 
-import AST
-import Options (LogSelection(Optimise))
-import Types
-import Expansion
-import LastUse
-import Data.List as List
-import Data.Map as Map
-import Data.Graph
-import Control.Monad
-import Control.Monad.Trans.State
-import Control.Monad.Trans
+import           AST
+import           Control.Monad
+import           Control.Monad.Trans
+import           Control.Monad.Trans.State
+import           Data.Graph
+import           Data.List                 as List
+import           Data.Map                  as Map
+import           Expansion
+import           LastUse
+import           Options                   (LogSelection (Optimise))
+import           Types
 
 optimiseMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 optimiseMod mods thisMod = do
@@ -32,10 +32,10 @@ optimiseMod mods thisMod = do
                (n,def) <- zip [0..] procDefs,
                let pspec = ProcSpec thisMod name n
              ]
-    logOptimise $ "Optimise SCCs:\n" ++ 
+    logOptimise $ "Optimise SCCs:\n" ++
       unlines (List.map (show . sccElts) ordered)
-    -- XXX this is wrong:  it does not do a proper top-down 
-    -- traversal, as it is not guaranteed to vist all callers before 
+    -- XXX this is wrong:  it does not do a proper top-down
+    -- traversal, as it is not guaranteed to vist all callers before
     -- visiting the called proc.  Need to construct inverse graph instead.
     mapM_ (mapM_ optimiseProcTopDown .  sccElts) $ reverse ordered
     procs <- getModuleImplementationField (Map.toList . modProcs)
@@ -57,7 +57,7 @@ procBody def =
     case procImpln def of
         ProcDefSrc _ -> shouldnt "Optimising un-compiled code"
         ProcDefPrim _ body -> body
-        ProcDefBlocks _ _ -> shouldnt "Optimising generated code"
+        ProcDefBlocks _ _ _ -> shouldnt "Optimising generated code"
 
 
 sccElts (AcyclicSCC single) = [single]
@@ -114,7 +114,7 @@ inlineIfWanted def = return def
 
 
 procCost :: PrimProto -> Int
-procCost proto = 
+procCost proto =
     1 + (length $ List.filter (not . phantomParam) $ primProtoParams proto)
 
 bodyCost :: [Placed Prim] -> Int
@@ -148,7 +148,7 @@ phantomType ty = "phantom" == typeName ty
 -- |Finding all procs called by a given proc body
 localBodyCallees :: ModSpec -> ProcBody -> [ProcSpec]
 localBodyCallees modspec body =
-    foldBodyDistrib (\_ prim callees -> localCallees modspec prim ++ callees) 
+    foldBodyDistrib (\_ prim callees -> localCallees modspec prim ++ callees)
     [] (++) (++) body
 
 
