@@ -41,16 +41,21 @@ type LLVMComp = StateT LLVMCompState Compiler
 
 -- | Hold some state while converting a AST.Module's procedures into LLVMAST
 -- definitions.
--- XXX: Maybe this is not needed / Make it useful?
--- XXX: Maybe hold externs?
 data LLVMCompState = LLVMCompState {
-      fnargs :: [PrimParam]
+      neededExterns :: [Prim] -- ^ collect required extern declarations
     }
+
+-- | Update the LLVMCompState list of primitives which require extern
+-- declarations.
+needExterns :: [Prim] -> LLVMComp ()
+needExterns ps =
+    do ex <- gets neededExterns
+       modify $ \s -> s { neededExterns = ex ++ ps }
+       return ()
 
 -- | Initialize the LLVMCompState
 initLLVMComp :: LLVMCompState
 initLLVMComp = LLVMCompState []
-
 
 evalLLVMComp :: LLVMComp t -> Compiler t
 evalLLVMComp llcomp =
@@ -69,14 +74,10 @@ blockTransformModule thisMod =
        (names, procs) <- fmap unzip $
                          getModuleImplementationField (Map.toList . modProcs)
        procs' <- mapM (mapM translateProc) procs
-       -- updateImplementation
-       --  (\imp -> imp { modProcs = Map.union
-       --                            (Map.fromList $ zip names procs')
-       --                            (modProcs imp) })
        -- Init LLVM Module and fill it
-       let llmod = newLLVMModule (show thisMod) procs'
+       let llmod = newLLVMModule (showModSpec thisMod) procs'
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
-       logBlocks' $ showPretty llmod
+       --logBlocks' $ showPretty llmod
        finishModule
        logBlocks' $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
@@ -85,18 +86,23 @@ blockTransformModule thisMod =
 -- | Translate a ProcDef whose procImpln field is of the type ProcDefPrim, to
 -- ProcDefBlocks (LLVM form). Each ProcDef is converted into a Global Definition
 -- in a LLVM Module by translating it's primitives.
+-- Translated procedures (ProcDefBlocks ...) can optionally have a list
+-- of extern declarations (which are also global definitions) if any primitive
+-- is going to call some foreign function (mostly C).
 translateProc :: ProcDef -> Compiler ProcDef
 translateProc proc =
     evalLLVMComp $ do
       let def@(ProcDefPrim proto body) = procImpln proc
-      -- logBlocks $ "Making definition of: "
-      -- logBlocks $ show def
+      logBlocks $ "Making definition of: "
+      logBlocks $ show def
       let args = primProtoParams proto
       -- logBlocks $ "Args: " ++ (show args)
       body' <- compileBodyToBlocks args body
+      ex <- gets neededExterns
+      let externs = List.map declareExtern ex
       let lldef = makeGlobalDefinition proto body'
       -- logBlocks $ showPretty lldef
-      let procblocks = ProcDefBlocks proto lldef
+      let procblocks = ProcDefBlocks proto lldef externs
       return $ proc { procImpln = procblocks}
 
 
@@ -125,7 +131,7 @@ makeFnArg :: PrimParam -> (Type, LLVMAST.Name)
 makeFnArg arg = (ty, nm)
     where
       ty = typed $ primParamType arg
-      nm = LLVMAST.Name $ show (primParamName arg)
+      nm = LLVMAST.Name $ show' (primParamName arg)
 
 -- | Open the Out parameter of a primitive (if there is one) into it's
 -- inferred 'Type' and name.
@@ -145,17 +151,22 @@ openOutputParam params =
 -- the symbol table.
 compileBodyToBlocks :: [PrimParam] -> ProcBody -> LLVMComp [LLVMAST.BasicBlock]
 compileBodyToBlocks args body =
-    do let prims = bodyPrims body
-       return $ createBlocks $ execCodegen $ do
-         entry <- addBlock entryBlockName
-         setBlock entry
-         mapM_ assignParam args
-         let ps = List.map content (bodyPrims body)
-         ops <- mapM cgen ps
-         -- case openOutputParam args of
-         --   (Just (ty, nm)) -> ret $ localVar ty nm
-         --   Nothing -> ret $ localVar phantom_t "void"
-         ret $ last ops
+    do let codestate = execCodegen $ codegenBody args body
+       let exs = externs codestate
+       needExterns exs
+       logBlocks $ "Externs: " ++ (show exs)
+       return $ createBlocks codestate
+
+
+codegenBody :: [PrimParam] -> ProcBody -> Codegen ()
+codegenBody args body =
+    do entry <- addBlock entryBlockName
+       setBlock entry
+       mapM_ assignParam args
+       let ps = List.map content (bodyPrims body)
+       ops <- mapM cgen ps
+       ret $ last ops
+       return ()
 
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
@@ -182,13 +193,21 @@ cgen (PrimCall pspec args) =
 -- 'Codegen'. Two main maps are the ones containing Binary and Unary instructions
 -- respectively. Adding each matched instruction to the BasicBlock creates a resulting
 -- Operand.
-cgen (PrimForeign lang name flags args)
+cgen prim@(PrimForeign lang name flags args)
      | lang == "llvm" = case (length args) of
                           2 -> cgenLLVMUnop name flags args
                           3 -> cgenLLVMBinop name flags args
                           _ -> return $ localVar phantom_t "still have to make"
      | otherwise =
-         return $ localVar phantom_t "c-phantom"
+         do addExtern prim
+            let (inp, outp) = splitArgs args
+            let (outty, outnm) = openPrimArg $ head outp
+            let nm = LLVMAST.Name name
+            inops <- mapM cgenArg inp
+            let ins = call (externf outty nm) inops
+            outop <- namedInstr outty outnm ins
+            assign outnm outop
+            return outop
 
 
 -- | Translate a Binary primitive procedure into a binary llvm instruction, add the
@@ -324,7 +343,7 @@ noteImplnSuperprocs _ (ProcDefSrc _) _ =
   shouldnt "scanning unprocessed code for calls"
 -- XXX do the actual work here:
 noteImplnSuperprocs caller (ProcDefPrim _ body) procs = procs
-noteImplnSuperprocs _ (ProcDefBlocks _ _) _ =
+noteImplnSuperprocs _ (ProcDefBlocks _ _ _) _ =
   shouldnt "scanning already compiled code for calls"
 
 
@@ -333,17 +352,26 @@ noteImplnSuperprocs _ (ProcDefBlocks _ _) _ =
 ------------------------------------------------------------------------------
 
 -- | Initialize and fill a new LLVMAST.Module with the translated
--- global definitions of LPVM procedures in a module.
+-- global definitions (extern declarations and defined functions)
+-- of LPVM procedures in a module.
 newLLVMModule :: String -> [[ProcDef]] -> LLVMAST.Module
-newLLVMModule name procs = let procs' = List.foldr (++) [] procs
+newLLVMModule name procs = let procs' = concat procs
                                defs = List.map takeDefinition procs'
-                           in modWithDefinitions name defs
+                               exs = concat $ List.map takeExterns procs'
+                           in modWithDefinitions name $ exs ++ defs
 
 -- | Pull out the LLVM Definition of a procedure.
 takeDefinition :: ProcDef -> LLVMAST.Definition
 takeDefinition p = case procImpln p of
-                     (ProcDefBlocks _ def) -> def
+                     (ProcDefBlocks _ def _) -> def
                      _ -> error "No definition found."
+
+-- | Pull out the list of needed extern definitions built during
+-- procedure translation.
+takeExterns :: ProcDef -> [LLVMAST.Definition]
+takeExterns p = case procImpln p of
+                  (ProcDefBlocks _ _ exs) -> exs
+                  _ -> error "No Externs field found."
 
 -- | Create a new LLVMAST.Module with the given name, and fill it with the
 -- given global definitions.
@@ -351,14 +379,24 @@ modWithDefinitions :: String -> [LLVMAST.Definition] -> LLVMAST.Module
 modWithDefinitions nm defs = LLVMAST.Module nm Nothing Nothing defs
 
 
+-- | Build an extern declaration definition from a given LPVM primitive.
+declareExtern :: Prim -> LLVMAST.Definition
+declareExtern (PrimForeign _ name _ args) =
+    external retty name fnargs
+    where
+      (inArgs, outArgs) = splitArgs args
+      retty = (fst . openPrimArg) outArg
+      outArg = head outArgs
+      fnargs = List.map makeExArg inArgs
+
+-- | Helper to make arguments for an extern declaration.
+makeExArg :: PrimArg -> (Type, LLVMAST.Name)
+makeExArg arg = let (ty, nm) = openPrimArg arg
+                in (ty, LLVMAST.Name nm)
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --
 ----------------------------------------------------------------------------
-
--- | Make 'show' not include quotes in certain contexts.
-show' :: Show a => a -> String
-show' s = read (show s)
 
 -- | Logging from the LLVMComp StateT Monad to Blocks.
 logBlocks :: String -> LLVMComp ()
@@ -367,3 +405,16 @@ logBlocks s = lift $ logMsg Blocks s
 -- | Logging from the Compiler monad to Blocks.
 logBlocks' :: String -> Compiler ()
 logBlocks' = logMsg Blocks
+
+-- | Make 'show' not include quotes when being used to name symbols.
+show' = sq . show
+
+sq :: String -> String
+sq s@[c] = s
+sq ('"':s)
+    | last s == '"'  = init s
+    | otherwise      = s
+sq ('\'':s)
+    | last s == '\'' = init s
+    | otherwise      = s
+sq s = s
