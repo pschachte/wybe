@@ -936,14 +936,13 @@ data ModuleImplementation = ModuleImplementation {
     modKnownResources :: Map Ident (Set ResourceSpec),
                                              -- ^Resources visible to this mod
     modKnownProcs:: Map Ident (Set ProcSpec),  -- ^Procs visible to this module
-    modExterns :: [LLVMAST.Definition]
+    modLLVM :: Maybe LLVMAST.Module  -- ^ Module's LLVM.General.AST.Module representation
     }
 
 emptyImplementation :: ModuleImplementation
 emptyImplementation =
     ModuleImplementation Map.empty Map.empty Map.empty Map.empty Map.empty
-                         Map.empty Map.empty Map.empty []
-
+                         Map.empty Map.empty Map.empty Nothing
 
 
 -- These functions hack around Haskell's terrible setter syntax
@@ -973,13 +972,7 @@ updateModProcsM :: (Map Ident [ProcDef] -> Compiler (Map Ident [ProcDef])) ->
                  ModuleImplementation -> Compiler ModuleImplementation
 updateModProcsM fn modimp = do
     procs' <- fn $ modProcs modimp
-    return $ modimp {modProcs = procs'}
-
--- |Update the list of module level extern definitions of a module implmentation           
-updateModExterns :: ([LLVMAST.Definition] -> [LLVMAST.Definition]) ->
-                    ModuleImplementation -> ModuleImplementation
-updateModExterns fn modimp = modimp { modExterns = fn $ modExterns modimp}
-                             
+    return $ modimp {modProcs = procs'}                             
                              
 -- |An identifier.
 type Ident = String

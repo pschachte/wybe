@@ -72,9 +72,14 @@ blockTransformModule thisMod =
         (\imp -> imp { modProcs = Map.union
                                   (Map.fromList $ zip names procs')
                                   (modProcs imp) })
-
+       -- Init LLVM Module and fill it
+       let llmod = newLLVMModule (show thisMod) procs'
+       updateImplementation (\imp -> imp { modLLVM = Just llmod })
+       logBlocks' $ showPretty llmod
        finishModule
        logBlocks' $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
+
+
 
 -- | Translate a ProcDef whose procImpln field is of the type ProcDefPrim, to
 -- ProcDefBlocks (LLVM form). Each ProcDef is converted into a Global Definition
@@ -83,13 +88,13 @@ translateProc :: ProcDef -> Compiler ProcDef
 translateProc proc =
     evalLLVMComp $ do
       let def@(ProcDefPrim proto body) = procImpln proc
-      logBlocks $ "Making definition of: "
-      logBlocks $ show def
+      -- logBlocks $ "Making definition of: "
+      -- logBlocks $ show def
       let args = primProtoParams proto
-      logBlocks $ "Args: " ++ (show args)
+      -- logBlocks $ "Args: " ++ (show args)
       body' <- compileBodyToBlocks args body
       let lldef = makeGlobalDefinition proto body'
-      logBlocks $ showPretty lldef
+      -- logBlocks $ showPretty lldef
       let procblocks = ProcDefBlocks proto lldef
       return $ proc { procImpln = procblocks}
 
@@ -105,7 +110,7 @@ makeGlobalDefinition proto bls = globalDefine retty label fnargs bls
       retty = case outp of
                 (Just (ty, nm)) -> ty
                 Nothing -> phantom_t
-      label = (show' . primProtoName) proto
+      label = primProtoName proto
       inputs = List.filter isInputParam params
       fnargs = List.map makeFnArg inputs
 
@@ -163,12 +168,14 @@ assignParam p =
 
 -- | Translate a Primitive statement (in clausal form) to a LLVM instruction.
 cgen :: Prim -> Codegen Operand
+
 -- | TODO: A primitive call
 cgen (PrimCall pspec args) =
     do let nm = LLVMAST.Name $ show (procSpecName pspec)
        ops <- mapM cgenArg args
        let ins = call (externf phantom_t nm) ops
        instr phantom_t ins
+
 -- | Foreign calls are resolved through numerous instruction maps which map
 -- function name to a correspoinding LLVM instruction wrapper defined in
 -- 'Codegen'. Two main maps are the ones containing Binary and Unary instructions
@@ -318,6 +325,31 @@ noteImplnSuperprocs _ (ProcDefSrc _) _ =
 noteImplnSuperprocs caller (ProcDefPrim _ body) procs = procs
 noteImplnSuperprocs _ (ProcDefBlocks _ _) _ =
   shouldnt "scanning already compiled code for calls"
+
+
+------------------------------------------------------------------------------
+-- -- * Creating LLVM AST module from global definitions                    --
+------------------------------------------------------------------------------
+
+-- | Initialize and fill a new LLVMAST.Module with the translated
+-- global definitions of LPVM procedures in a module.
+newLLVMModule :: String -> [[ProcDef]] -> LLVMAST.Module
+newLLVMModule name procs = let procs' = List.foldr (++) [] procs
+                               defs = List.map takeDefinition procs'
+                           in modWithDefinitions name defs
+
+-- | Pull out the LLVM Definition of a procedure.
+takeDefinition :: ProcDef -> LLVMAST.Definition
+takeDefinition p = case procImpln p of
+                     (ProcDefBlocks _ def) -> def
+                     _ -> error "No definition found."
+
+-- | Create a new LLVMAST.Module with the given name, and fill it with the
+-- given global definitions.
+modWithDefinitions :: String -> [LLVMAST.Definition] -> LLVMAST.Module
+modWithDefinitions nm defs = LLVMAST.Module nm Nothing Nothing defs
+
+
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

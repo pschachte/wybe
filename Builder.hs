@@ -290,8 +290,8 @@ compileModSCC mspecs = do
     logDump Optimise Optimise "OPTIMISATION"
     mapM_ blockTransformModule mspecs
     stopOnError $ "translating " ++ showModSpecs mspecs
-    -- mapM_ llvmEmitModule mspecs
-    -- stopOnError $ "emitting " ++ showModSpecs mspecs
+    mapM_ llvmEmitModule mspecs
+    stopOnError $ "emitting " ++ showModSpecs mspecs
     -- logDump Blocks Blocks "TRANSLATING TO LLVM"
 
     -- mods <- mapM getLoadedModule mods
