@@ -99,6 +99,7 @@ buildTarget force target = do
         let modname = takeBaseName target
         let dir = takeDirectory target
         built <- buildModuleIfNeeded force [modname] [dir]
+        codegenMod [modname]
         -- XXX prints nothing to be done even when dependencies were built
         -- XXX doesn't build executable even when dependencies were built
         if (built==False)
@@ -223,7 +224,6 @@ compileModule dir modspec params items = do
     mods <- exitModule -- may be empty list if module is mutually dependent
     logBuild $ "<=== finished compling module " ++ showModSpec modspec
     compileModSCC mods
-    codegenModSCC mods
 
 
 -- |Build executable from object file
@@ -301,12 +301,12 @@ compileModSCC mspecs = do
     --                         fromJust . modImplementation))
     return ()
 
-codegenModSCC :: [ModSpec] -> Compiler ()
-codegenModSCC mspecs =
-  do mapM_ blockTransformModule mspecs
-     stopOnError $ "translating " ++ showModSpecs mspecs
-     mapM_ llvmEmitModule mspecs
-     stopOnError $ "emitting " ++ showModSpecs mspecs
+codegenMod :: ModSpec -> Compiler ()
+codegenMod mspec =
+  do blockTransformModule mspec
+     stopOnError $ "translating " ++ showModSpec mspec
+     llvmEmitModule mspec
+     stopOnError $ "emitting " ++ showModSpec mspec
      return ()
 
 
