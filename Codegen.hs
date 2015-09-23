@@ -19,7 +19,7 @@ module Codegen (
   -- * Instructions
   instr, namedInstr,
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv,
-  cons, uitofp, fptoui
+  cons, uitofp, fptoui, icmp, fcmp
   -- * Testing
 
   ) where

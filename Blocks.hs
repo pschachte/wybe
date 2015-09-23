@@ -12,25 +12,27 @@ module Blocks
 import           AST
 import           Codegen
 import           Control.Monad
-import           Control.Monad.Trans          (lift, liftIO)
+import           Control.Monad.Trans                     (lift, liftIO)
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
-import           Data.Char                    (ord)
-import           Data.List                    as List
-import           Data.Map                     as Map
+import           Data.Char                               (ord)
+import           Data.List                               as List
+import           Data.Map                                as Map
 import           Data.Maybe
 import           Debug.Trace
-import qualified LLVM.General.AST             as LLVMAST
-import qualified LLVM.General.AST.Constant    as C
-import qualified LLVM.General.AST.Float       as F
+import qualified LLVM.General.AST                        as LLVMAST
+import qualified LLVM.General.AST.Constant               as C
+import qualified LLVM.General.AST.Float                  as F
+import qualified LLVM.General.AST.FloatingPointPredicate as FP
 import           LLVM.General.AST.Instruction
+import qualified LLVM.General.AST.IntegerPredicate       as IP
 import           LLVM.General.AST.Operand
 import           LLVM.General.AST.Type
 import           LLVM.General.Context
 import           LLVM.General.Module
 import           LLVM.General.PrettyPrint
-import           Options                      (LogSelection (Blocks))
+import           Options                                 (LogSelection (Blocks))
 
 ----------------------------------------------------------------------------
 -- LLVM Compiler Monad                                                    --
@@ -77,7 +79,7 @@ blockTransformModule thisMod =
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
-       --logBlocks' $ showPretty llmod
+       logBlocks' $ showPretty llmod
        finishModule
        logBlocks' $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
@@ -96,7 +98,6 @@ translateProc proc =
       logBlocks $ "Making definition of: "
       logBlocks $ show def
       let args = primProtoParams proto
-      -- logBlocks $ "Args: " ++ (show args)
       body' <- compileBodyToBlocks args body
       ex <- gets neededExterns
       let externs = List.map declareExtern ex
@@ -154,7 +155,6 @@ compileBodyToBlocks args body =
     do let codestate = execCodegen $ codegenBody args body
        let exs = externs codestate
        needExterns exs
-       logBlocks $ "Externs: " ++ (show exs)
        return $ createBlocks codestate
 
 
@@ -199,16 +199,21 @@ cgen prim@(PrimForeign lang name flags args)
                           3 -> cgenLLVMBinop name flags args
                           _ -> return $ localVar phantom_t "still have to make"
      | otherwise =
-         do addExtern prim
+         do addExtern prim     -- Mark the prim to form an extern declaration later
             let (inp, outp) = splitArgs args
-            let (outty, outnm) = openPrimArg $ head outp
+            let (outty, outnm) = openPrimArg outp
             let nm = LLVMAST.Name name
             inops <- mapM cgenArg inp
             let ins = call (externf outty nm) inops
-            outop <- namedInstr outty outnm ins
-            assign outnm outop
-            return outop
+            addInstruction ins outp
 
+
+addInstruction :: Instruction -> PrimArg -> Codegen Operand
+addInstruction ins outArg =
+     do let (outty, outnm) = openPrimArg outArg
+        outop <- namedInstr outty outnm ins
+        assign outnm outop
+        return outop
 
 -- | Translate a Binary primitive procedure into a binary llvm instruction, add the
 -- instruction to the current BasicBlock's instruction stack and emit the resulting
@@ -218,38 +223,32 @@ cgen prim@(PrimForeign lang name flags args)
 -- Operand of the instruction.
 cgenLLVMBinop :: ProcName -> [Ident] -> [PrimArg] -> Codegen Operand
 cgenLLVMBinop name flags args =
-    do let (inp, outp) = splitArgs args
-       -- There should be 2 items in inp list and one item in outp list
-       inops <- mapM cgenArg inp
-       case Map.lookup name llvmMapBinop of
-         (Just f) -> do let ins = (apply2 f inops)
-                        let (outty, outnm) = openPrimArg $ head outp
-                        outop <- namedInstr outty outnm ins
-                        assign outnm outop
-                        return outop
-         Nothing -> error "LLVM Instruction not found."
+    do let (inps, outp) = splitArgs args
+       inOps <- mapM cgenArg inps
+       case Map.lookup (withFlags name flags) llvmMapBinop of
+         (Just f) -> let ins = (apply2 f inOps) in addInstruction ins outp
+         Nothing -> error $ "LLVM Instruction not found: " ++ name
 
 -- | Similar to 'cgenLLVMBinop', but for unary operations on the 'llvmMapUnary'.
 cgenLLVMUnop :: ProcName -> [Ident] -> [PrimArg] -> Codegen Operand
 cgenLLVMUnop name flags args
     | name == "move" =
-        do let (inp, outp) = splitArgs args
-           -- Should be only one item in both inp and outp [Operand] list.
-           let (_, inpnm) = openPrimArg (head inp)
-           inop <- getVar inpnm
-           let (_, outnm) = openPrimArg (head outp)
-           assign outnm inop
-           return inop
+        do let (inps, outp) = splitArgs args
+           inOp <- cgenArg (head inps)
+           let (_, outnm) = openPrimArg outp
+           assign outnm inOp
+           return inOp
     | otherwise =
-        do let (inp, outp) = splitArgs args
-           inops <- mapM cgenArg inp
+        do let (inps, outp) = splitArgs args
+           inOps <- mapM cgenArg inps
            case Map.lookup name llvmMapUnop of
-             (Just f) -> do let ins = f (head inops)
-                            let (outty, outnm) = openPrimArg $ head outp
-                            outop <- namedInstr outty outnm ins
-                            assign outnm outop
-                            return outop
-             Nothing -> error "LLVM Instruction not found."
+             (Just f) -> let ins = f (head inOps) in addInstruction ins outp
+             Nothing -> error $ "LLVM Instruction not found : " ++ name
+
+
+withFlags :: ProcName -> [Ident] -> String
+withFlags p [] = p
+withFlags p f = p ++ " " ++ (List.intercalate " " f)
 
 -- | Apply Operands from the operand list (2 items) to the wrapped LLVM instruction
 -- from 'Codegen' Module.
@@ -259,17 +258,16 @@ apply2 f (a:b:[]) = f a b
 
 -- | Split primitive arguments into inputs and output arguments determined
 -- by their flow type.
-splitArgs :: [PrimArg] -> ([PrimArg], [PrimArg])
-splitArgs args = (inputs, outputs)
+splitArgs :: [PrimArg] -> ([PrimArg], PrimArg)
+splitArgs args = (inputs, output)
     where inputs = List.filter isInputP args
-          outputs = List.filter (not . isInputP) args
-          isInputP (ArgVar _ _ FlowOut _ _) = False
-          isInputP _ = True
+          output = head $ List.filter (not . isInputP) args
+          isInputP a = argFlowDirection a == FlowIn
 
 -- | Open a PrimArg into it's inferred type and string name.
 openPrimArg :: PrimArg -> (Type, String)
 openPrimArg (ArgVar nm ty _ _ _) = (typed ty, show nm)
-openPrimArg _ = error "Can't open!"
+openPrimArg a = error $ "Can't Open!: " ++ argDescription a ++ (show $ argFlowDirection a)
 
 -- | 'cgenArg' makes an Operand of the input argument. The argument may be:
 -- o input variable - lookup the symbol table to get it's Operand value.
@@ -305,8 +303,21 @@ llvmMapBinop =
             ("fadd", fadd),
             ("fsub", fsub),
             ("fmul", fmul),
-            ("fdiv", fdiv)
-            -- * Others
+            ("fdiv", fdiv),
+            -- * Comparisions
+            ("icmp eq", icmp IP.EQ),
+            ("icmp ne", icmp IP.NE),
+            ("icmp slt", icmp IP.SLT),
+            ("icmp sle", icmp IP.SLE),
+            ("icmp sgt", icmp IP.SGT),
+            ("icmp sge", icmp IP.SGE),
+            -- * Floating point comparisions
+            ("fcmp eq", fcmp FP.OEQ),
+            ("fcmp ne", fcmp FP.ONE),
+            ("fcmp slt", fcmp FP.OLT),
+            ("fcmp sle", fcmp FP.OLE),
+            ("fcmp sgt", fcmp FP.OGT),
+            ("fcmp sge", fcmp FP.OGE)
            ]
 
 -- | A map of unary llvm operations wrapped in the 'Codegen' module.
@@ -384,15 +395,18 @@ declareExtern :: Prim -> LLVMAST.Definition
 declareExtern (PrimForeign _ name _ args) =
     external retty name fnargs
     where
-      (inArgs, outArgs) = splitArgs args
+      (inArgs, outArg) = splitArgs args
       retty = (fst . openPrimArg) outArg
-      outArg = head outArgs
       fnargs = List.map makeExArg inArgs
 
 -- | Helper to make arguments for an extern declaration.
 makeExArg :: PrimArg -> (Type, LLVMAST.Name)
-makeExArg arg = let (ty, nm) = openPrimArg arg
-                in (ty, LLVMAST.Name nm)
+makeExArg arg = let ty = (typed . argType) arg
+                    nm = LLVMAST.UnName 0
+                in (ty, nm)
+
+
+
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --
