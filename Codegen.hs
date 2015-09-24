@@ -15,7 +15,7 @@ module Codegen (
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, localVar,
   -- * Types
-  int_t, phantom_t, float_t, char_t, ptr_t,
+  int_t, phantom_t, float_t, char_t, ptr_t, void_t, string_t,
   -- * Instructions
   instr, namedInstr,
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv,
@@ -63,8 +63,14 @@ ptr_t ty = PointerType ty (AddrSpace 0)
 phantom_t :: Type
 phantom_t = VoidType
 
+string_t :: Word64 -> Type
+string_t size = ArrayType size char_t
+
+void_t :: Type
+void_t = VoidType
+
 float_t :: Type
-float_t = FloatingPointType 32 IEEE
+float_t = FloatingPointType 64 IEEE
 
 char_t :: Type
 char_t = IntegerType 8
@@ -430,5 +436,5 @@ br val = terminator $ Do $ Br val []
 cbr :: Operand -> Name -> Name -> Codegen (Named Terminator)
 cbr cond tr fl = terminator $ Do $ CondBr cond tr fl []
 
-ret :: Operand -> Codegen (Named Terminator)
-ret val = terminator $ Do $ Ret (Just val) []
+ret :: Maybe Operand -> Codegen (Named Terminator)
+ret val = terminator $ Do $ Ret val []
