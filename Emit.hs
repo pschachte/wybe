@@ -82,8 +82,9 @@ runJIT mod = do
             mainfn <- EE.getFunction ee (LLVMAST.Name "main")
             case mainfn of
               Just fn -> do
+                putStrLn $ "Running: "
                 res <- run fn
-                putStrLn $ "Evaluated to: " ++ show res
+                putStrLn $ "Main returned: " ++ show res
               Nothing -> return ()
 
           -- Return the optimized module

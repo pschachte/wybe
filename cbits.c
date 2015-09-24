@@ -8,8 +8,12 @@ $ clang -fPIC -shared cbits.c -o cbits.so
 
 // putchard - putchar that takes a double and returns 0.
 void print_int(int X) {
-  putchar((char)X);
-  printf("Hello, world!");
+  printf("%d\n", X);
+  fflush(stdout);
+}
+
+void print_float(double X) {
+  printf("%f\n", X);
   fflush(stdout);
 }
 
