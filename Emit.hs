@@ -39,7 +39,6 @@ llvmEmitModule thisMod =
        maybeLLMod <- getModuleImplementationField modLLVM
        case maybeLLMod of
          (Just llmod) -> liftIO $ runJIT llmod
-         -- (Just llmod) -> liftIO $ codeemit llmod
          (Nothing) -> error "No LLVM Module Implementation"
        finishModule
 
