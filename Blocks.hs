@@ -405,7 +405,7 @@ cgenArg (ArgInt val _) = return $ cons (C.Int 32 val)
 cgenArg (ArgFloat val _) = return $ cons (C.Float $ F.Double val)
 cgenArg (ArgString s _) =
     do let conStr = (makeStringConstant s)
-       let len = (length s) + 2
+       let len = (length s) + 1
        let conType = array_t (fromIntegral len) char_t
        conName <- addGlobalConstant conType conStr
        let conPtr = C.GlobalReference conType conName
@@ -417,7 +417,7 @@ cgenArg (ArgChar c _) = return $ cons (C.Int 8 $ integerOrd c)
 -- | Convert a string into a constant array of constant integers.
 makeStringConstant :: String ->  C.Constant
 makeStringConstant s = C.Array char_t cs
-    where ns = List.map integerOrd (s ++ "\010\00")
+    where ns = List.map integerOrd (s ++ "\00")
           cs = List.map (C.Int 8) ns
 
 
