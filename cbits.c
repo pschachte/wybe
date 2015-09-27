@@ -17,12 +17,7 @@ void print_float(double X) {
   fflush(stdout);
 }
 
-void print_string(char *str) {
-  int i;
-  for (i = 0; i < 10; i++) {
-    printf("%c\n", str[0]);
-  }
-  printf("Test\n");
-  // printf("%s\n", str);
+void print_string(const char *s) {
+  puts(s);
   fflush(stdout);
 }
