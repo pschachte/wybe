@@ -8,14 +8,14 @@
 
 module Codegen (
   Codegen(..), LLVM(..), CodegenState(..), BlockState(..),
-  emptyModule, runLLVM, execCodegen, addExtern,
+  emptyModule, runLLVM, execCodegen, addExtern, addGlobalConstant,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
   call, externf, ret, globalDefine, external,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, localVar,
   -- * Types
-  int_t, phantom_t, float_t, char_t, ptr_t, void_t, string_t,
+  int_t, phantom_t, float_t, char_t, ptr_t, void_t, string_t, array_t,
   -- * Instructions
   instr, namedInstr,
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv,
@@ -37,6 +37,7 @@ import           Control.Monad.State
 import           LLVM.General.AST
 import qualified LLVM.General.AST                        as LLVMAST
 import           LLVM.General.AST.Global
+import qualified LLVM.General.AST.Global                 as G
 
 import           LLVM.General.AST.AddrSpace
 import qualified LLVM.General.AST.Attribute              as A
@@ -75,6 +76,9 @@ float_t = FloatingPointType 64 IEEE
 char_t :: Type
 char_t = IntegerType 8
 
+array_t :: Word64 -> Type -> Type
+array_t = ArrayType
+
 ----------------------------------------------------------------------------
 -- Codegen State                                                          --
 ----------------------------------------------------------------------------
@@ -96,6 +100,7 @@ data CodegenState
       , count        :: Word                    -- ^ Count for temporary operands
       , names        :: Names                   -- ^ Name supply
       , externs      :: [Prim] -- ^ Primitives which need to be declared
+      , globalVars   :: [Global] -- ^ Needed global variables/constants
       } deriving Show
 
 -- | 'BlockState' will generate the code for basic blocks inside of
@@ -126,12 +131,30 @@ fresh = do
   modify $ \s -> s { count = 1 + ix }
   return (ix + 1)
 
-
+-- | Update the list of externs which will be needed. The 'Prim' will be
+-- converted to an extern declaration later.
 addExtern :: Prim -> Codegen ()
 addExtern p =
     do ex <- gets externs
        modify $ \s -> s { externs = p : ex }
        return ()
+
+-- | Creates a Global value for a constant, given the type and appends it
+-- to the CodegenState list. This list will be used to convert these Global
+-- values into Global module level definitions. A UnName is generated too
+-- for reference.
+addGlobalConstant :: LLVMAST.Type -> C.Constant -> Codegen Name
+addGlobalConstant ty con =
+    do gs <- gets globalVars
+       n <- fresh
+       let ref = UnName n
+       let gvar = globalVariableDefaults { name = ref
+                                         , isConstant = True
+                                         , G.type' = ty
+                                         , initializer = Just con }
+       modify $ \s -> s { globalVars = gvar : gs }
+       return ref
+
 
 ----------------------------------------------------------------------------
 -- LLVM State Monad                                                       --
@@ -198,7 +221,7 @@ emptyBlock i = BlockState i [] Nothing
 -- | Initialize an empty CodegenState for a new Definition.
 emptyCodegen :: CodegenState
 emptyCodegen
-    = CodegenState (Name entryBlockName) Map.empty [] 1 0 Map.empty []
+    = CodegenState (Name entryBlockName) Map.empty [] 1 0 Map.empty [] []
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name

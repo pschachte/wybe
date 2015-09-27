@@ -25,6 +25,7 @@ import qualified LLVM.General.AST                        as LLVMAST
 import qualified LLVM.General.AST.Constant               as C
 import qualified LLVM.General.AST.Float                  as F
 import qualified LLVM.General.AST.FloatingPointPredicate as FP
+import qualified LLVM.General.AST.Global                 as G
 import           LLVM.General.AST.Instruction
 import qualified LLVM.General.AST.IntegerPredicate       as IP
 import           LLVM.General.AST.Operand
@@ -44,7 +45,8 @@ type LLVMComp = StateT LLVMCompState Compiler
 -- | Hold some state while converting a AST.Module's procedures into LLVMAST
 -- definitions.
 data LLVMCompState = LLVMCompState {
-      neededExterns :: [Prim] -- ^ collect required extern declarations
+      neededExterns    :: [Prim] -- ^ collect required extern declarations
+    , neededGlobalVars :: [G.Global] -- ^ collect required global constants
     }
 
 -- | Update the LLVMCompState list of primitives which require extern
@@ -55,9 +57,19 @@ needExterns ps =
        modify $ \s -> s { neededExterns = ex ++ ps }
        return ()
 
+-- | Update the LLVMCompState list of global variables. These global variables
+-- will be defined at the top of a module. Global variables get implicitely
+-- allocated and will be referenced using an element pointer wherever needed.
+needGlobalVars :: [G.Global] -> LLVMComp ()
+needGlobalVars gs =
+    do new <- gets neededGlobalVars
+       modify $ \s -> s { neededGlobalVars = new ++ gs }
+       return ()
+
 -- | Initialize the LLVMCompState
 initLLVMComp :: LLVMCompState
-initLLVMComp = LLVMCompState []
+initLLVMComp = LLVMCompState [] []
+
 
 evalLLVMComp :: LLVMComp t -> Compiler t
 evalLLVMComp llcomp =
@@ -91,6 +103,9 @@ blockTransformModule thisMod =
 -- Translated procedures (ProcDefBlocks ...) can optionally have a list
 -- of extern declarations (which are also global definitions) if any primitive
 -- is going to call some foreign function (mostly C).
+-- Translated procedures will also require some global variable/constant declarations
+-- which is represented as G.Global values in the neededGlobalVars field of
+-- LLVMCompstate. All in all, externs and globals go on the top of the module.
 translateProc :: ProcDef -> Compiler ProcDef
 translateProc proc =
     evalLLVMComp $ do
@@ -100,10 +115,12 @@ translateProc proc =
       let args = primProtoParams proto
       body' <- compileBodyToBlocks args body
       ex <- gets neededExterns
+      gs <- gets neededGlobalVars
       let externs = List.map declareExtern ex
+      let globals = List.map LLVMAST.GlobalDefinition gs
       let lldef = makeGlobalDefinition proto body'
       -- logBlocks $ showPretty lldef
-      let procblocks = ProcDefBlocks proto lldef externs
+      let procblocks = ProcDefBlocks proto lldef (externs ++ globals)
       return $ proc { procImpln = procblocks}
 
 
@@ -150,7 +167,8 @@ isPhantomParam p = case paramTypeName p of
                      "phantom" -> True
                      _ -> False
 
-
+-- | Generate a label to name the global functions. The top level procedure
+-- will be labelled main.
 makeLabel :: String -> String
 makeLabel name
     | name == "" = "main"
@@ -163,14 +181,20 @@ makeLabel name
 -- is useful in leveraging the existing SSA form in the LPVM rather than generating
 -- more unique names. Mostly all primitive's variable arguments can be resolved from
 -- the symbol table.
+-- Each procedure might also need some module level extern declarations and
+-- global constants which are pulled and recorded, to be defined later when the whole
+-- module is built.
 compileBodyToBlocks :: [PrimParam] -> ProcBody -> LLVMComp [LLVMAST.BasicBlock]
 compileBodyToBlocks args body =
     do let codestate = execCodegen $ codegenBody args body
        let exs = externs codestate
+       let gVars = globalVars codestate
        needExterns exs
+       needGlobalVars gVars
        return $ createBlocks codestate
 
-
+-- | Generate basic blocks for a procedure body. The first block is named 'entry'
+-- by default. All parameters go on the symbol table (output too).
 codegenBody :: [PrimParam] -> ProcBody -> Codegen ()
 codegenBody args body =
     do entry <- addBlock entryBlockName
@@ -224,6 +248,8 @@ cgen prim@(PrimForeign lang name flags args)
             res <- addInstruction ins args
             return (Just res)
 
+cgen PrimNop = error "No primitive found."
+
 -- | Translate a Binary primitive procedure into a binary llvm instruction, add the
 -- instruction to the current BasicBlock's instruction stack and emit the resulting
 -- Operand. Reads the 'llvmMapBinop' Map.
@@ -239,7 +265,13 @@ cgenLLVMBinop name flags args =
                      in addInstruction ins args >>= (return . Just)
          Nothing -> error $ "LLVM Instruction not found: " ++ name
 
+
 -- | Similar to 'cgenLLVMBinop', but for unary operations on the 'llvmMapUnary'.
+-- There is no LLVM move instruction, a special case has to be made for it. The
+-- special move instruction takes one input const/var param, one output variable,
+-- and assigns the output variable operand the input operant at the front of the
+-- symbol table. The next time the output name is referenced, the symbol table will
+-- return the latest assignment to it.
 cgenLLVMUnop :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
 cgenLLVMUnop name flags args
     | name == "move" =
@@ -253,9 +285,13 @@ cgenLLVMUnop name flags args
                          in addInstruction ins args >>= (return . Just)
              Nothing -> error $ "LLVM Instruction not found : " ++ name
 
------------------------------------------------------------------------p-----
+----------------------------------------------------------------------------
 -- Helpers for dealing with instructions                                  --
 ----------------------------------------------------------------------------
+
+-- | The 'maybeMove' instruction creates operands for both the input and
+-- output parameter and assigns the out operand the input operand on the
+-- reference symbol table.
 maybeMove :: [PrimArg] -> Maybe String -> Codegen (Maybe Operand)
 maybeMove _ Nothing = return Nothing
 maybeMove [] _ = return Nothing
@@ -266,6 +302,10 @@ maybeMove (a:[]) (Just nm) =
 maybeMove _ _ = error $ "Move instruction received more than one input!"
 
 
+-- | Append an 'Instruction' to the current basic block's instruction stack.
+-- The return type of the operand value generated by the instruction call is
+-- inferred depending on the primitive arguments. The name is inferred from the
+-- output argument's name (LPVM is in SSA form).
 addInstruction :: Instruction -> [PrimArg] -> Codegen Operand
 addInstruction ins args =
      do let outty = primOutputType args
@@ -276,6 +316,9 @@ addInstruction ins args =
                           return outop
           Nothing -> instr outty ins
 
+-- | Generate an expanding instruction name using the passed flags. This is useful
+-- to augment a simple instruction. (Ex: compare instructions can have the
+-- comparision type specified as a flag).
 withFlags :: ProcName -> [Ident] -> String
 withFlags p [] = p
 withFlags p f = p ++ " " ++ (List.intercalate " " f)
@@ -284,6 +327,7 @@ withFlags p f = p ++ " " ++ (List.intercalate " " f)
 -- from 'Codegen' Module.
 apply2 :: (Operand -> Operand -> Instruction) -> [Operand] -> Instruction
 apply2 f (a:b:[]) = f a b
+apply2 _ [] = error $ "Not a binary operation."
 
 
 
@@ -341,23 +385,41 @@ splitArgs args = (inputs, output)
 -- | Open a PrimArg into it's inferred type and string name.
 openPrimArg :: PrimArg -> (Type, String)
 openPrimArg (ArgVar nm ty _ _ _) = (typed ty, show nm)
-openPrimArg a = error $ "Can't Open!: " ++ argDescription a ++ (show $ argFlowDirection a)
+openPrimArg a = error $ "Can't Open!: "
+                ++ argDescription a
+                ++ (show $ argFlowDirection a)
+
+
 
 -- | 'cgenArg' makes an Operand of the input argument. The argument may be:
 -- o input variable - lookup the symbol table to get it's Operand value.
--- o Constant - Make a constant Operand according to the type.
+-- o Constant - Make a constant Operand according to the type:
+-- o String constants: A string constant is an constant Array Type of [N x i8].
+--   This will have to be declared as a global constant to get implicit memory
+--   allocation and then be referenced with a pointer (GetElementPtr). To make
+--   it a global declaration 'addGlobalConstant' creates a G.Global Value for it,
+--   generating a UnName name for it.
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
 cgenArg (ArgVar nm _ _ _ _) = getVar (show nm)
 cgenArg (ArgInt val _) = return $ cons (C.Int 32 val)
 cgenArg (ArgFloat val _) = return $ cons (C.Float $ F.Double val)
-cgenArg (ArgString s _) = return $ cons (makeStringConstant s)
+cgenArg (ArgString s _) =
+    do let conStr = (makeStringConstant s)
+       let len = (length s) + 2
+       let conType = array_t (fromIntegral len) char_t
+       conName <- addGlobalConstant conType conStr
+       let conPtr = C.GlobalReference conType conName
+       let conElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
+       return $ cons conElem
 cgenArg (ArgChar c _) = return $ cons (C.Int 8 $ integerOrd c)
+
 
 -- | Convert a string into a constant array of constant integers.
 makeStringConstant :: String ->  C.Constant
 makeStringConstant s = C.Array char_t cs
     where ns = List.map integerOrd (s ++ "\010\00")
           cs = List.map (C.Int 8) ns
+
 
 -- | 'integerOrd' performs ord but returns an Integer type
 integerOrd :: Char -> Integer
@@ -415,7 +477,7 @@ typed ty = case (typeName ty) of
              "char"    -> char_t
              "float"   -> float_t
              "double"  -> float_t
-             "string"  -> string_t 10
+             "string"  -> ptr_t char_t
              "phantom" -> phantom_t
              _         -> phantom_t
 
@@ -458,12 +520,12 @@ declareExtern (PrimForeign _ name _ args) =
     where
       retty = primOutputType args
       fnargs = List.map makeExArg (primInputs args)
-
 declareExtern (PrimCall pspec args) =
     external retty (show pspec) fnargs
     where
       retty = primOutputType args
       fnargs = List.map makeExArg (primInputs args)
+declareExtern PrimNop = error "Can't declare extern for PrimNop."
 
 -- | Helper to make arguments for an extern declaration.
 makeExArg :: PrimArg -> (Type, LLVMAST.Name)
