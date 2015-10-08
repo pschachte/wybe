@@ -1,6 +1,5 @@
 module Emit where
 
-
 import           AST
 import           Codegen
 import           Control.Monad
@@ -30,21 +29,76 @@ run :: FunPtr a -> IO Double
 run fn = haskFun (castFunPtr fn :: FunPtr (IO Double))
 
 
-type LLVMEmit = StateT LLVMAST.Module Compiler
+-- | Lookup the 'Target' for the given target triple.
+getTarget :: IO (Target, String)
+getTarget =
+    do initializeAllTargets
+       let triple = "x86_64-apple-macosx10.11.1"
+       liftError $ lookupTarget Nothing triple
 
 
-llvmEmitModule :: ModSpec -> Compiler AST.Module
-llvmEmitModule thisMod =
+-- | Create an Object file of the LLVMAST.Module representation of the
+-- given module specification using the default object code generation of
+-- llvm.
+llvmEmitToObjectFile :: ModSpec
+                     -> FilePath
+                     -> Compiler AST.Module
+llvmEmitToObjectFile thisMod fpath=
+    do reenterModule thisMod
+       maybeLLMod <- getModuleImplementationField modLLVM
+       let ofile = File fpath
+       case maybeLLMod of
+         (Just llmod) -> liftIO $ makeObjFile ofile llmod
+         (Nothing) -> error "No LLVM Module Implementation"
+       finishModule
+
+-- | Drop an LLVMAST.Module (haskell) into a Module.Module (C++),
+-- and write it as an object file.
+makeObjFile :: File -> LLVMAST.Module -> IO ()
+makeObjFile file llmod =
+    withContext $ \context ->
+        liftError $ withModuleFromAST context llmod $ \m ->
+            liftError $ withHostTargetMachine $ \tm ->
+                liftError $ writeObjectToFile tm file m
+
+-- | Create a LLVM Bitcode file of the LLVMAST.Module representation of
+-- the given module.
+llvmEmitToBitcodeFile :: ModSpec -> FilePath -> Compiler AST.Module
+llvmEmitToBitcodeFile thisMod fpath =
+    do reenterModule thisMod
+       maybeLLMod <- getModuleImplementationField modLLVM
+       let ofile = File fpath
+       case maybeLLMod of
+         (Just llmod) -> liftIO $ makeBCFile ofile llmod
+         (Nothing) -> error "No LLVM Module Implementation"
+       finishModule
+
+-- | Drop an LLVMAST.Module (hasjell) intop a Mod.Module (C++)
+-- represenation and write is a bitcode file.
+makeBCFile :: File -> LLVMAST.Module -> IO ()
+makeBCFile file llmod =
+    withContext $ \context ->
+        liftError $ withModuleFromAST context llmod $ \m ->
+            liftError $ writeBitcodeToFile file m
+
+
+-- | Emit the llvm IR of the LLVMAST.Module representation of the given
+-- module tp stdout and use a JIT compiler+optimiser to execute it.
+llvmEmitToIO :: ModSpec -> Compiler AST.Module
+llvmEmitToIO thisMod =
     do reenterModule thisMod
        maybeLLMod <- getModuleImplementationField modLLVM
        case maybeLLMod of
          (Just llmod) -> liftIO $ runJIT llmod
+         -- (Just llmod) -> liftIO $ codeemit llmod
          (Nothing) -> error "No LLVM Module Implementation"
        finishModule
 
+-- | Handle the ExceptT monad. If there is an error, it is better to fail.
 liftError :: ExceptT String IO a -> IO a
 liftError = runExceptT >=> either fail return
 
+-- | Emit the llvm IR version of the LLVMAST.Module to IO
 codeemit :: LLVMAST.Module -> IO String
 codeemit mod =
     withContext $ \context ->
@@ -54,6 +108,7 @@ codeemit mod =
                putStrLn llstr
                return llstr
 
+-- | Initialize the JIT compiler under the IO monad.
 jit :: Context -> (EE.MCJIT -> IO a) -> IO a
 jit c = EE.withMCJIT c optlevel model ptrelim fastins
   where
@@ -62,10 +117,14 @@ jit c = EE.withMCJIT c optlevel model ptrelim fastins
     ptrelim  = Nothing -- frame pointer elimination
     fastins  = Nothing -- fast instruction selection
 
+-- | Setup the set of passes the JIT will be using for optimisations.
 passes :: PassSetSpec
 passes = defaultCuratedPassSetSpec { optLevel = Just 3 }
 
 
+-- | Convert a LLVMAST.Module representation to LLVM IR and run it with a JIT
+-- compiler+optimiser. The running and emitting is done to stdout. The JIT will
+-- look for the function `main` to execute.
 runJIT :: LLVMAST.Module -> IO (Either String LLVMAST.Module)
 runJIT mod = do
   withContext $ \context ->
@@ -90,6 +149,9 @@ runJIT mod = do
           -- Return the optimized module
           return optmod
 
+----------------------------------------------------------------------------
+-- Logging                                                                --
+----------------------------------------------------------------------------
 
 logLLVM :: String -> Compiler ()
 logLLVM s = logMsg Emit s
