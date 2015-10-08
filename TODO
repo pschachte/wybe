@@ -38,3 +38,8 @@ o Common sub-expression elimination
 o Inter-procedure common sub-expression elimination
 o Code hoisting
 o Destructive update transformation (CTGC)
+
+
+Blocks:
+o Label supply for generating block labels on the fly
+o Object file generation
