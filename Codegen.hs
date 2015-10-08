@@ -9,9 +9,11 @@
 module Codegen (
   Codegen(..), LLVM(..), CodegenState(..), BlockState(..),
   emptyModule, runLLVM, execCodegen, addExtern, addGlobalConstant,
+  getModName,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
-  call, externf, ret, globalDefine, external,
+  call, externf, ret, globalDefine, external, phi, br, cbr,
+  getBlock, retNothing,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, localVar,
   -- * Types
@@ -93,13 +95,14 @@ type Names = Map.Map String Int
 -- | 'CodegenState' will hold a global Definition level code.
 data CodegenState
     = CodegenState {
-        currentBlock :: Name                    -- ^ Name of the active block to append to
+        currentBlock :: Name     -- ^ Name of the active block to append to
       , blocks       :: Map.Map Name BlockState -- ^ Blocks for function
-      , symtab       :: SymbolTable             -- ^ Local symbol table of a function
-      , blockCount   :: Int                     -- ^ Incrementing count of basic blocks
-      , count        :: Word                    -- ^ Count for temporary operands
-      , names        :: Names                   -- ^ Name supply
-      , externs      :: [Prim] -- ^ Primitives which need to be declared
+      , symtab       :: SymbolTable -- ^ Local symbol table of a function
+      , blockCount   :: Int      -- ^ Incrementing count of basic blocks
+      , count        :: Word     -- ^ Count for temporary operands
+      , names        :: Names    -- ^ Name supply
+      , modName      :: String   -- ^ Module Name being worked on
+      , externs      :: [Prim]   -- ^ Primitives which need to be declared
       , globalVars   :: [Global] -- ^ Needed global variables/constants
       } deriving Show
 
@@ -121,8 +124,9 @@ data BlockState
 newtype Codegen a = Codegen { runCodegen :: State CodegenState a }
     deriving (Functor, Applicative, Monad, MonadState CodegenState)
 
-execCodegen :: Codegen a -> CodegenState
-execCodegen m = execState (runCodegen m) emptyCodegen
+execCodegen :: String  -- ^ Module Name
+            -> Codegen a -> CodegenState
+execCodegen modName m = execState (runCodegen m) (emptyCodegen modName)
 
 -- | Gets a new incremental word suffix for a temporary local operands
 fresh :: Codegen Word
@@ -154,6 +158,9 @@ addGlobalConstant ty con =
                                          , initializer = Just con }
        modify $ \s -> s { globalVars = gvar : gs }
        return ref
+
+getModName :: Codegen String
+getModName = do gets modName
 
 
 ----------------------------------------------------------------------------
@@ -219,9 +226,11 @@ emptyBlock :: Int -> BlockState
 emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
-emptyCodegen :: CodegenState
-emptyCodegen
-    = CodegenState (Name entryBlockName) Map.empty [] 1 0 Map.empty [] []
+emptyCodegen :: String  -- ^ The Module Name
+             -> CodegenState
+emptyCodegen modName
+    = CodegenState (Name entryBlockName)
+      Map.empty [] 1 0 Map.empty modName [] []
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name
@@ -461,3 +470,9 @@ cbr cond tr fl = terminator $ Do $ CondBr cond tr fl []
 
 ret :: Maybe Operand -> Codegen (Named Terminator)
 ret val = terminator $ Do $ Ret val []
+
+retNothing :: Codegen (Named Terminator)
+retNothing = terminator $ Do $ Ret Nothing []
+
+phi :: Type -> [(Operand, Name)] -> Codegen Operand
+phi ty incoming = instr ty $ Phi ty incoming []
