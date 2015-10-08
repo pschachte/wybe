@@ -1,3 +1,4 @@
-public proc test(?result:int)
+public proc test(?result:int)       
        ?result = result + 1
+       
 end

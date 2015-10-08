@@ -1,5 +1,7 @@
-#public func toCelsius(f:float):float = (f - 32.0) / 1.8
-#print(toCelsius(95.0))
-print("hello world")
+public func toCelsius(f:float):float = (f - 32.0) / 1.8
+print(toCelsius(95.0))
+
+
+
 
 
