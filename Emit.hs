@@ -19,9 +19,11 @@ import           LLVM.General.Transforms
 
 import qualified LLVM.General.ExecutionEngine as EE
 
+import           System.Directory
+import           System.Process
 
+import           Config                       (linkerArgs, sharedLibs)
 import           Options                      (LogSelection (Emit))
-
 
 foreign import ccall "dynamic" haskFun :: FunPtr (IO Double) -> (IO Double)
 
@@ -29,21 +31,11 @@ run :: FunPtr a -> IO Double
 run fn = haskFun (castFunPtr fn :: FunPtr (IO Double))
 
 
--- | Lookup the 'Target' for the given target triple.
-getTarget :: IO (Target, String)
-getTarget =
-    do initializeAllTargets
-       let triple = "x86_64-apple-macosx10.11.1"
-       liftError $ lookupTarget Nothing triple
-
-
 -- | Create an Object file of the LLVMAST.Module representation of the
 -- given module specification using the default object code generation of
 -- llvm.
-llvmEmitToObjectFile :: ModSpec
-                     -> FilePath
-                     -> Compiler AST.Module
-llvmEmitToObjectFile thisMod fpath=
+emitObjectFile :: ModSpec -> FilePath -> Compiler ()
+emitObjectFile thisMod fpath =
     do reenterModule thisMod
        maybeLLMod <- getModuleImplementationField modLLVM
        let ofile = File fpath
@@ -51,6 +43,7 @@ llvmEmitToObjectFile thisMod fpath=
          (Just llmod) -> liftIO $ makeObjFile ofile llmod
          (Nothing) -> error "No LLVM Module Implementation"
        finishModule
+       return ()
 
 -- | Drop an LLVMAST.Module (haskell) into a Module.Module (C++),
 -- and write it as an object file.
@@ -63,8 +56,8 @@ makeObjFile file llmod =
 
 -- | Create a LLVM Bitcode file of the LLVMAST.Module representation of
 -- the given module.
-llvmEmitToBitcodeFile :: ModSpec -> FilePath -> Compiler AST.Module
-llvmEmitToBitcodeFile thisMod fpath =
+emitBitcodeFile :: ModSpec -> FilePath -> Compiler ()
+emitBitcodeFile thisMod fpath =
     do reenterModule thisMod
        maybeLLMod <- getModuleImplementationField modLLVM
        let ofile = File fpath
@@ -72,6 +65,7 @@ llvmEmitToBitcodeFile thisMod fpath =
          (Just llmod) -> liftIO $ makeBCFile ofile llmod
          (Nothing) -> error "No LLVM Module Implementation"
        finishModule
+       return ()
 
 -- | Drop an LLVMAST.Module (hasjell) intop a Mod.Module (C++)
 -- represenation and write is a bitcode file.
@@ -80,6 +74,30 @@ makeBCFile file llmod =
     withContext $ \context ->
         liftError $ withModuleFromAST context llmod $ \m ->
             liftError $ writeBitcodeToFile file m
+
+
+-- | Create an Object file of the LLVMAST.Module representation of the
+-- given module specification using the default object code generation of
+-- llvm.
+emitAssemblyFile :: ModSpec -> FilePath -> Compiler ()
+emitAssemblyFile thisMod fpath =
+    do reenterModule thisMod
+       maybeLLMod <- getModuleImplementationField modLLVM
+       let ofile = File fpath
+       case maybeLLMod of
+         (Just llmod) -> liftIO $ makeAssemblyFile ofile llmod
+         (Nothing) -> error "No LLVM Module Implementation"
+       finishModule
+       return ()
+
+-- | Drop an LLVMAST.Module (haskell) into a Module.Module (C++),
+-- and write it as an object file.
+makeAssemblyFile :: File -> LLVMAST.Module -> IO ()
+makeAssemblyFile file llmod =
+    withContext $ \context ->
+        liftError $ withModuleFromAST context llmod $ \m ->
+            liftError $ withHostTargetMachine $ \tm ->
+                liftError $ writeLLVMAssemblyToFile file m
 
 
 -- | Emit the llvm IR of the LLVMAST.Module representation of the given
@@ -148,6 +166,33 @@ runJIT mod = do
 
           -- Return the optimized module
           return optmod
+
+
+-- |Build executable from object file
+--   XXX not yet implemented
+buildExecutable :: ModSpec -> FilePath -> Compiler ()
+buildExecutable thisMod fpath =
+    do reenterModule thisMod
+       maybeLLMod <- getModuleImplementationField modLLVM
+       let objFileName = (fpath ++ ".o")
+       case maybeLLMod of
+         (Just llmod) ->
+             do liftIO $ makeObjFile (File objFileName) llmod
+                logLLVM $ "Built object file: " ++ objFileName
+                liftIO $ makeExec fpath
+                logLLVM $ "Built executable: " ++ fpath
+         (Nothing) -> message Error "No LLVM Module Implementation" Nothing
+       finishModule
+       return ()
+
+makeExec :: FilePath -> IO ()
+makeExec execFile =
+    do dir <- getCurrentDirectory
+       let objFile = (execFile ++ ".o")
+       let args = [objFile] ++ sharedLibs ++ linkerArgs
+                  ++ ["-o", execFile]
+       createProcess (proc "ld" args)
+       return ()
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

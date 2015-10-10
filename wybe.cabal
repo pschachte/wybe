@@ -22,3 +22,4 @@ executable wybemk
                , parsec
                , transformers
                , old-time
+               , process

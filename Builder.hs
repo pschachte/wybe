@@ -105,7 +105,9 @@ buildTarget force target = do
         if (built==False)
           then (liftIO . putStrLn) $ "Nothing to be done for " ++ target
           else
-            when (tType == ExecutableFile) (buildExecutable target modname)
+            do when (tType == ExecutableFile) (buildExecutable [modname] target)
+               when (tType == ObjectFile) (emitObjectFile [modname] target)
+               when (tType == BitcodeFile) (emitBitcodeFile [modname] target)
 
 
 -- |Compile or load a module dependency.
@@ -226,13 +228,6 @@ compileModule dir modspec params items = do
     compileModSCC mods
 
 
--- |Build executable from object file
---   XXX not yet implemented
-buildExecutable :: FilePath -> Ident -> Compiler ()
-buildExecutable file _ =
-    message Error ("can't build executable " ++ file ++ " yet") Nothing
-
-
   -- |Load module export info from compiled file
 --   XXX not yet implemented
 loadModule :: FilePath -> Compiler ()
@@ -305,8 +300,6 @@ codegenMod :: ModSpec -> Compiler ()
 codegenMod mspec =
   do blockTransformModule mspec
      stopOnError $ "translating " ++ showModSpec mspec
-     llvmEmitModule mspec
-     stopOnError $ "emitting " ++ showModSpec mspec
      return ()
 
 
@@ -400,7 +393,8 @@ handleModImports modSCC mod = do
 
 -- |The different sorts of files that could be specified on the
 --  command line.
-data TargetType = InterfaceFile | ObjectFile | ExecutableFile | UnknownFile
+data TargetType = InterfaceFile | ObjectFile | ExecutableFile
+                | UnknownFile | BitcodeFile
                 deriving (Show,Eq)
 
 
@@ -411,6 +405,7 @@ targetType filename
   | ext' == interfaceExtension  = InterfaceFile
   | ext' == objectExtension     = ObjectFile
   | ext' == executableExtension = ExecutableFile
+  | ext' == bitcodeExtension    = BitcodeFile
   | otherwise                  = UnknownFile
       where ext' = dropWhile (=='.') $ takeExtension filename
 
