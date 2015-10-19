@@ -284,11 +284,6 @@ compileModSCC mspecs = do
     fixpointProcessSCC optimiseMod mspecs
     stopOnError $ "optimising " ++ showModSpecs mspecs
     logDump Optimise Optimise "OPTIMISATION"
-    -- mapM_ blockTransformModule mspecs
-    -- stopOnError $ "translating " ++ showModSpecs mspecs
-    -- mapM_ llvmEmitModule mspecs
-    -- stopOnError $ "emitting " ++ showModSpecs mspecs
-    -- logDump Blocks Blocks "TRANSLATING TO LLVM"
 
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
