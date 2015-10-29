@@ -84,10 +84,7 @@ blockTransformModule :: ModSpec -> Compiler ()
 blockTransformModule thisMod =
     do reenterModule thisMod
        let modName = showModSpec thisMod
-       logBlocks' "------------------------------"
        logBlocks' $ "----------- Translating Mod: " ++ modName
-       logBlocks' "------------------------------"
-
        (names, procs) <- fmap unzip $
                          getModuleImplementationField (Map.toList . modProcs)
        procs' <- mapM (mapM $ translateProc modName) procs

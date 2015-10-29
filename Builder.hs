@@ -100,8 +100,6 @@ buildTarget force target = do
         let dir = takeDirectory target
         built <- buildModuleIfNeeded force [modname] [dir]
         codegenMod [modname]
-        -- XXX prints nothing to be done even when dependencies were built
-        -- XXX doesn't build executable even when dependencies were built
         if (built==False)
           then (liftIO . putStrLn) $ "Nothing to be done for " ++ target
           else
@@ -284,7 +282,9 @@ compileModSCC mspecs = do
     fixpointProcessSCC optimiseMod mspecs
     stopOnError $ "optimising " ++ showModSpecs mspecs
     logDump Optimise Optimise "OPTIMISATION"
-
+    -- Create an LLVMAST.Module represtation
+    mapM_ blockTransformModule mspecs
+    stopOnError $ "translating " ++ showModSpecs mspecs
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs .

@@ -31,15 +31,15 @@ run :: FunPtr a -> IO Double
 run fn = haskFun (castFunPtr fn :: FunPtr (IO Double))
 
 
-
-withModuleLLVM :: ModSpec -> FilePath
-               -> (LLVMAST.Module -> IO ())
-               -> Compiler ()
-withModuleLLVM thisMod fpath emitter =
+-- | Bracket matter to pull an LLVM AST Module representation of a
+-- LPVM module specification, and run some action on it under the compiler
+-- monad.
+withModuleLLVM :: ModSpec -> (LLVMAST.Module -> IO ()) -> Compiler ()
+withModuleLLVM thisMod action =
   do reenterModule thisMod
      maybeLLMod <- getModuleImplementationField modLLVM
      case maybeLLMod of
-       (Just llmod) -> liftIO $ emitter llmod
+       (Just llmod) -> liftIO $ action llmod
        (Nothing) -> error "No LLVM Module Implementation"
      finishModule
      return ()
@@ -47,17 +47,23 @@ withModuleLLVM thisMod fpath emitter =
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target object file.
 emitObjectFile :: ModSpec -> FilePath -> Compiler ()
-emitObjectFile m f = withModuleLLVM m f (makeObjFile f)
+emitObjectFile m f =
+  do logEmit $ "Emitting object file for " ++ (showModSpec m)
+     withModuleLLVM m f (makeObjFile f)
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Bitcode file.
 emitBitcodeFile :: ModSpec -> FilePath -> Compiler ()
-emitBitcodeFile m f = withModuleLLVM m f (makeBCFile f)
+emitBitcodeFile m f =
+  do logEmit $ "Emitting bitcode file for " ++ (showModSpec m)
+     withModuleLLVM m f (makeBCFile f)
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Assembly file.
 emitAssemblyFile :: ModSpec -> FilePath -> Compiler ()
-emitAssemblyFile m f = withModuleLLVM m f (makeAssemblyFile f)
+emitAssemblyFile m f =
+  do logEmit $ "Emitting assembly file for " ++ (showModSpec m)
+     withModuleLLVM m f (makeAssemblyFile f)
 
 
 ----------------------------------------------------------------------------
@@ -169,9 +175,9 @@ buildExecutable thisMod fpath =
        case maybeLLMod of
          (Just llmod) ->
              do liftIO $ makeObjFile objFileName llmod
-                logLLVM $ "Built object file: " ++ objFileName
+                logEmit $ "Built object file: " ++ objFileName
                 liftIO $ makeExec fpath
-                logLLVM $ "Built executable: " ++ fpath
+                logEmit $ "Built executable: " ++ fpath
          (Nothing) -> message Error "No LLVM Module Implementation" Nothing
        finishModule
        return ()
@@ -189,5 +195,5 @@ makeExec execFile =
 -- Logging                                                                --
 ----------------------------------------------------------------------------
 
-logLLVM :: String -> Compiler ()
-logLLVM s = logMsg Emit s
+logEmit :: String -> Compiler ()
+logEmit s = logMsg Emit s
