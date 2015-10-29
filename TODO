@@ -41,5 +41,11 @@ o Destructive update transformation (CTGC)
 
 
 Blocks:
-o Label supply for generating block labels on the fly
-o Object file generation
+o Make main return 0
+o Improve Logging to be distributable
+o EMpty mains dont generate executables
+
+Emit:
+o Improve Logging
+
+
