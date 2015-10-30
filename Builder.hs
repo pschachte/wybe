@@ -103,7 +103,8 @@ buildTarget force target = do
         if (built==False)
           then (liftIO . putStrLn) $ "Nothing to be done for " ++ target
           else
-            do when (tType == ExecutableFile) (buildExecutable [modname] target)
+            do logLLVMString [modname]
+               when (tType == ExecutableFile) (buildExecutable [modname] target)
                when (tType == ObjectFile) (emitObjectFile [modname] target)
                when (tType == BitcodeFile) (emitBitcodeFile [modname] target)
 

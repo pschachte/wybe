@@ -41,11 +41,11 @@ o Destructive update transformation (CTGC)
 
 
 Blocks:
-o Make main return 0
 o Improve Logging to be distributable
 o EMpty mains dont generate executables
 
 Emit:
 o Improve Logging
 
-
+Make:
+o Add creation of cabal sandbox and dependency install 

@@ -48,23 +48,33 @@ withModuleLLVM thisMod action =
 -- target object file.
 emitObjectFile :: ModSpec -> FilePath -> Compiler ()
 emitObjectFile m f =
-  do logEmit $ "Emitting object file for " ++ (showModSpec m)
-     withModuleLLVM m f (makeObjFile f)
+  do logEmit $ "Creating object file for " ++ (showModSpec m)
+     withModuleLLVM m (makeObjFile f)
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Bitcode file.
 emitBitcodeFile :: ModSpec -> FilePath -> Compiler ()
 emitBitcodeFile m f =
-  do logEmit $ "Emitting bitcode file for " ++ (showModSpec m)
-     withModuleLLVM m f (makeBCFile f)
+  do logEmit $ "Creating bitcode file for " ++ (showModSpec m)
+     withModuleLLVM m (makeBCFile f)
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Assembly file.
 emitAssemblyFile :: ModSpec -> FilePath -> Compiler ()
 emitAssemblyFile m f =
-  do logEmit $ "Emitting assembly file for " ++ (showModSpec m)
-     withModuleLLVM m f (makeAssemblyFile f)
+  do logEmit $ "Creating assembly file for " ++ (showModSpec m)
+     withModuleLLVM m (makeAssemblyFile f)
 
+
+logLLVMString :: ModSpec -> Compiler ()
+logLLVMString thisMod =
+  do reenterModule thisMod
+     maybeLLMod <- getModuleImplementationField modLLVM
+     case maybeLLMod of
+       (Just llmod) -> liftIO $ codeemit llmod
+       (Nothing) -> error "No LLVM Module Implementation"
+     finishModule
+     return ()
 
 ----------------------------------------------------------------------------
 -- Target Emitters                                                        --
@@ -119,7 +129,7 @@ codeemit :: LLVMAST.Module -> IO String
 codeemit mod =
     withContext $ \context ->
         liftError $ withModuleFromAST context mod $ \m ->
-            do putStrLn $ "Emitting for: " ++ (LLVMAST.moduleName mod)
+            do putStrLn $ "Emitting module: " ++ (LLVMAST.moduleName mod)
                llstr <- moduleLLVMAssembly m
                putStrLn llstr
                return llstr
