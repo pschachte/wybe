@@ -43,6 +43,7 @@ o Destructive update transformation (CTGC)
 Blocks:
 o Improve Logging to be distributable
 o EMpty mains dont generate executables
+o add Procedure id for global module level procedures
 
 Emit:
 o Improve Logging

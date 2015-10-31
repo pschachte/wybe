@@ -99,7 +99,7 @@ buildTarget force target = do
         let modname = takeBaseName target
         let dir = takeDirectory target
         built <- buildModuleIfNeeded force [modname] [dir]
-        codegenMod [modname]
+        --codegenMod [modname]    -- Transform target to LLVM 
         if (built==False)
           then (liftIO . putStrLn) $ "Nothing to be done for " ++ target
           else
@@ -156,12 +156,14 @@ buildModuleIfNeeded force modspec possDirs = do
                 Just (srcfile,True,objfile,True,modname) -> do
                     srcDate <- (liftIO . getModificationTime) srcfile
                     dstDate <- (liftIO . getModificationTime) objfile
-                    if force || srcDate > dstDate
-                      then do
-                        buildModule modname objfile srcfile
-                        return True
-                      else
-                        return False
+                    -- if force || srcDate > dstDate
+                    --   then do
+                    --     buildModule modname objfile srcfile
+                    --     return True
+                    --   else
+                    --     return False
+                    buildModule modname objfile srcfile
+                    return True
                 Just (_,False,_,False,_) ->
                     shouldnt "inconsistent file existence"
 
@@ -283,14 +285,22 @@ compileModSCC mspecs = do
     fixpointProcessSCC optimiseMod mspecs
     stopOnError $ "optimising " ++ showModSpecs mspecs
     logDump Optimise Optimise "OPTIMISATION"
+
     -- Create an LLVMAST.Module represtation
-    mapM_ blockTransformModule mspecs
+    mapM_ blockTransformModule (List.filter (not . isStdLib) mspecs)
     stopOnError $ "translating " ++ showModSpecs mspecs
+
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs .
     --                         fromJust . modImplementation))
+    -- mapM_ blockTransformModule mspecs
+    -- stopOnError $ "translating " ++ (showModSpecs mspecs)
+    -- mapM_ logLLVMString mspecs
     return ()
+
+isStdLib :: ModSpec -> Bool
+isStdLib (m:_) = m == "wybe"
 
 codegenMod :: ModSpec -> Compiler ()
 codegenMod mspec =

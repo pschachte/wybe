@@ -12,28 +12,29 @@ module Blocks
 import           AST
 import           Codegen
 import           Control.Monad
-import           Control.Monad.Trans                     (lift, liftIO)
+import           Control.Monad.Trans (lift, liftIO)
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
-import           Data.Char                               (ord)
-import           Data.List                               as List
-import           Data.Map                                as Map
+import           Data.Char (ord)
+import           Data.List as List
+import           Data.Map as Map
 import           Data.Maybe
+import           Data.Set as Set
 import           Debug.Trace
-import qualified LLVM.General.AST                        as LLVMAST
-import qualified LLVM.General.AST.Constant               as C
-import qualified LLVM.General.AST.Float                  as F
+import qualified LLVM.General.AST as LLVMAST
+import qualified LLVM.General.AST.Constant as C
+import qualified LLVM.General.AST.Float as F
 import qualified LLVM.General.AST.FloatingPointPredicate as FP
-import qualified LLVM.General.AST.Global                 as G
+import qualified LLVM.General.AST.Global as G
 import           LLVM.General.AST.Instruction
-import qualified LLVM.General.AST.IntegerPredicate       as IP
+import qualified LLVM.General.AST.IntegerPredicate as IP
 import           LLVM.General.AST.Operand
 import           LLVM.General.AST.Type
 import           LLVM.General.Context
 import           LLVM.General.Module
 import           LLVM.General.PrettyPrint
-import           Options                                 (LogSelection (Blocks))
+import           Options (LogSelection (Blocks))
 
 ----------------------------------------------------------------------------
 -- LLVM Compiler Monad                                                    --
@@ -84,7 +85,7 @@ blockTransformModule :: ModSpec -> Compiler ()
 blockTransformModule thisMod =
     do reenterModule thisMod
        let modName = showModSpec thisMod
-       logBlocks' $ "*** Translating Mod: " ++ modName
+       logBlocks' $ "*** Translating Module: " ++ modName
        (names, procs) <- fmap unzip $
                          getModuleImplementationField (Map.toList . modProcs)
        procs' <- mapM (mapM $ translateProc modName) procs
@@ -92,7 +93,7 @@ blockTransformModule thisMod =
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
-       logBlocks' $ showPretty llmod
+       -- logBlocks' $ showPretty llmod
        finishModule
        logBlocks' $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
@@ -111,7 +112,7 @@ translateProc :: String -> ProcDef -> Compiler ProcDef
 translateProc modName proc =
     evalLLVMComp modName $ do
       let def@(ProcDefPrim proto body) = procImpln proc
-      logBlocks $ "Making definition of: "
+      logBlocks $ "In Module: " ++ modName ++ ", creating definition of: "
       logBlocks $ show def      
       let args = primProtoParams proto
       body' <- compileBodyToBlocks proto body
@@ -177,7 +178,7 @@ isPhantomParam p = case paramTypeName p of
 -- The top level procedure will be labelled main.
 makeLabel :: String -> String -> String
 makeLabel modName name
-    | name == "" = "main"
+    | name == "" = modName ++ "." ++ "main"
     | otherwise = modName ++ "." ++ name
 
 
@@ -285,7 +286,9 @@ codegenForkBody _ _ = error $ "Unrecognized control flow. Too many/few blocks."
 cgen :: Prim -> Codegen (Maybe Operand)
 cgen prim@(PrimCall pspec args) =
     do modn <- getModName
-       let nm = LLVMAST.Name $ makeLabel modn (procSpecName pspec)
+       let (ProcSpec mod name _) = pspec
+       let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
+       unless (modn == (showModSpec mod)) (addExtern prim)
        -- addExtern prim
        let inArgs = primInputs args
        inops <- mapM cgenArg inArgs
@@ -600,8 +603,8 @@ declareExtern (PrimForeign _ name _ args) =
       retty = primReturnType args
       fnargs = List.map makeExArg (primInputs args)
 
-declareExtern (PrimCall pspec args) =
-    external retty (procSpecName pspec) fnargs
+declareExtern (PrimCall (ProcSpec m n _) args) =
+    external retty ((showModSpec m) ++ "." ++ n) fnargs
     where
       retty = primReturnType args
       fnargs = List.map makeExArg (primInputs args)
