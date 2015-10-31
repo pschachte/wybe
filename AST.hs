@@ -42,7 +42,7 @@ module AST (
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, getModuleInterface, updateModule, getSpecModule, updateSpecModule,
-  updateModImplementation, updateModImplementationM, 
+  updateModImplementation, updateModImplementationM, updateModLLVM,
   updateModInterface, updateAllProcs,
   getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, message, genProcName,
@@ -972,7 +972,16 @@ updateModProcsM :: (Map Ident [ProcDef] -> Compiler (Map Ident [ProcDef])) ->
                  ModuleImplementation -> Compiler ModuleImplementation
 updateModProcsM fn modimp = do
     procs' <- fn $ modProcs modimp
-    return $ modimp {modProcs = procs'}                             
+    return $ modimp {modProcs = procs'}
+
+-- | Update the LLVMAST.Module representation of the module
+updateModLLVM :: (Maybe LLVMAST.Module -> Maybe LLVMAST.Module)
+              -> ModuleImplementation
+              -> Compiler ModuleImplementation
+updateModLLVM fn modimp = do
+  let llmod' = fn $ modLLVM modimp
+  return $ modimp { modLLVM = llmod'}
+  
                              
 -- |An identifier.
 type Ident = String

@@ -2,6 +2,7 @@ module Emit where
 
 import           AST
 import           Codegen
+import Data.Map as Map
 import           Control.Monad
 import           Control.Monad.Trans          (lift, liftIO)
 import           Control.Monad.Trans.Except
@@ -176,28 +177,14 @@ runJIT mod = do
           return optmod
 
 
--- |Build executable from object file
-buildExecutable :: ModSpec -> FilePath -> Compiler ()
-buildExecutable thisMod fpath =
-    do reenterModule thisMod
-       maybeLLMod <- getModuleImplementationField modLLVM
-       let objFileName = (fpath ++ ".o")
-       case maybeLLMod of
-         (Just llmod) ->
-             do liftIO $ makeObjFile objFileName llmod
-                logEmit $ "Built object file: " ++ objFileName
-                liftIO $ makeExec fpath
-                logEmit $ "Built executable: " ++ fpath
-         (Nothing) -> message Error "No LLVM Module Implementation" Nothing
-       finishModule
-       return ()
-
-makeExec :: FilePath -> IO ()
-makeExec execFile =
+-- | With the `ld` linker, link the object files and create target.
+makeExec :: [FilePath]          -- Object Files
+         -> FilePath            -- Target File
+         -> IO ()               
+makeExec ofiles target =
     do dir <- getCurrentDirectory
-       let objFile = (execFile ++ ".o")
-       let args = [objFile] ++ sharedLibs ++ linkerArgs
-                  ++ ["-o", execFile]
+       let args = ofiles ++ sharedLibs ++ linkerArgs
+                  ++ ["-o", target]       
        createProcess (proc "ld" args)
        return ()
 

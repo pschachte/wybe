@@ -20,7 +20,6 @@ import           Data.Char (ord)
 import           Data.List as List
 import           Data.Map as Map
 import           Data.Maybe
-import           Data.Set as Set
 import           Debug.Trace
 import qualified LLVM.General.AST as LLVMAST
 import qualified LLVM.General.AST.Constant as C
@@ -618,7 +617,31 @@ makeExArg arg = let ty = (typed . argType) arg
                 in (ty, nm)
 
 
+----------------------------------------------------------------------------
+-- Block Modification                                                     --
+----------------------------------------------------------------------------
 
+markMain :: ModSpec -> Compiler ()
+markMain thisMod =
+  do reenterModule thisMod     
+     updateModImplementationM (updateModLLVM makeMainModule) 
+     finishModule
+     return ()
+
+makeMainModule :: Maybe LLVMAST.Module -> Maybe LLVMAST.Module
+makeMainModule Nothing = Nothing
+makeMainModule (Just (LLVMAST.Module name x y defs)) =
+  let newdefs = List.map replaceMainDef defs
+  in Just $ LLVMAST.Module name x y newdefs
+
+replaceMainDef :: LLVMAST.Definition -> LLVMAST.Definition
+replaceMainDef def@(LLVMAST.GlobalDefinition gl) =
+  let (LLVMAST.Name label) = G.name gl
+  in if List.isSuffixOf "main" label
+     then LLVMAST.GlobalDefinition gl { G.name = LLVMAST.Name "main" }
+     else def
+replaceMainDef d = d
+  
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

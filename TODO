@@ -44,6 +44,8 @@ Blocks:
 o Improve Logging to be distributable
 o EMpty mains dont generate executables
 o add Procedure id for global module level procedures
+o Insert target triple into the definition of LLVMAST.Module during
+  creation.
 
 Emit:
 o Improve Logging
