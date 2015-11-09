@@ -93,6 +93,7 @@ buildFork var last branchBuilders = do
           PrimFork v l revBranches ->
             modify (\s -> s { currBody = ProcBody revPrims' $ 
                                          PrimFork v l $ reverse revBranches })
+      _ -> shouldnt "Switch on non-integer value"
     logBuild $ ">>>> Finished building a fork"
 
 
