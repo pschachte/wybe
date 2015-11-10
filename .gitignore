@@ -34,3 +34,5 @@ wybemk
 design.pdf
 redesign.pdf
 TAGS
+*.so
+cbits.so
