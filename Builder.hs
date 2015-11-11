@@ -292,8 +292,6 @@ compileModSCC mspecs = do
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs .
     --                         fromJust . modImplementation))
-    -- mapM_ blockTransformModule mspecs
-    -- stopOnError $ "translating " ++ (showModSpecs mspecs)
     return ()
 
 -- | Filter for avoiding the standard library modules    
