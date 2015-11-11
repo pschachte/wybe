@@ -9,7 +9,7 @@
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
                interfaceExtension, bitcodeExtension, sharedLibs,
-                                 linkerArgs)
+                                 ldArgs, ldSystemArgs)
     where
 
 -- |The file extension for source files.
@@ -39,12 +39,15 @@ sharedLibDirName = "lib/"
 sharedLibs :: [FilePath]
 sharedLibs = ["cbits.so"]
 
-linkerArgs :: [String]
-linkerArgs =
-    ["-demangle", "-dynamic", "-arch", "x86_64",
-     "-macosx_version_min", "10.11.0",
-     "-syslibroot",
-     "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk",
-     "-lSystem",
-     "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/7.0.0/lib/darwin/libclang_rt.osx.a"
+ldArgs :: [String]
+ldArgs = ["-demangle", "-dynamic"]
+
+ldSystemArgs :: [String]
+ldSystemArgs =
+    [ "-arch", "x86_64",
+      "-macosx_version_min", "10.11.0",
+      "-syslibroot",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk",
+      "-lSystem",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/7.0.0/lib/darwin/libclang_rt.osx.a"
     ]

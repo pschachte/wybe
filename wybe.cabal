@@ -23,3 +23,6 @@ executable wybemk
                , transformers
                , old-time
                , process
+               , bytedump
+               , bytestring
+               , hex 

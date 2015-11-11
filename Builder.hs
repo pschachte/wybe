@@ -45,7 +45,7 @@
 module Builder (buildTargets, compileModule) where
 
 import           AST
-import           Blocks                    (blockTransformModule)
+import           Blocks                    (blockTransformModule, markMain)
 import           Callers                   (collectCallers)
 import           Clause                    (compileProc)
 import           Config
@@ -99,9 +99,6 @@ buildTarget force target = do
         let modname = takeBaseName target
         let dir = takeDirectory target
         built <- buildModuleIfNeeded force [modname] [dir]
-        codegenMod [modname]
-        -- XXX prints nothing to be done even when dependencies were built
-        -- XXX doesn't build executable even when dependencies were built
         if (built==False)
           then (liftIO . putStrLn) $ "Nothing to be done for " ++ target
           else
@@ -157,12 +154,14 @@ buildModuleIfNeeded force modspec possDirs = do
                 Just (srcfile,True,objfile,True,modname) -> do
                     srcDate <- (liftIO . getModificationTime) srcfile
                     dstDate <- (liftIO . getModificationTime) objfile
-                    if force || srcDate > dstDate
-                      then do
-                        buildModule modname objfile srcfile
-                        return True
-                      else
-                        return False
+                    -- if force || srcDate > dstDate
+                    --   then do
+                    --     buildModule modname objfile srcfile
+                    --     return True
+                    --   else
+                    --     return False
+                    buildModule modname objfile srcfile
+                    return True
                 Just (_,False,_,False,_) ->
                     shouldnt "inconsistent file existence"
 
@@ -285,17 +284,20 @@ compileModSCC mspecs = do
     stopOnError $ "optimising " ++ showModSpecs mspecs
     logDump Optimise Optimise "OPTIMISATION"
 
+    -- Create an LLVMAST.Module represtation
+    mapM_ blockTransformModule (List.filter (not . isStdLib) mspecs)
+    stopOnError $ "translating " ++ showModSpecs mspecs
+
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs .
     --                         fromJust . modImplementation))
     return ()
 
-codegenMod :: ModSpec -> Compiler ()
-codegenMod mspec =
-  do blockTransformModule mspec
-     stopOnError $ "translating " ++ showModSpec mspec
-     return ()
+-- | Filter for avoiding the standard library modules    
+isStdLib :: ModSpec -> Bool
+isStdLib [] = False
+isStdLib (m:_) = m == "wybe"
 
 
 -- |A Processor processes the specified module one iteration in a
@@ -382,6 +384,58 @@ handleModImports modSCC mod = do
     return (kTypes/=kTypes' || kResources/=kResources' ||
             kProcs/=kProcs' || iface/=iface',[])
 
+
+
+------------------------ Building Executable ---------------------
+
+-- | Build the executable for the Target Module at the given
+-- location.
+-- All dependencies are collected as object files and linked
+-- by the `ld` linker to create the target. The target module
+-- also needs to have a `main` function, which is created by
+-- simply renaming the existing 'module.main' to 'main' in the
+-- LLVM AST Module representation of the 'module'.
+buildExecutable :: ModSpec -> FilePath -> Compiler ()
+buildExecutable targetMod fpath =
+    do ofiles <- collectObjectFiles [] targetMod
+       markMain targetMod
+       thisfile <- loadObjectFile targetMod
+       logBuild $ "Building Executable at " ++ fpath
+       -- Call the ld linker 
+       liftIO $ makeExec (ofiles ++ [thisfile]) fpath
+       return ()
+
+-- | Recursively visit imports of module emitting and collecting
+-- the object files for each. It is assumed that every dependency
+-- has already been built upto LLVM till now. 
+collectObjectFiles :: [FilePath] -- Object Files collected till now
+                   -> ModSpec   -- Current Module
+                   -> Compiler [FilePath] 
+collectObjectFiles ofiles thisMod =
+  do reenterModule thisMod
+     imports <- getModuleImplementationField (keys . modImports)
+     -- We can't compile the standard library completely yet
+     -- to LLVM 
+     let nostd = List.filter (not . isStdLib) imports
+     finishModule     
+     case (List.null nostd) of
+       True -> return ofiles
+       False ->
+         do importfiles <- mapM loadObjectFile nostd    
+            cs <- mapM (collectObjectFiles (ofiles ++ importfiles)) nostd
+            return (concat cs)
+     
+-- | Load/Build object file for the module in the same directory
+-- the module is in.
+loadObjectFile :: ModSpec -> Compiler FilePath
+loadObjectFile thisMod =
+  do reenterModule thisMod
+     dir <- getDirectory
+     -- generating an name + extension for our object file
+     let objFile = moduleFilePath objectExtension dir thisMod
+     emitObjectFile thisMod objFile
+     finishModule
+     return objFile
 
 
 ------------------------ Filename Handling ------------------------

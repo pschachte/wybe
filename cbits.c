@@ -1,5 +1,4 @@
 /* cbits
-$ gcc -fPIC -shared cbits.c -o cbits.so
 $ clang -fPIC -shared cbits.c -o cbits.so
 */
 
@@ -8,12 +7,12 @@ $ clang -fPIC -shared cbits.c -o cbits.so
 
 // putchard - putchar that takes a double and returns 0.
 void print_int(int X) {
-  printf("%d\n", X);
+  printf("%d", X);
   fflush(stdout);
 }
 
 void print_float(double X) {
-  printf("%f\n", X);
+  printf("%f", X);
   fflush(stdout);
 }
 
