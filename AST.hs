@@ -2112,6 +2112,11 @@ logMsg :: LogSelection    -- ^ The aspect of the compiler being logged,
           -> String       -- ^ The log message
           -> Compiler ()  -- ^ Works in the Compiler monad
 logMsg selector msg = do
-    let prefix = show selector ++ ": "
+    let prefix = (makeBold $ show selector) ++ ": "
     whenLogging selector $
       liftIO $ hPutStrLn stderr (prefix ++ List.intercalate ('\n':prefix) (lines msg))
+
+-- | Appends a ISO/IEC 6429 code to the given string to print it bold
+-- in a terminal output. 
+makeBold :: String -> String
+makeBold s = "\x1b[1m" ++ s ++ "\x1b[0m"

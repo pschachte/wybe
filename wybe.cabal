@@ -25,4 +25,5 @@ executable wybemk
                , process
                , bytedump
                , bytestring
-               , hex 
+               , hex
+               , macho

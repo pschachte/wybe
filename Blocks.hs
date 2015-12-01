@@ -1,10 +1,9 @@
 --  File     : Blocks.hs
 --  RCS      : $Id$
---  Author   : Peter Schachte
+--  Author   : Ashutosh Rishi Ranjan
 --  Origin   : Thu Mar 26 14:25:37 AEDT 2015
 --  Purpose  : Transform a clausal form (LPVM) module to LLVM
 --  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
---
 
 module Blocks
        where
