@@ -148,7 +148,7 @@ expandPrims pprims = do
     mapM_ (\(p:rest) -> expandPrim (content p) (place p) (List.null rest))
       $ init $ tails pprims
 
--- XXX allow this to handle primitives that can fail with all inputs known, like 
+-- XXX allow this to handle primitives that can fail with all inputs known, like
 --     less than, removing ops that succeed and killing branches that fail.
 -- XXX allow this to handle non-primitives with all inputs known by inlining.
 expandPrim :: Prim -> OptPos -> Bool -> Expander ()
@@ -172,6 +172,7 @@ expandPrim call@(PrimCall pspec args) pos last = do
                                    . noFork)
             if inlinableLast
               then do
+                logExpansion $ "  Inlining tail call to branching proc"
                 inlineCall proto args' body pos
               else do
                 logExpansion $ "  Not inlinable"
@@ -221,7 +222,9 @@ expandArg arg@(ArgVar var typ flow _ _) = do
       FlowOut -> freshVar var typ
       FlowIn ->
         gets (Map.findWithDefault 
-              (shouldnt $ "inlining: reference to unassigned variable " ++ show var) 
+              -- (shouldnt $ "inlining: reference to unassigned variable "
+              --  ++ show var) 
+              arg
               var . renaming)
       else return arg
 expandArg arg = return arg
@@ -261,8 +264,18 @@ addOutputAssign pos (param@(PrimParam pname ty FlowOut _ _), v) = do
       shouldnt $ "Danger: untyped param: " ++ show param
     when (Unspecified == argType v) $
       shouldnt $ "Danger: untyped argument: " ++ show v
+    logExpansion $ "  creating output assignment for " ++ show pname
+    -- alreadyAssigned <- lift $ isProtected v
+    -- if alreadyAssigned
+    --   then do
+    --     logExpansion $ "  no need; it's protected "
+    --     return ()
+    --   else do
     oldVar <- expandArg (ArgVar pname ty FlowIn Ordinary False)
-    addInstr (PrimForeign "llvm" "move" [] [oldVar,v]) pos
+    let instr = PrimForeign "llvm" "move" [] [oldVar,v]
+    logExpansion $ "  to " ++ show instr
+    -- oldVar <- expandArg (ArgVar pname ty FlowIn Ordinary False)
+    addInstr instr pos
 
 -- renameParam :: Renaming -> PrimParam -> PrimParam
 -- renameParam renaming param@(PrimParam name typ FlowOut ftype inf ) = 

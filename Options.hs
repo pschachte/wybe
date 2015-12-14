@@ -139,7 +139,7 @@ handleCmdline = do
         exitSuccess
       else if optHelpLog opts
            then do
-             putStrLn "Use the -l or --log option to select loggin to stdout."
+             putStrLn "Use the -l or --log option to select logging to stdout."
              putStrLn "The argument to this option should be a comma-separated"
              putStrLn "list (with no spaces) of these options:"
              putStr $ formatMapping logSelectionDescription

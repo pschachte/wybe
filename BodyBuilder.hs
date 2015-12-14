@@ -7,7 +7,7 @@
 --
 
 module BodyBuilder (
-  BodyBuilder, buildBody, instr, buildFork
+  BodyBuilder, buildBody, instr, buildFork, isProtected
   ) where
 
 import AST
@@ -36,20 +36,38 @@ import Debug.Trace
 type BodyBuilder = StateT BodyState Compiler
 
 data BodyState = BodyState {
-    currBody     :: ProcBody,         -- ^The body we're building, lists reversed
+    currBuild     :: BodyBuildState,   -- ^The body we're building
     currSubst    :: Substitution,     -- ^variable substitutions to propagate
     protected    :: Set PrimVarName   -- ^Variables that cannot be renamed
     } deriving Show
 
 type Substitution = Map PrimVarName PrimArg
 
+data BodyBuildState
+    = Unforked { unforkedBody :: [Placed Prim] } -- reversed list of prims
+    | Forked   { forkedBody   ::  ProcBody }
+
+instance Show BodyBuildState where
+  show (Unforked revPrims) =
+      showBlock 4 $ ProcBody (reverse revPrims) NoFork
+  show (Forked body) = show body
+
+currBody :: BodyState -> ProcBody
+currBody (BodyState (Unforked prims) _ _) =
+  ProcBody (reverse prims) NoFork
+currBody (BodyState (Forked body) _ _) = body
+
 
 initState :: Set PrimVarName -> BodyState
-initState protected = BodyState (ProcBody [] NoFork) Map.empty protected
+initState protected = BodyState (Unforked []) Map.empty protected
 
 
 continueState :: Substitution -> Set PrimVarName -> BodyState
-continueState subst protected = BodyState (ProcBody [] NoFork) subst protected
+continueState subst protected = BodyState (Unforked []) subst protected
+
+
+isProtected :: PrimVarName -> BodyBuilder Bool
+isProtected var = gets (Set.member var . protected)
 
 
 ----------------------------------------------------------------
@@ -61,21 +79,21 @@ buildBody :: Set PrimVarName -> BodyBuilder a -> Compiler (a,ProcBody)
 buildBody prot builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
     -- (a,final) <- runStateT builder $ BodyState (Just []) []
-    (a,BodyState (ProcBody revPrims fork) _ _) <- runStateT builder $ 
-                                                  initState prot
+    (a,bstate) <- runStateT builder $ initState prot
     logMsg BodyBuilder ">>>> Finished  building a proc body"
     -- return (a,astateBody final)
-    return (a,ProcBody (reverse revPrims) fork)
+    return (a,currBody bstate)
 
 
 buildFork :: PrimVarName -> Bool -> [BodyBuilder ()] -> BodyBuilder ()
 buildFork var last branchBuilders = do
-    arg' <- expandArg $ ArgVar var (TypeSpec ["wybe"] "int" []) FlowIn Ordinary False
+    arg' <- expandArg
+            $ ArgVar var (TypeSpec ["wybe"] "int" []) FlowIn Ordinary False
     logBuild $ "<<<< beginning to build a new fork on " ++ show arg'
       ++ " (last=" ++ show last ++ ")"
-    ProcBody revPrims fork <- gets currBody
+    ProcBody prims fork <- gets currBody
     case arg' of
-      ArgInt n _ -> -- condition result known at compile-time:  only compile winner
+      ArgInt n _ -> -- result known at compile-time:  only compile winner
         case drop (fromIntegral n) branchBuilders of
           [] -> shouldnt "branch constant greater than number of cases"
           (winner:_) -> do
@@ -85,14 +103,17 @@ buildFork var last branchBuilders = do
         case fork of
           PrimFork _ _ _ -> shouldnt "Building a fork while building a fork"
           NoFork -> 
-            modify (\s -> s {currBody = ProcBody revPrims $ PrimFork var' last [] })
+            modify (\s -> s {currBuild =
+                             Forked $ ProcBody prims
+                                      $ PrimFork var' last [] })
         mapM buildBranch branchBuilders
         ProcBody revPrims' fork' <- gets currBody
         case fork' of
           NoFork -> shouldnt "Building a fork produced an empty fork"
           PrimFork v l revBranches ->
-            modify (\s -> s { currBody = ProcBody revPrims' $ 
-                                         PrimFork v l $ reverse revBranches })
+            modify (\s -> s { currBuild =
+                              Forked $ ProcBody revPrims'
+                                       $ PrimFork v l $ reverse revBranches })
       _ -> shouldnt "Switch on non-integer value"
     logBuild $ ">>>> Finished building a fork"
 
@@ -106,16 +127,16 @@ buildBranch builder = do
     case fork of
       NoFork -> shouldnt "Building a branch outside of buildFork"
       PrimFork v l branches ->
-        modify (\s -> s { currBody = ProcBody revPrims $ 
-                                     PrimFork v l $ branch : branches })
+        modify (\s -> s { currBuild =
+                          Forked $ ProcBody revPrims
+                                   $ PrimFork v l $ branch : branches })
 
 buildPrims :: BodyBuilder () -> BodyBuilder ProcBody
 buildPrims builder = do
     subst <- gets currSubst
     prot <- gets protected
-    ((),BodyState (ProcBody revPrims fork) _ _) <- 
-      lift $ runStateT builder $ continueState subst prot
-    return $ ProcBody (reverse revPrims) fork
+    ((),bstate) <- lift $ runStateT builder $ continueState subst prot
+    return $ currBody bstate
 
 
 -- |Add an instruction to the current body, after applying the current substitution.
@@ -135,7 +156,8 @@ instr PrimNop _ = do
 
 -- |Add an instr, unless it's a move to a non-protected variable, which is treated as
 --  a new substitution.
-foreignInstr (PrimForeign "llvm" "move" [] [val, argvar@(ArgVar var _ flow _ _)]) pos 
+foreignInstr instr@(PrimForeign "llvm" "move" []
+                    [val, argvar@(ArgVar var _ flow _ _)]) pos 
   = do
     logBuild $ "  Expanding move(" ++ show val ++ ", " ++ show argvar ++ ")"
     unless (flow == FlowOut && argFlowDirection val == FlowIn) $ 
@@ -143,7 +165,7 @@ foreignInstr (PrimForeign "llvm" "move" [] [val, argvar@(ArgVar var _ flow _ _)]
     addSubst var val
     noSubst <- gets (Set.member var . protected)
     -- keep this assignment if we need to
-    when noSubst $ rawInstr (PrimForeign "llvm" "move" [] [val, argvar]) pos
+    when noSubst $ rawInstr instr pos
 foreignInstr prim pos = rawInstr prim pos
 
 
@@ -160,11 +182,27 @@ addSubst var val = do
 rawInstr :: Prim -> OptPos -> BodyBuilder ()
 rawInstr prim pos = do
     logBuild $ "---- adding instruction " ++ show prim
-    ProcBody prims fork <- gets currBody
-    case fork of
-      PrimFork _ _ _ -> shouldnt "adding an instr after a fork"
-      NoFork ->     
-        modify (\s -> s { currBody = ProcBody (maybePlace prim pos : prims) fork })
+    modify (\s -> s { currBuild = addInstrToState (maybePlace prim pos)
+                                 $ currBuild s })
+
+addInstrToState :: Placed Prim -> BodyBuildState -> BodyBuildState
+addInstrToState instr (Unforked revPrims) = Unforked $ instr:revPrims
+addInstrToState instr (Forked body) = Forked $ addInstrToBody instr body
+
+addInstrToBody ::  Placed Prim -> ProcBody -> ProcBody
+addInstrToBody instr (ProcBody prims NoFork) =
+    ProcBody (prims ++ [instr]) NoFork
+addInstrToBody instr (ProcBody prims (PrimFork v l bodies)) =
+    ProcBody prims
+    (PrimFork v l (List.map (addInstrToBody instr) bodies))
+
+
+    -- ProcBody prims fork <- gets currBody
+    -- case fork of
+    --   -- PrimFork _ _ _ -> shouldnt "adding an instr after a fork"
+    --   -- XXX should add a single instruction at the end of the fork
+    --   NoFork ->     
+    --     modify (\s -> s { currBody = ProcBody (maybePlace prim pos : prims) fork })
 
 -- |Return the current ultimate value of the input argument.
 expandArg :: PrimArg -> BodyBuilder PrimArg
