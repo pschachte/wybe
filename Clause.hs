@@ -188,7 +188,7 @@ reconcilingAssignments caseVars jointVars =
 reconcileOne :: (Map VarName Int) -> (Map VarName Int) -> VarName -> Placed Prim
 reconcileOne caseVars jointVars var =
     Unplaced $
-    PrimForeign "wybe" "move" []
+    PrimForeign "llvm" "move" []
     [ArgVar (mkPrimVarName caseVars var) Unspecified FlowIn Ordinary False,
      ArgVar (mkPrimVarName jointVars var) Unspecified FlowOut Ordinary False]
 
