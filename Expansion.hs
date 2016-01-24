@@ -78,9 +78,9 @@ data ExpanderState = Expander {
 
 type Expander = StateT ExpanderState BodyBuilder
 
--- |Return a fresh variable name.  This assumes that all variables in inlined code
--- are given fresh variable names, so temp names appearing in procs being inlined
--- don't clash.
+-- |Return a fresh variable name. This assumes that all variables in
+-- inlined code are given fresh variable names, so temp names appearing in
+-- procs being inlined don't clash.
 tmpVar :: Expander PrimVarName
 tmpVar = do
     tmp <- gets tmpCount
@@ -98,8 +98,8 @@ freshVar oldVar typ = do
     return $ ArgVar newVar typ FlowOut Ordinary False
 
 
--- |Add a binding for a variable.  If that variable is an output for the proc being
---  defined, also add an explicit assignment to that variable.
+-- |Add a binding for a variable. If that variable is an output for the
+-- proc being defined, also add an explicit assignment to that variable.
 addRenaming :: PrimVarName -> PrimArg -> Expander ()
 addRenaming var val = do
     logExpansion $ "      adding renaming " ++ show var ++ " -> " ++ show val
@@ -148,8 +148,9 @@ expandPrims pprims = do
     mapM_ (\(p:rest) -> expandPrim (content p) (place p) (List.null rest))
       $ init $ tails pprims
 
--- XXX allow this to handle primitives that can fail with all inputs known, like
---     less than, removing ops that succeed and killing branches that fail.
+-- XXX allow this to handle primitives that can fail with all inputs known,
+-- like less than, removing ops that succeed and killing branches that
+-- fail.
 -- XXX allow this to handle non-primitives with all inputs known by inlining.
 expandPrim :: Prim -> OptPos -> Bool -> Expander ()
 expandPrim call@(PrimCall pspec args) pos last = do
@@ -240,9 +241,10 @@ outputArgs :: [PrimArg] -> [PrimVarName]
 outputArgs args =
     List.map outArgVar $ List.filter ((FlowOut ==) . argFlowDirection) args
 
--- |Add an assignment of input argument to parameter in preparation for inlining
---  a call.  The parameter name must be substituted with a new name; the argument
---  has already been renamed as appropriate for the calling context.
+-- |Add an assignment of input argument to parameter in preparation for
+-- inlining a call. The parameter name must be substituted with a new name;
+-- the argument has already been renamed as appropriate for the calling
+-- context.
 addInputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
 addInputAssign _ (PrimParam k ty FlowOut _ _,v) = return ()
 addInputAssign pos (param@(PrimParam name ty FlowIn _ _),v) = do
