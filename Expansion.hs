@@ -158,9 +158,10 @@ expandPrim call@(PrimCall pspec args) pos last = do
         if procInline def
           then inlineCall proto args' body pos
           else do
-            inlinableLast <- gets (((last && singleCaller def 
-                                     && procVis def == Private) &&) 
-                                   . noFork)
+            -- inlinableLast <- gets (((last && singleCaller def 
+            --                          && procVis def == Private) &&) 
+            --                        . noFork)
+            let inlinableLast = False
             if inlinableLast
               then do
                 logExpansion $ "  Inlining tail call to branching proc"

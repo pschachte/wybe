@@ -101,7 +101,7 @@ inlineIfWanted :: ProcDef -> Compiler ProcDef
 inlineIfWanted def
     |  NoFork == bodyFork body && not (procInline def) = do
     logOptimise $ "Considering inline of " ++ procName def
-    let benefit = 2 + procCost proto -- add 2 for time saving
+    let benefit = 4 + procCost proto -- add 4 for time saving
     logOptimise $ "  benefit = " ++ show benefit
     let cost = bodyCost $ bodyPrims body
     logOptimise $ "  cost = " ++ show cost

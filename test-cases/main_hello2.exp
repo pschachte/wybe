@@ -11,6 +11,7 @@ AFTER EVERYTHING:
   procs           : 
 public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
-    foreign c print_string("hello, ":wybe.string, ~%wybe.io$io#0:wybe.phantom, ?%wybe.io$io#1:wybe.phantom) @wybe:122:41
-    foreign c print_string("world!":wybe.string, ~%wybe.io$io#1:wybe.phantom, ?%tmp$0#0:wybe.phantom) @wybe:122:41
-    foreign c putc('\n':wybe.char, ~%tmp$0#0:wybe.phantom, ?%wybe.io$io#2:wybe.phantom) @wybe:108:28
+    foreign c print_string("hello, ":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:122:41
+    foreign c print_string("world!":wybe.string, ~tmp$2#0:wybe.phantom, ?tmp$5#0:wybe.phantom) @wybe:122:41
+    foreign c putc('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @wybe:108:28
+    foreign llvm move(~tmp$6#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @main_hello2:2:1

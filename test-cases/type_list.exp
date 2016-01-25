@@ -19,7 +19,7 @@ AFTER EVERYTHING:
   types           : intlist/0 @type_list:1:8
   resources       : 
   procs           : 
-public (1 calls)
+public (1 calls) (inline)
 0: ++(x#0:type_list.intlist, y#0:type_list.intlist, ?$#0:type_list.intlist):
     type_list.gen$1<0>(~x#0:type_list.intlist, ~y#0:type_list.intlist, ?tmp$0#0:type_list.intlist, ?x#1:type_list.intlist, ?y#1:type_list.intlist) @type_list:8:5
     foreign llvm move(~tmp$0#0:type_list.intlist, ?$#0:type_list.intlist) @type_list:7:8
@@ -31,11 +31,11 @@ public (1 calls)
     0:
         foreign $ access("intlist":wybe.string, "[|]":wybe.string, "head":wybe.string, x#0:type_list.intlist, ?tmp$14#0:wybe.int)
         foreign $ access("intlist":wybe.string, "[|]":wybe.string, "tail":wybe.string, x#0:type_list.intlist, ?tmp$17#0:type_list.intlist)
-        type_list.++<0>(~tmp$17#0:type_list.intlist, y#0:type_list.intlist, ?tmp$5#0:type_list.intlist) @type_list:10:18
-        foreign $ alloc("intlist":wybe.string, "[|]":wybe.string, ?tmp$21#0:type_list.intlist)
-        foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "head":wybe.string, ~tmp$21#0:type_list.intlist, ?tmp$22#0:type_list.intlist, ~tmp$14#0:wybe.int)
-        foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "tail":wybe.string, ~tmp$22#0:type_list.intlist, ?tmp$23#0:type_list.intlist, ~tmp$5#0:type_list.intlist)
-        foreign llvm move(~tmp$23#0:type_list.intlist, ?tmp$0#0:type_list.intlist) @type_list:8:5
+        type_list.gen$1<0>(~tmp$17#0:type_list.intlist, y#0:type_list.intlist, ?tmp$21#0:type_list.intlist, ?tmp$22#0:type_list.intlist, ?tmp$23#0:type_list.intlist) @type_list:8:5
+        foreign $ alloc("intlist":wybe.string, "[|]":wybe.string, ?tmp$27#0:type_list.intlist)
+        foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "head":wybe.string, ~tmp$27#0:type_list.intlist, ?tmp$28#0:type_list.intlist, ~tmp$14#0:wybe.int)
+        foreign $ mutate("intlist":wybe.string, "[|]":wybe.string, "tail":wybe.string, ~tmp$28#0:type_list.intlist, ?tmp$29#0:type_list.intlist, ~tmp$21#0:type_list.intlist)
+        foreign llvm move(~tmp$29#0:type_list.intlist, ?tmp$0#0:type_list.intlist) @type_list:8:5
 
     1:
         foreign llvm move(y#0:type_list.intlist, ?tmp$0#0:type_list.intlist) @type_list:8:5
