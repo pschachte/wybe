@@ -69,6 +69,7 @@ data ExpanderState = Expander {
     inlining     :: Bool,         -- ^Whether we are currently inlining (and
                                   --  therefore should not inline calls)
     renaming     :: Renaming,     -- ^The current variable renaming
+    writeNaming  :: Renaming,     -- ^Renaming for new assignments
     tmpCount     :: Int,          -- ^Next available tmp variable number
     noFork       :: Bool          -- ^There's no fork at the end of this body
     }
@@ -76,14 +77,20 @@ data ExpanderState = Expander {
 
 type Expander = StateT ExpanderState BodyBuilder
 
--- |Substitute a fresh temp variable for the specified variable
+-- |Substitute a fresh temp variable for the specified variable, unless
+-- we've already recorded the mapping for that name in writeNaming
 freshVar :: PrimVarName -> TypeSpec -> Expander PrimArg
 freshVar oldVar typ = do
-    tmp <- gets tmpCount
-    modify (\s -> s { tmpCount = tmp+1 })
-    let newVar = PrimVarName (mkTempName tmp) 0
-    addRenaming oldVar $ ArgVar newVar typ FlowIn Ordinary False
-    return $ ArgVar newVar typ FlowOut Ordinary False
+    maybeName <- gets (Map.lookup oldVar . writeNaming)
+    case maybeName of
+        Nothing -> do
+            tmp <- gets tmpCount
+            modify (\s -> s { tmpCount = tmp+1 })
+            let newVar = PrimVarName (mkTempName tmp) 0
+            addRenaming oldVar $ ArgVar newVar typ FlowIn Ordinary False
+            return $ ArgVar newVar typ FlowOut Ordinary False
+        Just newArg -> do
+            return newArg
 
 
 -- |Add a binding for a variable. If that variable is an output for the
@@ -102,7 +109,7 @@ addInstr prim pos = lift $ instr prim pos
 
 initExpanderState :: Int -> ExpanderState
 initExpanderState tCount = 
-    Expander False identityRenaming tCount True
+    Expander False identityRenaming identityRenaming tCount True
 
 
 ----------------------------------------------------------------
@@ -187,13 +194,11 @@ inlineCall proto args body pos = do
     logExpansion $ "    renaming = " ++ show (renaming saved)
     modify (\s -> s { renaming = identityRenaming, 
                       inlining = True })
+    mapM_ (addOutputNaming pos) $ zip (primProtoParams proto) args
     mapM_ (addInputAssign pos) $ zip (primProtoParams proto) args
     logExpansion $ "  Inlining defn: " ++ showBlock 4 body
     expandBody body
     tmp' <- gets tmpCount
-    -- subst <- gets ((Map.filterWithKey (\k _ -> List.elem k $ outputArgs args)) 
-    --                . renaming)
-    mapM_ (addOutputAssign pos) $ zip (primProtoParams proto) args
     -- Throw away state after inlining, except ...
     put saved
     -- ... put back temp count
@@ -231,43 +236,43 @@ outputParams proto =
 --     List.map outArgVar $ List.filter ((FlowOut ==) . argFlowDirection) args
 
 
+-- |Add a writeNaming assignment of output parameter to output argument
+--  for a call.  Any subsequent assignment of the parameter variable should
+--  be replaced with an assignment of the argument variable, rather than
+--  generating a temp variable name.
+addOutputNaming :: OptPos -> (PrimParam,PrimArg) -> Expander ()
+addOutputNaming _ (param@(PrimParam pname ty FlowOut _ _),
+                     v@(ArgVar vname _ _ _ _)) = do
+    when (Unspecified == ty) $
+      shouldnt $ "Danger: untyped param: " ++ show param
+    when (Unspecified == argType v) $
+      shouldnt $ "Danger: untyped argument: " ++ show v
+    logExpansion $ "  recording output naming for " ++ show pname
+      ++ " -> " ++ show vname
+    modify (\s -> s { writeNaming = Map.insert pname v (writeNaming s)})
+addOutputNaming _ _ = return ()
+
+
 -- |Add an assignment of input argument to parameter in preparation for
 -- inlining a call. The parameter name must be substituted with a new name;
 -- the argument has already been renamed as appropriate for the calling
 -- context.
 addInputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
-addInputAssign _ (PrimParam _ _ FlowOut _ _,_) = return ()
-addInputAssign pos (param@(PrimParam name ty FlowIn _ _),v) = do
+addInputAssign pos (param@(PrimParam name ty flow _ _),v) = do
     when (Unspecified == ty) $
       shouldnt $ "Danger: untyped param: " ++ show param
     when (Unspecified == argType v) $
       shouldnt $ "Danger: untyped argument: " ++ show v
+    addInputAssign' pos name ty flow v
+    
+addInputAssign' :: OptPos -> PrimVarName -> TypeSpec -> PrimFlow -> PrimArg
+                         -> Expander ()
+addInputAssign' pos name ty FlowIn v = do
     newVar <- freshVar name ty
     addInstr (PrimForeign "llvm" "move" [] [v,newVar]) pos
-             
-
--- |Add an assignment of output parameter to argument following inlining of
---  a call.  The parameter has been substituted with a new name, but the
---  argument should be interpreted without renaming.
-addOutputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
-addOutputAssign _ (PrimParam _ _ FlowIn _ _,_) = return ()
-addOutputAssign pos (param@(PrimParam pname ty FlowOut _ _), v) = do
-    when (Unspecified == ty) $
-      shouldnt $ "Danger: untyped param: " ++ show param
-    when (Unspecified == argType v) $
-      shouldnt $ "Danger: untyped argument: " ++ show v
-    logExpansion $ "  creating output assignment for " ++ show pname
-    -- alreadyAssigned <- lift $ isProtected v
-    -- if alreadyAssigned
-    --   then do
-    --     logExpansion $ "  no need; it's protected "
-    --     return ()
-    --   else do
-    oldVar <- expandArg (ArgVar pname ty FlowIn Ordinary False)
-    let ins = PrimForeign "llvm" "move" [] [oldVar,v]
-    logExpansion $ "  to " ++ show ins
-    -- oldVar <- expandArg (ArgVar pname ty FlowIn Ordinary False)
-    addInstr ins pos
+addInputAssign' _ _ _ FlowOut _ = do
+    return ()
+    
 
 -- renameParam :: Renaming -> PrimParam -> PrimParam
 -- renameParam renaming param@(PrimParam name typ FlowOut ftype inf ) = 

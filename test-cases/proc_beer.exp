@@ -11,8 +11,7 @@ AFTER EVERYTHING:
   procs           : 
 public (0 calls) (inline)
 0: beer99(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    proc_beer.gen$3<0>(99:wybe.int, ~wybe.io$io#0:wybe.phantom, ?tmp$6#0:wybe.int, ?tmp$7#0:wybe.phantom) @proc_beer:5:9
-    foreign llvm move(~tmp$7#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:5
+    proc_beer.gen$3<0>(99:wybe.int, ~wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:9
 
 (0 calls) (inline)
 0: gen$1(count#0:wybe.int, tmp$0#0:wybe.bool, wybe.io$io#0:wybe.phantom, [?count#0:wybe.int], [?tmp$0#0:wybe.bool], [?wybe.io$io#0:wybe.phantom]):
@@ -35,10 +34,8 @@ public (0 calls) (inline)
 
 (1 calls) (inline)
 0: gen$4(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?count#2:wybe.int, ?wybe.io$io#3:wybe.phantom):
-    foreign c print_int(count#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:110:38
-    foreign c print_string(" bottles of beer on the wall":wybe.string, ~tmp$4#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @wybe:122:41
-    foreign c putc('\n':wybe.char, ~tmp$7#0:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:108:28
-    foreign llvm sub(~count#0:wybe.int, 1:wybe.int, ?tmp$12#0:wybe.int) @wybe:7:38
-    proc_beer.gen$3<0>(~tmp$12#0:wybe.int, ~tmp$8#0:wybe.phantom, ?tmp$18#0:wybe.int, ?tmp$19#0:wybe.phantom) @proc_beer:5:9
-    foreign llvm move(~tmp$18#0:wybe.int, ?count#2:wybe.int) @proc_beer:5:5
-    foreign llvm move(~tmp$19#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom) @proc_beer:5:5
+    foreign c print_int(count#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:110:38
+    foreign c print_string(" bottles of beer on the wall":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?tmp$6#0:wybe.phantom) @wybe:122:41
+    foreign c putc('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:108:28
+    foreign llvm sub(~count#0:wybe.int, 1:wybe.int, ?tmp$9#0:wybe.int) @wybe:7:38
+    proc_beer.gen$3<0>(~tmp$9#0:wybe.int, ~wybe.io$io#2:wybe.phantom, ?count#2:wybe.int, ?wybe.io$io#3:wybe.phantom) @proc_beer:5:9

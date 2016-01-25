@@ -13,16 +13,16 @@ AFTER EVERYTHING:
 public (0 calls)
 0: distance(p1#0:position.position, p2#0:position.position, ?$#0:wybe.int):
     foreign $ access("position":wybe.string, "position":wybe.string, "x":wybe.string, p2#0:position.position, ?tmp$11#0:wybe.int)
-    foreign $ access("position":wybe.string, "position":wybe.string, "x":wybe.string, p1#0:position.position, ?tmp$14#0:wybe.int)
-    foreign llvm sub(~tmp$11#0:wybe.int, ~tmp$14#0:wybe.int, ?tmp$18#0:wybe.int) @wybe:7:38
-    foreign C ipow(~tmp$18#0:wybe.int, 2:wybe.int, ?tmp$22#0:wybe.int) @wybe:21:42
-    foreign $ access("position":wybe.string, "position":wybe.string, "y":wybe.string, ~p2#0:position.position, ?tmp$25#0:wybe.int)
-    foreign $ access("position":wybe.string, "position":wybe.string, "y":wybe.string, ~p1#0:position.position, ?tmp$28#0:wybe.int)
-    foreign llvm sub(~tmp$25#0:wybe.int, ~tmp$28#0:wybe.int, ?tmp$32#0:wybe.int) @wybe:7:38
-    foreign C ipow(~tmp$32#0:wybe.int, 2:wybe.int, ?tmp$36#0:wybe.int) @wybe:21:42
-    foreign llvm add(~tmp$22#0:wybe.int, ~tmp$36#0:wybe.int, ?tmp$40#0:wybe.int) @wybe:4:38
-    foreign C isqrt(~tmp$40#0:wybe.int, ?tmp$43#0:wybe.int) @wybe:20:35
-    foreign llvm move(~tmp$43#0:wybe.int, ?$#0:wybe.int) @import:3:8
+    foreign $ access("position":wybe.string, "position":wybe.string, "x":wybe.string, p1#0:position.position, ?tmp$13#0:wybe.int)
+    foreign llvm sub(~tmp$11#0:wybe.int, ~tmp$13#0:wybe.int, ?tmp$16#0:wybe.int) @wybe:7:38
+    foreign C ipow(~tmp$16#0:wybe.int, 2:wybe.int, ?tmp$19#0:wybe.int) @wybe:21:42
+    foreign $ access("position":wybe.string, "position":wybe.string, "y":wybe.string, ~p2#0:position.position, ?tmp$21#0:wybe.int)
+    foreign $ access("position":wybe.string, "position":wybe.string, "y":wybe.string, ~p1#0:position.position, ?tmp$23#0:wybe.int)
+    foreign llvm sub(~tmp$21#0:wybe.int, ~tmp$23#0:wybe.int, ?tmp$26#0:wybe.int) @wybe:7:38
+    foreign C ipow(~tmp$26#0:wybe.int, 2:wybe.int, ?tmp$29#0:wybe.int) @wybe:21:42
+    foreign llvm add(~tmp$19#0:wybe.int, ~tmp$29#0:wybe.int, ?tmp$32#0:wybe.int) @wybe:4:38
+    foreign C isqrt(~tmp$32#0:wybe.int, ?tmp$34#0:wybe.int) @wybe:20:35
+    foreign llvm move(~tmp$34#0:wybe.int, ?$#0:wybe.int)
 --------------------------------------------------
  Module position
   public submods  : 
@@ -68,18 +68,18 @@ public (0 calls) (inline)
     foreign $ alloc("position":wybe.string, "position":wybe.string, ?$rec#0:position.position)
     foreign $ mutate("position":wybe.string, "position":wybe.string, "x":wybe.string, ~%$rec#0:position.position, ?%$rec#1:position.position, ~x#0:wybe.int)
     foreign $ mutate("position":wybe.string, "position":wybe.string, "y":wybe.string, ~%$rec#1:position.position, ?%$rec#2:position.position, ~y#0:wybe.int)
-    foreign llvm move(~$rec#2:position.position, ?$#0:position.position) @position:2:12
+    foreign llvm move(~$rec#2:position.position, ?$#0:position.position)
 
 public (0 calls) (inline)
 0: x($rec#0:position.position, ?$#0:wybe.int):
     foreign $ access("position":wybe.string, "position":wybe.string, "x":wybe.string, ~$rec#0:position.position, ?tmp$0#0:wybe.int)
-    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int) @position:2:12public (0 calls) (inline)
+    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)public (0 calls) (inline)
 1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
     foreign $ mutate("position":wybe.string, "position":wybe.string, "x":wybe.string, ~%$rec#0:position.position, ?%$rec#1:position.position, ~$field#0:wybe.int)
 
 public (0 calls) (inline)
 0: y($rec#0:position.position, ?$#0:wybe.int):
     foreign $ access("position":wybe.string, "position":wybe.string, "y":wybe.string, ~$rec#0:position.position, ?tmp$0#0:wybe.int)
-    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int) @position:2:12public (0 calls) (inline)
+    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)public (0 calls) (inline)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
     foreign $ mutate("position":wybe.string, "position":wybe.string, "y":wybe.string, ~%$rec#0:position.position, ?%$rec#1:position.position, ~$field#0:wybe.int)
