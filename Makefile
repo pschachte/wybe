@@ -50,9 +50,10 @@ test:	wybemk
 	    if [ ! -r $$exp ] ; then \
 		printf "[31m?[39m" ; \
 		NEW="$${NEW}\n    $$out" ; \
-	    elif diff -u $$exp $$out >> ERRS 2>&1 ; then \
+	    elif diff -q $$exp $$out >/dev/null 2>&1 ; then \
 		printf "." ; \
 	    else \
+		dwdiff -c -d '()<>~!@:?.%#' $$exp $$out >> ERRS 2>&1 ; \
 		printf "[31mX[39m" ; \
 		FAILS="$${FAILS}\n    $$out" ; \
 	    fi \

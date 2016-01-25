@@ -24,7 +24,7 @@ for f in test-cases/*.wybe ; do
 	    cat $f
 	    echo '-------'
 	    echo 'Output changes:'
-	    dwdiff -c "$exp" "$out"
+	    dwdiff -c -d '()<>~!@:?.%#' "$exp" "$out"
 	    echo
 	    if agree "Is the green version appropriate? " ; then
 		mv "$out" "$exp"
