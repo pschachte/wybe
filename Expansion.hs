@@ -20,12 +20,9 @@ import Options (LogSelection(Expansion))
 import Data.Map as Map
 import Data.List as List
 import Data.Set as Set
-import Data.Maybe
 import Control.Monad
-import Control.Monad.Trans (lift,liftIO)
+import Control.Monad.Trans (lift)
 import Control.Monad.Trans.State
-
-import Debug.Trace
 
 
 -- | Expand the supplied ProcDef, inlining as desired.
@@ -34,9 +31,10 @@ procExpansion def = do
     logMsg Expansion $ "\nTry to expand proc " ++ show (procName def)
     let ProcDefPrim proto body = procImpln def
     let tmp = procTmpCount def
-    (expander,body') <- buildBody (outputParams proto) $ 
+    let outs = outputParams proto
+    (expander,body') <- buildBody (Map.fromSet id outs) $ 
                         execStateT (expandBody body) $
-                          initExpanderState tmp $ outputParams proto
+                          initExpanderState tmp
     let def' = def { procImpln = ProcDefPrim proto body',
                      procTmpCount = tmpCount expander }
     when (def /= def') $
@@ -102,9 +100,9 @@ addInstr :: Prim -> OptPos -> Expander ()
 addInstr prim pos = lift $ instr prim pos
 
 
-initExpanderState :: Int -> Set PrimVarName -> ExpanderState
-initExpanderState tmpCount varSet = 
-    Expander False identityRenaming tmpCount True
+initExpanderState :: Int -> ExpanderState
+initExpanderState tCount = 
+    Expander False identityRenaming tCount True
 
 
 ----------------------------------------------------------------
@@ -115,21 +113,21 @@ expandBody :: ProcBody -> Expander ()
 expandBody (ProcBody prims fork) = do
     modify (\s -> s { noFork = fork == NoFork })
     expandPrims prims
-    state <- get
+    st <- get
     case fork of
       NoFork -> return ()
-      PrimFork var last bodies -> do
+      PrimFork var final bodies -> do
         logExpansion $ "Now expanding fork (" ++ 
-          (if inlining state then "without" else "WITH") ++ " inlining)"
-        logExpansion $ "  with renaming = " ++ show (renaming state)
-        let var' = case Map.lookup var $ renaming state of
+          (if inlining st then "without" else "WITH") ++ " inlining)"
+        logExpansion $ "  with renaming = " ++ show (renaming st)
+        let var' = case Map.lookup var $ renaming st of
               Nothing -> var
               Just (ArgVar v _ _ _ _) -> v 
               -- XXX should handle case of switch on int constant
               Just _ -> shouldnt "expansion led to non-var conditional"
         logExpansion $ "  fork on " ++ show var'
-        lift $ buildFork var' last 
-          $ List.map (\b -> evalStateT (expandBody b) state) bodies
+        lift $ buildFork var' final 
+          $ List.map (\b -> evalStateT (expandBody b) st) bodies
         logExpansion $ "Finished expanding fork"
 
 
@@ -143,12 +141,12 @@ expandPrims pprims = do
 -- fail.
 -- XXX allow this to handle non-primitives with all inputs known by inlining.
 expandPrim :: Prim -> OptPos -> Bool -> Expander ()
-expandPrim call@(PrimCall pspec args) pos last = do
+expandPrim (PrimCall pspec args) pos _ = do
     args' <- mapM expandArg args
     let call' = PrimCall pspec args'
     logExpansion $ "  Expand call " ++ show call'
-    inlining <- gets inlining
-    if inlining
+    inliningNow <- gets inlining
+    if inliningNow
       then do
         logExpansion $ "  Cannot inline:  already inlining"
         addInstr call' pos
@@ -158,7 +156,7 @@ expandPrim call@(PrimCall pspec args) pos last = do
         if procInline def
           then inlineCall proto args' body pos
           else do
-            -- inlinableLast <- gets (((last && singleCaller def 
+            -- inlinableLast <- gets (((final && singleCaller def 
             --                          && procVis def == Private) &&) 
             --                        . noFork)
             let inlinableLast = False
@@ -170,14 +168,14 @@ expandPrim call@(PrimCall pspec args) pos last = do
                 logExpansion $ "  Not inlinable"
                 addInstr call' pos
 expandPrim (PrimForeign lang nm flags args) pos _ = do
-    state <- get
+    st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)
-    logExpansion $ "    with renaming = " ++ show (renaming state)
+    logExpansion $ "    with renaming = " ++ show (renaming st)
     args' <- mapM expandArg args
     logExpansion $ "  --> " ++ show (PrimForeign lang nm flags args')
     addInstr (PrimForeign lang nm flags args')  pos
-    state <- get
-    logExpansion $ "    renaming = " ++ show (renaming state)
+    st' <- get
+    logExpansion $ "    renaming = " ++ show (renaming st')
 expandPrim prim pos _ = do
     addInstr prim pos
 
@@ -193,17 +191,17 @@ inlineCall proto args body pos = do
     logExpansion $ "  Inlining defn: " ++ showBlock 4 body
     expandBody body
     tmp' <- gets tmpCount
-    subst <- gets ((Map.filterWithKey (\k _ -> List.elem k $ outputArgs args)) 
-                   . renaming)
+    -- subst <- gets ((Map.filterWithKey (\k _ -> List.elem k $ outputArgs args)) 
+    --                . renaming)
     mapM_ (addOutputAssign pos) $ zip (primProtoParams proto) args
     -- Throw away state after inlining, except ...
     put saved
     -- ... put back temp count
     modify (\s -> s { tmpCount = tmp' })
                       -- renaming = Map.union subst $ renaming s})
-    state <- get
+    st <- get
     logExpansion $ "  After inlining:"
-    logExpansion $ "    renaming = " ++ show (renaming state)
+    logExpansion $ "    renaming = " ++ show (renaming st)
 
 
 expandArg :: PrimArg -> Expander PrimArg
@@ -228,16 +226,17 @@ outputParams proto =
   List.filter ((==FlowOut) . primParamFlow) $ primProtoParams proto
 
 
-outputArgs :: [PrimArg] -> [PrimVarName]
-outputArgs args =
-    List.map outArgVar $ List.filter ((FlowOut ==) . argFlowDirection) args
+-- outputArgs :: [PrimArg] -> [PrimVarName]
+-- outputArgs args =
+--     List.map outArgVar $ List.filter ((FlowOut ==) . argFlowDirection) args
+
 
 -- |Add an assignment of input argument to parameter in preparation for
 -- inlining a call. The parameter name must be substituted with a new name;
 -- the argument has already been renamed as appropriate for the calling
 -- context.
 addInputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
-addInputAssign _ (PrimParam k ty FlowOut _ _,v) = return ()
+addInputAssign _ (PrimParam _ _ FlowOut _ _,_) = return ()
 addInputAssign pos (param@(PrimParam name ty FlowIn _ _),v) = do
     when (Unspecified == ty) $
       shouldnt $ "Danger: untyped param: " ++ show param
@@ -251,7 +250,7 @@ addInputAssign pos (param@(PrimParam name ty FlowIn _ _),v) = do
 --  a call.  The parameter has been substituted with a new name, but the
 --  argument should be interpreted without renaming.
 addOutputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
-addOutputAssign _ (PrimParam k ty FlowIn _ _,v) = return ()
+addOutputAssign _ (PrimParam _ _ FlowIn _ _,_) = return ()
 addOutputAssign pos (param@(PrimParam pname ty FlowOut _ _), v) = do
     when (Unspecified == ty) $
       shouldnt $ "Danger: untyped param: " ++ show param
@@ -265,10 +264,10 @@ addOutputAssign pos (param@(PrimParam pname ty FlowOut _ _), v) = do
     --     return ()
     --   else do
     oldVar <- expandArg (ArgVar pname ty FlowIn Ordinary False)
-    let instr = PrimForeign "llvm" "move" [] [oldVar,v]
-    logExpansion $ "  to " ++ show instr
+    let ins = PrimForeign "llvm" "move" [] [oldVar,v]
+    logExpansion $ "  to " ++ show ins
     -- oldVar <- expandArg (ArgVar pname ty FlowIn Ordinary False)
-    addInstr instr pos
+    addInstr ins pos
 
 -- renameParam :: Renaming -> PrimParam -> PrimParam
 -- renameParam renaming param@(PrimParam name typ FlowOut ftype inf ) = 
@@ -280,10 +279,10 @@ addOutputAssign pos (param@(PrimParam pname ty FlowOut _ _), v) = do
 -- renameParam _ param = param
 
 
-singleCaller :: ProcDef -> Bool
-singleCaller def =
-    let m = procCallers def
-    in  Map.size m == 1 && (snd . Map.findMin) m == 1
+-- singleCaller :: ProcDef -> Bool
+-- singleCaller def =
+--     let m = procCallers def
+--     in  Map.size m == 1 && (snd . Map.findMin) m == 1
 
 
 -- |Log a message, if we are logging unbrancher activity.
