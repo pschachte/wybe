@@ -139,9 +139,9 @@ buildPrims builder = do
     return $ currBody bstate
 
 
--- |Add an instruction to the current body, after applying the current substitution.
---  If it's a move instruction, add it to the current substitution, and only add it
---  if it assigns a protected variable.
+-- |Add an instruction to the current body, after applying the current
+--  substitution. If it's a move instruction, add it to the current
+--  substitution, and only add it if it assigns a protected variable.
 instr :: Prim -> OptPos -> BodyBuilder ()
 instr (PrimCall pspec args) pos = do
     args' <- mapM expandArg args
@@ -154,8 +154,8 @@ instr PrimNop _ = do
     return ()
 
 
--- |Add an instr, unless it's a move to a non-protected variable, which is treated as
---  a new substitution.
+-- |Add an instr, unless it's a move to a non-protected variable, which is
+--  treated as a new substitution.
 foreignInstr instr@(PrimForeign "llvm" "move" []
                     [val, argvar@(ArgVar var _ flow _ _)]) pos 
   = do
@@ -169,8 +169,8 @@ foreignInstr instr@(PrimForeign "llvm" "move" []
 foreignInstr prim pos = rawInstr prim pos
 
 
--- |Add a binding for a variable.  If that variable is an output for the proc being
---  defined, also add an explicit assignment to that variable.
+-- |Add a binding for a variable. If that variable is an output for the
+--  proc being defined, also add an explicit assignment to that variable.
 addSubst :: PrimVarName -> PrimArg -> BodyBuilder ()
 addSubst var val = do
     logBuild $ "      adding subst " ++ show var ++ " -> " ++ show val
@@ -228,8 +228,8 @@ setPrimArgFlow FlowOut _ arg =
 --                              Constant Folding
 ----------------------------------------------------------------
 
--- |Transform primitives with all inputs known into a move instruction by performing
---  the operation at compile-time.
+-- |Transform primitives with all inputs known into a move instruction by
+--  performing the operation at compile-time.
 constantFold ::  String -> ProcName -> [Ident] -> [PrimArg] -> Prim
 constantFold "llvm" op flags args
   | all constIfInput args = simplifyOp op flags args

@@ -78,16 +78,6 @@ data ExpanderState = Expander {
 
 type Expander = StateT ExpanderState BodyBuilder
 
--- |Return a fresh variable name. This assumes that all variables in
--- inlined code are given fresh variable names, so temp names appearing in
--- procs being inlined don't clash.
-tmpVar :: Expander PrimVarName
-tmpVar = do
-    tmp <- gets tmpCount
-    modify (\s -> s { tmpCount = tmp+1 })
-    return $ PrimVarName (mkTempName tmp) 0
-
-
 -- |Substitute a fresh temp variable for the specified variable
 freshVar :: PrimVarName -> TypeSpec -> Expander PrimArg
 freshVar oldVar typ = do
