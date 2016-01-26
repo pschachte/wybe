@@ -183,8 +183,27 @@ addSubst var val = do
 rawInstr :: Prim -> OptPos -> BodyBuilder ()
 rawInstr prim pos = do
     logBuild $ "---- adding instruction " ++ show prim
+    validateInstr prim
     modify (\s -> s { currBuild = addInstrToState (maybePlace prim pos)
                                  $ currBuild s })
+
+
+validateInstr :: Prim -> BodyBuilder ()
+validateInstr instr@(PrimCall _ args) =        mapM_ (validateArg instr) args
+validateInstr instr@(PrimForeign _ _ _ args) = mapM_ (validateArg instr) args
+validateInstr PrimNop = return ()
+
+validateArg :: Prim -> PrimArg -> BodyBuilder ()
+validateArg instr (ArgVar _ ty _ _ _) = validateType ty instr
+validateArg instr (ArgInt    _ ty)    = validateType ty instr
+validateArg instr (ArgFloat  _ ty)    = validateType ty instr
+validateArg instr (ArgString _ ty)    = validateType ty instr
+validateArg instr (ArgChar   _ ty)    = validateType ty instr
+
+validateType :: TypeSpec -> Prim -> BodyBuilder ()
+validateType Unspecified instr =
+    shouldnt $ "Unspecified type in argument of " ++ show instr
+validateType (TypeSpec _ _ _) instr = return ()
 
 addInstrToState :: Placed Prim -> BodyBuildState -> BodyBuildState
 addInstrToState ins (Unforked revPrims) = Unforked $ ins:revPrims
