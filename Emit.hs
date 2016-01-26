@@ -74,7 +74,9 @@ logLLVMString thisMod =
   do reenterModule thisMod
      maybeLLMod <- getModuleImplementationField modLLVM
      case maybeLLMod of
-       (Just llmod) -> liftIO $ codeemit llmod
+       (Just llmod) ->
+         do llstr <- liftIO $ codeemit llmod
+            logEmit llstr
        (Nothing) -> error "No LLVM Module Implementation"
      finishModule
      return ()
@@ -133,9 +135,8 @@ codeemit :: LLVMAST.Module -> IO String
 codeemit mod =
     withContext $ \context ->
         liftError $ withModuleFromAST context mod $ \m ->
-            do putStrLn $ "Emitting module: " ++ (LLVMAST.moduleName mod)
-               llstr <- moduleLLVMAssembly m
-               putStrLn llstr
+            do llstr <- moduleLLVMAssembly m
+               -- putStrLn llstr
                return llstr
 
 -- | Initialize the JIT compiler under the IO monad.
