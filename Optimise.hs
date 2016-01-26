@@ -47,9 +47,27 @@ optimiseMod mods thisMod = do
                (n,def) <- zip [0..] procDefs,
                let pspec = ProcSpec thisMod name n
              ]
-    mapM_ (mapM_ optimiseProcBottomUp .  sccElts) ordered
+    mapM_ optimiseSccBottomUp ordered
     finishModule
     return (False,[])
+
+
+-- | Do bottom-up optimisation on one SCC.  If optimising any but the first
+--   in the SCC determines it should be inlined, we may have already missed
+--   inlining a call to it, so go through the whole SCC and optimise it
+--   again.
+--
+--   XXX  This is a bit heavy-handed, but it will only do extra work for
+--   mutually recursive procs, and it's simpler than keeping track of all
+--   proc calls we've seen and not inlined so we avoid repeating work when
+--   it won't do anything.  It's also possible that this may need to be
+--   repeated to a fixed point, but I'm not confident that optimisation
+--   is monotone and I don't want an infinite loop.
+optimiseSccBottomUp procs = do
+    inlines <- mapM optimiseProcBottomUp $ sccElts procs
+    when (or $ tail inlines) $ do
+        mapM optimiseProcBottomUp $ sccElts procs
+        return ()
 
 
 procBody :: ProcDef -> ProcBody
@@ -76,11 +94,13 @@ optimiseProcDefTD pspec def = do
     return def
 
 
-optimiseProcBottomUp :: ProcSpec -> Compiler ()
+-- | Do bottom-up optimisations of a Proc, returning whether to inline it
+optimiseProcBottomUp :: ProcSpec -> Compiler Bool
 optimiseProcBottomUp pspec = do
     logOptimise $ ">>> Optimise (Bottom-up) " ++ show pspec
     updateProcDefM (optimiseProcDefBU pspec) pspec
-    return ()
+    newDef <- getProcDef pspec
+    return $ procInline newDef
 
 
 optimiseProcDefBU :: ProcSpec -> ProcDef -> Compiler ProcDef

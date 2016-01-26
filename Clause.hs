@@ -56,15 +56,6 @@ currVar name pos = do
         Just n -> return $ PrimVarName name n
 
 
--- mkPrimVarName :: Map String Int -> String -> PrimVarName
--- mkPrimVarName dict name =
---     case Map.lookup name dict of
---         Nothing -> PrimVarName name 0
---         -- must have been introduced in resource expansion, which always uses 0
---         -- Nothing -> shouldnt $ "Undefined variable '" ++ name ++ "'"
---         Just n  -> PrimVarName name n
-
-
 -- |Run a clause compiler function from the Compiler monad to compile
 --  a generated procedure.
 evalClauseComp :: ClauseComp t -> Compiler t
