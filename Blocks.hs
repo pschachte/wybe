@@ -50,12 +50,23 @@ data LLVMCompState = LLVMCompState {
     }
 
 -- | Update the LLVMCompState list of primitives which require extern
--- declarations.
+-- declarations. Don't add the primitive again if it has been added
+-- previously.
 needExterns :: [Prim] -> LLVMComp ()
 needExterns ps =
     do ex <- gets neededExterns
-       modify $ \s -> s { neededExterns = ex ++ ps }
+       let uniqueExs = List.nubBy samePrimName (ex ++ ps)
+       logBlocks $ "Externs: " ++ (show uniqueExs)
+       modify $ \s -> s { neededExterns = uniqueExs }
        return ()
+
+-- | Predicate to test if two Prims have the same name.
+samePrimName :: Prim -> Prim -> Bool
+samePrimName (PrimCall p1 _) (PrimCall p2 _) = p1 == p2 
+samePrimName (PrimForeign _ p1 _ _) (PrimForeign _ p2 _ _) = p1 == p2
+samePrimName PrimNop PrimNop = True
+samePrimName _ _ = False
+
 
 -- | Update the LLVMCompState list of global variables. These global variables
 -- will be defined at the top of a module. Global variables get implicitely
