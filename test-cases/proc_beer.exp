@@ -25,11 +25,15 @@ public (0 calls) (inline)
     foreign llvm icmp sge(count#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @wybe:18:40
     case ~tmp$4#0 of
     0:
-        foreign llvm move(~count#0, ?count#1)
-        foreign llvm move(~wybe.io$io#0, ?wybe.io$io#1)
+        foreign llvm move(~count#0:wybe.int, ?count#1:wybe.int)
+        foreign llvm move(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom)
 
     1:
-        proc_beer.gen$4<0>(~count#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom)
+        foreign c print_int(count#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @wybe:110:38
+        foreign c print_string(" bottles of beer on the wall":wybe.string, ~tmp$7#0:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:122:41
+        foreign c putc('\n':wybe.char, ~tmp$8#0:wybe.phantom, ?tmp$9#0:wybe.phantom) @wybe:108:28
+        foreign llvm sub(~count#0:wybe.int, 1:wybe.int, ?tmp$10#0:wybe.int) @wybe:7:38
+        proc_beer.gen$3<0>(~tmp$10#0:wybe.int, ~tmp$9#0:wybe.phantom, ?count#1:wybe.int, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:9
 
 
 (1 calls) (inline)

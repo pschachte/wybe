@@ -13,7 +13,7 @@ import Options (LogSelection(Clause))
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
-import Data.Maybe
+import Data.Maybe as Maybe
 import Text.ParserCombinators.Parsec.Pos
 import Control.Monad
 import Control.Monad.Trans.Class
@@ -56,13 +56,13 @@ currVar name pos = do
         Just n -> return $ PrimVarName name n
 
 
-mkPrimVarName :: Map String Int -> String -> PrimVarName
-mkPrimVarName dict name =
-    case Map.lookup name dict of
-        Nothing -> PrimVarName name 0
-        -- must have been introduced in resource expansion, which always uses 0
-        -- Nothing -> shouldnt $ "Undefined variable '" ++ name ++ "'"
-        Just n  -> PrimVarName name n
+-- mkPrimVarName :: Map String Int -> String -> PrimVarName
+-- mkPrimVarName dict name =
+--     case Map.lookup name dict of
+--         Nothing -> PrimVarName name 0
+--         -- must have been introduced in resource expansion, which always uses 0
+--         -- Nothing -> shouldnt $ "Undefined variable '" ++ name ++ "'"
+--         Just n  -> PrimVarName name n
 
 
 -- |Run a clause compiler function from the Compiler monad to compile
@@ -84,7 +84,7 @@ compileProc proc = do
           List.filter (flowsIn . paramFlow) params
         startVars <- get
         logClause $ "Compiling body:\n" ++ showBody 4 body
-        compiled <- compileBody body
+        compiled <- compileBody body params
         logClause $ "Compiled to:\n"  ++ showBlock 4 compiled
         endVars <- get
         logClause $ "startVars: " ++ show startVars
@@ -101,8 +101,8 @@ compileProc proc = do
 --  form of the body is very limited:  it is either a single Cond 
 --  statement, or it is a list of ProcCalls and ForeignCalls.  
 --  Everything else has already been transformed away.
-compileBody :: [Placed Stmt] -> ClauseComp ProcBody
-compileBody [placed]
+compileBody :: [Placed Stmt] -> [Param] -> ClauseComp ProcBody
+compileBody [placed] params
   | case content placed of
       Cond _ _ _ _ -> True
       _ -> False
@@ -118,8 +118,8 @@ compileBody [placed]
       afterElse <- get
       let final = Map.intersectionWith max afterThen afterElse
       put final
-      let thn'' = thn' ++ reconcilingAssignments afterThen final
-      let els'' = els' ++ reconcilingAssignments afterElse final
+      let thn'' = thn' ++ reconcilingAssignments afterThen final params
+      let els'' = els' ++ reconcilingAssignments afterElse final params
       case tstVar' of
         ArgVar var _ FlowIn _ _ ->
             return $ ProcBody tstStmts' $
@@ -133,7 +133,7 @@ compileBody [placed]
                     show tstVar' ++ "'") $
                  betterPlace (place placed) tstVar
             return $ ProcBody [] NoFork
-compileBody stmts = do
+compileBody stmts _ = do
     prims <- mapM compileSimpleStmt stmts
     return $ ProcBody prims NoFork
 
@@ -178,19 +178,25 @@ compileArg' _ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 
 
-reconcilingAssignments :: Map VarName Int -> Map VarName Int -> [Placed Prim]
-reconcilingAssignments caseVars jointVars =
-    let vars =
-          List.filter (\v -> caseVars ! v /= jointVars ! v) $ keys jointVars
-    in  List.map (reconcileOne caseVars jointVars) vars
+reconcilingAssignments :: Map VarName Int -> Map VarName Int
+                       -> [Param] -> [Placed Prim]
+reconcilingAssignments caseVars jointVars params =
+    Maybe.mapMaybe (reconcileOne caseVars jointVars) params
 
 
-reconcileOne :: (Map VarName Int) -> (Map VarName Int) -> VarName -> Placed Prim
-reconcileOne caseVars jointVars var =
-    Unplaced $
-    PrimForeign "llvm" "move" []
-    [ArgVar (mkPrimVarName caseVars var) Unspecified FlowIn Ordinary False,
-     ArgVar (mkPrimVarName jointVars var) Unspecified FlowOut Ordinary False]
+reconcileOne :: (Map VarName Int) -> (Map VarName Int) -> Param
+             -> Maybe (Placed Prim)
+reconcileOne caseVars jointVars (Param name ty flow ftype) =
+    case (Map.lookup name caseVars,
+          Map.lookup name jointVars)
+    of (Just caseNum, Just jointNum) ->
+         if caseNum /= jointNum && elem flow [ParamOut, ParamInOut]
+         then Just $ Unplaced $
+              PrimForeign "llvm" "move" []
+              [ArgVar (PrimVarName name caseNum) ty FlowIn Ordinary False,
+               ArgVar (PrimVarName name jointNum) ty FlowOut Ordinary False]
+         else Nothing
+       _ -> Nothing
 
 
 compileParam :: ClauseCompState -> ClauseCompState -> Param -> PrimParam

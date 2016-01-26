@@ -26,13 +26,15 @@ AFTER EVERYTHING:
     case ~tmp$1#0 of
     0:
         proc_yorn.gen$2<0>(prompt#0:wybe.string, ~wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_yorn:2:8
-        foreign llvm move(~prompt#0, ?prompt#1)
-        foreign llvm move(~response#0, ?response#1)
-        foreign llvm move(~result#0, ?result#1)
-        foreign llvm move(~tmp$0#0, ?tmp$0#1)
+        foreign llvm move(~prompt#0:wybe.string, ?prompt#1:wybe.string)
+        foreign llvm move(~response#0:wybe.char, ?response#1:wybe.char)
+        foreign llvm move(~result#0:wybe.bool, ?result#1:wybe.bool)
+        foreign llvm move(~tmp$0#0:wybe.bool, ?tmp$0#1:wybe.bool)
 
     1:
-        proc_yorn.gen$6<0>(~prompt#0:wybe.string, ~response#0:wybe.char, ~result#0:wybe.bool, ~tmp$0#0:wybe.bool, ~wybe.io$io#0:wybe.phantom, ?prompt#1:wybe.string, ?response#1:wybe.char, ?result#1:wybe.bool, ?tmp$0#1:wybe.bool, ?wybe.io$io#1:wybe.phantom)
+        foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~wybe.io$io#0:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:122:41
+        foreign c putc('\n':wybe.char, ~tmp$8#0:wybe.phantom, ?tmp$9#0:wybe.phantom) @wybe:108:28
+        proc_yorn.gen$4<0>(~prompt#0:wybe.string, ~response#0:wybe.char, ~result#0:wybe.bool, ~tmp$0#0:wybe.bool, ~tmp$9#0:wybe.phantom, ?prompt#1:wybe.string, ?response#1:wybe.char, ?result#1:wybe.bool, ?tmp$0#1:wybe.bool, ?tmp$10#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_yorn:8:12
 
 
 (1 calls)
@@ -40,14 +42,18 @@ AFTER EVERYTHING:
     proc_yorn.is_yes_or_no<0>(response#0:wybe.char, ?tmp$2#0:wybe.bool) @proc_yorn:8:18
     case tmp$2#0 of
     0:
-        proc_yorn.gen$5<0>(~prompt#0:wybe.string, ~response#0:wybe.char, ~result#0:wybe.bool, ~tmp$0#0:wybe.bool, ~wybe.io$io#0:wybe.phantom, ?prompt#1:wybe.string, ?response#1:wybe.char, ?result#1:wybe.bool, ?tmp$0#1:wybe.bool, ?tmp$2#0:wybe.bool, ?wybe.io$io#1:wybe.phantom)
+        foreign llvm move(prompt#0:wybe.string, ?prompt#1:wybe.string)
+        foreign llvm move(~response#0:wybe.char, ?response#1:wybe.char)
+        foreign llvm move(~result#0:wybe.bool, ?result#1:wybe.bool)
+        foreign llvm move(~tmp$0#0:wybe.bool, ?tmp$0#1:wybe.bool)
+        proc_yorn.gen$2<0>(~prompt#0:wybe.string, ~wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_yorn:2:8
 
     1:
-        foreign llvm move(~prompt#0, ?prompt#1)
-        foreign llvm move(~response#0, ?response#1)
-        foreign llvm move(~result#0, ?result#1)
-        foreign llvm move(~tmp$0#0, ?tmp$0#1)
-        foreign llvm move(~wybe.io$io#0, ?wybe.io$io#1)
+        foreign llvm move(~prompt#0:wybe.string, ?prompt#1:wybe.string)
+        foreign llvm move(~response#0:wybe.char, ?response#1:wybe.char)
+        foreign llvm move(~result#0:wybe.bool, ?result#1:wybe.bool)
+        foreign llvm move(~tmp$0#0:wybe.bool, ?tmp$0#1:wybe.bool)
+        foreign llvm move(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom)
 
 
 (1 calls) (inline)
