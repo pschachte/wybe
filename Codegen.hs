@@ -436,7 +436,7 @@ cons = ConstantOperand
 -- TODO: Look into and make a TCO version of the function
 -- TODO: Look into calling conventions (is fast cc alright?)
 call :: Operand -> [Operand] -> Instruction
-call fn args = Call False CC.C [] (Right fn) (toArgs args) [] []
+call fn args = Call Nothing CC.C [] (Right fn) (toArgs args) [] []
 
 toArgs :: [Operand] -> [(Operand, [A.ParameterAttribute])]
 toArgs xs = map (\x -> (x, [])) xs

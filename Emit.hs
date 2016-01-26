@@ -112,7 +112,7 @@ makeAssemblyFile file llmod =
 
 -- | Emit the llvm IR of the LLVMAST.Module representation of the given
 -- module tp stdout and use a JIT compiler+optimiser to execute it.
-llvmEmitToIO :: ModSpec -> Compiler AST.Module
+llvmEmitToIO :: ModSpec -> Compiler ()
 llvmEmitToIO thisMod =
     do reenterModule thisMod
        maybeLLMod <- getModuleImplementationField modLLVM
@@ -121,6 +121,7 @@ llvmEmitToIO thisMod =
          (Just llmod) -> liftIO $ codeemit llmod
          (Nothing) -> error "No LLVM Module Implementation"
        finishModule
+       return ()
 
 
 -- | Handle the ExceptT monad. If there is an error, it is better to fail.

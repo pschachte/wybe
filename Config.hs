@@ -1,3 +1,5 @@
+
+
 --  File     : Config.hs
 --  RCS      : $Id$
 --  Author   : Peter Schachte
@@ -49,5 +51,5 @@ ldSystemArgs =
       "-syslibroot",
       "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk",
       "-lSystem",
-      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/7.0.0/lib/darwin/libclang_rt.osx.a"
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/7.0.2/lib/darwin/libclang_rt.osx.a"
     ]

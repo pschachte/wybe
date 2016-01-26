@@ -105,6 +105,7 @@ buildTarget force target = do
             do when (tType == ExecutableFile) (buildExecutable [modname] target)
                when (tType == ObjectFile) (emitObjectFile [modname] target)
                when (tType == BitcodeFile) (emitBitcodeFile [modname] target)
+               llvmEmitToIO [modname]
 
 
 -- |Compile or load a module dependency.

@@ -16,7 +16,7 @@ executable wybemk
                , directory >= 1.2.2.0
                , filepath >= 1.4.0.0
                , haskeline
-               , llvm-general
+               , llvm-general == 3.5.0.0
                , llvm-general-pure
                , mtl
                , parsec

@@ -635,10 +635,12 @@ makeMainModule (Just (LLVMAST.Module name x y defs)) =
 
 replaceMainDef :: LLVMAST.Definition -> LLVMAST.Definition
 replaceMainDef def@(LLVMAST.GlobalDefinition gl) =
-  let (LLVMAST.Name label) = G.name gl
-  in if List.isSuffixOf "main" label
-     then LLVMAST.GlobalDefinition gl { G.name = LLVMAST.Name "main" }
-     else def
+  case G.name gl of
+    LLVMAST.Name label ->
+      if List.isSuffixOf "main" label
+      then LLVMAST.GlobalDefinition gl { G.name = LLVMAST.Name "main" }
+      else def
+    LLVMAST.UnName _ -> def 
 replaceMainDef d = d
   
 
