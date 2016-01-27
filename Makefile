@@ -15,7 +15,7 @@ all:	test
 
 wybemk:	*.hs Version.lhs Parser.hs *.c
 	clang -fPIC -shared cbits.c -o cbits.so
-	ghc -fwarn-incomplete-patterns cbits.so --make $@
+	ghc -fwarn-incomplete-patterns --make $@
 
 .PHONY:	info
 

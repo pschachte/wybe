@@ -68,7 +68,7 @@ emitAssemblyFile m f =
   do logEmit $ "Creating assembly file for " ++ (showModSpec m)
      withModuleLLVM m (makeAssemblyFile f)
 
-
+-- | Log LLVM IR representation of the given module.
 logLLVMString :: ModSpec -> Compiler ()
 logLLVMString thisMod =
   do reenterModule thisMod
