@@ -1,0 +1,58 @@
+SECTIONS
+--------
+1. Installing LLVM on OSX
+2. Configuring and Installing dependencies for Wybe
+3. Installing Haskell Package `llvm-general` from its source with cabal
+
+
+1. INSTALLING LLVM ON OSX
+-------------------------
+Required version: 3.5.x.x.
+
+1. Using Homebrew:
+      brew install llvm35 --with-all-targets
+
+2. Ensure '/usr/local/opt/llvm35/bin/' is in your PATH so that the Haskell
+   package `llvm-general` can find the binary `llvm-config-3.5`. This way you
+   can keep multiple LLVM versions installed.
+
+
+2. CONFIGURE AND INSTALLING DEPENDENCIES FOR WYBE
+-------------------------------------------------
+Sandbox can be avoided to make things simpler. In the project directory:
+
+        cabal configure
+        cabal install --only-dependencies
+
+
+It would probably fail at installing `llvm-general-3.5.1.0`, which would have
+to installed separately through it's github source.
+
+Using cabal to build and run, alternatively to make:
+
+      cabal build
+      cabal run
+
+
+3. INSTALLING HASKELL PACKAGE `llvm-general` FROM ITS SOURCE WITH CABAL
+-----------------------------------------------------------------------
+Required version: 3.5.1.0.
+In the project directory, `cabal list llvm-general` should give an overview on
+which `llvm-general` version is installed or available. Unfortunately,
+currently the `llvm-general-3.5.1.0` package on Hackage is not working with a
+simple `cabal install llvm-general-3.5.1.0`.
+
+Therefore, `llvm-general-3.5.1.0` should be installed through it's git
+repository:
+
+1. Clone the repository somewhere:
+
+         git clone https://github.com/bscarlet/llvm-general
+
+2. Switch to the branch `llvm-3.5` and install. This will install the package
+   `llvm-general-3.5.1.0` and `llvm-general-pure-3.5.0.0` in the user level
+   cabal package repository (~/.cabal..):
+
+        git checkout llvm-3.5
+        cd llvm-general
+        cabal install -fshared-llvm
