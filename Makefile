@@ -3,6 +3,7 @@
 #  Author   : Peter Schachte
 
 VERSION=0.1
+# OPTS = -no-user-package-db -package-db .cabal-sandbox/*-packages.conf.d
 
 all:	test
 
@@ -12,7 +13,8 @@ all:	test
 %.hs:	%.y
 	happy -a -g $<
 
-wybemk:	*.hs Version.lhs Parser.hs
+wybemk:	*.hs Version.lhs Parser.hs *.c
+	clang -fPIC -shared cbits.c -o cbits.so
 	ghc -fwarn-incomplete-patterns --make $@
 
 .PHONY:	info

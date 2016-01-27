@@ -33,3 +33,6 @@ wybemk
 *.synctex.gz
 design.pdf
 redesign.pdf
+TAGS
+*.so
+cbits.so

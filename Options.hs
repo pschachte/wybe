@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Thu Jan 19 17:15:01 2012
 --  Purpose  : Handle compiler options/switches
---  Copyright: © 2012 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
 --
 ----------------------------------------------------------------
 --                      Compiler Options
@@ -12,17 +12,17 @@
 -- |The wybe compiler command line options.
 module Options (Options(..), LogSelection(..), handleCmdline, defaultOptions) where
 
-import System.Console.GetOpt
-import System.Environment
-import System.Exit
-import System.FilePath
-import Data.List as List
-import Data.Map as Map
-import Data.Set as Set
-import Version
+import           Data.List             as List
+import           Data.Map              as Map
+import           Data.Set              as Set
+import           System.Console.GetOpt
+import           System.Environment
+import           System.Exit
+import           System.FilePath
+import           Version
 
 -- |Command line options for the wybe compiler.
-data Options = Options{  
+data Options = Options{
     optForce         :: Bool     -- ^Compile specified files even if up to date
     , optForceAll    :: Bool     -- ^Compile all files even if up to date
     , optShowVersion :: Bool     -- ^Print compiler version and exit
@@ -47,8 +47,9 @@ defaultOptions    = Options
 
 -- |All compiler features we may want to log
 data LogSelection =
-  All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump 
-  | Flatten | LastUse | Optimise | Resources | Types | Unbranch
+  All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
+  | Flatten | LastUse | Optimise | Resources | Types | Unbranch | Blocks
+  | Emit
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
 
@@ -73,12 +74,17 @@ logSelectionDescription LastUse
     = "Log determination of last variable uses"
 logSelectionDescription Optimise
     = "Log optimisation"
-logSelectionDescription Resources 
+logSelectionDescription Resources
     = "Log handling of resources"
 logSelectionDescription Types
     = "Log type checking"
 logSelectionDescription Unbranch
     = "Log transformation of loops and selections into clausal form"
+logSelectionDescription Blocks
+    = "Log translation of LPVM procedures into LLVM "
+logSelectionDescription Emit
+    = "Log emiition of LLVM IR from the definitions created."
+
 
 -- |Command line option parser and help text
 options :: [OptDescr (Options -> Options)]
@@ -94,7 +100,7 @@ options =
          "specify a library directory [default $WYBELIBS]"
  , Option ['l']     ["log"]
    (ReqArg (\ a opts -> opts { optLogAspects = addLogRequest
-                                               (optLogAspects opts) 
+                                               (optLogAspects opts)
                                                a }) "ASPECT")
          "add comma-separated aspects to log, or 'all'"
  , Option [] ["log-help"]
@@ -115,12 +121,12 @@ header = "Usage: wybemk [OPTION...] targets..."
 
 -- |Parse command line arguments
 compilerOpts :: [String] -> IO (Options, [String])
-compilerOpts argv = 
+compilerOpts argv =
   case getOpt Permute options argv of
     (o,n,[]  ) -> return (List.foldl (flip id) defaultOptions o, n)
     (_,_,errs) -> ioError (userError (concat errs ++ usageInfo header options))
 
--- |Parse the command line and handle all options asking to print 
+-- |Parse the command line and handle all options asking to print
 --  something and exit.
 handleCmdline :: IO (Options, [String])
 handleCmdline = do
@@ -133,7 +139,7 @@ handleCmdline = do
                      (\l -> opts0 { optLibDirs = splitSearchPath l }) $
                      Map.lookup "WYBELIBS" env
                 else opts0
-    if optShowHelp opts 
+    if optShowHelp opts
       then do
         putStrLn $ usageInfo header options
         exitSuccess
@@ -144,30 +150,31 @@ handleCmdline = do
              putStrLn "list (with no spaces) of these options:"
              putStr $ formatMapping logSelectionDescription
              exitSuccess
-      else if optShowVersion opts 
+      else if optShowVersion opts
            then do
                putStrLn $ "wybemk " ++ version ++ "\nBuilt " ++ buildDate
                putStrLn $ "Using " ++ show (length (optLibDirs opts)) ++
                  " library directories:\n    " ++
                  intercalate "\n    " (optLibDirs opts)
                exitSuccess
-           else if List.null files 
+           else if List.null files
                 then do
                     putStrLn $ usageInfo header options
                     exitFailure
                 else do
                     return (opts,files)
 
--- | Add 
+-- | Add
 addLogRequest :: Set LogSelection -> String -> Set LogSelection
 addLogRequest set aspectsCommaSep =
-  let set' = Set.union set $ Set.fromList $ List.map read $ 
-             separate ',' aspectsCommaSep
+  let logList = (List.map read $ separate ',' aspectsCommaSep) :: [LogSelection]
+      set' = Set.union set $ Set.fromList logList
   in  if Set.member All set'
       then Set.fromList [minBound .. maxBound]
       else set'
 
--- |The inverse of intercalate:  split up a list into sublists separated 
+
+-- |The inverse of intercalate:  split up a list into sublists separated
 --  by the separator list.
 separate :: Eq a => a -> [a] -> [[a]]
 separate separator [] = [[]]

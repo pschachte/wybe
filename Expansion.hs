@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Tue Apr 29 14:58:14 2014
 --  Purpose  : Replace certain procedure calls with others
---  Copyright: © 2014 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
 --
 --  This code is used for inlining procedures and other similar
 --  transformations.  As part of this, variables are also renamed.

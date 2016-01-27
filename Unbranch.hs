@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Thu Apr 17 13:48:52 2014
 --  Purpose  : Turn loops and conditionals into separate procedures
---  Copyright: © 2014 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
 --
 --  This code transforms loops into fresh recursive procs, and ensures
 --  that all conditionals are the last statements in their respective

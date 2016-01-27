@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Fri May 31 22:53:12 2013
 --  Purpose  : Mark last use of each variable and remove unneeded parameters
---  Copyright: © 2014 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
 --
 
 module LastUse (markLastUse) where

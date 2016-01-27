@@ -3,15 +3,15 @@
 --  Author   : Peter Schachte
 --  Origin   : Thu Mar 26 14:25:37 AEDT 2015
 --  Purpose  : Find all callers for each proc and count static calls per caller
---  Copyright: © 2015 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
 --
 
 module Callers ( collectCallers ) where
 
-import AST
-import Data.Maybe
-import Data.Map as Map
-import Data.List as List
+import           AST
+import           Data.List  as List
+import           Data.Map   as Map
+import           Data.Maybe
 
 
 collectCallers :: ModSpec -> Compiler ()
@@ -24,23 +24,23 @@ collectCallers mod = do
   return ()
 
 
-noteProcCallers :: ModSpec -> ProcName -> [ProcDef] -> 
+noteProcCallers :: ModSpec -> ProcName -> [ProcDef] ->
                        Map Ident [ProcDef] -> Map Ident [ProcDef]
 noteProcCallers mod name defs procs =
   List.foldr (\(def,n) ->
-               noteImplnCallers (ProcSpec mod name n) (procImpln def)) 
+               noteImplnCallers (ProcSpec mod name n) (procImpln def))
   procs $ zip defs [0..]
 
-noteImplnCallers :: ProcSpec -> ProcImpln -> 
+noteImplnCallers :: ProcSpec -> ProcImpln ->
                        Map Ident [ProcDef] -> Map Ident [ProcDef]
 noteImplnCallers _ (ProcDefSrc _) _ =
   shouldnt "scanning unprocessed code for calls"
 noteImplnCallers caller (ProcDefPrim _ body) procs =
-  let callers = foldBodyDistrib (noteCall caller) 
+  let callers = foldBodyDistrib (noteCall caller)
                 Map.empty mergeCallers mergeCallers
                 body
   in  registerCallers caller callers procs
-noteImplnCallers _ (ProcDefBlocks _ _) _ =
+noteImplnCallers _ (ProcDefBlocks _ _ _) _ =
   shouldnt "scanning already compiled code for calls"
 
 -- |Compute for each proc a total count of calls and determine if it
@@ -49,7 +49,7 @@ type CallRec = Map ProcSpec Int
 
 
 noteCall :: ProcSpec -> Bool -> Prim -> CallRec -> CallRec
-noteCall caller final (PrimCall spec _) rec = 
+noteCall caller final (PrimCall spec _) rec =
   Map.alter (Just . maybe 1 (1+)) spec rec
 noteCall caller final (PrimNop) rec = rec
 noteCall caller final (PrimForeign _ _ _ _) rec = rec
@@ -58,7 +58,7 @@ noteCall caller final (PrimForeign _ _ _ _) rec = rec
 mergeCallers :: CallRec -> CallRec -> CallRec
 mergeCallers rec1 rec2 = Map.unionWith (\n1 n2 -> n1+n2) rec1 rec2
 
-registerCallers :: ProcSpec -> CallRec -> Map Ident [ProcDef] 
+registerCallers :: ProcSpec -> CallRec -> Map Ident [ProcDef]
                    -> Map Ident [ProcDef]
 registerCallers caller callRec procs =
   List.foldr (\(callee,count) ps ->
@@ -79,6 +79,6 @@ noteCalls caller count procdef =
 adjustNth :: (a -> a) -> Int -> [a] -> [a]
 adjustNth _ _ [] = error "adjustNth refers beyond list end"
 adjustNth fn 0 (e:es) = fn e:es
-adjustNth fn n (e:es) 
+adjustNth fn n (e:es)
   | n > 0 = e : adjustNth fn (n-1) es
   | True  = error "adjustNth with negative n"

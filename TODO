@@ -38,3 +38,16 @@ o Common sub-expression elimination
 o Inter-procedure common sub-expression elimination
 o Code hoisting
 o Destructive update transformation (CTGC)
+
+
+Blocks:
+o Improve Logging to be distributable
+o add Procedure id for global module level procedures
+o Insert target triple into the definition of LLVMAST.Module during
+  creation.
+
+Emit:
+o Improve Logging
+
+Make:
+o Add creation of cabal sandbox and dependency install 

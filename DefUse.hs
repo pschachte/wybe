@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Fri May 31 22:53:12 2013
 --  Purpose  : Compute defined and used variables for statements and exprs
---  Copyright: © 2013 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2013 Peter Schachte.  All rights reserved.
 --
 
 module DefUse (DefUse, pstmtsDefUse) where

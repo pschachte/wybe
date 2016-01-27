@@ -1,0 +1,29 @@
+name:                wybe
+version:             0.1.0.0
+synopsis:            Wybe compilation to LPVM and ultimately LLVM
+cabal-version:       >=1.10
+Category:            Compilers
+build-type:          Simple
+
+
+executable wybemk
+  default-language:    Haskell2010
+  main-is:             wybemk.hs
+  hs-source-dirs: .
+  build-depends: base
+               , array >= 0.5.1.0
+               , containers
+               , directory >= 1.2.2.0
+               , filepath >= 1.4.0.0
+               , haskeline
+               , llvm-general == 3.5.1.0
+               , llvm-general-pure
+               , mtl
+               , parsec
+               , transformers
+               , old-time
+               , process
+               , bytedump
+               , bytestring
+               , hex
+               , macho

@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Fri Jan  6 11:28:23 2012
 --  Purpose  : Flatten function calls (expressions) into procedure calls
---  Copyright: © 2014 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
 --
 --  We transform away all expression types except for constants and
 --  variables.  Where, let, and conditional, and function call

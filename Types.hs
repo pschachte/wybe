@@ -2,23 +2,23 @@
 --  Author   : Peter Schachte
 --  Origin   : Sun Jan 15 16:00:18 2012
 --  Purpose  : Type checker/inferencer for Wybe
---  Copyright: © 2012 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
 
 -- |Support for type checking/inference.
 module Types (validateModExportTypes, typeCheckMod, checkFullyTyped) where
 
-import AST
-import Options (LogSelection(Types))
-import Resources
-import Util
-import Data.Map as Map
-import Data.Set as Set
-import Data.List as List
-import Control.Monad.State
-import Data.Maybe
-import Data.Graph
+import           AST
+import           Control.Monad.State
+import           Data.Graph
+import           Data.List           as List
+import           Data.Map            as Map
+import           Data.Maybe
+import           Data.Set            as Set
+import           Options             (LogSelection (Types))
+import           Resources
+import           Util
 
-import Debug.Trace
+import           Debug.Trace
 
 
 ----------------------------------------------------------------
@@ -78,7 +78,7 @@ checkDeclIfPublic pname ppos public ty = do
 
 
 -- |Type check a single module named in the second argument; the
---  first argument is a list of all the modules in this module 
+--  first argument is a list of all the modules in this module
 -- dependency SCC.
 typeCheckMod :: ModSpec -> Compiler ()
 typeCheckMod thisMod = do
@@ -90,7 +90,7 @@ typeCheckMod thisMod = do
             [(name, name, nub $ concatMap (localBodyProcs thisMod . procImpln) procDefs)
              | (name,procDefs) <- procs]
     logTypes $ "**** Strongly connected components:\n" ++
-      (intercalate "\n" $ 
+      (intercalate "\n" $
        List.map (\scc -> "    " ++ intercalate ", "
                          (case scc of
                              AcyclicSCC name -> [name]
@@ -166,8 +166,8 @@ instance Show TypeReason where
             "Unknown variable/constant '" ++ var ++ "'"
     show (ReasonArity callFrom callTo pos callArity procArity) =
         makeMessage pos $
-            (if callFrom == "" 
-             then "Toplevel call" 
+            (if callFrom == ""
+             then "Toplevel call"
              else "Call from " ++ callFrom) ++
             " to " ++ callTo ++ " with " ++
             (if callArity == procArity
@@ -200,19 +200,19 @@ addOneType reason name typ valid@(ValidTyping types) =
     case Map.lookup name types of
         Nothing -> ValidTyping $ Map.insert name typ types
         Just oldTyp ->
-            if typ == oldTyp 
+            if typ == oldTyp
             then valid
             else if typ `properSubtypeOf` oldTyp
                  then ValidTyping $ Map.insert name typ types
                  else if oldTyp `properSubtypeOf` typ
                       then valid -- we already have a stronger type, keep it
-                      else --trace ("addOneType " ++ name ++ ":" ++ show typ ++ 
+                      else --trace ("addOneType " ++ name ++ ":" ++ show typ ++
                            --       " vs. " ++ show oldTyp ++ " FAILED") $
                            InvalidTyping reason
 addOneType _ _ _ invalid = invalid
 
 
--- |Returns the first argument restricted to the variables appearing 
+-- |Returns the first argument restricted to the variables appearing
 --  in the second.
 projectTyping :: Typing -> Typing -> Typing
 projectTyping (ValidTyping typing) (ValidTyping interest) =
@@ -221,7 +221,7 @@ projectTyping (ValidTyping typing) (ValidTyping interest) =
 projectTyping typing _ = typing
 
 
--- Simple subtype relation for now; every type is a subtype of the 
+-- Simple subtype relation for now; every type is a subtype of the
 -- unspecified type.
 properSubtypeOf :: TypeSpec -> TypeSpec -> Bool
 properSubtypeOf _ Unspecified = True
@@ -237,7 +237,7 @@ localBodyProcs thisMod (ProcDefSrc body) =
     foldProcCalls (localCalls thisMod) (++) [] body
 localBodyProcs thisMod (ProcDefPrim _ _) =
     shouldnt "Type checking compiled code"
-localBodyProcs thisMod (ProcDefBlocks _ _) =
+localBodyProcs thisMod (ProcDefBlocks _ _ _) =
     shouldnt "Type checking compiled code"
 
 localCalls :: ModSpec -> ModSpec -> Ident -> (Maybe Int) -> [Placed Exp] -> [Ident]
@@ -254,11 +254,11 @@ localCalls _ _ _ _ _ = []
 -- |Type check one strongly connected component in the local call graph
 --  of a module.  The call graph contains only procs in the one module,
 --  because this is being done for type inference, and imported procs
---  must have had their types declared.  Returns True if the inferred 
---  types are more specific than the old ones and some proc(s) in the 
---  SCC depend on procs in the list of mods.  In this case, we will 
---  have to rerun the typecheck after typechecking the other modules 
---  on that list. 
+--  must have had their types declared.  Returns True if the inferred
+--  types are more specific than the old ones and some proc(s) in the
+--  SCC depend on procs in the list of mods.  In this case, we will
+--  have to rerun the typecheck after typechecking the other modules
+--  on that list.
 typecheckProcSCC :: ModSpec -> SCC ProcName -> Compiler ([TypeReason])
 typecheckProcSCC m (AcyclicSCC name) = do
     -- A single pass is always enough for non-cyclic SCCs
@@ -266,7 +266,7 @@ typecheckProcSCC m (AcyclicSCC name) = do
     (_,reasons) <- typecheckProcDecls m name
     return (reasons)
 typecheckProcSCC m (CyclicSCC list) = do
-    logTypes $ "**** Type checking recursive procs " ++ 
+    logTypes $ "**** Type checking recursive procs " ++
       intercalate ", " list
     (sccAgain,reasons) <-
         foldM (\(sccAgain,rs) name -> do
@@ -282,25 +282,25 @@ typecheckProcSCC m (CyclicSCC list) = do
       return (reasons)
 
 
--- |Type check a list of procedure definitions and update the 
---  definitions stored in the Compiler monad.  Returns a pair of 
---  Bools, the first saying whether any defnition has been udpated, 
---  and the second saying whether any public defnition has been 
+-- |Type check a list of procedure definitions and update the
+--  definitions stored in the Compiler monad.  Returns a pair of
+--  Bools, the first saying whether any defnition has been udpated,
+--  and the second saying whether any public defnition has been
 --  updated.
-typecheckProcDecls :: ModSpec -> ProcName -> 
+typecheckProcDecls :: ModSpec -> ProcName ->
                      Compiler (Bool,[TypeReason])
 typecheckProcDecls m name = do
     logTypes $ "** Type checking " ++ name
-    defs <- getModuleImplementationField 
+    defs <- getModuleImplementationField
             (Map.findWithDefault (error "missing proc definition")
              name . modProcs)
-    (revdefs,sccAgain,reasons) <- 
+    (revdefs,sccAgain,reasons) <-
         foldM (\(ds,sccAgain,rs) def -> do
                     (d,again,rs') <- typecheckProcDecl m def
                     return (d:ds,sccAgain || again,rs'++rs))
         ([],False,[]) defs
     updateModImplementation
-      (\imp -> imp { modProcs = Map.insert name (reverse revdefs) 
+      (\imp -> imp { modProcs = Map.insert name (reverse revdefs)
                                 $ modProcs imp })
     logTypes $ "** New definition of " ++ name ++ ":"
     logTypes $ intercalate "\n" $ List.map (showProcDef 4) (reverse revdefs)
@@ -308,7 +308,7 @@ typecheckProcDecls m name = do
     unless (sccAgain || not (List.null reasons)) $ do
         mapM_ checkProcDefFullytyped revdefs
     return (sccAgain,reasons)
-    
+
 
 -- |Type check a single procedure definition.
 typecheckProcDecl :: ModSpec -> ProcDef -> Compiler (ProcDef,Bool,[TypeReason])
@@ -340,7 +340,7 @@ typecheckProcDecl m pd = do
             let pd' = pd { procProto = proto', procImpln = ProcDefSrc def' }
             let pd'' = pd'
             let sccAgain = pd'' /= pd
-            logTypes $ "===== Definition is " ++ 
+            logTypes $ "===== Definition is " ++
                    (if sccAgain then "" else "un") ++ "changed"
             when sccAgain
                  (logTypes $ "** check again " ++ name ++
@@ -369,9 +369,9 @@ addResourceType procname pos typs rfspec = do
     resIface <- lookupResource rspec pos
     let (rspecs,types) = unzip $ maybe [] Map.toList resIface
     let names = List.map resourceName rspecs
-    let typs' = List.foldr 
+    let typs' = List.foldr
                 (\(n,t) typs ->
-                     addOneType 
+                     addOneType
                      (ReasonResource procname n pos) n t typs)
                 typs $ zip names types
     return typs'
@@ -387,9 +387,9 @@ updateParamTypes (ValidTyping dict) params =
 updateParamTypes _ params = params
 
 
--- |Type check the body of a single proc definition by type checking 
---  each clause in turn using the declared parameter typing plus the 
---  typing of all parameters inferred from previous clauses.  We can 
+-- |Type check the body of a single proc definition by type checking
+--  each clause in turn using the declared parameter typing plus the
+--  typing of all parameters inferred from previous clauses.  We can
 --  stop once we've found a contradiction.
 typecheckProcDef :: ModSpec -> ProcName -> OptPos -> Typing ->
                      [Placed Stmt] -> Compiler (Typing,[Placed Stmt])
@@ -416,7 +416,7 @@ typecheckProcDef m name pos paramTypes body = do
                 logTypes $ "After body typing:" ++ showBody 4 body'
                 return (typing',body')
       typings -> do
-          logTypes $ name ++ " has " ++ show (length typings) ++ 
+          logTypes $ name ++ " has " ++ show (length typings) ++
             " typings, of which " ++
             show (length (List.filter validTyping typings)) ++
             " are valid"
@@ -427,16 +427,16 @@ typecheckProcDef m name pos paramTypes body = do
           return (InvalidTyping $ ReasonAmbig name pos ambigs, body)
 
 
--- |Like a monadic foldl over a list, where each application produces 
---  a list of values, and for each element of the folded list, the 
---  function is applied to every result from the previous element, 
+-- |Like a monadic foldl over a list, where each application produces
+--  a list of values, and for each element of the folded list, the
+--  function is applied to every result from the previous element,
 --  finally producing the list of all the results.
-typecheckSequence :: (Typing -> t -> Compiler [Typing]) -> [Typing] -> [t] -> 
+typecheckSequence :: (Typing -> t -> Compiler [Typing]) -> [Typing] -> [t] ->
                     Compiler [Typing]
 typecheckSequence f typings [] = return typings
 typecheckSequence f typings (t:ts) = do
-    logTypes $ "Type checking " ++ show (1 + length ts) ++ " things with " ++ 
-      show (length typings) ++ " typings, " ++ 
+    logTypes $ "Type checking " ++ show (1 + length ts) ++ " things with " ++
+      show (length typings) ++ " typings, " ++
       show (length $ List.filter validTyping typings) ++ " of them valid"
     typings' <- mapM (flip f t) typings
     let typings'' = pruneTypings $ concat typings'
@@ -467,20 +467,20 @@ typecheckBody m name typing body = do
     return typings'
 
 
--- |Type check a single placed primitive operation given a list of 
+-- |Type check a single placed primitive operation given a list of
 --  possible starting typings and corresponding clauses up to this prim.
 typecheckPlacedStmt :: ModSpec -> ProcName -> Typing -> Placed Stmt ->
                        Compiler [Typing]
 typecheckPlacedStmt m caller typing pstmt = do
     typecheckStmt m caller (content pstmt) (place pstmt) typing
-    
 
--- |Type check a single primitive operation, producing a list of 
+
+-- |Type check a single primitive operation, producing a list of
 --  possible typings.
 typecheckStmt :: ModSpec -> ProcName -> Stmt -> OptPos -> Typing ->
                  Compiler [Typing]
 typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
-    logTypes $ "Type checking call " ++ showStmt 4 call ++ 
+    logTypes $ "Type checking call " ++ showStmt 4 call ++
       showMaybeSourcePos pos
     logTypes $ "   with types " ++ show typing
     procs <- case id of
@@ -490,15 +490,15 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
                                                   -- ignore pid?
     logTypes $ "   potential procs: " ++
            List.intercalate ", " (List.map show procs)
-    if List.null procs 
+    if List.null procs
       then if 1 == length args
            then return [InvalidTyping $ ReasonUninit caller name pos]
            else return [InvalidTyping $ ReasonUndef caller name pos]
       else do
-        typList <- 
-            mapM 
+        typList <-
+            mapM
             (\p -> do
-                 params <- fmap (List.filter nonResourceParam) $ 
+                 params <- fmap (List.filter nonResourceParam) $
                            getParams p
                  logTypes $ "checking flow of call to " ++
                    show p ++ " args " ++
@@ -506,14 +506,14 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
                    show params ++ "..."
                  case reconcileArgFlows params args of
                      Just args' -> do
-                         logTypes $ 
+                         logTypes $
                            "MATCHES: args = " ++ show args'
                          typing <- foldM (typecheckArg pos params $ procSpecName p)
                                    typing $ zip3 [1..] params args'
                          return [typing]
                      Nothing -> do
                          logTypes "fails"
-                         return [InvalidTyping $ 
+                         return [InvalidTyping $
                                  ReasonArity caller name pos (length args)
                                  (length  params)])
             procs
@@ -521,7 +521,7 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
         let typList'' = List.filter validTyping typList'
         let dups = snd $ List.foldr
                    (\elt (s,l) ->
-                        if Set.member elt s 
+                        if Set.member elt s
                         then (s,if List.elem elt l then l else elt:l)
                         else (Set.insert elt s,l))
                    (Set.empty,[]) typList''
@@ -535,7 +535,7 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
              else return typList''
         else return [InvalidTyping $ ReasonOverload
                                    (List.map fst $
-                                    List.filter 
+                                    List.filter
                                       (List.any (flip List.elem dups) . snd) $
                                     zip procs typList)
                                    pos]
@@ -557,15 +557,15 @@ typecheckStmt m caller (For itr gen) pos typing = do
     return [typing]
 typecheckStmt _ _ Break pos typing = return [typing]
 typecheckStmt _ _ Next pos typing = return [typing]
-    
 
 
--- |Match up params to args based only on flow, returning Nothing if 
---  they don't match, and Just a possibly updated arglist if they 
---  do.  The purpose is to handle passing an in-out argument pair 
---  where only an output is expected.  This is permitted, and the 
---  input half is just ignored.  This is performed after the code has 
---  been flattened, so ParamInOut have already been turned into 
+
+-- |Match up params to args based only on flow, returning Nothing if
+--  they don't match, and Just a possibly updated arglist if they
+--  do.  The purpose is to handle passing an in-out argument pair
+--  where only an output is expected.  This is permitted, and the
+--  input half is just ignored.  This is performed after the code has
+--  been flattened, so ParamInOut have already been turned into
 --  adjacent pairs of ParamIn and ParamOut parameters.
 reconcileArgFlows :: [Param] -> [Placed Exp] -> Maybe [Placed Exp]
 reconcileArgFlows [] [] = Just []
@@ -662,7 +662,7 @@ firstJust (Nothing:rest) = firstJust rest
 
 listArity :: (t -> ArgFlowType) -> (t -> PrimFlow) -> [t] -> Int
 listArity toFType toDirection lst =
-    sum $ [if toFType e == HalfUpdate && toDirection e == FlowOut then 0 else 1 
+    sum $ [if toFType e == HalfUpdate && toDirection e == FlowOut then 0 else 1
           | e <- lst]
 
 
@@ -672,7 +672,7 @@ applyBodyTyping dict body = do
     mapM (placedApplyM (applyStmtTyping dict)) $ body
 
 
-applyStmtTyping :: Map VarName TypeSpec -> Stmt -> OptPos -> 
+applyStmtTyping :: Map VarName TypeSpec -> Stmt -> OptPos ->
                    Compiler (Placed Stmt)
 applyStmtTyping dict call@(ProcCall cm name id args) pos = do
     logTypes $ "typing call " ++ showStmt 4 call
@@ -684,7 +684,7 @@ applyStmtTyping dict call@(ProcCall cm name id args) pos = do
            ++ intercalate ", " (List.map show procs)
     matches <- fmap catMaybes $
                mapM (\p -> do
-                          params <- fmap (List.filter nonResourceParam) $ 
+                          params <- fmap (List.filter nonResourceParam) $
                                     getParams p
                           logTypes $ "   checking call to " ++
                                  show p ++ " args " ++
@@ -693,9 +693,9 @@ applyStmtTyping dict call@(ProcCall cm name id args) pos = do
                           return $
                             fmap (\as -> (as,p)) $
                             checkMaybe (\as -> all (uncurry subtypeOf)
-                                               (zip (List.map 
+                                               (zip (List.map
                                                      (expType . content) as)
-                                                (List.map 
+                                                (List.map
                                                  paramType params))) $
                             reconcileArgFlows params args')
                procs
@@ -744,7 +744,7 @@ applyExpTyping dict exp@(Var nm flow ftype) =
         Just typ -> Typed exp typ
 applyExpTyping dict (Typed exp _) =
     applyExpTyping dict exp
-applyExpTyping _ exp = 
+applyExpTyping _ exp =
     shouldnt $ "Expression '" ++ show exp ++ "' left after flattening"
 
 
@@ -752,8 +752,8 @@ applyExpTyping _ exp =
 --                    Check that everything is typed
 ----------------------------------------------------------------
 
--- |Sanity check: make sure all args and params of all procs in the 
--- current module are fully typed.  If not, report an internal error. 
+-- |Sanity check: make sure all args and params of all procs in the
+-- current module are fully typed.  If not, report an internal error.
 checkFullyTyped :: Compiler ()
 checkFullyTyped = do
     procs <- getModuleImplementationField (concat . Map.elems . modProcs)
@@ -774,7 +774,7 @@ checkProcDefFullytyped def = do
 procDefSrc :: ProcImpln -> [Placed Stmt]
 procDefSrc (ProcDefSrc def) = def
 procDefSrc (ProcDefPrim _ _) = shouldnt $ "procDefSrc applied to ProcDefPrim"
-procDefSrc (ProcDefBlocks _ _) = 
+procDefSrc (ProcDefBlocks _ _ _) =
   shouldnt $ "procDefSrc applied to ProcDefBlocks"
 
 
@@ -835,7 +835,7 @@ checkExpTyped callerName callerPos msg _ =
 
 reportUntyped :: ProcName -> OptPos -> String -> Compiler ()
 reportUntyped procname pos msg = do
-    liftIO $ putStrLn $ "Internal error: In " ++ procname ++ 
+    liftIO $ putStrLn $ "Internal error: In " ++ procname ++
       showMaybeSourcePos pos ++ ", " ++ msg ++ " left untyped"
 
 

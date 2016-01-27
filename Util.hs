@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Thu May 22 14:43:47 2014
 --  Purpose  : Various small utility functions
---  Copyright: © 2014 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
 --
 
 module Util (checkMaybe, setMapInsert, fillLines) where

@@ -2,7 +2,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Thu Oct 14 23:30:58 2010
 --  Purpose  : Abstract Syntax Tree for Wybe language
---  Copyright: © 2010-2015 Peter Schachte.  All rights reserved.
+--  Copyright:  2010-2015 Peter Schachte.  All rights reserved.
 
 -- |The abstract syntax tree, and supporting types and functions.
 --  This includes the parse tree, as well as the AST types, which
@@ -38,11 +38,11 @@ module AST (
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
   updateModules, updateImplementations, updateImplementation,
-  getModuleImplementationField, 
+  getModuleImplementationField, getModuleImplementation,
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, getModuleInterface, updateModule, getSpecModule, updateSpecModule,
-  updateModImplementation, updateModImplementationM, 
+  updateModImplementation, updateModImplementationM, updateModLLVM,
   updateModInterface, updateAllProcs,
   getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, message, genProcName,
@@ -52,25 +52,29 @@ module AST (
   addProc, lookupProc, publicProc,
   refersTo, callTargets,
   logDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
-  showModSpecs, showResources, showMaybeSourcePos,
+  showModSpecs, showResources, showMaybeSourcePos, showProcDefs,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
-  showMessages, stopOnError, logMsg
+  showMessages, stopOnError, logMsg,
+  -- *Helper functions
+  defaultBlock                           
   ) where
 
-import Options
-import Data.Maybe
-import Data.Map as Map
-import Data.Set as Set
-import Data.List as List
-import Text.ParserCombinators.Parsec.Pos
-import System.IO
-import System.FilePath
-import System.Exit
-import Control.Monad
-import Control.Monad.Trans.State
-import Control.Monad.Trans (lift,liftIO)
 import Config
+import Control.Monad
+import Control.Monad.Trans (lift,liftIO)
+import Control.Monad.Trans.State
+import Data.List as List
+import Data.Map as Map
+import Data.Maybe
+import Data.Set as Set
+import Options
+import System.Exit
+import System.FilePath
+import System.IO
+import Text.ParserCombinators.Parsec.Pos
 import Util
+
+import qualified LLVM.General.AST as LLVMAST
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
@@ -931,14 +935,14 @@ data ModuleImplementation = ModuleImplementation {
     modKnownTypes:: Map Ident (Set TypeSpec), -- ^Type visible to this module
     modKnownResources :: Map Ident (Set ResourceSpec),
                                              -- ^Resources visible to this mod
-    modKnownProcs:: Map Ident (Set ProcSpec)  -- ^Procs visible to this module
+    modKnownProcs:: Map Ident (Set ProcSpec),  -- ^Procs visible to this module
+    modLLVM :: Maybe LLVMAST.Module  -- ^ Module's LLVM.General.AST.Module representation
     }
 
 emptyImplementation :: ModuleImplementation
 emptyImplementation =
     ModuleImplementation Map.empty Map.empty Map.empty Map.empty Map.empty
-                         Map.empty Map.empty Map.empty
-
+                         Map.empty Map.empty Map.empty Nothing
 
 
 -- These functions hack around Haskell's terrible setter syntax
@@ -970,6 +974,15 @@ updateModProcsM fn modimp = do
     procs' <- fn $ modProcs modimp
     return $ modimp {modProcs = procs'}
 
+-- | Update the LLVMAST.Module representation of the module
+updateModLLVM :: (Maybe LLVMAST.Module -> Maybe LLVMAST.Module)
+              -> ModuleImplementation
+              -> Compiler ModuleImplementation
+updateModLLVM fn modimp = do
+  let llmod' = fn $ modLLVM modimp
+  return $ modimp { modLLVM = llmod'}
+  
+                             
 -- |An identifier.
 type Ident = String
 
@@ -1162,23 +1175,23 @@ showSuperProc (SuperprocIs super) =
 -- this is gradually refined and constrained, until it is converted
 -- into a ProcBody, which is a clausal, logic programming form.
 -- Finally it is turned into SSA form (LLVM).
-data ProcImpln
+data ProcImpln 
     = ProcDefSrc [Placed Stmt]           -- defn in source-like form
     | ProcDefPrim PrimProto ProcBody     -- defn in LPVM (clausal) form
-    | ProcDefBlocks PrimProto [LLBlock]  -- defn in SSA (LLVM) form
+    | ProcDefBlocks PrimProto LLVMAST.Definition  [LLVMAST.Definition]
+      -- defn in SSA (LLVM) form along with any needed extern definitions 
     deriving (Eq)
 
 
 isCompiled :: ProcImpln -> Bool
 isCompiled (ProcDefPrim _ _) = True
 isCompiled (ProcDefSrc _) = False
-isCompiled (ProcDefBlocks _ _) = True
+isCompiled (ProcDefBlocks _ _ _) = True
 
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
     show (ProcDefPrim proto body) = show proto ++ ":" ++ showBlock 4 body
-    show (ProcDefBlocks proto blocks) = 
-      show proto ++ ":" ++ concatMap show blocks
+    show (ProcDefBlocks proto _ _ ) = show proto
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
 -- possibly containg some guards.  Each guard is a test that succeeds
@@ -1235,6 +1248,10 @@ data LLTerm = TermNop
 -- |The variable name for the temporary variable whose number is given.
 mkTempName :: Int -> String
 mkTempName ctr = "tmp$" ++ show ctr
+
+-- |Make a default LLBlock
+defaultBlock :: LLBlock
+defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 
 
 -- |Fold over a list of Placed Stmts applying the fn to each ProcCall, and
@@ -1841,8 +1858,8 @@ showProcDefs firstID (def:defs) =
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID procdef@(ProcDef _ proto def pos _ _ vis inline sub) =
-    visibilityPrefix vis
+showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis inline sub) =
+    n ++ " > " ++ visibilityPrefix vis
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ (if inline then " (inline)" else "")
     ++ showSuperProc sub
@@ -2095,6 +2112,11 @@ logMsg :: LogSelection    -- ^ The aspect of the compiler being logged,
           -> String       -- ^ The log message
           -> Compiler ()  -- ^ Works in the Compiler monad
 logMsg selector msg = do
-    let prefix = show selector ++ ": "
+    let prefix = (makeBold $ show selector) ++ ": "
     whenLogging selector $
       liftIO $ hPutStrLn stderr (prefix ++ List.intercalate ('\n':prefix) (lines msg))
+
+-- | Appends a ISO/IEC 6429 code to the given string to print it bold
+-- in a terminal output. 
+makeBold :: String -> String
+makeBold s = "\x1b[1m" ++ s ++ "\x1b[0m"
