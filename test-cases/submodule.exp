@@ -22,11 +22,11 @@ AFTER EVERYTHING:
   types           : 
   resources       : 
   procs           : 
-(0 calls) (inline)
+hidden > (0 calls) (inline)
 0: hidden(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     foreign c print_string("private proc in a private module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:122:41
 
-public (0 calls) (inline)
+semi_hidden > public (0 calls) (inline)
 0: semi_hidden(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     foreign c print_string("public proc in a private module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:122:41
 --------------------------------------------------
@@ -39,10 +39,10 @@ public (0 calls) (inline)
   types           : 
   resources       : 
   procs           : 
-(0 calls) (inline)
+semi_visible > (0 calls) (inline)
 0: semi_visible(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     foreign c print_string("private proc in a public module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:122:41
 
-public (0 calls) (inline)
+visible > public (0 calls) (inline)
 0: visible(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     foreign c print_string("public proc in a public module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:122:41

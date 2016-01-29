@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   types           : 
   resources       : 
   procs           : 
-public (0 calls) (inline)
+quad > public (0 calls) (inline)
 0: quad(x#0:wybe.int, ?$#0:wybe.int):
     foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$4#0:wybe.int) @wybe:4:38
     foreign llvm add(~tmp$4#0:wybe.int, ~tmp$4#0:wybe.int, ?tmp$8#0:wybe.int) @wybe:4:38

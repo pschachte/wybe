@@ -4,12 +4,17 @@ AFTER EVERYTHING:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : func_let.quad<0>
+  public procs    : func_let.<0>
+                    func_let.quad<0>
   imports         : use wybe
   types           : 
   resources       : 
   procs           : 
-public (0 calls) (inline)
+ > public (0 calls) (inline)
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+    foreign c print_int(40:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:110:38
+
+quad > public (1 calls) (inline)
 0: quad(x#0:wybe.int, ?$#0:wybe.int):
     foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$4#0:wybe.int) @wybe:4:38
     foreign llvm add(~tmp$4#0:wybe.int, ~tmp$4#0:wybe.int, ?tmp$8#0:wybe.int) @wybe:4:38

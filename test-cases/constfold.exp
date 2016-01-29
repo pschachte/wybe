@@ -12,22 +12,22 @@ AFTER EVERYTHING:
   types           : 
   resources       : 
   procs           : 
-public (3 calls) (inline)
+fold_add > public (3 calls) (inline)
 0: fold_add(?$#0:wybe.int):
     foreign llvm move(42:wybe.int, ?$#0:wybe.int)
 
-public (3 calls) (inline)
+fold_mult > public (3 calls) (inline)
 0: fold_mult(?$#0:wybe.int):
     foreign llvm move(42:wybe.int, ?$#0:wybe.int)
 
-public (0 calls) (inline)
+fold_test > public (0 calls) (inline)
 0: fold_test(?$#0:wybe.int):
     foreign llvm move(42:wybe.int, ?$#0:wybe.int)
 
-public (0 calls) (inline)
+fortytwo > public (0 calls) (inline)
 0: fortytwo(?$#0:wybe.int):
     foreign llvm move(42:wybe.int, ?$#0:wybe.int)
 
-(1 calls) (inline)
+gen$1 > (1 calls) (inline)
 0: gen$1(?tmp$0#0:wybe.int):
     foreign llvm move(42:wybe.int, ?tmp$0#0:wybe.int)

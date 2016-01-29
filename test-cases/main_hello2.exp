@@ -9,8 +9,8 @@ AFTER EVERYTHING:
   types           : 
   resources       : 
   procs           : 
-public (0 calls)
+ > public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
     foreign c print_string("hello, ":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:122:41
     foreign c print_string("world!":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:122:41
-    foreign c putc('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:108:28
+    foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:108:28
