@@ -10,10 +10,12 @@ AFTER EVERYTHING:
   types           : 
   resources       : 
   procs           : 
+
 double > public (2 calls) (inline)
 0: double(a#0:wybe.int, ?$#0:wybe.int):
     foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?tmp$3#0:wybe.int) @wybe:4:38
     foreign llvm move(~tmp$3#0:wybe.int, ?$#0:wybe.int)
+
 
 quadruple > public (0 calls) (inline)
 0: quadruple(a#0:wybe.int, ?$#0:wybe.int):

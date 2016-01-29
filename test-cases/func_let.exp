@@ -10,9 +10,11 @@ AFTER EVERYTHING:
   types           : 
   resources       : 
   procs           : 
- > public (0 calls) (inline)
+
+*main* > public (0 calls) (inline)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     foreign c print_int(40:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:110:38
+
 
 quad > public (1 calls) (inline)
 0: quad(x#0:wybe.int, ?$#0:wybe.int):

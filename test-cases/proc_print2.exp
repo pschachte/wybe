@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   types           : 
   resources       : 
   procs           : 
+
 print2 > public (0 calls) (inline)
 0: print2(x#0:wybe.int, y#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
     foreign c print_int(~x#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:110:38
