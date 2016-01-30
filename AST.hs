@@ -54,7 +54,7 @@ module AST (
   logDump, showBody, showStmt, showBlock, showProcDef, showModSpec, 
   showModSpecs, showResources, showMaybeSourcePos, showProcDefs,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
-  showMessages, stopOnError, logMsg,
+  showMessages, stopOnError, logMsg, whenLogging2, whenLogging,
   -- *Helper functions
   defaultBlock                           
   ) where

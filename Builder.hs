@@ -86,6 +86,7 @@ buildTargets opts targets = do
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     showMessages
     logDump FinalDump FinalDump "EVERYTHING"
+    logLLVMDump FinalDump FinalDump "LLVM IR"
 
 
 -- |Build a single target; flag specifies to re-compile even if the
@@ -105,7 +106,7 @@ buildTarget force target = do
             do when (tType == ExecutableFile) (buildExecutable [modname] target)
                when (tType == ObjectFile) (emitObjectFile [modname] target)
                when (tType == BitcodeFile) (emitBitcodeFile [modname] target)
-               logLLVMString [modname]
+               whenLogging Emit $ logLLVMString [modname]
 
 
 -- |Compile or load a module dependency.

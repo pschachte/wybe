@@ -2,6 +2,7 @@ module Emit where
 
 import           AST
 import           Codegen
+import           Control.Applicative ((<$>), (<*>))
 import           Control.Monad
 import           Control.Monad.Trans (lift, liftIO)
 import           Control.Monad.Trans.Except
@@ -68,18 +69,20 @@ emitAssemblyFile m f =
   do logEmit $ "Creating assembly file for " ++ (showModSpec m)
      withModuleLLVM m (makeAssemblyFile f)
 
--- | Log LLVM IR representation of the given module.
-logLLVMString :: ModSpec -> Compiler ()
-logLLVMString thisMod =
-  do reenterModule thisMod
-     maybeLLMod <- getModuleImplementationField modLLVM
-     case maybeLLMod of
-       (Just llmod) ->
-         do llstr <- liftIO $ codeemit llmod
-            logEmit llstr
-       (Nothing) -> error "No LLVM Module Implementation"
-     finishModule
-     return ()
+
+-- | Handle the ExceptT monad. If there is an error, it is better to fail.
+liftError :: ExceptT String IO a -> IO a
+liftError = runExceptT >=> either fail return
+
+-- | Emit the llvm IR version of the LLVMAST.Module to IO
+codeemit :: LLVMAST.Module -> IO String
+codeemit mod =
+    withContext $ \context ->
+        liftError $ withModuleFromAST context mod $ \m ->
+            do llstr <- moduleLLVMAssembly m
+               -- putStrLn llstr
+               return llstr
+     
 
 ----------------------------------------------------------------------------
 -- Target Emitters                                                        --
@@ -126,18 +129,6 @@ llvmEmitToIO thisMod =
        return ()
 
 
--- | Handle the ExceptT monad. If there is an error, it is better to fail.
-liftError :: ExceptT String IO a -> IO a
-liftError = runExceptT >=> either fail return
-
--- | Emit the llvm IR version of the LLVMAST.Module to IO
-codeemit :: LLVMAST.Module -> IO String
-codeemit mod =
-    withContext $ \context ->
-        liftError $ withModuleFromAST context mod $ \m ->
-            do llstr <- moduleLLVMAssembly m
-               -- putStrLn llstr
-               return llstr
 
 -- | Initialize the JIT compiler under the IO monad.
 jit :: Context -> (EE.MCJIT -> IO a) -> IO a
@@ -245,3 +236,39 @@ hex2char s = (concat . join) $ mapM unhex (words s)
 
 logEmit :: String -> Compiler ()
 logEmit s = logMsg Emit s
+
+-- | Log LLVM IR representation of the given module.
+logLLVMString :: ModSpec -> Compiler ()
+logLLVMString thisMod = 
+  do reenterModule thisMod
+     maybeLLMod <- getModuleImplementationField modLLVM
+     case maybeLLMod of
+       (Just llmod) ->
+         do llstr <- liftIO $ codeemit llmod
+            logEmit llstr
+       (Nothing) -> error "No LLVM Module Implementation"
+     finishModule
+     return ()
+
+-- | Pull the LLVMAST representation of the module and generate the LLVM
+-- IR String for it, if it exists.
+extractLLVM :: AST.Module -> Compiler String
+extractLLVM thisMod =
+  do case (modImplementation thisMod) of
+       Just imp -> case modLLVM imp of
+         Just llmod -> liftIO $ codeemit llmod
+         Nothing -> return "No LLVM IR generated."
+       Nothing -> return "No Module LPVM Implementation"
+
+-- | Log the LLVMIR strings for all the modules compiled, except the standard
+-- library.
+logLLVMDump :: LogSelection -> LogSelection -> String -> Compiler ()
+logLLVMDump selector1 selector2 pass = do
+  whenLogging2 selector1 selector2 $
+    do modList <- gets (Map.elems . modules)
+       let noLibMod = List.filter ((/="wybe"). List.head . modSpec) modList
+       liftIO $ putStrLn $ showModSpecs $ List.map modSpec noLibMod
+       llvmir <- mapM extractLLVM noLibMod
+       liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER " ++ pass ++ ":\n\n" ++
+         intercalate ("\n" ++ replicate 50 '-' ++ "\n") llvmir
+
