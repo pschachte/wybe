@@ -253,12 +253,10 @@ logLLVMString thisMod =
 -- | Pull the LLVMAST representation of the module and generate the LLVM
 -- IR String for it, if it exists.
 extractLLVM :: AST.Module -> Compiler String
-extractLLVM thisMod =
-  do case (modImplementation thisMod) of
-       Just imp -> case modLLVM imp of
-         Just llmod -> liftIO $ codeemit llmod
-         Nothing -> return "No LLVM IR generated."
-       Nothing -> return "No Module LPVM Implementation"
+extractLLVM thisMod =  
+  do case (modImplementation thisMod) >>= modLLVM of
+       Just llmod -> liftIO $ codeemit llmod
+       Nothing -> return "No LLVM IR generated."
 
 -- | Log the LLVMIR strings for all the modules compiled, except the standard
 -- library.
