@@ -97,7 +97,8 @@ blockTransformModule thisMod =
        logBlocks' $ "*** Translating Module: " ++ modName
        (names, procs) <- fmap unzip $
                          getModuleImplementationField (Map.toList . modProcs)
-       procs' <- mapM (mapM $ translateProc modName) procs
+       procs' <- mapM (mapM (translateProc modName) .
+                       (List.filter ((>0).procCallCount))) procs
 
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
@@ -121,16 +122,16 @@ translateProc :: String -> ProcDef -> Compiler ProcDef
 translateProc modName proc =
     evalLLVMComp modName $ do
       let def@(ProcDefPrim proto body) = procImpln proc
+      logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
       logBlocks $ "In Module: " ++ modName ++ ", creating definition of: "
-      logBlocks $ show def      
-      let args = primProtoParams proto
+      logBlocks $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"     
       body' <- compileBodyToBlocks proto body
       ex <- gets neededExterns
       gs <- gets neededGlobalVars
       let externs = List.map declareExtern ex
       let globals = List.map LLVMAST.GlobalDefinition gs
       let lldef = makeGlobalDefinition modName proto body'
-      -- logBlocks $ showPretty lldef
+      logBlocks $ showPretty lldef
       let procblocks = ProcDefBlocks proto lldef (externs ++ globals)
       return $ proc { procImpln = procblocks}
 
@@ -156,15 +157,17 @@ makeGlobalDefinition modName proto bls =
       fnargs = List.map makeFnArg inputs
 
 -- | Predicate to check if a primitive's parameter is of input flow (input)
+-- and the param is needed (inferred by it's param info field)
 isInputParam :: PrimParam -> Bool
-isInputParam p = primParamFlow p == FlowIn
+isInputParam p = primParamFlow p == FlowIn &&
+  (paramInfoUnneeded . primParamInfo) p == False
 
 -- | Convert a primitive's input parameter to LLVM's Definition parameter.
 makeFnArg :: PrimParam -> (Type, LLVMAST.Name)
 makeFnArg arg = (ty, nm)
     where
       ty = typed $ primParamType arg
-      nm = LLVMAST.Name $ show' (primParamName arg)
+      nm = LLVMAST.Name (show $ primParamName arg)
 
 -- | Open the Out parameter of a primitive (if there is one) into it's
 -- inferred 'Type' and name.
@@ -227,6 +230,8 @@ doCodegenBody proto body =
        op <- codegenBody body
        case bodyFork body of
          NoFork -> case (primProtoName proto) == "" of
+           -- Empty primitive prototype is the main function in LLVM
+           -- and as such should return an integer, preferrably a 0.
            True -> do ptr <- instr (ptr_t int_t) (alloca int_t)
                       let retcons = cons (C.Int 32 0)
                       store ptr retcons
@@ -234,10 +239,7 @@ doCodegenBody proto body =
                       return ()
            False -> do ret op
                        return ()
-         (PrimFork var _ fbody) -> do op <- codegenForkBody var fbody
-                                      ret (Just op)
-                                      return ()
-
+         (PrimFork var _ fbody) -> codegenForkBody var fbody
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
 -- param's name on the symbol table. Don't assign if phantom.
@@ -247,7 +249,9 @@ assignParam p =
        let ty = primParamType p
        case (typeName ty) of
          "phantom" -> return ()
-         _ -> assign nm (localVar (typed ty) nm)
+         _ -> case (paramInfoUnneeded . primParamInfo) p of
+           True -> return ()    -- unneeded param
+           False -> assign nm (localVar (typed ty) nm)
 
 
 -- | Generate basic blocks for a procedure body. The first block is named
@@ -256,32 +260,34 @@ codegenBody :: ProcBody -> Codegen (Maybe Operand)
 codegenBody body =
     do let ps = List.map content (bodyPrims body)
        ops <- mapM cgen ps
-       return (last ops)
+       case List.null ops of
+         True -> return Nothing
+         False -> return $ last ops
 
 
-codegenForkBody :: PrimVarName -> [ProcBody] -> Codegen Operand
+
+codegenForkBody :: PrimVarName -> [ProcBody] -> Codegen ()
 codegenForkBody var (b1:b2:[]) =
     do ifthen <- addBlock "if.then"
        ifelse <- addBlock "if.else"
-       ifexit <- addBlock "if.exit"
+       -- ifexit <- addBlock "if.exit"
        testop <- getVar (show var)
        cbr testop ifthen ifelse
 
        -- if.then
        setBlock ifthen
-       Just trueval <- codegenBody b2
-       br ifexit
-       ifthen <- getBlock
-
+       val <- codegenBody b2
+       ret val
        -- if.else
        setBlock ifelse
-       Just falseval <- codegenBody b1
-       br ifexit
-       ifelse <- getBlock
-
-       -- if.exit
-       setBlock ifexit
-       phi int_t [(trueval, ifthen), (falseval, ifelse)]
+       val <- codegenBody b1
+       ret val
+       -- return
+       return ()
+       
+       -- -- if.exit
+       -- setBlock ifexit
+       -- phi int_t [(trueval, ifthen), (falseval, ifelse)]
 
 codegenForkBody _ _ = error $ "Unrecognized control flow. Too many/few blocks."
 
@@ -583,7 +589,8 @@ newLLVMModule :: String -> [[ProcDef]] -> LLVMAST.Module
 newLLVMModule name procs = let procs' = concat procs
                                defs = List.map takeDefinition procs'
                                exs = concat $ List.map takeExterns procs'
-                           in modWithDefinitions name $ exs ++ defs
+                               exs' = uniqueExterns exs     
+                           in modWithDefinitions name $ exs' ++ defs
 
 -- | Pull out the LLVM Definition of a procedure.
 takeDefinition :: ProcDef -> LLVMAST.Definition
@@ -597,6 +604,14 @@ takeExterns :: ProcDef -> [LLVMAST.Definition]
 takeExterns p = case procImpln p of
                   (ProcDefBlocks _ _ exs) -> exs
                   _ -> error "No Externs field found."
+
+uniqueExterns :: [LLVMAST.Definition] -> [LLVMAST.Definition]
+uniqueExterns exs = List.nubBy sameDef exs
+  where
+    sameDef (LLVMAST.GlobalDefinition g1) (LLVMAST.GlobalDefinition g2)
+      = (G.name g1) == (G.name g2)
+    sameDef _ _ = False
+
 
 -- | Create a new LLVMAST.Module with the given name, and fill it with the
 -- given global definitions.
@@ -668,7 +683,7 @@ logBlocks' :: String -> Compiler ()
 logBlocks' = logMsg Blocks
 
 -- | Make 'show' not include quotes when being used to name symbols.
-show' = sq . show
+-- show' = sq . show
 
 sq :: String -> String
 sq s@[c] = s
