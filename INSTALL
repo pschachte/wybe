@@ -5,12 +5,20 @@ SECTIONS
 3. Installing Haskell Package `llvm-general` from its source with cabal
 
 
+0. Ensure XCode is installed (needs to be redone after OS upgrade):
+
+      xcode-select --install
+
+
 1. INSTALLING LLVM ON OSX
 -------------------------
 Required version: 3.5.x.x.
 
 1. Using Homebrew:
       brew install llvm35 --with-all-targets
+
+   If this fails, you may need to instead do:
+      brew install homebrew/versions/llvm35 --with-all-targets
 
 2. Ensure '/usr/local/opt/llvm35/bin/' is in your PATH so that the Haskell
    package `llvm-general` can find the binary `llvm-config-3.5`. This way you
