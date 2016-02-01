@@ -35,12 +35,17 @@ type BodyBuilder = StateT BodyState Compiler
 data BodyState = BodyState {
     currBuild     :: BodyBuildState, -- ^The body we're building
     currSubst    :: Substitution,    -- ^variable substitutions to propagate
-    outSubst     :: VarSubstitution  -- ^Substitutions for variable assignments
+    outSubst     :: VarSubstitution, -- ^Substitutions for variable assignments
+    subExprs     :: ComputedCalls    -- ^Previously computed calls to reuse
     } deriving Show
 
 type Substitution = Map PrimVarName PrimArg
 type VarSubstitution = Map PrimVarName PrimVarName
 
+-- To handle common subexpression elimination, we keep a map from previous
+-- calls with their outputs removed to the outputs.  This type encapsulates
+-- that.  In the Prim keys, all PrimArgs are inputs.
+type ComputedCalls = Map Prim [PrimArg]
 
 data BodyBuildState
     = Unforked [Placed Prim]  -- reversed list of prims
@@ -53,17 +58,18 @@ instance Show BodyBuildState where
   show (Forked body) = show body
 
 currBody :: BodyState -> ProcBody
-currBody (BodyState (Unforked prims) _ _) =
+currBody (BodyState (Unforked prims) _ _ _) =
   ProcBody (reverse prims) NoFork
-currBody (BodyState (Forked body) _ _) = body
+currBody (BodyState (Forked body) _ _ _) = body
 
 
 initState :: VarSubstitution -> BodyState
-initState oSubst = BodyState (Unforked []) Map.empty oSubst
+initState oSubst = BodyState (Unforked []) Map.empty oSubst Map.empty
 
 
-continueState :: Substitution -> VarSubstitution -> BodyState
-continueState subst oSubst = BodyState (Unforked []) subst oSubst
+continueState :: BodyState -> BodyState
+continueState (BodyState _ subst oSubst calls) =
+    BodyState (Unforked []) subst oSubst calls
 
 
 ----------------------------------------------------------------
@@ -129,9 +135,8 @@ buildBranch builder = do
 
 buildPrims :: BodyBuilder () -> BodyBuilder ProcBody
 buildPrims builder = do
-    subst <- gets currSubst
-    oSubst <- gets outSubst
-    ((),bstate) <- lift $ runStateT builder $ continueState subst oSubst
+    oldState <- get
+    ((),bstate) <- lift $ runStateT builder $ continueState oldState
     return $ currBody bstate
 
 
@@ -139,35 +144,70 @@ buildPrims builder = do
 --  substitution. If it's a move instruction, add it to the current
 --  substitution, and only add it if it assigns a protected variable.
 instr :: Prim -> OptPos -> BodyBuilder ()
-instr (PrimCall pspec args) pos = do
-    args' <- mapM expandArg args
-    rawInstr (PrimCall pspec args') pos
-instr (PrimForeign  lang nm flags args) pos = do
-    args' <- mapM expandArg args
-    foreignInstr (constantFold lang nm flags args') pos
-instr PrimNop _ = do
+instr prim pos = do         
+    prim' <- argExpandedPrim prim
+    instr' prim' pos
+
+
+instr' :: Prim -> OptPos -> BodyBuilder ()
+instr' PrimNop _ = do
     -- Filter out NOPs
     return ()
-
-
--- |Add an instr, unless it's a move to a non-protected variable, which is
---  treated as a new substitution.
-foreignInstr :: Prim -> OptPos -> StateT BodyState Compiler ()
-foreignInstr ins@(PrimForeign "llvm" "move" []
-                    [val, argvar@(ArgVar var _ flow _ _)]) pos 
+instr' prim@(PrimForeign "llvm" "move" []
+           [val, argvar@(ArgVar var _ flow _ _)]) pos
   = do
     logBuild $ "  Expanding move(" ++ show val ++ ", " ++ show argvar ++ ")"
-    unless (flow == FlowOut && argFlowDirection val == FlowIn) $ 
-      shouldnt "move instruction with wrong flow"
+    -- unless (flow == FlowOut && argFlowDirection val == FlowIn) $ 
+    --   shouldnt "move instruction with wrong flow"
     outVar <- gets (Map.findWithDefault var var . outSubst)
     addSubst outVar val
-    -- keep this assignment if it binds an important var; rawInstr will
-    -- rename the output var
-    -- when (isJust maybeOutVar) $ rawInstr ins pos
-    -- Always insert assignment, and count on dead code elim to remove it
-    -- unless the variable, rather than just the value, is needed
-    rawInstr ins pos
-foreignInstr prim pos = rawInstr prim pos
+    rawInstr prim pos
+instr' prim pos = do
+    let (prim',newOuts) = splitPrimOutputs prim
+    logBuild $ "Looking for computed instr " ++ show prim' ++ " ..."
+    match <- gets (Map.lookup prim' . subExprs)
+    case match of
+        Nothing -> do
+            -- record prim executed (and other modes), and generate instr
+            logBuild $ "not found"
+            addAllModes prim
+            rawInstr prim pos
+        Just oldOuts -> do
+            -- common subexpr: just need to record substitutions
+            logBuild $ "found it; substituting "
+                       ++ show oldOuts ++ " for " ++ show newOuts
+            mapM_ (\(newOut,oldOut) -> addSubst (outArgVar newOut)
+                                       (outVarIn oldOut))
+                  $ zip newOuts oldOuts
+
+
+outVarIn :: PrimArg -> PrimArg
+outVarIn (ArgVar name ty FlowOut ftype lst) =
+    ArgVar name ty FlowIn Ordinary False
+outVarIn arg =
+    shouldnt $ "outVarIn not actually out: " ++ show arg
+
+
+argExpandedPrim :: Prim -> BodyBuilder Prim
+argExpandedPrim (PrimCall pspec args) = do
+    args' <- mapM expandArg args
+    return $ PrimCall pspec args'
+argExpandedPrim (PrimForeign lang nm flags args) = do
+    args' <- mapM expandArg args
+    return $ constantFold lang nm flags args'
+argExpandedPrim PrimNop =
+    shouldnt "argExpandedPrim: Nops should be filtered out by now"
+
+
+splitPrimOutputs :: Prim -> (Prim, [PrimArg])
+splitPrimOutputs (PrimCall pspec args) =
+    let (inArgs,outArgs) = splitArgsByMode args
+    in (PrimCall pspec inArgs, outArgs)
+splitPrimOutputs (PrimForeign lang nm flags args) = 
+    let (inArgs,outArgs) = splitArgsByMode args
+    in (PrimForeign lang nm flags inArgs, outArgs)
+splitPrimOutputs PrimNop =
+    shouldnt "splitPrimOutputs: Nops should be filtered out by now"
 
 
 -- |Add a binding for a variable. If that variable is an output for the
@@ -179,6 +219,30 @@ addSubst var val = do
     subst <- gets currSubst
     logBuild $ "      new subst = " ++ show subst
 
+
+-- |Add all instructions equivalent to the input prim to the lookup table,
+--  so if we later see an equivalent instruction we don't repeat it but
+--  reuse the already-computed outputs.  This implements common subexpression
+--  elimination.  It can also handle optimisations like recognizing the
+--  reconstruction of a deconstructed value.
+--  XXX Doesn't yet handle multiple modes.
+--  XXX Doesn't handle arithmetic identities like commutative addition,
+--      if that's a good way to handle them.
+addAllModes :: Prim -> BodyBuilder ()
+addAllModes (PrimCall pspec args) = do
+    let (inArgs,outArgs) = splitArgsByMode args
+    let fakeInstr = PrimCall pspec inArgs
+    logBuild $ "Recording computed instr " ++ show fakeInstr
+    modify (\s -> s {subExprs = Map.insert fakeInstr outArgs $ subExprs s})
+addAllModes (PrimForeign lang nm flags args)  = do
+    let (inArgs,outArgs) = splitArgsByMode args
+    let fakeInstr = PrimForeign lang nm flags inArgs
+    logBuild $ "Recording computed instr " ++ show fakeInstr
+    modify (\s -> s {subExprs = Map.insert fakeInstr outArgs $ subExprs s})
+addAllModes PrimNop =
+    shouldnt "splitPrimOutputs: Nops should be filtered out by now"
+
+
 -- |Unconditionally add an instr to the current body
 rawInstr :: Prim -> OptPos -> BodyBuilder ()
 rawInstr prim pos = do
@@ -186,6 +250,14 @@ rawInstr prim pos = do
     validateInstr prim
     modify (\s -> s { currBuild = addInstrToState (maybePlace prim pos)
                                  $ currBuild s })
+
+
+splitArgsByMode :: [PrimArg] -> ([PrimArg], [PrimArg])
+splitArgsByMode =
+    List.foldr (\a (ins,outs) -> if argFlowDirection a == FlowIn
+                                 then (a:ins,outs)
+                                 else (ins,a:outs))
+    ([],[])
 
 
 validateInstr :: Prim -> BodyBuilder ()
@@ -217,13 +289,6 @@ addInstrToBody ins (ProcBody prims (PrimFork v l bodies)) =
     (PrimFork v l (List.map (addInstrToBody ins) bodies))
 
 
-    -- ProcBody prims fork <- gets currBody
-    -- case fork of
-    --   -- PrimFork _ _ _ -> shouldnt "adding an instr after a fork"
-    --   -- XXX should add a single instruction at the end of the fork
-    --   NoFork ->     
-    --     modify (\s -> s { currBody = ProcBody (maybePlace prim pos : prims) fork })
-
 -- |Return the current ultimate value of the input argument.
 expandArg :: PrimArg -> BodyBuilder PrimArg
 expandArg arg@(ArgVar var _ FlowIn _ _) = do
@@ -234,13 +299,6 @@ expandArg (ArgVar var typ FlowOut ftype lst) = do
     return $ ArgVar var' typ FlowOut ftype lst
 expandArg arg = return arg
 
-
--- setPrimArgFlow :: PrimFlow -> ArgFlowType -> PrimArg -> PrimArg
--- setPrimArgFlow flow ftype (ArgVar n t _ _ lst) = (ArgVar n t flow ftype lst)
--- setPrimArgFlow FlowIn _ arg = arg
--- setPrimArgFlow FlowOut _ arg =
---     -- XXX eventually want this to generate a comparison, once we allow failure
---     shouldnt $ "trying to make " ++ show arg ++ " an output argument"
 
 
 ----------------------------------------------------------------

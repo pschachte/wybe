@@ -1,0 +1,6 @@
+proc common_subexpr(x:int) use !io
+     # there should only be one incr and one multiplication
+     println(incr(x) * incr(x) + incr(x) * incr(x))
+     # the whole computation should be reused, but the prinln shouldn't
+    println(incr(x) * incr(x) + incr(x) * incr(x))
+end

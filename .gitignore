@@ -36,3 +36,4 @@ redesign.pdf
 TAGS
 *.so
 cbits.so
+test-cases/*~

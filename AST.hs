@@ -1432,7 +1432,7 @@ data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow
 
 -- |A primitive dataflow direction:  in or out
 data PrimFlow = FlowIn | FlowOut
-                   deriving (Show,Eq)
+                   deriving (Show,Eq,Ord)
 
 
 -- |Does the specified flow direction flow in?
@@ -1506,7 +1506,7 @@ data Prim
      = PrimCall ProcSpec [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
      | PrimNop
-     deriving Eq
+     deriving (Eq,Ord)
 
 instance Show Prim where
     show prim = showPrim 0 prim
@@ -1521,7 +1521,7 @@ data PrimArg
      | ArgFloat Double TypeSpec
      | ArgString String TypeSpec
      | ArgChar Char TypeSpec
-     deriving Eq
+     deriving (Eq,Ord)
 
 
 -- |Relates a primitive argument to the corresponding source argument
@@ -1529,7 +1529,7 @@ data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
                  | HalfUpdate      -- ^One half of a variable update (!var)
                  | Implicit OptPos -- ^Temp var for expression at that position
                  | Resource ResourceSpec -- ^An argument to pass a resource
-     deriving (Eq)
+     deriving (Eq,Ord)
 
 instance Show ArgFlowType where
     show Ordinary = ""
