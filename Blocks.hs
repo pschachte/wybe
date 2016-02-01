@@ -97,9 +97,12 @@ blockTransformModule thisMod =
        logBlocks' $ "*** Translating Module: " ++ modName
        (names, procs) <- fmap unzip $
                          getModuleImplementationField (Map.toList . modProcs)
+       -- procs' <- mapM (mapM (translateProc modName) .
+       --                 (List.filter ((>0).procCallCount))) procs
+       -- Map the translation function on every procedure, filtering
+       -- out the procedurces whose body is empty
        procs' <- mapM (mapM (translateProc modName) .
-                       (List.filter ((>0).procCallCount))) procs
-
+                       (List.filter (not . emptyProc))) procs
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
@@ -107,6 +110,13 @@ blockTransformModule thisMod =
        finishModule
        logBlocks' $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
+-- | Predicate to test for procedure definition with an empty body.
+emptyProc :: ProcDef -> Bool
+emptyProc p = case procImpln p of
+  ProcDefSrc pps -> List.null pps
+  ProcDefPrim _ body -> List.null $ bodyPrims body
+  _ -> False
+  
 
 
 -- | Translate a ProcDef whose procImpln field is of the type ProcDefPrim, to
@@ -124,7 +134,7 @@ translateProc modName proc =
       let def@(ProcDefPrim proto body) = procImpln proc
       logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
       logBlocks $ "In Module: " ++ modName ++ ", creating definition of: "
-      logBlocks $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"     
+      logBlocks $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"
       body' <- compileBodyToBlocks proto body
       ex <- gets neededExterns
       gs <- gets neededGlobalVars
@@ -605,6 +615,7 @@ takeExterns p = case procImpln p of
                   (ProcDefBlocks _ _ exs) -> exs
                   _ -> error "No Externs field found."
 
+-- | Filter out non-unique externs
 uniqueExterns :: [LLVMAST.Definition] -> [LLVMAST.Definition]
 uniqueExterns exs = List.nubBy sameDef exs
   where
