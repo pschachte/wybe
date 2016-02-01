@@ -230,14 +230,15 @@ compileBodyToBlocks proto body =
        needGlobalVars gVars
        return $ createBlocks codestate
 
-
+-- | Generate LLVM instructions for a procedure.
 doCodegenBody :: PrimProto -> ProcBody -> Codegen ()
 doCodegenBody proto body =
     do let params = primProtoParams proto
        mapM_ assignParam params
        entry <- addBlock entryBlockName
+       outop <- getOutputOp params
        setBlock entry
-       op <- codegenBody body
+       op <- codegenBody body   -- Codegen on body prims
        case bodyFork body of
          NoFork -> case (primProtoName proto) == "" of
            -- Empty primitive prototype is the main function in LLVM
@@ -249,7 +250,7 @@ doCodegenBody proto body =
                       return ()
            False -> do ret op
                        return ()
-         (PrimFork var _ fbody) -> codegenForkBody var fbody
+         (PrimFork var _ fbody) -> codegenForkBody var fbody outop
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
 -- param's name on the symbol table. Don't assign if phantom.
@@ -258,10 +259,19 @@ assignParam p =
     do let nm = show (primParamName p)
        let ty = primParamType p
        case (typeName ty) of
-         "phantom" -> return ()
+         "phantom" -> return () -- No need to assign phantoms
          _ -> case (paramInfoUnneeded . primParamInfo) p of
            True -> return ()    -- unneeded param
            False -> assign nm (localVar (typed ty) nm)
+
+-- | Get the output Paramter's Operand from the symbol table.
+-- The params are therefore assumed to have been assigned on the symbol
+-- table already. 
+getOutputOp :: [PrimParam] -> Codegen (Maybe Operand)
+getOutputOp params =
+  do case openOutputParam $ List.filter (not . isPhantomParam) params of
+       Just (_, paramName) -> getVar paramName >>= return . Just
+       Nothing -> return Nothing
 
 
 -- | Generate basic blocks for a procedure body. The first block is named
@@ -269,15 +279,26 @@ assignParam p =
 codegenBody :: ProcBody -> Codegen (Maybe Operand)
 codegenBody body =
     do let ps = List.map content (bodyPrims body)
-       ops <- mapM cgen ps
+       -- Filter out prims which contain only phantom arguments
+       ops <- mapM cgen $ List.filter (not . phantomPrim) ps
        case List.null ops of
          True -> return Nothing
          False -> return $ last ops
+         
+-- | Predicate to check whether a Prim is a phantom prim i.e Contains only
+-- phantom arguments.
+phantomPrim :: Prim -> Bool
+phantomPrim (PrimCall _ args) = List.null $ List.filter notPhantom args
+phantomPrim (PrimForeign _ _ _ args) =
+  List.null $ List.filter notPhantom args
+phantomPrim PrimNop = True  
 
 
-
-codegenForkBody :: PrimVarName -> [ProcBody] -> Codegen ()
-codegenForkBody var (b1:b2:[]) =
+-- | Code generation for a conditional branch. Currently a binary split
+-- is handled, which each branch returning the left value of their last
+-- instruction.
+codegenForkBody :: PrimVarName -> [ProcBody] -> Maybe Operand -> Codegen ()
+codegenForkBody var (b1:b2:[]) outop =
     do ifthen <- addBlock "if.then"
        ifelse <- addBlock "if.else"
        -- ifexit <- addBlock "if.exit"
@@ -287,19 +308,23 @@ codegenForkBody var (b1:b2:[]) =
        -- if.then
        setBlock ifthen
        val <- codegenBody b2
-       ret val
+       case val of
+         Nothing -> ret outop
+         v -> ret val
        -- if.else
        setBlock ifelse
        val <- codegenBody b1
-       ret val
+       case val of
+         Nothing -> ret outop
+         v -> ret val
        -- return
        return ()
        
        -- -- if.exit
        -- setBlock ifexit
        -- phi int_t [(trueval, ifthen), (falseval, ifelse)]
-
-codegenForkBody _ _ = error $ "Unrecognized control flow. Too many/few blocks."
+codegenForkBody _ _ _ = error
+  $ "Unrecognized control flow. Too many/few blocks."
 
 
 -- | Translate a Primitive statement (in clausal form) to a LLVM instruction.
