@@ -9,5 +9,12 @@ AFTER EVERYTHING:
   types           : 
   resources       : 
   procs           : 
-public (0 calls) (inline)
+
+nada > public (0 calls) (inline)
 0: nada([x#0:wybe.int], [y#0:wybe.int]):
+proc_allin
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'proc_allin'
+

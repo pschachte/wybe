@@ -159,10 +159,14 @@ makeGlobalDefinition modName proto bls =
     where
       params = List.filter (not . isPhantomParam) (primProtoParams proto)
       outp = openOutputParam params
-      label = makeLabel modName (primProtoName proto)
-      retty = case outp of
-                (Just (ty, nm)) -> ty
-                Nothing -> void_t
+      isMain = primProtoName proto == ""
+      -- *The top level procedure will be labelled main.
+      label = modName ++ "." ++
+        if isMain then "main" else primProtoName proto
+      retty = if isMain then int_t else
+                case outp of
+                  (Just (ty, nm)) -> ty
+                  Nothing -> void_t
       inputs = List.filter isInputParam params
       fnargs = List.map makeFnArg inputs
 
@@ -186,7 +190,7 @@ openOutputParam params =
     case outputs of
       (p:_) -> Just (typed $ primParamType p, show $ primParamName p)
       _ -> Nothing
-    where outputs = List.filter (not . isInputParam) params
+    where outputs = List.filter (\p -> primParamFlow p == FlowOut) params
 
 paramTypeName :: PrimParam -> String
 paramTypeName = typeName . primParamType
@@ -195,14 +199,6 @@ isPhantomParam :: PrimParam -> Bool
 isPhantomParam p = case paramTypeName p of
                      "phantom" -> True
                      _ -> False
-
--- | Generate a label to name the global functions with module name prefix
--- The top level procedure will be labelled main.
-makeLabel :: String -> String -> String
-makeLabel modName name
-    | name == "" = modName ++ "." ++ "main"
-    | otherwise = modName ++ "." ++ name
-
 
 ----------------------------------------------------------------------------
 -- Body Compilation                                                       --
@@ -237,6 +233,7 @@ doCodegenBody proto body =
        mapM_ assignParam params
        entry <- addBlock entryBlockName
        outop <- getOutputOp params
+       -- Start with creation of blocks and adding instructions to it
        setBlock entry
        op <- codegenBody body   -- Codegen on body prims
        case bodyFork body of
@@ -248,7 +245,13 @@ doCodegenBody proto body =
                       store ptr retcons
                       ret (Just retcons)
                       return ()
-           False -> do ret op
+           False -> do case openOutputParam $
+                            List.filter (not . isPhantomParam) params of
+                         -- return type of nothing is a void function
+                         Nothing -> retNothing
+                         -- otherwise return the last operand returned
+                         -- through codegen on the body
+                         _ -> ret op
                        return ()
          (PrimFork var _ fbody) -> codegenForkBody var fbody outop
 
@@ -270,7 +273,7 @@ assignParam p =
 getOutputOp :: [PrimParam] -> Codegen (Maybe Operand)
 getOutputOp params =
   do case openOutputParam $ List.filter (not . isPhantomParam) params of
-       Just (_, paramName) -> getVar paramName >>= return . Just
+       Just (ty, paramName) -> getVar paramName >>= return . Just
        Nothing -> return Nothing
 
 
@@ -297,7 +300,8 @@ phantomPrim PrimNop = True
 -- | Code generation for a conditional branch. Currently a binary split
 -- is handled, which each branch returning the left value of their last
 -- instruction.
-codegenForkBody :: PrimVarName -> [ProcBody] -> Maybe Operand -> Codegen ()
+codegenForkBody :: PrimVarName -> [ProcBody]
+                -> Maybe Operand -> Codegen ()
 codegenForkBody var (b1:b2:[]) outop =
     do ifthen <- addBlock "if.then"
        ifelse <- addBlock "if.else"

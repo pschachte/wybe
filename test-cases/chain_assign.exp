@@ -13,3 +13,14 @@ AFTER EVERYTHING:
 chain > (0 calls) (inline)
 0: chain(?z#0:wybe.int):
     foreign llvm move(1:wybe.int, ?z#0:wybe.int)
+chain_assign
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'chain_assign'
+
+define i32 @chain_assign.chain() {
+entry:
+  ret i32 1
+}
+

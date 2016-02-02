@@ -1,4 +1,4 @@
 do read(?c:char)
-   while (c /= eof)
+   while (c /= 'a')
    print(c)
 end
