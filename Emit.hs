@@ -184,10 +184,16 @@ makeExec :: [FilePath]          -- Object Files
          -> IO ()
 makeExec ofiles target =
     do dir <- getCurrentDirectory
-       let args = ofiles ++ sharedLibs ++ ldArgs ++ ldSystemArgs
-                  ++ ["-o", target]
-       createProcess (proc "ld" args)
+       let args = ofiles ++ sharedLibs ++ ["-o", target]
+       createProcess (proc "cc" args)
        return ()
+         
+-- makeExec ofiles target =
+--     do dir <- getCurrentDirectory
+--        let args = ofiles ++ sharedLibs ++ ldArgs ++ ldSystemArgs
+--                   ++ ["-o", target]
+--        createProcess (proc "ld" args)
+--        return ()
 
 ----------------------------------------------------------------------------
 -- -- * Object file manipulation                                          --
