@@ -157,8 +157,8 @@ instr' prim@(PrimForeign "llvm" "move" []
            [val, argvar@(ArgVar var _ flow _ _)]) pos
   = do
     logBuild $ "  Expanding move(" ++ show val ++ ", " ++ show argvar ++ ")"
-    -- unless (flow == FlowOut && argFlowDirection val == FlowIn) $ 
-    --   shouldnt "move instruction with wrong flow"
+    unless (flow == FlowOut && argFlowDirection val == FlowIn) $ 
+      shouldnt "move instruction with wrong flow"
     outVar <- gets (Map.findWithDefault var var . outSubst)
     addSubst outVar val
     rawInstr prim pos
