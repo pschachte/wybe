@@ -144,15 +144,15 @@ buildPrims builder = do
 --  substitution. If it's a move instruction, add it to the current
 --  substitution, and only add it if it assigns a protected variable.
 instr :: Prim -> OptPos -> BodyBuilder ()
+instr PrimNop _ = do
+    -- Filter out NOPs
+    return ()
 instr prim pos = do         
     prim' <- argExpandedPrim prim
     instr' prim' pos
 
 
 instr' :: Prim -> OptPos -> BodyBuilder ()
-instr' PrimNop _ = do
-    -- Filter out NOPs
-    return ()
 instr' prim@(PrimForeign "llvm" "move" []
            [val, argvar@(ArgVar var _ flow _ _)]) pos
   = do
