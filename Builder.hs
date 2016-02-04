@@ -158,12 +158,15 @@ buildModuleIfNeeded force modspec possDirs = do
                 Just (srcfile,True,objfile,True,modname) -> do
                     srcDate <- (liftIO . getModificationTime) srcfile
                     dstDate <- (liftIO . getModificationTime) objfile
-                    -- if force || srcDate > dstDate
-                    --   then do
-                    --     buildModule modname objfile srcfile
-                    --     return True
-                    --   else
-                    --     return False
+                    if force || srcDate > dstDate
+                      then do
+                        buildModule modname objfile srcfile
+                        return True
+                      else do
+                        -- XXX Replace build with load when that works
+                        buildModule modname objfile srcfile
+                        -- loadModule objfile
+                        return False
                     buildModule modname objfile srcfile
                     return True
                 Just (_,False,_,False,_) ->
