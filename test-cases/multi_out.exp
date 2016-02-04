@@ -1,0 +1,17 @@
+======================================================================
+AFTER EVERYTHING:
+ Module multi_out
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : multi_out.onetwothree<0>
+  imports         : use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+onetwothree > public (0 calls) (inline)
+0: onetwothree(?x#0:wybe.int, ?y#0:wybe.int, ?z#0:wybe.int):
+    foreign llvm move(1:wybe.int, ?x#0:wybe.int)
+    foreign llvm move(2:wybe.int, ?y#0:wybe.int)
+    foreign llvm move(3:wybe.int, ?z#0:wybe.int)
