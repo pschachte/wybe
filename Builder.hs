@@ -106,7 +106,8 @@ buildTarget force target = do
             do when (tType == ExecutableFile) (buildExecutable [modname] target)
                when (tType == ObjectFile) $
                  (markMain [modname]) >> (emitObjectFile [modname] target)
-               when (tType == BitcodeFile) (emitBitcodeFile [modname] target)
+               when (tType == BitcodeFile) $
+                 (markMain [modname]) >> (emitBitcodeFile [modname] target)
                whenLogging Emit $ logLLVMString [modname]
 
 
