@@ -7,16 +7,24 @@
 
 module ObjectInterface where
 
+import           AST
+import           BinaryFactory
 import           Config
 import           Control.Monad
+import           Data.Binary
+import           Data.Binary.Get
+import           Data.Binary.Put
 import qualified Data.ByteString as B
+import           Data.ByteString.Builder
+import qualified Data.ByteString.Lazy as BL
 import           Data.Hex
+import           Data.Int
 import           Data.List as List
 import           Data.Macho
 import           Data.Maybe (isJust)
+import           Data.Monoid
+import           Data.Word
 import           System.Process
-
-
 
 getMachoRecord :: FilePath -> IO Macho
 getMachoRecord ofile =
@@ -63,7 +71,7 @@ extractLPVMData obj =
 -- ASCII form.
 -- Sample:
 -- "test-cases/foo.o:\nContents of (__LPVM,__lpvm) section
--- 0000000000000000    23 20 70 75 62 6c 69 63 20 66 75 6e 63 20 74 6f ...
+-- 0000000000000000    23 20 70 75 62 6c 69 63 20 66 75 6e ...
 parseSegmentData :: String -> String
 parseSegmentData str = concat hexLines
     where
@@ -72,7 +80,70 @@ parseSegmentData str = concat hexLines
       filteredLines = List.filter (not . List.null) mappedLines
       hexLines = List.map (hex2char . tail) filteredLines
 
--- | Convert a string of 2 digit hex values to string of ascii characters.
+-- | Convert a string of 2 digit hex values to string of ascii
+-- characters.
 -- | Example: "23 20 70 75 62 6c 69 63" -> "# public"
 hex2char :: String -> String
 hex2char s = (concat . join) $ mapM unhex (words s)
+
+
+---------------------------------------------------------------------------------
+-- Bitcode Wrapper Structure                                                   --
+---------------------------------------------------------------------------------
+
+makeBitcodeWrapper :: FilePath -> IO ()
+makeBitcodeWrapper bcfile =
+  do bc <- BL.readFile bcfile
+     datStr <- BL.readFile "testFile"
+     let wrapped = runPut $ wrapBitcode bc datStr
+     BL.writeFile "dump" wrapped
+
+getWrappedBitcode :: BL.ByteString -> BL.ByteString -> BL.ByteString
+getWrappedBitcode bc datStr = runPut $ wrapBitcode bc datStr
+
+-- | Bitcode Wrappper structure magic number.
+magic :: Word32
+magic = 0x0B17C0DE
+
+-- | Put the Bitcode Bytes into a wrapper structure with an additional data
+-- bytestring inserted in between. The header of such a wrapper looks like
+-- this: [Magic32, Version32, Offset32, Size32, CPUType32] (little endian).
+-- Succeeding the header, the data bytestring and ultimately the bitcode
+-- bytestring is inserted.
+wrapBitcode :: BL.ByteString     -- ^ Bitcode
+            -> BL.ByteString     -- ^ Data Bytes to wrap along with bitcode            
+            -> Put
+wrapBitcode bc datStr = do
+  let bcsize = BL.length bc
+  let datsize = BL.length datStr
+  putWord32le magic             -- magic number
+  putWord32le 0
+  putWord32le (fromIntegral (20 + datsize) :: Word32)
+  putWord32le (fromIntegral bcsize :: Word32)
+  putWord32le 0
+  putLazyByteString datStr
+  putLazyByteString bc
+
+
+-- | Extract the wrapped bytestring from the given Wrapper Bitcode file
+-- and de-serialise (decode) the bytestring as a AST.Module type.
+extractModuleFromWrapper :: FilePath -> IO Module
+extractModuleFromWrapper bcfile =
+  do bc <- BL.readFile bcfile
+     let dump = runGet dataFromBitcode bc
+     print $ BL.length dump
+     return $ (decode dump :: Module)
+     
+-- | Run the Binary Get monad on a wrapped bitcode bytestring.
+-- The wrapped bytestring exists between the header bytes and the bitcode
+-- bytes. The header is of 20 bytes. The offset field in the header
+-- (from the 9th byte), gives the offset of the bitcode.
+dataFromBitcode :: Get BL.ByteString
+dataFromBitcode = do
+  skip 8
+  offset <- getWord32le
+  skip 8
+  let datSize = (toInteger offset) - 20
+  getLazyByteString (fromIntegral datSize)
+  
+  
