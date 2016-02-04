@@ -20,3 +20,9 @@ void print_string(const char *s) {
   puts(s);
   fflush(stdout);
 }
+
+int read_char() {
+    int ch;
+    ch = getchar();
+    return ch;        
+}

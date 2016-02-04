@@ -36,3 +36,34 @@ fortytwo > public (0 calls) (inline)
 gen$1 > (1 calls) (inline)
 0: gen$1(?tmp$0#0:wybe.int):
     foreign llvm move(42:wybe.int, ?tmp$0#0:wybe.int)
+constfold
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'constfold'
+
+define i32 @constfold.fold_add() {
+entry:
+  ret i32 42
+}
+
+define i32 @constfold.fold_mult() {
+entry:
+  ret i32 42
+}
+
+define i32 @constfold.fold_test() {
+entry:
+  ret i32 42
+}
+
+define i32 @constfold.fortytwo() {
+entry:
+  ret i32 42
+}
+
+define i32 @"constfold.gen$1"() {
+entry:
+  ret i32 42
+}
+

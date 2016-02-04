@@ -14,3 +14,15 @@ unneeded > (0 calls) (inline)
 0: unneeded(x#0:wybe.int, [y#0:wybe.int], ?z#0:wybe.int, q#0:wybe.int, [?q#0:wybe.int]):
     foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:4:38
     foreign llvm move(~tmp$3#0:wybe.int, ?z#0:wybe.int)
+unneeded
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'unneeded'
+
+define i32 @unneeded.unneeded(i32 %"x#0", i32 %"q#0") {
+entry:
+  %"tmp$3#0" = add i32 %"x#0", 1
+  ret i32 %"tmp$3#0"
+}
+
