@@ -50,3 +50,47 @@ semi_visible > (0 calls) (inline)
 visible > public (0 calls) (inline)
 0: visible(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     foreign c print_string("public proc in a public module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:122:41
+submodule, submodule.privatetest, submodule.publictest
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'submodule'
+
+--------------------------------------------------
+; ModuleID = 'submodule.privatetest'
+
+@0 = constant [33 x i8] c"private proc in a private module\00"
+
+declare void @print_string(i8*)
+
+define void @submodule.privatetest.hidden() {
+entry:
+  tail call void @print_string(i8* getelementptr inbounds ([33 x i8]* @0, i32 0, i32 0))
+  ret void
+}
+
+define void @submodule.privatetest.semi_hidden() {
+entry:
+  tail call void @print_string(i8* getelementptr inbounds ([33 x i8]* @0, i32 0, i32 0))
+  ret void
+}
+
+--------------------------------------------------
+; ModuleID = 'submodule.publictest'
+
+@0 = constant [32 x i8] c"private proc in a public module\00"
+
+declare void @print_string(i8*)
+
+define void @submodule.publictest.semi_visible() {
+entry:
+  tail call void @print_string(i8* getelementptr inbounds ([32 x i8]* @0, i32 0, i32 0))
+  ret void
+}
+
+define void @submodule.publictest.visible() {
+entry:
+  tail call void @print_string(i8* getelementptr inbounds ([32 x i8]* @0, i32 0, i32 0))
+  ret void
+}
+

@@ -36,3 +36,41 @@ gen$1 > (1 calls)
     1:
         foreign llvm move(1:wybe.int, ?tmp$0#0:wybe.int)
 
+func_factorial
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'func_factorial'
+
+declare void @print_int(i32)
+
+define i32 @main() {
+entry:
+  %"tmp$2#0" = tail call i32 @"func_factorial.gen$1"(i32 5)
+  tail call void @print_int(i32 %"tmp$2#0")
+  %0 = alloca i32
+  store i32 0, i32* %0
+  ret i32 0
+}
+
+define i32 @func_factorial.factorial(i32 %"n#0") {
+entry:
+  %"n#1" = tail call i32 @"func_factorial.gen$1"(i32 %"n#0")
+  ret i32 %"n#1"
+}
+
+define i32 @"func_factorial.gen$1"(i32 %"n#0") {
+entry:
+  %"tmp$7#0" = icmp sle i32 %"n#0", 0
+  br i1 %"tmp$7#0", label %if.then, label %if.else
+
+if.then:                                          ; preds = %entry
+  ret i32 1
+
+if.else:                                          ; preds = %entry
+  %"tmp$10#0" = sub i32 %"n#0", 1
+  %"tmp$12#0" = tail call i32 @"func_factorial.gen$1"(i32 %"tmp$10#0")
+  %"tmp$16#0" = mul i32 %"n#0", %"tmp$12#0"
+  ret i32 %"tmp$16#0"
+}
+

@@ -2,11 +2,11 @@ module Emit where
 
 import           AST
 import           Codegen
+import           Control.Applicative ((<$>), (<*>))
 import           Control.Monad
 import           Control.Monad.Trans (lift, liftIO)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
-import           Data.Hex
 import           Data.List as List
 import           Data.Map as Map
 import           Foreign.Ptr (FunPtr, castFunPtr)
@@ -68,18 +68,20 @@ emitAssemblyFile m f =
   do logEmit $ "Creating assembly file for " ++ (showModSpec m)
      withModuleLLVM m (makeAssemblyFile f)
 
--- | Log LLVM IR representation of the given module.
-logLLVMString :: ModSpec -> Compiler ()
-logLLVMString thisMod =
-  do reenterModule thisMod
-     maybeLLMod <- getModuleImplementationField modLLVM
-     case maybeLLMod of
-       (Just llmod) ->
-         do llstr <- liftIO $ codeemit llmod
-            logEmit llstr
-       (Nothing) -> error "No LLVM Module Implementation"
-     finishModule
-     return ()
+
+-- | Handle the ExceptT monad. If there is an error, it is better to fail.
+liftError :: ExceptT String IO a -> IO a
+liftError = runExceptT >=> either fail return
+
+-- | Emit the llvm IR version of the LLVMAST.Module to IO
+codeemit :: LLVMAST.Module -> IO String
+codeemit mod =
+    withContext $ \context ->
+        liftError $ withModuleFromAST context mod $ \m ->
+            do llstr <- moduleLLVMAssembly m
+               -- putStrLn llstr
+               return llstr
+
 
 ----------------------------------------------------------------------------
 -- Target Emitters                                                        --
@@ -126,18 +128,6 @@ llvmEmitToIO thisMod =
        return ()
 
 
--- | Handle the ExceptT monad. If there is an error, it is better to fail.
-liftError :: ExceptT String IO a -> IO a
-liftError = runExceptT >=> either fail return
-
--- | Emit the llvm IR version of the LLVMAST.Module to IO
-codeemit :: LLVMAST.Module -> IO String
-codeemit mod =
-    withContext $ \context ->
-        liftError $ withModuleFromAST context mod $ \m ->
-            do llstr <- moduleLLVMAssembly m
-               -- putStrLn llstr
-               return llstr
 
 -- | Initialize the JIT compiler under the IO monad.
 jit :: Context -> (EE.MCJIT -> IO a) -> IO a
@@ -193,51 +183,18 @@ makeExec :: [FilePath]          -- Object Files
          -> IO ()
 makeExec ofiles target =
     do dir <- getCurrentDirectory
-       let args = ofiles ++ sharedLibs ++ ldArgs ++ ldSystemArgs
-                  ++ ["-o", target]
-       createProcess (proc "ld" args)
+       let args = ofiles ++ sharedLibs ++ ["-o", target]
+       createProcess (proc "cc" args)
        return ()
 
-----------------------------------------------------------------------------
--- -- * Object file manipulation                                          --
-----------------------------------------------------------------------------
+-- makeExec ofiles target =
+--     do dir <- getCurrentDirectory
+--        let args = ofiles ++ sharedLibs ++ ldArgs ++ ldSystemArgs
+--                   ++ ["-o", target]
+--        createProcess (proc "ld" args)
+--        return ()
 
--- | Insert string data from first file into the second object file, into
--- the segment '__LPVM', and section '__lpvm' using ld.
-insertLPVMData :: FilePath -> FilePath -> IO ()
-insertLPVMData datfile obj =
-    do let args = ["-r"] ++ ldSystemArgs
-                  ++ ["-sectcreate", "__LPVM", "__lpvm", datfile]
-                  ++ ["-o", obj]
-       createProcess (proc "ld" args)
-       return ()
 
--- | Extract string data from the segment __LPVM, section __lpvm of the
--- given object file. An empty string is returned if there is no data
--- in that section. The program 'otool' is used to read the object file.
-extractLPVMData :: FilePath -> IO String
-extractLPVMData obj =
-    do let args = ["-s", "__LPVM", "__lpvm", obj]
-       sout <- readProcess "otool" args []
-       return $ parseSegmentData sout       
-
--- | Parse the returned segment/section contents from it's HEX form to
--- ASCII form.
--- Sample:
--- "test-cases/foo.o:\nContents of (__LPVM,__lpvm) section
--- 0000000000000000    23 20 70 75 62 6c 69 63 20 66 75 6e 63 20 74 6f ...
-parseSegmentData :: String -> String
-parseSegmentData str = concat hexLines
-    where
-      tillHex = dropWhile (\c -> c /= '\t') -- Actual data after \t 
-      mappedLines = List.map tillHex (lines str)
-      filteredLines = List.filter (not . List.null) mappedLines
-      hexLines = List.map (hex2char . tail) filteredLines
-
--- | Convert a string of 2 digit hex values to string of ascii characters.
--- | Example: "23 20 70 75 62 6c 69 63" -> "# public"
-hex2char :: String -> String
-hex2char s = (concat . join) $ mapM unhex (words s)
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --
@@ -245,3 +202,37 @@ hex2char s = (concat . join) $ mapM unhex (words s)
 
 logEmit :: String -> Compiler ()
 logEmit s = logMsg Emit s
+
+-- | Log LLVM IR representation of the given module.
+logLLVMString :: ModSpec -> Compiler ()
+logLLVMString thisMod =
+  do reenterModule thisMod
+     maybeLLMod <- getModuleImplementationField modLLVM
+     case maybeLLMod of
+       (Just llmod) ->
+         do llstr <- liftIO $ codeemit llmod
+            logEmit llstr
+       (Nothing) -> error "No LLVM Module Implementation"
+     finishModule
+     return ()
+
+-- | Pull the LLVMAST representation of the module and generate the LLVM
+-- IR String for it, if it exists.
+extractLLVM :: AST.Module -> Compiler String
+extractLLVM thisMod =
+  do case (modImplementation thisMod) >>= modLLVM of
+       Just llmod -> liftIO $ codeemit llmod
+       Nothing -> return "No LLVM IR generated."
+
+-- | Log the LLVMIR strings for all the modules compiled, except the standard
+-- library.
+logLLVMDump :: LogSelection -> LogSelection -> String -> Compiler ()
+logLLVMDump selector1 selector2 pass = do
+  whenLogging2 selector1 selector2 $
+    do modList <- gets (Map.elems . modules)
+       let noLibMod = List.filter ((/="wybe"). List.head . modSpec) modList
+       liftIO $ putStrLn $ showModSpecs $ List.map modSpec noLibMod
+       llvmir <- mapM extractLLVM noLibMod
+       liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER " ++ pass ++ ":\n\n" ++
+         intercalate ("\n" ++ replicate 50 '-' ++ "\n") llvmir
+

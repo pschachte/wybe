@@ -10,3 +10,9 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+mod3
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'mod3'
+

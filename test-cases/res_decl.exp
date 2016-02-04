@@ -10,3 +10,9 @@ AFTER EVERYTHING:
   resources       : count: fromList [(res_decl.count,Just wybe.int @res_decl:1:8)] @res_decl:1:8
   procs           : 
 
+res_decl
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'res_decl'
+

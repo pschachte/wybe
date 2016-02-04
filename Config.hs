@@ -11,8 +11,12 @@
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
                interfaceExtension, bitcodeExtension, sharedLibs,
-                                 ldArgs, ldSystemArgs)
+                                 ldArgs, ldSystemArgs, wordSize)
     where
+
+import Data.Word
+import Foreign.Storable
+
 
 -- |The file extension for source files.
 sourceExtension :: String
@@ -33,6 +37,10 @@ interfaceExtension = "int"
 -- |The file extension for bitcode files
 bitcodeExtension :: String
 bitcodeExtension = "bc"
+
+-- |Determining word size of the machine
+wordSize :: Int
+wordSize = (sizeOf (fromIntegral 3 :: Word) ) * 8
 
 -- |Foreign shared library directory name
 sharedLibDirName :: String
