@@ -25,7 +25,12 @@ import qualified LLVM.General.ExecutionEngine as EE
 import           System.Directory
 import           System.Process
 
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Lazy as BL
+import Data.Binary (encode)
+
 import           Config
+import           ObjectInterface
 import           Options (LogSelection (Emit))
 
 foreign import ccall "dynamic" haskFun :: FunPtr (IO Double) -> (IO Double)
@@ -58,8 +63,18 @@ emitObjectFile m f =
 -- target LLVM Bitcode file.
 emitBitcodeFile :: ModSpec -> FilePath -> Compiler ()
 emitBitcodeFile m f =
-  do logEmit $ "Creating bitcode file for " ++ (showModSpec m)
-     withModuleLLVM m (makeBCFile f)
+  do logEmit $ "Creating wrapped bitcode file for " ++ (showModSpec m)
+     reenterModule m     
+     maybeLLMod <- getModuleImplementationField modLLVM
+     case maybeLLMod of
+       (Just llmod) ->
+         do astMod <- getModule id
+            logEmit $ "Encoding and wrapping " ++ (showModSpec m)
+              ++ " in a wrapped bitcodefile."
+            liftIO $ makeWrappedBCFile f llmod astMod
+       (Nothing) -> error "No LLVM Module Implementation"
+     finishModule
+     return ()
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Assembly file.
@@ -103,6 +118,19 @@ makeBCFile file llmod =
     withContext $ \context ->
         liftError $ withModuleFromAST context llmod $ \m ->
             liftError $ writeBitcodeToFile (File file) m
+
+
+-- | Use the bitcode wrapper structure to wrap both the AST.Module
+-- (serialised) and the bitcode generated for the Module 
+makeWrappedBCFile :: FilePath -> LLVMAST.Module -> AST.Module -> IO ()
+makeWrappedBCFile file llmod origMod =
+    withContext $ \context ->
+        liftError $ withModuleFromAST context llmod $ \m ->
+            do bc <- moduleBitcode m
+               let modBS = encode origMod
+               let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
+               BL.writeFile file wrapped
+
 
 -- | Drop an LLVMAST.Module (haskell) into a Module.Module (C++),
 -- and write it as an object file.
