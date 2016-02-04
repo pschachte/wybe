@@ -4,6 +4,8 @@
 --  Purpose  : Abstract Syntax Tree for Wybe language
 --  Copyright:  2010-2015 Peter Schachte.  All rights reserved.
 
+{-# LANGUAGE DeriveGeneric #-}
+
 -- |The abstract syntax tree, and supporting types and functions.
 --  This includes the parse tree, as well as the AST types, which
 --  are normalised versions of the parse tree types.
@@ -59,20 +61,22 @@ module AST (
   defaultBlock                           
   ) where
 
-import Config
-import Control.Monad
-import Control.Monad.Trans (lift,liftIO)
-import Control.Monad.Trans.State
-import Data.List as List
-import Data.Map as Map
-import Data.Maybe
-import Data.Set as Set
-import Options
-import System.Exit
-import System.FilePath
-import System.IO
-import Text.ParserCombinators.Parsec.Pos
-import Util
+import           Config
+import           Control.Monad
+import           Control.Monad.Trans (lift,liftIO)
+import           Control.Monad.Trans.State
+import           Data.List as List
+import           Data.Map as Map
+import           Data.Maybe
+import           Data.Set as Set
+import           Options
+import           System.Exit
+import           System.FilePath
+import           System.IO
+import           Text.ParserCombinators.Parsec.Pos
+import           Util
+
+import GHC.Generics (Generic)
 
 import qualified LLVM.General.AST as LLVMAST
 
@@ -94,7 +98,7 @@ data Item
 
 -- |The visibility of a file item.  We only support public and private.
 data Visibility = Public | Private
-                  deriving (Eq, Show)
+                  deriving (Eq, Show, Generic)
 
 -- |Combine two visibilities, taking the most visible.
 maxVisibility :: Visibility -> Visibility -> Visibility
@@ -132,7 +136,7 @@ type OptPos = Maybe SourcePos
 data Placed t
     = Placed t SourcePos
     | Unplaced t
-    deriving Eq
+    deriving (Eq, Generic)
 
 -- |Return the optional position attached to a Placed value.
 place :: Placed t -> OptPos
@@ -815,7 +819,7 @@ data Module = Module {
   minDependencyNum :: Int,       -- ^the smallest loadNum of all dependencies
   procCount :: Int,              -- ^a counter for gensym-ed proc names
   stmtDecls :: [Placed Stmt]     -- ^top-level statements in this module
-  }
+  } deriving (Generic)
 
 
 descendantModuleOf :: ModSpec -> ModSpec -> Bool
@@ -890,7 +894,7 @@ data ModuleInterface = ModuleInterface {
                                     -- ^The other modules this module exports
     dependencies :: Set ModSpec      -- ^The other modules that must be linked
     }                               --  in by modules that depend on this one
-    deriving (Eq)
+    deriving (Eq, Generic)
 
 emptyInterface :: ModuleInterface
 emptyInterface = 
@@ -937,7 +941,7 @@ data ModuleImplementation = ModuleImplementation {
                                              -- ^Resources visible to this mod
     modKnownProcs:: Map Ident (Set ProcSpec),  -- ^Procs visible to this module
     modLLVM :: Maybe LLVMAST.Module  -- ^ Module's LLVM.General.AST.Module representation
-    }
+    } deriving (Generic)
 
 emptyImplementation :: ModuleImplementation
 emptyImplementation =
@@ -1006,7 +1010,7 @@ type ModSpec = [Ident]
 data ImportSpec = ImportSpec {
     importPublic::(Maybe (Set Ident)), 
     importPrivate::(Maybe (Set Ident))
-    } deriving Show
+    } deriving (Show, Generic)
 
 
 -- |Create an import spec to import the identifiers specified by the 
@@ -1083,7 +1087,7 @@ importsSelected (Just these) items =
 
 -- |A type definition, including the number of type parameters and an 
 --  optional source position.
-data TypeDef = TypeDef Int OptPos deriving (Eq)
+data TypeDef = TypeDef Int OptPos deriving (Eq, Generic)
 
 -- |The arity of a type definition.
 typeDefArity :: TypeDef -> Int
@@ -1114,7 +1118,7 @@ data ResourceImpln =
         resourceType::TypeSpec, 
         resourceInit::(Maybe (Placed Exp)), 
         resourcePos::OptPos
-        }
+        } deriving (Generic)
 
 
 -- |A proc definition, including the ID, prototype, the body, 
@@ -1135,7 +1139,7 @@ data ProcDef = ProcDef {
     procSuperproc :: SuperprocSpec 
                                 -- the proc this should be part of, if any
 }
-             deriving Eq
+             deriving (Eq, Generic)
 
 procCallCount :: ProcDef -> Int
 procCallCount proc = Map.foldr (+) 0 $ procCallers proc
@@ -1154,7 +1158,7 @@ data SuperprocSpec
     = NoSuperproc             -- Cannot be a subproc
     | AnySuperproc            -- Could be a subproc of any proc
     | SuperprocIs ProcSpec    -- May only be a subproc of specified proc
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 
 -- |The appropriate initial SuperprocSpec given the proc's visibility
@@ -1180,7 +1184,7 @@ data ProcImpln
     | ProcDefPrim PrimProto ProcBody     -- defn in LPVM (clausal) form
     | ProcDefBlocks PrimProto LLVMAST.Definition  [LLVMAST.Definition]
       -- defn in SSA (LLVM) form along with any needed extern definitions 
-    deriving (Eq)
+    deriving (Eq,Generic)
 
 
 isCompiled :: ProcImpln -> Bool
@@ -1216,7 +1220,7 @@ instance Show ProcImpln where
 data ProcBody = ProcBody {
       bodyPrims::[Placed Prim],
       bodyFork::PrimFork}
-              deriving (Eq, Show)
+              deriving (Eq, Show, Generic)
 
 data PrimFork =
     NoFork |
@@ -1225,7 +1229,7 @@ data PrimFork =
       forkVarLast::Bool,        -- ^Is this the last occurrence of forkVar
       forkBodies::[ProcBody]    -- ^one branch for each value of forkVar
     }
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 
 data LLBlock = LLBlock {
@@ -1338,7 +1342,7 @@ data ProcSpec = ProcSpec {
       procSpecMod::ModSpec,
       procSpecName::ProcName,
       procSpecID::ProcID}
-                deriving (Eq,Ord)
+                deriving (Eq,Ord,Generic)
 
 instance Show ProcSpec where
     show (ProcSpec mod name pid) =
@@ -1354,12 +1358,12 @@ data TypeSpec = TypeSpec {
     typeName::Ident,
     typeParams::[TypeSpec] 
     } | Unspecified
-              deriving (Eq,Ord)
+              deriving (Eq,Ord,Generic)
 
 data ResourceSpec = ResourceSpec {
     resourceMod::ModSpec,
     resourceName::ResourceName
-    } deriving (Eq, Ord)
+    } deriving (Eq, Ord, Generic)
                
 instance Show ResourceSpec where
     show (ResourceSpec mod name) = 
@@ -1368,7 +1372,7 @@ instance Show ResourceSpec where
 data ResourceFlowSpec = ResourceFlowSpec {
     resourceFlowRes::ResourceSpec,
     resourceFlowFlow::FlowDirection
-    } deriving (Eq, Ord)
+    } deriving (Eq, Ord, Generic)
                
 instance Show ResourceFlowSpec where
     show (ResourceFlowSpec resource dir) = 
@@ -1387,14 +1391,14 @@ data ProcProto = ProcProto {
     procProtoName::ProcName,
     procProtoParams::[Param],
     procProtoResources::[ResourceFlowSpec]
-    } deriving Eq
+    } deriving (Eq, Generic)
 
 
 -- |A proc prototype, including name and formal parameters.
 data PrimProto = PrimProto {
     primProtoName::ProcName,
     primProtoParams::[PrimParam]
-    } deriving Eq
+    } deriving (Eq, Generic)
 
 
 instance Show PrimProto where
@@ -1408,7 +1412,7 @@ data Param = Param {
     paramType::TypeSpec, 
     paramFlow::FlowDirection,
     paramFlowType::ArgFlowType
-    } deriving Eq
+    } deriving (Eq, Generic)
 
 
 -- |A formal parameter, including name, type, and flow direction.
@@ -1418,21 +1422,21 @@ data PrimParam = PrimParam {
     primParamFlow::PrimFlow,
     primParamFlowType::ArgFlowType, -- XXX Not sure this is still needed
     primParamInfo::ParamInfo  -- ^What we've inferred about this param
-    } deriving Eq
+    } deriving (Eq, Generic)
 
 
 -- |Info inferred about a single proc parameter
 data ParamInfo = ParamInfo {
         paramInfoUnneeded::Bool       -- ^Can this parameter be eliminated?
-    } deriving Eq
+    } deriving (Eq,Generic)
 
 -- |A dataflow direction:  in, out, both, or neither.
 data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow
-                   deriving (Show,Eq,Ord)
+                   deriving (Show,Eq,Ord,Generic)
 
 -- |A primitive dataflow direction:  in or out
 data PrimFlow = FlowIn | FlowOut
-                   deriving (Show,Eq,Ord)
+                   deriving (Show,Eq,Ord,Generic)
 
 
 -- |Does the specified flow direction flow in?
@@ -1466,7 +1470,7 @@ data Stmt
      | For (Placed Exp) (Placed Exp)
      | Break  -- holds the variable versions before the break
      | Next  -- holds the variable versions before the next
-     deriving (Eq)
+     deriving (Eq,Generic)
 
 -- |An expression.  These are all normalised into statements.
 data Exp
@@ -1481,7 +1485,7 @@ data Exp
       | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
       | Fncall ModSpec Ident [Placed Exp]
       | ForeignFn Ident Ident [Ident] [Placed Exp]
-     deriving (Eq)
+     deriving (Eq,Generic)
 
 -- |A loop generator (ie, an iterator).  These need to be 
 --  generalised, allowing them to be user-defined.
@@ -1498,7 +1502,7 @@ data PrimVarName =
   PrimVarName {
     primVarName :: VarName, 
     primVarNum :: Int
-    } deriving (Eq, Ord)
+    } deriving (Eq, Ord, Generic)
 
 -- |A primitive statment, including those that can only appear in a 
 --  loop.
@@ -1506,7 +1510,7 @@ data Prim
      = PrimCall ProcSpec [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
      | PrimNop
-     deriving (Eq,Ord)
+     deriving (Eq,Ord,Generic)
 
 instance Show Prim where
     show prim = showPrim 0 prim
@@ -1521,7 +1525,7 @@ data PrimArg
      | ArgFloat Double TypeSpec
      | ArgString String TypeSpec
      | ArgChar Char TypeSpec
-     deriving (Eq,Ord)
+     deriving (Eq,Ord,Generic)
 
 
 -- |Relates a primitive argument to the corresponding source argument
@@ -1529,7 +1533,7 @@ data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
                  | HalfUpdate      -- ^One half of a variable update (!var)
                  | Implicit OptPos -- ^Temp var for expression at that position
                  | Resource ResourceSpec -- ^An argument to pass a resource
-     deriving (Eq,Ord)
+     deriving (Eq,Ord,Generic)
 
 instance Show ArgFlowType where
     show Ordinary = ""

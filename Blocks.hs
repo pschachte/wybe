@@ -9,6 +9,7 @@ module Blocks
        where
 
 import           AST
+import           BinaryFactory
 import           Codegen
 import           Control.Monad
 import           Control.Monad.Trans (lift, liftIO)
@@ -33,6 +34,8 @@ import           LLVM.General.Context
 import           LLVM.General.Module
 import           LLVM.General.PrettyPrint
 import           Options (LogSelection (Blocks))
+
+import qualified Data.Binary as B
 
 ----------------------------------------------------------------------------
 -- LLVM Compiler Monad                                                    --
@@ -97,17 +100,13 @@ blockTransformModule thisMod =
        logBlocks' $ "*** Translating Module: " ++ modName
        (names, procs) <- fmap unzip $
                          getModuleImplementationField (Map.toList . modProcs)
-       -- procs' <- mapM (mapM (translateProc modName) .
-       --                 (List.filter ((>0).procCallCount))) procs
-       -- Map the translation function on every procedure, filtering
-       -- out the procedurces whose body is empty
        procs' <- mapM (mapM (translateProc modName) .
                        (List.filter (not . emptyProc))) procs
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
        -- logBlocks' $ showPretty llmod
-       finishModule
+       finishModule       
        logBlocks' $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
 -- | Predicate to test for procedure definition with an empty body.
