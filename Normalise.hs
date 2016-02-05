@@ -18,6 +18,7 @@ import Control.Monad
 import Control.Monad.Trans (lift,liftIO)
 import Flatten
 import Unbranch
+import Config (wordSize)
 
 
 -- |Normalise a list of file items, storing the results in the current module.
@@ -45,7 +46,8 @@ initResources = [ResourceFlowSpec (ResourceSpec ["wybe","io"] "io") ParamInOut]
 normaliseItem :: ([ModSpec] -> Compiler ()) -> Item -> Compiler ()
 normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos) 
   = do
-    ty <- addType name (TypeDef (length params) rep pos) vis
+    let rep' = normaliseTypeRepresentation rep
+    ty <- addType name (TypeDef (length params) rep' pos) vis
     let eq1 = ProcDecl Public
               (ProcProto "=" [Param "x" ty ParamOut Ordinary,
                               Param "y" ty ParamIn Ordinary] [])
@@ -93,6 +95,12 @@ normaliseItem modCompiler (CtorDecl vis proto pos) = do
     addCtor modCompiler vis (last modspec) modparams proto pos
 normaliseItem _ (StmtDecl stmt pos) = do
     updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
+
+
+normaliseTypeRepresentation :: TypeRepresentation -> TypeRepresentation
+normaliseTypeRepresentation "i" = "i" ++ show wordSize
+normaliseTypeRepresentation "f" = "i" ++ show wordSize
+normaliseTypeRepresentation other = other
 
 
 normaliseSubmodule :: ([ModSpec] -> Compiler ()) -> Ident -> 
