@@ -8,3 +8,5 @@ public proc beer99 use !io
 	?count = count - 1
     end
 end
+
+beer99
