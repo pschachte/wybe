@@ -1,4 +1,4 @@
-public type intlist is
+public type intlist
     public ctor []
     public ctor [|](head:int, tail:intlist)
     public func =(x:intlist, y:intlist):bool = false

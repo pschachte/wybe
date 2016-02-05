@@ -18,6 +18,7 @@ module AST (
   ProcProto(..), Param(..),
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), 
+  TypeRepresentation(..), defaultTypeRepresentation,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
@@ -86,7 +87,7 @@ import qualified LLVM.General.AST as LLVMAST
 
 -- |An item appearing at the top level of a source file.
 data Item
-     = TypeDecl Visibility TypeProto [Item] OptPos
+     = TypeDecl Visibility TypeProto TypeRepresentation [Item] OptPos
      | ModuleDecl Visibility Ident [Item] OptPos
      | ImportMods Visibility [ModSpec] OptPos
      | ImportItems Visibility ModSpec [Ident] OptPos
@@ -99,6 +100,12 @@ data Item
 -- |The visibility of a file item.  We only support public and private.
 data Visibility = Public | Private
                   deriving (Eq, Show, Generic)
+
+type TypeRepresentation = String
+
+defaultTypeRepresentation :: TypeRepresentation
+defaultTypeRepresentation = "pointer"
+
 
 -- |Combine two visibilities, taking the most visible.
 maxVisibility :: Visibility -> Visibility -> Visibility
@@ -1676,8 +1683,9 @@ logDump selector1 selector2 pass = do
 
 -- |How to show an Item.
 instance Show Item where
-  show (TypeDecl vis name items pos) =
-    visibilityPrefix vis ++ "type " ++ show name ++ " is" 
+  show (TypeDecl vis name repn items pos) =
+    visibilityPrefix vis ++ "type " ++ show name 
+    ++ " is" ++ repn
     ++ showMaybeSourcePos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\nend\n"

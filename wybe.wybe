@@ -1,6 +1,6 @@
 # The Wybe standard library (built-ins)
 
-public type int is
+public type int is i64
     public func +(x:int,y:int):int = foreign llvm add(x,y)
     public proc +(?x:int,y:int,z:int) ?x = foreign llvm sub(z,y) end
     public proc +(x:int,?y:int,z:int) ?y = foreign llvm sub(z,x) end
@@ -24,7 +24,7 @@ public type int is
 end
 
 
-public type float is
+public type float is f64
     public func +(x:float,y:float):float = foreign llvm fadd(x,y)
     public proc +(?x:float,y:float,z:float) ?x = foreign llvm fsub(z,y) end
     public proc +(x:float,?y:float,z:float) ?y = foreign llvm fsub(z,x) end
@@ -46,7 +46,7 @@ public type float is
 end
 
 
-public type bool is
+public type bool is i1
     public ctor false
     public ctor true
     # These are syntax errors because they are operators:
@@ -58,7 +58,7 @@ public type bool is
 end
 
 
-public type string is
+public type string
     # this whole implementation is completely wrong, but will do for now
     public func ++(x:string, y:string):string = foreign c strcat(x,y)
     public func =(x:string, y:string):bool = foreign llvm icmp eq(x,y)
@@ -66,13 +66,13 @@ public type string is
 end
 
 
-public type char is
+public type char is i32
     public func =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
     public func /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
 end
 
 
-public type int_seq is
+public type int_seq
     public ctor range(start:int, finish:int, incr:int)
     public proc [|](?next:int, ?rest:int_seq, curr:int_seq, ?succeed:bool)
     	# XXX commented out because it won't even parse!
@@ -91,7 +91,7 @@ public type int_seq is
     public func empty(seq:int_seq):bool = true
 end
 
-# public type list(t) is
+# public type list(t)
 #     public ctor []
 #     public ctor [|](head:t, tail:list(t))
 

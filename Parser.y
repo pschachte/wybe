@@ -109,8 +109,8 @@ RevItems :: { [Item] }
 
 
 Item  :: { Item }
-    : Visibility 'type' TypeProto 'is' Items 'end'
-                                { TypeDecl $1 $3 $5 $ 
+    : Visibility 'type' TypeProto OptRepresentation Items 'end'
+                                { TypeDecl $1 $3 $4 $5 $ 
 				    Just $ tokenPosition $2 }
     | Visibility 'module' ident 'is' Items 'end'
                                 { ModuleDecl $1 (identName $3) $5 $ 
@@ -127,7 +127,8 @@ Item  :: { Item }
                                 { FuncDecl $1 $3 $4 $6
 				    $ Just $ tokenPosition $2 }
     | Visibility 'proc' ProcProto ProcBody
-                                { ProcDecl $1 $3 $4 $ Just $ tokenPosition $2 }
+                                { ProcDecl $1 $3 $4 $ Just
+				    $ tokenPosition $2 }
     | Visibility 'ctor' FnProto { CtorDecl $1 $3
 				    $ Just $ tokenPosition $2 }
     | Stmt                      { StmtDecl (content $1) (place $1) }
@@ -135,6 +136,10 @@ Item  :: { Item }
 
 TypeProto :: { TypeProto }
     : ident OptIdents           { TypeProto (identName $1) $2 }
+
+OptRepresentation :: { TypeRepresentation }
+    : 'is' ident                 { identName $2 }
+    | {- empty -}                { defaultTypeRepresentation }
 
 ModSpecs :: { [ModSpec] }
     : ModSpec RevModSpecList
