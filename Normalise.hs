@@ -45,7 +45,7 @@ initResources = [ResourceFlowSpec (ResourceSpec ["wybe","io"] "io") ParamInOut]
 normaliseItem :: ([ModSpec] -> Compiler ()) -> Item -> Compiler ()
 normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos) 
   = do
-    ty <- addType name (TypeDef (length params) pos) vis
+    ty <- addType name (TypeDef (length params) rep pos) vis
     let eq1 = ProcDecl Public
               (ProcProto "=" [Param "x" ty ParamOut Ordinary,
                               Param "y" ty ParamIn Ordinary] [])

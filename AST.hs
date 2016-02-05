@@ -18,7 +18,7 @@ module AST (
   ProcProto(..), Param(..),
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), 
-  TypeRepresentation(..), defaultTypeRepresentation,
+  TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
@@ -566,7 +566,7 @@ updateImplementation implOp = do
 
 -- |Add the specified type definition to the current module.
 addType :: Ident -> TypeDef -> Visibility -> Compiler (TypeSpec)
-addType name def@(TypeDef arity _) vis = do
+addType name def@(TypeDef arity rep _) vis = do
     currMod <- getModuleSpec
     let spec = TypeSpec currMod name [] -- XXX what about type params?
     updateImplementation 
@@ -574,7 +574,7 @@ addType name def@(TypeDef arity _) vis = do
         let set = Set.singleton spec
         in imp { modTypes = Map.insert name def $ modTypes imp, 
                  modKnownTypes = Map.insert name set $ modKnownTypes imp })
-    updateInterface vis (updatePubTypes (Map.insert name spec))
+    updateInterface vis (updatePubTypes (Map.insert name (spec,rep)))
     return spec
 
 
@@ -893,7 +893,8 @@ updateModInterface fn =
 
 -- |Holds everything needed to compile code that uses a module
 data ModuleInterface = ModuleInterface {
-    pubTypes :: Map Ident TypeSpec,   -- ^The types this module exports
+    pubTypes :: Map Ident (TypeSpec,TypeRepresentation),   
+                                     -- ^The types this module exports
     pubResources :: Map ResourceName ResourceSpec,       
                                      -- ^The resources this module exports
     pubProcs :: Map Ident (Set ProcSpec), -- ^The procs this module exports
@@ -910,7 +911,8 @@ emptyInterface =
 -- These functions hack around Haskell's terrible setter syntax
 
 -- |Update the public types of a module interface.
-updatePubTypes :: (Map Ident TypeSpec -> Map Ident TypeSpec) -> 
+updatePubTypes :: (Map Ident (TypeSpec,TypeRepresentation) 
+                   -> Map Ident (TypeSpec,TypeRepresentation)) -> 
                  ModuleInterface -> ModuleInterface
 updatePubTypes fn modint = modint {pubTypes = fn $ pubTypes modint}
 
@@ -992,8 +994,25 @@ updateModLLVM :: (Maybe LLVMAST.Module -> Maybe LLVMAST.Module)
 updateModLLVM fn modimp = do
   let llmod' = fn $ modLLVM modimp
   return $ modimp { modLLVM = llmod'}
-  
-                             
+
+
+-- | Given a type spec, find its internal representation (a string),
+--   if possible.
+lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
+lookupTypeRepresentation Unspecified = return Nothing
+lookupTypeRepresentation (TypeSpec modSpec name _) = do
+    maybeMod <- getLoadedModule modSpec
+    let maybeImpln = maybeMod >>= modImplementation
+    let maybeInterface = fmap modInterface maybeMod
+    case (maybeInterface,maybeImpln) of
+        (Just iface,_) ->
+          return $ fmap snd $ Map.lookup name $ pubTypes iface
+        (Nothing, Just impln) ->
+          return $ fmap typeDefRepresentation $ Map.lookup name 
+          $ modTypes impln
+        _ -> return Nothing
+    
+
 -- |An identifier.
 type Ident = String
 
@@ -1066,7 +1085,7 @@ doImport mod imports = do
     let importedProcs = importsSelected allImports $ pubProcs fromIFace
     -- XXX Must report error for imports of non-exported items
     let knownTypes = Map.unionWith Set.union (modKnownTypes impl) $
-                     Map.map Set.singleton importedTypes
+                     Map.map (Set.singleton . fst) importedTypes
     let knownResources = 
             Map.unionWith Set.union (modKnownResources impl) $
             Map.map Set.singleton importedResources
@@ -1094,11 +1113,11 @@ importsSelected (Just these) items =
 
 -- |A type definition, including the number of type parameters and an 
 --  optional source position.
-data TypeDef = TypeDef Int OptPos deriving (Eq, Generic)
-
--- |The arity of a type definition.
-typeDefArity :: TypeDef -> Int
-typeDefArity (TypeDef arity _) = arity
+data TypeDef = TypeDef {
+    typeDefArity :: Int,
+    typeDefRepresentation :: TypeRepresentation,
+    typeDefOptPos :: OptPos
+    } deriving (Eq, Generic)
 
 
 -- |A resource interface: everything a module needs to know to use 
@@ -1855,7 +1874,8 @@ showMap outersep keyFn valFn m =
 
 -- |How to show a type definition.
 instance Show TypeDef where
-  show (TypeDef arity pos) = show arity ++ showMaybeSourcePos pos
+  show (TypeDef arity rep pos) = 
+    show arity ++ " (" ++ rep ++ ") " ++ showMaybeSourcePos pos
 
 -- |How to show a resource definition.
 instance Show ResourceImpln where
