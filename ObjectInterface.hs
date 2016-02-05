@@ -115,15 +115,24 @@ wrapBitcode :: BL.ByteString     -- ^ Bitcode
             -> Put
 wrapBitcode bc datStr = do
   let bcsize = BL.length bc
-  let datsize = BL.length datStr
+  -- The length data bytestring to be wrapped should be a multiple of 4
+  let paddedData = bytePad datStr
+  let datsize = BL.length paddedData
   putWord32le magic             -- magic number
   putWord32le 0
   putWord32le (fromIntegral (20 + datsize) :: Word32)
   putWord32le (fromIntegral bcsize :: Word32)
   putWord32le 0
-  putLazyByteString datStr
+  putLazyByteString paddedData
   putLazyByteString bc
 
+-- | Pad the bytestring with 0x00 bytes until it is of a length which is a
+-- multiple of 4.
+bytePad :: BL.ByteString -> BL.ByteString
+bytePad orig = if remainder == 0
+               then orig
+               else BL.append orig (BL.replicate remainder 0)
+  where remainder = (BL.length orig) `mod` 4
 
 -- | Extract the wrapped bytestring from the given Wrapper Bitcode file
 -- and de-serialise (decode) the bytestring as a AST.Module type.
