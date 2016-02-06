@@ -139,8 +139,7 @@ bytePad orig = if remainder == 0
 extractModuleFromWrapper :: FilePath -> IO Module
 extractModuleFromWrapper bcfile =
   do bc <- BL.readFile bcfile
-     let dump = runGet dataFromBitcode bc
-     print $ BL.length dump
+     let dump = runGet dataFromBitcode bc     
      return $ (decode dump :: Module)
      
 -- | Run the Binary Get monad on a wrapped bitcode bytestring.

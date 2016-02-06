@@ -43,45 +43,47 @@ run fn = haskFun (castFunPtr fn :: FunPtr (IO Double))
 -- LPVM module specification, and run some action on it under the compiler
 -- monad.
 withModuleLLVM :: ModSpec -> (LLVMAST.Module -> IO ()) -> Compiler ()
-withModuleLLVM thisMod action =
-  do reenterModule thisMod
-     maybeLLMod <- getModuleImplementationField modLLVM
-     case maybeLLMod of
-       (Just llmod) -> liftIO $ action llmod
-       (Nothing) -> error "No LLVM Module Implementation"
-     finishModule
-     return ()
+withModuleLLVM thisMod action = do
+    reenterModule thisMod
+    maybeLLMod <- getModuleImplementationField modLLVM
+    case maybeLLMod of
+      (Just llmod) -> liftIO $ action llmod
+      (Nothing) -> error "No LLVM Module Implementation"
+    finishModule
+    return ()
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target object file.
 emitObjectFile :: ModSpec -> FilePath -> Compiler ()
-emitObjectFile m f =
-  do logEmit $ "Creating object file for " ++ (showModSpec m)
-     withModuleLLVM m (makeObjFile f)
+emitObjectFile m f = do    
+    logEmit $ "Creating object file for " ++ (showModSpec m)    
+    withModuleLLVM m (makeObjFile f)
+    -- XXX Temporarily emit the wrapped bitcode file alongside too
+    emitBitcodeFile m f
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Bitcode file.
 emitBitcodeFile :: ModSpec -> FilePath -> Compiler ()
-emitBitcodeFile m f =
-  do logEmit $ "Creating wrapped bitcode file for " ++ (showModSpec m)
-     reenterModule m     
-     maybeLLMod <- getModuleImplementationField modLLVM
-     case maybeLLMod of
-       (Just llmod) ->
-         do astMod <- getModule id
-            logEmit $ "Encoding and wrapping " ++ (showModSpec m)
-              ++ " in a wrapped bitcodefile."
-            liftIO $ makeWrappedBCFile f llmod astMod
-       (Nothing) -> error "No LLVM Module Implementation"
-     finishModule
-     return ()
+emitBitcodeFile m f = do
+   logEmit $ "Creating wrapped bitcode file for " ++ (showModSpec m)
+   reenterModule m
+   maybeLLMod <- getModuleImplementationField modLLVM
+   case maybeLLMod of
+     (Just llmod) ->
+       do astMod <- getModule id
+          logEmit $ "Encoding and wrapping " ++ (showModSpec m)
+            ++ " in a wrapped bitcodefile."
+          liftIO $ makeWrappedBCFile f llmod astMod
+     (Nothing) -> error "No LLVM Module Implementation"
+   finishModule
+   return ()
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Assembly file.
 emitAssemblyFile :: ModSpec -> FilePath -> Compiler ()
-emitAssemblyFile m f =
-  do logEmit $ "Creating assembly file for " ++ (showModSpec m)
-     withModuleLLVM m (makeAssemblyFile f)
+emitAssemblyFile m f = do
+    logEmit $ "Creating assembly file for " ++ (showModSpec m)
+    withModuleLLVM m (makeAssemblyFile f)
 
 
 -- | Handle the ExceptT monad. If there is an error, it is better to fail.
@@ -121,12 +123,13 @@ makeBCFile file llmod =
 
 
 -- | Use the bitcode wrapper structure to wrap both the AST.Module
--- (serialised) and the bitcode generated for the Module 
+-- (serialised) and the bitcode generated for the Module
 makeWrappedBCFile :: FilePath -> LLVMAST.Module -> AST.Module -> IO ()
 makeWrappedBCFile file llmod origMod =
     withContext $ \context ->
         liftError $ withModuleFromAST context llmod $ \m ->
             do bc <- moduleBitcode m
+               -- encode the AST.Module type into a bytestring
                let modBS = encode origMod
                let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
                BL.writeFile file wrapped
@@ -263,4 +266,3 @@ logLLVMDump selector1 selector2 pass = do
        llvmir <- mapM extractLLVM noLibMod
        liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER " ++ pass ++ ":\n\n" ++
          intercalate ("\n" ++ replicate 50 '-' ++ "\n") llvmir
-
