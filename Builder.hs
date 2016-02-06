@@ -44,36 +44,36 @@
 -- |Code to oversee the compilation process.
 module Builder (buildTargets, compileModule) where
 
-import           AST
-import           Blocks                    (blockTransformModule, markMain)
-import           Callers                   (collectCallers)
-import           Clause                    (compileProc)
-import           Config
-import           Control.Monad
-import           Control.Monad.Trans
-import           Control.Monad.Trans.State
-import           Data.List                 as List
-import           Data.Map                  as Map
-import           Data.Maybe
-import           Data.Set                  as Set
-import           Emit
-import           Normalise                 (normalise, normaliseItem)
-import           Optimise                  (optimiseMod)
+import AST
+import Blocks (blockTransformModule, markMain)
+import Callers (collectCallers)
+import Clause (compileProc)
+import Config
+import Control.Monad
+import Control.Monad.Trans
+import Control.Monad.Trans.State
+import Data.List as List
+import Data.Map as Map
+import Data.Maybe
+import Data.Set as Set
+import Emit
+import Normalise (normalise, normaliseItem)
+import ObjectInterface
+import Optimise (optimiseMod)
 import           Options                   (LogSelection (..), Options,
                                             optForce, optForceAll, optLibDirs)
-import           Parser                    (parse)
-import           Resources                 (resourceCheckMod, resourceCheckProc)
-import           Scanner                   (Token, fileTokens, inputTokens)
+import Parser (parse)
+import Resources (resourceCheckMod, resourceCheckProc)
+import Scanner (Token, fileTokens, inputTokens)
 import           System.Directory          (canonicalizePath, doesFileExist,
                                             getCurrentDirectory,
                                             getModificationTime)
-import           System.Exit               (exitFailure, exitSuccess)
-import           System.FilePath
-import           System.Time               (ClockTime)
+import System.Exit (exitFailure, exitSuccess)
+import System.FilePath
+import System.Time (ClockTime)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
-import           Unbranch                  (unbranchProc)
-
+import Unbranch (unbranchProc)
 
 
 ------------------------ Handling dependencies ------------------------
@@ -98,12 +98,13 @@ buildTarget force target = do
       then message Error ("Unknown target file type " ++ target) Nothing
       else do
         let modname = takeBaseName target
-        let dir = takeDirectory target
+        let dir = takeDirectory target        
         built <- buildModuleIfNeeded force [modname] [dir]
-        if (built==False)
-          then (liftIO . putStrLn) $ "Nothing to be done for " ++ target
+        when (tType == ExecutableFile) (buildExecutable [modname] target)
+        if (built==False && tType /= ExecutableFile)
+          then logBuild $ "Nothing to be done for target: " ++ target
           else
-            do when (tType == ExecutableFile) (buildExecutable [modname] target)
+            do 
                when (tType == ObjectFile) $
                  (markMain [modname]) >> (emitObjectFile [modname] target)
                when (tType == BitcodeFile) $
@@ -149,7 +150,7 @@ buildModuleIfNeeded force modspec possDirs = do
                     return False
                 Just (_,False,objfile,True,_) -> do
                     -- only object file exists
-                    loadModule objfile
+                    loadModule modspec objfile
                     return False
                 Just (srcfile,True,objfile,False,modname) -> do
                     -- only source file exists
@@ -163,12 +164,10 @@ buildModuleIfNeeded force modspec possDirs = do
                         buildModule modname objfile srcfile
                         return True
                       else do
-                        -- XXX Replace build with load when that works
-                        buildModule modname objfile srcfile
-                        -- loadModule objfile
+                        loadModule modspec objfile
                         return False
-                    buildModule modname objfile srcfile
-                    return True
+                    -- buildModule modname objfile srcfile
+                    -- return True
                 Just (_,False,_,False,_) ->
                     shouldnt "inconsistent file existence"
 
@@ -234,12 +233,25 @@ compileModule dir modspec params items = do
     compileModSCC mods
 
 
-  -- |Load module export info from compiled file
+-- |Load module export info from compiled file
 --   XXX not yet implemented
-loadModule :: FilePath -> Compiler ()
-loadModule objfile =
-    message Error ("Can't handle pre-compiled file " ++ objfile ++ " yet")
-    Nothing
+loadModule :: ModSpec -> FilePath -> Compiler ()
+loadModule modspec objfile = do
+    logBuild $ "Trying to find wrapped bitcode for " ++ showModSpec modspec
+    let bcfile = dropExtension objfile ++ ".bc"
+    thisMod <- liftIO $ extractModuleFromWrapper bcfile
+    count <- gets ((1+) . loadCount)
+    modify (\comp -> comp { loadCount = count })
+    logBuild $ "===== >>> Loaded Module bytestring from " ++ (show bcfile)
+    modify (\comp -> let mods = thisMod : underCompilation comp
+                     in  comp { underCompilation = mods })
+    -- Load the dependencies
+    loadImports
+    stopOnError $ "handling imports for module " ++ showModSpec modspec    
+    mods <- exitModule -- may be empty list if module is mutually dependent
+    logBuild $ "<=== finished loading bytestring of module from "
+        ++ (show bcfile)
+
 
 
 descendantModules :: ModSpec -> Compiler [ModSpec]
@@ -407,8 +419,7 @@ buildExecutable targetMod fpath =
     do ofiles <- collectObjectFiles [] targetMod
        markMain targetMod
        thisfile <- loadObjectFile targetMod
-       logBuild $ "Building Executable at " ++ fpath
-       -- Call the ld linker 
+       logBuild $ "+++++++ Building Target (executatable): " ++ fpath
        liftIO $ makeExec (ofiles ++ [thisfile]) fpath
        return ()
 
