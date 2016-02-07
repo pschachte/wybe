@@ -685,29 +685,58 @@ makeExArg arg = let ty = (typed . argType) arg
 -- Block Modification                                                     --
 ----------------------------------------------------------------------------
 
-markMain :: ModSpec -> Compiler ()
-markMain thisMod =
-  do reenterModule thisMod     
-     updateModImplementationM (updateModLLVM makeMainModule) 
-     finishModule
-     return ()
+newMainModule :: [ModSpec] -> LLVMAST.Module
+newMainModule depends = modWithDefinitions "tmpMain" newDefs
+  where
+    mainDef = createMain depends
+    externsForMain = mainExterns depends
+    newDefs = externsForMain ++ [mainDef]
 
-makeMainModule :: Maybe LLVMAST.Module -> Maybe LLVMAST.Module
-makeMainModule Nothing = Nothing
-makeMainModule (Just (LLVMAST.Module name x y defs)) =
-  let newdefs = List.map replaceMainDef defs
-  in Just $ LLVMAST.Module name x y newdefs
+createMain :: [ModSpec] -> LLVMAST.Definition
+createMain mods = globalDefine int_t "main" [] bls
+  where
+    bls = createBlocks (execCodegen "" $ mainCodegen mods)
 
-replaceMainDef :: LLVMAST.Definition -> LLVMAST.Definition
-replaceMainDef def@(LLVMAST.GlobalDefinition gl) =
-  case G.name gl of
-    LLVMAST.Name label ->
-      if List.isSuffixOf "main" label
-      then LLVMAST.GlobalDefinition gl { G.name = LLVMAST.Name "main" }
-      else def
-    LLVMAST.UnName _ -> def 
-replaceMainDef d = d
-  
+mainCodegen :: [ModSpec] -> Codegen ()
+mainCodegen mods = do
+    entry <- addBlock entryBlockName
+    setBlock entry
+    let mainName m = LLVMAST.Name $ showModSpec m ++ ".main"
+    forM_ mods $ \m -> instr int_t $
+                       call (externf int_t (mainName m)) []
+    -- int main returns 0
+    ptr <- instr (ptr_t int_t) (alloca int_t)
+    let retcons = cons (C.Int 32 0)
+    store ptr retcons
+    ret (Just retcons)
+    return ()
+
+mainExterns :: [ModSpec] -> [LLVMAST.Definition]
+mainExterns mods = List.map externalMain mods
+    where
+      mainName m = showModSpec m ++ ".main"
+      externalMain m = external int_t (mainName m) []
+    
+
+-- makeMainModule :: [LLVMAST.Definition]
+--                -> Maybe LLVMAST.Module
+--                -> Maybe LLVMAST.Module
+-- makeMainModule _ Nothing = Nothing
+-- makeMainModule ds (Just (LLVMAST.Module name x y defs)) =
+--   let newdefs = ds ++ defs
+--   in Just $ LLVMAST.Module name x y newdefs
+
+-- replaceMainDef :: LLVMAST.Definition -> LLVMAST.Definition
+-- replaceMainDef def@(LLVMAST.GlobalDefinition gl) =
+--   case G.name gl of
+--     LLVMAST.Name label ->
+--       if List.isSuffixOf "main" label
+--       then LLVMAST.GlobalDefinition gl { G.name = LLVMAST.Name "main" }
+--       else def
+--     LLVMAST.UnName _ -> def 
+-- replaceMainDef d = d
+
+
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

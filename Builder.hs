@@ -45,7 +45,7 @@
 module Builder (buildTargets, compileModule) where
 
 import AST
-import Blocks (blockTransformModule, markMain)
+import Blocks (blockTransformModule, newMainModule)
 import Callers (collectCallers)
 import Clause (compileProc)
 import Config
@@ -74,7 +74,7 @@ import System.Time (ClockTime)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
 import Unbranch (unbranchProc)
-
+import           LLVM.General.PrettyPrint
 
 ------------------------ Handling dependencies ------------------------
 
@@ -104,11 +104,8 @@ buildTarget force target = do
         if (built==False && tType /= ExecutableFile)
           then logBuild $ "Nothing to be done for target: " ++ target
           else
-            do 
-               when (tType == ObjectFile) $
-                 (markMain [modname]) >> (emitObjectFile [modname] target)
-               when (tType == BitcodeFile) $
-                 (markMain [modname]) >> (emitBitcodeFile [modname] target)
+            do when (tType == ObjectFile) $ emitObjectFile [modname] target
+               when (tType == BitcodeFile) $ emitBitcodeFile [modname] target
                whenLogging Emit $ logLLVMString [modname]
 
 
@@ -416,12 +413,33 @@ handleModImports modSCC mod = do
 -- LLVM AST Module representation of the 'module'.
 buildExecutable :: ModSpec -> FilePath -> Compiler ()
 buildExecutable targetMod fpath =
-    do ofiles <- collectObjectFiles [] targetMod
-       markMain targetMod
+    do imports <- collectMainImports [targetMod] []
+       logBuild $ "o Modules with 'main': " ++ showModSpecs imports
+       let mainMod = newMainModule imports
+       let tmpMainOFile = takeDirectory fpath ++ "/tmpMain.o"
+       logBuild $ "o Creating temp Main module @ " ++ tmpMainOFile
+       liftIO $ makeObjFile tmpMainOFile mainMod
+       ofiles <- collectObjectFiles [] targetMod
        thisfile <- loadObjectFile targetMod
-       logBuild $ "+++++++ Building Target (executatable): " ++ fpath
-       liftIO $ makeExec (ofiles ++ [thisfile]) fpath
+       let allOFiles = thisfile:ofiles
+       logBuild $ "o Object Files to link: " ++ show allOFiles      
+       logBuild $ "o Building Target (executable): " ++ fpath
+       liftIO $ makeExec ([tmpMainOFile] ++ ofiles ++ [thisfile]) fpath
        return ()
+
+
+collectMainImports :: [ModSpec] -> [ModSpec] -> Compiler [ModSpec]
+collectMainImports [] cs = return cs
+collectMainImports (m:ms) cs = do
+    reenterModule m
+    procs <- getModuleImplementationField (keys . modProcs)
+    imports <- getModuleImplementationField (keys . modImports)
+    let noStd = List.filter (not . isStdLib) imports
+    finishModule
+    if elem "" procs 
+        then collectMainImports (reverse noStd ++ ms) (m:cs)
+        else collectMainImports (reverse noStd ++ ms) cs
+    
 
 -- | Recursively visit imports of module emitting and collecting
 -- the object files for each. It is assumed that every dependency
