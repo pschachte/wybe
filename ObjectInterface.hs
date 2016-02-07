@@ -111,7 +111,7 @@ magic = 0x0B17C0DE
 -- Succeeding the header, the data bytestring and ultimately the bitcode
 -- bytestring is inserted.
 wrapBitcode :: BL.ByteString     -- ^ Bitcode
-            -> BL.ByteString     -- ^ Data Bytes to wrap along with bitcode            
+            -> BL.ByteString     -- ^ Data Bytes to wrap along with bitcode        
             -> Put
 wrapBitcode bc datStr = do
   let bcsize = BL.length bc

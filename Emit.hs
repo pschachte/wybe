@@ -32,6 +32,7 @@ import Data.Binary (encode)
 import           Config
 import           ObjectInterface
 import           Options (LogSelection (Emit))
+import           System.FilePath (dropExtension)
 
 foreign import ccall "dynamic" haskFun :: FunPtr (IO Double) -> (IO Double)
 
@@ -56,23 +57,25 @@ withModuleLLVM thisMod action = do
 -- target object file.
 emitObjectFile :: ModSpec -> FilePath -> Compiler ()
 emitObjectFile m f = do
-    logEmit $ "Creating object file for " ++ (showModSpec m)
+    logEmit $ "Creating object file for *" ++ (showModSpec m) ++ "*" ++
+        " @ '" ++ f ++ "'"
     withModuleLLVM m (makeObjFile f)
     -- Also make the bitcode file for now
-    emitBitcodeFile m f
+    emitBitcodeFile m $ (dropExtension f) ++ ".bc"
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Bitcode file.
 emitBitcodeFile :: ModSpec -> FilePath -> Compiler ()
 emitBitcodeFile m f = do
-   logEmit $ "Creating wrapped bitcode file for " ++ (showModSpec m)
+   logEmit $ "Creating wrapped bitcode file for *" ++ (showModSpec m) ++ "*"
+       ++ " @ '" ++ f ++ "'"
    reenterModule m
    maybeLLMod <- getModuleImplementationField modLLVM
    case maybeLLMod of
      (Just llmod) ->
        do astMod <- getModule id
-          logEmit $ "Encoding and wrapping " ++ (showModSpec m)
-            ++ " in a wrapped bitcodefile."
+          logEmit $ "Encoding and wrapping Module *" ++ (showModSpec m)
+            ++ "* in a wrapped bitcodefile."
           liftIO $ makeWrappedBCFile f llmod astMod
      (Nothing) -> error "No LLVM Module Implementation"
    finishModule
@@ -242,7 +245,9 @@ logLLVMString thisMod =
      case maybeLLMod of
        (Just llmod) ->
          do llstr <- liftIO $ codeemit llmod
+            logEmit $ replicate 80 '-'
             logEmit llstr
+            logEmit $ replicate 80 '-'
        (Nothing) -> error "No LLVM Module Implementation"
      finishModule
      return ()
