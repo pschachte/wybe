@@ -55,10 +55,10 @@ withModuleLLVM thisMod action = do
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target object file.
 emitObjectFile :: ModSpec -> FilePath -> Compiler ()
-emitObjectFile m f = do    
-    logEmit $ "Creating object file for " ++ (showModSpec m)    
+emitObjectFile m f = do
+    logEmit $ "Creating object file for " ++ (showModSpec m)
     withModuleLLVM m (makeObjFile f)
-    -- XXX Temporarily emit the wrapped bitcode file alongside too
+    -- Also make the bitcode file for now
     emitBitcodeFile m f
 
 -- | With the LLVM AST representation of a LPVM Module, create a
