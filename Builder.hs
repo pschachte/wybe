@@ -427,11 +427,19 @@ buildExecutable targetMod fpath =
               let allOFiles = tmpMainOFile:thisfile:ofiles
               makeExec allOFiles fpath
               return allOFiles
-       logBuild $ "o Object Files to link: " ++ show filesLinked
+       logBuild $ "o Object Files to link: "
+       logBuild $ "++ " ++ intercalate "\n++ " filesLinked 
        logBuild $ "o Building Target (executable): " ++ fpath
        return ()
 
 
+-- | Recursively visit the imports of the modules passed in the first
+-- argument list, collecting the imports which have a 'main' function (or
+-- a empty procedure name) into the second argument list, returning the
+-- collected module names at the end of the traversal.
+-- The list is built up in such a way that the 'main' procedures of a 
+-- module's imports will appear first in the list. Sort of a
+-- depth-first-search.
 collectMainImports :: [ModSpec] -> [ModSpec] -> Compiler [ModSpec]
 collectMainImports [] cs = return cs
 collectMainImports (m:ms) cs = do
