@@ -57,6 +57,7 @@ import Data.Map as Map
 import Data.Maybe
 import Data.Set as Set
 import Emit
+import LLVM.General.PrettyPrint
 import Normalise (normalise, normaliseItem)
 import ObjectInterface
 import Optimise (optimiseMod)
@@ -67,14 +68,14 @@ import Resources (resourceCheckMod, resourceCheckProc)
 import Scanner (Token, fileTokens, inputTokens)
 import           System.Directory          (canonicalizePath, doesFileExist,
                                             getCurrentDirectory,
-                                            getModificationTime)
+                                            getModificationTime)                 
 import System.Exit (exitFailure, exitSuccess)
 import System.FilePath
+import System.IO.Temp
 import System.Time (ClockTime)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
 import Unbranch (unbranchProc)
-import           LLVM.General.PrettyPrint
 
 ------------------------ Handling dependencies ------------------------
 
@@ -416,15 +417,18 @@ buildExecutable targetMod fpath =
     do imports <- collectMainImports [targetMod] []
        logBuild $ "o Modules with 'main': " ++ showModSpecs imports
        let mainMod = newMainModule imports
-       let tmpMainOFile = takeDirectory fpath ++ "/tmpMain.o"
-       logBuild $ "o Creating temp Main module @ " ++ tmpMainOFile
-       liftIO $ makeObjFile tmpMainOFile mainMod
        ofiles <- collectObjectFiles [] targetMod
        thisfile <- loadObjectFile targetMod
-       let allOFiles = thisfile:ofiles
-       logBuild $ "o Object Files to link: " ++ show allOFiles      
+       logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
+       -- With temporary Directory
+       filesLinked <- liftIO $ withSystemTempDirectory "tmp" $ \dir ->
+           do let tmpMainOFile = dir ++ "/tmpMain.o"              
+              makeObjFile tmpMainOFile mainMod
+              let allOFiles = tmpMainOFile:thisfile:ofiles
+              makeExec allOFiles fpath
+              return allOFiles
+       logBuild $ "o Object Files to link: " ++ show filesLinked
        logBuild $ "o Building Target (executable): " ++ fpath
-       liftIO $ makeExec ([tmpMainOFile] ++ ofiles ++ [thisfile]) fpath
        return ()
 
 

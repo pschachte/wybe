@@ -218,7 +218,7 @@ makeExec :: [FilePath]          -- Object Files
 makeExec ofiles target =
     do dir <- getCurrentDirectory
        let args = ofiles ++ sharedLibs ++ ["-o", target]
-       -- Supressing the annoying Xcode warning 
+       -- Supressing the annoying Xcode warning
        (_, _, Just herr, _) <-
            createProcess (proc "cc" args){ std_err = CreatePipe }
        return ()
