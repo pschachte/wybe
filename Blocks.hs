@@ -685,18 +685,26 @@ makeExArg arg = let ty = (typed . argType) arg
 -- Block Modification                                                     --
 ----------------------------------------------------------------------------
 
+-- | Create a new LLVMAST.Module with in-order calls to the
+-- given modules' mains.
+-- A module's main would look like: 'module.main'
+-- For each call, an external declaration to that main function is needed.
 newMainModule :: [ModSpec] -> LLVMAST.Module
 newMainModule depends = modWithDefinitions "tmpMain" newDefs
   where
-    mainDef = createMain depends
+    mainDef = createMainFn depends
     externsForMain = mainExterns depends
     newDefs = externsForMain ++ [mainDef]
 
-createMain :: [ModSpec] -> LLVMAST.Definition
-createMain mods = globalDefine int_t "main" [] bls
+-- | Create the 'main' function definition which calls other modules'
+-- main(s). 
+createMainFn :: [ModSpec] -> LLVMAST.Definition
+createMainFn mods = globalDefine int_t "main" [] bls
   where
     bls = createBlocks (execCodegen "" $ mainCodegen mods)
 
+-- | Run the Codegen monad collecting the instructions needed to call
+-- the given modules' main(s). This main function returns 0.
 mainCodegen :: [ModSpec] -> Codegen ()
 mainCodegen mods = do
     entry <- addBlock entryBlockName
@@ -711,32 +719,13 @@ mainCodegen mods = do
     ret (Just retcons)
     return ()
 
+-- | Create a list of extern declarations for each call to a foreign
+-- module's main.
 mainExterns :: [ModSpec] -> [LLVMAST.Definition]
 mainExterns mods = List.map externalMain mods
     where
       mainName m = showModSpec m ++ ".main"
       externalMain m = external int_t (mainName m) []
-    
-
--- makeMainModule :: [LLVMAST.Definition]
---                -> Maybe LLVMAST.Module
---                -> Maybe LLVMAST.Module
--- makeMainModule _ Nothing = Nothing
--- makeMainModule ds (Just (LLVMAST.Module name x y defs)) =
---   let newdefs = ds ++ defs
---   in Just $ LLVMAST.Module name x y newdefs
-
--- replaceMainDef :: LLVMAST.Definition -> LLVMAST.Definition
--- replaceMainDef def@(LLVMAST.GlobalDefinition gl) =
---   case G.name gl of
---     LLVMAST.Name label ->
---       if List.isSuffixOf "main" label
---       then LLVMAST.GlobalDefinition gl { G.name = LLVMAST.Name "main" }
---       else def
---     LLVMAST.UnName _ -> def 
--- replaceMainDef d = d
-
-
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --
