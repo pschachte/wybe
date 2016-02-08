@@ -18,6 +18,8 @@ module Codegen (
   alloca, store, local, assign, load, getVar, localVar,
   -- * Types
   int_t, phantom_t, float_t, char_t, ptr_t, void_t, string_t, array_t,
+  -- * Custom Types
+  int_c, float_c,
   -- * Instructions
   instr, namedInstr,
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv,
@@ -80,6 +82,13 @@ char_t = IntegerType 8
 
 array_t :: Word64 -> Type -> Type
 array_t = ArrayType
+
+-- Custom Types
+int_c :: Word32 -> Type
+int_c = IntegerType
+
+float_c :: Word32 -> Type
+float_c b = FloatingPointType b IEEE
 
 ----------------------------------------------------------------------------
 -- Codegen State                                                          --
