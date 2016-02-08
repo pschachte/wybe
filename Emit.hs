@@ -25,8 +25,14 @@ import qualified LLVM.General.ExecutionEngine as EE
 import           System.Directory
 import           System.Process
 
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Lazy as BL
+import Data.Binary (encode)
+
 import           Config
+import           ObjectInterface
 import           Options (LogSelection (Emit))
+import           System.FilePath (dropExtension)
 
 foreign import ccall "dynamic" haskFun :: FunPtr (IO Double) -> (IO Double)
 
@@ -38,35 +44,49 @@ run fn = haskFun (castFunPtr fn :: FunPtr (IO Double))
 -- LPVM module specification, and run some action on it under the compiler
 -- monad.
 withModuleLLVM :: ModSpec -> (LLVMAST.Module -> IO ()) -> Compiler ()
-withModuleLLVM thisMod action =
-  do reenterModule thisMod
-     maybeLLMod <- getModuleImplementationField modLLVM
-     case maybeLLMod of
-       (Just llmod) -> liftIO $ action llmod
-       (Nothing) -> error "No LLVM Module Implementation"
-     finishModule
-     return ()
+withModuleLLVM thisMod action = do
+    reenterModule thisMod
+    maybeLLMod <- getModuleImplementationField modLLVM
+    case maybeLLMod of
+      (Just llmod) -> liftIO $ action llmod
+      (Nothing) -> error "No LLVM Module Implementation"
+    finishModule
+    return ()
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target object file.
 emitObjectFile :: ModSpec -> FilePath -> Compiler ()
-emitObjectFile m f =
-  do logEmit $ "Creating object file for " ++ (showModSpec m)
-     withModuleLLVM m (makeObjFile f)
+emitObjectFile m f = do
+    logEmit $ "Creating object file for *" ++ (showModSpec m) ++ "*" ++
+        " @ '" ++ f ++ "'"
+    withModuleLLVM m (makeObjFile f)
+    -- Also make the bitcode file for now
+    emitBitcodeFile m $ (dropExtension f) ++ ".bc"
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Bitcode file.
 emitBitcodeFile :: ModSpec -> FilePath -> Compiler ()
-emitBitcodeFile m f =
-  do logEmit $ "Creating bitcode file for " ++ (showModSpec m)
-     withModuleLLVM m (makeBCFile f)
+emitBitcodeFile m f = do
+   logEmit $ "Creating wrapped bitcode file for *" ++ (showModSpec m) ++ "*"
+       ++ " @ '" ++ f ++ "'"
+   reenterModule m
+   maybeLLMod <- getModuleImplementationField modLLVM
+   case maybeLLMod of
+     (Just llmod) ->
+       do astMod <- getModule id
+          logEmit $ "Encoding and wrapping Module *" ++ (showModSpec m)
+            ++ "* in a wrapped bitcodefile."
+          liftIO $ makeWrappedBCFile f llmod astMod
+     (Nothing) -> error "No LLVM Module Implementation"
+   finishModule
+   return ()
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Assembly file.
 emitAssemblyFile :: ModSpec -> FilePath -> Compiler ()
-emitAssemblyFile m f =
-  do logEmit $ "Creating assembly file for " ++ (showModSpec m)
-     withModuleLLVM m (makeAssemblyFile f)
+emitAssemblyFile m f = do
+    logEmit $ "Creating assembly file for " ++ (showModSpec m)
+    withModuleLLVM m (makeAssemblyFile f)
 
 
 -- | Handle the ExceptT monad. If there is an error, it is better to fail.
@@ -103,6 +123,20 @@ makeBCFile file llmod =
     withContext $ \context ->
         liftError $ withModuleFromAST context llmod $ \m ->
             liftError $ writeBitcodeToFile (File file) m
+
+
+-- | Use the bitcode wrapper structure to wrap both the AST.Module
+-- (serialised) and the bitcode generated for the Module
+makeWrappedBCFile :: FilePath -> LLVMAST.Module -> AST.Module -> IO ()
+makeWrappedBCFile file llmod origMod =
+    withContext $ \context ->
+        liftError $ withModuleFromAST context llmod $ \m ->
+            do bc <- moduleBitcode m
+               -- encode the AST.Module type into a bytestring
+               let modBS = encode origMod
+               let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
+               BL.writeFile file wrapped
+
 
 -- | Drop an LLVMAST.Module (haskell) into a Module.Module (C++),
 -- and write it as an object file.
@@ -184,7 +218,9 @@ makeExec :: [FilePath]          -- Object Files
 makeExec ofiles target =
     do dir <- getCurrentDirectory
        let args = ofiles ++ sharedLibs ++ ["-o", target]
-       createProcess (proc "cc" args)
+       -- Supressing the annoying Xcode warning
+       (_, _, Just herr, _) <-
+           createProcess (proc "cc" args){ std_err = CreatePipe }
        return ()
 
 -- makeExec ofiles target =
@@ -211,7 +247,9 @@ logLLVMString thisMod =
      case maybeLLMod of
        (Just llmod) ->
          do llstr <- liftIO $ codeemit llmod
+            logEmit $ replicate 80 '-'
             logEmit llstr
+            logEmit $ replicate 80 '-'
        (Nothing) -> error "No LLVM Module Implementation"
      finishModule
      return ()
@@ -235,4 +273,3 @@ logLLVMDump selector1 selector2 pass = do
        llvmir <- mapM extractLLVM noLibMod
        liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER " ++ pass ++ ":\n\n" ++
          intercalate ("\n" ++ replicate 50 '-' ++ "\n") llvmir
-
