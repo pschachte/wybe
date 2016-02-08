@@ -611,9 +611,12 @@ typecheckArg pos params pname typing (argNum,param,arg) = do
 
 typecheckArg' :: Exp -> OptPos -> TypeSpec -> TypeSpec -> Typing ->
                  TypeReason -> Compiler Typing
-typecheckArg' (Typed exp typ) pos _ paramType typing reason = do
+typecheckArg' (Typed exp typ cast) pos _ paramType typing reason = do
     typ' <- fmap (fromMaybe Unspecified) $ lookupType typ pos
-    typecheckArg' exp pos typ' paramType typing reason
+    typecheckArg' exp pos (if cast then Unspecified else typ')
+                  paramType typing reason
+    typecheckArg' exp pos  typ'
+                  paramType typing reason
 typecheckArg' (Var var _ _) _ declType paramType typing reason = do
     -- XXX should out flow typing be contravariant?
     unless (paramType == Unspecified) $ do
@@ -699,7 +702,9 @@ applyStmtTyping dict call@(ProcCall cm name id args) pos = do
                                                  paramType params))) $
                             reconcileArgFlows params args')
                procs
-    checkError ((show $ length matches) ++ " matching procs (should be 1)")
+    checkError ((show $ length matches) ++
+                " matching procs (should be 1) for stmt "
+                ++ showStmt 0 call)
       (1 /= length matches)
     let (args'',proc) = List.head matches
     let call' = ProcCall (procSpecMod proc) (procSpecName proc)
@@ -731,18 +736,18 @@ applyStmtTyping dict (Next) pos = return $ maybePlace Next pos
 
 applyExpTyping :: Map VarName TypeSpec -> Exp -> Exp
 applyExpTyping _ exp@(IntValue _) =
-    Typed exp (TypeSpec ["wybe"] "int" [])
+    Typed exp (TypeSpec ["wybe"] "int" []) False
 applyExpTyping _ exp@(FloatValue _) =
-    Typed exp (TypeSpec ["wybe"] "float" [])
+    Typed exp (TypeSpec ["wybe"] "float" []) False
 applyExpTyping _ exp@(StringValue _) =
-    Typed exp (TypeSpec ["wybe"] "string" [])
+    Typed exp (TypeSpec ["wybe"] "string" []) False
 applyExpTyping _ exp@(CharValue _) =
-    Typed exp (TypeSpec ["wybe"] "char" [])
+    Typed exp (TypeSpec ["wybe"] "char" []) False
 applyExpTyping dict exp@(Var nm flow ftype) =
     case Map.lookup nm dict of
         Nothing -> shouldnt $ "type of variable '" ++ nm ++ "' unknown"
-        Just typ -> Typed exp typ
-applyExpTyping dict (Typed exp _) =
+        Just typ -> Typed exp typ False
+applyExpTyping dict (Typed exp _ _) =
     applyExpTyping dict exp
 applyExpTyping _ exp =
     shouldnt $ "Expression '" ++ show exp ++ "' left after flattening"
@@ -779,7 +784,7 @@ procDefSrc (ProcDefBlocks _ _ _) =
 
 
 expType :: Exp -> TypeSpec
-expType (Typed _ typ)     = typ
+expType (Typed _ typ _)     = typ
 expType exp = shouldnt $ "expType of untyped expression " ++ show exp
 
 
@@ -828,7 +833,7 @@ checkArgTyped callerName callerPos calleeName callPos (n,arg) = do
 
 checkExpTyped :: ProcName -> OptPos -> String -> Exp ->
                  Compiler ()
-checkExpTyped _ _ _ (Typed _ _) = return ()
+checkExpTyped _ _ _ (Typed _ _ _) = return ()
 checkExpTyped callerName callerPos msg _ =
     reportUntyped callerName callerPos msg
 

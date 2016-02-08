@@ -946,8 +946,10 @@ data ModuleImplementation = ModuleImplementation {
     modResources :: Map Ident ResourceDef,    -- ^Resources defined by this mod
     modProcs     :: Map Ident [ProcDef],      -- ^Procs defined by this module
     modKnownTypes:: Map Ident (Set TypeSpec), -- ^Type visible to this module
+    modConstCtorCount :: Int,                 -- ^Number of consts constructors
+    modNonConstCtorCount :: Int,              -- ^Num of arity >=1 constructors
     modKnownResources :: Map Ident (Set ResourceSpec),
-                                             -- ^Resources visible to this mod
+                                              -- ^Resources visible to this mod
     modKnownProcs:: Map Ident (Set ProcSpec),  -- ^Procs visible to this module
     modLLVM :: Maybe LLVMAST.Module  -- ^ Module's LLVM.General.AST.Module representation
     } deriving (Generic)
@@ -955,7 +957,7 @@ data ModuleImplementation = ModuleImplementation {
 emptyImplementation :: ModuleImplementation
 emptyImplementation =
     ModuleImplementation Map.empty Map.empty Map.empty Map.empty Map.empty
-                         Map.empty Map.empty Map.empty Nothing
+                         Map.empty 0 0 Map.empty Map.empty Nothing
 
 
 -- These functions hack around Haskell's terrible setter syntax
@@ -1505,7 +1507,8 @@ data Exp
       | StringValue String
       | CharValue Char
       | Var VarName FlowDirection ArgFlowType
-      | Typed Exp TypeSpec
+      | Typed Exp TypeSpec Bool       -- ^explicitly typed expr giving type
+                                      -- and whether type is a cast
       -- The following are eliminated during flattening
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
@@ -1617,13 +1620,13 @@ expToStmt exp = shouldnt $ "non-Fncall expr " ++ show exp
 
 
 expFlow :: Exp -> FlowDirection
-expFlow (Typed exp _) = expFlow exp
+expFlow (Typed exp _ _) = expFlow exp
 expFlow (Var _ flow _) = flow
 expFlow _ = ParamIn
 
 
 setExpFlow :: FlowDirection -> Exp -> Exp
-setExpFlow flow (Typed exp ty) = Typed (setExpFlow flow exp) ty
+setExpFlow flow (Typed exp ty cast) = Typed (setExpFlow flow exp) ty cast
 setExpFlow flow (Var name _ ftype) = Var name flow ftype
 setExpFlow ParamIn exp = exp
 setExpFlow flow exp = 
@@ -1631,7 +1634,7 @@ setExpFlow flow exp =
 
 
 isHalfUpdate :: FlowDirection -> Exp -> Bool
-isHalfUpdate flow (Typed exp _) = isHalfUpdate flow exp
+isHalfUpdate flow (Typed exp _ _) = isHalfUpdate flow exp
 isHalfUpdate flow (Var _ flow' HalfUpdate) = flow == flow'
 isHalfUpdate _ _ = False
 
@@ -2062,8 +2065,8 @@ instance Show Exp where
     "foreign " ++ lang ++ " " ++ fn 
     ++ (if List.null flags then "" else " " ++ unwords flags)
     ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
-  show (Typed exp typ) =
-      show exp ++ showTypeSuffix typ
+  show (Typed exp typ cast) =
+      show exp ++ showTypeSuffix typ ++ if cast then "!" else ""
 
 -- |maybeShow pre maybe pos
 --  if maybe has something, show pre, the maybe payload, and post

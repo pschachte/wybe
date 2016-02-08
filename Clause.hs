@@ -164,7 +164,7 @@ compileArg' typ (Var name ParamIn flowType) pos = do
 compileArg' typ (Var name ParamOut flowType) _ = do
     name' <- nextVar name
     return $ ArgVar name' typ FlowOut flowType False
-compileArg' _ (Typed exp typ) pos = compileArg' typ exp pos
+compileArg' _ (Typed exp typ _) pos = compileArg' typ exp pos
 compileArg' _ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 

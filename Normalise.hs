@@ -128,6 +128,19 @@ normaliseSubmodule modCompiler name typeParams vis pos items = do
 -- |Add a contructor for the specified type.
 addCtor :: ([ModSpec] -> Compiler ()) -> Visibility -> Ident -> [Ident] ->
            FnProto -> OptPos -> Compiler ()
+addCtor modCompiler vis typeName typeParams (FnProto ctorName [] _) pos = do
+    let typespec = TypeSpec [] typeName $ 
+                   List.map (\n->TypeSpec [] n []) typeParams
+    let flowType = Implicit pos
+    ctorValue <- getModuleImplementationField modConstCtorCount
+    updateImplementation (\imp -> imp { modConstCtorCount = ctorValue + 1 })
+    normaliseItem modCompiler
+      (ProcDecl Public (ProcProto ctorName
+                        [Param "$" typespec ParamOut Ordinary] [])
+       [Unplaced $ ForeignCall "llvm" "move" []
+        [Unplaced $ Typed (IntValue $ fromIntegral ctorValue) typespec True,
+         Unplaced $ Var "$" ParamOut Ordinary]]
+       pos)
 addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
     let typespec = TypeSpec [] typeName $ 
                    List.map (\n->TypeSpec [] n []) typeParams
@@ -150,6 +163,7 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
         (Unplaced $ Var "$rec" ParamIn flowType))
        pos)
     mapM_ (addGetterSetter modCompiler vis typespec ctorName pos) params
+
 
 -- |Add a getter and setter for the specified type.
 addGetterSetter :: ([ModSpec] -> Compiler ()) -> Visibility -> TypeSpec ->
