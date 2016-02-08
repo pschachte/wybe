@@ -20,6 +20,7 @@ import           Data.Char (ord)
 import           Data.List as List
 import           Data.Map as Map
 import           Data.Maybe
+import qualified Data.Set as Set
 import           Debug.Trace
 import qualified LLVM.General.AST as LLVMAST
 import qualified LLVM.General.AST.Constant as C
@@ -102,6 +103,14 @@ blockTransformModule thisMod =
                          getModuleImplementationField (Map.toList . modProcs)
        procs' <- mapM (mapM (translateProc modName) .
                        (List.filter (not . emptyProc))) procs
+
+       knownTypesSet <- fmap (List.map snd) $
+           getModuleImplementationField (Map.toList . modKnownTypes)
+       let knownTypes = concat $ List.map Set.toList knownTypesSet
+       trs <- mapM lookupTypeRepresentation knownTypes
+       logBlocks' $ replicate 80 '.' 
+       logBlocks' $ show trs
+       logBlocks' $ replicate 80 '.' 
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
@@ -616,6 +625,22 @@ typed ty = case (typeName ty) of
              "phantom" -> phantom_t
              _         -> phantom_t
 
+
+typed' :: TypeSpec -> Compiler LLVMAST.Type
+typed' ty = do
+    repr <- lookupTypeRepresentation ty
+    case repr of
+        Just typeStr -> return $ typeStrToType typeStr
+        Nothing -> error "No type representaition"
+
+typeStrToType :: String -> LLVMAST.Type
+typeStrToType (c:cs)
+    | c == 'i' = int_c (fromIntegral bytes)
+    | c == 'f' = float_c (fromIntegral bytes)
+    | c == 'p' = ptr_t (int_c 8)
+    | otherwise = void_t
+  where
+    bytes = (read cs :: Int)
 ------------------------------------------------------------------------------
 -- -- * Creating LLVM AST module from global definitions                    --
 ------------------------------------------------------------------------------
