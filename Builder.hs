@@ -44,37 +44,38 @@
 -- |Code to oversee the compilation process.
 module Builder (buildTargets, compileModule) where
 
-import           AST
-import           Blocks                    (blockTransformModule, markMain)
-import           Callers                   (collectCallers)
-import           Clause                    (compileProc)
-import           Config
-import           Control.Monad
-import           Control.Monad.Trans
-import           Control.Monad.Trans.State
-import           Data.List                 as List
-import           Data.Map                  as Map
-import           Data.Maybe
-import           Data.Set                  as Set
-import           Emit
-import           Normalise                 (normalise, normaliseItem)
-import           Optimise                  (optimiseMod)
+import AST
+import Blocks (blockTransformModule, newMainModule)
+import Callers (collectCallers)
+import Clause (compileProc)
+import Config
+import Control.Monad
+import Control.Monad.Trans
+import Control.Monad.Trans.State
+import Data.List as List
+import Data.Map as Map
+import Data.Maybe
+import Data.Set as Set
+import Emit
+import LLVM.General.PrettyPrint
+import Normalise (normalise, normaliseItem)
+import ObjectInterface
+import Optimise (optimiseMod)
 import           Options                   (LogSelection (..), Options,
                                             optForce, optForceAll, optLibDirs)
-import           Parser                    (parse)
-import           Resources                 (resourceCheckMod, resourceCheckProc)
-import           Scanner                   (Token, fileTokens, inputTokens)
+import Parser (parse)
+import Resources (resourceCheckMod, resourceCheckProc)
+import Scanner (Token, fileTokens, inputTokens)
 import           System.Directory          (canonicalizePath, doesFileExist,
                                             getCurrentDirectory,
-                                            getModificationTime)
-import           System.Exit               (exitFailure, exitSuccess)
-import           System.FilePath
-import           System.Time               (ClockTime)
+                                            getModificationTime)                 
+import System.Exit (exitFailure, exitSuccess)
+import System.FilePath
+import System.IO.Temp
+import System.Time (ClockTime)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
-import           Unbranch                  (unbranchProc)
-
-
+import Unbranch (unbranchProc)
 
 ------------------------ Handling dependencies ------------------------
 
@@ -98,16 +99,14 @@ buildTarget force target = do
       then message Error ("Unknown target file type " ++ target) Nothing
       else do
         let modname = takeBaseName target
-        let dir = takeDirectory target
+        let dir = takeDirectory target        
         built <- buildModuleIfNeeded force [modname] [dir]
-        if (built==False)
-          then (liftIO . putStrLn) $ "Nothing to be done for " ++ target
+        when (tType == ExecutableFile) (buildExecutable [modname] target)
+        if (built==False && tType /= ExecutableFile)
+          then logBuild $ "Nothing to be done for target: " ++ target
           else
-            do when (tType == ExecutableFile) (buildExecutable [modname] target)
-               when (tType == ObjectFile) $
-                 (markMain [modname]) >> (emitObjectFile [modname] target)
-               when (tType == BitcodeFile) $
-                 (markMain [modname]) >> (emitBitcodeFile [modname] target)
+            do when (tType == ObjectFile) $ emitObjectFile [modname] target
+               when (tType == BitcodeFile) $ emitBitcodeFile [modname] target
                whenLogging Emit $ logLLVMString [modname]
 
 
@@ -149,7 +148,7 @@ buildModuleIfNeeded force modspec possDirs = do
                     return False
                 Just (_,False,objfile,True,_) -> do
                     -- only object file exists
-                    loadModule objfile
+                    loadModule modspec objfile
                     return False
                 Just (srcfile,True,objfile,False,modname) -> do
                     -- only source file exists
@@ -163,12 +162,10 @@ buildModuleIfNeeded force modspec possDirs = do
                         buildModule modname objfile srcfile
                         return True
                       else do
-                        -- XXX Replace build with load when that works
-                        buildModule modname objfile srcfile
-                        -- loadModule objfile
+                        loadModule modspec objfile
                         return False
-                    buildModule modname objfile srcfile
-                    return True
+                    -- buildModule modname objfile srcfile
+                    -- return True
                 Just (_,False,_,False,_) ->
                     shouldnt "inconsistent file existence"
 
@@ -234,12 +231,25 @@ compileModule dir modspec params items = do
     compileModSCC mods
 
 
-  -- |Load module export info from compiled file
+-- |Load module export info from compiled file
 --   XXX not yet implemented
-loadModule :: FilePath -> Compiler ()
-loadModule objfile =
-    message Error ("Can't handle pre-compiled file " ++ objfile ++ " yet")
-    Nothing
+loadModule :: ModSpec -> FilePath -> Compiler ()
+loadModule modspec objfile = do
+    logBuild $ "Trying to find wrapped bitcode for " ++ showModSpec modspec
+    let bcfile = dropExtension objfile ++ ".bc"
+    thisMod <- liftIO $ extractModuleFromWrapper bcfile
+    count <- gets ((1+) . loadCount)
+    modify (\comp -> comp { loadCount = count })
+    logBuild $ "===== >>> Loaded Module bytestring from " ++ (show bcfile)
+    modify (\comp -> let mods = thisMod : underCompilation comp
+                     in  comp { underCompilation = mods })
+    -- Load the dependencies
+    loadImports
+    stopOnError $ "handling imports for module " ++ showModSpec modspec    
+    mods <- exitModule -- may be empty list if module is mutually dependent
+    logBuild $ "<=== finished loading bytestring of module from "
+        ++ (show bcfile)
+
 
 
 descendantModules :: ModSpec -> Compiler [ModSpec]
@@ -404,13 +414,44 @@ handleModImports modSCC mod = do
 -- LLVM AST Module representation of the 'module'.
 buildExecutable :: ModSpec -> FilePath -> Compiler ()
 buildExecutable targetMod fpath =
-    do ofiles <- collectObjectFiles [] targetMod
-       markMain targetMod
+    do imports <- collectMainImports [targetMod] []
+       logBuild $ "o Modules with 'main': " ++ showModSpecs imports
+       let mainMod = newMainModule imports
+       ofiles <- collectObjectFiles [] targetMod
        thisfile <- loadObjectFile targetMod
-       logBuild $ "Building Executable at " ++ fpath
-       -- Call the ld linker 
-       liftIO $ makeExec (ofiles ++ [thisfile]) fpath
+       logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
+       -- With temporary Directory
+       filesLinked <- liftIO $ withSystemTempDirectory "tmp" $ \dir ->
+           do let tmpMainOFile = dir ++ "/tmpMain.o"              
+              makeObjFile tmpMainOFile mainMod
+              let allOFiles = tmpMainOFile:thisfile:ofiles
+              makeExec allOFiles fpath
+              return allOFiles
+       logBuild $ "o Object Files to link: "
+       logBuild $ "++ " ++ intercalate "\n++ " filesLinked 
+       logBuild $ "o Building Target (executable): " ++ fpath
        return ()
+
+
+-- | Recursively visit the imports of the modules passed in the first
+-- argument list, collecting the imports which have a 'main' function (or
+-- a empty procedure name) into the second argument list, returning the
+-- collected module names at the end of the traversal.
+-- The list is built up in such a way that the 'main' procedures of a 
+-- module's imports will appear first in the list. Sort of a
+-- depth-first-search.
+collectMainImports :: [ModSpec] -> [ModSpec] -> Compiler [ModSpec]
+collectMainImports [] cs = return cs
+collectMainImports (m:ms) cs = do
+    reenterModule m
+    procs <- getModuleImplementationField (keys . modProcs)
+    imports <- getModuleImplementationField (keys . modImports)
+    let noStd = List.filter (not . isStdLib) imports
+    finishModule
+    if elem "" procs 
+        then collectMainImports (reverse noStd ++ ms) (m:cs)
+        else collectMainImports (reverse noStd ++ ms) cs
+    
 
 -- | Recursively visit imports of module emitting and collecting
 -- the object files for each. It is assumed that every dependency

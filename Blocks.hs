@@ -685,29 +685,47 @@ makeExArg arg = let ty = (typed . argType) arg
 -- Block Modification                                                     --
 ----------------------------------------------------------------------------
 
-markMain :: ModSpec -> Compiler ()
-markMain thisMod =
-  do reenterModule thisMod     
-     updateModImplementationM (updateModLLVM makeMainModule) 
-     finishModule
-     return ()
+-- | Create a new LLVMAST.Module with in-order calls to the
+-- given modules' mains.
+-- A module's main would look like: 'module.main'
+-- For each call, an external declaration to that main function is needed.
+newMainModule :: [ModSpec] -> LLVMAST.Module
+newMainModule depends = modWithDefinitions "tmpMain" newDefs
+  where
+    mainDef = createMainFn depends
+    externsForMain = mainExterns depends
+    newDefs = externsForMain ++ [mainDef]
 
-makeMainModule :: Maybe LLVMAST.Module -> Maybe LLVMAST.Module
-makeMainModule Nothing = Nothing
-makeMainModule (Just (LLVMAST.Module name x y defs)) =
-  let newdefs = List.map replaceMainDef defs
-  in Just $ LLVMAST.Module name x y newdefs
+-- | Create the 'main' function definition which calls other modules'
+-- main(s). 
+createMainFn :: [ModSpec] -> LLVMAST.Definition
+createMainFn mods = globalDefine int_t "main" [] bls
+  where
+    bls = createBlocks (execCodegen "" $ mainCodegen mods)
 
-replaceMainDef :: LLVMAST.Definition -> LLVMAST.Definition
-replaceMainDef def@(LLVMAST.GlobalDefinition gl) =
-  case G.name gl of
-    LLVMAST.Name label ->
-      if List.isSuffixOf "main" label
-      then LLVMAST.GlobalDefinition gl { G.name = LLVMAST.Name "main" }
-      else def
-    LLVMAST.UnName _ -> def 
-replaceMainDef d = d
-  
+-- | Run the Codegen monad collecting the instructions needed to call
+-- the given modules' main(s). This main function returns 0.
+mainCodegen :: [ModSpec] -> Codegen ()
+mainCodegen mods = do
+    entry <- addBlock entryBlockName
+    setBlock entry
+    let mainName m = LLVMAST.Name $ showModSpec m ++ ".main"
+    forM_ mods $ \m -> instr int_t $
+                       call (externf int_t (mainName m)) []
+    -- int main returns 0
+    ptr <- instr (ptr_t int_t) (alloca int_t)
+    let retcons = cons (C.Int 32 0)
+    store ptr retcons
+    ret (Just retcons)
+    return ()
+
+-- | Create a list of extern declarations for each call to a foreign
+-- module's main.
+mainExterns :: [ModSpec] -> [LLVMAST.Definition]
+mainExterns mods = List.map externalMain mods
+    where
+      mainName m = showModSpec m ++ ".main"
+      externalMain m = external int_t (mainName m) []
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --
