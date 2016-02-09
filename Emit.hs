@@ -87,25 +87,35 @@ emitAssemblyFile m f = do
     logEmit $ "Creating assembly file for " ++ (showModSpec m) ++
         ("with optimisations.")
     -- withModuleLLVM m (makeAssemblyFile f)
-    withModuleLLVM m $ \llmod -> withOptimisedModule llmod 
+    withModuleLLVM m $ \llmod -> withOptimisedModule llmod
         (\mm -> liftError $ withHostTargetMachine $ \tm ->
             liftError $ writeLLVMAssemblyToFile (File f) mm)
-                                  
 
 
 -- | Handle the ExceptT monad. If there is an error, it is better to fail.
 liftError :: ExceptT String IO a -> IO a
 liftError = runExceptT >=> either fail return
 
--- | Emit the llvm IR version of the LLVMAST.Module to IO
+-- | Return string form LLVM IR represenation of a LLVMAST.Module
 codeemit :: LLVMAST.Module -> IO String
 codeemit mod =
     withContext $ \context ->
         liftError $ withModuleFromAST context mod $ \m ->
-            do llstr <- moduleLLVMAssembly m
-               -- putStrLn llstr
-               return llstr
+            moduleLLVMAssembly m >>= return
 
+
+-------------------------------------------------------------------------------
+-- Optimisations                                                             --
+-------------------------------------------------------------------------------
+
+-- | Setup the set of passes for optimisations.
+-- Currently using the curated set provided by LLVM.
+passes :: PassSetSpec
+passes = defaultCuratedPassSetSpec { optLevel = Just 3 }
+
+
+-- | Return a string LLVM IR representation of a LLVMAST.Module after
+-- a curated set of passes has been executed on the C++ Module form.
 codeEmitWithPasses :: LLVMAST.Module -> IO String
 codeEmitWithPasses llmod = do
     withContext $ \context -> do
@@ -116,6 +126,7 @@ codeEmitWithPasses llmod = do
                     then moduleLLVMAssembly m >>= return
                     else error "Running of optimisation passes not successful!"
 
+-- | Testing function to analyse optimisation passes.
 testOptimisations :: LLVMAST.Module -> IO ()
 testOptimisations llmod = do
     llstr <- codeEmitWithPasses llmod
@@ -126,6 +137,9 @@ testOptimisations llmod = do
     putStrLn $ replicate 80 '-'
 
 
+-- | Using a bracket pattern, perform an action on the C++ Module
+-- representation of a LLVMAST.Module after the C++ module has been through
+-- a set of curated passes.
 withOptimisedModule :: LLVMAST.Module -> (Mod.Module -> IO a)
                     -> IO a
 withOptimisedModule llmod action = do
@@ -135,9 +149,9 @@ withOptimisedModule llmod action = do
                 success <- runPassManager pm m
                 if success
                     then action m
-                    else error "Running of optimisation passes not successful!"
+                    else error "Running of optimisation passes not successful"
 
-                         
+
 ----------------------------------------------------------------------------
 -- Target Emitters                                                        --
 ----------------------------------------------------------------------------
@@ -183,20 +197,10 @@ makeAssemblyFile file llmod =
                 liftError $ writeLLVMAssemblyToFile (File file) m
 
 
--- | Emit the llvm IR of the LLVMAST.Module representation of the given
--- module tp stdout and use a JIT compiler+optimiser to execute it.
-llvmEmitToIO :: ModSpec -> Compiler ()
-llvmEmitToIO thisMod =
-    do reenterModule thisMod
-       maybeLLMod <- getModuleImplementationField modLLVM
-       case maybeLLMod of
-         -- (Just llmod) -> liftIO $ runJIT llmod
-         (Just llmod) -> liftIO $ codeemit llmod
-         (Nothing) -> error "No LLVM Module Implementation"
-       finishModule
-       return ()
 
-
+-------------------------------------------------------------------------------------
+-- JIT support                                                                     --
+-------------------------------------------------------------------------------------
 
 -- | Initialize the JIT compiler under the IO monad.
 jit :: Context -> (EE.MCJIT -> IO a) -> IO a
@@ -206,10 +210,6 @@ jit c = EE.withMCJIT c optlevel model ptrelim fastins
     model    = Nothing -- code model ( Default )
     ptrelim  = Nothing -- frame pointer elimination
     fastins  = Nothing -- fast instruction selection
-
--- | Setup the set of passes the JIT will be using for optimisations.
-passes :: PassSetSpec
-passes = defaultCuratedPassSetSpec { optLevel = Just 3 }
 
 
 -- | Convert a LLVMAST.Module representation to LLVM IR and run it with a JIT
