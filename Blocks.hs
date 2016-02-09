@@ -634,6 +634,7 @@ typed' ty = do
         Nothing -> error "No type representaition"
 
 typeStrToType :: String -> LLVMAST.Type
+typeStrToType [] = void_t
 typeStrToType (c:cs)
     | c == 'i' = int_c (fromIntegral bytes)
     | c == 'f' = float_c (fromIntegral bytes)
