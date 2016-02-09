@@ -107,6 +107,7 @@ buildTarget force target = do
           else
             do when (tType == ObjectFile) $ emitObjectFile [modname] target
                when (tType == BitcodeFile) $ emitBitcodeFile [modname] target
+               when (tType == AssemblyFile) $ emitAssemblyFile [modname] target
                whenLogging Emit $ logLLVMString [modname]
 
 
@@ -491,7 +492,7 @@ loadObjectFile thisMod =
 -- |The different sorts of files that could be specified on the
 --  command line.
 data TargetType = InterfaceFile | ObjectFile | ExecutableFile
-                | UnknownFile | BitcodeFile
+                | UnknownFile | BitcodeFile | AssemblyFile
                 deriving (Show,Eq)
 
 
@@ -503,6 +504,7 @@ targetType filename
   | ext' == objectExtension     = ObjectFile
   | ext' == executableExtension = ExecutableFile
   | ext' == bitcodeExtension    = BitcodeFile
+  | ext' == assemblyExtension   = AssemblyFile
   | otherwise                  = UnknownFile
       where ext' = dropWhile (=='.') $ takeExtension filename
 

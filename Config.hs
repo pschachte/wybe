@@ -11,7 +11,7 @@
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
                interfaceExtension, bitcodeExtension, sharedLibs,
-                                 ldArgs, ldSystemArgs, wordSize)
+               ldArgs, ldSystemArgs, wordSize, assemblyExtension)
     where
 
 import Data.Word
@@ -37,6 +37,9 @@ interfaceExtension = "int"
 -- |The file extension for bitcode files
 bitcodeExtension :: String
 bitcodeExtension = "bc"
+
+assemblyExtension :: String
+assemblyExtension = "s"
 
 -- |Determining word size of the machine
 wordSize :: Int
