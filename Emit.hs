@@ -43,15 +43,14 @@ run fn = haskFun (castFunPtr fn :: FunPtr (IO Double))
 -- | Bracket matter to pull an LLVM AST Module representation of a
 -- LPVM module specification, and run some action on it under the compiler
 -- monad.
-withModuleLLVM :: ModSpec -> (LLVMAST.Module -> IO ()) -> Compiler ()
+withModuleLLVM :: ModSpec -> (LLVMAST.Module -> IO a) -> Compiler a
 withModuleLLVM thisMod action = do
     reenterModule thisMod
     maybeLLMod <- getModuleImplementationField modLLVM
+    finishModule
     case maybeLLMod of
       (Just llmod) -> liftIO $ action llmod
       (Nothing) -> error "No LLVM Module Implementation"
-    finishModule
-    return ()
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target object file.
@@ -85,8 +84,13 @@ emitBitcodeFile m f = do
 -- target LLVM Assembly file.
 emitAssemblyFile :: ModSpec -> FilePath -> Compiler ()
 emitAssemblyFile m f = do
-    logEmit $ "Creating assembly file for " ++ (showModSpec m)
-    withModuleLLVM m (makeAssemblyFile f)
+    logEmit $ "Creating assembly file for " ++ (showModSpec m) ++
+        ("with optimisations.")
+    -- withModuleLLVM m (makeAssemblyFile f)
+    withModuleLLVM m $ \llmod -> withOptimisedModule llmod 
+        (\mm -> liftError $ withHostTargetMachine $ \tm ->
+            liftError $ writeLLVMAssemblyToFile (File f) mm)
+                                  
 
 
 -- | Handle the ExceptT monad. If there is an error, it is better to fail.
@@ -102,7 +106,38 @@ codeemit mod =
                -- putStrLn llstr
                return llstr
 
+codeEmitWithPasses :: LLVMAST.Module -> IO String
+codeEmitWithPasses llmod = do
+    withContext $ \context -> do
+        liftError $ withModuleFromAST context llmod $ \m -> do
+            withPassManager passes $ \pm -> do
+                success <- runPassManager pm m
+                if success
+                    then moduleLLVMAssembly m >>= return
+                    else error "Running of optimisation passes not successful!"
 
+testOptimisations :: LLVMAST.Module -> IO ()
+testOptimisations llmod = do
+    llstr <- codeEmitWithPasses llmod
+    putStrLn $ replicate 80 '-'
+    putStrLn "Optimisation Passes"
+    putStrLn $ replicate 80 '-'
+    putStrLn llstr
+    putStrLn $ replicate 80 '-'
+
+
+withOptimisedModule :: LLVMAST.Module -> (Mod.Module -> IO a)
+                    -> IO a
+withOptimisedModule llmod action = do
+    withContext $ \context -> do
+        liftError $ withModuleFromAST context llmod $ \m -> do
+            withPassManager passes $ \pm -> do
+                success <- runPassManager pm m
+                if success
+                    then action m
+                    else error "Running of optimisation passes not successful!"
+
+                         
 ----------------------------------------------------------------------------
 -- Target Emitters                                                        --
 ----------------------------------------------------------------------------

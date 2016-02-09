@@ -3,6 +3,7 @@ cabal-dev
 *.o
 *.hi
 *.bc
+*.ll
 *.chi
 *.chs.h
 *.dyn_o
