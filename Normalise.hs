@@ -145,15 +145,17 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
     let typespec = TypeSpec [] typeName $ 
                    List.map (\n->TypeSpec [] n []) typeParams
     let flowType = Implicit pos
+    tagValue <- getModuleImplementationField modNonConstCtorCount
+    updateImplementation (\imp -> imp { modNonConstCtorCount = tagValue + 1 })
     normaliseItem modCompiler
       (FuncDecl Public (FnProto ctorName params []) typespec
        (Unplaced $ Where
-        ([Unplaced $ ForeignCall "$" "alloc" []
+        ([Unplaced $ ForeignCall "lpvm" "alloc" []
           [Unplaced $ StringValue typeName, Unplaced $ StringValue ctorName,
            Unplaced $ Var "$rec" ParamOut flowType]]
          ++
          (List.map (\(Param var _ dir paramFlowType) ->
-                     (Unplaced $ ForeignCall "$" "mutate" []
+                     (Unplaced $ ForeignCall "lpvm" "mutate" []
                       [Unplaced $ StringValue $ typeName,
                        Unplaced $ StringValue ctorName,
                        Unplaced $ StringValue var,
@@ -173,7 +175,7 @@ addGetterSetter modCompiler vis rectype ctorName pos
     normaliseItem modCompiler $ FuncDecl vis
       (FnProto field [Param "$rec" rectype ParamIn Ordinary] [])
       fieldtype 
-      (Unplaced $ ForeignFn "$" "access" []
+      (Unplaced $ ForeignFn "lpvm" "access" []
        [Unplaced $ StringValue $ typeName rectype,
         Unplaced $ StringValue ctorName,
         Unplaced $ StringValue field,
@@ -183,7 +185,7 @@ addGetterSetter modCompiler vis rectype ctorName pos
       (ProcProto field 
        [Param "$rec" rectype ParamInOut Ordinary,
         Param "$field" fieldtype ParamIn Ordinary] [])
-      [Unplaced $ ForeignCall "$" "mutate" []
+      [Unplaced $ ForeignCall "lpvm" "mutate" []
        [Unplaced $ StringValue $ typeName rectype,
         Unplaced $ StringValue ctorName,
         Unplaced $ StringValue field,
