@@ -27,7 +27,7 @@ module Codegen (
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv,
   cons, uitofp, fptoui, icmp, fcmp,
   -- * Structure instructions
-  insertvalue
+  insertvalue, extractvalue
 
   -- * Testing
 
@@ -497,6 +497,9 @@ load ptr = Load False ptr Nothing 0 []
 -- * Structure operations
 insertvalue :: Operand -> Operand -> Word32 -> Instruction
 insertvalue st op i = InsertValue st op [i] []
+
+extractvalue :: Operand -> Word32 -> Instruction
+extractvalue st i = ExtractValue st [i] []
 
 
 -- * Control Flow operations

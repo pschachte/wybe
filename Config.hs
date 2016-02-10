@@ -11,8 +11,8 @@
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
                interfaceExtension, bitcodeExtension, sharedLibs,
-               ldArgs, ldSystemArgs, wordSize, wordSizeBytes,
-               availableTagBits)
+               assemblyExtension, ldArgs, ldSystemArgs, wordSize,
+               wordSizeBytes, availableTagBits)
     where
 
 import Data.Word
