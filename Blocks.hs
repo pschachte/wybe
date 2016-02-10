@@ -16,11 +16,13 @@ import           Control.Monad.Trans (lift, liftIO)
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
+import qualified Data.Binary as B
 import           Data.Char (ord)
 import           Data.List as List
 import           Data.Map as Map
 import           Data.Maybe
 import qualified Data.Set as Set
+import           Data.Word (Word32)
 import           Debug.Trace
 import qualified LLVM.General.AST as LLVMAST
 import qualified LLVM.General.AST.Constant as C
@@ -35,8 +37,6 @@ import           LLVM.General.Context
 import           LLVM.General.Module
 import           LLVM.General.PrettyPrint
 import           Options (LogSelection (Blocks))
-
-import qualified Data.Binary as B
 
 ----------------------------------------------------------------------------
 -- LLVM Compiler Monad                                                    --
@@ -66,7 +66,7 @@ needExterns ps =
 
 -- | Predicate to test if two Prims have the same name.
 samePrimName :: Prim -> Prim -> Bool
-samePrimName (PrimCall p1 _) (PrimCall p2 _) = p1 == p2 
+samePrimName (PrimCall p1 _) (PrimCall p2 _) = p1 == p2
 samePrimName (PrimForeign _ p1 _ _) (PrimForeign _ p2 _ _) = p1 == p2
 samePrimName PrimNop PrimNop = True
 samePrimName _ _ = False
@@ -108,14 +108,15 @@ blockTransformModule thisMod =
            getModuleImplementationField (Map.toList . modKnownTypes)
        let knownTypes = concat $ List.map Set.toList knownTypesSet
        trs <- mapM lookupTypeRepresentation knownTypes
-       logBlocks' $ replicate 80 '.' 
+       logBlocks' $ replicate 80 '.'
        logBlocks' $ show trs
-       logBlocks' $ replicate 80 '.' 
+       logBlocks' $ replicate 80 '.'
+
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
        -- logBlocks' $ showPretty llmod
-       finishModule       
+       finishModule
        logBlocks' $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
 -- | Predicate to test for procedure definition with an empty body.
@@ -124,7 +125,7 @@ emptyProc p = case procImpln p of
   ProcDefSrc pps -> List.null pps
   ProcDefPrim _ body -> List.null $ bodyPrims body
   _ -> False
-  
+
 
 
 -- | Translate a ProcDef whose procImpln field is of the type ProcDefPrim, to
@@ -166,15 +167,12 @@ makeGlobalDefinition modName proto bls =
     globalDefine retty label fnargs bls
     where
       params = List.filter (not . isPhantomParam) (primProtoParams proto)
-      outp = openOutputParam params
+
       isMain = primProtoName proto == ""
       -- *The top level procedure will be labelled main.
       label = modName ++ "." ++
         if isMain then "main" else primProtoName proto
-      retty = if isMain then int_t else
-                case outp of
-                  (Just (ty, nm)) -> ty
-                  Nothing -> void_t
+      retty = if isMain then int_t else primOutputType params
       inputs = List.filter isInputParam params
       fnargs = List.map makeFnArg inputs
 
@@ -193,18 +191,17 @@ makeFnArg arg = (ty, nm)
 
 -- | Open the Out parameter of a primitive (if there is one) into it's
 -- inferred 'Type' and name.
-openOutputParam :: [PrimParam] -> Maybe (Type, String)
-openOutputParam params =
-    case outputs of
-      (p:_) -> Just (typed $ primParamType p, show $ primParamName p)
-      _ -> Nothing
-    where outputs = List.filter (\p -> primParamFlow p == FlowOut) params
+primOutputType :: [PrimParam] -> Type
+primOutputType params =
+    let outputs = List.filter (not . isInputParam) params in
+    case length outputs of
+        0 -> void_t
+        1 -> (typed . primParamType . head) outputs
+        n -> struct_t $ List.map (typed . primParamType) outputs
 
-paramTypeName :: PrimParam -> String
-paramTypeName = typeName . primParamType
 
 isPhantomParam :: PrimParam -> Bool
-isPhantomParam p = case paramTypeName p of
+isPhantomParam p = case (typeName . primParamType) p of
                      "phantom" -> True
                      _ -> False
 
@@ -240,28 +237,31 @@ doCodegenBody proto body =
     do let params = primProtoParams proto
        mapM_ assignParam params
        entry <- addBlock entryBlockName
-       outop <- getOutputOp params
        -- Start with creation of blocks and adding instructions to it
+
        setBlock entry
-       op <- codegenBody body   -- Codegen on body prims
+       codegenBody body   -- Codegen on body prims
+       builtOp <- buildOutputOp params
+
        case bodyFork body of
          NoFork -> case (primProtoName proto) == "" of
            -- Empty primitive prototype is the main function in LLVM
-           -- and as such should return an integer, preferrably a 0.
-           True -> do ptr <- instr (ptr_t int_t) (alloca int_t)
-                      let retcons = cons (C.Int 32 0)
-                      store ptr retcons
-                      ret (Just retcons)
-                      return ()
-           False -> do case openOutputParam $
-                            List.filter (not . isPhantomParam) params of
-                         -- return type of nothing is a void function
-                         Nothing -> retNothing
-                         -- otherwise return the last operand returned
-                         -- through codegen on the body
-                         _ -> ret op
+           True -> mainReturnCodegen
+           False -> do ret builtOp
                        return ()
-         (PrimFork var _ fbody) -> codegenForkBody var fbody outop
+         (PrimFork var _ fbody) -> codegenForkBody var fbody builtOp
+
+
+-- | Generate code for returning integer exit code at the end main
+-- function.
+mainReturnCodegen :: Codegen ()
+mainReturnCodegen = do
+    ptr <- instr (ptr_t int_t) (alloca int_t)
+    let retcons = cons (C.Int 32 0)
+    store ptr retcons
+    ret (Just retcons)
+    return ()
+
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
 -- param's name on the symbol table. Don't assign if phantom.
@@ -275,14 +275,45 @@ assignParam p =
            True -> return ()    -- unneeded param
            False -> assign nm (localVar (typed ty) nm)
 
--- | Get the output Paramter's Operand from the symbol table.
--- The params are therefore assumed to have been assigned on the symbol
--- table already. 
-getOutputOp :: [PrimParam] -> Codegen (Maybe Operand)
-getOutputOp params =
-  do case openOutputParam $ List.filter (not . isPhantomParam) params of
-       Just (ty, paramName) -> getVar paramName >>= return . Just
-       Nothing -> return Nothing
+
+-- | Retrive or build the output operand from the given parameters.
+-- For no valid ouputs, return Nothing
+-- For 1 single output, retrieve it's assigned operand from the symbol
+-- table, and for multiple ouputs, generate code for creating an valid
+-- structure, pack the operands into it and return it.
+buildOutputOp :: [PrimParam] -> Codegen (Maybe Operand)
+buildOutputOp params = do
+    let outParams = List.filter (not . isInputParam) params
+    outputs <- mapM (getVar . show . primParamName) outParams
+    case length outputs of
+        -- * No valid output
+        0 -> return Nothing
+        -- * single output case
+        1 -> return $ Just $ head outputs
+        -- * multiple output case
+        n -> do let outputTypes = List.map operandType outputs
+                let strType = struct_t outputTypes
+                op <- structInsert outputs strType
+                return $ Just op
+
+-- | Sequentially call the insertvalue instruction to add each
+-- of the given operand into a new structure type. Each call to the
+-- insertvalue instruction would return a new structure which should be
+-- used for the next insertion at the next index.
+structInsert :: [Operand] -> Type -> Codegen Operand
+structInsert ops strType = do
+    let strCons = cons $ C.Undef strType
+    sequentialInsert ops strType strCons 0
+
+-- | Helper for structInsert to properly and sequentially index each
+-- operand into the structure.
+sequentialInsert :: [Operand] -> Type ->
+                    Operand -> Word32 -> Codegen Operand
+sequentialInsert [] _ finalStruct _ = return finalStruct
+sequentialInsert (op:ops) ty struct i = do
+    newStruct <- instr ty $ insertvalue struct op i
+    sequentialInsert ops ty newStruct (i + 1)
+
 
 
 -- | Generate basic blocks for a procedure body. The first block is named
@@ -295,14 +326,14 @@ codegenBody body =
        case List.null ops of
          True -> return Nothing
          False -> return $ last ops
-         
+
 -- | Predicate to check whether a Prim is a phantom prim i.e Contains only
 -- phantom arguments.
 phantomPrim :: Prim -> Bool
 phantomPrim (PrimCall _ args) = List.null $ List.filter notPhantom args
 phantomPrim (PrimForeign _ _ _ args) =
   List.null $ List.filter notPhantom args
-phantomPrim PrimNop = True  
+phantomPrim PrimNop = True
 
 
 -- | Code generation for a conditional branch. Currently a binary split
@@ -331,7 +362,7 @@ codegenForkBody var (b1:b2:[]) outop =
          v -> ret val
        -- return
        return ()
-       
+
        -- -- if.exit
        -- setBlock ifexit
        -- phi int_t [(trueval, ifthen), (falseval, ifelse)]
@@ -376,7 +407,7 @@ cgen prim@(PrimForeign lang name flags args)
 
 
 cgen PrimNop = error "No primitive found."
-                                                          
+
 -- | Translate a Binary primitive procedure into a binary llvm instruction,
 -- add the instruction to the current BasicBlock's instruction stack and emit
 -- the resulting Operand. Reads the 'llvmMapBinop' Map.  The primitive
@@ -653,7 +684,7 @@ newLLVMModule :: String -> [[ProcDef]] -> LLVMAST.Module
 newLLVMModule name procs = let procs' = concat procs
                                defs = List.map takeDefinition procs'
                                exs = concat $ List.map takeExterns procs'
-                               exs' = uniqueExterns exs     
+                               exs' = uniqueExterns exs
                            in modWithDefinitions name $ exs' ++ defs
 
 -- | Pull out the LLVM Definition of a procedure.
@@ -723,7 +754,7 @@ newMainModule depends = modWithDefinitions "tmpMain" newDefs
     newDefs = externsForMain ++ [mainDef]
 
 -- | Create the 'main' function definition which calls other modules'
--- main(s). 
+-- main(s).
 createMainFn :: [ModSpec] -> LLVMAST.Definition
 createMainFn mods = globalDefine int_t "main" [] bls
   where

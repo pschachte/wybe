@@ -16,14 +16,19 @@ module Codegen (
   getBlock, retNothing,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, localVar,
+  operandType,
   -- * Types
   int_t, phantom_t, float_t, char_t, ptr_t, void_t, string_t, array_t,
+  struct_t,
   -- * Custom Types
   int_c, float_c,
   -- * Instructions
   instr, namedInstr,
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv,
-  cons, uitofp, fptoui, icmp, fcmp
+  cons, uitofp, fptoui, icmp, fcmp,
+  -- * Structure instructions
+  insertvalue
+
   -- * Testing
 
   ) where
@@ -83,12 +88,16 @@ char_t = IntegerType 8
 array_t :: Word64 -> Type -> Type
 array_t = ArrayType
 
+struct_t :: [LLVMAST.Type] -> LLVMAST.Type
+struct_t types = LLVMAST.StructureType False types
+
 -- Custom Types
 int_c :: Word32 -> Type
 int_c = IntegerType
 
 float_c :: Word32 -> Type
 float_c b = FloatingPointType b IEEE
+
 
 ----------------------------------------------------------------------------
 -- Codegen State                                                          --
@@ -197,13 +206,14 @@ addDefn d = do
   modify $ \s -> s { moduleDefinitions = defs ++ [d] }
 
 -- | Create a global Function Definition to store in the LLVMAST.Module.
--- A Definition body is a list of BasicBlocks. A LPVM procedure roughly correspond
--- to this global function definition.
+-- A Definition body is a list of BasicBlocks. A LPVM procedure roughly
+-- correspond to this global function definition.
 globalDefine :: Type -> String -> [(Type, Name)] -> [BasicBlock] -> Definition
 globalDefine rettype label argtypes body
              = GlobalDefinition $ functionDefaults {
                  name = Name label
-               , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes], False)
+               , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes],
+                               False)
                , returnType = rettype
                , basicBlocks = body
                }
@@ -286,8 +296,8 @@ current = do
 
 
 -- | Generate the list of BasicBlocks added to the CodegenState for a global
--- definition. This list would be in order of execution. This list forms the body
--- of a global function definition.
+-- definition. This list would be in order of execution. This list forms the
+-- body of a global function definition.
 createBlocks :: CodegenState -> [BasicBlock]
 createBlocks m = map makeBlock $ sortBlocks $ Map.toList (blocks m)
 
@@ -352,6 +362,20 @@ getVar var = do
     Just x -> return x
     Nothing -> error $ "Local variable not in scope: " ++ show var
 
+-- | Look inside an operand and determine it's type.
+operandType :: Operand -> Type
+operandType (LocalReference ty _) = ty
+operandType (ConstantOperand cons) =
+    case cons of
+        C.Int 8 _ -> char_t
+        C.Int _ _ -> int_t
+        C.Float _ -> int_t
+        C.Null ty -> ty
+        C.GlobalReference ty _ -> ty
+        C.GetElementPtr _ (C.GlobalReference ty _) _ -> ty
+        _ -> error "Not a recognised constant operand."
+operandType _ = void_t
+
 
 ----------------------------------------------------------------------------
 -- Instructions                                                           --
@@ -359,7 +383,8 @@ getVar var = do
 
 -- | The `namedInstr` function appends a named instruction into the instruction
 -- stack of the current BasicBlock. This action also produces a Operand value
--- of the given type (this will be the result type of performing that instruction).
+-- of the given type (this will be the result type of performing that
+-- instruction).
 namedInstr :: Type -> String -> Instruction -> Codegen Operand
 namedInstr ty nm ins =
     do let ref = Name nm
@@ -368,8 +393,9 @@ namedInstr ty nm ins =
        modifyBlock $ blk { stack = i ++ [ref := ins] }
        return $ local ty ref
 
--- | The `instr` function appends an unnamed instruction intp the instruction stack
--- of the current BasicBlock. The temp name is generated using a fresh word counter.
+-- | The `instr` function appends an unnamed instruction intp the instruction
+-- stack of the current BasicBlock. The temp name is generated using a fresh
+-- word counter.
 instr :: Type -> Instruction -> Codegen Operand
 instr ty ins =
     do n <- fresh
@@ -453,10 +479,9 @@ toArgs xs = map (\x -> (x, [])) xs
 
 -- | The ‘alloca‘ function wraps LLVM's alloca instruction. The 'alloca'
 -- instruction is pushed on the instruction stack (unnamed) and referenced with
--- a *type operand.
--- The Alloca LLVM instruction allocates memory on the stack frame of the
--- currently executing function, to be automatically released when this
--- function returns to its caller.
+-- a *type operand.  The Alloca LLVM instruction allocates memory on the stack
+-- frame of the currently executing function, to be automatically released when
+-- this function returns to its caller.
 alloca :: Type -> Instruction
 alloca ty = Alloca ty Nothing 0 []
 
@@ -467,6 +492,11 @@ store ptr val = instr phantom_t $ Store False ptr val Nothing 0 []
 -- | The 'load' function wraps LLVM's load instruction with defaults.
 load :: Operand -> Instruction
 load ptr = Load False ptr Nothing 0 []
+
+
+-- * Structure operations
+insertvalue :: Operand -> Operand -> Word32 -> Instruction
+insertvalue st op i = InsertValue st op [i] []
 
 
 -- * Control Flow operations
