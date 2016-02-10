@@ -68,7 +68,9 @@ import Resources (resourceCheckMod, resourceCheckProc)
 import Scanner (Token, fileTokens, inputTokens)
 import           System.Directory          (canonicalizePath, doesFileExist,
                                             getCurrentDirectory,
-                                            getModificationTime)                 
+                                            getModificationTime,
+                                            createDirectoryIfMissing,
+                                            getTemporaryDirectory)                 
 import System.Exit (exitFailure, exitSuccess)
 import System.FilePath
 import System.IO.Temp
@@ -422,16 +424,19 @@ buildExecutable targetMod fpath =
        thisfile <- loadObjectFile targetMod
        logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
        -- With temporary Directory
-       filesLinked <- liftIO $ withSystemTempDirectory "tmp" $ \dir ->
-           do let tmpMainOFile = dir ++ "/tmpMain.o"              
-              makeObjFile tmpMainOFile mainMod
-              let allOFiles = tmpMainOFile:thisfile:ofiles
-              makeExec allOFiles fpath
-              return allOFiles
+       -- filesLinked <- liftIO $ withSystemTempDirectory "wybetmp" $ \dir ->
+       tempDir <- liftIO $ getTemporaryDirectory
+       liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
+       let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"   
+       liftIO $ makeObjFile tmpMainOFile mainMod
+       let allOFiles = tmpMainOFile:thisfile:ofiles
+       liftIO $ makeExec allOFiles fpath
+       -- return allOFiles
        logBuild $ "o Object Files to link: "
-       logBuild $ "++ " ++ intercalate "\n++ " filesLinked 
+       logBuild $ "++ " ++ intercalate "\n++" allOFiles
        logBuild $ "o Building Target (executable): " ++ fpath
        return ()
+
 
 
 -- | Recursively visit the imports of the modules passed in the first
