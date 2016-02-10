@@ -409,7 +409,7 @@ SimpleExp :: { Placed Exp }
 	                                 (tokenPosition $1) }
     | '{' '}'                   { Placed (Fncall [] "{}" [])
 	                                 (tokenPosition $1) }
-    | Exp ':' Type              { maybePlace (Typed (content $1) $3)
+    | Exp ':' Type              { maybePlace (Typed (content $1) $3 False)
 	                                 (place $1) }
     | StmtExp                   { $1 }
 

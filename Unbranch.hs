@@ -322,7 +322,7 @@ ifIsVarDef :: (VarName -> TypeSpec -> t) -> t -> Exp -> t
 ifIsVarDef f v expr = ifIsVarDef' f v expr Unspecified
 
 ifIsVarDef' :: (VarName -> TypeSpec -> t) -> t -> Exp -> TypeSpec -> t
-ifIsVarDef' f v (Typed expr ty) _ = ifIsVarDef' f v expr ty
+ifIsVarDef' f v (Typed expr ty _) _ = ifIsVarDef' f v expr ty
 ifIsVarDef' f v (Var name dir _) ty =
     if flowsOut dir then f name ty else v
 ifIsVarDef' _ v _ _ = v
@@ -343,7 +343,7 @@ factorFreshProc pname inVars outVars pos body = do
 
 
 varExp :: FlowDirection -> VarName -> TypeSpec -> Placed Exp
-varExp flow var ty = Unplaced $ Typed (Var var flow Ordinary) ty
+varExp flow var ty = Unplaced $ Typed (Var var flow Ordinary) ty False
 
 
 newProcCall :: ProcName -> VarDict -> VarDict -> OptPos -> 

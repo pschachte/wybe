@@ -44,7 +44,7 @@ AFTER LLVM IR:
 
 declare void @print_int(i32)
 
-define i32 @main() {
+define i32 @func_factorial.main() {
 entry:
   %"tmp$2#0" = tail call i32 @"func_factorial.gen$1"(i32 5)
   tail call void @print_int(i32 %"tmp$2#0")

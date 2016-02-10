@@ -40,7 +40,6 @@ TAGS
 cbits.so
 test-cases/*~
 .DS_Store
-
 # Ignoring binaries/executables generated during testing
 test-cases/bar
 test-cases/foo
@@ -48,3 +47,5 @@ test-cases/func_factorial
 test-cases/main_hello
 test-cases/main_hello2
 test-cases/simple_loop
+test-cases/*.bc
+

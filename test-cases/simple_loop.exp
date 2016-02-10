@@ -56,7 +56,7 @@ declare i8 @read_char()
 
 declare void @putchar(i8)
 
-define i32 @main() {
+define i32 @simple_loop.main() {
 entry:
   %"tmp$2#0" = tail call i8 @read_char()
   %"c#0" = tail call i8 @"simple_loop.gen$3"(i8 %"tmp$2#0")

@@ -29,7 +29,7 @@ AFTER LLVM IR:
 
 declare void @print_int(i32)
 
-define i32 @main() {
+define i32 @func_let.main() {
 entry:
   tail call void @print_int(i32 40)
   %0 = alloca i32

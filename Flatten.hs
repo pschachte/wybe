@@ -336,11 +336,11 @@ flattenExp (Fncall maybeMod name exps) pos = do
     flattenCall (ProcCall maybeMod name Nothing) pos exps
 flattenExp (ForeignFn lang name flags exps) pos = do
     flattenCall (ForeignCall lang name flags) pos exps
-flattenExp (Typed exp Unspecified) pos = do
+flattenExp (Typed exp Unspecified _) pos = do
     flattenExp exp pos
-flattenExp (Typed exp typ) pos = do
+flattenExp (Typed exp typ _) pos = do
     exps <- flattenExp exp pos
-    return $ List.map (fmap $ flip Typed typ) exps
+    return $ List.map (fmap $ (\e -> Typed e typ False)) exps
 
 
 flattenCall :: ([Placed Exp] -> Stmt) -> OptPos -> [Placed Exp] ->

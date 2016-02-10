@@ -11,7 +11,8 @@
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
                interfaceExtension, bitcodeExtension, sharedLibs,
-               ldArgs, ldSystemArgs, wordSize, assemblyExtension)
+               ldArgs, ldSystemArgs, wordSize, wordSizeBytes,
+               availableTagBits)
     where
 
 import Data.Word
@@ -38,12 +39,23 @@ interfaceExtension = "int"
 bitcodeExtension :: String
 bitcodeExtension = "bc"
 
+
 assemblyExtension :: String
 assemblyExtension = "ll"
 
--- |Determining word size of the machine
+-- |Determining word size of the machine in bits
 wordSize :: Int
-wordSize = (sizeOf (fromIntegral 3 :: Word) ) * 8
+wordSize = wordSizeBytes * 8
+
+-- |Word size of the machine in bytes
+wordSizeBytes :: Int
+wordSizeBytes = sizeOf (fromIntegral 3 :: Word)
+
+-- |The number of tag bits available on this architecture.  This is the base 2
+--  log of the word size in bytes, assuming this is a byte addressed machine.
+--  XXX this would need to be fixed for non-byte addressed architectures.
+availableTagBits :: Int
+availableTagBits = floor $ logBase 2 $ fromIntegral wordSizeBytes
 
 -- |Foreign shared library directory name
 sharedLibDirName :: String

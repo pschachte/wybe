@@ -26,7 +26,7 @@ declare void @putchar(i8)
 
 declare void @print_string(i8*)
 
-define i32 @main() {
+define i32 @main_hello.main() {
 entry:
   tail call void @print_string(i8* getelementptr inbounds ([13 x i8]* @0, i32 0, i32 0))
   tail call void @putchar(i8 10)
