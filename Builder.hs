@@ -73,7 +73,6 @@ import           System.Directory          (canonicalizePath, doesFileExist,
                                             getTemporaryDirectory)                 
 import System.Exit (exitFailure, exitSuccess)
 import System.FilePath
-import System.IO.Temp
 import System.Time (ClockTime)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
