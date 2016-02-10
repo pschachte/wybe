@@ -167,7 +167,6 @@ makeGlobalDefinition modName proto bls =
     globalDefine retty label fnargs bls
     where
       params = List.filter (not . isPhantomParam) (primProtoParams proto)
-
       isMain = primProtoName proto == ""
       -- *The top level procedure will be labelled main.
       label = modName ++ "." ++
@@ -193,7 +192,7 @@ makeFnArg arg = (ty, nm)
 -- inferred 'Type' and name.
 primOutputType :: [PrimParam] -> Type
 primOutputType params =
-    let outputs = List.filter (not . isInputParam) params in
+    let outputs = List.filter isOutputParam params in
     case length outputs of
         0 -> void_t
         1 -> (typed . primParamType . head) outputs
@@ -204,6 +203,11 @@ isPhantomParam :: PrimParam -> Bool
 isPhantomParam p = case (typeName . primParamType) p of
                      "phantom" -> True
                      _ -> False
+
+isOutputParam :: PrimParam -> Bool
+isOutputParam p = not (isInputParam p || isPhantomParam p) &&
+    (not . paramInfoUnneeded . primParamInfo) p
+    
 
 ----------------------------------------------------------------------------
 -- Body Compilation                                                       --
@@ -283,7 +287,7 @@ assignParam p =
 -- structure, pack the operands into it and return it.
 buildOutputOp :: [PrimParam] -> Codegen (Maybe Operand)
 buildOutputOp params = do
-    let outParams = List.filter (not . isInputParam) params
+    let outParams = List.filter isOutputParam params
     outputs <- mapM (getVar . show . primParamName) outParams
     case length outputs of
         -- * No valid output
@@ -291,22 +295,24 @@ buildOutputOp params = do
         -- * single output case
         1 -> return $ Just $ head outputs
         -- * multiple output case
-        n -> do let outputTypes = List.map operandType outputs
-                let strType = struct_t outputTypes
-                op <- structInsert outputs strType
+        n -> do op <- structPack outputs
                 return $ Just op
 
--- | Sequentially call the insertvalue instruction to add each
--- of the given operand into a new structure type. Each call to the
--- insertvalue instruction would return a new structure which should be
--- used for the next insertion at the next index.
-structInsert :: [Operand] -> Type -> Codegen Operand
-structInsert ops strType = do
+-- | Pack operands into a structure through a sequence of insertvalue
+-- instructions.
+structPack :: [Operand] -> Codegen Operand
+structPack ops = do
+    let opTypes = List.map operandType ops
+    let strType = struct_t opTypes
     let strCons = cons $ C.Undef strType
     sequentialInsert ops strType strCons 0
 
 -- | Helper for structInsert to properly and sequentially index each
 -- operand into the structure.
+-- | Sequentially call the insertvalue instruction to add each
+-- of the given operand into a new structure type. Each call to the
+-- insertvalue instruction would return a new structure which should be
+-- used for the next insertion at the next index.
 sequentialInsert :: [Operand] -> Type ->
                     Operand -> Word32 -> Codegen Operand
 sequentialInsert [] _ finalStruct _ = return finalStruct
@@ -315,6 +321,12 @@ sequentialInsert (op:ops) ty struct i = do
     sequentialInsert ops ty newStruct (i + 1)
 
 
+structUnPack :: Operand -> [Type] -> Codegen [Operand]
+structUnPack st tys = do
+    let n = (fromIntegral $ length tys) :: Word32
+    let ins = List.map (extractvalue st) [0..n-1]
+    zipWithM instr tys ins
+    
 
 -- | Generate basic blocks for a procedure body. The first block is named
 -- 'entry' by default. All parameters go on the symbol table (output too).
@@ -322,10 +334,11 @@ codegenBody :: ProcBody -> Codegen (Maybe Operand)
 codegenBody body =
     do let ps = List.map content (bodyPrims body)
        -- Filter out prims which contain only phantom arguments
-       ops <- mapM cgen $ List.filter (not . phantomPrim) ps
-       case List.null ops of
-         True -> return Nothing
-         False -> return $ last ops
+       -- ops <- mapM cgen $ List.filter (not . phantomPrim) ps
+       ops <- mapM cgen ps
+       if List.null ops
+           then return Nothing
+           else return $ last ops
 
 -- | Predicate to check whether a Prim is a phantom prim i.e Contains only
 -- phantom arguments.
@@ -350,17 +363,16 @@ codegenForkBody var (b1:b2:[]) outop =
 
        -- if.then
        setBlock ifthen
-       val <- codegenBody b2
-       case val of
-         Nothing -> ret outop
-         v -> ret val
+       retop <- codegenBody b2
+       case retop of
+           Nothing -> ret outop
+           _ -> ret retop
        -- if.else
        setBlock ifelse
-       val <- codegenBody b1
-       case val of
-         Nothing -> ret outop
-         v -> ret val
-       -- return
+       retop <- codegenBody b1
+       case retop of
+           Nothing -> ret outop
+           _ -> ret retop
        return ()
 
        -- -- if.exit
@@ -381,12 +393,14 @@ cgen prim@(PrimCall pspec args) =
     do modn <- getModName
        let (ProcSpec mod name _) = pspec
        let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
+       -- if the call is to an external module, declare it
        unless (modn == (showModSpec mod)) (addExtern prim)
-       -- addExtern prim
        let inArgs = primInputs args
+       let outArgs = primOutputs args
+       let outTy = primReturnType args
+
        inops <- mapM cgenArg inArgs
-       let outty = primReturnType args
-       let ins = call (externf outty nm) inops
+       let ins = call (externf outTy nm) inops
        res <- addInstruction ins args
        return (Just res)
 
@@ -469,21 +483,21 @@ maybeMove _ _ = error $ "Move instruction received more than one input!"
 -- inferred depending on the primitive arguments. The name is inferred from
 -- the output argument's name (LPVM is in SSA form).
 addInstruction :: Instruction -> [PrimArg] -> Codegen Operand
-addInstruction ins args =
-     do let outty = primReturnType args
-        let outputs = primOutputs args
-        case outputs of
-          [] -> instr outty ins
-          ((ArgVar var _ _ _ _):[]) ->
-              do outop <- namedInstr outty (show var) ins
-                 assign (show var) outop
-                 return outop
-          _ ->
-              do let var = pullName (head outputs)
-                 outop <- namedInstr outty var ins
-                 mapM_ (assignPrim outop) outputs
-                 return outop
-
+addInstruction ins args =  
+     do let outArgs = primOutputs args
+        let outTy = primReturnType args
+        case length outArgs of
+          0 -> instr outTy ins
+          1 -> do let outName = pullName $ head outArgs
+                  outop <- namedInstr outTy outName ins
+                  assign outName outop
+                  return outop
+          n -> do outOp <- instr outTy ins
+                  let outTys = List.map (typed . argType) outArgs
+                  fields <- structUnPack outOp outTys
+                  let outNames = List.map pullName outArgs
+                  zipWithM_ assign outNames fields
+                  return $ last fields
     where pullName (ArgVar var _ _ _ _) = show var
           pullName _ = error $ "Expected variable as output."
 
@@ -499,8 +513,6 @@ withFlags p f = p ++ " " ++ (List.intercalate " " f)
 apply2 :: (Operand -> Operand -> Instruction) -> [Operand] -> Instruction
 apply2 f (a:b:[]) = f a b
 apply2 _ _ = error $ "Not a binary operation."
-
-
 
 
 ----------------------------------------------------------------------------
@@ -524,9 +536,13 @@ primOutputs ps = List.filter isValidOutput ps
 -- | Get the 'Type' of the valid output from the given primitive argument
 -- list. If there is no output arg, return void_t.
 primReturnType :: [PrimArg] -> Type
-primReturnType ps = case primOutputs ps of
-                      (a:_) -> typed $ argType a
-                      _ -> void_t
+primReturnType ps =
+    let outputs = primOutputs ps in
+    case length outputs of
+        0 -> void_t
+        1 -> typed $ argType (head outputs)
+        n -> struct_t (List.map (typed . argType) outputs)
+            
 
 goesIn :: PrimArg -> Bool
 goesIn p = (argFlowDirection p) == FlowIn
@@ -652,9 +668,10 @@ typed ty = case (typeName ty) of
              "char"    -> char_t
              "float"   -> float_t
              "double"  -> float_t
+             "bool"    -> int_c 1
              "string"  -> ptr_t char_t
-             "phantom" -> phantom_t
-             _         -> phantom_t
+             "phantom" -> void_t
+             _         -> void_t
 
 
 typed' :: TypeSpec -> Compiler LLVMAST.Type
