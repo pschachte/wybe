@@ -39,7 +39,7 @@ bitcodeExtension :: String
 bitcodeExtension = "bc"
 
 assemblyExtension :: String
-assemblyExtension = "s"
+assemblyExtension = "ll"
 
 -- |Determining word size of the machine
 wordSize :: Int
