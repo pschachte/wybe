@@ -1,3 +1,4 @@
+{-# OPTIONS -XTupleSections #-}
 --  File     : Normalise.hs
 --  RCS      : $Id$
 --  Author   : Peter Schachte
@@ -147,6 +148,12 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
     let flowType = Implicit pos
     tagValue <- getModuleImplementationField modNonConstCtorCount
     updateImplementation (\imp -> imp { modNonConstCtorCount = tagValue + 1 })
+    fields <- mapM (\(Param var typ _ _) -> fmap (var,) $ fieldSize typ) params
+    let (fields,size) = 
+          List.foldl (\(lst,offset) (var,sz) ->
+                       let aligned = alignOffset offset sz
+                       in (((var,aligned):lst),aligned + sz))
+          ([],0) fields
     normaliseItem modCompiler
       (FuncDecl Public (FnProto ctorName params []) typespec
        (Unplaced $ Where
@@ -164,7 +171,59 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
           params))
         (Unplaced $ Var "$rec" ParamIn flowType))
        pos)
+    -- XXX This code should replace the previous normaliseItem call,
+    --     but it breaks everything:  compiler exits printing '<<loop>>'
+    -- normaliseItem modCompiler
+    --   (FuncDecl Public (FnProto ctorName params []) typespec
+    --    (Unplaced $ Where
+    --     ([Unplaced $ ForeignCall "lpvm" "alloc" []
+    --       [Unplaced $ StringValue typeName, Unplaced $ 
+    --                                         IntValue $ fromIntegral size,
+    --        Unplaced $ Var "$rec" ParamOut flowType]]
+    --      ++
+    --      (List.map (\(Param var _ dir paramFlowType) ->
+    --                  (Unplaced $ ForeignCall "lpvm" "mutate" []
+    --                   [Unplaced $ StringValue $ typeName,
+    --                    Unplaced $ StringValue ctorName,
+    --                    Unplaced $ StringValue var,
+    --                    Unplaced $ Var "$rec" ParamInOut flowType,
+    --                    Unplaced $ Var var ParamIn paramFlowType]))
+    --       params)
+    --      ++
+    --      (List.map (\(var,aligned) ->
+    --                  (Unplaced $ ForeignCall "lpvm" "mutate" []
+    --                   [Unplaced $ Var "$rec" ParamInOut flowType,
+    --                    Unplaced $ IntValue $ fromIntegral aligned,
+    --                    Unplaced $ Var var ParamIn flowType]))
+    --       fields))
+    --     (Unplaced $ Var "$rec" ParamIn flowType))
+    --    pos)
     mapM_ (addGetterSetter modCompiler vis typespec ctorName pos) params
+
+
+-- |The number of bytes occupied by a value of the specified type.  If the
+--  type is boxed, this is the word size.
+fieldSize :: TypeSpec -> Compiler Int
+fieldSize _ = return wordSize
+
+-- |The number of bytes occupied by a value of the specified type.  This is
+--  the actual size of a value of the type, regardless of boxing.
+-- typeSize :: TypeSpec -> Compiler Int
+
+
+-- |Given a tentative offset into a structure and the size of the thing at 
+--  that offset, return the appropriate actual offset based on the size.
+--  Our approach is never to align anything on more than a word size
+--  boundary, anything bigger than that is aligned to the word size.
+--  For smaller things 
+alignOffset :: Int -> Int -> Int
+alignOffset offset size =
+    let alignment = if size > wordSize
+                    then wordSize
+                    else fromJust $ find ((0==) . (size`mod`)) $ 
+                         reverse $ List.map (2^) 
+                         [0..floor $ logBase 2 $ fromIntegral wordSize]
+    in ((offset + alignment - 1) `div` alignment) * alignment
 
 
 -- |Add a getter and setter for the specified type.
