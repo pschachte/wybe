@@ -46,3 +46,4 @@ test-cases/main_hello
 test-cases/main_hello2
 test-cases/simple_loop
 test-cases/*.bc
+Parser.info
