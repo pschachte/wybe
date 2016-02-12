@@ -128,7 +128,8 @@ data TypeReason = ReasonParam ProcName Int OptPos
                 | ReasonArity ProcName ProcName OptPos Int Int
                                       -- Call to proc with wrong arity
                 | ReasonUndeclared ProcName OptPos
-                                      -- Public proc with some undeclared argument types
+                                      -- Public proc with some undeclared arg types
+                | ReasonShouldnt      -- Nothing should go wrong with this
                 deriving (Eq, Ord)
 
 instance Show TypeReason where
@@ -176,6 +177,8 @@ instance Show TypeReason where
     show (ReasonUndeclared name pos) =
         makeMessage pos $
         "Public definition of '" ++ name ++ "' with some undeclared types."
+    show (ReasonShouldnt) =
+        makeMessage Nothing "Mysterious typing error"
 
 data Typing = ValidTyping (Map VarName TypeSpec)
             | InvalidTyping TypeReason   -- call type conflicts w/callee
@@ -539,8 +542,9 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
                                       (List.any (flip List.elem dups) . snd) $
                                     zip procs typList)
                                    pos]
-typecheckStmt _ _ (ForeignCall lang name flags args) pos typing = do
-    return [typing]
+typecheckStmt _ _ (ForeignCall _ _ _ args) pos typing = do
+    -- Pick up any output casts
+    return [List.foldr noteOutputCast typing $ List.map content args]
 typecheckStmt _ _ Nop pos typing = return [typing]
 typecheckStmt m caller (Cond test exp thn els) pos typing = do
     typings <- typecheckSequence (typecheckPlacedStmt m caller) [typing] test
@@ -558,6 +562,12 @@ typecheckStmt m caller (For itr gen) pos typing = do
 typecheckStmt _ _ Break pos typing = return [typing]
 typecheckStmt _ _ Next pos typing = return [typing]
 
+
+
+noteOutputCast :: Exp -> Typing -> Typing
+noteOutputCast (Typed (Var name flow _) typ True) typing
+  | flowsOut flow = addOneType ReasonShouldnt name typ typing
+noteOutputCast _ typing = typing
 
 
 -- |Match up params to args based only on flow, returning Nothing if
@@ -712,10 +722,11 @@ applyStmtTyping dict call@(ProcCall cm name id args) pos = do
     logTypes $ "typed call = " ++ showStmt 4 call'
     return $ maybePlace call' pos
 applyStmtTyping dict call@(ForeignCall lang name flags args) pos = do
-    -- logTypes $ "typing call " ++ show call
+    logTypes $ "typing call " ++ showStmt 0 call
     let args' = List.map (fmap $ applyExpTyping dict) args
-    -- logTypes $ "typed call = " ++ show (PrimForeign lang name id args')
-    return $ maybePlace (ForeignCall lang name flags args') pos
+    let instr = ForeignCall lang name flags args'
+    logTypes $ "typed call = " ++ showStmt 0 instr
+    return $ maybePlace instr pos
 applyStmtTyping dict (Cond test cond thn els) pos = do
     test' <- applyBodyTyping dict test
     let cond' = fmap (applyExpTyping dict) cond
@@ -747,8 +758,9 @@ applyExpTyping dict exp@(Var nm flow ftype) =
     case Map.lookup nm dict of
         Nothing -> shouldnt $ "type of variable '" ++ nm ++ "' unknown"
         Just typ -> Typed exp typ False
-applyExpTyping dict (Typed exp _ _) =
+applyExpTyping dict (Typed exp _ False) =
     applyExpTyping dict exp
+applyExpTyping dict typed@(Typed _ _ True) = typed
 applyExpTyping _ exp =
     shouldnt $ "Expression '" ++ show exp ++ "' left after flattening"
 
