@@ -104,8 +104,8 @@ Items :: { [Item] }
     : RevItems                  { reverse $1 }
 
 RevItems :: { [Item] }
-    : {- empty -}               { [] }
-    | RevItems Item             { $2:$1 }
+    : RevItems Item             { $2:$1 }
+    | Item                      { [$1] }
 
 
 Item  :: { Item }
@@ -145,7 +145,7 @@ ModSpecs :: { [ModSpec] }
     : ModSpec RevModSpecList
                                 { $1 : reverse $2 }
 RevModSpecList :: { [ModSpec] }
-    : {- empty -}               { [] }
+    : ModSpec                  { [$1] }
     | RevModSpecList ',' ModSpec
                                 { $3:$1 }
 
@@ -267,11 +267,10 @@ UseResources :: { [ResourceFlowSpec] }
 
 
 ResourceFlowSpecs :: { [ResourceFlowSpec] }
-    : ResourceFlowSpec RevResourceFlowSpecs
-                                { $1 : reverse $2 }
+    :  RevResourceFlowSpecs     { reverse $1 }
 
 RevResourceFlowSpecs :: { [ResourceFlowSpec] }
-    : {- empty -}               { [] }
+    : ResourceFlowSpec          { [$1] }
     | RevResourceFlowSpecs ',' ResourceFlowSpec
                                 { $3:$1 }
 
@@ -282,13 +281,13 @@ ResourceFlowSpec :: { ResourceFlowSpec }
 
 
 modIdent :: { (ModSpec,Ident) }
-    : revDottedIdents ident     { (reverse $1,identName $2) }
+--    : dottedIdents ident     { ($1,identName $2) }
+-- XXX this does not allow module qualified resources
+: ident { ([],identName $1) }
 
-
-revDottedIdents :: { [Ident] }
+dottedIdents :: { [Ident] }
     : {- empty -}               { [] }
-    | revDottedIdents '.' ident
-                                { (identName $2:$1) }
+    |  ident '.' dottedIdents   { (identName $1:$3) }
 
 
 ProcBody :: { [Placed Stmt] }
@@ -298,11 +297,32 @@ Stmts :: { [Placed Stmt] }
     : RevStmts                  { reverse $1 }
 
 RevStmts :: { [Placed Stmt] }
-    : {- empty -}               { [] }
+    : Stmt                      { [$1] }
     | RevStmts Stmt             { $2:$1 }
 
 Stmt :: { Placed Stmt }
-    : StmtExp                   { fmap expToStmt $1 }
+    : ident                     { Placed (ProcCall [] (identName $1)
+					  Nothing [])
+                                         (tokenPosition $1)}
+    | SimpleExp '=' Exp               { maybePlace (ProcCall [] (symbolName $2)
+                                              Nothing [$1, $3])
+                                             (place $1) }
+    | ident ArgList             { Placed (ProcCall [] (identName $1)
+					  Nothing $2)
+	                                 (tokenPosition $1) }
+    | SimpleExp '.' ident ArgList     { maybePlace (ProcCall [] (identName $3)
+					      Nothing ($1:$4))
+	                                     (place $1) }
+    | SimpleExp '.' ident             { maybePlace (ProcCall [] (identName $3)
+					      Nothing [$1])
+	                                     (place $1) }
+--    | symbol ArgList            { Placed (Fncall [] (symbolName $1) $2)
+--	                                 (tokenPosition $1) }
+    | 'foreign' ident FuncProcName flags ArgList
+                                { Placed (ForeignCall (identName $2)
+					  $3 $4 $5)
+                                         (tokenPosition $1) }
+--    : StmtExp                   { fmap expToStmt $1 }
     | 'if' Exp 'then' Stmts Condelse
                                 { Placed (Cond [] $2 $4 $5)
                                  (tokenPosition $1) }
@@ -443,10 +463,11 @@ StmtExp :: { Placed Exp }
 
 flags :: { [Ident] }
     : revFlags                  { reverse $1 }
+    | {- empty -}               { [] }
 
 revFlags :: { [Ident] }
-    : {- empty -}               { [] }
-    | revFlags ident            { identName $2:$1 }
+    : ident                     { [identName $1] }
+    | revFlags ',' ident        { identName $3:$1 }
 
 
 --optMod :: { ModSpec }
@@ -462,16 +483,16 @@ ListTail :: { Placed Exp }
 
 OptArgList :: { [Placed Exp] }
     : {- empty -}               { [] }
-    | '(' Exp ExpList ')'       { $2:$3 }
+    | '(' ExpList ')'       { $2 }
 
 ArgList :: { [Placed Exp] }
-    : '(' Exp ExpList ')'       { $2:$3 }
+    : '(' ExpList ')'       { $2 }
 
 ExpList :: { [Placed Exp] }
     : RevExpList                { reverse $1 }
 
 RevExpList :: { [Placed Exp] }
-    : {- empty -}               { [] }
+    : Exp                       { [$1] }
     | RevExpList ',' Exp        { $3:$1 }
 
 {
