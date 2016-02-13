@@ -15,7 +15,7 @@ module Codegen (
   call, externf, ret, globalDefine, external, phi, br, cbr,
   getBlock, retNothing,
   -- * Symbol storage
-  alloca, store, local, assign, load, getVar, localVar,
+  alloca, store, local, assign, load, getVar, getVarMaybe, localVar,
   operandType,
   -- * Types
   int_t, phantom_t, float_t, char_t, ptr_t, void_t, string_t, array_t,
@@ -361,6 +361,12 @@ getVar var = do
   case lookup var lcls of
     Just x -> return x
     Nothing -> error $ "Local variable not in scope: " ++ show var
+
+getVarMaybe :: String -> Codegen (Maybe Operand)
+getVarMaybe var = do
+  lcls <- gets symtab
+  return $ lookup var lcls 
+
 
 -- | Look inside an operand and determine it's type.
 operandType :: Operand -> Type

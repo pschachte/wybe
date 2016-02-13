@@ -239,7 +239,7 @@ compileBodyToBlocks proto body =
 doCodegenBody :: PrimProto -> ProcBody -> Codegen ()
 doCodegenBody proto body =
     do let params = primProtoParams proto
-       mapM_ assignParam params
+       mapM_ assignParam $ List.filter (not . isOutputParam) params
        entry <- addBlock entryBlockName
        -- Start with creation of blocks and adding instructions to it
 
@@ -288,7 +288,9 @@ assignParam p =
 buildOutputOp :: [PrimParam] -> Codegen (Maybe Operand)
 buildOutputOp params = do
     let outParams = List.filter isOutputParam params
-    outputs <- mapM (getVar . show . primParamName) outParams
+    outputsMaybe <- mapM (getVarMaybe . show . primParamName) outParams
+    let outputs = catMaybes outputsMaybe
+    
     case length outputs of
         -- * No valid output
         0 -> return Nothing
