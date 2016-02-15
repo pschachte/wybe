@@ -154,44 +154,25 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
                        let aligned = alignOffset offset sz
                        in (((var,aligned):lst),aligned + sz))
           ([],0) fields
-    -- XXX this should replace the following call, but it causes type errors, because
-    --     it can't work out the type of $rec.
-    -- normaliseItem modCompiler $
-    --   ProcDecl Public (ProcProto ctorName 
-    --                     (params++[Param "$" typespec ParamOut Ordinary]) [])
-    --    ([Unplaced $ ForeignCall "lpvm" "alloc" []
-    --       [Unplaced $ IntValue $ fromIntegral size,
-    --        Unplaced $ Typed (Var "$rec" ParamOut Ordinary) typespec False]]
-    --      ++
-    --      (reverse $ List.map (\(var,aligned) ->
-    --                            (Unplaced $ ForeignCall "lpvm" "mutate" []
-    --                             [Unplaced $ Var "$rec" ParamInOut flowType,
-    --                              Unplaced $ IntValue $ fromIntegral aligned,
-    --                              Unplaced $ Var var ParamIn flowType]))
-    --       fields')
-    --     ++
-    --     [Unplaced $ ForeignCall "llvm" "or" []
-    --      [Unplaced $ Var "$rec" ParamIn Ordinary,
-    --       Unplaced $ IntValue $ fromIntegral tagValue,
-    --       Unplaced $ Var "$" ParamOut Ordinary]])
-    --    pos
-    normaliseItem modCompiler
-      (FuncDecl Public (FnProto ctorName params []) typespec
-       (Unplaced $ Where
-        ([Unplaced $ ForeignCall "lpvm" "alloc" []
-          [Unplaced $ StringValue typeName, Unplaced $ StringValue ctorName,
-           Unplaced $ Var "$rec" ParamOut flowType]]
+    normaliseItem modCompiler $
+      ProcDecl Public (ProcProto ctorName 
+                        (params++[Param "$" typespec ParamOut Ordinary]) [])
+       ([Unplaced $ ForeignCall "lpvm" "alloc" []
+          [Unplaced $ IntValue $ fromIntegral size,
+           Unplaced $ Typed (Var "$rec" ParamOut Ordinary) typespec True]]
          ++
-         (List.map (\(Param var _ dir paramFlowType) ->
-                     (Unplaced $ ForeignCall "lpvm" "mutate" []
-                      [Unplaced $ StringValue $ typeName,
-                       Unplaced $ StringValue ctorName,
-                       Unplaced $ StringValue var,
-                       Unplaced $ Var "$rec" ParamInOut flowType,
-                       Unplaced $ Var var ParamIn paramFlowType]))
-          params))
-        (Unplaced $ Var "$rec" ParamIn flowType))
-       pos)
+         (reverse $ List.map (\(var,aligned) ->
+                               (Unplaced $ ForeignCall "lpvm" "mutate" []
+                                [Unplaced $ Var "$rec" ParamInOut flowType,
+                                 Unplaced $ IntValue $ fromIntegral aligned,
+                                 Unplaced $ Var var ParamIn flowType]))
+          fields')
+        ++
+        [Unplaced $ ForeignCall "llvm" "or" []
+         [Unplaced $ Var "$rec" ParamIn Ordinary,
+          Unplaced $ IntValue $ fromIntegral tagValue,
+          Unplaced $ Var "$" ParamOut Ordinary]])
+       pos
     mapM_ (addGetterSetter modCompiler vis typespec ctorName pos) params
 
 

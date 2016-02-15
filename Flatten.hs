@@ -338,9 +338,9 @@ flattenExp (ForeignFn lang name flags exps) pos = do
     flattenCall (ForeignCall lang name flags) pos exps
 flattenExp (Typed exp Unspecified _) pos = do
     flattenExp exp pos
-flattenExp (Typed exp typ _) pos = do
+flattenExp (Typed exp typ cast) pos = do
     exps <- flattenExp exp pos
-    return $ List.map (fmap $ (\e -> Typed e typ False)) exps
+    return $ List.map (fmap $ (\e -> Typed e typ cast)) exps
 
 
 flattenCall :: ([Placed Exp] -> Stmt) -> OptPos -> [Placed Exp] ->
