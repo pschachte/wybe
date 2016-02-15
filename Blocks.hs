@@ -51,6 +51,7 @@ data LLVMCompState = LLVMCompState {
       neededExterns    :: [Prim] -- ^ collect required extern declarations
     , neededGlobalVars :: [G.Global] -- ^ collect required global constants
     , modName          :: String
+    , modProtos        :: [PrimProto] -- ^ All procedure prototypes in Module
     }
 
 -- | Update the LLVMCompState list of primitives which require extern
@@ -82,13 +83,13 @@ needGlobalVars gs =
        return ()
 
 -- | Initialize the LLVMCompState
-initLLVMComp :: String -> LLVMCompState
-initLLVMComp modName = LLVMCompState [] [] modName
+initLLVMComp :: String -> [PrimProto] -> LLVMCompState
+initLLVMComp modName modProtos = LLVMCompState [] [] modName modProtos
 
 
-evalLLVMComp :: String -> LLVMComp t -> Compiler t
-evalLLVMComp modName llcomp =
-    evalStateT llcomp (initLLVMComp modName)
+evalLLVMComp :: String -> [PrimProto] -> LLVMComp t -> Compiler t
+evalLLVMComp modName modProtos llcomp =
+    evalStateT llcomp (initLLVMComp modName modProtos)
 
 
 -- | Transofrorm the module's procedures (in LPVM by now) into LLVM function
@@ -101,7 +102,11 @@ blockTransformModule thisMod =
        logBlocks' $ "*** Translating Module: " ++ modName
        (names, procs) <- fmap unzip $
                          getModuleImplementationField (Map.toList . modProcs)
-       procs' <- mapM (mapM (translateProc modName) .
+       -- Collect all procedure prototypes in the module
+       let protos = List.map extractLPVMProto (concat procs)
+       logBlocks' $ "Prototypes:\n" ++ intercalate "\n" (List.map show protos)
+       -- Translate
+       procs' <- mapM (mapM (translateProc modName protos) .
                        (List.filter (not . emptyProc))) procs
 
        knownTypesSet <- fmap (List.map snd) $
@@ -118,6 +123,11 @@ blockTransformModule thisMod =
        -- logBlocks' $ showPretty llmod
        finishModule
        logBlocks' $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
+
+
+extractLPVMProto :: ProcDef -> PrimProto
+extractLPVMProto procdef =
+    let (ProcDefPrim proto _) = procImpln procdef in proto
 
 -- | Predicate to test for procedure definition with an empty body.
 emptyProc :: ProcDef -> Bool
@@ -137,9 +147,11 @@ emptyProc p = case procImpln p of
 -- require some global variable/constant declarations which is represented as
 -- G.Global values in the neededGlobalVars field of LLVMCompstate. All in all,
 -- externs and globals go on the top of the module.
-translateProc :: String -> ProcDef -> Compiler ProcDef
-translateProc modName proc =
-    evalLLVMComp modName $ do
+translateProc :: String -> [PrimProto]
+              -> ProcDef 
+              -> Compiler ProcDef
+translateProc modName modProtos proc =
+    evalLLVMComp modName modProtos $ do
       let def@(ProcDefPrim proto body) = procImpln proc
       logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
       logBlocks $ "In Module: " ++ modName ++ ", creating definition of: "
@@ -206,8 +218,11 @@ isPhantomParam p = case (typeName . primParamType) p of
 
 isOutputParam :: PrimParam -> Bool
 isOutputParam p = not (isInputParam p || isPhantomParam p) &&
-    (not . paramInfoUnneeded . primParamInfo) p
-    
+    paramNeeded p
+
+
+paramNeeded :: PrimParam -> Bool
+paramNeeded = not . paramInfoUnneeded . primParamInfo
 
 ----------------------------------------------------------------------------
 -- Body Compilation                                                       --
@@ -227,7 +242,8 @@ compileBodyToBlocks :: PrimProto           -- procedure prototype
                     -> LLVMComp [LLVMAST.BasicBlock]
 compileBodyToBlocks proto body =
     do modName <- gets Blocks.modName
-       let codestate = execCodegen modName (doCodegenBody proto body)
+       modProtos <- gets Blocks.modProtos
+       let codestate = execCodegen modName modProtos (doCodegenBody proto body)
        let exs = externs codestate
        let gVars = globalVars codestate
        -- Copy to LLVMCompState state
@@ -240,11 +256,9 @@ doCodegenBody :: PrimProto -> ProcBody -> Codegen ()
 doCodegenBody proto body =
     do let params = primProtoParams proto
        entry <- addBlock entryBlockName
-       mapM_ assignParam $ List.filter (not . isOutputParam) params
-
        -- Start with creation of blocks and adding instructions to it
-
        setBlock entry
+       mapM_ assignParam $ List.filter (not . isOutputParam) params
        codegenBody body   -- Codegen on body prims
        builtOp <- buildOutputOp params
 
@@ -297,7 +311,7 @@ buildOutputOp params = do
     let outParams = List.filter isOutputParam params
     outputsMaybe <- mapM (getVarMaybe . show . primParamName) outParams
     let outputs = catMaybes outputsMaybe
-    
+
     case length outputs of
         -- * No valid output
         0 -> return Nothing
@@ -335,7 +349,7 @@ structUnPack st tys = do
     let n = (fromIntegral $ length tys) :: Word32
     let ins = List.map (extractvalue st) [0..n-1]
     zipWithM instr tys ins
-    
+
 
 -- | Generate basic blocks for a procedure body. The first block is named
 -- 'entry' by default. All parameters go on the symbol table (output too).
@@ -404,13 +418,21 @@ cgen prim@(PrimCall pspec args) =
        let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
        -- if the call is to an external module, declare it
        unless (modn == (showModSpec mod)) (addExtern prim)
-       let inArgs = primInputs args
-       let outArgs = primOutputs args
-       let outTy = primReturnType args
+
+       -- Find the prototype of the pspec being called
+       -- and match it's parameters with the args here
+       -- and remove the unneeded ones.
+       protoFound <- findProto pspec       
+       let filteredArgs = case protoFound of
+               Just callProto -> filterUnneededArgs callProto args
+               Nothing -> args
+
+       let inArgs = primInputs filteredArgs
+       let outTy = primReturnType filteredArgs
 
        inops <- mapM cgenArg inArgs
        let ins = call (externf outTy nm) inops
-       res <- addInstruction ins args
+       res <- addInstruction ins filteredArgs
        return (Just res)
 
 cgen prim@(PrimForeign lang name flags args)
@@ -470,6 +492,26 @@ cgenLLVMUnop name flags args
                          in addInstruction ins args >>= (return . Just)
              Nothing -> error $ "LLVM Instruction not found : " ++ name
 
+
+findProto :: ProcSpec -> Codegen (Maybe PrimProto)
+findProto pspec = do
+    allProtos <- getModProtos
+    let procNm = procSpecName pspec
+    return $ List.find (\p -> primProtoName p == procNm) allProtos
+
+
+filterUnneededArgs :: PrimProto -> [PrimArg] -> [PrimArg]
+filterUnneededArgs proto args = argsNeeded args (primProtoParams proto)
+
+argsNeeded :: [PrimArg] -> [PrimParam] -> [PrimArg]
+argsNeeded [] [] = []
+argsNeeded (a:_) [] = []
+argsNeeded [] _ = []
+argsNeeded (a:as) (p:ps) 
+    | paramNeeded p == True = a : (argsNeeded as ps)
+    | otherwise = argsNeeded as ps
+      
+
 ----------------------------------------------------------------------------
 -- Helpers for dealing with instructions                                  --
 ----------------------------------------------------------------------------
@@ -492,7 +534,7 @@ maybeMove _ _ = error $ "Move instruction received more than one input!"
 -- inferred depending on the primitive arguments. The name is inferred from
 -- the output argument's name (LPVM is in SSA form).
 addInstruction :: Instruction -> [PrimArg] -> Codegen Operand
-addInstruction ins args =  
+addInstruction ins args =
      do let outArgs = primOutputs args
         let outTy = primReturnType args
         case length outArgs of
@@ -551,7 +593,7 @@ primReturnType ps =
         0 -> void_t
         1 -> typed $ argType (head outputs)
         n -> struct_t (List.map (typed . argType) outputs)
-            
+
 
 goesIn :: PrimArg -> Bool
 goesIn p = (argFlowDirection p) == FlowIn
@@ -784,7 +826,7 @@ newMainModule depends = modWithDefinitions "tmpMain" newDefs
 createMainFn :: [ModSpec] -> LLVMAST.Definition
 createMainFn mods = globalDefine int_t "main" [] bls
   where
-    bls = createBlocks (execCodegen "" $ mainCodegen mods)
+    bls = createBlocks (execCodegen "" [] $ mainCodegen mods)
 
 -- | Run the Codegen monad collecting the instructions needed to call
 -- the given modules' main(s). This main function returns 0.

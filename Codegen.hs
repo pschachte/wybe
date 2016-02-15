@@ -9,7 +9,7 @@
 module Codegen (
   Codegen(..), LLVM(..), CodegenState(..), BlockState(..),
   emptyModule, runLLVM, execCodegen, addExtern, addGlobalConstant,
-  getModName,
+  getModName, getModProtos,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
   call, externf, ret, globalDefine, external, phi, br, cbr,
@@ -55,7 +55,7 @@ import qualified LLVM.General.AST.Constant               as C
 import qualified LLVM.General.AST.FloatingPointPredicate as FP
 import qualified LLVM.General.AST.IntegerPredicate       as IP
 
-import           AST                                     (Prim)
+import           AST                                     (Prim, PrimProto)
 import           LLVM.General.Context
 import           LLVM.General.Module
 
@@ -122,6 +122,7 @@ data CodegenState
       , modName      :: String   -- ^ Module Name being worked on
       , externs      :: [Prim]   -- ^ Primitives which need to be declared
       , globalVars   :: [Global] -- ^ Needed global variables/constants
+      , modProtos    :: [PrimProto] -- ^ Module procedures prototypes
       } deriving Show
 
 -- | 'BlockState' will generate the code for basic blocks inside of
@@ -143,8 +144,10 @@ newtype Codegen a = Codegen { runCodegen :: State CodegenState a }
     deriving (Functor, Applicative, Monad, MonadState CodegenState)
 
 execCodegen :: String  -- ^ Module Name
+            -> [PrimProto]
             -> Codegen a -> CodegenState
-execCodegen modName m = execState (runCodegen m) (emptyCodegen modName)
+execCodegen modName modProtos m =
+    execState (runCodegen m) (emptyCodegen modName modProtos)
 
 -- | Gets a new incremental word suffix for a temporary local operands
 fresh :: Codegen Word
@@ -179,6 +182,9 @@ addGlobalConstant ty con =
 
 getModName :: Codegen String
 getModName = do gets modName
+
+getModProtos :: Codegen [PrimProto]
+getModProtos = do gets modProtos
 
 
 ----------------------------------------------------------------------------
@@ -246,10 +252,11 @@ emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
 emptyCodegen :: String  -- ^ The Module Name
+             -> [PrimProto]
              -> CodegenState
-emptyCodegen modName
+emptyCodegen modName modProtos
     = CodegenState (Name entryBlockName)
-      Map.empty [] 1 0 Map.empty modName [] []
+      Map.empty [] 1 0 Map.empty modName [] [] modProtos
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name
