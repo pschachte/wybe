@@ -1,3 +1,4 @@
+{-# OPTIONS -XTupleSections #-}
 --  File     : Normalise.hs
 --  RCS      : $Id$
 --  Author   : Peter Schachte
@@ -147,6 +148,33 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
     let flowType = Implicit pos
     tagValue <- getModuleImplementationField modNonConstCtorCount
     updateImplementation (\imp -> imp { modNonConstCtorCount = tagValue + 1 })
+    fields <- mapM (\(Param var typ _ _) -> fmap (var,) $ fieldSize typ) params
+    let (fields',size) = 
+          List.foldl (\(lst,offset) (var,sz) ->
+                       let aligned = alignOffset offset sz
+                       in (((var,aligned):lst),aligned + sz))
+          ([],0) fields
+    -- XXX this should replace the following call, but it causes type errors, because
+    --     it can't work out the type of $rec.
+    -- normaliseItem modCompiler $
+    --   ProcDecl Public (ProcProto ctorName 
+    --                     (params++[Param "$" typespec ParamOut Ordinary]) [])
+    --    ([Unplaced $ ForeignCall "lpvm" "alloc" []
+    --       [Unplaced $ IntValue $ fromIntegral size,
+    --        Unplaced $ Typed (Var "$rec" ParamOut Ordinary) typespec False]]
+    --      ++
+    --      (reverse $ List.map (\(var,aligned) ->
+    --                            (Unplaced $ ForeignCall "lpvm" "mutate" []
+    --                             [Unplaced $ Var "$rec" ParamInOut flowType,
+    --                              Unplaced $ IntValue $ fromIntegral aligned,
+    --                              Unplaced $ Var var ParamIn flowType]))
+    --       fields')
+    --     ++
+    --     [Unplaced $ ForeignCall "llvm" "or" []
+    --      [Unplaced $ Var "$rec" ParamIn Ordinary,
+    --       Unplaced $ IntValue $ fromIntegral tagValue,
+    --       Unplaced $ Var "$" ParamOut Ordinary]])
+    --    pos
     normaliseItem modCompiler
       (FuncDecl Public (FnProto ctorName params []) typespec
        (Unplaced $ Where
@@ -165,6 +193,31 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
         (Unplaced $ Var "$rec" ParamIn flowType))
        pos)
     mapM_ (addGetterSetter modCompiler vis typespec ctorName pos) params
+
+
+-- |The number of bytes occupied by a value of the specified type.  If the
+--  type is boxed, this is the word size.
+fieldSize :: TypeSpec -> Compiler Int
+fieldSize _ = return wordSize
+
+-- |The number of bytes occupied by a value of the specified type.  This is
+--  the actual size of a value of the type, regardless of boxing.
+-- typeSize :: TypeSpec -> Compiler Int
+
+
+-- |Given a tentative offset into a structure and the size of the thing at 
+--  that offset, return the appropriate actual offset based on the size.
+--  Our approach is never to align anything on more than a word size
+--  boundary, anything bigger than that is aligned to the word size.
+--  For smaller things 
+alignOffset :: Int -> Int -> Int
+alignOffset offset size =
+    let alignment = if size > wordSize
+                    then wordSize
+                    else fromJust $ find ((0==) . (size`mod`)) $ 
+                         reverse $ List.map (2^) 
+                         [0..floor $ logBase 2 $ fromIntegral wordSize]
+    in ((offset + alignment - 1) `div` alignment) * alignment
 
 
 -- |Add a getter and setter for the specified type.
