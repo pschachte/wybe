@@ -239,8 +239,9 @@ compileBodyToBlocks proto body =
 doCodegenBody :: PrimProto -> ProcBody -> Codegen ()
 doCodegenBody proto body =
     do let params = primProtoParams proto
-       mapM_ assignParam $ List.filter (not . isOutputParam) params
        entry <- addBlock entryBlockName
+       mapM_ assignParam $ List.filter (not . isOutputParam) params
+
        -- Start with creation of blocks and adding instructions to it
 
        setBlock entry
@@ -277,6 +278,12 @@ assignParam p =
          "phantom" -> return () -- No need to assign phantoms
          _ -> case (paramInfoUnneeded . primParamInfo) p of
            True -> return ()    -- unneeded param
+           -- False -> do
+           --     let varType = typed ty
+           --     ptr <- instr (ptr_t varType) $ alloca varType
+           --     store ptr (localVar varType nm)
+           --     op <- instr varType $ load ptr
+           --     assign nm op
            False -> assign nm (localVar (typed ty) nm)
 
 
