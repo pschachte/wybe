@@ -105,7 +105,7 @@ Items :: { [Item] }
 
 RevItems :: { [Item] }
     : RevItems Item             { $2:$1 }
-    | Item                      { [$1] }
+    | {- empty -}               { [] }
 
 
 Item  :: { Item }
@@ -138,14 +138,13 @@ TypeProto :: { TypeProto }
     : ident OptIdents           { TypeProto (identName $1) $2 }
 
 OptRepresentation :: { TypeRepresentation }
-    : 'is' ident                 { identName $2 }
-    | {- empty -}                { defaultTypeRepresentation }
+    : 'is' ident                { identName $2 }
+    | {- empty -}               { defaultTypeRepresentation }
 
 ModSpecs :: { [ModSpec] }
-    : ModSpec RevModSpecList
-                                { $1 : reverse $2 }
+    : RevModSpecList            { reverse $1 }
 RevModSpecList :: { [ModSpec] }
-    : ModSpec                  { [$1] }
+    : ModSpec                   { [$1] }
     | RevModSpecList ',' ModSpec
                                 { $3:$1 }
 
