@@ -148,11 +148,12 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
     let flowType = Implicit pos
     tagValue <- getModuleImplementationField modNonConstCtorCount
     updateImplementation (\imp -> imp { modNonConstCtorCount = tagValue + 1 })
-    fields <- mapM (\(Param var typ _ _) -> fmap (var,) $ fieldSize typ) params
+    fields <- mapM (\(Param var typ _ _) -> fmap (var,typ,) $ fieldSize typ)
+              params
     let (fields',size) = 
-          List.foldl (\(lst,offset) (var,sz) ->
+          List.foldl (\(lst,offset) (var,typ,sz) ->
                        let aligned = alignOffset offset sz
-                       in (((var,aligned):lst),aligned + sz))
+                       in (((var,typ,aligned):lst),aligned + sz))
           ([],0) fields
     normaliseItem modCompiler $
       ProcDecl Public (ProcProto ctorName 
@@ -161,7 +162,7 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
           [Unplaced $ IntValue $ fromIntegral size,
            Unplaced $ Typed (Var "$rec" ParamOut Ordinary) typespec True]]
          ++
-         (reverse $ List.map (\(var,aligned) ->
+         (reverse $ List.map (\(var,_,aligned) ->
                                (Unplaced $ ForeignCall "lpvm" "mutate" []
                                 [Unplaced $ Var "$rec" ParamInOut flowType,
                                  Unplaced $ IntValue $ fromIntegral aligned,
@@ -173,7 +174,7 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
           Unplaced $ IntValue $ fromIntegral tagValue,
           Unplaced $ Var "$" ParamOut Ordinary]])
        pos
-    mapM_ (addGetterSetter modCompiler vis typespec ctorName pos) params
+    mapM_ (addGetterSetter modCompiler vis typespec ctorName pos) fields'
 
 
 -- |The number of bytes occupied by a value of the specified type.  If the
@@ -203,26 +204,24 @@ alignOffset offset size =
 
 -- |Add a getter and setter for the specified type.
 addGetterSetter :: ([ModSpec] -> Compiler ()) -> Visibility -> TypeSpec ->
-                   Ident -> OptPos -> Param -> Compiler ()
+                   Ident -> OptPos -> (VarName,TypeSpec,Int) -> Compiler ()
 addGetterSetter modCompiler vis rectype ctorName pos
-                    (Param field fieldtype _ _) = do
+                    (field,fieldtype,offset) = do
+    -- XXX need to take tag into account!
     normaliseItem modCompiler $ FuncDecl vis
       (FnProto field [Param "$rec" rectype ParamIn Ordinary] [])
       fieldtype 
       (Unplaced $ ForeignFn "lpvm" "access" []
-       [Unplaced $ StringValue $ typeName rectype,
-        Unplaced $ StringValue ctorName,
-        Unplaced $ StringValue field,
-        Unplaced $ Var "$rec" ParamIn Ordinary])
+       [Unplaced $ Var "$rec" ParamIn Ordinary,
+        Unplaced $ IntValue $ fromIntegral offset])
       pos
     normaliseItem modCompiler $ ProcDecl vis 
-      (ProcProto field 
+      (ProcProto field
        [Param "$rec" rectype ParamInOut Ordinary,
         Param "$field" fieldtype ParamIn Ordinary] [])
       [Unplaced $ ForeignCall "lpvm" "mutate" []
-       [Unplaced $ StringValue $ typeName rectype,
-        Unplaced $ StringValue ctorName,
-        Unplaced $ StringValue field,
-        Unplaced $ Var "$rec" ParamInOut Ordinary,
-        Unplaced $ Var "$field" ParamIn Ordinary]]
+       [Unplaced $ Var "$rec" ParamIn Ordinary,
+        Unplaced $ IntValue $ fromIntegral offset,
+        Unplaced $ Var "$field" ParamIn Ordinary,
+        Unplaced $ Var "$rec" ParamOut Ordinary]]
        pos
