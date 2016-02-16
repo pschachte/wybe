@@ -19,7 +19,7 @@ import Control.Monad
 import Control.Monad.Trans (lift,liftIO)
 import Flatten
 import Unbranch
-import Config (wordSize)
+import Config (wordSize,wordSizeBytes)
 
 
 -- |Normalise a list of file items, storing the results in the current module.
@@ -193,7 +193,7 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
 -- |The number of bytes occupied by a value of the specified type.  If the
 --  type is boxed, this is the word size.
 fieldSize :: TypeSpec -> Compiler Int
-fieldSize _ = return wordSize
+fieldSize _ = return wordSizeBytes
 
 -- |The number of bytes occupied by a value of the specified type.  This is
 --  the actual size of a value of the type, regardless of boxing.
@@ -207,11 +207,11 @@ fieldSize _ = return wordSize
 --  For smaller things 
 alignOffset :: Int -> Int -> Int
 alignOffset offset size =
-    let alignment = if size > wordSize
-                    then wordSize
+    let alignment = if size > wordSizeBytes
+                    then wordSizeBytes
                     else fromJust $ find ((0==) . (size`mod`)) $ 
                          reverse $ List.map (2^) 
-                         [0..floor $ logBase 2 $ fromIntegral wordSize]
+                         [0..floor $ logBase 2 $ fromIntegral wordSizeBytes]
     in ((offset + alignment - 1) `div` alignment) * alignment
 
 
