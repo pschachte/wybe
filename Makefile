@@ -40,6 +40,7 @@ Version.lhs:	*.hs
 TESTCASES = $(wildcard test-cases/*.wybe)
 #DEBUG=--log=Unbranch
 
+# On Mac OS X, gtimeout is in homebrew coreutils package
 test:	wybemk
 	@rm -f ERRS ; touch ERRS
 	@printf "testing"
@@ -48,7 +49,8 @@ test:	wybemk
 	    log=`echo "$$f" | sed 's/.wybe$$/.log/'` ; \
 	    exp=`echo "$$f" | sed 's/.wybe$$/.exp/'` ; \
 	    targ=`echo "$$f" | sed 's/.wybe$$/.o/'` ; \
-	    ./wybemk --log=FinalDump $(DEBUG) -f $$targ > $$out 2> $$log ; \
+	    gtimeout 2 ./wybemk --log=FinalDump $(DEBUG) -f $$targ \
+		> $$out 2> $$log ; \
 	    if [ ! -r $$exp ] ; then \
 		printf "[31m?[39m" ; \
 		NEW="$${NEW}\n    $$out" ; \
