@@ -174,6 +174,19 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
           Unplaced $ IntValue $ fromIntegral tagValue,
           Unplaced $ Var "$" ParamOut Ordinary]])
        pos
+    -- XXX this needs to take the tag into account
+    -- XXX this needs to be able to fail if the constructor doesn't match
+    normaliseItem modCompiler $
+      ProcDecl Public (ProcProto ctorName 
+                        (List.map (\(Param n t _ ft) -> (Param n t ParamOut ft))
+                         params++[Param "$" typespec ParamIn Ordinary]) [])
+         (reverse $ List.map (\(var,_,aligned) ->
+                               (Unplaced $ ForeignCall "lpvm" "access" []
+                                [Unplaced $ Var "$" ParamIn flowType,
+                                 Unplaced $ IntValue $ fromIntegral aligned,
+                                 Unplaced $ Var var ParamOut flowType]))
+          fields')
+      pos
     mapM_ (addGetterSetter modCompiler vis typespec ctorName pos) fields'
 
 
