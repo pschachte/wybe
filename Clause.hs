@@ -112,10 +112,10 @@ compileBody [placed] params
       let thn'' = thn' ++ reconcilingAssignments afterThen final params
       let els'' = els' ++ reconcilingAssignments afterElse final params
       case tstVar' of
-        ArgVar var _ FlowIn _ _ ->
+        ArgVar var ty FlowIn _ _ ->
             return $ ProcBody tstStmts' $
-                   PrimFork var False [ProcBody els'' NoFork,
-                                       ProcBody thn'' NoFork]
+                   PrimFork var ty False [ProcBody els'' NoFork,
+                                          ProcBody thn'' NoFork]
         ArgInt n _ ->
             return $ ProcBody (if n/=0 then tstStmts'++thn'' else els'') NoFork
         _ -> do

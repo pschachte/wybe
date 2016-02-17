@@ -79,7 +79,7 @@ bodyLastUse (ProcBody prims fork) = do
 
 forkLastUse :: PrimFork -> NeededVars PrimFork
 forkLastUse NoFork = return NoFork
-forkLastUse (PrimFork var _ bodies) = do
+forkLastUse (PrimFork var ty _ bodies) = do
     needed <- get -- this will always be the empty set
     pairs <- mapM (\b -> lift $ runStateT (bodyLastUse b) needed) bodies
     let bodies' = List.map fst pairs
@@ -88,7 +88,7 @@ forkLastUse (PrimFork var _ bodies) = do
     put needed'
     last <- unneeded var
     needVar var
-    return $ PrimFork var last bodies'
+    return $ PrimFork var ty last bodies'
 
 
 pprimsLastUse :: [Placed Prim] -> NeededVars [Placed Prim]

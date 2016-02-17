@@ -123,7 +123,7 @@ expandBody (ProcBody prims fork) = do
     st <- get
     case fork of
       NoFork -> return ()
-      PrimFork var final bodies -> do
+      PrimFork var ty final bodies -> do
         logExpansion $ "Now expanding fork (" ++ 
           (if inlining st then "without" else "WITH") ++ " inlining)"
         logExpansion $ "  with renaming = " ++ show (renaming st)
@@ -132,8 +132,8 @@ expandBody (ProcBody prims fork) = do
               Just (ArgVar v _ _ _ _) -> v 
               -- XXX should handle case of switch on int constant
               Just _ -> shouldnt "expansion led to non-var conditional"
-        logExpansion $ "  fork on " ++ show var'
-        lift $ buildFork var' final 
+        logExpansion $ "  fork on " ++ show var' ++ ":" ++ show ty
+        lift $ buildFork var' ty final 
           $ List.map (\b -> evalStateT (expandBody b) st) bodies
         logExpansion $ "Finished expanding fork"
 

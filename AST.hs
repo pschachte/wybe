@@ -1250,10 +1250,18 @@ data ProcBody = ProcBody {
       bodyFork::PrimFork}
               deriving (Eq, Show, Generic)
 
+-- | A primitive switch.  This only appears at tne end of a ProcBody.
+-- This specifies that if forkVar is 0, the first body in forkBodies
+-- should be executed; if it's 1, the second body should be executed, and 
+-- so on.  If it's greater or equal to the length of the list, the last 
+-- body should be executed.  The forkVar is always treated as an unsigned 
+-- integer type.  If forkVarLast is True, then this is the last occurrence 
+-- of that variable.
 data PrimFork =
     NoFork |
     PrimFork {
       forkVar::PrimVarName,     -- ^The variable that selects branch to take
+      forkVarType::TypeSpec,    -- ^The Wybe type of the forkVar
       forkVarLast::Bool,        -- ^Is this the last occurrence of forkVar
       forkBodies::[ProcBody]    -- ^one branch for each value of forkVar
     }
@@ -1328,8 +1336,8 @@ foldBodyPrims primFn emptyConj abDisj (ProcBody pprims fork) =
                  emptyConj $ tails pprims
     in case fork of
       NoFork -> common
-      PrimFork _ _ [] -> shouldnt "empty clause list in a PrimFork"
-      PrimFork _ _ (body:bodies) ->
+      PrimFork _ _ _ [] -> shouldnt "empty clause list in a PrimFork"
+      PrimFork _ _ _ (body:bodies) ->
           List.foldl
           (\a b -> abDisj a $ foldBodyPrims primFn common abDisj b)
           (foldBodyPrims primFn common abDisj body)
@@ -1355,8 +1363,8 @@ foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
                  emptyConj $ tails pprims
     in case fork of
       NoFork -> common
-      PrimFork _ _ [] -> shouldnt "empty clause list in a PrimFork"
-      PrimFork _ _ (body:bodies) ->
+      PrimFork _ _ _ [] -> shouldnt "empty clause list in a PrimFork"
+      PrimFork _ _ _ (body:bodies) ->
         abConj common $
         List.foldl
         (\a b -> abDisj a $ foldBodyDistrib primFn common abDisj abConj b)
@@ -1967,9 +1975,9 @@ showBlock ind (ProcBody stmts fork) =
 
 showFork :: Int -> PrimFork -> String
 showFork ind NoFork = ""
-showFork ind (PrimFork var last bodies) =
+showFork ind (PrimFork var ty last bodies) =
     startLine ind ++ "case " ++ (if last then "~" else "") ++ show var ++
-                  " of" ++
+                  ":" ++ show ty ++ " of" ++
     List.concatMap (\(val,body) ->
                         startLine ind ++ show val ++ ":" ++
                         showBlock (ind+4) body ++ "\n")
