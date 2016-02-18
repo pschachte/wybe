@@ -86,10 +86,11 @@ buildBody oSubst builder = do
     return (a,currBody bstate)
 
 
-buildFork :: PrimVarName -> Bool -> [BodyBuilder ()] -> BodyBuilder ()
-buildFork var final branchBuilders = do
+buildFork :: PrimVarName -> TypeSpec -> Bool -> [BodyBuilder ()] 
+             -> BodyBuilder ()
+buildFork var ty final branchBuilders = do
     arg' <- expandArg
-            $ ArgVar var (TypeSpec ["wybe"] "int" []) FlowIn Ordinary False
+            $ ArgVar var ty FlowIn Ordinary False
     logBuild $ "<<<< beginning to build a new fork on " ++ show arg'
       ++ " (final=" ++ show final ++ ")"
     ProcBody prims fork <- gets currBody
@@ -100,20 +101,22 @@ buildFork var final branchBuilders = do
           (winner:_) -> do
             logBuild $ "**** condition result is " ++ show n
             winner
-      ArgVar var' _ _ _ _ -> do -- normal condition with unknown result
+      ArgVar var' ty _ _ _ -> do -- normal condition with unknown result
         case fork of
-          PrimFork _ _ _ -> shouldnt "Building a fork while building a fork"
+          PrimFork _ _ _ _ -> 
+            shouldnt "Building a fork while building a fork"
           NoFork -> 
             modify (\s -> s {currBuild = Forked $ ProcBody prims
-                                         $ PrimFork var' final [] })
+                                         $ PrimFork var' ty final [] })
         mapM_ buildBranch branchBuilders
         ProcBody revPrims' fork' <- gets currBody
         case fork' of
           NoFork -> shouldnt "Building a fork produced an empty fork"
-          PrimFork v l revBranches ->
+          PrimFork v ty l revBranches ->
             modify (\s -> s { currBuild =
                               Forked $ ProcBody revPrims'
-                                       $ PrimFork v l $ reverse revBranches })
+                                       $ PrimFork v ty l 
+                                       $ reverse revBranches })
       _ -> shouldnt "Switch on non-integer value"
     logBuild $ ">>>> Finished building a fork"
 
@@ -126,10 +129,10 @@ buildBranch builder = do
     ProcBody revPrims fork <- gets currBody
     case fork of
       NoFork -> shouldnt "Building a branch outside of buildFork"
-      PrimFork v l branches ->
+      PrimFork v ty l branches ->
         modify (\s -> s { currBuild =
                           Forked $ ProcBody revPrims
-                                   $ PrimFork v l $ branch : branches })
+                                   $ PrimFork v ty l $ branch : branches })
 
 buildPrims :: BodyBuilder () -> BodyBuilder ProcBody
 buildPrims builder = do
@@ -282,9 +285,9 @@ addInstrToState ins (Forked body) = Forked $ addInstrToBody ins body
 addInstrToBody ::  Placed Prim -> ProcBody -> ProcBody
 addInstrToBody ins (ProcBody prims NoFork) =
     ProcBody (prims ++ [ins]) NoFork
-addInstrToBody ins (ProcBody prims (PrimFork v l bodies)) =
+addInstrToBody ins (ProcBody prims (PrimFork v ty l bodies)) =
     ProcBody prims
-    (PrimFork v l (List.map (addInstrToBody ins) bodies))
+    (PrimFork v ty l (List.map (addInstrToBody ins) bodies))
 
 
 -- |Return the current ultimate value of the input argument.

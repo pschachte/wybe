@@ -252,7 +252,8 @@ doCodegenBody proto body =
                          -- through codegen on the body
                          _ -> ret op
                        return ()
-         (PrimFork var _ fbody) -> codegenForkBody var fbody outop
+         -- XXX use ty to get the right low-level type for the switch/conditional
+         (PrimFork var ty _ fbody) -> codegenForkBody var fbody outop
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
 -- param's name on the symbol table. Don't assign if phantom.
