@@ -441,7 +441,7 @@ enterModule dir modspec params = do
     count <- gets ((1+) . loadCount)
     modify (\comp -> comp { loadCount = count })
     logAST $ "Entering module " ++ showModSpec modspec
-    modify (\comp -> let mods = Module dir modspec params 
+    modify (\comp -> let mods = Module dir modspec params 0 0
                                        emptyInterface (Just emptyImplementation)
                                        count count 0 []
                                        : underCompilation comp
@@ -822,9 +822,11 @@ data Module = Module {
   modDirectory :: FilePath,      -- ^The directory the module is in
   modSpec :: ModSpec,            -- ^The module path name 
   modParams :: Maybe [Ident],    -- ^The type parameters, if a type
+  modConstants :: Int,           -- ^Num constant constructors, if a type
+  modNonConstants :: Int,        -- ^Num non-constant constructors, if a type
   modInterface :: ModuleInterface, -- ^The public face of this module
   modImplementation :: Maybe ModuleImplementation, 
-                                -- ^the module's implementation
+                                 -- ^the module's implementation
   thisLoadNum :: Int,            -- ^the loadCount when loading this module
   minDependencyNum :: Int,       -- ^the smallest loadNum of all dependencies
   procCount :: Int,              -- ^a counter for gensym-ed proc names
