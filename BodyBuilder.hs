@@ -81,10 +81,8 @@ continueState (BodyState _ subst oSubst calls) =
 buildBody :: VarSubstitution -> BodyBuilder a -> Compiler (a,ProcBody)
 buildBody oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
-    -- (a,final) <- runStateT builder $ BodyState (Just []) []
     (a,bstate) <- runStateT builder $ initState oSubst
     logMsg BodyBuilder ">>>> Finished  building a proc body"
-    -- return (a,astateBody final)
     return (a,currBody bstate)
 
 
@@ -106,9 +104,8 @@ buildFork var final branchBuilders = do
         case fork of
           PrimFork _ _ _ -> shouldnt "Building a fork while building a fork"
           NoFork -> 
-            modify (\s -> s {currBuild =
-                             Forked $ ProcBody prims
-                                      $ PrimFork var' final [] })
+            modify (\s -> s {currBuild = Forked $ ProcBody prims
+                                         $ PrimFork var' final [] })
         mapM_ buildBranch branchBuilders
         ProcBody revPrims' fork' <- gets currBody
         case fork' of
