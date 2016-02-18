@@ -33,7 +33,7 @@ normalise modCompiler items = do
     stmts <- getModule stmtDecls 
     unless (List.null stmts)
       $ normaliseItem modCompiler 
-            (ProcDecl Public (ProcProto "" [] initResources) 
+            (ProcDecl Public Det (ProcProto "" [] initResources) 
                           (List.reverse stmts) Nothing)
 
 -- |The resources available at the top level
@@ -49,7 +49,7 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
   = do
     let rep' = normaliseTypeRepresentation rep
     ty <- addType name (TypeDef (length params) rep' pos) vis
-    let eq1 = ProcDecl Public
+    let eq1 = ProcDecl Public Det
               (ProcProto "=" [Param "x" ty ParamOut Ordinary,
                               Param "y" ty ParamIn Ordinary] [])
               [Unplaced $
@@ -58,7 +58,7 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
                                              Unplaced $
                                              Var "x" ParamOut Ordinary]]
               Nothing
-    let eq2 = ProcDecl Public
+    let eq2 = ProcDecl Public Det
               (ProcProto "=" [Param "y" ty ParamIn Ordinary,
                               Param "x" ty ParamOut Ordinary] [])
               [Unplaced $
@@ -76,18 +76,18 @@ normaliseItem _ (ImportItems vis modspec imports pos) = do
     addImport modspec (importSpec (Just imports) vis)
 normaliseItem _ (ResourceDecl vis name typ init pos) =
   addSimpleResource name (SimpleResource typ init pos) vis
-normaliseItem modCompiler (FuncDecl vis (FnProto name params resources) 
+normaliseItem modCompiler (FuncDecl vis detism (FnProto name params resources) 
                resulttype result pos) =
   let flowType = Implicit pos
   in  normaliseItem modCompiler
    (ProcDecl
-    vis
+    vis detism
     (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType]) 
      resources)
     [maybePlace (ProcCall [] "=" Nothing [Unplaced $ Var "$" ParamOut flowType, result])
      pos]
     pos)
-normaliseItem _ item@(ProcDecl _ _ _ _) = do
+normaliseItem _ item@(ProcDecl _ _ _ _ _) = do
     (item',tmpCtr) <- flattenProcDecl item
     addProc tmpCtr item'
 normaliseItem modCompiler (CtorDecl vis proto pos) = do
@@ -136,8 +136,8 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName [] _) pos = do
     ctorValue <- getModuleImplementationField modConstCtorCount
     updateImplementation (\imp -> imp { modConstCtorCount = ctorValue + 1 })
     normaliseItem modCompiler
-      (ProcDecl Public (ProcProto ctorName
-                        [Param "$" typespec ParamOut Ordinary] [])
+      (ProcDecl Public Det
+       (ProcProto ctorName [Param "$" typespec ParamOut Ordinary] [])
        [Unplaced $ ForeignCall "llvm" "move" []
         [Unplaced $ Typed (IntValue $ fromIntegral ctorValue) typespec True,
          Unplaced $ Var "$" ParamOut Ordinary]]
@@ -156,8 +156,8 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
                        in (((var,typ,aligned):lst),aligned + sz))
           ([],0) fields
     normaliseItem modCompiler $
-      ProcDecl Public (ProcProto ctorName 
-                        (params++[Param "$" typespec ParamOut Ordinary]) [])
+      ProcDecl Public Det
+      (ProcProto ctorName (params++[Param "$" typespec ParamOut Ordinary]) [])
        ([Unplaced $ ForeignCall "lpvm" "alloc" []
           [Unplaced $ IntValue $ fromIntegral size,
            Unplaced $ Typed (Var "$rec" ParamOut Ordinary) typespec True]]
@@ -177,9 +177,10 @@ addCtor modCompiler vis typeName typeParams (FnProto ctorName params _) pos = do
     -- XXX this needs to take the tag into account
     -- XXX this needs to be able to fail if the constructor doesn't match
     normaliseItem modCompiler $
-      ProcDecl Public (ProcProto ctorName 
-                        (List.map (\(Param n t _ ft) -> (Param n t ParamOut ft))
-                         params++[Param "$" typespec ParamIn Ordinary]) [])
+      ProcDecl Public Det
+      (ProcProto ctorName (List.map
+                           (\(Param n t _ ft) -> (Param n t ParamOut ft))
+                           params++[Param "$" typespec ParamIn Ordinary]) [])
          (reverse $ List.map (\(var,_,aligned) ->
                                (Unplaced $ ForeignCall "lpvm" "access" []
                                 [Unplaced $ Var "$" ParamIn flowType,
@@ -221,14 +222,14 @@ addGetterSetter :: ([ModSpec] -> Compiler ()) -> Visibility -> TypeSpec ->
 addGetterSetter modCompiler vis rectype ctorName pos
                     (field,fieldtype,offset) = do
     -- XXX need to take tag into account!
-    normaliseItem modCompiler $ FuncDecl vis
+    normaliseItem modCompiler $ FuncDecl vis Det
       (FnProto field [Param "$rec" rectype ParamIn Ordinary] [])
       fieldtype 
       (Unplaced $ ForeignFn "lpvm" "access" []
        [Unplaced $ Var "$rec" ParamIn Ordinary,
         Unplaced $ IntValue $ fromIntegral offset])
       pos
-    normaliseItem modCompiler $ ProcDecl vis 
+    normaliseItem modCompiler $ ProcDecl vis Det
       (ProcProto field
        [Param "$rec" rectype ParamInOut Ordinary,
         Param "$field" fieldtype ParamIn Ordinary] [])

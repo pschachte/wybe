@@ -9,5 +9,5 @@ public proc yorn(prompt:string, ?result:bool) use !io
 	end
  end
 
-func is_yes(ch) = or(ch='y',ch='Y')
-func is_yes_or_no(ch) = or(is_yes(ch),(or(ch='n',ch='N')))
+func is_yes(ch) = ch='y' or ch='Y'
+func is_yes_or_no(ch) = is_yes(ch) or ch='n' or ch='N'

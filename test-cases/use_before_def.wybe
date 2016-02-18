@@ -1,4 +1,4 @@
-public proc test(?result:int)       
+public proc use_before_def(?result:int)       
        ?result = result + 1
        
 end

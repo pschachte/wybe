@@ -14,7 +14,7 @@
 module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
-  TypeProto(..), TypeSpec(..), FnProto(..),
+  Determinism(..), TypeProto(..), TypeSpec(..), FnProto(..),
   ProcProto(..), Param(..),
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), 
@@ -92,13 +92,16 @@ data Item
      | ImportMods Visibility [ModSpec] OptPos
      | ImportItems Visibility ModSpec [Ident] OptPos
      | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
-     | FuncDecl Visibility FnProto TypeSpec (Placed Exp) OptPos
-     | ProcDecl Visibility ProcProto [Placed Stmt] OptPos
+     | FuncDecl Visibility Determinism FnProto TypeSpec (Placed Exp) OptPos
+     | ProcDecl Visibility Determinism ProcProto [Placed Stmt] OptPos
      | CtorDecl Visibility FnProto OptPos
      | StmtDecl Stmt OptPos
 
 -- |The visibility of a file item.  We only support public and private.
 data Visibility = Public | Private
+                  deriving (Eq, Show, Generic)
+
+data Determinism = Det | SemiDet
                   deriving (Eq, Show, Generic)
 
 type TypeRepresentation = String
@@ -702,7 +705,7 @@ addImport modspec imports = do
 
 -- |Add the specified proc definition to the current module.
 addProc :: Int -> Item -> Compiler ()
-addProc tmpCtr (ProcDecl vis proto stmts pos) = do
+addProc tmpCtr (ProcDecl vis detism proto stmts pos) = do
     let ProcProto name params resources = proto
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr Map.empty vis False
                   $ initSuperprocSpec vis
@@ -1156,12 +1159,12 @@ data ProcDef = ProcDef {
     procName :: Ident,          -- the proc's name
     procProto :: ProcProto,     -- the proc's prototype
     procImpln :: ProcImpln,     -- the actual implementation
-    procPos :: OptPos,          -- where this proce is defined
+    procPos :: OptPos,          -- where this proc is defined
     procTmpCount :: Int,        -- the next temp variable number to use
     procCallers :: Map ProcSpec Int,
-                                -- callers to this proc from this mod in the source
-                                -- code (before inlining) and the count of calls 
-                                -- for each caller
+                                -- callers to this proc from this mod in the
+                                -- source code (before inlining) and the
+                                -- count of calls for each caller
     procVis :: Visibility,      -- what modules should be able to see this?
     procInline :: Bool,         -- should we inline calls to this proc?
     procSuperproc :: SuperprocSpec 
@@ -1735,12 +1738,16 @@ instance Show Item where
     visibilityPrefix vis ++ "resource " ++ show name ++ ":" ++ show typ
     ++ maybeShow " = " init " "
     ++ showMaybeSourcePos pos
-  show (FuncDecl vis proto typ exp pos) =
-    visibilityPrefix vis ++ "func " ++ show proto ++ ":" ++ show typ
+  show (FuncDecl vis detism proto typ exp pos) =
+    visibilityPrefix vis
+    ++ determinismPrefix detism
+    ++ "func " ++ show proto ++ ":" ++ show typ
     ++ showMaybeSourcePos pos
     ++ " = " ++ show exp
-  show (ProcDecl vis proto stmts pos) =
-    visibilityPrefix vis ++ "proc " ++ show proto
+  show (ProcDecl vis detism proto stmts pos) =
+    visibilityPrefix vis
+    ++ determinismPrefix detism
+    ++ "proc " ++ show proto
     ++ showMaybeSourcePos pos
     ++ showBody 4 stmts
   show (CtorDecl vis proto pos) =
@@ -1767,6 +1774,12 @@ maybeModPrefix modSpec =
 visibilityPrefix :: Visibility -> String
 visibilityPrefix Public = "public "
 visibilityPrefix Private = ""
+
+
+-- |How to show a determinism.
+determinismPrefix :: Determinism -> String
+determinismPrefix SemiDet = "test "
+determinismPrefix Det = ""
 
 -- |How to show an import or use declaration.
 showUse :: Int -> ModSpec -> ImportSpec -> String
