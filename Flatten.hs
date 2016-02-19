@@ -46,22 +46,27 @@ import Control.Monad.Trans (lift,liftIO)
 ----------------------------------------------------------------
 
 flattenProcDecl :: Item -> Compiler (Item,Int)
-flattenProcDecl (ProcDecl vis Det proto@(ProcProto name params resources) 
+flattenProcDecl (ProcDecl vis detism proto@(ProcProto name params resources) 
                  stmts pos) = do
-    proto' <- flattenProto proto
+    proto' <- flattenProto proto detism
     let inParams = Set.fromList $
                    List.map paramName $ 
                    List.filter (flowsIn . paramFlow) $
                    procProtoParams proto'
     (stmts',tmpCtr) <- flattenBody stmts inParams
-    return (ProcDecl vis Det proto' stmts' pos,tmpCtr)
+    return (ProcDecl vis detism proto' stmts' pos,tmpCtr)
 flattenProcDecl _ =
     shouldnt "flattening a non-proc or non-Det proc"
 
 
-flattenProto :: ProcProto -> Compiler ProcProto
-flattenProto (ProcProto name params resources) = do
-    return $ ProcProto name (concatMap flattenParam params) resources
+flattenProto :: ProcProto -> Determinism -> Compiler ProcProto
+flattenProto (ProcProto name params resources) detism = do
+    let params' = concatMap flattenParam params
+    let params'' = case detism of
+          Det     -> params'
+          SemiDet -> params' ++ [Param "$$" (TypeSpec ["wybe"] "bool" [])
+                                 ParamOut $ Implicit Nothing]
+    return $ ProcProto name params'' resources
 
 
 flattenBody :: [Placed Stmt] -> Set VarName -> Compiler ([Placed Stmt],Int)
