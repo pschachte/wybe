@@ -84,7 +84,8 @@ normaliseItem modCompiler (FuncDecl vis detism (FnProto name params resources)
     vis detism
     (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType]) 
      resources)
-    [maybePlace (ProcCall [] "=" Nothing [Unplaced $ Var "$" ParamOut flowType, result])
+    [maybePlace (ProcCall [] "=" Nothing 
+                 [Unplaced $ Var "$" ParamOut flowType, result])
      pos]
     pos)
 normaliseItem _ item@(ProcDecl _ _ _ _ _) = do
@@ -99,8 +100,9 @@ normaliseItem _ (StmtDecl stmt pos) = do
 
 
 normaliseTypeRepresentation :: TypeRepresentation -> TypeRepresentation
-normaliseTypeRepresentation "i" = "i" ++ show wordSize
-normaliseTypeRepresentation "f" = "i" ++ show wordSize
+normaliseTypeRepresentation "int" = "i" ++ show wordSize
+normaliseTypeRepresentation "float" = "f" ++ show wordSize
+normaliseTypeRepresentation "double" = "f64"
 normaliseTypeRepresentation other = other
 
 
