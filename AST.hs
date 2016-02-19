@@ -2034,11 +2034,10 @@ showStmt _ (ForeignCall lang name flags args) =
     "(" ++ intercalate ", " (List.map show args) ++ ")"
 showStmt indent (Cond condstmts cond thn els) =
     let leadIn = List.replicate indent ' '
-    in "if" ++ showBody (indent+2) condstmts ++ "\n"
-       ++ leadIn ++ "  test " ++ show cond ++ "\n"
-       ++ leadIn ++ "then:"
+    in "if {" ++ showBody (indent+4) condstmts ++ "}\n"
+       ++ leadIn ++ show cond ++ "::\n"
        ++ showBody (indent+4) thn ++ "\n"
-       ++ leadIn ++ "else:"
+       ++ leadIn ++ "else::"
        ++ showBody (indent+4) els ++ "\n"
        ++ leadIn ++ "end"
 showStmt indent (Loop lstmts) =
