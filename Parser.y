@@ -40,8 +40,9 @@ import AST
 -- If any other symbol tokens that can be used as funcs or procs are
 -- defined here, they need to be added to the defintion of Symbol below
       ','             { TokComma _ }
-      ';'             { TokSemicolon _ }
-      ':'             { TokColon _ }
+      ';'             { TokSymbol ";" _ }
+      ':'             { TokSymbol ":" _ }
+      '::'            { TokSymbol "::" _ }
       '.'             { TokSymbol "." _ }
       '?'             { TokSymbol "?" _ }
       '!'             { TokSymbol "!" _ }
@@ -59,9 +60,9 @@ import AST
       'end'           { TokIdent "end" _ }
       'in'            { TokIdent "in" _ }
       'if'            { TokIdent "if" _ }
+      'case'          { TokIdent "case" _ }
       'is'            { TokIdent "is" _ }
       'then'          { TokIdent "then" _ }
-      'elseif'        { TokIdent "elseif" _ }
       'else'          { TokIdent "else" _ }
       'do'            { TokIdent "do" _ }
       'for'           { TokIdent "for" _ }
@@ -328,10 +329,10 @@ Stmt :: { Placed Stmt }
                                 { Placed (ForeignCall (identName $2)
 					  $3 $4 $5)
                                          (tokenPosition $1) }
---    : StmtExp                   { fmap expToStmt $1 }
-    | 'if' Exp 'then' Stmts Condelse
-                                { Placed (Cond [] $2 $4 $5)
-                                 (tokenPosition $1) }
+    -- | 'if' Exp 'then' Stmts Condelse
+    --                             { Placed (Cond [] $2 $4 $5)
+    --                              (tokenPosition $1) }
+    | 'if' IfCases              { Placed $2 (tokenPosition $1) }
     | 'do' Stmts 'end'          { Placed (Loop $2)
                                   (tokenPosition $1) }
     | 'for' Exp 'in' Exp        { Placed (For $2 $4)
@@ -349,9 +350,14 @@ Stmt :: { Placed Stmt }
 					             [Unplaced $ Nop])
                                          (tokenPosition $1) }
 
-Condelse :: { [Placed Stmt] }
-    : 'else' Stmts 'end'        { $2 }
-    |  'end'                    { [] }
+IfCases :: { Stmt }
+    : Exp '::' Stmts IfCases    { Cond [] $1 $3 [Unplaced $4] }
+    | Exp '::' Stmts 'end'      { Cond [] $1 $3 [] }
+
+
+-- Condelse :: { [Placed Stmt] }
+--     : 'else' Stmts 'end'        { $2 }
+--     |  'end'                    { [] }
 
 
 OptInit :: { Maybe (Placed Exp) }
@@ -437,19 +443,7 @@ SimpleExp :: { Placed Exp }
 	                                 (tokenPosition $1) }
     | Exp ':' Type              { maybePlace (Typed (content $1) $3 False)
 	                                 (place $1) }
-    | StmtExp                   { $1 }
-
-Exp :: { Placed Exp }
-    : 'if' Exp 'then' Exp 'else' Exp
-                                { Placed (CondExp $2 $4 $6)
-				         (tokenPosition $1) }
-    | 'let' Stmts 'in' Exp      { Placed (Where $2 $4) (tokenPosition $1) }
-    | Exp 'where' ProcBody      { maybePlace (Where $3 $1) (place $1) }
-    | SimpleExp                 { $1 }
-
-
-StmtExp :: { Placed Exp }
-    : ident                     { Placed (Var (identName $1) ParamIn Ordinary)
+    | ident                     { Placed (Var (identName $1) ParamIn Ordinary)
 	                                 (tokenPosition $1) }
     | Exp '=' Exp               { maybePlace (Fncall [] (symbolName $2)
                                               [$1, $3])
@@ -460,12 +454,23 @@ StmtExp :: { Placed Exp }
 	                                     (place $1) }
     | Exp '.' ident             { maybePlace (Fncall [] (identName $3) [$1])
 	                                     (place $1) }
+-- XXX do we /want/ to allow prefix use of operators?
 --    | symbol ArgList            { Placed (Fncall [] (symbolName $1) $2)
 --	                                 (tokenPosition $1) }
     | 'foreign' ident FuncProcName flags ArgList
                                 { Placed (ForeignFn (identName $2)
 					  $3 $4 $5)
                                          (tokenPosition $1) }
+
+Exp :: { Placed Exp }
+    : 'if' Exp 'then' Exp 'else' Exp
+                                { Placed (CondExp $2 $4 $6)
+        			         (tokenPosition $1) }
+    | 'let' Stmts 'in' Exp      { Placed (Where $2 $4) (tokenPosition $1) }
+    | Exp 'where' ProcBody      { maybePlace (Where $3 $1) (place $1) }
+    | SimpleExp                 { $1 }
+
+
 
 flags :: { [Ident] }
     : revFlags                  { reverse $1 }
