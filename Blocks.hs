@@ -95,6 +95,11 @@ evalLLVMComp modName modProtos llcomp =
 -- | Transofrorm the module's procedures (in LPVM by now) into LLVM function
 -- definitions. A LLVMAST.Module is built up using these global definitions
 -- and then stored in the modLLVM field of 'ModuleImplementation'.
+-- Before translation of ProcDefs, all the prototypes of the ProcDef's LPVM
+-- form is collected, along with the same for all the imported modules.
+-- This is passed along to the codegen monad so that Primitive calls to these
+-- procedures can the prototype checked (match and eliminate unneeded
+-- arguments in cgen.)
 blockTransformModule :: ModSpec -> Compiler ()
 blockTransformModule thisMod =
     do reenterModule thisMod
@@ -104,18 +109,25 @@ blockTransformModule thisMod =
                          getModuleImplementationField (Map.toList . modProcs)
        -- Collect all procedure prototypes in the module
        let protos = List.map extractLPVMProto (concat procs)
-       logBlocks' $ "Prototypes:\n" ++ intercalate "\n" (List.map show protos)
-       -- Translate
-       procs' <- mapM (mapM (translateProc modName protos) .
-                       (List.filter (not . emptyProc))) procs
 
+       -- Collect prototypes of imported modules
+       imports <- getModuleImplementationField (keys . modImports)
+       importProtos <- mapM getPrimProtos
+                         (List.filter (not . isStdLib) imports)
+       let allProtos = protos ++ (concat importProtos)
+
+       logBlocks' $ "Prototypes:\n\t"
+                         ++ intercalate "\n\t" (List.map show allProtos)
+       -- Translate
+       procs' <- mapM (mapM (translateProc modName allProtos) .
+                       (List.filter (not . emptyProc))) procs
+                         
+       -- Listing all known types
        knownTypesSet <- fmap (List.map snd) $
            getModuleImplementationField (Map.toList . modKnownTypes)
        let knownTypes = concat $ List.map Set.toList knownTypesSet
        trs <- mapM lookupTypeRepresentation knownTypes
-       logBlocks' $ replicate 80 '.'
-       logBlocks' $ show trs
-       logBlocks' $ replicate 80 '.'
+       logWrapWith '.' (show trs) 
 
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
@@ -125,9 +137,29 @@ blockTransformModule thisMod =
        logBlocks' $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
 
+-- | Extract the LPVM compiled primitive from the procedure definition.
 extractLPVMProto :: ProcDef -> PrimProto
 extractLPVMProto procdef =
     let (ProcDefPrim proto _) = procImpln procdef in proto
+
+-- | Go into a (compiled) Module and pull out the PrimProto implementation
+-- of all ProcDefs in the module implementation.
+getPrimProtos :: ModSpec -> Compiler [PrimProto]
+getPrimProtos modSpec = do
+    mod <- trustFromJustM ("no such module " ++ showModSpec modSpec) $ 
+        getLoadingModule modSpec
+    let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $ 
+            modImplementation mod
+    let (_, procs) = (unzip . Map.toList . modProcs) impl
+    let protos = List.map extractLPVMProto (concat procs)
+    return protos
+
+-- | Filter for avoiding the standard library modules    
+isStdLib :: ModSpec -> Bool
+isStdLib [] = False
+isStdLib (m:_) = m == "wybe"
+    
+    
 
 -- | Predicate to test for procedure definition with an empty body.
 emptyProc :: ProcDef -> Bool
@@ -411,14 +443,16 @@ codegenForkBody _ _ _ = error
 -- 'Codegen'. Two main maps are the ones containing Binary and Unary
 -- instructions respectively. Adding each matched instruction to the
 -- BasicBlock creates a resulting Operand.
+--
+-- PrimCall: CodegenState contains the list of all the Prim prototypes defined
+-- in the current module and imported modules. All primitive calls' arguments
+-- are position checked with the respective prototype, eliminating arguments
+-- which do not eventually appear in the prototype.
 cgen :: Prim -> Codegen (Maybe Operand)
 cgen prim@(PrimCall pspec args) =
     do modn <- getModName
        let (ProcSpec mod name _) = pspec
        let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
-       -- if the call is to an external module, declare it
-       unless (modn == (showModSpec mod)) (addExtern prim)
-
        -- Find the prototype of the pspec being called
        -- and match it's parameters with the args here
        -- and remove the unneeded ones.
@@ -426,6 +460,11 @@ cgen prim@(PrimCall pspec args) =
        let filteredArgs = case protoFound of
                Just callProto -> filterUnneededArgs callProto args
                Nothing -> args
+
+       -- if the call is to an external module, declare it
+       unless (modn == (showModSpec mod))
+           (addExtern $ PrimCall pspec filteredArgs)
+               
 
        let inArgs = primInputs filteredArgs
        let outTy = primReturnType filteredArgs
@@ -481,9 +520,16 @@ cgenLLVMUnop name flags args
     | name == "move" =
         do let inArgs = primInputs args
            let outputs = primOutputs args
-           case length outputs of
-             1 -> maybeMove inArgs (argName $ head outputs)
-             _ -> maybeMove inArgs Nothing
+           if length outputs == 1 && length inArgs == 1
+               then do let (outTy, outNm) = openPrimArg $ head outputs
+                       ptr <- doAlloca outTy
+                       inop <- cgenArg $ head inArgs
+                       store ptr inop
+                       op <- doLoad outTy ptr
+                       assign outNm op
+                       return $ Just op
+               else return Nothing
+
     | otherwise =
         do let inArgs = primInputs args
            inOps <- mapM cgenArg inArgs
@@ -493,6 +539,8 @@ cgenLLVMUnop name flags args
              Nothing -> error $ "LLVM Instruction not found : " ++ name
 
 
+-- | Look inside the Prototype list stored in the CodegenState monad and
+-- find a matching ProcSpec.
 findProto :: ProcSpec -> Codegen (Maybe PrimProto)
 findProto pspec = do
     allProtos <- getModProtos
@@ -500,6 +548,9 @@ findProto pspec = do
     return $ List.find (\p -> primProtoName p == procNm) allProtos
 
 
+-- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
+-- counterpart in the prototype is unneeded, filtered out. Positional matching
+-- is used for this. 
 filterUnneededArgs :: PrimProto -> [PrimArg] -> [PrimArg]
 filterUnneededArgs proto args = argsNeeded args (primProtoParams proto)
 
@@ -699,7 +750,11 @@ llvmMapBinop =
             ("fcmp slt", fcmp FP.OLT),
             ("fcmp sle", fcmp FP.OLE),
             ("fcmp sgt", fcmp FP.OGT),
-            ("fcmp sge", fcmp FP.OGE)
+            ("fcmp sge", fcmp FP.OGE),
+            -- * Bitwise operations
+            ("or", lOr),
+            ("and", lAnd),
+            ("xor", lXor)
            ]
 
 -- | A map of unary llvm operations wrapped in the 'Codegen' module.
@@ -876,3 +931,13 @@ sq ('\'':s)
     | last s == '\'' = init s
     | otherwise      = s
 sq s = s
+
+-- | Log with a wrapping line of replicated characters above and below.
+logWrapWith :: Char -> String -> Compiler ()
+logWrapWith ch s = do
+    logMsg Blocks (replicate 80 ch)
+    logMsg Blocks s
+    logMsg Blocks (replicate 80 ch)
+
+
+

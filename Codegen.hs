@@ -16,7 +16,7 @@ module Codegen (
   getBlock, retNothing,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, getVarMaybe, localVar,
-  operandType,
+  operandType, doAlloca, doLoad,
   -- * Types
   int_t, phantom_t, float_t, char_t, ptr_t, void_t, string_t, array_t,
   struct_t,
@@ -25,7 +25,7 @@ module Codegen (
   -- * Instructions
   instr, namedInstr,
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv,
-  cons, uitofp, fptoui, icmp, fcmp,
+  cons, uitofp, fptoui, icmp, fcmp, lOr, lAnd, lXor,
   -- * Structure instructions
   insertvalue, extractvalue
 
@@ -466,6 +466,16 @@ fcmp p a b = FCmp p a b []
 icmp :: IP.IntegerPredicate -> Operand -> Operand -> Instruction
 icmp p a b = ICmp p a b []
 
+-- * Bitwise operations
+lOr :: Operand -> Operand -> Instruction
+lOr a b = Or a b []
+
+lAnd :: Operand -> Operand -> Instruction
+lAnd a b = And a b []
+
+lXor :: Operand -> Operand -> Instruction
+lXor a b = Xor a b []
+
 -- * Unary
 
 uitofp :: Operand -> Instruction
@@ -505,6 +515,14 @@ store ptr val = instr phantom_t $ Store False ptr val Nothing 0 []
 -- | The 'load' function wraps LLVM's load instruction with defaults.
 load :: Operand -> Instruction
 load ptr = Load False ptr Nothing 0 []
+
+
+-- Helpers for allocating, storing, loading
+doAlloca :: Type -> Codegen Operand
+doAlloca ty = instr (ptr_t ty) $ Alloca ty Nothing 0 []
+
+doLoad :: Type -> Operand -> Codegen Operand
+doLoad ty ptr = instr ty $ Load False ptr Nothing 0 []
 
 
 -- * Structure operations
