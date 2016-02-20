@@ -51,7 +51,7 @@ blockTransformModule :: ModSpec -> Compiler ()
 blockTransformModule thisMod =
     do reenterModule thisMod
        let modName = showModSpec thisMod
-       logBlocks' $ "*** Translating Module: " ++ modName
+       logBlocks $ "*** Translating Module: " ++ modName
        (names, procs) <- fmap unzip $
                          getModuleImplementationField (Map.toList . modProcs)
        -- Collect all procedure prototypes in the module
@@ -63,7 +63,7 @@ blockTransformModule thisMod =
                          (List.filter (not . isStdLib) imports)
        let allProtos = protos ++ (concat importProtos)
 
-       logBlocks' $ "Prototypes:\n\t"
+       logBlocks $ "Prototypes:\n\t"
                          ++ intercalate "\n\t" (List.map show allProtos)
        -- Translate
        procs' <- mapM (mapM (translateProc modName allProtos) .
@@ -83,9 +83,9 @@ blockTransformModule thisMod =
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
-       -- logBlocks' $ showPretty llmod
+       -- logBlocks $ showPretty llmod
        finishModule
-       logBlocks' $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
+       logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
 
 -- | Extract the LPVM compiled primitive from the procedure definition.
@@ -130,16 +130,16 @@ emptyProc p = case procImpln p of
 translateProc :: String -> [PrimProto] -> ProcDef -> Compiler ProcDef
 translateProc modName modProtos proc = do
     let def@(ProcDefPrim proto body) = procImpln proc
-    logBlocks' $ "\n" ++ replicate 70 '=' ++ "\n"
-    logBlocks' $ "In Module: " ++ modName ++ ", creating definition of: "
-    logBlocks' $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"
+    logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
+    logBlocks $ "In Module: " ++ modName ++ ", creating definition of: "
+    logBlocks $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
     codestate <- execCodegen modName modProtos (doCodegenBody proto body)
     let exs = List.map declareExtern $ externs codestate
     let globals = List.map LLVMAST.GlobalDefinition $ globalVars codestate
     let body' = createBlocks codestate
     let lldef = makeGlobalDefinition modName proto body'
-    logBlocks' $ showPretty lldef
+    logBlocks $ showPretty lldef
     let procblocks = ProcDefBlocks proto lldef (exs ++ globals)
     return $ proc { procImpln = procblocks}
 
@@ -881,8 +881,8 @@ addUniqueDefinitions (LLVMAST.Module n l t ds) defs =
 ----------------------------------------------------------------------------
 
 -- | Logging from the Compiler monad to Blocks.
-logBlocks' :: String -> Compiler ()
-logBlocks' = logMsg Blocks
+logBlocks :: String -> Compiler ()
+logBlocks = logMsg Blocks
 
 -- | Make 'show' not include quotes when being used to name symbols.
 -- show' = sq . show
