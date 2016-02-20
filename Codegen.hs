@@ -8,8 +8,8 @@
 
 module Codegen (
   Codegen(..), CodegenState(..), BlockState(..),
-  emptyModule, execCodegen, addExtern, addGlobalConstant,
-  getModName, getModProtos,
+  emptyModule, evalCodegen, addExtern, addGlobalConstant,
+  execCodegen,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
   call, externf, ret, globalDefine, external, phi, br, cbr,
@@ -119,7 +119,6 @@ data CodegenState
       , blockCount   :: Int      -- ^ Incrementing count of basic blocks
       , count        :: Word     -- ^ Count for temporary operands
       , names        :: Names    -- ^ Name supply
-      , modName      :: String   -- ^ Module Name being worked on
       , externs      :: [Prim]   -- ^ Primitives which need to be declared
       , globalVars   :: [Global] -- ^ Needed global variables/constants
       , modProtos    :: [PrimProto] -- ^ Module procedures prototypes
@@ -140,14 +139,18 @@ data BlockState
 
 -- | The 'Codegen' state monad will hold the state of the code generator
 -- That is, a map of block names to their 'BlockState' representation
-newtype Codegen a = Codegen { runCodegen :: StateT CodegenState Compiler a }
-    deriving (Functor, Applicative, Monad, MonadState CodegenState)
+-- newtype Codegen a = Codegen { runCodegen :: StateT CodegenState Compiler a }
+--     deriving (Functor, Applicative, Monad, MonadState CodegenState)
 
-execCodegen :: String  -- ^ Module Name
-            -> [PrimProto]
-            -> Codegen a -> Compiler CodegenState
-execCodegen modName modProtos m =
-    execStateT (runCodegen m) (emptyCodegen modName modProtos)
+type Codegen = StateT CodegenState Compiler
+
+execCodegen :: [PrimProto] -> Codegen a -> Compiler CodegenState
+execCodegen modProtos codegen =
+    execStateT codegen (emptyCodegen modProtos)
+
+evalCodegen :: [PrimProto] -> Codegen t -> Compiler t
+evalCodegen modProtos codegen =
+    evalStateT codegen (emptyCodegen modProtos)
 
 -- | Gets a new incremental word suffix for a temporary local operands
 fresh :: Codegen Word
@@ -179,13 +182,6 @@ addGlobalConstant ty con =
                                          , initializer = Just con }
        modify $ \s -> s { globalVars = gvar : gs }
        return ref
-
-getModName :: Codegen String
-getModName = do gets modName
-
-getModProtos :: Codegen [PrimProto]
-getModProtos = do gets modProtos
-
 
 -- | Create an empty LLVMAST.Module which would be converted into
 -- LLVM IR once the moduleDefinitions field is filled.
@@ -233,12 +229,10 @@ emptyBlock :: Int -> BlockState
 emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
-emptyCodegen :: String  -- ^ The Module Name
-             -> [PrimProto]
-             -> CodegenState
-emptyCodegen modName modProtos
+emptyCodegen :: [PrimProto] -> CodegenState
+emptyCodegen modProtos
     = CodegenState (Name entryBlockName)
-      Map.empty [] 1 0 Map.empty modName [] [] modProtos
+      Map.empty [] 1 0 Map.empty [] [] modProtos
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name

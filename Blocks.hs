@@ -50,13 +50,12 @@ import           Options (LogSelection (Blocks))
 blockTransformModule :: ModSpec -> Compiler ()
 blockTransformModule thisMod =
     do reenterModule thisMod
-       let modName = showModSpec thisMod
-       logBlocks $ "*** Translating Module: " ++ modName
+       logBlocks $ "*** Translating Module: " ++ (showModSpec thisMod)
        (names, procs) <- fmap unzip $
                          getModuleImplementationField (Map.toList . modProcs)
        -- Collect all procedure prototypes in the module
        let protos = List.map extractLPVMProto (concat procs)
-
+       --------------------------------------------------
        -- Collect prototypes of imported modules
        imports <- getModuleImplementationField (keys . modImports)
        importProtos <- mapM getPrimProtos
@@ -65,10 +64,7 @@ blockTransformModule thisMod =
 
        logBlocks $ "Prototypes:\n\t"
                          ++ intercalate "\n\t" (List.map show allProtos)
-       -- Translate
-       procs' <- mapM (mapM (translateProc modName allProtos) .
-                       (List.filter (not . emptyProc))) procs
-
+       --------------------------------------------------
        -- Listing all known types
        knownTypesSet <- fmap Map.elems $
            getModuleImplementationField modKnownTypes
@@ -79,7 +75,11 @@ blockTransformModule thisMod =
        -- log the assoc list typeList
        logWrapWith '.' $ "Known Types:\n" ++ (intercalate "\n" $
            List.map (\(a,b) -> show a ++ ": " ++ show b) typeList)
-
+       --------------------------------------------------
+       -- Translate
+       procs' <- mapM (mapM (translateProc allProtos) .
+                       (List.filter (not . emptyProc))) procs
+       --------------------------------------------------
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
@@ -127,18 +127,20 @@ emptyProc p = case procImpln p of
 -- require some global variable/constant declarations which is represented as
 -- G.Global values in the neededGlobalVars field of LLVMCompstate. All in all,
 -- externs and globals go on the top of the module.
-translateProc :: String -> [PrimProto] -> ProcDef -> Compiler ProcDef
-translateProc modName modProtos proc = do
+translateProc :: [PrimProto] -> ProcDef -> Compiler ProcDef
+translateProc modProtos proc = do
+    modspec <- getModuleSpec
     let def@(ProcDefPrim proto body) = procImpln proc
     logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
-    logBlocks $ "In Module: " ++ modName ++ ", creating definition of: "
+    logBlocks $ "In Module: " ++ (showModSpec modspec)
+        ++ ", creating definition of: "
     logBlocks $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
-    codestate <- execCodegen modName modProtos (doCodegenBody proto body)
+    codestate <- execCodegen modProtos (doCodegenBody proto body)
     let exs = List.map declareExtern $ externs codestate
     let globals = List.map LLVMAST.GlobalDefinition $ globalVars codestate
     let body' = createBlocks codestate
-    let lldef = makeGlobalDefinition modName proto body'
+    let lldef = makeGlobalDefinition (showModSpec modspec) proto body'
     logBlocks $ showPretty lldef
     let procblocks = ProcDefBlocks proto lldef (exs ++ globals)
     return $ proc { procImpln = procblocks}
@@ -380,30 +382,30 @@ codegenForkBody _ _ _ = error
 -- are position checked with the respective prototype, eliminating arguments
 -- which do not eventually appear in the prototype.
 cgen :: Prim -> Codegen (Maybe Operand)
-cgen prim@(PrimCall pspec args) =
-    do modn <- getModName
-       let (ProcSpec mod name _) = pspec
-       let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
-       -- Find the prototype of the pspec being called
-       -- and match it's parameters with the args here
-       -- and remove the unneeded ones.
-       protoFound <- findProto pspec
-       let filteredArgs = case protoFound of
-               Just callProto -> filterUnneededArgs callProto args
-               Nothing -> args
+cgen prim@(PrimCall pspec args) = do
+    thisMod <- lift $ getModuleSpec
+    let (ProcSpec mod name _) = pspec
+    let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
+    -- Find the prototype of the pspec being called
+    -- and match it's parameters with the args here
+    -- and remove the unneeded ones.
+    protoFound <- findProto pspec
+    let filteredArgs = case protoFound of
+            Just callProto -> filterUnneededArgs callProto args
+            Nothing -> args
 
-       -- if the call is to an external module, declare it
-       unless (modn == (showModSpec mod))
-           (addExtern $ PrimCall pspec filteredArgs)
+    -- if the call is to an external module, declare it
+    unless (thisMod == mod)
+        (addExtern $ PrimCall pspec filteredArgs)
 
 
-       let inArgs = primInputs filteredArgs
-       let outTy = primReturnType filteredArgs
+    let inArgs = primInputs filteredArgs
+    let outTy = primReturnType filteredArgs
 
-       inops <- mapM cgenArg inArgs
-       let ins = call (externf outTy nm) inops
-       res <- addInstruction ins filteredArgs
-       return (Just res)
+    inops <- mapM cgenArg inArgs
+    let ins = call (externf outTy nm) inops
+    res <- addInstruction ins filteredArgs
+    return (Just res)
 
 cgen prim@(PrimForeign lang name flags args)
      | lang == "llvm" = case (length args) of
@@ -474,7 +476,7 @@ cgenLLVMUnop name flags args
 -- find a matching ProcSpec.
 findProto :: ProcSpec -> Codegen (Maybe PrimProto)
 findProto pspec = do
-    allProtos <- getModProtos
+    allProtos <- gets Codegen.modProtos
     let procNm = procSpecName pspec
     return $ List.find (\p -> primProtoName p == procNm) allProtos
 
@@ -802,7 +804,7 @@ makeExArg arg = let ty = (typed . argType) arg
 -- For each call, an external declaration to that main function is needed.
 newMainModule :: [ModSpec] -> Compiler LLVMAST.Module
 newMainModule depends = do
-    blstate <- execCodegen "" [] $ mainCodegen depends
+    blstate <- execCodegen [] $ mainCodegen depends
     let bls = createBlocks blstate
     let mainDef = globalDefine int_t "main" [] bls
     let externsForMain = mainExterns depends
