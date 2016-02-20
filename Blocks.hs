@@ -146,11 +146,8 @@ extractLPVMProto procdef =
 -- of all ProcDefs in the module implementation.
 getPrimProtos :: ModSpec -> Compiler [PrimProto]
 getPrimProtos modSpec = do
-    mod <- trustFromJustM ("no such module " ++ showModSpec modSpec) $ 
-        getLoadingModule modSpec
-    let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $ 
-            modImplementation mod
-    let (_, procs) = (unzip . Map.toList . modProcs) impl
+    (_, procs) <- fmap (unzip . Map.toList . modProcs)
+        $ getLoadedModuleImpln modSpec
     let protos = List.map extractLPVMProto (concat procs)
     return protos
 
@@ -906,6 +903,41 @@ mainExterns mods = List.map externalMain mods
     where
       mainName m = showModSpec m ++ ".main"
       externalMain m = external int_t (mainName m) []
+
+
+-- | Concat the LLVMAST.Module implementations of a list of loaded modules
+-- to the LLVMAST.Module implementation ModSpec passed as the first
+-- parameter.
+-- It is assumed and required that all these modules are loaded and compiled
+-- to their LLVM stage (so that the modLLVM field will exist)
+-- Concatenation involves uniquely appending the LLVMAST.Definition lists.
+concatLLVMASTModules :: ModSpec      -- ^ Module to append to 
+                     -> [ModSpec]    -- ^ Modules to append
+                     -> Compiler ()
+concatLLVMASTModules thisMod mspecs = do
+    -- pull LLVMAST.Module implementations of appending modspecs
+    maybeLLMods <- mapM ((fmap modLLVM) . getLoadedModuleImpln) mspecs
+    let trustMsg = "LLVMAST.Module implementation not generated."
+    let llmods = List.map (trustFromJust trustMsg) maybeLLMods
+    let defs = List.map LLVMAST.moduleDefinitions llmods
+    -- pull LLVMAST.Module implementation of the modspec to append to 
+    thisLLMod <- trustFromJustM trustMsg $
+        fmap modLLVM $ getLoadedModuleImpln thisMod
+    let updatedLLMod = List.foldl addUniqueDefinitions thisLLMod defs
+    updateLoadedModuleImpln (\imp -> imp { modLLVM = Just updatedLLMod })
+        thisMod
+
+-- | Extend the LLVMAST.Definition list of the first module with the
+-- LLVMAST.Definition list passed as the second parameter. The concatenation
+-- must be unique.
+addUniqueDefinitions :: LLVMAST.Module -> [LLVMAST.Definition]
+                     -> LLVMAST.Module
+addUniqueDefinitions (LLVMAST.Module n l t ds) defs =
+    LLVMAST.Module n l t newDefs
+  where
+    newDefs = List.nub $ ds ++ defs
+
+
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --
