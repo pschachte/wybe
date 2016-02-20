@@ -11,15 +11,17 @@
 module Normalise (normalise, normaliseItem) where
 
 import AST
-import Data.Map as Map
-import Data.Set as Set
-import Data.List as List
-import Data.Maybe
-import Control.Monad
-import Control.Monad.Trans (lift,liftIO)
-import Flatten
-import Unbranch
 import Config (wordSize)
+import Control.Monad
+import Control.Monad.State (gets)
+import Control.Monad.Trans (lift,liftIO)
+import Data.List as List
+import Data.Map as Map
+import Data.Maybe
+import Data.Set as Set
+import Flatten
+import Options (optUseStd)
+import Unbranch
 
 
 -- |Normalise a list of file items, storing the results in the current module.
@@ -28,7 +30,8 @@ normalise modCompiler items = do
     mapM_ (normaliseItem modCompiler) items
     -- liftIO $ putStrLn "File compiled"
     -- every module imports stdlib
-    addImport ["wybe"] (ImportSpec (Just Set.empty) Nothing)
+    useStdLib <- gets (optUseStd . options)
+    when useStdLib $ addImport ["wybe"] (ImportSpec (Just Set.empty) Nothing)
     -- Now generate main proc if needed
     stmts <- getModule stmtDecls 
     unless (List.null stmts)

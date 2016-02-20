@@ -62,7 +62,8 @@ import Normalise (normalise, normaliseItem)
 import ObjectInterface
 import Optimise (optimiseMod)
 import           Options                   (LogSelection (..), Options,
-                                            optForce, optForceAll, optLibDirs)
+                                            optForce, optForceAll, optLibDirs,
+                                            optUseStd)
 import Parser (parse)
 import Resources (resourceCheckMod, resourceCheckProc)
 import Scanner (Token, fileTokens, inputTokens)
@@ -84,7 +85,9 @@ import Unbranch (unbranchProc)
 buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
     possDirs <- gets (optLibDirs . options)
-    buildModuleIfNeeded False ["wybe"] possDirs -- load library first
+    let useStd = optUseStd opts
+    -- load library first (if useStd is True)
+    when useStd $ (buildModuleIfNeeded False ["wybe"] possDirs ) >> return ()
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     showMessages
     logDump FinalDump FinalDump "EVERYTHING"
