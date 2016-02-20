@@ -137,10 +137,10 @@ translateProc modProtos proc = do
     logBlocks $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
     codestate <- execCodegen modProtos (doCodegenBody proto body)
-    let exs = List.map declareExtern $ externs codestate
+    exs <- mapM declareExtern $ externs codestate
     let globals = List.map LLVMAST.GlobalDefinition $ globalVars codestate
     let body' = createBlocks codestate
-    let lldef = makeGlobalDefinition (showModSpec modspec) proto body'
+    lldef <- makeGlobalDefinition proto body'
     logBlocks $ showPretty lldef
     let procblocks = ProcDefBlocks proto lldef (exs ++ globals)
     return $ proc { procImpln = procblocks}
@@ -150,21 +150,21 @@ translateProc modProtos proc = do
 -- prototype and it's body as a list of BasicBlock(s). The return type of such
 -- a definition is decided based on the Ouput parameter of the procedure, or
 -- is made to be phantom.
-makeGlobalDefinition :: String
-                     -> PrimProto
+makeGlobalDefinition :: PrimProto
                      -> [LLVMAST.BasicBlock]
-                     -> LLVMAST.Definition
-makeGlobalDefinition modName proto bls =
-    globalDefine retty label fnargs bls
-    where
-      params = List.filter (not . isPhantomParam) (primProtoParams proto)
-      isMain = primProtoName proto == ""
-      -- *The top level procedure will be labelled main.
-      label = modName ++ "." ++
-        if isMain then "main" else primProtoName proto
-      retty = if isMain then int_t else primOutputType params
-      inputs = List.filter isInputParam params
-      fnargs = List.map makeFnArg inputs
+                     -> Compiler LLVMAST.Definition
+makeGlobalDefinition proto bls = do
+    modName <- fmap showModSpec getModuleSpec
+    let params = List.filter (not . isPhantomParam) (primProtoParams proto)
+        isMain = primProtoName proto == ""
+        -- *The top level procedure will be labelled main.
+        label = modName ++ "." ++
+            if isMain then "main" else primProtoName proto        
+        inputs = List.filter isInputParam params
+    fnargs <- mapM makeFnArg inputs
+    retty <- if isMain then return int_t else primOutputType params
+    return $ globalDefine retty label fnargs bls
+      
 
 -- | Predicate to check if a primitive's parameter is of input flow (input)
 -- and the param is needed (inferred by it's param info field)
@@ -173,21 +173,21 @@ isInputParam p = primParamFlow p == FlowIn &&
   (paramInfoUnneeded . primParamInfo) p == False
 
 -- | Convert a primitive's input parameter to LLVM's Definition parameter.
-makeFnArg :: PrimParam -> (Type, LLVMAST.Name)
-makeFnArg arg = (ty, nm)
-    where
-      ty = typed $ primParamType arg
-      nm = LLVMAST.Name (show $ primParamName arg)
+makeFnArg :: PrimParam -> Compiler (Type, LLVMAST.Name)
+makeFnArg param = do
+    ty <- typed' $ primParamType param
+    let nm = LLVMAST.Name (show $ primParamName param)
+    return (ty, nm)
 
 -- | Open the Out parameter of a primitive (if there is one) into it's
 -- inferred 'Type' and name.
-primOutputType :: [PrimParam] -> Type
-primOutputType params =
-    let outputs = List.filter isOutputParam params in
+primOutputType :: [PrimParam] -> Compiler Type
+primOutputType params = do
+    let outputs = List.filter isOutputParam params
     case length outputs of
-        0 -> void_t
-        1 -> (typed . primParamType . head) outputs
-        n -> struct_t $ List.map (typed . primParamType) outputs
+        0 -> return void_t
+        1 -> (typed' . primParamType . head) outputs
+        n -> fmap struct_t $ mapM (typed' . primParamType) outputs
 
 
 isPhantomParam :: PrimParam -> Bool
@@ -253,6 +253,7 @@ assignParam :: PrimParam -> Codegen ()
 assignParam p =
     do let nm = show (primParamName p)
        let ty = primParamType p
+       llty <- lift $ typed' ty
        case (typeName ty) of
          "phantom" -> return () -- No need to assign phantoms
          _ -> case (paramInfoUnneeded . primParamInfo) p of
@@ -263,7 +264,7 @@ assignParam p =
            --     store ptr (localVar varType nm)
            --     op <- instr varType $ load ptr
            --     assign nm op
-           False -> assign nm (localVar (typed ty) nm)
+           False -> assign nm (localVar llty nm)
 
 
 -- | Retrive or build the output operand from the given parameters.
@@ -400,7 +401,7 @@ cgen prim@(PrimCall pspec args) = do
 
 
     let inArgs = primInputs filteredArgs
-    let outTy = primReturnType filteredArgs
+    outTy <- lift $ primReturnType filteredArgs
 
     inops <- mapM cgenArg inArgs
     let ins = call (externf outTy nm) inops
@@ -417,7 +418,7 @@ cgen prim@(PrimForeign lang name flags args)
             let inArgs = primInputs args
             let nm = LLVMAST.Name name
             inops <- mapM cgenArg inArgs
-            let outty = primReturnType args
+            outty <- lift $ primReturnType args
             let ins = call (externf outty nm) inops
             res <- addInstruction ins args
             return (Just res)
@@ -454,7 +455,7 @@ cgenLLVMUnop name flags args
         do let inArgs = primInputs args
            let outputs = primOutputs args
            if length outputs == 1 && length inArgs == 1
-               then do let (outTy, outNm) = openPrimArg $ head outputs
+               then do (outTy, outNm) <-openPrimArg $ head outputs
                        ptr <- doAlloca outTy
                        inop <- cgenArg $ head inArgs
                        store ptr inop
@@ -520,7 +521,7 @@ maybeMove _ _ = error $ "Move instruction received more than one input!"
 addInstruction :: Instruction -> [PrimArg] -> Codegen Operand
 addInstruction ins args =
      do let outArgs = primOutputs args
-        let outTy = primReturnType args
+        outTy <- lift $ primReturnType args
         case length outArgs of
           0 -> instr outTy ins
           1 -> do let outName = pullName $ head outArgs
@@ -528,7 +529,7 @@ addInstruction ins args =
                   assign outName outop
                   return outop
           n -> do outOp <- instr outTy ins
-                  let outTys = List.map (typed . argType) outArgs
+                  outTys <- lift $ mapM (typed' . argType) outArgs
                   fields <- structUnPack outOp outTys
                   let outNames = List.map pullName outArgs
                   zipWithM_ assign outNames fields
@@ -570,13 +571,13 @@ primOutputs ps = List.filter isValidOutput ps
 
 -- | Get the 'Type' of the valid output from the given primitive argument
 -- list. If there is no output arg, return void_t.
-primReturnType :: [PrimArg] -> Type
+primReturnType :: [PrimArg] -> Compiler Type
 primReturnType ps =
     let outputs = primOutputs ps in
     case length outputs of
-        0 -> void_t
-        1 -> typed $ argType (head outputs)
-        n -> struct_t (List.map (typed . argType) outputs)
+        0 -> return void_t
+        1 -> typed' $ argType (head outputs)
+        n -> fmap struct_t (mapM (typed' . argType) outputs)
 
 
 goesIn :: PrimArg -> Bool
@@ -599,8 +600,10 @@ splitArgs args = (inputs, output)
           isInputP a = argFlowDirection a == FlowIn
 
 -- | Open a PrimArg into it's inferred type and string name.
-openPrimArg :: PrimArg -> (Type, String)
-openPrimArg (ArgVar nm ty _ _ _) = (typed ty, show nm)
+openPrimArg :: PrimArg -> Codegen (Type, String)
+openPrimArg (ArgVar nm ty _ _ _) = do
+    lltype <- lift $ typed' ty
+    return (lltype, show nm)
 openPrimArg a = error $ "Can't Open!: "
                 ++ argDescription a
                 ++ (show $ argFlowDirection a)
@@ -627,8 +630,10 @@ localOperandType _ = void_t
 -- it, generating a UnName name for it.
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
 cgenArg (ArgVar nm _ _ _ _) = getVar (show nm)
-cgenArg (ArgInt val _) = return $ cons (C.Int 32 val)
-cgenArg (ArgFloat val _) = return $ cons (C.Float $ F.Double val)
+cgenArg (ArgInt val ty) = do t <- lift $ typed' ty
+                             let bs = getBits t
+                             return $ cons $ C.Int bs val
+cgenArg (ArgFloat val ty) = return $ cons $ C.Float (F.Double val)
 cgenArg (ArgString s _) =
     do let conStr = (makeStringConstant s)
        let len = (length s) + 1
@@ -637,9 +642,17 @@ cgenArg (ArgString s _) =
        let conPtr = C.GlobalReference conType conName
        let conElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
        return $ cons conElem
-cgenArg (ArgChar c _) = return $ cons (C.Int 8 $ integerOrd c)
+cgenArg (ArgChar c ty) = do t <- lift $ typed' ty
+                            let bs = getBits t
+                            return $ cons $ C.Int bs $ integerOrd c
 
 
+getBits :: LLVMAST.Type -> Word32
+getBits (IntegerType bs) = bs
+getBits (PointerType ty _) = getBits ty
+getBits (FloatingPointType bs _) = bs
+getBits ty = shouldnt $ "Can't get bit size for type: " ++ show ty
+    
 -- | Convert a string into a constant array of constant integers.
 makeStringConstant :: String ->  C.Constant
 makeStringConstant s = C.Array char_t cs
@@ -718,7 +731,8 @@ typed' ty = do
     repr <- lookupTypeRepresentation ty
     case repr of
         Just typeStr -> return $ typeStrToType typeStr
-        Nothing -> error "No type representaition"
+        -- Nothing -> error $ "No type representaition: " ++ (show ty)
+        Nothing -> return void_t
 
 typeStrToType :: String -> LLVMAST.Type
 typeStrToType [] = void_t
@@ -772,26 +786,25 @@ modWithDefinitions nm defs = LLVMAST.Module nm Nothing Nothing defs
 
 
 -- | Build an extern declaration definition from a given LPVM primitive.
-declareExtern :: Prim -> LLVMAST.Definition
-declareExtern (PrimForeign _ name _ args) =
-    external retty name fnargs
-    where
-      retty = primReturnType args
-      fnargs = List.map makeExArg (primInputs args)
+declareExtern :: Prim -> Compiler LLVMAST.Definition
+declareExtern (PrimForeign _ name _ args) = do
+    fnargs <- mapM makeExArg (primInputs args)
+    retty <- primReturnType args
+    return $ external retty name fnargs
 
-declareExtern (PrimCall (ProcSpec m n _) args) =
-    external retty ((showModSpec m) ++ "." ++ n) fnargs
-    where
-      retty = primReturnType args
-      fnargs = List.map makeExArg (primInputs args)
-
+declareExtern (PrimCall (ProcSpec m n _) args) = do
+    retty <- primReturnType args
+    fnargs <- mapM makeExArg (primInputs args)
+    return $ external retty ((showModSpec m) ++ "." ++ n) fnargs
+      
 declareExtern PrimNop = error "Can't declare extern for PrimNop."
 
 -- | Helper to make arguments for an extern declaration.
-makeExArg :: PrimArg -> (Type, LLVMAST.Name)
-makeExArg arg = let ty = (typed . argType) arg
-                    nm = LLVMAST.UnName 0
-                in (ty, nm)
+makeExArg :: PrimArg -> Compiler (Type, LLVMAST.Name)
+makeExArg arg = do
+    ty <- (typed' . argType) arg
+    let nm = LLVMAST.UnName 0
+    return (ty, nm)
 
 
 ----------------------------------------------------------------------------
