@@ -45,7 +45,7 @@
 module Builder (buildTargets, compileModule) where
 
 import AST
-import Blocks (blockTransformModule, newMainModule)
+import Blocks (blockTransformModule, newMainModule, concatLLVMASTModules)
 import Callers (collectCallers)
 import Clause (compileProc)
 import Config
@@ -102,6 +102,10 @@ buildTarget force target = do
         let modname = takeBaseName target
         let dir = takeDirectory target        
         built <- buildModuleIfNeeded force [modname] [dir]
+                
+        -- Check if the module contains sub modules
+        subMods <- concatSubMods [modname]
+
         when (tType == ExecutableFile) (buildExecutable [modname] target)
         if (built==False && tType /= ExecutableFile)
           then logBuild $ "Nothing to be done for target: " ++ target
@@ -256,12 +260,24 @@ loadModule modspec objfile = do
         ++ (show bcfile)
 
 
-
+-- | Collect all the subModules of the given modspec.
 descendantModules :: ModSpec -> Compiler [ModSpec]
 descendantModules mspec = do
     subMods <- fmap (Map.elems . modSubmods) $ getLoadedModuleImpln mspec
     desc <- fmap concat $ mapM descendantModules subMods
     return $ subMods ++ desc
+
+
+-- | Concatenate the LLVMAST.Module implementations of the submodules to the
+-- the given super module.
+concatSubMods :: ModSpec -> Compiler [ModSpec]
+concatSubMods mspec = do
+    someMods <- descendantModules mspec
+    logBuild $ "### Descendents of " ++ showModSpec mspec
+        ++ ": " ++ showModSpecs someMods
+    concatLLVMASTModules mspec someMods
+    return someMods
+    
 
 -------------------- Actually compiling some modues --------------------
 
@@ -421,7 +437,7 @@ buildExecutable :: ModSpec -> FilePath -> Compiler ()
 buildExecutable targetMod fpath =
     do imports <- collectMainImports [targetMod] []
        logBuild $ "o Modules with 'main': " ++ showModSpecs imports
-       let mainMod = newMainModule imports
+       mainMod <- newMainModule imports
        ofiles <- collectObjectFiles [] targetMod
        thisfile <- loadObjectFile targetMod
        logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"

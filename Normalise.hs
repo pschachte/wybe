@@ -112,6 +112,9 @@ normaliseSubmodule modCompiler name typeParams vis pos items = do
     parentModSpec <- getModuleSpec
     let subModSpec = parentModSpec ++ [name]
     addImport subModSpec (importSpec Nothing vis)
+    -- Add the submodule to the submodule list of the implementation
+    updateImplementation $
+        updateModSubmods (\sm-> Map.insert name subModSpec sm)
     enterModule dir subModSpec typeParams
     case typeParams of
       Nothing -> return ()

@@ -46,7 +46,7 @@ module AST (
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, getModuleInterface, updateModule, getSpecModule, updateSpecModule,
   updateModImplementation, updateModImplementationM, updateModLLVM,
-  updateModInterface, updateAllProcs,
+  updateModInterface, updateAllProcs, updateModSubmods,
   getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, message, genProcName,
   addImport, doImport, addType, lookupType, publicType,
