@@ -38,59 +38,6 @@ import           LLVM.General.Module
 import           LLVM.General.PrettyPrint
 import           Options (LogSelection (Blocks))
 
-----------------------------------------------------------------------------
--- LLVM Compiler Monad                                                    --
-----------------------------------------------------------------------------
--- | The llvm compiler monad is a state transformer monad carrying the
---  clause compiler state over the compiler monad.
-type LLVMComp = StateT LLVMCompState Compiler
-
--- | Hold some state while converting a AST.Module's procedures into LLVMAST
--- definitions.
-data LLVMCompState = LLVMCompState {
-      neededExterns    :: [Prim] -- ^ collect required extern declarations
-    , neededGlobalVars :: [G.Global] -- ^ collect required global constants
-    , modName          :: String
-    , modProtos        :: [PrimProto] -- ^ All procedure prototypes in Module
-    }
-
--- | Update the LLVMCompState list of primitives which require extern
--- declarations. Don't add the primitive again if it has been added
--- previously.
-needExterns :: [Prim] -> LLVMComp ()
-needExterns ps =
-    do ex <- gets neededExterns
-       let uniqueExs = List.nubBy samePrimName (ex ++ ps)
-       logBlocks $ "Externs: " ++ (show uniqueExs)
-       modify $ \s -> s { neededExterns = uniqueExs }
-       return ()
-
--- | Predicate to test if two Prims have the same name.
-samePrimName :: Prim -> Prim -> Bool
-samePrimName (PrimCall p1 _) (PrimCall p2 _) = p1 == p2
-samePrimName (PrimForeign _ p1 _ _) (PrimForeign _ p2 _ _) = p1 == p2
-samePrimName PrimNop PrimNop = True
-samePrimName _ _ = False
-
-
--- | Update the LLVMCompState list of global variables. These global variables
--- will be defined at the top of a module. Global variables get implicitely
---allocated and will be referenced using an element pointer wherever needed.
-needGlobalVars :: [G.Global] -> LLVMComp ()
-needGlobalVars gs =
-    do new <- gets neededGlobalVars
-       modify $ \s -> s { neededGlobalVars = new ++ gs }
-       return ()
-
--- | Initialize the LLVMCompState
-initLLVMComp :: String -> [PrimProto] -> LLVMCompState
-initLLVMComp modName modProtos = LLVMCompState [] [] modName modProtos
-
-
-evalLLVMComp :: String -> [PrimProto] -> LLVMComp t -> Compiler t
-evalLLVMComp modName modProtos llcomp =
-    evalStateT llcomp (initLLVMComp modName modProtos)
-
 
 -- | Transofrorm the module's procedures (in LPVM by now) into LLVM function
 -- definitions. A LLVMAST.Module is built up using these global definitions
@@ -121,13 +68,17 @@ blockTransformModule thisMod =
        -- Translate
        procs' <- mapM (mapM (translateProc modName allProtos) .
                        (List.filter (not . emptyProc))) procs
-                         
+
        -- Listing all known types
-       knownTypesSet <- fmap (List.map snd) $
-           getModuleImplementationField (Map.toList . modKnownTypes)
+       knownTypesSet <- fmap Map.elems $
+           getModuleImplementationField modKnownTypes
        let knownTypes = concat $ List.map Set.toList knownTypesSet
-       trs <- mapM lookupTypeRepresentation knownTypes
-       logWrapWith '.' (show trs) 
+       trs <- mapM typed' knownTypes
+       -- typeList :: [(TypeSpec, LLVMAST.Type)]
+       let typeList = zip knownTypes trs
+       -- log the assoc list typeList
+       logWrapWith '.' $ "Known Types:\n" ++ (intercalate "\n" $
+           List.map (\(a,b) -> show a ++ ": " ++ show b) typeList)
 
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
@@ -151,12 +102,12 @@ getPrimProtos modSpec = do
     let protos = List.map extractLPVMProto (concat procs)
     return protos
 
--- | Filter for avoiding the standard library modules    
+-- | Filter for avoiding the standard library modules
 isStdLib :: ModSpec -> Bool
 isStdLib [] = False
 isStdLib (m:_) = m == "wybe"
-    
-    
+
+
 
 -- | Predicate to test for procedure definition with an empty body.
 emptyProc :: ProcDef -> Bool
@@ -176,24 +127,21 @@ emptyProc p = case procImpln p of
 -- require some global variable/constant declarations which is represented as
 -- G.Global values in the neededGlobalVars field of LLVMCompstate. All in all,
 -- externs and globals go on the top of the module.
-translateProc :: String -> [PrimProto]
-              -> ProcDef 
-              -> Compiler ProcDef
-translateProc modName modProtos proc =
-    evalLLVMComp modName modProtos $ do
-      let def@(ProcDefPrim proto body) = procImpln proc
-      logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
-      logBlocks $ "In Module: " ++ modName ++ ", creating definition of: "
-      logBlocks $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"
-      body' <- compileBodyToBlocks proto body
-      ex <- gets neededExterns
-      gs <- gets neededGlobalVars
-      let externs = List.map declareExtern ex
-      let globals = List.map LLVMAST.GlobalDefinition gs
-      let lldef = makeGlobalDefinition modName proto body'
-      logBlocks $ showPretty lldef
-      let procblocks = ProcDefBlocks proto lldef (externs ++ globals)
-      return $ proc { procImpln = procblocks}
+translateProc :: String -> [PrimProto] -> ProcDef -> Compiler ProcDef
+translateProc modName modProtos proc = do
+    let def@(ProcDefPrim proto body) = procImpln proc
+    logBlocks' $ "\n" ++ replicate 70 '=' ++ "\n"
+    logBlocks' $ "In Module: " ++ modName ++ ", creating definition of: "
+    logBlocks' $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"
+    -- Codegen
+    codestate <- execCodegen modName modProtos (doCodegenBody proto body)
+    let exs = List.map declareExtern $ externs codestate
+    let globals = List.map LLVMAST.GlobalDefinition $ globalVars codestate
+    let body' = createBlocks codestate
+    let lldef = makeGlobalDefinition modName proto body'
+    logBlocks' $ showPretty lldef
+    let procblocks = ProcDefBlocks proto lldef (exs ++ globals)
+    return $ proc { procImpln = procblocks}
 
 
 -- | Create LLVM's module level Function Definition from the LPVM procedure
@@ -266,20 +214,6 @@ paramNeeded = not . paramInfoUnneeded . primParamInfo
 -- arguments can be resolved from the symbol table.  Each procedure might also
 -- need some module level extern declarations and global constants which are
 -- pulled and recorded, to be defined later when the whole module is built.
-compileBodyToBlocks :: PrimProto           -- procedure prototype
-                    -> ProcBody              -- procedure body
-                    -> LLVMComp [LLVMAST.BasicBlock]
-compileBodyToBlocks proto body =
-    do modName <- gets Blocks.modName
-       modProtos <- gets Blocks.modProtos
-       let codestate = execCodegen modName modProtos (doCodegenBody proto body)
-       let exs = externs codestate
-       let gVars = globalVars codestate
-       -- Copy to LLVMCompState state
-       needExterns exs
-       needGlobalVars gVars
-       return $ createBlocks codestate
-
 -- | Generate LLVM instructions for a procedure.
 doCodegenBody :: PrimProto -> ProcBody -> Codegen ()
 doCodegenBody proto body =
@@ -453,7 +387,7 @@ cgen prim@(PrimCall pspec args) =
        -- Find the prototype of the pspec being called
        -- and match it's parameters with the args here
        -- and remove the unneeded ones.
-       protoFound <- findProto pspec       
+       protoFound <- findProto pspec
        let filteredArgs = case protoFound of
                Just callProto -> filterUnneededArgs callProto args
                Nothing -> args
@@ -461,7 +395,7 @@ cgen prim@(PrimCall pspec args) =
        -- if the call is to an external module, declare it
        unless (modn == (showModSpec mod))
            (addExtern $ PrimCall pspec filteredArgs)
-               
+
 
        let inArgs = primInputs filteredArgs
        let outTy = primReturnType filteredArgs
@@ -547,7 +481,7 @@ findProto pspec = do
 
 -- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
 -- counterpart in the prototype is unneeded, filtered out. Positional matching
--- is used for this. 
+-- is used for this.
 filterUnneededArgs :: PrimProto -> [PrimArg] -> [PrimArg]
 filterUnneededArgs proto args = argsNeeded args (primProtoParams proto)
 
@@ -555,10 +489,10 @@ argsNeeded :: [PrimArg] -> [PrimParam] -> [PrimArg]
 argsNeeded [] [] = []
 argsNeeded (a:_) [] = []
 argsNeeded [] _ = []
-argsNeeded (a:as) (p:ps) 
+argsNeeded (a:as) (p:ps)
     | paramNeeded p == True = a : (argsNeeded as ps)
     | otherwise = argsNeeded as ps
-      
+
 
 ----------------------------------------------------------------------------
 -- Helpers for dealing with instructions                                  --
@@ -866,19 +800,22 @@ makeExArg arg = let ty = (typed . argType) arg
 -- given modules' mains.
 -- A module's main would look like: 'module.main'
 -- For each call, an external declaration to that main function is needed.
-newMainModule :: [ModSpec] -> LLVMAST.Module
-newMainModule depends = modWithDefinitions "tmpMain" newDefs
-  where
-    mainDef = createMainFn depends
-    externsForMain = mainExterns depends
-    newDefs = externsForMain ++ [mainDef]
+newMainModule :: [ModSpec] -> Compiler LLVMAST.Module
+newMainModule depends = do
+    blstate <- execCodegen "" [] $ mainCodegen depends
+    let bls = createBlocks blstate
+    let mainDef = globalDefine int_t "main" [] bls
+    let externsForMain = mainExterns depends
+    let newDefs = externsForMain ++ [mainDef]
+    return $ modWithDefinitions "tmpMain" newDefs
 
--- | Create the 'main' function definition which calls other modules'
--- main(s).
-createMainFn :: [ModSpec] -> LLVMAST.Definition
-createMainFn mods = globalDefine int_t "main" [] bls
-  where
-    bls = createBlocks (execCodegen "" [] $ mainCodegen mods)
+-- -- | Create the 'main' function definition which calls other modules'
+-- -- main(s).
+-- createMainFn :: [ModSpec] -> LLVMAST.Definition
+-- createMainFn mods = globalDefine int_t "main" [] bls
+--   where
+--     bls = createBlocks (execCodegen "" [] $ mainCodegen mods)
+
 
 -- | Run the Codegen monad collecting the instructions needed to call
 -- the given modules' main(s). This main function returns 0.
@@ -911,7 +848,7 @@ mainExterns mods = List.map externalMain mods
 -- It is assumed and required that all these modules are loaded and compiled
 -- to their LLVM stage (so that the modLLVM field will exist)
 -- Concatenation involves uniquely appending the LLVMAST.Definition lists.
-concatLLVMASTModules :: ModSpec      -- ^ Module to append to 
+concatLLVMASTModules :: ModSpec      -- ^ Module to append to
                      -> [ModSpec]    -- ^ Modules to append
                      -> Compiler ()
 concatLLVMASTModules thisMod mspecs = do
@@ -920,7 +857,7 @@ concatLLVMASTModules thisMod mspecs = do
     let trustMsg = "LLVMAST.Module implementation not generated."
     let llmods = List.map (trustFromJust trustMsg) maybeLLMods
     let defs = List.map LLVMAST.moduleDefinitions llmods
-    -- pull LLVMAST.Module implementation of the modspec to append to 
+    -- pull LLVMAST.Module implementation of the modspec to append to
     thisLLMod <- trustFromJustM trustMsg $
         fmap modLLVM $ getLoadedModuleImpln thisMod
     let updatedLLMod = List.foldl addUniqueDefinitions thisLLMod defs
@@ -942,10 +879,6 @@ addUniqueDefinitions (LLVMAST.Module n l t ds) defs =
 ----------------------------------------------------------------------------
 -- Logging                                                                --
 ----------------------------------------------------------------------------
-
--- | Logging from the LLVMComp StateT Monad to Blocks.
-logBlocks :: String -> LLVMComp ()
-logBlocks s = lift $ logMsg Blocks s
 
 -- | Logging from the Compiler monad to Blocks.
 logBlocks' :: String -> Compiler ()
@@ -970,6 +903,3 @@ logWrapWith ch s = do
     logMsg Blocks (replicate 80 ch)
     logMsg Blocks s
     logMsg Blocks (replicate 80 ch)
-
-
-

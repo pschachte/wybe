@@ -7,8 +7,8 @@
 {-# LANGUAGE OverloadedStrings          #-}
 
 module Codegen (
-  Codegen(..), LLVM(..), CodegenState(..), BlockState(..),
-  emptyModule, runLLVM, execCodegen, addExtern, addGlobalConstant,
+  Codegen(..), CodegenState(..), BlockState(..),
+  emptyModule, execCodegen, addExtern, addGlobalConstant,
   getModName, getModProtos,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
@@ -55,7 +55,7 @@ import qualified LLVM.General.AST.Constant               as C
 import qualified LLVM.General.AST.FloatingPointPredicate as FP
 import qualified LLVM.General.AST.IntegerPredicate       as IP
 
-import           AST                                     (Prim, PrimProto)
+import           AST                                     (Prim, PrimProto, Compiler)
 import           LLVM.General.Context
 import           LLVM.General.Module
 
@@ -140,14 +140,14 @@ data BlockState
 
 -- | The 'Codegen' state monad will hold the state of the code generator
 -- That is, a map of block names to their 'BlockState' representation
-newtype Codegen a = Codegen { runCodegen :: State CodegenState a }
+newtype Codegen a = Codegen { runCodegen :: StateT CodegenState Compiler a }
     deriving (Functor, Applicative, Monad, MonadState CodegenState)
 
 execCodegen :: String  -- ^ Module Name
             -> [PrimProto]
-            -> Codegen a -> CodegenState
+            -> Codegen a -> Compiler CodegenState
 execCodegen modName modProtos m =
-    execState (runCodegen m) (emptyCodegen modName modProtos)
+    execStateT (runCodegen m) (emptyCodegen modName modProtos)
 
 -- | Gets a new incremental word suffix for a temporary local operands
 fresh :: Codegen Word
@@ -187,29 +187,11 @@ getModProtos :: Codegen [PrimProto]
 getModProtos = do gets modProtos
 
 
-----------------------------------------------------------------------------
--- LLVM State Monad                                                       --
-----------------------------------------------------------------------------
-
--- | The 'LLVM' state monad holds code for the LLVM module and will be
--- evaluated to emit llvm-general module contatining the AST
-newtype LLVM a = LLVM { unLLVM :: State LLVMAST.Module a }
-    deriving (Functor, Applicative, Monad, MonadState LLVMAST.Module)
-
-runLLVM :: LLVMAST.Module -> LLVM a -> LLVMAST.Module
-runLLVM = flip (execState . unLLVM)
-
 -- | Create an empty LLVMAST.Module which would be converted into
 -- LLVM IR once the moduleDefinitions field is filled.
 emptyModule :: String -> LLVMAST.Module
 emptyModule label = defaultModule { moduleName = label }
 
--- | Add a definition to the AST.Module (LLVMAST.Module qualified),
--- to the field moduleDefinitions
-addDefn :: Definition -> LLVM ()
-addDefn d = do
-  defs <- gets moduleDefinitions
-  modify $ \s -> s { moduleDefinitions = defs ++ [d] }
 
 -- | Create a global Function Definition to store in the LLVMAST.Module.
 -- A Definition body is a list of BasicBlocks. A LPVM procedure roughly
