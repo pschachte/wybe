@@ -198,9 +198,9 @@ makeAssemblyFile file llmod =
 
 
 
--------------------------------------------------------------------------------------
--- JIT support                                                                     --
--------------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+-- JIT Support                                                              --
+------------------------------------------------------------------------------
 
 -- | Initialize the JIT compiler under the IO monad.
 jit :: Context -> (EE.MCJIT -> IO a) -> IO a
@@ -254,6 +254,7 @@ makeExec ofiles target =
     do dir <- getCurrentDirectory
        let args = ofiles ++ sharedLibs ++ ["-o", target]
        -- Supressing the annoying Xcode warning
+       -- (_,_,_,_) <- createProcess (proc "cc" args){std_err = CreatePipe}
        createProcess (proc "cc" args)
        return ()
 
