@@ -66,7 +66,7 @@ public type string
 end
 
 
-public type char is i32
+public type char is i8
     public func =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
     public func /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
 end
@@ -122,6 +122,8 @@ public module io is
     public proc print(x:string) use !io foreign c print_string(x,!io) end
     public proc println(x:string) use !io print(x) nl end
     public proc read(?x:string) use !io foreign c read_line(?x,!io) end
+
+    public proc print(x:bool) use !io foreign c print_int(x,!io) end
 
     public func eof:char = '.' # XXX completely wrong!!!
 end
