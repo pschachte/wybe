@@ -4,6 +4,7 @@
 
 VERSION=0.1
 # OPTS = -no-user-package-db -package-db .cabal-sandbox/*-packages.conf.d
+COPTS = -lgc -I/usr/local/include -L/usr/local/lib
 
 all:	test
 
@@ -14,7 +15,7 @@ all:	test
 	happy -a -g $<
 
 wybemk:	*.hs Version.lhs Parser.hs *.c
-	clang -fPIC -shared cbits.c -o cbits.so
+	clang -fPIC -shared cbits.c -o cbits.so $(COPTS) 2>/dev/null
 	ghc -fwarn-incomplete-patterns --make $@
 
 .PHONY:	info

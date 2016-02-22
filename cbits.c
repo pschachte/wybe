@@ -3,6 +3,8 @@ $ clang -fPIC -shared cbits.c -o cbits.so
 */
 
 #include <stdio.h>
+#include <assert.h>
+#include <gc/gc.h>
 #include <stdlib.h>
 
 // putchard - putchar that takes a double and returns 0.
@@ -25,4 +27,10 @@ int read_char() {
     int ch;
     ch = getchar();
     return ch;        
+}
+
+// Boehm GC
+void *wybe_malloc(int size) {
+    GC_INIT();
+    return GC_MALLOC(size);
 }
