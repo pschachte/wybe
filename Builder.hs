@@ -71,7 +71,7 @@ import           System.Directory          (canonicalizePath, doesFileExist,
                                             getCurrentDirectory,
                                             getModificationTime,
                                             createDirectoryIfMissing,
-                                            getTemporaryDirectory)                 
+                                            getTemporaryDirectory)
 import System.Exit (exitFailure, exitSuccess)
 import System.FilePath
 import System.Time (ClockTime)
@@ -103,9 +103,9 @@ buildTarget force target = do
       then message Error ("Unknown target file type " ++ target) Nothing
       else do
         let modname = takeBaseName target
-        let dir = takeDirectory target        
+        let dir = takeDirectory target
         built <- buildModuleIfNeeded force [modname] [dir]
-                
+
         -- Check if the module contains sub modules
         subMods <- concatSubMods [modname]
 
@@ -257,7 +257,7 @@ loadModule modspec objfile = do
                      in  comp { underCompilation = mods })
     -- Load the dependencies
     loadImports
-    stopOnError $ "handling imports for module " ++ showModSpec modspec    
+    stopOnError $ "handling imports for module " ++ showModSpec modspec
     mods <- exitModule -- may be empty list if module is mutually dependent
     logBuild $ "===== <<< Extracted Module put in it's place "
         ++ (show bcfile)
@@ -276,11 +276,11 @@ descendantModules mspec = do
 concatSubMods :: ModSpec -> Compiler [ModSpec]
 concatSubMods mspec = do
     someMods <- descendantModules mspec
-    logBuild $ "### Descendents of " ++ showModSpec mspec
+    logBuild $ "### Combining descendents of " ++ showModSpec mspec
         ++ ": " ++ showModSpecs someMods
     concatLLVMASTModules mspec someMods
     return someMods
-    
+
 
 -------------------- Actually compiling some modues --------------------
 
@@ -335,7 +335,7 @@ compileModSCC mspecs = do
     --                         fromJust . modImplementation))
     return ()
 
--- | Filter for avoiding the standard library modules    
+-- | Filter for avoiding the standard library modules
 isStdLib :: ModSpec -> Bool
 isStdLib [] = False
 isStdLib (m:_) = m == "wybe"
@@ -432,10 +432,11 @@ handleModImports modSCC mod = do
 -- | Build the executable for the Target Module at the given
 -- location.
 -- All dependencies are collected as object files and linked
--- by the `ld` linker to create the target. The target module
--- also needs to have a `main` function, which is created by
--- simply renaming the existing 'module.main' to 'main' in the
--- LLVM AST Module representation of the 'module'.
+-- by the system 'cc' to create the target.
+-- A new temporary main object file is created which has the main
+-- function (LLVM) which calls the mains of the target module and the
+-- imports in the correct order. The target module and imports have
+-- mains defined as 'modName.main'.
 buildExecutable :: ModSpec -> FilePath -> Compiler ()
 buildExecutable targetMod fpath =
     do imports <- collectMainImports [targetMod] []
@@ -448,7 +449,7 @@ buildExecutable targetMod fpath =
        -- filesLinked <- liftIO $ withSystemTempDirectory "wybetmp" $ \dir ->
        tempDir <- liftIO $ getTemporaryDirectory
        liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
-       let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"   
+       let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"
        liftIO $ makeObjFile tmpMainOFile mainMod
        let allOFiles = tmpMainOFile:thisfile:ofiles
        liftIO $ makeExec allOFiles fpath
@@ -464,7 +465,7 @@ buildExecutable targetMod fpath =
 -- argument list, collecting the imports which have a 'main' function (or
 -- a empty procedure name) into the second argument list, returning the
 -- collected module names at the end of the traversal.
--- The list is built up in such a way that the 'main' procedures of a 
+-- The list is built up in such a way that the 'main' procedures of a
 -- module's imports will appear first in the list. Sort of a
 -- depth-first-search.
 collectMainImports :: [ModSpec] -> [ModSpec] -> Compiler [ModSpec]
@@ -475,31 +476,31 @@ collectMainImports (m:ms) cs = do
     imports <- getModuleImplementationField (keys . modImports)
     let noStd = List.filter (not . isStdLib) imports
     finishModule
-    if elem "" procs 
+    if elem "" procs
         then collectMainImports (reverse noStd ++ ms) (m:cs)
         else collectMainImports (reverse noStd ++ ms) cs
-    
+
 
 -- | Recursively visit imports of module emitting and collecting
 -- the object files for each. It is assumed that every dependency
--- has already been built upto LLVM till now. 
+-- has already been built upto LLVM till now.
 collectObjectFiles :: [FilePath] -- Object Files collected till now
                    -> ModSpec   -- Current Module
-                   -> Compiler [FilePath] 
+                   -> Compiler [FilePath]
 collectObjectFiles ofiles thisMod =
   do reenterModule thisMod
      imports <- getModuleImplementationField (keys . modImports)
      -- We can't compile the standard library completely yet
-     -- to LLVM 
+     -- to LLVM
      let nostd = List.filter (not . isStdLib) imports
-     finishModule     
+     finishModule
      case (List.null nostd) of
        True -> return ofiles
        False ->
-         do importfiles <- mapM loadObjectFile nostd    
+         do importfiles <- mapM loadObjectFile nostd
             cs <- mapM (collectObjectFiles (ofiles ++ importfiles)) nostd
             return (concat cs)
-     
+
 -- | Load/Build object file for the module in the same directory
 -- the module is in.
 loadObjectFile :: ModSpec -> Compiler FilePath

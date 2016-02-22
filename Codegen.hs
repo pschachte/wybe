@@ -9,7 +9,7 @@
 module Codegen (
   Codegen(..), CodegenState(..), BlockState(..),
   emptyModule, evalCodegen, addExtern, addGlobalConstant,
-  execCodegen,
+  execCodegen, emptyCodegen,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
   call, externf, ret, globalDefine, external, phi, br, cbr,
@@ -525,3 +525,5 @@ retNothing = terminator $ Do $ Ret Nothing []
 
 phi :: Type -> [(Operand, Name)] -> Codegen Operand
 phi ty incoming = instr ty $ Phi ty incoming []
+
+    

@@ -159,12 +159,12 @@ makeGlobalDefinition proto bls = do
         isMain = primProtoName proto == ""
         -- *The top level procedure will be labelled main.
         label = modName ++ "." ++
-            if isMain then "main" else primProtoName proto        
+            if isMain then "main" else primProtoName proto
         inputs = List.filter isInputParam params
     fnargs <- mapM makeFnArg inputs
     retty <- if isMain then return int_t else primOutputType params
     return $ globalDefine retty label fnargs bls
-      
+
 
 -- | Predicate to check if a primitive's parameter is of input flow (input)
 -- and the param is needed (inferred by it's param info field)
@@ -455,7 +455,7 @@ cgenLLVMUnop name flags args
         do let inArgs = primInputs args
            let outputs = primOutputs args
            if length outputs == 1 && length inArgs == 1
-               then do (outTy, outNm) <-openPrimArg $ head outputs
+               then do (outTy, outNm) <- openPrimArg $ head outputs
                        ptr <- doAlloca outTy
                        inop <- cgenArg $ head inArgs
                        store ptr inop
@@ -500,18 +500,6 @@ argsNeeded (a:as) (p:ps)
 ----------------------------------------------------------------------------
 -- Helpers for dealing with instructions                                  --
 ----------------------------------------------------------------------------
-
--- | The 'maybeMove' instruction creates operands for both the input and
--- output parameter and assigns the out operand the input operand on the
--- reference symbol table.
-maybeMove :: [PrimArg] -> Maybe String -> Codegen (Maybe Operand)
-maybeMove _ Nothing = return Nothing
-maybeMove [] _ = return Nothing
-maybeMove (a:[]) (Just nm) =
-    do inop <- cgenArg a
-       assign nm inop
-       return (Just inop)
-maybeMove _ _ = error $ "Move instruction received more than one input!"
 
 
 -- | Append an 'Instruction' to the current basic block's instruction stack.
@@ -652,7 +640,7 @@ getBits (IntegerType bs) = bs
 getBits (PointerType ty _) = getBits ty
 getBits (FloatingPointType bs _) = bs
 getBits ty = shouldnt $ "Can't get bit size for type: " ++ show ty
-    
+
 -- | Convert a string into a constant array of constant integers.
 makeStringConstant :: String ->  C.Constant
 makeStringConstant s = C.Array char_t cs
@@ -796,7 +784,7 @@ declareExtern (PrimCall (ProcSpec m n _) args) = do
     retty <- primReturnType args
     fnargs <- mapM makeExArg (primInputs args)
     return $ external retty ((showModSpec m) ++ "." ++ n) fnargs
-      
+
 declareExtern PrimNop = error "Can't declare extern for PrimNop."
 
 -- | Helper to make arguments for an extern declaration.
@@ -889,6 +877,16 @@ addUniqueDefinitions (LLVMAST.Module n l t ds) defs =
   where
     newDefs = List.nub $ ds ++ defs
 
+
+-------------------------------------------------------------------------------
+-- Memory Interface                                                          --
+-------------------------------------------------------------------------------
+
+-- * $ functions
+
+-- gcAllocate :: Word -> Codegen Operand
+-- gcAllocate size = do
+    
 
 
 ----------------------------------------------------------------------------
