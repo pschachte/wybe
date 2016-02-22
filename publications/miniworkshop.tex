@@ -112,7 +112,7 @@
 \section{Introduction}
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Motivation}
 \begin{itemize}
 \item Many students have difficulty learning to program
@@ -136,7 +136,7 @@
 \end{frame}
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Student issues with Java}
 \begin{itemize}
 \item Aliasing and its dangers, defensive copying, immutability
@@ -153,7 +153,7 @@ But they can write non-trivial programs --- build-and-fix works
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Student issues with Haskell and Mercury}
 \begin{itemize}
 \item Recursion
@@ -174,7 +174,7 @@ But they can write non-trivial programs --- build-and-fix works
 \section{Interface Integrity}
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Action at a distance}
 \begin{itemize}
 \item Several of the problems students have with Java stem from
@@ -192,7 +192,7 @@ But they can write non-trivial programs --- build-and-fix works
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Software Engineering}
 \begin{itemize}
 \item For code to be \emph{maintainable}, callers and callees should be
@@ -212,7 +212,7 @@ But they can write non-trivial programs --- build-and-fix works
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Interface integrity}
 
 A function exhibits \textbf{interface integrity} if its apparent and
@@ -245,7 +245,7 @@ effective interfaces are identical.
 \section{Wybe Basics}
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Wybe basics}
 \begin{quotation}
 Simplicity is prerequisite for reliability. \\
@@ -268,23 +268,23 @@ Simplicity is prerequisite for reliability. \\
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Hello World}
 \begin{itemize}
 \item Comments introduced by hash (\texttt{\#})
-\item Hello World in Wybe: \\[3ex]
-\begin{alltt}
-    \hspace*{5em}\texttt{\#!/usr/bin/env wybe}\\
-    \hspace*{5em}\texttt{!println("Hello, World!")}
-\end{alltt} \\[3ex]
+\item Hello World in Wybe:
+\begin{semiverbatim}
+    #!/usr/bin/env wybe
+    !println("Hello, World!")
+\end{semiverbatim}
 \item Like a scripting language, top-level statements are executed
-\item I'll explain the \texttt{!} later
+\item I'll explain the \texttt{!} on the second line later
 \end{itemize}
 \end{frame}
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Information flow}
 \begin{itemize}
 \item Direction of information flow (\emph{mode}) is explicit
@@ -300,7 +300,7 @@ Simplicity is prerequisite for reliability. \\
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Procedures}
 \begin{itemize}
 \item Same adornments are used in formal parameters
@@ -317,7 +317,7 @@ Simplicity is prerequisite for reliability. \\
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Expressions}
 \begin{itemize}
 \item Procedure call arguments can be expressions
@@ -345,7 +345,7 @@ Simplicity is prerequisite for reliability. \\
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Reversibility}
 \begin{itemize}
 \item Procedures can be overloaded based on mode
@@ -371,7 +371,7 @@ Expression \texttt{cons(\^{ }h,\^{ }t)} deconstructs
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Value semantics}
 \begin{itemize}
 \item Wybe has value semantics:  aliasing is not semantically significant
@@ -388,7 +388,7 @@ Expression \texttt{cons(\^{ }h,\^{ }t)} deconstructs
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Resources}
 \begin{itemize}
 \item A \emph{resource} is data that can be used and/or defined
@@ -401,16 +401,17 @@ Expression \texttt{cons(\^{ }h,\^{ }t)} deconstructs
 \item Resource can be declared as a name for several other resources
 \item Useful for data that is widely used/modified in a module
 \item I/O, command line arguments are resources visible at top level
-\item \texttt{def hello(name) with io:} \\
-\hspace*{2em}\texttt{!print("Hello, ")} \\
-\hspace*{2em}\texttt{!command\_line([\^{ }name])} \\
-\hspace*{2em}\texttt{!print(name)} \\
+  \begin{semiverbatim}
+def hello(name) use io:
+    !print("Hello, ")
+    !println(name)
+  \end{semiverbatim}
 \end{itemize}
 \end{frame}
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Tests}
 \begin{itemize}
 \item Some procedure calls, called \emph{tests}, can succeed or fail
@@ -429,12 +430,12 @@ Expression \texttt{cons(\^{ }h,\^{ }t)} deconstructs
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{If statement}
 \begin{itemize}
 \item Tests can be used in \texttt{if} statements
-\item \texttt{if} \emph{test1}\texttt{:} \emph{statements} \ldots \\
-\hspace*{1em} \emph{test2}\texttt{:} \emph{statements} \ldots \\
+\item \texttt{if} \emph{test1}\texttt{::} \emph{statements} \ldots \\
+\hspace*{1em} \emph{test2}\texttt{::} \emph{statements} \ldots \\
 \hspace*{1em} \ldots \\
 \texttt{end}
 \item Tests are tried in order; body of first to succeed is executed
@@ -451,7 +452,7 @@ Expression \texttt{cons(\^{ }h,\^{ }t)} deconstructs
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Tests as statements}
 \begin{itemize}
 \item A test can be used as a statement
@@ -468,7 +469,7 @@ Expression \texttt{cons(\^{ }h,\^{ }t)} deconstructs
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Case statement and expression}
 \begin{itemize}
 \item \texttt{case} \emph{expr} \texttt{of} \\
@@ -493,10 +494,11 @@ is equivalent to \\[2ex]
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Loops}
 \begin{itemize}
-\item One modular looping construct: \texttt{do} \emph{loop-statements} \ldots
+\item One modular looping construct:
+  \texttt{do} \emph{loop-statements} \ldots \texttt{end}
 \item \emph{loop-statements} are any normal statements plus any
   special looping statements, including:
   \begin{itemize}
@@ -512,18 +514,19 @@ is equivalent to \\[2ex]
   \end{itemize}
 \item Include as many of these constructs as you like in the loop,
   wherever you like, \emph{e.g.:} \\
-\begin{alltt}
-\hspace*{2em}do  !print(prompt) \\
-\hspace*{3em}    !readln(\^{ }answer) \\
-\hspace*{3em}    until answer in ["y","n"] \\
-\hspace*{3em}    !println("Please answer 'y' or 'n'.") \\
-\end{alltt}
+\begin{semiverbatim}
+    do  !print(prompt)
+        !readln(\^{ }answer)
+        until answer in ["y","n"]
+        !println("Please answer 'y' or 'n'.")
+    end
+\end{semiverbatim}
 \end{itemize}
 \end{frame}
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Generators}
 \begin{itemize}
 \item Generators are procedures that return any number of times
@@ -545,7 +548,7 @@ is equivalent to \\[2ex]
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Generators}
 \begin{itemize}
 \item A procedure that calls a generator outside of a \texttt{for}
@@ -563,7 +566,7 @@ is equivalent to \\[2ex]
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Types}
 \begin{itemize}
 \item Type system is not designed yet; much work to be done
@@ -586,7 +589,7 @@ is equivalent to \\[2ex]
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Types}
 \begin{itemize}
 \item Interface inheritance: unify types with type classes
@@ -612,7 +615,7 @@ is equivalent to \\[2ex]
 
 
 %-----------------------------------------------------------------------%
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Conclusion}
 \begin{quotation}
 \noindent

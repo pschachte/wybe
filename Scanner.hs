@@ -27,8 +27,6 @@ data Token = TokFloat Double SourcePos          -- ^A floating point number
               | TokRBracket BracketStyle SourcePos
                                                 -- ^Some kind of right bracket
               | TokComma SourcePos              -- ^A comma
-              | TokSemicolon SourcePos          -- ^A semicolon
-              | TokColon SourcePos              -- ^A colon
               | TokSymbol String SourcePos      -- ^A symbol of made up of
                                                 --  non-identifier chars
               deriving (Show)
@@ -43,8 +41,6 @@ tokenPosition (TokIdent _     pos) = pos
 tokenPosition (TokLBracket _  pos) = pos
 tokenPosition (TokRBracket _  pos) = pos
 tokenPosition (TokComma       pos) = pos
-tokenPosition (TokSemicolon   pos) = pos
-tokenPosition (TokColon       pos) = pos
 tokenPosition (TokSymbol _    pos) = pos
 
 -- |Returns the value of a float token.
@@ -122,8 +118,6 @@ tokenise pos str@(c:cs)
                 in  multiCharTok name rest (TokIdent name pos) pos
   | otherwise = case c of
                     ',' -> singleCharTok c cs pos $ TokComma pos
-                    ';' -> singleCharTok c cs pos $ TokSemicolon pos
-                    ':' -> singleCharTok c cs pos $ TokColon pos
                     '(' -> singleCharTok c cs pos $ TokLBracket Paren pos
                     '[' -> singleCharTok c cs pos $ TokLBracket Bracket pos
                     '{' -> singleCharTok c cs pos $ TokLBracket Brace pos
@@ -248,4 +242,4 @@ isIdentChar ch = isAlphaNum ch || ch == '_'
 -- |Is this a character that can appear in a symbol?
 isSymbolChar :: Char -> Bool
 isSymbolChar ch = not (isAlphaNum ch || isSpace ch || isControl ch 
-                       || ch `elem` ",;.([{)]}#'\"\\")
+                       || ch `elem` ",.([{)]}#'\"\\")

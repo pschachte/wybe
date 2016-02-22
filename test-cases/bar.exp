@@ -39,7 +39,7 @@ factorial > public (1 calls) (inline)
 gen$1 > (1 calls)
 0: gen$1(n#0:wybe.int, [?n#0:wybe.int], ?tmp$0#0:wybe.int):
     foreign llvm icmp sle(n#0:wybe.int, 0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:16:40
-    case ~tmp$7#0 of
+    case ~tmp$7#0:wybe.bool of
     0:
         foreign llvm sub(n#0:wybe.int, 1:wybe.int, ?tmp$10#0:wybe.int) @wybe:7:38
         numbers.gen$1<0>(~tmp$10#0:wybe.int, ?tmp$12#0:wybe.int, ?tmp$13#0:wybe.int) @numbers:4:8

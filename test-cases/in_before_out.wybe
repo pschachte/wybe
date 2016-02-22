@@ -1,3 +1,3 @@
-public proc test(?result:int)
+public proc in_before_out(?result:int)
        incr(!result)
 end

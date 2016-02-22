@@ -1,5 +1,5 @@
 Fix bugs:
-Internal error: inlining: reference to unassigned variable ...
+
 
 Complete the implementation:
 o Optimisations
@@ -13,6 +13,7 @@ o Detect and report use of uninitialised variables, including update
 
 
 Complete the language:
+o Provide switch-on-constructor syntax and implementation
 o Fix the syntax!
     o At statement level, support interleaved operator value syntax,
       eg, "f v g w h x", which would be read as f__g__h(v,w,x)
@@ -34,7 +35,6 @@ o Support optional and named arguments
 
 Optimise:
 o Remove unneeded input and unchanged output arguments
-o Common sub-expression elimination
 o Inter-procedure common sub-expression elimination
 o Code hoisting
 o Destructive update transformation (CTGC)

@@ -542,9 +542,12 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
                                       (List.any (flip List.elem dups) . snd) $
                                     zip procs typList)
                                    pos]
-typecheckStmt _ _ (ForeignCall _ _ _ args) pos typing = do
+typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
     -- Pick up any output casts
-    return [List.foldr noteOutputCast typing $ List.map content args]
+    logTypes $ "Type checking foreign " ++ showStmt 4 call
+    let typing' = List.foldr noteOutputCast typing $ List.map content args
+    logTypes $ "Resulting typing = " ++ show typing
+    return [typing']
 typecheckStmt _ _ Nop pos typing = return [typing]
 typecheckStmt m caller (Cond test exp thn els) pos typing = do
     typings <- typecheckSequence (typecheckPlacedStmt m caller) [typing] test
@@ -758,9 +761,10 @@ applyExpTyping dict exp@(Var nm flow ftype) =
     case Map.lookup nm dict of
         Nothing -> shouldnt $ "type of variable '" ++ nm ++ "' unknown"
         Just typ -> Typed exp typ False
+applyExpTyping dict typed@(Typed _ _ True) =
+    typed
 applyExpTyping dict (Typed exp _ False) =
     applyExpTyping dict exp
-applyExpTyping dict typed@(Typed _ _ True) = typed
 applyExpTyping _ exp =
     shouldnt $ "Expression '" ++ show exp ++ "' left after flattening"
 

@@ -14,6 +14,7 @@ import AST
 import Options (LogSelection(BodyBuilder))
 import Data.Map as Map
 import Data.List as List
+import Data.Bits
 import Control.Monad
 import Control.Monad.Trans (lift)
 import Control.Monad.Trans.State
@@ -80,17 +81,16 @@ continueState (BodyState _ subst oSubst calls) =
 buildBody :: VarSubstitution -> BodyBuilder a -> Compiler (a,ProcBody)
 buildBody oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
-    -- (a,final) <- runStateT builder $ BodyState (Just []) []
     (a,bstate) <- runStateT builder $ initState oSubst
     logMsg BodyBuilder ">>>> Finished  building a proc body"
-    -- return (a,astateBody final)
     return (a,currBody bstate)
 
 
-buildFork :: PrimVarName -> Bool -> [BodyBuilder ()] -> BodyBuilder ()
-buildFork var final branchBuilders = do
+buildFork :: PrimVarName -> TypeSpec -> Bool -> [BodyBuilder ()] 
+             -> BodyBuilder ()
+buildFork var ty final branchBuilders = do
     arg' <- expandArg
-            $ ArgVar var (TypeSpec ["wybe"] "int" []) FlowIn Ordinary False
+            $ ArgVar var ty FlowIn Ordinary False
     logBuild $ "<<<< beginning to build a new fork on " ++ show arg'
       ++ " (final=" ++ show final ++ ")"
     ProcBody prims fork <- gets currBody
@@ -101,21 +101,22 @@ buildFork var final branchBuilders = do
           (winner:_) -> do
             logBuild $ "**** condition result is " ++ show n
             winner
-      ArgVar var' _ _ _ _ -> do -- normal condition with unknown result
+      ArgVar var' ty _ _ _ -> do -- normal condition with unknown result
         case fork of
-          PrimFork _ _ _ -> shouldnt "Building a fork while building a fork"
+          PrimFork _ _ _ _ -> 
+            shouldnt "Building a fork while building a fork"
           NoFork -> 
-            modify (\s -> s {currBuild =
-                             Forked $ ProcBody prims
-                                      $ PrimFork var' final [] })
+            modify (\s -> s {currBuild = Forked $ ProcBody prims
+                                         $ PrimFork var' ty final [] })
         mapM_ buildBranch branchBuilders
         ProcBody revPrims' fork' <- gets currBody
         case fork' of
           NoFork -> shouldnt "Building a fork produced an empty fork"
-          PrimFork v l revBranches ->
+          PrimFork v ty l revBranches ->
             modify (\s -> s { currBuild =
                               Forked $ ProcBody revPrims'
-                                       $ PrimFork v l $ reverse revBranches })
+                                       $ PrimFork v ty l 
+                                       $ reverse revBranches })
       _ -> shouldnt "Switch on non-integer value"
     logBuild $ ">>>> Finished building a fork"
 
@@ -128,10 +129,10 @@ buildBranch builder = do
     ProcBody revPrims fork <- gets currBody
     case fork of
       NoFork -> shouldnt "Building a branch outside of buildFork"
-      PrimFork v l branches ->
+      PrimFork v ty l branches ->
         modify (\s -> s { currBuild =
                           Forked $ ProcBody revPrims
-                                   $ PrimFork v l $ branch : branches })
+                                   $ PrimFork v ty l $ branch : branches })
 
 buildPrims :: BodyBuilder () -> BodyBuilder ProcBody
 buildPrims builder = do
@@ -194,7 +195,7 @@ argExpandedPrim (PrimCall pspec args) = do
     return $ PrimCall pspec args'
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
-    return $ constantFold lang nm flags args'
+    return $ simplifyForeign lang nm flags args'
 argExpandedPrim PrimNop =
     shouldnt "argExpandedPrim: Nops should be filtered out by now"
 
@@ -284,9 +285,9 @@ addInstrToState ins (Forked body) = Forked $ addInstrToBody ins body
 addInstrToBody ::  Placed Prim -> ProcBody -> ProcBody
 addInstrToBody ins (ProcBody prims NoFork) =
     ProcBody (prims ++ [ins]) NoFork
-addInstrToBody ins (ProcBody prims (PrimFork v l bodies)) =
+addInstrToBody ins (ProcBody prims (PrimFork v ty l bodies)) =
     ProcBody prims
-    (PrimFork v l (List.map (addInstrToBody ins) bodies))
+    (PrimFork v ty l (List.map (addInstrToBody ins) bodies))
 
 
 -- |Return the current ultimate value of the input argument.
@@ -311,10 +312,9 @@ expandArg arg = return arg
 
 -- |Transform primitives with all inputs known into a move instruction by
 --  performing the operation at compile-time.
-constantFold ::  String -> ProcName -> [Ident] -> [PrimArg] -> Prim
-constantFold "llvm" op flags args
-  | all constIfInput args = simplifyOp op flags args
-constantFold lang op flags args = PrimForeign lang op flags args
+simplifyForeign ::  String -> ProcName -> [Ident] -> [PrimArg] -> Prim
+simplifyForeign "llvm" op flags args = simplifyOp op flags args
+simplifyForeign lang op flags args = PrimForeign lang op flags args
 
 
 -- |If the specified argument is an input, then it is a constant
@@ -323,15 +323,67 @@ constIfInput (ArgVar _ _ FlowIn _ _) = False
 constIfInput _ = True
 
 
+-- | Simplify llvm instructions where possible.  This handles constant
+--   folding and simple (single-operation) algebraic simplifications
+--   (left and right identities and annihilators).
 simplifyOp :: ProcName -> [Ident] -> [PrimArg] -> Prim
+-- Integer ops
 simplifyOp "add" _ [ArgInt n1 ty, ArgInt n2 _, output] =
   PrimForeign "llvm" "move" [] [ArgInt (n1+n2) ty, output]
+simplifyOp "add" _ [ArgInt 0 ty, arg, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+simplifyOp "add" _ [arg, ArgInt 0 ty, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
 simplifyOp "sub" _ [ArgInt n1 ty, ArgInt n2 _, output] =
   PrimForeign "llvm" "move" [] [ArgInt (n1-n2) ty, output]
+simplifyOp "sub" _ [arg, ArgInt 0 _, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
 simplifyOp "mul" _ [ArgInt n1 ty, ArgInt n2 _, output] =
   PrimForeign "llvm" "move" [] [ArgInt (n1*n2) ty, output]
+simplifyOp "mul" _ [ArgInt 1 ty, arg, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+simplifyOp "mul" _ [arg, ArgInt 1 ty, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+simplifyOp "mul" _ [ArgInt 0 ty, _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt 0 ty, output]
+simplifyOp "mul" _ [_, ArgInt 0 ty, output] =
+  PrimForeign "llvm" "move" [] [ArgInt 0 ty, output]
 simplifyOp "div" _ [ArgInt n1 ty, ArgInt n2 _, output] =
   PrimForeign "llvm" "move" [] [ArgInt (n1 `div` n2) ty, output]
+simplifyOp "div" _ [arg, ArgInt 1 _, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+-- Bitstring ops
+simplifyOp "and" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" []
+  [ArgInt (fromIntegral n1 .&. fromIntegral n2) ty, output]
+simplifyOp "and" _ [ArgInt 0 ty, _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt 0 ty, output]
+simplifyOp "and" _ [_, ArgInt 0 ty, output] =
+  PrimForeign "llvm" "move" [] [ArgInt 0 ty, output]
+simplifyOp "and" _ [ArgInt (-1) _, arg, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+simplifyOp "and" _ [arg, ArgInt (-1) _, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+simplifyOp "or" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" []
+  [ArgInt (fromIntegral n1 .|. fromIntegral n2) ty, output]
+simplifyOp "or" _ [ArgInt (-1) ty, _, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (-1) ty, output]
+simplifyOp "or" _ [_, ArgInt (-1) ty, output] =
+  PrimForeign "llvm" "move" [] [ArgInt (-1) ty, output]
+simplifyOp "or" _ [ArgInt 0 _, arg, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+simplifyOp "or" _ [arg, ArgInt 0 _, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+simplifyOp "xor" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+  PrimForeign "llvm" "move" []
+  [ArgInt (fromIntegral n1 `xor` fromIntegral n2) ty, output]
+simplifyOp "xor" _ [ArgInt 0 _, arg, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+simplifyOp "xor" _ [arg, ArgInt 0 _, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+-- XXX should probably put shift ops here, too
+-- Integer comparisons
 simplifyOp "icmp" ["eq"] [ArgInt n1 ty, ArgInt n2 _, output] =
   PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1==n2) ty, output]
 simplifyOp "icmp" ["ne"] [ArgInt n1 ty, ArgInt n2 _, output] =
@@ -344,14 +396,29 @@ simplifyOp "icmp" ["sgt"] [ArgInt n1 ty, ArgInt n2 _, output] =
   PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1>n2) ty, output]
 simplifyOp "icmp" ["sge"] [ArgInt n1 ty, ArgInt n2 _, output] =
   PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1>=n2) ty, output]
+-- Float ops
 simplifyOp "fadd" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
   PrimForeign "llvm" "move" [] [ArgFloat (n1+n2) ty, output]
+simplifyOp "fadd" _ [ArgFloat 0 ty, arg, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+simplifyOp "fadd" _ [arg, ArgFloat 0 ty, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
 simplifyOp "fsub" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
   PrimForeign "llvm" "move" [] [ArgFloat (n1-n2) ty, output]
+simplifyOp "fsub" _ [arg, ArgFloat 0 _, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
 simplifyOp "fmul" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
   PrimForeign "llvm" "move" [] [ArgFloat (n1*n2) ty, output]
+simplifyOp "fmul" _ [arg, ArgFloat 1 _, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+simplifyOp "fmul" _ [ArgFloat 1 _, arg, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+-- We don't handle float * 0.0 because of the semantics of IEEE floating mult.
 simplifyOp "fdiv" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
   PrimForeign "llvm" "move" [] [ArgFloat (n1/n2) ty, output]
+simplifyOp "fdiv" _ [arg, ArgFloat 1 _, output] =
+  PrimForeign "llvm" "move" [] [arg, output]
+-- Float comparisons
 simplifyOp "fcmp" ["eq"] [ArgFloat n1 ty, ArgFloat n2 _, output] =
   PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1==n2) ty, output]
 simplifyOp "fcmp" ["ne"] [ArgFloat n1 ty, ArgFloat n2 _, output] =

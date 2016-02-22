@@ -233,7 +233,7 @@ doCodegenBody proto body =
            True -> mainReturnCodegen
            False -> do ret builtOp
                        return ()
-         (PrimFork var _ fbody) -> codegenForkBody var fbody builtOp
+         (PrimFork var ty _ fbody) -> codegenForkBody var fbody builtOp
 
 
 -- | Generate code for returning integer exit code at the end main

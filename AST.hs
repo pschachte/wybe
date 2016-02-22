@@ -14,7 +14,7 @@
 module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
-  TypeProto(..), TypeSpec(..), FnProto(..),
+  Determinism(..), TypeProto(..), TypeSpec(..), FnProto(..),
   ProcProto(..), Param(..),
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), 
@@ -92,13 +92,16 @@ data Item
      | ImportMods Visibility [ModSpec] OptPos
      | ImportItems Visibility ModSpec [Ident] OptPos
      | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
-     | FuncDecl Visibility FnProto TypeSpec (Placed Exp) OptPos
-     | ProcDecl Visibility ProcProto [Placed Stmt] OptPos
+     | FuncDecl Visibility Determinism FnProto TypeSpec (Placed Exp) OptPos
+     | ProcDecl Visibility Determinism ProcProto [Placed Stmt] OptPos
      | CtorDecl Visibility FnProto OptPos
      | StmtDecl Stmt OptPos
 
 -- |The visibility of a file item.  We only support public and private.
 data Visibility = Public | Private
+                  deriving (Eq, Show, Generic)
+
+data Determinism = Det | SemiDet
                   deriving (Eq, Show, Generic)
 
 type TypeRepresentation = String
@@ -438,7 +441,7 @@ enterModule dir modspec params = do
     count <- gets ((1+) . loadCount)
     modify (\comp -> comp { loadCount = count })
     logAST $ "Entering module " ++ showModSpec modspec
-    modify (\comp -> let mods = Module dir modspec params 
+    modify (\comp -> let mods = Module dir modspec params 0 0
                                        emptyInterface (Just emptyImplementation)
                                        count count 0 []
                                        : underCompilation comp
@@ -702,7 +705,7 @@ addImport modspec imports = do
 
 -- |Add the specified proc definition to the current module.
 addProc :: Int -> Item -> Compiler ()
-addProc tmpCtr (ProcDecl vis proto stmts pos) = do
+addProc tmpCtr (ProcDecl vis detism proto stmts pos) = do
     let ProcProto name params resources = proto
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr Map.empty vis False
                   $ initSuperprocSpec vis
@@ -819,9 +822,11 @@ data Module = Module {
   modDirectory :: FilePath,      -- ^The directory the module is in
   modSpec :: ModSpec,            -- ^The module path name 
   modParams :: Maybe [Ident],    -- ^The type parameters, if a type
+  modConstants :: Int,           -- ^Num constant constructors, if a type
+  modNonConstants :: Int,        -- ^Num non-constant constructors, if a type
   modInterface :: ModuleInterface, -- ^The public face of this module
   modImplementation :: Maybe ModuleImplementation, 
-                                -- ^the module's implementation
+                                 -- ^the module's implementation
   thisLoadNum :: Int,            -- ^the loadCount when loading this module
   minDependencyNum :: Int,       -- ^the smallest loadNum of all dependencies
   procCount :: Int,              -- ^a counter for gensym-ed proc names
@@ -1156,12 +1161,12 @@ data ProcDef = ProcDef {
     procName :: Ident,          -- the proc's name
     procProto :: ProcProto,     -- the proc's prototype
     procImpln :: ProcImpln,     -- the actual implementation
-    procPos :: OptPos,          -- where this proce is defined
+    procPos :: OptPos,          -- where this proc is defined
     procTmpCount :: Int,        -- the next temp variable number to use
     procCallers :: Map ProcSpec Int,
-                                -- callers to this proc from this mod in the source
-                                -- code (before inlining) and the count of calls 
-                                -- for each caller
+                                -- callers to this proc from this mod in the
+                                -- source code (before inlining) and the
+                                -- count of calls for each caller
     procVis :: Visibility,      -- what modules should be able to see this?
     procInline :: Bool,         -- should we inline calls to this proc?
     procSuperproc :: SuperprocSpec 
@@ -1250,10 +1255,18 @@ data ProcBody = ProcBody {
       bodyFork::PrimFork}
               deriving (Eq, Show, Generic)
 
+-- | A primitive switch.  This only appears at tne end of a ProcBody.
+-- This specifies that if forkVar is 0, the first body in forkBodies
+-- should be executed; if it's 1, the second body should be executed, and 
+-- so on.  If it's greater or equal to the length of the list, the last 
+-- body should be executed.  The forkVar is always treated as an unsigned 
+-- integer type.  If forkVarLast is True, then this is the last occurrence 
+-- of that variable.
 data PrimFork =
     NoFork |
     PrimFork {
       forkVar::PrimVarName,     -- ^The variable that selects branch to take
+      forkVarType::TypeSpec,    -- ^The Wybe type of the forkVar
       forkVarLast::Bool,        -- ^Is this the last occurrence of forkVar
       forkBodies::[ProcBody]    -- ^one branch for each value of forkVar
     }
@@ -1328,8 +1341,8 @@ foldBodyPrims primFn emptyConj abDisj (ProcBody pprims fork) =
                  emptyConj $ tails pprims
     in case fork of
       NoFork -> common
-      PrimFork _ _ [] -> shouldnt "empty clause list in a PrimFork"
-      PrimFork _ _ (body:bodies) ->
+      PrimFork _ _ _ [] -> shouldnt "empty clause list in a PrimFork"
+      PrimFork _ _ _ (body:bodies) ->
           List.foldl
           (\a b -> abDisj a $ foldBodyPrims primFn common abDisj b)
           (foldBodyPrims primFn common abDisj body)
@@ -1355,8 +1368,8 @@ foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
                  emptyConj $ tails pprims
     in case fork of
       NoFork -> common
-      PrimFork _ _ [] -> shouldnt "empty clause list in a PrimFork"
-      PrimFork _ _ (body:bodies) ->
+      PrimFork _ _ _ [] -> shouldnt "empty clause list in a PrimFork"
+      PrimFork _ _ _ (body:bodies) ->
         abConj common $
         List.foldl
         (\a b -> abDisj a $ foldBodyDistrib primFn common abDisj abConj b)
@@ -1727,12 +1740,16 @@ instance Show Item where
     visibilityPrefix vis ++ "resource " ++ show name ++ ":" ++ show typ
     ++ maybeShow " = " init " "
     ++ showMaybeSourcePos pos
-  show (FuncDecl vis proto typ exp pos) =
-    visibilityPrefix vis ++ "func " ++ show proto ++ ":" ++ show typ
+  show (FuncDecl vis detism proto typ exp pos) =
+    visibilityPrefix vis
+    ++ determinismPrefix detism
+    ++ "func " ++ show proto ++ ":" ++ show typ
     ++ showMaybeSourcePos pos
     ++ " = " ++ show exp
-  show (ProcDecl vis proto stmts pos) =
-    visibilityPrefix vis ++ "proc " ++ show proto
+  show (ProcDecl vis detism proto stmts pos) =
+    visibilityPrefix vis
+    ++ determinismPrefix detism
+    ++ "proc " ++ show proto
     ++ showMaybeSourcePos pos
     ++ showBody 4 stmts
   show (CtorDecl vis proto pos) =
@@ -1759,6 +1776,12 @@ maybeModPrefix modSpec =
 visibilityPrefix :: Visibility -> String
 visibilityPrefix Public = "public "
 visibilityPrefix Private = ""
+
+
+-- |How to show a determinism.
+determinismPrefix :: Determinism -> String
+determinismPrefix SemiDet = "test "
+determinismPrefix Det = ""
 
 -- |How to show an import or use declaration.
 showUse :: Int -> ModSpec -> ImportSpec -> String
@@ -1967,9 +1990,9 @@ showBlock ind (ProcBody stmts fork) =
 
 showFork :: Int -> PrimFork -> String
 showFork ind NoFork = ""
-showFork ind (PrimFork var last bodies) =
+showFork ind (PrimFork var ty last bodies) =
     startLine ind ++ "case " ++ (if last then "~" else "") ++ show var ++
-                  " of" ++
+                  ":" ++ show ty ++ " of" ++
     List.concatMap (\(val,body) ->
                         startLine ind ++ show val ++ ":" ++
                         showBlock (ind+4) body ++ "\n")
@@ -2011,11 +2034,10 @@ showStmt _ (ForeignCall lang name flags args) =
     "(" ++ intercalate ", " (List.map show args) ++ ")"
 showStmt indent (Cond condstmts cond thn els) =
     let leadIn = List.replicate indent ' '
-    in "if" ++ showBody (indent+2) condstmts ++ "\n"
-       ++ leadIn ++ "  test " ++ show cond ++ "\n"
-       ++ leadIn ++ "then:"
+    in "if {" ++ showBody (indent+4) condstmts ++ "}\n"
+       ++ leadIn ++ show cond ++ "::\n"
        ++ showBody (indent+4) thn ++ "\n"
-       ++ leadIn ++ "else:"
+       ++ leadIn ++ "else::"
        ++ showBody (indent+4) els ++ "\n"
        ++ leadIn ++ "end"
 showStmt indent (Loop lstmts) =
@@ -2066,7 +2088,7 @@ instance Show Exp where
     ++ (if List.null flags then "" else " " ++ unwords flags)
     ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
   show (Typed exp typ cast) =
-      show exp ++ showTypeSuffix typ ++ if cast then "!" else ""
+      show exp ++ if cast then "!" else "" ++ showTypeSuffix typ
 
 -- |maybeShow pre maybe pos
 --  if maybe has something, show pre, the maybe payload, and post
