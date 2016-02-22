@@ -46,9 +46,7 @@ public type float is f64
 end
 
 
-public type bool is i1
-    public ctor false
-    public ctor true
+public type bool = public false | true
     # These are syntax errors because they are operators:
     public func and(p:bool, q:bool):bool = foreign llvm and(p,q)
     public func or(p:bool, q:bool):bool = foreign llvm or(p,q)
@@ -58,7 +56,7 @@ public type bool is i1
 end
 
 
-public type string
+public type string is pointer
     # this whole implementation is completely wrong, but will do for now
     public func ++(x:string, y:string):string = foreign c strcat(x,y)
     public func =(x:string, y:string):bool = foreign llvm icmp eq(x,y)
@@ -72,8 +70,7 @@ public type char is i32
 end
 
 
-public type int_seq
-    public ctor range(start:int, finish:int, incr:int)
+public type int_seq = public range(start:int, finish:int, incr:int)
     public proc [|](?next:int, ?rest:int_seq, curr:int_seq, ?succeed:bool)
     	# XXX commented out because it won't even parse!
     	# if curr.incr > 0 then

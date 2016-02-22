@@ -14,6 +14,8 @@ o Detect and report use of uninitialised variables, including update
 
 Complete the language:
 o Provide switch-on-constructor syntax and implementation
+o Introduce 'test' proc calls, that are only allowed in test procs, and
+  that cause the proc to fail (return false) when the call fails
 o Fix the syntax!
     o At statement level, support interleaved operator value syntax,
       eg, "f v g w h x", which would be read as f__g__h(v,w,x)
@@ -29,6 +31,7 @@ o Fix the syntax!
 o Support polymorphism
 o Support subtypes
 o Support higher-order programming
+o Support generators (lazy lists)
 o Support declared laziness
 o Support optional and named arguments
 
