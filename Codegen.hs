@@ -495,6 +495,7 @@ load ptr = Load False ptr Nothing 0 []
 
 -- Helpers for allocating, storing, loading
 doAlloca :: Type -> Codegen Operand
+doAlloca (PointerType ty _) = instr (ptr_t ty) $ Alloca ty Nothing 0 []
 doAlloca ty = instr (ptr_t ty) $ Alloca ty Nothing 0 []
 
 doLoad :: Type -> Operand -> Codegen Operand

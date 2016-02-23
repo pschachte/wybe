@@ -37,7 +37,7 @@ import           LLVM.General.Context
 import           LLVM.General.Module
 import           LLVM.General.PrettyPrint
 import           Options (LogSelection (Blocks))
-
+import Config (wordSize,wordSizeBytes)
 
 -- | Transofrorm the module's procedures (in LPVM by now) into LLVM function
 -- definitions. A LLVMAST.Module is built up using these global definitions
@@ -412,7 +412,12 @@ cgen prim@(PrimForeign lang name flags args)
      | lang == "llvm" = case (length args) of
                           2 -> cgenLLVMUnop name flags args
                           3 -> cgenLLVMBinop name flags args
-                          _ -> error $ "Instruction " ++ name ++ " not found!"
+                          _ -> shouldnt $ "Instruction " ++ name ++ " not found!"
+
+     | lang == "lpvm" = do
+           -- mapM_ cgenArg $ primInputs args
+           cgenLPVM name flags args
+                          
      | otherwise =
          do addExtern prim
             let inArgs = primInputs args
@@ -455,13 +460,17 @@ cgenLLVMUnop name flags args
         do let inArgs = primInputs args
            let outputs = primOutputs args
            if length outputs == 1 && length inArgs == 1
+               -- then do (outTy, outNm) <- openPrimArg $ head outputs
+               --         ptr <- doAlloca outTy
+               --         inop <- cgenArg $ head inArgs
+               --         store ptr inop
+               --         op <- doLoad outTy ptr
+               --         assign outNm op
+               --         return $ Just op
                then do (outTy, outNm) <- openPrimArg $ head outputs
-                       ptr <- doAlloca outTy
                        inop <- cgenArg $ head inArgs
-                       store ptr inop
-                       op <- doLoad outTy ptr
-                       assign outNm op
-                       return $ Just op
+                       assign outNm inop
+                       return $ Just inop
                else return Nothing
 
     | otherwise =
@@ -497,6 +506,50 @@ argsNeeded (a:as) (p:ps)
     | otherwise = argsNeeded as ps
 
 
+-- | Code generation for LPVM instructions.
+cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
+cgenLPVM pname flags args
+    | pname == "alloc" = do
+          outTy <- lift $ primReturnType args
+          when (length inputs /= 1 ) $ shouldnt "Incorrect alloc instruction."
+          let size = valTrust (head inputs)
+          op <- gcAllocate size outTy
+          assign outNm op
+          return $ Just op
+
+    | pname == "access" = do          
+          let (ptrOpArg, index) = case inputs of
+                  (a:b:[]) -> (a, valTrust b)
+                  _ -> shouldnt "Incorrect access instruction."
+          ptrOp <- cgenArg ptrOpArg
+          op <- gcAccess ptrOp index
+          assign outNm op
+          return $ Just op
+    
+    | pname == "mutate" = do
+          let (ptrOpArg, index, valArg) = case inputs of
+                  (a:b:c:[]) -> (a, valTrust b , c)
+                  _ -> shouldnt "Incorrect mutate instruction."
+          val <- cgenArg valArg
+          ptrOp <- cgenArg ptrOpArg
+          op <- gcMutate ptrOp index val
+          assign outNm ptrOp
+          return $ Just ptrOp
+          
+          
+          
+
+    | otherwise = shouldnt $ "Instruction " ++ pname ++ " not imlemented."
+  where
+    inputs = primInputs args
+    outputs = primOutputs args
+    trustMsg = "Argument is not an Integer value."
+    valTrust a = trustFromJust trustMsg $ argIntVal a
+    outNm = pullName $ head outputs
+    
+    
+
+
 ----------------------------------------------------------------------------
 -- Helpers for dealing with instructions                                  --
 ----------------------------------------------------------------------------
@@ -522,8 +575,9 @@ addInstruction ins args =
                   let outNames = List.map pullName outArgs
                   zipWithM_ assign outNames fields
                   return $ last fields
-    where pullName (ArgVar var _ _ _ _) = show var
-          pullName _ = error $ "Expected variable as output."
+
+pullName (ArgVar var _ _ _ _) = show var
+pullName _ = error $ "Expected variable as output."        
 
 -- | Generate an expanding instruction name using the passed flags. This is
 -- useful to augment a simple instruction. (Ex: compare instructions can have
@@ -579,6 +633,11 @@ argName :: PrimArg -> Maybe String
 argName (ArgVar var _ _ _ _) = Just $ show var
 argName _ = Nothing
 
+
+argIntVal :: PrimArg -> Maybe Integer
+argIntVal (ArgInt val _) = Just val
+argIntVal _ = Nothing
+
 -- | Split primitive arguments into inputs and output arguments determined
 -- by their flow type.
 splitArgs :: [PrimArg] -> ([PrimArg], PrimArg)
@@ -617,8 +676,13 @@ localOperandType _ = void_t
 -- it a global declaration 'addGlobalConstant' creates a G.Global Value for
 -- it, generating a UnName name for it.
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
-cgenArg (ArgVar nm _ _ _ _) = getVar (show nm)
+cgenArg (ArgVar nm _ _ _ _) = do
+    lift $ logBlocks $ "Getting arg: " ++ show nm
+    getVar (show nm)
 cgenArg (ArgInt val ty) = do t <- lift $ typed' ty
+                             lift $ logBlocks $ "Type: " ++ show ty
+                                 ++ " -> " ++ show t
+                                 ++ " -> " ++ show val
                              let bs = getBits t
                              return $ cons $ C.Int bs val
 cgenArg (ArgFloat val ty) = return $ cons $ C.Float (F.Double val)
@@ -639,7 +703,7 @@ getBits :: LLVMAST.Type -> Word32
 getBits (IntegerType bs) = bs
 getBits (PointerType ty _) = getBits ty
 getBits (FloatingPointType bs _) = bs
-getBits ty = shouldnt $ "Can't get bit size for type: " ++ show ty
+getBits ty = fromIntegral wordSize 
 
 -- | Convert a string into a constant array of constant integers.
 makeStringConstant :: String ->  C.Constant
@@ -699,6 +763,7 @@ llvmMapUnop =
            ]
 
 
+
 ----------------------------------------------------------------------------
 -- Helpers                                                                --
 ----------------------------------------------------------------------------
@@ -720,7 +785,7 @@ typed' ty = do
     case repr of
         Just typeStr -> return $ typeStrToType typeStr
         -- Nothing -> error $ "No type representaition: " ++ (show ty)
-        Nothing -> return void_t
+        Nothing -> return $ ptr_t $ int_c (fromIntegral wordSize)
 
 typeStrToType :: String -> LLVMAST.Type
 typeStrToType [] = void_t
@@ -742,7 +807,7 @@ newLLVMModule :: String -> [[ProcDef]] -> LLVMAST.Module
 newLLVMModule name procs = let procs' = concat procs
                                defs = List.map takeDefinition procs'
                                exs = concat $ List.map takeExterns procs'
-                               exs' = uniqueExterns exs
+                               exs' = uniqueExterns exs ++ [mallocExtern]
                            in modWithDefinitions name $ exs' ++ defs
 
 -- | Pull out the LLVM Definition of a procedure.
@@ -794,6 +859,10 @@ makeExArg arg = do
     let nm = LLVMAST.UnName 0
     return (ty, nm)
 
+
+mallocExtern :: LLVMAST.Definition
+mallocExtern = let ext_arg = [(LLVMAST.IntegerType 32, LLVMAST.Name "size")]
+               in external (ptr_t (int_c 8)) "wybe_malloc" ext_arg    
 
 ----------------------------------------------------------------------------
 -- Block Modification                                                     --
@@ -884,8 +953,46 @@ addUniqueDefinitions (LLVMAST.Module n l t ds) defs =
 
 -- * $ functions
 
--- gcAllocate :: Word -> Codegen Operand
--- gcAllocate size = do
+-- | returns a i8* pointer
+-- XXX What will be the type of 'size' we pass to extern C's malloc?
+callWybeMalloc :: Integer -> Codegen Operand
+callWybeMalloc size = do
+    let outTy = (ptr_t (int_c 8))
+    let fnName = LLVMAST.Name "wybe_malloc"
+    let inOp = cons $ C.Int 32 size
+    let ins = call (externf outTy fnName) [inOp]
+    instr outTy ins
+    
+
+gcAllocate :: Integer -> LLVMAST.Type -> Codegen Operand
+gcAllocate size castTy = do
+    voidPtr <- callWybeMalloc size
+    instr castTy $ LLVMAST.BitCast voidPtr castTy []
+
+
+gcAccess :: Operand -> Integer -> Codegen Operand
+gcAccess ptr index = do
+    let indices = [(cons $ C.Int 64 index)]
+    let getel = LLVMAST.GetElementPtr False ptr indices []
+    let opTypePtr = localOperandType ptr
+    let opType = pullFromPointer opTypePtr
+    accessPtr <- instr opTypePtr getel
+    instr opType $ load accessPtr
+
+
+gcMutate :: Operand -> Integer -> Operand -> Codegen Operand
+gcMutate ptr index val = do
+    let indices = [(cons $ C.Int 64 index)]
+    let getel = LLVMAST.GetElementPtr False ptr indices []
+    let opTypePtr = localOperandType ptr
+    accessPtr <- instr opTypePtr getel
+    store accessPtr val
+
+
+pullFromPointer :: LLVMAST.Type -> LLVMAST.Type
+pullFromPointer (PointerType ty _) = ty
+pullFromPointer pty = shouldnt $ "Not a pointer: " ++ show pty
+    
     
 
 
