@@ -111,9 +111,12 @@ RevItems :: { [Item] }
 
 
 Item  :: { Item }
-    : Visibility 'type' TypeProto OptRepresentation Items 'end'
+    : Visibility 'type' TypeProto  TypeImpln Items 'end'
                                 { TypeDecl $1 $3 $4 $5 $ 
 				    Just $ tokenPosition $2 }
+    -- : Visibility 'type' TypeProto OptRepresentation Items 'end'
+    --                             { TypeDecl $1 $3 $4 $5 $ 
+    --     			    Just $ tokenPosition $2 }
     | Visibility 'module' ident 'is' Items 'end'
                                 { ModuleDecl $1 (identName $3) $5 $ 
 				    Just $ tokenPosition $2 }
@@ -126,13 +129,13 @@ Item  :: { Item }
                                 { ResourceDecl $1 (identName $3) $4 $5
 				    $ Just $ tokenPosition $2 }
     | Visibility 'func' Determinism FnProto OptType '=' Exp
-                                { FuncDecl $1 $3 $4 $5 $7
+                                { FuncDecl $1 $3 (content $4) $5 $7
 				    $ Just $ tokenPosition $2 }
     | Visibility 'proc' Determinism ProcProto ProcBody
                                 { ProcDecl $1 $3 $4 $5
                                     $ Just $ tokenPosition $2 }
-    | Visibility 'ctor' FnProto { CtorDecl $1 $3
-				    $ Just $ tokenPosition $2 }
+    -- | Visibility 'ctor' FnProto { CtorDecl $1 $3
+    --     			    $ Just $ tokenPosition $2 }
     | Stmt                      { StmtDecl (content $1) (place $1) }
 
 
@@ -142,6 +145,18 @@ TypeProto :: { TypeProto }
 OptRepresentation :: { TypeRepresentation }
     : 'is' ident                { identName $2 }
     | {- empty -}               { defaultTypeRepresentation }
+
+TypeImpln :: { TypeImpln }
+    : 'is' ident                { TypeRepresentation $ identName $2 }
+    | '=' Visibility TypeCtors  { TypeCtors $2 $3 }
+
+TypeCtors :: { [Placed FnProto] }
+    : RevTypeCtors              { reverse $1 }
+
+RevTypeCtors :: { [Placed FnProto] }
+    : RevTypeCtors '|' FnProto  {  $3 : $1 }
+    | FnProto                   { [$1] }
+
 
 ModSpecs :: { [ModSpec] }
     : RevModSpecList            { reverse $1 }
@@ -157,37 +172,42 @@ RevModuleTail :: { ModSpec }
     : {- empty -}               { [] }
     | RevModuleTail '.' ident   { identName $3:$1}
 
-FnProto :: { FnProto }
-    : FuncProcName OptParamList UseResources
-                                { FnProto $1 $2 $3 }
+FnProto :: { Placed FnProto }
+    : PlacedFuncProcName OptParamList UseResources
+                                { fmap (\n -> FnProto n $2 $3) $1 }
 
 FuncProcName :: { String }
     : ident                     { identName $1 }
+    | Symbol                    { content $1 }
+
+
+PlacedFuncProcName :: { Placed String }
+    : ident                     { Placed (identName $1) (tokenPosition $1) }
     | Symbol                    { $1 }
 
 
-Symbol :: { String }
-    : '='                       { symbolName $1 }
-    | '+'                       { symbolName $1 }
-    | '-'                       { symbolName $1 }
-    | '*'                       { symbolName $1 }
-    | '/'                       { symbolName $1 }
-    | '++'                      { symbolName $1 }
-    | '<'                       { symbolName $1 }
-    | '>'                       { symbolName $1 }
-    | '<='                      { symbolName $1 }
-    | '>='                      { symbolName $1 }
-    | '=='                      { symbolName $1 }
-    | '/='                      { symbolName $1 }
-    | '|'                       { symbolName $1 }
-    | '..'                      { symbolName $1 }
-    | 'and'                     { identName $1 }
-    | 'or'                      { identName $1 }
-    | 'not'                     { identName $1 }
-    | '[' ']'                   { "[]"  }
-    | '[' '|' ']'               { "[|]" }
-    | '{' '}'                   { "{}"  }
-    | symbol                    { symbolName $1 }
+Symbol :: { Placed String }
+    : '='                       { Placed (symbolName $1) (tokenPosition $1) }
+    | '+'                       { Placed (symbolName $1) (tokenPosition $1) }
+    | '-'                       { Placed (symbolName $1) (tokenPosition $1) }
+    | '*'                       { Placed (symbolName $1) (tokenPosition $1) }
+    | '/'                       { Placed (symbolName $1) (tokenPosition $1) }
+    | '++'                      { Placed (symbolName $1) (tokenPosition $1) }
+    | '<'                       { Placed (symbolName $1) (tokenPosition $1) }
+    | '>'                       { Placed (symbolName $1) (tokenPosition $1) }
+    | '<='                      { Placed (symbolName $1) (tokenPosition $1) }
+    | '>='                      { Placed (symbolName $1) (tokenPosition $1) }
+    | '=='                      { Placed (symbolName $1) (tokenPosition $1) }
+    | '/='                      { Placed (symbolName $1) (tokenPosition $1) }
+    | '|'                       { Placed (symbolName $1) (tokenPosition $1) }
+    | '..'                      { Placed (symbolName $1) (tokenPosition $1) }
+    | 'and'                     { Placed (identName $1) (tokenPosition $1) }
+    | 'or'                      { Placed (identName $1) (tokenPosition $1) }
+    | 'not'                     { Placed (identName $1) (tokenPosition $1) }
+    | '[' ']'                   { Placed "[]" (tokenPosition $1) }
+    | '[' '|' ']'               { Placed "[|]" (tokenPosition $1) }
+    | '{' '}'                   { Placed "{}" (tokenPosition $1) }
+    | symbol                    { Placed (symbolName $1) (tokenPosition $1) }
 
 
 ProcProto :: { ProcProto }

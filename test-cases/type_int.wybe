@@ -1,4 +1,4 @@
-public type myint is i
+public type myint is int
     public func +(x:myint,y:myint):myint = foreign llvm add(x,y)
     public proc +(?x:myint,y:myint,z:myint) ?x = foreign llvm sub(z,y) end
     public proc +(x:myint,?y:myint,z:myint) ?y = foreign llvm sub(z,x) end

@@ -14,8 +14,8 @@
 module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
-  Determinism(..), TypeProto(..), TypeSpec(..), FnProto(..),
-  ProcProto(..), Param(..),
+  Determinism(..), TypeProto(..), TypeSpec(..), TypeImpln(..),
+  FnProto(..), ProcProto(..), Param(..),
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), 
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
@@ -87,14 +87,15 @@ import qualified LLVM.General.AST as LLVMAST
 
 -- |An item appearing at the top level of a source file.
 data Item
-     = TypeDecl Visibility TypeProto TypeRepresentation [Item] OptPos
+     -- = TypeDecl Visibility TypeProto TypeRepresentation [Item] OptPos
+     = TypeDecl Visibility TypeProto TypeImpln [Item] OptPos
      | ModuleDecl Visibility Ident [Item] OptPos
      | ImportMods Visibility [ModSpec] OptPos
      | ImportItems Visibility ModSpec [Ident] OptPos
      | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
      | FuncDecl Visibility Determinism FnProto TypeSpec (Placed Exp) OptPos
      | ProcDecl Visibility Determinism ProcProto [Placed Stmt] OptPos
-     | CtorDecl Visibility FnProto OptPos
+     -- | CtorDecl Visibility FnProto OptPos
      | StmtDecl Stmt OptPos
 
 -- |The visibility of a file item.  We only support public and private.
@@ -108,6 +109,9 @@ type TypeRepresentation = String
 
 defaultTypeRepresentation :: TypeRepresentation
 defaultTypeRepresentation = "pointer"
+
+data TypeImpln = TypeRepresentation TypeRepresentation 
+               | TypeCtors Visibility [Placed FnProto]
 
 
 -- |Combine two visibilities, taking the most visible.
@@ -132,7 +136,11 @@ data TypeProto = TypeProto Ident [Ident]
 
 -- |A function prototype consists of a function name and zero or more formal 
 --  parameters.
-data FnProto = FnProto Ident [Param] [ResourceFlowSpec]
+data FnProto = FnProto {
+    fnProtoName::Ident,
+    fnProtoParams::[Param],
+    fnProtoResourceFlows::[ResourceFlowSpec]
+    }
 
 
 ----------------------------------------------------------------
@@ -147,6 +155,7 @@ data Placed t
     = Placed t SourcePos
     | Unplaced t
     deriving (Eq, Generic)
+
 
 -- |Return the optional position attached to a Placed value.
 place :: Placed t -> OptPos
@@ -1718,10 +1727,17 @@ logDump selector1 selector2 pass = do
 
 -- |How to show an Item.
 instance Show Item where
-  show (TypeDecl vis name repn items pos) =
+  show (TypeDecl vis name (TypeRepresentation repn) items pos) =
     visibilityPrefix vis ++ "type " ++ show name 
     ++ " is" ++ repn
     ++ showMaybeSourcePos pos ++ "\n  "
+    ++ intercalate "\n  " (List.map show items)
+    ++ "\nend\n"
+  show (TypeDecl vis name (TypeCtors ctorvis ctors) items pos) =
+    visibilityPrefix vis ++ "type " ++ show name 
+    ++ " " ++ visibilityPrefix ctorvis
+    ++ showMaybeSourcePos pos ++ "\n    "
+    ++ intercalate "\n  | " (List.map show ctors) ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\nend\n"
   show (ImportMods vis mods pos) =
@@ -1752,9 +1768,9 @@ instance Show Item where
     ++ "proc " ++ show proto
     ++ showMaybeSourcePos pos
     ++ showBody 4 stmts
-  show (CtorDecl vis proto pos) =
-    visibilityPrefix vis ++ "ctor " ++ show proto
-    ++ showMaybeSourcePos pos
+  -- show (CtorDecl vis proto pos) =
+  --   visibilityPrefix vis ++ "ctor " ++ show proto
+  --   ++ showMaybeSourcePos pos
   show (StmtDecl stmt pos) =
     showStmt 4 stmt ++ showMaybeSourcePos pos
 
@@ -1813,7 +1829,9 @@ instance Show FnProto where
 
 -- |How to show something that may have a source position
 instance Show t => Show (Placed t) where
-  show pl = show (content pl) ++ showMaybeSourcePos (place pl)
+    show (Placed t pos) = show t ++ showMaybeSourcePos (Just pos)
+    show (Unplaced t) =   show t
+
     
 -- |How to show an optional source position
 showMaybeSourcePos :: OptPos -> String
@@ -1898,21 +1916,25 @@ showMap outersep keyFn valFn m =
     intercalate outersep $ List.map (\(k,v) -> keyFn k ++ valFn v) $
     Map.assocs m
 
+
 -- |How to show a type definition.
 instance Show TypeDef where
   show (TypeDef arity rep pos) = 
     show arity ++ " (" ++ rep ++ ") " ++ showMaybeSourcePos pos
+
 
 -- |How to show a resource definition.
 instance Show ResourceImpln where
   show (SimpleResource typ init pos) =
     show typ ++ maybeShow " = " init "" ++ showMaybeSourcePos pos
 
+
 -- |How to show a list of proc definitions.
 showProcDefs :: Int -> [ProcDef] -> String
 showProcDefs _ [] = ""
 showProcDefs firstID (def:defs) =
     showProcDef firstID def ++ showProcDefs (1+firstID) defs
+
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String

@@ -1,6 +1,1 @@
-public type season
-    public ctor winter
-    public ctor spring
-    public ctor summer
-    public ctor autumn
-end
+public type season = public winter | spring | summer | autumn end
