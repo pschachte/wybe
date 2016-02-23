@@ -88,10 +88,7 @@ public type int_seq = public range(start:int, finish:int, incr:int)
     public func empty(seq:int_seq):bool = true
 end
 
-# public type list(t)
-#     public ctor []
-#     public ctor [|](head:t, tail:list(t))
-
+# public type list(t) = public [] | [|](head:t, tail:list(t))
 #     public func ++(x:list(t), y:list(t)) =
 #         if x = []
 #         then y
@@ -120,5 +117,5 @@ public module io is
     public proc println(x:string) use !io print(x) nl end
     public proc read(?x:string) use !io foreign c read_line(?x,!io) end
 
-    public func eof:char = '.' # XXX completely wrong!!!
+    public func eof:char = foreign lpvm cast(-1)
 end

@@ -1,9 +1,13 @@
+-*- mode: text -*-
+
 Fix bugs:
 
 
 Complete the implementation:
 o Optimisations
 o Fix algebraic type implementation to use tagged pointers
+o Fix algebraic type implementation to generate code for = only when not
+   explicitly defined
 
 
 Improve error handling:

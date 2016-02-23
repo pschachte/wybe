@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 
 *main* > public (0 calls) (inline)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_int(40:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:110:38
+    foreign c print_int(40:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:104:38
 
 
 quad > public (1 calls) (inline)

@@ -75,10 +75,10 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
                                         modNonConstCtorCount = nonConstCount })
     let constItems =
           concatMap (constCtorItems ctorVis typespec) $ zip consts [0..]
-    let nonconstItems =
-          concatMap (nonConstCtorItems ctorVis typespec
-                     $ fromIntegral nonConstCount)
-          $ zip nonconsts [0..]
+    nonconstItems <- fmap concat $
+           mapM (nonConstCtorItems ctorVis typespec 
+                 $ fromIntegral nonConstCount)
+           $ zip nonconsts [0..]
     normaliseSubmodule modCompiler name (Just params) vis pos
       $ [eq1,eq2] ++ constItems ++ nonconstItems ++ items
 normaliseItem modCompiler (ModuleDecl vis name items pos) = do
@@ -168,62 +168,30 @@ constCtorItems  vis typeSpec (placedProto,num) =
         constName = fnProtoName $ content placedProto
     in [ProcDecl vis Det
         (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] [])
-        [Unplaced $ ForeignCall "llvm" "cast" []
+        [Unplaced $ ForeignCall "lpvm" "cast" []
          [Unplaced $ Typed (IntValue num) typeSpec True,
           Unplaced $ Var "$" ParamOut Ordinary]]
         pos]
 
 
 nonConstCtorItems :: Visibility -> TypeSpec -> Integer
-                  -> (Placed FnProto,Integer) -> [Item]
-nonConstCtorItems vis typeSpec ctorCount (placedProto,num) =
-    []
-    -- let pos = place placedProto
-    --     ctorName = fnProtoName $ content placedProto
-    --     params = fnProtoParams $ content placedProto
-    --     flowType = Implicit pos
-    --     
-    -- fields <- mapM (\(Param var typ _ _) -> fmap (var,typ,) $ fieldSize typ)
-    --           params
-    -- let (fields',size) = 
-    --       List.foldl (\(lst,offset) (var,typ,sz) ->
-    --                    let aligned = alignOffset offset sz
-    --                    in (((var,typ,aligned):lst),aligned + sz))
-    --       ([],0) fields
-    -- normaliseItem modCompiler $
-    --   ProcDecl Public Det
-    --   (ProcProto ctorName (params++[Param "$" typespec ParamOut Ordinary]) [])
-    --    ([Unplaced $ ForeignCall "lpvm" "alloc" []
-    --       [Unplaced $ IntValue $ fromIntegral size,
-    --        Unplaced $ Typed (Var "$rec" ParamOut Ordinary) typespec True]]
-    --      ++
-    --      (reverse $ List.map (\(var,_,aligned) ->
-    --                            (Unplaced $ ForeignCall "lpvm" "mutate" []
-    --                             [Unplaced $ Var "$rec" ParamInOut flowType,
-    --                              Unplaced $ IntValue $ fromIntegral aligned,
-    --                              Unplaced $ Var var ParamIn flowType]))
-    --       fields')
-    --     ++
-    --     [Unplaced $ ForeignCall "llvm" "or" []
-    --      [Unplaced $ Var "$rec" ParamIn Ordinary,
-    --       Unplaced $ IntValue $ fromIntegral tagValue,
-    --       Unplaced $ Var "$" ParamOut Ordinary]])
-    --    pos
-    -- -- XXX this needs to take the tag into account
-    -- -- XXX this needs to be able to fail if the constructor doesn't match
-    -- normaliseItem modCompiler $
-    --   ProcDecl Public Det
-    --   (ProcProto ctorName (List.map
-    --                        (\(Param n t _ ft) -> (Param n t ParamOut ft))
-    --                        params++[Param "$" typespec ParamIn Ordinary]) [])
-    --      (reverse $ List.map (\(var,_,aligned) ->
-    --                            (Unplaced $ ForeignCall "lpvm" "access" []
-    --                             [Unplaced $ Var "$" ParamIn flowType,
-    --                              Unplaced $ IntValue $ fromIntegral aligned,
-    --                              Unplaced $ Var var ParamOut flowType]))
-    --       fields')
-    --   pos
-    -- mapM_ (addGetterSetter modCompiler vis typespec ctorName pos) fields'
+                  -> (Placed FnProto,Integer) -> Compiler [Item]
+nonConstCtorItems vis typeSpec ctorCount (placedProto,num) = do
+    let pos = place placedProto
+    let ctorName = fnProtoName $ content placedProto
+    let params = fnProtoParams $ content placedProto
+        
+    fields <- mapM (\(Param var typ _ _) -> fmap (var,typ,) $ fieldSize typ)
+              params
+    let (fields',size) = 
+          List.foldl (\(lst,offset) (var,typ,sz) ->
+                       let aligned = alignOffset offset sz
+                       in (((var,typ,aligned):lst),aligned + sz))
+          ([],0) fields
+    return 
+      $ constructorItems ctorName params typeSpec size fields' num pos
+      ++ deconstructorItems ctorName params typeSpec size fields' num pos
+      ++ concatMap (getterSetterItems vis typeSpec ctorName pos) fields'
 
 
 -- |The number of bytes occupied by a value of the specified type.  If the
@@ -251,26 +219,69 @@ alignOffset offset size =
     in ((offset + alignment - 1) `div` alignment) * alignment
 
 
--- |Add a getter and setter for the specified type.
-addGetterSetter :: ([ModSpec] -> Compiler ()) -> Visibility -> TypeSpec ->
-                   Ident -> OptPos -> (VarName,TypeSpec,Int) -> Compiler ()
-addGetterSetter modCompiler vis rectype ctorName pos
-                    (field,fieldtype,offset) = do
+constructorItems :: Ident -> [Param] -> TypeSpec -> Int 
+                    -> [(Ident,TypeSpec,Int)] -> Integer -> OptPos -> [Item]
+constructorItems ctorName params typeSpec size fields tag pos =
+    let flowType = Implicit pos
+    in [ProcDecl Public Det
+        (ProcProto ctorName (params++[Param "$" typeSpec ParamOut Ordinary]) [])
+        ([Unplaced $ ForeignCall "lpvm" "alloc" []
+          [Unplaced $ IntValue $ fromIntegral size,
+           Unplaced $ Typed (Var "$rec" ParamOut Ordinary) typeSpec True]]
+         ++
+         (reverse $ List.map (\(var,_,aligned) ->
+                               (Unplaced $ ForeignCall "lpvm" "mutate" []
+                                [Unplaced $ Var "$rec" ParamInOut flowType,
+                                 Unplaced $ IntValue $ fromIntegral aligned,
+                                 Unplaced $ Var var ParamIn flowType]))
+          fields)
+         ++
+         [Unplaced $ ForeignCall "llvm" "or" []
+          [Unplaced $ Var "$rec" ParamIn Ordinary,
+           Unplaced $ IntValue $ fromIntegral tag,
+           Unplaced $ Var "$" ParamOut Ordinary]])
+        pos]
+
+
+deconstructorItems :: Ident -> [Param] -> TypeSpec -> Int 
+                    -> [(Ident,TypeSpec,Int)] -> Integer -> OptPos -> [Item]
+deconstructorItems ctorName params typeSpec size fields tag pos =
+    -- XXX this needs to take the tag into account
+    -- XXX this needs to be able to fail if the constructor doesn't match
+    let flowType = Implicit pos
+    in [ProcDecl Public Det
+        (ProcProto ctorName 
+         (List.map (\(Param n t _ ft) -> (Param n t ParamOut ft)) params
+          ++ [Param "$" typeSpec ParamIn Ordinary]) 
+         [])
+        (reverse $ List.map (\(var,_,aligned) ->
+                              (Unplaced $ ForeignCall "lpvm" "access" []
+                               [Unplaced $ Var "$" ParamIn flowType,
+                                Unplaced $ IntValue $ fromIntegral aligned,
+                                Unplaced $ Var var ParamOut flowType]))
+         fields)
+        pos]
+
+
+-- | Produce a getter and a setter for one field of the specified type.
+getterSetterItems :: Visibility -> TypeSpec -> Ident -> OptPos 
+                     -> (VarName,TypeSpec,Int) -> [Item]
+getterSetterItems vis rectype ctorName pos (field,fieldtype,offset) =
     -- XXX need to take tag into account!
-    normaliseItem modCompiler $ FuncDecl vis Det
-      (FnProto field [Param "$rec" rectype ParamIn Ordinary] [])
-      fieldtype 
-      (Unplaced $ ForeignFn "lpvm" "access" []
-       [Unplaced $ Var "$rec" ParamIn Ordinary,
-        Unplaced $ IntValue $ fromIntegral offset])
-      pos
-    normaliseItem modCompiler $ ProcDecl vis Det
-      (ProcProto field
-       [Param "$rec" rectype ParamInOut Ordinary,
-        Param "$field" fieldtype ParamIn Ordinary] [])
-      [Unplaced $ ForeignCall "lpvm" "mutate" []
-       [Unplaced $ Var "$rec" ParamIn Ordinary,
-        Unplaced $ IntValue $ fromIntegral offset,
-        Unplaced $ Var "$field" ParamIn Ordinary,
-        Unplaced $ Var "$rec" ParamOut Ordinary]]
-       pos
+    [FuncDecl vis Det
+     (FnProto field [Param "$rec" rectype ParamIn Ordinary] [])
+     fieldtype 
+     (Unplaced $ ForeignFn "lpvm" "access" []
+      [Unplaced $ Var "$rec" ParamIn Ordinary,
+       Unplaced $ IntValue $ fromIntegral offset])
+     pos,
+     ProcDecl vis Det
+     (ProcProto field
+      [Param "$rec" rectype ParamInOut Ordinary,
+       Param "$field" fieldtype ParamIn Ordinary] [])
+     [Unplaced $ ForeignCall "lpvm" "mutate" []
+      [Unplaced $ Var "$rec" ParamIn Ordinary,
+       Unplaced $ IntValue $ fromIntegral offset,
+       Unplaced $ Var "$field" ParamIn Ordinary,
+       Unplaced $ Var "$rec" ParamOut Ordinary]]
+     pos]

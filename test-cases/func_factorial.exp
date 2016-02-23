@@ -14,7 +14,7 @@ AFTER EVERYTHING:
 *main* > public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     func_factorial.gen$1<0>(5:wybe.int, ?tmp$2#0:wybe.int, ?tmp$3#0:wybe.int) @func_factorial:2:8
-    foreign c print_int(~tmp$3#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:110:38
+    foreign c print_int(~tmp$3#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:104:38
 
 
 factorial > public (2 calls) (inline)
