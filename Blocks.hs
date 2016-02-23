@@ -522,7 +522,8 @@ cgenLPVM pname flags args
                   (a:b:[]) -> (a, valTrust b)
                   _ -> shouldnt "Incorrect access instruction."
           ptrOp <- cgenArg ptrOpArg
-          op <- gcAccess ptrOp index
+          outTy <- lift $ primReturnType args
+          op <- gcAccess ptrOp index outTy
           assign outNm op
           return $ Just op
     
@@ -536,7 +537,19 @@ cgenLPVM pname flags args
           assign outNm ptrOp
           return $ Just ptrOp
           
-          
+    | pname == "cast" = do
+          when (length inputs /= 1) $ shouldnt "Incorrect cast instruction."
+          let inArg = head inputs
+          let outArg = head outputs
+          inTy <- lift $ typed' (argType inArg)
+          outTy <- lift $ typed' (argType outArg)
+          inOp <- cgenArg inArg
+          castOp <- case (inTy, outTy) of
+              ((IntegerType _), (PointerType _ _)) -> inttoptr inOp outTy
+              ((PointerType _ _), (IntegerType _ )) -> ptrtoint inOp outTy
+              _ -> bitcast inOp outTy
+          assign outNm castOp
+          return $ Just castOp
           
 
     | otherwise = shouldnt $ "Instruction " ++ pname ++ " not imlemented."
@@ -651,7 +664,7 @@ openPrimArg :: PrimArg -> Codegen (Type, String)
 openPrimArg (ArgVar nm ty _ _ _) = do
     lltype <- lift $ typed' ty
     return (lltype, show nm)
-openPrimArg a = error $ "Can't Open!: "
+openPrimArg a = shouldnt $ "Can't Open!: "
                 ++ argDescription a
                 ++ (show $ argFlowDirection a)
 
@@ -677,14 +690,18 @@ localOperandType _ = void_t
 -- it, generating a UnName name for it.
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
 cgenArg (ArgVar nm _ _ _ _) = do
-    lift $ logBlocks $ "Getting arg: " ++ show nm
+    lift $ logBlocks $ "Symbol table hit: " ++ show nm
     getVar (show nm)
-cgenArg (ArgInt val ty) = do t <- lift $ typed' ty
-                             lift $ logBlocks $ "Type: " ++ show ty
-                                 ++ " -> " ++ show t
-                                 ++ " -> " ++ show val
-                             let bs = getBits t
-                             return $ cons $ C.Int bs val
+cgenArg (ArgInt val ty) = do
+    reprTy <- lift $ typed' ty
+    lift $ logBlocks $ show val ++ " :: " ++ show ty
+        ++ " -> " ++ show reprTy
+    let bs = getBits reprTy
+    let intCons = cons $ C.Int bs val
+    case reprTy of
+        ptrTy@(PointerType ty _ ) -> do inttoptr intCons ptrTy
+        _ -> return intCons
+
 cgenArg (ArgFloat val ty) = return $ cons $ C.Float (F.Double val)
 cgenArg (ArgString s _) =
     do let conStr = (makeStringConstant s)
@@ -953,7 +970,7 @@ addUniqueDefinitions (LLVMAST.Module n l t ds) defs =
 
 -- * $ functions
 
--- | returns a i8* pointer
+-- | Call "wybe_malloc" from external C shared lib. Returns an i8* pointer.
 -- XXX What will be the type of 'size' we pass to extern C's malloc?
 callWybeMalloc :: Integer -> Codegen Operand
 callWybeMalloc size = do
@@ -964,37 +981,65 @@ callWybeMalloc size = do
     instr outTy ins
     
 
+-- | Call the external C-library function for malloc and return
+-- the bitcasted pointer to that location.
 gcAllocate :: Integer -> LLVMAST.Type -> Codegen Operand
 gcAllocate size castTy = do
     voidPtr <- callWybeMalloc size
     instr castTy $ LLVMAST.BitCast voidPtr castTy []
 
 
-gcAccess :: Operand -> Integer -> Codegen Operand
-gcAccess ptr index = do
+-- | Index and return the value in the memory field referenced by the pointer
+-- at the given offset.
+-- If expected return type/value at that location is a pointer, then
+-- the instruction inttoptr should precede the load instruction.
+gcAccess :: Operand -> Integer -> LLVMAST.Type -> Codegen Operand
+gcAccess ptr offset outTy = do
+    let opTypePtr = localOperandType ptr
+    let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
     let getel = LLVMAST.GetElementPtr False ptr indices []
-    let opTypePtr = localOperandType ptr
     let opType = pullFromPointer opTypePtr
     accessPtr <- instr opTypePtr getel
-    instr opType $ load accessPtr
 
+    case outTy of
+        (PointerType ty _) -> do
+            loadedOp <- instr opType $ load accessPtr
+            inttoptr loadedOp outTy
+        _ -> instr opType $ load accessPtr
+    
 
+-- | Index the pointer at the given offset and store the given operand value
+-- in that indexed location.
+-- If the operand to be stored is a pointer, the ptrtoint instruction should
+-- precede the store instruction, with the int value of the pointer stored.
 gcMutate :: Operand -> Integer -> Operand -> Codegen Operand
-gcMutate ptr index val = do
+gcMutate ptr offset val = do
+    let opTypePtr = localOperandType ptr
+    let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
     let getel = LLVMAST.GetElementPtr False ptr indices []
-    let opTypePtr = localOperandType ptr
     accessPtr <- instr opTypePtr getel
-    store accessPtr val
+    -- if val is a pointer then the ptrtoint instruction is needed
+    case val of
+        (LocalReference (PointerType ty _) _) -> do
+            ptrInt <- ptrtoint val ty
+            store accessPtr ptrInt
+        _ -> store accessPtr val
 
-
+-- | Get the LLVMAST.Type the given pointer type points to.
 pullFromPointer :: LLVMAST.Type -> LLVMAST.Type
 pullFromPointer (PointerType ty _) = ty
 pullFromPointer pty = shouldnt $ "Not a pointer: " ++ show pty
-    
-    
 
+
+-- | Compute the index given the size of the fields the pointer
+-- points to and an offset in bytes.
+getIndex :: LLVMAST.Type -> Integer -> Integer
+getIndex (PointerType ty _) bytes =
+    let ptrBits = toInteger $ getBits ty
+    in quot (bytes * 8) ptrBits
+getIndex _ _ = shouldnt "Can't compute index from a non-pointer."
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

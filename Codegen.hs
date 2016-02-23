@@ -16,7 +16,7 @@ module Codegen (
   getBlock, retNothing,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, getVarMaybe, localVar,
-  operandType, doAlloca, doLoad,
+  operandType, doAlloca, doLoad, bitcast, inttoptr, ptrtoint,
   -- * Types
   int_t, phantom_t, float_t, char_t, ptr_t, void_t, string_t, array_t,
   struct_t,
@@ -492,6 +492,15 @@ store ptr val = instr phantom_t $ Store False ptr val Nothing 0 []
 load :: Operand -> Instruction
 load ptr = Load False ptr Nothing 0 []
 
+
+bitcast :: Operand -> LLVMAST.Type -> Codegen Operand
+bitcast op ty = instr ty $ BitCast op ty []
+
+inttoptr :: Operand -> LLVMAST.Type -> Codegen Operand
+inttoptr op ty = instr ty $ IntToPtr op ty []
+
+ptrtoint :: Operand -> LLVMAST.Type -> Codegen Operand
+ptrtoint op ty = instr ty $ PtrToInt op ty []
 
 -- Helpers for allocating, storing, loading
 doAlloca :: Type -> Codegen Operand
