@@ -57,6 +57,7 @@ test:	wybemk
 	    elif diff -q $$exp $$out >/dev/null 2>&1 ; then \
 		printf "." ; \
 	    else \
+		printf "\n[34;1m**************** difference building $$targ ****************[0m\n" >> ERRS ; \
 		dwdiff -c -d '()<>~!@:?.%#' $$exp $$out >> ERRS 2>&1 ; \
 		printf "[31mX[39m" ; \
 		FAILS="$${FAILS}\n    $$out" ; \
