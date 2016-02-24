@@ -1,13 +1,24 @@
 SECTIONS
 --------
+0. Installing Prerequisites
 1. Installing LLVM on OSX
 2. Configuring and Installing dependencies for Wybe
 3. Installing Haskell Package `llvm-general` from its source with cabal
 
 
-0. Ensure XCode is installed (needs to be redone after OS upgrade):
+0. INSTALLING PREREQUISITES
+---------------------------
+
+1.  (On a Mac) Ensure XCode is installed:
 
       xcode-select --install
+
+    This needs to be redone after each OS upgrade.
+
+2.  Install the Boehm Garbage Collector development tools:
+
+      brew install bdw-gc
+
 
 
 1. INSTALLING LLVM ON OSX

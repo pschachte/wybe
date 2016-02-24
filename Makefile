@@ -43,6 +43,7 @@ TESTCASES = $(wildcard test-cases/*.wybe)
 # On Mac OS X, gtimeout is in homebrew coreutils package
 test:	wybemk
 	@rm -f ERRS ; touch ERRS
+	@rm -f test-cases/*.bc
 	@printf "testing"
 	@ time ( for f in $(TESTCASES) ; do \
 	    out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
