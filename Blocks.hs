@@ -75,10 +75,15 @@ blockTransformModule thisMod =
        -- log the assoc list typeList
        logWrapWith '.' $ "Known Types:\n" ++ (intercalate "\n" $
            List.map (\(a,b) -> show a ++ ": " ++ show b) typeList)
+
+       --------------------------------------------------
+       -- Name mangling
+       let emptyFilter = List.filter (not . emptyProc)       
+       let mangledProcs = mangleProcs $ concat procs
+                  
        --------------------------------------------------
        -- Translate
-       procs' <- mapM (mapM (translateProc allProtos) .
-                       (List.filter (not . emptyProc))) procs
+       procs' <- mapM (translateProc allProtos) $ emptyFilter mangledProcs
        --------------------------------------------------
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
@@ -86,6 +91,40 @@ blockTransformModule thisMod =
        -- logBlocks $ showPretty llmod
        finishModule
        logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
+
+
+mangleProcs :: [ProcDef] -> [ProcDef]
+mangleProcs ps = changeNameWith nameMap ps
+  where
+    nameMap = buildNameMap ps
+
+
+changeNameWith :: [(String, Int)] -> [ProcDef] -> [ProcDef]
+changeNameWith [] [] = []
+changeNameWith ((s,i):ns) (p:ps) =
+    let (ProcDefPrim proto body) = procImpln p
+        pname = s ++ "<" ++ show i ++ ">"
+        newProto = proto {primProtoName = pname}
+        newImpln = ProcDefPrim newProto body
+    in p {procImpln = newImpln} : changeNameWith ns ps
+changeNameWith _ _ = shouldnt "Incorrect name map used for mangling."       
+
+buildNameMap :: [ProcDef] -> [(String, Int)]
+buildNameMap ps = List.foldl reduceNameMap [] procNames
+    where
+      procNames = List.map pullDefName ps
+
+reduceNameMap :: [(String, Int)] -> String -> [(String, Int)]
+reduceNameMap namemap name =
+    case List.lookup name namemap of
+        Just val -> namemap ++ [(name, (val + 1))]
+        Nothing -> namemap ++ [(name, 0)]
+
+
+pullDefName :: ProcDef -> String
+pullDefName p =
+    let (ProcDefPrim proto body) = procImpln p
+    in primProtoName proto
 
 
 -- | Extract the LPVM compiled primitive from the procedure definition.
@@ -137,10 +176,12 @@ translateProc modProtos proc = do
     logBlocks $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
     codestate <- execCodegen modProtos (doCodegenBody proto body)
+    let pname = primProtoName proto
+    
     exs <- mapM declareExtern $ externs codestate
     let globals = List.map LLVMAST.GlobalDefinition $ globalVars codestate
     let body' = createBlocks codestate
-    lldef <- makeGlobalDefinition proto body'
+    lldef <- makeGlobalDefinition pname proto body'
     logBlocks $ showPretty lldef
     let procblocks = ProcDefBlocks proto lldef (exs ++ globals)
     return $ proc { procImpln = procblocks}
@@ -150,16 +191,16 @@ translateProc modProtos proc = do
 -- prototype and it's body as a list of BasicBlock(s). The return type of such
 -- a definition is decided based on the Ouput parameter of the procedure, or
 -- is made to be phantom.
-makeGlobalDefinition :: PrimProto
+makeGlobalDefinition :: String -> PrimProto
                      -> [LLVMAST.BasicBlock]
                      -> Compiler LLVMAST.Definition
-makeGlobalDefinition proto bls = do
+makeGlobalDefinition pname proto bls = do
     modName <- fmap showModSpec getModuleSpec
     let params = List.filter (not . isPhantomParam) (primProtoParams proto)
-        isMain = primProtoName proto == ""
+        isMain = primProtoName proto == "<0>"
         -- *The top level procedure will be labelled main.
         label = modName ++ "." ++
-            if isMain then "main" else primProtoName proto
+            if isMain then "main" else pname
         inputs = List.filter isInputParam params
     fnargs <- mapM makeFnArg inputs
     retty <- if isMain then return int_t else primOutputType params
@@ -386,7 +427,8 @@ cgen :: Prim -> Codegen (Maybe Operand)
 cgen prim@(PrimCall pspec args) = do
     thisMod <- lift $ getModuleSpec
     let (ProcSpec mod name _) = pspec
-    let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
+    -- let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
+    let nm = LLVMAST.Name (show pspec)
     -- Find the prototype of the pspec being called
     -- and match it's parameters with the args here
     -- and remove the unneeded ones.
@@ -396,7 +438,7 @@ cgen prim@(PrimCall pspec args) = do
             Nothing -> args
 
     -- if the call is to an external module, declare it
-    unless (thisMod == mod)
+    unless (thisMod == mod || thisMod `List.isPrefixOf` mod)
         (addExtern $ PrimCall pspec filteredArgs)
 
 
@@ -417,17 +459,6 @@ cgen prim@(PrimForeign lang name flags args)
      | lang == "lpvm" = do
            -- mapM_ cgenArg $ primInputs args
            cgenLPVM name flags args
-
-     -- | lang == "C" = do
-     --       addExtern prim
-     --       let inArgs = primInputs args
-     --       let nm = LLVMAST.Name name
-     --       inops <- mapM cgenArg inArgs
-     --       outty <- lift $ primReturnType args
-     --       let ins = call (externf outty nm) inops
-     --       res <- addInstruction ins args
-     --       return (Just res)
-
                           
      | otherwise =
          do addExtern prim
@@ -519,9 +550,9 @@ cgenLLVMUnop name flags args
 -- | Look inside the Prototype list stored in the CodegenState monad and
 -- find a matching ProcSpec.
 findProto :: ProcSpec -> Codegen (Maybe PrimProto)
-findProto pspec = do
+findProto (ProcSpec _ nm i) = do
     allProtos <- gets Codegen.modProtos
-    let procNm = procSpecName pspec
+    let procNm = nm 
     return $ List.find (\p -> primProtoName p == procNm) allProtos
 
 
@@ -884,6 +915,8 @@ typeStrToType (c:cs)
     | otherwise = void_t
   where
     bytes = (read cs :: Int)
+
+    
 ------------------------------------------------------------------------------
 -- -- * Creating LLVM AST module from global definitions                    --
 ------------------------------------------------------------------------------
@@ -891,12 +924,12 @@ typeStrToType (c:cs)
 -- | Initialize and fill a new LLVMAST.Module with the translated
 -- global definitions (extern declarations and defined functions)
 -- of LPVM procedures in a module.
-newLLVMModule :: String -> [[ProcDef]] -> LLVMAST.Module
-newLLVMModule name procs = let procs' = concat procs
-                               defs = List.map takeDefinition procs'
-                               exs = concat $ List.map takeExterns procs'
+newLLVMModule :: String -> [ProcDef] -> LLVMAST.Module
+newLLVMModule name procs = let defs = List.map takeDefinition procs
+                               exs = concat $ List.map takeExterns procs
                                exs' = uniqueExterns exs ++ [mallocExtern]
                            in modWithDefinitions name $ exs' ++ defs
+
 
 -- | Pull out the LLVM Definition of a procedure.
 takeDefinition :: ProcDef -> LLVMAST.Definition
@@ -910,6 +943,7 @@ takeExterns :: ProcDef -> [LLVMAST.Definition]
 takeExterns p = case procImpln p of
                   (ProcDefBlocks _ _ exs) -> exs
                   _ -> error "No Externs field found."
+
 
 -- | Filter out non-unique externs
 uniqueExterns :: [LLVMAST.Definition] -> [LLVMAST.Definition]
@@ -933,10 +967,10 @@ declareExtern (PrimForeign _ name _ args) = do
     retty <- primReturnType args
     return $ external retty name fnargs
 
-declareExtern (PrimCall (ProcSpec m n _) args) = do
+declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
     retty <- primReturnType args
     fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
-    return $ external retty ((showModSpec m) ++ "." ++ n) fnargs
+    return $ external retty (show pspec) fnargs
 
 declareExtern PrimNop = error "Can't declare extern for PrimNop."
 

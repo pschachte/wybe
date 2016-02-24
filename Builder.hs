@@ -490,15 +490,20 @@ collectObjectFiles :: [FilePath] -- Object Files collected till now
 collectObjectFiles ofiles thisMod =
   do reenterModule thisMod
      imports <- getModuleImplementationField (keys . modImports)
+     submods <- getModuleImplementationField (Map.elems . modSubmods)
+     logBuild $ "IMPORTS: "++ showModSpecs imports
+     logBuild $ "SUBMODS: "++ showModSpecs submods
      -- We can't compile the standard library completely yet
      -- to LLVM
      let nostd = List.filter (not . isStdLib) imports
+     let noSubMods = List.filter (not . (`elem` submods)) nostd
+     
      finishModule
-     case (List.null nostd) of
+     case (List.null noSubMods) of
        True -> return ofiles
        False ->
-         do importfiles <- mapM loadObjectFile nostd
-            cs <- mapM (collectObjectFiles (ofiles ++ importfiles)) nostd
+         do importfiles <- mapM loadObjectFile noSubMods
+            cs <- mapM (collectObjectFiles (ofiles ++ importfiles)) noSubMods
             return (concat cs)
 
 -- | Load/Build object file for the module in the same directory
@@ -509,6 +514,7 @@ loadObjectFile thisMod =
      dir <- getDirectory
      -- generating an name + extension for our object file
      let objFile = moduleFilePath objectExtension dir thisMod
+     subMods <- concatSubMods thisMod
      emitObjectFile thisMod objFile
      finishModule
      return objFile
