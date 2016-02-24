@@ -510,9 +510,10 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
                  case reconcileArgFlows params args of
                      Just args' -> do
                          logTypes $
-                           "MATCHES: args = " ++ show args'
+                           "MATCHES; checking types: args = " ++ show args'
                          typing <- foldM (typecheckArg pos params $ procSpecName p)
                                    typing $ zip3 [1..] params args'
+                         logTypes $ "Type check result = " ++ show typing
                          return [typing]
                      Nothing -> do
                          logTypes "fails"
@@ -610,16 +611,21 @@ typecheckArg pos params pname typing (argNum,param,arg) = do
     let reasonFlow = ReasonArgFlow pname argNum pos
     if not $ validTyping typing
       then return typing
-      else if formalFlow /= actualFlow
-             then do
-               logTypes $
-                 "wrong flow: " ++ show arg ++ " against " ++ show param
-               return $ InvalidTyping reasonFlow
-             else do
-               logTypes $
-                 "OK flow: " ++ show arg ++ " against " ++ show param
-               typecheckArg' (content arg) (place arg) Unspecified
-                 (paramType param) typing reasonType
+      else do
+      logTypes $ "type checking " ++ show arg ++ " against " ++ show param
+      typecheckArg' (content arg) (place arg) Unspecified
+        (paramType param) typing reasonType
+           -- XXX Shouldn't need to check flow: that's already been confirmed
+      -- else if formalFlow /= actualFlow
+      --        then do
+      --          logTypes $
+      --            "wrong flow: " ++ show arg ++ " against " ++ show param
+      --          return $ InvalidTyping reasonFlow
+      --        else do
+      --          logTypes $
+      --            "OK flow: " ++ show arg ++ " against " ++ show param
+      --          typecheckArg' (content arg) (place arg) Unspecified
+      --            (paramType param) typing reasonType
 
 
 typecheckArg' :: Exp -> OptPos -> TypeSpec -> TypeSpec -> Typing ->
@@ -628,8 +634,8 @@ typecheckArg' (Typed exp typ cast) pos _ paramType typing reason = do
     typ' <- fmap (fromMaybe Unspecified) $ lookupType typ pos
     typecheckArg' exp pos (if cast then Unspecified else typ')
                   paramType typing reason
-    typecheckArg' exp pos  typ'
-                  paramType typing reason
+    -- typecheckArg' exp pos  typ'
+    --               paramType typing reason
 typecheckArg' (Var var _ _) _ declType paramType typing reason = do
     -- XXX should out flow typing be contravariant?
     unless (paramType == Unspecified) $ do
