@@ -13,10 +13,11 @@ module Codegen (
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
   call, externf, ret, globalDefine, external, phi, br, cbr,
-  getBlock, retNothing,
+  getBlock, retNothing, fresh,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, getVarMaybe, localVar,
   operandType, doAlloca, doLoad, bitcast, inttoptr, ptrtoint,
+  trunc, zext, sext,
   -- * Types
   int_t, phantom_t, float_t, char_t, ptr_t, void_t, string_t, array_t,
   struct_t,
@@ -356,9 +357,8 @@ operandType :: Operand -> Type
 operandType (LocalReference ty _) = ty
 operandType (ConstantOperand cons) =
     case cons of
-        C.Int 8 _ -> char_t
-        C.Int _ _ -> int_t
-        C.Float _ -> int_t
+        C.Int bs _ -> int_c bs
+        C.Float _ -> float_t
         C.Null ty -> ty
         C.GlobalReference ty _ -> ty
         C.GetElementPtr _ (C.GlobalReference ty _) _ -> ty
@@ -501,6 +501,27 @@ inttoptr op ty = instr ty $ IntToPtr op ty []
 
 ptrtoint :: Operand -> LLVMAST.Type -> Codegen Operand
 ptrtoint op ty = instr ty $ PtrToInt op ty []
+
+-- constBitcast :: Operand -> LLVMAST.Type -> Operand
+-- constBitcast (ConstantOperand c) ty =  cons $ C.BitCast c ty
+
+-- constInttoptr :: Operand -> LLVMAST.Type -> Operand
+-- constInttoptr (ConstantOperand c) ty = cons $ C.IntToPtr c ty
+
+-- constPtrtoint :: Operand -> LLVMAST.Type -> Operand
+-- constPtrtoint (ConstantOperand c) ty = cons $ C.PtrToInt c ty
+
+trunc :: Operand -> LLVMAST.Type -> Codegen Operand
+trunc op ty = instr ty $ Trunc op ty []
+
+zext :: Operand -> LLVMAST.Type -> Codegen Operand
+zext op ty = instr ty $ ZExt op ty []
+
+sext :: Operand -> LLVMAST.Type -> Codegen Operand
+sext op ty = instr ty $ SExt op ty []
+
+
+
 
 -- Helpers for allocating, storing, loading
 doAlloca :: Type -> Codegen Operand

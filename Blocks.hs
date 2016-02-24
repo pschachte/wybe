@@ -417,12 +417,24 @@ cgen prim@(PrimForeign lang name flags args)
      | lang == "lpvm" = do
            -- mapM_ cgenArg $ primInputs args
            cgenLPVM name flags args
+
+     -- | lang == "C" = do
+     --       addExtern prim
+     --       let inArgs = primInputs args
+     --       let nm = LLVMAST.Name name
+     --       inops <- mapM cgenArg inArgs
+     --       outty <- lift $ primReturnType args
+     --       let ins = call (externf outty nm) inops
+     --       res <- addInstruction ins args
+     --       return (Just res)
+
                           
      | otherwise =
          do addExtern prim
-            let inArgs = primInputs args
+            let inArgs = primInputs args            
             let nm = LLVMAST.Name name
             inops <- mapM cgenArg inArgs
+            -- alignedOps <- mapM makeCIntOp inops
             outty <- lift $ primReturnType args
             let ins = call (externf outty nm) inops
             res <- addInstruction ins args
@@ -430,6 +442,28 @@ cgen prim@(PrimForeign lang name flags args)
 
 
 cgen PrimNop = error "No primitive found."
+
+
+makeCIntOp :: Operand -> Codegen Operand
+makeCIntOp op
+    | isIntOp op == True = do
+          let opTy = operandType op
+          let inBits = getBits opTy
+          if inBits > 32
+              then trunc op (int_c 32)
+              else if inBits < 32
+                   then sext op (int_c 32)
+                   else return op
+    | otherwise = return op
+
+isIntOp :: Operand -> Bool
+isIntOp (LocalReference (LLVMAST.IntegerType _) _) = True
+isIntOp (ConstantOperand (C.Int _ _)) = True
+isIntOp _ = False
+             
+    
+
+
 
 -- | Translate a Binary primitive procedure into a binary llvm instruction,
 -- add the instruction to the current BasicBlock's instruction stack and emit
@@ -541,13 +575,21 @@ cgenLPVM pname flags args
           when (length inputs /= 1) $ shouldnt "Incorrect cast instruction."
           let inArg = head inputs
           let outArg = head outputs
-          inTy <- lift $ typed' (argType inArg)
           outTy <- lift $ typed' (argType outArg)
-          inOp <- cgenArg inArg
-          castOp <- case (inTy, outTy) of
-              ((IntegerType _), (PointerType _ _)) -> inttoptr inOp outTy
-              ((PointerType _ _), (IntegerType _ )) -> ptrtoint inOp outTy
-              _ -> bitcast inOp outTy
+          inTy <- lift $ typed' (argType inArg)
+          inOp <- cgenArg inArg          
+          castOp <- case inOp of
+              (ConstantOperand c) ->
+                  if isPtr outTy
+                  then return $ cons $ C.Null outTy
+                  else do
+                      let consTy = constantType c
+                      ptr <- doAlloca consTy
+                      store ptr inOp
+                      loaded <- doLoad consTy ptr
+                      doCast loaded consTy outTy
+              _ -> doCast inOp inTy outTy
+                  
           assign outNm castOp
           return $ Just castOp
           
@@ -560,7 +602,31 @@ cgenLPVM pname flags args
     valTrust a = trustFromJust trustMsg $ argIntVal a
     outNm = pullName $ head outputs
     
-    
+
+
+isPtr :: LLVMAST.Type -> Bool
+isPtr (PointerType _ _) = True
+isPtr _ = False
+
+
+doCast :: Operand -> LLVMAST.Type -> LLVMAST.Type -> Codegen Operand
+doCast op (IntegerType _) ty2@(PointerType _ _) = inttoptr op ty2
+doCast op (PointerType _ _) ty2@(IntegerType _) = ptrtoint op ty2
+doCast op (IntegerType bs1) ty2@(IntegerType bs2)
+    | bs1 == bs2 = bitcast op ty2
+    | bs2 > bs1 = zext op ty2
+    | bs1 > bs2 = trunc op ty2
+doCast op _ ty2 = bitcast op ty2
+
+
+
+-- | Predicate to check if an operand is a constant    
+constantType :: C.Constant -> LLVMAST.Type
+constantType (C.Int bs _) = int_c bs
+constantType (C.Float _) = float_t
+constantType (C.Null ty) = ty
+constantType (C.Undef ty) = ty
+constantType _ = shouldnt "Cannot determine constant type."
 
 
 ----------------------------------------------------------------------------
@@ -698,9 +764,10 @@ cgenArg (ArgInt val ty) = do
         ++ " -> " ++ show reprTy
     let bs = getBits reprTy
     let intCons = cons $ C.Int bs val
-    case reprTy of
-        ptrTy@(PointerType ty _ ) -> do inttoptr intCons ptrTy
-        _ -> return intCons
+    return intCons
+    -- case reprTy of
+    --     (PointerType ty _ ) -> return $ cons $ C.Null reprTy
+    --     _ -> return intCons
 
 cgenArg (ArgFloat val ty) = return $ cons $ C.Float (F.Double val)
 cgenArg (ArgString s _) =
@@ -802,14 +869,18 @@ typed' ty = do
     case repr of
         Just typeStr -> return $ typeStrToType typeStr
         -- Nothing -> error $ "No type representaition: " ++ (show ty)
-        Nothing -> return $ ptr_t $ int_c (fromIntegral wordSize)
+        Nothing -> do
+            -- logBlocks $ "xxx No type representation: " ++ show ty
+            if typeName ty == "bool"
+                then return $ int_c (fromIntegral wordSize)
+                else return $ ptr_t $ int_c (fromIntegral wordSize)
 
 typeStrToType :: String -> LLVMAST.Type
 typeStrToType [] = void_t
 typeStrToType (c:cs)
     | c == 'i' = int_c (fromIntegral bytes)
     | c == 'f' = float_c (fromIntegral bytes)
-    | c == 'p' = ptr_t (int_c 8)
+    | c == 'p' = ptr_t (int_c (fromIntegral wordSize))
     | otherwise = void_t
   where
     bytes = (read cs :: Int)
@@ -858,22 +929,22 @@ modWithDefinitions nm defs = LLVMAST.Module nm Nothing Nothing defs
 -- | Build an extern declaration definition from a given LPVM primitive.
 declareExtern :: Prim -> Compiler LLVMAST.Definition
 declareExtern (PrimForeign _ name _ args) = do
-    fnargs <- mapM makeExArg (primInputs args)
+    fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
     retty <- primReturnType args
     return $ external retty name fnargs
 
 declareExtern (PrimCall (ProcSpec m n _) args) = do
     retty <- primReturnType args
-    fnargs <- mapM makeExArg (primInputs args)
+    fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
     return $ external retty ((showModSpec m) ++ "." ++ n) fnargs
 
 declareExtern PrimNop = error "Can't declare extern for PrimNop."
 
 -- | Helper to make arguments for an extern declaration.
-makeExArg :: PrimArg -> Compiler (Type, LLVMAST.Name)
-makeExArg arg = do
+makeExArg :: (Word, PrimArg) -> Compiler (Type, LLVMAST.Name)
+makeExArg (index,arg) = do
     ty <- (typed' . argType) arg
-    let nm = LLVMAST.UnName 0
+    let nm = LLVMAST.UnName index    
     return (ty, nm)
 
 
