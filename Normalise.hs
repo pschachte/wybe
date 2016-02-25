@@ -33,7 +33,7 @@ normalise modCompiler items = do
     stmts <- getModule stmtDecls 
     unless (List.null stmts)
       $ normaliseItem modCompiler 
-            (ProcDecl Public Det (ProcProto "" [] initResources) 
+            (ProcDecl Public Det False (ProcProto "" [] initResources) 
                           (List.reverse stmts) Nothing)
 
 -- |The resources available at the top level
@@ -50,7 +50,7 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
     let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
     ty <- addType name (TypeDef (length params) rep' pos) vis
     -- XXX Should we special-case handling of = instead of generating these:
-    let eq1 = ProcDecl Public Det
+    let eq1 = ProcDecl Public Det True
               (ProcProto "=" [Param "x" ty ParamOut Ordinary,
                               Param "y" ty ParamIn Ordinary] [])
               [Unplaced $
@@ -59,7 +59,7 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
                                              Unplaced $
                                              Var "x" ParamOut Ordinary]]
               Nothing
-    let eq2 = ProcDecl Public Det
+    let eq2 = ProcDecl Public Det True
               (ProcProto "=" [Param "y" ty ParamIn Ordinary,
                               Param "x" ty ParamOut Ordinary] [])
               [Unplaced $
@@ -89,19 +89,20 @@ normaliseItem _ (ImportItems vis modspec imports pos) = do
     addImport modspec (importSpec (Just imports) vis)
 normaliseItem _ (ResourceDecl vis name typ init pos) =
   addSimpleResource name (SimpleResource typ init pos) vis
-normaliseItem modCompiler (FuncDecl vis detism (FnProto name params resources) 
-               resulttype result pos) =
+normaliseItem modCompiler (FuncDecl vis detism inline 
+                           (FnProto name params resources) 
+                           resulttype result pos) =
   let flowType = Implicit pos
   in  normaliseItem modCompiler
    (ProcDecl
-    vis detism
+    vis detism inline
     (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType]) 
      resources)
     [maybePlace (ProcCall [] "=" Nothing 
                  [Unplaced $ Var "$" ParamOut flowType, result])
      pos]
     pos)
-normaliseItem _ item@(ProcDecl _ _ _ _ _) = do
+normaliseItem _ item@(ProcDecl _ _ _ _ _ _) = do
     (item',tmpCtr) <- flattenProcDecl item
     addProc tmpCtr item'
 -- normaliseItem modCompiler (CtorDecl vis proto pos) = do
@@ -166,7 +167,7 @@ constCtorItems :: Visibility -> TypeSpec -> (Placed FnProto,Integer) -> [Item]
 constCtorItems  vis typeSpec (placedProto,num) =
     let pos = place placedProto
         constName = fnProtoName $ content placedProto
-    in [ProcDecl vis Det
+    in [ProcDecl vis Det True
         (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] [])
         [Unplaced $ ForeignCall "lpvm" "cast" []
          [Unplaced $ Typed (IntValue num) typeSpec True,
@@ -223,7 +224,7 @@ constructorItems :: Ident -> [Param] -> TypeSpec -> Int
                     -> [(Ident,TypeSpec,Int)] -> Integer -> OptPos -> [Item]
 constructorItems ctorName params typeSpec size fields tag pos =
     let flowType = Implicit pos
-    in [ProcDecl Public Det
+    in [ProcDecl Public Det True
         (ProcProto ctorName (params++[Param "$" typeSpec ParamOut Ordinary]) [])
         ([Unplaced $ ForeignCall "lpvm" "alloc" []
           [Unplaced $ IntValue $ fromIntegral size,
@@ -249,7 +250,7 @@ deconstructorItems ctorName params typeSpec size fields tag pos =
     -- XXX this needs to take the tag into account
     -- XXX this needs to be able to fail if the constructor doesn't match
     let flowType = Implicit pos
-    in [ProcDecl Public Det
+    in [ProcDecl Public Det True
         (ProcProto ctorName 
          (List.map (\(Param n t _ ft) -> (Param n t ParamOut ft)) params
           ++ [Param "$" typeSpec ParamIn Ordinary]) 
@@ -268,14 +269,14 @@ getterSetterItems :: Visibility -> TypeSpec -> Ident -> OptPos
                      -> (VarName,TypeSpec,Int) -> [Item]
 getterSetterItems vis rectype ctorName pos (field,fieldtype,offset) =
     -- XXX need to take tag into account!
-    [FuncDecl vis Det
+    [FuncDecl vis Det True
      (FnProto field [Param "$rec" rectype ParamIn Ordinary] [])
      fieldtype 
      (Unplaced $ ForeignFn "lpvm" "access" []
       [Unplaced $ Var "$rec" ParamIn Ordinary,
        Unplaced $ IntValue $ fromIntegral offset])
      pos,
-     ProcDecl vis Det
+     ProcDecl vis Det True
      (ProcProto field
       [Param "$rec" rectype ParamInOut Ordinary,
        Param "$field" fieldtype ParamIn Ordinary] [])

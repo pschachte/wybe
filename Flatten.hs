@@ -46,7 +46,8 @@ import Control.Monad.Trans (lift,liftIO)
 ----------------------------------------------------------------
 
 flattenProcDecl :: Item -> Compiler (Item,Int)
-flattenProcDecl (ProcDecl vis detism proto@(ProcProto name params resources) 
+flattenProcDecl (ProcDecl vis detism inline 
+                 proto@(ProcProto name params resources) 
                  stmts pos) = do
     proto' <- flattenProto proto detism
     let inParams = Set.fromList $
@@ -54,7 +55,7 @@ flattenProcDecl (ProcDecl vis detism proto@(ProcProto name params resources)
                    List.filter (flowsIn . paramFlow) $
                    procProtoParams proto'
     (stmts',tmpCtr) <- flattenBody stmts inParams
-    return (ProcDecl vis detism proto' stmts' pos,tmpCtr)
+    return (ProcDecl vis detism inline proto' stmts' pos,tmpCtr)
 flattenProcDecl _ =
     shouldnt "flattening a non-proc or non-Det proc"
 

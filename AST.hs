@@ -93,8 +93,10 @@ data Item
      | ImportMods Visibility [ModSpec] OptPos
      | ImportItems Visibility ModSpec [Ident] OptPos
      | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
-     | FuncDecl Visibility Determinism FnProto TypeSpec (Placed Exp) OptPos
-     | ProcDecl Visibility Determinism ProcProto [Placed Stmt] OptPos
+       -- The Bool in the next two indicates whether inlining is forced
+     | FuncDecl Visibility Determinism Bool 
+       FnProto TypeSpec (Placed Exp) OptPos
+     | ProcDecl Visibility Determinism Bool ProcProto [Placed Stmt] OptPos
      -- | CtorDecl Visibility FnProto OptPos
      | StmtDecl Stmt OptPos
 
@@ -714,10 +716,10 @@ addImport modspec imports = do
 
 -- |Add the specified proc definition to the current module.
 addProc :: Int -> Item -> Compiler ()
-addProc tmpCtr (ProcDecl vis detism proto stmts pos) = do
+addProc tmpCtr (ProcDecl vis detism inline proto stmts pos) = do
     let ProcProto name params resources = proto
-    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr Map.empty vis False
-                  $ initSuperprocSpec vis
+    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 
+                  Map.empty vis inline $ initSuperprocSpec vis
     currMod <- getModuleSpec
     procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
     let procs' = procs ++ [procDef]
@@ -1756,15 +1758,17 @@ instance Show Item where
     visibilityPrefix vis ++ "resource " ++ show name ++ ":" ++ show typ
     ++ maybeShow " = " init " "
     ++ showMaybeSourcePos pos
-  show (FuncDecl vis detism proto typ exp pos) =
+  show (FuncDecl vis detism inline proto typ exp pos) =
     visibilityPrefix vis
     ++ determinismPrefix detism
+    ++ if inline then "inline " else ""
     ++ "func " ++ show proto ++ ":" ++ show typ
     ++ showMaybeSourcePos pos
     ++ " = " ++ show exp
-  show (ProcDecl vis detism proto stmts pos) =
+  show (ProcDecl vis detism inline proto stmts pos) =
     visibilityPrefix vis
     ++ determinismPrefix detism
+    ++ if inline then "inline " else ""
     ++ "proc " ++ show proto
     ++ showMaybeSourcePos pos
     ++ showBody 4 stmts

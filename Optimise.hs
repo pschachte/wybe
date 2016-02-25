@@ -107,7 +107,7 @@ optimiseProcDefBU :: ProcSpec -> ProcDef -> Compiler ProcDef
 optimiseProcDefBU pspec def = do
     logOptimise $ "Definition of " ++ show pspec ++
       " before optimisation:" ++ showProcDef 4 def
-    def' <- procExpansion def >>= markLastUse pspec >>= inlineIfWanted
+    def' <- procExpansion def >>= markLastUse pspec >>= decideInlining
     logOptimise $ "Definition of " ++ show pspec ++
       " after optimisation:" ++ showProcDef 4 def'
     return def'
@@ -117,8 +117,10 @@ optimiseProcDefBU pspec def = do
 --                       Deciding what to inline
 ----------------------------------------------------------------
 
-inlineIfWanted :: ProcDef -> Compiler ProcDef
-inlineIfWanted def
+-- |Decide whether to inline the proc and mark it if so.  If it's already
+--  marked to be inlined, don't second guess that.
+decideInlining :: ProcDef -> Compiler ProcDef
+decideInlining def
     |  NoFork == bodyFork body && not (procInline def) = do
     logOptimise $ "Considering inline of " ++ procName def
     let benefit = 4 + procCost proto -- add 4 for time saving
@@ -130,7 +132,7 @@ inlineIfWanted def
     then return $ def { procInline = True }
     else return def
     where ProcDefPrim proto body = procImpln def
-inlineIfWanted def = return def
+decideInlining def = return def
 
 
 procCost :: PrimProto -> Int

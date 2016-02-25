@@ -147,7 +147,7 @@ newProcName = do
 
 genProc :: ProcProto -> [Placed Stmt] -> Unbrancher ()
 genProc proto stmts = do
-    let item = ProcDecl Private Det proto stmts Nothing
+    let item = ProcDecl Private Det False proto stmts Nothing
     logUnbranch $ "Generating proc:\n"
       ++ show item
     modify (\s -> s { brNewDefs = item:brNewDefs s })

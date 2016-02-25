@@ -129,10 +129,10 @@ Item  :: { Item }
                                 { ResourceDecl $1 (identName $3) $4 $5
 				    $ Just $ tokenPosition $2 }
     | Visibility 'func' Determinism FnProto OptType '=' Exp
-                                { FuncDecl $1 $3 (content $4) $5 $7
+                                { FuncDecl $1 $3 False (content $4) $5 $7
 				    $ Just $ tokenPosition $2 }
     | Visibility 'proc' Determinism ProcProto ProcBody
-                                { ProcDecl $1 $3 $4 $5
+                                { ProcDecl $1 $3 False $4 $5
                                     $ Just $ tokenPosition $2 }
     -- | Visibility 'ctor' FnProto { CtorDecl $1 $3
     --     			    $ Just $ tokenPosition $2 }
