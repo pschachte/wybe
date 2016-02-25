@@ -12,7 +12,7 @@
 module Config (sourceExtension, objectExtension, executableExtension,
                interfaceExtension, bitcodeExtension, sharedLibs,
                ldArgs, ldSystemArgs, wordSize, wordSizeBytes,
-               availableTagBits)
+               availableTagBits, tagMask)
     where
 
 import Data.Word
@@ -52,6 +52,10 @@ wordSizeBytes = sizeOf (fromIntegral 3 :: Word)
 --  XXX this would need to be fixed for non-byte addressed architectures.
 availableTagBits :: Int
 availableTagBits = floor $ logBase 2 $ fromIntegral wordSizeBytes
+
+-- |The bitmask to use to mask out all but the tag bits of a tagged pointer
+tagMask :: Int
+tagMask = 2^availableTagBits - 1
 
 -- |Foreign shared library directory name
 sharedLibDirName :: String
