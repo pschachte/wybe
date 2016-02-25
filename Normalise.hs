@@ -70,14 +70,14 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
               Nothing
     let typespec = TypeSpec [] name
                    $ List.map (\n->TypeSpec [] n []) params
+    let constCount = length consts
     let nonConstCount = length nonconsts
-    updateImplementation (\imp -> imp { modConstCtorCount = length consts,
+    updateImplementation (\imp -> imp { modConstCtorCount = constCount,
                                         modNonConstCtorCount = nonConstCount })
     let constItems =
           concatMap (constCtorItems ctorVis typespec) $ zip consts [0..]
     nonconstItems <- fmap concat $
-           mapM (nonConstCtorItems ctorVis typespec 
-                 $ fromIntegral nonConstCount)
+           mapM (nonConstCtorItems ctorVis typespec constCount nonConstCount)
            $ zip nonconsts [0..]
     normaliseSubmodule modCompiler name (Just params) vis pos
       $ [eq1,eq2] ++ constItems ++ nonconstItems ++ items
@@ -175,13 +175,12 @@ constCtorItems  vis typeSpec (placedProto,num) =
         pos]
 
 
-nonConstCtorItems :: Visibility -> TypeSpec -> Integer
+nonConstCtorItems :: Visibility -> TypeSpec -> Int -> Int
                   -> (Placed FnProto,Integer) -> Compiler [Item]
-nonConstCtorItems vis typeSpec ctorCount (placedProto,num) = do
+nonConstCtorItems vis typeSpec constCount ctorCount (placedProto,num) = do
     let pos = place placedProto
     let ctorName = fnProtoName $ content placedProto
     let params = fnProtoParams $ content placedProto
-        
     fields <- mapM (\(Param var typ _ _) -> fmap (var,typ,) $ fieldSize typ)
               params
     let (fields',size) = 
@@ -237,9 +236,17 @@ constructorItems ctorName params typeSpec size fields tag pos =
                                  Unplaced $ Var var ParamIn flowType]))
           fields)
          ++
-         [Unplaced $ ForeignCall "llvm" "or" []
+         [Unplaced $ ForeignCall "lpvm" "cast" []
           [Unplaced $ Var "$rec" ParamIn Ordinary,
+           Unplaced $ Typed (Var "$recint" ParamOut Ordinary) 
+                      (TypeSpec ["wybe"] "int" []) True],
+          Unplaced $ ForeignCall "llvm" "or" []
+          [Unplaced $ Var "$recint" ParamIn Ordinary,
            Unplaced $ IntValue $ fromIntegral tag,
+           Unplaced $ Typed (Var "$recinttagged" ParamOut Ordinary)
+                      (TypeSpec ["wybe"] "int" []) True],
+          Unplaced $ ForeignCall "lpvm" "cast" []
+          [Unplaced $ Var "$recinttagged" ParamIn Ordinary,
            Unplaced $ Var "$" ParamOut Ordinary]])
         pos]
 
@@ -269,6 +276,7 @@ getterSetterItems :: Visibility -> TypeSpec -> Ident -> OptPos
                      -> (VarName,TypeSpec,Int) -> [Item]
 getterSetterItems vis rectype ctorName pos (field,fieldtype,offset) =
     -- XXX need to take tag into account!
+    -- XXX this needs to be able to fail if the constructor doesn't match
     [FuncDecl vis Det True
      (FnProto field [Param "$rec" rectype ParamIn Ordinary] [])
      fieldtype 
