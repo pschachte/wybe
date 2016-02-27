@@ -50,8 +50,8 @@ import Config (wordSize,wordSizeBytes)
 blockTransformModule :: ModSpec -> Compiler ()
 blockTransformModule thisMod =
     do reenterModule thisMod
-       logBlocks $ "*** Translating Module: " ++ (showModSpec thisMod)
-       (names, procs) <- fmap unzip $
+       logBlocks $ "*** Translating Module: " ++ showModSpec thisMod
+       (names, procs) <- unzip <$>
                          getModuleImplementationField (Map.toList . modProcs)
        -- Collect all procedure prototypes in the module
        let protos = List.map extractLPVMProto (concat procs)
@@ -60,15 +60,15 @@ blockTransformModule thisMod =
        imports <- getModuleImplementationField (keys . modImports)
        importProtos <- mapM getPrimProtos
                          (List.filter (not . isStdLib) imports)
-       let allProtos = protos ++ (concat importProtos)
+       let allProtos = protos ++ concat importProtos
 
        logBlocks $ "Prototypes:\n\t"
                          ++ intercalate "\n\t" (List.map show allProtos)
        --------------------------------------------------
        -- Listing all known types
-       knownTypesSet <- fmap Map.elems $
-           getModuleImplementationField modKnownTypes
-       let knownTypes = concat $ List.map Set.toList knownTypesSet
+       knownTypesSet <- Map.elems <$>
+                         getModuleImplementationField modKnownTypes
+       let knownTypes = concatMap Set.toList knownTypesSet
        trs <- mapM typed' knownTypes
        -- typeList :: [(TypeSpec, LLVMAST.Type)]
        let typeList = zip knownTypes trs
@@ -441,7 +441,6 @@ cgen prim@(PrimCall pspec args) = do
     unless (thisMod == mod || thisMod `List.isPrefixOf` mod)
         (addExtern $ PrimCall pspec filteredArgs)
 
-
     let inArgs = primInputs filteredArgs
     outTy <- lift $ primReturnType filteredArgs
 
@@ -612,7 +611,9 @@ cgenLPVM pname flags args
           castOp <- case inOp of
               (ConstantOperand c) ->
                   if isPtr outTy
-                  then return $ cons $ C.Null outTy
+                  then do
+                      return $ constInttoptr inOp outTy
+                      -- return $ cons $ C.Null outTy
                   else do
                       let consTy = constantType c
                       ptr <- doAlloca consTy
@@ -908,10 +909,12 @@ typed' ty = do
 
 typeStrToType :: String -> LLVMAST.Type
 typeStrToType [] = void_t
-typeStrToType (c:cs)
+typeStrToType ty@(c:cs)
     | c == 'i' = int_c (fromIntegral bytes)
     | c == 'f' = float_c (fromIntegral bytes)
-    | c == 'p' = ptr_t (int_c (fromIntegral wordSize))
+    | c == 'p' = if ty == "pointer"
+                 then ptr_t (int_c (fromIntegral wordSize))
+                 else ptr_t (int_c 8)
     | otherwise = void_t
   where
     bytes = (read cs :: Int)
@@ -965,7 +968,9 @@ declareExtern :: Prim -> Compiler LLVMAST.Definition
 declareExtern (PrimForeign _ name _ args) = do
     fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
     retty <- primReturnType args
-    return $ external retty name fnargs
+    let ex = external retty name fnargs
+    logBlocks $ "## Declared extern: " ++ showPretty ex
+    return ex
 
 declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
     retty <- primReturnType args
