@@ -452,7 +452,10 @@ buildExecutable targetMod fpath =
        let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"
        liftIO $ makeObjFile tmpMainOFile mainMod
        let allOFiles = tmpMainOFile:thisfile:ofiles
-       liftIO $ makeExec allOFiles fpath
+       clangErr <- liftIO $ makeExec allOFiles fpath
+       logBuild $ "-- CLANG errs -- "
+       logBuild clangErr
+       logBuild $ "----"
        -- return allOFiles
        logBuild $ "o Object Files to link: "
        logBuild $ "++ " ++ intercalate "\n++" allOFiles

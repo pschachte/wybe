@@ -24,6 +24,7 @@ import qualified LLVM.General.ExecutionEngine as EE
 
 import           System.Directory
 import           System.Process
+import System.IO (hGetContents)
 
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
@@ -249,14 +250,16 @@ runJIT mod = do
 -- executable.
 makeExec :: [FilePath]          -- Object Files
          -> FilePath            -- Target File
-         -> IO ()
+         -> IO String
 makeExec ofiles target =
     do dir <- getCurrentDirectory
        let args = ofiles ++ sharedLibs ++ ["-o", target]
        -- Supressing the annoying Xcode warning
-       -- (_,_,_,_) <- createProcess (proc "cc" args){std_err = CreatePipe}
-       createProcess (proc "cc" args)
-       return ()
+       (_,_, Just hout,_) <- createProcess (proc "cc" args){std_err = CreatePipe}
+       errCons <- hGetContents hout
+       -- putStrLn errCons
+       -- createProcess (proc "cc" args)
+       return errCons
 
 -- makeExec ofiles target =
 --     do dir <- getCurrentDirectory
