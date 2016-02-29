@@ -612,7 +612,7 @@ cgenLPVM pname flags args
               (ConstantOperand c) ->
                   if isPtr outTy
                   then do
-                      return $ constInttoptr inOp outTy
+                      return $ constInttoptr c outTy
                       -- return $ cons $ C.Null outTy
                   else do
                       let consTy = constantType c

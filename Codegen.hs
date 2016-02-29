@@ -506,8 +506,8 @@ ptrtoint op ty = instr ty $ PtrToInt op ty []
 -- constBitcast :: Operand -> LLVMAST.Type -> Operand
 -- constBitcast (ConstantOperand c) ty =  cons $ C.BitCast c ty
 
-constInttoptr :: Operand -> LLVMAST.Type -> Operand
-constInttoptr (ConstantOperand c) ty = cons $ C.IntToPtr c ty
+constInttoptr :: C.Constant -> LLVMAST.Type -> Operand
+constInttoptr c ty = cons $ C.IntToPtr c ty
 
 -- constPtrtoint :: Operand -> LLVMAST.Type -> Operand
 -- constPtrtoint (ConstantOperand c) ty = cons $ C.PtrToInt c ty
