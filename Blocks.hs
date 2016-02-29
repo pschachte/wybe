@@ -316,8 +316,10 @@ assignParam p =
 buildOutputOp :: [PrimParam] -> Codegen (Maybe Operand)
 buildOutputOp params = do
     let outParams = List.filter isOutputParam params
-    outputsMaybe <- mapM (getVarMaybe . show . primParamName) outParams
-    let outputs = catMaybes outputsMaybe
+    -- outputsMaybe <- mapM (getVarMaybe . show . primParamName) outParams
+    -- let outputs = catMaybes outputsMaybe
+    outputs <- mapM (getVar . show . primParamName) outParams
+    logCodegen $ "Built outputs from symbol table: " ++ show outputs
 
     case length outputs of
         -- * No valid output
@@ -684,6 +686,7 @@ addInstruction ins args =
                   outTys <- lift $ mapM (typed' . argType) outArgs
                   fields <- structUnPack outOp outTys
                   let outNames = List.map pullName outArgs
+                  -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
                   zipWithM_ assign outNames fields
                   return $ last fields
 
@@ -787,9 +790,7 @@ localOperandType _ = void_t
 -- it a global declaration 'addGlobalConstant' creates a G.Global Value for
 -- it, generating a UnName name for it.
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
-cgenArg (ArgVar nm _ _ _ _) = do
-    lift $ logBlocks $ "Symbol table hit: " ++ show nm
-    getVar (show nm)
+cgenArg (ArgVar nm _ _ _ _) = getVar (show nm)
 cgenArg (ArgInt val ty) = do
     reprTy <- lift $ typed' ty
     lift $ logBlocks $ show val ++ " :: " ++ show ty
@@ -1178,3 +1179,6 @@ logWrapWith ch s = do
     logMsg Blocks (replicate 80 ch)
     logMsg Blocks s
     logMsg Blocks (replicate 80 ch)
+
+logCodegen :: String -> Codegen ()
+logCodegen s = lift $ logBlocks $ "=CODEGEN=" ++ s

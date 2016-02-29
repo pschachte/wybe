@@ -57,7 +57,8 @@ import qualified LLVM.General.AST.Constant               as C
 import qualified LLVM.General.AST.FloatingPointPredicate as FP
 import qualified LLVM.General.AST.IntegerPredicate       as IP
 
-import           AST                                     (Prim, PrimProto, Compiler)
+import           AST                                     (Prim, PrimProto, Compiler,
+                                                         shouldnt)
 import           LLVM.General.Context
 import           LLVM.General.Module
 
@@ -345,7 +346,7 @@ getVar var = do
   lcls <- gets symtab
   case lookup var lcls of
     Just x -> return x
-    Nothing -> error $ "Local variable not in scope: " ++ show var
+    Nothing -> shouldnt $ "Local variable not in scope: " ++ show var
 
 getVarMaybe :: String -> Codegen (Maybe Operand)
 getVarMaybe var = do
