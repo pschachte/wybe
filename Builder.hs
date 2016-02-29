@@ -45,7 +45,7 @@
 module Builder (buildTargets, compileModule) where
 
 import AST
-import Blocks (blockTransformModule, newMainModule)
+import Blocks (blockTransformModule, newMainModule, concatLLVMASTModules)
 import Callers (collectCallers)
 import Clause (compileProc)
 import Config
@@ -62,16 +62,18 @@ import Normalise (normalise, normaliseItem)
 import ObjectInterface
 import Optimise (optimiseMod)
 import           Options                   (LogSelection (..), Options,
-                                            optForce, optForceAll, optLibDirs)
+                                            optForce, optForceAll, optLibDirs,
+                                            optUseStd)
 import Parser (parse)
 import Resources (resourceCheckMod, resourceCheckProc)
 import Scanner (Token, fileTokens, inputTokens)
 import           System.Directory          (canonicalizePath, doesFileExist,
                                             getCurrentDirectory,
-                                            getModificationTime)                 
+                                            getModificationTime,
+                                            createDirectoryIfMissing,
+                                            getTemporaryDirectory)
 import System.Exit (exitFailure, exitSuccess)
 import System.FilePath
-import System.IO.Temp
 import System.Time (ClockTime)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
@@ -83,7 +85,9 @@ import Unbranch (unbranchProc)
 buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
     possDirs <- gets (optLibDirs . options)
-    buildModuleIfNeeded False ["wybe"] possDirs -- load library first
+    let useStd = optUseStd opts
+    -- load library first (if useStd is True)
+    when useStd $ (buildModuleIfNeeded False ["wybe"] possDirs ) >> return ()
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     showMessages
     logDump FinalDump FinalDump "EVERYTHING"
@@ -99,14 +103,19 @@ buildTarget force target = do
       then message Error ("Unknown target file type " ++ target) Nothing
       else do
         let modname = takeBaseName target
-        let dir = takeDirectory target        
+        let dir = takeDirectory target
         built <- buildModuleIfNeeded force [modname] [dir]
+
+        -- Check if the module contains sub modules
+        subMods <- concatSubMods [modname]
+
         when (tType == ExecutableFile) (buildExecutable [modname] target)
         if (built==False && tType /= ExecutableFile)
           then logBuild $ "Nothing to be done for target: " ++ target
           else
             do when (tType == ObjectFile) $ emitObjectFile [modname] target
                when (tType == BitcodeFile) $ emitBitcodeFile [modname] target
+               when (tType == AssemblyFile) $ emitAssemblyFile [modname] target
                whenLogging Emit $ logLLVMString [modname]
 
 
@@ -180,7 +189,9 @@ srcObjFiles modspec possDirs = do
                        mapM (\ms -> do
                                   let srcfile = moduleFilePath sourceExtension
                                                 d ms
-                                  let objfile = moduleFilePath objectExtension
+                                  -- let objfile = moduleFilePath objectExtension
+                                  --               d ms
+                                  let objfile = moduleFilePath bitcodeExtension
                                                 d ms
                                   let modname = List.last ms
                                   srcExists <- (liftIO . doesFileExist) srcfile
@@ -235,28 +246,41 @@ compileModule dir modspec params items = do
 --   XXX not yet implemented
 loadModule :: ModSpec -> FilePath -> Compiler ()
 loadModule modspec objfile = do
-    logBuild $ "Trying to find wrapped bitcode for " ++ showModSpec modspec
+    logBuild $ "===== ??? Trying to load from wrapped bitcode for "
+        ++ showModSpec modspec
     let bcfile = dropExtension objfile ++ ".bc"
     thisMod <- liftIO $ extractModuleFromWrapper bcfile
     count <- gets ((1+) . loadCount)
     modify (\comp -> comp { loadCount = count })
-    logBuild $ "===== >>> Loaded Module bytestring from " ++ (show bcfile)
+    logBuild $ "===== >>> Extracted Module bytestring from " ++ (show bcfile)
     modify (\comp -> let mods = thisMod : underCompilation comp
                      in  comp { underCompilation = mods })
     -- Load the dependencies
     loadImports
-    stopOnError $ "handling imports for module " ++ showModSpec modspec    
+    stopOnError $ "handling imports for module " ++ showModSpec modspec
     mods <- exitModule -- may be empty list if module is mutually dependent
-    logBuild $ "<=== finished loading bytestring of module from "
+    logBuild $ "===== <<< Extracted Module put in it's place "
         ++ (show bcfile)
 
 
-
+-- | Collect all the subModules of the given modspec.
 descendantModules :: ModSpec -> Compiler [ModSpec]
 descendantModules mspec = do
     subMods <- fmap (Map.elems . modSubmods) $ getLoadedModuleImpln mspec
     desc <- fmap concat $ mapM descendantModules subMods
     return $ subMods ++ desc
+
+
+-- | Concatenate the LLVMAST.Module implementations of the submodules to the
+-- the given super module.
+concatSubMods :: ModSpec -> Compiler [ModSpec]
+concatSubMods mspec = do
+    someMods <- descendantModules mspec
+    logBuild $ "### Combining descendents of " ++ showModSpec mspec
+        ++ ": " ++ showModSpecs someMods
+    concatLLVMASTModules mspec someMods
+    return someMods
+
 
 -------------------- Actually compiling some modues --------------------
 
@@ -311,7 +335,7 @@ compileModSCC mspecs = do
     --                         fromJust . modImplementation))
     return ()
 
--- | Filter for avoiding the standard library modules    
+-- | Filter for avoiding the standard library modules
 isStdLib :: ModSpec -> Bool
 isStdLib [] = False
 isStdLib (m:_) = m == "wybe"
@@ -408,36 +432,43 @@ handleModImports modSCC mod = do
 -- | Build the executable for the Target Module at the given
 -- location.
 -- All dependencies are collected as object files and linked
--- by the `ld` linker to create the target. The target module
--- also needs to have a `main` function, which is created by
--- simply renaming the existing 'module.main' to 'main' in the
--- LLVM AST Module representation of the 'module'.
+-- by the system 'cc' to create the target.
+-- A new temporary main object file is created which has the main
+-- function (LLVM) which calls the mains of the target module and the
+-- imports in the correct order. The target module and imports have
+-- mains defined as 'modName.main'.
 buildExecutable :: ModSpec -> FilePath -> Compiler ()
 buildExecutable targetMod fpath =
     do imports <- collectMainImports [targetMod] []
        logBuild $ "o Modules with 'main': " ++ showModSpecs imports
-       let mainMod = newMainModule imports
+       mainMod <- newMainModule imports
        ofiles <- collectObjectFiles [] targetMod
        thisfile <- loadObjectFile targetMod
        logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
        -- With temporary Directory
-       filesLinked <- liftIO $ withSystemTempDirectory "tmp" $ \dir ->
-           do let tmpMainOFile = dir ++ "/tmpMain.o"              
-              makeObjFile tmpMainOFile mainMod
-              let allOFiles = tmpMainOFile:thisfile:ofiles
-              makeExec allOFiles fpath
-              return allOFiles
+       -- filesLinked <- liftIO $ withSystemTempDirectory "wybetmp" $ \dir ->
+       tempDir <- liftIO $ getTemporaryDirectory
+       liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
+       let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"
+       liftIO $ makeObjFile tmpMainOFile mainMod
+       let allOFiles = tmpMainOFile:thisfile:ofiles
+       clangErr <- liftIO $ makeExec allOFiles fpath
+       logBuild $ "-- CLANG errs -- "
+       logBuild clangErr
+       logBuild $ "----"
+       -- return allOFiles
        logBuild $ "o Object Files to link: "
-       logBuild $ "++ " ++ intercalate "\n++ " filesLinked 
+       logBuild $ "++ " ++ intercalate "\n++" allOFiles
        logBuild $ "o Building Target (executable): " ++ fpath
        return ()
+
 
 
 -- | Recursively visit the imports of the modules passed in the first
 -- argument list, collecting the imports which have a 'main' function (or
 -- a empty procedure name) into the second argument list, returning the
 -- collected module names at the end of the traversal.
--- The list is built up in such a way that the 'main' procedures of a 
+-- The list is built up in such a way that the 'main' procedures of a
 -- module's imports will appear first in the list. Sort of a
 -- depth-first-search.
 collectMainImports :: [ModSpec] -> [ModSpec] -> Compiler [ModSpec]
@@ -448,31 +479,36 @@ collectMainImports (m:ms) cs = do
     imports <- getModuleImplementationField (keys . modImports)
     let noStd = List.filter (not . isStdLib) imports
     finishModule
-    if elem "" procs 
+    if elem "" procs
         then collectMainImports (reverse noStd ++ ms) (m:cs)
         else collectMainImports (reverse noStd ++ ms) cs
-    
+
 
 -- | Recursively visit imports of module emitting and collecting
 -- the object files for each. It is assumed that every dependency
--- has already been built upto LLVM till now. 
+-- has already been built upto LLVM till now.
 collectObjectFiles :: [FilePath] -- Object Files collected till now
                    -> ModSpec   -- Current Module
-                   -> Compiler [FilePath] 
+                   -> Compiler [FilePath]
 collectObjectFiles ofiles thisMod =
   do reenterModule thisMod
      imports <- getModuleImplementationField (keys . modImports)
+     submods <- getModuleImplementationField (Map.elems . modSubmods)
+     logBuild $ "IMPORTS: "++ showModSpecs imports
+     logBuild $ "SUBMODS: "++ showModSpecs submods
      -- We can't compile the standard library completely yet
-     -- to LLVM 
+     -- to LLVM
      let nostd = List.filter (not . isStdLib) imports
-     finishModule     
-     case (List.null nostd) of
+     let noSubMods = List.filter (not . (`elem` submods)) nostd
+     
+     finishModule
+     case (List.null noSubMods) of
        True -> return ofiles
        False ->
-         do importfiles <- mapM loadObjectFile nostd    
-            cs <- mapM (collectObjectFiles (ofiles ++ importfiles)) nostd
+         do importfiles <- mapM loadObjectFile noSubMods
+            cs <- mapM (collectObjectFiles (ofiles ++ importfiles)) noSubMods
             return (concat cs)
-     
+
 -- | Load/Build object file for the module in the same directory
 -- the module is in.
 loadObjectFile :: ModSpec -> Compiler FilePath
@@ -481,6 +517,7 @@ loadObjectFile thisMod =
      dir <- getDirectory
      -- generating an name + extension for our object file
      let objFile = moduleFilePath objectExtension dir thisMod
+     subMods <- concatSubMods thisMod
      emitObjectFile thisMod objFile
      finishModule
      return objFile
@@ -491,7 +528,7 @@ loadObjectFile thisMod =
 -- |The different sorts of files that could be specified on the
 --  command line.
 data TargetType = InterfaceFile | ObjectFile | ExecutableFile
-                | UnknownFile | BitcodeFile
+                | UnknownFile | BitcodeFile | AssemblyFile
                 deriving (Show,Eq)
 
 
@@ -503,6 +540,7 @@ targetType filename
   | ext' == objectExtension     = ObjectFile
   | ext' == executableExtension = ExecutableFile
   | ext' == bitcodeExtension    = BitcodeFile
+  | ext' == assemblyExtension   = AssemblyFile
   | otherwise                  = UnknownFile
       where ext' = dropWhile (=='.') $ takeExtension filename
 

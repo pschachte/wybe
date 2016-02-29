@@ -23,12 +23,19 @@ AFTER EVERYTHING:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : numbers.factorial<0>
+  public procs    : numbers.<0>
+                    numbers.factorial<0>
                     numbers.toCelsius<0>
   imports         : use wybe
   types           : 
   resources       : 
   procs           : 
+
+*main* > public (0 calls) (inline)
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+    foreign c print_string("Numbers has been initialised.":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:116:41
+    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:102:28
+
 
 factorial > public (1 calls) (inline)
 0: factorial(n#0:wybe.int, ?$#0:wybe.int):
@@ -66,47 +73,62 @@ declare void @putchar(i8)
 
 declare void @print_float(double)
 
-declare void @print_int(i32)
+declare void @print_int(i64)
 
-declare i32 @"numbers.gen$1"(i32)
+declare i64 @"numbers.gen$1<0>"(i64)
+
+declare i8* @wybe_malloc(i32)
 
 define i32 @bar.main() {
 entry:
-  %"tmp$3#0" = tail call i32 @"numbers.gen$1"(i32 4)
-  tail call void @print_int(i32 %"tmp$3#0")
+  %"tmp$4#0" = tail call i64 @"numbers.gen$1<0>"(i64 4)
+  tail call void @print_int(i64 %"tmp$4#0")
   tail call void @putchar(i8 10)
   tail call void @print_float(double 3.500000e+01)
   tail call void @putchar(i8 10)
-  %0 = alloca i32
-  store i32 0, i32* %0
-  ret i32 0
+  ret void
 }
 
 --------------------------------------------------
 ; ModuleID = 'numbers'
 
-define i32 @numbers.factorial(i32 %"n#0") {
+@0 = constant [30 x i8] c"Numbers has been initialised.\00"
+
+declare void @putchar(i8)
+
+declare void @print_string(i8*)
+
+declare i8* @wybe_malloc(i32)
+
+define i32 @numbers.main() {
 entry:
-  %"n#1" = tail call i32 @"numbers.gen$1"(i32 %"n#0")
-  ret i32 %"n#1"
+  tail call void @print_string(i8* getelementptr inbounds ([30 x i8]* @0, i32 0, i32 0))
+  tail call void @putchar(i8 10)
+  ret void
 }
 
-define i32 @"numbers.gen$1"(i32 %"n#0") {
+define i64 @"numbers.factorial<0>"(i64 %"n#0") {
 entry:
-  %"tmp$7#0" = icmp sle i32 %"n#0", 0
+  %"tmp$0#0" = tail call i64 @"numbers.gen$1<0>"(i64 %"n#0")
+  ret i64 %"tmp$0#0"
+}
+
+define i64 @"numbers.gen$1<0>"(i64 %"n#0") {
+entry:
+  %"tmp$7#0" = icmp sle i64 %"n#0", 0
   br i1 %"tmp$7#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
-  ret i32 1
+  ret i64 1
 
 if.else:                                          ; preds = %entry
-  %"tmp$10#0" = sub i32 %"n#0", 1
-  %"tmp$12#0" = tail call i32 @"numbers.gen$1"(i32 %"tmp$10#0")
-  %"tmp$16#0" = mul i32 %"n#0", %"tmp$12#0"
-  ret i32 %"tmp$16#0"
+  %"tmp$10#0" = sub i64 %"n#0", 1
+  %"tmp$13#0" = tail call i64 @"numbers.gen$1<0>"(i64 %"tmp$10#0")
+  %"tmp$16#0" = mul i64 %"n#0", %"tmp$13#0"
+  ret i64 %"tmp$16#0"
 }
 
-define double @numbers.toCelsius(double %"f#0") {
+define double @"numbers.toCelsius<0>"(double %"f#0") {
 entry:
   %"tmp$4#0" = fsub double %"f#0", 3.200000e+01
   %"tmp$7#0" = fdiv double %"tmp$4#0", 1.800000e+00

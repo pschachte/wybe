@@ -56,23 +56,23 @@ declare i8 @read_char()
 
 declare void @putchar(i8)
 
+declare i8* @wybe_malloc(i32)
+
 define i32 @simple_loop.main() {
 entry:
   %"tmp$2#0" = tail call i8 @read_char()
-  %"c#0" = tail call i8 @"simple_loop.gen$3"(i8 %"tmp$2#0")
-  %0 = alloca i32
-  store i32 0, i32* %0
-  ret i32 0
+  %"c#0" = tail call i8 @"simple_loop.gen$3<0>"(i8 %"tmp$2#0")
+  ret void
 }
 
-define i8 @"simple_loop.gen$2"() {
+define { i8, i1 } @"simple_loop.gen$2<0>"() {
 entry:
   %"c#0" = tail call i8 @read_char()
-  %"c#1" = tail call i8 @"simple_loop.gen$3"(i8 %"c#0")
+  %"c#1" = tail call i8 @"simple_loop.gen$3<0>"(i8 %"c#0")
   ret i8 %"c#1"
 }
 
-define i8 @"simple_loop.gen$3"(i8 %"c#0") {
+define i8 @"simple_loop.gen$3<0>"(i8 %"c#0") {
 entry:
   %"tmp$3#0" = icmp ne i8 %"c#0", 97
   br i1 %"tmp$3#0", label %if.then, label %if.else
@@ -80,18 +80,18 @@ entry:
 if.then:                                          ; preds = %entry
   tail call void @putchar(i8 %"c#0")
   %"tmp$8#0" = tail call i8 @read_char()
-  %"c#1" = tail call i8 @"simple_loop.gen$3"(i8 %"tmp$8#0")
+  %"c#1" = tail call i8 @"simple_loop.gen$3<0>"(i8 %"tmp$8#0")
   ret i8 %"c#1"
 
 if.else:                                          ; preds = %entry
-  ret i8 %"c#0"
+  ret void
 }
 
-define i8 @"simple_loop.gen$4"(i8 %"c#0") {
+define i8 @"simple_loop.gen$4<0>"(i8 %"c#0") {
 entry:
   tail call void @putchar(i8 %"c#0")
   %"tmp$4#0" = tail call i8 @read_char()
-  %"c#1" = tail call i8 @"simple_loop.gen$3"(i8 %"tmp$4#0")
+  %"c#1" = tail call i8 @"simple_loop.gen$3<0>"(i8 %"tmp$4#0")
   ret i8 %"c#1"
 }
 

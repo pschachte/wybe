@@ -11,13 +11,16 @@
 module Normalise (normalise, normaliseItem) where
 
 import AST
-import Data.Map as Map
-import Data.Set as Set
-import Data.List as List
-import Data.Maybe
+import Config (wordSize)
 import Control.Monad
+import Control.Monad.State (gets)
 import Control.Monad.Trans (lift,liftIO)
+import Data.List as List
+import Data.Map as Map
+import Data.Maybe
+import Data.Set as Set
 import Flatten
+import Options (optUseStd)
 import Unbranch
 import Config (wordSize,wordSizeBytes)
 
@@ -28,7 +31,8 @@ normalise modCompiler items = do
     mapM_ (normaliseItem modCompiler) items
     -- liftIO $ putStrLn "File compiled"
     -- every module imports stdlib
-    addImport ["wybe"] (ImportSpec (Just Set.empty) Nothing)
+    useStdLib <- gets (optUseStd . options)
+    when useStdLib $ addImport ["wybe"] (ImportSpec (Just Set.empty) Nothing)
     -- Now generate main proc if needed
     stmts <- getModule stmtDecls 
     unless (List.null stmts)
@@ -122,6 +126,9 @@ normaliseSubmodule modCompiler name typeParams vis pos items = do
     parentModSpec <- getModuleSpec
     let subModSpec = parentModSpec ++ [name]
     addImport subModSpec (importSpec Nothing vis)
+    -- Add the submodule to the submodule list of the implementation
+    updateImplementation $
+        updateModSubmods (\sm-> Map.insert name subModSpec sm)
     enterModule dir subModSpec typeParams
     case typeParams of
       Nothing -> return ()
@@ -134,6 +141,7 @@ normaliseSubmodule modCompiler name typeParams vis pos items = do
     mods <- exitModule
     unless (List.null mods) $ modCompiler mods
     return ()
+
 
 
 ----------------------------------------------------------------

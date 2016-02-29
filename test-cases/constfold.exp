@@ -42,28 +42,30 @@ AFTER LLVM IR:
 
 ; ModuleID = 'constfold'
 
-define i32 @constfold.fold_add() {
+declare i8* @wybe_malloc(i32)
+
+define i64 @"constfold.fold_add<0>"() {
 entry:
-  ret i32 42
+  ret i64 42
 }
 
-define i32 @constfold.fold_mult() {
+define i64 @"constfold.fold_mult<0>"() {
 entry:
-  ret i32 42
+  ret i64 42
 }
 
-define i32 @constfold.fold_test() {
+define i64 @"constfold.fold_test<0>"() {
 entry:
-  ret i32 42
+  ret i64 42
 }
 
-define i32 @constfold.fortytwo() {
+define i64 @"constfold.fortytwo<0>"() {
 entry:
-  ret i32 42
+  ret i64 42
 }
 
-define i32 @"constfold.gen$1"() {
+define i64 @"constfold.gen$1<0>"() {
 entry:
-  ret i32 42
+  ret i64 42
 }
 

@@ -20,9 +20,11 @@ AFTER LLVM IR:
 
 ; ModuleID = 'func_untyped'
 
-define i32 @func_untyped.incr(i32 %"a#0") {
+declare i8* @wybe_malloc(i32)
+
+define i64 @"func_untyped.incr<0>"(i64 %"a#0") {
 entry:
-  %"tmp$3#0" = add i32 %"a#0", 1
-  ret i32 %"tmp$3#0"
+  %"tmp$3#0" = add i64 %"a#0", 1
+  ret i64 %"tmp$3#0"
 }
 

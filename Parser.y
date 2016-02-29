@@ -33,7 +33,7 @@ import AST
       '>'             { TokSymbol ">" _ }
       '<='            { TokSymbol "<=" _ }
       '>='            { TokSymbol ">=" _ }
-      '=='            { TokSymbol "==" _ }
+      -- '=='            { TokSymbol "==" _ }
       '/='            { TokSymbol "/=" _ }
       '|'             { TokSymbol "|" _ }
       '..'            { TokSymbol ".." _ }
@@ -90,9 +90,9 @@ import AST
 %left 'or'
 %left 'and'
 %left 'not'
-%nonassoc 'in' '==' '/='
+%nonassoc 'in' '=' '/='
 %left '>' '<' '<=' '>='
-%nonassoc 'by'
+-- %nonassoc 'by'
 %nonassoc '..'
 %right '++'
 %left '+' '-'
@@ -197,7 +197,7 @@ Symbol :: { Placed String }
     | '>'                       { Placed (symbolName $1) (tokenPosition $1) }
     | '<='                      { Placed (symbolName $1) (tokenPosition $1) }
     | '>='                      { Placed (symbolName $1) (tokenPosition $1) }
-    | '=='                      { Placed (symbolName $1) (tokenPosition $1) }
+    -- | '=='                      { Placed (symbolName $1) (tokenPosition $1) }
     | '/='                      { Placed (symbolName $1) (tokenPosition $1) }
     | '|'                       { Placed (symbolName $1) (tokenPosition $1) }
     | '..'                      { Placed (symbolName $1) (tokenPosition $1) }
@@ -420,9 +420,9 @@ SimpleExp :: { Placed Exp }
     | Exp '>=' Exp              { maybePlace (Fncall [] (symbolName $2)
                                               [$1, $3])
                                              (place $1) }
-    | Exp '==' Exp              { maybePlace (Fncall [] (symbolName $2)
-                                              [$1, $3])
-                                             (place $1) }
+    -- | Exp '==' Exp              { maybePlace (Fncall [] (symbolName $2)
+    --                                           [$1, $3])
+    --                                          (place $1) }
     | Exp '/=' Exp              { maybePlace (Fncall [] (symbolName $2)
                                               [$1, $3])
                                              (place $1) }

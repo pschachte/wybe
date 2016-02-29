@@ -4,20 +4,31 @@ AFTER EVERYTHING:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : import.distance<0>
+  public procs    : import.<0>
+                    import.distance<0>
   imports         : use position
                     use wybe
   types           : 
   resources       : 
   procs           : 
-public (0 calls)
+
+*main* > public (0 calls)
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+    position.position.position<0>(0:wybe.int, 10:wybe.int, ?tmp$1#0:position.position) @import:6:18
+    position.position.position<0>(0:wybe.int, 0:wybe.int, ?tmp$2#0:position.position) @import:6:34
+    import.distance<0>(~tmp$1#0:position.position, ~tmp$2#0:position.position, ?tmp$0#0:wybe.int) @import:6:9
+    foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$5#0:wybe.phantom) @wybe:104:38
+    foreign c putchar('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:102:28
+
+
+distance > public (1 calls)
 0: distance(p1#0:position.position, p2#0:position.position, ?$#0:wybe.int):
-    foreign $ access("position":wybe.string, "position":wybe.string, "x":wybe.string, p2#0:position.position, ?tmp$11#0:wybe.int)
-    foreign $ access("position":wybe.string, "position":wybe.string, "x":wybe.string, p1#0:position.position, ?tmp$13#0:wybe.int)
+    foreign lpvm access(p2#0:position.position, 0:wybe.int, ?tmp$11#0:wybe.int)
+    foreign lpvm access(p1#0:position.position, 0:wybe.int, ?tmp$13#0:wybe.int)
     foreign llvm sub(~tmp$11#0:wybe.int, ~tmp$13#0:wybe.int, ?tmp$16#0:wybe.int) @wybe:7:38
     foreign C ipow(~tmp$16#0:wybe.int, 2:wybe.int, ?tmp$19#0:wybe.int) @wybe:21:42
-    foreign $ access("position":wybe.string, "position":wybe.string, "y":wybe.string, ~p2#0:position.position, ?tmp$21#0:wybe.int)
-    foreign $ access("position":wybe.string, "position":wybe.string, "y":wybe.string, ~p1#0:position.position, ?tmp$23#0:wybe.int)
+    foreign lpvm access(~p2#0:position.position, 8:wybe.int, ?tmp$21#0:wybe.int)
+    foreign lpvm access(~p1#0:position.position, 8:wybe.int, ?tmp$23#0:wybe.int)
     foreign llvm sub(~tmp$21#0:wybe.int, ~tmp$23#0:wybe.int, ?tmp$26#0:wybe.int) @wybe:7:38
     foreign C ipow(~tmp$26#0:wybe.int, 2:wybe.int, ?tmp$29#0:wybe.int) @wybe:21:42
     foreign llvm add(~tmp$19#0:wybe.int, ~tmp$29#0:wybe.int, ?tmp$32#0:wybe.int) @wybe:4:38
@@ -26,21 +37,23 @@ public (0 calls)
 --------------------------------------------------
  Module position
   public submods  : 
-  public types    : position: position.position
+  public types    : position: (position.position,"pointer")
   public resources: 
   public procs    : position.position.=<0>
                     position.position.=<1>
                     position.position.position<0>
+                    position.position.position<1>
                     position.position.x<0>
                     position.position.x<1>
                     position.position.y<0>
                     position.position.y<1>
   imports         : public use position.position
                     use wybe
-  types           : position/0 @position:1:8
+  types           : position/0 (pointer)  @position:1:8
   resources       : 
   procs           : 
 
+  submodules      : position.position
 --------------------------------------------------
  Module position.position([])
   public submods  : 
@@ -49,6 +62,7 @@ public (0 calls)
   public procs    : position.position.=<0>
                     position.position.=<1>
                     position.position.position<0>
+                    position.position.position<1>
                     position.position.x<0>
                     position.position.x<1>
                     position.position.y<0>
@@ -57,29 +71,157 @@ public (0 calls)
   types           : 
   resources       : 
   procs           : 
-public (3 calls) (inline)
+
+= > public (2 calls) (inline)
 0: =(?x#0:position.position, y#0:position.position):
-    foreign llvm move(~y#0:position.position, ?x#0:position.position)public (0 calls) (inline)
+    foreign llvm move(~y#0:position.position, ?x#0:position.position)
+= > public (0 calls) (inline)
 1: =(y#0:position.position, ?x#0:position.position):
     foreign llvm move(~y#0:position.position, ?x#0:position.position)
 
-public (0 calls) (inline)
+
+position > public (0 calls)
 0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:position.position):
-    foreign $ alloc("position":wybe.string, "position":wybe.string, ?$rec#0:position.position)
-    foreign $ mutate("position":wybe.string, "position":wybe.string, "x":wybe.string, ~%$rec#0:position.position, ?%$rec#1:position.position, ~x#0:wybe.int)
-    foreign $ mutate("position":wybe.string, "position":wybe.string, "y":wybe.string, ~%$rec#1:position.position, ?%$rec#2:position.position, ~y#0:wybe.int)
-    foreign llvm move(~$rec#2:position.position, ?$#0:position.position)
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:position)
+    foreign lpvm mutate(~%$rec#0:position, ?%$rec#1:position, 0:wybe.int, ~x#0:wybe.int)
+    foreign lpvm mutate(~%$rec#1:position, ?%$rec#2:position, 8:wybe.int, ~y#0:wybe.int)
+    foreign llvm move(~$rec#2:position, ?$#0:position.position)
+position > public (0 calls) (inline)
+1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position):
+    foreign lpvm access($#0:position.position, 0:wybe.int, ?x#0:wybe.int)
+    foreign lpvm access(~$#0:position.position, 8:wybe.int, ?y#0:wybe.int)
 
-public (0 calls) (inline)
+
+x > public (0 calls) (inline)
 0: x($rec#0:position.position, ?$#0:wybe.int):
-    foreign $ access("position":wybe.string, "position":wybe.string, "x":wybe.string, ~$rec#0:position.position, ?tmp$0#0:wybe.int)
-    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)public (0 calls) (inline)
+    foreign lpvm access(~$rec#0:position.position, 0:wybe.int, ?tmp$0#0:wybe.int)
+    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)
+x > public (0 calls) (inline)
 1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
-    foreign $ mutate("position":wybe.string, "position":wybe.string, "x":wybe.string, ~%$rec#0:position.position, ?%$rec#1:position.position, ~$field#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:position.position, 0:wybe.int, ~$field#0:wybe.int, ?$rec#1:position.position)
 
-public (0 calls) (inline)
+
+y > public (0 calls) (inline)
 0: y($rec#0:position.position, ?$#0:wybe.int):
-    foreign $ access("position":wybe.string, "position":wybe.string, "y":wybe.string, ~$rec#0:position.position, ?tmp$0#0:wybe.int)
-    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)public (0 calls) (inline)
+    foreign lpvm access(~$rec#0:position.position, 8:wybe.int, ?tmp$0#0:wybe.int)
+    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)
+y > public (0 calls) (inline)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
-    foreign $ mutate("position":wybe.string, "position":wybe.string, "y":wybe.string, ~%$rec#0:position.position, ?%$rec#1:position.position, ~$field#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:position.position, 8:wybe.int, ~$field#0:wybe.int, ?$rec#1:position.position)
+import, position, position.position
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'import'
+
+declare void @putchar(i8)
+
+declare void @print_int(i64)
+
+declare i64* @"position.position.position<0>"(i64, i64)
+
+declare i64 @isqrt(i64)
+
+declare i64 @ipow(i64, i64)
+
+declare i8* @wybe_malloc(i32)
+
+define i32 @import.main() {
+entry:
+  %"tmp$1#0" = tail call i64* @"position.position.position<0>"(i64 0, i64 10)
+  %"tmp$2#0" = tail call i64* @"position.position.position<0>"(i64 0, i64 0)
+  %"tmp$0#0" = tail call i64 @"import.distance<0>"(i64* %"tmp$1#0", i64* %"tmp$2#0")
+  tail call void @print_int(i64 %"tmp$0#0")
+  tail call void @putchar(i8 10)
+  ret void
+}
+
+define i64 @"import.distance<0>"(i64* %"p1#0", i64* %"p2#0") {
+entry:
+  %0 = getelementptr i64* %"p2#0", i64 0
+  %1 = load i64* %0
+  %2 = getelementptr i64* %"p1#0", i64 0
+  %3 = load i64* %2
+  %"tmp$16#0" = sub i64 %1, %3
+  %"tmp$19#0" = tail call i64 @ipow(i64 %"tmp$16#0", i64 2)
+  %4 = getelementptr i64* %"p2#0", i64 1
+  %5 = load i64* %4
+  %6 = getelementptr i64* %"p1#0", i64 1
+  %7 = load i64* %6
+  %"tmp$26#0" = sub i64 %5, %7
+  %"tmp$29#0" = tail call i64 @ipow(i64 %"tmp$26#0", i64 2)
+  %"tmp$32#0" = add i64 %"tmp$19#0", %"tmp$29#0"
+  %"tmp$34#0" = tail call i64 @isqrt(i64 %"tmp$32#0")
+  ret i64 %"tmp$34#0"
+}
+
+--------------------------------------------------
+; ModuleID = 'position'
+
+declare i8* @wybe_malloc(i32)
+
+--------------------------------------------------
+; ModuleID = 'position.position'
+
+declare i8* @wybe_malloc(i32)
+
+define i64* @"position.position.=<0>"(i64* %"y#0") {
+entry:
+  ret i64* %"y#0"
+}
+
+define i64* @"position.position.=<1>"(i64* %"y#0") {
+entry:
+  ret i64* %"y#0"
+}
+
+define i64* @"position.position.position<0>"(i64 %"x#0", i64 %"y#0") {
+entry:
+  %0 = tail call i8* @wybe_malloc(i32 16)
+  %1 = bitcast i8* %0 to i64*
+  %2 = getelementptr i64* %1, i64 0
+  store i64 %"x#0", i64* %2
+  %3 = getelementptr i64* %1, i64 1
+  store i64 %"y#0", i64* %3
+  ret i64* %1
+}
+
+define { i64, i64 } @"position.position.position<1>"(i64* %"$#0") {
+entry:
+  %0 = getelementptr i64* %"$#0", i64 0
+  %1 = load i64* %0
+  %2 = getelementptr i64* %"$#0", i64 1
+  %3 = load i64* %2
+  %4 = insertvalue { i64, i64 } undef, i64 %1, 0
+  %5 = insertvalue { i64, i64 } %4, i64 %3, 1
+  ret { i64, i64 } %5
+}
+
+define i64 @"position.position.x<0>"(i64* %"$rec#0") {
+entry:
+  %0 = getelementptr i64* %"$rec#0", i64 0
+  %1 = load i64* %0
+  ret i64 %1
+}
+
+define i64* @"position.position.x<1>"(i64* %"$rec#0", i64 %"$field#0") {
+entry:
+  %0 = getelementptr i64* %"$rec#0", i64 0
+  store i64 %"$field#0", i64* %0
+  ret i64* %"$rec#0"
+}
+
+define i64 @"position.position.y<0>"(i64* %"$rec#0") {
+entry:
+  %0 = getelementptr i64* %"$rec#0", i64 1
+  %1 = load i64* %0
+  ret i64 %1
+}
+
+define i64* @"position.position.y<1>"(i64* %"$rec#0", i64 %"$field#0") {
+entry:
+  %0 = getelementptr i64* %"$rec#0", i64 1
+  store i64 %"$field#0", i64* %0
+  ret i64* %"$rec#0"
+}
+

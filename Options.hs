@@ -31,6 +31,7 @@ data Options = Options{
     , optLibDirs     :: [String] -- ^Directories where library files live
     , optLogAspects  :: Set LogSelection
                                  -- ^Which aspects to log
+    , optUseStd      :: Bool     -- ^Use the standard library or not
     } deriving Show
 
 
@@ -43,6 +44,7 @@ defaultOptions    = Options
  , optShowHelp    = False
  , optLibDirs     = []
  , optLogAspects  = Set.empty
+ , optUseStd      = True
  }
 
 -- |All compiler features we may want to log
@@ -112,6 +114,9 @@ options =
  , Option ['h'] ["help"]
      (NoArg (\ opts -> opts { optShowHelp = True }))
      "display this help text and exit"
+ , Option ['x'] ["no-std"]
+     (NoArg (\opts -> opts { optUseStd = False }))
+     "avoid loading the standard wybe library"
  ]
 
 

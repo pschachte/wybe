@@ -27,17 +27,19 @@ AFTER LLVM IR:
 
 ; ModuleID = 'update'
 
-define i32 @update.inc2(i32 %"x#0") {
+declare i8* @wybe_malloc(i32)
+
+define i64 @"update.inc2<0>"(i64 %"x#0") {
 entry:
-  %"tmp$4#0" = add i32 %"x#0", 1
-  %"tmp$7#0" = add i32 %"tmp$4#0", 1
-  ret i32 %"tmp$7#0"
+  %"tmp$4#0" = add i64 %"x#0", 1
+  %"tmp$7#0" = add i64 %"tmp$4#0", 1
+  ret i64 %"tmp$7#0"
 }
 
-define i32 @update.inc21(i32 %"y#0") {
+define i64 @"update.inc2<1>"(i64 %"y#0") {
 entry:
-  %"tmp$11#0" = sub i32 %"y#0", 1
-  %"tmp$14#0" = sub i32 %"tmp$11#0", 1
-  ret i32 %"tmp$14#0"
+  %"tmp$11#0" = sub i64 %"y#0", 1
+  %"tmp$14#0" = sub i64 %"tmp$11#0", 1
+  ret i64 %"tmp$14#0"
 }
 

@@ -7,21 +7,30 @@
 {-# LANGUAGE OverloadedStrings          #-}
 
 module Codegen (
-  Codegen(..), LLVM(..), CodegenState(..), BlockState(..),
-  emptyModule, runLLVM, execCodegen, addExtern, addGlobalConstant,
-  getModName,
+  Codegen(..), CodegenState(..), BlockState(..),
+  emptyModule, evalCodegen, addExtern, addGlobalConstant,
+  execCodegen, emptyCodegen,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
   call, externf, ret, globalDefine, external, phi, br, cbr,
-  getBlock, retNothing,
+  getBlock, retNothing, fresh,
   -- * Symbol storage
-  alloca, store, local, assign, load, getVar, localVar,
+  alloca, store, local, assign, load, getVar, getVarMaybe, localVar,
+  operandType, doAlloca, doLoad, bitcast, inttoptr, ptrtoint,
+  trunc, zext, sext,
   -- * Types
   int_t, phantom_t, float_t, char_t, ptr_t, void_t, string_t, array_t,
+  struct_t,
+  -- * Custom Types
+  int_c, float_c,
   -- * Instructions
   instr, namedInstr,
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv,
-  cons, uitofp, fptoui, icmp, fcmp
+  cons, uitofp, fptoui, icmp, fcmp, lOr, lAnd, lXor,
+  constInttoptr,
+  -- * Structure instructions
+  insertvalue, extractvalue
+
   -- * Testing
 
   ) where
@@ -48,7 +57,7 @@ import qualified LLVM.General.AST.Constant               as C
 import qualified LLVM.General.AST.FloatingPointPredicate as FP
 import qualified LLVM.General.AST.IntegerPredicate       as IP
 
-import           AST                                     (Prim)
+import           AST                                     (Prim, PrimProto, Compiler)
 import           LLVM.General.Context
 import           LLVM.General.Module
 
@@ -81,6 +90,17 @@ char_t = IntegerType 8
 array_t :: Word64 -> Type -> Type
 array_t = ArrayType
 
+struct_t :: [LLVMAST.Type] -> LLVMAST.Type
+struct_t types = LLVMAST.StructureType False types
+
+-- Custom Types
+int_c :: Word32 -> Type
+int_c = IntegerType
+
+float_c :: Word32 -> Type
+float_c b = FloatingPointType b IEEE
+
+
 ----------------------------------------------------------------------------
 -- Codegen State                                                          --
 ----------------------------------------------------------------------------
@@ -101,9 +121,9 @@ data CodegenState
       , blockCount   :: Int      -- ^ Incrementing count of basic blocks
       , count        :: Word     -- ^ Count for temporary operands
       , names        :: Names    -- ^ Name supply
-      , modName      :: String   -- ^ Module Name being worked on
       , externs      :: [Prim]   -- ^ Primitives which need to be declared
       , globalVars   :: [Global] -- ^ Needed global variables/constants
+      , modProtos    :: [PrimProto] -- ^ Module procedures prototypes
       } deriving Show
 
 -- | 'BlockState' will generate the code for basic blocks inside of
@@ -121,12 +141,18 @@ data BlockState
 
 -- | The 'Codegen' state monad will hold the state of the code generator
 -- That is, a map of block names to their 'BlockState' representation
-newtype Codegen a = Codegen { runCodegen :: State CodegenState a }
-    deriving (Functor, Applicative, Monad, MonadState CodegenState)
+-- newtype Codegen a = Codegen { runCodegen :: StateT CodegenState Compiler a }
+--     deriving (Functor, Applicative, Monad, MonadState CodegenState)
 
-execCodegen :: String  -- ^ Module Name
-            -> Codegen a -> CodegenState
-execCodegen modName m = execState (runCodegen m) (emptyCodegen modName)
+type Codegen = StateT CodegenState Compiler
+
+execCodegen :: [PrimProto] -> Codegen a -> Compiler CodegenState
+execCodegen modProtos codegen =
+    execStateT codegen (emptyCodegen modProtos)
+
+evalCodegen :: [PrimProto] -> Codegen t -> Compiler t
+evalCodegen modProtos codegen =
+    evalStateT codegen (emptyCodegen modProtos)
 
 -- | Gets a new incremental word suffix for a temporary local operands
 fresh :: Codegen Word
@@ -159,42 +185,21 @@ addGlobalConstant ty con =
        modify $ \s -> s { globalVars = gvar : gs }
        return ref
 
-getModName :: Codegen String
-getModName = do gets modName
-
-
-----------------------------------------------------------------------------
--- LLVM State Monad                                                       --
-----------------------------------------------------------------------------
-
--- | The 'LLVM' state monad holds code for the LLVM module and will be
--- evaluated to emit llvm-general module contatining the AST
-newtype LLVM a = LLVM { unLLVM :: State LLVMAST.Module a }
-    deriving (Functor, Applicative, Monad, MonadState LLVMAST.Module)
-
-runLLVM :: LLVMAST.Module -> LLVM a -> LLVMAST.Module
-runLLVM = flip (execState . unLLVM)
-
 -- | Create an empty LLVMAST.Module which would be converted into
 -- LLVM IR once the moduleDefinitions field is filled.
 emptyModule :: String -> LLVMAST.Module
 emptyModule label = defaultModule { moduleName = label }
 
--- | Add a definition to the AST.Module (LLVMAST.Module qualified),
--- to the field moduleDefinitions
-addDefn :: Definition -> LLVM ()
-addDefn d = do
-  defs <- gets moduleDefinitions
-  modify $ \s -> s { moduleDefinitions = defs ++ [d] }
 
 -- | Create a global Function Definition to store in the LLVMAST.Module.
--- A Definition body is a list of BasicBlocks. A LPVM procedure roughly correspond
--- to this global function definition.
+-- A Definition body is a list of BasicBlocks. A LPVM procedure roughly
+-- correspond to this global function definition.
 globalDefine :: Type -> String -> [(Type, Name)] -> [BasicBlock] -> Definition
 globalDefine rettype label argtypes body
              = GlobalDefinition $ functionDefaults {
                  name = Name label
-               , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes], False)
+               , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes],
+                               False)
                , returnType = rettype
                , basicBlocks = body
                }
@@ -226,11 +231,10 @@ emptyBlock :: Int -> BlockState
 emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
-emptyCodegen :: String  -- ^ The Module Name
-             -> CodegenState
-emptyCodegen modName
+emptyCodegen :: [PrimProto] -> CodegenState
+emptyCodegen modProtos
     = CodegenState (Name entryBlockName)
-      Map.empty [] 1 0 Map.empty modName [] []
+      Map.empty [] 1 0 Map.empty [] [] modProtos
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name
@@ -277,8 +281,8 @@ current = do
 
 
 -- | Generate the list of BasicBlocks added to the CodegenState for a global
--- definition. This list would be in order of execution. This list forms the body
--- of a global function definition.
+-- definition. This list would be in order of execution. This list forms the
+-- body of a global function definition.
 createBlocks :: CodegenState -> [BasicBlock]
 createBlocks m = map makeBlock $ sortBlocks $ Map.toList (blocks m)
 
@@ -343,6 +347,25 @@ getVar var = do
     Just x -> return x
     Nothing -> error $ "Local variable not in scope: " ++ show var
 
+getVarMaybe :: String -> Codegen (Maybe Operand)
+getVarMaybe var = do
+  lcls <- gets symtab
+  return $ lookup var lcls 
+
+
+-- | Look inside an operand and determine it's type.
+operandType :: Operand -> Type
+operandType (LocalReference ty _) = ty
+operandType (ConstantOperand cons) =
+    case cons of
+        C.Int bs _ -> int_c bs
+        C.Float _ -> float_t
+        C.Null ty -> ty
+        C.GlobalReference ty _ -> ty
+        C.GetElementPtr _ (C.GlobalReference ty _) _ -> ty
+        _ -> error "Not a recognised constant operand."
+operandType _ = void_t
+
 
 ----------------------------------------------------------------------------
 -- Instructions                                                           --
@@ -350,7 +373,8 @@ getVar var = do
 
 -- | The `namedInstr` function appends a named instruction into the instruction
 -- stack of the current BasicBlock. This action also produces a Operand value
--- of the given type (this will be the result type of performing that instruction).
+-- of the given type (this will be the result type of performing that
+-- instruction).
 namedInstr :: Type -> String -> Instruction -> Codegen Operand
 namedInstr ty nm ins =
     do let ref = Name nm
@@ -359,8 +383,9 @@ namedInstr ty nm ins =
        modifyBlock $ blk { stack = i ++ [ref := ins] }
        return $ local ty ref
 
--- | The `instr` function appends an unnamed instruction intp the instruction stack
--- of the current BasicBlock. The temp name is generated using a fresh word counter.
+-- | The `instr` function appends an unnamed instruction intp the instruction
+-- stack of the current BasicBlock. The temp name is generated using a fresh
+-- word counter.
 instr :: Type -> Instruction -> Codegen Operand
 instr ty ins =
     do n <- fresh
@@ -418,6 +443,16 @@ fcmp p a b = FCmp p a b []
 icmp :: IP.IntegerPredicate -> Operand -> Operand -> Instruction
 icmp p a b = ICmp p a b []
 
+-- * Bitwise operations
+lOr :: Operand -> Operand -> Instruction
+lOr a b = Or a b []
+
+lAnd :: Operand -> Operand -> Instruction
+lAnd a b = And a b []
+
+lXor :: Operand -> Operand -> Instruction
+lXor a b = Xor a b []
+
 -- * Unary
 
 uitofp :: Operand -> Instruction
@@ -444,10 +479,9 @@ toArgs xs = map (\x -> (x, [])) xs
 
 -- | The ‘alloca‘ function wraps LLVM's alloca instruction. The 'alloca'
 -- instruction is pushed on the instruction stack (unnamed) and referenced with
--- a *type operand.
--- The Alloca LLVM instruction allocates memory on the stack frame of the
--- currently executing function, to be automatically released when this
--- function returns to its caller.
+-- a *type operand.  The Alloca LLVM instruction allocates memory on the stack
+-- frame of the currently executing function, to be automatically released when
+-- this function returns to its caller.
 alloca :: Type -> Instruction
 alloca ty = Alloca ty Nothing 0 []
 
@@ -458,6 +492,53 @@ store ptr val = instr phantom_t $ Store False ptr val Nothing 0 []
 -- | The 'load' function wraps LLVM's load instruction with defaults.
 load :: Operand -> Instruction
 load ptr = Load False ptr Nothing 0 []
+
+
+bitcast :: Operand -> LLVMAST.Type -> Codegen Operand
+bitcast op ty = instr ty $ BitCast op ty []
+
+inttoptr :: Operand -> LLVMAST.Type -> Codegen Operand
+inttoptr op ty = instr ty $ IntToPtr op ty []
+
+ptrtoint :: Operand -> LLVMAST.Type -> Codegen Operand
+ptrtoint op ty = instr ty $ PtrToInt op ty []
+
+-- constBitcast :: Operand -> LLVMAST.Type -> Operand
+-- constBitcast (ConstantOperand c) ty =  cons $ C.BitCast c ty
+
+constInttoptr :: C.Constant -> LLVMAST.Type -> Operand
+constInttoptr c ty = cons $ C.IntToPtr c ty
+
+-- constPtrtoint :: Operand -> LLVMAST.Type -> Operand
+-- constPtrtoint (ConstantOperand c) ty = cons $ C.PtrToInt c ty
+
+trunc :: Operand -> LLVMAST.Type -> Codegen Operand
+trunc op ty = instr ty $ Trunc op ty []
+
+zext :: Operand -> LLVMAST.Type -> Codegen Operand
+zext op ty = instr ty $ ZExt op ty []
+
+sext :: Operand -> LLVMAST.Type -> Codegen Operand
+sext op ty = instr ty $ SExt op ty []
+
+
+
+
+-- Helpers for allocating, storing, loading
+doAlloca :: Type -> Codegen Operand
+doAlloca (PointerType ty _) = instr (ptr_t ty) $ Alloca ty Nothing 0 []
+doAlloca ty = instr (ptr_t ty) $ Alloca ty Nothing 0 []
+
+doLoad :: Type -> Operand -> Codegen Operand
+doLoad ty ptr = instr ty $ Load False ptr Nothing 0 []
+
+
+-- * Structure operations
+insertvalue :: Operand -> Operand -> Word32 -> Instruction
+insertvalue st op i = InsertValue st op [i] []
+
+extractvalue :: Operand -> Word32 -> Instruction
+extractvalue st i = ExtractValue st [i] []
 
 
 -- * Control Flow operations
@@ -476,3 +557,5 @@ retNothing = terminator $ Do $ Ret Nothing []
 
 phi :: Type -> [(Operand, Name)] -> Codegen Operand
 phi ty incoming = instr ty $ Phi ty incoming []
+
+    
