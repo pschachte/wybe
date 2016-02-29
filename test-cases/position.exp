@@ -45,12 +45,13 @@ AFTER EVERYTHING:
     foreign llvm move(~y#0:position.position, ?x#0:position.position)
 
 
-position > public (0 calls)
+position > public (0 calls) (inline)
 0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:position.position):
     foreign lpvm alloc(16:wybe.int, ?$rec#0:position)
     foreign lpvm mutate(~%$rec#0:position, ?%$rec#1:position, 0:wybe.int, ~x#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:position, ?%$rec#2:position, 8:wybe.int, ~y#0:wybe.int)
-    foreign llvm move(~$rec#2:position, ?$#0:position.position)
+    foreign lpvm cast(~$rec#2:position, ?$recint#0:wybe.int)
+    foreign lpvm cast(~$recint#0:wybe.int, ?$#0:position.position)
 position > public (0 calls) (inline)
 1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position):
     foreign lpvm access($#0:position.position, 0:wybe.int, ?x#0:wybe.int)
@@ -99,7 +100,9 @@ entry:
   store i64 %"x#0", i64* %2
   %3 = getelementptr i64* %1, i64 1
   store i64 %"y#0", i64* %3
-  ret i64* %1
+  %4 = ptrtoint i64* %1 to i64
+  %5 = inttoptr i64 %4 to i64*
+  ret i64* %5
 }
 
 define { i64, i64 } @"position.position.position<1>"(i64* %"$#0") {
@@ -164,7 +167,9 @@ entry:
   store i64 %"x#0", i64* %2
   %3 = getelementptr i64* %1, i64 1
   store i64 %"y#0", i64* %3
-  ret i64* %1
+  %4 = ptrtoint i64* %1 to i64
+  %5 = inttoptr i64 %4 to i64*
+  ret i64* %5
 }
 
 define { i64, i64 } @"position.position.position<1>"(i64* %"$#0") {

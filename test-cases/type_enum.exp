@@ -1,0 +1,134 @@
+======================================================================
+AFTER EVERYTHING:
+ Module type_enum
+  public submods  : 
+  public types    : season: (type_enum.season,"i2")
+  public resources: 
+  public procs    : type_enum.season.=<0>
+                    type_enum.season.=<1>
+                    type_enum.season.autumn<0>
+                    type_enum.season.spring<0>
+                    type_enum.season.summer<0>
+                    type_enum.season.winter<0>
+  imports         : public use type_enum.season
+                    use wybe
+  types           : season/0 (i2)  @type_enum:1:8
+  resources       : 
+  procs           : 
+
+  submodules      : type_enum.season
+--------------------------------------------------
+ Module type_enum.season([])
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : type_enum.season.=<0>
+                    type_enum.season.=<1>
+                    type_enum.season.autumn<0>
+                    type_enum.season.spring<0>
+                    type_enum.season.summer<0>
+                    type_enum.season.winter<0>
+  imports         : use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+= > public (0 calls) (inline)
+0: =(?x#0:type_enum.season, y#0:type_enum.season):
+    foreign llvm move(~y#0:type_enum.season, ?x#0:type_enum.season)
+= > public (0 calls) (inline)
+1: =(y#0:type_enum.season, ?x#0:type_enum.season):
+    foreign llvm move(~y#0:type_enum.season, ?x#0:type_enum.season)
+
+
+autumn > public (0 calls) (inline)
+0: autumn(?$#0:type_enum.season):
+    foreign lpvm cast(3:season, ?$#0:type_enum.season)
+
+
+spring > public (0 calls) (inline)
+0: spring(?$#0:type_enum.season):
+    foreign lpvm cast(1:season, ?$#0:type_enum.season)
+
+
+summer > public (0 calls) (inline)
+0: summer(?$#0:type_enum.season):
+    foreign lpvm cast(2:season, ?$#0:type_enum.season)
+
+
+winter > public (0 calls) (inline)
+0: winter(?$#0:type_enum.season):
+    foreign lpvm cast(0:season, ?$#0:type_enum.season)
+type_enum, type_enum.season
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'type_enum'
+
+declare i8* @wybe_malloc(i32)
+
+define i64* @"type_enum.season.=<0>"(i64* %"y#0") {
+entry:
+  ret i64* %"y#0"
+}
+
+define i64* @"type_enum.season.=<1>"(i64* %"y#0") {
+entry:
+  ret i64* %"y#0"
+}
+
+define i64* @"type_enum.season.autumn<0>"() {
+entry:
+  ret i64* inttoptr (i64 3 to i64*)
+}
+
+define i64* @"type_enum.season.spring<0>"() {
+entry:
+  ret i64* inttoptr (i64 1 to i64*)
+}
+
+define i64* @"type_enum.season.summer<0>"() {
+entry:
+  ret i64* inttoptr (i64 2 to i64*)
+}
+
+define i64* @"type_enum.season.winter<0>"() {
+entry:
+  ret i64* null
+}
+
+--------------------------------------------------
+; ModuleID = 'type_enum.season'
+
+declare i8* @wybe_malloc(i32)
+
+define i64* @"type_enum.season.=<0>"(i64* %"y#0") {
+entry:
+  ret i64* %"y#0"
+}
+
+define i64* @"type_enum.season.=<1>"(i64* %"y#0") {
+entry:
+  ret i64* %"y#0"
+}
+
+define i64* @"type_enum.season.autumn<0>"() {
+entry:
+  ret i64* inttoptr (i64 3 to i64*)
+}
+
+define i64* @"type_enum.season.spring<0>"() {
+entry:
+  ret i64* inttoptr (i64 1 to i64*)
+}
+
+define i64* @"type_enum.season.summer<0>"() {
+entry:
+  ret i64* inttoptr (i64 2 to i64*)
+}
+
+define i64* @"type_enum.season.winter<0>"() {
+entry:
+  ret i64* null
+}
+

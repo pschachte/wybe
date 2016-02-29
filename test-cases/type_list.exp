@@ -35,7 +35,11 @@ gen$1 > (1 calls)
         foreign lpvm access(x#0:type_list.intlist, 0:wybe.int, ?tmp$11#0:wybe.int)
         foreign lpvm access(x#0:type_list.intlist, 8:wybe.int, ?tmp$13#0:type_list.intlist)
         type_list.gen$1<0>(~tmp$13#0:type_list.intlist, y#0:type_list.intlist, ?tmp$16#0:type_list.intlist, ?tmp$17#0:type_list.intlist, ?tmp$18#0:type_list.intlist) @type_list:6:5
-        type_list.intlist.[|]<0>(~tmp$11#0:wybe.int, ~tmp$16#0:type_list.intlist, ?tmp$3#0:type_list.intlist) @type_list:8:10
+        foreign lpvm alloc(16:wybe.int, ?tmp$21#0:intlist)
+        foreign lpvm mutate(~tmp$21#0:intlist, ?tmp$22#0:intlist, 0:wybe.int, ~tmp$11#0:wybe.int)
+        foreign lpvm mutate(~tmp$22#0:intlist, ?tmp$23#0:intlist, 8:wybe.int, ~tmp$16#0:type_list.intlist)
+        foreign lpvm cast(~tmp$23#0:intlist, ?tmp$24#0:wybe.int)
+        foreign lpvm cast(~tmp$24#0:wybe.int, ?tmp$3#0:type_list.intlist)
         foreign llvm move(~tmp$3#0:type_list.intlist, ?tmp$0#0:type_list.intlist)
 
     1:
@@ -79,12 +83,13 @@ gen$1 > (1 calls)
     foreign lpvm cast(0:intlist, ?$#0:type_list.intlist)
 
 
-[|] > public (0 calls)
+[|] > public (0 calls) (inline)
 0: [|](head#0:wybe.int, tail#0:type_list.intlist, ?$#0:type_list.intlist):
     foreign lpvm alloc(16:wybe.int, ?$rec#0:intlist)
     foreign lpvm mutate(~%$rec#0:intlist, ?%$rec#1:intlist, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:intlist, ?%$rec#2:intlist, 8:wybe.int, ~tail#0:type_list.intlist)
-    foreign llvm move(~$rec#2:intlist, ?$#0:type_list.intlist)
+    foreign lpvm cast(~$rec#2:intlist, ?$recint#0:wybe.int)
+    foreign lpvm cast(~$recint#0:wybe.int, ?$#0:type_list.intlist)
 [|] > public (0 calls) (inline)
 1: [|](?head#0:wybe.int, ?tail#0:type_list.intlist, $#0:type_list.intlist):
     foreign lpvm access($#0:type_list.intlist, 0:wybe.int, ?head#0:wybe.int)
@@ -139,8 +144,16 @@ if.else:                                          ; preds = %entry
   %6 = load i64* %5
   %7 = inttoptr i64 %6 to i64*
   %"tmp$16#0" = tail call i64* @"type_list.gen$1<0>"(i64* %7, i64* %"y#0")
-  %"tmp$3#0" = tail call i64* @"type_list.intlist.[|]<0>"(i64 %4, i64* %"tmp$16#0")
-  ret i64* %"tmp$3#0"
+  %8 = tail call i8* @wybe_malloc(i32 16)
+  %9 = bitcast i8* %8 to i64*
+  %10 = getelementptr i64* %9, i64 0
+  store i64 %4, i64* %10
+  %11 = getelementptr i64* %9, i64 1
+  %12 = ptrtoint i64* %"tmp$16#0" to i64
+  store i64 %12, i64* %11
+  %13 = ptrtoint i64* %9 to i64
+  %14 = inttoptr i64 %13 to i64*
+  ret i64* %14
 }
 
 define i64* @"type_list.intlist.=<0>"(i64* %"y#0") {
@@ -176,7 +189,9 @@ entry:
   %3 = getelementptr i64* %1, i64 1
   %4 = ptrtoint i64* %"tail#0" to i64
   store i64 %4, i64* %3
-  ret i64* %1
+  %5 = ptrtoint i64* %1 to i64
+  %6 = inttoptr i64 %5 to i64*
+  ret i64* %6
 }
 
 define { i64, i64* } @"type_list.intlist.[|]<1>"(i64* %"$#0") {
@@ -259,7 +274,9 @@ entry:
   %3 = getelementptr i64* %1, i64 1
   %4 = ptrtoint i64* %"tail#0" to i64
   store i64 %4, i64* %3
-  ret i64* %1
+  %5 = ptrtoint i64* %1 to i64
+  %6 = inttoptr i64 %5 to i64*
+  ret i64* %6
 }
 
 define { i64, i64* } @"type_list.intlist.[|]<1>"(i64* %"$#0") {

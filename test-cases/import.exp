@@ -14,11 +14,17 @@ AFTER EVERYTHING:
 
 *main* > public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    position.position.position<0>(0:wybe.int, 10:wybe.int, ?tmp$1#0:position.position) @import:6:18
-    position.position.position<0>(0:wybe.int, 0:wybe.int, ?tmp$2#0:position.position) @import:6:34
+    foreign lpvm alloc(16:wybe.int, ?tmp$5#0:position)
+    foreign lpvm mutate(~tmp$5#0:position, ?tmp$6#0:position, 0:wybe.int, 0:wybe.int)
+    foreign lpvm mutate(tmp$6#0:position, ?tmp$7#0:position, 8:wybe.int, 10:wybe.int)
+    foreign lpvm cast(~tmp$7#0:position, ?tmp$8#0:wybe.int)
+    foreign lpvm cast(~tmp$8#0:wybe.int, ?tmp$1#0:position.position)
+    foreign lpvm mutate(~tmp$6#0:position, ?tmp$13#0:position, 8:wybe.int, 0:wybe.int)
+    foreign lpvm cast(~tmp$13#0:position, ?tmp$14#0:wybe.int)
+    foreign lpvm cast(~tmp$14#0:wybe.int, ?tmp$2#0:position.position)
     import.distance<0>(~tmp$1#0:position.position, ~tmp$2#0:position.position, ?tmp$0#0:wybe.int) @import:6:9
-    foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$5#0:wybe.phantom) @wybe:104:38
-    foreign c putchar('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:102:28
+    foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$17#0:wybe.phantom) @wybe:104:38
+    foreign c putchar('\n':wybe.char, ~tmp$17#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:102:28
 
 
 distance > public (1 calls)
@@ -80,12 +86,13 @@ distance > public (1 calls)
     foreign llvm move(~y#0:position.position, ?x#0:position.position)
 
 
-position > public (0 calls)
+position > public (0 calls) (inline)
 0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:position.position):
     foreign lpvm alloc(16:wybe.int, ?$rec#0:position)
     foreign lpvm mutate(~%$rec#0:position, ?%$rec#1:position, 0:wybe.int, ~x#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:position, ?%$rec#2:position, 8:wybe.int, ~y#0:wybe.int)
-    foreign llvm move(~$rec#2:position, ?$#0:position.position)
+    foreign lpvm cast(~$rec#2:position, ?$recint#0:wybe.int)
+    foreign lpvm cast(~$recint#0:wybe.int, ?$#0:position.position)
 position > public (0 calls) (inline)
 1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position):
     foreign lpvm access($#0:position.position, 0:wybe.int, ?x#0:wybe.int)
@@ -118,8 +125,6 @@ declare void @putchar(i8)
 
 declare void @print_int(i64)
 
-declare i64* @"position.position.position<0>"(i64, i64)
-
 declare i64 @isqrt(i64)
 
 declare i64 @ipow(i64, i64)
@@ -128,9 +133,19 @@ declare i8* @wybe_malloc(i32)
 
 define i32 @import.main() {
 entry:
-  %"tmp$1#0" = tail call i64* @"position.position.position<0>"(i64 0, i64 10)
-  %"tmp$2#0" = tail call i64* @"position.position.position<0>"(i64 0, i64 0)
-  %"tmp$0#0" = tail call i64 @"import.distance<0>"(i64* %"tmp$1#0", i64* %"tmp$2#0")
+  %0 = tail call i8* @wybe_malloc(i32 16)
+  %1 = bitcast i8* %0 to i64*
+  %2 = getelementptr i64* %1, i64 0
+  store i64 0, i64* %2
+  %3 = getelementptr i64* %1, i64 1
+  store i64 10, i64* %3
+  %4 = ptrtoint i64* %1 to i64
+  %5 = inttoptr i64 %4 to i64*
+  %6 = getelementptr i64* %1, i64 1
+  store i64 0, i64* %6
+  %7 = ptrtoint i64* %1 to i64
+  %8 = inttoptr i64 %7 to i64*
+  %"tmp$0#0" = tail call i64 @"import.distance<0>"(i64* %5, i64* %8)
   tail call void @print_int(i64 %"tmp$0#0")
   tail call void @putchar(i8 10)
   ret void
@@ -183,7 +198,9 @@ entry:
   store i64 %"x#0", i64* %2
   %3 = getelementptr i64* %1, i64 1
   store i64 %"y#0", i64* %3
-  ret i64* %1
+  %4 = ptrtoint i64* %1 to i64
+  %5 = inttoptr i64 %4 to i64*
+  ret i64* %5
 }
 
 define { i64, i64 } @"position.position.position<1>"(i64* %"$#0") {

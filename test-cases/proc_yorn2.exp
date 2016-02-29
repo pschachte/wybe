@@ -31,9 +31,9 @@ gen$3 > (1 calls)
     foreign llvm move(tmp$8#0:wybe.bool, ?tmp$1#0:wybe.bool)
     case ~tmp$8#0:wybe.bool of
     0:
-        foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~wybe.io$io#0:wybe.phantom, ?tmp$15#0:wybe.phantom) @wybe:116:41
-        foreign c putchar('\n':wybe.char, ~tmp$15#0:wybe.phantom, ?tmp$16#0:wybe.phantom) @wybe:102:28
-        proc_yorn2.gen$2<0>(~prompt#0:wybe.string, ~tmp$16#0:wybe.phantom, ?prompt#1:wybe.string, ?response#1:wybe.char, ?result#1:wybe.bool, ?tmp$0#1:wybe.bool, ?tmp$1#0:wybe.bool, ?tmp$2#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_yorn2:2:5
+        foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~wybe.io$io#0:wybe.phantom, ?tmp$14#0:wybe.phantom) @wybe:116:41
+        foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?tmp$15#0:wybe.phantom) @wybe:102:28
+        proc_yorn2.gen$2<0>(~prompt#0:wybe.string, ~tmp$15#0:wybe.phantom, ?prompt#1:wybe.string, ?response#1:wybe.char, ?result#1:wybe.bool, ?tmp$0#1:wybe.bool, ?tmp$1#0:wybe.bool, ?tmp$2#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_yorn2:2:5
 
     1:
         foreign llvm move(~prompt#0:wybe.string, ?prompt#1:wybe.string)
