@@ -112,27 +112,45 @@ AFTER LLVM IR:
 
 ; ModuleID = 'imports'
 
+declare i8* @wybe_malloc(i32)
+
 --------------------------------------------------
 ; ModuleID = 'mod1'
+
+declare i8* @wybe_malloc(i32)
 
 --------------------------------------------------
 ; ModuleID = 'mod2'
 
+declare i8* @wybe_malloc(i32)
+
 --------------------------------------------------
 ; ModuleID = 'mod3'
+
+declare i8* @wybe_malloc(i32)
 
 --------------------------------------------------
 ; ModuleID = 'mod4'
 
+declare i8* @wybe_malloc(i32)
+
 --------------------------------------------------
 ; ModuleID = 'mod5'
+
+declare i8* @wybe_malloc(i32)
 
 --------------------------------------------------
 ; ModuleID = 'mod6'
 
+declare i8* @wybe_malloc(i32)
+
 --------------------------------------------------
 ; ModuleID = 'mod7'
 
+declare i8* @wybe_malloc(i32)
+
 --------------------------------------------------
 ; ModuleID = 'mod8'
+
+declare i8* @wybe_malloc(i32)
 

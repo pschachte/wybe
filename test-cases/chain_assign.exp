@@ -19,8 +19,10 @@ AFTER LLVM IR:
 
 ; ModuleID = 'chain_assign'
 
-define i32 @chain_assign.chain() {
+declare i8* @wybe_malloc(i32)
+
+define i64 @"chain_assign.chain<0>"() {
 entry:
-  ret i32 1
+  ret i64 1
 }
 

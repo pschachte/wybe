@@ -56,7 +56,7 @@ public type bool = public false | true
 end
 
 
-public type string is pointer
+public type string is pointer8
     # this whole implementation is completely wrong, but will do for now
     public func ++(x:string, y:string):string = foreign c strcat(x,y)
     public func =(x:string, y:string):bool = foreign llvm icmp eq(x,y)
@@ -64,7 +64,7 @@ public type string is pointer
 end
 
 
-public type char is i32
+public type char is i8
     public func =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
     public func /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
 end
@@ -117,5 +117,6 @@ public module io is
     public proc println(x:string) use !io print(x) nl end
     public proc read(?x:string) use !io foreign c read_line(?x,!io) end
 
+    public proc print(x:bool) use !io foreign c print_int(x,!io) end
     public func eof:char = foreign lpvm cast(-1)
 end

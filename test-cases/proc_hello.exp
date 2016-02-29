@@ -26,7 +26,9 @@ declare void @putchar(i8)
 
 declare void @print_string(i8*)
 
-define void @proc_hello.print2() {
+declare i8* @wybe_malloc(i32)
+
+define void @"proc_hello.print2<0>"() {
 entry:
   tail call void @print_string(i8* getelementptr inbounds ([13 x i8]* @0, i32 0, i32 0))
   tail call void @putchar(i8 10)

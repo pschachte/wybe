@@ -20,9 +20,11 @@ AFTER LLVM IR:
 
 ; ModuleID = 'unneeded'
 
-define i32 @unneeded.unneeded(i32 %"x#0", i32 %"q#0") {
+declare i8* @wybe_malloc(i32)
+
+define i64 @"unneeded.unneeded<0>"(i64 %"x#0", i64 %"q#0") {
 entry:
-  %"tmp$3#0" = add i32 %"x#0", 1
-  ret i32 %"tmp$3#0"
+  %"tmp$3#0" = add i64 %"x#0", 1
+  ret i64 %"tmp$3#0"
 }
 
