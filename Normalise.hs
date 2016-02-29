@@ -114,6 +114,33 @@ normaliseItem _ (StmtDecl stmt pos) = do
 
 
 
+normaliseSubmodule :: ([ModSpec] -> Compiler ()) -> Ident -> 
+                      Maybe [Ident] -> Visibility -> OptPos -> 
+                      [Item] -> Compiler ()
+normaliseSubmodule modCompiler name typeParams vis pos items = do
+    dir <- getDirectory
+    parentModSpec <- getModuleSpec
+    let subModSpec = parentModSpec ++ [name]
+    addImport subModSpec (importSpec Nothing vis)
+    enterModule dir subModSpec typeParams
+    case typeParams of
+      Nothing -> return ()
+      Just _ ->
+        updateImplementation 
+        (\imp ->
+          let set = Set.singleton $ TypeSpec parentModSpec name []
+          in imp { modKnownTypes = Map.insert name set $ modKnownTypes imp })
+    normalise modCompiler items
+    mods <- exitModule
+    unless (List.null mods) $ modCompiler mods
+    return ()
+
+
+----------------------------------------------------------------
+--                Generating code for type declarations
+----------------------------------------------------------------
+
+
 -- |Given a type implementation, return the low-level type, the visibility
 --  of its constructors, and the constructors divided into constant (arity 0)
 --  and non-constant ones.
@@ -138,28 +165,6 @@ normaliseTypeRepresntation "float" = "f" ++ show wordSize
 normaliseTypeRepresntation "double" = "f64"
 normaliseTypeRepresntation other = other
 
-
-
-normaliseSubmodule :: ([ModSpec] -> Compiler ()) -> Ident -> 
-                      Maybe [Ident] -> Visibility -> OptPos -> 
-                      [Item] -> Compiler ()
-normaliseSubmodule modCompiler name typeParams vis pos items = do
-    dir <- getDirectory
-    parentModSpec <- getModuleSpec
-    let subModSpec = parentModSpec ++ [name]
-    addImport subModSpec (importSpec Nothing vis)
-    enterModule dir subModSpec typeParams
-    case typeParams of
-      Nothing -> return ()
-      Just _ ->
-        updateImplementation 
-        (\imp ->
-          let set = Set.singleton $ TypeSpec parentModSpec name []
-          in imp { modKnownTypes = Map.insert name set $ modKnownTypes imp })
-    normalise modCompiler items
-    mods <- exitModule
-    unless (List.null mods) $ modCompiler mods
-    return ()
 
 
 -- |Add a contructor for the specified type.
