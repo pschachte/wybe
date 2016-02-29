@@ -1,16 +1,16 @@
 public type myint is int
     public func +(x:myint,y:myint):myint = foreign llvm add(x,y)
-    public proc +(?x:myint,y:myint,z:myint) ?x = foreign llvm sub(z,y) end
-    public proc +(x:myint,?y:myint,z:myint) ?y = foreign llvm sub(z,x) end
-    public func -(x:myint,y:myint):myint = foreign llvm sub(x,y)
-    public proc -(?x:myint,y:myint,z:myint) ?x = foreign llvm add(z,y) end
-    public proc -(x:myint,?y:myint,z:myint) ?y = foreign llvm sub(z,x) end
-    public func *(x:myint,y:myint):myint = foreign llvm mul(x,y)
-    public func /(x:myint,y:myint):myint = foreign llvm sdiv(x,y)
-    public func ==(x:myint,y:myint):bool = foreign llvm icmp eq(x,y)
-    public func /=(x:myint,y:myint):bool = foreign llvm icmp ne(x,y)
-    public func <(x:myint,y:myint):bool = foreign llvm icmp slt(x,y)
-    public func <=(x:myint,y:myint):bool = foreign llvm icmp sle(x,y)
-    public func >(x:myint,y:myint):bool = foreign llvm icmp sgt(x,y)
-    public func >=(x:myint,y:myint):bool = foreign llvm icmp sge(x,y)
+    # public proc +(?x:myint,y:myint,z:myint) ?x = foreign llvm sub(z,y) end
+    # public proc +(x:myint,?y:myint,z:myint) ?y = foreign llvm sub(z,x) end
+    # public func -(x:myint,y:myint):myint = foreign llvm sub(x,y)
+    # public proc -(?x:myint,y:myint,z:myint) ?x = foreign llvm add(z,y) end
+    # public proc -(x:myint,?y:myint,z:myint) ?y = foreign llvm sub(z,x) end
+    # public func *(x:myint,y:myint):myint = foreign llvm mul(x,y)
+    # public func /(x:myint,y:myint):myint = foreign llvm sdiv(x,y)
+    # public func ==(x:myint,y:myint):bool = foreign llvm icmp eq(x,y)
+    # public func /=(x:myint,y:myint):bool = foreign llvm icmp ne(x,y)
+    # public func <(x:myint,y:myint):bool = foreign llvm icmp slt(x,y)
+    # public func <=(x:myint,y:myint):bool = foreign llvm icmp sle(x,y)
+    # public func >(x:myint,y:myint):bool = foreign llvm icmp sgt(x,y)
+    # public func >=(x:myint,y:myint):bool = foreign llvm icmp sge(x,y)
 end

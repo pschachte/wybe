@@ -28,16 +28,18 @@ AFTER LLVM IR:
 
 ; ModuleID = 'func_quadruple'
 
-define i32 @func_quadruple.double(i32 %"a#0") {
+declare i8* @wybe_malloc(i32)
+
+define i64 @"func_quadruple.double<0>"(i64 %"a#0") {
 entry:
-  %"tmp$3#0" = add i32 %"a#0", %"a#0"
-  ret i32 %"tmp$3#0"
+  %"tmp$3#0" = add i64 %"a#0", %"a#0"
+  ret i64 %"tmp$3#0"
 }
 
-define i32 @func_quadruple.quadruple(i32 %"a#0") {
+define i64 @"func_quadruple.quadruple<0>"(i64 %"a#0") {
 entry:
-  %"tmp$3#0" = add i32 %"a#0", %"a#0"
-  %"tmp$5#0" = add i32 %"tmp$3#0", %"tmp$3#0"
-  ret i32 %"tmp$5#0"
+  %"tmp$3#0" = add i64 %"a#0", %"a#0"
+  %"tmp$5#0" = add i64 %"tmp$3#0", %"tmp$3#0"
+  ret i64 %"tmp$5#0"
 }
 

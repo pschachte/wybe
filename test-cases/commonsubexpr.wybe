@@ -4,3 +4,5 @@ proc common_subexpr(x:int) use !io
      # the whole computation should be reused, but the prinln shouldn't
     println(incr(x) * incr(x) + incr(x) * incr(x))
 end
+
+common_subexpr(10)

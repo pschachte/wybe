@@ -56,7 +56,7 @@ public type bool = public false | true
 end
 
 
-public type string is pointer
+public type string is pointer8
     # this whole implementation is completely wrong, but will do for now
     public func ++(x:string, y:string):string = foreign c strcat(x,y)
     public func =(x:string, y:string):bool = foreign llvm icmp eq(x,y)
