@@ -50,7 +50,7 @@ test:	wybemk
 	    log=`echo "$$f" | sed 's/.wybe$$/.log/'` ; \
 	    exp=`echo "$$f" | sed 's/.wybe$$/.exp/'` ; \
 	    targ=`echo "$$f" | sed 's/.wybe$$/.o/'` ; \
-	    gtimeout 2 ./wybemk --log=FinalDump $(DEBUG) -f $$targ \
+	    gtimeout 2 ./wybemk --log=FinalDump $(DEBUG) --force-all $$targ \
 		> $$out 2> $$log ; \
 	    if [ ! -r $$exp ] ; then \
 		printf "[31m?[39m" ; \
