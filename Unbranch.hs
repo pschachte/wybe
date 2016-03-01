@@ -186,6 +186,10 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     tstStmts' <- unbranchStmts tstStmts
     (thn',thnVars,thnTerm) <- unbranchBranch thn
     setVars beforeVars
+    case content tstVar of
+         Typed (Var name _ _) ty _ -> defVar name ty
+         Var name _ _ -> defVar name $ TypeSpec ["wybe"] "bool" []
+         _ -> return ()
     (els',elsVars,elsTerm) <- unbranchBranch els
     let afterVars = varsAfterITE thnVars thnTerm elsVars elsTerm
     logUnbranch $ "Vars after conditional: " ++ show afterVars
@@ -279,10 +283,11 @@ unbranchBranch ::  [Placed Stmt] -> Unbrancher ([Placed Stmt],VarDict,Bool)
 unbranchBranch branch = do
     branch' <- unbranchStmts branch
     branchVars <- gets brVars
-    logUnbranch $ "Vars after then branch: " ++ show branchVars
+    logUnbranch $ "Vars after then/else branch: " ++ show branchVars
     branchTerm <- gets brTerminated
     logUnbranch $
-      "Then branch is" ++ (if branchTerm then "" else " NOT") ++ " terminal"
+      "Then/else branch is" ++ (if branchTerm then "" else " NOT")
+          ++ " terminal"
     setTerminated False
     return (branch', branchVars,branchTerm)
 
