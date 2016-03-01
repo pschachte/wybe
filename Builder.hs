@@ -281,8 +281,13 @@ concatSubMods mspec = do
     concatLLVMASTModules mspec someMods
     return someMods
 
+-- | Compile and build modules inside a folder, compacting everything into
+-- one object file archive.
+buildArchive :: FilePath -> Compiler ()
+buildArchive dir = shouldnt "Not Implemented."
 
--------------------- Actually compiling some modues --------------------
+
+-------------------- Actually compiling some modules --------------------
 
 -- |Actually compile a list of modules that form an SCC in the module
 --  dependency graph.  This is called in a way that guarantees that
@@ -529,6 +534,7 @@ loadObjectFile thisMod =
 --  command line.
 data TargetType = InterfaceFile | ObjectFile | ExecutableFile
                 | UnknownFile | BitcodeFile | AssemblyFile
+                | ArchiveFile 
                 deriving (Show,Eq)
 
 
@@ -541,6 +547,7 @@ targetType filename
   | ext' == executableExtension = ExecutableFile
   | ext' == bitcodeExtension    = BitcodeFile
   | ext' == assemblyExtension   = AssemblyFile
+  | ext' == archiveExtension    = ArchiveFile
   | otherwise                  = UnknownFile
       where ext' = dropWhile (=='.') $ takeExtension filename
 
