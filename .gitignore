@@ -50,3 +50,10 @@ test-cases/simple_loop
 test-cases/*.bc
 Parser.info
 miniworkshop.pdf
+test-cases/commonsubexpr
+test-cases/func_let
+test-cases/import
+test-cases/multi_out
+test-cases/numbers
+test-cases/proc_beer
+test-cases/proc_yorn
