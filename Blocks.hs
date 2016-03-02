@@ -614,7 +614,9 @@ cgenLPVM pname flags args
               (ConstantOperand c) ->
                   if isPtr outTy
                   then do
-                      return $ constInttoptr c outTy
+                      if isNullCons c
+                          then return $ cons $ C.Null outTy
+                          else return $ constInttoptr c outTy
                       -- return $ cons $ C.Null outTy
                   else do
                       let consTy = constantType c
@@ -636,6 +638,10 @@ cgenLPVM pname flags args
     valTrust a = trustFromJust trustMsg $ argIntVal a
     outNm = pullName $ head outputs
     
+
+isNullCons :: C.Constant -> Bool
+isNullCons (C.Int _ val) = val == 0
+isNullCons _ = False
 
 
 isPtr :: LLVMAST.Type -> Bool
@@ -1136,6 +1142,8 @@ gcMutate ptr offset val = do
         (LocalReference (PointerType ty _) _) -> do
             ptrInt <- ptrtoint val ty
             store accessPtr ptrInt
+        (ConstantOperand (C.Null (PointerType (IntegerType bs) _))) -> do
+            store accessPtr (cons $ C.Int bs 0)
         _ -> store accessPtr val
 
 -- | Get the LLVMAST.Type the given pointer type points to.
