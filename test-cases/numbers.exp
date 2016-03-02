@@ -20,19 +20,20 @@ AFTER EVERYTHING:
 
 factorial > public (1 calls) (inline)
 0: factorial(n#0:wybe.int, ?$#0:wybe.int):
-    numbers.gen$1<0>(~n#0:wybe.int, ?n#1:wybe.int, ?tmp$0#0:wybe.int) @numbers:4:8
+    numbers.gen$1<0>(~n#0:wybe.int, ?n#1:wybe.int, ?tmp$0#0:wybe.int, ?tmp$1#0:wybe.bool) @numbers:4:8
     foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)
 
 
 gen$1 > (1 calls)
-0: gen$1(n#0:wybe.int, [?n#0:wybe.int], ?tmp$0#0:wybe.int):
+0: gen$1(n#0:wybe.int, [?n#0:wybe.int], ?tmp$0#0:wybe.int, ?tmp$1#0:wybe.bool):
     foreign llvm icmp sle(n#0:wybe.int, 0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:16:40
+    foreign llvm move(tmp$7#0:wybe.bool, ?tmp$1#0:wybe.bool)
     case ~tmp$7#0:wybe.bool of
     0:
         foreign llvm sub(n#0:wybe.int, 1:wybe.int, ?tmp$10#0:wybe.int) @wybe:7:38
-        numbers.gen$1<0>(~tmp$10#0:wybe.int, ?tmp$12#0:wybe.int, ?tmp$13#0:wybe.int) @numbers:4:8
-        foreign llvm mul(n#0:wybe.int, ~tmp$13#0:wybe.int, ?tmp$16#0:wybe.int) @wybe:12:38
-        foreign llvm move(~tmp$16#0:wybe.int, ?tmp$0#0:wybe.int)
+        numbers.gen$1<0>(~tmp$10#0:wybe.int, ?tmp$12#0:wybe.int, ?tmp$13#0:wybe.int, ?tmp$14#0:wybe.bool) @numbers:4:8
+        foreign llvm mul(n#0:wybe.int, ~tmp$13#0:wybe.int, ?tmp$17#0:wybe.int) @wybe:12:38
+        foreign llvm move(~tmp$17#0:wybe.int, ?tmp$0#0:wybe.int)
 
     1:
         foreign llvm move(1:wybe.int, ?tmp$0#0:wybe.int)
@@ -67,11 +68,13 @@ entry:
 
 define i64 @"numbers.factorial<0>"(i64 %"n#0") {
 entry:
-  %"tmp$0#0" = tail call i64 @"numbers.gen$1<0>"(i64 %"n#0")
-  ret i64 %"tmp$0#0"
+  %0 = tail call { i64, i1 } @"numbers.gen$1<0>"(i64 %"n#0")
+  %1 = extractvalue { i64, i1 } %0, 0
+  %2 = extractvalue { i64, i1 } %0, 1
+  ret i64 %1
 }
 
-define i64 @"numbers.gen$1<0>"(i64 %"n#0") {
+define { i64, i1 } @"numbers.gen$1<0>"(i64 %"n#0") {
 entry:
   %"tmp$7#0" = icmp sle i64 %"n#0", 0
   br i1 %"tmp$7#0", label %if.then, label %if.else
@@ -81,9 +84,11 @@ if.then:                                          ; preds = %entry
 
 if.else:                                          ; preds = %entry
   %"tmp$10#0" = sub i64 %"n#0", 1
-  %"tmp$13#0" = tail call i64 @"numbers.gen$1<0>"(i64 %"tmp$10#0")
-  %"tmp$16#0" = mul i64 %"n#0", %"tmp$13#0"
-  ret i64 %"tmp$16#0"
+  %0 = tail call { i64, i1 } @"numbers.gen$1<0>"(i64 %"tmp$10#0")
+  %1 = extractvalue { i64, i1 } %0, 0
+  %2 = extractvalue { i64, i1 } %0, 1
+  %"tmp$17#0" = mul i64 %"n#0", %1
+  ret i64 %"tmp$17#0"
 }
 
 define double @"numbers.toCelsius<0>"(double %"f#0") {

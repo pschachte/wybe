@@ -23,23 +23,24 @@ AFTER EVERYTHING:
 
 ++ > public (1 calls) (inline)
 0: ++(x#0:type_list.intlist, y#0:type_list.intlist, ?$#0:type_list.intlist):
-    type_list.gen$1<0>(~x#0:type_list.intlist, ~y#0:type_list.intlist, ?tmp$0#0:type_list.intlist, ?x#1:type_list.intlist, ?y#1:type_list.intlist) @type_list:6:5
+    type_list.gen$1<0>(~x#0:type_list.intlist, ~y#0:type_list.intlist, ?tmp$0#0:type_list.intlist, ?tmp$1#0:wybe.bool, ?x#1:type_list.intlist, ?y#1:type_list.intlist) @type_list:6:5
     foreign llvm move(~tmp$0#0:type_list.intlist, ?$#0:type_list.intlist)
 
 
 gen$1 > (1 calls)
-0: gen$1(x#0:type_list.intlist, y#0:type_list.intlist, ?tmp$0#0:type_list.intlist, [?x#0:type_list.intlist], [?y#0:type_list.intlist]):
+0: gen$1(x#0:type_list.intlist, y#0:type_list.intlist, ?tmp$0#0:type_list.intlist, ?tmp$1#0:wybe.bool, [?x#0:type_list.intlist], [?y#0:type_list.intlist]):
     foreign lpvm cast(0:bool, ?tmp$9#0:wybe.bool)
+    foreign llvm move(tmp$9#0:wybe.bool, ?tmp$1#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
         foreign lpvm access(x#0:type_list.intlist, 0:wybe.int, ?tmp$11#0:wybe.int)
         foreign lpvm access(x#0:type_list.intlist, 8:wybe.int, ?tmp$13#0:type_list.intlist)
-        type_list.gen$1<0>(~tmp$13#0:type_list.intlist, y#0:type_list.intlist, ?tmp$16#0:type_list.intlist, ?tmp$17#0:type_list.intlist, ?tmp$18#0:type_list.intlist) @type_list:6:5
-        foreign lpvm alloc(16:wybe.int, ?tmp$21#0:intlist)
-        foreign lpvm mutate(~tmp$21#0:intlist, ?tmp$22#0:intlist, 0:wybe.int, ~tmp$11#0:wybe.int)
-        foreign lpvm mutate(~tmp$22#0:intlist, ?tmp$23#0:intlist, 8:wybe.int, ~tmp$16#0:type_list.intlist)
-        foreign lpvm cast(~tmp$23#0:intlist, ?tmp$24#0:wybe.int)
-        foreign lpvm cast(~tmp$24#0:wybe.int, ?tmp$3#0:type_list.intlist)
+        type_list.gen$1<0>(~tmp$13#0:type_list.intlist, y#0:type_list.intlist, ?tmp$16#0:type_list.intlist, ?tmp$17#0:wybe.bool, ?tmp$18#0:type_list.intlist, ?tmp$19#0:type_list.intlist) @type_list:6:5
+        foreign lpvm alloc(16:wybe.int, ?tmp$22#0:intlist)
+        foreign lpvm mutate(~tmp$22#0:intlist, ?tmp$23#0:intlist, 0:wybe.int, ~tmp$11#0:wybe.int)
+        foreign lpvm mutate(~tmp$23#0:intlist, ?tmp$24#0:intlist, 8:wybe.int, ~tmp$16#0:type_list.intlist)
+        foreign lpvm cast(~tmp$24#0:intlist, ?tmp$25#0:wybe.int)
+        foreign lpvm cast(~tmp$25#0:wybe.int, ?tmp$3#0:type_list.intlist)
         foreign llvm move(~tmp$3#0:type_list.intlist, ?tmp$0#0:type_list.intlist)
 
     1:
@@ -122,11 +123,13 @@ declare i8* @wybe_malloc(i32)
 
 define i64* @"type_list.++<0>"(i64* %"x#0", i64* %"y#0") {
 entry:
-  %"tmp$0#0" = tail call i64* @"type_list.gen$1<0>"(i64* %"x#0", i64* %"y#0")
-  ret i64* %"tmp$0#0"
+  %0 = tail call { i64*, i1 } @"type_list.gen$1<0>"(i64* %"x#0", i64* %"y#0")
+  %1 = extractvalue { i64*, i1 } %0, 0
+  %2 = extractvalue { i64*, i1 } %0, 1
+  ret i64* %1
 }
 
-define i64* @"type_list.gen$1<0>"(i64* %"x#0", i64* %"y#0") {
+define { i64*, i1 } @"type_list.gen$1<0>"(i64* %"x#0", i64* %"y#0") {
 entry:
   %0 = alloca i64
   store i64 0, i64* %0
@@ -143,17 +146,19 @@ if.else:                                          ; preds = %entry
   %5 = getelementptr i64* %"x#0", i64 1
   %6 = load i64* %5
   %7 = inttoptr i64 %6 to i64*
-  %"tmp$16#0" = tail call i64* @"type_list.gen$1<0>"(i64* %7, i64* %"y#0")
-  %8 = tail call i8* @wybe_malloc(i32 16)
-  %9 = bitcast i8* %8 to i64*
-  %10 = getelementptr i64* %9, i64 0
-  store i64 %4, i64* %10
-  %11 = getelementptr i64* %9, i64 1
-  %12 = ptrtoint i64* %"tmp$16#0" to i64
-  store i64 %12, i64* %11
-  %13 = ptrtoint i64* %9 to i64
-  %14 = inttoptr i64 %13 to i64*
-  ret i64* %14
+  %8 = tail call { i64*, i1 } @"type_list.gen$1<0>"(i64* %7, i64* %"y#0")
+  %9 = extractvalue { i64*, i1 } %8, 0
+  %10 = extractvalue { i64*, i1 } %8, 1
+  %11 = tail call i8* @wybe_malloc(i32 16)
+  %12 = bitcast i8* %11 to i64*
+  %13 = getelementptr i64* %12, i64 0
+  store i64 %4, i64* %13
+  %14 = getelementptr i64* %12, i64 1
+  %15 = ptrtoint i64* %9 to i64
+  store i64 %15, i64* %14
+  %16 = ptrtoint i64* %12 to i64
+  %17 = inttoptr i64 %16 to i64*
+  ret i64* %17
 }
 
 define i64* @"type_list.intlist.=<0>"(i64* %"y#0") {
