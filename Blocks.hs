@@ -266,15 +266,15 @@ doCodegenBody proto body =
        setBlock entry
        mapM_ assignParam $ List.filter (not . isOutputParam) params
        codegenBody body   -- Codegen on body prims
-       builtOp <- buildOutputOp params
 
        case bodyFork body of
          NoFork -> case (primProtoName proto) == "" of
            -- Empty primitive prototype is the main function in LLVM
            True -> mainReturnCodegen
-           False -> do ret builtOp
+           False -> do retOp <- buildOutputOp params
+                       ret retOp
                        return ()
-         (PrimFork var ty _ fbody) -> codegenForkBody var fbody builtOp
+         (PrimFork var ty _ fbody) -> codegenForkBody var fbody params
 
 
 -- | Generate code for returning integer exit code at the end main
@@ -318,6 +318,7 @@ buildOutputOp params = do
     let outParams = List.filter isOutputParam params
     -- outputsMaybe <- mapM (getVarMaybe . show . primParamName) outParams
     -- let outputs = catMaybes outputsMaybe
+    logCodegen $ "OutParms: " ++ show outParams
     outputs <- mapM (getVar . show . primParamName) outParams
     logCodegen $ "Built outputs from symbol table: " ++ show outputs
 
@@ -384,9 +385,8 @@ phantomPrim PrimNop = True
 -- | Code generation for a conditional branch. Currently a binary split
 -- is handled, which each branch returning the left value of their last
 -- instruction.
-codegenForkBody :: PrimVarName -> [ProcBody]
-                -> Maybe Operand -> Codegen ()
-codegenForkBody var (b1:b2:[]) outop =
+codegenForkBody :: PrimVarName -> [ProcBody] -> [PrimParam] -> Codegen ()
+codegenForkBody var (b1:b2:[]) params =
     do ifthen <- addBlock "if.then"
        ifelse <- addBlock "if.else"
        -- ifexit <- addBlock "if.exit"
@@ -394,16 +394,16 @@ codegenForkBody var (b1:b2:[]) outop =
        cbr testop ifthen ifelse
 
        -- if.then
-       setBlock ifthen
+       setBlock ifthen       
        retop <- codegenBody b2
        case retop of
-           Nothing -> ret outop
+           Nothing -> buildOutputOp params >>= ret
            _ -> ret retop
        -- if.else
        setBlock ifelse
        retop <- codegenBody b1
        case retop of
-           Nothing -> ret outop
+           Nothing -> buildOutputOp params >>= ret
            _ -> ret retop
        return ()
 

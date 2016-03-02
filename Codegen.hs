@@ -58,10 +58,10 @@ import qualified LLVM.General.AST.FloatingPointPredicate as FP
 import qualified LLVM.General.AST.IntegerPredicate       as IP
 
 import           AST                                     (Prim, PrimProto, Compiler,
-                                                         shouldnt)
+                                                         shouldnt, logMsg)
 import           LLVM.General.Context
 import           LLVM.General.Module
-
+import           Options (LogSelection (Blocks))
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
@@ -335,8 +335,9 @@ local ty nm = LocalReference ty nm
 -- | Store a local variable on the front of the symbol table.
 assign :: String -> Operand -> Codegen ()
 assign var x = do
-  lcls <- gets symtab
-  modify $ \s -> s { symtab = (var, x) : lcls }
+    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show x
+    lcls <- gets symtab
+    modify $ \s -> s { symtab = (var, x) : lcls }
 
 -- | Find and return the local operand by its given name from the symbol
 -- table. Only the first find will be returned so new names can shadow
@@ -560,3 +561,5 @@ phi :: Type -> [(Operand, Name)] -> Codegen Operand
 phi ty incoming = instr ty $ Phi ty incoming []
 
     
+logCodegen :: String -> Codegen ()
+logCodegen s = lift $ logMsg Blocks $ "=CODEGEN=" ++ s
