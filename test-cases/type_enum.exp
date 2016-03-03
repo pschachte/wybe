@@ -67,34 +67,50 @@ AFTER LLVM IR:
 
 declare i8* @wybe_malloc(i32)
 
-define i64* @"type_enum.season.=<0>"(i64* %"y#0") {
+define i2 @"type_enum.season.=<0>"(i2 %"y#0") {
 entry:
-  ret i64* %"y#0"
+  ret i2 %"y#0"
 }
 
-define i64* @"type_enum.season.=<1>"(i64* %"y#0") {
+define i2 @"type_enum.season.=<1>"(i2 %"y#0") {
 entry:
-  ret i64* %"y#0"
+  ret i2 %"y#0"
 }
 
-define i64* @"type_enum.season.autumn<0>"() {
+define i2 @"type_enum.season.autumn<0>"() {
 entry:
-  ret i64* inttoptr (i64 3 to i64*)
+  %0 = alloca i64
+  store i64 3, i64* %0
+  %1 = load i64* %0
+  %2 = trunc i64 %1 to i2
+  ret i2 %2
 }
 
-define i64* @"type_enum.season.spring<0>"() {
+define i2 @"type_enum.season.spring<0>"() {
 entry:
-  ret i64* inttoptr (i64 1 to i64*)
+  %0 = alloca i64
+  store i64 1, i64* %0
+  %1 = load i64* %0
+  %2 = trunc i64 %1 to i2
+  ret i2 %2
 }
 
-define i64* @"type_enum.season.summer<0>"() {
+define i2 @"type_enum.season.summer<0>"() {
 entry:
-  ret i64* inttoptr (i64 2 to i64*)
+  %0 = alloca i64
+  store i64 2, i64* %0
+  %1 = load i64* %0
+  %2 = trunc i64 %1 to i2
+  ret i2 %2
 }
 
-define i64* @"type_enum.season.winter<0>"() {
+define i2 @"type_enum.season.winter<0>"() {
 entry:
-  ret i64* null
+  %0 = alloca i64
+  store i64 0, i64* %0
+  %1 = load i64* %0
+  %2 = trunc i64 %1 to i2
+  ret i2 %2
 }
 
 --------------------------------------------------
@@ -102,33 +118,49 @@ entry:
 
 declare i8* @wybe_malloc(i32)
 
-define i64* @"type_enum.season.=<0>"(i64* %"y#0") {
+define i2 @"type_enum.season.=<0>"(i2 %"y#0") {
 entry:
-  ret i64* %"y#0"
+  ret i2 %"y#0"
 }
 
-define i64* @"type_enum.season.=<1>"(i64* %"y#0") {
+define i2 @"type_enum.season.=<1>"(i2 %"y#0") {
 entry:
-  ret i64* %"y#0"
+  ret i2 %"y#0"
 }
 
-define i64* @"type_enum.season.autumn<0>"() {
+define i2 @"type_enum.season.autumn<0>"() {
 entry:
-  ret i64* inttoptr (i64 3 to i64*)
+  %0 = alloca i64
+  store i64 3, i64* %0
+  %1 = load i64* %0
+  %2 = trunc i64 %1 to i2
+  ret i2 %2
 }
 
-define i64* @"type_enum.season.spring<0>"() {
+define i2 @"type_enum.season.spring<0>"() {
 entry:
-  ret i64* inttoptr (i64 1 to i64*)
+  %0 = alloca i64
+  store i64 1, i64* %0
+  %1 = load i64* %0
+  %2 = trunc i64 %1 to i2
+  ret i2 %2
 }
 
-define i64* @"type_enum.season.summer<0>"() {
+define i2 @"type_enum.season.summer<0>"() {
 entry:
-  ret i64* inttoptr (i64 2 to i64*)
+  %0 = alloca i64
+  store i64 2, i64* %0
+  %1 = load i64* %0
+  %2 = trunc i64 %1 to i2
+  ret i2 %2
 }
 
-define i64* @"type_enum.season.winter<0>"() {
+define i2 @"type_enum.season.winter<0>"() {
 entry:
-  ret i64* null
+  %0 = alloca i64
+  store i64 0, i64* %0
+  %1 = load i64* %0
+  %2 = trunc i64 %1 to i2
+  ret i2 %2
 }
 
