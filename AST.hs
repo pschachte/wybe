@@ -851,6 +851,10 @@ descendantModuleOf (a:as) (b:bs)
   | a == b = descendantModuleOf as bs
 descendantModuleOf _ _ = False
 
+getDescendant :: ModSpec -> Maybe ModSpec
+getDescendant [] = Nothing
+getDescendant (m:[]) = Nothing
+getDescendant modspec = Just $ init modspec
 
 -- |The list of defining modules that the given (possibly
 --  module-qualified) name could possibly refer to from the current
@@ -867,7 +871,18 @@ refersTo modspec name implMapFn specModFn = do
       name ++ " from module " ++ showModSpec currMod
     visible <- getModule (Map.findWithDefault Set.empty name . implMapFn . 
                           fromJust . modImplementation)
-    return $ Set.filter ((modspec `isSuffixOf`) . specModFn) visible
+    let matched = Set.filter ((modspec `isSuffixOf`) . specModFn) visible
+    case Set.null matched of
+        False -> return matched
+        -- Try and look into the super mod.
+        True -> case getDescendant currMod of
+            Just des -> do
+                reenterModule des
+                desMatched <- refersTo modspec name implMapFn specModFn
+                finishModule
+                return desMatched
+            Nothing -> return matched
+    
 
 
 -- |Returns a list of the potential targets of a proc call.
@@ -1018,17 +1033,28 @@ updateModLLVM fn modimp = do
 --   if possible.
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
 lookupTypeRepresentation Unspecified = return Nothing
-lookupTypeRepresentation (TypeSpec modSpec name _) = do
-    maybeMod <- getLoadedModule modSpec
-    let maybeImpln = maybeMod >>= modImplementation
-    let maybeInterface = fmap modInterface maybeMod
-    case (maybeInterface,maybeImpln) of
-        (Just iface,_) ->
-          return $ fmap snd $ Map.lookup name $ pubTypes iface
-        (Nothing, Just impln) ->
-          return $ fmap typeDefRepresentation $ Map.lookup name 
-          $ modTypes impln
-        _ -> return Nothing
+lookupTypeRepresentation (TypeSpec modSpec name ps) = do
+    reenterModule modSpec
+    maybeImpln <- getModuleImplementation
+    modInt <- getModuleInterface
+    finishModule
+    -- Try find the TypeRepresentation in the interface
+    let maybeIntMatch = fmap snd $ Map.lookup name $ pubTypes modInt
+    -- Try find the TypeRepresentation in the implementation if not found
+    -- in the interface
+    let maybeMatch = case maybeIntMatch of
+            Nothing ->
+                maybeImpln >>=
+                (fmap typeDefRepresentation . Map.lookup name . modTypes)
+            _ -> maybeIntMatch
+    -- If still not found, search the direct descendant interface and
+    -- implementation
+    case maybeMatch of
+        Nothing -> case getDescendant modSpec of
+            Just des -> lookupTypeRepresentation (TypeSpec des name ps)
+            Nothing -> return Nothing
+        _ -> return maybeMatch
+            
     
 
 -- |An identifier.

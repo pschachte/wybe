@@ -51,6 +51,8 @@ blockTransformModule :: ModSpec -> Compiler ()
 blockTransformModule thisMod =
     do reenterModule thisMod
        logBlocks $ "*** Translating Module: " ++ showModSpec thisMod
+       modRec <- getModule id
+       logWrapWith '-' $ show modRec
        (names, procs) <- unzip <$>
                          getModuleImplementationField (Map.toList . modProcs)
        -- Collect all procedure prototypes in the module
@@ -613,11 +615,10 @@ cgenLPVM pname flags args
           castOp <- case inOp of
               (ConstantOperand c) ->
                   if isPtr outTy
-                  then do
-                      if isNullCons c
-                          then return $ cons $ C.Null outTy
-                          else return $ constInttoptr c outTy
-                      -- return $ cons $ C.Null outTy
+                  then return $ constInttoptr c outTy
+                      -- if isNullCons c
+                      --     then return $ cons $ C.Null outTy
+                      --     else return $ constInttoptr c outTy
                   else do
                       let consTy = constantType c
                       ptr <- doAlloca consTy
@@ -909,7 +910,7 @@ typed' ty = do
         Just typeStr -> return $ typeStrToType typeStr
         -- Nothing -> error $ "No type representaition: " ++ (show ty)
         Nothing -> do
-            -- logBlocks $ "xxx No type representation: " ++ show ty
+            logBlocks $ "xxx No type representation: " ++ show ty
             if typeName ty == "bool"
                 then return $ int_c (fromIntegral wordSize)
                 else return $ ptr_t $ int_c (fromIntegral wordSize)
@@ -1137,14 +1138,9 @@ gcMutate ptr offset val = do
     let indices = [(cons $ C.Int 64 index)]
     let getel = LLVMAST.GetElementPtr False ptr indices []
     accessPtr <- instr opTypePtr getel
-    -- if val is a pointer then the ptrtoint instruction is needed
-    case val of
-        (LocalReference (PointerType ty _) _) -> do
-            ptrInt <- ptrtoint val ty
-            store accessPtr ptrInt
-        (ConstantOperand (C.Null (PointerType (IntegerType bs) _))) -> do
-            store accessPtr (cons $ C.Int bs 0)
-        _ -> store accessPtr val
+    -- if val is a pointer then the ptrtoint instruction is needed    
+    storeOp <- makeStoreOp ptr val
+    store accessPtr storeOp
 
 -- | Get the LLVMAST.Type the given pointer type points to.
 pullFromPointer :: LLVMAST.Type -> LLVMAST.Type
@@ -1159,6 +1155,20 @@ getIndex (PointerType ty _) bytes =
     let ptrBits = toInteger $ getBits ty
     in quot (bytes * 8) ptrBits
 getIndex _ _ = shouldnt "Can't compute index from a non-pointer."
+
+
+makeStoreOp :: Operand -> Operand -> Codegen Operand
+makeStoreOp ptr v@(LocalReference (PointerType ty _) _) = ptrtoint v ty
+makeStoreOp ptr
+    v@(ConstantOperand (C.Null (PointerType (IntegerType bs) _))) =
+    return $ cons $ C.Int bs 0
+makeStoreOp ptr
+    v@(ConstantOperand (C.IntToPtr c pty)) =
+    return $ cons c
+makeStoreOp ptr v = return v  
+    
+    
+
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --
