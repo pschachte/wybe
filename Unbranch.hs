@@ -185,7 +185,9 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     logUnbranch $ "Vars before test: " ++ show beforeVars
     tstStmts' <- unbranchStmts tstStmts
     (thn',thnVars,thnTerm) <- unbranchBranch thn
+    -- Vars assigned in the condition cannot be used in the else branch
     setVars beforeVars
+    -- but the branch variable itself can be used in the else branch
     case content tstVar of
          Typed (Var name _ _) ty _ -> defVar name ty
          Var name _ _ -> defVar name $ TypeSpec ["wybe"] "bool" []
@@ -201,19 +203,31 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
                   [maybePlace (Cond tstStmts' tstVar thn' els') pos]
         logUnbranch $ "Generated switch " ++ showStmt 4 (content switch)
         setVars beforeVars
+        -- Translate conditional outside a loop into a call to a proc that
+        -- handles the conditional, then continue to rest of the body
         unbranchStmts (switch:stmts)
       else do
+        -- Conditionals in a loop must be handled differently so we can
+        -- handle a break and continue.  Those statements "kill" the following
+        -- statements, so they are not executed.  So we translate a
+        -- code following a conditional in a loop into a separate proc to
+        -- be called at the end of each branch that does not contain a
+        -- break or continue (which we call "terminal").
         setVars afterVars
         stmts' <- unbranchStmts stmts
-        finalVars <- if thnTerm || elsTerm 
-                     then return afterVars
-                     else gets brVars
+        -- XXX replacing this with the following assignment breaks proc_beer
+        -- finalVars <- if thnTerm || elsTerm 
+        --              then return afterVars -- XXX Why?
+        --              else gets brVars
+        finalVars <- gets brVars
         logUnbranch $ "Loop body:\n" ++ showBody 4 stmts
         logUnbranch $ "Loop body inputs = " ++ show afterVars
         logUnbranch $ "Loop body outputs = " ++ show finalVars
         contName <- newProcName
         let exitVs = Map.intersection thnVars elsVars
         cont <- factorFreshProc contName exitVs finalVars Nothing stmts'
+        -- XXX do we need to generate moves for input/output vars not
+        -- reassigned by stmts'?
         logUnbranch $ "Generated continuation " ++ showStmt 4 (content cont)
         switch <- factorFreshProc switchName beforeVars finalVars {- afterVars -} pos
                   [maybePlace 
