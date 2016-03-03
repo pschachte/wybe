@@ -1033,7 +1033,9 @@ updateModLLVM fn modimp = do
 --   if possible.
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
 lookupTypeRepresentation Unspecified = return Nothing
-lookupTypeRepresentation (TypeSpec modSpec name ps) = do
+lookupTypeRepresentation (TypeSpec [] _ _) = return Nothing    
+lookupTypeRepresentation (TypeSpec modSpec name _) = do
+    logMsg Blocks $ "Looking for " ++ name ++ " in mod: " ++ showModSpec modSpec
     reenterModule modSpec
     maybeImpln <- getModuleImplementation
     modInt <- getModuleInterface
@@ -1049,11 +1051,12 @@ lookupTypeRepresentation (TypeSpec modSpec name ps) = do
             _ -> maybeIntMatch
     -- If still not found, search the direct descendant interface and
     -- implementation
-    case maybeMatch of
-        Nothing -> case getDescendant modSpec of
-            Just des -> lookupTypeRepresentation (TypeSpec des name ps)
-            Nothing -> return Nothing
-        _ -> return maybeMatch
+    -- case maybeMatch of
+    --     Nothing -> case getDescendant modSpec of
+    --         Just des -> lookupTypeRepresentation (TypeSpec des name ps)
+    --         Nothing -> return Nothing
+    --     _ -> return maybeMatch
+    return maybeMatch
             
     
 
