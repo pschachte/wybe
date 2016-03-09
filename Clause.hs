@@ -105,6 +105,11 @@ compileBody [placed] params
       thn' <- mapM compileSimpleStmt thn
       afterThen <- get
       put initial
+      case tstVar' of
+        ArgVar var ty FlowIn _ _ -> do
+            nextVar $ primVarName var
+            return ()
+        _ -> return ()
       els' <- mapM compileSimpleStmt els
       afterElse <- get
       let final = Map.intersectionWith max afterThen afterElse

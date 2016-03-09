@@ -100,6 +100,7 @@ data LoopInfo = LoopInfo {
     loopBreak    :: Placed Stmt,  -- ^stmt to break out of the loop
     loopInit :: [Placed Stmt],    -- ^code to initialise before entering loop
     loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
+                                  --  current loopInit, loopTerm are unused
     | NoLoop
     deriving (Eq)
 
