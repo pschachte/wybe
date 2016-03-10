@@ -69,9 +69,8 @@ unbranchProc proc = do
 
 unbranchBody :: [Param] -> [Placed Stmt] -> Compiler ([Placed Stmt],[Item])
 unbranchBody params stmts = do
-    let vars = inputParamNames params
     (stmts',st) <- runStateT (unbranchStmts stmts) $ 
-                   initUnbrancherState vars
+                   initUnbrancherState params
     return (stmts',brNewDefs st)
 
 
@@ -89,56 +88,92 @@ type VarDict = Map VarName TypeSpec
 data UnbrancherState = Unbrancher {
     brLoopInfo   :: LoopInfo,     -- ^If in a loop, the break and continue stmts
     brVars       :: VarDict,      -- ^Variables defined up to here
-    brTerminated :: Bool,         -- ^Whether code so far included a Break or
-                                  --  Next, which terminate execution
+    brOutParams  :: [Param],      -- ^Output arguments for generated procs
+    brOutArgs    :: [Placed Exp], -- ^Output arguments for generated procs
     brNewDefs    :: [Item]        -- ^Generated auxilliary procedures
     }
 
 
 data LoopInfo = LoopInfo {
-    loopNext :: Placed Stmt,      -- ^stmt to go to the next loop iteration
-    loopBreak    :: Placed Stmt,  -- ^stmt to break out of the loop
+    loopExitVars :: Maybe VarDict -- ^Variables available at all breaks seen,
+                                  --  or Nothing if no breaks seen yet
+    loopTerminated :: Bool,       -- ^Whether code so far included a Break or
+                                  --  Next, which terminate execution
     loopInit :: [Placed Stmt],    -- ^code to initialise before entering loop
     loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
-                                  --  current loopInit, loopTerm are unused
+                                  --  currently loopInit, loopTerm are unused
     | NoLoop
     deriving (Eq)
 
 
-initUnbrancherState :: VarDict -> UnbrancherState
-initUnbrancherState vars =
-    Unbrancher NoLoop vars False []
+initUnbrancherState :: [Param] -> UnbrancherState
+initUnbrancherState params =
+    let defined = inputParams params
+        outParams = [Param nm ty ParamOut Ordinary
+                    | Param nm ty fl _ <- params
+                    , flowsIn fl]
+        outArgs   = [Unplaced $ Typed (Var nm ParamOut Ordinary) ty False
+                    | Param nm ty fl _ <- params
+                    , flowsIn fl]
+    in Unbrancher NoLoop defined outParams outArgs []
 
 
-setLoopInfo :: Placed Stmt -> Placed Stmt -> Unbrancher ()
-setLoopInfo next break = do
-    logUnbranch $ "next call: " ++ showStmt 14 (content next)
-    logUnbranch $ "break call: " ++ showStmt 15 (content break)
-    modify (\s -> s { brLoopInfo = LoopInfo next break [] [] })
+-- |Start unbranching a loop, returing the previous loop info
+startLoop :: Unbrancher LoopInfo
+startLoop = do
+    old <- gets brLoopInfo
+    modify (\s -> s { brLoopInfo = LoopInfo Nothing False [] [] })
+    return old
+
+-- |Complete unbranching a loop by restoring the previous loop info
+endLoop :: LoopInfo -> Unbrancher ()
+endLoop old = modify (\s -> s { brLoopInfo = old })
 
 
-setNoLoop :: Unbrancher ()
-setNoLoop = modify (\s -> s { brLoopInfo = NoLoop })
+ifTerminated :: Unbrancher a -> Unbrancher a -> Unbrancher a
+ifTerminated thn els = do
+    lp <- gets brLoopInfo
+    case lp of
+        LoopInfo _ True _ _ -> thn
+        _ -> els
 
 
+setTerminated :: String -> Unbrancher ()
+setTerminated stmtKind = do
+    lp <- gets brLoopInfo
+    if lp == NoLoop
+        then lift $ message Error (stmtKind ++ " outside a loop") pos
+        else modify (\s -> s { brLoopInfo = lp { loopTerminated = True }})
+
+
+-- |Record the current set of defined vars as one of the possible sets of
+--  defined vars at a loop break
+recordBreakVars :: Unbrancher ()
+recordBreakVars = do
+    vars <- gets brVars
+    eVars <- gets (loopExitVars . brLoopInfo)
+    let eVars'' = case eVars of
+            Nothing     -> Just vars
+            Just eVars' -> Just $ Map.intersection eVars' vars
+    modify (\s -> s { brLoopInfo = lp { loopExitVars = eVars'' }})
+
+
+-- | Add the specified variable to the symbol table
 defVar :: VarName -> TypeSpec -> Unbrancher ()
 defVar var ty =
     modify (\s -> s { brVars = Map.insert var ty $ brVars s })
 
 
+-- | if the Exp is a variable, add it to the symbol table
+defIfVar :: TypeSpec -> Exp -> Unbrancher ()
+defIfVar _ (Typed exp ty) = defIfVar ty exp
+defIfVar defaultType (Var name _ _) = defVar name defaultType
+defIfVar _ _ = return ()
+
+
 setVars :: VarDict -> Unbrancher ()
 setVars vs =
     modify (\s -> s { brVars = vs })
-
-
-ifTerminated :: Unbrancher a -> Unbrancher a -> Unbrancher a
-ifTerminated thn els = do
-    term <- gets brTerminated
-    if term then thn else els
-
-
-setTerminated :: Bool -> Unbrancher ()
-setTerminated term = modify (\s -> s { brTerminated = term })
 
 
 newProcName :: Unbrancher String
@@ -159,6 +194,7 @@ logUnbranch :: String -> Unbrancher ()
 logUnbranch s = lift $ logMsg Unbranch s
 
 
+----------------------------------------------------------------
 --                 Unbranching statement sequences
 ----------------------------------------------------------------
 
@@ -171,6 +207,45 @@ unbranchStmts (stmt:stmts) = do
     ifTerminated (return []) (unbranchStmt (content stmt) (place stmt) stmts)
 
 
+-- | 'Unbranch' a single statement, along with all the following statements.
+--   This transforms loops into calls to freshly generated procedures that
+--   implement not only the loops themselves, but all following code. That
+--   is, rather than returning at the loop exit(s), the generated procs
+--   call procs for the code following the loops. Similarly, conditionals
+--   are transformed by generating a separate proc for the code following
+--   the conditional and adding a call to this proc at the end of each arm
+--   of the conditional in place of the code following the conditional, so
+--   that conditionals are always the final statement in a statement
+--   sequence, as are calls to loop procs.
+--
+--   The input arguments to these generated procs are all the variables in
+--   scope everywhere the proc is called. The proc generated for the code
+--   after a conditional is called only from the end of each branch, so the
+--   set of input arguments is just the intersection of the sets of
+--   variables defined at the end of each branch. Also note that the only
+--   variable defined by the condition of a conditional that can be used in
+--   the 'else' branch is the condition variable itself. The condition may
+--   be permitted to bind other variables, but in the 'else' branch the
+--   condition is considered to have failed, so the other variables cannot
+--   be used.
+--
+--   The variables in scope at the start of a loop are the ones in scope at
+--   *every* call to the generated proc. Since variables defined before the
+--   loop can be redefined in the loop but cannot become "lost", this means
+--   the intersecion of the variables available at all calls is just the
+--   set of variables defined at the start of the loop.  The inputs to the
+--   proc generated for the code following a loop is the set of variables
+--   defined at every 'break' in the loop.
+--
+--   Because these generated procs always chain to the next proc, they don't
+--   need to return any values not returned by the proc they are generated
+--   for, so the output arguments for all of them are just the output
+--   arguments for the proc they are generated for.
+--
+--   Because later compiler passes will inline simple procs and remove dead
+--   code and unneeded input and output arguments, we don't bother to try
+--   to optimise these things here.
+--
 unbranchStmt :: Stmt -> OptPos -> [Placed Stmt] -> Unbrancher [Placed Stmt]
 unbranchStmt stmt@(ProcCall _ _ _ args) pos stmts = do
     defArgs args
@@ -188,110 +263,53 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     (thn',thnVars,thnTerm) <- unbranchBranch thn
     -- Vars assigned in the condition cannot be used in the else branch
     setVars beforeVars
-    -- but the branch variable itself can be used in the else branch
-    case content tstVar of
-         Typed (Var name _ _) ty _ -> defVar name ty
-         Var name _ _ -> defVar name $ TypeSpec ["wybe"] "bool" []
-         _ -> return ()
+    -- but the branch variable itself _can_ be used in the else branch
+    defIfVar (TypeSpec ["wybe"] "bool" []) $ content tstVar
     (els',elsVars,elsTerm) <- unbranchBranch els
     let afterVars = varsAfterITE thnVars thnTerm elsVars elsTerm
     logUnbranch $ "Vars after conditional: " ++ show afterVars
     switchName <- newProcName
-    lp <- gets brLoopInfo
-    if lp == NoLoop || stmts == []
-      then do
-        switch <- factorFreshProc switchName beforeVars afterVars pos
-                  [maybePlace (Cond tstStmts' tstVar thn' els') pos]
-        logUnbranch $ "Generated switch " ++ showStmt 4 (content switch)
-        setVars beforeVars
-        -- Translate conditional outside a loop into a call to a proc that
-        -- handles the conditional, then continue to rest of the body
-        unbranchStmts (switch:stmts)
-      else do
-        -- Conditionals in a loop must be handled differently so we can
-        -- handle a break and continue.  Those statements "kill" the following
-        -- statements, so they are not executed.  So we translate a
-        -- code following a conditional in a loop into a separate proc to
-        -- be called at the end of each branch that does not contain a
-        -- break or continue (which we call "terminal").
-        setVars afterVars
-        stmts' <- unbranchStmts stmts
-        -- XXX replacing this with the following assignment breaks proc_beer
-        -- finalVars <- if thnTerm || elsTerm 
-        --              then return afterVars -- XXX Why?
-        --              else gets brVars
-        finalVars <- gets brVars
-        logUnbranch $ "Loop body:\n" ++ showBody 4 stmts
-        logUnbranch $ "Loop body inputs = " ++ show afterVars
-        logUnbranch $ "Loop body outputs = " ++ show finalVars
-        contName <- newProcName
-        let exitVs = Map.intersection thnVars elsVars
-        cont <- factorFreshProc contName exitVs finalVars Nothing stmts'
-        -- XXX do we need to generate moves for input/output vars not
-        -- reassigned by stmts'?
-        logUnbranch $ "Generated continuation " ++ showStmt 4 (content cont)
-        switch <- factorFreshProc switchName beforeVars finalVars {- afterVars -} pos
-                  [maybePlace 
-                   (Cond tstStmts' tstVar
-                    (if thnTerm then thn' else thn' ++ [cont]) 
-                    (if elsTerm then els' else els' ++ [cont])) pos]
-        logUnbranch $ "Generated loop switch " ++ showStmt 4 (content switch)
-        return [switch]
--- Determining the set of variables (certain to be) defined after a
--- loop is a bit tricky, because we transform a loop together with the
--- following statements.  The variables available at the start of the
--- code following the loop is the the intersection of the sets of
--- variables defined after 0, 1, 2, etc iterations, which is the 
--- intersection of the sets of variables defined at each (usually 
--- conditional) loop break.
+    setVars afterVars
+    stmts' <- unbranchStmts stmts
+    contName <- newProcName
+    cont <- factorFreshProc contName afterVars Nothing stmts'
+    let thn'' = if thnTerm then thn' else thn' ++ [cont]
+    let els'' = if elsTerm then els' else els' ++ [cont]
+    return [maybePlace
+            (Cond tstStmts' tstVar
+             (if thnTerm then thn' else thn' ++ [cont]) 
+             (if elsTerm then els' else els' ++ [cont])) pos]
 unbranchStmt (Loop body) pos stmts = do
+    prevState <- startLoop
     logUnbranch $ "Handling loop:" ++ showBody 4 body
     beforeVars <- gets brVars
     logUnbranch $ "Vars before loop: " ++ show beforeVars
-    let afterVars = fromMaybe Map.empty $ snd $ loopExitVars beforeVars body
-    logUnbranch $ "Vars after loop: " ++ show afterVars
-    setVars afterVars
-    stmts' <- unbranchStmts stmts
-    finalVars <- gets brVars
-    logUnbranch $ "Vars after body: " ++ show finalVars
-    breakName <- newProcName
-    brk <- factorFreshProc breakName afterVars finalVars Nothing stmts'
-    logUnbranch $ "Generated break " ++ showStmt 4 (content brk)
     loopName <- newProcName
-    next <- newProcCall loopName beforeVars afterVars pos
-    setLoopInfo next brk
-    setVars beforeVars
-    body' <- unbranchStmts $ body ++ [next]
-    _ <- factorFreshProc loopName beforeVars afterVars pos body'
+    body' <- unbranchStmts $ body ++ [Unplaced Next]
+    exitVars <- gets (fromMaybe Map.empty . loopExitVars . brLoopInfo)
+    setVars exitVars
+    stmts' <- unbranchStmts stmts
+    next <- newProcCall loopName beforeVars pos
+    breakName <- newProcName
+    brk <- factorFreshProc breakName exitVars Nothing stmts'
+    body'' <- undefined -- XXX Must re-process body' replacing Break and Next
+    factorFreshProc loopName beforeVars pos body''
+    logUnbranch $ "Generated break " ++ showStmt 4 (content brk)
     logUnbranch $ "Generated loop " ++ showStmt 4 (content next)
-    setNoLoop
-    setVars finalVars
     logUnbranch $ "Finished handling loop"
+    endLoop prevState
     return [next]
 unbranchStmt (For _ _) _ _ =
     shouldnt "flattening should have removed For statements"
 unbranchStmt (Nop) _ stmts =
     unbranchStmts stmts         -- might as well filter out Nops
 unbranchStmt (Break) pos _ = do
-    inLoop <- gets ((/= NoLoop) . brLoopInfo)
-    if inLoop 
-      then do
-        brk <- gets (Unbranch.loopBreak . brLoopInfo)
-        setTerminated True
-        return [Unplaced Nop]
-      else do
-        lift $ message Error "Break outside a loop" pos
-        return []
+    setTerminated "Break"
+    recordBreakVars
+    return [maybePlace Break pos]
 unbranchStmt (Next) pos _ = do
-    inLoop <- gets ((/= NoLoop) . brLoopInfo)
-    if inLoop 
-      then do
-        next <- gets (loopNext . brLoopInfo)
-        setTerminated True
-        return [next]
-      else do
-        lift $ message Error "Next outside a loop" pos
-        return []
+    setTerminated "Next"
+    return [maybePlace Next pos]
 
 
 unbranchBranch ::  [Placed Stmt] -> Unbrancher ([Placed Stmt],VarDict,Bool)
@@ -303,35 +321,34 @@ unbranchBranch branch = do
     logUnbranch $
       "Then/else branch is" ++ (if branchTerm then "" else " NOT")
           ++ " terminal"
-    setTerminated False
     return (branch', branchVars,branchTerm)
 
 
 varsAfterITE :: VarDict -> Bool -> VarDict -> Bool -> VarDict
-varsAfterITE thnVars True elsVars True   = Map.intersection thnVars elsVars
+varsAfterITE thnVars True elsVars True   = Map.empty
 varsAfterITE thnVars True elsVars False  = thnVars
 varsAfterITE thnVars False elsVars True  = elsVars
 varsAfterITE thnVars False elsVars False = Map.intersection thnVars elsVars
 
 
--- |The set of names of the input parameters
-inputParamNames :: [Param] -> VarDict
-inputParamNames params =
+-- |A symbol table containing all input parameters
+inputParams :: [Param] -> VarDict
+inputParams params =
     List.foldr 
     (\(Param v ty dir _) vdict -> 
          if flowsIn dir then Map.insert v ty vdict else vdict)
     Map.empty params    
 
 
--- |The set of variables defined by the list of expressions.
+-- |Add all output arguments of a param list to the symbol table
 defArgs :: [Placed Exp] -> Unbrancher ()
 defArgs = mapM_ (defArg . content)
 
 
--- |The set of variables defined by the expression.  Since the
---  expression is already flattened, it will only be a constant, in
---  which case it doesn't define any variables, or a variable, in
---  which case it might.
+-- |Add the output variables defined by the expression to the symbol
+--  table. Since the expression is already flattened, it will only be a
+--  constant, in which case it doesn't define any variables, or a variable,
+--  in which case it might.
 defArg :: Exp -> Unbrancher ()
 defArg = ifIsVarDef defVar (return ())
 
@@ -353,69 +370,71 @@ outputVars =
     List.foldr ((ifIsVarDef Map.insert id)  . content)
 
 
--- |Generate a fresh proc 
-factorFreshProc :: ProcName -> (VarDict) -> (VarDict) ->
-                   OptPos -> [Placed Stmt] -> Unbrancher (Placed Stmt)
-factorFreshProc pname inVars outVars pos body = do
-    proto <- newProcProto pname inVars outVars
+-- |Generate a fresh proc with all the vars in the supplied dictionary
+--  as inputs, and all the output params of the proc we're unbranching as
+--  outputs.  Then return a call to this proc with the same inputs and outputs.
+factorFreshProc :: ProcName -> (VarDict) -> OptPos -> [Placed Stmt]
+                -> Unbrancher (Placed Stmt)
+factorFreshProc pname inVars pos body = do
+    proto <- newProcProto pname inVars
     genProc proto body
-    newProcCall pname inVars outVars pos
+    newProcCall pname inVars pos
 
 
 varExp :: FlowDirection -> VarName -> TypeSpec -> Placed Exp
 varExp flow var ty = Unplaced $ Typed (Var var flow Ordinary) ty False
 
 
-newProcCall :: ProcName -> VarDict -> VarDict -> OptPos -> 
-               Unbrancher (Placed Stmt)
-newProcCall name inVars outVars pos = do
+newProcCall :: ProcName -> VarDict -> OptPos -> Unbrancher (Placed Stmt)
+newProcCall name inVars pos = do
     let inArgs  = List.map (uncurry $ varExp ParamIn) $ Map.toList inVars
-    let outArgs = List.map (uncurry $ varExp ParamOut) $ Map.toList outVars
+    outArgs <- gets brOutArgs
     currMod <- lift getModuleSpec
     return $ maybePlace (ProcCall currMod name (Just 0) (inArgs ++ outArgs)) pos
 
 
-newProcProto :: ProcName -> VarDict -> VarDict -> Unbrancher ProcProto
-newProcProto name inVars outVars = do
+newProcProto :: ProcName -> VarDict -> Unbrancher ProcProto
+newProcProto name inVars = do
     let inParams  = [Param v ty ParamIn Ordinary
                     | (v,ty) <- Map.toList inVars]
-    let outParams = [Param v ty ParamOut Ordinary
-                    | (v,ty) <- Map.toList outVars]
+    outParams <- gets brOutParams
     return $ ProcProto name (inParams ++ outParams) []
 
--- Given the specified environment and a statement sequence, returns the
--- environment following the statements and the loop exit environment.
--- The loop exit environment is Just the intersection of the environments
--- at all the breaks in the scope of the loop, or Nothing if there are no
--- such breaks.
-loopExitVars :: VarDict -> [Placed Stmt] -> (VarDict, Maybe VarDict)
-loopExitVars vars pstmts =
-  List.foldl stmtExitVars (vars,Nothing) $ List.map content pstmts
 
 
-stmtExitVars :: (VarDict, Maybe VarDict) -> Stmt -> (VarDict, Maybe VarDict)
-stmtExitVars  (vars,exits) (ProcCall _ _ _ args) =
-    (outputVars vars args, exits)
-stmtExitVars (vars,exits) (ForeignCall _ _ _ args) =
-    (outputVars vars args, exits)
-stmtExitVars (vars,_) (Cond tstStmts _ thn els) =
-    let (tstVars,tstExit) = loopExitVars vars tstStmts
-        (thnVars,thnExit) = loopExitVars tstVars thn
-        (elsVars,elsExit) = loopExitVars tstVars els
-    in  (Map.intersection thnVars elsVars, intersectExit thnExit elsExit)
-stmtExitVars (vars,exits) (Loop body) =
-    let (bodyVars,bodyExit) = loopExitVars vars body
-    in  case bodyExit of 
-      Nothing -> (Map.empty, exits)
-      Just exits' -> (exits', exits)
-stmtExitVars (vars,exits)  (Nop) = (vars,exits)
-stmtExitVars _ (For _ _) =
-    shouldnt "flattening should have removed For statements"
-stmtExitVars (vars,exits)  (Break) = 
-  (Map.empty, intersectExit (Just vars) exits)
-stmtExitVars (vars,exits) (Next) = (Map.empty, exits)
-
-
-intersectExit (Just v1) (Just v2) = Just $ Map.intersection v1 v2
-intersectExit Nothing x = x
-intersectExit x Nothing = x
+-- -- Given the specified environment and a statement sequence, returns the
+-- -- environment following the statements and the loop exit environment.
+-- -- The loop exit environment is Just the intersection of the environments
+-- -- at all the breaks in the scope of the loop, or Nothing if there are no
+-- -- such breaks.
+-- loopExitVars :: VarDict -> [Placed Stmt] -> (VarDict, Maybe VarDict)
+-- loopExitVars vars pstmts =
+--   List.foldl stmtExitVars (vars,Nothing) $ List.map content pstmts
+-- 
+-- 
+-- stmtExitVars :: (VarDict, Maybe VarDict) -> Stmt -> (VarDict, Maybe VarDict)
+-- stmtExitVars  (vars,exits) (ProcCall _ _ _ args) =
+--     (outputVars vars args, exits)
+-- stmtExitVars (vars,exits) (ForeignCall _ _ _ args) =
+--     (outputVars vars args, exits)
+-- stmtExitVars (vars,_) (Cond tstStmts _ thn els) =
+--     let (tstVars,tstExit) = loopExitVars vars tstStmts
+--         (thnVars,thnExit) = loopExitVars tstVars thn
+--         (elsVars,elsExit) = loopExitVars tstVars els
+--     in  (Map.intersection thnVars elsVars, intersectExit thnExit elsExit)
+-- stmtExitVars (vars,exits) (Loop body) =
+--     let (bodyVars,bodyExit) = loopExitVars vars body
+--     in  case bodyExit of 
+--       Nothing -> (Map.empty, exits)
+--       Just exits' -> (exits', exits)
+-- stmtExitVars (vars,exits)  (Nop) = (vars,exits)
+-- stmtExitVars _ (For _ _) =
+--     shouldnt "flattening should have removed For statements"
+-- stmtExitVars (vars,exits)  (Break) = 
+--   (Map.empty, intersectExit (Just vars) exits)
+-- stmtExitVars (vars,exits) (Next) = (Map.empty, exits)
+-- 
+-- 
+-- intersectExit (Just v1) (Just v2) = Just $ Map.intersection v1 v2
+-- intersectExit Nothing x = x
+-- intersectExit x Nothing = x
