@@ -443,6 +443,6 @@ integerOfBool True  = 1
 --                                  Logging
 ----------------------------------------------------------------
 
--- |Log a message, if we are logging unbrancher activity.
+-- |Log a message, if we are logging body building activity.
 logBuild :: String -> BodyBuilder ()
 logBuild s = lift $ logMsg BodyBuilder s

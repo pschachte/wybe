@@ -209,6 +209,6 @@ compileParam startVars endVars param@(Param name ty flow ftype) =
        ty pflow ftype (ParamInfo False)
 
 
--- |Log a message, if we are logging unbrancher activity.
+-- |Log a message, if we are logging clause generation.
 logClause :: String -> ClauseComp ()
 logClause s = lift $ logMsg Clause s

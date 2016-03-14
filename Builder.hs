@@ -568,6 +568,6 @@ moduleFilePath extension dir spec = do
     addExtension (joinPath $ (splitDirectories dir) ++ spec) extension
 
 
--- |Log a message, if we are logging unbrancher activity.
+-- |Log a message, if we are logging builder activity (file-level compilation).
 logBuild :: String -> Compiler ()
 logBuild s = logMsg Builder s

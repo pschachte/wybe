@@ -396,6 +396,6 @@ flattenParam (Param name typ dir flowType) =
         (if isOut then [Param name typ ParamOut flowType'] else [])
     
 
--- |Log a message, if we are logging unbrancher activity.
+-- |Log a message, if we are logging flattening activity.
 logFlatten :: String -> Flattener ()
 logFlatten s = lift $ logMsg Flatten s

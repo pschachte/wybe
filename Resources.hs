@@ -175,6 +175,6 @@ resourceArgs pos rflow = do
          simpleSpecs
 
 
--- |Log a message, if we are logging unbrancher activity.
+-- |Log a message, if we are logging resource transformation activity.
 logResources :: String -> Compiler ()
 logResources s = logMsg Resources s

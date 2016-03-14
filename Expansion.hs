@@ -290,6 +290,6 @@ addInputAssign' _ _ _ FlowOut _ = do
 --     in  Map.size m == 1 && (snd . Map.findMin) m == 1
 
 
--- |Log a message, if we are logging unbrancher activity.
+-- |Log a message, if we are logging inlining and code expansion activity.
 logExpansion :: String -> Expander ()
 logExpansion s = lift $ lift $ logMsg Expansion s

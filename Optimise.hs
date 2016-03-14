@@ -179,6 +179,6 @@ localCallees modspec (PrimCall pspec _) = [pspec]
 localCallees _ _ = []
 
 
--- |Log a message, if we are logging unbrancher activity.
+-- |Log a message, if we are logging optimisation activity.
 logOptimise :: String -> Compiler ()
 logOptimise s = logMsg Optimise s

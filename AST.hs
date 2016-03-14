@@ -2201,7 +2201,7 @@ stopOnError incident = do
         liftIO exitFailure
 
 
--- |Log a message, if we are logging unbrancher activity.
+-- |Log a message, if we are logging AST manipulation.
 logAST :: String -> Compiler ()
 logAST s = logMsg AST s
 

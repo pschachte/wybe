@@ -21,7 +21,6 @@ import Data.Maybe
 import Data.Set as Set
 import Flatten
 import Options (optUseStd)
-import Unbranch
 import Config (wordSize,wordSizeBytes)
 
 

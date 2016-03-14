@@ -13,31 +13,29 @@ AFTER EVERYTHING:
 
 *main* > public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    func_factorial.gen$1<0>(5:wybe.int, ?tmp$2#0:wybe.int, ?tmp$3#0:wybe.int, ?tmp$4#0:wybe.bool) @func_factorial:2:8
-    foreign c print_int(~tmp$3#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @wybe:104:38
-    foreign c putchar('\n':wybe.char, ~tmp$7#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:102:28
+    func_factorial.factorial<0>(5:wybe.int, ?tmp$0#0:wybe.int) @func_factorial:4:9
+    foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$3#0:wybe.phantom) @wybe:104:38
+    foreign c putchar('\n':wybe.char, ~tmp$3#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:102:28
 
 
-factorial > public (2 calls) (inline)
+factorial > public (2 calls)
 0: factorial(n#0:wybe.int, ?$#0:wybe.int):
-    func_factorial.gen$1<0>(~n#0:wybe.int, ?n#1:wybe.int, ?tmp$0#0:wybe.int, ?tmp$1#0:wybe.bool) @func_factorial:2:8
-    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)
-
-
-gen$1 > (1 calls)
-0: gen$1(n#0:wybe.int, [?n#0:wybe.int], ?tmp$0#0:wybe.int, ?tmp$1#0:wybe.bool):
     foreign llvm icmp sle(n#0:wybe.int, 0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:16:40
-    foreign llvm move(tmp$7#0:wybe.bool, ?tmp$1#0:wybe.bool)
     case ~tmp$7#0:wybe.bool of
     0:
         foreign llvm sub(n#0:wybe.int, 1:wybe.int, ?tmp$10#0:wybe.int) @wybe:7:38
-        func_factorial.gen$1<0>(~tmp$10#0:wybe.int, ?tmp$12#0:wybe.int, ?tmp$13#0:wybe.int, ?tmp$14#0:wybe.bool) @func_factorial:2:8
-        foreign llvm mul(n#0:wybe.int, ~tmp$13#0:wybe.int, ?tmp$17#0:wybe.int) @wybe:12:38
-        foreign llvm move(~tmp$17#0:wybe.int, ?tmp$0#0:wybe.int)
+        func_factorial.factorial<0>(~tmp$10#0:wybe.int, ?tmp$3#0:wybe.int) @func_factorial:2:34
+        foreign llvm mul(~n#0:wybe.int, ~tmp$3#0:wybe.int, ?tmp$13#0:wybe.int) @wybe:12:38
+        foreign llvm move(~tmp$13#0:wybe.int, ?$#0:wybe.int)
 
     1:
-        foreign llvm move(1:wybe.int, ?tmp$0#0:wybe.int)
+        foreign llvm move(1:wybe.int, ?$#0:wybe.int)
 
+
+
+gen$2 > (2 calls) (inline)
+0: gen$2([n#0:wybe.int], tmp$0#0:wybe.int, [tmp$1#0:wybe.bool], ?$#0:wybe.int):
+    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)
 func_factorial
 ======================================================================
 AFTER LLVM IR:
@@ -52,23 +50,13 @@ declare i8* @wybe_malloc(i32)
 
 define i32 @func_factorial.main() {
 entry:
-  %0 = tail call { i64, i1 } @"func_factorial.gen$1<0>"(i64 5)
-  %1 = extractvalue { i64, i1 } %0, 0
-  %2 = extractvalue { i64, i1 } %0, 1
-  tail call void @print_int(i64 %1)
+  %"tmp$0#0" = tail call i64 @"func_factorial.factorial<0>"(i64 5)
+  tail call void @print_int(i64 %"tmp$0#0")
   tail call void @putchar(i8 10)
   ret void
 }
 
 define i64 @"func_factorial.factorial<0>"(i64 %"n#0") {
-entry:
-  %0 = tail call { i64, i1 } @"func_factorial.gen$1<0>"(i64 %"n#0")
-  %1 = extractvalue { i64, i1 } %0, 0
-  %2 = extractvalue { i64, i1 } %0, 1
-  ret i64 %1
-}
-
-define { i64, i1 } @"func_factorial.gen$1<0>"(i64 %"n#0") {
 entry:
   %"tmp$7#0" = icmp sle i64 %"n#0", 0
   br i1 %"tmp$7#0", label %if.then, label %if.else
@@ -78,10 +66,13 @@ if.then:                                          ; preds = %entry
 
 if.else:                                          ; preds = %entry
   %"tmp$10#0" = sub i64 %"n#0", 1
-  %0 = tail call { i64, i1 } @"func_factorial.gen$1<0>"(i64 %"tmp$10#0")
-  %1 = extractvalue { i64, i1 } %0, 0
-  %2 = extractvalue { i64, i1 } %0, 1
-  %"tmp$17#0" = mul i64 %"n#0", %1
-  ret i64 %"tmp$17#0"
+  %"tmp$3#0" = tail call i64 @"func_factorial.factorial<0>"(i64 %"tmp$10#0")
+  %"tmp$13#0" = mul i64 %"n#0", %"tmp$3#0"
+  ret i64 %"tmp$13#0"
+}
+
+define i64 @"func_factorial.gen$2<0>"(i64 %"tmp$0#0") {
+entry:
+  ret i64 %"tmp$0#0"
 }
 
