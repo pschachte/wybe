@@ -1035,7 +1035,8 @@ lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
 lookupTypeRepresentation Unspecified = return Nothing
 lookupTypeRepresentation (TypeSpec [] _ _) = return Nothing    
 lookupTypeRepresentation (TypeSpec modSpec name _) = do
-    logMsg Blocks $ "Looking for " ++ name ++ " in mod: " ++ showModSpec modSpec
+    -- logMsg Blocks $ "Looking for " ++ name ++ " in mod: " ++
+    --     showModSpec modSpec
     reenterModule modSpec
     maybeImpln <- getModuleImplementation
     modInt <- getModuleInterface

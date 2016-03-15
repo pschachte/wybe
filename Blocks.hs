@@ -89,6 +89,7 @@ blockTransformModule thisMod =
        --------------------------------------------------
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
+       -- logWrapWith '~' $ showPretty llmod
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
        -- logBlocks $ showPretty llmod
        finishModule
@@ -320,7 +321,7 @@ buildOutputOp params = do
     let outParams = List.filter isOutputParam params
     -- outputsMaybe <- mapM (getVarMaybe . show . primParamName) outParams
     -- let outputs = catMaybes outputsMaybe
-    logCodegen $ "OutParms: " ++ show outParams
+    logCodegen $ "OutParams: " ++ show outParams
     outputs <- mapM (getVar . show . primParamName) outParams
     logCodegen $ "Built outputs from symbol table: " ++ show outputs
 
@@ -398,15 +399,15 @@ codegenForkBody var (b1:b2:[]) params =
        -- if.then
        setBlock ifthen       
        retop <- codegenBody b2
-       case retop of
+       case blockReturn retop of
            Nothing -> buildOutputOp params >>= ret
-           _ -> ret retop
+           bret -> ret bret
        -- if.else
        setBlock ifelse
        retop <- codegenBody b1
-       case retop of
+       case blockReturn retop of
            Nothing -> buildOutputOp params >>= ret
-           _ -> ret retop
+           bret -> ret bret
        return ()
 
        -- -- if.exit
@@ -415,6 +416,11 @@ codegenForkBody var (b1:b2:[]) params =
 codegenForkBody _ _ _ = error
   $ "Unrecognized control flow. Too many/few blocks."
 
+-- | A filter transformation to ensure that a Just Void operand is
+-- treated as a Nothing instead of an existing value. 
+blockReturn :: Maybe Operand -> Maybe Operand
+blockReturn op@(Just (LocalReference VoidType _)) = Nothing
+blockReturn op = op
 
 -- | Translate a Primitive statement (in clausal form) to a LLVM instruction.
 -- Foreign calls are resolved through numerous instruction maps which map
@@ -908,9 +914,7 @@ typed' ty = do
     repr <- lookupTypeRepresentation ty
     case repr of
         Just typeStr -> return $ typeStrToType typeStr
-        -- Nothing -> error $ "No type representaition: " ++ (show ty)
         Nothing -> do
-            logBlocks $ "xxx No type representation: " ++ show ty
             if typeName ty == "bool"
                 then return $ int_c (fromIntegral wordSize)
                 else return $ ptr_t $ int_c (fromIntegral wordSize)
@@ -977,7 +981,7 @@ declareExtern (PrimForeign _ name _ args) = do
     fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
     retty <- primReturnType args
     let ex = external retty name fnargs
-    logBlocks $ "## Declared extern: " ++ showPretty ex
+    -- logBlocks $ "## Declared extern: " ++ showPretty ex
     return ex
 
 declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
@@ -1015,13 +1019,6 @@ newMainModule depends = do
     let externsForMain = mainExterns depends
     let newDefs = externsForMain ++ [mainDef]
     return $ modWithDefinitions "tmpMain" newDefs
-
--- -- | Create the 'main' function definition which calls other modules'
--- -- main(s).
--- createMainFn :: [ModSpec] -> LLVMAST.Definition
--- createMainFn mods = globalDefine int_t "main" [] bls
---   where
---     bls = createBlocks (execCodegen "" [] $ mainCodegen mods)
 
 
 -- | Run the Codegen monad collecting the instructions needed to call
