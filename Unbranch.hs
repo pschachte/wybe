@@ -74,7 +74,7 @@ unbranchBody :: [Param] -> [Placed Stmt] -> Compiler ([Placed Stmt],[Item])
 unbranchBody params stmts = do
     let unbrancher = initUnbrancherState params
     let outparams =  brOutParams unbrancher
-    let outvars = brOutParams unbrancher
+    let outvars = brOutArgs unbrancher
     logMsg Unbranch $ "** Unbranching with output params:" ++ show outparams
     logMsg Unbranch $ "** Unbranching with output args:" ++ show outvars
     (stmts',st) <- runStateT (unbranchStmts stmts) unbrancher
@@ -194,10 +194,12 @@ setBreakNext brk nxt = do
 recordBreakVars :: Unbrancher ()
 recordBreakVars = do
     vars <- gets brVars
+    logUnbranch $ "Recording loop exit vars " ++ show vars
     eVars <- gets (loopExitVars . brLoopInfo)
     let eVars'' = case eVars of
             Nothing     -> Just vars
             Just eVars' -> Just $ Map.intersection eVars' vars
+    logUnbranch $ "New loop exit vars " ++ show eVars''
     modify (\s -> s { brLoopInfo = (brLoopInfo s) { loopExitVars = eVars'' }})
 
 
@@ -354,19 +356,23 @@ unbranchStmt (Loop body) pos stmts = do
     resetTerminated False
     setDryRun dryrun
     exitVars <- gets (fromMaybe Map.empty . loopExitVars . brLoopInfo)
+    logUnbranch $ "loop exit vars from dryrun: " ++ show exitVars
     setVars exitVars
     stmts' <- unbranchStmts stmts
+    logUnbranch $ "Next inputs: " ++ show beforeVars
     next <- newProcCall loopName beforeVars pos
+    logUnbranch $ "Generated next " ++ showStmt 4 (content next)
     if dryrun
         then return ()
         else do
             breakName <- newProcName
+            logUnbranch $ "Break inputs: " ++ show exitVars
             brk <- factorFreshProc breakName exitVars Nothing stmts'
+            logUnbranch $ "Generated break " ++ showStmt 4 (content brk)
             setBreakNext brk next
+            setVars beforeVars
             body' <- unbranchStmts $ body ++ [Unplaced Next]
             factorFreshProc loopName beforeVars pos body'
-            logUnbranch $ "Generated break " ++ showStmt 4 (content brk)
-            logUnbranch $ "Generated loop " ++ showStmt 4 (content next)
             logUnbranch $ "Finished handling loop"
     endLoop prevState
     return [next]
