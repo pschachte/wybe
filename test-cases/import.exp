@@ -148,7 +148,9 @@ entry:
   %"tmp$0#0" = tail call i64 @"import.distance<0>"(i64* %5, i64* %8)
   tail call void @print_int(i64 %"tmp$0#0")
   tail call void @putchar(i8 10)
-  ret void
+  %9 = alloca i32
+  store i32 0, i32* %9
+  ret i32 0
 }
 
 define i64 @"import.distance<0>"(i64* %"p1#0", i64* %"p2#0") {

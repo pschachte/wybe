@@ -53,7 +53,9 @@ entry:
   %"tmp$0#0" = tail call i64 @"func_factorial.factorial<0>"(i64 5)
   tail call void @print_int(i64 %"tmp$0#0")
   tail call void @putchar(i8 10)
-  ret void
+  %0 = alloca i32
+  store i32 0, i32* %0
+  ret i32 0
 }
 
 define i64 @"func_factorial.factorial<0>"(i64 %"n#0") {

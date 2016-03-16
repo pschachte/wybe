@@ -34,7 +34,9 @@ declare i8* @wybe_malloc(i32)
 define i32 @func_let.main() {
 entry:
   tail call void @print_int(i64 40)
-  ret void
+  %0 = alloca i32
+  store i32 0, i32* %0
+  ret i32 0
 }
 
 define i64 @"func_let.quad<0>"(i64 %"x#0") {

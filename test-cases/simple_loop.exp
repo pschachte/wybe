@@ -52,7 +52,9 @@ declare i8* @wybe_malloc(i32)
 define i32 @simple_loop.main() {
 entry:
   tail call void @"simple_loop.gen$1<0>"()
-  ret void
+  %0 = alloca i32
+  store i32 0, i32* %0
+  ret i32 0
 }
 
 define void @"simple_loop.gen$1<0>"() {

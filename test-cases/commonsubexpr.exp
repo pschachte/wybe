@@ -45,7 +45,9 @@ entry:
   tail call void @putchar(i8 10)
   tail call void @print_int(i64 242)
   tail call void @putchar(i8 10)
-  ret void
+  %0 = alloca i32
+  store i32 0, i32* %0
+  ret i32 0
 }
 
 define void @"commonsubexpr.common_subexpr<0>"(i64 %"x#0") {

@@ -11,3 +11,6 @@ public proc yorn(prompt:string, ?result:bool) use !io
 
 func is_yes(ch) = ch='y' or ch='Y'
 func is_yes_or_no(ch) = is_yes(ch) or ch='n' or ch='N'
+
+?r = yorn("What's your input?")
+print(r)

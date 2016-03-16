@@ -271,7 +271,7 @@ doCodegenBody proto body =
        codegenBody body   -- Codegen on body prims
 
        case bodyFork body of
-         NoFork -> case (primProtoName proto) == "" of
+         NoFork -> case (primProtoName proto) == "<0>" of
            -- Empty primitive prototype is the main function in LLVM
            True -> mainReturnCodegen
            False -> do retOp <- buildOutputOp params
