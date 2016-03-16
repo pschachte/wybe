@@ -100,15 +100,18 @@ compileBody stmts params =
           front <- mapM compileSimpleStmt $ init stmts
           initial <- get
           tstStmts' <- mapM compileSimpleStmt tstStmts
+          afterTest <- get
           tstVar' <- placedApplyM compileArg tstVar
           thn' <- mapM compileSimpleStmt thn
           afterThen <- get
-          put initial
-          case tstVar' of
-              ArgVar var ty FlowIn _ _ -> do
-                nextVar $ primVarName var
-                return ()
-              _ -> return ()
+          -- XXX This isn't right when tests can bind outputs only when
+          -- the test succeeds
+          put afterTest
+          -- case tstVar' of
+          --     ArgVar var ty FlowIn _ _ -> do
+          --       nextVar $ primVarName var
+          --       return ()
+          --     _ -> return ()
           els' <- mapM compileSimpleStmt els
           afterElse <- get
           let final = Map.intersectionWith max afterThen afterElse
