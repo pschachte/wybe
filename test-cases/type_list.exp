@@ -41,8 +41,8 @@ AFTER EVERYTHING:
 
 
 
-gen$2 > (2 calls) (inline)
-0: gen$2(tmp$0#0:type_list.intlist, [tmp$1#0:wybe.bool], [x#0:type_list.intlist], [y#0:type_list.intlist], ?$#0:type_list.intlist):
+gen$1 > (2 calls) (inline)
+0: gen$1(tmp$0#0:type_list.intlist, [tmp$1#0:wybe.bool], [x#0:type_list.intlist], [y#0:type_list.intlist], ?$#0:type_list.intlist):
     foreign llvm move(~tmp$0#0:type_list.intlist, ?$#0:type_list.intlist)
   submodules      : type_list.intlist
 --------------------------------------------------
@@ -149,7 +149,7 @@ if.else:                                          ; preds = %entry
   ret i64* %14
 }
 
-define i64* @"type_list.gen$2<0>"(i64* %"tmp$0#0") {
+define i64* @"type_list.gen$1<0>"(i64* %"tmp$0#0") {
 entry:
   ret i64* %"tmp$0#0"
 }

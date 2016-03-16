@@ -330,7 +330,6 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     let afterVars = varsAfterITE thnVars thnTerm elsVars elsTerm
     logUnbranch $ "Vars after conditional: " ++ show afterVars
     resetTerminated $ thnTerm && elsTerm
-    switchName <- newProcName
     setVars afterVars
     stmts' <- unbranchStmts stmts
     contName <- newProcName

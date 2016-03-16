@@ -33,8 +33,8 @@ factorial > public (1 calls)
 
 
 
-gen$2 > (2 calls) (inline)
-0: gen$2([n#0:wybe.int], tmp$0#0:wybe.int, [tmp$1#0:wybe.bool], ?$#0:wybe.int):
+gen$1 > (2 calls) (inline)
+0: gen$1([n#0:wybe.int], tmp$0#0:wybe.int, [tmp$1#0:wybe.bool], ?$#0:wybe.int):
     foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)
 
 
@@ -79,7 +79,7 @@ if.else:                                          ; preds = %entry
   ret i64 %"tmp$13#0"
 }
 
-define i64 @"numbers.gen$2<0>"(i64 %"tmp$0#0") {
+define i64 @"numbers.gen$1<0>"(i64 %"tmp$0#0") {
 entry:
   ret i64 %"tmp$0#0"
 }
