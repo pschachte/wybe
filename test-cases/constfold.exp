@@ -33,9 +33,9 @@ fortytwo > public (0 calls) (inline)
     foreign llvm move(42:wybe.int, ?$#0:wybe.int)
 
 
-gen$1 > (1 calls) (inline)
-0: gen$1(?tmp$0#0:wybe.int):
-    foreign llvm move(42:wybe.int, ?tmp$0#0:wybe.int)
+gen$1 > (2 calls) (inline)
+0: gen$1(tmp$0#0:wybe.int, [tmp$1#0:wybe.bool], ?$#0:wybe.int):
+    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)
 constfold
 ======================================================================
 AFTER LLVM IR:
@@ -64,8 +64,8 @@ entry:
   ret i64 42
 }
 
-define i64 @"constfold.gen$1<0>"() {
+define i64 @"constfold.gen$1<0>"(i64 %"tmp$0#0") {
 entry:
-  ret i64 42
+  ret i64 %"tmp$0#0"
 }
 

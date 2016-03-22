@@ -142,6 +142,6 @@ argNoteUse (ArgVar var _ FlowIn _ _) = do
 argNoteUse _ = return ()
 
 
--- |Log a message, if we are logging unbrancher activity.
+-- |Log a message, if we are logging last use tracking.
 logLastUse :: String -> NeededVars ()
 logLastUse s = lift $ logMsg LastUse s

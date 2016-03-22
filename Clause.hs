@@ -89,44 +89,54 @@ compileProc proc = do
 
 
 -- |Compile a proc body to LPVM form.  By the time we get here, the 
---  form of the body is very limited:  it is either a single Cond 
---  statement, or it is a list of ProcCalls and ForeignCalls.  
+--  form of the body is very limited:  it is a list of ProcCalls and
+--  ForeignCalls, possibly ending with a single Cond statement.
 --  Everything else has already been transformed away.
 compileBody :: [Placed Stmt] -> [Param] -> ClauseComp ProcBody
-compileBody [placed] params
-  | case content placed of
-      Cond _ _ _ _ -> True
-      _ -> False
- = do
-      let Cond tstStmts tstVar thn els = content placed
-      initial <- get
-      tstStmts' <- mapM compileSimpleStmt tstStmts
-      tstVar' <- placedApplyM compileArg tstVar
-      thn' <- mapM compileSimpleStmt thn
-      afterThen <- get
-      put initial
-      els' <- mapM compileSimpleStmt els
-      afterElse <- get
-      let final = Map.intersectionWith max afterThen afterElse
-      put final
-      let thn'' = thn' ++ reconcilingAssignments afterThen final params
-      let els'' = els' ++ reconcilingAssignments afterElse final params
-      case tstVar' of
-        ArgVar var ty FlowIn _ _ ->
-            return $ ProcBody tstStmts' $
-                   PrimFork var ty False [ProcBody els'' NoFork,
-                                          ProcBody thn'' NoFork]
-        ArgInt n _ ->
-            return $ ProcBody (if n/=0 then tstStmts'++thn'' else els'') NoFork
+compileBody [] params = return $ ProcBody [] NoFork
+compileBody stmts params =
+    case content $ last stmts of
+        Cond tstStmts tstVar thn els -> do
+          front <- mapM compileSimpleStmt $ init stmts
+          initial <- get
+          tstStmts' <- mapM compileSimpleStmt tstStmts
+          afterTest <- get
+          tstVar' <- placedApplyM compileArg tstVar
+          thn' <- mapM compileSimpleStmt thn
+          afterThen <- get
+          -- XXX This isn't right when tests can bind outputs only when
+          -- the test succeeds
+          put afterTest
+          -- case tstVar' of
+          --     ArgVar var ty FlowIn _ _ -> do
+          --       nextVar $ primVarName var
+          --       return ()
+          --     _ -> return ()
+          els' <- mapM compileSimpleStmt els
+          afterElse <- get
+          let final = Map.intersectionWith max afterThen afterElse
+          put final
+          let thn'' = thn' ++ reconcilingAssignments afterThen final params
+          let els'' = els' ++ reconcilingAssignments afterElse final params
+          case tstVar' of
+              ArgVar var ty FlowIn _ _ ->
+                return $ ProcBody (front++tstStmts') $
+                PrimFork var ty False [ProcBody els'' NoFork,
+                                       ProcBody thn'' NoFork]
+              ArgInt n _ ->
+                return $ ProcBody
+                (if n==0 then els'' else front++tstStmts'++thn'') NoFork
+              _ -> do
+                lift $ message Error 
+                    ("Condition is non-bool constant or output '" ++
+                     show tstVar' ++ "'") $
+                    betterPlace (place $ last stmts) tstVar
+                return $ ProcBody [] NoFork
         _ -> do
-            lift $ message Error 
-                   ("Condition is non-bool constant or output '" ++
-                    show tstVar' ++ "'") $
-                 betterPlace (place placed) tstVar
-            return $ ProcBody [] NoFork
-compileBody stmts _ = do
-    prims <- mapM compileSimpleStmt stmts
-    return $ ProcBody prims NoFork
+          prims <- mapM compileSimpleStmt stmts
+          return $ ProcBody prims NoFork
+
+
 
 compileSimpleStmt :: Placed Stmt -> ClauseComp (Placed Prim)
 compileSimpleStmt stmt = do
@@ -204,6 +214,6 @@ compileParam startVars endVars param@(Param name ty flow ftype) =
        ty pflow ftype (ParamInfo False)
 
 
--- |Log a message, if we are logging unbrancher activity.
+-- |Log a message, if we are logging clause generation.
 logClause :: String -> ClauseComp ()
 logClause s = lift $ logMsg Clause s

@@ -12,7 +12,8 @@
 module Config (sourceExtension, objectExtension, executableExtension,
                interfaceExtension, bitcodeExtension, sharedLibs,
                ldArgs, ldSystemArgs, wordSize, wordSizeBytes,
-               availableTagBits, tagMask, assemblyExtension)
+               availableTagBits, tagMask, assemblyExtension,
+               archiveExtension)
     where
 
 import Data.Word
@@ -35,13 +36,17 @@ executableExtension = ""
 interfaceExtension :: String
 interfaceExtension = "int"
 
--- |The file extension for bitcode files
+-- |The file extension for bitcode files.
 bitcodeExtension :: String
 bitcodeExtension = "bc"
 
-
+-- |The file extension for assembly files.
 assemblyExtension :: String
 assemblyExtension = "ll"
+
+-- |The file extension for object archive files.
+archiveExtension :: String
+archiveExtension = "a"
 
 -- |Determining word size of the machine in bits
 wordSize :: Int

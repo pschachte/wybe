@@ -51,6 +51,8 @@ blockTransformModule :: ModSpec -> Compiler ()
 blockTransformModule thisMod =
     do reenterModule thisMod
        logBlocks $ "*** Translating Module: " ++ showModSpec thisMod
+       modRec <- getModule id
+       logWrapWith '-' $ show modRec
        (names, procs) <- unzip <$>
                          getModuleImplementationField (Map.toList . modProcs)
        -- Collect all procedure prototypes in the module
@@ -87,6 +89,7 @@ blockTransformModule thisMod =
        --------------------------------------------------
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) procs'
+       -- logWrapWith '~' $ showPretty llmod
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
        -- logBlocks $ showPretty llmod
        finishModule
@@ -266,15 +269,15 @@ doCodegenBody proto body =
        setBlock entry
        mapM_ assignParam $ List.filter (not . isOutputParam) params
        codegenBody body   -- Codegen on body prims
-       builtOp <- buildOutputOp params
 
        case bodyFork body of
-         NoFork -> case (primProtoName proto) == "" of
+         NoFork -> case (primProtoName proto) == "<0>" of
            -- Empty primitive prototype is the main function in LLVM
            True -> mainReturnCodegen
-           False -> do ret builtOp
+           False -> do retOp <- buildOutputOp params
+                       ret retOp
                        return ()
-         (PrimFork var ty _ fbody) -> codegenForkBody var fbody builtOp
+         (PrimFork var ty _ fbody) -> codegenForkBody var fbody params
 
 
 -- | Generate code for returning integer exit code at the end main
@@ -318,6 +321,7 @@ buildOutputOp params = do
     let outParams = List.filter isOutputParam params
     -- outputsMaybe <- mapM (getVarMaybe . show . primParamName) outParams
     -- let outputs = catMaybes outputsMaybe
+    logCodegen $ "OutParams: " ++ show outParams
     outputs <- mapM (getVar . show . primParamName) outParams
     logCodegen $ "Built outputs from symbol table: " ++ show outputs
 
@@ -384,9 +388,8 @@ phantomPrim PrimNop = True
 -- | Code generation for a conditional branch. Currently a binary split
 -- is handled, which each branch returning the left value of their last
 -- instruction.
-codegenForkBody :: PrimVarName -> [ProcBody]
-                -> Maybe Operand -> Codegen ()
-codegenForkBody var (b1:b2:[]) outop =
+codegenForkBody :: PrimVarName -> [ProcBody] -> [PrimParam] -> Codegen ()
+codegenForkBody var (b1:b2:[]) params =
     do ifthen <- addBlock "if.then"
        ifelse <- addBlock "if.else"
        -- ifexit <- addBlock "if.exit"
@@ -394,17 +397,17 @@ codegenForkBody var (b1:b2:[]) outop =
        cbr testop ifthen ifelse
 
        -- if.then
-       setBlock ifthen
+       setBlock ifthen       
        retop <- codegenBody b2
-       case retop of
-           Nothing -> ret outop
-           _ -> ret retop
+       case blockReturn retop of
+           Nothing -> buildOutputOp params >>= ret
+           bret -> ret bret
        -- if.else
        setBlock ifelse
        retop <- codegenBody b1
-       case retop of
-           Nothing -> ret outop
-           _ -> ret retop
+       case blockReturn retop of
+           Nothing -> buildOutputOp params >>= ret
+           bret -> ret bret
        return ()
 
        -- -- if.exit
@@ -413,6 +416,11 @@ codegenForkBody var (b1:b2:[]) outop =
 codegenForkBody _ _ _ = error
   $ "Unrecognized control flow. Too many/few blocks."
 
+-- | A filter transformation to ensure that a Just Void operand is
+-- treated as a Nothing instead of an existing value. 
+blockReturn :: Maybe Operand -> Maybe Operand
+blockReturn op@(Just (LocalReference VoidType _)) = Nothing
+blockReturn op = op
 
 -- | Translate a Primitive statement (in clausal form) to a LLVM instruction.
 -- Foreign calls are resolved through numerous instruction maps which map
@@ -613,9 +621,10 @@ cgenLPVM pname flags args
           castOp <- case inOp of
               (ConstantOperand c) ->
                   if isPtr outTy
-                  then do
-                      return $ constInttoptr c outTy
-                      -- return $ cons $ C.Null outTy
+                  then return $ constInttoptr c outTy
+                      -- if isNullCons c
+                      --     then return $ cons $ C.Null outTy
+                      --     else return $ constInttoptr c outTy
                   else do
                       let consTy = constantType c
                       ptr <- doAlloca consTy
@@ -636,6 +645,10 @@ cgenLPVM pname flags args
     valTrust a = trustFromJust trustMsg $ argIntVal a
     outNm = pullName $ head outputs
     
+
+isNullCons :: C.Constant -> Bool
+isNullCons (C.Int _ val) = val == 0
+isNullCons _ = False
 
 
 isPtr :: LLVMAST.Type -> Bool
@@ -901,9 +914,7 @@ typed' ty = do
     repr <- lookupTypeRepresentation ty
     case repr of
         Just typeStr -> return $ typeStrToType typeStr
-        -- Nothing -> error $ "No type representaition: " ++ (show ty)
         Nothing -> do
-            -- logBlocks $ "xxx No type representation: " ++ show ty
             if typeName ty == "bool"
                 then return $ int_c (fromIntegral wordSize)
                 else return $ ptr_t $ int_c (fromIntegral wordSize)
@@ -970,7 +981,7 @@ declareExtern (PrimForeign _ name _ args) = do
     fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
     retty <- primReturnType args
     let ex = external retty name fnargs
-    logBlocks $ "## Declared extern: " ++ showPretty ex
+    -- logBlocks $ "## Declared extern: " ++ showPretty ex
     return ex
 
 declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
@@ -1008,13 +1019,6 @@ newMainModule depends = do
     let externsForMain = mainExterns depends
     let newDefs = externsForMain ++ [mainDef]
     return $ modWithDefinitions "tmpMain" newDefs
-
--- -- | Create the 'main' function definition which calls other modules'
--- -- main(s).
--- createMainFn :: [ModSpec] -> LLVMAST.Definition
--- createMainFn mods = globalDefine int_t "main" [] bls
---   where
---     bls = createBlocks (execCodegen "" [] $ mainCodegen mods)
 
 
 -- | Run the Codegen monad collecting the instructions needed to call
@@ -1131,12 +1135,9 @@ gcMutate ptr offset val = do
     let indices = [(cons $ C.Int 64 index)]
     let getel = LLVMAST.GetElementPtr False ptr indices []
     accessPtr <- instr opTypePtr getel
-    -- if val is a pointer then the ptrtoint instruction is needed
-    case val of
-        (LocalReference (PointerType ty _) _) -> do
-            ptrInt <- ptrtoint val ty
-            store accessPtr ptrInt
-        _ -> store accessPtr val
+    -- if val is a pointer then the ptrtoint instruction is needed    
+    storeOp <- makeStoreOp ptr val
+    store accessPtr storeOp
 
 -- | Get the LLVMAST.Type the given pointer type points to.
 pullFromPointer :: LLVMAST.Type -> LLVMAST.Type
@@ -1151,6 +1152,20 @@ getIndex (PointerType ty _) bytes =
     let ptrBits = toInteger $ getBits ty
     in quot (bytes * 8) ptrBits
 getIndex _ _ = shouldnt "Can't compute index from a non-pointer."
+
+
+makeStoreOp :: Operand -> Operand -> Codegen Operand
+makeStoreOp ptr v@(LocalReference (PointerType ty _) _) = ptrtoint v ty
+makeStoreOp ptr
+    v@(ConstantOperand (C.Null (PointerType (IntegerType bs) _))) =
+    return $ cons $ C.Int bs 0
+makeStoreOp ptr
+    v@(ConstantOperand (C.IntToPtr c pty)) =
+    return $ cons c
+makeStoreOp ptr v = return v  
+    
+    
+
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

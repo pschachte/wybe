@@ -6,7 +6,7 @@ VERSION=0.1
 # OPTS = -no-user-package-db -package-db .cabal-sandbox/*-packages.conf.d
 COPTS = -lgc -I/usr/local/include -L/usr/local/lib
 
-all:	test
+all:	wybemk
 
 %.pdf:	%.tex
 	rubber -m pdftex $<

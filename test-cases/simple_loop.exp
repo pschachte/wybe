@@ -12,86 +12,70 @@ AFTER EVERYTHING:
 
 *main* > public (0 calls) (inline)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c read_char(?tmp$2#0:wybe.char, ~wybe.io$io#0:wybe.phantom, ?tmp$3#0:wybe.phantom) @wybe:114:39
-    simple_loop.gen$3<0>(~tmp$2#0:wybe.char, ~tmp$3#0:wybe.phantom, ?c#0:wybe.char, ?wybe.io$io#1:wybe.phantom) @simple_loop:2:4
+    simple_loop.gen$1<0>(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @simple_loop:1:1
 
 
-gen$1 > (0 calls) (inline)
-0: gen$1(c#0:wybe.char, tmp$0#0:wybe.bool, wybe.io$io#0:wybe.phantom, [?c#0:wybe.char], [?tmp$0#0:wybe.bool], [?wybe.io$io#0:wybe.phantom]):
-
-
-gen$2 > (2 calls) (inline)
-0: gen$2(wybe.io$io#0:wybe.phantom, ?c#1:wybe.char, ?tmp$0#0:wybe.bool, ?wybe.io$io#2:wybe.phantom):
+gen$1 > (2 calls)
+0: gen$1(wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
     foreign c read_char(?c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:114:39
-    simple_loop.gen$3<0>(~c#0:wybe.char, ~wybe.io$io#1:wybe.phantom, ?c#1:wybe.char, ?wybe.io$io#2:wybe.phantom) @simple_loop:2:4
-
-
-gen$3 > (1 calls)
-0: gen$3(c#0:wybe.char, wybe.io$io#0:wybe.phantom, ?c#1:wybe.char, ?wybe.io$io#1:wybe.phantom):
-    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$3#0:wybe.bool) @wybe:69:42
-    case ~tmp$3#0:wybe.bool of
+    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$4#0:wybe.bool) @wybe:69:42
+    case ~tmp$4#0:wybe.bool of
     0:
-        foreign llvm move(~c#0:wybe.char, ?c#1:wybe.char)
-        foreign llvm move(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom)
+        foreign llvm move(~wybe.io$io#1:wybe.phantom, ?wybe.io$io#2:wybe.phantom)
 
     1:
-        foreign c putchar(~c#0:wybe.char, ~wybe.io$io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @wybe:112:39
-        foreign c read_char(?tmp$7#0:wybe.char, ~tmp$6#0:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:114:39
-        simple_loop.gen$3<0>(~tmp$7#0:wybe.char, ~tmp$8#0:wybe.phantom, ?c#1:wybe.char, ?wybe.io$io#1:wybe.phantom) @simple_loop:2:4
+        foreign c putchar(~c#0:wybe.char, ~wybe.io$io#1:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:112:39
+        simple_loop.gen$1<0>(~tmp$8#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom) @simple_loop:1:1
 
+
+
+gen$3 > (1 calls) (inline)
+0: gen$3([c#0:wybe.char], [tmp$0#0:wybe.bool], wybe.io$io#0:wybe.phantom, [?wybe.io$io#0:wybe.phantom]):
 
 
 gen$4 > (1 calls) (inline)
-0: gen$4(c#0:wybe.char, wybe.io$io#0:wybe.phantom, ?c#1:wybe.char, ?wybe.io$io#2:wybe.phantom):
+0: gen$4(c#0:wybe.char, [tmp$0#0:wybe.bool], wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
     foreign c putchar(~c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:112:39
-    foreign c read_char(?tmp$4#0:wybe.char, ~wybe.io$io#1:wybe.phantom, ?tmp$5#0:wybe.phantom) @wybe:114:39
-    simple_loop.gen$3<0>(~tmp$4#0:wybe.char, ~tmp$5#0:wybe.phantom, ?c#1:wybe.char, ?wybe.io$io#2:wybe.phantom) @simple_loop:2:4
+    simple_loop.gen$1<0>(~wybe.io$io#1:wybe.phantom, ?wybe.io$io#2:wybe.phantom) @simple_loop:1:1
 simple_loop
 ======================================================================
 AFTER LLVM IR:
 
 ; ModuleID = 'simple_loop'
 
-declare i8 @read_char()
-
 declare void @putchar(i8)
+
+declare i8 @read_char()
 
 declare i8* @wybe_malloc(i32)
 
 define i32 @simple_loop.main() {
 entry:
-  %"tmp$2#0" = tail call i8 @read_char()
-  %"c#0" = tail call i8 @"simple_loop.gen$3<0>"(i8 %"tmp$2#0")
-  ret void
+  tail call void @"simple_loop.gen$1<0>"()
+  %0 = alloca i32
+  store i32 0, i32* %0
+  ret i32 0
 }
 
-define { i8, i1 } @"simple_loop.gen$2<0>"() {
+define void @"simple_loop.gen$1<0>"() {
 entry:
   %"c#0" = tail call i8 @read_char()
-  %"c#1" = tail call i8 @"simple_loop.gen$3<0>"(i8 %"c#0")
-  ret i8 %"c#1"
-}
-
-define i8 @"simple_loop.gen$3<0>"(i8 %"c#0") {
-entry:
-  %"tmp$3#0" = icmp ne i8 %"c#0", 97
-  br i1 %"tmp$3#0", label %if.then, label %if.else
+  %"tmp$4#0" = icmp ne i8 %"c#0", 97
+  br i1 %"tmp$4#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
   tail call void @putchar(i8 %"c#0")
-  %"tmp$7#0" = tail call i8 @read_char()
-  %"c#1" = tail call i8 @"simple_loop.gen$3<0>"(i8 %"tmp$7#0")
-  ret i8 %"c#1"
+  tail call void @"simple_loop.gen$1<0>"()
+  ret void
 
 if.else:                                          ; preds = %entry
   ret void
 }
 
-define i8 @"simple_loop.gen$4<0>"(i8 %"c#0") {
+define void @"simple_loop.gen$4<0>"(i8 %"c#0") {
 entry:
   tail call void @putchar(i8 %"c#0")
-  %"tmp$4#0" = tail call i8 @read_char()
-  %"c#1" = tail call i8 @"simple_loop.gen$3<0>"(i8 %"tmp$4#0")
-  ret i8 %"c#1"
+  tail call void @"simple_loop.gen$1<0>"()
+  ret void
 }
 
