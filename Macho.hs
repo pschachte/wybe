@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-incomplete-patterns #-}
 {- |
 Data.Macho is a module for parsing a ByteString of a Mach-O file into a Macho record.
 Original: hackage.haskell.org/package/macho-0.22
@@ -348,7 +349,7 @@ getLoadCommand 0x8000001c mr lc fl mh = getRPathCommand mr lc
 getLoadCommand 0x0000001d mr lc fl mh = getLinkEditCommand mr lc LC_CODE_SIGNATURE
 getLoadCommand 0x0000001e mr lc fl mh = getLinkEditCommand mr lc LC_SEGMENT_SPLIT_INFO
 getLoadCommand x _ _ _ _ = return LC_NOP
-    
+
 data VM_PROT
     = VM_PROT_READ    -- ^ read permission
     | VM_PROT_WRITE   -- ^ write permission
@@ -1062,4 +1063,3 @@ getLinkEditCommand mr lc con = do
     dataoff             <- getWord32 mr
     datasize            <- getWord32 mr
     return $ con dataoff datasize
-
