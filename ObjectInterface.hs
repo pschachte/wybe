@@ -17,44 +17,37 @@ import           Data.Binary.Put
 import qualified Data.ByteString as B
 import           Data.ByteString.Builder
 import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString.Lazy.Char8 as C
 import           Data.Hex
 import           Data.Int
 import           Data.List as List
-import           Data.Macho
 import           Data.Maybe (isJust)
 import           Data.Monoid
 import           Data.Word
+import Data.Bits
 import           System.Process
+import           System.Directory          (createDirectoryIfMissing,
+                                            getTemporaryDirectory)
+import Control.Monad.Trans
+import Macho
 
-getMachoRecord :: FilePath -> IO Macho
-getMachoRecord ofile =
-  do bs <- B.readFile ofile
-     return $ parseMacho bs
-
-
-listSegments :: FilePath -> IO ()
-listSegments ofile = do
-  m <-getMachoRecord ofile
-  let names = segmentNames (m_commands m)
-  putStrLn (show names)
-
-segmentNames :: [LC_COMMAND] -> [String]
-segmentNames [] = [] 
-segmentNames ((LC_SEGMENT seg):cs) = (seg_segname seg) : segmentNames cs
-segmentNames ((LC_SEGMENT_64 seg):cs) = (seg_segname seg) : segmentNames cs
-segmentNames (_:cs) = segmentNames cs
 
 ----------------------------------------------------------------------------
 -- -- * Object file manipulation                                          --
 ----------------------------------------------------------------------------
 
--- | Insert string data from first file into the second object file, into
--- the segment '__LPVM', and section '__lpvm' using ld.
-insertLPVMData :: FilePath -> FilePath -> IO ()
-insertLPVMData datfile obj =
-    do let args = ["-r"] ++ ldSystemArgs
-                  ++ ["-sectcreate", "__LPVM", "__lpvm", datfile]
-                  ++ ["-o", obj]
+-- | Use system `ld' to create a __lpvm section and put the given
+-- bytestring `bs' into it.
+-- ld reads the bs from a new tmpFile.
+insertLPVMDataLd :: BL.ByteString -> FilePath -> IO ()
+insertLPVMDataLd bs obj =
+    do tempDir <- liftIO $ getTemporaryDirectory
+       liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
+       let lpvmFile = (tempDir ++ "wybetemp/" ++ "lpvmCache")
+       BL.writeFile lpvmFile bs
+       let args = ["-r"] ++ ldSystemArgs
+                  ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
+                  ++ ["-o", obj]                  
        createProcess (proc "ld" args)
        return ()
 
@@ -154,4 +147,53 @@ dataFromBitcode = do
   let datSize = (toInteger offset) - 20
   getLazyByteString (fromIntegral datSize)
   
-  
+
+-------------------------------------------------------------------------------
+-- Segment Parsing and Extraction                                            --
+-------------------------------------------------------------------------------
+
+machoLPVMSection :: FilePath -> IO ()
+machoLPVMSection ofile = do
+    bs <- B.readFile ofile
+    let (cmdsize, macho) = parseMacho bs
+    let lpvmSeg = findLPVMSegment (m_commands macho)
+    case lpvmSeg of
+        Nothing -> error "LPVM segment does not exist in the file."
+        Just seg -> do
+            let (off, size) = lpvmFileOffset seg
+            let bytes = readBytes off size (BL.fromStrict bs)
+            print $ C.unpack bytes
+
+                   
+findLPVMSegment :: [LC_COMMAND] -> Maybe MachoSegment
+findLPVMSegment [] = Nothing
+findLPVMSegment ((LC_SEGMENT seg):cs) =
+    case extractSection "__lpvm" seg of
+        Nothing -> findLPVMSegment cs
+        Just _ -> Just seg
+findLPVMSegment((LC_SEGMENT_64 seg):cs) =
+    case extractSection "__lpvm" seg of
+        Nothing -> findLPVMSegment cs
+        Just _ -> Just seg
+
+
+extractSection :: String -> MachoSegment -> Maybe MachoSection
+extractSection name seg =
+    let sections = seg_sections seg
+        filtered = List.filter ((== name) . sec_sectname) sections
+    in if null filtered then Nothing else Just $ head filtered
+
+
+lpvmFileOffset :: MachoSegment -> (Int64, Int64)
+lpvmFileOffset seg =
+    let foff = seg_fileoff seg
+        sections = seg_sections seg        
+    in case List.find ((== "__lpvm") . sec_sectname) sections of
+        Just sec -> let off = fromIntegral $ foff + (sec_addr sec)
+                        size = fromIntegral $ sec_size sec
+                    in (off, size)
+        Nothing -> error "LPVM Section not found."
+        
+
+readBytes :: Int64 -> Int64 -> BL.ByteString -> BL.ByteString
+readBytes from size bs = BL.take size $ BL.drop from bs
