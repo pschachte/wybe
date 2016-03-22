@@ -54,7 +54,8 @@ withModuleLLVM thisMod action = do
       (Nothing) -> error "No LLVM Module Implementation"
 
 -- | With the LLVM AST representation of a LPVM Module, create a
--- target object file.
+-- target object file, embedding the 'AST.Module' serialised bytestring
+-- into the '__lpvm' section of the Macho-O object file.
 emitObjectFile :: ModSpec -> FilePath -> Compiler ()
 emitObjectFile m f = do
     logEmit $ "Creating object file for *" ++ (showModSpec m) ++ "*" ++
@@ -177,7 +178,7 @@ makeObjFile file llmod =
             liftError $ withHostTargetMachine $ \tm ->
                 liftError $ writeObjectToFile tm (File file) m
 
--- | Drop an LLVMAST.Module (hasjell) intop a Mod.Module (C++)
+-- | Drop an LLVMAST.Module (haskell) intop a Mod.Module (C++)
 -- represenation and write is a bitcode file.
 makeBCFile :: FilePath -> LLVMAST.Module -> IO ()
 makeBCFile file llmod =
@@ -209,6 +210,8 @@ makeAssemblyFile file llmod =
                 liftError $ writeLLVMAssemblyToFile (File file) m
 
 
+-- | Create a Macho-O object file and embed a 'AST.Module' bytestring
+-- representation into the '__lpvm' section in it.
 makeWrappedObjFile :: FilePath -> LLVMAST.Module -> AST.Module -> IO ()
 makeWrappedObjFile file llmod origMod = do
     withContext $ \context -> do
@@ -216,8 +219,8 @@ makeWrappedObjFile file llmod origMod = do
             let modBS = encode origMod
             liftError $ withHostTargetMachine $ \tm ->
                 liftError $ writeObjectToFile tm (File file) m
-            insertLPVMDataLd modBS file            
-    
+            insertLPVMDataLd modBS file
+
 
 
 ------------------------------------------------------------------------------

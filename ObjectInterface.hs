@@ -37,8 +37,9 @@ import Macho
 ----------------------------------------------------------------------------
 
 -- | Use system `ld' to create a __lpvm section and put the given
--- bytestring `bs' into it.
--- ld reads the bs from a new tmpFile.
+-- 'BL.ByteString' into it.
+-- ld reads the bs from a new tmpFile which is created with the contents
+-- of the given 'BL.ByteString'.
 insertLPVMDataLd :: BL.ByteString -> FilePath -> IO ()
 insertLPVMDataLd bs obj =
     do tempDir <- liftIO $ getTemporaryDirectory
@@ -47,7 +48,7 @@ insertLPVMDataLd bs obj =
        BL.writeFile lpvmFile bs
        let args = ["-r"] ++ ldSystemArgs
                   ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
-                  ++ ["-o", obj]                  
+                  ++ ["-o", obj]
        createProcess (proc "ld" args)
        return ()
 
@@ -58,7 +59,7 @@ extractLPVMData :: FilePath -> IO String
 extractLPVMData obj =
     do let args = ["-s", "__LPVM", "__lpvm", obj]
        sout <- readProcess "otool" args []
-       return $ parseSegmentData sout       
+       return $ parseSegmentData sout
 
 -- | Parse the returned segment/section contents from it's HEX form to
 -- ASCII form.
@@ -68,7 +69,7 @@ extractLPVMData obj =
 parseSegmentData :: String -> String
 parseSegmentData str = concat hexLines
     where
-      tillHex = dropWhile (\c -> c /= '\t') -- Actual data after \t 
+      tillHex = dropWhile (\c -> c /= '\t') -- Actual data after \t
       mappedLines = List.map tillHex (lines str)
       filteredLines = List.filter (not . List.null) mappedLines
       hexLines = List.map (hex2char . tail) filteredLines
@@ -104,7 +105,7 @@ magic = 0x0B17C0DE
 -- Succeeding the header, the data bytestring and ultimately the bitcode
 -- bytestring is inserted.
 wrapBitcode :: BL.ByteString     -- ^ Bitcode
-            -> BL.ByteString     -- ^ Data Bytes to wrap along with bitcode        
+            -> BL.ByteString     -- ^ Data Bytes to wrap along with bitcode
             -> Put
 wrapBitcode bc datStr = do
   let bcsize = BL.length bc
@@ -132,9 +133,9 @@ bytePad orig = if remainder == 0
 extractModuleFromWrapper :: FilePath -> IO Module
 extractModuleFromWrapper bcfile =
   do bc <- BL.readFile bcfile
-     let dump = runGet dataFromBitcode bc     
+     let dump = runGet dataFromBitcode bc
      return $ (decode dump :: Module)
-     
+
 -- | Run the Binary Get monad on a wrapped bitcode bytestring.
 -- The wrapped bytestring exists between the header bytes and the bitcode
 -- bytes. The header is of 20 bytes. The offset field in the header
@@ -146,13 +147,16 @@ dataFromBitcode = do
   skip 8
   let datSize = (toInteger offset) - 20
   getLazyByteString (fromIntegral datSize)
-  
+
 
 -------------------------------------------------------------------------------
 -- Segment Parsing and Extraction                                            --
 -------------------------------------------------------------------------------
 
-machoLPVMSection :: FilePath -> IO ()
+-- | Parse the given object file into a 'Macho' structure, determine the
+-- offset and size of the '__lpvm' section data, and decode those bytes as
+-- a 'AST.Module'.
+machoLPVMSection :: FilePath -> IO Module
 machoLPVMSection ofile = do
     bs <- B.readFile ofile
     let (cmdsize, macho) = parseMacho bs
@@ -162,38 +166,49 @@ machoLPVMSection ofile = do
         Just seg -> do
             let (off, size) = lpvmFileOffset seg
             let bytes = readBytes off size (BL.fromStrict bs)
-            print $ C.unpack bytes
+            let mod = (decode bytes :: Module)
+            print mod
+            return mod
 
-                   
+-- | Find the load command from a 'LC_COMMAND' list which contains
+-- section '__lpvm'. This section will usually by in a general segment
+-- load command (32 or 64 bit) of the Mach-O file.
 findLPVMSegment :: [LC_COMMAND] -> Maybe MachoSegment
 findLPVMSegment [] = Nothing
 findLPVMSegment ((LC_SEGMENT seg):cs) =
     case extractSection "__lpvm" seg of
-        Nothing -> findLPVMSegment cs
-        Just _ -> Just seg
+        False -> findLPVMSegment cs
+        True -> Just seg
 findLPVMSegment((LC_SEGMENT_64 seg):cs) =
     case extractSection "__lpvm" seg of
-        Nothing -> findLPVMSegment cs
-        Just _ -> Just seg
+        False -> findLPVMSegment cs
+        True -> Just seg
 
-
-extractSection :: String -> MachoSegment -> Maybe MachoSection
-extractSection name seg =
+-- | Check if a section of the given 'String' name exists in the
+-- 'MachoSegment'.
+sectionExists :: String -> MachoSegment -> Bool
+sectionExists name seg =
     let sections = seg_sections seg
-        filtered = List.filter ((== name) . sec_sectname) sections
-    in if null filtered then Nothing else Just $ head filtered
+        find = List.find ((== name) . sec_sectname) sections
+    in case find of
+        Nothing -> False
+        _ -> True
 
-
+-- | Determine the (offset, size) byte range where the __lpvm section data
+-- exists. The offset is determined by adding the segment offset word of the
+-- 'MachoSegment' (which contains the lpvm section) and the __lpvm section
+-- offset word.
 lpvmFileOffset :: MachoSegment -> (Int64, Int64)
 lpvmFileOffset seg =
     let foff = seg_fileoff seg
-        sections = seg_sections seg        
+        sections = seg_sections seg
     in case List.find ((== "__lpvm") . sec_sectname) sections of
         Just sec -> let off = fromIntegral $ foff + (sec_addr sec)
                         size = fromIntegral $ sec_size sec
                     in (off, size)
         Nothing -> error "LPVM Section not found."
-        
 
+
+-- | Read bytestring from 'BL.ByteString' in the given range.
 readBytes :: Int64 -> Int64 -> BL.ByteString -> BL.ByteString
 readBytes from size bs = BL.take size $ BL.drop from bs
