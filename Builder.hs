@@ -44,40 +44,41 @@
 -- |Code to oversee the compilation process.
 module Builder (buildTargets, compileModule) where
 
-import AST
-import Blocks (blockTransformModule, newMainModule, concatLLVMASTModules)
-import Callers (collectCallers)
-import Clause (compileProc)
-import Config
-import Control.Monad
-import Control.Monad.Trans
-import Control.Monad.Trans.State
-import Data.List as List
-import Data.Map as Map
-import Data.Maybe
-import Data.Set as Set
-import Emit
-import LLVM.General.PrettyPrint
-import Normalise (normalise, normaliseItem)
-import ObjectInterface
-import Optimise (optimiseMod)
+import           AST
+import           Blocks                    (blockTransformModule,
+                                            concatLLVMASTModules, newMainModule)
+import           Callers                   (collectCallers)
+import           Clause                    (compileProc)
+import           Config
+import           Control.Monad
+import           Control.Monad.Trans
+import           Control.Monad.Trans.State
+import           Data.List                 as List
+import           Data.Map                  as Map
+import           Data.Maybe
+import           Data.Set                  as Set
+import           Emit
+import           LLVM.General.PrettyPrint
+import           Normalise                 (normalise, normaliseItem)
+import           ObjectInterface
+import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
                                             optForce, optForceAll, optLibDirs,
                                             optUseStd)
-import Parser (parse)
-import Resources (resourceCheckMod, resourceCheckProc)
-import Scanner (Token, fileTokens, inputTokens)
-import           System.Directory          (canonicalizePath, doesFileExist,
-                                            getCurrentDirectory,
-                                            getModificationTime,
+import           Parser                    (parse)
+import           Resources                 (resourceCheckMod, resourceCheckProc)
+import           Scanner                   (Token, fileTokens, inputTokens)
+import           System.Directory          (canonicalizePath,
                                             createDirectoryIfMissing,
+                                            doesFileExist, getCurrentDirectory,
+                                            getModificationTime,
                                             getTemporaryDirectory)
-import System.Exit (exitFailure, exitSuccess)
-import System.FilePath
-import System.Time (ClockTime)
+import           System.Exit               (exitFailure, exitSuccess)
+import           System.FilePath
+import           System.Time               (ClockTime)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
-import Unbranch (unbranchProc)
+import           Unbranch                  (unbranchProc)
 
 ------------------------ Handling dependencies ------------------------
 
@@ -500,7 +501,7 @@ collectObjectFiles ofiles thisMod =
      -- to LLVM
      let nostd = List.filter (not . isStdLib) imports
      let noSubMods = List.filter (not . (`elem` submods)) nostd
-     
+
      finishModule
      case (List.null noSubMods) of
        True -> return ofiles

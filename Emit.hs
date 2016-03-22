@@ -59,9 +59,20 @@ emitObjectFile :: ModSpec -> FilePath -> Compiler ()
 emitObjectFile m f = do
     logEmit $ "Creating object file for *" ++ (showModSpec m) ++ "*" ++
         " @ '" ++ f ++ "'"
-    withModuleLLVM m (makeObjFile f)
+    reenterModule m
+    maybeLLMod <- getModuleImplementationField modLLVM
+    case maybeLLMod of
+        (Just llmod) ->
+            do astMod <- getModule id
+               logEmit $ "Encoding and wrapping Module *" ++ (showModSpec m)
+                   ++ "* in a wrapped object."
+               liftIO $ makeWrappedObjFile f llmod astMod
+        (Nothing) -> error "No LLVM Module Implementation"
+    finishModule
+    return ()
+    -- withModuleLLVM m (makeWrappedObjFile f)
     -- Also make the bitcode file for now
-    emitBitcodeFile m $ (dropExtension f) ++ ".bc"
+    -- emitBitcodeFile m $ (dropExtension f) ++ ".bc"
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Bitcode file.
@@ -197,6 +208,16 @@ makeAssemblyFile file llmod =
             liftError $ withHostTargetMachine $ \tm ->
                 liftError $ writeLLVMAssemblyToFile (File file) m
 
+
+makeWrappedObjFile :: FilePath -> LLVMAST.Module -> AST.Module -> IO ()
+makeWrappedObjFile file llmod origMod = do
+    withContext $ \context -> do
+        liftError $ withModuleFromAST context llmod $ \m -> do
+            let modBS = encode origMod
+            liftError $ withHostTargetMachine $ \tm ->
+                liftError $ writeObjectToFile tm (File file) m
+            insertLPVMDataLd modBS file            
+    
 
 
 ------------------------------------------------------------------------------
