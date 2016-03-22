@@ -46,7 +46,7 @@ insertLPVMDataLd bs obj =
        liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
        let lpvmFile = (tempDir ++ "wybetemp/" ++ "lpvmCache")
        BL.writeFile lpvmFile bs
-       let args = ["-r"] ++ ldSystemArgs
+       let args = [obj] ++ ["-r"] ++ ldSystemArgs
                   ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
                   ++ ["-o", obj]
        createProcess (proc "ld" args)
@@ -167,7 +167,6 @@ machoLPVMSection ofile = do
             let (off, size) = lpvmFileOffset seg
             let bytes = readBytes off size (BL.fromStrict bs)
             let mod = (decode bytes :: Module)
-            print mod
             return mod
 
 -- | Find the load command from a 'LC_COMMAND' list which contains
@@ -176,13 +175,14 @@ machoLPVMSection ofile = do
 findLPVMSegment :: [LC_COMMAND] -> Maybe MachoSegment
 findLPVMSegment [] = Nothing
 findLPVMSegment ((LC_SEGMENT seg):cs) =
-    case extractSection "__lpvm" seg of
+    case sectionExists "__lpvm" seg of
         False -> findLPVMSegment cs
         True -> Just seg
 findLPVMSegment((LC_SEGMENT_64 seg):cs) =
-    case extractSection "__lpvm" seg of
+    case sectionExists "__lpvm" seg of
         False -> findLPVMSegment cs
         True -> Just seg
+findLPVMSegment (c:cs) = findLPVMSegment cs        
 
 -- | Check if a section of the given 'String' name exists in the
 -- 'MachoSegment'.

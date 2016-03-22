@@ -190,10 +190,10 @@ srcObjFiles modspec possDirs = do
                        mapM (\ms -> do
                                   let srcfile = moduleFilePath sourceExtension
                                                 d ms
-                                  -- let objfile = moduleFilePath objectExtension
-                                  --               d ms
-                                  let objfile = moduleFilePath bitcodeExtension
+                                  let objfile = moduleFilePath objectExtension
                                                 d ms
+                                  -- let objfile = moduleFilePath bitcodeExtension
+                                  --               d ms
                                   let modname = List.last ms
                                   srcExists <- (liftIO . doesFileExist) srcfile
                                   objExists <- (liftIO . doesFileExist) objfile
@@ -247,21 +247,22 @@ compileModule dir modspec params items = do
 --   XXX not yet implemented
 loadModule :: ModSpec -> FilePath -> Compiler ()
 loadModule modspec objfile = do
-    logBuild $ "===== ??? Trying to load from wrapped bitcode for "
+    logBuild $ "===== ??? Trying to load LPVM Module for "
         ++ showModSpec modspec
-    let bcfile = dropExtension objfile ++ ".bc"
-    thisMod <- liftIO $ extractModuleFromWrapper bcfile
+    -- let bcfile = dropExtension objfile ++ ".bc"
+    -- thisMod <- liftIO $ extractModuleFromWrapper bcfile
+    thisMod <- liftIO $ machoLPVMSection objfile
     count <- gets ((1+) . loadCount)
     modify (\comp -> comp { loadCount = count })
-    logBuild $ "===== >>> Extracted Module bytestring from " ++ (show bcfile)
+    logBuild $ "===== >>> Extracted Module bytestring from " ++ (show objfile)
     modify (\comp -> let mods = thisMod : underCompilation comp
                      in  comp { underCompilation = mods })
     -- Load the dependencies
     loadImports
     stopOnError $ "handling imports for module " ++ showModSpec modspec
     mods <- exitModule -- may be empty list if module is mutually dependent
-    logBuild $ "===== <<< Extracted Module put in it's place "
-        ++ (show bcfile)
+    logBuild $ "===== <<< Extracted Module put in it's place from "
+        ++ (show objfile)
 
 
 -- | Collect all the subModules of the given modspec.
@@ -535,7 +536,7 @@ loadObjectFile thisMod =
 --  command line.
 data TargetType = InterfaceFile | ObjectFile | ExecutableFile
                 | UnknownFile | BitcodeFile | AssemblyFile
-                | ArchiveFile 
+                | ArchiveFile
                 deriving (Show,Eq)
 
 

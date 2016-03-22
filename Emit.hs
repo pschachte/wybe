@@ -16,6 +16,8 @@ import           LLVM.General.Context
 import           LLVM.General.Module as Mod
 import           LLVM.General.Target
 
+import qualified Data.ByteString.Lazy as BL
+
 import           LLVM.General.Analysis
 import           LLVM.General.PassManager
 import           LLVM.General.Transforms
