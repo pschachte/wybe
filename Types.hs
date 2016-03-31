@@ -498,29 +498,7 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
            then return [InvalidTyping $ ReasonUninit caller name pos]
            else return [InvalidTyping $ ReasonUndef caller name pos]
       else do
-        typList <-
-            mapM
-            (\p -> do
-                 params <- fmap (List.filter nonResourceParam) $
-                           getParams p
-                 logTypes $ "checking flow of call to " ++
-                   show p ++ " args " ++
-                   show args ++ " against params " ++
-                   show params ++ "..."
-                 case reconcileArgFlows params args of
-                     Just args' -> do
-                         logTypes $
-                           "MATCHES; checking types: args = " ++ show args'
-                         typing <- foldM (typecheckArg pos params $ procSpecName p)
-                                   typing $ zip3 [1..] params args'
-                         logTypes $ "Type check result = " ++ show typing
-                         return [typing]
-                     Nothing -> do
-                         logTypes "fails"
-                         return [InvalidTyping $
-                                 ReasonArity caller name pos (length args)
-                                 (length  params)])
-            procs
+        typList <- mapM (matchingArgFlows caller name args pos typing) procs
         let typList' = concat typList
         let typList'' = List.filter validTyping typList'
         let dups = snd $ List.foldr
@@ -549,6 +527,7 @@ typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
     let typing' = List.foldr noteOutputCast typing $ List.map content args
     logTypes $ "Resulting typing = " ++ show typing
     return [typing']
+typecheckStmt m caller (Test stmt) pos typing = undefined
 typecheckStmt _ _ Nop pos typing = return [typing]
 typecheckStmt m caller (Cond test exp thn els) pos typing = do
     typings <- typecheckSequence (typecheckPlacedStmt m caller) [typing] test
@@ -567,6 +546,23 @@ typecheckStmt _ _ Break pos typing = return [typing]
 typecheckStmt _ _ Next pos typing = return [typing]
 
 
+matchingArgFlows :: ProcName -> ProcName -> [Placed Exp] -> OptPos -> Typing -> ProcSpec -> Compiler [Typing]
+matchingArgFlows caller called args pos typing pspec = do
+    params <- fmap (List.filter nonResourceParam) $ getParams pspec
+    logTypes $ "checking flow of call to " ++ show pspec
+        ++ " args " ++ show args
+        ++ " against params " ++ show params ++ "..."
+    case reconcileArgFlows params args of
+      Just args' -> do
+        logTypes $ "MATCHES; checking types: args = " ++ show args'
+        typing <- foldM (typecheckArg pos params $ procSpecName pspec)
+            typing $ zip3 [1..] params args'
+        logTypes $ "Type check result = " ++ show typing
+        return [typing]
+      Nothing -> do
+        logTypes "fails"
+        return [InvalidTyping $ ReasonArity caller called pos (length args)
+                (length  params)]
 
 noteOutputCast :: Exp -> Typing -> Typing
 noteOutputCast (Typed (Var name flow _) typ True) typing

@@ -1542,8 +1542,9 @@ flowsOut ParamInOut = True
 data Stmt
      = ProcCall ModSpec Ident (Maybe Int) [Placed Exp]
      | ForeignCall Ident Ident [Ident] [Placed Exp]
+     | Test Stmt
      | Nop
-     -- All the following are eliminated during unbranching
+     -- All the following are eliminated during unbranching.
      -- The first stmt list is empty and the Exp is anything until
      -- flattening.  After that, the stmt list contains the body of
      -- the test, and the Exp is primitive.
@@ -2090,6 +2091,7 @@ showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ name ++ 
     (if List.null flags then "" else " " ++ unwords flags) ++
     "(" ++ intercalate ", " (List.map show args) ++ ")"
+showStmt indent (Test stmt) = "test " ++ showStmt (indent+5) stmt
 showStmt indent (Cond condstmts cond thn els) =
     let leadIn = List.replicate indent ' '
     in "if {" ++ showBody (indent+4) condstmts ++ "}\n"
