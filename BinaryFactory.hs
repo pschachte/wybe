@@ -19,6 +19,7 @@ import Text.ParserCombinators.Parsec.Pos
 
 -- * Self Deriving instances
 instance Binary Visibility
+instance Binary Determinism
 instance (Binary t) => Binary (Placed t)
 instance Binary ArgFlowType
 instance Binary ResourceSpec

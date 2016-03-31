@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-onetwothree > public (0 calls) (inline)
+onetwothree > public inline (0 calls)
 0: onetwothree(?x#0:wybe.int, ?y#0:wybe.int, ?z#0:wybe.int):
     foreign llvm move(1:wybe.int, ?x#0:wybe.int)
     foreign llvm move(2:wybe.int, ?y#0:wybe.int)

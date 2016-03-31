@@ -33,30 +33,30 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-= > public (0 calls) (inline)
+= > public inline (0 calls)
 0: =(?x#0:type_enum.season, y#0:type_enum.season):
     foreign llvm move(~y#0:type_enum.season, ?x#0:type_enum.season)
-= > public (0 calls) (inline)
+= > public inline (0 calls)
 1: =(y#0:type_enum.season, ?x#0:type_enum.season):
     foreign llvm move(~y#0:type_enum.season, ?x#0:type_enum.season)
 
 
-autumn > public (0 calls) (inline)
+autumn > public inline (0 calls)
 0: autumn(?$#0:type_enum.season):
     foreign lpvm cast(3:season, ?$#0:type_enum.season)
 
 
-spring > public (0 calls) (inline)
+spring > public inline (0 calls)
 0: spring(?$#0:type_enum.season):
     foreign lpvm cast(1:season, ?$#0:type_enum.season)
 
 
-summer > public (0 calls) (inline)
+summer > public inline (0 calls)
 0: summer(?$#0:type_enum.season):
     foreign lpvm cast(2:season, ?$#0:type_enum.season)
 
 
-winter > public (0 calls) (inline)
+winter > public inline (0 calls)
 0: winter(?$#0:type_enum.season):
     foreign lpvm cast(0:season, ?$#0:type_enum.season)
 type_enum, type_enum.season

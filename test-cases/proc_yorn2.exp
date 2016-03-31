@@ -30,18 +30,18 @@ gen$1 > (2 calls)
 
 
 
-gen$3 > (1 calls) (inline)
+gen$3 > inline (1 calls)
 0: gen$3([prompt#0:wybe.string], [response#0:wybe.char], result#0:wybe.bool, [tmp$0#0:wybe.bool], [tmp$1#0:wybe.bool], [tmp$2#0:wybe.bool], wybe.io$io#0:wybe.phantom, [?result#0:wybe.bool], [?wybe.io$io#0:wybe.phantom]):
 
 
-gen$4 > (1 calls) (inline)
+gen$4 > inline (1 calls)
 0: gen$4(prompt#0:wybe.string, [response#0:wybe.char], [result#0:wybe.bool], [tmp$0#0:wybe.bool], [tmp$1#0:wybe.bool], [tmp$2#0:wybe.bool], wybe.io$io#0:wybe.phantom, ?result#1:wybe.bool, ?wybe.io$io#2:wybe.phantom):
     foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$5#0:wybe.phantom) @wybe:116:41
     foreign c putchar('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:102:28
     proc_yorn2.gen$1<0>(~prompt#0:wybe.string, ~wybe.io$io#1:wybe.phantom, ?result#1:wybe.bool, ?wybe.io$io#2:wybe.phantom) @proc_yorn2:2:5
 
 
-yorn > public (0 calls) (inline)
+yorn > public inline (0 calls)
 0: yorn(prompt#0:wybe.string, ?result#0:wybe.bool, wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     proc_yorn2.gen$1<0>(~prompt#0:wybe.string, ~wybe.io$io#0:wybe.phantom, ?result#0:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_yorn2:2:5
 proc_yorn2

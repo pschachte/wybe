@@ -11,12 +11,12 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-inc2 > public (0 calls) (inline)
+inc2 > public inline (0 calls)
 0: inc2(x#0:wybe.int, ?$#0:wybe.int):
     foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @wybe:4:38
     foreign llvm add(~tmp$4#0:wybe.int, 1:wybe.int, ?tmp$7#0:wybe.int) @wybe:4:38
     foreign llvm move(~tmp$7#0:wybe.int, ?$#0:wybe.int)
-inc2 > public (0 calls) (inline)
+inc2 > public inline (0 calls)
 1: inc2([x#0:wybe.int], ?x#1:wybe.int, y#0:wybe.int):
     foreign llvm sub(~y#0:wybe.int, 1:wybe.int, ?tmp$11#0:wybe.int) @wybe:5:44
     foreign llvm sub(~tmp$11#0:wybe.int, 1:wybe.int, ?tmp$14#0:wybe.int) @wybe:5:44

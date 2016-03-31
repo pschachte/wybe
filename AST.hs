@@ -719,7 +719,7 @@ addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis detism inline proto stmts pos) = do
     let ProcProto name params resources = proto
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 
-                  Map.empty vis inline $ initSuperprocSpec vis
+                  Map.empty vis detism inline $ initSuperprocSpec vis
     currMod <- getModuleSpec
     procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
     let procs' = procs ++ [procDef]
@@ -1209,6 +1209,7 @@ data ProcDef = ProcDef {
                                 -- source code (before inlining) and the
                                 -- count of calls for each caller
     procVis :: Visibility,      -- what modules should be able to see this?
+    procDetism :: Determinism,  -- how many results this proc returns
     procInline :: Bool,         -- should we inline calls to this proc?
     procSuperproc :: SuperprocSpec 
                                 -- the proc this should be part of, if any
@@ -1972,12 +1973,13 @@ showProcDefs firstID (def:defs) =
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis inline sub) =
+showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis detism inline sub) =
     "\n" 
-    ++ (if n == "" then "*main*" else n)
-    ++ " > " ++ visibilityPrefix vis
+    ++ (if n == "" then "*main*" else n) ++ " > "
+    ++ visibilityPrefix vis
+    ++ (if inline then "inline " else "")
+    ++ determinismPrefix detism
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
-    ++ (if inline then " (inline)" else "")
     ++ showSuperProc sub
     ++ "\n"
     ++ show thisID ++ ": "

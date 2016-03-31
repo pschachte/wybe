@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-beer99 > public (0 calls) (inline)
+beer99 > public inline (0 calls)
 0: beer99(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     proc_beer.gen$1<0>(99:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:5
 
@@ -31,11 +31,11 @@ gen$1 > (2 calls)
 
 
 
-gen$3 > (1 calls) (inline)
+gen$3 > inline (1 calls)
 0: gen$3([count#0:wybe.int], [tmp$0#0:wybe.bool], wybe.io$io#0:wybe.phantom, [?wybe.io$io#0:wybe.phantom]):
 
 
-gen$4 > (1 calls) (inline)
+gen$4 > inline (1 calls)
 0: gen$4(count#0:wybe.int, [tmp$0#0:wybe.bool], wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom):
     foreign c print_int(count#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:104:38
     foreign c print_string(" bottles of beer on the wall":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?tmp$6#0:wybe.phantom) @wybe:116:41
