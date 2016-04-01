@@ -114,9 +114,6 @@ Item  :: { Item }
     : Visibility 'type' TypeProto  TypeImpln Items 'end'
                                 { TypeDecl $1 $3 $4 $5 $ 
 				    Just $ tokenPosition $2 }
-    -- : Visibility 'type' TypeProto OptRepresentation Items 'end'
-    --                             { TypeDecl $1 $3 $4 $5 $ 
-    --     			    Just $ tokenPosition $2 }
     | Visibility 'module' ident 'is' Items 'end'
                                 { ModuleDecl $1 (identName $3) $5 $ 
 				    Just $ tokenPosition $2 }
@@ -134,17 +131,11 @@ Item  :: { Item }
     | Visibility Determinism 'proc' ProcProto ProcBody
                                 { ProcDecl $1 $2 False $4 $5
                                     $ Just $ tokenPosition $3 }
-    -- | Visibility 'ctor' FnProto { CtorDecl $1 $3
-    --     			    $ Just $ tokenPosition $2 }
     | Stmt                      { StmtDecl (content $1) (place $1) }
 
 
 TypeProto :: { TypeProto }
     : ident OptIdents           { TypeProto (identName $1) $2 }
-
-OptRepresentation :: { TypeRepresentation }
-    : 'is' ident                { identName $2 }
-    | {- empty -}               { defaultTypeRepresentation }
 
 TypeImpln :: { TypeImpln }
     : 'is' ident                { TypeRepresentation $ identName $2 }
@@ -378,9 +369,9 @@ IfCases :: { Stmt }
     | Exp '::' Stmts 'end'      { Cond [] $1 $3 [] }
 
 
-Condelse :: { [Placed Stmt] }
-    : 'else' Stmts 'end'        { $2 }
-    |  'end'                    { [] }
+-- Condelse :: { [Placed Stmt] }
+--     : 'else' Stmts 'end'        { $2 }
+--     |  'end'                    { [] }
 
 
 OptInit :: { Maybe (Placed Exp) }
