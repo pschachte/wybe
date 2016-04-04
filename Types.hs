@@ -527,7 +527,12 @@ typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
     let typing' = List.foldr noteOutputCast typing $ List.map content args
     logTypes $ "Resulting typing = " ++ show typing
     return [typing']
-typecheckStmt m caller (Test stmt) pos typing = undefined
+typecheckStmt m caller (Test stmts exp) pos typing = do
+    typings <- typecheckBody m caller typing stmts
+    mapM (\t -> do
+               typecheckArg' (content exp) (place exp) Unspecified
+                   (TypeSpec ["wybe"] "bool" []) t (ReasonCond pos))
+        typings
 typecheckStmt _ _ Nop pos typing = return [typing]
 typecheckStmt m caller (Cond test exp thn els) pos typing = do
     typings <- typecheckSequence (typecheckPlacedStmt m caller) [typing] test
@@ -700,23 +705,7 @@ applyStmtTyping dict call@(ProcCall cm name id args) pos = do
         Just n -> return [ProcSpec cm name n]
     logTypes $ "   " ++ show (length procs) ++ " potential procs: "
            ++ intercalate ", " (List.map show procs)
-    matches <- fmap catMaybes $
-               mapM (\p -> do
-                          params <- fmap (List.filter nonResourceParam) $
-                                    getParams p
-                          logTypes $ "   checking call to " ++
-                                 show p ++ " args " ++
-                                 show args' ++ " against params " ++
-                                 show params
-                          return $
-                            fmap (\as -> (as,p)) $
-                            checkMaybe (\as -> all (uncurry subtypeOf)
-                                               (zip (List.map
-                                                     (expType . content) as)
-                                                (List.map
-                                                 paramType params))) $
-                            reconcileArgFlows params args')
-               procs
+    matches <- fmap catMaybes $ mapM (matchProcType args') procs
     checkError ((show $ length matches) ++
                 " matching procs (should be 1) for stmt "
                 ++ showStmt 0 call)
@@ -732,6 +721,10 @@ applyStmtTyping dict call@(ForeignCall lang name flags args) pos = do
     let instr = ForeignCall lang name flags args'
     logTypes $ "typed call = " ++ showStmt 0 instr
     return $ maybePlace instr pos
+applyStmtTyping dict (Test stmts exp) pos = do
+    stmts' <- applyBodyTyping dict stmts
+    let exp' = fmap (applyExpTyping dict) exp
+    return $ maybePlace (Test stmts' exp') pos
 applyStmtTyping dict (Cond test cond thn els) pos = do
     test' <- applyBodyTyping dict test
     let cond' = fmap (applyExpTyping dict) cond
@@ -769,6 +762,24 @@ applyExpTyping dict (Typed exp _ False) =
     applyExpTyping dict exp
 applyExpTyping _ exp =
     shouldnt $ "Expression '" ++ show exp ++ "' left after flattening"
+
+
+matchProcType :: [Placed Exp] -> ProcSpec
+              -> Compiler (Maybe ([Placed Exp], ProcSpec))
+matchProcType args p = do
+    params <- fmap (List.filter nonResourceParam) $ getParams p
+    logTypes $ "   checking call to " ++
+        show p ++ " args " ++
+        show args ++ " against params " ++
+        show params
+    return $
+        fmap (\as -> (as,p)) $
+        checkMaybe (\as -> all (uncurry subtypeOf)
+                           (zip (List.map
+                                 (expType . content) as)
+                            (List.map
+                             paramType params))) $
+        reconcileArgFlows params args
 
 
 ----------------------------------------------------------------
@@ -822,6 +833,10 @@ checkStmtTyped name pos (ProcCall pmod pname pid args) ppos = do
 checkStmtTyped name pos (ForeignCall _ pname _ args) ppos = do
     mapM_ (checkArgTyped name pos pname ppos) $
           zip [1..] $ List.map content args
+checkStmtTyped name pos (Test stmts exp) ppos = do
+    mapM_ (placedApplyM (checkStmtTyped name pos)) stmts
+    checkExpTyped name pos ("test" ++ showMaybeSourcePos ppos) $
+                  content exp
 checkStmtTyped name pos (Cond ifstmts cond thenstmts elsestmts) ppos = do
     mapM_ (placedApplyM (checkStmtTyped name pos)) ifstmts
     checkExpTyped name pos ("condition" ++ showMaybeSourcePos ppos) $

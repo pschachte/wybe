@@ -344,9 +344,11 @@ Stmt :: { Placed Stmt }
     --                             { Placed (Cond [] $2 $4 $5)
     --                              (tokenPosition $1) }
     | 'if' IfCases              { Placed $2 (tokenPosition $1) }
-    | 'test' Stmt               {Placed (Test (content $2)) (tokenPosition $1)}
-    | 'test' RelExp             {Placed (Test (expToStmt (content $2)))
+    | 'test' Stmt               {Placed
+                                 (Test [$2]
+                                  (Unplaced $ Var "$$" ParamOut Ordinary))
                                  (tokenPosition $1)}
+    | 'test' RelExp             {Placed (Test [] $2) (tokenPosition $1)}
     | 'do' Stmts 'end'          { Placed (Loop $2)
                                   (tokenPosition $1) }
     | 'for' Exp 'in' Exp        { Placed (For $2 $4)

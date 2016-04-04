@@ -203,7 +203,9 @@ flattenStmts stmts =
 
 flattenStmt :: Stmt -> OptPos -> Flattener ()
 flattenStmt stmt pos = do
-    modify (\s -> s { stmtUses = Set.empty, stmtDefs = Set.empty, currPos = pos})
+    modify (\s -> s { stmtUses = Set.empty,
+                      stmtDefs = Set.empty,
+                      currPos = pos})
     defd <- gets defdVars
     logFlatten $ "flattening stmt " ++ showStmt 4 stmt ++
       " with defined vars " ++ show defd
@@ -220,6 +222,17 @@ flattenStmt' (ForeignCall lang name flags args) pos = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
     emitPostponed
+flattenStmt' (Test stmts tst) pos = do
+    logFlatten $ "** Flattening test:" ++ show tst
+    (vars,tst') <- flattenInner False (flattenPExp tst)
+    logFlatten $ "** Result:\n" ++ showBody 4 tst'
+    let errPos = betterPlace pos tst
+    case vars of
+      [] -> lift $ message Error "Test with no flow" errPos
+      [var] -> emit pos $ Test (stmts++tst') var
+      [_,_] -> lift $ message Error
+              ("Test with in-out flow: " ++ show vars) errPos
+      _ -> shouldnt "Single expression expanded to more than 2 args"
 flattenStmt' (Cond tstStmts tst thn els) pos = do
     logFlatten $ "** Flattening test:" ++ show tst
     (vars,tst') <- flattenInner False (flattenPExp tst)

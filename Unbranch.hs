@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 --  File     : Unbranch.hs
 --  RCS      : $Id$
 --  Author   : Peter Schachte
@@ -308,6 +309,17 @@ unbranchStmt stmt@(ForeignCall _ _ _ args) pos stmts = do
     defArgs args
     stmts' <- unbranchStmts stmts
     return $ (maybePlace stmt pos):stmts'
+unbranchStmt (Test tstStmts tstVar) pos stmts = do
+    logUnbranch "Unbranching a test statement"
+    beforeVars <- gets brVars
+    logUnbranch $ "test (" ++ show tstVar ++ "): " ++ showBody 8 tstStmts
+    logUnbranch $ "Vars before test: " ++ show beforeVars
+    tstStmts' <- unbranchStmts tstStmts
+    afterVars <- gets brVars
+    stmts' <- unbranchStmts stmts
+    let genStmt = Cond tstStmts' tstVar stmts' []
+    logUnbranch $ "Conditional unbranched to " ++ showStmt 4 genStmt 
+    return [maybePlace genStmt pos]
 unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     logUnbranch "Unbranching a conditional"
     beforeVars <- gets brVars
