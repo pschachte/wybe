@@ -33,7 +33,7 @@ module AST (
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..), 
   argFlowDirection, argType, outArgVar, argDescription, flowsIn, flowsOut,
   foldBodyPrims, foldBodyDistrib, foldProcCalls,
-  expToStmt, expFlow, setExpFlow, isHalfUpdate,
+  expToStmt, procCallToExp, expFlow, setExpFlow, isHalfUpdate,
   Prim(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
@@ -1673,6 +1673,13 @@ expToStmt (ForeignFn lang name flags args) =
   ForeignCall lang name flags args
 expToStmt (Var name ParamIn _) = ProcCall [] name Nothing []
 expToStmt exp = shouldnt $ "non-Fncall expr " ++ show exp
+
+
+procCallToExp :: Stmt -> Exp
+procCallToExp (ProcCall maybeMod name Nothing args) =
+    Fncall maybeMod name args
+procCallToExp stmt =
+    shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
 
 
 expFlow :: Exp -> FlowDirection

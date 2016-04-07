@@ -8,6 +8,9 @@ o Optimisations
 o Fix algebraic type implementation to use tagged pointers
 o Fix algebraic type implementation to generate code for = only when not
    explicitly defined
+o Implied modes:  transform expression version of proc call with inputs where
+  outputs are expected into proc call plus equality tests
+o Unifications:  transform f(?x,?y) = z into test f(?x,?y,z)
 
 
 Improve error handling:

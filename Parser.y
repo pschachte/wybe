@@ -345,8 +345,7 @@ Stmt :: { Placed Stmt }
     --                              (tokenPosition $1) }
     | 'if' IfCases              { Placed $2 (tokenPosition $1) }
     | 'test' Stmt               {Placed
-                                 (Test [$2]
-                                  (Unplaced $ Var "$$" ParamOut Ordinary))
+                                 (Test [] (fmap procCallToExp $2))
                                  (tokenPosition $1)}
     | 'test' RelExp             {Placed (Test [] $2) (tokenPosition $1)}
     | 'do' Stmts 'end'          { Placed (Loop $2)
