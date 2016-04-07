@@ -5,7 +5,7 @@ public test proc lt(x:int, y:int)
     test x < y
 end
 
-public type map = empty | node(left:map, key:int, value:int, right:map) end
+public type map = public empty | node(left:map, key:int, value:int, right:map) end
 
 public test proc lookup(key:int, map:map, ?result:int)
     if map = empty:: test false
