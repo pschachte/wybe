@@ -62,9 +62,20 @@ unbranchProc :: ProcDef -> Compiler ProcDef
 unbranchProc proc = do
     logMsg Unbranch $ "** Unbranching proc " ++ procName proc
     let ProcDefSrc body = procImpln proc
+    let setup = if procDetism proc == SemiDet
+                then [Unplaced $ ProcCall [] "true" Nothing
+                      [Unplaced $ Var "$$" ParamOut Ordinary]]
+                else []
     let params = procProtoParams $ procProto proc
-    (body',newProcs) <- unbranchBody params body
-    let proc' = proc { procImpln = ProcDefSrc body' }
+    (body',newProcs) <- unbranchBody params (setup++body)
+    let proto = procProto proc
+    let proto' = if procDetism proc == SemiDet
+                 then proto {procProtoParams =
+                                 procProtoParams proto ++
+                                 [Param "$$" (TypeSpec ["wybe"] "bool" [])
+                                  ParamOut Ordinary]}
+                 else proto
+    let proc' = proc { procImpln = ProcDefSrc body', procProto = proto' }
     let tmpCount = procTmpCount proc
     mapM_ (addProc tmpCount) newProcs
     logMsg Unbranch $ "** Unbranched defn:" ++ showProcDef 0 proc' ++ "\n"
@@ -314,10 +325,14 @@ unbranchStmt (Test tstStmts tstVar) pos stmts = do
     beforeVars <- gets brVars
     logUnbranch $ "test (" ++ show tstVar ++ "): " ++ showBody 8 tstStmts
     logUnbranch $ "Vars before test: " ++ show beforeVars
-    tstStmts' <- unbranchStmts tstStmts
+    tstStmts' <- unbranchStmts $ tstStmts ++
+        [Unplaced
+         $ ProcCall [] "=" Nothing  [Unplaced $ Var "$$" ParamOut Ordinary,
+                                     tstVar]]
     afterVars <- gets brVars
     stmts' <- unbranchStmts stmts
-    let genStmt = Cond tstStmts' tstVar stmts' []
+    let tstVar' = Unplaced $ Var "$$" ParamIn Ordinary
+    let genStmt = Cond tstStmts' tstVar' stmts' []
     logUnbranch $ "Conditional unbranched to " ++ showStmt 4 genStmt 
     return [maybePlace genStmt pos]
 unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
