@@ -180,52 +180,60 @@ instance Show TypeReason where
     show (ReasonShouldnt) =
         makeMessage Nothing "Mysterious typing error"
 
-data Typing = ValidTyping (Map VarName TypeSpec)
-            | InvalidTyping TypeReason   -- call type conflicts w/callee
-            deriving (Show,Eq,Ord)
 
-typingDict :: Typing -> Map VarName TypeSpec
-typingDict (ValidTyping dict) = dict
-typingDict (InvalidTyping _) = error "no typingDict for InvalidTyping"
+-- | A type assignment for variables (symbol table), with a list of type errors
+data Typing = Typing {
+                  typingDict::Map VarName TypeSpec,
+                  typingErrs::[TypeReason]
+                  }
+            deriving (Show,Eq,Ord)
 
 
 initTyping :: Typing
-initTyping = ValidTyping Map.empty
+initTyping = Typing Map.empty []
 
 
 validTyping :: Typing -> Bool
-validTyping (ValidTyping _) = True
-validTyping _ = False
+validTyping (Typing _ errs) = List.null errs
+
+
+varType :: Typing -> VarName -> Maybe TypeSpec
+varType typing var = Map.lookup var $ typingDict typing
+
+
+typeError :: TypeReason -> Typing -> Typing
+typeError err (Typing dict errs) = Typing dict $ err:errs
 
 
 addOneType :: TypeReason -> VarName -> TypeSpec -> Typing -> Typing
-addOneType reason name typ valid@(ValidTyping types) =
+addOneType reason name typ typing@(Typing types errs) =
+    -- Be sure we insert Unspecified if it's not already there, because
+    -- it distinguishes a defined variable with unknown type from an
+    -- undefined variable
     case Map.lookup name types of
-        Nothing -> ValidTyping $ Map.insert name typ types
-        Just oldTyp ->
-            if typ == oldTyp
-            then valid
-            else if typ `properSubtypeOf` oldTyp
-                 then ValidTyping $ Map.insert name typ types
-                 else if oldTyp `properSubtypeOf` typ
-                      then valid -- we already have a stronger type, keep it
-                      else --trace ("addOneType " ++ name ++ ":" ++ show typ ++
-                           --       " vs. " ++ show oldTyp ++ " FAILED") $
-                           InvalidTyping reason
-addOneType _ _ _ invalid = invalid
+      Nothing -> Typing (Map.insert name typ types) errs
+      Just oldTyp ->
+          if oldTyp `subtypeOf` typ
+          then typing -- the type we already have covers the new one:  keep it
+          else if typ `properSubtypeOf` oldTyp
+               then -- the new type is compatible but better:  substitute it
+                    Typing (Map.insert name typ types) errs
+               else -- old and new types are incompatible:  report error
+                    --trace ("addOneType " ++ name ++ ":" ++ show typ ++
+                    --       " vs. " ++ show oldTyp ++ " FAILED") $
+                    typeError reason typing
 
 
 -- |Returns the first argument restricted to the variables appearing
 --  in the second.
 projectTyping :: Typing -> Typing -> Typing
-projectTyping (ValidTyping typing) (ValidTyping interest) =
-    ValidTyping $
-    Map.filterWithKey (\k _ -> isJust $ Map.lookup k interest) typing
-projectTyping typing _ = typing
-
+projectTyping (Typing typing errs) (Typing interest _) =
+    Typing (Map.filterWithKey (\k _ -> Map.member k interest) typing) errs
+    
 
 -- Simple subtype relation for now; every type is a subtype of the
 -- unspecified type.
+-- XXX Extend to support actual subtypes
 properSubtypeOf :: TypeSpec -> TypeSpec -> Bool
 properSubtypeOf _ Unspecified = True
 properSubtypeOf _ _ = False
@@ -330,7 +338,7 @@ typecheckProcDecl m pd = do
                   initTyping $ zip params [1..]
         typing' <- foldM (addResourceType name pos)
                    typing resources
-        if validTyping typing
+        if validTyping typing'
           then do
             logTypes $ "** Type checking " ++ name ++
               ": " ++ show typing'
@@ -349,10 +357,7 @@ typecheckProcDecl m pd = do
                  (logTypes $ "** check again " ++ name ++
                       "\n-----------------OLD:" ++ showProcDef 4 pd ++
                       "\n-----------------NEW:" ++ showProcDef 4 pd' ++ "\n")
-            return (pd'',sccAgain,
-                    case typing'' of
-                        ValidTyping _ -> []
-                        InvalidTyping r -> [r])
+            return (pd'',sccAgain,typingErrs typing'')
           else
             shouldnt $ "Inconsistent param typing for proc " ++ name
 
@@ -381,13 +386,12 @@ addResourceType procname pos typs rfspec = do
 
 
 updateParamTypes :: Typing -> [Param] -> [Param]
-updateParamTypes (ValidTyping dict) params =
+updateParamTypes typing params =
     List.map (\p@(Param name typ fl afl) ->
-               case Map.lookup name dict of
+               case varType typing name of
                    Nothing -> p
-                   Just newTyp -> (Param name newTyp fl afl))
+                   Just newTyp -> Param name newTyp fl afl)
     params
-updateParamTypes _ params = params
 
 
 -- |Type check the body of a single proc definition by type checking
@@ -404,20 +408,22 @@ typecheckProcDef m name pos paramTypes body = do
     case typings of
       [] -> do
         logTypes $ "   no valid type"
-          -- XXX This is the wrong reason
-        return (InvalidTyping $ ReasonAmbig name pos [],body)
+        -- XXX This is the wrong reason
+        return (typeError (ReasonAmbig name pos []) initTyping, body)
       [typing] -> do
         logTypes $ "   final typing: " ++ show typing
+        logTypes $ "   initial param typing: " ++ show paramTypes
         let typing' = projectTyping typing paramTypes
-        case typing of
-            InvalidTyping _ -> do
-                logTypes $ "invalid: no body typing" ++ showBody 4 body
-                return (typing', body)
-            ValidTyping dict -> do
+        logTypes $ "   projected typing: " ++ show typing'
+        if validTyping typing
+            then do
                 logTypes $ "apply body typing" ++ showBody 4 body
-                body' <- applyBodyTyping dict body
+                body' <- applyBodyTyping typing body
                 logTypes $ "After body typing:" ++ showBody 4 body'
                 return (typing',body')
+            else do
+                logTypes $ "invalid: no body typing" ++ showBody 4 body
+                return (typing', body)
       typings -> do
           logTypes $ name ++ " has " ++ show (length typings) ++
             " typings, of which " ++
@@ -427,7 +433,7 @@ typecheckProcDef m name pos paramTypes body = do
           let merged = Map.filter ((>1).Set.size) $
                        Map.unionsWith Set.union typingSets
           let ambigs = List.map (\(v,ts) -> (v,Set.toAscList ts)) $ assocs merged
-          return (InvalidTyping $ ReasonAmbig name pos ambigs, body)
+          return (typeError (ReasonAmbig name pos ambigs) initTyping, body)
 
 
 -- |Like a monadic foldl over a list, where each application produces
@@ -495,8 +501,8 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
            List.intercalate ", " (List.map show procs)
     if List.null procs
       then if 1 == length args
-           then return [InvalidTyping $ ReasonUninit caller name pos]
-           else return [InvalidTyping $ ReasonUndef caller name pos]
+           then return [typeError (ReasonUninit caller name pos) typing]
+           else return [typeError (ReasonUndef caller name pos) typing]
       else do
         typList <- mapM (matchingArgFlows caller name args pos typing) procs
         let typList' = concat typList
@@ -515,12 +521,12 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
                     unlines (List.map show typList')
                 return typList'
              else return typList''
-        else return [InvalidTyping $ ReasonOverload
+        else return [typeError (ReasonOverload
                                    (List.map fst $
                                     List.filter
                                       (List.any (flip List.elem dups) . snd) $
                                     zip procs typList)
-                                   pos]
+                                   pos) typing]
 typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
     -- Pick up any output casts
     logTypes $ "Type checking foreign " ++ showStmt 4 call
@@ -566,8 +572,9 @@ matchingArgFlows caller called args pos typing pspec = do
         return [typing]
       Nothing -> do
         logTypes "fails"
-        return [InvalidTyping $ ReasonArity caller called pos (length args)
-                (length  params)]
+        return [typeError (ReasonArity caller called pos (length args)
+                           (length  params))
+                typing]
 
 noteOutputCast :: Exp -> Typing -> Typing
 noteOutputCast (Typed (Var name flow _) typ True) typing
@@ -606,27 +613,13 @@ nonResourceParam _ = True
 typecheckArg :: OptPos -> [Param] -> ProcName ->
                 Typing -> (Int,Param,Placed Exp) -> Compiler Typing
 typecheckArg pos params pname typing (argNum,param,arg) = do
-    let actualFlow = expFlow (content arg)
-    let formalFlow = paramFlow param
     let reasonType = ReasonArgType pname argNum pos
-    let reasonFlow = ReasonArgFlow pname argNum pos
     if not $ validTyping typing
       then return typing
       else do
       logTypes $ "type checking " ++ show arg ++ " against " ++ show param
       typecheckArg' (content arg) (place arg) Unspecified
         (paramType param) typing reasonType
-           -- XXX Shouldn't need to check flow: that's already been confirmed
-      -- else if formalFlow /= actualFlow
-      --        then do
-      --          logTypes $
-      --            "wrong flow: " ++ show arg ++ " against " ++ show param
-      --          return $ InvalidTyping reasonFlow
-      --        else do
-      --          logTypes $
-      --            "OK flow: " ++ show arg ++ " against " ++ show param
-      --          typecheckArg' (content arg) (place arg) Unspecified
-      --            (paramType param) typing reasonType
 
 
 typecheckArg' :: Exp -> OptPos -> TypeSpec -> TypeSpec -> Typing ->
@@ -639,16 +632,15 @@ typecheckArg' (Typed exp typ cast) pos _ paramType typing reason = do
     --               paramType typing reason
 typecheckArg' (Var var _ _) _ declType paramType typing reason = do
     -- XXX should out flow typing be contravariant?
-    unless (paramType == Unspecified) $ do
-        logTypes $
-          "Check Var " ++ var ++ ":" ++ show declType ++ " vs. " ++
-          show paramType ++
-          (if paramType `subtypeOf` declType then " succeeded" else " FAILED")
+    logTypes $
+        "Check Var " ++ var ++ ":" ++ show declType ++ " vs. " ++
+        show paramType ++
+        (if paramType `subtypeOf` declType then " succeeded" else " FAILED")
     if paramType `subtypeOf` declType
       then return $ addOneType reason var paramType typing
       else if paramType == Unspecified -- may be type checking recursion
            then return typing
-           else return $ InvalidTyping reason
+           else return $ typeError reason typing
 typecheckArg' (IntValue val) _ declType paramType typing reason = do
     return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "int" [])
       typing reason
@@ -674,7 +666,7 @@ typecheckArg'' callType paramType constType typing reason =
        if paramType `subtypeOf` realType
        then typing
        else -- trace ("type error with constant: " ++ show realType ++ " vs. " ++ show paramType)
-            InvalidTyping reason
+            typeError reason typing
 
 
 firstJust :: [Maybe a] -> Maybe a
@@ -689,17 +681,15 @@ listArity toFType toDirection lst =
           | e <- lst]
 
 
-applyBodyTyping :: Map VarName TypeSpec -> [Placed Stmt] ->
-                   Compiler [Placed Stmt]
-applyBodyTyping dict body = do
-    mapM (placedApplyM (applyStmtTyping dict)) $ body
+applyBodyTyping :: Typing -> [Placed Stmt] -> Compiler [Placed Stmt]
+applyBodyTyping typing body = do
+    mapM (placedApplyM (applyStmtTyping typing)) $ body
 
 
-applyStmtTyping :: Map VarName TypeSpec -> Stmt -> OptPos ->
-                   Compiler (Placed Stmt)
-applyStmtTyping dict call@(ProcCall cm name id args) pos = do
+applyStmtTyping :: Typing -> Stmt -> OptPos -> Compiler (Placed Stmt)
+applyStmtTyping typing call@(ProcCall cm name id args) pos = do
     logTypes $ "typing call " ++ showStmt 4 call
-    let args' = List.map (fmap $ applyExpTyping dict) args
+    let args' = List.map (fmap $ applyExpTyping typing) args
     procs <- case id of
         Nothing   -> callTargets cm name
         Just n -> return [ProcSpec cm name n]
@@ -715,35 +705,35 @@ applyStmtTyping dict call@(ProcCall cm name id args) pos = do
                          (Just (procSpecID proc)) args''
     logTypes $ "typed call = " ++ showStmt 4 call'
     return $ maybePlace call' pos
-applyStmtTyping dict call@(ForeignCall lang name flags args) pos = do
+applyStmtTyping typing call@(ForeignCall lang name flags args) pos = do
     logTypes $ "typing call " ++ showStmt 0 call
-    let args' = List.map (fmap $ applyExpTyping dict) args
+    let args' = List.map (fmap $ applyExpTyping typing) args
     let instr = ForeignCall lang name flags args'
     logTypes $ "typed call = " ++ showStmt 0 instr
     return $ maybePlace instr pos
-applyStmtTyping dict (Test stmts exp) pos = do
-    stmts' <- applyBodyTyping dict stmts
-    let exp' = fmap (applyExpTyping dict) exp
+applyStmtTyping typing (Test stmts exp) pos = do
+    stmts' <- applyBodyTyping typing stmts
+    let exp' = fmap (applyExpTyping typing) exp
     return $ maybePlace (Test stmts' exp') pos
-applyStmtTyping dict (Cond test cond thn els) pos = do
-    test' <- applyBodyTyping dict test
-    let cond' = fmap (applyExpTyping dict) cond
-    thn' <- applyBodyTyping dict thn
-    els' <- applyBodyTyping dict els
+applyStmtTyping typing (Cond test cond thn els) pos = do
+    test' <- applyBodyTyping typing test
+    let cond' = fmap (applyExpTyping typing) cond
+    thn' <- applyBodyTyping typing thn
+    els' <- applyBodyTyping typing els
     return $ maybePlace (Cond test' cond' thn' els') pos
-applyStmtTyping dict (Loop body) pos = do
-    body' <- applyBodyTyping dict body
+applyStmtTyping typing (Loop body) pos = do
+    body' <- applyBodyTyping typing body
     return $ maybePlace (Loop body') pos
-applyStmtTyping dict (Nop) pos = return $ maybePlace Nop pos
-applyStmtTyping dict (For itr gen) pos = do
-    let itr' = fmap (applyExpTyping dict) itr
-    let gen' = fmap (applyExpTyping dict) gen
+applyStmtTyping typing (Nop) pos = return $ maybePlace Nop pos
+applyStmtTyping typing (For itr gen) pos = do
+    let itr' = fmap (applyExpTyping typing) itr
+    let gen' = fmap (applyExpTyping typing) gen
     return $ maybePlace (For itr' gen') pos
-applyStmtTyping dict (Break) pos = return $ maybePlace Break pos
-applyStmtTyping dict (Next) pos = return $ maybePlace Next pos
+applyStmtTyping typing (Break) pos = return $ maybePlace Break pos
+applyStmtTyping typing (Next) pos = return $ maybePlace Next pos
 
 
-applyExpTyping :: Map VarName TypeSpec -> Exp -> Exp
+applyExpTyping :: Typing -> Exp -> Exp
 applyExpTyping _ exp@(IntValue _) =
     Typed exp (TypeSpec ["wybe"] "int" []) False
 applyExpTyping _ exp@(FloatValue _) =
@@ -752,14 +742,14 @@ applyExpTyping _ exp@(StringValue _) =
     Typed exp (TypeSpec ["wybe"] "string" []) False
 applyExpTyping _ exp@(CharValue _) =
     Typed exp (TypeSpec ["wybe"] "char" []) False
-applyExpTyping dict exp@(Var nm flow ftype) =
-    case Map.lookup nm dict of
+applyExpTyping typing exp@(Var nm flow ftype) =
+    case varType typing nm of
         Nothing -> shouldnt $ "type of variable '" ++ nm ++ "' unknown"
         Just typ -> Typed exp typ False
-applyExpTyping dict typed@(Typed _ _ True) =
+applyExpTyping typing typed@(Typed _ _ True) =
     typed
-applyExpTyping dict (Typed exp _ False) =
-    applyExpTyping dict exp
+applyExpTyping typing (Typed exp _ False) =
+    applyExpTyping typing exp
 applyExpTyping _ exp =
     shouldnt $ "Expression '" ++ show exp ++ "' left after flattening"
 
