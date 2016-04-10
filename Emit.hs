@@ -287,12 +287,16 @@ makeExec ofiles target =
        -- createProcess (proc "cc" args)
        return errCons
 
--- makeExec ofiles target =
---     do dir <- getCurrentDirectory
---        let args = ofiles ++ sharedLibs ++ ldArgs ++ ldSystemArgs
---                   ++ ["-o", target]
---        createProcess (proc "ld" args)
---        return ()
+-- | Use `ar' system util to link object files into an archive file.
+makeArchive :: [FilePath] -> FilePath -> IO String
+makeArchive ofiles target =
+    do dir <- getCurrentDirectory
+       let args = ["rvs", target] ++ ofiles 
+       (_,_, Just hout,_) <- createProcess
+           (proc "ar" args){std_err = CreatePipe}
+       errCons <- hGetContents hout
+       return errCons
+
 
 
 

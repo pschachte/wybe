@@ -68,11 +68,7 @@ import           Options                   (LogSelection (..), Options,
 import           Parser                    (parse)
 import           Resources                 (resourceCheckMod, resourceCheckProc)
 import           Scanner                   (Token, fileTokens, inputTokens)
-import           System.Directory          (canonicalizePath,
-                                            createDirectoryIfMissing,
-                                            doesFileExist, getCurrentDirectory,
-                                            getModificationTime,
-                                            getTemporaryDirectory)
+import           System.Directory          
 import           System.Exit               (exitFailure, exitSuccess)
 import           System.FilePath
 import           System.Time               (ClockTime)
@@ -100,24 +96,29 @@ buildTargets opts targets = do
 buildTarget :: Bool -> FilePath -> Compiler ()
 buildTarget force target = do
     let tType = targetType target
-    if tType == UnknownFile
-      then message Error ("Unknown target file type " ++ target) Nothing
-      else do
-        let modname = takeBaseName target
-        let dir = takeDirectory target
-        built <- buildModuleIfNeeded force [modname] [dir]
+    case tType of
+        UnknownFile -> message Error
+            ("Unknown target file type " ++ target) Nothing
+        ArchiveFile -> buildArchive target
+        _ -> do
+            let modname = takeBaseName target
+            let dir = takeDirectory target
+            built <- buildModuleIfNeeded force [modname] [dir]
 
-        -- Check if the module contains sub modules
-        subMods <- concatSubMods [modname]
+            -- Check if the module contains sub modules
+            subMods <- concatSubMods [modname]
 
-        when (tType == ExecutableFile) (buildExecutable [modname] target)
-        if (built==False && tType /= ExecutableFile)
-          then logBuild $ "Nothing to be done for target: " ++ target
-          else
-            do when (tType == ObjectFile) $ emitObjectFile [modname] target
-               when (tType == BitcodeFile) $ emitBitcodeFile [modname] target
-               when (tType == AssemblyFile) $ emitAssemblyFile [modname] target
-               whenLogging Emit $ logLLVMString [modname]
+            when (tType == ExecutableFile) (buildExecutable [modname] target)
+            if (built==False && tType /= ExecutableFile)
+              then logBuild $ "Nothing to be done for target: " ++ target
+              else
+                do when (tType == ObjectFile) $
+                       emitObjectFile [modname] target
+                   when (tType == BitcodeFile) $
+                       emitBitcodeFile [modname] target
+                   when (tType == AssemblyFile) $
+                       emitAssemblyFile [modname] target
+                   whenLogging Emit $ logLLVMString [modname]
 
 
 -- |Compile or load a module dependency.
@@ -286,8 +287,17 @@ concatSubMods mspec = do
 -- | Compile and build modules inside a folder, compacting everything into
 -- one object file archive.
 buildArchive :: FilePath -> Compiler ()
-buildArchive dir = shouldnt "Not Implemented."
-
+buildArchive arch = do
+    let dir = takeBaseName arch  ++ "/"
+    let isWybe = List.filter ((== ".wybe") . takeExtension)    
+    archiveMods <- liftIO $ (List.map dropExtension)
+        <$> isWybe <$> listDirectory dir
+    logBuild $ "Building modules to archive: " ++ show archiveMods
+    mapM_ (\m -> buildModuleIfNeeded False [m] [dir]) archiveMods
+    let oFileOf m = dir ++ m ++ ".o" 
+    mapM_ (\m -> emitObjectFile [m] (oFileOf m)) archiveMods
+    err <- liftIO $ makeArchive (List.map oFileOf archiveMods) arch
+    logBuild $ "Archive linking output: \n" ++ err
 
 -------------------- Actually compiling some modules --------------------
 
@@ -528,6 +538,8 @@ loadObjectFile thisMod =
      emitObjectFile thisMod objFile
      finishModule
      return objFile
+
+    
 
 
 ------------------------ Filename Handling ------------------------
