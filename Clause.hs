@@ -149,8 +149,11 @@ compileSimpleStmt' call@(ProcCall maybeMod name procID args) = do
     logClause $ "Compiling call " ++ showStmt 4 call
     args' <- mapM (placedApply compileArg) args
     return $ PrimCall (ProcSpec maybeMod name $
-                       trustFromJust "compileSimpleStmt'" procID)
-      args'
+                       trustFromJust
+                       ("compileSimpleStmt' for " ++ showStmt 4 call)
+                       procID)
+        args'
+    -- return $ PrimCall (ProcSpec maybeMod name $ fromMaybe (-1) procID) args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'

@@ -184,6 +184,20 @@ constCtorItems  vis typeSpec (placedProto,num) =
         [Unplaced $ ForeignCall "lpvm" "cast" []
          [Unplaced $ Typed (IntValue num) typeSpec True,
           Unplaced $ Var "$" ParamOut Ordinary]]
+        pos,
+        ProcDecl vis SemiDet True
+        (ProcProto constName [Param "$" typeSpec ParamIn Ordinary] [])
+        [Unplaced $ Test
+         [Unplaced $ ForeignCall "lpvm" "cast" []
+          [Unplaced $ Var "$" ParamIn Ordinary,
+           Unplaced $ Typed (Var "$int" ParamOut Ordinary)
+           (TypeSpec ["wybe"] "int" []) True],
+          Unplaced $ ForeignCall "llvm" "icmp" ["eq"]
+          [Unplaced $ Var "$int" ParamIn Ordinary,
+           Unplaced $ IntValue num,
+           Unplaced $ Typed (Var "$succeed" ParamOut Ordinary)
+           (TypeSpec ["wybe"] "bool" []) True]]
+         (Unplaced $ Var "$succeed" ParamIn Ordinary)]
         pos]
 
 
@@ -292,25 +306,16 @@ tagCheck constCount nonConstCount tag varName =
     -- If there are any constant constructors, be sure it's not one of them
     (case constCount of
           0 -> []
-          1 -> [Unplaced
-                $ Test [Unplaced $ ForeignCall "lpvm" "cast" []
-                        [Unplaced $ Var varName ParamIn Ordinary,
-                         Unplaced $ Typed (Var "$int" ParamOut Ordinary) 
-                         (TypeSpec ["wybe"] "int" []) True],
-                        Unplaced $ ForeignCall "llvm" "icmp" ["ne"]
-                        [Unplaced $ Var "$int" ParamIn Ordinary,
-                         Unplaced $ IntValue 0,
-                         Unplaced $ Var "$nonconst" ParamOut Ordinary]]
-                (Unplaced $ Var "$nonconst" ParamIn Ordinary)]
           _ -> [Unplaced
                 $ Test [Unplaced $ ForeignCall "lpvm" "cast" []
                         [Unplaced $ Var varName ParamIn Ordinary,
                          Unplaced $ Typed (Var "$int" ParamOut Ordinary) 
                          (TypeSpec ["wybe"] "int" []) True],
-                        Unplaced $ ForeignCall "llvm" "icmp" ["ult"]
+                        Unplaced $ ForeignCall "llvm" "icmp" ["uge"]
                         [Unplaced $ Var "$int" ParamIn Ordinary,
                          Unplaced $ IntValue $ fromIntegral constCount,
-                         Unplaced $ Var "$nonconst" ParamOut Ordinary]]
+                         Unplaced $ Typed (Var "$nonconst" ParamOut Ordinary)
+                         (TypeSpec ["wybe"] "bool" []) True]]
                 (Unplaced $ Var "$nonconst" ParamIn Ordinary)])
     ++
     (case nonConstCount of
@@ -323,11 +328,13 @@ tagCheck constCount nonConstCount tag varName =
                         Unplaced $ ForeignCall "llvm" "and" []
                         [Unplaced $ Var "$int" ParamIn Ordinary,
                          Unplaced $ IntValue $ fromIntegral tagMask,
-                         Unplaced $ Var "$tag" ParamOut Ordinary],
+                         Unplaced $ Typed (Var "$tag" ParamOut Ordinary)
+                         (TypeSpec ["wybe"] "int" []) True],
                         Unplaced $ ForeignCall "llvm" "icmp" ["eq"]
                         [Unplaced $ Var "$tag" ParamIn Ordinary,
                          Unplaced $ IntValue tag,
-                         Unplaced $ Var "$righttag" ParamOut Ordinary]]
+                         Unplaced $ Typed (Var "$righttag" ParamOut Ordinary)
+                         (TypeSpec ["wybe"] "int" []) True]]
                 (Unplaced $ Var "$righttag" ParamIn Ordinary)])
 
 

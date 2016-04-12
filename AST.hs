@@ -2099,7 +2099,9 @@ showStmt _ (ForeignCall lang name flags args) =
     (if List.null flags then "" else " " ++ unwords flags) ++
     "(" ++ intercalate ", " (List.map show args) ++ ")"
 showStmt indent (Test stmts exp) =
-    "test {" ++ showBody (indent+6) stmts ++ "} " ++ show exp
+    "test {" ++ showBody (indent+6) stmts ++ "}\n"
+    ++ List.replicate (indent+5) ' '
+    ++ "} " ++ show exp
 showStmt indent (Cond condstmts cond thn els) =
     let leadIn = List.replicate indent ' '
     in "if {" ++ showBody (indent+4) condstmts ++ "}\n"

@@ -87,7 +87,8 @@ typeCheckMod thisMod = do
     procs <- getModuleImplementationField (Map.toList . modProcs)
     let ordered =
             stronglyConnComp
-            [(name, name, nub $ concatMap (localBodyProcs thisMod . procImpln) procDefs)
+            [(name, name,
+              nub $ concatMap (localBodyProcs thisMod . procImpln) procDefs)
              | (name,procDefs) <- procs]
     logTypes $ "**** Strongly connected components:\n" ++
       (intercalate "\n" $
@@ -529,9 +530,9 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
                                    pos) typing]
 typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
     -- Pick up any output casts
-    logTypes $ "Type checking foreign " ++ showStmt 4 call
+    logTypes $ "Type checking foreign call " ++ showStmt 4 call
     let typing' = List.foldr noteOutputCast typing $ List.map content args
-    logTypes $ "Resulting typing = " ++ show typing
+    logTypes $ "Resulting typing = " ++ show typing'
     return [typing']
 typecheckStmt m caller (Test stmts exp) pos typing = do
     typings <- typecheckBody m caller typing stmts
@@ -700,7 +701,7 @@ applyStmtTyping typing call@(ProcCall cm name id args) pos = do
                 " matching procs (should be 1) for stmt "
                 ++ showStmt 0 call)
       (1 /= length matches)
-    let (args'',proc) = List.head matches
+    let [(args'',proc)] = matches
     let call' = ProcCall (procSpecMod proc) (procSpecName proc)
                          (Just (procSpecID proc)) args''
     logTypes $ "typed call = " ++ showStmt 4 call'
