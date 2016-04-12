@@ -25,8 +25,8 @@ module Codegen (
   int_c, float_c,
   -- * Instructions
   instr, namedInstr,
-  iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv,
-  cons, uitofp, fptoui, icmp, fcmp, lOr, lAnd, lXor,
+  iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv, urem, srem, frem,
+  cons, uitofp, fptoui, icmp, fcmp, lOr, lAnd, lXor, shl, lshr, ashr,
   constInttoptr,
   -- * Structure instructions
   insertvalue, extractvalue
@@ -423,6 +423,12 @@ idiv a b = UDiv True a b []
 sdiv :: Operand -> Operand -> Instruction
 sdiv a b = SDiv True a b []
 
+urem :: Operand -> Operand -> Instruction
+urem a b = URem a b []
+
+srem :: Operand -> Operand -> Instruction
+srem a b = SRem a b []
+
 -- * Floating point arithmetic operations (Binary)
 
 fadd :: Operand -> Operand -> Instruction
@@ -437,15 +443,19 @@ fmul a b = FMul NoFastMathFlags a b []
 fdiv :: Operand -> Operand -> Instruction
 fdiv a b = FDiv NoFastMathFlags a b []
 
--- * Comparisions
+frem :: Operand -> Operand -> Instruction
+frem a b = FRem NoFastMathFlags a b []
 
-fcmp :: FP.FloatingPointPredicate -> Operand -> Operand -> Instruction
-fcmp p a b = FCmp p a b []
+-- * Bitwise Binary Operations
+shl :: Operand -> Operand -> Instruction
+shl a b = Shl False False a b []
 
-icmp :: IP.IntegerPredicate -> Operand -> Operand -> Instruction
-icmp p a b = ICmp p a b []
+lshr :: Operand -> Operand -> Instruction
+lshr a b = LShr False a b []
 
--- * Bitwise operations
+ashr :: Operand -> Operand -> Instruction
+ashr a b = AShr False a b []
+
 lOr :: Operand -> Operand -> Instruction
 lOr a b = Or a b []
 
@@ -454,6 +464,15 @@ lAnd a b = And a b []
 
 lXor :: Operand -> Operand -> Instruction
 lXor a b = Xor a b []
+
+
+-- * Comparisions
+
+fcmp :: FP.FloatingPointPredicate -> Operand -> Operand -> Instruction
+fcmp p a b = FCmp p a b []
+
+icmp :: IP.IntegerPredicate -> Operand -> Operand -> Instruction
+icmp p a b = ICmp p a b []
 
 -- * Unary
 
