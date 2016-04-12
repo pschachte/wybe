@@ -333,7 +333,7 @@ unbranchStmt (Test tstStmts tstVar) pos stmts = do
     stmts' <- unbranchStmts stmts
     let tstVar' = Unplaced $ Var "$$" ParamIn Ordinary
     let genStmt = Cond tstStmts' tstVar' stmts' []
-    logUnbranch $ "Conditional unbranched to " ++ showStmt 4 genStmt 
+    logUnbranch $  "Test statement unbranched to " ++ showStmt 4 genStmt 
     return [maybePlace genStmt pos]
 unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     logUnbranch "Unbranching a conditional"
