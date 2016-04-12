@@ -63,8 +63,11 @@ unbranchProc proc = do
     logMsg Unbranch $ "** Unbranching proc " ++ procName proc
     let ProcDefSrc body = procImpln proc
     let setup = if procDetism proc == SemiDet
-                then [Unplaced $ ProcCall [] "true" Nothing
-                      [Unplaced $ Var "$$" ParamOut Ordinary]]
+                then [Unplaced $ ForeignCall "lpvm" "cast" []
+                      [Unplaced $ Typed (IntValue 1)
+                       (TypeSpec ["wybe"] "int" []) True,
+                       Unplaced $ Typed (Var "$$" ParamOut Ordinary)
+                       (TypeSpec ["wybe"] "bool" []) True]]
                 else []
     let params = procProtoParams $ procProto proc
     (body',newProcs) <- unbranchBody params (setup++body)
@@ -327,8 +330,10 @@ unbranchStmt (Test tstStmts tstVar) pos stmts = do
     logUnbranch $ "Vars before test: " ++ show beforeVars
     tstStmts' <- unbranchStmts $ tstStmts ++
         [Unplaced
-         $ ProcCall [] "=" Nothing  [Unplaced $ Var "$$" ParamOut Ordinary,
-                                     tstVar]]
+         $ ForeignCall "llvm" "move" []
+         [tstVar,
+          Unplaced $ Typed (Var "$$" ParamOut Ordinary)
+          (TypeSpec ["wybe"] "bool" []) True]]
     afterVars <- gets brVars
     stmts' <- unbranchStmts stmts
     let tstVar' = Unplaced $ Var "$$" ParamIn Ordinary

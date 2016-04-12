@@ -118,5 +118,5 @@ public module io is
     public proc read(?x:string) use !io foreign c read_line(?x,!io) end
 
     public proc print(x:bool) use !io foreign c print_int(x,!io) end
-    public func eof:char = foreign lpvm cast(-1)
+#    public func eof:char = foreign lpvm cast(-1)
 end
