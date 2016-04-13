@@ -53,24 +53,8 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
     let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
     ty <- addType name (TypeDef (length params) rep' pos) vis
     -- XXX Should we special-case handling of = instead of generating these:
-    let eq1 = ProcDecl Public Det True
-              (ProcProto "=" [Param "x" ty ParamOut Ordinary,
-                              Param "y" ty ParamIn Ordinary] [])
-              [Unplaced $
-               ForeignCall "llvm" "move" [] [Unplaced $
-                                             Var "y" ParamIn Ordinary,
-                                             Unplaced $
-                                             Var "x" ParamOut Ordinary]]
-              Nothing
-    let eq2 = ProcDecl Public Det True
-              (ProcProto "=" [Param "y" ty ParamIn Ordinary,
-                              Param "x" ty ParamOut Ordinary] [])
-              [Unplaced $
-               ForeignCall "llvm" "move" [] [Unplaced $
-                                             Var "y" ParamIn Ordinary,
-                                             Unplaced $
-                                             Var "x" ParamOut Ordinary]]
-              Nothing
+    let eq1 = assignmentProc ty False
+    let eq2 = assignmentProc ty True
     let typespec = TypeSpec [] name
                    $ List.map (\n->TypeSpec [] n []) params
     let constCount = length consts
@@ -82,8 +66,9 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
     nonconstItems <- fmap concat $
            mapM (nonConstCtorItems ctorVis typespec constCount nonConstCount)
            $ zip nonconsts [0..]
+    let extraItems = implicitItems typespec consts nonconsts
     normaliseSubmodule modCompiler name (Just params) vis pos
-      $ [eq1,eq2] ++ constItems ++ nonconstItems ++ items
+      $ [eq1,eq2] ++ constItems ++ nonconstItems ++ items ++ extraItems
 normaliseItem modCompiler (ModuleDecl vis name items pos) = do
     normaliseSubmodule modCompiler name Nothing vis pos items
 normaliseItem _ (ImportMods vis modspecs pos) = do
@@ -108,10 +93,6 @@ normaliseItem modCompiler (FuncDecl vis detism inline
 normaliseItem _ item@(ProcDecl _ _ _ _ _ _) = do
     (item',tmpCtr) <- flattenProcDecl item
     addProc tmpCtr item'
--- normaliseItem modCompiler (CtorDecl vis proto pos) = do
---     modspec <- getModuleSpec
---     Just modparams <- getModuleParams
---     addCtor modCompiler vis (last modspec) modparams proto pos
 normaliseItem _ (StmtDecl stmt pos) = do
     updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
 
@@ -172,6 +153,22 @@ normaliseTypeRepresntation "float" = "f" ++ show wordSize
 normaliseTypeRepresntation "double" = "f64"
 normaliseTypeRepresntation other = other
 
+
+-- |Generate an assignment proc (a definition of '=')
+assignmentProc :: TypeSpec -> Bool -> Item
+assignmentProc ty leftToRight =
+    let (lname,lflow,rname,rflow)
+            = if leftToRight
+              then ("in", ParamIn,"out", ParamOut)
+              else ("out", ParamOut,"in", ParamIn)
+    in ProcDecl Public Det True
+       (ProcProto "=" [Param lname ty lflow Ordinary,
+                       Param rname ty rflow Ordinary] [])
+       [Unplaced $
+        ForeignCall "llvm" "move" []
+        [Unplaced $ Var "in" ParamIn Ordinary,
+         Unplaced $ Var "out" ParamOut Ordinary]]
+       Nothing
 
 
 -- |Add a contructor for the specified type.
@@ -365,3 +362,15 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
            Unplaced $ Var "$field" ParamIn Ordinary,
            Unplaced $ Var "$rec" ParamOut Ordinary]])
      pos]
+
+
+----------------------------------------------------------------
+--                     Generating implicit procs
+--
+-- Wybe automatically generates equality test procs if you don't write
+-- your own definitions.
+--
+----------------------------------------------------------------
+
+implicitItems :: TypeSpec -> [Placed FnProto] -> [Placed FnProto] -> [Item]
+implicitItems typespec consts nonconsts = []

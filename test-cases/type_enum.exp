@@ -42,11 +42,11 @@ AFTER EVERYTHING:
   procs           : 
 
 = > public inline (0 calls)
-0: =(?x#0:type_enum.season, y#0:type_enum.season):
-    foreign llvm move(~y#0:type_enum.season, ?x#0:type_enum.season)
+0: =(?out#0:type_enum.season, in#0:type_enum.season):
+    foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
 = > public inline (0 calls)
-1: =(y#0:type_enum.season, ?x#0:type_enum.season):
-    foreign llvm move(~y#0:type_enum.season, ?x#0:type_enum.season)
+1: =(in#0:type_enum.season, ?out#0:type_enum.season):
+    foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
 
 
 autumn > public inline (0 calls)
@@ -115,14 +115,14 @@ AFTER LLVM IR:
 
 declare i8* @wybe_malloc(i32)
 
-define i2 @"type_enum.season.=<0>"(i2 %"y#0") {
+define i2 @"type_enum.season.=<0>"(i2 %"in#0") {
 entry:
-  ret i2 %"y#0"
+  ret i2 %"in#0"
 }
 
-define i2 @"type_enum.season.=<1>"(i2 %"y#0") {
+define i2 @"type_enum.season.=<1>"(i2 %"in#0") {
 entry:
-  ret i2 %"y#0"
+  ret i2 %"in#0"
 }
 
 define i2 @"type_enum.season.autumn<0>"() {
@@ -234,14 +234,14 @@ if.else:                                          ; preds = %entry
 
 declare i8* @wybe_malloc(i32)
 
-define i2 @"type_enum.season.=<0>"(i2 %"y#0") {
+define i2 @"type_enum.season.=<0>"(i2 %"in#0") {
 entry:
-  ret i2 %"y#0"
+  ret i2 %"in#0"
 }
 
-define i2 @"type_enum.season.=<1>"(i2 %"y#0") {
+define i2 @"type_enum.season.=<1>"(i2 %"in#0") {
 entry:
-  ret i2 %"y#0"
+  ret i2 %"in#0"
 }
 
 define i2 @"type_enum.season.autumn<0>"() {

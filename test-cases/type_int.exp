@@ -112,11 +112,11 @@ AFTER EVERYTHING:
 
 
 = > public inline (14 calls)
-0: =(?x#0:type_int.myint, y#0:type_int.myint):
-    foreign llvm move(~y#0:type_int.myint, ?x#0:type_int.myint)
+0: =(?out#0:type_int.myint, in#0:type_int.myint):
+    foreign llvm move(~in#0:type_int.myint, ?out#0:type_int.myint)
 = > public inline (0 calls)
-1: =(y#0:type_int.myint, ?x#0:type_int.myint):
-    foreign llvm move(~y#0:type_int.myint, ?x#0:type_int.myint)
+1: =(in#0:type_int.myint, ?out#0:type_int.myint):
+    foreign llvm move(~in#0:type_int.myint, ?out#0:type_int.myint)
 
 
 == > public inline (0 calls)
@@ -209,14 +209,14 @@ entry:
   ret i1 %"tmp$0#0"
 }
 
-define i64 @"type_int.myint.=<0>"(i64 %"y#0") {
+define i64 @"type_int.myint.=<0>"(i64 %"in#0") {
 entry:
-  ret i64 %"y#0"
+  ret i64 %"in#0"
 }
 
-define i64 @"type_int.myint.=<1>"(i64 %"y#0") {
+define i64 @"type_int.myint.=<1>"(i64 %"in#0") {
 entry:
-  ret i64 %"y#0"
+  ret i64 %"in#0"
 }
 
 define i1 @"type_int.myint.==<0>"(i64 %"x#0", i64 %"y#0") {
@@ -308,14 +308,14 @@ entry:
   ret i1 %"tmp$0#0"
 }
 
-define i64 @"type_int.myint.=<0>"(i64 %"y#0") {
+define i64 @"type_int.myint.=<0>"(i64 %"in#0") {
 entry:
-  ret i64 %"y#0"
+  ret i64 %"in#0"
 }
 
-define i64 @"type_int.myint.=<1>"(i64 %"y#0") {
+define i64 @"type_int.myint.=<1>"(i64 %"in#0") {
 entry:
-  ret i64 %"y#0"
+  ret i64 %"in#0"
 }
 
 define i1 @"type_int.myint.==<0>"(i64 %"x#0", i64 %"y#0") {

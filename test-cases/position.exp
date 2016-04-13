@@ -38,11 +38,11 @@ AFTER EVERYTHING:
   procs           : 
 
 = > public inline (2 calls)
-0: =(?x#0:position.position, y#0:position.position):
-    foreign llvm move(~y#0:position.position, ?x#0:position.position)
+0: =(?out#0:position.position, in#0:position.position):
+    foreign llvm move(~in#0:position.position, ?out#0:position.position)
 = > public inline (0 calls)
-1: =(y#0:position.position, ?x#0:position.position):
-    foreign llvm move(~y#0:position.position, ?x#0:position.position)
+1: =(in#0:position.position, ?out#0:position.position):
+    foreign llvm move(~in#0:position.position, ?out#0:position.position)
 
 
 position > public inline (0 calls)
@@ -82,14 +82,14 @@ AFTER LLVM IR:
 
 declare i8* @wybe_malloc(i32)
 
-define i64* @"position.position.=<0>"(i64* %"y#0") {
+define i64* @"position.position.=<0>"(i64* %"in#0") {
 entry:
-  ret i64* %"y#0"
+  ret i64* %"in#0"
 }
 
-define i64* @"position.position.=<1>"(i64* %"y#0") {
+define i64* @"position.position.=<1>"(i64* %"in#0") {
 entry:
-  ret i64* %"y#0"
+  ret i64* %"in#0"
 }
 
 define i64* @"position.position.position<0>"(i64 %"x#0", i64 %"y#0") {
@@ -149,14 +149,14 @@ entry:
 
 declare i8* @wybe_malloc(i32)
 
-define i64* @"position.position.=<0>"(i64* %"y#0") {
+define i64* @"position.position.=<0>"(i64* %"in#0") {
 entry:
-  ret i64* %"y#0"
+  ret i64* %"in#0"
 }
 
-define i64* @"position.position.=<1>"(i64* %"y#0") {
+define i64* @"position.position.=<1>"(i64* %"in#0") {
 entry:
-  ret i64* %"y#0"
+  ret i64* %"in#0"
 }
 
 define i64* @"position.position.position<0>"(i64 %"x#0", i64 %"y#0") {
