@@ -60,7 +60,7 @@ instance Show BodyBuildState where
 
 currBody :: BodyState -> ProcBody
 currBody (BodyState (Unforked prims) _ _ _) =
-  ProcBody (reverse prims) NoFork
+    ProcBody (reverse prims) NoFork
 currBody (BodyState (Forked body) _ _ _) = body
 
 
@@ -109,12 +109,24 @@ buildFork var ty final branchBuilders = do
             modify (\s -> s {currBuild = Forked $ ProcBody prims
                                          $ PrimFork var' ty final [] })
         mapM_ buildBranch branchBuilders
-        ProcBody revPrims' fork' <- gets currBody
+        ProcBody prims' fork' <- gets currBody
         case fork' of
-          NoFork -> shouldnt "Building a fork produced an empty fork"
+          NoFork -> return ()
+          PrimFork v ty l (b@(ProcBody pprims fork):bs) | all (==b) bs -> do
+            logBuild $ "All branches equal:  simplifying body to:"
+            let newPrims = pprims ++ prims'
+            -- all branches are equal:  don't create a new fork
+            case fork of
+              NoFork -> do
+                logBuild $ showPlacedPrims 4 newPrims
+                modify (\s -> s { currBuild = Unforked $ reverse newPrims })
+              PrimFork v ty l bods -> do
+                logBuild $ showBlock 4 $ ProcBody newPrims fork
+                modify (\s -> s { currBuild =
+                                  Forked $ ProcBody newPrims fork })
           PrimFork v ty l revBranches ->
             modify (\s -> s { currBuild =
-                              Forked $ ProcBody revPrims'
+                              Forked $ ProcBody prims'
                                        $ PrimFork v ty l 
                                        $ reverse revBranches })
       _ -> shouldnt "Switch on non-integer value"

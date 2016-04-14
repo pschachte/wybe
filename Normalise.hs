@@ -66,7 +66,7 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
     nonconstItems <- fmap concat $
            mapM (nonConstCtorItems ctorVis typespec constCount nonConstCount)
            $ zip nonconsts [0..]
-    let extraItems = implicitItems typespec consts nonconsts
+    let extraItems = implicitItems typespec consts nonconsts items
     normaliseSubmodule modCompiler name (Just params) vis pos
       $ [eq1,eq2] ++ constItems ++ nonconstItems ++ items ++ extraItems
 normaliseItem modCompiler (ModuleDecl vis name items pos) = do
@@ -373,4 +373,24 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
 ----------------------------------------------------------------
 
 implicitItems :: TypeSpec -> [Placed FnProto] -> [Placed FnProto] -> [Item]
-implicitItems typespec consts nonconsts = []
+                 -> [Item]
+implicitItems typespec consts nonconsts items =
+    implicitEquality typespec consts nonconsts items
+    -- XXX add print, display, maybe prettyprint, and lots more
+
+
+implicitEquality :: TypeSpec -> [Placed FnProto] -> [Placed FnProto] -> [Item]
+                 -> [Item]
+implicitEquality typespec consts nonconsts items =
+    []
+--     if List.any equalityTest items
+--     then []
+--     else
+--       let proto = ProcProto "=" [Param "left" typespec ParamIn Ordinary,
+--                                  Param "right" typespec ParamIn Ordinary] []
+--           body = equalityBody consts nonconsts
+--       in [ProcDecl Public SemiDet True proto body Nothing]
+-- 
+-- equalityBody :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
+-- equalityBody consts nonconsts =
+    
