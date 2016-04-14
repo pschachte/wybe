@@ -33,7 +33,7 @@ module AST (
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..), 
   argFlowDirection, argType, outArgVar, argDescription, flowsIn, flowsOut,
   foldBodyPrims, foldBodyDistrib, foldProcCalls,
-  expToStmt, expFlow, setExpFlow, isHalfUpdate,
+  expToStmt, procCallToExp, expFlow, setExpFlow, isHalfUpdate,
   Prim(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
@@ -719,7 +719,7 @@ addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis detism inline proto stmts pos) = do
     let ProcProto name params resources = proto
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 
-                  Map.empty vis inline $ initSuperprocSpec vis
+                  Map.empty vis detism inline $ initSuperprocSpec vis
     currMod <- getModuleSpec
     procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
     let procs' = procs ++ [procDef]
@@ -1209,6 +1209,7 @@ data ProcDef = ProcDef {
                                 -- source code (before inlining) and the
                                 -- count of calls for each caller
     procVis :: Visibility,      -- what modules should be able to see this?
+    procDetism :: Determinism,  -- how many results this proc returns
     procInline :: Bool,         -- should we inline calls to this proc?
     procSuperproc :: SuperprocSpec 
                                 -- the proc this should be part of, if any
@@ -1541,8 +1542,9 @@ flowsOut ParamInOut = True
 data Stmt
      = ProcCall ModSpec Ident (Maybe Int) [Placed Exp]
      | ForeignCall Ident Ident [Ident] [Placed Exp]
+     | Test [Placed Stmt] (Placed Exp)
      | Nop
-     -- All the following are eliminated during unbranching
+     -- All the following are eliminated during unbranching.
      -- The first stmt list is empty and the Exp is anything until
      -- flattening.  After that, the stmt list contains the body of
      -- the test, and the Exp is primitive.
@@ -1671,6 +1673,13 @@ expToStmt (ForeignFn lang name flags args) =
   ForeignCall lang name flags args
 expToStmt (Var name ParamIn _) = ProcCall [] name Nothing []
 expToStmt exp = shouldnt $ "non-Fncall expr " ++ show exp
+
+
+procCallToExp :: Stmt -> Exp
+procCallToExp (ProcCall maybeMod name Nothing args) =
+    Fncall maybeMod name args
+procCallToExp stmt =
+    shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
 
 
 expFlow :: Exp -> FlowDirection
@@ -1972,12 +1981,13 @@ showProcDefs firstID (def:defs) =
     
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis inline sub) =
+showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis detism inline sub) =
     "\n" 
-    ++ (if n == "" then "*main*" else n)
-    ++ " > " ++ visibilityPrefix vis
+    ++ (if n == "" then "*main*" else n) ++ " > "
+    ++ visibilityPrefix vis
+    ++ (if inline then "inline " else "")
+    ++ determinismPrefix detism
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
-    ++ (if inline then " (inline)" else "")
     ++ showSuperProc sub
     ++ "\n"
     ++ show thisID ++ ": "
@@ -2088,6 +2098,10 @@ showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ name ++ 
     (if List.null flags then "" else " " ++ unwords flags) ++
     "(" ++ intercalate ", " (List.map show args) ++ ")"
+showStmt indent (Test stmts exp) =
+    "test {" ++ showBody (indent+6) stmts ++ "}\n"
+    ++ List.replicate (indent+5) ' '
+    ++ "} " ++ show exp
 showStmt indent (Cond condstmts cond thn els) =
     let leadIn = List.replicate indent ' '
     in "if {" ++ showBody (indent+4) condstmts ++ "}\n"

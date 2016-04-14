@@ -72,7 +72,7 @@ import           System.Directory
 import           System.Exit               (exitFailure, exitSuccess)
 import           System.FilePath
 import           System.Time               (ClockTime)
-import           Types                     (typeCheckMod,
+import           Types                     (typeCheckMod, checkFullyTyped,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
 

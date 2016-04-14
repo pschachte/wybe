@@ -11,7 +11,7 @@
 module Normalise (normalise, normaliseItem) where
 
 import AST
-import Config (wordSize)
+import Config (wordSize,tagMask)
 import Control.Monad
 import Control.Monad.State (gets)
 import Control.Monad.Trans (lift,liftIO)
@@ -53,24 +53,8 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
     let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
     ty <- addType name (TypeDef (length params) rep' pos) vis
     -- XXX Should we special-case handling of = instead of generating these:
-    let eq1 = ProcDecl Public Det True
-              (ProcProto "=" [Param "x" ty ParamOut Ordinary,
-                              Param "y" ty ParamIn Ordinary] [])
-              [Unplaced $
-               ForeignCall "llvm" "move" [] [Unplaced $
-                                             Var "y" ParamIn Ordinary,
-                                             Unplaced $
-                                             Var "x" ParamOut Ordinary]]
-              Nothing
-    let eq2 = ProcDecl Public Det True
-              (ProcProto "=" [Param "y" ty ParamIn Ordinary,
-                              Param "x" ty ParamOut Ordinary] [])
-              [Unplaced $
-               ForeignCall "llvm" "move" [] [Unplaced $
-                                             Var "y" ParamIn Ordinary,
-                                             Unplaced $
-                                             Var "x" ParamOut Ordinary]]
-              Nothing
+    let eq1 = assignmentProc ty False
+    let eq2 = assignmentProc ty True
     let typespec = TypeSpec [] name
                    $ List.map (\n->TypeSpec [] n []) params
     let constCount = length consts
@@ -82,8 +66,9 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
     nonconstItems <- fmap concat $
            mapM (nonConstCtorItems ctorVis typespec constCount nonConstCount)
            $ zip nonconsts [0..]
+    let extraItems = implicitItems typespec consts nonconsts
     normaliseSubmodule modCompiler name (Just params) vis pos
-      $ [eq1,eq2] ++ constItems ++ nonconstItems ++ items
+      $ [eq1,eq2] ++ constItems ++ nonconstItems ++ items ++ extraItems
 normaliseItem modCompiler (ModuleDecl vis name items pos) = do
     normaliseSubmodule modCompiler name Nothing vis pos items
 normaliseItem _ (ImportMods vis modspecs pos) = do
@@ -108,10 +93,6 @@ normaliseItem modCompiler (FuncDecl vis detism inline
 normaliseItem _ item@(ProcDecl _ _ _ _ _ _) = do
     (item',tmpCtr) <- flattenProcDecl item
     addProc tmpCtr item'
--- normaliseItem modCompiler (CtorDecl vis proto pos) = do
---     modspec <- getModuleSpec
---     Just modparams <- getModuleParams
---     addCtor modCompiler vis (last modspec) modparams proto pos
 normaliseItem _ (StmtDecl stmt pos) = do
     updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
 
@@ -173,6 +154,22 @@ normaliseTypeRepresntation "double" = "f64"
 normaliseTypeRepresntation other = other
 
 
+-- |Generate an assignment proc (a definition of '=')
+assignmentProc :: TypeSpec -> Bool -> Item
+assignmentProc ty leftToRight =
+    let (lname,lflow,rname,rflow)
+            = if leftToRight
+              then ("in", ParamIn,"out", ParamOut)
+              else ("out", ParamOut,"in", ParamIn)
+    in ProcDecl Public Det True
+       (ProcProto "=" [Param lname ty lflow Ordinary,
+                       Param rname ty rflow Ordinary] [])
+       [Unplaced $
+        ForeignCall "llvm" "move" []
+        [Unplaced $ Var "in" ParamIn Ordinary,
+         Unplaced $ Var "out" ParamOut Ordinary]]
+       Nothing
+
 
 -- |Add a contructor for the specified type.
 constCtorItems :: Visibility -> TypeSpec -> (Placed FnProto,Integer) -> [Item]
@@ -184,12 +181,26 @@ constCtorItems  vis typeSpec (placedProto,num) =
         [Unplaced $ ForeignCall "lpvm" "cast" []
          [Unplaced $ Typed (IntValue num) typeSpec True,
           Unplaced $ Var "$" ParamOut Ordinary]]
+        pos,
+        ProcDecl vis SemiDet True
+        (ProcProto constName [Param "$" typeSpec ParamIn Ordinary] [])
+        [Unplaced $ Test
+         [Unplaced $ ForeignCall "lpvm" "cast" []
+          [Unplaced $ Var "$" ParamIn Ordinary,
+           Unplaced $ Typed (Var "$int" ParamOut Ordinary)
+           (TypeSpec ["wybe"] "int" []) True],
+          Unplaced $ ForeignCall "llvm" "icmp" ["eq"]
+          [Unplaced $ Var "$int" ParamIn Ordinary,
+           Unplaced $ IntValue num,
+           Unplaced $ Typed (Var "$succeed" ParamOut Ordinary)
+           (TypeSpec ["wybe"] "bool" []) True]]
+         (Unplaced $ Var "$succeed" ParamIn Ordinary)]
         pos]
 
 
 nonConstCtorItems :: Visibility -> TypeSpec -> Int -> Int
                   -> (Placed FnProto,Integer) -> Compiler [Item]
-nonConstCtorItems vis typeSpec constCount ctorCount (placedProto,num) = do
+nonConstCtorItems vis typeSpec constCount nonConstCount (placedProto,tag) = do
     let pos = place placedProto
     let ctorName = fnProtoName $ content placedProto
     let params = fnProtoParams $ content placedProto
@@ -201,9 +212,11 @@ nonConstCtorItems vis typeSpec constCount ctorCount (placedProto,num) = do
                        in (((var,typ,aligned):lst),aligned + sz))
           ([],0) fields
     return 
-      $ constructorItems ctorName params typeSpec size fields' num pos
-      ++ deconstructorItems ctorName params typeSpec size fields' num pos
-      ++ concatMap (getterSetterItems vis typeSpec ctorName pos) fields'
+      $ constructorItems ctorName params typeSpec size fields' tag pos
+      ++ deconstructorItems ctorName params typeSpec constCount nonConstCount
+         fields' tag pos
+      ++ concatMap (getterSetterItems vis typeSpec ctorName pos
+                    constCount nonConstCount tag) fields'
 
 
 -- |The number of bytes occupied by a value of the specified type.  If the
@@ -263,9 +276,10 @@ constructorItems ctorName params typeSpec size fields tag pos =
         pos]
 
 
-deconstructorItems :: Ident -> [Param] -> TypeSpec -> Int 
+deconstructorItems :: Ident -> [Param] -> TypeSpec -> Int -> Int
                     -> [(Ident,TypeSpec,Int)] -> Integer -> OptPos -> [Item]
-deconstructorItems ctorName params typeSpec size fields tag pos =
+deconstructorItems ctorName params typeSpec constCount nonConstCount
+    fields tag pos =
     -- XXX this needs to take the tag into account
     -- XXX this needs to be able to fail if the constructor doesn't match
     let flowType = Implicit pos
@@ -274,35 +288,89 @@ deconstructorItems ctorName params typeSpec size fields tag pos =
          (List.map (\(Param n t _ ft) -> (Param n t ParamOut ft)) params
           ++ [Param "$" typeSpec ParamIn Ordinary]) 
          [])
+        ((tagCheck constCount nonConstCount tag "$") ++
         (reverse $ List.map (\(var,_,aligned) ->
                               (Unplaced $ ForeignCall "lpvm" "access" []
                                [Unplaced $ Var "$" ParamIn flowType,
                                 Unplaced $ IntValue $ fromIntegral aligned,
                                 Unplaced $ Var var ParamOut flowType]))
-         fields)
+         fields))
         pos]
+
+
+tagCheck :: Int -> Int -> Integer -> Ident -> [Placed Stmt]
+tagCheck constCount nonConstCount tag varName =
+    -- If there are any constant constructors, be sure it's not one of them
+    (case constCount of
+          0 -> []
+          _ -> [Unplaced
+                $ Test [Unplaced $ ForeignCall "lpvm" "cast" []
+                        [Unplaced $ Var varName ParamIn Ordinary,
+                         Unplaced $ Typed (Var "$int" ParamOut Ordinary) 
+                         (TypeSpec ["wybe"] "int" []) True],
+                        Unplaced $ ForeignCall "llvm" "icmp" ["uge"]
+                        [Unplaced $ Var "$int" ParamIn Ordinary,
+                         Unplaced $ IntValue $ fromIntegral constCount,
+                         Unplaced $ Typed (Var "$nonconst" ParamOut Ordinary)
+                         (TypeSpec ["wybe"] "bool" []) True]]
+                (Unplaced $ Var "$nonconst" ParamIn Ordinary)])
+    ++
+    (case nonConstCount of
+          1 -> []  -- Nothing to do if it's the only non-const constructor
+          _ -> [Unplaced
+                $ Test [Unplaced $ ForeignCall "lpvm" "cast" []
+                        [Unplaced $ Var varName ParamIn Ordinary,
+                         Unplaced $ Typed (Var "$int" ParamOut Ordinary) 
+                         (TypeSpec ["wybe"] "int" []) True],
+                        Unplaced $ ForeignCall "llvm" "and" []
+                        [Unplaced $ Var "$int" ParamIn Ordinary,
+                         Unplaced $ IntValue $ fromIntegral tagMask,
+                         Unplaced $ Typed (Var "$tag" ParamOut Ordinary)
+                         (TypeSpec ["wybe"] "int" []) True],
+                        Unplaced $ ForeignCall "llvm" "icmp" ["eq"]
+                        [Unplaced $ Var "$tag" ParamIn Ordinary,
+                         Unplaced $ IntValue tag,
+                         Unplaced $ Typed (Var "$righttag" ParamOut Ordinary)
+                         (TypeSpec ["wybe"] "int" []) True]]
+                (Unplaced $ Var "$righttag" ParamIn Ordinary)])
 
 
 -- | Produce a getter and a setter for one field of the specified type.
 getterSetterItems :: Visibility -> TypeSpec -> Ident -> OptPos 
-                     -> (VarName,TypeSpec,Int) -> [Item]
-getterSetterItems vis rectype ctorName pos (field,fieldtype,offset) =
+                     -> Int -> Int -> Integer -> (VarName,TypeSpec,Int)
+                     -> [Item]
+getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
+    (field,fieldtype,offset) =
     -- XXX need to take tag into account!
     -- XXX this needs to be able to fail if the constructor doesn't match
     [FuncDecl vis Det True
      (FnProto field [Param "$rec" rectype ParamIn Ordinary] [])
-     fieldtype 
-     (Unplaced $ ForeignFn "lpvm" "access" []
-      [Unplaced $ Var "$rec" ParamIn Ordinary,
-       Unplaced $ IntValue $ fromIntegral offset])
-     pos,
-     ProcDecl vis Det True
-     (ProcProto field
-      [Param "$rec" rectype ParamInOut Ordinary,
-       Param "$field" fieldtype ParamIn Ordinary] [])
-     [Unplaced $ ForeignCall "lpvm" "mutate" []
-      [Unplaced $ Var "$rec" ParamIn Ordinary,
-       Unplaced $ IntValue $ fromIntegral offset,
-       Unplaced $ Var "$field" ParamIn Ordinary,
-       Unplaced $ Var "$rec" ParamOut Ordinary]]
+     fieldtype
+     (Unplaced $ Where (tagCheck constCount nonConstCount tag "$rec")
+      (Unplaced $ ForeignFn "lpvm" "access" []
+       [Unplaced $ Var "$rec" ParamIn Ordinary,
+        Unplaced $ IntValue $ fromIntegral offset]))
+      pos,
+      ProcDecl vis Det True
+      (ProcProto field
+       [Param "$rec" rectype ParamInOut Ordinary,
+        Param "$field" fieldtype ParamIn Ordinary] [])
+      ((tagCheck constCount nonConstCount tag "$rec")
+      ++ [Unplaced $ ForeignCall "lpvm" "mutate" []
+          [Unplaced $ Var "$rec" ParamIn Ordinary,
+           Unplaced $ IntValue $ fromIntegral offset,
+           Unplaced $ Var "$field" ParamIn Ordinary,
+           Unplaced $ Var "$rec" ParamOut Ordinary]])
      pos]
+
+
+----------------------------------------------------------------
+--                     Generating implicit procs
+--
+-- Wybe automatically generates equality test procs if you don't write
+-- your own definitions.
+--
+----------------------------------------------------------------
+
+implicitItems :: TypeSpec -> [Placed FnProto] -> [Placed FnProto] -> [Item]
+implicitItems typespec consts nonconsts = []

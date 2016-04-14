@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public (0 calls) (inline)
+*main* > public inline (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     simple_loop.gen$1<0>(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @simple_loop:1:1
 
@@ -29,11 +29,11 @@ gen$1 > (2 calls)
 
 
 
-gen$3 > (1 calls) (inline)
+gen$3 > inline (1 calls)
 0: gen$3([c#0:wybe.char], [tmp$0#0:wybe.bool], wybe.io$io#0:wybe.phantom, [?wybe.io$io#0:wybe.phantom]):
 
 
-gen$4 > (1 calls) (inline)
+gen$4 > inline (1 calls)
 0: gen$4(c#0:wybe.char, [tmp$0#0:wybe.bool], wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
     foreign c putchar(~c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:112:39
     simple_loop.gen$1<0>(~wybe.io$io#1:wybe.phantom, ?wybe.io$io#2:wybe.phantom) @simple_loop:1:1

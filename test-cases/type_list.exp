@@ -41,7 +41,7 @@ AFTER EVERYTHING:
 
 
 
-gen$1 > (2 calls) (inline)
+gen$1 > inline (2 calls)
 0: gen$1(tmp$0#0:type_list.intlist, [tmp$1#0:wybe.bool], [x#0:type_list.intlist], [y#0:type_list.intlist], ?$#0:type_list.intlist):
     foreign llvm move(~tmp$0#0:type_list.intlist, ?$#0:type_list.intlist)
   submodules      : type_list.intlist
@@ -65,50 +65,50 @@ gen$1 > (2 calls) (inline)
   resources       : 
   procs           : 
 
-= > public (3 calls) (inline)
+= > public inline (3 calls)
 0: =(?x#0:type_list.intlist, y#0:type_list.intlist):
     foreign llvm move(~y#0:type_list.intlist, ?x#0:type_list.intlist)
-= > public (0 calls) (inline)
+= > public inline (0 calls)
 1: =(y#0:type_list.intlist, ?x#0:type_list.intlist):
     foreign llvm move(~y#0:type_list.intlist, ?x#0:type_list.intlist)
-= > public (0 calls) (inline)
+= > public inline (0 calls)
 2: =([x#0:type_list.intlist], [y#0:type_list.intlist], ?$#0:wybe.bool):
     foreign lpvm cast(0:bool, ?tmp$0#0:wybe.bool)
     foreign llvm move(~tmp$0#0:wybe.bool, ?$#0:wybe.bool)
 
 
-[] > public (0 calls) (inline)
+[] > public inline (0 calls)
 0: [](?$#0:type_list.intlist):
     foreign lpvm cast(0:intlist, ?$#0:type_list.intlist)
 
 
-[|] > public (0 calls) (inline)
+[|] > public inline (0 calls)
 0: [|](head#0:wybe.int, tail#0:type_list.intlist, ?$#0:type_list.intlist):
     foreign lpvm alloc(16:wybe.int, ?$rec#0:intlist)
     foreign lpvm mutate(~%$rec#0:intlist, ?%$rec#1:intlist, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:intlist, ?%$rec#2:intlist, 8:wybe.int, ~tail#0:type_list.intlist)
     foreign lpvm cast(~$rec#2:intlist, ?$recint#0:wybe.int)
     foreign lpvm cast(~$recint#0:wybe.int, ?$#0:type_list.intlist)
-[|] > public (0 calls) (inline)
+[|] > public inline (0 calls)
 1: [|](?head#0:wybe.int, ?tail#0:type_list.intlist, $#0:type_list.intlist):
     foreign lpvm access($#0:type_list.intlist, 0:wybe.int, ?head#0:wybe.int)
     foreign lpvm access(~$#0:type_list.intlist, 8:wybe.int, ?tail#0:type_list.intlist)
 
 
-head > public (0 calls) (inline)
+head > public inline (0 calls)
 0: head($rec#0:type_list.intlist, ?$#0:wybe.int):
     foreign lpvm access(~$rec#0:type_list.intlist, 0:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)
-head > public (0 calls) (inline)
+head > public inline (0 calls)
 1: head($rec#0:type_list.intlist, ?$rec#1:type_list.intlist, $field#0:wybe.int):
     foreign lpvm mutate(~$rec#0:type_list.intlist, 0:wybe.int, ~$field#0:wybe.int, ?$rec#1:type_list.intlist)
 
 
-tail > public (0 calls) (inline)
+tail > public inline (0 calls)
 0: tail($rec#0:type_list.intlist, ?$#0:type_list.intlist):
     foreign lpvm access(~$rec#0:type_list.intlist, 8:wybe.int, ?tmp$0#0:type_list.intlist)
     foreign llvm move(~tmp$0#0:type_list.intlist, ?$#0:type_list.intlist)
-tail > public (0 calls) (inline)
+tail > public inline (0 calls)
 1: tail($rec#0:type_list.intlist, ?$rec#1:type_list.intlist, $field#0:type_list.intlist):
     foreign lpvm mutate(~$rec#0:type_list.intlist, 8:wybe.int, ~$field#0:type_list.intlist, ?$rec#1:type_list.intlist)
 type_list, type_list.intlist

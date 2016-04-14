@@ -90,6 +90,7 @@ type Flattener = StateT FlattenerState Compiler
 
 data FlattenerState = Flattener {
     prefixStmts :: [Placed Stmt],   -- ^Code to be generated earlier, reversed
+                                    -- (used for loop initialisation)
     flattened   :: [Placed Stmt],   -- ^Flattened code generated, reversed
     postponed   :: [Placed Stmt],   -- ^Code to be generated later
     tempCtr     :: Int,             -- ^Temp variable counter
@@ -118,6 +119,8 @@ postpone pos stmt = do
     modify (\s -> s { postponed = maybePlace stmt pos:stmts })
 
 
+-- | Add an initialisation statement to the list of initialisations
+--   XXX This will be needed for for loops, but is not used yet
 saveInit :: OptPos -> Stmt -> Flattener ()
 saveInit pos stmt = do
     stmts <- gets prefixStmts
@@ -140,8 +143,8 @@ tempVar = do
     return $ mkTempName ctr
 
 
-flattenInner :: Bool -> Flattener t -> Flattener (t,[Placed Stmt])
-flattenInner isLoop inner = do
+flattenInner :: Bool -> Bool -> Flattener t -> Flattener (t,[Placed Stmt])
+flattenInner isLoop transparent inner = do
     oldState <- get
     (val,innerState) <-
         lift (runStateT inner
@@ -154,7 +157,10 @@ flattenInner isLoop inner = do
       showBody 4 (flattened innerState)
     logFlatten $ "** Postponed:\n" ++ 
       showBody 4 (postponed innerState)
-    put $ oldState { tempCtr = tempCtr innerState }
+    if transparent
+       then put $ oldState { tempCtr = tempCtr innerState,
+                             defdVars = defdVars innerState }
+        else put $ oldState { tempCtr = tempCtr innerState }
     if isLoop
       then flattenStmts $ prefixStmts innerState
       else modify (\s -> s { prefixStmts = prefixStmts innerState })
@@ -203,7 +209,9 @@ flattenStmts stmts =
 
 flattenStmt :: Stmt -> OptPos -> Flattener ()
 flattenStmt stmt pos = do
-    modify (\s -> s { stmtUses = Set.empty, stmtDefs = Set.empty, currPos = pos})
+    modify (\s -> s { stmtUses = Set.empty,
+                      stmtDefs = Set.empty,
+                      currPos = pos})
     defd <- gets defdVars
     logFlatten $ "flattening stmt " ++ showStmt 4 stmt ++
       " with defined vars " ++ show defd
@@ -220,12 +228,25 @@ flattenStmt' (ForeignCall lang name flags args) pos = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
     emitPostponed
+flattenStmt' tststmt@(Test stmts tst) pos = do
+    logFlatten $ "** Flattening test:" ++ showStmt 4 tststmt
+    (_,stmts') <- flattenInner False True (flattenStmts stmts)
+    (vars,tst') <- flattenInner False False (flattenPExp tst)
+    let errPos = betterPlace pos tst
+    case vars of
+      [] -> lift $ message Error "Test with no flow" errPos
+      [var] -> do
+        logFlatten $ "** Result:\n" ++ (showStmt 4 $ Test (stmts++tst') var)
+        emit pos $ Test (stmts++tst') var
+      [_,_] -> lift $ message Error
+              ("Test with in-out flow: " ++ show vars) errPos
+      _ -> shouldnt "Single expression expanded to more than 2 args"
 flattenStmt' (Cond tstStmts tst thn els) pos = do
-    logFlatten $ "** Flattening test:" ++ show tst
-    (vars,tst') <- flattenInner False (flattenPExp tst)
+    logFlatten $ "** Flattening conditional:" ++ show tst
+    (vars,tst') <- flattenInner False False (flattenPExp tst)
     logFlatten $ "** Result:\n" ++ showBody 4 tst'
-    (_,thn') <- flattenInner False (flattenStmts thn)
-    (_,els') <- flattenInner False (flattenStmts els)
+    (_,thn') <- flattenInner False False (flattenStmts thn)
+    (_,els') <- flattenInner False False (flattenStmts els)
     let errPos = betterPlace pos tst
     case vars of
       [] -> lift $ message Error "Condition with no flow" errPos
@@ -234,7 +255,7 @@ flattenStmt' (Cond tstStmts tst thn els) pos = do
               ("Condition with in-out flow: " ++ show vars) errPos
       _ -> shouldnt "Single expression expanded to more than 2 args"
 flattenStmt' (Loop body) pos = do
-    (_,body') <- flattenInner True 
+    (_,body') <- flattenInner True False
              (flattenStmts $ body ++ [Unplaced $ Next])
     emit pos $ Loop body'
 flattenStmt' (For itr gen) pos = do

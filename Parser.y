@@ -1,4 +1,4 @@
-{
+{ -- -*- haskell -*-
 --  File     : Parser.y
 --  Author   : Peter Schachte
 --  Origin   : Tue Nov 08 22:23:55 2011
@@ -114,9 +114,6 @@ Item  :: { Item }
     : Visibility 'type' TypeProto  TypeImpln Items 'end'
                                 { TypeDecl $1 $3 $4 $5 $ 
 				    Just $ tokenPosition $2 }
-    -- : Visibility 'type' TypeProto OptRepresentation Items 'end'
-    --                             { TypeDecl $1 $3 $4 $5 $ 
-    --     			    Just $ tokenPosition $2 }
     | Visibility 'module' ident 'is' Items 'end'
                                 { ModuleDecl $1 (identName $3) $5 $ 
 				    Just $ tokenPosition $2 }
@@ -128,23 +125,17 @@ Item  :: { Item }
     | Visibility 'resource' ident OptType OptInit
                                 { ResourceDecl $1 (identName $3) $4 $5
 				    $ Just $ tokenPosition $2 }
-    | Visibility 'func' Determinism FnProto OptType '=' Exp
-                                { FuncDecl $1 $3 False (content $4) $5 $7
-				    $ Just $ tokenPosition $2 }
-    | Visibility 'proc' Determinism ProcProto ProcBody
-                                { ProcDecl $1 $3 False $4 $5
-                                    $ Just $ tokenPosition $2 }
-    -- | Visibility 'ctor' FnProto { CtorDecl $1 $3
-    --     			    $ Just $ tokenPosition $2 }
+    | Visibility Determinism 'func' FnProto OptType '=' Exp
+                                { FuncDecl $1 $2 False (content $4) $5 $7
+				    $ Just $ tokenPosition $3 }
+    | Visibility Determinism 'proc' ProcProto ProcBody
+                                { ProcDecl $1 $2 False $4 $5
+                                    $ Just $ tokenPosition $3 }
     | Stmt                      { StmtDecl (content $1) (place $1) }
 
 
 TypeProto :: { TypeProto }
     : ident OptIdents           { TypeProto (identName $1) $2 }
-
-OptRepresentation :: { TypeRepresentation }
-    : 'is' ident                { identName $2 }
-    | {- empty -}               { defaultTypeRepresentation }
 
 TypeImpln :: { TypeImpln }
     : 'is' ident                { TypeRepresentation $ identName $2 }
@@ -353,6 +344,10 @@ Stmt :: { Placed Stmt }
     --                             { Placed (Cond [] $2 $4 $5)
     --                              (tokenPosition $1) }
     | 'if' IfCases              { Placed $2 (tokenPosition $1) }
+    | 'test' Stmt               {Placed
+                                 (Test [] (fmap procCallToExp $2))
+                                 (tokenPosition $1)}
+    | 'test' RelExp             {Placed (Test [] $2) (tokenPosition $1)}
     | 'do' Stmts 'end'          { Placed (Loop $2)
                                   (tokenPosition $1) }
     | 'for' Exp 'in' Exp        { Placed (For $2 $4)
@@ -371,7 +366,7 @@ Stmt :: { Placed Stmt }
                                          (tokenPosition $1) }
 
 IfCases :: { Stmt }
-    : Exp '::' Stmts IfCases    { Cond [] $1 $3 [Unplaced $4] }
+    : Exp '::' Stmts '|' IfCases { Cond [] $1 $3 [Unplaced $5] }
     | Exp '::' Stmts 'end'      { Cond [] $1 $3 [] }
 
 
@@ -386,8 +381,26 @@ OptInit :: { Maybe (Placed Exp) }
 
 
 
+RelExp :: { Placed Exp }
+    : Exp '<' Exp               { maybePlace (Fncall [] (symbolName $2)
+                                              [$1, $3])
+                                             (place $1) }
+    | Exp '<=' Exp              { maybePlace (Fncall [] (symbolName $2)
+                                              [$1, $3])
+                                             (place $1) }
+    | Exp '>' Exp               { maybePlace (Fncall [] (symbolName $2)
+                                              [$1, $3])
+                                             (place $1) }
+    | Exp '>=' Exp              { maybePlace (Fncall [] (symbolName $2)
+                                              [$1, $3])
+                                             (place $1) }
+    | Exp '/=' Exp              { maybePlace (Fncall [] (symbolName $2)
+                                              [$1, $3])
+                                             (place $1) }
+
 SimpleExp :: { Placed Exp }
-    : Exp '+' Exp               { maybePlace (Fncall [] (symbolName $2)
+    : RelExp                    { $1 }
+    | Exp '+' Exp               { maybePlace (Fncall [] (symbolName $2)
                                               [$1, $3])
 	                                     (place $1) }
     | Exp '-' Exp               { maybePlace (Fncall [] (symbolName $2)
@@ -408,24 +421,9 @@ SimpleExp :: { Placed Exp }
     | Exp '++' Exp              { maybePlace (Fncall [] (symbolName $2)
                                               [$1, $3])
                                              (place $1) }
-    | Exp '<' Exp               { maybePlace (Fncall [] (symbolName $2)
-                                              [$1, $3])
-                                             (place $1) }
-    | Exp '<=' Exp              { maybePlace (Fncall [] (symbolName $2)
-                                              [$1, $3])
-                                             (place $1) }
-    | Exp '>' Exp               { maybePlace (Fncall [] (symbolName $2)
-                                              [$1, $3])
-                                             (place $1) }
-    | Exp '>=' Exp              { maybePlace (Fncall [] (symbolName $2)
-                                              [$1, $3])
-                                             (place $1) }
     -- | Exp '==' Exp              { maybePlace (Fncall [] (symbolName $2)
     --                                           [$1, $3])
     --                                          (place $1) }
-    | Exp '/=' Exp              { maybePlace (Fncall [] (symbolName $2)
-                                              [$1, $3])
-                                             (place $1) }
    | 'not' Exp                 { Placed (Fncall [] (identName $1) [$2])
 	                                 (tokenPosition $1) }
    | Exp 'and' Exp             { maybePlace (Fncall [] (identName $2)

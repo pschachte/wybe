@@ -11,12 +11,12 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public (0 calls) (inline)
+*main* > public inline (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     foreign c print_int(40:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:104:38
 
 
-quad > public (1 calls) (inline)
+quad > public inline (1 calls)
 0: quad(x#0:wybe.int, ?$#0:wybe.int):
     foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$4#0:wybe.int) @wybe:4:38
     foreign llvm add(~tmp$4#0:wybe.int, ~tmp$4#0:wybe.int, ?tmp$8#0:wybe.int) @wybe:4:38
