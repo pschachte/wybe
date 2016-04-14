@@ -45,7 +45,6 @@ o Support optional and named arguments
 
 Optimise:
 o More foreign primitive optimisation:  or with 0, unsigned > 1, etc.
-o Optimise away conditionals with empty then and else branches
 o Remove unneeded input and unchanged output arguments
 o Inter-procedure common sub-expression elimination
 o Code hoisting
