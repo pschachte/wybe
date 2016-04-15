@@ -156,7 +156,7 @@ type OptPos = Maybe SourcePos
 data Placed t
     = Placed t SourcePos
     | Unplaced t
-    deriving (Eq, Generic)
+    deriving (Eq, Ord, Generic)
 
 
 -- |Return the optional position attached to a Placed value.
@@ -1554,7 +1554,7 @@ data Stmt
      | For (Placed Exp) (Placed Exp)
      | Break  -- holds the variable versions before the break
      | Next  -- holds the variable versions before the next
-     deriving (Eq,Generic)
+     deriving (Eq,Ord,Generic)
 
 -- |An expression.  These are all normalised into statements.
 data Exp
@@ -1570,7 +1570,7 @@ data Exp
       | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
       | Fncall ModSpec Ident [Placed Exp]
       | ForeignFn Ident Ident [Ident] [Placed Exp]
-     deriving (Eq,Generic)
+     deriving (Eq,Ord,Generic)
 
 -- |A loop generator (ie, an iterator).  These need to be 
 --  generalised, allowing them to be user-defined.

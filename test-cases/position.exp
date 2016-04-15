@@ -37,7 +37,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-= > public inline (2 calls)
+= > public inline (0 calls)
 0: =(?out#0:position.position, in#0:position.position):
     foreign llvm move(~in#0:position.position, ?out#0:position.position)
 = > public inline (0 calls)
@@ -60,8 +60,7 @@ position > public inline (0 calls)
 
 x > public inline (0 calls)
 0: x($rec#0:position.position, ?$#0:wybe.int):
-    foreign lpvm access(~$rec#0:position.position, 0:wybe.int, ?tmp$0#0:wybe.int)
-    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)
+    foreign lpvm access(~$rec#0:position.position, 0:wybe.int, ?$#0:wybe.int)
 x > public inline (0 calls)
 1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
     foreign lpvm mutate(~$rec#0:position.position, 0:wybe.int, ~$field#0:wybe.int, ?$rec#1:position.position)
@@ -69,8 +68,7 @@ x > public inline (0 calls)
 
 y > public inline (0 calls)
 0: y($rec#0:position.position, ?$#0:wybe.int):
-    foreign lpvm access(~$rec#0:position.position, 8:wybe.int, ?tmp$0#0:wybe.int)
-    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int)
+    foreign lpvm access(~$rec#0:position.position, 8:wybe.int, ?$#0:wybe.int)
 y > public inline (0 calls)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
     foreign lpvm mutate(~$rec#0:position.position, 8:wybe.int, ~$field#0:wybe.int, ?$rec#1:position.position)

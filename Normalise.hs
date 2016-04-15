@@ -86,8 +86,11 @@ normaliseItem modCompiler (FuncDecl vis detism inline
     vis detism inline
     (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType]) 
      resources)
-    [maybePlace (ProcCall [] "=" Nothing 
-                 [Unplaced $ Var "$" ParamOut flowType, result])
+    [maybePlace (ForeignCall "llvm" "move" []
+                 [maybePlace (Typed (content result) resulttype False)
+                  $ place result,
+                  Unplaced
+                  $ Typed (Var "$" ParamOut flowType) resulttype False])
      pos]
     pos)
 normaliseItem _ item@(ProcDecl _ _ _ _ _ _) = do
@@ -343,13 +346,14 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
     (field,fieldtype,offset) =
     -- XXX need to take tag into account!
     -- XXX this needs to be able to fail if the constructor doesn't match
-    [FuncDecl vis Det True
-     (FnProto field [Param "$rec" rectype ParamIn Ordinary] [])
-     fieldtype
-     (Unplaced $ Where (tagCheck constCount nonConstCount tag "$rec")
-      (Unplaced $ ForeignFn "lpvm" "access" []
-       [Unplaced $ Var "$rec" ParamIn Ordinary,
-        Unplaced $ IntValue $ fromIntegral offset]))
+    [ProcDecl vis Det True
+     (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
+                       Param "$" fieldtype ParamOut Ordinary] [])
+     ((tagCheck constCount nonConstCount tag "$rec")
+      ++ [Unplaced $ ForeignCall "lpvm" "access" []
+          [Unplaced $ Var "$rec" ParamIn Ordinary,
+           Unplaced $ IntValue $ fromIntegral offset,
+           Unplaced $ Var "$" ParamOut Ordinary]])
       pos,
       ProcDecl vis Det True
       (ProcProto field
