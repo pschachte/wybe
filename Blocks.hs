@@ -80,9 +80,9 @@ blockTransformModule thisMod =
 
        --------------------------------------------------
        -- Name mangling
-       let emptyFilter = List.filter (not . emptyProc)       
+       let emptyFilter = List.filter (not . emptyProc)
        let mangledProcs = mangleProcs $ concat procs
-                  
+
        --------------------------------------------------
        -- Translate
        procs' <- mapM (translateProc allProtos) $ emptyFilter mangledProcs
@@ -110,7 +110,7 @@ changeNameWith ((s,i):ns) (p:ps) =
         newProto = proto {primProtoName = pname}
         newImpln = ProcDefPrim newProto body
     in p {procImpln = newImpln} : changeNameWith ns ps
-changeNameWith _ _ = shouldnt "Incorrect name map used for mangling."       
+changeNameWith _ _ = shouldnt "Incorrect name map used for mangling."
 
 buildNameMap :: [ProcDef] -> [(String, Int)]
 buildNameMap ps = List.foldl reduceNameMap [] procNames
@@ -180,7 +180,7 @@ translateProc modProtos proc = do
     -- Codegen
     codestate <- execCodegen modProtos (doCodegenBody proto body)
     let pname = primProtoName proto
-    
+
     exs <- mapM declareExtern $ externs codestate
     let globals = List.map LLVMAST.GlobalDefinition $ globalVars codestate
     let body' = createBlocks codestate
@@ -397,7 +397,7 @@ codegenForkBody var (b1:b2:[]) params =
        cbr testop ifthen ifelse
 
        -- if.then
-       setBlock ifthen       
+       setBlock ifthen
        retop <- codegenBody b2
        case blockReturn retop of
            Nothing -> buildOutputOp params >>= ret
@@ -417,7 +417,7 @@ codegenForkBody _ _ _ = error
   $ "Unrecognized control flow. Too many/few blocks."
 
 -- | A filter transformation to ensure that a Just Void operand is
--- treated as a Nothing instead of an existing value. 
+-- treated as a Nothing instead of an existing value.
 blockReturn :: Maybe Operand -> Maybe Operand
 blockReturn op@(Just (LocalReference VoidType _)) = Nothing
 blockReturn op = op
@@ -468,10 +468,10 @@ cgen prim@(PrimForeign lang name flags args)
      | lang == "lpvm" = do
            -- mapM_ cgenArg $ primInputs args
            cgenLPVM name flags args
-                          
+
      | otherwise =
          do addExtern prim
-            let inArgs = primInputs args            
+            let inArgs = primInputs args
             let nm = LLVMAST.Name name
             inops <- mapM cgenArg inArgs
             -- alignedOps <- mapM makeCIntOp inops
@@ -500,8 +500,8 @@ isIntOp :: Operand -> Bool
 isIntOp (LocalReference (LLVMAST.IntegerType _) _) = True
 isIntOp (ConstantOperand (C.Int _ _)) = True
 isIntOp _ = False
-             
-    
+
+
 
 
 
@@ -561,7 +561,7 @@ cgenLLVMUnop name flags args
 findProto :: ProcSpec -> Codegen (Maybe PrimProto)
 findProto (ProcSpec _ nm i) = do
     allProtos <- gets Codegen.modProtos
-    let procNm = nm 
+    let procNm = nm
     return $ List.find (\p -> primProtoName p == procNm) allProtos
 
 
@@ -591,7 +591,7 @@ cgenLPVM pname flags args
           assign outNm op
           return $ Just op
 
-    | pname == "access" = do          
+    | pname == "access" = do
           let (ptrOpArg, index) = case inputs of
                   (a:b:[]) -> (a, valTrust b)
                   _ -> shouldnt "Incorrect access instruction."
@@ -600,7 +600,7 @@ cgenLPVM pname flags args
           op <- gcAccess ptrOp index outTy
           assign outNm op
           return $ Just op
-    
+
     | pname == "mutate" = do
           let (ptrOpArg, index, valArg) = case inputs of
                   (a:b:c:[]) -> (a, valTrust b , c)
@@ -610,14 +610,14 @@ cgenLPVM pname flags args
           op <- gcMutate ptrOp index val
           assign outNm ptrOp
           return $ Just ptrOp
-          
+
     | pname == "cast" = do
           when (length inputs /= 1) $ shouldnt "Incorrect cast instruction."
           let inArg = head inputs
           let outArg = head outputs
           outTy <- lift $ typed' (argType outArg)
           inTy <- lift $ typed' (argType inArg)
-          inOp <- cgenArg inArg          
+          inOp <- cgenArg inArg
           castOp <- case inOp of
               (ConstantOperand c) ->
                   if isPtr outTy
@@ -632,10 +632,10 @@ cgenLPVM pname flags args
                       loaded <- doLoad consTy ptr
                       doCast loaded consTy outTy
               _ -> doCast inOp inTy outTy
-                  
+
           assign outNm castOp
           return $ Just castOp
-          
+
 
     | otherwise = shouldnt $ "Instruction " ++ pname ++ " not imlemented."
   where
@@ -644,7 +644,7 @@ cgenLPVM pname flags args
     trustMsg = "Argument is not an Integer value."
     valTrust a = trustFromJust trustMsg $ argIntVal a
     outNm = pullName $ head outputs
-    
+
 
 isNullCons :: C.Constant -> Bool
 isNullCons (C.Int _ val) = val == 0
@@ -667,7 +667,7 @@ doCast op _ ty2 = bitcast op ty2
 
 
 
--- | Predicate to check if an operand is a constant    
+-- | Predicate to check if an operand is a constant
 constantType :: C.Constant -> LLVMAST.Type
 constantType (C.Int bs _) = int_c bs
 constantType (C.Float _) = float_t
@@ -704,7 +704,7 @@ addInstruction ins args =
                   return $ last fields
 
 pullName (ArgVar var _ _ _ _) = show var
-pullName _ = error $ "Expected variable as output."        
+pullName _ = error $ "Expected variable as output."
 
 -- | Generate an expanding instruction name using the passed flags. This is
 -- useful to augment a simple instruction. (Ex: compare instructions can have
@@ -833,7 +833,7 @@ getBits :: LLVMAST.Type -> Word32
 getBits (IntegerType bs) = bs
 getBits (PointerType ty _) = getBits ty
 getBits (FloatingPointType bs _) = bs
-getBits ty = fromIntegral wordSize 
+getBits ty = fromIntegral wordSize
 
 -- | Convert a string into a constant array of constant integers.
 makeStringConstant :: String ->  C.Constant
@@ -860,18 +860,26 @@ llvmMapBinop =
             ("mul", imul),
             ("div", idiv),
             ("sdiv", sdiv),
+            ("urem", urem),
+            ("srem", srem),
             -- * Floating point instruction
             ("fadd", fadd),
             ("fsub", fsub),
             ("fmul", fmul),
             ("fdiv", fdiv),
+            ("frem", frem),
             -- * Comparisions
             ("icmp eq", icmp IP.EQ),
             ("icmp ne", icmp IP.NE),
-            ("icmp slt", icmp IP.SLT),
-            ("icmp sle", icmp IP.SLE),
+            ("icmp ugt", icmp IP.UGT),
+            ("icmp uge", icmp IP.UGE),
+            ("icmp ult", icmp IP.ULT),
+            ("icmp ule", icmp IP.ULE),
             ("icmp sgt", icmp IP.SGT),
             ("icmp sge", icmp IP.SGE),
+            ("icmp slt", icmp IP.SLT),
+            ("icmp sle", icmp IP.SLE),
+
             -- * Floating point comparisions
             ("fcmp eq", fcmp FP.OEQ),
             ("fcmp ne", fcmp FP.ONE),
@@ -880,6 +888,9 @@ llvmMapBinop =
             ("fcmp sgt", fcmp FP.OGT),
             ("fcmp sge", fcmp FP.OGE),
             -- * Bitwise operations
+            ("shl", shl),
+            ("lshr", lshr),
+            ("ashr", ashr),
             ("or", lOr),
             ("and", lAnd),
             ("xor", lXor)
@@ -931,7 +942,7 @@ typeStrToType ty@(c:cs)
   where
     bytes = (read cs :: Int)
 
-    
+
 ------------------------------------------------------------------------------
 -- -- * Creating LLVM AST module from global definitions                    --
 ------------------------------------------------------------------------------
@@ -995,13 +1006,13 @@ declareExtern PrimNop = error "Can't declare extern for PrimNop."
 makeExArg :: (Word, PrimArg) -> Compiler (Type, LLVMAST.Name)
 makeExArg (index,arg) = do
     ty <- (typed' . argType) arg
-    let nm = LLVMAST.UnName index    
+    let nm = LLVMAST.UnName index
     return (ty, nm)
 
 
 mallocExtern :: LLVMAST.Definition
 mallocExtern = let ext_arg = [(LLVMAST.IntegerType 32, LLVMAST.Name "size")]
-               in external (ptr_t (int_c 8)) "wybe_malloc" ext_arg    
+               in external (ptr_t (int_c 8)) "wybe_malloc" ext_arg
 
 ----------------------------------------------------------------------------
 -- Block Modification                                                     --
@@ -1094,7 +1105,7 @@ callWybeMalloc size = do
     let inOp = cons $ C.Int 32 size
     let ins = call (externf outTy fnName) [inOp]
     instr outTy ins
-    
+
 
 -- | Call the external C-library function for malloc and return
 -- the bitcasted pointer to that location.
@@ -1122,7 +1133,7 @@ gcAccess ptr offset outTy = do
             loadedOp <- instr opType $ load accessPtr
             inttoptr loadedOp outTy
         _ -> instr opType $ load accessPtr
-    
+
 
 -- | Index the pointer at the given offset and store the given operand value
 -- in that indexed location.
@@ -1135,7 +1146,7 @@ gcMutate ptr offset val = do
     let indices = [(cons $ C.Int 64 index)]
     let getel = LLVMAST.GetElementPtr False ptr indices []
     accessPtr <- instr opTypePtr getel
-    -- if val is a pointer then the ptrtoint instruction is needed    
+    -- if val is a pointer then the ptrtoint instruction is needed
     storeOp <- makeStoreOp ptr val
     store accessPtr storeOp
 
@@ -1162,9 +1173,9 @@ makeStoreOp ptr
 makeStoreOp ptr
     v@(ConstantOperand (C.IntToPtr c pty)) =
     return $ cons c
-makeStoreOp ptr v = return v  
-    
-    
+makeStoreOp ptr v = return v
+
+
 
 
 ----------------------------------------------------------------------------

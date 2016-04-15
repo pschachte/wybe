@@ -55,14 +55,14 @@ AFTER EVERYTHING:
 
 * > public inline (0 calls)
 0: *(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint):
-    foreign llvm mul(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:8:44
-    foreign llvm move(~tmp$0#0:type_int.myint, ?$#0:type_int.myint)
+    foreign llvm mul(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:myint) @type_int:8:44
+    foreign llvm move(~tmp$0#0:myint, ?$#0:type_int.myint) @type_int:8:12
 
 
 + > public inline (0 calls)
 0: +(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint):
-    foreign llvm add(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:2:44
-    foreign llvm move(~tmp$0#0:type_int.myint, ?$#0:type_int.myint)
+    foreign llvm add(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:myint) @type_int:2:44
+    foreign llvm move(~tmp$0#0:myint, ?$#0:type_int.myint) @type_int:2:12
 + > public inline (0 calls)
 1: +(?x#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint):
     foreign llvm sub(~z#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:3:50
@@ -75,8 +75,8 @@ AFTER EVERYTHING:
 
 - > public inline (0 calls)
 0: -(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint):
-    foreign llvm sub(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:5:44
-    foreign llvm move(~tmp$0#0:type_int.myint, ?$#0:type_int.myint)
+    foreign llvm sub(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:myint) @type_int:5:44
+    foreign llvm move(~tmp$0#0:myint, ?$#0:type_int.myint) @type_int:5:12
 - > public inline (0 calls)
 1: -(?x#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint):
     foreign llvm add(~z#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:6:50
@@ -89,52 +89,52 @@ AFTER EVERYTHING:
 
 / > public inline (0 calls)
 0: /(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint):
-    foreign llvm sdiv(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:9:44
-    foreign llvm move(~tmp$0#0:type_int.myint, ?$#0:type_int.myint)
+    foreign llvm sdiv(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:myint) @type_int:9:44
+    foreign llvm move(~tmp$0#0:myint, ?$#0:type_int.myint) @type_int:9:12
 
 
 /= > public inline (0 calls)
 0: /=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
-    foreign llvm icmp ne(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:wybe.bool) @type_int:11:44
-    foreign llvm move(~tmp$0#0:wybe.bool, ?$#0:wybe.bool)
+    foreign llvm icmp ne(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:bool) @type_int:11:44
+    foreign llvm move(~tmp$0#0:bool, ?$#0:wybe.bool) @type_int:11:12
 
 
 < > public inline (0 calls)
 0: <(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
-    foreign llvm icmp slt(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:wybe.bool) @type_int:12:43
-    foreign llvm move(~tmp$0#0:wybe.bool, ?$#0:wybe.bool)
+    foreign llvm icmp slt(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:bool) @type_int:12:43
+    foreign llvm move(~tmp$0#0:bool, ?$#0:wybe.bool) @type_int:12:12
 
 
 <= > public inline (0 calls)
 0: <=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
-    foreign llvm icmp sle(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:wybe.bool) @type_int:13:44
-    foreign llvm move(~tmp$0#0:wybe.bool, ?$#0:wybe.bool)
+    foreign llvm icmp sle(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:bool) @type_int:13:44
+    foreign llvm move(~tmp$0#0:bool, ?$#0:wybe.bool) @type_int:13:12
 
 
-= > public inline (14 calls)
-0: =(?x#0:type_int.myint, y#0:type_int.myint):
-    foreign llvm move(~y#0:type_int.myint, ?x#0:type_int.myint)
+= > public inline (4 calls)
+0: =(?out#0:type_int.myint, in#0:type_int.myint):
+    foreign llvm move(~in#0:type_int.myint, ?out#0:type_int.myint)
 = > public inline (0 calls)
-1: =(y#0:type_int.myint, ?x#0:type_int.myint):
-    foreign llvm move(~y#0:type_int.myint, ?x#0:type_int.myint)
+1: =(in#0:type_int.myint, ?out#0:type_int.myint):
+    foreign llvm move(~in#0:type_int.myint, ?out#0:type_int.myint)
 
 
 == > public inline (0 calls)
 0: ==(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
-    foreign llvm icmp eq(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:wybe.bool) @type_int:10:44
-    foreign llvm move(~tmp$0#0:wybe.bool, ?$#0:wybe.bool)
+    foreign llvm icmp eq(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:bool) @type_int:10:44
+    foreign llvm move(~tmp$0#0:bool, ?$#0:wybe.bool) @type_int:10:12
 
 
 > > public inline (0 calls)
 0: >(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
-    foreign llvm icmp sgt(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:wybe.bool) @type_int:14:43
-    foreign llvm move(~tmp$0#0:wybe.bool, ?$#0:wybe.bool)
+    foreign llvm icmp sgt(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:bool) @type_int:14:43
+    foreign llvm move(~tmp$0#0:bool, ?$#0:wybe.bool) @type_int:14:12
 
 
 >= > public inline (0 calls)
 0: >=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
-    foreign llvm icmp sge(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:wybe.bool) @type_int:15:44
-    foreign llvm move(~tmp$0#0:wybe.bool, ?$#0:wybe.bool)
+    foreign llvm icmp sge(~x#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:bool) @type_int:15:44
+    foreign llvm move(~tmp$0#0:bool, ?$#0:wybe.bool) @type_int:15:12
 type_int, type_int.myint
 ======================================================================
 AFTER LLVM IR:
@@ -209,14 +209,14 @@ entry:
   ret i1 %"tmp$0#0"
 }
 
-define i64 @"type_int.myint.=<0>"(i64 %"y#0") {
+define i64 @"type_int.myint.=<0>"(i64 %"in#0") {
 entry:
-  ret i64 %"y#0"
+  ret i64 %"in#0"
 }
 
-define i64 @"type_int.myint.=<1>"(i64 %"y#0") {
+define i64 @"type_int.myint.=<1>"(i64 %"in#0") {
 entry:
-  ret i64 %"y#0"
+  ret i64 %"in#0"
 }
 
 define i1 @"type_int.myint.==<0>"(i64 %"x#0", i64 %"y#0") {
@@ -308,14 +308,14 @@ entry:
   ret i1 %"tmp$0#0"
 }
 
-define i64 @"type_int.myint.=<0>"(i64 %"y#0") {
+define i64 @"type_int.myint.=<0>"(i64 %"in#0") {
 entry:
-  ret i64 %"y#0"
+  ret i64 %"in#0"
 }
 
-define i64 @"type_int.myint.=<1>"(i64 %"y#0") {
+define i64 @"type_int.myint.=<1>"(i64 %"in#0") {
 entry:
-  ret i64 %"y#0"
+  ret i64 %"in#0"
 }
 
 define i1 @"type_int.myint.==<0>"(i64 %"x#0", i64 %"y#0") {

@@ -18,9 +18,9 @@ AFTER EVERYTHING:
 
 quad > public inline (1 calls)
 0: quad(x#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$4#0:wybe.int) @wybe:4:38
-    foreign llvm add(~tmp$4#0:wybe.int, ~tmp$4#0:wybe.int, ?tmp$8#0:wybe.int) @wybe:4:38
-    foreign llvm move(~tmp$8#0:wybe.int, ?$#0:wybe.int)
+    foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$4#0:int) @wybe:4:38
+    foreign llvm add(~tmp$4#0:int, ~tmp$4#0:int, ?tmp$8#0:int) @wybe:4:38
+    foreign llvm move(~tmp$8#0:int, ?$#0:wybe.int) @func_let:1:8
 func_let
 ======================================================================
 AFTER LLVM IR:

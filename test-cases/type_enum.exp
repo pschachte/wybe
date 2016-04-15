@@ -42,11 +42,11 @@ AFTER EVERYTHING:
   procs           : 
 
 = > public inline (0 calls)
-0: =(?x#0:type_enum.season, y#0:type_enum.season):
-    foreign llvm move(~y#0:type_enum.season, ?x#0:type_enum.season)
+0: =(?out#0:type_enum.season, in#0:type_enum.season):
+    foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
 = > public inline (0 calls)
-1: =(y#0:type_enum.season, ?x#0:type_enum.season):
-    foreign llvm move(~y#0:type_enum.season, ?x#0:type_enum.season)
+1: =(in#0:type_enum.season, ?out#0:type_enum.season):
+    foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
 
 
 autumn > public inline (0 calls)
@@ -56,12 +56,7 @@ autumn > public inline test (0 calls)
 1: autumn($#0:type_enum.season, ?$$#1:wybe.bool, ?$$#1:wybe.bool):
     foreign lpvm cast(~$#0:type_enum.season, ?$int#0:wybe.int)
     foreign llvm icmp eq(~$int#0:wybe.int, 3:wybe.int, ?$succeed#0:wybe.bool)
-    foreign llvm move($succeed#0:wybe.bool, ?$$#1:wybe.bool)
-    case ~$succeed#0:wybe.bool of
-    0:
-
-    1:
-
+    foreign llvm move(~$succeed#0:wybe.bool, ?$$#1:wybe.bool)
 
 
 spring > public inline (0 calls)
@@ -71,12 +66,7 @@ spring > public inline test (0 calls)
 1: spring($#0:type_enum.season, ?$$#1:wybe.bool, ?$$#1:wybe.bool):
     foreign lpvm cast(~$#0:type_enum.season, ?$int#0:wybe.int)
     foreign llvm icmp eq(~$int#0:wybe.int, 1:wybe.int, ?$succeed#0:wybe.bool)
-    foreign llvm move($succeed#0:wybe.bool, ?$$#1:wybe.bool)
-    case ~$succeed#0:wybe.bool of
-    0:
-
-    1:
-
+    foreign llvm move(~$succeed#0:wybe.bool, ?$$#1:wybe.bool)
 
 
 summer > public inline (0 calls)
@@ -86,12 +76,7 @@ summer > public inline test (0 calls)
 1: summer($#0:type_enum.season, ?$$#1:wybe.bool, ?$$#1:wybe.bool):
     foreign lpvm cast(~$#0:type_enum.season, ?$int#0:wybe.int)
     foreign llvm icmp eq(~$int#0:wybe.int, 2:wybe.int, ?$succeed#0:wybe.bool)
-    foreign llvm move($succeed#0:wybe.bool, ?$$#1:wybe.bool)
-    case ~$succeed#0:wybe.bool of
-    0:
-
-    1:
-
+    foreign llvm move(~$succeed#0:wybe.bool, ?$$#1:wybe.bool)
 
 
 winter > public inline (0 calls)
@@ -101,12 +86,7 @@ winter > public inline test (0 calls)
 1: winter($#0:type_enum.season, ?$$#1:wybe.bool, ?$$#1:wybe.bool):
     foreign lpvm cast(~$#0:type_enum.season, ?$int#0:wybe.int)
     foreign llvm icmp eq(~$int#0:wybe.int, 0:wybe.int, ?$succeed#0:wybe.bool)
-    foreign llvm move($succeed#0:wybe.bool, ?$$#1:wybe.bool)
-    case ~$succeed#0:wybe.bool of
-    0:
-
-    1:
-
+    foreign llvm move(~$succeed#0:wybe.bool, ?$$#1:wybe.bool)
 type_enum, type_enum.season
 ======================================================================
 AFTER LLVM IR:
@@ -115,14 +95,14 @@ AFTER LLVM IR:
 
 declare i8* @wybe_malloc(i32)
 
-define i2 @"type_enum.season.=<0>"(i2 %"y#0") {
+define i2 @"type_enum.season.=<0>"(i2 %"in#0") {
 entry:
-  ret i2 %"y#0"
+  ret i2 %"in#0"
 }
 
-define i2 @"type_enum.season.=<1>"(i2 %"y#0") {
+define i2 @"type_enum.season.=<1>"(i2 %"in#0") {
 entry:
-  ret i2 %"y#0"
+  ret i2 %"in#0"
 }
 
 define i2 @"type_enum.season.autumn<0>"() {
@@ -138,17 +118,9 @@ define { i1, i1 } @"type_enum.season.autumn<1>"(i2 %"$#0") {
 entry:
   %0 = zext i2 %"$#0" to i64
   %"$succeed#0" = icmp eq i64 %0, 3
-  br i1 %"$succeed#0", label %if.then, label %if.else
-
-if.then:                                          ; preds = %entry
   %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
   %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
   ret { i1, i1 } %2
-
-if.else:                                          ; preds = %entry
-  %3 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %4 = insertvalue { i1, i1 } %3, i1 %"$succeed#0", 1
-  ret { i1, i1 } %4
 }
 
 define i2 @"type_enum.season.spring<0>"() {
@@ -164,17 +136,9 @@ define { i1, i1 } @"type_enum.season.spring<1>"(i2 %"$#0") {
 entry:
   %0 = zext i2 %"$#0" to i64
   %"$succeed#0" = icmp eq i64 %0, 1
-  br i1 %"$succeed#0", label %if.then, label %if.else
-
-if.then:                                          ; preds = %entry
   %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
   %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
   ret { i1, i1 } %2
-
-if.else:                                          ; preds = %entry
-  %3 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %4 = insertvalue { i1, i1 } %3, i1 %"$succeed#0", 1
-  ret { i1, i1 } %4
 }
 
 define i2 @"type_enum.season.summer<0>"() {
@@ -190,17 +154,9 @@ define { i1, i1 } @"type_enum.season.summer<1>"(i2 %"$#0") {
 entry:
   %0 = zext i2 %"$#0" to i64
   %"$succeed#0" = icmp eq i64 %0, 2
-  br i1 %"$succeed#0", label %if.then, label %if.else
-
-if.then:                                          ; preds = %entry
   %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
   %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
   ret { i1, i1 } %2
-
-if.else:                                          ; preds = %entry
-  %3 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %4 = insertvalue { i1, i1 } %3, i1 %"$succeed#0", 1
-  ret { i1, i1 } %4
 }
 
 define i2 @"type_enum.season.winter<0>"() {
@@ -216,17 +172,9 @@ define { i1, i1 } @"type_enum.season.winter<1>"(i2 %"$#0") {
 entry:
   %0 = zext i2 %"$#0" to i64
   %"$succeed#0" = icmp eq i64 %0, 0
-  br i1 %"$succeed#0", label %if.then, label %if.else
-
-if.then:                                          ; preds = %entry
   %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
   %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
   ret { i1, i1 } %2
-
-if.else:                                          ; preds = %entry
-  %3 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %4 = insertvalue { i1, i1 } %3, i1 %"$succeed#0", 1
-  ret { i1, i1 } %4
 }
 
 --------------------------------------------------
@@ -234,14 +182,14 @@ if.else:                                          ; preds = %entry
 
 declare i8* @wybe_malloc(i32)
 
-define i2 @"type_enum.season.=<0>"(i2 %"y#0") {
+define i2 @"type_enum.season.=<0>"(i2 %"in#0") {
 entry:
-  ret i2 %"y#0"
+  ret i2 %"in#0"
 }
 
-define i2 @"type_enum.season.=<1>"(i2 %"y#0") {
+define i2 @"type_enum.season.=<1>"(i2 %"in#0") {
 entry:
-  ret i2 %"y#0"
+  ret i2 %"in#0"
 }
 
 define i2 @"type_enum.season.autumn<0>"() {
@@ -257,17 +205,9 @@ define { i1, i1 } @"type_enum.season.autumn<1>"(i2 %"$#0") {
 entry:
   %0 = zext i2 %"$#0" to i64
   %"$succeed#0" = icmp eq i64 %0, 3
-  br i1 %"$succeed#0", label %if.then, label %if.else
-
-if.then:                                          ; preds = %entry
   %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
   %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
   ret { i1, i1 } %2
-
-if.else:                                          ; preds = %entry
-  %3 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %4 = insertvalue { i1, i1 } %3, i1 %"$succeed#0", 1
-  ret { i1, i1 } %4
 }
 
 define i2 @"type_enum.season.spring<0>"() {
@@ -283,17 +223,9 @@ define { i1, i1 } @"type_enum.season.spring<1>"(i2 %"$#0") {
 entry:
   %0 = zext i2 %"$#0" to i64
   %"$succeed#0" = icmp eq i64 %0, 1
-  br i1 %"$succeed#0", label %if.then, label %if.else
-
-if.then:                                          ; preds = %entry
   %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
   %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
   ret { i1, i1 } %2
-
-if.else:                                          ; preds = %entry
-  %3 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %4 = insertvalue { i1, i1 } %3, i1 %"$succeed#0", 1
-  ret { i1, i1 } %4
 }
 
 define i2 @"type_enum.season.summer<0>"() {
@@ -309,17 +241,9 @@ define { i1, i1 } @"type_enum.season.summer<1>"(i2 %"$#0") {
 entry:
   %0 = zext i2 %"$#0" to i64
   %"$succeed#0" = icmp eq i64 %0, 2
-  br i1 %"$succeed#0", label %if.then, label %if.else
-
-if.then:                                          ; preds = %entry
   %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
   %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
   ret { i1, i1 } %2
-
-if.else:                                          ; preds = %entry
-  %3 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %4 = insertvalue { i1, i1 } %3, i1 %"$succeed#0", 1
-  ret { i1, i1 } %4
 }
 
 define i2 @"type_enum.season.winter<0>"() {
@@ -335,16 +259,8 @@ define { i1, i1 } @"type_enum.season.winter<1>"(i2 %"$#0") {
 entry:
   %0 = zext i2 %"$#0" to i64
   %"$succeed#0" = icmp eq i64 %0, 0
-  br i1 %"$succeed#0", label %if.then, label %if.else
-
-if.then:                                          ; preds = %entry
   %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
   %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
   ret { i1, i1 } %2
-
-if.else:                                          ; preds = %entry
-  %3 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %4 = insertvalue { i1, i1 } %3, i1 %"$succeed#0", 1
-  ret { i1, i1 } %4
 }
 

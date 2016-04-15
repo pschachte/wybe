@@ -129,7 +129,9 @@ data TypeReason = ReasonParam ProcName Int OptPos
                 | ReasonArity ProcName ProcName OptPos Int Int
                                       -- Call to proc with wrong arity
                 | ReasonUndeclared ProcName OptPos
-                                      -- Public proc with some undeclared arg types
+                                      -- Public proc with some undeclared types
+                | ReasonEqual Exp Exp OptPos
+                                      -- expression types should be equal
                 | ReasonShouldnt      -- Nothing should go wrong with this
                 deriving (Eq, Ord)
 
@@ -178,11 +180,18 @@ instance Show TypeReason where
     show (ReasonUndeclared name pos) =
         makeMessage pos $
         "Public definition of '" ++ name ++ "' with some undeclared types."
+    show (ReasonEqual exp1 exp2 pos) =
+        makeMessage pos $
+        "Expressions must have compatible types:\n    "
+        ++ show exp1 ++ "\n    "
+        ++ show exp2
     show (ReasonShouldnt) =
         makeMessage Nothing "Mysterious typing error"
 
 
 -- | A type assignment for variables (symbol table), with a list of type errors
+-- XXX Need to handle type unification properly by allowing a variable to
+--     specify its type as whatever the type of another variable is. 
 data Typing = Typing {
                   typingDict::Map VarName TypeSpec,
                   typingErrs::[TypeReason]
@@ -241,7 +250,23 @@ properSubtypeOf _ _ = False
 
 
 subtypeOf :: TypeSpec -> TypeSpec -> Bool
-subtypeOf sub super = sub == super || sub `properSubtypeOf` super
+subtypeOf sub super =
+    sub `properSubtypeOf` super
+    || case (sub,super) of
+         (TypeSpec mod1 name1 params1, TypeSpec mod2 name2 params2) ->
+           name1 == name2
+           && (mod1 == mod2 || mod2 == [])
+           && length params1 == length params2
+           && List.all (uncurry subtypeOf) (zip params1 params2)
+         (_,_) -> False
+
+meetTypes :: TypeSpec -> TypeSpec -> Maybe TypeSpec
+meetTypes ty1 ty2 =
+    if ty1 `subtypeOf` ty2
+    then Just ty1
+    else if ty2 `properSubtypeOf` ty1
+         then Just ty2
+         else Nothing
 
 
 localBodyProcs :: ModSpec -> ProcImpln -> [Ident]
@@ -256,6 +281,43 @@ localCalls :: ModSpec -> ModSpec -> Ident -> (Maybe Int) -> [Placed Exp] -> [Ide
 localCalls thisMod m name _ _
   | m == [] || m == thisMod = [name]
 localCalls _ _ _ _ _ = []
+
+
+exprType :: Typing -> Exp -> Maybe TypeSpec
+exprType _ (IntValue _) = Just $ TypeSpec ["wybe"] "int" []
+exprType _ (FloatValue _) = Just $ TypeSpec ["wybe"] "float" []
+exprType _ (StringValue _) = Just $ TypeSpec ["wybe"] "string" []
+exprType _ (CharValue _) = Just $ TypeSpec ["wybe"] "char" []
+exprType typing (Var name _ _) = varType typing name
+exprType _ (Typed _ ty _) = Just ty
+exprType _ exp =
+    shouldnt $ "Expression '" ++ show exp ++ "' left after flattening"
+
+
+matchTypes :: (Placed Exp) -> (Placed Exp) -> OptPos -> Typing -> Typing
+matchTypes parg1 parg2 pos typing =
+    let arg1 = content parg1
+        arg2 = content parg2
+        ty1  = exprType typing arg1
+        ty2  = exprType typing arg2
+    in  case (ty1,ty2) of
+      (Nothing,Nothing)  -> typing
+      (Nothing,Just typ) -> enforceType arg1 typ arg1 arg2 pos typing
+      (Just typ,Nothing) -> enforceType arg2 typ arg1 arg2 pos typing
+      (Just t1,Just t2)  -> enforceType arg1 t2 arg1 arg2 pos
+                            $ enforceType arg2 t1 arg1 arg2 pos typing
+
+
+-- |Require the Exp to have the specified type
+enforceType :: Exp -> TypeSpec -> Exp -> Exp -> OptPos -> Typing -> Typing
+enforceType (Var name _ _) typespec arg1 arg2 pos typing =
+    addOneType (ReasonEqual arg1 arg2 pos) name typespec typing
+enforceType (Typed (Var name _ _) typespec1 _) typespec arg1 arg2 pos typing =
+    let reason = ReasonEqual arg1 arg2 pos
+    in case meetTypes typespec1 typespec of
+      Nothing -> typeError reason typing
+      Just ty -> addOneType reason name ty typing
+enforceType _ _ _ _ _ typing = typing -- no variable to record the type of
 
 
 
@@ -528,6 +590,12 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
                                       (List.any (flip List.elem dups) . snd) $
                                     zip procs typList)
                                    pos) typing]
+typecheckStmt _ _ call@(ForeignCall "llvm" "move" [] [a1,a2]) pos typing = do
+  -- Ensure arguments have the same types
+    logTypes $ "Type checking move instruction " ++ showStmt 4 call
+    let typing' = matchTypes a1 a2 pos typing
+    logTypes $ "Resulting typing = " ++ show typing'
+    return [typing']
 typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
     -- Pick up any output casts
     logTypes $ "Type checking foreign call " ++ showStmt 4 call
@@ -605,7 +673,7 @@ reconcileArgFlows (Param _ _ pflow _:params) (arg:args)
       else Nothing
 
 
--- |Doe this parameter *not* correspond to a resource?
+-- |Does this parameter *not* correspond to a resource?
 nonResourceParam :: Param -> Bool
 nonResourceParam (Param _ _ _ (Resource _)) = False
 nonResourceParam _ = True
