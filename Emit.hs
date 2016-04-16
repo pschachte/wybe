@@ -73,9 +73,6 @@ emitObjectFile m f = do
         (Nothing) -> error "No LLVM Module Implementation"
     finishModule
     return ()
-    -- withModuleLLVM m (makeWrappedObjFile f)
-    -- Also make the bitcode file for now
-    -- emitBitcodeFile m $ (dropExtension f) ++ ".bc"
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Bitcode file.

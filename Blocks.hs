@@ -164,6 +164,7 @@ emptyProc p = case procImpln p of
   ProcDefPrim _ body -> List.null $ bodyPrims body
 
 
+
 -- | Translate a ProcDef whose procImpln field is of the type ProcDefPrim, to
 -- ProcDefBlocks (LLVM form). Each ProcDef is converted into a Global
 -- Definition in a LLVM Module by translating it's primitives.  Translated
