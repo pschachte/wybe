@@ -66,7 +66,7 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
     nonconstItems <- fmap concat $
            mapM (nonConstCtorItems ctorVis typespec constCount nonConstCount)
            $ zip nonconsts [0..]
-    let extraItems = implicitItems typespec consts nonconsts
+    let extraItems = implicitItems typespec consts nonconsts items
     normaliseSubmodule modCompiler name (Just params) vis pos
       $ [eq1,eq2] ++ constItems ++ nonconstItems ++ items ++ extraItems
 normaliseItem modCompiler (ModuleDecl vis name items pos) = do
@@ -86,8 +86,11 @@ normaliseItem modCompiler (FuncDecl vis detism inline
     vis detism inline
     (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType]) 
      resources)
-    [maybePlace (ProcCall [] "=" Nothing 
-                 [Unplaced $ Var "$" ParamOut flowType, result])
+    [maybePlace (ForeignCall "llvm" "move" []
+                 [maybePlace (Typed (content result) resulttype False)
+                  $ place result,
+                  Unplaced
+                  $ Typed (Var "$" ParamOut flowType) resulttype False])
      pos]
     pos)
 normaliseItem _ item@(ProcDecl _ _ _ _ _ _) = do
@@ -171,7 +174,7 @@ assignmentProc ty leftToRight =
        Nothing
 
 
--- |Add a contructor for the specified type.
+-- |All items needed to implement a const contructor for the specified type.
 constCtorItems :: Visibility -> TypeSpec -> (Placed FnProto,Integer) -> [Item]
 constCtorItems  vis typeSpec (placedProto,num) =
     let pos = place placedProto
@@ -198,6 +201,9 @@ constCtorItems  vis typeSpec (placedProto,num) =
         pos]
 
 
+-- |All items needed to implement a non-const contructor for the specified type.
+-- XXX need to handle the case of too many constructors for the number of tag
+-- bits available
 nonConstCtorItems :: Visibility -> TypeSpec -> Int -> Int
                   -> (Placed FnProto,Integer) -> Compiler [Item]
 nonConstCtorItems vis typeSpec constCount nonConstCount (placedProto,tag) = do
@@ -343,13 +349,14 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
     (field,fieldtype,offset) =
     -- XXX need to take tag into account!
     -- XXX this needs to be able to fail if the constructor doesn't match
-    [FuncDecl vis Det True
-     (FnProto field [Param "$rec" rectype ParamIn Ordinary] [])
-     fieldtype
-     (Unplaced $ Where (tagCheck constCount nonConstCount tag "$rec")
-      (Unplaced $ ForeignFn "lpvm" "access" []
-       [Unplaced $ Var "$rec" ParamIn Ordinary,
-        Unplaced $ IntValue $ fromIntegral offset]))
+    [ProcDecl vis Det True
+     (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
+                       Param "$" fieldtype ParamOut Ordinary] [])
+     ((tagCheck constCount nonConstCount tag "$rec")
+      ++ [Unplaced $ ForeignCall "lpvm" "access" []
+          [Unplaced $ Var "$rec" ParamIn Ordinary,
+           Unplaced $ IntValue $ fromIntegral offset,
+           Unplaced $ Var "$" ParamOut Ordinary]])
       pos,
       ProcDecl vis Det True
       (ProcProto field
@@ -373,4 +380,61 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
 ----------------------------------------------------------------
 
 implicitItems :: TypeSpec -> [Placed FnProto] -> [Placed FnProto] -> [Item]
-implicitItems typespec consts nonconsts = []
+                 -> [Item]
+implicitItems typespec consts nonconsts items =
+    implicitEquality typespec consts nonconsts items
+    -- XXX add print, display, maybe prettyprint, and lots more
+
+
+implicitEquality :: TypeSpec -> [Placed FnProto] -> [Placed FnProto] -> [Item]
+                 -> [Item]
+implicitEquality typespec consts nonconsts items =
+  []
+    -- if List.any equalityTest items
+    -- then []
+    -- else
+    --   let proto = ProcProto "=" [Param "left" typespec ParamIn Ordinary,
+    --                              Param "right" typespec ParamIn Ordinary] []
+    --       body = equalityBody consts nonconsts
+    --   in [ProcDecl Public SemiDet True proto body Nothing]
+
+-- |Does the item declare an = test or function?
+equalityTest :: Item -> Bool
+equalityTest (ProcDecl _ SemiDet _ (ProcProto "=" [_,_] _) _ _) = True
+equalityTest (FuncDecl _ Det _ (FnProto "=" [_,_] _) _ _ _) = True
+equalityTest _ = False
+
+
+-- | Generate the body of an equality test proc given the const and
+--   non-const constructors.
+--   Our strategy is:
+--       if there are no non-consts, just compare the values; otherwise
+--       if there are any consts, generate code to check if the value
+--       of the first is less than the number of consts, and if so, return
+--       whether or not the two values are equal.  If there are no consts,
+--       or if the value is not less than the number, then generate one
+--       test per non-const constructor.  Each test checks if the tag of
+--       the first argument is the tag for that constructor (unless there
+--       is exactly one non-const constructor, in which case skip the test),
+--       and then test each field for equality by calling the = test.
+--
+--       XXX this needs to check that there are not too many non-const
+--       constructors for the number of available tag bits.
+-- equalityBody :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
+-- equalityBody [] [] = shouldnt $ "defining type with no constructors"
+-- equalityBody consts [] = equalityBody' consts []
+-- equalityBody consts nonconsts =
+--     let intType = TypeSpec ["wybe"] "int" []
+--     in [Unplaced $ ForeignCall "lpvm" "cast" []
+--         [Unplaced $ Var "left" ParamIn Ordinary,
+--          Unplaced $ Typed (Var "left$int" ParamOut Ordinary) intType True],
+--         Unplaced $ Cond [] (Unplaced $ ForeignFn "llvm" "icmp" ["ult"]
+--                             [Unplaced $ Var "left$int" ParamIn Ordinary,
+--                              Unplaced $ Typed (IntValue (length consts)
+--                                                (TypeSpec ["wybe"] "int" [])
+--                                                True)])
+--         (equalityBody' consts nonconsts)
+--         [Unplaced $ ForeignCall "llvm" "move" []
+--          [Unplaced $ Typed (IntValue 0) intType True,
+--           Unplaced $ Typed (Var "$$" ParamOut Ordinary) intType True]]]
+    

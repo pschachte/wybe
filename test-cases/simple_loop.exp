@@ -18,8 +18,8 @@ AFTER EVERYTHING:
 gen$1 > (2 calls)
 0: gen$1(wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
     foreign c read_char(?c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:114:39
-    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$4#0:wybe.bool) @wybe:69:42
-    case ~tmp$4#0:wybe.bool of
+    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$4#0:bool) @wybe:69:42
+    case ~tmp$4#0:bool of
     0:
         foreign llvm move(~wybe.io$io#1:wybe.phantom, ?wybe.io$io#2:wybe.phantom)
 
