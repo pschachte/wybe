@@ -57,8 +57,10 @@ import qualified LLVM.General.AST.Constant               as C
 import qualified LLVM.General.AST.FloatingPointPredicate as FP
 import qualified LLVM.General.AST.IntegerPredicate       as IP
 
-import           AST                                     (Prim, PrimProto, Compiler,
-                                                         shouldnt, logMsg)
+import           AST                                     (Prim, PrimProto, Compiler
+                                                         , shouldnt, logMsg
+                                                         , showModSpec
+                                                         , getModuleSpec)
 import           LLVM.General.Context
 import           LLVM.General.Module
 import           Options (LogSelection (Blocks))
@@ -176,9 +178,10 @@ addExtern p =
 -- for reference.
 addGlobalConstant :: LLVMAST.Type -> C.Constant -> Codegen Name
 addGlobalConstant ty con =
-    do gs <- gets globalVars
+    do modName <- lift $ fmap showModSpec getModuleSpec
+       gs <- gets globalVars
        n <- fresh
-       let ref = UnName n
+       let ref = Name $ modName ++ "." ++ show n
        let gvar = globalVariableDefaults { name = ref
                                          , isConstant = True
                                          , G.type' = ty
