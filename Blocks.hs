@@ -925,10 +925,12 @@ typed' ty = do
     repr <- lookupTypeRepresentation ty
     case repr of
         Just typeStr -> return $ typeStrToType typeStr
-        Nothing -> do
-            if typeName ty == "bool"
-                then return $ int_c (fromIntegral wordSize)
-                else return $ ptr_t $ int_c (fromIntegral wordSize)
+        Nothing -> 
+            case typeName ty of
+                "bool" -> return $ int_c 1
+                "int" -> return $ int_c (fromIntegral wordSize)
+                _ -> return $ ptr_t $ int_c (fromIntegral wordSize)
+
 
 typeStrToType :: String -> LLVMAST.Type
 typeStrToType [] = void_t

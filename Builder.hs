@@ -343,7 +343,8 @@ compileModSCC mspecs = do
     logDump Optimise Optimise "OPTIMISATION"
 
     -- Create an LLVMAST.Module represtation
-    mapM_ blockTransformModule (List.filter (not . isStdLib) mspecs)
+    -- mapM_ blockTransformModule (List.filter (not . isStdLib) mspecs)
+    mapM_ blockTransformModule mspecs
     stopOnError $ "translating " ++ showModSpecs mspecs
 
     -- mods <- mapM getLoadedModule mods
