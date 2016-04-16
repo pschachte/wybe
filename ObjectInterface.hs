@@ -46,7 +46,7 @@ insertLPVMDataLd bs obj =
        liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
        let lpvmFile = (tempDir ++ "wybetemp/" ++ "lpvmCache")
        BL.writeFile lpvmFile bs
-       let args = [obj] ++ ["-r"] ++ ldSystemArgs
+       let args = [obj] ++ ["-r"] 
                   ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
                   ++ ["-o", obj]
        createProcess (proc "ld" args)
