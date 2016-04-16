@@ -39,6 +39,14 @@ import           LLVM.General.PrettyPrint
 import           Options (LogSelection (Blocks))
 import Config (wordSize,wordSizeBytes)
 
+
+data ProcDefBlock =
+    ProcDefBlock { blockProto   :: PrimProto
+                 , blockDef     :: LLVMAST.Definition
+                 , blockExterns :: [LLVMAST.Definition]
+                 } deriving (Show, Eq)
+
+
 -- | Transofrorm the module's procedures (in LPVM by now) into LLVM function
 -- definitions. A LLVMAST.Module is built up using these global definitions
 -- and then stored in the modLLVM field of 'ModuleImplementation'.
@@ -85,13 +93,11 @@ blockTransformModule thisMod =
 
        --------------------------------------------------
        -- Translate
-       procs' <- mapM (translateProc allProtos) $ emptyFilter mangledProcs
+       blocks <- mapM (translateProc allProtos) $ emptyFilter mangledProcs
        --------------------------------------------------
        -- Init LLVM Module and fill it
-       let llmod = newLLVMModule (showModSpec thisMod) procs'
-       -- logWrapWith '~' $ showPretty llmod
+       let llmod = newLLVMModule (showModSpec thisMod) blocks
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
-       -- logBlocks $ showPretty llmod
        finishModule
        logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
@@ -156,8 +162,6 @@ emptyProc :: ProcDef -> Bool
 emptyProc p = case procImpln p of
   ProcDefSrc pps -> List.null pps
   ProcDefPrim _ body -> List.null $ bodyPrims body
-  _ -> False
-
 
 
 -- | Translate a ProcDef whose procImpln field is of the type ProcDefPrim, to
@@ -169,7 +173,7 @@ emptyProc p = case procImpln p of
 -- require some global variable/constant declarations which is represented as
 -- G.Global values in the neededGlobalVars field of LLVMCompstate. All in all,
 -- externs and globals go on the top of the module.
-translateProc :: [PrimProto] -> ProcDef -> Compiler ProcDef
+translateProc :: [PrimProto] -> ProcDef -> Compiler ProcDefBlock
 translateProc modProtos proc = do
     modspec <- getModuleSpec
     let def@(ProcDefPrim proto body) = procImpln proc
@@ -186,8 +190,7 @@ translateProc modProtos proc = do
     let body' = createBlocks codestate
     lldef <- makeGlobalDefinition pname proto body'
     logBlocks $ showPretty lldef
-    let procblocks = ProcDefBlocks proto lldef (exs ++ globals)
-    return $ proc { procImpln = procblocks}
+    return $ ProcDefBlock proto lldef (exs ++ globals)
 
 
 -- | Create LLVM's module level Function Definition from the LPVM procedure
@@ -952,25 +955,11 @@ typeStrToType ty@(c:cs)
 -- | Initialize and fill a new LLVMAST.Module with the translated
 -- global definitions (extern declarations and defined functions)
 -- of LPVM procedures in a module.
-newLLVMModule :: String -> [ProcDef] -> LLVMAST.Module
-newLLVMModule name procs = let defs = List.map takeDefinition procs
-                               exs = concat $ List.map takeExterns procs
-                               exs' = uniqueExterns exs ++ [mallocExtern]
-                           in modWithDefinitions name $ exs' ++ defs
-
-
--- | Pull out the LLVM Definition of a procedure.
-takeDefinition :: ProcDef -> LLVMAST.Definition
-takeDefinition p = case procImpln p of
-                     (ProcDefBlocks _ def _) -> def
-                     _ -> error "No definition found."
-
--- | Pull out the list of needed extern definitions built during
--- procedure translation.
-takeExterns :: ProcDef -> [LLVMAST.Definition]
-takeExterns p = case procImpln p of
-                  (ProcDefBlocks _ _ exs) -> exs
-                  _ -> error "No Externs field found."
+newLLVMModule :: String -> [ProcDefBlock] -> LLVMAST.Module
+newLLVMModule name blocks = let defs = List.map blockDef blocks
+                                exs = concat $ List.map blockExterns blocks
+                                exs' = uniqueExterns exs ++ [mallocExtern]
+                            in modWithDefinitions name $ exs' ++ defs
 
 
 -- | Filter out non-unique externs
