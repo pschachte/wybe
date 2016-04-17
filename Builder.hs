@@ -522,10 +522,31 @@ loadObjectFile thisMod =
      dir <- getDirectory
      -- generating an name + extension for our object file
      let objFile = moduleFilePath objectExtension dir thisMod
-     subMods <- concatSubMods thisMod
-     emitObjectFile thisMod objFile
+     -- Check if we need to re-emit object file
+     rebuild <- objectReBuildNeeded thisMod dir
+     when rebuild $ emitObjectFile thisMod objFile
      finishModule
      return objFile
+
+
+objectReBuildNeeded :: ModSpec -> FilePath -> Compiler Bool
+objectReBuildNeeded thisMod dir = do
+    srcOb <- srcObjFiles thisMod [dir]
+    case srcOb of
+        Nothing -> return True
+        -- only object file exists, so we have loaded Module from object
+        Just (_,False,_,True,_) -> return False
+        -- only source file exists
+        Just (srcfile,True,objfile,False,_) -> return True
+        Just (srcfile,True,objfile,True,_) -> do
+            srcDate <- (liftIO . getModificationTime) srcfile
+            dstDate <- (liftIO . getModificationTime) objfile
+            if srcDate > dstDate
+              then return True
+              else return False
+        Just (_,False,_,False,_) -> return True
+
+    
 
 
 ------------------------ Filename Handling ------------------------
