@@ -268,27 +268,35 @@ runJIT mod = do
 -- -- * Linking                                                           --
 ----------------------------------------------------------------------------
 
+suppressLdWarnings :: String -> String
+suppressLdWarnings s = intercalate "\n" $ List.filter notWarning $ lines s
+  where
+    notWarning l = not ("ld: warning:" `List.isPrefixOf` l)
+
+
 
 -- | With the `ld` linker, link the object files and create target
 -- executable.
 makeExec :: [FilePath]          -- Object Files
          -> FilePath            -- Target File
-         -> IO String
+         -> Compiler String
 makeExec ofiles target =
-    do dir <- getCurrentDirectory
+    do dir <- liftIO $ getCurrentDirectory
        let args = ofiles ++ sharedLibs ++ ["-o", target]
-       -- Supressing the annoying Xcode warning
-       (_,_, Just hout,_) <- createProcess (proc "cc" args){std_err = CreatePipe}
-       errCons <- hGetContents hout
-       -- putStrLn errCons
-       -- createProcess (proc "cc" args)
-       return errCons
+       (_,_, Just hout,_) <- liftIO $
+           createProcess (proc "cc" args){std_err = CreatePipe}
+       ccOut <- suppressLdWarnings <$> (liftIO $ hGetContents hout)
+       let output = "--- CC ---\n" ++
+               "$ cc " ++ List.intercalate " " args ++ "\nCC Log:" ++
+               ccOut ++ "-------\n"
+       return output
+
 
 -- | Use `ar' system util to link object files into an archive file.
 makeArchive :: [FilePath] -> FilePath -> IO String
 makeArchive ofiles target =
     do dir <- getCurrentDirectory
-       let args = ["rvs", target] ++ ofiles 
+       let args = ["rvs", target] ++ ofiles
        (_,_, Just hout,_) <- createProcess
            (proc "ar" args){std_err = CreatePipe}
        errCons <- hGetContents hout
