@@ -463,24 +463,25 @@ buildExecutable targetMod fpath =
                [] depends
        logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
        mainMod <- newMainModule mainImports
+       logBuild $ "o Built 'main' module for target: "
+       mainModStr <- liftIO $ codeemit mainMod
+       logEmit $ mainModStr
        ------------       
        logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
        tempDir <- liftIO $ getTemporaryDirectory
        liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
        let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"
        liftIO $ makeObjFile tmpMainOFile mainMod
+       
        ofiles <- mapM loadObjectFile $ List.map fst depends
        let allOFiles = tmpMainOFile:ofiles
        -----------
-       clangErr <- liftIO $ makeExec allOFiles fpath
-       logBuild $ "-- CLANG errs -- "
+       clangErr <- makeExec allOFiles fpath
        logBuild clangErr
-       logBuild $ "----"
        -- return allOFiles
        logBuild $ "o Object Files to link: "
        logBuild $ "++ " ++ intercalate "\n++" allOFiles
        logBuild $ "o Building Target (executable): " ++ fpath
-       return ()
 
 
 -- | Traverse and collect a depth first dependency list from the given initial
@@ -491,7 +492,7 @@ buildExecutable targetMod fpath =
 -- file, that means no sub-mod dependencies and no standard library (for now).
 orderedDependencies :: ModSpec -> Compiler [(ModSpec, Bool)]
 orderedDependencies targetMod =
-    visit [targetMod] []
+    List.nubBy (\(a,_) (b,_) -> a == b) <$> visit [targetMod] []
   where
     visit [] cs = return cs
     visit (m:ms) collected = do
@@ -508,7 +509,7 @@ orderedDependencies targetMod =
                          then (m, True):collected
                          else (m, False):collected
         -- Don't visit any modspec already in `ms' (will be visited as it is)
-        let rem = List.foldr (\a xs -> if elem a xs then xs else a:xs)
+        let rem = List.foldr (\x acc -> if elem x acc then acc else x:acc)
                 ms imports
         visit rem collected'
    

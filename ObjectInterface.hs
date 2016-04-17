@@ -22,13 +22,14 @@ import           Data.Hex
 import           Data.Int
 import           Data.List as List
 import           Data.Maybe (isJust)
-import           Data.Monoid
 import           Data.Word
 import Data.Bits
 import           System.Process
-import           System.Directory          (createDirectoryIfMissing,
-                                            getTemporaryDirectory)
-import Control.Monad.Trans
+import           System.Directory          (createDirectoryIfMissing
+                                           ,getTemporaryDirectory
+                                           ,removeFile)
+import System.FilePath (replaceExtension, takeBaseName)                 
+import Control.Monad.Trans (liftIO)
 import Macho
 
 
@@ -44,12 +45,14 @@ insertLPVMDataLd :: BL.ByteString -> FilePath -> IO ()
 insertLPVMDataLd bs obj =
     do tempDir <- liftIO $ getTemporaryDirectory
        liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
-       let lpvmFile = (tempDir ++ "wybetemp/" ++ "lpvmCache")
+       let modFile = takeBaseName obj ++ ".module"
+       let lpvmFile = (tempDir ++ "wybetemp/" ++ modFile)
        BL.writeFile lpvmFile bs
        let args = [obj] ++ ["-r"] 
                   ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
                   ++ ["-o", obj]
        createProcess (proc "ld" args)
+       -- Cleanup
        return ()
 
 -- | Extract string data from the segment __LPVM, section __lpvm of the

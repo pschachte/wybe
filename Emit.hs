@@ -287,8 +287,8 @@ makeExec ofiles target =
            createProcess (proc "cc" args){std_err = CreatePipe}
        ccOut <- suppressLdWarnings <$> (liftIO $ hGetContents hout)
        let output = "--- CC ---\n" ++
-               "$ cc " ++ List.intercalate " " args ++ "\nCC Log:" ++
-               ccOut ++ "-------\n"
+               "$ cc " ++ List.intercalate " " args ++ "\nCC Log:\n" ++
+               ccOut ++ "\n-------\n"
        return output
 
 
