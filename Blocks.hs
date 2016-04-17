@@ -1019,7 +1019,8 @@ newMainModule depends = do
     blstate <- execCodegen [] $ mainCodegen depends
     let bls = createBlocks blstate
     let mainDef = globalDefine int_t "main" [] bls
-    let externsForMain = mainExterns depends
+    let externsForMain = [(external void_t "gc_init" [])]
+            ++ (mainExterns depends)
     let newDefs = externsForMain ++ [mainDef]
     return $ modWithDefinitions "tmpMain" newDefs
 
@@ -1030,6 +1031,10 @@ mainCodegen :: [ModSpec] -> Codegen ()
 mainCodegen mods = do
     entry <- addBlock entryBlockName
     setBlock entry
+    -- Temp Boehm GC init call
+    instr void_t $
+        call (externf void_t (LLVMAST.Name "gc_init")) []
+    -- Call the mods mains in order    
     let mainName m = LLVMAST.Name $ showModSpec m ++ ".main"
     forM_ mods $ \m -> instr int_t $
                        call (externf int_t (mainName m)) []
