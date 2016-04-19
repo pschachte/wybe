@@ -175,6 +175,17 @@ instr' prim@(PrimForeign "llvm" "move" []
     outVar <- gets (Map.findWithDefault var var . outSubst)
     addSubst outVar val
     rawInstr prim pos
+-- XXX this is a bit of a hack to work around not threading a heap
+--     through the code, which causes the compiler to try to reuse
+--     the results of calls to alloc.  Since the mutate primitives
+--     already has an output value, that should stop us from trying
+--     to reuse modified structures or the results of calls to
+--     access after a structure is modified, so alloc should be
+--     the only problem that needs fixing.
+instr' prim@(PrimForeign "lpvm" "alloc" [] args) pos
+  = do
+    logBuild $ "  Leaving alloc alone"
+    rawInstr prim pos
 instr' prim pos = do
     let (prim',newOuts) = splitPrimOutputs prim
     logBuild $ "Looking for computed instr " ++ show prim' ++ " ..."
