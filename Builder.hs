@@ -249,40 +249,54 @@ loadModule :: ModSpec -> FilePath -> Compiler ()
 loadModule modspec objfile = do
     logBuild $ "===== ??? Trying to load LPVM Module for "
         ++ showModSpec modspec
-    -- let bcfile = dropExtension objfile ++ ".bc"
-    -- thisMod <- liftIO $ extractModuleFromWrapper bcfile
-    thisMod <- liftIO $ machoLPVMSection objfile
-    count <- gets ((1+) . loadCount)
-    modify (\comp -> comp { loadCount = count })
+    -- Extract binary data from the object file
+    extractedMods <- liftIO $ liftIO $ machoLPVMSection objfile
     logBuild $ "===== >>> Extracted Module bytestring from " ++ (show objfile)
-    modify (\comp -> let mods = thisMod : underCompilation comp
-                     in  comp { underCompilation = mods })
-    -- Load the dependencies
-    loadImports
-    stopOnError $ "handling imports for module " ++ showModSpec modspec
-    mods <- exitModule -- may be empty list if module is mutually dependent
+    let extractedSpecs = List.map modSpec extractedMods
+    logBuild $ "===== >>> Found modules: " ++ showModSpecs extractedSpecs
+
+    -- Collect the imports
+    imports <- concat <$> mapM placeModule extractedMods    
+    logBuild $ "==== >>> Building dependencies: " ++ showModSpecs imports
+    
+    -- Place the super mod under compilation while dependencies are built
+    let superMod = head extractedMods
+    modify (\comp -> let ms = superMod : underCompilation comp
+                     in comp { underCompilation = ms })
+    mapM_ buildDependency imports
+    finishModule
+    
     logBuild $ "===== <<< Extracted Module put in it's place from "
         ++ (show objfile)
 
+placeModule :: Module -> Compiler [ModSpec]
+placeModule thisMod = do
+    let modspec = modSpec thisMod
+    count <- gets ((1+) . loadCount)
+    modify (\comp -> comp { loadCount = count })
+    let loadMod = thisMod { thisLoadNum = count
+                          , minDependencyNum = count }    
+    updateModules $ Map.insert modspec loadMod
+    -- Load the dependencies
+    let thisModImpln = trustFromJust
+            "==== >>> Pulling Module implementation from loaded module"
+            (modImplementation loadMod)
+    let imports = (keys . modImports) thisModImpln
+    return imports
 
--- | Collect all the subModules of the given modspec.
-descendantModules :: ModSpec -> Compiler [ModSpec]
-descendantModules mspec = do
-    subMods <- fmap (Map.elems . modSubmods) $ getLoadedModuleImpln mspec
-    desc <- fmap concat $ mapM descendantModules subMods
-    return $ subMods ++ desc
 
 
 -- | Concatenate the LLVMAST.Module implementations of the submodules to the
 -- the given super module.
 concatSubMods :: ModSpec -> Compiler [ModSpec]
 concatSubMods mspec = do
-    someMods <- descendantModules mspec
+    someMods <- collectSubModules mspec
     unless (List.null someMods) $
         logBuild $ "### Combining descendents of " ++ showModSpec mspec
         ++ ": " ++ showModSpecs someMods
     concatLLVMASTModules mspec someMods
     return someMods
+
 
 -- | Compile and build modules inside a folder, compacting everything into
 -- one object file archive.
