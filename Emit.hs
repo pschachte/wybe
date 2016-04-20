@@ -69,6 +69,9 @@ emitObjectFile m f = do
             do astMod <- getModule id
                logEmit $ "Encoding and wrapping Module *" ++ (showModSpec m)
                    ++ "* in a wrapped object."
+               logEmit $ "Running passmanager on the generated LLVM for *"
+                   ++ (showModSpec m) ++ "*."
+               -- liftIO $ withOptimisedModule llmod (encodeAndWriteFile f astMod)
                liftIO $ makeWrappedObjFile f llmod astMod
         (Nothing) -> error "No LLVM Module Implementation"
     finishModule
@@ -110,10 +113,7 @@ liftError = runExceptT >=> either fail return
 
 -- | Return string form LLVM IR represenation of a LLVMAST.Module
 codeemit :: LLVMAST.Module -> IO String
-codeemit mod =
-    withContext $ \context ->
-        liftError $ withModuleFromAST context mod $ \m ->
-            moduleLLVMAssembly m >>= return
+codeemit llmod = withOptimisedModule llmod moduleLLVMAssembly
 
 
 -------------------------------------------------------------------------------
@@ -171,11 +171,10 @@ withOptimisedModule llmod action = do
 -- | Drop an LLVMAST.Module (haskell) into a LLVM Module.Module (C++),
 -- and write it as an object file.
 makeObjFile :: FilePath -> LLVMAST.Module -> IO ()
-makeObjFile file llmod =
-    withContext $ \context ->
-        liftError $ withModuleFromAST context llmod $ \m ->
-            liftError $ withHostTargetMachine $ \tm ->
-                liftError $ writeObjectToFile tm (File file) m
+makeObjFile file llmod = do
+    liftError $ withHostTargetMachine $ \tm ->
+        withOptimisedModule llmod $ \m ->
+        liftError $ writeObjectToFile tm (File file) m
 
 -- | Drop an LLVMAST.Module (haskell) intop a Mod.Module (C++)
 -- represenation and write is a bitcode file.
@@ -213,12 +212,24 @@ makeAssemblyFile file llmod =
 -- representation into the '__lpvm' section in it.
 makeWrappedObjFile :: FilePath -> LLVMAST.Module -> AST.Module -> IO ()
 makeWrappedObjFile file llmod origMod = do
-    withContext $ \context -> do
-        liftError $ withModuleFromAST context llmod $ \m -> do
+    withContext $ \context -> do        
+        withOptimisedModule llmod $ \m -> do
             let modBS = encode origMod
             liftError $ withHostTargetMachine $ \tm ->
                 liftError $ writeObjectToFile tm (File file) m
             insertLPVMDataLd modBS file
+
+
+-- | Binary encode 'AST.Module', create object file out of 'Mod.Module' and
+-- insert the encoded binary string into the "__LPVM" section of the created
+-- object file.
+encodeAndWriteFile :: FilePath -> AST.Module -> Mod.Module -> IO ()
+encodeAndWriteFile file origMod m = do
+    let modBS = encode origMod
+    liftError $ withHostTargetMachine $ \tm ->
+        liftError $ writeObjectToFile tm (File file) m
+    insertLPVMDataLd modBS file
+        
 
 
 
