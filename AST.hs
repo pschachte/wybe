@@ -25,6 +25,7 @@ module AST (
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..), 
   ImportSpec(..), importSpec,
+  collectSubModules,
   enterModule, reenterModule, exitModule, finishModule, 
   emptyInterface, emptyImplementation, 
   getParams, getProcDef, mkTempName, updateProcDef, updateProcDefM,
@@ -855,6 +856,14 @@ getDescendant :: ModSpec -> Maybe ModSpec
 getDescendant [] = Nothing
 getDescendant (m:[]) = Nothing
 getDescendant modspec = Just $ init modspec
+
+-- | Collect all the subModules of the given modspec.
+collectSubModules :: ModSpec -> Compiler [ModSpec]
+collectSubModules mspec = do
+    subMods <- fmap (Map.elems . modSubmods) $ getLoadedModuleImpln mspec
+    desc <- fmap concat $ mapM collectSubModules subMods
+    return $ subMods ++ desc
+
 
 -- |The list of defining modules that the given (possibly
 --  module-qualified) name could possibly refer to from the current
