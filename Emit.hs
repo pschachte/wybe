@@ -31,6 +31,7 @@ import System.IO (hGetContents)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import Data.Binary (encode)
+import BinaryFactory (encodeModule)
 
 import           Config
 import           ObjectInterface
@@ -71,8 +72,8 @@ emitObjectFile m f = do
                    ++ "* in a wrapped object."
                logEmit $ "Running passmanager on the generated LLVM for *"
                    ++ (showModSpec m) ++ "*."
-               -- liftIO $ withOptimisedModule llmod (encodeAndWriteFile f astMod)
-               liftIO $ makeWrappedObjFile f llmod astMod
+               modBS <- encodeModule astMod
+               liftIO $ makeWrappedObjFile f llmod modBS
         (Nothing) -> error "No LLVM Module Implementation"
     finishModule
     return ()
@@ -90,7 +91,8 @@ emitBitcodeFile m f = do
        do astMod <- getModule id
           logEmit $ "Encoding and wrapping Module *" ++ (showModSpec m)
             ++ "* in a wrapped bitcodefile."
-          liftIO $ makeWrappedBCFile f llmod astMod
+          modBS <- encodeModule astMod
+          liftIO $ makeWrappedBCFile f llmod modBS
      (Nothing) -> error "No LLVM Module Implementation"
    finishModule
    return ()
@@ -187,13 +189,11 @@ makeBCFile file llmod =
 
 -- | Use the bitcode wrapper structure to wrap both the AST.Module
 -- (serialised) and the bitcode generated for the Module
-makeWrappedBCFile :: FilePath -> LLVMAST.Module -> AST.Module -> IO ()
-makeWrappedBCFile file llmod origMod =
+makeWrappedBCFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
+makeWrappedBCFile file llmod modBS =
     withContext $ \context ->
         liftError $ withModuleFromAST context llmod $ \m ->
             do bc <- moduleBitcode m
-               -- encode the AST.Module type into a bytestring
-               let modBS = encode origMod
                let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
                BL.writeFile file wrapped
 
@@ -210,11 +210,10 @@ makeAssemblyFile file llmod =
 
 -- | Create a Macho-O object file and embed a 'AST.Module' bytestring
 -- representation into the '__lpvm' section in it.
-makeWrappedObjFile :: FilePath -> LLVMAST.Module -> AST.Module -> IO ()
-makeWrappedObjFile file llmod origMod = do
+makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
+makeWrappedObjFile file llmod modBS = do
     withContext $ \context -> do        
         withOptimisedModule llmod $ \m -> do
-            let modBS = encode origMod
             liftError $ withHostTargetMachine $ \tm ->
                 liftError $ writeObjectToFile tm (File file) m
             insertLPVMDataLd modBS file
@@ -223,13 +222,14 @@ makeWrappedObjFile file llmod origMod = do
 -- | Binary encode 'AST.Module', create object file out of 'Mod.Module' and
 -- insert the encoded binary string into the "__LPVM" section of the created
 -- object file.
-encodeAndWriteFile :: FilePath -> AST.Module -> Mod.Module -> IO ()
-encodeAndWriteFile file origMod m = do
-    let modBS = encode origMod
+encodeAndWriteFile :: FilePath -> BL.ByteString -> Mod.Module -> IO ()
+encodeAndWriteFile file modBS m = do
     liftError $ withHostTargetMachine $ \tm ->
         liftError $ writeObjectToFile tm (File file) m
     insertLPVMDataLd modBS file
         
+
+
 
 
 

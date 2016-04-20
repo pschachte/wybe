@@ -159,7 +159,7 @@ dataFromBitcode = do
 -- | Parse the given object file into a 'Macho' structure, determine the
 -- offset and size of the '__lpvm' section data, and decode those bytes as
 -- a 'AST.Module'.
-machoLPVMSection :: FilePath -> IO Module
+machoLPVMSection :: FilePath -> IO [Module]
 machoLPVMSection ofile = do
     bs <- B.readFile ofile
     let (cmdsize, macho) = parseMacho bs
@@ -169,8 +169,8 @@ machoLPVMSection ofile = do
         Just seg -> do
             let (off, size) = lpvmFileOffset seg
             let bytes = readBytes off size (BL.fromStrict bs)
-            let mod = (decode bytes :: Module)
-            return mod
+            let mods = (decode bytes :: [Module])
+            return mods
 
 -- | Find the load command from a 'LC_COMMAND' list which contains
 -- section '__lpvm'. This section will usually by in a general segment
