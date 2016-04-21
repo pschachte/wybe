@@ -42,7 +42,7 @@ defaultOptions    = Options
  , optShowVersion = False
  , optHelpLog     = False
  , optShowHelp    = False
- , optLibDirs     = []
+ , optLibDirs     = ["prelude"]
  , optLogAspects  = Set.empty
  , optUseStd      = True
  }

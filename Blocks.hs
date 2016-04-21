@@ -40,6 +40,7 @@ import           Options (LogSelection (Blocks))
 import Config (wordSize,wordSizeBytes)
 
 
+-- | Holds information on the LLVM representation of the LPVM procedure.
 data ProcDefBlock =
     ProcDefBlock { blockProto   :: PrimProto
                  , blockDef     :: LLVMAST.Definition

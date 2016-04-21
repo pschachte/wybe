@@ -244,7 +244,6 @@ compileModule dir modspec params items = do
 
 
 -- |Load module export info from compiled file
---   XXX not yet implemented
 loadModule :: ModSpec -> FilePath -> Compiler ()
 loadModule modspec objfile = do
     logBuild $ "===== ??? Trying to load LPVM Module for "
@@ -256,26 +255,28 @@ loadModule modspec objfile = do
     logBuild $ "===== >>> Found modules: " ++ showModSpecs extractedSpecs
 
     -- Collect the imports
-    imports <- concat <$> mapM placeModule extractedMods    
+    imports <- concat <$> mapM placeExtractedModule extractedMods
     logBuild $ "==== >>> Building dependencies: " ++ showModSpecs imports
-    
+
     -- Place the super mod under compilation while dependencies are built
     let superMod = head extractedMods
     modify (\comp -> let ms = superMod : underCompilation comp
                      in comp { underCompilation = ms })
     mapM_ buildDependency imports
     finishModule
-    
+
     logBuild $ "===== <<< Extracted Module put in it's place from "
         ++ (show objfile)
 
-placeModule :: Module -> Compiler [ModSpec]
-placeModule thisMod = do
+
+-- | 
+placeExtractedModule :: Module -> Compiler [ModSpec]
+placeExtractedModule thisMod = do
     let modspec = modSpec thisMod
     count <- gets ((1+) . loadCount)
     modify (\comp -> comp { loadCount = count })
     let loadMod = thisMod { thisLoadNum = count
-                          , minDependencyNum = count }    
+                          , minDependencyNum = count }
     updateModules $ Map.insert modspec loadMod
     -- Load the dependencies
     let thisModImpln = trustFromJust
@@ -357,8 +358,8 @@ compileModSCC mspecs = do
     logDump Optimise Optimise "OPTIMISATION"
 
     -- Create an LLVMAST.Module represtation
-    mapM_ blockTransformModule (List.filter (not . isStdLib) mspecs)
-    -- mapM_ blockTransformModule mspecs
+    -- mapM_ blockTransformModule (List.filter (not . isStdLib) mspecs)
+    mapM_ blockTransformModule mspecs
     stopOnError $ "translating " ++ showModSpecs mspecs
 
     -- mods <- mapM getLoadedModule mods
@@ -480,13 +481,13 @@ buildExecutable targetMod fpath =
        logBuild $ "o Built 'main' module for target: "
        mainModStr <- liftIO $ codeemit mainMod
        logEmit $ mainModStr
-       ------------       
+       ------------
        logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
        tempDir <- liftIO $ getTemporaryDirectory
        liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
        let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"
        liftIO $ makeObjFile tmpMainOFile mainMod
-       
+
        ofiles <- mapM loadObjectFile $ List.map fst depends
        let allOFiles = tmpMainOFile:ofiles
        -----------
@@ -526,7 +527,7 @@ orderedDependencies targetMod =
         let rem = List.foldr (\x acc -> if elem x acc then acc else x:acc)
                 ms imports
         visit rem collected'
-   
+
 
 -- | Load/Build object file for the module in the same directory
 -- the module is in.
@@ -560,7 +561,7 @@ objectReBuildNeeded thisMod dir = do
               else return False
         Just (_,False,_,False,_) -> return True
 
-    
+
 
 
 ------------------------ Filename Handling ------------------------
