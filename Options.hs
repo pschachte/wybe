@@ -42,7 +42,7 @@ defaultOptions    = Options
  , optShowVersion = False
  , optHelpLog     = False
  , optShowHelp    = False
- , optLibDirs     = ["prelude"]
+ , optLibDirs     = ["wybelibs"]
  , optLogAspects  = Set.empty
  , optUseStd      = True
  }
