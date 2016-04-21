@@ -22,7 +22,7 @@ import Data.Set as Set
 import Flatten
 import Options (optUseStd)
 import Config (wordSize,wordSizeBytes)
-
+import Snippets
 
 -- |Normalise a list of file items, storing the results in the current module.
 normalise :: ([ModSpec] -> Compiler ()) -> [Item] -> Compiler ()
@@ -169,8 +169,8 @@ assignmentProc ty leftToRight =
                        Param rname ty rflow Ordinary] [])
        [Unplaced $
         ForeignCall "llvm" "move" []
-        [Unplaced $ Var "in" ParamIn Ordinary,
-         Unplaced $ Var "out" ParamOut Ordinary]]
+        [Unplaced $ varGet "in",
+         Unplaced $ varSet "out"]]
        Nothing
 
 
@@ -183,21 +183,19 @@ constCtorItems  vis typeSpec (placedProto,num) =
         (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] [])
         [Unplaced $ ForeignCall "lpvm" "cast" []
          [Unplaced $ Typed (IntValue num) typeSpec True,
-          Unplaced $ Var "$" ParamOut Ordinary]]
+          Unplaced $ varSet "$"]]
         pos,
         ProcDecl vis SemiDet True
         (ProcProto constName [Param "$" typeSpec ParamIn Ordinary] [])
         [Unplaced $ Test
          [Unplaced $ ForeignCall "lpvm" "cast" []
-          [Unplaced $ Var "$" ParamIn Ordinary,
-           Unplaced $ Typed (Var "$int" ParamOut Ordinary)
-           (TypeSpec ["wybe"] "int" []) True],
+          [Unplaced $ varGet "$",
+           Unplaced $ intCast (varSet "$int")],
           Unplaced $ ForeignCall "llvm" "icmp" ["eq"]
-          [Unplaced $ Var "$int" ParamIn Ordinary,
+          [Unplaced $ varGet "$int",
            Unplaced $ IntValue num,
-           Unplaced $ Typed (Var "$succeed" ParamOut Ordinary)
-           (TypeSpec ["wybe"] "bool" []) True]]
-         (Unplaced $ Var "$succeed" ParamIn Ordinary)]
+           Unplaced $ boolCast (varSet "$succeed")]]
+         (Unplaced $ varGet "$succeed")]
         pos]
 
 
@@ -258,7 +256,7 @@ constructorItems ctorName params typeSpec size fields tag pos =
         (ProcProto ctorName (params++[Param "$" typeSpec ParamOut Ordinary]) [])
         ([Unplaced $ ForeignCall "lpvm" "alloc" []
           [Unplaced $ IntValue $ fromIntegral size,
-           Unplaced $ Typed (Var "$rec" ParamOut Ordinary) typeSpec True]]
+           Unplaced $ Typed (varSet "$rec") typeSpec True]]
          ++
          (reverse $ List.map (\(var,_,aligned) ->
                                (Unplaced $ ForeignCall "lpvm" "mutate" []
@@ -268,17 +266,15 @@ constructorItems ctorName params typeSpec size fields tag pos =
           fields)
          ++
          [Unplaced $ ForeignCall "lpvm" "cast" []
-          [Unplaced $ Var "$rec" ParamIn Ordinary,
-           Unplaced $ Typed (Var "$recint" ParamOut Ordinary) 
-                      (TypeSpec ["wybe"] "int" []) True],
+          [Unplaced $ varGet "$rec",
+           Unplaced $ intCast (varSet "$recint")],
           Unplaced $ ForeignCall "llvm" "or" []
-          [Unplaced $ Var "$recint" ParamIn Ordinary,
+          [Unplaced $ varGet "$recint",
            Unplaced $ IntValue $ fromIntegral tag,
-           Unplaced $ Typed (Var "$recinttagged" ParamOut Ordinary)
-                      (TypeSpec ["wybe"] "int" []) True],
+           Unplaced $ intCast (varSet "$recinttagged")],
           Unplaced $ ForeignCall "lpvm" "cast" []
-          [Unplaced $ Var "$recinttagged" ParamIn Ordinary,
-           Unplaced $ Var "$" ParamOut Ordinary]])
+          [Unplaced $ varGet "$recinttagged",
+           Unplaced $ varSet "$"]])
         pos]
 
 
@@ -311,34 +307,29 @@ tagCheck constCount nonConstCount tag varName =
           0 -> []
           _ -> [Unplaced
                 $ Test [Unplaced $ ForeignCall "lpvm" "cast" []
-                        [Unplaced $ Var varName ParamIn Ordinary,
-                         Unplaced $ Typed (Var "$int" ParamOut Ordinary) 
-                         (TypeSpec ["wybe"] "int" []) True],
+                        [Unplaced $ varGet varName,
+                         Unplaced $ intCast (varSet "$int")],
                         Unplaced $ ForeignCall "llvm" "icmp" ["uge"]
-                        [Unplaced $ Var "$int" ParamIn Ordinary,
+                        [Unplaced $ varGet "$int",
                          Unplaced $ IntValue $ fromIntegral constCount,
-                         Unplaced $ Typed (Var "$nonconst" ParamOut Ordinary)
-                         (TypeSpec ["wybe"] "bool" []) True]]
-                (Unplaced $ Var "$nonconst" ParamIn Ordinary)])
+                         Unplaced $ boolCast (varSet "$nonconst")]]
+                (Unplaced $ varGet "$nonconst")])
     ++
     (case nonConstCount of
           1 -> []  -- Nothing to do if it's the only non-const constructor
           _ -> [Unplaced
                 $ Test [Unplaced $ ForeignCall "lpvm" "cast" []
-                        [Unplaced $ Var varName ParamIn Ordinary,
-                         Unplaced $ Typed (Var "$int" ParamOut Ordinary) 
-                         (TypeSpec ["wybe"] "int" []) True],
+                        [Unplaced $ varGet varName,
+                         Unplaced $ intCast (varSet "$int")],
                         Unplaced $ ForeignCall "llvm" "and" []
-                        [Unplaced $ Var "$int" ParamIn Ordinary,
+                        [Unplaced $ varGet "$int",
                          Unplaced $ IntValue $ fromIntegral tagMask,
-                         Unplaced $ Typed (Var "$tag" ParamOut Ordinary)
-                         (TypeSpec ["wybe"] "int" []) True],
+                         Unplaced $ intCast (varSet "$tag")],
                         Unplaced $ ForeignCall "llvm" "icmp" ["eq"]
-                        [Unplaced $ Var "$tag" ParamIn Ordinary,
+                        [Unplaced $ varGet "$tag",
                          Unplaced $ IntValue tag,
-                         Unplaced $ Typed (Var "$righttag" ParamOut Ordinary)
-                         (TypeSpec ["wybe"] "int" []) True]]
-                (Unplaced $ Var "$righttag" ParamIn Ordinary)])
+                         Unplaced $ intCast (varSet "$righttag")]]
+                (Unplaced $ varGet "$righttag")])
 
 
 -- | Produce a getter and a setter for one field of the specified type.
@@ -354,9 +345,9 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
                        Param "$" fieldtype ParamOut Ordinary] [])
      ((tagCheck constCount nonConstCount tag "$rec")
       ++ [Unplaced $ ForeignCall "lpvm" "access" []
-          [Unplaced $ Var "$rec" ParamIn Ordinary,
+          [Unplaced $ varGet "$rec",
            Unplaced $ IntValue $ fromIntegral offset,
-           Unplaced $ Var "$" ParamOut Ordinary]])
+           Unplaced $ varSet "$"]])
       pos,
       ProcDecl vis Det True
       (ProcProto field
@@ -364,10 +355,10 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
         Param "$field" fieldtype ParamIn Ordinary] [])
       ((tagCheck constCount nonConstCount tag "$rec")
       ++ [Unplaced $ ForeignCall "lpvm" "mutate" []
-          [Unplaced $ Var "$rec" ParamIn Ordinary,
+          [Unplaced $ varGet "$rec",
            Unplaced $ IntValue $ fromIntegral offset,
-           Unplaced $ Var "$field" ParamIn Ordinary,
-           Unplaced $ Var "$rec" ParamOut Ordinary]])
+           Unplaced $ varGet "$field",
+           Unplaced $ varSet "$rec"]])
      pos]
 
 
@@ -424,17 +415,15 @@ equalityTest _ = False
 -- equalityBody [] [] = shouldnt $ "defining type with no constructors"
 -- equalityBody consts [] = equalityBody' consts []
 -- equalityBody consts nonconsts =
---     let intType = TypeSpec ["wybe"] "int" []
+--     let 
 --     in [Unplaced $ ForeignCall "lpvm" "cast" []
---         [Unplaced $ Var "left" ParamIn Ordinary,
---          Unplaced $ Typed (Var "left$int" ParamOut Ordinary) intType True],
+--         [Unplaced $ varGet "left",
+--          Unplaced $ intCast (varSet "left$int")],
 --         Unplaced $ Cond [] (Unplaced $ ForeignFn "llvm" "icmp" ["ult"]
---                             [Unplaced $ Var "left$int" ParamIn Ordinary,
---                              Unplaced $ Typed (IntValue (length consts)
---                                                (TypeSpec ["wybe"] "int" [])
---                                                True)])
+--                             [Unplaced $ varGet "left$int",
+--                              Unplaced $ intCast (IntValue (length consts)))])
 --         (equalityBody' consts nonconsts)
 --         [Unplaced $ ForeignCall "llvm" "move" []
---          [Unplaced $ Typed (IntValue 0) intType True,
---           Unplaced $ Typed (Var "$$" ParamOut Ordinary) intType True]]]
+--          [Unplaced $ intCast (IntValue 0),
+--           Unplaced $ intCast (varSet "$$")]]]
     
