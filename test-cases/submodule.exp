@@ -26,12 +26,12 @@ AFTER EVERYTHING:
 
 hidden > inline (0 calls)
 0: hidden(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_string("private proc in a private module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:116:41
+    foreign c print_string("private proc in a private module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:87:41
 
 
 semi_hidden > public inline (0 calls)
 0: semi_hidden(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_string("public proc in a private module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:116:41
+    foreign c print_string("public proc in a private module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:87:41
 --------------------------------------------------
  Module submodule.publictest
   public submods  : 
@@ -45,88 +45,82 @@ semi_hidden > public inline (0 calls)
 
 semi_visible > inline (0 calls)
 0: semi_visible(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_string("private proc in a public module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:116:41
+    foreign c print_string("private proc in a public module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:87:41
 
 
 visible > public inline (0 calls)
 0: visible(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_string("public proc in a public module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:116:41
+    foreign c print_string("public proc in a public module":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:87:41
 submodule, submodule.privatetest, submodule.publictest
 ======================================================================
 AFTER LLVM IR:
 
 ; ModuleID = 'submodule'
 
-@0 = constant [33 x i8] c"private proc in a private module\00"
-@1 = constant [32 x i8] c"private proc in a public module\00"
-
-declare i8* @wybe_malloc(i32)
+@submodule.privatetest.1 = constant [33 x i8] c"private proc in a private module\00"
+@submodule.publictest.1 = constant [32 x i8] c"private proc in a public module\00"
 
 declare void @print_string(i8*)
 
 define void @"submodule.privatetest.hidden<0>"() {
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([32 x i8]* @1, i32 0, i32 0))
+  tail call void @print_string(i8* getelementptr inbounds ([33 x i8]* @submodule.privatetest.1, i32 0, i32 0))
   ret void
 }
 
 define void @"submodule.privatetest.semi_hidden<0>"() {
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([32 x i8]* @1, i32 0, i32 0))
+  tail call void @print_string(i8* getelementptr inbounds ([33 x i8]* @submodule.privatetest.1, i32 0, i32 0))
   ret void
 }
 
 define void @"submodule.publictest.semi_visible<0>"() {
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([32 x i8]* @1, i32 0, i32 0))
+  tail call void @print_string(i8* getelementptr inbounds ([32 x i8]* @submodule.publictest.1, i32 0, i32 0))
   ret void
 }
 
 define void @"submodule.publictest.visible<0>"() {
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([32 x i8]* @1, i32 0, i32 0))
+  tail call void @print_string(i8* getelementptr inbounds ([32 x i8]* @submodule.publictest.1, i32 0, i32 0))
   ret void
 }
 
 --------------------------------------------------
 ; ModuleID = 'submodule.privatetest'
 
-@0 = constant [33 x i8] c"private proc in a private module\00"
+@submodule.privatetest.1 = constant [33 x i8] c"private proc in a private module\00"
 
 declare void @print_string(i8*)
 
-declare i8* @wybe_malloc(i32)
-
 define void @"submodule.privatetest.hidden<0>"() {
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([33 x i8]* @0, i32 0, i32 0))
+  tail call void @print_string(i8* getelementptr inbounds ([33 x i8]* @submodule.privatetest.1, i32 0, i32 0))
   ret void
 }
 
 define void @"submodule.privatetest.semi_hidden<0>"() {
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([33 x i8]* @0, i32 0, i32 0))
+  tail call void @print_string(i8* getelementptr inbounds ([33 x i8]* @submodule.privatetest.1, i32 0, i32 0))
   ret void
 }
 
 --------------------------------------------------
 ; ModuleID = 'submodule.publictest'
 
-@0 = constant [32 x i8] c"private proc in a public module\00"
+@submodule.publictest.1 = constant [32 x i8] c"private proc in a public module\00"
 
 declare void @print_string(i8*)
 
-declare i8* @wybe_malloc(i32)
-
 define void @"submodule.publictest.semi_visible<0>"() {
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([32 x i8]* @0, i32 0, i32 0))
+  tail call void @print_string(i8* getelementptr inbounds ([32 x i8]* @submodule.publictest.1, i32 0, i32 0))
   ret void
 }
 
 define void @"submodule.publictest.visible<0>"() {
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([32 x i8]* @0, i32 0, i32 0))
+  tail call void @print_string(i8* getelementptr inbounds ([32 x i8]* @submodule.publictest.1, i32 0, i32 0))
   ret void
 }
 

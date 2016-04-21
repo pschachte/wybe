@@ -13,13 +13,13 @@ AFTER EVERYTHING:
 
 inc2 > public inline (0 calls)
 0: inc2(x#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$4#0:int) @wybe:4:38
-    foreign llvm add(~tmp$4#0:int, 1:wybe.int, ?tmp$7#0:int) @wybe:4:38
+    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$4#0:int) @wybe:12:38
+    foreign llvm add(~tmp$4#0:int, 1:wybe.int, ?tmp$7#0:int) @wybe:12:38
     foreign llvm move(~tmp$7#0:int, ?$#0:wybe.int) @update:1:8
 inc2 > public inline (0 calls)
 1: inc2([x#0:wybe.int], ?x#1:wybe.int, y#0:wybe.int):
-    foreign llvm sub(~y#0:wybe.int, 1:wybe.int, ?tmp$11#0:wybe.int) @wybe:5:44
-    foreign llvm sub(~tmp$11#0:wybe.int, 1:wybe.int, ?tmp$14#0:wybe.int) @wybe:5:44
+    foreign llvm sub(~y#0:wybe.int, 1:wybe.int, ?tmp$11#0:wybe.int) @wybe:13:44
+    foreign llvm sub(~tmp$11#0:wybe.int, 1:wybe.int, ?tmp$14#0:wybe.int) @wybe:13:44
     foreign llvm move(~tmp$14#0:wybe.int, ?%x#1:wybe.int)
 update
 ======================================================================
@@ -27,19 +27,19 @@ AFTER LLVM IR:
 
 ; ModuleID = 'update'
 
-declare i8* @wybe_malloc(i32)
-
-define i64 @"update.inc2<0>"(i64 %"x#0") {
+; Function Attrs: nounwind readnone
+define i64 @"update.inc2<0>"(i64 %"x#0") #0 {
 entry:
-  %"tmp$4#0" = add i64 %"x#0", 1
-  %"tmp$7#0" = add i64 %"tmp$4#0", 1
+  %"tmp$7#0" = add i64 %"x#0", 2
   ret i64 %"tmp$7#0"
 }
 
-define i64 @"update.inc2<1>"(i64 %"y#0") {
+; Function Attrs: nounwind readnone
+define i64 @"update.inc2<1>"(i64 %"y#0") #0 {
 entry:
-  %"tmp$11#0" = sub i64 %"y#0", 1
-  %"tmp$14#0" = sub i64 %"tmp$11#0", 1
+  %"tmp$14#0" = add i64 %"y#0", -2
   ret i64 %"tmp$14#0"
 }
+
+attributes #0 = { nounwind readnone }
 

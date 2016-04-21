@@ -17,14 +17,14 @@ AFTER EVERYTHING:
 
 gen$1 > (2 calls)
 0: gen$1(wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
-    foreign c read_char(?c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:114:39
-    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$4#0:bool) @wybe:69:42
+    foreign c read_char(?c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:85:39
+    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$4#0:bool) @wybe:67:42
     case ~tmp$4#0:bool of
     0:
         foreign llvm move(~wybe.io$io#1:wybe.phantom, ?wybe.io$io#2:wybe.phantom)
 
     1:
-        foreign c putchar(~c#0:wybe.char, ~wybe.io$io#1:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:112:39
+        foreign c putchar(~c#0:wybe.char, ~wybe.io$io#1:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:83:39
         simple_loop.gen$1<0>(~tmp$8#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom) @simple_loop:1:1
 
 
@@ -35,7 +35,7 @@ gen$3 > inline (1 calls)
 
 gen$4 > inline (1 calls)
 0: gen$4(c#0:wybe.char, [tmp$0#0:wybe.bool], wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
-    foreign c putchar(~c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:112:39
+    foreign c putchar(~c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:83:39
     simple_loop.gen$1<0>(~wybe.io$io#1:wybe.phantom, ?wybe.io$io#2:wybe.phantom) @simple_loop:1:1
 simple_loop
 ======================================================================
@@ -43,32 +43,37 @@ AFTER LLVM IR:
 
 ; ModuleID = 'simple_loop'
 
-declare void @putchar(i8)
+; Function Attrs: nounwind
+declare void @putchar(i8) #0
 
 declare i8 @read_char()
-
-declare i8* @wybe_malloc(i32)
 
 define i32 @simple_loop.main() {
 entry:
   tail call void @"simple_loop.gen$1<0>"()
-  %0 = alloca i32
-  store i32 0, i32* %0
   ret i32 0
 }
 
 define void @"simple_loop.gen$1<0>"() {
 entry:
+  %"c#01" = tail call i8 @read_char()
+  %"tmp$4#02" = icmp eq i8 %"c#01", 97
+  br i1 %"tmp$4#02", label %if.else, label %if.then.preheader
+
+if.then.preheader:                                ; preds = %entry
+  br label %if.then
+
+if.then:                                          ; preds = %if.then.preheader, %if.then
+  %"c#03" = phi i8 [ %"c#0", %if.then ], [ %"c#01", %if.then.preheader ]
+  tail call void @putchar(i8 %"c#03")
   %"c#0" = tail call i8 @read_char()
-  %"tmp$4#0" = icmp ne i8 %"c#0", 97
-  br i1 %"tmp$4#0", label %if.then, label %if.else
+  %"tmp$4#0" = icmp eq i8 %"c#0", 97
+  br i1 %"tmp$4#0", label %if.else.loopexit, label %if.then
 
-if.then:                                          ; preds = %entry
-  tail call void @putchar(i8 %"c#0")
-  tail call void @"simple_loop.gen$1<0>"()
-  ret void
+if.else.loopexit:                                 ; preds = %if.then
+  br label %if.else
 
-if.else:                                          ; preds = %entry
+if.else:                                          ; preds = %if.else.loopexit, %entry
   ret void
 }
 
@@ -78,4 +83,6 @@ entry:
   tail call void @"simple_loop.gen$1<0>"()
   ret void
 }
+
+attributes #0 = { nounwind }
 

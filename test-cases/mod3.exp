@@ -16,5 +16,3 @@ AFTER LLVM IR:
 
 ; ModuleID = 'mod3'
 
-declare i8* @wybe_malloc(i32)
-

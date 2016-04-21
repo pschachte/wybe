@@ -93,174 +93,154 @@ AFTER LLVM IR:
 
 ; ModuleID = 'type_enum'
 
-declare i8* @wybe_malloc(i32)
-
-define i2 @"type_enum.season.=<0>"(i2 %"in#0") {
+; Function Attrs: nounwind readnone
+define i2 @"type_enum.season.=<0>"(i2 %"in#0") #0 {
 entry:
   ret i2 %"in#0"
 }
 
-define i2 @"type_enum.season.=<1>"(i2 %"in#0") {
+; Function Attrs: nounwind readnone
+define i2 @"type_enum.season.=<1>"(i2 %"in#0") #0 {
 entry:
   ret i2 %"in#0"
 }
 
-define i2 @"type_enum.season.autumn<0>"() {
+; Function Attrs: nounwind readnone
+define i2 @"type_enum.season.autumn<0>"() #0 {
 entry:
-  %0 = alloca i64
-  store i64 3, i64* %0
-  %1 = load i64* %0
-  %2 = trunc i64 %1 to i2
-  ret i2 %2
+  ret i2 -1
 }
 
-define { i1, i1 } @"type_enum.season.autumn<1>"(i2 %"$#0") {
+; Function Attrs: nounwind readnone
+define { i1, i1 } @"type_enum.season.autumn<1>"(i2 %"$#0") #0 {
 entry:
-  %0 = zext i2 %"$#0" to i64
-  %"$succeed#0" = icmp eq i64 %0, 3
-  %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
-  ret { i1, i1 } %2
+  %"$succeed#0" = icmp eq i2 %"$#0", -1
+  %0 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
+  %1 = insertvalue { i1, i1 } %0, i1 %"$succeed#0", 1
+  ret { i1, i1 } %1
 }
 
-define i2 @"type_enum.season.spring<0>"() {
+; Function Attrs: nounwind readnone
+define i2 @"type_enum.season.spring<0>"() #0 {
 entry:
-  %0 = alloca i64
-  store i64 1, i64* %0
-  %1 = load i64* %0
-  %2 = trunc i64 %1 to i2
-  ret i2 %2
+  ret i2 1
 }
 
-define { i1, i1 } @"type_enum.season.spring<1>"(i2 %"$#0") {
+; Function Attrs: nounwind readnone
+define { i1, i1 } @"type_enum.season.spring<1>"(i2 %"$#0") #0 {
 entry:
-  %0 = zext i2 %"$#0" to i64
-  %"$succeed#0" = icmp eq i64 %0, 1
-  %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
-  ret { i1, i1 } %2
+  %"$succeed#0" = icmp eq i2 %"$#0", 1
+  %0 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
+  %1 = insertvalue { i1, i1 } %0, i1 %"$succeed#0", 1
+  ret { i1, i1 } %1
 }
 
-define i2 @"type_enum.season.summer<0>"() {
+; Function Attrs: nounwind readnone
+define i2 @"type_enum.season.summer<0>"() #0 {
 entry:
-  %0 = alloca i64
-  store i64 2, i64* %0
-  %1 = load i64* %0
-  %2 = trunc i64 %1 to i2
-  ret i2 %2
+  ret i2 -2
 }
 
-define { i1, i1 } @"type_enum.season.summer<1>"(i2 %"$#0") {
+; Function Attrs: nounwind readnone
+define { i1, i1 } @"type_enum.season.summer<1>"(i2 %"$#0") #0 {
 entry:
-  %0 = zext i2 %"$#0" to i64
-  %"$succeed#0" = icmp eq i64 %0, 2
-  %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
-  ret { i1, i1 } %2
+  %"$succeed#0" = icmp eq i2 %"$#0", -2
+  %0 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
+  %1 = insertvalue { i1, i1 } %0, i1 %"$succeed#0", 1
+  ret { i1, i1 } %1
 }
 
-define i2 @"type_enum.season.winter<0>"() {
+; Function Attrs: nounwind readnone
+define i2 @"type_enum.season.winter<0>"() #0 {
 entry:
-  %0 = alloca i64
-  store i64 0, i64* %0
-  %1 = load i64* %0
-  %2 = trunc i64 %1 to i2
-  ret i2 %2
+  ret i2 0
 }
 
-define { i1, i1 } @"type_enum.season.winter<1>"(i2 %"$#0") {
+; Function Attrs: nounwind readnone
+define { i1, i1 } @"type_enum.season.winter<1>"(i2 %"$#0") #0 {
 entry:
-  %0 = zext i2 %"$#0" to i64
-  %"$succeed#0" = icmp eq i64 %0, 0
-  %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
-  ret { i1, i1 } %2
+  %"$succeed#0" = icmp eq i2 %"$#0", 0
+  %0 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
+  %1 = insertvalue { i1, i1 } %0, i1 %"$succeed#0", 1
+  ret { i1, i1 } %1
 }
+
+attributes #0 = { nounwind readnone }
 
 --------------------------------------------------
 ; ModuleID = 'type_enum.season'
 
-declare i8* @wybe_malloc(i32)
-
-define i2 @"type_enum.season.=<0>"(i2 %"in#0") {
+; Function Attrs: nounwind readnone
+define i2 @"type_enum.season.=<0>"(i2 %"in#0") #0 {
 entry:
   ret i2 %"in#0"
 }
 
-define i2 @"type_enum.season.=<1>"(i2 %"in#0") {
+; Function Attrs: nounwind readnone
+define i2 @"type_enum.season.=<1>"(i2 %"in#0") #0 {
 entry:
   ret i2 %"in#0"
 }
 
-define i2 @"type_enum.season.autumn<0>"() {
+; Function Attrs: nounwind readnone
+define i2 @"type_enum.season.autumn<0>"() #0 {
 entry:
-  %0 = alloca i64
-  store i64 3, i64* %0
-  %1 = load i64* %0
-  %2 = trunc i64 %1 to i2
-  ret i2 %2
+  ret i2 -1
 }
 
-define { i1, i1 } @"type_enum.season.autumn<1>"(i2 %"$#0") {
+; Function Attrs: nounwind readnone
+define { i1, i1 } @"type_enum.season.autumn<1>"(i2 %"$#0") #0 {
 entry:
-  %0 = zext i2 %"$#0" to i64
-  %"$succeed#0" = icmp eq i64 %0, 3
-  %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
-  ret { i1, i1 } %2
+  %"$succeed#0" = icmp eq i2 %"$#0", -1
+  %0 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
+  %1 = insertvalue { i1, i1 } %0, i1 %"$succeed#0", 1
+  ret { i1, i1 } %1
 }
 
-define i2 @"type_enum.season.spring<0>"() {
+; Function Attrs: nounwind readnone
+define i2 @"type_enum.season.spring<0>"() #0 {
 entry:
-  %0 = alloca i64
-  store i64 1, i64* %0
-  %1 = load i64* %0
-  %2 = trunc i64 %1 to i2
-  ret i2 %2
+  ret i2 1
 }
 
-define { i1, i1 } @"type_enum.season.spring<1>"(i2 %"$#0") {
+; Function Attrs: nounwind readnone
+define { i1, i1 } @"type_enum.season.spring<1>"(i2 %"$#0") #0 {
 entry:
-  %0 = zext i2 %"$#0" to i64
-  %"$succeed#0" = icmp eq i64 %0, 1
-  %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
-  ret { i1, i1 } %2
+  %"$succeed#0" = icmp eq i2 %"$#0", 1
+  %0 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
+  %1 = insertvalue { i1, i1 } %0, i1 %"$succeed#0", 1
+  ret { i1, i1 } %1
 }
 
-define i2 @"type_enum.season.summer<0>"() {
+; Function Attrs: nounwind readnone
+define i2 @"type_enum.season.summer<0>"() #0 {
 entry:
-  %0 = alloca i64
-  store i64 2, i64* %0
-  %1 = load i64* %0
-  %2 = trunc i64 %1 to i2
-  ret i2 %2
+  ret i2 -2
 }
 
-define { i1, i1 } @"type_enum.season.summer<1>"(i2 %"$#0") {
+; Function Attrs: nounwind readnone
+define { i1, i1 } @"type_enum.season.summer<1>"(i2 %"$#0") #0 {
 entry:
-  %0 = zext i2 %"$#0" to i64
-  %"$succeed#0" = icmp eq i64 %0, 2
-  %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
-  ret { i1, i1 } %2
+  %"$succeed#0" = icmp eq i2 %"$#0", -2
+  %0 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
+  %1 = insertvalue { i1, i1 } %0, i1 %"$succeed#0", 1
+  ret { i1, i1 } %1
 }
 
-define i2 @"type_enum.season.winter<0>"() {
+; Function Attrs: nounwind readnone
+define i2 @"type_enum.season.winter<0>"() #0 {
 entry:
-  %0 = alloca i64
-  store i64 0, i64* %0
-  %1 = load i64* %0
-  %2 = trunc i64 %1 to i2
-  ret i2 %2
+  ret i2 0
 }
 
-define { i1, i1 } @"type_enum.season.winter<1>"(i2 %"$#0") {
+; Function Attrs: nounwind readnone
+define { i1, i1 } @"type_enum.season.winter<1>"(i2 %"$#0") #0 {
 entry:
-  %0 = zext i2 %"$#0" to i64
-  %"$succeed#0" = icmp eq i64 %0, 0
-  %1 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
-  %2 = insertvalue { i1, i1 } %1, i1 %"$succeed#0", 1
-  ret { i1, i1 } %2
+  %"$succeed#0" = icmp eq i2 %"$#0", 0
+  %0 = insertvalue { i1, i1 } undef, i1 %"$succeed#0", 0
+  %1 = insertvalue { i1, i1 } %0, i1 %"$succeed#0", 1
+  ret { i1, i1 } %1
 }
+
+attributes #0 = { nounwind readnone }
 
