@@ -167,10 +167,7 @@ assignmentProc ty leftToRight =
     in ProcDecl Public Det True
        (ProcProto "=" [Param lname ty lflow Ordinary,
                        Param rname ty rflow Ordinary] [])
-       [Unplaced $
-        ForeignCall "llvm" "move" []
-        [Unplaced $ varGet "in",
-         Unplaced $ varSet "out"]]
+       [move (varGet "in") (varSet "out")]
        Nothing
 
 
@@ -181,20 +178,12 @@ constCtorItems  vis typeSpec (placedProto,num) =
         constName = fnProtoName $ content placedProto
     in [ProcDecl vis Det True
         (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] [])
-        [Unplaced $ ForeignCall "lpvm" "cast" []
-         [Unplaced $ Typed (IntValue num) typeSpec True,
-          Unplaced $ varSet "$"]]
-        pos,
+        [lpvmCastToVar (castTo (IntValue num) typeSpec) "$"] pos,
         ProcDecl vis SemiDet True
         (ProcProto constName [Param "$" typeSpec ParamIn Ordinary] [])
         [Unplaced $ Test
-         [Unplaced $ ForeignCall "lpvm" "cast" []
-          [Unplaced $ varGet "$",
-           Unplaced $ intCast (varSet "$int")],
-          Unplaced $ ForeignCall "llvm" "icmp" ["eq"]
-          [Unplaced $ varGet "$int",
-           Unplaced $ IntValue num,
-           Unplaced $ boolCast (varSet "$succeed")]]
+         [lpvmCast (varGet "$") "$int" intType,
+          comparison "eq" (varGet "$int") (IntValue num) "$succeed"]
          (Unplaced $ varGet "$succeed")]
         pos]
 
@@ -265,16 +254,12 @@ constructorItems ctorName params typeSpec size fields tag pos =
                                  Unplaced $ Var var ParamIn flowType]))
           fields)
          ++
-         [Unplaced $ ForeignCall "lpvm" "cast" []
-          [Unplaced $ varGet "$rec",
-           Unplaced $ intCast (varSet "$recint")],
+         [lpvmCast (varGet "$rec") "$recint" intType,
           Unplaced $ ForeignCall "llvm" "or" []
           [Unplaced $ varGet "$recint",
            Unplaced $ IntValue $ fromIntegral tag,
            Unplaced $ intCast (varSet "$recinttagged")],
-          Unplaced $ ForeignCall "lpvm" "cast" []
-          [Unplaced $ varGet "$recinttagged",
-           Unplaced $ varSet "$"]])
+          lpvmCastToVar (varGet "$recinttagged") "$"])
         pos]
 
 
@@ -306,29 +291,20 @@ tagCheck constCount nonConstCount tag varName =
     (case constCount of
           0 -> []
           _ -> [Unplaced
-                $ Test [Unplaced $ ForeignCall "lpvm" "cast" []
-                        [Unplaced $ varGet varName,
-                         Unplaced $ intCast (varSet "$int")],
-                        Unplaced $ ForeignCall "llvm" "icmp" ["uge"]
-                        [Unplaced $ varGet "$int",
-                         Unplaced $ IntValue $ fromIntegral constCount,
-                         Unplaced $ boolCast (varSet "$nonconst")]]
+                $ Test [lpvmCast (varGet varName) "$int" intType,
+                        comparison "uge" (varGet "$int") (iVal constCount)
+                        "$nonconst"]
                 (Unplaced $ varGet "$nonconst")])
     ++
     (case nonConstCount of
           1 -> []  -- Nothing to do if it's the only non-const constructor
           _ -> [Unplaced
-                $ Test [Unplaced $ ForeignCall "lpvm" "cast" []
-                        [Unplaced $ varGet varName,
-                         Unplaced $ intCast (varSet "$int")],
+                $ Test [lpvmCast (varGet varName) "$int" intType,
                         Unplaced $ ForeignCall "llvm" "and" []
                         [Unplaced $ varGet "$int",
                          Unplaced $ IntValue $ fromIntegral tagMask,
                          Unplaced $ intCast (varSet "$tag")],
-                        Unplaced $ ForeignCall "llvm" "icmp" ["eq"]
-                        [Unplaced $ varGet "$tag",
-                         Unplaced $ IntValue tag,
-                         Unplaced $ intCast (varSet "$righttag")]]
+                        comparison "eq" (varGet "$tag") (iVal tag) "$righttag"]
                 (Unplaced $ varGet "$righttag")])
 
 
@@ -380,14 +356,13 @@ implicitItems typespec consts nonconsts items =
 implicitEquality :: TypeSpec -> [Placed FnProto] -> [Placed FnProto] -> [Item]
                  -> [Item]
 implicitEquality typespec consts nonconsts items =
-  []
-    -- if List.any equalityTest items
-    -- then []
-    -- else
-    --   let proto = ProcProto "=" [Param "left" typespec ParamIn Ordinary,
-    --                              Param "right" typespec ParamIn Ordinary] []
-    --       body = equalityBody consts nonconsts
-    --   in [ProcDecl Public SemiDet True proto body Nothing]
+    if List.any equalityTest items
+    then []
+    else
+      let proto = ProcProto "=" [Param "left" typespec ParamIn Ordinary,
+                                 Param "right" typespec ParamIn Ordinary] []
+          body = equalityBody consts nonconsts
+      in [ProcDecl Public SemiDet True proto body Nothing]
 
 -- |Does the item declare an = test or function?
 equalityTest :: Item -> Bool
@@ -411,19 +386,20 @@ equalityTest _ = False
 --
 --       XXX this needs to check that there are not too many non-const
 --       constructors for the number of available tag bits.
--- equalityBody :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
--- equalityBody [] [] = shouldnt $ "defining type with no constructors"
--- equalityBody consts [] = equalityBody' consts []
--- equalityBody consts nonconsts =
---     let 
---     in [Unplaced $ ForeignCall "lpvm" "cast" []
---         [Unplaced $ varGet "left",
---          Unplaced $ intCast (varSet "left$int")],
---         Unplaced $ Cond [] (Unplaced $ ForeignFn "llvm" "icmp" ["ult"]
---                             [Unplaced $ varGet "left$int",
---                              Unplaced $ intCast (IntValue (length consts)))])
---         (equalityBody' consts nonconsts)
---         [Unplaced $ ForeignCall "llvm" "move" []
---          [Unplaced $ intCast (IntValue 0),
---           Unplaced $ intCast (varSet "$$")]]]
-    
+equalityBody :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
+equalityBody [] [] = shouldnt $ "defining type with no constructors"
+equalityBody consts [] = equalityConsts consts
+equalityBody consts nonconsts =
+    [lpvmCast (varGet "left")"left$int" intType,
+     comparison "ult" (varGet "left$int") (iVal $ length consts) "$$",
+     Unplaced $ Cond [] (Unplaced $ varGet "$$")
+     (equalityConsts consts)
+     [move (boolCast $ IntValue 0) (boolCast $ varSet "$$")]]
+
+
+-- |Return code to check of two const values values are equal, given that we
+--  know that the values are not non-consts.
+equalityConsts :: [Placed FnProto] -> [Placed Stmt]
+equalityConsts [] = [move (boolCast $ IntValue 1) (boolCast $ varSet "$$")]
+equalityConsts _ = [comparison "eq" (intCast $ varGet "left")
+                    (intCast $ varGet "right") "$$"]
