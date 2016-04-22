@@ -22,7 +22,7 @@ executable wybemk
                , hex
                , llvm-general == 3.5.1.0
                , llvm-general-pure
-               , macho
+--               , macho
                , mtl
                , old-time
                , parsec
