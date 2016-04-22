@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 
 incr > inline (0 calls)
 0: incr(a#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm add(~a#0:wybe.int, 1:wybe.int, ?tmp$3#0:int) @wybe:4:38
+    foreign llvm add(~a#0:wybe.int, 1:wybe.int, ?tmp$3#0:int) @wybe:12:38
     foreign llvm move(~tmp$3#0:int, ?$#0:wybe.int) @func_untyped:1:1
 func_untyped
 ======================================================================
@@ -20,11 +20,12 @@ AFTER LLVM IR:
 
 ; ModuleID = 'func_untyped'
 
-declare i8* @wybe_malloc(i32)
-
-define i64 @"func_untyped.incr<0>"(i64 %"a#0") {
+; Function Attrs: nounwind readnone
+define i64 @"func_untyped.incr<0>"(i64 %"a#0") #0 {
 entry:
   %"tmp$3#0" = add i64 %"a#0", 1
   ret i64 %"tmp$3#0"
 }
+
+attributes #0 = { nounwind readnone }
 

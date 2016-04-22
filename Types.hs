@@ -274,8 +274,6 @@ localBodyProcs thisMod (ProcDefSrc body) =
     foldProcCalls (localCalls thisMod) (++) [] body
 localBodyProcs thisMod (ProcDefPrim _ _) =
     shouldnt "Type checking compiled code"
-localBodyProcs thisMod (ProcDefBlocks _ _ _) =
-    shouldnt "Type checking compiled code"
 
 localCalls :: ModSpec -> ModSpec -> Ident -> (Maybe Int) -> [Placed Exp] -> [Ident]
 localCalls thisMod m name _ _
@@ -867,8 +865,6 @@ checkProcDefFullytyped def = do
 procDefSrc :: ProcImpln -> [Placed Stmt]
 procDefSrc (ProcDefSrc def) = def
 procDefSrc (ProcDefPrim _ _) = shouldnt $ "procDefSrc applied to ProcDefPrim"
-procDefSrc (ProcDefBlocks _ _ _) =
-  shouldnt $ "procDefSrc applied to ProcDefBlocks"
 
 
 expType :: Exp -> TypeSpec

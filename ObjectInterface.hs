@@ -22,13 +22,14 @@ import           Data.Hex
 import           Data.Int
 import           Data.List as List
 import           Data.Maybe (isJust)
-import           Data.Monoid
 import           Data.Word
 import Data.Bits
 import           System.Process
-import           System.Directory          (createDirectoryIfMissing,
-                                            getTemporaryDirectory)
-import Control.Monad.Trans
+import           System.Directory          (createDirectoryIfMissing
+                                           ,getTemporaryDirectory
+                                           ,removeFile)
+import System.FilePath (replaceExtension, takeBaseName)                 
+import Control.Monad.Trans (liftIO)
 import Macho
 
 
@@ -44,12 +45,14 @@ insertLPVMDataLd :: BL.ByteString -> FilePath -> IO ()
 insertLPVMDataLd bs obj =
     do tempDir <- liftIO $ getTemporaryDirectory
        liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
-       let lpvmFile = (tempDir ++ "wybetemp/" ++ "lpvmCache")
+       let modFile = takeBaseName obj ++ ".module"
+       let lpvmFile = (tempDir ++ "wybetemp/" ++ modFile)
        BL.writeFile lpvmFile bs
-       let args = [obj] ++ ["-r"] ++ ldSystemArgs
+       let args = [obj] ++ ["-r"] 
                   ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
                   ++ ["-o", obj]
        createProcess (proc "ld" args)
+       -- Cleanup
        return ()
 
 -- | Extract string data from the segment __LPVM, section __lpvm of the
@@ -156,7 +159,7 @@ dataFromBitcode = do
 -- | Parse the given object file into a 'Macho' structure, determine the
 -- offset and size of the '__lpvm' section data, and decode those bytes as
 -- a 'AST.Module'.
-machoLPVMSection :: FilePath -> IO Module
+machoLPVMSection :: FilePath -> IO [Module]
 machoLPVMSection ofile = do
     bs <- B.readFile ofile
     let (cmdsize, macho) = parseMacho bs
@@ -166,8 +169,8 @@ machoLPVMSection ofile = do
         Just seg -> do
             let (off, size) = lpvmFileOffset seg
             let bytes = readBytes off size (BL.fromStrict bs)
-            let mod = (decode bytes :: Module)
-            return mod
+            let mods = (decode bytes :: [Module])
+            return mods
 
 -- | Find the load command from a 'LC_COMMAND' list which contains
 -- section '__lpvm'. This section will usually by in a general segment

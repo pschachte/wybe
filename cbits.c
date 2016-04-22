@@ -30,8 +30,7 @@ int read_char() {
     return ch;        
 }
 
-int ipow(int base, int exp)
-{
+int ipow(int base, int exp) {
     int result = 1;
     while (exp)
     {
@@ -53,6 +52,10 @@ int isqrt(int x) {
 
 // Boehm GC
 void *wybe_malloc(int size) {
-    GC_INIT();
     return GC_MALLOC(size);
 }
+
+void gc_init(){
+    GC_INIT();
+}
+

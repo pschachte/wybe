@@ -12,8 +12,8 @@ AFTER EVERYTHING:
 
 quad > public inline (0 calls)
 0: quad(x#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$4#0:int) @wybe:4:38
-    foreign llvm add(~tmp$4#0:int, ~tmp$4#0:int, ?tmp$8#0:int) @wybe:4:38
+    foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$4#0:int) @wybe:12:38
+    foreign llvm add(~tmp$4#0:int, ~tmp$4#0:int, ?tmp$8#0:int) @wybe:12:38
     foreign llvm move(~tmp$8#0:int, ?$#0:wybe.int) @func_where:1:8
 func_where
 ======================================================================
@@ -21,12 +21,12 @@ AFTER LLVM IR:
 
 ; ModuleID = 'func_where'
 
-declare i8* @wybe_malloc(i32)
-
-define i64 @"func_where.quad<0>"(i64 %"x#0") {
+; Function Attrs: nounwind readnone
+define i64 @"func_where.quad<0>"(i64 %"x#0") #0 {
 entry:
-  %"tmp$4#0" = add i64 %"x#0", %"x#0"
-  %"tmp$8#0" = add i64 %"tmp$4#0", %"tmp$4#0"
+  %"tmp$8#0" = shl i64 %"x#0", 2
   ret i64 %"tmp$8#0"
 }
+
+attributes #0 = { nounwind readnone }
 

@@ -11,23 +11,19 @@ AFTER EVERYTHING:
   procs           : 
 
 print2 > public inline (0 calls)
-0: print2(x#0:wybe.int, y#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
-    foreign c print_int(~x#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:104:38
-    foreign c print_int(~y#0:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:104:38
+0: print2([x#0:wybe.int], [y#0:wybe.int], wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
+    foreign llvm move(~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @proc_print2:3:8
 proc_print2
 ======================================================================
 AFTER LLVM IR:
 
 ; ModuleID = 'proc_print2'
 
-declare void @print_int(i64)
-
-declare i8* @wybe_malloc(i32)
-
-define void @"proc_print2.print2<0>"(i64 %"x#0", i64 %"y#0") {
+; Function Attrs: nounwind readnone
+define void @"proc_print2.print2<0>"() #0 {
 entry:
-  tail call void @print_int(i64 %"x#0")
-  tail call void @print_int(i64 %"y#0")
   ret void
 }
+
+attributes #0 = { nounwind readnone }
 

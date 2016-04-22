@@ -13,6 +13,8 @@ module BinaryFactory
 import AST
 import Control.Monad
 import Data.Binary as B
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Lazy as BL
 import qualified LLVM.General.AST as LLVMAST
 import Text.ParserCombinators.Parsec.Pos
 
@@ -75,3 +77,17 @@ instance Binary LLVMAST.Module where
            return (read def :: LLVMAST.Module)
 
 
+
+-- * Encoding
+encodeModule :: Module -> Compiler BL.ByteString
+encodeModule m = do
+    let msg = "Unable to get loaded Module for binary encoding."
+    -- func to get get a trusted loaded Module from it's spec
+    let getm name = trustFromJustM msg $ getLoadedModule name
+    subModSpecs <- collectSubModules (modSpec m)
+    subMods <- mapM getm subModSpecs
+    return $ B.encode (m:subMods)
+
+
+
+    

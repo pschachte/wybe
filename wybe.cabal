@@ -16,7 +16,7 @@ executable wybemk
                , bytedump
                , bytestring
                , containers
-               , directory >= 1.2.2.0
+               , directory >= 1.2.5.0
                , filepath >= 1.4.0.0
                , haskeline
                , hex
