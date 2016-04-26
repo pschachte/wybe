@@ -387,14 +387,18 @@ equalityTest _ = False
 --       XXX this needs to check that there are not too many non-const
 --       constructors for the number of available tag bits.
 equalityBody :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
-equalityBody [] [] = shouldnt $ "defining type with no constructors"
+equalityBody [] [] = [] -- nothing to do if no constructors at all, such as
+                        -- for primitive types
 equalityBody consts [] = equalityConsts consts
 equalityBody consts nonconsts =
-    [lpvmCast (varGet "left")"left$int" intType,
+    [lpvmCast (varGet "left") "left$int" intType,
      comparison "ult" (varGet "left$int") (iVal $ length consts) "$$",
      Unplaced $ Cond [] (Unplaced $ varGet "$$")
      (equalityConsts consts)
+     -- XXX temporarily:
      [move (boolCast $ IntValue 0) (boolCast $ varSet "$$")]]
+     --  XXX should be:
+     --  (equalityNonconsts nonconsts)]
 
 
 -- |Return code to check of two const values values are equal, given that we
@@ -403,3 +407,26 @@ equalityConsts :: [Placed FnProto] -> [Placed Stmt]
 equalityConsts [] = [move (boolCast $ IntValue 1) (boolCast $ varSet "$$")]
 equalityConsts _ = [comparison "eq" (intCast $ varGet "left")
                     (intCast $ varGet "right") "$$"]
+
+-- |Return code to check that two values are equal when the first is known
+--  not to be a const constructor.
+equalityNonconsts :: [Placed FnProto] -> [Placed Stmt]
+equalityNonconsts [] = [move (boolCast $ IntValue 0) (boolCast $ varSet "$$")]
+equalityNonconsts [single] =
+    concatMap equalityField $ fnProtoParams $ content single
+equalityNonconsts ctrs = nyi "multiple non-const constructors"
+
+-- |Return code to check that all the fields of two data are equal, when
+--  they are known to have the same constructor.
+equalityField :: Param -> [Placed Stmt]
+equalityField param =
+    let field = paramName param
+    in  List.map Unplaced
+        [ProcCall [] field Nothing [Unplaced $ varGet "left",
+                                    Unplaced $ varSet "left$field"],
+         ProcCall [] field Nothing [Unplaced $ varGet "right",
+                                    Unplaced $ varSet "right$field"],
+         ProcCall [] "=" Nothing [Unplaced $ varGet "left$field",
+                                  Unplaced $ varGet "right$field",
+                                  Unplaced $ boolCast $ varSet "$$"],
+         Test [] (Unplaced $ varGet "$$")]

@@ -894,8 +894,7 @@ checkStmtTyped name pos (ForeignCall _ pname _ args) ppos = do
           zip [1..] $ List.map content args
 checkStmtTyped name pos (Test stmts exp) ppos = do
     mapM_ (placedApplyM (checkStmtTyped name pos)) stmts
-    checkExpTyped name pos ("test" ++ showMaybeSourcePos ppos) $
-                  content exp
+    checkExpTyped name pos ("test" ++ showMaybeSourcePos ppos) $ content exp
 checkStmtTyped name pos (Cond ifstmts cond thenstmts elsestmts) ppos = do
     mapM_ (placedApplyM (checkStmtTyped name pos)) ifstmts
     checkExpTyped name pos ("condition" ++ showMaybeSourcePos ppos) $
