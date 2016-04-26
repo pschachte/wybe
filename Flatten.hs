@@ -237,7 +237,7 @@ flattenStmt' tststmt@(Test stmts tst) pos = do
       [] -> lift $ message Error "Test with no flow" errPos
       [var] -> do
         logFlatten $ "** Result:\n" ++ (showStmt 4 $ Test (stmts++tst') var)
-        emit pos $ Test (stmts++tst') var
+        emit pos $ Test (stmts'++tst') var
       [_,_] -> lift $ message Error
               ("Test with in-out flow: " ++ show vars) errPos
       _ -> shouldnt "Single expression expanded to more than 2 args"

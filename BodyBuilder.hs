@@ -59,9 +59,8 @@ instance Show BodyBuildState where
   show (Forked body) = show body
 
 currBody :: BodyState -> ProcBody
-currBody (BodyState (Unforked prims) _ _ _) =
-    ProcBody (reverse prims) NoFork
-currBody (BodyState (Forked body) _ _ _) = body
+currBody (BodyState (Unforked prims) _ _ _) = ProcBody (reverse prims) NoFork
+currBody (BodyState (Forked body) _ _ _)    = body
 
 
 initState :: VarSubstitution -> BodyState
@@ -89,19 +88,19 @@ buildBody oSubst builder = do
 buildFork :: PrimVarName -> TypeSpec -> Bool -> [BodyBuilder ()] 
              -> BodyBuilder ()
 buildFork var ty final branchBuilders = do
-    arg' <- expandArg
-            $ ArgVar var ty FlowIn Ordinary False
+    arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
     logBuild $ "<<<< beginning to build a new fork on " ++ show arg'
       ++ " (final=" ++ show final ++ ")"
     ProcBody prims fork <- gets currBody
     case arg' of
       ArgInt n _ -> -- result known at compile-time:  only compile winner
         case drop (fromIntegral n) branchBuilders of
+          -- XXX should be an error message rather than an abort
           [] -> shouldnt "branch constant greater than number of cases"
           (winner:_) -> do
             logBuild $ "**** condition result is " ++ show n
             winner
-      ArgVar var' ty _ _ _ -> do -- normal condition with unknown result
+      ArgVar var' ty _ _ _ -> do -- statically unknown result
         case fork of
           PrimFork _ _ _ _ -> 
             shouldnt "Building a fork while building a fork"
@@ -113,17 +112,16 @@ buildFork var ty final branchBuilders = do
         case fork' of
           NoFork -> return ()
           PrimFork v ty l (b@(ProcBody pprims fork):bs) | all (==b) bs -> do
+            -- all branches are equal:  don't create a new fork
             logBuild $ "All branches equal:  simplifying body to:"
             let newPrims = pprims ++ prims'
-            -- all branches are equal:  don't create a new fork
             case fork of
               NoFork -> do
                 logBuild $ showPlacedPrims 4 newPrims
                 modify (\s -> s { currBuild = Unforked $ reverse newPrims })
               PrimFork v ty l bods -> do
                 logBuild $ showBlock 4 $ ProcBody newPrims fork
-                modify (\s -> s { currBuild =
-                                  Forked $ ProcBody newPrims fork })
+                modify (\s -> s { currBuild = Forked $ ProcBody newPrims fork })
           PrimFork v ty l revBranches ->
             modify (\s -> s { currBuild =
                               Forked $ ProcBody prims'
