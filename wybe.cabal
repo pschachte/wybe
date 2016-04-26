@@ -1,7 +1,7 @@
 name:                wybe
 version:             0.1.0.0
 synopsis:            Wybe compilation to LPVM and ultimately LLVM
-cabal-version:       >=1.10
+cabal-version:       >= 1.22.5.0
 Category:            Compilers
 build-type:          Simple
 
@@ -22,10 +22,8 @@ executable wybemk
                , hex
                , llvm-general == 3.5.1.0
                , llvm-general-pure
---               , macho
                , mtl
                , old-time
                , parsec
-               , process
-               , temporary >= 1.2.0.3
+               , process == 1.4.2.0
                , transformers

@@ -72,7 +72,7 @@ public module io is
 
     public proc nl use !io foreign c putchar('\n', !io) end
 
-    public proc print(x:int) use !io foreign c printf(x) end
+    public proc print(x:int) use !io foreign c print_int(x, !io) end
     public proc println(x:int) use !io print(x) nl end
     public proc read(?x:int) use !io foreign c read_int(?x,!io) end
 
