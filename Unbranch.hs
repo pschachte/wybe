@@ -47,6 +47,7 @@
 module Unbranch (unbranchProc, unbranchBody) where
 
 import AST
+import Snippets
 import Control.Monad
 import Control.Monad.Trans (lift)
 import Control.Monad.Trans.Class
@@ -63,11 +64,7 @@ unbranchProc proc = do
     logMsg Unbranch $ "** Unbranching proc " ++ procName proc
     let ProcDefSrc body = procImpln proc
     let setup = if procDetism proc == SemiDet
-                then [Unplaced $ ForeignCall "lpvm" "cast" []
-                      [Unplaced $ Typed (IntValue 1)
-                       (TypeSpec ["wybe"] "int" []) True,
-                       Unplaced $ Typed (Var "$$" ParamOut Ordinary)
-                       (TypeSpec ["wybe"] "bool" []) True]]
+                then [lpvmCast (intCast $ IntValue 1) "$$" boolType]
                 else []
     let params = procProtoParams $ procProto proc
     (body',newProcs) <- unbranchBody params (setup++body)
@@ -75,8 +72,7 @@ unbranchProc proc = do
     let proto' = if procDetism proc == SemiDet
                  then proto {procProtoParams =
                                  procProtoParams proto ++
-                                 [Param "$$" (TypeSpec ["wybe"] "bool" [])
-                                  ParamOut Ordinary]}
+                                 [Param "$$" boolType ParamOut Ordinary]}
                  else proto
     let proc' = proc { procImpln = ProcDefSrc body', procProto = proto' }
     let tmpCount = procTmpCount proc
@@ -138,7 +134,7 @@ initUnbrancherState params =
         outParams = [Param nm ty ParamOut Ordinary
                     | Param nm ty fl _ <- params
                     , flowsOut fl]
-        outArgs   = [Unplaced $ Typed (Var nm ParamOut Ordinary) ty False
+        outArgs   = [Unplaced $ Typed (varSet nm) ty False
                     | Param nm ty fl _ <- params
                     , flowsOut fl]
     in Unbrancher NoLoop defined False outParams outArgs []
@@ -332,11 +328,10 @@ unbranchStmt (Test tstStmts tstVar) pos stmts = do
         [Unplaced
          $ ForeignCall "llvm" "move" []
          [tstVar,
-          Unplaced $ Typed (Var "$$" ParamOut Ordinary)
-          (TypeSpec ["wybe"] "bool" []) True]]
+          Unplaced $ boolCast (varSet "$$")]]
     afterVars <- gets brVars
     stmts' <- unbranchStmts stmts
-    let tstVar' = Unplaced $ Var "$$" ParamIn Ordinary
+    let tstVar' = Unplaced $ varGet "$$"
     let genStmt = Cond tstStmts' tstVar' stmts' []
     logUnbranch $  "Test statement unbranched to " ++ showStmt 4 genStmt 
     return [maybePlace genStmt pos]
@@ -353,7 +348,7 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     -- Vars assigned in the condition cannot be used in the else branch
     setVars beforeVars
     -- but the branch variable itself _can_ be used in the else branch
-    defIfVar (TypeSpec ["wybe"] "bool" []) $ content tstVar
+    defIfVar boolType $ content tstVar
     resetTerminated False
     beforeElseVars <- gets brVars
     logUnbranch $ "Unbranching else branch with vars: " ++ show beforeElseVars
