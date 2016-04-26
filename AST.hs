@@ -25,6 +25,7 @@ module AST (
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..), 
   ImportSpec(..), importSpec,
+  collectSubModules,
   enterModule, reenterModule, exitModule, finishModule, 
   emptyInterface, emptyImplementation, 
   getParams, getProcDef, mkTempName, updateProcDef, updateProcDefM,
@@ -856,6 +857,14 @@ getDescendant [] = Nothing
 getDescendant (m:[]) = Nothing
 getDescendant modspec = Just $ init modspec
 
+-- | Collect all the subModules of the given modspec.
+collectSubModules :: ModSpec -> Compiler [ModSpec]
+collectSubModules mspec = do
+    subMods <- fmap (Map.elems . modSubmods) $ getLoadedModuleImpln mspec
+    desc <- fmap concat $ mapM collectSubModules subMods
+    return $ subMods ++ desc
+
+
 -- |The list of defining modules that the given (possibly
 --  module-qualified) name could possibly refer to from the current
 --  module.  This may include the current module, or any module it may
@@ -1257,7 +1266,6 @@ showSuperProc (SuperprocIs super) =
 data ProcImpln 
     = ProcDefSrc [Placed Stmt]           -- defn in source-like form
     | ProcDefPrim PrimProto ProcBody     -- defn in LPVM (clausal) form
-    | ProcDefBlocks PrimProto LLVMAST.Definition  [LLVMAST.Definition]
       -- defn in SSA (LLVM) form along with any needed extern definitions 
     deriving (Eq,Generic)
 
@@ -1265,12 +1273,10 @@ data ProcImpln
 isCompiled :: ProcImpln -> Bool
 isCompiled (ProcDefPrim _ _) = True
 isCompiled (ProcDefSrc _) = False
-isCompiled (ProcDefBlocks _ _ _) = True
 
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
     show (ProcDefPrim proto body) = show proto ++ ":" ++ showBlock 4 body
-    show (ProcDefBlocks proto _ _ ) = show proto
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
 -- possibly containg some guards.  Each guard is a test that succeeds

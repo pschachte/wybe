@@ -31,6 +31,7 @@ import System.IO (hGetContents)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import Data.Binary (encode)
+import BinaryFactory (encodeModule)
 
 import           Config
 import           ObjectInterface
@@ -69,13 +70,13 @@ emitObjectFile m f = do
             do astMod <- getModule id
                logEmit $ "Encoding and wrapping Module *" ++ (showModSpec m)
                    ++ "* in a wrapped object."
-               liftIO $ makeWrappedObjFile f llmod astMod
+               logEmit $ "Running passmanager on the generated LLVM for *"
+                   ++ (showModSpec m) ++ "*."
+               modBS <- encodeModule astMod
+               liftIO $ makeWrappedObjFile f llmod modBS
         (Nothing) -> error "No LLVM Module Implementation"
     finishModule
     return ()
-    -- withModuleLLVM m (makeWrappedObjFile f)
-    -- Also make the bitcode file for now
-    -- emitBitcodeFile m $ (dropExtension f) ++ ".bc"
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Bitcode file.
@@ -90,7 +91,8 @@ emitBitcodeFile m f = do
        do astMod <- getModule id
           logEmit $ "Encoding and wrapping Module *" ++ (showModSpec m)
             ++ "* in a wrapped bitcodefile."
-          liftIO $ makeWrappedBCFile f llmod astMod
+          modBS <- encodeModule astMod
+          liftIO $ makeWrappedBCFile f llmod modBS
      (Nothing) -> error "No LLVM Module Implementation"
    finishModule
    return ()
@@ -113,10 +115,7 @@ liftError = runExceptT >=> either fail return
 
 -- | Return string form LLVM IR represenation of a LLVMAST.Module
 codeemit :: LLVMAST.Module -> IO String
-codeemit mod =
-    withContext $ \context ->
-        liftError $ withModuleFromAST context mod $ \m ->
-            moduleLLVMAssembly m >>= return
+codeemit llmod = withOptimisedModule llmod moduleLLVMAssembly
 
 
 -------------------------------------------------------------------------------
@@ -174,11 +173,10 @@ withOptimisedModule llmod action = do
 -- | Drop an LLVMAST.Module (haskell) into a LLVM Module.Module (C++),
 -- and write it as an object file.
 makeObjFile :: FilePath -> LLVMAST.Module -> IO ()
-makeObjFile file llmod =
-    withContext $ \context ->
-        liftError $ withModuleFromAST context llmod $ \m ->
-            liftError $ withHostTargetMachine $ \tm ->
-                liftError $ writeObjectToFile tm (File file) m
+makeObjFile file llmod = do
+    liftError $ withHostTargetMachine $ \tm ->
+        withOptimisedModule llmod $ \m ->
+        liftError $ writeObjectToFile tm (File file) m
 
 -- | Drop an LLVMAST.Module (haskell) intop a Mod.Module (C++)
 -- represenation and write is a bitcode file.
@@ -191,13 +189,11 @@ makeBCFile file llmod =
 
 -- | Use the bitcode wrapper structure to wrap both the AST.Module
 -- (serialised) and the bitcode generated for the Module
-makeWrappedBCFile :: FilePath -> LLVMAST.Module -> AST.Module -> IO ()
-makeWrappedBCFile file llmod origMod =
+makeWrappedBCFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
+makeWrappedBCFile file llmod modBS =
     withContext $ \context ->
         liftError $ withModuleFromAST context llmod $ \m ->
             do bc <- moduleBitcode m
-               -- encode the AST.Module type into a bytestring
-               let modBS = encode origMod
                let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
                BL.writeFile file wrapped
 
@@ -214,14 +210,26 @@ makeAssemblyFile file llmod =
 
 -- | Create a Macho-O object file and embed a 'AST.Module' bytestring
 -- representation into the '__lpvm' section in it.
-makeWrappedObjFile :: FilePath -> LLVMAST.Module -> AST.Module -> IO ()
-makeWrappedObjFile file llmod origMod = do
-    withContext $ \context -> do
-        liftError $ withModuleFromAST context llmod $ \m -> do
-            let modBS = encode origMod
+makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
+makeWrappedObjFile file llmod modBS = do
+    withContext $ \context -> do        
+        withOptimisedModule llmod $ \m -> do
             liftError $ withHostTargetMachine $ \tm ->
                 liftError $ writeObjectToFile tm (File file) m
             insertLPVMDataLd modBS file
+
+
+-- | Binary encode 'AST.Module', create object file out of 'Mod.Module' and
+-- insert the encoded binary string into the "__LPVM" section of the created
+-- object file.
+encodeAndWriteFile :: FilePath -> BL.ByteString -> Mod.Module -> IO ()
+encodeAndWriteFile file modBS m = do
+    liftError $ withHostTargetMachine $ \tm ->
+        liftError $ writeObjectToFile tm (File file) m
+    insertLPVMDataLd modBS file
+        
+
+
 
 
 
@@ -271,28 +279,40 @@ runJIT mod = do
 -- -- * Linking                                                           --
 ----------------------------------------------------------------------------
 
+suppressLdWarnings :: String -> String
+suppressLdWarnings s = intercalate "\n" $ List.filter notWarning $ lines s
+  where
+    notWarning l = not ("ld: warning:" `List.isPrefixOf` l)
+
+
 
 -- | With the `ld` linker, link the object files and create target
 -- executable.
 makeExec :: [FilePath]          -- Object Files
          -> FilePath            -- Target File
-         -> IO String
+         -> Compiler String
 makeExec ofiles target =
-    do dir <- getCurrentDirectory
+    do dir <- liftIO $ getCurrentDirectory
        let args = ofiles ++ sharedLibs ++ ["-o", target]
-       -- Supressing the annoying Xcode warning
-       (_,_, Just hout,_) <- createProcess (proc "cc" args){std_err = CreatePipe}
+       (_,_, Just hout,_) <- liftIO $
+           createProcess (proc "cc" args){std_err = CreatePipe}
+       ccOut <- suppressLdWarnings <$> (liftIO $ hGetContents hout)
+       let output = "--- CC ---\n" ++
+               "$ cc " ++ List.intercalate " " args ++ "\nCC Log:\n" ++
+               ccOut ++ "\n-------\n"
+       return output
+
+
+-- | Use `ar' system util to link object files into an archive file.
+makeArchive :: [FilePath] -> FilePath -> IO String
+makeArchive ofiles target =
+    do dir <- getCurrentDirectory
+       let args = ["rvs", target] ++ ofiles
+       (_,_, Just hout,_) <- createProcess
+           (proc "ar" args){std_err = CreatePipe}
        errCons <- hGetContents hout
-       -- putStrLn errCons
-       -- createProcess (proc "cc" args)
        return errCons
 
--- makeExec ofiles target =
---     do dir <- getCurrentDirectory
---        let args = ofiles ++ sharedLibs ++ ldArgs ++ ldSystemArgs
---                   ++ ["-o", target]
---        createProcess (proc "ld" args)
---        return ()
 
 
 

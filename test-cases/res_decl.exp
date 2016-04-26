@@ -16,5 +16,3 @@ AFTER LLVM IR:
 
 ; ModuleID = 'res_decl'
 
-declare i8* @wybe_malloc(i32)
-

@@ -18,5 +18,3 @@ AFTER LLVM IR:
 
 ; ModuleID = 'proc_allin'
 
-declare i8* @wybe_malloc(i32)
-

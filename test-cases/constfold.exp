@@ -42,30 +42,35 @@ AFTER LLVM IR:
 
 ; ModuleID = 'constfold'
 
-declare i8* @wybe_malloc(i32)
-
-define i64 @"constfold.fold_add<0>"() {
+; Function Attrs: nounwind readnone
+define i64 @"constfold.fold_add<0>"() #0 {
 entry:
   ret i64 42
 }
 
-define i64 @"constfold.fold_mult<0>"() {
+; Function Attrs: nounwind readnone
+define i64 @"constfold.fold_mult<0>"() #0 {
 entry:
   ret i64 42
 }
 
-define i64 @"constfold.fold_test<0>"() {
+; Function Attrs: nounwind readnone
+define i64 @"constfold.fold_test<0>"() #0 {
 entry:
   ret i64 42
 }
 
-define i64 @"constfold.fortytwo<0>"() {
+; Function Attrs: nounwind readnone
+define i64 @"constfold.fortytwo<0>"() #0 {
 entry:
   ret i64 42
 }
 
-define i64 @"constfold.gen$1<0>"(i64 %"tmp$0#0") {
+; Function Attrs: nounwind readnone
+define i64 @"constfold.gen$1<0>"(i64 %"tmp$0#0") #0 {
 entry:
   ret i64 %"tmp$0#0"
 }
+
+attributes #0 = { nounwind readnone }
 

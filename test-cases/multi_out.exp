@@ -21,10 +21,11 @@ AFTER LLVM IR:
 
 ; ModuleID = 'multi_out'
 
-declare i8* @wybe_malloc(i32)
-
-define { i64, i64, i64 } @"multi_out.onetwothree<0>"() {
+; Function Attrs: nounwind readnone
+define { i64, i64, i64 } @"multi_out.onetwothree<0>"() #0 {
 entry:
   ret { i64, i64, i64 } { i64 1, i64 2, i64 3 }
 }
+
+attributes #0 = { nounwind readnone }
 

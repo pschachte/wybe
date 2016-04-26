@@ -19,10 +19,11 @@ AFTER LLVM IR:
 
 ; ModuleID = 'chain_assign'
 
-declare i8* @wybe_malloc(i32)
-
-define i64 @"chain_assign.chain<0>"() {
+; Function Attrs: nounwind readnone
+define i64 @"chain_assign.chain<0>"() #0 {
 entry:
   ret i64 1
 }
+
+attributes #0 = { nounwind readnone }
 

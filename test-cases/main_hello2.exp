@@ -12,31 +12,30 @@ AFTER EVERYTHING:
 
 *main* > public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
-    foreign c print_string("hello, ":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:116:41
-    foreign c print_string("world!":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:116:41
-    foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:102:28
+    foreign c print_string("hello, ":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:87:41
+    foreign c print_string("world!":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:87:41
+    foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:73:28
 main_hello2
 ======================================================================
 AFTER LLVM IR:
 
 ; ModuleID = 'main_hello2'
 
-@0 = constant [7 x i8] c"world!\00"
-@1 = constant [8 x i8] c"hello, \00"
+@main_hello2.3 = constant [7 x i8] c"world!\00"
+@main_hello2.1 = constant [8 x i8] c"hello, \00"
 
-declare void @putchar(i8)
+; Function Attrs: nounwind
+declare void @putchar(i8) #0
 
 declare void @print_string(i8*)
 
-declare i8* @wybe_malloc(i32)
-
 define i32 @main_hello2.main() {
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([8 x i8]* @1, i32 0, i32 0))
-  tail call void @print_string(i8* getelementptr inbounds ([7 x i8]* @0, i32 0, i32 0))
+  tail call void @print_string(i8* getelementptr inbounds ([8 x i8]* @main_hello2.1, i32 0, i32 0))
+  tail call void @print_string(i8* getelementptr inbounds ([7 x i8]* @main_hello2.3, i32 0, i32 0))
   tail call void @putchar(i8 10)
-  %0 = alloca i32
-  store i32 0, i32* %0
   ret i32 0
 }
+
+attributes #0 = { nounwind }
 

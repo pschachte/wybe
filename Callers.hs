@@ -40,8 +40,6 @@ noteImplnCallers caller (ProcDefPrim _ body) procs =
                 Map.empty mergeCallers mergeCallers
                 body
   in  registerCallers caller callers procs
-noteImplnCallers _ (ProcDefBlocks _ _ _) _ =
-  shouldnt "scanning already compiled code for calls"
 
 -- |Compute for each proc a total count of calls and determine if it
 -- should be a subproc of another proc, and if so, which one.
