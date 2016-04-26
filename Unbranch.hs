@@ -325,10 +325,8 @@ unbranchStmt (Test tstStmts tstVar) pos stmts = do
     logUnbranch $ "test (" ++ show tstVar ++ "): " ++ showBody 8 tstStmts
     logUnbranch $ "Vars before test: " ++ show beforeVars
     tstStmts' <- unbranchStmts $ tstStmts ++
-        [Unplaced
-         $ ForeignCall "llvm" "move" []
-         [tstVar,
-          Unplaced $ boolCast (varSet "$$")]]
+        [Unplaced $ ForeignCall "llvm" "move" []
+         [tstVar, Unplaced $ boolCast (varSet "$$")]]
     afterVars <- gets brVars
     stmts' <- unbranchStmts stmts
     let tstVar' = Unplaced $ varGet "$$"
