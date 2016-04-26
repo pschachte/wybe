@@ -89,8 +89,7 @@ buildBody oSubst builder = do
 buildFork :: PrimVarName -> TypeSpec -> Bool -> [BodyBuilder ()] 
              -> BodyBuilder ()
 buildFork var ty final branchBuilders = do
-    arg' <- expandArg
-            $ ArgVar var ty FlowIn Ordinary False
+    arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
     logBuild $ "<<<< beginning to build a new fork on " ++ show arg'
       ++ " (final=" ++ show final ++ ")"
     ProcBody prims fork <- gets currBody
@@ -113,17 +112,16 @@ buildFork var ty final branchBuilders = do
         case fork' of
           NoFork -> return ()
           PrimFork v ty l (b@(ProcBody pprims fork):bs) | all (==b) bs -> do
+            -- all branches are equal:  don't create a new fork
             logBuild $ "All branches equal:  simplifying body to:"
             let newPrims = pprims ++ prims'
-            -- all branches are equal:  don't create a new fork
             case fork of
               NoFork -> do
                 logBuild $ showPlacedPrims 4 newPrims
                 modify (\s -> s { currBuild = Unforked $ reverse newPrims })
               PrimFork v ty l bods -> do
                 logBuild $ showBlock 4 $ ProcBody newPrims fork
-                modify (\s -> s { currBuild =
-                                  Forked $ ProcBody newPrims fork })
+                modify (\s -> s { currBuild = Forked $ ProcBody newPrims fork })
           PrimFork v ty l revBranches ->
             modify (\s -> s { currBuild =
                               Forked $ ProcBody prims'
