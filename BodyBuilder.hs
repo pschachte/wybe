@@ -59,9 +59,8 @@ instance Show BodyBuildState where
   show (Forked body) = show body
 
 currBody :: BodyState -> ProcBody
-currBody (BodyState (Unforked prims) _ _ _) =
-    ProcBody (reverse prims) NoFork
-currBody (BodyState (Forked body) _ _ _) = body
+currBody (BodyState (Unforked prims) _ _ _) = ProcBody (reverse prims) NoFork
+currBody (BodyState (Forked body) _ _ _)    = body
 
 
 initState :: VarSubstitution -> BodyState
@@ -96,11 +95,12 @@ buildFork var ty final branchBuilders = do
     case arg' of
       ArgInt n _ -> -- result known at compile-time:  only compile winner
         case drop (fromIntegral n) branchBuilders of
+          -- XXX should be an error message rather than an abort
           [] -> shouldnt "branch constant greater than number of cases"
           (winner:_) -> do
             logBuild $ "**** condition result is " ++ show n
             winner
-      ArgVar var' ty _ _ _ -> do -- normal condition with unknown result
+      ArgVar var' ty _ _ _ -> do -- statically unknown result
         case fork of
           PrimFork _ _ _ _ -> 
             shouldnt "Building a fork while building a fork"
