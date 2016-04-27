@@ -26,6 +26,7 @@ import qualified LLVM.General.ExecutionEngine as EE
 
 import           System.Directory
 import           System.Process
+import System.Exit ( ExitCode(..) )
 import System.IO (hGetContents)
 
 import qualified Data.ByteString as B
@@ -35,7 +36,7 @@ import BinaryFactory (encodeModule)
 
 import           Config
 import           ObjectInterface
-import           Options (LogSelection (Emit))
+import           Options (LogSelection (Emit, Blocks))
 import           System.FilePath (dropExtension)
 
 foreign import ccall "dynamic" haskFun :: FunPtr (IO Double) -> (IO Double)
@@ -212,7 +213,7 @@ makeAssemblyFile file llmod =
 -- representation into the '__lpvm' section in it.
 makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
 makeWrappedObjFile file llmod modBS = do
-    withContext $ \context -> do        
+    withContext $ \context -> do
         withOptimisedModule llmod $ \m -> do
             liftError $ withHostTargetMachine $ \tm ->
                 liftError $ writeObjectToFile tm (File file) m
@@ -227,7 +228,7 @@ encodeAndWriteFile file modBS m = do
     liftError $ withHostTargetMachine $ \tm ->
         liftError $ writeObjectToFile tm (File file) m
     insertLPVMDataLd modBS file
-        
+
 
 
 
@@ -279,39 +280,47 @@ runJIT mod = do
 -- -- * Linking                                                           --
 ----------------------------------------------------------------------------
 
+-- | Remove OSX Ld warnings of incompatible built object file version.
 suppressLdWarnings :: String -> String
 suppressLdWarnings s = intercalate "\n" $ List.filter notWarning $ lines s
   where
     notWarning l = not ("ld: warning:" `List.isPrefixOf` l)
 
 
-
 -- | With the `ld` linker, link the object files and create target
 -- executable.
 makeExec :: [FilePath]          -- Object Files
          -> FilePath            -- Target File
-         -> Compiler String
-makeExec ofiles target =
-    do dir <- liftIO $ getCurrentDirectory
-       let args = ofiles ++ sharedLibs ++ ["-o", target]
-       (_,_, Just hout,_) <- liftIO $
-           createProcess (proc "cc" args){std_err = CreatePipe}
-       ccOut <- suppressLdWarnings <$> (liftIO $ hGetContents hout)
-       let output = "--- CC ---\n" ++
-               "$ cc " ++ List.intercalate " " args ++ "\nCC Log:\n" ++
-               ccOut ++ "\n-------\n"
-       return output
+         -> Compiler ()
+makeExec ofiles target = do
+    dir <- liftIO $ getCurrentDirectory
+    let args = ofiles ++ sharedLibs ++ ["-o", target]
+    (exCode, sout, serr) <- liftIO $
+        readCreateProcessWithExitCode (proc "cc" args) ""
+    case exCode of
+        ExitSuccess ->
+            logMsg Blocks $ "--- CC ---\n"
+                ++ "$ cc " ++ List.intercalate " " args
+                ++ "\nCC Log:\n" ++ suppressLdWarnings serr
+                ++ "\n-------\n"
+        _ -> shouldnt serr
 
 
 -- | Use `ar' system util to link object files into an archive file.
-makeArchive :: [FilePath] -> FilePath -> IO String
-makeArchive ofiles target =
-    do dir <- getCurrentDirectory
-       let args = ["rvs", target] ++ ofiles
-       (_,_, Just hout,_) <- createProcess
-           (proc "ar" args){std_err = CreatePipe}
-       errCons <- hGetContents hout
-       return errCons
+makeArchive :: [FilePath] -> FilePath -> Compiler ()
+makeArchive ofiles target = do
+    dir <- liftIO $ getCurrentDirectory
+    let args = ["rvs", target] ++ ofiles
+    (exCode, sout, serr) <- liftIO $
+        readCreateProcessWithExitCode (proc "ar" args) ""
+    case exCode of
+        ExitSuccess ->
+            logMsg Blocks $ "--- AR Util ---\n"
+                ++ "$ ar " ++ List.intercalate " " args
+                ++ "\nAR Log:\n" ++ suppressLdWarnings serr
+                ++ "\n-------\n"
+        _ -> shouldnt serr
+
 
 
 

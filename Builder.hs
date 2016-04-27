@@ -269,7 +269,7 @@ loadModule modspec objfile = do
         ++ (show objfile)
 
 
--- | 
+-- |
 placeExtractedModule :: Module -> Compiler [ModSpec]
 placeExtractedModule thisMod = do
     let modspec = modSpec thisMod
@@ -311,8 +311,7 @@ buildArchive arch = do
     mapM_ (\m -> buildModuleIfNeeded False [m] [dir]) archiveMods
     let oFileOf m = dir ++ m ++ ".o"
     mapM_ (\m -> emitObjectFile [m] (oFileOf m)) archiveMods
-    err <- liftIO $ makeArchive (List.map oFileOf archiveMods) arch
-    logBuild $ "Archive linking output: \n" ++ err
+    makeArchive (List.map oFileOf archiveMods) arch    
 
 -------------------- Actually compiling some modules --------------------
 
@@ -491,8 +490,7 @@ buildExecutable targetMod fpath =
        ofiles <- mapM loadObjectFile $ List.map fst depends
        let allOFiles = tmpMainOFile:ofiles
        -----------
-       clangErr <- makeExec allOFiles fpath
-       logBuild clangErr
+       makeExec allOFiles fpath
        -- return allOFiles
        logBuild $ "o Object Files to link: "
        logBuild $ "++ " ++ intercalate "\n++" allOFiles
