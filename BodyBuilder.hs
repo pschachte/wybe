@@ -33,12 +33,20 @@ import Control.Monad.Trans.State
 
 type BodyBuilder = StateT BodyState Compiler
 
-data BodyState = BodyState {
-    currBuild     :: BodyBuildState, -- ^The body we're building
-    currSubst    :: Substitution,    -- ^variable substitutions to propagate
-    outSubst     :: VarSubstitution, -- ^Substitutions for variable assignments
-    subExprs     :: ComputedCalls    -- ^Previously computed calls to reuse
-    } deriving Show
+data BodyState
+    = Unforked {
+      currBuild :: [Placed Prim],   -- ^The body we're building, reversed
+      currSubst :: Substitution,    -- ^variable substitutions to propagate
+      outSubst  :: VarSubstitution, -- ^Substitutions for variable assignments
+      subExprs  :: ComputedCalls    -- ^Previously computed calls to reuse
+      }
+    | Forked {
+      initBuild   :: [Placed Prim],   -- ^Statements before the fork, reversed
+      stForkVar   :: PrimVarName,     -- ^Variable that selects branch to take
+      stForkVarTy :: TypeSpec,        -- ^Type of stForkVar
+      stForkBods  :: [BodyState]      -- ^BodyStates of all the branches
+      }
+    deriving (Eq,Show)
 
 type Substitution = Map PrimVarName PrimArg
 type VarSubstitution = Map PrimVarName PrimVarName
@@ -48,28 +56,18 @@ type VarSubstitution = Map PrimVarName PrimVarName
 -- that.  In the Prim keys, all PrimArgs are inputs.
 type ComputedCalls = Map Prim [PrimArg]
 
-data BodyBuildState
-    = Unforked [Placed Prim]  -- reversed list of prims
-    | Forked   ProcBody
-
-
-instance Show BodyBuildState where
-  show (Unforked revPrims) =
-      showBlock 4 $ ProcBody (reverse revPrims) NoFork
-  show (Forked body) = show body
+-- instance Show BodyBuildState where
+--   show (Unforked revPrims) =
+--       showBlock 4 $ ProcBody (reverse revPrims) NoFork
+--   show (Forked body) = show body
 
 currBody :: BodyState -> ProcBody
-currBody (BodyState (Unforked prims) _ _ _) = ProcBody (reverse prims) NoFork
-currBody (BodyState (Forked body) _ _ _)    = body
-
+currBody (Unforked prims _ _ _)     = ProcBody (reverse prims) NoFork
+currBody (Forked prims var ty bods) = ProcBody (reverse prims) $
+    PrimFork var ty False $ List.map currBody bods
 
 initState :: VarSubstitution -> BodyState
-initState oSubst = BodyState (Unforked []) Map.empty oSubst Map.empty
-
-
-continueState :: BodyState -> BodyState
-continueState (BodyState _ subst oSubst calls) =
-    BodyState (Unforked []) subst oSubst calls
+initState oSubst = Unforked [] Map.empty oSubst Map.empty
 
 
 ----------------------------------------------------------------
@@ -80,9 +78,9 @@ continueState (BodyState _ subst oSubst calls) =
 buildBody :: VarSubstitution -> BodyBuilder a -> Compiler (a,ProcBody)
 buildBody oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
-    (a,bstate) <- runStateT builder $ initState oSubst
+    (a,st) <- buildPrims (initState oSubst) builder
     logMsg BodyBuilder ">>>> Finished  building a proc body"
-    return (a,currBody bstate)
+    return (a,currBody st)
 
 
 buildFork :: PrimVarName -> TypeSpec -> Bool -> [BodyBuilder ()] 
@@ -91,7 +89,6 @@ buildFork var ty final branchBuilders = do
     arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
     logBuild $ "<<<< beginning to build a new fork on " ++ show arg'
       ++ " (final=" ++ show final ++ ")"
-    ProcBody prims fork <- gets currBody
     case arg' of
       ArgInt n _ -> -- result known at compile-time:  only compile winner
         case drop (fromIntegral n) branchBuilders of
@@ -101,54 +98,35 @@ buildFork var ty final branchBuilders = do
             logBuild $ "**** condition result is " ++ show n
             winner
       ArgVar var' ty _ _ _ -> do -- statically unknown result
-        case fork of
-          PrimFork _ _ _ _ -> 
-            shouldnt "Building a fork while building a fork"
-          NoFork -> 
-            modify (\s -> s {currBuild = Forked $ ProcBody prims
-                                         $ PrimFork var' ty final [] })
-        mapM_ buildBranch branchBuilders
-        ProcBody prims' fork' <- gets currBody
-        case fork' of
-          NoFork -> return ()
-          PrimFork v ty l (b@(ProcBody pprims fork):bs) | all (==b) bs -> do
-            -- all branches are equal:  don't create a new fork
-            logBuild $ "All branches equal:  simplifying body to:"
-            let newPrims = pprims ++ prims'
-            case fork of
-              NoFork -> do
-                logBuild $ showPlacedPrims 4 newPrims
-                modify (\s -> s { currBuild = Unforked $ reverse newPrims })
-              PrimFork v ty l bods -> do
-                logBuild $ showBlock 4 $ ProcBody newPrims fork
-                modify (\s -> s { currBuild = Forked $ ProcBody newPrims fork })
-          PrimFork v ty l revBranches ->
-            modify (\s -> s { currBuild =
-                              Forked $ ProcBody prims'
-                                       $ PrimFork v ty l 
-                                       $ reverse revBranches })
+        st <- get
+        case st of
+          Forked _ _ _ _ -> 
+            nyi "Fork after a fork"
+          Unforked build _ _ _ -> do
+            let st' = st { currBuild = [] }
+            branches <- mapM (buildBranch st') branchBuilders
+            case branches of
+              [] -> return ()
+              [br] -> put $ concatBodies st br
+              (br:brs) | all (==br) brs -> 
+                -- all branches are equal:  don't create a new fork
+                put $ concatBodies st br
+              brs ->
+                put $ Forked build var' ty brs
       _ -> shouldnt "Switch on non-integer value"
     logBuild $ ">>>> Finished building a fork"
 
 
-buildBranch :: BodyBuilder () -> BodyBuilder ()
-buildBranch builder = do
+buildBranch :: BodyState -> BodyBuilder () -> BodyBuilder BodyState
+buildBranch st builder = do
     logBuild "<<<< <<<< Beginning to build a branch"
-    branch <- buildPrims builder
+    branch <- lift $ fmap snd $ buildPrims st builder
     logBuild ">>>> >>>> Finished  building a branch"
-    ProcBody revPrims fork <- gets currBody
-    case fork of
-      NoFork -> shouldnt "Building a branch outside of buildFork"
-      PrimFork v ty l branches ->
-        modify (\s -> s { currBuild =
-                          Forked $ ProcBody revPrims
-                                   $ PrimFork v ty l $ branch : branches })
+    return branch
 
-buildPrims :: BodyBuilder () -> BodyBuilder ProcBody
-buildPrims builder = do
-    oldState <- get
-    ((),bstate) <- lift $ runStateT builder $ continueState oldState
-    return $ currBody bstate
+
+buildPrims :: BodyState -> BodyBuilder a -> Compiler (a,BodyState)
+buildPrims st builder = runStateT builder st
 
 
 -- |Add an instruction to the current body, after applying the current
@@ -270,8 +248,8 @@ rawInstr :: Prim -> OptPos -> BodyBuilder ()
 rawInstr prim pos = do
     logBuild $ "---- adding instruction " ++ show prim
     validateInstr prim
-    modify (\s -> s { currBuild = addInstrToState (maybePlace prim pos)
-                                 $ currBuild s })
+    modify $ addInstrToState (maybePlace prim pos)
+    logBuild $ "---- added " ++ show prim
 
 
 splitArgsByMode :: [PrimArg] -> ([PrimArg], [PrimArg])
@@ -299,16 +277,19 @@ validateType Unspecified instr =
     shouldnt $ "Unspecified type in argument of " ++ show instr
 validateType (TypeSpec _ _ _) instr = return ()
 
-addInstrToState :: Placed Prim -> BodyBuildState -> BodyBuildState
-addInstrToState ins (Unforked revPrims) = Unforked $ ins:revPrims
-addInstrToState ins (Forked body) = Forked $ addInstrToBody ins body
 
-addInstrToBody ::  Placed Prim -> ProcBody -> ProcBody
-addInstrToBody ins (ProcBody prims NoFork) =
-    ProcBody (prims ++ [ins]) NoFork
-addInstrToBody ins (ProcBody prims (PrimFork v ty l bodies)) =
-    ProcBody prims
-    (PrimFork v ty l (List.map (addInstrToBody ins) bodies))
+concatBodies :: BodyState -> BodyState -> BodyState
+concatBodies (Unforked revBody1 _ _ _) (Unforked revBody2 subs osubs comp)
+    = Unforked (revBody2 ++ revBody1) subs osubs comp -- they're reversed
+concatBodies (Unforked revBody1 _ _ _) (Forked revBody2 var ty bods)
+    = Forked (revBody2 ++ revBody1) var ty bods -- they're reversed
+concatBodies _ _ = shouldnt "Fork after fork should have been caught earlier"
+
+addInstrToState :: Placed Prim -> BodyState -> BodyState
+addInstrToState ins st@(Unforked _ _ _ _)
+    = st { currBuild = ins:currBuild st}
+addInstrToState ins st@(Forked _ _ _ _)
+    = st { stForkBods = List.map (addInstrToState ins) $ stForkBods st }
 
 
 -- |Return the current ultimate value of the input argument.
