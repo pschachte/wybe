@@ -181,10 +181,10 @@ constCtorItems  vis typeSpec (placedProto,num) =
         [lpvmCastToVar (castTo (IntValue num) typeSpec) "$"] pos,
         ProcDecl vis SemiDet True
         (ProcProto constName [Param "$" typeSpec ParamIn Ordinary] [])
-        [Unplaced $ Test
-         [lpvmCast (varGet "$") "$int" intType,
-          comparison "eq" (varGet "$int") (IntValue num) "$succeed"]
-         (Unplaced $ varGet "$succeed")]
+        [Unplaced $ Test []
+         (comparisonExp "eq"
+          (lpvmCastExp (varGet "$") intType)
+          (intCast $ IntValue num))]
         pos]
 
 
@@ -291,21 +291,19 @@ tagCheck constCount nonConstCount tag varName =
     (case constCount of
           0 -> []
           _ -> [Unplaced
-                $ Test [lpvmCast (varGet varName) "$int" intType,
-                        comparison "uge" (varGet "$int") (iVal constCount)
-                        "$nonconst"]
-                (Unplaced $ varGet "$nonconst")])
-    ++
-    (case nonConstCount of
-          1 -> []  -- Nothing to do if it's the only non-const constructor
-          _ -> [Unplaced
-                $ Test [lpvmCast (varGet varName) "$int" intType,
-                        Unplaced $ ForeignCall "llvm" "and" []
-                        [Unplaced $ varGet "$int",
-                         Unplaced $ IntValue $ fromIntegral tagMask,
-                         Unplaced $ intCast (varSet "$tag")],
-                        comparison "eq" (varGet "$tag") (iVal tag) "$righttag"]
-                (Unplaced $ varGet "$righttag")])
+                $ Test []
+                (comparisonExp "uge"
+                 (lpvmCastExp (varGet varName) intType)
+                 (intCast $ iVal constCount))])
+     ++
+     (case nonConstCount of
+           1 -> []  -- Nothing to do if it's the only non-const constructor
+           _ -> [Unplaced $ Test []
+                 (comparisonExp "eq"
+                  (intCast $ ForeignFn "llvm" "and" []
+                   [Unplaced $ lpvmCastExp (varGet varName) intType,
+                    Unplaced $ iVal tagMask])
+                  (intCast $ iVal tag))])
 
 
 -- | Produce a getter and a setter for one field of the specified type.
@@ -422,11 +420,9 @@ equalityField :: Param -> [Placed Stmt]
 equalityField param =
     let field = paramName param
     in  List.map Unplaced
-        [ProcCall [] field Nothing [Unplaced $ varGet "left",
-                                    Unplaced $ varSet "left$field"],
-         ProcCall [] field Nothing [Unplaced $ varGet "right",
-                                    Unplaced $ varSet "right$field"],
-         ProcCall [] "=" Nothing [Unplaced $ varGet "left$field",
-                                  Unplaced $ varGet "right$field",
-                                  Unplaced $ boolCast $ varSet "$$"],
-         Test [] (Unplaced $ varGet "$$")]
+        [Test []
+         (Unplaced $ Fncall [] "="
+          [Unplaced $ Fncall [] field
+           [Unplaced $ varGet "left"],
+           Unplaced $ Fncall [] field
+           [Unplaced $ varGet "right"]])]

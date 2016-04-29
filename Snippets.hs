@@ -5,7 +5,8 @@
 --  Copyright: 2016 Peter Schachte.  All rights reserved.
 
 module Snippets (intType, intCast, boolType, boolCast, varSet, varGet, castTo,
-                lpvmCast, lpvmCastToVar, iVal, move, comparison) where
+                lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, comparison,
+                comparisonExp) where
 
 import AST
 
@@ -44,6 +45,11 @@ lpvmCast from to totype =
     [Unplaced from, Unplaced $ Typed (varSet to) totype True]
 
 -- |An unplaced statement to cast a value into fresh variable
+lpvmCastExp :: Exp -> TypeSpec -> Exp
+lpvmCastExp from totype =
+    Typed (ForeignFn "lpvm" "cast" [] [Unplaced from]) totype True
+
+-- |An unplaced statement to cast a value into fresh variable
 lpvmCastToVar :: Exp -> Ident -> Placed Stmt
 lpvmCastToVar from to =
     Unplaced $ ForeignCall "lpvm" "cast" []
@@ -63,3 +69,9 @@ comparison :: Ident -> Exp -> Exp -> Ident -> Placed Stmt
 comparison tst left right dest =
     Unplaced $ ForeignCall "llvm" "icmp" [tst]
     [Unplaced left, Unplaced right, Unplaced $ boolCast $ varSet dest]
+
+-- |An unplaced function call to compare two integer values
+comparisonExp :: Ident -> Exp -> Exp -> Placed Exp
+comparisonExp tst left right =
+    Unplaced $ boolCast $ ForeignFn "llvm" "icmp" [tst]
+    [Unplaced left, Unplaced right]

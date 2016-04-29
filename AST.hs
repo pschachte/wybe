@@ -2168,7 +2168,7 @@ instance Show Exp where
     ++ (if List.null flags then "" else " " ++ unwords flags)
     ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
   show (Typed exp typ cast) =
-      show exp ++ if cast then "!" else "" ++ showTypeSuffix typ
+      show exp ++ (if cast then "!" else "") ++ showTypeSuffix typ
 
 -- |maybeShow pre maybe pos
 --  if maybe has something, show pre, the maybe payload, and post
