@@ -100,6 +100,7 @@ data Item
      | ProcDecl Visibility Determinism Bool ProcProto [Placed Stmt] OptPos
      -- | CtorDecl Visibility FnProto OptPos
      | StmtDecl Stmt OptPos
+     deriving Generic
 
 -- |The visibility of a file item.  We only support public and private.
 data Visibility = Public | Private
@@ -115,6 +116,7 @@ defaultTypeRepresentation = "pointer"
 
 data TypeImpln = TypeRepresentation TypeRepresentation 
                | TypeCtors Visibility [Placed FnProto]
+               deriving Generic
 
 
 -- |Combine two visibilities, taking the most visible.
@@ -136,6 +138,7 @@ isPublic = (==Public)
 
 -- |A type prototype consists of a type name and zero or more type parameters.
 data TypeProto = TypeProto Ident [Ident]
+                 deriving Generic
 
 -- |A function prototype consists of a function name and zero or more formal 
 --  parameters.
@@ -143,7 +146,7 @@ data FnProto = FnProto {
     fnProtoName::Ident,
     fnProtoParams::[Param],
     fnProtoResourceFlows::[ResourceFlowSpec]
-    }
+    } deriving Generic
 
 
 ----------------------------------------------------------------
@@ -455,7 +458,7 @@ enterModule dir modspec params = do
     logAST $ "Entering module " ++ showModSpec modspec
     modify (\comp -> let mods = Module dir modspec params 0 0
                                        emptyInterface (Just emptyImplementation)
-                                       count count 0 []
+                                       count count 0 [] ""
                                        : underCompilation comp
                      in  comp { underCompilation = mods })
 
@@ -842,7 +845,8 @@ data Module = Module {
   thisLoadNum :: Int,            -- ^the loadCount when loading this module
   minDependencyNum :: Int,       -- ^the smallest loadNum of all dependencies
   procCount :: Int,              -- ^a counter for gensym-ed proc names
-  stmtDecls :: [Placed Stmt]     -- ^top-level statements in this module
+  stmtDecls :: [Placed Stmt],     -- ^top-level statements in this module
+  itemsHash :: String -- ^map of proc name to it's hash 
   } deriving (Generic)
 
 
@@ -1560,7 +1564,7 @@ data Stmt
      | For (Placed Exp) (Placed Exp)
      | Break  -- holds the variable versions before the break
      | Next  -- holds the variable versions before the next
-     deriving (Eq,Ord,Generic)
+     deriving (Eq,Ord,Generic,Show)
 
 -- |An expression.  These are all normalised into statements.
 data Exp

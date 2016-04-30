@@ -75,6 +75,8 @@ import           System.Time               (ClockTime)
 import           Types                     (typeCheckMod, checkFullyTyped,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
+import Data.Binary (encode)
+import BinaryFactory
 
 ------------------------ Handling dependencies ------------------------
 
@@ -214,7 +216,7 @@ buildModule :: Ident -> FilePath -> FilePath -> Compiler ()
 buildModule modname objfile srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
     let parseTree = parse tokens
-    let dir = takeDirectory objfile
+    let dir = takeDirectory objfile    
     compileModule dir [modname] Nothing parseTree
 
 
@@ -223,6 +225,10 @@ compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
 compileModule dir modspec params items = do
     logBuild $ "===> Compiling module " ++ showModSpec modspec
     enterModule dir modspec params
+    -- Hash the parse items and store it in the module
+    let hashOfItems = hashItems items
+    -- logBuild $ "HASH: " ++ hashOfItems
+    updateModule (\m -> m { itemsHash = hashOfItems })
     -- verboseMsg 1 $ return (intercalate "\n" $ List.map show items)
     -- XXX This means we generate LPVM code for a module before
     -- considering dependencies.  This will need to change if we
