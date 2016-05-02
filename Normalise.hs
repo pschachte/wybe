@@ -55,7 +55,8 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
     -- XXX Should we special-case handling of = instead of generating these:
     let eq1 = assignmentProc ty False
     let eq2 = assignmentProc ty True
-    let typespec = TypeSpec [] name
+    modspec <- getModuleSpec
+    let typespec = TypeSpec modspec name
                    $ List.map (\n->TypeSpec [] n []) params
     let constCount = length consts
     let nonConstCount = length nonconsts

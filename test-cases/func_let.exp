@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 
 *main* > public inline (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign llvm move(~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @func_let:3:1
+    foreign c print_int(40:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:75:38
 
 
 quad > public inline (1 calls)
@@ -27,9 +27,11 @@ AFTER LLVM IR:
 
 ; ModuleID = 'func_let'
 
-; Function Attrs: nounwind readnone
-define i32 @func_let.main() #0 {
+declare void @print_int(i64)
+
+define i32 @func_let.main() {
 entry:
+  tail call void @print_int(i64 40)
   ret i32 0
 }
 

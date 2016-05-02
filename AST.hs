@@ -617,14 +617,17 @@ lookupType ty@(TypeSpec mod name args) pos = do
             if typeDefArity def == length args
               then do
                 args' <- fmap catMaybes $ mapM (flip lookupType pos) args
-                return $
-                  Just $
-                  TypeSpec (maybe (shouldnt "lookupType") modSpec maybeMod) name args'
+                let matchingMod = maybe (shouldnt "lookupType") modSpec maybeMod
+                let matchingType = TypeSpec matchingMod name args'
+                logAST $ "Matching type = " ++ show matchingType
+                return $ Just $ matchingType
+                  
               else do
                 message Error
                   ("Type '" ++ name ++ "' expects " ++ (show $ typeDefArity def) ++
                    " arguments, but " ++ (show $ length args) ++ " were given")
                   pos
+                logAST "Type constructor arities don't match!"
                 return Nothing
         _   -> do
             message Error ("Ambiguous type " ++ show ty ++

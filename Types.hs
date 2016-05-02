@@ -246,19 +246,17 @@ projectTyping (Typing typing errs) (Typing interest _) =
 -- XXX Extend to support actual subtypes
 properSubtypeOf :: TypeSpec -> TypeSpec -> Bool
 properSubtypeOf _ Unspecified = True
+properSubtypeOf (TypeSpec mod1 name1 params1) (TypeSpec mod2 name2 params2) =
+    name1 == name2
+    && (mod1 == mod2 || mod2 == [])
+    && length params1 == length params2
+    && List.all (uncurry subtypeOf) (zip params1 params2)
 properSubtypeOf _ _ = False
 
 
 subtypeOf :: TypeSpec -> TypeSpec -> Bool
-subtypeOf sub super =
-    sub `properSubtypeOf` super
-    || case (sub,super) of
-         (TypeSpec mod1 name1 params1, TypeSpec mod2 name2 params2) ->
-           name1 == name2
-           && (mod1 == mod2 || mod2 == [])
-           && length params1 == length params2
-           && List.all (uncurry subtypeOf) (zip params1 params2)
-         (_,_) -> False
+subtypeOf sub super = sub `properSubtypeOf` super || sub == super
+
 
 meetTypes :: TypeSpec -> TypeSpec -> Maybe TypeSpec
 meetTypes ty1 ty2 =
@@ -281,29 +279,32 @@ localCalls thisMod m name _ _
 localCalls _ _ _ _ _ = []
 
 
-exprType :: Typing -> Exp -> Maybe TypeSpec
-exprType _ (IntValue _) = Just $ TypeSpec ["wybe"] "int" []
-exprType _ (FloatValue _) = Just $ TypeSpec ["wybe"] "float" []
-exprType _ (StringValue _) = Just $ TypeSpec ["wybe"] "string" []
-exprType _ (CharValue _) = Just $ TypeSpec ["wybe"] "char" []
-exprType typing (Var name _ _) = varType typing name
-exprType _ (Typed _ ty _) = Just ty
-exprType _ exp =
+exprType :: Typing -> Exp -> OptPos -> Compiler (Maybe TypeSpec)
+exprType _ (IntValue _) _ = return $ Just $ TypeSpec ["wybe"] "int" []
+exprType _ (FloatValue _) _ = return $ Just $ TypeSpec ["wybe"] "float" []
+exprType _ (StringValue _) _ = return $ Just $ TypeSpec ["wybe"] "string" []
+exprType _ (CharValue _) _ = return $ Just $ TypeSpec ["wybe"] "char" []
+exprType typing (Var name _ _) _ = return $ varType typing name
+exprType _ (Typed _ typ _) pos = lookupType typ pos
+exprType _ exp _ =
     shouldnt $ "Expression '" ++ show exp ++ "' left after flattening"
 
 
-matchTypes :: (Placed Exp) -> (Placed Exp) -> OptPos -> Typing -> Typing
-matchTypes parg1 parg2 pos typing =
+matchTypes :: (Placed Exp) -> (Placed Exp) -> OptPos -> Typing
+           -> Compiler Typing
+matchTypes parg1 parg2 pos typing = do
     let arg1 = content parg1
-        arg2 = content parg2
-        ty1  = exprType typing arg1
-        ty2  = exprType typing arg2
-    in  case (ty1,ty2) of
-      (Nothing,Nothing)  -> typing
-      (Nothing,Just typ) -> enforceType arg1 typ arg1 arg2 pos typing
-      (Just typ,Nothing) -> enforceType arg2 typ arg1 arg2 pos typing
-      (Just t1,Just t2)  -> enforceType arg1 t2 arg1 arg2 pos
-                            $ enforceType arg2 t1 arg1 arg2 pos typing
+    let arg2 = content parg2
+    maybety1 <- exprType typing arg1 pos
+    maybety2 <- exprType typing arg2 pos
+    logTypes $ "Matching types " ++ show maybety1 ++ " and " ++ show maybety2
+    case (maybety1,maybety2) of
+      (Nothing,Nothing)  -> return typing
+      (Nothing,Just typ) -> return $ enforceType arg1 typ arg1 arg2 pos typing
+      (Just typ,Nothing) -> return $ enforceType arg2 typ arg1 arg2 pos typing
+      (Just typ1,Just typ2)  ->
+        return $ enforceType arg1 typ2 arg1 arg2 pos
+        $ enforceType arg2 typ1 arg1 arg2 pos typing
 
 
 -- |Require the Exp to have the specified type
@@ -401,12 +402,10 @@ typecheckProcDecl m pd = do
                    typing resources
         if validTyping typing'
           then do
-            logTypes $ "** Type checking " ++ name ++
-              ": " ++ show typing'
+            logTypes $ "** Type checking " ++ name ++ ": " ++ show typing'
             logTypes $ "   with resources: " ++ show resources
             (typing'',def') <- typecheckProcDef m name pos typing' def
-            logTypes $ "*resulting types " ++ name ++
-              ": " ++ show typing''
+            logTypes $ "*resulting types " ++ name ++ ": " ++ show typing''
             let params' = updateParamTypes typing'' params
             let proto' = proto { procProtoParams = params' }
             let pd' = pd { procProto = proto', procImpln = ProcDefSrc def' }
@@ -591,7 +590,7 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
 typecheckStmt _ _ call@(ForeignCall "llvm" "move" [] [a1,a2]) pos typing = do
   -- Ensure arguments have the same types
     logTypes $ "Type checking move instruction " ++ showStmt 4 call
-    let typing' = matchTypes a1 a2 pos typing
+    typing' <- matchTypes a1 a2 pos typing
     logTypes $ "Resulting typing = " ++ show typing'
     return [typing']
 typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
@@ -691,10 +690,13 @@ typecheckArg pos params pname typing (argNum,param,arg) = do
 
 typecheckArg' :: Exp -> OptPos -> TypeSpec -> TypeSpec -> Typing ->
                  TypeReason -> Compiler Typing
-typecheckArg' (Typed exp typ cast) pos _ paramType typing reason = do
+typecheckArg' texp@(Typed exp typ cast) pos _ paramType typing reason = do
+    logTypes $ "Checking typed expr " ++ show texp
     typ' <- fmap (fromMaybe Unspecified) $ lookupType typ pos
-    typecheckArg' exp pos (if cast then Unspecified else typ')
-                  paramType typing reason
+    logTypes $ "Determined type " ++ show typ'
+    let typ'' = if cast then Unspecified else typ'
+    logTypes $ "Considering casting, type is " ++ show typ''
+    typecheckArg' exp pos typ'' paramType typing reason
     -- typecheckArg' exp pos  typ'
     --               paramType typing reason
 typecheckArg' (Var var _ _) _ declType paramType typing reason = do
