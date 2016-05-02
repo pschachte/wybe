@@ -390,12 +390,11 @@ equalityBody [] [] = [] -- nothing to do if no constructors at all, such as
                         -- for primitive types
 equalityBody consts [] = equalityConsts consts
 equalityBody consts nonconsts =
-    [lpvmCast (varGet "left") "left$int" intType,
-     comparison "ult" (varGet "left$int") (iVal $ length consts) "$$",
-     Unplaced $ Cond [] (Unplaced $ varGet "$$")
+    [Unplaced $ Cond [] (comparisonExp "ult" (intCast $ varGet "left")
+                         (iVal $ length consts))
      (equalityConsts consts)
      -- XXX temporarily:
-     [move (boolCast $ IntValue 0) (boolCast $ varSet "$$")]]
+     []]
      --  XXX should be:
      --  (equalityNonconsts nonconsts)]
 
@@ -403,14 +402,16 @@ equalityBody consts nonconsts =
 -- |Return code to check of two const values values are equal, given that we
 --  know that the values are not non-consts.
 equalityConsts :: [Placed FnProto] -> [Placed Stmt]
-equalityConsts [] = [move (boolCast $ IntValue 1) (boolCast $ varSet "$$")]
-equalityConsts _ = [comparison "eq" (intCast $ varGet "left")
-                    (intCast $ varGet "right") "$$"]
+equalityConsts [] = []
+equalityConsts _ =
+    [Unplaced $ Test [] (comparisonExp "eq" (intCast $ varGet "left")
+                         (intCast $ varGet "right"))]
 
 -- |Return code to check that two values are equal when the first is known
 --  not to be a const constructor.
 equalityNonconsts :: [Placed FnProto] -> [Placed Stmt]
-equalityNonconsts [] = [move (boolCast $ IntValue 0) (boolCast $ varSet "$$")]
+equalityNonconsts [] =
+    shouldnt "type with no non-const constructors should have been handled"
 equalityNonconsts [single] =
     concatMap equalityField $ fnProtoParams $ content single
 equalityNonconsts ctrs = nyi "multiple non-const constructors"

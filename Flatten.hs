@@ -28,6 +28,7 @@
 module Flatten (flattenProcDecl) where
 
 import AST
+import Snippets
 import Options (LogSelection(Flatten))
 import Data.Map as Map
 import Data.Set as Set
@@ -65,8 +66,8 @@ flattenProto (ProcProto name params resources) detism = do
     let params' = concatMap flattenParam params
     let params'' = case detism of
           Det     -> params'
-          SemiDet -> params' ++ [Param "$$" (TypeSpec ["wybe"] "bool" [])
-                                 ParamOut $ Implicit Nothing]
+          SemiDet -> params' ++ [Param "$$" boolType ParamOut
+                                 $ Implicit Nothing]
     return $ ProcProto name params'' resources
 
 

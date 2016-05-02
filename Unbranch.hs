@@ -69,12 +69,7 @@ unbranchProc proc = do
     let params = procProtoParams $ procProto proc
     (body',newProcs) <- unbranchBody params (setup++body)
     let proto = procProto proc
-    let proto' = if procDetism proc == SemiDet
-                 then proto {procProtoParams =
-                                 procProtoParams proto ++
-                                 [Param "$$" boolType ParamOut Ordinary]}
-                 else proto
-    let proc' = proc { procImpln = ProcDefSrc body', procProto = proto' }
+    let proc' = proc { procImpln = ProcDefSrc body' }
     let tmpCount = procTmpCount proc
     mapM_ (addProc tmpCount) newProcs
     logMsg Unbranch $ "** Unbranched defn:" ++ showProcDef 0 proc' ++ "\n"
