@@ -434,6 +434,7 @@ unbranchBranch branch = do
 --   the invariant that only the final statement is allowed to be a Cond.
 appendStmts :: [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt]
 appendStmts front [] = front
+appendStmts [] back = back
 appendStmts front back =
     case content $ last front of
       Cond tst var thn els ->
