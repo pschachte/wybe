@@ -355,8 +355,8 @@ implicitItems typespec consts nonconsts items =
 implicitEquality :: TypeSpec -> [Placed FnProto] -> [Placed FnProto] -> [Item]
                  -> [Item]
 implicitEquality typespec consts nonconsts items =
-    if List.any equalityTest items
-    then []
+    if List.any equalityTest items || consts==[] && nonconsts==[]
+    then [] -- don't generate if user-defined or if no constructors at all
     else
       let proto = ProcProto "=" [Param "left" typespec ParamIn Ordinary,
                                  Param "right" typespec ParamIn Ordinary] []
@@ -386,17 +386,16 @@ equalityTest _ = False
 --       XXX this needs to check that there are not too many non-const
 --       constructors for the number of available tag bits.
 equalityBody :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
-equalityBody [] [] = [] -- nothing to do if no constructors at all, such as
-                        -- for primitive types
+equalityBody [] [] = shouldnt "trying to generate = test with no constructors"
 equalityBody consts [] = equalityConsts consts
 equalityBody consts nonconsts =
     [Unplaced $ Cond [] (comparisonExp "ult" (intCast $ varGet "left")
                          (iVal $ length consts))
      (equalityConsts consts)
      -- XXX temporarily:
-     []]
+     -- []]
      --  XXX should be:
-     --  (equalityNonconsts nonconsts)]
+      (equalityNonconsts nonconsts)]
 
 
 -- |Return code to check of two const values values are equal, given that we

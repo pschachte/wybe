@@ -143,7 +143,7 @@ data FnProto = FnProto {
     fnProtoName::Ident,
     fnProtoParams::[Param],
     fnProtoResourceFlows::[ResourceFlowSpec]
-    }
+    } deriving Eq
 
 
 ----------------------------------------------------------------
