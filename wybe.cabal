@@ -1,7 +1,7 @@
 name:                wybe
 version:             0.1.0.0
 synopsis:            Wybe compilation to LPVM and ultimately LLVM
-cabal-version:       >= 1.22.5.0
+cabal-version:       >= 1.22.2.0
 Category:            Compilers
 build-type:          Simple
 
