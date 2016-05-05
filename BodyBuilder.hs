@@ -86,9 +86,9 @@ buildBody oSubst builder = do
 buildFork :: PrimVarName -> TypeSpec -> Bool -> [BodyBuilder ()] 
              -> BodyBuilder ()
 buildFork var ty final branchBuilders = do
-    arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
-    logBuild $ "<<<< beginning to build a new fork on " ++ show arg'
+    logBuild $ "<<<< beginning to build a new fork on " ++ show var
       ++ " (final=" ++ show final ++ ")"
+    arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
     case arg' of
       ArgInt n _ -> -- result known at compile-time:  only compile winner
         case drop (fromIntegral n) branchBuilders of
@@ -136,9 +136,16 @@ instr :: Prim -> OptPos -> BodyBuilder ()
 instr PrimNop _ = do
     -- Filter out NOPs
     return ()
-instr prim pos = do         
-    prim' <- argExpandedPrim prim
-    instr' prim' pos
+instr prim pos = do
+    st <- get
+    case st of
+      Unforked _ _ _ _ -> do
+        logBuild $ "Generating instr " ++ show prim
+        prim' <- argExpandedPrim prim
+        instr' prim' pos
+      Forked bld var ty bods -> do
+        bods' <- mapM (flip buildBranch (instr prim pos)) bods
+        put $ Forked bld var ty bods'
 
 
 instr' :: Prim -> OptPos -> BodyBuilder ()
