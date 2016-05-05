@@ -140,15 +140,14 @@ expandBody (ProcBody prims fork) = do
 
 expandPrims :: [Placed Prim] -> Expander ()
 expandPrims pprims = do
-    mapM_ (\(p:rest) -> expandPrim (content p) (place p) (List.null rest))
-      $ init $ tails pprims
+    mapM_ (\p -> expandPrim (content p) (place p)) pprims
 
 -- XXX allow this to handle primitives that can fail with all inputs known,
 -- like less than, removing ops that succeed and killing branches that
 -- fail.
 -- XXX allow this to handle non-primitives with all inputs known by inlining.
-expandPrim :: Prim -> OptPos -> Bool -> Expander ()
-expandPrim (PrimCall pspec args) pos _ = do
+expandPrim :: Prim -> OptPos -> Expander ()
+expandPrim (PrimCall pspec args) pos = do
     args' <- mapM expandArg args
     let call' = PrimCall pspec args'
     logExpansion $ "  Expand call " ++ show call'
@@ -174,7 +173,7 @@ expandPrim (PrimCall pspec args) pos _ = do
               else do
                 logExpansion $ "  Not inlinable"
                 addInstr call' pos
-expandPrim (PrimForeign lang nm flags args) pos _ = do
+expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)
     logExpansion $ "    with renaming = " ++ show (renaming st)
@@ -183,7 +182,7 @@ expandPrim (PrimForeign lang nm flags args) pos _ = do
     addInstr (PrimForeign lang nm flags args')  pos
     st' <- get
     logExpansion $ "    renaming = " ++ show (renaming st')
-expandPrim prim pos _ = do
+expandPrim prim pos = do
     addInstr prim pos
 
 
