@@ -244,8 +244,9 @@ data CompilerState = Compiler {
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
   loadCount :: Int,              -- ^counter of module load order
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
-  deferred :: [Module]          -- ^modules in the same SCC as the current one
-  }
+  deferred :: [Module],          -- ^modules in the same SCC as the current one
+  moduleHashes :: Map ModSpec String -- ^hashed module items
+}
 
 -- |The compiler monad is a state transformer monad carrying the 
 --  compiler state over the IO monad.
@@ -254,7 +255,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp 
-                        (Compiler opts [] False Map.empty 0 [] [])
+                        (Compiler opts [] False Map.empty 0 [] [] Map.empty)
 
 
 -- |Apply some transformation function to the compiler state.

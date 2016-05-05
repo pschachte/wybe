@@ -182,8 +182,8 @@ buildModuleIfNeeded force modspec possDirs = do
                     shouldnt "inconsistent file existence"
 
 
--- |Find the source and/or object files for the specified module.  We
--- search the library search path for the files.
+-- |Find the source and/or object files for the specified module. We search
+-- the library search path for the files.
 srcObjFiles :: ModSpec -> [FilePath] ->
                Compiler (Maybe (FilePath,Bool,FilePath,Bool,Ident))
 srcObjFiles modspec possDirs = do
