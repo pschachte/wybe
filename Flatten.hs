@@ -232,19 +232,25 @@ flattenStmt' (ForeignCall lang name flags args) pos = do
 flattenStmt' tststmt@(Test stmts tst) pos = do
     logFlatten $ "** Flattening test:" ++ showStmt 4 tststmt
     (_,stmts') <- flattenInner False True (flattenStmts stmts)
-    (vars,tst') <- flattenInner False False (flattenPExp tst)
+    (vars,tst') <- flattenInner False False (do
+      vars <- flattenPExp tst
+      emitPostponed
+      return vars)
     let errPos = betterPlace pos tst
     case vars of
       [] -> lift $ message Error "Test with no flow" errPos
       [var] -> do
-        logFlatten $ "** Result:\n" ++ (showStmt 4 $ Test (stmts++tst') var)
+        logFlatten $ "** Result:\n" ++ (showStmt 4 $ Test (stmts'++tst') var)
         emit pos $ Test (stmts'++tst') var
       [_,_] -> lift $ message Error
               ("Test with in-out flow: " ++ show vars) errPos
       _ -> shouldnt "Single expression expanded to more than 2 args"
 flattenStmt' (Cond tstStmts tst thn els) pos = do
     logFlatten $ "** Flattening conditional:" ++ show tst
-    (vars,tst') <- flattenInner False False (flattenPExp tst)
+    (vars,tst') <- flattenInner False False (do
+      vars <- flattenPExp tst
+      emitPostponed
+      return vars)
     logFlatten $ "** Result:\n" ++ showBody 4 tst'
     (_,thn') <- flattenInner False False (flattenStmts thn)
     (_,els') <- flattenInner False False (flattenStmts els)
