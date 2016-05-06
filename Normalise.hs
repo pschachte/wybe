@@ -358,8 +358,8 @@ implicitEquality typespec consts nonconsts items =
     if List.any equalityTest items || consts==[] && nonconsts==[]
     then [] -- don't generate if user-defined or if no constructors at all
     else
-      let proto = ProcProto "=" [Param "left" typespec ParamIn Ordinary,
-                                 Param "right" typespec ParamIn Ordinary] []
+      let proto = ProcProto "=" [Param "$left" typespec ParamIn Ordinary,
+                                 Param "$right" typespec ParamIn Ordinary] []
           body = equalityBody consts nonconsts
       in [ProcDecl Public SemiDet True proto body Nothing]
 
@@ -389,7 +389,7 @@ equalityBody :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
 equalityBody [] [] = shouldnt "trying to generate = test with no constructors"
 equalityBody consts [] = equalityConsts consts
 equalityBody consts nonconsts =
-    [Unplaced $ Cond [] (comparisonExp "ult" (intCast $ varGet "left")
+    [Unplaced $ Cond [] (comparisonExp "ult" (intCast $ varGet "$left")
                          (iVal $ length consts))
      (equalityConsts consts)
      -- XXX temporarily:
@@ -403,8 +403,8 @@ equalityBody consts nonconsts =
 equalityConsts :: [Placed FnProto] -> [Placed Stmt]
 equalityConsts [] = []
 equalityConsts _ =
-    [Unplaced $ Test [] (comparisonExp "eq" (intCast $ varGet "left")
-                         (intCast $ varGet "right"))]
+    [Unplaced $ Test [] (comparisonExp "eq" (intCast $ varGet "$left")
+                         (intCast $ varGet "$right"))]
 
 -- |Return code to check that two values are equal when the first is known
 --  not to be a const constructor.
@@ -415,15 +415,23 @@ equalityNonconsts [single] =
     concatMap equalityField $ fnProtoParams $ content single
 equalityNonconsts ctrs = nyi "multiple non-const constructors"
 
--- |Return code to check that all the fields of two data are equal, when
+-- |Return code to check that one field of two data are equal, when
 --  they are known to have the same constructor.
 equalityField :: Param -> [Placed Stmt]
 equalityField param =
     let field = paramName param
+        leftField = field++"$left"
+        rightField = field++"$right"
     in  List.map Unplaced
         [Test []
+         (Unplaced $ Fncall [] field
+          [Unplaced $ varGet "$left",
+           Unplaced $ varSet leftField]),
+         Test []
+         (Unplaced $ Fncall [] field 
+          [Unplaced $ varGet "$right",
+           Unplaced $ varSet rightField]),
+         Test []
          (Unplaced $ Fncall [] "="
-          [Unplaced $ Fncall [] field
-           [Unplaced $ varGet "left"],
-           Unplaced $ Fncall [] field
-           [Unplaced $ varGet "right"]])]
+          [Unplaced $ varGet leftField,
+           Unplaced $ varGet rightField])]
