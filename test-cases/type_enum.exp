@@ -50,8 +50,8 @@ AFTER EVERYTHING:
 1: =(in#0:type_enum.season, ?out#0:type_enum.season):
     foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
 = > public inline test (0 calls)
-2: =(left#0:type_enum.season, right#0:type_enum.season, ?$$#1:wybe.bool):
-    foreign llvm icmp eq(~left#0:wybe.int, ~right#0:wybe.int, ?tmp$0#0:wybe.bool)
+2: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#1:wybe.bool):
+    foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?tmp$0#0:wybe.bool)
     foreign llvm move(~tmp$0#0:wybe.bool, ?$$#1:wybe.bool)
 
 
@@ -112,9 +112,9 @@ entry:
 }
 
 ; Function Attrs: nounwind readnone
-define i1 @"type_enum.season.=<1>1"(i2 %"left#0", i2 %"right#0") #0 {
+define i1 @"type_enum.season.=<1>1"(i2 %"$left#0", i2 %"$right#0") #0 {
 entry:
-  %"tmp$0#0" = icmp eq i2 %"left#0", %"right#0"
+  %"tmp$0#0" = icmp eq i2 %"$left#0", %"$right#0"
   ret i1 %"tmp$0#0"
 }
 
@@ -188,9 +188,9 @@ entry:
 }
 
 ; Function Attrs: nounwind readnone
-define i1 @"type_enum.season.=<1>1"(i2 %"left#0", i2 %"right#0") #0 {
+define i1 @"type_enum.season.=<1>1"(i2 %"$left#0", i2 %"$right#0") #0 {
 entry:
-  %"tmp$0#0" = icmp eq i2 %"left#0", %"right#0"
+  %"tmp$0#0" = icmp eq i2 %"$left#0", %"$right#0"
   ret i1 %"tmp$0#0"
 }
 
