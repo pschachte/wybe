@@ -148,7 +148,7 @@ instance Show TypeReason where
             "Type error in call to " ++ name ++ ", argument " ++ show num
     show (ReasonCond pos) =
         makeMessage pos $
-            "Type error in conditional expression"
+            "Conditional or test expression with non-boolean result"
     show (ReasonArgFlow name num pos) =
         makeMessage pos $
             "Flow error in call to " ++ name ++ ", argument " ++ show num
