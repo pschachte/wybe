@@ -160,7 +160,7 @@ buildModuleIfNeeded force modspec possDirs = do
                     return False
                 Just (_,False,objfile,True,_) -> do
                     -- only object file exists
-                    loadModule modspec objfile
+                    loadModuleFromObjFile modspec objfile
                     return False
                 Just (srcfile,True,objfile,False,modname) -> do
                     -- only source file exists
@@ -171,10 +171,11 @@ buildModuleIfNeeded force modspec possDirs = do
                     dstDate <- (liftIO . getModificationTime) objfile
                     if force || srcDate > dstDate
                       then do
+                        extractModules objfile
                         buildModule modname objfile srcfile
                         return True
                       else do
-                        loadModule modspec objfile
+                        loadModuleFromObjFile modspec objfile
                         return False
                     -- buildModule modname objfile srcfile
                     -- return True
@@ -216,8 +217,20 @@ buildModule :: Ident -> FilePath -> FilePath -> Compiler ()
 buildModule modname objfile srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
     let parseTree = parse tokens
-    let dir = takeDirectory objfile    
-    compileModule dir [modname] Nothing parseTree
+    let dir = takeDirectory objfile
+    let mspec = [modname]
+    let currHash = hashItems parseTree
+    extractedHash <- extractedItemsHash mspec
+    case extractedHash of
+        Nothing -> compileModule dir mspec Nothing parseTree
+        Just otherHash ->
+            if currHash == otherHash
+            then do
+                logBuild $ "... Hash for module " ++ showModSpec mspec ++
+                    " matches the old hash."
+                loadModuleFromObjFile mspec objfile
+            else compileModule dir mspec Nothing parseTree
+    
 
 
 -- |Compile a module given the parsed source file contents.
@@ -228,7 +241,7 @@ compileModule dir modspec params items = do
     -- Hash the parse items and store it in the module
     let hashOfItems = hashItems items
     -- logBuild $ "HASH: " ++ hashOfItems
-    updateModule (\m -> m { itemsHash = hashOfItems })
+    updateModule (\m -> m { itemsHash = Just hashOfItems })
     -- verboseMsg 1 $ return (intercalate "\n" $ List.map show items)
     -- XXX This means we generate LPVM code for a module before
     -- considering dependencies.  This will need to change if we
@@ -249,23 +262,68 @@ compileModule dir modspec params items = do
     compileModSCC mods
 
 
--- |Load module export info from compiled file
-loadModule :: ModSpec -> FilePath -> Compiler ()
-loadModule modspec objfile = do
+extractedItemsHash :: ModSpec -> Compiler (Maybe String)
+extractedItemsHash modspec = do
+    storedMods <- gets extractedMods
+    case Map.lookup modspec storedMods of
+        Nothing -> return Nothing
+        Just m -> return $ itemsHash m
+
+
+-- | Parse the stored module bytestring in the 'objfile' and record them in the
+-- compiler state for later access.
+extractModules :: FilePath -> Compiler ()
+extractModules objfile = do
+    logBuild $ "<<< Looking for serialised Wybe modules in " ++ objfile
+    extracted <- liftIO $ liftIO $ machoLPVMSection objfile
+    logBuild $ ">>> Extracted Module bytestring from " ++ (show objfile)
+    let extractedSpecs = List.map modSpec extracted
+    logBuild $ "+++ Recording modules: " ++ showModSpecs extractedSpecs
+    -- Add the extracted modules in the 'objectModules' Map
+    exMods <- gets extractedMods
+    let addMod m acc = Map.insert (modSpec m) m acc
+    let exMods' = List.foldr addMod exMods extracted
+    modify (\s -> s { extractedMods = exMods' })
+
+
+
+loadModuleWithModule :: Module -> Compiler ()
+loadModuleWithModule m = do
+    let modspec = modSpec m
+    deps <- placeExtractedModule m
+    subs <- collectSubModules modspec
+    storedMods <- gets extractedMods
+    let getStoredModule spec =
+            case Map.lookup spec storedMods of
+                Nothing ->
+                    shouldnt ("Module " ++ showModSpec spec ++
+                                 " was not extracted.")
+                Just m -> m
+    let subMods = List.map getStoredModule subs 
+    subDeps <- concat <$> mapM placeExtractedModule subMods
+    modify (\comp -> let ms = m : underCompilation comp
+                     in comp { underCompilation = ms })
+    mapM_ buildDependency (subs ++ subDeps)
+    finishModule
+    return ()
+
+
+loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler ()
+loadModuleFromObjFile modspec objfile = do
     logBuild $ "===== ??? Trying to load LPVM Module for "
         ++ showModSpec modspec
-    -- Extract binary data from the object file
-    extractedMods <- liftIO $ liftIO $ machoLPVMSection objfile
+
+    extracted <- liftIO $ liftIO $ machoLPVMSection objfile
     logBuild $ "===== >>> Extracted Module bytestring from " ++ (show objfile)
-    let extractedSpecs = List.map modSpec extractedMods
+    let extractedSpecs = List.map modSpec extracted
     logBuild $ "===== >>> Found modules: " ++ showModSpecs extractedSpecs
 
     -- Collect the imports
-    imports <- concat <$> mapM placeExtractedModule extractedMods
+    imports <- concat <$> mapM placeExtractedModule extracted
     logBuild $ "==== >>> Building dependencies: " ++ showModSpecs imports
 
     -- Place the super mod under compilation while dependencies are built
-    let superMod = head extractedMods
+    let superMod = head extracted
     modify (\comp -> let ms = superMod : underCompilation comp
                      in comp { underCompilation = ms })
     mapM_ buildDependency imports
@@ -273,9 +331,10 @@ loadModule modspec objfile = do
 
     logBuild $ "===== <<< Extracted Module put in it's place from "
         ++ (show objfile)
+    
 
 
--- |
+
 placeExtractedModule :: Module -> Compiler [ModSpec]
 placeExtractedModule thisMod = do
     let modspec = modSpec thisMod

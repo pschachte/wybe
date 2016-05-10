@@ -156,6 +156,7 @@ dataFromBitcode = do
 -- Segment Parsing and Extraction                                            --
 -------------------------------------------------------------------------------
 
+
 -- | Parse the given object file into a 'Macho' structure, determine the
 -- offset and size of the '__lpvm' section data, and decode those bytes as
 -- a 'AST.Module'.

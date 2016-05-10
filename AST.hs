@@ -42,6 +42,7 @@ module AST (
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
   updateModules, updateImplementations, updateImplementation,
+  getExtractedModuleImpln,
   getModuleImplementationField, getModuleImplementation,
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
@@ -245,7 +246,7 @@ data CompilerState = Compiler {
   loadCount :: Int,              -- ^counter of module load order
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
   deferred :: [Module],          -- ^modules in the same SCC as the current one
-  moduleHashes :: Map ModSpec String -- ^hashed module items
+  extractedMods :: Map ModSpec Module
 }
 
 -- |The compiler monad is a state transformer monad carrying the 
@@ -275,6 +276,7 @@ updateAllProcs :: (ProcDef -> ProcDef) -> Compiler ()
 updateAllProcs fn =
     updateImplementations
     (\imp -> imp { modProcs = Map.map (List.map fn) $ modProcs imp })
+
 
 -- |Return Just the specified module, if already loaded or currently
 -- being loaded, otherwise Nothing.  Takes care to handle it if the
@@ -459,7 +461,7 @@ enterModule dir modspec params = do
     logAST $ "Entering module " ++ showModSpec modspec
     modify (\comp -> let mods = Module dir modspec params 0 0
                                        emptyInterface (Just emptyImplementation)
-                                       count count 0 [] ""
+                                       count count 0 [] Nothing
                                        : underCompilation comp
                      in  comp { underCompilation = mods })
 
@@ -535,6 +537,16 @@ getModuleImplementationMaybe fn = do
   case imp of
       Nothing -> return Nothing
       Just imp' -> return $ fn imp'
+
+
+getExtractedModuleImpln :: ModSpec -> Compiler (Maybe ModuleImplementation)
+getExtractedModuleImpln mspec = do
+    maybeMod <- Map.lookup mspec <$> gets extractedMods
+    case maybeMod of
+        Nothing -> return Nothing
+        Just m -> return $ modImplementation m
+
+
 
 
 -- |Add the specified string as a message of the specified severity 
@@ -847,7 +859,7 @@ data Module = Module {
   minDependencyNum :: Int,       -- ^the smallest loadNum of all dependencies
   procCount :: Int,              -- ^a counter for gensym-ed proc names
   stmtDecls :: [Placed Stmt],     -- ^top-level statements in this module
-  itemsHash :: String -- ^map of proc name to it's hash 
+  itemsHash :: Maybe String -- ^map of proc name to it's hash 
   } deriving (Generic)
 
 
@@ -868,6 +880,7 @@ collectSubModules mspec = do
     subMods <- fmap (Map.elems . modSubmods) $ getLoadedModuleImpln mspec
     desc <- fmap concat $ mapM collectSubModules subMods
     return $ subMods ++ desc
+
 
 
 -- |The list of defining modules that the given (possibly
