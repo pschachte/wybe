@@ -271,7 +271,8 @@ deconstructorItems ctorName params typeSpec constCount nonConstCount
     -- XXX this needs to take the tag into account
     -- XXX this needs to be able to fail if the constructor doesn't match
     let flowType = Implicit pos
-    in [ProcDecl Public Det True
+        detism = if constCount + nonConstCount > 1 then SemiDet else Det
+    in [ProcDecl Public detism True
         (ProcProto ctorName 
          (List.map (\(Param n t _ ft) -> (Param n t ParamOut ft)) params
           ++ [Param "$" typeSpec ParamIn Ordinary]) 
@@ -286,6 +287,8 @@ deconstructorItems ctorName params typeSpec constCount nonConstCount
         pos]
 
 
+-- |Generate the needed Test statements to check that the tag of the value
+--  of the specified variable matches the specified tag
 tagCheck :: Int -> Int -> Integer -> Ident -> [Placed Stmt]
 tagCheck constCount nonConstCount tag varName =
     -- If there are any constant constructors, be sure it's not one of them
@@ -395,7 +398,7 @@ equalityBody consts nonconsts =
      -- XXX temporarily:
      -- []]
      --  XXX should be:
-      (equalityNonconsts nonconsts)]
+     (equalityNonconsts nonconsts consts)]
 
 
 -- |Return code to check of two const values values are equal, given that we
@@ -408,30 +411,40 @@ equalityConsts _ =
 
 -- |Return code to check that two values are equal when the first is known
 --  not to be a const constructor.
-equalityNonconsts :: [Placed FnProto] -> [Placed Stmt]
-equalityNonconsts [] =
+equalityNonconsts :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
+equalityNonconsts [] _ =
     shouldnt "type with no non-const constructors should have been handled"
-equalityNonconsts [single] =
-    concatMap equalityField $ fnProtoParams $ content single
-equalityNonconsts ctrs = nyi "multiple non-const constructors"
+equalityNonconsts [single] [] =
+    let FnProto name params _ = content single
+    in  deconstructCall name "$left" params False
+        ++ deconstructCall name "$right" params False
+        ++ concatMap equalityField params
+equalityNonconsts [single] (_:_) =
+    let FnProto name params _ = content single
+    in  [Unplaced $ Test (deconstructCall name "$left" params True)
+         $ Unplaced $ varGet "$left$",
+         Unplaced $ Test (deconstructCall name "$right" params True)
+         $ Unplaced $ varGet "$right$"]
+        ++
+        concatMap equalityField params
+equalityNonconsts ctrs _ = nyi "multiple non-const constructors"
+
+
+deconstructCall :: Ident -> Ident -> [Param] -> Bool -> [Placed Stmt]
+deconstructCall ctor arg params isTest =
+    [Unplaced $ ProcCall [] ctor Nothing
+     $ List.map (\p -> Unplaced $ varSet $ arg++"$"++paramName p) params
+     ++ [Unplaced $ varGet arg]
+     ++ if isTest then [Unplaced $ varSet $ arg++"$"] else []]
 
 -- |Return code to check that one field of two data are equal, when
 --  they are known to have the same constructor.
 equalityField :: Param -> [Placed Stmt]
 equalityField param =
     let field = paramName param
-        leftField = field++"$left"
-        rightField = field++"$right"
-    in  List.map Unplaced
-        [Test []
-         (Unplaced $ Fncall [] field
-          [Unplaced $ varGet "$left",
-           Unplaced $ varSet leftField]),
-         Test []
-         (Unplaced $ Fncall [] field 
-          [Unplaced $ varGet "$right",
-           Unplaced $ varSet rightField]),
-         Test []
+        leftField = "$left$"++field
+        rightField = "$right$"++field
+    in  [Unplaced $ Test []
          (Unplaced $ Fncall [] "="
           [Unplaced $ varGet leftField,
            Unplaced $ varGet rightField])]
