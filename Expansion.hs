@@ -118,8 +118,10 @@ initExpanderState tCount =
 
 expandBody :: ProcBody -> Expander ()
 expandBody (ProcBody prims fork) = do
+    logExpansion $ "Expanding unforked part of body:" ++ showPlacedPrims 4 prims
     modify (\s -> s { noFork = fork == NoFork })
     expandPrims prims
+    logExpansion $ "Finished expanding unforked part of body"
     st <- get
     case fork of
       NoFork -> return ()
