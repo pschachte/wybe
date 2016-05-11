@@ -86,35 +86,45 @@ buildBody oSubst builder = do
 buildFork :: PrimVarName -> TypeSpec -> Bool -> [BodyBuilder ()] 
              -> BodyBuilder ()
 buildFork var ty final branchBuilders = do
-    logBuild $ "<<<< beginning to build a new fork on " ++ show var
-      ++ " (final=" ++ show final ++ ")"
-    arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
-    case arg' of
-      ArgInt n _ -> -- result known at compile-time:  only compile winner
-        case drop (fromIntegral n) branchBuilders of
-          -- XXX should be an error message rather than an abort
-          [] -> shouldnt "branch constant greater than number of cases"
-          (winner:_) -> do
-            logBuild $ "**** condition result is " ++ show n
-            winner
-      ArgVar var' ty _ _ _ -> do -- statically unknown result
-        st <- get
-        case st of
-          Forked _ _ _ _ -> 
-            nyi "Fork after a fork"
-          Unforked build _ _ _ -> do
-            let st' = st { currBuild = [] }
-            branches <- mapM (buildBranch st') branchBuilders
-            case branches of
-              [] -> return ()
-              [br] -> put $ concatBodies st br
-              (br:brs) | all (==br) brs -> 
-                -- all branches are equal:  don't create a new fork
-                put $ concatBodies st br
-              brs ->
-                put $ Forked build var' ty brs
-      _ -> shouldnt "Switch on non-integer value"
-    logBuild $ ">>>> Finished building a fork"
+    st <- get
+    case st of
+      Forked bld var ty bods -> do
+        -- This shouldn't usually happen, but it can happen when a test
+        -- proc is inlined.  Handle by building the fork at the end of
+        -- each of the branches.
+        bods' <- mapM (\st -> lift $ execStateT
+                              (buildFork var ty final branchBuilders) st) bods
+        put $ Forked bld var ty bods'
+      Unforked _ _ _ _ -> do
+        logBuild $ "<<<< beginning to build a new fork on " ++ show var
+            ++ " (final=" ++ show final ++ ")"
+        arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
+        case arg' of
+          ArgInt n _ -> -- result known at compile-time:  only compile winner
+            case drop (fromIntegral n) branchBuilders of
+              -- XXX should be an error message rather than an abort
+              [] -> shouldnt "branch constant greater than number of cases"
+              (winner:_) -> do
+                logBuild $ "**** condition result is " ++ show n
+                winner
+          ArgVar var' ty _ _ _ -> do -- statically unknown result
+            st <- get
+            case st of
+              Forked _ _ _ _ -> 
+                nyi "Fork after a fork"
+              Unforked build _ _ _ -> do
+                let st' = st { currBuild = [] }
+                branches <- mapM (buildBranch st') branchBuilders
+                case branches of
+                  [] -> return ()
+                  [br] -> put $ concatBodies st br
+                  (br:brs) | all (==br) brs -> 
+                    -- all branches are equal:  don't create a new fork
+                    put $ concatBodies st br
+                  brs ->
+                    put $ Forked build var' ty brs
+          _ -> shouldnt "Switch on non-integer value"
+        logBuild $ ">>>> Finished building a fork"
 
 
 buildBranch :: BodyState -> BodyBuilder () -> BodyBuilder BodyState
