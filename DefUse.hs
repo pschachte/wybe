@@ -5,6 +5,8 @@
 --  Purpose  : Compute defined and used variables for statements and exprs
 --  Copyright: (c) 2013 Peter Schachte.  All rights reserved.
 --
+-- XXX this module is currently not used; should be deleted when it's
+--     clear it won't be needed.
 
 module DefUse (DefUse, pstmtsDefUse) where
 
@@ -92,23 +94,3 @@ expDefUse (CondExp cond thn els) =
     (pexpDefUse thn `joinDefUse` pexpDefUse els)
 expDefUse (Fncall _ exps) = pexpsDefUse exps
 expDefUse (ForeignFn _ _ exps) = pexpsDefUse exps
-
-
-----------------------------------------------------------------
--- Copied from Normalise.hs
-----------------------------------------------------------------
-
--- |Does the specified flow direction flow in?
-flowsIn :: FlowDirection -> Bool
-flowsIn NoFlow     = False
-flowsIn ParamIn    = True
-flowsIn ParamOut   = False
-flowsIn ParamInOut = True
-
--- |Does the specified flow direction flow out?
-flowsOut :: FlowDirection -> Bool
-flowsOut NoFlow     = False
-flowsOut ParamIn = False
-flowsOut ParamOut = True
-flowsOut ParamInOut = True
-
