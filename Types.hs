@@ -665,7 +665,8 @@ reconcileArgFlows (Param _ _ ParamOut _:params)
       isHalfUpdate ParamOut (content arg2)
     = fmap (arg2:) $ reconcileArgFlows params args
 reconcileArgFlows (Param _ _ pflow _:params) (arg:args)
-    = if pflow == expFlow (content arg)
+    = let aflow = expFlow (content arg)
+      in if pflow == aflow || aflow == FlowUnknown
       then fmap (arg:) $ reconcileArgFlows params args
       else Nothing
 

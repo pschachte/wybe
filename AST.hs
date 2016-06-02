@@ -1523,7 +1523,7 @@ data ParamInfo = ParamInfo {
     } deriving (Eq,Generic)
 
 -- |A dataflow direction:  in, out, both, or neither.
-data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow
+data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow | FlowUnknown
                    deriving (Show,Eq,Ord,Generic)
 
 -- |A primitive dataflow direction:  in or out
@@ -1537,7 +1537,7 @@ flowsIn NoFlow     = False
 flowsIn ParamIn    = True
 flowsIn ParamOut   = False
 flowsIn ParamInOut = True
-
+flowsIn FlowUnknown = shouldnt "checking if unknown flow direction flows in"
 
 -- |Does the specified flow direction flow out?
 flowsOut :: FlowDirection -> Bool
@@ -1545,6 +1545,7 @@ flowsOut NoFlow     = False
 flowsOut ParamIn = False
 flowsOut ParamOut = True
 flowsOut ParamInOut = True
+flowsOut FlowUnknown = shouldnt "checking if unknown flow direction flows out"
 
 
 -- |Source program statements.  These will be normalised into Prims.
@@ -2046,6 +2047,7 @@ flowPrefix NoFlow     = ""
 flowPrefix ParamIn    = ""
 flowPrefix ParamOut   = "?"
 flowPrefix ParamInOut = "!"
+flowPrefix FlowUnknown = "???"
 
 -- |How to show a *primitive* dataflow direction.
 primFlowPrefix :: PrimFlow -> String

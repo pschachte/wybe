@@ -52,7 +52,6 @@ stmtDefUse (Cond exp thn els _ _) =
     pexpDefUse exp `sequentialDefUse`
     (pstmtsDefUse thn `joinDefUse` pstmtsDefUse els)
 stmtDefUse (Loop loop _ _) = pstmtsDefUse loop
-stmtDefUse (Guard exp val _ _) = pexpDefUse exp
 stmtDefUse Nop = noDefUse
 stmtDefUse (For gen _ _) = generatorDefUse gen
 stmtDefUse Break = noDefUse

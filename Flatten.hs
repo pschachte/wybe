@@ -96,9 +96,12 @@ data FlattenerState = Flattener {
     postponed   :: [Placed Stmt],   -- ^Code to be generated later
     tempCtr     :: Int,             -- ^Temp variable counter
     currPos     :: OptPos,          -- ^Position of current statement
+    -- XXX are stmtDefs and stmtUses actually needed now?
     stmtDefs    :: Set VarName,     -- ^Variables defined by this statement
     stmtUses    :: Set VarName,     -- ^Variables used by this statement
     defdVars    :: Set VarName      -- ^Variables defined before this stmt
+                                    --  needed to distinguish niladic fns
+                                    --  from variables
     }
 
 
@@ -342,7 +345,7 @@ flattenExp exp@(Var name dir flowType) ty cast pos = do
     if (dir == ParamIn && (not defd))
       then -- Reference to an undefined variable: assume it's meant to be
            -- a niladic function instead of a variable reference
-        flattenCall (ProcCall [] name Nothing) ty cast pos []
+        flattenCall (ProcCall [] name Nothing) False ty cast pos []
       else do
         noteVarMention name dir
         let inPart = if isIn
@@ -374,18 +377,18 @@ flattenExp (CondExp cond thn els) ty cast pos = do
         pos
     return $ [maybePlace (Var resultName ParamIn flowType) pos]
 flattenExp (Fncall maybeMod name exps) ty cast pos = do
-    flattenCall (ProcCall maybeMod name Nothing) ty cast pos exps
+    flattenCall (ProcCall maybeMod name Nothing) False ty cast pos exps
 flattenExp (ForeignFn lang name flags exps) ty cast pos = do
-    flattenCall (ForeignCall lang name flags) ty cast pos exps
+    flattenCall (ForeignCall lang name flags) True ty cast pos exps
 flattenExp (Typed exp Unspecified _) ty cast pos = do
     flattenExp exp ty cast pos
 flattenExp (Typed exp ty cast) _ _ pos = do
     flattenExp exp ty cast pos
 
 
-flattenCall :: ([Placed Exp] -> Stmt) -> TypeSpec -> Bool -> OptPos
+flattenCall :: ([Placed Exp] -> Stmt) -> Bool -> TypeSpec -> Bool -> OptPos
             -> [Placed Exp] -> Flattener [Placed Exp]
-flattenCall stmtBuilder ty cast pos exps = do
+flattenCall stmtBuilder isForeign ty cast pos exps = do
     logFlatten $ "** flattening args:  " ++ show exps
     resultName <- tempVar
     oldPos <- gets currPos
@@ -394,32 +397,40 @@ flattenCall stmtBuilder ty cast pos exps = do
     modify (\s -> s { stmtUses = Set.empty, stmtDefs = Set.empty, 
                       currPos = pos})
     exps' <- flattenArgs exps
-    let exps'' = List.filter (isInExp . content) exps'
+    -- let exps'' = List.filter (isInExp . content) exps'
     uses' <- gets stmtUses
     defs' <- gets stmtDefs
     modify (\s -> s { stmtUses = uses `Set.union` uses', 
                       stmtDefs = defs `Set.union` defs', 
                       currPos = oldPos})
-    let isOut = not $ Set.null defs'
-    let isIn = not (isOut && Set.null (defs' `Set.intersection` uses'))
+    -- let isOut = not $ Set.null defs'
+    -- let isIn = not (isOut && Set.null (defs' `Set.intersection` uses'))
     logFlatten $ "** defines:  " ++ show defs'
     logFlatten $ "** uses   :  " ++ show uses'
-    logFlatten $ "** in = " ++ show isIn ++ "; out = " ++ show isOut
-    let flowType = if isIn && isOut then HalfUpdate else Implicit pos
-    when isIn $ 
-      emit pos $ stmtBuilder $ 
-      exps'' ++ [typeAndPlace (Var resultName ParamOut flowType) ty cast pos]
-    when isOut $ 
-      postpone pos $ stmtBuilder $ 
-      exps' ++ [typeAndPlace (Var resultName ParamIn flowType) ty cast pos]
-    return $
-      (if isIn
-       then [Unplaced $ maybeType (Var resultName ParamIn flowType) ty cast]
-       else []) ++
-      (if isOut
-       then [Unplaced $ maybeType (Var resultName ParamOut flowType) ty cast]
-       else [])
-
+    -- logFlatten $ "** in = " ++ show isIn ++ "; out = " ++ show isOut
+    -- let flowType = if isIn && isOut then HalfUpdate else Implicit pos
+    -- when isIn $ 
+    --   emit pos $ stmtBuilder $ 
+    --   exps'' ++ [typeAndPlace (Var resultName ParamOut flowType) ty cast pos]
+    -- when isOut $ 
+    --   postpone pos $ stmtBuilder $ 
+    --   exps' ++ [typeAndPlace (Var resultName ParamIn flowType) ty cast pos]
+    -- return $
+    --   (if isIn
+    --    then [Unplaced $ maybeType (Var resultName ParamIn flowType) ty cast]
+    --    else []) ++
+    --   (if isOut
+    --    then [Unplaced $ maybeType (Var resultName ParamOut flowType) ty cast]
+    --    else [])
+    let (argflow,varflow) =
+          if isForeign -- implicit arg of foreign function calls is always out
+          then (ParamOut,ParamIn)
+          else (FlowUnknown,FlowUnknown)
+    emit pos $ stmtBuilder $ 
+        exps' ++ [typeAndPlace (Var resultName argflow $ Implicit pos)
+                  ty cast pos]
+    return [Unplaced $ maybeType (Var resultName varflow $ Implicit pos)
+            ty cast]
 
 typeAndPlace :: Exp -> TypeSpec -> Bool -> OptPos -> Placed Exp
 typeAndPlace exp ty cast pos = maybePlace (maybeType exp ty cast) pos
