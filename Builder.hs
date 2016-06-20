@@ -56,10 +56,8 @@ import           Control.Monad.Trans.State
 import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Maybe
-import           Data.Set                  as Set
 import           Emit
-import           LLVM.General.PrettyPrint
-import           Normalise                 (normalise, normaliseItem)
+import           Normalise                 (normalise)
 import           ObjectInterface
 import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
@@ -67,15 +65,12 @@ import           Options                   (LogSelection (..), Options,
                                             optUseStd)
 import           Parser                    (parse)
 import           Resources                 (resourceCheckMod, resourceCheckProc)
-import           Scanner                   (Token, fileTokens, inputTokens)
+import           Scanner                   (fileTokens)
 import           System.Directory
-import           System.Exit               (exitFailure, exitSuccess)
 import           System.FilePath
-import           System.Time               (ClockTime)
-import           Types                     (typeCheckMod, checkFullyTyped,
+import           Types                     (typeCheckMod,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
-import Data.Binary (encode)
 import BinaryFactory
 
 ------------------------ Handling dependencies ------------------------
@@ -86,7 +81,7 @@ buildTargets opts targets = do
     possDirs <- gets (optLibDirs . options)
     let useStd = optUseStd opts
     -- load library first (if useStd is True)
-    when useStd $ (buildModuleIfNeeded False ["wybe"] possDirs ) >> return ()
+    when useStd $ void (buildModuleIfNeeded False ["wybe"] possDirs)
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     showMessages
     logDump FinalDump FinalDump "EVERYTHING"
@@ -107,10 +102,10 @@ buildTarget force target = do
             let dir = takeDirectory target
             built <- buildModuleIfNeeded force [modname] [dir]
             -- Check if the module contains sub modules
-            subMods <- concatSubMods [modname]
+            _ <- concatSubMods [modname]
 
             when (tType == ExecutableFile) (buildExecutable [modname] target)
-            if (built==False && tType /= ExecutableFile)
+            if not built && tType /= ExecutableFile
               then logBuild $ "Nothing to be done for target: " ++ target
               else
                 do when (tType == ObjectFile) $
@@ -142,8 +137,7 @@ buildModuleIfNeeded :: Bool    -- ^Force compilation of this module
 buildModuleIfNeeded force modspec possDirs = do
     loading <- gets (List.elem modspec . List.map modSpec . underCompilation)
     if loading
-      then do
-          return False -- Already loading it; we'll handle it later
+      then return False -- Already loading it; we'll handle it later
       else do
         maybemod <- getLoadedModule modspec
         logBuild $ "module " ++ showModSpec modspec ++ " is " ++
@@ -188,15 +182,12 @@ buildModuleIfNeeded force modspec possDirs = do
 srcObjFiles :: ModSpec -> [FilePath] ->
                Compiler (Maybe (FilePath,Bool,FilePath,Bool,Ident))
 srcObjFiles modspec possDirs = do
-    let splits = List.map (flip take modspec) [1..length modspec]
-    dirs <- mapM (\d -> do
-                       mapM (\ms -> do
+    let splits = List.map (`take` modspec) [1..length modspec]
+    dirs <- mapM (\d -> mapM (\ms -> do
                                   let srcfile = moduleFilePath sourceExtension
                                                 d ms
                                   let objfile = moduleFilePath objectExtension
                                                 d ms
-                                  -- let objfile = moduleFilePath bitcodeExtension
-                                  --               d ms
                                   let modname = List.last ms
                                   srcExists <- (liftIO . doesFileExist) srcfile
                                   objExists <- (liftIO . doesFileExist) objfile
@@ -276,12 +267,12 @@ extractModules :: FilePath -> Compiler ()
 extractModules objfile = do
     logBuild $ "<<< Looking for serialised Wybe modules in " ++ objfile
     extracted <- liftIO $ liftIO $ machoLPVMSection objfile
-    logBuild $ ">>> Extracted Module bytestring from " ++ (show objfile)
+    logBuild $ ">>> Extracted Module bytestring from " ++ show objfile
     let extractedSpecs = List.map modSpec extracted
     logBuild $ "+++ Recording modules: " ++ showModSpecs extractedSpecs
     -- Add the extracted modules in the 'objectModules' Map
     exMods <- gets extractedMods
-    let addMod m acc = Map.insert (modSpec m) m acc
+    let addMod m = Map.insert (modSpec m) m
     let exMods' = List.foldr addMod exMods extracted
     modify (\s -> s { extractedMods = exMods' })
 
@@ -294,44 +285,37 @@ loadModuleWithModule m = do
     subs <- collectSubModules modspec
     storedMods <- gets extractedMods
     let getStoredModule spec =
-            case Map.lookup spec storedMods of
-                Nothing ->
-                    shouldnt ("Module " ++ showModSpec spec ++
-                                 " was not extracted.")
-                Just m -> m
+            fromMaybe
+            (shouldnt ("Module " ++ showModSpec spec ++
+                      " was not extracted."))
+            (Map.lookup spec storedMods)
     let subMods = List.map getStoredModule subs 
     subDeps <- concat <$> mapM placeExtractedModule subMods
     modify (\comp -> let ms = m : underCompilation comp
                      in comp { underCompilation = ms })
     mapM_ buildDependency (subs ++ subDeps)
-    finishModule
-    return ()
+    void finishModule
 
 
 loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler ()
 loadModuleFromObjFile modspec objfile = do
     logBuild $ "===== ??? Trying to load LPVM Module for "
-        ++ showModSpec modspec
-
+        ++ showModSpec modspec    
     extracted <- liftIO $ liftIO $ machoLPVMSection objfile
     logBuild $ "===== >>> Extracted Module bytestring from " ++ (show objfile)
     let extractedSpecs = List.map modSpec extracted
     logBuild $ "===== >>> Found modules: " ++ showModSpecs extractedSpecs
-
     -- Collect the imports
     imports <- concat <$> mapM placeExtractedModule extracted
     logBuild $ "==== >>> Building dependencies: " ++ showModSpecs imports
-
     -- Place the super mod under compilation while dependencies are built
     let superMod = head extracted
     modify (\comp -> let ms = superMod : underCompilation comp
                      in comp { underCompilation = ms })
     mapM_ buildDependency imports
-    finishModule
-
+    _ <- finishModule
     logBuild $ "===== <<< Extracted Module put in it's place from "
-        ++ (show objfile)
-    
+        ++ show objfile
 
 
 
@@ -370,8 +354,8 @@ buildArchive :: FilePath -> Compiler ()
 buildArchive arch = do
     let dir = takeBaseName arch  ++ "/"
     let isWybe = List.filter ((== ".wybe") . takeExtension)
-    archiveMods <- liftIO $ (List.map dropExtension)
-        <$> isWybe <$> listDirectory dir
+    archiveMods <- liftIO $ List.map dropExtension . isWybe <$>
+        listDirectory dir
     logBuild $ "Building modules to archive: " ++ show archiveMods
     mapM_ (\m -> buildModuleIfNeeded False [m] [dir]) archiveMods
     let oFileOf m = dir ++ m ++ ".o"
@@ -670,3 +654,4 @@ moduleFilePath extension dir spec = do
 -- |Log a message, if we are logging builder activity (file-level compilation).
 logBuild :: String -> Compiler ()
 logBuild s = logMsg Builder s
+

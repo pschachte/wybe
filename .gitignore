@@ -1,7 +1,6 @@
 dist
 cabal-dev
 *.o
-!wybe.o
 *.hi
 *.bc
 *.ll

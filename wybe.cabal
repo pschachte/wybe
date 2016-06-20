@@ -11,7 +11,7 @@ executable wybemk
   main-is:             wybemk.hs
   hs-source-dirs: .
   build-depends: array >= 0.5.1.0
-               , base
+               , base >=4.6 && <5
                , binary >= 0.7.5.0
                , bytedump
                , bytestring
@@ -20,11 +20,11 @@ executable wybemk
                , filepath >= 1.4.0.0
                , haskeline
                , hex
-               , llvm-general == 3.5.1.0
+               , llvm-general == 3.5.1.2
                , llvm-general-pure
                , mtl
                , old-time
                , parsec
                , process == 1.4.2.0
-               , transformers
+               , transformers >=0.3.0.0 && <0.5
                , cryptonite
