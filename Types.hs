@@ -17,7 +17,8 @@ import           Data.Set            as Set
 import           Options             (LogSelection (Types))
 import           Resources
 import           Util
-
+import           Snippets
+    
 import           Debug.Trace
 
 
@@ -135,6 +136,7 @@ data TypeReason = ReasonParam ProcName Int OptPos
                 | ReasonShouldnt      -- Nothing should go wrong with this
                 deriving (Eq, Ord)
 
+
 instance Show TypeReason where
     show (ReasonParam name num pos) =
         makeMessage pos $
@@ -147,7 +149,7 @@ instance Show TypeReason where
         makeMessage pos $
             "Type error in call to " ++ name ++ ", argument " ++ show num
     show (ReasonCond pos) =
-        makeMessage pos $
+        makeMessage pos
             "Conditional or test expression with non-boolean result"
     show (ReasonArgFlow name num pos) =
         makeMessage pos $
@@ -332,12 +334,12 @@ enforceType _ _ _ _ _ typing = typing -- no variable to record the type of
 --  SCC depend on procs in the list of mods.  In this case, we will
 --  have to rerun the typecheck after typechecking the other modules
 --  on that list.
-typecheckProcSCC :: ModSpec -> SCC ProcName -> Compiler ([TypeReason])
+typecheckProcSCC :: ModSpec -> SCC ProcName -> Compiler [TypeReason]
 typecheckProcSCC m (AcyclicSCC name) = do
     -- A single pass is always enough for non-cyclic SCCs
     logTypes $ "Type checking non-recursive proc " ++ name
     (_,reasons) <- typecheckProcDecls m name
-    return (reasons)
+    return reasons
 typecheckProcSCC m (CyclicSCC list) = do
     logTypes $ "**** Type checking recursive procs " ++
       intercalate ", " list
@@ -383,18 +385,46 @@ typecheckProcDecls m name = do
     return (sccAgain,reasons)
 
 
--- |Type check a single procedure definition.
+-- |Type check a single procedure definition, including resolving overloaded
+-- calls, handling implied modes, and appropriately ordering calls from
+-- nested function application.  We search for a valid resolution
+-- deterministically if possible.
+--
+-- To do this we first collect a list of all the calls in the proc body.
+-- We process this maintaining 3 data structures:
+--    * a typing:  a map from variable name to type;
+--    * a resulution:  a mapping from original call to the selected proc spec;
+--    * residue:  a list of unprocessed (delayed) calls with the list of
+--      resolutions for each.
+--
+-- For each call, we collect the list of all possible resolutions, and filter
+-- this down to the ones that match the current typing.  If this is unique,
+-- we add it to the resolution mapping and update the typing.  If there are
+-- no matches, we check if there is a unique resolution taking implied modes
+-- into account, and if so we select it.  If there are no resolutions at all,
+-- even allowing for implied modes, then we can report a type error.  If there
+-- are multiple matches, we add this call to the residue and move on to the
+-- the call.
+--
+-- This process is repeated using the residue of the previous pass as the
+-- input to the next one, repeating as long as the residue gets strictly
+-- smaller.  Once it stops getting smaller, we select the remaining call
+-- with the fewest resolutions and try selecting each resolution and then
+-- processing the remainder of the residue with that "guess".  If only one
+-- of the guesses leads to a valid typing, that is the correct typing;
+-- otherwise we report a type error.
+
 typecheckProcDecl :: ModSpec -> ProcDef -> Compiler (ProcDef,Bool,[TypeReason])
-typecheckProcDecl m pd = do
-    let name = procName pd
-    let proto = procProto pd
+typecheckProcDecl m pdef = do
+    let name = procName pdef
+    let proto = procProto pdef
     let params = procProtoParams proto
     let resources = procProtoResources proto
-    let (ProcDefSrc def) = procImpln pd
-    let pos = procPos pd
-    let vis = procVis pd
-    if vis == Public && any ((==Unspecified). paramType) params
-      then return (pd,False,[ReasonUndeclared name pos])
+    let (ProcDefSrc def) = procImpln pdef
+    let pos = procPos pdef
+    let vis = procVis pdef
+    if vis == Public && any ((==Unspecified) . paramType) params
+      then return (pdef,False,[ReasonUndeclared name pos])
       else do
         typing <- foldM (addDeclaredType name pos (length params))
                   initTyping $ zip params [1..]
@@ -404,20 +434,22 @@ typecheckProcDecl m pd = do
           then do
             logTypes $ "** Type checking " ++ name ++ ": " ++ show typing'
             logTypes $ "   with resources: " ++ show resources
-            (typing'',def') <- typecheckProcDef m name pos typing' def
-            logTypes $ "*resulting types " ++ name ++ ": " ++ show typing''
-            let params' = updateParamTypes typing'' params
+            let (calls,typing'') = runState (bodyCalls def) typing'
+            -- (typing'',def') <- typecheckCalls m name pos calls typing'' []
+            (typing''',def') <- typecheckProcDef m name pos typing'' def
+            logTypes $ "*resulting types " ++ name ++ ": " ++ show typing'''
+            let params' = updateParamTypes typing''' params
             let proto' = proto { procProtoParams = params' }
-            let pd' = pd { procProto = proto', procImpln = ProcDefSrc def' }
-            let pd'' = pd'
-            let sccAgain = pd'' /= pd
+            let pdef' = pdef { procProto = proto', procImpln = ProcDefSrc def' }
+            let pdef'' = pdef'
+            let sccAgain = pdef'' /= pdef
             logTypes $ "===== Definition is " ++
                    (if sccAgain then "" else "un") ++ "changed"
             when sccAgain
                  (logTypes $ "** check again " ++ name ++
-                      "\n-----------------OLD:" ++ showProcDef 4 pd ++
-                      "\n-----------------NEW:" ++ showProcDef 4 pd' ++ "\n")
-            return (pd'',sccAgain,typingErrs typing'')
+                      "\n-----------------OLD:" ++ showProcDef 4 pdef ++
+                      "\n-----------------NEW:" ++ showProcDef 4 pdef' ++ "\n")
+            return (pdef'',sccAgain,typingErrs typing''')
           else
             shouldnt $ "Inconsistent param typing for proc " ++ name
 
@@ -452,6 +484,49 @@ updateParamTypes typing params =
                    Nothing -> p
                    Just newTyp -> Param name newTyp fl afl)
     params
+
+
+-- Return a list of the statements (recursively) in a body that can
+-- constrain types, paired with all the possible resolutions.
+bodyCalls :: [Placed Stmt] -> State Typing [Stmt]
+bodyCalls [] = return []
+bodyCalls (pstmt:pstmts) = do
+    rest <- bodyCalls pstmts
+    let stmt = content pstmt
+    let pos  = place pstmt
+    case stmt of
+        ProcCall{} -> return $ stmt:rest
+        ForeignCall{} -> return rest -- no type constraints
+        Test nested exp -> do
+          modify $ addOneType (ReasonCond pos) (expVar $ content exp) boolType
+          nested' <- bodyCalls nested
+          return $ nested' ++ rest
+        Nop -> return rest
+        Cond cond exp thn els -> do
+          modify $ addOneType (ReasonCond pos) (expVar $ content exp) boolType
+          cond' <- bodyCalls cond
+          thn' <- bodyCalls thn
+          els' <- bodyCalls els
+          return $ cond' ++ thn' ++ els' ++ rest
+        Loop nested -> do
+          nested' <- bodyCalls nested
+          return $ nested' ++ rest
+        For _ _ -> shouldnt "bodyCalls: flattening left For stmt"
+        Break -> return rest
+        Next ->  return rest
+
+
+-- Return the variable name of the supplied exp.  After flattening,
+-- the exp will always be a variable.
+expVar :: Exp -> VarName
+expVar (Var name _ _) = name
+expVar (Typed exp _ _) = expVar exp
+expVar exp = shouldnt $ "expVar of non-variable exp " ++ show exp
+
+
+typecheckCalls :: ModSpec -> ProcName -> OptPos -> [Stmt] -> Typing ->
+                     [Stmt] -> Compiler (Typing,[Placed Stmt])
+typecheckCalls m name pos calls typing residue = nyi "typecheckCalls"
 
 
 -- |Type check the body of a single proc definition by type checking
@@ -529,7 +604,7 @@ pruneTypings typings =
 typecheckBody :: ModSpec -> ProcName -> Typing -> [Placed Stmt] ->
                  Compiler [Typing]
 typecheckBody m name typing body = do
-    logTypes $ "Entering typecheckSequence from typecheckBody"
+    logTypes "Entering typecheckSequence from typecheckBody"
     typings' <- typecheckSequence (typecheckPlacedStmt m name)
                 [typing] body
     logTypes $ "Body types: " ++ show typings'
@@ -540,7 +615,7 @@ typecheckBody m name typing body = do
 --  possible starting typings and corresponding clauses up to this prim.
 typecheckPlacedStmt :: ModSpec -> ProcName -> Typing -> Placed Stmt ->
                        Compiler [Typing]
-typecheckPlacedStmt m caller typing pstmt = do
+typecheckPlacedStmt m caller typing pstmt =
     typecheckStmt m caller (content pstmt) (place pstmt) typing
 
 
