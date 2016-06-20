@@ -69,12 +69,7 @@ unbranchProc proc = do
     let params = procProtoParams $ procProto proc
     (body',newProcs) <- unbranchBody params (setup++body)
     let proto = procProto proc
-    let proto' = if procDetism proc == SemiDet
-                 then proto {procProtoParams =
-                                 procProtoParams proto ++
-                                 [Param "$$" boolType ParamOut Ordinary]}
-                 else proto
-    let proc' = proc { procImpln = ProcDefSrc body', procProto = proto' }
+    let proc' = proc { procImpln = ProcDefSrc body' }
     let tmpCount = procTmpCount proc
     mapM_ (addProc tmpCount) newProcs
     logMsg Unbranch $ "** Unbranched defn:" ++ showProcDef 0 proc' ++ "\n"
@@ -362,9 +357,12 @@ unbranchStmt (Cond tstStmts tstVar thn els) pos stmts = do
     if dryrun
         then return []
         else do
-            cont <- factorFreshProc contName afterVars Nothing stmts'
-            let thn'' = if thnTerm then thn' else thn' ++ [cont]
-            let els'' = if elsTerm then els' else els' ++ [cont]
+            cont <- if stmts' == []
+                    then return $ []
+                    else fmap (:[])
+                         $ factorFreshProc contName afterVars Nothing stmts'
+            let thn'' = if thnTerm then thn' else appendStmts thn' cont
+            let els'' = if elsTerm then els' else appendStmts els' cont
             let genStmt = Cond tstStmts' tstVar thn'' els''
             logUnbranch $ "Conditional unbranched to " ++ showStmt 4 genStmt 
             return [maybePlace genStmt pos]
@@ -430,6 +428,20 @@ unbranchBranch branch = do
       "Then/else branch is" ++ (if branchTerm then "" else " NOT")
           ++ " terminal"
     return (branch', branchVars,branchTerm)
+
+
+-- | Add the back statements at the end of the front.  Ensure we maintain
+--   the invariant that only the final statement is allowed to be a Cond.
+appendStmts :: [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt]
+appendStmts front [] = front
+appendStmts [] back = back
+appendStmts front back =
+    case content $ last front of
+      Cond tst var thn els ->
+        init front
+        ++ [Unplaced
+            $ Cond tst var (appendStmts thn back) (appendStmts els back)]
+      _ -> front ++ back
 
 
 varsAfterITE :: VarDict -> Bool -> VarDict -> Bool -> VarDict

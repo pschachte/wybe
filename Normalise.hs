@@ -55,7 +55,8 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
     -- XXX Should we special-case handling of = instead of generating these:
     let eq1 = assignmentProc ty False
     let eq2 = assignmentProc ty True
-    let typespec = TypeSpec [] name
+    modspec <- getModuleSpec
+    let typespec = TypeSpec modspec name
                    $ List.map (\n->TypeSpec [] n []) params
     let constCount = length consts
     let nonConstCount = length nonconsts
@@ -181,10 +182,10 @@ constCtorItems  vis typeSpec (placedProto,num) =
         [lpvmCastToVar (castTo (IntValue num) typeSpec) "$"] pos,
         ProcDecl vis SemiDet True
         (ProcProto constName [Param "$" typeSpec ParamIn Ordinary] [])
-        [Unplaced $ Test
-         [lpvmCast (varGet "$") "$int" intType,
-          comparison "eq" (varGet "$int") (IntValue num) "$succeed"]
-         (Unplaced $ varGet "$succeed")]
+        [Unplaced $ Test []
+         (comparisonExp "eq"
+          (lpvmCastExp (varGet "$") intType)
+          (intCast $ IntValue num))]
         pos]
 
 
@@ -270,7 +271,8 @@ deconstructorItems ctorName params typeSpec constCount nonConstCount
     -- XXX this needs to take the tag into account
     -- XXX this needs to be able to fail if the constructor doesn't match
     let flowType = Implicit pos
-    in [ProcDecl Public Det True
+        detism = if constCount + nonConstCount > 1 then SemiDet else Det
+    in [ProcDecl Public detism True
         (ProcProto ctorName 
          (List.map (\(Param n t _ ft) -> (Param n t ParamOut ft)) params
           ++ [Param "$" typeSpec ParamIn Ordinary]) 
@@ -285,27 +287,27 @@ deconstructorItems ctorName params typeSpec constCount nonConstCount
         pos]
 
 
+-- |Generate the needed Test statements to check that the tag of the value
+--  of the specified variable matches the specified tag
 tagCheck :: Int -> Int -> Integer -> Ident -> [Placed Stmt]
 tagCheck constCount nonConstCount tag varName =
     -- If there are any constant constructors, be sure it's not one of them
     (case constCount of
           0 -> []
           _ -> [Unplaced
-                $ Test [lpvmCast (varGet varName) "$int" intType,
-                        comparison "uge" (varGet "$int") (iVal constCount)
-                        "$nonconst"]
-                (Unplaced $ varGet "$nonconst")])
-    ++
-    (case nonConstCount of
-          1 -> []  -- Nothing to do if it's the only non-const constructor
-          _ -> [Unplaced
-                $ Test [lpvmCast (varGet varName) "$int" intType,
-                        Unplaced $ ForeignCall "llvm" "and" []
-                        [Unplaced $ varGet "$int",
-                         Unplaced $ IntValue $ fromIntegral tagMask,
-                         Unplaced $ intCast (varSet "$tag")],
-                        comparison "eq" (varGet "$tag") (iVal tag) "$righttag"]
-                (Unplaced $ varGet "$righttag")])
+                $ Test []
+                (comparisonExp "uge"
+                 (lpvmCastExp (varGet varName) intType)
+                 (intCast $ iVal constCount))])
+     ++
+     (case nonConstCount of
+           1 -> []  -- Nothing to do if it's the only non-const constructor
+           _ -> [Unplaced $ Test []
+                 (comparisonExp "eq"
+                  (intCast $ ForeignFn "llvm" "and" []
+                   [Unplaced $ lpvmCastExp (varGet varName) intType,
+                    Unplaced $ iVal tagMask])
+                  (intCast $ iVal tag))])
 
 
 -- | Produce a getter and a setter for one field of the specified type.
@@ -356,11 +358,11 @@ implicitItems typespec consts nonconsts items =
 implicitEquality :: TypeSpec -> [Placed FnProto] -> [Placed FnProto] -> [Item]
                  -> [Item]
 implicitEquality typespec consts nonconsts items =
-    if List.any equalityTest items
-    then []
+    if List.any equalityTest items || consts==[] && nonconsts==[]
+    then [] -- don't generate if user-defined or if no constructors at all
     else
-      let proto = ProcProto "=" [Param "left" typespec ParamIn Ordinary,
-                                 Param "right" typespec ParamIn Ordinary] []
+      let proto = ProcProto "=" [Param "$left" typespec ParamIn Ordinary,
+                                 Param "$right" typespec ParamIn Ordinary] []
           body = equalityBody consts nonconsts
       in [ProcDecl Public SemiDet True proto body Nothing]
 
@@ -387,46 +389,62 @@ equalityTest _ = False
 --       XXX this needs to check that there are not too many non-const
 --       constructors for the number of available tag bits.
 equalityBody :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
-equalityBody [] [] = [] -- nothing to do if no constructors at all, such as
-                        -- for primitive types
+equalityBody [] [] = shouldnt "trying to generate = test with no constructors"
 equalityBody consts [] = equalityConsts consts
 equalityBody consts nonconsts =
-    [lpvmCast (varGet "left") "left$int" intType,
-     comparison "ult" (varGet "left$int") (iVal $ length consts) "$$",
-     Unplaced $ Cond [] (Unplaced $ varGet "$$")
+    [Unplaced $ Cond [] (comparisonExp "ult" (intCast $ varGet "$left")
+                         (iVal $ length consts))
      (equalityConsts consts)
      -- XXX temporarily:
-     [move (boolCast $ IntValue 0) (boolCast $ varSet "$$")]]
+     -- []]
      --  XXX should be:
-     --  (equalityNonconsts nonconsts)]
+     (equalityNonconsts nonconsts consts)]
 
 
 -- |Return code to check of two const values values are equal, given that we
 --  know that the values are not non-consts.
 equalityConsts :: [Placed FnProto] -> [Placed Stmt]
-equalityConsts [] = [move (boolCast $ IntValue 1) (boolCast $ varSet "$$")]
-equalityConsts _ = [comparison "eq" (intCast $ varGet "left")
-                    (intCast $ varGet "right") "$$"]
+equalityConsts [] = []
+equalityConsts _ =
+    [Unplaced $ Test [] (comparisonExp "eq" (intCast $ varGet "$left")
+                         (intCast $ varGet "$right"))]
 
 -- |Return code to check that two values are equal when the first is known
 --  not to be a const constructor.
-equalityNonconsts :: [Placed FnProto] -> [Placed Stmt]
-equalityNonconsts [] = [move (boolCast $ IntValue 0) (boolCast $ varSet "$$")]
-equalityNonconsts [single] =
-    concatMap equalityField $ fnProtoParams $ content single
-equalityNonconsts ctrs = nyi "multiple non-const constructors"
+equalityNonconsts :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
+equalityNonconsts [] _ =
+    shouldnt "type with no non-const constructors should have been handled"
+equalityNonconsts [single] [] =
+    let FnProto name params _ = content single
+    in  deconstructCall name "$left" params False
+        ++ deconstructCall name "$right" params False
+        ++ concatMap equalityField params
+equalityNonconsts [single] (_:_) =
+    let FnProto name params _ = content single
+    in  [Unplaced $ Test (deconstructCall name "$left" params True)
+         $ Unplaced $ varGet "$left$",
+         Unplaced $ Test (deconstructCall name "$right" params True)
+         $ Unplaced $ varGet "$right$"]
+        ++
+        concatMap equalityField params
+equalityNonconsts ctrs _ = nyi "multiple non-const constructors"
 
--- |Return code to check that all the fields of two data are equal, when
+
+deconstructCall :: Ident -> Ident -> [Param] -> Bool -> [Placed Stmt]
+deconstructCall ctor arg params isTest =
+    [Unplaced $ ProcCall [] ctor Nothing
+     $ List.map (\p -> Unplaced $ varSet $ arg++"$"++paramName p) params
+     ++ [Unplaced $ varGet arg]
+     ++ if isTest then [Unplaced $ varSet $ arg++"$"] else []]
+
+-- |Return code to check that one field of two data are equal, when
 --  they are known to have the same constructor.
 equalityField :: Param -> [Placed Stmt]
 equalityField param =
     let field = paramName param
-    in  List.map Unplaced
-        [ProcCall [] field Nothing [Unplaced $ varGet "left",
-                                    Unplaced $ varSet "left$field"],
-         ProcCall [] field Nothing [Unplaced $ varGet "right",
-                                    Unplaced $ varSet "right$field"],
-         ProcCall [] "=" Nothing [Unplaced $ varGet "left$field",
-                                  Unplaced $ varGet "right$field",
-                                  Unplaced $ boolCast $ varSet "$$"],
-         Test [] (Unplaced $ varGet "$$")]
+        leftField = "$left$"++field
+        rightField = "$right$"++field
+    in  [Unplaced $ Test []
+         (Unplaced $ Fncall [] "="
+          [Unplaced $ varGet leftField,
+           Unplaced $ varGet rightField])]

@@ -1,0 +1,165 @@
+%  Emacs    : -*- latex -*-
+%  File     : compiler.tex
+%  Author   : Peter Schachte
+%  Origin   : Fri Mar 28 19:36:48 2003
+%  Purpose  : Description of the wybe compiler architecture
+%
+
+\documentclass{article}
+\usepackage{a4wide}
+\usepackage{xspace}
+\usepackage{fancyvrb}
+%\usepackage{ensuremath}
+
+\newcommand{\lang}{\textsf{Wybe}\xspace}
+\newcommand{\Lang}{\textsf{Wybe}\xspace}
+
+\newcommand{\ie}{\emph{i.e.}\xspace}
+\newcommand{\eg}{\emph{e.g.}\xspace}
+\newcommand{\Ie}{\emph{I.e.}\xspace}
+\newcommand{\Eg}{\emph{E.g.}\xspace}
+\newcommand{\etc}{\emph{etc}}
+
+\newcommand{\tuple}[1]{\ensuremath{\langle#1\rangle}}
+
+\title{The \Lang Compiler}
+\author{Peter Schachte}
+
+\begin{document}
+\maketitle
+
+\section{Aims}
+
+The \lang compiler is designed to achieve the following goals:
+\begin{itemize}
+\item It should generate efficient code.
+\item It should take care of compiling dependencies as needed, without
+  the need for \texttt{Makefile}s or separate include files.  
+\item It should compile quickly, particularly following small changes to the 
+  source code.
+\end{itemize}
+
+To achieve the first goal, the compiler makes heavy use of inlining and
+global analysis.
+However, the use of inlining and global analysis makes the second and
+third goals more difficult to achieve.
+
+For the second goal, the compiler stores whatever is needed to compile uses
+of a module its object file, and always compares modify times of source and
+object files for all recursive dependencies of files being recompiled.
+
+In addition to coding the compiler as efficiently as possible,
+the third goal requires the compiler to be incremental.
+We go beyond file-level incrementality, compiling individual changed
+procedures, keeping the code for previously compiled procedures where possible.
+
+Inlining and global analysis make this more difficult.
+In addition to recompiling a changed dependency,
+it may in general be required to recompile any
+module that depends on that dependency.
+This will be needed for any module that uses any changed public procedure
+in the changed module, if the change has led to a change in the analysis
+results, or, in the case of an inlined public procedure, in the object code.
+This need for recompilation flows recursively up the module dependency
+hierarchy.
+
+
+\section{Architecture}
+\label{sec:arch}
+
+The compiler is split into a number of components, to manage compiler
+complexity.
+Many of these components are compiler passes, and others manage the
+compilation process.
+
+\subsection{Build system}
+\label{sec:build}
+
+The build system is responsible for determining which modules need to be
+compiled, and oversees the compilation.
+All of a module's dependencies are compiled before the module itself
+is compiled.
+In the case of mutually dependent modules, all the modules in each
+strongly connected component in the module dependency graph are compiled
+together, after all other modules it depends on.
+
+Similarly, each SCC in the module dependency graph
+(or individual non-mutually dependent module)
+is compiled bottom-up, one SCC at a time, according
+to the call graph.
+This requires that all procedure calls are resolved prior to finding
+the SCCs in preparation for compilation.
+
+
+\subsection{Module resolution and type analysis}
+\label{sec:call-resolution}
+
+\Lang supports overloading of procedure calls based first on argument types,
+and second based on argument modes (which arguments are inputs, which are
+outputs, and which are both).
+Since \lang supports optional arguments, there is no overloading based
+on arity.
+It is required that all procedures with the same name in single module
+also have the same argument types in the same order.
+They may, however, have different modes.
+Thus the module of a procedure call determines the argument types, allowing
+us to split call resolution into two separate phases:
+first the module of each call is determined, and then the mode-overloaded
+procedure within the module is determined.
+
+Wybe semantics insists that the argument types of a procedure do not depend
+on its callers, only on its definition.
+Together with the problem of overloading resolution and the need to
+support subtypes, this precludes the use of
+the classical Algorithm W approach to type inference.
+Type analysis is made more complex because
+the argument types of the procedures called by a procedure
+depend on which procedure those calls resolve to, while the resolution
+of calls depends on the argument types
+Thus module resolution must be performed concurrently with type analysis.
+Resolution of modes is performed during flattening
+(Section~\ref{sec:flattening}).
+
+Type analysis is performed on a single SCC in the module dependency graph.
+It is a fixed point process operating on a potential call graph.
+Each node in the graph represents all procedures with the same name defined
+in any of the modules being analyzed, and each edge represents a call.
+Analysis precedes bottom up through this graph by strongly connected component
+building a mapping from procedure definition to its argument types.
+Initially the typing for each procedure in a potential call graph SCC
+is approximated to be its declared type,
+if it has one, or the special bottom type if not.
+For each procedure definition in each node in the SCC,
+we analyse the variable types in the body of the definition,
+and replace the approximation of the argument types for that definition
+with the lattice join of previous and newly computed parameter types.
+The analysis of a single procedure body proceeds through the code collecting
+a list of possible typings considering the known types of arguments for each
+visible definition of each called procedure name from previously compiled
+modules, plus the current approximation of the types for definitions in the
+current module SCC.
+
+This process is repeated until a fixed point is reached, and then
+any type errors are reported.
+If no type errors are uncovered, then a unique module is determined for
+each call.
+The final step is then to traverse all the procedure
+bodies in the SCC, adding the determined module to each call.
+
+
+\subsection{Flattening}
+\label{sec:flattening}
+
+Flattening significantly simplifies the code,
+replacing all function calls with procedure calls,
+eliminating all \texttt{let}, \texttt{where} and conditional
+expressions, and rewriting function definitions as procedure definitions.
+It also finally resolves mode-based overloading, determining for
+each call which definition is intended, and splits in-out arguments
+into separate inputs and outputs.
+
+
+\end{document}
+
+% LocalWords:  Makefile SCC SCCs inlining inlined wybe incrementality
+% LocalWords:  subtypes subtype typing typings

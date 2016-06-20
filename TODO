@@ -1,23 +1,30 @@
 -*- mode: text -*-
 
 Fix bugs:
-
+o Fix handling of function call:  mode of last argument should be determined
+  by what modes are defined for the proc.
 
 Complete the implementation:
 o Optimisations
 o Fix algebraic type implementation to use tagged pointers
-o Fix algebraic type implementation to generate code for = only when not
-   explicitly defined
 o Implied modes:  transform expression version of proc call with inputs where
   outputs are expected into proc call plus equality tests
+o Treat call with mixed inputs and outputs as all outputs, plus calls to =
+  for each input argument
+o Ensure a variable both assigned and used in a statement has the assignment
+  happen first, wherever it appears in the statement
 o Unifications:  transform f(?x,?y) = z into test f(?x,?y,z)
 
+Error checking:
+o Error if foreign call has no outputs; suggest use !I/O.
+o Check for test calls outside a test proc
+o Check for calls to test procs outside a conditional or test
+o Ensure no statement binds the same variable multiple times
 
 Improve error handling:
 o Give meaningful message for errors detected in generated procs
 o Detect and report use of uninitialised variables, including update
    of uninitialised variables
-
 
 Complete the language:
 o Provide switch-on-constructor syntax and implementation

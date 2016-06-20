@@ -1,6 +1,4 @@
-public type intlist = public [] | [|](head:int, tail:intlist)
-    public func =(x:intlist, y:intlist):bool = false
-end
+public type intlist = public [] | [|](head:int, tail:intlist) end
 
 public func ++(x:intlist, y:intlist):intlist =
     if x = []

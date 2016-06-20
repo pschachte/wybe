@@ -147,7 +147,7 @@ data FnProto = FnProto {
     fnProtoName::Ident,
     fnProtoParams::[Param],
     fnProtoResourceFlows::[ResourceFlowSpec]
-    } deriving Generic
+    } deriving (Generic, Eq)
 
 
 ----------------------------------------------------------------
@@ -633,14 +633,17 @@ lookupType ty@(TypeSpec mod name args) pos = do
             if typeDefArity def == length args
               then do
                 args' <- fmap catMaybes $ mapM (flip lookupType pos) args
-                return $
-                  Just $
-                  TypeSpec (maybe (shouldnt "lookupType") modSpec maybeMod) name args'
+                let matchingMod = maybe (shouldnt "lookupType") modSpec maybeMod
+                let matchingType = TypeSpec matchingMod name args'
+                logAST $ "Matching type = " ++ show matchingType
+                return $ Just $ matchingType
+                  
               else do
                 message Error
                   ("Type '" ++ name ++ "' expects " ++ (show $ typeDefArity def) ++
                    " arguments, but " ++ (show $ length args) ++ " were given")
                   pos
+                logAST "Type constructor arities don't match!"
                 return Nothing
         _   -> do
             message Error ("Ambiguous type " ++ show ty ++
@@ -2186,7 +2189,7 @@ instance Show Exp where
     ++ (if List.null flags then "" else " " ++ unwords flags)
     ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
   show (Typed exp typ cast) =
-      show exp ++ if cast then "!" else "" ++ showTypeSuffix typ
+      show exp ++ (if cast then "!" else "") ++ showTypeSuffix typ
 
 -- |maybeShow pre maybe pos
 --  if maybe has something, show pre, the maybe payload, and post

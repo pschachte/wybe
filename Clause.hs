@@ -74,7 +74,6 @@ compileProc proc = do
         mapM_ nextVar $ List.map paramName $ 
           List.filter (flowsIn . paramFlow) params
         startVars <- get
-        logClause $ "Compiling body:\n" ++ showBody 4 body
         compiled <- compileBody body params
         logClause $ "Compiled to:\n"  ++ showBlock 4 compiled
         endVars <- get
@@ -94,7 +93,8 @@ compileProc proc = do
 --  Everything else has already been transformed away.
 compileBody :: [Placed Stmt] -> [Param] -> ClauseComp ProcBody
 compileBody [] params = return $ ProcBody [] NoFork
-compileBody stmts params =
+compileBody stmts params = do
+    logClause $ "Compiling body:" ++ showBody 4 stmts
     case content $ last stmts of
         Cond tstStmts tstVar thn els -> do
           front <- mapM compileSimpleStmt $ init stmts
@@ -102,7 +102,7 @@ compileBody stmts params =
           tstStmts' <- mapM compileSimpleStmt tstStmts
           afterTest <- get
           tstVar' <- placedApplyM compileArg tstVar
-          thn' <- mapM compileSimpleStmt thn
+          thn' <- compileBody thn params
           afterThen <- get
           -- XXX This isn't right when tests can bind outputs only when
           -- the test succeeds
@@ -112,31 +112,40 @@ compileBody stmts params =
           --       nextVar $ primVarName var
           --       return ()
           --     _ -> return ()
-          els' <- mapM compileSimpleStmt els
+          els' <- compileBody els params
           afterElse <- get
           let final = Map.intersectionWith max afterThen afterElse
           put final
-          let thn'' = thn' ++ reconcilingAssignments afterThen final params
-          let els'' = els' ++ reconcilingAssignments afterElse final params
+          let thnAssigns = reconcilingAssignments afterThen final params
+          let elsAssigns = reconcilingAssignments afterElse final params
+          let front' = front++tstStmts'
           case tstVar' of
               ArgVar var ty FlowIn _ _ ->
-                return $ ProcBody (front++tstStmts') $
-                PrimFork var ty False [ProcBody els'' NoFork,
-                                       ProcBody thn'' NoFork]
-              ArgInt n _ ->
-                return $ ProcBody
-                (if n==0 then els'' else front++tstStmts'++thn'') NoFork
+                return $ ProcBody front' $ PrimFork var ty False
+                [appendToBody els' elsAssigns, appendToBody thn' thnAssigns]
+              ArgInt 0 _ -> return $ prependToBody front' els'
+              ArgInt _ _ -> return $ prependToBody front' thn'
               _ -> do
                 lift $ message Error 
                     ("Condition is non-bool constant or output '" ++
                      show tstVar' ++ "'") $
                     betterPlace (place $ last stmts) tstVar
-                return $ ProcBody [] NoFork
+                return $ ProcBody front' NoFork
         _ -> do
           prims <- mapM compileSimpleStmt stmts
           return $ ProcBody prims NoFork
 
+-- |Add the specified statements at the end of the given body
+appendToBody :: ProcBody -> [Placed Prim] -> ProcBody
+appendToBody (ProcBody prims NoFork) after
+    = ProcBody (prims++after) NoFork
+appendToBody (ProcBody prims (PrimFork v ty lst bodies)) after
+    = let bodies' = List.map (flip appendToBody after) bodies
+      in ProcBody prims $ PrimFork v ty lst bodies'
 
+prependToBody :: [Placed Prim] -> ProcBody -> ProcBody
+prependToBody before (ProcBody prims fork)
+    = ProcBody (before++prims) fork
 
 compileSimpleStmt :: Placed Stmt -> ClauseComp (Placed Prim)
 compileSimpleStmt stmt = do

@@ -86,35 +86,45 @@ buildBody oSubst builder = do
 buildFork :: PrimVarName -> TypeSpec -> Bool -> [BodyBuilder ()] 
              -> BodyBuilder ()
 buildFork var ty final branchBuilders = do
-    arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
-    logBuild $ "<<<< beginning to build a new fork on " ++ show arg'
-      ++ " (final=" ++ show final ++ ")"
-    case arg' of
-      ArgInt n _ -> -- result known at compile-time:  only compile winner
-        case drop (fromIntegral n) branchBuilders of
-          -- XXX should be an error message rather than an abort
-          [] -> shouldnt "branch constant greater than number of cases"
-          (winner:_) -> do
-            logBuild $ "**** condition result is " ++ show n
-            winner
-      ArgVar var' ty _ _ _ -> do -- statically unknown result
-        st <- get
-        case st of
-          Forked _ _ _ _ -> 
-            nyi "Fork after a fork"
-          Unforked build _ _ _ -> do
-            let st' = st { currBuild = [] }
-            branches <- mapM (buildBranch st') branchBuilders
-            case branches of
-              [] -> return ()
-              [br] -> put $ concatBodies st br
-              (br:brs) | all (==br) brs -> 
-                -- all branches are equal:  don't create a new fork
-                put $ concatBodies st br
-              brs ->
-                put $ Forked build var' ty brs
-      _ -> shouldnt "Switch on non-integer value"
-    logBuild $ ">>>> Finished building a fork"
+    st <- get
+    case st of
+      Forked bld var ty bods -> do
+        -- This shouldn't usually happen, but it can happen when a test
+        -- proc is inlined.  Handle by building the fork at the end of
+        -- each of the branches.
+        bods' <- mapM (\st -> lift $ execStateT
+                              (buildFork var ty final branchBuilders) st) bods
+        put $ Forked bld var ty bods'
+      Unforked _ _ _ _ -> do
+        logBuild $ "<<<< beginning to build a new fork on " ++ show var
+            ++ " (final=" ++ show final ++ ")"
+        arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
+        case arg' of
+          ArgInt n _ -> -- result known at compile-time:  only compile winner
+            case drop (fromIntegral n) branchBuilders of
+              -- XXX should be an error message rather than an abort
+              [] -> shouldnt "branch constant greater than number of cases"
+              (winner:_) -> do
+                logBuild $ "**** condition result is " ++ show n
+                winner
+          ArgVar var' ty _ _ _ -> do -- statically unknown result
+            st <- get
+            case st of
+              Forked _ _ _ _ -> 
+                nyi "Fork after a fork"
+              Unforked build _ _ _ -> do
+                let st' = st { currBuild = [] }
+                branches <- mapM (buildBranch st') branchBuilders
+                case branches of
+                  [] -> return ()
+                  [br] -> put $ concatBodies st br
+                  (br:brs) | all (==br) brs -> 
+                    -- all branches are equal:  don't create a new fork
+                    put $ concatBodies st br
+                  brs ->
+                    put $ Forked build var' ty brs
+          _ -> shouldnt "Switch on non-integer value"
+        logBuild $ ">>>> Finished building a fork"
 
 
 buildBranch :: BodyState -> BodyBuilder () -> BodyBuilder BodyState
@@ -136,9 +146,16 @@ instr :: Prim -> OptPos -> BodyBuilder ()
 instr PrimNop _ = do
     -- Filter out NOPs
     return ()
-instr prim pos = do         
-    prim' <- argExpandedPrim prim
-    instr' prim' pos
+instr prim pos = do
+    st <- get
+    case st of
+      Unforked _ _ _ _ -> do
+        logBuild $ "Generating instr " ++ show prim
+        prim' <- argExpandedPrim prim
+        instr' prim' pos
+      Forked bld var ty bods -> do
+        bods' <- mapM (flip buildBranch (instr prim pos)) bods
+        put $ Forked bld var ty bods'
 
 
 instr' :: Prim -> OptPos -> BodyBuilder ()
@@ -154,10 +171,12 @@ instr' prim@(PrimForeign "llvm" "move" []
 -- XXX this is a bit of a hack to work around not threading a heap
 --     through the code, which causes the compiler to try to reuse
 --     the results of calls to alloc.  Since the mutate primitives
---     already has an output value, that should stop us from trying
+--     already have an output value, that should stop us from trying
 --     to reuse modified structures or the results of calls to
 --     access after a structure is modified, so alloc should be
---     the only problem that needs fixing.
+--     the only problem that needs fixing.  We don't want to fix this
+--     by threading a heap through, because it's fine to reorder calls
+--     to alloc.
 instr' prim@(PrimForeign "lpvm" "alloc" [] args) pos
   = do
     logBuild $ "  Leaving alloc alone"
