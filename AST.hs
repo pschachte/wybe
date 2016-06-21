@@ -1566,6 +1566,9 @@ data Stmt
      | Next  -- holds the variable versions before the next
      deriving (Eq,Ord,Generic)
 
+instance Show Stmt where
+  show s = "{" ++ showStmt 4 s ++ "}"
+
 -- |An expression.  These are all normalised into statements.
 data Exp
       = IntValue Integer

@@ -15,7 +15,7 @@ import           Data.Map            as Map
 import           Data.Maybe
 import           Data.Set            as Set
 import           Options             (LogSelection (Types))
-import           Resources
+-- import           Resources
 import           Util
 import           Snippets
     
@@ -108,36 +108,41 @@ typeCheckMod thisMod = do
 --                           Supporting types
 ----------------------------------------------------------------
 
+-- |Either something or some type errors
+data MaybeErr t = OK t | Err [TypeError]
+    deriving (Eq,Show)
+
 
 -- |The reason a variable is given a certain type
-data TypeReason = ReasonParam ProcName Int OptPos
-                                      -- Formal param type/flow inconsistent
-                | ReasonResource ProcName Ident OptPos
-                                      -- Declared resource inconsistent
-                | ReasonUndef ProcName ProcName OptPos
-                                      -- Call to unknown proc
-                | ReasonUninit ProcName VarName OptPos
-                                      -- Use of uninitialised variable
-                | ReasonArgType ProcName Int OptPos
-                                      -- Actual param type inconsistent
-                | ReasonCond OptPos   -- Conditional expression not bool
-                | ReasonArgFlow ProcName Int OptPos
-                                      -- Actual param flow inconsistent
-                | ReasonOverload [ProcSpec] OptPos
-                                      -- Multiple procs with same types/flows
-                | ReasonAmbig ProcName OptPos [(VarName,[TypeSpec])]
-                                      -- Proc defn has ambiguous types
-                | ReasonArity ProcName ProcName OptPos Int Int
-                                      -- Call to proc with wrong arity
-                | ReasonUndeclared ProcName OptPos
-                                      -- Public proc with some undeclared types
-                | ReasonEqual Exp Exp OptPos
-                                      -- expression types should be equal
-                | ReasonShouldnt      -- Nothing should go wrong with this
-                deriving (Eq, Ord)
+data TypeError = ReasonParam ProcName Int OptPos
+                   -- ^Formal param type/flow inconsistent
+               | ReasonResource ProcName Ident OptPos
+                   -- ^Declared resource inconsistent
+               | ReasonUndef ProcName ProcName OptPos
+                   -- ^Call to unknown proc
+               | ReasonUninit ProcName VarName OptPos
+                   -- ^Use of uninitialised variable
+               | ReasonArgType ProcName Int OptPos
+                   -- ^Actual param type inconsistent
+               | ReasonCond OptPos   -- Conditional expression not bool
+               | ReasonArgFlow ProcName Int OptPos
+                   -- ^Actual param flow inconsistent
+               | ReasonOverload [ProcSpec] OptPos
+                   -- ^Multiple procs with same types/flows
+               | ReasonAmbig ProcName OptPos [(VarName,[TypeSpec])]
+                   -- ^Proc defn has ambiguous types
+               | ReasonArity ProcName ProcName OptPos Int Int
+                   -- ^Call to proc with wrong arity
+               | ReasonUndeclared ProcName OptPos
+                   -- ^Public proc with some undeclared types
+               | ReasonEqual Exp Exp OptPos
+                   -- ^Expression types should be equal
+               | ReasonShouldnt
+                   -- ^This error should never happen
+               deriving (Eq, Ord)
 
 
-instance Show TypeReason where
+instance Show TypeError where
     show (ReasonParam name num pos) =
         makeMessage pos $
             "Type/flow error in definition of " ++ name ++
@@ -196,7 +201,7 @@ instance Show TypeReason where
 --     specify its type as whatever the type of another variable is. 
 data Typing = Typing {
                   typingDict::Map VarName TypeSpec,
-                  typingErrs::[TypeReason]
+                  typingErrs::[TypeError]
                   }
             deriving (Show,Eq,Ord)
 
@@ -213,11 +218,11 @@ varType :: Typing -> VarName -> Maybe TypeSpec
 varType typing var = Map.lookup var $ typingDict typing
 
 
-typeError :: TypeReason -> Typing -> Typing
+typeError :: TypeError -> Typing -> Typing
 typeError err (Typing dict errs) = Typing dict $ err:errs
 
 
-addOneType :: TypeReason -> VarName -> TypeSpec -> Typing -> Typing
+addOneType :: TypeError -> VarName -> TypeSpec -> Typing -> Typing
 addOneType reason name typ typing@(Typing types errs) =
     -- Be sure we insert Unspecified if it's not already there, because
     -- it distinguishes a defined variable with unknown type from an
@@ -334,7 +339,7 @@ enforceType _ _ _ _ _ typing = typing -- no variable to record the type of
 --  SCC depend on procs in the list of mods.  In this case, we will
 --  have to rerun the typecheck after typechecking the other modules
 --  on that list.
-typecheckProcSCC :: ModSpec -> SCC ProcName -> Compiler [TypeReason]
+typecheckProcSCC :: ModSpec -> SCC ProcName -> Compiler [TypeError]
 typecheckProcSCC m (AcyclicSCC name) = do
     -- A single pass is always enough for non-cyclic SCCs
     logTypes $ "Type checking non-recursive proc " ++ name
@@ -363,7 +368,7 @@ typecheckProcSCC m (CyclicSCC list) = do
 --  and the second saying whether any public defnition has been
 --  updated.
 typecheckProcDecls :: ModSpec -> ProcName ->
-                     Compiler (Bool,[TypeReason])
+                     Compiler (Bool,[TypeError])
 typecheckProcDecls m name = do
     logTypes $ "** Type checking " ++ name
     defs <- getModuleImplementationField
@@ -385,26 +390,29 @@ typecheckProcDecls m name = do
     return (sccAgain,reasons)
 
 
--- |Type check a single procedure definition, including resolving overloaded
+----------------------------------------------------------------
+--                       Resolving types and modes
+--
+-- This code resolves types and modes, including resolving overloaded
 -- calls, handling implied modes, and appropriately ordering calls from
--- nested function application.  We search for a valid resolution
--- deterministically if possible.
+-- nested function application (which was not resolved during flattening).
+-- We search for a valid resolution deterministically if possible.
 --
 -- To do this we first collect a list of all the calls in the proc body.
 -- We process this maintaining 3 data structures:
 --    * a typing:  a map from variable name to type;
---    * a resulution:  a mapping from original call to the selected proc spec;
+--    * a resolution:  a mapping from original call to the selected proc spec;
 --    * residue:  a list of unprocessed (delayed) calls with the list of
 --      resolutions for each.
 --
--- For each call, we collect the list of all possible resolutions, and filter
--- this down to the ones that match the current typing.  If this is unique,
--- we add it to the resolution mapping and update the typing.  If there are
--- no matches, we check if there is a unique resolution taking implied modes
--- into account, and if so we select it.  If there are no resolutions at all,
--- even allowing for implied modes, then we can report a type error.  If there
--- are multiple matches, we add this call to the residue and move on to the
--- the call.
+-- For each call, we collect the list of all possible resolutions, and
+-- filter this down to the ones that match the argument types given the
+-- current typing. If this is unique, we add it to the resolution mapping
+-- and update the typing. If there are no matches, we check if there is a
+-- unique resolution taking implied modes into account, and if so we select
+-- it. If there are no resolutions at all, even allowing for implied modes,
+-- then we can report a type error. If there are multiple matches, we add
+-- this call to the residue and move on to the the call.
 --
 -- This process is repeated using the residue of the previous pass as the
 -- input to the next one, repeating as long as the residue gets strictly
@@ -414,7 +422,29 @@ typecheckProcDecls m name = do
 -- of the guesses leads to a valid typing, that is the correct typing;
 -- otherwise we report a type error.
 
-typecheckProcDecl :: ModSpec -> ProcDef -> Compiler (ProcDef,Bool,[TypeReason])
+
+-- |A ProcSpec resolving a call together with it param types
+data ProcAndParams = ProcAndParams { procSpec :: ProcSpec,
+                                     procParams :: [Param]}
+    deriving (Eq,Show)
+
+-- |The resolutions of many proc calls
+type StmtResolution = Map Stmt ProcSpec
+
+emptyStmtResolution = Map.empty
+
+-- |A single call statement together with a list of proc specs it could
+--  refer to and their parameter lists.  This type is used to narrow down
+--  the procs that a call may refer to.
+data StmtTypings = StmtTypings (Placed Stmt) [ProcAndParams]
+    deriving (Eq)
+
+
+-- |Type check a single procedure definition, including resolving overloaded
+-- calls, handling implied modes, and appropriately ordering calls from
+-- nested function application.  We search for a valid resolution
+-- deterministically if possible.
+typecheckProcDecl :: ModSpec -> ProcDef -> Compiler (ProcDef,Bool,[TypeError])
 typecheckProcDecl m pdef = do
     let name = procName pdef
     let proto = procProto pdef
@@ -435,7 +465,10 @@ typecheckProcDecl m pdef = do
             logTypes $ "** Type checking " ++ name ++ ": " ++ show typing'
             logTypes $ "   with resources: " ++ show resources
             let (calls,typing'') = runState (bodyCalls def) typing'
-            -- (typing'',def') <- typecheckCalls m name pos calls typing'' []
+            calls' <- mapM (placedApply callResolutions) calls
+            resolution <- typecheckCalls m name pos calls' emptyStmtResolution
+                typing'' [] False
+            logTypes $ "Type resolution = " ++ show resolution
             (typing''',def') <- typecheckProcDef m name pos typing'' def
             logTypes $ "*resulting types " ++ name ++ ": " ++ show typing'''
             let params' = updateParamTypes typing''' params
@@ -488,14 +521,14 @@ updateParamTypes typing params =
 
 -- Return a list of the statements (recursively) in a body that can
 -- constrain types, paired with all the possible resolutions.
-bodyCalls :: [Placed Stmt] -> State Typing [Stmt]
+bodyCalls :: [Placed Stmt] -> State Typing [Placed Stmt]
 bodyCalls [] = return []
 bodyCalls (pstmt:pstmts) = do
     rest <- bodyCalls pstmts
     let stmt = content pstmt
     let pos  = place pstmt
     case stmt of
-        ProcCall{} -> return $ stmt:rest
+        ProcCall{} -> return $ pstmt:rest
         ForeignCall{} -> return rest -- no type constraints
         Test nested exp -> do
           modify $ addOneType (ReasonCond pos) (expVar $ content exp) boolType
@@ -516,7 +549,21 @@ bodyCalls (pstmt:pstmts) = do
         Next ->  return rest
 
 
--- Return the variable name of the supplied exp.  After flattening,
+callResolutions :: Stmt -> OptPos -> Compiler StmtTypings
+callResolutions call@(ProcCall m name procId _) pos = do
+    procs <- case procId of
+        Nothing   -> callTargets m name
+        Just pid -> return [ProcSpec m name pid] -- XXX check modspec
+                                                  -- is valid; or just
+                                                  -- ignore pid?
+    procsTypes <- fmap (zipWith ProcAndParams procs)
+                  $ mapM (fmap (List.filter nonResourceParam) . getParams) procs
+    return $ StmtTypings (maybePlace call pos) procsTypes
+callResolutions stmt _ =
+    shouldnt $ "callResolutions with non-call statement " ++ showStmt 4 stmt
+
+
+-- Return the variable name of the supplied exp.  In this context,
 -- the exp will always be a variable.
 expVar :: Exp -> VarName
 expVar (Var name _ _) = name
@@ -524,9 +571,21 @@ expVar (Typed exp _ _) = expVar exp
 expVar exp = shouldnt $ "expVar of non-variable exp " ++ show exp
 
 
-typecheckCalls :: ModSpec -> ProcName -> OptPos -> [Stmt] -> Typing ->
-                     [Stmt] -> Compiler (Typing,[Placed Stmt])
-typecheckCalls m name pos calls typing residue = nyi "typecheckCalls"
+typecheckCalls :: ModSpec -> ProcName -> OptPos -> [StmtTypings]
+    -> StmtResolution -> Typing -> [StmtTypings] -> Bool
+    -> Compiler (MaybeErr StmtResolution)
+typecheckCalls m name pos [] resolutions typing [] _ = return $ OK resolutions
+typecheckCalls m name pos [] resolutions typing residue True =
+    typecheckCalls m name pos residue resolutions typing [] False
+typecheckCalls m name pos [] resolutions typing residue False =
+    return $ Err $ List.map overloadErr residue
+typecheckCalls m name pos (call:calls) resolutions typing residue chg = do
+    nyi "typecheckCalls"
+
+
+overloadErr :: StmtTypings -> TypeError
+overloadErr (StmtTypings call candidates) =
+    ReasonOverload (List.map procSpec candidates) $ place call
 
 
 -- |Type check the body of a single proc definition by type checking
@@ -765,7 +824,7 @@ typecheckArg pos params pname typing (argNum,param,arg) = do
 
 
 typecheckArg' :: Exp -> OptPos -> TypeSpec -> TypeSpec -> Typing ->
-                 TypeReason -> Compiler Typing
+                 TypeError -> Compiler Typing
 typecheckArg' texp@(Typed exp typ cast) pos _ paramType typing reason = do
     logTypes $ "Checking typed expr " ++ show texp
     typ' <- fmap (fromMaybe Unspecified) $ lookupType typ pos
@@ -802,7 +861,7 @@ typecheckArg' exp _ _ _ _ _ = do
     shouldnt $ "trying to type check expression " ++ show exp ++ "."
 
 
-typecheckArg'' :: TypeSpec -> TypeSpec -> TypeSpec -> Typing -> TypeReason ->
+typecheckArg'' :: TypeSpec -> TypeSpec -> TypeSpec -> Typing -> TypeError ->
                   Typing
 typecheckArg'' callType paramType constType typing reason =
     let realType =
