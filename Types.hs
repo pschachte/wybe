@@ -124,7 +124,8 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Use of uninitialised variable
                | ReasonArgType ProcName Int OptPos
                    -- ^Actual param type inconsistent
-               | ReasonCond OptPos   -- Conditional expression not bool
+               | ReasonCond OptPos
+                   -- ^Conditional expression not bool
                | ReasonArgFlow ProcName Int OptPos
                    -- ^Actual param flow inconsistent
                | ReasonOverload [ProcSpec] OptPos
@@ -220,6 +221,10 @@ varType typing var = Map.lookup var $ typingDict typing
 
 typeError :: TypeError -> Typing -> Typing
 typeError err (Typing dict errs) = Typing dict $ err:errs
+
+
+typeErrors :: [TypeError] -> Typing -> Typing
+typeErrors newErrs (Typing dict errs) = Typing dict $ newErrs ++ errs
 
 
 addOneType :: TypeError -> VarName -> TypeSpec -> Typing -> Typing
@@ -425,7 +430,7 @@ typecheckProcDecls m name = do
 
 -- |A ProcSpec resolving a call together with it param types
 data ProcAndParams = ProcAndParams { procSpec :: ProcSpec,
-                                     procParams :: [Param]}
+                                     paramTypes :: [TypeSpec]}
     deriving (Eq,Show)
 
 -- |The resolutions of many proc calls
@@ -433,10 +438,10 @@ type StmtResolution = Map Stmt ProcSpec
 
 emptyStmtResolution = Map.empty
 
--- |A single call statement together with a list of proc specs it could
---  refer to and their parameter lists.  This type is used to narrow down
---  the procs that a call may refer to.
-data StmtTypings = StmtTypings (Placed Stmt) [ProcAndParams]
+-- |A single call statement together with a list of all the possible different
+--  parameter list types (a list of types).  This type is used to narrow down
+--  the possible call typings.
+data StmtTypings = StmtTypings (Placed Stmt) [[TypeSpec]]
     deriving (Eq)
 
 
@@ -456,20 +461,19 @@ typecheckProcDecl m pdef = do
     if vis == Public && any ((==Unspecified) . paramType) params
       then return (pdef,False,[ReasonUndeclared name pos])
       else do
-        typing <- foldM (addDeclaredType name pos (length params))
+        paramTyping <- foldM (addDeclaredType name pos (length params))
                   initTyping $ zip params [1..]
-        typing' <- foldM (addResourceType name pos)
-                   typing resources
-        if validTyping typing'
+        resourceTyping <- foldM (addResourceType name pos) paramTyping resources
+        if validTyping resourceTyping
           then do
-            logTypes $ "** Type checking " ++ name ++ ": " ++ show typing'
+            logTypes $ "** Type checking " ++ name ++ ": "
+                       ++ show resourceTyping
             logTypes $ "   with resources: " ++ show resources
-            let (calls,typing'') = runState (bodyCalls def) typing'
-            calls' <- mapM (placedApply callResolutions) calls
-            resolution <- typecheckCalls m name pos calls' emptyStmtResolution
-                typing'' [] False
-            logTypes $ "Type resolution = " ++ show resolution
-            (typing''',def') <- typecheckProcDef m name pos typing'' def
+            let (calls,preTyping) = runState (bodyCalls def) resourceTyping
+            calls' <- mapM callTypes calls
+            typing <- typecheckCalls m name pos calls' preTyping [] False
+            logTypes $ "Typing independent of mode = " ++ show typing
+            (typing''',def') <- typecheckProcDef m name pos preTyping def
             logTypes $ "*resulting types " ++ name ++ ": " ++ show typing'''
             let params' = updateParamTypes typing''' params
             let proto' = proto { procProtoParams = params' }
@@ -549,18 +553,22 @@ bodyCalls (pstmt:pstmts) = do
         Next ->  return rest
 
 
-callResolutions :: Stmt -> OptPos -> Compiler StmtTypings
-callResolutions call@(ProcCall m name procId _) pos = do
-    procs <- case procId of
-        Nothing   -> callTargets m name
-        Just pid -> return [ProcSpec m name pid] -- XXX check modspec
-                                                  -- is valid; or just
-                                                  -- ignore pid?
-    procsTypes <- fmap (zipWith ProcAndParams procs)
-                  $ mapM (fmap (List.filter nonResourceParam) . getParams) procs
-    return $ StmtTypings (maybePlace call pos) procsTypes
-callResolutions stmt _ =
-    shouldnt $ "callResolutions with non-call statement " ++ showStmt 4 stmt
+callTypes :: Placed Stmt -> Compiler StmtTypings
+callTypes pstmt = do
+    case content pstmt of
+        ProcCall m name procId _ -> do
+          procs <- case procId of
+              Nothing   -> callTargets m name
+              Just pid -> return [ProcSpec m name pid] -- XXX check modspec
+                                                       -- is valid; or just
+                                                       -- ignore pid?
+          typesList <- mapM (fmap (List.map paramType
+                                   . List.filter nonResourceParam)
+                                . getParams) procs
+          let nonResourceTypes = nub typesList
+          return $ StmtTypings pstmt nonResourceTypes
+        stmt ->
+          shouldnt $ "callTypes with non-call statement " ++ showStmt 4 stmt
 
 
 -- Return the variable name of the supplied exp.  In this context,
@@ -571,21 +579,31 @@ expVar (Typed exp _ _) = expVar exp
 expVar exp = shouldnt $ "expVar of non-variable exp " ++ show exp
 
 
-typecheckCalls :: ModSpec -> ProcName -> OptPos -> [StmtTypings]
-    -> StmtResolution -> Typing -> [StmtTypings] -> Bool
-    -> Compiler (MaybeErr StmtResolution)
-typecheckCalls m name pos [] resolutions typing [] _ = return $ OK resolutions
-typecheckCalls m name pos [] resolutions typing residue True =
-    typecheckCalls m name pos residue resolutions typing [] False
-typecheckCalls m name pos [] resolutions typing residue False =
-    return $ Err $ List.map overloadErr residue
-typecheckCalls m name pos (call:calls) resolutions typing residue chg = do
-    nyi "typecheckCalls"
-
+typecheckCalls :: modspec -> ProcName -> OptPos -> [StmtTypings]
+    -> Typing -> [StmtTypings] -> Bool -> Compiler Typing
+typecheckCalls m name pos [] typing [] _ = return typing
+typecheckCalls m name pos [] typing residue True =
+    typecheckCalls m name pos residue typing [] False
+typecheckCalls m name pos [] typing residue False =
+    return $ typeErrors (List.map overloadErr residue) typing
+typecheckCalls m name pos
+        (StmtTypings call@(ProcCall _ _ _ pexps) candidates:calls)
+        typing residue chg = do
+    let actualTypes = List.map (lookupType typing . content) pexps
+    let matches = catMaybes $ List.map (matchTypeList actualTypes) candidates
+    case matches of
+        [match] -> do
+          let typing' = assignTypes match pexps typing
+          typecheckCalls m name pos calls typing' residue True
+        _ -> typecheckCalls m name pos calls typing
+             (StmtTypings call matches:residue) chg
+typecheckCalls _ _ _ (StmtTypings noncall _) _ _ _ =
+    shouldnt $ "typecheckCalls with non-call stmt" ++ show noncall
 
 overloadErr :: StmtTypings -> TypeError
 overloadErr (StmtTypings call candidates) =
-    ReasonOverload (List.map procSpec candidates) $ place call
+    -- XXX Need to give list of matching procs
+    ReasonOverload [] $ place call
 
 
 -- |Type check the body of a single proc definition by type checking
