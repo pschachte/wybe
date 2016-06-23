@@ -241,12 +241,15 @@ FlowDirection :: { FlowDirection }
     | '!'                       { ParamInOut }
 
 OptType :: { TypeSpec }
-    : {- empty -}               { Unspecified }
+    : {- empty -}               { AnyType }
     | ':' Type                  { $2 }
 
 
 Type :: { TypeSpec }
-    : ident OptTypeList         { TypeSpec [] (identName $1) $2 }
+    : ident OptTypeList         { case identName $1 of
+                                     "any" -> AnyType
+                                     "invalid" -> InvalidType
+                                     name -> TypeSpec [] name $2 }
 
 OptTypeList :: { [TypeSpec] }
     : {- empty -}               { [] }

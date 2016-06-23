@@ -597,7 +597,8 @@ addType name def@(TypeDef arity rep _) vis = do
 -- |Find the definition of the specified type visible from the current module.
 
 lookupType :: TypeSpec -> OptPos -> Compiler (Maybe TypeSpec)
-lookupType Unspecified _ = return $ Just Unspecified
+lookupType AnyType _ = return $ Just AnyType
+lookupType InvalidType _ = return $ Just InvalidType
 lookupType ty@(TypeSpec _ "phantom" []) pos =
     return $ Just $ TypeSpec ["wybe"] "phantom" []
 lookupType ty@(TypeSpec mod name args) pos = do
@@ -621,7 +622,6 @@ lookupType ty@(TypeSpec mod name args) pos = do
                 let matchingType = TypeSpec matchingMod name args'
                 logAST $ "Matching type = " ++ show matchingType
                 return $ Just $ matchingType
-                  
               else do
                 message Error
                   ("Type '" ++ name ++ "' expects " ++ (show $ typeDefArity def) ++
@@ -1044,7 +1044,8 @@ updateModLLVM fn modimp = do
 -- | Given a type spec, find its internal representation (a string),
 --   if possible.
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
-lookupTypeRepresentation Unspecified = return Nothing
+lookupTypeRepresentation AnyType = return Nothing
+lookupTypeRepresentation InvalidType = return Nothing
 lookupTypeRepresentation (TypeSpec [] _ _) = return Nothing    
 lookupTypeRepresentation (TypeSpec modSpec name _) = do
     -- logMsg Blocks $ "Looking for " ++ name ++ " in mod: " ++
@@ -1189,7 +1190,7 @@ type ResourceIFace = Map ResourceSpec TypeSpec
 
 resourceDefToIFace :: ResourceDef -> ResourceIFace
 resourceDefToIFace def =
-    Map.map (maybe Unspecified resourceType) $ content def
+    Map.map (maybe AnyType resourceType) $ content def
 
 
 -- |A resource definition.  Since a resource may be defined as a 
@@ -1444,12 +1445,13 @@ instance Show ProcSpec where
 type ProcID = Int
 
 -- |A type specification:  the type name and type parameters.  Also 
---  could be Unspecified, meaning a type to be inferred.
+--  could be AnyType or InvalidType, the top and bottom of the type lattice,
+--  respectively.
 data TypeSpec = TypeSpec {
     typeMod::ModSpec,
     typeName::Ident,
     typeParams::[TypeSpec] 
-    } | Unspecified
+    } | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
 
 data ResourceSpec = ResourceSpec {
@@ -2010,7 +2012,8 @@ showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis detism inline sub) =
 
 -- |How to show a type specification.
 instance Show TypeSpec where
-  show Unspecified = "?"
+  show AnyType = "?"
+  show InvalidType = "XXX"
   show (TypeSpec optmod ident args) = 
       maybeModPrefix optmod ++ ident ++
       if List.null args then ""
@@ -2040,7 +2043,7 @@ instance Show PrimParam where
       in  pre ++ primFlowPrefix dir ++ show name ++ showTypeSuffix typ ++ post
 
 showTypeSuffix :: TypeSpec -> String
-showTypeSuffix Unspecified = ""
+showTypeSuffix AnyType = ""
 showTypeSuffix typ = ":" ++ show typ
 
 

@@ -6,14 +6,21 @@
 --  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
 --
 
-module Util (checkMaybe, setMapInsert, fillLines) where
+module Util (sameLength, checkMaybe, setMapInsert, fillLines) where
 
 
 import Data.Map as Map
 import Data.Set as Set
 
 
--- | Test the value in a maybe, and if it fails, return Nothing.
+-- |Do the the two lists have the same length?
+sameLength :: [a] -> [b] -> Bool
+sameLength [] [] = True
+sameLength (_:as) (_:bs) = sameLength as bs
+sameLength _ _ = False
+
+
+-- |Test the value in a maybe, and if it fails, return Nothing.
 checkMaybe :: (a -> Bool) -> Maybe a -> Maybe a
 checkMaybe test Nothing = Nothing
 checkMaybe test (Just val) = if test val then Just val else Nothing

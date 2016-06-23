@@ -173,7 +173,7 @@ compileSimpleStmt' stmt =
 
 
 compileArg :: Exp -> OptPos -> ClauseComp PrimArg
-compileArg = compileArg' Unspecified
+compileArg = compileArg' AnyType
 
 compileArg' :: TypeSpec -> Exp -> OptPos -> ClauseComp PrimArg
 compileArg' typ (IntValue int) _ = return $ ArgInt int typ

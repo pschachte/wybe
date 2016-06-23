@@ -314,7 +314,7 @@ flattenPExp pexp = do
     vs <- gets defdVars
     logFlatten $ "  Flattening exp " ++ show pexp ++ ", with vars " ++
            show vs
-    result <- flattenExp (content pexp) Unspecified False (place pexp)
+    result <- flattenExp (content pexp) AnyType False (place pexp)
     logFlatten $ "  Result =   " ++ show result
     return result
 
@@ -380,7 +380,7 @@ flattenExp (Fncall maybeMod name exps) ty cast pos = do
     flattenCall (ProcCall maybeMod name Nothing) False ty cast pos exps
 flattenExp (ForeignFn lang name flags exps) ty cast pos = do
     flattenCall (ForeignCall lang name flags) True ty cast pos exps
-flattenExp (Typed exp Unspecified _) ty cast pos = do
+flattenExp (Typed exp AnyType _) ty cast pos = do
     flattenExp exp ty cast pos
 flattenExp (Typed exp ty cast) _ _ pos = do
     flattenExp exp ty cast pos
@@ -436,7 +436,7 @@ typeAndPlace :: Exp -> TypeSpec -> Bool -> OptPos -> Placed Exp
 typeAndPlace exp ty cast pos = maybePlace (maybeType exp ty cast) pos
 
 maybeType :: Exp -> TypeSpec -> Bool -> Exp
-maybeType exp Unspecified _ = exp
+maybeType exp AnyType _ = exp
 maybeType exp ty cast = Typed exp ty cast
 
 isInExp :: Exp -> Bool

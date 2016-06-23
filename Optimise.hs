@@ -158,7 +158,7 @@ phantomArg :: PrimArg -> Bool
 phantomArg (ArgVar _ ty _ _ _) = phantomType ty
 phantomArg _ = False -- Nothing but a var can be a phantom
 
-phantomType Unspecified = False
+phantomType AnyType = False
 phantomType ty = "phantom" == typeName ty
 
 ----------------------------------------------------------------
