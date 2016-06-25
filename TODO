@@ -5,6 +5,11 @@ o Fix handling of function call:  mode of last argument should be determined
   by what modes are defined for the proc.
 
 Complete the implementation:
+o Rework handling of test procs.  Test proc calls can be combined with and
+  and or, and modified with not.  Variables assigned by calls combined with
+  and are unioned; combined by or are intersected; modified by not are the
+  empty set.  A test can be converted to a Boolean expression by dropping all
+  variables assigned within the test.
 o Optimisations
 o Fix algebraic type implementation to use tagged pointers
 o Implied modes:  transform expression version of proc call with inputs where
