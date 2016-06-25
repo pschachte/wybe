@@ -638,6 +638,10 @@ typecheckCalls m name pos [] typing [] _ = return typing
 typecheckCalls m name pos [] typing residue True =
     typecheckCalls m name pos residue typing [] False
 typecheckCalls m name pos [] typing residue False =
+    -- XXX Propagation alone is not enough to determine a unique type.
+    -- Need code to try to find a mode by picking a residual call with the
+    -- fewest possibilities and try all combinations to see if exactly one
+    -- of them gives us a valid typing.  If not, it's an overloading error.
     return $ typeErrors (List.map overloadErr residue) typing
 typecheckCalls m name pos (StmtTypings pcall candidates:calls) typing
         residue chg = do
@@ -657,7 +661,8 @@ typecheckCalls m name pos (StmtTypings pcall candidates:calls) typing
                         $ zip pexps match
           typecheckCalls m name pos calls typing' residue True
         _ -> typecheckCalls m name pos calls typing
-             (StmtTypings pcall validMatches:residue) chg
+             (StmtTypings pcall validMatches:residue)
+             $ chg || validMatches /= candidates
     
 
 
@@ -902,7 +907,8 @@ reconcileArgFlows (Param _ _ pflow _:params) (arg:args)
       else Nothing
 
 
--- |Does this parameter *not* correspond to a resource?
+-- |Does this parameter correspond to a manifest argument?
+-- XXX this needs to filter out the output introduced for a test proc, too.
 nonResourceParam :: Param -> Bool
 nonResourceParam (Param _ _ _ (Resource _)) = False
 nonResourceParam _ = True
