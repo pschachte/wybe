@@ -519,29 +519,49 @@ typecheckProcDecl m pdef = do
             if List.null badCalls
               then do
                 typing <- typecheckCalls m name pos calls' preTyping [] False
+                
                 logTypes $ "Typing independent of mode = " ++ show typing
                 -- XXX Replace the rest of this with code to check if
                 --     typing is OK, and if so, resolve modes and build
                 --     revised proc body.
-                (typing''',def') <- typecheckProcDef m name pos preTyping def
-                logTypes $ "*resulting types " ++ name ++ ": " ++ show typing'''
-                let params' = updateParamTypes typing''' params
-                let proto' = proto { procProtoParams = params' }
-                let pdef' = pdef { procProto = proto', procImpln = ProcDefSrc def' }
-                let pdef'' = pdef'
-                let sccAgain = pdef'' /= pdef
-                logTypes $ "===== Definition is " ++
-                    (if sccAgain then "" else "un") ++ "changed"
-                when sccAgain
-                    (logTypes $ "** check again " ++ name ++
-                        "\n-----------------OLD:" ++ showProcDef 4 pdef ++
-                        "\n-----------------NEW:" ++ showProcDef 4 pdef' ++ "\n")
-                return (pdef'',sccAgain,typingErrs typing''')
+                -- (typing''',def') <- typecheckProcDef m name pos preTyping def
+                -- logTypes $ "*resulting types " ++ name ++ ": " ++ show typing'''
+                if validTyping typing
+                  then do
+                    maybeDef <- modecheckProcDef m name pos typing
+                                Map.empty Set.empty def
+                    case maybeDef of
+                        OK (def',_) -> do
+                          let params' = updateParamTypes typing params
+                          let proto' = proto { procProtoParams = params' }
+                          let pdef' = pdef { procProto = proto',
+                                             procImpln = ProcDefSrc def' }
+                          let sccAgain = pdef' /= pdef
+                          logTypes $ "===== Definition is " ++
+                              (if sccAgain then "" else "un") ++ "changed"
+                          when sccAgain
+                              (logTypes $ "** check again " ++ name ++
+                               "\n-----------------OLD:"
+                               ++ showProcDef 4 pdef ++
+                               "\n-----------------NEW:"
+                               ++ showProcDef 4 pdef' ++ "\n")
+                          return (pdef',sccAgain,[])
+                        Err lst -> do
+                          logTypes $ "==== modecheck error " ++ show lst
+                          return (pdef,False,lst)
+                  else
+                    return (pdef,False,typingErrs typing)
               else
                 return (pdef,False,
-                        List.map (undefStmtErr name) badCalls)
+                           List.map (\pcall ->
+                                         case content pcall of
+                                             ProcCall _ callee _ _ ->
+                                                 ReasonUndef name callee
+                                                 $ place pcall
+                                             _ -> shouldnt "typecheckProcDecl")
+                           badCalls)
           else
-            shouldnt $ "Inconsistent param typing for proc " ++ name
+            return (pdef,False,typingErrs resourceTyping)
 
 
 addDeclaredType :: ProcName -> OptPos -> Int -> Typing -> (Param,Int) ->
@@ -641,7 +661,7 @@ typecheckCalls m name pos [] typing residue False =
     -- XXX Propagation alone is not enough to determine a unique type.
     -- Need code to try to find a mode by picking a residual call with the
     -- fewest possibilities and try all combinations to see if exactly one
-    -- of them gives us a valid typing.  If not, it's an overloading error.
+    -- of them gives us a valid typing.  If not, it's a type error.
     return $ typeErrors (List.map overloadErr residue) typing
 typecheckCalls m name pos (StmtTypings pcall candidates:calls) typing
         residue chg = do
@@ -688,6 +708,35 @@ overloadErr :: StmtTypings -> TypeError
 overloadErr (StmtTypings call candidates) =
     -- XXX Need to give list of matching procs
     ReasonOverload [] $ place call
+
+
+modecheckProcDef :: ModSpec -> ProcName -> OptPos -> Typing
+                 -> Map VarName [Placed Stmt] -> Set VarName -> [Placed Stmt]
+                 -> Compiler (MaybeErr ([Placed Stmt], Set VarName))
+modecheckProcDef m name pos typing delayed assigned []
+    | delayed == Map.empty = return $ OK ([],assigned)
+    | otherwise =
+        shouldnt $ "modecheckProcDef reached end of proc with delayed stmts"
+                   ++ show delayed
+modecheckProcDef m name pos typing delayed assigned (pstmt:pstmts) = do
+    maybePStmt <- modecheckStmt m name pos typing delayed assigned pstmt
+    case maybePStmt of
+        OK (pstmt',delayed',assigned') -> do
+          maybePStmts <- modecheckProcDef m name pos typing
+                         delayed' assigned' pstmts
+          case maybePStmts of
+              OK (pstmts',assigned'') ->
+                  return $ OK (pstmt'++pstmts',assigned'')
+              errs -> return errs
+        Err errs -> return $ Err errs
+
+
+modecheckStmt :: ModSpec -> ProcName -> OptPos -> Typing
+                 -> Map VarName [Placed Stmt] -> Set VarName -> Placed Stmt
+                 -> Compiler (MaybeErr ([Placed Stmt],
+                                        Map VarName [Placed Stmt], Set VarName))
+modecheckStmt m name pos typing delayed assigned pstmt = do
+    nyi "modecheckStmt"
 
 
 -- |Type check the body of a single proc definition by type checking
