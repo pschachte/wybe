@@ -222,7 +222,9 @@ undefStmtErr caller pstmt =
 
 -- | A type assignment for variables (symbol table), with a list of type errors
 -- XXX Need to handle type unification properly by allowing a variable to
---     specify its type as whatever the type of another variable is. 
+--     specify its type as whatever the type of another variable is.
+--     This could be done by adding a variable reference alternative to the
+--     TypeSpec type.
 data Typing = Typing {
                   typingDict::Map VarName TypeSpec,
                   typingErrs::[TypeError]
@@ -521,15 +523,12 @@ typecheckProcDecl m pdef = do
                 typing <- typecheckCalls m name pos calls' preTyping [] False
                 
                 logTypes $ "Typing independent of mode = " ++ show typing
-                -- XXX Replace the rest of this with code to check if
-                --     typing is OK, and if so, resolve modes and build
-                --     revised proc body.
                 -- (typing''',def') <- typecheckProcDef m name pos preTyping def
                 -- logTypes $ "*resulting types " ++ name ++ ": " ++ show typing'''
                 if validTyping typing
                   then do
-                    maybeDef <- modecheckProcDef m name pos typing
-                                Map.empty Set.empty def
+                    maybeDef <- modecheckStmts m name pos typing []
+                                Set.empty def
                     case maybeDef of
                         OK (def',_) -> do
                           let params' = updateParamTypes typing params
@@ -710,19 +709,34 @@ overloadErr (StmtTypings call candidates) =
     ReasonOverload [] $ place call
 
 
-modecheckProcDef :: ModSpec -> ProcName -> OptPos -> Typing
-                 -> Map VarName [Placed Stmt] -> Set VarName -> [Placed Stmt]
+-- |Given type assignments to variables, resolve modes in a proc body,
+--  building a revised, properly moded body, or indicate a mode error.
+--  This must handle several cases:
+--  * Flow direction for function calls are unspecified; they must be assigned,
+--    and may need to be postponed if the use appears before the definition.
+--  * Test statements must be handled, determining which stmts in a test
+--    context are actually tests, and reporting an error for tests outside
+--    a test context
+--  * Implied modes:  in a test context, allow in mode where out mode is
+--    expected by assigning a fresh temp variable and generating an =
+--    test of the variable against the in value.
+--  * Handle in-out call mode where an out-only argument is expected.
+--  This code threads a set of assigned variables through, which starts as
+--  the set of in parameter names.  It also threads through a list of
+--  statements postponed because an unknown flow variable is not assigned yet.
+modecheckStmts :: ModSpec -> ProcName -> OptPos -> Typing
+                 -> [Placed Stmt] -> Set VarName -> [Placed Stmt]
                  -> Compiler (MaybeErr ([Placed Stmt], Set VarName))
-modecheckProcDef m name pos typing delayed assigned []
-    | delayed == Map.empty = return $ OK ([],assigned)
+modecheckStmts m name pos typing delayed assigned []
+    | delayed == [] = return $ OK ([],assigned)
     | otherwise =
-        shouldnt $ "modecheckProcDef reached end of proc with delayed stmts"
+        shouldnt $ "modecheckStmts reached end of proc with delayed stmts"
                    ++ show delayed
-modecheckProcDef m name pos typing delayed assigned (pstmt:pstmts) = do
+modecheckStmts m name pos typing delayed assigned (pstmt:pstmts) = do
     maybePStmt <- modecheckStmt m name pos typing delayed assigned pstmt
     case maybePStmt of
         OK (pstmt',delayed',assigned') -> do
-          maybePStmts <- modecheckProcDef m name pos typing
+          maybePStmts <- modecheckStmts m name pos typing
                          delayed' assigned' pstmts
           case maybePStmts of
               OK (pstmts',assigned'') ->
@@ -732,9 +746,9 @@ modecheckProcDef m name pos typing delayed assigned (pstmt:pstmts) = do
 
 
 modecheckStmt :: ModSpec -> ProcName -> OptPos -> Typing
-                 -> Map VarName [Placed Stmt] -> Set VarName -> Placed Stmt
+                 -> [Placed Stmt] -> Set VarName -> Placed Stmt
                  -> Compiler (MaybeErr ([Placed Stmt],
-                                        Map VarName [Placed Stmt], Set VarName))
+                                        [Placed Stmt], Set VarName))
 modecheckStmt m name pos typing delayed assigned pstmt = do
     nyi "modecheckStmt"
 
