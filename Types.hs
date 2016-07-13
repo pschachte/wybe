@@ -734,7 +734,9 @@ modecheckStmts m name pos typing delayed assigned []
         shouldnt $ "modecheckStmts reached end of proc with delayed stmts"
                    ++ show delayed
 modecheckStmts m name pos typing delayed assigned (pstmt:pstmts) = do
-    maybePStmt <- modecheckStmt m name pos typing delayed assigned pstmt
+    maybePStmt <- placedApply
+                  (modecheckStmt m name pos typing delayed assigned)
+                  pstmt
     case maybePStmt of
         OK (pstmt',delayed',assigned') -> do
           maybePStmts <- modecheckStmts m name pos typing
@@ -747,11 +749,20 @@ modecheckStmts m name pos typing delayed assigned (pstmt:pstmts) = do
 
 
 modecheckStmt :: ModSpec -> ProcName -> OptPos -> Typing
-                 -> [Placed Stmt] -> Set VarName -> Placed Stmt
+                 -> [Placed Stmt] -> Set VarName -> Stmt -> OptPos
                  -> Compiler (MaybeErr ([Placed Stmt],
                                         [Placed Stmt], Set VarName))
-modecheckStmt m name pos typing delayed assigned pstmt = do
-    nyi "modecheckStmt"
+modecheckStmt m name defPos typing delayed assigned
+    stmt@(ProcCall cmod cname cid args) pos = do
+    StmtTypings _ argTypes <- callTypes $ maybePlace stmt pos
+    actualTypes <- catMaybes <$> mapM (expType typing) args
+    let matches = List.map (matchTypeList name cname pos actualTypes)
+                  argTypes
+    let validMatches = catOKs matches
+    return $ OK ([maybePlace Break pos],delayed,assigned)
+  
+modecheckStmt m name defPos typing delayed assigned stmt pos =
+    return $ OK ([maybePlace stmt pos],delayed,assigned)
 
 
 -- |Type check the body of a single proc definition by type checking
