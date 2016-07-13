@@ -101,7 +101,7 @@ compileBody stmts params = do
           initial <- get
           tstStmts' <- mapM compileSimpleStmt tstStmts
           afterTest <- get
-          tstVar' <- placedApplyM compileArg tstVar
+          tstVar' <- placedApply compileArg tstVar
           thn' <- compileBody thn params
           afterThen <- get
           -- XXX This isn't right when tests can bind outputs only when

@@ -472,15 +472,16 @@ typecheckProcDecls m name = do
 -- otherwise we report a type error.
 
 
--- |A ProcSpec resolving a call together with it param types
-data ProcAndParams = ProcAndParams { procSpec :: ProcSpec,
-                                     paramTypes :: [TypeSpec]}
-    deriving (Eq,Show)
+-- -- |A ProcSpec resolving a call together with it param types
+-- data ProcAndParams = ProcAndParams { procSpec :: ProcSpec,
+--                                      paramTypes :: [TypeSpec]}
+--     deriving (Eq,Show)
 
--- |The resolutions of many proc calls
-type StmtResolution = Map Stmt ProcSpec
+-- -- |The resolutions of many proc calls
+-- type StmtResolution = Map Stmt ProcSpec
+-- 
+-- emptyStmtResolution = Map.empty
 
-emptyStmtResolution = Map.empty
 
 -- |A single call statement together with a list of all the possible different
 --  parameter list types (a list of types).  This type is used to narrow down
@@ -1053,7 +1054,7 @@ listArity toFType toDirection lst =
 
 applyBodyTyping :: Typing -> [Placed Stmt] -> Compiler [Placed Stmt]
 applyBodyTyping typing body = do
-    mapM (placedApplyM (applyStmtTyping typing)) $ body
+    mapM (placedApply (applyStmtTyping typing)) $ body
 
 
 applyStmtTyping :: Typing -> Stmt -> OptPos -> Compiler (Placed Stmt)
@@ -1161,7 +1162,7 @@ checkProcDefFullytyped def = do
     let pos = procPos def
     mapM_ (checkParamTyped name pos) $
       zip [1..] $ procProtoParams $ procProto def
-    mapM_ (placedApplyM (checkStmtTyped name pos)) $
+    mapM_ (placedApply (checkStmtTyped name pos)) $
           procDefSrc $ procImpln def
 
 
@@ -1187,16 +1188,16 @@ checkStmtTyped name pos (ForeignCall _ pname _ args) ppos = do
     mapM_ (checkArgTyped name pos pname ppos) $
           zip [1..] $ List.map content args
 checkStmtTyped name pos (Test stmts exp) ppos = do
-    mapM_ (placedApplyM (checkStmtTyped name pos)) stmts
+    mapM_ (placedApply (checkStmtTyped name pos)) stmts
     checkExpTyped name pos ("test" ++ showMaybeSourcePos ppos) $ content exp
 checkStmtTyped name pos (Cond ifstmts cond thenstmts elsestmts) ppos = do
-    mapM_ (placedApplyM (checkStmtTyped name pos)) ifstmts
+    mapM_ (placedApply (checkStmtTyped name pos)) ifstmts
     checkExpTyped name pos ("condition" ++ showMaybeSourcePos ppos) $
                   content cond
-    mapM_ (placedApplyM (checkStmtTyped name pos)) thenstmts
-    mapM_ (placedApplyM (checkStmtTyped name pos)) elsestmts
+    mapM_ (placedApply (checkStmtTyped name pos)) thenstmts
+    mapM_ (placedApply (checkStmtTyped name pos)) elsestmts
 checkStmtTyped name pos (Loop stmts) ppos = do
-    mapM_ (placedApplyM (checkStmtTyped name pos)) stmts
+    mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (For itr gen) ppos = do
     checkExpTyped name pos ("for iterator" ++ showMaybeSourcePos ppos) $
                   content itr

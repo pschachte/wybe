@@ -21,7 +21,7 @@ module AST (
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
-  placedApply, placedApplyM, makeMessage, updatePlacedM,
+  placedApply, makeMessage, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..), 
   ImportSpec(..), importSpec,
@@ -191,12 +191,6 @@ rePlace t (Unplaced _)   = Unplaced t
 --  placed thing.
 placedApply :: (a -> OptPos -> b) -> (Placed a) -> b
 placedApply f placed = f (content placed) (place placed)
-
-
--- |Apply a function that takes a thing and an optional place to a 
---  placed thing.
-placedApplyM :: Monad m => (a -> OptPos -> m b) -> (Placed a) -> m b
-placedApplyM f placed = f (content placed) (place placed)
 
 
 instance Functor Placed where
