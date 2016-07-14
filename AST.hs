@@ -15,7 +15,7 @@ module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
   Determinism(..), TypeProto(..), TypeSpec(..), TypeImpln(..),
-  FnProto(..), ProcProto(..), Param(..),
+  FnProto(..), ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), 
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
@@ -1502,6 +1502,17 @@ data Param = Param {
     paramFlowType::ArgFlowType
     } deriving (Eq, Generic)
 
+
+-- |The type and mode (flow) of a single argument or parameter
+data TypeFlow = TypeFlow {
+  typeModeType :: TypeSpec,
+  typeModeMode :: FlowDirection
+  } deriving (Eq)
+
+
+-- |Return the TypeSpec and FlowDirection of a Param
+paramTypeFlow :: Param -> TypeFlow
+paramTypeFlow (Param{paramType=ty, paramFlow=fl}) = TypeFlow ty fl
 
 -- |A formal parameter, including name, type, and flow direction.
 data PrimParam = PrimParam {
