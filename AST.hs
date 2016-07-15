@@ -1505,8 +1505,8 @@ data Param = Param {
 
 -- |The type and mode (flow) of a single argument or parameter
 data TypeFlow = TypeFlow {
-  typeModeType :: TypeSpec,
-  typeModeMode :: FlowDirection
+  typeFlowType :: TypeSpec,
+  typeFlowMode :: FlowDirection
   } deriving (Eq)
 
 

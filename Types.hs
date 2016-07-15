@@ -7,7 +7,7 @@
 -- |Support for type checking/inference.
 module Types (validateModExportTypes, typeCheckMod, checkFullyTyped) where
 
-import Control.Arrow
+import           Control.Arrow
 import           AST
 import           Control.Monad.State
 import           Data.Graph
@@ -24,7 +24,7 @@ import           Debug.Trace
 
 
 ----------------------------------------------------------------
---           Validating proc parameter type declarations
+--           Validating Proc Parameter Type Declarations
 ----------------------------------------------------------------
 
 
@@ -109,7 +109,7 @@ typeCheckMod thisMod = do
 
 
 ----------------------------------------------------------------
---                           Supporting types
+--                       Supporting Type Errors
 ----------------------------------------------------------------
 
 -- |Either something or some type errors
@@ -223,6 +223,9 @@ undefStmtErr caller pstmt =
         other -> shouldnt $ "undefStmtErr with non-call stmt " ++ show other
     
 
+----------------------------------------------------------------
+--                           Type Assignments
+----------------------------------------------------------------
 
 -- | A type assignment for variables (symbol table), with a list of type errors
 -- XXX Need to handle type unification properly by allowing a variable to
@@ -286,8 +289,12 @@ projectTyping (Typing typing errs) (Typing interest _) =
     Typing (Map.filterWithKey (\k _ -> Map.member k interest) typing) errs
     
 
--- Simple subtype relation for now; every type is a subtype of the
--- unspecified type.
+----------------------------------------------------------------
+--                           The Type Lattice
+----------------------------------------------------------------
+
+-- Simple strict subtype relation for now; every type is a subtype of the
+-- unspecified type, and the invalid type is a subtype of every other type.
 -- XXX Extend to support actual subtypes
 properSubtypeOf :: TypeSpec -> TypeSpec -> Bool
 properSubtypeOf _ AnyType = True
@@ -300,8 +307,10 @@ properSubtypeOf (TypeSpec mod1 name1 params1) (TypeSpec mod2 name2 params2) =
 properSubtypeOf _ _ = False
 
 
+-- |Non-strict subtype relation
 subtypeOf :: TypeSpec -> TypeSpec -> Bool
 subtypeOf sub super = sub `properSubtypeOf` super || sub == super
+
 
 -- |Return the greatest lower bound of two TypeSpecs.  
 meetTypes :: TypeSpec -> TypeSpec -> TypeSpec
@@ -381,7 +390,7 @@ setExpType' otherExp _ _ = shouldnt $ "Invalid expr left after flattening "
                                      ++ show otherExp
 
 ----------------------------------------------------------------
---                         Type checking procs
+--                         Type Checking Procs
 ----------------------------------------------------------------
 
 -- |Type check one strongly connected component in the local call graph
@@ -495,7 +504,7 @@ data ProcInfo = ProcInfo {
 
 
 procInfoTypes :: ProcInfo -> [TypeSpec]
-procInfoTypes call = typeModeType <$> procInfoArgs call
+procInfoTypes call = typeFlowType <$> procInfoArgs call
 
 
 -- |A single call statement together with a list of all the possible different
@@ -715,38 +724,44 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls) typing
         [] -> return $ typeErrors (concatMap errList matches) typing
         [match] -> do
           let typing' = List.foldr (uncurry setExpType) typing
-                        $ zip pexps match
+                        $ zip pexps $ procInfoTypes match
           typecheckCalls m name pos calls typing' residue True
         _ -> let stmtTyping' = stmtTyping {typingArgsTypes = validMatches}
              in typecheckCalls m name pos calls typing (stmtTyping':residue)
                 $ chg || validMatches == typs
     
 
-filterTypeList :: Ident -> [TypeSpec] -> StmtTypings
-               -> Compiler (MaybeErr StmtTypings)
-filterTypeList caller callTypes stmtTyping@(StmtTypings pstmt typs) = do
-    let (callee,pexps) = case content pstmt of
-                             ProcCall _ callee' _ pexps' -> (callee',pexps')
-                             noncall -> shouldnt
-                                        $ "typecheckCalls with non-call stmt"
-                                          ++ show noncall
-    matchTypeList caller callee (place pstmt) callTypes typs
+-- XXX Needed?
+-- filterTypeList :: Ident -> [TypeSpec] -> StmtTypings
+--                -> Compiler (MaybeErr StmtTypings)
+-- filterTypeList caller callTypes stmtTyping@(StmtTypings pstmt typs) = do
+--     let (callee,pexps) = case content pstmt of
+--                              ProcCall _ callee' _ pexps' -> (callee',pexps')
+--                              noncall -> shouldnt
+--                                         $ "typecheckCalls with non-call stmt"
+--                                           ++ show noncall
+--     matchTypeList caller callee (place pstmt) callTypes typs
+
 
 -- |Match up the argument types of a call with the parameter types of the
 -- callee, producing a list of the actual types.  If this list contains
--- InvalidType, then the call would be a type error.  If 
-matchTypeList :: Ident -> Ident -> OptPos -> [TypeSpec] -> [TypeSpec]
-              -> MaybeErr [TypeSpec]
-matchTypeList caller callee pos callTypes calleeTypes
+-- InvalidType, then the call would be a type error.
+matchTypeList :: Ident -> Ident -> OptPos -> [TypeSpec] -> ProcInfo
+              -> MaybeErr ProcInfo
+matchTypeList caller callee pos callTypes calleeInfo
     | sameLength callTypes calleeTypes =
       let matches = List.zipWith meetTypes callTypes calleeTypes
           mismatches = List.map fst $ List.filter ((==InvalidType) . snd)
                        $ zip [1..] matches
       in if List.null mismatches
-         then OK matches
+         then OK $ calleeInfo
+              {procInfoArgs = List.zipWith TypeFlow matches calleeFlows}
          else Err [ReasonArgType callee n pos | n <- mismatches]
     | otherwise = Err [ReasonArity caller callee pos
                        (length callTypes) (length calleeTypes)]
+    where args = procInfoArgs calleeInfo
+          calleeTypes = typeFlowType <$> args
+          calleeFlows = typeFlowMode <$> args
 
 
 
@@ -849,7 +864,7 @@ typecheckProcDef m name pos paramTypes body = do
           let typingSets = List.map (Map.map Set.singleton . typingDict) typings
           let merged = Map.filter ((>1).Set.size) $
                        Map.unionsWith Set.union typingSets
-          let ambigs = Control.Arrow.second <$> assocs merged
+          let ambigs = List.map (\(v,ts) -> (v,Set.toAscList ts)) $ assocs merged
           return (typeError (ReasonAmbig name pos ambigs) initTyping, body)
 
 
@@ -953,7 +968,7 @@ typecheckStmt _ _ call@(ForeignCall "llvm" "move" [] [a1,a2]) pos typing = do
 typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
     -- Pick up any output casts
     logTypes $ "Type checking foreign call " ++ showStmt 4 call
-    let typing' = List.foldr (noteOutputCast typing . content) args
+    let typing' = List.foldr (noteOutputCast . content) typing args
     logTypes $ "Resulting typing = " ++ show typing'
     return [typing']
 typecheckStmt m caller (Test stmts exp) pos typing = do
