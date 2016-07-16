@@ -500,7 +500,7 @@ typecheckProcDecls m name = do
 data ProcInfo = ProcInfo {
   procInfoProc :: ProcSpec,
   procInfoArgs :: [TypeFlow]
-  } deriving (Eq)
+  } deriving (Eq,Show)
 
 
 procInfoTypes :: ProcInfo -> [TypeSpec]
@@ -512,7 +512,7 @@ procInfoTypes call = typeFlowType <$> procInfoArgs call
 --  the possible call typings.
 data StmtTypings = StmtTypings {typingStmt::Placed Stmt,
                                 typingArgsTypes::[ProcInfo]}
-    deriving (Eq)
+    deriving (Eq,Show)
 
 
 -- |Type check a single procedure definition, including resolving overloaded
@@ -536,7 +536,7 @@ typecheckProcDecl m pdef = do
         resourceTyping <- foldM (addResourceType name pos) paramTyping resources
         if validTyping resourceTyping
           then do
-            logTypes $ "** Type checking " ++ name ++ ": "
+            logTypes $ "** Type checking proc " ++ name ++ ": "
                        ++ show resourceTyping
             logTypes $ "   with resources: " ++ show resources
             let (calls,preTyping) = runState (bodyCalls def) resourceTyping
@@ -711,20 +711,25 @@ typecheckCalls m name pos [] typing residue False =
     return $ typeErrors (List.map overloadErr residue) typing
 typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls) typing
         residue chg = do
+    logTypes $ "Type checking call " ++ show pstmt
+    logTypes $ "Candidate types: " ++ show (procInfoTypes <$> typs)
     let (callee,pexps) = case content pstmt of
                              ProcCall _ callee' _ pexps' -> (callee',pexps')
                              noncall -> shouldnt
                                         $ "typecheckCalls with non-call stmt"
                                           ++ show noncall
-    actualTypes <- catMaybes <$> mapM (expType typing) pexps
+    actualTypes <- (fromMaybe AnyType <$>) <$> mapM (expType typing) pexps
+    logTypes $ "Actual types: " ++ show actualTypes
     let matches = List.map (matchTypeList name callee (place pstmt) actualTypes)
                   typs
     let validMatches = catOKs matches
-    case validMatches of
+    let validTypes = nub $ procInfoTypes <$> validMatches
+    logTypes $ "Valid types = " ++ show validTypes
+    case validTypes of
         [] -> return $ typeErrors (concatMap errList matches) typing
         [match] -> do
           let typing' = List.foldr (uncurry setExpType) typing
-                        $ zip pexps $ procInfoTypes match
+                        $ zip pexps match
           typecheckCalls m name pos calls typing' residue True
         _ -> let stmtTyping' = stmtTyping {typingArgsTypes = validMatches}
              in typecheckCalls m name pos calls typing (stmtTyping':residue)

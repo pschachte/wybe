@@ -1509,6 +1509,9 @@ data TypeFlow = TypeFlow {
   typeFlowMode :: FlowDirection
   } deriving (Eq)
 
+instance Show TypeFlow where
+    show (TypeFlow ty fl) = flowPrefix fl ++ show ty
+
 
 -- |Return the TypeSpec and FlowDirection of a Param
 paramTypeFlow :: Param -> TypeFlow
