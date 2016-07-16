@@ -819,11 +819,13 @@ modecheckStmt :: ModSpec -> ProcName -> OptPos -> Typing
                  -> Compiler (MaybeErr ([Placed Stmt],
                                         [Placed Stmt], Set VarName))
 modecheckStmt m name defPos typing delayed assigned
-    stmt@(ProcCall cmod cname cid args) pos = do
+    stmt@(ProcCall _ cname _ args) pos = do
+    logTypes $ "Mode checking call " ++ show stmt
     callInfos <- callProcInfos $ maybePlace stmt pos
-    actualTypes <- catMaybes <$> mapM (expType typing) args
+    actualTypes <- (fromMaybe AnyType <$>) <$> mapM (expType typing) args
     let matches = List.map (matchTypeList name cname pos actualTypes)
                   callInfos
+    logTypes $ "Possible modes: " ++ show matches
     -- let validMatches = catOKs matches
     return $ OK ([maybePlace Break pos],delayed,assigned)
   
