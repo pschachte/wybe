@@ -7,7 +7,6 @@
 -- |Support for type checking/inference.
 module Types (validateModExportTypes, typeCheckMod, checkFullyTyped) where
 
-import           Control.Arrow
 import           AST
 import           Control.Monad.State
 import           Data.Graph
@@ -20,7 +19,7 @@ import           Options             (LogSelection (Types))
 import           Util
 import           Snippets
     
-import           Debug.Trace
+-- import           Debug.Trace
 
 
 ----------------------------------------------------------------
@@ -46,7 +45,7 @@ validateModExportTypes thisMod = do
 
 loggedFinishModule :: ModSpec -> Compiler ()
 loggedFinishModule thisMod = do
-    finishModule
+    _ <- finishModule
     logTypes $ "**** Exiting module " ++ showModSpec thisMod
     return ()
 
@@ -552,27 +551,23 @@ typecheckProcDecl m pdef = do
                 -- logTypes $ "*resulting types " ++ name ++ ": " ++ show typing'''
                 if validTyping typing
                   then do
-                    maybeDef <- modecheckStmts m name pos typing []
-                                Set.empty def
-                    case maybeDef of
-                        OK (def',_) -> do
-                          let params' = updateParamTypes typing params
-                          let proto' = proto { procProtoParams = params' }
-                          let pdef' = pdef { procProto = proto',
-                                             procImpln = ProcDefSrc def' }
-                          let sccAgain = pdef' /= pdef
-                          logTypes $ "===== Definition is " ++
-                              (if sccAgain then "" else "un") ++ "changed"
-                          when sccAgain
-                              (logTypes $ "** check again " ++ name ++
-                               "\n-----------------OLD:"
-                               ++ showProcDef 4 pdef ++
-                               "\n-----------------NEW:"
-                               ++ showProcDef 4 pdef' ++ "\n")
-                          return (pdef',sccAgain,[])
-                        Err lst -> do
-                          logTypes $ "==== modecheck error " ++ show lst
-                          return (pdef,False,lst)
+                    logTypes "Now mode checking"
+                    (def',_,errs') <-
+                      modecheckStmts m name pos typing [] Set.empty def
+                    let params' = updateParamTypes typing params
+                    let proto' = proto { procProtoParams = params' }
+                    let pdef' = pdef { procProto = proto',
+                                       procImpln = ProcDefSrc def' }
+                    let sccAgain = pdef' /= pdef
+                    logTypes $ "===== Definition is " ++
+                        (if sccAgain then "" else "un") ++ "changed"
+                    when sccAgain
+                        (logTypes $ "** check again " ++ name ++
+                            "\n-----------------OLD:"
+                            ++ showProcDef 4 pdef
+                            ++ "\n-----------------NEW:"
+                            ++ showProcDef 4 pdef' ++ "\n")
+                    return (pdef',sccAgain,[])
                   else
                     return (pdef,False,typingErrs typing)
               else
@@ -793,44 +788,60 @@ overloadErr (StmtTypings call candidates) =
 --  statements postponed because an unknown flow variable is not assigned yet.
 modecheckStmts :: ModSpec -> ProcName -> OptPos -> Typing
                  -> [Placed Stmt] -> Set VarName -> [Placed Stmt]
-                 -> Compiler (MaybeErr ([Placed Stmt], Set VarName))
-modecheckStmts m name pos typing delayed assigned []
-    | List.null delayed = return $ OK ([],assigned)
+                 -> Compiler ([Placed Stmt], Set VarName,[TypeError])
+modecheckStmts _ _ _ _ delayed assigned []
+    | List.null delayed = return ([],assigned,[])
     | otherwise =
-        shouldnt $ "modecheckStmts reached end of proc with delayed stmts"
+        shouldnt $ "modecheckStmts reached end of body with delayed stmts"
                    ++ show delayed
 modecheckStmts m name pos typing delayed assigned (pstmt:pstmts) = do
-    maybePStmt <- placedApply
-                  (modecheckStmt m name pos typing delayed assigned)
-                  pstmt
-    case maybePStmt of
-        OK (pstmt',delayed',assigned') -> do
-          maybePStmts <- modecheckStmts m name pos typing
-                         delayed' assigned' pstmts
-          case maybePStmts of
-              OK (pstmts',assigned'') ->
-                  return $ OK (pstmt'++pstmts',assigned'')
-              errs -> return errs
-        Err errs -> return $ Err errs
+    (pstmt',delayed',assigned',errs') <-
+      placedApply (modecheckStmt m name pos typing delayed assigned) pstmt
+    (pstmts',assigned'',errs) <-
+      modecheckStmts m name pos typing delayed' assigned' pstmts
+    return (pstmt'++pstmts',assigned'',errs'++errs)
 
 
 modecheckStmt :: ModSpec -> ProcName -> OptPos -> Typing
                  -> [Placed Stmt] -> Set VarName -> Stmt -> OptPos
-                 -> Compiler (MaybeErr ([Placed Stmt],
-                                        [Placed Stmt], Set VarName))
+                 -> Compiler ([Placed Stmt], [Placed Stmt],
+                              Set VarName,[TypeError])
 modecheckStmt m name defPos typing delayed assigned
     stmt@(ProcCall _ cname _ args) pos = do
     logTypes $ "Mode checking call " ++ show stmt
     callInfos <- callProcInfos $ maybePlace stmt pos
     actualTypes <- (fromMaybe AnyType <$>) <$> mapM (expType typing) args
-    let matches = List.map (matchTypeList name cname pos actualTypes)
-                  callInfos
+    let matches = catOKs
+                  $ List.map (matchTypeList name cname pos actualTypes)
+                    callInfos
     logTypes $ "Possible modes: " ++ show matches
-    -- let validMatches = catOKs matches
-    return $ OK ([maybePlace Break pos],delayed,assigned)
-  
-modecheckStmt m name defPos typing delayed assigned stmt pos =
-    return $ OK ([maybePlace stmt pos],delayed,assigned)
+    return ([maybePlace stmt pos],delayed,assigned,[])
+modecheckStmt m name defPos typing delayed assigned
+    stmt@(Test stmts expr) pos = do
+    logTypes $ "Mode checking test " ++ show stmt
+    (stmts', assigned',errs') <-
+      modecheckStmts m name defPos typing [] assigned stmts
+    return ([maybePlace (Test stmts' expr) pos], delayed, assigned',errs')
+modecheckStmt m name defPos typing delayed assigned
+    stmt@(Cond tstStmts expr thnStmts elsStmts) pos = do
+    logTypes $ "Mode checking conditional " ++ show stmt
+    (tstStmts', assigned1,errs1) <-
+      modecheckStmts m name defPos typing [] assigned tstStmts
+    (thnStmts', assigned2,errs2) <-
+      modecheckStmts m name defPos typing [] assigned1 thnStmts
+    (elsStmts', assigned3,errs3) <-
+      modecheckStmts m name defPos typing [] assigned2 elsStmts
+    return ([maybePlace (Cond tstStmts' expr thnStmts' elsStmts') pos],
+            delayed, assigned2 `Set.intersection` assigned3,
+            errs1++errs2++errs3)
+modecheckStmt m name defPos typing delayed assigned
+    stmt@(Loop stmts) pos = do
+    logTypes $ "Mode checking loop " ++ show stmt
+    (stmts', assigned',errs') <-
+      modecheckStmts m name defPos typing [] assigned stmts
+    return ([maybePlace (Loop stmts') pos], delayed, assigned',errs')
+modecheckStmt m _ _ _ delayed assigned stmt pos =
+    return ([maybePlace stmt pos],delayed,assigned,[])
 
 
 -- |Type check the body of a single proc definition by type checking
