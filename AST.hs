@@ -34,7 +34,7 @@ module AST (
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..), 
   argFlowDirection, argType, outArgVar, argDescription, flowsIn, flowsOut,
   foldBodyPrims, foldBodyDistrib, foldProcCalls,
-  expToStmt, procCallToExp, expFlow, setExpFlow, isHalfUpdate,
+  expToStmt, procCallToExp, expFlow, setExpFlow, setPExpFlow, isHalfUpdate,
   Prim(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
@@ -1706,21 +1706,25 @@ procCallToExp stmt =
 
 
 expFlow :: Exp -> FlowDirection
-expFlow (Typed exp _ _) = expFlow exp
+expFlow (Typed expr _ _) = expFlow expr
 expFlow (Var _ flow _) = flow
 expFlow _ = ParamIn
 
 
 setExpFlow :: FlowDirection -> Exp -> Exp
-setExpFlow flow (Typed exp ty cast) = Typed (setExpFlow flow exp) ty cast
+setExpFlow flow (Typed expr ty cast) = Typed (setExpFlow flow expr) ty cast
 setExpFlow flow (Var name _ ftype) = Var name flow ftype
-setExpFlow ParamIn exp = exp
-setExpFlow flow exp = 
-    shouldnt $ "Cannot set flow of " ++ show exp ++ " to " ++ show flow
+setExpFlow ParamIn expr = expr
+setExpFlow flow expr = 
+    shouldnt $ "Cannot set flow of " ++ show expr ++ " to " ++ show flow
+
+
+setPExpFlow :: FlowDirection -> Placed Exp -> Placed Exp
+setPExpFlow flow pexpr = (setExpFlow flow) <$> pexpr
 
 
 isHalfUpdate :: FlowDirection -> Exp -> Bool
-isHalfUpdate flow (Typed exp _ _) = isHalfUpdate flow exp
+isHalfUpdate flow (Typed expr _ _) = isHalfUpdate flow expr
 isHalfUpdate flow (Var _ flow' HalfUpdate) = flow == flow'
 isHalfUpdate _ _ = False
 

@@ -143,7 +143,9 @@ data TypeError = ReasonParam ProcName Int OptPos
                | ReasonCond OptPos
                    -- ^Conditional expression not bool
                | ReasonArgFlow ProcName Int OptPos
-                   -- ^Actual param flow inconsistent
+                   -- ^Input param with undefined argument variable
+               | ReasonUndefinedFlow ProcName OptPos
+                   -- ^Call argument flow does not match any definition
                | ReasonOverload [ProcSpec] OptPos
                    -- ^Multiple procs with same types/flows
                | ReasonAmbig ProcName OptPos [(VarName,[TypeSpec])]
@@ -175,7 +177,11 @@ instance Show TypeError where
             "Conditional or test expression with non-boolean result"
     show (ReasonArgFlow name num pos) =
         makeMessage pos $
-            "Flow error in call to " ++ name ++ ", argument " ++ show num
+            "Undefined argument in call to " ++ name
+            ++ ", argument " ++ show num
+    show (ReasonUndefinedFlow name pos) =
+        makeMessage pos $
+            "No matching mode in call to " ++ name
     show (ReasonOverload pspecs pos) =
         makeMessage pos $
             "Ambiguous overloading: call could refer to:" ++
@@ -346,6 +352,23 @@ expType' _ exp _ =
     shouldnt $ "Expression '" ++ show exp ++ "' left after flattening"
 
 
+-- |Works out the declared flow direction of an actual parameter, paired
+-- with whether or not the actual value is in fact available (is a constant
+-- or a previously assigned variable).
+expMode :: Set VarName -> Placed Exp -> (FlowDirection,Bool)
+expMode assigned pexp = expMode' assigned $ content pexp
+
+expMode' :: Set VarName -> Exp -> (FlowDirection,Bool)
+expMode' _ (IntValue _) = (ParamIn, True)
+expMode' _ (FloatValue _) = (ParamIn, True)
+expMode' _ (StringValue _) = (ParamIn, True)
+expMode' _ (CharValue _) = (ParamIn, True)
+expMode' assigned (Var name flow _) = (flow, name `elem` assigned)
+expMode' assigned (Typed expr _ _) = expMode' assigned expr
+expMode' _ expr =
+    shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
+
+
 matchTypes :: Placed Exp -> Placed Exp -> OptPos -> Typing -> Compiler Typing
 matchTypes parg1 parg2 pos typing = do
     let arg1 = content parg1
@@ -495,7 +518,7 @@ typecheckProcDecls m name = do
 -- emptyStmtResolution = Map.empty
 
 
--- |An individual proc and its argument types
+-- |An individual proc and its formal parameter types and modes.
 data ProcInfo = ProcInfo {
   procInfoProc :: ProcSpec,
   procInfoArgs :: [TypeFlow]
@@ -552,8 +575,13 @@ typecheckProcDecl m pdef = do
                 if validTyping typing
                   then do
                     logTypes "Now mode checking"
-                    (def',_,errs') <-
-                      modecheckStmts m name pos typing [] Set.empty def
+                    let inParams =
+                          List.filter
+                          ((`elem` [ParamIn,ParamInOut]) . paramFlow)
+                          params
+                    (def',assigned',errs') <-
+                      modecheckStmts m name pos typing []
+                      (Set.fromList $ paramName <$> inParams) def
                     let params' = updateParamTypes typing params
                     let proto' = proto { procProtoParams = params' }
                     let pdef' = pdef { procProto = proto',
@@ -764,6 +792,21 @@ matchTypeList caller callee pos callTypes calleeInfo
           calleeFlows = typeFlowMode <$> args
 
 
+-- |Match up the argument modes of a call with the available parameter
+-- modes of the callee, producing a list of the actual types. If this list
+-- contains InvalidType, then the call would be a type error.
+--
+-- This code deals with 3 modes per argument:  the mode of the called proc,
+-- the mode specified by annotations (or not) on the actual parameter, and
+-- the fact of whether the variable is actually previously assigned.
+matchModeList :: Ident -> Ident -> OptPos -> [(FlowDirection,Bool)]
+              -> ProcInfo -> Maybe ProcInfo
+matchModeList caller callee pos modes procinfo@(ProcInfo pspec typModes)
+  | (ParamIn,ParamOut) `elem` argModes -- Some param is in where actual is out
+    = Nothing
+  | otherwise = Just procinfo
+    where argModes = zip (typeFlowMode <$> typModes) (fst <$> modes)
+
 
 overloadErr :: StmtTypings -> TypeError
 overloadErr (StmtTypings call candidates) =
@@ -807,15 +850,40 @@ modecheckStmt :: ModSpec -> ProcName -> OptPos -> Typing
                  -> Compiler ([Placed Stmt], [Placed Stmt],
                               Set VarName,[TypeError])
 modecheckStmt m name defPos typing delayed assigned
-    stmt@(ProcCall _ cname _ args) pos = do
+    stmt@(ProcCall cmod cname _ args) pos = do
     logTypes $ "Mode checking call " ++ show stmt
+    logTypes $ "    with assigned " ++ show assigned
     callInfos <- callProcInfos $ maybePlace stmt pos
     actualTypes <- (fromMaybe AnyType <$>) <$> mapM (expType typing) args
-    let matches = catOKs
-                  $ List.map (matchTypeList name cname pos actualTypes)
-                    callInfos
-    logTypes $ "Possible modes: " ++ show matches
-    return ([maybePlace stmt pos],delayed,assigned,[])
+    let actualModes = List.map (expMode assigned) args
+    let flowErrs = [ReasonArgFlow cname num pos
+                   | ((mode,avail),num) <- zip actualModes [1..]
+                   , not avail && mode == ParamIn]
+    let typeMatches = catOKs
+                      $ List.map (matchTypeList name cname pos actualTypes)
+                      callInfos
+    let modeMatches = Maybe.mapMaybe (matchModeList name cname pos actualModes)
+                      typeMatches
+    logTypes $ "Possible modes: " ++ show modeMatches
+    if not $ List.null flowErrs -- Using undefined var as input?
+        then return ([],delayed,assigned,flowErrs)
+        else if List.null modeMatches -- No matching mode?
+             then return ([],delayed,assigned,[ReasonUndefinedFlow cname pos])
+             else do
+                 let match = selectMode modeMatches actualModes
+                 let matchProc = procInfoProc match
+                 let args' = List.zipWith setPExpFlow
+                             (typeFlowMode <$> procInfoArgs match) args
+                 let stmt' = ProcCall (procSpecMod matchProc)
+                                      (procSpecName matchProc)
+                                      (Just $ procSpecID matchProc)
+                                      args'
+                 let assigned' = Set.union assigned
+                                 $ Set.fromList
+                                 $ List.map (expVar . content)
+                                 $ List.filter
+                                   ((==ParamOut) . expFlow . content) args'
+                 return ([maybePlace stmt' pos],delayed,assigned',[])
 modecheckStmt m name defPos typing delayed assigned
     stmt@(Test stmts expr) pos = do
     logTypes $ "Mode checking test " ++ show stmt
@@ -842,6 +910,12 @@ modecheckStmt m name defPos typing delayed assigned
     return ([maybePlace (Loop stmts') pos], delayed, assigned',errs')
 modecheckStmt m _ _ _ delayed assigned stmt pos =
     return ([maybePlace stmt pos],delayed,assigned,[])
+
+
+selectMode :: [ProcInfo] -> [(FlowDirection,Bool)] -> ProcInfo
+selectMode (procInfo:_) _ = procInfo
+selectMode _ _ = shouldnt "selectMode with empty list of modes"
+
 
 
 -- |Type check the body of a single proc definition by type checking
