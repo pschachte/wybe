@@ -348,8 +348,8 @@ expType' _ (StringValue _) _ = return $ Just $ TypeSpec ["wybe"] "string" []
 expType' _ (CharValue _) _ = return $ Just $ TypeSpec ["wybe"] "char" []
 expType' typing (Var name _ _) _ = return $ varType name typing
 expType' _ (Typed _ typ _) pos = lookupType typ pos
-expType' _ exp _ =
-    shouldnt $ "Expression '" ++ show exp ++ "' left after flattening"
+expType' _ expr _ =
+    shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
 
 
 -- |Works out the declared flow direction of an actual parameter, paired
@@ -398,7 +398,7 @@ enforceType _ _ _ _ _ typing = typing -- no variable to record the type of
 
 
 
--- |Update the typing to assign the specified type to the specified exp
+-- |Update the typing to assign the specified type to the specified expr
 setExpType :: Placed Exp -> TypeSpec -> Typing  -> Typing
 setExpType pexp = setExpType' (content pexp)
 
@@ -407,7 +407,7 @@ setExpType' (FloatValue _) _ typing = typing
 setExpType' (StringValue _) _ typing = typing
 setExpType' (CharValue _) _ typing = typing
 setExpType' (Var name _ _) typ typing = setVarType name typ typing
-setExpType' (Typed exp _ _) typ typing = setExpType' exp typ typing
+setExpType' (Typed expr _ _) typ typing = setExpType' expr typ typing
 setExpType' otherExp _ _ = shouldnt $ "Invalid expr left after flattening "
                                      ++ show otherExp
 
@@ -653,13 +653,13 @@ bodyCalls (pstmt:pstmts) = do
     case stmt of
         ProcCall{} -> return $ pstmt:rest
         ForeignCall{} -> return rest -- no type constraints
-        Test nested exp -> do
-          modify $ addOneType (ReasonCond pos) (expVar $ content exp) boolType
+        Test nested expr -> do
+          modify $ addOneType (ReasonCond pos) (expVar $ content expr) boolType
           nested' <- bodyCalls nested
           return $ nested' ++ rest
         Nop -> return rest
-        Cond cond exp thn els -> do
-          modify $ addOneType (ReasonCond pos) (expVar $ content exp) boolType
+        Cond cond expr thn els -> do
+          modify $ addOneType (ReasonCond pos) (expVar $ content expr) boolType
           cond' <- bodyCalls cond
           thn' <- bodyCalls thn
           els' <- bodyCalls els
@@ -693,12 +693,12 @@ callProcInfos pstmt =
           shouldnt $ "callProcInfo with non-call statement " ++ showStmt 4 stmt
 
 
--- Return the variable name of the supplied exp.  In this context,
--- the exp will always be a variable.
+-- Return the variable name of the supplied expr.  In this context,
+-- the expr will always be a variable.
 expVar :: Exp -> VarName
 expVar (Var name _ _) = name
-expVar (Typed exp _ _) = expVar exp
-expVar exp = shouldnt $ "expVar of non-variable exp " ++ show exp
+expVar (Typed expr _ _) = expVar expr
+expVar expr = shouldnt $ "expVar of non-variable expr " ++ show expr
 
 
 -- |Type check a list of statement typings, resulting in a typing of all
@@ -1063,15 +1063,15 @@ typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
     let typing' = List.foldr (noteOutputCast . content) typing args
     logTypes $ "Resulting typing = " ++ show typing'
     return [typing']
-typecheckStmt m caller (Test stmts exp) pos typing = do
+typecheckStmt m caller (Test stmts expr) pos typing = do
     typings <- typecheckBody m caller typing stmts
-    mapM (\t -> typecheckArg' (content exp) (place exp) AnyType
+    mapM (\t -> typecheckArg' (content expr) (place expr) AnyType
                 (TypeSpec ["wybe"] "bool" []) t (ReasonCond pos))
         typings
 typecheckStmt _ _ Nop pos typing = return [typing]
-typecheckStmt m caller (Cond test exp thn els) pos typing = do
+typecheckStmt m caller (Cond test expr thn els) pos typing = do
     typings <- typecheckSequence (typecheckPlacedStmt m caller) [typing] test
-    typings' <- mapM (\t -> typecheckArg' (content exp) (place exp) AnyType
+    typings' <- mapM (\t -> typecheckArg' (content expr) (place expr) AnyType
                             (TypeSpec ["wybe"] "bool" []) t (ReasonCond pos))
                 typings
     typings'' <- typecheckSequence (typecheckPlacedStmt m caller) typings' thn
@@ -1154,14 +1154,14 @@ typecheckArg pos params pname typing (argNum,param,arg) = do
 
 typecheckArg' :: Exp -> OptPos -> TypeSpec -> TypeSpec -> Typing ->
                  TypeError -> Compiler Typing
-typecheckArg' texp@(Typed exp typ cast) pos _ paramType typing reason = do
+typecheckArg' texp@(Typed expr typ cast) pos _ paramType typing reason = do
     logTypes $ "Checking typed expr " ++ show texp
     typ' <- fromMaybe AnyType <$> lookupType typ pos
     logTypes $ "Determined type " ++ show typ'
     let typ'' = if cast then AnyType else typ'
     logTypes $ "Considering casting, type is " ++ show typ''
-    typecheckArg' exp pos typ'' paramType typing reason
-    -- typecheckArg' exp pos  typ'
+    typecheckArg' expr pos typ'' paramType typing reason
+    -- typecheckArg' expr pos  typ'
     --               paramType typing reason
 typecheckArg' (Var var _ _) _ declType paramType typing reason = do
     -- XXX should out flow typing be contravariant?
@@ -1186,8 +1186,8 @@ typecheckArg' (StringValue val) _ declType paramType typing reason =
 typecheckArg' (CharValue val) _ declType paramType typing reason =
     return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "char" [])
       typing reason
-typecheckArg' exp _ _ _ _ _ =
-    shouldnt $ "trying to type check expression " ++ show exp ++ "."
+typecheckArg' expr _ _ _ _ _ =
+    shouldnt $ "trying to type check expression " ++ show expr ++ "."
 
 
 typecheckArg'' :: TypeSpec -> TypeSpec -> TypeSpec -> Typing -> TypeError ->
@@ -1244,10 +1244,10 @@ applyStmtTyping typing call@(ForeignCall lang name flags args) pos = do
     let instr = ForeignCall lang name flags args'
     logTypes $ "typed call = " ++ showStmt 0 instr
     return $ maybePlace instr pos
-applyStmtTyping typing (Test stmts exp) pos = do
+applyStmtTyping typing (Test stmts expr) pos = do
     stmts' <- applyBodyTyping typing stmts
-    let exp' = fmap (applyExpTyping typing) exp
-    return $ maybePlace (Test stmts' exp') pos
+    let expr' = fmap (applyExpTyping typing) expr
+    return $ maybePlace (Test stmts' expr') pos
 applyStmtTyping typing (Cond test cond thn els) pos = do
     test' <- applyBodyTyping typing test
     let cond' = fmap (applyExpTyping typing) cond
@@ -1267,24 +1267,24 @@ applyStmtTyping typing Next pos = return $ maybePlace Next pos
 
 
 applyExpTyping :: Typing -> Exp -> Exp
-applyExpTyping _ exp@(IntValue _) =
-    Typed exp (TypeSpec ["wybe"] "int" []) False
-applyExpTyping _ exp@(FloatValue _) =
-    Typed exp (TypeSpec ["wybe"] "float" []) False
-applyExpTyping _ exp@(StringValue _) =
-    Typed exp (TypeSpec ["wybe"] "string" []) False
-applyExpTyping _ exp@(CharValue _) =
-    Typed exp (TypeSpec ["wybe"] "char" []) False
-applyExpTyping typing exp@(Var nm flow ftype) =
+applyExpTyping _ expr@(IntValue _) =
+    Typed expr (TypeSpec ["wybe"] "int" []) False
+applyExpTyping _ expr@(FloatValue _) =
+    Typed expr (TypeSpec ["wybe"] "float" []) False
+applyExpTyping _ expr@(StringValue _) =
+    Typed expr (TypeSpec ["wybe"] "string" []) False
+applyExpTyping _ expr@(CharValue _) =
+    Typed expr (TypeSpec ["wybe"] "char" []) False
+applyExpTyping typing expr@(Var nm flow ftype) =
     case varType nm typing of
         Nothing -> shouldnt $ "type of variable '" ++ nm ++ "' unknown"
-        Just typ -> Typed exp typ False
+        Just typ -> Typed expr typ False
 applyExpTyping typing typed@(Typed _ _ True) =
     typed
-applyExpTyping typing (Typed exp _ False) =
-    applyExpTyping typing exp
-applyExpTyping _ exp =
-    shouldnt $ "Expression '" ++ show exp ++ "' left after flattening"
+applyExpTyping typing (Typed expr _ False) =
+    applyExpTyping typing expr
+applyExpTyping _ expr =
+    shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
 
 
 matchProcType :: Typing -> [Placed Exp] -> ProcSpec
@@ -1349,9 +1349,9 @@ checkStmtTyped name pos (ProcCall pmod pname pid args) ppos = do
 checkStmtTyped name pos (ForeignCall _ pname _ args) ppos =
     mapM_ (checkArgTyped name pos pname ppos) $
           zip [1..] $ List.map content args
-checkStmtTyped name pos (Test stmts exp) ppos = do
+checkStmtTyped name pos (Test stmts expr) ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
-    checkExpTyped name pos ("test" ++ showMaybeSourcePos ppos) $ content exp
+    checkExpTyped name pos ("test" ++ showMaybeSourcePos ppos) $ content expr
 checkStmtTyped name pos (Cond ifstmts cond thenstmts elsestmts) ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) ifstmts
     checkExpTyped name pos ("condition" ++ showMaybeSourcePos ppos) $
