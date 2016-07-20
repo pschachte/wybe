@@ -34,7 +34,8 @@ module AST (
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..), 
   argFlowDirection, argType, outArgVar, argDescription, flowsIn, flowsOut,
   foldBodyPrims, foldBodyDistrib, foldProcCalls,
-  expToStmt, procCallToExp, expFlow, setExpFlow, setPExpFlow, isHalfUpdate,
+  expToStmt, procCallToExp, expFlow,
+  setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
   Prim(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
@@ -1038,7 +1039,7 @@ updateModLLVM fn modimp = do
 -- | Given a type spec, find its internal representation (a string),
 --   if possible.
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
-lookupTypeRepresentation AnyType = return Nothing
+lookupTypeRepresentation AnyType = return $ Just "word"
 lookupTypeRepresentation InvalidType = return Nothing
 lookupTypeRepresentation (TypeSpec [] _ _) = return Nothing    
 lookupTypeRepresentation (TypeSpec modSpec name _) = do
@@ -1711,16 +1712,20 @@ expFlow (Var _ flow _) = flow
 expFlow _ = ParamIn
 
 
-setExpFlow :: FlowDirection -> Exp -> Exp
-setExpFlow flow (Typed expr ty cast) = Typed (setExpFlow flow expr) ty cast
-setExpFlow flow (Var name _ ftype) = Var name flow ftype
-setExpFlow ParamIn expr = expr
-setExpFlow flow expr = 
-    shouldnt $ "Cannot set flow of " ++ show expr ++ " to " ++ show flow
+setExpTypeFlow :: TypeFlow -> Exp -> Exp
+setExpTypeFlow typeflow (Typed expr _ cast)
+    = Typed expr' ty cast
+    where Typed expr' ty _ = setExpTypeFlow typeflow expr
+setExpTypeFlow (TypeFlow ty fl) (Var name _ ftype)
+    = Typed (Var name fl ftype) ty False
+setExpTypeFlow (TypeFlow ty ParamIn) expr
+    = Typed expr ty False
+setExpTypeFlow (TypeFlow ty fl) expr = 
+    shouldnt $ "Cannot set type/flow of " ++ show expr
 
 
-setPExpFlow :: FlowDirection -> Placed Exp -> Placed Exp
-setPExpFlow flow pexpr = (setExpFlow flow) <$> pexpr
+setPExpTypeFlow :: TypeFlow -> Placed Exp -> Placed Exp
+setPExpTypeFlow typeflow pexpr = (setExpTypeFlow typeflow) <$> pexpr
 
 
 isHalfUpdate :: FlowDirection -> Exp -> Bool

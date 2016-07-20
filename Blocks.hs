@@ -931,6 +931,7 @@ typed' ty = do
     case repr of
         Just typeStr -> return $ typeStrToType typeStr
         Nothing -> 
+            -- XXX this should be an error, not special cased.
             case typeName ty of
                 "bool" -> return $ int_c 1
                 "int" -> return $ int_c (fromIntegral wordSize)

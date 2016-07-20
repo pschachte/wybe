@@ -363,6 +363,8 @@ expMode' _ (IntValue _) = (ParamIn, True)
 expMode' _ (FloatValue _) = (ParamIn, True)
 expMode' _ (StringValue _) = (ParamIn, True)
 expMode' _ (CharValue _) = (ParamIn, True)
+expMode' assigned (Var name FlowUnknown _)
+    = if name `elem` assigned then (ParamIn, True) else (ParamOut, False)
 expMode' assigned (Var name flow _) = (flow, name `elem` assigned)
 expMode' assigned (Typed expr _ _) = expMode' assigned expr
 expMode' _ expr =
@@ -872,8 +874,8 @@ modecheckStmt m name defPos typing delayed assigned
              else do
                  let match = selectMode modeMatches actualModes
                  let matchProc = procInfoProc match
-                 let args' = List.zipWith setPExpFlow
-                             (typeFlowMode <$> procInfoArgs match) args
+                 let args' = List.zipWith setPExpTypeFlow
+                             (procInfoArgs match) args
                  let stmt' = ProcCall (procSpecMod matchProc)
                                       (procSpecName matchProc)
                                       (Just $ procSpecID matchProc)
@@ -885,21 +887,45 @@ modecheckStmt m name defPos typing delayed assigned
                                    ((==ParamOut) . expFlow . content) args'
                  return ([maybePlace stmt' pos],delayed,assigned',[])
 modecheckStmt m name defPos typing delayed assigned
+    stmt@(ForeignCall lang cname flags args) pos = do
+    logTypes $ "Mode checking foreign call " ++ show stmt
+    logTypes $ "    with assigned " ++ show assigned
+    actualTypes <- (fromMaybe AnyType <$>) <$> mapM (expType typing) args
+    let actualModes = List.map (expMode assigned) args
+    let flowErrs = [ReasonArgFlow cname num pos
+                   | ((mode,avail),num) <- zip actualModes [1..]
+                   , not avail && mode == ParamIn]
+    if not $ List.null flowErrs -- Using undefined var as input?
+        then return ([],delayed,assigned,flowErrs)
+        else do
+            let typeflows = List.zipWith TypeFlow actualTypes
+                            $ fst <$> actualModes
+            let args' = List.zipWith setPExpTypeFlow typeflows args
+            let stmt' = ForeignCall lang cname flags args'
+            let assigned' = Set.union assigned
+                                 $ Set.fromList
+                                 $ List.map (expVar . content)
+                                 $ List.filter
+                                   ((==ParamOut) . expFlow . content) args'
+            return ([maybePlace stmt' pos],delayed,assigned',[])
+modecheckStmt m name defPos typing delayed assigned
     stmt@(Test stmts expr) pos = do
     logTypes $ "Mode checking test " ++ show stmt
     (stmts', assigned',errs') <-
       modecheckStmts m name defPos typing [] assigned stmts
-    return ([maybePlace (Test stmts' expr) pos], delayed, assigned',errs')
+    let expr' = setPExpTypeFlow (TypeFlow boolType ParamIn) expr
+    return ([maybePlace (Test stmts' expr') pos], delayed, assigned',errs')
 modecheckStmt m name defPos typing delayed assigned
     stmt@(Cond tstStmts expr thnStmts elsStmts) pos = do
     logTypes $ "Mode checking conditional " ++ show stmt
     (tstStmts', assigned1,errs1) <-
       modecheckStmts m name defPos typing [] assigned tstStmts
+    let expr' = setPExpTypeFlow (TypeFlow boolType ParamIn) expr
     (thnStmts', assigned2,errs2) <-
       modecheckStmts m name defPos typing [] assigned1 thnStmts
     (elsStmts', assigned3,errs3) <-
       modecheckStmts m name defPos typing [] assigned2 elsStmts
-    return ([maybePlace (Cond tstStmts' expr thnStmts' elsStmts') pos],
+    return ([maybePlace (Cond tstStmts' expr' thnStmts' elsStmts') pos],
             delayed, assigned2 `Set.intersection` assigned3,
             errs1++errs2++errs3)
 modecheckStmt m name defPos typing delayed assigned
@@ -1381,9 +1407,19 @@ checkArgTyped callerName callerPos calleeName callPos (n,arg) =
 
 checkExpTyped :: ProcName -> OptPos -> String -> Exp ->
                  Compiler ()
-checkExpTyped _ _ _ Typed{} = return ()
+checkExpTyped callerName callerPos msg (Typed expr ty _)
+    | ty /= AnyType = checkExpModed callerName callerPos msg expr
 checkExpTyped callerName callerPos msg _ =
     reportUntyped callerName callerPos msg
+
+
+checkExpModed :: ProcName -> OptPos -> String -> Exp
+              -> Compiler ()
+checkExpModed callerName callerPos msg (Var _ FlowUnknown _)
+    = liftIO $ putStrLn $ "Internal error: In " ++ callerName ++
+      showMaybeSourcePos callerPos ++ ", " ++ msg ++ " left with FlowUnknown"
+checkExpModed _ _ _ _ = return ()
+
 
 
 reportUntyped :: ProcName -> OptPos -> String -> Compiler ()
