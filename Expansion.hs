@@ -260,10 +260,11 @@ addOutputNaming _ _ = return ()
 -- context.
 addInputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
 addInputAssign pos (param@(PrimParam name ty flow _ _),v) = do
-    when (AnyType == ty) $
-      shouldnt $ "Danger: untyped param: " ++ show param
-    when (AnyType == argType v) $
-      shouldnt $ "Danger: untyped argument: " ++ show v
+    -- XXX AnyType is now a valid type, treated as a word type
+    -- when (AnyType == ty) $
+    --   shouldnt $ "Danger: untyped param: " ++ show param
+    -- when (AnyType == argType v) $
+    --   shouldnt $ "Danger: untyped argument: " ++ show v
     addInputAssign' pos name ty flow v
     
 addInputAssign' :: OptPos -> PrimVarName -> TypeSpec -> PrimFlow -> PrimArg

@@ -204,7 +204,7 @@ makeGlobalDefinition :: String -> PrimProto
                      -> Compiler LLVMAST.Definition
 makeGlobalDefinition pname proto bls = do
     modName <- fmap showModSpec getModuleSpec
-    let params = List.filter (not . isPhantomParam) (primProtoParams proto)
+    let params = List.filter (not . phantomParam) (primProtoParams proto)
         isMain = primProtoName proto == "<0>"
         -- *The top level procedure will be labelled main.
         label = modName ++ "." ++
@@ -239,13 +239,8 @@ primOutputType params = do
         n -> fmap struct_t $ mapM (typed' . primParamType) outputs
 
 
-isPhantomParam :: PrimParam -> Bool
-isPhantomParam p = case (typeName . primParamType) p of
-                     "phantom" -> True
-                     _ -> False
-
 isOutputParam :: PrimParam -> Bool
-isOutputParam p = not (isInputParam p || isPhantomParam p) &&
+isOutputParam p = not (isInputParam p || phantomParam p) &&
     paramNeeded p
 
 
@@ -303,9 +298,9 @@ assignParam p =
     do let nm = show (primParamName p)
        let ty = primParamType p
        llty <- lift $ typed' ty
-       case (typeName ty) of
-         "phantom" -> return () -- No need to assign phantoms
-         _ -> case (paramInfoUnneeded . primParamInfo) p of
+       if phantomType ty
+         then return () -- No need to assign phantoms
+         else case (paramInfoUnneeded . primParamInfo) p of
            True -> return ()    -- unneeded param
            -- False -> do
            --     let varType = typed ty
@@ -758,7 +753,7 @@ goesIn :: PrimArg -> Bool
 goesIn p = (argFlowDirection p) == FlowIn
 
 notPhantom :: PrimArg -> Bool
-notPhantom p = ((typeName .argType) p) /= "phantom"
+notPhantom = not . phantomArg
 
 -- | Pull out the name of a primitive argument if it is a variable.
 argName :: PrimArg -> Maybe String
@@ -914,15 +909,15 @@ llvmMapUnop =
 -- Helpers                                                                --
 ----------------------------------------------------------------------------
 typed :: TypeSpec -> LLVMAST.Type
-typed ty = case (typeName ty) of
-             "int"     -> int_t
-             "char"    -> char_t
-             "float"   -> float_t
-             "double"  -> float_t
-             "bool"    -> int_c 1
-             "string"  -> ptr_t char_t
-             "phantom" -> void_t
-             _         -> void_t
+typed AnyType                      = ptr_t char_t -- XXX should be a word type
+typed TypeSpec{typeName="int"}     = int_t
+typed TypeSpec{typeName="char"}    = char_t
+typed TypeSpec{typeName="float"}   = float_t
+typed TypeSpec{typeName="double"}  = float_t
+typed TypeSpec{typeName="bool"}    = int_c 1
+typed TypeSpec{typeName="string"}  = ptr_t char_t
+typed TypeSpec{typeName="phantom"} = void_t
+typed _                            = void_t
 
 
 typed' :: TypeSpec -> Compiler LLVMAST.Type
@@ -931,11 +926,12 @@ typed' ty = do
     case repr of
         Just typeStr -> return $ typeStrToType typeStr
         Nothing -> 
+            shouldnt "type' applied to InvaldType or unknown type"
             -- XXX this should be an error, not special cased.
-            case typeName ty of
-                "bool" -> return $ int_c 1
-                "int" -> return $ int_c (fromIntegral wordSize)
-                _ -> return $ ptr_t $ int_c (fromIntegral wordSize)
+            -- case typeName ty of
+            --     "bool" -> return $ int_c 1
+            --     "int" -> return $ int_c (fromIntegral wordSize)
+            --     _ -> return $ ptr_t $ int_c (fromIntegral wordSize)
 
 
 typeStrToType :: String -> LLVMAST.Type

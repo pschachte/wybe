@@ -19,6 +19,7 @@ module AST (
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), 
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
+  phantomParam, phantomArg, phantomType,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   placedApply, makeMessage, updatePlacedM,
@@ -1595,6 +1596,21 @@ data Exp
       | Fncall ModSpec Ident [Placed Exp]
       | ForeignFn Ident Ident [Ident] [Placed Exp]
      deriving (Eq,Ord,Generic)
+
+
+-- |Is the supplied parameter a phantom?
+phantomParam :: PrimParam -> Bool
+phantomParam = phantomType . primParamType
+
+-- |Is the supplied argument a phantom?
+phantomArg :: PrimArg -> Bool
+phantomArg (ArgVar _ ty _ _ _) = phantomType ty
+phantomArg _ = False -- Nothing but a var can be a phantom
+
+-- |Does the supplied type indicate a phantom?
+phantomType TypeSpec{typeName="phantom"} = True
+phantomType _ = False
+
 
 -- |A loop generator (ie, an iterator).  These need to be 
 --  generalised, allowing them to be user-defined.
