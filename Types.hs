@@ -232,32 +232,52 @@ undefStmtErr caller pstmt =
 --                           Type Assignments
 ----------------------------------------------------------------
 
--- | A type assignment for variables (symbol table), with a list of type errors
--- XXX Need to handle type unification properly by allowing a variable to
---     specify its type as whatever the type of another variable is.
---     This could be done by adding a variable reference alternative to the
---     TypeSpec type.
+-- | A variable type assignment (symbol table), with a list of type errors.
+-- 
 data Typing = Typing {
-                  typingDict::Map VarName TypeSpec,
+                  typingDict::Map VarName TypeRef,
                   typingErrs::[TypeError]
                   }
             deriving (Show,Eq,Ord)
 
-
+-- |The empty typing, assigning every var the type AnyType.
 initTyping :: Typing
 initTyping = Typing Map.empty []
 
 
+-- |Does this typing have no type errors?
 validTyping :: Typing -> Bool
 validTyping (Typing _ errs) = List.null errs
 
 
-varType :: VarName -> Typing -> Maybe TypeSpec
-varType var typing = Map.lookup var $ typingDict typing
+-- |Get the type associated with a variable; AnyType if no constraint has
+--  been imposed on that variable.
+varType :: VarName -> Typing -> TypeSpec
+varType var typing
+    = case Map.findWithDefault (DirectType AnyType) var $ typingDict typing of
+          DirectType t -> t
+          IndirectType v -> varType v typing
 
 
-setVarType :: VarName -> TypeSpec -> Typing -> Typing
-setVarType var ty (Typing dict errs) = Typing (Map.insert var ty dict) errs
+-- |Constrain the type of the specified variable to be a subtype of the
+--  specified type.  If this produces an invalid type, the specified type
+--  error describes the error.
+constrainVarType :: TypeError -> VarName -> TypeSpec -> Typing -> Typing
+constrainVarType reason var ty typing
+    = case meetTypes ty $ varType var typing of
+          InvalidType -> typeError reason typing
+          newType -> typing {typingDict =
+                             Map.insert var newType $ typingDict typing }
+
+
+-- |Constrain the types of the two specified variables to be identical,
+--  even following further constraints on the types of either of the vars.
+unifyVarTypes :: VarName -> VarName -> Typing -> Typing
+unifyVarTypes var1 var2 typing
+    = case meetTypes ty $ varType var typing of
+          InvalidType -> typeError reason typing
+          newType -> typing {typingDict =
+                             Map.insert var newType $ typingDict typing }
 
 
 typeError :: TypeError -> Typing -> Typing
@@ -266,25 +286,6 @@ typeError err = typeErrors [err]
 
 typeErrors :: [TypeError] -> Typing -> Typing
 typeErrors newErrs (Typing dict errs) = Typing dict $ newErrs ++ errs
-
-
-addOneType :: TypeError -> VarName -> TypeSpec -> Typing -> Typing
-addOneType reason name typ typing =
-    -- Be sure we insert AnyType if it's not already there, because
-    -- it distinguishes a defined variable with unknown type from an
-    -- undefined variable
-    case varType name typing of
-      Nothing -> setVarType name typ typing
-      Just oldTyp
-          -- the type we already have covers the new one:  keep it
-          | oldTyp `subtypeOf` typ -> typing
-          -- the new type is compatible but better:  substitute it
-          | typ `properSubtypeOf` oldTyp -> setVarType name typ typing
-          -- old and new types are incompatible:  report error
-          | otherwise ->
-              --trace ("addOneType " ++ name ++ ":" ++ show typ ++
-              --       " vs. " ++ show oldTyp ++ " FAILED") $
-              typeError reason typing
 
 
 -- |Returns the first argument restricted to the variables appearing
@@ -390,12 +391,12 @@ matchTypes parg1 parg2 pos typing = do
 -- |Require the Exp to have the specified type
 enforceType :: Exp -> TypeSpec -> Exp -> Exp -> OptPos -> Typing -> Typing
 enforceType (Var name _ _) typespec arg1 arg2 pos typing =
-    addOneType (ReasonEqual arg1 arg2 pos) name typespec typing
+    constrainVarType (ReasonEqual arg1 arg2 pos) name typespec typing
 enforceType (Typed (Var name _ _) typespec1 _) typespec arg1 arg2 pos typing =
     let reason = ReasonEqual arg1 arg2 pos
     in case meetTypes typespec1 typespec of
       InvalidType -> typeError reason typing
-      ty          -> addOneType reason name ty typing
+      ty          -> constrainVarType reason name ty typing
 enforceType _ _ _ _ _ typing = typing -- no variable to record the type of
 
 
@@ -618,7 +619,7 @@ addDeclaredType :: ProcName -> OptPos -> Int -> Typing -> (Param,Int) ->
 addDeclaredType procname pos arity typs (Param name typ flow _,argNum) = do
     typ' <- fromMaybe AnyType <$> lookupType typ pos
     logTypes $ "    type of '" ++ name ++ "' is " ++ show typ'
-    return $ addOneType (ReasonParam procname arity pos) name typ' typs
+    return $ constrainVarType (ReasonParam procname arity pos) name typ' typs
 
 
 addResourceType :: ProcName -> OptPos -> Typing -> ResourceFlowSpec ->
@@ -630,7 +631,7 @@ addResourceType procname pos typs rfspec = do
     let names = List.map resourceName rspecs
     let typs' = List.foldr
                 (\(n,t) typs ->
-                     addOneType
+                     constrainVarType
                      (ReasonResource procname n pos) n t typs)
                 typs $ zip names types
     return typs'
@@ -654,14 +655,16 @@ bodyCalls (pstmt:pstmts) = do
     let pos  = place pstmt
     case stmt of
         ProcCall{} -> return $ pstmt:rest
-        ForeignCall{} -> return rest -- no type constraints
+        -- need to handle move instructions:
+        (ForeignCall "llvm" "move" [] _) -> return $ pstmt:rest
+        ForeignCall{} -> return rest
         Test nested expr -> do
-          modify $ addOneType (ReasonCond pos) (expVar $ content expr) boolType
+          modify $ constrainVarType (ReasonCond pos) (expVar $ content expr) boolType
           nested' <- bodyCalls nested
           return $ nested' ++ rest
         Nop -> return rest
         Cond cond expr thn els -> do
-          modify $ addOneType (ReasonCond pos) (expVar $ content expr) boolType
+          modify $ constrainVarType (ReasonCond pos) (expVar $ content expr) boolType
           cond' <- bodyCalls cond
           thn' <- bodyCalls thn
           els' <- bodyCalls els
@@ -692,7 +695,8 @@ callProcInfos pstmt =
                        . getParams)
               procs
         stmt ->
-          shouldnt $ "callProcInfo with non-call statement " ++ showStmt 4 stmt
+          shouldnt $ "callProcInfos with non-call statement "
+                     ++ showStmt 4 stmt
 
 
 -- Return the variable name of the supplied expr.  In this context,
@@ -1077,12 +1081,14 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
                                       (List.any (`elem` dups) . snd) $
                                     zip procs typList)
                                    pos) typing]
-typecheckStmt _ _ call@(ForeignCall "llvm" "move" [] [a1,a2]) pos typing = do
-  -- Ensure arguments have the same types
+typecheckStmt _ _ call@(ForeignCall "llvm" "move" [] args@[a1,a2]) pos typing
+  = do
+    -- Ensure arguments have the same types
     logTypes $ "Type checking move instruction " ++ showStmt 4 call
-    typing' <- matchTypes a1 a2 pos typing
-    logTypes $ "Resulting typing = " ++ show typing'
-    return [typing']
+    let typing' = List.foldr (noteOutputCast . content) typing args
+    typing'' <- matchTypes a1 a2 pos typing'
+    logTypes $ "Resulting typing = " ++ show typing''
+    return [typing'']
 typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
     -- Pick up any output casts
     logTypes $ "Type checking foreign call " ++ showStmt 4 call
@@ -1132,7 +1138,7 @@ matchingArgFlows caller called args pos typing pspec = do
 
 noteOutputCast :: Exp -> Typing -> Typing
 noteOutputCast (Typed (Var name flow _) typ True) typing
-  | flowsOut flow = addOneType ReasonShouldnt name typ typing
+  | flowsOut flow = constrainVarType ReasonShouldnt name typ typing
 noteOutputCast _ typing = typing
 
 
@@ -1196,7 +1202,7 @@ typecheckArg' (Var var _ _) _ declType paramType typing reason = do
         show paramType ++
         (if paramType `subtypeOf` declType then " succeeded" else " FAILED")
     if paramType `subtypeOf` declType
-      then return $ addOneType reason var paramType typing
+      then return $ constrainVarType reason var paramType typing
       else if paramType == AnyType -- may be type checking recursion
            then return typing
            else return $ typeError reason typing
