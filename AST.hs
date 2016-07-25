@@ -14,7 +14,7 @@
 module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
-  Determinism(..), TypeProto(..), TypeSpec(..), TypeImpln(..),
+  Determinism(..), TypeProto(..), TypeSpec(..), TypeRef(..), TypeImpln(..),
   FnProto(..), ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), 
@@ -1449,6 +1449,16 @@ data TypeSpec = TypeSpec {
     typeParams::[TypeSpec] 
     } | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
+
+-- |This specifies a type, but permits a type to be specified indirectly,
+--  as simply identical to the type of another variable, or directly.
+data TypeRef = DirectType {typeRefType :: TypeSpec}
+             | IndirectType {typeRefVar :: VarName}
+             deriving (Eq,Ord)
+
+instance Show TypeRef where
+    show (DirectType tspec) = show tspec
+    show (IndirectType var) = "@" ++ show var
 
 data ResourceSpec = ResourceSpec {
     resourceMod::ModSpec,
