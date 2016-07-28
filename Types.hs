@@ -256,11 +256,17 @@ validTyping (Typing _ errs) = List.null errs
 --  ultimate reference, where possible, so future lookups will be faster.
 ultimateRef :: VarName -> Typing -> (VarName,Typing)
 ultimateRef var typing
-    = case Map.lookup var $ typingDict typing of
-          DirectType t -> (var,typing)
-          IndirectType v ->
-            let (var',typing') = ultimateRef v typing
-            in (var', Map.insert var (IndirectType var') typing')
+    = let (var',dict') = ultimateRef' var $ typingDict typing
+      in  (var', typing {typingDict = dict' })
+
+ultimateRef' :: VarName -> Map VarName TypeRef
+             -> (VarName,Map VarName TypeRef)
+ultimateRef' var dict
+    = case Map.lookup var dict of
+          Just (IndirectType v) ->
+            let (var',dict') = ultimateRef' v dict
+            in (var', Map.insert var (IndirectType var') dict')
+          _ -> (var,dict)
 
 
 -- |Get the type associated with a variable; AnyType if no constraint has
@@ -280,7 +286,8 @@ constrainVarType reason var ty typing
     = case meetTypes ty $ varType var typing of
           InvalidType -> typeError reason typing
           newType -> typing {typingDict =
-                             Map.insert var newType $ typingDict typing }
+                             Map.insert var (DirectType newType)
+                             $ typingDict typing }
 
 
 -- |Constrain the types of the two specified variables to be identical,
@@ -291,7 +298,9 @@ unifyVarTypes var1 var2 typing
           (var2',typing'') = ultimateRef var2 typing'
           lower = min var1' var2'
           higher = max var1' var2'
-      in  Map.insert higher (IndirectType lower) typing''
+      in  typing'' {typingDict =
+                    Map.insert higher (IndirectType lower)
+                    $ typingDict typing''}
 
 
 typeError :: TypeError -> Typing -> Typing
@@ -323,8 +332,8 @@ projectTyping (Typing typing errs) (Typing interest _) =
 projectTypingDict :: [VarName] -> Map VarName TypeRef -> Map VarName TypeRef
                   -> Map VarName VarName -> Map VarName TypeRef
 projectTypingDict [] _ result _ = result
-projectTypingDict (v:vs) typing result renaming
-    = let (v',typing') = ultimateRef v typing
+projectTypingDict (v:vs) dict result renaming
+    = let (v',dict') = ultimateRef' v dict
           ty = varType v' typing'
       in  case Map.lookup v' renaming of
               Nothing -> projectTypingDict vs typing
