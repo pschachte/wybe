@@ -926,25 +926,26 @@ typed' ty = do
     case repr of
         Just typeStr -> return $ typeStrToType typeStr
         Nothing -> 
-            shouldnt "type' applied to InvaldType or unknown type"
-            -- XXX this should be an error, not special cased.
-            -- case typeName ty of
-            --     "bool" -> return $ int_c 1
-            --     "int" -> return $ int_c (fromIntegral wordSize)
-            --     _ -> return $ ptr_t $ int_c (fromIntegral wordSize)
+            shouldnt $ "typed' applied to InvaldType or unknown type ("
+            ++ show ty
+            ++ ")"
 
 
 typeStrToType :: String -> LLVMAST.Type
-typeStrToType [] = void_t
-typeStrToType ty@(c:cs)
+typeStrToType []        = void_t
+typeStrToType "int"     = int_c (fromIntegral wordSize)
+typeStrToType "bool"    = int_c 1
+typeStrToType "float"   = float_t
+typeStrToType "double"  = float_t
+typeStrToType "pointer" = ptr_t $ int_c (fromIntegral wordSize)
+typeStrToType "word"    = ptr_t $ int_c (fromIntegral wordSize)
+typeStrToType "phantom" = void_t
+typeStrToType (c:cs)
     | c == 'i' = int_c (fromIntegral bytes)
     | c == 'f' = float_c (fromIntegral bytes)
-    | c == 'p' = if ty == "pointer"
-                 then ptr_t (int_c (fromIntegral wordSize))
-                 else ptr_t (int_c 8)
     | otherwise = void_t
   where
-    bytes = (read cs :: Int)
+    bytes = read cs :: Int
 
 
 ------------------------------------------------------------------------------

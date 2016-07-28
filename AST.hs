@@ -1042,14 +1042,19 @@ updateModLLVM fn modimp = do
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
 lookupTypeRepresentation AnyType = return $ Just "word"
 lookupTypeRepresentation InvalidType = return Nothing
-lookupTypeRepresentation (TypeSpec [] _ _) = return Nothing    
-lookupTypeRepresentation (TypeSpec modSpec name _) = do
+lookupTypeRepresentation (TypeSpec [] "bool" _) = return $ Just "bool"
+lookupTypeRepresentation (TypeSpec [] "int" _) = return $ Just "int"
+lookupTypeRepresentation (TypeSpec [] "float" _) = return $ Just "float"
+lookupTypeRepresentation (TypeSpec [] "double" _) = return $ Just "double"
+lookupTypeRepresentation (TypeSpec [] _ _) = return Nothing
+lookupTypeRepresentation (TypeSpec _ "phantom" _) = return $ Just "phantom"
+lookupTypeRepresentation (TypeSpec modSpecs name _) = do
     -- logMsg Blocks $ "Looking for " ++ name ++ " in mod: " ++
-    --     showModSpec modSpec
-    reenterModule modSpec
+    --      showModSpec modSpecs
+    reenterModule modSpecs
     maybeImpln <- getModuleImplementation
     modInt <- getModuleInterface
-    finishModule
+    _ <- finishModule
     -- Try find the TypeRepresentation in the interface
     let maybeIntMatch = fmap snd $ Map.lookup name $ pubTypes modInt
     -- Try find the TypeRepresentation in the implementation if not found
@@ -1062,7 +1067,7 @@ lookupTypeRepresentation (TypeSpec modSpec name _) = do
     -- If still not found, search the direct descendant interface and
     -- implementation
     -- case maybeMatch of
-    --     Nothing -> case getDescendant modSpec of
+    --     Nothing -> case getDescendant modSpecs of
     --         Just des -> lookupTypeRepresentation (TypeSpec des name ps)
     --         Nothing -> return Nothing
     --     _ -> return maybeMatch
