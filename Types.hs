@@ -14,6 +14,7 @@ import           Data.List           as List
 import           Data.Map            as Map
 import           Data.Maybe          as Maybe
 import           Data.Set            as Set
+import           Data.Tuple
 import           Options             (LogSelection (Types))
 -- import           Resources
 import           Util
@@ -250,6 +251,24 @@ validTyping :: Typing -> Bool
 validTyping (Typing _ errs) = List.null errs
 
 
+-- |Follow a chain of TypeRefs to find the final IndirectType reference.
+--  This code also sort-circuits all the keys along the path to the
+--  ultimate reference, where possible, so future lookups will be faster.
+ultimateRef :: VarName -> Typing -> (VarName,Typing)
+ultimateRef var typing
+    = let (var',dict') = ultimateRef' var $ typingDict typing
+      in  (var', typing {typingDict = dict' })
+
+ultimateRef' :: VarName -> Map VarName TypeRef
+             -> (VarName,Map VarName TypeRef)
+ultimateRef' var dict
+    = case Map.lookup var dict of
+          Just (IndirectType v) ->
+            let (var',dict') = ultimateRef' v dict
+            in (var', Map.insert var (IndirectType var') dict')
+          _ -> (var,dict)
+
+
 -- |Get the type associated with a variable; AnyType if no constraint has
 --  been imposed on that variable.
 varType :: VarName -> Typing -> TypeSpec
@@ -288,12 +307,37 @@ typeErrors :: [TypeError] -> Typing -> Typing
 typeErrors newErrs (Typing dict errs) = Typing dict $ newErrs ++ errs
 
 
--- |Returns the first argument restricted to the variables appearing
---  in the second.
+-- |Returns the first argument restricted to the variables appearing in the
+--  second. This must handle cases where variable appearing in chains of
+--  indirections (equivalence classes of variables) are projected away.
 projectTyping :: Typing -> Typing -> Typing
 projectTyping (Typing typing errs) (Typing interest _) =
-    Typing (Map.filterWithKey (\k _ -> Map.member k interest) typing) errs
-    
+    -- Typing (Map.filterWithKey (\k _ -> Map.member k interest) typing) errs
+    Typing (projectTypingDict (Map.keys interest) typing Map.empty Map.empty)
+    errs
+
+
+-- |Return a map containing the types of the first input map projected onto
+-- the supplied list of variables (which is in ascending alphabetical
+-- order) and maintaining the equivalences of the original. The second map
+-- argument holds the translation from the smallest equivalent variable
+-- name in the input map to the same for the result.
+--
+-- This works by traversing the list of variable names, looking up each in
+-- the input map.  I
+projectTypingDict :: [VarName] -> Map VarName TypeRef -> Map VarName TypeRef
+                  -> Map VarName VarName -> Map VarName TypeRef
+projectTypingDict [] _ result _ = result
+projectTypingDict (v:vs) dict result renaming
+    = let (v',dict') = ultimateRef' v dict
+          ty = varType v' typing'
+      in  case Map.lookup v' renaming of
+              Nothing -> projectTypingDict vs typing
+                         (Map.insert v (DirectType ty) result)
+                         (Map.insert v' v renaming)
+              Just v'' -> projectTypingDict vs typing
+                         (Map.insert v (IndirectType v'') result) renaming
+
 
 ----------------------------------------------------------------
 --                           The Type Lattice
@@ -400,19 +444,22 @@ enforceType (Typed (Var name _ _) typespec1 _) typespec arg1 arg2 pos typing =
 enforceType _ _ _ _ _ typing = typing -- no variable to record the type of
 
 
-
 -- |Update the typing to assign the specified type to the specified expr
-setExpType :: Placed Exp -> TypeSpec -> Typing  -> Typing
-setExpType pexp = setExpType' (content pexp)
+setExpType :: Placed Exp -> TypeSpec -> Int -> ProcName -> Typing -> Typing
+setExpType pexp typ argnum procName typing
+    = setExpType' (content pexp) (place pexp) typ argnum procName typing
 
-setExpType' (IntValue _) _ typing = typing
-setExpType' (FloatValue _) _ typing = typing
-setExpType' (StringValue _) _ typing = typing
-setExpType' (CharValue _) _ typing = typing
-setExpType' (Var name _ _) typ typing = setVarType name typ typing
-setExpType' (Typed expr _ _) typ typing = setExpType' expr typ typing
-setExpType' otherExp _ _ = shouldnt $ "Invalid expr left after flattening "
-                                     ++ show otherExp
+setExpType' :: Exp -> OptPos -> TypeSpec -> Int -> ProcName -> Typing -> Typing
+setExpType' (IntValue _) _ _ _ _ typing = typing
+setExpType' (FloatValue _) _ _ _ _ typing = typing
+setExpType' (StringValue _) _ _ _ _ typing = typing
+setExpType' (CharValue _) _ _ _ _ typing = typing
+setExpType' (Var var _ _) pos typ argnum procName typing
+    = constrainVarType (ReasonArgType procName argnum pos) var typ typing
+setExpType' (Typed expr _ _) pos typ argnum procName typing
+    = setExpType' expr pos typ argnum procName typing
+setExpType' otherExp _ _ _ _ _
+    = shouldnt $ "Invalid expr left after flattening " ++ show otherExp
 
 ----------------------------------------------------------------
 --                         Type Checking Procs
@@ -757,8 +804,10 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls) typing
     case validTypes of
         [] -> return $ typeErrors (concatMap errList matches) typing
         [match] -> do
-          let typing' = List.foldr (uncurry setExpType) typing
-                        $ zip pexps match
+          let typing' = List.foldr
+                        (\ (pexp,ty,argnum) -> setExpType pexp ty argnum name)
+                        typing
+                        $ zip3 pexps match [1..]
           typecheckCalls m name pos calls typing' residue True
         _ -> let stmtTyping' = stmtTyping {typingArgsTypes = validMatches}
              in typecheckCalls m name pos calls typing (stmtTyping':residue)
