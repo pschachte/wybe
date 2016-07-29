@@ -149,7 +149,7 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Call argument flow does not match any definition
                | ReasonOverload [ProcSpec] OptPos
                    -- ^Multiple procs with same types/flows
-               | ReasonAmbig ProcName OptPos [(VarName,[TypeSpec])]
+               | ReasonAmbig ProcName OptPos [(VarName,[TypeRef])]
                    -- ^Proc defn has ambiguous types
                |  ReasonArity ProcName ProcName OptPos Int Int
                    -- ^Call to proc with wrong arity
@@ -272,10 +272,16 @@ ultimateRef' var dict
 -- |Get the type associated with a variable; AnyType if no constraint has
 --  been imposed on that variable.
 varType :: VarName -> Typing -> TypeSpec
-varType var typing
-    = case Map.findWithDefault (DirectType AnyType) var $ typingDict typing of
+varType var Typing{typingDict=dict} = varType' var dict
+
+
+-- |Get the type associated with a variable; AnyType if no constraint has
+--  been imposed on that variable.
+varType' :: VarName -> Map VarName TypeRef -> TypeSpec
+varType' var dict
+    = case Map.findWithDefault (DirectType AnyType) var dict of
           DirectType t -> t
-          IndirectType v -> varType v typing
+          IndirectType v -> varType' v dict
 
 
 -- |Constrain the type of the specified variable to be a subtype of the
@@ -286,17 +292,26 @@ constrainVarType reason var ty typing
     = case meetTypes ty $ varType var typing of
           InvalidType -> typeError reason typing
           newType -> typing {typingDict =
-                             Map.insert var newType $ typingDict typing }
+                             Map.insert var (DirectType newType)
+                                $ typingDict typing }
 
 
 -- |Constrain the types of the two specified variables to be identical,
 --  even following further constraints on the types of either of the vars.
-unifyVarTypes :: VarName -> VarName -> Typing -> Typing
-unifyVarTypes var1 var2 typing
-    = case meetTypes ty $ varType var typing of
-          InvalidType -> typeError reason typing
-          newType -> typing {typingDict =
-                             Map.insert var newType $ typingDict typing }
+unifyVarTypes :: VarName -> VarName -> OptPos -> Typing -> Typing
+unifyVarTypes var1 var2 pos typing
+    = let (v1,typing1) = ultimateRef var1 typing
+          (v2,typing2) = ultimateRef var2 typing1
+          vLow =  min v1 v2
+          vHigh = max v1 v2
+      in case meetTypes (varType vLow typing2) (varType vHigh typing2) of
+          InvalidType -> typeError
+                         (ReasonEqual (varGet var1) (varGet var2) pos)
+                         typing2
+          newType -> typing2 {typingDict =
+                              Map.insert vLow (DirectType newType)
+                              $ Map.insert vHigh (IndirectType vLow)
+                              $ typingDict typing2 }
 
 
 typeError :: TypeError -> Typing -> Typing
@@ -330,12 +345,12 @@ projectTypingDict :: [VarName] -> Map VarName TypeRef -> Map VarName TypeRef
 projectTypingDict [] _ result _ = result
 projectTypingDict (v:vs) dict result renaming
     = let (v',dict') = ultimateRef' v dict
-          ty = varType v' typing'
+          ty = varType' v' dict
       in  case Map.lookup v' renaming of
-              Nothing -> projectTypingDict vs typing
+              Nothing -> projectTypingDict vs dict
                          (Map.insert v (DirectType ty) result)
                          (Map.insert v' v renaming)
-              Just v'' -> projectTypingDict vs typing
+              Just v'' -> projectTypingDict vs dict
                          (Map.insert v (IndirectType v'') result) renaming
 
 
@@ -383,16 +398,17 @@ localCalls thisMod m name _ _
 localCalls _ _ _ _ _ = []
 
 
-expType :: Typing -> Placed Exp -> Compiler (Maybe TypeSpec)
+expType :: Typing -> Placed Exp -> Compiler TypeSpec
 expType typing = placedApply (expType' typing)
 
 
-expType' _ (IntValue _) _ = return $ Just $ TypeSpec ["wybe"] "int" []
-expType' _ (FloatValue _) _ = return $ Just $ TypeSpec ["wybe"] "float" []
-expType' _ (StringValue _) _ = return $ Just $ TypeSpec ["wybe"] "string" []
-expType' _ (CharValue _) _ = return $ Just $ TypeSpec ["wybe"] "char" []
+expType' :: Typing -> Exp -> OptPos -> Compiler TypeSpec
+expType' _ (IntValue _) _ = return $ TypeSpec ["wybe"] "int" []
+expType' _ (FloatValue _) _ = return $ TypeSpec ["wybe"] "float" []
+expType' _ (StringValue _) _ = return $ TypeSpec ["wybe"] "string" []
+expType' _ (CharValue _) _ = return $ TypeSpec ["wybe"] "char" []
 expType' typing (Var name _ _) _ = return $ varType name typing
-expType' _ (Typed _ typ _) pos = lookupType typ pos
+expType' _ (Typed _ typ _) pos = fromMaybe AnyType <$> lookupType typ pos
 expType' _ expr _ =
     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
 
@@ -416,32 +432,32 @@ expMode' _ expr =
     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
 
 
-matchTypes :: Placed Exp -> Placed Exp -> OptPos -> Typing -> Compiler Typing
-matchTypes parg1 parg2 pos typing = do
-    let arg1 = content parg1
-    let arg2 = content parg2
-    maybety1 <- expType typing parg1
-    maybety2 <- expType typing parg2
-    logTypes $ "Matching types " ++ show maybety1 ++ " and " ++ show maybety2
-    case (maybety1,maybety2) of
-      (Nothing,Nothing)  -> return typing
-      (Nothing,Just typ) -> return $ enforceType arg1 typ arg1 arg2 pos typing
-      (Just typ,Nothing) -> return $ enforceType arg2 typ arg1 arg2 pos typing
-      (Just typ1,Just typ2)  ->
-        return $ enforceType arg1 typ2 arg1 arg2 pos
-        $ enforceType arg2 typ1 arg1 arg2 pos typing
-
-
--- |Require the Exp to have the specified type
-enforceType :: Exp -> TypeSpec -> Exp -> Exp -> OptPos -> Typing -> Typing
-enforceType (Var name _ _) typespec arg1 arg2 pos typing =
-    constrainVarType (ReasonEqual arg1 arg2 pos) name typespec typing
-enforceType (Typed (Var name _ _) typespec1 _) typespec arg1 arg2 pos typing =
-    let reason = ReasonEqual arg1 arg2 pos
-    in case meetTypes typespec1 typespec of
-      InvalidType -> typeError reason typing
-      ty          -> constrainVarType reason name ty typing
-enforceType _ _ _ _ _ typing = typing -- no variable to record the type of
+-- matchTypes :: Placed Exp -> Placed Exp -> OptPos -> Typing -> Compiler Typing
+-- matchTypes parg1 parg2 pos typing = do
+--     let arg1 = content parg1
+--     let arg2 = content parg2
+--     maybety1 <- expType typing parg1
+--     maybety2 <- expType typing parg2
+--     logTypes $ "Matching types " ++ show maybety1 ++ " and " ++ show maybety2
+--     case (maybety1,maybety2) of
+--       (Nothing,Nothing)  -> return typing
+--       (Nothing,Just typ) -> return $ enforceType arg1 typ arg1 arg2 pos typing
+--       (Just typ,Nothing) -> return $ enforceType arg2 typ arg1 arg2 pos typing
+--       (Just typ1,Just typ2)  ->
+--         return $ enforceType arg1 typ2 arg1 arg2 pos
+--         $ enforceType arg2 typ1 arg1 arg2 pos typing
+-- 
+-- 
+-- -- |Require the Exp to have the specified type
+-- enforceType :: Exp -> TypeSpec -> Exp -> Exp -> OptPos -> Typing -> Typing
+-- enforceType (Var name _ _) typespec arg1 arg2 pos typing =
+--     constrainVarType (ReasonEqual arg1 arg2 pos) name typespec typing
+-- enforceType (Typed (Var name _ _) typespec1 _) typespec arg1 arg2 pos typing =
+--     let reason = ReasonEqual arg1 arg2 pos
+--     in case meetTypes typespec1 typespec of
+--       InvalidType -> typeError reason typing
+--       ty          -> constrainVarType reason name ty typing
+-- enforceType _ _ _ _ _ typing = typing -- no variable to record the type of
 
 
 -- |Update the typing to assign the specified type to the specified expr
@@ -687,9 +703,7 @@ addResourceType procname pos typs rfspec = do
 updateParamTypes :: Typing -> [Param] -> [Param]
 updateParamTypes typing =
     List.map (\p@(Param name typ fl afl) ->
-               case varType name typing of
-                   Nothing -> p
-                   Just newTyp -> Param name newTyp fl afl)
+                  Param name (varType name typing) fl afl)
 
 
 -- Return a list of the statements (recursively) in a body that can
@@ -706,12 +720,14 @@ bodyCalls (pstmt:pstmts) = do
         (ForeignCall "llvm" "move" [] _) -> return $ pstmt:rest
         ForeignCall{} -> return rest
         Test nested expr -> do
-          modify $ constrainVarType (ReasonCond pos) (expVar $ content expr) boolType
+          modify $ constrainVarType (ReasonCond pos)
+                   (expVar $ content expr) boolType
           nested' <- bodyCalls nested
           return $ nested' ++ rest
         Nop -> return rest
         Cond cond expr thn els -> do
-          modify $ constrainVarType (ReasonCond pos) (expVar $ content expr) boolType
+          modify $ constrainVarType (ReasonCond pos)
+                   (expVar $ content expr) boolType
           cond' <- bodyCalls cond
           thn' <- bodyCalls thn
           els' <- bodyCalls els
@@ -746,12 +762,26 @@ callProcInfos pstmt =
                      ++ showStmt 4 stmt
 
 
--- Return the variable name of the supplied expr.  In this context,
--- the expr will always be a variable.
+-- |Return the variable name of the supplied expr.  In this context,
+--  the expr will always be a variable.
 expVar :: Exp -> VarName
-expVar (Var name _ _) = name
-expVar (Typed expr _ _) = expVar expr
-expVar expr = shouldnt $ "expVar of non-variable expr " ++ show expr
+expVar expr = fromMaybe
+              (shouldnt $ "expVar of non-variable expr " ++ show expr)
+              $ expVar' expr
+
+
+-- |Return the variable name of the supplied expr, if there is one.
+expVar' :: Exp -> Maybe VarName
+expVar' (Typed expr _ _) = expVar' expr
+expVar' (Var name _ _) = Just name
+expVar' expr = Nothing
+
+
+-- |Return the "primitive" expr of the specified expr.  This unwraps Typed
+--  wrappers, giving the internal exp.
+ultimateExp :: Exp -> Exp
+ultimateExp (Typed expr _ _) = ultimateExp expr
+ultimateExp expr = expr
 
 
 -- |Type check a list of statement typings, resulting in a typing of all
@@ -794,7 +824,7 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls) typing
                              noncall -> shouldnt
                                         $ "typecheckCalls with non-call stmt"
                                           ++ show noncall
-    actualTypes <- (fromMaybe AnyType <$>) <$> mapM (expType typing) pexps
+    actualTypes <- mapM (expType typing) pexps
     logTypes $ "Actual types: " ++ show actualTypes
     let matches = List.map (matchTypeList name callee (place pstmt) actualTypes)
                   typs
@@ -909,7 +939,7 @@ modecheckStmt m name defPos typing delayed assigned
     logTypes $ "Mode checking call " ++ show stmt
     logTypes $ "    with assigned " ++ show assigned
     callInfos <- callProcInfos $ maybePlace stmt pos
-    actualTypes <- (fromMaybe AnyType <$>) <$> mapM (expType typing) args
+    actualTypes <- mapM (expType typing) args
     let actualModes = List.map (expMode assigned) args
     let flowErrs = [ReasonArgFlow cname num pos
                    | ((mode,avail),num) <- zip actualModes [1..]
@@ -943,7 +973,7 @@ modecheckStmt m name defPos typing delayed assigned
     stmt@(ForeignCall lang cname flags args) pos = do
     logTypes $ "Mode checking foreign call " ++ show stmt
     logTypes $ "    with assigned " ++ show assigned
-    actualTypes <- (fromMaybe AnyType <$>) <$> mapM (expType typing) args
+    actualTypes <- mapM (expType typing) args
     let actualModes = List.map (expMode assigned) args
     let flowErrs = [ReasonArgFlow cname num pos
                    | ((mode,avail),num) <- zip actualModes [1..]
@@ -1035,7 +1065,8 @@ typecheckProcDef m name pos paramTypes body = do
           let typingSets = List.map (Map.map Set.singleton . typingDict) typings
           let merged = Map.filter ((>1).Set.size) $
                        Map.unionsWith Set.union typingSets
-          let ambigs = List.map (\(v,ts) -> (v,Set.toAscList ts)) $ assocs merged
+          let ambigs = List.map (\(v,ts) -> (v,Set.toAscList ts))
+                       $ assocs merged
           return (typeError (ReasonAmbig name pos ambigs) initTyping, body)
 
 
@@ -1135,9 +1166,22 @@ typecheckStmt _ _ call@(ForeignCall "llvm" "move" [] args@[a1,a2]) pos typing
     -- Ensure arguments have the same types
     logTypes $ "Type checking move instruction " ++ showStmt 4 call
     let typing' = List.foldr (noteOutputCast . content) typing args
-    typing'' <- matchTypes a1 a2 pos typing'
-    logTypes $ "Resulting typing = " ++ show typing''
-    return [typing'']
+    case expVar' $ content a2 of
+        -- XXX Need new error for move to non-variable
+        Nothing -> return
+                   [typeError (shouldnt $ "move to non-variable" ++ show call)
+                    typing']
+        Just toVar ->
+          case ultimateExp $ content a1 of
+              Var fromVar _ _ -> do
+                let typing'' = unifyVarTypes fromVar toVar pos typing'
+                logTypes $ "Resulting typing = " ++ show typing''
+                return [typing'']
+              expr -> do
+                ty <- expType typing' (Unplaced expr)
+                return [constrainVarType
+                        (shouldnt $ "type error in move" ++ show call)
+                        toVar ty typing']
 typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
     -- Pick up any output casts
     logTypes $ "Type checking foreign call " ++ showStmt 4 call
@@ -1356,10 +1400,8 @@ applyExpTyping _ expr@(StringValue _) =
     Typed expr (TypeSpec ["wybe"] "string" []) False
 applyExpTyping _ expr@(CharValue _) =
     Typed expr (TypeSpec ["wybe"] "char" []) False
-applyExpTyping typing expr@(Var nm flow ftype) =
-    case varType nm typing of
-        Nothing -> shouldnt $ "type of variable '" ++ nm ++ "' unknown"
-        Just typ -> Typed expr typ False
+applyExpTyping typing expr@(Var nm flow ftype)
+    = Typed expr (varType nm typing) False
 applyExpTyping typing typed@(Typed _ _ True) =
     typed
 applyExpTyping typing (Typed expr _ False) =
@@ -1379,7 +1421,7 @@ matchProcType typing args p = do
     case reconcileArgFlows params args of
         Nothing -> return Nothing
         Just as -> do
-            argTypes <- catMaybes <$> mapM (expType typing) as
+            argTypes <- mapM (expType typing) as
             if all (uncurry subtypeOf)
                 (zip argTypes (List.map paramType params))
                 then return $ Just (as,p)

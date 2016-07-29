@@ -1623,6 +1623,7 @@ phantomArg (ArgVar _ ty _ _ _) = phantomType ty
 phantomArg _ = False -- Nothing but a var can be a phantom
 
 -- |Does the supplied type indicate a phantom?
+phantomType :: TypeSpec -> Bool
 phantomType TypeSpec{typeName="phantom"} = True
 phantomType _ = False
 
