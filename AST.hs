@@ -595,7 +595,7 @@ addType name def@(TypeDef arity rep _) vis = do
 lookupType :: TypeSpec -> OptPos -> Compiler (Maybe TypeSpec)
 lookupType AnyType _ = return $ Just AnyType
 lookupType InvalidType _ = return $ Just InvalidType
-lookupType ty@(TypeSpec _ "phantom" []) pos =
+lookupType (TypeSpec _ "phantom" []) _ =
     return $ Just $ TypeSpec ["wybe"] "phantom" []
 lookupType ty@(TypeSpec mod name args) pos = do
     logAST $ "Looking up type " ++ show ty
@@ -867,7 +867,7 @@ collectSubModules mspec = do
 -- |The list of defining modules that the given (possibly
 --  module-qualified) name could possibly refer to from the current
 --  module.  This may include the current module, or any module it may
---  be imported from.  The ifaceMapFn is a Module selector function that
+--  be imported from.  The implMapFn is a Module selector function that
 --  produces a map that tells whether that module exports that name,
 --  and implMapFn tells whether a module implementation defines that
 --  name.  The reference to this name occurs in the current module.
@@ -879,6 +879,8 @@ refersTo modspec name implMapFn specModFn = do
       name ++ " from module " ++ showModSpec currMod
     visible <- getModule (Map.findWithDefault Set.empty name . implMapFn . 
                           fromJust . modImplementation)
+    logAST $ "*** ALL visible from: " ++ showModSpec modspec ++ ": "
+        ++ showModSpecs (Set.toList (Set.map specModFn visible)) 
     let matched = Set.filter ((modspec `isSuffixOf`) . specModFn) visible
     case Set.null matched of
         False -> return matched
