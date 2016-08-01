@@ -2216,7 +2216,7 @@ instance Show Exp where
   show (FloatValue f) = show f
   show (StringValue s) = show s
   show (CharValue c) = show c
-  show (Var name dir _) = (flowPrefix dir) ++ name
+  show (Var name dir flowtype) = (show flowtype) ++ (flowPrefix dir) ++ name
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
   show (CondExp cond thn els) = 
     "if\n" ++ show cond ++ "then " ++ show thn ++ " else " ++ show els
