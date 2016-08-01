@@ -1,2 +1,2 @@
-Error detected during generating low level code in in_before_out
-test-cases/in_before_out.wybe:2:13: Uninitialised variable 'result'
+Error detected during type checking of modules in_before_out
+test-cases/in_before_out.wybe:2:8: Uninitialised argument in call to incr, argument 1

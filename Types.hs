@@ -178,7 +178,7 @@ instance Show TypeError where
             "Conditional or test expression with non-boolean result"
     show (ReasonArgFlow name num pos) =
         makeMessage pos $
-            "Undefined argument in call to " ++ name
+            "Uninitialised argument in call to " ++ name
             ++ ", argument " ++ show num
     show (ReasonUndefinedFlow name pos) =
         makeMessage pos $
@@ -651,23 +651,24 @@ typecheckProcDecl m pdef = do
                           List.filter
                           ((`elem` [ParamIn,ParamInOut]) . paramFlow)
                           params
-                    (def',assigned',errs') <-
+                    (def',_,modeErrs) <-
                       modecheckStmts m name pos typing []
                       (Set.fromList $ paramName <$> inParams) def
-                    let params' = updateParamTypes typing params
+                    let typing' = typeErrors modeErrs typing
+                    let params' = updateParamTypes typing' params
                     let proto' = proto { procProtoParams = params' }
                     let pdef' = pdef { procProto = proto',
                                        procImpln = ProcDefSrc def' }
-                    let sccAgain = pdef' /= pdef
-                    logTypes $ "===== Definition is " ++
-                        (if sccAgain then "" else "un") ++ "changed"
+                    let sccAgain = validTyping typing' && pdef' /= pdef
+                    logTypes $ "===== "
+                               ++ (if sccAgain then "" else "NO ")
+                               ++ "Need to check again."
                     when sccAgain
-                        (logTypes $ "** check again " ++ name ++
-                            "\n-----------------OLD:"
-                            ++ showProcDef 4 pdef
-                            ++ "\n-----------------NEW:"
-                            ++ showProcDef 4 pdef' ++ "\n")
-                    return (pdef',sccAgain,[])
+                        (logTypes $ "\n-----------------OLD:"
+                                    ++ showProcDef 4 pdef
+                                    ++ "\n-----------------NEW:"
+                                    ++ showProcDef 4 pdef' ++ "\n")
+                    return (pdef',sccAgain,typingErrs typing')
                   else
                     return (pdef,False,typingErrs typing)
               else
@@ -859,18 +860,6 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls) typing
                 $ chg || validMatches == typs
     
 
--- XXX Needed?
--- filterTypeList :: Ident -> [TypeSpec] -> StmtTypings
---                -> Compiler (MaybeErr StmtTypings)
--- filterTypeList caller callTypes stmtTyping@(StmtTypings pstmt typs) = do
---     let (callee,pexps) = case content pstmt of
---                              ProcCall _ callee' _ pexps' -> (callee',pexps')
---                              noncall -> shouldnt
---                                         $ "typecheckCalls with non-call stmt"
---                                           ++ show noncall
---     matchTypeList caller callee (place pstmt) callTypes typs
-
-
 -- |Match up the argument types of a call with the parameter types of the
 -- callee, producing a list of the actual types.  If this list contains
 -- InvalidType, then the call would be a type error.
@@ -940,6 +929,8 @@ modecheckStmts _ _ _ _ delayed assigned []
 modecheckStmts m name pos typing delayed assigned (pstmt:pstmts) = do
     (pstmt',delayed',assigned',errs') <-
       placedApply (modecheckStmt m name pos typing delayed assigned) pstmt
+    logTypes $ "New errors   = " ++ show errs'
+    logTypes $ "Now assigned = " ++ show assigned'
     (pstmts',assigned'',errs) <-
       modecheckStmts m name pos typing delayed' assigned' pstmts
     return (pstmt'++pstmts',assigned'',errs'++errs)
@@ -968,7 +959,9 @@ modecheckStmt m name defPos typing delayed assigned
     if not $ List.null flowErrs -- Using undefined var as input?
         then return ([],delayed,assigned,flowErrs)
         else if List.null modeMatches -- No matching mode?
-             then return ([],delayed,assigned,[ReasonUndefinedFlow cname pos])
+             then do
+                logTypes $ "Mode errors in call:  " ++ show flowErrs
+                return ([],delayed,assigned,[ReasonUndefinedFlow cname pos])
              else do
                  let match = selectMode modeMatches actualModes
                  let matchProc = procInfoProc match
