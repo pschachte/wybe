@@ -1108,95 +1108,95 @@ pruneTypings typings =
         else pruned
 
 
-typecheckBody :: ModSpec -> ProcName -> Typing -> [Placed Stmt] ->
-                 Compiler [Typing]
-typecheckBody m name typing body = do
-    logTypes "Entering typecheckSequence from typecheckBody"
-    typings' <- typecheckSequence (typecheckPlacedStmt m name)
-                [typing] body
-    logTypes $ "Body types: " ++ show typings'
-    return typings'
-
-
--- |Type check a single placed primitive operation given a list of
---  possible starting typings and corresponding clauses up to this prim.
-typecheckPlacedStmt :: ModSpec -> ProcName -> Typing -> Placed Stmt ->
-                       Compiler [Typing]
-typecheckPlacedStmt m caller typing pstmt =
-    typecheckStmt m caller (content pstmt) (place pstmt) typing
-
-
--- |Type check a single primitive operation, producing a list of
---  possible typings.
-typecheckStmt :: ModSpec -> ProcName -> Stmt -> OptPos -> Typing ->
-                 Compiler [Typing]
-typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
-    logTypes $ "Type checking call " ++ showStmt 4 call ++
-      showMaybeSourcePos pos
-    logTypes $ "   with types " ++ show typing
-    procs <- case id of
-        Nothing   -> callTargets cm name
-        Just pid -> return [ProcSpec cm name pid] -- XXX check modspec
-                                                  -- is valid; or just
-                                                  -- ignore pid?
-    logTypes $ "   potential procs: " ++
-           List.intercalate ", " (List.map show procs)
-    if List.null procs
-      then if 1 == length args
-           then return [typeError (ReasonUninit caller name pos) typing]
-           else return [typeError (ReasonUndef caller name pos) typing]
-      else do
-        typList <- mapM (matchingArgFlows caller name args pos typing) procs
-        let typList' = concat typList
-        let typList'' = List.filter validTyping typList'
-        let dups = snd $ List.foldr
-                   (\elt (s,l) ->
-                        if Set.member elt s
-                        then (s,if elt `elem` l then l else elt:l)
-                        else (Set.insert elt s,l))
-                   (Set.empty,[]) typList''
-        logTypes $ "Resulting valid types: " ++ show typList''
-        if List.null dups
-        then if List.null typList''
-             then do
-                logTypes $ "Type error detected:\n" ++
-                    unlines (List.map show typList')
-                return typList'
-             else return typList''
-        else return [typeError (ReasonOverload
-                                   (List.map fst $
-                                    List.filter
-                                      (List.any (`elem` dups) . snd) $
-                                    zip procs typList)
-                                   pos) typing]
-typecheckStmt _ _ call@(ForeignCall "llvm" "move" [] args@[a1,a2]) pos typing
-    = (:[]) <$> unifyExprTypes pos a1 a2 typing
-typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
-    -- Pick up any output casts
-    logTypes $ "Type checking foreign call " ++ showStmt 4 call
-    let typing' = List.foldr (noteOutputCast . content) typing args
-    logTypes $ "Resulting typing = " ++ show typing'
-    return [typing']
-typecheckStmt m caller (Test stmts expr) pos typing = do
-    typings <- typecheckBody m caller typing stmts
-    mapM (\t -> typecheckArg' (content expr) (place expr) AnyType
-                (TypeSpec ["wybe"] "bool" []) t (ReasonCond pos))
-        typings
-typecheckStmt _ _ Nop pos typing = return [typing]
-typecheckStmt m caller (Cond test expr thn els) pos typing = do
-    typings <- typecheckSequence (typecheckPlacedStmt m caller) [typing] test
-    typings' <- mapM (\t -> typecheckArg' (content expr) (place expr) AnyType
-                            (TypeSpec ["wybe"] "bool" []) t (ReasonCond pos))
-                typings
-    typings'' <- typecheckSequence (typecheckPlacedStmt m caller) typings' thn
-    typecheckSequence (typecheckPlacedStmt m caller) typings'' els
-typecheckStmt m caller (Loop body) pos typing =
-    typecheckSequence (typecheckPlacedStmt m caller) [typing] body
-typecheckStmt m caller (For itr gen) pos typing =
-    -- XXX must handle generator type
-    return [typing]
-typecheckStmt _ _ Break pos typing = return [typing]
-typecheckStmt _ _ Next pos typing = return [typing]
+-- typecheckBody :: ModSpec -> ProcName -> Typing -> [Placed Stmt] ->
+--                  Compiler [Typing]
+-- typecheckBody m name typing body = do
+--     logTypes "Entering typecheckSequence from typecheckBody"
+--     typings' <- typecheckSequence (typecheckPlacedStmt m name)
+--                 [typing] body
+--     logTypes $ "Body types: " ++ show typings'
+--     return typings'
+-- 
+-- 
+-- -- |Type check a single placed primitive operation given a list of
+-- --  possible starting typings and corresponding clauses up to this prim.
+-- typecheckPlacedStmt :: ModSpec -> ProcName -> Typing -> Placed Stmt ->
+--                        Compiler [Typing]
+-- typecheckPlacedStmt m caller typing pstmt =
+--     typecheckStmt m caller (content pstmt) (place pstmt) typing
+-- 
+-- 
+-- -- |Type check a single primitive operation, producing a list of
+-- --  possible typings.
+-- typecheckStmt :: ModSpec -> ProcName -> Stmt -> OptPos -> Typing ->
+--                  Compiler [Typing]
+-- typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
+--     logTypes $ "Type checking call " ++ showStmt 4 call ++
+--       showMaybeSourcePos pos
+--     logTypes $ "   with types " ++ show typing
+--     procs <- case id of
+--         Nothing   -> callTargets cm name
+--         Just pid -> return [ProcSpec cm name pid] -- XXX check modspec
+--                                                   -- is valid; or just
+--                                                   -- ignore pid?
+--     logTypes $ "   potential procs: " ++
+--            List.intercalate ", " (List.map show procs)
+--     if List.null procs
+--       then if 1 == length args
+--            then return [typeError (ReasonUninit caller name pos) typing]
+--            else return [typeError (ReasonUndef caller name pos) typing]
+--       else do
+--         typList <- mapM (matchingArgFlows caller name args pos typing) procs
+--         let typList' = concat typList
+--         let typList'' = List.filter validTyping typList'
+--         let dups = snd $ List.foldr
+--                    (\elt (s,l) ->
+--                         if Set.member elt s
+--                         then (s,if elt `elem` l then l else elt:l)
+--                         else (Set.insert elt s,l))
+--                    (Set.empty,[]) typList''
+--         logTypes $ "Resulting valid types: " ++ show typList''
+--         if List.null dups
+--         then if List.null typList''
+--              then do
+--                 logTypes $ "Type error detected:\n" ++
+--                     unlines (List.map show typList')
+--                 return typList'
+--              else return typList''
+--         else return [typeError (ReasonOverload
+--                                    (List.map fst $
+--                                     List.filter
+--                                       (List.any (`elem` dups) . snd) $
+--                                     zip procs typList)
+--                                    pos) typing]
+-- typecheckStmt _ _ call@(ForeignCall "llvm" "move" [] args@[a1,a2]) pos typing
+--     = (:[]) <$> unifyExprTypes pos a1 a2 typing
+-- typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
+--     -- Pick up any output casts
+--     logTypes $ "Type checking foreign call " ++ showStmt 4 call
+--     let typing' = List.foldr (noteOutputCast . content) typing args
+--     logTypes $ "Resulting typing = " ++ show typing'
+--     return [typing']
+-- typecheckStmt m caller (Test stmts expr) pos typing = do
+--     typings <- typecheckBody m caller typing stmts
+--     mapM (\t -> typecheckArg' (content expr) (place expr) AnyType
+--                 (TypeSpec ["wybe"] "bool" []) t (ReasonCond pos))
+--         typings
+-- typecheckStmt _ _ Nop pos typing = return [typing]
+-- typecheckStmt m caller (Cond test expr thn els) pos typing = do
+--     typings <- typecheckSequence (typecheckPlacedStmt m caller) [typing] test
+--     typings' <- mapM (\t -> typecheckArg' (content expr) (place expr) AnyType
+--                             (TypeSpec ["wybe"] "bool" []) t (ReasonCond pos))
+--                 typings
+--     typings'' <- typecheckSequence (typecheckPlacedStmt m caller) typings' thn
+--     typecheckSequence (typecheckPlacedStmt m caller) typings'' els
+-- typecheckStmt m caller (Loop body) pos typing =
+--     typecheckSequence (typecheckPlacedStmt m caller) [typing] body
+-- typecheckStmt m caller (For itr gen) pos typing =
+--     -- XXX must handle generator type
+--     return [typing]
+-- typecheckStmt _ _ Break pos typing = return [typing]
+-- typecheckStmt _ _ Next pos typing = return [typing]
 
 
 -- |Ensure the two exprs have the same types; if both are variables, this
