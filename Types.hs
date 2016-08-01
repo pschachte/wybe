@@ -628,12 +628,18 @@ typecheckProcDecl m pdef = do
                        ++ show resourceTyping
             logTypes $ "   with resources: " ++ show resources
             let (calls,preTyping) = runState (bodyCalls def) resourceTyping
-            calls' <- zipWith StmtTypings calls <$> mapM callProcInfos calls
+            let procCalls = List.filter (isProcCall . content) calls
+            let unifs = List.map (\(ForeignCall _ _ _ [e1,e2]) -> (e1,e2))
+                        $ List.filter isMove (content <$> calls)
+            unifTyping <- foldM (\t (e1,e2) -> unifyExprTypes pos e1 e2 t)
+                          preTyping unifs
+            calls' <- zipWith StmtTypings procCalls
+                      <$> mapM callProcInfos procCalls
             let badCalls = List.map typingStmt
                            $ List.filter (List.null . typingArgsTypes) calls'
             if List.null badCalls
               then do
-                typing <- typecheckCalls m name pos calls' preTyping [] False
+                typing <- typecheckCalls m name pos calls' unifTyping [] False
                 
                 logTypes $ "Typing independent of mode = " ++ show typing
                 -- (typing''',def') <- typecheckProcDef m name pos preTyping def
@@ -706,8 +712,8 @@ updateParamTypes typing =
                   Param name (varType name typing) fl afl)
 
 
--- Return a list of the statements (recursively) in a body that can
--- constrain types, paired with all the possible resolutions.
+-- |Return a list of the proc and foreign calls recursively in a list of
+--  statements, paired with all the possible resolutions.
 bodyCalls :: [Placed Stmt] -> State Typing [Placed Stmt]
 bodyCalls [] = return []
 bodyCalls (pstmt:pstmts) = do
@@ -717,8 +723,7 @@ bodyCalls (pstmt:pstmts) = do
     case stmt of
         ProcCall{} -> return $ pstmt:rest
         -- need to handle move instructions:
-        (ForeignCall "llvm" "move" [] _) -> return $ pstmt:rest
-        ForeignCall{} -> return rest
+        ForeignCall{} -> return $ pstmt:rest
         Test nested expr -> do
           modify $ constrainVarType (ReasonCond pos)
                    (expVar $ content expr) boolType
@@ -738,6 +743,16 @@ bodyCalls (pstmt:pstmts) = do
         For _ _ -> shouldnt "bodyCalls: flattening left For stmt"
         Break -> return rest
         Next ->  return rest
+
+
+isProcCall :: Stmt -> Bool
+isProcCall ProcCall{} = True
+isProcCall _ = False
+
+
+isMove :: Stmt -> Bool
+isMove (ForeignCall "llvm" "move" [] [_,_]) = True
+isMove _ = False
 
 
 callTypes :: Placed Stmt -> Compiler [[TypeSpec]]
@@ -1162,26 +1177,7 @@ typecheckStmt m caller call@(ProcCall cm name id args) pos typing = do
                                     zip procs typList)
                                    pos) typing]
 typecheckStmt _ _ call@(ForeignCall "llvm" "move" [] args@[a1,a2]) pos typing
-  = do
-    -- Ensure arguments have the same types
-    logTypes $ "Type checking move instruction " ++ showStmt 4 call
-    let typing' = List.foldr (noteOutputCast . content) typing args
-    case expVar' $ content a2 of
-        -- XXX Need new error for move to non-variable
-        Nothing -> return
-                   [typeError (shouldnt $ "move to non-variable" ++ show call)
-                    typing']
-        Just toVar ->
-          case ultimateExp $ content a1 of
-              Var fromVar _ _ -> do
-                let typing'' = unifyVarTypes fromVar toVar pos typing'
-                logTypes $ "Resulting typing = " ++ show typing''
-                return [typing'']
-              expr -> do
-                ty <- expType typing' (Unplaced expr)
-                return [constrainVarType
-                        (shouldnt $ "type error in move" ++ show call)
-                        toVar ty typing']
+    = (:[]) <$> unifyExprTypes pos a1 a2 typing
 typecheckStmt _ _ call@(ForeignCall _ _ _ args) pos typing = do
     -- Pick up any output casts
     logTypes $ "Type checking foreign call " ++ showStmt 4 call
@@ -1208,6 +1204,33 @@ typecheckStmt m caller (For itr gen) pos typing =
     return [typing]
 typecheckStmt _ _ Break pos typing = return [typing]
 typecheckStmt _ _ Next pos typing = return [typing]
+
+
+-- |Ensure the two exprs have the same types; if both are variables, this
+--  means unifying their types.
+unifyExprTypes :: OptPos -> Placed Exp -> Placed Exp -> Typing
+               -> Compiler Typing
+unifyExprTypes pos a1 a2 typing = do
+    let args = [a1,a2]
+    let call = ForeignCall "llvm" "move" [] args
+    logTypes $ "Type checking move instruction " ++ showStmt 4 call
+    let typing' = List.foldr (noteOutputCast . content) typing args
+    case expVar' $ content a2 of
+        -- XXX Need new error for move to non-variable
+        Nothing -> return
+                   $ typeError (shouldnt $ "move to non-variable" ++ show call)
+                     typing'
+        Just toVar ->
+          case ultimateExp $ content a1 of
+              Var fromVar _ _ -> do
+                let typing'' = unifyVarTypes fromVar toVar pos typing'
+                logTypes $ "Resulting typing = " ++ show typing''
+                return typing''
+              expr -> do
+                ty <- expType typing' (Unplaced expr)
+                return $ constrainVarType
+                         (shouldnt $ "type error in move" ++ show call)
+                         toVar ty typing'
 
 
 matchingArgFlows :: ProcName -> ProcName -> [Placed Exp] -> OptPos -> Typing -> ProcSpec -> Compiler [Typing]
