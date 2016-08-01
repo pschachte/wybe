@@ -2082,8 +2082,8 @@ instance Show ProcProto where
 
 -- |How to show a formal parameter.
 instance Show Param where
-  show (Param name typ dir _) =
-    flowPrefix dir ++ name ++ showTypeSuffix typ
+  show (Param name typ dir flowType) =
+    (show flowType) ++ flowPrefix dir ++ name ++ showTypeSuffix typ
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
