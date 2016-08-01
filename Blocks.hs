@@ -938,7 +938,7 @@ typeStrToType "bool"    = int_c 1
 typeStrToType "float"   = float_t
 typeStrToType "double"  = float_t
 typeStrToType "pointer" = ptr_t $ int_c (fromIntegral wordSize)
-typeStrToType "word"    = ptr_t $ int_c (fromIntegral wordSize)
+typeStrToType "word"    = int_c (fromIntegral wordSize)
 typeStrToType "phantom" = void_t
 typeStrToType (c:cs)
     | c == 'i' = int_c (fromIntegral bytes)
