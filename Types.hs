@@ -1035,47 +1035,47 @@ selectMode _ _ = shouldnt "selectMode with empty list of modes"
 
 
 
--- |Type check the body of a single proc definition by type checking
---  each clause in turn using the declared parameter typing plus the
---  typing of all parameters inferred from previous clauses.  We can
---  stop once we've found a contradiction.
-typecheckProcDef :: ModSpec -> ProcName -> OptPos -> Typing ->
-                     [Placed Stmt] -> Compiler (Typing,[Placed Stmt])
-typecheckProcDef m name pos paramTypes body = do
-    logTypes $ "\ntype checking: " ++ name
-    typings <- typecheckBody m name paramTypes body
-    logTypes $ "typings:  " ++
-      intercalate "\n          " (List.map show typings) ++ "\n"
-    case typings of
-      [] -> do
-        logTypes "   no valid type"
-        -- XXX This is the wrong reason
-        return (typeError (ReasonAmbig name pos []) initTyping, body)
-      [typing] -> do
-        logTypes $ "   final typing: " ++ show typing
-        logTypes $ "   initial param typing: " ++ show paramTypes
-        let typing' = projectTyping typing paramTypes
-        logTypes $ "   projected typing: " ++ show typing'
-        if validTyping typing
-            then do
-                logTypes $ "apply body typing" ++ showBody 4 body
-                body' <- applyBodyTyping typing body
-                logTypes $ "After body typing:" ++ showBody 4 body'
-                return (typing',body')
-            else do
-                logTypes $ "invalid: no body typing" ++ showBody 4 body
-                return (typing', body)
-      typings -> do
-          logTypes $ name ++ " has " ++ show (length typings) ++
-            " typings, of which " ++
-            show (length (List.filter validTyping typings)) ++
-            " are valid"
-          let typingSets = List.map (Map.map Set.singleton . typingDict) typings
-          let merged = Map.filter ((>1).Set.size) $
-                       Map.unionsWith Set.union typingSets
-          let ambigs = List.map (\(v,ts) -> (v,Set.toAscList ts))
-                       $ assocs merged
-          return (typeError (ReasonAmbig name pos ambigs) initTyping, body)
+-- -- |Type check the body of a single proc definition by type checking
+-- --  each clause in turn using the declared parameter typing plus the
+-- --  typing of all parameters inferred from previous clauses.  We can
+-- --  stop once we've found a contradiction.
+-- typecheckProcDef :: ModSpec -> ProcName -> OptPos -> Typing ->
+--                      [Placed Stmt] -> Compiler (Typing,[Placed Stmt])
+-- typecheckProcDef m name pos paramTypes body = do
+--     logTypes $ "\ntype checking: " ++ name
+--     typings <- typecheckBody m name paramTypes body
+--     logTypes $ "typings:  " ++
+--       intercalate "\n          " (List.map show typings) ++ "\n"
+--     case typings of
+--       [] -> do
+--         logTypes "   no valid type"
+--         -- XXX This is the wrong reason
+--         return (typeError (ReasonAmbig name pos []) initTyping, body)
+--       [typing] -> do
+--         logTypes $ "   final typing: " ++ show typing
+--         logTypes $ "   initial param typing: " ++ show paramTypes
+--         let typing' = projectTyping typing paramTypes
+--         logTypes $ "   projected typing: " ++ show typing'
+--         if validTyping typing
+--             then do
+--                 logTypes $ "apply body typing" ++ showBody 4 body
+--                 body' <- applyBodyTyping typing body
+--                 logTypes $ "After body typing:" ++ showBody 4 body'
+--                 return (typing',body')
+--             else do
+--                 logTypes $ "invalid: no body typing" ++ showBody 4 body
+--                 return (typing', body)
+--       typings -> do
+--           logTypes $ name ++ " has " ++ show (length typings) ++
+--             " typings, of which " ++
+--             show (length (List.filter validTyping typings)) ++
+--             " are valid"
+--           let typingSets = List.map (Map.map Set.singleton . typingDict) typings
+--           let merged = Map.filter ((>1).Set.size) $
+--                        Map.unionsWith Set.union typingSets
+--           let ambigs = List.map (\(v,ts) -> (v,Set.toAscList ts))
+--                        $ assocs merged
+--           return (typeError (ReasonAmbig name pos ambigs) initTyping, body)
 
 
 -- |Like a monadic foldl over a list, where each application produces
