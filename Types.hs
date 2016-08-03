@@ -1084,34 +1084,34 @@ selectMode _ _ = shouldnt "selectMode with empty list of modes"
 --           return (typeError (ReasonAmbig name pos ambigs) initTyping, body)
 
 
--- |Like a monadic foldl over a list, where each application produces
---  a list of values, and for each element of the folded list, the
---  function is applied to every result from the previous element,
---  finally producing the list of all the results.
-typecheckSequence :: (Typing -> t -> Compiler [Typing]) -> [Typing] -> [t] ->
-                    Compiler [Typing]
-typecheckSequence f typings [] = return typings
-typecheckSequence f typings (t:ts) = do
-    logTypes $ "Type checking " ++ show (1 + length ts) ++ " things with " ++
-      show (length typings) ++ " typings, " ++
-      show (length $ List.filter validTyping typings) ++ " of them valid"
-    typings' <- mapM (`f` t) typings
-    let typings'' = pruneTypings $ concat typings'
-    if List.null typings'
-      then return []
-      else if List.null typings'' || not (validTyping $ List.head typings'')
-              -- No point going further if it's already invalid
-           then return [List.head $ concat typings']
-           else typecheckSequence f typings'' ts
+-- -- |Like a monadic foldl over a list, where each application produces
+-- --  a list of values, and for each element of the folded list, the
+-- --  function is applied to every result from the previous element,
+-- --  finally producing the list of all the results.
+-- typecheckSequence :: (Typing -> t -> Compiler [Typing]) -> [Typing] -> [t] ->
+--                     Compiler [Typing]
+-- typecheckSequence f typings [] = return typings
+-- typecheckSequence f typings (t:ts) = do
+--     logTypes $ "Type checking " ++ show (1 + length ts) ++ " things with " ++
+--       show (length typings) ++ " typings, " ++
+--       show (length $ List.filter validTyping typings) ++ " of them valid"
+--     typings' <- mapM (`f` t) typings
+--     let typings'' = pruneTypings $ concat typings'
+--     if List.null typings'
+--       then return []
+--       else if List.null typings'' || not (validTyping $ List.head typings'')
+--               -- No point going further if it's already invalid
+--            then return [List.head $ concat typings']
+--            else typecheckSequence f typings'' ts
 
 
-pruneTypings :: [Typing] -> [Typing]
-pruneTypings [] = []
-pruneTypings typings =
-    let pruned = nub $ List.filter validTyping typings
-    in  if List.null pruned
-        then typings
-        else pruned
+-- pruneTypings :: [Typing] -> [Typing]
+-- pruneTypings [] = []
+-- pruneTypings typings =
+--     let pruned = nub $ List.filter validTyping typings
+--     in  if List.null pruned
+--         then typings
+--         else pruned
 
 
 -- typecheckBody :: ModSpec -> ProcName -> Typing -> [Placed Stmt] ->
@@ -1232,24 +1232,24 @@ unifyExprTypes pos a1 a2 typing = do
                          toVar ty typing'
 
 
-matchingArgFlows :: ProcName -> ProcName -> [Placed Exp] -> OptPos -> Typing -> ProcSpec -> Compiler [Typing]
-matchingArgFlows caller called args pos typing pspec = do
-    params <- List.filter nonResourceParam <$> getParams pspec
-    logTypes $ "checking flow of call to " ++ show pspec
-        ++ " args " ++ show args
-        ++ " against params " ++ show params ++ "..."
-    case reconcileArgFlows params args of
-      Just args' -> do
-        logTypes $ "MATCHES; checking types: args = " ++ show args'
-        typing <- foldM (typecheckArg pos params $ procSpecName pspec)
-            typing $ zip3 [1..] params args'
-        logTypes $ "Type check result = " ++ show typing
-        return [typing]
-      Nothing -> do
-        logTypes "fails"
-        return [typeError (ReasonArity caller called pos (length args)
-                           (length  params))
-                typing]
+-- matchingArgFlows :: ProcName -> ProcName -> [Placed Exp] -> OptPos -> Typing -> ProcSpec -> Compiler [Typing]
+-- matchingArgFlows caller called args pos typing pspec = do
+--     params <- List.filter nonResourceParam <$> getParams pspec
+--     logTypes $ "checking flow of call to " ++ show pspec
+--         ++ " args " ++ show args
+--         ++ " against params " ++ show params ++ "..."
+--     case reconcileArgFlows params args of
+--       Just args' -> do
+--         logTypes $ "MATCHES; checking types: args = " ++ show args'
+--         typing <- foldM (typecheckArg pos params $ procSpecName pspec)
+--             typing $ zip3 [1..] params args'
+--         logTypes $ "Type check result = " ++ show typing
+--         return [typing]
+--       Nothing -> do
+--         logTypes "fails"
+--         return [typeError (ReasonArity caller called pos (length args)
+--                            (length  params))
+--                 typing]
 
 noteOutputCast :: Exp -> Typing -> Typing
 noteOutputCast (Typed (Var name flow _) typ True) typing
@@ -1257,27 +1257,27 @@ noteOutputCast (Typed (Var name flow _) typ True) typing
 noteOutputCast _ typing = typing
 
 
--- |Match up params to args based only on flow, returning Nothing if
---  they don't match, and Just a possibly updated arglist if they
---  do.  The purpose is to handle passing an in-out argument pair
---  where only an output is expected.  This is permitted, and the
---  input half is just ignored.  This is performed after the code has
---  been flattened, so ParamInOut have already been turned into
---  adjacent pairs of ParamIn and ParamOut parameters.
-reconcileArgFlows :: [Param] -> [Placed Exp] -> Maybe [Placed Exp]
-reconcileArgFlows [] [] = Just []
-reconcileArgFlows _ [] = Nothing
-reconcileArgFlows [] _ = Nothing
-reconcileArgFlows (Param _ _ ParamOut _:params)
-  (arg1:arg2:args)
-    | isHalfUpdate ParamIn (content arg1) &&
-      isHalfUpdate ParamOut (content arg2)
-    = (arg2:) <$> reconcileArgFlows params args
-reconcileArgFlows (Param _ _ pflow _:params) (arg:args)
-    = let aflow = expFlow (content arg)
-      in if pflow == aflow || aflow == FlowUnknown
-      then (arg:) <$> reconcileArgFlows params args
-      else Nothing
+-- -- |Match up params to args based only on flow, returning Nothing if
+-- --  they don't match, and Just a possibly updated arglist if they
+-- --  do.  The purpose is to handle passing an in-out argument pair
+-- --  where only an output is expected.  This is permitted, and the
+-- --  input half is just ignored.  This is performed after the code has
+-- --  been flattened, so ParamInOut have already been turned into
+-- --  adjacent pairs of ParamIn and ParamOut parameters.
+-- reconcileArgFlows :: [Param] -> [Placed Exp] -> Maybe [Placed Exp]
+-- reconcileArgFlows [] [] = Just []
+-- reconcileArgFlows _ [] = Nothing
+-- reconcileArgFlows [] _ = Nothing
+-- reconcileArgFlows (Param _ _ ParamOut _:params)
+--   (arg1:arg2:args)
+--     | isHalfUpdate ParamIn (content arg1) &&
+--       isHalfUpdate ParamOut (content arg2)
+--     = (arg2:) <$> reconcileArgFlows params args
+-- reconcileArgFlows (Param _ _ pflow _:params) (arg:args)
+--     = let aflow = expFlow (content arg)
+--       in if pflow == aflow || aflow == FlowUnknown
+--       then (arg:) <$> reconcileArgFlows params args
+--       else Nothing
 
 
 -- |Does this parameter correspond to a manifest argument?
@@ -1287,167 +1287,167 @@ nonResourceParam (Param _ _ _ (Resource _)) = False
 nonResourceParam _ = True
 
 
-typecheckArg :: OptPos -> [Param] -> ProcName ->
-                Typing -> (Int,Param,Placed Exp) -> Compiler Typing
-typecheckArg pos params pname typing (argNum,param,arg) = do
-    let reasonType = ReasonArgType pname argNum pos
-    if not $ validTyping typing
-      then return typing
-      else do
-      logTypes $ "type checking " ++ show arg ++ " against " ++ show param
-      typecheckArg' (content arg) (place arg) AnyType
-        (paramType param) typing reasonType
+-- typecheckArg :: OptPos -> [Param] -> ProcName ->
+--                 Typing -> (Int,Param,Placed Exp) -> Compiler Typing
+-- typecheckArg pos params pname typing (argNum,param,arg) = do
+--     let reasonType = ReasonArgType pname argNum pos
+--     if not $ validTyping typing
+--       then return typing
+--       else do
+--       logTypes $ "type checking " ++ show arg ++ " against " ++ show param
+--       typecheckArg' (content arg) (place arg) AnyType
+--         (paramType param) typing reasonType
+-- 
+-- 
+-- typecheckArg' :: Exp -> OptPos -> TypeSpec -> TypeSpec -> Typing ->
+--                  TypeError -> Compiler Typing
+-- typecheckArg' texp@(Typed expr typ cast) pos _ paramType typing reason = do
+--     logTypes $ "Checking typed expr " ++ show texp
+--     typ' <- fromMaybe AnyType <$> lookupType typ pos
+--     logTypes $ "Determined type " ++ show typ'
+--     let typ'' = if cast then AnyType else typ'
+--     logTypes $ "Considering casting, type is " ++ show typ''
+--     typecheckArg' expr pos typ'' paramType typing reason
+--     -- typecheckArg' expr pos  typ'
+--     --               paramType typing reason
+-- typecheckArg' (Var var _ _) _ declType paramType typing reason = do
+--     -- XXX should out flow typing be contravariant?
+--     logTypes $
+--         "Check Var " ++ var ++ ":" ++ show declType ++ " vs. " ++
+--         show paramType ++
+--         (if paramType `subtypeOf` declType then " succeeded" else " FAILED")
+--     if paramType `subtypeOf` declType
+--       then return $ constrainVarType reason var paramType typing
+--       else if paramType == AnyType -- may be type checking recursion
+--            then return typing
+--            else return $ typeError reason typing
+-- typecheckArg' (IntValue val) _ declType paramType typing reason =
+--     return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "int" [])
+--       typing reason
+-- typecheckArg' (FloatValue val) _ declType paramType typing reason =
+--     return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "float" [])
+--       typing reason
+-- typecheckArg' (StringValue val) _ declType paramType typing reason =
+--     return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "string" [])
+--       typing reason
+-- typecheckArg' (CharValue val) _ declType paramType typing reason =
+--     return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "char" [])
+--       typing reason
+-- typecheckArg' expr _ _ _ _ _ =
+--     shouldnt $ "trying to type check expression " ++ show expr ++ "."
+-- 
+-- 
+-- typecheckArg'' :: TypeSpec -> TypeSpec -> TypeSpec -> Typing -> TypeError ->
+--                   Typing
+-- typecheckArg'' callType paramType constType typing reason =
+--     let realType =
+--             if constType `subtypeOf` callType then constType else callType
+--     in -- trace ("check call type " ++ show callType ++ " against param type " ++ show paramType ++ " for const type " ++ show constType) $
+--        if paramType `subtypeOf` realType
+--        then typing
+--        else -- trace ("type error with constant: " ++ show realType ++ " vs. " ++ show paramType)
+--             typeError reason typing
 
 
-typecheckArg' :: Exp -> OptPos -> TypeSpec -> TypeSpec -> Typing ->
-                 TypeError -> Compiler Typing
-typecheckArg' texp@(Typed expr typ cast) pos _ paramType typing reason = do
-    logTypes $ "Checking typed expr " ++ show texp
-    typ' <- fromMaybe AnyType <$> lookupType typ pos
-    logTypes $ "Determined type " ++ show typ'
-    let typ'' = if cast then AnyType else typ'
-    logTypes $ "Considering casting, type is " ++ show typ''
-    typecheckArg' expr pos typ'' paramType typing reason
-    -- typecheckArg' expr pos  typ'
-    --               paramType typing reason
-typecheckArg' (Var var _ _) _ declType paramType typing reason = do
-    -- XXX should out flow typing be contravariant?
-    logTypes $
-        "Check Var " ++ var ++ ":" ++ show declType ++ " vs. " ++
-        show paramType ++
-        (if paramType `subtypeOf` declType then " succeeded" else " FAILED")
-    if paramType `subtypeOf` declType
-      then return $ constrainVarType reason var paramType typing
-      else if paramType == AnyType -- may be type checking recursion
-           then return typing
-           else return $ typeError reason typing
-typecheckArg' (IntValue val) _ declType paramType typing reason =
-    return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "int" [])
-      typing reason
-typecheckArg' (FloatValue val) _ declType paramType typing reason =
-    return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "float" [])
-      typing reason
-typecheckArg' (StringValue val) _ declType paramType typing reason =
-    return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "string" [])
-      typing reason
-typecheckArg' (CharValue val) _ declType paramType typing reason =
-    return $ typecheckArg'' declType paramType (TypeSpec ["wybe"] "char" [])
-      typing reason
-typecheckArg' expr _ _ _ _ _ =
-    shouldnt $ "trying to type check expression " ++ show expr ++ "."
+-- firstJust :: [Maybe a] -> Maybe a
+-- firstJust [] = Nothing
+-- firstJust (j@(Just _):_) = j
+-- firstJust (Nothing:rest) = firstJust rest
+-- 
+-- 
+-- listArity :: (t -> ArgFlowType) -> (t -> PrimFlow) -> [t] -> Int
+-- listArity toFType toDirection lst =
+--     sum [if toFType e == HalfUpdate && toDirection e == FlowOut then 0 else 1
+--         | e <- lst]
 
 
-typecheckArg'' :: TypeSpec -> TypeSpec -> TypeSpec -> Typing -> TypeError ->
-                  Typing
-typecheckArg'' callType paramType constType typing reason =
-    let realType =
-            if constType `subtypeOf` callType then constType else callType
-    in -- trace ("check call type " ++ show callType ++ " against param type " ++ show paramType ++ " for const type " ++ show constType) $
-       if paramType `subtypeOf` realType
-       then typing
-       else -- trace ("type error with constant: " ++ show realType ++ " vs. " ++ show paramType)
-            typeError reason typing
+-- applyBodyTyping :: Typing -> [Placed Stmt] -> Compiler [Placed Stmt]
+-- applyBodyTyping typing =
+--     mapM (placedApply (applyStmtTyping typing))
+-- 
+-- 
+-- applyStmtTyping :: Typing -> Stmt -> OptPos -> Compiler (Placed Stmt)
+-- applyStmtTyping typing call@(ProcCall cm name id args) pos = do
+--     logTypes $ "typing call " ++ showStmt 4 call
+--     let args' = List.map (fmap $ applyExpTyping typing) args
+--     procs <- case id of
+--         Nothing   -> callTargets cm name
+--         Just n -> return [ProcSpec cm name n]
+--     logTypes $ "   " ++ show (length procs) ++ " potential procs: "
+--            ++ intercalate ", " (List.map show procs)
+--     matches <- catMaybes <$> mapM (matchProcType typing args') procs
+--     checkError (show (length matches) ++
+--                 " matching procs (should be 1) for stmt "
+--                 ++ showStmt 0 call)
+--       (1 /= length matches)
+--     let [(args'',proc)] = matches
+--     let call' = ProcCall (procSpecMod proc) (procSpecName proc)
+--                          (Just (procSpecID proc)) args''
+--     logTypes $ "typed call = " ++ showStmt 4 call'
+--     return $ maybePlace call' pos
+-- applyStmtTyping typing call@(ForeignCall lang name flags args) pos = do
+--     logTypes $ "typing call " ++ showStmt 0 call
+--     let args' = List.map (fmap $ applyExpTyping typing) args
+--     let instr = ForeignCall lang name flags args'
+--     logTypes $ "typed call = " ++ showStmt 0 instr
+--     return $ maybePlace instr pos
+-- applyStmtTyping typing (Test stmts expr) pos = do
+--     stmts' <- applyBodyTyping typing stmts
+--     let expr' = fmap (applyExpTyping typing) expr
+--     return $ maybePlace (Test stmts' expr') pos
+-- applyStmtTyping typing (Cond test cond thn els) pos = do
+--     test' <- applyBodyTyping typing test
+--     let cond' = fmap (applyExpTyping typing) cond
+--     thn' <- applyBodyTyping typing thn
+--     els' <- applyBodyTyping typing els
+--     return $ maybePlace (Cond test' cond' thn' els') pos
+-- applyStmtTyping typing (Loop body) pos = do
+--     body' <- applyBodyTyping typing body
+--     return $ maybePlace (Loop body') pos
+-- applyStmtTyping typing Nop pos = return $ maybePlace Nop pos
+-- applyStmtTyping typing (For itr gen) pos = do
+--     let itr' = fmap (applyExpTyping typing) itr
+--     let gen' = fmap (applyExpTyping typing) gen
+--     return $ maybePlace (For itr' gen') pos
+-- applyStmtTyping typing Break pos = return $ maybePlace Break pos
+-- applyStmtTyping typing Next pos = return $ maybePlace Next pos
+-- 
+-- 
+-- applyExpTyping :: Typing -> Exp -> Exp
+-- applyExpTyping _ expr@(IntValue _) =
+--     Typed expr (TypeSpec ["wybe"] "int" []) False
+-- applyExpTyping _ expr@(FloatValue _) =
+--     Typed expr (TypeSpec ["wybe"] "float" []) False
+-- applyExpTyping _ expr@(StringValue _) =
+--     Typed expr (TypeSpec ["wybe"] "string" []) False
+-- applyExpTyping _ expr@(CharValue _) =
+--     Typed expr (TypeSpec ["wybe"] "char" []) False
+-- applyExpTyping typing expr@(Var nm flow ftype)
+--     = Typed expr (varType nm typing) False
+-- applyExpTyping typing typed@(Typed _ _ True) =
+--     typed
+-- applyExpTyping typing (Typed expr _ False) =
+--     applyExpTyping typing expr
+-- applyExpTyping _ expr =
+--     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
 
 
-firstJust :: [Maybe a] -> Maybe a
-firstJust [] = Nothing
-firstJust (j@(Just _):_) = j
-firstJust (Nothing:rest) = firstJust rest
-
-
-listArity :: (t -> ArgFlowType) -> (t -> PrimFlow) -> [t] -> Int
-listArity toFType toDirection lst =
-    sum [if toFType e == HalfUpdate && toDirection e == FlowOut then 0 else 1
-        | e <- lst]
-
-
-applyBodyTyping :: Typing -> [Placed Stmt] -> Compiler [Placed Stmt]
-applyBodyTyping typing =
-    mapM (placedApply (applyStmtTyping typing))
-
-
-applyStmtTyping :: Typing -> Stmt -> OptPos -> Compiler (Placed Stmt)
-applyStmtTyping typing call@(ProcCall cm name id args) pos = do
-    logTypes $ "typing call " ++ showStmt 4 call
-    let args' = List.map (fmap $ applyExpTyping typing) args
-    procs <- case id of
-        Nothing   -> callTargets cm name
-        Just n -> return [ProcSpec cm name n]
-    logTypes $ "   " ++ show (length procs) ++ " potential procs: "
-           ++ intercalate ", " (List.map show procs)
-    matches <- catMaybes <$> mapM (matchProcType typing args') procs
-    checkError (show (length matches) ++
-                " matching procs (should be 1) for stmt "
-                ++ showStmt 0 call)
-      (1 /= length matches)
-    let [(args'',proc)] = matches
-    let call' = ProcCall (procSpecMod proc) (procSpecName proc)
-                         (Just (procSpecID proc)) args''
-    logTypes $ "typed call = " ++ showStmt 4 call'
-    return $ maybePlace call' pos
-applyStmtTyping typing call@(ForeignCall lang name flags args) pos = do
-    logTypes $ "typing call " ++ showStmt 0 call
-    let args' = List.map (fmap $ applyExpTyping typing) args
-    let instr = ForeignCall lang name flags args'
-    logTypes $ "typed call = " ++ showStmt 0 instr
-    return $ maybePlace instr pos
-applyStmtTyping typing (Test stmts expr) pos = do
-    stmts' <- applyBodyTyping typing stmts
-    let expr' = fmap (applyExpTyping typing) expr
-    return $ maybePlace (Test stmts' expr') pos
-applyStmtTyping typing (Cond test cond thn els) pos = do
-    test' <- applyBodyTyping typing test
-    let cond' = fmap (applyExpTyping typing) cond
-    thn' <- applyBodyTyping typing thn
-    els' <- applyBodyTyping typing els
-    return $ maybePlace (Cond test' cond' thn' els') pos
-applyStmtTyping typing (Loop body) pos = do
-    body' <- applyBodyTyping typing body
-    return $ maybePlace (Loop body') pos
-applyStmtTyping typing Nop pos = return $ maybePlace Nop pos
-applyStmtTyping typing (For itr gen) pos = do
-    let itr' = fmap (applyExpTyping typing) itr
-    let gen' = fmap (applyExpTyping typing) gen
-    return $ maybePlace (For itr' gen') pos
-applyStmtTyping typing Break pos = return $ maybePlace Break pos
-applyStmtTyping typing Next pos = return $ maybePlace Next pos
-
-
-applyExpTyping :: Typing -> Exp -> Exp
-applyExpTyping _ expr@(IntValue _) =
-    Typed expr (TypeSpec ["wybe"] "int" []) False
-applyExpTyping _ expr@(FloatValue _) =
-    Typed expr (TypeSpec ["wybe"] "float" []) False
-applyExpTyping _ expr@(StringValue _) =
-    Typed expr (TypeSpec ["wybe"] "string" []) False
-applyExpTyping _ expr@(CharValue _) =
-    Typed expr (TypeSpec ["wybe"] "char" []) False
-applyExpTyping typing expr@(Var nm flow ftype)
-    = Typed expr (varType nm typing) False
-applyExpTyping typing typed@(Typed _ _ True) =
-    typed
-applyExpTyping typing (Typed expr _ False) =
-    applyExpTyping typing expr
-applyExpTyping _ expr =
-    shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
-
-
-matchProcType :: Typing -> [Placed Exp] -> ProcSpec
-              -> Compiler (Maybe ([Placed Exp], ProcSpec))
-matchProcType typing args p = do
-    params <- List.filter nonResourceParam <$> getParams p
-    logTypes $ "   checking call to " ++
-        show p ++ " args " ++
-        show args ++ " against params " ++
-        show params
-    case reconcileArgFlows params args of
-        Nothing -> return Nothing
-        Just as -> do
-            argTypes <- mapM (expType typing) as
-            if all (uncurry subtypeOf)
-                (zip argTypes (List.map paramType params))
-                then return $ Just (as,p)
-                else return Nothing
+-- matchProcType :: Typing -> [Placed Exp] -> ProcSpec
+--               -> Compiler (Maybe ([Placed Exp], ProcSpec))
+-- matchProcType typing args p = do
+--     params <- List.filter nonResourceParam <$> getParams p
+--     logTypes $ "   checking call to " ++
+--         show p ++ " args " ++
+--         show args ++ " against params " ++
+--         show params
+--     case reconcileArgFlows params args of
+--         Nothing -> return Nothing
+--         Just as -> do
+--             argTypes <- mapM (expType typing) as
+--             if all (uncurry subtypeOf)
+--                 (zip argTypes (List.map paramType params))
+--                 then return $ Just (as,p)
+--                 else return Nothing
 
 
 ----------------------------------------------------------------
