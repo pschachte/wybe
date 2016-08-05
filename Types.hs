@@ -417,19 +417,19 @@ expType' _ expr _ =
 -- with whether or not the actual value is in fact available (is a constant
 -- or a previously assigned variable), and with whether the call this arg
 -- appears in should be delayed until this argument variable is assigned.
-expMode :: Set VarName -> Placed Exp -> (FlowDirection,Bool,Bool)
+expMode :: Set VarName -> Placed Exp -> (FlowDirection,Bool,Maybe VarName)
 expMode assigned pexp = expMode' assigned $ content pexp
 
-expMode' :: Set VarName -> Exp -> (FlowDirection,Bool,Bool)
-expMode' _ (IntValue _) = (ParamIn, True, False)
-expMode' _ (FloatValue _) = (ParamIn, True, False)
-expMode' _ (StringValue _) = (ParamIn, True, False)
-expMode' _ (CharValue _) = (ParamIn, True, False)
+expMode' :: Set VarName -> Exp -> (FlowDirection,Bool,Maybe VarName)
+expMode' _ (IntValue _) = (ParamIn, True, Nothing)
+expMode' _ (FloatValue _) = (ParamIn, True, Nothing)
+expMode' _ (StringValue _) = (ParamIn, True, Nothing)
+expMode' _ (CharValue _) = (ParamIn, True, Nothing)
 expMode' assigned (Var name FlowUnknown _)
     = if name `elem` assigned
-      then (ParamIn, True, False)
-      else (ParamOut, False, True)
-expMode' assigned (Var name flow _) = (flow, name `elem` assigned, False)
+      then (ParamIn, True, Nothing)
+      else (ParamOut, False, Just name)
+expMode' assigned (Var name flow _) = (flow, name `elem` assigned, Nothing)
 expMode' assigned (Typed expr _ _) = expMode' assigned expr
 expMode' _ expr =
     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
@@ -885,19 +885,36 @@ matchTypeList caller callee pos callTypes calleeInfo
 
 
 -- |Match up the argument modes of a call with the available parameter
--- modes of the callee, producing a list of the actual types. If this list
--- contains InvalidType, then the call would be a type error.
---
--- This code deals with 3 modes per argument:  the mode of the called proc,
--- the mode specified by annotations (or not) on the actual parameter, and
--- the fact of whether the variable is actually previously assigned.
-matchModeList :: Ident -> Ident -> OptPos -> [(FlowDirection,Bool,Bool)]
-              -> ProcInfo -> Maybe ProcInfo
-matchModeList caller callee pos modes procinfo@(ProcInfo pspec typModes)
-  | (ParamIn,ParamOut) `elem` argModes -- Some param is in where actual is out
-    = Nothing
-  | otherwise = Just procinfo
+-- modes of the callee.  Determine if all actual arguments are instantiated
+-- if the corresponding parameter is an input.
+matchModeList :: [(FlowDirection,Bool,Maybe VarName)]
+              -> ProcInfo -> Bool
+matchModeList modes (ProcInfo _ typModes)
+    -- Check that no param is in where actual is out
+    = (ParamIn,ParamOut) `notElem` argModes
     where argModes = zip (typeFlowMode <$> typModes) (sel1 <$> modes)
+
+
+-- |Match up the argument modes of a call with the available parameter
+-- modes of the callee.  Determine if the call mode exactly matches the
+-- proc mode, treating a FlowUnknown argument as ParamOut.
+exactModeMatch :: [(FlowDirection,Bool,Maybe VarName)]
+               -> ProcInfo -> Bool
+exactModeMatch modes (ProcInfo _ typModes)
+    = all (\(formal,actual) -> formal == actual
+                               || formal == ParamOut && actual == FlowUnknown)
+      $ zip (typeFlowMode <$> typModes) (sel1 <$> modes)
+
+
+-- |Match up the argument modes of a call with the available parameter
+-- modes of the callee.  Determine if the call mode exactly matches the
+-- proc mode, treating a FlowUnknown argument as ParamOut.
+delayModeMatch :: [(FlowDirection,Bool,Maybe VarName)]
+               -> ProcInfo -> Bool
+delayModeMatch modes (ProcInfo _ typModes)
+    = all (\(formal,actual) -> formal == actual
+                               || formal == ParamIn && actual == FlowUnknown)
+      $ zip (typeFlowMode <$> typModes) (sel1 <$> modes)
 
 
 overloadErr :: StmtTypings -> TypeError
@@ -922,7 +939,7 @@ overloadErr (StmtTypings call candidates) =
 --  the set of in parameter names.  It also threads through a list of
 --  statements postponed because an unknown flow variable is not assigned yet.
 modecheckStmts :: ModSpec -> ProcName -> OptPos -> Typing
-                 -> [Placed Stmt] -> Set VarName -> [Placed Stmt]
+                 -> [(Set VarName,Placed Stmt)] -> Set VarName -> [Placed Stmt]
                  -> Compiler ([Placed Stmt], Set VarName,[TypeError])
 modecheckStmts _ _ _ _ delayed assigned []
     | List.null delayed = return ([],assigned,[])
@@ -932,57 +949,101 @@ modecheckStmts _ _ _ _ delayed assigned []
 modecheckStmts m name pos typing delayed assigned (pstmt:pstmts) = do
     (pstmt',delayed',assigned',errs') <-
       placedApply (modecheckStmt m name pos typing delayed assigned) pstmt
+    let assigned'' = assigned `Set.union` assigned'
     logTypes $ "New errors   = " ++ show errs'
-    logTypes $ "Now assigned = " ++ show assigned'
-    (pstmts',assigned'',errs) <-
-      modecheckStmts m name pos typing delayed' assigned' pstmts
-    return (pstmt'++pstmts',assigned'',errs'++errs)
+    logTypes $ "Now assigned = " ++ show assigned''
+    let (doNow,delayed'')
+            = List.partition (flip Set.isSubsetOf assigned' . fst) delayed'
+    (pstmts',assigned''',errs) <-
+      modecheckStmts m name pos typing delayed'' assigned''
+        ((snd <$> doNow) ++ pstmts)
+    return (pstmt'++pstmts',assigned''',errs'++errs)
 
 
+-- |Mode check a single statement, returning a list of moded statements,
+--  plus a list of delayed statements, a set of variables bound by this
+--  statement, and a list of type (mode) errors.
+--
+--  We select a mode as follows:
+--    0.  If some input arguments are not assigned, report an uninitialised
+--        variable error.
+--    1.  If there is an exact match for the current instantiation state
+--        (treating any FlowUnknown args as ParamIn), select it.
+--    2.  If this is a test context and there is a match for the current
+--        instantiation state (treating any FlowUnknown args as ParamIn
+--        and allowing ParamIn arguments where the parameter is ParamOut),
+--        select it, and transform by replacing each non-identical flow
+--        ParamIn argument with a fresh ParamOut variable, and adding a
+--        = test call to test the fresh variable against the actual ParamIn
+--        argument.
+--    3.  If there is a match (possibly with some ParamIn args where
+--        ParamOut is expected) treating any FlowUnknown args as ParamOut,
+--        then select that mode but delay the call.
+--    4.  Otherwise report a mode error.
+--
+--    In case there are multiple modes that match one of those criteria,
+--    select the first that matches.
 modecheckStmt :: ModSpec -> ProcName -> OptPos -> Typing
-                 -> [Placed Stmt] -> Set VarName -> Stmt -> OptPos
-                 -> Compiler ([Placed Stmt], [Placed Stmt],
+                 -> [(Set VarName,Placed Stmt)] -> Set VarName -> Stmt -> OptPos
+                 -> Compiler ([Placed Stmt], [(Set VarName,Placed Stmt)],
                               Set VarName,[TypeError])
 modecheckStmt m name defPos typing delayed assigned
     stmt@(ProcCall cmod cname _ args) pos = do
-    logTypes $ "Mode checking call " ++ show stmt
-    logTypes $ "    with assigned " ++ show assigned
+    logTypes $ "Mode checking call   : " ++ show stmt
+    logTypes $ "    with assigned    : " ++ show assigned
     callInfos <- callProcInfos $ maybePlace stmt pos
     actualTypes <- mapM (expType typing) args
     let actualModes = List.map (expMode assigned) args
     let flowErrs = [ReasonArgFlow cname num pos
                    | ((mode,avail,_),num) <- zip actualModes [1..]
-                   , not avail && mode == ParamIn]
-    let typeMatches = catOKs
+                   , mode == ParamIn && not avail]
+    if not $ List.null flowErrs -- Using undefined var as input?
+        then do
+            logTypes $ "Unpreventable mode errors: " ++ show flowErrs
+            return ([],delayed,assigned,flowErrs)
+        else do
+            let typeMatches
+                    = catOKs
                       $ List.map (matchTypeList name cname pos actualTypes)
                       callInfos
-    let modeMatches = Maybe.mapMaybe (matchModeList name cname pos actualModes)
-                      typeMatches
-    logTypes $ "Possible modes: " ++ show modeMatches
-    if or $ sel3 <$> actualModes
-        then return ([],maybePlace stmt pos:delayed,assigned,[])
-        else if not $ List.null flowErrs -- Using undefined var as input?
-             then return ([],delayed,assigned,flowErrs)
-             else if List.null modeMatches -- No matching mode?
-                  then do
+            -- All the possibly matching modes
+            let modeMatches
+                    = List.filter (matchModeList actualModes) typeMatches
+            logTypes $ "Actual types         : " ++ show actualTypes
+            logTypes $ "Actual call modes    : " ++ show actualModes
+            logTypes $ "Type-correct modes   : " ++ show typeMatches
+            logTypes $ "Possible mode matches: " ++ show modeMatches
+            let exactMatches
+                    = List.filter (exactModeMatch actualModes) modeMatches
+            logTypes $ "Exact mode matches: " ++ show exactMatches
+            -- XXX Must handle test context
+            let delayMatches
+                    = List.filter (delayModeMatch actualModes) modeMatches
+            logTypes $ "Delay mode matches: " ++ show delayMatches
+            case exactMatches of
+                (match:_) -> do
+                  let matchProc = procInfoProc match
+                  let args' = List.zipWith setPExpTypeFlow
+                              (procInfoArgs match) args
+                  let stmt' = ProcCall (procSpecMod matchProc)
+                              (procSpecName matchProc)
+                              (Just $ procSpecID matchProc)
+                              args'
+                  let assigned' = Set.fromList
+                                  $ List.map (expVar . content)
+                                  $ List.filter
+                                  ((==ParamOut) . expFlow . content) args'
+                  return ([maybePlace stmt' pos],delayed,assigned',[])
+                [] -> case delayMatches of
+                    (match:_) -> do
+                      logTypes $ "delaying call: "
+                                 ++ ": " ++ show stmt
+                      return ([],(Set.empty,maybePlace stmt pos):delayed,
+                              assigned,[])
+                    [] -> do
                       logTypes $ "Mode errors in call:  " ++ show flowErrs
                       return ([],delayed,assigned,
                               [ReasonUndefinedFlow cname pos])
-                  else do
-                      let match = selectMode modeMatches actualModes
-                      let matchProc = procInfoProc match
-                      let args' = List.zipWith setPExpTypeFlow
-                                  (procInfoArgs match) args
-                      let stmt' = ProcCall (procSpecMod matchProc)
-                                           (procSpecName matchProc)
-                                           (Just $ procSpecID matchProc)
-                                           args'
-                      let assigned' = Set.union assigned
-                                      $ Set.fromList
-                                      $ List.map (expVar . content)
-                                      $ List.filter
-                                      ((==ParamOut) . expFlow . content) args'
-                      return ([maybePlace stmt' pos],delayed,assigned',[])
 modecheckStmt m name defPos typing delayed assigned
     stmt@(ForeignCall lang cname flags args) pos = do
     logTypes $ "Mode checking foreign call " ++ show stmt
@@ -999,11 +1060,10 @@ modecheckStmt m name defPos typing delayed assigned
                             $ sel1 <$> actualModes
             let args' = List.zipWith setPExpTypeFlow typeflows args
             let stmt' = ForeignCall lang cname flags args'
-            let assigned' = Set.union assigned
-                                 $ Set.fromList
-                                 $ List.map (expVar . content)
-                                 $ List.filter
-                                   ((==ParamOut) . expFlow . content) args'
+            let assigned' = Set.fromList
+                            $ List.map (expVar . content)
+                            $ List.filter ((==ParamOut) . expFlow . content)
+                              args'
             return ([maybePlace stmt' pos],delayed,assigned',[])
 modecheckStmt m name defPos typing delayed assigned
     stmt@(Test stmts expr) pos = do
@@ -1023,19 +1083,23 @@ modecheckStmt m name defPos typing delayed assigned
     (elsStmts', assigned3,errs3) <-
       modecheckStmts m name defPos typing [] assigned2 elsStmts
     return ([maybePlace (Cond tstStmts' expr' thnStmts' elsStmts') pos],
-            delayed, assigned2 `Set.intersection` assigned3,
+            delayed, assigned1 `Set.union`
+                     (assigned2 `Set.intersection` assigned3),
             errs1++errs2++errs3)
 modecheckStmt m name defPos typing delayed assigned
     stmt@(Loop stmts) pos = do
     logTypes $ "Mode checking loop " ++ show stmt
     (stmts', assigned',errs') <-
       modecheckStmts m name defPos typing [] assigned stmts
+    -- XXX Can only assume vars assigned before first loop exit are
+    --     actually assigned by loop
     return ([maybePlace (Loop stmts') pos], delayed, assigned',errs')
-modecheckStmt m _ _ _ delayed assigned stmt pos =
-    return ([maybePlace stmt pos],delayed,assigned,[])
+modecheckStmt m _ _ _ delayed _ stmt pos =
+    return ([maybePlace stmt pos],delayed,Set.empty,[])
 
 
-selectMode :: [ProcInfo] -> [(FlowDirection,Bool,Bool)] -> ProcInfo
+selectMode :: [ProcInfo] -> [(FlowDirection,Bool,Maybe VarName)]
+           -> ProcInfo
 selectMode (procInfo:_) _ = procInfo
 selectMode _ _ = shouldnt "selectMode with empty list of modes"
 
