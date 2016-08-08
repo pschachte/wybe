@@ -654,9 +654,17 @@ typecheckProcDecl m pdef = do
                           List.filter
                           ((`elem` [ParamIn,ParamInOut]) . paramFlow)
                           params
+                    let inResources =
+                          resourceFlowRes
+                          <$> List.filter 
+                              ((`elem` [ParamIn,ParamInOut]) . resourceFlowFlow)
+                              resources
+                    let initialised
+                            = (Set.fromList $ paramName <$> inParams)
+                              `Set.union`
+                              (Set.fromList $ resourceName <$> inResources)
                     (def',_,modeErrs) <-
-                      modecheckStmts m name pos typing []
-                      (Set.fromList $ paramName <$> inParams) def
+                      modecheckStmts m name pos typing [] initialised def
                     let typing' = typeErrors modeErrs typing
                     let params' = updateParamTypes typing' params
                     let proto' = proto { procProtoParams = params' }
