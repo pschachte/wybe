@@ -926,7 +926,7 @@ typed' ty = do
     case repr of
         Just typeStr -> return $ typeStrToType typeStr
         Nothing -> 
-            shouldnt $ "typed' applied to InvaldType or unknown type ("
+            shouldnt $ "typed' applied to InvalidType or unknown type ("
             ++ show ty
             ++ ")"
 
@@ -943,6 +943,10 @@ typeStrToType "phantom" = void_t
 typeStrToType (c:cs)
     | c == 'i' = int_c (fromIntegral bytes)
     | c == 'f' = float_c (fromIntegral bytes)
+    | c == 'p' = if take 6 cs == "ointer"
+                 then let bs = read (drop 6 cs) :: Int
+                      in ptr_t $ int_c (fromIntegral bs)
+                 else void_t
     | otherwise = void_t
   where
     bytes = read cs :: Int

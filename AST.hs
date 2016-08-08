@@ -597,6 +597,7 @@ lookupType AnyType _ = return $ Just AnyType
 lookupType InvalidType _ = return $ Just InvalidType
 lookupType (TypeSpec _ "phantom" []) _ =
     return $ Just $ TypeSpec ["wybe"] "phantom" []
+lookupType ty@(TypeSpec ["wybe"] "int" []) _ = return $ Just ty
 lookupType ty@(TypeSpec mod name args) pos = do
     logAST $ "Looking up type " ++ show ty
     tspecs <- refersTo mod name modKnownTypes typeMod
@@ -1044,11 +1045,10 @@ updateModLLVM fn modimp = do
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
 lookupTypeRepresentation AnyType = return $ Just "word"
 lookupTypeRepresentation InvalidType = return Nothing
-lookupTypeRepresentation (TypeSpec [] "bool" _) = return $ Just "bool"
-lookupTypeRepresentation (TypeSpec [] "int" _) = return $ Just "int"
-lookupTypeRepresentation (TypeSpec [] "float" _) = return $ Just "float"
-lookupTypeRepresentation (TypeSpec [] "double" _) = return $ Just "double"
-lookupTypeRepresentation (TypeSpec [] _ _) = return Nothing
+lookupTypeRepresentation (TypeSpec ["wybe"] "bool" _) = return $ Just "bool"
+lookupTypeRepresentation (TypeSpec ["wybe"] "int" _) = return $ Just "int"
+lookupTypeRepresentation (TypeSpec ["wybe"] "float" _) = return $ Just "float"
+lookupTypeRepresentation (TypeSpec ["wybe"] "double" _) = return $ Just "double"
 lookupTypeRepresentation (TypeSpec _ "phantom" _) = return $ Just "phantom"
 lookupTypeRepresentation (TypeSpec modSpecs name _) = do
     -- logMsg Blocks $ "Looking for " ++ name ++ " in mod: " ++
