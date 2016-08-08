@@ -14,10 +14,10 @@ AFTER EVERYTHING:
 *main* > public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
     numbers.factorial<0>(4:wybe.int, ?tmp$0#0:wybe.int) @bar:3:9
-    foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:75:38
-    foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:73:28
-    foreign c print_float(35.0:wybe.float, ~#wybe.io$io#1:wybe.phantom, ?tmp$10#0:wybe.phantom) @wybe:79:40
-    foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:73:28
+    foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:76:38
+    foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+    foreign c print_float(35.0:wybe.float, ~#wybe.io$io#1:wybe.phantom, ?tmp$10#0:wybe.phantom) @wybe:80:40
+    foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:74:28
 --------------------------------------------------
  Module numbers
   public submods  : 
@@ -33,19 +33,19 @@ AFTER EVERYTHING:
 
 *main* > public inline (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_string("Numbers has been initialised.":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:87:41
-    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:73:28
+    foreign c print_string("Numbers has been initialised.":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:88:41
+    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
 
 
 factorial > public (1 calls)
 0: factorial(n#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm icmp sle(n#0:wybe.int, 0:wybe.int, ?tmp$7#0:bool) @wybe:24:40
-    case ~tmp$7#0:bool of
+    foreign llvm icmp sle(n#0:wybe.int, 0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:25:40
+    case ~tmp$7#0:wybe.bool of
     0:
-        foreign llvm sub(n#0:wybe.int, 1:wybe.int, ?tmp$10#0:int) @wybe:15:38
-        numbers.factorial<0>(~tmp$10#0:int, ?tmp$3#0:wybe.int) @numbers:4:34
-        foreign llvm mul(~n#0:wybe.int, ~tmp$3#0:wybe.int, ?tmp$13#0:int) @wybe:20:38
-        foreign llvm move(~tmp$13#0:int, ?$#0:wybe.int) @numbers:3:8
+        foreign llvm sub(n#0:wybe.int, 1:wybe.int, ?tmp$10#0:wybe.int) @wybe:16:38
+        numbers.factorial<0>(~tmp$10#0:wybe.int, ?tmp$3#0:wybe.int) @numbers:4:34
+        foreign llvm mul(~n#0:wybe.int, ~tmp$3#0:wybe.int, ?tmp$13#0:wybe.int) @wybe:21:38
+        foreign llvm move(~tmp$13#0:wybe.int, ?$#0:wybe.int) @numbers:3:8
 
     1:
         foreign llvm move(1:wybe.int, ?$#0:wybe.int) @numbers:3:8
@@ -59,9 +59,9 @@ gen$1 > inline (2 calls)
 
 toCelsius > public inline (0 calls)
 0: toCelsius(f#0:wybe.float, ?$#0:wybe.float):
-    foreign llvm fsub(~f#0:wybe.float, 32.0:wybe.float, ?tmp$4#0:float) @wybe:39:44
-    foreign llvm fdiv(~tmp$4#0:float, 1.8:wybe.float, ?tmp$7#0:float) @wybe:45:44
-    foreign llvm move(~tmp$7#0:float, ?$#0:wybe.float) @numbers:1:8
+    foreign llvm fsub(~f#0:wybe.float, 32.0:wybe.float, ?tmp$4#0:wybe.float) @wybe:40:44
+    foreign llvm fdiv(~tmp$4#0:wybe.float, 1.8:wybe.float, ?tmp$7#0:wybe.float) @wybe:46:44
+    foreign llvm move(~tmp$7#0:wybe.float, ?$#0:wybe.float) @numbers:1:8
 bar, numbers
 ======================================================================
 AFTER LLVM IR:

@@ -17,14 +17,14 @@ AFTER EVERYTHING:
 
 gen$1 > (2 calls)
 0: gen$1(wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
-    foreign c read_char(?c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:85:39
-    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$4#0:wybe.bool) @wybe:67:42
+    foreign c read_char(?c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:86:39
+    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$4#0:wybe.bool) @wybe:68:42
     case ~tmp$4#0:wybe.bool of
     0:
         foreign llvm move(~wybe.io$io#1:wybe.phantom, ?wybe.io$io#2:wybe.phantom)
 
     1:
-        foreign c putchar(~c#0:wybe.char, ~wybe.io$io#1:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:83:39
+        foreign c putchar(~c#0:wybe.char, ~wybe.io$io#1:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:84:39
         simple_loop.gen$1<0>(~tmp$8#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom) @simple_loop:1:1
 
 
@@ -35,7 +35,7 @@ gen$3 > inline (1 calls)
 
 gen$4 > inline (1 calls)
 0: gen$4(c#0:wybe.char, [tmp$0#0:wybe.bool], wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
-    foreign c putchar(~c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:83:39
+    foreign c putchar(~c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:84:39
     simple_loop.gen$1<0>(~wybe.io$io#1:wybe.phantom, ?wybe.io$io#2:wybe.phantom) @simple_loop:1:1
 simple_loop
 ======================================================================
