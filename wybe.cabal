@@ -28,3 +28,4 @@ executable wybemk
                , process == 1.4.2.0
                , transformers >=0.3.0.0 && <0.5
                , cryptonite
+               , tuple >= 0.3.0.2

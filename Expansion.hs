@@ -244,9 +244,9 @@ outputParams proto =
 addOutputNaming :: OptPos -> (PrimParam,PrimArg) -> Expander ()
 addOutputNaming _ (param@(PrimParam pname ty FlowOut _ _),
                      v@(ArgVar vname _ _ _ _)) = do
-    when (Unspecified == ty) $
+    when (AnyType == ty) $
       shouldnt $ "Danger: untyped param: " ++ show param
-    when (Unspecified == argType v) $
+    when (AnyType == argType v) $
       shouldnt $ "Danger: untyped argument: " ++ show v
     logExpansion $ "  recording output naming for " ++ show pname
       ++ " -> " ++ show vname
@@ -260,10 +260,11 @@ addOutputNaming _ _ = return ()
 -- context.
 addInputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
 addInputAssign pos (param@(PrimParam name ty flow _ _),v) = do
-    when (Unspecified == ty) $
-      shouldnt $ "Danger: untyped param: " ++ show param
-    when (Unspecified == argType v) $
-      shouldnt $ "Danger: untyped argument: " ++ show v
+    -- XXX AnyType is now a valid type, treated as a word type
+    -- when (AnyType == ty) $
+    --   shouldnt $ "Danger: untyped param: " ++ show param
+    -- when (AnyType == argType v) $
+    --   shouldnt $ "Danger: untyped argument: " ++ show v
     addInputAssign' pos name ty flow v
     
 addInputAssign' :: OptPos -> PrimVarName -> TypeSpec -> PrimFlow -> PrimArg

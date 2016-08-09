@@ -476,7 +476,7 @@ defArg = ifIsVarDef defVar (return ())
 -- |Apply the function if the expression as a variable assignment,
 --  otherwise just take the second argument.
 ifIsVarDef :: (VarName -> TypeSpec -> t) -> t -> Exp -> t
-ifIsVarDef f v expr = ifIsVarDef' f v expr Unspecified
+ifIsVarDef f v expr = ifIsVarDef' f v expr AnyType
 
 ifIsVarDef' :: (VarName -> TypeSpec -> t) -> t -> Exp -> TypeSpec -> t
 ifIsVarDef' f v (Typed expr ty _) _ = ifIsVarDef' f v expr ty

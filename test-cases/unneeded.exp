@@ -12,8 +12,8 @@ AFTER EVERYTHING:
 
 unneeded > inline (0 calls)
 0: unneeded(x#0:wybe.int, [y#0:wybe.int], ?z#0:wybe.int, q#0:wybe.int, [?q#0:wybe.int]):
-    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$3#0:int) @wybe:12:38
-    foreign llvm move(~tmp$3#0:int, ?z#0:wybe.int)
+    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:13:38
+    foreign llvm move(~tmp$3#0:wybe.int, ?z#0:wybe.int)
 unneeded
 ======================================================================
 AFTER LLVM IR:

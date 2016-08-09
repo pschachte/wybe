@@ -14,19 +14,19 @@ AFTER EVERYTHING:
 *main* > public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     func_factorial.factorial<0>(5:wybe.int, ?tmp$0#0:wybe.int) @func_factorial:4:9
-    foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$3#0:wybe.phantom) @wybe:75:38
-    foreign c putchar('\n':wybe.char, ~tmp$3#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:73:28
+    foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$3#0:wybe.phantom) @wybe:76:38
+    foreign c putchar('\n':wybe.char, ~tmp$3#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
 
 
 factorial > public (2 calls)
 0: factorial(n#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm icmp sle(n#0:wybe.int, 0:wybe.int, ?tmp$7#0:bool) @wybe:24:40
-    case ~tmp$7#0:bool of
+    foreign llvm icmp sle(n#0:wybe.int, 0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:25:40
+    case ~tmp$7#0:wybe.bool of
     0:
-        foreign llvm sub(n#0:wybe.int, 1:wybe.int, ?tmp$10#0:int) @wybe:15:38
-        func_factorial.factorial<0>(~tmp$10#0:int, ?tmp$3#0:wybe.int) @func_factorial:2:34
-        foreign llvm mul(~n#0:wybe.int, ~tmp$3#0:wybe.int, ?tmp$13#0:int) @wybe:20:38
-        foreign llvm move(~tmp$13#0:int, ?$#0:wybe.int) @func_factorial:1:8
+        foreign llvm sub(n#0:wybe.int, 1:wybe.int, ?tmp$10#0:wybe.int) @wybe:16:38
+        func_factorial.factorial<0>(~tmp$10#0:wybe.int, ?tmp$3#0:wybe.int) @func_factorial:2:34
+        foreign llvm mul(~n#0:wybe.int, ~tmp$3#0:wybe.int, ?tmp$13#0:wybe.int) @wybe:21:38
+        foreign llvm move(~tmp$13#0:wybe.int, ?$#0:wybe.int) @func_factorial:1:8
 
     1:
         foreign llvm move(1:wybe.int, ?$#0:wybe.int) @func_factorial:1:8

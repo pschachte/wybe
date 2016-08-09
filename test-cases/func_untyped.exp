@@ -12,8 +12,8 @@ AFTER EVERYTHING:
 
 incr > inline (0 calls)
 0: incr(a#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm add(~a#0:wybe.int, 1:wybe.int, ?tmp$3#0:int) @wybe:12:38
-    foreign llvm move(~tmp$3#0:int, ?$#0:wybe.int) @func_untyped:1:1
+    foreign llvm add(~a#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:13:38
+    foreign llvm move(~tmp$3#0:wybe.int, ?$#0:wybe.int) @func_untyped:1:1
 func_untyped
 ======================================================================
 AFTER LLVM IR:

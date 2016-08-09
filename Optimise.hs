@@ -151,16 +151,6 @@ primCost (PrimNop) = 0
 argCost :: PrimArg -> Int
 argCost arg = if phantomArg arg then 0 else 1
 
-phantomParam :: PrimParam -> Bool
-phantomParam param = phantomType $ primParamType param
-
-phantomArg :: PrimArg -> Bool
-phantomArg (ArgVar _ ty _ _ _) = phantomType ty
-phantomArg _ = False -- Nothing but a var can be a phantom
-
-phantomType Unspecified = False
-phantomType ty = "phantom" == typeName ty
-
 ----------------------------------------------------------------
 --                     Handling the call graph
 ----------------------------------------------------------------

@@ -292,9 +292,12 @@ validateArg instr (ArgString _ ty)    = validateType ty instr
 validateArg instr (ArgChar   _ ty)    = validateType ty instr
 
 validateType :: TypeSpec -> Prim -> BodyBuilder ()
-validateType Unspecified instr =
-    shouldnt $ "Unspecified type in argument of " ++ show instr
-validateType (TypeSpec _ _ _) instr = return ()
+validateType InvalidType instr =
+    shouldnt $ "InvalidType in argument of " ++ show instr
+-- XXX AnyType is now a valid type treated as a word type
+-- validateType AnyType instr =
+--     shouldnt $ "AnyType in argument of " ++ show instr
+validateType _ instr = return ()
 
 
 concatBodies :: BodyState -> BodyState -> BodyState

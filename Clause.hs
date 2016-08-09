@@ -101,7 +101,7 @@ compileBody stmts params = do
           initial <- get
           tstStmts' <- mapM compileSimpleStmt tstStmts
           afterTest <- get
-          tstVar' <- placedApplyM compileArg tstVar
+          tstVar' <- placedApply compileArg tstVar
           thn' <- compileBody thn params
           afterThen <- get
           -- XXX This isn't right when tests can bind outputs only when
@@ -173,7 +173,7 @@ compileSimpleStmt' stmt =
 
 
 compileArg :: Exp -> OptPos -> ClauseComp PrimArg
-compileArg = compileArg' Unspecified
+compileArg = compileArg' AnyType
 
 compileArg' :: TypeSpec -> Exp -> OptPos -> ClauseComp PrimArg
 compileArg' typ (IntValue int) _ = return $ ArgInt int typ

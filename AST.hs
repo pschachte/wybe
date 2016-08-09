@@ -14,14 +14,15 @@
 module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
-  Determinism(..), TypeProto(..), TypeSpec(..), TypeImpln(..),
-  FnProto(..), ProcProto(..), Param(..),
+  Determinism(..), TypeProto(..), TypeSpec(..), TypeRef(..), TypeImpln(..),
+  FnProto(..), ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), 
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
+  phantomParam, phantomArg, phantomType,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
-  placedApply, placedApplyM, makeMessage, updatePlacedM,
+  placedApply, makeMessage, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..), 
   ImportSpec(..), importSpec,
@@ -34,7 +35,8 @@ module AST (
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..), 
   argFlowDirection, argType, outArgVar, argDescription, flowsIn, flowsOut,
   foldBodyPrims, foldBodyDistrib, foldProcCalls,
-  expToStmt, procCallToExp, expFlow, setExpFlow, isHalfUpdate,
+  expToStmt, procCallToExp, expFlow,
+  setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
   Prim(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
@@ -195,12 +197,6 @@ rePlace t (Unplaced _)   = Unplaced t
 --  placed thing.
 placedApply :: (a -> OptPos -> b) -> (Placed a) -> b
 placedApply f placed = f (content placed) (place placed)
-
-
--- |Apply a function that takes a thing and an optional place to a 
---  placed thing.
-placedApplyM :: Monad m => (a -> OptPos -> m b) -> (Placed a) -> m b
-placedApplyM f placed = f (content placed) (place placed)
 
 
 instance Functor Placed where
@@ -613,9 +609,11 @@ addType name def@(TypeDef arity rep _) vis = do
 -- |Find the definition of the specified type visible from the current module.
 
 lookupType :: TypeSpec -> OptPos -> Compiler (Maybe TypeSpec)
-lookupType Unspecified _ = return $ Just Unspecified
-lookupType ty@(TypeSpec _ "phantom" []) pos =
+lookupType AnyType _ = return $ Just AnyType
+lookupType InvalidType _ = return $ Just InvalidType
+lookupType (TypeSpec _ "phantom" []) _ =
     return $ Just $ TypeSpec ["wybe"] "phantom" []
+lookupType ty@(TypeSpec ["wybe"] "int" []) _ = return $ Just ty
 lookupType ty@(TypeSpec mod name args) pos = do
     logAST $ "Looking up type " ++ show ty
     tspecs <- refersTo mod name modKnownTypes typeMod
@@ -637,7 +635,6 @@ lookupType ty@(TypeSpec mod name args) pos = do
                 let matchingType = TypeSpec matchingMod name args'
                 logAST $ "Matching type = " ++ show matchingType
                 return $ Just $ matchingType
-                  
               else do
                 message Error
                   ("Type '" ++ name ++ "' expects " ++ (show $ typeDefArity def) ++
@@ -889,7 +886,7 @@ collectSubModules mspec = do
 -- |The list of defining modules that the given (possibly
 --  module-qualified) name could possibly refer to from the current
 --  module.  This may include the current module, or any module it may
---  be imported from.  The ifaceMapFn is a Module selector function that
+--  be imported from.  The implMapFn is a Module selector function that
 --  produces a map that tells whether that module exports that name,
 --  and implMapFn tells whether a module implementation defines that
 --  name.  The reference to this name occurs in the current module.
@@ -901,6 +898,8 @@ refersTo modspec name implMapFn specModFn = do
       name ++ " from module " ++ showModSpec currMod
     visible <- getModule (Map.findWithDefault Set.empty name . implMapFn . 
                           fromJust . modImplementation)
+    logAST $ "*** ALL visible from: " ++ showModSpec modspec ++ ": "
+        ++ showModSpecs (Set.toList (Set.map specModFn visible)) 
     let matched = Set.filter ((modspec `isSuffixOf`) . specModFn) visible
     case Set.null matched of
         False -> return matched
@@ -1062,15 +1061,20 @@ updateModLLVM fn modimp = do
 -- | Given a type spec, find its internal representation (a string),
 --   if possible.
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
-lookupTypeRepresentation Unspecified = return Nothing
-lookupTypeRepresentation (TypeSpec [] _ _) = return Nothing    
-lookupTypeRepresentation (TypeSpec modSpec name _) = do
+lookupTypeRepresentation AnyType = return $ Just "word"
+lookupTypeRepresentation InvalidType = return Nothing
+lookupTypeRepresentation (TypeSpec ["wybe"] "bool" _) = return $ Just "bool"
+lookupTypeRepresentation (TypeSpec ["wybe"] "int" _) = return $ Just "int"
+lookupTypeRepresentation (TypeSpec ["wybe"] "float" _) = return $ Just "float"
+lookupTypeRepresentation (TypeSpec ["wybe"] "double" _) = return $ Just "double"
+lookupTypeRepresentation (TypeSpec _ "phantom" _) = return $ Just "phantom"
+lookupTypeRepresentation (TypeSpec modSpecs name _) = do
     -- logMsg Blocks $ "Looking for " ++ name ++ " in mod: " ++
-    --     showModSpec modSpec
-    reenterModule modSpec
+    --      showModSpec modSpecs
+    reenterModule modSpecs
     maybeImpln <- getModuleImplementation
     modInt <- getModuleInterface
-    finishModule
+    _ <- finishModule
     -- Try find the TypeRepresentation in the interface
     let maybeIntMatch = fmap snd $ Map.lookup name $ pubTypes modInt
     -- Try find the TypeRepresentation in the implementation if not found
@@ -1083,7 +1087,7 @@ lookupTypeRepresentation (TypeSpec modSpec name _) = do
     -- If still not found, search the direct descendant interface and
     -- implementation
     -- case maybeMatch of
-    --     Nothing -> case getDescendant modSpec of
+    --     Nothing -> case getDescendant modSpecs of
     --         Just des -> lookupTypeRepresentation (TypeSpec des name ps)
     --         Nothing -> return Nothing
     --     _ -> return maybeMatch
@@ -1207,7 +1211,7 @@ type ResourceIFace = Map ResourceSpec TypeSpec
 
 resourceDefToIFace :: ResourceDef -> ResourceIFace
 resourceDefToIFace def =
-    Map.map (maybe Unspecified resourceType) $ content def
+    Map.map (maybe AnyType resourceType) $ content def
 
 
 -- |A resource definition.  Since a resource may be defined as a 
@@ -1462,13 +1466,24 @@ instance Show ProcSpec where
 type ProcID = Int
 
 -- |A type specification:  the type name and type parameters.  Also 
---  could be Unspecified, meaning a type to be inferred.
+--  could be AnyType or InvalidType, the top and bottom of the type lattice,
+--  respectively.
 data TypeSpec = TypeSpec {
     typeMod::ModSpec,
     typeName::Ident,
     typeParams::[TypeSpec] 
-    } | Unspecified
+    } | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
+
+-- |This specifies a type, but permits a type to be specified indirectly,
+--  as simply identical to the type of another variable, or directly.
+data TypeRef = DirectType {typeRefType :: TypeSpec}
+             | IndirectType {typeRefVar :: VarName}
+             deriving (Eq,Ord)
+
+instance Show TypeRef where
+    show (DirectType tspec) = show tspec
+    show (IndirectType var) = "@" ++ show var
 
 data ResourceSpec = ResourceSpec {
     resourceMod::ModSpec,
@@ -1525,6 +1540,20 @@ data Param = Param {
     } deriving (Eq, Generic)
 
 
+-- |The type and mode (flow) of a single argument or parameter
+data TypeFlow = TypeFlow {
+  typeFlowType :: TypeSpec,
+  typeFlowMode :: FlowDirection
+  } deriving (Eq)
+
+instance Show TypeFlow where
+    show (TypeFlow ty fl) = flowPrefix fl ++ show ty
+
+
+-- |Return the TypeSpec and FlowDirection of a Param
+paramTypeFlow :: Param -> TypeFlow
+paramTypeFlow (Param{paramType=ty, paramFlow=fl}) = TypeFlow ty fl
+
 -- |A formal parameter, including name, type, and flow direction.
 data PrimParam = PrimParam {
     primParamName::PrimVarName,
@@ -1541,7 +1570,7 @@ data ParamInfo = ParamInfo {
     } deriving (Eq,Generic)
 
 -- |A dataflow direction:  in, out, both, or neither.
-data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow
+data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow | FlowUnknown
                    deriving (Show,Eq,Ord,Generic)
 
 -- |A primitive dataflow direction:  in or out
@@ -1555,7 +1584,7 @@ flowsIn NoFlow     = False
 flowsIn ParamIn    = True
 flowsIn ParamOut   = False
 flowsIn ParamInOut = True
-
+flowsIn FlowUnknown = shouldnt "checking if unknown flow direction flows in"
 
 -- |Does the specified flow direction flow out?
 flowsOut :: FlowDirection -> Bool
@@ -1563,6 +1592,7 @@ flowsOut NoFlow     = False
 flowsOut ParamIn = False
 flowsOut ParamOut = True
 flowsOut ParamInOut = True
+flowsOut FlowUnknown = shouldnt "checking if unknown flow direction flows out"
 
 
 -- |Source program statements.  These will be normalised into Prims.
@@ -1583,6 +1613,9 @@ data Stmt
      | Next  -- holds the variable versions before the next
      deriving (Eq,Ord,Generic,Show)
 
+instance Show Stmt where
+  show s = "{" ++ showStmt 4 s ++ "}"
+
 -- |An expression.  These are all normalised into statements.
 data Exp
       = IntValue Integer
@@ -1598,6 +1631,22 @@ data Exp
       | Fncall ModSpec Ident [Placed Exp]
       | ForeignFn Ident Ident [Ident] [Placed Exp]
      deriving (Eq,Ord,Generic)
+
+
+-- |Is the supplied parameter a phantom?
+phantomParam :: PrimParam -> Bool
+phantomParam = phantomType . primParamType
+
+-- |Is the supplied argument a phantom?
+phantomArg :: PrimArg -> Bool
+phantomArg (ArgVar _ ty _ _ _) = phantomType ty
+phantomArg _ = False -- Nothing but a var can be a phantom
+
+-- |Does the supplied type indicate a phantom?
+phantomType :: TypeSpec -> Bool
+phantomType TypeSpec{typeName="phantom"} = True
+phantomType _ = False
+
 
 -- |A loop generator (ie, an iterator).  These need to be 
 --  generalised, allowing them to be user-defined.
@@ -1710,21 +1759,29 @@ procCallToExp stmt =
 
 
 expFlow :: Exp -> FlowDirection
-expFlow (Typed exp _ _) = expFlow exp
+expFlow (Typed expr _ _) = expFlow expr
 expFlow (Var _ flow _) = flow
 expFlow _ = ParamIn
 
 
-setExpFlow :: FlowDirection -> Exp -> Exp
-setExpFlow flow (Typed exp ty cast) = Typed (setExpFlow flow exp) ty cast
-setExpFlow flow (Var name _ ftype) = Var name flow ftype
-setExpFlow ParamIn exp = exp
-setExpFlow flow exp = 
-    shouldnt $ "Cannot set flow of " ++ show exp ++ " to " ++ show flow
+setExpTypeFlow :: TypeFlow -> Exp -> Exp
+setExpTypeFlow typeflow (Typed expr _ cast)
+    = Typed expr' ty cast
+    where Typed expr' ty _ = setExpTypeFlow typeflow expr
+setExpTypeFlow (TypeFlow ty fl) (Var name _ ftype)
+    = Typed (Var name fl ftype) ty False
+setExpTypeFlow (TypeFlow ty ParamIn) expr
+    = Typed expr ty False
+setExpTypeFlow (TypeFlow ty fl) expr = 
+    shouldnt $ "Cannot set type/flow of " ++ show expr
+
+
+setPExpTypeFlow :: TypeFlow -> Placed Exp -> Placed Exp
+setPExpTypeFlow typeflow pexpr = (setExpTypeFlow typeflow) <$> pexpr
 
 
 isHalfUpdate :: FlowDirection -> Exp -> Bool
-isHalfUpdate flow (Typed exp _ _) = isHalfUpdate flow exp
+isHalfUpdate flow (Typed expr _ _) = isHalfUpdate flow expr
 isHalfUpdate flow (Var _ flow' HalfUpdate) = flow == flow'
 isHalfUpdate _ _ = False
 
@@ -2024,7 +2081,8 @@ showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis detism inline sub) =
 
 -- |How to show a type specification.
 instance Show TypeSpec where
-  show Unspecified = "?"
+  show AnyType = "?"
+  show InvalidType = "XXX"
   show (TypeSpec optmod ident args) = 
       maybeModPrefix optmod ++ ident ++
       if List.null args then ""
@@ -2044,8 +2102,8 @@ instance Show ProcProto where
 
 -- |How to show a formal parameter.
 instance Show Param where
-  show (Param name typ dir _) =
-    flowPrefix dir ++ name ++ showTypeSuffix typ
+  show (Param name typ dir flowType) =
+    (show flowType) ++ flowPrefix dir ++ name ++ showTypeSuffix typ
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
@@ -2054,7 +2112,7 @@ instance Show PrimParam where
       in  pre ++ primFlowPrefix dir ++ show name ++ showTypeSuffix typ ++ post
 
 showTypeSuffix :: TypeSpec -> String
-showTypeSuffix Unspecified = ""
+showTypeSuffix AnyType = ""
 showTypeSuffix typ = ":" ++ show typ
 
 
@@ -2064,6 +2122,7 @@ flowPrefix NoFlow     = ""
 flowPrefix ParamIn    = ""
 flowPrefix ParamOut   = "?"
 flowPrefix ParamInOut = "!"
+flowPrefix FlowUnknown = "???"
 
 -- |How to show a *primitive* dataflow direction.
 primFlowPrefix :: PrimFlow -> String
@@ -2177,7 +2236,7 @@ instance Show Exp where
   show (FloatValue f) = show f
   show (StringValue s) = show s
   show (CharValue c) = show c
-  show (Var name dir _) = (flowPrefix dir) ++ name
+  show (Var name dir flowtype) = (show flowtype) ++ (flowPrefix dir) ++ name
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
   show (CondExp cond thn els) = 
     "if\n" ++ show cond ++ "then " ++ show thn ++ " else " ++ show els
