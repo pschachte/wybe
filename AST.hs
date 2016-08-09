@@ -1611,7 +1611,7 @@ data Stmt
      | For (Placed Exp) (Placed Exp)
      | Break  -- holds the variable versions before the break
      | Next  -- holds the variable versions before the next
-     deriving (Eq,Ord,Generic,Show)
+     deriving (Eq,Ord,Generic)
 
 instance Show Stmt where
   show s = "{" ++ showStmt 4 s ++ "}"

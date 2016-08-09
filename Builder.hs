@@ -165,14 +165,12 @@ buildModuleIfNeeded force modspec possDirs = do
                     dstDate <- (liftIO . getModificationTime) objfile
                     if force || srcDate > dstDate
                       then do
-                        extractModules objfile
+                        unless force (extractModules objfile)
                         buildModule modname objfile srcfile
                         return True
                       else do
                         loadModuleFromObjFile modspec objfile
                         return False
-                    -- buildModule modname objfile srcfile
-                    -- return True
                 Just (_,False,_,False,_) ->
                     shouldnt "inconsistent file existence"
 
@@ -256,9 +254,13 @@ compileModule dir modspec params items = do
 extractedItemsHash :: ModSpec -> Compiler (Maybe String)
 extractedItemsHash modspec = do
     storedMods <- gets extractedMods
-    case Map.lookup modspec storedMods of
-        Nothing -> return Nothing
-        Just m -> return $ itemsHash m
+    -- Get the force options
+    opts <- gets options
+    if optForce opts || optForceAll opts
+        then return Nothing
+        else case Map.lookup modspec storedMods of
+                 Nothing -> return Nothing
+                 Just m -> return $ itemsHash m
 
 
 -- | Parse the stored module bytestring in the 'objfile' and record them in the
