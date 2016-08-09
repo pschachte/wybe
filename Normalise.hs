@@ -391,14 +391,16 @@ equalityTest _ = False
 equalityBody :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
 equalityBody [] [] = shouldnt "trying to generate = test with no constructors"
 equalityBody consts [] = equalityConsts consts
+-- This shouldn't be necessary if we optimise the case of unsigned < 0:
+-- equalityBody [] nonconsts =
+--     equalityNonconsts nonconsts []
 equalityBody consts nonconsts =
-    [Unplaced $ Cond [] (comparisonExp "ult" (intCast $ varGet "$left")
+    -- decide whether $left is const or non const, and handle accordingly
+    [Unplaced $ Cond [] (comparisonExp "ult"
+                         (lpvmCastExp (varGet "$left") intType)
                          (iVal $ length consts))
-     (equalityConsts consts)
-     -- XXX temporarily:
-     -- []]
-     --  XXX should be:
-     (equalityNonconsts nonconsts consts)]
+                (equalityConsts consts)
+                (equalityNonconsts nonconsts consts)]
 
 
 -- |Return code to check of two const values values are equal, given that we
