@@ -60,3 +60,4 @@ test-cases/proc_beer
 test-cases/proc_yorn
 *~
 compiler.pdf
+wybelibs/wybe.o

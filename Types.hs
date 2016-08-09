@@ -289,11 +289,12 @@ varType' var dict
 --  error describes the error.
 constrainVarType :: TypeError -> VarName -> TypeSpec -> Typing -> Typing
 constrainVarType reason var ty typing
-    = case meetTypes ty $ varType var typing of
-          InvalidType -> typeError reason typing
+    = let (var',typing') = ultimateRef var typing
+      in  case meetTypes ty $ varType var' typing' of
+          InvalidType -> typeError reason typing'
           newType -> typing {typingDict =
-                             Map.insert var (DirectType newType)
-                                $ typingDict typing }
+                                  Map.insert var' (DirectType newType)
+                                  $ typingDict typing' }
 
 
 -- |Constrain the types of the two specified variables to be identical,
@@ -654,17 +655,9 @@ typecheckProcDecl m pdef = do
                           List.filter
                           ((`elem` [ParamIn,ParamInOut]) . paramFlow)
                           params
-                    let inResources =
-                          resourceFlowRes
-                          <$> List.filter 
-                              ((`elem` [ParamIn,ParamInOut]) . resourceFlowFlow)
-                              resources
-                    let initialised
-                            = (Set.fromList $ paramName <$> inParams)
-                              `Set.union`
-                              (Set.fromList $ resourceName <$> inResources)
                     (def',_,modeErrs) <-
-                      modecheckStmts m name pos typing [] initialised def
+                      modecheckStmts m name pos typing []
+                      (Set.fromList $ paramName <$> inParams) def
                     let typing' = typeErrors modeErrs typing
                     let params' = updateParamTypes typing' params
                     let proto' = proto { procProtoParams = params' }
@@ -865,6 +858,7 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls) typing
                         (\ (pexp,ty,argnum) -> setExpType pexp ty argnum name)
                         typing
                         $ zip3 pexps match [1..]
+          logTypes $ "Resulting typing = " ++ show typing'
           typecheckCalls m name pos calls typing' residue True
         _ -> let stmtTyping' = stmtTyping {typingArgsTypes = validMatches}
              in typecheckCalls m name pos calls typing (stmtTyping':residue)
