@@ -11,6 +11,7 @@ module BodyBuilder (
   ) where
 
 import AST
+import Snippets
 import Options (LogSelection(BodyBuilder))
 import Data.Map as Map
 import Data.List as List
@@ -353,115 +354,134 @@ constIfInput _ = True
 simplifyOp :: ProcName -> [Ident] -> [PrimArg] -> Prim
 -- Integer ops
 simplifyOp "add" _ [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (n1+n2) ty, output]
+  primMove (ArgInt (n1+n2) ty) output
 simplifyOp "add" _ [ArgInt 0 ty, arg, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "add" _ [arg, ArgInt 0 ty, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "sub" _ [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (n1-n2) ty, output]
+  primMove (ArgInt (n1-n2) ty) output
 simplifyOp "sub" _ [arg, ArgInt 0 _, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "mul" _ [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (n1*n2) ty, output]
+  primMove (ArgInt (n1*n2) ty) output
 simplifyOp "mul" _ [ArgInt 1 ty, arg, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "mul" _ [arg, ArgInt 1 ty, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "mul" _ [ArgInt 0 ty, _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt 0 ty, output]
+  primMove (ArgInt 0 ty) output
 simplifyOp "mul" _ [_, ArgInt 0 ty, output] =
-  PrimForeign "llvm" "move" [] [ArgInt 0 ty, output]
+  primMove (ArgInt 0 ty) output
 simplifyOp "div" _ [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (n1 `div` n2) ty, output]
+  primMove (ArgInt (n1 `div` n2) ty) output
 simplifyOp "div" _ [arg, ArgInt 1 _, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 -- Bitstring ops
 simplifyOp "and" _ [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" []
-  [ArgInt (fromIntegral n1 .&. fromIntegral n2) ty, output]
+  primMove (ArgInt (fromIntegral n1 .&. fromIntegral n2) ty) output
 simplifyOp "and" _ [ArgInt 0 ty, _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt 0 ty, output]
+  primMove (ArgInt 0 ty) output
 simplifyOp "and" _ [_, ArgInt 0 ty, output] =
-  PrimForeign "llvm" "move" [] [ArgInt 0 ty, output]
+  primMove (ArgInt 0 ty) output
 simplifyOp "and" _ [ArgInt (-1) _, arg, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "and" _ [arg, ArgInt (-1) _, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "or" _ [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" []
-  [ArgInt (fromIntegral n1 .|. fromIntegral n2) ty, output]
+  primMove (ArgInt (fromIntegral n1 .|. fromIntegral n2) ty) output
 simplifyOp "or" _ [ArgInt (-1) ty, _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (-1) ty, output]
+  primMove (ArgInt (-1) ty) output
 simplifyOp "or" _ [_, ArgInt (-1) ty, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (-1) ty, output]
+  primMove (ArgInt (-1) ty) output
 simplifyOp "or" _ [ArgInt 0 _, arg, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "or" _ [arg, ArgInt 0 _, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "xor" _ [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" []
-  [ArgInt (fromIntegral n1 `xor` fromIntegral n2) ty, output]
+  primMove (ArgInt (fromIntegral n1 `xor` fromIntegral n2) ty) output
 simplifyOp "xor" _ [ArgInt 0 _, arg, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "xor" _ [arg, ArgInt 0 _, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 -- XXX should probably put shift ops here, too
 -- Integer comparisons
-simplifyOp "icmp" ["eq"] [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1==n2) ty, output]
-simplifyOp "icmp" ["ne"] [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1/=n2) ty, output]
-simplifyOp "icmp" ["slt"] [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1<n2) ty, output]
-simplifyOp "icmp" ["sle"] [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1<=n2) ty, output]
-simplifyOp "icmp" ["sgt"] [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1>n2) ty, output]
-simplifyOp "icmp" ["sge"] [ArgInt n1 ty, ArgInt n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1>=n2) ty, output]
+simplifyOp "icmp" ["eq"] [ArgInt n1 _, ArgInt n2 _, output] =
+  primMove (boolConstant $ n1==n2) output
+simplifyOp "icmp" ["ne"] [ArgInt n1 _, ArgInt n2 _, output] =
+  primMove (boolConstant $ n1/=n2) output
+simplifyOp "icmp" ["slt"] [ArgInt n1 _, ArgInt n2 _, output] =
+  primMove (boolConstant $ n1<n2) output
+simplifyOp "icmp" ["sle"] [ArgInt n1 _, ArgInt n2 _, output] =
+  primMove (boolConstant $ n1<=n2) output
+simplifyOp "icmp" ["sgt"] [ArgInt n1 _, ArgInt n2 _, output] =
+  primMove (boolConstant $ n1>n2) output
+simplifyOp "icmp" ["sge"] [ArgInt n1 _, ArgInt n2 _, output] =
+  primMove (boolConstant $ n1>=n2) output
+simplifyOp "icmp" ["ult"] [ArgInt n1 _, ArgInt n2 _, output] =
+  let n1' = fromIntegral n1 :: Word
+      n2' = fromIntegral n2 :: Word
+  in primMove (boolConstant $ n1'<n2') output
+simplifyOp "icmp" ["ult"] [_, ArgInt 0 _, output] = -- nothing is < 0
+  primMove (ArgInt 0 boolType) output
+simplifyOp "icmp" ["ule"] [ArgInt n1 _, ArgInt n2 _, output] =
+  let n1' = fromIntegral n1 :: Word
+      n2' = fromIntegral n2 :: Word
+  in primMove (boolConstant $ n1'<=n2') output
+simplifyOp "icmp" ["ule"] [ArgInt 0 _, _, output] = -- 0 is <= everything
+  primMove (ArgInt 1 boolType) output
+simplifyOp "icmp" ["ugt"] [ArgInt n1 _, ArgInt n2 _, output] =
+  let n1' = fromIntegral n1 :: Word
+      n2' = fromIntegral n2 :: Word
+  in primMove (boolConstant $ n1'>n2') output
+simplifyOp "icmp" ["ugt"] [ArgInt 0 _, _, output] = -- 0 is > nothing
+  primMove (ArgInt 0 boolType) output
+simplifyOp "icmp" ["uge"] [ArgInt n1 _, ArgInt n2 _, output] =
+  let n1' = fromIntegral n1 :: Word
+      n2' = fromIntegral n2 :: Word
+  in primMove (boolConstant $ n1'>=n2') output
+simplifyOp "icmp" ["uge"] [_, ArgInt 0 _, output] = -- everything is >= 0
+  primMove (ArgInt 1 boolType) output
 -- Float ops
 simplifyOp "fadd" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgFloat (n1+n2) ty, output]
+  primMove (ArgFloat (n1+n2) ty) output
 simplifyOp "fadd" _ [ArgFloat 0 ty, arg, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "fadd" _ [arg, ArgFloat 0 ty, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "fsub" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgFloat (n1-n2) ty, output]
+  primMove (ArgFloat (n1-n2) ty) output
 simplifyOp "fsub" _ [arg, ArgFloat 0 _, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "fmul" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgFloat (n1*n2) ty, output]
+  primMove (ArgFloat (n1*n2) ty) output
 simplifyOp "fmul" _ [arg, ArgFloat 1 _, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 simplifyOp "fmul" _ [ArgFloat 1 _, arg, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 -- We don't handle float * 0.0 because of the semantics of IEEE floating mult.
 simplifyOp "fdiv" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgFloat (n1/n2) ty, output]
+  primMove (ArgFloat (n1/n2) ty) output
 simplifyOp "fdiv" _ [arg, ArgFloat 1 _, output] =
-  PrimForeign "llvm" "move" [] [arg, output]
+  primMove arg output
 -- Float comparisons
-simplifyOp "fcmp" ["eq"] [ArgFloat n1 ty, ArgFloat n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1==n2) ty, output]
-simplifyOp "fcmp" ["ne"] [ArgFloat n1 ty, ArgFloat n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1/=n2) ty, output]
-simplifyOp "fcmp" ["slt"] [ArgFloat n1 ty, ArgFloat n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1<n2) ty, output]
-simplifyOp "fcmp" ["sle"] [ArgFloat n1 ty, ArgFloat n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1<=n2) ty, output]
-simplifyOp "fcmp" ["sgt"] [ArgFloat n1 ty, ArgFloat n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1>n2) ty, output]
-simplifyOp "fcmp" ["sge"] [ArgFloat n1 ty, ArgFloat n2 _, output] =
-  PrimForeign "llvm" "move" [] [ArgInt (integerOfBool $ n1>=n2) ty, output]
+simplifyOp "fcmp" ["eq"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1==n2) output
+simplifyOp "fcmp" ["ne"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1/=n2) output
+simplifyOp "fcmp" ["slt"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1<n2) output
+simplifyOp "fcmp" ["sle"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1<=n2) output
+simplifyOp "fcmp" ["sgt"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1>n2) output
+simplifyOp "fcmp" ["sge"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1>=n2) output
 simplifyOp name flags args = PrimForeign "llvm" name flags args
 
 
-integerOfBool :: Bool -> Integer
-integerOfBool False = 0
-integerOfBool True  = 1
-
+boolConstant :: Bool -> PrimArg
+boolConstant bool = ArgInt (fromIntegral $ fromEnum bool) boolType
 
 ----------------------------------------------------------------
 --                                  Logging

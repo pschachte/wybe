@@ -391,9 +391,6 @@ equalityTest _ = False
 equalityBody :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
 equalityBody [] [] = shouldnt "trying to generate = test with no constructors"
 equalityBody consts [] = equalityConsts consts
--- This shouldn't be necessary if we optimise the case of unsigned < 0:
--- equalityBody [] nonconsts =
---     equalityNonconsts nonconsts []
 equalityBody consts nonconsts =
     -- decide whether $left is const or non const, and handle accordingly
     [Unplaced $ Cond [] (comparisonExp "ult"

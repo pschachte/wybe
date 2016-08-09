@@ -5,8 +5,8 @@
 --  Copyright: 2016 Peter Schachte.  All rights reserved.
 
 module Snippets (intType, intCast, boolType, boolCast, varSet, varGet, castTo,
-                lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, comparison,
-                comparisonExp) where
+                lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
+                comparison, comparisonExp) where
 
 import AST
 
@@ -63,6 +63,10 @@ iVal v = IntValue $ fromIntegral v
 move :: Exp -> Exp -> Placed Stmt
 move src dest =
     Unplaced $ ForeignCall "llvm" "move" [] [Unplaced src, Unplaced dest]
+
+primMove :: PrimArg -> PrimArg -> Prim
+primMove src dest =
+  PrimForeign "llvm" "move" [] [src, dest]
 
 -- |An unplaced instruction to compare two integer values
 comparison :: Ident -> Exp -> Exp -> Ident -> Placed Stmt
