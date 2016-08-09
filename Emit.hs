@@ -16,8 +16,6 @@ import           LLVM.General.Context
 import           LLVM.General.Module as Mod
 import           LLVM.General.Target
 
-import qualified Data.ByteString.Lazy as BL
-
 import           LLVM.General.Analysis
 import           LLVM.General.PassManager
 import           LLVM.General.Transforms
@@ -39,11 +37,6 @@ import           ObjectInterface
 import           Options (LogSelection (Emit, Blocks))
 import           System.FilePath (dropExtension)
 
-foreign import ccall "dynamic" haskFun :: FunPtr (IO Double) -> (IO Double)
-
-run :: FunPtr a -> IO Double
-run fn = haskFun (castFunPtr fn :: FunPtr (IO Double))
-
 
 -- | Bracket matter to pull an LLVM AST Module representation of a
 -- LPVM module specification, and run some action on it under the compiler
@@ -55,27 +48,27 @@ withModuleLLVM thisMod action = do
     finishModule
     case maybeLLMod of
       (Just llmod) -> liftIO $ action llmod
-      (Nothing) -> error "No LLVM Module Implementation"
+      Nothing -> error "No LLVM Module Implementation"
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target object file, embedding the 'AST.Module' serialised bytestring
 -- into the '__lpvm' section of the Macho-O object file.
 emitObjectFile :: ModSpec -> FilePath -> Compiler ()
 emitObjectFile m f = do
-    logEmit $ "Creating object file for *" ++ (showModSpec m) ++ "*" ++
+    logEmit $ "Creating object file for *" ++ showModSpec m ++ "*" ++
         " @ '" ++ f ++ "'"
     reenterModule m
     maybeLLMod <- getModuleImplementationField modLLVM
     case maybeLLMod of
         (Just llmod) ->
             do astMod <- getModule id
-               logEmit $ "Encoding and wrapping Module *" ++ (showModSpec m)
+               logEmit $ "Encoding and wrapping Module *" ++ showModSpec m
                    ++ "* in a wrapped object."
                logEmit $ "Running passmanager on the generated LLVM for *"
-                   ++ (showModSpec m) ++ "*."
+                   ++ showModSpec m ++ "*."
                modBS <- encodeModule astMod
                liftIO $ makeWrappedObjFile f llmod modBS
-        (Nothing) -> error "No LLVM Module Implementation"
+        Nothing -> error "No LLVM Module Implementation"
     finishModule
     return ()
 
@@ -83,18 +76,18 @@ emitObjectFile m f = do
 -- target LLVM Bitcode file.
 emitBitcodeFile :: ModSpec -> FilePath -> Compiler ()
 emitBitcodeFile m f = do
-   logEmit $ "Creating wrapped bitcode file for *" ++ (showModSpec m) ++ "*"
+   logEmit $ "Creating wrapped bitcode file for *" ++ showModSpec m ++ "*"
        ++ " @ '" ++ f ++ "'"
    reenterModule m
    maybeLLMod <- getModuleImplementationField modLLVM
    case maybeLLMod of
      (Just llmod) ->
        do astMod <- getModule id
-          logEmit $ "Encoding and wrapping Module *" ++ (showModSpec m)
+          logEmit $ "Encoding and wrapping Module *" ++ showModSpec m
             ++ "* in a wrapped bitcodefile."
           modBS <- encodeModule astMod
           liftIO $ makeWrappedBCFile f llmod modBS
-     (Nothing) -> error "No LLVM Module Implementation"
+     Nothing -> error "No LLVM Module Implementation"
    finishModule
    return ()
 
@@ -102,8 +95,8 @@ emitBitcodeFile m f = do
 -- target LLVM Assembly file.
 emitAssemblyFile :: ModSpec -> FilePath -> Compiler ()
 emitAssemblyFile m f = do
-    logEmit $ "Creating assembly file for " ++ (showModSpec m) ++
-        ("with optimisations.")
+    logEmit $ "Creating assembly file for " ++ showModSpec m ++
+        "with optimisations."
     -- withModuleLLVM m (makeAssemblyFile f)
     withModuleLLVM m $ \llmod -> withOptimisedModule llmod
         (\mm -> liftError $ withHostTargetMachine $ \tm ->
@@ -116,7 +109,8 @@ liftError = runExceptT >=> either fail return
 
 -- | Return string form LLVM IR represenation of a LLVMAST.Module
 codeemit :: LLVMAST.Module -> IO String
-codeemit llmod = withOptimisedModule llmod moduleLLVMAssembly
+-- codeemit llmod = withOptimisedModule llmod moduleLLVMAssembly
+codeemit llmod = withModule llmod moduleLLVMAssembly
 
 
 -------------------------------------------------------------------------------
@@ -132,13 +126,13 @@ passes = defaultCuratedPassSetSpec { optLevel = Just 3 }
 -- | Return a string LLVM IR representation of a LLVMAST.Module after
 -- a curated set of passes has been executed on the C++ Module form.
 codeEmitWithPasses :: LLVMAST.Module -> IO String
-codeEmitWithPasses llmod = do
-    withContext $ \context -> do
-        liftError $ withModuleFromAST context llmod $ \m -> do
+codeEmitWithPasses llmod =
+    withContext $ \context ->
+        liftError $ withModuleFromAST context llmod $ \m ->
             withPassManager passes $ \pm -> do
                 success <- runPassManager pm m
                 if success
-                    then moduleLLVMAssembly m >>= return
+                    then moduleLLVMAssembly m
                     else error "Running of optimisation passes not successful!"
 
 -- | Testing function to analyse optimisation passes.
@@ -157,14 +151,21 @@ testOptimisations llmod = do
 -- a set of curated passes.
 withOptimisedModule :: LLVMAST.Module -> (Mod.Module -> IO a)
                     -> IO a
-withOptimisedModule llmod action = do
-    withContext $ \context -> do
-        liftError $ withModuleFromAST context llmod $ \m -> do
+withOptimisedModule llmod action =
+    withContext $ \context -> 
+        liftError $ withModuleFromAST context llmod $ \m ->
             withPassManager passes $ \pm -> do
                 success <- runPassManager pm m
                 if success
                     then action m
                     else error "Running of optimisation passes not successful"
+
+-- | Bracket pattern to run an [action] on the [LLVMAST.Module].
+withModule :: LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
+withModule llmod action = 
+    withContext $ \context ->
+        liftError $ withModuleFromAST context llmod action
+            
 
 
 ----------------------------------------------------------------------------
@@ -174,7 +175,7 @@ withOptimisedModule llmod action = do
 -- | Drop an LLVMAST.Module (haskell) into a LLVM Module.Module (C++),
 -- and write it as an object file.
 makeObjFile :: FilePath -> LLVMAST.Module -> IO ()
-makeObjFile file llmod = do
+makeObjFile file llmod =
     liftError $ withHostTargetMachine $ \tm ->
         withOptimisedModule llmod $ \m ->
         liftError $ writeObjectToFile tm (File file) m
@@ -212,9 +213,9 @@ makeAssemblyFile file llmod =
 -- | Create a Macho-O object file and embed a 'AST.Module' bytestring
 -- representation into the '__lpvm' section in it.
 makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
-makeWrappedObjFile file llmod modBS = do
-    withContext $ \context -> do
-        withOptimisedModule llmod $ \m -> do
+makeWrappedObjFile file llmod modBS =
+    withContext $ \context -> 
+        withModule llmod $ \m -> do
             liftError $ withHostTargetMachine $ \tm ->
                 liftError $ writeObjectToFile tm (File file) m
             insertLPVMDataLd modBS file
@@ -230,50 +231,6 @@ encodeAndWriteFile file modBS m = do
     insertLPVMDataLd modBS file
 
 
-
-
-
-
-------------------------------------------------------------------------------
--- JIT Support                                                              --
-------------------------------------------------------------------------------
-
--- | Initialize the JIT compiler under the IO monad.
-jit :: Context -> (EE.MCJIT -> IO a) -> IO a
-jit c = EE.withMCJIT c optlevel model ptrelim fastins
-  where
-    optlevel = Just 0  -- optimization level
-    model    = Nothing -- code model ( Default )
-    ptrelim  = Nothing -- frame pointer elimination
-    fastins  = Nothing -- fast instruction selection
-
-
--- | Convert a LLVMAST.Module representation to LLVM IR and run it with a JIT
--- compiler+optimiser. The running and emitting is done to stdout. The JIT will
--- look for the function `main` to execute.
-runJIT :: LLVMAST.Module -> IO (Either String LLVMAST.Module)
-runJIT mod = do
-  withContext $ \context ->
-    jit context $ \executionEngine ->
-      runExceptT $ withModuleFromAST context mod $ \m ->
-        withPassManager passes $ \pm -> do
-          -- Optimization Pass
-          {-runPassManager pm m-}
-          optmod <- moduleAST m
-          s <- moduleLLVMAssembly m
-          putStrLn s
-
-          EE.withModuleInEngine executionEngine m $ \ee -> do
-            mainfn <- EE.getFunction ee (LLVMAST.Name "main")
-            case mainfn of
-              Just fn -> do
-                putStrLn $ "Running: "
-                res <- run fn
-                putStrLn $ "Main returned: " ++ show res
-              Nothing -> return ()
-
-          -- Return the optimized module
-          return optmod
 
 
 ----------------------------------------------------------------------------
@@ -293,14 +250,14 @@ makeExec :: [FilePath]          -- Object Files
          -> FilePath            -- Target File
          -> Compiler ()
 makeExec ofiles target = do
-    dir <- liftIO $ getCurrentDirectory
+    dir <- liftIO getCurrentDirectory
     let args = ofiles ++ sharedLibs ++ ["-o", target]
     (exCode, sout, serr) <- liftIO $
         readCreateProcessWithExitCode (proc "cc" args) ""
     case exCode of
         ExitSuccess ->
             logMsg Blocks $ "--- CC ---\n"
-                ++ "$ cc " ++ List.intercalate " " args
+                ++ "$ cc " ++ unwords args
                 ++ "\nCC Log:\n" ++ suppressLdWarnings serr
                 ++ "\n-------\n"
         _ -> shouldnt serr
@@ -309,14 +266,14 @@ makeExec ofiles target = do
 -- | Use `ar' system util to link object files into an archive file.
 makeArchive :: [FilePath] -> FilePath -> Compiler ()
 makeArchive ofiles target = do
-    dir <- liftIO $ getCurrentDirectory
+    dir <- liftIO getCurrentDirectory
     let args = ["rvs", target] ++ ofiles
     (exCode, sout, serr) <- liftIO $
         readCreateProcessWithExitCode (proc "ar" args) ""
     case exCode of
         ExitSuccess ->
             logMsg Blocks $ "--- AR Util ---\n"
-                ++ "$ ar " ++ List.intercalate " " args
+                ++ "$ ar " ++ unwords args
                 ++ "\nAR Log:\n" ++ suppressLdWarnings serr
                 ++ "\n-------\n"
         _ -> shouldnt serr
@@ -330,7 +287,7 @@ makeArchive ofiles target = do
 ----------------------------------------------------------------------------
 
 logEmit :: String -> Compiler ()
-logEmit s = logMsg Emit s
+logEmit = logMsg Emit
 
 -- | Log LLVM IR representation of the given module.
 logLLVMString :: ModSpec -> Compiler ()
@@ -343,7 +300,7 @@ logLLVMString thisMod =
             logEmit $ replicate 80 '-'
             logEmit llstr
             logEmit $ replicate 80 '-'
-       (Nothing) -> error "No LLVM Module Implementation"
+       Nothing -> error "No LLVM Module Implementation"
      finishModule
      return ()
 
@@ -351,14 +308,14 @@ logLLVMString thisMod =
 -- IR String for it, if it exists.
 extractLLVM :: AST.Module -> Compiler String
 extractLLVM thisMod =
-  do case (modImplementation thisMod) >>= modLLVM of
-       Just llmod -> liftIO $ codeemit llmod
-       Nothing -> return "No LLVM IR generated."
+  case modImplementation thisMod >>= modLLVM of
+      Just llmod -> liftIO $ codeemit llmod
+      Nothing -> return "No LLVM IR generated."
 
 -- | Log the LLVMIR strings for all the modules compiled, except the standard
 -- library.
 logLLVMDump :: LogSelection -> LogSelection -> String -> Compiler ()
-logLLVMDump selector1 selector2 pass = do
+logLLVMDump selector1 selector2 pass =
   whenLogging2 selector1 selector2 $
     do modList <- gets (Map.elems . modules)
        let noLibMod = List.filter ((/="wybe"). List.head . modSpec) modList

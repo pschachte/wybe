@@ -44,6 +44,7 @@ module AST (
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
   updateModules, updateImplementations, updateImplementation,
+  getExtractedModuleImpln,
   getModuleImplementationField, getModuleImplementation,
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
@@ -102,6 +103,7 @@ data Item
      | ProcDecl Visibility Determinism Bool ProcProto [Placed Stmt] OptPos
      -- | CtorDecl Visibility FnProto OptPos
      | StmtDecl Stmt OptPos
+     deriving Generic
 
 -- |The visibility of a file item.  We only support public and private.
 data Visibility = Public | Private
@@ -117,6 +119,7 @@ defaultTypeRepresentation = "pointer"
 
 data TypeImpln = TypeRepresentation TypeRepresentation 
                | TypeCtors Visibility [Placed FnProto]
+               deriving Generic
 
 
 -- |Combine two visibilities, taking the most visible.
@@ -138,6 +141,7 @@ isPublic = (==Public)
 
 -- |A type prototype consists of a type name and zero or more type parameters.
 data TypeProto = TypeProto Ident [Ident]
+                 deriving Generic
 
 -- |A function prototype consists of a function name and zero or more formal 
 --  parameters.
@@ -145,7 +149,7 @@ data FnProto = FnProto {
     fnProtoName::Ident,
     fnProtoParams::[Param],
     fnProtoResourceFlows::[ResourceFlowSpec]
-    } deriving Eq
+    } deriving (Generic, Eq)
 
 
 ----------------------------------------------------------------
@@ -237,8 +241,9 @@ data CompilerState = Compiler {
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
   loadCount :: Int,              -- ^counter of module load order
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
-  deferred :: [Module]          -- ^modules in the same SCC as the current one
-  }
+  deferred :: [Module],          -- ^modules in the same SCC as the current one
+  extractedMods :: Map ModSpec Module
+}
 
 -- |The compiler monad is a state transformer monad carrying the 
 --  compiler state over the IO monad.
@@ -247,7 +252,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp 
-                        (Compiler opts [] False Map.empty 0 [] [])
+                        (Compiler opts [] False Map.empty 0 [] [] Map.empty)
 
 
 -- |Apply some transformation function to the compiler state.
@@ -267,6 +272,7 @@ updateAllProcs :: (ProcDef -> ProcDef) -> Compiler ()
 updateAllProcs fn =
     updateImplementations
     (\imp -> imp { modProcs = Map.map (List.map fn) $ modProcs imp })
+
 
 -- |Return Just the specified module, if already loaded or currently
 -- being loaded, otherwise Nothing.  Takes care to handle it if the
@@ -451,7 +457,7 @@ enterModule dir modspec params = do
     logAST $ "Entering module " ++ showModSpec modspec
     modify (\comp -> let mods = Module dir modspec params 0 0
                                        emptyInterface (Just emptyImplementation)
-                                       count count 0 []
+                                       count count 0 [] Nothing
                                        : underCompilation comp
                      in  comp { underCompilation = mods })
 
@@ -527,6 +533,16 @@ getModuleImplementationMaybe fn = do
   case imp of
       Nothing -> return Nothing
       Just imp' -> return $ fn imp'
+
+
+getExtractedModuleImpln :: ModSpec -> Compiler (Maybe ModuleImplementation)
+getExtractedModuleImpln mspec = do
+    maybeMod <- Map.lookup mspec <$> gets extractedMods
+    case maybeMod of
+        Nothing -> return Nothing
+        Just m -> return $ modImplementation m
+
+
 
 
 -- |Add the specified string as a message of the specified severity 
@@ -842,7 +858,8 @@ data Module = Module {
   thisLoadNum :: Int,            -- ^the loadCount when loading this module
   minDependencyNum :: Int,       -- ^the smallest loadNum of all dependencies
   procCount :: Int,              -- ^a counter for gensym-ed proc names
-  stmtDecls :: [Placed Stmt]     -- ^top-level statements in this module
+  stmtDecls :: [Placed Stmt],     -- ^top-level statements in this module
+  itemsHash :: Maybe String -- ^map of proc name to it's hash 
   } deriving (Generic)
 
 
@@ -863,6 +880,7 @@ collectSubModules mspec = do
     subMods <- fmap (Map.elems . modSubmods) $ getLoadedModuleImpln mspec
     desc <- fmap concat $ mapM collectSubModules subMods
     return $ subMods ++ desc
+
 
 
 -- |The list of defining modules that the given (possibly
