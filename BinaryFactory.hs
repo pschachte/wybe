@@ -17,7 +17,7 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BL
 import qualified LLVM.General.AST as LLVMAST
 import Text.ParserCombinators.Parsec.Pos
-
+import Crypto.Hash
 
 -- * Self Deriving instances
 instance Binary Visibility
@@ -55,6 +55,11 @@ instance Binary ImportSpec
 instance Binary Module
 instance Binary ModuleInterface
 
+
+instance Binary Item
+instance Binary FnProto
+instance Binary TypeProto
+instance Binary TypeImpln
 -- * Manual Serialisation
 
 
@@ -88,6 +93,15 @@ encodeModule m = do
     subMods <- mapM getm subModSpecs
     return $ B.encode (m:subMods)
 
+
+
+-- * Hashing functions
+
+sha1 :: BL.ByteString -> Digest SHA1
+sha1 = hashlazy
+
+hashItems :: [Item] -> String
+hashItems = (show . sha1 . encode)
 
 
     
