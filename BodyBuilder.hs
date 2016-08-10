@@ -424,30 +424,38 @@ simplifyOp "icmp" ["ult"] [ArgInt n1 _, ArgInt n2 _, output] =
   in primMove (boolConstant $ n1'<n2') output
 simplifyOp "icmp" ["ult"] [_, ArgInt 0 _, output] = -- nothing is < 0
   primMove (ArgInt 0 boolType) output
+simplifyOp "icmp" ["ult"] [a1, ArgInt 1 ty, output] = -- only 0 is < 1
+  PrimForeign "llvm" "icmp" ["eq"] [a1,ArgInt 0 ty,output]
 simplifyOp "icmp" ["ule"] [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
   in primMove (boolConstant $ n1'<=n2') output
 simplifyOp "icmp" ["ule"] [ArgInt 0 _, _, output] = -- 0 is <= everything
   primMove (ArgInt 1 boolType) output
+simplifyOp "icmp" ["ule"] [ArgInt 1 ty, a2, output] = -- 1 is <= all but 0
+  PrimForeign "llvm" "icmp" ["ne"] [ArgInt 0 ty,a2,output]
 simplifyOp "icmp" ["ugt"] [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
   in primMove (boolConstant $ n1'>n2') output
 simplifyOp "icmp" ["ugt"] [ArgInt 0 _, _, output] = -- 0 is > nothing
   primMove (ArgInt 0 boolType) output
+simplifyOp "icmp" ["ugt"] [ArgInt 1 ty, a2, output] = -- 1 is > only 0
+  PrimForeign "llvm" "icmp" ["eq"] [ArgInt 0 ty,a2,output]
 simplifyOp "icmp" ["uge"] [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
   in primMove (boolConstant $ n1'>=n2') output
 simplifyOp "icmp" ["uge"] [_, ArgInt 0 _, output] = -- everything is >= 0
   primMove (ArgInt 1 boolType) output
+simplifyOp "icmp" ["uge"] [a1, ArgInt 1 ty, output] = -- all but 0 is >= 1
+  PrimForeign "llvm" "icmp" ["ne"] [a1,ArgInt 0 ty,output]
 -- Float ops
 simplifyOp "fadd" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
   primMove (ArgFloat (n1+n2) ty) output
-simplifyOp "fadd" _ [ArgFloat 0 ty, arg, output] =
+simplifyOp "fadd" _ [ArgFloat 0 _, arg, output] =
   primMove arg output
-simplifyOp "fadd" _ [arg, ArgFloat 0 ty, output] =
+simplifyOp "fadd" _ [arg, ArgFloat 0 _, output] =
   primMove arg output
 simplifyOp "fsub" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
   primMove (ArgFloat (n1-n2) ty) output
