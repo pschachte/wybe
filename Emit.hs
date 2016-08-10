@@ -109,8 +109,8 @@ liftError = runExceptT >=> either fail return
 
 -- | Return string form LLVM IR represenation of a LLVMAST.Module
 codeemit :: LLVMAST.Module -> IO String
--- codeemit llmod = withOptimisedModule llmod moduleLLVMAssembly
-codeemit llmod = withModule llmod moduleLLVMAssembly
+codeemit llmod = withOptimisedModule llmod moduleLLVMAssembly
+-- codeemit llmod = withModule llmod moduleLLVMAssembly
 
 
 -------------------------------------------------------------------------------
@@ -277,10 +277,6 @@ makeArchive ofiles target = do
                 ++ "\nAR Log:\n" ++ suppressLdWarnings serr
                 ++ "\n-------\n"
         _ -> shouldnt serr
-
-
-
-
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

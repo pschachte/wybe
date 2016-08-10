@@ -1061,7 +1061,7 @@ updateModLLVM fn modimp = do
 -- | Given a type spec, find its internal representation (a string),
 --   if possible.
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
-lookupTypeRepresentation AnyType = return $ Just "word"
+lookupTypeRepresentation AnyType = return $ Just "pointer"
 lookupTypeRepresentation InvalidType = return Nothing
 lookupTypeRepresentation (TypeSpec ["wybe"] "bool" _) = return $ Just "bool"
 lookupTypeRepresentation (TypeSpec ["wybe"] "int" _) = return $ Just "int"

@@ -466,7 +466,6 @@ cgen prim@(PrimForeign lang name flags args)
                           _ -> shouldnt $ "Instruction " ++ name ++ " not found!"
 
      | lang == "lpvm" = do
-           -- mapM_ cgenArg $ primInputs args
            cgenLPVM name flags args
 
      | otherwise =
@@ -603,7 +602,7 @@ cgenLPVM pname flags args
 
     | pname == "mutate" = do
           let (ptrOpArg, index, valArg) = case inputs of
-                  (a:b:c:[]) -> (a, valTrust b , c)
+                  [a, b, c] -> (a, valTrust b , c)
                   _ -> shouldnt "Incorrect mutate instruction."
           val <- cgenArg valArg
           ptrOp <- cgenArg ptrOpArg
@@ -616,15 +615,18 @@ cgenLPVM pname flags args
           let inArg = head inputs
           let outArg = head outputs
           outTy <- lift $ typed' (argType outArg)
-          inTy <- lift $ typed' (argType inArg)
           inOp <- cgenArg inArg
+          let inTy = operandType inOp
+          
+          lift $ logBlocks $ "CAST IN : " ++ show inArg ++ " -> "
+              ++ show (argType inArg)
+          lift $ logBlocks $ " CAST IN OP " ++ show inOp    
+          lift $ logBlocks $ "CAST OUT : " ++ show outArg ++ " -> "
+              ++ show (argType outArg)
           castOp <- case inOp of
               (ConstantOperand c) ->
                   if isPtr outTy
                   then return $ constInttoptr c outTy
-                      -- if isNullCons c
-                      --     then return $ cons $ C.Null outTy
-                      --     else return $ constInttoptr c outTy
                   else do
                       let consTy = constantType c
                       ptr <- doAlloca consTy
@@ -811,10 +813,6 @@ cgenArg (ArgInt val ty) = do
     let bs = getBits reprTy
     let intCons = cons $ C.Int bs val
     return intCons
-    -- case reprTy of
-    --     (PointerType ty _ ) -> return $ cons $ C.Null reprTy
-    --     _ -> return intCons
-
 cgenArg (ArgFloat val ty) = return $ cons $ C.Float (F.Double val)
 cgenArg (ArgString s _) =
     do let conStr = (makeStringConstant s)
