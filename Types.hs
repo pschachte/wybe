@@ -860,7 +860,9 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls) typing
     let validTypes = nub $ procInfoTypes <$> validMatches
     logTypes $ "Valid types = " ++ show validTypes
     case validTypes of
-        [] -> return $ typeErrors (concatMap errList matches) typing
+        [] -> do
+          logTypes "Type error: no valid types for call"
+          return $ typeErrors (concatMap errList matches) typing
         [match] -> do
           let typing' = List.foldr
                         (\ (pexp,ty,argnum) -> setExpType pexp ty argnum name)
@@ -868,9 +870,10 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls) typing
                         $ zip3 pexps match [1..]
           logTypes $ "Resulting typing = " ++ show typing'
           typecheckCalls m name pos calls typing' residue True
-        _ -> let stmtTyping' = stmtTyping {typingArgsTypes = validMatches}
-             in typecheckCalls m name pos calls typing (stmtTyping':residue)
-                $ chg || validMatches == typs
+        _ -> do
+          let stmtTyping' = stmtTyping {typingArgsTypes = validMatches}
+          typecheckCalls m name pos calls typing (stmtTyping':residue)
+              $ chg || validMatches /= typs
     
 
 -- |Match up the argument types of a call with the parameter types of the
@@ -930,7 +933,7 @@ delayModeMatch modes (ProcInfo _ typModes)
 overloadErr :: StmtTypings -> TypeError
 overloadErr (StmtTypings call candidates) =
     -- XXX Need to give list of matching procs
-    ReasonOverload [] $ place call
+    ReasonOverload (procInfoProc <$> candidates) $ place call
 
 
 -- |Given type assignments to variables, resolve modes in a proc body,
