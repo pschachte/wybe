@@ -405,7 +405,7 @@ simplifyOp "xor" _ [ArgInt 0 _, arg, output] =
 simplifyOp "xor" _ [arg, ArgInt 0 _, output] =
   primMove arg output
 -- XXX should probably put shift ops here, too
--- Integer comparisons
+-- Integer comparisons, including special handling of unsigned comparison to 0
 simplifyOp "icmp" ["eq"] [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1==n2) output
 simplifyOp "icmp" ["ne"] [ArgInt n1 _, ArgInt n2 _, output] =
