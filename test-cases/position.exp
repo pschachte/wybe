@@ -6,6 +6,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : position.position.=<0>
                     position.position.=<1>
+                    position.position.=<2>
                     position.position.position<0>
                     position.position.position<1>
                     position.position.x<0>
@@ -26,6 +27,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : position.position.=<0>
                     position.position.=<1>
+                    position.position.=<2>
                     position.position.position<0>
                     position.position.position<1>
                     position.position.x<0>
@@ -43,16 +45,31 @@ AFTER EVERYTHING:
 = > public inline (0 calls)
 1: =(in#0:position.position, ?out#0:position.position):
     foreign llvm move(~in#0:position.position, ?out#0:position.position)
+= > public inline test (5 calls)
+2: =($left#0:position.position, $right#0:position.position, ?$$#2:wybe.bool):
+    foreign lpvm access($left#0:position.position, 0:wybe.int, ?$left$x#0:wybe.int)
+    foreign lpvm access(~$left#0:position.position, 8:wybe.int, ?$left$y#0:wybe.int)
+    foreign lpvm access($right#0:position.position, 0:wybe.int, ?$right$x#0:wybe.int)
+    foreign lpvm access(~$right#0:position.position, 8:wybe.int, ?$right$y#0:wybe.int)
+    foreign llvm icmp eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$8#0:wybe.bool) @wybe:28:40
+    case tmp$8#0:wybe.bool of
+    0:
+        foreign llvm move(~tmp$8#0:wybe.bool, ?$$#2:wybe.bool)
+
+    1:
+        foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:28:40
+        foreign llvm move(~tmp$11#0:wybe.bool, ?$$#2:wybe.bool)
+
 
 
 position > public inline (0 calls)
 0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:position.position):
-    foreign lpvm alloc(16:wybe.int, ?$rec#0:position)
-    foreign lpvm mutate(~%$rec#0:position, ?%$rec#1:position, 0:wybe.int, ~x#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:position, ?%$rec#2:position, 8:wybe.int, ~y#0:wybe.int)
-    foreign lpvm cast(~$rec#2:position, ?$recint#0:wybe.int)
-    foreign lpvm cast(~$recint#0:wybe.int, ?$#0:position.position)
-position > public inline (0 calls)
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:position.position)
+    foreign lpvm mutate(~%$rec#0, ?%$rec#1, 0:wybe.int, ~x#0:wybe.int)
+    foreign lpvm mutate(~%$rec#1, ?%$rec#2, 8:wybe.int, ~y#0:wybe.int)
+    foreign lpvm cast(~$rec#2, ?$recint#0:wybe.int)
+    foreign lpvm cast(~$recint#0, ?$#0:position.position)
+position > public inline (6 calls)
 1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position):
     foreign lpvm access($#0:position.position, 0:wybe.int, ?x#0:wybe.int)
     foreign lpvm access(~$#0:position.position, 8:wybe.int, ?y#0:wybe.int)
@@ -90,6 +107,26 @@ entry:
 define i64* @"position.position.=<1>"(i64* readnone %"in#0") #0 {
 entry:
   ret i64* %"in#0"
+}
+
+; Function Attrs: nounwind readonly
+define i1 @"position.position.=<1>1"(i64* nocapture readonly %"$left#0", i64* nocapture readonly %"$right#0") #1 {
+entry:
+  %0 = load i64* %"$left#0"
+  %1 = load i64* %"$right#0"
+  %"tmp$8#0" = icmp eq i64 %0, %1
+  br i1 %"tmp$8#0", label %if.then, label %if.else
+
+if.then:                                          ; preds = %entry
+  %2 = getelementptr i64* %"$right#0", i64 1
+  %3 = load i64* %2
+  %4 = getelementptr i64* %"$left#0", i64 1
+  %5 = load i64* %4
+  %"tmp$11#0" = icmp eq i64 %5, %3
+  ret i1 %"tmp$11#0"
+
+if.else:                                          ; preds = %entry
+  ret i1 false
 }
 
 define i64* @"position.position.position<0>"(i64 %"x#0", i64 %"y#0") {
@@ -162,6 +199,26 @@ entry:
 define i64* @"position.position.=<1>"(i64* readnone %"in#0") #0 {
 entry:
   ret i64* %"in#0"
+}
+
+; Function Attrs: nounwind readonly
+define i1 @"position.position.=<1>1"(i64* nocapture readonly %"$left#0", i64* nocapture readonly %"$right#0") #1 {
+entry:
+  %0 = load i64* %"$left#0"
+  %1 = load i64* %"$right#0"
+  %"tmp$8#0" = icmp eq i64 %0, %1
+  br i1 %"tmp$8#0", label %if.then, label %if.else
+
+if.then:                                          ; preds = %entry
+  %2 = getelementptr i64* %"$right#0", i64 1
+  %3 = load i64* %2
+  %4 = getelementptr i64* %"$left#0", i64 1
+  %5 = load i64* %4
+  %"tmp$11#0" = icmp eq i64 %5, %3
+  ret i1 %"tmp$11#0"
+
+if.else:                                          ; preds = %entry
+  ret i1 false
 }
 
 define i64* @"position.position.position<0>"(i64 %"x#0", i64 %"y#0") {

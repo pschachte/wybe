@@ -1,2 +1,2 @@
 Error detected during type checking of modules use_before_def
-test-cases/use_before_def.wybe:2:18: Unknown variable/constant 'result'
+test-cases/use_before_def.wybe:2:18: Call to unknown 'result' from use_before_def
