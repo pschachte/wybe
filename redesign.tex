@@ -95,16 +95,57 @@ used for procedures that behave functionally.
 The new syntax philosophy is conceptual parsimony, built on relatively
 few syntactic elements.
 
+Miscellaneous ideas:
+\begin{itemize}
+\item Special syntax for manifest constant maps:
+  \begin{center}
+  \texttt{\{}\textit{key$_1$}\texttt{::}\textit{value$_1$},
+  \textit{key$_2$}\texttt{::}\textit{value$_2$}, \ldots\texttt{\}}
+  \end{center}
+  As a special case, sets can be written as
+  \begin{center}
+  \texttt{\{}\textit{key$_1$}, \textit{key$_2$}, \ldots\texttt{\}}
+  \end{center}
+\item Capitalising on this, we use this syntax for case statements:
+  \begin{center}
+    \texttt{case} \textit{expr} \textit{map}
+  \end{center}
+  where the values in the \textit{map} are statement sequences. Case
+  expressions are similar, but where the values in the \textit{map} are
+  expressions.
+
+  One challenge to this is that we want case values to be patterns, which
+  can have outputs. This makes maps quite powerful, as matching keys must
+  involve pattern matching, \ie, executing code.
+  Is this too powerful?
+
+\item Conditional statements and expressions have the syntax
+  \begin{center}
+    \texttt{if} \textit{map}
+  \end{center}
+  which is equivalent to \texttt{case true} \textit{map}. For this to be
+  meaningful, the semantics of manifest constants maps must be that
+  multiple mappings with identical keys are permitted, and the \emph{first}
+  mapping for the repeated key is taken.
+
+\item As a special case, allow proc calls with a single argument to be
+  written without the parentheses surrounding the argument (or with them).
+\item We need a syntax for statement sequences. Curly braces are the
+  obvious choice, but they conflict with the map/set notation above.
+\end{itemize}
+
+
+
 At the highest (tightest) precedence, \lang has manifest constants, identifiers,
 and calls.  A call is written as an identifier followed by an open
 parenthesis, a comma-separated argument list, and a close parenthesis.
 
+\textbf{Abandon this:}
 At the loosest precedence, \lang supports ``interfix'' operators:
 alternating identifiers and terms of higher precedence.  These are
 parsed as a term whose constructor is the concatenation of the
 identifiers, separated by underscores, with the subterms, in order, as
 arguments.
-
 
 
 \subsubsection*{Definition}
