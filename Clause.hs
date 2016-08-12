@@ -70,19 +70,20 @@ compileProc proc = do
     evalClauseComp $ do
         let ProcDefSrc body = procImpln proc
         let proto = procProto proc
+        logClause $ "--------------\nCompiling proc " ++ show proto
         let params = procProtoParams proto
         mapM_ nextVar $ List.map paramName $ 
           List.filter (flowsIn . paramFlow) params
         startVars <- get
         compiled <- compileBody body params
-        logClause $ "Compiled to:\n"  ++ showBlock 4 compiled
+        logClause $ "Compiled to:"  ++ showBlock 4 compiled
         endVars <- get
-        logClause $ "startVars: " ++ show startVars
-        logClause $ "endVars  : " ++ show endVars
-        logClause $ "params   : " ++ show params
+        logClause $ "  startVars: " ++ show startVars
+        logClause $ "  endVars  : " ++ show endVars
+        logClause $ "  params   : " ++ show params
         let params' = List.map (compileParam startVars endVars) params
         let proto' = PrimProto (procProtoName proto) params'
-        logClause $ "comparams: " ++ show params'
+        logClause $ "  comparams: " ++ show params'
         return $ proc { procImpln = ProcDefPrim proto' compiled }
 
 
