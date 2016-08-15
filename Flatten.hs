@@ -48,9 +48,10 @@ import Control.Monad.Trans (lift,liftIO)
 
 flattenProcDecl :: Item -> Compiler (Item,Int)
 flattenProcDecl (ProcDecl vis detism inline 
-                 proto@(ProcProto name params resources) 
+                 proto@ProcProto{procProtoParams=params}
                  stmts pos) = do
-    proto' <- flattenProto proto detism
+    let proto' = proto {procProtoParams = concatMap flattenParam params}
+              -- flattenProto proto detism
     let inParams = Set.fromList $
                    List.map paramName $ 
                    List.filter (flowsIn . paramFlow) $
@@ -61,22 +62,22 @@ flattenProcDecl _ =
     shouldnt "flattening a non-proc or non-Det proc"
 
 
-flattenProto :: ProcProto -> Determinism -> Compiler ProcProto
-flattenProto (ProcProto name params resources) detism = do
-    let params' = concatMap flattenParam params
-    let params'' = case detism of
-          Det     -> params'
-          SemiDet -> params' ++ [Param "$$" boolType ParamOut
-                                 $ Implicit Nothing]
-    return $ ProcProto name params'' resources
+-- flattenProto :: ProcProto -> Determinism -> Compiler ProcProto
+-- flattenProto (ProcProto name params resources) detism = do
+--     let params' = concatMap flattenParam params
+--     let params'' = case detism of
+--           Det     -> params'
+--           SemiDet -> params' ++ [Param "$$" boolType ParamOut
+--                                  $ Implicit Nothing]
+--     return $ ProcProto name params'' resources
 
 
 flattenBody :: [Placed Stmt] -> Set VarName -> Compiler ([Placed Stmt],Int)
 flattenBody stmts varSet = do
     finalState <- execStateT (flattenStmts stmts) $ initFlattenerState varSet
     return (List.reverse (prefixStmts finalState) ++ 
-            List.reverse (flattened finalState) ++ 
-            postponed finalState,
+            List.reverse (flattened finalState),
+            -- ++ postponed finalState,
             tempCtr finalState)
 
 
@@ -93,7 +94,7 @@ data FlattenerState = Flattener {
     prefixStmts :: [Placed Stmt],   -- ^Code to be generated earlier, reversed
                                     -- (used for loop initialisation)
     flattened   :: [Placed Stmt],   -- ^Flattened code generated, reversed
-    postponed   :: [Placed Stmt],   -- ^Code to be generated later
+    -- postponed   :: [Placed Stmt],   -- ^Code to be generated later
     tempCtr     :: Int,             -- ^Temp variable counter
     currPos     :: OptPos,          -- ^Position of current statement
     -- XXX are stmtDefs and stmtUses actually needed now?
@@ -107,7 +108,7 @@ data FlattenerState = Flattener {
 
 initFlattenerState :: Set VarName -> FlattenerState
 initFlattenerState varSet = 
-    Flattener [] [] [] 0 Nothing Set.empty Set.empty varSet
+    Flattener [] [] 0 Nothing Set.empty Set.empty varSet
 
 
 emit :: OptPos -> Stmt -> Flattener ()
@@ -117,10 +118,10 @@ emit pos stmt = do
     modify (\s -> s { flattened = maybePlace stmt pos:stmts })
 
 
-postpone :: OptPos -> Stmt -> Flattener ()
-postpone pos stmt = do
-    stmts <- gets postponed
-    modify (\s -> s { postponed = maybePlace stmt pos:stmts })
+-- postpone :: OptPos -> Stmt -> Flattener ()
+-- postpone pos stmt = do
+--     stmts <- gets postponed
+--     modify (\s -> s { postponed = maybePlace stmt pos:stmts })
 
 
 -- | Add an initialisation statement to the list of initialisations
@@ -131,12 +132,12 @@ saveInit pos stmt = do
     modify (\s -> s { prefixStmts = maybePlace stmt pos:stmts })
 
 
-emitPostponed :: Flattener ()
-emitPostponed = do
-    stmts <- gets flattened
-    stmts' <- gets postponed
-    modify (\s -> s { flattened = (List.reverse stmts') ++ stmts, 
-                      postponed = [] })
+-- emitPostponed :: Flattener ()
+-- emitPostponed = do
+--     stmts <- gets flattened
+--     stmts' <- gets postponed
+--     modify (\s -> s { flattened = (List.reverse stmts') ++ stmts, 
+--                       postponed = [] })
 
 
 -- |Return a fresh variable name.
@@ -159,8 +160,8 @@ flattenInner isLoop transparent inner = do
       showBody 4 (prefixStmts innerState)
     logFlatten $ "** Flattened:\n" ++ 
       showBody 4 (flattened innerState)
-    logFlatten $ "** Postponed:\n" ++ 
-      showBody 4 (postponed innerState)
+    -- logFlatten $ "** Postponed:\n" ++ 
+    --   showBody 4 (postponed innerState)
     if transparent
        then put $ oldState { tempCtr = tempCtr innerState,
                              defdVars = defdVars innerState }
@@ -227,32 +228,34 @@ flattenStmt' :: Stmt -> OptPos -> Flattener ()
 flattenStmt' (ProcCall maybeMod name procID args) pos = do
     args' <- flattenStmtArgs args pos
     emit pos $ ProcCall maybeMod name procID args'
-    emitPostponed
+    -- emitPostponed
 flattenStmt' (ForeignCall lang name flags args) pos = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
-    emitPostponed
-flattenStmt' tststmt@(Test stmts tst) pos = do
+    -- emitPostponed
+flattenStmt' tststmt@(Test stmts) pos = do
     logFlatten $ "** Flattening test:" ++ showStmt 4 tststmt
     (_,stmts') <- flattenInner False True (flattenStmts stmts)
-    (vars,tst') <- flattenInner False False (do
-      vars <- flattenPExp tst
-      emitPostponed
-      return vars)
-    let errPos = betterPlace pos tst
-    case vars of
-      [] -> lift $ message Error "Test with no flow" errPos
-      [var] -> do
-        logFlatten $ "** Result:\n" ++ (showStmt 4 $ Test (stmts'++tst') var)
-        emit pos $ Test (stmts'++tst') var
-      [_,_] -> lift $ message Error
-              ("Test with in-out flow: " ++ show vars) errPos
-      _ -> shouldnt "Single expression expanded to more than 2 args"
+    logFlatten $ "** Result:\n" ++ showStmt 4 (Test stmts')
+    emit pos $ Test stmts'
+    -- (vars,tst') <- flattenInner False False (do
+    --   vars <- flattenPExp tst
+    --   emitPostponed
+    --   return vars)
+    -- let errPos = betterPlace pos tst
+    -- case vars of
+    --   [] -> lift $ message Error "Test with no flow" pos
+    --   [var] -> do
+    --     logFlatten $ "** Result:\n" ++ (showStmt 4 $ Test stmts')
+    --     emit pos $ Test stmts'
+    --   [_,_] -> lift $ message Error
+    --           ("Test with in-out flow: " ++ show vars) pos
+    --   _ -> shouldnt "Single expression expanded to more than 2 args"
 flattenStmt' (Cond tstStmts tst thn els) pos = do
     logFlatten $ "** Flattening conditional:" ++ show tst
     (vars,tst') <- flattenInner False False (do
       vars <- flattenPExp tst
-      emitPostponed
+      -- emitPostponed
       return vars)
     logFlatten $ "** Result:\n" ++ showBody 4 tst'
     (_,thn') <- flattenInner False False (flattenStmts thn)

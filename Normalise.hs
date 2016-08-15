@@ -179,14 +179,17 @@ constCtorItems  vis typeSpec (placedProto,num) =
         constName = fnProtoName $ content placedProto
     in [ProcDecl vis Det True
         (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] [])
-        [lpvmCastToVar (castTo (IntValue num) typeSpec) "$"] pos,
-        ProcDecl vis SemiDet True
-        (ProcProto constName [Param "$" typeSpec ParamIn Ordinary] [])
-        [Unplaced $ Test []
-         (comparisonExp "eq"
-          (lpvmCastExp (varGet "$") intType)
-          (intCast $ IntValue num))]
-        pos]
+        [lpvmCastToVar (castTo (IntValue num) typeSpec) "$"] pos
+       ]
+    -- Don't need out mode of const constructors; just use implied mode
+-- ,
+--         ProcDecl vis SemiDet True
+--         (ProcProto constName [Param "$" typeSpec ParamIn Ordinary] [])
+--         [Unplaced $ Test []
+--          (comparisonExp "eq"
+--           (lpvmCastExp (varGet "$") intType)
+--           (intCast $ IntValue num))]
+--         pos]
 
 
 -- |All items needed to implement a non-const contructor for the specified type.

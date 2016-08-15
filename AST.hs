@@ -1599,7 +1599,7 @@ flowsOut FlowUnknown = shouldnt "checking if unknown flow direction flows out"
 data Stmt
      = ProcCall ModSpec Ident (Maybe Int) [Placed Exp]
      | ForeignCall Ident Ident [Ident] [Placed Exp]
-     | Test [Placed Stmt] (Placed Exp)
+     | Test [Placed Stmt]
      | Nop
      -- All the following are eliminated during unbranching.
      -- The first stmt list is empty and the Exp is anything until
@@ -2188,10 +2188,8 @@ showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ name ++ 
     (if List.null flags then "" else " " ++ unwords flags) ++
     "(" ++ intercalate ", " (List.map show args) ++ ")"
-showStmt indent (Test stmts exp) =
-    "test {" ++ showBody (indent+6) stmts ++ "}\n"
-    ++ List.replicate (indent+5) ' '
-    ++ "} " ++ show exp
+showStmt indent (Test stmts) =
+    "test {" ++ showBody (indent+6) stmts ++ "\n}"
 showStmt indent (Cond condstmts cond thn els) =
     let leadIn = List.replicate indent ' '
     in "if {" ++ showBody (indent+4) condstmts ++ "}\n"

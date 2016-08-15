@@ -737,9 +737,9 @@ bodyCalls (pstmt:pstmts) = do
         ProcCall{} -> return $ pstmt:rest
         -- need to handle move instructions:
         ForeignCall{} -> return $ pstmt:rest
-        Test nested expr -> do
-          modify $ constrainVarType (ReasonCond pos)
-                   (expVar $ content expr) boolType
+        Test nested -> do
+          -- modify $ constrainVarType (ReasonCond pos)
+          --          (expVar $ content expr) boolType
           nested' <- bodyCalls nested
           return $ nested' ++ rest
         Nop -> return rest
@@ -1079,12 +1079,12 @@ modecheckStmt m name defPos typing delayed assigned
                               args'
             return ([maybePlace stmt' pos],delayed,assigned',[])
 modecheckStmt m name defPos typing delayed assigned
-    stmt@(Test stmts expr) pos = do
+    stmt@(Test stmts) pos = do
     logTypes $ "Mode checking test " ++ show stmt
     (stmts', assigned',errs') <-
       modecheckStmts m name defPos typing [] assigned stmts
-    let expr' = setPExpTypeFlow (TypeFlow boolType ParamIn) expr
-    return ([maybePlace (Test stmts' expr') pos], delayed, assigned',errs')
+    -- let expr' = setPExpTypeFlow (TypeFlow boolType ParamIn) expr
+    return ([maybePlace (Test stmts') pos], delayed, assigned',errs')
 modecheckStmt m name defPos typing delayed assigned
     stmt@(Cond tstStmts expr thnStmts elsStmts) pos = do
     logTypes $ "Mode checking conditional " ++ show stmt
@@ -1571,9 +1571,9 @@ checkStmtTyped name pos (ProcCall pmod pname pid args) ppos = do
 checkStmtTyped name pos (ForeignCall _ pname _ args) ppos =
     mapM_ (checkArgTyped name pos pname ppos) $
           zip [1..] $ List.map content args
-checkStmtTyped name pos (Test stmts expr) ppos = do
+checkStmtTyped name pos (Test stmts) ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
-    checkExpTyped name pos ("test" ++ showMaybeSourcePos ppos) $ content expr
+    -- checkExpTyped name pos ("test" ++ showMaybeSourcePos ppos) $ content expr
 checkStmtTyped name pos (Cond ifstmts cond thenstmts elsestmts) ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) ifstmts
     checkExpTyped name pos ("condition" ++ showMaybeSourcePos ppos) $

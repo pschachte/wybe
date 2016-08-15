@@ -137,9 +137,9 @@ transformStmt resources (ProcCall m n id args) pos = do
     return $ maybePlace (ProcCall m n (Just procID) (args++resArgs)) pos
 transformStmt resources (ForeignCall lang name flags args) pos = do
     return $ maybePlace (ForeignCall lang name flags args) pos
-transformStmt resources (Test stmts exp) pos = do
+transformStmt resources (Test stmts) pos = do
     stmts' <- transformBody resources stmts
-    return $ maybePlace (Test stmts' exp) pos
+    return $ maybePlace (Test stmts') pos
 transformStmt _ (Nop) pos = return $ maybePlace Nop pos
 transformStmt resources (Cond test exp thn els) pos = do
     test' <- transformBody resources test
