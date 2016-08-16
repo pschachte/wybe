@@ -43,7 +43,7 @@ import Macho
 -- of the given 'BL.ByteString'.
 insertLPVMDataLd :: BL.ByteString -> FilePath -> IO ()
 insertLPVMDataLd bs obj =
-    do tempDir <- liftIO $ getTemporaryDirectory
+    do tempDir <- getTemporaryDirectory
        liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
        let modFile = takeBaseName obj ++ ".module"
        let lpvmFile = (tempDir ++ "wybetemp/" ++ modFile)
@@ -163,15 +163,21 @@ dataFromBitcode = do
 machoLPVMSection :: FilePath -> IO [Module]
 machoLPVMSection ofile = do
     bs <- B.readFile ofile
-    let (cmdsize, macho) = parseMacho bs
-    let lpvmSeg = findLPVMSegment (m_commands macho)
+    let lpvmSeg = if isMachoBytes bs
+                  then let (cmdsize, macho) = parseMacho bs
+                       in findLPVMSegment (m_commands macho)
+                  else Nothing
     case lpvmSeg of
-        Nothing -> error "LPVM segment does not exist in the file."
+        -- error "LPVM segment does not exist in the file."
+        Nothing -> return []
         Just seg -> do
             let (off, size) = lpvmFileOffset seg
             let bytes = readBytes off size (BL.fromStrict bs)
-            let mods = (decode bytes :: [Module])
-            return mods
+            -- let mods = decode bytes :: [Module]
+            case decodeOrFail bytes of
+                Left _ -> return []
+                Right (_, _, mods) -> return (mods :: [Module])
+
 
 -- | Find the load command from a 'LC_COMMAND' list which contains
 -- section '__lpvm'. This section will usually by in a general segment
@@ -216,3 +222,20 @@ lpvmFileOffset seg =
 -- | Read bytestring from 'BL.ByteString' in the given range.
 readBytes :: Int64 -> Int64 -> BL.ByteString -> BL.ByteString
 readBytes from size bs = BL.take size $ BL.drop from bs
+
+
+
+-----------------------------------------------------------------------------
+-- File Helpers                                                            --
+-----------------------------------------------------------------------------
+
+-- | Checks the magic number of the given bytestring [bs] to determine whether
+-- it is a parasable Macho bytestring or not.
+isMachoBytes :: B.ByteString -> Bool
+isMachoBytes bs = flip runGet (C.fromChunks [bs]) $ do
+    word <- getWord32le
+    return $ List.elem word [ 0xfeedface
+                            , 0xfeedfacf
+                            , 0xcefaedfe
+                            , 0xcffaedfe ]
+    
