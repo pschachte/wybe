@@ -32,6 +32,7 @@ data Options = Options{
     , optLogAspects  :: Set LogSelection
                                  -- ^Which aspects to log
     , optUseStd      :: Bool     -- ^Use the standard library or not
+    , optNoLLVMOpt  :: Bool      -- ^Don't run the LLVM optimisation passes
     } deriving Show
 
 
@@ -45,6 +46,7 @@ defaultOptions    = Options
  , optLibDirs     = ["wybelibs"]
  , optLogAspects  = Set.empty
  , optUseStd      = True
+ , optNoLLVMOpt   = False
  }
 
 -- |All compiler features we may want to log
@@ -117,6 +119,9 @@ options =
  , Option ['x'] ["no-std"]
      (NoArg (\opts -> opts { optUseStd = False }))
      "avoid loading the standard wybe library"
+ , Option ['s'] ["no-llvm-opt"]
+     (NoArg (\opts -> opts { optNoLLVMOpt = True }))
+     "don't run the LLVM optimisation pass manager on the emitted LLVM"
  ]
 
 
