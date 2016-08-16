@@ -165,8 +165,8 @@ buildModuleIfNeeded force modspec possDirs = do
                         let err = ("Object file " ++ objfile ++
                                   " yielded no LPVM modules for " ++
                                   showModSpec modspec ++ ".")
-                        message Error "No other options to pursue." Nothing
-                        message Error err Nothing
+                        Error @@ "No other options to pursue."
+                        Error @@ err
                         stopOnError "Building only object file"
                         return False
                         -- extraction successful, no need to build
