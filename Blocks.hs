@@ -1,6 +1,6 @@
 --  File     : Blocks.hs
 --  RCS      : $Id$
---  Author   : Ashutosh Rishi Ranjan
+--  author   : Ashutosh Rishi Ranjan
 --  Origin   : Thu Mar 26 14:25:37 AEDT 2015
 --  Purpose  : Transform a clausal form (LPVM) module to LLVM
 --  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
@@ -9,21 +9,19 @@ module Blocks
        where
 
 import           AST
-import           BinaryFactory
+import           BinaryFactory ()
 import           Codegen
+import           Config (wordSize)
 import           Control.Monad
 import           Control.Monad.Trans (lift, liftIO)
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
-import qualified Data.Binary as B
 import           Data.Char (ord)
 import           Data.List as List
 import           Data.Map as Map
-import           Data.Maybe
 import qualified Data.Set as Set
 import           Data.Word (Word32)
-import           Debug.Trace
 import qualified LLVM.General.AST as LLVMAST
 import qualified LLVM.General.AST.Constant as C
 import qualified LLVM.General.AST.Float as F
@@ -33,11 +31,8 @@ import           LLVM.General.AST.Instruction
 import qualified LLVM.General.AST.IntegerPredicate as IP
 import           LLVM.General.AST.Operand
 import           LLVM.General.AST.Type
-import           LLVM.General.Context
-import           LLVM.General.Module
 import           LLVM.General.PrettyPrint
 import           Options (LogSelection (Blocks))
-import Config (wordSize,wordSizeBytes)
 
 
 -- | Holds information on the LLVM representation of the LPVM procedure.
@@ -62,7 +57,7 @@ blockTransformModule thisMod =
        logBlocks $ "*** Translating Module: " ++ showModSpec thisMod
        modRec <- getModule id
        logWrapWith '-' $ show modRec
-       (names, procs) <- unzip <$>
+       (_, procs) <- unzip <$>
                          getModuleImplementationField (Map.toList . modProcs)
        -- Collect all procedure prototypes in the module
        let protos = List.map extractLPVMProto (concat procs)
@@ -94,12 +89,12 @@ blockTransformModule thisMod =
 
        --------------------------------------------------
        -- Translate
-       blocks <- mapM (translateProc allProtos) $ emptyFilter mangledProcs
+       procBlocks <- mapM (translateProc allProtos) $ emptyFilter mangledProcs
        --------------------------------------------------
        -- Init LLVM Module and fill it
-       let llmod = newLLVMModule (showModSpec thisMod) blocks
+       let llmod = newLLVMModule (showModSpec thisMod) procBlocks
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
-       finishModule
+       _ <- finishModule
        logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
 
@@ -127,13 +122,13 @@ buildNameMap ps = List.foldl reduceNameMap [] procNames
 reduceNameMap :: [(String, Int)] -> String -> [(String, Int)]
 reduceNameMap namemap name =
     case List.lookup name namemap of
-        Just val -> namemap ++ [(name, (val + 1))]
+        Just val -> namemap ++ [(name, val + 1)]
         Nothing -> namemap ++ [(name, 0)]
 
 
 pullDefName :: ProcDef -> String
 pullDefName p =
-    let (ProcDefPrim proto body) = procImpln p
+    let (ProcDefPrim proto _) = procImpln p
     in primProtoName proto
 
 
@@ -145,9 +140,9 @@ extractLPVMProto procdef =
 -- | Go into a (compiled) Module and pull out the PrimProto implementation
 -- of all ProcDefs in the module implementation.
 getPrimProtos :: ModSpec -> Compiler [PrimProto]
-getPrimProtos modSpec = do
-    (_, procs) <- fmap (unzip . Map.toList . modProcs)
-        $ getLoadedModuleImpln modSpec
+getPrimProtos modspec = do
+    (_, procs) <- (unzip . Map.toList . modProcs) <$>
+                  getLoadedModuleImpln modspec
     let protos = List.map extractLPVMProto (concat procs)
     return protos
 
@@ -180,7 +175,7 @@ translateProc modProtos proc = do
     modspec <- getModuleSpec
     let def@(ProcDefPrim proto body) = procImpln proc
     logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
-    logBlocks $ "In Module: " ++ (showModSpec modspec)
+    logBlocks $ "In Module: " ++ showModSpec modspec
         ++ ", creating definition of: "
     logBlocks $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
@@ -219,7 +214,8 @@ makeGlobalDefinition pname proto bls = do
 -- and the param is needed (inferred by it's param info field)
 isInputParam :: PrimParam -> Bool
 isInputParam p = primParamFlow p == FlowIn &&
-  (paramInfoUnneeded . primParamInfo) p == False
+  not ((paramInfoUnneeded . primParamInfo) p)
+
 
 -- | Convert a primitive's input parameter to LLVM's Definition parameter.
 makeFnArg :: PrimParam -> Compiler (Type, LLVMAST.Name)
@@ -236,7 +232,7 @@ primOutputType params = do
     case length outputs of
         0 -> return void_t
         1 -> (typed' . primParamType . head) outputs
-        n -> fmap struct_t $ mapM (typed' . primParamType) outputs
+        _ -> struct_t <$> mapM (typed' . primParamType) outputs
 
 
 isOutputParam :: PrimParam -> Bool
@@ -1183,19 +1179,6 @@ makeStoreOp ptr v = return v
 -- | Logging from the Compiler monad to Blocks.
 logBlocks :: String -> Compiler ()
 logBlocks = logMsg Blocks
-
--- | Make 'show' not include quotes when being used to name symbols.
--- show' = sq . show
-
-sq :: String -> String
-sq s@[c] = s
-sq ('"':s)
-    | last s == '"'  = init s
-    | otherwise      = s
-sq ('\'':s)
-    | last s == '\'' = init s
-    | otherwise      = s
-sq s = s
 
 -- | Log with a wrapping line of replicated characters above and below.
 logWrapWith :: Char -> String -> Compiler ()

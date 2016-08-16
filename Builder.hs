@@ -80,7 +80,7 @@ buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
     possDirs <- gets (optLibDirs . options)
     let useStd = optUseStd opts
-    -- load library first (if useStd is True)
+    -- load library first (if option useStd is True)
     when useStd $ void (buildModuleIfNeeded False ["wybe"] possDirs)
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     showMessages
@@ -101,6 +101,7 @@ buildTarget force target = do
             let modname = takeBaseName target
             let dir = takeDirectory target
             built <- buildModuleIfNeeded force [modname] [dir]
+            stopOnError "BUILDING TARGET"
             -- Check if the module contains sub modules
             _ <- concatSubMods [modname]
 
@@ -124,11 +125,14 @@ buildDependency modspec = do
     force <- option optForceAll
     possDirs <- gets (optLibDirs . options)
     localDir <- getModule modDirectory
-    buildModuleIfNeeded force modspec (localDir:possDirs)
+    _ <- buildModuleIfNeeded force modspec (localDir:possDirs)
     return ()
 
 
--- |Compile a single module to an object file.
+-- | Run compilation passes on a single module specified by [modspec] resulting
+-- in the LPVM and LLVM forms of the module to be placed in the Compiler State
+-- monad. The [force] flag determines whether the module is built from source
+-- or its previous compilation is extracted from its corresponding object file.
 buildModuleIfNeeded :: Bool    -- ^Force compilation of this module
               -> ModSpec       -- ^Module name
               -> [FilePath]    -- ^Directories to look in
@@ -154,8 +158,19 @@ buildModuleIfNeeded force modspec possDirs = do
                     return False
                 Just (_,False,objfile,True,_) -> do
                     -- only object file exists
-                    loadModuleFromObjFile modspec objfile
-                    return False
+                    loaded <- loadModuleFromObjFile modspec objfile
+                    if not loaded
+                        -- if extraction failed, it is uncrecoverable now
+                        then do
+                        let err = ("Object file " ++ objfile ++
+                                  " yielded no LPVM modules for " ++
+                                  showModSpec modspec ++ ".")
+                        message Error "No other options to pursue." Nothing
+                        message Error err Nothing
+                        stopOnError "Building only object file"
+                        return False
+                        -- extraction successful, no need to build
+                        else return False
                 Just (srcfile,True,objfile,False,modname) -> do
                     -- only source file exists
                     buildModule modname objfile srcfile
@@ -169,8 +184,13 @@ buildModuleIfNeeded force modspec possDirs = do
                         buildModule modname objfile srcfile
                         return True
                       else do
-                        loadModuleFromObjFile modspec objfile
-                        return False
+                        loaded <- loadModuleFromObjFile modspec objfile
+                        unless loaded $ do
+                            -- Loading failed, fallback on source building
+                            logBuild $ "Falling back on building " ++
+                                showModSpec modspec
+                            buildModule modname objfile srcfile
+                        return $ not loaded
                 Just (_,False,_,False,_) ->
                     shouldnt "inconsistent file existence"
 
@@ -218,6 +238,7 @@ buildModule modname objfile srcfile = do
                 logBuild $ "... Hash for module " ++ showModSpec mspec ++
                     " matches the old hash."
                 loadModuleFromObjFile mspec objfile
+                return () 
             else compileModule dir mspec Nothing parseTree
     
 
@@ -267,16 +288,21 @@ extractedItemsHash modspec = do
 -- compiler state for later access.
 extractModules :: FilePath -> Compiler ()
 extractModules objfile = do
-    logBuild $ "<<< Looking for serialised Wybe modules in " ++ objfile
-    extracted <- liftIO $ liftIO $ machoLPVMSection objfile
-    logBuild $ ">>> Extracted Module bytestring from " ++ show objfile
-    let extractedSpecs = List.map modSpec extracted
-    logBuild $ "+++ Recording modules: " ++ showModSpecs extractedSpecs
-    -- Add the extracted modules in the 'objectModules' Map
-    exMods <- gets extractedMods
-    let addMod m = Map.insert (modSpec m) m
-    let exMods' = List.foldr addMod exMods extracted
-    modify (\s -> s { extractedMods = exMods' })
+    logBuild $ "=== Preloading Wybe-LPVM modules from " ++ objfile
+    extracted <- liftIO $ machoLPVMSection objfile
+    if List.null extracted
+        then
+        message Warning ("Unable to preload serialised LPVM from " ++ objfile)
+            Nothing
+        else do
+        logBuild $ ">>> Extracted Module bytestring from " ++ show objfile
+        let extractedSpecs = List.map modSpec extracted
+        logBuild $ "+++ Recording modules: " ++ showModSpecs extractedSpecs
+        -- Add the extracted modules in the 'objectModules' Map
+        exMods <- gets extractedMods
+        let addMod m = Map.insert (modSpec m) m
+        let exMods' = List.foldr addMod exMods extracted
+        modify (\s -> s { extractedMods = exMods' })
 
 
 
@@ -299,25 +325,32 @@ loadModuleWithModule m = do
     void finishModule
 
 
-loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler ()
+loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler Bool
 loadModuleFromObjFile modspec objfile = do
-    logBuild $ "===== ??? Trying to load LPVM Module for "
-        ++ showModSpec modspec    
-    extracted <- liftIO $ liftIO $ machoLPVMSection objfile
-    logBuild $ "===== >>> Extracted Module bytestring from " ++ (show objfile)
-    let extractedSpecs = List.map modSpec extracted
-    logBuild $ "===== >>> Found modules: " ++ showModSpecs extractedSpecs
-    -- Collect the imports
-    imports <- concat <$> mapM placeExtractedModule extracted
-    logBuild $ "==== >>> Building dependencies: " ++ showModSpecs imports
-    -- Place the super mod under compilation while dependencies are built
-    let superMod = head extracted
-    modify (\comp -> let ms = superMod : underCompilation comp
-                     in comp { underCompilation = ms })
-    mapM_ buildDependency imports
-    _ <- finishModule
-    logBuild $ "===== <<< Extracted Module put in it's place from "
-        ++ show objfile
+    logBuild $ "=== ??? Trying to load LPVM Module for " ++
+        showModSpec modspec ++ " from " ++ objfile
+    extracted <- liftIO $ machoLPVMSection objfile
+    if List.null extracted
+        then do
+        logBuild $ "xxx Failed extraction of LPVM Modules from object file "
+            ++ objfile
+        return False
+        else do
+        logBuild $ "=== >>> Extracted Module bytes from " ++ show objfile
+        let extractedSpecs = List.map modSpec extracted
+        logBuild $ "=== >>> Found modules: " ++ showModSpecs extractedSpecs
+        -- Collect the imports
+        imports <- concat <$> mapM placeExtractedModule extracted
+        logBuild $ "=== >>> Building dependencies: " ++ showModSpecs imports
+        -- Place the super mod under compilation while dependencies are built
+        let superMod = head extracted
+        modify (\comp -> let ms = superMod : underCompilation comp
+                         in comp { underCompilation = ms })
+        mapM_ buildDependency imports
+        _ <- finishModule
+        logBuild $ "=== <<< Extracted Module put in it's place from "
+            ++ show objfile
+        return True
 
 
 
