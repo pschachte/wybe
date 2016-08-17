@@ -13,6 +13,7 @@ module BinaryFactory
 import AST
 import Control.Monad
 import Data.Binary as B
+import Data.Word (Word8)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BL
 import qualified LLVM.General.AST as LLVMAST
@@ -91,7 +92,9 @@ encodeModule m = do
     let getm name = trustFromJustM msg $ getLoadedModule name
     subModSpecs <- collectSubModules (modSpec m)
     subMods <- mapM getm subModSpecs
-    return $ B.encode (m:subMods)
+    let encoded = B.encode (m:subMods)
+    -- Add a magic byte
+    return $ BL.cons (1 :: Word8) encoded
 
 
 
@@ -101,7 +104,7 @@ sha1 :: BL.ByteString -> Digest SHA1
 sha1 = hashlazy
 
 hashItems :: [Item] -> String
-hashItems = (show . sha1 . encode)
+hashItems = show . sha1 . encode
 
 
     

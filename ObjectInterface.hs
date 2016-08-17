@@ -162,21 +162,21 @@ dataFromBitcode = do
 -- a 'AST.Module'.
 machoLPVMSection :: FilePath -> IO [Module]
 machoLPVMSection ofile = do
-    bs <- B.readFile ofile
-    let lpvmSeg = if isMachoBytes bs
-                  then let (cmdsize, macho) = parseMacho bs
-                       in findLPVMSegment (m_commands macho)
-                  else Nothing
-    case lpvmSeg of
-        -- error "LPVM segment does not exist in the file."
-        Nothing -> return []
-        Just seg -> do
-            let (off, size) = lpvmFileOffset seg
-            let bytes = readBytes off size (BL.fromStrict bs)
-            -- let mods = decode bytes :: [Module]
-            case decodeOrFail bytes of
-                Left _ -> return []
-                Right (_, _, mods) -> return (mods :: [Module])
+    bsWithMagic <- B.readFile ofile
+    -- XXX Chain maybe monads please
+    case verifyBytes bsWithMagic of
+        Just bs -> do
+            let (cmdsize, macho) = parseMacho (bs)
+            case findLPVMSegment (m_commands macho) of
+                Just seg -> do
+                    let (off, size) = lpvmFileOffset seg
+                    let bytes = readBytes off size (BL.fromStrict bs)
+                    -- let mods = decode bytes :: [Module]
+                    case decodeOrFail bytes of
+                        Left _ -> return []
+                        Right (_, _, mods) -> return (mods :: [Module])
+                Nothing -> return []
+        Nothing -> return []  
 
 
 -- | Find the load command from a 'LC_COMMAND' list which contains
@@ -228,6 +228,21 @@ readBytes from size bs = BL.take size $ BL.drop from bs
 -----------------------------------------------------------------------------
 -- File Helpers                                                            --
 -----------------------------------------------------------------------------
+
+
+verifyBytes :: B.ByteString -> Maybe B.ByteString
+verifyBytes bs =
+    if isValidLPVMBytes bs
+    then let lpvmbs = B.tail bs
+         in if isMachoBytes lpvmbs then Just lpvmbs else Nothing
+    else Nothing
+
+
+isValidLPVMBytes :: B.ByteString -> Bool
+isValidLPVMBytes bs =
+    bs /= B.empty && B.head bs == (1 :: Word8)
+
+
 
 -- | Checks the magic number of the given bytestring [bs] to determine whether
 -- it is a parasable Macho bytestring or not.
