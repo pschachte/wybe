@@ -52,7 +52,7 @@ module AST (
   updateModImplementation, updateModImplementationM, updateModLLVM,
   updateModInterface, updateAllProcs, updateModSubmods,
   getDirectory, getModuleSpec, getModuleParams, option, 
-  optionallyPutStr, message, (@@), genProcName,
+  optionallyPutStr, message, (<!>), genProcName,
   addImport, doImport, addType, lookupType, publicType,
   ResourceName(..), ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource, 
@@ -554,9 +554,9 @@ message lvl msg pos = do
     when (lvl == Error) (modify (\bldr -> bldr { errorState = True }))
 
 
-(@@) :: MessageLevel -> String -> Compiler ()
-(@@) lvl msg = message lvl msg Nothing
-
+(<!>) :: MessageLevel -> String -> Compiler ()
+lvl <!> msg = message lvl msg Nothing
+infix 0 <!>
 
 -- |Construct a message string from the specified text and location.
 makeMessage :: OptPos -> String -> String
