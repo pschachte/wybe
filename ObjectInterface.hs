@@ -8,6 +8,7 @@
 module ObjectInterface where
 
 import           AST
+import Options (LogSelection(Builder))
 import           BinaryFactory
 import           Config
 import           Control.Monad
@@ -160,23 +161,35 @@ dataFromBitcode = do
 -- | Parse the given object file into a 'Macho' structure, determine the
 -- offset and size of the '__lpvm' section data, and decode those bytes as
 -- a 'AST.Module'.
-machoLPVMSection :: FilePath -> IO [Module]
-machoLPVMSection ofile = do
-    bsWithMagic <- B.readFile ofile
-    -- XXX Chain maybe monads please
-    case verifyBytes bsWithMagic of
-        Just bs -> do
-            let (cmdsize, macho) = parseMacho (bs)
-            case findLPVMSegment (m_commands macho) of
-                Just seg -> do
-                    let (off, size) = lpvmFileOffset seg
-                    let bytes = readBytes off size (BL.fromStrict bs)
-                    -- let mods = decode bytes :: [Module]
-                    case decodeOrFail bytes of
-                        Left _ -> return []
-                        Right (_, _, mods) -> return (mods :: [Module])
-                Nothing -> return []
-        Nothing -> return []  
+machoLPVMSection :: FilePath -> Compiler [Module]
+machoLPVMSection ofile =
+    withMachoFile ofile [] decodeLPVMSegment
+
+
+decodeLPVMSegment :: BL.ByteString -> Compiler [Module]
+decodeLPVMSegment bs = do
+    let (_, macho) = parseMacho (BL.toStrict bs)
+    case findLPVMSegment (m_commands macho) of
+        Just seg ->
+            decodeModule $ uncurry (readBytes bs) (lpvmFileOffset seg)
+        Nothing -> do
+            logMsg Builder "No LPVM Segment found."
+            return []
+            
+
+withMachoFile :: FilePath -> a -> (BL.ByteString -> Compiler a)
+              -> Compiler a
+withMachoFile mfile empty action = do
+    bs <- liftIO $ BL.readFile mfile
+    if isMachoBytes bs then action bs
+        else do
+        logMsg Builder $ "Not a recognised object file: "
+            ++ mfile
+        return empty
+    
+
+withMachoSegment :: MachoSegment -> (MachoSegment -> Compiler a) -> Compiler a
+withMachoSegment with f = f with
 
 
 -- | Find the load command from a 'LC_COMMAND' list which contains
@@ -184,25 +197,19 @@ machoLPVMSection ofile = do
 -- load command (32 or 64 bit) of the Mach-O file.
 findLPVMSegment :: [LC_COMMAND] -> Maybe MachoSegment
 findLPVMSegment [] = Nothing
-findLPVMSegment ((LC_SEGMENT seg):cs) =
-    case sectionExists "__lpvm" seg of
-        False -> findLPVMSegment cs
-        True -> Just seg
-findLPVMSegment((LC_SEGMENT_64 seg):cs) =
-    case sectionExists "__lpvm" seg of
-        False -> findLPVMSegment cs
-        True -> Just seg
-findLPVMSegment (c:cs) = findLPVMSegment cs        
+findLPVMSegment (LC_SEGMENT seg : cs) =
+    if sectionExists "__lpvm" seg then Just seg else findLPVMSegment cs
+findLPVMSegment (LC_SEGMENT_64 seg : cs) =
+    if sectionExists "__lpvm" seg then Just seg else findLPVMSegment cs
+findLPVMSegment (_:cs) = findLPVMSegment cs        
 
 -- | Check if a section of the given 'String' name exists in the
 -- 'MachoSegment'.
 sectionExists :: String -> MachoSegment -> Bool
 sectionExists name seg =
     let sections = seg_sections seg
-        find = List.find ((== name) . sec_sectname) sections
-    in case find of
-        Nothing -> False
-        _ -> True
+        found = List.find ((== name) . sec_sectname) sections
+    in isJust found
 
 -- | Determine the (offset, size) byte range where the __lpvm section data
 -- exists. The offset is determined by adding the segment offset word of the
@@ -213,15 +220,15 @@ lpvmFileOffset seg =
     let foff = seg_fileoff seg
         sections = seg_sections seg
     in case List.find ((== "__lpvm") . sec_sectname) sections of
-        Just sec -> let off = fromIntegral $ foff + (sec_addr sec)
+        Just sec -> let off = fromIntegral $ foff + sec_addr sec
                         size = fromIntegral $ sec_size sec
                     in (off, size)
         Nothing -> error "LPVM Section not found."
 
 
 -- | Read bytestring from 'BL.ByteString' in the given range.
-readBytes :: Int64 -> Int64 -> BL.ByteString -> BL.ByteString
-readBytes from size bs = BL.take size $ BL.drop from bs
+readBytes :: BL.ByteString -> Int64 -> Int64 -> BL.ByteString
+readBytes bs from size = BL.take size $ BL.drop from bs
 
 
 
@@ -230,24 +237,17 @@ readBytes from size bs = BL.take size $ BL.drop from bs
 -----------------------------------------------------------------------------
 
 
-verifyBytes :: B.ByteString -> Maybe B.ByteString
-verifyBytes bs =
-    if isValidLPVMBytes bs
-    then let lpvmbs = B.tail bs
-         in if isMachoBytes lpvmbs then Just lpvmbs else Nothing
-    else Nothing
-
-
-isValidLPVMBytes :: B.ByteString -> Bool
-isValidLPVMBytes bs =
-    bs /= B.empty && B.head bs == (1 :: Word8)
+isValidLPVMBytes :: BL.ByteString -> Maybe BL.ByteString
+isValidLPVMBytes bs = do
+    (hd, tl) <- BL.uncons bs
+    if hd == (1 :: Word8) then Just tl else Nothing    
 
 
 
 -- | Checks the magic number of the given bytestring [bs] to determine whether
 -- it is a parasable Macho bytestring or not.
-isMachoBytes :: B.ByteString -> Bool
-isMachoBytes bs = flip runGet (C.fromChunks [bs]) $ do
+isMachoBytes :: BL.ByteString -> Bool
+isMachoBytes bs = flip runGet bs $ do
     word <- getWord32le
     return $ List.elem word [ 0xfeedface
                             , 0xfeedfacf

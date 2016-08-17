@@ -221,8 +221,9 @@ data Macho = Macho
 -- | Parse a ByteString of a Mach-O object into a Macho record.
 parseMacho :: B.ByteString -> (Int, Macho)
 parseMacho b =
-    let (mr, sizeofcmds, hdrSize, header) = runGet getMachoHeader $ L.fromChunks [b]
-        commands = runGet (getLoadCommands mr b header) $ L.fromChunks [B.take sizeofcmds $ B.drop hdrSize b]
+    let (mr, sizeofcmds, hdrSize, header) = runGet getMachoHeader $ L.fromStrict b
+        commands = runGet (getLoadCommands mr b header) $ L.fromStrict
+            (B.take sizeofcmds $ B.drop hdrSize b)
     in (sizeofcmds, Macho header commands)
 
 data MH_FILETYPE

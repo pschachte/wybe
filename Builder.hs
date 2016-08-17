@@ -289,7 +289,7 @@ extractedItemsHash modspec = do
 extractModules :: FilePath -> Compiler ()
 extractModules objfile = do
     logBuild $ "=== Preloading Wybe-LPVM modules from " ++ objfile
-    extracted <- liftIO $ machoLPVMSection objfile
+    extracted <- machoLPVMSection objfile
     if List.null extracted
         then
         message Warning ("Unable to preload serialised LPVM from " ++ objfile)
@@ -329,7 +329,7 @@ loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler Bool
 loadModuleFromObjFile modspec objfile = do
     logBuild $ "=== ??? Trying to load LPVM Module for " ++
         showModSpec modspec ++ " from " ++ objfile
-    extracted <- liftIO $ machoLPVMSection objfile
+    extracted <- machoLPVMSection objfile
     if List.null extracted
         then do
         logBuild $ "xxx Failed extraction of LPVM Modules from object file "

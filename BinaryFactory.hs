@@ -4,9 +4,6 @@
 --  Origin   : Thu Mar 26 14:25:37 AEDT 2015
 --  Purpose  : Deriving AST Types to be Binary instances
 --  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
-
-{-# LANGUAGE DeriveGeneric #-}
-
 module BinaryFactory
        where
 
@@ -93,9 +90,19 @@ encodeModule m = do
     subModSpecs <- collectSubModules (modSpec m)
     subMods <- mapM getm subModSpecs
     let encoded = B.encode (m:subMods)
-    -- Add a magic byte
     return $ BL.cons (1 :: Word8) encoded
 
+-- * Decoding
+decodeModule :: BL.ByteString -> Compiler [Module]
+decodeModule bs =
+    case BL.uncons bs of
+        Just (hd, tl) -> 
+            if hd == 1 then
+                case B.decodeOrFail tl of
+                    Left _ -> return []
+                    Right (_, _, ms) -> return (ms :: [Module])
+                else return []
+        Nothing -> return []
 
 
 -- * Hashing functions
