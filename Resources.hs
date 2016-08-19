@@ -140,6 +140,8 @@ transformStmt resources (ForeignCall lang name flags args) pos = do
 transformStmt resources (Test stmts) pos = do
     stmts' <- transformBody resources stmts
     return $ maybePlace (Test stmts') pos
+transformStmt resources stmt@(TestBool var) pos = do
+    return $ maybePlace stmt pos
 transformStmt _ (Nop) pos = return $ maybePlace Nop pos
 transformStmt resources (Cond test exp thn els) pos = do
     test' <- transformBody resources test

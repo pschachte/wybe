@@ -251,6 +251,7 @@ flattenStmt' tststmt@(Test stmts) pos = do
     --   [_,_] -> lift $ message Error
     --           ("Test with in-out flow: " ++ show vars) pos
     --   _ -> shouldnt "Single expression expanded to more than 2 args"
+flattenStmt' stmt@(TestBool _) pos = emit pos stmt
 flattenStmt' (Cond tstStmts tst thn els) pos = do
     logFlatten $ "** Flattening conditional:" ++ show tst
     (vars,tst') <- flattenInner False False (do

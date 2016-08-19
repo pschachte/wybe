@@ -298,19 +298,22 @@ tagCheck constCount nonConstCount tag varName =
     (case constCount of
           0 -> []
           _ -> [Unplaced
-                $ Test []
-                (comparisonExp "uge"
-                 (lpvmCastExp (varGet varName) intType)
-                 (intCast $ iVal constCount))])
+                $ Test [
+                    (comparison "uge"
+                     (lpvmCastExp (varGet varName) intType)
+                     (intCast $ iVal constCount)
+                     "$$"),
+                    (Unplaced $ TestBool "$$")]])
      ++
      (case nonConstCount of
            1 -> []  -- Nothing to do if it's the only non-const constructor
-           _ -> [Unplaced $ Test []
-                 (comparisonExp "eq"
+           _ -> [Unplaced $ Test [
+                 (comparison "eq"
                   (intCast $ ForeignFn "llvm" "and" []
                    [Unplaced $ lpvmCastExp (varGet varName) intType,
                     Unplaced $ iVal tagMask])
-                  (intCast $ iVal tag))])
+                  (intCast $ iVal tag) "$$"),
+                 (Unplaced $ TestBool "$$")]])
 
 
 -- | Produce a getter and a setter for one field of the specified type.
@@ -408,27 +411,31 @@ equalityBody consts nonconsts =
 equalityConsts :: [Placed FnProto] -> [Placed Stmt]
 equalityConsts [] = []
 equalityConsts _ =
-    [Unplaced $ Test [] (comparisonExp "eq" (intCast $ varGet "$left")
-                         (intCast $ varGet "$right"))]
+    [Unplaced $ Test [
+          (comparison "eq" (intCast $ varGet "$left")
+              (intCast $ varGet "$right") "$$"),
+          (Unplaced $ TestBool "$$")]]
 
 -- |Return code to check that two values are equal when the first is known
---  not to be a const constructor.
+--  not to be a const constructor.  The first argument is the list of
+--  nonconsts, second is the list of consts.
 equalityNonconsts :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
 equalityNonconsts [] _ =
     shouldnt "type with no non-const constructors should have been handled"
 equalityNonconsts [single] [] =
+    -- single non-const and no const constructors:  just compare fields
     let FnProto name params _ = content single
     in  deconstructCall name "$left" params False
         ++ deconstructCall name "$right" params False
-        ++ concatMap equalityField params
+        ++ [Unplaced $ Test $ concatMap equalityField params]
 equalityNonconsts [single] (_:_) =
     let FnProto name params _ = content single
-    in  [Unplaced $ Test (deconstructCall name "$left" params True)
-         $ Unplaced $ varGet "$left$",
-         Unplaced $ Test (deconstructCall name "$right" params True)
-         $ Unplaced $ varGet "$right$"]
-        ++
-        concatMap equalityField params
+    in  [Unplaced $ Test
+         $  (deconstructCall name "$left" params True)
+         ++ [(Unplaced $ TestBool "$$")]
+         ++ (deconstructCall name "$right" params True)
+         ++ [(Unplaced $ TestBool "$$")]
+         ++ concatMap equalityField params]
 equalityNonconsts ctrs _ = nyi "multiple non-const constructors"
 
 
@@ -436,8 +443,7 @@ deconstructCall :: Ident -> Ident -> [Param] -> Bool -> [Placed Stmt]
 deconstructCall ctor arg params isTest =
     [Unplaced $ ProcCall [] ctor Nothing
      $ List.map (\p -> Unplaced $ varSet $ arg++"$"++paramName p) params
-     ++ [Unplaced $ varGet arg]
-     ++ if isTest then [Unplaced $ varSet $ arg++"$"] else []]
+        ++ [Unplaced $ varGet arg]]
 
 -- |Return code to check that one field of two data are equal, when
 --  they are known to have the same constructor.
@@ -446,7 +452,6 @@ equalityField param =
     let field = paramName param
         leftField = "$left$"++field
         rightField = "$right$"++field
-    in  [Unplaced $ Test []
-         (Unplaced $ Fncall [] "="
-          [Unplaced $ varGet leftField,
-           Unplaced $ varGet rightField])]
+    in  [Unplaced $ ProcCall [] "=" Nothing
+            [Unplaced $ varGet leftField,
+             Unplaced $ varGet rightField]]

@@ -742,6 +742,7 @@ bodyCalls (pstmt:pstmts) = do
           --          (expVar $ content expr) boolType
           nested' <- bodyCalls nested
           return $ nested' ++ rest
+        TestBool _ -> return rest
         Nop -> return rest
         Cond cond expr thn els -> do
           modify $ constrainVarType (ReasonCond pos)
@@ -1574,6 +1575,7 @@ checkStmtTyped name pos (ForeignCall _ pname _ args) ppos =
 checkStmtTyped name pos (Test stmts) ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
     -- checkExpTyped name pos ("test" ++ showMaybeSourcePos ppos) $ content expr
+checkStmtTyped _ _ (TestBool _) _ = return ()
 checkStmtTyped name pos (Cond ifstmts cond thenstmts elsestmts) ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) ifstmts
     checkExpTyped name pos ("condition" ++ showMaybeSourcePos ppos) $

@@ -1597,19 +1597,33 @@ flowsOut FlowUnknown = shouldnt "checking if unknown flow direction flows out"
 
 -- |Source program statements.  These will be normalised into Prims.
 data Stmt
+     -- |A Wybe procedure call, with module, proc name, proc ID, and args
      = ProcCall ModSpec Ident (Maybe Int) [Placed Exp]
+     -- |A foreign call, with language, tags, and args
      | ForeignCall Ident Ident [Ident] [Placed Exp]
+     -- |Enclosed statements appear in a test context:  are allowed to fail
      | Test [Placed Stmt]
+     -- |Test the (Boolean) var, and fail if false; can only be use in a
+     -- test context, or in a conditional
+     | TestBool Ident
+     -- |Do nothing
      | Nop
-     -- All the following are eliminated during unbranching.
+
+     -- |All the following are eliminated during unbranching.
      -- The first stmt list is empty and the Exp is anything until
      -- flattening.  After that, the stmt list contains the body of
      -- the test, and the Exp is primitive.
+
+     -- |A conditional; execute the first Stmts, then test the Exp,
+     --  and execute the second Stmts if true, else the third.
      | Cond [Placed Stmt] (Placed Exp) [Placed Stmt] [Placed Stmt]
+     -- |A loop body; the loop is controlled by Breaks and Nexts
      | Loop [Placed Stmt]
-     -- These are only valid in a loop
+     -- |An enumerator; only valid in a loop
      | For (Placed Exp) (Placed Exp)
+     -- |Immediately exit the enclosing loop; only valid in a loop
      | Break  -- holds the variable versions before the break
+     -- |Immediately jump to the top of the enclosing loop; only valid in a loop
      | Next  -- holds the variable versions before the next
      deriving (Eq,Ord,Generic)
 
@@ -1674,7 +1688,7 @@ data Prim
      deriving (Eq,Ord,Generic)
 
 instance Show Prim where
-    show prim = showPrim 0 prim
+    show = showPrim 0
 
 -- |The allowed arguments in primitive proc or foreign proc calls, 
 --  just variables and constants.
@@ -1700,7 +1714,7 @@ instance Show ArgFlowType where
     show Ordinary = ""
     show HalfUpdate = "%"
     show (Implicit _) = ""
-    show (Resource res) = "#"
+    show (Resource _) = "#"
 
 
 -- |The dataflow direction of an actual argument.
@@ -1748,7 +1762,7 @@ expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name Nothing args
 expToStmt (ForeignFn lang name flags args) = 
   ForeignCall lang name flags args
 expToStmt (Var name ParamIn _) = ProcCall [] name Nothing []
-expToStmt exp = shouldnt $ "non-Fncall expr " ++ show exp
+expToStmt expr = shouldnt $ "non-Fncall expr " ++ show expr
 
 
 procCallToExp :: Stmt -> Exp
@@ -2190,6 +2204,8 @@ showStmt _ (ForeignCall lang name flags args) =
     "(" ++ intercalate ", " (List.map show args) ++ ")"
 showStmt indent (Test stmts) =
     "test {" ++ showBody (indent+6) stmts ++ "\n}"
+showStmt _ (TestBool var) =
+    "testbool " ++ var ++ "\n}"
 showStmt indent (Cond condstmts cond thn els) =
     let leadIn = List.replicate indent ' '
     in "if {" ++ showBody (indent+4) condstmts ++ "}\n"
