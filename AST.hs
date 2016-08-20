@@ -110,7 +110,7 @@ data Visibility = Public | Private
                   deriving (Eq, Show, Generic)
 
 data Determinism = Det | SemiDet
-                  deriving (Eq, Show, Generic)
+                  deriving (Eq, Ord, Show, Generic)
 
 type TypeRepresentation = String
 
@@ -1374,16 +1374,18 @@ defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 
 -- |Fold over a list of Placed Stmts applying the fn to each ProcCall, and
 -- applying comb, which must be associative, to combine results.
-foldProcCalls :: (ModSpec -> Ident -> (Maybe Int) -> [Placed Exp] -> a) ->
+foldProcCalls :: (ModSpec -> Ident -> (Maybe Int) -> Determinism
+                  -> [Placed Exp] -> a) ->
                  (a -> a -> a) -> a -> [Placed Stmt] -> a
 foldProcCalls fn comb val [] = val
 foldProcCalls fn comb val (s:ss) = foldProcCalls' fn comb val (content s) ss
 
-foldProcCalls' :: (ModSpec -> Ident -> (Maybe Int) -> [Placed Exp] -> a) ->
+foldProcCalls' :: (ModSpec -> Ident -> (Maybe Int) -> Determinism
+                   -> [Placed Exp] -> a) ->
                  (a -> a -> a) -> a -> Stmt -> [Placed Stmt] -> a
-foldProcCalls' fn comb val (ProcCall m name procID args) ss =
-    foldProcCalls fn comb (comb val $ fn m name procID args) ss
-foldProcCalls' fn comb val (Cond tst _ thn els) ss =
+foldProcCalls' fn comb val (ProcCall m name procID detism args) ss =
+    foldProcCalls fn comb (comb val $ fn m name procID detism args) ss
+foldProcCalls' fn comb val (Cond tst thn els) ss =
     foldProcCalls fn comb
     (foldProcCalls fn comb
      (foldProcCalls fn comb
@@ -1393,7 +1395,7 @@ foldProcCalls' fn comb val (Cond tst _ thn els) ss =
     ss
 foldProcCalls' fn comb val (Loop body) ss =
     foldProcCalls fn comb (foldProcCalls fn comb val body) ss
-foldProcCalls' fn comb val (_) ss =
+foldProcCalls' fn comb val _ ss =
     foldProcCalls fn comb val ss
 
 
@@ -1597,14 +1599,13 @@ flowsOut FlowUnknown = shouldnt "checking if unknown flow direction flows out"
 
 -- |Source program statements.  These will be normalised into Prims.
 data Stmt
-     -- |A Wybe procedure call, with module, proc name, proc ID, and args
-     = ProcCall ModSpec Ident (Maybe Int) [Placed Exp]
+     -- |A Wybe procedure call, with module, proc name, proc ID, determinism,
+    --   and args.  We assume every call is Det until type checking.
+     = ProcCall ModSpec Ident (Maybe Int) Determinism [Placed Exp]
      -- |A foreign call, with language, tags, and args
      | ForeignCall Ident Ident [Ident] [Placed Exp]
-     -- |Enclosed statements appear in a test context:  are allowed to fail
-     | Test [Placed Stmt]
-     -- |Test the (Boolean) var, and fail if false; can only be use in a
-     -- test context, or in a conditional
+     -- |Test the (Boolean) var, and fail if false; can only be used in a
+     -- SemiDet context
      | TestBool Ident
      -- |Do nothing
      | Nop
@@ -1614,9 +1615,9 @@ data Stmt
      -- flattening.  After that, the stmt list contains the body of
      -- the test, and the Exp is primitive.
 
-     -- |A conditional; execute the first Stmts, then test the Exp,
-     --  and execute the second Stmts if true, else the third.
-     | Cond [Placed Stmt] (Placed Exp) [Placed Stmt] [Placed Stmt]
+     -- |A conditional; execute the first (SemiDet) Stmts; if they succeed
+     --  execute the second Stmts, else execute the third.
+     | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt]
      -- |A loop body; the loop is controlled by Breaks and Nexts
      | Loop [Placed Stmt]
      -- |An enumerator; only valid in a loop
@@ -1758,15 +1759,15 @@ argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
-expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name Nothing args
+expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name Nothing Det args
 expToStmt (ForeignFn lang name flags args) = 
   ForeignCall lang name flags args
-expToStmt (Var name ParamIn _) = ProcCall [] name Nothing []
+expToStmt (Var name ParamIn _) = ProcCall [] name Nothing Det []
 expToStmt expr = shouldnt $ "non-Fncall expr " ++ show expr
 
 
 procCallToExp :: Stmt -> Exp
-procCallToExp (ProcCall maybeMod name Nothing args) =
+procCallToExp (ProcCall maybeMod name Nothing _ args) =
     Fncall maybeMod name args
 procCallToExp stmt =
     shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
@@ -2195,21 +2196,20 @@ instance Show PrimVarName where
 
 
 showStmt :: Int -> Stmt -> String
-showStmt _ (ProcCall maybeMod name procID args) =
-    maybeModPrefix maybeMod ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
+showStmt _ (ProcCall maybeMod name procID detism args) =
+    determinismPrefix detism
+    ++ maybeModPrefix maybeMod
+    ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
 showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ name ++ 
     (if List.null flags then "" else " " ++ unwords flags) ++
     "(" ++ intercalate ", " (List.map show args) ++ ")"
-showStmt indent (Test stmts) =
-    "test {" ++ showBody (indent+6) stmts ++ "\n}"
 showStmt _ (TestBool var) =
     "testbool " ++ var ++ "\n}"
-showStmt indent (Cond condstmts cond thn els) =
+showStmt indent (Cond condstmts thn els) =
     let leadIn = List.replicate indent ' '
-    in "if {" ++ showBody (indent+4) condstmts ++ "}\n"
-       ++ leadIn ++ show cond ++ "::\n"
+    in "if {" ++ showBody (indent+4) condstmts ++ "}::\n"
        ++ showBody (indent+4) thn ++ "\n"
        ++ leadIn ++ "else::"
        ++ showBody (indent+4) els ++ "\n"

@@ -181,7 +181,7 @@ constCtorItems  vis typeSpec (placedProto,num) =
         (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] [])
         [lpvmCastToVar (castTo (IntValue num) typeSpec) "$"] pos
        ]
-    -- Don't need out mode of const constructors; just use implied mode
+    -- Don't need in mode of const constructors; just use implied mode
 -- ,
 --         ProcDecl vis SemiDet True
 --         (ProcProto constName [Param "$" typeSpec ParamIn Ordinary] [])

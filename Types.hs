@@ -737,11 +737,6 @@ bodyCalls (pstmt:pstmts) = do
         ProcCall{} -> return $ pstmt:rest
         -- need to handle move instructions:
         ForeignCall{} -> return $ pstmt:rest
-        Test nested -> do
-          -- modify $ constrainVarType (ReasonCond pos)
-          --          (expVar $ content expr) boolType
-          nested' <- bodyCalls nested
-          return $ nested' ++ rest
         TestBool _ -> return rest
         Nop -> return rest
         Cond cond expr thn els -> do
@@ -1572,14 +1567,9 @@ checkStmtTyped name pos (ProcCall pmod pname pid args) ppos = do
 checkStmtTyped name pos (ForeignCall _ pname _ args) ppos =
     mapM_ (checkArgTyped name pos pname ppos) $
           zip [1..] $ List.map content args
-checkStmtTyped name pos (Test stmts) ppos = do
-    mapM_ (placedApply (checkStmtTyped name pos)) stmts
-    -- checkExpTyped name pos ("test" ++ showMaybeSourcePos ppos) $ content expr
 checkStmtTyped _ _ (TestBool _) _ = return ()
-checkStmtTyped name pos (Cond ifstmts cond thenstmts elsestmts) ppos = do
+checkStmtTyped name pos (Cond ifstmts thenstmts elsestmts) ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) ifstmts
-    checkExpTyped name pos ("condition" ++ showMaybeSourcePos ppos) $
-                  content cond
     mapM_ (placedApply (checkStmtTyped name pos)) thenstmts
     mapM_ (placedApply (checkStmtTyped name pos)) elsestmts
 checkStmtTyped name pos (Loop stmts) ppos =
