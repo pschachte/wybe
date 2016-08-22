@@ -9,6 +9,7 @@
 module Clause (compileProc) where
 
 import AST
+import Snippets
 import Options (LogSelection(Clause))
 import Data.Map as Map
 import Data.Set as Set
@@ -96,13 +97,23 @@ compileBody :: [Placed Stmt] -> [Param] -> ClauseComp ProcBody
 compileBody [] params = return $ ProcBody [] NoFork
 compileBody stmts params = do
     logClause $ "Compiling body:" ++ showBody 4 stmts
-    case content $ last stmts of
-        Cond tstStmts tstVar thn els -> do
+    let final = last stmts
+    case content final of
+        Cond tstStmts thn els -> do
+          -- XXX really need to compile this by by compiling the tstStmts as a
+          -- test context, where we jump to els on failure and thn on success.
           front <- mapM compileSimpleStmt $ init stmts
-          initial <- get
+          compileCond front (place final) tstStmts thn els params
+        _ -> do
+          prims <- mapM compileSimpleStmt stmts
+          return $ ProcBody prims NoFork
+
+compileCond :: [Placed Prim] -> OptPos -> [Placed Stmt] -> [Placed Stmt]
+    -> [Placed Stmt] -> [Param] -> ClauseComp ProcBody
+compileCond front pos tstStmts thn els params = do
+          -- initial <- get
           tstStmts' <- mapM compileSimpleStmt tstStmts
           afterTest <- get
-          tstVar' <- placedApply compileArg tstVar
           thn' <- compileBody thn params
           afterThen <- get
           -- XXX This isn't right when tests can bind outputs only when
@@ -120,21 +131,10 @@ compileBody stmts params = do
           let thnAssigns = reconcilingAssignments afterThen final params
           let elsAssigns = reconcilingAssignments afterElse final params
           let front' = front++tstStmts'
-          case tstVar' of
-              ArgVar var ty FlowIn _ _ ->
-                return $ ProcBody front' $ PrimFork var ty False
+          name' <- currVar "$$" Nothing
+          return $ ProcBody front' $ PrimFork name' boolType False
                 [appendToBody els' elsAssigns, appendToBody thn' thnAssigns]
-              ArgInt 0 _ -> return $ prependToBody front' els'
-              ArgInt _ _ -> return $ prependToBody front' thn'
-              _ -> do
-                lift $ message Error 
-                    ("Condition is non-bool constant or output '" ++
-                     show tstVar' ++ "'") $
-                    betterPlace (place $ last stmts) tstVar
-                return $ ProcBody front' NoFork
-        _ -> do
-          prims <- mapM compileSimpleStmt stmts
-          return $ ProcBody prims NoFork
+  
 
 -- |Add the specified statements at the end of the given body
 appendToBody :: ProcBody -> [Placed Prim] -> ProcBody
@@ -155,7 +155,7 @@ compileSimpleStmt stmt = do
     return $ maybePlace stmt' (place stmt)
 
 compileSimpleStmt' :: Stmt -> ClauseComp Prim
-compileSimpleStmt' call@(ProcCall maybeMod name procID args) = do
+compileSimpleStmt' call@(ProcCall maybeMod name procID _ args) = do
     logClause $ "Compiling call " ++ showStmt 4 call
     args' <- mapM (placedApply compileArg) args
     return $ PrimCall (ProcSpec maybeMod name $
@@ -167,6 +167,9 @@ compileSimpleStmt' call@(ProcCall maybeMod name procID args) = do
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
+-- XXX Must do something appropriate with TestBool
+compileSimpleStmt' (TestBool var) = do
+    return $ PrimNop
 compileSimpleStmt' (Nop) = do
     return $ PrimNop
 compileSimpleStmt' stmt =

@@ -297,23 +297,20 @@ tagCheck constCount nonConstCount tag varName =
     -- If there are any constant constructors, be sure it's not one of them
     (case constCount of
           0 -> []
-          _ -> [Unplaced
-                $ Test [
-                    (comparison "uge"
-                     (lpvmCastExp (varGet varName) intType)
-                     (intCast $ iVal constCount)
-                     "$$"),
-                    (Unplaced $ TestBool "$$")]])
+          _ -> [(comparison "uge"
+                 (lpvmCastExp (varGet varName) intType)
+                 (intCast $ iVal constCount)
+                 "$$"),
+                   (Unplaced $ TestBool "$$")])
      ++
      (case nonConstCount of
            1 -> []  -- Nothing to do if it's the only non-const constructor
-           _ -> [Unplaced $ Test [
-                 (comparison "eq"
+           _ -> [(comparison "eq"
                   (intCast $ ForeignFn "llvm" "and" []
                    [Unplaced $ lpvmCastExp (varGet varName) intType,
                     Unplaced $ iVal tagMask])
-                  (intCast $ iVal tag) "$$"),
-                 (Unplaced $ TestBool "$$")]])
+                     (intCast $ iVal tag) "$$"),
+                    (Unplaced $ TestBool "$$")])
 
 
 -- | Produce a getter and a setter for one field of the specified type.
@@ -399,9 +396,10 @@ equalityBody [] [] = shouldnt "trying to generate = test with no constructors"
 equalityBody consts [] = equalityConsts consts
 equalityBody consts nonconsts =
     -- decide whether $left is const or non const, and handle accordingly
-    [Unplaced $ Cond [] (comparisonExp "ult"
+    [Unplaced $ Cond [comparison "ult"
                          (lpvmCastExp (varGet "$left") intType)
-                         (iVal $ length consts))
+                         (iVal $ length consts) "$$",
+                         Unplaced $ TestBool "$$"]
                 (equalityConsts consts)
                 (equalityNonconsts nonconsts consts)]
 
@@ -411,10 +409,9 @@ equalityBody consts nonconsts =
 equalityConsts :: [Placed FnProto] -> [Placed Stmt]
 equalityConsts [] = []
 equalityConsts _ =
-    [Unplaced $ Test [
-          (comparison "eq" (intCast $ varGet "$left")
-              (intCast $ varGet "$right") "$$"),
-          (Unplaced $ TestBool "$$")]]
+    [(comparison "eq" (intCast $ varGet "$left")
+         (intCast $ varGet "$right") "$$"),
+        (Unplaced $ TestBool "$$")]
 
 -- |Return code to check that two values are equal when the first is known
 --  not to be a const constructor.  The first argument is the list of
@@ -427,21 +424,20 @@ equalityNonconsts [single] [] =
     let FnProto name params _ = content single
     in  deconstructCall name "$left" params False
         ++ deconstructCall name "$right" params False
-        ++ [Unplaced $ Test $ concatMap equalityField params]
+        ++ concatMap equalityField params
 equalityNonconsts [single] (_:_) =
     let FnProto name params _ = content single
-    in  [Unplaced $ Test
-         $  (deconstructCall name "$left" params True)
-         ++ [(Unplaced $ TestBool "$$")]
-         ++ (deconstructCall name "$right" params True)
-         ++ [(Unplaced $ TestBool "$$")]
-         ++ concatMap equalityField params]
+    in  (deconstructCall name "$left" params True)
+        ++ [(Unplaced $ TestBool "$$")]
+        ++ (deconstructCall name "$right" params True)
+        ++ [(Unplaced $ TestBool "$$")]
+        ++ concatMap equalityField params
 equalityNonconsts ctrs _ = nyi "multiple non-const constructors"
 
 
 deconstructCall :: Ident -> Ident -> [Param] -> Bool -> [Placed Stmt]
 deconstructCall ctor arg params isTest =
-    [Unplaced $ ProcCall [] ctor Nothing
+    [Unplaced $ ProcCall [] ctor Nothing SemiDet
      $ List.map (\p -> Unplaced $ varSet $ arg++"$"++paramName p) params
         ++ [Unplaced $ varGet arg]]
 
@@ -452,6 +448,6 @@ equalityField param =
     let field = paramName param
         leftField = "$left$"++field
         rightField = "$right$"++field
-    in  [Unplaced $ ProcCall [] "=" Nothing
+    in  [Unplaced $ ProcCall [] "=" Nothing SemiDet
             [Unplaced $ varGet leftField,
              Unplaced $ varGet rightField]]

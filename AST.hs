@@ -29,7 +29,7 @@ module AST (
   collectSubModules,
   enterModule, reenterModule, exitModule, finishModule, 
   emptyInterface, emptyImplementation, 
-  getParams, getProcDef, mkTempName, updateProcDef, updateProcDefM,
+  getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..), 
@@ -756,9 +756,15 @@ addProc _ item =
 
 
 getParams :: ProcSpec -> Compiler [Param]
-getParams pspec = do
+getParams pspec =
     -- XXX shouldn't have to grovel in implementation to find prototype
     fmap (procProtoParams . procProto) $ getProcDef pspec
+
+
+getDetism :: ProcSpec -> Compiler Determinism
+getDetism pspec =
+    -- XXX shouldn't have to grovel in implementation to find prototype
+    fmap procDetism $ getProcDef pspec
 
 
 getProcDef :: ProcSpec -> Compiler ProcDef
@@ -1642,7 +1648,7 @@ data Exp
                                       -- and whether type is a cast
       -- The following are eliminated during flattening
       | Where [Placed Stmt] (Placed Exp)
-      | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
+      | CondExp [Placed Stmt] (Placed Exp) (Placed Exp)
       | Fncall ModSpec Ident [Placed Exp]
       | ForeignFn Ident Ident [Ident] [Placed Exp]
      deriving (Eq,Ord,Generic)

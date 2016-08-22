@@ -305,7 +305,7 @@ unbranchStmts detism (stmt:stmts) = do
 --
 unbranchStmt :: Determinism -> Stmt -> OptPos -> [Placed Stmt]
              -> Unbrancher [Placed Stmt]
-unbranchStmt detism stmt@(ProcCall _ _ _ args) pos stmts = do
+unbranchStmt detism stmt@(ProcCall _ _ _ _ args) pos stmts = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
     defArgs args
     stmts' <- unbranchStmts detism stmts
@@ -315,22 +315,14 @@ unbranchStmt detism stmt@(ForeignCall _ _ _ args) pos stmts = do
     defArgs args
     stmts' <- unbranchStmts detism stmts
     return $ (maybePlace stmt pos):stmts'
-unbranchStmt detism (Test tstStmts) pos stmts = do
-    logUnbranch "Unbranching a test statement"
-    beforeVars <- gets brVars
-    logUnbranch $ "test: {" ++ showBody 8 tstStmts ++ "}"
-    logUnbranch $ "Vars before test: " ++ show beforeVars
-    tstStmts' <- unbranchStmts SemiDet tstStmts
-    afterVars <- gets brVars
+unbranchStmt detism stmt@(TestBool var) pos stmts = do
+    logUnbranch $ "Unbranching primitive test " ++ show stmt
     stmts' <- unbranchStmts detism stmts
-    let tstVar' = Unplaced $ varGet "$$"
-    let genStmt = Cond tstStmts' tstVar' stmts' []
-    logUnbranch $  "Test statement unbranched to " ++ showStmt 4 genStmt 
-    return [maybePlace genStmt pos]
-unbranchStmt detism (Cond tstStmts tstVar thn els) pos stmts = do
+    return $ (maybePlace stmt pos):stmts'
+unbranchStmt detism (Cond tstStmts thn els) pos stmts = do
     logUnbranch "Unbranching a conditional"
     beforeVars <- gets brVars
-    logUnbranch $ "test (" ++ show tstVar ++ "): " ++ showBody 8 tstStmts
+    logUnbranch $ "test " ++ showBody 8 tstStmts
     logUnbranch $ "Vars before test: " ++ show beforeVars
     tstStmts' <- unbranchStmts SemiDet tstStmts
     beforeThenVars <- gets brVars
@@ -340,7 +332,6 @@ unbranchStmt detism (Cond tstStmts tstVar thn els) pos stmts = do
     -- Vars assigned in the condition cannot be used in the else branch
     setVars beforeVars
     -- but the branch variable itself _can_ be used in the else branch
-    defIfVar boolType $ content tstVar
     resetTerminated False
     beforeElseVars <- gets brVars
     logUnbranch $ "Unbranching else branch with vars: " ++ show beforeElseVars
@@ -362,7 +353,7 @@ unbranchStmt detism (Cond tstStmts tstVar thn els) pos stmts = do
                          $ factorFreshProc contName afterVars Nothing stmts'
             let thn'' = if thnTerm then thn' else appendStmts thn' cont
             let els'' = if elsTerm then els' else appendStmts els' cont
-            let genStmt = Cond tstStmts' tstVar thn'' els''
+            let genStmt = Cond tstStmts' thn'' els''
             logUnbranch $ "Conditional unbranched to " ++ showStmt 4 genStmt 
             return [maybePlace genStmt pos]
 unbranchStmt detism (Loop body) pos stmts = do
@@ -437,10 +428,10 @@ appendStmts front [] = front
 appendStmts [] back = back
 appendStmts front back =
     case content $ last front of
-      Cond tst var thn els ->
+      Cond tst thn els ->
         init front
         ++ [Unplaced
-            $ Cond tst var (appendStmts thn back) (appendStmts els back)]
+            $ Cond tst (appendStmts thn back) (appendStmts els back)]
       _ -> front ++ back
 
 
@@ -510,7 +501,8 @@ newProcCall name inVars pos = do
     let inArgs  = List.map (uncurry $ varExp ParamIn) $ Map.toList inVars
     outArgs <- gets brOutArgs
     currMod <- lift getModuleSpec
-    return $ maybePlace (ProcCall currMod name (Just 0) (inArgs ++ outArgs)) pos
+    return $ maybePlace (ProcCall currMod name (Just 0) Det
+                         (inArgs ++ outArgs)) pos
 
 
 newProcProto :: ProcName -> VarDict -> Unbrancher ProcProto

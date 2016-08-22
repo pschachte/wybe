@@ -100,7 +100,7 @@ data FlattenerState = Flattener {
     -- XXX are stmtDefs and stmtUses actually needed now?
     stmtDefs    :: Set VarName,     -- ^Variables defined by this statement
     stmtUses    :: Set VarName,     -- ^Variables used by this statement
-    defdVars    :: Set VarName      -- ^Variables defined before this stmt
+    defdVars    :: Set VarName      -- ^Variables defined before this stmt,
                                     --  needed to distinguish niladic fns
                                     --  from variables
     }
@@ -225,49 +225,38 @@ flattenStmt stmt pos = do
 
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Flattener ()
-flattenStmt' (ProcCall maybeMod name procID args) pos = do
+flattenStmt' (ProcCall maybeMod name procID detism args) pos = do
     args' <- flattenStmtArgs args pos
-    emit pos $ ProcCall maybeMod name procID args'
+    emit pos $ ProcCall maybeMod name procID detism args'
     -- emitPostponed
 flattenStmt' (ForeignCall lang name flags args) pos = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
     -- emitPostponed
-flattenStmt' tststmt@(Test stmts) pos = do
-    logFlatten $ "** Flattening test:" ++ showStmt 4 tststmt
-    (_,stmts') <- flattenInner False True (flattenStmts stmts)
-    logFlatten $ "** Result:\n" ++ showStmt 4 (Test stmts')
-    emit pos $ Test stmts'
-    -- (vars,tst') <- flattenInner False False (do
-    --   vars <- flattenPExp tst
-    --   emitPostponed
-    --   return vars)
-    -- let errPos = betterPlace pos tst
-    -- case vars of
-    --   [] -> lift $ message Error "Test with no flow" pos
-    --   [var] -> do
-    --     logFlatten $ "** Result:\n" ++ (showStmt 4 $ Test stmts')
-    --     emit pos $ Test stmts'
-    --   [_,_] -> lift $ message Error
-    --           ("Test with in-out flow: " ++ show vars) pos
-    --   _ -> shouldnt "Single expression expanded to more than 2 args"
+-- flattenStmt' tststmt@(Test stmts) pos = do
+--     logFlatten $ "** Flattening test:" ++ showStmt 4 tststmt
+--     (_,stmts') <- flattenInner False True (flattenStmts stmts)
+--     logFlatten $ "** Result:\n" ++ showStmt 4 (Test stmts')
+--     emit pos $ Test stmts'
+--     -- (vars,tst') <- flattenInner False False (do
+--     --   vars <- flattenPExp tst
+--     --   emitPostponed
+--     --   return vars)
+--     -- let errPos = betterPlace pos tst
+--     -- case vars of
+--     --   [] -> lift $ message Error "Test with no flow" pos
+--     --   [var] -> do
+--     --     logFlatten $ "** Result:\n" ++ (showStmt 4 $ Test stmts')
+--     --     emit pos $ Test stmts'
+--     --   [_,_] -> lift $ message Error
+--     --           ("Test with in-out flow: " ++ show vars) pos
+--     --   _ -> shouldnt "Single expression expanded to more than 2 args"
 flattenStmt' stmt@(TestBool _) pos = emit pos stmt
-flattenStmt' (Cond tstStmts tst thn els) pos = do
-    logFlatten $ "** Flattening conditional:" ++ show tst
-    (vars,tst') <- flattenInner False False (do
-      vars <- flattenPExp tst
-      -- emitPostponed
-      return vars)
-    logFlatten $ "** Result:\n" ++ showBody 4 tst'
+flattenStmt' (Cond tstStmts thn els) pos = do
+    (_,tstStmts') <- flattenInner False False (flattenStmts tstStmts)
     (_,thn') <- flattenInner False False (flattenStmts thn)
     (_,els') <- flattenInner False False (flattenStmts els)
-    let errPos = betterPlace pos tst
-    case vars of
-      [] -> lift $ message Error "Condition with no flow" errPos
-      [var] -> emit pos $ Cond (tstStmts++tst') var thn' els'
-      [_,_] -> lift $ message Error
-              ("Condition with in-out flow: " ++ show vars) errPos
-      _ -> shouldnt "Single expression expanded to more than 2 args"
+    emit pos $ Cond tstStmts' thn' els'
 flattenStmt' (Loop body) pos = do
     (_,body') <- flattenInner True False
              (flattenStmts $ body ++ [Unplaced $ Next])
@@ -283,15 +272,17 @@ flattenStmt' (For itr gen) pos = do
         [genVar@(Unplaced (Var genVarName ParamIn flowType))] -> do
             -- XXX not generating the right code until we have polymorphism
             flattenStmt 
-              (Cond [] (maybePlace (Fncall [] "empty" [genVar]) pos)
-               [Unplaced $ Break]
-               [maybePlace
-                  (ProcCall [] "[|]" Nothing
-                   [itr,
-                    Unplaced $ 
-                    Var genVarName ParamOut flowType,
-                    genVar])
-                  pos]) pos
+              (Cond [maybePlace (ProcCall [] "[|]" Nothing SemiDet
+                                 [itr,
+                                  Unplaced $ 
+                                  Var genVarName ParamOut flowType,
+                                  genVar])
+                     pos]
+                  []
+                  [maybePlace (ProcCall [] "[]" Nothing SemiDet [genVar])
+                      pos,
+                   Unplaced Break]
+              ) pos
         _ -> shouldnt "Generator expression producing unexpected vars"
 flattenStmt' Nop pos = emit pos Nop
 flattenStmt' Break pos = emit pos Break
@@ -349,7 +340,7 @@ flattenExp exp@(Var name dir flowType) ty cast pos = do
     if (dir == ParamIn && (not defd))
       then -- Reference to an undefined variable: assume it's meant to be
            -- a niladic function instead of a variable reference
-        flattenCall (ProcCall [] name Nothing) False ty cast pos []
+        flattenCall (ProcCall [] name Nothing Det) False ty cast pos []
       else do
         noteVarMention name dir
         let inPart = if isIn
@@ -369,7 +360,7 @@ flattenExp (Where stmts pexp) _ _ _ = do
 flattenExp (CondExp cond thn els) ty cast pos = do
     resultName <- tempVar
     let flowType = Implicit pos
-    flattenStmt (Cond [] cond
+    flattenStmt (Cond cond
                  [maybePlace (ForeignCall "llvm" "move" []
                               [typeAndPlace (content thn) ty cast (place thn),
                                Unplaced $ Var resultName ParamOut flowType])
@@ -381,7 +372,7 @@ flattenExp (CondExp cond thn els) ty cast pos = do
         pos
     return $ [maybePlace (Var resultName ParamIn flowType) pos]
 flattenExp (Fncall maybeMod name exps) ty cast pos = do
-    flattenCall (ProcCall maybeMod name Nothing) False ty cast pos exps
+    flattenCall (ProcCall maybeMod name Nothing Det) False ty cast pos exps
 flattenExp (ForeignFn lang name flags exps) ty cast pos = do
     flattenCall (ForeignCall lang name flags) True ty cast pos exps
 flattenExp (Typed exp AnyType _) ty cast pos = do
