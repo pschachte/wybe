@@ -887,21 +887,33 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
 -- InvalidType, then the call would be a type error.
 matchTypeList :: Ident -> Ident -> OptPos -> [TypeSpec] -> Determinism
               -> ProcInfo -> MaybeErr ProcInfo
-matchTypeList caller callee pos callTypes detismContext calleeInfo
-    | sameLength callTypes calleeTypes =
-      let matches = List.zipWith meetTypes callTypes calleeTypes
-          mismatches = List.map fst $ List.filter ((==InvalidType) . snd)
-                       $ zip [1..] matches
-      in if List.null mismatches
-         then OK $ calleeInfo
-              {procInfoArgs = List.zipWith TypeFlow matches calleeFlows}
-         else Err [ReasonArgType callee n pos | n <- mismatches]
+matchTypeList caller callee pos callArgTypes detismContext calleeInfo
+    | sameLength callArgTypes calleeTypes
+    = matchTypeList' callee pos callArgTypes calleeInfo
     -- XXX handle case of SemiDet context call to bool function as a proc call
+    | detismContext == SemiDet && procInfoDetism calleeInfo == Det
+      && last calleeTypes == boolType && last calleeFlows == ParamOut
+      && sameLength funcArgTypes calleeTypes
+    = matchTypeList' callee pos funcArgTypes calleeInfo
     | otherwise = Err [ReasonArity caller callee pos
-                       (length callTypes) (length calleeTypes)]
+                       (length callArgTypes) (length calleeTypes)]
     where args = procInfoArgs calleeInfo
           calleeTypes = typeFlowType <$> args
           calleeFlows = typeFlowMode <$> args
+          funcArgTypes = callArgTypes ++ [boolType]
+
+matchTypeList' :: Ident -> OptPos -> [TypeSpec] -> ProcInfo -> MaybeErr ProcInfo
+matchTypeList' callee pos callArgTypes calleeInfo =
+    if List.null mismatches
+    then OK $ calleeInfo
+         {procInfoArgs = List.zipWith TypeFlow matches calleeFlows}
+    else Err [ReasonArgType callee n pos | n <- mismatches]
+    where args = procInfoArgs calleeInfo
+          calleeTypes = typeFlowType <$> args
+          calleeFlows = typeFlowMode <$> args
+          matches = List.zipWith meetTypes callArgTypes calleeTypes
+          mismatches = List.map fst $ List.filter ((==InvalidType) . snd)
+                       $ zip [1..] matches
 
 
 -- |Match up the argument modes of a call with the available parameter
