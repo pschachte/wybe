@@ -7,15 +7,17 @@
 module BinaryFactory
        where
 
-import AST
-import Control.Monad
-import Data.Binary as B
-import Data.Word (Word8)
+import           AST
+import           Control.Monad
+import           Crypto.Hash
+import           Data.Binary as B
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BL
+import           Data.Word (Word8)
 import qualified LLVM.General.AST as LLVMAST
-import Text.ParserCombinators.Parsec.Pos
-import Crypto.Hash
+import           Text.ParserCombinators.Parsec.Pos
+import           Config (magicVersion)
+
 
 -- * Self Deriving instances
 instance Binary Visibility
@@ -90,19 +92,19 @@ encodeModule m = do
     subModSpecs <- collectSubModules (modSpec m)
     subMods <- mapM getm subModSpecs
     let encoded = B.encode (m:subMods)
-    return $ BL.cons (1 :: Word8) encoded
+    return $ BL.append (BL.pack magicVersion) encoded
+
 
 -- * Decoding
 decodeModule :: BL.ByteString -> Compiler [Module]
-decodeModule bs =
-    case BL.uncons bs of
-        Just (hd, tl) -> 
-            if hd == 1 then
-                case B.decodeOrFail tl of
-                    Left _ -> return []
-                    Right (_, _, ms) -> return (ms :: [Module])
-                else return []
-        Nothing -> return []
+decodeModule bs = do
+    let (magic, rest) = BL.splitAt 4 bs
+    if magic == BL.pack magicVersion
+        then
+        case B.decodeOrFail rest of
+            Left _ -> return []
+            Right (_, _, ms) -> return (ms :: [Module])
+        else return []
 
 
 -- * Hashing functions

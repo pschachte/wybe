@@ -13,10 +13,11 @@ module Config (sourceExtension, objectExtension, executableExtension,
                interfaceExtension, bitcodeExtension, sharedLibs,
                ldArgs, ldSystemArgs, wordSize, wordSizeBytes,
                availableTagBits, tagMask, assemblyExtension,
-               archiveExtension)
+               archiveExtension, magicVersion)
     where
 
 import Data.Word
+import qualified Data.List as List
 import Foreign.Storable
 
 
@@ -85,3 +86,10 @@ ldSystemArgs =
       "-lSystem",
       "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/7.0.2/lib/darwin/libclang_rt.osx.a"
     ]
+
+
+-- | Magic version number for the current iteration of LPVM.
+magicVersion :: [Word8]
+magicVersion =
+    let magicStr = "WB01"
+    in List.map (fromIntegral . fromEnum) magicStr

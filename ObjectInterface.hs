@@ -170,8 +170,11 @@ decodeLPVMSegment :: BL.ByteString -> Compiler [Module]
 decodeLPVMSegment bs = do
     let (_, macho) = parseMacho (BL.toStrict bs)
     case findLPVMSegment (m_commands macho) of
-        Just seg ->
-            decodeModule $ uncurry (readBytes bs) (lpvmFileOffset seg)
+        Just seg -> do
+            ms <- decodeModule $
+                  uncurry (readBytes bs) (lpvmFileOffset seg)
+            unless (List.null ms) $ logMsg Builder "Decoding successful!"
+            return ms
         Nothing -> do
             logMsg Builder "No LPVM Segment found."
             return []
