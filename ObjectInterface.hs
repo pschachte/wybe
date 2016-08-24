@@ -10,7 +10,6 @@ module ObjectInterface where
 import           AST
 import Options (LogSelection(Builder))
 import           BinaryFactory
-import           Config
 import           Control.Monad
 import           Data.Binary
 import           Data.Binary.Get
@@ -47,7 +46,7 @@ insertLPVMDataLd bs obj =
     do tempDir <- getTemporaryDirectory
        liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
        let modFile = takeBaseName obj ++ ".module"
-       let lpvmFile = (tempDir ++ "wybetemp/" ++ modFile)
+       let lpvmFile = tempDir ++ "wybetemp/" ++ modFile
        BL.writeFile lpvmFile bs
        let args = [obj] ++ ["-r"] 
                   ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
@@ -73,7 +72,7 @@ extractLPVMData obj =
 parseSegmentData :: String -> String
 parseSegmentData str = concat hexLines
     where
-      tillHex = dropWhile (\c -> c /= '\t') -- Actual data after \t
+      tillHex = dropWhile (/= '\t') -- Actual data after \t
       mappedLines = List.map tillHex (lines str)
       filteredLines = List.filter (not . List.null) mappedLines
       hexLines = List.map (hex2char . tail) filteredLines
@@ -130,7 +129,7 @@ bytePad :: BL.ByteString -> BL.ByteString
 bytePad orig = if remainder == 0
                then orig
                else BL.append orig (BL.replicate remainder 0)
-  where remainder = (BL.length orig) `mod` 4
+  where remainder = BL.length orig `mod` 4
 
 -- | Extract the wrapped bytestring from the given Wrapper Bitcode file
 -- and de-serialise (decode) the bytestring as a AST.Module type.
@@ -138,7 +137,7 @@ extractModuleFromWrapper :: FilePath -> IO Module
 extractModuleFromWrapper bcfile =
   do bc <- BL.readFile bcfile
      let dump = runGet dataFromBitcode bc
-     return $ (decode dump :: Module)
+     return (decode dump :: Module)
 
 -- | Run the Binary Get monad on a wrapped bitcode bytestring.
 -- The wrapped bytestring exists between the header bytes and the bitcode
@@ -149,7 +148,7 @@ dataFromBitcode = do
   skip 8
   offset <- getWord32le
   skip 8
-  let datSize = (toInteger offset) - 20
+  let datSize = toInteger offset - 20
   getLazyByteString (fromIntegral datSize)
 
 

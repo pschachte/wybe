@@ -102,9 +102,13 @@ decodeModule bs = do
     if magic == BL.pack magicVersion
         then
         case B.decodeOrFail rest of
-            Left _ -> return []
+            Left _ -> do
+                Warning <!> "Error decoding LPVM bytes."
+                return []
             Right (_, _, ms) -> return (ms :: [Module])
-        else return []
+        else do
+        Warning <!> "Extracted LPVM version mismatch."
+        return []
 
 
 -- * Hashing functions
