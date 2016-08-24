@@ -57,3 +57,4 @@ fillLines' marginText currColumn lineLength (word1:word2:words) =
              fillLines' marginText (length marginText) lineLength (word2:words)
         else " " ++ fillLines' marginText nextColumn lineLength (word2:words)
 
+    

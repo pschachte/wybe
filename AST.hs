@@ -80,6 +80,7 @@ import           System.FilePath
 import           System.IO
 import           Text.ParserCombinators.Parsec.Pos
 import           Util
+import System.Console.ANSI
 
 import GHC.Generics (Generic)
 
@@ -236,7 +237,7 @@ data MessageLevel = Informational | Warning | Error
 --  compiling the module's dependencies.
 data CompilerState = Compiler {
   options :: Options,            -- ^compiler options specified on command line
-  msgs :: [String],              -- ^warnings, error messages, and info messages
+  msgs :: [(MessageLevel, String)],  -- ^warnings, error messages, and info messages
   errorState :: Bool,            -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
   loadCount :: Int,              -- ^counter of module load order
@@ -550,10 +551,13 @@ getExtractedModuleImpln mspec = do
 --  collected compiler output messages. 
 message :: MessageLevel -> String -> OptPos -> Compiler ()
 message lvl msg pos = do
-    modify (\bldr -> bldr { msgs = (msgs bldr) ++ [makeMessage pos msg]})
+    let posMsg = makeMessage pos msg
+    modify (\bldr ->
+                bldr { msgs = msgs bldr ++ [(lvl, posMsg)] })
     when (lvl == Error) (modify (\bldr -> bldr { errorState = True }))
 
 
+-- |Pretty helper operator for adding messages to the compiler state.
 (<!>) :: MessageLevel -> String -> Compiler ()
 lvl <!> msg = message lvl msg Nothing
 infix 0 <!>
@@ -562,7 +566,7 @@ infix 0 <!>
 makeMessage :: OptPos -> String -> String
 makeMessage Nothing msg = msg
 makeMessage (Just pos) msg =
-  (sourceName pos) ++ ":" ++ 
+  sourceName pos ++ ":" ++ 
   show (sourceLine pos) ++ ":" ++ 
   show (sourceColumn pos) ++ ": " ++ 
   msg
@@ -2296,9 +2300,24 @@ trustFromJustM msg computation = do
 
 showMessages :: Compiler ()
 showMessages = do
-    messages <- gets msgs
-    (liftIO . putStr) $ unlines $ reverse messages
-    return ()
+    messages <- reverse <$> gets msgs
+    liftIO $ mapM_ showMessage messages
+
+
+showMessage :: (MessageLevel, String) -> IO ()
+showMessage (lvl, msg) =
+  case lvl of
+      Informational ->
+          putStrLn msg
+      Warning -> do          
+          setSGR [SetColor Foreground Vivid Yellow]
+          putStrLn msg
+          setSGR [Reset]
+      Error -> do
+          setSGR [SetColor Foreground Vivid Red]
+          putStrLn msg
+          setSGR [Reset]
+    
 
 
 stopOnError :: String -> Compiler ()
