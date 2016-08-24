@@ -32,11 +32,13 @@ data Options = Options{
     , optLogAspects  :: Set LogSelection
                                  -- ^Which aspects to log
     , optUseStd      :: Bool     -- ^Use the standard library or not
-    , optNoLLVMOpt  :: Bool      -- ^Don't run the LLVM optimisation passes
+    , optNoLLVMOpt   :: Bool     -- ^Don't run the LLVM optimisation passes
+    , optVerbose     :: Bool     -- ^Be verbose in compiler output
     } deriving Show
 
 
 -- |Defaults for all compiler options
+defaultOptions :: Options
 defaultOptions    = Options
  { optForce       = False
  , optForceAll    = False
@@ -47,6 +49,7 @@ defaultOptions    = Options
  , optLogAspects  = Set.empty
  , optUseStd      = True
  , optNoLLVMOpt   = False
+ , optVerbose     = False
  }
 
 -- |All compiler features we may want to log
@@ -122,6 +125,9 @@ options =
  , Option ['s'] ["no-llvm-opt"]
      (NoArg (\opts -> opts { optNoLLVMOpt = True }))
      "don't run the LLVM optimisation pass manager on the emitted LLVM"
+ , Option ['v'] ["verbose"]
+     (NoArg (\opts -> opts { optVerbose = True }))
+     "dump verbose messages after compilation"
  ]
 
 

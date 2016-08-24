@@ -2298,10 +2298,17 @@ trustFromJustM msg computation = do
     return $ trustFromJust msg maybe
 
 
+-- |Prettify and show compiler messages. Only Error messages are shown always,
+-- the other message levels are shown only when the 'verbose' option is set.
 showMessages :: Compiler ()
 showMessages = do
+    verbose <- optVerbose <$> gets options
     messages <- reverse <$> gets msgs
-    liftIO $ mapM_ showMessage messages
+    let filtered =
+            if verbose
+            then messages
+            else List.filter (\(a,_) -> a == Error) messages
+    liftIO $ mapM_ showMessage filtered
 
 
 showMessage :: (MessageLevel, String) -> IO ()
