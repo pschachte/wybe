@@ -92,10 +92,11 @@ buildTargets opts targets = do
 --  target is up-to-date.
 buildTarget :: Bool -> FilePath -> Compiler ()
 buildTarget force target = do
+    Informational <!> "Building target: " ++ target
     let tType = targetType target
     case tType of
-        UnknownFile -> message Error
-            ("Unknown target file type " ++ target) Nothing
+        UnknownFile ->
+            Error <!> "Unknown target file type: " ++ target
         ArchiveFile -> buildArchive target
         _ -> do
             let modname = takeBaseName target
@@ -153,8 +154,8 @@ buildModuleIfNeeded force modspec possDirs = do
             srcOb <- srcObjFiles modspec possDirs
             case srcOb of
                 Nothing -> do
-                    message Error ("Could not find module " ++
-                                   showModSpec modspec) Nothing
+                    Error <!> "Could not find module " ++
+                        showModSpec modspec
                     return False
                 Just (_,False,objfile,True,_) -> do
                     -- only object file exists
@@ -209,11 +210,12 @@ srcObjFiles modspec possDirs = do
                                   let modname = List.last ms
                                   srcExists <- (liftIO . doesFileExist) srcfile
                                   objExists <- (liftIO . doesFileExist) objfile
-                                  return $ if srcExists || objExists
-                                           then [(srcfile,srcExists,
-                                                  objfile,objExists,modname)]
-                                           else [])
-                         splits)
+                                  return
+                                      [ (srcfile, srcExists,
+                                         objfile, objExists, modname)
+                                      | srcExists || objExists
+                                      ])
+                        splits)
             possDirs
     let validDirs = concat $ concat dirs
     if List.null validDirs
@@ -292,8 +294,7 @@ extractModules objfile = do
     extracted <- machoLPVMSection objfile
     if List.null extracted
         then
-        message Warning ("Unable to preload serialised LPVM from " ++ objfile)
-            Nothing
+        Warning <!> "Unable to preload serialised LPVM from " ++ objfile
         else do
         logBuild $ ">>> Extracted Module bytestring from " ++ show objfile
         let extractedSpecs = List.map modSpec extracted
@@ -474,7 +475,7 @@ fixpointProcessSCC :: Processor -> [ModSpec] -> Compiler ()
 fixpointProcessSCC processor [modspec] = do
     (_,errors) <- processor [modspec] modspec
     -- immediate fixpoint if no mutual dependency
-    mapM_ (\(msg,pos) -> message Error msg pos) errors
+    mapM_ (uncurry (message Error)) errors
     return ()
 fixpointProcessSCC processor scc = do        -- must find fixpoint
     (changed,errors) <-
@@ -484,7 +485,7 @@ fixpointProcessSCC processor scc = do        -- must find fixpoint
         (False,[]) scc
     if changed
     then fixpointProcessSCC processor scc
-    else mapM_ (\(msg,pos) -> message Error msg pos) errors
+    else mapM_ (uncurry (message Error)) errors
 
 
 
@@ -493,7 +494,7 @@ transformModuleProcs :: (ProcDef -> Compiler ProcDef) -> ModSpec ->
 transformModuleProcs trans thisMod = do
     reenterModule thisMod
     -- (names, procs) <- :: StateT CompilerState IO ([Ident], [[ProcDef]])
-    (names,procs) <- fmap unzip $
+    (names,procs) <- unzip <$>
                      getModuleImplementationField (Map.toList . modProcs)
     -- for each name we have a list of procdefs, so we must double map
     procs' <- mapM (mapM trans) procs
@@ -532,7 +533,7 @@ handleModImports modSCC mod = do
     kResources <- getModuleImplementationField modKnownResources
     kProcs <- getModuleImplementationField modKnownProcs
     iface <- getModuleInterface
-    mapM (uncurry doImport) $ Map.toList imports
+    mapM_ (uncurry doImport) $ Map.toList imports
     kTypes' <- getModuleImplementationField modKnownTypes
     kResources' <- getModuleImplementationField modKnownResources
     kProcs' <- getModuleImplementationField modKnownProcs
@@ -557,26 +558,26 @@ buildExecutable :: ModSpec -> FilePath -> Compiler ()
 buildExecutable targetMod fpath =
     do depends <- orderedDependencies targetMod
        -- Filter the modules for which the second element of the tuple is True
-       let mainImports = List.foldr (\x a -> if snd x then (fst x):a else a)
+       let mainImports = List.foldr (\x a -> if snd x then fst x:a else a)
                [] depends
        logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
        mainMod <- newMainModule mainImports
-       logBuild $ "o Built 'main' module for target: "
+       logBuild "o Built 'main' module for target: "
        mainModStr <- liftIO $ codeemit mainMod
-       logEmit $ mainModStr
+       logEmit mainModStr
        ------------
        logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
-       tempDir <- liftIO $ getTemporaryDirectory
+       tempDir <- liftIO getTemporaryDirectory
        liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
        let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"
        liftIO $ makeObjFile tmpMainOFile mainMod
 
-       ofiles <- mapM loadObjectFile $ List.map fst depends
+       ofiles <- mapM (loadObjectFile . fst) depends
        let allOFiles = tmpMainOFile:ofiles
        -----------
        makeExec allOFiles fpath
        -- return allOFiles
-       logBuild $ "o Object Files to link: "
+       logBuild "o Object Files to link: "
        logBuild $ "++ " ++ intercalate "\n++" allOFiles
        logBuild $ "o Building Target (executable): " ++ fpath
 
@@ -599,14 +600,14 @@ orderedDependencies targetMod =
         -- filter out std lib imports and sub-mod imports from imports
         -- since we are looking for imports which need a physical object file
         let imports =
-                List.filter (\x -> not (elem x subMods) && (not.isStdLib) x) $
+                List.filter (\x -> notElem x subMods && (not.isStdLib) x) $
                 (keys . modImports) thisMod
         -- Check if this module 'm' has a main procedure.
         let collected' = if "" `elem` procs || "<0>" `elem` procs
                          then (m, True):collected
                          else (m, False):collected
         -- Don't visit any modspec already in `ms' (will be visited as it is)
-        let rem = List.foldr (\x acc -> if elem x acc then acc else x:acc)
+        let rem = List.foldr (\x acc -> if x `elem` acc then acc else x:acc)
                 ms imports
         visit rem collected'
 
@@ -682,11 +683,11 @@ fileSourceFile filename = replaceExtension filename sourceExtension
 -- |Find the file path for the specified module spec relative to the
 --  specified file path for the referencing module.
 moduleFilePath :: String -> FilePath -> ModSpec -> FilePath
-moduleFilePath extension dir spec = do
-    addExtension (joinPath $ (splitDirectories dir) ++ spec) extension
+moduleFilePath extension dir spec = 
+    addExtension (joinPath $ splitDirectories dir ++ spec) extension
 
 
 -- |Log a message, if we are logging builder activity (file-level compilation).
 logBuild :: String -> Compiler ()
-logBuild s = logMsg Builder s
+logBuild = logMsg Builder
 
