@@ -1,0 +1,3 @@
+use numeric
+
+println(factorial(4))
