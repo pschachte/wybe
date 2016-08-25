@@ -1,41 +1,25 @@
 module Emit where
 
 import           AST
-import           Codegen
-import           Control.Applicative ((<$>), (<*>))
 import           Control.Monad
-import           Control.Monad.Trans (lift, liftIO)
+import           Control.Monad.Trans (liftIO)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
 import           Data.List as List
 import           Data.Map as Map
-import           Foreign.Ptr (FunPtr, castFunPtr)
 import qualified LLVM.General.AST as LLVMAST
-import           LLVM.General.CodeModel
 import           LLVM.General.Context
 import           LLVM.General.Module as Mod
 import           LLVM.General.Target
-
-import           LLVM.General.Analysis
 import           LLVM.General.PassManager
-import           LLVM.General.Transforms
-
-import qualified LLVM.General.ExecutionEngine as EE
-
-import           System.Directory
 import           System.Process
 import System.Exit ( ExitCode(..) )
-import System.IO (hGetContents)
-
-import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
-import Data.Binary (encode)
 import BinaryFactory (encodeModule)
-
 import           Config
 import           ObjectInterface
-import           Options (LogSelection (Emit, Blocks))
-import           System.FilePath (dropExtension)
+import           Options (LogSelection (Emit, Blocks, Builder))
+
 
 
 -- | Bracket matter to pull an LLVM AST Module representation of a
@@ -45,7 +29,7 @@ withModuleLLVM :: ModSpec -> (LLVMAST.Module -> IO a) -> Compiler a
 withModuleLLVM thisMod action = do
     reenterModule thisMod
     maybeLLMod <- getModuleImplementationField modLLVM
-    finishModule
+    _ <- finishModule
     case maybeLLMod of
       (Just llmod) -> liftIO $ action llmod
       Nothing -> error "No LLVM Module Implementation"
@@ -69,7 +53,7 @@ emitObjectFile m f = do
                modBS <- encodeModule astMod
                liftIO $ makeWrappedObjFile f llmod modBS
         Nothing -> error "No LLVM Module Implementation"
-    finishModule
+    _ <- finishModule
     return ()
 
 -- | With the LLVM AST representation of a LPVM Module, create a
@@ -88,7 +72,7 @@ emitBitcodeFile m f = do
           modBS <- encodeModule astMod
           liftIO $ makeWrappedBCFile f llmod modBS
      Nothing -> error "No LLVM Module Implementation"
-   finishModule
+   _ <- finishModule
    return ()
 
 -- | With the LLVM AST representation of a LPVM Module, create a
@@ -99,7 +83,7 @@ emitAssemblyFile m f = do
         "with optimisations."
     -- withModuleLLVM m (makeAssemblyFile f)
     withModuleLLVM m $ \llmod -> withOptimisedModule llmod
-        (\mm -> liftError $ withHostTargetMachine $ \tm ->
+        (\mm -> liftError $ withHostTargetMachine $ \_ ->
             liftError $ writeLLVMAssemblyToFile (File f) mm)
 
 
@@ -152,7 +136,7 @@ testOptimisations llmod = do
 withOptimisedModule :: LLVMAST.Module -> (Mod.Module -> IO a)
                     -> IO a
 withOptimisedModule llmod action =
-    withContext $ \context -> 
+    withContext $ \context ->
         liftError $ withModuleFromAST context llmod $ \m ->
             withPassManager passes $ \pm -> do
                 success <- runPassManager pm m
@@ -162,10 +146,10 @@ withOptimisedModule llmod action =
 
 -- | Bracket pattern to run an [action] on the [LLVMAST.Module].
 withModule :: LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
-withModule llmod action = 
+withModule llmod action =
     withContext $ \context ->
         liftError $ withModuleFromAST context llmod action
-            
+
 
 
 ----------------------------------------------------------------------------
@@ -206,7 +190,7 @@ makeAssemblyFile :: FilePath -> LLVMAST.Module -> IO ()
 makeAssemblyFile file llmod =
     withContext $ \context ->
         liftError $ withModuleFromAST context llmod $ \m ->
-            liftError $ withHostTargetMachine $ \tm ->
+            liftError $ withHostTargetMachine $ \_ ->
                 liftError $ writeLLVMAssemblyToFile (File file) m
 
 
@@ -214,7 +198,7 @@ makeAssemblyFile file llmod =
 -- representation into the '__lpvm' section in it.
 makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
 makeWrappedObjFile file llmod modBS =
-    withContext $ \context -> 
+    withContext $ \_ ->
         withModule llmod $ \m -> do
             liftError $ withHostTargetMachine $ \tm ->
                 liftError $ writeObjectToFile tm (File file) m
@@ -250,9 +234,8 @@ makeExec :: [FilePath]          -- Object Files
          -> FilePath            -- Target File
          -> Compiler ()
 makeExec ofiles target = do
-    dir <- liftIO getCurrentDirectory
     let args = ofiles ++ sharedLibs ++ ["-o", target]
-    (exCode, sout, serr) <- liftIO $
+    (exCode, _, serr) <- liftIO $
         readCreateProcessWithExitCode (proc "cc" args) ""
     case exCode of
         ExitSuccess ->
@@ -266,13 +249,14 @@ makeExec ofiles target = do
 -- | Use `ar' system util to link object files into an archive file.
 makeArchive :: [FilePath] -> FilePath -> Compiler ()
 makeArchive ofiles target = do
-    dir <- liftIO getCurrentDirectory
+    logMsg Builder $ "Building Archive: " ++ target ++ " with: "
+        ++ show ofiles
     let args = ["rvs", target] ++ ofiles
-    (exCode, sout, serr) <- liftIO $
+    (exCode, _, serr) <- liftIO $
         readCreateProcessWithExitCode (proc "ar" args) ""
     case exCode of
         ExitSuccess ->
-            logMsg Blocks $ "--- AR Util ---\n"
+            logMsg Builder $ "--- AR Util ---\n"
                 ++ "$ ar " ++ unwords args
                 ++ "\nAR Log:\n" ++ suppressLdWarnings serr
                 ++ "\n-------\n"
@@ -297,7 +281,7 @@ logLLVMString thisMod =
             logEmit llstr
             logEmit $ replicate 80 '-'
        Nothing -> error "No LLVM Module Implementation"
-     finishModule
+     _ <- finishModule
      return ()
 
 -- | Pull the LLVMAST representation of the module and generate the LLVM

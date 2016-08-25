@@ -239,10 +239,10 @@ buildModule modname objfile srcfile = do
             then do
                 logBuild $ "... Hash for module " ++ showModSpec mspec ++
                     " matches the old hash."
-                loadModuleFromObjFile mspec objfile
-                return () 
+                _ <- loadModuleFromObjFile mspec objfile
+                return ()
             else compileModule dir mspec Nothing parseTree
-    
+
 
 
 -- |Compile a module given the parsed source file contents.
@@ -268,7 +268,7 @@ compileModule dir modspec params items = do
     stopOnError $ "preliminary processing of module " ++ showModSpec modspec
     loadImports
     stopOnError $ "handling imports for module " ++ showModSpec modspec
-    underComp <- gets underCompilation
+    _ <- gets underCompilation
     mods <- exitModule -- may be empty list if module is mutually dependent
     logBuild $ "<=== finished compling module " ++ showModSpec modspec
     compileModSCC mods
@@ -305,25 +305,6 @@ extractModules objfile = do
         let exMods' = List.foldr addMod exMods extracted
         modify (\s -> s { extractedMods = exMods' })
 
-
-
-loadModuleWithModule :: Module -> Compiler ()
-loadModuleWithModule m = do
-    let modspec = modSpec m
-    deps <- placeExtractedModule m
-    subs <- collectSubModules modspec
-    storedMods <- gets extractedMods
-    let getStoredModule spec =
-            fromMaybe
-            (shouldnt ("Module " ++ showModSpec spec ++
-                      " was not extracted."))
-            (Map.lookup spec storedMods)
-    let subMods = List.map getStoredModule subs 
-    subDeps <- concat <$> mapM placeExtractedModule subMods
-    modify (\comp -> let ms = m : underCompilation comp
-                     in comp { underCompilation = ms })
-    mapM_ buildDependency (subs ++ subDeps)
-    void finishModule
 
 
 loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler Bool
@@ -388,15 +369,15 @@ concatSubMods mspec = do
 -- one object file archive.
 buildArchive :: FilePath -> Compiler ()
 buildArchive arch = do
-    let dir = takeBaseName arch  ++ "/"
+    let dir = dropExtension arch
     let isWybe = List.filter ((== ".wybe") . takeExtension)
     archiveMods <- liftIO $ List.map dropExtension . isWybe <$>
         listDirectory dir
     logBuild $ "Building modules to archive: " ++ show archiveMods
     mapM_ (\m -> buildModuleIfNeeded False [m] [dir]) archiveMods
-    let oFileOf m = dir ++ m ++ ".o"
+    let oFileOf m = joinPath [dir, m] ++ ".o"
     mapM_ (\m -> emitObjectFile [m] (oFileOf m)) archiveMods
-    makeArchive (List.map oFileOf archiveMods) arch    
+    makeArchive (List.map oFileOf archiveMods) arch
 
 -------------------- Actually compiling some modules --------------------
 
@@ -479,8 +460,8 @@ fixpointProcessSCC processor [modspec] = do
     return ()
 fixpointProcessSCC processor scc = do        -- must find fixpoint
     (changed,errors) <-
-        foldM (\(chg,errs) mod -> do
-                    (chg1,errs1) <- processor scc mod
+        foldM (\(chg,errs) mod' -> do
+                    (chg1,errs1) <- processor scc mod'
                     return (chg1||chg, errs1++errs))
         (False,[]) scc
     if changed
@@ -502,7 +483,7 @@ transformModuleProcs trans thisMod = do
         (\imp -> imp { modProcs = Map.union
                                   (Map.fromList $ zip names procs')
                                   (modProcs imp) })
-    finishModule
+    _ <- finishModule
     logBuild $ "**** Exiting module " ++ showModSpec thisMod
     return ()
 
@@ -526,8 +507,8 @@ loadImports = do
 -- can finally work out what is exported by, and what is visible in,
 -- each of these modules.
 handleModImports :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
-handleModImports modSCC mod = do
-    reenterModule mod
+handleModImports _ thisMod = do
+    reenterModule thisMod
     imports <- getModuleImplementationField modImports
     kTypes <- getModuleImplementationField modKnownTypes
     kResources <- getModuleImplementationField modKnownResources
@@ -538,7 +519,7 @@ handleModImports modSCC mod = do
     kResources' <- getModuleImplementationField modKnownResources
     kProcs' <- getModuleImplementationField modKnownProcs
     iface' <- getModuleInterface
-    finishModule
+    _ <- finishModule
     return (kTypes/=kTypes' || kResources/=kResources' ||
             kProcs/=kProcs' || iface/=iface',[])
 
@@ -607,9 +588,9 @@ orderedDependencies targetMod =
                          then (m, True):collected
                          else (m, False):collected
         -- Don't visit any modspec already in `ms' (will be visited as it is)
-        let rem = List.foldr (\x acc -> if x `elem` acc then acc else x:acc)
+        let remains = List.foldr (\x acc -> if x `elem` acc then acc else x:acc)
                 ms imports
-        visit rem collected'
+        visit remains collected'
 
 
 -- | Load/Build object file for the module in the same directory
@@ -623,7 +604,7 @@ loadObjectFile thisMod =
      -- Check if we need to re-emit object file
      rebuild <- objectReBuildNeeded thisMod dir
      when rebuild $ emitObjectFile thisMod objFile
-     finishModule
+     _ <- finishModule
      return objFile
 
 
@@ -635,7 +616,7 @@ objectReBuildNeeded thisMod dir = do
         -- only object file exists, so we have loaded Module from object
         Just (_,False,_,True,_) -> return False
         -- only source file exists
-        Just (srcfile,True,objfile,False,_) -> return True
+        Just (_, True, _, False, _) -> return True
         Just (srcfile,True,objfile,True,_) -> do
             srcDate <- (liftIO . getModificationTime) srcfile
             dstDate <- (liftIO . getModificationTime) objfile
@@ -670,24 +651,14 @@ targetType filename
   | otherwise                  = UnknownFile
       where ext' = dropWhile (=='.') $ takeExtension filename
 
--- |Given a source or executable file path, return the file path of
---  the corresponding object file.
-fileObjFile :: FilePath -> FilePath
-fileObjFile filename = replaceExtension filename objectExtension
-
--- |Given an object or executable file path, return the file path of
---  the corresponding source file.
-fileSourceFile :: FilePath -> FilePath
-fileSourceFile filename = replaceExtension filename sourceExtension
 
 -- |Find the file path for the specified module spec relative to the
 --  specified file path for the referencing module.
 moduleFilePath :: String -> FilePath -> ModSpec -> FilePath
-moduleFilePath extension dir spec = 
+moduleFilePath extension dir spec =
     addExtension (joinPath $ splitDirectories dir ++ spec) extension
 
 
 -- |Log a message, if we are logging builder activity (file-level compilation).
 logBuild :: String -> Compiler ()
 logBuild = logMsg Builder
-
