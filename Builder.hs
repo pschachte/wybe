@@ -196,31 +196,8 @@ buildModuleIfNeeded force modspec possDirs = do
                     shouldnt "inconsistent file existence"
 
 
--- |Find the source and/or object files for the specified module. We search
--- the library search path for the files.
-srcObjFiles :: ModSpec -> [FilePath] ->
-               Compiler (Maybe (FilePath,Bool,FilePath,Bool,Ident))
-srcObjFiles modspec possDirs = do
-    let splits = List.map (`take` modspec) [1..length modspec]
-    dirs <- mapM (\d -> mapM (\ms -> do
-                                  let srcfile = moduleFilePath sourceExtension
-                                                d ms
-                                  let objfile = moduleFilePath objectExtension
-                                                d ms
-                                  let modname = List.last ms
-                                  srcExists <- (liftIO . doesFileExist) srcfile
-                                  objExists <- (liftIO . doesFileExist) objfile
-                                  return
-                                      [ (srcfile, srcExists,
-                                         objfile, objExists, modname)
-                                      | srcExists || objExists
-                                      ])
-                        splits)
-            possDirs
-    let validDirs = concat $ concat dirs
-    if List.null validDirs
-      then return Nothing
-      else return $ Just $ List.head validDirs
+
+
 
 
 -- |Actually load and compile the module
@@ -643,6 +620,109 @@ objectReBuildNeeded thisMod dir = do
 
 
 
+-----------------------------------------------------------------------------
+-- Module Source Handlers                                                  --
+-----------------------------------------------------------------------------
+
+-- |Find the source and/or object files for the specified module. We search
+-- the library search path for the files.
+srcObjFiles :: ModSpec -> [FilePath] ->
+               Compiler (Maybe (FilePath,Bool,FilePath,Bool,Ident))
+srcObjFiles modspec possDirs = do
+    let splits = List.map (`take` modspec) [1..length modspec]
+    dirs <- mapM (\d -> mapM (\ms -> do
+                                  let srcfile = moduleFilePath sourceExtension
+                                                d ms
+                                  let objfile = moduleFilePath objectExtension
+                                                d ms
+                                  let modname = List.last ms
+                                  srcExists <- (liftIO . doesFileExist) srcfile
+                                  objExists <- (liftIO . doesFileExist) objfile
+                                  return
+                                      [ (srcfile, srcExists,
+                                         objfile, objExists, modname)
+                                      | srcExists || objExists
+                                      ])
+                        splits)
+            possDirs
+    let validDirs = concat $ concat dirs
+    if List.null validDirs
+      then return Nothing
+      else return $ Just $ List.head validDirs
+
+
+moduleSources :: ModSpec -> [FilePath] -> IO ModuleSource
+moduleSources modspec possDirs = do
+    let splits = List.map (`take` modspec) [1..length modspec]
+    dirs <- mapM (\d -> mapM (sourceInDir d) splits) possDirs
+    let validDirs = List.filter (/= NoSource) $ concat dirs
+    if List.null validDirs
+        then return NoSource
+        else return $ List.head validDirs
+
+
+sourceInDir :: FilePath -> ModSpec -> IO ModuleSource
+sourceInDir d ms = do
+    let maybeFile b f = if b then Just f else Nothing
+    let srcfile = moduleFilePath sourceExtension d ms
+    let objfile = moduleFilePath objectExtension d ms
+    let arfile = moduleFilePath archiveExtension d ms
+    srcExists <- doesFileExist srcfile
+    objExists <- doesFileExist objfile
+    arExists <- doesFileExist arfile
+    if srcExists || objExists || arExists
+        then return
+             ModuleSource
+             { moduleName = ms
+             , srcWybe = maybeFile srcExists srcfile
+             , srcObj = maybeFile objExists objfile
+             , srcDir = Nothing
+             , srcArchive = maybeFile arExists arfile
+             }
+        else return NoSource
+
+
+-- |The different sources that can provide implementation of a Module
+data ModuleSource = NoSource
+                  | ModuleSource
+                    { moduleName  :: ModSpec
+                    , srcWybe    :: Maybe FilePath
+                    , srcObj     :: Maybe FilePath
+                    , srcDir     :: Maybe FilePath
+                    , srcArchive :: Maybe FilePath
+                    }
+                  deriving (Eq)
+
+
+    
+
+instance Show ModuleSource where
+    show NoSource = "NO SOURCE"
+    show m =
+        let showPath (Just f) = f
+            showPath Nothing = "NIL"
+        in "[ " ++ showModSpec (moduleName m)
+           ++ "\n| "
+           ++ "S: " ++ showPath (srcWybe m)
+           ++ "\n| "
+           ++ "O: " ++ showPath (srcObj m)
+           ++ "\n| "
+           ++ "D: " ++ showPath (srcDir m)
+           ++ "\n| "
+           ++ "A: " ++ showPath (srcArchive m)
+           ++ "\n]\n"
+ 
+             
+
+
+
+-- findModuleSources :: ModSpec -> [FilePath] -> IO ()
+-- findModuleSources mspec possDirs = do
+--     let splits = List.map (`take` mspec) [1..length mspec]
+    
+    
+
+
 ------------------------ Filename Handling ------------------------
 
 -- |The different sorts of files that could be specified on the
@@ -651,6 +731,9 @@ data TargetType = InterfaceFile | ObjectFile | ExecutableFile
                 | UnknownFile | BitcodeFile | AssemblyFile
                 | ArchiveFile
                 deriving (Show,Eq)
+
+
+
 
 
 -- |Given a file specification, return what sort of file it is.  The
@@ -672,6 +755,10 @@ targetType filename
 moduleFilePath :: String -> FilePath -> ModSpec -> FilePath
 moduleFilePath extension dir spec =
     addExtension (joinPath $ splitDirectories dir ++ spec) extension
+
+
+
+
 
 
 -- |Log a message, if we are logging builder activity (file-level compilation).
