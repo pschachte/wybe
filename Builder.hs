@@ -151,13 +151,13 @@ buildModuleIfNeeded force modspec possDirs = do
         if isJust maybemod
           then return False -- already loaded:  nothing more to do
           else do
-            srcOb <- srcObjFiles modspec possDirs
+            srcOb <- liftIO $ moduleSources modspec possDirs
             case srcOb of
-                Nothing -> do
+                NoSource -> do
                     Error <!> "Could not find module " ++
                         showModSpec modspec
                     return False
-                Just (_,False,objfile,True,_) -> do
+                ModuleSource _ Nothing (Just objfile) _ _ -> do
                     -- only object file exists
                     loaded <- loadModuleFromObjFile modspec objfile
                     if not loaded
@@ -172,11 +172,14 @@ buildModuleIfNeeded force modspec possDirs = do
                         return False
                         -- extraction successful, no need to build
                         else return False
-                Just (srcfile,True,objfile,False,modname) -> do
+
+                ModuleSource modname (Just srcfile) Nothing _ _ -> do
                     -- only source file exists
+                    let objfile = replaceExtension srcfile "o"
                     buildModule modname objfile srcfile
                     return True
-                Just (srcfile,True,objfile,True,modname) -> do
+
+                ModuleSource modname (Just srcfile) (Just objfile) _ _ -> do
                     srcDate <- (liftIO . getModificationTime) srcfile
                     dstDate <- (liftIO . getModificationTime) objfile
                     if force || srcDate > dstDate
@@ -192,8 +195,8 @@ buildModuleIfNeeded force modspec possDirs = do
                                 showModSpec modspec
                             buildModule modname objfile srcfile
                         return $ not loaded
-                Just (_,False,_,False,_) ->
-                    shouldnt "inconsistent file existence"
+
+                _ -> shouldnt "inconsistent file existence"
 
 
 
@@ -673,7 +676,7 @@ sourceInDir d ms = do
     if srcExists || objExists || arExists
         then return
              ModuleSource
-             { moduleName = ms
+             { moduleName = List.last ms
              , srcWybe = maybeFile srcExists srcfile
              , srcObj = maybeFile objExists objfile
              , srcDir = Nothing
@@ -685,7 +688,7 @@ sourceInDir d ms = do
 -- |The different sources that can provide implementation of a Module
 data ModuleSource = NoSource
                   | ModuleSource
-                    { moduleName  :: ModSpec
+                    { moduleName  :: String
                     , srcWybe    :: Maybe FilePath
                     , srcObj     :: Maybe FilePath
                     , srcDir     :: Maybe FilePath
@@ -694,14 +697,14 @@ data ModuleSource = NoSource
                   deriving (Eq)
 
 
-    
+
 
 instance Show ModuleSource where
     show NoSource = "NO SOURCE"
     show m =
         let showPath (Just f) = f
             showPath Nothing = "NIL"
-        in "[ " ++ showModSpec (moduleName m)
+        in "[ " ++ show (moduleName m)
            ++ "\n| "
            ++ "S: " ++ showPath (srcWybe m)
            ++ "\n| "
@@ -711,16 +714,16 @@ instance Show ModuleSource where
            ++ "\n| "
            ++ "A: " ++ showPath (srcArchive m)
            ++ "\n]\n"
- 
-             
+
+
 
 
 
 -- findModuleSources :: ModSpec -> [FilePath] -> IO ()
 -- findModuleSources mspec possDirs = do
 --     let splits = List.map (`take` mspec) [1..length mspec]
-    
-    
+
+
 
 
 ------------------------ Filename Handling ------------------------
