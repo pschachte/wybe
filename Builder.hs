@@ -307,32 +307,47 @@ extractModules objfile = do
 
 
 
+-- | Load all serialised modules present in the LPVM section of the object
+-- file.  The returned boolean flag indicates whether this was successful. A
+-- False flag is returned in the scenarios:
+-- o Extraction failed
+-- o Extracted modules didn't contain the `required` Module.
 loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler Bool
-loadModuleFromObjFile modspec objfile = do
-    logBuild $ "=== ??? Trying to load LPVM Module for " ++
-        showModSpec modspec ++ " from " ++ objfile
+loadModuleFromObjFile required objfile = do
+    logBuild $ "=== ??? Trying to load LPVM Module(s) from " ++ objfile
     extracted <- machoLPVMSection objfile
     if List.null extracted
         then do
         logBuild $ "xxx Failed extraction of LPVM Modules from object file "
             ++ objfile
         return False
+        -- Some module was extracted
         else do
         logBuild $ "=== >>> Extracted Module bytes from " ++ show objfile
         let extractedSpecs = List.map modSpec extracted
         logBuild $ "=== >>> Found modules: " ++ showModSpecs extractedSpecs
-        -- Collect the imports
-        imports <- concat <$> mapM placeExtractedModule extracted
-        logBuild $ "=== >>> Building dependencies: " ++ showModSpecs imports
-        -- Place the super mod under compilation while dependencies are built
-        let superMod = head extracted
-        modify (\comp -> let ms = superMod : underCompilation comp
-                         in comp { underCompilation = ms })
-        mapM_ buildDependency imports
-        _ <- finishModule
-        logBuild $ "=== <<< Extracted Module put in it's place from "
-            ++ show objfile
-        return True
+        -- Check if the `required` modspec is in the extracted ones.
+        if required `elem` extractedSpecs
+            then do
+            -- Collect the imports
+            imports <- concat <$> mapM placeExtractedModule extracted
+            logBuild $ "=== >>> Building dependencies: "
+                ++ showModSpecs imports
+            -- Place the super mod under compilation while
+            -- dependencies are built
+            let superMod = head extracted
+            modify (\comp -> let ms = superMod : underCompilation comp
+                       in comp { underCompilation = ms })
+            mapM_ buildDependency imports
+            _ <- finishModule
+            logBuild $ "=== <<< Extracted Module put in it's place from "
+                ++ show objfile
+            return True
+
+            -- The required modspec was not part of the extracted
+            -- Return false and try for building
+            else
+            return False
 
 
 
