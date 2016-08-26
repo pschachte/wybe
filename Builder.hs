@@ -605,20 +605,23 @@ loadObjectFile thisMod =
 
 objectReBuildNeeded :: ModSpec -> FilePath -> Compiler Bool
 objectReBuildNeeded thisMod dir = do
-    srcOb <- srcObjFiles thisMod [dir]
+    srcOb <- liftIO $ moduleSources thisMod [dir]
     case srcOb of
-        Nothing -> return True
+        NoSource -> return True
+        
         -- only object file exists, so we have loaded Module from object
-        Just (_,False,_,True,_) -> return False
+        ModuleSource _ Nothing (Just _) _ _ -> return False
+        
         -- only source file exists
-        Just (_, True, _, False, _) -> return True
-        Just (srcfile,True,objfile,True,_) -> do
+        ModuleSource _ (Just _) Nothing _ _ -> return True
+
+        ModuleSource _ (Just srcfile) (Just objfile) _ _ -> do
             srcDate <- (liftIO . getModificationTime) srcfile
             dstDate <- (liftIO . getModificationTime) objfile
             if srcDate > dstDate
               then return True
               else return False
-        Just (_,False,_,False,_) -> return True
+        _ -> return True
 
 
 
