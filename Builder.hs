@@ -665,7 +665,9 @@ moduleSources :: ModSpec -> [FilePath] -> IO ModuleSource
 moduleSources modspec possDirs = do
     let splits = List.map (`take` modspec) [1..length modspec]
     dirs <- mapM (\d -> mapM (sourceInDir d) splits) possDirs
-    return $ (fromMaybe NoSource . List.find (/= NoSource)) $ concat dirs
+    -- Predicate to find a viable source to return
+    return $ (fromMaybe NoSource . List.find (/= NoSource) . reverse )
+        $ concat dirs
 
 
 
@@ -676,10 +678,13 @@ moduleSources modspec possDirs = do
 sourceInDir :: FilePath -> ModSpec -> IO ModuleSource
 sourceInDir d ms = do
     let dirName = joinPath [d, showModSpec ms]
+    -- Helper to convert a boolean to a Maybe [maybeFile True f == Just f]
     let maybeFile b f = if b then Just f else Nothing
+    -- Different paths which can be a source for a module in the directory `d`
     let srcfile = moduleFilePath sourceExtension d ms
     let objfile = moduleFilePath objectExtension d ms
     let arfile = moduleFilePath archiveExtension d ms
+    -- Flags checking
     dirExists <- doesDirectoryExist dirName
     srcExists <- doesFileExist srcfile
     objExists <- doesFileExist objfile
