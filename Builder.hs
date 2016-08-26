@@ -608,10 +608,10 @@ objectReBuildNeeded thisMod dir = do
     srcOb <- liftIO $ moduleSources thisMod [dir]
     case srcOb of
         NoSource -> return True
-        
+
         -- only object file exists, so we have loaded Module from object
         ModuleSource _ Nothing (Just _) _ _ -> return False
-        
+
         -- only source file exists
         ModuleSource _ (Just _) Nothing _ _ -> return True
 
@@ -657,32 +657,40 @@ srcObjFiles modspec possDirs = do
       else return $ Just $ List.head validDirs
 
 
+
+-- | Search for different sources module `modspec` in the possible directory
+-- list `possDirs`. This information is encapsulated as a ModuleSource. The
+-- first found non-empty (not of constr NoSource) of ModuleSource is returned.
 moduleSources :: ModSpec -> [FilePath] -> IO ModuleSource
 moduleSources modspec possDirs = do
     let splits = List.map (`take` modspec) [1..length modspec]
     dirs <- mapM (\d -> mapM (sourceInDir d) splits) possDirs
-    let validDirs = List.filter (/= NoSource) $ concat dirs
-    if List.null validDirs
-        then return NoSource
-        else return $ List.head validDirs
+    return $ (fromMaybe NoSource . List.find (/= NoSource)) $ concat dirs
 
 
+
+-- | For a given module `ms`, check whether the name `ms` represents a source
+-- file (.wybe), an object file (.o), an archive file (.a), or a sub-directory
+-- in the given directory `d`. This information is returned as a `ModuleSource`
+-- record.
 sourceInDir :: FilePath -> ModSpec -> IO ModuleSource
 sourceInDir d ms = do
+    let dirName = joinPath [d, showModSpec ms]
     let maybeFile b f = if b then Just f else Nothing
     let srcfile = moduleFilePath sourceExtension d ms
     let objfile = moduleFilePath objectExtension d ms
     let arfile = moduleFilePath archiveExtension d ms
+    dirExists <- doesDirectoryExist dirName
     srcExists <- doesFileExist srcfile
     objExists <- doesFileExist objfile
     arExists <- doesFileExist arfile
-    if srcExists || objExists || arExists
+    if srcExists || objExists || arExists || dirExists
         then return
              ModuleSource
              { moduleName = List.last ms
              , srcWybe = maybeFile srcExists srcfile
              , srcObj = maybeFile objExists objfile
-             , srcDir = Nothing
+             , srcDir = maybeFile dirExists dirName
              , srcArchive = maybeFile arExists arfile
              }
         else return NoSource
@@ -761,7 +769,6 @@ targetType filename
 moduleFilePath :: String -> FilePath -> ModSpec -> FilePath
 moduleFilePath extension dir spec =
     addExtension (joinPath $ splitDirectories dir ++ spec) extension
-
 
 
 
