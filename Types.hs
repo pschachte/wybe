@@ -600,6 +600,16 @@ procInfoTypes :: ProcInfo -> [TypeSpec]
 procInfoTypes call = typeFlowType <$> procInfoArgs call
 
 
+boolFnToTest :: ProcInfo -> Maybe ProcInfo
+boolFnToTest (ProcInfo _ _ SemiDet) = Nothing
+boolFnToTest (ProcInfo proc args Det)
+    | last args == TypeFlow boolType ParamOut =
+        Just $ ProcInfo proc (init args) SemiDet
+    | otherwise = Nothing
+-- last calleeTypes == boolType && last calleeFlows == ParamOut
+    
+
+
 -- |A single call statement together with the determinism context in which
 --  the call appears and a list of all the possible different parameter
 --  list types (a list of types). This type is used to narrow down the
@@ -888,19 +898,17 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
 matchTypeList :: Ident -> Ident -> OptPos -> [TypeSpec] -> Determinism
               -> ProcInfo -> MaybeErr ProcInfo
 matchTypeList caller callee pos callArgTypes detismContext calleeInfo
-    | sameLength callArgTypes calleeTypes
+    | sameLength callArgTypes args
     = matchTypeList' callee pos callArgTypes calleeInfo
     -- XXX handle case of SemiDet context call to bool function as a proc call
-    | detismContext == SemiDet && procInfoDetism calleeInfo == Det
-      && last calleeTypes == boolType && last calleeFlows == ParamOut
-      && sameLength funcArgTypes calleeTypes
-    = matchTypeList' callee pos funcArgTypes calleeInfo
+    | detismContext == SemiDet && isJust testInfo
+      && sameLength callArgTypes (procInfoArgs calleeInfo')
+    = matchTypeList' callee pos callArgTypes calleeInfo'
     | otherwise = Err [ReasonArity caller callee pos
-                       (length callArgTypes) (length calleeTypes)]
+                       (length callArgTypes) (length args)]
     where args = procInfoArgs calleeInfo
-          calleeTypes = typeFlowType <$> args
-          calleeFlows = typeFlowMode <$> args
-          funcArgTypes = callArgTypes ++ [boolType]
+          testInfo = boolFnToTest calleeInfo
+          calleeInfo' = fromJust testInfo
 
 matchTypeList' :: Ident -> OptPos -> [TypeSpec] -> ProcInfo -> MaybeErr ProcInfo
 matchTypeList' callee pos callArgTypes calleeInfo =
