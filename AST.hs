@@ -730,11 +730,11 @@ addImport modspec imports = do
            "currently being loaded"
     case maybeMod of
         Nothing -> return ()  -- not currently loading dependency
-        Just mod -> do
+        Just mod' -> do
             logAST $ "Limiting minDependencyNum to " ++
-                    show (thisLoadNum mod)
+                    show (thisLoadNum mod')
             updateModule (\m -> m { minDependencyNum =
-                                        min (thisLoadNum mod)
+                                        min (thisLoadNum mod')
                                             (minDependencyNum m) })
 
 
@@ -856,7 +856,7 @@ optionallyPutStr opt strcomp = do
 -- |Holds everything needed to compile a module
 data Module = Module {
   modDirectory :: FilePath,      -- ^The directory the module is in
-  modSpec :: ModSpec,            -- ^The module path name 
+  modSpec :: ModSpec,            -- ^The module path name
   modParams :: Maybe [Ident],    -- ^The type parameters, if a type
   modConstants :: Int,           -- ^Num constant constructors, if a type
   modNonConstants :: Int,        -- ^Num non-constant constructors, if a type
@@ -1166,7 +1166,7 @@ doImport mod imports = do
       " into " ++ 
       let modStr = showModSpec currMod
       in modStr ++ ":  " ++ showUse (27 + length modStr) mod imports
-    fromIFace <- fmap (modInterface . trustFromJust "doImport") $ 
+    fromIFace <- modInterface . trustFromJust "doImport" <$> 
                  getLoadingModule mod
     let pubImports = importPublic imports
     let allImports = combineImportPart pubImports $ importPrivate imports

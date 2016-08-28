@@ -110,7 +110,8 @@ buildTarget force target = do
             if not built && tType /= ExecutableFile
               then logBuild $ "Nothing to be done for target: " ++ target
               else
-                do when (tType == ObjectFile) $
+                do logBuild $ "Emitting Target: " ++ target
+                   when (tType == ObjectFile) $
                        emitObjectFile [modname] target
                    when (tType == BitcodeFile) $
                        emitBitcodeFile [modname] target
@@ -159,7 +160,7 @@ buildModuleIfNeeded force modspec possDirs = do
                         showModSpec modspec
                     return False
 
-                ModuleSource _ Nothing (Just objfile) _ _ -> do
+                ModuleSource _ Nothing (Just objfile) Nothing _ -> do
                     -- only object file exists
                     loaded <- loadModuleFromObjFile modspec objfile
                     if not loaded
@@ -174,6 +175,7 @@ buildModuleIfNeeded force modspec possDirs = do
                         return False
                         -- extraction successful, no need to build
                         else return False
+                
 
                 ModuleSource modname (Just srcfile) Nothing _ _ -> do
                     -- only source file exists
@@ -181,7 +183,7 @@ buildModuleIfNeeded force modspec possDirs = do
                     buildModule modname objfile srcfile
                     return True
 
-                ModuleSource modname Nothing Nothing (Just dir) _ -> do
+                ModuleSource modname Nothing _ (Just dir) _ -> do
                     logBuild $ "Modname for directory: " ++ modname
                     buildDirectory dir modspec
 
@@ -241,12 +243,26 @@ buildDirectory dir dirmod= do
     wybemods <- liftIO $ List.map (makeMod . dropExtension)
         <$> wybeSourcesInDir dir
     -- Build the list
-    force <- optForceAll <$> gets options
+    opts <- gets options
+    let force = optForceAll opts || optForce opts
     -- quick shortcut
     let build m = buildModuleIfNeeded force m [dir]
-    or <$> mapM build wybemods
-
-
+    built <- or <$> mapM build wybemods
+    -- Dir one level up
+    let updir = takeDirectory dir
+    enterModule updir dirmod Nothing
+    -- Helper to add new import
+    let updateImport m = do
+            addImport m (importSpec Nothing Public)
+            updateImplementation $
+                updateModSubmods $ Map.insert (last m) m
+    mapM_ updateImport wybemods    
+    done <- finishModule
+    liftIO $ print done
+    -- Run the compilation passes
+    compileModSCC [dirmod]
+    return built
+    
 
 
 -- |Compile a module given the parsed source file contents.
@@ -555,6 +571,8 @@ handleModImports _ thisMod = do
 buildExecutable :: ModSpec -> FilePath -> Compiler ()
 buildExecutable targetMod fpath =
     do depends <- orderedDependencies targetMod
+       liftIO $ print depends
+       error "STOP"
        -- Filter the modules for which the second element of the tuple is True
        let mainImports = List.foldr (\x a -> if snd x then fst x:a else a)
                [] depends
