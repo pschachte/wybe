@@ -679,6 +679,7 @@ objectReBuildNeeded thisMod dir = do
 
 -- |Find the source and/or object files for the specified module. We search
 -- the library search path for the files.
+{-# DEPRECATED srcObjFiles "Use moduleSources instead, more variety." #-}
 srcObjFiles :: ModSpec -> [FilePath] ->
                Compiler (Maybe (FilePath,Bool,FilePath,Bool,Ident))
 srcObjFiles modspec possDirs = do
