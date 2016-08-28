@@ -1,5 +1,5 @@
 --  File     : Builder.hs
---  RCS      : $Id$
+--  RCS      : $Id$ 
 --  Author   : Peter Schachte
 --  Origin   : Tue Jan 31 16:37:48 2012
 --  Purpose  : Handles compilation at the module level.
@@ -152,11 +152,13 @@ buildModuleIfNeeded force modspec possDirs = do
           then return False -- already loaded:  nothing more to do
           else do
             srcOb <- liftIO $ moduleSources modspec possDirs
+            logBuild $ show srcOb
             case srcOb of
                 NoSource -> do
                     Error <!> "Could not find module " ++
                         showModSpec modspec
                     return False
+
                 ModuleSource _ Nothing (Just objfile) _ _ -> do
                     -- only object file exists
                     loaded <- loadModuleFromObjFile modspec objfile
@@ -178,6 +180,10 @@ buildModuleIfNeeded force modspec possDirs = do
                     let objfile = replaceExtension srcfile "o"
                     buildModule modname objfile srcfile
                     return True
+
+                ModuleSource modname Nothing Nothing (Just dir) _ -> do
+                    logBuild $ "Modname for directory: " ++ modname
+                    buildDirectory dir modspec
 
                 ModuleSource modname (Just srcfile) (Just objfile) _ _ -> do
                     srcDate <- (liftIO . getModificationTime) srcfile
@@ -222,6 +228,24 @@ buildModule modname objfile srcfile = do
                 _ <- loadModuleFromObjFile mspec objfile
                 return ()
             else compileModule dir mspec Nothing parseTree
+
+
+
+-- |Build a directory as the module `dirmod`.
+buildDirectory :: FilePath -> ModSpec -> Compiler Bool
+buildDirectory dir dirmod= do
+    logBuild $ "Building DIR: " ++ dir ++ ", into MODULE: "
+        ++ showModSpec dirmod
+    -- Get wybe modules to build
+    let makeMod x = [x]
+    wybemods <- liftIO $ List.map (makeMod . dropExtension)
+        <$> wybeSourcesInDir dir
+    -- Build the list
+    force <- optForceAll <$> gets options
+    -- quick shortcut
+    let build m = buildModuleIfNeeded force m [dir]
+    or <$> mapM build wybemods
+
 
 
 
@@ -365,9 +389,7 @@ concatSubMods mspec = do
 buildArchive :: FilePath -> Compiler ()
 buildArchive arch = do
     let dir = dropExtension arch
-    let isWybe = List.filter ((== ".wybe") . takeExtension)
-    archiveMods <- liftIO $ List.map dropExtension . isWybe <$>
-        listDirectory dir
+    archiveMods <- liftIO $ List.map dropExtension <$> wybeSourcesInDir dir 
     logBuild $ "Building modules to archive: " ++ show archiveMods
     mapM_ (\m -> buildModuleIfNeeded False [m] [dir]) archiveMods
     let oFileOf m = joinPath [dir, m] ++ ".o"
@@ -665,7 +687,7 @@ moduleSources :: ModSpec -> [FilePath] -> IO ModuleSource
 moduleSources modspec possDirs = do
     let splits = List.map (`take` modspec) [1..length modspec]
     dirs <- mapM (\d -> mapM (sourceInDir d) splits) possDirs
-    -- Predicate to find a viable source to return
+    -- Return the last valid Source
     return $ (fromMaybe NoSource . List.find (/= NoSource) . reverse )
         $ concat dirs
 
@@ -733,12 +755,10 @@ instance Show ModuleSource where
 
 
 
-
-
--- findModuleSources :: ModSpec -> [FilePath] -> IO ()
--- findModuleSources mspec possDirs = do
---     let splits = List.map (`take` mspec) [1..length mspec]
-
+wybeSourcesInDir :: FilePath -> IO [FilePath]
+wybeSourcesInDir dir = do
+    let isWybe = List.filter ((== ".wybe") . takeExtension)
+    isWybe <$> listDirectory dir
 
 
 
@@ -774,7 +794,6 @@ targetType filename
 moduleFilePath :: String -> FilePath -> ModSpec -> FilePath
 moduleFilePath extension dir spec =
     addExtension (joinPath $ splitDirectories dir ++ spec) extension
-
 
 
 
