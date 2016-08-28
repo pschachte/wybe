@@ -1,5 +1,5 @@
 --  File     : Builder.hs
---  RCS      : $Id$ 
+--  RCS      : $Id$
 --  Author   : Peter Schachte
 --  Origin   : Tue Jan 31 16:37:48 2012
 --  Purpose  : Handles compilation at the module level.
@@ -175,7 +175,7 @@ buildModuleIfNeeded force modspec possDirs = do
                         return False
                         -- extraction successful, no need to build
                         else return False
-                
+
 
                 ModuleSource modname (Just srcfile) Nothing _ _ -> do
                     -- only source file exists
@@ -238,31 +238,35 @@ buildDirectory :: FilePath -> ModSpec -> Compiler Bool
 buildDirectory dir dirmod= do
     logBuild $ "Building DIR: " ++ dir ++ ", into MODULE: "
         ++ showModSpec dirmod
-    -- Get wybe modules to build
+    -- Get wybe modules (in the directory) to build
     let makeMod x = [x]
     wybemods <- liftIO $ List.map (makeMod . dropExtension)
         <$> wybeSourcesInDir dir
-    -- Build the list
+    -- Build the above list of modules
     opts <- gets options
     let force = optForceAll opts || optForce opts
-    -- quick shortcut
+    -- quick shortcut to build a module
     let build m = buildModuleIfNeeded force m [dir]
     built <- or <$> mapM build wybemods
-    -- Dir one level up
-    let updir = takeDirectory dir
-    enterModule updir dirmod Nothing
-    -- Helper to add new import
+
+    -- Make the directory a Module package
+    enterModule (takeDirectory dir) dirmod Nothing
+    updateModule (\m -> m { isPackage = True })
+    -- Helper to add new import of `m` to current module
     let updateImport m = do
             addImport m (importSpec Nothing Public)
             updateImplementation $
                 updateModSubmods $ Map.insert (last m) m
-    mapM_ updateImport wybemods    
+    -- The module package imports all wybe modules in its source dir
+    mapM_ updateImport wybemods
     done <- finishModule
     liftIO $ print done
-    -- Run the compilation passes
+    -- Run the compilation passes on this module package to append the
+    -- procs from the imports to the interface.
+    -- XXX Maybe run only the import pass, as there is no module source!
     compileModSCC [dirmod]
     return built
-    
+
 
 
 -- |Compile a module given the parsed source file contents.
@@ -405,7 +409,7 @@ concatSubMods mspec = do
 buildArchive :: FilePath -> Compiler ()
 buildArchive arch = do
     let dir = dropExtension arch
-    archiveMods <- liftIO $ List.map dropExtension <$> wybeSourcesInDir dir 
+    archiveMods <- liftIO $ List.map dropExtension <$> wybeSourcesInDir dir
     logBuild $ "Building modules to archive: " ++ show archiveMods
     mapM_ (\m -> buildModuleIfNeeded False [m] [dir]) archiveMods
     let oFileOf m = joinPath [dir, m] ++ ".o"
@@ -571,8 +575,6 @@ handleModImports _ thisMod = do
 buildExecutable :: ModSpec -> FilePath -> Compiler ()
 buildExecutable targetMod fpath =
     do depends <- orderedDependencies targetMod
-       liftIO $ print depends
-       error "STOP"
        -- Filter the modules for which the second element of the tuple is True
        let mainImports = List.foldr (\x a -> if snd x then fst x:a else a)
                [] depends
@@ -612,16 +614,21 @@ orderedDependencies targetMod =
     visit (m:ms) collected = do
         thisMod <- getLoadedModuleImpln m
         let procs = (keys . modProcs) thisMod
-        let subMods = (Map.elems . modSubmods) thisMod
+        packageFlag <- moduleIsPackage m
+        let subMods = if packageFlag
+                      then []
+                      else (Map.elems . modSubmods) thisMod
         -- filter out std lib imports and sub-mod imports from imports
         -- since we are looking for imports which need a physical object file
         let imports =
                 List.filter (\x -> notElem x subMods && (not.isStdLib) x) $
                 (keys . modImports) thisMod
         -- Check if this module 'm' has a main procedure.
-        let collected' = if "" `elem` procs || "<0>" `elem` procs
-                         then (m, True):collected
-                         else (m, False):collected
+        let mainExists = "" `elem` procs || "<0>" `elem` procs
+        let collected' =
+                case (packageFlag, mainExists) of
+                    (True, _) -> collected
+                    (False, flag) -> (m, flag) : collected
         -- Don't visit any modspec already in `ms' (will be visited as it is)
         let remains = List.foldr (\x acc -> if x `elem` acc then acc else x:acc)
                 ms imports
