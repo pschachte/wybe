@@ -63,7 +63,7 @@ module AST (
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
   showMessages, stopOnError, logMsg, whenLogging2, whenLogging,
   -- *Helper functions
-  defaultBlock                           
+  defaultBlock, moduleIsPackage
   ) where
 
 import           Config
@@ -436,9 +436,10 @@ updateSpecModule spec updater = do
     modify 
       (\comp -> comp { modules = Map.adjust updater spec (modules comp) })
 
+
 -- |Transform the specified module.  An error if it does not exist.
 updateSpecModuleM :: (Module -> Compiler Module) -> ModSpec -> Compiler ()
-updateSpecModuleM updater spec = do
+updateSpecModuleM updater spec =
     updateCompilerM
       (\comp -> do
             let mods = modules comp
@@ -449,6 +450,7 @@ updateSpecModuleM updater spec = do
                     m' <- updater m
                     return $ comp {modules = Map.insert spec m' mods})
 
+
 -- |Prepare to compile a module by setting up a new Module on the 
 --  front of the list of modules underCompilation. 
 enterModule :: FilePath -> ModSpec -> Maybe [Ident] -> Compiler ()
@@ -456,11 +458,24 @@ enterModule dir modspec params = do
     count <- gets ((1+) . loadCount)
     modify (\comp -> comp { loadCount = count })
     logAST $ "Entering module " ++ showModSpec modspec
-    modify (\comp -> let mods = Module dir modspec params 0 0
-                                       emptyInterface (Just emptyImplementation)
-                                       count count 0 [] Nothing
-                                       : underCompilation comp
+    modify (\comp -> let newMod = emptyModule
+                                  { modDirectory = dir
+                                  , modSpec = modspec
+                                  , modParams = params
+                                  , thisLoadNum = count
+                                  , minDependencyNum = count
+                                  }
+                         mods = newMod : underCompilation comp
                      in  comp { underCompilation = mods })
+
+
+moduleIsPackage :: ModSpec -> Compiler Bool
+moduleIsPackage spec =  do
+    maybeMod <- getLoadedModule spec
+    case maybeMod of
+        Nothing -> return False
+        Just m -> return $ isPackage m
+
 
 -- |Go back to compiling a module we have previously finished with.
 -- Trusts that the modspec really does specify a module.
@@ -856,6 +871,7 @@ optionallyPutStr opt strcomp = do
 -- |Holds everything needed to compile a module
 data Module = Module {
   modDirectory :: FilePath,      -- ^The directory the module is in
+  isPackage :: Bool,             -- ^Is module actually a pacakage
   modSpec :: ModSpec,            -- ^The module path name
   modParams :: Maybe [Ident],    -- ^The type parameters, if a type
   modConstants :: Int,           -- ^Num constant constructors, if a type
@@ -869,6 +885,26 @@ data Module = Module {
   stmtDecls :: [Placed Stmt],     -- ^top-level statements in this module
   itemsHash :: Maybe String -- ^map of proc name to it's hash 
   } deriving (Generic)
+
+
+-- | Empty deafult for Module.
+emptyModule :: Module
+emptyModule = Module
+    { modDirectory      = error "No Default Directory"
+    , isPackage         = False
+    , modSpec           = error "No Default Modspec"
+    , modParams         = Nothing
+    , modConstants      = 0
+    , modNonConstants   = 0
+    , modInterface      = emptyInterface
+    , modImplementation = Just emptyImplementation
+    , thisLoadNum       = 0
+    , minDependencyNum  = 0
+    , procCount         = 0
+    , stmtDecls         = []
+    , itemsHash         = Nothing
+    }
+
 
 
 descendantModuleOf :: ModSpec -> ModSpec -> Bool
