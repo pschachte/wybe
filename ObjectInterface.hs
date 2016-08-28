@@ -14,21 +14,15 @@ import           Control.Monad
 import           Data.Binary
 import           Data.Binary.Get
 import           Data.Binary.Put
-import qualified Data.ByteString as B
-import           Data.ByteString.Builder
 import qualified Data.ByteString.Lazy as BL
-import qualified Data.ByteString.Lazy.Char8 as C
 import           Data.Hex
 import           Data.Int
 import           Data.List as List
 import           Data.Maybe (isJust)
-import           Data.Word
-import Data.Bits
 import           System.Process
 import           System.Directory          (createDirectoryIfMissing
-                                           ,getTemporaryDirectory
-                                           ,removeFile)
-import System.FilePath (replaceExtension, takeBaseName)                 
+                                           ,getTemporaryDirectory)
+import System.FilePath (takeBaseName)
 import Control.Monad.Trans (liftIO)
 import Macho
 
@@ -48,10 +42,10 @@ insertLPVMDataLd bs obj =
        let modFile = takeBaseName obj ++ ".module"
        let lpvmFile = tempDir ++ "wybetemp/" ++ modFile
        BL.writeFile lpvmFile bs
-       let args = [obj] ++ ["-r"] 
+       let args = [obj] ++ ["-r"]
                   ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
                   ++ ["-o", obj]
-       createProcess (proc "ld" args)
+       _ <- createProcess (proc "ld" args)
        -- Cleanup
        return ()
 
@@ -177,7 +171,7 @@ decodeLPVMSegment bs = do
         Nothing -> do
             logMsg Builder "No LPVM Segment found."
             return []
-            
+
 
 withMachoFile :: FilePath -> a -> (BL.ByteString -> Compiler a)
               -> Compiler a
@@ -188,7 +182,7 @@ withMachoFile mfile empty action = do
         logMsg Builder $ "Not a recognised object file: "
             ++ mfile
         return empty
-    
+
 
 withMachoSegment :: MachoSegment -> (MachoSegment -> Compiler a) -> Compiler a
 withMachoSegment with f = f with
@@ -203,7 +197,7 @@ findLPVMSegment (LC_SEGMENT seg : cs) =
     if sectionExists "__lpvm" seg then Just seg else findLPVMSegment cs
 findLPVMSegment (LC_SEGMENT_64 seg : cs) =
     if sectionExists "__lpvm" seg then Just seg else findLPVMSegment cs
-findLPVMSegment (_:cs) = findLPVMSegment cs        
+findLPVMSegment (_:cs) = findLPVMSegment cs
 
 -- | Check if a section of the given 'String' name exists in the
 -- 'MachoSegment'.
@@ -242,7 +236,7 @@ readBytes bs from size = BL.take size $ BL.drop from bs
 isValidLPVMBytes :: BL.ByteString -> Maybe BL.ByteString
 isValidLPVMBytes bs = do
     (hd, tl) <- BL.uncons bs
-    if hd == (1 :: Word8) then Just tl else Nothing    
+    if hd == (1 :: Word8) then Just tl else Nothing
 
 
 
@@ -255,4 +249,3 @@ isMachoBytes bs = flip runGet bs $ do
                             , 0xfeedfacf
                             , 0xcefaedfe
                             , 0xcffaedfe ]
-    
