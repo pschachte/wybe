@@ -58,6 +58,7 @@ test-cases/numbers
 test-cases/proc_beer
 test-cases/proc_yorn
 test-cases/proc_factorial
+test-cases/compute
 *~
 compiler.pdf
 wybelibs/wybe.o
