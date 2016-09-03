@@ -180,7 +180,7 @@ buildModuleIfNeeded force modspec possDirs = do
                 ModuleSource modname (Just srcfile) Nothing _ _ -> do
                     -- only source file exists
                     let objfile = replaceExtension srcfile "o"
-                    buildModule modname objfile srcfile
+                    buildModule modspec objfile srcfile
                     return True
 
                 ModuleSource modname Nothing _ (Just dir) _ -> do
@@ -193,7 +193,7 @@ buildModuleIfNeeded force modspec possDirs = do
                     if force || srcDate > dstDate
                       then do
                         unless force (extractModules objfile)
-                        buildModule modname objfile srcfile
+                        buildModule modspec objfile srcfile
                         return True
                       else do
                         loaded <- loadModuleFromObjFile modspec objfile
@@ -201,7 +201,7 @@ buildModuleIfNeeded force modspec possDirs = do
                             -- Loading failed, fallback on source building
                             logBuild $ "Falling back on building " ++
                                 showModSpec modspec
-                            buildModule modname objfile srcfile
+                            buildModule modspec objfile srcfile
                         return $ not loaded
 
                 _ -> shouldnt "inconsistent file existence"
@@ -212,12 +212,11 @@ buildModuleIfNeeded force modspec possDirs = do
 
 
 -- |Actually load and compile the module
-buildModule :: Ident -> FilePath -> FilePath -> Compiler ()
-buildModule modname objfile srcfile = do
+buildModule :: ModSpec -> FilePath -> FilePath -> Compiler ()
+buildModule mspec objfile srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
     let parseTree = parse tokens
     let dir = takeDirectory objfile
-    let mspec = [modname]
     let currHash = hashItems parseTree
     extractedHash <- extractedItemsHash mspec
     case extractedHash of
@@ -239,14 +238,14 @@ buildDirectory dir dirmod= do
     logBuild $ "Building DIR: " ++ dir ++ ", into MODULE: "
         ++ showModSpec dirmod
     -- Get wybe modules (in the directory) to build
-    let makeMod x = [x]
+    let makeMod x = dirmod ++ [x]
     wybemods <- liftIO $ List.map (makeMod . dropExtension)
         <$> wybeSourcesInDir dir
     -- Build the above list of modules
     opts <- gets options
     let force = optForceAll opts || optForce opts
     -- quick shortcut to build a module
-    let build m = buildModuleIfNeeded force m [dir]
+    let build m = buildModuleIfNeeded force m [takeDirectory dir]
     built <- or <$> mapM build wybemods
 
     -- Make the directory a Module package
@@ -749,7 +748,7 @@ sourceInDir d ms = do
         else return NoSource
 
 
--- |The different sources that can provide implementation of a Module
+-- |The different sources that can provide implementation of a Module.
 data ModuleSource = NoSource
                   | ModuleSource
                     { moduleName  :: String
@@ -762,7 +761,7 @@ data ModuleSource = NoSource
 
 
 
-
+-- |Pretty Printing
 instance Show ModuleSource where
     show NoSource = "NO SOURCE"
     show m =
