@@ -106,6 +106,16 @@ Miscellaneous ideas:
   \begin{center}
   \texttt{\{}\textit{key$_1$}, \textit{key$_2$}, \ldots\texttt{\}}
   \end{center}
+
+\item Allow use of ``\verb`|`'' as an alternative to ``\verb`,`'' to
+  separate set and map items.
+  When values involve multiple statements, this is useful because \verb`|`
+  has lower precedence than statement separation.
+  If ``\verb`|`'' is the first or last thing within curly braces, it is
+  ignored, to simplify code layout and avoid the separator vs.\ terminator
+  problem.
+  
+
 \item Capitalising on this, we use this syntax for case statements:
   \begin{center}
     \texttt{case} \textit{expr} \textit{map}
@@ -128,10 +138,24 @@ Miscellaneous ideas:
   multiple mappings with identical keys are permitted, and the \emph{first}
   mapping for the repeated key is taken.
 
-\item As a special case, allow proc calls with a single argument to be
-  written without the parentheses surrounding the argument (or with them).
-\item We need a syntax for statement sequences. Curly braces are the
-  obvious choice, but they conflict with the map/set notation above.
+\item Allow a set of statement sequences to be treated as a closure?
+  A singleton set is a deterministic statement sequence (providing its
+  statements are det), and multi-element sets are nondet, so ``\verb`|`''
+  could be used to separate alternatives in generators.
+  This would allow curly brace notation for statement sequences, but
+  int means that where a statement sequence is used, it needs to be
+  surrounded by braces.
+  Perhaps we could coerce a single statement to a singleton statement
+  sequence.
+
+\item Either maintain the decision not to have any statement separators, or
+  allow separator (semicolon, I assume) to be omitted when its the last
+  thing on a line.
+
+\item As a special syntactic case, allow proc calls with a single argument
+  to be written without the parentheses surrounding the argument (or with
+  them).
+
 \end{itemize}
 
 
@@ -150,40 +174,45 @@ arguments.
 
 \subsubsection*{Definition}
 \begin{Verbatim}
-    def foo(x int, y int) use io:
-            !bar(x)
-            !baz(y)
+    def foo(x:int, y:int) use io {
+        !bar(x)
+        !baz(y)
+    }
 \end{Verbatim}
 
 \begin{Verbatim}
-    def hypot(x int, y int) int = sqrt(x**2 + y**2)
+    def hypot(x:int, y:int):int = sqrt(x**2 + y**2)
 \end{Verbatim}
 
 \subsubsection*{Selection}
 \begin{Verbatim}
-        if prime(x):
+        if {
+        | prime(x):
             !bar(x)
             !baz(y)
-           else:
+        | else:
             !baz(y)
             !bar(x)
+        }
 \end{Verbatim}
 
 \begin{Verbatim}
-        case x of
-          0:  !bar(x)
+        case x {
+        | 0:: !bar(x)
               !baz(y)
-          1:  !baz(y)
+        | 1:: !baz(y)
               !bar(x)
-          _:  nop
+        | _:: nop
+        }
 
 \end{Verbatim}
 
 \subsubsection*{Looping}
 \begin{Verbatim}
-        do  stmt1
+        do {stmt1
             while test
             stmt2
+        }
 \end{Verbatim}
 
 
