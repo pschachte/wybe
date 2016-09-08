@@ -126,7 +126,7 @@ buildDependency modspec = do
     logBuild $ "Load dependency: " ++ showModSpec modspec
     force <- option optForceAll
     possDirs <- gets (optLibDirs . options)
-    localDir <- getModule modDirectory
+    localDir <- getDirectory
     _ <- buildModuleIfNeeded force modspec (localDir:possDirs)
     return ()
 
@@ -159,9 +159,9 @@ buildModuleIfNeeded force modspec possDirs = do
                     Error <!> "Could not find module " ++
                         showModSpec modspec
                     return False
-
-                ModuleSource _ Nothing (Just objfile) Nothing _ -> do
-                    -- only object file exists
+                    
+                -- only object file exists
+                ModuleSource Nothing (Just objfile) Nothing _ -> do
                     loaded <- loadModuleFromObjFile modspec objfile
                     if not loaded
                         -- if extraction failed, it is uncrecoverable now
@@ -177,23 +177,22 @@ buildModuleIfNeeded force modspec possDirs = do
                         else return False
 
 
-                ModuleSource modname (Just srcfile) Nothing _ _ -> do
+                ModuleSource (Just srcfile) Nothing _ _ -> do
                     -- only source file exists
-                    let objfile = replaceExtension srcfile "o"
-                    buildModule modspec objfile srcfile
+                    buildModule modspec srcfile
                     return True
 
-                ModuleSource modname Nothing _ (Just dir) _ -> do
-                    logBuild $ "Modname for directory: " ++ modname
+                ModuleSource Nothing _ (Just dir) _ -> do
+                    logBuild $ "Modname for directory: " ++ showModSpec modspec
                     buildDirectory dir modspec
 
-                ModuleSource modname (Just srcfile) (Just objfile) _ _ -> do
+                ModuleSource (Just srcfile) (Just objfile) _ _ -> do
                     srcDate <- (liftIO . getModificationTime) srcfile
                     dstDate <- (liftIO . getModificationTime) objfile
                     if force || srcDate > dstDate
                       then do
                         unless force (extractModules objfile)
-                        buildModule modspec objfile srcfile
+                        buildModule modspec srcfile
                         return True
                       else do
                         loaded <- loadModuleFromObjFile modspec objfile
@@ -201,7 +200,7 @@ buildModuleIfNeeded force modspec possDirs = do
                             -- Loading failed, fallback on source building
                             logBuild $ "Falling back on building " ++
                                 showModSpec modspec
-                            buildModule modspec objfile srcfile
+                            buildModule modspec srcfile
                         return $ not loaded
 
                 _ -> shouldnt "inconsistent file existence"
@@ -212,23 +211,24 @@ buildModuleIfNeeded force modspec possDirs = do
 
 
 -- |Actually load and compile the module
-buildModule :: ModSpec -> FilePath -> FilePath -> Compiler ()
-buildModule mspec objfile srcfile = do
+buildModule :: ModSpec -> FilePath -> Compiler ()
+buildModule mspec srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
     let parseTree = parse tokens
-    let dir = takeDirectory objfile
-    let currHash = hashItems parseTree
-    extractedHash <- extractedItemsHash mspec
-    case extractedHash of
-        Nothing -> compileModule dir mspec Nothing parseTree
-        Just otherHash ->
-            if currHash == otherHash
-            then do
-                logBuild $ "... Hash for module " ++ showModSpec mspec ++
-                    " matches the old hash."
-                _ <- loadModuleFromObjFile mspec objfile
-                return ()
-            else compileModule dir mspec Nothing parseTree
+    compileModule srcfile mspec Nothing parseTree
+    -- XXX Rethink parse tree hashing
+    -- let currHash = hashItems parseTree
+    -- extractedHash <- extractedItemsHash mspec
+    -- case extractedHash of
+    --     Nothing -> compileModule srcfile mspec Nothing parseTree
+    --     Just otherHash ->
+    --         if currHash == otherHash
+    --         then do
+    --             logBuild $ "... Hash for module " ++ showModSpec mspec ++
+    --                 " matches the old hash."
+    --             _ <- loadModuleFromObjFile mspec objfile
+    --             return ()
+    --         else compileModule srcfile mspec Nothing parseTree
 
 
 
@@ -249,7 +249,7 @@ buildDirectory dir dirmod= do
     built <- or <$> mapM build wybemods
 
     -- Make the directory a Module package
-    enterModule (takeDirectory dir) dirmod Nothing
+    enterModule dir dirmod Nothing
     updateModule (\m -> m { isPackage = True })
     -- Helper to add new import of `m` to current module
     let updateImport m = do
@@ -270,9 +270,9 @@ buildDirectory dir dirmod= do
 
 -- |Compile a module given the parsed source file contents.
 compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
-compileModule dir modspec params items = do
+compileModule source modspec params items = do
     logBuild $ "===> Compiling module " ++ showModSpec modspec
-    enterModule dir modspec params
+    enterModule source modspec params
     -- Hash the parse items and store it in the module
     let hashOfItems = hashItems items
     -- logBuild $ "HASH: " ++ hashOfItems
@@ -338,7 +338,7 @@ extractModules objfile = do
 loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler Bool
 loadModuleFromObjFile required objfile = do
     logBuild $ "=== ??? Trying to load LPVM Module(s) from " ++ objfile
-    extracted <- machoLPVMSection objfile
+    extracted <- machoLPVMSection objfile required
     if List.null extracted
         then do
         logBuild $ "xxx Failed extraction of LPVM Modules from object file "
@@ -577,6 +577,7 @@ buildExecutable targetMod fpath =
        -- Filter the modules for which the second element of the tuple is True
        let mainImports = List.foldr (\x a -> if snd x then fst x:a else a)
                [] depends
+       logBuild $ show depends
        logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
        mainMod <- newMainModule mainImports
        logBuild "o Built 'main' module for target: "
@@ -640,8 +641,11 @@ loadObjectFile :: ModSpec -> Compiler FilePath
 loadObjectFile thisMod =
   do reenterModule thisMod
      dir <- getDirectory
+     source <- getSource
+     logBuild $ "SOURCE for " ++ showModSpec thisMod ++ " :: " ++ show source
+     logBuild $ "DIR is: "  ++ show dir
      -- generating an name + extension for our object file
-     let objFile = moduleFilePath objectExtension dir thisMod
+     let objFile = replaceExtension source $ "." ++ objectExtension
      -- Check if we need to re-emit object file
      rebuild <- objectReBuildNeeded thisMod dir
      when rebuild $ emitObjectFile thisMod objFile
@@ -656,12 +660,12 @@ objectReBuildNeeded thisMod dir = do
         NoSource -> return True
 
         -- only object file exists, so we have loaded Module from object
-        ModuleSource _ Nothing (Just _) _ _ -> return False
+        ModuleSource Nothing (Just _) _ _ -> return False
 
         -- only source file exists
-        ModuleSource _ (Just _) Nothing _ _ -> return True
+        ModuleSource (Just _) Nothing _ _ -> return True
 
-        ModuleSource _ (Just srcfile) (Just objfile) _ _ -> do
+        ModuleSource (Just srcfile) (Just objfile) _ _ -> do
             srcDate <- (liftIO . getModificationTime) srcfile
             dstDate <- (liftIO . getModificationTime) objfile
             if srcDate > dstDate
@@ -739,8 +743,7 @@ sourceInDir d ms = do
     if srcExists || objExists || arExists || dirExists
         then return
              ModuleSource
-             { moduleName = List.last ms
-             , srcWybe = maybeFile srcExists srcfile
+             { srcWybe = maybeFile srcExists srcfile
              , srcObj = maybeFile objExists objfile
              , srcDir = maybeFile dirExists dirName
              , srcArchive = maybeFile arExists arfile
@@ -751,8 +754,7 @@ sourceInDir d ms = do
 -- |The different sources that can provide implementation of a Module.
 data ModuleSource = NoSource
                   | ModuleSource
-                    { moduleName  :: String
-                    , srcWybe    :: Maybe FilePath
+                    { srcWybe    :: Maybe FilePath
                     , srcObj     :: Maybe FilePath
                     , srcDir     :: Maybe FilePath
                     , srcArchive :: Maybe FilePath
@@ -767,9 +769,7 @@ instance Show ModuleSource where
     show m =
         let showPath (Just f) = f
             showPath Nothing = "NIL"
-        in "[ " ++ show (moduleName m)
-           ++ "\n| "
-           ++ "S: " ++ showPath (srcWybe m)
+        in "[ S: " ++ showPath (srcWybe m)
            ++ "\n| "
            ++ "O: " ++ showPath (srcObj m)
            ++ "\n| "

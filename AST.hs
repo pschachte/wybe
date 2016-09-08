@@ -51,7 +51,7 @@ module AST (
   getModule, getModuleInterface, updateModule, getSpecModule, updateSpecModule,
   updateModImplementation, updateModImplementationM, updateModLLVM,
   updateModInterface, updateAllProcs, updateModSubmods,
-  getDirectory, getModuleSpec, getModuleParams, option, 
+  getModuleSpec, getModuleParams, option, getSource, getDirectory,
   optionallyPutStr, message, (<!>), genProcName,
   addImport, doImport, addType, lookupType, publicType,
   ResourceName(..), ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
@@ -63,10 +63,13 @@ module AST (
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
   showMessages, stopOnError, logMsg, whenLogging2, whenLogging,
   -- *Helper functions
-  defaultBlock, moduleIsPackage
+  defaultBlock, moduleIsPackage,
+  -- *LPVM Encoding types
+  EncodedLPVM(..), ModuleIndex, makeEncodedLPVM
   ) where
 
-import           Config
+import           Config (magicVersion)
+import Data.Word (Word8)
 import           Control.Monad
 import           Control.Monad.Trans (lift,liftIO)
 import           Control.Monad.Trans.State
@@ -454,12 +457,12 @@ updateSpecModuleM updater spec =
 -- |Prepare to compile a module by setting up a new Module on the 
 --  front of the list of modules underCompilation. 
 enterModule :: FilePath -> ModSpec -> Maybe [Ident] -> Compiler ()
-enterModule dir modspec params = do
+enterModule source modspec params = do
     count <- gets ((1+) . loadCount)
     modify (\comp -> comp { loadCount = count })
     logAST $ "Entering module " ++ showModSpec modspec
     modify (\comp -> let newMod = emptyModule
-                                  { modDirectory = dir
+                                  { modSourceFile = source
                                   , modSpec = modspec
                                   , modParams = params
                                   , thisLoadNum = count
@@ -515,7 +518,10 @@ finishModule = do
 
 -- |Return the directory of the current module.
 getDirectory :: Compiler FilePath
-getDirectory = getModule modDirectory
+getDirectory = takeDirectory <$> getSource
+
+getSource :: Compiler FilePath
+getSource = getModule modSourceFile
 
 -- |Return the module spec of the current module.
 getModuleSpec :: Compiler ModSpec
@@ -870,7 +876,7 @@ optionallyPutStr opt strcomp = do
 
 -- |Holds everything needed to compile a module
 data Module = Module {
-  modDirectory :: FilePath,      -- ^The directory the module is in
+  modSourceFile :: FilePath,     -- ^Absolute path of the source file
   isPackage :: Bool,             -- ^Is module actually a pacakage
   modSpec :: ModSpec,            -- ^The module path name
   modParams :: Maybe [Ident],    -- ^The type parameters, if a type
@@ -890,7 +896,7 @@ data Module = Module {
 -- | Empty deafult for Module.
 emptyModule :: Module
 emptyModule = Module
-    { modDirectory      = error "No Default Directory"
+    { modSourceFile     = error "No Default Source file"
     , isPackage         = False
     , modSpec           = error "No Default Modspec"
     , modParams         = Nothing
@@ -2405,3 +2411,19 @@ logMsg selector msg = do
 -- in a terminal output. 
 makeBold :: String -> String
 makeBold s = "\x1b[1m" ++ s ++ "\x1b[0m"
+
+
+------------------------------ Module Encoding Types -----------------------
+
+data EncodedLPVM = EncodedLPVM ModuleIndex [Module]
+                   deriving (Show, Generic)
+
+
+type ModuleIndex = [(ModSpec, FilePath)]
+    
+makeEncodedLPVM :: [Module] -> EncodedLPVM
+makeEncodedLPVM ms =
+    let makeIndex m = (modSpec m, modSourceFile m)
+        index = List.map makeIndex ms
+    in  EncodedLPVM index ms
+        

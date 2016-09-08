@@ -151,20 +151,30 @@ dataFromBitcode = do
 -------------------------------------------------------------------------------
 
 
--- | Parse the given object file into a 'Macho' structure, determine the
--- offset and size of the '__lpvm' section data, and decode those bytes as
--- a 'AST.Module'.
-machoLPVMSection :: FilePath -> Compiler [Module]
-machoLPVMSection ofile =
-    withMachoFile ofile [] decodeLPVMSegment
+-- |Read the contents of the Mach-O object file 'ofile', checking if the module
+-- 'required' has a serialised LPVM module form in the __LPVM section of the
+-- object file, and then extracting its serialised Module type along with any
+-- of its submodules' Module types.
+-- The action fails by returning an empty list of Modules if
+-- o Not a Macho File structure
+-- o No __LPVM Section
+-- o Incompatible version of serialised modules
+-- o The required module is not present in the file
+machoLPVMSection :: FilePath -> ModSpec -> Compiler [Module]
+machoLPVMSection ofile required =
+    withMachoFile ofile (decodeLPVMSegment required)
 
 
-decodeLPVMSegment :: BL.ByteString -> Compiler [Module]
-decodeLPVMSegment bs = do
+-- | Given a bytestring representation 'bs' of a Mach-O object file, find the
+-- __LPVM section and segment and decode the encoded structure in the data part
+-- of the segment as a List of Module(s). The ModSpec 'required' should be
+-- present in this list, or it's an error.
+decodeLPVMSegment :: ModSpec -> BL.ByteString -> Compiler [Module]
+decodeLPVMSegment required bs = do
     let (_, macho) = parseMacho (BL.toStrict bs)
     case findLPVMSegment (m_commands macho) of
         Just seg -> do
-            ms <- decodeModule $
+            ms <- decodeModule required $
                   uncurry (readBytes bs) (lpvmFileOffset seg)
             unless (List.null ms) $ logMsg Builder "Decoding successful!"
             return ms
@@ -173,15 +183,17 @@ decodeLPVMSegment bs = do
             return []
 
 
-withMachoFile :: FilePath -> a -> (BL.ByteString -> Compiler a)
+-- | Bracket pattern to run an action on the bytestring of a valid Mach-O
+-- file. Default return is 'mempty' if the file is not a valid file.
+withMachoFile :: Monoid a => FilePath -> (BL.ByteString -> Compiler a)
               -> Compiler a
-withMachoFile mfile empty action = do
+withMachoFile mfile action = do
     bs <- liftIO $ BL.readFile mfile
     if isMachoBytes bs then action bs
         else do
         logMsg Builder $ "Not a recognised object file: "
             ++ mfile
-        return empty
+        return mempty
 
 
 withMachoSegment :: MachoSegment -> (MachoSegment -> Compiler a) -> Compiler a

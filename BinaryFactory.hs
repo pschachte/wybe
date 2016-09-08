@@ -17,6 +17,7 @@ import           Data.Word (Word8)
 import qualified LLVM.General.AST as LLVMAST
 import           Text.ParserCombinators.Parsec.Pos
 import           Config (magicVersion)
+import qualified Data.List as List
 
 
 -- * Self Deriving instances
@@ -62,13 +63,15 @@ instance Binary TypeProto
 instance Binary TypeImpln
 -- * Manual Serialisation
 
+instance Binary EncodedLPVM
+
 
 instance Binary SourcePos where
   put pos = do put $ sourceName pos
                put $ sourceLine pos
                put $ sourceColumn pos
 
-  get = liftM3 newPos get get get                                   
+  get = liftM3 newPos get get get
 
 
 instance Binary LLVMAST.Definition where
@@ -91,13 +94,14 @@ encodeModule m = do
     let getm name = trustFromJustM msg $ getLoadedModule name
     subModSpecs <- collectSubModules (modSpec m)
     subMods <- mapM getm subModSpecs
-    let encoded = B.encode (m:subMods)
+    let encoded = B.encode $ makeEncodedLPVM (m:subMods)
     return $ BL.append (BL.pack magicVersion) encoded
 
 
+
 -- * Decoding
-decodeModule :: BL.ByteString -> Compiler [Module]
-decodeModule bs = do
+decodeModule :: ModSpec -> BL.ByteString -> Compiler [Module]
+decodeModule required bs = do
     let (magic, rest) = BL.splitAt 4 bs
     if magic == BL.pack magicVersion
         then
@@ -105,10 +109,18 @@ decodeModule bs = do
             Left _ -> do
                 Warning <!> "Error decoding LPVM bytes."
                 return []
-            Right (_, _, ms) -> return (ms :: [Module])
+            Right (_, _, lpvm) -> decodeEncodedLPVM required lpvm
         else do
         Warning <!> "Extracted LPVM version mismatch."
         return []
+
+
+decodeEncodedLPVM :: ModSpec -> EncodedLPVM -> Compiler [Module]
+decodeEncodedLPVM required (EncodedLPVM _ ms) =
+    if required `elem` List.map modSpec ms
+    then return ms
+    else return []
+
 
 
 -- * Hashing functions
@@ -118,6 +130,3 @@ sha1 = hashlazy
 
 hashItems :: [Item] -> String
 hashItems = show . sha1 . encode
-
-
-    
