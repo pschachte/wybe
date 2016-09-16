@@ -86,7 +86,7 @@ data StringDelim = DoubleQuote | BackQuote | LongQuote String
 
 -- |The different kinds of brackets.
 data BracketStyle = Paren | Bracket | Brace
-                  deriving (Show)
+                  deriving (Show, Eq)
 
 
 -- |The contents of a file as a list of tokens.
