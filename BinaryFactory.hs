@@ -11,11 +11,11 @@ import           AST
 import           Control.Monad
 import           Crypto.Hash
 import           Data.Binary as B
-import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BL
-import           Data.Word (Word8)
 import qualified LLVM.General.AST as LLVMAST
-import           Text.ParserCombinators.Parsec.Pos
+import           Text.Parsec.Pos
+                 ( SourcePos, sourceName, sourceLine,
+                   sourceColumn, newPos )
 import           Config (magicVersion)
 import qualified Data.List as List
 
@@ -23,7 +23,7 @@ import qualified Data.List as List
 -- * Self Deriving instances
 instance Binary Visibility
 instance Binary Determinism
-instance (Binary t) => Binary (Placed t)
+instance Binary t => Binary (Placed t)
 instance Binary ArgFlowType
 instance Binary ResourceSpec
 instance Binary FlowDirection
@@ -35,6 +35,7 @@ instance Binary ParamInfo
 instance Binary Prim
 instance Binary PrimVarName
 instance Binary PrimArg
+
 -- Procedures
 instance Binary ProcSpec
 instance Binary ProcImpln
@@ -87,6 +88,11 @@ instance Binary LLVMAST.Module where
 
 
 -- * Encoding
+
+
+-- | A Module is encoding by creating an 'EncodedLPVM' type which wraps the
+-- Module `m` and all its sub-modules. This type is serialised and prefixed
+-- with 4 magic bytes.
 encodeModule :: Module -> Compiler BL.ByteString
 encodeModule m = do
     let msg = "Unable to get loaded Module for binary encoding."
@@ -100,7 +106,9 @@ encodeModule m = do
 
 
 -- * Decoding
-decodeModule :: ModSpec -> BL.ByteString -> Compiler [Module]
+
+
+decodeModule :: [ModSpec] -> BL.ByteString -> Compiler [Module]
 decodeModule required bs = do
     let (magic, rest) = BL.splitAt 4 bs
     if magic == BL.pack magicVersion
@@ -115,12 +123,13 @@ decodeModule required bs = do
         return []
 
 
-decodeEncodedLPVM :: ModSpec -> EncodedLPVM -> Compiler [Module]
+decodeEncodedLPVM ::  [ModSpec] -> EncodedLPVM -> Compiler [Module]
 decodeEncodedLPVM required (EncodedLPVM _ ms) =
-    if required `elem` List.map modSpec ms
+    if List.all (`elem` specs) required
     then return ms
     else return []
-
+  where
+    specs = List.map modSpec ms
 
 
 -- * Hashing functions
