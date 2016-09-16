@@ -7,7 +7,7 @@
 -- |The tokeniser for wybe.
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
                 charValue, identName, symbolName, showPosition, 
-                StringDelim(..), BracketStyle(..), fileTokens, 
+                StringDelim(..), BracketStyle(..), fileTokens, tokenise,
                 inputTokens) where
 
 import AST

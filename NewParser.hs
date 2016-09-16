@@ -19,12 +19,12 @@ NOTES:
 Parser Type : ParsecT [Token] () Identity a
 -}
 
-import AST
+import AST hiding (option)
 import Control.Monad.Identity
 import Scanner
 import Text.Parsec
 import Text.Parsec.Expr
-
+import Text.Parsec.Pos
 
 
 -- | Alias for our 'Parsec s u'.
@@ -49,20 +49,81 @@ main = do
         Right expr -> print expr
 
 
+foo :: String -> IO ()
+foo s = do
+    let stream = tokenise (initialPos "<stdin>") s
+    case parse itemParser "<stdin>" stream of
+        Left err -> print err
+        Right expr -> print expr
+
+
 -----------------------------------------------------------------------------
 -- Grammar                                                                 --
 -----------------------------------------------------------------------------
 
 -- | Parser entry for a Wybe program.
-itemParser :: Parser (Placed Exp)
-itemParser = expParser
+itemParser :: Parser Item
+itemParser =
+    (,) <$> visibility <*> determinism >>= funcItemParser
 
+
+-- | Function parser.
+funcItemParser :: (Visibility, Determinism) -> Parser Item
+funcItemParser (vis, det) = do
+    _ <- ident "func"
+    -- Function prototype : FnProto
+    pName <- choice [identPlaced, symbolPlaced]
+    params <- option [] $ between
+              ( leftBracket Paren )
+              ( rightBracket Paren )
+              ( sepBy paramParser comma )
+    let proto = FnProto (content pName) params []
+    -- Optional return type
+    ty <- optTypeParser
+    -- Function body
+    body <- symbol "=" *> expParser
+    let pos = place pName
+    return $
+        FuncDecl vis det False proto ty body pos
+
+
+-- | Parser for a 'Param'.
+-- Param -> ident OptType
+paramParser :: Parser Param
+paramParser = do
+    name <- identString
+    ty <- optTypeParser
+    return $ Param name ty ParamIn Ordinary
+
+
+-- | Parser for an optional type.
+optTypeParser :: Parser TypeSpec
+optTypeParser = option AnyType (symbol ":" *> typeParser)
+
+
+-- | Parser a type.
+-- Type -> ident OptTypeList
+typeParser :: Parser TypeSpec
+typeParser = do
+    name <- identString
+    optTypeList <- option [] $ between
+                   ( leftBracket Paren )
+                   ( rightBracket Paren )
+                   ( sepBy typeParser comma )
+    case name of
+        "any" -> return AnyType
+        "invalid" -> return InvalidType
+        _   -> return $ TypeSpec [] name optTypeList
+
+
+-----------------------------------------------------------------------------
+-- Expression Parsing                                                      --
+-----------------------------------------------------------------------------
 
 -- | Parse expressions.
 expParser :: Parser (Placed Exp)
-expParser =  ifExpParser
-         <|> buildExpressionParser operatorTable simpleExpParser
-         <?> "Unexpected Expresion."
+expParser =  buildExpressionParser operatorTable expTerms
+         <?> "Expresions"
 
 
 -- | Exp -> 'if' Exp 'then' Exp 'else' Exp
@@ -76,37 +137,55 @@ ifExpParser = do
 
 
 
------------------------------------------------------------------------------
--- Arithmetic Expression Parsing                                           --
------------------------------------------------------------------------------
+expTerms :: Parser (Placed Exp)
+expTerms =  parenExp
+        <|> ifExpParser
+        <|> intExp
+        <|> floatExp
+        <|> charExp
+        <|> stringExp
+        <|> outParam
+        <|> inoutParam
+        <|> identifier
+        <|> emptyBrackets Bracket
+        <|> emptyBrackets Brace
+        <?> "Simple Expression Terms."
 
--- | Parse components of an arithmetic expression.
-simpleExpParser :: Parser (Placed Exp)
-simpleExpParser =  parenExpParser
-               <|> intExp
-               <|> floatExp
-               <?> "Simple Expression."
 
 
 -- | Parenthesised expressions.
-parenExpParser :: Parser (Placed Exp)
-parenExpParser = do
+parenExp :: Parser (Placed Exp)
+parenExp = do
     pos <- tokenPosition <$> leftBracket Paren
     e <- content <$> expParser <* rightBracket Paren
     return $ Placed e pos
+
+
+typedExp :: Parser (Placed Exp)
+typedExp = do
+    pExp <- expParser <* symbol ":"
+    ty <- typeParser
+    return $ maybePlace (Typed (content pExp) ty False) (place pExp)
+
+
 
 
 -- | Table defining operator precedence and associativeness, helps parsec to
 -- deal with expression parsing without ambiguity.
 operatorTable :: WybeOperatorTable (Placed Exp)
 operatorTable =
-    [ [ binary "*"   AssocLeft
+    [ [ binary "." AssocLeft ]
+    , [ prefix "-" ]
+    , [ binary "^" AssocLeft ]
+    , [ binary "*"   AssocLeft
       , binary "/"   AssocLeft
       , binary "mod" AssocLeft
       ]
     , [ binary "+" AssocLeft
       , binary "-" AssocLeft
       ]
+    , [ binary "++" AssocRight ]
+    , [ binary' ".." AssocNone [ Unplaced (IntValue 1) ] ]
     , [ binary ">"  AssocLeft
       , binary "<"  AssocLeft
       , binary "<=" AssocLeft
@@ -133,6 +212,16 @@ binary :: String -> Assoc -> WybeOperator (Placed Exp)
 binary sym = Infix (symOrIdent sym *> return (binFn sym))
   where
     binFn s a b = makeFnCall s [a, b]
+
+
+-- | Same as 'binary', but takes a list of extra expression arguments to be
+-- given to the combined function call expression.
+binary' :: String -> Assoc -> [Placed Exp] -> WybeOperator (Placed Exp)
+binary' sym assoc exArgs =
+    Infix (symOrIdent sym *> return (binFnEx sym)) assoc
+  where
+    binFnEx s a b = makeFnCall s ([a, b] ++ exArgs)
+
 
 -- | Helper to create an unary prefix operator expression parser.
 prefix :: String -> WybeOperator (Placed Exp)
@@ -185,11 +274,47 @@ stringExp = takeToken test
     test _ = Nothing
 
 
+outParam :: Parser (Placed Exp)
+outParam = do
+    pos <- tokenPosition <$> symbol "?"
+    s <- identString
+    return $ Placed (Var s ParamOut Ordinary) pos
+
+inoutParam :: Parser (Placed Exp)
+inoutParam = do
+    pos <- tokenPosition <$> symbol "!"
+    s <- identString
+    return $ Placed (Var s ParamInOut Ordinary) pos
+
+
+-- | Parse the keyword terminal 'key', in the form of identifier tokens.
+ident :: String -> Parser Token
+ident key = takeToken test
+  where
+    test tok@(TokIdent t _) = if t == key then Just tok else Nothing
+    test _ = Nothing
+
 -- | Parse an identifier token.
-identifier :: Parser Token
+identifier :: Parser (Placed Exp)
 identifier = takeToken test
   where
-    test tok@TokIdent{} = Just tok
+    test (TokIdent s p) = Just $ Placed (Var s ParamIn Ordinary) p
+    test _ = Nothing
+
+
+
+
+
+identString :: Parser String
+identString = takeToken test
+  where
+    test (TokIdent s _) = Just s
+    test _ = Nothing
+
+identPlaced :: Parser (Placed String)
+identPlaced = takeToken test
+  where
+    test (TokIdent s p) = Just $ Placed s p
     test _ = Nothing
 
 
@@ -209,6 +334,12 @@ symbol sym = takeToken test
     test _ = Nothing
 
 
+symbolPlaced :: Parser (Placed String)
+symbolPlaced = takeToken test
+  where
+    test (TokSymbol s p) = Just $ Placed s p
+    test _ = Nothing
+
 -- | Parse a comma token.
 comma :: Parser Token
 comma = takeToken test
@@ -217,12 +348,7 @@ comma = takeToken test
     test _ = Nothing
 
 
--- | Parse the keyword terminal 'key', in the form of identifier tokens.
-ident :: String -> Parser Token
-ident key = takeToken test
-  where
-    test tok@(TokIdent t _) = if t == key then Just tok else Nothing
-    test _ = Nothing
+
 
 
 -- | Parse a left bracket of style 'bs'.
@@ -243,3 +369,24 @@ rightBracket bs = takeToken test
                                   then Just tok
                                   else Nothing
     test _ = Nothing
+
+
+-- | Parses each of "()", "[]", "{}".
+emptyBrackets :: BracketStyle -> Parser (Placed Exp)
+emptyBrackets bs = do
+    pos <- tokenPosition <$> leftBracket bs <* rightBracket bs
+    let fnname = case bs of
+            Paren -> "()"
+            Bracket -> "[]"
+            Brace -> "{}"
+    return $ Placed (Fncall [] fnname []) pos
+
+
+-- | Terminal "public" / "private".
+visibility :: Parser Visibility
+visibility = option Private (ident "public" *> return Public)
+
+
+-- | Terminal for determinism.
+determinism :: Parser Determinism
+determinism = option Det (ident "test" *> return SemiDet)
