@@ -151,25 +151,24 @@ dataFromBitcode = do
 -------------------------------------------------------------------------------
 
 
--- |Read the contents of the Mach-O object file 'ofile', checking if the module
--- 'required' has a serialised LPVM module form in the __LPVM section of the
--- object file, and then extracting its serialised Module type along with any
--- of its submodules' Module types.
--- The action fails by returning an empty list of Modules if
--- o Not a Macho File structure
--- o No __LPVM Section
+-- |Read the contents of the Mach-O object file 'ofile', checking if the
+-- modules in 'required' all have a serialised LPVM module form in the __LPVM
+-- section of the object file, and then extracting their serialised Module type
+-- along with each of theirs' submodules Module types.  The action fails by
+-- returning an empty list of Modules if o Not a Macho File structure o No
+-- __LPVM Section
 -- o Incompatible version of serialised modules
--- o The required module is not present in the file
-machoLPVMSection :: FilePath -> ModSpec -> Compiler [Module]
+-- o The required modules are not found
+machoLPVMSection :: FilePath -> [ModSpec] -> Compiler [Module]
 machoLPVMSection ofile required =
     withMachoFile ofile (decodeLPVMSegment required)
 
 
 -- | Given a bytestring representation 'bs' of a Mach-O object file, find the
 -- __LPVM section and segment and decode the encoded structure in the data part
--- of the segment as a List of Module(s). The ModSpec 'required' should be
+-- of the segment as a List of Module(s). The ModSpecs 'required' should all be
 -- present in this list, or it's an error.
-decodeLPVMSegment :: ModSpec -> BL.ByteString -> Compiler [Module]
+decodeLPVMSegment :: [ModSpec] -> BL.ByteString -> Compiler [Module]
 decodeLPVMSegment required bs = do
     let (_, macho) = parseMacho (BL.toStrict bs)
     case findLPVMSegment (m_commands macho) of

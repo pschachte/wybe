@@ -159,7 +159,7 @@ buildModuleIfNeeded force modspec possDirs = do
                     Error <!> "Could not find module " ++
                         showModSpec modspec
                     return False
-                    
+
                 -- only object file exists
                 ModuleSource Nothing (Just objfile) Nothing _ -> do
                     loaded <- loadModuleFromObjFile modspec objfile
@@ -314,10 +314,12 @@ extractedItemsHash modspec = do
 extractModules :: FilePath -> Compiler ()
 extractModules objfile = do
     logBuild $ "=== Preloading Wybe-LPVM modules from " ++ objfile
-    extracted <- machoLPVMSection objfile
+    extracted <- machoLPVMSection objfile []
     if List.null extracted
+
         then
         Warning <!> "Unable to preload serialised LPVM from " ++ objfile
+
         else do
         logBuild $ ">>> Extracted Module bytestring from " ++ show objfile
         let extractedSpecs = List.map modSpec extracted
@@ -338,7 +340,7 @@ extractModules objfile = do
 loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler Bool
 loadModuleFromObjFile required objfile = do
     logBuild $ "=== ??? Trying to load LPVM Module(s) from " ++ objfile
-    extracted <- machoLPVMSection objfile required
+    extracted <- machoLPVMSection objfile [required]
     if List.null extracted
         then do
         logBuild $ "xxx Failed extraction of LPVM Modules from object file "
