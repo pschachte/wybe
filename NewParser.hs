@@ -268,9 +268,10 @@ simpleExpTerms =  parenExp
               <|> stringExp
               <|> outParam
               <|> inoutParam
-              <|> identifier
               <|> try (emptyBrackets Bracket)
               <|> (listExpParser <?> "list")
+              <|> try funcCallParser
+              <|> identifier
               <|> try (emptyBrackets Brace)
               <?> "simple expression terms."
 
@@ -379,6 +380,17 @@ listTailParser =
            return $ Unplaced (Fncall [] "[|]" [hd, tl])
     <|> symbol "|" *> expParser <* symbol "]"
 
+-- | Parse a function call.
+-- Exp -> ident ArgList
+-- ArgList -> '(' ExpList ')'
+funcCallParser :: Parser (Placed Exp)
+funcCallParser = do
+    pName <- identPlaced
+    args <- between (leftBracket Paren) (rightBracket Paren)
+            ( expParser `sepBy` comma )
+    let pos = place pName
+    return $ maybePlace (Fncall [] (content pName) args) pos
+
 
 -----------------------------------------------------------------------------
 -- Terminals                                                               --
@@ -440,11 +452,15 @@ ident key = takeToken test
     test tok@(TokIdent t _) = if t == key then Just tok else Nothing
     test _ = Nothing
 
+
 -- | Parse an identifier token.
 identifier :: Parser (Placed Exp)
 identifier = takeToken test
   where
-    test (TokIdent s p) = Just $ Placed (Var s ParamIn Ordinary) p
+    test (TokIdent s p) =
+        if s `elem` keywords
+        then Nothing
+        else Just $ Placed (Var s ParamIn Ordinary) p
     test _ = Nothing
 
 
@@ -544,3 +560,11 @@ visibility = option Private (ident "public" *> return Public)
 -- | Terminal for determinism.
 determinism :: Parser Determinism
 determinism = option Det (ident "test" *> return SemiDet)
+
+
+keywords :: [String]
+keywords =
+    [ "if", "then", "else", "proc", "end", "use"
+    , "do",  "until", "unless", "or", "test", "import"
+    , "while", "foreign"
+    ]
