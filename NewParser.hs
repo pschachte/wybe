@@ -215,14 +215,21 @@ typeParser = do
 
 stmtParser :: Parser (Placed Stmt)
 stmtParser =  try assignmentParser
+          <|> doStmt
+          <|> forStmt
+          <|> whileStmt
+          <|> untilStmt
+          <|> unlessStmt
+          <|> whenStmt
+          <|> untilStmt
           <|> procCallParser
-          
+
 
 
 -- | A simple proc call stmt.
 procCallParser :: Parser (Placed Stmt)
 procCallParser = do
-    p <- identButNot ["end"]
+    p <- identButNot keywords
     return $ maybePlace (ProcCall [] (content p) Nothing []) (place p)
 
 
@@ -233,6 +240,50 @@ assignmentParser = do
     x <- simpleExpParser <* symbol "="
     y <- expParser
     return $ maybePlace (ProcCall [] "=" Nothing [x,y]) (place x)
+
+
+doStmt :: Parser (Placed Stmt)
+doStmt = do
+    pos <- tokenPosition <$> ident "do"
+    body <- many1 stmtParser <* ident "end"
+    return $ Placed (Loop body) pos
+
+
+forStmt :: Parser (Placed Stmt)
+forStmt = do
+    pos <- tokenPosition <$> ident "for"
+    cond <- expParser <* ident "in"
+    body <- expParser
+    return $ Placed (For cond body) pos
+
+
+whileStmt :: Parser (Placed Stmt)
+whileStmt = do
+    pos <- tokenPosition <$> ident "while"
+    e <- expParser
+    return $ Placed (Cond [] e [Unplaced Nop] [Unplaced Break]) pos
+
+
+untilStmt :: Parser (Placed Stmt)
+untilStmt = do
+    pos <- tokenPosition <$> ident "until"
+    e <- expParser
+    return $ Placed (Cond [] e [Unplaced Break] [Unplaced Nop]) pos
+
+
+unlessStmt :: Parser (Placed Stmt)
+unlessStmt = do
+    pos <- tokenPosition <$> ident "unless"
+    e <- expParser
+    return $ Placed (Cond [] e [Unplaced Nop] [Unplaced Next]) pos
+
+whenStmt :: Parser (Placed Stmt)
+whenStmt = do
+    pos <- tokenPosition <$> ident "when"
+    e <- expParser
+    return $ Placed (Cond [] e [Unplaced Next] [Unplaced Nop]) pos
+
+
 
 
 
@@ -392,7 +443,7 @@ listTailParser =
 -- ArgList -> '(' ExpList ')'
 funcCallParser :: Parser (Placed Exp)
 funcCallParser = do
-    pName <- identPlaced
+    pName <- identButNot keywords
     args <- between (leftBracket Paren) (rightBracket Paren)
             ( expParser `sepBy` comma )
     let pos = place pName
@@ -442,13 +493,13 @@ stringExp = takeToken test
 outParam :: Parser (Placed Exp)
 outParam = do
     pos <- tokenPosition <$> symbol "?"
-    s <- identString
+    s <- content <$> identButNot keywords
     return $ Placed (Var s ParamOut Ordinary) pos
 
 inoutParam :: Parser (Placed Exp)
 inoutParam = do
     pos <- tokenPosition <$> symbol "!"
-    s <- identString
+    s <- content <$> identButNot keywords
     return $ Placed (Var s ParamInOut Ordinary) pos
 
 
