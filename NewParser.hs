@@ -69,8 +69,7 @@ foo s = do
 -- | Parser entry for a Wybe program.
 itemParser :: Parser [Item]
 itemParser =
-    many procOrFuncParser
-
+    many procOrFuncParser <* eof
 
 
 
@@ -215,7 +214,9 @@ typeParser = do
 -----------------------------------------------------------------------------
 
 stmtParser :: Parser (Placed Stmt)
-stmtParser = procCallParser
+stmtParser =  try assignmentParser
+          <|> procCallParser
+          
 
 
 -- | A simple proc call stmt.
@@ -225,7 +226,13 @@ procCallParser = do
     return $ maybePlace (ProcCall [] (content p) Nothing []) (place p)
 
 
-
+-- | Introduces ambiguity on the token '=', as it is also a binary infix
+-- operator in a simple express
+assignmentParser :: Parser (Placed Stmt)
+assignmentParser = do
+    x <- simpleExpParser <* symbol "="
+    y <- expParser
+    return $ maybePlace (ProcCall [] "=" Nothing [x,y]) (place x)
 
 
 
@@ -316,7 +323,7 @@ operatorTable =
       , binary ">=" AssocLeft
       ]
     , [ binary "/=" AssocNone
-      , binary "="  AssocNone
+      -- , binary "="  AssocNone
       ]
     , [ prefix "not" ]
     , [ binary "and" AssocLeft ]
