@@ -46,7 +46,12 @@ main = do
     -- putStrLn "--------------------"
     case parse itemParser file stream of
         Left err -> print err
-        Right expr -> print expr
+        Right items -> printItems items
+
+
+printItems :: [Item] -> IO ()
+printItems =  mapM_ (putStrLn . (++ "\n-------") . show)
+
 
 
 foo :: String -> IO ()
@@ -62,24 +67,86 @@ foo s = do
 -----------------------------------------------------------------------------
 
 -- | Parser entry for a Wybe program.
-itemParser :: Parser Item
+itemParser :: Parser [Item]
 itemParser =
-    (,) <$> visibility <*> determinism >>= funcItemParser
+    many procOrFuncParser
+
+
+
+
+-----------------------------------------------------------------------------
+-- Top Level Items                                                         --
+-----------------------------------------------------------------------------
+
+-- | Parse a procedure or function, since both items share the same prefix of
+-- 'visibility' 'determinism'.
+procOrFuncParser :: Parser Item
+procOrFuncParser = do
+    v <- visibility
+    d <- determinism
+    procItemParser (v,d) <|> funcItemParser (v,d) <?> "Procedure/Function"
+
+
+-- | Procedure parser.
+-- Proc -> Vis Det 'proc' ProcProto ProcBody
+-- ProcProto -> FuncProcName OptProcParamlist UseResources
+-- FuncProcName -> ident | Symbol
+-- OptProcparamlist -> '(' ProcParams ')'
+-- ProcParam -> FlowDirection ident OptType
+procItemParser :: (Visibility, Determinism) -> Parser Item
+procItemParser (vis, det) = do
+    _ <- ident "proc"
+    -- Proc proto
+    name <- funcProcNamePlaced
+    params <- option [] $ between
+              ( leftBracket Paren )
+              ( rightBracket Paren )
+              ( sepBy procParamParser comma)
+    -- Resources
+    rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
+    let proto = ProcProto (content name) params rs
+    -- ProcBody
+    body <- many stmtParser <* ident "end"
+    -- Final
+    let pos = place name
+    return $
+        ProcDecl vis det False proto body pos
+
+
+-- | A procedure param parser.
+-- ProcParam -> FlowDirection ident OptType
+procParamParser :: Parser Param
+procParamParser = do
+    flow <- flowDirection
+    name <- identString
+    ty <- optType
+    return $ Param name ty flow Ordinary
 
 
 -- | Function parser.
+-- Func -> Vis Det func Proto Opttype '=' Exp
+-- Proto -> PlacedFuncName OptParamList UseResources
+-- PlacedFuncName -> ident | Symbol
+-- OptParamList ->   | '(' Params ')'
+-- Params -> ident OptType
+-- UseResources -> 'use' ResourceFlowSpecs
+-- ResourceFlowSpecs -> FlowDirection modIdent
+-- modIdent -> ident
+-- FlowDirection -> '?' | '!' |
 funcItemParser :: (Visibility, Determinism) -> Parser Item
 funcItemParser (vis, det) = do
     _ <- ident "func"
     -- Function prototype : FnProto
-    pName <- choice [identPlaced, symbolPlaced]
+    pName <- funcProcNamePlaced
     params <- option [] $ between
               ( leftBracket Paren )
               ( rightBracket Paren )
-              ( sepBy paramParser comma )
-    let proto = FnProto (content pName) params []
+              ( paramParser `sepBy` comma )
+    -- Resource flow specs, optional
+    rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
+    let proto = FnProto (content pName) params rs
     -- Optional return type
-    ty <- optTypeParser
+    ty <- optType
     -- Function body
     body <- symbol "=" *> expParser
     let pos = place pName
@@ -87,18 +154,44 @@ funcItemParser (vis, det) = do
         FuncDecl vis det False proto ty body pos
 
 
--- | Parser for a 'Param'.
+
+-- | Parser for a function 'Param'. The flow is implicitly 'ParamIn' unlike for
+-- procedures.
 -- Param -> ident OptType
 paramParser :: Parser Param
 paramParser = do
     name <- identString
-    ty <- optTypeParser
+    ty <- optType
     return $ Param name ty ParamIn Ordinary
 
 
+-- | Placed function name. A choice between an ident string or a symbol string.
+funcProcNamePlaced :: Parser (Placed String)
+funcProcNamePlaced = choice [identPlaced, symbolPlaced]
+
+
+-- | ResourceFlowSpecs -> FlowDirection modIdent
+resourceFlowSpec :: Parser ResourceFlowSpec
+resourceFlowSpec = do
+    flow <- flowDirection
+    m <- moduleIdent
+    return $ ResourceFlowSpec (ResourceSpec (init m) (last m)) flow
+
+
+-- | Optional flow direction symbol prefix.
+flowDirection :: Parser FlowDirection
+flowDirection =
+    option ParamIn $ (ParamIn <$ symbol "?") <|> (ParamOut <$ symbol "!")
+
+
+-- | Module name, period separated
+moduleIdent :: Parser ModSpec
+moduleIdent = identString `sepBy` symbol "."
+
+
 -- | Parser for an optional type.
-optTypeParser :: Parser TypeSpec
-optTypeParser = option AnyType (symbol ":" *> typeParser)
+optType :: Parser TypeSpec
+optType = option AnyType (symbol ":" *> typeParser)
 
 
 -- | Parser a type.
@@ -109,11 +202,31 @@ typeParser = do
     optTypeList <- option [] $ between
                    ( leftBracket Paren )
                    ( rightBracket Paren )
-                   ( sepBy typeParser comma )
+                   ( typeParser `sepBy` comma )
     case name of
         "any" -> return AnyType
         "invalid" -> return InvalidType
         _   -> return $ TypeSpec [] name optTypeList
+
+
+
+-----------------------------------------------------------------------------
+-- Statement Parsing                                                       --
+-----------------------------------------------------------------------------
+
+stmtParser :: Parser (Placed Stmt)
+stmtParser = procCallParser
+
+
+-- | A simple proc call stmt.
+procCallParser :: Parser (Placed Stmt)
+procCallParser = do
+    p <- identButNot ["end"]
+    return $ maybePlace (ProcCall [] (content p) Nothing []) (place p)
+
+
+
+
 
 
 -----------------------------------------------------------------------------
@@ -303,18 +416,26 @@ identifier = takeToken test
 
 
 
-
-
 identString :: Parser String
 identString = takeToken test
   where
     test (TokIdent s _) = Just s
     test _ = Nothing
 
+
 identPlaced :: Parser (Placed String)
 identPlaced = takeToken test
   where
     test (TokIdent s p) = Just $ Placed s p
+    test _ = Nothing
+
+
+-- | Parse an ident token if its string value is not in the list 'avoid'.
+identButNot :: [String] -> Parser (Placed String)
+identButNot avoid = takeToken test
+  where
+    test (TokIdent s p) =
+        if s `elem` avoid then Nothing else Just $ Placed s p
     test _ = Nothing
 
 
