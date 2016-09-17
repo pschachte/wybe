@@ -236,7 +236,12 @@ procCallParser = do
 -- | Parse expressions.
 expParser :: Parser (Placed Exp)
 expParser =  buildExpressionParser operatorTable expTerms
-         <?> "Expresions"
+         <?> "expresions"
+
+
+-- | Parse simple expressions.
+simpleExpParser :: Parser (Placed Exp)
+simpleExpParser = buildExpressionParser operatorTable simpleExpTerms
 
 
 -- | Exp -> 'if' Exp 'then' Exp 'else' Exp
@@ -251,18 +256,23 @@ ifExpParser = do
 
 
 expTerms :: Parser (Placed Exp)
-expTerms =  parenExp
-        <|> ifExpParser
-        <|> intExp
-        <|> floatExp
-        <|> charExp
-        <|> stringExp
-        <|> outParam
-        <|> inoutParam
-        <|> identifier
-        <|> emptyBrackets Bracket
-        <|> emptyBrackets Brace
-        <?> "Simple Expression Terms."
+expTerms =  ifExpParser
+        <|> simpleExpTerms
+
+
+simpleExpTerms :: Parser (Placed Exp)
+simpleExpTerms =  parenExp
+              <|> intExp
+              <|> floatExp
+              <|> charExp
+              <|> stringExp
+              <|> outParam
+              <|> inoutParam
+              <|> identifier
+              <|> try (emptyBrackets Bracket)
+              <|> (listExpParser <?> "list")
+              <|> try (emptyBrackets Brace)
+              <?> "simple expression terms."
 
 
 
@@ -346,6 +356,29 @@ prefix sym = Prefix (symOrIdent sym *> return (unFn sym))
 -- | Helper to parse a symbol or an identifier as the same semantic token.
 symOrIdent :: String -> Parser Token
 symOrIdent s = choice [ symbol s, ident s]
+
+
+-- | Parse a list.
+-- List -> '[' Exp ListTail
+listExpParser :: Parser (Placed Exp)
+listExpParser = do
+    pos <- tokenPosition <$> leftBracket Bracket
+    hd <- expParser
+    tl <- listTailParser
+    return $ Placed (Fncall [] "[|]" [hd, tl]) pos
+
+
+-- | Parse the tail of a list.
+-- ListTail -> ']' | ',' Exp ListTail
+listTailParser :: Parser (Placed Exp)
+listTailParser =
+        rightBracket Bracket *> return (Unplaced (Fncall [] "[]" []))
+    <|> comma *>
+        do hd <- expParser
+           tl <- listTailParser
+           return $ Unplaced (Fncall [] "[|]" [hd, tl])
+    <|> symbol "|" *> expParser <* symbol "]"
+
 
 -----------------------------------------------------------------------------
 -- Terminals                                                               --
