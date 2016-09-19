@@ -226,7 +226,8 @@ stmtParser =  try assignmentParser
 procCallParser :: Parser (Placed Stmt)
 procCallParser = do
     p <- identButNot keywords
-    return $ maybePlace (ProcCall [] (content p) Nothing []) (place p)
+    args <- option [] argListParser
+    return $ maybePlace (ProcCall [] (content p) Nothing args) (place p)
 
 
 -- | Introduces ambiguity on the token '=', as it is also a binary infix
@@ -308,9 +309,18 @@ ifExpParser = do
     return $ Placed (CondExp cond thenBody elseBody) pos
 
 
+letExpParser :: Parser (Placed Exp)
+letExpParser = do
+    pos <- tokenPosition <$> ident "let"
+    body <- many stmtParser <* ident "in"
+    e <- expParser
+    return $ Placed (Where body e) pos
+
+
 
 expTerms :: Parser (Placed Exp)
 expTerms =  ifExpParser
+        <|> letExpParser
         <|> simpleExpTerms
 
 
@@ -686,5 +696,5 @@ keywords :: [String]
 keywords =
     [ "if", "then", "else", "proc", "end", "use"
     , "do",  "until", "unless", "or", "test", "import"
-    , "while", "foreign"
+    , "while", "foreign", "in"
     ]
