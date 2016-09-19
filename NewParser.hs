@@ -96,7 +96,7 @@ procItemParser :: (Visibility, Determinism) -> Parser Item
 procItemParser (vis, det) = do
     _ <- ident "proc"
     -- Proc proto
-    name <- funcProcNamePlaced
+    name <- funcNamePlaced <?> "no keywords"
     params <- option [] $ between
               ( leftBracket Paren )
               ( rightBracket Paren )
@@ -136,7 +136,7 @@ funcItemParser :: (Visibility, Determinism) -> Parser Item
 funcItemParser (vis, det) = do
     _ <- ident "func"
     -- Function prototype : FnProto
-    pName <- funcProcNamePlaced
+    pName <- funcNamePlaced <?> "no keywords"
     params <- option [] $ between
               ( leftBracket Paren )
               ( rightBracket Paren )
@@ -163,10 +163,6 @@ paramParser = do
     ty <- optType
     return $ Param name ty ParamIn Ordinary
 
-
--- | Placed function name. A choice between an ident string or a symbol string.
-funcProcNamePlaced :: Parser (Placed String)
-funcProcNamePlaced = choice [identPlaced, symbolPlaced]
 
 
 -- | ResourceFlowSpecs -> FlowDirection modIdent
@@ -333,6 +329,7 @@ simpleExpTerms =  parenExp
               -- ident
               <|> identifier
               <|> try (emptyBrackets Brace)
+              <|> foreignExp
               <?> "simple expression terms."
 
 
@@ -453,6 +450,7 @@ listTailParser =
            return $ Unplaced (Fncall [] "[|]" [hd, tl])
     <|> symbol "|" *> expParser <* symbol "]"
 
+
 -- | Parse a function call.
 -- Exp -> ident ArgList
 -- ArgList -> '(' ExpList ')'
@@ -468,6 +466,19 @@ argListParser :: Parser [Placed Exp]
 argListParser =
     between (leftBracket Paren) (rightBracket Paren)
     ( expParser `sepBy` comma )
+
+
+
+foreignExp :: Parser (Placed Exp)
+foreignExp = do
+    pos <- tokenPosition <$> ident "foreign"
+    group <- identString
+    fname <- content <$> funcNamePlaced
+    flags <- option [] (identString `sepBy` comma)
+    args <- argListParser
+    return $ Placed (ForeignFn group fname flags args) pos
+
+
 
 -----------------------------------------------------------------------------
 -- Terminals                                                               --
@@ -586,6 +597,38 @@ symbolPlaced = takeToken test
   where
     test (TokSymbol s p) = Just $ Placed s p
     test _ = Nothing
+
+
+-- | Parses a function or procedure name.
+funcNamePlaced :: Parser (Placed String)
+funcNamePlaced = choice [ identButNot keywords
+                        , funcSymbolPlaced
+                        ]
+
+
+-- | Symbol function names.
+funcSymbolPlaced :: Parser (Placed String)
+funcSymbolPlaced =
+    let placeToken (TokIdent s p) = Placed s p
+        placeToken (TokSymbol s p) = Placed s p
+        placeToken _ = error "Only ident and symbol token expected."
+    in choice [ placeToken <$> symbolAny
+              , placeToken <$> ident "and"
+              , placeToken <$> ident "or"
+              , placeToken <$> ident "not"
+              -- []
+              , do t <- leftBracket Bracket <* rightBracket Bracket
+                   return $ Placed "[]" (tokenPosition t)
+              -- [|]
+              , do t <- leftBracket Bracket <* symbol "|"
+                        <* rightBracket Bracket
+                   return $ Placed "[|]" (tokenPosition t)
+              -- {}
+              , do t <- leftBracket Brace <* rightBracket Brace
+                   return $ Placed "{}" (tokenPosition t)
+              ]
+
+
 
 -- | Parse a comma token.
 comma :: Parser Token
