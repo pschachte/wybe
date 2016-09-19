@@ -328,7 +328,9 @@ simpleExpTerms =  parenExp
               <|> inoutParam
               <|> try (emptyBrackets Bracket)
               <|> (listExpParser <?> "list")
+              -- ident ArgList
               <|> try funcCallParser
+              -- ident
               <|> identifier
               <|> try (emptyBrackets Brace)
               <?> "simple expression terms."
@@ -356,7 +358,7 @@ typedExp = do
 -- deal with expression parsing without ambiguity.
 operatorTable :: WybeOperatorTable (Placed Exp)
 operatorTable =
-    [ [ binary "." AssocLeft ]
+    [ [ Postfix funcAppExp ]
     , [ prefix "-" ]
     , [ binary "^" AssocLeft ]
     , [ binary "*"   AssocLeft
@@ -374,7 +376,7 @@ operatorTable =
       , binary ">=" AssocLeft
       ]
     , [ binary "/=" AssocNone
-      -- , binary "="  AssocNone
+      , binary "="  AssocNone
       ]
     , [ prefix "not" ]
     , [ binary "and" AssocLeft ]
@@ -417,6 +419,19 @@ symOrIdent :: String -> Parser Token
 symOrIdent s = choice [ symbol s, ident s]
 
 
+-- | Postfix '.' operator. There are two variants of the postfix
+-- . operator. They are:
+-- . ident
+-- . ident ( ArgList )
+funcAppExp :: Parser (Placed Exp -> Placed Exp)
+funcAppExp = do
+    nm <- content <$> (symbol "." *> identButNot keywords)
+    optargs <- option [] argListParser
+    return $ \a ->
+        maybePlace (Fncall [] nm (a:optargs)) (place a)
+
+
+
 -- | Parse a list.
 -- List -> '[' Exp ListTail
 listExpParser :: Parser (Placed Exp)
@@ -444,11 +459,15 @@ listTailParser =
 funcCallParser :: Parser (Placed Exp)
 funcCallParser = do
     pName <- identButNot keywords
-    args <- between (leftBracket Paren) (rightBracket Paren)
-            ( expParser `sepBy` comma )
+    args <- argListParser
     let pos = place pName
     return $ maybePlace (Fncall [] (content pName) args) pos
 
+
+argListParser :: Parser [Placed Exp]
+argListParser =
+    between (leftBracket Paren) (rightBracket Paren)
+    ( expParser `sepBy` comma )
 
 -----------------------------------------------------------------------------
 -- Terminals                                                               --
