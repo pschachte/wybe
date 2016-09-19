@@ -219,6 +219,7 @@ stmtParser =  try assignmentParser
           <|> whenStmt
           <|> untilStmt
           <|> procCallParser
+          <|> ifStmtParser
 
 
 
@@ -280,6 +281,23 @@ whenStmt = do
     e <- expParser
     return $ Placed (Cond [] e [Unplaced Next] [Unplaced Nop]) pos
 
+
+ifStmtParser :: Parser (Placed Stmt)
+ifStmtParser = do
+    pos <- tokenPosition <$> ident "if"
+    cases <- (ifCaseParser `sepBy` symbol "|") <* ident "end"
+    let final = foldr (\(cond, body) rest ->
+                           [Unplaced (Cond [] cond body rest)]) [] cases
+    if null final
+        then unexpected "if cases statement structure."
+        else return $ Placed ((content . head) final) pos
+
+
+ifCaseParser :: Parser (Placed Exp, [Placed Stmt])
+ifCaseParser = do
+    cond <- expParser <* symbol "::"
+    body <- many stmtParser
+    return (cond, body)
 
 
 
