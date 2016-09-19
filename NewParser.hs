@@ -283,6 +283,7 @@ stmtParser =  try assignmentParser
           <|> unlessStmt
           <|> whenStmt
           <|> untilStmt
+          <|> testStmt
           <|> procCallParser
           <|> ifStmtParser
 
@@ -347,6 +348,7 @@ whenStmt = do
     return $ Placed (Cond [] e [Unplaced Next] [Unplaced Nop]) pos
 
 
+-- | If statement parser.
 ifStmtParser :: Parser (Placed Stmt)
 ifStmtParser = do
     pos <- tokenPosition <$> ident "if"
@@ -365,6 +367,12 @@ ifCaseParser = do
     return (cond, body)
 
 
+-- | Test statement parser.
+testStmt :: Parser (Placed Stmt)
+testStmt = do
+    pos <- tokenPosition <$> ident "test"
+    rel <- relExpParser
+    return $ Placed (Test [] rel) pos
 
 
 -----------------------------------------------------------------------------
@@ -373,13 +381,20 @@ ifCaseParser = do
 
 -- | Parse expressions.
 expParser :: Parser (Placed Exp)
-expParser =  buildExpressionParser operatorTable expTerms
+expParser =  buildExpressionParser completeOperatorTable expTerms
          <?> "expresions"
 
 
 -- | Parse simple expressions.
 simpleExpParser :: Parser (Placed Exp)
-simpleExpParser = buildExpressionParser operatorTable simpleExpTerms
+simpleExpParser =  buildExpressionParser completeOperatorTable simpleExpTerms
+               <?> "simple expressions"
+
+-- | Parser for expressions built over the relational operators table and
+-- simple expression terms.
+relExpParser :: Parser (Placed Exp)
+relExpParser =  buildExpressionParser relOperatorTable simpleExpTerms
+            <?> "relational expressions"
 
 
 -- | Exp -> 'if' Exp 'then' Exp 'else' Exp
@@ -435,20 +450,16 @@ parenExp = do
     return $ Placed e pos
 
 
-typedExp :: Parser (Placed Exp)
-typedExp = do
-    pExp <- expParser <* symbol ":"
-    ty <- typeParser
-    return $ maybePlace (Typed (content pExp) ty False) (place pExp)
 
 
 
 
 -- | Table defining operator precedence and associativeness, helps parsec to
 -- deal with expression parsing without ambiguity.
-operatorTable :: WybeOperatorTable (Placed Exp)
-operatorTable =
+completeOperatorTable :: WybeOperatorTable (Placed Exp)
+completeOperatorTable =
     [ [ Postfix funcAppExp ]
+    , [ Postfix typedExp ]
     , [ prefix "-" ]
     , [ binary "^" AssocLeft ]
     , [ binary "*"   AssocLeft
@@ -472,6 +483,18 @@ operatorTable =
     , [ binary "and" AssocLeft ]
     , [ binary "or"  AssocLeft ]
     ]
+
+-- | Wybe relational operators table, separated out for test statements.
+relOperatorTable :: WybeOperatorTable (Placed Exp)
+relOperatorTable =
+    [ [ binary ">"  AssocLeft
+      , binary "<"  AssocLeft
+      , binary "<=" AssocLeft
+      , binary ">=" AssocLeft
+      ]
+    ]
+
+
 
 
 -- | Helper to make a placed function call expression out of n number of
@@ -519,6 +542,13 @@ funcAppExp = do
     optargs <- option [] argListParser
     return $ \a ->
         maybePlace (Fncall [] nm (a:optargs)) (place a)
+
+
+typedExp :: Parser (Placed Exp -> Placed Exp)
+typedExp = do
+    pos <- tokenPosition <$> symbol ":"
+    ty <- typeParser
+    return $ \e -> Placed (Typed (content e) ty False) pos
 
 
 
