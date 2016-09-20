@@ -36,7 +36,7 @@ type WybeOperatorTable a = [[ WybeOperator a ]]
 
 main :: IO ()
 main = do
-    let file = "wybelibs/wybe.wybe"
+    let file = "test-cases/numbers.wybe"
     stream <- fileTokens file
     -- print stream
     -- putStrLn "--------------------"
@@ -548,9 +548,9 @@ funcAppExp = do
 
 typedExp :: Parser (Placed Exp -> Placed Exp)
 typedExp = do
-    pos <- tokenPosition <$> symbol ":"
+    _ <- symbol ":"
     ty <- typeParser
-    return $ \e -> Placed (Typed (content e) ty False) pos
+    return $ \e -> maybePlace (Typed (content e) ty False) (place e)
 
 
 
