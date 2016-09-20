@@ -14,17 +14,12 @@ the old happy based parser.
 
 module NewParser where
 
-{-
-NOTES:
-Parser Type : ParsecT [Token] () Identity a
--}
 
 import AST hiding (option)
-import Control.Monad.Identity
+import Control.Monad.Identity (Identity)
 import Scanner
 import Text.Parsec
 import Text.Parsec.Expr
-import Text.Parsec.Pos
 
 
 
@@ -41,7 +36,7 @@ type WybeOperatorTable a = [[ WybeOperator a ]]
 
 main :: IO ()
 main = do
-    let file = "tokentest.wybe"
+    let file = "wybelibs/wybe.wybe"
     stream <- fileTokens file
     -- print stream
     -- putStrLn "--------------------"
@@ -49,31 +44,25 @@ main = do
         Left err -> print err
         Right is -> printItems is
 
-
+-- | Parse a Wybe module.
 parseWybe :: [Token] -> FilePath -> Either ParseError [Item]
-parseWybe toks file = parse wybeModule file toks
+parseWybe toks file = parse (itemParser <* eof) file toks
 
 
 printItems :: [Item] -> IO ()
 printItems =  mapM_ (putStrLn . (++ "\n-------") . show)
 
-
-
-foo :: String -> IO ()
-foo s = do
-    let stream = tokenise (initialPos "<stdin>") s
-    case parse wybeModule "<stdin>" stream of
+writeItems :: FilePath -> FilePath -> IO ()
+writeItems file to = do
+    stream <- fileTokens file
+    case parseWybe stream file of
         Left err -> print err
-        Right expr -> print expr
+        Right is -> writeFile to (show is)
 
 
 -----------------------------------------------------------------------------
 -- Grammar                                                                 --
 -----------------------------------------------------------------------------
-
-wybeModule :: Parser [Item]
-wybeModule = itemParser <* eof
-
 
 -- | Parser entry for a Wybe program.
 itemParser :: Parser [Item]
@@ -87,6 +76,7 @@ topLevelStmtItem = do
     return $ StmtDecl (content st) (place st)
 
 
+-- | Parse 'Item's with the common 'Visibility' prefix.
 visibilityItem :: Parser Item
 visibilityItem = do
     v <- visibility
@@ -163,7 +153,7 @@ procOrFuncItemParser v = do
 -- ProcParam -> FlowDirection ident OptType
 procItemParser :: Visibility -> Determinism -> Parser Item
 procItemParser vis det = do
-    _ <- ident "proc"
+    pos <- tokenPosition <$> ident "proc"
     -- Proc proto
     name <- funcNamePlaced <?> "no keywords"
     params <- option [] $ betweenB Paren (procParamParser `sepBy` comma)
@@ -173,9 +163,8 @@ procItemParser vis det = do
     -- ProcBody
     body <- many stmtParser <* ident "end"
     -- Final
-    let pos = place name
     return $
-        ProcDecl vis det False proto body pos
+        ProcDecl vis det False proto body (Just pos)
 
 
 -- | A procedure param parser.
@@ -200,16 +189,14 @@ procParamParser = do
 -- FlowDirection -> '?' | '!' |
 funcItemParser :: Visibility -> Determinism -> Parser Item
 funcItemParser vis det = do
-    _ <- ident "func"
-    protoP <- funcProtoParser
-    let proto = content protoP
-    let pos = place protoP
+    pos <- tokenPosition <$> ident "func"
+    proto <- content <$> funcProtoParser
     -- Optional return type
     ty <- optType
     -- Function body
     body <- symbol "=" *> expParser
     return $
-        FuncDecl vis det False proto ty body pos
+        FuncDecl vis det False proto ty body (Just pos)
 
 
 -- | Function prototype parser : FnProto
@@ -244,7 +231,7 @@ resourceFlowSpec = do
 -- | Optional flow direction symbol prefix.
 flowDirection :: Parser FlowDirection
 flowDirection =
-    option ParamIn $ (ParamIn <$ symbol "?") <|> (ParamOut <$ symbol "!")
+    option ParamIn $ (ParamOut <$ symbol "?") <|> (ParamInOut <$ symbol "!")
 
 
 -- | Module name, period separated
@@ -275,8 +262,8 @@ typeParser = do
 -----------------------------------------------------------------------------
 
 stmtParser :: Parser (Placed Stmt)
-stmtParser =  try assignmentParser
-          <|> doStmt
+stmtParser =  
+          doStmt
           <|> forStmt
           <|> whileStmt
           <|> untilStmt
@@ -286,6 +273,7 @@ stmtParser =  try assignmentParser
           <|> testStmt
           <|> procCallParser
           <|> ifStmtParser
+          <|> expStmtParser 
 
 
 
@@ -297,13 +285,7 @@ procCallParser = do
     return $ maybePlace (ProcCall [] (content p) Nothing args) (place p)
 
 
--- | Introduces ambiguity on the token '=', as it is also a binary infix
--- operator in a simple express
-assignmentParser :: Parser (Placed Stmt)
-assignmentParser = do
-    x <- simpleExpParser <* symbol "="
-    y <- expParser
-    return $ maybePlace (ProcCall [] "=" Nothing [x,y]) (place x)
+
 
 
 doStmt :: Parser (Placed Stmt)
@@ -374,6 +356,26 @@ testStmt = do
     rel <- relExpParser
     return $ Placed (Test [] rel) pos
 
+
+-- | Parse expression statement.
+expStmtParser :: Parser (Placed Stmt)
+expStmtParser = try foreignCallStmt
+             <|> try assignmentParser
+
+
+foreignCallStmt :: Parser (Placed Stmt)
+foreignCallStmt = do
+    Placed (ForeignFn a b c d) pos <- foreignExp
+    return $ Placed (ForeignCall a b c d) pos
+
+
+-- | Introduces ambiguity on the token '=', as it is also a binary infix
+-- operator in a simple express
+assignmentParser :: Parser (Placed Stmt)
+assignmentParser = do
+    x <- simpleExpTerms <* symbol "="
+    y <- expParser
+    return $ maybePlace (ProcCall [] "=" Nothing [x,y]) (place x)    
 
 -----------------------------------------------------------------------------
 -- Expression Parsing                                                      --
@@ -602,7 +604,7 @@ foreignExp = do
 
 
 -----------------------------------------------------------------------------
--- Terminals                                                               --
+-- Terminal helpers                                                        --
 -----------------------------------------------------------------------------
 
 -- | Tests an individual token.
@@ -748,8 +750,6 @@ comma = takeToken test
 
 
 
-
-
 -- | Parse a left bracket of style 'bs'.
 leftBracket :: BracketStyle -> Parser Token
 leftBracket bs = takeToken test
@@ -780,6 +780,8 @@ emptyBrackets bs = do
             Brace -> "{}"
     return $ Placed (Fncall [] fnname []) pos
 
+
+-- | Helper to run a parser between enclosing brackets of the given style.
 betweenB :: BracketStyle -> Parser a -> Parser a
 betweenB bs = between (leftBracket bs) (rightBracket bs)
 
@@ -794,9 +796,10 @@ determinism :: Parser Determinism
 determinism = option Det (ident "test" *> return SemiDet)
 
 
+-- | Wybe keywords to exclude from identitfier tokens conditionally.
 keywords :: [String]
 keywords =
     [ "if", "then", "else", "proc", "end", "use"
     , "do",  "until", "unless", "or", "test", "import"
-    , "while", "foreign", "in"
+    , "while", "foreign", "in", "end"
     ]
