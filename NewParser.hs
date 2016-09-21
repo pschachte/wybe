@@ -101,6 +101,7 @@ visibilityItem = do
         <|> typeItemParser v
         <|> resourceItemParser v
         <|> useItemParser v
+        <|> fromUseItemParser v
 
 
 -----------------------------------------------------------------------------
@@ -150,6 +151,15 @@ useItemParser :: Visibility -> Parser Item
 useItemParser v = do
     pos <- tokenPosition <$> ident "use"
     ImportMods v <$> (modSpecParser `sepBy` comma) <*> return (Just pos)
+
+
+fromUseItemParser :: Visibility -> Parser Item
+fromUseItemParser v = do
+    pos <- tokenPosition <$> ident "from"
+    m <- modSpecParser <* ident "use"
+    ids <- identString `sepBy` comma
+    return $ ImportItems v m ids (Just pos)
+
 
 
 
