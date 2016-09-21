@@ -19,7 +19,10 @@ import AST hiding (option)
 import Control.Monad.Identity (Identity)
 import Scanner
 import Text.Parsec
+import qualified Parser as OldParser
 import Text.Parsec.Expr
+import Data.Algorithm.Diff (getGroupedDiff)
+import Data.Algorithm.DiffOutput (ppDiff)
 
 
 
@@ -36,7 +39,7 @@ type WybeOperatorTable a = [[ WybeOperator a ]]
 
 main :: IO ()
 main = do
-    let file = "test-cases/numbers.wybe"
+    let file = "test-cases/type_list.wybe"
     stream <- fileTokens file
     -- print stream
     -- putStrLn "--------------------"
@@ -49,6 +52,8 @@ parseWybe :: [Token] -> FilePath -> Either ParseError [Item]
 parseWybe toks file = parse (itemParser <* eof) file toks
 
 
+------------- Some testing helpers --------------------
+
 printItems :: [Item] -> IO ()
 printItems =  mapM_ (putStrLn . (++ "\n-------") . show)
 
@@ -59,6 +64,17 @@ writeItems file to = do
         Left err -> print err
         Right is -> writeFile to (show is)
 
+
+compareOld :: FilePath -> IO ()
+compareOld file = do
+    stream <- fileTokens file
+    case parseWybe stream file of
+        Left err -> print err
+        Right is -> do
+            let old = OldParser.parse stream
+            let diff = getGroupedDiff (map show old) (map show is)
+            putStrLn "Comparing..."
+            putStrLn $ ppDiff diff
 
 -----------------------------------------------------------------------------
 -- Grammar                                                                 --
@@ -262,7 +278,7 @@ typeParser = do
 -----------------------------------------------------------------------------
 
 stmtParser :: Parser (Placed Stmt)
-stmtParser =  
+stmtParser =
           doStmt
           <|> forStmt
           <|> whileStmt
@@ -273,7 +289,7 @@ stmtParser =
           <|> testStmt
           <|> procCallParser
           <|> ifStmtParser
-          <|> expStmtParser 
+          <|> expStmtParser
 
 
 
@@ -375,7 +391,7 @@ assignmentParser :: Parser (Placed Stmt)
 assignmentParser = do
     x <- simpleExpTerms <* symbol "="
     y <- expParser
-    return $ maybePlace (ProcCall [] "=" Nothing [x,y]) (place x)    
+    return $ maybePlace (ProcCall [] "=" Nothing [x,y]) (place x)
 
 -----------------------------------------------------------------------------
 -- Expression Parsing                                                      --
@@ -432,8 +448,7 @@ simpleExpTerms =  parenExp
               <|> stringExp
               <|> outParam
               <|> inoutParam
-              <|> try (emptyBrackets Bracket)
-              <|> (listExpParser <?> "list")
+              <|> listExpParser
               -- ident ArgList
               <|> try funcCallParser
               -- ident
@@ -484,6 +499,7 @@ completeOperatorTable =
     , [ prefix "not" ]
     , [ binary "and" AssocLeft ]
     , [ binary "or"  AssocLeft ]
+    , [ Postfix whereBodyParser]
     ]
 
 -- | Wybe relational operators table, separated out for test statements.
@@ -553,12 +569,25 @@ typedExp = do
     return $ \e -> maybePlace (Typed (content e) ty False) (place e)
 
 
+whereBodyParser :: Parser (Placed Exp -> Placed Exp)
+whereBodyParser = do
+    body <- ident "where" *> many1 stmtParser <* ident "end"
+    return $ \e -> maybePlace (Where body e) (place e)
 
--- | Parse a list.
+
+-- | Parse all expressions beginning with the terminal "[".
 -- List -> '[' Exp ListTail
+-- Empty List -> '[' ']'
+-- List Cons -> '[' '|' ']'
 listExpParser :: Parser (Placed Exp)
 listExpParser = do
-    pos <- tokenPosition <$> leftBracket Bracket
+    pos <- (tokenPosition <$> leftBracket Bracket) <?> "list"
+    rightBracket Bracket *> return (Placed (Fncall [] "[]" []) pos)
+        <|> listHeadParser pos
+
+
+listHeadParser :: SourcePos -> Parser (Placed Exp)
+listHeadParser pos = do
     hd <- expParser
     tl <- listTailParser
     return $ Placed (Fncall [] "[|]" [hd, tl]) pos
@@ -573,7 +602,7 @@ listTailParser =
         do hd <- expParser
            tl <- listTailParser
            return $ Unplaced (Fncall [] "[|]" [hd, tl])
-    <|> symbol "|" *> expParser <* symbol "]"
+    <|> symbol "|" *> expParser <* rightBracket Bracket
 
 
 -- | Parse a function call.
@@ -727,16 +756,18 @@ funcSymbolPlaced =
               , placeToken <$> ident "and"
               , placeToken <$> ident "or"
               , placeToken <$> ident "not"
-              -- []
-              , do t <- leftBracket Bracket <* rightBracket Bracket
-                   return $ Placed "[]" (tokenPosition t)
-              -- [|]
-              , do t <- leftBracket Bracket <* symbol "|"
-                        <* rightBracket Bracket
-                   return $ Placed "[|]" (tokenPosition t)
+
+              -- [] or [|]
+              , do p <- tokenPosition <$> leftBracket Bracket
+                   rightBracket Bracket *> return (Placed "[]" p)
+                       <|> symbol "|"
+                       *>  rightBracket Bracket
+                       *>  return (Placed "[|]" p)
+
               -- {}
-              , do t <- leftBracket Brace <* rightBracket Brace
-                   return $ Placed "{}" (tokenPosition t)
+              , tokenPosition <$> leftBracket Brace
+                  >>= \p -> return (Placed "{}" p)
+                  <*  rightBracket Brace
               ]
 
 
