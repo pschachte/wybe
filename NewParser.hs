@@ -39,7 +39,7 @@ type WybeOperatorTable a = [[ WybeOperator a ]]
 
 main :: IO ()
 main = do
-    let file = "test-cases/type_list.wybe"
+    let file = "test-cases/tests.wybe"
     stream <- fileTokens file
     -- print stream
     -- putStrLn "--------------------"
@@ -312,8 +312,6 @@ procCallParser = do
 
 
 
-
-
 doStmt :: Parser (Placed Stmt)
 doStmt = do
     pos <- tokenPosition <$> ident "do"
@@ -380,7 +378,13 @@ testStmt :: Parser (Placed Stmt)
 testStmt = do
     pos <- tokenPosition <$> ident "test"
     rel <- relExpParser
-    return $ Placed (Test [] rel) pos
+    let e = case rel of
+                Placed (Var s ParamIn Ordinary) p ->
+                    Placed (Fncall [] s []) p
+                _ ->
+                    rel
+    return $ Placed (Test [] e) pos
+    
 
 
 -- | Parse expression statement.
@@ -842,5 +846,5 @@ keywords :: [String]
 keywords =
     [ "if", "then", "else", "proc", "end", "use"
     , "do",  "until", "unless", "or", "test", "import"
-    , "while", "foreign", "in", "end"
+    , "while", "foreign", "in", "when"
     ]
