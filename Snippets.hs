@@ -4,7 +4,8 @@
 --  Purpose  : Convenience functions for generation of Wybe AST
 --  Copyright: 2016 Peter Schachte.  All rights reserved.
 
-module Snippets (intType, intCast, boolType, boolCast, varSet, varGet, castTo,
+module Snippets (intType, intCast, boolType, boolCast, varSet, varGet,
+                 boolVarSet, boolVarGet, intVarSet, intVarGet, castTo,
                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
                 comparison, comparisonExp) where
 
@@ -33,6 +34,22 @@ varSet name = Var name ParamOut Ordinary
 -- |An input variable reference (rvalue)
 varGet :: Ident -> Exp
 varGet name = Var name ParamIn Ordinary
+
+-- |A Boolean typed output variable reference (lvalue)
+boolVarSet :: Ident -> Exp
+boolVarSet name = Typed (varSet name) boolType False
+
+-- |A Boolean typed input variable reference (rvalue)
+boolVarGet :: Ident -> Exp
+boolVarGet name = Typed (varGet name) boolType False
+
+-- |An integer type output variable reference (lvalue)
+intVarSet :: Ident -> Exp
+intVarSet name = Typed (varSet name) intType False
+
+-- |An integer type input variable reference (rvalue)
+intVarGet :: Ident -> Exp
+intVarGet name = Typed (varGet name) intType False
 
 -- |An expression to cast a value to the specified type
 castTo :: Exp -> TypeSpec -> Exp
