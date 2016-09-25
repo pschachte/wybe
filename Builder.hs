@@ -64,6 +64,7 @@ import           Options                   (LogSelection (..), Options,
                                             optForce, optForceAll, optLibDirs,
                                             optUseStd)
 import           Parser                    (parse)
+import           NewParser                 (parseWybe)
 import           Resources                 (resourceCheckMod, resourceCheckProc)
 import           Scanner                   (fileTokens)
 import           System.Directory
@@ -214,7 +215,8 @@ buildModuleIfNeeded force modspec possDirs = do
 buildModule :: ModSpec -> FilePath -> Compiler ()
 buildModule mspec srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
-    let parseTree = parse tokens
+    -- let parseTree = parse tokens
+    let parseTree = either (shouldnt . show) id $ parseWybe tokens srcfile
     compileModule srcfile mspec Nothing parseTree
     -- XXX Rethink parse tree hashing
     -- let currHash = hashItems parseTree
