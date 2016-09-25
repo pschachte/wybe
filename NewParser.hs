@@ -502,10 +502,10 @@ completeOperatorTable =
       ]
     , [ binary "++" AssocRight ]
     , [ binary' ".." AssocNone [ Unplaced (IntValue 1) ] ]
-    , [ binary ">"  AssocLeft
-      , binary "<"  AssocLeft
-      , binary "<=" AssocLeft
-      , binary ">=" AssocLeft
+    , [ binary ">"  AssocNone
+      , binary "<"  AssocNone
+      , binary "<=" AssocNone
+      , binary ">=" AssocNone
       ]
     , [ binary "/=" AssocNone
       , binary "="  AssocNone
@@ -519,10 +519,10 @@ completeOperatorTable =
 -- | Wybe relational operators table, separated out for test statements.
 relOperatorTable :: WybeOperatorTable (Placed Exp)
 relOperatorTable =
-    [ [ binary ">"  AssocLeft
-      , binary "<"  AssocLeft
-      , binary "<=" AssocLeft
-      , binary ">=" AssocLeft
+    [ [ binary ">"  AssocNone
+      , binary "<"  AssocNone
+      , binary "<=" AssocNone
+      , binary ">=" AssocNone
       ]
     ]
 
