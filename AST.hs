@@ -109,7 +109,7 @@ data Item
      | ProcDecl Visibility Determinism Bool ProcProto [Placed Stmt] OptPos
      -- | CtorDecl Visibility FnProto OptPos
      | StmtDecl Stmt OptPos
-     deriving Generic
+     deriving (Generic, Eq)
 
 -- |The visibility of a file item.  We only support public and private.
 data Visibility = Public | Private
@@ -125,7 +125,7 @@ defaultTypeRepresentation = "pointer"
 
 data TypeImpln = TypeRepresentation TypeRepresentation
                | TypeCtors Visibility [Placed FnProto]
-               deriving Generic
+               deriving (Generic, Eq)
 
 
 -- |Combine two visibilities, taking the most visible.
@@ -147,7 +147,7 @@ isPublic = (==Public)
 
 -- |A type prototype consists of a type name and zero or more type parameters.
 data TypeProto = TypeProto Ident [Ident]
-                 deriving Generic
+                 deriving (Generic, Eq)
 
 -- |A function prototype consists of a function name and zero or more formal
 --  parameters.
