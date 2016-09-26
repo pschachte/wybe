@@ -45,7 +45,12 @@ TESTCASES = $(wildcard test-cases/*.wybe)
 test:	wybemk
 	@rm -f ERRS ; touch ERRS
 	@rm -f test-cases/*.bc
-	@printf "testing"
+	@rm -f test-cases/*.o
+	@rm -f wybelibs/*.o
+	@printf "Testing building wybe library..."
+	@gtimeout 2 ./wybemk --force-all --no-std wybelibs/wybe.o
+	@printf "Done.\n"
+	@printf "Testing test-cases "
 	@ time ( for f in $(TESTCASES) ; do \
 	    out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
 	    log=`echo "$$f" | sed 's/.wybe$$/.log/'` ; \
