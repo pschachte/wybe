@@ -75,4 +75,4 @@ test:	wybemk
 	fi )
 
 clean:
-	rm -f *.o *.hi Parser.hs Version.lhs *.pdf *.aux
+	rm -f *.o *.hi Parser.hs Version.lhs *.pdf *.aux wybelibs/*.o test-cases/*.o
