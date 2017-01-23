@@ -39,7 +39,7 @@ type WybeOperatorTable a = [[ WybeOperator a ]]
 
 main :: IO ()
 main = do
-    let file = "test-cases/tests.wybe"
+    let file = "test-cases/update.wybe"
     stream <- fileTokens file
     -- print stream
     -- putStrLn "--------------------"
@@ -311,6 +311,23 @@ procCallParser = do
     return $ maybePlace (ProcCall [] (content p) Nothing args) (place p)
 
 
+-- procCallTailParser :: String -> Parser (Placed Stmt)
+-- procCallTailParser pname = do
+--     option [] (argListParser <|> setParser)
+
+
+-- | Parse a set notation statement block.
+-- { A | B | C }  --> insert(A, insert(B, insert(C, {})))
+setParser :: OptPos -> Parser (Placed Stmt)
+setParser p = do
+    let sep = choice [ symbol "|", symbol "," ]
+    let insertSet a b = Unplaced $ Fncall [] "insert" [a, b]
+    let emptySet = Unplaced (Fncall [] "{}" [])
+    pexps <- betweenB Brace (expParser `sepBy` sep)
+    -- folding
+    let final = foldr insertSet emptySet pexps
+    return $ maybePlace ((expToStmt . content) final) p
+
 
 doStmt :: Parser (Placed Stmt)
 doStmt = do
@@ -384,7 +401,7 @@ testStmt = do
                 _ ->
                     rel
     return $ Placed (Test [] e) pos
-    
+
 
 
 -- | Parse expression statement.
