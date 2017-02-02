@@ -755,6 +755,10 @@ bodyCalls (pstmt:pstmts) detism = do
         -- need to handle move instructions:
         ForeignCall{} -> return $ (pstmt,detism):rest
         TestBool _ -> return rest
+        And stmts -> bodyCalls stmts detism
+        Or stmts -> bodyCalls stmts detism
+        Not stmt' -> bodyCalls [stmt'] detism
+        Fail -> return rest
         Nop -> return rest
         Cond cond thn els -> do
           -- modify $ constrainVarType (ReasonCond pos)
@@ -1602,6 +1606,12 @@ checkStmtTyped name pos (ForeignCall _ pname _ args) ppos =
     mapM_ (checkArgTyped name pos pname ppos) $
           zip [1..] $ List.map content args
 checkStmtTyped _ _ (TestBool _) _ = return ()
+checkStmtTyped name pos (And stmts) ppos = do
+    mapM_ (placedApply (checkStmtTyped name pos)) stmts
+checkStmtTyped name pos (Or stmts) ppos = do
+    mapM_ (placedApply (checkStmtTyped name pos)) stmts
+checkStmtTyped name pos (Not stmt) ppos = do
+    placedApply (checkStmtTyped name pos) stmt
 checkStmtTyped name pos (Cond ifstmts thenstmts elsestmts) ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) ifstmts
     mapM_ (placedApply (checkStmtTyped name pos)) thenstmts
@@ -1614,6 +1624,7 @@ checkStmtTyped name pos (For itr gen) ppos = do
     checkExpTyped name pos ("for generator" ++ showMaybeSourcePos ppos) $
                   content itr
 checkStmtTyped _ _ Nop _ = return ()
+checkStmtTyped _ _ Fail _ = return ()
 checkStmtTyped _ _ Break _ = return ()
 checkStmtTyped _ _ Next _ = return ()
 

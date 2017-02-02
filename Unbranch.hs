@@ -289,7 +289,7 @@ unbranchStmts detism (stmt:stmts) = do
 --   The variables in scope at the start of a loop are the ones in scope at
 --   *every* call to the generated proc. Since variables defined before the
 --   loop can be redefined in the loop but cannot become "lost", this means
---   the intersecion of the variables available at all calls is just the
+--   the intersection of the variables available at all calls is just the
 --   set of variables defined at the start of the loop.  The inputs to the
 --   proc generated for the code following a loop is the set of variables
 --   defined at every 'break' in the loop.
@@ -319,6 +319,26 @@ unbranchStmt detism stmt@(TestBool var) pos stmts = do
     logUnbranch $ "Unbranching primitive test " ++ show stmt
     stmts' <- unbranchStmts detism stmts
     return $ (maybePlace stmt pos):stmts'
+unbranchStmt detism stmt@(And conj) pos stmts = do
+    logUnbranch "Unbranching conjunction"
+    conj' <- unbranchStmts detism conj
+    stmts' <- unbranchStmts detism stmts
+    return $ maybePlace (And conj') pos:stmts'
+unbranchStmt detism stmt@(Or disj) pos stmts = do
+    logUnbranch "Unbranching conjunction"
+    disjVars <- gets brVars
+    disj' <- mapM
+             (\s -> do
+                   setVars disjVars
+                   unbranchStmt detism (content s) (place s) [])
+             disj
+    stmts' <- unbranchStmts detism stmts
+    return $ maybePlace (Or $ concat disj') pos:stmts'
+unbranchStmt detism stmt@(Not neg) pos stmts = do
+    logUnbranch "Unbranching negation"
+    [neg'] <- unbranchStmt detism (content neg) (place neg) []
+    stmts' <- unbranchStmts detism stmts
+    return $ maybePlace (Not neg') pos:stmts'
 unbranchStmt detism (Cond tstStmts thn els) pos stmts = do
     logUnbranch "Unbranching a conditional"
     beforeVars <- gets brVars
@@ -390,6 +410,10 @@ unbranchStmt detism (Loop body) pos stmts = do
     return [next]
 unbranchStmt detism (For _ _) _ _ =
     shouldnt "flattening should have removed For statements"
+unbranchStmt detism (Fail) pos stmts = do
+    logUnbranch "Unbranching a Fail"
+    stmts' <- unbranchStmts detism stmts
+    return $ maybePlace Fail pos:stmts'
 unbranchStmt detism (Nop) _ stmts = do
     logUnbranch "Unbranching a Nop"
     unbranchStmts detism stmts         -- might as well filter out Nops

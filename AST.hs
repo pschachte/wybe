@@ -1610,16 +1610,23 @@ data Stmt
      = ProcCall ModSpec Ident (Maybe Int) Determinism [Placed Exp]
      -- |A foreign call, with language, tags, and args
      | ForeignCall Ident Ident [Ident] [Placed Exp]
-     -- |Test the (Boolean) var, and fail if false; can only be used in a
-     -- SemiDet context
+     -- |A test that succeeds iff all the enclosed tests succeed; enclosed
+     -- statements that aren't tests are honorary successes.
      | TestBool Ident
+     -- |A test that succeeds iff all the enclosed tests succeed; enclosed
+     -- statements that aren't tests are honorary successes.
+     | And [Placed Stmt]
+     -- |A test that fails iff all the enclosed tests fail; enclosed
+     -- statements that aren't tests are honorary failures.
+     | Or [Placed Stmt]
+     -- |A test that fails iff the enclosed test succeeds
+     | Not (Placed Stmt)
+     -- |A test that always fails
+     | Fail
      -- |Do nothing
      | Nop
 
-     -- |All the following are eliminated during unbranching.
-     -- The first stmt list is empty and the Exp is anything until
-     -- flattening.  After that, the stmt list contains the body of
-     -- the test, and the Exp is primitive.
+     -- All the following are eliminated during unbranching.
 
      -- |A conditional; execute the first (SemiDet) Stmts; if they succeed
      --  execute the second Stmts, else execute the third.
@@ -2213,6 +2220,18 @@ showStmt _ (ForeignCall lang name flags args) =
     "(" ++ intercalate ", " (List.map show args) ++ ")"
 showStmt _ (TestBool var) =
     "testbool " ++ var ++ "\n}"
+showStmt indent (And stmts) =
+    "(" ++
+    intercalate (" &&\n" ++ replicate indent ' ')
+        (List.map (showStmt indent . content) stmts) ++
+    ")"
+showStmt indent (Or stmts) =
+    "(" ++
+    intercalate (" ||\n" ++ replicate indent ' ')
+        (List.map (showStmt indent . content) stmts) ++
+    ")"
+showStmt indent (Not stmt) =
+    "not " ++ showStmt indent (content stmt)
 showStmt indent (Cond condstmts thn els) =
     let leadIn = List.replicate indent ' '
     in "if {" ++ showBody (indent+4) condstmts ++ "}::\n"
@@ -2223,6 +2242,7 @@ showStmt indent (Cond condstmts thn els) =
 showStmt indent (Loop lstmts) =
     "do" ++  showBody (indent + 4) lstmts
     ++ List.replicate indent ' ' ++ " end"
+showStmt _ (Fail) = "fail"
 showStmt _ (Nop) = "nop"
 showStmt _ (For itr gen) =
     "for " ++ show itr ++ " in " ++ show gen
