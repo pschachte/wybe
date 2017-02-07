@@ -34,9 +34,9 @@
 --    o  Imported modules are loaded, building if needed (this module)
 --    o  The types of exported procs are validated (Types)
 --    o  Resource imports and exports are checked (Resources)
---    o  Proc argument types are checked (Types)
+--    o  Proc argument types and modes are checked (Types)
 --    o  Proc resources are checked and transformed to args (Resources)
---    o  Branches and loops are transformed away (Unbranch)
+--    o  Branches, loops, and nondeterminism are transformed away (Unbranch)
 --    o  Procs are compiled to clausal form (Clause)
 --    o  Procs are optimised (Optimise)
 --  This is the responsibility of the compileModSCC function.

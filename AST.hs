@@ -1610,9 +1610,24 @@ data Stmt
      = ProcCall ModSpec Ident (Maybe Int) Determinism [Placed Exp]
      -- |A foreign call, with language, tags, and args
      | ForeignCall Ident Ident [Ident] [Placed Exp]
+     -- |Do nothing (and succeed)
+     | Nop
+
+     -- After unbranching, this con only appear as the last Stmt in a body.
+
+     -- |A conditional; execute the first (SemiDet) Stmts; if they succeed
+     --  execute the second Stmts, else execute the third.
+     | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt]
+
+     -- All the following are eliminated during unbranching.
+
      -- |A test that succeeds iff all the enclosed tests succeed; enclosed
      -- statements that aren't tests are honorary successes.
      | TestBool Ident
+     -- |A test that always succeeds
+     -- | Pass
+     -- |A test that always fails
+     | Fail
      -- |A test that succeeds iff all the enclosed tests succeed; enclosed
      -- statements that aren't tests are honorary successes.
      | And [Placed Stmt]
@@ -1621,16 +1636,7 @@ data Stmt
      | Or [Placed Stmt]
      -- |A test that fails iff the enclosed test succeeds
      | Not (Placed Stmt)
-     -- |A test that always fails
-     | Fail
-     -- |Do nothing
-     | Nop
 
-     -- All the following are eliminated during unbranching.
-
-     -- |A conditional; execute the first (SemiDet) Stmts; if they succeed
-     --  execute the second Stmts, else execute the third.
-     | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt]
      -- |A loop body; the loop is controlled by Breaks and Nexts
      | Loop [Placed Stmt]
      -- |An enumerator; only valid in a loop

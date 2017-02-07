@@ -233,33 +233,26 @@ flattenStmt' (ForeignCall lang name flags args) pos = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
     -- emitPostponed
--- flattenStmt' tststmt@(Test stmts) pos = do
---     logFlatten $ "** Flattening test:" ++ showStmt 4 tststmt
---     (_,stmts') <- flattenInner False True (flattenStmts stmts)
---     logFlatten $ "** Result:\n" ++ showStmt 4 (Test stmts')
---     emit pos $ Test stmts'
---     -- (vars,tst') <- flattenInner False False (do
---     --   vars <- flattenPExp tst
---     --   emitPostponed
---     --   return vars)
---     -- let errPos = betterPlace pos tst
---     -- case vars of
---     --   [] -> lift $ message Error "Test with no flow" pos
---     --   [var] -> do
---     --     logFlatten $ "** Result:\n" ++ (showStmt 4 $ Test stmts')
---     --     emit pos $ Test stmts'
---     --   [_,_] -> lift $ message Error
---     --           ("Test with in-out flow: " ++ show vars) pos
---     --   _ -> shouldnt "Single expression expanded to more than 2 args"
-flattenStmt' stmt@(TestBool _) pos = emit pos stmt
 flattenStmt' (Cond tstStmts thn els) pos = do
     (_,tstStmts') <- flattenInner False False (flattenStmts tstStmts)
     (_,thn') <- flattenInner False False (flattenStmts thn)
     (_,els') <- flattenInner False False (flattenStmts els)
     emit pos $ Cond tstStmts' thn' els'
+flattenStmt' stmt@(TestBool _) pos = emit pos stmt
+flattenStmt' Fail pos = emit pos Fail
+flattenStmt' (And tstStmts) pos = do
+    (_,tstStmts') <- flattenInner False False (flattenStmts tstStmts)
+    emit pos $ And tstStmts'
+flattenStmt' (Or tstStmts) pos = do
+    (_,tstStmts') <- flattenInner False False (flattenStmts tstStmts)
+    emit pos $ Or tstStmts'
+flattenStmt' (Not tstStmt) pos = do
+    (_,tstStmts') <- flattenInner False False (flattenStmt (content tstStmt)
+                                               (place tstStmt))
+    emit pos $ Or tstStmts'
 flattenStmt' (Loop body) pos = do
     (_,body') <- flattenInner True False
-             (flattenStmts $ body ++ [Unplaced $ Next])
+             (flattenStmts $ body ++ [Unplaced Next])
     emit pos $ Loop body'
 flattenStmt' (For itr gen) pos = do
     vars <- flattenPExp gen
