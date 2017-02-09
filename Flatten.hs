@@ -50,6 +50,7 @@ flattenProcDecl :: Item -> Compiler (Item,Int)
 flattenProcDecl (ProcDecl vis detism inline 
                  proto@ProcProto{procProtoParams=params}
                  stmts pos) = do
+    logMsg Flatten $ "Flattening proc " ++ show proto
     let proto' = proto {procProtoParams = concatMap flattenParam params}
               -- flattenProto proto detism
     let inParams = Set.fromList $
@@ -156,10 +157,8 @@ flattenInner isLoop transparent inner = do
               ((initFlattenerState (defdVars oldState)) {
                     tempCtr = (tempCtr oldState),
                     prefixStmts = if isLoop then [] else prefixStmts oldState}))
-    logFlatten $ "** Prefix:\n" ++ 
-      showBody 4 (prefixStmts innerState)
-    logFlatten $ "** Flattened:\n" ++ 
-      showBody 4 (flattened innerState)
+    logFlatten $ "** Prefix:\n" ++ showBody 4 (prefixStmts innerState)
+    logFlatten $ "** Flattened:\n" ++ showBody 4 (flattened innerState)
     -- logFlatten $ "** Postponed:\n" ++ 
     --   showBody 4 (postponed innerState)
     if transparent
