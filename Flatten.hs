@@ -57,7 +57,7 @@ flattenProcDecl (ProcDecl vis detism inline
                    List.map paramName $ 
                    List.filter (flowsIn . paramFlow) $
                    procProtoParams proto'
-    (stmts',tmpCtr) <- flattenBody stmts inParams
+    (stmts',tmpCtr) <- flattenBody stmts inParams detism
     return (ProcDecl vis detism inline proto' stmts' pos,tmpCtr)
 flattenProcDecl _ =
     shouldnt "flattening a non-proc or non-Det proc"
@@ -73,9 +73,11 @@ flattenProcDecl _ =
 --     return $ ProcProto name params'' resources
 
 
-flattenBody :: [Placed Stmt] -> Set VarName -> Compiler ([Placed Stmt],Int)
-flattenBody stmts varSet = do
-    finalState <- execStateT (flattenStmts stmts) $ initFlattenerState varSet
+flattenBody :: [Placed Stmt] -> Set VarName -> Determinism
+            -> Compiler ([Placed Stmt],Int)
+flattenBody stmts varSet detism = do
+    finalState <- execStateT (flattenStmts stmts detism)
+                  $ initFlattenerState varSet
     return (List.reverse (prefixStmts finalState) ++ 
             List.reverse (flattened finalState),
             -- ++ postponed finalState,
@@ -149,8 +151,9 @@ tempVar = do
     return $ mkTempName ctr
 
 
-flattenInner :: Bool -> Bool -> Flattener t -> Flattener (t,[Placed Stmt])
-flattenInner isLoop transparent inner = do
+flattenInner :: Bool -> Bool -> Determinism
+             -> Flattener t -> Flattener (t,[Placed Stmt])
+flattenInner isLoop transparent detism inner = do
     oldState <- get
     (val,innerState) <-
         lift (runStateT inner
@@ -166,7 +169,7 @@ flattenInner isLoop transparent inner = do
                              defdVars = defdVars innerState }
         else put $ oldState { tempCtr = tempCtr innerState }
     if isLoop
-      then flattenStmts $ prefixStmts innerState
+      then flattenStmts (prefixStmts innerState) detism
       else modify (\s -> s { prefixStmts = prefixStmts innerState })
     return (val,List.reverse $ flattened innerState)
 
@@ -205,55 +208,59 @@ noteVarMention name dir = do
 --                      Flattening Statements
 ----------------------------------------------------------------
 
--- |Flatten the specified statements to primitive statements.
-flattenStmts :: [Placed Stmt] -> Flattener ()
-flattenStmts stmts = 
-    mapM_ (\pstmt -> flattenStmt (content pstmt) (place pstmt)) stmts
+-- |Flatten the specified statements to primitive statements, in a context
+--  whose determinism is as specified.
+flattenStmts :: [Placed Stmt] -> Determinism -> Flattener ()
+flattenStmts stmts detism = 
+    mapM_ (\pstmt -> flattenStmt (content pstmt) (place pstmt) detism) stmts
 
 
-flattenStmt :: Stmt -> OptPos -> Flattener ()
-flattenStmt stmt pos = do
+flattenStmt :: Stmt -> OptPos -> Determinism -> Flattener ()
+flattenStmt stmt pos detism = do
     modify (\s -> s { stmtUses = Set.empty,
                       stmtDefs = Set.empty,
                       currPos = pos})
     defd <- gets defdVars
     logFlatten $ "flattening stmt " ++ showStmt 4 stmt ++
       " with defined vars " ++ show defd
-    flattenStmt' stmt pos
+    flattenStmt' stmt pos detism
     modify (\s -> s { defdVars = defdVars s `Set.union` stmtDefs s })
 
 -- |Flatten the specified statement
-flattenStmt' :: Stmt -> OptPos -> Flattener ()
-flattenStmt' (ProcCall maybeMod name procID detism args) pos = do
+flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
+flattenStmt' (ProcCall maybeMod name procID callDetism args) pos detism = do
     args' <- flattenStmtArgs args pos
-    emit pos $ ProcCall maybeMod name procID detism args'
+    emit pos $ ProcCall maybeMod name procID callDetism args'
     -- emitPostponed
-flattenStmt' (ForeignCall lang name flags args) pos = do
+flattenStmt' (ForeignCall lang name flags args) pos detism = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
     -- emitPostponed
-flattenStmt' (Cond tstStmts thn els) pos = do
-    (_,tstStmts') <- flattenInner False False (flattenStmts tstStmts)
-    (_,thn') <- flattenInner False False (flattenStmts thn)
-    (_,els') <- flattenInner False False (flattenStmts els)
+flattenStmt' (Cond tstStmts thn els) pos detism = do
+    (_,tstStmts') <- flattenInner False False SemiDet
+                     (flattenStmts tstStmts SemiDet)
+    (_,thn') <- flattenInner False False detism (flattenStmts thn detism)
+    (_,els') <- flattenInner False False detism (flattenStmts els detism)
     emit pos $ Cond tstStmts' thn' els'
-flattenStmt' stmt@(TestBool _) pos = emit pos stmt
-flattenStmt' Fail pos = emit pos Fail
-flattenStmt' (And tstStmts) pos = do
-    (_,tstStmts') <- flattenInner False False (flattenStmts tstStmts)
+flattenStmt' stmt@(TestBool _) pos detism = emit pos stmt
+flattenStmt' Fail pos detism = emit pos Fail
+flattenStmt' (And tstStmts) pos detism = do
+    (_,tstStmts') <- flattenInner False False detism
+                     (flattenStmts tstStmts detism)
     emit pos $ And tstStmts'
-flattenStmt' (Or tstStmts) pos = do
-    (_,tstStmts') <- flattenInner False False (flattenStmts tstStmts)
+flattenStmt' (Or tstStmts) pos detism = do
+    (_,tstStmts') <- flattenInner False False detism
+                     (flattenStmts tstStmts detism)
     emit pos $ Or tstStmts'
-flattenStmt' (Not tstStmt) pos = do
-    (_,tstStmts') <- flattenInner False False (flattenStmt (content tstStmt)
-                                               (place tstStmt))
+flattenStmt' (Not tstStmt) pos detism = do
+    (_,tstStmts') <- flattenInner False False detism
+                     (flattenStmt (content tstStmt) (place tstStmt) detism)
     emit pos $ Or tstStmts'
-flattenStmt' (Loop body) pos = do
-    (_,body') <- flattenInner True False
-             (flattenStmts $ body ++ [Unplaced Next])
+flattenStmt' (Loop body) pos detism = do
+    (_,body') <- flattenInner True False detism
+             (flattenStmts (body ++ [Unplaced Next]) detism)
     emit pos $ Loop body'
-flattenStmt' (For itr gen) pos = do
+flattenStmt' (For itr gen) pos detism = do
     vars <- flattenPExp gen
     case vars of
         [] -> lift $
@@ -274,11 +281,11 @@ flattenStmt' (For itr gen) pos = do
                   [maybePlace (ProcCall [] "[]" Nothing SemiDet [genVar])
                       pos,
                    Unplaced Break]
-              ) pos
+              ) pos detism
         _ -> shouldnt "Generator expression producing unexpected vars"
-flattenStmt' Nop pos = emit pos Nop
-flattenStmt' Break pos = emit pos Break
-flattenStmt' Next pos = emit pos Next
+flattenStmt' Nop pos detism = emit pos Nop
+flattenStmt' Break pos detism = emit pos Break
+flattenStmt' Next pos detism = emit pos Next
 
 
 ----------------------------------------------------------------
@@ -347,7 +354,7 @@ flattenExp exp@(Var name dir flowType) ty cast pos = do
         logFlatten $ "  Arg flattened to " ++ show (inPart ++ outPart)
         return $ inPart ++ outPart
 flattenExp (Where stmts pexp) _ _ _ = do
-    flattenStmts stmts
+    flattenStmts stmts Det
     flattenPExp pexp
 flattenExp (CondExp cond thn els) ty cast pos = do
     resultName <- tempVar
@@ -361,7 +368,7 @@ flattenExp (CondExp cond thn els) ty cast pos = do
                               [typeAndPlace (content els) ty cast (place els),
                                Unplaced $ Var resultName ParamOut flowType])
                   pos])
-        pos
+        pos Det
     return $ [maybePlace (Var resultName ParamIn flowType) pos]
 flattenExp (Fncall maybeMod name exps) ty cast pos = do
     flattenCall (ProcCall maybeMod name Nothing Det) False ty cast pos exps

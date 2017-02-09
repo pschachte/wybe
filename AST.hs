@@ -1996,8 +1996,9 @@ instance Show t => Show (Placed t) where
     
 -- |How to show an optional source position
 showMaybeSourcePos :: OptPos -> String
--- turn off annoying source positions
+-- uncomment turn off annoying source positions
 -- showMaybeSourcePos _ = ""
+-- comment to turn off annoying source positions
 showMaybeSourcePos (Just pos) = 
   " @" ++ takeBaseName (sourceName pos) ++ ":" 
   ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos)
