@@ -1075,7 +1075,8 @@ modecheckStmt m name defPos typing delayed assigned detism
                               (procInfoArgs match) args
                   let stmt' = ProcCall (procSpecMod matchProc)
                               (procSpecName matchProc)
-                              (Just $ procSpecID matchProc) Det
+                              (Just $ procSpecID matchProc)
+                              (procInfoDetism match)
                               args'
                   let assigned' = Set.fromList
                                   $ List.map (expVar . content)
