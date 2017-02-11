@@ -2,15 +2,15 @@
 
 public test proc lt(x:int, y:int)
     # use a boolean-valued expression as a test
-    test x < y
+    x < y
 end
 
 public type map = public empty | node(left:map, key:int, value:int, right:map) end
 
 public test proc lookup(key:int, map:map, ?result:int)
-    if map = empty:: test false
+    if map = empty:: false
     |  key = map.key:: ?result = map.value
-    |  key < map.key:: test lookup(key, map.left, ?result)
-    |  true:: test lookup(key, map.right, ?result)
+    |  key < map.key:: lookup(key, map.left, ?result)
+    |  true:: lookup(key, map.right, ?result)
     end
 end
