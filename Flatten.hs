@@ -50,7 +50,7 @@ flattenProcDecl :: Item -> Compiler (Item,Int)
 flattenProcDecl (ProcDecl vis detism inline 
                  proto@ProcProto{procProtoParams=params}
                  stmts pos) = do
-    logMsg Flatten $ "Flattening proc " ++ show proto
+    logMsg Flatten $ "** Flattening proc " ++ show proto
     let proto' = proto {procProtoParams = concatMap flattenParam params}
               -- flattenProto proto detism
     let inParams = Set.fromList $
@@ -116,15 +116,9 @@ initFlattenerState varSet =
 
 emit :: OptPos -> Stmt -> Flattener ()
 emit pos stmt = do
-    -- logFlatten $ "** Emitting:  " ++ showStmt 14 stmt
+    -- logFlatten $ "-- Emitting:  " ++ showStmt 14 stmt
     stmts <- gets flattened
     modify (\s -> s { flattened = maybePlace stmt pos:stmts })
-
-
--- postpone :: OptPos -> Stmt -> Flattener ()
--- postpone pos stmt = do
---     stmts <- gets postponed
---     modify (\s -> s { postponed = maybePlace stmt pos:stmts })
 
 
 -- | Add an initialisation statement to the list of initialisations
@@ -133,14 +127,6 @@ saveInit :: OptPos -> Stmt -> Flattener ()
 saveInit pos stmt = do
     stmts <- gets prefixStmts
     modify (\s -> s { prefixStmts = maybePlace stmt pos:stmts })
-
-
--- emitPostponed :: Flattener ()
--- emitPostponed = do
---     stmts <- gets flattened
---     stmts' <- gets postponed
---     modify (\s -> s { flattened = (List.reverse stmts') ++ stmts, 
---                       postponed = [] })
 
 
 -- |Return a fresh variable name.
@@ -160,9 +146,9 @@ flattenInner isLoop transparent detism inner = do
               ((initFlattenerState (defdVars oldState)) {
                     tempCtr = (tempCtr oldState),
                     prefixStmts = if isLoop then [] else prefixStmts oldState}))
-    logFlatten $ "** Prefix:\n" ++ showBody 4 (prefixStmts innerState)
-    logFlatten $ "** Flattened:\n" ++ showBody 4 (flattened innerState)
-    -- logFlatten $ "** Postponed:\n" ++ 
+    logFlatten $ "-- Prefix:\n" ++ showBody 4 (prefixStmts innerState)
+    logFlatten $ "-- Flattened:\n" ++ showBody 4 (flattened innerState)
+    -- logFlatten $ "-- Postponed:\n" ++ 
     --   showBody 4 (postponed innerState)
     if transparent
        then put $ oldState { tempCtr = tempCtr innerState,
@@ -221,7 +207,7 @@ flattenStmt stmt pos detism = do
                       stmtDefs = Set.empty,
                       currPos = pos})
     defd <- gets defdVars
-    logFlatten $ "flattening stmt " ++ showStmt 4 stmt ++
+    logFlatten $ "flattening " ++ show detism ++ " stmt " ++ showStmt 4 stmt ++
       " with defined vars " ++ show defd
     flattenStmt' stmt pos detism
     modify (\s -> s { defdVars = defdVars s `Set.union` stmtDefs s })
@@ -229,12 +215,13 @@ flattenStmt stmt pos detism = do
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
 flattenStmt' call@(ProcCall maybeMod name procID SemiDet args) pos SemiDet = do
-    logFlatten $ "** flattening test call:  " ++ show call
+    logFlatten $ "   call is Semidet"
     args' <- flattenStmtArgs args pos
     testVarName <- tempVar
     emit pos $ ProcCall maybeMod name procID Det $ args' ++ [Unplaced (varSet testVarName)]
     emit pos $ TestBool testVarName
 flattenStmt' (ProcCall maybeMod name procID callDetism args) pos detism = do
+    logFlatten $ "   call is " ++ show callDetism
     args' <- flattenStmtArgs args pos
     emit pos $ ProcCall maybeMod name procID callDetism args'
 flattenStmt' (ForeignCall lang name flags args) pos detism = do
@@ -387,7 +374,7 @@ flattenExp (Typed exp ty cast) _ _ pos = do
 flattenCall :: ([Placed Exp] -> Stmt) -> Bool -> TypeSpec -> Bool -> OptPos
             -> [Placed Exp] -> Flattener [Placed Exp]
 flattenCall stmtBuilder isForeign ty cast pos exps = do
-    logFlatten $ "** flattening args:  " ++ show exps
+    logFlatten $ "-- flattening args:  " ++ show exps
     resultName <- tempVar
     oldPos <- gets currPos
     uses <- gets stmtUses
@@ -403,9 +390,9 @@ flattenCall stmtBuilder isForeign ty cast pos exps = do
                       currPos = oldPos})
     -- let isOut = not $ Set.null defs'
     -- let isIn = not (isOut && Set.null (defs' `Set.intersection` uses'))
-    logFlatten $ "** defines:  " ++ show defs'
-    logFlatten $ "** uses   :  " ++ show uses'
-    -- logFlatten $ "** in = " ++ show isIn ++ "; out = " ++ show isOut
+    logFlatten $ "-- defines:  " ++ show defs'
+    logFlatten $ "-- uses   :  " ++ show uses'
+    -- logFlatten $ "-- in = " ++ show isIn ++ "; out = " ++ show isOut
     -- let flowType = if isIn && isOut then HalfUpdate else Implicit pos
     -- when isIn $ 
     --   emit pos $ stmtBuilder $ 
