@@ -3,6 +3,8 @@
 Fix bugs:
 o Fix handling of function call:  mode of last argument should be determined
   by what modes are defined for the proc.
+o Compiler produces executable even when no main is found.
+
 
 Complete the implementation:
 o Rework handling of test procs.  Test proc calls can be combined with and
