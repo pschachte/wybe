@@ -372,7 +372,8 @@ implicitEquality typespec consts nonconsts items =
 -- |Does the item declare an = test or function?
 equalityTest :: Item -> Bool
 equalityTest (ProcDecl _ SemiDet _ (ProcProto "=" [_,_] _) _ _) = True
-equalityTest (FuncDecl _ Det _ (FnProto "=" [_,_] _) _ _ _) = True
+equalityTest (FuncDecl _ Det _ (FnProto "=" [_,_] _) ty _ _) =
+    ty == boolType
 equalityTest _ = False
 
 
@@ -422,22 +423,22 @@ equalityNonconsts [] _ =
 equalityNonconsts [single] [] =
     -- single non-const and no const constructors:  just compare fields
     let FnProto name params _ = content single
-    in  deconstructCall name "$left" params False
-        ++ deconstructCall name "$right" params False
+    in  deconstructCall name "$left" params Det
+        ++ deconstructCall name "$right" params Det
         ++ concatMap equalityField params
 equalityNonconsts [single] (_:_) =
     let FnProto name params _ = content single
-    in  (deconstructCall name "$left" params True)
+    in  (deconstructCall name "$left" params SemiDet)
         ++ [(Unplaced $ TestBool "$$")]
-        ++ (deconstructCall name "$right" params True)
+        ++ (deconstructCall name "$right" params SemiDet)
         ++ [(Unplaced $ TestBool "$$")]
         ++ concatMap equalityField params
 equalityNonconsts ctrs _ = nyi "multiple non-const constructors"
 
 
-deconstructCall :: Ident -> Ident -> [Param] -> Bool -> [Placed Stmt]
-deconstructCall ctor arg params isTest =
-    [Unplaced $ ProcCall [] ctor Nothing SemiDet
+deconstructCall :: Ident -> Ident -> [Param] -> Determinism -> [Placed Stmt]
+deconstructCall ctor arg params detism =
+    [Unplaced $ ProcCall [] ctor Nothing detism
      $ List.map (\p -> Unplaced $ varSet $ arg++"$"++paramName p) params
         ++ [Unplaced $ varGet arg]]
 

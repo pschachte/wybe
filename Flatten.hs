@@ -116,7 +116,7 @@ initFlattenerState varSet =
 
 emit :: OptPos -> Stmt -> Flattener ()
 emit pos stmt = do
-    -- logFlatten $ "-- Emitting:  " ++ showStmt 14 stmt
+    logFlatten $ "-- Emitting:  " ++ showStmt 14 stmt
     stmts <- gets flattened
     modify (\s -> s { flattened = maybePlace stmt pos:stmts })
 
