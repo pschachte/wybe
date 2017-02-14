@@ -224,6 +224,13 @@ flattenStmt' (ProcCall maybeMod name procID callDetism args) pos detism = do
     logFlatten $ "   call is " ++ show callDetism
     args' <- flattenStmtArgs args pos
     emit pos $ ProcCall maybeMod name procID callDetism args'
+flattenStmt' (ForeignCall "llvm" "test" flags args) pos detism = do
+    args' <- flattenStmtArgs args pos
+    resultName <- tempVar
+    let vSet = Unplaced
+               $ Typed (Var resultName ParamOut $ Implicit pos) boolType False
+    emit pos $ ForeignCall "llvm" "icmp" flags $ args' ++ [vSet]
+    emit pos $ TestBool resultName
 flattenStmt' (ForeignCall lang name flags args) pos detism = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'

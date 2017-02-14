@@ -7,7 +7,7 @@
 module Snippets (intType, intCast, boolType, boolCast, varSet, varGet,
                  boolVarSet, boolVarGet, intVarSet, intVarGet, castTo,
                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
-                comparison, comparisonExp) where
+                comparison) where
 
 import AST
 
@@ -86,13 +86,7 @@ primMove src dest =
   PrimForeign "llvm" "move" [] [src, dest]
 
 -- |An unplaced instruction to compare two integer values
-comparison :: Ident -> Exp -> Exp -> Ident -> Placed Stmt
-comparison tst left right dest =
-    Unplaced $ ForeignCall "llvm" "icmp" [tst]
-    [Unplaced left, Unplaced right, Unplaced $ boolCast $ varSet dest]
-
--- |An unplaced function call to compare two integer values
-comparisonExp :: Ident -> Exp -> Exp -> Placed Exp
-comparisonExp tst left right =
-    Unplaced $ boolCast $ ForeignFn "llvm" "icmp" [tst]
-    [Unplaced left, Unplaced right]
+comparison :: Ident -> Exp -> Exp  -> [Placed Stmt]
+comparison tst left right =
+    [Unplaced $ ForeignCall "llvm" "test" [tst]
+     [Unplaced left, Unplaced right]]

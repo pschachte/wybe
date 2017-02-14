@@ -181,15 +181,6 @@ constCtorItems  vis typeSpec (placedProto,num) =
         (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] [])
         [lpvmCastToVar (castTo (IntValue num) typeSpec) "$"] pos
        ]
-    -- Don't need in mode of const constructors; just use implied mode
--- ,
---         ProcDecl vis SemiDet True
---         (ProcProto constName [Param "$" typeSpec ParamIn Ordinary] [])
---         [Unplaced $ Test []
---          (comparisonExp "eq"
---           (lpvmCastExp (varGet "$") intType)
---           (intCast $ IntValue num))]
---         pos]
 
 
 -- |All items needed to implement a non-const contructor for the specified type.
@@ -297,20 +288,17 @@ tagCheck constCount nonConstCount tag varName =
     -- If there are any constant constructors, be sure it's not one of them
     (case constCount of
           0 -> []
-          _ -> [(comparison "uge"
+          _ -> comparison "uge"
                  (lpvmCastExp (varGet varName) intType)
-                 (intCast $ iVal constCount)
-                 "$$"),
-                   (Unplaced $ TestBool "$$")])
+                 (intCast $ iVal constCount))
      ++
      (case nonConstCount of
            1 -> []  -- Nothing to do if it's the only non-const constructor
-           _ -> [(comparison "eq"
+           _ -> comparison "eq"
                   (intCast $ ForeignFn "llvm" "and" []
                    [Unplaced $ lpvmCastExp (varGet varName) intType,
                     Unplaced $ iVal tagMask])
-                     (intCast $ iVal tag) "$$"),
-                    (Unplaced $ TestBool "$$")])
+                  (intCast $ iVal tag))
 
 
 -- | Produce a getter and a setter for one field of the specified type.
@@ -397,10 +385,9 @@ equalityBody [] [] = shouldnt "trying to generate = test with no constructors"
 equalityBody consts [] = equalityConsts consts
 equalityBody consts nonconsts =
     -- decide whether $left is const or non const, and handle accordingly
-    [Unplaced $ Cond [comparison "ult"
+    [Unplaced $ Cond (comparison "ult"
                          (lpvmCastExp (varGet "$left") intType)
-                         (iVal $ length consts) "$$",
-                         Unplaced $ TestBool "$$"]
+                         (iVal $ length consts))
                 (equalityConsts consts)
                 (equalityNonconsts nonconsts consts)]
 
@@ -410,9 +397,7 @@ equalityBody consts nonconsts =
 equalityConsts :: [Placed FnProto] -> [Placed Stmt]
 equalityConsts [] = []
 equalityConsts _ =
-    [(comparison "eq" (intCast $ varGet "$left")
-         (intCast $ varGet "$right") "$$"),
-        (Unplaced $ TestBool "$$")]
+    comparison "eq" (intCast $ varGet "$left") (intCast $ varGet "$right")
 
 -- |Return code to check that two values are equal when the first is known
 --  not to be a const constructor.  The first argument is the list of
@@ -428,10 +413,8 @@ equalityNonconsts [single] [] =
         ++ concatMap equalityField params
 equalityNonconsts [single] (_:_) =
     let FnProto name params _ = content single
-    in  (deconstructCall name "$left" params SemiDet)
-        ++ [(Unplaced $ TestBool "$$")]
-        ++ (deconstructCall name "$right" params SemiDet)
-        ++ [(Unplaced $ TestBool "$$")]
+    in  deconstructCall name "$left" params SemiDet
+        ++ deconstructCall name "$right" params SemiDet
         ++ concatMap equalityField params
 equalityNonconsts ctrs _ = nyi "multiple non-const constructors"
 
