@@ -137,27 +137,32 @@ tempVar = do
     return $ mkTempName ctr
 
 
+-- |Run a flattener, ignoring its state changes except for the temp variable
+--  counter.  If transparent is True, also keep changes to the set of defined
+--  variables.  If isLoop is True, then flatten any loop initialisations
+--  accumulated while processing the body so they are executed before entering
+--  the loop; otherwise, just preserve the accumulated initialisations.
 flattenInner :: Bool -> Bool -> Determinism
-             -> Flattener t -> Flattener (t,[Placed Stmt])
+             -> Flattener t -> Flattener [Placed Stmt]
 flattenInner isLoop transparent detism inner = do
     oldState <- get
-    (val,innerState) <-
+    (_,innerState) <-
         lift (runStateT inner
-              ((initFlattenerState (defdVars oldState)) {
-                    tempCtr = (tempCtr oldState),
-                    prefixStmts = if isLoop then [] else prefixStmts oldState}))
+              (initFlattenerState (defdVars oldState)) {
+                    tempCtr = tempCtr oldState,
+                    prefixStmts = if isLoop then [] else prefixStmts oldState})
     logFlatten $ "-- Prefix:\n" ++ showBody 4 (prefixStmts innerState)
     logFlatten $ "-- Flattened:\n" ++ showBody 4 (flattened innerState)
     -- logFlatten $ "-- Postponed:\n" ++ 
     --   showBody 4 (postponed innerState)
     if transparent
-       then put $ oldState { tempCtr = tempCtr innerState,
-                             defdVars = defdVars innerState }
-        else put $ oldState { tempCtr = tempCtr innerState }
+      then put $ oldState { tempCtr = tempCtr innerState,
+                            defdVars = defdVars innerState }
+      else put $ oldState { tempCtr = tempCtr innerState }
     if isLoop
       then flattenStmts (prefixStmts innerState) detism
       else modify (\s -> s { prefixStmts = prefixStmts innerState })
-    return (val,List.reverse $ flattened innerState)
+    return $ List.reverse $ flattened innerState
 
 
 flattenStmtArgs :: [Placed Exp] -> OptPos -> Flattener [Placed Exp]
@@ -214,48 +219,55 @@ flattenStmt stmt pos detism = do
 
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
-flattenStmt' call@(ProcCall maybeMod name procID SemiDet args) pos SemiDet = do
-    logFlatten $ "   call is Semidet"
+flattenStmt' (ProcCall maybeMod name procID SemiDet args) pos SemiDet = do
+    logFlatten "   call is Semidet"
     args' <- flattenStmtArgs args pos
     testVarName <- tempVar
     emit pos $ ProcCall maybeMod name procID Det $ args' ++ [Unplaced (varSet testVarName)]
     emit pos $ TestBool testVarName
-flattenStmt' (ProcCall maybeMod name procID callDetism args) pos detism = do
-    logFlatten $ "   call is " ++ show callDetism
+flattenStmt' call@(ProcCall _ _ _ SemiDet _) _ Det =
+    shouldnt $ "SemiDet call in Det context: " ++ show call
+flattenStmt' (ProcCall maybeMod name procID Det args) pos _ = do
+    logFlatten "   call is Det"
     args' <- flattenStmtArgs args pos
-    emit pos $ ProcCall maybeMod name procID callDetism args'
-flattenStmt' (ForeignCall "llvm" "test" flags args) pos detism = do
+    emit pos $ ProcCall maybeMod name procID Det args'
+flattenStmt' (ForeignCall "llvm" "test" flags args) pos SemiDet = do
     args' <- flattenStmtArgs args pos
     resultName <- tempVar
     let vSet = Unplaced
                $ Typed (Var resultName ParamOut $ Implicit pos) boolType False
     emit pos $ ForeignCall "llvm" "icmp" flags $ args' ++ [vSet]
     emit pos $ TestBool resultName
-flattenStmt' (ForeignCall lang name flags args) pos detism = do
+flattenStmt' stmt@(ForeignCall "llvm" "test" _ _) _ Det =
+    shouldnt $ "llvm test in Det context: " ++ show stmt
+flattenStmt' (ForeignCall lang name flags args) pos _ = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
 flattenStmt' (Cond tstStmts thn els) pos detism = do
-    (_,tstStmts') <- flattenInner False False SemiDet
-                     (flattenStmts tstStmts SemiDet)
-    (_,thn') <- flattenInner False False detism (flattenStmts thn detism)
-    (_,els') <- flattenInner False False detism (flattenStmts els detism)
+    tstStmts' <- flattenInner False False SemiDet
+                 (flattenStmts tstStmts SemiDet)
+    thn' <- flattenInner False False detism (flattenStmts thn detism)
+    els' <- flattenInner False False detism (flattenStmts els detism)
     emit pos $ Cond tstStmts' thn' els'
-flattenStmt' stmt@(TestBool _) pos detism = emit pos stmt
-flattenStmt' Fail pos detism = emit pos Fail
+flattenStmt' stmt@(TestBool _) pos SemiDet = emit pos stmt
+flattenStmt' (TestBool var) _pos Det =
+    shouldnt $ "TestBool " ++ var ++ "in Det context"
+flattenStmt' Fail pos SemiDet = emit pos Fail
+flattenStmt' Fail _pos Det = shouldnt "Fail in Det context"
 flattenStmt' (And tstStmts) pos detism = do
-    (_,tstStmts') <- flattenInner False False detism
-                     (flattenStmts tstStmts detism)
+    tstStmts' <- flattenInner False False detism
+                 (flattenStmts tstStmts detism)
     emit pos $ And tstStmts'
 flattenStmt' (Or tstStmts) pos detism = do
-    (_,tstStmts') <- flattenInner False False detism
-                     (flattenStmts tstStmts detism)
+    tstStmts' <- flattenInner False False detism
+                 (flattenStmts tstStmts detism)
     emit pos $ Or tstStmts'
 flattenStmt' (Not tstStmt) pos detism = do
-    (_,tstStmts') <- flattenInner False False detism
-                     (flattenStmt (content tstStmt) (place tstStmt) detism)
+    tstStmts' <- flattenInner False False detism
+                 (flattenStmt (content tstStmt) (place tstStmt) detism)
     emit pos $ Or tstStmts'
 flattenStmt' (Loop body) pos detism = do
-    (_,body') <- flattenInner True False detism
+    body' <- flattenInner True False detism
              (flattenStmts (body ++ [Unplaced Next]) detism)
     emit pos $ Loop body'
 flattenStmt' (For itr gen) pos detism = do
