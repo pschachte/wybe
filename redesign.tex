@@ -13,8 +13,8 @@
 \usepackage{fancyvrb}
 %\usepackage{ensuremath}
 
-\newcommand{\lang}{\textsc{Wybe}\xspace}
-\newcommand{\Lang}{\textsc{Wybe}\xspace}
+\newcommand{\lang}{\textsf{Wybe}\xspace}
+\newcommand{\Lang}{\textsf{Wybe}\xspace}
 
 \newcommand{\ie}{\emph{i.e.}\xspace}
 \newcommand{\eg}{\emph{e.g.}\xspace}
@@ -42,7 +42,7 @@ language, and should be powerful and efficient enough for serious use.
 
 In \Lang, each variable use may either read, write, or modify
 (\ie, both read and write) the variable.
-Variable names prefixed with a \verb+^+ operator specify that the
+Variable names prefixed with a \verb+?+ operator specify that the
 variable will be written (without being read); variable names prefixed
 with a \verb+!+ operator signify that it will be read and written.
 Unadorned variable names indicate read-only usage.
@@ -70,7 +70,7 @@ So regardless of whether something is defined as procedure or
 function, it may be called as either an expression or a statement.
 
 Each procedure argument, may be input, output, or both, according
-to the \verb+^+ and \verb+!+ annotations on its declaration.
+to the \verb+?+ and \verb+!+ annotations on its declaration.
 A particular ordering of inputs, outputs, and in/out arguments is
 called a procedure \emph{mode}.
 A given procedure name may have any number of different declarations
@@ -88,6 +88,56 @@ If any of these restrictions are not met, the procedure cannot be used
 with a functional syntax in that mode.
 These restrictions are imposed to ensure functional syntax is only
 used for procedures that behave functionally.
+
+
+\section{Tests}
+
+A \emph{test} is a procedure call that can succeed or fail.
+A test is similar to a Boolean expression, except that
+none of the outputs of a test are deemed to have been produced
+if the test fails; if it succeeds, all the outputs are taken
+to have been produced.
+A test with no outputs is indistinguishable from a Boolean expression.
+
+Outputs of a test may only be used in contexts where the test
+must have succeeded; in particular in the \emph{then} branch of
+a conditional or following conjuncts in a conjunction.
+Outputs of a negated test can only be used when the negation fails.
+Variables that are assigned by all disjuncts in a disjunction, or
+all branches of a conditional may also be used, as may variables that
+are assigned prior to the conjunction, disjunction, negation, or, conditional.
+
+The condition of a conditional statement must be a test, as must the parts
+of a conjunction, disjunction, or negation.
+A conjunction, disjunction, or negation is a test, as is
+a call to a test procedure.
+A sequence of statements is a test if exactly one of the statements
+is a test.
+As a convenience, a Boolean expression may be used as a test.
+Note that some modes for a procedure name may be tests while others
+are not.
+For example, in a functional mode, a constructor is not a test, while
+in a backward mode, it will be iff the type has multiple constructors.
+
+A function may also be a test, which indicates a partial function.
+A statement is a test iff the called procedure is a test in that mode,
+or if any of its arguments is a test.
+An expression is a test iff the function is a test in that mode, or
+if any subexpressions is a test.
+A test statement succeeds iff all argument expressions succeed \emph{and}
+the procedure call itself succeeds.
+An expression succeeds iff all subexpressions succeed and
+the function call itself succeeds.
+Non-test procedure and function calls are treated as succeeding,
+and nested expressions are treated as the conjunction of their
+subexpressions.
+Thus a disjunction of statements is deemed to succeed if all the
+subexpressions of at least one of them succeeds.
+
+Unlike in logic programming, tests in \lang\ are deterministic;
+the output bindings of the first successful test are final.
+However, \lang\ also supports generators, which are used in loops
+and are similar to backtracking in logic programs.
 
 
 \section{Syntax}
@@ -233,7 +283,7 @@ character of the operator name, as follows:
     left &
     10 (tightest) \\
     \hline
-    \verb'^', \verb'!' &
+    \verb'?', \verb'!' &
     unary (prefix) &
     non-associative &
     9 \\
