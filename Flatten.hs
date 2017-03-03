@@ -224,7 +224,7 @@ flattenStmt' (ProcCall maybeMod name procID SemiDet args) pos SemiDet = do
     args' <- flattenStmtArgs args pos
     testVarName <- tempVar
     emit pos $ ProcCall maybeMod name procID Det $ args' ++ [Unplaced (varSet testVarName)]
-    emit pos $ TestBool testVarName
+    emit pos $ TestBool $ varGet testVarName
 flattenStmt' call@(ProcCall _ _ _ SemiDet _) _ Det =
     shouldnt $ "SemiDet call in Det context: " ++ show call
 flattenStmt' (ProcCall maybeMod name procID Det args) pos _ = do
@@ -237,7 +237,7 @@ flattenStmt' (ForeignCall "llvm" "test" flags args) pos SemiDet = do
     let vSet = Unplaced
                $ Typed (Var resultName ParamOut $ Implicit pos) boolType False
     emit pos $ ForeignCall "llvm" "icmp" flags $ args' ++ [vSet]
-    emit pos $ TestBool resultName
+    emit pos $ TestBool $ varGet resultName
 flattenStmt' stmt@(ForeignCall "llvm" "test" _ _) _ Det =
     shouldnt $ "llvm test in Det context: " ++ show stmt
 flattenStmt' (ForeignCall lang name flags args) pos _ = do
@@ -250,22 +250,26 @@ flattenStmt' (Cond tstStmts thn els) pos detism = do
     els' <- flattenInner False False detism (flattenStmts els detism)
     emit pos $ Cond tstStmts' thn' els'
 flattenStmt' stmt@(TestBool _) pos SemiDet = emit pos stmt
-flattenStmt' (TestBool var) _pos Det =
-    shouldnt $ "TestBool " ++ var ++ "in Det context"
-flattenStmt' Fail pos SemiDet = emit pos Fail
-flattenStmt' Fail _pos Det = shouldnt "Fail in Det context"
-flattenStmt' (And tstStmts) pos detism = do
-    tstStmts' <- flattenInner False False detism
-                 (flattenStmts tstStmts detism)
+flattenStmt' (TestBool expr) _pos Det =
+    shouldnt $ "TestBool " ++ show expr ++ "in Det context"
+flattenStmt' (And tstStmts) pos SemiDet = do
+    tstStmts' <- flattenInner False False SemiDet
+                 (flattenStmts tstStmts SemiDet)
     emit pos $ And tstStmts'
-flattenStmt' (Or tstStmts) pos detism = do
-    tstStmts' <- flattenInner False False detism
-                 (flattenStmts tstStmts detism)
+flattenStmt' (And tstStmts) _pos Det =
+    shouldnt $ "And in a Det context: " ++ showBody 4 tstStmts
+flattenStmt' (Or tstStmts) pos SemiDet = do
+    tstStmts' <- flattenInner False False SemiDet
+                 (flattenStmts tstStmts SemiDet)
     emit pos $ Or tstStmts'
-flattenStmt' (Not tstStmt) pos detism = do
-    tstStmts' <- flattenInner False False detism
-                 (flattenStmt (content tstStmt) (place tstStmt) detism)
+flattenStmt' (Or tstStmts) _pos Det =
+    shouldnt $ "Or in a Det context: " ++ showBody 4 tstStmts
+flattenStmt' (Not tstStmt) pos SemiDet = do
+    tstStmts' <- flattenInner False False SemiDet
+                 (flattenStmt (content tstStmt) (place tstStmt) SemiDet)
     emit pos $ Or tstStmts'
+flattenStmt' (Not tstStmt) _pos Det =
+    shouldnt $ "negation in a Det context: " ++ show tstStmt
 flattenStmt' (Loop body) pos detism = do
     body' <- flattenInner True False detism
              (flattenStmts (body ++ [Unplaced Next]) detism)

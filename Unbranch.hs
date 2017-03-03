@@ -280,8 +280,10 @@ unbranchStmts detism (stmt:stmts) = do
 --   of the conditional in place of the code following the conditional, so
 --   that conditionals are always the final statement in a statement
 --   sequence, as are calls to loop procs.  If detism indicates the code is
---   in a SemiDet context, the generated code leaves the variable $$ bound
---   to 1 if the code succeeds, and 0 if it fails.
+--   in a SemiDet context, the generated code ends in a TestBool instruction,
+--   or in a Cond both arms of which end in a TestBool.  Further, all Cond
+--   instructions have a single TestBool as the condition.  All And, Or,
+--   and Not constructs are transformed away.
 --
 --   The input arguments to generated procs are all the variables in
 --   scope everywhere the proc is called. The proc generated for the code
@@ -316,30 +318,21 @@ unbranchStmt :: Determinism -> Stmt -> OptPos -> [Placed Stmt]
 unbranchStmt detism stmt@(ProcCall _ _ _ Det args) pos stmts = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
     defArgs args
-    stmts' <- unbranchStmts detism stmts
-    return $ maybePlace stmt pos : stmts'
-unbranchStmt detism stmt@(ProcCall mod name pid SemiDet args) pos [] = do
-    logUnbranch $ "Unbranching final test " ++ showStmt 4 stmt
-    let args' = args++[Unplaced $ boolVarSet "$$"]
-    defArgs args
-    return [maybePlace (ProcCall mod name pid Det args') pos]
-unbranchStmt Det stmt@(ProcCall _ _ _ SemiDet _) _ _ =
-    shouldnt $ "Semidet call in Det context" ++ showStmt 4 stmt
-unbranchStmt SemiDet stmt@(ProcCall _ _ _ SemiDet _) pos stmts = do
-    logUnbranch $ "Unbranching test " ++ showStmt 4 stmt
-    unbranchStmt SemiDet (Cond [maybePlace stmt pos] stmts []) Nothing []
+    leaveStmtAsIs stmt pos detism stmts
+unbranchStmt _ stmt@(ProcCall _ _ _ SemiDet _) pos _ = do
+    shouldnt $ "SemiDet call not converted by flattening: " ++ show stmt
 unbranchStmt detism stmt@(ForeignCall _ _ _ args) pos stmts = do
     logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
     defArgs args
-    stmts' <- unbranchStmts detism stmts
-    return $ maybePlace stmt pos:stmts'
-unbranchStmt detism stmt@(TestBool var) pos stmts = do
+    leaveStmtAsIs stmt pos detism stmts
+unbranchStmt Det (TestBool expr) _ _ =
+    shouldnt $ "TestBool " ++ show expr ++ " in a Det context"
+unbranchStmt SemiDet stmt@(TestBool _) pos stmts = do
     logUnbranch $ "Unbranching primitive test " ++ show stmt
-    let dollarDollar = boolVarSet "$$"
-    defArgs [Unplaced dollarDollar]
-    stmts' <- unbranchStmts detism stmts
-    return $ move (boolVarGet var) dollarDollar:stmts'
-unbranchStmt detism stmt@(And conj) pos stmts = do
+    leaveStmtAsIs stmt pos SemiDet stmts
+unbranchStmt Det stmt@(And _) _ _ =
+    shouldnt $ "Conjunction in a Det context: " ++ show stmt
+unbranchStmt detism (And conj) _pos stmts = do
     logUnbranch "Unbranching conjunction"
     unbranchStmts detism $ conj++stmts
 unbranchStmt detism stmt@(Or disj) pos stmts = do
@@ -359,43 +352,8 @@ unbranchStmt detism stmt@(Not neg) pos stmts = do
     -- [neg'] <- unbranchStmt detism (content neg) (place neg) []
     -- stmts' <- unbranchStmts detism stmts
     -- return $ maybePlace (Not neg') pos:stmts'
-unbranchStmt detism (Cond tstStmts thn els) pos stmts = do
-    logUnbranch "Unbranching a conditional"
-    beforeVars <- gets brVars
-    logUnbranch $ "test " ++ showBody 8 tstStmts
-    logUnbranch $ "Vars before test: " ++ show beforeVars
-    tstStmts' <- unbranchStmts SemiDet tstStmts
-    beforeThenVars <- gets brVars
-    logUnbranch $ "Unbranching then branch with vars: " ++ show beforeThenVars
-    (thn',thnVars,thnTerm) <- unbranchBranch detism thn
-    logUnbranch $ "Unbranched then is: " ++ showBody 4 thn'
-    -- Vars assigned in the condition cannot be used in the else branch
-    setVars beforeVars
-    -- but the branch variable itself _can_ be used in the else branch
-    resetTerminated False
-    beforeElseVars <- gets brVars
-    logUnbranch $ "Unbranching else branch with vars: " ++ show beforeElseVars
-    (els',elsVars,elsTerm) <- unbranchBranch detism els
-    logUnbranch $ "Unbranched else is: " ++ showBody 4 els'
-    let afterVars = varsAfterITE thnVars thnTerm elsVars elsTerm
-    logUnbranch $ "Vars after conditional: " ++ show afterVars
-    resetTerminated $ thnTerm && elsTerm
-    setVars afterVars
-    stmts' <- unbranchStmts detism stmts
-    contName <- newProcName
-    dryrun <- isDryRun
-    if dryrun
-        then return []
-        else do
-            cont <- if stmts' == []
-                    then return $ []
-                    else fmap (:[])
-                         $ factorFreshProc contName afterVars Nothing stmts'
-            let thn'' = if thnTerm then thn' else appendStmts thn' cont
-            let els'' = if elsTerm then els' else appendStmts els' cont
-            let genStmt = Cond tstStmts' thn'' els''
-            logUnbranch $ "Conditional unbranched to " ++ showStmt 4 genStmt 
-            return [maybePlace genStmt pos]
+unbranchStmt detism (Cond tstStmts thn els) pos stmts =
+    unbranchCond detism tstStmts thn els pos stmts
 unbranchStmt detism (Loop body) pos stmts = do
     logUnbranch "Unbranching a loop"
     prevState <- startLoop
@@ -430,9 +388,6 @@ unbranchStmt detism (Loop body) pos stmts = do
     return [next]
 unbranchStmt detism (For _ _) _ _ =
     shouldnt "flattening should have removed For statements"
-unbranchStmt detism (Fail) pos stmts = do
-    logUnbranch "Unbranching a Fail"
-    return [move (iVal 0) (boolVarSet "$$")]
 unbranchStmt detism (Nop) _ stmts = do
     logUnbranch "Unbranching a Nop"
     unbranchStmts detism stmts         -- might as well filter out Nops
@@ -449,6 +404,58 @@ unbranchStmt _ (Next) _ _ = do
     nxt <- gets (loopNext . brLoopInfo)
     logUnbranch $ "Current next proc = " ++ showStmt 4 (content nxt)
     return [nxt]
+
+
+leaveStmtAsIs :: Stmt -> OptPos -> Determinism -> [Placed Stmt]
+              -> Unbrancher [Placed Stmt]
+leaveStmtAsIs stmt pos detism stmts = do
+    stmts' <- unbranchStmts detism stmts
+    return $ maybePlace stmt pos:stmts'
+
+
+unbranchCond :: Determinism -> [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt]
+             -> OptPos -> [Placed Stmt] -> Unbrancher [Placed Stmt]
+unbranchCond detism tstStmts thn els pos stmts = do
+    logUnbranch "Unbranching a conditional"
+    beforeVars <- gets brVars
+    logUnbranch $ "test " ++ showBody 8 tstStmts
+    logUnbranch $ "Vars before test: " ++ show beforeVars
+    tstStmts' <- unbranchStmts SemiDet tstStmts
+    beforeThenVars <- gets brVars
+    logUnbranch $ "Unbranching then branch with vars: " ++ show beforeThenVars
+    (thn',thnVars,thnTerm) <- unbranchBranch detism thn
+    logUnbranch $ "Unbranched then is: " ++ showBody 4 thn'
+    -- Vars assigned in the condition cannot be used in the else branch
+    setVars beforeVars
+    -- but the branch variable itself _can_ be used in the else branch
+    resetTerminated False
+    beforeElseVars <- gets brVars
+    logUnbranch $ "Unbranching else branch with vars: " ++ show beforeElseVars
+    (els',elsVars,elsTerm) <- unbranchBranch detism els
+    logUnbranch $ "Unbranched else is: " ++ showBody 4 els'
+    let afterVars = varsAfterITE thnVars thnTerm elsVars elsTerm
+    logUnbranch $ "Vars after conditional: " ++ show afterVars
+    resetTerminated $ thnTerm && elsTerm
+    setVars afterVars
+    stmts' <- unbranchStmts detism stmts
+    dryrun <- isDryRun
+    if dryrun
+        then return []
+        else do
+            cont <- if List.null stmts'
+                    then return []
+                         -- XXX maybe handle singleton list case, too?
+                    else do
+                        contName <- newProcName
+                        fmap (:[])
+                         $ factorFreshProc contName afterVars Nothing stmts'
+            let thn'' = if thnTerm then thn' else appendStmts thn' cont
+            let els'' = if elsTerm then els' else appendStmts els' cont
+            let genStmt = Cond tstStmts' thn'' els''
+            logUnbranch $ "Conditional unbranched to " ++ showStmt 4 genStmt 
+            return [maybePlace genStmt pos]
+
+
 
 
 unbranchBranch :: Determinism -> [Placed Stmt]
@@ -507,7 +514,7 @@ defArg :: Exp -> Unbrancher ()
 defArg = ifIsVarDef defVar (return ())
 
 
--- |Apply the function if the expression as a variable assignment,
+-- |Apply the function if the expression is a variable assignment,
 --  otherwise just take the second argument.
 ifIsVarDef :: (VarName -> TypeSpec -> t) -> t -> Exp -> t
 ifIsVarDef f v expr = ifIsVarDef' f v expr AnyType

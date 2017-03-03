@@ -758,7 +758,6 @@ bodyCalls (pstmt:pstmts) detism = do
         And stmts -> bodyCalls stmts detism
         Or stmts -> bodyCalls stmts detism
         Not stmt' -> bodyCalls [stmt'] detism
-        Fail -> return rest
         Nop -> return rest
         Cond cond thn els -> do
           -- modify $ constrainVarType (ReasonCond pos)
@@ -1625,7 +1624,6 @@ checkStmtTyped name pos (For itr gen) ppos = do
     checkExpTyped name pos ("for generator" ++ showMaybeSourcePos ppos) $
                   content itr
 checkStmtTyped _ _ Nop _ = return ()
-checkStmtTyped _ _ Fail _ = return ()
 checkStmtTyped _ _ Break _ = return ()
 checkStmtTyped _ _ Next _ = return ()
 

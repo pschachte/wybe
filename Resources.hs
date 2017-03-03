@@ -151,8 +151,6 @@ transformStmt resources (Or stmts) pos = do
 transformStmt resources (Not stmt) pos = do
     [stmt'] <- transformBody resources [stmt]
     return $ maybePlace (Not stmt') pos
-transformStmt _ (Fail) pos = do
-    return $ maybePlace Fail pos
 transformStmt _ (Nop) pos = do
     return $ maybePlace Nop pos
 transformStmt resources (Cond test thn els) pos = do

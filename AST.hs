@@ -1617,17 +1617,15 @@ data Stmt
 
      -- |A conditional; execute the first (SemiDet) Stmts; if they succeed
      --  execute the second Stmts, else execute the third.
+     -- XXX try to make the first argument a single placed statement
      | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt]
 
      -- All the following are eliminated during unbranching.
 
      -- |A test that succeeds iff all the enclosed tests succeed; enclosed
      -- statements that aren't tests are honorary successes.
-     | TestBool Ident
-     -- |A test that always succeeds
-     -- | Pass
-     -- |A test that always fails
-     | Fail
+     -- XXX allow an expression as argument
+     | TestBool Exp
      -- |A test that succeeds iff all the enclosed tests succeed; enclosed
      -- statements that aren't tests are honorary successes.
      | And [Placed Stmt]
@@ -2225,8 +2223,8 @@ showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ name ++ 
     (if List.null flags then "" else " " ++ unwords flags) ++
     "(" ++ intercalate ", " (List.map show args) ++ ")"
-showStmt _ (TestBool var) =
-    "testbool " ++ var ++ "\n}"
+showStmt _ (TestBool test) =
+    "testbool " ++ show test ++ "\n}"
 showStmt indent (And stmts) =
     "(" ++
     intercalate (" &&\n" ++ replicate indent ' ')
@@ -2249,7 +2247,6 @@ showStmt indent (Cond condstmts thn els) =
 showStmt indent (Loop lstmts) =
     "do" ++  showBody (indent + 4) lstmts
     ++ List.replicate indent ' ' ++ " end"
-showStmt _ (Fail) = "fail"
 showStmt _ (Nop) = "nop"
 showStmt _ (For itr gen) =
     "for " ++ show itr ++ " in " ++ show gen
