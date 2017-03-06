@@ -329,7 +329,10 @@ unbranchStmt Det (TestBool expr) _ _ =
     shouldnt $ "TestBool " ++ show expr ++ " in a Det context"
 unbranchStmt SemiDet stmt@(TestBool _) pos stmts = do
     logUnbranch $ "Unbranching primitive test " ++ show stmt
-    leaveStmtAsIs stmt pos SemiDet stmts
+    stmts' <- unbranchStmts SemiDet stmts
+    if List.null stmts'
+        then return [maybePlace stmt pos]
+        else return [Unplaced $ Cond [maybePlace stmt pos] stmts' []]
 unbranchStmt Det stmt@(And _) _ _ =
     shouldnt $ "Conjunction in a Det context: " ++ show stmt
 unbranchStmt detism (And conj) _pos stmts = do
