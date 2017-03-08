@@ -264,9 +264,9 @@ flattenStmt' (Or tstStmts) pos SemiDet = do
     emit pos $ Or tstStmts'
 flattenStmt' (Or tstStmts) _pos Det =
     shouldnt $ "Or in a Det context: " ++ showBody 4 tstStmts
-flattenStmt' (Not tstStmt) pos SemiDet = do
+flattenStmt' (Not tstStmts) pos SemiDet = do
     tstStmts' <- flattenInner False False SemiDet
-                 (flattenStmt (content tstStmt) (place tstStmt) SemiDet)
+                 (flattenStmts tstStmts SemiDet)
     emit pos $ Or tstStmts'
 flattenStmt' (Not tstStmt) _pos Det =
     shouldnt $ "negation in a Det context: " ++ show tstStmt

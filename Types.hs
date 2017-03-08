@@ -757,7 +757,7 @@ bodyCalls (pstmt:pstmts) detism = do
         TestBool _ -> return rest
         And stmts -> bodyCalls stmts detism
         Or stmts -> bodyCalls stmts detism
-        Not stmt' -> bodyCalls [stmt'] detism
+        Not stmts -> bodyCalls stmts detism
         Nop -> return rest
         Cond cond thn els -> do
           -- modify $ constrainVarType (ReasonCond pos)
@@ -1610,8 +1610,8 @@ checkStmtTyped name pos (And stmts) ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (Or stmts) ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
-checkStmtTyped name pos (Not stmt) ppos = do
-    placedApply (checkStmtTyped name pos) stmt
+checkStmtTyped name pos (Not stmts) ppos = do
+    mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (Cond ifstmts thenstmts elsestmts) ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) ifstmts
     mapM_ (placedApply (checkStmtTyped name pos)) thenstmts

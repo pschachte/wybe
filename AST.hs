@@ -1633,7 +1633,7 @@ data Stmt
      -- statements that aren't tests are honorary failures.
      | Or [Placed Stmt]
      -- |A test that fails iff the enclosed test succeeds
-     | Not (Placed Stmt)
+     | Not [Placed Stmt]
 
      -- |A loop body; the loop is controlled by Breaks and Nexts
      | Loop [Placed Stmt]
@@ -2226,17 +2226,22 @@ showStmt _ (ForeignCall lang name flags args) =
 showStmt _ (TestBool test) =
     "testbool " ++ show test ++ "\n}"
 showStmt indent (And stmts) =
-    "(" ++
-    intercalate (" &&\n" ++ replicate indent ' ')
-        (List.map (showStmt indent . content) stmts) ++
+    "(    " ++
+    intercalate (" and\n" ++ replicate indent' ' ')
+        (List.map (showStmt indent' . content) stmts) ++
     ")"
+    where indent' = indent + 4
 showStmt indent (Or stmts) =
-    "(" ++
-    intercalate (" ||\n" ++ replicate indent ' ')
-        (List.map (showStmt indent . content) stmts) ++
+    "(   " ++
+    intercalate (" or\n" ++ replicate indent' ' ')
+        (List.map (showStmt indent' . content) stmts) ++
     ")"
-showStmt indent (Not stmt) =
-    "not " ++ showStmt indent (content stmt)
+    where indent' = indent + 4
+showStmt indent (Not stmts) =
+    "not(" ++
+    intercalate ("\n" ++ replicate indent' ' ')
+    (List.map (showStmt indent' . content) stmts) ++ ")"
+    where indent' = indent + 4
 showStmt indent (Cond condstmts thn els) =
     let leadIn = List.replicate indent ' '
     in "if {" ++ showBody (indent+4) condstmts ++ "}::\n"

@@ -62,10 +62,13 @@ import Options (LogSelection(Unbranch))
 --  final statement in their block.  Transform all semidet code into
 --  conditional code that ends with Nop or Fail.  Transform away all
 --  conjunctions, disjunctions, and negations.  After this, all bodies
---  comprise a sequence of ProcCall, ForeignCall, TestBool, Nop, Cond,
---  Pass, or Fail, and the last three can only be the final Stmt in a
---  body.  Furthermore, every SemiDet proc body must end with one of
---  the last three.
+--  comprise a sequence of ProcCall, ForeignCall, TestBool, Cond, and
+--  Nop statements.  Furthermore,  Cond statements can only be the final
+--  Stmt in a body, the condition of a Cond can only be a single TestBool
+--  statement, and and TestBool statements can only appear as the
+--  condition of a Cond, or, in the case of a SemiDet proc, as the final
+--  statement of a proc body.  Every SemiDet proc body must end with a
+--  TestBool.
 
 unbranchProc :: ProcDef -> Compiler ProcDef
 unbranchProc proc = do
@@ -82,16 +85,25 @@ unbranchProc proc = do
     return proc'
 
 
+-- |Eliminate loops and ensure that Conds only appear as the final
+--  statement of a body.
 unbranchBody :: [Param] -> Determinism -> [Placed Stmt]
              -> Compiler ([Placed Stmt],[Item])
-unbranchBody params detism stmts = do
+unbranchBody params detism body = do
     let unbrancher = initUnbrancherState params
     let outparams =  brOutParams unbrancher
     let outvars = brOutArgs unbrancher
+    let stmts = case detism of
+            Det     -> body
+            SemiDet -> [Unplaced $ Cond body
+                           [Unplaced $ TestBool $ iVal 1]
+                           [Unplaced $ TestBool $ iVal 0]]
     logMsg Unbranch $ "** Unbranching with output params:" ++ show outparams
     logMsg Unbranch $ "** Unbranching with output args:" ++ show outvars
     (stmts',st) <- runStateT (unbranchStmts detism stmts) unbrancher
-    return (stmts',brNewDefs st)
+    (stmts'',st') <- runStateT (flattenBranches stmts')
+                     unbrancher {brNewDefs = brNewDefs st}
+    return (stmts'',brNewDefs st')
 
 
 ----------------------------------------------------------------
@@ -329,32 +341,25 @@ unbranchStmt Det (TestBool expr) _ _ =
     shouldnt $ "TestBool " ++ show expr ++ " in a Det context"
 unbranchStmt SemiDet stmt@(TestBool _) pos stmts = do
     logUnbranch $ "Unbranching primitive test " ++ show stmt
-    stmts' <- unbranchStmts SemiDet stmts
-    if List.null stmts'
-        then return [maybePlace stmt pos]
-        else return [Unplaced $ Cond [maybePlace stmt pos] stmts' []]
+    leaveStmtAsIs stmt pos SemiDet stmts
 unbranchStmt Det stmt@(And _) _ _ =
     shouldnt $ "Conjunction in a Det context: " ++ show stmt
-unbranchStmt detism (And conj) _pos stmts = do
+unbranchStmt SemiDet (And conj) pos stmts = do
     logUnbranch "Unbranching conjunction"
-    unbranchStmts detism $ conj++stmts
-unbranchStmt detism stmt@(Or disj) pos stmts = do
+    conj' <- unbranchStmts SemiDet conj
+    leaveStmtAsIs (And conj') pos SemiDet stmts
+unbranchStmt Det stmt@(Or _) _ _ =
+    shouldnt $ "Disjunction in a Det context: " ++ show stmt
+unbranchStmt SemiDet (Or disj) pos stmts = do
     logUnbranch "Unbranching disjunction"
-    nyi "Disjunction"
-    -- disjVars <- gets brVars
-    -- disj' <- mapM
-    --          (\s -> do
-    --                setVars disjVars
-    --                unbranchStmt detism (content s) (place s) [])
-    --          disj
-    -- stmts' <- unbranchStmts detism stmts
-    -- return $ maybePlace (Or $ concat disj') pos:stmts'
-unbranchStmt detism stmt@(Not neg) pos stmts = do
+    disj' <- unbranchStmts SemiDet disj
+    leaveStmtAsIs (Or disj') pos SemiDet stmts
+unbranchStmt Det stmt@(Not _) _ _ =
+    shouldnt $ "Negation in a Det context: " ++ show stmt
+unbranchStmt SemiDet (Not tst) pos stmts = do
     logUnbranch "Unbranching negation"
-    nyi "Negation"
-    -- [neg'] <- unbranchStmt detism (content neg) (place neg) []
-    -- stmts' <- unbranchStmts detism stmts
-    -- return $ maybePlace (Not neg') pos:stmts'
+    tst' <- unbranchStmts SemiDet tst
+    leaveStmtAsIs (Not tst') pos SemiDet stmts
 unbranchStmt detism (Cond tstStmts thn els) pos stmts =
     unbranchCond detism tstStmts thn els pos stmts
 unbranchStmt detism (Loop body) pos stmts = do
@@ -409,6 +414,7 @@ unbranchStmt _ (Next) _ _ = do
     return [nxt]
 
 
+-- |Emit the supplied statement, and process the remaining statements.
 leaveStmtAsIs :: Stmt -> OptPos -> Determinism -> [Placed Stmt]
               -> Unbrancher [Placed Stmt]
 leaveStmtAsIs stmt pos detism stmts = do
@@ -567,39 +573,63 @@ newProcProto name inVars = do
 
 
 
--- -- Given the specified environment and a statement sequence, returns the
--- -- environment following the statements and the loop exit environment.
--- -- The loop exit environment is Just the intersection of the environments
--- -- at all the breaks in the scope of the loop, or Nothing if there are no
--- -- such breaks.
--- loopExitVars :: VarDict -> [Placed Stmt] -> (VarDict, Maybe VarDict)
--- loopExitVars vars pstmts =
---   List.foldl stmtExitVars (vars,Nothing) $ List.map content pstmts
--- 
--- 
--- stmtExitVars :: (VarDict, Maybe VarDict) -> Stmt -> (VarDict, Maybe VarDict)
--- stmtExitVars  (vars,exits) (ProcCall _ _ _ args) =
---     (outputVars vars args, exits)
--- stmtExitVars (vars,exits) (ForeignCall _ _ _ args) =
---     (outputVars vars args, exits)
--- stmtExitVars (vars,_) (Cond tstStmts _ thn els) =
---     let (tstVars,tstExit) = loopExitVars vars tstStmts
---         (thnVars,thnExit) = loopExitVars tstVars thn
---         (elsVars,elsExit) = loopExitVars tstVars els
---     in  (Map.intersection thnVars elsVars, intersectExit thnExit elsExit)
--- stmtExitVars (vars,exits) (Loop body) =
---     let (bodyVars,bodyExit) = loopExitVars vars body
---     in  case bodyExit of 
---       Nothing -> (Map.empty, exits)
---       Just exits' -> (exits', exits)
--- stmtExitVars (vars,exits)  (Nop) = (vars,exits)
--- stmtExitVars _ (For _ _) =
---     shouldnt "flattening should have removed For statements"
--- stmtExitVars (vars,exits)  (Break) = 
---   (Map.empty, intersectExit (Just vars) exits)
--- stmtExitVars (vars,exits) (Next) = (Map.empty, exits)
--- 
--- 
--- intersectExit (Just v1) (Just v2) = Just $ Map.intersection v1 v2
--- intersectExit Nothing x = x
--- intersectExit x Nothing = x
+----------------------------------------------------------------
+--                          Flattening Branches
+----------------------------------------------------------------
+
+-- |Flatten all branches in the statement list; ie, expand all
+--  conjunctions, disjunctions, and negations into Conds, and
+--  ensure that the condition of every Cond is just one TestBool.
+flattenBranches :: [Placed Stmt] -> Unbrancher [Placed Stmt]
+flattenBranches [] = return []
+flattenBranches (stmt:stmts) = do
+    vars <- gets brVars
+    logUnbranch $ "flattening branches in "
+        ++ "\n    " ++ showStmt 4 (content stmt)
+        ++ "\nwith vars " ++ show vars
+    flattenBranches' (content stmt) (place stmt) stmts
+
+
+flattenBranches' :: Stmt -> OptPos -> [Placed Stmt] -> Unbrancher [Placed Stmt]
+flattenBranches' stmt@ProcCall{} pos stmts =
+    (maybePlace stmt pos:) <$> flattenBranches stmts
+flattenBranches' stmt@ForeignCall{} pos stmts =
+    (maybePlace stmt pos:) <$> flattenBranches stmts
+flattenBranches' (Cond tstStmts thn els) pos [] =
+    flattenCond tstStmts thn els pos
+flattenBranches' stmt@(Cond tstStmts thn els) pos stmts =
+    shouldnt $ "Cond with following statements: " ++ show stmt
+flattenBranches' (Nop) pos stmts =
+    flattenBranches stmts -- Just remove Nops
+flattenBranches' stmt pos stmts =
+    shouldnt
+    $ "Statement should have been eliminated before flatten branches\n"
+    ++ show stmt
+-- flattenBranches' stmt@TestBool{} pos stmts =
+--     (maybePlace stmt pos:) <$> flattenBranches stmts
+-- flattenBranches' _stmt@(And _) _pos (_:_) =
+--     shouldnt $ "And with following statements" ++ show stmt
+-- flattenBranches' _(And []) _pos [] =
+--     return []
+-- flattenBranches' (And (conj:conjs)) pos [] =
+--     flattenBranches detism
+--     [maybePlace (Cond [conj] [Unplaced $ And conjs] []) pos]
+-- flattenBranches' _stmt@(Or _) _pos (_:_) =
+--     shouldnt $ "Or with following statements" ++ show stmt
+-- flattenBranches' _(Or []) _pos [] =
+--     return []
+-- flattenBranches' (Or (disj:disjs)) pos [] =
+--     flattenBranches detism
+--     [maybePlace (Cond [disj] [] [Unplaced $ Or disjs]) pos]
+
+
+flattenCond :: [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt]
+            -> OptPos -> Unbrancher [Placed Stmt]
+flattenCond [] thn _els _pos = return thn
+flattenCond (tst:tsts) thn els pos =
+    flattenCond' (content tst) (place tst) tsts thn els pos
+
+flattenCond' :: Stmt -> OptPos -> [Placed Stmt]
+             -> [Placed Stmt] -> [Placed Stmt]
+            -> OptPos -> Unbrancher [Placed Stmt]
+flattenCond' = undefined

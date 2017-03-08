@@ -148,9 +148,9 @@ transformStmt resources (And stmts) pos = do
 transformStmt resources (Or stmts) pos = do
     stmts' <- transformBody resources stmts
     return $ maybePlace (Or stmts') pos
-transformStmt resources (Not stmt) pos = do
-    [stmt'] <- transformBody resources [stmt]
-    return $ maybePlace (Not stmt') pos
+transformStmt resources (Not stmts) pos = do
+    stmts' <- transformBody resources stmts
+    return $ maybePlace (Not stmts') pos
 transformStmt _ (Nop) pos = do
     return $ maybePlace Nop pos
 transformStmt resources (Cond test thn els) pos = do

@@ -73,6 +73,8 @@ import AST
       'when'          { TokIdent "when" _ }
       'unless'        { TokIdent "unless" _ }
       'from'          { TokIdent "from" _ }
+      'and'           { TokIdent "and" _ }
+      'or'            { TokIdent "or" _ }
       'not'           { TokIdent "not" _ }
       'foreign'       { TokIdent "foreign" _ }
       'mod'           { TokIdent "mod" _ }
@@ -322,7 +324,11 @@ RevStmts :: { [Placed Stmt] }
 -- XXX Need to handle disjunction and negation, too
 TestStmts :: { [Placed Stmt] }
     : SimpleStmt                 { [$1] }
-    | TestStmts '&&' SimpleStmt  { $1 ++ [$3] }
+    | TestStmts 'and' SimpleStmt  { [Placed (And ($1 ++ [$3]))
+                                    (tokenPosition $2)] }
+    | TestStmts 'or' SimpleStmt  { [Placed (Or ($1 ++ [$3]))
+                                    (tokenPosition $2)] }
+    | 'not' TestStmts            { [Placed (Not $2) (tokenPosition $1)] }
 
 
 SimpleStmt :: { Placed Stmt }
