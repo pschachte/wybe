@@ -338,11 +338,14 @@ unbranchStmt detism stmt@(ProcCall _ _ _ Det args) pos stmts = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
     defArgs args
     leaveStmtAsIs stmt pos detism stmts
-unbranchStmt _ stmt@(ProcCall _ _ _ SemiDet _) pos _ = do
-    -- XXX Convert the call now.  Flatten happens before the Type analysis
-    -- that determines that a call is SemiDet, so we can't count on flattening
-    -- to remove these.
-    shouldnt $ "SemiDet call not converted by flattening: " ++ show stmt
+unbranchStmt detism stmt@(ProcCall md name procID SemiDet args) pos stmts = do
+    logUnbranch $ "converting SemiDet proc call" ++ show stmt
+    testVarName <- tempVar
+    stmts' <- unbranchStmts detism stmts
+    return (maybePlace (ProcCall md name procID Det
+                         $ args ++ [Unplaced (boolVarSet testVarName)]) pos
+            : (Unplaced $ TestBool $ varGet testVarName)
+            : stmts')
 unbranchStmt detism stmt@(ForeignCall _ _ _ args) pos stmts = do
     logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
     defArgs args
@@ -631,6 +634,10 @@ flattenBranches' stmt pos stmts =
 -- flattenBranches' (Or (disj:disjs)) pos [] =
 --     flattenBranches detism
 --     [maybePlace (Cond [disj] [] [Unplaced $ Or disjs]) pos]
+
+
+-- XXX Fix this to factor out branches that will be repeated into
+--     separate procs so the code is not duplicated.
 
 
 -- |Flatten out a conditional removing Ands, Ors, and Nots, and ensuring

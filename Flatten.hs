@@ -219,18 +219,10 @@ flattenStmt stmt pos detism = do
 
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
-flattenStmt' (ProcCall maybeMod name procID SemiDet args) pos SemiDet = do
-    logFlatten "   call is Semidet"
-    args' <- flattenStmtArgs args pos
-    testVarName <- tempVar
-    emit pos $ ProcCall maybeMod name procID Det $ args' ++ [Unplaced (varSet testVarName)]
-    emit pos $ TestBool $ varGet testVarName
-flattenStmt' call@(ProcCall _ _ _ SemiDet _) _ Det =
-    shouldnt $ "SemiDet call in Det context: " ++ show call
-flattenStmt' (ProcCall maybeMod name procID Det args) pos _ = do
+flattenStmt' (ProcCall maybeMod name procID detism args) pos _ = do
     logFlatten "   call is Det"
     args' <- flattenStmtArgs args pos
-    emit pos $ ProcCall maybeMod name procID Det args'
+    emit pos $ ProcCall maybeMod name procID detism args'
 flattenStmt' (ForeignCall "llvm" "test" flags args) pos SemiDet = do
     args' <- flattenStmtArgs args pos
     resultName <- tempVar
