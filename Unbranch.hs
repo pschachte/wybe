@@ -75,10 +75,11 @@ unbranchProc proc = do
     logMsg Unbranch $ "** Unbranching proc " ++ procName proc
     let ProcDefSrc body = procImpln proc
     let detism = procDetism proc
+    let tmpCtr = procTmpCount proc
     let params = procProtoParams $ procProto proc
-    (body',newProcs) <- unbranchBody params detism body
+    (body',tmpCtr',newProcs) <- unbranchBody tmpCtr params detism body
     let proto = procProto proc
-    let proc' = proc { procImpln = ProcDefSrc body' }
+    let proc' = proc { procTmpCount = tmpCtr', procImpln = ProcDefSrc body' }
     let tmpCount = procTmpCount proc
     mapM_ (addProc tmpCount) newProcs
     logMsg Unbranch $ "** Unbranched defn:" ++ showProcDef 0 proc' ++ "\n"
@@ -87,10 +88,10 @@ unbranchProc proc = do
 
 -- |Eliminate loops and ensure that Conds only appear as the final
 --  statement of a body.
-unbranchBody :: [Param] -> Determinism -> [Placed Stmt]
-             -> Compiler ([Placed Stmt],[Item])
-unbranchBody params detism body = do
-    let unbrancher = initUnbrancherState params
+unbranchBody :: Int -> [Param] -> Determinism -> [Placed Stmt]
+             -> Compiler ([Placed Stmt],Int,[Item])
+unbranchBody tmpCtr params detism body = do
+    let unbrancher = initUnbrancherState tmpCtr params
     let outparams =  brOutParams unbrancher
     let outvars = brOutArgs unbrancher
     let stmts = case detism of
@@ -102,8 +103,9 @@ unbranchBody params detism body = do
     logMsg Unbranch $ "** Unbranching with output args:" ++ show outvars
     (stmts',st) <- runStateT (unbranchStmts detism stmts) unbrancher
     (stmts'',st') <- runStateT (flattenBranches stmts')
-                     unbrancher {brNewDefs = brNewDefs st}
-    return (stmts'',brNewDefs st')
+                     unbrancher {brTempCtr = brTempCtr st,
+                                 brNewDefs = brNewDefs st}
+    return (stmts'', brTempCtr st', brNewDefs st')
 
 
 ----------------------------------------------------------------
@@ -120,6 +122,7 @@ type VarDict = Map VarName TypeSpec
 data UnbrancherState = Unbrancher {
     brLoopInfo   :: LoopInfo,     -- ^If in a loop, the break and continue stmts
     brVars       :: VarDict,      -- ^Variables defined up to here
+    brTempCtr    :: Int,          -- ^Number of next temp variable to make 
     brDryRun     :: Bool,         -- ^Whether to suppress code generation
     brOutParams  :: [Param],      -- ^Output arguments for generated procs
     brOutArgs    :: [Placed Exp], -- ^Output arguments for call to gen procs
@@ -141,8 +144,8 @@ data LoopInfo = LoopInfo {
     deriving (Eq)
 
 
-initUnbrancherState :: [Param] -> UnbrancherState
-initUnbrancherState params =
+initUnbrancherState :: Int -> [Param] -> UnbrancherState
+initUnbrancherState tmpCtr params =
     let defined = inputParams params
         outParams = [Param nm ty ParamOut Ordinary
                     | Param nm ty fl _ <- params
@@ -150,7 +153,7 @@ initUnbrancherState params =
         outArgs   = [Unplaced $ Typed (varSet nm) ty False
                     | Param nm ty fl _ <- params
                     , flowsOut fl]
-    in Unbrancher NoLoop defined False outParams outArgs []
+    in Unbrancher NoLoop defined tmpCtr False outParams outArgs []
 
 
 -- |Start unbranching a loop, returing the previous loop info
@@ -257,6 +260,14 @@ genProc proto stmts = do
     modify (\s -> s { brNewDefs = item:brNewDefs s })
 
 
+-- |Return a fresh variable name.
+tempVar :: Unbrancher VarName
+tempVar = do
+    ctr <- gets brTempCtr
+    modify (\s -> s { brTempCtr = ctr + 1 })
+    return $ mkTempName ctr
+
+
 -- |Log a message, if we are logging unbrancher activity.
 logUnbranch :: String -> Unbrancher ()
 logUnbranch s = lift $ logMsg Unbranch s
@@ -291,11 +302,7 @@ unbranchStmts detism (stmt:stmts) = do
 --   the conditional and adding a call to this proc at the end of each arm
 --   of the conditional in place of the code following the conditional, so
 --   that conditionals are always the final statement in a statement
---   sequence, as are calls to loop procs.  If detism indicates the code is
---   in a SemiDet context, the generated code ends in a TestBool instruction,
---   or in a Cond both arms of which end in a TestBool.  Further, all Cond
---   instructions have a single TestBool as the condition.  All And, Or,
---   and Not constructs are transformed away.
+--   sequence, as are calls to loop procs.
 --
 --   The input arguments to generated procs are all the variables in
 --   scope everywhere the proc is called. The proc generated for the code
@@ -332,6 +339,9 @@ unbranchStmt detism stmt@(ProcCall _ _ _ Det args) pos stmts = do
     defArgs args
     leaveStmtAsIs stmt pos detism stmts
 unbranchStmt _ stmt@(ProcCall _ _ _ SemiDet _) pos _ = do
+    -- XXX Convert the call now.  Flatten happens before the Type analysis
+    -- that determines that a call is SemiDet, so we can't count on flattening
+    -- to remove these.
     shouldnt $ "SemiDet call not converted by flattening: " ++ show stmt
 unbranchStmt detism stmt@(ForeignCall _ _ _ args) pos stmts = do
     logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
