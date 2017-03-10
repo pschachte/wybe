@@ -662,6 +662,7 @@ flattenCond' stmt@TestBool{} stmtPos stmts thn els condPos = do
 flattenCond' (And conj) _stmtPos stmts thn els condPos =
     flattenCond (conj++stmts) thn els condPos
 flattenCond' (Or []) _stmtPos stmts thn els condPos =
+    -- XXX this does't look right.
     flattenBranches els
 flattenCond' (Or (disj:disjs)) _stmtPos stmts thn els condPos =
     flattenCond [disj] [Unplaced $ Cond stmts thn els]
