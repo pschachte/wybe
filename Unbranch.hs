@@ -623,6 +623,9 @@ flattenBranches' stmt pos stmts =
 --     [maybePlace (Cond [disj] [] [Unplaced $ Or disjs]) pos]
 
 
+-- |Flatten out a conditional removing Ands, Ors, and Nots, and ensuring
+--  that the condition of every Cond is a single TestBool instruction.
+--  On input, Conds are always the last thing in a statement sequence.
 flattenCond :: [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt]
             -> OptPos -> Unbrancher [Placed Stmt]
 flattenCond [] thn _els _pos = return thn
@@ -632,4 +635,23 @@ flattenCond (tst:tsts) thn els pos =
 flattenCond' :: Stmt -> OptPos -> [Placed Stmt]
              -> [Placed Stmt] -> [Placed Stmt]
             -> OptPos -> Unbrancher [Placed Stmt]
-flattenCond' = undefined
+flattenCond' stmt@ProcCall{} stmtPos stmts thn els condPos =
+    (maybePlace stmt stmtPos:) <$> flattenCond stmts thn els condPos
+flattenCond' stmt@ForeignCall{} stmtPos stmts thn els condPos =
+    (maybePlace stmt stmtPos:) <$> flattenCond stmts thn els condPos
+flattenCond' stmt@TestBool{} stmtPos stmts thn els condPos = do
+    stmts' <- flattenCond stmts thn els condPos
+    return [maybePlace (Cond [maybePlace stmt stmtPos] stmts' els) condPos]
+flattenCond' (And conj) _stmtPos stmts thn els condPos =
+    flattenCond (conj++stmts) thn els condPos
+flattenCond' (Or []) _stmtPos stmts thn els condPos =
+    flattenBranches els
+flattenCond' (Or (disj:disjs)) _stmtPos stmts thn els condPos =
+    flattenCond [disj] [Unplaced $ Cond stmts thn els]
+    [Unplaced $ Cond ((Unplaced $ Or disjs):stmts) thn els] condPos
+flattenCond' (Not neg) _stmtPos stmts thn els condPos =
+    flattenCond neg els [Unplaced $ Cond stmts thn els] condPos
+flattenCond' stmt@Cond{} _stmtPos _ _ _ _ =
+    shouldnt $ "Condition in test of a condition: " ++ show stmt
+flattenCond' stmt _stmtPos _ _ _ _ =
+    shouldnt $ "Invalid statement in test of a condition: " ++ show stmt

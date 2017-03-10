@@ -1063,12 +1063,13 @@ modecheckStmt m name defPos typing delayed assigned detism
             let exactMatches
                     = List.filter (exactModeMatch actualModes) modeMatches
             logTypes $ "Exact mode matches: " ++ show exactMatches
-            -- XXX Must handle test context
             let delayMatches
                     = List.filter (delayModeMatch actualModes) modeMatches
             logTypes $ "Delay mode matches: " ++ show delayMatches
             case exactMatches of
                 (match:_) -> do
+                  -- XXX If it's semidet, we need to convert to Det by adding
+                  -- and Boolean output parameter and a TestBool instruction
                   let matchProc = procInfoProc match
                   let args' = List.zipWith setPExpTypeFlow
                               (procInfoArgs match) args
