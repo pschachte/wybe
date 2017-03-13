@@ -46,19 +46,25 @@ AFTER EVERYTHING:
 1: =(in#0:position.position, ?out#0:position.position):
     foreign llvm move(~in#0:position.position, ?out#0:position.position)
 = > public inline test (5 calls)
-2: =($left#0:position.position, $right#0:position.position, ?$$#2:wybe.bool):
+2: =($left#0:position.position, $right#0:position.position, ?$$#0:wybe.bool):
     foreign lpvm access($left#0:position.position, 0:wybe.int, ?$left$x#0:wybe.int)
     foreign lpvm access(~$left#0:position.position, 8:wybe.int, ?$left$y#0:wybe.int)
     foreign lpvm access($right#0:position.position, 0:wybe.int, ?$right$x#0:wybe.int)
     foreign lpvm access(~$right#0:position.position, 8:wybe.int, ?$right$y#0:wybe.int)
     foreign llvm icmp eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$8#0:wybe.bool) @wybe:28:40
-    case tmp$8#0:wybe.bool of
+    case ~tmp$8#0:wybe.bool of
     0:
-        foreign llvm move(~tmp$8#0:wybe.bool, ?$$#2:wybe.bool)
+        foreign llvm move(0, ?$$#0:wybe.bool)
 
     1:
         foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:28:40
-        foreign llvm move(~tmp$11#0:wybe.bool, ?$$#2:wybe.bool)
+        case ~tmp$11#0:wybe.bool of
+        0:
+            foreign llvm move(0, ?$$#0:wybe.bool)
+
+        1:
+            foreign llvm move(1, ?$$#0:wybe.bool)
+
 
 
 
@@ -126,7 +132,7 @@ if.then:                                          ; preds = %entry
   ret i1 %"tmp$11#0"
 
 if.else:                                          ; preds = %entry
-  ret i1 false
+  ret i64 0
 }
 
 define i64* @"position.position.position<0>"(i64 %"x#0", i64 %"y#0") {
@@ -218,7 +224,7 @@ if.then:                                          ; preds = %entry
   ret i1 %"tmp$11#0"
 
 if.else:                                          ; preds = %entry
-  ret i1 false
+  ret i64 0
 }
 
 define i64* @"position.position.position<0>"(i64 %"x#0", i64 %"y#0") {

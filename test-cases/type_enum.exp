@@ -8,13 +8,9 @@ AFTER EVERYTHING:
                     type_enum.season.=<1>
                     type_enum.season.=<2>
                     type_enum.season.autumn<0>
-                    type_enum.season.autumn<1>
                     type_enum.season.spring<0>
-                    type_enum.season.spring<1>
                     type_enum.season.summer<0>
-                    type_enum.season.summer<1>
                     type_enum.season.winter<0>
-                    type_enum.season.winter<1>
   imports         : public use type_enum.season
                     use wybe
   types           : season/0 (i2)  @type_enum:1:8
@@ -31,13 +27,9 @@ AFTER EVERYTHING:
                     type_enum.season.=<1>
                     type_enum.season.=<2>
                     type_enum.season.autumn<0>
-                    type_enum.season.autumn<1>
                     type_enum.season.spring<0>
-                    type_enum.season.spring<1>
                     type_enum.season.summer<0>
-                    type_enum.season.summer<1>
                     type_enum.season.winter<0>
-                    type_enum.season.winter<1>
   imports         : use wybe
   types           : 
   resources       : 
@@ -50,49 +42,35 @@ AFTER EVERYTHING:
 1: =(in#0:type_enum.season, ?out#0:type_enum.season):
     foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
 = > public inline test (0 calls)
-2: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#1:wybe.bool):
+2: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
     foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?tmp$0#0:wybe.bool)
-    foreign llvm move(~tmp$0#0:wybe.bool, ?$$#1:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0, ?$$#0:wybe.bool)
+
+    1:
+        foreign llvm move(1, ?$$#0:wybe.bool)
+
 
 
 autumn > public inline (0 calls)
 0: autumn(?$#0:type_enum.season):
     foreign lpvm cast(3:type_enum.season, ?$#0:type_enum.season)
-autumn > public inline test (0 calls)
-1: autumn($#0:type_enum.season, ?$$#1:wybe.bool):
-    foreign lpvm cast(~$#0:type_enum.season, ?tmp$1#0:wybe.int)
-    foreign llvm icmp eq(~tmp$1#0:wybe.int, 3:wybe.int, ?tmp$0#0:wybe.bool)
-    foreign llvm move(~tmp$0#0:wybe.bool, ?$$#1:wybe.bool)
 
 
 spring > public inline (0 calls)
 0: spring(?$#0:type_enum.season):
     foreign lpvm cast(1:type_enum.season, ?$#0:type_enum.season)
-spring > public inline test (0 calls)
-1: spring($#0:type_enum.season, ?$$#1:wybe.bool):
-    foreign lpvm cast(~$#0:type_enum.season, ?tmp$1#0:wybe.int)
-    foreign llvm icmp eq(~tmp$1#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.bool)
-    foreign llvm move(~tmp$0#0:wybe.bool, ?$$#1:wybe.bool)
 
 
 summer > public inline (0 calls)
 0: summer(?$#0:type_enum.season):
     foreign lpvm cast(2:type_enum.season, ?$#0:type_enum.season)
-summer > public inline test (0 calls)
-1: summer($#0:type_enum.season, ?$$#1:wybe.bool):
-    foreign lpvm cast(~$#0:type_enum.season, ?tmp$1#0:wybe.int)
-    foreign llvm icmp eq(~tmp$1#0:wybe.int, 2:wybe.int, ?tmp$0#0:wybe.bool)
-    foreign llvm move(~tmp$0#0:wybe.bool, ?$$#1:wybe.bool)
 
 
 winter > public inline (0 calls)
 0: winter(?$#0:type_enum.season):
     foreign lpvm cast(0:type_enum.season, ?$#0:type_enum.season)
-winter > public inline test (0 calls)
-1: winter($#0:type_enum.season, ?$$#1:wybe.bool):
-    foreign lpvm cast(~$#0:type_enum.season, ?tmp$1#0:wybe.int)
-    foreign llvm icmp eq(~tmp$1#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
-    foreign llvm move(~tmp$0#0:wybe.bool, ?$$#1:wybe.bool)
 type_enum, type_enum.season
 ======================================================================
 AFTER LLVM IR:
@@ -115,7 +93,8 @@ entry:
 define i1 @"type_enum.season.=<1>1"(i2 %"$left#0", i2 %"$right#0") #0 {
 entry:
   %"tmp$0#0" = icmp eq i2 %"$left#0", %"$right#0"
-  ret i1 %"tmp$0#0"
+  %. = zext i1 %"tmp$0#0" to i64
+  ret i64 %.
 }
 
 ; Function Attrs: nounwind readnone
@@ -125,23 +104,9 @@ entry:
 }
 
 ; Function Attrs: nounwind readnone
-define i1 @"type_enum.season.autumn<1>"(i2 %"$#0") #0 {
-entry:
-  %"tmp$0#0" = icmp eq i2 %"$#0", -1
-  ret i1 %"tmp$0#0"
-}
-
-; Function Attrs: nounwind readnone
 define i2 @"type_enum.season.spring<0>"() #0 {
 entry:
   ret i2 1
-}
-
-; Function Attrs: nounwind readnone
-define i1 @"type_enum.season.spring<1>"(i2 %"$#0") #0 {
-entry:
-  %"tmp$0#0" = icmp eq i2 %"$#0", 1
-  ret i1 %"tmp$0#0"
 }
 
 ; Function Attrs: nounwind readnone
@@ -151,23 +116,9 @@ entry:
 }
 
 ; Function Attrs: nounwind readnone
-define i1 @"type_enum.season.summer<1>"(i2 %"$#0") #0 {
-entry:
-  %"tmp$0#0" = icmp eq i2 %"$#0", -2
-  ret i1 %"tmp$0#0"
-}
-
-; Function Attrs: nounwind readnone
 define i2 @"type_enum.season.winter<0>"() #0 {
 entry:
   ret i2 0
-}
-
-; Function Attrs: nounwind readnone
-define i1 @"type_enum.season.winter<1>"(i2 %"$#0") #0 {
-entry:
-  %"tmp$0#0" = icmp eq i2 %"$#0", 0
-  ret i1 %"tmp$0#0"
 }
 
 attributes #0 = { nounwind readnone }
@@ -191,7 +142,8 @@ entry:
 define i1 @"type_enum.season.=<1>1"(i2 %"$left#0", i2 %"$right#0") #0 {
 entry:
   %"tmp$0#0" = icmp eq i2 %"$left#0", %"$right#0"
-  ret i1 %"tmp$0#0"
+  %. = zext i1 %"tmp$0#0" to i64
+  ret i64 %.
 }
 
 ; Function Attrs: nounwind readnone
@@ -201,23 +153,9 @@ entry:
 }
 
 ; Function Attrs: nounwind readnone
-define i1 @"type_enum.season.autumn<1>"(i2 %"$#0") #0 {
-entry:
-  %"tmp$0#0" = icmp eq i2 %"$#0", -1
-  ret i1 %"tmp$0#0"
-}
-
-; Function Attrs: nounwind readnone
 define i2 @"type_enum.season.spring<0>"() #0 {
 entry:
   ret i2 1
-}
-
-; Function Attrs: nounwind readnone
-define i1 @"type_enum.season.spring<1>"(i2 %"$#0") #0 {
-entry:
-  %"tmp$0#0" = icmp eq i2 %"$#0", 1
-  ret i1 %"tmp$0#0"
 }
 
 ; Function Attrs: nounwind readnone
@@ -227,23 +165,9 @@ entry:
 }
 
 ; Function Attrs: nounwind readnone
-define i1 @"type_enum.season.summer<1>"(i2 %"$#0") #0 {
-entry:
-  %"tmp$0#0" = icmp eq i2 %"$#0", -2
-  ret i1 %"tmp$0#0"
-}
-
-; Function Attrs: nounwind readnone
 define i2 @"type_enum.season.winter<0>"() #0 {
 entry:
   ret i2 0
-}
-
-; Function Attrs: nounwind readnone
-define i1 @"type_enum.season.winter<1>"(i2 %"$#0") #0 {
-entry:
-  %"tmp$0#0" = icmp eq i2 %"$#0", 0
-  ret i1 %"tmp$0#0"
 }
 
 attributes #0 = { nounwind readnone }

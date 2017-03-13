@@ -2224,7 +2224,7 @@ showStmt _ (ForeignCall lang name flags args) =
     (if List.null flags then "" else " " ++ unwords flags) ++
     "(" ++ intercalate ", " (List.map show args) ++ ")"
 showStmt _ (TestBool test) =
-    "testbool " ++ show test ++ "\n}"
+    "testbool " ++ show test
 showStmt indent (And stmts) =
     "(    " ++
     intercalate (" and\n" ++ replicate indent' ' ')

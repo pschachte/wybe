@@ -94,11 +94,12 @@ unbranchBody tmpCtr params detism body = do
     let unbrancher = initUnbrancherState tmpCtr params
     let outparams =  brOutParams unbrancher
     let outvars = brOutArgs unbrancher
-    let stmts = case detism of
-            Det     -> body
-            SemiDet -> [Unplaced $ Cond body
-                           [Unplaced $ TestBool $ iVal 1]
-                           [Unplaced $ TestBool $ iVal 0]]
+    let stmts = body
+-- case detism of
+--             Det     -> body
+--             SemiDet -> [Unplaced $ Cond body
+--                            [Unplaced $ TestBool $ iVal 1]
+--                            [Unplaced $ TestBool $ iVal 0]]
     logMsg Unbranch $ "** Unbranching with output params:" ++ show outparams
     logMsg Unbranch $ "** Unbranching with output args:" ++ show outvars
     (stmts',st) <- runStateT (unbranchStmts detism stmts) unbrancher
@@ -614,6 +615,13 @@ flattenBranches' stmt@(Cond tstStmts thn els) pos stmts =
     shouldnt $ "Cond with following statements: " ++ show stmt
 flattenBranches' (Nop) pos stmts =
     flattenBranches stmts -- Just remove Nops
+flattenBranches' stmt@TestBool{} pos stmts = do
+    thn <- flattenBranches stmts
+    return [Unplaced (Cond [maybePlace stmt pos]
+                      (if List.null thn
+                       then [Unplaced $ TestBool $ iVal 1]
+                       else thn)
+                      [Unplaced $ TestBool $ iVal 0])]
 flattenBranches' stmt pos stmts =
     shouldnt
     $ "Statement should have been eliminated before flatten branches\n"
@@ -645,7 +653,7 @@ flattenBranches' stmt pos stmts =
 --  On input, Conds are always the last thing in a statement sequence.
 flattenCond :: [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt]
             -> OptPos -> Unbrancher [Placed Stmt]
-flattenCond [] thn _els _pos = return thn
+flattenCond [] thn _els _pos = flattenBranches thn
 flattenCond (tst:tsts) thn els pos =
     flattenCond' (content tst) (place tst) tsts thn els pos
 
@@ -658,7 +666,8 @@ flattenCond' stmt@ForeignCall{} stmtPos stmts thn els condPos =
     (maybePlace stmt stmtPos:) <$> flattenCond stmts thn els condPos
 flattenCond' stmt@TestBool{} stmtPos stmts thn els condPos = do
     stmts' <- flattenCond stmts thn els condPos
-    return [maybePlace (Cond [maybePlace stmt stmtPos] stmts' els) condPos]
+    els' <- flattenBranches els
+    return [maybePlace (Cond [maybePlace stmt stmtPos] stmts' els') condPos]
 flattenCond' (And conj) _stmtPos stmts thn els condPos =
     flattenCond (conj++stmts) thn els condPos
 flattenCond' (Or []) _stmtPos stmts thn els condPos =
