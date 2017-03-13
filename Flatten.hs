@@ -50,7 +50,8 @@ flattenProcDecl :: Item -> Compiler (Item,Int)
 flattenProcDecl (ProcDecl vis detism inline 
                  proto@ProcProto{procProtoParams=params}
                  stmts pos) = do
-    logMsg Flatten $ "** Flattening proc " ++ show proto
+    logMsg Flatten $ "** Flattening proc "
+           ++ show proto ++ ":" ++ showBody 4 stmts
     let proto' = proto {procProtoParams = concatMap flattenParam params}
               -- flattenProto proto detism
     let inParams = Set.fromList $

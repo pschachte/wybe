@@ -20,7 +20,7 @@ import Data.Map as Map
 import Data.Maybe
 import Data.Set as Set
 import Flatten
-import Options (optUseStd)
+import Options (optUseStd,LogSelection(Normalise))
 import Config (wordSize,wordSizeBytes)
 import Snippets
 
@@ -96,6 +96,7 @@ normaliseItem modCompiler (FuncDecl vis detism inline
     pos)
 normaliseItem _ item@(ProcDecl _ _ _ _ _ _) = do
     (item',tmpCtr) <- flattenProcDecl item
+    logNormalise $ "Normalised proc:" ++ show item'
     addProc tmpCtr item'
 normaliseItem _ (StmtDecl stmt pos) = do
     updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
@@ -143,7 +144,7 @@ normaliseTypeImpln (TypeRepresentation repName) =
     (normaliseTypeRepresntation repName, Private, [], [])
 normaliseTypeImpln (TypeCtors vis ctors) =
     let (constCtrs,nonConstCtrs) =
-            List.partition ((==0) . length . fnProtoParams . content) ctors
+            List.partition (List.null . fnProtoParams . content) ctors
     in ((if List.null nonConstCtrs
          then "i" ++
               (show $ ceiling $ logBase 2 $ fromIntegral $ length constCtrs)
@@ -435,3 +436,7 @@ equalityField param =
     in  [Unplaced $ ProcCall [] "=" Nothing SemiDet
             [Unplaced $ varGet leftField,
              Unplaced $ varGet rightField]]
+
+-- |Log a message about normalised input items.
+logNormalise :: String -> Compiler ()
+logNormalise msg = logMsg Normalise msg

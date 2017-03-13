@@ -1916,20 +1916,17 @@ instance Show Item where
   show (FuncDecl vis detism inline proto typ exp pos) =
     visibilityPrefix vis
     ++ determinismPrefix detism
-    ++ if inline then "inline " else ""
+    ++ (if inline then "inline " else "")
     ++ "func " ++ show proto ++ ":" ++ show typ
     ++ showMaybeSourcePos pos
     ++ " = " ++ show exp
   show (ProcDecl vis detism inline proto stmts pos) =
     visibilityPrefix vis
     ++ determinismPrefix detism
-    ++ if inline then "inline " else ""
+    ++ (if inline then "inline " else "")
     ++ "proc " ++ show proto
     ++ showMaybeSourcePos pos
     ++ showBody 4 stmts
-  -- show (CtorDecl vis proto pos) =
-  --   visibilityPrefix vis ++ "ctor " ++ show proto
-  --   ++ showMaybeSourcePos pos
   show (StmtDecl stmt pos) =
     showStmt 4 stmt ++ showMaybeSourcePos pos
 
