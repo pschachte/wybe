@@ -310,26 +310,27 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
     (field,fieldtype,offset) =
     -- XXX need to take tag into account!
     -- XXX this needs to be able to fail if the constructor doesn't match
-    [ProcDecl vis Det True
-     (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
-                       Param "$" fieldtype ParamOut Ordinary] [])
-     ((tagCheck constCount nonConstCount tag "$rec")
-      ++ [Unplaced $ ForeignCall "lpvm" "access" []
-          [Unplaced $ varGet "$rec",
-           Unplaced $ IntValue $ fromIntegral offset,
-           Unplaced $ varSet "$"]])
-      pos,
-      ProcDecl vis Det True
-      (ProcProto field
-       [Param "$rec" rectype ParamInOut Ordinary,
-        Param "$field" fieldtype ParamIn Ordinary] [])
-      ((tagCheck constCount nonConstCount tag "$rec")
-      ++ [Unplaced $ ForeignCall "lpvm" "mutate" []
-          [Unplaced $ varGet "$rec",
-           Unplaced $ IntValue $ fromIntegral offset,
-           Unplaced $ varGet "$field",
-           Unplaced $ varSet "$rec"]])
-     pos]
+    let detism = if constCount + nonConstCount == 1 then Det else SemiDet
+    in [ProcDecl vis detism True
+        (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
+                          Param "$" fieldtype ParamOut Ordinary] [])
+        (tagCheck constCount nonConstCount tag "$rec"
+         ++ [Unplaced $ ForeignCall "lpvm" "access" []
+             [Unplaced $ varGet "$rec",
+              Unplaced $ IntValue $ fromIntegral offset,
+              Unplaced $ varSet "$"]])
+        pos,
+        ProcDecl vis detism True
+        (ProcProto field
+         [Param "$rec" rectype ParamInOut Ordinary,
+          Param "$field" fieldtype ParamIn Ordinary] [])
+        (tagCheck constCount nonConstCount tag "$rec"
+         ++ [Unplaced $ ForeignCall "lpvm" "mutate" []
+             [Unplaced $ varGet "$rec",
+              Unplaced $ IntValue $ fromIntegral offset,
+              Unplaced $ varGet "$field",
+              Unplaced $ varSet "$rec"]])
+        pos]
 
 
 ----------------------------------------------------------------
@@ -439,4 +440,4 @@ equalityField param =
 
 -- |Log a message about normalised input items.
 logNormalise :: String -> Compiler ()
-logNormalise msg = logMsg Normalise msg
+logNormalise = logMsg Normalise
