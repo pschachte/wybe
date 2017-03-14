@@ -81,7 +81,7 @@ unbranchProc proc = do
     let proto = procProto proc
     let proc' = proc { procTmpCount = tmpCtr', procImpln = ProcDefSrc body' }
     let tmpCount = procTmpCount proc
-    mapM_ (addProc tmpCount) newProcs
+    mapM_ addProcDef newProcs
     logMsg Unbranch $ "** Unbranched defn:" ++ showProcDef 0 proc' ++ "\n"
     return proc'
 
@@ -89,17 +89,12 @@ unbranchProc proc = do
 -- |Eliminate loops and ensure that Conds only appear as the final
 --  statement of a body.
 unbranchBody :: Int -> [Param] -> Determinism -> [Placed Stmt]
-             -> Compiler ([Placed Stmt],Int,[Item])
+             -> Compiler ([Placed Stmt],Int,[ProcDef])
 unbranchBody tmpCtr params detism body = do
     let unbrancher = initUnbrancherState tmpCtr params
     let outparams =  brOutParams unbrancher
     let outvars = brOutArgs unbrancher
     let stmts = body
--- case detism of
---             Det     -> body
---             SemiDet -> [Unplaced $ Cond body
---                            [Unplaced $ TestBool $ iVal 1]
---                            [Unplaced $ TestBool $ iVal 0]]
     logMsg Unbranch $ "** Unbranching with output params:" ++ show outparams
     logMsg Unbranch $ "** Unbranching with output args:" ++ show outvars
     (stmts',st) <- runStateT (unbranchStmts detism stmts) unbrancher
@@ -127,7 +122,7 @@ data UnbrancherState = Unbrancher {
     brDryRun     :: Bool,         -- ^Whether to suppress code generation
     brOutParams  :: [Param],      -- ^Output arguments for generated procs
     brOutArgs    :: [Placed Exp], -- ^Output arguments for call to gen procs
-    brNewDefs    :: [Item]        -- ^Generated auxilliary procedures
+    brNewDefs    :: [ProcDef]        -- ^Generated auxilliary procedures
     }
 
 
@@ -256,9 +251,13 @@ newProcName = do
 
 genProc :: ProcProto -> [Placed Stmt] -> Unbrancher ()
 genProc proto stmts = do
-    let item = ProcDecl Private Det False proto stmts Nothing
-    logUnbranch $ "Generating proc:\n" ++ show item
-    modify (\s -> s { brNewDefs = item:brNewDefs s })
+    -- let item = ProcDecl Private Det False proto stmts Nothing
+    let name = procProtoName proto
+    let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing 0
+                  Map.empty Private Det False NoSuperproc
+    procDef' <- lift $ unbranchProc procDef
+    logUnbranch $ "Generating proc:\n" ++ showProcDef 4 procDef'
+    modify (\s -> s { brNewDefs = procDef':brNewDefs s })
 
 
 -- |Return a fresh variable name.

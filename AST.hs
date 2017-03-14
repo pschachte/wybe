@@ -54,9 +54,9 @@ module AST (
   getDirectory, getModuleSpec, getModuleParams, option, 
   optionallyPutStr, message, genProcName,
   addImport, doImport, addType, lookupType, publicType,
-  ResourceName(..), ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
+  ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource, 
-  addProc, lookupProc, publicProc,
+  addProc, addProcDef, lookupProc, publicProc,
   refersTo, callTargets, logDump,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec, 
   showModSpecs, showResources, showMaybeSourcePos, showProcDefs,
@@ -734,9 +734,18 @@ addImport modspec imports = do
 -- |Add the specified proc definition to the current module.
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis detism inline proto stmts pos) = do
-    let ProcProto name params resources = proto
+    let name = procProtoName proto
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 
                   Map.empty vis detism inline $ initSuperprocSpec vis
+    addProcDef procDef
+addProc _ item =
+    shouldnt $ "addProc given non-Proc item " ++ show item
+
+
+addProcDef :: ProcDef -> Compiler ()
+addProcDef procDef = do
+    let name = procName procDef
+    let vis = procVis procDef
     currMod <- getModuleSpec
     procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
     let procs' = procs ++ [procDef]
@@ -751,8 +760,6 @@ addProc tmpCtr (ProcDecl vis detism inline proto stmts pos) = do
     logAST $ "Adding defnintion for " ++ show spec ++ ":" ++
       showProcDef 4 procDef
     return ()
-addProc _ item =
-    shouldnt $ "addProc given non-Proc item " ++ show item
 
 
 getParams :: ProcSpec -> Compiler [Param]
