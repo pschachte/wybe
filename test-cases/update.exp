@@ -13,14 +13,14 @@ AFTER EVERYTHING:
 
 inc2 > public inline (0 calls)
 0: inc2(x#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$4#0:int) @wybe:12:38
-    foreign llvm add(~tmp$4#0:int, 1:wybe.int, ?tmp$7#0:int) @wybe:12:38
-    foreign llvm move(~tmp$7#0:int, ?$#0:wybe.int) @update:1:8
+    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @wybe:13:38
+    foreign llvm add(~tmp$4#0:wybe.int, 1:wybe.int, ?tmp$7#0:wybe.int) @wybe:13:38
+    foreign llvm move(~tmp$7#0:wybe.int, ?$#0:wybe.int) @update:1:8
 inc2 > public inline (0 calls)
-1: inc2([x#0:wybe.int], ?x#1:wybe.int, y#0:wybe.int):
-    foreign llvm sub(~y#0:wybe.int, 1:wybe.int, ?tmp$11#0:wybe.int) @wybe:13:44
-    foreign llvm sub(~tmp$11#0:wybe.int, 1:wybe.int, ?tmp$14#0:wybe.int) @wybe:13:44
-    foreign llvm move(~tmp$14#0:wybe.int, ?%x#1:wybe.int)
+1: inc2(?x#0:wybe.int, y#0:wybe.int):
+    foreign llvm sub(~y#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.int) @wybe:14:44
+    foreign llvm sub(~tmp$5#0:wybe.int, 1:wybe.int, ?tmp$8#0:wybe.int) @wybe:14:44
+    foreign llvm move(~tmp$8#0:wybe.int, ?x#0:wybe.int)
 update
 ======================================================================
 AFTER LLVM IR:
@@ -37,8 +37,8 @@ entry:
 ; Function Attrs: nounwind readnone
 define i64 @"update.inc2<1>"(i64 %"y#0") #0 {
 entry:
-  %"tmp$14#0" = add i64 %"y#0", -2
-  ret i64 %"tmp$14#0"
+  %"tmp$8#0" = add i64 %"y#0", -2
+  ret i64 %"tmp$8#0"
 }
 
 attributes #0 = { nounwind readnone }

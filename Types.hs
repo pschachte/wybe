@@ -429,7 +429,7 @@ expMode' _ (CharValue _) = (ParamIn, True, Nothing)
 expMode' assigned (Var name FlowUnknown _)
     = if name `elem` assigned
       then (ParamIn, True, Nothing)
-      else (ParamOut, False, Just name)
+      else (FlowUnknown, False, Just name)
 expMode' assigned (Var name flow _) = (flow, name `elem` assigned, Nothing)
 expMode' assigned (Typed expr _ _) = expMode' assigned expr
 expMode' _ expr =
@@ -956,7 +956,8 @@ delayModeMatch :: [(FlowDirection,Bool,Maybe VarName)]
                -> ProcInfo -> Bool
 delayModeMatch modes ProcInfo{procInfoArgs=typModes}
     = all (\(formal,actual) -> formal == actual
-                               || formal == ParamIn && actual == FlowUnknown)
+                               || actual == FlowUnknown
+                               && (formal == ParamIn || formal == ParamOut))
       $ zip (typeFlowMode <$> typModes) (sel1 <$> modes)
 
 
@@ -998,7 +999,9 @@ modecheckStmts m name pos typing delayed assigned detism (pstmt:pstmts) = do
     logTypes $ "New errors   = " ++ show errs'
     logTypes $ "Now assigned = " ++ show assigned''
     let (doNow,delayed'')
-            = List.partition (flip Set.isSubsetOf assigned' . fst) delayed'
+            = List.partition
+            (not . Set.null . flip Set.intersection assigned' . fst)
+            delayed'
     (pstmts',assigned''',errs) <-
       modecheckStmts m name pos typing delayed'' assigned'' detism
         ((snd <$> doNow) ++ pstmts)
@@ -1064,12 +1067,12 @@ modecheckStmt m name defPos typing delayed assigned detism
                     = List.filter (exactModeMatch actualModes) modeMatches
             logTypes $ "Exact mode matches: " ++ show exactMatches
             let delayMatches
-                    = List.filter (delayModeMatch actualModes) modeMatches
+                    = List.any (delayModeMatch actualModes) modeMatches
             logTypes $ "Delay mode matches: " ++ show delayMatches
             case exactMatches of
                 (match:_) -> do
                   -- XXX If it's semidet, we need to convert to Det by adding
-                  -- and Boolean output parameter and a TestBool instruction
+                  -- a Boolean output parameter and a TestBool instruction
                   let matchProc = procInfoProc match
                   let args' = List.zipWith setPExpTypeFlow
                               (procInfoArgs match) args
@@ -1083,16 +1086,18 @@ modecheckStmt m name defPos typing delayed assigned detism
                                   $ List.filter
                                   ((==ParamOut) . expFlow . content) args'
                   return ([maybePlace stmt' pos],delayed,assigned',[])
-                [] -> case delayMatches of
-                    (match:_) -> do
-                      logTypes $ "delaying call: "
-                                 ++ ": " ++ show stmt
-                      return ([],(Set.empty,maybePlace stmt pos):delayed,
-                              assigned,[])
-                    [] -> do
-                      logTypes $ "Mode errors in call:  " ++ show flowErrs
-                      return ([],delayed,assigned,
-                              [ReasonUndefinedFlow cname pos])
+                [] -> if delayMatches
+                      then do
+                        logTypes $ "delaying call: " ++ ": " ++ show stmt
+                        let vars = Set.fromList $ catMaybes
+                                   $ sel3 <$> actualModes
+                        let delayed' = (vars,maybePlace stmt pos):delayed
+                        logTypes $ "delayed = " ++ show delayed'
+                        return ([],delayed',assigned,[])
+                      else do
+                        logTypes $ "Mode errors in call:  " ++ show flowErrs
+                        return ([],delayed,assigned,
+                                [ReasonUndefinedFlow cname pos])
 modecheckStmt m name defPos typing delayed assigned detism
     stmt@(ForeignCall lang cname flags args) pos = do
     logTypes $ "Mode checking foreign call " ++ show stmt
