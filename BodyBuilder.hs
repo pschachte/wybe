@@ -80,8 +80,10 @@ buildBody :: VarSubstitution -> BodyBuilder a -> Compiler (a,ProcBody)
 buildBody oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
     (a,st) <- buildPrims (initState oSubst) builder
-    logMsg BodyBuilder ">>>> Finished  building a proc body"
-    return (a,currBody st)
+    logMsg BodyBuilder ">>>> Finished  building a proc body:"
+    let body = currBody st
+    logMsg BodyBuilder $ showBlock 4 body
+    return (a,body)
 
 
 buildFork :: PrimVarName -> TypeSpec -> Bool -> [BodyBuilder ()] 
@@ -93,10 +95,11 @@ buildFork var ty final branchBuilders = do
         -- This shouldn't usually happen, but it can happen when a test
         -- proc is inlined.  Handle by building the fork at the end of
         -- each of the branches.
+        logBuild $ "buildFork in forked state" ++ show st
         bods' <- mapM (\st -> lift $ execStateT
                               (buildFork var ty final branchBuilders) st) bods
         put $ Forked bld var ty bods'
-      Unforked _ _ _ _ -> do
+      Unforked build _ _ _ -> do
         logBuild $ "<<<< beginning to build a new fork on " ++ show var
             ++ " (final=" ++ show final ++ ")"
         arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
@@ -110,30 +113,34 @@ buildFork var ty final branchBuilders = do
                 winner
           ArgVar var' ty _ _ _ -> do -- statically unknown result
             st <- get
-            case st of
-              Forked _ _ _ _ -> 
-                nyi "Fork after a fork"
-              Unforked build _ _ _ -> do
-                let st' = st { currBuild = [] }
-                branches <- mapM (buildBranch st') branchBuilders
-                case branches of
-                  [] -> return ()
-                  [br] -> put $ concatBodies st br
-                  (br:brs) | all (==br) brs -> 
-                    -- all branches are equal:  don't create a new fork
+            let st' = st { currBuild = [] }
+            branches <- mapM (buildBranch st' var' ty)
+                        $ zip branchBuilders [0..]
+            case branches of
+                [] -> return ()
+                [br] -> put $ concatBodies st br
+                (br:brs) | all (==br) brs -> 
+                           -- all branches are equal:  don't create a new fork
                     put $ concatBodies st br
-                  brs ->
+                brs ->
                     put $ Forked build var' ty brs
           _ -> shouldnt "Switch on non-integer value"
         logBuild $ ">>>> Finished building a fork"
 
 
-buildBranch :: BodyState -> BodyBuilder () -> BodyBuilder BodyState
-buildBranch st builder = do
-    logBuild "<<<< <<<< Beginning to build a branch"
-    branch <- lift $ fmap snd $ buildPrims st builder
+buildBranch :: BodyState -> PrimVarName -> TypeSpec -> (BodyBuilder (),Int)
+            -> BodyBuilder BodyState
+buildBranch st var ty (builder,val) = do
+    logBuild $ "<<<< <<<< Beginning to build branch "
+               ++ show val ++ " on " ++ show var
+    let st' = st { currSubst = Map.insert var (ArgInt (fromIntegral val) ty)
+                               $ currSubst st }
+    branch <- buildBranch' st' builder
     logBuild ">>>> >>>> Finished  building a branch"
     return branch
+
+buildBranch' :: BodyState -> BodyBuilder () -> BodyBuilder BodyState
+buildBranch' st builder = lift $ snd <$> buildPrims st builder
 
 
 buildPrims :: BodyState -> BodyBuilder a -> Compiler (a,BodyState)
@@ -155,7 +162,7 @@ instr prim pos = do
         prim' <- argExpandedPrim prim
         instr' prim' pos
       Forked bld var ty bods -> do
-        bods' <- mapM (flip buildBranch (instr prim pos)) bods
+        bods' <- mapM (flip buildBranch' (instr prim pos)) bods
         put $ Forked bld var ty bods'
 
 
