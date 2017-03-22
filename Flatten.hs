@@ -155,7 +155,8 @@ flattenInner isLoop transparent detism inner = do
                     tempCtr = tempCtr oldState,
                     prefixStmts = if isLoop then [] else prefixStmts oldState})
     logFlatten $ "-- Prefix:\n" ++ showBody 4 (prefixStmts innerState)
-    logFlatten $ "-- Flattened:\n" ++ showBody 4 (flattened innerState)
+    logFlatten $ "-- Flattened:" ++ showBody 4 (List.reverse
+                                                $ flattened innerState)
     -- logFlatten $ "-- Postponed:\n" ++ 
     --   showBody 4 (postponed innerState)
     if transparent

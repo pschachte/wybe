@@ -356,8 +356,8 @@ implicitEquality typespec consts nonconsts items =
     else
       let proto = ProcProto "=" [Param "$left" typespec ParamIn Ordinary,
                                  Param "$right" typespec ParamIn Ordinary] []
-          body = equalityBody consts nonconsts
-      in [ProcDecl Public SemiDet True proto body Nothing]
+          (body,inline) = equalityBody consts nonconsts
+      in [ProcDecl Public SemiDet inline proto body Nothing]
 
 -- |Does the item declare an = test or function?
 equalityTest :: Item -> Bool
@@ -380,18 +380,26 @@ equalityTest _ = False
 --       is exactly one non-const constructor, in which case skip the test),
 --       and then test each field for equality by calling the = test.
 --
+--   Also return whether the test should be inlined.  We inline when there
+--   there is no ore than one non-const constructor and either it has no more
+--   than two arguments or there are no const constructors.
+--
 --       XXX this needs to check that there are not too many non-const
 --       constructors for the number of available tag bits.
-equalityBody :: [Placed FnProto] -> [Placed FnProto] -> [Placed Stmt]
+equalityBody :: [Placed FnProto] -> [Placed FnProto] -> ([Placed Stmt],Bool)
 equalityBody [] [] = shouldnt "trying to generate = test with no constructors"
-equalityBody consts [] = equalityConsts consts
+equalityBody consts [] = (equalityConsts consts,True)
 equalityBody consts nonconsts =
     -- decide whether $left is const or non const, and handle accordingly
-    [Unplaced $ Cond (comparison "ult"
+    ([Unplaced $ Cond (comparison "ult"
                          (lpvmCastExp (varGet "$left") intType)
                          (iVal $ length consts))
                 (equalityConsts consts)
-                (equalityNonconsts nonconsts consts)]
+                (equalityNonconsts nonconsts consts)],
+     case List.map content nonconsts of
+         [FnProto _ params _ ] -> length params <= 2 || List.null consts
+         _ -> False
+        )
 
 
 -- |Return code to check of two const values values are equal, given that we

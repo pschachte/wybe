@@ -88,7 +88,7 @@ distance > public (1 calls)
 = > public inline (0 calls)
 1: =(in#0:position.position, ?out#0:position.position):
     foreign llvm move(~in#0:position.position, ?out#0:position.position)
-= > public inline test (5 calls)
+= > public inline test (3 calls)
 2: =($left#0:position.position, $right#0:position.position, ?$$#0:wybe.bool):
     foreign lpvm access($left#0:position.position, 0:wybe.int, ?$left$x#0:wybe.int)
     foreign lpvm access(~$left#0:position.position, 8:wybe.int, ?$left$y#0:wybe.int)
@@ -101,13 +101,7 @@ distance > public (1 calls)
 
     1:
         foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:28:40
-        case ~tmp$11#0:wybe.bool of
-        0:
-            foreign llvm move(0, ?$$#0:wybe.bool)
-
-        1:
-            foreign llvm move(1, ?$$#0:wybe.bool)
-
+        foreign llvm move(~tmp$11#0:wybe.bool, ?$$#0:wybe.bool)
 
 
 
@@ -118,7 +112,7 @@ position > public inline (0 calls)
     foreign lpvm mutate(~%$rec#1, ?%$rec#2, 8:wybe.int, ~y#0:wybe.int)
     foreign lpvm cast(~$rec#2, ?$recint#0:wybe.int)
     foreign lpvm cast(~$recint#0, ?$#0:position.position)
-position > public inline (6 calls)
+position > public inline (4 calls)
 1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position):
     foreign lpvm access($#0:position.position, 0:wybe.int, ?x#0:wybe.int)
     foreign lpvm access(~$#0:position.position, 8:wybe.int, ?y#0:wybe.int)

@@ -614,6 +614,8 @@ flattenBranches' stmt@(Cond tstStmts thn els) pos stmts =
     shouldnt $ "Cond with following statements: " ++ show stmt
 flattenBranches' (Nop) pos stmts =
     flattenBranches stmts -- Just remove Nops
+flattenBranches' stmt@TestBool{} pos [] =
+    return [maybePlace stmt pos]
 flattenBranches' stmt@TestBool{} pos stmts = do
     thn <- flattenBranches stmts
     return [Unplaced (Cond [maybePlace stmt pos]
