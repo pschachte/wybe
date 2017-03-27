@@ -30,7 +30,7 @@ gen$1 > (2 calls)
         foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @wybe:74:28
 
     1:
-        foreign llvm mul(~result#0:wybe.int, n#0:wybe.int, ?tmp$6#0:wybe.int) @wybe:21:38
+        foreign llvm mul(n#0:wybe.int, ~result#0:wybe.int, ?tmp$6#0:wybe.int) @wybe:21:38
         foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$7#0:wybe.int) @wybe:16:38
         proc_factorial.gen$1<0>(~tmp$7#0:wybe.int, ~tmp$6#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_factorial:3:5
 
@@ -44,7 +44,7 @@ gen$2 > inline (1 calls)
 
 gen$3 > inline (1 calls)
 0: gen$3(n#0:wybe.int, result#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign llvm mul(~result#0:wybe.int, n#0:wybe.int, ?tmp$2#0:wybe.int) @wybe:21:38
+    foreign llvm mul(n#0:wybe.int, ~result#0:wybe.int, ?tmp$2#0:wybe.int) @wybe:21:38
     foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$6#0:wybe.int) @wybe:16:38
     proc_factorial.gen$1<0>(~tmp$6#0:wybe.int, ~tmp$2#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_factorial:3:5
 proc_factorial

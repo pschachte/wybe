@@ -125,17 +125,16 @@ expandBody (ProcBody prims fork) = do
     modify (\s -> s { noFork = fork == NoFork })
     expandPrims prims
     logExpansion $ "Finished expanding unforked part of body"
-    st <- get
     case fork of
       NoFork -> return ()
       PrimFork var ty final bodies -> do
+        st <- get
         logExpansion $ "Now expanding fork (" ++ 
           (if inlining st then "without" else "WITH") ++ " inlining)"
         logExpansion $ "  with renaming = " ++ show (renaming st)
         let var' = case Map.lookup var $ renaming st of
               Nothing -> var
               Just (ArgVar v _ _ _ _) -> v 
-              -- XXX should handle case of switch on int constant
               Just _ -> shouldnt "expansion led to non-var conditional"
         logExpansion $ "  fork on " ++ show var' ++ ":" ++ show ty
         lift $ buildFork var' ty final 

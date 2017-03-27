@@ -349,15 +349,13 @@ simplifyForeign "llvm" op flags args = simplifyOp op flags args
 simplifyForeign lang op flags args = PrimForeign lang op flags args
 
 
--- |If the specified argument is an input, then it is a constant
-constIfInput :: PrimArg -> Bool
-constIfInput (ArgVar _ _ FlowIn _ _) = False
-constIfInput _ = True
-
-
--- | Simplify llvm instructions where possible.  This handles constant
---   folding and simple (single-operation) algebraic simplifications
---   (left and right identities and annihilators).
+-- | Simplify and canonicalise llvm instructions where possible. This
+--   handles constant folding and simple (single-operation) algebraic
+--   simplifications (left and right identities and annihilators).
+--   Commutative ops are canonicalised by putting the smaller argument
+--   first, but only for integer ops.  Integer inequalities are
+--   canonicalised by putting smaller argument first and flipping
+--   comparison if necessary.
 simplifyOp :: ProcName -> [Ident] -> [PrimArg] -> Prim
 -- Integer ops
 simplifyOp "add" _ [ArgInt n1 ty, ArgInt n2 _, output] =
@@ -366,6 +364,8 @@ simplifyOp "add" _ [ArgInt 0 ty, arg, output] =
   primMove arg output
 simplifyOp "add" _ [arg, ArgInt 0 ty, output] =
   primMove arg output
+simplifyOp "add" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "add" flags [arg2, arg1, output]
 simplifyOp "sub" _ [ArgInt n1 ty, ArgInt n2 _, output] =
   primMove (ArgInt (n1-n2) ty) output
 simplifyOp "sub" _ [arg, ArgInt 0 _, output] =
@@ -380,6 +380,8 @@ simplifyOp "mul" _ [ArgInt 0 ty, _, output] =
   primMove (ArgInt 0 ty) output
 simplifyOp "mul" _ [_, ArgInt 0 ty, output] =
   primMove (ArgInt 0 ty) output
+simplifyOp "mul" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "mul" flags [arg2, arg1, output]
 simplifyOp "div" _ [ArgInt n1 ty, ArgInt n2 _, output] =
   primMove (ArgInt (n1 `div` n2) ty) output
 simplifyOp "div" _ [arg, ArgInt 1 _, output] =
@@ -395,6 +397,8 @@ simplifyOp "and" _ [ArgInt (-1) _, arg, output] =
   primMove arg output
 simplifyOp "and" _ [arg, ArgInt (-1) _, output] =
   primMove arg output
+simplifyOp "and" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "and" flags [arg2, arg1, output]
 simplifyOp "or" _ [ArgInt n1 ty, ArgInt n2 _, output] =
   primMove (ArgInt (fromIntegral n1 .|. fromIntegral n2) ty) output
 simplifyOp "or" _ [ArgInt (-1) ty, _, output] =
@@ -405,26 +409,42 @@ simplifyOp "or" _ [ArgInt 0 _, arg, output] =
   primMove arg output
 simplifyOp "or" _ [arg, ArgInt 0 _, output] =
   primMove arg output
+simplifyOp "or" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "or" flags [arg2, arg1, output]
 simplifyOp "xor" _ [ArgInt n1 ty, ArgInt n2 _, output] =
   primMove (ArgInt (fromIntegral n1 `xor` fromIntegral n2) ty) output
 simplifyOp "xor" _ [ArgInt 0 _, arg, output] =
   primMove arg output
 simplifyOp "xor" _ [arg, ArgInt 0 _, output] =
   primMove arg output
+simplifyOp "xor" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "xor" flags [arg2, arg1, output]
 -- XXX should probably put shift ops here, too
 -- Integer comparisons, including special handling of unsigned comparison to 0
 simplifyOp "icmp" ["eq"] [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1==n2) output
+simplifyOp "icmp" ["eq"] [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["eq"] [arg2, arg1, output]
 simplifyOp "icmp" ["ne"] [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1/=n2) output
+simplifyOp "icmp" ["ne"] [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["ne"] [arg2, arg1, output]
 simplifyOp "icmp" ["slt"] [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1<n2) output
+simplifyOp "icmp" ["slt"] [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["sgt"] [arg2, arg1, output]
 simplifyOp "icmp" ["sle"] [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1<=n2) output
+simplifyOp "icmp" ["sle"] [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["sge"] [arg2, arg1, output]
 simplifyOp "icmp" ["sgt"] [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1>n2) output
+simplifyOp "icmp" ["sgt"] [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["slt"] [arg2, arg1, output]
 simplifyOp "icmp" ["sge"] [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1>=n2) output
+simplifyOp "icmp" ["sge"] [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["sle"] [arg2, arg1, output]
 simplifyOp "icmp" ["ult"] [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
@@ -433,6 +453,8 @@ simplifyOp "icmp" ["ult"] [_, ArgInt 0 _, output] = -- nothing is < 0
   primMove (ArgInt 0 boolType) output
 simplifyOp "icmp" ["ult"] [a1, ArgInt 1 ty, output] = -- only 0 is < 1
   PrimForeign "llvm" "icmp" ["eq"] [a1,ArgInt 0 ty,output]
+simplifyOp "icmp" ["ult"] [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["ugt"] [arg2, arg1, output]
 simplifyOp "icmp" ["ule"] [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
@@ -441,6 +463,8 @@ simplifyOp "icmp" ["ule"] [ArgInt 0 _, _, output] = -- 0 is <= everything
   primMove (ArgInt 1 boolType) output
 simplifyOp "icmp" ["ule"] [ArgInt 1 ty, a2, output] = -- 1 is <= all but 0
   PrimForeign "llvm" "icmp" ["ne"] [ArgInt 0 ty,a2,output]
+simplifyOp "icmp" ["ule"] [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["uge"] [arg2, arg1, output]
 simplifyOp "icmp" ["ugt"] [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
@@ -449,6 +473,8 @@ simplifyOp "icmp" ["ugt"] [ArgInt 0 _, _, output] = -- 0 is > nothing
   primMove (ArgInt 0 boolType) output
 simplifyOp "icmp" ["ugt"] [ArgInt 1 ty, a2, output] = -- 1 is > only 0
   PrimForeign "llvm" "icmp" ["eq"] [ArgInt 0 ty,a2,output]
+simplifyOp "icmp" ["ugt"] [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["ult"] [arg2, arg1, output]
 simplifyOp "icmp" ["uge"] [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
@@ -457,6 +483,8 @@ simplifyOp "icmp" ["uge"] [_, ArgInt 0 _, output] = -- everything is >= 0
   primMove (ArgInt 1 boolType) output
 simplifyOp "icmp" ["uge"] [a1, ArgInt 1 ty, output] = -- all but 0 is >= 1
   PrimForeign "llvm" "icmp" ["ne"] [a1,ArgInt 0 ty,output]
+simplifyOp "icmp" ["uge"] [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["ule"] [arg2, arg1, output]
 -- Float ops
 simplifyOp "fadd" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
   primMove (ArgFloat (n1+n2) ty) output
