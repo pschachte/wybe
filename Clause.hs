@@ -156,6 +156,7 @@ appendToBody (ProcBody prims (PrimFork v ty lst bodies)) after
     = let bodies' = List.map (flip appendToBody after) bodies
       in ProcBody prims $ PrimFork v ty lst bodies'
 
+-- |Add the specified statements at the front of the given body
 prependToBody :: [Placed Prim] -> ProcBody -> ProcBody
 prependToBody before (ProcBody prims fork)
     = ProcBody (before++prims) fork
@@ -179,9 +180,9 @@ compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
 compileSimpleStmt' (TestBool expr) =
+    -- Only for handling a TestBool other than as the condition of a Cond:
     compileSimpleStmt' $ content $ move expr (boolVarSet "$$")
-compileSimpleStmt' (Nop) = do
-    return $ PrimNop
+compileSimpleStmt' Nop = return PrimNop
 compileSimpleStmt' stmt =
     shouldnt $ "Normalisation left complex statement:\n" ++ showStmt 4 stmt
 
