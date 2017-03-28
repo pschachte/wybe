@@ -39,7 +39,8 @@ data BodyState
       currBuild :: [Placed Prim],   -- ^The body we're building, reversed
       currSubst :: Substitution,    -- ^variable substitutions to propagate
       outSubst  :: VarSubstitution, -- ^Substitutions for variable assignments
-      subExprs  :: ComputedCalls    -- ^Previously computed calls to reuse
+      subExprs  :: ComputedCalls,   -- ^Previously computed calls to reuse
+      definers  :: VarDefiner       -- ^The call that defined each var
       }
     | Forked {
       initBuild   :: [Placed Prim],   -- ^Statements before the fork, reversed
@@ -49,26 +50,31 @@ data BodyState
       }
     deriving (Eq,Show)
 
+
 type Substitution = Map PrimVarName PrimArg
 type VarSubstitution = Map PrimVarName PrimVarName
+
 
 -- To handle common subexpression elimination, we keep a map from previous
 -- calls with their outputs removed to the outputs.  This type encapsulates
 -- that.  In the Prim keys, all PrimArgs are inputs.
 type ComputedCalls = Map Prim [PrimArg]
 
--- instance Show BodyBuildState where
---   show (Unforked revPrims) =
---       showBlock 4 $ ProcBody (reverse revPrims) NoFork
---   show (Forked body) = show body
+
+-- To handle branch conditions, we keep track of the statement that bound
+-- each variable.  For each arm of a branch, this lets us work out what
+-- must be true and what must be false for that arm, so we can avoid
+-- redundant tests.
+type VarDefiner = Map PrimVarName Prim
+
 
 currBody :: BodyState -> ProcBody
-currBody (Unforked prims _ _ _)     = ProcBody (reverse prims) NoFork
+currBody Unforked{currBuild=prims}  = ProcBody (reverse prims) NoFork
 currBody (Forked prims var ty bods) = ProcBody (reverse prims) $
     PrimFork var ty False $ List.map currBody bods
 
 initState :: VarSubstitution -> BodyState
-initState oSubst = Unforked [] Map.empty oSubst Map.empty
+initState oSubst = Unforked [] Map.empty oSubst Map.empty Map.empty
 
 
 ----------------------------------------------------------------
@@ -99,7 +105,7 @@ buildFork var ty final branchBuilders = do
         bods' <- mapM (\st -> lift $ execStateT
                               (buildFork var ty final branchBuilders) st) bods
         put $ Forked bld var ty bods'
-      Unforked build _ _ _ -> do
+      Unforked{currBuild=build} -> do
         logBuild $ "<<<< beginning to build a new fork on " ++ show var
             ++ " (final=" ++ show final ++ ")"
         arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
@@ -111,10 +117,11 @@ buildFork var ty final branchBuilders = do
               (winner:_) -> do
                 logBuild $ "**** condition result is " ++ show n
                 winner
-          ArgVar var' ty _ _ _ -> do -- statically unknown result
-            st <- get
-            let st' = st { currBuild = [] }
-            branches <- mapM (buildBranch st' var' ty)
+          ArgVar var' varType _ _ _ -> do -- statically unknown result
+            st' <- get
+            let def = Map.lookup var' $ definers st'
+            let st'' = st { currBuild = [] }
+            branches <- mapM (buildBranch st'' var' varType def)
                         $ zip branchBuilders [0..]
             case branches of
                 [] -> return ()
@@ -128,9 +135,9 @@ buildFork var ty final branchBuilders = do
         logBuild $ ">>>> Finished building a fork"
 
 
-buildBranch :: BodyState -> PrimVarName -> TypeSpec -> (BodyBuilder (),Int)
-            -> BodyBuilder BodyState
-buildBranch st var ty (builder,val) = do
+buildBranch :: BodyState -> PrimVarName -> TypeSpec -> Maybe Prim
+            -> (BodyBuilder (),Int) -> BodyBuilder BodyState
+buildBranch st var ty definer (builder,val) = do
     logBuild $ "<<<< <<<< Beginning to build branch "
                ++ show val ++ " on " ++ show var
     let st' = st { currSubst = Map.insert var (ArgInt (fromIntegral val) ty)
@@ -138,6 +145,7 @@ buildBranch st var ty (builder,val) = do
     branch <- buildBranch' st' builder
     logBuild ">>>> >>>> Finished  building a branch"
     return branch
+
 
 buildBranch' :: BodyState -> BodyBuilder () -> BodyBuilder BodyState
 buildBranch' st builder = lift $ snd <$> buildPrims st builder
@@ -149,7 +157,7 @@ buildPrims st builder = runStateT builder st
 
 -- |Add an instruction to the current body, after applying the current
 --  substitution. If it's a move instruction, add it to the current
---  substitution, and only add it if it assigns a protected variable.
+--  substitution.
 instr :: Prim -> OptPos -> BodyBuilder ()
 instr PrimNop _ = do
     -- Filter out NOPs
@@ -157,11 +165,12 @@ instr PrimNop _ = do
 instr prim pos = do
     st <- get
     case st of
-      Unforked _ _ _ _ -> do
+      Unforked{} -> do
         logBuild $ "Generating instr " ++ show prim
         prim' <- argExpandedPrim prim
         instr' prim' pos
       Forked bld var ty bods -> do
+        -- add instr to every branch
         bods' <- mapM (flip buildBranch' (instr prim pos)) bods
         put $ Forked bld var ty bods'
 
@@ -196,7 +205,7 @@ instr' prim pos = do
     case match of
         Nothing -> do
             -- record prim executed (and other modes), and generate instr
-            logBuild $ "not found"
+            logBuild "not found"
             addAllModes prim
             rawInstr prim pos
         Just oldOuts -> do
@@ -253,14 +262,15 @@ addSubst var val = do
 --  elimination.  It can also handle optimisations like recognizing the
 --  reconstruction of a deconstructed value.
 --  XXX Doesn't yet handle multiple modes.
---  XXX Doesn't handle arithmetic identities like commutative addition,
---      if that's a good way to handle them.
 addAllModes :: Prim -> BodyBuilder ()
-addAllModes (PrimCall pspec args) = do
+addAllModes instr@(PrimCall pspec args) = do
     let (inArgs,outArgs) = splitArgsByMode args
     let fakeInstr = PrimCall pspec inArgs
     logBuild $ "Recording computed instr " ++ show fakeInstr
     modify (\s -> s {subExprs = Map.insert fakeInstr outArgs $ subExprs s})
+    modify (\s -> s {definers = List.foldr
+                                (flip Map.insert instr . argVarName)
+                                (definers s) outArgs})
 addAllModes (PrimForeign lang nm flags args)  = do
     let (inArgs,outArgs) = splitArgsByMode args
     let fakeInstr = PrimForeign lang nm flags inArgs
@@ -280,11 +290,7 @@ rawInstr prim pos = do
 
 
 splitArgsByMode :: [PrimArg] -> ([PrimArg], [PrimArg])
-splitArgsByMode =
-    List.foldr (\a (ins,outs) -> if argFlowDirection a == FlowIn
-                                 then (a:ins,outs)
-                                 else (ins,a:outs))
-    ([],[])
+splitArgsByMode = List.partition ((==FlowIn) . argFlowDirection)
 
 
 validateInstr :: Prim -> BodyBuilder ()
@@ -309,16 +315,17 @@ validateType _ instr = return ()
 
 
 concatBodies :: BodyState -> BodyState -> BodyState
-concatBodies (Unforked revBody1 _ _ _) (Unforked revBody2 subs osubs comp)
-    = Unforked (revBody2 ++ revBody1) subs osubs comp -- they're reversed
-concatBodies (Unforked revBody1 _ _ _) (Forked revBody2 var ty bods)
-    = Forked (revBody2 ++ revBody1) var ty bods -- they're reversed
+concatBodies (Unforked revBody1 _ _ _ _)
+             (Unforked revBody2 subs osubs comp definers)
+    = Unforked (revBody2 ++ revBody1) subs osubs comp definers
+    -- NB: bodies are reversed
+concatBodies (Unforked revBody1 _ _ _ _) (Forked revBody2 var ty bods)
+    = Forked (revBody2 ++ revBody1) var ty bods -- bodies are reversed
 concatBodies _ _ = shouldnt "Fork after fork should have been caught earlier"
 
 addInstrToState :: Placed Prim -> BodyState -> BodyState
-addInstrToState ins st@(Unforked _ _ _ _)
-    = st { currBuild = ins:currBuild st}
-addInstrToState ins st@(Forked _ _ _ _)
+addInstrToState ins st@Unforked{} = st { currBuild = ins:currBuild st}
+addInstrToState ins st@Forked{}
     = st { stForkBods = List.map (addInstrToState ins) $ stForkBods st }
 
 
@@ -333,10 +340,6 @@ expandArg (ArgVar var typ FlowOut ftype lst) = do
 expandArg arg = return arg
 
 
-
-----------------------------------------------------------------
---                          Extracting the Actual Body
-----------------------------------------------------------------
 
 ----------------------------------------------------------------
 --                              Constant Folding

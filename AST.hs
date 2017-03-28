@@ -1718,9 +1718,14 @@ instance Show Prim where
 -- |The allowed arguments in primitive proc or foreign proc calls, 
 --  just variables and constants.
 data PrimArg 
-     = ArgVar PrimVarName TypeSpec PrimFlow ArgFlowType Bool 
-       -- ^Bool indicates definite last use (one use in the last 
-       --  statement to use the variable) 
+     = ArgVar {argVarName     :: PrimVarName, -- ^Name of output variable
+               argVarType     :: TypeSpec,    -- ^Its type
+               argVarFlow     :: PrimFlow,    -- ^Its flow direction
+               argVarFlowType :: ArgFlowType, -- ^Its flow type
+               argVarFinal    :: Bool         -- ^Is this a definite last use
+                                              -- (one use in the last statement
+                                              -- to use the variable) 
+              }
      | ArgInt Integer TypeSpec
      | ArgFloat Double TypeSpec
      | ArgString String TypeSpec
