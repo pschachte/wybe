@@ -17,6 +17,7 @@ import Data.Map as Map
 import Data.List as List
 import Data.Bits
 import Control.Monad
+import Control.Monad.Extra (whenJust)
 import Control.Monad.Trans (lift)
 import Control.Monad.Trans.State
 
@@ -118,10 +119,8 @@ buildFork var ty final branchBuilders = do
                 logBuild $ "**** condition result is " ++ show n
                 winner
           ArgVar var' varType _ _ _ -> do -- statically unknown result
-            st' <- get
-            let def = Map.lookup var' $ definers st'
-            let st'' = st { currBuild = [] }
-            branches <- mapM (buildBranch st'' var' varType def)
+            def <- gets (Map.lookup var' . definers)
+            branches <- mapM (buildBranch var' varType def)
                         $ zip branchBuilders [0..]
             case branches of
                 [] -> return ()
@@ -135,14 +134,19 @@ buildFork var ty final branchBuilders = do
         logBuild $ ">>>> Finished building a fork"
 
 
-buildBranch :: BodyState -> PrimVarName -> TypeSpec -> Maybe Prim
+buildBranch :: PrimVarName -> TypeSpec -> Maybe Prim
             -> (BodyBuilder (),Int) -> BodyBuilder BodyState
-buildBranch st var ty definer (builder,val) = do
+buildBranch var ty definer (builder,val) = do
     logBuild $ "<<<< <<<< Beginning to build branch "
                ++ show val ++ " on " ++ show var
-    let st' = st { currSubst = Map.insert var (ArgInt (fromIntegral val) ty)
+    st <- get
+    let st' = st { currBuild = [],
+                   currSubst = Map.insert var (ArgInt (fromIntegral val) ty)
                                $ currSubst st }
-    branch <- buildBranch' st' builder
+    branch <- buildBranch' st' $ do
+        logBuild $ "Propagating " ++ show val ++ " result of " ++ show definer
+        whenJust definer $ propagateBinding var ty val
+        builder
     logBuild ">>>> >>>> Finished  building a branch"
     return branch
 
@@ -153,6 +157,64 @@ buildBranch' st builder = lift $ snd <$> buildPrims st builder
 
 buildPrims :: BodyState -> BodyBuilder a -> Compiler (a,BodyState)
 buildPrims st builder = runStateT builder st
+
+
+-- |Augment st with whatever consequences can be deduced from the fact
+--  that prim assigned var the value val.
+--  
+propagateBinding :: PrimVarName -> TypeSpec -> Int -> Prim -> BodyBuilder ()
+propagateBinding var ty val (PrimForeign "llvm" "icmp" [cmp] [a1, a2, _]) = do
+    propagateComparison var ty val cmp a1 a2
+propagateBinding _ _ _ _ = return ()
+
+
+-- |Augment st with whatever consequences can be deduced from the fact
+--  that the specified LLVM comparison assigned var the value val.
+propagateComparison :: PrimVarName -> TypeSpec -> Int -> String
+                    -> PrimArg -> PrimArg -> BodyBuilder ()
+propagateComparison var ty val cmp a1 a2 = do
+    -- note that the negation of the test gives the negation of the result
+    let (oppositeCmp,trues0,falses0) = comparisonRelatives cmp
+    let (_,trues,falses) = if val == 0
+                           then comparisonRelatives oppositeCmp
+                           else ("", trues0, falses0)
+    let allConsequences = (oppositeCmp,(1-val))
+                          :  zip trues (repeat 1)
+                          ++ zip falses (repeat 0)
+    logBuild $ "Adding consequences of branch:  "
+               ++ show (List.map (\(c,v) ->
+                                  PrimForeign "llvm" "icmp" [cmp]
+                                  [a1, a2, ArgInt (fromIntegral val) ty])
+                        allConsequences)
+    let insertInstr =
+          \(cmp,val) map -> Map.insert
+                            (PrimForeign "llvm" "icmp" [cmp] [a1, a2])
+                            [ArgInt (fromIntegral val) ty]
+                            map
+    modify (\s -> s {subExprs = List.foldr insertInstr (subExprs s)
+                                allConsequences
+                    })
+
+
+-- |Given an LLVM comparison instruction name, returns a triple of
+--  (1) the negation of the comparison
+--  (2) a list of comparisons that are true whenever it is true
+--  (3) a list of comparisons that are false whenever it is true, other than
+--      the negation (1)
+comparisonRelatives :: String -> (String,[String],[String])
+comparisonRelatives "eq"  = ("ne", ["sle", "sge", "ule", "uge"],
+                          ["slt", "sgt", "ult", "ugt"])
+comparisonRelatives "ne"  = ("eq", [], [])
+comparisonRelatives "slt" = ("sge", ["sle", "ne"], [])
+comparisonRelatives "sge" = ("slt", [], [])
+comparisonRelatives "sgt" = ("sle", ["sge", "ne"], [])
+comparisonRelatives "sle" = ("sgt", [], [])
+comparisonRelatives "ult" = ("uge", ["ule", "ne"], [])
+comparisonRelatives "uge" = ("ult", [], [])
+comparisonRelatives "ugt" = ("ule", ["uge", "ne"], [])
+comparisonRelatives "ule" = ("ugt", [], [])
+comparisonRelatives comp = shouldnt $ "unknown llvm comparison " ++ comp
+
 
 
 -- |Add an instruction to the current body, after applying the current
@@ -220,8 +282,11 @@ instr' prim pos = do
 outVarIn :: PrimArg -> PrimArg
 outVarIn (ArgVar name ty FlowOut ftype lst) =
     ArgVar name ty FlowIn Ordinary False
-outVarIn arg =
-    shouldnt $ "outVarIn not actually out: " ++ show arg
+outVarIn arg@ArgInt{} = arg
+outVarIn arg@ArgFloat{} = arg
+outVarIn arg@ArgString{} = arg
+outVarIn arg@ArgChar{} = arg
+outVarIn arg = shouldnt $ "outVarIn not actually out: " ++ show arg
 
 
 argExpandedPrim :: Prim -> BodyBuilder Prim
@@ -267,17 +332,23 @@ addAllModes instr@(PrimCall pspec args) = do
     let (inArgs,outArgs) = splitArgsByMode args
     let fakeInstr = PrimCall pspec inArgs
     logBuild $ "Recording computed instr " ++ show fakeInstr
-    modify (\s -> s {subExprs = Map.insert fakeInstr outArgs $ subExprs s})
-    modify (\s -> s {definers = List.foldr
+    modify (\s -> s {subExprs = Map.insert fakeInstr outArgs $ subExprs s,
+                     definers = List.foldr
                                 (flip Map.insert instr . argVarName)
                                 (definers s) outArgs})
-addAllModes (PrimForeign lang nm flags args)  = do
+addAllModes instr@(PrimForeign lang nm flags args)  = do
     let (inArgs,outArgs) = splitArgsByMode args
     let fakeInstr = PrimForeign lang nm flags inArgs
     logBuild $ "Recording computed instr " ++ show fakeInstr
-    modify (\s -> s {subExprs = Map.insert fakeInstr outArgs $ subExprs s})
+    modify (\s -> s {subExprs = Map.insert fakeInstr outArgs $ subExprs s,
+                     definers = List.foldr
+                                (flip Map.insert instr . argVarName)
+                                (definers s) outArgs})
 addAllModes PrimNop =
     shouldnt "splitPrimOutputs: Nops should be filtered out by now"
+
+
+
 
 
 -- |Unconditionally add an instr to the current body
@@ -286,7 +357,6 @@ rawInstr prim pos = do
     logBuild $ "---- adding instruction " ++ show prim
     validateInstr prim
     modify $ addInstrToState (maybePlace prim pos)
-    logBuild $ "---- added " ++ show prim
 
 
 splitArgsByMode :: [PrimArg] -> ([PrimArg], [PrimArg])
