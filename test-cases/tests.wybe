@@ -1,8 +1,18 @@
 # Tests for wybe's support for test procs, ie, procs that can succeed or fail
 
 public test proc lt(x:int, y:int)
-    # use a boolean-valued expression as a test
+    # use a test to implement another test
     x < y
+end
+
+public proc lt2(x:int, y:int, ?res:bool)
+    # reify a test as a bool to implement a non-test
+    ?res = lt(x, y)
+end
+
+public test proc lt3(x:int, y:int)
+    # use a boolean expr to implement a test
+    lt2(y,x)
 end
 
 public type map = public empty | node(left:map, key:int, value:int, right:map) end

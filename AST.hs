@@ -2160,7 +2160,7 @@ showTypeSuffix typ = ":" ++ show typ
 
 -- |How to show a dataflow direction.
 flowPrefix :: FlowDirection -> String
-flowPrefix NoFlow     = ""
+flowPrefix NoFlow     = "|=|"
 flowPrefix ParamIn    = ""
 flowPrefix ParamOut   = "?"
 flowPrefix ParamInOut = "!"

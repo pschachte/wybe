@@ -600,13 +600,23 @@ procInfoTypes :: ProcInfo -> [TypeSpec]
 procInfoTypes call = typeFlowType <$> procInfoArgs call
 
 
+-- |Check if ProcInfo is for a proc with a single Bool output as last arg,
+--  and if so, return Just the ProcInfo for the equivalent test proc
 boolFnToTest :: ProcInfo -> Maybe ProcInfo
 boolFnToTest (ProcInfo _ _ SemiDet) = Nothing
 boolFnToTest (ProcInfo proc args Det)
+    | List.null args = Nothing
     | last args == TypeFlow boolType ParamOut =
         Just $ ProcInfo proc (init args) SemiDet
     | otherwise = Nothing
--- last calleeTypes == boolType && last calleeFlows == ParamOut
+    
+
+-- |Check if ProcInfo is for a test proc, and if so, return a ProcInfo for
+--  the Det proc with a single Bool output as last arg
+testToBoolFn :: ProcInfo -> Maybe ProcInfo
+testToBoolFn (ProcInfo _ _ Det) = Nothing
+testToBoolFn (ProcInfo proc args SemiDet)
+    = Just $ ProcInfo proc (args ++ [TypeFlow boolType ParamOut]) Det
     
 
 
@@ -864,7 +874,8 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
         typing residue chg = do
     logTypes $ "Type checking call " ++ show pstmt
     logTypes $ "Calling context is " ++ show detism
-    logTypes $ "Candidate types: " ++ show (procInfoTypes <$> typs)
+    logTypes $ "Candidate types: " ++ show typs
+    -- XXX Must handle reification of test as a bool
     let (callee,pexps) = case content pstmt of
                              ProcCall _ callee' _ _ pexps' -> (callee',pexps')
                              noncall -> shouldnt
@@ -878,6 +889,7 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
     let validMatches = catOKs matches
     let validTypes = nub $ procInfoTypes <$> validMatches
     logTypes $ "Valid types = " ++ show validTypes
+    logTypes $ "Converted types = " ++ show (boolFnToTest <$> typs)
     case validTypes of
         [] -> do
           logTypes "Type error: no valid types for call"
@@ -903,15 +915,21 @@ matchTypeList :: Ident -> Ident -> OptPos -> [TypeSpec] -> Determinism
 matchTypeList caller callee pos callArgTypes detismContext calleeInfo
     | sameLength callArgTypes args
     = matchTypeList' callee pos callArgTypes calleeInfo
-    -- XXX handle case of SemiDet context call to bool function as a proc call
+    -- Handle case of SemiDet context call to bool function as a proc call
     | detismContext == SemiDet && isJust testInfo
       && sameLength callArgTypes (procInfoArgs calleeInfo')
     = matchTypeList' callee pos callArgTypes calleeInfo'
+    -- Handle case of reified test call
+    | isJust detCallInfo
+      && sameLength callArgTypes (procInfoArgs calleeInfo'')
+    = matchTypeList' callee pos callArgTypes calleeInfo''
     | otherwise = Err [ReasonArity caller callee pos
                        (length callArgTypes) (length args)]
     where args = procInfoArgs calleeInfo
           testInfo = boolFnToTest calleeInfo
           calleeInfo' = fromJust testInfo
+          detCallInfo = testToBoolFn calleeInfo
+          calleeInfo'' = fromJust detCallInfo
 
 matchTypeList' :: Ident -> OptPos -> [TypeSpec] -> ProcInfo -> MaybeErr ProcInfo
 matchTypeList' callee pos callArgTypes calleeInfo =
