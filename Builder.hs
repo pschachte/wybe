@@ -521,31 +521,39 @@ handleModImports modSCC mod = do
 -- imports in the correct order. The target module and imports have
 -- mains defined as 'modName.main'.
 buildExecutable :: ModSpec -> FilePath -> Compiler ()
-buildExecutable targetMod fpath =
-    do depends <- orderedDependencies targetMod
-       -- Filter the modules for which the second element of the tuple is True
-       let mainImports = List.foldr (\x a -> if snd x then (fst x):a else a)
-               [] depends
-       logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
-       mainMod <- newMainModule mainImports
-       logBuild $ "o Built 'main' module for target: "
-       mainModStr <- liftIO $ codeemit mainMod
-       logEmit $ mainModStr
-       ------------
-       logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
-       tempDir <- liftIO $ getTemporaryDirectory
-       liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
-       let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"
-       liftIO $ makeObjFile tmpMainOFile mainMod
+buildExecutable targetMod fpath = do
+    depends <- orderedDependencies targetMod
+    if List.null depends || not (snd (head depends))
+        then
+        -- No main code in the selected module: don't build executable
+        message Error
+               ("No main (top-level) code in module '"
+                ++ showModSpec targetMod ++ "'; not building executable")
+               Nothing
+        else do
+        -- Filter the modules for which the second element is True
+        let mainImports = List.foldr (\x a -> if snd x then (fst x):a else a)
+                          [] depends
+        logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
+        mainMod <- newMainModule mainImports
+        logBuild $ "o Built 'main' module for target: "
+        mainModStr <- liftIO $ codeemit mainMod
+        logEmit $ mainModStr
+        ------------
+        logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
+        tempDir <- liftIO $ getTemporaryDirectory
+        liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
+        let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"
+        liftIO $ makeObjFile tmpMainOFile mainMod
 
-       ofiles <- mapM loadObjectFile $ List.map fst depends
-       let allOFiles = tmpMainOFile:ofiles
-       -----------
-       makeExec allOFiles fpath
-       -- return allOFiles
-       logBuild $ "o Object Files to link: "
-       logBuild $ "++ " ++ intercalate "\n++" allOFiles
-       logBuild $ "o Building Target (executable): " ++ fpath
+        ofiles <- mapM loadObjectFile $ List.map fst depends
+        let allOFiles = tmpMainOFile:ofiles
+        -----------
+        makeExec allOFiles fpath
+        -- return allOFiles
+        logBuild $ "o Object Files to link: "
+        logBuild $ "++ " ++ intercalate "\n++" allOFiles
+        logBuild $ "o Building Target (executable): " ++ fpath
 
 
 -- | Traverse and collect a depth first dependency list from the given initial

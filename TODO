@@ -1,31 +1,18 @@
 -*- mode: text -*-
 
 Fix bugs:
-o Fix handling of function call:  mode of last argument should be determined
-  by what modes are defined for the proc.
-o Compiler produces executable even when no main is found.
 
 
 Complete the implementation:
-o Rework handling of test procs.  Test proc calls can be combined with and
-  and or, and modified with not.  Variables assigned by calls combined with
-  and are unioned; combined by or are intersected; modified by not are the
-  empty set.  A test can be converted to a Boolean expression by dropping all
-  variables assigned within the test.
-o Optimisations
-o Fix algebraic type implementation to use tagged pointers
+o Support multiple non-constant constructors
 o Implied modes:  transform expression version of proc call with inputs where
   outputs are expected into proc call plus equality tests
-o Treat call with mixed inputs and outputs as all outputs, plus calls to =
-  for each input argument
 o Ensure a variable both assigned and used in a statement has the assignment
   happen first, wherever it appears in the statement
 o Unifications:  transform f(?x,?y) = z into test f(?x,?y,z)
 
 Error checking:
 o Error if foreign call has no outputs; suggest use !I/O.
-o Check for test calls outside a test proc
-o Check for calls to test procs outside a conditional or test
 o Ensure no statement binds the same variable multiple times
 
 Improve error handling:
