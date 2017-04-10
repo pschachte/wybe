@@ -21,12 +21,9 @@ o Detect and report use of uninitialised variables, including update
    of uninitialised variables
 
 Complete the language:
+o Support higher order procs and functions through multiple specialisation
 o Provide switch-on-constructor syntax and implementation
-o Introduce 'test' proc calls, that are only allowed in test procs, and
-  that cause the proc to fail (return false) when the call fails
 o Fix the syntax!
-    o At statement level, support interleaved operator value syntax,
-      eg, "f v g w h x", which would be read as f__g__h(v,w,x)
     o At expression level, support infix ops, where the ops are sequences of
       operator characters
     o At statement level, support brace-enclosed statement sequence as statement
@@ -38,9 +35,8 @@ o Fix the syntax!
 	o with this, no need for [ ... | ...] syntax
 o Support polymorphism
 o Support subtypes
-o Support higher-order programming
 o Support generators (lazy lists)
-o Support declared laziness
+o Support declared laziness through multiple specialisation
 o Support optional and named arguments
 
 
