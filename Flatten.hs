@@ -239,6 +239,10 @@ flattenStmt' stmt@(ForeignCall "llvm" "test" _ _) _ Det =
 flattenStmt' (ForeignCall lang name flags args) pos _ = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
+-- XXX must handle Flattener state more carefully.  Defined variables need
+--     to be retained between condition and then branch, but forgotten for
+--     the else branch.  Also note that 'transparent' arg to flatteninner is
+--     always False
 flattenStmt' (Cond tstStmts thn els) pos detism = do
     tstStmts' <- flattenInner False False SemiDet
                  (flattenStmts tstStmts SemiDet)
