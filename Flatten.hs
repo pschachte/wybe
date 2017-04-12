@@ -103,9 +103,7 @@ data FlattenerState = Flattener {
     -- postponed   :: [Placed Stmt],   -- ^Code to be generated later
     tempCtr     :: Int,             -- ^Temp variable counter
     currPos     :: OptPos,          -- ^Position of current statement
-    -- XXX are stmtDefs and stmtUses actually needed now?
     stmtDefs    :: Set VarName,     -- ^Variables defined by this statement
-    stmtUses    :: Set VarName,     -- ^Variables used by this statement
     defdVars    :: Set VarName      -- ^Variables defined before this stmt,
                                     --  needed to distinguish niladic fns
                                     --  from variables
@@ -114,7 +112,7 @@ data FlattenerState = Flattener {
 
 initFlattenerState :: Set VarName -> FlattenerState
 initFlattenerState varSet = 
-    Flattener [] [] 0 Nothing Set.empty Set.empty varSet
+    Flattener [] [] 0 Nothing Set.empty varSet
 
 
 emit :: OptPos -> Stmt -> Flattener ()
@@ -171,13 +169,8 @@ flattenInner isLoop transparent detism inner = do
 
 flattenStmtArgs :: [Placed Exp] -> OptPos -> Flattener [Placed Exp]
 flattenStmtArgs args pos = do
-    modify (\s -> s { stmtUses = Set.empty, stmtDefs = Set.empty, currPos = pos})
+    modify (\s -> s { stmtDefs = Set.empty, currPos = pos})
     flattenArgs args
-
-
-noteVarUse :: VarName -> Flattener ()
-noteVarUse var =
-    modify (\s -> s { stmtUses = Set.insert var $ stmtUses s })
 
 
 noteVarDef :: VarName -> Flattener ()
@@ -196,7 +189,6 @@ noteVarDef var = do
 
 noteVarMention :: VarName -> FlowDirection -> Flattener ()
 noteVarMention name dir = do
-    when (flowsIn dir) $ noteVarUse name
     when (flowsOut dir) $ noteVarDef name
 
 ----------------------------------------------------------------
@@ -212,8 +204,7 @@ flattenStmts stmts detism =
 
 flattenStmt :: Stmt -> OptPos -> Determinism -> Flattener ()
 flattenStmt stmt pos detism = do
-    modify (\s -> s { stmtUses = Set.empty,
-                      stmtDefs = Set.empty,
+    modify (\s -> s { stmtDefs = Set.empty,
                       currPos = pos})
     defd <- gets defdVars
     logFlatten $ "flattening " ++ show detism ++ " stmt " ++ showStmt 4 stmt ++
@@ -400,21 +391,15 @@ flattenCall stmtBuilder isForeign ty cast pos exps = do
     logFlatten $ "-- flattening args:  " ++ show exps
     resultName <- tempVar
     oldPos <- gets currPos
-    uses <- gets stmtUses
     defs <- gets stmtDefs
-    modify (\s -> s { stmtUses = Set.empty, stmtDefs = Set.empty, 
-                      currPos = pos})
+    modify (\s -> s { stmtDefs = Set.empty, currPos = pos})
     exps' <- flattenArgs exps
     -- let exps'' = List.filter (isInExp . content) exps'
-    uses' <- gets stmtUses
     defs' <- gets stmtDefs
-    modify (\s -> s { stmtUses = uses `Set.union` uses', 
-                      stmtDefs = defs `Set.union` defs', 
+    modify (\s -> s { stmtDefs = defs `Set.union` defs', 
                       currPos = oldPos})
     -- let isOut = not $ Set.null defs'
-    -- let isIn = not (isOut && Set.null (defs' `Set.intersection` uses'))
     logFlatten $ "-- defines:  " ++ show defs'
-    logFlatten $ "-- uses   :  " ++ show uses'
     -- logFlatten $ "-- in = " ++ show isIn ++ "; out = " ++ show isOut
     -- let flowType = if isIn && isOut then HalfUpdate else Implicit pos
     -- when isIn $ 
