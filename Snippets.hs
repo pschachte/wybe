@@ -7,7 +7,7 @@
 module Snippets (intType, intCast, boolType, boolCast, varSet, varGet,
                  boolVarSet, boolVarGet, intVarSet, intVarGet, castTo,
                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
-                comparison) where
+                comparison, succeedTest, failTest, succeedIfSemiDet) where
 
 import AST
 
@@ -61,7 +61,7 @@ lpvmCast from to totype =
     Unplaced $ ForeignCall "lpvm" "cast" []
     [Unplaced from, Unplaced $ Typed (varSet to) totype True]
 
--- |An unplaced statement to cast a value into fresh variable
+-- |An expr to cast a value
 lpvmCastExp :: Exp -> TypeSpec -> Exp
 lpvmCastExp from totype =
     Typed (ForeignFn "lpvm" "cast" [] [Unplaced from]) totype True
@@ -90,3 +90,19 @@ comparison :: Ident -> Exp -> Exp  -> [Placed Stmt]
 comparison tst left right =
     [Unplaced $ ForeignCall "llvm" "test" [tst]
      [Unplaced left, Unplaced right]]
+
+
+-- |A TestBool statement that always succeeds
+succeedTest :: Placed Stmt
+succeedTest = Unplaced $ TestBool $ castTo (iVal 1) boolType
+
+
+-- |In a SemiDet context, generates code to succeed, otherwise generates no code
+succeedIfSemiDet :: Determinism -> [Placed Stmt]
+succeedIfSemiDet Det     = []
+succeedIfSemiDet SemiDet = [succeedTest]
+
+
+-- |A TestBool statement that always fails
+failTest :: Placed Stmt
+failTest = Unplaced $ TestBool $ castTo (iVal 0) boolType

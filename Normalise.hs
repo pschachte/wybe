@@ -284,15 +284,17 @@ deconstructorItems ctorName params typeSpec constCount nonConstCount
           ++ [Param "$" typeSpec ParamIn Ordinary]) 
          [])
         -- Code to check we have the right constructor
-        ((tagCheck constCount nonConstCount tag "$")
+        (tagCheck constCount nonConstCount tag "$"
          ++
-        -- Code to fetch all the fields
-        (reverse $ List.map (\(var,_,aligned) ->
+        -- Code to strip tag and fetch all the fields
+        tagStrip tag "$" "$stripped" typeSpec
+        ++
+        reverse (List.map (\(var,_,aligned) ->
                               (Unplaced $ ForeignCall "lpvm" "access" []
-                               [Unplaced $ Var "$" ParamIn flowType,
+                               [Unplaced $ Var "$stripped" ParamIn flowType,
                                 Unplaced $ IntValue $ fromIntegral aligned,
                                 Unplaced $ Var var ParamOut flowType]))
-         fields))
+                 fields))
         pos]
 
 
@@ -317,6 +319,19 @@ tagCheck constCount nonConstCount tag varName =
                   (intCast $ iVal tag))
 
 
+-- |Generate the needed statements to strip the specified tag off of the value
+--  of the specified variable, placing the result in the second variable.
+--  We use the stripped name with "$asInt" appended as a temp var name.
+tagStrip :: Integer -> Ident -> Ident -> TypeSpec -> [Placed Stmt]
+tagStrip tag varName strippedName typ =
+    let intStrippedName = strippedName ++ "$asInt"
+    in [Unplaced $ ForeignCall "llvm" "sub" []
+           [Unplaced $ lpvmCastExp (varGet varName) intType,
+            Unplaced $ iVal tag,
+            Unplaced $ intVarSet intStrippedName],
+        lpvmCast (intVarGet intStrippedName) strippedName typ]
+
+
 -- | Produce a getter and a setter for one field of the specified type.
 getterSetterItems :: Visibility -> TypeSpec -> Ident -> OptPos 
                      -> Int -> Int -> Integer -> (VarName,TypeSpec,Int)
@@ -332,9 +347,11 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
         -- Code to check we have the right constructor
         (tagCheck constCount nonConstCount tag "$rec"
          ++
-        -- Code to access the selected field
+        -- Code to strip the tag and access the selected field
+         tagStrip tag "$rec" "$rec$stripped" rectype
+         ++
          [Unplaced $ ForeignCall "lpvm" "access" []
-          [Unplaced $ varGet "$rec",
+          [Unplaced $ varGet "$rec$stripped",
            Unplaced $ IntValue $ fromIntegral offset,
            Unplaced $ varSet "$"]])
         pos,
@@ -345,9 +362,11 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
         -- Code to check we have the right constructor
         (tagCheck constCount nonConstCount tag "$rec"
          ++
-        -- Code to mutate the selected field
+        -- Code to strip the tag and mutate the selected field
+         tagStrip tag "$rec" "$rec$stripped" rectype
+         ++
          [Unplaced $ ForeignCall "lpvm" "mutate" []
-          [Unplaced $ varGet "$rec",
+          [Unplaced $ varGet "$rec$stripped",
            Unplaced $ IntValue $ fromIntegral offset,
            Unplaced $ varGet "$field",
            Unplaced $ varSet "$rec"]])
@@ -425,9 +444,9 @@ equalityBody consts nonconsts =
 
 
 -- |Return code to check of two const values values are equal, given that we
---  know that the values are not non-consts.
+--  know that the $left value is a const.
 equalityConsts :: [Placed FnProto] -> [Placed Stmt]
-equalityConsts [] = []
+equalityConsts [] = [failTest]
 equalityConsts _ =
     comparison "eq" (intCast $ varGet "$left") (intCast $ varGet "$right")
 

@@ -235,18 +235,20 @@ flattenStmt' (ForeignCall lang name flags args) pos _ = do
 --     the else branch.  Also note that 'transparent' arg to flatteninner is
 --     always False
 flattenStmt' (Cond tstStmts thn els) pos detism = do
-    tstStmts' <- flattenInner False False SemiDet
+    defined <- gets defdVars
+    -- expand tstStmts, allowing defined vars to propagate to then branch
+    tstStmts' <- flattenInner False True SemiDet
                  (flattenStmts tstStmts SemiDet)
     thn' <- flattenInner False False detism (flattenStmts thn detism)
+    -- for else branch, put defined vars back as they were before condition 
+    modify (\s -> s {defdVars = defined})
     els' <- flattenInner False False detism (flattenStmts els detism)
     emit pos $ Cond tstStmts' thn' els'
 flattenStmt' stmt@(TestBool _) pos SemiDet = emit pos stmt
 flattenStmt' (TestBool expr) _pos Det =
     shouldnt $ "TestBool " ++ show expr ++ "in Det context"
-flattenStmt' (And tstStmts) pos SemiDet = do
-    tstStmts' <- flattenInner False False SemiDet
-                 (flattenStmts tstStmts SemiDet)
-    emit pos $ And tstStmts'
+flattenStmt' (And tstStmts) _pos SemiDet = do
+    flattenStmts tstStmts SemiDet
 flattenStmt' (And tstStmts) _pos Det =
     shouldnt $ "And in a Det context: " ++ showBody 4 tstStmts
 flattenStmt' (Or tstStmts) pos SemiDet = do
