@@ -619,10 +619,8 @@ flattenBranches' stmt@TestBool{} pos [] =
 flattenBranches' stmt@TestBool{} pos stmts = do
     thn <- flattenBranches stmts
     return [Unplaced (Cond [maybePlace stmt pos]
-                      (if List.null thn
-                       then [Unplaced $ TestBool $ iVal 1]
-                       else thn)
-                      [Unplaced $ TestBool $ iVal 0])]
+                      (if List.null thn then [succeedTest] else thn)
+                      [failTest])]
 flattenBranches' stmt pos stmts =
     shouldnt
     $ "Statement should have been eliminated before flatten branches\n"

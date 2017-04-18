@@ -26,9 +26,9 @@ import Control.Monad.Trans.State
 
 
 -- | Expand the supplied ProcDef, inlining as desired.
-procExpansion :: ProcDef -> Compiler ProcDef
-procExpansion def = do
-    logMsg Expansion $ "*** Try to expand proc " ++ show (procName def)
+procExpansion :: ProcSpec -> ProcDef -> Compiler ProcDef
+procExpansion pspec def = do
+    logMsg Expansion $ "*** Try to expand proc " ++ show pspec
     let ProcDefPrim proto body = procImpln def
     let tmp = procTmpCount def
     let outs = outputParams proto

@@ -57,6 +57,18 @@ currVar name pos = do
         Just n -> return $ PrimVarName name n
 
 
+closingStmts :: Determinism -> ClauseComp [Placed Prim]
+closingStmts Det = return []
+closingStmts SemiDet = do
+    tested <- gets $ Map.member "$$"
+    return $ if tested
+             then []
+             else [Unplaced $ primMove
+                   (ArgInt 1 boolType)
+                   (ArgVar (PrimVarName "$$" 0) boolType
+                    FlowOut Ordinary False)]
+
+
 -- |Run a clause compiler function from the Compiler monad to compile
 --  a generated procedure.
 evalClauseComp :: ClauseComp t -> Compiler t
@@ -79,7 +91,7 @@ compileProc proc =
         logClause $ "--------------\nCompiling proc " ++ show proto
         mapM_ (nextVar . paramName) $ List.filter (flowsIn . paramFlow) params
         startVars <- get
-        compiled <- compileBody body params'
+        compiled <- compileBody body params' detism
         logClause $ "Compiled to:"  ++ showBlock 4 compiled
         endVars <- get
         logClause $ "  startVars: " ++ show startVars
@@ -104,9 +116,11 @@ compileProc proc =
 --  proc, as the final statement of a body.  This code assumes that
 --  these invariants are observed, and does not worry whether the proc
 --  is Det or SemiDet.
-compileBody :: [Placed Stmt] -> [Param] -> ClauseComp ProcBody
-compileBody [] params = return $ ProcBody [] NoFork
-compileBody stmts params = do
+compileBody :: [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
+compileBody [] params detism = do
+    end <- closingStmts detism
+    return $ ProcBody end NoFork
+compileBody stmts params detism = do
     logClause $ "Compiling body:" ++ showBody 4 stmts
     let final = last stmts
     case content final of
@@ -114,22 +128,23 @@ compileBody stmts params = do
           case content tst of
               TestBool var -> do
                 front <- mapM compileSimpleStmt $ init stmts
-                compileCond front (place final) var thn els params
+                compileCond front (place final) var thn els params detism
               tstStmts ->
                 shouldnt $ "CompileBody of Cond with non-simple test"
                            ++ show tstStmts
         _ -> do
           prims <- mapM compileSimpleStmt stmts
-          return $ ProcBody prims NoFork
+          end <- closingStmts detism
+          return $ ProcBody (prims++end) NoFork
 
 compileCond :: [Placed Prim] -> OptPos -> Exp -> [Placed Stmt]
-    -> [Placed Stmt] -> [Param] -> ClauseComp ProcBody
-compileCond front pos expr thn els params = do
+    -> [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
+compileCond front pos expr thn els params detism = do
           beforeTest <- get
-          thn' <- compileBody thn params
+          thn' <- compileBody thn params detism
           afterThen <- get
           put beforeTest
-          els' <- compileBody els params
+          els' <- compileBody els params detism
           afterElse <- get
           let final = Map.intersectionWith max afterThen afterElse
           put final

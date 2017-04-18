@@ -106,7 +106,7 @@ optimiseProcDefBU :: ProcSpec -> ProcDef -> Compiler ProcDef
 optimiseProcDefBU pspec def = do
     logOptimise $ "*** " ++ show pspec ++
       " before optimisation:" ++ showProcDef 4 def
-    def' <- procExpansion def >>= markLastUse pspec >>= decideInlining
+    def' <- procExpansion pspec def >>= markLastUse pspec >>= decideInlining
     logOptimise $ "*** " ++ show pspec ++
       " after optimisation:" ++ showProcDef 4 def'
     return def'

@@ -120,7 +120,8 @@ buildFork var ty final branchBuilders = do
                 winner
           ArgVar var' varType _ _ _ -> do -- statically unknown result
             def <- gets (Map.lookup var' . definers)
-            branches <- mapM (buildBranch var' varType def)
+            st' <- get
+            branches <- lift $ mapM (buildBranch var' varType def st)
                         $ zip branchBuilders [0..]
             case branches of
                 [] -> return ()
@@ -135,11 +136,10 @@ buildFork var ty final branchBuilders = do
 
 
 buildBranch :: PrimVarName -> TypeSpec -> Maybe Prim
-            -> (BodyBuilder (),Int) -> BodyBuilder BodyState
-buildBranch var ty definer (builder,val) = do
-    logBuild $ "<<<< <<<< Beginning to build branch "
-               ++ show val ++ " on " ++ show var
-    st <- get
+            -> BodyState -> (BodyBuilder (),Int) -> Compiler BodyState
+buildBranch var ty definer st (builder,val) = do
+    logMsg BodyBuilder $ "<<<< <<<< Beginning to build branch "
+                         ++ show val ++ " on " ++ show var
     let st' = st { currBuild = [],
                    currSubst = Map.insert var (ArgInt (fromIntegral val) ty)
                                $ currSubst st }
@@ -147,12 +147,13 @@ buildBranch var ty definer (builder,val) = do
         logBuild $ "Propagating " ++ show val ++ " result of " ++ show definer
         whenJust definer $ propagateBinding var ty val
         builder
-    logBuild ">>>> >>>> Finished  building a branch"
+    logMsg BodyBuilder $ ">>>> >>>> Finished building branch "
+                         ++ show val ++ " on " ++ show var
     return branch
 
 
-buildBranch' :: BodyState -> BodyBuilder () -> BodyBuilder BodyState
-buildBranch' st builder = lift $ snd <$> buildPrims st builder
+buildBranch' :: BodyState -> BodyBuilder () -> Compiler BodyState
+buildBranch' st builder = snd <$> buildPrims st builder
 
 
 buildPrims :: BodyState -> BodyBuilder a -> Compiler (a,BodyState)
@@ -178,22 +179,24 @@ propagateComparison var ty val cmp a1 a2 = do
     let (_,trues,falses) = if val == 0
                            then comparisonRelatives oppositeCmp
                            else ("", trues0, falses0)
-    let allConsequences = (oppositeCmp,(1-val))
+    let allConsequences = (oppositeCmp,1-val)
                           :  zip trues (repeat 1)
                           ++ zip falses (repeat 0)
     logBuild $ "Adding consequences of branch:  "
                ++ show (List.map (\(c,v) ->
-                                  PrimForeign "llvm" "icmp" [cmp]
-                                  [a1, a2, ArgInt (fromIntegral val) ty])
+                                  PrimForeign "llvm" "icmp" [c]
+                                  [a1, a2, ArgInt (fromIntegral v) ty])
                         allConsequences)
-    let insertInstr =
-          \(cmp,val) map -> Map.insert
-                            (PrimForeign "llvm" "icmp" [cmp] [a1, a2])
-                            [ArgInt (fromIntegral val) ty]
-                            map
+    let insertInstr (c,v)
+            = Map.insert
+              (PrimForeign "llvm" "icmp" [c] [canonicaliseArg a1,
+                                              canonicaliseArg a2])
+              [ArgInt (fromIntegral v) ty]
     modify (\s -> s {subExprs = List.foldr insertInstr (subExprs s)
                                 allConsequences
                     })
+    mp <- gets subExprs
+    logBuild $ "After adding consequences, subExprs = " ++ show mp
 
 
 -- |Given an LLVM comparison instruction name, returns a triple of
@@ -233,7 +236,7 @@ instr prim pos = do
         instr' prim' pos
       Forked bld var ty bods -> do
         -- add instr to every branch
-        bods' <- mapM (flip buildBranch' (instr prim pos)) bods
+        bods' <- lift $ mapM (flip buildBranch' (instr prim pos)) bods
         put $ Forked bld var ty bods'
 
 
@@ -263,6 +266,8 @@ instr' prim@(PrimForeign "lpvm" "alloc" [] args) pos
 instr' prim pos = do
     let (prim',newOuts) = splitPrimOutputs prim
     logBuild $ "Looking for computed instr " ++ show prim' ++ " ..."
+    currSubExprs <- gets subExprs
+    logBuild $ "with subExprs = " ++ show currSubExprs
     match <- gets (Map.lookup prim' . subExprs)
     case match of
         Nothing -> do
@@ -343,7 +348,8 @@ addAllModes instr@(PrimForeign lang nm flags args)  = do
     modify (\s -> s {subExprs = Map.insert fakeInstr outArgs $ subExprs s,
                      definers = List.foldr
                                 (flip Map.insert instr . argVarName)
-                                (definers s) outArgs})
+                                (definers s)
+                                outArgs})
 addAllModes PrimNop =
     shouldnt "splitPrimOutputs: Nops should be filtered out by now"
 
@@ -360,12 +366,24 @@ rawInstr prim pos = do
 
 
 splitArgsByMode :: [PrimArg] -> ([PrimArg], [PrimArg])
-splitArgsByMode = List.partition ((==FlowIn) . argFlowDirection)
+splitArgsByMode
+    = List.partition ((==FlowIn) . argFlowDirection)
+      . List.map canonicaliseArg
+
+
+-- |Standardise unimportant info in an arg, so that it is equal to any
+--  other arg with the same content.
+canonicaliseArg :: PrimArg -> PrimArg      
+canonicaliseArg (ArgVar nm _ fl _ _) = ArgVar nm AnyType fl Ordinary False
+canonicaliseArg (ArgInt v _)         = ArgInt v AnyType
+canonicaliseArg (ArgFloat v _)       = ArgFloat v AnyType
+canonicaliseArg (ArgString v _)      = ArgString v AnyType
+canonicaliseArg (ArgChar v _)        = ArgChar v AnyType
 
 
 validateInstr :: Prim -> BodyBuilder ()
-validateInstr instr@(PrimCall _ args) =        mapM_ (validateArg instr) args
-validateInstr instr@(PrimForeign _ _ _ args) = mapM_ (validateArg instr) args
+validateInstr i@(PrimCall _ args) =        mapM_ (validateArg i) args
+validateInstr i@(PrimForeign _ _ _ args) = mapM_ (validateArg i) args
 validateInstr PrimNop = return ()
 
 validateArg :: Prim -> PrimArg -> BodyBuilder ()

@@ -105,7 +105,7 @@ distance > public (1 calls)
     foreign llvm icmp eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$12#0:wybe.bool) @wybe:28:40
     case ~tmp$12#0:wybe.bool of
     0:
-        foreign llvm move(0, ?$$#0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
         foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?tmp$15#0:wybe.bool) @wybe:28:40
@@ -241,7 +241,7 @@ if.then:                                          ; preds = %entry
   ret i1 %"tmp$15#0"
 
 if.else:                                          ; preds = %entry
-  ret i64 0
+  ret i1 false
 }
 
 define i64* @"position.position.position<0>"(i64 %"x#0", i64 %"y#0") {
