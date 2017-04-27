@@ -137,9 +137,27 @@ expandBody (ProcBody prims fork) = do
               Just (ArgVar v _ _ _ _) -> v 
               Just _ -> shouldnt "expansion led to non-var conditional"
         logExpansion $ "  fork on " ++ show var' ++ ":" ++ show ty
-        lift $ buildFork var' ty final 
-          $ List.map (\b -> evalStateT (expandBody b) st) bodies
+        bState <- lift get
+        let preFork = case bState of
+                Unforked{currBuild=pf} -> pf
+                Forked{initBuild=pf} -> pf
+        bodies' <- expandFork bodies
+        -- XXX the [] is completely wrong
+        lift $ put $ Forked preFork var ty bodies'
         logExpansion $ "Finished expanding fork"
+
+
+expandFork :: [ProcBody] -> Expander [BodyState]
+expandFork [] = return []
+expandFork (body:bodies) = do
+    st <- get
+    builderSt <- lift get
+    (expander,body') <- lift $ lift
+                        $ buildPrims builderSt {currBuild=[]} $
+                          execStateT (expandBody body) st
+    -- put back initial expander state, except for temp counter
+    put $ st {tmpCount = tmpCount expander}
+    (body':) <$> expandFork bodies
 
 
 expandPrims :: [Placed Prim] -> Expander ()

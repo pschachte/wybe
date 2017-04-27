@@ -7,7 +7,7 @@
 --
 
 module BodyBuilder (
-  BodyBuilder, buildBody, instr, buildFork
+  BodyBuilder, BodyState(..), buildBody, buildPrims, instr, buildFork
   ) where
 
 import AST
@@ -99,10 +99,10 @@ buildFork var ty final branchBuilders = do
     st <- get
     case st of
       Forked bld var ty bods -> do
-        -- This shouldn't usually happen, but it can happen when a test
-        -- proc is inlined.  Handle by building the fork at the end of
-        -- each of the branches.
-        logBuild $ "buildFork in forked state" ++ show st
+        -- This shouldn't usually happen, but it can happen after
+        -- inlining a forked proc (or test proc).  Handle by
+        -- building the fork at the end of each of the branches.
+        logBuild $ "buildFork in forked state: " ++ show st
         bods' <- mapM (\st -> lift $ execStateT
                               (buildFork var ty final branchBuilders) st) bods
         put $ Forked bld var ty bods'
@@ -231,8 +231,8 @@ instr prim pos = do
     st <- get
     case st of
       Unforked{} -> do
-        logBuild $ "Generating instr " ++ show prim
         prim' <- argExpandedPrim prim
+        logBuild $ "Generating instr " ++ show prim ++ " -> " ++ show prim'
         instr' prim' pos
       Forked bld var ty bods -> do
         -- add instr to every branch
