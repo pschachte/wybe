@@ -137,19 +137,24 @@ expandBody (ProcBody prims fork) = do
               Just (ArgVar v _ _ _ _) -> v 
               Just _ -> shouldnt "expansion led to non-var conditional"
         logExpansion $ "  fork on " ++ show var' ++ ":" ++ show ty
-        bState <- lift get
-        let preFork = case bState of
-                Unforked{currBuild=pf} -> pf
-                Forked{initBuild=pf} -> pf
-        bodies' <- expandFork bodies
-        -- XXX the [] is completely wrong
-        lift $ put $ Forked preFork var ty bodies'
+        expandFork var ty bodies
         logExpansion $ "Finished expanding fork"
 
 
-expandFork :: [ProcBody] -> Expander [BodyState]
-expandFork [] = return []
-expandFork (body:bodies) = do
+expandFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Expander ()
+expandFork var ty bodies = do
+    builderSt <- lift get
+    -- XXX must handle Forked BodyBuilder state
+    case builderSt of
+        Unforked{currBuild=preFork} -> do
+          bodies' <- expandFork' bodies
+          lift $ put $ Forked preFork var ty bodies' Nothing
+        Forked preFork v t bs _ -> error "Forked BodyBuilder"
+          
+
+expandFork' :: [ProcBody] -> Expander [BodyState]
+expandFork' [] = return []
+expandFork' (body:bodies) = do
     st <- get
     builderSt <- lift get
     (expander,body') <- lift $ lift
@@ -157,7 +162,7 @@ expandFork (body:bodies) = do
                           execStateT (expandBody body) st
     -- put back initial expander state, except for temp counter
     put $ st {tmpCount = tmpCount expander}
-    (body':) <$> expandFork bodies
+    (body':) <$> expandFork' bodies
 
 
 expandPrims :: [Placed Prim] -> Expander ()
