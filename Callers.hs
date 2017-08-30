@@ -49,7 +49,7 @@ type CallRec = Map ProcSpec Int
 noteCall :: ProcSpec -> Bool -> Prim -> CallRec -> CallRec
 noteCall caller final (PrimCall spec _) rec =
   Map.alter (Just . maybe 1 (1+)) spec rec
-noteCall caller final (PrimNop) rec = rec
+noteCall caller final (PrimTest _) rec = rec
 noteCall caller final (PrimForeign _ _ _ _) rec = rec
 
 

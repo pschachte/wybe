@@ -382,7 +382,7 @@ phantomPrim :: Prim -> Bool
 phantomPrim (PrimCall _ args) = List.null $ List.filter notPhantom args
 phantomPrim (PrimForeign _ _ _ args) =
   List.null $ List.filter notPhantom args
-phantomPrim PrimNop = True
+phantomPrim (PrimTest _) = False
 
 
 -- | Code generation for a conditional branch. Currently a binary split
@@ -480,7 +480,7 @@ cgen prim@(PrimForeign lang name flags args)
             return (Just res)
 
 
-cgen PrimNop = error "No primitive found."
+cgen (PrimTest _) = error "No primitive found."
 
 
 makeCIntOp :: Operand -> Codegen Operand
@@ -993,7 +993,7 @@ declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
     fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
     return $ external retty (show pspec) fnargs
 
-declareExtern PrimNop = error "Can't declare extern for PrimNop."
+declareExtern (PrimTest _) = error "Can't declare extern for PrimNop."
 
 -- | Helper to make arguments for an extern declaration.
 makeExArg :: (Word, PrimArg) -> Compiler (Type, LLVMAST.Name)

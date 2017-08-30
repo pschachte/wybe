@@ -103,11 +103,11 @@ pprimsLastUse (pprim:pprims) = do
     return $ prim' ++ pprims'
 
 primLastUse :: Prim -> OptPos -> NeededVars [Placed Prim]
-primLastUse (PrimCall sp args) pos = do
+primLastUse (PrimCall sp args) pos =
     noteLastUses args pos $ PrimCall sp
-primLastUse (PrimForeign ln pr tg args) pos = do
+primLastUse (PrimForeign ln pr tg args) pos =
     noteLastUses args pos $ PrimForeign ln pr tg
-primLastUse (PrimNop) pos = return [maybePlace PrimNop pos]
+primLastUse (PrimTest arg) pos = noteLastUses [arg] pos $ PrimTest . head
 
 
 noteLastUses :: [PrimArg] -> OptPos -> ([PrimArg] -> Prim) -> 

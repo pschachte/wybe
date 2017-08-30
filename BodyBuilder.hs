@@ -249,9 +249,6 @@ comparisonRelatives comp = shouldnt $ "unknown llvm comparison " ++ comp
 --  substitution. If it's a move instruction, add it to the current
 --  substitution.
 instr :: Prim -> OptPos -> BodyBuilder ()
-instr PrimNop _ = do
-    -- Filter out NOPs
-    return ()
 instr prim pos = do
     st <- get
     case st of
@@ -326,9 +323,9 @@ argExpandedPrim (PrimCall pspec args) = do
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
     return $ simplifyForeign lang nm flags args'
-argExpandedPrim PrimNop =
-    shouldnt "argExpandedPrim: Nops should be filtered out by now"
-
+argExpandedPrim (PrimTest arg) = do
+    arg' <- expandArg arg
+    return $ PrimTest arg'
 
 splitPrimOutputs :: Prim -> (Prim, [PrimArg])
 splitPrimOutputs (PrimCall pspec args) =
@@ -337,8 +334,7 @@ splitPrimOutputs (PrimCall pspec args) =
 splitPrimOutputs (PrimForeign lang nm flags args) = 
     let (inArgs,outArgs) = splitArgsByMode args
     in (PrimForeign lang nm flags inArgs, outArgs)
-splitPrimOutputs PrimNop =
-    shouldnt "splitPrimOutputs: Nops should be filtered out by now"
+splitPrimOutputs tst@(PrimTest arg) = (tst, [])
 
 
 -- |Add a binding for a variable. If that variable is an output for the
@@ -375,8 +371,7 @@ addAllModes instr@(PrimForeign lang nm flags args)  = do
                                 (flip Map.insert instr . argVarName)
                                 (definers s)
                                 outArgs})
-addAllModes PrimNop =
-    shouldnt "splitPrimOutputs: Nops should be filtered out by now"
+addAllModes _ = return () -- No other instrs equivalent to a PrimTest
 
 
 
@@ -409,7 +404,7 @@ canonicaliseArg (ArgChar v _)        = ArgChar v AnyType
 validateInstr :: Prim -> BodyBuilder ()
 validateInstr i@(PrimCall _ args) =        mapM_ (validateArg i) args
 validateInstr i@(PrimForeign _ _ _ args) = mapM_ (validateArg i) args
-validateInstr PrimNop = return ()
+validateInstr (PrimTest _) = return ()
 
 validateArg :: Prim -> PrimArg -> BodyBuilder ()
 validateArg instr (ArgVar _ ty _ _ _) = validateType ty instr

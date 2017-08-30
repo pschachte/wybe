@@ -1709,7 +1709,7 @@ data PrimVarName =
 data Prim
      = PrimCall ProcSpec [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
-     | PrimNop
+     | PrimTest PrimArg
      deriving (Eq,Ord,Generic)
 
 instance Show Prim where
@@ -1844,7 +1844,7 @@ varsInPrims dir prims =
 varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
 varsInPrim dir (PrimCall _ args)      = varsInPrimArgs dir args
 varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
-varsInPrim dir (PrimNop)                = Set.empty
+varsInPrim dir (PrimTest arg)         = varsInPrimArgs dir [arg]
 
 varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
 varsInPrimArgs dir args = 
@@ -2214,8 +2214,8 @@ showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++ 
         name ++ (if List.null flags then "" else " " ++ unwords flags) ++
         "(" ++ intercalate ", " (List.map show args) ++ ")"
-showPrim _ (PrimNop) =
-        "NOP"
+showPrim _ (PrimTest arg) =
+        "test " ++ show arg
 
 -- |Show a variable, with its suffix
 instance Show PrimVarName where

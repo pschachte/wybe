@@ -197,7 +197,7 @@ compileSimpleStmt' (ForeignCall lang name flags args) = do
 compileSimpleStmt' (TestBool expr) =
     -- Only for handling a TestBool other than as the condition of a Cond:
     compileSimpleStmt' $ content $ move expr (boolVarSet "$$")
-compileSimpleStmt' Nop = return PrimNop
+compileSimpleStmt' Nop = return $ PrimTest $ ArgInt 1 intType
 compileSimpleStmt' stmt =
     shouldnt $ "Normalisation left complex statement:\n" ++ showStmt 4 stmt
 

@@ -146,7 +146,7 @@ primCost (PrimCall _ args) = 1 + (sum $ List.map argCost args)
 primCost (PrimForeign "llvm" _ _ _) = 1 -- single instuction, so cost = 1
 primCost (PrimForeign "$" _ _ _) = 1    -- single instuction, so cost = 1
 primCost (PrimForeign _ _ _ args) = 1 + (sum $ List.map argCost args)
-primCost (PrimNop) = 0
+primCost (PrimTest _) = 0
 
 argCost :: PrimArg -> Int
 argCost arg = if phantomArg arg then 0 else 1
