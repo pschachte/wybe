@@ -143,6 +143,9 @@ expandBody (ProcBody prims fork) = do
 
 expandFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Expander ()
 expandFork var ty bodies = do
+    -- lift $ buildFork var ty
+    -- mapM_ (\b -> lift beginBranch >> expandBody b >> lift endBranch) bodies
+    -- lift $ completeFork var ty
     builderSt <- lift get
     -- XXX must handle Forked BodyBuilder state
     case builderSt of
