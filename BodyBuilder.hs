@@ -72,8 +72,6 @@ data BodyState
       stForkBods  :: [BodyState],    -- ^BodyStates of all the branches
       fParent     :: Maybe BodyState -- ^The fork of which this is a part
       }
-    | PlaceHolder                    -- ^In a fork, holds the place of the   
-                                     -- current unforked segment in the fork
     deriving (Eq,Show)
 
 
