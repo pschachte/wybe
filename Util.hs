@@ -6,7 +6,7 @@
 --  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
 --
 
-module Util (sameLength, checkMaybe, setMapInsert, fillLines) where
+module Util (sameLength, maybeNth, checkMaybe, setMapInsert, fillLines) where
 
 
 import Data.Map as Map
@@ -18,6 +18,15 @@ sameLength :: [a] -> [b] -> Bool
 sameLength [] [] = True
 sameLength (_:as) (_:bs) = sameLength as bs
 sameLength _ _ = False
+
+
+-- |Return the nth element of the list, if present, else Nothing.
+maybeNth :: (Eq n, Ord n, Num n) => n -> [a] -> Maybe a
+maybeNth _ []     = Nothing
+maybeNth 0 (e:_ ) = Just e
+maybeNth n (_:es)
+ | n > 0          = maybeNth (n - 1) es
+ | otherwise      = Nothing
 
 
 -- |Test the value in a maybe, and if it fails, return Nothing.
