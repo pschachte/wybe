@@ -7,11 +7,12 @@
 --
 
 module BodyBuilder (
-  BodyBuilder, BodyState(..), buildBody, buildPrims, instr, buildFork
+  BodyBuilder, buildBody, instr, buildFork
   ) where
 
 import AST
 import Snippets
+import Util
 import Options (LogSelection(BodyBuilder))
 import Data.Map as Map
 import Data.List as List
@@ -25,52 +26,90 @@ import Control.Monad.Trans.State
 ----------------------------------------------------------------
 --                       The BodyBuilder Monad
 --
--- This monad keeps track of variable renaming needed to keep inlining
--- hygenic.  To do this, we rename all the input parameters of the proc to 
--- be inlined, and when expanding the body, we rename any variables when 
--- first assigned.  The exception to this is the proc's output parameters.  
--- These are kept as a set.  We also maintain a counter for temporary 
+-- This monad is used to build up a ProcBody one instruction at a time.
+--
+-- buildBody runs the monad, producing a ProcBody.
+-- instr adds a single instruction to the procBody that will be produced.
+-- Forks are produced by the following functions:
+--    buildFork     initiates a fork on a specified variable
+--    beginBranch   starts a new branch of the current fork
+--    endBranch     ends the current branch
+--    completeFork  completes the current fork
+--
+-- No instructions can be added between buildFork and beginBranch, or
+-- between endBranch and beginBranch. A new fork can be built within a
+-- branch, but must be completed before the branch is ended.
+--
+-- The ProcBody type does not support having anything follow a fork. Once a
+-- ProcBody forks, the branches do not join again. Instead, each branch of
+-- a fork should end with a call to another proc, which does whatever
+-- should come after the fork. To handle this, once a fork is completed,
+-- the BodyBuilder starts a new Unforked instruction sequence, and records
+-- the completed fork as the predecessor of the Unforked sequence. This
+-- also permits a fork to follow the Unforked sequence which follows a
+-- fork. When producing the final ProcBody, if the current Unforked
+-- sequence is short (or empty) and there is a predecessor fork, we simply
+-- add the sequence to the end of each of branch of the fork and remove the
+-- Unforked sequence. If it is not short and there is a predecessor, we
+-- create a fresh proc whose input arguments are all the live variables,
+-- whose outputs are the current proc's outputs, and whose body is built
+-- from Unforked sequence, add a call to this fresh proc to each branch of
+-- the previous Forked sequence, and remove the Unforked.
+--
+-- We handle a Forked sequence by generating a ProcBody for each branch,
+-- collecting these as the branches of a ProcBody, and taking the
+-- instructions from the preceding Unforked as the instruction sequence of
+-- the ProcBody.
+--
+-- Note that for convenience/efficiency, we collect the instructions in a
+-- sequence and the branches in a fork in reverse order, so these are
+-- reversed when converting to a ProcBody.
+--
+-- Some transformation is performed by the BodyBuilder monad; in
+-- particular, we keep track of variable renaming needed to keep inlining
+-- hygenic. To do this, we rename all the input parameters of the proc to
+-- be inlined, and when expanding the body, we rename any variables when
+-- first assigned. The exception to this is the proc's output parameters.
+-- These are kept as a set. We also maintain a counter for temporary
 -- variable names.
 --
--- To handle forks, we use a zipper-like structure, where the top of the
--- structure is the part we're building, and below that is the parent, ie,
--- the fork structure of which it's a part. When constructing a fork, we
--- create a parent with a placeholder where the new branch of the fork
--- should go and create a fresh segment. When we finish a branch, we
--- replace the placeholder of the parent with the newly constructed
--- segment, add a new placeholder, and create a fresh segment.  When we
--- finish the last branch, we raise the parent up to be the new state.
+-- The BodyState has two constructors:  Unforked is used before the first
+-- fork, and after each new branch is created. Instructions can just be
+-- added to this. Forked is used after a new fork is begun and before its
+-- first branch is created, between ending a branch and starting a new one,
+-- and after the fork is completed. New instructions can be added and new
+-- forks built only when in the Unforked state. In the Forked state, we can
+-- only create a new branch.
 --
--- When adding a new primitive at the end of a segment, we just add it to
--- the front of the list of primitives, because the list is reversed. When
--- adding a primitive at the end of a fork, it needs to be added to the end
--- of each branch of the fork. This should only happen for the occasional
--- prim, such as writing output variables to their destinations, or where
--- all but one branch is failing, so the prim does not need to be added. If
--- it turns out we do need to handle adding more than a few move primitives
--- to multiple branches, we should handle it by generating a fresh proc
--- containing whatever coded is added at the end, and then just add a
--- call to that proc to the end of each branch.  In the LLVM generation,
--- we would want this to turn into a jump.
+-- These constructors are used in a zipper-like structure, where the top of the
+-- structure is the part we're building, and below that is the parent, ie,
+-- the fork structure of which it's a part. When constructing a new fork, we
+-- transform the existing Unforked state into a Forked state.  When beginning
+-- a new branch, we make an empty Unforked state with the existing Forked
+-- state as its parent.  When ending a branch, we transfer the current state
+-- into the parent's list of branch bodies and promote the parent.
 ----------------------------------------------------------------
 
 type BodyBuilder = StateT BodyState Compiler
 
+-- Holds the content of a ProcBody while we're building it.
 data BodyState
     = Unforked {
-      currBuild :: [Placed Prim],   -- ^The body we're building, reversed
-      currSubst :: Substitution,    -- ^variable substitutions to propagate
-      outSubst  :: VarSubstitution, -- ^Substitutions for variable assignments
-      subExprs  :: ComputedCalls,   -- ^Previously computed calls to reuse
-      definers  :: VarDefiner,      -- ^The call that defined each var
-      uParent   :: Maybe BodyState  -- ^The fork of which this is a part
+      currBuild   :: [Placed Prim],   -- ^The body we're building, reversed
+      currSubst   :: Substitution,    -- ^variable substitutions to propagate
+      outSubst    :: VarSubstitution, -- ^Substitutions for var assignments
+      subExprs    :: ComputedCalls,   -- ^Previously computed calls to reuse
+      definers    :: VarDefiner,      -- ^The call that defined each var
+      uParent     :: Maybe BodyState, -- ^The Forked of which this is a part
+      uPred       :: Maybe BodyState  -- ^The BodyState before the current one
       }
     | Forked {
-      initBuild   :: [Placed Prim],  -- ^Statements before the fork, reversed
-      stForkVar   :: PrimVarName,    -- ^Variable that selects branch to take
-      stForkVarTy :: TypeSpec,       -- ^Type of stForkVar
-      stForkBods  :: [BodyState],    -- ^BodyStates of all the branches
-      fParent     :: Maybe BodyState -- ^The fork of which this is a part
+      origin      :: BodyState,       -- ^The Unforked state before the fork
+      stForkVar   :: PrimVarName,     -- ^Variable that selects branch to take
+      stKnownVal  :: Maybe Integer,   -- ^Definite value of stForkVar if known
+      stForkVarTy :: TypeSpec,        -- ^Type of stForkVar
+      stForkBods  :: [BodyState],     -- ^BodyStates of all branches so far
+      fParent     :: Maybe BodyState  -- ^The Forked of which this is a part
       }
     deriving (Eq,Show)
 
@@ -94,11 +133,19 @@ type VarDefiner = Map PrimVarName Prim
 
 currBody :: BodyState -> ProcBody
 currBody Unforked{currBuild=prims}  = ProcBody (reverse prims) NoFork
-currBody (Forked prims var ty bods _) = ProcBody (reverse prims) $
+currBody (Forked unforked@Unforked{currBuild=prims} var (Just val) ty bods _) =
+    case maybeNth val bods of
+        Nothing -> currBody unforked
+        Just bod ->
+          let (ProcBody prims' fork) = currBody bod
+          in ProcBody (reverse prims ++ prims') fork
+currBody (Forked Unforked{currBuild=prims} var val ty bods _) =
+    ProcBody (reverse prims) $
     PrimFork var ty False $ List.map currBody bods
 
 initState :: VarSubstitution -> BodyState
-initState oSubst = Unforked [] Map.empty oSubst Map.empty Map.empty Nothing
+initState oSubst =
+    Unforked [] Map.empty oSubst Map.empty Map.empty Nothing Nothing
 
 
 ----------------------------------------------------------------
@@ -116,46 +163,61 @@ buildBody oSubst builder = do
     return (a,body)
 
 
-buildFork :: PrimVarName -> TypeSpec -> Bool -> [BodyBuilder ()] 
-             -> BodyBuilder ()
-buildFork var ty final branchBuilders = do
+-- |Start a new fork on var of type ty
+buildFork :: PrimVarName -> TypeSpec -> BodyBuilder ()
+buildFork var ty = do
     st <- get
     case st of
-      Forked bld var ty bods parent-> do
-        -- This shouldn't usually happen, but it can happen after
-        -- inlining a forked proc (or test proc).  Handle by
-        -- building the fork at the end of each of the branches.
-        logBuild $ "buildFork in forked state: " ++ show st
-        bods' <- mapM (\st -> lift $ execStateT
-                              (buildFork var ty final branchBuilders) st) bods
-        put $ Forked bld var ty bods' parent
-      Unforked{currBuild=build} -> do
+      Forked{} -> do
+        shouldnt "Building a fork outside of a body or branch"
+      Unforked{} -> do
         logBuild $ "<<<< beginning to build a new fork on " ++ show var
-            ++ " (final=" ++ show final ++ ")"
         arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
-        case arg' of
-          ArgInt n _ -> -- result known at compile-time:  only compile winner
-            case drop (fromIntegral n) branchBuilders of
-              -- XXX should be an error message rather than an abort
-              [] -> shouldnt "branch constant greater than number of cases"
-              (winner:_) -> do
-                logBuild $ "**** condition result is " ++ show n
-                winner
-          ArgVar var' varType _ _ _ -> do -- statically unknown result
-            def <- gets (Map.lookup var' . definers)
-            st' <- get
-            branches <- lift $ mapM (buildBranch var' varType def st)
-                        $ zip branchBuilders [0..]
-            case branches of
-                [] -> return ()
-                [br] -> put $ concatBodies st br
-                (br:brs) | all (==br) brs -> 
-                           -- all branches are equal:  don't create a new fork
-                    put $ concatBodies st br
-                brs ->
-                    put $ Forked build var' ty brs Nothing
-          _ -> shouldnt "Switch on non-integer value"
+        let (var,val) =
+              case arg' of
+                  ArgInt n _ -> -- result known at compile-time
+                    (var,Just n)
+                  ArgVar var' varType _ _ _ -> do -- statically unknown result
+                    (var',Nothing)
+        put $ Forked st var val ty [] (uParent st)
         logBuild $ ">>>> Finished building a fork"
+
+
+completeFork :: BodyBuilder ()
+completeFork = do
+    st <- get
+    case st of
+      Unforked{} -> do
+        shouldnt "Completing an unbegun fork"
+      Forked{origin=Unforked{currSubst=subst, outSubst=osubst, subExprs=subes,
+                             definers=defs, uParent=upar}} -> do
+        logBuild $ "<<<< ending new fork"
+        let prevUnforked = origin st
+        put $ Unforked [] subst osubst subes defs upar $ Just st
+        logBuild $ ">>>> Completed a fork"
+
+
+beginBranch :: BodyBuilder ()
+beginBranch = do
+    st <- get
+    case st of
+        Unforked{} ->
+          shouldnt "beginBranch in Unforked state"
+        Forked{origin=Unforked _ subst vsubst subexp defs _ _} -> do
+          put $ Unforked [] subst vsubst subexp defs (Just st) Nothing
+
+
+endBranch :: BodyBuilder ()
+endBranch = do
+    st <- get
+    case st of
+        Forked{} ->
+          shouldnt "endBranch in Unforked state"
+        Unforked{uParent=Just parent} -> do
+          put $ parent { stForkBods = st:stForkBods parent }
+        Unforked{} ->
+          shouldnt "endBranch with no parent fork"
+
 
 
 buildBranch :: PrimVarName -> TypeSpec -> Maybe Prim
@@ -254,10 +316,8 @@ instr prim pos = do
         prim' <- argExpandedPrim prim
         logBuild $ "Generating instr " ++ show prim ++ " -> " ++ show prim'
         instr' prim' pos
-      Forked bld var ty bods parnt -> do
-        -- add instr to every branch
-        bods' <- lift $ mapM (flip buildBranch' (instr prim pos)) bods
-        put $ Forked bld var ty bods' parnt
+      Forked{} -> do
+        shouldnt "instr in Forked context"
 
 
 instr' :: Prim -> OptPos -> BodyBuilder ()
@@ -420,16 +480,16 @@ validateType InvalidType instr =
 validateType _ instr = return ()
 
 
-concatBodies :: BodyState -> BodyState -> BodyState
--- XXX Handle uParent parts!
-concatBodies (Unforked revBody1 _ _ _ _ _)
-             (Unforked revBody2 subs osubs comp definers _)
-    = Unforked (revBody2 ++ revBody1) subs osubs comp definers Nothing
-    -- NB: bodies are reversed
--- XXX Handle uParent and fParent parts!
-concatBodies (Unforked revBody1 _ _ _ _ _) (Forked revBody2 var ty bods _)
-    = Forked (revBody2 ++ revBody1) var ty bods Nothing -- bodies are reversed
-concatBodies _ _ = shouldnt "Fork after fork should have been caught earlier"
+-- concatBodies :: BodyState -> BodyState -> BodyState
+-- -- XXX Handle uParent parts!
+-- concatBodies (Unforked revBody1 _ _ _ _ _ _)
+--              (Unforked revBody2 subs osubs comp definers _ _)
+--     = Unforked (revBody2 ++ revBody1) subs osubs comp definers Nothing Nothing
+--     -- NB: bodies are reversed
+-- -- XXX Handle uParent and fParent parts!
+-- concatBodies (Unforked revBody1 _ _ _ _ _ _) (Forked revBody2 var ty bods _ _)
+--     = Forked (revBody2 ++ revBody1) var ty bods Nothing Nothing -- bodies are reversed
+-- concatBodies _ _ = shouldnt "Fork after fork should have been caught earlier"
 
 addInstrToState :: Placed Prim -> BodyState -> BodyState
 addInstrToState ins st@Unforked{} = st { currBuild = ins:currBuild st}
