@@ -454,9 +454,9 @@ rawInstr prim pos = do
 
 
 splitArgsByMode :: [PrimArg] -> ([PrimArg], [PrimArg])
-splitArgsByMode
-    = List.partition ((==FlowIn) . argFlowDirection)
-      . List.map canonicaliseArg
+splitArgsByMode args =
+    let (ins,outs) = List.partition ((==FlowIn) . argFlowDirection) args
+    in  (List.map canonicaliseArg ins, outs)
 
 
 -- |Standardise unimportant info in an arg, so that it is equal to any
