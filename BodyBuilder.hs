@@ -7,7 +7,8 @@
 --
 
 module BodyBuilder (
-  BodyBuilder, buildBody, instr, buildFork
+  BodyBuilder, buildBody, instr, buildFork, completeFork,
+  beginBranch, endBranch
   ) where
 
 import AST

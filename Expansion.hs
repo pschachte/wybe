@@ -143,29 +143,22 @@ expandBody (ProcBody prims fork) = do
 
 expandFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Expander ()
 expandFork var ty bodies = do
-    -- lift $ buildFork var ty
-    -- mapM_ (\b -> lift beginBranch >> expandBody b >> lift endBranch) bodies
-    -- lift $ completeFork var ty
-    builderSt <- lift get
-    -- XXX must handle Forked BodyBuilder state
-    case builderSt of
-        Unforked{currBuild=preFork} -> do
-          bodies' <- expandFork' bodies
-          lift $ put $ Forked preFork var ty bodies' Nothing
-        Forked preFork v t bs _ -> error "Forked BodyBuilder"
+    lift $ buildFork var ty
+    mapM_ (\b -> lift beginBranch >> expandBody b >> lift endBranch) bodies
+    lift $ completeFork
           
 
-expandFork' :: [ProcBody] -> Expander [BodyState]
-expandFork' [] = return []
-expandFork' (body:bodies) = do
-    st <- get
-    builderSt <- lift get
-    (expander,body') <- lift $ lift
-                        $ buildPrims builderSt {currBuild=[]} $
-                          execStateT (expandBody body) st
-    -- put back initial expander state, except for temp counter
-    put $ st {tmpCount = tmpCount expander}
-    (body':) <$> expandFork' bodies
+-- expandFork' :: [ProcBody] -> Expander [BodyState]
+-- expandFork' [] = return []
+-- expandFork' (body:bodies) = do
+--     st <- get
+--     builderSt <- lift get
+--     (expander,body') <- lift $ lift
+--                         $ buildPrims builderSt {currBuild=[]} $
+--                           execStateT (expandBody body) st
+--     -- put back initial expander state, except for temp counter
+--     put $ st {tmpCount = tmpCount expander}
+--     (body':) <$> expandFork' bodies
 
 
 expandPrims :: [Placed Prim] -> Expander ()
