@@ -134,17 +134,18 @@ type VarDefiner = Map PrimVarName Prim
 
 -- |Extract a ProcBody from a BodyState.
 -- XXX This must be prepared to generate multiple auxilliary procs.
-currBody :: BodyState -> ProcBody
-currBody Unforked{currBuild=prims}  = ProcBody (reverse prims) NoFork
+currBody :: BodyState -> Compiler ProcBody
+currBody Unforked{currBuild=prims}  = return $ ProcBody (reverse prims) NoFork
 currBody (Forked unforked@Unforked{currBuild=prims} var (Just val) ty bods _) =
     case maybeNth val bods of
         Nothing -> currBody unforked
-        Just bod ->
-          let (ProcBody prims' fork) = currBody bod
-          in ProcBody (reverse prims ++ prims') fork
-currBody (Forked Unforked{currBuild=prims} var val ty bods _) =
-    ProcBody (reverse prims) $
-    PrimFork var ty False $ List.map currBody bods
+        Just bod -> do
+          (ProcBody prims' fork) <- currBody bod
+          return $ ProcBody (reverse prims ++ prims') fork
+currBody (Forked Unforked{currBuild=prims} var val ty bods _) = do
+    bods' <- mapM currBody bods
+    return $ ProcBody (reverse prims) $
+             PrimFork var ty False bods'
 
 initState :: VarSubstitution -> BodyState
 initState oSubst =
@@ -161,7 +162,7 @@ buildBody oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
     (a,st) <- buildPrims (initState oSubst) builder
     logMsg BodyBuilder ">>>> Finished  building a proc body:"
-    let body = currBody st
+    body <- currBody st
     logMsg BodyBuilder $ showBlock 4 body
     return (a,body)
 
