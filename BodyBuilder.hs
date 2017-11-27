@@ -131,6 +131,8 @@ type ComputedCalls = Map Prim [PrimArg]
 type VarDefiner = Map PrimVarName Prim
 
 
+-- |Extract a ProcBody from a BodyState.
+-- XXX This must be prepared to generate multiple auxilliary procs.
 currBody :: BodyState -> ProcBody
 currBody Unforked{currBuild=prims}  = ProcBody (reverse prims) NoFork
 currBody (Forked unforked@Unforked{currBuild=prims} var (Just val) ty bods _) =
@@ -179,10 +181,12 @@ buildFork var ty = do
                     (var,Just n)
                   ArgVar var' varType _ _ _ -> do -- statically unknown result
                     (var',Nothing)
+                  _ -> shouldnt "switch on non-integer variable"
         put $ Forked st var val ty [] (uParent st)
         logBuild $ ">>>> Finished building a fork"
 
 
+-- |Complete a fork previously initiated by buildFork.
 completeFork :: BodyBuilder ()
 completeFork = do
     st <- get
@@ -195,8 +199,10 @@ completeFork = do
         let prevUnforked = origin st
         put $ Unforked [] subst osubst subes defs upar $ Just st
         logBuild $ ">>>> Completed a fork"
+      Forked{origin=Forked{}} -> shouldnt "Complete an unbuilt fork"
 
 
+-- |Start a new branch for the next integer value of the switch variable.
 beginBranch :: BodyBuilder ()
 beginBranch = do
     st <- get
@@ -205,8 +211,11 @@ beginBranch = do
           shouldnt "beginBranch in Unforked state"
         Forked{origin=Unforked _ subst vsubst subexp defs _ _} -> do
           put $ Unforked [] subst vsubst subexp defs (Just st) Nothing
+        Forked{origin=Forked{}} ->
+          shouldnt "Beginning a branch outside of a fork"
 
 
+-- |End the current branch.
 endBranch :: BodyBuilder ()
 endBranch = do
     st <- get
