@@ -175,17 +175,18 @@ buildFork var ty = do
       Forked{} -> do
         shouldnt "Building a fork outside of a body or branch"
       Unforked{} -> do
-        logBuild $ "<<<< beginning to build a new fork on " ++ show var
         arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
-        let (var,val) =
+        let (fvar,fval) =
               case arg' of
                   ArgInt n _ -> -- result known at compile-time
                     (var,Just n)
                   ArgVar var' varType _ _ _ -> do -- statically unknown result
                     (var',Nothing)
                   _ -> shouldnt "switch on non-integer variable"
-        put $ Forked st var val ty [] (uParent st)
-        logBuild $ ">>>> Finished building a fork"
+        logBuild $ "<<<< beginning to build a new fork on " ++ show var ++
+            " ( actually " ++ show fvar ++
+            (maybe "" (\v -> " = " ++ show v) fval) ++ ")"
+        put $ Forked st fvar fval ty [] (uParent st)
 
 
 -- |Complete a fork previously initiated by buildFork.
@@ -197,10 +198,9 @@ completeFork = do
         shouldnt "Completing an unbegun fork"
       Forked{origin=Unforked{currSubst=subst, outSubst=osubst, subExprs=subes,
                              definers=defs, uParent=upar}} -> do
-        logBuild $ "<<<< ending new fork"
+        logBuild $ ">>>> ending fork on " ++ show (stForkVar st)
         let prevUnforked = origin st
         put $ Unforked [] subst osubst subes defs upar $ Just st
-        logBuild $ ">>>> Completed a fork"
       Forked{origin=Forked{}} -> shouldnt "Complete an unbuilt fork"
 
 
@@ -212,6 +212,8 @@ beginBranch = do
         Unforked{} ->
           shouldnt "beginBranch in Unforked state"
         Forked{origin=Unforked _ subst vsubst subexp defs _ _} -> do
+          logBuild $ "<<<< <<<< Beginning to build branch "
+              ++ show (length $ stForkBods st) ++ " on " ++ show (stForkVar st)
           put $ Unforked [] subst vsubst subexp defs (Just st) Nothing
         Forked{origin=Forked{}} ->
           shouldnt "Beginning a branch outside of a fork"
@@ -225,31 +227,34 @@ endBranch = do
         Forked{} ->
           shouldnt "endBranch in Unforked state"
         Unforked{uParent=Just parent} -> do
+          logBuild $ ">>>> >>>> Ending branch "
+              ++ show (length $ stForkBods parent)
+              ++ " on " ++ show (stForkVar parent)
           put $ parent { stForkBods = st:stForkBods parent }
         Unforked{} ->
           shouldnt "endBranch with no parent fork"
 
 
 
-buildBranch :: PrimVarName -> TypeSpec -> Maybe Prim
-            -> BodyState -> (BodyBuilder (),Int) -> Compiler BodyState
-buildBranch var ty definer st (builder,val) = do
-    logMsg BodyBuilder $ "<<<< <<<< Beginning to build branch "
-                         ++ show val ++ " on " ++ show var
-    let st' = st { currBuild = [],
-                   currSubst = Map.insert var (ArgInt (fromIntegral val) ty)
-                               $ currSubst st }
-    branch <- buildBranch' st' $ do
-        logBuild $ "Propagating " ++ show val ++ " result of " ++ show definer
-        whenJust definer $ propagateBinding var ty val
-        builder
-    logMsg BodyBuilder $ ">>>> >>>> Finished building branch "
-                         ++ show val ++ " on " ++ show var
-    return branch
-
-
-buildBranch' :: BodyState -> BodyBuilder () -> Compiler BodyState
-buildBranch' st builder = snd <$> buildPrims st builder
+-- buildBranch :: PrimVarName -> TypeSpec -> Maybe Prim
+--             -> BodyState -> (BodyBuilder (),Int) -> Compiler BodyState
+-- buildBranch var ty definer st (builder,val) = do
+--     logMsg BodyBuilder $ "<<<< <<<< Beginning to build branch "
+--                          ++ show val ++ " on " ++ show var
+--     let st' = st { currBuild = [],
+--                    currSubst = Map.insert var (ArgInt (fromIntegral val) ty)
+--                                $ currSubst st }
+--     branch <- buildBranch' st' $ do
+--         logBuild $ "Propagating " ++ show val ++ " result of " ++ show definer
+--         whenJust definer $ propagateBinding var ty val
+--         builder
+--     logMsg BodyBuilder $ ">>>> >>>> Finished building branch "
+--                          ++ show val ++ " on " ++ show var
+--     return branch
+-- 
+-- 
+-- buildBranch' :: BodyState -> BodyBuilder () -> Compiler BodyState
+-- buildBranch' st builder = snd <$> buildPrims st builder
 
 
 buildPrims :: BodyState -> BodyBuilder a -> Compiler (a,BodyState)
