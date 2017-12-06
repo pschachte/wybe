@@ -30,9 +30,9 @@ gen$1 > (2 calls)
         foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @wybe:74:28
 
     1:
-        foreign llvm mul(n#0:wybe.int, ~result#0:wybe.int, ?tmp$6#0:wybe.int) @wybe:21:38
-        foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$7#0:wybe.int) @wybe:16:38
-        proc_factorial.gen$1<0>(~tmp$7#0:wybe.int, ~tmp$6#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_factorial:3:5
+        foreign llvm mul(n#0:wybe.int, ~result#0:wybe.int, ?tmp$10#0:wybe.int) @wybe:21:38
+        foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$11#0:wybe.int) @wybe:16:38
+        proc_factorial.gen$1<0>(~tmp$11#0:wybe.int, ~tmp$10#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_factorial:3:5
 
 
 
@@ -79,19 +79,19 @@ if.then.preheader:                                ; preds = %entry
   br label %if.then
 
 if.then:                                          ; preds = %if.then.preheader, %if.then
-  %"result#0.tr3" = phi i64 [ %"tmp$6#0", %if.then ], [ %"result#0", %if.then.preheader ]
-  %"n#0.tr2" = phi i64 [ %"tmp$7#0", %if.then ], [ %"n#0", %if.then.preheader ]
-  %"tmp$6#0" = mul i64 %"result#0.tr3", %"n#0.tr2"
-  %"tmp$7#0" = add i64 %"n#0.tr2", -1
-  %"tmp$2#0" = icmp sgt i64 %"tmp$7#0", 1
+  %"result#0.tr3" = phi i64 [ %"tmp$10#0", %if.then ], [ %"result#0", %if.then.preheader ]
+  %"n#0.tr2" = phi i64 [ %"tmp$11#0", %if.then ], [ %"n#0", %if.then.preheader ]
+  %"tmp$10#0" = mul i64 %"result#0.tr3", %"n#0.tr2"
+  %"tmp$11#0" = add i64 %"n#0.tr2", -1
+  %"tmp$2#0" = icmp sgt i64 %"tmp$11#0", 1
   br i1 %"tmp$2#0", label %if.then, label %if.else.loopexit
 
 if.else.loopexit:                                 ; preds = %if.then
-  %"tmp$6#0.lcssa" = phi i64 [ %"tmp$6#0", %if.then ]
+  %"tmp$10#0.lcssa" = phi i64 [ %"tmp$10#0", %if.then ]
   br label %if.else
 
 if.else:                                          ; preds = %if.else.loopexit, %entry
-  %"result#0.tr.lcssa" = phi i64 [ %"result#0", %entry ], [ %"tmp$6#0.lcssa", %if.else.loopexit ]
+  %"result#0.tr.lcssa" = phi i64 [ %"result#0", %entry ], [ %"tmp$10#0.lcssa", %if.else.loopexit ]
   tail call void @print_int(i64 %"result#0.tr.lcssa")
   tail call void @putchar(i8 10)
   ret void

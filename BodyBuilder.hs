@@ -135,17 +135,40 @@ type VarDefiner = Map PrimVarName Prim
 -- |Extract a ProcBody from a BodyState.
 -- XXX This must be prepared to generate multiple auxilliary procs.
 currBody :: BodyState -> Compiler ProcBody
-currBody Unforked{currBuild=prims}  = return $ ProcBody (reverse prims) NoFork
+currBody Unforked{currBuild=prims, uPred=Nothing} = do
+    logMsg BodyBuilder "Completing unforked body with no predecessor"
+    return $ ProcBody (reverse prims) NoFork
+currBody Unforked{currBuild=prims, uPred=Just pred} = do
+    logMsg BodyBuilder "Completing unforked body with predecessor"
+    pred' <- addInstrs pred prims
+    (ProcBody prims' fork) <- currBody pred'
+    return $ ProcBody (reverse prims ++ prims') fork
 currBody (Forked unforked@Unforked{currBuild=prims} var (Just val) ty bods _) =
-    case maybeNth val bods of
-        Nothing -> currBody unforked
+    case maybeNth val $ reverse bods of
+        Nothing -> do
+          logMsg BodyBuilder "Completing forked body with unknown decision var"
+          currBody unforked
         Just bod -> do
+          logMsg BodyBuilder "Completing forked body with known decision var"
           (ProcBody prims' fork) <- currBody bod
           return $ ProcBody (reverse prims ++ prims') fork
 currBody (Forked Unforked{currBuild=prims} var val ty bods _) = do
-    bods' <- mapM currBody bods
+    logMsg BodyBuilder "Completing forked body with unforked origin"
+    bods' <- reverse <$> mapM currBody bods
     return $ ProcBody (reverse prims) $
              PrimFork var ty False bods'
+
+-- Add a list of instrs at the end of a BodyState.  Since the instrs are
+-- stored in reverse order, that means adding them at the front.
+-- XXX If suffix is more than a few instructions and the state is forked,
+--     this should generate a fresh proc and add a call to it as the suffix.
+addInstrs :: BodyState -> [Placed Prim] -> Compiler BodyState
+addInstrs st@Unforked{currBuild=prims} suffix =
+    return $ st {currBuild=suffix ++ prims}
+addInstrs st@Forked{stForkBods=bods} suffix = do
+    bods' <- mapM (flip addInstrs suffix) bods
+    return $ st {stForkBods=bods'}
+
 
 initState :: VarSubstitution -> BodyState
 initState oSubst =
