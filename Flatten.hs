@@ -48,35 +48,42 @@ import Control.Monad.Trans (lift,liftIO)
 
 flattenProcDecl :: Item -> Compiler (Item,Int)
 flattenProcDecl (ProcDecl vis detism inline 
-                 proto@(ProcProto name params resources) 
+                 proto@ProcProto{procProtoParams=params}
                  stmts pos) = do
-    proto' <- flattenProto proto detism
+    logMsg Flatten $ "** Flattening "
+           ++ (if inline then "inline " else "")
+           ++ show detism ++ " proc "
+           ++ show proto ++ ":" ++ showBody 4 stmts
+    let proto' = proto {procProtoParams = concatMap flattenParam params}
+              -- flattenProto proto detism
     let inParams = Set.fromList $
                    List.map paramName $ 
                    List.filter (flowsIn . paramFlow) $
                    procProtoParams proto'
-    (stmts',tmpCtr) <- flattenBody stmts inParams
+    (stmts',tmpCtr) <- flattenBody stmts inParams detism
     return (ProcDecl vis detism inline proto' stmts' pos,tmpCtr)
 flattenProcDecl _ =
     shouldnt "flattening a non-proc or non-Det proc"
 
 
-flattenProto :: ProcProto -> Determinism -> Compiler ProcProto
-flattenProto (ProcProto name params resources) detism = do
-    let params' = concatMap flattenParam params
-    let params'' = case detism of
-          Det     -> params'
-          SemiDet -> params' ++ [Param "$$" boolType ParamOut
-                                 $ Implicit Nothing]
-    return $ ProcProto name params'' resources
+-- flattenProto :: ProcProto -> Determinism -> Compiler ProcProto
+-- flattenProto (ProcProto name params resources) detism = do
+--     let params' = concatMap flattenParam params
+--     let params'' = case detism of
+--           Det     -> params'
+--           SemiDet -> params' ++ [Param "$$" boolType ParamOut
+--                                  $ Implicit Nothing]
+--     return $ ProcProto name params'' resources
 
 
-flattenBody :: [Placed Stmt] -> Set VarName -> Compiler ([Placed Stmt],Int)
-flattenBody stmts varSet = do
-    finalState <- execStateT (flattenStmts stmts) $ initFlattenerState varSet
+flattenBody :: [Placed Stmt] -> Set VarName -> Determinism
+            -> Compiler ([Placed Stmt],Int)
+flattenBody stmts varSet detism = do
+    finalState <- execStateT (flattenStmts stmts detism)
+                  $ initFlattenerState varSet
     return (List.reverse (prefixStmts finalState) ++ 
-            List.reverse (flattened finalState) ++ 
-            postponed finalState,
+            List.reverse (flattened finalState),
+            -- ++ postponed finalState,
             tempCtr finalState)
 
 
@@ -93,13 +100,11 @@ data FlattenerState = Flattener {
     prefixStmts :: [Placed Stmt],   -- ^Code to be generated earlier, reversed
                                     -- (used for loop initialisation)
     flattened   :: [Placed Stmt],   -- ^Flattened code generated, reversed
-    postponed   :: [Placed Stmt],   -- ^Code to be generated later
+    -- postponed   :: [Placed Stmt],   -- ^Code to be generated later
     tempCtr     :: Int,             -- ^Temp variable counter
     currPos     :: OptPos,          -- ^Position of current statement
-    -- XXX are stmtDefs and stmtUses actually needed now?
     stmtDefs    :: Set VarName,     -- ^Variables defined by this statement
-    stmtUses    :: Set VarName,     -- ^Variables used by this statement
-    defdVars    :: Set VarName      -- ^Variables defined before this stmt
+    defdVars    :: Set VarName      -- ^Variables defined before this stmt,
                                     --  needed to distinguish niladic fns
                                     --  from variables
     }
@@ -107,20 +112,14 @@ data FlattenerState = Flattener {
 
 initFlattenerState :: Set VarName -> FlattenerState
 initFlattenerState varSet = 
-    Flattener [] [] [] 0 Nothing Set.empty Set.empty varSet
+    Flattener [] [] 0 Nothing Set.empty varSet
 
 
 emit :: OptPos -> Stmt -> Flattener ()
 emit pos stmt = do
-    -- logFlatten $ "** Emitting:  " ++ showStmt 14 stmt
+    logFlatten $ "-- Emitting:  " ++ showStmt 14 stmt
     stmts <- gets flattened
     modify (\s -> s { flattened = maybePlace stmt pos:stmts })
-
-
-postpone :: OptPos -> Stmt -> Flattener ()
-postpone pos stmt = do
-    stmts <- gets postponed
-    modify (\s -> s { postponed = maybePlace stmt pos:stmts })
 
 
 -- | Add an initialisation statement to the list of initialisations
@@ -131,14 +130,6 @@ saveInit pos stmt = do
     modify (\s -> s { prefixStmts = maybePlace stmt pos:stmts })
 
 
-emitPostponed :: Flattener ()
-emitPostponed = do
-    stmts <- gets flattened
-    stmts' <- gets postponed
-    modify (\s -> s { flattened = (List.reverse stmts') ++ stmts, 
-                      postponed = [] })
-
-
 -- |Return a fresh variable name.
 tempVar :: Flattener VarName
 tempVar = do
@@ -147,39 +138,39 @@ tempVar = do
     return $ mkTempName ctr
 
 
-flattenInner :: Bool -> Bool -> Flattener t -> Flattener (t,[Placed Stmt])
-flattenInner isLoop transparent inner = do
+-- |Run a flattener, ignoring its state changes except for the temp variable
+--  counter.  If transparent is True, also keep changes to the set of defined
+--  variables.  If isLoop is True, then flatten any loop initialisations
+--  accumulated while processing the body so they are executed before entering
+--  the loop; otherwise, just preserve the accumulated initialisations.
+flattenInner :: Bool -> Bool -> Determinism
+             -> Flattener t -> Flattener [Placed Stmt]
+flattenInner isLoop transparent detism inner = do
     oldState <- get
-    (val,innerState) <-
+    (_,innerState) <-
         lift (runStateT inner
-              ((initFlattenerState (defdVars oldState)) {
-                    tempCtr = (tempCtr oldState),
-                    prefixStmts = if isLoop then [] else prefixStmts oldState}))
-    logFlatten $ "** Prefix:\n" ++ 
-      showBody 4 (prefixStmts innerState)
-    logFlatten $ "** Flattened:\n" ++ 
-      showBody 4 (flattened innerState)
-    logFlatten $ "** Postponed:\n" ++ 
-      showBody 4 (postponed innerState)
+              (initFlattenerState (defdVars oldState)) {
+                    tempCtr = tempCtr oldState,
+                    prefixStmts = if isLoop then [] else prefixStmts oldState})
+    logFlatten $ "-- Prefix:\n" ++ showBody 4 (prefixStmts innerState)
+    logFlatten $ "-- Flattened:" ++ showBody 4 (List.reverse
+                                                $ flattened innerState)
+    -- logFlatten $ "-- Postponed:\n" ++ 
+    --   showBody 4 (postponed innerState)
     if transparent
-       then put $ oldState { tempCtr = tempCtr innerState,
-                             defdVars = defdVars innerState }
-        else put $ oldState { tempCtr = tempCtr innerState }
+      then put $ oldState { tempCtr = tempCtr innerState,
+                            defdVars = defdVars innerState }
+      else put $ oldState { tempCtr = tempCtr innerState }
     if isLoop
-      then flattenStmts $ prefixStmts innerState
+      then flattenStmts (prefixStmts innerState) detism
       else modify (\s -> s { prefixStmts = prefixStmts innerState })
-    return (val,List.reverse $ flattened innerState)
+    return $ List.reverse $ flattened innerState
 
 
 flattenStmtArgs :: [Placed Exp] -> OptPos -> Flattener [Placed Exp]
 flattenStmtArgs args pos = do
-    modify (\s -> s { stmtUses = Set.empty, stmtDefs = Set.empty, currPos = pos})
+    modify (\s -> s { stmtDefs = Set.empty, currPos = pos})
     flattenArgs args
-
-
-noteVarUse :: VarName -> Flattener ()
-noteVarUse var =
-    modify (\s -> s { stmtUses = Set.insert var $ stmtUses s })
 
 
 noteVarDef :: VarName -> Flattener ()
@@ -198,77 +189,85 @@ noteVarDef var = do
 
 noteVarMention :: VarName -> FlowDirection -> Flattener ()
 noteVarMention name dir = do
-    when (flowsIn dir) $ noteVarUse name
     when (flowsOut dir) $ noteVarDef name
 
 ----------------------------------------------------------------
 --                      Flattening Statements
 ----------------------------------------------------------------
 
--- |Flatten the specified statements to primitive statements.
-flattenStmts :: [Placed Stmt] -> Flattener ()
-flattenStmts stmts = 
-    mapM_ (\pstmt -> flattenStmt (content pstmt) (place pstmt)) stmts
+-- |Flatten the specified statements to primitive statements, in a context
+--  whose determinism is as specified.
+flattenStmts :: [Placed Stmt] -> Determinism -> Flattener ()
+flattenStmts stmts detism = 
+    mapM_ (\pstmt -> flattenStmt (content pstmt) (place pstmt) detism) stmts
 
 
-flattenStmt :: Stmt -> OptPos -> Flattener ()
-flattenStmt stmt pos = do
-    modify (\s -> s { stmtUses = Set.empty,
-                      stmtDefs = Set.empty,
+flattenStmt :: Stmt -> OptPos -> Determinism -> Flattener ()
+flattenStmt stmt pos detism = do
+    modify (\s -> s { stmtDefs = Set.empty,
                       currPos = pos})
     defd <- gets defdVars
-    logFlatten $ "flattening stmt " ++ showStmt 4 stmt ++
+    logFlatten $ "flattening " ++ show detism ++ " stmt " ++ showStmt 4 stmt ++
       " with defined vars " ++ show defd
-    flattenStmt' stmt pos
+    flattenStmt' stmt pos detism
     modify (\s -> s { defdVars = defdVars s `Set.union` stmtDefs s })
 
 -- |Flatten the specified statement
-flattenStmt' :: Stmt -> OptPos -> Flattener ()
-flattenStmt' (ProcCall maybeMod name procID args) pos = do
+flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
+flattenStmt' (ProcCall maybeMod name procID detism args) pos _ = do
+    logFlatten "   call is Det"
     args' <- flattenStmtArgs args pos
-    emit pos $ ProcCall maybeMod name procID args'
-    emitPostponed
-flattenStmt' (ForeignCall lang name flags args) pos = do
+    emit pos $ ProcCall maybeMod name procID detism args'
+flattenStmt' (ForeignCall "llvm" "test" flags args) pos SemiDet = do
+    args' <- flattenStmtArgs args pos
+    resultName <- tempVar
+    let vSet = Unplaced
+               $ Typed (Var resultName ParamOut $ Implicit pos) boolType False
+    emit pos $ ForeignCall "llvm" "icmp" flags $ args' ++ [vSet]
+    emit pos $ TestBool $ varGet resultName
+flattenStmt' stmt@(ForeignCall "llvm" "test" _ _) _ Det =
+    shouldnt $ "llvm test in Det context: " ++ show stmt
+flattenStmt' (ForeignCall lang name flags args) pos _ = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
-    emitPostponed
-flattenStmt' tststmt@(Test stmts tst) pos = do
-    logFlatten $ "** Flattening test:" ++ showStmt 4 tststmt
-    (_,stmts') <- flattenInner False True (flattenStmts stmts)
-    (vars,tst') <- flattenInner False False (do
-      vars <- flattenPExp tst
-      emitPostponed
-      return vars)
-    let errPos = betterPlace pos tst
-    case vars of
-      [] -> lift $ message Error "Test with no flow" errPos
-      [var] -> do
-        logFlatten $ "** Result:\n" ++ (showStmt 4 $ Test (stmts'++tst') var)
-        emit pos $ Test (stmts'++tst') var
-      [_,_] -> lift $ message Error
-              ("Test with in-out flow: " ++ show vars) errPos
-      _ -> shouldnt "Single expression expanded to more than 2 args"
-flattenStmt' (Cond tstStmts tst thn els) pos = do
-    logFlatten $ "** Flattening conditional:" ++ show tst
-    (vars,tst') <- flattenInner False False (do
-      vars <- flattenPExp tst
-      emitPostponed
-      return vars)
-    logFlatten $ "** Result:\n" ++ showBody 4 tst'
-    (_,thn') <- flattenInner False False (flattenStmts thn)
-    (_,els') <- flattenInner False False (flattenStmts els)
-    let errPos = betterPlace pos tst
-    case vars of
-      [] -> lift $ message Error "Condition with no flow" errPos
-      [var] -> emit pos $ Cond (tstStmts++tst') var thn' els'
-      [_,_] -> lift $ message Error
-              ("Condition with in-out flow: " ++ show vars) errPos
-      _ -> shouldnt "Single expression expanded to more than 2 args"
-flattenStmt' (Loop body) pos = do
-    (_,body') <- flattenInner True False
-             (flattenStmts $ body ++ [Unplaced $ Next])
+-- XXX must handle Flattener state more carefully.  Defined variables need
+--     to be retained between condition and then branch, but forgotten for
+--     the else branch.  Also note that 'transparent' arg to flatteninner is
+--     always False
+flattenStmt' (Cond tstStmts thn els) pos detism = do
+    defined <- gets defdVars
+    -- expand tstStmts, allowing defined vars to propagate to then branch
+    tstStmts' <- flattenInner False True SemiDet
+                 (flattenStmts tstStmts SemiDet)
+    thn' <- flattenInner False False detism (flattenStmts thn detism)
+    -- for else branch, put defined vars back as they were before condition 
+    modify (\s -> s {defdVars = defined})
+    els' <- flattenInner False False detism (flattenStmts els detism)
+    emit pos $ Cond tstStmts' thn' els'
+flattenStmt' stmt@(TestBool _) pos SemiDet = emit pos stmt
+flattenStmt' (TestBool expr) _pos Det =
+    shouldnt $ "TestBool " ++ show expr ++ "in Det context"
+flattenStmt' (And tstStmts) _pos SemiDet = do
+    flattenStmts tstStmts SemiDet
+flattenStmt' (And tstStmts) _pos Det =
+    shouldnt $ "And in a Det context: " ++ showBody 4 tstStmts
+flattenStmt' (Or tstStmts) pos SemiDet = do
+    tstStmts' <- flattenInner False False SemiDet
+                 (flattenStmts tstStmts SemiDet)
+    emit pos $ Or tstStmts'
+flattenStmt' (Or tstStmts) _pos Det =
+    shouldnt $ "Or in a Det context: " ++ showBody 4 tstStmts
+flattenStmt' (Not tstStmts) pos SemiDet = do
+    tstStmts' <- flattenInner False False SemiDet
+                 (flattenStmts tstStmts SemiDet)
+    emit pos $ Or tstStmts'
+flattenStmt' (Not tstStmt) _pos Det =
+    shouldnt $ "negation in a Det context: " ++ show tstStmt
+flattenStmt' (Loop body) pos detism = do
+    body' <- flattenInner True False detism
+             (flattenStmts (body ++ [Unplaced Next]) detism)
     emit pos $ Loop body'
-flattenStmt' (For itr gen) pos = do
+flattenStmt' (For itr gen) pos detism = do
     vars <- flattenPExp gen
     case vars of
         [] -> lift $
@@ -279,19 +278,21 @@ flattenStmt' (For itr gen) pos = do
         [genVar@(Unplaced (Var genVarName ParamIn flowType))] -> do
             -- XXX not generating the right code until we have polymorphism
             flattenStmt 
-              (Cond [] (maybePlace (Fncall [] "empty" [genVar]) pos)
-               [Unplaced $ Break]
-               [maybePlace
-                  (ProcCall [] "[|]" Nothing
-                   [itr,
-                    Unplaced $ 
-                    Var genVarName ParamOut flowType,
-                    genVar])
-                  pos]) pos
+              (Cond [maybePlace (ProcCall [] "[|]" Nothing SemiDet
+                                 [itr,
+                                  Unplaced $ 
+                                  Var genVarName ParamOut flowType,
+                                  genVar])
+                     pos]
+                  []
+                  [maybePlace (ProcCall [] "[]" Nothing SemiDet [genVar])
+                      pos,
+                   Unplaced Break]
+              ) pos detism
         _ -> shouldnt "Generator expression producing unexpected vars"
-flattenStmt' Nop pos = emit pos Nop
-flattenStmt' Break pos = emit pos Break
-flattenStmt' Next pos = emit pos Next
+flattenStmt' Nop pos detism = emit pos Nop
+flattenStmt' Break pos detism = emit pos Break
+flattenStmt' Next pos detism = emit pos Next
 
 
 ----------------------------------------------------------------
@@ -345,7 +346,7 @@ flattenExp exp@(Var name dir flowType) ty cast pos = do
     if (dir == ParamIn && (not defd))
       then -- Reference to an undefined variable: assume it's meant to be
            -- a niladic function instead of a variable reference
-        flattenCall (ProcCall [] name Nothing) False ty cast pos []
+        flattenCall (ProcCall [] name Nothing Det) False ty cast pos []
       else do
         noteVarMention name dir
         let inPart = if isIn
@@ -360,12 +361,12 @@ flattenExp exp@(Var name dir flowType) ty cast pos = do
         logFlatten $ "  Arg flattened to " ++ show (inPart ++ outPart)
         return $ inPart ++ outPart
 flattenExp (Where stmts pexp) _ _ _ = do
-    flattenStmts stmts
+    flattenStmts stmts Det
     flattenPExp pexp
 flattenExp (CondExp cond thn els) ty cast pos = do
     resultName <- tempVar
     let flowType = Implicit pos
-    flattenStmt (Cond [] cond
+    flattenStmt (Cond cond
                  [maybePlace (ForeignCall "llvm" "move" []
                               [typeAndPlace (content thn) ty cast (place thn),
                                Unplaced $ Var resultName ParamOut flowType])
@@ -374,10 +375,10 @@ flattenExp (CondExp cond thn els) ty cast pos = do
                               [typeAndPlace (content els) ty cast (place els),
                                Unplaced $ Var resultName ParamOut flowType])
                   pos])
-        pos
+        pos Det
     return $ [maybePlace (Var resultName ParamIn flowType) pos]
 flattenExp (Fncall maybeMod name exps) ty cast pos = do
-    flattenCall (ProcCall maybeMod name Nothing) False ty cast pos exps
+    flattenCall (ProcCall maybeMod name Nothing Det) False ty cast pos exps
 flattenExp (ForeignFn lang name flags exps) ty cast pos = do
     flattenCall (ForeignCall lang name flags) True ty cast pos exps
 flattenExp (Typed exp AnyType _) ty cast pos = do
@@ -389,25 +390,19 @@ flattenExp (Typed exp ty cast) _ _ pos = do
 flattenCall :: ([Placed Exp] -> Stmt) -> Bool -> TypeSpec -> Bool -> OptPos
             -> [Placed Exp] -> Flattener [Placed Exp]
 flattenCall stmtBuilder isForeign ty cast pos exps = do
-    logFlatten $ "** flattening args:  " ++ show exps
+    logFlatten $ "-- flattening args:  " ++ show exps
     resultName <- tempVar
     oldPos <- gets currPos
-    uses <- gets stmtUses
     defs <- gets stmtDefs
-    modify (\s -> s { stmtUses = Set.empty, stmtDefs = Set.empty, 
-                      currPos = pos})
+    modify (\s -> s { stmtDefs = Set.empty, currPos = pos})
     exps' <- flattenArgs exps
     -- let exps'' = List.filter (isInExp . content) exps'
-    uses' <- gets stmtUses
     defs' <- gets stmtDefs
-    modify (\s -> s { stmtUses = uses `Set.union` uses', 
-                      stmtDefs = defs `Set.union` defs', 
+    modify (\s -> s { stmtDefs = defs `Set.union` defs', 
                       currPos = oldPos})
     -- let isOut = not $ Set.null defs'
-    -- let isIn = not (isOut && Set.null (defs' `Set.intersection` uses'))
-    logFlatten $ "** defines:  " ++ show defs'
-    logFlatten $ "** uses   :  " ++ show uses'
-    -- logFlatten $ "** in = " ++ show isIn ++ "; out = " ++ show isOut
+    logFlatten $ "-- defines:  " ++ show defs'
+    -- logFlatten $ "-- in = " ++ show isIn ++ "; out = " ++ show isOut
     -- let flowType = if isIn && isOut then HalfUpdate else Implicit pos
     -- when isIn $ 
     --   emit pos $ stmtBuilder $ 

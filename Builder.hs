@@ -34,9 +34,9 @@
 --    o  Imported modules are loaded, building if needed (this module)
 --    o  The types of exported procs are validated (Types)
 --    o  Resource imports and exports are checked (Resources)
---    o  Proc argument types are checked (Types)
+--    o  Proc argument types and modes are checked (Types)
 --    o  Proc resources are checked and transformed to args (Resources)
---    o  Branches and loops are transformed away (Unbranch)
+--    o  Branches, loops, and nondeterminism are transformed away (Unbranch)
 --    o  Procs are compiled to clausal form (Clause)
 --    o  Procs are optimised (Optimise)
 --  This is the responsibility of the compileModSCC function.
@@ -577,32 +577,40 @@ handleModImports _ thisMod = do
 -- imports in the correct order. The target module and imports have
 -- mains defined as 'modName.main'.
 buildExecutable :: ModSpec -> FilePath -> Compiler ()
-buildExecutable targetMod fpath =
-    do depends <- orderedDependencies targetMod
-       -- Filter the modules for which the second element of the tuple is True
-       let mainImports = List.foldr (\x a -> if snd x then fst x:a else a)
-               [] depends
-       logBuild $ show depends
-       logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
-       mainMod <- newMainModule mainImports
-       logBuild "o Built 'main' module for target: "
-       mainModStr <- liftIO $ codeemit mainMod
-       logEmit mainModStr
-       ------------
-       logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
-       tempDir <- liftIO getTemporaryDirectory
-       liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
-       let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"
-       liftIO $ makeObjFile tmpMainOFile mainMod
+buildExecutable targetMod fpath = do
+    depends <- orderedDependencies targetMod
+    if List.null depends || not (snd (head depends))
+        then
+            -- No main code in the selected module: don't build executable
+            message Error
+            ("No main (top-level) code in module '"
+             ++ showModSpec targetMod ++ "'; not building executable")
+            Nothing
+        else do
+            -- Filter the modules for which the second element of tuple is True
+            let mainImports = List.foldr (\x a -> if snd x then fst x:a else a)
+                              [] depends
+            logBuild $ show depends
+            logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
+            mainMod <- newMainModule mainImports
+            logBuild "o Built 'main' module for target: "
+            mainModStr <- liftIO $ codeemit mainMod
+            logEmit mainModStr
+            ------------
+            logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
+            tempDir <- liftIO getTemporaryDirectory
+            liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
+            let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"
+            liftIO $ makeObjFile tmpMainOFile mainMod
 
-       ofiles <- mapM (loadObjectFile . fst) depends
-       let allOFiles = tmpMainOFile:ofiles
-       -----------
-       makeExec allOFiles fpath
-       -- return allOFiles
-       logBuild "o Object Files to link: "
-       logBuild $ "++ " ++ intercalate "\n++" allOFiles
-       logBuild $ "o Building Target (executable): " ++ fpath
+            ofiles <- mapM (loadObjectFile . fst) depends
+            let allOFiles = tmpMainOFile:ofiles
+            -----------
+            makeExec allOFiles fpath
+            -- return allOFiles
+            logBuild "o Object Files to link: "
+            logBuild $ "++ " ++ intercalate "\n++" allOFiles
+            logBuild $ "o Building Target (executable): " ++ fpath
 
 
 -- | Traverse and collect a depth first dependency list from the given initial

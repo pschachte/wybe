@@ -296,11 +296,28 @@ stmtParser =
           <|> unlessStmt
           <|> whenStmt
           <|> untilStmt
-          <|> testStmt
-          <|> procCallParser
           <|> ifStmtParser
-          <|> expStmtParser
+          <|> simpleStmt
 
+
+simpleStmt :: Parser (Placed Stmt)
+simpleStmt = try procCallParser
+          <|> try expStmtParser
+          <|> relStmtParser
+
+
+testStmts :: Parser [Placed Stmt]
+testStmts =
+          (:[]) <$> fmap expToStmt <$> simpleExpParser
+          -- XXX Need to handle and, or, and not
+          -- (   do pos <- tokenPosition <$> ident "and"
+          --        rest <- testStmts
+          --        return maybePlace (And [stmt1,rest]) pos
+          -- <|> do pos <- tokenPosition <$> ident "or"
+          --        rest <- testStmts
+          --        return maybePlace (And [stmt1,rest]) pos
+          -- <|> return [stmt1]
+          -- )
 
 
 -- | A simple proc call stmt.
@@ -308,7 +325,7 @@ procCallParser :: Parser (Placed Stmt)
 procCallParser = do
     p <- identButNot keywords
     args <- option [] argListParser
-    return $ maybePlace (ProcCall [] (content p) Nothing args) (place p)
+    return $ maybePlace (ProcCall [] (content p) Nothing Det args) (place p)
 
 
 
@@ -330,28 +347,28 @@ forStmt = do
 whileStmt :: Parser (Placed Stmt)
 whileStmt = do
     pos <- tokenPosition <$> ident "while"
-    e <- expParser
-    return $ Placed (Cond [] e [Unplaced Nop] [Unplaced Break]) pos
+    cond <- testStmts
+    return $ Placed (Cond cond [Unplaced Nop] [Unplaced Break]) pos
 
 
 untilStmt :: Parser (Placed Stmt)
 untilStmt = do
     pos <- tokenPosition <$> ident "until"
-    e <- expParser
-    return $ Placed (Cond [] e [Unplaced Break] [Unplaced Nop]) pos
+    e <- testStmts
+    return $ Placed (Cond e [Unplaced Break] [Unplaced Nop]) pos
 
 
 unlessStmt :: Parser (Placed Stmt)
 unlessStmt = do
     pos <- tokenPosition <$> ident "unless"
-    e <- expParser
-    return $ Placed (Cond [] e [Unplaced Nop] [Unplaced Next]) pos
+    e <- testStmts
+    return $ Placed (Cond e [Unplaced Nop] [Unplaced Next]) pos
 
 whenStmt :: Parser (Placed Stmt)
 whenStmt = do
     pos <- tokenPosition <$> ident "when"
-    e <- expParser
-    return $ Placed (Cond [] e [Unplaced Next] [Unplaced Nop]) pos
+    e <- testStmts
+    return $ Placed (Cond e [Unplaced Next] [Unplaced Nop]) pos
 
 
 -- | If statement parser.
@@ -360,30 +377,30 @@ ifStmtParser = do
     pos <- tokenPosition <$> ident "if"
     cases <- (ifCaseParser `sepBy` symbol "|") <* ident "end"
     let final = foldr (\(cond, body) rest ->
-                           [Unplaced (Cond [] cond body rest)]) [] cases
+                           [Unplaced (Cond cond body rest)]) [] cases
     if null final
         then unexpected "if cases statement structure."
         else return $ Placed ((content . head) final) pos
 
 
-ifCaseParser :: Parser (Placed Exp, [Placed Stmt])
+ifCaseParser :: Parser ([Placed Stmt], [Placed Stmt])
 ifCaseParser = do
-    cond <- expParser <* symbol "::"
+    cond <- testStmts <* symbol "::"
     body <- many stmtParser
     return (cond, body)
 
 
 -- | Test statement parser.
-testStmt :: Parser (Placed Stmt)
-testStmt = do
-    pos <- tokenPosition <$> ident "test"
-    rel <- relExpParser
-    let e = case rel of
-                Placed (Var s ParamIn Ordinary) p ->
-                    Placed (Fncall [] s []) p
-                _ ->
-                    rel
-    return $ Placed (Test [] e) pos
+-- testStmt :: Parser (Placed Stmt)
+-- testStmt = do
+--     pos <- tokenPosition <$> ident "test"
+--     rel <- relExpParser
+--     let e = case rel of
+--                 Placed (Var s ParamIn Ordinary) p ->
+--                     Placed (Fncall [] s []) p
+--                 _ ->
+--                     rel
+--     return $ Placed (TestBool e) pos
     
 
 
@@ -405,7 +422,12 @@ assignmentParser :: Parser (Placed Stmt)
 assignmentParser = do
     x <- simpleExpTerms <* symbol "="
     y <- expParser
-    return $ maybePlace (ProcCall [] "=" Nothing [x,y]) (place x)
+    return $ maybePlace (ProcCall [] "=" Nothing Det [x,y]) (place x)
+
+
+
+
+
 
 -----------------------------------------------------------------------------
 -- Expression Parsing                                                      --
@@ -422,18 +444,20 @@ simpleExpParser :: Parser (Placed Exp)
 simpleExpParser =  buildExpressionParser completeOperatorTable simpleExpTerms
                <?> "simple expressions"
 
--- | Parser for expressions built over the relational operators table and
+-- | Parser for test statements built over the relational operators table and
 -- simple expression terms.
-relExpParser :: Parser (Placed Exp)
-relExpParser =  buildExpressionParser relOperatorTable simpleExpTerms
-            <?> "relational expressions"
+relStmtParser :: Parser (Placed Stmt)
+relStmtParser = do
+    exp <- buildExpressionParser relOperatorTable simpleExpTerms
+           <?> "relational expressions"
+    return (expToStmt <$> exp)
 
 
 -- | Exp -> 'if' Exp 'then' Exp 'else' Exp
 ifExpParser :: Parser (Placed Exp)
 ifExpParser = do
     pos <- tokenPosition <$> ident "if"
-    cond <- expParser
+    cond <- testStmts
     thenBody <- ident "then" *> expParser
     elseBody <- ident "else" *> expParser
     return $ Placed (CondExp cond thenBody elseBody) pos
@@ -523,6 +547,9 @@ relOperatorTable =
       , binary "<"  AssocNone
       , binary "<=" AssocNone
       , binary ">=" AssocNone
+      ]
+    , [ binary "/=" AssocNone
+      , binary "="  AssocNone
       ]
     ]
 
@@ -845,6 +872,6 @@ determinism = option Det (ident "test" *> return SemiDet)
 keywords :: [String]
 keywords =
     [ "if", "then", "else", "proc", "end", "use"
-    , "do",  "until", "unless", "or", "test", "import"
+    , "do",  "until", "unless", "and", "or", "not", "test", "import"
     , "while", "foreign", "in", "when"
     ]

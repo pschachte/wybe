@@ -225,7 +225,7 @@ undefStmtErr :: Ident -> Placed Stmt -> TypeError
 undefStmtErr caller pstmt =
     let pos = place pstmt
     in case content pstmt of
-        ProcCall _ callee _ _ -> ReasonUndef caller callee pos
+        ProcCall _ callee _ _ _ -> ReasonUndef caller callee pos
         other -> shouldnt $ "undefStmtErr with non-call stmt " ++ show other
     
 
@@ -392,11 +392,11 @@ localBodyProcs thisMod (ProcDefSrc body) =
 localBodyProcs thisMod (ProcDefPrim _ _) =
     shouldnt "Type checking compiled code"
 
-localCalls :: ModSpec -> ModSpec -> Ident -> Maybe Int -> [Placed Exp]
-           -> [Ident]
-localCalls thisMod m name _ _
+localCalls :: ModSpec -> ModSpec -> Ident -> Maybe Int -> Determinism
+           -> [Placed Exp] -> [Ident]
+localCalls thisMod m name _ _ _
   | List.null m || m == thisMod = [name]
-localCalls _ _ _ _ _ = []
+localCalls _ _ _ _ _ _ = []
 
 
 expType :: Typing -> Placed Exp -> Compiler TypeSpec
@@ -429,7 +429,7 @@ expMode' _ (CharValue _) = (ParamIn, True, Nothing)
 expMode' assigned (Var name FlowUnknown _)
     = if name `elem` assigned
       then (ParamIn, True, Nothing)
-      else (ParamOut, False, Just name)
+      else (FlowUnknown, False, Just name)
 expMode' assigned (Var name flow _) = (flow, name `elem` assigned, Nothing)
 expMode' assigned (Typed expr _ _) = expMode' assigned expr
 expMode' _ expr =
@@ -588,10 +588,11 @@ typecheckProcDecls m name = do
 -- emptyStmtResolution = Map.empty
 
 
--- |An individual proc and its formal parameter types and modes.
+-- |An individual proc, its formal parameter types and modes, and determinism
 data ProcInfo = ProcInfo {
   procInfoProc :: ProcSpec,
-  procInfoArgs :: [TypeFlow]
+  procInfoArgs :: [TypeFlow],
+  procInfoDetism:: Determinism
   } deriving (Eq,Show)
 
 
@@ -599,10 +600,32 @@ procInfoTypes :: ProcInfo -> [TypeSpec]
 procInfoTypes call = typeFlowType <$> procInfoArgs call
 
 
--- |A single call statement together with a list of all the possible different
---  parameter list types (a list of types).  This type is used to narrow down
---  the possible call typings.
+-- |Check if ProcInfo is for a proc with a single Bool output as last arg,
+--  and if so, return Just the ProcInfo for the equivalent test proc
+boolFnToTest :: ProcInfo -> Maybe ProcInfo
+boolFnToTest (ProcInfo _ _ SemiDet) = Nothing
+boolFnToTest (ProcInfo proc args Det)
+    | List.null args = Nothing
+    | last args == TypeFlow boolType ParamOut =
+        Just $ ProcInfo proc (init args) SemiDet
+    | otherwise = Nothing
+    
+
+-- |Check if ProcInfo is for a test proc, and if so, return a ProcInfo for
+--  the Det proc with a single Bool output as last arg
+testToBoolFn :: ProcInfo -> Maybe ProcInfo
+testToBoolFn (ProcInfo _ _ Det) = Nothing
+testToBoolFn (ProcInfo proc args SemiDet)
+    = Just $ ProcInfo proc (args ++ [TypeFlow boolType ParamOut]) Det
+    
+
+
+-- |A single call statement together with the determinism context in which
+--  the call appears and a list of all the possible different parameter
+--  list types (a list of types). This type is used to narrow down the
+--  possible call typings.
 data StmtTypings = StmtTypings {typingStmt::Placed Stmt,
+                                typingDetism::Determinism,
                                 typingArgsTypes::[ProcInfo]}
     deriving (Eq,Show)
 
@@ -618,6 +641,7 @@ typecheckProcDecl m pdef = do
     let params = procProtoParams proto
     let resources = procProtoResources proto
     let (ProcDefSrc def) = procImpln pdef
+    let detism = procDetism pdef
     let pos = procPos pdef
     let vis = procVis pdef
     if vis == Public && any ((==AnyType) . paramType) params
@@ -631,14 +655,16 @@ typecheckProcDecl m pdef = do
             logTypes $ "** Type checking proc " ++ name ++ ": "
                        ++ show resourceTyping
             logTypes $ "   with resources: " ++ show resources
-            let (calls,preTyping) = runState (bodyCalls def) resourceTyping
-            let procCalls = List.filter (isProcCall . content) calls
+            let (calls,preTyping) =
+                  runState (bodyCalls def detism) resourceTyping
+            let procCalls = List.filter (isProcCall . content . fst) calls
             let unifs = List.map (\(ForeignCall _ _ _ [e1,e2]) -> (e1,e2))
-                        $ List.filter isMove (content <$> calls)
+                        $ List.filter isMove ((content . fst) <$> calls)
             unifTyping <- foldM (\t (e1,e2) -> unifyExprTypes pos e1 e2 t)
                           preTyping unifs
-            calls' <- zipWith StmtTypings procCalls
-                      <$> mapM callProcInfos procCalls
+            calls' <- zipWith (\(call,detism) typs ->
+                                   StmtTypings call detism typs) procCalls
+                      <$> mapM (callProcInfos . fst) procCalls
             let badCalls = List.map typingStmt
                            $ List.filter (List.null . typingArgsTypes) calls'
             if List.null badCalls
@@ -665,7 +691,7 @@ typecheckProcDecl m pdef = do
                               `Set.union`
                               (Set.fromList $ resourceName <$> inResources)
                     (def',_,modeErrs) <-
-                      modecheckStmts m name pos typing [] initialised def
+                      modecheckStmts m name pos typing [] initialised detism def
                     let typing' = typeErrors modeErrs typing
                     let params' = updateParamTypes typing' params
                     let proto' = proto { procProtoParams = params' }
@@ -687,7 +713,7 @@ typecheckProcDecl m pdef = do
                 return (pdef,False,
                            List.map (\pcall ->
                                          case content pcall of
-                                             ProcCall _ callee _ _ ->
+                                             ProcCall _ callee _ _ _ ->
                                                  ReasonUndef name callee
                                                  $ place pcall
                                              _ -> shouldnt "typecheckProcDecl")
@@ -727,31 +753,31 @@ updateParamTypes typing =
 
 -- |Return a list of the proc and foreign calls recursively in a list of
 --  statements, paired with all the possible resolutions.
-bodyCalls :: [Placed Stmt] -> State Typing [Placed Stmt]
-bodyCalls [] = return []
-bodyCalls (pstmt:pstmts) = do
-    rest <- bodyCalls pstmts
+bodyCalls :: [Placed Stmt] -> Determinism
+          -> State Typing [(Placed Stmt, Determinism)]
+bodyCalls [] _ = return []
+bodyCalls (pstmt:pstmts) detism = do
+    rest <- bodyCalls pstmts detism
     let stmt = content pstmt
     let pos  = place pstmt
     case stmt of
-        ProcCall{} -> return $ pstmt:rest
+        ProcCall{} -> return $  (pstmt,detism):rest
         -- need to handle move instructions:
-        ForeignCall{} -> return $ pstmt:rest
-        Test nested expr -> do
-          modify $ constrainVarType (ReasonCond pos)
-                   (expVar $ content expr) boolType
-          nested' <- bodyCalls nested
-          return $ nested' ++ rest
+        ForeignCall{} -> return $ (pstmt,detism):rest
+        TestBool _ -> return rest
+        And stmts -> bodyCalls stmts detism
+        Or stmts -> bodyCalls stmts detism
+        Not stmts -> bodyCalls stmts detism
         Nop -> return rest
-        Cond cond expr thn els -> do
-          modify $ constrainVarType (ReasonCond pos)
-                   (expVar $ content expr) boolType
-          cond' <- bodyCalls cond
-          thn' <- bodyCalls thn
-          els' <- bodyCalls els
+        Cond cond thn els -> do
+          -- modify $ constrainVarType (ReasonCond pos)
+          --          (expVar $ content expr) boolType
+          cond' <- bodyCalls cond SemiDet
+          thn' <- bodyCalls thn detism
+          els' <- bodyCalls els detism
           return $ cond' ++ thn' ++ els' ++ rest
         Loop nested -> do
-          nested' <- bodyCalls nested
+          nested' <- bodyCalls nested detism
           return $ nested' ++ rest
         For _ _ -> shouldnt "bodyCalls: flattening left For stmt"
         Break -> return rest
@@ -775,16 +801,17 @@ callTypes pstmt = nub . (procInfoTypes <$>) <$> callProcInfos pstmt
 callProcInfos :: Placed Stmt -> Compiler [ProcInfo]
 callProcInfos pstmt =
     case content pstmt of
-        ProcCall m name procId _ -> do
+        ProcCall m name procId _ _ -> do
           procs <- case procId of
               Nothing   -> callTargets m name
-              Just pid -> return [ProcSpec m name pid] -- XXX check modspec
-                                                       -- validity?
-          zipWith ProcInfo procs <$>
-              mapM (fmap (List.map paramTypeFlow
-                             . List.filter nonResourceParam)
-                       . getParams)
-              procs
+              Just pid -> return [ProcSpec m name pid]
+          typflows <- mapM (fmap (List.map paramTypeFlow
+                                  . List.filter nonResourceParam)
+                            . getParams)
+                      procs
+          detisms <- mapM getDetism procs
+          return $ zipWith3 ProcInfo procs typflows detisms
+              
         stmt ->
           shouldnt $ "callProcInfos with non-call statement "
                      ++ showStmt 4 stmt
@@ -843,24 +870,30 @@ typecheckCalls m name pos [] typing residue False =
     -- fewest possibilities and try all combinations to see if exactly one
     -- of them gives us a valid typing.  If not, it's a type error.
     return $ typeErrors (List.map overloadErr residue) typing
-typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls) typing
-        residue chg = do
+typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
+        typing residue chg = do
     logTypes $ "Type checking call " ++ show pstmt
-    logTypes $ "Candidate types: " ++ show (procInfoTypes <$> typs)
+    logTypes $ "Calling context is " ++ show detism
+    logTypes $ "Candidate types: " ++ show typs
+    -- XXX Must handle reification of test as a bool
     let (callee,pexps) = case content pstmt of
-                             ProcCall _ callee' _ pexps' -> (callee',pexps')
+                             ProcCall _ callee' _ _ pexps' -> (callee',pexps')
                              noncall -> shouldnt
                                         $ "typecheckCalls with non-call stmt"
                                           ++ show noncall
     actualTypes <- mapM (expType typing) pexps
     logTypes $ "Actual types: " ++ show actualTypes
-    let matches = List.map (matchTypeList name callee (place pstmt) actualTypes)
+    let matches = List.map
+                  (matchTypeList name callee (place pstmt) actualTypes detism)
                   typs
     let validMatches = catOKs matches
     let validTypes = nub $ procInfoTypes <$> validMatches
     logTypes $ "Valid types = " ++ show validTypes
+    logTypes $ "Converted types = " ++ show (boolFnToTest <$> typs)
     case validTypes of
-        [] -> return $ typeErrors (concatMap errList matches) typing
+        [] -> do
+          logTypes "Type error: no valid types for call"
+          return $ typeErrors (concatMap errList matches) typing
         [match] -> do
           let typing' = List.foldr
                         (\ (pexp,ty,argnum) -> setExpType pexp ty argnum name)
@@ -868,30 +901,48 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls) typing
                         $ zip3 pexps match [1..]
           logTypes $ "Resulting typing = " ++ show typing'
           typecheckCalls m name pos calls typing' residue True
-        _ -> let stmtTyping' = stmtTyping {typingArgsTypes = validMatches}
-             in typecheckCalls m name pos calls typing (stmtTyping':residue)
-                $ chg || validMatches == typs
+        _ -> do
+          let stmtTyping' = stmtTyping {typingArgsTypes = validMatches}
+          typecheckCalls m name pos calls typing (stmtTyping':residue)
+              $ chg || validMatches /= typs
     
 
 -- |Match up the argument types of a call with the parameter types of the
 -- callee, producing a list of the actual types.  If this list contains
 -- InvalidType, then the call would be a type error.
-matchTypeList :: Ident -> Ident -> OptPos -> [TypeSpec] -> ProcInfo
-              -> MaybeErr ProcInfo
-matchTypeList caller callee pos callTypes calleeInfo
-    | sameLength callTypes calleeTypes =
-      let matches = List.zipWith meetTypes callTypes calleeTypes
-          mismatches = List.map fst $ List.filter ((==InvalidType) . snd)
-                       $ zip [1..] matches
-      in if List.null mismatches
-         then OK $ calleeInfo
-              {procInfoArgs = List.zipWith TypeFlow matches calleeFlows}
-         else Err [ReasonArgType callee n pos | n <- mismatches]
+matchTypeList :: Ident -> Ident -> OptPos -> [TypeSpec] -> Determinism
+              -> ProcInfo -> MaybeErr ProcInfo
+matchTypeList caller callee pos callArgTypes detismContext calleeInfo
+    | sameLength callArgTypes args
+    = matchTypeList' callee pos callArgTypes calleeInfo
+    -- Handle case of SemiDet context call to bool function as a proc call
+    | detismContext == SemiDet && isJust testInfo
+      && sameLength callArgTypes (procInfoArgs calleeInfo')
+    = matchTypeList' callee pos callArgTypes calleeInfo'
+    -- Handle case of reified test call
+    | isJust detCallInfo
+      && sameLength callArgTypes (procInfoArgs calleeInfo'')
+    = matchTypeList' callee pos callArgTypes calleeInfo''
     | otherwise = Err [ReasonArity caller callee pos
-                       (length callTypes) (length calleeTypes)]
+                       (length callArgTypes) (length args)]
+    where args = procInfoArgs calleeInfo
+          testInfo = boolFnToTest calleeInfo
+          calleeInfo' = fromJust testInfo
+          detCallInfo = testToBoolFn calleeInfo
+          calleeInfo'' = fromJust detCallInfo
+
+matchTypeList' :: Ident -> OptPos -> [TypeSpec] -> ProcInfo -> MaybeErr ProcInfo
+matchTypeList' callee pos callArgTypes calleeInfo =
+    if List.null mismatches
+    then OK $ calleeInfo
+         {procInfoArgs = List.zipWith TypeFlow matches calleeFlows}
+    else Err [ReasonArgType callee n pos | n <- mismatches]
     where args = procInfoArgs calleeInfo
           calleeTypes = typeFlowType <$> args
           calleeFlows = typeFlowMode <$> args
+          matches = List.zipWith meetTypes callArgTypes calleeTypes
+          mismatches = List.map fst $ List.filter ((==InvalidType) . snd)
+                       $ zip [1..] matches
 
 
 -- |Match up the argument modes of a call with the available parameter
@@ -899,7 +950,7 @@ matchTypeList caller callee pos callTypes calleeInfo
 -- if the corresponding parameter is an input.
 matchModeList :: [(FlowDirection,Bool,Maybe VarName)]
               -> ProcInfo -> Bool
-matchModeList modes (ProcInfo _ typModes)
+matchModeList modes ProcInfo{procInfoArgs=typModes}
     -- Check that no param is in where actual is out
     = (ParamIn,ParamOut) `notElem` argModes
     where argModes = zip (typeFlowMode <$> typModes) (sel1 <$> modes)
@@ -910,7 +961,7 @@ matchModeList modes (ProcInfo _ typModes)
 -- proc mode, treating a FlowUnknown argument as ParamOut.
 exactModeMatch :: [(FlowDirection,Bool,Maybe VarName)]
                -> ProcInfo -> Bool
-exactModeMatch modes (ProcInfo _ typModes)
+exactModeMatch modes ProcInfo{procInfoArgs=typModes}
     = all (\(formal,actual) -> formal == actual
                                || formal == ParamOut && actual == FlowUnknown)
       $ zip (typeFlowMode <$> typModes) (sel1 <$> modes)
@@ -921,16 +972,17 @@ exactModeMatch modes (ProcInfo _ typModes)
 -- proc mode, treating a FlowUnknown argument as ParamOut.
 delayModeMatch :: [(FlowDirection,Bool,Maybe VarName)]
                -> ProcInfo -> Bool
-delayModeMatch modes (ProcInfo _ typModes)
+delayModeMatch modes ProcInfo{procInfoArgs=typModes}
     = all (\(formal,actual) -> formal == actual
-                               || formal == ParamIn && actual == FlowUnknown)
+                               || actual == FlowUnknown
+                               && (formal == ParamIn || formal == ParamOut))
       $ zip (typeFlowMode <$> typModes) (sel1 <$> modes)
 
 
 overloadErr :: StmtTypings -> TypeError
-overloadErr (StmtTypings call candidates) =
+overloadErr StmtTypings{typingStmt=call,typingArgsTypes=candidates} =
     -- XXX Need to give list of matching procs
-    ReasonOverload [] $ place call
+    ReasonOverload (procInfoProc <$> candidates) $ place call
 
 
 -- |Given type assignments to variables, resolve modes in a proc body,
@@ -949,23 +1001,27 @@ overloadErr (StmtTypings call candidates) =
 --  the set of in parameter names.  It also threads through a list of
 --  statements postponed because an unknown flow variable is not assigned yet.
 modecheckStmts :: ModSpec -> ProcName -> OptPos -> Typing
-                 -> [(Set VarName,Placed Stmt)] -> Set VarName -> [Placed Stmt]
+                 -> [(Set VarName,Placed Stmt)] -> Set VarName -> Determinism
+                 -> [Placed Stmt]
                  -> Compiler ([Placed Stmt], Set VarName,[TypeError])
-modecheckStmts _ _ _ _ delayed assigned []
+modecheckStmts _ _ _ _ delayed assigned _ []
     | List.null delayed = return ([],assigned,[])
     | otherwise =
         shouldnt $ "modecheckStmts reached end of body with delayed stmts"
                    ++ show delayed
-modecheckStmts m name pos typing delayed assigned (pstmt:pstmts) = do
+modecheckStmts m name pos typing delayed assigned detism (pstmt:pstmts) = do
     (pstmt',delayed',assigned',errs') <-
-      placedApply (modecheckStmt m name pos typing delayed assigned) pstmt
+      placedApply (modecheckStmt m name pos typing delayed assigned detism)
+        pstmt
     let assigned'' = assigned `Set.union` assigned'
     logTypes $ "New errors   = " ++ show errs'
     logTypes $ "Now assigned = " ++ show assigned''
     let (doNow,delayed'')
-            = List.partition (flip Set.isSubsetOf assigned' . fst) delayed'
+            = List.partition
+            (not . Set.null . flip Set.intersection assigned' . fst)
+            delayed'
     (pstmts',assigned''',errs) <-
-      modecheckStmts m name pos typing delayed'' assigned''
+      modecheckStmts m name pos typing delayed'' assigned'' detism
         ((snd <$> doNow) ++ pstmts)
     return (pstmt'++pstmts',assigned''',errs'++errs)
 
@@ -994,11 +1050,12 @@ modecheckStmts m name pos typing delayed assigned (pstmt:pstmts) = do
 --    In case there are multiple modes that match one of those criteria,
 --    select the first that matches.
 modecheckStmt :: ModSpec -> ProcName -> OptPos -> Typing
-                 -> [(Set VarName,Placed Stmt)] -> Set VarName -> Stmt -> OptPos
+                 -> [(Set VarName,Placed Stmt)] -> Set VarName -> Determinism
+                 -> Stmt -> OptPos
                  -> Compiler ([Placed Stmt], [(Set VarName,Placed Stmt)],
                               Set VarName,[TypeError])
-modecheckStmt m name defPos typing delayed assigned
-    stmt@(ProcCall cmod cname _ args) pos = do
+modecheckStmt m name defPos typing delayed assigned detism
+    stmt@(ProcCall cmod cname _ _ args) pos = do
     logTypes $ "Mode checking call   : " ++ show stmt
     logTypes $ "    with assigned    : " ++ show assigned
     callInfos <- callProcInfos $ maybePlace stmt pos
@@ -1014,8 +1071,9 @@ modecheckStmt m name defPos typing delayed assigned
         else do
             let typeMatches
                     = catOKs
-                      $ List.map (matchTypeList name cname pos actualTypes)
-                      callInfos
+                      $ List.map
+                        (matchTypeList name cname pos actualTypes detism)
+                        callInfos
             -- All the possibly matching modes
             let modeMatches
                     = List.filter (matchModeList actualModes) typeMatches
@@ -1026,35 +1084,39 @@ modecheckStmt m name defPos typing delayed assigned
             let exactMatches
                     = List.filter (exactModeMatch actualModes) modeMatches
             logTypes $ "Exact mode matches: " ++ show exactMatches
-            -- XXX Must handle test context
             let delayMatches
-                    = List.filter (delayModeMatch actualModes) modeMatches
+                    = List.any (delayModeMatch actualModes) modeMatches
             logTypes $ "Delay mode matches: " ++ show delayMatches
             case exactMatches of
                 (match:_) -> do
+                  -- XXX If it's semidet, we need to convert to Det by adding
+                  -- a Boolean output parameter and a TestBool instruction
                   let matchProc = procInfoProc match
                   let args' = List.zipWith setPExpTypeFlow
                               (procInfoArgs match) args
                   let stmt' = ProcCall (procSpecMod matchProc)
                               (procSpecName matchProc)
                               (Just $ procSpecID matchProc)
+                              (procInfoDetism match)
                               args'
                   let assigned' = Set.fromList
                                   $ List.map (expVar . content)
                                   $ List.filter
                                   ((==ParamOut) . expFlow . content) args'
                   return ([maybePlace stmt' pos],delayed,assigned',[])
-                [] -> case delayMatches of
-                    (match:_) -> do
-                      logTypes $ "delaying call: "
-                                 ++ ": " ++ show stmt
-                      return ([],(Set.empty,maybePlace stmt pos):delayed,
-                              assigned,[])
-                    [] -> do
-                      logTypes $ "Mode errors in call:  " ++ show flowErrs
-                      return ([],delayed,assigned,
-                              [ReasonUndefinedFlow cname pos])
-modecheckStmt m name defPos typing delayed assigned
+                [] -> if delayMatches
+                      then do
+                        logTypes $ "delaying call: " ++ ": " ++ show stmt
+                        let vars = Set.fromList $ catMaybes
+                                   $ sel3 <$> actualModes
+                        let delayed' = (vars,maybePlace stmt pos):delayed
+                        logTypes $ "delayed = " ++ show delayed'
+                        return ([],delayed',assigned,[])
+                      else do
+                        logTypes $ "Mode errors in call:  " ++ show flowErrs
+                        return ([],delayed,assigned,
+                                [ReasonUndefinedFlow cname pos])
+modecheckStmt m name defPos typing delayed assigned detism
     stmt@(ForeignCall lang cname flags args) pos = do
     logTypes $ "Mode checking foreign call " ++ show stmt
     logTypes $ "    with assigned " ++ show assigned
@@ -1075,36 +1137,36 @@ modecheckStmt m name defPos typing delayed assigned
                             $ List.filter ((==ParamOut) . expFlow . content)
                               args'
             return ([maybePlace stmt' pos],delayed,assigned',[])
-modecheckStmt m name defPos typing delayed assigned
-    stmt@(Test stmts expr) pos = do
-    logTypes $ "Mode checking test " ++ show stmt
-    (stmts', assigned',errs') <-
-      modecheckStmts m name defPos typing [] assigned stmts
-    let expr' = setPExpTypeFlow (TypeFlow boolType ParamIn) expr
-    return ([maybePlace (Test stmts' expr') pos], delayed, assigned',errs')
-modecheckStmt m name defPos typing delayed assigned
-    stmt@(Cond tstStmts expr thnStmts elsStmts) pos = do
+-- modecheckStmt m name defPos typing delayed assigned
+--     stmt@(Test stmts) pos = do
+--     logTypes $ "Mode checking test " ++ show stmt
+--     (stmts', assigned',errs') <-
+--       modecheckStmts m name defPos typing [] assigned stmts
+--     -- let expr' = setPExpTypeFlow (TypeFlow boolType ParamIn) expr
+--     return ([maybePlace (Test stmts') pos], delayed, assigned',errs')
+modecheckStmt m name defPos typing delayed assigned detism
+    stmt@(Cond tstStmts thnStmts elsStmts) pos = do
     logTypes $ "Mode checking conditional " ++ show stmt
     (tstStmts', assigned1,errs1) <-
-      modecheckStmts m name defPos typing [] assigned tstStmts
-    let expr' = setPExpTypeFlow (TypeFlow boolType ParamIn) expr
+      modecheckStmts m name defPos typing [] assigned SemiDet tstStmts
+    -- let expr' = setPExpTypeFlow (TypeFlow boolType ParamIn) expr
     (thnStmts', assigned2,errs2) <-
-      modecheckStmts m name defPos typing [] assigned1 thnStmts
+      modecheckStmts m name defPos typing [] assigned1 detism thnStmts
     (elsStmts', assigned3,errs3) <-
-      modecheckStmts m name defPos typing [] assigned2 elsStmts
-    return ([maybePlace (Cond tstStmts' expr' thnStmts' elsStmts') pos],
+      modecheckStmts m name defPos typing [] assigned2 detism elsStmts
+    return ([maybePlace (Cond tstStmts' thnStmts' elsStmts') pos],
             delayed, assigned1 `Set.union`
                      (assigned2 `Set.intersection` assigned3),
             errs1++errs2++errs3)
-modecheckStmt m name defPos typing delayed assigned
+modecheckStmt m name defPos typing delayed assigned detism
     stmt@(Loop stmts) pos = do
     logTypes $ "Mode checking loop " ++ show stmt
     (stmts', assigned',errs') <-
-      modecheckStmts m name defPos typing [] assigned stmts
+      modecheckStmts m name defPos typing [] assigned detism stmts
     -- XXX Can only assume vars assigned before first loop exit are
     --     actually assigned by loop
     return ([maybePlace (Loop stmts') pos], delayed, assigned',errs')
-modecheckStmt m _ _ _ delayed _ stmt pos =
+modecheckStmt m _ _ _ delayed _ _ stmt pos =
     return ([maybePlace stmt pos],delayed,Set.empty,[])
 
 
@@ -1355,7 +1417,6 @@ noteOutputCast _ typing = typing
 
 
 -- |Does this parameter correspond to a manifest argument?
--- XXX this needs to filter out the output introduced for a test proc, too.
 nonResourceParam :: Param -> Bool
 nonResourceParam (Param _ _ _ (Resource _)) = False
 nonResourceParam _ = True
@@ -1559,7 +1620,7 @@ checkParamTyped name pos (num,param) =
 
 
 checkStmtTyped :: ProcName -> OptPos -> Stmt -> OptPos -> Compiler ()
-checkStmtTyped name pos (ProcCall pmod pname pid args) ppos = do
+checkStmtTyped name pos (ProcCall pmod pname pid _ args) ppos = do
     when (isNothing pid || List.null pmod) $
          shouldnt $ "Call to " ++ pname ++ showMaybeSourcePos ppos ++
                   " left unresolved"
@@ -1568,13 +1629,15 @@ checkStmtTyped name pos (ProcCall pmod pname pid args) ppos = do
 checkStmtTyped name pos (ForeignCall _ pname _ args) ppos =
     mapM_ (checkArgTyped name pos pname ppos) $
           zip [1..] $ List.map content args
-checkStmtTyped name pos (Test stmts expr) ppos = do
+checkStmtTyped _ _ (TestBool _) _ = return ()
+checkStmtTyped name pos (And stmts) ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
-    checkExpTyped name pos ("test" ++ showMaybeSourcePos ppos) $ content expr
-checkStmtTyped name pos (Cond ifstmts cond thenstmts elsestmts) ppos = do
+checkStmtTyped name pos (Or stmts) ppos = do
+    mapM_ (placedApply (checkStmtTyped name pos)) stmts
+checkStmtTyped name pos (Not stmts) ppos = do
+    mapM_ (placedApply (checkStmtTyped name pos)) stmts
+checkStmtTyped name pos (Cond ifstmts thenstmts elsestmts) ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) ifstmts
-    checkExpTyped name pos ("condition" ++ showMaybeSourcePos ppos) $
-                  content cond
     mapM_ (placedApply (checkStmtTyped name pos)) thenstmts
     mapM_ (placedApply (checkStmtTyped name pos)) elsestmts
 checkStmtTyped name pos (Loop stmts) ppos =

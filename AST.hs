@@ -29,7 +29,7 @@ module AST (
   collectSubModules,
   enterModule, reenterModule, exitModule, finishModule,
   emptyInterface, emptyImplementation,
-  getParams, getProcDef, mkTempName, updateProcDef, updateProcDefM,
+  getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
@@ -54,9 +54,9 @@ module AST (
   getModuleSpec, getModuleParams, option, getSource, getDirectory,
   optionallyPutStr, message, (<!>), genProcName,
   addImport, doImport, addType, lookupType, publicType,
-  ResourceName(..), ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
+  ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource,
-  addProc, lookupProc, publicProc,
+  addProc, addProcDef, lookupProc, publicProc,
   refersTo, callTargets, logDump,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showMaybeSourcePos, showProcDefs,
@@ -116,7 +116,7 @@ data Visibility = Public | Private
                   deriving (Eq, Show, Generic)
 
 data Determinism = Det | SemiDet
-                  deriving (Eq, Show, Generic)
+                  deriving (Eq, Ord, Show, Generic)
 
 type TypeRepresentation = String
 
@@ -765,9 +765,18 @@ addImport modspec imports = do
 -- |Add the specified proc definition to the current module.
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis detism inline proto stmts pos) = do
-    let ProcProto name params resources = proto
-    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr
+    let name = procProtoName proto
+    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 
                   Map.empty vis detism inline $ initSuperprocSpec vis
+    addProcDef procDef
+addProc _ item =
+    shouldnt $ "addProc given non-Proc item " ++ show item
+
+
+addProcDef :: ProcDef -> Compiler ()
+addProcDef procDef = do
+    let name = procName procDef
+    let vis = procVis procDef
     currMod <- getModuleSpec
     procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
     let procs' = procs ++ [procDef]
@@ -782,14 +791,18 @@ addProc tmpCtr (ProcDecl vis detism inline proto stmts pos) = do
     logAST $ "Adding defnintion for " ++ show spec ++ ":" ++
       showProcDef 4 procDef
     return ()
-addProc _ item =
-    shouldnt $ "addProc given non-Proc item " ++ show item
 
 
 getParams :: ProcSpec -> Compiler [Param]
-getParams pspec = do
+getParams pspec =
     -- XXX shouldn't have to grovel in implementation to find prototype
     fmap (procProtoParams . procProto) $ getProcDef pspec
+
+
+getDetism :: ProcSpec -> Compiler Determinism
+getDetism pspec =
+    -- XXX shouldn't have to grovel in implementation to find prototype
+    fmap procDetism $ getProcDef pspec
 
 
 getProcDef :: ProcSpec -> Compiler ProcDef
@@ -1426,16 +1439,18 @@ defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 
 -- |Fold over a list of Placed Stmts applying the fn to each ProcCall, and
 -- applying comb, which must be associative, to combine results.
-foldProcCalls :: (ModSpec -> Ident -> (Maybe Int) -> [Placed Exp] -> a) ->
+foldProcCalls :: (ModSpec -> Ident -> (Maybe Int) -> Determinism
+                  -> [Placed Exp] -> a) ->
                  (a -> a -> a) -> a -> [Placed Stmt] -> a
 foldProcCalls fn comb val [] = val
 foldProcCalls fn comb val (s:ss) = foldProcCalls' fn comb val (content s) ss
 
-foldProcCalls' :: (ModSpec -> Ident -> (Maybe Int) -> [Placed Exp] -> a) ->
+foldProcCalls' :: (ModSpec -> Ident -> (Maybe Int) -> Determinism
+                   -> [Placed Exp] -> a) ->
                  (a -> a -> a) -> a -> Stmt -> [Placed Stmt] -> a
-foldProcCalls' fn comb val (ProcCall m name procID args) ss =
-    foldProcCalls fn comb (comb val $ fn m name procID args) ss
-foldProcCalls' fn comb val (Cond tst _ thn els) ss =
+foldProcCalls' fn comb val (ProcCall m name procID detism args) ss =
+    foldProcCalls fn comb (comb val $ fn m name procID detism args) ss
+foldProcCalls' fn comb val (Cond tst thn els) ss =
     foldProcCalls fn comb
     (foldProcCalls fn comb
      (foldProcCalls fn comb
@@ -1445,7 +1460,7 @@ foldProcCalls' fn comb val (Cond tst _ thn els) ss =
     ss
 foldProcCalls' fn comb val (Loop body) ss =
     foldProcCalls fn comb (foldProcCalls fn comb val body) ss
-foldProcCalls' fn comb val (_) ss =
+foldProcCalls' fn comb val _ ss =
     foldProcCalls fn comb val ss
 
 
@@ -1649,19 +1664,41 @@ flowsOut FlowUnknown = shouldnt "checking if unknown flow direction flows out"
 
 -- |Source program statements.  These will be normalised into Prims.
 data Stmt
-     = ProcCall ModSpec Ident (Maybe Int) [Placed Exp]
+     -- |A Wybe procedure call, with module, proc name, proc ID, determinism,
+    --   and args.  We assume every call is Det until type checking.
+     = ProcCall ModSpec Ident (Maybe Int) Determinism [Placed Exp]
+     -- |A foreign call, with language, tags, and args
      | ForeignCall Ident Ident [Ident] [Placed Exp]
-     | Test [Placed Stmt] (Placed Exp)
+     -- |Do nothing (and succeed)
      | Nop
+
+     -- After unbranching, this con only appear as the last Stmt in a body.
+
+     -- |A conditional; execute the first (SemiDet) Stmts; if they succeed
+     --  execute the second Stmts, else execute the third.
+     -- XXX try to make the first argument a single placed statement
+     | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt]
+
      -- All the following are eliminated during unbranching.
-     -- The first stmt list is empty and the Exp is anything until
-     -- flattening.  After that, the stmt list contains the body of
-     -- the test, and the Exp is primitive.
-     | Cond [Placed Stmt] (Placed Exp) [Placed Stmt] [Placed Stmt]
+
+     -- |A test that succeeds iff the expression is true
+     | TestBool Exp
+     -- |A test that succeeds iff all the enclosed tests succeed; enclosed
+     -- statements that aren't tests are honorary successes.
+     | And [Placed Stmt]
+     -- |A test that fails iff all the enclosed tests fail; enclosed
+     -- statements that aren't tests are honorary failures.
+     | Or [Placed Stmt]
+     -- |A test that fails iff the enclosed test succeeds
+     | Not [Placed Stmt]
+
+     -- |A loop body; the loop is controlled by Breaks and Nexts
      | Loop [Placed Stmt]
-     -- These are only valid in a loop
+     -- |An enumerator; only valid in a loop
      | For (Placed Exp) (Placed Exp)
+     -- |Immediately exit the enclosing loop; only valid in a loop
      | Break  -- holds the variable versions before the break
+     -- |Immediately jump to the top of the enclosing loop; only valid in a loop
      | Next  -- holds the variable versions before the next
      deriving (Eq,Ord,Generic)
 
@@ -1679,7 +1716,7 @@ data Exp
                                       -- and whether type is a cast
       -- The following are eliminated during flattening
       | Where [Placed Stmt] (Placed Exp)
-      | CondExp (Placed Exp) (Placed Exp) (Placed Exp)
+      | CondExp [Placed Stmt] (Placed Exp) (Placed Exp)
       | Fncall ModSpec Ident [Placed Exp]
       | ForeignFn Ident Ident [Ident] [Placed Exp]
      deriving (Eq,Ord,Generic)
@@ -1722,18 +1759,23 @@ data PrimVarName =
 data Prim
      = PrimCall ProcSpec [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
-     | PrimNop
+     | PrimTest PrimArg
      deriving (Eq,Ord,Generic)
 
 instance Show Prim where
-    show prim = showPrim 0 prim
+    show = showPrim 0
 
 -- |The allowed arguments in primitive proc or foreign proc calls,
 --  just variables and constants.
-data PrimArg
-     = ArgVar PrimVarName TypeSpec PrimFlow ArgFlowType Bool
-       -- ^Bool indicates definite last use (one use in the last
-       --  statement to use the variable)
+data PrimArg 
+     = ArgVar {argVarName     :: PrimVarName, -- ^Name of output variable
+               argVarType     :: TypeSpec,    -- ^Its type
+               argVarFlow     :: PrimFlow,    -- ^Its flow direction
+               argVarFlowType :: ArgFlowType, -- ^Its flow type
+               argVarFinal    :: Bool         -- ^Is this a definite last use
+                                              -- (one use in the last statement
+                                              -- to use the variable) 
+              }
      | ArgInt Integer TypeSpec
      | ArgFloat Double TypeSpec
      | ArgString String TypeSpec
@@ -1752,7 +1794,7 @@ instance Show ArgFlowType where
     show Ordinary = ""
     show HalfUpdate = "%"
     show (Implicit _) = ""
-    show (Resource res) = "#"
+    show (Resource _) = "#"
 
 
 -- |The dataflow direction of an actual argument.
@@ -1796,15 +1838,18 @@ argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
-expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name Nothing args
-expToStmt (ForeignFn lang name flags args) =
-  ForeignCall lang name flags args
-expToStmt (Var name ParamIn _) = ProcCall [] name Nothing []
-expToStmt exp = shouldnt $ "non-Fncall expr " ++ show exp
+expToStmt (Fncall [] "and" args) = And $ List.map (fmap expToStmt) args
+expToStmt (Fncall [] "or"  args) = Or  $ List.map (fmap expToStmt) args
+expToStmt (Fncall [] "not" args) = Not $ List.map (fmap expToStmt) args
+expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name Nothing Det args
+expToStmt (ForeignFn lang name flags args) = 
+    ForeignCall lang name flags args
+expToStmt (Var name ParamIn _) = ProcCall [] name Nothing Det []
+expToStmt expr = shouldnt $ "non-Fncall expr " ++ show expr
 
 
 procCallToExp :: Stmt -> Exp
-procCallToExp (ProcCall maybeMod name Nothing args) =
+procCallToExp (ProcCall maybeMod name Nothing _ args) =
     Fncall maybeMod name args
 procCallToExp stmt =
     shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
@@ -1852,7 +1897,7 @@ varsInPrims dir prims =
 varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
 varsInPrim dir (PrimCall _ args)      = varsInPrimArgs dir args
 varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
-varsInPrim dir (PrimNop)                = Set.empty
+varsInPrim dir (PrimTest arg)         = varsInPrimArgs dir [arg]
 
 varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
 varsInPrimArgs dir args =
@@ -1936,20 +1981,17 @@ instance Show Item where
   show (FuncDecl vis detism inline proto typ exp pos) =
     visibilityPrefix vis
     ++ determinismPrefix detism
-    ++ if inline then "inline " else ""
+    ++ (if inline then "inline " else "")
     ++ "func " ++ show proto ++ ":" ++ show typ
     ++ showMaybeSourcePos pos
     ++ " = " ++ show exp
   show (ProcDecl vis detism inline proto stmts pos) =
     visibilityPrefix vis
     ++ determinismPrefix detism
-    ++ if inline then "inline " else ""
+    ++ (if inline then "inline " else "")
     ++ "proc " ++ show proto
     ++ showMaybeSourcePos pos
     ++ showBody 4 stmts
-  -- show (CtorDecl vis proto pos) =
-  --   visibilityPrefix vis ++ "ctor " ++ show proto
-  --   ++ showMaybeSourcePos pos
   show (StmtDecl stmt pos) =
     showStmt 4 stmt ++ showMaybeSourcePos pos
 
@@ -2014,8 +2056,9 @@ instance Show t => Show (Placed t) where
 
 -- |How to show an optional source position
 showMaybeSourcePos :: OptPos -> String
--- turn off annoying source positions
+-- uncomment turn off annoying source positions
 -- showMaybeSourcePos _ = ""
+-- comment to turn off annoying source positions
 showMaybeSourcePos (Just pos) =
   " @" ++ takeBaseName (sourceName pos) ++ ":"
   ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos)
@@ -2170,7 +2213,7 @@ showTypeSuffix typ = ":" ++ show typ
 
 -- |How to show a dataflow direction.
 flowPrefix :: FlowDirection -> String
-flowPrefix NoFlow     = ""
+flowPrefix NoFlow     = "|=|"
 flowPrefix ParamIn    = ""
 flowPrefix ParamOut   = "?"
 flowPrefix ParamInOut = "!"
@@ -2224,8 +2267,8 @@ showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++
         name ++ (if List.null flags then "" else " " ++ unwords flags) ++
         "(" ++ intercalate ", " (List.map show args) ++ ")"
-showPrim _ (PrimNop) =
-        "NOP"
+showPrim _ (PrimTest arg) =
+        "test " ++ show arg
 
 -- |Show a variable, with its suffix
 instance Show PrimVarName where
@@ -2233,21 +2276,37 @@ instance Show PrimVarName where
 
 
 showStmt :: Int -> Stmt -> String
-showStmt _ (ProcCall maybeMod name procID args) =
-    maybeModPrefix maybeMod ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
+showStmt _ (ProcCall maybeMod name procID detism args) =
+    determinismPrefix detism
+    ++ maybeModPrefix maybeMod
+    ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
 showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ name ++
     (if List.null flags then "" else " " ++ unwords flags) ++
     "(" ++ intercalate ", " (List.map show args) ++ ")"
-showStmt indent (Test stmts exp) =
-    "test {" ++ showBody (indent+6) stmts ++ "}\n"
-    ++ List.replicate (indent+5) ' '
-    ++ "} " ++ show exp
-showStmt indent (Cond condstmts cond thn els) =
+showStmt _ (TestBool test) =
+    "testbool " ++ show test
+showStmt indent (And stmts) =
+    "(    " ++
+    intercalate (" and\n" ++ replicate indent' ' ')
+        (List.map (showStmt indent' . content) stmts) ++
+    ")"
+    where indent' = indent + 4
+showStmt indent (Or stmts) =
+    "(   " ++
+    intercalate (" or\n" ++ replicate indent' ' ')
+        (List.map (showStmt indent' . content) stmts) ++
+    ")"
+    where indent' = indent + 4
+showStmt indent (Not stmts) =
+    "not(" ++
+    intercalate ("\n" ++ replicate indent' ' ')
+    (List.map (showStmt indent' . content) stmts) ++ ")"
+    where indent' = indent + 4
+showStmt indent (Cond condstmts thn els) =
     let leadIn = List.replicate indent ' '
-    in "if {" ++ showBody (indent+4) condstmts ++ "}\n"
-       ++ leadIn ++ show cond ++ "::\n"
+    in "if {" ++ showBody (indent+4) condstmts ++ "}::\n"
        ++ showBody (indent+4) thn ++ "\n"
        ++ leadIn ++ "else::"
        ++ showBody (indent+4) els ++ "\n"
@@ -2428,3 +2487,4 @@ makeEncodedLPVM ms =
     let makeIndex m = (modSpec m, modSourceFile m)
         index = List.map makeIndex ms
     in  EncodedLPVM index ms
+

@@ -26,9 +26,9 @@ import Control.Monad.Trans.State
 
 
 -- | Expand the supplied ProcDef, inlining as desired.
-procExpansion :: ProcDef -> Compiler ProcDef
-procExpansion def = do
-    logMsg Expansion $ "\nTry to expand proc " ++ show (procName def)
+procExpansion :: ProcSpec -> ProcDef -> Compiler ProcDef
+procExpansion pspec def = do
+    logMsg Expansion $ "*** Try to expand proc " ++ show pspec
     let ProcDefPrim proto body = procImpln def
     let tmp = procTmpCount def
     let outs = outputParams proto
@@ -37,10 +37,13 @@ procExpansion def = do
                           initExpanderState tmp
     let def' = def { procImpln = ProcDefPrim proto body',
                      procTmpCount = tmpCount expander }
-    when (def /= def') $
-      logMsg Expansion $
-        "Expanded:" ++ showProcDef 4 def ++
-        "\nTo:" ++ showProcDef 4 def'
+    if def /= def'
+        then
+        logMsg Expansion $
+        "*** Expanded:" ++ showProcDef 4 def ++ "*** To:" ++ showProcDef 4 def'
+        else
+        logMsg Expansion $
+        "*** Expansion did not change proc " ++ show (procName def)
     return def'
 
 
@@ -122,22 +125,40 @@ expandBody (ProcBody prims fork) = do
     modify (\s -> s { noFork = fork == NoFork })
     expandPrims prims
     logExpansion $ "Finished expanding unforked part of body"
-    st <- get
     case fork of
       NoFork -> return ()
       PrimFork var ty final bodies -> do
+        st <- get
         logExpansion $ "Now expanding fork (" ++ 
           (if inlining st then "without" else "WITH") ++ " inlining)"
         logExpansion $ "  with renaming = " ++ show (renaming st)
         let var' = case Map.lookup var $ renaming st of
               Nothing -> var
               Just (ArgVar v _ _ _ _) -> v 
-              -- XXX should handle case of switch on int constant
               Just _ -> shouldnt "expansion led to non-var conditional"
         logExpansion $ "  fork on " ++ show var' ++ ":" ++ show ty
-        lift $ buildFork var' ty final 
-          $ List.map (\b -> evalStateT (expandBody b) st) bodies
+        expandFork var ty bodies
         logExpansion $ "Finished expanding fork"
+
+
+expandFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Expander ()
+expandFork var ty bodies = do
+    lift $ buildFork var ty
+    mapM_ (\b -> lift beginBranch >> expandBody b >> lift endBranch) bodies
+    lift $ completeFork
+          
+
+-- expandFork' :: [ProcBody] -> Expander [BodyState]
+-- expandFork' [] = return []
+-- expandFork' (body:bodies) = do
+--     st <- get
+--     builderSt <- lift get
+--     (expander,body') <- lift $ lift
+--                         $ buildPrims builderSt {currBuild=[]} $
+--                           execStateT (expandBody body) st
+--     -- put back initial expander state, except for temp counter
+--     put $ st {tmpCount = tmpCount expander}
+--     (body':) <$> expandFork' bodies
 
 
 expandPrims :: [Placed Prim] -> Expander ()

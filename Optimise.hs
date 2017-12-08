@@ -104,10 +104,10 @@ optimiseProcBottomUp pspec = do
 
 optimiseProcDefBU :: ProcSpec -> ProcDef -> Compiler ProcDef
 optimiseProcDefBU pspec def = do
-    logOptimise $ "Definition of " ++ show pspec ++
+    logOptimise $ "*** " ++ show pspec ++
       " before optimisation:" ++ showProcDef 4 def
-    def' <- procExpansion def >>= markLastUse pspec >>= decideInlining
-    logOptimise $ "Definition of " ++ show pspec ++
+    def' <- procExpansion pspec def >>= markLastUse pspec >>= decideInlining
+    logOptimise $ "*** " ++ show pspec ++
       " after optimisation:" ++ showProcDef 4 def'
     return def'
 
@@ -146,7 +146,7 @@ primCost (PrimCall _ args) = 1 + (sum $ List.map argCost args)
 primCost (PrimForeign "llvm" _ _ _) = 1 -- single instuction, so cost = 1
 primCost (PrimForeign "$" _ _ _) = 1    -- single instuction, so cost = 1
 primCost (PrimForeign _ _ _ args) = 1 + (sum $ List.map argCost args)
-primCost (PrimNop) = 0
+primCost (PrimTest _) = 0
 
 argCost :: PrimArg -> Int
 argCost arg = if phantomArg arg then 0 else 1

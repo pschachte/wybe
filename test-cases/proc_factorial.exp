@@ -23,30 +23,30 @@ factorial > public inline (1 calls)
 
 gen$1 > (2 calls)
 0: gen$1(n#0:wybe.int, result#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign llvm icmp sgt(n#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.bool) @wybe:26:39
-    case ~tmp$5#0:wybe.bool of
+    foreign llvm icmp sgt(n#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.bool) @wybe:26:39
+    case ~tmp$2#0:wybe.bool of
     0:
-        foreign c print_int(~result#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @wybe:76:38
-        foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @wybe:74:28
+        foreign c print_int(~result#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @wybe:76:38
+        foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @wybe:74:28
 
     1:
-        foreign llvm mul(~result#0:wybe.int, n#0:wybe.int, ?tmp$10#0:wybe.int) @wybe:21:38
+        foreign llvm mul(n#0:wybe.int, ~result#0:wybe.int, ?tmp$10#0:wybe.int) @wybe:21:38
         foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$11#0:wybe.int) @wybe:16:38
         proc_factorial.gen$1<0>(~tmp$11#0:wybe.int, ~tmp$10#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_factorial:3:5
 
 
 
+gen$2 > inline (1 calls)
+0: gen$2([n#0:wybe.int], result#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+    foreign c print_int(~result#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:76:38
+    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+
+
 gen$3 > inline (1 calls)
-0: gen$3([n#0:wybe.int], result#0:wybe.int, [tmp$0#0:wybe.bool], wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_int(~result#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$5#0:wybe.phantom) @wybe:76:38
-    foreign c putchar('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
-
-
-gen$4 > inline (1 calls)
-0: gen$4(n#0:wybe.int, result#0:wybe.int, [tmp$0#0:wybe.bool], wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign llvm mul(~result#0:wybe.int, n#0:wybe.int, ?tmp$5#0:wybe.int) @wybe:21:38
-    foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$9#0:wybe.int) @wybe:16:38
-    proc_factorial.gen$1<0>(~tmp$9#0:wybe.int, ~tmp$5#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_factorial:3:5
+0: gen$3(n#0:wybe.int, result#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+    foreign llvm mul(n#0:wybe.int, ~result#0:wybe.int, ?tmp$2#0:wybe.int) @wybe:21:38
+    foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$6#0:wybe.int) @wybe:16:38
+    proc_factorial.gen$1<0>(~tmp$6#0:wybe.int, ~tmp$2#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_factorial:3:5
 proc_factorial
 ======================================================================
 AFTER LLVM IR:
@@ -72,8 +72,8 @@ entry:
 
 define void @"proc_factorial.gen$1<0>"(i64 %"n#0", i64 %"result#0") {
 entry:
-  %"tmp$5#01" = icmp sgt i64 %"n#0", 1
-  br i1 %"tmp$5#01", label %if.then.preheader, label %if.else
+  %"tmp$2#01" = icmp sgt i64 %"n#0", 1
+  br i1 %"tmp$2#01", label %if.then.preheader, label %if.else
 
 if.then.preheader:                                ; preds = %entry
   br label %if.then
@@ -83,8 +83,8 @@ if.then:                                          ; preds = %if.then.preheader, 
   %"n#0.tr2" = phi i64 [ %"tmp$11#0", %if.then ], [ %"n#0", %if.then.preheader ]
   %"tmp$10#0" = mul i64 %"result#0.tr3", %"n#0.tr2"
   %"tmp$11#0" = add i64 %"n#0.tr2", -1
-  %"tmp$5#0" = icmp sgt i64 %"tmp$11#0", 1
-  br i1 %"tmp$5#0", label %if.then, label %if.else.loopexit
+  %"tmp$2#0" = icmp sgt i64 %"tmp$11#0", 1
+  br i1 %"tmp$2#0", label %if.then, label %if.else.loopexit
 
 if.else.loopexit:                                 ; preds = %if.then
   %"tmp$10#0.lcssa" = phi i64 [ %"tmp$10#0", %if.then ]
@@ -97,18 +97,18 @@ if.else:                                          ; preds = %if.else.loopexit, %
   ret void
 }
 
-define void @"proc_factorial.gen$3<0>"(i64 %"result#0") {
+define void @"proc_factorial.gen$2<0>"(i64 %"result#0") {
 entry:
   tail call void @print_int(i64 %"result#0")
   tail call void @putchar(i8 10)
   ret void
 }
 
-define void @"proc_factorial.gen$4<0>"(i64 %"n#0", i64 %"result#0") {
+define void @"proc_factorial.gen$3<0>"(i64 %"n#0", i64 %"result#0") {
 entry:
-  %"tmp$5#0" = mul i64 %"result#0", %"n#0"
-  %"tmp$9#0" = add i64 %"n#0", -1
-  tail call void @"proc_factorial.gen$1<0>"(i64 %"tmp$9#0", i64 %"tmp$5#0")
+  %"tmp$2#0" = mul i64 %"result#0", %"n#0"
+  %"tmp$6#0" = add i64 %"n#0", -1
+  tail call void @"proc_factorial.gen$1<0>"(i64 %"tmp$6#0", i64 %"tmp$2#0")
   ret void
 }
 

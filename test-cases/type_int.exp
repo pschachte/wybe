@@ -79,7 +79,7 @@ AFTER EVERYTHING:
     foreign llvm move(~tmp$0#0:type_int.myint, ?$#0:type_int.myint) @type_int:5:12
 - > public inline (0 calls)
 1: -(?x#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint):
-    foreign llvm add(~z#0:type_int.myint, ~y#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:6:50
+    foreign llvm add(~y#0:type_int.myint, ~z#0:type_int.myint, ?tmp$0#0:type_int.myint) @type_int:6:50
     foreign llvm move(~tmp$0#0:type_int.myint, ?x#0:type_int.myint)
 - > public inline (0 calls)
 2: -(x#0:type_int.myint, ?y#0:type_int.myint, z#0:type_int.myint):

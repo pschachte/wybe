@@ -55,8 +55,8 @@ defaultOptions    = Options
 -- |All compiler features we may want to log
 data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
-  | Flatten | LastUse | Optimise | Resources | Types | Unbranch | Blocks
-  | Emit
+  | Flatten | LastUse | Normalise | Optimise | Resources | Types
+  | Unbranch | Blocks | Emit
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
 
@@ -81,6 +81,8 @@ logSelectionDescription LastUse
     = "Log determination of last variable uses"
 logSelectionDescription Optimise
     = "Log optimisation"
+logSelectionDescription Normalise
+    = "Log normalised items"
 logSelectionDescription Resources
     = "Log handling of resources"
 logSelectionDescription Types

@@ -37,6 +37,8 @@ import AST
       '/='            { TokSymbol "/=" _ }
       '|'             { TokSymbol "|" _ }
       '..'            { TokSymbol ".." _ }
+      '&&'            { TokSymbol "&&" _ }
+      '||'            { TokSymbol "||" _ }
 -- If any other symbol tokens that can be used as funcs or procs are
 -- defined here, they need to be added to the defintion of Symbol below
       ','             { TokComma _ }
@@ -192,8 +194,6 @@ Symbol :: { Placed String }
     | '/='                      { Placed (symbolName $1) (tokenPosition $1) }
     | '|'                       { Placed (symbolName $1) (tokenPosition $1) }
     | '..'                      { Placed (symbolName $1) (tokenPosition $1) }
-    | 'and'                     { Placed (identName $1) (tokenPosition $1) }
-    | 'or'                      { Placed (identName $1) (tokenPosition $1) }
     | 'not'                     { Placed (identName $1) (tokenPosition $1) }
     | '[' ']'                   { Placed "[]" (tokenPosition $1) }
     | '[' '|' ']'               { Placed "[|]" (tokenPosition $1) }
@@ -321,56 +321,83 @@ RevStmts :: { [Placed Stmt] }
     : Stmt                      { [$1] }
     | RevStmts Stmt             { $2:$1 }
 
-Stmt :: { Placed Stmt }
+-- XXX Need to handle disjunction and negation, too
+TestStmts :: { [Placed Stmt] }
+    : SimpleStmt                 { [$1] }
+    | TestStmts 'and' SimpleStmt  { [Placed (And ($1 ++ [$3]))
+                                    (tokenPosition $2)] }
+    | TestStmts 'or' SimpleStmt  { [Placed (Or ($1 ++ [$3]))
+                                    (tokenPosition $2)] }
+    | 'not' TestStmts            { [Placed (Not $2) (tokenPosition $1)] }
+
+
+SimpleStmt :: { Placed Stmt }
     : ident                     { Placed (ProcCall [] (identName $1)
-					  Nothing [])
+					  Nothing Det []) 
                                          (tokenPosition $1)}
-    | SimpleExp '=' Exp               { maybePlace (ProcCall [] (symbolName $2)
-                                              Nothing [$1, $3])
+    | SimpleExp '=' Exp         { maybePlace (ProcCall [] (symbolName $2)
+                                              Nothing Det [$1, $3])
+                                             (place $1) }
+    | Exp '<' Exp               { maybePlace (ProcCall [] (symbolName $2)
+                                              Nothing SemiDet [$1, $3])
+                                             (place $1) }
+    | Exp '<=' Exp              { maybePlace (ProcCall [] (symbolName $2)
+                                              Nothing SemiDet [$1, $3])
+                                             (place $1) }
+    | Exp '>' Exp               { maybePlace (ProcCall [] (symbolName $2)
+                                              Nothing SemiDet [$1, $3])
+                                             (place $1) }
+    | Exp '>=' Exp              { maybePlace (ProcCall [] (symbolName $2)
+                                              Nothing SemiDet [$1, $3])
+                                             (place $1) }
+    | Exp '/=' Exp              { maybePlace (ProcCall [] (symbolName $2)
+                                              Nothing SemiDet [$1, $3])
                                              (place $1) }
     | ident ArgList             { Placed (ProcCall [] (identName $1)
-					  Nothing $2)
+					  Nothing Det $2)
 	                                 (tokenPosition $1) }
     | SimpleExp '.' ident ArgList     { maybePlace (ProcCall [] (identName $3)
-					      Nothing ($1:$4))
+					      Nothing Det ($1:$4))
 	                                     (place $1) }
     | SimpleExp '.' ident             { maybePlace (ProcCall [] (identName $3)
-					      Nothing [$1])
+					      Nothing Det [$1])
 	                                     (place $1) }
 --    | symbol ArgList            { Placed (Fncall [] (symbolName $1) $2)
 --	                                 (tokenPosition $1) }
-    | 'foreign' ident FuncProcName flags ArgList
+    | 'foreign' ident ident flags ArgList
                                 { Placed (ForeignCall (identName $2)
-					  $3 $4 $5)
+					  (identName $3) $4 $5)
                                          (tokenPosition $1) }
+
+
+Stmt :: { Placed Stmt }
+    : SimpleStmt                 { $1 }
     -- | 'if' Exp 'then' Stmts Condelse
     --                             { Placed (Cond [] $2 $4 $5)
     --                              (tokenPosition $1) }
     | 'if' IfCases              { Placed $2 (tokenPosition $1) }
-    | 'test' Stmt               {Placed
-                                 (Test [] (fmap procCallToExp $2))
-                                 (tokenPosition $1)}
-    | 'test' RelExp             {Placed (Test [] $2) (tokenPosition $1)}
+    -- | 'test' Stmt               {Placed (Test [$2]) (tokenPosition $1)}
+    -- | 'test' RelExp             {Placed (Test [] $2) (tokenPosition $1)}
     | 'do' Stmts 'end'          { Placed (Loop $2)
                                   (tokenPosition $1) }
     | 'for' Exp 'in' Exp        { Placed (For $2 $4)
                                   (tokenPosition $1) }
-    | 'until' Exp               { Placed (Cond [] $2 [Unplaced $ Break]
+    | 'until' TestStmts         { Placed (Cond $2 [Unplaced $ Break]
                                                      [Unplaced $ Nop])
                                   (tokenPosition $1) }
-    | 'while' Exp               { Placed (Cond [] $2 [Unplaced $ Nop]
+    | 'while' TestStmts         { Placed (Cond $2 [Unplaced $ Nop]
                                                      [Unplaced $ Break])
                                   (tokenPosition $1) }
-    | 'unless' Exp              { Placed (Cond [] $2 [Unplaced $ Nop]
+    | 'unless' TestStmts        { Placed (Cond $2 [Unplaced $ Nop]
                                                      [Unplaced $ Next])
                                          (tokenPosition $1) }
-    | 'when' Exp                { Placed (Cond [] $2 [Unplaced $ Next]
+    | 'when' TestStmts          { Placed (Cond $2 [Unplaced $ Next]
 					             [Unplaced $ Nop])
                                          (tokenPosition $1) }
 
 IfCases :: { Stmt }
-    : Exp '::' Stmts '|' IfCases { Cond [] $1 $3 [Unplaced $5] }
-    | Exp '::' Stmts 'end'      { Cond [] $1 $3 [] }
+    : TestStmts '::' Stmts '|' IfCases { Cond $1 $3 [Unplaced $5] }
+    | TestStmts '::' Stmts 'end'       { Cond $1 $3 [] }
 
 
 -- Condelse :: { [Placed Stmt] }
@@ -384,26 +411,8 @@ OptInit :: { Maybe (Placed Exp) }
 
 
 
-RelExp :: { Placed Exp }
-    : Exp '<' Exp               { maybePlace (Fncall [] (symbolName $2)
-                                              [$1, $3])
-                                             (place $1) }
-    | Exp '<=' Exp              { maybePlace (Fncall [] (symbolName $2)
-                                              [$1, $3])
-                                             (place $1) }
-    | Exp '>' Exp               { maybePlace (Fncall [] (symbolName $2)
-                                              [$1, $3])
-                                             (place $1) }
-    | Exp '>=' Exp              { maybePlace (Fncall [] (symbolName $2)
-                                              [$1, $3])
-                                             (place $1) }
-    | Exp '/=' Exp              { maybePlace (Fncall [] (symbolName $2)
-                                              [$1, $3])
-                                             (place $1) }
-
 SimpleExp :: { Placed Exp }
-    : RelExp                    { $1 }
-    | Exp '+' Exp               { maybePlace (Fncall [] (symbolName $2)
+    : Exp '+' Exp               { maybePlace (Fncall [] (symbolName $2)
                                               [$1, $3])
 	                                     (place $1) }
     | Exp '-' Exp               { maybePlace (Fncall [] (symbolName $2)
@@ -429,12 +438,6 @@ SimpleExp :: { Placed Exp }
     --                                          (place $1) }
    | 'not' Exp                 { Placed (Fncall [] (identName $1) [$2])
 	                                 (tokenPosition $1) }
-   | Exp 'and' Exp             { maybePlace (Fncall [] (identName $2)
-                                             [$1, $3])
-	                                     (place $1) }
-   | Exp 'or' Exp              { maybePlace (Fncall [] (identName $2)
-                                             [$1, $3])
-                                            (place $1) }
    | Exp '..' Exp              { maybePlace (Fncall [] (symbolName $2) 
 					      [$1, $3, Unplaced $ IntValue 1])
                                             (place $1) }
@@ -484,7 +487,7 @@ SimpleExp :: { Placed Exp }
                                          (tokenPosition $1) }
 
 Exp :: { Placed Exp }
-    : 'if' Exp 'then' Exp 'else' Exp
+    : 'if' TestStmts 'then' Exp 'else' Exp
                                 { Placed (CondExp $2 $4 $6)
         			         (tokenPosition $1) }
     | 'let' Stmts 'in' Exp      { Placed (Where $2 $4) (tokenPosition $1) }

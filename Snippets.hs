@@ -4,9 +4,10 @@
 --  Purpose  : Convenience functions for generation of Wybe AST
 --  Copyright: 2016 Peter Schachte.  All rights reserved.
 
-module Snippets (intType, intCast, boolType, boolCast, varSet, varGet, castTo,
+module Snippets (intType, intCast, boolType, boolCast, varSet, varGet,
+                 boolVarSet, boolVarGet, intVarSet, intVarGet, castTo,
                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
-                comparison, comparisonExp) where
+                comparison, succeedTest, failTest, succeedIfSemiDet) where
 
 import AST
 
@@ -34,6 +35,22 @@ varSet name = Var name ParamOut Ordinary
 varGet :: Ident -> Exp
 varGet name = Var name ParamIn Ordinary
 
+-- |A Boolean typed output variable reference (lvalue)
+boolVarSet :: Ident -> Exp
+boolVarSet name = Typed (varSet name) boolType False
+
+-- |A Boolean typed input variable reference (rvalue)
+boolVarGet :: Ident -> Exp
+boolVarGet name = Typed (varGet name) boolType False
+
+-- |An integer type output variable reference (lvalue)
+intVarSet :: Ident -> Exp
+intVarSet name = Typed (varSet name) intType False
+
+-- |An integer type input variable reference (rvalue)
+intVarGet :: Ident -> Exp
+intVarGet name = Typed (varGet name) intType False
+
 -- |An expression to cast a value to the specified type
 castTo :: Exp -> TypeSpec -> Exp
 castTo exp typ = Typed exp typ True
@@ -44,7 +61,7 @@ lpvmCast from to totype =
     Unplaced $ ForeignCall "lpvm" "cast" []
     [Unplaced from, Unplaced $ Typed (varSet to) totype True]
 
--- |An unplaced statement to cast a value into fresh variable
+-- |An expr to cast a value
 lpvmCastExp :: Exp -> TypeSpec -> Exp
 lpvmCastExp from totype =
     Typed (ForeignFn "lpvm" "cast" [] [Unplaced from]) totype True
@@ -69,13 +86,23 @@ primMove src dest =
   PrimForeign "llvm" "move" [] [src, dest]
 
 -- |An unplaced instruction to compare two integer values
-comparison :: Ident -> Exp -> Exp -> Ident -> Placed Stmt
-comparison tst left right dest =
-    Unplaced $ ForeignCall "llvm" "icmp" [tst]
-    [Unplaced left, Unplaced right, Unplaced $ boolCast $ varSet dest]
+comparison :: Ident -> Exp -> Exp  -> [Placed Stmt]
+comparison tst left right =
+    [Unplaced $ ForeignCall "llvm" "test" [tst]
+     [Unplaced left, Unplaced right]]
 
--- |An unplaced function call to compare two integer values
-comparisonExp :: Ident -> Exp -> Exp -> Placed Exp
-comparisonExp tst left right =
-    Unplaced $ boolCast $ ForeignFn "llvm" "icmp" [tst]
-    [Unplaced left, Unplaced right]
+
+-- |A TestBool statement that always succeeds
+succeedTest :: Placed Stmt
+succeedTest = Unplaced $ TestBool $ castTo (iVal 1) boolType
+
+
+-- |In a SemiDet context, generates code to succeed, otherwise generates no code
+succeedIfSemiDet :: Determinism -> [Placed Stmt]
+succeedIfSemiDet Det     = []
+succeedIfSemiDet SemiDet = [succeedTest]
+
+
+-- |A TestBool statement that always fails
+failTest :: Placed Stmt
+failTest = Unplaced $ TestBool $ castTo (iVal 0) boolType

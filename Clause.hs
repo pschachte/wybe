@@ -9,6 +9,7 @@
 module Clause (compileProc) where
 
 import AST
+import Snippets
 import Options (LogSelection(Clause))
 import Data.Map as Map
 import Data.Set as Set
@@ -56,6 +57,18 @@ currVar name pos = do
         Just n -> return $ PrimVarName name n
 
 
+closingStmts :: Determinism -> ClauseComp [Placed Prim]
+closingStmts Det = return []
+closingStmts SemiDet = do
+    tested <- gets $ Map.member "$$"
+    return $ if tested
+             then []
+             else [Unplaced $ primMove
+                   (ArgInt 1 boolType)
+                   (ArgVar (PrimVarName "$$" 0) boolType
+                    FlowOut Ordinary False)]
+
+
 -- |Run a clause compiler function from the Compiler monad to compile
 --  a generated procedure.
 evalClauseComp :: ClauseComp t -> Compiler t
@@ -66,74 +79,89 @@ evalClauseComp clcomp =
 -- |Compile a ProcDefSrc to a ProcDefPrim, ie, compile a proc 
 --  definition in source form to one in clausal form.
 compileProc :: ProcDef -> Compiler ProcDef
-compileProc proc = do
+compileProc proc =
     evalClauseComp $ do
+        let detism = procDetism proc
         let ProcDefSrc body = procImpln proc
         let proto = procProto proc
         let params = procProtoParams proto
-        mapM_ nextVar $ List.map paramName $ 
-          List.filter (flowsIn . paramFlow) params
+        let params' = case detism of
+                         SemiDet -> params ++ [testOutParam]
+                         Det -> params
+        logClause $ "--------------\nCompiling proc " ++ show proto
+        mapM_ (nextVar . paramName) $ List.filter (flowsIn . paramFlow) params
         startVars <- get
-        compiled <- compileBody body params
-        logClause $ "Compiled to:\n"  ++ showBlock 4 compiled
+        compiled <- compileBody body params' detism
+        logClause $ "Compiled to:"  ++ showBlock 4 compiled
         endVars <- get
-        logClause $ "startVars: " ++ show startVars
-        logClause $ "endVars  : " ++ show endVars
-        logClause $ "params   : " ++ show params
-        let params' = List.map (compileParam startVars endVars) params
-        let proto' = PrimProto (procProtoName proto) params'
-        logClause $ "comparams: " ++ show params'
+        logClause $ "  startVars: " ++ show startVars
+        logClause $ "  endVars  : " ++ show endVars
+        logClause $ "  params   : " ++ show params
+        let params'' = List.map (compileParam startVars endVars) params'
+        let proto' = PrimProto (procProtoName proto) params''
+        logClause $ "  comparams: " ++ show params''
         return $ proc { procImpln = ProcDefPrim proto' compiled }
 
 
 
 -- |Compile a proc body to LPVM form.  By the time we get here, the 
 --  form of the body is very limited:  it is a list of ProcCalls and
---  ForeignCalls, possibly ending with a single Cond statement.
---  Everything else has already been transformed away.
-compileBody :: [Placed Stmt] -> [Param] -> ClauseComp ProcBody
-compileBody [] params = return $ ProcBody [] NoFork
-compileBody stmts params = do
+--  ForeignCalls, possibly ending with a single Cond statement whose
+--  test is a single TestBool statement.  If the proc is SemiDet,
+--  it must be a list of ProcCalls and ForeignCalls that *does* end
+--  with either a Cond statement whose test is a single TestBool statement,
+--  or with a single TestBool statement.  Everything else has already
+--  been transformed away.  Furthermore, TestBool statements only appear
+--  as the condition of a Cond statement or, in the case of a SemiDet
+--  proc, as the final statement of a body.  This code assumes that
+--  these invariants are observed, and does not worry whether the proc
+--  is Det or SemiDet.
+compileBody :: [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
+compileBody [] params detism = do
+    end <- closingStmts detism
+    return $ ProcBody end NoFork
+compileBody stmts params detism = do
     logClause $ "Compiling body:" ++ showBody 4 stmts
-    case content $ last stmts of
-        Cond tstStmts tstVar thn els -> do
-          front <- mapM compileSimpleStmt $ init stmts
-          initial <- get
-          tstStmts' <- mapM compileSimpleStmt tstStmts
-          afterTest <- get
-          tstVar' <- placedApply compileArg tstVar
-          thn' <- compileBody thn params
+    let final = last stmts
+    case content final of
+        Cond [tst] thn els ->
+          case content tst of
+              TestBool var -> do
+                front <- mapM compileSimpleStmt $ init stmts
+                compileCond front (place final) var thn els params detism
+              tstStmts ->
+                shouldnt $ "CompileBody of Cond with non-simple test"
+                           ++ show tstStmts
+        _ -> do
+          prims <- mapM compileSimpleStmt stmts
+          end <- closingStmts detism
+          return $ ProcBody (prims++end) NoFork
+
+compileCond :: [Placed Prim] -> OptPos -> Exp -> [Placed Stmt]
+    -> [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
+compileCond front pos expr thn els params detism = do
+          beforeTest <- get
+          thn' <- compileBody thn params detism
           afterThen <- get
-          -- XXX This isn't right when tests can bind outputs only when
-          -- the test succeeds
-          put afterTest
-          -- case tstVar' of
-          --     ArgVar var ty FlowIn _ _ -> do
-          --       nextVar $ primVarName var
-          --       return ()
-          --     _ -> return ()
-          els' <- compileBody els params
+          put beforeTest
+          els' <- compileBody els params detism
           afterElse <- get
           let final = Map.intersectionWith max afterThen afterElse
           put final
           let thnAssigns = reconcilingAssignments afterThen final params
           let elsAssigns = reconcilingAssignments afterElse final params
-          let front' = front++tstStmts'
-          case tstVar' of
-              ArgVar var ty FlowIn _ _ ->
-                return $ ProcBody front' $ PrimFork var ty False
-                [appendToBody els' elsAssigns, appendToBody thn' thnAssigns]
-              ArgInt 0 _ -> return $ prependToBody front' els'
-              ArgInt _ _ -> return $ prependToBody front' thn'
-              _ -> do
-                lift $ message Error 
-                    ("Condition is non-bool constant or output '" ++
-                     show tstVar' ++ "'") $
-                    betterPlace (place $ last stmts) tstVar
-                return $ ProcBody front' NoFork
-        _ -> do
-          prims <- mapM compileSimpleStmt stmts
-          return $ ProcBody prims NoFork
+          let front' = front
+          case expr of
+              IntValue 0 ->
+                return $ prependToBody front' $ appendToBody els' elsAssigns
+              IntValue _ ->
+                return $ prependToBody front' $ appendToBody thn' thnAssigns
+              Var var ParamIn _ -> do
+                name' <- currVar var Nothing
+                return $ ProcBody front' $ PrimFork name' boolType False
+                    [appendToBody els' elsAssigns, appendToBody thn' thnAssigns]
+              _ ->
+                shouldnt $ "TestBool with invalid argument " ++ show expr
 
 -- |Add the specified statements at the end of the given body
 appendToBody :: ProcBody -> [Placed Prim] -> ProcBody
@@ -143,6 +171,7 @@ appendToBody (ProcBody prims (PrimFork v ty lst bodies)) after
     = let bodies' = List.map (flip appendToBody after) bodies
       in ProcBody prims $ PrimFork v ty lst bodies'
 
+-- |Add the specified statements at the front of the given body
 prependToBody :: [Placed Prim] -> ProcBody -> ProcBody
 prependToBody before (ProcBody prims fork)
     = ProcBody (before++prims) fork
@@ -154,7 +183,7 @@ compileSimpleStmt stmt = do
     return $ maybePlace stmt' (place stmt)
 
 compileSimpleStmt' :: Stmt -> ClauseComp Prim
-compileSimpleStmt' call@(ProcCall maybeMod name procID args) = do
+compileSimpleStmt' call@(ProcCall maybeMod name procID _ args) = do
     logClause $ "Compiling call " ++ showStmt 4 call
     args' <- mapM (placedApply compileArg) args
     return $ PrimCall (ProcSpec maybeMod name $
@@ -162,12 +191,13 @@ compileSimpleStmt' call@(ProcCall maybeMod name procID args) = do
                        ("compileSimpleStmt' for " ++ showStmt 4 call)
                        procID)
         args'
-    -- return $ PrimCall (ProcSpec maybeMod name $ fromMaybe (-1) procID) args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
-compileSimpleStmt' (Nop) = do
-    return $ PrimNop
+compileSimpleStmt' (TestBool expr) =
+    -- Only for handling a TestBool other than as the condition of a Cond:
+    compileSimpleStmt' $ content $ move expr (boolVarSet "$$")
+compileSimpleStmt' Nop = return $ PrimTest $ ArgInt 1 intType
 compileSimpleStmt' stmt =
     shouldnt $ "Normalisation left complex statement:\n" ++ showStmt 4 stmt
 
@@ -224,6 +254,11 @@ compileParam startVars endVars param@(Param name ty flow ftype) =
                 _ -> shouldnt "non-simple parameter flow in compileParam"
     in PrimParam (PrimVarName name num)
        ty pflow ftype (ParamInfo False)
+
+
+-- |A synthetic output parameter carrying the test result
+testOutParam :: Param
+testOutParam = Param "$$" boolType ParamOut $ Implicit Nothing
 
 
 -- |Log a message, if we are logging clause generation.

@@ -128,24 +128,36 @@ transformBody resources body =
 
 
 transformStmt :: [ResourceFlowSpec] -> Stmt -> OptPos -> Compiler (Placed Stmt)
-transformStmt resources (ProcCall m n id args) pos = do
+transformStmt resources (ProcCall m n id detism args) pos = do
     let procID = trustFromJust "transformStmt" id
     callResources <- fmap (procProtoResources . procProto) $
                  getProcDef (ProcSpec m n procID)
     -- XXX check that all callResources are available
     resArgs <- fmap concat $ mapM (resourceArgs pos) callResources
-    return $ maybePlace (ProcCall m n (Just procID) (args++resArgs)) pos
+    return $ maybePlace (ProcCall m n (Just procID) detism (args++resArgs)) pos
 transformStmt resources (ForeignCall lang name flags args) pos = do
     return $ maybePlace (ForeignCall lang name flags args) pos
-transformStmt resources (Test stmts exp) pos = do
+-- transformStmt resources (Test stmts) pos = do
+--     stmts' <- transformBody resources stmts
+--     return $ maybePlace (Test stmts') pos
+transformStmt resources stmt@(TestBool var) pos = do
+    return $ maybePlace stmt pos
+transformStmt resources (And stmts) pos = do
     stmts' <- transformBody resources stmts
-    return $ maybePlace (Test stmts' exp) pos
-transformStmt _ (Nop) pos = return $ maybePlace Nop pos
-transformStmt resources (Cond test exp thn els) pos = do
+    return $ maybePlace (And stmts') pos
+transformStmt resources (Or stmts) pos = do
+    stmts' <- transformBody resources stmts
+    return $ maybePlace (Or stmts') pos
+transformStmt resources (Not stmts) pos = do
+    stmts' <- transformBody resources stmts
+    return $ maybePlace (Not stmts') pos
+transformStmt _ (Nop) pos = do
+    return $ maybePlace Nop pos
+transformStmt resources (Cond test thn els) pos = do
     test' <- transformBody resources test
     thn' <- transformBody resources thn
     els' <- transformBody resources els
-    return $ maybePlace (Cond test' exp thn' els') pos
+    return $ maybePlace (Cond test' thn' els') pos
 transformStmt resources (Loop body) pos = do
     body' <- transformBody resources body
     return $ maybePlace (Loop body') pos
