@@ -63,7 +63,6 @@ import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
                                             optForce, optForceAll, optLibDirs,
                                             optUseStd)
-import           Parser                    (parse)
 import           NewParser                 (parseWybe)
 import           Resources                 (resourceCheckMod, resourceCheckProc)
 import           Scanner                   (fileTokens)
