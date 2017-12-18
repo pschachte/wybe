@@ -194,11 +194,13 @@ buildBody oSubst builder = do
 buildFork :: PrimVarName -> TypeSpec -> BodyBuilder ()
 buildFork var ty = do
     st <- get
+    logBuild $ "<<<< beginning to build a new fork on " ++ show var
     case st of
       Forked{} -> do
         shouldnt "Building a fork outside of a body or branch"
       Unforked{} -> do
         arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
+        logBuild $ "     (expands to " ++ show arg' ++ ")"
         let (fvar,fval) =
               case arg' of
                   ArgInt n _ -> -- result known at compile-time
@@ -206,8 +208,7 @@ buildFork var ty = do
                   ArgVar var' varType _ _ _ -> do -- statically unknown result
                     (var',Nothing)
                   _ -> shouldnt "switch on non-integer variable"
-        logBuild $ "<<<< beginning to build a new fork on " ++ show var ++
-            " ( actually " ++ show fvar ++
+        logBuild $ "     ( actually " ++ show fvar ++
             (maybe "" (\v -> " = " ++ show v) fval) ++ ")"
         put $ Forked st fvar fval ty [] (uParent st)
 
@@ -231,12 +232,12 @@ completeFork = do
 beginBranch :: BodyBuilder ()
 beginBranch = do
     st <- get
+    logBuild $ "<<<< <<<< Beginning to build branch "
+               ++ show (length $ stForkBods st) ++ " on " ++ show (stForkVar st)
     case st of
         Unforked{} ->
           shouldnt "beginBranch in Unforked state"
         Forked{origin=Unforked _ subst vsubst subexp defs _ _} -> do
-          logBuild $ "<<<< <<<< Beginning to build branch "
-              ++ show (length $ stForkBods st) ++ " on " ++ show (stForkVar st)
           put $ Unforked [] subst vsubst subexp defs (Just st) Nothing
         Forked{origin=Forked{}} ->
           shouldnt "Beginning a branch outside of a fork"

@@ -19,7 +19,7 @@ import AST hiding (option)
 import Control.Monad.Identity (Identity)
 import Scanner
 import Text.Parsec
-import qualified Parser as OldParser
+-- import qualified Parser as OldParser
 import Text.Parsec.Expr
 import Data.Algorithm.Diff (getGroupedDiff)
 import Data.Algorithm.DiffOutput (ppDiff)
@@ -65,16 +65,16 @@ writeItems file to = do
         Right is -> writeFile to (show is)
 
 
-compareOld :: FilePath -> IO ()
-compareOld file = do
-    stream <- fileTokens file
-    case parseWybe stream file of
-        Left err -> print err
-        Right is -> do
-            let old = OldParser.parse stream
-            let diff = getGroupedDiff (map show old) (map show is)
-            putStrLn "Comparing..."
-            putStrLn $ ppDiff diff
+-- compareOld :: FilePath -> IO ()
+-- compareOld file = do
+--     stream <- fileTokens file
+--     case parseWybe stream file of
+--         Left err -> print err
+--         Right is -> do
+--             let old = OldParser.parse stream
+--             let diff = getGroupedDiff (map show old) (map show is)
+--             putStrLn "Comparing..."
+--             putStrLn $ ppDiff diff
 
 -----------------------------------------------------------------------------
 -- Grammar                                                                 --
