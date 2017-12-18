@@ -1,8 +1,7 @@
 Error detected during type checking of modules type_ambig
-[91mtest-cases/type_ambig.wybe:1:15: Ambiguous overloading: call could refer to:
+test-cases/type_ambig.wybe:1:15: Ambiguous overloading: call could refer to:
     wybe.io.print<4>
     wybe.io.print<3>
     wybe.io.print<2>
     wybe.io.print<1>
     wybe.io.print<0>
-[0m

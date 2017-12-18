@@ -1,4 +1,3 @@
 Error detected during checking parameter type declarations in modules func_no_types
-[91mtest-cases/func_no_types.wybe:1:8: Public proc 'double' with undeclared parameter or return type
-[0m[91mtest-cases/func_no_types.wybe:1:8: Public proc 'double' with undeclared parameter or return type
-[0m
+test-cases/func_no_types.wybe:1:8: Public proc 'double' with undeclared parameter or return type
+test-cases/func_no_types.wybe:1:8: Public proc 'double' with undeclared parameter or return type
