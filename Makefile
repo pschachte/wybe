@@ -14,7 +14,7 @@ all:	wybemk
 # %.hs:	%.y
 # 	happy -a -g $<
 
-wybemk:	*.hs Version.lhs Parser.hs *.c
+wybemk:	*.hs Version.lhs *.c
 	cabal configure
 	cabal install --only-dependencies
 	cabal -j3 build && cp dist/build/$@/$@ $@
