@@ -1,3 +1,4 @@
 Error detected during type checking of modules type_error
-test-cases/type_error.wybe:1:31: Type error in call to *, argument 2
-test-cases/type_error.wybe:1:31: Type error in call to *, argument 1
+[91mtest-cases/type_error.wybe:1:31: Type error in call to *, argument 2
+[0m[91mtest-cases/type_error.wybe:1:31: Type error in call to *, argument 1
+[0m
