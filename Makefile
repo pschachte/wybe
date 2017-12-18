@@ -11,20 +11,20 @@ all:	wybemk
 %.pdf:	%.tex
 	rubber -m pdftex $<
 
-%.hs:	%.y
-	happy -a -g $<
+# %.hs:	%.y
+# 	happy -a -g $<
 
 wybemk:	*.hs Version.lhs Parser.hs *.c
-	cabal build -j3 $@
-	# clang -fPIC -shared cbits.c -o cbits.so $(COPTS) 2>/dev/null
-	# ghc -fwarn-incomplete-patterns --make $@
+	cabal configure
+	cabal install --only-dependencies
+	cabal -j3 build && cp dist/build/$@/$@ $@
 
-.PHONY:	info
-
-info:  Parser.info
-
-%.info:	%.y
-	happy -i -a -g $<
+# .PHONY:	info
+# 
+# info:  Parser.info
+# 
+# %.info:	%.y
+# 	happy -i -a -g $<
 
 doc:	*.hs
 	rm -rf $@
