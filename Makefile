@@ -15,8 +15,9 @@ all:	wybemk
 	happy -a -g $<
 
 wybemk:	*.hs Version.lhs Parser.hs *.c
-	clang -fPIC -shared cbits.c -o cbits.so $(COPTS) 2>/dev/null
-	ghc -fwarn-incomplete-patterns --make $@
+	cabal build -j3 $@
+	# clang -fPIC -shared cbits.c -o cbits.so $(COPTS) 2>/dev/null
+	# ghc -fwarn-incomplete-patterns --make $@
 
 .PHONY:	info
 
