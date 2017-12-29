@@ -541,6 +541,7 @@ addInstrToState ins st@Forked{}
 expandArg :: PrimArg -> BodyBuilder PrimArg
 expandArg arg@(ArgVar var _ FlowIn _ _) = do
     var' <- gets (Map.lookup var . currSubst)
+    logBuild $ "Expanded to variable " ++ show var'
     maybe (return arg) expandArg var'
 expandArg (ArgVar var typ FlowOut ftype lst) = do
     var' <- gets (Map.findWithDefault var var . outSubst)

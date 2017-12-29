@@ -30,6 +30,7 @@ procExpansion :: ProcSpec -> ProcDef -> Compiler ProcDef
 procExpansion pspec def = do
     logMsg Expansion $ "*** Try to expand proc " ++ show pspec
     let ProcDefPrim proto body = procImpln def
+    logMsg Expansion $ "    initial body: " ++ show (ProcDefPrim proto body)
     let tmp = procTmpCount def
     let outs = outputParams proto
     (expander,body') <- buildBody (Map.fromSet id outs) $ 
@@ -84,15 +85,18 @@ type Expander = StateT ExpanderState BodyBuilder
 -- we've already recorded the mapping for that name in writeNaming
 freshVar :: PrimVarName -> TypeSpec -> Expander PrimArg
 freshVar oldVar typ = do
+    logExpansion $ "Making fresh name for variable " ++ show oldVar
     maybeName <- gets (Map.lookup oldVar . writeNaming)
     case maybeName of
         Nothing -> do
             tmp <- gets tmpCount
             modify (\s -> s { tmpCount = tmp+1 })
             let newVar = PrimVarName (mkTempName tmp) 0
+            logExpansion $ "    Generated fresh name " ++ show newVar
             addRenaming oldVar $ ArgVar newVar typ FlowIn Ordinary False
             return $ ArgVar newVar typ FlowOut Ordinary False
         Just newArg -> do
+            logExpansion $ "    Already named it " ++ show newArg
             return newArg
 
 
