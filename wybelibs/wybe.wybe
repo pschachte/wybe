@@ -1,9 +1,9 @@
 
 public type bool = public false | true
     # These are syntax errors because they are operators:
-    # public func and(p:bool, q:bool):bool = foreign llvm and(p,q)
-    # public func or(p:bool, q:bool):bool = foreign llvm or(p,q)
-    # public func not(p:bool):bool = foreign llvm xor(p,true)
+    public func and(p:bool, q:bool):bool = foreign llvm and(p,q)
+    public func or(p:bool, q:bool):bool = foreign llvm or(p,q)
+    public func not(p:bool):bool = foreign llvm xor(p,true)
     public func =(x:bool, y:bool):bool = foreign llvm icmp eq(x,y)
     public func /=(x:bool,y:bool):bool = foreign llvm icmp ne(x,y)
 end
@@ -29,7 +29,7 @@ public type int is i64
     public func sqrt(x:int):int = foreign C isqrt(x)
     public func power(x:int,y:int):int = foreign C ipow(x,y)
     public proc incr(!x:int) ?x = x + 1 end
-    public proc decr(!x:int) ?x = x + 1 end
+    public proc decr(!x:int) ?x = x - 1 end
 end
 
 
