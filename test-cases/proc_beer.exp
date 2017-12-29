@@ -17,31 +17,31 @@ beer99 > public inline (0 calls)
 
 gen$1 > (2 calls)
 0: gen$1(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign llvm icmp sge(count#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @wybe:27:40
-    case ~tmp$4#0:wybe.bool of
+    foreign llvm icmp sge(count#0:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:27:40
+    case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm move(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom)
 
     1:
-        foreign c print_int(count#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @wybe:76:38
-        foreign c print_string(" bottles of beer on the wall":wybe.string, ~tmp$7#0:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:88:41
-        foreign c putchar('\n':wybe.char, ~tmp$8#0:wybe.phantom, ?tmp$9#0:wybe.phantom) @wybe:74:28
-        foreign llvm sub(~count#0:wybe.int, 1:wybe.int, ?tmp$10#0:wybe.int) @wybe:16:38
-        proc_beer.gen$1<0>(~tmp$10#0:wybe.int, ~tmp$9#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:5
+        foreign c print_int(count#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?tmp$9#0:wybe.phantom) @wybe:76:38
+        foreign c print_string(" bottles of beer on the wall":wybe.string, ~tmp$9#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @wybe:88:41
+        foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?tmp$11#0:wybe.phantom) @wybe:74:28
+        foreign llvm sub(~count#0:wybe.int, 1:wybe.int, ?tmp$12#0:wybe.int) @wybe:16:38
+        proc_beer.gen$1<0>(~tmp$12#0:wybe.int, ~tmp$11#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:5
 
+
+
+gen$2 > inline (1 calls)
+0: gen$2([count#0:wybe.int], wybe.io$io#0:wybe.phantom, [?wybe.io$io#0:wybe.phantom]):
 
 
 gen$3 > inline (1 calls)
-0: gen$3([count#0:wybe.int], wybe.io$io#0:wybe.phantom, [?wybe.io$io#0:wybe.phantom]):
-
-
-gen$4 > inline (1 calls)
-0: gen$4(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom):
+0: gen$3(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom):
     foreign c print_int(count#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:76:38
-    foreign c print_string(" bottles of beer on the wall":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?tmp$6#0:wybe.phantom) @wybe:88:41
-    foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:74:28
-    foreign llvm sub(~count#0:wybe.int, 1:wybe.int, ?tmp$9#0:wybe.int) @wybe:16:38
-    proc_beer.gen$1<0>(~tmp$9#0:wybe.int, ~wybe.io$io#2:wybe.phantom, ?wybe.io$io#3:wybe.phantom) @proc_beer:5:5
+    foreign c print_string(" bottles of beer on the wall":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?tmp$7#0:wybe.phantom) @wybe:88:41
+    foreign c putchar('\n':wybe.char, ~tmp$7#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:74:28
+    foreign llvm sub(~count#0:wybe.int, 1:wybe.int, ?tmp$10#0:wybe.int) @wybe:16:38
+    proc_beer.gen$1<0>(~tmp$10#0:wybe.int, ~wybe.io$io#2:wybe.phantom, ?wybe.io$io#3:wybe.phantom) @proc_beer:5:5
 proc_beer
 ======================================================================
 AFTER LLVM IR:
@@ -65,20 +65,20 @@ entry:
 
 define void @"proc_beer.gen$1<0>"(i64 %"count#0") {
 entry:
-  %"tmp$4#01" = icmp sgt i64 %"count#0", -1
-  br i1 %"tmp$4#01", label %if.then.preheader, label %if.else
+  %"tmp$5#01" = icmp sgt i64 %"count#0", -1
+  br i1 %"tmp$5#01", label %if.then.preheader, label %if.else
 
 if.then.preheader:                                ; preds = %entry
   br label %if.then
 
 if.then:                                          ; preds = %if.then.preheader, %if.then
-  %"count#0.tr2" = phi i64 [ %"tmp$10#0", %if.then ], [ %"count#0", %if.then.preheader ]
+  %"count#0.tr2" = phi i64 [ %"tmp$12#0", %if.then ], [ %"count#0", %if.then.preheader ]
   tail call void @print_int(i64 %"count#0.tr2")
   tail call void @print_string(i8* getelementptr inbounds ([29 x i8]* @proc_beer.2, i32 0, i32 0))
   tail call void @putchar(i8 10)
-  %"tmp$10#0" = add i64 %"count#0.tr2", -1
-  %"tmp$4#0" = icmp sgt i64 %"tmp$10#0", -1
-  br i1 %"tmp$4#0", label %if.then, label %if.else.loopexit
+  %"tmp$12#0" = add i64 %"count#0.tr2", -1
+  %"tmp$5#0" = icmp sgt i64 %"tmp$12#0", -1
+  br i1 %"tmp$5#0", label %if.then, label %if.else.loopexit
 
 if.else.loopexit:                                 ; preds = %if.then
   br label %if.else
@@ -87,13 +87,13 @@ if.else:                                          ; preds = %if.else.loopexit, %
   ret void
 }
 
-define void @"proc_beer.gen$4<0>"(i64 %"count#0") {
+define void @"proc_beer.gen$3<0>"(i64 %"count#0") {
 entry:
   tail call void @print_int(i64 %"count#0")
   tail call void @print_string(i8* getelementptr inbounds ([29 x i8]* @proc_beer.2, i32 0, i32 0))
   tail call void @putchar(i8 10)
-  %"tmp$9#0" = add i64 %"count#0", -1
-  tail call void @"proc_beer.gen$1<0>"(i64 %"tmp$9#0")
+  %"tmp$10#0" = add i64 %"count#0", -1
+  tail call void @"proc_beer.gen$1<0>"(i64 %"tmp$10#0")
   ret void
 }
 

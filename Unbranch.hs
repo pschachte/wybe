@@ -44,7 +44,7 @@
 --  generated call.
 ----------------------------------------------------------------
 
-module Unbranch (unbranchProc, unbranchBody) where
+module Unbranch (unbranchProc) where
 
 import AST
 import Snippets
@@ -253,7 +253,8 @@ genProc :: ProcProto -> [Placed Stmt] -> Unbrancher ()
 genProc proto stmts = do
     -- let item = ProcDecl Private Det False proto stmts Nothing
     let name = procProtoName proto
-    let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing 0
+    tmpCtr <- gets brTempCtr
+    let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr
                   Map.empty Private Det False NoSuperproc
     procDef' <- lift $ unbranchProc procDef
     logUnbranch $ "Generating proc:\n" ++ showProcDef 4 procDef'
