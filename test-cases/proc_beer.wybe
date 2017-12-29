@@ -5,7 +5,7 @@ public proc beer99 use !io
     do  while count >= 0
         print(count)
 	println(" bottles of beer on the wall")
-	?count = count - 1
+	decr(!count)
     end
 end
 
