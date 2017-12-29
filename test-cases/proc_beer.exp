@@ -4,13 +4,19 @@ AFTER EVERYTHING:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : proc_beer.beer99<0>
+  public procs    : proc_beer.<0>
+                    proc_beer.beer99<0>
   imports         : use wybe
   types           : 
   resources       : 
   procs           : 
 
-beer99 > public inline (0 calls)
+*main* > public inline (0 calls)
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+    proc_beer.gen$1<0>(99:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @proc_beer:5:5
+
+
+beer99 > public inline (1 calls)
 0: beer99(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     proc_beer.gen$1<0>(99:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:5
 
@@ -56,6 +62,12 @@ declare void @putchar(i8) #0
 declare void @print_string(i8*)
 
 declare void @print_int(i64)
+
+define i32 @proc_beer.main() {
+entry:
+  tail call void @"proc_beer.gen$1<0>"(i64 99)
+  ret i32 0
+}
 
 define void @"proc_beer.beer99<0>"() {
 entry:
