@@ -208,8 +208,6 @@ buildFork var ty = do
                   ArgVar var' varType _ _ _ -> do -- statically unknown result
                     (var',Nothing)
                   _ -> shouldnt "switch on non-integer variable"
-        logBuild $ "     ( actually " ++ show fvar ++
-            (maybe "" (\v -> " = " ++ show v) fval) ++ ")"
         put $ Forked st fvar fval ty [] (uParent st)
 
 
@@ -232,13 +230,16 @@ completeFork = do
 beginBranch :: BodyBuilder ()
 beginBranch = do
     st <- get
+    let branchNum = fromIntegral $ length $ stForkBods st
     logBuild $ "<<<< <<<< Beginning to build branch "
-               ++ show (length $ stForkBods st) ++ " on " ++ show (stForkVar st)
+               ++ show branchNum ++ " on " ++ show (stForkVar st)
     case st of
         Unforked{} ->
           shouldnt "beginBranch in Unforked state"
-        Forked{origin=Unforked _ subst vsubst subexp defs _ _} -> do
+        Forked{origin=Unforked _ subst vsubst subexp defs _ _,
+               stForkVar=var} -> do
           put $ Unforked [] subst vsubst subexp defs (Just st) Nothing
+          addSubst var $ ArgInt branchNum intType
         Forked{origin=Forked{}} ->
           shouldnt "Beginning a branch outside of a fork"
 
@@ -541,7 +542,7 @@ addInstrToState ins st@Forked{}
 expandArg :: PrimArg -> BodyBuilder PrimArg
 expandArg arg@(ArgVar var _ FlowIn _ _) = do
     var' <- gets (Map.lookup var . currSubst)
-    logBuild $ "Expanded to variable " ++ show var'
+    logBuild $ "Expanded " ++ show var ++ " to variable " ++ show var'
     maybe (return arg) expandArg var'
 expandArg (ArgVar var typ FlowOut ftype lst) = do
     var' <- gets (Map.findWithDefault var var . outSubst)
