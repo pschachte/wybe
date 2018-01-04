@@ -244,6 +244,8 @@ beginBranch = do
                stForkVar=var, stKnownVal=val} -> do
           put $ Unforked [] subst vsubst subexp defs (Just st) Nothing
           -- note the value of the fork variable for this branch if unknown
+          -- XXX also add consequences of this, eg if var is result of X==Y
+          --     comparison and var == 1, then record that X==Y.
           when (val == Nothing) $ addSubst var $ ArgInt branchNum intType
           return ()
         Forked{origin=Forked{}} ->

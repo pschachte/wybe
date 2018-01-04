@@ -148,6 +148,8 @@ expandBody (ProcBody prims fork) = do
 
 expandFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Expander ()
 expandFork var ty bodies = do
+    -- XXX optimise:  use definiteVariableValue to see if we have a definite
+    --     value for var, and if so, only expand that one branch
     lift $ buildFork var ty
     mapM_ (\b -> lift beginBranch >> expandBody b >> lift endBranch) bodies
     lift $ completeFork
