@@ -8,7 +8,7 @@
 
 module BodyBuilder (
   BodyBuilder, buildBody, instr, buildFork, completeFork,
-  beginBranch, endBranch
+  beginBranch, endBranch, definiteVariableValue
   ) where
 
 import AST
@@ -216,12 +216,16 @@ completeFork :: BodyBuilder ()
 completeFork = do
     st <- get
     case st of
-      Unforked{} -> do
-        shouldnt "Completing an unbegun fork"
+      Unforked{} -> shouldnt "Completing an unbegun fork"
+      -- Forked{stKnownVal=Just n, stForkBods=bods} -> do
+      --   logBuild $ ">>>> ending fork on value " ++ show n
+      --   let selectedBranch = reverse bods !! fromIntegral n
+      --   logBuild $ ">>> leaving state: " ++ show selectedBranch
+      --   put selectedBranch
       Forked{origin=Unforked{currSubst=subst, outSubst=osubst, subExprs=subes,
                              definers=defs, uParent=upar}} -> do
         logBuild $ ">>>> ending fork on " ++ show (stForkVar st)
-        let prevUnforked = origin st
+        -- let prevUnforked = origin st
         put $ Unforked [] subst osubst subes defs upar $ Just st
       Forked{origin=Forked{}} -> shouldnt "Complete an unbuilt fork"
 
@@ -237,9 +241,11 @@ beginBranch = do
         Unforked{} ->
           shouldnt "beginBranch in Unforked state"
         Forked{origin=Unforked _ subst vsubst subexp defs _ _,
-               stForkVar=var} -> do
+               stForkVar=var, stKnownVal=val} -> do
           put $ Unforked [] subst vsubst subexp defs (Just st) Nothing
-          addSubst var $ ArgInt branchNum intType
+          -- note the value of the fork variable for this branch if unknown
+          when (val == Nothing) $ addSubst var $ ArgInt branchNum intType
+          return ()
         Forked{origin=Forked{}} ->
           shouldnt "Beginning a branch outside of a fork"
 
@@ -261,26 +267,13 @@ endBranch = do
 
 
 
--- buildBranch :: PrimVarName -> TypeSpec -> Maybe Prim
---             -> BodyState -> (BodyBuilder (),Int) -> Compiler BodyState
--- buildBranch var ty definer st (builder,val) = do
---     logMsg BodyBuilder $ "<<<< <<<< Beginning to build branch "
---                          ++ show val ++ " on " ++ show var
---     let st' = st { currBuild = [],
---                    currSubst = Map.insert var (ArgInt (fromIntegral val) ty)
---                                $ currSubst st }
---     branch <- buildBranch' st' $ do
---         logBuild $ "Propagating " ++ show val ++ " result of " ++ show definer
---         whenJust definer $ propagateBinding var ty val
---         builder
---     logMsg BodyBuilder $ ">>>> >>>> Finished building branch "
---                          ++ show val ++ " on " ++ show var
---     return branch
--- 
--- 
--- buildBranch' :: BodyState -> BodyBuilder () -> Compiler BodyState
--- buildBranch' st builder = snd <$> buildPrims st builder
-
+-- |Return Just the known value of the specified variable, or Nothing
+definiteVariableValue :: PrimVarName -> BodyBuilder (Maybe PrimArg)
+definiteVariableValue var = do
+    arg <- expandArg $ ArgVar var AnyType FlowIn Ordinary False
+    case arg of
+        ArgVar{} -> return Nothing -- variable (unknown) result
+        _ -> return $ Just arg
 
 buildPrims :: BodyState -> BodyBuilder a -> Compiler (a,BodyState)
 buildPrims st builder = runStateT builder st
