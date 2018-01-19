@@ -33,11 +33,9 @@ procExpansion pspec def = do
     logMsg Expansion $ "    initial body: " ++ show (ProcDefPrim proto body)
     let tmp = procTmpCount def
     let outs = outputParams proto
-    (expander,body') <- buildBody (Map.fromSet id outs) $ 
-                        execStateT (expandBody body) $
-                          initExpanderState tmp
-    let def' = def { procImpln = ProcDefPrim proto body',
-                     procTmpCount = tmpCount expander }
+    (tmp',body') <- buildBody tmp (Map.fromSet id outs) $ 
+                        execStateT (expandBody body) initExpanderState
+    let def' = def { procImpln = ProcDefPrim proto body', procTmpCount = tmp' }
     if def /= def'
         then
         logMsg Expansion $
@@ -74,7 +72,6 @@ data ExpanderState = Expander {
                                   --  therefore should not inline calls)
     renaming     :: Renaming,     -- ^The current variable renaming
     writeNaming  :: Renaming,     -- ^Renaming for new assignments
-    tmpCount     :: Int,          -- ^Next available tmp variable number
     noFork       :: Bool          -- ^There's no fork at the end of this body
     }
 
@@ -89,9 +86,7 @@ freshVar oldVar typ = do
     maybeName <- gets (Map.lookup oldVar . writeNaming)
     case maybeName of
         Nothing -> do
-            tmp <- gets tmpCount
-            modify (\s -> s { tmpCount = tmp+1 })
-            let newVar = PrimVarName (mkTempName tmp) 0
+            newVar <- lift freshVarName
             logExpansion $ "    Generated fresh name " ++ show newVar
             addRenaming oldVar $ ArgVar newVar typ FlowIn Ordinary False
             return $ ArgVar newVar typ FlowOut Ordinary False
@@ -114,9 +109,9 @@ addInstr :: Prim -> OptPos -> Expander ()
 addInstr prim pos = lift $ instr prim pos
 
 
-initExpanderState :: Int -> ExpanderState
-initExpanderState tCount = 
-    Expander False identityRenaming identityRenaming tCount True
+initExpanderState :: ExpanderState
+initExpanderState = 
+    Expander False identityRenaming identityRenaming True
 
 
 ----------------------------------------------------------------
@@ -227,12 +222,7 @@ inlineCall proto args body pos = do
     mapM_ (addInputAssign pos) $ zip (primProtoParams proto) args
     logExpansion $ "  Inlining defn: " ++ showBlock 4 body
     expandBody body
-    tmp' <- gets tmpCount
-    -- Throw away state after inlining, except ...
     put saved
-    -- ... put back temp count
-    modify (\s -> s { tmpCount = tmp' })
-                      -- renaming = Map.union subst $ renaming s})
     st <- get
     logExpansion $ "  After inlining:"
     logExpansion $ "    renaming = " ++ show (renaming st)

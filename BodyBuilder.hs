@@ -7,7 +7,7 @@
 --
 
 module BodyBuilder (
-  BodyBuilder, buildBody, instr, buildFork, completeFork,
+  BodyBuilder, buildBody, freshVarName, instr, buildFork, completeFork,
   beginBranch, endBranch, definiteVariableValue
   ) where
 
@@ -102,7 +102,8 @@ data BodyState
       subExprs    :: ComputedCalls,   -- ^Previously computed calls to reuse
       definers    :: VarDefiner,      -- ^The call that defined each var
       uParent     :: Maybe BodyState, -- ^The Forked of which this is a part
-      uPred       :: Maybe BodyState  -- ^The BodyState before the current one
+      uPred       :: Maybe BodyState, -- ^The BodyState before the current one
+      uTmpCnt     :: Int              -- ^The next temp variable number to use
       }
     | Forked {
       origin      :: BodyState,       -- ^The Unforked state before the fork
@@ -110,7 +111,8 @@ data BodyState
       stKnownVal  :: Maybe Integer,   -- ^Definite value of stForkVar if known
       stForkVarTy :: TypeSpec,        -- ^Type of stForkVar
       stForkBods  :: [BodyState],     -- ^BodyStates of all branches so far
-      fParent     :: Maybe BodyState  -- ^The Forked of which this is a part
+      fParent     :: Maybe BodyState, -- ^The Forked of which this is a part
+      fTmpCnt     :: Int              -- ^The next temp variable number to use
       }
     deriving (Eq,Show)
 
@@ -132,31 +134,69 @@ type ComputedCalls = Map Prim [PrimArg]
 type VarDefiner = Map PrimVarName Prim
 
 
+-- |Get the current temp variable count
+tmpCount :: BodyBuilder Int
+tmpCount = do
+    st <- get
+    case st of
+        Unforked{uTmpCnt=tmp} -> return tmp
+        Forked{fTmpCnt=tmp} -> return tmp
+
+-- |Allocate the next temp variable name and ensure it's not allocated again
+freshVarName :: BodyBuilder PrimVarName
+freshVarName = do
+    st <- get
+    case st of
+        Unforked{uTmpCnt=tmp} -> do
+          put $ st {uTmpCnt=tmp+1}
+          return $ PrimVarName (mkTempName tmp) 0
+        Forked{fTmpCnt=tmp} -> do
+          put $ st {fTmpCnt=tmp+1}
+          return $ PrimVarName (mkTempName tmp) 0
+
+
 -- |Extract a ProcBody from a BodyState.
 -- XXX This must be prepared to generate multiple auxilliary procs.
-currBody :: BodyState -> Compiler ProcBody
-currBody Unforked{currBuild=prims, uPred=Nothing} = do
+-- XXX This seems to miss the unforked part besides at the top level
+currBody :: BodyState -> Compiler (Int,ProcBody)
+currBody Unforked{currBuild=prims, uPred=Nothing, uTmpCnt=tmp} = do
     logMsg BodyBuilder "Completing unforked body with no predecessor"
-    return $ ProcBody (reverse prims) NoFork
-currBody Unforked{currBuild=prims, uPred=Just pred} = do
-    logMsg BodyBuilder "Completing unforked body with predecessor"
+    let result = ProcBody (reverse prims) NoFork
+    logMsg BodyBuilder $ "Result = " ++ show result
+    return (tmp,result)
+currBody Unforked{currBuild=prims, uPred=Just pred, uTmpCnt=tmp} = do
+    logMsg BodyBuilder $ "Completing unforked body of "
+                         ++ show (length prims)
+                         ++ " instructions with predecessor"
     pred' <- addInstrs pred prims
-    (ProcBody prims' fork) <- currBody pred'
-    return $ ProcBody (reverse prims ++ prims') fork
-currBody (Forked unforked@Unforked{currBuild=prims} var (Just val) ty bods _) =
+    (ProcBody prims' fork) <- snd <$> currBody pred'
+    let result = ProcBody (reverse prims ++ prims') fork
+    logMsg BodyBuilder $ "Result = " ++ show result
+    return (tmp,result)
+currBody (Forked unforked@Unforked{currBuild=prims} var (Just val) ty
+          bods _ tmp) =
     case maybeNth val $ reverse bods of
         Nothing -> do
-          logMsg BodyBuilder "Completing forked body with unknown decision var"
+          logMsg BodyBuilder
+                 $ "Completing forked body with out-of-range decision value "
+                   ++ show val
           currBody unforked
         Just bod -> do
+          logMsg BodyBuilder
+                 $ "Completing forked body with decision value " ++ show val
+          (ProcBody prims' fork) <- snd <$> currBody bod
           logMsg BodyBuilder "Completing forked body with known decision var"
-          (ProcBody prims' fork) <- currBody bod
-          return $ ProcBody (reverse prims ++ prims') fork
-currBody (Forked Unforked{currBuild=prims} var val ty bods _) = do
+          let result = ProcBody (reverse prims ++ prims') fork
+          logMsg BodyBuilder $ "Result = " ++ show result
+          return (tmp,result)
+currBody (Forked Unforked{currBuild=prims} var val ty bods _ tmp) = do
     logMsg BodyBuilder "Completing forked body with unforked origin"
     bods' <- reverse <$> mapM currBody bods
-    return $ ProcBody (reverse prims) $
-             PrimFork var ty False bods'
+    let result =
+          ProcBody (reverse prims) $ PrimFork var ty False $ snd <$> bods'
+    logMsg BodyBuilder $ "Result = " ++ show result
+    return (tmp,result)
+             
 
 -- Add a list of instrs at the end of a BodyState.  Since the instrs are
 -- stored in reverse order, that means adding them at the front.
@@ -170,9 +210,9 @@ addInstrs st@Forked{stForkBods=bods} suffix = do
     return $ st {stForkBods=bods'}
 
 
-initState :: VarSubstitution -> BodyState
-initState oSubst =
-    Unforked [] Map.empty oSubst Map.empty Map.empty Nothing Nothing
+initState :: Int -> VarSubstitution -> BodyState
+initState tmp oSubst =
+    Unforked [] Map.empty oSubst Map.empty Map.empty Nothing Nothing tmp
 
 
 ----------------------------------------------------------------
@@ -180,14 +220,13 @@ initState oSubst =
 ----------------------------------------------------------------
 
 -- |Run a BodyBuilder monad and extract the final proc body
-buildBody :: VarSubstitution -> BodyBuilder a -> Compiler (a,ProcBody)
-buildBody oSubst builder = do
+buildBody :: Int -> VarSubstitution -> BodyBuilder a -> Compiler (Int,ProcBody)
+buildBody tmpCnt oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
-    (a,st) <- buildPrims (initState oSubst) builder
+    (a,st) <- buildPrims (initState tmpCnt oSubst) builder
     logMsg BodyBuilder ">>>> Finished  building a proc body:"
-    body <- currBody st
-    logMsg BodyBuilder $ showBlock 4 body
-    return (a,body)
+    (tmp,body) <- currBody st
+    return (tmp,body)
 
 
 -- |Start a new fork on var of type ty
@@ -198,7 +237,7 @@ buildFork var ty = do
     case st of
       Forked{} -> do
         shouldnt "Building a fork outside of a body or branch"
-      Unforked{} -> do
+      Unforked{uTmpCnt=tmp} -> do
         arg' <- expandArg $ ArgVar var ty FlowIn Ordinary False
         logBuild $ "     (expands to " ++ show arg' ++ ")"
         let (fvar,fval) =
@@ -208,7 +247,7 @@ buildFork var ty = do
                   ArgVar var' varType _ _ _ -> do -- statically unknown result
                     (var',Nothing)
                   _ -> shouldnt "switch on non-integer variable"
-        put $ Forked st fvar fval ty [] (uParent st)
+        put $ Forked st fvar fval ty [] (uParent st) tmp
 
 
 -- |Complete a fork previously initiated by buildFork.
@@ -223,10 +262,10 @@ completeFork = do
       --   logBuild $ ">>> leaving state: " ++ show selectedBranch
       --   put selectedBranch
       Forked{origin=Unforked{currSubst=subst, outSubst=osubst, subExprs=subes,
-                             definers=defs, uParent=upar}} -> do
+                             definers=defs, uParent=upar, uTmpCnt=tmp}} -> do
         logBuild $ ">>>> ending fork on " ++ show (stForkVar st)
         -- let prevUnforked = origin st
-        put $ Unforked [] subst osubst subes defs upar $ Just st
+        put $ Unforked [] subst osubst subes defs upar (Just st) tmp
       Forked{origin=Forked{}} -> shouldnt "Complete an unbuilt fork"
 
 
@@ -240,9 +279,9 @@ beginBranch = do
     case st of
         Unforked{} ->
           shouldnt "beginBranch in Unforked state"
-        Forked{origin=Unforked _ subst vsubst subexp defs _ _,
+        Forked{origin=Unforked _ subst vsubst subexp defs _ _ tmp,
                stForkVar=var, stKnownVal=val} -> do
-          put $ Unforked [] subst vsubst subexp defs (Just st) Nothing
+          put $ Unforked [] subst vsubst subexp defs (Just st) Nothing tmp
           -- note the value of the fork variable for this branch if unknown
           -- XXX also add consequences of this, eg if var is result of X==Y
           --     comparison and var == 1, then record that X==Y.
@@ -383,7 +422,7 @@ instr' prim pos = do
     let (prim',newOuts) = splitPrimOutputs prim
     logBuild $ "Looking for computed instr " ++ show prim' ++ " ..."
     currSubExprs <- gets subExprs
-    logBuild $ "with subExprs = " ++ show currSubExprs
+    logBuild $ "  with subExprs = " ++ show currSubExprs
     match <- gets (Map.lookup prim' . subExprs)
     case match of
         Nothing -> do

@@ -24,8 +24,8 @@ gen$1 > (2 calls)
         foreign llvm move(~wybe.io$io#1:wybe.phantom, ?wybe.io$io#2:wybe.phantom)
 
     1:
-        foreign c putchar(~c#0:wybe.char, ~wybe.io$io#1:wybe.phantom, ?tmp$9#0:wybe.phantom) @wybe:84:39
-        simple_loop.gen$1<0>(~tmp$9#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom) @simple_loop:1:1
+        foreign c putchar(~c#0:wybe.char, ~wybe.io$io#1:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:84:39
+        simple_loop.gen$1<0>(~tmp$8#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom) @simple_loop:1:1
 
 
 
