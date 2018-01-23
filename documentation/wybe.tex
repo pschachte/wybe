@@ -1,0 +1,868 @@
+%  Emacs    : -*- latex -*-
+%  File     : design.tex
+%  RCS      : $Id: design.tex,v 1.14 2008/11/19 22:50:59 schachte Exp $
+%  Author   : Peter Schachte
+%  Origin   : Fri Mar 28 19:36:48 2003
+%  Purpose  : Discussion document on design of new language
+%  Copyright: © 2003 Peter Schachte.  All rights reserved.
+%
+
+\documentclass{article}
+\usepackage{a4wide}
+\usepackage{xspace}
+\usepackage{fancyvrb}
+%\usepackage{ensuremath}
+
+\newcommand{\lang}{\textsf{Wybe}\xspace}
+\newcommand{\Lang}{\textsf{Wybe}\xspace}
+
+\newcommand{\ie}{\emph{i.e.}\xspace}
+\newcommand{\eg}{\emph{e.g.}\xspace}
+\newcommand{\Ie}{\emph{I.e.}\xspace}
+\newcommand{\Eg}{\emph{E.g.}\xspace}
+\newcommand{\etc}{\emph{etc}}
+
+\newcommand{\nyi}[1]{\underline{#1} (not yet implemented)}
+\newcommand{\tbi}[1]{(\underline{Currently}, #1).}
+
+\newcommand{\tuple}[1]{\ensuremath{\langle#1\rangle}}
+
+\title{The \Lang Programming Language}
+\author{Peter Schachte}
+\begin{document}
+\maketitle
+\noindent
+The aim of the \lang programming language is to be simple, easy-to-learn,
+and easy-to-use, while supporting large teams in producing maintainable
+efficient programs.
+It encourages designs with low coupling and high cohesion, and takes
+the best aspects of both declarative and imperative programming, in
+particular taking ideas from procedural, object-oriented, functional,
+and logic programming languages.
+
+
+\section{Lexical structure}
+\label{sec:Lexical structure}
+
+Comments begin with a hash (\#) character and continue until the end of
+the line.
+
+Identifiers are sequences of letters, digits, and underscore characters
+not beginning with a digit.  Numbers follow C's syntax, except that
+they may contain (but not begin with) underscore characters (\verb+_+),
+which are ignored, and can be used to make large numbers easier for
+humans to read.  Operator symbols consist of any sequence of one or
+more of the following characters:  
+\begin{center}
+\verb'~ @ $ % ^ & + - * / = | \ : ; < > .'
+\end{center}
+Any sequence of these characters written between backquote characters
+(\verb+`+) is an ordinary identifier.  That is, surrounding an
+operator with backquotes allows it to be used as an identifier.
+
+String literals follow orthodox syntax:  they begin and end with a
+double quote character (\verb|"|).  Inside the string, the following
+sequences have the specified special meaning:
+
+\begin{center}
+\begin{tabular}{|c|l|}
+  \hline \textbf{sequence} & \textbf{meaning} \\
+  \hline \verb+\a+ & alert/bell (ascii code \verb+0x07+) \\
+  \hline \verb+\b+ & backspace (ascii code \verb+0x08+) \\
+  \hline \verb+\e+ & escape (ascii code \verb+0x1B+) \\
+  \hline \verb+\f+ & formfeed (ascii code \verb+0x0C+) \\
+  \hline \verb+\n+ & newline (ascii code \verb+0x0A+) \\
+  \hline \verb+\r+ & carriage return (ascii code \verb+0x0D+) \\
+  \hline \verb+\t+ & horizontal tab (ascii code \verb+0x09+) \\
+  % \hline \verb+\u+\emph{hhhh} & the unicode character with code \emph{hhhh} (where \emph{h} is a hex digit)  \\
+  % \hline \verb+\U+\emph{hhhhhhh} & the unicode character with code \emph{hhhhhhhh} (where \emph{h} is a hex digit)  \\
+  \hline \verb+\v+ & vertical tab (ascii code \verb+0x0B+) \\
+  \hline \verb+\x+\emph{hh} & the character with code \emph{hh} (where \emph{h} is a hex digit) \\
+  \hline \verb+\(+\emph{expr}\verb+)+ & the value of expression \emph{expr} as a string (for any expression \emph{expr}) \\
+  \hline \verb+\+\emph{c} & the character \emph{c} (for any other character \emph{c}) \\
+\hline
+\end{tabular}
+\end{center}
+To include a double quote or backslash (\verb+\+) character in a string,
+precede it with a backslash.
+
+Character constants begin and end with a single quote, but can only contain
+a single character.
+All the character escapes for strings can be used in character constants,
+except for \verb+\(+\emph{expr}\verb+)+.
+
+
+\section{Syntax}
+\label{sec:Syntax}
+
+
+\section{Statements and expressions}
+\label{sec:Statements and expressions}
+
+A \emph{statement} is a \lang construct that has an effect when executed,
+and does not have a value.
+Effects may include performing input or output, or setting the
+value of a variable.
+The usual form of a statement is
+\begin{center}
+  \emph{procname}\texttt{(}\emph{expr},\ldots\texttt{)}
+\end{center}
+where the \emph{procname}, naming the procedure called, is an identifier,
+and there are any number of
+expression arguments, separated by commas.
+
+An \emph{expression} is a construct that determines outputs from inputs.
+Each expression is either a \emph{variable reference} (described below)
+or a call to a \emph{function}, of the form
+\begin{center}
+  \emph{funcname}\texttt{(}\emph{expr},\ldots\texttt{)}
+\end{center}
+where \emph{funcname} is the name of the function to be called.
+
+\subsection{Dataflow}
+\label{sec:Dataflow}
+
+Each variable reference may either read, write, or modify
+(\ie, both read and write) the variable.
+This is the \emph{mode} of the reference.
+Variable names prefixed with a \verb+?+ operator specify that the
+variable will be written (without being read); this is an \emph{output} mode.
+A variable names prefixed
+with a \verb+!+ operator signify that it will be read and written,
+an \emph{input/output} mode.
+Unadorned variable names indicate read-only usage, an \emph{input} mode.
+
+Expressions have modes, too.
+An expression all of whose arguments are inputs is an input mode,
+while one all of whose arguments are outputs is an output mode.
+If there is a mix of inputs and outputs, or if any argument is in
+input/output mode, the expression is in input/output mode.
+This will be discussed further when we address tests.
+
+\subsection{Mode overloading}
+\label{sec:Mode overloading}
+
+The mode of a statement is the ordered list of the modes of the arguments
+of the statement.
+This is specified in the declaration of the procedure.
+A statement may have any number of inputs and any number of outputs.
+
+There may be more than one procedure with a given name, as long as
+the modes are different.
+The mode of the procedure call is used to determine which procedure
+with that name is being called.
+For example, the procedure \texttt{=} has a mode with the first argument
+output and the second input, and another with the first input and
+the second output.
+Thus \texttt{x} can be assigned the value \texttt{42} with either of the
+following statements:
+\begin{verbatim}
+    ?x = 42
+    42 = ?x
+\end{verbatim}
+
+\subsection{Defining functions and procedures}
+\label{sec:Defining functions and procedures}
+
+Functions and procedures are defined using the following syntaxes:
+\begin{center}
+  \texttt{func} \emph{name}\texttt{(}%
+  \emph{param}\texttt{:}\emph{ptype}, \ldots\texttt{):}\emph{rtype}
+  \texttt{=} \textit{expr} \\
+  \texttt{proc}
+  \emph{name}(\emph{mode} \emph{param}\texttt{:}\emph{ptype}, \ldots)
+  \textit{stmt} \ldots \texttt{end}
+\end{center}
+where \emph{name} and \emph{param} are identifiers,
+\emph{ptype} and \emph{rtype} are
+argument and result type specifications, respectively, and
+each \emph{mode} is either \texttt{?}, \texttt{!}, or nothing,
+meaning that that argument is output, input/output, or input only,
+respectively.
+Any number of parameters can be specified; if no parameters are
+specified, the empty parentheses are omitted.
+Any \texttt{:}\emph{ptype}s or \texttt{:}\emph{rtype} can be omitted,
+in which case the compiler will infer it, provided it is uniquely
+determined and the procedure or function is not exported
+(see Section~\ref{sec:Exports}).
+However, it is considered to be good programming style to include
+the declarations.
+
+\subsection{Functions \emph{are} procedures}
+\label{sec:Functions \emph{are} procedures}
+
+A function of $n$ arguments is just a procedure with $n$ input arguments
+plus a single output argument.
+A statement one of whose arguments is a function call is equivalent to
+two (or three) statements.
+For example, the statement
+\begin{verbatim}
+    p(f(x,y))
+\end{verbatim}
+is equivalent to
+\begin{verbatim}
+    f(x,y,?temp)
+    p(temp).
+\end{verbatim}
+In fact, this is how \lang implements such a statement.
+If the expression is in output mode, the statement for the expression
+comes after; for example
+\begin{verbatim}
+    p(f(?x,?y))
+\end{verbatim}
+is equivalent to
+\begin{verbatim}
+    p(?temp)
+    f(?x,?y,temp).
+\end{verbatim}
+Where an expression is in input/output mode, it is equivalent to two
+procedure calls; for example
+\begin{verbatim}
+    p(f(!x,!y))
+\end{verbatim}
+is equivalent to
+\begin{verbatim}
+    f(x,y,?temp)
+    p(!temp)
+    f(?x,?y,temp).
+\end{verbatim}
+
+Conversely, any procedure can be called as a function by simply
+substituting a call to the procedure with its final argument
+omitted for the omitted argument.
+Thus
+\begin{center}
+  \texttt{func} \emph{name}\texttt{(}%
+  \emph{param$_1$}\texttt{:}\emph{type$_1$},\ldots,
+  \emph{param$_n$}\texttt{:}\emph{type$_n$}\texttt{):}\emph{type}
+  \texttt{=} \textit{expr}
+\end{center}
+is exactly equivalent to
+\begin{center}
+  \texttt{proc}
+  \emph{name}(\emph{param$_1$}\texttt{:}\emph{type$_1$},\ldots,
+  \emph{param$_n$}\texttt{:}\emph{type$_n$}, \texttt{?temp:}\emph{type})
+  \texttt{?temp =} \emph{expr} \texttt{end} \\
+\end{center}
+For example, the following is valid:
+\begin{verbatim}
+    proc succ(x:int, ?y:int) ?y = x + 1 end
+    proc succ(?x:int, y:int) ?x = y - 1 end
+
+    proc updown(in, ?out) # out always = in
+        ?tmp = succ(in)   # increment in
+        tmp = succ(?out)  # decrement tmp
+    end
+\end{verbatim}
+
+\subsection{Tests}
+\label{sec:Tests}
+
+A \emph{test} is a statement that can succeed or fail.
+A test is similar to a Boolean expression, except that
+none of the outputs of a test are deemed to have been produced
+if the test fails; if it succeeds, all the outputs are taken
+to have been produced.
+A statement sequence fails if any of its statements fails, and
+execution does not continue following the failing statement.
+
+The condition of a conditional statement must be a test, as must the parts
+of a conjunction, disjunction, or negation.
+A conjunction, disjunction, or negation is a test, as is
+a call to a test procedure.
+
+Outputs of a test may only be used in contexts where the test
+must have succeeded; in particular in the \emph{then} branch of
+a conditional or following conjuncts in a conjunction.
+Outputs of a negated test can only be used when the negation fails.
+Variables that are assigned by all disjuncts in a disjunction, or
+all branches of a conditional may also be used, as may variables that
+are assigned prior to the conjunction, disjunction, negation, or conditional.
+As a convenience, a Boolean expression may be used as a test.
+
+Note that some modes for a procedure name may be tests while others
+are not.
+A function may also be a test, which indicates a partial function.
+A statement is a test iff the called procedure is a test in that mode,
+or if any of its arguments is a test.
+An expression is a test iff the function is a test in that mode, or
+if any subexpression is a test.
+A test statement succeeds iff all argument expressions succeed \emph{and}
+the procedure call itself succeeds.
+An expression succeeds iff all subexpressions succeed and
+the function call itself succeeds.
+Non-test procedure and function calls are treated as succeeding,
+and nested expressions are treated as the conjunction of their
+subexpressions.
+Thus a disjunction of statements is deemed to succeed if all the
+subexpressions of at least one of them succeeds.
+
+Unlike in logic programming, tests in \lang\ are deterministic:
+the output bindings of the first successful test are final.
+However, \lang\ also supports \nyi{generators}, which are used in loops
+and are similar to backtracking in logic programs.
+
+\subsection{Implied modes}
+\label{sec:Implied modes}
+
+It is always permitted to supply an input in a mode where an output is
+expected, providing the type of that argument permits equality testing.
+In this case, the output mode is used to store the result in a temporary
+variable, and then the supplied value is tested for equality with the
+temporary variable.
+As we will see, data constructors are functions that work in forwards
+and backwards modes, making these implied modes useful for pattern matching.
+
+\subsection{Selection and iteration statements}
+\label{sec:Selection and iteration statements}
+
+
+The new syntax philosophy is conceptual parsimony, built on relatively
+few syntactic elements.
+
+Miscellaneous ideas:
+\begin{itemize}
+\item Special syntax for manifest constant maps:
+  \begin{center}
+  \texttt{\{}\textit{key$_1$}\texttt{::}\textit{value$_1$},
+  \textit{key$_2$}\texttt{::}\textit{value$_2$}, \ldots\texttt{\}}
+  \end{center}
+  As a special case, sets can be written as
+  \begin{center}
+  \texttt{\{}\textit{key$_1$}, \textit{key$_2$}, \ldots\texttt{\}}
+  \end{center}
+
+\item Allow use of ``\verb`|`'' as an alternative to ``\verb`,`'' to
+  separate set and map items.
+  When values involve multiple statements, this is useful because \verb`|`
+  has lower precedence than statement separation.
+  If ``\verb`|`'' is the first or last thing within curly braces, it is
+  ignored, to simplify code layout and avoid the separator vs.\ terminator
+  problem.
+  
+
+\item Capitalising on this, we use this syntax for case statements:
+  \begin{center}
+    \texttt{case} \textit{expr} \textit{map}
+  \end{center}
+  where the values in the \textit{map} are statement sequences. Case
+  expressions are similar, but where the values in the \textit{map} are
+  expressions.
+
+  One challenge to this is that we want case values to be patterns, which
+  can have outputs. This makes maps quite powerful, as matching keys must
+  involve pattern matching, \ie, executing code.
+  Is this too powerful?
+
+\item Conditional statements and expressions have the syntax
+  \begin{center}
+    \texttt{if} \textit{map}
+  \end{center}
+  which is equivalent to \texttt{case true} \textit{map}. For this to be
+  meaningful, the semantics of manifest constants maps must be that
+  multiple mappings with identical keys are permitted, and the \emph{first}
+  mapping for the repeated key is taken.
+
+\item Allow a set of statement sequences to be treated as a closure?
+  A singleton set is a deterministic statement sequence (providing its
+  statements are det), and multi-element sets are nondet, so ``\verb`|`''
+  could be used to separate alternatives in generators.
+  This would allow curly brace notation for statement sequences, but
+  int means that where a statement sequence is used, it needs to be
+  surrounded by braces.
+  Perhaps we could coerce a single statement to a singleton statement
+  sequence.
+
+\item Either maintain the decision not to have any statement separators, or
+  allow separator (semicolon, I assume) to be omitted when its the last
+  thing on a line.
+
+\item As a special syntactic case, allow proc calls with a single argument
+  to be written without the parentheses surrounding the argument (or with
+  them).
+
+\end{itemize}
+
+
+
+At the highest (tightest) precedence, \lang has manifest constants, identifiers,
+and calls.  A call is written as an identifier followed by an open
+parenthesis, a comma-separated argument list, and a close parenthesis.
+
+\textbf{Abandon this:}
+At the loosest precedence, \lang supports ``interfix'' operators:
+alternating identifiers and terms of higher precedence.  These are
+parsed as a term whose constructor is the concatenation of the
+identifiers, separated by underscores, with the subterms, in order, as
+arguments.
+
+
+\subsubsection*{Definition}
+\begin{Verbatim}
+    def foo(x:int, y:int) use io {
+        !bar(x)
+        !baz(y)
+    }
+\end{Verbatim}
+
+\begin{Verbatim}
+    def hypot(x:int, y:int):int = sqrt(x**2 + y**2)
+\end{Verbatim}
+
+\subsubsection*{Selection}
+\begin{Verbatim}
+        if {
+        | prime(x):
+            !bar(x)
+            !baz(y)
+        | else:
+            !baz(y)
+            !bar(x)
+        }
+\end{Verbatim}
+
+\begin{Verbatim}
+        case x {
+        | 0:: !bar(x)
+              !baz(y)
+        | 1:: !baz(y)
+              !bar(x)
+        | _:: nop
+        }
+
+\end{Verbatim}
+
+\subsubsection*{Looping}
+\begin{Verbatim}
+        do {stmt1
+            while test
+            stmt2
+        }
+\end{Verbatim}
+
+
+\Lang procedure and function names can be used as prefix or infix
+operators, regardless of whether they are alphabetic or symbolic.
+Their precedence and associativity are determined by the first
+character of the operator name, as follows:
+\begin{center}
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+    \textbf{lead character} &
+    \textbf{arity} &
+    \textbf{associativity} &
+    \textbf{precedence} \\
+    \hline
+    \verb'.' (period) &
+    infix &
+    left &
+    10 (tightest) \\
+    \hline
+    \verb'?', \verb'!' &
+    unary (prefix) &
+    non-associative &
+    9 \\
+    \hline
+    \verb'~', \verb'@', \verb'$', \verb'%', \verb'&', \verb'=',
+    \verb'*', \verb'/', \verb'-', \verb'+' &
+    unary (prefix) &
+    non-associative &
+    8 \\
+    \hline
+    \verb'*', \verb'/', \verb'%' &
+    binary (infix) &
+    left &
+    7 \\
+    \hline
+    \verb'-', \verb'+' &
+    binary (infix) &
+    left &
+    6 \\
+    \hline
+    \verb':' &
+    binary (infix) &
+    non-associative &
+    5 \\
+    \hline
+    \verb'a'--\verb'z', \verb'A'--\verb'Z', \verb'_' &
+    binary (infix) &
+    right &
+    4 \\
+    \hline
+    \verb'a'--\verb'z', \verb'A'--\verb'Z', \verb'_' &
+    unary (prefix) &
+    non-associative &
+    3 \\
+    \hline
+  \end{tabular}
+\end{center}
+By allowing any name to be an operator, we avoid the need for a lot of
+special syntax.  In particular, we want to allow the following forms:
+
+
+\section{Modules}
+\label{sec:Modules}
+
+Each \lang module should be written in a file named
+\emph{module}\texttt{.wybe}, where \emph{module} is the name of the module.
+Module names may be any valid identifier, except for the special name \verb+_+.
+Modules may be nested to any depth, allowing them to fulfill the role
+packages play in other languages.
+Modules may contain any number of the following things, in any order:
+\begin{itemize}
+\item Module imports
+\item Type definitions
+\item (Sub-)modules
+\item Function definitions
+\item Procedure definitions
+\item Resource declarations
+\item Statements
+\end{itemize}
+
+A module may also be an operating system directory, in which case all
+modules in that directory are taken to be its public submodules.  If
+the directory contains a \lang source file named \verb+_.wybe+,
+this overrides the public importation, allowing the
+module to chose which submodules to export, as well as to define its
+own top-level procedures, functions, and initialization statements.
+
+\subsection{Exports}
+\label{sec:Exports}
+Each type, submodule, function, procedure, and resource definition may be
+preceded with the modifier '\texttt{public}', in which case, that
+element is exported.  Without a \texttt{public} modifier, it is private,
+and cannot be used outside that module.
+
+\subsection{Imports}
+\label{sec:Imports}
+\Lang supports the following varieties of module importation:
+\begin{itemize}
+\item Module members may be imported such that they can be used without
+  module qualification (\texttt{import}), or
+  \nyi{so that they can only be used with explicit module qualification}
+  (\texttt{use}).
+  \tbi{\texttt{use} means import so that it can be used with or without
+    module qualification}
+\item All public members of a module may be imported
+  (\texttt{use} or \texttt{import} \emph{module}),
+  or only certain specified members may be imported
+  (\texttt{from} \emph{module} \texttt{use} or \texttt{import} \emph{items}).
+\item Members may be imported such that they become public members of
+  the \emph{importing} module, visible to any module that imports it
+  (by preceding the \texttt{use} directive with \texttt{public}) or not.
+\end{itemize}
+This gives the following eight varieties of importation:
+\begin{center}
+  \begin{tabular}{|p{25mm}|p{107mm}|}
+    \hline \raggedright
+    \texttt{use} \emph{module}
+    & Imports everything made public by \emph{module} so that it can be used
+    with module qualification.
+    \\ \hline \raggedright
+    \texttt{import} \emph{module}
+    & Imports everything made public by \emph{module} so that it can be used
+    with or without module qualification.
+    \\ \hline \raggedright
+    \texttt{from} \emph{module} \hspace{2em} \texttt{use} \emph{items}
+    & Imports the specified items, which must all be made public
+    by \emph{module}, so that they
+    can be used with module qualification.
+    \\ \hline \raggedright
+    \texttt{from} \emph{module} \texttt{import} \emph{items}
+    & Imports the specified items, which must all be made public
+    by \emph{module}, so that they
+    can be used with or without module qualification.
+    \\ \hline \raggedright
+    \texttt{public} \hspace{4em} \texttt{use} \emph{module}
+    & Imports everything made public by \emph{module} so that it can be used
+    with qualification, and reexport it from the
+    importing module as if it were defined there.
+    \\ \hline \raggedright
+    \texttt{public} \hspace{4em} \texttt{import} \emph{module}
+    & Imports everything made public by \emph{module} so that it can be used
+    with or without module qualification, and reexport it from the
+    importing module as if it were defined there.
+    \\ \hline \raggedright
+    \texttt{public} \hspace{4em} \texttt{from} \emph{module} \hspace{2em} 
+    \texttt{use} \emph{items}
+    & Imports the specified items, which must all be made public by
+    \emph{module}, so that they
+    can only be used with module qualification, and reexport
+    them from the importing module as if they were defined there.
+    \\ \hline \raggedright
+    \texttt{public} \hspace{4em} \texttt{from} \emph{module}
+    \texttt{import} \emph{items}
+    & Imports the specified items, which must all be made public by
+    \emph{module}, so that they
+    can be used with or without module qualification, and reexport
+    them from the importing module as if they were defined there.
+    \\ \hline
+  \end{tabular}
+\end{center}
+
+
+\subsection{Submodules}
+\label{sec:Submodules}
+
+Submodule declarations have the form:
+\begin{center}
+  \texttt{module} \emph{modname} \texttt{is} \emph{item} \ldots\ \texttt{end}
+\end{center}
+where \emph{modname} is the submodule name and the
+\emph{item}s are the contents of the submodule.
+Submodules are implicitly imported into the parent module.
+
+
+\subsection{Top level statements}
+\label{sec:Top level statements}
+
+Statements written at the top level of a file are executed, in the order
+written, at the time the program begins execution.
+Top level statements of a module are executed before the top level
+statements of any module that imports it, but are only executed
+once regardless of how many modules import it, making them suitable for
+module initialisations.
+Top level statements also fill the role a \texttt{main} function or
+method fills in other languages.
+
+
+\section{Types}
+\label{sec:Types}
+\Lang is strongly typed, with parametric polymorphism (generics),
+type inference, \nyi{abstract types},
+and \nyi{subtypes} supporting the Liskov substitution principle.
+
+% A type may declare that it \texttt{extends} another type.
+% That means that,
+% as in object oriented languages, any type may be ``extended'' by
+% another type, and instances of that other type my be used wherever
+% instances of the extended type can be.
+% All data types are effectively abstract data types.
+% 
+% This provides similar functionality to type classes, but without the
+% need to decide ahead which things should be types and which should be
+% type classes.
+% \Lang ensures that all programs follow Martin's dictum:
+% ``Depend upon Abstractions. Do not depend upon concretions.''
+
+Type declarations have the form:
+\begin{center}
+  \texttt{type} \emph{typename}(\emph{paramname,\ldots}) \texttt{=} \emph{ctorname}(\emph{membername}\texttt{:}\texttt{membertype},\ldots) $\mid$ \ldots\ \texttt{end}
+\end{center}
+where \emph{typename}, \emph{paramname}, \emph{ctorname}, and
+\emph{membername} are identifiers,
+and \emph{membertype} is a type.
+Here \emph{typename} is the name of the type being defined, and the
+\emph{paramname}s name the type parameters.
+If no type parameters are specified, the empty parentheses are omitted.
+Each \emph{ctorname} is a data constructor for this type, and the
+\emph{membername}s and \emph{membertype}s are the arguments of the
+constructor and their types.
+Again, if a \emph{ctorname} has no parameters, the empty parentheses
+are omitted.
+As many constructors may be specified as desired, separated by vertical
+bars.
+
+For example:
+\begin{verbatim}
+    type colour = colour(red:int, green:int, blue:int) end
+
+    type list(t) =
+            empty 
+          | cons(head:t, tail:list(t))
+    end
+\end{verbatim}
+
+It should be noted that \lang constructors are not like constructors in
+object oriented languages, in that they do not have explicit implementations.
+Constructors simply construct a value holding the supplied data.
+But \lang constructors are ordinary \lang functions, except that they are
+not explicitly defined.
+You are free to define other functions to construct values of that type,
+and their use will not be distinguishable from constructors.
+
+\Lang also provides a backward mode for each constructor, to serve as
+a deconstructor.
+That is, constructors can be run backwards to deconstruct a data structure.
+Additionally, a single argument deconstructor function is defined for
+each constructor argument.
+For types with more than one constructor, these backward deconstructor modes,
+as well as forward deconstructor functions, are tests.
+For the examples above, \lang will support to following statements (where
+\texttt{c} is a color and \texttt{l} is a list):
+\begin{verbatim}
+     # to deconstruct a color into red, green, and blue components
+     c = colour(?r, ?g, ?b)
+
+     # the following are equivalent:
+     ?r = red(c)
+     ?g = green(c)
+     ?b = blue(c)
+     
+     # to deconstruct a non-empty list into head and tail:
+     if l = cons(?h, ?t) ...
+
+     # to pattern match a singleton list:
+     if l = cons(?h, empty)
+\end{verbatim}
+
+The \lang library supplies a useful little function with only
+a backward mode:
+
+The language also supports Myer's uniform access principle.
+Every type is simply a module whose name may be used as a type name.
+The primitive operations (methods) of the type are the operations
+exported by the module.
+
+Constructors (and deconstructors) are ordinary functions.
+Each type declaration includes all its data constructors, each of which
+looks like a function declaration, except that the return type
+and function body are omitted.
+The compiler automatically generates the implementation of the
+constructor and deconstructor functions.
+However, constructors and deconstructors are ordinary functions, so
+an existing type with defined constructors and deconstructors can be
+redefined with new functions implementing the same interface as the
+previous constructors and deconstructors.
+
+Functions and procedures can be declared to be \texttt{abstract}, in
+which case their implementations are omitted.
+The compiler will not permit abstract operations to be invoked; the
+value must be known to be of a subtype that implements the operation for
+it to be used.
+
+There is an abstract type \texttt{data} that serves as the root of the hierarchy
+of data types.  This type has several useful abstract operations such
+as equality testing, and printing.  All types declared with
+constructors, as well as all the primitive types such as integer,
+float, and char, implement this type.
+
+
+\section{Functions and procedures}
+\label{sec:Functions and procedures}
+
+\Lang supports both functions and procedures.
+The top level of a procedure definition, and the top level of a
+module, are statement contexts.
+Calls written there are taken to be procedure calls.
+The arguments of a procedure or function call, and the body of a
+function definition, are expressions.
+Calls written as parts of expressions are taken to be function calls.
+
+However, procedures and functions are, in fact, the same thing called
+with a different syntax.
+A function call is merely a procedure call whose final
+argument is omitted; the value of that argument after the call is
+taken to be the value of the function call.
+A procedure call is merely a function call with one extra argument
+whose value is the value of the function call.
+So regardless of whether something is defined as procedure or
+function, it may be called as either an expression or a statement.
+
+Each procedure argument, may be input, output, or both, according
+to the \verb+?+ and \verb+!+ annotations on its declaration.
+A particular ordering of inputs, outputs, and in/out arguments is
+called a procedure \emph{mode}.
+A given procedure name may have any number of different declarations
+with the same argument types and different modes, but may not have
+more than one declaration with the same types and modes.
+There are some restrictions on modes specific to functions:
+\begin{enumerate}
+\item if the last argument is output, at least one other argument must
+  be input; and
+\item if the last argument is input, at least one other argument must
+  be output or in/out; and
+\item the last argument must not be in/out.
+\end{enumerate}
+If any of these restrictions are not met, the procedure cannot be used
+with a functional syntax in that mode.
+These restrictions are imposed to ensure functional syntax is only
+used for procedures that behave functionally.
+
+As a syntactic convenience, funcs and procs can use patterns in place
+of formal parameters.
+This is equivalent to a variable parameter, with a deconstruction
+statement inserted at the front of the body.
+Further, funcs and procs can be defined by pattern matching;
+this involves writing multiple definitions of the same func/proc name
+and arity, with mutually exclusive patterns in the header.
+This is semantically equivalent to a single definition whose body is a
+disjunction of the bodies of all the definitions.
+
+
+\section{Resources}
+\label{sec:Resources}
+
+\section{The Expression Problem}
+\label{sec:The Expression Problem}
+
+\Lang solves the ``expression problem'' by allowing types, funcs, and procs
+to be declared \texttt{open}.
+An open type is declared by preceding a type declaration with the modifier \texttt{open}.
+An open type in one module can be extended with extra constructors
+in another module.
+This is done with an extend declaration, which has the same
+syntax as a type declaration, except that it substitutes the
+keyword \texttt{extend} for \texttt{type}.
+The type specified in an extend declaration 
+must have previously be declared an \texttt{open} type.
+In this case, the constructors defined in the extend declaration
+live in the enclosing module, although the type itself may live in a
+different module.
+
+Similarly, a func or proc may also be declared open by preceding
+the (first) declaration of the func/proc by the keyword \texttt{open}.
+An open func or proc may be extended by a definition in another module
+by preceding the definition by the keyword \texttt{extend}.
+Only the first definition of a func/proc need use the keyword.
+The semantics of the func/proc is then the disjunction of the original
+and extension definitions.
+The order of definitions within a module is the order they are written in
+that module; the modules themselves are taken in an undefined order that
+is consistent with a module dependencies.
+That is, if module A depends on B, but not vice versa, then A's
+definitions must come before B's.
+
+A func or proc definition, whether open or not, and whether the original
+or extension definition, may also be declared as a default definition by
+preceding it with the keyword \texttt{default} (in place of the
+\texttt{extend} or \texttt{open} keyword).
+This means that that definition is disjoined after all non-\texttt{default}
+definitions.
+If multiple default definitions are made for the same func/proc,
+all the defaults for a given module are taken in the order written.
+If multiple module specify defaults for the same func/proc,
+then they are taken in the reverse order of the non-default definitions.
+That is, if module A depends on module B, then B's default definitions
+come before A's.
+
+
+\section{Foreign interface}
+\label{sec:Foreign interface}
+
+\section{Code Transformation}
+\label{sec:Code Transformation}
+
+\Lang code is transformed into deterministic clausal form as the
+compiler's intermediate representation.
+In this form, each procedure body is represented as a (possibly empty)
+list of primitive operations (comprising the common initial operations
+for all clauses), and optionally a variable on which to switch and a
+list of procedure bodies.
+The value of the variable then determines which (exactly one)
+of the bodies is executed.
+
+Each operation in a body may have any number of inputs and any number
+of outputs, but not in/out variables.
+Inputs may be either variables or manifest constants; outputs must
+always be distinct fresh variables.
+For convenience, variable names have an explicit ``version'' number
+suffix, similar to the common variable naming scheme used in SSA
+languages.
+
+
+\end{document}
+
+% LocalWords:  vararg predicate's nonfailure DCG monoporphized nondet RDBMS
+% LocalWords:  coroutining distfix ness supertyping Liskov backquote
+% LocalWords:  restrictable ctor
