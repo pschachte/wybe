@@ -22,7 +22,7 @@
 \newcommand{\Eg}{\emph{E.g.}\xspace}
 \newcommand{\etc}{\emph{etc}}
 
-\newcommand{\nyi}[1]{\underline{#1} (not yet implemented)}
+\newcommand{\nyi}[1]{\underline{#1} \emph{(not yet implemented)}}
 \newcommand{\tbi}[1]{(\underline{Currently}, #1).}
 
 \newcommand{\tuple}[1]{\ensuremath{\langle#1\rangle}}
@@ -57,7 +57,7 @@ more of the following characters:
 \verb'~ @ $ % ^ & + - * / = | \ : ; < > .'
 \end{center}
 Any sequence of these characters written between backquote characters
-(\verb+`+) is an ordinary identifier.  That is, surrounding an
+(\verb+`+) is \nyi{an ordinary identifier}.  That is, surrounding an
 operator with backquotes allows it to be used as an identifier.
 
 String literals follow orthodox syntax:  they begin and end with a
@@ -74,10 +74,15 @@ sequences have the specified special meaning:
   \hline \verb+\n+ & newline (ascii code \verb+0x0A+) \\
   \hline \verb+\r+ & carriage return (ascii code \verb+0x0D+) \\
   \hline \verb+\t+ & horizontal tab (ascii code \verb+0x09+) \\
-  % \hline \verb+\u+\emph{hhhh} & the unicode character with code \emph{hhhh} (where \emph{h} is a hex digit)  \\
-  % \hline \verb+\U+\emph{hhhhhhh} & the unicode character with code \emph{hhhhhhhh} (where \emph{h} is a hex digit)  \\
+  \hline \verb+\u+\emph{hhhh} &
+         \nyi{the unicode character with code \texttt{0x}\emph{hhhh}}
+         (where \emph{h} is a hex digit)  \\
+  \hline \verb+\U+\emph{hhhhhhh} &
+         \nyi{the unicode character \texttt{0x}\emph{hhhhhhhh}}
+         (where \emph{h} is a hex digit)  \\
   \hline \verb+\v+ & vertical tab (ascii code \verb+0x0B+) \\
-  \hline \verb+\x+\emph{hh} & the character with code \emph{hh} (where \emph{h} is a hex digit) \\
+  \hline \verb+\x+\emph{hh} &
+         the character \texttt{0x}\emph{hh} (where \emph{h} is a hex digit) \\
   \hline \verb+\(+\emph{expr}\verb+)+ & the value of expression \emph{expr} as a string (for any expression \emph{expr}) \\
   \hline \verb+\+\emph{c} & the character \emph{c} (for any other character \emph{c}) \\
 \hline
