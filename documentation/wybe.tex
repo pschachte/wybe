@@ -24,6 +24,7 @@
 
 \newcommand{\nyi}[1]{\underline{#1} \emph{(not yet implemented)}}
 \newcommand{\tbi}[1]{(\underline{Currently}, #1).}
+\newcommand{\possible}[1]{\emph{Possible improvement:} #1}
 
 \newcommand{\tuple}[1]{\ensuremath{\langle#1\rangle}}
 
@@ -56,7 +57,8 @@ more of the following characters:
 \begin{center}
 \verb'~ @ $ % ^ & + - * / = | \ : ; < > .'
 \end{center}
-Any sequence of these characters written between backquote characters
+Any sequence of any of these characters plus any parenthesis, bracket,
+or brace characters, written between backquote characters
 (\verb+`+) is \nyi{an ordinary identifier}.  That is, surrounding an
 operator with backquotes allows it to be used as an identifier.
 
@@ -75,11 +77,11 @@ sequences have the specified special meaning:
   \hline \verb+\r+ & carriage return (ascii code \verb+0x0D+) \\
   \hline \verb+\t+ & horizontal tab (ascii code \verb+0x09+) \\
   \hline \verb+\u+\emph{hhhh} &
-         \nyi{the unicode character with code \texttt{0x}\emph{hhhh}}
-         (where \emph{h} is a hex digit)  \\
+         \nyi{the unicode character with code \texttt{0x}\emph{hhhh}
+         (where \emph{h} is a hex digit)}  \\
   \hline \verb+\U+\emph{hhhhhhh} &
-         \nyi{the unicode character \texttt{0x}\emph{hhhhhhhh}}
-         (where \emph{h} is a hex digit)  \\
+         \nyi{the unicode character \texttt{0x}\emph{hhhhhhhh}
+         (where \emph{h} is a hex digit)} \\
   \hline \verb+\v+ & vertical tab (ascii code \verb+0x0B+) \\
   \hline \verb+\x+\emph{hh} &
          the character \texttt{0x}\emph{hh} (where \emph{h} is a hex digit) \\
@@ -99,6 +101,224 @@ except for \verb+\(+\emph{expr}\verb+)+.
 
 \section{Syntax}
 \label{sec:Syntax}
+The primary syntactic building blocks of \lang programs are statements
+and expressions.
+In this section, we will discuss their syntax;
+their meaning and the relationship between them will be
+discussed in Section~\ref{sec:Statements and expressions}.
+
+Both statements and expressions have the same usual syntax:
+\begin{center}
+  \emph{name}\texttt{(}\emph{expr$_1$},\ldots,\emph{expr$_n$}\texttt{)},
+\end{center}
+where \emph{name} is an identifier naming the procedure called by
+the statement or the function called by the expression,
+and there are any number of
+expression arguments, separated by commas.
+If there are no enclosed expressions (i.e., $n=0$), then the
+empty parentheses are omitted.
+Note that the open parentheses, if present, must immediately follow the
+name, with no intervening whitespace.
+
+To make code more readable and convenient, \lang provides
+several special syntactic forms.
+All of these forms are simply syntactic sugar, and can always be
+written as the equivalent code in the usual syntax shown above.
+
+First, operator symbols can be used as infix or prefix operators (there
+are no postfix operators, aside from function call and indexing).
+It is not necessary to explicitly declare operators; any 
+operator symbols can be used by the programmer.
+Operator precedence and associativity are determined by the fixity
+(prefix or infix) and the final character of the operator, as follows:
+% all operator characters:  ~ @ $ % ^ & + - * / = | \ : ; < > .
+\begin{center}
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+    \textbf{token} &
+    \textbf{fixity} &
+    \textbf{associativity} &
+    \textbf{precedence} \\
+    \hline
+    \emph{identifier, string, or number} &
+    non-operator &
+    non-associative &
+    16 \\
+    \hline
+    \emph{bracketed expression} &
+    non-operator &
+    non-associative &
+    16 \\
+    \hline
+    \verb'.' \emph{(a single period)} &
+    infix &
+    left &
+    15 \\
+    \hline
+    \verb'(' \ldots \verb+)+ \emph{(application)} &
+    postfix &
+    left &
+    15 \\
+    \hline
+    \verb'[' \ldots \verb+]+ \emph{(indexing)} &
+    postfix &
+    left &
+    15 \\
+    \hline
+    \verb'?' \emph{or} \verb'!' &
+    prefix &
+    non-associative &
+    14 \\
+    \hline
+    \verb':' \emph{(a single colon)} &
+    infix &
+    non-associative &
+    13 \\
+    \hline
+    \emph{any other operator} &
+    % \verb'~' \quad \verb'@' \quad \verb'$' \quad \verb'%' \quad \verb'&' \quad \verb'=',
+    % \verb'*' \quad \verb'/' \quad \verb'-' \quad \verb'+' &
+    prefix &
+    non-associative &
+    12 \\
+    \hline
+    \emph{operator ending with} \verb'^' \emph{or} \verb'@' &
+    infix &
+    non-associative &
+    11 \\
+    \hline
+    \emph{operator ending with} \verb'*' \emph{or} \verb'/' \emph{or} \verb'%' &
+    infix &
+    left &
+    10 \\
+    \hline
+    \emph{operator ending with} \verb'-' \emph{or} \verb'+' &
+    infix &
+    left &
+    9 \\
+    \hline
+    \emph{operator ending with} \verb'.' &
+    infix &
+    left &
+    8 \\
+    \hline
+    \emph{operator ending with} \verb'%' \emph{or} \verb'$' &
+    infix &
+    right &
+    7 \\
+    \hline
+    \emph{operator ending with} \verb'\' \emph{or} \verb'~' &
+    infix &
+    left &
+    6 \\
+    \hline
+    \emph{operator ending with} \verb'<' \emph{or} \verb'>' &
+    infix &
+    non-associative &
+    5 \\
+    \hline
+    \emph{operator ending with} \verb'&' &
+    infix &
+    left &
+    4 \\
+    \hline
+    \emph{operator ending with} \verb'|' &
+    infix &
+    left &
+    3 \\
+    \hline
+    \emph{operator ending with} \verb'=' &
+    infix &
+    right &
+    2 \\
+    \hline
+    \emph{operator ending with} \verb':' &
+    infix &
+    right &
+    1 \\
+    % \hline
+    % \verb',' \emph{(a single comma)} &
+    % infix &
+    % associative &
+    % 0 \\
+    \hline
+    \emph{declared distfix operator} &
+    distfix &
+    non-associative &
+    0 \\
+    \hline
+    \emph{operator ending with} \verb';' &
+    infix &
+    left &
+    -1 \\
+    \hline
+  \end{tabular}
+\end{center}
+
+Bracketed expressions, those surrounded by parentheses, square brackets, or
+braces, are treated differently depending on whether they are preceded by
+whitespace.
+
+If the bracketed expression $e$ is immediately preceded by an identifier,
+string, number, or bracketed expression $d$, with no intervening whitespace,
+then $e$ is expected to be at precedence 0.
+That is, it is a comma-separated sequence of precedence 1 expressions, and
+is interpreted as an expression $b(d, e_1,\ldots,e_n)$, where $b$ is
+either \verb+`(...)`+, \verb+`[...]`+, or \verb+`{...}`+, depending on
+whether the expression is surrounded by parentheses, brackets, or braces,
+and the $e_1,\ldots,e_n$ are the expressions separated by commas.
+
+If the bracketed expression \emph{is} preceded by whitespace, then it is
+treated as an expression in its own right, rather than as a postfix
+operator.
+Following whitespace, a single expression at precedence 1 or above
+surrounded by parentheses are interpreted as the enclosed expression.
+This is simply used for grouping.
+A sequence of expressions at precedence 1 or above surrounded by
+square brackets and separated by
+commas optionally ending with a vertical bar and a final expression,
+are interpreted as a list.
+For example, \verb+[a,b,c|d]+ is interpreted as
+\verb+`[|]`(a,`[|]`(b,`[|]`(c,d)))+.
+If the \verb+|d+ part is omitted, it defaults to \verb+[]+.
+
+Within braces following whitespace,
+one or more expressions at precedence -1 or above separated by
+vertical bars, or one or more expressions at precedence 0 or above
+separated by commas, will be read a set.
+For example, \verb+{a,b,c}+ is interpreted as
+\verb+`{,}`(c,`{,}`(b,`{,}`(a,{})))+.
+Sets with elements of the form \emph{a}\texttt{::}\emph{x} are
+handled specially.
+For example,
+\verb+{a::x,b::y,c::z}+ is interpreted as
+\verb+`{:,}`(c,z,`{:,}`(b,y,`{:,}`(a,x,{})))+.
+
+Distfix operators, \ie interspersed operator keywords and expressions,
+must be declared before they can be used.
+The declaration syntax is as either of the following:
+\begin{center}
+  \texttt{distfix}
+  \emph{ident$_1$} \emph{sep$_1$} \ldots \emph{ident$_n$}
+\end{center}
+where each of 
+\emph{sep}$1$ through \emph{sep}$n-1$ is either \texttt{.} meaning
+no intervening expression or \texttt{..} meaning an expression should
+come at that point (and e).
+For example,
+\begin{verbatim}
+    distfix if .. then .. else ..
+\end{verbatim}
+
+\possible{Introduce ``associative'' operators, which collect all the
+  arguments separated by multiple occurrences of the same operator
+  into a single call.
+  This would allow \texttt{a < b < c < d} to be meaningful, and would
+  handle \texttt{a + b + c + d} as a single operation.  It would also
+  handle \texttt{\{ a ::\@ b c ; d ::\@ e f g ; h ::\@ i \}} nicely.
+  But this requires some kind of varargs facility, which we don't have yet.
+}
+
 
 
 \section{Statements and expressions}
@@ -130,11 +350,10 @@ where \emph{funcname} is the name of the function to be called.
 Each variable reference may either read, write, or modify
 (\ie, both read and write) the variable.
 This is the \emph{mode} of the reference.
-Variable names prefixed with a \verb+?+ operator specify that the
+Prefixing a variable name with a \verb+?+ operator specifies that the
 variable will be written (without being read); this is an \emph{output} mode.
-A variable names prefixed
-with a \verb+!+ operator signify that it will be read and written,
-an \emph{input/output} mode.
+Prefixing a variable name with a \verb+!+ operator signifies that it
+will be read and written, an \emph{input/output} mode.
 Unadorned variable names indicate read-only usage, an \emph{input} mode.
 
 Expressions have modes, too.
@@ -446,63 +665,6 @@ arguments.
 \end{Verbatim}
 
 
-\Lang procedure and function names can be used as prefix or infix
-operators, regardless of whether they are alphabetic or symbolic.
-Their precedence and associativity are determined by the first
-character of the operator name, as follows:
-\begin{center}
-  \begin{tabular}{|c|c|c|c|}
-    \hline
-    \textbf{lead character} &
-    \textbf{arity} &
-    \textbf{associativity} &
-    \textbf{precedence} \\
-    \hline
-    \verb'.' (period) &
-    infix &
-    left &
-    10 (tightest) \\
-    \hline
-    \verb'?', \verb'!' &
-    unary (prefix) &
-    non-associative &
-    9 \\
-    \hline
-    \verb'~', \verb'@', \verb'$', \verb'%', \verb'&', \verb'=',
-    \verb'*', \verb'/', \verb'-', \verb'+' &
-    unary (prefix) &
-    non-associative &
-    8 \\
-    \hline
-    \verb'*', \verb'/', \verb'%' &
-    binary (infix) &
-    left &
-    7 \\
-    \hline
-    \verb'-', \verb'+' &
-    binary (infix) &
-    left &
-    6 \\
-    \hline
-    \verb':' &
-    binary (infix) &
-    non-associative &
-    5 \\
-    \hline
-    \verb'a'--\verb'z', \verb'A'--\verb'Z', \verb'_' &
-    binary (infix) &
-    right &
-    4 \\
-    \hline
-    \verb'a'--\verb'z', \verb'A'--\verb'Z', \verb'_' &
-    unary (prefix) &
-    non-associative &
-    3 \\
-    \hline
-  \end{tabular}
-\end{center}
-By allowing any name to be an operator, we avoid the need for a lot of
-special syntax.  In particular, we want to allow the following forms:
 
 
 \section{Modules}
