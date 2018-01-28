@@ -126,7 +126,9 @@ tokenise pos str@(c:cs)
                     '}' -> singleCharTok c cs pos $ TokRBracket Brace pos
                     '\'' -> tokeniseChar pos cs
                     '\"' -> tokeniseString DoubleQuote pos cs
-                    '`' -> tokeniseString BackQuote pos cs
+                    -- backquote makes anything an identifier
+                    '`' -> let (name,rest) = span (not . (=='`')) str
+                           in  multiCharTok name rest (TokIdent name pos) pos
                     '#' -> tokenise (setSourceColumn pos 1)
                            $ dropWhile (not . (=='\n')) cs
                     _   -> tokeniseSymbol pos str
@@ -179,7 +181,6 @@ tokeniseString delim pos cs =
 
 -- |Is the specified char the expected final delimiter?
 delimChar DoubleQuote = '\"'
-delimChar BackQuote = '`'
 delimChar _ = shouldnt "not a delimiter character"
 
 -- |Recognise an escaped character constant.
