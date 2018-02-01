@@ -140,6 +140,9 @@ compileBody stmts params detism = do
 compileCond :: [Placed Prim] -> OptPos -> Exp -> [Placed Stmt]
     -> [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
 compileCond front pos expr thn els params detism = do
+          name' <- case expr of
+              Var var ParamIn _ -> Just <$> currVar var Nothing
+              _ -> return Nothing
           beforeTest <- get
           thn' <- compileBody thn params detism
           afterThen <- get
@@ -150,15 +153,14 @@ compileCond front pos expr thn els params detism = do
           put final
           let thnAssigns = reconcilingAssignments afterThen final params
           let elsAssigns = reconcilingAssignments afterElse final params
-          let front' = front
           case expr of
               IntValue 0 ->
-                return $ prependToBody front' $ appendToBody els' elsAssigns
+                return $ prependToBody front $ appendToBody els' elsAssigns
               IntValue _ ->
-                return $ prependToBody front' $ appendToBody thn' thnAssigns
-              Var var ParamIn _ -> do
-                name' <- currVar var Nothing
-                return $ ProcBody front' $ PrimFork name' boolType False
+                return $ prependToBody front $ appendToBody thn' thnAssigns
+              Var _ ParamIn _ ->
+                return $ ProcBody front
+                    $ PrimFork (fromJust name') boolType False
                     [appendToBody els' elsAssigns, appendToBody thn' thnAssigns]
               _ ->
                 shouldnt $ "TestBool with invalid argument " ++ show expr
@@ -180,6 +182,7 @@ compileSimpleStmt :: Placed Stmt -> ClauseComp (Placed Prim)
 compileSimpleStmt stmt = do
     logClause $ "Compiling " ++ showStmt 4 (content stmt)
     stmt' <- compileSimpleStmt' (content stmt)
+    logClause $ "Compiled to " ++ show stmt'
     return $ maybePlace stmt' (place stmt)
 
 compileSimpleStmt' :: Stmt -> ClauseComp Prim

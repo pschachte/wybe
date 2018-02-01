@@ -219,9 +219,7 @@ flattenStmt' (ProcCall [] name procID detism []) pos _ = do
     -- Convert call to no-arg proc to a bool variable test if there's a
     -- local variable with that name
     if name `elem` defined
-        then emit pos $ ForeignCall "llvm" "icmp" ["ne"] [
-                                 Unplaced $ Var name ParamIn Ordinary,
-                                 Unplaced $ IntValue 0]
+        then emit pos $ TestBool $ Var name ParamIn Ordinary
         else emit pos $ ProcCall [] name procID detism []
 flattenStmt' (ProcCall maybeMod name procID detism args) pos _ = do
     logFlatten "   call is Det"
