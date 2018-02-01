@@ -139,10 +139,13 @@ compileBody stmts params detism = do
 
 compileCond :: [Placed Prim] -> OptPos -> Exp -> [Placed Stmt]
     -> [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
+compileCond front pos (Typed expr _typ _) thn els params detism =
+    compileCond front pos expr thn els params detism
 compileCond front pos expr thn els params detism = do
           name' <- case expr of
               Var var ParamIn _ -> Just <$> currVar var Nothing
               _ -> return Nothing
+          logClause $ "conditional on " ++ show expr ++ " new name = " ++ show name'
           beforeTest <- get
           thn' <- compileBody thn params detism
           afterThen <- get
