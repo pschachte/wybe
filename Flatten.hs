@@ -214,6 +214,15 @@ flattenStmt stmt pos detism = do
 
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
+flattenStmt' (ProcCall [] name procID detism []) pos _ = do
+    defined <- gets defdVars
+    -- Convert call to no-arg proc to a bool variable test if there's a
+    -- local variable with that name
+    if name `elem` defined
+        then emit pos $ ForeignCall "llvm" "icmp" ["ne"] [
+                                 Unplaced $ Var name ParamIn Ordinary,
+                                 Unplaced $ IntValue 0]
+        else emit pos $ ProcCall [] name procID detism []
 flattenStmt' (ProcCall maybeMod name procID detism args) pos _ = do
     logFlatten "   call is Det"
     args' <- flattenStmtArgs args pos
