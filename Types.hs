@@ -1137,13 +1137,9 @@ modecheckStmt m name defPos typing delayed assigned detism
                             $ List.filter ((==ParamOut) . expFlow . content)
                               args'
             return ([maybePlace stmt' pos],delayed,assigned',[])
--- modecheckStmt m name defPos typing delayed assigned
---     stmt@(Test stmts) pos = do
---     logTypes $ "Mode checking test " ++ show stmt
---     (stmts', assigned',errs') <-
---       modecheckStmts m name defPos typing [] assigned stmts
---     -- let expr' = setPExpTypeFlow (TypeFlow boolType ParamIn) expr
---     return ([maybePlace (Test stmts') pos], delayed, assigned',errs')
+modecheckStmt _ _ _ _ delayed assigned _ Nop pos = do
+    logTypes $ "Mode checking Nop"
+    return ([maybePlace Nop pos], delayed, assigned,[])
 modecheckStmt m name defPos typing delayed assigned detism
     stmt@(Cond tstStmts thnStmts elsStmts) pos = do
     logTypes $ "Mode checking conditional " ++ show stmt
@@ -1159,6 +1155,12 @@ modecheckStmt m name defPos typing delayed assigned detism
                      (assigned2 `Set.intersection` assigned3),
             errs1++errs2++errs3)
 modecheckStmt m name defPos typing delayed assigned detism
+    stmt@(TestBool exp) pos = do
+    logTypes $ "Mode checking test " ++ show stmt
+    let exp' = content $ setPExpTypeFlow (TypeFlow boolType ParamIn)
+                                         (maybePlace exp pos)
+    return ([maybePlace (TestBool exp') pos], delayed, assigned,[])
+modecheckStmt m name defPos typing delayed assigned detism
     stmt@(Loop stmts) pos = do
     logTypes $ "Mode checking loop " ++ show stmt
     (stmts', assigned',errs') <-
@@ -1166,8 +1168,19 @@ modecheckStmt m name defPos typing delayed assigned detism
     -- XXX Can only assume vars assigned before first loop exit are
     --     actually assigned by loop
     return ([maybePlace (Loop stmts') pos], delayed, assigned',errs')
-modecheckStmt m _ _ _ delayed _ _ stmt pos =
-    return ([maybePlace stmt pos],delayed,Set.empty,[])
+-- XXX Need to implement these:
+modecheckStmt m name defPos typing delayed assigned detism
+    stmt@(And stmts) pos = nyi "mode checking And"
+modecheckStmt m name defPos typing delayed assigned detism
+    stmt@(Or stmts) pos = nyi "mode checking Or"
+modecheckStmt m name defPos typing delayed assigned detism
+    (Not stmt) pos = nyi "mode checking Not"
+modecheckStmt m name defPos typing delayed assigned detism
+    stmt@(For gen stmts) pos = nyi "mode checking For"
+modecheckStmt m name defPos typing delayed assigned detism
+    Break pos = return ([maybePlace Break pos],delayed,Set.empty,[])
+modecheckStmt m name defPos typing delayed assigned detism
+    Next pos = return ([maybePlace Next pos],delayed,Set.empty,[])
 
 
 selectMode :: [ProcInfo] -> [(FlowDirection,Bool,Maybe VarName)]
