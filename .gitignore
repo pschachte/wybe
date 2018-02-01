@@ -50,3 +50,4 @@ test-cases/simple_loop
 test-cases/*.bc
 Parser.info
 miniworkshop.pdf
+test-cases/import
