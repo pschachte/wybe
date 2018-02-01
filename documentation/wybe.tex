@@ -282,17 +282,30 @@ For example, \verb+[a,b,c|d]+ is interpreted as
 \verb+`[|]`(a,`[|]`(b,`[|]`(c,d)))+.
 If the \verb+|d+ part is omitted, it defaults to \verb+[]+.
 
+The \texttt{::} operator denotes lambda abstraction, along the lines
+of Haskell.
+That is, \texttt{p(?x) :: q(x)} denotes the partial function that matches
+input against \texttt{p(?x)}; if that match succeeds, then \texttt{x} is
+bound to the appropriate value, and the result of the partial function is
+\texttt{q(x)}.
+In the special case of an expression like \texttt{a :: b}, if the input
+equals \texttt{a}, then the result is \texttt{b}, otherwise the function
+fails.
+
 Within braces following whitespace,
-one or more expressions at precedence -1 or above separated by
-vertical bars, or one or more expressions at precedence 0 or above
-separated by commas, will be read a set.
+one or more \texttt{::} expressions can be specified, separated by
+vertical bars, denoting the partial function whose value is the
+value of the first \texttt{::} term if it succeeds, otherwise the
+value of the second if that succeeds, and so on.
+Such an expression denotes a kind of ``active map'', and if all
+the left sides of the enclosed \texttt{::} expressions are constants,
+it is an ordinary map.
+Going one step further, if the elements within the braces are
+not \texttt{::} expressions, they are interpreted as \texttt{::}
+expressions where the right argument is \texttt{true}.
+This in effect makes them sets.
 For example, \verb+{a,b,c}+ is interpreted as
 \verb+`{,}`(c,`{,}`(b,`{,}`(a,{})))+.
-Sets with elements of the form \emph{a}\texttt{::}\emph{x} are
-handled specially.
-For example,
-\verb+{a::x,b::y,c::z}+ is interpreted as
-\verb+`{:,}`(c,z,`{:,}`(b,y,`{:,}`(a,x,{})))+.
 
 Distfix operators, \ie interspersed operator keywords and expressions,
 must be declared before they can be used.
