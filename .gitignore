@@ -51,3 +51,6 @@ test-cases/*.bc
 Parser.info
 miniworkshop.pdf
 test-cases/import
+*.pdf
+*~
+test-cases/proc_beer
