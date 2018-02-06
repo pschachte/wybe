@@ -2,7 +2,8 @@
 
 public test proc lt(x:int, y:int)
     # use a test to implement another test
-    x < y
+    # x < y # this should work, but is currently a syntax error, so do this:
+    `<`(x, y)
 end
 
 public proc lt2(x:int, y:int, ?res:bool)
@@ -22,5 +23,14 @@ public test proc lookup(key:int, map:map, ?result:int)
     |  key = map.key:: ?result = map.value
     |  key < map.key:: lookup(key, map.left, ?result)
     |  true:: lookup(key, map.right, ?result)
+    end
+end
+
+# this should work, too, since map.key should fail if map is empty
+# hopefully we can optimise this to be the same as lookup
+public test proc lookup2(key:int, map:map, ?result:int)
+    if key = map.key:: ?result = map.value
+    |  key < map.key:: lookup(key, map.left, ?result)
+    |  key > map.key:: lookup(key, map.right, ?result)
     end
 end
