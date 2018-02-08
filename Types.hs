@@ -1170,11 +1170,23 @@ modecheckStmt m name defPos typing delayed assigned detism
     return ([maybePlace (Loop stmts') pos], delayed, assigned',errs')
 -- XXX Need to implement these:
 modecheckStmt m name defPos typing delayed assigned detism
-    stmt@(And stmts) pos = nyi "mode checking And"
+    stmt@(And stmts) pos = do
+    logTypes $ "Mode checking conjunction " ++ show stmt
+    (stmts', assigned',errs') <-
+      modecheckStmts m name defPos typing [] assigned detism stmts
+    return ([maybePlace (And stmts') pos], delayed, assigned',errs')
 modecheckStmt m name defPos typing delayed assigned detism
-    stmt@(Or stmts) pos = nyi "mode checking Or"
+    stmt@(Or stmts) pos = do
+    logTypes $ "Mode checking disjunction " ++ show stmt
+    (stmts', assigned',errs') <-
+      modecheckStmts m name defPos typing [] assigned detism stmts
+    return ([maybePlace (Or stmts') pos], delayed, assigned',errs')
 modecheckStmt m name defPos typing delayed assigned detism
-    (Not stmt) pos = nyi "mode checking Not"
+    stmt@(Not stmts) pos = do
+    logTypes $ "Mode checking negation " ++ show stmt
+    (stmts', assigned',errs') <-
+      modecheckStmts m name defPos typing [] assigned detism stmts
+    return ([maybePlace (Not stmts') pos], delayed, assigned',errs')
 modecheckStmt m name defPos typing delayed assigned detism
     stmt@(For gen stmts) pos = nyi "mode checking For"
 modecheckStmt m name defPos typing delayed assigned detism

@@ -647,15 +647,17 @@ flattenBranches' stmt pos stmts =
 -- XXX Fix this to factor out branches that will be repeated into
 --     separate procs so the code is not duplicated.
 
-
 -- |Flatten out a conditional removing Ands, Ors, and Nots, and ensuring
 --  that the condition of every Cond is a single TestBool instruction.
 --  On input, Conds are always the last thing in a statement sequence.
 flattenCond :: [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt]
             -> OptPos -> Unbrancher [Placed Stmt]
 flattenCond [] thn _els _pos = flattenBranches thn
-flattenCond (tst:tsts) thn els pos =
-    flattenCond' (content tst) (place tst) tsts thn els pos
+flattenCond (tst:tsts) thn els pos = do
+    flattened <- flattenCond' (content tst) (place tst) tsts thn els pos
+    logUnbranch $ "Flattening cond: " ++ show (Cond (tst:tsts) thn els)
+    logUnbranch $ "Flattened to   : " ++ show flattened
+    return flattened
 
 flattenCond' :: Stmt -> OptPos -> [Placed Stmt]
              -> [Placed Stmt] -> [Placed Stmt]
@@ -671,7 +673,6 @@ flattenCond' stmt@TestBool{} stmtPos stmts thn els condPos = do
 flattenCond' (And conj) _stmtPos stmts thn els condPos =
     flattenCond (conj++stmts) thn els condPos
 flattenCond' (Or []) _stmtPos stmts thn els condPos =
-    -- XXX this does't look right.
     flattenBranches els
 flattenCond' (Or (disj:disjs)) _stmtPos stmts thn els condPos =
     flattenCond [disj] [Unplaced $ Cond stmts thn els]
