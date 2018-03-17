@@ -148,13 +148,13 @@ transformStmt resources (And stmts) pos = do
 transformStmt resources (Or stmts) pos = do
     stmts' <- transformBody resources stmts
     return $ maybePlace (Or stmts') pos
-transformStmt resources (Not stmts) pos = do
-    stmts' <- transformBody resources stmts
-    return $ maybePlace (Not stmts') pos
-transformStmt _ (Nop) pos = do
+transformStmt resources (Not stmt) pos = do
+    stmt' <- placedApplyM (transformStmt resources) stmt
+    return $ maybePlace (Not stmt') pos
+transformStmt _ Nop pos =
     return $ maybePlace Nop pos
 transformStmt resources (Cond test thn els) pos = do
-    test' <- transformBody resources test
+    test' <- placedApplyM (transformStmt resources) test
     thn' <- transformBody resources thn
     els' <- transformBody resources els
     return $ maybePlace (Cond test' thn' els') pos
@@ -162,8 +162,8 @@ transformStmt resources (Loop body) pos = do
     body' <- transformBody resources body
     return $ maybePlace (Loop body') pos
 transformStmt _ (For itr gen) pos = return $ maybePlace (For itr gen) pos
-transformStmt _ (Break) pos = return $ maybePlace Break pos
-transformStmt _ (Next) pos = return $ maybePlace Next pos
+transformStmt _ Break pos = return $ maybePlace Break pos
+transformStmt _ Next pos = return $ maybePlace Next pos
 
 
 -- |Returns the list of args corresponding to the specified resource

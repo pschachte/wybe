@@ -284,7 +284,7 @@ deconstructorItems ctorName params typeSpec constCount nonConstCount
           ++ [Param "$" typeSpec ParamIn Ordinary]) 
          [])
         -- Code to check we have the right constructor
-        (tagCheck constCount nonConstCount tag "$"
+        ([tagCheck constCount nonConstCount tag "$"]
          ++
         -- Code to strip tag and fetch all the fields
         tagStrip tag "$" "$stripped" typeSpec
@@ -300,23 +300,24 @@ deconstructorItems ctorName params typeSpec constCount nonConstCount
 
 -- |Generate the needed Test statements to check that the tag of the value
 --  of the specified variable matches the specified tag
-tagCheck :: Int -> Int -> Integer -> Ident -> [Placed Stmt]
+tagCheck :: Int -> Int -> Integer -> Ident -> Placed Stmt
 tagCheck constCount nonConstCount tag varName =
     -- If there are any constant constructors, be sure it's not one of them
+    seqToStmt
     (case constCount of
-          0 -> []  -- Nothing to do if no const constructors
-          _ -> comparison "uge"
+          0 -> []
+          _ -> [comparison "uge"
                  (lpvmCastExp (varGet varName) intType)
-                 (intCast $ iVal constCount))
+                 (intCast $ iVal constCount)]
      ++
     -- If there is more than non-const constructors, check it's the right one
-     (case nonConstCount of
+     case nonConstCount of
            1 -> []  -- Nothing to do if it's the only non-const constructor
-           _ -> comparison "eq"
+           _ -> [comparison "eq"
                   (intCast $ ForeignFn "llvm" "and" []
                    [Unplaced $ lpvmCastExp (varGet varName) intType,
                     Unplaced $ iVal tagMask])
-                  (intCast $ iVal tag))
+                  (intCast $ iVal tag)])
 
 
 -- |Generate the needed statements to strip the specified tag off of the value
@@ -345,7 +346,7 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
                           Param "$" fieldtype ParamOut Ordinary] [])
         -- Code to check we have the right constructor
-        (tagCheck constCount nonConstCount tag "$rec"
+        ([tagCheck constCount nonConstCount tag "$rec"]
          ++
         -- Code to strip the tag and access the selected field
          tagStrip tag "$rec" "$rec$stripped" rectype
@@ -360,7 +361,7 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
          [Param "$rec" rectype ParamInOut Ordinary,
           Param "$field" fieldtype ParamIn Ordinary] [])
         -- Code to check we have the right constructor
-        (tagCheck constCount nonConstCount tag "$rec"
+        ([tagCheck constCount nonConstCount tag "$rec"]
          ++
         -- Code to strip the tag and mutate the selected field
          tagStrip tag "$rec" "$rec$stripped" rectype
@@ -427,14 +428,14 @@ equalityTest _ = False
 --
 equalityBody :: [Placed FnProto] -> [Placed FnProto] -> ([Placed Stmt],Bool)
 equalityBody [] [] = shouldnt "trying to generate = test with no constructors"
-equalityBody consts [] = (equalityConsts consts,True)
+equalityBody consts [] = ([equalityConsts consts],True)
 equalityBody consts nonconsts =
     -- decide whether $left is const or non const, and handle accordingly
     ([Unplaced $ Cond (comparison "ult"
                          (lpvmCastExp (varGet "$left") intType)
                          (iVal $ length consts))
-                (equalityConsts consts)
-                (equalityNonconsts (content <$> nonconsts) (List.null consts))],
+                [equalityConsts consts]
+                [equalityNonconsts (content <$> nonconsts) (List.null consts)]],
      -- Decide to inline if only 1 non-const constructor and either no
      -- non-const constructors (so not recursive) or at most 2 fields
      case List.map content nonconsts of
@@ -445,8 +446,8 @@ equalityBody consts nonconsts =
 
 -- |Return code to check of two const values values are equal, given that we
 --  know that the $left value is a const.
-equalityConsts :: [Placed FnProto] -> [Placed Stmt]
-equalityConsts [] = [failTest]
+equalityConsts :: [Placed FnProto] -> Placed Stmt
+equalityConsts [] = failTest
 equalityConsts _ =
     comparison "eq" (intCast $ varGet "$left") (intCast $ varGet "$right")
 
@@ -454,15 +455,15 @@ equalityConsts _ =
 -- |Return code to check that two values are equal when the first is known
 --  not to be a const constructor.  The first argument is the list of
 --  nonconsts, second is the list of consts.
-equalityNonconsts :: [FnProto] -> Bool -> [Placed Stmt]
+equalityNonconsts :: [FnProto] -> Bool -> Placed Stmt
 equalityNonconsts [] _ =
     shouldnt "type with no non-const constructors should have been handled"
 equalityNonconsts [FnProto name params _] noConsts =
     -- single non-const and no const constructors:  just compare fields
     let detism = if noConsts then Det else SemiDet
-    in  deconstructCall name "$left" params detism
-        ++ deconstructCall name "$right" params detism
-        ++ concatMap equalityField params
+    in  Unplaced $ And ([deconstructCall name "$left" params detism,
+                        deconstructCall name "$right" params detism]
+                        ++ concatMap equalityField params)
 equalityNonconsts ctrs _ =
     equalityMultiNonconsts ctrs
 
@@ -473,22 +474,21 @@ equalityNonconsts ctrs _ =
 --  $left against each possible constructor; if it matches, it tests
 --  that $right is also that constructor and all the fields match; if
 --  it doesn't match, it tests the next possible constructor, etc.
-equalityMultiNonconsts :: [FnProto] -> [Placed Stmt]
-equalityMultiNonconsts [] = [Unplaced Nop]
+equalityMultiNonconsts :: [FnProto] -> Placed Stmt
+equalityMultiNonconsts [] = succeedTest
 equalityMultiNonconsts (FnProto name params _:ctrs) =
-    [Unplaced
+    Unplaced
      $ Cond (deconstructCall name "$left" params SemiDet)
-        (deconstructCall name "$right" params SemiDet
+        ([deconstructCall name "$right" params SemiDet]
          ++ concatMap equalityField params)
-        (equalityMultiNonconsts ctrs)
-    ]
+        [equalityMultiNonconsts ctrs]
 
 -- |Return code to deconstruct 
-deconstructCall :: Ident -> Ident -> [Param] -> Determinism -> [Placed Stmt]
+deconstructCall :: Ident -> Ident -> [Param] -> Determinism -> Placed Stmt
 deconstructCall ctor arg params detism =
-    [Unplaced $ ProcCall [] ctor Nothing detism
+    Unplaced $ ProcCall [] ctor Nothing detism
      $ List.map (\p -> Unplaced $ varSet $ arg++"$"++paramName p) params
-        ++ [Unplaced $ varGet arg]]
+        ++ [Unplaced $ varGet arg]
 
 
 -- |Return code to check that one field of two data are equal, when

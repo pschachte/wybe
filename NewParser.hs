@@ -306,15 +306,15 @@ simpleStmt = try procCallParser
           <|> relStmtParser
 
 
-testStmts :: Parser [Placed Stmt]
-testStmts =
-          (:[]) <$> fmap expToStmt <$> simpleExpParser
+testStmt :: Parser (Placed Stmt)
+testStmt =
+          fmap expToStmt <$> simpleExpParser
           -- XXX Need to handle and, or, and not
           -- (   do pos <- tokenPosition <$> ident "and"
-          --        rest <- testStmts
+          --        rest <- testStmt
           --        return maybePlace (And [stmt1,rest]) pos
           -- <|> do pos <- tokenPosition <$> ident "or"
-          --        rest <- testStmts
+          --        rest <- testStmt
           --        return maybePlace (And [stmt1,rest]) pos
           -- <|> return [stmt1]
           -- )
@@ -347,27 +347,27 @@ forStmt = do
 whileStmt :: Parser (Placed Stmt)
 whileStmt = do
     pos <- tokenPosition <$> ident "while"
-    cond <- testStmts
+    cond <- testStmt
     return $ Placed (Cond cond [Unplaced Nop] [Unplaced Break]) pos
 
 
 untilStmt :: Parser (Placed Stmt)
 untilStmt = do
     pos <- tokenPosition <$> ident "until"
-    e <- testStmts
+    e <- testStmt
     return $ Placed (Cond e [Unplaced Break] [Unplaced Nop]) pos
 
 
 unlessStmt :: Parser (Placed Stmt)
 unlessStmt = do
     pos <- tokenPosition <$> ident "unless"
-    e <- testStmts
+    e <- testStmt
     return $ Placed (Cond e [Unplaced Nop] [Unplaced Next]) pos
 
 whenStmt :: Parser (Placed Stmt)
 whenStmt = do
     pos <- tokenPosition <$> ident "when"
-    e <- testStmts
+    e <- testStmt
     return $ Placed (Cond e [Unplaced Next] [Unplaced Nop]) pos
 
 
@@ -383,9 +383,9 @@ ifStmtParser = do
         else return $ Placed ((content . head) final) pos
 
 
-ifCaseParser :: Parser ([Placed Stmt], [Placed Stmt])
+ifCaseParser :: Parser (Placed Stmt, [Placed Stmt])
 ifCaseParser = do
-    cond <- testStmts <* symbol "::"
+    cond <- testStmt <* symbol "::"
     body <- many stmtParser
     return (cond, body)
 
@@ -457,7 +457,7 @@ relStmtParser = do
 ifExpParser :: Parser (Placed Exp)
 ifExpParser = do
     pos <- tokenPosition <$> ident "if"
-    cond <- testStmts
+    cond <- testStmt
     thenBody <- ident "then" *> expParser
     elseBody <- ident "else" *> expParser
     return $ Placed (CondExp cond thenBody elseBody) pos

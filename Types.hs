@@ -767,12 +767,12 @@ bodyCalls (pstmt:pstmts) detism = do
         TestBool _ -> return rest
         And stmts -> bodyCalls stmts detism
         Or stmts -> bodyCalls stmts detism
-        Not stmts -> bodyCalls stmts detism
+        Not stmt -> bodyCalls [stmt] detism
         Nop -> return rest
         Cond cond thn els -> do
           -- modify $ constrainVarType (ReasonCond pos)
           --          (expVar $ content expr) boolType
-          cond' <- bodyCalls cond SemiDet
+          cond' <- bodyCalls [cond] SemiDet
           thn' <- bodyCalls thn detism
           els' <- bodyCalls els detism
           return $ cond' ++ thn' ++ els' ++ rest
@@ -989,7 +989,7 @@ overloadErr StmtTypings{typingStmt=call,typingArgsTypes=candidates} =
 --  building a revised, properly moded body, or indicate a mode error.
 --  This must handle several cases:
 --  * Flow direction for function calls are unspecified; they must be assigned,
---    and may need to be postponed if the use appears before the definition.
+--    and may need to be delayed if the use appears before the definition.
 --  * Test statements must be handled, determining which stmts in a test
 --    context are actually tests, and reporting an error for tests outside
 --    a test context
@@ -1016,6 +1016,7 @@ modecheckStmts m name pos typing delayed assigned detism (pstmt:pstmts) = do
     let assigned'' = assigned `Set.union` assigned'
     logTypes $ "New errors   = " ++ show errs'
     logTypes $ "Now assigned = " ++ show assigned''
+    logTypes $ "Now delayed  = " ++ show delayed'
     let (doNow,delayed'')
             = List.partition
             (not . Set.null . flip Set.intersection assigned' . fst)
@@ -1141,18 +1142,18 @@ modecheckStmt _ _ _ _ delayed assigned _ Nop pos = do
     logTypes $ "Mode checking Nop"
     return ([maybePlace Nop pos], delayed, assigned,[])
 modecheckStmt m name defPos typing delayed assigned detism
-    stmt@(Cond tstStmts thnStmts elsStmts) pos = do
+    stmt@(Cond tstStmt thnStmts elsStmts) pos = do
     logTypes $ "Mode checking conditional " ++ show stmt
-    (tstStmts', assigned1,errs1) <-
-      modecheckStmts m name defPos typing [] assigned SemiDet tstStmts
-    -- let expr' = setPExpTypeFlow (TypeFlow boolType ParamIn) expr
+    (tstStmt', delayed', assigned1,errs1) <-
+      placedApplyM (modecheckStmt m name defPos typing delayed assigned SemiDet)
+      tstStmt
     (thnStmts', assigned2,errs2) <-
       modecheckStmts m name defPos typing [] assigned1 detism thnStmts
     (elsStmts', assigned3,errs3) <-
       modecheckStmts m name defPos typing [] assigned2 detism elsStmts
-    return ([maybePlace (Cond tstStmts' thnStmts' elsStmts') pos],
-            delayed, assigned1 `Set.union`
-                     (assigned2 `Set.intersection` assigned3),
+    return ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts') pos],
+            delayed'++delayed,
+            assigned1 `Set.union` (assigned2 `Set.intersection` assigned3),
             errs1++errs2++errs3)
 modecheckStmt m name defPos typing delayed assigned detism
     stmt@(TestBool exp) pos = do
@@ -1182,11 +1183,12 @@ modecheckStmt m name defPos typing delayed assigned detism
       modecheckStmts m name defPos typing [] assigned detism stmts
     return ([maybePlace (Or stmts') pos], delayed, assigned',errs')
 modecheckStmt m name defPos typing delayed assigned detism
-    stmt@(Not stmts) pos = do
+    (Not stmt) pos = do
     logTypes $ "Mode checking negation " ++ show stmt
-    (stmts', assigned',errs') <-
-      modecheckStmts m name defPos typing [] assigned detism stmts
-    return ([maybePlace (Not stmts') pos], delayed, assigned',errs')
+    (stmt', delayed', assigned',errs') <-
+      placedApplyM (modecheckStmt m name defPos typing [] assigned detism) stmt 
+    return ([maybePlace (Not (seqToStmt stmt')) pos],
+            delayed'++delayed, assigned',errs')
 modecheckStmt m name defPos typing delayed assigned detism
     stmt@(For gen stmts) pos = nyi "mode checking For"
 modecheckStmt m name defPos typing delayed assigned detism
@@ -1655,17 +1657,17 @@ checkStmtTyped name pos (ForeignCall _ pname _ args) ppos =
     mapM_ (checkArgTyped name pos pname ppos) $
           zip [1..] $ List.map content args
 checkStmtTyped _ _ (TestBool _) _ = return ()
-checkStmtTyped name pos (And stmts) ppos = do
+checkStmtTyped name pos (And stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
-checkStmtTyped name pos (Or stmts) ppos = do
+checkStmtTyped name pos (Or stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
-checkStmtTyped name pos (Not stmts) ppos = do
-    mapM_ (placedApply (checkStmtTyped name pos)) stmts
-checkStmtTyped name pos (Cond ifstmts thenstmts elsestmts) ppos = do
-    mapM_ (placedApply (checkStmtTyped name pos)) ifstmts
+checkStmtTyped name pos (Not stmt) _ppos =
+    placedApply (checkStmtTyped name pos) stmt
+checkStmtTyped name pos (Cond tst thenstmts elsestmts) _ppos = do
+    placedApply (checkStmtTyped name pos) tst
     mapM_ (placedApply (checkStmtTyped name pos)) thenstmts
     mapM_ (placedApply (checkStmtTyped name pos)) elsestmts
-checkStmtTyped name pos (Loop stmts) ppos =
+checkStmtTyped name pos (Loop stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (For itr gen) ppos = do
     checkExpTyped name pos ("for iterator" ++ showMaybeSourcePos ppos) $

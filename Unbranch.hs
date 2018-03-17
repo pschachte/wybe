@@ -372,10 +372,10 @@ unbranchStmt Det stmt@(Not _) _ _ =
     shouldnt $ "Negation in a Det context: " ++ show stmt
 unbranchStmt SemiDet (Not tst) pos stmts = do
     logUnbranch "Unbranching negation"
-    tst' <- unbranchStmts SemiDet tst
-    leaveStmtAsIs (Not tst') pos SemiDet stmts
-unbranchStmt detism (Cond tstStmts thn els) pos stmts =
-    unbranchCond detism tstStmts thn els pos stmts
+    tst' <- unbranchStmt SemiDet (content tst) (place tst) []
+    leaveStmtAsIs (Not $ seqToStmt tst') pos SemiDet stmts
+unbranchStmt detism (Cond tstStmt thn els) pos stmts =
+    unbranchCond detism tstStmt thn els pos stmts
 unbranchStmt detism (Loop body) pos stmts = do
     logUnbranch "Unbranching a loop"
     prevState <- startLoop
@@ -436,14 +436,17 @@ leaveStmtAsIs stmt pos detism stmts = do
     return $ maybePlace stmt pos:stmts'
 
 
-unbranchCond :: Determinism -> [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt]
+unbranchCond :: Determinism -> Placed Stmt -> [Placed Stmt] -> [Placed Stmt]
              -> OptPos -> [Placed Stmt] -> Unbrancher [Placed Stmt]
-unbranchCond detism tstStmts thn els pos stmts = do
-    logUnbranch "Unbranching a conditional"
+unbranchCond detism tstStmt thn els pos stmts = do
+    logUnbranch "Unbranching a conditional:"
+    logUnbranch $ showStmt 8 $ content tstStmt
     beforeVars <- gets brVars
-    logUnbranch $ "test " ++ showBody 8 tstStmts
     logUnbranch $ "Vars before test: " ++ show beforeVars
-    tstStmts' <- unbranchStmts SemiDet tstStmts
+    tstStmt' <- seqToStmt <$> unbranchStmt SemiDet (content tstStmt)
+                                                   (place tstStmt) []
+    logUnbranch "Unbranched condition:"
+    logUnbranch $ showStmt 8 $ content tstStmt'
     beforeThenVars <- gets brVars
     logUnbranch $ "Unbranching then branch with vars: " ++ show beforeThenVars
     (thn',thnVars,thnTerm) <- unbranchBranch detism thn
@@ -474,7 +477,7 @@ unbranchCond detism tstStmts thn els pos stmts = do
                          $ factorFreshProc contName afterVars Nothing stmts'
             let thn'' = if thnTerm then thn' else appendStmts thn' cont
             let els'' = if elsTerm then els' else appendStmts els' cont
-            let genStmt = Cond tstStmts' thn'' els''
+            let genStmt = Cond tstStmt' thn'' els''
             logUnbranch $ "Conditional unbranched to " ++ showStmt 4 genStmt 
             return [maybePlace genStmt pos]
 
@@ -609,17 +612,20 @@ flattenBranches' stmt@ProcCall{} pos stmts =
     (maybePlace stmt pos:) <$> flattenBranches stmts
 flattenBranches' stmt@ForeignCall{} pos stmts =
     (maybePlace stmt pos:) <$> flattenBranches stmts
-flattenBranches' (Cond tstStmts thn els) pos [] =
-    flattenCond tstStmts thn els pos
-flattenBranches' stmt@(Cond tstStmts thn els) pos stmts =
-    shouldnt $ "Cond with following statements: " ++ show stmt
+flattenBranches' (Cond tstStmt thn els) pos [] = do
+    thn' <- flattenBranches thn
+    els' <- flattenBranches els
+    placedApplyM (flattenCond thn' els' pos) tstStmt
+flattenBranches' stmt@Cond{} pos stmts =
+    shouldnt $ "Cond with following statements: "
+    ++ showBody 4 (maybePlace stmt pos:stmts)
 flattenBranches' (Nop) pos stmts =
     flattenBranches stmts -- Just remove Nops
 flattenBranches' stmt@TestBool{} pos [] =
     return [maybePlace stmt pos]
 flattenBranches' stmt@TestBool{} pos stmts = do
     thn <- flattenBranches stmts
-    return [Unplaced (Cond [maybePlace stmt pos]
+    return [Unplaced (Cond (maybePlace stmt pos)
                       (if List.null thn then [succeedTest] else thn)
                       [failTest])]
 flattenBranches' stmt pos stmts =
@@ -650,36 +656,36 @@ flattenBranches' stmt pos stmts =
 -- |Flatten out a conditional removing Ands, Ors, and Nots, and ensuring
 --  that the condition of every Cond is a single TestBool instruction.
 --  On input, Conds are always the last thing in a statement sequence.
-flattenCond :: [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt]
-            -> OptPos -> Unbrancher [Placed Stmt]
-flattenCond [] thn _els _pos = flattenBranches thn
-flattenCond (tst:tsts) thn els pos = do
-    flattened <- flattenCond' (content tst) (place tst) tsts thn els pos
-    logUnbranch $ "Flattening cond: " ++ show (Cond (tst:tsts) thn els)
-    logUnbranch $ "Flattened to   : " ++ show flattened
-    return flattened
-
-flattenCond' :: Stmt -> OptPos -> [Placed Stmt]
-             -> [Placed Stmt] -> [Placed Stmt]
-            -> OptPos -> Unbrancher [Placed Stmt]
-flattenCond' stmt@ProcCall{} stmtPos stmts thn els condPos =
-    (maybePlace stmt stmtPos:) <$> flattenCond stmts thn els condPos
-flattenCond' stmt@ForeignCall{} stmtPos stmts thn els condPos =
-    (maybePlace stmt stmtPos:) <$> flattenCond stmts thn els condPos
-flattenCond' stmt@TestBool{} stmtPos stmts thn els condPos = do
-    stmts' <- flattenCond stmts thn els condPos
-    els' <- flattenBranches els
-    return [maybePlace (Cond [maybePlace stmt stmtPos] stmts' els') condPos]
-flattenCond' (And conj) _stmtPos stmts thn els condPos =
-    flattenCond (conj++stmts) thn els condPos
-flattenCond' (Or []) _stmtPos stmts thn els condPos =
-    flattenBranches els
-flattenCond' (Or (disj:disjs)) _stmtPos stmts thn els condPos =
-    flattenCond [disj] [Unplaced $ Cond stmts thn els]
-    [Unplaced $ Cond ((Unplaced $ Or disjs):stmts) thn els] condPos
+--  The then and else branches have already been flattened, and
+--  SemiDet proc calls have been turned into conjunctions of Det calls
+--  followed by TestBool stmts.  Subexpressions have already been turned
+--  into separate proc calls.
+flattenCond :: [Placed Stmt] -> [Placed Stmt] -> OptPos
+    -> Stmt -> OptPos -> Unbrancher [Placed Stmt]
+flattenCond thn _els _pos (TestBool (Typed (IntValue 1) _ _)) _ =
+    return thn
+flattenCond _thn els condPos (TestBool (Typed (IntValue 0) _ _)) _ =
+    return els
+flattenCond thn els condPos stmt@TestBool{} stmtPos =
+    return [maybePlace (Cond (maybePlace stmt stmtPos) thn els) condPos]
+flattenCond thn els condPos stmt@ProcCall{} stmtPos =
+    -- ProcCalls are all Det here, so it doesn't need to be conditional
+    return (maybePlace stmt stmtPos:thn)
+flattenCond thn els condPos stmt@ForeignCall{} stmtPos = do
+    return [maybePlace (Cond (maybePlace stmt stmtPos) thn els) condPos]
+flattenCond thn els condPos (And []) _stmtPos =
+    return thn
+flattenCond thn els condPos (And (tst:tsts)) stmtPos = do
+    thn' <- flattenCond thn els condPos (And tsts) stmtPos
+    placedApplyM (flattenCond thn' els condPos) tst
+flattenCond thn els condPos (Or []) _stmtPos =
+    return els
+flattenCond thn els condPos (Or (disj:disjs)) stmtPos = do
+    els' <- flattenCond thn els condPos (Or disjs) stmtPos
+    placedApplyM (flattenCond thn els' condPos) disj
 flattenCond' (Not neg) _stmtPos stmts thn els condPos =
-    flattenCond neg els [Unplaced $ Cond stmts thn els] condPos
+    placedApplyM (flattenCond els thn condPos) neg
 flattenCond' stmt@Cond{} _stmtPos _ _ _ _ =
     shouldnt $ "Condition in test of a condition: " ++ show stmt
-flattenCond' stmt _stmtPos _ _ _ _ =
-    shouldnt $ "Invalid statement in test of a condition: " ++ show stmt
+-- flattenCond' stmt _stmtPos _ _ _ _ =
+--     shouldnt $ "Invalid statement in test of a condition: " ++ show stmt

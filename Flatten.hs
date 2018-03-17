@@ -6,7 +6,7 @@
 --  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
 --
 --  We transform away all expression types except for constants and
---  variables.  Where, let, and conditional, and function call
+--  variables.  Where, let, conditional, and function call
 --  expressions are turned into statements that bind a variable, and
 --  then the variable is used in place of the expression.  In-out
 --  variable uses, like !x, are expanded into separate input and
@@ -241,33 +241,33 @@ flattenStmt' (ForeignCall lang name flags args) pos _ = do
 --     to be retained between condition and then branch, but forgotten for
 --     the else branch.  Also note that 'transparent' arg to flatteninner is
 --     always False
-flattenStmt' (Cond tstStmts thn els) pos detism = do
+flattenStmt' (Cond tstStmt thn els) pos detism = do
     defined <- gets defdVars
     -- expand tstStmts, allowing defined vars to propagate to then branch
-    tstStmts' <- flattenInner False True SemiDet
-                 (flattenStmts tstStmts SemiDet)
+    tstStmt' <- seqToStmt <$> flattenInner False True SemiDet
+                (placedApply flattenStmt tstStmt SemiDet)
     thn' <- flattenInner False False detism (flattenStmts thn detism)
     -- for else branch, put defined vars back as they were before condition 
     modify (\s -> s {defdVars = defined})
     els' <- flattenInner False False detism (flattenStmts els detism)
-    emit pos $ Cond tstStmts' thn' els'
+    emit pos $ Cond tstStmt' thn' els'
 flattenStmt' stmt@(TestBool _) pos SemiDet = emit pos stmt
 flattenStmt' (TestBool expr) _pos Det =
     shouldnt $ "TestBool " ++ show expr ++ "in Det context"
-flattenStmt' (And tstStmts) _pos SemiDet = do
-    flattenStmts tstStmts SemiDet
-flattenStmt' (And tstStmts) _pos Det =
-    shouldnt $ "And in a Det context: " ++ showBody 4 tstStmts
-flattenStmt' (Or tstStmts) pos SemiDet = do
-    tstStmts' <- flattenInner False False SemiDet
-                 (flattenStmts tstStmts SemiDet)
-    emit pos $ Or tstStmts'
+flattenStmt' (And tsts) pos SemiDet = do
+    tsts' <- flattenInner False True SemiDet (flattenStmts tsts SemiDet)
+    emit pos $ And tsts'
+flattenStmt' stmt@And{} _pos Det =
+    shouldnt $ "And in a Det context: " ++ showStmt 4 stmt
+flattenStmt' (Or tsts) pos SemiDet = do
+    tsts' <- flattenInner False True SemiDet (flattenStmts tsts SemiDet)
+    emit pos $ Or tsts'
 flattenStmt' (Or tstStmts) _pos Det =
     shouldnt $ "Or in a Det context: " ++ showBody 4 tstStmts
-flattenStmt' (Not tstStmts) pos SemiDet = do
-    tstStmts' <- flattenInner False False SemiDet
-                 (flattenStmts tstStmts SemiDet)
-    emit pos $ Or tstStmts'
+flattenStmt' (Not tstStmt) pos SemiDet = do
+    tstStmt' <- seqToStmt <$> flattenInner False True SemiDet
+                (placedApply flattenStmt tstStmt SemiDet)
+    emit pos $ Not tstStmt'
 flattenStmt' (Not tstStmt) _pos Det =
     shouldnt $ "negation in a Det context: " ++ show tstStmt
 flattenStmt' (Loop body) pos detism = do
@@ -285,12 +285,12 @@ flattenStmt' (For itr gen) pos detism = do
         [genVar@(Unplaced (Var genVarName ParamIn flowType))] -> do
             -- XXX not generating the right code until we have polymorphism
             flattenStmt 
-              (Cond [maybePlace (ProcCall [] "[|]" Nothing SemiDet
+              (Cond (maybePlace (ProcCall [] "[|]" Nothing SemiDet
                                  [itr,
                                   Unplaced $ 
                                   Var genVarName ParamOut flowType,
                                   genVar])
-                     pos]
+                     pos)
                   []
                   [maybePlace (ProcCall [] "[]" Nothing SemiDet [genVar])
                       pos,

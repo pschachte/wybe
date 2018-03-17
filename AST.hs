@@ -22,7 +22,7 @@ module AST (
   phantomParam, phantomArg, phantomType,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
-  placedApply, makeMessage, updatePlacedM,
+  placedApply, placedApplyM, makeMessage, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   ImportSpec(..), importSpec,
@@ -34,8 +34,8 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, outArgVar, argDescription, flowsIn, flowsOut,
-  foldBodyPrims, foldBodyDistrib, foldProcCalls,
-  expToStmt, procCallToExp, expFlow,
+  foldProcCalls, foldBodyPrims, foldBodyDistrib,
+  expToStmt, seqToStmt, procCallToExp, expFlow,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
   Prim(..), ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
@@ -201,8 +201,14 @@ rePlace t (Unplaced _)   = Unplaced t
 
 -- |Apply a function that takes a thing and an optional place to a
 --  placed thing.
-placedApply :: (a -> OptPos -> b) -> (Placed a) -> b
+placedApply :: (a -> OptPos -> b) -> Placed a -> b
 placedApply f placed = f (content placed) (place placed)
+
+
+-- |Apply a function that takes a thing and an optional place to a
+--  placed thing.
+placedApplyM :: Monad m => (a -> OptPos -> m b) -> Placed a -> m b
+placedApplyM f placed = f (content placed) (place placed)
 
 
 instance Functor Placed where
@@ -1438,29 +1444,51 @@ defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 
 
 -- |Fold over a list of Placed Stmts applying the fn to each ProcCall, and
--- applying comb, which must be associative, to combine results.
-foldProcCalls :: (ModSpec -> Ident -> (Maybe Int) -> Determinism
+-- applying comb, which must be associative, to combine results.  Results
+-- are combined in a right-associative way, with the initial val on the right.
+foldProcCalls :: (ModSpec -> Ident -> Maybe Int -> Determinism
                   -> [Placed Exp] -> a) ->
                  (a -> a -> a) -> a -> [Placed Stmt] -> a
-foldProcCalls fn comb val [] = val
+foldProcCalls _fn _comb val [] = val
 foldProcCalls fn comb val (s:ss) = foldProcCalls' fn comb val (content s) ss
 
-foldProcCalls' :: (ModSpec -> Ident -> (Maybe Int) -> Determinism
+foldProcCalls' :: (ModSpec -> Ident -> Maybe Int -> Determinism
                    -> [Placed Exp] -> a) ->
                  (a -> a -> a) -> a -> Stmt -> [Placed Stmt] -> a
 foldProcCalls' fn comb val (ProcCall m name procID detism args) ss =
     foldProcCalls fn comb (comb val $ fn m name procID detism args) ss
+foldProcCalls' fn comb val ForeignCall{} ss =
+    foldProcCalls fn comb val ss
 foldProcCalls' fn comb val (Cond tst thn els) ss =
+    foldProcCalls' fn comb
+      (foldProcCalls fn comb
+        (foldProcCalls fn comb val els)
+          thn)
+      (content tst)
+      ss
+foldProcCalls' fn comb val (And stmts) ss =
     foldProcCalls fn comb
-    (foldProcCalls fn comb
-     (foldProcCalls fn comb
-      (foldProcCalls fn comb val els)
-      thn)
-     tst)
-    ss
+      (foldProcCalls fn comb val stmts)
+      ss
+foldProcCalls' fn comb val (Or stmts) ss =
+    foldProcCalls fn comb
+      (foldProcCalls fn comb val stmts)
+      ss
+foldProcCalls' fn comb val (Not stmt) ss =
+    foldProcCalls' fn comb val
+      (content stmt)
+      ss
+foldProcCalls' fn comb val TestBool{} ss =
+    foldProcCalls fn comb val ss
+foldProcCalls' fn comb val Nop ss =
+    foldProcCalls fn comb val ss
 foldProcCalls' fn comb val (Loop body) ss =
     foldProcCalls fn comb (foldProcCalls fn comb val body) ss
-foldProcCalls' fn comb val _ ss =
+foldProcCalls' fn comb val For{} ss =
+    foldProcCalls fn comb val ss
+foldProcCalls' fn comb val Break ss =
+    foldProcCalls fn comb val ss
+foldProcCalls' fn comb val Next ss =
     foldProcCalls fn comb val ss
 
 
@@ -1676,21 +1704,18 @@ data Stmt
 
      -- |A conditional; execute the first (SemiDet) Stmts; if they succeed
      --  execute the second Stmts, else execute the third.
-     -- XXX try to make the first argument a single placed statement
-     | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt]
+     | Cond (Placed Stmt) [Placed Stmt] [Placed Stmt]
 
      -- All the following are eliminated during unbranching.
 
      -- |A test that succeeds iff the expression is true
      | TestBool Exp
-     -- |A test that succeeds iff all the enclosed tests succeed; enclosed
-     -- statements that aren't tests are honorary successes.
+     -- |A test that fails iff all the enclosed tests fail; enclosed
      | And [Placed Stmt]
      -- |A test that fails iff all the enclosed tests fail; enclosed
-     -- statements that aren't tests are honorary failures.
      | Or [Placed Stmt]
      -- |A test that fails iff the enclosed test succeeds
-     | Not [Placed Stmt]
+     | Not (Placed Stmt)
 
      -- |A loop body; the loop is controlled by Breaks and Nexts
      | Loop [Placed Stmt]
@@ -1705,6 +1730,16 @@ data Stmt
 instance Show Stmt where
   show s = "{" ++ showStmt 4 s ++ "}"
 
+-- |Produce a single statement comprising the conjunctions of the statements
+--  in the supplied list.
+seqToStmt :: [Placed Stmt] -> Placed Stmt
+seqToStmt [] = Unplaced $ TestBool $ Typed (IntValue 1)
+                                           (TypeSpec ["wybe"] "bool" [])
+                                           True
+seqToStmt [stmt] = stmt
+seqToStmt stmts = Unplaced $ And stmts
+
+
 -- |An expression.  These are all normalised into statements.
 data Exp
       = IntValue Integer
@@ -1716,7 +1751,7 @@ data Exp
                                       -- and whether type is a cast
       -- The following are eliminated during flattening
       | Where [Placed Stmt] (Placed Exp)
-      | CondExp [Placed Stmt] (Placed Exp) (Placed Exp)
+      | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
       | Fncall ModSpec Ident [Placed Exp]
       | ForeignFn Ident Ident [Ident] [Placed Exp]
      deriving (Eq,Ord,Generic)
@@ -1840,7 +1875,8 @@ argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
 expToStmt :: Exp -> Stmt
 expToStmt (Fncall [] "and" args) = And $ List.map (fmap expToStmt) args
 expToStmt (Fncall [] "or"  args) = Or  $ List.map (fmap expToStmt) args
-expToStmt (Fncall [] "not" args) = Not $ List.map (fmap expToStmt) args
+expToStmt (Fncall [] "not" [arg]) = Not $ fmap expToStmt arg
+expToStmt (Fncall [] "not" args) = shouldnt $ "non-unary 'not' " ++ show args
 expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name Nothing Det args
 expToStmt (ForeignFn lang name flags args) = 
     ForeignCall lang name flags args
@@ -2288,10 +2324,9 @@ showStmt _ (ForeignCall lang name flags args) =
 showStmt _ (TestBool test) =
     "testbool " ++ show test
 showStmt indent (And stmts) =
-    "(    " ++
     intercalate (" and\n" ++ replicate indent' ' ')
-        (List.map (showStmt indent' . content) stmts) ++
-    ")"
+    (List.map (showStmt indent' . content) stmts) ++
+    ")"  
     where indent' = indent + 4
 showStmt indent (Or stmts) =
     "(   " ++
@@ -2299,14 +2334,12 @@ showStmt indent (Or stmts) =
         (List.map (showStmt indent' . content) stmts) ++
     ")"
     where indent' = indent + 4
-showStmt indent (Not stmts) =
-    "not(" ++
-    intercalate ("\n" ++ replicate indent' ' ')
-    (List.map (showStmt indent' . content) stmts) ++ ")"
+showStmt indent (Not stmt) =
+    "not(" ++ showStmt indent' (content stmt) ++ ")"
     where indent' = indent + 4
-showStmt indent (Cond condstmts thn els) =
+showStmt indent (Cond condstmt thn els) =
     let leadIn = List.replicate indent ' '
-    in "if {" ++ showBody (indent+4) condstmts ++ "}::\n"
+    in "if {" ++ showStmt (indent+4) (content condstmt) ++ "}::\n"
        ++ showBody (indent+4) thn ++ "\n"
        ++ leadIn ++ "else::"
        ++ showBody (indent+4) els ++ "\n"
