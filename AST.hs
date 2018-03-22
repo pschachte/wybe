@@ -89,7 +89,7 @@ import           System.Console.ANSI
 
 import           GHC.Generics (Generic)
 
-import qualified LLVM.General.AST as LLVMAST
+import qualified LLVM.AST as LLVMAST
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing

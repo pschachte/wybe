@@ -45,24 +45,24 @@ import           Control.Applicative
 import           Control.Monad.Except
 import           Control.Monad.State
 
-import           LLVM.General.AST
-import qualified LLVM.General.AST                        as LLVMAST
-import           LLVM.General.AST.Global
-import qualified LLVM.General.AST.Global                 as G
+import           LLVM.AST
+import qualified LLVM.AST                                as LLVMAST
+import           LLVM.AST.Global
+import qualified LLVM.AST.Global                         as G
 
-import           LLVM.General.AST.AddrSpace
-import qualified LLVM.General.AST.Attribute              as A
-import qualified LLVM.General.AST.CallingConvention      as CC
-import qualified LLVM.General.AST.Constant               as C
-import qualified LLVM.General.AST.FloatingPointPredicate as FP
-import qualified LLVM.General.AST.IntegerPredicate       as IP
+import           LLVM.AST.AddrSpace
+import qualified LLVM.AST.Attribute                      as A
+import qualified LLVM.AST.CallingConvention              as CC
+import qualified LLVM.AST.Constant                       as C
+import qualified LLVM.AST.FloatingPointPredicate         as FP
+import qualified LLVM.AST.IntegerPredicate               as IP
 
-import           AST                                     (Prim, PrimProto, Compiler
-                                                         , shouldnt, logMsg
-                                                         , showModSpec
-                                                         , getModuleSpec)
-import           LLVM.General.Context
-import           LLVM.General.Module
+import           AST                                 (Prim, PrimProto, Compiler
+                                                     , shouldnt, logMsg
+                                                     , showModSpec
+                                                     , getModuleSpec)
+import           LLVM.Context
+import           LLVM.Module
 import           Options (LogSelection (Blocks))
 
 ----------------------------------------------------------------------------
@@ -108,7 +108,7 @@ float_c b = FloatingPointType b IEEE
 -- Codegen State                                                          --
 ----------------------------------------------------------------------------
 -- | 'SymbolTable' is a simple mapping of scope variable names and their
--- representation as an LLVM.General.AST.Operand.Operand.
+-- representation as an LLVM.AST.Operand.Operand.
 type SymbolTable = [(String, Operand)]
 
 -- | A Map of all the assigned names to assist in supllying new unique names.

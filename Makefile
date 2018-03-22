@@ -15,8 +15,8 @@ all:	wybemk
 # 	happy -a -g $<
 
 wybemk:	*.hs Version.lhs *.c
-	cabal configure
-	cabal install --only-dependencies
+	# cabal configure
+	cabal -j3 install --only-dependencies
 	cabal -j3 build && cp dist/build/$@/$@ $@
 
 # .PHONY:	info
