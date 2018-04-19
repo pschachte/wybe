@@ -71,7 +71,8 @@ import           System.FilePath
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
-import BinaryFactory
+import           BinaryFactory
+import qualified Data.ByteString.Char8 as BS
 
 ------------------------ Handling dependencies ------------------------
 
@@ -594,7 +595,7 @@ buildExecutable targetMod fpath = do
             mainMod <- newMainModule mainImports
             logBuild "o Built 'main' module for target: "
             mainModStr <- liftIO $ codeemit mainMod
-            logEmit mainModStr
+            logEmit $ BS.unpack mainModStr
             ------------
             logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
             tempDir <- liftIO getTemporaryDirectory
@@ -698,7 +699,7 @@ objectReBuildNeeded thisMod dir = do
 srcObjFiles :: ModSpec -> [FilePath] ->
                Compiler (Maybe (FilePath,Bool,FilePath,Bool,Ident))
 srcObjFiles modspec possDirs = do
-    let splits = List.map (`take` modspec) [1..length modspec]
+    let splits = List.map (`List.take` modspec) [1..length modspec]
     dirs <- mapM (\d -> mapM (\ms -> do
                                   let srcfile = moduleFilePath sourceExtension
                                                 d ms
@@ -726,7 +727,7 @@ srcObjFiles modspec possDirs = do
 -- first found non-empty (not of constr NoSource) of ModuleSource is returned.
 moduleSources :: ModSpec -> [FilePath] -> IO ModuleSource
 moduleSources modspec possDirs = do
-    let splits = List.map (`take` modspec) [1..length modspec]
+    let splits = List.map (`List.take` modspec) [1..length modspec]
     dirs <- mapM (\d -> mapM (sourceInDir d) splits) possDirs
     -- Return the last valid Source
     return $ (fromMaybe NoSource . List.find (/= NoSource) . reverse )

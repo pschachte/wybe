@@ -28,11 +28,11 @@ executable wybemk
                , old-time
                , parsec >=3.1.3
                , process >= 1.4.2.0
-               , transformers >=0.3.0.0
+               , transformers
                , cryptonite
                , tuple >= 0.3.0.2
                , extra >= 1.5.1
-               , ansi-terminal >=0.6.2.3
+               , ansi-terminal
                , Diff
 
 
@@ -48,10 +48,10 @@ test-suite wybe-test
                   , containers
                   , directory >= 1.2.5.0
                   , filepath >= 1.4.0.0
-                  , llvm-general == 3.5.1.2
-                  , llvm-general-pure
+                  , llvm-hs
+                  , llvm-hs-pure
                   , mtl
                   , parsec >=3.1.3
-                  , transformers >=0.3.0.0 && <0.5
-                  , ansi-terminal ==0.6.2.3
+                  , transformers
+                  , ansi-terminal
                   , Diff

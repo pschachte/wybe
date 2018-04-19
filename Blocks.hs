@@ -22,18 +22,22 @@ import           Data.List as List
 import           Data.Map as Map
 import qualified Data.Set as Set
 import           Data.Word (Word32)
-import qualified LLVM.General.AST as LLVMAST
-import qualified LLVM.General.AST.Constant as C
-import qualified LLVM.General.AST.Float as F
-import qualified LLVM.General.AST.FloatingPointPredicate as FP
-import qualified LLVM.General.AST.Global as G
-import           LLVM.General.AST.Instruction
-import qualified LLVM.General.AST.IntegerPredicate as IP
-import           LLVM.General.AST.Operand
-import           LLVM.General.AST.Type
-import           LLVM.General.PrettyPrint
+import qualified LLVM.AST as LLVMAST
+import qualified LLVM.AST.Constant as C
+import qualified LLVM.AST.Float as F
+import qualified LLVM.AST.FloatingPointPredicate as FP
+import qualified LLVM.AST.Global as G
+import           LLVM.AST.Instruction
+import qualified LLVM.AST.IntegerPredicate as IP
+import           LLVM.AST.Operand
+import           LLVM.AST.Type
+-- import           LLVM.PrettyPrint
+import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Short as BSS
+import qualified Data.ByteString.Char8 as B8
 import           Options (LogSelection (Blocks))
-
+import           Unsafe.Coerce -- needed to convert char to Word8
 
 -- | Holds information on the LLVM representation of the LPVM procedure.
 data ProcDefBlock =
@@ -56,6 +60,7 @@ blockTransformModule thisMod =
     do reenterModule thisMod
        logBlocks $ "*** Translating Module: " ++ showModSpec thisMod
        modRec <- getModule id
+       modFile <- getModule modSourceFile
        logWrapWith '-' $ show modRec
        (_, procs) <- unzip <$>
                          getModuleImplementationField (Map.toList . modProcs)
@@ -92,7 +97,7 @@ blockTransformModule thisMod =
        procBlocks <- mapM (translateProc allProtos) $ emptyFilter mangledProcs
        --------------------------------------------------
        -- Init LLVM Module and fill it
-       let llmod = newLLVMModule (showModSpec thisMod) procBlocks
+       let llmod = newLLVMModule (showModSpec thisMod) modFile procBlocks
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
        _ <- finishModule
        logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
@@ -186,7 +191,7 @@ translateProc modProtos proc = do
     let globals = List.map LLVMAST.GlobalDefinition $ globalVars codestate
     let body' = createBlocks codestate
     lldef <- makeGlobalDefinition pname proto body'
-    logBlocks $ showPretty lldef
+    logBlocks $ show lldef
     return $ ProcDefBlock proto lldef (exs ++ globals)
 
 
@@ -221,7 +226,7 @@ isInputParam p = primParamFlow p == FlowIn &&
 makeFnArg :: PrimParam -> Compiler (Type, LLVMAST.Name)
 makeFnArg param = do
     ty <- typed' $ primParamType param
-    let nm = LLVMAST.Name (show $ primParamName param)
+    let nm = LLVMAST.Name $ toSBString $ show $ primParamName param
     return (ty, nm)
 
 -- | Open the Out parameter of a primitive (if there is one) into it's
@@ -434,7 +439,7 @@ cgen prim@(PrimCall pspec args) = do
     thisMod <- lift $ getModuleSpec
     let (ProcSpec mod name _) = pspec
     -- let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
-    let nm = LLVMAST.Name (show pspec)
+    let nm = LLVMAST.Name $ toSBString $ show pspec
     -- Find the prototype of the pspec being called
     -- and match it's parameters with the args here
     -- and remove the unneeded ones.
@@ -467,7 +472,7 @@ cgen prim@(PrimForeign lang name flags args)
      | otherwise =
          do addExtern prim
             let inArgs = primInputs args
-            let nm = LLVMAST.Name name
+            let nm = LLVMAST.Name $ toSBString name
             inops <- mapM cgenArg inArgs
             -- alignedOps <- mapM makeCIntOp inops
             outty <- lift $ primReturnType args
@@ -824,10 +829,15 @@ cgenArg (ArgChar c ty) = do t <- lift $ typed' ty
 
 
 getBits :: LLVMAST.Type -> Word32
-getBits (IntegerType bs) = bs
-getBits (PointerType ty _) = getBits ty
-getBits (FloatingPointType bs _) = bs
-getBits ty = fromIntegral wordSize
+getBits (IntegerType bs)                = bs
+getBits (PointerType ty _)              = getBits ty
+getBits (FloatingPointType HalfFP)      = 16
+getBits (FloatingPointType FloatFP)     = 32
+getBits (FloatingPointType DoubleFP)    = 64
+getBits (FloatingPointType FP128FP)     = 128
+getBits (FloatingPointType X86_FP80FP)  = 80
+getBits (FloatingPointType PPC_FP128FP) = 128
+getBits ty                              = fromIntegral wordSize
 
 -- | Convert a string into a constant array of constant integers.
 makeStringConstant :: String ->  C.Constant
@@ -937,8 +947,8 @@ typeStrToType "phantom" = void_t
 typeStrToType (c:cs)
     | c == 'i' = int_c (fromIntegral bytes)
     | c == 'f' = float_c (fromIntegral bytes)
-    | c == 'p' = if take 6 cs == "ointer"
-                 then let bs = read (drop 6 cs) :: Int
+    | c == 'p' = if List.take 6 cs == "ointer"
+                 then let bs = read (List.drop 6 cs) :: Int
                       in ptr_t $ int_c (fromIntegral bs)
                  else void_t
     | otherwise = void_t
@@ -953,11 +963,12 @@ typeStrToType (c:cs)
 -- | Initialize and fill a new LLVMAST.Module with the translated
 -- global definitions (extern declarations and defined functions)
 -- of LPVM procedures in a module.
-newLLVMModule :: String -> [ProcDefBlock] -> LLVMAST.Module
-newLLVMModule name blocks = let defs = List.map blockDef blocks
-                                exs = concat $ List.map blockExterns blocks
-                                exs' = uniqueExterns exs ++ [mallocExtern]
-                            in modWithDefinitions name $ exs' ++ defs
+newLLVMModule :: String -> String -> [ProcDefBlock] -> LLVMAST.Module
+newLLVMModule name fname blocks
+    = let defs = List.map blockDef blocks
+          exs  = concat $ List.map blockExterns blocks
+          exs' = uniqueExterns exs ++ [mallocExtern]
+      in modWithDefinitions name fname $ exs' ++ defs
 
 
 -- | Filter out non-unique externs
@@ -971,8 +982,9 @@ uniqueExterns exs = List.nubBy sameDef exs
 
 -- | Create a new LLVMAST.Module with the given name, and fill it with the
 -- given global definitions.
-modWithDefinitions :: String -> [LLVMAST.Definition] -> LLVMAST.Module
-modWithDefinitions nm defs = LLVMAST.Module nm Nothing Nothing defs
+modWithDefinitions :: String -> String -> [LLVMAST.Definition] -> LLVMAST.Module
+modWithDefinitions nm filename defs =
+    LLVMAST.Module (toSBString nm) (toSBString filename) Nothing Nothing defs
 
 
 -- | Build an extern declaration definition from a given LPVM primitive.
@@ -1000,8 +1012,9 @@ makeExArg (index,arg) = do
 
 
 mallocExtern :: LLVMAST.Definition
-mallocExtern = let ext_arg = [(LLVMAST.IntegerType 32, LLVMAST.Name "size")]
-               in external (ptr_t (int_c 8)) "wybe_malloc" ext_arg
+mallocExtern =
+    let ext_arg = [(LLVMAST.IntegerType 32, LLVMAST.Name $ toSBString "size")]
+    in external (ptr_t (int_c 8)) "wybe_malloc" ext_arg
 
 ----------------------------------------------------------------------------
 -- Block Modification                                                     --
@@ -1019,7 +1032,8 @@ newMainModule depends = do
     let externsForMain = [(external void_t "gc_init" [])]
             ++ (mainExterns depends)
     let newDefs = externsForMain ++ [mainDef]
-    return $ modWithDefinitions "tmpMain" newDefs
+    -- XXX Use empty string as source file name; should be main file name
+    return $ modWithDefinitions "tmpMain" "" newDefs
 
 
 -- | Run the Codegen monad collecting the instructions needed to call
@@ -1030,9 +1044,9 @@ mainCodegen mods = do
     setBlock entry
     -- Temp Boehm GC init call
     instr void_t $
-        call (externf void_t (LLVMAST.Name "gc_init")) []
+        call (externf void_t (LLVMAST.Name $ toSBString "gc_init")) []
     -- Call the mods mains in order    
-    let mainName m = LLVMAST.Name $ showModSpec m ++ ".main"
+    let mainName m = LLVMAST.Name $ toSBString $ showModSpec m ++ ".main"
     forM_ mods $ \m -> instr int_t $
                        call (externf int_t (mainName m)) []
     -- int main returns 0
@@ -1078,8 +1092,8 @@ concatLLVMASTModules thisMod mspecs = do
 -- must be unique.
 addUniqueDefinitions :: LLVMAST.Module -> [LLVMAST.Definition]
                      -> LLVMAST.Module
-addUniqueDefinitions (LLVMAST.Module n l t ds) defs =
-    LLVMAST.Module n l t newDefs
+addUniqueDefinitions (LLVMAST.Module n fn l t ds) defs =
+    LLVMAST.Module n fn l t newDefs
   where
     newDefs = List.nub $ ds ++ defs
 
@@ -1095,7 +1109,7 @@ addUniqueDefinitions (LLVMAST.Module n l t ds) defs =
 callWybeMalloc :: Integer -> Codegen Operand
 callWybeMalloc size = do
     let outTy = (ptr_t (int_c 8))
-    let fnName = LLVMAST.Name "wybe_malloc"
+    let fnName = LLVMAST.Name $ toSBString "wybe_malloc"
     let inOp = cons $ C.Int 32 size
     let ins = call (externf outTy fnName) [inOp]
     instr outTy ins
@@ -1170,7 +1184,9 @@ makeStoreOp ptr
 makeStoreOp ptr v = return v
 
 
-
+-- Convert string to ShortByteString
+toSBString :: [Char] -> BSS.ShortByteString
+toSBString string = BSS.pack $ unsafeCoerce <$> string
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

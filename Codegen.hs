@@ -63,6 +63,7 @@ import           AST                                 (Prim, PrimProto, Compiler
                                                      , getModuleSpec)
 import           LLVM.Context
 import           LLVM.Module
+import           Unsafe.Coerce
 import           Options (LogSelection (Blocks))
 
 ----------------------------------------------------------------------------
@@ -85,7 +86,7 @@ void_t :: Type
 void_t = VoidType
 
 float_t :: Type
-float_t = FloatingPointType 64 IEEE
+float_t = FloatingPointType DoubleFP
 
 char_t :: Type
 char_t = IntegerType 8
@@ -101,7 +102,12 @@ int_c :: Word32 -> Type
 int_c = IntegerType
 
 float_c :: Word32 -> Type
-float_c b = FloatingPointType b IEEE
+float_c 16  = FloatingPointType HalfFP
+float_c 32  = FloatingPointType FloatFP
+float_c 64  = FloatingPointType DoubleFP
+float_c 128 = FloatingPointType FP128FP
+float_c 80  = FloatingPointType X86_FP80FP
+float_c n   = error $ "Invalid floating point width " ++ show n
 
 
 ----------------------------------------------------------------------------
@@ -181,7 +187,7 @@ addGlobalConstant ty con =
     do modName <- lift $ fmap showModSpec getModuleSpec
        gs <- gets globalVars
        n <- fresh
-       let ref = Name $ modName ++ "." ++ show n
+       let ref = Name $ fromString $ modName ++ "." ++ show n
        let gvar = globalVariableDefaults { name = ref
                                          , isConstant = True
                                          , G.type' = ty
@@ -192,7 +198,7 @@ addGlobalConstant ty con =
 -- | Create an empty LLVMAST.Module which would be converted into
 -- LLVM IR once the moduleDefinitions field is filled.
 emptyModule :: String -> LLVMAST.Module
-emptyModule label = defaultModule { moduleName = label }
+emptyModule label = defaultModule { moduleName = fromString label }
 
 
 -- | Create a global Function Definition to store in the LLVMAST.Module.
@@ -201,7 +207,7 @@ emptyModule label = defaultModule { moduleName = label }
 globalDefine :: Type -> String -> [(Type, Name)] -> [BasicBlock] -> Definition
 globalDefine rettype label argtypes body
              = GlobalDefinition $ functionDefaults {
-                 name = Name label
+                 name = Name $ fromString label
                , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes],
                                False)
                , returnType = rettype
@@ -212,7 +218,7 @@ globalDefine rettype label argtypes body
 external :: Type -> String -> [(Type, Name)] -> Definition
 external rettype label argtypes
     = GlobalDefinition $ functionDefaults {
-        name = Name label
+        name = Name $ fromString label
       , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes], False)
       , returnType = rettype
       , basicBlocks = []
@@ -237,7 +243,7 @@ emptyBlock i = BlockState i [] Nothing
 -- | Initialize an empty CodegenState for a new Definition.
 emptyCodegen :: [PrimProto] -> CodegenState
 emptyCodegen modProtos
-    = CodegenState (Name entryBlockName)
+    = CodegenState (Name $ fromString entryBlockName)
       Map.empty [] 1 0 Map.empty [] [] modProtos
 
 -- | 'addBlock' creates and adds a new block to the current blocks
@@ -250,11 +256,11 @@ addBlock bname = do
   let new = emptyBlock ix
       (qname, supply) = uniqueName bname ns
   -- updating with new block appended
-  modify $ \s -> s { blocks = Map.insert (Name qname) new blks
+  modify $ \s -> s { blocks = Map.insert (Name $ fromString qname) new blks
                    , blockCount = ix + 1
                    , names = supply
                    }
-  return (Name qname)
+  return (Name $ fromString qname)
 
 -- | Set the current block label.
 setBlock :: Name -> Codegen Name
@@ -326,7 +332,7 @@ externf ty = ConstantOperand . (C.GlobalReference ty)
 
 -- | Create a new Local Operand (prefixed with % in LLVM)
 localVar :: Type -> String -> Operand
-localVar t s =  (LocalReference t ) $ LLVMAST.Name s
+localVar t s =  (LocalReference t ) $ LLVMAST.Name $ fromString s
 
 local :: Type -> LLVMAST.Name -> Operand
 local ty nm = LocalReference ty nm
@@ -382,7 +388,7 @@ operandType _ = void_t
 -- instruction).
 namedInstr :: Type -> String -> Instruction -> Codegen Operand
 namedInstr ty nm ins =
-    do let ref = Name nm
+    do let ref = Name $ fromString nm
        blk <- current
        let i = stack blk
        modifyBlock $ blk { stack = i ++ [ref := ins] }

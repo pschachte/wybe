@@ -7,14 +7,16 @@ import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
 import           Data.List as List
 import           Data.Map as Map
-import qualified LLVM.General.AST as LLVMAST
-import           LLVM.General.Context
-import           LLVM.General.Module as Mod
-import           LLVM.General.Target
-import           LLVM.General.PassManager
+import qualified LLVM.AST as LLVMAST
+import           LLVM.Context
+import           LLVM.Module as Mod
+import           LLVM.Target
+import           LLVM.PassManager
 import           System.Process
 import System.Exit ( ExitCode(..) )
 import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Char8 as B8
 import BinaryFactory (encodeModule)
 import           Config
 import           ObjectInterface
@@ -80,11 +82,11 @@ emitBitcodeFile m f = do
 emitAssemblyFile :: ModSpec -> FilePath -> Compiler ()
 emitAssemblyFile m f = do
     logEmit $ "Creating assembly file for " ++ showModSpec m ++
-        "with optimisations."
+        ", with optimisations."
     -- withModuleLLVM m (makeAssemblyFile f)
     withModuleLLVM m $ \llmod -> withOptimisedModule llmod
-        (\mm -> liftError $ withHostTargetMachine $ \_ ->
-            liftError $ writeLLVMAssemblyToFile (File f) mm)
+        (\mm -> withHostTargetMachine $ \_ ->
+            writeLLVMAssemblyToFile (File f) mm)
 
 
 -- | Handle the ExceptT monad. If there is an error, it is better to fail.
@@ -92,7 +94,7 @@ liftError :: ExceptT String IO a -> IO a
 liftError = runExceptT >=> either fail return
 
 -- | Return string form LLVM IR represenation of a LLVMAST.Module
-codeemit :: LLVMAST.Module -> IO String
+codeemit :: LLVMAST.Module -> IO BS.ByteString
 codeemit llmod = withOptimisedModule llmod moduleLLVMAssembly
 -- codeemit llmod = withModule llmod moduleLLVMAssembly
 
@@ -109,10 +111,10 @@ passes = defaultCuratedPassSetSpec { optLevel = Just 3 }
 
 -- | Return a string LLVM IR representation of a LLVMAST.Module after
 -- a curated set of passes has been executed on the C++ Module form.
-codeEmitWithPasses :: LLVMAST.Module -> IO String
+codeEmitWithPasses :: LLVMAST.Module -> IO BS.ByteString
 codeEmitWithPasses llmod =
     withContext $ \context ->
-        liftError $ withModuleFromAST context llmod $ \m ->
+        withModuleFromAST context llmod $ \m ->
             withPassManager passes $ \pm -> do
                 success <- runPassManager pm m
                 if success
@@ -126,7 +128,7 @@ testOptimisations llmod = do
     putStrLn $ replicate 80 '-'
     putStrLn "Optimisation Passes"
     putStrLn $ replicate 80 '-'
-    putStrLn llstr
+    B8.putStrLn llstr
     putStrLn $ replicate 80 '-'
 
 
@@ -137,7 +139,7 @@ withOptimisedModule :: LLVMAST.Module -> (Mod.Module -> IO a)
                     -> IO a
 withOptimisedModule llmod action =
     withContext $ \context ->
-        liftError $ withModuleFromAST context llmod $ \m ->
+        withModuleFromAST context llmod $ \m ->
             withPassManager passes $ \pm -> do
                 success <- runPassManager pm m
                 if success
@@ -148,7 +150,7 @@ withOptimisedModule llmod action =
 withModule :: LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
 withModule llmod action =
     withContext $ \context ->
-        liftError $ withModuleFromAST context llmod action
+        withModuleFromAST context llmod action
 
 
 
@@ -160,17 +162,17 @@ withModule llmod action =
 -- and write it as an object file.
 makeObjFile :: FilePath -> LLVMAST.Module -> IO ()
 makeObjFile file llmod =
-    liftError $ withHostTargetMachine $ \tm ->
+    withHostTargetMachine $ \tm ->
         withOptimisedModule llmod $ \m ->
-        liftError $ writeObjectToFile tm (File file) m
+            writeObjectToFile tm (File file) m
 
 -- | Drop an LLVMAST.Module (haskell) intop a Mod.Module (C++)
 -- represenation and write is a bitcode file.
 makeBCFile :: FilePath -> LLVMAST.Module -> IO ()
 makeBCFile file llmod =
     withContext $ \context ->
-        liftError $ withModuleFromAST context llmod $ \m ->
-            liftError $ writeBitcodeToFile (File file) m
+        withModuleFromAST context llmod $ \m ->
+            writeBitcodeToFile (File file) m
 
 
 -- | Use the bitcode wrapper structure to wrap both the AST.Module
@@ -178,7 +180,7 @@ makeBCFile file llmod =
 makeWrappedBCFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
 makeWrappedBCFile file llmod modBS =
     withContext $ \context ->
-        liftError $ withModuleFromAST context llmod $ \m ->
+        withModuleFromAST context llmod $ \m ->
             do bc <- moduleBitcode m
                let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
                BL.writeFile file wrapped
@@ -189,9 +191,9 @@ makeWrappedBCFile file llmod modBS =
 makeAssemblyFile :: FilePath -> LLVMAST.Module -> IO ()
 makeAssemblyFile file llmod =
     withContext $ \context ->
-        liftError $ withModuleFromAST context llmod $ \m ->
-            liftError $ withHostTargetMachine $ \_ ->
-                liftError $ writeLLVMAssemblyToFile (File file) m
+        withModuleFromAST context llmod $ \m ->
+            withHostTargetMachine $ \_ ->
+                writeLLVMAssemblyToFile (File file) m
 
 
 -- | Create a Macho-O object file and embed a 'AST.Module' bytestring
@@ -200,8 +202,8 @@ makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
 makeWrappedObjFile file llmod modBS =
     withContext $ \_ ->
         withModule llmod $ \m -> do
-            liftError $ withHostTargetMachine $ \tm ->
-                liftError $ writeObjectToFile tm (File file) m
+            withHostTargetMachine $ \tm ->
+                writeObjectToFile tm (File file) m
             insertLPVMDataLd modBS file
 
 
@@ -210,8 +212,8 @@ makeWrappedObjFile file llmod modBS =
 -- object file.
 encodeAndWriteFile :: FilePath -> BL.ByteString -> Mod.Module -> IO ()
 encodeAndWriteFile file modBS m = do
-    liftError $ withHostTargetMachine $ \tm ->
-        liftError $ writeObjectToFile tm (File file) m
+    withHostTargetMachine $ \tm ->
+        writeObjectToFile tm (File file) m
     insertLPVMDataLd modBS file
 
 
@@ -278,7 +280,7 @@ logLLVMString thisMod =
        (Just llmod) ->
          do llstr <- liftIO $ codeemit llmod
             logEmit $ replicate 80 '-'
-            logEmit llstr
+            logEmit $ show llstr
             logEmit $ replicate 80 '-'
        Nothing -> error "No LLVM Module Implementation"
      _ <- finishModule
@@ -286,11 +288,11 @@ logLLVMString thisMod =
 
 -- | Pull the LLVMAST representation of the module and generate the LLVM
 -- IR String for it, if it exists.
-extractLLVM :: AST.Module -> Compiler String
+extractLLVM :: AST.Module -> Compiler BS.ByteString
 extractLLVM thisMod =
   case modImplementation thisMod >>= modLLVM of
       Just llmod -> liftIO $ codeemit llmod
-      Nothing -> return "No LLVM IR generated."
+      Nothing -> return $ B8.pack "No LLVM IR generated."
 
 -- | Log the LLVMIR strings for all the modules compiled, except the standard
 -- library.
@@ -302,4 +304,4 @@ logLLVMDump selector1 selector2 pass =
        liftIO $ putStrLn $ showModSpecs $ List.map modSpec noLibMod
        llvmir <- mapM extractLLVM noLibMod
        liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER " ++ pass ++ ":\n\n" ++
-         intercalate ("\n" ++ replicate 50 '-' ++ "\n") llvmir
+         intercalate ("\n" ++ replicate 50 '-' ++ "\n") (B8.unpack <$> llvmir)
