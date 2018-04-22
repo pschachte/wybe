@@ -27,20 +27,21 @@ func_quadruple
 AFTER LLVM IR:
 
 ; ModuleID = 'func_quadruple'
+source_filename = "test-cases/func_quadruple.wybe"
 
-; Function Attrs: nounwind readnone
-define i64 @"func_quadruple.double<0>"(i64 %"a#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"func_quadruple.double<0>"(i64 %"a#0") local_unnamed_addr #0 {
 entry:
   %"tmp$3#0" = shl i64 %"a#0", 1
   ret i64 %"tmp$3#0"
 }
 
-; Function Attrs: nounwind readnone
-define i64 @"func_quadruple.quadruple<0>"(i64 %"a#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"func_quadruple.quadruple<0>"(i64 %"a#0") local_unnamed_addr #0 {
 entry:
   %"tmp$5#0" = shl i64 %"a#0", 2
   ret i64 %"tmp$5#0"
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 

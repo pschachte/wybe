@@ -26,20 +26,21 @@ update
 AFTER LLVM IR:
 
 ; ModuleID = 'update'
+source_filename = "test-cases/update.wybe"
 
-; Function Attrs: nounwind readnone
-define i64 @"update.inc2<0>"(i64 %"x#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"update.inc2<0>"(i64 %"x#0") local_unnamed_addr #0 {
 entry:
   %"tmp$7#0" = add i64 %"x#0", 2
   ret i64 %"tmp$7#0"
 }
 
-; Function Attrs: nounwind readnone
-define i64 @"update.inc2<1>"(i64 %"y#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"update.inc2<1>"(i64 %"y#0") local_unnamed_addr #0 {
 entry:
   %"tmp$8#0" = add i64 %"y#0", -2
   ret i64 %"tmp$8#0"
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 

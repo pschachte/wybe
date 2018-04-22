@@ -19,13 +19,14 @@ unneeded
 AFTER LLVM IR:
 
 ; ModuleID = 'unneeded'
+source_filename = "test-cases/unneeded.wybe"
 
-; Function Attrs: nounwind readnone
-define i64 @"unneeded.unneeded<0>"(i64 %"x#0", i64 %"q#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"unneeded.unneeded<0>"(i64 %"x#0", i64 %"q#0") local_unnamed_addr #0 {
 entry:
   %"tmp$3#0" = add i64 %"x#0", 1
   ret i64 %"tmp$3#0"
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 

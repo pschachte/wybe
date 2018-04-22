@@ -15,4 +15,5 @@ mod8
 AFTER LLVM IR:
 
 ; ModuleID = 'mod8'
+source_filename = "test-cases/mod8.wybe"
 

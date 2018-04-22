@@ -20,13 +20,14 @@ func_where
 AFTER LLVM IR:
 
 ; ModuleID = 'func_where'
+source_filename = "test-cases/func_where.wybe"
 
-; Function Attrs: nounwind readnone
-define i64 @"func_where.quad<0>"(i64 %"x#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"func_where.quad<0>"(i64 %"x#0") local_unnamed_addr #0 {
 entry:
   %"tmp$8#0" = shl i64 %"x#0", 2
   ret i64 %"tmp$8#0"
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 

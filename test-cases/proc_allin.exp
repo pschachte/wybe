@@ -17,4 +17,5 @@ proc_allin
 AFTER LLVM IR:
 
 ; ModuleID = 'proc_allin'
+source_filename = "test-cases/proc_allin.wybe"
 

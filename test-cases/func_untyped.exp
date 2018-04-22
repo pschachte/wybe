@@ -19,13 +19,14 @@ func_untyped
 AFTER LLVM IR:
 
 ; ModuleID = 'func_untyped'
+source_filename = "test-cases/func_untyped.wybe"
 
-; Function Attrs: nounwind readnone
-define i64 @"func_untyped.incr<0>"(i64 %"a#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"func_untyped.incr<0>"(i64 %"a#0") local_unnamed_addr #0 {
 entry:
   %"tmp$3#0" = add i64 %"a#0", 1
   ret i64 %"tmp$3#0"
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 

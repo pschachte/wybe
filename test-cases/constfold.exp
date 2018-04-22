@@ -41,36 +41,37 @@ constfold
 AFTER LLVM IR:
 
 ; ModuleID = 'constfold'
+source_filename = "test-cases/constfold.wybe"
 
-; Function Attrs: nounwind readnone
-define i64 @"constfold.fold_add<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"constfold.fold_add<0>"() local_unnamed_addr #0 {
 entry:
   ret i64 42
 }
 
-; Function Attrs: nounwind readnone
-define i64 @"constfold.fold_mult<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"constfold.fold_mult<0>"() local_unnamed_addr #0 {
 entry:
   ret i64 42
 }
 
-; Function Attrs: nounwind readnone
-define i64 @"constfold.fold_test<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"constfold.fold_test<0>"() local_unnamed_addr #0 {
 entry:
   ret i64 42
 }
 
-; Function Attrs: nounwind readnone
-define i64 @"constfold.fortytwo<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"constfold.fortytwo<0>"() local_unnamed_addr #0 {
 entry:
   ret i64 42
 }
 
-; Function Attrs: nounwind readnone
-define i64 @"constfold.gen$1<0>"(i64 %"tmp$0#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"constfold.gen$1<0>"(i64 returned %"tmp$0#0") local_unnamed_addr #0 {
 entry:
   ret i64 %"tmp$0#0"
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 
