@@ -253,7 +253,7 @@ flattenStmt' (Cond tstStmt thn els) pos detism = do
     emit pos $ Cond tstStmt' thn' els'
 flattenStmt' stmt@(TestBool _) pos SemiDet = emit pos stmt
 flattenStmt' (TestBool expr) _pos Det =
-    shouldnt $ "TestBool " ++ show expr ++ "in Det context"
+    shouldnt $ "TestBool " ++ show expr ++ " in Det context"
 flattenStmt' (And tsts) pos SemiDet = do
     tsts' <- flattenInner False True SemiDet (flattenStmts tsts SemiDet)
     emit pos $ And tsts'
