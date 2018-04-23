@@ -65,7 +65,7 @@ import Options (LogSelection(Unbranch))
 --  comprise a sequence of ProcCall, ForeignCall, TestBool, Cond, and
 --  Nop statements.  Furthermore,  Cond statements can only be the final
 --  Stmt in a body, the condition of a Cond can only be a single TestBool
---  statement, and and TestBool statements can only appear as the
+--  statement, and TestBool statements can only appear as the
 --  condition of a Cond, or, in the case of a SemiDet proc, as the final
 --  statement of a proc body.  Every SemiDet proc body must end with a
 --  TestBool.

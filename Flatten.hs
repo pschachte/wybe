@@ -239,7 +239,7 @@ flattenStmt' (ForeignCall lang name flags args) pos _ = do
     emit pos $ ForeignCall lang name flags args'
 -- XXX must handle Flattener state more carefully.  Defined variables need
 --     to be retained between condition and then branch, but forgotten for
---     the else branch.  Also note that 'transparent' arg to flatteninner is
+--     the else branch.  Also note that 'transparent' arg to flattenInner is
 --     always False
 flattenStmt' (Cond tstStmt thn els) pos detism = do
     defined <- gets defdVars
