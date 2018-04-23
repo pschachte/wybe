@@ -299,25 +299,30 @@ deconstructorItems ctorName params typeSpec constCount nonConstCount
 
 
 -- |Generate the needed Test statements to check that the tag of the value
---  of the specified variable matches the specified tag
+--  of the specified variable matches the specified tag.  If not checking
+--  is necessary, just generate a Nop, rather than a true test.
 tagCheck :: Int -> Int -> Integer -> Ident -> Placed Stmt
 tagCheck constCount nonConstCount tag varName =
     -- If there are any constant constructors, be sure it's not one of them
-    seqToStmt
-    (case constCount of
-          0 -> []
-          _ -> [comparison "uge"
-                 (lpvmCastExp (varGet varName) intType)
-                 (intCast $ iVal constCount)]
-     ++
-    -- If there is more than non-const constructors, check it's the right one
-     case nonConstCount of
-           1 -> []  -- Nothing to do if it's the only non-const constructor
-           _ -> [comparison "eq"
-                  (intCast $ ForeignFn "llvm" "and" []
-                   [Unplaced $ lpvmCastExp (varGet varName) intType,
-                    Unplaced $ iVal tagMask])
-                  (intCast $ iVal tag)])
+    let tests =
+          (case constCount of
+               0 -> []
+               _ -> [comparison "uge"
+                     (lpvmCastExp (varGet varName) intType)
+                     (intCast $ iVal constCount)]
+           ++
+           -- If there is more than one non-const constructors, check that
+           -- it's the right one
+           case nonConstCount of
+               1 -> []  -- Nothing to do if it's the only non-const constructor
+               _ -> [comparison "eq"
+                     (intCast $ ForeignFn "llvm" "and" []
+                      [Unplaced $ lpvmCastExp (varGet varName) intType,
+                       Unplaced $ iVal tagMask])
+                     (intCast $ iVal tag)])
+    in if List.null tests
+       then Unplaced Nop
+       else seqToStmt tests
 
 
 -- |Generate the needed statements to strip the specified tag off of the value
