@@ -52,7 +52,7 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
   = do
     let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
     ty <- addType name (TypeDef (length params) rep' pos) vis
-    -- XXX Should we special-case handling of = instead of generating these:
+    -- XXX Should we special-case handling of = instead of generating these?
     let eq1 = assignmentProc ty False
     let eq2 = assignmentProc ty True
     modspec <- getModuleSpec

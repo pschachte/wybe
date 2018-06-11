@@ -28,10 +28,10 @@
 --  the loop.  Inside a loop, if a: b else: c end d would be
 --  transformed to a call to gen1, where gen2 is defined as def gen2:
 --  d end, and gen1 is defined as def gen1: guard a 1 b gen2 guard a 0
---  c gen2 end.  So for example do a if b: Break end c end d would be 
+--  c gen2 end.  So for example do a if b: Break end c end d would be
 --  transformed into next1, which is defined as def next1 a gen1 end,
---  gen1 is defined as def gen1 guard b 1 break1  guard b 0 gen2 end, 
---  gen2 is defined as def gen2 c next1, and break1 is defined as def 
+--  gen1 is defined as def gen1 guard b 1 break1  guard b 0 gen2 end,
+--  gen2 is defined as def gen2 c next1, and break1 is defined as def
 --  break1 d end.
 --
 --  The tricky part of all this is handling the arguments to these
@@ -60,7 +60,7 @@ import Options (LogSelection(Unbranch))
 
 -- |Transform away all loops, and all conditionals other than as the
 --  final statement in their block.  Transform all semidet code into
---  conditional code that ends with Nop or Fail.  Transform away all
+--  conditional code that ends with a TestBool.  Transform away all
 --  conjunctions, disjunctions, and negations.  After this, all bodies
 --  comprise a sequence of ProcCall, ForeignCall, TestBool, Cond, and
 --  Nop statements.  Furthermore,  Cond statements can only be the final
@@ -98,7 +98,7 @@ unbranchBody tmpCtr params detism body = do
     logMsg Unbranch $ "** Unbranching with output params:" ++ show outparams
     logMsg Unbranch $ "** Unbranching with output args:" ++ show outvars
     (stmts',st) <- runStateT (unbranchStmts detism stmts) unbrancher
-    (stmts'',st') <- runStateT (flattenBranches stmts')
+    (stmts'',st') <- runStateT (flattenBranches detism stmts')
                      unbrancher {brTempCtr = brTempCtr st,
                                  brNewDefs = brNewDefs st}
     return (stmts'', brTempCtr st', brNewDefs st')
@@ -597,57 +597,62 @@ newProcProto name inVars = do
 -- |Flatten all branches in the statement list; ie, expand all
 --  conjunctions, disjunctions, and negations into Conds, and
 --  ensure that the condition of every Cond is just one TestBool.
-flattenBranches :: [Placed Stmt] -> Unbrancher [Placed Stmt]
-flattenBranches [] = return []
-flattenBranches (stmt:stmts) = do
+flattenBranches :: Determinism -> [Placed Stmt] -> Unbrancher [Placed Stmt]
+flattenBranches Det [] = return []
+flattenBranches SemiDet [] = return [succeedTest]
+flattenBranches detism (stmt:stmts) = do
     vars <- gets brVars
     logUnbranch $ "flattening branches in "
         ++ "\n    " ++ showStmt 4 (content stmt)
         ++ "\nwith vars " ++ show vars
-    flattenBranches' (content stmt) (place stmt) stmts
+    flattenBranches' detism (content stmt) (place stmt) stmts
 
 
-flattenBranches' :: Stmt -> OptPos -> [Placed Stmt] -> Unbrancher [Placed Stmt]
-flattenBranches' stmt@ProcCall{} pos stmts =
-    (maybePlace stmt pos:) <$> flattenBranches stmts
-flattenBranches' stmt@ForeignCall{} pos stmts =
-    (maybePlace stmt pos:) <$> flattenBranches stmts
-flattenBranches' (Cond tstStmt thn els) pos [] = do
-    thn' <- flattenBranches thn
-    els' <- flattenBranches els
+flattenBranches' :: Determinism -> Stmt -> OptPos -> [Placed Stmt]
+                 -> Unbrancher [Placed Stmt]
+flattenBranches' detism stmt@ProcCall{} pos stmts =
+    (maybePlace stmt pos:) <$> flattenBranches detism stmts
+flattenBranches' detism stmt@ForeignCall{} pos stmts =
+    (maybePlace stmt pos:) <$> flattenBranches detism stmts
+flattenBranches' detism (Cond tstStmt thn els) pos [] = do
+    thn' <- flattenBranches detism thn
+    els' <- flattenBranches detism els
     placedApplyM (flattenCond thn' els' pos) tstStmt
-flattenBranches' stmt@Cond{} pos stmts =
+flattenBranches' detism stmt@Cond{} pos stmts =
     shouldnt $ "Cond with following statements: "
     ++ showBody 4 (maybePlace stmt pos:stmts)
-flattenBranches' (Nop) pos stmts =
-    flattenBranches stmts -- Just remove Nops
-flattenBranches' stmt@TestBool{} pos [] =
+flattenBranches' detism (Nop) pos stmts =
+    flattenBranches detism stmts -- Just remove Nops
+flattenBranches' detism stmt@TestBool{} pos [] =
     return [maybePlace stmt pos]
-flattenBranches' stmt@TestBool{} pos stmts = do
-    thn <- flattenBranches stmts
+flattenBranches' detism stmt@TestBool{} pos stmts = do
+    thn <- flattenBranches detism stmts
     return [Unplaced (Cond (maybePlace stmt pos)
                       (if List.null thn then [succeedTest] else thn)
                       [failTest])]
-flattenBranches' stmt pos stmts =
+flattenBranches' Det stmt@(And _) pos _ =
+    shouldnt $ "Conjunction in Det context: " ++ show stmt ++ "@" ++ show pos
+flattenBranches' Det stmt@(Or _) pos _ =
+    shouldnt $ "Disjunction in Det context: " ++ show stmt ++ "@" ++ show pos
+flattenBranches' Det stmt@(Not _) pos _ =
+    shouldnt $ "Negation in Det context: " ++ show stmt ++ "@" ++ show pos
+flattenBranches' SemiDet (And [conj]) _pos [] =
+    flattenBranches' SemiDet (content conj) (place conj) []
+flattenBranches' SemiDet (And (conj:conjs)) pos [] =
+    flattenBranches' SemiDet (Cond conj [Unplaced $ And conjs] [failTest])
+    pos []
+flattenBranches' SemiDet (Or [disj]) _pos [] =
+    flattenBranches' SemiDet (content disj) (place disj) []
+flattenBranches' SemiDet (Or (disj:disjs)) pos [] =
+    flattenBranches' SemiDet (Cond disj [succeedTest] [Unplaced $ Or disjs])
+    pos []
+flattenBranches' SemiDet (Not tst) pos [] =
+    flattenBranches' SemiDet (Cond tst [failTest] [succeedTest])
+    pos []
+flattenBranches' _detism stmt _pos _stmts =
     shouldnt
     $ "Statement should have been eliminated before flatten branches\n"
     ++ show stmt
--- flattenBranches' stmt@TestBool{} pos stmts =
---     (maybePlace stmt pos:) <$> flattenBranches stmts
--- flattenBranches' _stmt@(And _) _pos (_:_) =
---     shouldnt $ "And with following statements" ++ show stmt
--- flattenBranches' _(And []) _pos [] =
---     return []
--- flattenBranches' (And (conj:conjs)) pos [] =
---     flattenBranches detism
---     [maybePlace (Cond [conj] [Unplaced $ And conjs] []) pos]
--- flattenBranches' _stmt@(Or _) _pos (_:_) =
---     shouldnt $ "Or with following statements" ++ show stmt
--- flattenBranches' _(Or []) _pos [] =
---     return []
--- flattenBranches' (Or (disj:disjs)) pos [] =
---     flattenBranches detism
---     [maybePlace (Cond [disj] [] [Unplaced $ Or disjs]) pos]
 
 
 -- XXX Fix this to factor out branches that will be repeated into
@@ -664,7 +669,11 @@ flattenCond :: [Placed Stmt] -> [Placed Stmt] -> OptPos
     -> Stmt -> OptPos -> Unbrancher [Placed Stmt]
 flattenCond thn _els _pos (TestBool (Typed (IntValue 1) _ _)) _ =
     return thn
-flattenCond _thn els condPos (TestBool (Typed (IntValue 0) _ _)) _ =
+flattenCond _thn els _pos (TestBool (Typed (IntValue 0) _ _)) _ =
+    return els
+flattenCond thn _els _pos (TestBool (IntValue 1)) _ =
+    return thn
+flattenCond _thn els _pos (TestBool (IntValue 0)) _ =
     return els
 flattenCond thn els condPos stmt@TestBool{} stmtPos =
     return [maybePlace (Cond (maybePlace stmt stmtPos) thn els) condPos]
