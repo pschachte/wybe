@@ -17,7 +17,7 @@ module AST (
   Determinism(..), TypeProto(..), TypeSpec(..), TypeRef(..), TypeImpln(..),
   FnProto(..), ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
-  Exp(..), Generator(..), Stmt(..),
+  Exp(..), Generator(..), Stmt(..), detStmt,
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
   phantomParam, phantomArg, phantomType,
   -- *Source Position Types
@@ -1729,6 +1729,17 @@ data Stmt
 
 instance Show Stmt where
   show s = "{" ++ showStmt 4 s ++ "}"
+
+-- |Returns whether the statement is Det
+detStmt :: Stmt -> Bool
+detStmt (ProcCall _ _ _ SemiDet _) = False
+detStmt (TestBool _) = False
+detStmt (Cond _ thn els) = all detStmt $ List.map content $ thn++els
+detStmt (And list) = all detStmt $ List.map content list
+detStmt (Or list) = all detStmt $ List.map content list
+detStmt (Not _) = False
+detStmt _ = True
+
 
 -- |Produce a single statement comprising the conjunctions of the statements
 --  in the supplied list.

@@ -614,16 +614,20 @@ flattenBranches' detism stmt@ProcCall{} pos stmts =
     (maybePlace stmt pos:) <$> flattenBranches detism stmts
 flattenBranches' detism stmt@ForeignCall{} pos stmts =
     (maybePlace stmt pos:) <$> flattenBranches detism stmts
-flattenBranches' detism (Cond tstStmt thn els) pos [] = do
-    thn' <- flattenBranches detism thn
-    els' <- flattenBranches detism els
-    placedApplyM (flattenCond thn' els' pos) tstStmt
-flattenBranches' detism stmt@Cond{} pos stmts =
+flattenBranches' detism (Cond tstStmt thn els) pos [] =
+    if detStmt $ content tstStmt
+    then
+      (tstStmt:) <$> flattenBranches detism thn
+    else do
+      thn' <- flattenBranches detism thn
+      els' <- flattenBranches detism els
+      placedApplyM (flattenCond thn' els' pos) tstStmt
+flattenBranches' _detism stmt@Cond{} pos stmts =
     shouldnt $ "Cond with following statements: "
     ++ showBody 4 (maybePlace stmt pos:stmts)
-flattenBranches' detism (Nop) pos stmts =
+flattenBranches' detism Nop _pos stmts =
     flattenBranches detism stmts -- Just remove Nops
-flattenBranches' detism stmt@TestBool{} pos [] =
+flattenBranches' _detism stmt@TestBool{} pos [] =
     return [maybePlace stmt pos]
 flattenBranches' detism stmt@TestBool{} pos stmts = do
     thn <- flattenBranches detism stmts

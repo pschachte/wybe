@@ -117,7 +117,7 @@ compileProc proc =
 --  these invariants are observed, and does not worry whether the proc
 --  is Det or SemiDet.
 compileBody :: [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
-compileBody [] params detism = do
+compileBody [] _params detism = do
     end <- closingStmts detism
     return $ ProcBody end NoFork
 compileBody stmts params detism = do
@@ -129,13 +129,14 @@ compileBody stmts params detism = do
               TestBool var -> do
                 front <- mapM compileSimpleStmt $ init stmts
                 compileCond front (place final) var thn els params detism
-              tstStmts ->
-                shouldnt $ "CompileBody of Cond with non-simple test"
-                           ++ show tstStmts
+              tstStmt ->
+                shouldnt $ "CompileBody of Cond with non-simple test:\n"
+                           ++ show tstStmt
         _ -> do
           prims <- mapM compileSimpleStmt stmts
           end <- closingStmts detism
           return $ ProcBody (prims++end) NoFork
+
 
 compileCond :: [Placed Prim] -> OptPos -> Exp -> [Placed Stmt]
     -> [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
