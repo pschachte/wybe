@@ -278,7 +278,7 @@ logUnbranch s = lift $ logMsg Unbranch s
 --                 Unbranching statement sequences
 ----------------------------------------------------------------
 
--- | 'Unbranch' a list of statements.  If the boolean argument is true,
+-- | 'Unbranch' a list of statements.  If isDryRun is true,
 --   this is a "dry run", and should not generate any code, but only
 --   work out which variables are defined when.
 unbranchStmts :: Determinism -> [Placed Stmt] -> Unbrancher [Placed Stmt]
@@ -614,11 +614,14 @@ flattenBranches' detism stmt@ProcCall{} pos stmts =
     (maybePlace stmt pos:) <$> flattenBranches detism stmts
 flattenBranches' detism stmt@ForeignCall{} pos stmts =
     (maybePlace stmt pos:) <$> flattenBranches detism stmts
-flattenBranches' detism (Cond tstStmt thn els) pos [] =
+flattenBranches' detism (Cond tstStmt thn els) pos [] = do
+    logUnbranch $ "flattening cond with test " ++ showStmt 4 (content tstStmt)
     if detStmt $ content tstStmt
-    then
+    then do
+      logUnbranch "  test is det: just execute"
       (tstStmt:) <$> flattenBranches detism thn
     else do
+      logUnbranch "  test is semidet: keep as a Cond"
       thn' <- flattenBranches detism thn
       els' <- flattenBranches detism els
       placedApplyM (flattenCond thn' els' pos) tstStmt
@@ -689,13 +692,21 @@ flattenCond thn els condPos stmt@ForeignCall{} stmtPos = do
 flattenCond thn els condPos (And []) _stmtPos =
     return thn
 flattenCond thn els condPos (And (tst:tsts)) stmtPos = do
-    thn' <- flattenCond thn els condPos (And tsts) stmtPos
-    placedApplyM (flattenCond thn' els condPos) tst
+    logUnbranch $ "flattening And condition " ++ show (tst:tsts)
+    if detStmt $ content tst
+      then (tst:) <$> flattenCond thn els condPos (And tsts) stmtPos
+      else do
+      thn' <- flattenCond thn els condPos (And tsts) stmtPos
+      placedApplyM (flattenCond thn' els condPos) tst
 flattenCond thn els condPos (Or []) _stmtPos =
     return els
 flattenCond thn els condPos (Or (disj:disjs)) stmtPos = do
-    els' <- flattenCond thn els condPos (Or disjs) stmtPos
-    placedApplyM (flattenCond thn els' condPos) disj
+    logUnbranch $ "flattening Or condition " ++ show (disj:disjs)
+    if detStmt $ content disj
+      then (disj:) <$> flattenCond thn els condPos (Or disjs) stmtPos
+      else do
+      els' <- flattenCond thn els condPos (Or disjs) stmtPos
+      placedApplyM (flattenCond thn els' condPos) disj
 flattenCond' (Not neg) _stmtPos stmts thn els condPos =
     placedApplyM (flattenCond els thn condPos) neg
 flattenCond' stmt@Cond{} _stmtPos _ _ _ _ =
