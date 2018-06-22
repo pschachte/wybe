@@ -66,7 +66,7 @@ optimiseMod mods thisMod = do
 optimiseSccBottomUp procs = do
     inlines <- mapM optimiseProcBottomUp $ sccElts procs
     when (or $ tail inlines) $ do
-        mapM optimiseProcBottomUp $ sccElts procs
+        mapM_ optimiseProcBottomUp $ sccElts procs
         return ()
 
 
