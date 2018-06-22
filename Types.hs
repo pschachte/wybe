@@ -1007,7 +1007,7 @@ modecheckStmts :: ModSpec -> ProcName -> OptPos -> Typing
 modecheckStmts _ _ _ _ delayed assigned _ []
     | List.null delayed = return ([],assigned,[])
     | otherwise =
-        shouldnt $ "modecheckStmts reached end of body with delayed stmts"
+        shouldnt $ "modecheckStmts reached end of body with delayed stmts:\n"
                    ++ show delayed
 modecheckStmts m name pos typing delayed assigned detism (pstmt:pstmts) = do
     (pstmt',delayed',assigned',errs') <-
@@ -1100,10 +1100,12 @@ modecheckStmt m name defPos typing delayed assigned detism
                               (Just $ procSpecID matchProc)
                               (procInfoDetism match)
                               args'
-                  let assigned' = Set.fromList
+                  let assigned' = Set.union
+                                  (Set.fromList
                                   $ List.map (expVar . content)
                                   $ List.filter
-                                  ((==ParamOut) . expFlow . content) args'
+                                  ((==ParamOut) . expFlow . content) args')
+                                  assigned
                   return ([maybePlace stmt' pos],delayed,assigned',[])
                 [] -> if delayMatches
                       then do
