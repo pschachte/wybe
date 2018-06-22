@@ -9,35 +9,35 @@ module Blocks
        where
 
 import           AST
-import           BinaryFactory ()
+import           BinaryFactory                   ()
 import           Codegen
-import           Config (wordSize)
+import           Config                          (wordSize)
 import           Control.Monad
-import           Control.Monad.Trans (lift, liftIO)
+import           Control.Monad.Trans             (lift, liftIO)
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
-import           Data.Char (ord)
-import           Data.List as List
-import           Data.Map as Map
-import qualified Data.Set as Set
-import           Data.Word (Word32)
-import qualified LLVM.AST as LLVMAST
-import qualified LLVM.AST.Constant as C
-import qualified LLVM.AST.Float as F
+import           Data.Char                       (ord)
+import           Data.List                       as List
+import           Data.Map                        as Map
+import qualified Data.Set                        as Set
+import           Data.Word                       (Word32)
+import qualified LLVM.AST                        as LLVMAST
+import qualified LLVM.AST.Constant               as C
+import qualified LLVM.AST.Float                  as F
 import qualified LLVM.AST.FloatingPointPredicate as FP
-import qualified LLVM.AST.Global as G
+import qualified LLVM.AST.Global                 as G
 import           LLVM.AST.Instruction
-import qualified LLVM.AST.IntegerPredicate as IP
-import           LLVM.AST.Operand
+import qualified LLVM.AST.IntegerPredicate       as IP
+import           LLVM.AST.Operand                hiding (PointerType)
 import           LLVM.AST.Type
 -- import           LLVM.PrettyPrint
-import qualified Data.ByteString.Lazy as BL
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Short as BSS
-import qualified Data.ByteString.Char8 as B8
-import           Options (LogSelection (Blocks))
-import           Unsafe.Coerce -- needed to convert char to Word8
+import qualified Data.ByteString                 as BS
+import qualified Data.ByteString.Char8           as B8
+import qualified Data.ByteString.Lazy            as BL
+import qualified Data.ByteString.Short           as BSS
+import           Options                         (LogSelection (Blocks))
+import           Unsafe.Coerce
 
 -- | Holds information on the LLVM representation of the LPVM procedure.
 data ProcDefBlock =
@@ -128,7 +128,7 @@ reduceNameMap :: [(String, Int)] -> String -> [(String, Int)]
 reduceNameMap namemap name =
     case List.lookup name namemap of
         Just val -> namemap ++ [(name, val + 1)]
-        Nothing -> namemap ++ [(name, 0)]
+        Nothing  -> namemap ++ [(name, 0)]
 
 
 pullDefName :: ProcDef -> String
@@ -153,7 +153,7 @@ getPrimProtos modspec = do
 
 -- | Filter for avoiding the standard library modules
 isStdLib :: ModSpec -> Bool
-isStdLib [] = False
+isStdLib []    = False
 isStdLib (m:_) = m == "wybe"
 
 
@@ -161,7 +161,7 @@ isStdLib (m:_) = m == "wybe"
 -- | Predicate to test for procedure definition with an empty body.
 emptyProc :: ProcDef -> Bool
 emptyProc p = case procImpln p of
-  ProcDefSrc pps -> List.null pps
+  ProcDefSrc pps     -> List.null pps
   ProcDefPrim _ body -> List.null $ bodyPrims body
 
 
@@ -302,7 +302,7 @@ assignParam p =
        if phantomType ty
          then return () -- No need to assign phantoms
          else case (paramInfoUnneeded . primParamInfo) p of
-           True -> return ()    -- unneeded param
+           True  -> return ()    -- unneeded param
            -- False -> do
            --     let varType = typed ty
            --     ptr <- instr (ptr_t varType) $ alloca varType
@@ -402,13 +402,13 @@ codegenForkBody var (b1:b2:[]) params =
        retop <- codegenBody b2
        case blockReturn retop of
            Nothing -> buildOutputOp params >>= ret
-           bret -> ret bret
+           bret    -> ret bret
        -- if.else
        setBlock ifelse
        retop <- codegenBody b1
        case blockReturn retop of
            Nothing -> buildOutputOp params >>= ret
-           bret -> ret bret
+           bret    -> ret bret
        return ()
 
        -- -- if.exit
@@ -421,7 +421,7 @@ codegenForkBody _ _ _ = error
 -- treated as a Nothing instead of an existing value.
 blockReturn :: Maybe Operand -> Maybe Operand
 blockReturn op@(Just (LocalReference VoidType _)) = Nothing
-blockReturn op = op
+blockReturn op                                    = op
 
 -- | Translate a Primitive statement (in clausal form) to a LLVM instruction.
 -- Foreign calls are resolved through numerous instruction maps which map
@@ -446,7 +446,7 @@ cgen prim@(PrimCall pspec args) = do
     protoFound <- findProto pspec
     let filteredArgs = case protoFound of
             Just callProto -> filterUnneededArgs callProto args
-            Nothing -> args
+            Nothing        -> args
 
     -- if the call is to an external module, declare it
     unless (thisMod == mod || thisMod `List.isPrefixOf` mod)
@@ -498,8 +498,8 @@ makeCIntOp op
 
 isIntOp :: Operand -> Bool
 isIntOp (LocalReference (LLVMAST.IntegerType _) _) = True
-isIntOp (ConstantOperand (C.Int _ _)) = True
-isIntOp _ = False
+isIntOp (ConstantOperand (C.Int _ _))              = True
+isIntOp _                                          = False
 
 
 
@@ -594,7 +594,7 @@ cgenLPVM pname flags args
     | pname == "access" = do
           let (ptrOpArg, index) = case inputs of
                   (a:b:[]) -> (a, valTrust b)
-                  _ -> shouldnt "Incorrect access instruction."
+                  _        -> shouldnt "Incorrect access instruction."
           ptrOp <- cgenArg ptrOpArg
           outTy <- lift $ primReturnType args
           op <- gcAccess ptrOp index outTy
@@ -604,7 +604,7 @@ cgenLPVM pname flags args
     | pname == "mutate" = do
           let (ptrOpArg, index, valArg) = case inputs of
                   [a, b, c] -> (a, valTrust b , c)
-                  _ -> shouldnt "Incorrect mutate instruction."
+                  _         -> shouldnt "Incorrect mutate instruction."
           val <- cgenArg valArg
           ptrOp <- cgenArg ptrOpArg
           op <- gcMutate ptrOp index val
@@ -618,10 +618,10 @@ cgenLPVM pname flags args
           outTy <- lift $ typed' (argType outArg)
           inOp <- cgenArg inArg
           let inTy = operandType inOp
-          
+
           lift $ logBlocks $ "CAST IN : " ++ show inArg ++ " -> "
               ++ show (argType inArg)
-          lift $ logBlocks $ " CAST IN OP " ++ show inOp    
+          lift $ logBlocks $ " CAST IN OP " ++ show inOp
           lift $ logBlocks $ "CAST OUT : " ++ show outArg ++ " -> "
               ++ show (argType outArg)
           castOp <- case inOp of
@@ -651,12 +651,12 @@ cgenLPVM pname flags args
 
 isNullCons :: C.Constant -> Bool
 isNullCons (C.Int _ val) = val == 0
-isNullCons _ = False
+isNullCons _             = False
 
 
 isPtr :: LLVMAST.Type -> Bool
 isPtr (PointerType _ _) = True
-isPtr _ = False
+isPtr _                 = False
 
 
 doCast :: Operand -> LLVMAST.Type -> LLVMAST.Type -> Codegen Operand
@@ -673,10 +673,10 @@ doCast op _ ty2 = bitcast op ty2
 -- | Predicate to check if an operand is a constant
 constantType :: C.Constant -> LLVMAST.Type
 constantType (C.Int bs _) = int_c bs
-constantType (C.Float _) = float_t
-constantType (C.Null ty) = ty
+constantType (C.Float _)  = float_t
+constantType (C.Null ty)  = ty
 constantType (C.Undef ty) = ty
-constantType _ = shouldnt "Cannot determine constant type."
+constantType _            = shouldnt "Cannot determine constant type."
 
 
 ----------------------------------------------------------------------------
@@ -707,20 +707,20 @@ addInstruction ins args =
                   return $ last fields
 
 pullName (ArgVar var _ _ _ _) = show var
-pullName _ = error $ "Expected variable as output."
+pullName _                    = error $ "Expected variable as output."
 
 -- | Generate an expanding instruction name using the passed flags. This is
 -- useful to augment a simple instruction. (Ex: compare instructions can have
 -- the comparision type specified as a flag).
 withFlags :: ProcName -> [Ident] -> String
 withFlags p [] = p
-withFlags p f = p ++ " " ++ (List.intercalate " " f)
+withFlags p f  = p ++ " " ++ (List.intercalate " " f)
 
 -- | Apply Operands from the operand list (2 items) to the wrapped LLVM
 -- instruction from 'Codegen' Module.
 apply2 :: (Operand -> Operand -> Instruction) -> [Operand] -> Instruction
 apply2 f (a:b:[]) = f a b
-apply2 _ _ = error $ "Not a binary operation."
+apply2 _ _        = error $ "Not a binary operation."
 
 
 ----------------------------------------------------------------------------
@@ -761,12 +761,12 @@ notPhantom = not . phantomArg
 -- | Pull out the name of a primitive argument if it is a variable.
 argName :: PrimArg -> Maybe String
 argName (ArgVar var _ _ _ _) = Just $ show var
-argName _ = Nothing
+argName _                    = Nothing
 
 
 argIntVal :: PrimArg -> Maybe Integer
 argIntVal (ArgInt val _) = Just val
-argIntVal _ = Nothing
+argIntVal _              = Nothing
 
 -- | Split primitive arguments into inputs and output arguments determined
 -- by their flow type.
@@ -789,12 +789,12 @@ openPrimArg a = shouldnt $ "Can't Open!: "
 -- | Assigns the primitive argument on the symbol table
 assignPrim :: Operand -> PrimArg -> Codegen ()
 assignPrim op (ArgVar var _ _ _ _) = assign (show var) op
-assignPrim _ _ = return ()
+assignPrim _ _                     = return ()
 
 
 localOperandType :: Operand -> Type
 localOperandType (LocalReference ty _) = ty
-localOperandType _ = void_t
+localOperandType _                     = void_t
 
 
 -- | 'cgenArg' makes an Operand of the input argument. The argument may be:
@@ -929,7 +929,7 @@ typed' ty = do
     repr <- lookupTypeRepresentation ty
     case repr of
         Just typeStr -> return $ typeStrToType typeStr
-        Nothing -> 
+        Nothing ->
             shouldnt $ "typed' applied to InvalidType or unknown type ("
             ++ show ty
             ++ ")"
@@ -1029,7 +1029,7 @@ newMainModule depends = do
     blstate <- execCodegen [] $ mainCodegen depends
     let bls = createBlocks blstate
     let mainDef = globalDefine int_t "main" [] bls
-    let externsForMain = [(external void_t "gc_init" [])]
+    let externsForMain = [(external (ptr_t void_t) "gc_init" [])]
             ++ (mainExterns depends)
     let newDefs = externsForMain ++ [mainDef]
     -- XXX Use empty string as source file name; should be main file name
@@ -1045,7 +1045,7 @@ mainCodegen mods = do
     -- Temp Boehm GC init call
     instr void_t $
         call (externf void_t (LLVMAST.Name $ toSBString "gc_init")) []
-    -- Call the mods mains in order    
+    -- Call the mods mains in order
     let mainName m = LLVMAST.Name $ toSBString $ showModSpec m ++ ".main"
     forM_ mods $ \m -> instr int_t $
                        call (externf int_t (mainName m)) []
@@ -1161,7 +1161,7 @@ gcMutate ptr offset val = do
 -- | Get the LLVMAST.Type the given pointer type points to.
 pullFromPointer :: LLVMAST.Type -> LLVMAST.Type
 pullFromPointer (PointerType ty _) = ty
-pullFromPointer pty = shouldnt $ "Not a pointer: " ++ show pty
+pullFromPointer pty                = shouldnt $ "Not a pointer: " ++ show pty
 
 
 -- | Compute the index given the size of the fields the pointer

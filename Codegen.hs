@@ -37,7 +37,7 @@ module Codegen (
 
 import           Data.Function
 import           Data.List
-import qualified Data.Map                                as Map
+import qualified Data.Map                        as Map
 import           Data.String
 import           Data.Word
 
@@ -46,25 +46,24 @@ import           Control.Monad.Except
 import           Control.Monad.State
 
 import           LLVM.AST
-import qualified LLVM.AST                                as LLVMAST
+import qualified LLVM.AST                        as LLVMAST
 import           LLVM.AST.Global
-import qualified LLVM.AST.Global                         as G
+import qualified LLVM.AST.Global                 as G
 
 import           LLVM.AST.AddrSpace
-import qualified LLVM.AST.Attribute                      as A
-import qualified LLVM.AST.CallingConvention              as CC
-import qualified LLVM.AST.Constant                       as C
-import qualified LLVM.AST.FloatingPointPredicate         as FP
-import qualified LLVM.AST.IntegerPredicate               as IP
+import qualified LLVM.AST.Attribute              as A
+import qualified LLVM.AST.CallingConvention      as CC
+import qualified LLVM.AST.Constant               as C
+import qualified LLVM.AST.FloatingPointPredicate as FP
+import qualified LLVM.AST.IntegerPredicate       as IP
 
-import           AST                                 (Prim, PrimProto, Compiler
-                                                     , shouldnt, logMsg
-                                                     , showModSpec
-                                                     , getModuleSpec)
+import           AST                             (Compiler, Prim, PrimProto,
+                                                  getModuleSpec, logMsg,
+                                                  shouldnt, showModSpec)
 import           LLVM.Context
 import           LLVM.Module
+import           Options                         (LogSelection (Blocks))
 import           Unsafe.Coerce
-import           Options (LogSelection (Blocks))
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
@@ -286,7 +285,7 @@ current = do
   curr <- gets currentBlock
   blks <- gets blocks
   case Map.lookup curr blks of
-    Just x -> return x
+    Just x  -> return x
     Nothing -> error $ "No such block found: " ++ show curr
 
 
@@ -301,7 +300,7 @@ makeBlock :: (Name, BlockState) -> BasicBlock
 makeBlock (l, (BlockState _ s t)) = BasicBlock l s (maketerm t)
   where
     maketerm (Just x) = x
-    maketerm Nothing = error $ "Block has no terminator: " ++ (show l)
+    maketerm Nothing  = error $ "Block has no terminator: " ++ (show l)
 
 -- | Sort the blocks on their ids. Blocks do get out of order since any block
 -- can be brought to be the 'currentBlock'.
@@ -355,13 +354,13 @@ getVar :: String -> Codegen Operand
 getVar var = do
   lcls <- gets symtab
   case lookup var lcls of
-    Just x -> return x
+    Just x  -> return x
     Nothing -> shouldnt $ "Local variable not in scope: " ++ show var
 
 getVarMaybe :: String -> Codegen (Maybe Operand)
 getVarMaybe var = do
   lcls <- gets symtab
-  return $ lookup var lcls 
+  return $ lookup var lcls
 
 
 -- | Look inside an operand and determine it's type.
@@ -441,19 +440,19 @@ srem a b = SRem a b []
 -- * Floating point arithmetic operations (Binary)
 
 fadd :: Operand -> Operand -> Instruction
-fadd a b = FAdd NoFastMathFlags a b []
+fadd a b = FAdd noFastMathFlags a b []
 
 fsub :: Operand -> Operand -> Instruction
-fsub a b = FSub NoFastMathFlags a b []
+fsub a b = FSub noFastMathFlags a b []
 
 fmul :: Operand -> Operand -> Instruction
-fmul a b = FMul NoFastMathFlags a b []
+fmul a b = FMul noFastMathFlags a b []
 
 fdiv :: Operand -> Operand -> Instruction
-fdiv a b = FDiv NoFastMathFlags a b []
+fdiv a b = FDiv noFastMathFlags a b []
 
 frem :: Operand -> Operand -> Instruction
-frem a b = FRem NoFastMathFlags a b []
+frem a b = FRem noFastMathFlags a b []
 
 -- * Bitwise Binary Operations
 shl :: Operand -> Operand -> Instruction
@@ -557,7 +556,7 @@ sext op ty = instr ty $ SExt op ty []
 -- Helpers for allocating, storing, loading
 doAlloca :: Type -> Codegen Operand
 doAlloca (PointerType ty _) = instr (ptr_t ty) $ Alloca ty Nothing 0 []
-doAlloca ty = instr (ptr_t ty) $ Alloca ty Nothing 0 []
+doAlloca ty                 = instr (ptr_t ty) $ Alloca ty Nothing 0 []
 
 doLoad :: Type -> Operand -> Codegen Operand
 doLoad ty ptr = instr ty $ Load False ptr Nothing 0 []
@@ -588,6 +587,6 @@ retNothing = terminator $ Do $ Ret Nothing []
 phi :: Type -> [(Operand, Name)] -> Codegen Operand
 phi ty incoming = instr ty $ Phi ty incoming []
 
-    
+
 logCodegen :: String -> Codegen ()
 logCodegen s = lift $ logMsg Blocks $ "=CODEGEN=" ++ s

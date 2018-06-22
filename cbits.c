@@ -4,9 +4,10 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include <gc/gc.h>
+#include <gc.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <math.h>
 
 // putchard - putchar that takes a double and returns 0.
 void print_int(int X) {
