@@ -10,19 +10,16 @@
 #include <math.h>
 
 // putchard - putchar that takes a double and returns 0.
-void print_int(int X) {
-    printf("%d", X);
-    fflush(stdout);
+int print_int(int X) {
+    return printf("%d", X);
 }
 
-void print_float(double X) {
-    printf("%f", X);
-    fflush(stdout);
+int print_float(double X) {
+    return printf("%f", X);
 }
 
-void print_string(const char *s) {
-    puts(s);
-    fflush(stdout);
+int print_string(const char *s) {
+    return puts(s);
 }
 
 int read_char() {
@@ -52,11 +49,13 @@ int isqrt(int x) {
 
 
 // Boehm GC
-void *wybe_malloc(int size) {
-    return GC_MALLOC(size);
+int wybe_malloc(int size) {
+    GC_MALLOC(size);
+    return size;
 }
 
-void gc_init(){
+int gc_init(){
     GC_INIT();
+    return 0;
 }
 

@@ -24,7 +24,7 @@ module Codegen (
   -- * Custom Types
   int_c, float_c,
   -- * Instructions
-  instr, namedInstr,
+  instr, namedInstr, voidInstr,
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv, urem, srem, frem,
   cons, uitofp, fptoui, icmp, fcmp, lOr, lAnd, lXor, shl, lshr, ashr,
   constInttoptr,
@@ -405,6 +405,11 @@ instr ty ins =
        modifyBlock $ blk { stack = i ++ [ref := ins] }
        return $ local ty ref
 
+voidInstr :: Type -> Instruction -> Codegen ()
+voidInstr ty inst = do
+  blk <- current
+  let i = stack blk
+  modifyBlock $ blk { stack = i ++ [Do inst] }
 
 -- | 'terminator' provides the last instruction of a basic block.
 terminator :: Named Terminator -> Codegen (Named Terminator)
@@ -516,7 +521,9 @@ alloca ty = Alloca ty Nothing 0 []
 
 -- | The 'store' instruction is used to write to write to memory. yields void.
 store :: Operand -> Operand -> Codegen Operand
-store ptr val = instr phantom_t $ Store False ptr val Nothing 0 []
+store ptr val = do
+  voidInstr phantom_t $ Store False ptr val Nothing 0 []
+  return ptr
 
 -- | The 'load' function wraps LLVM's load instruction with defaults.
 load :: Operand -> Instruction
