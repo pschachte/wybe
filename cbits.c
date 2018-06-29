@@ -1,5 +1,5 @@
 /* cbits
-   $ clang -fPIC -shared cbits.c -o cbits.so
+   $ clang -fPIC -shared cbits.c -o cbits.so -lgc -v
 */
 
 #include <stdio.h>

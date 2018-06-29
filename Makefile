@@ -12,20 +12,23 @@ all:	wybemk
 	rubber -m pdftex $<
 
 # %.hs:	%.y
-# 	happy -a -g $<
+#	happy -a -g $<
 
-wybemk:	*.hs Version.lhs *.c
+cbits.so: cbits.c
+	clang -fPIC -shared cbits.c -o cbits.so -lgc -v
+
+wybemk:	*.hs Version.lhs cbits.so 
 	stack install && cp ~/.local/bin/$@ ./$@
-        # cabal configure
+	# cabal configure
 	# cabal -j3 install --only-dependencies
 	# cabal -j3 build && cp dist/build/$@/$@ $@
 
 # .PHONY:	info
-# 
+#
 # info:  Parser.info
-# 
+#
 # %.info:	%.y
-# 	happy -i -a -g $<
+#	happy -i -a -g $<
 
 doc:	*.hs
 	rm -rf $@
@@ -54,31 +57,31 @@ test:	wybemk
 	@printf "Done.\n"
 	@printf "Testing test-cases "
 	@ time ( for f in $(TESTCASES) ; do \
-	    out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
-	    log=`echo "$$f" | sed 's/.wybe$$/.log/'` ; \
-	    exp=`echo "$$f" | sed 's/.wybe$$/.exp/'` ; \
-	    targ=`echo "$$f" | sed 's/.wybe$$/.o/'` ; \
-	    gtimeout 2 ./wybemk --log=FinalDump $(DEBUG) --force-all $$targ \
+		out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
+		log=`echo "$$f" | sed 's/.wybe$$/.log/'` ; \
+		exp=`echo "$$f" | sed 's/.wybe$$/.exp/'` ; \
+		targ=`echo "$$f" | sed 's/.wybe$$/.o/'` ; \
+		gtimeout 2 ./wybemk --log=FinalDump $(DEBUG) --force-all $$targ \
 		> $$out 2> $$log ; \
-	    if [ ! -r $$exp ] ; then \
+		if [ ! -r $$exp ] ; then \
 		printf "[31m?[39m" ; \
 		NEW="$${NEW}\n    $$out" ; \
-	    elif diff -q $$exp $$out >/dev/null 2>&1 ; then \
+		elif diff -q $$exp $$out >/dev/null 2>&1 ; then \
 		printf "." ; \
-	    else \
+		else \
 		printf "\n[34;1m**************** difference building $$targ ****************[0m\n" >> ERRS ; \
 		dwdiff -c -d '()<>~!@:?.%#' $$exp $$out >> ERRS 2>&1 ; \
 		printf "[31mX[39m" ; \
 		FAILS="$${FAILS}\n    $$out" ; \
-	    fi \
+		fi \
 	done ; \
 	echo ; \
 	if [ -n "$$FAILS" ] ; \
-	    then echo "Failed: $$FAILS\nSee ERRS for differences." ; \
-	    else echo "ALL TESTS PASS" ; rm -f ERRS ; \
+		then echo "Failed: $$FAILS\nSee ERRS for differences." ; \
+		else echo "ALL TESTS PASS" ; rm -f ERRS ; \
 	fi ; \
 	if [ -n "$$NEW" ] ; \
-	    then echo "New tests: $$NEW\nDo .\update-exp to specify expected output" ; \
+		then echo "New tests: $$NEW\nDo .\update-exp to specify expected output" ; \
 	fi )
 
 clean:
