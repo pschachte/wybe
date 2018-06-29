@@ -31,6 +31,8 @@ import           LLVM.AST.Instruction
 import qualified LLVM.AST.IntegerPredicate       as IP
 import           LLVM.AST.Operand                hiding (PointerType)
 import           LLVM.AST.Type
+import           LLVM.AST.Typed
+
 -- import           LLVM.PrettyPrint
 import qualified Data.ByteString                 as BS
 import qualified Data.ByteString.Char8           as B8
@@ -476,7 +478,7 @@ cgen prim@(PrimForeign lang name flags args)
             inops <- mapM cgenArg inArgs
             -- alignedOps <- mapM makeCIntOp inops
             outty <- lift $ primReturnType args
-            let ins = call (externf outty nm) inops
+            let ins = call (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm) inops
             res <- addInstruction ins args
             return (Just res)
 
@@ -747,7 +749,7 @@ primReturnType :: [PrimArg] -> Compiler Type
 primReturnType ps =
     let outputs = primOutputs ps in
     case length outputs of
-        0 -> return void_t
+        0 -> return int_t
         1 -> typed' $ argType (head outputs)
         n -> fmap struct_t (mapM (typed' . argType) outputs)
 
@@ -820,7 +822,7 @@ cgenArg (ArgString s _) =
        let len = (length s) + 1
        let conType = array_t (fromIntegral len) char_t
        conName <- addGlobalConstant conType conStr
-       let conPtr = C.GlobalReference conType conName
+       let conPtr = C.GlobalReference (ptr_t conType) conName
        let conElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
        return $ cons conElem
 cgenArg (ArgChar c ty) = do t <- lift $ typed' ty
@@ -943,7 +945,7 @@ typeStrToType "float"   = float_t
 typeStrToType "double"  = float_t
 typeStrToType "pointer" = ptr_t $ int_c (fromIntegral wordSize)
 typeStrToType "word"    = int_c (fromIntegral wordSize)
-typeStrToType "phantom" = void_t
+typeStrToType "phantom" = int_t
 typeStrToType (c:cs)
     | c == 'i' = int_c (fromIntegral bytes)
     | c == 'f' = float_c (fromIntegral bytes)
@@ -1029,7 +1031,7 @@ newMainModule depends = do
     blstate <- execCodegen [] $ mainCodegen depends
     let bls = createBlocks blstate
     let mainDef = globalDefine int_t "main" [] bls
-    let externsForMain = [(external (ptr_t void_t) "gc_init" [])]
+    let externsForMain = [(external (int_t) "gc_init" [])]
             ++ (mainExterns depends)
     let newDefs = externsForMain ++ [mainDef]
     -- XXX Use empty string as source file name; should be main file name
@@ -1044,11 +1046,12 @@ mainCodegen mods = do
     setBlock entry
     -- Temp Boehm GC init call
     instr void_t $
-        call (externf void_t (LLVMAST.Name $ toSBString "gc_init")) []
+        call (externf (ptr_t $ FunctionType int_t [] False)
+              (LLVMAST.Name $ toSBString "gc_init")) []
     -- Call the mods mains in order
     let mainName m = LLVMAST.Name $ toSBString $ showModSpec m ++ ".main"
     forM_ mods $ \m -> instr int_t $
-                       call (externf int_t (mainName m)) []
+                       call (externf (ptr_t $ FunctionType int_t [] False) (mainName m)) []
     -- int main returns 0
     ptr <- instr (ptr_t int_t) (alloca int_t)
     let retcons = cons (C.Int 32 0)

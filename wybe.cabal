@@ -21,6 +21,8 @@ executable wybemk
                , hex
                , llvm-hs
                , llvm-hs-pure
+               , llvm-hs-pretty
+               , text
                -- , llvm-general == 3.5.1.2
                -- , llvm-general-pure
                , mtl
