@@ -32,32 +32,30 @@ commonsubexpr
 AFTER LLVM IR:
 
 ; ModuleID = 'commonsubexpr'
+source_filename = "test-cases/commonsubexpr.wybe"
 
-; Function Attrs: nounwind
-declare void @putchar(i8) #0
+declare i32 @putchar(i8) local_unnamed_addr
 
-declare void @print_int(i64)
+declare i32 @print_int(i64) local_unnamed_addr
 
-define i32 @commonsubexpr.main() {
+define i32 @commonsubexpr.main() local_unnamed_addr {
 entry:
-  tail call void @print_int(i64 242)
-  tail call void @putchar(i8 10)
-  tail call void @print_int(i64 242)
-  tail call void @putchar(i8 10)
+  %0 = tail call i32 @print_int(i64 242)
+  %1 = tail call i32 @putchar(i8 10)
+  %2 = tail call i32 @print_int(i64 242)
+  %3 = tail call i32 @putchar(i8 10)
   ret i32 0
 }
 
-define void @"commonsubexpr.common_subexpr<0>"(i64 %"x#0") {
+define void @"commonsubexpr.common_subexpr<0>"(i64 %"x#0") local_unnamed_addr {
 entry:
   %"tmp$15#0" = add i64 %"x#0", 1
   %"tmp$20#0" = shl i64 %"tmp$15#0", 1
   %"tmp$30#0" = mul i64 %"tmp$20#0", %"tmp$15#0"
-  tail call void @print_int(i64 %"tmp$30#0")
-  tail call void @putchar(i8 10)
-  tail call void @print_int(i64 %"tmp$30#0")
-  tail call void @putchar(i8 10)
+  %0 = tail call i32 @print_int(i64 %"tmp$30#0")
+  %1 = tail call i32 @putchar(i8 10)
+  %2 = tail call i32 @print_int(i64 %"tmp$30#0")
+  %3 = tail call i32 @putchar(i8 10)
   ret void
 }
-
-attributes #0 = { nounwind }
 

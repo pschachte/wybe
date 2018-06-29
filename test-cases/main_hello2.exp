@@ -20,22 +20,20 @@ main_hello2
 AFTER LLVM IR:
 
 ; ModuleID = 'main_hello2'
+source_filename = "test-cases/main_hello2.wybe"
 
 @main_hello2.3 = constant [7 x i8] c"world!\00"
 @main_hello2.1 = constant [8 x i8] c"hello, \00"
 
-; Function Attrs: nounwind
-declare void @putchar(i8) #0
+declare i32 @putchar(i8) local_unnamed_addr
 
-declare void @print_string(i8*)
+declare i32 @print_string(i8*) local_unnamed_addr
 
-define i32 @main_hello2.main() {
+define i32 @main_hello2.main() local_unnamed_addr {
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([8 x i8]* @main_hello2.1, i32 0, i32 0))
-  tail call void @print_string(i8* getelementptr inbounds ([7 x i8]* @main_hello2.3, i32 0, i32 0))
-  tail call void @putchar(i8 10)
+  %0 = tail call i32 @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @main_hello2.1, i64 0, i64 0))
+  %1 = tail call i32 @print_string(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @main_hello2.3, i64 0, i64 0))
+  %2 = tail call i32 @putchar(i8 10)
   ret i32 0
 }
-
-attributes #0 = { nounwind }
 

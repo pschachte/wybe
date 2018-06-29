@@ -35,39 +35,35 @@ ccc, ddd
 AFTER LLVM IR:
 
 ; ModuleID = 'ccc'
+source_filename = "test-cases/ccc.wybe"
 
 @ccc.1 = constant [10 x i8] c"CCC: Init\00"
 
-; Function Attrs: nounwind
-declare void @putchar(i8) #0
+declare i32 @putchar(i8) local_unnamed_addr
 
-declare void @print_string(i8*)
+declare i32 @print_string(i8*) local_unnamed_addr
 
-define i32 @ccc.main() {
+define i32 @ccc.main() local_unnamed_addr {
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([10 x i8]* @ccc.1, i32 0, i32 0))
-  tail call void @putchar(i8 10)
+  %0 = tail call i32 @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ccc.1, i64 0, i64 0))
+  %1 = tail call i32 @putchar(i8 10)
   ret i32 0
 }
-
-attributes #0 = { nounwind }
 
 --------------------------------------------------
 ; ModuleID = 'ddd'
+source_filename = "test-cases/ddd.wybe"
 
 @ddd.1 = constant [10 x i8] c"DDD: Init\00"
 
-; Function Attrs: nounwind
-declare void @putchar(i8) #0
+declare i32 @putchar(i8) local_unnamed_addr
 
-declare void @print_string(i8*)
+declare i32 @print_string(i8*) local_unnamed_addr
 
-define i32 @ddd.main() {
+define i32 @ddd.main() local_unnamed_addr {
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([10 x i8]* @ddd.1, i32 0, i32 0))
-  tail call void @putchar(i8 10)
+  %0 = tail call i32 @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ddd.1, i64 0, i64 0))
+  %1 = tail call i32 @putchar(i8 10)
   ret i32 0
 }
-
-attributes #0 = { nounwind }
 
