@@ -253,6 +253,11 @@ constructorItems ctorName params typeSpec size fields tag pos =
          ++
        -- Code to fill all the fields
          (reverse $ List.map (\(var,_,aligned) ->
+-- XXX Revise mutate instruction to take address, size, offset,
+--     destructive (Bool), and new address (output).  If destructive
+--     is True, does in place update and new address = address;
+--     otherwise allocates fresh storage, copies old contents,
+--     and mutates the new storage.
                                (Unplaced $ ForeignCall "lpvm" "mutate" []
                                 [Unplaced $ Var "$rec" ParamInOut flowType,
                                  Unplaced $ IntValue $ fromIntegral aligned,
@@ -371,6 +376,11 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
         -- Code to strip the tag and mutate the selected field
          tagStrip tag "$rec" "$rec$stripped" rectype
          ++
+-- XXX Revise mutate instruction to take address, size, offset,
+--     destructive (Bool), and new address (output).  If destructive
+--     is True, does in place update and new address = address;
+--     otherwise allocates fresh storage, copies old contents,
+--     and mutates the new storage.
          [Unplaced $ ForeignCall "lpvm" "mutate" []
           [Unplaced $ varGet "$rec$stripped",
            Unplaced $ IntValue $ fromIntegral offset,

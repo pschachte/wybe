@@ -603,6 +603,11 @@ cgenLPVM pname flags args
           assign outNm op
           return $ Just op
 
+-- XXX Revise mutate instruction to take address, size, offset,
+--     destructive (Bool), and new address (output).  If destructive
+--     is True, does in place update and new address = address;
+--     otherwise allocates fresh storage, copies old contents,
+--     and mutates the new storage.
     | pname == "mutate" = do
           let (ptrOpArg, index, valArg) = case inputs of
                   [a, b, c] -> (a, valTrust b , c)
