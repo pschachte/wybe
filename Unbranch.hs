@@ -382,7 +382,7 @@ unbranchStmt detism (Cond tstStmt thn els) pos stmts =
     if detStmt $ content tstStmt
     -- XXX Should warn of Cond with Det test, but can't because we transform
     --     other code into Conds.
-    then unbranchStmts detism (thn ++ stmts)
+    then (tstStmt:) <$> unbranchStmts detism (thn ++ stmts)
     else unbranchCond detism tstStmt thn els pos stmts
 unbranchStmt detism (Loop body) pos stmts = do
     logUnbranch "Unbranching a loop"
