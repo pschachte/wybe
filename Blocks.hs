@@ -458,7 +458,10 @@ cgen prim@(PrimCall pspec args) = do
     outTy <- lift $ primReturnType filteredArgs
 
     inops <- mapM cgenArg inArgs
-    let ins = call (externf outTy nm) inops
+    let ins =
+          call
+          (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) nm)
+          inops
     res <- addInstruction ins filteredArgs
     return (Just res)
 
@@ -478,7 +481,10 @@ cgen prim@(PrimForeign lang name flags args)
             inops <- mapM cgenArg inArgs
             -- alignedOps <- mapM makeCIntOp inops
             outty <- lift $ primReturnType args
-            let ins = call (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm) inops
+            let ins =
+                  call
+                  (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
+                  inops
             res <- addInstruction ins args
             return (Just res)
 
@@ -1119,7 +1125,11 @@ callWybeMalloc size = do
     let outTy = (ptr_t (int_c 8))
     let fnName = LLVMAST.Name $ toSBString "wybe_malloc"
     let inOp = cons $ C.Int 32 size
-    let ins = call (externf outTy fnName) [inOp]
+    let inops = [inOp]
+    let ins =
+          call
+          (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) fnName)
+          inops
     instr outTy ins
 
 
