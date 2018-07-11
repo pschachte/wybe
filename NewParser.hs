@@ -362,13 +362,13 @@ unlessStmt :: Parser (Placed Stmt)
 unlessStmt = do
     pos <- tokenPosition <$> ident "unless"
     e <- testStmt
-    return $ Placed (Cond e [Unplaced Nop] [Unplaced Next]) pos
+    return $ Placed (Cond e [Unplaced Next] [Unplaced Nop]) pos
 
 whenStmt :: Parser (Placed Stmt)
 whenStmt = do
     pos <- tokenPosition <$> ident "when"
     e <- testStmt
-    return $ Placed (Cond e [Unplaced Next] [Unplaced Nop]) pos
+    return $ Placed (Cond e [Unplaced Nop] [Unplaced Next]) pos
 
 
 -- | If statement parser.

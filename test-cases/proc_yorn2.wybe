@@ -1,9 +1,9 @@
 public proc yorn(prompt:string, ?result:bool) use !io
     do  print(prompt:string) # XXX shouldn't be necessary to qualify prompt
-	print(" (y/n) ")
-	read(?response)
-	?result = response = 'Y'
-	until result or response = 'N'
-	println("Please answer 'yes' or 'no'.")
+	      print(" (y/n) ")
+        read(?response)
+	      ?result = response = 'Y'
+	      until result or response = 'N'
+	      println("Please answer 'yes' or 'no'.")
     end
- end
+end
