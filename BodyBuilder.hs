@@ -156,7 +156,6 @@ freshVarName = do
 
 
 -- |Extract a ProcBody from a BodyState.
--- XXX This must be prepared to generate multiple auxilliary procs.
 -- XXX This seems to miss the unforked part besides at the top level
 currBody :: BodyState -> Compiler (Int,ProcBody)
 currBody Unforked{currBuild=prims, uPred=Nothing, uTmpCnt=tmp} = do
