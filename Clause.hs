@@ -104,18 +104,17 @@ compileProc proc =
 
 
 
--- |Compile a proc body to LPVM form.  By the time we get here, the 
---  form of the body is very limited:  it is a list of ProcCalls and
---  ForeignCalls, possibly ending with a single Cond statement whose
---  test is a single TestBool statement.  If the proc is SemiDet,
---  it must be a list of ProcCalls and ForeignCalls that *does* end
---  with either a Cond statement whose test is a single TestBool statement,
---  or with a single TestBool statement.  Everything else has already
---  been transformed away.  Furthermore, TestBool statements only appear
---  as the condition of a Cond statement or, in the case of a SemiDet
---  proc, as the final statement of a body.  This code assumes that
---  these invariants are observed, and does not worry whether the proc
---  is Det or SemiDet.
+-- |Compile a proc body to LPVM form. By the time we get here, the form of the
+--  body is very limited: it is a list of ProcCalls and ForeignCalls, possibly
+--  ending with a single Cond statement whose test is a single TestBool
+--  statement and whose then and else branches are also bodies satisfying these
+--  conditions. If the proc is SemiDet, then the body must ends with a TestBool
+--  statement, or with a Cond statement whose then and else branches satisfy
+--  this condition. Everything else has already been transformed away.
+--  Furthermore, TestBool statements only appear as the condition of a Cond
+--  statement or, in the case of a SemiDet proc, as the final statement of a
+--  body. This code assumes that these invariants are observed, and does not
+--  worry whether the proc is Det or SemiDet.
 compileBody :: [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
 compileBody [] _params detism = do
     end <- closingStmts detism

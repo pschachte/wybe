@@ -514,6 +514,7 @@ fixpointProcessSCC processor scc = do        -- must find fixpoint
 transformModuleProcs :: (ProcDef -> Compiler ProcDef) -> ModSpec ->
                         Compiler ()
 transformModuleProcs trans thisMod = do
+    logBuild $ "**** Reentering module " ++ showModSpec thisMod
     reenterModule thisMod
     -- (names, procs) <- :: StateT CompilerState IO ([Ident], [[ProcDef]])
     (names,procs) <- unzip <$>
