@@ -336,23 +336,35 @@ unbranchStmt detism stmt@(ProcCall _ _ _ Det args) pos stmts = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
     defArgs args
     leaveStmtAsIs stmt pos detism stmts
-unbranchStmt detism stmt@(ProcCall md name procID SemiDet args) pos stmts = do
+unbranchStmt Det stmt@(ProcCall md name procID SemiDet args) pos stmts =
+    shouldnt $ "Semidet proc call " ++ show stmt ++ " in a Det context"
+unbranchStmt SemiDet stmt@(ProcCall md name procID SemiDet args) pos stmts = do
     logUnbranch $ "converting SemiDet proc call" ++ show stmt
     testVarName <- tempVar
-    stmts' <- unbranchStmts detism stmts
-    return (maybePlace (ProcCall md name procID Det
+    let testStmt = TestBool $ varGet testVarName
+    stmts' <- unbranchStmt SemiDet testStmt pos stmts
+    let result = (maybePlace (ProcCall md name procID Det
                          $ args ++ [Unplaced (boolVarSet testVarName)]) pos
-            : (Unplaced $ TestBool $ varGet testVarName)
-            : stmts')
+                 : stmts')
+    logUnbranch $ "#Converted SemiDet proc call" ++ show stmt
+    logUnbranch $ "#To: " ++ showBody 4 result
+    return result
 unbranchStmt detism stmt@(ForeignCall _ _ _ args) pos stmts = do
     logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
     defArgs args
     leaveStmtAsIs stmt pos detism stmts
 unbranchStmt Det (TestBool expr) _ _ =
     shouldnt $ "TestBool " ++ show expr ++ " in a Det context"
-unbranchStmt SemiDet stmt@(TestBool _) pos stmts = do
-    logUnbranch $ "Unbranching primitive test " ++ show stmt
-    leaveStmtAsIs stmt pos SemiDet stmts
+unbranchStmt SemiDet stmt@(TestBool _) pos [] = do
+    logUnbranch $ "Unbranching a final primitive test " ++ show stmt
+    return [maybePlace stmt pos]
+unbranchStmt SemiDet stmt@(TestBool _) pos stmts@(_:_) = do
+    logUnbranch $ "Unbranching a non-final primitive test " ++ show stmt
+    stmts' <- unbranchStmts SemiDet stmts
+    let result = [Unplaced $ Cond (maybePlace stmt pos) stmts' [failTest]]
+    logUnbranch $ "#Unbranched non-final primitive test " ++ show stmt
+    logUnbranch $ "#To: " ++ showBody 4 result
+    return result
 unbranchStmt Det stmt@(And _) _ _ =
     shouldnt $ "Conjunction in a Det context: " ++ show stmt
 unbranchStmt SemiDet (And []) pos stmts =
