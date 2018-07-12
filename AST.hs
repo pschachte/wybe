@@ -1989,8 +1989,9 @@ logDump :: LogSelection -> LogSelection -> String -> Compiler ()
 logDump selector1 selector2 pass = do
     whenLogging2 selector1 selector2 $ do
       modList <- gets (Map.elems . modules)
-      liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER " ++ pass ++ ":\n" ++
-        intercalate ("\n" ++ replicate 50 '-' ++ "\n")
+      liftIO $ hPutStrLn stderr $ replicate 70 '='
+        ++ "\nAFTER " ++ pass ++ ":\n"
+        ++ intercalate ("\n" ++ replicate 50 '-' ++ "\n")
         (List.map show $ List.filter ((/="wybe"). List.head . modSpec) modList)
 
 
