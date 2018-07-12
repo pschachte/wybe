@@ -278,7 +278,7 @@ compileModule source modspec params items = do
     enterModule source modspec params
     -- Hash the parse items and store it in the module
     let hashOfItems = hashItems items
-    -- logBuild $ "HASH: " ++ hashOfItems
+    logBuild $ "HASH: " ++ hashOfItems
     updateModule (\m -> m { itemsHash = Just hashOfItems })
     -- verboseMsg 1 $ return (intercalate "\n" $ List.map show items)
     -- XXX This means we generate LPVM code for a module before

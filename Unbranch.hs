@@ -83,6 +83,7 @@ unbranchProc proc = do
     let tmpCount = procTmpCount proc
     mapM_ addProcDef newProcs
     logMsg Unbranch $ "** Unbranched defn:" ++ showProcDef 0 proc' ++ "\n"
+    logMsg Unbranch "================================================\n"
     return proc'
 
 
