@@ -195,7 +195,8 @@ currBody (Forked Unforked{currBuild=prims} var val ty bods _ tmp) = do
           ProcBody (reverse prims) $ PrimFork var ty False $ snd <$> bods'
     logMsg BodyBuilder $ "Result = " ++ show result
     return (tmp,result)
-             
+currBody body@(Forked Forked{} var val ty bods _ tmp) =
+    shouldnt $ "currBody of Forked Forked state " ++ show body
 
 -- Add a list of instrs at the end of a BodyState.  Since the instrs are
 -- stored in reverse order, that means adding them at the front.
