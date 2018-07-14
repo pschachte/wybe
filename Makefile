@@ -58,11 +58,10 @@ test:	wybemk
 	@printf "Testing test-cases "
 	@ time ( for f in $(TESTCASES) ; do \
 		out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
-		log=`echo "$$f" | sed 's/.wybe$$/.log/'` ; \
 		exp=`echo "$$f" | sed 's/.wybe$$/.exp/'` ; \
 		targ=`echo "$$f" | sed 's/.wybe$$/.o/'` ; \
 		gtimeout 2 ./wybemk --log=FinalDump $(DEBUG) --force-all $$targ \
-		> $$out 2> $$log ; \
+		> $$out 2>&1 ; \
 		if [ ! -r $$exp ] ; then \
 		printf "[31m?[39m" ; \
 		NEW="$${NEW}\n    $$out" ; \
