@@ -66,16 +66,6 @@ flattenProcDecl _ =
     shouldnt "flattening a non-proc or non-Det proc"
 
 
--- flattenProto :: ProcProto -> Determinism -> Compiler ProcProto
--- flattenProto (ProcProto name params resources) detism = do
---     let params' = concatMap flattenParam params
---     let params'' = case detism of
---           Det     -> params'
---           SemiDet -> params' ++ [Param "$$" boolType ParamOut
---                                  $ Implicit Nothing]
---     return $ ProcProto name params'' resources
-
-
 flattenBody :: [Placed Stmt] -> Set VarName -> Determinism
             -> Compiler ([Placed Stmt],Int)
 flattenBody stmts varSet detism = do
