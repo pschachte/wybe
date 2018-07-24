@@ -143,29 +143,18 @@ expandBody (ProcBody prims fork) = do
 
 expandFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Expander ()
 expandFork var ty bodies = do
-    -- XXX optimise:  use definiteVariableValue to see if we have a definite
-    --     value for var, and if so, only expand that one branch
-    lift $ buildFork var ty
-    mapM_ (\b -> lift beginBranch >> expandBody b >> lift endBranch) bodies
-    lift $ completeFork
-          
+    maybeVal <- lift $ definiteVariableValue var
+    case maybeVal of
+      Just (ArgInt n _) | n < fromIntegral (length bodies) -> expandBody $ bodies !! fromIntegral n
+      _ -> do
+        lift $ buildFork var ty
+        mapM_ (\b -> lift beginBranch >> expandBody b >> lift endBranch) bodies
+        lift completeFork
 
--- expandFork' :: [ProcBody] -> Expander [BodyState]
--- expandFork' [] = return []
--- expandFork' (body:bodies) = do
---     st <- get
---     builderSt <- lift get
---     (expander,body') <- lift $ lift
---                         $ buildPrims builderSt {currBuild=[]} $
---                           execStateT (expandBody body) st
---     -- put back initial expander state, except for temp counter
---     put $ st {tmpCount = tmpCount expander}
---     (body':) <$> expandFork' bodies
 
 
 expandPrims :: [Placed Prim] -> Expander ()
-expandPrims pprims = do
-    mapM_ (\p -> expandPrim (content p) (place p)) pprims
+expandPrims = mapM_ (\p -> expandPrim (content p) (place p))
 
 -- XXX allow this to handle primitives that can fail with all inputs known,
 -- like less than, removing ops that succeed and killing branches that
