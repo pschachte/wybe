@@ -19,7 +19,7 @@ import           Options             (LogSelection (Types))
 -- import           Resources
 import           Util
 import           Snippets
-    
+
 -- import           Debug.Trace
 
 
@@ -670,7 +670,7 @@ typecheckProcDecl m pdef = do
             if List.null badCalls
               then do
                 typing <- typecheckCalls m name pos calls' unifTyping [] False
-                
+
                 logTypes $ "Typing independent of mode = " ++ show typing
                 -- (typing''',def') <- typecheckProcDef m name pos preTyping def
                 -- logTypes $ "*resulting types " ++ name ++ ": " ++ show typing'''
@@ -811,7 +811,7 @@ callProcInfos pstmt =
                       procs
           detisms <- mapM getDetism procs
           return $ zipWith3 ProcInfo procs typflows detisms
-              
+
         stmt ->
           shouldnt $ "callProcInfos with non-call statement "
                      ++ showStmt 4 stmt
