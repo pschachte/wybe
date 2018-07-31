@@ -1,1 +1,9 @@
-*.out
+# Ignoring binaries/executables generated during testing
+*
+
+# but keep tracking .wybe, .exp, and subdirectories
+!*/
+!*.exp
+!*.wybe
+
+*.o
