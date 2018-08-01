@@ -45,6 +45,7 @@
 module Builder (buildTargets, compileModule) where
 
 import           AST
+import           BinaryFactory
 import           Blocks                    (blockTransformModule,
                                             concatLLVMASTModules, newMainModule)
 import           Callers                   (collectCallers)
@@ -53,17 +54,18 @@ import           Config
 import           Control.Monad
 import           Control.Monad.Trans
 import           Control.Monad.Trans.State
+import qualified Data.ByteString.Char8     as BS
 import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Maybe
 import           Emit
+import           NewParser                 (parseWybe)
 import           Normalise                 (normalise)
 import           ObjectInterface
 import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
                                             optForce, optForceAll, optLibDirs,
                                             optUseStd)
-import           NewParser                 (parseWybe)
 import           Resources                 (resourceCheckMod, resourceCheckProc)
 import           Scanner                   (fileTokens)
 import           System.Directory
@@ -71,8 +73,6 @@ import           System.FilePath
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
-import           BinaryFactory
-import qualified Data.ByteString.Char8 as BS
 
 ------------------------ Handling dependencies ------------------------
 
@@ -309,7 +309,7 @@ extractedItemsHash modspec = do
         then return Nothing
         else case Map.lookup modspec storedMods of
                  Nothing -> return Nothing
-                 Just m -> return $ itemsHash m
+                 Just m  -> return $ itemsHash m
 
 
 -- | Parse the stored module bytestring in the 'objfile' and record them in the
@@ -455,7 +455,9 @@ compileModSCC mspecs = do
     stopOnError $ "handling loops and conditionals in modules " ++
       showModSpecs mspecs
     logDump Unbranch Clause "UNBRANCHING"
+    -- AST manipulation before this line
     mapM_ (transformModuleProcs compileProc)  mspecs
+    -- LPVM from here
     stopOnError $ "generating low level code in " ++ showModSpecs mspecs
     mapM_ collectCallers mspecs
     logDump Clause Optimise "COMPILATION TO LPVM"
@@ -476,7 +478,7 @@ compileModSCC mspecs = do
 
 -- | Filter for avoiding the standard library modules
 isStdLib :: ModSpec -> Bool
-isStdLib [] = False
+isStdLib []    = False
 isStdLib (m:_) = m == "wybe"
 
 
@@ -641,7 +643,7 @@ orderedDependencies targetMod =
         let mainExists = "" `elem` procs || "<0>" `elem` procs
         let collected' =
                 case (packageFlag, mainExists) of
-                    (True, _) -> collected
+                    (True, _)     -> collected
                     (False, flag) -> (m, flag) : collected
         -- Don't visit any modspec already in `ms' (will be visited as it is)
         let remains = List.foldr (\x acc -> if x `elem` acc then acc else x:acc)
@@ -782,7 +784,7 @@ instance Show ModuleSource where
     show NoSource = "NO SOURCE"
     show m =
         let showPath (Just f) = f
-            showPath Nothing = "NIL"
+            showPath Nothing  = "NIL"
         in "[ S: " ++ showPath (srcWybe m)
            ++ "\n| "
            ++ "O: " ++ showPath (srcObj m)
