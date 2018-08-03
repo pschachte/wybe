@@ -73,12 +73,16 @@ import Control.Monad.Trans.State
 -- reversed when converting to a ProcBody.
 --
 -- Some transformation is performed by the BodyBuilder monad; in
--- particular, we keep track of variable renaming needed to keep inlining
--- hygenic. To do this, we rename all the input parameters of the proc to
--- be inlined, and when expanding the body, we rename any variables when
--- first assigned. The exception to this is the proc's output parameters.
--- These are kept as a set. We also maintain a counter for temporary
--- variable names.
+-- particular, we keep track of variable=variable assignments, and replace
+-- references to the destination (left) variable with the source (right)
+-- variable.  This usually leaves the assignment dead, to be removed in
+-- a later pass.  We also keep track of previous instructions, and later
+-- calls to the same instructions with the same inputs are replaced by
+-- assignments to the outputs with the old outputs.  We also handle some
+-- arithmetic equivalences, entailments, and tautologies (eg, on a branch
+-- where we know x==y, a call to x<=y will always return true; for
+-- unsigned x, x<0 is always false, and x>0 is replaced with x!=0).
+-- We also maintain a counter for temporary variable names.
 --
 -- The BodyState has two constructors:  Unforked is used before the first
 -- fork, and after each new branch is created. Instructions can just be
@@ -118,6 +122,7 @@ data BodyState
       subExprs    :: ComputedCalls,   -- ^Previously computed calls to reuse
       definers    :: VarDefiner,      -- ^The call that defined each var
       failed      :: Bool,            -- ^True if this body always fails
+      predecessor :: Maybe BodyState, -- ^The preceding body state
       uParent     :: Maybe BodyState, -- ^The Forked of which this is a part
       uTmpCnt     :: Int              -- ^The next temp variable number to use
       }
@@ -127,8 +132,7 @@ data BodyState
       stKnownVal  :: Maybe Integer,   -- ^Definite value of stForkVar if known
       stForkVarTy :: TypeSpec,        -- ^Type of stForkVar
       stForkBods  :: [BodyState],     -- ^BodyStates of all branches so far
-      fParent     :: Maybe BodyState, -- ^The Forked of which this is a part
-      fTmpCnt     :: Int              -- ^The next temp variable number to use
+      fParent     :: Maybe BodyState  -- ^The Forked of which this is a part
       }
     deriving (Eq,Show)
 
@@ -151,30 +155,24 @@ type VarDefiner = Map PrimVarName Prim
 
 
 -- |Get the current temp variable count
-tmpCount :: BodyBuilder Int
-tmpCount = do
-    st <- get
-    case st of
-        Unforked{uTmpCnt=tmp} -> return tmp
-        Forked{fTmpCnt=tmp} -> return tmp
+tmpCount :: BodyState -> Int
+tmpCount Unforked{uTmpCnt=tmp}   = tmp
+tmpCount Forked{stForkBods=bods} = maximum $ tmpCount <$> bods
+
+
+-- |Get the current temp variable count
+setTmpCount :: Int -> BodyState -> BodyState
+setTmpCount tmp st@Unforked{} = st {uTmpCnt=tmp}
+setTmpCount tmp st@Forked{stForkBods=bods} =
+    st {stForkBods = setTmpCount tmp <$> bods}
+
 
 -- |Allocate the next temp variable name and ensure it's not allocated again
 freshVarName :: BodyBuilder PrimVarName
 freshVarName = do
-    st <- get
-    case st of
-        Unforked{uTmpCnt=tmp} -> do
-          put $ st {uTmpCnt=tmp+1}
-          return $ PrimVarName (mkTempName tmp) 0
-        Forked{fTmpCnt=tmp} -> do
-          put $ st {fTmpCnt=tmp+1}
-          return $ PrimVarName (mkTempName tmp) 0
-
-
--- |Return the parent of a state and remove it from the state
-popParent :: BodyState -> (Maybe BodyState,BodyState)
-popParent st@Unforked{uParent=parent} = (parent, st {uParent=Nothing})
-popParent st@Forked{fParent=parent}   = (parent, st {fParent=Nothing})
+    tmp <- gets tmpCount
+    modify $ setTmpCount (tmp+1)
+    return $ PrimVarName (mkTempName tmp) 0
 
 
 -- |Extract a ProcBody from a BodyState.
@@ -184,18 +182,22 @@ currBody st@Unforked{uParent=Just _} =
     shouldnt $ "currBody of non-root unforked state " ++ show st
 currBody st@Forked{fParent=Just _} =
     shouldnt $ "currBody of non-root forked state " ++ show st
-currBody Unforked{currBuild=prims, uTmpCnt=tmp} = do
+currBody st@Unforked{currBuild=[], predecessor=Just pred} =
+    currBody pred
+currBody st@Unforked{predecessor=Just _} =
+    shouldnt $ "Non-empty body after a fork" ++ show st
+currBody Unforked{currBuild=prims, uTmpCnt=tmp, predecessor=Nothing} = do
     logMsg BodyBuilder "Completing unforked body"
     let result = ProcBody (reverse prims) NoFork
     logMsg BodyBuilder $ "Result = " ++ show result
     return (tmp,result)
-currBody (Forked Unforked{currBuild=prims} var (Just val) ty bods _ tmp) =
+currBody st@(Forked Unforked{currBuild=prims} var (Just val) ty bods _) =
     case maybeNth val $ reverse bods of
         Nothing -> do
           message Error
             ("Completing forked body with out-of-range decision value "
              ++ show val) Nothing
-          return (tmp,ProcBody (reverse prims) NoFork)
+          return (tmpCount st,ProcBody (reverse prims) NoFork)
         Just bod -> do
           logMsg BodyBuilder
                  $ "Completing forked body with decision value " ++ show val
@@ -203,20 +205,20 @@ currBody (Forked Unforked{currBuild=prims} var (Just val) ty bods _ tmp) =
           logMsg BodyBuilder "Completing forked body with known decision var"
           let result = ProcBody (reverse prims ++ prims') fork
           logMsg BodyBuilder $ "Result = " ++ show result
-          return (tmp,result)
-currBody (Forked Unforked{currBuild=prims} var val ty bods _ tmp) = do
+          return (tmpCount st,result)
+currBody st@(Forked Unforked{currBuild=prims} var val ty bods _) = do
     logMsg BodyBuilder "Completing forked body with unforked origin"
-    bods' <- reverse <$> (snd <$>) <$> mapM currBody bods
+    bods' <- reverse . (snd <$>) <$> mapM currBody bods
     let result = ProcBody (reverse prims) $ PrimFork var ty False bods'
     logMsg BodyBuilder $ "Result = " ++ show result
-    return (tmp,result)
-currBody body@(Forked Forked{} var val ty bods _ tmp) =
+    return (tmpCount st,result)
+currBody body@(Forked Forked{} var val ty bods _) =
     shouldnt $ "currBody of Forked Forked state " ++ show body
 
 
 initState :: Int -> VarSubstitution -> BodyState
 initState tmp oSubst =
-    Unforked [] Map.empty oSubst Map.empty Map.empty False Nothing tmp
+    Unforked [] Map.empty oSubst Map.empty Map.empty False Nothing Nothing tmp
 
 
 ----------------------------------------------------------------
@@ -225,9 +227,9 @@ initState tmp oSubst =
 
 -- |Run a BodyBuilder monad and extract the final proc body
 buildBody :: Int -> VarSubstitution -> BodyBuilder a -> Compiler (Int,ProcBody)
-buildBody tmpCnt oSubst builder = do
+buildBody tmp oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
-    (a,st) <- buildPrims (initState tmpCnt oSubst) builder
+    (a,st) <- buildPrims (initState tmp oSubst) builder
     logMsg BodyBuilder ">>>> Finished building a proc body:"
     (tmp,body) <- currBody st
     logMsg BodyBuilder $ show body
@@ -244,7 +246,10 @@ buildFork var ty = do
     case st of
       Forked{} ->
         shouldnt "Building a fork outside of a body or branch"
-      Unforked{uTmpCnt=tmp, uParent=parent} -> do
+      -- Unforked{failed=True} ->
+      --   -- XXX not right: need to balance building/completing this fork
+      --   logBuild "Beginning fork after failed body"
+      Unforked{uParent=parent} -> do
         arg' <- expandVar var ty
         logBuild $ "     (expands to " ++ show arg' ++ ")"
         let (fvar,fval) =
@@ -254,7 +259,7 @@ buildFork var ty = do
                   ArgVar var' varType _ _ _ -> -- statically unknown result
                     (var',Nothing)
                   _ -> shouldnt "switch on non-integer variable"
-        put $ Forked st fvar fval ty [] parent tmp
+        put $ Forked st fvar fval ty [] parent
 
 
 -- |Complete a fork previously initiated by buildFork.
@@ -262,18 +267,22 @@ completeFork :: BodyBuilder ()
 completeFork = do
     st <- get
     case st of
+      -- Unforked{failed=True} ->
+      --   logBuild "Completing fork after failed body"
       Unforked{} -> shouldnt "Completing an unbegun fork"
       -- Forked{stKnownVal=Just n, stForkBods=bods} -> do
       --   logBuild $ ">>>> ending fork on value " ++ show n
       --   let selectedBranch = reverse bods !! fromIntegral n
       --   logBuild $ ">>> leaving state: " ++ show selectedBranch
       --   put selectedBranch
-      Forked{origin=Unforked{currBuild=build, currSubst=subst, outSubst=osubst,
-                             subExprs=subes, definers=defs, uParent=upar,
-                             uTmpCnt=tmp}} -> do
-        logBuild $ ">>>> ending fork on " ++ show (stForkVar st)
-        -- put $ Unforked build subst osubst subes defs upar tmp
       Forked{origin=Forked{}} -> shouldnt "Complete an unbuilt fork"
+      Forked{origin=Unforked{currSubst=subst, outSubst=osubst, subExprs=se,
+                             definers=defs},
+             stForkBods=bods, stForkVar=var} -> do
+        logBuild $ ">>>> ending fork on " ++ show var
+        -- Prepare for any instructions coming after the fork
+        put $ Unforked [] subst osubst se defs False (Just st) Nothing
+                       $ maximum $ tmpCount <$> bods
 
 
 -- |Start a new branch for the next integer value of the switch variable.
@@ -284,11 +293,17 @@ beginBranch = do
     logBuild $ "<<<< <<<< Beginning to build branch "
                ++ show branchNum ++ " on " ++ show (stForkVar st)
     case st of
+        -- Unforked{failed=True} ->
+        --   logBuild "Beginning branch after failed body"
         Unforked{} ->
           shouldnt "beginBranch in Unforked state"
-        Forked{origin=Unforked _ subst vsubst subexp defs failed _ tmp,
+        Forked{origin=Unforked _ subst vsubst subexp defs failed _ _ tmp,
                stForkVar=var, stKnownVal=val} -> do
-          put $ Unforked [] subst vsubst subexp defs failed (Just st) tmp
+          -- consider the branch failed if we know the switch variable, and
+          -- this is the wrong branch.  This avoids generating unneeded code.
+          let failed' = failed || maybe False (/=branchNum) val
+          put $ Unforked [] subst vsubst subexp defs failed'
+                    Nothing (Just st) tmp
           -- note the value of the fork variable for this branch if unknown
           -- XXX also add consequences of this, eg if var is result of X==Y
           --     comparison and var == 1, then record that X==Y.
@@ -310,9 +325,19 @@ endBranch = do
               ++ show (length $ stForkBods parent)
               ++ " on " ++ show (stForkVar parent)
           put $ parent { stForkBods = st:stForkBods parent }
+        -- Just Unforked{failed=True} ->
+        --   logBuild "Ending branch after failed body"
+        --   -- leave state as is
         Just Unforked{} ->
           shouldnt "endBranch with unforked parent"
 
+
+
+-- |Return the parent of a state and remove it from the state
+popParent :: BodyState -> (Maybe BodyState,BodyState)
+-- popParent st@Unforked{failed=True,uParent=Nothing} = (Just st, st)
+popParent st@Unforked{uParent=parent} = (parent, st {uParent=Nothing})
+popParent st@Forked{fParent=parent}   = (parent, st {fParent=Nothing})
 
 
 -- |Return Just the known value of the specified variable, or Nothing
