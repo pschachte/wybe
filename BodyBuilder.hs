@@ -122,7 +122,7 @@ data BodyState
       subExprs    :: ComputedCalls,   -- ^Previously computed calls to reuse
       definers    :: VarDefiner,      -- ^The call that defined each var
       failed      :: Bool,            -- ^True if this body always fails
-      predecessor :: Maybe BodyState, -- ^The preceding body state
+      predecessor :: Maybe BodyState, -- ^The preceding Forked body state
       uParent     :: Maybe BodyState, -- ^The Forked of which this is a part
       uTmpCnt     :: Int              -- ^The next temp variable number to use
       }
@@ -336,6 +336,8 @@ endBranch = do
 -- |Return the parent of a state and remove it from the state
 popParent :: BodyState -> (Maybe BodyState,BodyState)
 -- popParent st@Unforked{failed=True,uParent=Nothing} = (Just st, st)
+-- XXX must fix BodyState type to allow us to store a successor for a Forked.
+-- popParent st@Unforked{predecessor=Just pred} = popParent pred
 popParent st@Unforked{uParent=parent} = (parent, st {uParent=Nothing})
 popParent st@Forked{fParent=parent}   = (parent, st {fParent=Nothing})
 
