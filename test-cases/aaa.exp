@@ -72,14 +72,14 @@ source_filename = "test-cases/aaa.wybe"
 
 @aaa.1 = constant [10 x i8] c"AAA: Init\00"
 
-declare i32 @putchar(i8) local_unnamed_addr
+declare void @putchar(i8) local_unnamed_addr
 
-declare i32 @print_string(i8*) local_unnamed_addr
+declare void @print_string(i8*) local_unnamed_addr
 
 define i32 @aaa.main() local_unnamed_addr {
 entry:
-  %0 = tail call i32 @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @aaa.1, i64 0, i64 0))
-  %1 = tail call i32 @putchar(i8 10)
+  tail call void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @aaa.1, i64 0, i64 0))
+  tail call void @putchar(i8 10)
   ret i32 0
 }
 
@@ -89,14 +89,14 @@ source_filename = "test-cases/bbb.wybe"
 
 @bbb.1 = constant [10 x i8] c"BBB: Init\00"
 
-declare i32 @putchar(i8) local_unnamed_addr
+declare void @putchar(i8) local_unnamed_addr
 
-declare i32 @print_string(i8*) local_unnamed_addr
+declare void @print_string(i8*) local_unnamed_addr
 
 define i32 @bbb.main() local_unnamed_addr {
 entry:
-  %0 = tail call i32 @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @bbb.1, i64 0, i64 0))
-  %1 = tail call i32 @putchar(i8 10)
+  tail call void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @bbb.1, i64 0, i64 0))
+  tail call void @putchar(i8 10)
   ret i32 0
 }
 
@@ -106,14 +106,14 @@ source_filename = "test-cases/ccc.wybe"
 
 @ccc.1 = constant [10 x i8] c"CCC: Init\00"
 
-declare i32 @putchar(i8) local_unnamed_addr
+declare void @putchar(i8) local_unnamed_addr
 
-declare i32 @print_string(i8*) local_unnamed_addr
+declare void @print_string(i8*) local_unnamed_addr
 
 define i32 @ccc.main() local_unnamed_addr {
 entry:
-  %0 = tail call i32 @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ccc.1, i64 0, i64 0))
-  %1 = tail call i32 @putchar(i8 10)
+  tail call void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ccc.1, i64 0, i64 0))
+  tail call void @putchar(i8 10)
   ret i32 0
 }
 
@@ -123,14 +123,14 @@ source_filename = "test-cases/ddd.wybe"
 
 @ddd.1 = constant [10 x i8] c"DDD: Init\00"
 
-declare i32 @putchar(i8) local_unnamed_addr
+declare void @putchar(i8) local_unnamed_addr
 
-declare i32 @print_string(i8*) local_unnamed_addr
+declare void @print_string(i8*) local_unnamed_addr
 
 define i32 @ddd.main() local_unnamed_addr {
 entry:
-  %0 = tail call i32 @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ddd.1, i64 0, i64 0))
-  %1 = tail call i32 @putchar(i8 10)
+  tail call void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ddd.1, i64 0, i64 0))
+  tail call void @putchar(i8 10)
   ret i32 0
 }
 

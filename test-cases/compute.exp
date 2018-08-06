@@ -99,21 +99,21 @@ AFTER LLVM IR:
 ; ModuleID = 'compute'
 source_filename = "test-cases/compute.wybe"
 
-declare i32 @putchar(i8) local_unnamed_addr
+declare void @putchar(i8) local_unnamed_addr
 
-declare i32 @print_float(double) local_unnamed_addr
+declare void @print_float(double) local_unnamed_addr
 
-declare i32 @print_int(i64) local_unnamed_addr
+declare void @print_int(i64) local_unnamed_addr
 
 declare i64 @"math.utils.factorial<0>"(i64) local_unnamed_addr
 
 define i32 @compute.main() local_unnamed_addr {
 entry:
   %"tmp$0#0" = tail call i64 @"math.utils.factorial<0>"(i64 4)
-  %0 = tail call i32 @print_int(i64 %"tmp$0#0")
-  %1 = tail call i32 @putchar(i8 10)
-  %2 = tail call i32 @print_float(double 0x4050638E38E38E39)
-  %3 = tail call i32 @putchar(i8 10)
+  tail call void @print_int(i64 %"tmp$0#0")
+  tail call void @putchar(i8 10)
+  tail call void @print_float(double 0x4050638E38E38E39)
+  tail call void @putchar(i8 10)
   ret i32 0
 }
 
@@ -141,14 +141,14 @@ source_filename = "test-cases/math/utils.wybe"
 
 @math.utils.1 = constant [28 x i8] c"Utils has been initialised.\00"
 
-declare i32 @putchar(i8) local_unnamed_addr
+declare void @putchar(i8) local_unnamed_addr
 
-declare i32 @print_string(i8*) local_unnamed_addr
+declare void @print_string(i8*) local_unnamed_addr
 
 define i32 @math.utils.main() local_unnamed_addr {
 entry:
-  %0 = tail call i32 @print_string(i8* getelementptr inbounds ([28 x i8], [28 x i8]* @math.utils.1, i64 0, i64 0))
-  %1 = tail call i32 @putchar(i8 10)
+  tail call void @print_string(i8* getelementptr inbounds ([28 x i8], [28 x i8]* @math.utils.1, i64 0, i64 0))
+  tail call void @putchar(i8 10)
   ret i32 0
 }
 

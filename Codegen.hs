@@ -405,8 +405,8 @@ instr ty ins =
        modifyBlock $ blk { stack = i ++ [ref := ins] }
        return $ local ty ref
 
-voidInstr :: Type -> Instruction -> Codegen ()
-voidInstr ty inst = do
+voidInstr :: Instruction -> Codegen ()
+voidInstr inst = do
   blk <- current
   let i = stack blk
   modifyBlock $ blk { stack = i ++ [Do inst] }
@@ -522,7 +522,7 @@ alloca ty = Alloca ty Nothing 0 []
 -- | The 'store' instruction is used to write to write to memory. yields void.
 store :: Operand -> Operand -> Codegen Operand
 store ptr val = do
-  voidInstr phantom_t $ Store False ptr val Nothing 0 []
+  voidInstr $ Store False ptr val Nothing 0 []
   return ptr
 
 -- | The 'load' function wraps LLVM's load instruction with defaults.
