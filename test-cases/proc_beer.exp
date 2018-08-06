@@ -46,7 +46,7 @@ AFTER LLVM IR:
 ; ModuleID = 'proc_beer'
 source_filename = "test-cases/proc_beer.wybe"
 
-@proc_beer.1 = constant [29 x i8] c" bottles of beer on the wall\00"
+@proc_beer.2 = constant [29 x i8] c" bottles of beer on the wall\00"
 
 declare void @putchar(i8) local_unnamed_addr
 
@@ -77,7 +77,7 @@ if.then.preheader:                                ; preds = %entry
 if.then:                                          ; preds = %if.then.preheader, %if.then
   %"count#0.tr2" = phi i64 [ %"tmp$11#0", %if.then ], [ %"count#0", %if.then.preheader ]
   tail call void @print_int(i64 %"count#0.tr2")
-  tail call void @print_string(i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_beer.1, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_beer.2, i64 0, i64 0))
   tail call void @putchar(i8 10)
   %"tmp$11#0" = add nsw i64 %"count#0.tr2", -1
   %"tmp$4#0" = icmp sgt i64 %"count#0.tr2", 0

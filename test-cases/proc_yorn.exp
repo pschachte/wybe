@@ -74,11 +74,11 @@ source_filename = "test-cases/proc_yorn.wybe"
 
 @proc_yorn.1 = constant [19 x i8] c"What's your input?\00"
 @proc_yorn.4 = constant [29 x i8] c"Please answer 'yes' or 'no'.\00"
-@proc_yorn.2 = constant [8 x i8] c" (y/n) \00"
+@proc_yorn.3 = constant [8 x i8] c" (y/n) \00"
 
-declare i32 @putchar(i8) local_unnamed_addr
+declare void @putchar(i8) local_unnamed_addr
 
-declare i32 @print_string(i8*) local_unnamed_addr
+declare void @print_string(i8*) local_unnamed_addr
 
 declare i8 @read_char() local_unnamed_addr
 
@@ -90,8 +90,8 @@ entry:
 
 define i1 @"proc_yorn.gen$1<0>"(i8* %"prompt#0") local_unnamed_addr {
 entry:
-  %0 = tail call i32 @print_string(i8* %"prompt#0")
-  %1 = tail call i32 @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @proc_yorn.2, i64 0, i64 0))
+  tail call void @print_string(i8* %"prompt#0")
+  tail call void @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @proc_yorn.3, i64 0, i64 0))
   %"response#01" = tail call i8 @read_char()
   %"tmp$2#02" = tail call i1 @"proc_yorn.is_yes_or_no<0>"(i8 %"response#01")
   br i1 %"tmp$2#02", label %if.then, label %if.else.preheader
@@ -101,15 +101,15 @@ if.else.preheader:                                ; preds = %entry
 
 if.then:                                          ; preds = %if.else, %entry
   %"response#0.lcssa" = phi i8 [ %"response#01", %entry ], [ %"response#0", %if.else ]
-  %2 = or i8 %"response#0.lcssa", 32
-  %3 = icmp eq i8 %2, 121
-  ret i1 %3
+  %0 = or i8 %"response#0.lcssa", 32
+  %1 = icmp eq i8 %0, 121
+  ret i1 %1
 
 if.else:                                          ; preds = %if.else.preheader, %if.else
-  %4 = tail call i32 @print_string(i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_yorn.4, i64 0, i64 0))
-  %5 = tail call i32 @putchar(i8 10)
-  %6 = tail call i32 @print_string(i8* %"prompt#0")
-  %7 = tail call i32 @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @proc_yorn.2, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_yorn.4, i64 0, i64 0))
+  tail call void @putchar(i8 10)
+  tail call void @print_string(i8* %"prompt#0")
+  tail call void @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @proc_yorn.3, i64 0, i64 0))
   %"response#0" = tail call i8 @read_char()
   %"tmp$2#0" = tail call i1 @"proc_yorn.is_yes_or_no<0>"(i8 %"response#0")
   br i1 %"tmp$2#0", label %if.then, label %if.else

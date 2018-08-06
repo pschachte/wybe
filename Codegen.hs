@@ -7,9 +7,9 @@
 {-# LANGUAGE OverloadedStrings          #-}
 
 module Codegen (
-  Codegen(..), CodegenState(..), BlockState(..),
+  Codegen(..), CodegenState(..), BlockState(..), Translation,
   emptyModule, evalCodegen, addExtern, addGlobalConstant,
-  execCodegen, emptyCodegen,
+  execCodegen, emptyCodegen, evalTranslation, getCount, putCount,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
   call, externf, ret, globalDefine, external, phi, br, cbr,
@@ -154,13 +154,23 @@ data BlockState
 
 type Codegen = StateT CodegenState Compiler
 
-execCodegen :: [PrimProto] -> Codegen a -> Compiler CodegenState
-execCodegen modProtos codegen =
-    execStateT codegen (emptyCodegen modProtos)
+execCodegen :: Word -> [PrimProto] -> Codegen a -> Compiler CodegenState
+execCodegen startCount protos codegen =
+  execStateT codegen (emptyCodegen startCount protos)
 
 evalCodegen :: [PrimProto] -> Codegen t -> Compiler t
-evalCodegen modProtos codegen =
-    evalStateT codegen (emptyCodegen modProtos)
+evalCodegen protos codegen = evalStateT codegen (emptyCodegen 0 protos)
+
+type Translation = StateT Word Compiler
+
+evalTranslation :: Word -> Translation a -> Compiler a
+evalTranslation = flip evalStateT
+
+getCount :: Translation Word
+getCount = get
+
+putCount :: Word -> Translation ()
+putCount = put
 
 -- | Gets a new incremental word suffix for a temporary local operands
 fresh :: Codegen Word
@@ -240,10 +250,17 @@ emptyBlock :: Int -> BlockState
 emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
-emptyCodegen :: [PrimProto] -> CodegenState
-emptyCodegen modProtos
-    = CodegenState (Name $ fromString entryBlockName)
-      Map.empty [] 1 0 Map.empty [] [] modProtos
+emptyCodegen :: Word -> [PrimProto] -> CodegenState
+emptyCodegen startCount =
+  CodegenState
+    (Name $ fromString entryBlockName)
+    Map.empty
+    []
+    1
+    startCount
+    Map.empty
+    []
+    []
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name

@@ -96,7 +96,8 @@ blockTransformModule thisMod =
 
        --------------------------------------------------
        -- Translate
-       procBlocks <- mapM (translateProc allProtos) $ emptyFilter mangledProcs
+       procBlocks <- evalTranslation 0 $
+         mapM (translateProc allProtos) $ emptyFilter mangledProcs
        --------------------------------------------------
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) modFile procBlocks
@@ -177,24 +178,30 @@ emptyProc p = case procImpln p of
 -- require some global variable/constant declarations which is represented as
 -- G.Global values in the neededGlobalVars field of LLVMCompstate. All in all,
 -- externs and globals go on the top of the module.
-translateProc :: [PrimProto] -> ProcDef -> Compiler ProcDefBlock
+translateProc :: [PrimProto] -> ProcDef -> Translation ProcDefBlock
 translateProc modProtos proc = do
+  startCount <- getCount
+  (block, endCount) <- lift $ do
     modspec <- getModuleSpec
     let def@(ProcDefPrim proto body) = procImpln proc
     logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
     logBlocks $ "In Module: " ++ showModSpec modspec
-        ++ ", creating definition of: "
+      ++ ", creating definition of: "
     logBlocks $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
-    codestate <- execCodegen modProtos (doCodegenBody proto body)
+    codestate <- execCodegen startCount modProtos (doCodegenBody proto body)
     let pname = primProtoName proto
-
+    logBlocks $ show $ externs codestate
     exs <- mapM declareExtern $ externs codestate
     let globals = List.map LLVMAST.GlobalDefinition $ globalVars codestate
     let body' = createBlocks codestate
     lldef <- makeGlobalDefinition pname proto body'
     logBlocks $ show lldef
-    return $ ProcDefBlock proto lldef (exs ++ globals)
+    let block = ProcDefBlock proto lldef (exs ++ globals)
+    let endCount = Codegen.count codestate
+    return (block, endCount)
+  putCount endCount
+  return block
 
 
 -- | Create LLVM's module level Function Definition from the LPVM procedure
@@ -457,7 +464,6 @@ cgen prim@(PrimCall pspec args) = do
     let inArgs = primInputs filteredArgs
     outTy <- lift $ primReturnType filteredArgs
     inops <- mapM cgenArg inArgs
-    -- liftIO $ putStrLn $ "Call " ++ show inops
     let ins =
           call
           (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) nm)
@@ -828,8 +834,8 @@ cgenArg (ArgInt val ty) = do
     return intCons
 cgenArg (ArgFloat val ty) = return $ cons $ C.Float (F.Double val)
 cgenArg (ArgString s _) =
-    do let conStr = (makeStringConstant s)
-       let len = (length s) + 1
+    do let conStr = makeStringConstant s
+       let len = length s + 1
        let conType = array_t (fromIntegral len) char_t
        conName <- addGlobalConstant conType conStr
        let conPtr = C.GlobalReference (ptr_t conType) conName
@@ -1005,7 +1011,6 @@ declareExtern (PrimForeign _ name _ args) = do
     fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
     retty <- primReturnType args
     let ex = external retty name fnargs
-    -- logBlocks $ "## Declared extern: " ++ showPretty ex
     return ex
 
 declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
@@ -1038,7 +1043,7 @@ mallocExtern =
 -- For each call, an external declaration to that main function is needed.
 newMainModule :: [ModSpec] -> Compiler LLVMAST.Module
 newMainModule depends = do
-    blstate <- execCodegen [] $ mainCodegen depends
+    blstate <- execCodegen 0 [] $ mainCodegen depends
     let bls = createBlocks blstate
     let mainDef = globalDefine int_t "main" [] bls
     let externsForMain = [(external (int_t) "gc_init" [])]
