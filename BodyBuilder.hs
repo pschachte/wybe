@@ -131,46 +131,52 @@ data BodyState
       stForkVar   :: PrimVarName,     -- ^Variable that selects branch to take
       stKnownVal  :: Maybe Integer,   -- ^Definite value of stForkVar if known
       stForkVarTy :: TypeSpec,        -- ^Type of stForkVar
-      stForkBods  :: [BodyState]     -- ^BodyStates of all branches so far
+      stForkBods  :: [BodyState]      -- ^BodyStates of all branches so far
       }
     deriving (Eq,Show)
 
 
 logState :: BodyBuilder ()
 logState = do
-    logBuild $ "     Current state:"
     st <- get
-    logBuild $ fst $ showState 8 st
+    logBuild $ "     Current state:" ++ fst (showState 8 st)
+
+
+predSep = "\n    ---- ^ Predecessor ^ ----"
+
+mapFst :: (a->b) -> (a,c) -> (b,c)
+mapFst f (x,y) = (f x,y)
 
 
 showState :: Int -> BodyState -> (String,Int)
 showState indent Unforked{predecessor=pred, uParent=par, currBuild=revPrims} =
     let (str',indent')   = maybe ("",indent) (showState indent) par
-        (str'',indent'') = maybe ("",indent) (showState indent) pred
-    in  (str' ++ str'' ++ showPlacedPrims indent'' (reverse revPrims), indent'')
+        (str'',_)        = maybe ("",indent)
+                                 (mapFst (++predSep) . showState indent') pred
+    in  (str' ++ str'' ++ showPlacedPrims indent' (reverse revPrims), indent')
 showState indent Forked{origin=orig, stForkVar=var, stForkVarTy=ty,
                         stKnownVal=val, stForkBods=bods} =
     let (str',indent')   = showState indent orig
-        (str'',indent'') = showBranches indent' 0 bods
-    in  (str'
+        (str'',indent'') = showBranches indent' 0 $ reverse bods
+    in  (str' ++ "\n"
          ++ replicate indent' ' ' ++ "case " ++ show var ++ ":" ++ show ty
          ++ maybe "" (\v-> " (=" ++ show v ++ ")") val
-         ++ "\n"
+         ++ " of"
          ++ str''
         , indent''
         )
 
+
 showBranches :: Int -> Int -> [BodyState] -> (String,Int)
-showBranches indent bodyNum [] =
-    (showCase indent bodyNum, indent+4)
+showBranches indent bodyNum [] = (showCase indent bodyNum, indent)
 showBranches indent bodyNum (body:bodies) =
-    let (str'',indent'') = showBranches (bodyNum+1) indent bodies
-        (str',_) = showState indent'' body
+    let (str',indent') = showState (indent+4) body
+        (str'',indent'') = showBranches indent (bodyNum+1) bodies
     in  (showCase indent bodyNum ++ str' ++ str''
-        , indent'')
+        , indent')
 
 
-showCase indent bodyNum = replicate indent ' ' ++ show bodyNum ++ ":\n"
+showCase indent bodyNum = "\n" ++ replicate indent ' ' ++ show bodyNum ++ "::"
 
 
 type Substitution = Map PrimVarName PrimArg
@@ -278,7 +284,6 @@ buildFork var ty = do
     var' <- expandVar var boolType
     logBuild $ "<<<< beginning to build a new fork on " ++ show var
                ++ " (-> " ++ show var' ++ ")"
-    logState
     case st of
       Forked{} ->
         shouldnt "Building a fork outside of a body or branch"
@@ -296,6 +301,7 @@ buildFork var ty = do
                     (var',Nothing)
                   _ -> shouldnt "switch on non-integer variable"
         put $ Forked st fvar fval ty []
+        logState
 
 
 -- |Complete a fork previously initiated by buildFork.
@@ -316,10 +322,10 @@ completeFork = do
                              definers=defs},
              stForkBods=bods, stForkVar=var} -> do
         logBuild $ ">>>> ending fork on " ++ show var
-        logState
         -- Prepare for any instructions coming after the fork
         put $ Unforked [] subst osubst se defs False (Just st) Nothing
                        $ maximum $ tmpCount <$> bods
+        logState
 
 
 -- |Start a new branch for the next integer value of the switch variable.
@@ -329,7 +335,6 @@ beginBranch = do
     let branchNum = fromIntegral $ length $ stForkBods st
     logBuild $ "<<<< <<<< Beginning to build branch "
                ++ show branchNum ++ " on " ++ show (stForkVar st)
-    logState
     case st of
         -- Unforked{failed=True} ->
         --   logBuild "Beginning branch after failed body"
@@ -346,6 +351,7 @@ beginBranch = do
           -- XXX also add consequences of this, eg if var is result of X==Y
           --     comparison and var == 1, then record that X==Y.
           when (isNothing val) $ addSubst var $ ArgInt branchNum intType
+          logState
           return ()
         Forked{origin=Forked{}} ->
           shouldnt "Beginning a branch outside of a fork"
@@ -362,8 +368,8 @@ endBranch = do
           logBuild $ ">>>> >>>> Ending branch "
               ++ show (length $ stForkBods parent)
               ++ " on " ++ show (stForkVar parent)
-          logState
           put $ parent { stForkBods = st:stForkBods parent }
+          logState
         -- Just Unforked{failed=True} ->
         --   logBuild "Ending branch after failed body"
         --   -- leave state as is
@@ -375,8 +381,9 @@ endBranch = do
 -- |Return the parent of a state and remove it from the state
 popParent :: BodyState -> (Maybe BodyState,BodyState)
 -- popParent st@Unforked{failed=True,uParent=Nothing} = (Just st, st)
--- XXX must fix BodyState type to allow us to store a successor for a Forked.
--- popParent st@Unforked{predecessor=Just pred} = popParent pred
+popParent st@Unforked{predecessor=Just pred} =
+    let (par,_) = popParent pred
+    in  (par,st)
 popParent st@Unforked{uParent=parent} = (parent, st {uParent=Nothing})
 popParent st@Forked{origin=orig}      = popParent orig
 
