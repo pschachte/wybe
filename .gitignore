@@ -46,4 +46,7 @@ miniworkshop.pdf
 *~
 compiler.pdf
 wybelibs/wybe.o
-test-cases/alias
+
+# individual parser for testing purposes
+ParserTest.hs
+ParserTest
