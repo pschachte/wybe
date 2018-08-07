@@ -40,6 +40,7 @@ executable wybemk
                  Macho, NewParser, Normalise, ObjectInterface, Optimise,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
                  Version
+  hs-source-dirs: src
 
 
 test-suite wybe-test
@@ -66,3 +67,4 @@ test-suite wybe-test
                  Macho, NewParser, Normalise, ObjectInterface, Optimise,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
                  Version
+  hs-source-dirs: src
