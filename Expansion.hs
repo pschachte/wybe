@@ -137,7 +137,7 @@ expandBody (ProcBody prims fork) = do
               Just _ -> shouldnt "expansion led to non-var conditional"
         logExpansion $ "  fork on " ++ show var' ++ ":" ++ show ty
                        ++ " with " ++ show (length bodies) ++ " branches"
-        expandFork var ty bodies
+        expandFork var' ty bodies
         logExpansion $ "Finished expanding fork"
 
 
