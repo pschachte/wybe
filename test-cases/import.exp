@@ -157,9 +157,9 @@ AFTER LLVM IR:
 ; ModuleID = 'import'
 source_filename = "test-cases/import.wybe"
 
-declare i32 @putchar(i8) local_unnamed_addr
+declare void @putchar(i8) local_unnamed_addr
 
-declare i32 @print_int(i64) local_unnamed_addr
+declare void @print_int(i64) local_unnamed_addr
 
 declare i64 @isqrt(i64) local_unnamed_addr
 
@@ -179,8 +179,8 @@ entry:
   %5 = bitcast i8* %4 to i64*
   call void @llvm.memset.p0i8.i64(i8* %4, i8 0, i64 16, i32 4, i1 false)
   %"tmp$0#0" = tail call i64 @"import.distance<0>"(i64* %1, i64* %5)
-  %6 = tail call i32 @print_int(i64 %"tmp$0#0")
-  %7 = tail call i32 @putchar(i8 10)
+  tail call void @print_int(i64 %"tmp$0#0")
+  tail call void @putchar(i8 10)
   ret i32 0
 }
 

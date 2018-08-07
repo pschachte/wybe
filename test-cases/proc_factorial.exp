@@ -30,9 +30,9 @@ gen$1 > (2 calls)
         foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @wybe:74:28
 
     1:
-        foreign llvm mul(n#0:wybe.int, ~result#0:wybe.int, ?tmp$10#0:wybe.int) @wybe:21:38
-        foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$11#0:wybe.int) @wybe:16:38
-        proc_factorial.gen$1<0>(~tmp$11#0:wybe.int, ~tmp$10#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_factorial:3:5
+        foreign llvm mul(n#0:wybe.int, ~result#0:wybe.int, ?tmp$9#0:wybe.int) @wybe:21:38
+        foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$13#0:wybe.int) @wybe:16:38
+        proc_factorial.gen$1<0>(~tmp$13#0:wybe.int, ~tmp$9#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_factorial:3:5
 
 
 
@@ -40,37 +40,30 @@ gen$2 > inline (1 calls)
 0: gen$2([n#0:wybe.int], result#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     foreign c print_int(~result#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$5#0:wybe.phantom) @wybe:76:38
     foreign c putchar('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
-
-
-gen$3 > inline (1 calls)
-0: gen$3(n#0:wybe.int, result#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign llvm mul(n#0:wybe.int, ~result#0:wybe.int, ?tmp$6#0:wybe.int) @wybe:21:38
-    foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$10#0:wybe.int) @wybe:16:38
-    proc_factorial.gen$1<0>(~tmp$10#0:wybe.int, ~tmp$6#0:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_factorial:3:5
 proc_factorial
 ======================================================================
 AFTER LLVM IR:
 
 ; ModuleID = 'proc_factorial'
+source_filename = "test-cases/proc_factorial.wybe"
 
-; Function Attrs: nounwind
-declare void @putchar(i8) #0
+declare void @putchar(i8) local_unnamed_addr
 
-declare void @print_int(i64)
+declare void @print_int(i64) local_unnamed_addr
 
-define i32 @proc_factorial.main() {
+define i32 @proc_factorial.main() local_unnamed_addr {
 entry:
   tail call void @"proc_factorial.gen$1<0>"(i64 5, i64 1)
   ret i32 0
 }
 
-define void @"proc_factorial.factorial<0>"(i64 %"n#0") {
+define void @"proc_factorial.factorial<0>"(i64 %"n#0") local_unnamed_addr {
 entry:
   tail call void @"proc_factorial.gen$1<0>"(i64 %"n#0", i64 1)
   ret void
 }
 
-define void @"proc_factorial.gen$1<0>"(i64 %"n#0", i64 %"result#0") {
+define void @"proc_factorial.gen$1<0>"(i64 %"n#0", i64 %"result#0") local_unnamed_addr {
 entry:
   %"tmp$6#01" = icmp sgt i64 %"n#0", 1
   br i1 %"tmp$6#01", label %if.then.preheader, label %if.else
@@ -79,38 +72,24 @@ if.then.preheader:                                ; preds = %entry
   br label %if.then
 
 if.then:                                          ; preds = %if.then.preheader, %if.then
-  %"result#0.tr3" = phi i64 [ %"tmp$10#0", %if.then ], [ %"result#0", %if.then.preheader ]
-  %"n#0.tr2" = phi i64 [ %"tmp$11#0", %if.then ], [ %"n#0", %if.then.preheader ]
-  %"tmp$10#0" = mul i64 %"result#0.tr3", %"n#0.tr2"
-  %"tmp$11#0" = add i64 %"n#0.tr2", -1
-  %"tmp$6#0" = icmp sgt i64 %"tmp$11#0", 1
-  br i1 %"tmp$6#0", label %if.then, label %if.else.loopexit
+  %"result#0.tr3" = phi i64 [ %"tmp$9#0", %if.then ], [ %"result#0", %if.then.preheader ]
+  %"n#0.tr2" = phi i64 [ %"tmp$13#0", %if.then ], [ %"n#0", %if.then.preheader ]
+  %"tmp$9#0" = mul i64 %"result#0.tr3", %"n#0.tr2"
+  %"tmp$13#0" = add nsw i64 %"n#0.tr2", -1
+  %"tmp$6#0" = icmp sgt i64 %"n#0.tr2", 2
+  br i1 %"tmp$6#0", label %if.then, label %if.else
 
-if.else.loopexit:                                 ; preds = %if.then
-  %"tmp$10#0.lcssa" = phi i64 [ %"tmp$10#0", %if.then ]
-  br label %if.else
-
-if.else:                                          ; preds = %if.else.loopexit, %entry
-  %"result#0.tr.lcssa" = phi i64 [ %"result#0", %entry ], [ %"tmp$10#0.lcssa", %if.else.loopexit ]
+if.else:                                          ; preds = %if.then, %entry
+  %"result#0.tr.lcssa" = phi i64 [ %"result#0", %entry ], [ %"tmp$9#0", %if.then ]
   tail call void @print_int(i64 %"result#0.tr.lcssa")
   tail call void @putchar(i8 10)
   ret void
 }
 
-define void @"proc_factorial.gen$2<0>"(i64 %"result#0") {
+define void @"proc_factorial.gen$2<0>"(i64 %"result#0") local_unnamed_addr {
 entry:
   tail call void @print_int(i64 %"result#0")
   tail call void @putchar(i8 10)
   ret void
 }
-
-define void @"proc_factorial.gen$3<0>"(i64 %"n#0", i64 %"result#0") {
-entry:
-  %"tmp$6#0" = mul i64 %"result#0", %"n#0"
-  %"tmp$10#0" = add i64 %"n#0", -1
-  tail call void @"proc_factorial.gen$1<0>"(i64 %"tmp$10#0", i64 %"tmp$6#0")
-  ret void
-}
-
-attributes #0 = { nounwind }
 
