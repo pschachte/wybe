@@ -15,14 +15,14 @@ the old happy based parser.
 module NewParser where
 
 
-import AST hiding (option)
-import Control.Monad.Identity (Identity)
-import Scanner
-import Text.Parsec
+import           AST                       hiding (option)
+import           Control.Monad.Identity    (Identity)
+import           Scanner
+import           Text.Parsec
 -- import qualified Parser as OldParser
-import Text.Parsec.Expr
-import Data.Algorithm.Diff (getGroupedDiff)
-import Data.Algorithm.DiffOutput (ppDiff)
+import           Data.Algorithm.Diff       (getGroupedDiff)
+import           Data.Algorithm.DiffOutput (ppDiff)
+import           Text.Parsec.Expr
 
 
 
@@ -277,9 +277,9 @@ typeParser = do
     name <- identString
     optTypeList <- option [] $ betweenB Paren (typeParser `sepBy` comma)
     case name of
-        "any" -> return AnyType
+        "any"     -> return AnyType
         "invalid" -> return InvalidType
-        _   -> return $ TypeSpec [] name optTypeList
+        _         -> return $ TypeSpec [] name optTypeList
 
 
 
@@ -295,7 +295,6 @@ stmtParser =
           <|> untilStmt
           <|> unlessStmt
           <|> whenStmt
-          <|> untilStmt
           <|> ifStmtParser
           <|> simpleStmt
 
@@ -401,7 +400,7 @@ ifCaseParser = do
 --                 _ ->
 --                     rel
 --     return $ Placed (TestBool e) pos
-    
+
 
 
 -- | Parse expression statement.
@@ -560,7 +559,7 @@ relOperatorTable =
 -- arguments.
 makeFnCall :: String -> [Placed Exp] -> Placed Exp
 makeFnCall sym args@(x:_) = maybePlace (Fncall [] sym args) (place x)
-makeFnCall sym [] = Unplaced (Fncall [] sym [])
+makeFnCall sym []         = Unplaced (Fncall [] sym [])
 
 
 -- | Helper to create a binary operator expression parser.
@@ -687,7 +686,7 @@ floatExp :: Parser (Placed Exp)
 floatExp = takeToken test
     where
       test (TokFloat f p) = Just $ Placed (FloatValue f) p
-      test _ = Nothing
+      test _              = Nothing
 
 
 -- | Parse an integer literal token.
@@ -695,14 +694,14 @@ intExp :: Parser (Placed Exp)
 intExp = takeToken test
   where
     test (TokInt i p) = Just $ Placed (IntValue i) p
-    test _ = Nothing
+    test _            = Nothing
 
 
 charExp :: Parser (Placed Exp)
 charExp = takeToken test
     where
       test (TokChar c p) = Just $ Placed (CharValue c) p
-      test _ = Nothing
+      test _             = Nothing
 
 
 -- | Parse a string literal token.
@@ -710,7 +709,7 @@ stringExp :: Parser (Placed Exp)
 stringExp = takeToken test
   where
     test (TokString _ s p) = Just $ Placed (StringValue s) p
-    test _ = Nothing
+    test _                 = Nothing
 
 
 outParam :: Parser (Placed Exp)
@@ -731,7 +730,7 @@ ident :: String -> Parser Token
 ident key = takeToken test
   where
     test tok@(TokIdent t _) = if t == key then Just tok else Nothing
-    test _ = Nothing
+    test _                  = Nothing
 
 
 -- | Parse an identifier token.
@@ -750,7 +749,7 @@ identString :: Parser String
 identString = takeToken test
   where
     test (TokIdent s _) = Just s
-    test _ = Nothing
+    test _              = Nothing
 
 
 
@@ -768,7 +767,7 @@ symbolAny :: Parser Token
 symbolAny = takeToken test
   where
     test tok@TokSymbol{} = Just tok
-    test _ = Nothing
+    test _               = Nothing
 
 
 -- | Parse the symbol token of the string 'symbol'.
@@ -776,7 +775,7 @@ symbol :: String -> Parser Token
 symbol sym = takeToken test
   where
     test tok@(TokSymbol s _) = if sym == s then Just tok else Nothing
-    test _ = Nothing
+    test _                   = Nothing
 
 
 
@@ -818,7 +817,7 @@ comma :: Parser Token
 comma = takeToken test
   where
     test tok@TokComma{} = Just tok
-    test _ = Nothing
+    test _              = Nothing
 
 
 
@@ -847,9 +846,9 @@ emptyBrackets :: BracketStyle -> Parser (Placed Exp)
 emptyBrackets bs = do
     pos <- tokenPosition <$> leftBracket bs <* rightBracket bs
     let fnname = case bs of
-            Paren -> "()"
+            Paren   -> "()"
             Bracket -> "[]"
-            Brace -> "{}"
+            Brace   -> "{}"
     return $ Placed (Fncall [] fnname []) pos
 
 
