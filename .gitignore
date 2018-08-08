@@ -62,3 +62,4 @@ test-cases/compute
 *~
 compiler.pdf
 wybelibs/wybe.o
+test-cases/alias

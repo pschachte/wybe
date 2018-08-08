@@ -1,0 +1,4 @@
+public  type position = public position(x:int, y:int) end
+
+?pos = position(6666,7777)
+println(pos.y)
