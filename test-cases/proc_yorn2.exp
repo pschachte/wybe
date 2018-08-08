@@ -52,16 +52,16 @@ AFTER LLVM IR:
 ; ModuleID = 'proc_yorn2'
 source_filename = "test-cases/proc_yorn2.wybe"
 
-@proc_yorn2.2 = constant [8 x i8] c" (y/n) \00"
+@proc_yorn2.1 = constant [8 x i8] c" (y/n) \00"
 
 declare i8 @read_char() local_unnamed_addr
 
-declare i32 @print_string(i8*) local_unnamed_addr
+declare void @print_string(i8*) local_unnamed_addr
 
 define i1 @"proc_yorn2.gen$1<0>"(i8* %"prompt#0") local_unnamed_addr {
 entry:
-  %0 = tail call i32 @print_string(i8* %"prompt#0")
-  %1 = tail call i32 @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @proc_yorn2.2, i64 0, i64 0))
+  tail call void @print_string(i8* %"prompt#0")
+  tail call void @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @proc_yorn2.1, i64 0, i64 0))
   %"response#0" = tail call i8 @read_char()
   %"tmp$10#0" = icmp eq i8 %"response#0", 89
   br i1 %"tmp$10#0", label %if.then, label %if.else
