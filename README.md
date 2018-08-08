@@ -3,6 +3,10 @@
 ## How to build
 
 ```
+make
+```
+OR
+```
 stack build
 stack exec wybemk
 ```
