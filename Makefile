@@ -5,6 +5,7 @@
 VERSION=0.1
 # OPTS = -no-user-package-db -package-db .cabal-sandbox/*-packages.conf.d
 COPTS = -lgc -I/usr/local/include -L/usr/local/lib
+SRCDIR = src/
 
 all:	wybemk
 
@@ -17,7 +18,7 @@ all:	wybemk
 cbits.so: cbits.c
 	clang -fPIC -shared cbits.c -o cbits.so -lgc -v
 
-wybemk:	*.hs Version.lhs cbits.so 
+wybemk:	*.hs $(SRCDIR)/Version.lhs cbits.so
 	stack install && cp ~/.local/bin/$@ ./$@
 	# cabal configure
 	# cabal -j3 install --only-dependencies
@@ -34,7 +35,7 @@ doc:	*.hs
 	rm -rf $@
 	haddock -h -o $@ *.hs
 
-Version.lhs:	*.hs
+$(SRCDIR)/Version.lhs:	*.hs
 	@echo "Generating Version.lhs for version $(VERSION)"
 	@rm -f $@
 	@printf "Version.lhs automatically generated:  DO NOT EDIT\n" > $@
@@ -84,4 +85,4 @@ test:	wybemk
 	fi )
 
 clean:
-	rm -f *.o *.hi Parser.hs Version.lhs *.pdf *.aux wybelibs/*.o test-cases/*.o
+	rm -f *.o *.hi Parser.hs $(SRCDIR)/Version.lhs *.pdf *.aux wybelibs/*.o test-cases/*.o
