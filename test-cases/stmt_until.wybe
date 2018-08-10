@@ -1,0 +1,6 @@
+?n = 10
+do
+  until n < 0 
+    ?n = n - 1 
+    println(n)
+end

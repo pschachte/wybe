@@ -1,0 +1,4 @@
+# ifExpParser
+public func if_test : string =
+  if 3 > 0 then "larger" else "smaller"
+print(if_test)

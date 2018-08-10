@@ -1,0 +1,17 @@
+# if case
+
+public type tree = public empty | node(left:tree, key:int, right:tree) end
+
+public test proc lookup(key:int, tree:tree, ?result:bool)
+    if tree = empty:: false
+    |  key = tree.key:: ?result = true
+    |  key < tree.key:: lookup(key, tree.left, ?result)
+    |  true:: lookup(key, tree.right, ?result)
+    end
+end
+
+?tr = node(empty, 1, empty)
+?found = lookup(1, tr)
+if found :: print("found")
+| false :: print("not found")
+end

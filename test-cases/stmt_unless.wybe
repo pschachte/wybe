@@ -1,0 +1,8 @@
+# terminate but not halt?
+
+?n = 10
+do
+  unless n < 0 
+    ?n = n - 1
+    println(n)
+end

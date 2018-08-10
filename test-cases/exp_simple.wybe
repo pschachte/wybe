@@ -1,0 +1,31 @@
+#### simpleExpParser- simpleExpTerms ###
+# parenExp
+# intExp
+println(1 + 2)
+
+# floatExp
+println(1.3 + 2.3)
+
+# charExp
+println('h')
+
+# stringExp
+print("hello")
+
+# outParam
+?x = 1+2
+println(x)
+
+# inoutParam
+?x = 1000
+incr(!x)
+println(x)
+
+# funcCallParser
+# identifier
+# (emptyBrackets Brace)
+
+# foreignExp
+# Placed (ForeignFn group fname flags args) pos
+func foreign_add():int = foreign llvm add(1,2)
+print(foreign_add())
