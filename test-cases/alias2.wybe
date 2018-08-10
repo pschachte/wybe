@@ -1,0 +1,24 @@
+public type position = public position(x:int, y:int) end
+
+# cannot say whether p1 is fresh or not because it's passed in from outside
+# p2 is fresh in this proc
+public proc pcopy(p1:position, ?p2:position) use !io
+  println("in proc")
+  println(p1.x)
+  println(p1.y)
+  ?p2 = position(0,0)
+  x(!p2, p1.x)
+  y(!p2, p1.y)
+  println(p2.x)
+  println(p2.y)
+end
+
+# copy as a function
+# p2 is fresh
+public func fcopy(p1:position):position =
+  let ?p2 = position(0,0) x(!p2, p1.x) y(!p2, p1.y) in p2
+
+println("copy a position")
+?r = pcopy(position(0,20))
+println(x(r))
+println(y(r))

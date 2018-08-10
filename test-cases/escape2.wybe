@@ -1,0 +1,8 @@
+use position
+
+# p1 not escape this module - can store in stack?
+public proc replicate(p1:position, ?p2:position)
+    ?p2 = p1
+end
+
+print(x(replicate(position(0,20))))

@@ -1,0 +1,9 @@
+use position
+
+# not escape
+public proc random_pos use !io
+   ?pos = position(1,2)
+   println(pos.x)
+end
+
+random_pos
