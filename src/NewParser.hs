@@ -15,13 +15,13 @@ the old happy based parser.
 module NewParser where
 
 
-import           AST                       hiding (option)
-import           Control.Monad.Identity    (Identity)
+import           AST                    hiding (option)
+import           Control.Monad.Identity (Identity)
 import           Scanner
 import           Text.Parsec
 -- import qualified Parser as OldParser
-import           Data.Algorithm.Diff       (getGroupedDiff)
-import           Data.Algorithm.DiffOutput (ppDiff)
+-- import           Data.Algorithm.Diff       (getGroupedDiff)
+-- import           Data.Algorithm.DiffOutput (ppDiff)
 import           Text.Parsec.Expr
 
 
