@@ -284,20 +284,19 @@ deconstructorItems ctorName params typeSpec constCount nonConstCount
     let flowType = Implicit pos
         detism = if constCount + nonConstCount > 1 then SemiDet else Det
     in [ProcDecl Public detism True
-        (ProcProto ctorName 
+        (ProcProto ctorName
          (List.map (\(Param n t _ ft) -> (Param n t ParamOut ft)) params
-          ++ [Param "$" typeSpec ParamIn Ordinary]) 
+          ++ [Param "$" typeSpec ParamIn Ordinary])
          [])
         -- Code to check we have the right constructor
         ([tagCheck constCount nonConstCount tag "$"]
          ++
-        -- Code to strip tag and fetch all the fields
-        tagStrip tag "$" "$stripped" typeSpec
-        ++
+        -- Code to fetch all the fields
         reverse (List.map (\(var,_,aligned) ->
                               (Unplaced $ ForeignCall "lpvm" "access" []
-                               [Unplaced $ Var "$stripped" ParamIn flowType,
-                                Unplaced $ IntValue $ fromIntegral aligned,
+                               [Unplaced $ Var "$" ParamIn flowType,
+                                Unplaced $ IntValue
+                                  $ fromIntegral aligned - tag,
                                 Unplaced $ Var var ParamOut flowType]))
                  fields))
         pos]
@@ -333,16 +332,6 @@ tagCheck constCount nonConstCount tag varName =
 -- |Generate the needed statements to strip the specified tag off of the value
 --  of the specified variable, placing the result in the second variable.
 --  We use the stripped name with "$asInt" appended as a temp var name.
-tagStrip :: Integer -> Ident -> Ident -> TypeSpec -> [Placed Stmt]
-tagStrip tag varName strippedName typ =
-    let intStrippedName = strippedName ++ "$asInt"
-    in [Unplaced $ ForeignCall "llvm" "sub" []
-           [Unplaced $ lpvmCastExp (varGet varName) intType,
-            Unplaced $ iVal tag,
-            Unplaced $ intVarSet intStrippedName],
-        lpvmCast (intVarGet intStrippedName) strippedName typ]
-
-
 -- | Produce a getter and a setter for one field of the specified type.
 getterSetterItems :: Visibility -> TypeSpec -> Ident -> OptPos 
                      -> Int -> Int -> Integer -> (VarName,TypeSpec,Int)
@@ -358,12 +347,10 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
         -- Code to check we have the right constructor
         ([tagCheck constCount nonConstCount tag "$rec"]
          ++
-        -- Code to strip the tag and access the selected field
-         tagStrip tag "$rec" "$rec$stripped" rectype
-         ++
+        -- Code to access the selected field
          [Unplaced $ ForeignCall "lpvm" "access" []
-          [Unplaced $ varGet "$rec$stripped",
-           Unplaced $ IntValue $ fromIntegral offset,
+          [Unplaced $ varGet "$rec",
+           Unplaced $ IntValue $ fromIntegral offset - tag,
            Unplaced $ varSet "$"]])
         pos,
         ProcDecl vis detism True
@@ -373,17 +360,15 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
         -- Code to check we have the right constructor
         ([tagCheck constCount nonConstCount tag "$rec"]
          ++
-        -- Code to strip the tag and mutate the selected field
-         tagStrip tag "$rec" "$rec$stripped" rectype
-         ++
+        -- Code to mutate the selected field
 -- XXX Revise mutate instruction to take address, size, offset,
 --     destructive (Bool), and new address (output).  If destructive
 --     is True, does in place update and new address = address;
 --     otherwise allocates fresh storage, copies old contents,
 --     and mutates the new storage.
          [Unplaced $ ForeignCall "lpvm" "mutate" []
-          [Unplaced $ varGet "$rec$stripped",
-           Unplaced $ IntValue $ fromIntegral offset,
+          [Unplaced $ varGet "$rec",
+           Unplaced $ IntValue $ fromIntegral offset - tag,
            Unplaced $ varGet "$field",
            Unplaced $ varSet "$rec"]])
         pos]

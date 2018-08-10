@@ -31,21 +31,17 @@ AFTER EVERYTHING:
 
 distance > public (1 calls)
 0: distance(p1#0:position.position, p2#0:position.position, ?$#0:wybe.int):
-    foreign lpvm cast(~p2#0:position.position, ?tmp$11#0:wybe.int)
-    foreign lpvm cast(~tmp$11#0:wybe.int, ?tmp$12#0:position.position)
-    foreign lpvm access(tmp$12#0:position.position, 0:wybe.int, ?tmp$4#0:wybe.int)
-    foreign lpvm cast(~p1#0:position.position, ?tmp$14#0:wybe.int)
-    foreign lpvm cast(~tmp$14#0:wybe.int, ?tmp$15#0:position.position)
-    foreign lpvm access(tmp$15#0:position.position, 0:wybe.int, ?tmp$5#0:wybe.int)
-    foreign llvm sub(~tmp$4#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$18#0:wybe.int) @wybe:16:38
-    foreign C ipow(~tmp$18#0:wybe.int, 2:wybe.int, ?tmp$21#0:wybe.int) @wybe:30:42
-    foreign lpvm access(~tmp$12#0:position.position, 8:wybe.int, ?tmp$8#0:wybe.int)
-    foreign lpvm access(~tmp$15#0:position.position, 8:wybe.int, ?tmp$9#0:wybe.int)
-    foreign llvm sub(~tmp$8#0:wybe.int, ~tmp$9#0:wybe.int, ?tmp$30#0:wybe.int) @wybe:16:38
-    foreign C ipow(~tmp$30#0:wybe.int, 2:wybe.int, ?tmp$33#0:wybe.int) @wybe:30:42
-    foreign llvm add(~tmp$21#0:wybe.int, ~tmp$33#0:wybe.int, ?tmp$36#0:wybe.int) @wybe:13:38
-    foreign C isqrt(~tmp$36#0:wybe.int, ?tmp$38#0:wybe.int) @wybe:29:35
-    foreign llvm move(~tmp$38#0:wybe.int, ?$#0:wybe.int) @import:3:8
+    foreign lpvm access(p2#0:position.position, 0:wybe.int, ?tmp$4#0:wybe.int)
+    foreign lpvm access(p1#0:position.position, 0:wybe.int, ?tmp$5#0:wybe.int)
+    foreign llvm sub(~tmp$4#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$14#0:wybe.int) @wybe:16:38
+    foreign C ipow(~tmp$14#0:wybe.int, 2:wybe.int, ?tmp$17#0:wybe.int) @wybe:30:42
+    foreign lpvm access(~p2#0:position.position, 8:wybe.int, ?tmp$8#0:wybe.int)
+    foreign lpvm access(~p1#0:position.position, 8:wybe.int, ?tmp$9#0:wybe.int)
+    foreign llvm sub(~tmp$8#0:wybe.int, ~tmp$9#0:wybe.int, ?tmp$22#0:wybe.int) @wybe:16:38
+    foreign C ipow(~tmp$22#0:wybe.int, 2:wybe.int, ?tmp$25#0:wybe.int) @wybe:30:42
+    foreign llvm add(~tmp$17#0:wybe.int, ~tmp$25#0:wybe.int, ?tmp$28#0:wybe.int) @wybe:13:38
+    foreign C isqrt(~tmp$28#0:wybe.int, ?tmp$30#0:wybe.int) @wybe:29:35
+    foreign llvm move(~tmp$30#0:wybe.int, ?$#0:wybe.int) @import:3:8
 --------------------------------------------------
  Module position
   public submods  : 
@@ -94,22 +90,18 @@ distance > public (1 calls)
     foreign llvm move(~in#0:position.position, ?out#0:position.position)
 = > public inline test (3 calls)
 2: =($left#0:position.position, $right#0:position.position, ?$$#0:wybe.bool):
-    foreign lpvm cast(~$left#0:position.position, ?tmp$0#0:wybe.int)
-    foreign lpvm cast(~tmp$0#0:wybe.int, ?tmp$6#0:position.position)
-    foreign lpvm access(tmp$6#0:position.position, 0:wybe.int, ?$left$x#0:wybe.int)
-    foreign lpvm access(~tmp$6#0:position.position, 8:wybe.int, ?$left$y#0:wybe.int)
-    foreign lpvm cast(~$right#0:position.position, ?tmp$8#0:wybe.int)
-    foreign lpvm cast(~tmp$8#0:wybe.int, ?tmp$9#0:position.position)
-    foreign lpvm access(tmp$9#0:position.position, 0:wybe.int, ?$right$x#0:wybe.int)
-    foreign lpvm access(~tmp$9#0:position.position, 8:wybe.int, ?$right$y#0:wybe.int)
-    foreign llvm icmp eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$12#0:wybe.bool) @wybe:28:40
-    case ~tmp$12#0:wybe.bool of
+    foreign lpvm access($left#0:position.position, 0:wybe.int, ?$left$x#0:wybe.int)
+    foreign lpvm access(~$left#0:position.position, 8:wybe.int, ?$left$y#0:wybe.int)
+    foreign lpvm access($right#0:position.position, 0:wybe.int, ?$right$x#0:wybe.int)
+    foreign lpvm access(~$right#0:position.position, 8:wybe.int, ?$right$y#0:wybe.int)
+    foreign llvm icmp eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$8#0:wybe.bool) @wybe:28:40
+    case ~tmp$8#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?tmp$15#0:wybe.bool) @wybe:28:40
-        foreign llvm move(~tmp$15#0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:28:40
+        foreign llvm move(~tmp$11#0:wybe.bool, ?$$#0:wybe.bool)
 
 
 
@@ -122,34 +114,24 @@ position > public inline (0 calls)
     foreign lpvm cast(~$recint#0, ?$#0:position.position)
 position > public inline (4 calls)
 1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position):
-    foreign lpvm cast(~$#0:position.position, ?tmp$0#0:wybe.int)
-    foreign lpvm cast(~tmp$0#0:wybe.int, ?$stripped#0:position.position)
-    foreign lpvm access($stripped#0, 0:wybe.int, ?x#0:wybe.int)
-    foreign lpvm access(~$stripped#0, 8:wybe.int, ?y#0:wybe.int)
+    foreign lpvm access($#0:position.position, 0:wybe.int, ?x#0:wybe.int)
+    foreign lpvm access(~$#0:position.position, 8:wybe.int, ?y#0:wybe.int)
 
 
 x > public inline (0 calls)
 0: x($rec#0:position.position, ?$#0:wybe.int):
-    foreign lpvm cast(~$rec#0:position.position, ?tmp$0#0:wybe.int)
-    foreign lpvm cast(~tmp$0#0:wybe.int, ?$rec$stripped#0:position.position)
-    foreign lpvm access(~$rec$stripped#0, 0:wybe.int, ?$#0:wybe.int)
+    foreign lpvm access(~$rec#0:position.position, 0:wybe.int, ?$#0:wybe.int)
 x > public inline (0 calls)
 1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
-    foreign lpvm cast(~$rec#0:position.position, ?tmp$0#0:wybe.int)
-    foreign lpvm cast(~tmp$0#0:wybe.int, ?$rec$stripped#0:position.position)
-    foreign lpvm mutate(~$rec$stripped#0, 0:wybe.int, ~$field#0:wybe.int, ?$rec#1:position.position)
+    foreign lpvm mutate(~$rec#0:position.position, 0:wybe.int, ~$field#0:wybe.int, ?$rec#1:position.position)
 
 
 y > public inline (0 calls)
 0: y($rec#0:position.position, ?$#0:wybe.int):
-    foreign lpvm cast(~$rec#0:position.position, ?tmp$0#0:wybe.int)
-    foreign lpvm cast(~tmp$0#0:wybe.int, ?$rec$stripped#0:position.position)
-    foreign lpvm access(~$rec$stripped#0, 8:wybe.int, ?$#0:wybe.int)
+    foreign lpvm access(~$rec#0:position.position, 8:wybe.int, ?$#0:wybe.int)
 y > public inline (0 calls)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
-    foreign lpvm cast(~$rec#0:position.position, ?tmp$0#0:wybe.int)
-    foreign lpvm cast(~tmp$0#0:wybe.int, ?$rec$stripped#0:position.position)
-    foreign lpvm mutate(~$rec$stripped#0, 8:wybe.int, ~$field#0:wybe.int, ?$rec#1:position.position)
+    foreign lpvm mutate(~$rec#0:position.position, 8:wybe.int, ~$field#0:wybe.int, ?$rec#1:position.position)
 import, position, position.position
 ======================================================================
 AFTER LLVM IR:
@@ -188,17 +170,17 @@ define i64 @"import.distance<0>"(i64* nocapture readonly %"p1#0", i64* nocapture
 entry:
   %0 = load i64, i64* %"p2#0", align 4
   %1 = load i64, i64* %"p1#0", align 4
-  %"tmp$18#0" = sub i64 %0, %1
-  %"tmp$21#0" = tail call i64 @ipow(i64 %"tmp$18#0", i64 2)
+  %"tmp$14#0" = sub i64 %0, %1
+  %"tmp$17#0" = tail call i64 @ipow(i64 %"tmp$14#0", i64 2)
   %2 = getelementptr i64, i64* %"p2#0", i64 1
   %3 = load i64, i64* %2, align 4
   %4 = getelementptr i64, i64* %"p1#0", i64 1
   %5 = load i64, i64* %4, align 4
-  %"tmp$30#0" = sub i64 %3, %5
-  %"tmp$33#0" = tail call i64 @ipow(i64 %"tmp$30#0", i64 2)
-  %"tmp$36#0" = add i64 %"tmp$33#0", %"tmp$21#0"
-  %"tmp$38#0" = tail call i64 @isqrt(i64 %"tmp$36#0")
-  ret i64 %"tmp$38#0"
+  %"tmp$22#0" = sub i64 %3, %5
+  %"tmp$25#0" = tail call i64 @ipow(i64 %"tmp$22#0", i64 2)
+  %"tmp$28#0" = add i64 %"tmp$25#0", %"tmp$17#0"
+  %"tmp$30#0" = tail call i64 @isqrt(i64 %"tmp$28#0")
+  ret i64 %"tmp$30#0"
 }
 
 ; Function Attrs: argmemonly nounwind
@@ -233,16 +215,16 @@ define i1 @"position.position.=<1>.1"(i64* nocapture readonly %"$left#0", i64* n
 entry:
   %0 = load i64, i64* %"$left#0", align 4
   %1 = load i64, i64* %"$right#0", align 4
-  %"tmp$12#0" = icmp eq i64 %0, %1
-  br i1 %"tmp$12#0", label %if.then, label %if.else
+  %"tmp$8#0" = icmp eq i64 %0, %1
+  br i1 %"tmp$8#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
   %2 = getelementptr i64, i64* %"$right#0", i64 1
   %3 = load i64, i64* %2, align 4
   %4 = getelementptr i64, i64* %"$left#0", i64 1
   %5 = load i64, i64* %4, align 4
-  %"tmp$15#0" = icmp eq i64 %5, %3
-  ret i1 %"tmp$15#0"
+  %"tmp$11#0" = icmp eq i64 %5, %3
+  ret i1 %"tmp$11#0"
 
 if.else:                                          ; preds = %entry
   ret i1 false

@@ -140,9 +140,9 @@ logState :: BodyBuilder ()
 logState = do
     st <- get
     logBuild $ "     Current state:" ++ fst (showState 8 st)
+    return ()
 
-
-predSep = "\n    ---- ^ Predecessor ^ ----"
+predSep indent = "\n" ++ replicate indent ' ' ++ "---- ^ Predecessor ^ ----"
 
 mapFst :: (a->b) -> (a,c) -> (b,c)
 mapFst f (x,y) = (f x,y)
@@ -152,7 +152,9 @@ showState :: Int -> BodyState -> (String,Int)
 showState indent Unforked{predecessor=pred, uParent=par, currBuild=revPrims} =
     let (str',indent')   = maybe ("",indent) (showState indent) par
         (str'',_)        = maybe ("",indent)
-                                 (mapFst (++predSep) . showState indent') pred
+                                 (mapFst 
+                                  (++predSep indent') . showState indent')
+                                 pred
     in  (str' ++ str'' ++ showPlacedPrims indent' (reverse revPrims), indent')
 showState indent Forked{origin=orig, stForkVar=var, stForkVarTy=ty,
                         stKnownVal=val, stForkBods=bods} =
