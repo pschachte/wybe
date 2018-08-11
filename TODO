@@ -1,15 +1,20 @@
 -*- mode: text -*-
 
 Fix bugs:
+o Fix lost output argument type in mutate instructions
+    o Maybe this is all in-out arguments?
+o Don't mark = proc for recursive types for inlining
 
+Documentation:
+o Write Wybe intro
+o Write setup/build/install document
 
 Complete the implementation:
-o Support multiple non-constant constructors
-o Implied modes:  transform expression version of proc call with inputs where
-  outputs are expected into proc call plus equality tests
+o Support many non-constant constructors
 o Ensure a variable both assigned and used in a statement has the assignment
   happen first, wherever it appears in the statement
-o Unifications:  transform f(?x,?y) = z into test f(?x,?y,z)
+o Support versioning for libraries
+o Support auto-download for libraries (with sandboxing?)
 
 Error checking:
 o Error if foreign call has no outputs; suggest use !I/O.
@@ -38,18 +43,20 @@ o Support subtypes
 o Support generators (lazy lists)
 o Support declared laziness through multiple specialisation
 o Support optional and named arguments
+o Support generators (nondet procs)
 
 
 Optimise:
-o More foreign primitive optimisation:  or with 0, unsigned > 1, etc.
+o Eliminate remaining redundant (final) variable-variable moves
+o Eliminate round trip cast to and from int
 o Remove unneeded input and unchanged output arguments
 o Inter-procedure common sub-expression elimination
 o Code hoisting
 o Destructive update transformation (CTGC)
-
+o delay statements until their outputs are needed
+    o delay into one arm of a branch if only one arm needs the outputs
 
 Blocks:
-o Improve Logging to be distributable
 o add Procedure id for global module level procedures
 o Insert target triple into the definition of LLVMAST.Module during
   creation.
@@ -59,3 +66,7 @@ o Improve Logging
 
 Make:
 o Add creation of cabal sandbox and dependency install 
+
+Porting:
+o to Linux
+o to Windows
