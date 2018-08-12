@@ -1,5 +1,5 @@
 # Fix bugs:
-
+* Assertion failed in `test-cases/multictr.wybe`
 
 # Documentation:
 * Write Wybe intro
@@ -8,10 +8,11 @@
 
 # Complete the implementation:
 * Support many non-constant constructors
+* Handle building `.o` files for foreign code using `make` or alternatives
 * Ensure a variable both assigned and used in a statement has the assignment
   happen first, wherever it appears in the statement
 * Support versioning for libraries
-* Support auto-download for libraries (with sandboxing?)
+* Support auto-download for libraries (with sandboxing and caching)
 
 
 # Error checking:
@@ -61,8 +62,9 @@
 
 
 # Tooling:
-* `wybedoc`` utility
+* `wybedoc` utility with *markdown* support
 * Wybe code reformatter/beautifier
+* Tool to generate .wybe foreign interface file from C `.h` file
 * Parser and scanner generators
 
 
