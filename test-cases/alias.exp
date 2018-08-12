@@ -23,9 +23,9 @@ AFTER EVERYTHING:
 *main* > public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp$4#0:alias.position)
-    foreign lpvm mutate(~tmp$4#0:alias.position, ?tmp$5#0, 0:wybe.int, 6666:wybe.int)
-    foreign lpvm mutate(~tmp$5#0, ?tmp$6#0, 8:wybe.int, 7777:wybe.int)
-    foreign lpvm cast(~tmp$6#0, ?tmp$7#0:wybe.int)
+    foreign lpvm mutate(~tmp$4#0:alias.position, ?tmp$5#0:alias.position, 0:wybe.int, 6666:wybe.int)
+    foreign lpvm mutate(~tmp$5#0:alias.position, ?tmp$6#0:alias.position, 8:wybe.int, 7777:wybe.int)
+    foreign lpvm cast(~tmp$6#0:alias.position, ?tmp$7#0:wybe.int)
     foreign lpvm cast(~tmp$7#0:wybe.int, ?tmp$0#0:alias.position)
     foreign lpvm access(~tmp$0#0:alias.position, 8:wybe.int, ?tmp$1#0:wybe.int)
     foreign c print_int(~tmp$1#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$12#0:wybe.phantom) @wybe:76:38
@@ -76,9 +76,9 @@ AFTER EVERYTHING:
 position > public inline (0 calls)
 0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:alias.position):
     foreign lpvm alloc(16:wybe.int, ?$rec#0:alias.position)
-    foreign lpvm mutate(~%$rec#0, ?%$rec#1, 0:wybe.int, ~x#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1, ?%$rec#2, 8:wybe.int, ~y#0:wybe.int)
-    foreign lpvm cast(~$rec#2, ?$recint#0:wybe.int)
+    foreign lpvm mutate(~%$rec#0:alias.position, ?%$rec#1:alias.position, 0:wybe.int, ~x#0:wybe.int)
+    foreign lpvm mutate(~%$rec#1:alias.position, ?%$rec#2:alias.position, 8:wybe.int, ~y#0:wybe.int)
+    foreign lpvm cast(~$rec#2:alias.position, ?$recint#0:wybe.int)
     foreign lpvm cast(~$recint#0, ?$#0:alias.position)
 position > public inline (4 calls)
 1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:alias.position):
