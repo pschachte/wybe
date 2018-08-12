@@ -1,8 +1,6 @@
 -*- mode: text -*-
 
 Fix bugs:
-o Fix lost output argument type in mutate instructions
-    o Maybe this is all in-out arguments?
 o Don't mark = proc for recursive types for inlining
 
 Documentation:

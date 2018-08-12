@@ -903,7 +903,7 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
           let stmtTyping' = stmtTyping {typingArgsTypes = validMatches}
           typecheckCalls m name pos calls typing (stmtTyping':residue)
               $ chg || validMatches /= typs
-    
+
 
 -- |Match up the argument types of a call with the parameter types of the
 -- callee, producing a list of the actual types.  If this list contains
@@ -1127,7 +1127,9 @@ modecheckStmt m name defPos typing delayed assigned detism
                    | ((mode,avail,_yy),num) <- zip actualModes [1..]
                    , not avail && mode == ParamIn]
     if not $ List.null flowErrs -- Using undefined var as input?
-        then return ([],delayed,assigned,flowErrs)
+        then do
+            logTypes "delaying foreign call"
+            return ([],delayed,assigned,flowErrs)
         else do
             let typeflows = List.zipWith TypeFlow actualTypes
                             $ sel1 <$> actualModes
@@ -1137,6 +1139,7 @@ modecheckStmt m name defPos typing delayed assigned detism
                             $ List.map (expVar . content)
                             $ List.filter ((==ParamOut) . expFlow . content)
                               args'
+            logTypes $ "New instr = " ++ show stmt'
             return ([maybePlace stmt' pos],delayed,assigned',[])
 modecheckStmt _ _ _ _ delayed assigned _ Nop pos = do
     logTypes $ "Mode checking Nop"

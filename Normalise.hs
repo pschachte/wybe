@@ -253,13 +253,15 @@ constructorItems ctorName params typeSpec size fields tag pos =
          ++
        -- Code to fill all the fields
          (reverse $ List.map (\(var,_,aligned) ->
--- XXX Revise mutate instruction to take address, size, offset,
---     destructive (Bool), and new address (output).  If destructive
+-- XXX Revise mutate instruction to take address, new address (output),
+--     size, offset, and destructive (Bool).  If destructive
 --     is True, does in place update and new address = address;
 --     otherwise allocates fresh storage, copies old contents,
 --     and mutates the new storage.
                                (Unplaced $ ForeignCall "lpvm" "mutate" []
-                                [Unplaced $ Var "$rec" ParamInOut flowType,
+                                [Unplaced $ Typed
+                                   (Var "$rec" ParamInOut flowType)
+                                   typeSpec True,
                                  Unplaced $ IntValue $ fromIntegral aligned,
                                  Unplaced $ Var var ParamIn flowType]))
           fields)
@@ -361,13 +363,14 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
         ([tagCheck constCount nonConstCount tag "$rec"]
          ++
         -- Code to mutate the selected field
--- XXX Revise mutate instruction to take address, size, offset,
---     destructive (Bool), and new address (output).  If destructive
+-- XXX Revise mutate instruction to take address, new address (output),
+--     size, offset, and destructive (Bool).  If destructive
 --     is True, does in place update and new address = address;
 --     otherwise allocates fresh storage, copies old contents,
 --     and mutates the new storage.
          [Unplaced $ ForeignCall "lpvm" "mutate" []
-          [Unplaced $ Var "$rec" ParamInOut $ Implicit pos,
+          [Unplaced $ Typed (Var "$rec" ParamInOut $ Implicit pos)
+                      rectype False,
            Unplaced $ IntValue $ fromIntegral offset - tag,
            Unplaced $ varGet "$field"]])
         pos]
