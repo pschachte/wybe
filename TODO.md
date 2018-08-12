@@ -5,6 +5,7 @@
 * Write Wybe intro
 * Write setup/build/install document
 
+
 # Complete the implementation:
 * Support many non-constant constructors
 * Ensure a variable both assigned and used in a statement has the assignment
@@ -12,9 +13,11 @@
 * Support versioning for libraries
 * Support auto-download for libraries (with sandboxing?)
 
+
 # Error checking:
 * Error if foreign call has no outputs; suggest use !I/O.
 * Ensure no statement binds the same variable multiple times
+
 
 # Improve error handling:
 * Give meaningful message for errors detected in generated procs
@@ -22,6 +25,7 @@
    of uninitialised variables
 * Type and mode check foreign call arguments for llvm and lpvm calls;
   don't abort compiler on errors.
+
 
 # Complete the language:
 * Support higher order procs and functions through multiple specialisation
@@ -45,10 +49,21 @@
 * Support optional and named arguments
 * Support generators (nondet procs)
 * Support "commutative" resources, which don't need to be threaded everywhere
+* Support unicode
 
 
 # Library:
 * Implement decent string type
+* Map and set types
+* Library of I/O operations using resources for streams
+* Command line argument handling using resources
+* Expandable array type
+
+
+# Tooling:
+* `wybedoc`` utility
+* Wybe code reformatter/beautifier
+* Parser and scanner generators
 
 
 # Optimise:
