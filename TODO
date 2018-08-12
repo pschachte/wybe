@@ -1,7 +1,7 @@
 -*- mode: text -*-
 
 Fix bugs:
-o Don't mark = proc for recursive types for inlining
+
 
 Documentation:
 o Write Wybe intro

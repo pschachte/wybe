@@ -425,7 +425,7 @@ equalityTest _ = False
 --       and then test each field for equality by calling the = test.
 --
 --   Also return whether the test should be inlined.  We inline when there
---   there is no ore than one non-const constructor and either it has no more
+--   there is no more than one non-const constructor and either it has no more
 --   than two arguments or there are no const constructors.
 --
 equalityBody :: [Placed FnProto] -> [Placed FnProto] -> ([Placed Stmt],Bool)
@@ -438,10 +438,10 @@ equalityBody consts nonconsts =
                          (iVal $ length consts))
                 [equalityConsts consts]
                 [equalityNonconsts (content <$> nonconsts) (List.null consts)]],
-     -- Decide to inline if only 1 non-const constructor and either no
-     -- non-const constructors (so not recursive) or at most 2 fields
+     -- Decide to inline if only 1 non-const constructor, no non-const
+     -- constructors (so not recursive), and at most 4 fields
      case List.map content nonconsts of
-         [FnProto _ params _ ] -> length params <= 2 || List.null consts
+         [FnProto _ params _ ] -> length params <= 4 && List.null consts
          _ -> False
         )
 
