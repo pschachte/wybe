@@ -119,7 +119,9 @@ data BodyState = BodyState {
       currSubst   :: Substitution,    -- ^variable substitutions to propagate
       outSubst    :: VarSubstitution, -- ^Substitutions for var assignments
       subExprs    :: ComputedCalls,   -- ^Previously computed calls to reuse
+      -- XXX I don't think definers is actually used; get rid of it?
       definers    :: VarDefiner,      -- ^The call that defined each var
+      -- XXX I don't think failed is actually used; get rid of it?
       failed      :: Bool,            -- ^True if this body always fails
       tmpCount    :: Int,             -- ^The next temp variable number to use
       buildState  :: BuildState,      -- ^What state this node is in
@@ -401,7 +403,6 @@ buildPrims st builder = runStateT builder st
 
 -- |Augment st with whatever consequences can be deduced from the fact
 --  that prim assigned var the value val.
---  
 propagateBinding :: PrimVarName -> TypeSpec -> Int -> Prim -> BodyBuilder ()
 propagateBinding var ty val (PrimForeign "llvm" "icmp" [cmp] [a1, a2, _]) = do
     propagateComparison var ty val cmp a1 a2

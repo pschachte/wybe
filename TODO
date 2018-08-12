@@ -50,6 +50,7 @@ o Support "commutative" resources, which don't need to be threaded everywhere
 
 
 Optimise:
+o Keep track of bounds on tags to avoid unnecessary tests and allow tag switches
 o Eliminate remaining redundant (final) variable-variable moves
 o Eliminate round trip cast to and from int
 o Remove unneeded input and unchanged output arguments
