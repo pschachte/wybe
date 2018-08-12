@@ -1,0 +1,87 @@
+# Fix bugs:
+
+
+# Documentation:
+* Write Wybe intro
+* Write setup/build/install document
+
+# Complete the implementation:
+* Support many non-constant constructors
+* Ensure a variable both assigned and used in a statement has the assignment
+  happen first, wherever it appears in the statement
+* Support versioning for libraries
+* Support auto-download for libraries (with sandboxing?)
+
+# Error checking:
+* Error if foreign call has no outputs; suggest use !I/O.
+* Ensure no statement binds the same variable multiple times
+
+# Improve error handling:
+* Give meaningful message for errors detected in generated procs
+* Detect and report use of uninitialised variables, including update
+   of uninitialised variables
+* Type and mode check foreign call arguments for llvm and lpvm calls;
+  don't abort compiler on errors.
+
+# Complete the language:
+* Support higher order procs and functions through multiple specialisation
+* Fix the syntax!
+    * At expression level, support infix ops, where the ops are sequences of
+      operator characters
+    * At statement level, support brace-enclosed statement sequence as statement
+    * Interpolation (string and array)
+        * "...@foo..." = "..." ++ foo ++ "..."
+	* "...@(foo(bar,baz))..." = "..." ++ foo(bar,baz) ++ "..."
+	* [foo,@bar(baz),zip] = [foo] ++ bar(baz) ++ [zip]
+	* if ++ can run backwards, then [?foo,@?bar] and [@?foo,bar] can be patterns
+	* with this, no need for [ ... | ...] syntax
+* Provide scoped way to set resources
+* Provide way to give top-level initial value to resources
+* Support polymorphism
+* Provide switch-on-constructor syntax and implementation
+* Support subtypes
+* Support generators (lazy lists)
+* Support declared laziness through multiple specialisation
+* Support optional and named arguments
+* Support generators (nondet procs)
+* Support "commutative" resources, which don't need to be threaded everywhere
+
+
+# Library:
+* Implement decent string type
+
+
+# Optimise:
+* Keep track of bounds on tags to avoid unnecessary tests and allow tag switches
+* Eliminate remaining redundant (final) variable-variable moves
+* Eliminate round trip cast to and from int
+* Remove unneeded input and unchanged output arguments
+* Inter-procedure common sub-expression elimination
+* Code hoisting
+* Destructive update transformation (CTGC)
+* delay statements until their outputs are needed
+    * delay into one arm of a branch if only one arm needs the outputs
+
+
+# Build System:
+* Record procs before inlining to allow rebuild when dependencies change
+
+
+# Blocks:
+* add Procedure id for global module level procedures
+* Insert target triple into the definition of LLVMAST.Module during
+  creation.
+
+
+# Emit:
+* Improve Logging
+
+
+# Make:
+* Add creation of cabal sandbox and dependency install 
+
+
+# Porting:
+* to Linux
+* to Windows
+* Rewrite compiler in Wybe
