@@ -367,10 +367,9 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
 --     otherwise allocates fresh storage, copies old contents,
 --     and mutates the new storage.
          [Unplaced $ ForeignCall "lpvm" "mutate" []
-          [Unplaced $ varGet "$rec",
+          [Unplaced $ Var "$rec" ParamInOut $ Implicit pos,
            Unplaced $ IntValue $ fromIntegral offset - tag,
-           Unplaced $ varGet "$field",
-           Unplaced $ varSet "$rec"]])
+           Unplaced $ varGet "$field"]])
         pos]
 
 

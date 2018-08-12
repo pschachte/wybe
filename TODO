@@ -24,6 +24,8 @@ Improve error handling:
 o Give meaningful message for errors detected in generated procs
 o Detect and report use of uninitialised variables, including update
    of uninitialised variables
+o Type and mode check foreign call arguments for llvm and lpvm calls;
+  don't abort compiler on errors.
 
 Complete the language:
 o Support higher order procs and functions through multiple specialisation
