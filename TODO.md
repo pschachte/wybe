@@ -7,6 +7,8 @@
 
 
 # Complete the implementation:
+* Generate print and comparison methods for user defined types
+* Generate string function for user defined types, once we have decent strings
 * Support many non-constant constructors
 * Handle building `.o` files for foreign code using `make` or alternatives
 * Ensure a variable both assigned and used in a statement has the assignment
@@ -42,6 +44,7 @@
 	* with this, no need for [ ... | ...] syntax
 * Provide scoped way to set resources
 * Provide way to give top-level initial value to resources
+* Support automatic type conversion?
 * Support polymorphism
 * Provide switch-on-constructor syntax and implementation
 * Support subtypes
