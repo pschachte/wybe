@@ -25,3 +25,7 @@ The last instruction will soon be replaced with the following:
    perform the operation destructively, making *struct2* the same address
    as *struct*.
 
+* `foreign lpvm cast(`*var1:type1*, `?`*var2:type2*`)`
+  Move *var1* to *var2* converting its type from *type1* to *type2*, without
+  changing the representation.  This just allows getting around LLVM strong
+  typing; it does not actually require any instructions.
