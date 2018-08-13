@@ -1,8 +1,13 @@
 proc common_subexpr(x:int) use !io
     # there should only be one incr and one multiplication
-    println(incr(x) * incr(x) + incr(x) * incr(x))
+    # this demonstrates reusing the incrs and decr, but also that
+    # it understands that * is commutative.
+    println(incr(x) * decr(x) + decr(x) * incr(x))
     # the whole computation should be reused, but the prinln shouldn't
-    println(incr(x) * incr(x) + incr(x) * incr(x))
+    # this also checks that the compiler knows that + is commutative.
+    println(decr(x) * incr(x) + incr(x) * decr(x))
+    # and check that the compiler understands about inverting operations
+    println(incr(x) - decr(x) + decr(x))
 end
 
 common_subexpr(10)
