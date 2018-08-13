@@ -657,9 +657,10 @@ typecheckProcDecl m pdef = do
             logTypes $ "   with resources: " ++ show resources
             let (calls,preTyping) =
                   runState (bodyCalls def detism) resourceTyping
+            logTypes $ "   containing calls: " ++ showBody 4 (fst <$> calls)
             let procCalls = List.filter (isProcCall . content . fst) calls
-            let unifs = List.map (\(ForeignCall _ _ _ [e1,e2]) -> (e1,e2))
-                        $ List.filter isMove ((content . fst) <$> calls)
+            let unifs = List.concatMap foreignTypeEquivs
+                        ((content . fst) <$> calls)
             unifTyping <- foldM (\t (e1,e2) -> unifyExprTypes pos e1 e2 t)
                           preTyping unifs
             calls' <- zipWith (\(call,detism) typs ->
@@ -789,13 +790,10 @@ isProcCall ProcCall{} = True
 isProcCall _ = False
 
 
-isMove :: Stmt -> Bool
-isMove (ForeignCall "llvm" "move" [] [_,_]) = True
-isMove _ = False
-
-
-callTypes :: Placed Stmt -> Compiler [[TypeSpec]]
-callTypes pstmt = nub . (procInfoTypes <$>) <$> callProcInfos pstmt
+foreignTypeEquivs :: Stmt -> [(Placed Exp,Placed Exp)]
+foreignTypeEquivs (ForeignCall "llvm" "move" _ [v1,v2]) = [(v1,v2)]
+foreignTypeEquivs (ForeignCall "lpvm" "mutate" _ [v1,v2,_,_]) = [(v1,v2)]
+foreignTypeEquivs _ = []
 
 
 callProcInfos :: Placed Stmt -> Compiler [ProcInfo]
@@ -829,7 +827,7 @@ expVar expr = fromMaybe
 expVar' :: Exp -> Maybe VarName
 expVar' (Typed expr _ _) = expVar' expr
 expVar' (Var name _ _) = Just name
-expVar' expr = Nothing
+expVar' _expr = Nothing
 
 
 -- |Return the "primitive" expr of the specified expr.  This unwraps Typed
@@ -905,7 +903,7 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
           let stmtTyping' = stmtTyping {typingArgsTypes = validMatches}
           typecheckCalls m name pos calls typing (stmtTyping':residue)
               $ chg || validMatches /= typs
-    
+
 
 -- |Match up the argument types of a call with the parameter types of the
 -- callee, producing a list of the actual types.  If this list contains
@@ -1129,7 +1127,9 @@ modecheckStmt m name defPos typing delayed assigned detism
                    | ((mode,avail,_yy),num) <- zip actualModes [1..]
                    , not avail && mode == ParamIn]
     if not $ List.null flowErrs -- Using undefined var as input?
-        then return ([],delayed,assigned,flowErrs)
+        then do
+            logTypes "delaying foreign call"
+            return ([],delayed,assigned,flowErrs)
         else do
             let typeflows = List.zipWith TypeFlow actualTypes
                             $ sel1 <$> actualModes
@@ -1139,6 +1139,7 @@ modecheckStmt m name defPos typing delayed assigned detism
                             $ List.map (expVar . content)
                             $ List.filter ((==ParamOut) . expFlow . content)
                               args'
+            logTypes $ "New instr = " ++ show stmt'
             return ([maybePlace stmt' pos],delayed,assigned',[])
 modecheckStmt _ _ _ _ delayed assigned _ Nop pos = do
     logTypes $ "Mode checking Nop"
@@ -1377,7 +1378,8 @@ unifyExprTypes :: OptPos -> Placed Exp -> Placed Exp -> Typing
 unifyExprTypes pos a1 a2 typing = do
     let args = [a1,a2]
     let call = ForeignCall "llvm" "move" [] args
-    logTypes $ "Type checking move instruction " ++ showStmt 4 call
+    logTypes $ "Type checking foreign instruction unifying arguments "
+               ++ show a1 ++ " and " ++ show a2
     let typing' = List.foldr (noteOutputCast . content) typing args
     case expVar' $ content a2 of
         -- XXX Need new error for move to non-variable

@@ -52,3 +52,5 @@ wybe.pdf
 wybe.ps
 wybe.html
 wybe.dvi
+*.html
+*.pdf

@@ -50,3 +50,5 @@ wybelibs/wybe.o
 # individual parser for testing purposes
 ParserTest.hs
 ParserTest
+test-cases/alias
+/TODO.html

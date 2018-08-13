@@ -15,14 +15,14 @@ AFTER EVERYTHING:
 *main* > public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp$5#0:position.position)
-    foreign lpvm mutate(~tmp$5#0:position.position, ?tmp$6#0, 0:wybe.int, 0:wybe.int)
-    foreign lpvm mutate(~tmp$6#0, ?tmp$7#0, 8:wybe.int, 20:wybe.int)
-    foreign lpvm cast(~tmp$7#0, ?tmp$8#0:wybe.int)
+    foreign lpvm mutate(~tmp$5#0:position.position, ?tmp$6#0:position.position, 0:wybe.int, 0:wybe.int)
+    foreign lpvm mutate(~tmp$6#0:position.position, ?tmp$7#0:position.position, 8:wybe.int, 20:wybe.int)
+    foreign lpvm cast(~tmp$7#0:position.position, ?tmp$8#0:wybe.int)
     foreign lpvm cast(~tmp$8#0:wybe.int, ?tmp$1#0:position.position)
     foreign lpvm alloc(16:wybe.int, ?tmp$11#0:position.position)
-    foreign lpvm mutate(~tmp$11#0:position.position, ?tmp$12#0, 0:wybe.int, 0:wybe.int)
-    foreign lpvm mutate(~tmp$12#0, ?tmp$13#0, 8:wybe.int, 0:wybe.int)
-    foreign lpvm cast(~tmp$13#0, ?tmp$14#0:wybe.int)
+    foreign lpvm mutate(~tmp$11#0:position.position, ?tmp$12#0:position.position, 0:wybe.int, 0:wybe.int)
+    foreign lpvm mutate(~tmp$12#0:position.position, ?tmp$13#0:position.position, 8:wybe.int, 0:wybe.int)
+    foreign lpvm cast(~tmp$13#0:position.position, ?tmp$14#0:wybe.int)
     foreign lpvm cast(~tmp$14#0:wybe.int, ?tmp$2#0:position.position)
     import.distance<0>(~tmp$1#0:position.position, ~tmp$2#0:position.position, ?tmp$0#0:wybe.int) @import:6:9
     foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$17#0:wybe.phantom) @wybe:76:38
@@ -108,9 +108,9 @@ distance > public (1 calls)
 position > public inline (0 calls)
 0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:position.position):
     foreign lpvm alloc(16:wybe.int, ?$rec#0:position.position)
-    foreign lpvm mutate(~%$rec#0, ?%$rec#1, 0:wybe.int, ~x#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1, ?%$rec#2, 8:wybe.int, ~y#0:wybe.int)
-    foreign lpvm cast(~$rec#2, ?$recint#0:wybe.int)
+    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 0:wybe.int, ~x#0:wybe.int)
+    foreign lpvm mutate(~%$rec#1:position.position, ?%$rec#2:position.position, 8:wybe.int, ~y#0:wybe.int)
+    foreign lpvm cast(~$rec#2:position.position, ?$recint#0:wybe.int)
     foreign lpvm cast(~$recint#0, ?$#0:position.position)
 position > public inline (4 calls)
 1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position):
@@ -123,7 +123,7 @@ x > public inline (0 calls)
     foreign lpvm access(~$rec#0:position.position, 0:wybe.int, ?$#0:wybe.int)
 x > public inline (0 calls)
 1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
-    foreign lpvm mutate(~$rec#0:position.position, 0:wybe.int, ~$field#0:wybe.int, ?$rec#1:position.position)
+    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 0:wybe.int, ~$field#0:wybe.int)
 
 
 y > public inline (0 calls)
@@ -131,7 +131,7 @@ y > public inline (0 calls)
     foreign lpvm access(~$rec#0:position.position, 8:wybe.int, ?$#0:wybe.int)
 y > public inline (0 calls)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
-    foreign lpvm mutate(~$rec#0:position.position, 8:wybe.int, ~$field#0:wybe.int, ?$rec#1:position.position)
+    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 8:wybe.int, ~$field#0:wybe.int)
 import, position, position.position
 ======================================================================
 AFTER LLVM IR:

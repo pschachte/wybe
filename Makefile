@@ -24,16 +24,12 @@ wybemk:	*.hs $(SRCDIR)/Version.lhs cbits.so
 	# cabal -j3 install --only-dependencies
 	# cabal -j3 build && cp dist/build/$@/$@ $@
 
-# .PHONY:	info
-#
-# info:  Parser.info
-#
-# %.info:	%.y
-#	happy -i -a -g $<
-
 doc:	*.hs
 	rm -rf $@
 	haddock -h -o $@ *.hs
+
+%.html:	%.md
+	markdown $< >$@
 
 $(SRCDIR)/Version.lhs:	*.hs
 	@echo "Generating Version.lhs for version $(VERSION)"

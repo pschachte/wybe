@@ -253,13 +253,15 @@ constructorItems ctorName params typeSpec size fields tag pos =
          ++
        -- Code to fill all the fields
          (reverse $ List.map (\(var,_,aligned) ->
--- XXX Revise mutate instruction to take address, size, offset,
---     destructive (Bool), and new address (output).  If destructive
+-- XXX Revise mutate instruction to take address, new address (output),
+--     size, offset, and destructive (Bool).  If destructive
 --     is True, does in place update and new address = address;
 --     otherwise allocates fresh storage, copies old contents,
 --     and mutates the new storage.
                                (Unplaced $ ForeignCall "lpvm" "mutate" []
-                                [Unplaced $ Var "$rec" ParamInOut flowType,
+                                [Unplaced $ Typed
+                                   (Var "$rec" ParamInOut flowType)
+                                   typeSpec True,
                                  Unplaced $ IntValue $ fromIntegral aligned,
                                  Unplaced $ Var var ParamIn flowType]))
           fields)
@@ -361,16 +363,16 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
         ([tagCheck constCount nonConstCount tag "$rec"]
          ++
         -- Code to mutate the selected field
--- XXX Revise mutate instruction to take address, size, offset,
---     destructive (Bool), and new address (output).  If destructive
+-- XXX Revise mutate instruction to take address, new address (output),
+--     size, offset, and destructive (Bool).  If destructive
 --     is True, does in place update and new address = address;
 --     otherwise allocates fresh storage, copies old contents,
 --     and mutates the new storage.
          [Unplaced $ ForeignCall "lpvm" "mutate" []
-          [Unplaced $ varGet "$rec",
+          [Unplaced $ Typed (Var "$rec" ParamInOut $ Implicit pos)
+                      rectype False,
            Unplaced $ IntValue $ fromIntegral offset - tag,
-           Unplaced $ varGet "$field",
-           Unplaced $ varSet "$rec"]])
+           Unplaced $ varGet "$field"]])
         pos]
 
 
@@ -423,7 +425,7 @@ equalityTest _ = False
 --       and then test each field for equality by calling the = test.
 --
 --   Also return whether the test should be inlined.  We inline when there
---   there is no ore than one non-const constructor and either it has no more
+--   there is no more than one non-const constructor and either it has no more
 --   than two arguments or there are no const constructors.
 --
 equalityBody :: [Placed FnProto] -> [Placed FnProto] -> ([Placed Stmt],Bool)
@@ -436,10 +438,10 @@ equalityBody consts nonconsts =
                          (iVal $ length consts))
                 [equalityConsts consts]
                 [equalityNonconsts (content <$> nonconsts) (List.null consts)]],
-     -- Decide to inline if only 1 non-const constructor and either no
-     -- non-const constructors (so not recursive) or at most 2 fields
+     -- Decide to inline if only 1 non-const constructor, no non-const
+     -- constructors (so not recursive), and at most 4 fields
      case List.map content nonconsts of
-         [FnProto _ params _ ] -> length params <= 2 || List.null consts
+         [FnProto _ params _ ] -> length params <= 4 && List.null consts
          _ -> False
         )
 
