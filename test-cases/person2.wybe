@@ -1,0 +1,7 @@
+public type person = public person(firstname:string, lastname:string) end
+
+# expect: A and B are fresh
+?personA = person("John", "Smith")
+?personB = person("John", "Smith")
+print(personA.lastname)
+print(personB.lastname)
