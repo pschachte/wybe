@@ -72,6 +72,8 @@
 * Keep track of bounds on tags to avoid unnecessary tests and allow tag switches
 * Eliminate remaining redundant (final) variable-variable moves
 * Eliminate round trip cast to and from int
+* BodyBuilder: note inverse operations when caching computed operations
+* Move some argument threading into memory (global variables)
 * Remove unneeded input and unchanged output arguments
 * Inter-procedure common sub-expression elimination
 * Code hoisting
