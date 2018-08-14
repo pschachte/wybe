@@ -515,25 +515,26 @@ instr' prim pos = do
         Nothing -> do
             -- record prim executed (and other modes), and generate instr
             logBuild "not found"
-            addAllModes prim
+            recordEntailedPrims prim
             rawInstr prim pos
         Just oldOuts -> do
             -- common subexpr: just need to record substitutions
             logBuild $ "found it; substituting "
                        ++ show oldOuts ++ " for " ++ show newOuts
-            mapM_ (\(newOut,oldOut) -> addSubst (outArgVar newOut)
-                                       (outVarIn oldOut))
+            mapM_ (\(newOut,oldOut) ->
+                     instr' (PrimForeign "llvm" "move" []
+                              [mkInput oldOut, newOut])
+                     Nothing)
                   $ zip newOuts oldOuts
 
 
-outVarIn :: PrimArg -> PrimArg
-outVarIn (ArgVar name ty FlowOut ftype lst) =
-    ArgVar name ty FlowIn Ordinary False
-outVarIn arg@ArgInt{} = arg
-outVarIn arg@ArgFloat{} = arg
-outVarIn arg@ArgString{} = arg
-outVarIn arg@ArgChar{} = arg
-outVarIn arg = shouldnt $ "outVarIn not actually out: " ++ show arg
+-- | Invert an output arg to be an input arg.
+mkInput :: PrimArg -> PrimArg
+mkInput (ArgVar name ty _ ftype lst) = ArgVar name ty FlowIn Ordinary False
+mkInput arg@ArgInt{} = arg
+mkInput arg@ArgFloat{} = arg
+mkInput arg@ArgString{} = arg
+mkInput arg@ArgChar{} = arg
 
 
 argExpandedPrim :: Prim -> BodyBuilder Prim
@@ -547,11 +548,12 @@ argExpandedPrim (PrimTest arg) = do
     arg' <- expandArg arg
     return $ PrimTest arg'
 
+
 splitPrimOutputs :: Prim -> (Prim, [PrimArg])
 splitPrimOutputs (PrimCall pspec args) =
     let (inArgs,outArgs) = splitArgsByMode args
     in (PrimCall pspec inArgs, outArgs)
-splitPrimOutputs (PrimForeign lang nm flags args) = 
+splitPrimOutputs (PrimForeign lang nm flags args) =
     let (inArgs,outArgs) = splitArgsByMode args
     in (PrimForeign lang nm flags inArgs, outArgs)
 splitPrimOutputs tst@(PrimTest arg) = (tst, [])
@@ -567,33 +569,77 @@ addSubst var val = do
     logBuild $ "      new subst = " ++ show subst
 
 
--- |Add all instructions equivalent to the input prim to the lookup table,
+-- |Record all instructions equivalent to the input prim in the lookup table,
 --  so if we later see an equivalent instruction we don't repeat it but
 --  reuse the already-computed outputs.  This implements common subexpression
 --  elimination.  It can also handle optimisations like recognizing the
---  reconstruction of a deconstructed value.
---  XXX Doesn't yet handle multiple modes.
-addAllModes :: Prim -> BodyBuilder ()
-addAllModes instr@(PrimCall pspec args) = do
-    let (inArgs,outArgs) = splitArgsByMode args
-    let fakeInstr = PrimCall pspec inArgs
-    logBuild $ "Recording computed instr " ++ show fakeInstr
-    modify (\s -> s {subExprs = Map.insert fakeInstr outArgs $ subExprs s,
+--  reconstruction of a deconstructed value, and accounts for commutative
+--  operations and inverse operations.
+recordEntailedPrims :: Prim -> BodyBuilder ()
+recordEntailedPrims prim = do
+    let pair1 = splitPrimOutputs prim
+    instrPairs <- (pair1:) <$> lift (instrInverses prim)
+    logBuild $ "Recording computed instrs"
+               ++ List.concatMap
+                  (\(p,o)-> "\n        " ++ show p ++ " -> " ++ show o)
+                  instrPairs
+    modify (\s -> s {subExprs = List.foldr (uncurry Map.insert) (subExprs s)
+                                instrPairs,
                      definers = List.foldr
-                                (flip Map.insert instr . argVarName)
-                                (definers s) outArgs})
-addAllModes instr@(PrimForeign lang nm flags args)  = do
-    let (inArgs,outArgs) = splitArgsByMode args
-    let fakeInstr = PrimForeign lang nm flags inArgs
-    logBuild $ "Recording computed instr " ++ show fakeInstr
-    modify (\s -> s {subExprs = Map.insert fakeInstr outArgs $ subExprs s,
-                     definers = List.foldr
-                                (flip Map.insert instr . argVarName)
-                                (definers s)
-                                outArgs})
-addAllModes _ = return () -- No other instrs equivalent to a PrimTest
+                                (flip Map.insert prim . argVarName)
+                                (definers s) $ snd pair1})
 
 
+-- |Return a list of instructions that have been effectively already been
+--  computed, mostly because they are inverses of instructions already
+--  computed, or because of commutativity.
+--  XXX Doesn't yet handle multiple modes for PrimCalls
+instrInverses :: Prim -> Compiler [(Prim,[PrimArg])]
+instrInverses prim =
+   List.map (\(p,os) -> (canonicalisePrim p, os)) <$> instrInverses' prim
+
+instrInverses' :: Prim -> Compiler [(Prim,[PrimArg])]
+instrInverses' (PrimForeign "lpvm" "cast" flags [a1,a2]) =
+    return [(PrimForeign "lpvm" "cast" flags [a2], [a1])]
+instrInverses' (PrimForeign "llvm" "add" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "sub" flags [a3,a2], [a1]),
+            (PrimForeign "llvm" "sub" flags [a3,a1], [a2]),
+            (PrimForeign "llvm" "add" flags [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "sub" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "add" flags [a3,a2], [a1]),
+            (PrimForeign "llvm" "add" flags [a2,a3], [a1]),
+            (PrimForeign "llvm" "sub" flags [a1,a3], [a2])]
+instrInverses' (PrimForeign "llvm" "mul" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "mul" flags [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "fadd" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "fadd" flags [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "fmul" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "fmul" flags [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "and" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "and" flags [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "or" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "or" flags [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "icmp" ["eq"] [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp" ["eq"] [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "icmp" ["ne"] [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp" ["ne"] [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "icmp" ["slt"] [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp" ["sgt"] [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "icmp" ["sgt"] [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp" ["slt"] [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "icmp" ["ult"] [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp" ["ugt"] [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "icmp" ["ugt"] [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp" ["ult"] [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "icmp" ["sle"] [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp" ["sge"] [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "icmp" ["sge"] [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp" ["sle"] [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "icmp" ["ule"] [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp" ["uge"] [a2,a1], [a3])]
+instrInverses' (PrimForeign "llvm" "icmp" ["uge"] [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp" ["ule"] [a2,a1], [a3])]
+instrInverses' _ = return []
 
 
 
@@ -611,9 +657,18 @@ splitArgsByMode args =
     in  (List.map canonicaliseArg ins, outs)
 
 
+canonicalisePrim :: Prim -> Prim
+canonicalisePrim (PrimCall nm args) =
+    PrimCall nm $ List.map (canonicaliseArg . mkInput) args
+canonicalisePrim (PrimForeign lang op flags args) =
+    PrimForeign lang op flags $ List.map (canonicaliseArg . mkInput) args
+canonicalisePrim (PrimTest arg) =
+    PrimTest $ (canonicaliseArg . mkInput) arg
+
+
 -- |Standardise unimportant info in an arg, so that it is equal to any
 --  other arg with the same content.
-canonicaliseArg :: PrimArg -> PrimArg      
+canonicaliseArg :: PrimArg -> PrimArg
 canonicaliseArg (ArgVar nm _ fl _ _) = ArgVar nm AnyType fl Ordinary False
 canonicaliseArg (ArgInt v _)         = ArgInt v AnyType
 canonicaliseArg (ArgFloat v _)       = ArgFloat v AnyType
@@ -622,9 +677,9 @@ canonicaliseArg (ArgChar v _)        = ArgChar v AnyType
 
 
 validateInstr :: Prim -> BodyBuilder ()
-validateInstr i@(PrimCall _ args) =        mapM_ (validateArg i) args
+validateInstr i@(PrimCall _ args)        = mapM_ (validateArg i) args
 validateInstr i@(PrimForeign _ _ _ args) = mapM_ (validateArg i) args
-validateInstr (PrimTest _) = return ()
+validateInstr (PrimTest _)               = return ()
 
 validateArg :: Prim -> PrimArg -> BodyBuilder ()
 validateArg instr (ArgVar _ ty _ _ _) = validateType ty instr

@@ -36,9 +36,7 @@ AFTER EVERYTHING:
         foreign lpvm alloc(16:wybe.int, ?tmp$11#0:type_list.intlist)
         foreign lpvm mutate(~tmp$11#0:type_list.intlist, ?tmp$12#0:type_list.intlist, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$12#0:type_list.intlist, ?tmp$13#0:type_list.intlist, 8:wybe.int, ~tmp$3#0:type_list.intlist)
-        foreign lpvm cast(~tmp$13#0:type_list.intlist, ?tmp$14#0:wybe.int)
-        foreign lpvm cast(~tmp$14#0:wybe.int, ?tmp$2#0:type_list.intlist)
-        foreign llvm move(~tmp$2#0:type_list.intlist, ?$#0:type_list.intlist) @type_list:3:8
+        foreign llvm move(~tmp$13#0:type_list.intlist, ?$#0:type_list.intlist) @type_list:3:8
 
   submodules      : type_list.intlist
 --------------------------------------------------
@@ -118,8 +116,7 @@ AFTER EVERYTHING:
     foreign lpvm alloc(16:wybe.int, ?$rec#0:type_list.intlist)
     foreign lpvm mutate(~%$rec#0:type_list.intlist, ?%$rec#1:type_list.intlist, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:type_list.intlist, ?%$rec#2:type_list.intlist, 8:wybe.int, ~tail#0:type_list.intlist)
-    foreign lpvm cast(~$rec#2:type_list.intlist, ?$recint#0:wybe.int)
-    foreign lpvm cast(~$recint#0, ?$#0:type_list.intlist)
+    foreign llvm move(~$rec#2:type_list.intlist, ?$#0:type_list.intlist)
 [|] > public inline test (7 calls)
 1: [|](?head#0:wybe.int, ?tail#0:type_list.intlist, $#0:type_list.intlist, ?$$#0:wybe.bool):
     foreign lpvm cast($#0:type_list.intlist, ?tmp$0#0:wybe.int)
