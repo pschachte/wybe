@@ -1,0 +1,7 @@
+public type position = public position(x:int, y:int) end
+
+# posB is redundant - space not allocated
+?posA = position(111, 222)
+?posB = position(333, 444)
+y(!posA, 112)
+println(posA.y)

@@ -1,0 +1,16 @@
+public func mod(x:int, y:int):int = foreign llvm urem(x, y)
+public proc mod(x:int, y:int, ?r:int) foreign llvm urem(x, y) end
+
+public proc gcd(a:int, b:int, ?r:int)
+  ?x = a
+  ?y = b
+  ?t = a
+  do
+    while y /= 0
+      ?t = y
+      ?y = mod(x, t)
+      ?x = t
+    ?r = x
+  end
+end
+print(gcd(18, 24))
