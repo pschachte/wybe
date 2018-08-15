@@ -1,0 +1,10 @@
+public proc myprint_a(x:int) use !io
+  println(x)
+end
+
+public proc myprint_b(x:int, ?y:int)
+  myprint_a(x)
+  ?y = 200
+end
+
+println(myprint_b(100))

@@ -4,3 +4,11 @@ public func ++(x:intlist, y:intlist):intlist =
     if x = [ ?h | ?t]
     then [h|t++y]
     else y
+
+public func length(x:intlist) : int =
+    if x = [] then 0 else 1 + length(tail(x))
+
+
+?x = [1,2,3]
+?y = [100, 200]
+print(length(x++y))

@@ -3,3 +3,5 @@ public proc onetwothree(?x:int, ?y:int, ?z:int)
         ?y = 2
         ?z = 3
 end
+
+onetwothree(?x,?y,?z)

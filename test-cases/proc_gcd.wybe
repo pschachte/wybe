@@ -1,7 +1,12 @@
-public func mod(x:int, y:int):int = foreign llvm urem(x, y)
-public proc mod(x:int, y:int, ?r:int) foreign llvm urem(x, y) end
+#public func mod(x:int, y:int):int = foreign llvm urem(x, y)
+#public proc mod(x:int, y:int, ?r:int) ?r = foreign llvm urem(x, y) end
 
-public proc gcd(a:int, b:int, ?r:int)
+public proc mod(x:int, y:int, ?r:int) use !io
+  print('x') print(x) print(' ') print('y') println(y)
+  ?r = foreign llvm urem(x, y) 
+end
+
+public proc gcd(a:int, b:int, ?r:int) use !io
   ?x = a
   ?y = b
   ?t = a
@@ -13,4 +18,5 @@ public proc gcd(a:int, b:int, ?r:int)
     ?r = x
   end
 end
+
 print(gcd(18, 24))
