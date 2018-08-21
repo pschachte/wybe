@@ -209,6 +209,6 @@ updateFreshVarSet Both freshVars (ArgVar name _ dir _ final) =
     case dir of
         FlowOut -> Set.insert name freshVars
         FlowIn  ->
-            if final then Set.delete name freshVars
-            else freshVars
+            if final then Set.insert name freshVars
+            else Set.delete name freshVars
 updateFreshVarSet _ freshVars _ = freshVars
