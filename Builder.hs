@@ -64,7 +64,8 @@ import           Options                   (LogSelection (..), Options,
                                             optForce, optForceAll, optLibDirs,
                                             optUseStd)
 import           NewParser                 (parseWybe)
-import           Resources                 (resourceCheckMod, resourceCheckProc)
+import           Resources                 (resourceCheckMod, resourceCheckProc,
+                                            canonicaliseProcResources)
 import           Scanner                   (fileTokens)
 import           System.Directory
 import           System.FilePath
@@ -448,6 +449,7 @@ compileModSCC mspecs = do
     stopOnError $ "type checking of modules " ++
       showModSpecs mspecs
     logDump Types Unbranch "TYPE CHECK"
+    mapM_ (transformModuleProcs canonicaliseProcResources)  mspecs
     mapM_ (transformModuleProcs resourceCheckProc)  mspecs
     stopOnError $ "resource checking of modules " ++
       showModSpecs mspecs

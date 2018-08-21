@@ -53,6 +53,7 @@ import Control.Monad.Trans (lift)
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Data.List as List
+import Data.Set as Set
 import Data.Map as Map
 import Data.Maybe
 import Options (LogSelection(Unbranch))
@@ -680,4 +681,4 @@ newProcProto name inVars = do
     let inParams  = [Param v ty ParamIn Ordinary
                     | (v,ty) <- Map.toList inVars]
     outParams <- gets brOutParams
-    return $ ProcProto name (inParams ++ outParams) []
+    return $ ProcProto name (inParams ++ outParams) Set.empty

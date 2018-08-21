@@ -683,14 +683,14 @@ typecheckProcDecl m pdef = do
                           ((`elem` [ParamIn,ParamInOut]) . paramFlow)
                           params
                     let inResources =
-                          resourceFlowRes
-                          <$> List.filter 
+                          Set.map resourceFlowRes
+                          $ Set.filter
                               ((`elem` [ParamIn,ParamInOut]) . resourceFlowFlow)
                               resources
                     let initialised
                             = (Set.fromList $ paramName <$> inParams)
                               `Set.union`
-                              (Set.fromList $ resourceName <$> inResources)
+                              (Set.map resourceName inResources)
                     (def',_,modeErrs) <-
                       modecheckStmts m name pos typing [] initialised detism def
                     let typing' = typeErrors modeErrs typing
@@ -736,7 +736,7 @@ addResourceType :: ProcName -> OptPos -> Typing -> ResourceFlowSpec ->
 addResourceType procname pos typs rfspec = do
     let rspec = resourceFlowRes rfspec
     resIface <- lookupResource rspec pos
-    let (rspecs,types) = unzip $ maybe [] Map.toList resIface
+    let (rspecs,types) = unzip $ maybe [] (Map.toList . snd) resIface
     let names = List.map resourceName rspecs
     let typs' = List.foldr
                 (\(n,t) typs ->
