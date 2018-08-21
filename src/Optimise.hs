@@ -14,6 +14,7 @@ import           Control.Monad.Trans.State
 import           Data.Graph
 import           Data.List                 as List
 import           Data.Map                  as Map
+import           Data.Set                  as Set
 import           Expansion
 import           LastUse
 import           Options                   (LogSelection (Optimise))
@@ -33,11 +34,12 @@ optimiseMod mods thisMod = do
                let pspec = ProcSpec thisMod name n
              ]
     logOptimise $ "Optimise SCCs:\n" ++
-      unlines (List.map (show . sccElts) ordered)
+        unlines (List.map (show . sccElts) ordered)
     -- XXX this is wrong:  it does not do a proper top-down
     -- traversal, as it is not guaranteed to vist all callers before
     -- visiting the called proc.  Need to construct inverse graph instead.
     mapM_ (mapM_ optimiseProcTopDown .  sccElts) $ reverse ordered
+
     procs <- getModuleImplementationField (Map.toList . modProcs)
     let ordered =
             stronglyConnComp
@@ -48,6 +50,21 @@ optimiseMod mods thisMod = do
                let pspec = ProcSpec thisMod name n
              ]
     mapM_ optimiseSccBottomUp ordered
+
+    -- check freshness
+    logOptimise "\n~~~~~~ freshness analysis: ~~~~~~\n"
+    procs <- getModuleImplementationField (Map.toList . modProcs)
+    let ordered =
+            stronglyConnComp
+            [(pspec,pspec,
+              nub $ concatMap (localBodyCallees thisMod . procBody) procDefs)
+             | (name,procDefs) <- procs,
+               (n,def) <- zip [0..] procDefs,
+               let pspec = ProcSpec thisMod name n
+             ]
+    mapM_ freshVarM ordered
+    logOptimise  "~~~~~~~~~~~~\n\n"
+
     finishModule
     return (False,[])
 
@@ -73,12 +90,12 @@ optimiseSccBottomUp procs = do
 procBody :: ProcDef -> ProcBody
 procBody def =
     case procImpln def of
-        ProcDefSrc _ -> shouldnt "Optimising un-compiled code"
+        ProcDefSrc _       -> shouldnt "Optimising un-compiled code"
         ProcDefPrim _ body -> body
 
 
 sccElts (AcyclicSCC single) = [single]
-sccElts (CyclicSCC multi) = multi
+sccElts (CyclicSCC multi)   = multi
 
 
 optimiseProcTopDown :: ProcSpec -> Compiler ()
@@ -142,11 +159,11 @@ bodyCost :: [Placed Prim] -> Int
 bodyCost pprims = sum $ List.map (primCost . content) pprims
 
 primCost :: Prim -> Int
-primCost (PrimCall _ args) = 1 + (sum $ List.map argCost args)
+primCost (PrimCall _ args)          = 1 + (sum $ List.map argCost args)
 primCost (PrimForeign "llvm" _ _ _) = 1 -- single instuction, so cost = 1
-primCost (PrimForeign "$" _ _ _) = 1    -- single instuction, so cost = 1
-primCost (PrimForeign _ _ _ args) = 1 + (sum $ List.map argCost args)
-primCost (PrimTest _) = 0
+primCost (PrimForeign "$" _ _ _)    = 1    -- single instuction, so cost = 1
+primCost (PrimForeign _ _ _ args)   = 1 + (sum $ List.map argCost args)
+primCost (PrimTest _)               = 0
 
 argCost :: PrimArg -> Int
 argCost arg = if phantomArg arg then 0 else 1
@@ -165,9 +182,51 @@ localBodyCallees modspec body =
 
 localCallees :: ModSpec -> Prim -> [ProcSpec]
 localCallees modspec (PrimCall pspec _) = [pspec]
-localCallees _ _ = []
+localCallees _ _                        = []
 
 
 -- |Log a message, if we are logging optimisation activity.
 logOptimise :: String -> Compiler ()
 logOptimise s = logMsg Optimise s
+
+
+----------------------------------------------------------------
+--                     Freshness Analysis
+----------------------------------------------------------------
+data FreshVarSetAction = AppendOnly | Both
+
+freshVarM :: SCC ProcSpec -> Compiler ()
+freshVarM procs = do
+    logOptimise $ show $ sccElts procs
+    mapM_ freshVarProc $ sccElts procs
+    return ()
+
+freshVarProc :: ProcSpec -> Compiler ()
+freshVarProc pspec = do
+    pdef <- getProcDef pspec
+    let (ProcDefPrim proto body) = procImpln pdef
+    let prims = bodyPrims body
+    let freshset = List.foldl (\fs prim -> freshVarPrim (content prim) fs) Set.empty prims
+    logOptimise $ show freshset
+    return ()
+
+freshVarPrim :: Prim -> Set PrimVarName -> Set PrimVarName
+freshVarPrim (PrimForeign _ "mutate" _ args) freshVars =
+    List.foldl (updateFreshVarSet Both) freshVars args
+freshVarPrim (PrimForeign _ _ _ args) freshVars =
+    List.foldl (updateFreshVarSet AppendOnly) freshVars args
+freshVarPrim _ freshVars = freshVars
+
+updateFreshVarSet :: FreshVarSetAction -> Set PrimVarName -> PrimArg
+                        -> Set PrimVarName
+updateFreshVarSet AppendOnly freshVars (ArgVar name _ dir _ _) =
+    case dir of
+        FlowOut -> Set.insert name freshVars
+        _       -> freshVars
+updateFreshVarSet Both freshVars (ArgVar name _ dir _ final) =
+    case dir of
+        FlowOut -> Set.insert name freshVars
+        FlowIn  ->
+            if final then Set.delete name freshVars
+            else freshVars
+updateFreshVarSet _ freshVars _ = freshVars
