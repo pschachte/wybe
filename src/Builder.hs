@@ -431,9 +431,13 @@ buildArchive arch = do
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
+    ----------------------------------
+    -- FLATTENING
     logDump Flatten Types "FLATTENING"
     fixpointProcessSCC handleModImports mspecs
     logBuild $ replicate 70 '='
+    ----------------------------------
+    -- TYPE CHECKING
     logBuild $ "resource and type checking modules "
       ++ showModSpecs mspecs ++ "..."
     mapM_ validateModExportTypes mspecs
@@ -453,20 +457,27 @@ compileModSCC mspecs = do
     mapM_ (transformModuleProcs resourceCheckProc)  mspecs
     stopOnError $ "resource checking of modules " ++
       showModSpecs mspecs
+    ----------------------------------
+    -- UNBRANCHING
     mapM_ (transformModuleProcs unbranchProc)  mspecs
     stopOnError $ "handling loops and conditionals in modules " ++
       showModSpecs mspecs
     logDump Unbranch Clause "UNBRANCHING"
     -- AST manipulation before this line
+    ----------------------------------
+    -- CLAUSE GENERATION
     mapM_ (transformModuleProcs compileProc)  mspecs
     -- LPVM from here
     stopOnError $ "generating low level code in " ++ showModSpecs mspecs
     mapM_ collectCallers mspecs
     logDump Clause Optimise "COMPILATION TO LPVM"
+    ----------------------------------
+    -- EXPANSION (INLINING)
     fixpointProcessSCC optimiseMod mspecs
     stopOnError $ "optimising " ++ showModSpecs mspecs
     logDump Optimise Optimise "OPTIMISATION"
 
+    ----------------------------------
     -- Create an LLVMAST.Module represtation
     -- mapM_ blockTransformModule (List.filter (not . isStdLib) mspecs)
     mapM_ blockTransformModule mspecs
