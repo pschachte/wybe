@@ -49,13 +49,11 @@ int isqrt(int x) {
 
 
 // Boehm GC
-int wybe_malloc(int size) {
-    GC_MALLOC(size);
-    return size;
+void *wybe_malloc(int size) {
+    return GC_MALLOC(size);
 }
 
-int gc_init(){
+void gc_init(){
     GC_INIT();
-    return 0;
 }
 
