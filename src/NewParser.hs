@@ -15,10 +15,12 @@ the old happy based parser.
 module NewParser where
 
 
-import           AST                    hiding (option)
-import           Control.Monad.Identity (Identity)
-import           Scanner
-import           Text.Parsec
+import AST hiding (option)
+import Data.Set as Set
+import Data.List as List
+import Control.Monad.Identity (Identity)
+import Scanner
+import Text.Parsec
 -- import qualified Parser as OldParser
 -- import           Data.Algorithm.Diff       (getGroupedDiff)
 -- import           Data.Algorithm.DiffOutput (ppDiff)
@@ -185,7 +187,7 @@ procItemParser vis det = do
     params <- option [] $ betweenB Paren (procParamParser `sepBy` comma)
     -- Resources
     rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
-    let proto = ProcProto (content name) params rs
+    let proto = ProcProto (content name) params $ fromList rs
     -- ProcBody
     body <- many stmtParser <* ident "end"
     -- Final
@@ -232,7 +234,8 @@ funcProtoParser = do
     params <- option [] $ betweenB Paren (paramParser `sepBy` comma)
     -- Resource flow specs, optional
     rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
-    return $ maybePlace (FnProto (content pName) params rs) (place pName)
+    return $ maybePlace (FnProto (content pName) params $fromList rs)
+             (place pName)
 
 
 -- | Parser for a function 'Param'. The flow is implicitly 'ParamIn' unlike for
@@ -375,9 +378,9 @@ ifStmtParser :: Parser (Placed Stmt)
 ifStmtParser = do
     pos <- tokenPosition <$> ident "if"
     cases <- (ifCaseParser `sepBy` symbol "|") <* ident "end"
-    let final = foldr (\(cond, body) rest ->
+    let final = List.foldr (\(cond, body) rest ->
                            [Unplaced (Cond cond body rest)]) [] cases
-    if null final
+    if List.null final
         then unexpected "if cases statement structure."
         else return $ Placed ((content . head) final) pos
 

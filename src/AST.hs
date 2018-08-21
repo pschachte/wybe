@@ -154,7 +154,7 @@ data TypeProto = TypeProto Ident [Ident]
 data FnProto = FnProto {
     fnProtoName::Ident,
     fnProtoParams::[Param],
-    fnProtoResourceFlows::[ResourceFlowSpec]
+    fnProtoResourceFlows::Set.Set ResourceFlowSpec
     } deriving (Generic, Eq)
 
 
@@ -709,7 +709,8 @@ addSimpleResource name impln vis = do
 
 
 -- |Find the definition of the specified resource visible in the current module.
-lookupResource :: ResourceSpec -> OptPos -> Compiler (Maybe ResourceIFace)
+lookupResource :: ResourceSpec -> OptPos
+               -> Compiler (Maybe (ResourceSpec,ResourceIFace))
 lookupResource res@(ResourceSpec mod name) pos = do
     logAST $ "Looking up resource " ++ show res
     rspecs <- refersTo mod name modKnownResources resourceMod
@@ -725,7 +726,7 @@ lookupResource res@(ResourceSpec mod name) pos = do
                         (Map.lookup (resourceName rspec) . modResources)
             let iface = resourceDefToIFace $
                         trustFromJust "lookupResource" maybeDef
-            return $ Just iface
+            return $ Just (rspec,iface)
         _   -> do
             message Error ("Ambiguous resource " ++ show res ++
                            " defined in modules: " ++
@@ -1610,7 +1611,7 @@ data Constant = Int Int
 data ProcProto = ProcProto {
     procProtoName::ProcName,
     procProtoParams::[Param],
-    procProtoResources::[ResourceFlowSpec]
+    procProtoResources::Set.Set ResourceFlowSpec
     } deriving (Eq, Generic)
 
 
@@ -2231,10 +2232,11 @@ instance Show TypeSpec where
       if List.null args then ""
       else "(" ++ (intercalate "," $ List.map show args) ++ ")"
 
-showResources :: [ResourceFlowSpec] -> String
-showResources [] = ""
-showResources resources =
-    " use " ++ intercalate ", " (List.map show resources)
+showResources :: Set.Set ResourceFlowSpec -> String
+showResources resources
+  | Set.null resources = ""
+  | otherwise          = " use " ++ intercalate ", "
+                                    (List.map show $ Set.elems resources)
 
 
 -- |How to show a proc prototype.

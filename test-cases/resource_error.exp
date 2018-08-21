@@ -1,0 +1,4 @@
+Error detected during resource checking of modules resource_error
+[91mtest-cases/resource_error.wybe:6:5: Proc println uses unavailable resources !wybe.io.io
+[0m[91mtest-cases/resource_error.wybe:2:5: Proc println uses unavailable resources !wybe.io.io
+[0m

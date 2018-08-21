@@ -41,9 +41,9 @@ normalise modCompiler items = do
 
 -- |The resources available at the top level
 -- XXX this should be all resources with initial values
-initResources :: [ResourceFlowSpec]
--- initResources = [ResourceFlowSpec (ResourceSpec ["wybe"] "io") ParamInOut]
-initResources = [ResourceFlowSpec (ResourceSpec ["wybe","io"] "io") ParamInOut]
+initResources :: Set ResourceFlowSpec
+initResources = Set.singleton
+                $ ResourceFlowSpec (ResourceSpec ["wybe","io"] "io") ParamInOut
 
 
 -- |Normalise a single file item, storing the result in the current module.
@@ -174,7 +174,7 @@ assignmentProc ty leftToRight =
               else ("out", ParamOut,"in", ParamIn)
     in ProcDecl Public Det True
        (ProcProto "=" [Param lname ty lflow Ordinary,
-                       Param rname ty rflow Ordinary] [])
+                       Param rname ty rflow Ordinary] Set.empty)
        [move (varGet "in") (varSet "out")]
        Nothing
 
@@ -185,7 +185,7 @@ constCtorItems  vis typeSpec (placedProto,num) =
     let pos = place placedProto
         constName = fnProtoName $ content placedProto
     in [ProcDecl vis Det True
-        (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] [])
+        (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] Set.empty)
         [lpvmCastToVar (castTo (IntValue num) typeSpec) "$"] pos
        ]
 
@@ -245,7 +245,8 @@ constructorItems :: Ident -> [Param] -> TypeSpec -> Int
 constructorItems ctorName params typeSpec size fields tag pos =
     let flowType = Implicit pos
     in [ProcDecl Public Det True
-        (ProcProto ctorName (params++[Param "$" typeSpec ParamOut Ordinary]) [])
+        (ProcProto ctorName (params++[Param "$" typeSpec ParamOut Ordinary])
+         Set.empty)
        -- Code to allocate memory for the value
         ([Unplaced $ ForeignCall "lpvm" "alloc" []
           [Unplaced $ IntValue $ fromIntegral size,
@@ -289,7 +290,7 @@ deconstructorItems ctorName params typeSpec constCount nonConstCount
         (ProcProto ctorName
          (List.map (\(Param n t _ ft) -> (Param n t ParamOut ft)) params
           ++ [Param "$" typeSpec ParamIn Ordinary])
-         [])
+         Set.empty)
         -- Code to check we have the right constructor
         ([tagCheck constCount nonConstCount tag "$"]
          ++
@@ -345,7 +346,8 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
     let detism = if constCount + nonConstCount == 1 then Det else SemiDet
     in [ProcDecl vis detism True
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
-                          Param "$" fieldtype ParamOut Ordinary] [])
+                          Param "$" fieldtype ParamOut Ordinary]
+         Set.empty)
         -- Code to check we have the right constructor
         ([tagCheck constCount nonConstCount tag "$rec"]
          ++
@@ -358,7 +360,7 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
         ProcDecl vis detism True
         (ProcProto field
          [Param "$rec" rectype ParamInOut Ordinary,
-          Param "$field" fieldtype ParamIn Ordinary] [])
+          Param "$field" fieldtype ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
         ([tagCheck constCount nonConstCount tag "$rec"]
          ++
@@ -399,7 +401,8 @@ implicitEquality typespec consts nonconsts items =
     then [] -- don't generate if user-defined or if no constructors at all
     else
       let proto = ProcProto "=" [Param "$left" typespec ParamIn Ordinary,
-                                 Param "$right" typespec ParamIn Ordinary] []
+                                 Param "$right" typespec ParamIn Ordinary]
+                  Set.empty
           (body,inline) = equalityBody consts nonconsts
       in [ProcDecl Public SemiDet inline proto body Nothing]
 

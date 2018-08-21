@@ -63,7 +63,7 @@ flattenProcDecl (ProcDecl vis detism inline
     (stmts',tmpCtr) <- flattenBody stmts inParams detism
     return (ProcDecl vis detism inline proto' stmts' pos,tmpCtr)
 flattenProcDecl _ =
-    shouldnt "flattening a non-proc or non-Det proc"
+    shouldnt "flattening a non-proc item"
 
 
 flattenBody :: [Placed Stmt] -> Set VarName -> Determinism
