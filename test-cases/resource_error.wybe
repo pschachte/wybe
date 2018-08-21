@@ -1,0 +1,16 @@
+public proc resource_error
+    println("shouldn't work: no use !io")
+end
+
+public proc resource_error2 use io
+    println("shouldn't work: only uses io read-only")
+end
+
+public proc should_be_ok use !io
+    should_be_ok2
+end
+
+public proc should_be_ok2 use !io
+    println("should work")
+end
+
