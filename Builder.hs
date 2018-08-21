@@ -582,7 +582,7 @@ handleModImports _ thisMod = do
 buildExecutable :: ModSpec -> FilePath -> Compiler ()
 buildExecutable targetMod fpath = do
     depends <- orderedDependencies targetMod
-    if List.null depends || not (snd (head depends))
+    if List.null depends || not (snd (last depends))
         then
             -- No main code in the selected module: don't build executable
             message Error
