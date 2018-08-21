@@ -1,26 +1,28 @@
 module Emit where
 
 import           AST
+import           BinaryFactory              (encodeModule)
+import           Config
 import           Control.Monad
-import           Control.Monad.Trans (liftIO)
+import           Control.Monad.Trans        (liftIO)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
-import           Data.List as List
-import           Data.Map as Map
-import qualified LLVM.AST as LLVMAST
+import qualified Data.ByteString            as BS
+import qualified Data.ByteString.Char8      as B8
+import qualified Data.ByteString.Lazy       as BL
+import           Data.List                  as List
+import           Data.Map                   as Map
+import qualified Data.Text.Lazy             as TL
+import qualified LLVM.AST                   as LLVMAST
 import           LLVM.Context
-import           LLVM.Module as Mod
-import           LLVM.Target
+import           LLVM.Module                as Mod
 import           LLVM.PassManager
-import           System.Process
-import System.Exit ( ExitCode(..) )
-import qualified Data.ByteString.Lazy as BL
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as B8
-import BinaryFactory (encodeModule)
-import           Config
+import           LLVM.Pretty                (ppllvm)
+import           LLVM.Target
 import           ObjectInterface
-import           Options (LogSelection (Emit, Blocks, Builder))
+import           Options                    (LogSelection (Blocks, Builder, Emit))
+import           System.Exit                (ExitCode (..))
+import           System.Process
 
 
 
@@ -34,7 +36,7 @@ withModuleLLVM thisMod action = do
     _ <- finishModule
     case maybeLLMod of
       (Just llmod) -> liftIO $ action llmod
-      Nothing -> error "No LLVM Module Implementation"
+      Nothing      -> error "No LLVM Module Implementation"
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target object file, embedding the 'AST.Module' serialised bytestring
@@ -278,9 +280,9 @@ logLLVMString thisMod =
      maybeLLMod <- getModuleImplementationField modLLVM
      case maybeLLMod of
        (Just llmod) ->
-         do llstr <- liftIO $ codeemit llmod
+         do let llstr = ppllvm llmod
             logEmit $ replicate 80 '-'
-            logEmit $ show llstr
+            logEmit $ TL.unpack llstr
             logEmit $ replicate 80 '-'
        Nothing -> error "No LLVM Module Implementation"
      _ <- finishModule
@@ -292,7 +294,7 @@ extractLLVM :: AST.Module -> Compiler BS.ByteString
 extractLLVM thisMod =
   case modImplementation thisMod >>= modLLVM of
       Just llmod -> liftIO $ codeemit llmod
-      Nothing -> return $ B8.pack "No LLVM IR generated."
+      Nothing    -> return $ B8.pack "No LLVM IR generated."
 
 -- | Log the LLVMIR strings for all the modules compiled, except the standard
 -- library.
