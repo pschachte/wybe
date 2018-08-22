@@ -98,6 +98,8 @@
 * Update code generator to support destructive flag in lpvm mutate instruction
 * delay statements until their outputs are needed
     * delay into one arm of a branch if only one arm needs the outputs
+* Remove redundant mutate prim that will be overwritten by following mutates
+  e.g. in person1.wybe, the first mutate of lastname could be removed in final LPVM
 
 
 # Build System:
