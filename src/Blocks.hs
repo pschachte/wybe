@@ -619,7 +619,7 @@ cgenLPVM pname flags args
 --     and mutates the new storage.
     | pname == "mutate" = do
           let (ptrOpArg, index, valArg) = case inputs of
-                  [a, b, c] -> (a, valTrust b , c)
+                  [a, _, b, _, c] -> (a, valTrust b , c)
                   _         -> shouldnt "Incorrect mutate instruction."
           val <- cgenArg valArg
           ptrOp <- cgenArg ptrOpArg

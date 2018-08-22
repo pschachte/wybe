@@ -17,8 +17,8 @@ the LLVM instructions.
 
 The last instruction will soon be replaced with the following:
 
-* `foreign lpvm mutate(`*struct:type*, `?`*struct2:type*, *offset:*`int`,
-   *destructive*:`bool`, *member:type2*`)`  
+* `foreign lpvm mutate(`*struct:type*, `?`*struct2:type*, *size:`int`,
+                       *offset:*`int`, *destructive*:`bool`, *member:type2*`)`  
    *struct2* is the same as *struct*, except that it has *member*, with type
    *type2*, at *offset* from the address of *struct*.
    If *destructive* is `true`, then this instruction is permitted to
