@@ -37,7 +37,7 @@ markLastUse ps def = do
 
 -- |Returns whether this parameter is strictly superfluous.  For input
 -- params, that means it is never used; for outputs, that means its
--- value is alwas identical to one of the inputs, which we detect by
+-- value is always identical to one of the inputs, which we detect by
 -- the fact that parameter name (including version) is the same as a
 -- input parameter.
 unneededParam :: Set PrimVarName -> Set PrimVarName -> PrimParam -> Bool
@@ -50,8 +50,8 @@ unneededParam needed inSet param =
 ----------------------------------------------------------------
 --                       The NeededVars Monad
 --
--- records the variables that will be used later in a proc definition 
--- as we process it from end to beginning. 
+-- records the variables that will be used later in a proc definition
+-- as we process it from end to beginning.
 ----------------------------------------------------------------
 
 type NeededVars = StateT (Set PrimVarName)  Compiler
@@ -110,11 +110,11 @@ primLastUse (PrimForeign ln pr tg args) pos =
 primLastUse (PrimTest arg) pos = noteLastUses [arg] pos $ PrimTest . head
 
 
-noteLastUses :: [PrimArg] -> OptPos -> ([PrimArg] -> Prim) -> 
+noteLastUses :: [PrimArg] -> OptPos -> ([PrimArg] -> Prim) ->
                 NeededVars [Placed Prim]
 noteLastUses args pos buildPrim = do
     primNeeded <- foldM neededOutput False args
-    if primNeeded 
+    if primNeeded
     then do
         args' <- mapM argLastUse args
         mapM_ argNoteUse args
