@@ -792,7 +792,7 @@ isProcCall _ = False
 
 foreignTypeEquivs :: Stmt -> [(Placed Exp,Placed Exp)]
 foreignTypeEquivs (ForeignCall "llvm" "move" _ [v1,v2]) = [(v1,v2)]
-foreignTypeEquivs (ForeignCall "lpvm" "mutate" _ [v1,v2,_,_]) = [(v1,v2)]
+foreignTypeEquivs (ForeignCall "lpvm" "mutate" _ [v1,v2,_,_,_,_]) = [(v1,v2)]
 foreignTypeEquivs _ = []
 
 

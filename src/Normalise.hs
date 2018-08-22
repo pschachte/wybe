@@ -211,7 +211,7 @@ nonConstCtorItems vis typeSpec constCount nonConstCount (placedProto,tag) = do
       ++ deconstructorItems ctorName params typeSpec constCount nonConstCount
          fields' tag pos
       ++ concatMap (getterSetterItems vis typeSpec ctorName pos
-                    constCount nonConstCount tag) fields'
+                    constCount nonConstCount size tag) fields'
 
 
 -- |The number of bytes occupied by a value of the specified type.  If the
@@ -254,16 +254,13 @@ constructorItems ctorName params typeSpec size fields tag pos =
          ++
        -- Code to fill all the fields
          (reverse $ List.map (\(var,_,aligned) ->
--- XXX Revise mutate instruction to take address, new address (output),
---     size, offset, and destructive (Bool).  If destructive
---     is True, does in place update and new address = address;
---     otherwise allocates fresh storage, copies old contents,
---     and mutates the new storage.
                                (Unplaced $ ForeignCall "lpvm" "mutate" []
                                 [Unplaced $ Typed
                                    (Var "$rec" ParamInOut flowType)
                                    typeSpec True,
+                                 Unplaced $ IntValue $ fromIntegral size,
                                  Unplaced $ IntValue $ fromIntegral aligned,
+                                 Unplaced $ IntValue $ 1,
                                  Unplaced $ Var var ParamIn flowType]))
           fields)
          ++
@@ -337,9 +334,9 @@ tagCheck constCount nonConstCount tag varName =
 --  We use the stripped name with "$asInt" appended as a temp var name.
 -- | Produce a getter and a setter for one field of the specified type.
 getterSetterItems :: Visibility -> TypeSpec -> Ident -> OptPos 
-                     -> Int -> Int -> Integer -> (VarName,TypeSpec,Int)
-                     -> [Item]
-getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
+                     -> Int -> Int -> Int -> Integer
+                     -> (VarName,TypeSpec,Int) -> [Item]
+getterSetterItems vis rectype ctorName pos constCount nonConstCount size tag
     (field,fieldtype,offset) =
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
@@ -373,7 +370,9 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
          [Unplaced $ ForeignCall "lpvm" "mutate" []
           [Unplaced $ Typed (Var "$rec" ParamInOut $ Implicit pos)
                       rectype False,
+           Unplaced $ IntValue $ fromIntegral size,
            Unplaced $ IntValue $ fromIntegral offset - tag,
+           Unplaced $ IntValue 0,
            Unplaced $ varGet "$field"]])
         pos]
 

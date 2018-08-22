@@ -18,7 +18,7 @@ all:	wybemk
 cbits.so: cbits.c
 	clang -fPIC -shared cbits.c -o cbits.so -lgc -v
 
-wybemk:	*.hs $(SRCDIR)/Version.lhs cbits.so
+wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs cbits.so
 	stack install && cp ~/.local/bin/$@ ./$@
 	# cabal configure
 	# cabal -j3 install --only-dependencies
