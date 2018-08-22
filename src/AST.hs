@@ -1938,26 +1938,26 @@ isHalfUpdate _ _ = False
 -- or definitions.
 ----------------------------------------------------------------
 
-varsInPrims :: PrimFlow -> [Prim] -> Set PrimVarName
-varsInPrims dir prims =
-    List.foldr Set.union Set.empty $ List.map (varsInPrim dir) prims
+-- varsInPrims :: PrimFlow -> [Prim] -> Set PrimVarName
+-- varsInPrims dir prims =
+--     List.foldr Set.union Set.empty $ List.map (varsInPrim dir) prims
 
-varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
-varsInPrim dir (PrimCall _ args)      = varsInPrimArgs dir args
-varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
-varsInPrim dir (PrimTest arg)         = varsInPrimArgs dir [arg]
+-- varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
+-- varsInPrim dir (PrimCall _ args)      = varsInPrimArgs dir args
+-- varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
+-- varsInPrim dir (PrimTest arg)         = varsInPrimArgs dir [arg]
 
-varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
-varsInPrimArgs dir args =
-    List.foldr Set.union Set.empty $ List.map (varsInPrimArg dir) args
+-- varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
+-- varsInPrimArgs dir args =
+--     List.foldr Set.union Set.empty $ List.map (varsInPrimArg dir) args
 
-varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
-varsInPrimArg dir (ArgVar var _ dir' _ _) =
-  if dir == dir' then Set.singleton var else Set.empty
-varsInPrimArg _ (ArgInt _ _)            = Set.empty
-varsInPrimArg _ (ArgFloat _ _)          = Set.empty
-varsInPrimArg _ (ArgString _ _)         = Set.empty
-varsInPrimArg _ (ArgChar _ _)           = Set.empty
+-- varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
+-- varsInPrimArg dir (ArgVar var _ dir' _ _) =
+--   if dir == dir' then Set.singleton var else Set.empty
+-- varsInPrimArg _ (ArgInt _ _)            = Set.empty
+-- varsInPrimArg _ (ArgFloat _ _)          = Set.empty
+-- varsInPrimArg _ (ArgString _ _)         = Set.empty
+-- varsInPrimArg _ (ArgChar _ _)           = Set.empty
 
 
 ----------------------------------------------------------------
