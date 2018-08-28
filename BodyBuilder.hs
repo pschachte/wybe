@@ -245,7 +245,8 @@ freshVarName = do
 ----------------------------------------------------------------
 
 -- |Run a BodyBuilder monad and extract the final proc body
-buildBody :: Int -> VarSubstitution -> BodyBuilder a -> Compiler (Int,ProcBody)
+buildBody :: Int -> VarSubstitution -> BodyBuilder a
+          -> Compiler (Int,Set PrimVarName,ProcBody)
 buildBody tmp oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
     st <- execStateT builder $ initState tmp oSubst
@@ -508,23 +509,19 @@ argExpandedPrim (PrimTest arg) = do
     return $ PrimTest arg'
 
 
+-- |Construct a fake version of a Prim instruction containing only its
+-- inputs, and with inessential parts canonicalised away.  Also return the
+-- outputs of the instruction.
 splitPrimOutputs :: Prim -> (Prim, [PrimArg])
-splitPrimOutputs (PrimCall pspec args) =
-    let (inArgs,outArgs) = splitArgsByMode args
-    in (PrimCall pspec inArgs, outArgs)
-splitPrimOutputs (PrimForeign lang nm flags args) =
-    let (inArgs,outArgs) = splitArgsByMode args
-    in (PrimForeign lang nm flags inArgs, outArgs)
-splitPrimOutputs tst@(PrimTest arg) = (tst, [])
+splitPrimOutputs prim =
+    let (inArgs,outArgs) = splitArgsByMode $ primArgs prim
+    in  (replacePrimArgs prim $ canonicaliseArg <$> inArgs, outArgs)
 
 
 -- |Returns a list of all output arguments of the input Prim
 primOutputs :: Prim -> [PrimArg]
-primOutputs (PrimCall _ args) =
-    List.filter ((==FlowOut) . argFlowDirection) args
-primOutputs (PrimForeign _ _ _ args) =
-    List.filter ((==FlowOut) . argFlowDirection) args
-primOutputs tst@(PrimTest arg) = []
+primOutputs prim =
+    List.filter ((==FlowOut) . argFlowDirection) $ primArgs prim
 
 
 -- |Add a binding for a variable. If that variable is an output for the
@@ -628,8 +625,7 @@ rawInstr prim pos = do
 
 splitArgsByMode :: [PrimArg] -> ([PrimArg], [PrimArg])
 splitArgsByMode args =
-    let (ins,outs) = List.partition ((==FlowIn) . argFlowDirection) args
-    in  (List.map canonicaliseArg ins, outs)
+    List.partition ((==FlowIn) . argFlowDirection) args
 
 
 canonicalisePrim :: Prim -> Prim
@@ -899,11 +895,11 @@ boolConstant bool = ArgInt (fromIntegral $ fromEnum bool) boolType
 -- parameters.
 ----------------------------------------------------------------
 
-currBody :: ProcBody -> BodyState -> Compiler (Int,ProcBody)
+currBody :: ProcBody -> BodyState -> Compiler (Int,Set PrimVarName,ProcBody)
 currBody body st = do
     st' <- execStateT (rebuildBody st)
-           $ BkwdBuilderState Set.empty Map.empty 0 body
-    return (asmTmpCount st', asmFollowing st')
+           $ BkwdBuilderState (Map.keysSet $ outSubst st) Map.empty 0 body
+    return (asmTmpCount st', asmUsedLater st', asmFollowing st')
   
 
 type BkwdBuilder = StateT BkwdBuilderState Compiler
@@ -945,10 +941,14 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             bkwdSt <- get
             let usedLater = List.foldr Set.union (asmUsedLater bkwdSt)
                             $ asmUsedLater <$> sts
+            logBkwd $ "Switch on " ++ show var
+                      ++ " with usedLater " ++ show usedLater
+            let lastUse = Set.notMember var usedLater
+            let usedLater' = Set.insert var usedLater
             let tmp = maximum $ List.map asmTmpCount sts
             let followingBranches = List.map asmFollowing sts
-            put $ BkwdBuilderState usedLater Map.empty tmp
-                  $ ProcBody [] $ PrimFork var ty False followingBranches
+            put $ BkwdBuilderState usedLater' Map.empty tmp
+                  $ ProcBody [] $ PrimFork var ty lastUse followingBranches
     mapM_ (placedApply (bkwdBuildStmt defs)) prims
     maybe nop rebuildBody par
 
@@ -985,8 +985,22 @@ pruneBody _ body = body
 
 bkwdBuildStmt :: Set PrimVarName -> Prim -> OptPos -> BkwdBuilder ()
 bkwdBuildStmt defs prim pos = do
-    st@BkwdBuilderState{asmFollowing=bd@ProcBody{bodyPrims=prims}} <- get
-    put $ st { asmFollowing = bd { bodyPrims = maybePlace prim pos:prims} }
+    usedLater <- gets asmUsedLater
+    let args = primArgs prim
+    let (ins, outs) = splitArgsByMode args
+    when (any (`Set.member` usedLater) $ argVarName <$> outs) $ do
+      let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args
+      let inVars = argVarName <$> List.filter argIsVar ins
+      let usedLater' = List.foldr Set.insert usedLater inVars
+      st@BkwdBuilderState{asmFollowing=bd@ProcBody{bodyPrims=prims}} <- get
+      put $ st { asmFollowing = bd { bodyPrims = maybePlace prim' pos:prims},
+                 asmUsedLater = usedLater' }
+
+
+markIfLastUse :: Set PrimVarName -> PrimArg -> PrimArg
+markIfLastUse usedLater arg@ArgVar{argVarName=nm,argVarFlow=FlowIn}
+  | Set.notMember nm usedLater = arg {argVarFinal=True}
+markIfLastUse _ arg = arg
 
 
 -- -- |Build a ProcBody from a BodyState and the ProcBody that follows it.

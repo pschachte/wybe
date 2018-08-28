@@ -37,7 +37,7 @@ module AST (
   foldProcCalls, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp, expFlow,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
-  Prim(..), ProcSpec(..),
+  Prim(..), primArgs, replacePrimArgs, argIsVar, ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   -- *Stateful monad for the compilation process
@@ -1828,6 +1828,29 @@ data PrimArg
      | ArgString String TypeSpec
      | ArgChar Char TypeSpec
      deriving (Eq,Ord,Generic)
+
+
+-- |Returns a list of all arguments to a prim
+primArgs :: Prim -> [PrimArg]
+primArgs (PrimCall _ args) = args
+primArgs (PrimForeign _ _ _ args) = args
+primArgs (PrimTest arg) = [arg]
+
+
+-- |Returns a list of all arguments to a prim
+replacePrimArgs :: Prim -> [PrimArg] -> Prim
+replacePrimArgs (PrimCall pspec _) args = PrimCall pspec args
+replacePrimArgs (PrimForeign lang nm flags _) args =
+    PrimForeign lang nm flags args
+replacePrimArgs (PrimTest _) [arg] = PrimTest arg
+replacePrimArgs instr args =
+    shouldnt $ "Attempting to replace arguments of " ++ show instr
+               ++ " with " ++ show args
+
+
+argIsVar :: PrimArg -> Bool
+argIsVar ArgVar{} = True
+argIsVar _ = False
 
 
 -- |Relates a primitive argument to the corresponding source argument

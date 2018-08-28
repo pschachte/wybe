@@ -32,20 +32,36 @@ procExpansion pspec def = do
     let ProcDefPrim proto body = procImpln def
     logMsg Expansion $ "    initial body: " ++ show (ProcDefPrim proto body)
     let tmp = procTmpCount def
-    let outs = outputParams proto
-    (tmp',body') <- buildBody tmp (Map.fromSet id outs) $ 
+    let (ins,outs) = inputOutputParams proto
+    (tmp',used,body') <- buildBody tmp (Map.fromSet id outs) $
                         execStateT (expandBody body) initExpanderState
-    let def' = def { procImpln = ProcDefPrim proto body', procTmpCount = tmp' }
+    let proto' = proto {primProtoParams = markParamNeededness used ins
+                                          <$> primProtoParams proto}
+    let def' = def { procImpln = ProcDefPrim proto' body', procTmpCount = tmp' }
     if def /= def'
         then
-        logMsg Expansion $
-        "*** Expanded:" ++ showProcDef 4 def ++ "*** To:" ++ showProcDef 4 def'
+        logMsg Expansion
+        $ "*** Expanded:" ++ showProcDef 4 def
+          ++ "\n*** To:" ++ showProcDef 4 def'
         else
-        logMsg Expansion $
-        "*** Expansion did not change proc " ++ show (procName def)
+        logMsg Expansion
+        $ "*** Expansion did not change proc " ++ show (procName def)
     return def'
 
 
+-- |Update the param to indicate whether the param is actually needed based
+-- on the set of variables used in the prod body and the set of input var
+-- names.  We consider outputs to be unneeded if they're identical to inputs.
+markParamNeededness :: Set PrimVarName -> Set PrimVarName -> PrimParam
+                    -> PrimParam
+markParamNeededness used _ param@PrimParam{primParamName=nm,
+                                           primParamFlow=FlowIn} =
+    param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
+                                                  Set.notMember nm used}}
+markParamNeededness _ ins param@PrimParam{primParamName=nm,
+                                          primParamFlow=FlowOut} =
+    param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
+                                                  Set.member nm ins}}
 
 -- |Type to remember the variable renamings.
 type Renaming = Map PrimVarName PrimArg
@@ -233,10 +249,12 @@ expandArg arg@(ArgVar var typ flow _ _) = do
 expandArg arg = return arg
 
 
-outputParams :: PrimProto -> Set PrimVarName
-outputParams proto = 
-  Set.fromList $ List.map primParamName $
-  List.filter ((==FlowOut) . primParamFlow) $ primProtoParams proto
+inputOutputParams :: PrimProto -> (Set PrimVarName,Set PrimVarName)
+inputOutputParams proto =
+  let setFromParamList = (Set.fromList . List.map primParamName)
+      (ins,outs) = List.partition ((==FlowIn) . primParamFlow)
+                   $ primProtoParams proto
+  in  (setFromParamList ins, setFromParamList outs)
 
 
 -- outputArgs :: [PrimArg] -> [PrimVarName]
