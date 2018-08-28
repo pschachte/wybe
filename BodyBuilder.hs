@@ -17,8 +17,10 @@ import Util
 import Options (LogSelection(BodyBuilder))
 import Data.Map as Map
 import Data.List as List
+import Data.Set as Set
 import Data.Maybe
 import Data.Bits
+import Control.Applicative
 import Control.Monad
 import Control.Monad.Extra (whenJust)
 import Control.Monad.Trans (lift)
@@ -117,11 +119,11 @@ type BodyBuilder = StateT BodyState Compiler
 data BodyState = BodyState {
       currBuild   :: [Placed Prim],   -- ^The body we're building, reversed
       currSubst   :: Substitution,    -- ^variable substitutions to propagate
+      blockDefs   :: Set PrimVarName, -- ^All variables defined in this block
       outSubst    :: VarSubstitution, -- ^Substitutions for var assignments
       subExprs    :: ComputedCalls,   -- ^Previously computed calls to reuse
       -- XXX I don't think definers is actually used; get rid of it?
       definers    :: VarDefiner,      -- ^The call that defined each var
-      -- XXX I don't think failed is actually used; get rid of it?
       failed      :: Bool,            -- ^True if this body always fails
       tmpCount    :: Int,             -- ^The next temp variable number to use
       buildState  :: BuildState,      -- ^What state this node is in
@@ -132,8 +134,8 @@ data BodyState = BodyState {
 data BuildState
     = Building           -- ^Still building; ready for more instrs
     | Forking {          -- ^Building a new fork
-        forkVar    :: PrimVarName,     -- ^Variable that selects branch to take
-        forkVarTy  :: TypeSpec,        -- ^Type of stForkVar
+        forkingVar    :: PrimVarName,     -- ^Variable that selects branch to take
+        forkingVarTy  :: TypeSpec,        -- ^Type of stForkVar
         knownVal   :: Maybe Integer,   -- ^Definite value of stForkVar if known
         bodies     :: [BodyState]      -- ^BodyStates of all branches so far
         }
@@ -148,14 +150,15 @@ data BuildState
 -- | A fresh BodyState with specified temp counter and output var substitution
 initState :: Int -> VarSubstitution -> BodyState
 initState tmp oSubst =
-    BodyState [] Map.empty oSubst Map.empty Map.empty False tmp Building Nothing
+    BodyState [] Map.empty Set.empty oSubst Map.empty Map.empty False
+              tmp Building Nothing
 
 
 -- | A BodyState as a new child of the specified BodyState
 childState :: BodyState -> BuildState -> BodyState
 childState st@BodyState{currSubst=iSubst,outSubst=oSubst,subExprs=subs,
                         definers=defs,tmpCount=tmp} bld =
-    BodyState [] iSubst oSubst subs defs False tmp bld $ Just st
+    BodyState [] iSubst Set.empty oSubst subs defs False tmp bld $ Just st
 
 
 logState :: BodyBuilder ()
@@ -164,18 +167,19 @@ logState = do
     logBuild $ "     Current state:" ++ fst (showState 8 st)
     return ()
 
-predSep indent = "\n" ++ replicate indent ' ' ++ "---- ^ Predecessor ^ ----"
-
-mapFst :: (a->b) -> (a,c) -> (b,c)
-mapFst f (x,y) = (f x,y)
-
 
 showState :: Int -> BodyState -> (String,Int)
-showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld} =
+showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
+                           blockDefs=defed} =
     let (str  ,indent')   = maybe ("",indent) (showState indent) par
         str'              = showPlacedPrims indent' (reverse revPrims)
+        sets              = "\n" ++ replicate indent ' '
+                            ++ "# retargetable assignments: {"
+                            ++ intercalate ", " (List.map show $
+                                                 Set.toList defed)
+                            ++ "}"
         (str'',indent'') = showBuildState indent' bld
-    in  (str ++ str' ++ str'', indent'')
+    in  (str ++ str' ++ sets ++ str'', indent'')
 
 
 showBuildState :: Int -> BuildState -> (String,Int)
@@ -235,54 +239,6 @@ freshVarName = do
     return $ PrimVarName (mkTempName tmp) 0
 
 
--- |Build a ProcBody from a BodyState and the ProcBody that follows it.
-currBody :: ProcBody -> BodyState -> (Int,ProcBody)
-currBody _ st@BodyState{buildState=Forking{}} =
-    shouldnt "Building proc body for bodystate with incomplete fork"
-currBody rest st@BodyState{buildState=Building, currBuild=prims,
-                           currSubst=subst, tmpCount=tmp, parent=par} =
-    let prims' = forwardPrims prims Map.empty
-        rest'  = pasteBody prims' subst rest
-    in  (tmp, maybe rest' (snd . currBody rest') par)
-currBody rest st@BodyState{buildState=Forked var ty (Just val) bodies,
-                           currSubst=subst, parent=par, currBuild=prims} =
-    let prims' = forwardPrims prims Map.empty
-        val' = fromInteger val
-        (tmp,rest') = if val' >= 0 && val' < length bodies
-                      then currBody rest $ bodies !! val'
-                      else shouldnt "Out of bounds fixed value in fork"
-        rest'' = pasteBody prims' subst rest
-    in  (tmp, maybe rest' (snd . currBody rest'') par)
-currBody rest st@BodyState{buildState=Forked var ty Nothing bodies,
-                           parent=par, currBuild=prims, currSubst=subst} =
-    let prims' = forwardPrims prims Map.empty
-        (tmps,bodies') = unzip $ List.map (currBody rest) $ reverse bodies
-        rest' = ProcBody prims' $ PrimFork var ty False bodies'
-        tmp = maximum tmps
-    in  (tmp, maybe rest' (snd . currBody rest') par)
-
-
--- |Returns the forward list of prims corresponding to the input list of prims
---  in reversed order in the context of the supplied output variable
---  substitution mapping.
-forwardPrims :: [Placed Prim] -> VarSubstitution -> [Placed Prim]
-forwardPrims revPrims osubst = reverse revPrims
-
-
--- |Returns a ProcBody comprising the supplied prims followed by the supplied
---  body in the context of the specified known substitutions.
-pasteBody :: [Placed Prim] -> Substitution -> ProcBody -> ProcBody
-pasteBody prims subst (ProcBody prims' frk@(PrimFork var ty lst bodies)) =
-    case Map.lookup var subst of
-      Just (ArgInt val _) ->
-          let val' = fromInteger val
-          in  if val' >= 0 && val' < length bodies
-              then pasteBody prims subst $ bodies !! val'
-              else shouldnt "Out of bounds predetermined value in fork"
-      _ -> ProcBody (prims ++ prims') frk
-pasteBody prims subst (ProcBody prims' NoFork) =
-    ProcBody (prims ++ prims') NoFork
-
 
 ----------------------------------------------------------------
 --                      BodyBuilder Primitive Operations
@@ -292,11 +248,11 @@ pasteBody prims subst (ProcBody prims' NoFork) =
 buildBody :: Int -> VarSubstitution -> BodyBuilder a -> Compiler (Int,ProcBody)
 buildBody tmp oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
-    (a,st) <- buildPrims (initState tmp oSubst) builder
+    st <- execStateT builder $ initState tmp oSubst
     logMsg BodyBuilder ">>>> Finished building a proc body"
     logMsg BodyBuilder "     Current state:"
     logMsg BodyBuilder $ fst $ showState 8 st
-    return $ currBody (ProcBody [] NoFork) st
+    currBody (ProcBody [] NoFork) st
 
 
 -- |Start a new fork on var of type ty
@@ -401,62 +357,62 @@ buildPrims :: BodyState -> BodyBuilder a -> Compiler (a,BodyState)
 buildPrims st builder = runStateT builder st
 
 
--- |Augment st with whatever consequences can be deduced from the fact
---  that prim assigned var the value val.
-propagateBinding :: PrimVarName -> TypeSpec -> Int -> Prim -> BodyBuilder ()
-propagateBinding var ty val (PrimForeign "llvm" "icmp" [cmp] [a1, a2, _]) = do
-    propagateComparison var ty val cmp a1 a2
-propagateBinding _ _ _ _ = return ()
+-- -- |Augment st with whatever consequences can be deduced from the fact
+-- --  that prim assigned var the value val.
+-- propagateBinding :: PrimVarName -> TypeSpec -> Int -> Prim -> BodyBuilder ()
+-- propagateBinding var ty val (PrimForeign "llvm" "icmp" [cmp] [a1, a2, _]) = do
+--     propagateComparison var ty val cmp a1 a2
+-- propagateBinding _ _ _ _ = return ()
 
 
--- |Augment st with whatever consequences can be deduced from the fact
---  that the specified LLVM comparison assigned var the value val.
-propagateComparison :: PrimVarName -> TypeSpec -> Int -> String
-                    -> PrimArg -> PrimArg -> BodyBuilder ()
-propagateComparison var ty val cmp a1 a2 = do
-    -- note that the negation of the test gives the negation of the result
-    let (oppositeCmp,trues0,falses0) = comparisonRelatives cmp
-    let (_,trues,falses) = if val == 0
-                           then comparisonRelatives oppositeCmp
-                           else ("", trues0, falses0)
-    let allConsequences = (oppositeCmp,1-val)
-                          :  zip trues (repeat 1)
-                          ++ zip falses (repeat 0)
-    logBuild $ "Adding consequences of branch:  "
-               ++ show (List.map (\(c,v) ->
-                                  PrimForeign "llvm" "icmp" [c]
-                                  [a1, a2, ArgInt (fromIntegral v) ty])
-                        allConsequences)
-    let insertInstr (c,v)
-            = Map.insert
-              (PrimForeign "llvm" "icmp" [c] [canonicaliseArg a1,
-                                              canonicaliseArg a2])
-              [ArgInt (fromIntegral v) ty]
-    modify (\s -> s {subExprs = List.foldr insertInstr (subExprs s)
-                                allConsequences
-                    })
-    mp <- gets subExprs
-    logBuild $ "After adding consequences, subExprs = " ++ show mp
+-- -- |Augment st with whatever consequences can be deduced from the fact
+-- --  that the specified LLVM comparison assigned var the value val.
+-- propagateComparison :: PrimVarName -> TypeSpec -> Int -> String
+--                     -> PrimArg -> PrimArg -> BodyBuilder ()
+-- propagateComparison var ty val cmp a1 a2 = do
+--     -- note that the negation of the test gives the negation of the result
+--     let (oppositeCmp,trues0,falses0) = comparisonRelatives cmp
+--     let (_,trues,falses) = if val == 0
+--                            then comparisonRelatives oppositeCmp
+--                            else ("", trues0, falses0)
+--     let allConsequences = (oppositeCmp,1-val)
+--                           :  zip trues (repeat 1)
+--                           ++ zip falses (repeat 0)
+--     logBuild $ "Adding consequences of branch:  "
+--                ++ show (List.map (\(c,v) ->
+--                                   PrimForeign "llvm" "icmp" [c]
+--                                   [a1, a2, ArgInt (fromIntegral v) ty])
+--                         allConsequences)
+--     let insertInstr (c,v)
+--             = Map.insert
+--               (PrimForeign "llvm" "icmp" [c] [canonicaliseArg a1,
+--                                               canonicaliseArg a2])
+--               [ArgInt (fromIntegral v) ty]
+--     modify (\s -> s {subExprs = List.foldr insertInstr (subExprs s)
+--                                 allConsequences
+--                     })
+--     mp <- gets subExprs
+--     logBuild $ "After adding consequences, subExprs = " ++ show mp
 
 
--- |Given an LLVM comparison instruction name, returns a triple of
---  (1) the negation of the comparison
---  (2) a list of comparisons that are true whenever it is true
---  (3) a list of comparisons that are false whenever it is true, other than
---      the negation (1)
-comparisonRelatives :: String -> (String,[String],[String])
-comparisonRelatives "eq"  = ("ne", ["sle", "sge", "ule", "uge"],
-                          ["slt", "sgt", "ult", "ugt"])
-comparisonRelatives "ne"  = ("eq", [], [])
-comparisonRelatives "slt" = ("sge", ["sle", "ne"], [])
-comparisonRelatives "sge" = ("slt", [], [])
-comparisonRelatives "sgt" = ("sle", ["sge", "ne"], [])
-comparisonRelatives "sle" = ("sgt", [], [])
-comparisonRelatives "ult" = ("uge", ["ule", "ne"], [])
-comparisonRelatives "uge" = ("ult", [], [])
-comparisonRelatives "ugt" = ("ule", ["uge", "ne"], [])
-comparisonRelatives "ule" = ("ugt", [], [])
-comparisonRelatives comp = shouldnt $ "unknown llvm comparison " ++ comp
+-- -- |Given an LLVM comparison instruction name, returns a triple of
+-- --  (1) the negation of the comparison
+-- --  (2) a list of comparisons that are true whenever it is true
+-- --  (3) a list of comparisons that are false whenever it is true, other than
+-- --      the negation (1)
+-- comparisonRelatives :: String -> (String,[String],[String])
+-- comparisonRelatives "eq"  = ("ne", ["sle", "sge", "ule", "uge"],
+--                           ["slt", "sgt", "ult", "ugt"])
+-- comparisonRelatives "ne"  = ("eq", [], [])
+-- comparisonRelatives "slt" = ("sge", ["sle", "ne"], [])
+-- comparisonRelatives "sge" = ("slt", [], [])
+-- comparisonRelatives "sgt" = ("sle", ["sge", "ne"], [])
+-- comparisonRelatives "sle" = ("sgt", [], [])
+-- comparisonRelatives "ult" = ("uge", ["ule", "ne"], [])
+-- comparisonRelatives "uge" = ("ult", [], [])
+-- comparisonRelatives "ugt" = ("ule", ["uge", "ne"], [])
+-- comparisonRelatives "ule" = ("ugt", [], [])
+-- comparisonRelatives comp = shouldnt $ "unknown llvm comparison " ++ comp
 
 
 
@@ -488,6 +444,7 @@ instr' prim@(PrimForeign "llvm" "move" []
     outVar <- gets (Map.findWithDefault var var . outSubst)
     addSubst outVar val
     rawInstr prim pos
+    recordVarSet argvar
 -- XXX this is a bit of a hack to work around not threading a heap
 --     through the code, which causes the compiler to try to reuse
 --     the results of calls to alloc.  Since the mutate primitives
@@ -497,9 +454,10 @@ instr' prim@(PrimForeign "llvm" "move" []
 --     the only problem that needs fixing.  We don't want to fix this
 --     by threading a heap through, because it's fine to reorder calls
 --     to alloc.
-instr' prim@(PrimForeign "lpvm" "alloc" [] args) pos = do
+instr' prim@(PrimForeign "lpvm" "alloc" [] [_,argvar]) pos = do
     logBuild $ "  Leaving alloc alone"
     rawInstr prim pos
+    recordVarSet argvar
 instr' prim@(PrimTest (ArgInt 0 _)) pos = do
     rawInstr prim pos
     logBuild $ "  Found fail instruction; noting failing branch"
@@ -517,6 +475,7 @@ instr' prim pos = do
             logBuild "not found"
             recordEntailedPrims prim
             rawInstr prim pos
+            mapM_ recordVarSet $ primOutputs prim
         Just oldOuts -> do
             -- common subexpr: just need to record substitutions
             logBuild $ "found it; substituting "
@@ -559,6 +518,15 @@ splitPrimOutputs (PrimForeign lang nm flags args) =
 splitPrimOutputs tst@(PrimTest arg) = (tst, [])
 
 
+-- |Returns a list of all output arguments of the input Prim
+primOutputs :: Prim -> [PrimArg]
+primOutputs (PrimCall _ args) =
+    List.filter ((==FlowOut) . argFlowDirection) args
+primOutputs (PrimForeign _ _ _ args) =
+    List.filter ((==FlowOut) . argFlowDirection) args
+primOutputs tst@(PrimTest arg) = []
+
+
 -- |Add a binding for a variable. If that variable is an output for the
 --  proc being defined, also add an explicit assignment to that variable.
 addSubst :: PrimVarName -> PrimArg -> BodyBuilder ()
@@ -568,6 +536,12 @@ addSubst var val = do
     subst <- gets currSubst
     logBuild $ "      new subst = " ++ show subst
 
+
+recordVarSet :: PrimArg -> BodyBuilder ()
+recordVarSet (ArgVar nm _ FlowOut _ _) =
+    modify (\s -> s { blockDefs = Set.insert nm $ blockDefs s })
+recordVarSet arg =
+    shouldnt $ "recordVarSet of non-output argument " ++ show arg
 
 -- |Record all instructions equivalent to the input prim in the lookup table,
 --  so if we later see an equivalent instruction we don't repeat it but
@@ -649,6 +623,7 @@ rawInstr prim pos = do
     logBuild $ "---- adding instruction " ++ show prim
     validateInstr prim
     modify $ addInstrToState (maybePlace prim pos)
+
 
 
 splitArgsByMode :: [PrimArg] -> ([PrimArg], [PrimArg])
@@ -913,9 +888,209 @@ boolConstant :: Bool -> PrimArg
 boolConstant bool = ArgInt (fromIntegral $ fromEnum bool) boolType
 
 ----------------------------------------------------------------
+--                  Reassembling the ProcBody
+--
+-- Once we've built up a BodyState, this code assembles it into a new ProcBody.
+-- While we're at it, we also mark the last use of each variable, eliminate
+-- calls that don't produce any output needed later in the body, and eliminate
+-- any move instructions that moves a variable defined in the same block as the
+-- move and not used after the move.  Most other move instructions were removed
+-- while building BodyState, but that approach cannot eliminate moves to output
+-- parameters.
+----------------------------------------------------------------
+
+currBody :: ProcBody -> BodyState -> Compiler (Int,ProcBody)
+currBody body st = do
+    st' <- execStateT (rebuildBody st)
+           $ BkwdBuilderState Set.empty Map.empty 0 body
+    return (asmTmpCount st', asmFollowing st')
+  
+
+type BkwdBuilder = StateT BkwdBuilderState Compiler
+
+-- |BkwdBuilderState is used to store context info while building a ProcBody
+-- backwards from a BodyState, itself the result of rebuilding a ProcBody
+-- forwards.  Because construction runs backwards, the state mostly holds
+-- information about the following code.
+data BkwdBuilderState = BkwdBuilderState {
+      asmUsedLater :: Set PrimVarName,  -- ^Variables used later in computation
+      asmRenaming  :: VarSubstitution,  -- ^Variable substitution to apply
+      asmTmpCount  :: Int,              -- ^Highest temporary variable number
+      asmFollowing :: ProcBody          -- ^Code to come later
+      } deriving (Eq,Show)
+
+
+
+rebuildBody :: BodyState -> BkwdBuilder ()
+rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
+                         buildState=bldst, parent=par} = do
+    bkwdSt <- get
+    logBkwd $ "Rebuilding body:" ++ fst (showState 8 st)
+              ++ "\nwith currSubst = " ++ show subst
+              ++ "\n and followed by:" ++ showBlock 8 (asmFollowing bkwdSt)
+    modify (\s -> s { asmFollowing = pruneBody subst $ asmFollowing s })
+    case bldst of
+      Forking{} ->
+        shouldnt "Building proc body for bodystate with incomplete fork"
+      Building -> nop
+      Forked var ty fixedval bods ->
+        case fixedval of
+          Just val ->
+            rebuildBody $ selectFork val bods
+          Nothing -> do
+            -- XXX Perhaps we should generate a new proc for the parent par in
+            -- cases where it's more than a few prims.  Currently UnBranch
+            -- ensures that's not needed, but maybe it shouldn't.
+            sts <- mapM (rebuildBranch subst) $ reverse bods
+            bkwdSt <- get
+            let usedLater = List.foldr Set.union (asmUsedLater bkwdSt)
+                            $ asmUsedLater <$> sts
+            let tmp = maximum $ List.map asmTmpCount sts
+            let followingBranches = List.map asmFollowing sts
+            put $ BkwdBuilderState usedLater Map.empty tmp
+                  $ ProcBody [] $ PrimFork var ty False followingBranches
+    mapM_ (placedApply (bkwdBuildStmt defs)) prims
+    maybe nop rebuildBody par
+
+
+-- |Select the element of bods specified by num
+selectFork :: Integral a => a -> [b] -> b
+selectFork num bods =
+    if num' >= 0 && num' < length bods
+    then bods !! num'
+    else shouldnt $ "Out-of-bounds fixed value in fork " ++ show num'
+  where num' = fromIntegral num
+
+
+rebuildBranch :: Substitution -> BodyState -> BkwdBuilder BkwdBuilderState
+rebuildBranch subst bod = do
+    bkwdSt <- get
+    lift $ execStateT (rebuildBody bod) bkwdSt
+
+
+-- |Prune the specified ProcBody according to the variable bindings of
+-- subst, eliminating any forks whose selection is forced by the bindings.
+pruneBody :: Substitution -> ProcBody -> ProcBody
+pruneBody subst body@ProcBody{bodyPrims=prims,
+                              bodyFork=PrimFork{forkVar=var,forkBodies=bods}} =
+    let bods' = List.map (pruneBody subst) bods
+    in  case Map.lookup var subst of
+      Just (ArgInt num _) ->
+        let bod = selectFork num bods
+        in  bod { bodyPrims = prims ++ bodyPrims bod }
+      _ -> body { bodyFork = (bodyFork body) { forkBodies = bods' } }
+pruneBody _ body = body
+
+
+
+bkwdBuildStmt :: Set PrimVarName -> Prim -> OptPos -> BkwdBuilder ()
+bkwdBuildStmt defs prim pos = do
+    st@BkwdBuilderState{asmFollowing=bd@ProcBody{bodyPrims=prims}} <- get
+    put $ st { asmFollowing = bd { bodyPrims = maybePlace prim pos:prims} }
+
+
+-- -- |Build a ProcBody from a BodyState and the ProcBody that follows it.
+-- currBody :: ProcBody -> BodyState -> (Int,ProcBody)
+-- currBody _ st@BodyState{buildState=Forking{}} =
+--     shouldnt "Building proc body for bodystate with incomplete fork"
+-- currBody rest st@BodyState{buildState=Building, currBuild=prims, parent=par,
+--                            currSubst=subst, tmpCount=tmp, blockDefs=defs} =
+--     let prims' = forwardPrims prims defs
+--         rest'  = pasteBody prims' subst rest
+--     in  (tmp, maybe rest' (snd . currBody rest') par)
+-- currBody rest st@BodyState{buildState=Forked var ty (Just val) bodies,
+--                            currSubst=subst, parent=par, currBuild=prims,
+--                            blockDefs=defs} =
+--     let prims' = forwardPrims prims defs
+--         val' = fromInteger val
+--         (tmp,rest') = if val' >= 0 && val' < length bodies
+--                       then currBody rest $ bodies !! val'
+--                       else shouldnt "Out of bounds fixed value in fork"
+--         rest'' = pasteBody prims' subst rest
+--     in  (tmp, maybe rest' (snd . currBody rest'') par)
+-- currBody rest st@BodyState{buildState=Forked var ty Nothing bodies,
+--                            parent=par, currBuild=prims, currSubst=subst,
+--                            blockDefs=defs} =
+--     let prims' = forwardPrims prims defs
+--         (tmps,bodies') = unzip $ List.map (currBody rest) $ reverse bodies
+--         rest' = ProcBody prims' $ PrimFork var ty False bodies'
+--         tmp = maximum tmps
+--     in  (tmp, maybe rest' (snd . currBody rest') par)
+
+
+-- -- |Returns the forward list of prims corresponding to the input list of prims
+-- --  in reversed order in the context of the supplied set of variables defined in
+-- --  the reversed list of instructions ahead and not used outside that list. This
+-- --  function reverses the list, and also eliminates llvm move instructions where
+-- --  the from variable was defined in the current block, replacing all references
+-- --  to the from variable with the to variable. However, if we've already seen
+-- --  (and included in the output list) a use of the from variable, we can't do
+-- --  that.
+-- forwardPrims :: [Placed Prim] -> Set PrimVarName -> [Placed Prim]
+-- forwardPrims revPrims defs = forwardPrims' revPrims defs Map.empty []
+
+-- forwardPrims' :: [Placed Prim] -> Set PrimVarName -> VarSubstitution
+--               -> [Placed Prim] -> [Placed Prim]
+-- forwardPrims' [] _ _ prims = prims
+-- forwardPrims' (pprim:revPrims) safedefs osubst prims =
+--     placedApply forwardPrims'' pprim revPrims safedefs osubst prims
+
+-- forwardPrims'' :: Prim -> OptPos -> [Placed Prim] -> Set PrimVarName
+--               -> VarSubstitution -> [Placed Prim] -> [Placed Prim]
+-- forwardPrims'' (PrimForeign "llvm" "move" []
+--                  [ArgVar srcvar _ FlowIn _ _,
+--                    ArgVar dstvar _ FlowOut _ _])
+--                _ revPrims safedefs osubst collected
+--   | Set.member srcvar safedefs =
+--     forwardPrims' revPrims (Set.delete srcvar safedefs)
+--     (Map.insert srcvar dstvar osubst) collected
+-- forwardPrims'' prim pos revPrims safedefs osubst collected =
+--     let prim' = updatePrimArgs prim osubst
+--     in  forwardPrims' revPrims safedefs osubst (maybePlace prim' pos:collected)
+
+
+
+-- updatePrimArgs :: Prim -> VarSubstitution -> Prim
+-- updatePrimArgs (PrimCall pspec args) osubst =
+--     PrimCall pspec $ List.map (applySubst osubst) args
+-- updatePrimArgs (PrimForeign lang nm flags args) osubst =
+--     PrimForeign lang nm flags $ List.map (applySubst osubst) args
+-- updatePrimArgs (PrimTest arg) osubst =
+--     PrimTest $ applySubst osubst arg
+
+
+-- applySubst :: VarSubstitution -> PrimArg -> PrimArg
+-- applySubst subst arg@ArgVar{argVarName=var} =
+--     arg { argVarName = Map.findWithDefault var var subst }
+-- applySubst _ arg = arg
+
+
+-- -- |Returns a ProcBody comprising the supplied prims followed by the supplied
+-- --  body in the context of the specified known substitutions.
+-- pasteBody :: [Placed Prim] -> Substitution -> ProcBody -> ProcBody
+-- pasteBody prims subst (ProcBody prims' frk@(PrimFork var ty lst bodies)) =
+--     case Map.lookup var subst of
+--       Just (ArgInt val _) ->
+--           let val' = fromInteger val
+--           in  if val' >= 0 && val' < length bodies
+--               then pasteBody prims subst $ bodies !! val'
+--               else shouldnt "Out of bounds predetermined value in fork"
+--       _ -> ProcBody (prims ++ prims') frk
+-- pasteBody prims subst (ProcBody prims' NoFork) =
+--     ProcBody (prims ++ prims') NoFork
+
+
+----------------------------------------------------------------
 --                                  Logging
 ----------------------------------------------------------------
 
 -- |Log a message, if we are logging body building activity.
 logBuild :: String -> BodyBuilder ()
 logBuild s = lift $ logMsg BodyBuilder s
+
+
+-- |Log a message, if we are logging body building activity.
+logBkwd :: String -> BkwdBuilder ()
+logBkwd s = lift $ logMsg BodyBuilder s
+
+
