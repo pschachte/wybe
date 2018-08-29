@@ -132,18 +132,13 @@ data BodyState = BodyState {
 
 
 data BuildState
-    = Building           -- ^Still building; ready for more instrs
-    | Forking {          -- ^Building a new fork
-        forkingVar    :: PrimVarName,     -- ^Variable that selects branch to take
-        forkingVarTy  :: TypeSpec,        -- ^Type of stForkVar
+    = Unforked           -- ^Still building; ready for more instrs
+    | Forked {           -- ^Building a new fork
+        forkingVar    :: PrimVarName,  -- ^Variable that selects branch to take
+        forkingVarTy  :: TypeSpec,     -- ^Type of stForkVar
         knownVal   :: Maybe Integer,   -- ^Definite value of stForkVar if known
-        bodies     :: [BodyState]      -- ^BodyStates of all branches so far
-        }
-    | Forked {          -- ^Finished building this fork
-        forkVar'   :: PrimVarName,     -- ^Variable that selects branch to take
-        forkVarTy' :: TypeSpec,        -- ^Type of stForkVar
-        knownVal'  :: Maybe Integer,   -- ^Definite value of stForkVar if known
-        bodies'    :: [BodyState]      -- ^BodyStates of all branches so far
+        bodies     :: [BodyState],     -- ^BodyStates of all branches so far
+        complete   :: Bool             -- ^Whether the fork has been completed
         } deriving (Eq,Show)
 
 
@@ -151,7 +146,7 @@ data BuildState
 initState :: Int -> VarSubstitution -> BodyState
 initState tmp oSubst =
     BodyState [] Map.empty Set.empty oSubst Map.empty Map.empty False
-              tmp Building Nothing
+              tmp Unforked Nothing
 
 
 -- | A BodyState as a new child of the specified BodyState
@@ -183,13 +178,13 @@ showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
 
 
 showBuildState :: Int -> BuildState -> (String,Int)
-showBuildState indent Building = ("", indent)
-showBuildState indent (Forking var ty val bodies) =
+showBuildState indent Unforked = ("", indent)
+showBuildState indent (Forked var ty val bodies False) =
     let intro = showSwitch indent var ty val
         indent' = indent + 4
         content = showBranches indent' 0 True $ reverse bodies
     in  (intro++content,indent')
-showBuildState indent (Forked var ty val bodies) =
+showBuildState indent (Forked var ty val bodies True) =
     let intro = showSwitch indent var ty val
         indent' = indent + 4
         content = showBranches indent' 0 False $ reverse bodies
@@ -264,11 +259,11 @@ buildFork var ty = do
     logBuild $ "<<<< beginning to build a new fork on " ++ show var
                ++ " (-> " ++ show var' ++ ")"
     case buildState st of
-      Forked{} ->
+      Forked{complete=True} ->
         shouldnt "Building a fork in Forked state"
-      Forking{} ->
+      Forked{complete=False} ->
         shouldnt "Building a fork in Forking state"
-      Building -> do
+      Unforked -> do
         arg' <- expandVar var ty
         logBuild $ "     (expands to " ++ show arg' ++ ")"
         let (fvar,fval) =
@@ -278,7 +273,7 @@ buildFork var ty = do
                   ArgVar var' varType _ _ _ -> -- statically unknown result
                     (var',Nothing)
                   _ -> shouldnt "switch on non-integer variable"
-        put $ childState st $  Forking fvar ty fval []
+        put $ childState st $  Forked fvar ty fval [] False
         logState
 
 
@@ -287,16 +282,16 @@ completeFork :: BodyBuilder ()
 completeFork = do
     st <- get
     case buildState st of
-      Forked{} ->
+      Forked{complete=True} ->
         shouldnt "Completing an already-completed fork"
-      Building ->
+      Unforked ->
         shouldnt "Completing an un-built fork"
-      Forking var ty val bods -> do
+      Forked var ty val bods False -> do
         logBuild $ ">>>> ending fork on " ++ show var
         -- Prepare for any instructions coming after the fork
-        let parent = st {buildState = Forked var ty val bods,
+        let parent = st {buildState = Forked var ty val bods True,
                          tmpCount = maximum $ tmpCount <$> bods}
-        put $ childState parent Building
+        put $ childState parent Unforked
         logState
 
 
@@ -305,15 +300,15 @@ beginBranch :: BodyBuilder ()
 beginBranch = do
     st <- get
     case buildState st of
-      Forked{} ->
+      Forked{complete=True} ->
         shouldnt "Beginning a branch in an already-completed fork"
-      Building ->
+      Unforked ->
         shouldnt "Beginning a branch in an un-built fork"
-      Forking var ty val bods -> do
+      Forked var ty val bods False -> do
         let branchNum = fromIntegral $ length bods
         logBuild $ "<<<< <<<< Beginning to build branch "
                    ++ show branchNum ++ " on " ++ show var
-        put $ childState st Building
+        put $ childState st Unforked
         -- XXX Do we want to maintain this field?
         -- let failed' = failed st || maybe False (/=branchNum) val
         -- XXX also add consequences of this, eg if var is result of X==Y
@@ -328,7 +323,7 @@ endBranch = do
     (par,st,var,ty,val,bodies) <- gets popParent
     logBuild $ ">>>> >>>> Ending branch "
               ++ show (length bodies) ++ " on " ++ show var
-    put $ par { buildState=Forking var ty val (st:bodies) }
+    put $ par { buildState=Forked var ty val (st:bodies) False }
     logState
 
 
@@ -339,7 +334,7 @@ popParent :: BodyState -> (BodyState,BodyState,PrimVarName,TypeSpec,
 popParent st@BodyState{parent=Nothing} =
     shouldnt "endBranch with no open branch to end"
 popParent st@BodyState{parent=(Just
-             par@BodyState{buildState=(Forking var ty val branches)})} =
+             par@BodyState{buildState=(Forked var ty val branches False)})} =
     (par, st {parent = Nothing}, var, ty, val, branches)
 popParent st@BodyState{parent=Just par} =
     let (ancestor, fixedPar, var, ty, val, branches) = popParent par
@@ -427,7 +422,7 @@ instr prim pos = do
       BodyState{failed=True}  -> do -- ignore if we've already failed
         logBuild $ "  Failing branch:  ignoring instruction " ++ show prim
         return ()
-      BodyState{failed=False,buildState=Building} -> do
+      BodyState{failed=False,buildState=Unforked} -> do
         prim' <- argExpandedPrim prim
         logBuild $ "Generating instr " ++ show prim ++ " -> " ++ show prim'
         instr' prim' pos
@@ -669,12 +664,12 @@ validateType _ instr = return ()
 
 
 addInstrToState :: Placed Prim -> BodyState -> BodyState
-addInstrToState ins st@BodyState{buildState=Building} =
+addInstrToState ins st@BodyState{buildState=Unforked} =
     st { currBuild = ins:currBuild st}
-addInstrToState ins st@BodyState{buildState=bld@Forking{bodies=bods}} =
+addInstrToState ins st@BodyState{buildState=bld@Forked{complete=False,bodies=bods}} =
     st { buildState = bld {bodies=List.map (addInstrToState ins) bods} }
-addInstrToState ins st@BodyState{buildState=bld@Forked{bodies'=bods}} =
-    st { buildState = bld {bodies'=List.map (addInstrToState ins) bods} }
+addInstrToState ins st@BodyState{buildState=bld@Forked{complete=True,bodies=bods}} =
+    st { buildState = bld {bodies=List.map (addInstrToState ins) bods} }
 
 
 -- |Return the current ultimate value of the specified variable name and type
@@ -926,10 +921,10 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
               ++ "\n and followed by:" ++ showBlock 8 (asmFollowing bkwdSt)
     modify (\s -> s { asmFollowing = pruneBody subst $ asmFollowing s })
     case bldst of
-      Forking{} ->
+      Forked{complete=False} ->
         shouldnt "Building proc body for bodystate with incomplete fork"
-      Building -> nop
-      Forked var ty fixedval bods ->
+      Unforked -> nop
+      Forked var ty fixedval bods True ->
         case fixedval of
           Just val ->
             rebuildBody $ selectFork val bods
@@ -1005,7 +1000,7 @@ markIfLastUse _ arg = arg
 
 -- -- |Build a ProcBody from a BodyState and the ProcBody that follows it.
 -- currBody :: ProcBody -> BodyState -> (Int,ProcBody)
--- currBody _ st@BodyState{buildState=Forking{}} =
+-- currBody _ st@BodyState{buildState=Forked{complete=False}} =
 --     shouldnt "Building proc body for bodystate with incomplete fork"
 -- currBody rest st@BodyState{buildState=Building, currBuild=prims, parent=par,
 --                            currSubst=subst, tmpCount=tmp, blockDefs=defs} =
