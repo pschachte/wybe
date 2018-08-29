@@ -895,7 +895,7 @@ currBody body st = do
     st' <- execStateT (rebuildBody st)
            $ BkwdBuilderState (Map.keysSet $ outSubst st) Map.empty 0 body
     return (asmTmpCount st', asmUsedLater st', asmFollowing st')
-  
+
 
 type BkwdBuilder = StateT BkwdBuilderState Compiler
 
@@ -919,11 +919,14 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
     logBkwd $ "Rebuilding body:" ++ fst (showState 8 st)
               ++ "\nwith currSubst = " ++ show subst
               ++ "\n and followed by:" ++ showBlock 8 (asmFollowing bkwdSt)
-    modify (\s -> s { asmFollowing = pruneBody subst $ asmFollowing s })
+    let usedLater = asmUsedLater bkwdSt
+    let following = asmFollowing bkwdSt
+    let (usedLater',following') = pruneBody subst usedLater following
+    modify (\s -> s { asmFollowing = following', asmUsedLater = usedLater' })
     case bldst of
+      Unforked -> nop
       Forked{complete=False} ->
         shouldnt "Building proc body for bodystate with incomplete fork"
-      Unforked -> nop
       Forked var ty fixedval bods True ->
         case fixedval of
           Just val ->
@@ -933,16 +936,15 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             -- cases where it's more than a few prims.  Currently UnBranch
             -- ensures that's not needed, but maybe it shouldn't.
             sts <- mapM (rebuildBranch subst) $ reverse bods
-            bkwdSt <- get
-            let usedLater = List.foldr Set.union (asmUsedLater bkwdSt)
-                            $ asmUsedLater <$> sts
+            let usedLater'' = List.foldr Set.union usedLater'
+                              $ asmUsedLater <$> sts
             logBkwd $ "Switch on " ++ show var
-                      ++ " with usedLater " ++ show usedLater
-            let lastUse = Set.notMember var usedLater
-            let usedLater' = Set.insert var usedLater
+                      ++ " with usedLater " ++ show usedLater''
+            let lastUse = Set.notMember var usedLater''
+            let usedLater''' = Set.insert var usedLater''
             let tmp = maximum $ List.map asmTmpCount sts
             let followingBranches = List.map asmFollowing sts
-            put $ BkwdBuilderState usedLater' Map.empty tmp
+            put $ BkwdBuilderState usedLater''' Map.empty tmp
                   $ ProcBody [] $ PrimFork var ty lastUse followingBranches
     mapM_ (placedApply (bkwdBuildStmt defs)) prims
     maybe nop rebuildBody par
@@ -965,16 +967,21 @@ rebuildBranch subst bod = do
 
 -- |Prune the specified ProcBody according to the variable bindings of
 -- subst, eliminating any forks whose selection is forced by the bindings.
-pruneBody :: Substitution -> ProcBody -> ProcBody
-pruneBody subst body@ProcBody{bodyPrims=prims,
-                              bodyFork=PrimFork{forkVar=var,forkBodies=bods}} =
-    let bods' = List.map (pruneBody subst) bods
-    in  case Map.lookup var subst of
+-- XXX This is weak.  First, it should prune forks recursively, and second,
+-- the returned used var set should only included the bodies that are not
+-- pruned.  But to do that, ProcBody needs to track used variables, or else
+-- we have to recompute it from scratch.
+pruneBody :: Substitution -> Set PrimVarName -> ProcBody
+          -> (Set PrimVarName,ProcBody)
+pruneBody subst used body@ProcBody{bodyPrims=prims,
+                                   bodyFork=PrimFork{forkVar=var,
+                                                     forkBodies=bods}} =
+    case Map.lookup var subst of
       Just (ArgInt num _) ->
         let bod = selectFork num bods
-        in  bod { bodyPrims = prims ++ bodyPrims bod }
-      _ -> body { bodyFork = (bodyFork body) { forkBodies = bods' } }
-pruneBody _ body = body
+        in  (Set.delete var used, bod { bodyPrims = prims ++ bodyPrims bod })
+      _ -> (used,body)
+pruneBody _ used body = (used,body)
 
 
 
@@ -1101,5 +1108,3 @@ logBuild s = lift $ logMsg BodyBuilder s
 -- |Log a message, if we are logging body building activity.
 logBkwd :: String -> BkwdBuilder ()
 logBkwd s = lift $ logMsg BodyBuilder s
-
-
