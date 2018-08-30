@@ -7,7 +7,7 @@ DEVDOC=compiler.html design.html lpvm.html
 all:	$(USERDOC) $(DEVDOC)
 
 %.html:	%.md
-	markdown $< >$@
+	pandoc -s -o $@ -f markdown -t html $<
 
 %.html:	%.tex
 	hevea -o $@ $<
