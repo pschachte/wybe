@@ -35,7 +35,7 @@ executable wybemk
                , ansi-terminal
                , Diff
   other-modules: AST, BinaryFactory, Blocks, BodyBuilder, Builder, Callers,
-                 Clause, Codegen, Config, Emit, Expansion, Flatten, LastUse,
+                 Clause, Codegen, Config, Emit, Expansion, Flatten,
                  Macho, NewParser, Normalise, ObjectInterface, Optimise,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
                  Version
@@ -61,7 +61,7 @@ test-suite wybe-test
                   , ansi-terminal
                   , Diff
   other-modules: AST, BinaryFactory, Blocks, BodyBuilder, Builder, Callers,
-                 Clause, Codegen, Config, Emit, Expansion, Flatten, LastUse,
+                 Clause, Codegen, Config, Emit, Expansion, Flatten,
                  Macho, NewParser, Normalise, ObjectInterface, Optimise,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
                  Version

@@ -6,7 +6,8 @@
 --  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
 --
 
-module Util (sameLength, maybeNth, checkMaybe, setMapInsert, fillLines) where
+module Util (sameLength, maybeNth, checkMaybe, setMapInsert,
+             fillLines, nop) where
 
 
 import Data.Map as Map
@@ -66,4 +67,7 @@ fillLines' marginText currColumn lineLength (word1:word2:words) =
              fillLines' marginText (length marginText) lineLength (word2:words)
         else " " ++ fillLines' marginText nextColumn lineLength (word2:words)
 
-    
+-- |Do nothing monadically.
+nop :: Monad m => m ()
+nop = return ()
+

@@ -41,7 +41,6 @@ src/Callers.hs         | Find all callers for each proc & count static calls per
 src/DefUse.hs          | Compute defined and used variables for statements and exprs
 src/BodyBuilder.hs     | A monad to build up a procedure Body, with copy propagation
 src/Expansion.hs       | Replace certain procedure calls with others
-src/LastUse.hs         | Mark last use of each variable and remove unneeded parameters
 src/Optimise.hs        | Framework to optimise a single module
 src/Macho.hs           |
 src/ObjectInterface.hs | Parse and edit a object file

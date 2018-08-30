@@ -35,8 +35,7 @@ AFTER EVERYTHING:
         type_list.++<0>(~t#0:type_list.intlist, ~y#0:type_list.intlist, ?tmp$3#0:type_list.intlist) @type_list:5:13
         foreign lpvm alloc(16:wybe.int, ?tmp$11#0:type_list.intlist)
         foreign lpvm mutate(~tmp$11#0:type_list.intlist, ?tmp$12#0:type_list.intlist, 0:wybe.int, ~h#0:wybe.int)
-        foreign lpvm mutate(~tmp$12#0:type_list.intlist, ?tmp$13#0:type_list.intlist, 8:wybe.int, ~tmp$3#0:type_list.intlist)
-        foreign llvm move(~tmp$13#0:type_list.intlist, ?$#0:type_list.intlist) @type_list:3:8
+        foreign lpvm mutate(~tmp$12#0:type_list.intlist, ?$#0:type_list.intlist, 8:wybe.int, ~tmp$3#0:type_list.intlist)
 
   submodules      : type_list.intlist
 --------------------------------------------------
@@ -88,21 +87,19 @@ AFTER EVERYTHING:
             1:
                 foreign lpvm access($right#0:type_list.intlist, 0:wybe.int, ?$right$head#0:wybe.int)
                 foreign lpvm access(~$right#0:type_list.intlist, 8:wybe.int, ?$right$tail#0:type_list.intlist)
-                foreign llvm icmp eq(~$left$head#0:wybe.int, ~$right$head#0:wybe.int, ?tmp$15#0:wybe.bool) @wybe:28:40
-                case ~tmp$15#0:wybe.bool of
+                foreign llvm icmp eq(~$left$head#0:wybe.int, ~$right$head#0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:28:40
+                case ~tmp$5#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
-                    type_list.intlist.=<2>(~$left$tail#0:type_list.intlist, ~$right$tail#0:type_list.intlist, ?tmp$6#0:wybe.bool)
-                    foreign llvm move(~tmp$6#0, ?$$#0:wybe.bool)
+                    type_list.intlist.=<2>(~$left$tail#0:type_list.intlist, ~$right$tail#0:type_list.intlist, ?$$#0:wybe.bool)
 
 
 
 
     1:
-        foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?tmp$2#0:wybe.bool)
-        foreign llvm move(~tmp$2#0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?$$#0:wybe.bool)
 
 
 
@@ -115,8 +112,7 @@ AFTER EVERYTHING:
 0: [|](head#0:wybe.int, tail#0:type_list.intlist, ?$#0:type_list.intlist):
     foreign lpvm alloc(16:wybe.int, ?$rec#0:type_list.intlist)
     foreign lpvm mutate(~%$rec#0:type_list.intlist, ?%$rec#1:type_list.intlist, 0:wybe.int, ~head#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:type_list.intlist, ?%$rec#2:type_list.intlist, 8:wybe.int, ~tail#0:type_list.intlist)
-    foreign llvm move(~$rec#2:type_list.intlist, ?$#0:type_list.intlist)
+    foreign lpvm mutate(~%$rec#1:type_list.intlist, ?%$#0:type_list.intlist, 8:wybe.int, ~tail#0:type_list.intlist)
 [|] > public inline test (7 calls)
 1: [|](?head#0:wybe.int, ?tail#0:type_list.intlist, $#0:type_list.intlist, ?$$#0:wybe.bool):
     foreign lpvm cast($#0:type_list.intlist, ?tmp$0#0:wybe.int)
@@ -236,8 +232,8 @@ entry:
   br i1 %"tmp$1#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
-  %"tmp$2#0" = icmp eq i64* %"$right#0", null
-  ret i1 %"tmp$2#0"
+  %"$$#0" = icmp eq i64* %"$right#0", null
+  ret i1 %"$$#0"
 
 if.else:                                          ; preds = %entry
   ret i1 true
@@ -340,8 +336,8 @@ entry:
   br i1 %"tmp$1#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
-  %"tmp$2#0" = icmp eq i64* %"$right#0", null
-  ret i1 %"tmp$2#0"
+  %"$$#0" = icmp eq i64* %"$right#0", null
+  ret i1 %"$$#0"
 
 if.else:                                          ; preds = %entry
   ret i1 true

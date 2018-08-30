@@ -18,8 +18,8 @@ AFTER EVERYTHING:
 gen$1 > (2 calls)
 0: gen$1(wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom):
     foreign c read_char(?c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:86:39
-    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$5#0:wybe.bool) @wybe:68:42
-    case ~tmp$5#0:wybe.bool of
+    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$1#0:wybe.bool) @wybe:68:42
+    case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(~wybe.io$io#1:wybe.phantom, ?wybe.io$io#3:wybe.phantom)
 
@@ -51,8 +51,8 @@ entry:
 define void @"simple_loop.gen$1<0>"() local_unnamed_addr {
 entry:
   %"c#01" = tail call i8 @read_char()
-  %"tmp$5#02" = icmp eq i8 %"c#01", 97
-  br i1 %"tmp$5#02", label %if.else, label %if.then.preheader
+  %"tmp$1#02" = icmp eq i8 %"c#01", 97
+  br i1 %"tmp$1#02", label %if.else, label %if.then.preheader
 
 if.then.preheader:                                ; preds = %entry
   br label %if.then
@@ -61,8 +61,8 @@ if.then:                                          ; preds = %if.then.preheader, 
   %"c#03" = phi i8 [ %"c#0", %if.then ], [ %"c#01", %if.then.preheader ]
   tail call void @putchar(i8 %"c#03")
   %"c#0" = tail call i8 @read_char()
-  %"tmp$5#0" = icmp eq i8 %"c#0", 97
-  br i1 %"tmp$5#0", label %if.else, label %if.then
+  %"tmp$1#0" = icmp eq i8 %"c#0", 97
+  br i1 %"tmp$1#0", label %if.else, label %if.then
 
 if.else:                                          ; preds = %if.then, %entry
   ret void
