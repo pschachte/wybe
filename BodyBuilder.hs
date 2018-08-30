@@ -989,14 +989,30 @@ bkwdBuildStmt :: Set PrimVarName -> Prim -> OptPos -> BkwdBuilder ()
 bkwdBuildStmt defs prim pos = do
     usedLater <- gets asmUsedLater
     let args = primArgs prim
-    let (ins, outs) = splitArgsByMode args
-    when (any (`Set.member` usedLater) $ argVarName <$> outs) $ do
-      let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args
-      let inVars = argVarName <$> List.filter argIsVar ins
-      let usedLater' = List.foldr Set.insert usedLater inVars
-      st@BkwdBuilderState{asmFollowing=bd@ProcBody{bodyPrims=prims}} <- get
-      put $ st { asmFollowing = bd { bodyPrims = maybePlace prim' pos:prims},
-                 asmUsedLater = usedLater' }
+    args' <- mapM renameArg args
+    case (prim,args') of
+      (PrimForeign "llvm" "move" [] _, [ArgVar{argVarName=fromVar},
+                                        ArgVar{argVarName=toVar}])
+        | Set.notMember fromVar usedLater && Set.member fromVar defs ->
+            modify (\s -> s { asmRenaming = Map.insert fromVar toVar
+                                            $ asmRenaming s })
+      _ -> do
+        let (ins, outs) = splitArgsByMode args'
+        when (any (`Set.member` usedLater) $ argVarName <$> outs) $ do
+          let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args'
+          let inVars = argVarName <$> List.filter argIsVar ins
+          let usedLater' = List.foldr Set.insert usedLater inVars
+          st@BkwdBuilderState{asmFollowing=bd@ProcBody{bodyPrims=prims}} <- get
+          put $ st { asmFollowing =
+                       bd { bodyPrims = maybePlace prim' pos:prims },
+                     asmUsedLater = usedLater' }
+
+
+renameArg :: PrimArg -> BkwdBuilder PrimArg
+renameArg arg@ArgVar{argVarName=name} = do
+    name' <- gets (Map.findWithDefault name name . asmRenaming)
+    return $ arg { argVarName = name' }
+renameArg arg = return arg
 
 
 markIfLastUse :: Set PrimVarName -> PrimArg -> PrimArg

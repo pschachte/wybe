@@ -43,8 +43,7 @@ AFTER EVERYTHING:
     foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
 = > public inline test (0 calls)
 2: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
-    foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?tmp$0#0:wybe.bool)
-    foreign llvm move(~tmp$0#0:wybe.bool, ?$$#0:wybe.bool)
+    foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?$$#0:wybe.bool)
 
 
 autumn > public inline (0 calls)
@@ -87,8 +86,8 @@ entry:
 ; Function Attrs: norecurse nounwind readnone
 define i1 @"type_enum.season.=<1>.1"(i2 %"$left#0", i2 %"$right#0") local_unnamed_addr #0 {
 entry:
-  %"tmp$0#0" = icmp eq i2 %"$left#0", %"$right#0"
-  ret i1 %"tmp$0#0"
+  %"$$#0" = icmp eq i2 %"$left#0", %"$right#0"
+  ret i1 %"$$#0"
 }
 
 ; Function Attrs: norecurse nounwind readnone
@@ -136,8 +135,8 @@ entry:
 ; Function Attrs: norecurse nounwind readnone
 define i1 @"type_enum.season.=<1>.1"(i2 %"$left#0", i2 %"$right#0") local_unnamed_addr #0 {
 entry:
-  %"tmp$0#0" = icmp eq i2 %"$left#0", %"$right#0"
-  ret i1 %"tmp$0#0"
+  %"$$#0" = icmp eq i2 %"$left#0", %"$right#0"
+  ret i1 %"$$#0"
 }
 
 ; Function Attrs: norecurse nounwind readnone

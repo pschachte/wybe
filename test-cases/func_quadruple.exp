@@ -13,15 +13,13 @@ AFTER EVERYTHING:
 
 double > public inline (2 calls)
 0: double(a#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?tmp$3#0:wybe.int) @wybe:13:38
-    foreign llvm move(~tmp$3#0:wybe.int, ?$#0:wybe.int) @func_quadruple:1:8
+    foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?$#0:wybe.int) @wybe:13:38
 
 
 quadruple > public inline (0 calls)
 0: quadruple(a#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?tmp$3#0:wybe.int) @wybe:13:38
-    foreign llvm add(~tmp$3#0:wybe.int, ~tmp$3#0:wybe.int, ?tmp$5#0:wybe.int) @wybe:13:38
-    foreign llvm move(~tmp$5#0:wybe.int, ?$#0:wybe.int) @func_quadruple:3:8
+    foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?tmp$1#0:wybe.int) @wybe:13:38
+    foreign llvm add(~tmp$1#0:wybe.int, ~tmp$1#0:wybe.int, ?$#0:wybe.int) @wybe:13:38
 func_quadruple
 ======================================================================
 AFTER LLVM IR:
@@ -32,15 +30,15 @@ source_filename = "test-cases/func_quadruple.wybe"
 ; Function Attrs: norecurse nounwind readnone
 define i64 @"func_quadruple.double<0>"(i64 %"a#0") local_unnamed_addr #0 {
 entry:
-  %"tmp$3#0" = shl i64 %"a#0", 1
-  ret i64 %"tmp$3#0"
+  %"$#0" = shl i64 %"a#0", 1
+  ret i64 %"$#0"
 }
 
 ; Function Attrs: norecurse nounwind readnone
 define i64 @"func_quadruple.quadruple<0>"(i64 %"a#0") local_unnamed_addr #0 {
 entry:
-  %"tmp$5#0" = shl i64 %"a#0", 2
-  ret i64 %"tmp$5#0"
+  %"$#0" = shl i64 %"a#0", 2
+  ret i64 %"$#0"
 }
 
 attributes #0 = { norecurse nounwind readnone }
