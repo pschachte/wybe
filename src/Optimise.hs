@@ -41,11 +41,6 @@ optimiseMod mods thisMod = do
 
     mapM_ optimiseSccBottomUp ordered
 
-    -- check freshness
-    logOptimise "\n~~~~~~ freshness analysis: ~~~~~~\n"
-    mapM_ freshVarM ordered
-    logOptimise  "~~~~~~~~~~~~\n\n"
-
     finishModule
     return (False,[])
 
@@ -104,7 +99,7 @@ optimiseProcDefBU :: ProcSpec -> ProcDef -> Compiler ProcDef
 optimiseProcDefBU pspec def = do
     logOptimise $ "*** " ++ show pspec ++
       " before optimisation:" ++ showProcDef 4 def
-    def' <- procExpansion pspec def >>= decideInlining
+    def' <- procExpansion pspec def >>= decideInlining >>= updateFreshness
     logOptimise $ "*** " ++ show pspec ++
       " after optimisation:" ++ showProcDef 4 def'
     return def'
@@ -175,40 +170,55 @@ logOptimise s = logMsg Optimise s
 ----------------------------------------------------------------
 --                     Freshness Analysis
 ----------------------------------------------------------------
-data FreshVarSetAction = AppendOnly | Both
-
-freshVarM :: SCC ProcSpec -> Compiler ()
-freshVarM procs = do
-    logOptimise $ show $ sccElts procs
-    mapM_ freshVarProc $ sccElts procs
-    return ()
-
-freshVarProc :: ProcSpec -> Compiler ()
-freshVarProc pspec = do
-    pdef <- getProcDef pspec
-    let (ProcDefPrim proto body) = procImpln pdef
+-- Build a set of fresh vars and update destructive flag in lpvm mutate
+-- instruction
+updateFreshness :: ProcDef -> Compiler ProcDef
+updateFreshness prodDef = do
+    let (ProcDefPrim proto body) = procImpln prodDef
     let prims = bodyPrims body
-    let freshset = List.foldl (\fs prim -> freshVarPrim (content prim) fs) Set.empty prims
+    let (freshset, prims') =
+            List.foldl (\(fs, ps) prim -> freshInPrim prim (fs, ps))
+                (Set.empty, []) prims
+    logOptimise "*** Freshness analysis:"
     logOptimise $ show freshset
-    return ()
+    logOptimise "***********************"
+    let body' = body { bodyPrims = prims' }
+    return prodDef { procImpln = ProcDefPrim proto body' }
 
-freshVarPrim :: Prim -> Set PrimVarName -> Set PrimVarName
-freshVarPrim (PrimForeign _ "mutate" _ args) freshVars =
-    List.foldl (updateFreshVarSet Both) freshVars args
-freshVarPrim (PrimForeign _ _ _ args) freshVars =
-    List.foldl (updateFreshVarSet AppendOnly) freshVars args
-freshVarPrim _ freshVars = freshVars
 
-updateFreshVarSet :: FreshVarSetAction -> Set PrimVarName -> PrimArg
-                        -> Set PrimVarName
-updateFreshVarSet AppendOnly freshVars (ArgVar name _ dir _ _) =
-    case dir of
-        FlowOut -> Set.insert name freshVars
-        _       -> freshVars
-updateFreshVarSet Both freshVars (ArgVar name _ dir _ final) =
-    case dir of
-        FlowOut -> Set.insert name freshVars
-        FlowIn  ->
-            if final then Set.insert name freshVars
-            else Set.delete name freshVars
-updateFreshVarSet _ freshVars _ = freshVars
+-- Update args in a signle (alloc/mutate) prim
+freshInPrim :: Placed Prim -> (Set PrimVarName, [Placed Prim])
+                    -> (Set PrimVarName, [Placed Prim])
+freshInPrim (Placed (PrimForeign lang "mutate" flags args) pos) (freshVars, prims) =
+    (freshVars', prims ++ [Placed (PrimForeign lang "mutate" flags args') pos])
+        where (freshVars', args') = freshInMutate freshVars args
+freshInPrim (Unplaced (PrimForeign lang "mutate" flags args)) (freshVars, prims) =
+    (freshVars', prims ++ [Unplaced (PrimForeign lang "mutate" flags args')])
+        where (freshVars', args') = freshInMutate freshVars args
+freshInPrim prim (freshVars, prims) =
+    case content prim of
+        (PrimForeign _ "alloc" _ args) ->
+            (freshVars', prims ++ [prim])
+                where freshVars' = List.foldl freshInAlloc freshVars args
+        _ ->
+            (freshVars, prims ++ [prim])
+
+
+freshInAlloc :: Set PrimVarName -> PrimArg -> Set PrimVarName
+freshInAlloc freshVars (ArgVar nm _ FlowOut _ _) = Set.insert nm freshVars
+freshInAlloc freshVars _ = freshVars
+
+-- foreign lpvm mutate(struct:type, ?struct2:type, *size:int, offset:int,
+-- destructive:bool, member:type2)
+freshInMutate :: Set PrimVarName -> [PrimArg] -> (Set PrimVarName, [PrimArg])
+freshInMutate freshVars
+    [fIn@(ArgVar inName _ _ _ final), fOut@(ArgVar outName _ _ _ _), size,
+    offset, ArgInt des typ, mem] =
+        let
+            freshVars' = Set.delete inName freshVars
+            freshVars'' = Set.insert outName freshVars'
+        in
+            if Set.member inName freshVars'' || final
+            then (freshVars'', [fIn, fOut, size, offset, ArgInt 1 typ, mem])
+            else (freshVars'', [fIn, fOut, size, offset, ArgInt 0 typ, mem])
+freshInMutate freshVars args = (freshVars, args)
