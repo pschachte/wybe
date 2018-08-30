@@ -480,12 +480,12 @@ equalityNonconsts ctrs _ =
 --  that $right is also that constructor and all the fields match; if
 --  it doesn't match, it tests the next possible constructor, etc.
 equalityMultiNonconsts :: [FnProto] -> Placed Stmt
-equalityMultiNonconsts [] = succeedTest
+equalityMultiNonconsts [] = failTest
 equalityMultiNonconsts (FnProto name params _:ctrs) =
     Unplaced
      $ Cond (deconstructCall name "$left" params SemiDet)
-        ([deconstructCall name "$right" params SemiDet]
-         ++ concatMap equalityField params)
+        [Unplaced $ And ([deconstructCall name "$right" params SemiDet]
+                         ++ concatMap equalityField params)]
         [equalityMultiNonconsts ctrs]
 
 -- |Return code to deconstruct 
