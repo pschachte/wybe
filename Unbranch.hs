@@ -194,9 +194,7 @@ resetTerminated terminated = do
     lp <- gets brLoopInfo
     if lp /= NoLoop
        then modify (\s -> s { brLoopInfo = lp { loopTerminated = terminated }})
-        else if terminated
-             then shouldnt "Next or Break outside a loop"
-             else return ()
+        else when terminated $ shouldnt "Next or Break outside a loop"
 
 
 -- | Set the Break and Next proc calls in the monad
@@ -244,8 +242,7 @@ setVars vs =
 
 
 newProcName :: Unbrancher String
-newProcName = do
-    lift genProcName
+newProcName = lift genProcName
 
 
 genProc :: ProcProto -> [Placed Stmt] -> Unbrancher ()
