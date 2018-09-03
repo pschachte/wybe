@@ -194,9 +194,7 @@ resetTerminated terminated = do
     lp <- gets brLoopInfo
     if lp /= NoLoop
        then modify (\s -> s { brLoopInfo = lp { loopTerminated = terminated }})
-        else if terminated
-             then shouldnt "Next or Break outside a loop"
-             else return ()
+        else when terminated $ shouldnt "Next or Break outside a loop"
 
 
 -- | Set the Break and Next proc calls in the monad
@@ -244,8 +242,7 @@ setVars vs =
 
 
 newProcName :: Unbrancher String
-newProcName = do
-    lift genProcName
+newProcName = lift genProcName
 
 
 genProc :: ProcProto -> [Placed Stmt] -> Unbrancher ()
@@ -340,11 +337,21 @@ unbranchStmt detism stmt@(ProcCall _ _ _ Det args) pos stmts = do
     leaveStmtAsIs stmt pos detism stmts
 unbranchStmt Det stmt@(ProcCall md name procID SemiDet args) pos stmts =
     shouldnt $ "Semidet proc call " ++ show stmt ++ " in a Det context"
+unbranchStmt SemiDet stmt@(ProcCall md name procID SemiDet args) pos [] = do
+    logUnbranch $ "converting SemiDet proc call" ++ show stmt
+    testVarName <- tempVar
+    let result = [maybePlace (ProcCall md name procID Det
+                         $ args ++ [Unplaced (boolVarSet testVarName)]) pos,
+                 maybePlace (TestBool $ varGet testVarName) pos]
+    logUnbranch $ "#Converted SemiDet proc call" ++ show stmt
+    logUnbranch $ "#To: " ++ showBody 4 result
+    return result
 unbranchStmt SemiDet stmt@(ProcCall md name procID SemiDet args) pos stmts = do
     logUnbranch $ "converting SemiDet proc call" ++ show stmt
     testVarName <- tempVar
     let testStmt = TestBool $ varGet testVarName
-    stmts' <- unbranchStmt SemiDet testStmt pos stmts
+    stmts' <- unbranchStmt SemiDet (Cond (maybePlace testStmt pos)
+                                    stmts [failTest]) pos []
     let result = (maybePlace (ProcCall md name procID Det
                          $ args ++ [Unplaced (boolVarSet testVarName)]) pos
                  : stmts')
