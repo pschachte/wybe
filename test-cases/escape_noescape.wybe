@@ -1,0 +1,15 @@
+# Should we move p1 to p2 directly?
+# Or do we allocation p1 in stack?
+
+use position
+public proc replicate(?p2:position)
+  ?p1 = position(101,102)
+  ?p2 = position(p1.x, p1.y)
+end
+
+public proc foo use !io
+  ?p2 = replicate
+  println(p2.x) # 101
+end
+
+foo
