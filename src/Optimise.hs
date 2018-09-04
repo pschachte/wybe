@@ -176,26 +176,25 @@ updateFreshness :: ProcDef -> Compiler ProcDef
 updateFreshness prodDef = do
     let (ProcDefPrim proto body) = procImpln prodDef
     let prims = bodyPrims body
-    let (freshset, prims') =
-            List.foldl (\(fs, ps) prim -> freshInPrim prim (fs, ps))
-                (Set.empty, []) prims
+    let (freshset, prims') = List.foldl freshInPrim (Set.empty, []) prims
+    logOptimise "\n***********************"
     logOptimise "*** Freshness analysis:"
     logOptimise $ show freshset
-    logOptimise "***********************"
+    logOptimise "***********************\n\n"
     let body' = body { bodyPrims = prims' }
     return prodDef { procImpln = ProcDefPrim proto body' }
 
 
 -- Update args in a signle (alloc/mutate) prim
-freshInPrim :: Placed Prim -> (Set PrimVarName, [Placed Prim])
-                    -> (Set PrimVarName, [Placed Prim])
-freshInPrim (Placed (PrimForeign lang "mutate" flags args) pos) (freshVars, prims) =
+freshInPrim :: (Set PrimVarName, [Placed Prim]) -> Placed Prim
+                -> (Set PrimVarName, [Placed Prim])
+freshInPrim (freshVars, prims) (Placed (PrimForeign lang "mutate" flags args) pos) =
     (freshVars', prims ++ [Placed (PrimForeign lang "mutate" flags args') pos])
         where (freshVars', args') = freshInMutate freshVars args
-freshInPrim (Unplaced (PrimForeign lang "mutate" flags args)) (freshVars, prims) =
+freshInPrim (freshVars, prims) (Unplaced (PrimForeign lang "mutate" flags args)) =
     (freshVars', prims ++ [Unplaced (PrimForeign lang "mutate" flags args')])
         where (freshVars', args') = freshInMutate freshVars args
-freshInPrim prim (freshVars, prims) =
+freshInPrim (freshVars, prims) prim =
     case content prim of
         (PrimForeign _ "alloc" _ args) ->
             (freshVars', prims ++ [prim])
