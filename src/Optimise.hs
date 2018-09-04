@@ -99,7 +99,7 @@ optimiseProcDefBU :: ProcSpec -> ProcDef -> Compiler ProcDef
 optimiseProcDefBU pspec def = do
     logOptimise $ "*** " ++ show pspec ++
       " before optimisation:" ++ showProcDef 4 def
-    def' <- procExpansion pspec def >>= decideInlining >>= updateFreshness
+    def' <- procExpansion pspec def >>= decideInlining >>= updateFreshness >>= checkEscape
     logOptimise $ "*** " ++ show pspec ++
       " after optimisation:" ++ showProcDef 4 def'
     return def'
@@ -221,3 +221,71 @@ freshInMutate freshVars
             then (freshVars'', [fIn, fOut, size, offset, ArgInt 1 typ, mem])
             else (freshVars'', [fIn, fOut, size, offset, ArgInt 0 typ, mem])
 freshInMutate freshVars args = (freshVars, args)
+
+
+----------------------------------------------------------------
+--                     Escape Analysis
+----------------------------------------------------------------
+-- Check any argument become stale after this proc call if this
+-- proc is not inlined
+checkEscape :: ProcDef -> Compiler ProcDef
+checkEscape def
+    | not (procInline def) = do
+        let (ProcDefPrim proto body) = procImpln def
+        let prims = bodyPrims body
+        let escapablePrims = List.filter
+                                (\prim -> escapablePrim $ content prim) prims
+        let escapedVars = List.foldl (escapedProcArgs proto) [] escapablePrims
+        let escapedVarSt = Set.fromList escapedVars
+
+        logOptimise "\n....................."
+        logOptimise "*** Escape analysis:"
+        logOptimise $ "Checking " ++ procName def
+        logOptimise $ show escapedVarSt
+
+        escapeInfo <- procEscapeInfo proto escapedVarSt
+        logOptimise $ show escapeInfo
+        logOptimise ".....................\n\n"
+
+        return def
+checkEscape def = return def
+
+
+escapablePrim :: Prim -> Bool
+escapablePrim (PrimForeign _ "move" _ args) = True
+escapablePrim (PrimForeign _ "mutate" _ args) = True
+escapablePrim _ = False
+
+escapablePrimArgs :: Prim -> [PrimArg]
+escapablePrimArgs (PrimForeign _ "move" _ args) = args
+escapablePrimArgs (PrimForeign _ "mutate" _ args) = args
+escapablePrimArgs _ = []
+-- escapablePrimArgs :: Prim -> Compiler [PrimArg]
+-- escapablePrimArgs (PrimForeign _ "move" _ args) = return args
+-- escapablePrimArgs (PrimForeign _ "mutate" _ args) = return args
+-- escapablePrimArgs _ = shouldnt "not escapable"
+
+
+escapedProcArgs :: PrimProto -> [PrimVarName] -> Placed Prim -> [PrimVarName]
+escapedProcArgs proto escapedVars prim =
+    let args = escapablePrimArgs $ content prim
+        inputArgs = List.filter ((FlowIn ==) . argFlowDirection) args
+        escapedInputs = List.foldl
+                        (\es arg ->
+                            if procProtoArg proto arg
+                                then inArgVar arg:es
+                                else es)
+                                    [] inputArgs
+    in escapedVars ++ escapedInputs
+
+procEscapeInfo :: PrimProto -> Set PrimVarName -> Compiler [Bool]
+procEscapeInfo proto escapedVars = do
+    let protoParams = primProtoParams proto
+    logOptimise $ show $ List.foldr (\pram bs ->
+                                        primParamName pram : bs) [] protoParams
+    let info = List.foldr (\pram bs ->
+                    let pnm = primParamName pram
+                    in if Set.member pnm escapedVars
+                        then True:bs
+                        else False:bs) [] protoParams
+    return info

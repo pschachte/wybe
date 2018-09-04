@@ -19,7 +19,7 @@ module AST (
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt,
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
-  phantomParam, phantomArg, phantomType,
+  phantomParam, phantomArg, phantomType, procProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
@@ -33,7 +33,7 @@ module AST (
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
-  argFlowDirection, argType, outArgVar, argDescription, flowsIn, flowsOut,
+  argFlowDirection, argType, inArgVar, outArgVar, argDescription, flowsIn, flowsOut,
   foldProcCalls, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp, expFlow,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
@@ -773,7 +773,7 @@ addImport modspec imports = do
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis detism inline proto stmts pos) = do
     let name = procProtoName proto
-    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 
+    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr
                   Map.empty vis detism inline $ initSuperprocSpec vis
     addProcDef procDef
 addProc _ item =
@@ -1784,6 +1784,15 @@ phantomType TypeSpec{typeName="phantom"} = True
 phantomType _ = False
 
 
+-- |Is the supplied argument a parameter of the proc proto
+procProtoArg :: PrimProto -> PrimArg -> Bool
+procProtoArg proto arg@ArgVar {} =
+    let protoParams = primProtoParams proto
+        paramNames = List.foldl
+                        (\ps pram -> primParamName pram:ps) [] protoParams
+    in List.elem (argVarName arg) paramNames
+procProtoArg _ _ = False
+
 -- |A loop generator (ie, an iterator).  These need to be
 --  generalised, allowing them to be user-defined.
 data Generator
@@ -1814,21 +1823,20 @@ instance Show Prim where
 
 -- |The allowed arguments in primitive proc or foreign proc calls,
 --  just variables and constants.
-data PrimArg 
+data PrimArg
      = ArgVar {argVarName     :: PrimVarName, -- ^Name of output variable
                argVarType     :: TypeSpec,    -- ^Its type
                argVarFlow     :: PrimFlow,    -- ^Its flow direction
                argVarFlowType :: ArgFlowType, -- ^Its flow type
                argVarFinal    :: Bool         -- ^Is this a definite last use
                                               -- (one use in the last statement
-                                              -- to use the variable) 
+                                              -- to use the variable)
               }
      | ArgInt Integer TypeSpec
      | ArgFloat Double TypeSpec
      | ArgString String TypeSpec
      | ArgChar Char TypeSpec
      deriving (Eq,Ord,Generic)
-
 
 -- |Returns a list of all arguments to a prim
 primArgs :: Prim -> [PrimArg]
@@ -1883,6 +1891,9 @@ argType (ArgFloat _ typ) = typ
 argType (ArgString _ typ) = typ
 argType (ArgChar _ typ) = typ
 
+inArgVar:: PrimArg -> PrimVarName
+inArgVar (ArgVar var _ flow _ _) | flow == FlowIn = var
+inArgVar _ = shouldnt "inArgVar of input argument"
 
 outArgVar:: PrimArg -> PrimVarName
 outArgVar (ArgVar var _ flow _ _) | flow == FlowOut = var
@@ -1913,7 +1924,7 @@ expToStmt (Fncall [] "or"  args) = Or  $ List.map (fmap expToStmt) args
 expToStmt (Fncall [] "not" [arg]) = Not $ fmap expToStmt arg
 expToStmt (Fncall [] "not" args) = shouldnt $ "non-unary 'not' " ++ show args
 expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name Nothing Det args
-expToStmt (ForeignFn lang name flags args) = 
+expToStmt (ForeignFn lang name flags args) =
     ForeignCall lang name flags args
 expToStmt (Var name ParamIn _) = ProcCall [] name Nothing Det []
 expToStmt expr = shouldnt $ "non-Fncall expr " ++ show expr
@@ -2363,7 +2374,7 @@ showStmt _ (TestBool test) =
 showStmt indent (And stmts) =
     intercalate (" and\n" ++ replicate indent' ' ')
     (List.map (showStmt indent' . content) stmts) ++
-    ")"  
+    ")"
     where indent' = indent + 4
 showStmt indent (Or stmts) =
     "(   " ++
