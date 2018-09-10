@@ -41,6 +41,8 @@ optimiseMod mods thisMod = do
 
     mapM_ optimiseSccBottomUp ordered
 
+    -- mapM_ (mapM_ aliasSccTopDown . sccElts) ordered
+
     finishModule
     return (False,[])
 
@@ -173,8 +175,8 @@ logOptimise s = logMsg Optimise s
 -- Build a set of fresh vars and update destructive flag in lpvm mutate
 -- instruction
 updateFreshness :: ProcDef -> Compiler ProcDef
-updateFreshness prodDef = do
-    let (ProcDefPrim proto body) = procImpln prodDef
+updateFreshness procDef = do
+    let (ProcDefPrim proto body) = procImpln procDef
     let prims = bodyPrims body
     let (freshset, prims') = List.foldl freshInPrim (Set.empty, []) prims
     logOptimise "\n***********************"
@@ -182,7 +184,7 @@ updateFreshness prodDef = do
     logOptimise $ show freshset
     logOptimise "***********************\n\n"
     let body' = body { bodyPrims = prims' }
-    return prodDef { procImpln = ProcDefPrim proto body' }
+    return procDef { procImpln = ProcDefPrim proto body' }
 
 
 -- Update args in a signle (alloc/mutate) prim
@@ -226,66 +228,78 @@ freshInMutate freshVars args = (freshVars, args)
 ----------------------------------------------------------------
 --                     Escape Analysis
 ----------------------------------------------------------------
+
+-- aliasSccTopDown :: ProcSpec -> Compiler ()
+-- aliasSccTopDown pspec = do
+--     logOptimise $ ">>> Alias analysis (Top-down) " ++ show pspec
+--     pdef <- getProcDef pspec
+--     checkEscape pdef
+--     return ()
+
+-- Help function to normalise alias pairs in order
+normalise :: Ord a => (a,a) -> (a,a)
+normalise t@(x,y)
+    | y < x    = (y,x)
+    | otherwise = t
+
+-- Then remove duplicated alias pairs
+removeDupTuples :: Ord a => [(a,a)] -> [(a,a)]
+removeDupTuples =
+    List.map List.head . List.group . List.sort . List.map normalise
+
+
 -- Check any argument become stale after this proc call if this
 -- proc is not inlined
 checkEscape :: ProcDef -> Compiler ProcDef
 checkEscape def
     | not (procInline def) = do
-        let (ProcDefPrim proto body) = procImpln def
-        let prims = bodyPrims body
-        let escapablePrims = List.filter
-                                (\prim -> escapablePrim $ content prim) prims
-        let escapedVars = List.foldl (escapedProcArgs proto) [] escapablePrims
-        let escapedVarSt = Set.fromList escapedVars
-
         logOptimise "\n....................."
         logOptimise "*** Escape analysis:"
-        logOptimise $ "Checking " ++ procName def
-        logOptimise $ show escapedVarSt
-
-        escapeInfo <- procEscapeInfo proto escapedVarSt
-        logOptimise $ show escapeInfo
+        logOptimise $ "*** " ++ procName def
+        let (ProcDefPrim entryProto body) = procImpln def
+        let prims = bodyPrims body
+        let aliasPairs = List.foldr
+                            (\prim alias ->
+                                let args = escapablePrimArgs $ content prim
+                                in aliasProcVars entryProto args alias) [] prims
+        let aliasPairs' = removeDupTuples aliasPairs
+        let proto' = entryProto { primProtoAliases = aliasPairs' }
+        logOptimise $ "Alias pairs: " ++ show aliasPairs'
         logOptimise ".....................\n\n"
-
-        return def
+        return def { procImpln = ProcDefPrim proto' body }
 checkEscape def = return def
 
-
-escapablePrim :: Prim -> Bool
-escapablePrim (PrimForeign _ "move" _ args) = True
-escapablePrim (PrimForeign _ "mutate" _ args) = True
-escapablePrim _ = False
 
 escapablePrimArgs :: Prim -> [PrimArg]
 escapablePrimArgs (PrimForeign _ "move" _ args) = args
 escapablePrimArgs (PrimForeign _ "mutate" _ args) = args
 escapablePrimArgs _ = []
--- escapablePrimArgs :: Prim -> Compiler [PrimArg]
--- escapablePrimArgs (PrimForeign _ "move" _ args) = return args
--- escapablePrimArgs (PrimForeign _ "mutate" _ args) = return args
--- escapablePrimArgs _ = shouldnt "not escapable"
 
 
-escapedProcArgs :: PrimProto -> [PrimVarName] -> Placed Prim -> [PrimVarName]
-escapedProcArgs proto escapedVars prim =
-    let args = escapablePrimArgs $ content prim
-        inputArgs = List.filter ((FlowIn ==) . argFlowDirection) args
-        escapedInputs = List.foldl
-                        (\es arg ->
-                            if procProtoArg proto arg
-                                then inArgVar arg:es
-                                else es)
-                                    [] inputArgs
-    in escapedVars ++ escapedInputs
+-- Only append to list if the arg is passed in by the enclosing entry proc or is
+-- the return arg of the proc
+argsOfProcProto :: PrimProto -> (PrimArg -> PrimVarName) -> [PrimArg]
+                    -> [PrimVarName]
+argsOfProcProto entryProto varNameGetter args =
+    let paramNames = procProtoParamNames entryProto
+    in List.foldl (\es arg ->
+        if isProcProtoArg paramNames arg
+            then varNameGetter arg:es
+            else es) [] args
 
-procEscapeInfo :: PrimProto -> Set PrimVarName -> Compiler [Bool]
-procEscapeInfo proto escapedVars = do
-    let protoParams = primProtoParams proto
-    logOptimise $ show $ List.foldr (\pram bs ->
-                                        primParamName pram : bs) [] protoParams
-    let info = List.foldr (\pram bs ->
-                    let pnm = primParamName pram
-                    in if Set.member pnm escapedVars
-                        then True:bs
-                        else False:bs) [] protoParams
-    return info
+
+-- Cartesian product of escaped FlowIn vars to proc output
+cartProd :: [PrimVarName] -> [PrimVarName] -> [(PrimVarName, PrimVarName)]
+cartProd ins outs = [(i, o) | i <- ins, o <- outs]
+
+
+-- Check Arg escape in one prim of prims of the a ProcBody
+aliasProcVars :: PrimProto -> [PrimArg] -> [(PrimVarName, PrimVarName)]
+                     -> [(PrimVarName, PrimVarName)]
+aliasProcVars entryProto [] aliasPairs = aliasPairs
+aliasProcVars entryProto args aliasPairs =
+    let inputArgs = List.filter ((FlowIn ==) . argFlowDirection) args
+        outputArgs = List.filter ((FlowOut ==) . argFlowDirection) args
+        escapedInputs = argsOfProcProto entryProto inArgVar inputArgs
+        escapedVia = argsOfProcProto entryProto outArgVar outputArgs
+    in cartProd escapedInputs escapedVia ++ aliasPairs

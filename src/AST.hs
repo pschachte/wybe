@@ -19,7 +19,7 @@ module AST (
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt,
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
-  phantomParam, phantomArg, phantomType, procProtoArg,
+  phantomParam, phantomArg, phantomType, procProtoParamNames, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
@@ -1784,15 +1784,16 @@ phantomType :: TypeSpec -> Bool
 phantomType TypeSpec{typeName="phantom"} = True
 phantomType _ = False
 
+-- |Get proto param names in a list
+procProtoParamNames :: PrimProto -> [PrimVarName]
+procProtoParamNames proto =
+    let protoParams = primProtoParams proto
+    in List.foldl (\ps pram -> primParamName pram:ps) [] protoParams
 
 -- |Is the supplied argument a parameter of the proc proto
-procProtoArg :: PrimProto -> PrimArg -> Bool
-procProtoArg proto arg@ArgVar {} =
-    let protoParams = primProtoParams proto
-        paramNames = List.foldl
-                        (\ps pram -> primParamName pram:ps) [] protoParams
-    in List.elem (argVarName arg) paramNames
-procProtoArg _ _ = False
+isProcProtoArg :: [PrimVarName] -> PrimArg -> Bool
+isProcProtoArg paramNames arg@ArgVar {} = argVarName arg `elem` paramNames
+isProcProtoArg _ _ = False
 
 -- |A loop generator (ie, an iterator).  These need to be
 --  generalised, allowing them to be user-defined.
