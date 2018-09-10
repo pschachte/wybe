@@ -26,7 +26,7 @@ import Control.Monad.Trans (lift,liftIO)
 --                 Clause compiler monad
 ----------------------------------------------------------------
 
--- |The clause compiler monad is a state transformer monad carrying the 
+-- |The clause compiler monad is a state transformer monad carrying the
 --  clause compiler state over the compiler monad.
 type ClauseComp = StateT ClauseCompState Compiler
 
@@ -76,7 +76,7 @@ evalClauseComp clcomp =
     evalStateT clcomp initClauseComp
 
 
--- |Compile a ProcDefSrc to a ProcDefPrim, ie, compile a proc 
+-- |Compile a ProcDefSrc to a ProcDefPrim, ie, compile a proc
 --  definition in source form to one in clausal form.
 compileProc :: ProcDef -> Compiler ProcDef
 compileProc proc =
@@ -98,7 +98,7 @@ compileProc proc =
         logClause $ "  endVars  : " ++ show endVars
         logClause $ "  params   : " ++ show params
         let params'' = List.map (compileParam startVars endVars) params'
-        let proto' = PrimProto (procProtoName proto) params''
+        let proto' = PrimProto (procProtoName proto) params'' []
         logClause $ "  comparams: " ++ show params''
         return $ proc { procImpln = ProcDefPrim proto' compiled }
 

@@ -1618,13 +1618,14 @@ data ProcProto = ProcProto {
 -- |A proc prototype, including name and formal parameters.
 data PrimProto = PrimProto {
     primProtoName::ProcName,
-    primProtoParams::[PrimParam]
+    primProtoParams::[PrimParam],
+    primProtoAliases::[(PrimVarName,PrimVarName)]
     } deriving (Eq, Generic)
 
 
 instance Show PrimProto where
-  show (PrimProto name params) =
-    name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")"
+  show (PrimProto name params aliases) =
+    name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")" ++ show aliases
 
 
 -- |A formal parameter, including name, type, and flow direction.
