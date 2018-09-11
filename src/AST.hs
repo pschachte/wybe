@@ -1625,7 +1625,7 @@ data PrimProto = PrimProto {
 
 instance Show PrimProto where
   show (PrimProto name params aliases) =
-    name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")" ++ show aliases
+    name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ") aliases " ++ show aliases
 
 
 -- |A formal parameter, including name, type, and flow direction.

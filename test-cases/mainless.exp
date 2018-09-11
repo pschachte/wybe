@@ -11,7 +11,7 @@ AFTER EVERYTHING:
   procs           : 
 
 nothing_interesting > public inline (0 calls)
-0: nothing_interesting(?$#0:wybe.int):
+0: nothing_interesting(?$#0:wybe.int) aliases []:
     foreign llvm move(7:wybe.int, ?$#0:wybe.int) @mainless:4:8
 mainless
 ======================================================================

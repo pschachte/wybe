@@ -40,13 +40,13 @@ AFTER EVERYTHING:
   procs           : 
 
 = > public inline (0 calls)
-0: =(?out#0:position.position, in#0:position.position):
+0: =(?out#0:position.position, in#0:position.position) aliases []:
     foreign llvm move(~in#0:position.position, ?out#0:position.position)
 = > public inline (0 calls)
-1: =(in#0:position.position, ?out#0:position.position):
+1: =(in#0:position.position, ?out#0:position.position) aliases []:
     foreign llvm move(~in#0:position.position, ?out#0:position.position)
 = > public inline test (3 calls)
-2: =($left#0:position.position, $right#0:position.position, ?$$#0:wybe.bool):
+2: =($left#0:position.position, $right#0:position.position, ?$$#0:wybe.bool) aliases []:
     foreign lpvm access($left#0:position.position, 0:wybe.int, ?$left$x#0:wybe.int)
     foreign lpvm access(~$left#0:position.position, 8:wybe.int, ?$left$y#0:wybe.int)
     foreign lpvm access($right#0:position.position, 0:wybe.int, ?$right$x#0:wybe.int)
@@ -62,30 +62,30 @@ AFTER EVERYTHING:
 
 
 position > public inline (0 calls)
-0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:position.position):
+0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:position.position) aliases []:
     foreign lpvm alloc(16:wybe.int, ?$rec#0:position.position)
     foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, ~x#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:position.position, ?%$rec#2:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~y#0:wybe.int)
+    foreign lpvm mutate(~%$rec#1:position.position, ?%$#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~y#0:wybe.int)
 position > public inline (4 calls)
-1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position):
+1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position) aliases []:
     foreign lpvm access($#0:position.position, 0:wybe.int, ?x#0:wybe.int)
     foreign lpvm access(~$#0:position.position, 8:wybe.int, ?y#0:wybe.int)
 
 
 x > public inline (0 calls)
-0: x($rec#0:position.position, ?$#0:wybe.int):
+0: x($rec#0:position.position, ?$#0:wybe.int) aliases []:
     foreign lpvm access(~$rec#0:position.position, 0:wybe.int, ?$#0:wybe.int)
 x > public inline (0 calls)
-1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int) aliases []:
+    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
 
 
 y > public inline (0 calls)
-0: y($rec#0:position.position, ?$#0:wybe.int):
+0: y($rec#0:position.position, ?$#0:wybe.int) aliases []:
     foreign lpvm access(~$rec#0:position.position, 8:wybe.int, ?$#0:wybe.int)
 y > public inline (0 calls)
-1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int) aliases []:
+    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
 position, position.position
 ======================================================================
 AFTER LLVM IR:
