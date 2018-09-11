@@ -618,14 +618,15 @@ cgenLPVM pname flags args
 --     otherwise allocates fresh storage, copies old contents,
 --     and mutates the new storage.
     | pname == "mutate" = do
-          let (ptrOpArg, index, valArg) = case inputs of
-                  [a, _, b, _, c] -> (a, valTrust b , c)
+          let (ptrOpArg, size, index, destructiveArg, valArg) = case inputs of
+                -- XXX Using valTrust means the size and offset must be
+                --     constants; fix to allow variable sizes and offsets.
+                  [a, b, c, d, e] -> (a, valTrust b, valTrust c, d, e)
                   _         -> shouldnt "Incorrect mutate instruction."
           val <- cgenArg valArg
           ptrOp <- cgenArg ptrOpArg
-          op <- gcMutate ptrOp index val
-          assign outNm ptrOp
-          return $ Just ptrOp
+          outTy <- lift $ typed' $ argType $ head outputs
+          gcMutate ptrOp outNm outTy size index destructiveArg val
 
     | pname == "cast" = do
           when (length inputs /= 1) $ shouldnt "Incorrect cast instruction."
@@ -1169,8 +1170,9 @@ gcAccess ptr offset outTy = do
 -- in that indexed location.
 -- If the operand to be stored is a pointer, the ptrtoint instruction should
 -- precede the store instruction, with the int value of the pointer stored.
-gcMutate :: Operand -> Integer -> Operand -> Codegen Operand
-gcMutate ptr offset val = do
+gcMutate :: Operand -> String -> Type -> Integer -> Integer -> PrimArg
+         -> Operand -> Codegen (Maybe Operand)
+gcMutate ptr outNm _ size offset (ArgInt 1 _) val = do
     let opTypePtr = localOperandType ptr
     let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
@@ -1179,6 +1181,23 @@ gcMutate ptr offset val = do
     -- if val is a pointer then the ptrtoint instruction is needed
     storeOp <- makeStoreOp ptr val
     store accessPtr storeOp
+    assign outNm ptr
+    return $ Just ptr
+gcMutate ptr outNm outTy size offset (ArgInt 0 _) val = do
+    voidPtr <- callWybeMalloc size
+    newObj <- instr outTy $ LLVMAST.BitCast voidPtr outTy []
+    let opTypePtr = localOperandType ptr
+    let index = getIndex opTypePtr offset
+    let indices = [(cons $ C.Int 64 index)]
+    let getel = LLVMAST.GetElementPtr False ptr indices []
+    accessPtr <- instr opTypePtr getel
+    -- if val is a pointer then the ptrtoint instruction is needed
+    storeOp <- makeStoreOp ptr val
+    store accessPtr storeOp
+    assign outNm ptr
+    return $ Just ptr
+gcMutate ptr outNm _ size offset destructiveArg val =
+    nyi "lpvm mutate instruction with non-constant destructive flag"
 
 -- | Get the LLVMAST.Type the given pointer type points to.
 pullFromPointer :: LLVMAST.Type -> LLVMAST.Type
