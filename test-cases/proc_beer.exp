@@ -12,17 +12,17 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public inline (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) aliases []:
     proc_beer.gen$1<0>(99:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @proc_beer:5:5
 
 
 beer99 > public inline (1 calls)
-0: beer99(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+0: beer99(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) aliases []:
     proc_beer.gen$1<0>(99:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @proc_beer:5:5
 
 
 gen$1 > (2 calls)
-0: gen$1(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom):
+0: gen$1(count#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom) aliases []:
     foreign llvm icmp sge(count#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:27:40
     case ~tmp$1#0:wybe.bool of
     0:
@@ -38,7 +38,7 @@ gen$1 > (2 calls)
 
 
 gen$2 > inline (1 calls)
-0: gen$2([count#0:wybe.int], wybe.io$io#0:wybe.phantom, [?wybe.io$io#0:wybe.phantom]):
+0: gen$2([count#0:wybe.int], wybe.io$io#0:wybe.phantom, [?wybe.io$io#0:wybe.phantom]) aliases []:
 proc_beer
 ======================================================================
 AFTER LLVM IR:

@@ -11,7 +11,7 @@ AFTER EVERYTHING:
   procs           : 
 
 incr > inline (0 calls)
-0: incr(a#0:wybe.int, ?$#0:wybe.int):
+0: incr(a#0:wybe.int, ?$#0:wybe.int) aliases []:
     foreign llvm add(~a#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @wybe:13:38
 func_untyped
 ======================================================================
