@@ -12,20 +12,20 @@ AFTER EVERYTHING:
 
 plus > public inline (0 calls)
 0: plus(a#0:wybe.int, b#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm add(~a#0:wybe.int, ~b#0:wybe.int, ?tmp$3#0:wybe.int) @wybe:13:38
-    foreign llvm move(~tmp$3#0:wybe.int, ?$#0:wybe.int) @func_typed:1:8
+    foreign llvm add(~a#0:wybe.int, ~b#0:wybe.int, ?$#0:wybe.int) @wybe:13:38
 func_typed
 ======================================================================
 AFTER LLVM IR:
 
 ; ModuleID = 'func_typed'
+source_filename = "test-cases/func_typed.wybe"
 
-; Function Attrs: nounwind readnone
-define i64 @"func_typed.plus<0>"(i64 %"a#0", i64 %"b#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"func_typed.plus<0>"(i64 %"a#0", i64 %"b#0") local_unnamed_addr #0 {
 entry:
-  %"tmp$3#0" = add i64 %"b#0", %"a#0"
-  ret i64 %"tmp$3#0"
+  %"$#0" = add i64 %"b#0", %"a#0"
+  ret i64 %"$#0"
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 

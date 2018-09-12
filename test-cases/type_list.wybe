@@ -1,6 +1,6 @@
 public type intlist = public [] | [|](head:int, tail:intlist) end
 
 public func ++(x:intlist, y:intlist):intlist =
-    if x = []
-    then y
-    else [x.head|x.tail++y]
+    if x = [ ?h | ?t]
+    then [h|t++y]
+    else y

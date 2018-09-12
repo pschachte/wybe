@@ -12,20 +12,20 @@ AFTER EVERYTHING:
 
 unneeded > inline (0 calls)
 0: unneeded(x#0:wybe.int, [y#0:wybe.int], ?z#0:wybe.int, q#0:wybe.int, [?q#0:wybe.int]):
-    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:13:38
-    foreign llvm move(~tmp$3#0:wybe.int, ?z#0:wybe.int)
+    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?z#0:wybe.int) @wybe:13:38
 unneeded
 ======================================================================
 AFTER LLVM IR:
 
 ; ModuleID = 'unneeded'
+source_filename = "test-cases/unneeded.wybe"
 
-; Function Attrs: nounwind readnone
-define i64 @"unneeded.unneeded<0>"(i64 %"x#0", i64 %"q#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"unneeded.unneeded<0>"(i64 %"x#0", i64 %"q#0") local_unnamed_addr #0 {
 entry:
-  %"tmp$3#0" = add i64 %"x#0", 1
-  ret i64 %"tmp$3#0"
+  %"z#0" = add i64 %"x#0", 1
+  ret i64 %"z#0"
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 

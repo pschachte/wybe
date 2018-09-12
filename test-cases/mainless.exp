@@ -18,12 +18,13 @@ mainless
 AFTER LLVM IR:
 
 ; ModuleID = 'mainless'
+source_filename = "test-cases/mainless.wybe"
 
-; Function Attrs: nounwind readnone
-define i64 @"mainless.nothing_interesting<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"mainless.nothing_interesting<0>"() local_unnamed_addr #0 {
 entry:
   ret i64 7
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 

@@ -15,7 +15,6 @@ import           Data.Graph
 import           Data.List                 as List
 import           Data.Map                  as Map
 import           Expansion
-import           LastUse
 import           Options                   (LogSelection (Optimise))
 import           Types
 
@@ -66,7 +65,7 @@ optimiseMod mods thisMod = do
 optimiseSccBottomUp procs = do
     inlines <- mapM optimiseProcBottomUp $ sccElts procs
     when (or $ tail inlines) $ do
-        mapM optimiseProcBottomUp $ sccElts procs
+        mapM_ optimiseProcBottomUp $ sccElts procs
         return ()
 
 
@@ -106,7 +105,7 @@ optimiseProcDefBU :: ProcSpec -> ProcDef -> Compiler ProcDef
 optimiseProcDefBU pspec def = do
     logOptimise $ "*** " ++ show pspec ++
       " before optimisation:" ++ showProcDef 4 def
-    def' <- procExpansion pspec def >>= markLastUse pspec >>= decideInlining
+    def' <- procExpansion pspec def >>= decideInlining
     logOptimise $ "*** " ++ show pspec ++
       " after optimisation:" ++ showProcDef 4 def'
     return def'
@@ -126,6 +125,7 @@ decideInlining def
     logOptimise $ "  benefit = " ++ show benefit
     let cost = bodyCost $ bodyPrims body
     logOptimise $ "  cost = " ++ show cost
+    -- Inline procs where benefit >= cost and private procs with only one use
     if benefit >= cost
        || procCallCount def <= 1 && procVis def == Private
     then return $ def { procInline = True }

@@ -86,10 +86,10 @@ primMove src dest =
   PrimForeign "llvm" "move" [] [src, dest]
 
 -- |An unplaced instruction to compare two integer values
-comparison :: Ident -> Exp -> Exp  -> [Placed Stmt]
+comparison :: Ident -> Exp -> Exp  -> Placed Stmt
 comparison tst left right =
-    [Unplaced $ ForeignCall "llvm" "test" [tst]
-     [Unplaced left, Unplaced right]]
+    Unplaced $ ForeignCall "llvm" "test" [tst]
+     [Unplaced left, Unplaced right]
 
 
 -- |A TestBool statement that always succeeds

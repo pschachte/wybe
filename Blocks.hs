@@ -9,31 +9,37 @@ module Blocks
        where
 
 import           AST
-import           BinaryFactory ()
+import           BinaryFactory                   ()
 import           Codegen
-import           Config (wordSize)
+import           Config                          (wordSize)
 import           Control.Monad
-import           Control.Monad.Trans (lift, liftIO)
+import           Control.Monad.Trans             (lift, liftIO)
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
-import           Data.Char (ord)
-import           Data.List as List
-import           Data.Map as Map
-import qualified Data.Set as Set
-import           Data.Word (Word32)
-import qualified LLVM.General.AST as LLVMAST
-import qualified LLVM.General.AST.Constant as C
-import qualified LLVM.General.AST.Float as F
-import qualified LLVM.General.AST.FloatingPointPredicate as FP
-import qualified LLVM.General.AST.Global as G
-import           LLVM.General.AST.Instruction
-import qualified LLVM.General.AST.IntegerPredicate as IP
-import           LLVM.General.AST.Operand
-import           LLVM.General.AST.Type
-import           LLVM.General.PrettyPrint
-import           Options (LogSelection (Blocks))
+import           Data.Char                       (ord)
+import           Data.List                       as List
+import           Data.Map                        as Map
+import qualified Data.Set                        as Set
+import           Data.Word                       (Word32)
+import qualified LLVM.AST                        as LLVMAST
+import qualified LLVM.AST.Constant               as C
+import qualified LLVM.AST.Float                  as F
+import qualified LLVM.AST.FloatingPointPredicate as FP
+import qualified LLVM.AST.Global                 as G
+import           LLVM.AST.Instruction
+import qualified LLVM.AST.IntegerPredicate       as IP
+import           LLVM.AST.Operand                hiding (PointerType)
+import           LLVM.AST.Type
+import           LLVM.AST.Typed
 
+-- import           LLVM.PrettyPrint
+import qualified Data.ByteString                 as BS
+import qualified Data.ByteString.Char8           as B8
+import qualified Data.ByteString.Lazy            as BL
+import qualified Data.ByteString.Short           as BSS
+import           Options                         (LogSelection (Blocks))
+import           Unsafe.Coerce
 
 -- | Holds information on the LLVM representation of the LPVM procedure.
 data ProcDefBlock =
@@ -56,6 +62,7 @@ blockTransformModule thisMod =
     do reenterModule thisMod
        logBlocks $ "*** Translating Module: " ++ showModSpec thisMod
        modRec <- getModule id
+       modFile <- getModule modSourceFile
        logWrapWith '-' $ show modRec
        (_, procs) <- unzip <$>
                          getModuleImplementationField (Map.toList . modProcs)
@@ -89,10 +96,11 @@ blockTransformModule thisMod =
 
        --------------------------------------------------
        -- Translate
-       procBlocks <- mapM (translateProc allProtos) $ emptyFilter mangledProcs
+       procBlocks <- evalTranslation 0 $
+         mapM (translateProc allProtos) $ emptyFilter mangledProcs
        --------------------------------------------------
        -- Init LLVM Module and fill it
-       let llmod = newLLVMModule (showModSpec thisMod) procBlocks
+       let llmod = newLLVMModule (showModSpec thisMod) modFile procBlocks
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
        _ <- finishModule
        logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
@@ -123,7 +131,7 @@ reduceNameMap :: [(String, Int)] -> String -> [(String, Int)]
 reduceNameMap namemap name =
     case List.lookup name namemap of
         Just val -> namemap ++ [(name, val + 1)]
-        Nothing -> namemap ++ [(name, 0)]
+        Nothing  -> namemap ++ [(name, 0)]
 
 
 pullDefName :: ProcDef -> String
@@ -148,7 +156,7 @@ getPrimProtos modspec = do
 
 -- | Filter for avoiding the standard library modules
 isStdLib :: ModSpec -> Bool
-isStdLib [] = False
+isStdLib []    = False
 isStdLib (m:_) = m == "wybe"
 
 
@@ -156,7 +164,7 @@ isStdLib (m:_) = m == "wybe"
 -- | Predicate to test for procedure definition with an empty body.
 emptyProc :: ProcDef -> Bool
 emptyProc p = case procImpln p of
-  ProcDefSrc pps -> List.null pps
+  ProcDefSrc pps     -> List.null pps
   ProcDefPrim _ body -> List.null $ bodyPrims body
 
 
@@ -170,24 +178,30 @@ emptyProc p = case procImpln p of
 -- require some global variable/constant declarations which is represented as
 -- G.Global values in the neededGlobalVars field of LLVMCompstate. All in all,
 -- externs and globals go on the top of the module.
-translateProc :: [PrimProto] -> ProcDef -> Compiler ProcDefBlock
+translateProc :: [PrimProto] -> ProcDef -> Translation ProcDefBlock
 translateProc modProtos proc = do
+  startCount <- getCount
+  (block, endCount) <- lift $ do
     modspec <- getModuleSpec
     let def@(ProcDefPrim proto body) = procImpln proc
     logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
     logBlocks $ "In Module: " ++ showModSpec modspec
-        ++ ", creating definition of: "
+      ++ ", creating definition of: "
     logBlocks $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
-    codestate <- execCodegen modProtos (doCodegenBody proto body)
+    codestate <- execCodegen startCount modProtos (doCodegenBody proto body)
     let pname = primProtoName proto
-
+    logBlocks $ show $ externs codestate
     exs <- mapM declareExtern $ externs codestate
     let globals = List.map LLVMAST.GlobalDefinition $ globalVars codestate
     let body' = createBlocks codestate
     lldef <- makeGlobalDefinition pname proto body'
-    logBlocks $ showPretty lldef
-    return $ ProcDefBlock proto lldef (exs ++ globals)
+    logBlocks $ show lldef
+    let block = ProcDefBlock proto lldef (exs ++ globals)
+    let endCount = Codegen.count codestate
+    return (block, endCount)
+  putCount endCount
+  return block
 
 
 -- | Create LLVM's module level Function Definition from the LPVM procedure
@@ -221,7 +235,7 @@ isInputParam p = primParamFlow p == FlowIn &&
 makeFnArg :: PrimParam -> Compiler (Type, LLVMAST.Name)
 makeFnArg param = do
     ty <- typed' $ primParamType param
-    let nm = LLVMAST.Name (show $ primParamName param)
+    let nm = LLVMAST.Name $ toSBString $ show $ primParamName param
     return (ty, nm)
 
 -- | Open the Out parameter of a primitive (if there is one) into it's
@@ -297,7 +311,7 @@ assignParam p =
        if phantomType ty
          then return () -- No need to assign phantoms
          else case (paramInfoUnneeded . primParamInfo) p of
-           True -> return ()    -- unneeded param
+           True  -> return ()    -- unneeded param
            -- False -> do
            --     let varType = typed ty
            --     ptr <- instr (ptr_t varType) $ alloca varType
@@ -397,13 +411,13 @@ codegenForkBody var (b1:b2:[]) params =
        retop <- codegenBody b2
        case blockReturn retop of
            Nothing -> buildOutputOp params >>= ret
-           bret -> ret bret
+           bret    -> ret bret
        -- if.else
        setBlock ifelse
        retop <- codegenBody b1
        case blockReturn retop of
            Nothing -> buildOutputOp params >>= ret
-           bret -> ret bret
+           bret    -> ret bret
        return ()
 
        -- -- if.exit
@@ -416,7 +430,7 @@ codegenForkBody _ _ _ = error
 -- treated as a Nothing instead of an existing value.
 blockReturn :: Maybe Operand -> Maybe Operand
 blockReturn op@(Just (LocalReference VoidType _)) = Nothing
-blockReturn op = op
+blockReturn op                                    = op
 
 -- | Translate a Primitive statement (in clausal form) to a LLVM instruction.
 -- Foreign calls are resolved through numerous instruction maps which map
@@ -434,14 +448,14 @@ cgen prim@(PrimCall pspec args) = do
     thisMod <- lift $ getModuleSpec
     let (ProcSpec mod name _) = pspec
     -- let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
-    let nm = LLVMAST.Name (show pspec)
+    let nm = LLVMAST.Name $ toSBString $ show pspec
     -- Find the prototype of the pspec being called
     -- and match it's parameters with the args here
     -- and remove the unneeded ones.
     protoFound <- findProto pspec
     let filteredArgs = case protoFound of
             Just callProto -> filterUnneededArgs callProto args
-            Nothing -> args
+            Nothing        -> args
 
     -- if the call is to an external module, declare it
     unless (thisMod == mod || thisMod `List.isPrefixOf` mod)
@@ -449,11 +463,12 @@ cgen prim@(PrimCall pspec args) = do
 
     let inArgs = primInputs filteredArgs
     outTy <- lift $ primReturnType filteredArgs
-
     inops <- mapM cgenArg inArgs
-    let ins = call (externf outTy nm) inops
-    res <- addInstruction ins filteredArgs
-    return (Just res)
+    let ins =
+          call
+          (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) nm)
+          inops
+    addInstruction ins filteredArgs
 
 cgen prim@(PrimForeign lang name flags args)
      | lang == "llvm" = case (length args) of
@@ -467,14 +482,15 @@ cgen prim@(PrimForeign lang name flags args)
      | otherwise =
          do addExtern prim
             let inArgs = primInputs args
-            let nm = LLVMAST.Name name
+            let nm = LLVMAST.Name $ toSBString name
             inops <- mapM cgenArg inArgs
             -- alignedOps <- mapM makeCIntOp inops
             outty <- lift $ primReturnType args
-            let ins = call (externf outty nm) inops
-            res <- addInstruction ins args
-            return (Just res)
-
+            let ins =
+                  call
+                  (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
+                  inops
+            addInstruction ins args
 
 cgen (PrimTest _) = error "No primitive found."
 
@@ -493,8 +509,8 @@ makeCIntOp op
 
 isIntOp :: Operand -> Bool
 isIntOp (LocalReference (LLVMAST.IntegerType _) _) = True
-isIntOp (ConstantOperand (C.Int _ _)) = True
-isIntOp _ = False
+isIntOp (ConstantOperand (C.Int _ _))              = True
+isIntOp _                                          = False
 
 
 
@@ -512,7 +528,7 @@ cgenLLVMBinop name flags args =
        inOps <- mapM cgenArg inArgs
        case Map.lookup (withFlags name flags) llvmMapBinop of
          (Just f) -> let ins = (apply2 f inOps)
-                     in addInstruction ins args >>= (return . Just)
+                     in addInstruction ins args
          Nothing -> error $ "LLVM Instruction not found: " ++ name
 
 
@@ -547,7 +563,7 @@ cgenLLVMUnop name flags args
            inOps <- mapM cgenArg inArgs
            case Map.lookup name llvmMapUnop of
              (Just f) -> let ins = f (head inOps)
-                         in addInstruction ins args >>= (return . Just)
+                         in addInstruction ins args
              Nothing -> error $ "LLVM Instruction not found : " ++ name
 
 
@@ -589,17 +605,22 @@ cgenLPVM pname flags args
     | pname == "access" = do
           let (ptrOpArg, index) = case inputs of
                   (a:b:[]) -> (a, valTrust b)
-                  _ -> shouldnt "Incorrect access instruction."
+                  _        -> shouldnt "Incorrect access instruction."
           ptrOp <- cgenArg ptrOpArg
           outTy <- lift $ primReturnType args
           op <- gcAccess ptrOp index outTy
           assign outNm op
           return $ Just op
 
+-- XXX Revise mutate instruction to take address, size, offset,
+--     destructive (Bool), and new address (output).  If destructive
+--     is True, does in place update and new address = address;
+--     otherwise allocates fresh storage, copies old contents,
+--     and mutates the new storage.
     | pname == "mutate" = do
           let (ptrOpArg, index, valArg) = case inputs of
                   [a, b, c] -> (a, valTrust b , c)
-                  _ -> shouldnt "Incorrect mutate instruction."
+                  _         -> shouldnt "Incorrect mutate instruction."
           val <- cgenArg valArg
           ptrOp <- cgenArg ptrOpArg
           op <- gcMutate ptrOp index val
@@ -613,10 +634,10 @@ cgenLPVM pname flags args
           outTy <- lift $ typed' (argType outArg)
           inOp <- cgenArg inArg
           let inTy = operandType inOp
-          
+
           lift $ logBlocks $ "CAST IN : " ++ show inArg ++ " -> "
               ++ show (argType inArg)
-          lift $ logBlocks $ " CAST IN OP " ++ show inOp    
+          lift $ logBlocks $ " CAST IN OP " ++ show inOp
           lift $ logBlocks $ "CAST OUT : " ++ show outArg ++ " -> "
               ++ show (argType outArg)
           castOp <- case inOp of
@@ -646,12 +667,12 @@ cgenLPVM pname flags args
 
 isNullCons :: C.Constant -> Bool
 isNullCons (C.Int _ val) = val == 0
-isNullCons _ = False
+isNullCons _             = False
 
 
 isPtr :: LLVMAST.Type -> Bool
 isPtr (PointerType _ _) = True
-isPtr _ = False
+isPtr _                 = False
 
 
 doCast :: Operand -> LLVMAST.Type -> LLVMAST.Type -> Codegen Operand
@@ -668,10 +689,10 @@ doCast op _ ty2 = bitcast op ty2
 -- | Predicate to check if an operand is a constant
 constantType :: C.Constant -> LLVMAST.Type
 constantType (C.Int bs _) = int_c bs
-constantType (C.Float _) = float_t
-constantType (C.Null ty) = ty
+constantType (C.Float _)  = float_t
+constantType (C.Null ty)  = ty
 constantType (C.Undef ty) = ty
-constantType _ = shouldnt "Cannot determine constant type."
+constantType _            = shouldnt "Cannot determine constant type."
 
 
 ----------------------------------------------------------------------------
@@ -683,39 +704,41 @@ constantType _ = shouldnt "Cannot determine constant type."
 -- The return type of the operand value generated by the instruction call is
 -- inferred depending on the primitive arguments. The name is inferred from
 -- the output argument's name (LPVM is in SSA form).
-addInstruction :: Instruction -> [PrimArg] -> Codegen Operand
+addInstruction :: Instruction -> [PrimArg] -> Codegen (Maybe Operand)
 addInstruction ins args =
      do let outArgs = primOutputs args
         outTy <- lift $ primReturnType args
         case length outArgs of
-          0 -> instr outTy ins
+          0 -> case outTy of
+            VoidType -> voidInstr ins >> return Nothing
+            _        -> Just <$> instr outTy ins
           1 -> do let outName = pullName $ head outArgs
                   outop <- namedInstr outTy outName ins
                   assign outName outop
-                  return outop
+                  return (Just outop)
           n -> do outOp <- instr outTy ins
                   outTys <- lift $ mapM (typed' . argType) outArgs
                   fields <- structUnPack outOp outTys
                   let outNames = List.map pullName outArgs
                   -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
                   zipWithM_ assign outNames fields
-                  return $ last fields
+                  return $ Just $ last fields
 
 pullName (ArgVar var _ _ _ _) = show var
-pullName _ = error $ "Expected variable as output."
+pullName _                    = error $ "Expected variable as output."
 
 -- | Generate an expanding instruction name using the passed flags. This is
 -- useful to augment a simple instruction. (Ex: compare instructions can have
 -- the comparision type specified as a flag).
 withFlags :: ProcName -> [Ident] -> String
 withFlags p [] = p
-withFlags p f = p ++ " " ++ (List.intercalate " " f)
+withFlags p f  = p ++ " " ++ (List.intercalate " " f)
 
 -- | Apply Operands from the operand list (2 items) to the wrapped LLVM
 -- instruction from 'Codegen' Module.
 apply2 :: (Operand -> Operand -> Instruction) -> [Operand] -> Instruction
 apply2 f (a:b:[]) = f a b
-apply2 _ _ = error $ "Not a binary operation."
+apply2 _ _        = error $ "Not a binary operation."
 
 
 ----------------------------------------------------------------------------
@@ -739,12 +762,12 @@ primOutputs ps = List.filter isValidOutput ps
 -- | Get the 'Type' of the valid output from the given primitive argument
 -- list. If there is no output arg, return void_t.
 primReturnType :: [PrimArg] -> Compiler Type
-primReturnType ps =
-    let outputs = primOutputs ps in
+primReturnType ps = do
+    let outputs = primOutputs ps
     case length outputs of
-        0 -> return void_t
-        1 -> typed' $ argType (head outputs)
-        n -> fmap struct_t (mapM (typed' . argType) outputs)
+      0 -> return void_t
+      1 -> typed' $ argType (head outputs)
+      n -> fmap struct_t (mapM (typed' . argType) outputs)
 
 
 goesIn :: PrimArg -> Bool
@@ -756,12 +779,12 @@ notPhantom = not . phantomArg
 -- | Pull out the name of a primitive argument if it is a variable.
 argName :: PrimArg -> Maybe String
 argName (ArgVar var _ _ _ _) = Just $ show var
-argName _ = Nothing
+argName _                    = Nothing
 
 
 argIntVal :: PrimArg -> Maybe Integer
 argIntVal (ArgInt val _) = Just val
-argIntVal _ = Nothing
+argIntVal _              = Nothing
 
 -- | Split primitive arguments into inputs and output arguments determined
 -- by their flow type.
@@ -784,12 +807,12 @@ openPrimArg a = shouldnt $ "Can't Open!: "
 -- | Assigns the primitive argument on the symbol table
 assignPrim :: Operand -> PrimArg -> Codegen ()
 assignPrim op (ArgVar var _ _ _ _) = assign (show var) op
-assignPrim _ _ = return ()
+assignPrim _ _                     = return ()
 
 
 localOperandType :: Operand -> Type
 localOperandType (LocalReference ty _) = ty
-localOperandType _ = void_t
+localOperandType _                     = void_t
 
 
 -- | 'cgenArg' makes an Operand of the input argument. The argument may be:
@@ -811,11 +834,11 @@ cgenArg (ArgInt val ty) = do
     return intCons
 cgenArg (ArgFloat val ty) = return $ cons $ C.Float (F.Double val)
 cgenArg (ArgString s _) =
-    do let conStr = (makeStringConstant s)
-       let len = (length s) + 1
+    do let conStr = makeStringConstant s
+       let len = length s + 1
        let conType = array_t (fromIntegral len) char_t
        conName <- addGlobalConstant conType conStr
-       let conPtr = C.GlobalReference conType conName
+       let conPtr = C.GlobalReference (ptr_t conType) conName
        let conElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
        return $ cons conElem
 cgenArg (ArgChar c ty) = do t <- lift $ typed' ty
@@ -824,10 +847,15 @@ cgenArg (ArgChar c ty) = do t <- lift $ typed' ty
 
 
 getBits :: LLVMAST.Type -> Word32
-getBits (IntegerType bs) = bs
-getBits (PointerType ty _) = getBits ty
-getBits (FloatingPointType bs _) = bs
-getBits ty = fromIntegral wordSize
+getBits (IntegerType bs)                = bs
+getBits (PointerType ty _)              = getBits ty
+getBits (FloatingPointType HalfFP)      = 16
+getBits (FloatingPointType FloatFP)     = 32
+getBits (FloatingPointType DoubleFP)    = 64
+getBits (FloatingPointType FP128FP)     = 128
+getBits (FloatingPointType X86_FP80FP)  = 80
+getBits (FloatingPointType PPC_FP128FP) = 128
+getBits ty                              = fromIntegral wordSize
 
 -- | Convert a string into a constant array of constant integers.
 makeStringConstant :: String ->  C.Constant
@@ -919,7 +947,7 @@ typed' ty = do
     repr <- lookupTypeRepresentation ty
     case repr of
         Just typeStr -> return $ typeStrToType typeStr
-        Nothing -> 
+        Nothing ->
             shouldnt $ "typed' applied to InvalidType or unknown type ("
             ++ show ty
             ++ ")"
@@ -933,12 +961,12 @@ typeStrToType "float"   = float_t
 typeStrToType "double"  = float_t
 typeStrToType "pointer" = ptr_t $ int_c (fromIntegral wordSize)
 typeStrToType "word"    = int_c (fromIntegral wordSize)
-typeStrToType "phantom" = void_t
+typeStrToType "phantom" = int_t
 typeStrToType (c:cs)
     | c == 'i' = int_c (fromIntegral bytes)
     | c == 'f' = float_c (fromIntegral bytes)
-    | c == 'p' = if take 6 cs == "ointer"
-                 then let bs = read (drop 6 cs) :: Int
+    | c == 'p' = if List.take 6 cs == "ointer"
+                 then let bs = read (List.drop 6 cs) :: Int
                       in ptr_t $ int_c (fromIntegral bs)
                  else void_t
     | otherwise = void_t
@@ -953,11 +981,12 @@ typeStrToType (c:cs)
 -- | Initialize and fill a new LLVMAST.Module with the translated
 -- global definitions (extern declarations and defined functions)
 -- of LPVM procedures in a module.
-newLLVMModule :: String -> [ProcDefBlock] -> LLVMAST.Module
-newLLVMModule name blocks = let defs = List.map blockDef blocks
-                                exs = concat $ List.map blockExterns blocks
-                                exs' = uniqueExterns exs ++ [mallocExtern]
-                            in modWithDefinitions name $ exs' ++ defs
+newLLVMModule :: String -> String -> [ProcDefBlock] -> LLVMAST.Module
+newLLVMModule name fname blocks
+    = let defs = List.map blockDef blocks
+          exs  = concat $ List.map blockExterns blocks
+          exs' = uniqueExterns exs ++ [mallocExtern]
+      in modWithDefinitions name fname $ exs' ++ defs
 
 
 -- | Filter out non-unique externs
@@ -971,8 +1000,9 @@ uniqueExterns exs = List.nubBy sameDef exs
 
 -- | Create a new LLVMAST.Module with the given name, and fill it with the
 -- given global definitions.
-modWithDefinitions :: String -> [LLVMAST.Definition] -> LLVMAST.Module
-modWithDefinitions nm defs = LLVMAST.Module nm Nothing Nothing defs
+modWithDefinitions :: String -> String -> [LLVMAST.Definition] -> LLVMAST.Module
+modWithDefinitions nm filename defs =
+    LLVMAST.Module (toSBString nm) (toSBString filename) Nothing Nothing defs
 
 
 -- | Build an extern declaration definition from a given LPVM primitive.
@@ -981,7 +1011,6 @@ declareExtern (PrimForeign _ name _ args) = do
     fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
     retty <- primReturnType args
     let ex = external retty name fnargs
-    -- logBlocks $ "## Declared extern: " ++ showPretty ex
     return ex
 
 declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
@@ -1000,8 +1029,9 @@ makeExArg (index,arg) = do
 
 
 mallocExtern :: LLVMAST.Definition
-mallocExtern = let ext_arg = [(LLVMAST.IntegerType 32, LLVMAST.Name "size")]
-               in external (ptr_t (int_c 8)) "wybe_malloc" ext_arg
+mallocExtern =
+    let ext_arg = [(LLVMAST.IntegerType 32, LLVMAST.Name $ toSBString "size")]
+    in external (ptr_t (int_c 8)) "wybe_malloc" ext_arg
 
 ----------------------------------------------------------------------------
 -- Block Modification                                                     --
@@ -1013,13 +1043,14 @@ mallocExtern = let ext_arg = [(LLVMAST.IntegerType 32, LLVMAST.Name "size")]
 -- For each call, an external declaration to that main function is needed.
 newMainModule :: [ModSpec] -> Compiler LLVMAST.Module
 newMainModule depends = do
-    blstate <- execCodegen [] $ mainCodegen depends
+    blstate <- execCodegen 0 [] $ mainCodegen depends
     let bls = createBlocks blstate
     let mainDef = globalDefine int_t "main" [] bls
-    let externsForMain = [(external void_t "gc_init" [])]
+    let externsForMain = [(external (void_t) "gc_init" [])]
             ++ (mainExterns depends)
     let newDefs = externsForMain ++ [mainDef]
-    return $ modWithDefinitions "tmpMain" newDefs
+    -- XXX Use empty string as source file name; should be main file name
+    return $ modWithDefinitions "tmpMain" "" newDefs
 
 
 -- | Run the Codegen monad collecting the instructions needed to call
@@ -1029,12 +1060,13 @@ mainCodegen mods = do
     entry <- addBlock entryBlockName
     setBlock entry
     -- Temp Boehm GC init call
-    instr void_t $
-        call (externf void_t (LLVMAST.Name "gc_init")) []
-    -- Call the mods mains in order    
-    let mainName m = LLVMAST.Name $ showModSpec m ++ ".main"
+    voidInstr $
+        call (externf (ptr_t $ FunctionType void_t [] False)
+              (LLVMAST.Name $ toSBString "gc_init")) []
+    -- Call the mods mains in order
+    let mainName m = LLVMAST.Name $ toSBString $ showModSpec m ++ ".main"
     forM_ mods $ \m -> instr int_t $
-                       call (externf int_t (mainName m)) []
+                       call (externf (ptr_t $ FunctionType int_t [] False) (mainName m)) []
     -- int main returns 0
     ptr <- instr (ptr_t int_t) (alloca int_t)
     let retcons = cons (C.Int 32 0)
@@ -1078,8 +1110,8 @@ concatLLVMASTModules thisMod mspecs = do
 -- must be unique.
 addUniqueDefinitions :: LLVMAST.Module -> [LLVMAST.Definition]
                      -> LLVMAST.Module
-addUniqueDefinitions (LLVMAST.Module n l t ds) defs =
-    LLVMAST.Module n l t newDefs
+addUniqueDefinitions (LLVMAST.Module n fn l t ds) defs =
+    LLVMAST.Module n fn l t newDefs
   where
     newDefs = List.nub $ ds ++ defs
 
@@ -1095,9 +1127,13 @@ addUniqueDefinitions (LLVMAST.Module n l t ds) defs =
 callWybeMalloc :: Integer -> Codegen Operand
 callWybeMalloc size = do
     let outTy = (ptr_t (int_c 8))
-    let fnName = LLVMAST.Name "wybe_malloc"
+    let fnName = LLVMAST.Name $ toSBString "wybe_malloc"
     let inOp = cons $ C.Int 32 size
-    let ins = call (externf outTy fnName) [inOp]
+    let inops = [inOp]
+    let ins =
+          call
+          (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) fnName)
+          inops
     instr outTy ins
 
 
@@ -1147,7 +1183,7 @@ gcMutate ptr offset val = do
 -- | Get the LLVMAST.Type the given pointer type points to.
 pullFromPointer :: LLVMAST.Type -> LLVMAST.Type
 pullFromPointer (PointerType ty _) = ty
-pullFromPointer pty = shouldnt $ "Not a pointer: " ++ show pty
+pullFromPointer pty                = shouldnt $ "Not a pointer: " ++ show pty
 
 
 -- | Compute the index given the size of the fields the pointer
@@ -1170,7 +1206,9 @@ makeStoreOp ptr
 makeStoreOp ptr v = return v
 
 
-
+-- Convert string to ShortByteString
+toSBString :: [Char] -> BSS.ShortByteString
+toSBString string = BSS.pack $ unsafeCoerce <$> string
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

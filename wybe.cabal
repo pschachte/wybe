@@ -5,13 +5,12 @@ cabal-version:       >= 1.22.2.0
 Category:            Compilers
 build-type:          Simple
 
-
 executable wybemk
   default-language:    Haskell2010
   main-is:             wybemk.hs
   hs-source-dirs: .
   build-depends: array >= 0.5.1.0
-               , base >=4.6 && <5
+               , base >=4.6
                , binary >= 0.7.5.0
                , bytedump
                , bytestring
@@ -20,18 +19,27 @@ executable wybemk
                , filepath >= 1.4.0.0
                , haskeline
                , hex
-               , llvm-general == 3.5.1.2
-               , llvm-general-pure
+               , llvm-hs
+               , llvm-hs-pure
+               , llvm-hs-pretty
+               , text
+               -- , llvm-general == 3.5.1.2
+               -- , llvm-general-pure
                , mtl
                , old-time
                , parsec >=3.1.3
-               , process == 1.4.2.0
-               , transformers >=0.3.0.0 && <0.5
+               , process >= 1.4.2.0
+               , transformers
                , cryptonite
                , tuple >= 0.3.0.2
                , extra >= 1.5.1
-               , ansi-terminal ==0.6.2.3
+               , ansi-terminal
                , Diff
+  other-modules: AST, BinaryFactory, Blocks, BodyBuilder, Builder, Callers,
+                 Clause, Codegen, Config, Emit, Expansion, Flatten,
+                 Macho, NewParser, Normalise, ObjectInterface, Optimise,
+                 Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
+                 Version
 
 
 test-suite wybe-test
@@ -46,10 +54,15 @@ test-suite wybe-test
                   , containers
                   , directory >= 1.2.5.0
                   , filepath >= 1.4.0.0
-                  , llvm-general == 3.5.1.2
-                  , llvm-general-pure
+                  , llvm-hs
+                  , llvm-hs-pure
                   , mtl
                   , parsec >=3.1.3
-                  , transformers >=0.3.0.0 && <0.5
-                  , ansi-terminal ==0.6.2.3
+                  , transformers
+                  , ansi-terminal
                   , Diff
+  other-modules: AST, BinaryFactory, Blocks, BodyBuilder, Builder, Callers,
+                 Clause, Codegen, Config, Emit, Expansion, Flatten,
+                 Macho, NewParser, Normalise, ObjectInterface, Optimise,
+                 Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
+                 Version

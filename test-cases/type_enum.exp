@@ -43,8 +43,7 @@ AFTER EVERYTHING:
     foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
 = > public inline test (0 calls)
 2: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
-    foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?tmp$0#0:wybe.bool)
-    foreign llvm move(~tmp$0#0:wybe.bool, ?$$#0:wybe.bool)
+    foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?$$#0:wybe.bool)
 
 
 autumn > public inline (0 calls)
@@ -70,97 +69,99 @@ type_enum, type_enum.season
 AFTER LLVM IR:
 
 ; ModuleID = 'type_enum'
+source_filename = "test-cases/type_enum.wybe"
 
-; Function Attrs: nounwind readnone
-define i2 @"type_enum.season.=<0>"(i2 %"in#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i2 @"type_enum.season.=<0>"(i2 returned %"in#0") local_unnamed_addr #0 {
 entry:
   ret i2 %"in#0"
 }
 
-; Function Attrs: nounwind readnone
-define i2 @"type_enum.season.=<1>"(i2 %"in#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i2 @"type_enum.season.=<1>"(i2 returned %"in#0") local_unnamed_addr #0 {
 entry:
   ret i2 %"in#0"
 }
 
-; Function Attrs: nounwind readnone
-define i1 @"type_enum.season.=<1>1"(i2 %"$left#0", i2 %"$right#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i1 @"type_enum.season.=<1>.1"(i2 %"$left#0", i2 %"$right#0") local_unnamed_addr #0 {
 entry:
-  %"tmp$0#0" = icmp eq i2 %"$left#0", %"$right#0"
-  ret i1 %"tmp$0#0"
+  %"$$#0" = icmp eq i2 %"$left#0", %"$right#0"
+  ret i1 %"$$#0"
 }
 
-; Function Attrs: nounwind readnone
-define i2 @"type_enum.season.autumn<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i2 @"type_enum.season.autumn<0>"() local_unnamed_addr #0 {
 entry:
   ret i2 -1
 }
 
-; Function Attrs: nounwind readnone
-define i2 @"type_enum.season.spring<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i2 @"type_enum.season.spring<0>"() local_unnamed_addr #0 {
 entry:
   ret i2 1
 }
 
-; Function Attrs: nounwind readnone
-define i2 @"type_enum.season.summer<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i2 @"type_enum.season.summer<0>"() local_unnamed_addr #0 {
 entry:
   ret i2 -2
 }
 
-; Function Attrs: nounwind readnone
-define i2 @"type_enum.season.winter<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i2 @"type_enum.season.winter<0>"() local_unnamed_addr #0 {
 entry:
   ret i2 0
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 
 --------------------------------------------------
 ; ModuleID = 'type_enum.season'
+source_filename = "test-cases"
 
-; Function Attrs: nounwind readnone
-define i2 @"type_enum.season.=<0>"(i2 %"in#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i2 @"type_enum.season.=<0>"(i2 returned %"in#0") local_unnamed_addr #0 {
 entry:
   ret i2 %"in#0"
 }
 
-; Function Attrs: nounwind readnone
-define i2 @"type_enum.season.=<1>"(i2 %"in#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i2 @"type_enum.season.=<1>"(i2 returned %"in#0") local_unnamed_addr #0 {
 entry:
   ret i2 %"in#0"
 }
 
-; Function Attrs: nounwind readnone
-define i1 @"type_enum.season.=<1>1"(i2 %"$left#0", i2 %"$right#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i1 @"type_enum.season.=<1>.1"(i2 %"$left#0", i2 %"$right#0") local_unnamed_addr #0 {
 entry:
-  %"tmp$0#0" = icmp eq i2 %"$left#0", %"$right#0"
-  ret i1 %"tmp$0#0"
+  %"$$#0" = icmp eq i2 %"$left#0", %"$right#0"
+  ret i1 %"$$#0"
 }
 
-; Function Attrs: nounwind readnone
-define i2 @"type_enum.season.autumn<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i2 @"type_enum.season.autumn<0>"() local_unnamed_addr #0 {
 entry:
   ret i2 -1
 }
 
-; Function Attrs: nounwind readnone
-define i2 @"type_enum.season.spring<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i2 @"type_enum.season.spring<0>"() local_unnamed_addr #0 {
 entry:
   ret i2 1
 }
 
-; Function Attrs: nounwind readnone
-define i2 @"type_enum.season.summer<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i2 @"type_enum.season.summer<0>"() local_unnamed_addr #0 {
 entry:
   ret i2 -2
 }
 
-; Function Attrs: nounwind readnone
-define i2 @"type_enum.season.winter<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i2 @"type_enum.season.winter<0>"() local_unnamed_addr #0 {
 entry:
   ret i2 0
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 

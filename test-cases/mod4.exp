@@ -15,4 +15,5 @@ mod4
 AFTER LLVM IR:
 
 ; ModuleID = 'mod4'
+source_filename = "test-cases/mod4.wybe"
 

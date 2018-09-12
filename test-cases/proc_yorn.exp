@@ -13,25 +13,30 @@ AFTER EVERYTHING:
 
 *main* > public inline (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
-    proc_yorn.gen$1<0>("What's your input?":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$0#0:wybe.bool, ?#wybe.io$io#1:wybe.phantom) @proc_yorn:2:8
-    foreign llvm move(~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @proc_yorn:16:1
+    proc_yorn.gen$1<0>("What's your input?":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$4#0:wybe.bool, ?#wybe.io$io#2:wybe.phantom) @proc_yorn:2:8
 
 
-gen$1 > (3 calls)
-0: gen$1(prompt#0:wybe.string, wybe.io$io#0:wybe.phantom, ?result#1:wybe.bool, ?wybe.io$io#4:wybe.phantom):
+gen$1 > (2 calls)
+0: gen$1(prompt#0:wybe.string, wybe.io$io#0:wybe.phantom, ?result#1:wybe.bool, ?wybe.io$io#5:wybe.phantom):
     foreign c print_string(prompt#0:wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:88:41
     foreign c print_string(" (y/n) ":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:88:41
     foreign c read_char(?response#0:wybe.char, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @wybe:86:39
-    foreign llvm icmp eq(response#0:wybe.char, 'y':wybe.char, ?tmp$11#0:wybe.bool) @wybe:67:42
-    foreign llvm icmp eq(response#0:wybe.char, 'Y':wybe.char, ?tmp$12#0:wybe.bool) @wybe:67:42
-    foreign llvm or(~tmp$11#0:wybe.bool, ~tmp$12#0:wybe.bool, ?tmp$13#0:wybe.bool) @wybe:5:43
-    proc_yorn.is_yes_or_no<0>(response#0:wybe.char, ?tmp$3#0:wybe.bool) @proc_yorn:6:19
-    case ~tmp$3#0:wybe.bool of
+    foreign llvm icmp eq(response#0:wybe.char, 'y':wybe.char, ?tmp$13#0:wybe.bool) @wybe:67:42
+    foreign llvm icmp eq(response#0:wybe.char, 'Y':wybe.char, ?tmp$14#0:wybe.bool) @wybe:67:42
+    foreign llvm or(~tmp$14#0:wybe.bool, ~tmp$13#0:wybe.bool, ?tmp$0#0:wybe.bool) @wybe:5:43
+    foreign llvm icmp eq(response#0:wybe.char, 'n':wybe.char, ?tmp$16#0:wybe.bool) @wybe:67:42
+    foreign llvm or(tmp$0#0:wybe.bool, ~tmp$16#0:wybe.bool, ?tmp$17#0:wybe.bool) @wybe:5:43
+    foreign llvm icmp eq(~response#0:wybe.char, 'N':wybe.char, ?tmp$18#0:wybe.bool) @wybe:67:42
+    foreign llvm or(~tmp$17#0:wybe.bool, ~tmp$18#0:wybe.bool, ?tmp$2#0:wybe.bool) @wybe:5:43
+    case ~tmp$2#0:wybe.bool of
     0:
-        proc_yorn.gen$1<0>(~prompt#0:wybe.string, ~wybe.io$io#3:wybe.phantom, ?result#1:wybe.bool, ?wybe.io$io#4:wybe.phantom) @proc_yorn:2:8
+        foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~#wybe.io$io#3:wybe.phantom, ?tmp$21#0:wybe.phantom) @wybe:88:41
+        foreign c putchar('\n':wybe.char, ~tmp$21#0:wybe.phantom, ?#wybe.io$io#4:wybe.phantom) @wybe:74:28
+        proc_yorn.gen$1<0>(~prompt#0:wybe.string, ~wybe.io$io#4:wybe.phantom, ?result#1:wybe.bool, ?wybe.io$io#5:wybe.phantom) @proc_yorn:2:8
 
     1:
-        proc_yorn.gen$4<0>(~prompt#0:wybe.string, ~response#0:wybe.char, ~tmp$13#0:wybe.bool, ~tmp$13#0:wybe.bool, ~wybe.io$io#3:wybe.phantom, ?result#1:wybe.bool, ?wybe.io$io#4:wybe.phantom)
+        foreign llvm move(~tmp$0#0:wybe.bool, ?result#1:wybe.bool)
+        foreign llvm move(~wybe.io$io#3:wybe.phantom, ?wybe.io$io#5:wybe.phantom)
 
 
 
@@ -39,44 +44,22 @@ gen$2 > inline (1 calls)
 0: gen$2([prompt#0:wybe.string], [response#0:wybe.char], result#0:wybe.bool, [tmp$0#0:wybe.bool], wybe.io$io#0:wybe.phantom, [?result#0:wybe.bool], [?wybe.io$io#0:wybe.phantom]):
 
 
-gen$3 > inline (1 calls)
-0: gen$3(prompt#0:wybe.string, [response#0:wybe.char], [result#0:wybe.bool], [tmp$0#0:wybe.bool], wybe.io$io#0:wybe.phantom, ?result#1:wybe.bool, ?wybe.io$io#1:wybe.phantom):
-    proc_yorn.gen$1<0>(~prompt#0:wybe.string, ~wybe.io$io#0:wybe.phantom, ?result#1:wybe.bool, ?wybe.io$io#1:wybe.phantom) @proc_yorn:2:8
-
-
-gen$4 > (1 calls)
-0: gen$4(prompt#0:wybe.string, response#0:wybe.char, result#0:wybe.bool, [tmp$0#0:wybe.bool], wybe.io$io#0:wybe.phantom, ?result#1:wybe.bool, ?wybe.io$io#2:wybe.phantom):
-    foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @wybe:88:41
-    foreign c putchar('\n':wybe.char, ~tmp$7#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
-    proc_yorn.is_yes_or_no<0>(~response#0:wybe.char, ?tmp$4#0:wybe.bool) @proc_yorn:8:18
-    case ~tmp$4#0:wybe.bool of
-    0:
-        proc_yorn.gen$1<0>(~prompt#0:wybe.string, ~wybe.io$io#1:wybe.phantom, ?result#1:wybe.bool, ?wybe.io$io#2:wybe.phantom) @proc_yorn:2:8
-
-    1:
-        foreign llvm move(~result#0:wybe.bool, ?result#1:wybe.bool)
-        foreign llvm move(~wybe.io$io#1:wybe.phantom, ?wybe.io$io#2:wybe.phantom)
-
-
-
 is_yes > inline (4 calls)
 0: is_yes(ch#0:wybe.char, ?$#0:wybe.bool):
-    foreign llvm icmp eq(ch#0:wybe.char, 'y':wybe.char, ?tmp$5#0:wybe.bool) @wybe:67:42
-    foreign llvm icmp eq(~ch#0:wybe.char, 'Y':wybe.char, ?tmp$8#0:wybe.bool) @wybe:67:42
-    foreign llvm or(~tmp$5#0:wybe.bool, ~tmp$8#0:wybe.bool, ?tmp$11#0:wybe.bool) @wybe:5:43
-    foreign llvm move(~tmp$11#0:wybe.bool, ?$#0:wybe.bool) @proc_yorn:12:1
+    foreign llvm icmp eq(ch#0:wybe.char, 'y':wybe.char, ?tmp$1#0:wybe.bool) @wybe:67:42
+    foreign llvm icmp eq(~ch#0:wybe.char, 'Y':wybe.char, ?tmp$2#0:wybe.bool) @wybe:67:42
+    foreign llvm or(~tmp$1#0:wybe.bool, ~tmp$2#0:wybe.bool, ?$#0:wybe.bool) @wybe:5:43
 
 
-is_yes_or_no > (6 calls)
+is_yes_or_no > inline (3 calls)
 0: is_yes_or_no(ch#0:wybe.char, ?$#0:wybe.bool):
     foreign llvm icmp eq(ch#0:wybe.char, 'y':wybe.char, ?tmp$6#0:wybe.bool) @wybe:67:42
     foreign llvm icmp eq(ch#0:wybe.char, 'Y':wybe.char, ?tmp$7#0:wybe.bool) @wybe:67:42
-    foreign llvm or(~tmp$6#0:wybe.bool, ~tmp$7#0:wybe.bool, ?tmp$8#0:wybe.bool) @wybe:5:43
-    foreign llvm icmp eq(ch#0:wybe.char, 'n':wybe.char, ?tmp$11#0:wybe.bool) @wybe:67:42
-    foreign llvm or(~tmp$11#0:wybe.bool, ~tmp$8#0:wybe.bool, ?tmp$14#0:wybe.bool) @wybe:5:43
-    foreign llvm icmp eq(~ch#0:wybe.char, 'N':wybe.char, ?tmp$17#0:wybe.bool) @wybe:67:42
-    foreign llvm or(~tmp$14#0:wybe.bool, ~tmp$17#0:wybe.bool, ?tmp$20#0:wybe.bool) @wybe:5:43
-    foreign llvm move(~tmp$20#0:wybe.bool, ?$#0:wybe.bool) @proc_yorn:13:1
+    foreign llvm or(~tmp$6#0:wybe.bool, ~tmp$7#0:wybe.bool, ?tmp$2#0:wybe.bool) @wybe:5:43
+    foreign llvm icmp eq(ch#0:wybe.char, 'n':wybe.char, ?tmp$3#0:wybe.bool) @wybe:67:42
+    foreign llvm or(~tmp$2#0:wybe.bool, ~tmp$3#0:wybe.bool, ?tmp$1#0:wybe.bool) @wybe:5:43
+    foreign llvm icmp eq(~ch#0:wybe.char, 'N':wybe.char, ?tmp$4#0:wybe.bool) @wybe:67:42
+    foreign llvm or(~tmp$1#0:wybe.bool, ~tmp$4#0:wybe.bool, ?$#0:wybe.bool) @wybe:5:43
 
 
 yorn > public inline (1 calls)
@@ -87,89 +70,73 @@ proc_yorn
 AFTER LLVM IR:
 
 ; ModuleID = 'proc_yorn'
+source_filename = "test-cases/proc_yorn.wybe"
 
 @proc_yorn.1 = constant [19 x i8] c"What's your input?\00"
-@proc_yorn.2 = constant [8 x i8] c" (y/n) \00"
+@proc_yorn.4 = constant [29 x i8] c"Please answer 'yes' or 'no'.\00"
+@proc_yorn.3 = constant [8 x i8] c" (y/n) \00"
 
-declare i8 @read_char()
+declare void @putchar(i8) local_unnamed_addr
 
-declare void @print_string(i8*)
+declare void @print_string(i8*) local_unnamed_addr
 
-; Function Attrs: nounwind
-declare void @putchar(i8) #0
+declare i8 @read_char() local_unnamed_addr
 
-define i32 @proc_yorn.main() {
+define i32 @proc_yorn.main() local_unnamed_addr {
 entry:
-  %"tmp$0#0" = tail call i1 @"proc_yorn.gen$1<0>"(i8* getelementptr inbounds ([19 x i8]* @proc_yorn.1, i32 0, i32 0))
+  %"tmp$4#0" = tail call i1 @"proc_yorn.gen$1<0>"(i8* getelementptr inbounds ([19 x i8], [19 x i8]* @proc_yorn.1, i64 0, i64 0))
   ret i32 0
 }
 
-define i1 @"proc_yorn.gen$1<0>"(i8* %"prompt#0") {
+define i1 @"proc_yorn.gen$1<0>"(i8* %"prompt#0") local_unnamed_addr {
 entry:
   br label %tailrecurse
 
-tailrecurse:                                      ; preds = %tailrecurse, %entry
+tailrecurse:                                      ; preds = %if.else, %entry
   tail call void @print_string(i8* %"prompt#0")
-  tail call void @print_string(i8* getelementptr inbounds ([8 x i8]* @proc_yorn.2, i32 0, i32 0))
+  tail call void @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @proc_yorn.3, i64 0, i64 0))
   %"response#0" = tail call i8 @read_char()
-  %"tmp$3#0" = tail call i1 @"proc_yorn.is_yes_or_no<0>"(i8 %"response#0")
-  br i1 %"tmp$3#0", label %if.then, label %tailrecurse
+  switch i8 %"response#0", label %if.else [
+    i8 121, label %if.then
+    i8 110, label %if.then
+    i8 89, label %if.then
+    i8 78, label %if.then
+  ]
 
-if.then:                                          ; preds = %tailrecurse
-  %"response#0.lcssa" = phi i8 [ %"response#0", %tailrecurse ]
-  %0 = and i8 %"response#0.lcssa", -33
-  %1 = icmp eq i8 %0, 89
-  %"result#1" = tail call i1 @"proc_yorn.gen$4<0>"(i8* %"prompt#0", i8 %"response#0.lcssa", i1 %1)
-  ret i1 %"result#1"
-}
+if.then:                                          ; preds = %tailrecurse, %tailrecurse, %tailrecurse, %tailrecurse
+  %0 = or i8 %"response#0", 32
+  %1 = icmp eq i8 %0, 121
+  ret i1 %1
 
-define i1 @"proc_yorn.gen$3<0>"(i8* %"prompt#0") {
-entry:
-  %"result#1" = tail call i1 @"proc_yorn.gen$1<0>"(i8* %"prompt#0")
-  ret i1 %"result#1"
-}
-
-define i1 @"proc_yorn.gen$4<0>"(i8* %"prompt#0", i8 %"response#0", i1 %"result#0") {
-entry:
-  tail call void @print_string(i8* getelementptr inbounds ([19 x i8]* @proc_yorn.1, i32 0, i32 0))
+if.else:                                          ; preds = %tailrecurse
+  tail call void @print_string(i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_yorn.4, i64 0, i64 0))
   tail call void @putchar(i8 10)
-  %"tmp$4#0" = tail call i1 @"proc_yorn.is_yes_or_no<0>"(i8 %"response#0")
-  br i1 %"tmp$4#0", label %if.then, label %if.else
-
-if.then:                                          ; preds = %entry
-  ret i1 %"result#0"
-
-if.else:                                          ; preds = %entry
-  %"result#1" = tail call i1 @"proc_yorn.gen$1<0>"(i8* %"prompt#0")
-  ret i1 %"result#1"
+  br label %tailrecurse
 }
 
-; Function Attrs: nounwind readnone
-define i1 @"proc_yorn.is_yes<0>"(i8 %"ch#0") #1 {
+; Function Attrs: norecurse nounwind readnone
+define i1 @"proc_yorn.is_yes<0>"(i8 %"ch#0") local_unnamed_addr #0 {
 entry:
-  %0 = and i8 %"ch#0", -33
-  %1 = icmp eq i8 %0, 89
+  %0 = or i8 %"ch#0", 32
+  %1 = icmp eq i8 %0, 121
   ret i1 %1
 }
 
-; Function Attrs: nounwind readnone
-define i1 @"proc_yorn.is_yes_or_no<0>"(i8 %"ch#0") #1 {
+; Function Attrs: norecurse nounwind readnone
+define i1 @"proc_yorn.is_yes_or_no<0>"(i8 %"ch#0") local_unnamed_addr #0 {
 entry:
-  %0 = and i8 %"ch#0", -33
-  %1 = icmp eq i8 %0, 89
-  %"tmp$11#0" = icmp eq i8 %"ch#0", 110
-  %"tmp$14#0" = or i1 %"tmp$11#0", %1
-  %"tmp$17#0" = icmp eq i8 %"ch#0", 78
-  %"tmp$20#0" = or i1 %"tmp$14#0", %"tmp$17#0"
-  ret i1 %"tmp$20#0"
+  %0 = or i8 %"ch#0", 32
+  %1 = icmp eq i8 %0, 121
+  %2 = icmp eq i8 %0, 110
+  %3 = or i1 %2, %1
+  ret i1 %3
 }
 
-define i1 @"proc_yorn.yorn<0>"(i8* %"prompt#0") {
+define i1 @"proc_yorn.yorn<0>"(i8* %"prompt#0") local_unnamed_addr {
 entry:
   %"result#0" = tail call i1 @"proc_yorn.gen$1<0>"(i8* %"prompt#0")
   ret i1 %"result#0"
 }
 
-attributes #0 = { nounwind }
-attributes #1 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 

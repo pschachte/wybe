@@ -18,29 +18,29 @@ AFTER EVERYTHING:
 
 quad > public inline (1 calls)
 0: quad(x#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$4#0:wybe.int) @wybe:13:38
-    foreign llvm add(~tmp$4#0:wybe.int, ~tmp$4#0:wybe.int, ?tmp$8#0:wybe.int) @wybe:13:38
-    foreign llvm move(~tmp$8#0:wybe.int, ?$#0:wybe.int) @func_let:1:8
+    foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:13:38
+    foreign llvm add(~tmp$0#0:wybe.int, ~tmp$0#0:wybe.int, ?$#0:wybe.int) @wybe:13:38
 func_let
 ======================================================================
 AFTER LLVM IR:
 
 ; ModuleID = 'func_let'
+source_filename = "test-cases/func_let.wybe"
 
-declare void @print_int(i64)
+declare void @print_int(i64) local_unnamed_addr
 
-define i32 @func_let.main() {
+define i32 @func_let.main() local_unnamed_addr {
 entry:
   tail call void @print_int(i64 40)
   ret i32 0
 }
 
-; Function Attrs: nounwind readnone
-define i64 @"func_let.quad<0>"(i64 %"x#0") #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"func_let.quad<0>"(i64 %"x#0") local_unnamed_addr #0 {
 entry:
-  %"tmp$8#0" = shl i64 %"x#0", 2
-  ret i64 %"tmp$8#0"
+  %"$#0" = shl i64 %"x#0", 2
+  ret i64 %"$#0"
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 

@@ -11,8 +11,9 @@ import           AST
 import           Control.Monad
 import           Crypto.Hash
 import           Data.Binary as B
+-- import qualified Data.ByteString.Char8 as BL
 import qualified Data.ByteString.Lazy as BL
-import qualified LLVM.General.AST as LLVMAST
+import qualified LLVM.AST as LLVMAST
 import           Text.Parsec.Pos
                  ( SourcePos, sourceName, sourceLine,
                    sourceColumn, newPos )

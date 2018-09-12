@@ -7,9 +7,9 @@
 {-# LANGUAGE OverloadedStrings          #-}
 
 module Codegen (
-  Codegen(..), CodegenState(..), BlockState(..),
+  Codegen(..), CodegenState(..), BlockState(..), Translation,
   emptyModule, evalCodegen, addExtern, addGlobalConstant,
-  execCodegen, emptyCodegen,
+  execCodegen, emptyCodegen, evalTranslation, getCount, putCount,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
   call, externf, ret, globalDefine, external, phi, br, cbr,
@@ -24,7 +24,7 @@ module Codegen (
   -- * Custom Types
   int_c, float_c,
   -- * Instructions
-  instr, namedInstr,
+  instr, namedInstr, voidInstr,
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv, urem, srem, frem,
   cons, uitofp, fptoui, icmp, fcmp, lOr, lAnd, lXor, shl, lshr, ashr,
   constInttoptr,
@@ -37,7 +37,7 @@ module Codegen (
 
 import           Data.Function
 import           Data.List
-import qualified Data.Map                                as Map
+import qualified Data.Map                        as Map
 import           Data.String
 import           Data.Word
 
@@ -45,25 +45,25 @@ import           Control.Applicative
 import           Control.Monad.Except
 import           Control.Monad.State
 
-import           LLVM.General.AST
-import qualified LLVM.General.AST                        as LLVMAST
-import           LLVM.General.AST.Global
-import qualified LLVM.General.AST.Global                 as G
+import           LLVM.AST
+import qualified LLVM.AST                        as LLVMAST
+import           LLVM.AST.Global
+import qualified LLVM.AST.Global                 as G
 
-import           LLVM.General.AST.AddrSpace
-import qualified LLVM.General.AST.Attribute              as A
-import qualified LLVM.General.AST.CallingConvention      as CC
-import qualified LLVM.General.AST.Constant               as C
-import qualified LLVM.General.AST.FloatingPointPredicate as FP
-import qualified LLVM.General.AST.IntegerPredicate       as IP
+import           LLVM.AST.AddrSpace
+import qualified LLVM.AST.Attribute              as A
+import qualified LLVM.AST.CallingConvention      as CC
+import qualified LLVM.AST.Constant               as C
+import qualified LLVM.AST.FloatingPointPredicate as FP
+import qualified LLVM.AST.IntegerPredicate       as IP
 
-import           AST                                     (Prim, PrimProto, Compiler
-                                                         , shouldnt, logMsg
-                                                         , showModSpec
-                                                         , getModuleSpec)
-import           LLVM.General.Context
-import           LLVM.General.Module
-import           Options (LogSelection (Blocks))
+import           AST                             (Compiler, Prim, PrimProto,
+                                                  getModuleSpec, logMsg,
+                                                  shouldnt, showModSpec)
+import           LLVM.Context
+import           LLVM.Module
+import           Options                         (LogSelection (Blocks))
+import           Unsafe.Coerce
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
@@ -85,7 +85,7 @@ void_t :: Type
 void_t = VoidType
 
 float_t :: Type
-float_t = FloatingPointType 64 IEEE
+float_t = FloatingPointType DoubleFP
 
 char_t :: Type
 char_t = IntegerType 8
@@ -101,14 +101,19 @@ int_c :: Word32 -> Type
 int_c = IntegerType
 
 float_c :: Word32 -> Type
-float_c b = FloatingPointType b IEEE
+float_c 16  = FloatingPointType HalfFP
+float_c 32  = FloatingPointType FloatFP
+float_c 64  = FloatingPointType DoubleFP
+float_c 128 = FloatingPointType FP128FP
+float_c 80  = FloatingPointType X86_FP80FP
+float_c n   = error $ "Invalid floating point width " ++ show n
 
 
 ----------------------------------------------------------------------------
 -- Codegen State                                                          --
 ----------------------------------------------------------------------------
 -- | 'SymbolTable' is a simple mapping of scope variable names and their
--- representation as an LLVM.General.AST.Operand.Operand.
+-- representation as an LLVM.AST.Operand.Operand.
 type SymbolTable = [(String, Operand)]
 
 -- | A Map of all the assigned names to assist in supllying new unique names.
@@ -149,13 +154,23 @@ data BlockState
 
 type Codegen = StateT CodegenState Compiler
 
-execCodegen :: [PrimProto] -> Codegen a -> Compiler CodegenState
-execCodegen modProtos codegen =
-    execStateT codegen (emptyCodegen modProtos)
+execCodegen :: Word -> [PrimProto] -> Codegen a -> Compiler CodegenState
+execCodegen startCount protos codegen =
+  execStateT codegen (emptyCodegen startCount protos)
 
 evalCodegen :: [PrimProto] -> Codegen t -> Compiler t
-evalCodegen modProtos codegen =
-    evalStateT codegen (emptyCodegen modProtos)
+evalCodegen protos codegen = evalStateT codegen (emptyCodegen 0 protos)
+
+type Translation = StateT Word Compiler
+
+evalTranslation :: Word -> Translation a -> Compiler a
+evalTranslation = flip evalStateT
+
+getCount :: Translation Word
+getCount = get
+
+putCount :: Word -> Translation ()
+putCount = put
 
 -- | Gets a new incremental word suffix for a temporary local operands
 fresh :: Codegen Word
@@ -181,7 +196,7 @@ addGlobalConstant ty con =
     do modName <- lift $ fmap showModSpec getModuleSpec
        gs <- gets globalVars
        n <- fresh
-       let ref = Name $ modName ++ "." ++ show n
+       let ref = Name $ fromString $ modName ++ "." ++ show n
        let gvar = globalVariableDefaults { name = ref
                                          , isConstant = True
                                          , G.type' = ty
@@ -192,7 +207,7 @@ addGlobalConstant ty con =
 -- | Create an empty LLVMAST.Module which would be converted into
 -- LLVM IR once the moduleDefinitions field is filled.
 emptyModule :: String -> LLVMAST.Module
-emptyModule label = defaultModule { moduleName = label }
+emptyModule label = defaultModule { moduleName = fromString label }
 
 
 -- | Create a global Function Definition to store in the LLVMAST.Module.
@@ -201,7 +216,7 @@ emptyModule label = defaultModule { moduleName = label }
 globalDefine :: Type -> String -> [(Type, Name)] -> [BasicBlock] -> Definition
 globalDefine rettype label argtypes body
              = GlobalDefinition $ functionDefaults {
-                 name = Name label
+                 name = Name $ fromString label
                , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes],
                                False)
                , returnType = rettype
@@ -212,7 +227,7 @@ globalDefine rettype label argtypes body
 external :: Type -> String -> [(Type, Name)] -> Definition
 external rettype label argtypes
     = GlobalDefinition $ functionDefaults {
-        name = Name label
+        name = Name $ fromString label
       , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes], False)
       , returnType = rettype
       , basicBlocks = []
@@ -235,10 +250,17 @@ emptyBlock :: Int -> BlockState
 emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
-emptyCodegen :: [PrimProto] -> CodegenState
-emptyCodegen modProtos
-    = CodegenState (Name entryBlockName)
-      Map.empty [] 1 0 Map.empty [] [] modProtos
+emptyCodegen :: Word -> [PrimProto] -> CodegenState
+emptyCodegen startCount =
+  CodegenState
+    (Name $ fromString entryBlockName)
+    Map.empty
+    []
+    1
+    startCount
+    Map.empty
+    []
+    []
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name
@@ -250,11 +272,11 @@ addBlock bname = do
   let new = emptyBlock ix
       (qname, supply) = uniqueName bname ns
   -- updating with new block appended
-  modify $ \s -> s { blocks = Map.insert (Name qname) new blks
+  modify $ \s -> s { blocks = Map.insert (Name $ fromString qname) new blks
                    , blockCount = ix + 1
                    , names = supply
                    }
-  return (Name qname)
+  return (Name $ fromString qname)
 
 -- | Set the current block label.
 setBlock :: Name -> Codegen Name
@@ -280,7 +302,7 @@ current = do
   curr <- gets currentBlock
   blks <- gets blocks
   case Map.lookup curr blks of
-    Just x -> return x
+    Just x  -> return x
     Nothing -> error $ "No such block found: " ++ show curr
 
 
@@ -295,7 +317,7 @@ makeBlock :: (Name, BlockState) -> BasicBlock
 makeBlock (l, (BlockState _ s t)) = BasicBlock l s (maketerm t)
   where
     maketerm (Just x) = x
-    maketerm Nothing = error $ "Block has no terminator: " ++ (show l)
+    maketerm Nothing  = error $ "Block has no terminator: " ++ (show l)
 
 -- | Sort the blocks on their ids. Blocks do get out of order since any block
 -- can be brought to be the 'currentBlock'.
@@ -326,7 +348,7 @@ externf ty = ConstantOperand . (C.GlobalReference ty)
 
 -- | Create a new Local Operand (prefixed with % in LLVM)
 localVar :: Type -> String -> Operand
-localVar t s =  (LocalReference t ) $ LLVMAST.Name s
+localVar t s =  (LocalReference t ) $ LLVMAST.Name $ fromString s
 
 local :: Type -> LLVMAST.Name -> Operand
 local ty nm = LocalReference ty nm
@@ -349,13 +371,13 @@ getVar :: String -> Codegen Operand
 getVar var = do
   lcls <- gets symtab
   case lookup var lcls of
-    Just x -> return x
+    Just x  -> return x
     Nothing -> shouldnt $ "Local variable not in scope: " ++ show var
 
 getVarMaybe :: String -> Codegen (Maybe Operand)
 getVarMaybe var = do
   lcls <- gets symtab
-  return $ lookup var lcls 
+  return $ lookup var lcls
 
 
 -- | Look inside an operand and determine it's type.
@@ -382,7 +404,7 @@ operandType _ = void_t
 -- instruction).
 namedInstr :: Type -> String -> Instruction -> Codegen Operand
 namedInstr ty nm ins =
-    do let ref = Name nm
+    do let ref = Name $ fromString nm
        blk <- current
        let i = stack blk
        modifyBlock $ blk { stack = i ++ [ref := ins] }
@@ -400,6 +422,11 @@ instr ty ins =
        modifyBlock $ blk { stack = i ++ [ref := ins] }
        return $ local ty ref
 
+voidInstr :: Instruction -> Codegen ()
+voidInstr inst = do
+  blk <- current
+  let i = stack blk
+  modifyBlock $ blk { stack = i ++ [Do inst] }
 
 -- | 'terminator' provides the last instruction of a basic block.
 terminator :: Named Terminator -> Codegen (Named Terminator)
@@ -435,19 +462,19 @@ srem a b = SRem a b []
 -- * Floating point arithmetic operations (Binary)
 
 fadd :: Operand -> Operand -> Instruction
-fadd a b = FAdd NoFastMathFlags a b []
+fadd a b = FAdd noFastMathFlags a b []
 
 fsub :: Operand -> Operand -> Instruction
-fsub a b = FSub NoFastMathFlags a b []
+fsub a b = FSub noFastMathFlags a b []
 
 fmul :: Operand -> Operand -> Instruction
-fmul a b = FMul NoFastMathFlags a b []
+fmul a b = FMul noFastMathFlags a b []
 
 fdiv :: Operand -> Operand -> Instruction
-fdiv a b = FDiv NoFastMathFlags a b []
+fdiv a b = FDiv noFastMathFlags a b []
 
 frem :: Operand -> Operand -> Instruction
-frem a b = FRem NoFastMathFlags a b []
+frem a b = FRem noFastMathFlags a b []
 
 -- * Bitwise Binary Operations
 shl :: Operand -> Operand -> Instruction
@@ -511,7 +538,9 @@ alloca ty = Alloca ty Nothing 0 []
 
 -- | The 'store' instruction is used to write to write to memory. yields void.
 store :: Operand -> Operand -> Codegen Operand
-store ptr val = instr phantom_t $ Store False ptr val Nothing 0 []
+store ptr val = do
+  voidInstr $ Store False ptr val Nothing 0 []
+  return ptr
 
 -- | The 'load' function wraps LLVM's load instruction with defaults.
 load :: Operand -> Instruction
@@ -551,7 +580,7 @@ sext op ty = instr ty $ SExt op ty []
 -- Helpers for allocating, storing, loading
 doAlloca :: Type -> Codegen Operand
 doAlloca (PointerType ty _) = instr (ptr_t ty) $ Alloca ty Nothing 0 []
-doAlloca ty = instr (ptr_t ty) $ Alloca ty Nothing 0 []
+doAlloca ty                 = instr (ptr_t ty) $ Alloca ty Nothing 0 []
 
 doLoad :: Type -> Operand -> Codegen Operand
 doLoad ty ptr = instr ty $ Load False ptr Nothing 0 []
@@ -582,6 +611,6 @@ retNothing = terminator $ Do $ Ret Nothing []
 phi :: Type -> [(Operand, Name)] -> Codegen Operand
 phi ty incoming = instr ty $ Phi ty incoming []
 
-    
+
 logCodegen :: String -> Codegen ()
 logCodegen s = lift $ logMsg Blocks $ "=CODEGEN=" ++ s

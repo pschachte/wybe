@@ -18,12 +18,13 @@ chain_assign
 AFTER LLVM IR:
 
 ; ModuleID = 'chain_assign'
+source_filename = "test-cases/chain_assign.wybe"
 
-; Function Attrs: nounwind readnone
-define i64 @"chain_assign.chain<0>"() #0 {
+; Function Attrs: norecurse nounwind readnone
+define i64 @"chain_assign.chain<0>"() local_unnamed_addr #0 {
 entry:
   ret i64 1
 }
 
-attributes #0 = { nounwind readnone }
+attributes #0 = { norecurse nounwind readnone }
 

@@ -17,12 +17,12 @@ module AST (
   Determinism(..), TypeProto(..), TypeSpec(..), TypeRef(..), TypeImpln(..),
   FnProto(..), ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
-  Exp(..), Generator(..), Stmt(..),
+  Exp(..), Generator(..), Stmt(..), detStmt,
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
   phantomParam, phantomArg, phantomType,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
-  placedApply, makeMessage, updatePlacedM,
+  placedApply, placedApplyM, makeMessage, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   ImportSpec(..), importSpec,
@@ -34,10 +34,10 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, outArgVar, argDescription, flowsIn, flowsOut,
-  foldBodyPrims, foldBodyDistrib, foldProcCalls,
-  expToStmt, procCallToExp, expFlow,
+  foldProcCalls, foldBodyPrims, foldBodyDistrib,
+  expToStmt, seqToStmt, procCallToExp, expFlow,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
-  Prim(..), ProcSpec(..),
+  Prim(..), primArgs, replacePrimArgs, argIsVar, ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   -- *Stateful monad for the compilation process
@@ -89,7 +89,7 @@ import           System.Console.ANSI
 
 import           GHC.Generics (Generic)
 
-import qualified LLVM.General.AST as LLVMAST
+import qualified LLVM.AST as LLVMAST
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
@@ -154,7 +154,7 @@ data TypeProto = TypeProto Ident [Ident]
 data FnProto = FnProto {
     fnProtoName::Ident,
     fnProtoParams::[Param],
-    fnProtoResourceFlows::[ResourceFlowSpec]
+    fnProtoResourceFlows::Set.Set ResourceFlowSpec
     } deriving (Generic, Eq)
 
 
@@ -201,8 +201,14 @@ rePlace t (Unplaced _)   = Unplaced t
 
 -- |Apply a function that takes a thing and an optional place to a
 --  placed thing.
-placedApply :: (a -> OptPos -> b) -> (Placed a) -> b
+placedApply :: (a -> OptPos -> b) -> Placed a -> b
 placedApply f placed = f (content placed) (place placed)
+
+
+-- |Apply a function that takes a thing and an optional place to a
+--  placed thing.
+placedApplyM :: Monad m => (a -> OptPos -> m b) -> Placed a -> m b
+placedApplyM f placed = f (content placed) (place placed)
 
 
 instance Functor Placed where
@@ -703,7 +709,8 @@ addSimpleResource name impln vis = do
 
 
 -- |Find the definition of the specified resource visible in the current module.
-lookupResource :: ResourceSpec -> OptPos -> Compiler (Maybe ResourceIFace)
+lookupResource :: ResourceSpec -> OptPos
+               -> Compiler (Maybe (ResourceSpec,ResourceIFace))
 lookupResource res@(ResourceSpec mod name) pos = do
     logAST $ "Looking up resource " ++ show res
     rspecs <- refersTo mod name modKnownResources resourceMod
@@ -719,7 +726,7 @@ lookupResource res@(ResourceSpec mod name) pos = do
                         (Map.lookup (resourceName rspec) . modResources)
             let iface = resourceDefToIFace $
                         trustFromJust "lookupResource" maybeDef
-            return $ Just iface
+            return $ Just (rspec,iface)
         _   -> do
             message Error ("Ambiguous resource " ++ show res ++
                            " defined in modules: " ++
@@ -1438,29 +1445,51 @@ defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 
 
 -- |Fold over a list of Placed Stmts applying the fn to each ProcCall, and
--- applying comb, which must be associative, to combine results.
-foldProcCalls :: (ModSpec -> Ident -> (Maybe Int) -> Determinism
+-- applying comb, which must be associative, to combine results.  Results
+-- are combined in a right-associative way, with the initial val on the right.
+foldProcCalls :: (ModSpec -> Ident -> Maybe Int -> Determinism
                   -> [Placed Exp] -> a) ->
                  (a -> a -> a) -> a -> [Placed Stmt] -> a
-foldProcCalls fn comb val [] = val
+foldProcCalls _fn _comb val [] = val
 foldProcCalls fn comb val (s:ss) = foldProcCalls' fn comb val (content s) ss
 
-foldProcCalls' :: (ModSpec -> Ident -> (Maybe Int) -> Determinism
+foldProcCalls' :: (ModSpec -> Ident -> Maybe Int -> Determinism
                    -> [Placed Exp] -> a) ->
                  (a -> a -> a) -> a -> Stmt -> [Placed Stmt] -> a
 foldProcCalls' fn comb val (ProcCall m name procID detism args) ss =
     foldProcCalls fn comb (comb val $ fn m name procID detism args) ss
+foldProcCalls' fn comb val ForeignCall{} ss =
+    foldProcCalls fn comb val ss
 foldProcCalls' fn comb val (Cond tst thn els) ss =
+    foldProcCalls' fn comb
+      (foldProcCalls fn comb
+        (foldProcCalls fn comb val els)
+          thn)
+      (content tst)
+      ss
+foldProcCalls' fn comb val (And stmts) ss =
     foldProcCalls fn comb
-    (foldProcCalls fn comb
-     (foldProcCalls fn comb
-      (foldProcCalls fn comb val els)
-      thn)
-     tst)
-    ss
+      (foldProcCalls fn comb val stmts)
+      ss
+foldProcCalls' fn comb val (Or stmts) ss =
+    foldProcCalls fn comb
+      (foldProcCalls fn comb val stmts)
+      ss
+foldProcCalls' fn comb val (Not stmt) ss =
+    foldProcCalls' fn comb val
+      (content stmt)
+      ss
+foldProcCalls' fn comb val TestBool{} ss =
+    foldProcCalls fn comb val ss
+foldProcCalls' fn comb val Nop ss =
+    foldProcCalls fn comb val ss
 foldProcCalls' fn comb val (Loop body) ss =
     foldProcCalls fn comb (foldProcCalls fn comb val body) ss
-foldProcCalls' fn comb val _ ss =
+foldProcCalls' fn comb val For{} ss =
+    foldProcCalls fn comb val ss
+foldProcCalls' fn comb val Break ss =
+    foldProcCalls fn comb val ss
+foldProcCalls' fn comb val Next ss =
     foldProcCalls fn comb val ss
 
 
@@ -1582,7 +1611,7 @@ data Constant = Int Int
 data ProcProto = ProcProto {
     procProtoName::ProcName,
     procProtoParams::[Param],
-    procProtoResources::[ResourceFlowSpec]
+    procProtoResources::Set.Set ResourceFlowSpec
     } deriving (Eq, Generic)
 
 
@@ -1676,21 +1705,18 @@ data Stmt
 
      -- |A conditional; execute the first (SemiDet) Stmts; if they succeed
      --  execute the second Stmts, else execute the third.
-     -- XXX try to make the first argument a single placed statement
-     | Cond [Placed Stmt] [Placed Stmt] [Placed Stmt]
+     | Cond (Placed Stmt) [Placed Stmt] [Placed Stmt]
 
      -- All the following are eliminated during unbranching.
 
      -- |A test that succeeds iff the expression is true
      | TestBool Exp
-     -- |A test that succeeds iff all the enclosed tests succeed; enclosed
-     -- statements that aren't tests are honorary successes.
+     -- |A test that fails iff all the enclosed tests fail; enclosed
      | And [Placed Stmt]
      -- |A test that fails iff all the enclosed tests fail; enclosed
-     -- statements that aren't tests are honorary failures.
      | Or [Placed Stmt]
      -- |A test that fails iff the enclosed test succeeds
-     | Not [Placed Stmt]
+     | Not (Placed Stmt)
 
      -- |A loop body; the loop is controlled by Breaks and Nexts
      | Loop [Placed Stmt]
@@ -1705,6 +1731,27 @@ data Stmt
 instance Show Stmt where
   show s = "{" ++ showStmt 4 s ++ "}"
 
+-- |Returns whether the statement is Det
+detStmt :: Stmt -> Bool
+detStmt (ProcCall _ _ _ SemiDet _) = False
+detStmt (TestBool _) = False
+detStmt (Cond _ thn els) = all detStmt $ List.map content $ thn++els
+detStmt (And list) = all detStmt $ List.map content list
+detStmt (Or list) = all detStmt $ List.map content list
+detStmt (Not _) = False
+detStmt _ = True
+
+
+-- |Produce a single statement comprising the conjunctions of the statements
+--  in the supplied list.
+seqToStmt :: [Placed Stmt] -> Placed Stmt
+seqToStmt [] = Unplaced $ TestBool $ Typed (IntValue 1)
+                                           (TypeSpec ["wybe"] "bool" [])
+                                           True
+seqToStmt [stmt] = stmt
+seqToStmt stmts = Unplaced $ And stmts
+
+
 -- |An expression.  These are all normalised into statements.
 data Exp
       = IntValue Integer
@@ -1716,7 +1763,7 @@ data Exp
                                       -- and whether type is a cast
       -- The following are eliminated during flattening
       | Where [Placed Stmt] (Placed Exp)
-      | CondExp [Placed Stmt] (Placed Exp) (Placed Exp)
+      | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
       | Fncall ModSpec Ident [Placed Exp]
       | ForeignFn Ident Ident [Ident] [Placed Exp]
      deriving (Eq,Ord,Generic)
@@ -1783,6 +1830,29 @@ data PrimArg
      deriving (Eq,Ord,Generic)
 
 
+-- |Returns a list of all arguments to a prim
+primArgs :: Prim -> [PrimArg]
+primArgs (PrimCall _ args) = args
+primArgs (PrimForeign _ _ _ args) = args
+primArgs (PrimTest arg) = [arg]
+
+
+-- |Returns a list of all arguments to a prim
+replacePrimArgs :: Prim -> [PrimArg] -> Prim
+replacePrimArgs (PrimCall pspec _) args = PrimCall pspec args
+replacePrimArgs (PrimForeign lang nm flags _) args =
+    PrimForeign lang nm flags args
+replacePrimArgs (PrimTest _) [arg] = PrimTest arg
+replacePrimArgs instr args =
+    shouldnt $ "Attempting to replace arguments of " ++ show instr
+               ++ " with " ++ show args
+
+
+argIsVar :: PrimArg -> Bool
+argIsVar ArgVar{} = True
+argIsVar _ = False
+
+
 -- |Relates a primitive argument to the corresponding source argument
 data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
                  | HalfUpdate      -- ^One half of a variable update (!var)
@@ -1840,7 +1910,8 @@ argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
 expToStmt :: Exp -> Stmt
 expToStmt (Fncall [] "and" args) = And $ List.map (fmap expToStmt) args
 expToStmt (Fncall [] "or"  args) = Or  $ List.map (fmap expToStmt) args
-expToStmt (Fncall [] "not" args) = Not $ List.map (fmap expToStmt) args
+expToStmt (Fncall [] "not" [arg]) = Not $ fmap expToStmt arg
+expToStmt (Fncall [] "not" args) = shouldnt $ "non-unary 'not' " ++ show args
 expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name Nothing Det args
 expToStmt (ForeignFn lang name flags args) = 
     ForeignCall lang name flags args
@@ -1942,8 +2013,9 @@ logDump :: LogSelection -> LogSelection -> String -> Compiler ()
 logDump selector1 selector2 pass = do
     whenLogging2 selector1 selector2 $ do
       modList <- gets (Map.elems . modules)
-      liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER " ++ pass ++ ":\n" ++
-        intercalate ("\n" ++ replicate 50 '-' ++ "\n")
+      liftIO $ hPutStrLn stderr $ replicate 70 '='
+        ++ "\nAFTER " ++ pass ++ ":\n"
+        ++ intercalate ("\n" ++ replicate 50 '-' ++ "\n")
         (List.map show $ List.filter ((/="wybe"). List.head . modSpec) modList)
 
 
@@ -2183,10 +2255,11 @@ instance Show TypeSpec where
       if List.null args then ""
       else "(" ++ (intercalate "," $ List.map show args) ++ ")"
 
-showResources :: [ResourceFlowSpec] -> String
-showResources [] = ""
-showResources resources =
-    " use " ++ intercalate ", " (List.map show resources)
+showResources :: Set.Set ResourceFlowSpec -> String
+showResources resources
+  | Set.null resources = ""
+  | otherwise          = " use " ++ intercalate ", "
+                                    (List.map show $ Set.elems resources)
 
 
 -- |How to show a proc prototype.
@@ -2288,10 +2361,9 @@ showStmt _ (ForeignCall lang name flags args) =
 showStmt _ (TestBool test) =
     "testbool " ++ show test
 showStmt indent (And stmts) =
-    "(    " ++
     intercalate (" and\n" ++ replicate indent' ' ')
-        (List.map (showStmt indent' . content) stmts) ++
-    ")"
+    (List.map (showStmt indent' . content) stmts) ++
+    ")"  
     where indent' = indent + 4
 showStmt indent (Or stmts) =
     "(   " ++
@@ -2299,14 +2371,12 @@ showStmt indent (Or stmts) =
         (List.map (showStmt indent' . content) stmts) ++
     ")"
     where indent' = indent + 4
-showStmt indent (Not stmts) =
-    "not(" ++
-    intercalate ("\n" ++ replicate indent' ' ')
-    (List.map (showStmt indent' . content) stmts) ++ ")"
+showStmt indent (Not stmt) =
+    "not(" ++ showStmt indent' (content stmt) ++ ")"
     where indent' = indent + 4
-showStmt indent (Cond condstmts thn els) =
+showStmt indent (Cond condstmt thn els) =
     let leadIn = List.replicate indent ' '
-    in "if {" ++ showBody (indent+4) condstmts ++ "}::\n"
+    in "if {" ++ showStmt (indent+4) (content condstmt) ++ "}::\n"
        ++ showBody (indent+4) thn ++ "\n"
        ++ leadIn ++ "else::"
        ++ showBody (indent+4) els ++ "\n"

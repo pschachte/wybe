@@ -64,14 +64,16 @@ import           Options                   (LogSelection (..), Options,
                                             optForce, optForceAll, optLibDirs,
                                             optUseStd)
 import           NewParser                 (parseWybe)
-import           Resources                 (resourceCheckMod, resourceCheckProc)
+import           Resources                 (resourceCheckMod, resourceCheckProc,
+                                            canonicaliseProcResources)
 import           Scanner                   (fileTokens)
 import           System.Directory
 import           System.FilePath
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
-import BinaryFactory
+import           BinaryFactory
+import qualified Data.ByteString.Char8 as BS
 
 ------------------------ Handling dependencies ------------------------
 
@@ -277,7 +279,7 @@ compileModule source modspec params items = do
     enterModule source modspec params
     -- Hash the parse items and store it in the module
     let hashOfItems = hashItems items
-    -- logBuild $ "HASH: " ++ hashOfItems
+    logBuild $ "HASH: " ++ hashOfItems
     updateModule (\m -> m { itemsHash = Just hashOfItems })
     -- verboseMsg 1 $ return (intercalate "\n" $ List.map show items)
     -- XXX This means we generate LPVM code for a module before
@@ -447,6 +449,7 @@ compileModSCC mspecs = do
     stopOnError $ "type checking of modules " ++
       showModSpecs mspecs
     logDump Types Unbranch "TYPE CHECK"
+    mapM_ (transformModuleProcs canonicaliseProcResources)  mspecs
     mapM_ (transformModuleProcs resourceCheckProc)  mspecs
     stopOnError $ "resource checking of modules " ++
       showModSpecs mspecs
@@ -513,6 +516,7 @@ fixpointProcessSCC processor scc = do        -- must find fixpoint
 transformModuleProcs :: (ProcDef -> Compiler ProcDef) -> ModSpec ->
                         Compiler ()
 transformModuleProcs trans thisMod = do
+    logBuild $ "**** Reentering module " ++ showModSpec thisMod
     reenterModule thisMod
     -- (names, procs) <- :: StateT CompilerState IO ([Ident], [[ProcDef]])
     (names,procs) <- unzip <$>
@@ -578,7 +582,7 @@ handleModImports _ thisMod = do
 buildExecutable :: ModSpec -> FilePath -> Compiler ()
 buildExecutable targetMod fpath = do
     depends <- orderedDependencies targetMod
-    if List.null depends || not (snd (head depends))
+    if List.null depends || not (snd (last depends))
         then
             -- No main code in the selected module: don't build executable
             message Error
@@ -594,7 +598,7 @@ buildExecutable targetMod fpath = do
             mainMod <- newMainModule mainImports
             logBuild "o Built 'main' module for target: "
             mainModStr <- liftIO $ codeemit mainMod
-            logEmit mainModStr
+            logEmit $ BS.unpack mainModStr
             ------------
             logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
             tempDir <- liftIO getTemporaryDirectory
@@ -698,7 +702,7 @@ objectReBuildNeeded thisMod dir = do
 srcObjFiles :: ModSpec -> [FilePath] ->
                Compiler (Maybe (FilePath,Bool,FilePath,Bool,Ident))
 srcObjFiles modspec possDirs = do
-    let splits = List.map (`take` modspec) [1..length modspec]
+    let splits = List.map (`List.take` modspec) [1..length modspec]
     dirs <- mapM (\d -> mapM (\ms -> do
                                   let srcfile = moduleFilePath sourceExtension
                                                 d ms
@@ -726,7 +730,7 @@ srcObjFiles modspec possDirs = do
 -- first found non-empty (not of constr NoSource) of ModuleSource is returned.
 moduleSources :: ModSpec -> [FilePath] -> IO ModuleSource
 moduleSources modspec possDirs = do
-    let splits = List.map (`take` modspec) [1..length modspec]
+    let splits = List.map (`List.take` modspec) [1..length modspec]
     dirs <- mapM (\d -> mapM (sourceInDir d) splits) possDirs
     -- Return the last valid Source
     return $ (fromMaybe NoSource . List.find (/= NoSource) . reverse )

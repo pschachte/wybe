@@ -41,9 +41,9 @@ normalise modCompiler items = do
 
 -- |The resources available at the top level
 -- XXX this should be all resources with initial values
-initResources :: [ResourceFlowSpec]
--- initResources = [ResourceFlowSpec (ResourceSpec ["wybe"] "io") ParamInOut]
-initResources = [ResourceFlowSpec (ResourceSpec ["wybe","io"] "io") ParamInOut]
+initResources :: Set ResourceFlowSpec
+initResources = Set.singleton
+                $ ResourceFlowSpec (ResourceSpec ["wybe","io"] "io") ParamInOut
 
 
 -- |Normalise a single file item, storing the result in the current module.
@@ -52,7 +52,7 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
   = do
     let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
     ty <- addType name (TypeDef (length params) rep' pos) vis
-    -- XXX Should we special-case handling of = instead of generating these:
+    -- XXX Should we special-case handling of = instead of generating these?
     let eq1 = assignmentProc ty False
     let eq2 = assignmentProc ty True
     modspec <- getModuleSpec
@@ -174,7 +174,7 @@ assignmentProc ty leftToRight =
               else ("out", ParamOut,"in", ParamIn)
     in ProcDecl Public Det True
        (ProcProto "=" [Param lname ty lflow Ordinary,
-                       Param rname ty rflow Ordinary] [])
+                       Param rname ty rflow Ordinary] Set.empty)
        [move (varGet "in") (varSet "out")]
        Nothing
 
@@ -185,7 +185,7 @@ constCtorItems  vis typeSpec (placedProto,num) =
     let pos = place placedProto
         constName = fnProtoName $ content placedProto
     in [ProcDecl vis Det True
-        (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] [])
+        (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] Set.empty)
         [lpvmCastToVar (castTo (IntValue num) typeSpec) "$"] pos
        ]
 
@@ -245,7 +245,8 @@ constructorItems :: Ident -> [Param] -> TypeSpec -> Int
 constructorItems ctorName params typeSpec size fields tag pos =
     let flowType = Implicit pos
     in [ProcDecl Public Det True
-        (ProcProto ctorName (params++[Param "$" typeSpec ParamOut Ordinary]) [])
+        (ProcProto ctorName (params++[Param "$" typeSpec ParamOut Ordinary])
+         Set.empty)
        -- Code to allocate memory for the value
         ([Unplaced $ ForeignCall "lpvm" "alloc" []
           [Unplaced $ IntValue $ fromIntegral size,
@@ -253,8 +254,15 @@ constructorItems ctorName params typeSpec size fields tag pos =
          ++
        -- Code to fill all the fields
          (reverse $ List.map (\(var,_,aligned) ->
+-- XXX Revise mutate instruction to take address, new address (output),
+--     size, offset, and destructive (Bool).  If destructive
+--     is True, does in place update and new address = address;
+--     otherwise allocates fresh storage, copies old contents,
+--     and mutates the new storage.
                                (Unplaced $ ForeignCall "lpvm" "mutate" []
-                                [Unplaced $ Var "$rec" ParamInOut flowType,
+                                [Unplaced $ Typed
+                                   (Var "$rec" ParamInOut flowType)
+                                   typeSpec True,
                                  Unplaced $ IntValue $ fromIntegral aligned,
                                  Unplaced $ Var var ParamIn flowType]))
           fields)
@@ -279,59 +287,54 @@ deconstructorItems ctorName params typeSpec constCount nonConstCount
     let flowType = Implicit pos
         detism = if constCount + nonConstCount > 1 then SemiDet else Det
     in [ProcDecl Public detism True
-        (ProcProto ctorName 
+        (ProcProto ctorName
          (List.map (\(Param n t _ ft) -> (Param n t ParamOut ft)) params
-          ++ [Param "$" typeSpec ParamIn Ordinary]) 
-         [])
+          ++ [Param "$" typeSpec ParamIn Ordinary])
+         Set.empty)
         -- Code to check we have the right constructor
-        (tagCheck constCount nonConstCount tag "$"
+        ([tagCheck constCount nonConstCount tag "$"]
          ++
-        -- Code to strip tag and fetch all the fields
-        tagStrip tag "$" "$stripped" typeSpec
-        ++
+        -- Code to fetch all the fields
         reverse (List.map (\(var,_,aligned) ->
                               (Unplaced $ ForeignCall "lpvm" "access" []
-                               [Unplaced $ Var "$stripped" ParamIn flowType,
-                                Unplaced $ IntValue $ fromIntegral aligned,
+                               [Unplaced $ Var "$" ParamIn flowType,
+                                Unplaced $ IntValue
+                                  $ fromIntegral aligned - tag,
                                 Unplaced $ Var var ParamOut flowType]))
                  fields))
         pos]
 
 
 -- |Generate the needed Test statements to check that the tag of the value
---  of the specified variable matches the specified tag
-tagCheck :: Int -> Int -> Integer -> Ident -> [Placed Stmt]
+--  of the specified variable matches the specified tag.  If not checking
+--  is necessary, just generate a Nop, rather than a true test.
+tagCheck :: Int -> Int -> Integer -> Ident -> Placed Stmt
 tagCheck constCount nonConstCount tag varName =
     -- If there are any constant constructors, be sure it's not one of them
-    (case constCount of
-          0 -> []  -- Nothing to do if no const constructors
-          _ -> comparison "uge"
-                 (lpvmCastExp (varGet varName) intType)
-                 (intCast $ iVal constCount))
-     ++
-    -- If there is more than non-const constructors, check it's the right one
-     (case nonConstCount of
-           1 -> []  -- Nothing to do if it's the only non-const constructor
-           _ -> comparison "eq"
-                  (intCast $ ForeignFn "llvm" "and" []
-                   [Unplaced $ lpvmCastExp (varGet varName) intType,
-                    Unplaced $ iVal tagMask])
-                  (intCast $ iVal tag))
+    let tests =
+          (case constCount of
+               0 -> []
+               _ -> [comparison "uge"
+                     (lpvmCastExp (varGet varName) intType)
+                     (intCast $ iVal constCount)]
+           ++
+           -- If there is more than one non-const constructors, check that
+           -- it's the right one
+           case nonConstCount of
+               1 -> []  -- Nothing to do if it's the only non-const constructor
+               _ -> [comparison "eq"
+                     (intCast $ ForeignFn "llvm" "and" []
+                      [Unplaced $ lpvmCastExp (varGet varName) intType,
+                       Unplaced $ iVal tagMask])
+                     (intCast $ iVal tag)])
+    in if List.null tests
+       then Unplaced Nop
+       else seqToStmt tests
 
 
 -- |Generate the needed statements to strip the specified tag off of the value
 --  of the specified variable, placing the result in the second variable.
 --  We use the stripped name with "$asInt" appended as a temp var name.
-tagStrip :: Integer -> Ident -> Ident -> TypeSpec -> [Placed Stmt]
-tagStrip tag varName strippedName typ =
-    let intStrippedName = strippedName ++ "$asInt"
-    in [Unplaced $ ForeignCall "llvm" "sub" []
-           [Unplaced $ lpvmCastExp (varGet varName) intType,
-            Unplaced $ iVal tag,
-            Unplaced $ intVarSet intStrippedName],
-        lpvmCast (intVarGet intStrippedName) strippedName typ]
-
-
 -- | Produce a getter and a setter for one field of the specified type.
 getterSetterItems :: Visibility -> TypeSpec -> Ident -> OptPos 
                      -> Int -> Int -> Integer -> (VarName,TypeSpec,Int)
@@ -343,33 +346,35 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
     let detism = if constCount + nonConstCount == 1 then Det else SemiDet
     in [ProcDecl vis detism True
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
-                          Param "$" fieldtype ParamOut Ordinary] [])
+                          Param "$" fieldtype ParamOut Ordinary]
+         Set.empty)
         -- Code to check we have the right constructor
-        (tagCheck constCount nonConstCount tag "$rec"
+        ([tagCheck constCount nonConstCount tag "$rec"]
          ++
-        -- Code to strip the tag and access the selected field
-         tagStrip tag "$rec" "$rec$stripped" rectype
-         ++
+        -- Code to access the selected field
          [Unplaced $ ForeignCall "lpvm" "access" []
-          [Unplaced $ varGet "$rec$stripped",
-           Unplaced $ IntValue $ fromIntegral offset,
+          [Unplaced $ varGet "$rec",
+           Unplaced $ IntValue $ fromIntegral offset - tag,
            Unplaced $ varSet "$"]])
         pos,
         ProcDecl vis detism True
         (ProcProto field
          [Param "$rec" rectype ParamInOut Ordinary,
-          Param "$field" fieldtype ParamIn Ordinary] [])
+          Param "$field" fieldtype ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        (tagCheck constCount nonConstCount tag "$rec"
+        ([tagCheck constCount nonConstCount tag "$rec"]
          ++
-        -- Code to strip the tag and mutate the selected field
-         tagStrip tag "$rec" "$rec$stripped" rectype
-         ++
+        -- Code to mutate the selected field
+-- XXX Revise mutate instruction to take address, new address (output),
+--     size, offset, and destructive (Bool).  If destructive
+--     is True, does in place update and new address = address;
+--     otherwise allocates fresh storage, copies old contents,
+--     and mutates the new storage.
          [Unplaced $ ForeignCall "lpvm" "mutate" []
-          [Unplaced $ varGet "$rec$stripped",
-           Unplaced $ IntValue $ fromIntegral offset,
-           Unplaced $ varGet "$field",
-           Unplaced $ varSet "$rec"]])
+          [Unplaced $ Typed (Var "$rec" ParamInOut $ Implicit pos)
+                      rectype False,
+           Unplaced $ IntValue $ fromIntegral offset - tag,
+           Unplaced $ varGet "$field"]])
         pos]
 
 
@@ -396,7 +401,8 @@ implicitEquality typespec consts nonconsts items =
     then [] -- don't generate if user-defined or if no constructors at all
     else
       let proto = ProcProto "=" [Param "$left" typespec ParamIn Ordinary,
-                                 Param "$right" typespec ParamIn Ordinary] []
+                                 Param "$right" typespec ParamIn Ordinary]
+                  Set.empty
           (body,inline) = equalityBody consts nonconsts
       in [ProcDecl Public SemiDet inline proto body Nothing]
 
@@ -422,31 +428,31 @@ equalityTest _ = False
 --       and then test each field for equality by calling the = test.
 --
 --   Also return whether the test should be inlined.  We inline when there
---   there is no ore than one non-const constructor and either it has no more
+--   there is no more than one non-const constructor and either it has no more
 --   than two arguments or there are no const constructors.
 --
 equalityBody :: [Placed FnProto] -> [Placed FnProto] -> ([Placed Stmt],Bool)
 equalityBody [] [] = shouldnt "trying to generate = test with no constructors"
-equalityBody consts [] = (equalityConsts consts,True)
+equalityBody consts [] = ([equalityConsts consts],True)
 equalityBody consts nonconsts =
     -- decide whether $left is const or non const, and handle accordingly
     ([Unplaced $ Cond (comparison "ult"
                          (lpvmCastExp (varGet "$left") intType)
                          (iVal $ length consts))
-                (equalityConsts consts)
-                (equalityNonconsts (content <$> nonconsts) (List.null consts))],
-     -- Decide to inline if only 1 non-const constructor and either no
-     -- non-const constructors (so not recursive) or at most 2 fields
+                [equalityConsts consts]
+                [equalityNonconsts (content <$> nonconsts) (List.null consts)]],
+     -- Decide to inline if only 1 non-const constructor, no non-const
+     -- constructors (so not recursive), and at most 4 fields
      case List.map content nonconsts of
-         [FnProto _ params _ ] -> length params <= 2 || List.null consts
+         [FnProto _ params _ ] -> length params <= 4 && List.null consts
          _ -> False
         )
 
 
 -- |Return code to check of two const values values are equal, given that we
 --  know that the $left value is a const.
-equalityConsts :: [Placed FnProto] -> [Placed Stmt]
-equalityConsts [] = [failTest]
+equalityConsts :: [Placed FnProto] -> Placed Stmt
+equalityConsts [] = failTest
 equalityConsts _ =
     comparison "eq" (intCast $ varGet "$left") (intCast $ varGet "$right")
 
@@ -454,15 +460,15 @@ equalityConsts _ =
 -- |Return code to check that two values are equal when the first is known
 --  not to be a const constructor.  The first argument is the list of
 --  nonconsts, second is the list of consts.
-equalityNonconsts :: [FnProto] -> Bool -> [Placed Stmt]
+equalityNonconsts :: [FnProto] -> Bool -> Placed Stmt
 equalityNonconsts [] _ =
     shouldnt "type with no non-const constructors should have been handled"
 equalityNonconsts [FnProto name params _] noConsts =
     -- single non-const and no const constructors:  just compare fields
     let detism = if noConsts then Det else SemiDet
-    in  deconstructCall name "$left" params detism
-        ++ deconstructCall name "$right" params detism
-        ++ concatMap equalityField params
+    in  Unplaced $ And ([deconstructCall name "$left" params detism,
+                        deconstructCall name "$right" params detism]
+                        ++ concatMap equalityField params)
 equalityNonconsts ctrs _ =
     equalityMultiNonconsts ctrs
 
@@ -473,22 +479,21 @@ equalityNonconsts ctrs _ =
 --  $left against each possible constructor; if it matches, it tests
 --  that $right is also that constructor and all the fields match; if
 --  it doesn't match, it tests the next possible constructor, etc.
-equalityMultiNonconsts :: [FnProto] -> [Placed Stmt]
-equalityMultiNonconsts [] = [Unplaced Nop]
+equalityMultiNonconsts :: [FnProto] -> Placed Stmt
+equalityMultiNonconsts [] = failTest
 equalityMultiNonconsts (FnProto name params _:ctrs) =
-    [Unplaced
+    Unplaced
      $ Cond (deconstructCall name "$left" params SemiDet)
-        (deconstructCall name "$right" params SemiDet
-         ++ concatMap equalityField params)
-        (equalityMultiNonconsts ctrs)
-    ]
+        [Unplaced $ And ([deconstructCall name "$right" params SemiDet]
+                         ++ concatMap equalityField params)]
+        [equalityMultiNonconsts ctrs]
 
 -- |Return code to deconstruct 
-deconstructCall :: Ident -> Ident -> [Param] -> Determinism -> [Placed Stmt]
+deconstructCall :: Ident -> Ident -> [Param] -> Determinism -> Placed Stmt
 deconstructCall ctor arg params detism =
-    [Unplaced $ ProcCall [] ctor Nothing detism
+    Unplaced $ ProcCall [] ctor Nothing detism
      $ List.map (\p -> Unplaced $ varSet $ arg++"$"++paramName p) params
-        ++ [Unplaced $ varGet arg]]
+        ++ [Unplaced $ varGet arg]
 
 
 -- |Return code to check that one field of two data are equal, when

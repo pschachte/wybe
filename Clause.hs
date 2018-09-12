@@ -104,38 +104,38 @@ compileProc proc =
 
 
 
--- |Compile a proc body to LPVM form.  By the time we get here, the 
---  form of the body is very limited:  it is a list of ProcCalls and
---  ForeignCalls, possibly ending with a single Cond statement whose
---  test is a single TestBool statement.  If the proc is SemiDet,
---  it must be a list of ProcCalls and ForeignCalls that *does* end
---  with either a Cond statement whose test is a single TestBool statement,
---  or with a single TestBool statement.  Everything else has already
---  been transformed away.  Furthermore, TestBool statements only appear
---  as the condition of a Cond statement or, in the case of a SemiDet
---  proc, as the final statement of a body.  This code assumes that
---  these invariants are observed, and does not worry whether the proc
---  is Det or SemiDet.
+-- |Compile a proc body to LPVM form. By the time we get here, the form of the
+--  body is very limited: it is a list of ProcCalls and ForeignCalls, possibly
+--  ending with a single Cond statement whose test is a single TestBool
+--  statement and whose then and else branches are also bodies satisfying these
+--  conditions. If the proc is SemiDet, then the body must ends with a TestBool
+--  statement, or with a Cond statement whose then and else branches satisfy
+--  this condition. Everything else has already been transformed away.
+--  Furthermore, TestBool statements only appear as the condition of a Cond
+--  statement or, in the case of a SemiDet proc, as the final statement of a
+--  body. This code assumes that these invariants are observed, and does not
+--  worry whether the proc is Det or SemiDet.
 compileBody :: [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
-compileBody [] params detism = do
+compileBody [] _params detism = do
     end <- closingStmts detism
     return $ ProcBody end NoFork
 compileBody stmts params detism = do
     logClause $ "Compiling body:" ++ showBody 4 stmts
     let final = last stmts
     case content final of
-        Cond [tst] thn els ->
+        Cond tst thn els ->
           case content tst of
               TestBool var -> do
                 front <- mapM compileSimpleStmt $ init stmts
                 compileCond front (place final) var thn els params detism
-              tstStmts ->
-                shouldnt $ "CompileBody of Cond with non-simple test"
-                           ++ show tstStmts
+              tstStmt ->
+                shouldnt $ "CompileBody of Cond with non-simple test:\n"
+                           ++ show tstStmt
         _ -> do
           prims <- mapM compileSimpleStmt stmts
           end <- closingStmts detism
           return $ ProcBody (prims++end) NoFork
+
 
 compileCond :: [Placed Prim] -> OptPos -> Exp -> [Placed Stmt]
     -> [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody

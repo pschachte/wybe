@@ -1,27 +1,25 @@
 /* cbits
-   $ clang -fPIC -shared cbits.c -o cbits.so
+   $ clang -fPIC -shared cbits.c -o cbits.so -lgc -v
 */
 
 #include <stdio.h>
 #include <assert.h>
-#include <gc/gc.h>
+#include <gc.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <math.h>
 
 // putchard - putchar that takes a double and returns 0.
-void print_int(int X) {
-    printf("%d", X);
-    fflush(stdout);
+int print_int(int X) {
+    return printf("%d", X);
 }
 
-void print_float(double X) {
-    printf("%f", X);
-    fflush(stdout);
+int print_float(double X) {
+    return printf("%f", X);
 }
 
-void print_string(const char *s) {
-    puts(s);
-    fflush(stdout);
+int print_string(const char *s) {
+    return puts(s);
 }
 
 int read_char() {

@@ -16,8 +16,8 @@ AFTER EVERYTHING:
     numbers.factorial<0>(4:wybe.int, ?tmp$0#0:wybe.int) @bar:3:9
     foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:76:38
     foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
-    foreign c print_float(35.0:wybe.float, ~#wybe.io$io#1:wybe.phantom, ?tmp$10#0:wybe.phantom) @wybe:80:40
-    foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:74:28
+    foreign c print_float(35.0:wybe.float, ~#wybe.io$io#1:wybe.phantom, ?tmp$9#0:wybe.phantom) @wybe:80:40
+    foreign c putchar('\n':wybe.char, ~tmp$9#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:74:28
 --------------------------------------------------
  Module numbers
   public submods  : 
@@ -39,45 +39,38 @@ AFTER EVERYTHING:
 
 factorial > public (1 calls)
 0: factorial(n#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm icmp sle(n#0:wybe.int, 0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:25:40
-    case ~tmp$7#0:wybe.bool of
+    foreign llvm icmp sle(n#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @wybe:25:40
+    case ~tmp$4#0:wybe.bool of
     0:
-        foreign llvm sub(n#0:wybe.int, 1:wybe.int, ?tmp$10#0:wybe.int) @wybe:16:38
-        numbers.factorial<0>(~tmp$10#0:wybe.int, ?tmp$2#0:wybe.int) @numbers:4:34
-        foreign llvm mul(~n#0:wybe.int, ~tmp$2#0:wybe.int, ?tmp$13#0:wybe.int) @wybe:21:38
-        foreign llvm move(~tmp$13#0:wybe.int, ?$#0:wybe.int) @numbers:3:8
+        foreign llvm sub(n#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:16:38
+        numbers.factorial<0>(~tmp$3#0:wybe.int, ?tmp$2#0:wybe.int) @numbers:4:34
+        foreign llvm mul(~n#0:wybe.int, ~tmp$2#0:wybe.int, ?$#0:wybe.int) @wybe:21:38
 
     1:
         foreign llvm move(1:wybe.int, ?$#0:wybe.int) @numbers:3:8
 
 
 
-gen$1 > inline (2 calls)
-0: gen$1([n#0:wybe.int], tmp$0#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm move(~tmp$0#0:wybe.int, ?$#0:wybe.int) @numbers:3:8
-
-
 toCelsius > public inline (0 calls)
 0: toCelsius(f#0:wybe.float, ?$#0:wybe.float):
-    foreign llvm fsub(~f#0:wybe.float, 32.0:wybe.float, ?tmp$4#0:wybe.float) @wybe:40:44
-    foreign llvm fdiv(~tmp$4#0:wybe.float, 1.8:wybe.float, ?tmp$7#0:wybe.float) @wybe:46:44
-    foreign llvm move(~tmp$7#0:wybe.float, ?$#0:wybe.float) @numbers:1:8
+    foreign llvm fsub(~f#0:wybe.float, 32.0:wybe.float, ?tmp$1#0:wybe.float) @wybe:40:44
+    foreign llvm fdiv(~tmp$1#0:wybe.float, 1.8:wybe.float, ?$#0:wybe.float) @wybe:46:44
 bar, numbers
 ======================================================================
 AFTER LLVM IR:
 
 ; ModuleID = 'bar'
+source_filename = "test-cases/bar.wybe"
 
-; Function Attrs: nounwind
-declare void @putchar(i8) #0
+declare void @putchar(i8) local_unnamed_addr
 
-declare void @print_float(double)
+declare void @print_float(double) local_unnamed_addr
 
-declare void @print_int(i64)
+declare void @print_int(i64) local_unnamed_addr
 
-declare i64 @"numbers.factorial<0>"(i64)
+declare i64 @"numbers.factorial<0>"(i64) local_unnamed_addr
 
-define i32 @bar.main() {
+define i32 @bar.main() local_unnamed_addr {
 entry:
   %"tmp$0#0" = tail call i64 @"numbers.factorial<0>"(i64 4)
   tail call void @print_int(i64 %"tmp$0#0")
@@ -87,65 +80,53 @@ entry:
   ret i32 0
 }
 
-attributes #0 = { nounwind }
-
 --------------------------------------------------
 ; ModuleID = 'numbers'
+source_filename = "test-cases/numbers.wybe"
 
 @numbers.1 = constant [30 x i8] c"Numbers has been initialised.\00"
 
-; Function Attrs: nounwind
-declare void @putchar(i8) #0
+declare void @putchar(i8) local_unnamed_addr
 
-declare void @print_string(i8*)
+declare void @print_string(i8*) local_unnamed_addr
 
-define i32 @numbers.main() {
+define i32 @numbers.main() local_unnamed_addr {
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([30 x i8]* @numbers.1, i32 0, i32 0))
+  tail call void @print_string(i8* getelementptr inbounds ([30 x i8], [30 x i8]* @numbers.1, i64 0, i64 0))
   tail call void @putchar(i8 10)
   ret i32 0
 }
 
 ; Function Attrs: nounwind readnone
-define i64 @"numbers.factorial<0>"(i64 %"n#0") #1 {
+define i64 @"numbers.factorial<0>"(i64 %"n#0") local_unnamed_addr #0 {
 entry:
-  %"tmp$7#01" = icmp slt i64 %"n#0", 1
-  br i1 %"tmp$7#01", label %if.then, label %if.else.preheader
+  %"tmp$4#01" = icmp slt i64 %"n#0", 1
+  br i1 %"tmp$4#01", label %if.then, label %if.else.preheader
 
 if.else.preheader:                                ; preds = %entry
   br label %if.else
 
-if.then.loopexit:                                 ; preds = %if.else
-  %"tmp$13#0.lcssa" = phi i64 [ %"tmp$13#0", %if.else ]
-  br label %if.then
-
-if.then:                                          ; preds = %if.then.loopexit, %entry
-  %accumulator.tr.lcssa = phi i64 [ 1, %entry ], [ %"tmp$13#0.lcssa", %if.then.loopexit ]
+if.then:                                          ; preds = %if.else, %entry
+  %accumulator.tr.lcssa = phi i64 [ 1, %entry ], [ %"$#0", %if.else ]
   ret i64 %accumulator.tr.lcssa
 
 if.else:                                          ; preds = %if.else.preheader, %if.else
-  %"n#0.tr3" = phi i64 [ %"tmp$10#0", %if.else ], [ %"n#0", %if.else.preheader ]
-  %accumulator.tr2 = phi i64 [ %"tmp$13#0", %if.else ], [ 1, %if.else.preheader ]
-  %"tmp$10#0" = add i64 %"n#0.tr3", -1
-  %"tmp$13#0" = mul i64 %"n#0.tr3", %accumulator.tr2
-  %"tmp$7#0" = icmp slt i64 %"tmp$10#0", 1
-  br i1 %"tmp$7#0", label %if.then.loopexit, label %if.else
+  %"n#0.tr3" = phi i64 [ %"tmp$3#0", %if.else ], [ %"n#0", %if.else.preheader ]
+  %accumulator.tr2 = phi i64 [ %"$#0", %if.else ], [ 1, %if.else.preheader ]
+  %"tmp$3#0" = add nsw i64 %"n#0.tr3", -1
+  %"$#0" = mul i64 %"n#0.tr3", %accumulator.tr2
+  %"tmp$4#0" = icmp slt i64 %"n#0.tr3", 2
+  br i1 %"tmp$4#0", label %if.then, label %if.else
 }
 
-; Function Attrs: nounwind readnone
-define i64 @"numbers.gen$1<0>"(i64 %"tmp$0#0") #1 {
+; Function Attrs: norecurse nounwind readnone
+define double @"numbers.toCelsius<0>"(double %"f#0") local_unnamed_addr #1 {
 entry:
-  ret i64 %"tmp$0#0"
+  %"tmp$1#0" = fadd double %"f#0", -3.200000e+01
+  %"$#0" = fdiv double %"tmp$1#0", 1.800000e+00
+  ret double %"$#0"
 }
 
-; Function Attrs: nounwind readnone
-define double @"numbers.toCelsius<0>"(double %"f#0") #1 {
-entry:
-  %"tmp$4#0" = fadd double %"f#0", -3.200000e+01
-  %"tmp$7#0" = fdiv double %"tmp$4#0", 1.800000e+00
-  ret double %"tmp$7#0"
-}
-
-attributes #0 = { nounwind }
-attributes #1 = { nounwind readnone }
+attributes #0 = { nounwind readnone }
+attributes #1 = { norecurse nounwind readnone }
 

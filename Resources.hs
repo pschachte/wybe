@@ -4,7 +4,8 @@
 --  Purpose  : Resource checker for Wybe
 --  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
 
-module Resources (resourceCheckMod, resourceCheckProc) where
+module Resources (resourceCheckMod, canonicaliseProcResources,
+                  resourceCheckProc) where
 
 import AST
 import Options (LogSelection(Resources))
@@ -23,14 +24,16 @@ import Debug.Trace
 -- |Check a module's resource declarations.
 resourceCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 resourceCheckMod modSCC thisMod = do
+    logResources $ "**** resource checking module " ++ showModSpec thisMod
     reenterModule thisMod
     resources <- getModuleImplementationField (Map.toAscList . modResources)
     (chg,errs,resources') <-
         fmap unzip3 $ mapM (uncurry checkResourceDef) resources
-    updateModImplementation (\imp -> imp { modResources = 
+    updateModImplementation (\imp -> imp { modResources =
                                               Map.fromAscList resources'})
     finishModule
-    logResources $ "**** Exiting module " ++ showModSpec thisMod
+    logResources $ "**** finished resource checking module "
+                   ++ showModSpec thisMod
     return (or chg,concat errs)
 
 
@@ -60,6 +63,24 @@ checkOneResource rspec Nothing = do
     nyi "compound resources"
 
 
+-- |Make sure all resource for the specified proc are module qualified,
+--  making them canonical.
+canonicaliseProcResources :: ProcDef -> Compiler ProcDef
+canonicaliseProcResources pd = do
+    logResources $ "Canonicalising resources used by proc " ++ procName pd
+    let proto = procProto pd
+    let pos = procPos pd
+    let lst = Set.elems $ procProtoResources proto
+    resourceFlows <- Set.fromList <$>
+                     mapM (canonicaliseResourceFlow pos) lst
+    logResources $ "Available resources: " ++ show resourceFlows
+    let proto' = proto {procProtoResources = resourceFlows}
+    let pd' = pd {procProto = proto'}
+    logResources $ "Adding resources results in:" ++ showProcDef 4 pd'
+    return pd'
+
+
+
 -- |Check use of resources in a single procedure definition, updating
 -- parameters and body to thread extra arguments as needed.
 resourceCheckProc :: ProcDef -> Compiler ProcDef
@@ -67,20 +88,32 @@ resourceCheckProc pd = do
     logResources $ "--------------------------------------\n"
     logResources $ "Adding resources to:" ++ showProcDef 4 pd
     let proto = procProto pd
-    let resources = procProtoResources proto
+    let pos = procPos pd
+    let resourceFlows = procProtoResources proto
     let params = procProtoParams proto
     let (ProcDefSrc body) = procImpln pd
-    let pos = procPos pd
-    resFlows <- fmap concat $ mapM (simpleResourceFlows pos) resources
-    body' <- transformBody resources body
+    resFlows <- fmap concat $ mapM (simpleResourceFlows pos)
+                            $ Set.elems resourceFlows
+    body' <- transformBody resourceFlows body
     -- let params' = List.filter (not . resourceParam)
     --               params
     resParams <- fmap concat $ mapM (resourceParams pos) resFlows
-    let proto' = proto { procProtoParams = params ++ resParams }
+    let proto' = proto { procProtoParams = params ++ resParams}
     let pd' = pd { procProto = proto', procImpln = ProcDefSrc body' }
     logResources $ "Adding resources results in:" ++ showProcDef 4 pd'
     return pd'
 
+
+
+canonicaliseResourceFlow :: OptPos -> ResourceFlowSpec
+                         -> Compiler ResourceFlowSpec
+canonicaliseResourceFlow pos spec = do
+    let res = resourceFlowRes spec
+    logResources $ "canonicalising resource " ++ show res
+    mbRes <- (fst <$>) <$> lookupResource res pos
+    let res' = fromMaybe res mbRes
+    logResources $ "    to --> " ++ show mbRes
+    return $ spec { resourceFlowRes = res'}
 
 
 -- |Get a list of all the SimpleResources, and their types, referred 
@@ -92,7 +125,7 @@ simpleResourceFlows pos (ResourceFlowSpec spec flow) = do
     maybeIFace <- lookupResource spec pos
     case maybeIFace of
         Nothing -> return []
-        Just iface ->
+        Just (_,iface) ->
             return $
             [(ResourceFlowSpec sp flow,ty) |
              (sp,ty) <- Map.toList iface]
@@ -121,19 +154,28 @@ resourceVar (ResourceSpec mod name) = do
     else return $ intercalate "." mod ++ "$" ++ name
 
 
-transformBody :: [ResourceFlowSpec] -> [Placed Stmt] -> Compiler [Placed Stmt]
+transformBody :: Set.Set ResourceFlowSpec -> [Placed Stmt]
+              -> Compiler [Placed Stmt]
 transformBody resources body =
     mapM (placedApply (transformStmt resources)) body
 
 
 
-transformStmt :: [ResourceFlowSpec] -> Stmt -> OptPos -> Compiler (Placed Stmt)
+transformStmt :: Set.Set ResourceFlowSpec -> Stmt -> OptPos
+              -> Compiler (Placed Stmt)
 transformStmt resources (ProcCall m n id detism args) pos = do
     let procID = trustFromJust "transformStmt" id
-    callResources <- fmap (procProtoResources . procProto) $
-                 getProcDef (ProcSpec m n procID)
-    -- XXX check that all callResources are available
-    resArgs <- fmap concat $ mapM (resourceArgs pos) callResources
+    callResources <-
+        procProtoResources . procProto <$> getProcDef (ProcSpec m n procID)
+    logResources $ "Checking call to " ++ n ++ " using " ++ show callResources
+    logResources $ "    with available resources " ++ show resources
+    unless (callResources `isSubsetOf` resources)
+      $ message Error
+        ("Proc " ++ n ++ " uses unavailable resources "
+         ++ List.intercalate ", "
+         (List.map show $ Set.elems $ Set.difference callResources resources))
+        pos
+    resArgs <- concat <$> mapM (resourceArgs pos) (Set.elems callResources)
     return $ maybePlace (ProcCall m n (Just procID) detism (args++resArgs)) pos
 transformStmt resources (ForeignCall lang name flags args) pos = do
     return $ maybePlace (ForeignCall lang name flags args) pos
@@ -148,13 +190,13 @@ transformStmt resources (And stmts) pos = do
 transformStmt resources (Or stmts) pos = do
     stmts' <- transformBody resources stmts
     return $ maybePlace (Or stmts') pos
-transformStmt resources (Not stmts) pos = do
-    stmts' <- transformBody resources stmts
-    return $ maybePlace (Not stmts') pos
-transformStmt _ (Nop) pos = do
+transformStmt resources (Not stmt) pos = do
+    stmt' <- placedApplyM (transformStmt resources) stmt
+    return $ maybePlace (Not stmt') pos
+transformStmt _ Nop pos =
     return $ maybePlace Nop pos
 transformStmt resources (Cond test thn els) pos = do
-    test' <- transformBody resources test
+    test' <- placedApplyM (transformStmt resources) test
     thn' <- transformBody resources thn
     els' <- transformBody resources els
     return $ maybePlace (Cond test' thn' els') pos
@@ -162,8 +204,8 @@ transformStmt resources (Loop body) pos = do
     body' <- transformBody resources body
     return $ maybePlace (Loop body') pos
 transformStmt _ (For itr gen) pos = return $ maybePlace (For itr gen) pos
-transformStmt _ (Break) pos = return $ maybePlace Break pos
-transformStmt _ (Next) pos = return $ maybePlace Next pos
+transformStmt _ Break pos = return $ maybePlace Break pos
+transformStmt _ Next pos = return $ maybePlace Next pos
 
 
 -- |Returns the list of args corresponding to the specified resource

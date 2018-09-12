@@ -15,4 +15,5 @@ res_decl
 AFTER LLVM IR:
 
 ; ModuleID = 'res_decl'
+source_filename = "test-cases/res_decl.wybe"
 

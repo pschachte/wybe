@@ -16,6 +16,8 @@ module NewParser where
 
 
 import AST hiding (option)
+import Data.Set as Set
+import Data.List as List
 import Control.Monad.Identity (Identity)
 import Scanner
 import Text.Parsec
@@ -185,7 +187,7 @@ procItemParser vis det = do
     params <- option [] $ betweenB Paren (procParamParser `sepBy` comma)
     -- Resources
     rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
-    let proto = ProcProto (content name) params rs
+    let proto = ProcProto (content name) params $ fromList rs
     -- ProcBody
     body <- many stmtParser <* ident "end"
     -- Final
@@ -232,7 +234,8 @@ funcProtoParser = do
     params <- option [] $ betweenB Paren (paramParser `sepBy` comma)
     -- Resource flow specs, optional
     rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
-    return $ maybePlace (FnProto (content pName) params rs) (place pName)
+    return $ maybePlace (FnProto (content pName) params $fromList rs)
+             (place pName)
 
 
 -- | Parser for a function 'Param'. The flow is implicitly 'ParamIn' unlike for
@@ -306,15 +309,15 @@ simpleStmt = try procCallParser
           <|> relStmtParser
 
 
-testStmts :: Parser [Placed Stmt]
-testStmts =
-          (:[]) <$> fmap expToStmt <$> simpleExpParser
+testStmt :: Parser (Placed Stmt)
+testStmt =
+          fmap expToStmt <$> simpleExpParser
           -- XXX Need to handle and, or, and not
           -- (   do pos <- tokenPosition <$> ident "and"
-          --        rest <- testStmts
+          --        rest <- testStmt
           --        return maybePlace (And [stmt1,rest]) pos
           -- <|> do pos <- tokenPosition <$> ident "or"
-          --        rest <- testStmts
+          --        rest <- testStmt
           --        return maybePlace (And [stmt1,rest]) pos
           -- <|> return [stmt1]
           -- )
@@ -347,28 +350,28 @@ forStmt = do
 whileStmt :: Parser (Placed Stmt)
 whileStmt = do
     pos <- tokenPosition <$> ident "while"
-    cond <- testStmts
+    cond <- testStmt
     return $ Placed (Cond cond [Unplaced Nop] [Unplaced Break]) pos
 
 
 untilStmt :: Parser (Placed Stmt)
 untilStmt = do
     pos <- tokenPosition <$> ident "until"
-    e <- testStmts
+    e <- testStmt
     return $ Placed (Cond e [Unplaced Break] [Unplaced Nop]) pos
 
 
 unlessStmt :: Parser (Placed Stmt)
 unlessStmt = do
     pos <- tokenPosition <$> ident "unless"
-    e <- testStmts
-    return $ Placed (Cond e [Unplaced Nop] [Unplaced Next]) pos
+    e <- testStmt
+    return $ Placed (Cond e [Unplaced Next] [Unplaced Nop]) pos
 
 whenStmt :: Parser (Placed Stmt)
 whenStmt = do
     pos <- tokenPosition <$> ident "when"
-    e <- testStmts
-    return $ Placed (Cond e [Unplaced Next] [Unplaced Nop]) pos
+    e <- testStmt
+    return $ Placed (Cond e [Unplaced Nop] [Unplaced Next]) pos
 
 
 -- | If statement parser.
@@ -376,16 +379,16 @@ ifStmtParser :: Parser (Placed Stmt)
 ifStmtParser = do
     pos <- tokenPosition <$> ident "if"
     cases <- (ifCaseParser `sepBy` symbol "|") <* ident "end"
-    let final = foldr (\(cond, body) rest ->
+    let final = List.foldr (\(cond, body) rest ->
                            [Unplaced (Cond cond body rest)]) [] cases
-    if null final
+    if List.null final
         then unexpected "if cases statement structure."
         else return $ Placed ((content . head) final) pos
 
 
-ifCaseParser :: Parser ([Placed Stmt], [Placed Stmt])
+ifCaseParser :: Parser (Placed Stmt, [Placed Stmt])
 ifCaseParser = do
-    cond <- testStmts <* symbol "::"
+    cond <- testStmt <* symbol "::"
     body <- many stmtParser
     return (cond, body)
 
@@ -457,7 +460,7 @@ relStmtParser = do
 ifExpParser :: Parser (Placed Exp)
 ifExpParser = do
     pos <- tokenPosition <$> ident "if"
-    cond <- testStmts
+    cond <- testStmt
     thenBody <- ident "then" *> expParser
     elseBody <- ident "else" *> expParser
     return $ Placed (CondExp cond thenBody elseBody) pos
