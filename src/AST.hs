@@ -1619,7 +1619,7 @@ data ProcProto = ProcProto {
 data PrimProto = PrimProto {
     primProtoName::ProcName,
     primProtoParams::[PrimParam],
-    primProtoAliases::[(PrimVarName,PrimVarName)]
+    primProtoAliases::[(Int,Int)]
     } deriving (Eq, Generic)
 
 
@@ -1788,7 +1788,7 @@ phantomType _ = False
 procProtoParamNames :: PrimProto -> [PrimVarName]
 procProtoParamNames proto =
     let protoParams = primProtoParams proto
-    in List.foldl (\ps pram -> primParamName pram:ps) [] protoParams
+    in List.foldr (\pram ps -> primParamName pram:ps) [] protoParams
 
 -- |Is the supplied argument a parameter of the proc proto
 isProcProtoArg :: [PrimVarName] -> PrimArg -> Bool

@@ -91,6 +91,7 @@ optimiseProcDefTD pspec def = do
 -- | Do bottom-up optimisations of a Proc, returning whether to inline it
 optimiseProcBottomUp :: ProcSpec -> Compiler Bool
 optimiseProcBottomUp pspec = do
+    logOptimise "\n\nvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
     logOptimise $ ">>> Optimise (Bottom-up) " ++ show pspec
     updateProcDefM (optimiseProcDefBU pspec) pspec
     newDef <- getProcDef pspec
@@ -104,6 +105,7 @@ optimiseProcDefBU pspec def = do
     def' <- procExpansion pspec def >>= decideInlining >>= updateFreshness >>= checkEscape
     logOptimise $ "*** " ++ show pspec ++
       " after optimisation:" ++ showProcDef 4 def'
+    logOptimise "\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"
     return def'
 
 
@@ -278,24 +280,32 @@ escapablePrimArgs _ = []
 
 -- Only append to list if the arg is passed in by the enclosing entry proc or is
 -- the return arg of the proc
+-- entryProto: the enclosing proc
+-- args: the list of PrimArg, the arguments of the prim enclosed in entryProto
 argsOfProcProto :: PrimProto -> (PrimArg -> PrimVarName) -> [PrimArg]
-                    -> [PrimVarName]
+                    -> [Int]
 argsOfProcProto entryProto varNameGetter args =
+    -- paramNames is a list of PrimVarName of arguments of the enclosing proc
     let paramNames = procProtoParamNames entryProto
     in List.foldl (\es arg ->
         if isProcProtoArg paramNames arg
-            then varNameGetter arg:es
+            then
+                let vnm = varNameGetter arg
+                    vidx = List.elemIndex vnm paramNames
+                in case vidx of
+                    Just vidx -> vidx : es
+                    Nothing -> es
             else es) [] args
 
 
 -- Cartesian product of escaped FlowIn vars to proc output
-cartProd :: [PrimVarName] -> [PrimVarName] -> [(PrimVarName, PrimVarName)]
+cartProd :: [a] -> [a] -> [(a, a)]
 cartProd ins outs = [(i, o) | i <- ins, o <- outs]
 
 
 -- Check Arg escape in one prim of prims of the a ProcBody
-aliasProcVars :: PrimProto -> [PrimArg] -> [(PrimVarName, PrimVarName)]
-                     -> [(PrimVarName, PrimVarName)]
+aliasProcVars :: PrimProto -> [PrimArg] -> [(Int, Int)]
+                     -> [(Int, Int)]
 aliasProcVars entryProto [] aliasPairs = aliasPairs
 aliasProcVars entryProto args aliasPairs =
     let inputArgs = List.filter ((FlowIn ==) . argFlowDirection) args
