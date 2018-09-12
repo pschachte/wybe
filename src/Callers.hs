@@ -35,7 +35,7 @@ noteImplnCallers :: ProcSpec -> ProcImpln ->
                        Map Ident [ProcDef] -> Map Ident [ProcDef]
 noteImplnCallers _ (ProcDefSrc _) _ =
   shouldnt "scanning unprocessed code for calls"
-noteImplnCallers caller (ProcDefPrim _ body) procs =
+noteImplnCallers caller (ProcDefPrim _ body _) procs =
   let callers = foldBodyDistrib (noteCall caller)
                 Map.empty mergeCallers mergeCallers
                 body

@@ -29,15 +29,17 @@ import Control.Monad.Trans.State
 procExpansion :: ProcSpec -> ProcDef -> Compiler ProcDef
 procExpansion pspec def = do
     logMsg Expansion $ "*** Try to expand proc " ++ show pspec
-    let ProcDefPrim proto body = procImpln def
-    logMsg Expansion $ "    initial body: " ++ show (ProcDefPrim proto body)
+    let ProcDefPrim proto body _ = procImpln def
+    logMsg Expansion $ "    initial body: "
+                     ++ show (ProcDefPrim proto body ProcAnalysis)
     let tmp = procTmpCount def
     let (ins,outs) = inputOutputParams proto
     (tmp',used,body') <- buildBody tmp (Map.fromSet id outs) $
                         execStateT (expandBody body) initExpanderState
     let proto' = proto {primProtoParams = markParamNeededness used ins
                                           <$> primProtoParams proto}
-    let def' = def { procImpln = ProcDefPrim proto' body', procTmpCount = tmp' }
+    let def' = def { procImpln = ProcDefPrim proto' body' ProcAnalysis,
+                     procTmpCount = tmp' }
     if def /= def'
         then
         logMsg Expansion
@@ -188,7 +190,7 @@ expandPrim (PrimCall pspec args) pos = do
         addInstr call' pos
       else do
         def <- lift $ lift $ getProcDef pspec
-        let ProcDefPrim proto body = procImpln def
+        let ProcDefPrim proto body _ = procImpln def
         if procInline def
           then inlineCall proto args' body pos
           else do

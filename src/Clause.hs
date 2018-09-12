@@ -100,7 +100,7 @@ compileProc proc =
         let params'' = List.map (compileParam startVars endVars) params'
         let proto' = PrimProto (procProtoName proto) params'' []
         logClause $ "  comparams: " ++ show params''
-        return $ proc { procImpln = ProcDefPrim proto' compiled }
+        return $ proc { procImpln = ProcDefPrim proto' compiled ProcAnalysis}
 
 
 
