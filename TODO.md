@@ -90,6 +90,7 @@
 * Keep track of bounds on tags to avoid unnecessary tests and allow tag switches
 * Revise handling of inverse ops and other implied instructions to search for
   instruction variants instead of inserting them into table
+* Delay instructions until their results are needed
 * Move some argument threading into memory (global variables)
 * Remove unneeded input and unchanged output arguments
 * Inter-procedure common sub-expression elimination

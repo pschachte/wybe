@@ -529,6 +529,7 @@ addSubst var val = do
     logBuild $ "      new subst = " ++ show subst
 
 
+-- |Reconrd that the specified arg (which must be a variable) has been set.
 recordVarSet :: PrimArg -> BodyBuilder ()
 recordVarSet (ArgVar nm _ FlowOut _ _) =
     modify (\s -> s { blockDefs = Set.insert nm $ blockDefs s })
