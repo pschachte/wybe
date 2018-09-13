@@ -30,7 +30,7 @@ module AST (
   enterModule, reenterModule, exitModule, finishModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
+  ModSpec, ProcImpln(..), ProcAnalysis(..), ProcDef(..), procCallCount,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, inArgVar, outArgVar, argDescription, flowsIn, flowsOut,
@@ -1361,19 +1361,24 @@ showSuperProc (SuperprocIs super) =
 -- into a ProcBody, which is a clausal, logic programming form.
 -- Finally it is turned into SSA form (LLVM).
 data ProcImpln
-    = ProcDefSrc [Placed Stmt]           -- defn in source-like form
-    | ProcDefPrim PrimProto ProcBody     -- defn in LPVM (clausal) form
+    = ProcDefSrc [Placed Stmt]           -- ^defn in source-like form
+    | ProcDefPrim PrimProto ProcBody ProcAnalysis
+                                         -- ^defn in LPVM (clausal) form
       -- defn in SSA (LLVM) form along with any needed extern definitions
     deriving (Eq,Generic)
 
+-- | Stores whatever analysis results we infer about a proc definition.
+data ProcAnalysis = ProcAnalysis
+  deriving (Eq,Generic)
 
 isCompiled :: ProcImpln -> Bool
-isCompiled (ProcDefPrim _ _) = True
+isCompiled (ProcDefPrim _ _ _) = True
 isCompiled (ProcDefSrc _) = False
 
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
-    show (ProcDefPrim proto body) = show proto ++ ":" ++ showBlock 4 body
+    show (ProcDefPrim proto body analysis)
+        = show proto ++ ":" ++ showBlock 4 body
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
 -- possibly containg some guards.  Each guard is a test that succeeds

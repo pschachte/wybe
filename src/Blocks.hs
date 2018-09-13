@@ -115,10 +115,10 @@ mangleProcs ps = changeNameWith nameMap ps
 changeNameWith :: [(String, Int)] -> [ProcDef] -> [ProcDef]
 changeNameWith [] [] = []
 changeNameWith ((s,i):ns) (p:ps) =
-    let (ProcDefPrim proto body) = procImpln p
+    let (ProcDefPrim proto body ans) = procImpln p
         pname = s ++ "<" ++ show i ++ ">"
         newProto = proto {primProtoName = pname}
-        newImpln = ProcDefPrim newProto body
+        newImpln = ProcDefPrim newProto body ans
     in p {procImpln = newImpln} : changeNameWith ns ps
 changeNameWith _ _ = shouldnt "Incorrect name map used for mangling."
 
@@ -136,14 +136,14 @@ reduceNameMap namemap name =
 
 pullDefName :: ProcDef -> String
 pullDefName p =
-    let (ProcDefPrim proto _) = procImpln p
+    let (ProcDefPrim proto _ _) = procImpln p
     in primProtoName proto
 
 
 -- | Extract the LPVM compiled primitive from the procedure definition.
 extractLPVMProto :: ProcDef -> PrimProto
 extractLPVMProto procdef =
-    let (ProcDefPrim proto _) = procImpln procdef in proto
+    let (ProcDefPrim proto _ _) = procImpln procdef in proto
 
 -- | Go into a (compiled) Module and pull out the PrimProto implementation
 -- of all ProcDefs in the module implementation.
@@ -164,8 +164,8 @@ isStdLib (m:_) = m == "wybe"
 -- | Predicate to test for procedure definition with an empty body.
 emptyProc :: ProcDef -> Bool
 emptyProc p = case procImpln p of
-  ProcDefSrc pps     -> List.null pps
-  ProcDefPrim _ body -> List.null $ bodyPrims body
+  ProcDefSrc pps       -> List.null pps
+  ProcDefPrim _ body _ -> List.null $ bodyPrims body
 
 
 
@@ -183,7 +183,7 @@ translateProc modProtos proc = do
   startCount <- getCount
   (block, endCount) <- lift $ do
     modspec <- getModuleSpec
-    let def@(ProcDefPrim proto body) = procImpln proc
+    let def@(ProcDefPrim proto body _) = procImpln proc
     logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
     logBlocks $ "In Module: " ++ showModSpec modspec
       ++ ", creating definition of: "

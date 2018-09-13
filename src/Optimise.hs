@@ -69,7 +69,7 @@ procBody :: ProcDef -> ProcBody
 procBody def =
     case procImpln def of
         ProcDefSrc _       -> shouldnt "Optimising un-compiled code"
-        ProcDefPrim _ body -> body
+        ProcDefPrim _ body _ -> body
 
 
 sccElts (AcyclicSCC single) = [single]
@@ -128,7 +128,7 @@ decideInlining def
        || procCallCount def <= 1 && procVis def == Private
     then return $ def { procInline = True }
     else return def
-    where ProcDefPrim proto body = procImpln def
+    where ProcDefPrim proto body _ = procImpln def
 decideInlining def = return def
 
 
@@ -178,7 +178,7 @@ logOptimise s = logMsg Optimise s
 -- instruction
 updateFreshness :: ProcDef -> Compiler ProcDef
 updateFreshness procDef = do
-    let (ProcDefPrim proto body) = procImpln procDef
+    let (ProcDefPrim proto body _) = procImpln procDef
     let prims = bodyPrims body
     let (freshset, prims') = List.foldl freshInPrim (Set.empty, []) prims
     logOptimise "\n***********************"
@@ -186,7 +186,7 @@ updateFreshness procDef = do
     logOptimise $ show freshset
     logOptimise "***********************\n\n"
     let body' = body { bodyPrims = prims' }
-    return procDef { procImpln = ProcDefPrim proto body' }
+    return procDef { procImpln = ProcDefPrim proto body' ProcAnalysis }
 
 
 -- Update args in a signle (alloc/mutate) prim
@@ -258,7 +258,7 @@ checkEscape def
         logOptimise "\n....................."
         logOptimise "*** Escape analysis:"
         logOptimise $ "*** " ++ procName def
-        let (ProcDefPrim entryProto body) = procImpln def
+        let (ProcDefPrim entryProto body _) = procImpln def
         let prims = bodyPrims body
         let aliasPairs = List.foldr
                             (\prim alias ->
@@ -268,7 +268,7 @@ checkEscape def
         let proto' = entryProto { primProtoAliases = aliasPairs' }
         logOptimise $ "Alias pairs: " ++ show aliasPairs'
         logOptimise ".....................\n\n"
-        return def { procImpln = ProcDefPrim proto' body }
+        return def { procImpln = ProcDefPrim proto' body ProcAnalysis}
 checkEscape def = return def
 
 
