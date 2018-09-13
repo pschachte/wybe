@@ -72,7 +72,6 @@
 
 
 # Optimise:
-* Read-after-write optimisation:  record access as inverse of mutate instruction
 * Extend read-after-write to support read with intervening write with different
   offset
 * Keep track of bounds on tags to avoid unnecessary tests and allow tag switches
