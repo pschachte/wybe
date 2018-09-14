@@ -206,24 +206,22 @@ freshInPrim (freshVars, prims) prim =
         _ ->
             (freshVars, prims ++ [prim])
 
-
+-- newly allocated space is fresh
 freshInAlloc :: Set PrimVarName -> PrimArg -> Set PrimVarName
 freshInAlloc freshVars (ArgVar nm _ FlowOut _ _) = Set.insert nm freshVars
 freshInAlloc freshVars _ = freshVars
 
--- foreign lpvm mutate(struct:type, ?struct2:type, *size:int, offset:int,
--- destructive:bool, member:type2)
+-- variable after mutation is also fresh
 freshInMutate :: Set PrimVarName -> [PrimArg] -> (Set PrimVarName, [PrimArg])
 freshInMutate freshVars
     [fIn@(ArgVar inName _ _ _ final), fOut@(ArgVar outName _ _ _ _), size,
     offset, ArgInt des typ, mem] =
         let
-            freshVars' = Set.delete inName freshVars
-            freshVars'' = Set.insert outName freshVars'
+            freshVars' = Set.insert outName freshVars
         in
-            if Set.member inName freshVars'' || final
-            then (freshVars'', [fIn, fOut, size, offset, ArgInt 1 typ, mem])
-            else (freshVars'', [fIn, fOut, size, offset, ArgInt 0 typ, mem])
+            if Set.member inName freshVars' && final
+            then (freshVars', [fIn, fOut, size, offset, ArgInt 1 typ, mem])
+            else (freshVars', [fIn, fOut, size, offset, ArgInt 0 typ, mem])
 freshInMutate freshVars args = (freshVars, args)
 
 
