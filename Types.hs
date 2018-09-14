@@ -225,7 +225,7 @@ undefStmtErr :: Ident -> Placed Stmt -> TypeError
 undefStmtErr caller pstmt =
     let pos = place pstmt
     in case content pstmt of
-        ProcCall _ callee _ _ _ -> ReasonUndef caller callee pos
+        ProcCall _ callee _ _ _ _ -> ReasonUndef caller callee pos
         other -> shouldnt $ "undefStmtErr with non-call stmt " ++ show other
     
 
@@ -393,10 +393,10 @@ localBodyProcs thisMod (ProcDefPrim _ _) =
     shouldnt "Type checking compiled code"
 
 localCalls :: ModSpec -> ModSpec -> Ident -> Maybe Int -> Determinism
-           -> [Placed Exp] -> [Ident]
-localCalls thisMod m name _ _ _
+           -> Bool -> [Placed Exp] -> [Ident]
+localCalls thisMod m name _ _ _ _
   | List.null m || m == thisMod = [name]
-localCalls _ _ _ _ _ _ = []
+localCalls _ _ _ _ _ _ _ = []
 
 
 expType :: Typing -> Placed Exp -> Compiler TypeSpec
@@ -714,7 +714,7 @@ typecheckProcDecl m pdef = do
                 return (pdef,False,
                            List.map (\pcall ->
                                          case content pcall of
-                                             ProcCall _ callee _ _ _ ->
+                                             ProcCall _ callee _ _ _ _ ->
                                                  ReasonUndef name callee
                                                  $ place pcall
                                              _ -> shouldnt "typecheckProcDecl")
@@ -799,7 +799,7 @@ foreignTypeEquivs _ = []
 callProcInfos :: Placed Stmt -> Compiler [ProcInfo]
 callProcInfos pstmt =
     case content pstmt of
-        ProcCall m name procId _ _ -> do
+        ProcCall m name procId _ _ _ -> do
           procs <- case procId of
               Nothing   -> callTargets m name
               Just pid -> return [ProcSpec m name pid]
@@ -875,7 +875,7 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
     logTypes $ "Candidate types: " ++ show typs
     -- XXX Must handle reification of test as a bool
     let (callee,pexps) = case content pstmt of
-                             ProcCall _ callee' _ _ pexps' -> (callee',pexps')
+                             ProcCall _ callee' _ _ _ pexps' -> (callee',pexps')
                              noncall -> shouldnt
                                         $ "typecheckCalls with non-call stmt"
                                           ++ show noncall
@@ -1054,7 +1054,7 @@ modecheckStmt :: ModSpec -> ProcName -> OptPos -> Typing
                  -> Compiler ([Placed Stmt], [(Set VarName,Placed Stmt)],
                               Set VarName,[TypeError])
 modecheckStmt m name defPos typing delayed assigned detism
-    stmt@(ProcCall cmod cname _ _ args) pos = do
+    stmt@(ProcCall cmod cname _ _ resourceful args) pos = do
     logTypes $ "Mode checking call   : " ++ show stmt
     logTypes $ "    with assigned    : " ++ show assigned
     callInfos <- callProcInfos $ maybePlace stmt pos
@@ -1097,6 +1097,7 @@ modecheckStmt m name defPos typing delayed assigned detism
                               (procSpecName matchProc)
                               (Just $ procSpecID matchProc)
                               (procInfoDetism match)
+                              resourceful
                               args'
                   let assigned' = Set.union
                                   (Set.fromList
@@ -1651,7 +1652,7 @@ checkParamTyped name pos (num,param) =
 
 
 checkStmtTyped :: ProcName -> OptPos -> Stmt -> OptPos -> Compiler ()
-checkStmtTyped name pos (ProcCall pmod pname pid _ args) ppos = do
+checkStmtTyped name pos (ProcCall pmod pname pid _ _ args) ppos = do
     when (isNothing pid || List.null pmod) $
          shouldnt $ "Call to " ++ pname ++ showMaybeSourcePos ppos ++
                   " left unresolved"

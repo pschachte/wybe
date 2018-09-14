@@ -4,7 +4,7 @@ public proc factorial(n:int) use !io
        ?result = result * n
        ?n = n - 1
     end
-    println(result)
+    !println(result)
 end
 
-factorial(5)
+!factorial(5)

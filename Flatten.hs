@@ -204,17 +204,17 @@ flattenStmt stmt pos detism = do
 
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
-flattenStmt' (ProcCall [] name procID detism []) pos _ = do
+flattenStmt' (ProcCall [] name procID detism res []) pos _ = do
     defined <- gets defdVars
     -- Convert call to no-arg proc to a bool variable test if there's a
     -- local variable with that name
     if name `elem` defined
         then emit pos $ TestBool $ Var name ParamIn Ordinary
-        else emit pos $ ProcCall [] name procID detism []
-flattenStmt' (ProcCall maybeMod name procID detism args) pos _ = do
+        else emit pos $ ProcCall [] name procID detism res []
+flattenStmt' (ProcCall maybeMod name procID detism res args) pos _ = do
     logFlatten "   call is Det"
     args' <- flattenStmtArgs args pos
-    emit pos $ ProcCall maybeMod name procID detism args'
+    emit pos $ ProcCall maybeMod name procID detism res args'
 flattenStmt' (ForeignCall "llvm" "test" flags args) pos SemiDet = do
     args' <- flattenStmtArgs args pos
     resultName <- tempVar
@@ -275,14 +275,14 @@ flattenStmt' (For itr gen) pos detism = do
         [genVar@(Unplaced (Var genVarName ParamIn flowType))] -> do
             -- XXX not generating the right code until we have polymorphism
             flattenStmt 
-              (Cond (maybePlace (ProcCall [] "[|]" Nothing SemiDet
+              (Cond (maybePlace (ProcCall [] "[|]" Nothing SemiDet False
                                  [itr,
                                   Unplaced $ 
                                   Var genVarName ParamOut flowType,
                                   genVar])
                      pos)
                   []
-                  [maybePlace (ProcCall [] "[]" Nothing SemiDet [genVar])
+                  [maybePlace (ProcCall [] "[]" Nothing SemiDet False [genVar])
                       pos,
                    Unplaced Break]
               ) pos detism
@@ -343,7 +343,7 @@ flattenExp exp@(Var name dir flowType) ty cast pos = do
     if (dir == ParamIn && (not defd))
       then -- Reference to an undefined variable: assume it's meant to be
            -- a niladic function instead of a variable reference
-        flattenCall (ProcCall [] name Nothing Det) False ty cast pos []
+        flattenCall (ProcCall [] name Nothing Det False) False ty cast pos []
       else do
         noteVarMention name dir
         let inPart = if isIn
@@ -375,7 +375,8 @@ flattenExp (CondExp cond thn els) ty cast pos = do
         pos Det
     return $ [maybePlace (Var resultName ParamIn flowType) pos]
 flattenExp (Fncall maybeMod name exps) ty cast pos = do
-    flattenCall (ProcCall maybeMod name Nothing Det) False ty cast pos exps
+    flattenCall (ProcCall maybeMod name Nothing Det False) False ty cast pos
+      exps
 flattenExp (ForeignFn lang name flags exps) ty cast pos = do
     flattenCall (ForeignCall lang name flags) True ty cast pos exps
 flattenExp (Typed exp AnyType _) ty cast pos = do

@@ -163,10 +163,15 @@ transformBody resources body =
 
 transformStmt :: Set.Set ResourceFlowSpec -> Stmt -> OptPos
               -> Compiler (Placed Stmt)
-transformStmt resources (ProcCall m n id detism args) pos = do
+transformStmt resources stmt@(ProcCall m n id detism resourceful args) pos = do
     let procID = trustFromJust "transformStmt" id
     callResources <-
         procProtoResources . procProto <$> getProcDef (ProcSpec m n procID)
+    unless (resourceful || Set.null callResources)
+      $ message Error
+        ("Call to resourceful proc without ! resource marker: "
+         ++ showStmt 4 stmt)
+        pos
     logResources $ "Checking call to " ++ n ++ " using " ++ show callResources
     logResources $ "    with available resources " ++ show resources
     unless (callResources `isSubsetOf` resources)
@@ -176,7 +181,8 @@ transformStmt resources (ProcCall m n id detism args) pos = do
          (List.map show $ Set.elems $ Set.difference callResources resources))
         pos
     resArgs <- concat <$> mapM (resourceArgs pos) (Set.elems callResources)
-    return $ maybePlace (ProcCall m n (Just procID) detism (args++resArgs)) pos
+    return $ maybePlace
+      (ProcCall m n (Just procID) detism False (args++resArgs)) pos
 transformStmt resources (ForeignCall lang name flags args) pos = do
     return $ maybePlace (ForeignCall lang name flags args) pos
 -- transformStmt resources (Test stmts) pos = do

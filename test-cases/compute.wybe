@@ -1,4 +1,4 @@
 use math
 
-println(factorial(4))
-println(toCelsius(150.0))
+!println(factorial(4))
+!println(toCelsius(150.0))

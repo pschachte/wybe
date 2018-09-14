@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 
 *main* > public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
-    numbers.factorial<0>(4:wybe.int, ?tmp$0#0:wybe.int) @bar:3:9
+    numbers.factorial<0>(4:wybe.int, ?tmp$0#0:wybe.int) @bar:3:10
     foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:76:38
     foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
     foreign c print_float(35.0:wybe.float, ~#wybe.io$io#1:wybe.phantom, ?tmp$9#0:wybe.phantom) @wybe:80:40

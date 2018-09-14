@@ -1,15 +1,15 @@
 public proc yorn(prompt:string, ?result:bool) use !io
-       do  print(prompt)
-       	   print(" (y/n) ")
-           read(?response)
-	   ?result = is_yes(response)
+       do  ! print(prompt)
+       	   ! print(" (y/n) ")
+           ! read(?response)
+	     ?result = is_yes(response)
 	   until is_yes_or_no(response)
-	   println("Please answer 'yes' or 'no'.")
+	   ! println("Please answer 'yes' or 'no'.")
 	end
  end
 
 func is_yes(ch) = ch='y' or ch='Y'
 func is_yes_or_no(ch) = is_yes(ch) or ch='n' or ch='N'
 
-?r = yorn("What's your input?")
-print(r)
+!yorn("What's your input?", ?r)
+!print(r)

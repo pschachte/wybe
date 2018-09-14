@@ -491,7 +491,7 @@ equalityMultiNonconsts (FnProto name params _:ctrs) =
 -- |Return code to deconstruct 
 deconstructCall :: Ident -> Ident -> [Param] -> Determinism -> Placed Stmt
 deconstructCall ctor arg params detism =
-    Unplaced $ ProcCall [] ctor Nothing detism
+    Unplaced $ ProcCall [] ctor Nothing detism False
      $ List.map (\p -> Unplaced $ varSet $ arg++"$"++paramName p) params
         ++ [Unplaced $ varGet arg]
 
@@ -503,7 +503,7 @@ equalityField param =
     let field = paramName param
         leftField = "$left$"++field
         rightField = "$right$"++field
-    in  [Unplaced $ ProcCall [] "=" Nothing SemiDet
+    in  [Unplaced $ ProcCall [] "=" Nothing SemiDet False
             [Unplaced $ varGet leftField,
              Unplaced $ varGet rightField]]
 

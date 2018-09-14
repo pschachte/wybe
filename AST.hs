@@ -1447,17 +1447,17 @@ defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 -- |Fold over a list of Placed Stmts applying the fn to each ProcCall, and
 -- applying comb, which must be associative, to combine results.  Results
 -- are combined in a right-associative way, with the initial val on the right.
-foldProcCalls :: (ModSpec -> Ident -> Maybe Int -> Determinism
+foldProcCalls :: (ModSpec -> Ident -> Maybe Int -> Determinism -> Bool
                   -> [Placed Exp] -> a) ->
                  (a -> a -> a) -> a -> [Placed Stmt] -> a
 foldProcCalls _fn _comb val [] = val
 foldProcCalls fn comb val (s:ss) = foldProcCalls' fn comb val (content s) ss
 
-foldProcCalls' :: (ModSpec -> Ident -> Maybe Int -> Determinism
+foldProcCalls' :: (ModSpec -> Ident -> Maybe Int -> Determinism -> Bool
                    -> [Placed Exp] -> a) ->
                  (a -> a -> a) -> a -> Stmt -> [Placed Stmt] -> a
-foldProcCalls' fn comb val (ProcCall m name procID detism args) ss =
-    foldProcCalls fn comb (comb val $ fn m name procID detism args) ss
+foldProcCalls' fn comb val (ProcCall m name procID detism res args) ss =
+    foldProcCalls fn comb (comb val $ fn m name procID detism res args) ss
 foldProcCalls' fn comb val ForeignCall{} ss =
     foldProcCalls fn comb val ss
 foldProcCalls' fn comb val (Cond tst thn els) ss =
@@ -1694,8 +1694,9 @@ flowsOut FlowUnknown = shouldnt "checking if unknown flow direction flows out"
 -- |Source program statements.  These will be normalised into Prims.
 data Stmt
      -- |A Wybe procedure call, with module, proc name, proc ID, determinism,
-    --   and args.  We assume every call is Det until type checking.
-     = ProcCall ModSpec Ident (Maybe Int) Determinism [Placed Exp]
+     --   and args.  We assume every call is Det until type checking.
+     --   The Bool flag indicates that the proc is allowed to use resources.
+     = ProcCall ModSpec Ident (Maybe Int) Determinism Bool [Placed Exp]
      -- |A foreign call, with language, tags, and args
      | ForeignCall Ident Ident [Ident] [Placed Exp]
      -- |Do nothing (and succeed)
@@ -1733,7 +1734,7 @@ instance Show Stmt where
 
 -- |Returns whether the statement is Det
 detStmt :: Stmt -> Bool
-detStmt (ProcCall _ _ _ SemiDet _) = False
+detStmt (ProcCall _ _ _ SemiDet _ _) = False
 detStmt (TestBool _) = False
 detStmt (Cond _ thn els) = all detStmt $ List.map content $ thn++els
 detStmt (And list) = all detStmt $ List.map content list
@@ -1912,15 +1913,17 @@ expToStmt (Fncall [] "and" args) = And $ List.map (fmap expToStmt) args
 expToStmt (Fncall [] "or"  args) = Or  $ List.map (fmap expToStmt) args
 expToStmt (Fncall [] "not" [arg]) = Not $ fmap expToStmt arg
 expToStmt (Fncall [] "not" args) = shouldnt $ "non-unary 'not' " ++ show args
-expToStmt (Fncall maybeMod name args) = ProcCall maybeMod name Nothing Det args
+expToStmt (Fncall maybeMod name args) =
+    ProcCall maybeMod name Nothing Det False args
 expToStmt (ForeignFn lang name flags args) = 
     ForeignCall lang name flags args
-expToStmt (Var name ParamIn _) = ProcCall [] name Nothing Det []
+expToStmt (Var name ParamIn _) = ProcCall [] name Nothing Det False []
+expToStmt (Var name ParamInOut _) = ProcCall [] name Nothing Det True []
 expToStmt expr = shouldnt $ "non-Fncall expr " ++ show expr
 
 
 procCallToExp :: Stmt -> Exp
-procCallToExp (ProcCall maybeMod name Nothing _ args) =
+procCallToExp (ProcCall maybeMod name Nothing _ _ args) =
     Fncall maybeMod name args
 procCallToExp stmt =
     shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
@@ -2349,8 +2352,9 @@ instance Show PrimVarName where
 
 
 showStmt :: Int -> Stmt -> String
-showStmt _ (ProcCall maybeMod name procID detism args) =
+showStmt _ (ProcCall maybeMod name procID detism resourceful args) =
     determinismPrefix detism
+    ++ (if resourceful then "!" else "")
     ++ maybeModPrefix maybeMod
     ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")"

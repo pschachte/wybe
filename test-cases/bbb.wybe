@@ -1,3 +1,3 @@
 use ddd
 
-println("BBB: Init")
+!println("BBB: Init")
