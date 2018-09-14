@@ -31,11 +31,14 @@
 
 
 # Complete the language:
-* Support higher order procs and functions through multiple specialisation
+* Support higher order procs and functions
 * Fix the syntax!
     * At expression level, support infix ops, where the ops are sequences of
       operator characters
-    * At statement level, support brace-enclosed statement sequence as statement
+    * At statement level, allow unary procs to omit parentheses;
+      eg `print foo` instead of `print(foo)`
+    * At statement level, support brace-enclosed statement sequence as
+      statement; then revise proc body to be single statement
     * Interpolation (string and array)
         * "...@foo..." = "..." ++ foo ++ "..."
 	* "...@(foo(bar,baz))..." = "..." ++ foo(bar,baz) ++ "..."
@@ -77,13 +80,13 @@
 * Keep track of bounds on tags to avoid unnecessary tests and allow tag switches
 * Revise handling of inverse ops and other implied instructions to search for
   instruction variants instead of inserting them into table
-* Delay instructions until their results are needed
 * Move some argument threading into memory (global variables)
-* Remove unneeded input and unchanged output arguments
+* Remove unneeded input and unchanged output arguments globally
+* Multiple specialisation
 * Inter-procedure common sub-expression elimination
 * Code hoisting
 * Destructive update transformation (CTGC)
-* delay statements until their outputs are needed
+* delay instructions until their outputs are needed
     * delay into one arm of a branch if only one arm needs the outputs
 
 
