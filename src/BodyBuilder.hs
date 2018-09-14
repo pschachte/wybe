@@ -545,7 +545,7 @@ recordVarSet arg =
 recordEntailedPrims :: Prim -> BodyBuilder ()
 recordEntailedPrims prim = do
     let pair1 = splitPrimOutputs prim
-    instrPairs <- (pair1:) <$> lift (instrInverses prim)
+    instrPairs <- (pair1:) <$> lift (instrConsequences prim)
     logBuild $ "Recording computed instrs"
                ++ List.concatMap
                   (\(p,o)-> "\n        " ++ show p ++ " -> " ++ show o)
@@ -557,56 +557,58 @@ recordEntailedPrims prim = do
                                 (definers s) $ snd pair1})
 
 
--- |Return a list of instructions that have been effectively already been
+-- |Return a list of instructions that have effectively already been
 --  computed, mostly because they are inverses of instructions already
 --  computed, or because of commutativity.
 --  XXX Doesn't yet handle multiple modes for PrimCalls
-instrInverses :: Prim -> Compiler [(Prim,[PrimArg])]
-instrInverses prim =
-   List.map (\(p,os) -> (canonicalisePrim p, os)) <$> instrInverses' prim
+instrConsequences :: Prim -> Compiler [(Prim,[PrimArg])]
+instrConsequences prim =
+   List.map (\(p,os) -> (canonicalisePrim p, os)) <$> instrConsequences' prim
 
-instrInverses' :: Prim -> Compiler [(Prim,[PrimArg])]
-instrInverses' (PrimForeign "lpvm" "cast" flags [a1,a2]) =
+instrConsequences' :: Prim -> Compiler [(Prim,[PrimArg])]
+instrConsequences' (PrimForeign "lpvm" "cast" flags [a1,a2]) =
     return [(PrimForeign "lpvm" "cast" flags [a2], [a1])]
-instrInverses' (PrimForeign "llvm" "add" flags [a1,a2,a3]) =
+instrConsequences' (PrimForeign "lpvm" "mutate" [] [_,a2,a3,a4]) =
+    return [(PrimForeign "lpvm" "access" [] [a2,a3], [a4])]
+instrConsequences' (PrimForeign "llvm" "add" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "sub" flags [a3,a2], [a1]),
             (PrimForeign "llvm" "sub" flags [a3,a1], [a2]),
             (PrimForeign "llvm" "add" flags [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "sub" flags [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "sub" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "add" flags [a3,a2], [a1]),
             (PrimForeign "llvm" "add" flags [a2,a3], [a1]),
             (PrimForeign "llvm" "sub" flags [a1,a3], [a2])]
-instrInverses' (PrimForeign "llvm" "mul" flags [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "mul" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "mul" flags [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "fadd" flags [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "fadd" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "fadd" flags [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "fmul" flags [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "fmul" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "fmul" flags [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "and" flags [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "and" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "and" flags [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "or" flags [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "or" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "or" flags [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "icmp" ["eq"] [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "icmp" ["eq"] [a1,a2,a3]) =
     return [(PrimForeign "llvm" "icmp" ["eq"] [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "icmp" ["ne"] [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "icmp" ["ne"] [a1,a2,a3]) =
     return [(PrimForeign "llvm" "icmp" ["ne"] [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "icmp" ["slt"] [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "icmp" ["slt"] [a1,a2,a3]) =
     return [(PrimForeign "llvm" "icmp" ["sgt"] [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "icmp" ["sgt"] [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "icmp" ["sgt"] [a1,a2,a3]) =
     return [(PrimForeign "llvm" "icmp" ["slt"] [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "icmp" ["ult"] [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "icmp" ["ult"] [a1,a2,a3]) =
     return [(PrimForeign "llvm" "icmp" ["ugt"] [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "icmp" ["ugt"] [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "icmp" ["ugt"] [a1,a2,a3]) =
     return [(PrimForeign "llvm" "icmp" ["ult"] [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "icmp" ["sle"] [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "icmp" ["sle"] [a1,a2,a3]) =
     return [(PrimForeign "llvm" "icmp" ["sge"] [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "icmp" ["sge"] [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "icmp" ["sge"] [a1,a2,a3]) =
     return [(PrimForeign "llvm" "icmp" ["sle"] [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "icmp" ["ule"] [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "icmp" ["ule"] [a1,a2,a3]) =
     return [(PrimForeign "llvm" "icmp" ["uge"] [a2,a1], [a3])]
-instrInverses' (PrimForeign "llvm" "icmp" ["uge"] [a1,a2,a3]) =
+instrConsequences' (PrimForeign "llvm" "icmp" ["uge"] [a1,a2,a3]) =
     return [(PrimForeign "llvm" "icmp" ["ule"] [a2,a1], [a3])]
-instrInverses' _ = return []
+instrConsequences' _ = return []
 
 
 

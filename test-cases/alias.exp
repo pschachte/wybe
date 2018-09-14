@@ -1,9 +1,9 @@
 ======================================================================
 AFTER EVERYTHING:
  Module alias
-  public submods  : 
+  public submods  :
   public types    : position: (alias.position,"pointer")
-  public resources: 
+  public resources:
   public procs    : alias.<0>
                     alias.position.=<0>
                     alias.position.=<1>
@@ -17,23 +17,19 @@ AFTER EVERYTHING:
   imports         : public use alias.position
                     use wybe
   types           : position/0 (pointer)  @alias:1:9
-  resources       : 
-  procs           : 
+  resources       :
+  procs           :
 
-*main* > public (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) aliases []:
-    foreign lpvm alloc(16:wybe.int, ?tmp$4#0:alias.position)
-    foreign lpvm mutate(~tmp$4#0:alias.position, ?tmp$5#0:alias.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 6666:wybe.int)
-    foreign lpvm mutate(~tmp$5#0:alias.position, ?tmp$0#0:alias.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 7777:wybe.int)
-    foreign lpvm access(~tmp$0#0:alias.position, 8:wybe.int, ?tmp$1#0:wybe.int)
-    foreign c print_int(~tmp$1#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @wybe:76:38
+*main* > public inline (0 calls)
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+    foreign c print_int(7777:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @wybe:76:38
     foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
   submodules      : alias.position
 --------------------------------------------------
  Module alias.position([])
-  public submods  : 
-  public types    : 
-  public resources: 
+  public submods  :
+  public types    :
+  public resources:
   public procs    : alias.position.=<0>
                     alias.position.=<1>
                     alias.position.=<2>
@@ -44,9 +40,9 @@ AFTER EVERYTHING:
                     alias.position.y<0>
                     alias.position.y<1>
   imports         : use wybe
-  types           : 
-  resources       : 
-  procs           : 
+  types           :
+  resources       :
+  procs           :
 
 = > public inline (0 calls)
 0: =(?out#0:alias.position, in#0:alias.position) aliases []:
@@ -110,12 +106,6 @@ declare i8* @wybe_malloc(i32) local_unnamed_addr
 
 define i32 @alias.main() local_unnamed_addr {
 entry:
-  %0 = tail call i8* @wybe_malloc(i32 16)
-  %1 = bitcast i8* %0 to i64*
-  store i64 6666, i64* %1, align 4
-  %2 = getelementptr i8, i8* %0, i64 8
-  %3 = bitcast i8* %2 to i64*
-  store i64 7777, i64* %3, align 4
   tail call void @print_int(i64 7777)
   tail call void @putchar(i8 10)
   ret i32 0
