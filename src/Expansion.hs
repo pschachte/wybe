@@ -9,7 +9,7 @@
 --  transformations.  As part of this, variables are also renamed.
 --  This code operates on LPVM (Prim) form.
 --
---  This code is used bottom-up, ie, callees are expanded before 
+--  This code is used bottom-up, ie, callees are expanded before
 --  their callers, so it does not need to recursively expand calls.
 
 module Expansion (procExpansion) where
@@ -31,14 +31,14 @@ procExpansion pspec def = do
     logMsg Expansion $ "*** Try to expand proc " ++ show pspec
     let ProcDefPrim proto body _ = procImpln def
     logMsg Expansion $ "    initial body: "
-                     ++ show (ProcDefPrim proto body ProcAnalysis)
+                     ++ show (ProcDefPrim proto body (ProcAnalysis []))
     let tmp = procTmpCount def
     let (ins,outs) = inputOutputParams proto
     (tmp',used,body') <- buildBody tmp (Map.fromSet id outs) $
                         execStateT (expandBody body) initExpanderState
     let proto' = proto {primProtoParams = markParamNeededness used ins
                                           <$> primProtoParams proto}
-    let def' = def { procImpln = ProcDefPrim proto' body' ProcAnalysis,
+    let def' = def { procImpln = ProcDefPrim proto' body' (ProcAnalysis []),
                      procTmpCount = tmp' }
     if def /= def'
         then
@@ -78,10 +78,10 @@ identityRenaming = Map.empty
 --                       The Expander Monad
 --
 -- This monad keeps track of variable renaming needed to keep inlining
--- hygenic.  To do this, we rename all the input parameters of the proc to 
--- be inlined, and when expanding the body, we rename any variables when 
--- first assigned.  The exception to this is the proc's output parameters.  
--- These are kept as a set.  We also maintain a counter for temporary 
+-- hygenic.  To do this, we rename all the input parameters of the proc to
+-- be inlined, and when expanding the body, we rename any variables when
+-- first assigned.  The exception to this is the proc's output parameters.
+-- These are kept as a set.  We also maintain a counter for temporary
 -- variable names.
 ----------------------------------------------------------------
 
@@ -119,7 +119,7 @@ addRenaming :: PrimVarName -> PrimArg -> Expander ()
 addRenaming var val = do
     logExpansion $ "      adding renaming " ++ show var ++ " -> " ++ show val
     modify (\s -> s { renaming = Map.insert var val $ renaming s })
--- Need to add renaming even if it's an identity, because renamings 
+-- Need to add renaming even if it's an identity, because renamings
 -- are used to tell which variables shoudn't be renamed.
 
 
@@ -128,7 +128,7 @@ addInstr prim pos = lift $ instr prim pos
 
 
 initExpanderState :: ExpanderState
-initExpanderState = 
+initExpanderState =
     Expander False identityRenaming identityRenaming True
 
 
@@ -146,12 +146,12 @@ expandBody (ProcBody prims fork) = do
       NoFork -> return ()
       PrimFork var ty final bodies -> do
         st <- get
-        logExpansion $ "Now expanding fork (" ++ 
+        logExpansion $ "Now expanding fork (" ++
           (if inlining st then "without" else "WITH") ++ " inlining)"
         logExpansion $ "  with renaming = " ++ show (renaming st)
         let var' = case Map.lookup var $ renaming st of
               Nothing -> var
-              Just (ArgVar v _ _ _ _) -> v 
+              Just (ArgVar v _ _ _ _) -> v
               Just _ -> shouldnt "expansion led to non-var conditional"
         logExpansion $ "  fork on " ++ show var' ++ ":" ++ show ty
                        ++ " with " ++ show (length bodies) ++ " branches"
@@ -194,8 +194,8 @@ expandPrim (PrimCall pspec args) pos = do
         if procInline def
           then inlineCall proto args' body pos
           else do
-            -- inlinableLast <- gets (((final && singleCaller def 
-            --                          && procVis def == Private) &&) 
+            -- inlinableLast <- gets (((final && singleCaller def
+            --                          && procVis def == Private) &&)
             --                        . noFork)
             let inlinableLast = False
             if inlinableLast
@@ -223,7 +223,7 @@ inlineCall proto args body pos = do
     saved <- get
     logExpansion $ "  Before inlining:"
     logExpansion $ "    renaming = " ++ show (renaming saved)
-    modify (\s -> s { renaming = identityRenaming, 
+    modify (\s -> s { renaming = identityRenaming,
                       inlining = True })
     mapM_ (addOutputNaming pos) $ zip (primProtoParams proto) args
     mapM_ (addInputAssign pos) $ zip (primProtoParams proto) args
@@ -242,9 +242,9 @@ expandArg arg@(ArgVar var typ flow _ _) = do
       then case flow of
       FlowOut -> freshVar var typ
       FlowIn ->
-        gets (Map.findWithDefault 
+        gets (Map.findWithDefault
               -- (shouldnt $ "inlining: reference to unassigned variable "
-              --  ++ show var) 
+              --  ++ show var)
               arg
               var . renaming)
       else return arg
@@ -293,7 +293,7 @@ addInputAssign pos (param@(PrimParam name ty flow _ _),v) = do
     -- when (AnyType == argType v) $
     --   shouldnt $ "Danger: untyped argument: " ++ show v
     addInputAssign' pos name ty flow v
-    
+
 addInputAssign' :: OptPos -> PrimVarName -> TypeSpec -> PrimFlow -> PrimArg
                          -> Expander ()
 addInputAssign' pos name ty FlowIn v = do
@@ -301,11 +301,11 @@ addInputAssign' pos name ty FlowIn v = do
     addInstr (PrimForeign "llvm" "move" [] [v,newVar]) pos
 addInputAssign' _ _ _ FlowOut _ = do
     return ()
-    
+
 
 -- renameParam :: Renaming -> PrimParam -> PrimParam
--- renameParam renaming param@(PrimParam name typ FlowOut ftype inf ) = 
---     maybe param 
+-- renameParam renaming param@(PrimParam name typ FlowOut ftype inf ) =
+--     maybe param
 --     (\arg -> case arg of
 --           ArgVar name' _ _ _ _ -> PrimParam name' typ FlowOut ftype inf
 --           _ -> param) $

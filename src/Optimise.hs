@@ -186,7 +186,7 @@ updateFreshness procDef = do
     logOptimise $ show freshset
     logOptimise "***********************\n\n"
     let body' = body { bodyPrims = prims' }
-    return procDef { procImpln = ProcDefPrim proto body' ProcAnalysis }
+    return procDef { procImpln = ProcDefPrim proto body' (ProcAnalysis []) }
 
 
 -- Update args in a signle (alloc/mutate) prim
@@ -256,17 +256,17 @@ checkEscape def
         logOptimise "\n....................."
         logOptimise "*** Escape analysis:"
         logOptimise $ "*** " ++ procName def
-        let (ProcDefPrim entryProto body _) = procImpln def
+        let (ProcDefPrim entryProto body analysis) = procImpln def
         let prims = bodyPrims body
         let aliasPairs = List.foldr
                             (\prim alias ->
                                 let args = escapablePrimArgs $ content prim
                                 in aliasProcVars entryProto args alias) [] prims
         let aliasPairs' = removeDupTuples aliasPairs
-        let proto' = entryProto { primProtoAliases = aliasPairs' }
+        let analysis' = analysis { procArgAliases = aliasPairs' }
         logOptimise $ "Alias pairs: " ++ show aliasPairs'
         logOptimise ".....................\n\n"
-        return def { procImpln = ProcDefPrim proto' body ProcAnalysis}
+        return def { procImpln = ProcDefPrim entryProto body analysis'}
 checkEscape def = return def
 
 

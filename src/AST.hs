@@ -1368,8 +1368,9 @@ data ProcImpln
     deriving (Eq,Generic)
 
 -- | Stores whatever analysis results we infer about a proc definition.
-data ProcAnalysis = ProcAnalysis
-  deriving (Eq,Generic)
+data ProcAnalysis = ProcAnalysis {
+    procArgAliases::[(Int,Int)]
+} deriving (Eq,Generic)
 
 isCompiled :: ProcImpln -> Bool
 isCompiled (ProcDefPrim _ _ _) = True
@@ -1378,7 +1379,11 @@ isCompiled (ProcDefSrc _) = False
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
     show (ProcDefPrim proto body analysis)
-        = show proto ++ ":" ++ showBlock 4 body
+        = show proto ++ ":" ++ show analysis ++ showBlock 4 body
+
+instance Show ProcAnalysis where
+    show (ProcAnalysis procArgAliases) =
+        " Alias Pairs: " ++ show procArgAliases ++ "\n"
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
 -- possibly containg some guards.  Each guard is a test that succeeds
@@ -1623,14 +1628,13 @@ data ProcProto = ProcProto {
 -- |A proc prototype, including name and formal parameters.
 data PrimProto = PrimProto {
     primProtoName::ProcName,
-    primProtoParams::[PrimParam],
-    primProtoAliases::[(Int,Int)]
+    primProtoParams::[PrimParam]
     } deriving (Eq, Generic)
 
 
 instance Show PrimProto where
-  show (PrimProto name params aliases) =
-    name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ") aliases " ++ show aliases
+  show (PrimProto name params) =
+    name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")"
 
 
 -- |A formal parameter, including name, type, and flow direction.
