@@ -1,0 +1,31 @@
+use position
+public proc replicate2(p1:position, ?p2:position) use !io
+  ?pp = position(0,0)
+  print("random replicate2")
+  println(pp.x)
+  ?p2 = p1
+end
+
+public proc replicate1(p1:position, ?p2:position, ?p3:position) use !io
+  ?pp = position(0,0)
+  print("random replicate1")
+  println(pp.x)
+  ?p2 = p1
+
+  ?p3 = replicate2(p1)
+end
+
+public proc bar use !io
+  ?p1 = position(101,102)
+  replicate1(p1, ?p2, ?p3)
+
+  x(!p1, 555)
+  print("p1")
+  println(p1.x) # expected 555 - is 555
+  print("p2")
+  println(p2.x) # expected 101 - but is 555
+  print("p3")
+  println(p3.x) # expected 101 - but is 555
+end
+
+bar
