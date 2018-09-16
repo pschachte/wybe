@@ -41,7 +41,7 @@ optimiseMod mods thisMod = do
 
     mapM_ optimiseSccBottomUp ordered
 
-    -- mapM_ (mapM_ aliasSccTopDown . sccElts) ordered
+    mapM_ aliasSccBottomUp ordered
 
     finishModule
     return (False,[])
@@ -91,8 +91,7 @@ optimiseProcDefTD pspec def = do
 -- | Do bottom-up optimisations of a Proc, returning whether to inline it
 optimiseProcBottomUp :: ProcSpec -> Compiler Bool
 optimiseProcBottomUp pspec = do
-    logOptimise "\n\nvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
-    logOptimise $ ">>> Optimise (Bottom-up) " ++ show pspec
+    logOptimise $ "\n>>> Optimise (Bottom-up) " ++ show pspec
     updateProcDefM (optimiseProcDefBU pspec) pspec
     newDef <- getProcDef pspec
     return $ procInline newDef
@@ -102,10 +101,9 @@ optimiseProcDefBU :: ProcSpec -> ProcDef -> Compiler ProcDef
 optimiseProcDefBU pspec def = do
     logOptimise $ "*** " ++ show pspec ++
       " before optimisation:" ++ showProcDef 4 def
-    def' <- procExpansion pspec def >>= decideInlining >>= updateFreshness >>= checkEscape
+    def' <- procExpansion pspec def >>= decideInlining >>= updateFreshness
     logOptimise $ "*** " ++ show pspec ++
-      " after optimisation:" ++ showProcDef 4 def'
-    logOptimise "\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"
+      " after optimisation:" ++ showProcDef 4 def' ++ "\n"
     return def'
 
 
@@ -181,10 +179,7 @@ updateFreshness procDef = do
     let (ProcDefPrim proto body _) = procImpln procDef
     let prims = bodyPrims body
     let (freshset, prims') = List.foldl freshInPrim (Set.empty, []) prims
-    logOptimise "\n***********************"
-    logOptimise "*** Freshness analysis:"
-    logOptimise $ show freshset
-    logOptimise "***********************\n\n"
+    logOptimise $ "\n*** Freshness analysis:" ++ show freshset ++ "\n"
     let body' = body { bodyPrims = prims' }
     return procDef { procImpln = ProcDefPrim proto body' (ProcAnalysis []) }
 
@@ -192,12 +187,14 @@ updateFreshness procDef = do
 -- Update args in a signle (alloc/mutate) prim
 freshInPrim :: (Set PrimVarName, [Placed Prim]) -> Placed Prim
                 -> (Set PrimVarName, [Placed Prim])
-freshInPrim (freshVars, prims) (Placed (PrimForeign lang "mutate" flags args) pos) =
-    (freshVars', prims ++ [Placed (PrimForeign lang "mutate" flags args') pos])
-        where (freshVars', args') = freshInMutate freshVars args
-freshInPrim (freshVars, prims) (Unplaced (PrimForeign lang "mutate" flags args)) =
-    (freshVars', prims ++ [Unplaced (PrimForeign lang "mutate" flags args')])
-        where (freshVars', args') = freshInMutate freshVars args
+freshInPrim (freshVars, prims)
+    (Placed (PrimForeign lang "mutate" flags args) pos) =
+        (freshVars', prims ++ [Placed (PrimForeign lang "mutate" flags args') pos])
+            where (freshVars', args') = freshInMutate freshVars args
+freshInPrim (freshVars, prims)
+    (Unplaced (PrimForeign lang "mutate" flags args)) =
+        (freshVars', prims ++ [Unplaced (PrimForeign lang "mutate" flags args')])
+            where (freshVars', args') = freshInMutate freshVars args
 freshInPrim (freshVars, prims) prim =
     case content prim of
         (PrimForeign _ "alloc" _ args) ->
@@ -228,64 +225,84 @@ freshInMutate freshVars args = (freshVars, args)
 ----------------------------------------------------------------
 --                     Escape Analysis
 ----------------------------------------------------------------
+aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
+aliasSccBottomUp procs = do
+    -- First pass (only process alias pairs incurred by move and mutate)
+    mapM_ aliasProcBottomUp $ sccElts procs
+    -- Second pass (handle alias pairs incurred by proc calls within procs)
+    -- mapM_ aliasProcBottomUp $ sccElts procs
 
--- aliasSccTopDown :: ProcSpec -> Compiler ()
--- aliasSccTopDown pspec = do
---     logOptimise $ ">>> Alias analysis (Top-down) " ++ show pspec
---     pdef <- getProcDef pspec
---     checkEscape pdef
---     return ()
+aliasProcBottomUp :: ProcSpec -> Compiler ()
+aliasProcBottomUp pspec = do
+    logOptimise ">>> Alias analysis (Bottom-up):"
+    updateProcDefM (checkEscape pspec) pspec
+    return ()
 
--- Help function to normalise alias pairs in order
+
+-- Helper: normalise alias pairs in order
 normalise :: Ord a => (a,a) -> (a,a)
 normalise t@(x,y)
     | y < x    = (y,x)
     | otherwise = t
 
--- Then remove duplicated alias pairs
+-- Helper: then remove duplicated alias pairs
 removeDupTuples :: Ord a => [(a,a)] -> [(a,a)]
 removeDupTuples =
     List.map List.head . List.group . List.sort . List.map normalise
 
+-- Helper: Cartesian product of escaped FlowIn vars to proc output
+_cartProd :: [a] -> [a] -> [(a, a)]
+_cartProd ins outs = [(i, o) | i <- ins, o <- outs]
+
 
 -- Check any argument become stale after this proc call if this
 -- proc is not inlined
-checkEscape :: ProcDef -> Compiler ProcDef
-checkEscape def
+checkEscape :: ProcSpec -> ProcDef -> Compiler ProcDef
+checkEscape spec def
     | not (procInline def) = do
-        logOptimise "\n....................."
-        logOptimise "*** Escape analysis:"
-        logOptimise $ "*** " ++ procName def
         let (ProcDefPrim entryProto body analysis) = procImpln def
         let prims = bodyPrims body
+        -- First pass (only process alias pairs incurred by move and mutate)
         let aliasPairs = List.foldr
                             (\prim alias ->
                                 let args = escapablePrimArgs $ content prim
-                                in aliasProcVars entryProto args alias) [] prims
+                                in aliasPairsFromArgs entryProto args alias) [] prims
         let aliasPairs' = removeDupTuples aliasPairs
-        let analysis' = analysis { procArgAliases = aliasPairs' }
-        logOptimise $ "Alias pairs: " ++ show aliasPairs'
-        logOptimise ".....................\n\n"
-        return def { procImpln = ProcDefPrim entryProto body analysis'}
-checkEscape def = return def
+
+        -- Second pass (handle alias pairs incurred by proc calls within
+        -- entryProto)
+        (prims', aliasNames) <- foldM (\(ps, as) prim ->
+                            escapeByProcCalls (ps, as) prim) ([], []) prims
+        let aliasByProcCalls = _aliasNamesToPairs entryProto aliasNames
+        let allPairs = aliasPairs' ++ aliasByProcCalls
+        let allPairs' = removeDupTuples allPairs
+
+        -- Update body prims with correct destructive flag
+        let body' = body { bodyPrims = prims' }
+
+        -- Update proc analysis with new aliasPairs
+        let analysis' = analysis { procArgAliases = allPairs' }
+        logOptimise $ show entryProto ++ ":\n" ++ show allPairs'
+
+        return def { procImpln = ProcDefPrim entryProto body' analysis'}
+checkEscape _ def = return def
 
 
+-- For first pass:
+-- Build up alias pairs triggerred by move and mutate instructions
 escapablePrimArgs :: Prim -> [PrimArg]
 escapablePrimArgs (PrimForeign _ "move" _ args) = args
 escapablePrimArgs (PrimForeign _ "mutate" _ args) = args
 escapablePrimArgs _ = []
 
-
 -- Only append to list if the arg is passed in by the enclosing entry proc or is
 -- the return arg of the proc
--- entryProto: the enclosing proc
+-- paramNames: a list of PrimVarName of arguments of the enclosing proc
 -- args: the list of PrimArg, the arguments of the prim enclosed in entryProto
-argsOfProcProto :: PrimProto -> (PrimArg -> PrimVarName) -> [PrimArg]
+argsOfProcProto :: [PrimVarName] -> (PrimArg -> PrimVarName) -> [PrimArg]
                     -> [Int]
-argsOfProcProto entryProto varNameGetter args =
-    -- paramNames is a list of PrimVarName of arguments of the enclosing proc
-    let paramNames = procProtoParamNames entryProto
-    in List.foldl (\es arg ->
+argsOfProcProto paramNames varNameGetter =
+    List.foldl (\es arg ->
         if isProcProtoArg paramNames arg
             then
                 let vnm = varNameGetter arg
@@ -293,21 +310,83 @@ argsOfProcProto entryProto varNameGetter args =
                 in case vidx of
                     Just vidx -> vidx : es
                     Nothing -> es
-            else es) [] args
-
-
--- Cartesian product of escaped FlowIn vars to proc output
-cartProd :: [a] -> [a] -> [(a, a)]
-cartProd ins outs = [(i, o) | i <- ins, o <- outs]
+            else es) []
 
 
 -- Check Arg escape in one prim of prims of the a ProcBody
-aliasProcVars :: PrimProto -> [PrimArg] -> [(Int, Int)]
-                     -> [(Int, Int)]
-aliasProcVars entryProto [] aliasPairs = aliasPairs
-aliasProcVars entryProto args aliasPairs =
+aliasPairsFromArgs :: PrimProto -> [PrimArg] -> [AliasPair] -> [AliasPair]
+aliasPairsFromArgs _ [] aliasPairs = aliasPairs
+aliasPairsFromArgs entryProto args aliasPairs =
     let inputArgs = List.filter ((FlowIn ==) . argFlowDirection) args
         outputArgs = List.filter ((FlowOut ==) . argFlowDirection) args
-        escapedInputs = argsOfProcProto entryProto inArgVar inputArgs
-        escapedVia = argsOfProcProto entryProto outArgVar outputArgs
-    in cartProd escapedInputs escapedVia ++ aliasPairs
+        paramNames = procProtoParamNames entryProto
+        escapedInputs = argsOfProcProto paramNames inArgVar inputArgs
+        escapedVia = argsOfProcProto paramNames outArgVar outputArgs
+    in _cartProd escapedInputs escapedVia ++ aliasPairs
+
+
+-- For second pass:
+-- Build up alias pairs triggerred by proc calls
+-- Also update destructive flag in mutate prims following proc calls
+escapeByProcCalls :: ([Placed Prim], [(PrimVarName, PrimVarName)])
+                    -> Placed Prim
+                    -> Compiler ([Placed Prim], [(PrimVarName, PrimVarName)])
+escapeByProcCalls (prims, aliasNames)
+    (Placed (PrimForeign lang "mutate" flags args) pos) =
+        return (prims ++ [Placed (PrimForeign lang "mutate" flags args') pos], aliasNames)
+            where args' = _updateMutateForAlias aliasNames args
+escapeByProcCalls (prims, aliasNames)
+    (Unplaced (PrimForeign lang "mutate" flags args)) =
+        return (prims ++ [Unplaced (PrimForeign lang "mutate" flags args')], aliasNames)
+            where args' = _updateMutateForAlias aliasNames args
+escapeByProcCalls (prims, aliasNames) prim =
+    case content prim of
+        PrimCall spec args -> do
+            def <- getProcDef spec
+            let (ProcDefPrim thisProto body analysis) = procImpln def
+            let pairs = procArgAliases analysis
+            logOptimise $ show thisProto
+            logOptimise $ "PrimCall args: " ++ show args
+            logOptimise $ "pairs: " ++ show pairs
+            let aliasNames' = _aliasPairsToNames args pairs
+            logOptimise $ "names: " ++ show aliasNames'
+            return (prims ++ [prim], aliasNames ++ aliasNames')
+        _ ->
+            return (prims ++ [prim], aliasNames)
+
+-- Helper: convert alias index pairs to var name pairs
+_aliasPairsToNames :: [PrimArg] -> [AliasPair] -> [(PrimVarName, PrimVarName)]
+_aliasPairsToNames primCallArgs =
+    List.foldr (\(p1,p2) aliasNames ->
+        let ArgVar n1 _ _ _ _ = primCallArgs !! p1
+            ArgVar n2 _ _ _ _ = primCallArgs !! p2
+        in (n1, n2) : aliasNames
+        ) []
+
+-- Helper: convert aliased var names pair to arg index pair
+_aliasNamesToPairs :: PrimProto -> [(PrimVarName, PrimVarName)] -> [AliasPair]
+_aliasNamesToPairs entryProto aliasNames =
+    let paramNames = procProtoParamNames entryProto
+    in List.foldr (\(n1, n2) pairs ->
+        let idexes = (List.elemIndex n1 paramNames, List.elemIndex n2 paramNames)
+            -- idx2 = (List.elemIndex n1 paramNames, List.elemIndex n2 paramNames)
+        in case idexes of
+            (Just idx1, Just idx2) -> (idx1, idx2):pairs
+            _ -> pairs
+        ) [] aliasNames
+
+-- Helper: change mutate destructive flag to false if FlowIn variable is aliased
+_updateMutateForAlias :: [(PrimVarName, PrimVarName)] -> [PrimArg] -> [PrimArg]
+_updateMutateForAlias aliasNames
+    [fIn@(ArgVar inName _ _ _ final), fOut@(ArgVar outName _ _ _ _), size,
+    offset, ArgInt des typ, mem] =
+        if _isVarAliased inName aliasNames
+            then [fIn, fOut, size, offset, ArgInt 0 typ, mem]
+            else [fIn, fOut, size, offset, ArgInt des typ, mem]
+_updateMutateForAlias _ args = args
+
+-- Helper: check if FlowIn variable is aliased after previous proc calls
+_isVarAliased :: PrimVarName -> [(PrimVarName, PrimVarName)] -> Bool
+_isVarAliased varName [] = False
+_isVarAliased varName ((n1,n2):as) =
+    (varName == n1 || varName == n2) || _isVarAliased varName as

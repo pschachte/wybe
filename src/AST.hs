@@ -30,7 +30,7 @@ module AST (
   enterModule, reenterModule, exitModule, finishModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, ProcImpln(..), ProcAnalysis(..), ProcDef(..), procCallCount,
+  ModSpec, ProcImpln(..), AliasPair, ProcAnalysis(..), ProcDef(..), procCallCount,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, inArgVar, outArgVar, argDescription, flowsIn, flowsOut,
@@ -1367,9 +1367,11 @@ data ProcImpln
       -- defn in SSA (LLVM) form along with any needed extern definitions
     deriving (Eq,Generic)
 
+type AliasPair = (Int,Int)
+
 -- | Stores whatever analysis results we infer about a proc definition.
 data ProcAnalysis = ProcAnalysis {
-    procArgAliases::[(Int,Int)]
+    procArgAliases::[AliasPair]
 } deriving (Eq,Generic)
 
 isCompiled :: ProcImpln -> Bool
