@@ -7,18 +7,19 @@
 --
 
 module Util (sameLength, maybeNth, checkMaybe, setMapInsert,
-             fillLines, nop) where
+             fillLines, nop, sccElts) where
 
 
-import Data.Map as Map
-import Data.Set as Set
+import           Data.Graph
+import           Data.Map   as Map
+import           Data.Set   as Set
 
 
 -- |Do the the two lists have the same length?
 sameLength :: [a] -> [b] -> Bool
-sameLength [] [] = True
+sameLength [] []         = True
 sameLength (_:as) (_:bs) = sameLength as bs
-sameLength _ _ = False
+sameLength _ _           = False
 
 
 -- |Return the nth element of the list, if present, else Nothing.
@@ -32,25 +33,25 @@ maybeNth n (_:es)
 
 -- |Test the value in a maybe, and if it fails, return Nothing.
 checkMaybe :: (a -> Bool) -> Maybe a -> Maybe a
-checkMaybe test Nothing = Nothing
+checkMaybe test Nothing    = Nothing
 checkMaybe test (Just val) = if test val then Just val else Nothing
 
 
--- |Insert an element into the set mapped to by the specified key in 
---  the given map.  Maps to a singleton set if there is no current 
+-- |Insert an element into the set mapped to by the specified key in
+--  the given map.  Maps to a singleton set if there is no current
 --  mapping for the specified key.
 setMapInsert :: (Ord a, Ord b) => a -> b -> Map a (Set b) -> Map a (Set b)
 setMapInsert key item dict =
     Map.alter (\ms -> case ms of
                     Nothing -> Just $ Set.singleton item
-                    Just s -> Just $ Set.insert item s)
+                    Just s  -> Just $ Set.insert item s)
     key dict
 
 
 
 -- |fillLines marginText currColumn lineLength text
---  Fill lines with text.  marginText is the string to start each 
---  line but the first.  currColumn is the output column at the start 
+--  Fill lines with text.  marginText is the string to start each
+--  line but the first.  currColumn is the output column at the start
 --  of the first word, and lineLength is the maximum line length.
 fillLines :: String -> Int -> Int -> String -> String
 fillLines marginText currColumn lineLength text =
@@ -71,3 +72,7 @@ fillLines' marginText currColumn lineLength (word1:word2:words) =
 nop :: Monad m => m ()
 nop = return ()
 
+
+sccElts :: SCC a -> [a]
+sccElts (AcyclicSCC single) = [single]
+sccElts (CyclicSCC multi)   = multi
