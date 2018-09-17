@@ -176,7 +176,7 @@ transformStmt resources stmt@(ProcCall m n id detism resourceful args) pos = do
     logResources $ "    with available resources " ++ show resources
     unless (callResources `isSubsetOf` resources)
       $ message Error
-        ("Proc " ++ n ++ " uses unavailable resources "
+        ("Call to " ++ n ++ " needs unavailable resource(s) "
          ++ List.intercalate ", "
          (List.map show $ Set.elems $ Set.difference callResources resources))
         pos
@@ -185,9 +185,6 @@ transformStmt resources stmt@(ProcCall m n id detism resourceful args) pos = do
       (ProcCall m n (Just procID) detism False (args++resArgs)) pos
 transformStmt resources (ForeignCall lang name flags args) pos = do
     return $ maybePlace (ForeignCall lang name flags args) pos
--- transformStmt resources (Test stmts) pos = do
---     stmts' <- transformBody resources stmts
---     return $ maybePlace (Test stmts') pos
 transformStmt resources stmt@(TestBool var) pos = do
     return $ maybePlace stmt pos
 transformStmt resources (And stmts) pos = do
@@ -209,6 +206,13 @@ transformStmt resources (Cond test thn els) pos = do
 transformStmt resources (Loop body) pos = do
     body' <- transformBody resources body
     return $ maybePlace (Loop body') pos
+transformStmt resources (UseResources res body) pos = do
+    let resFlows = flip ResourceFlowSpec ParamInOut <$> res
+    resFlows' <- mapM (canonicaliseResourceFlow pos) resFlows
+    let res' = resourceFlowRes <$> resFlows'
+    let resources' = Set.union resources $ Set.fromList resFlows'
+    body' <- transformBody resources' body
+    return $ maybePlace (UseResources res' body') pos
 transformStmt _ (For itr gen) pos = return $ maybePlace (For itr gen) pos
 transformStmt _ Break pos = return $ maybePlace Break pos
 transformStmt _ Next pos = return $ maybePlace Next pos

@@ -60,7 +60,11 @@ flattenProcDecl (ProcDecl vis detism inline
                    List.map paramName $ 
                    List.filter (flowsIn . paramFlow) $
                    procProtoParams proto'
-    (stmts',tmpCtr) <- flattenBody stmts inParams detism
+    let inResources = Set.map (resourceName . resourceFlowRes) $ 
+                   Set.filter (flowsIn . resourceFlowFlow) $
+                   procProtoResources proto'
+    (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` inResources)
+                       detism
     return (ProcDecl vis detism inline proto' stmts' pos,tmpCtr)
 flattenProcDecl _ =
     shouldnt "flattening a non-proc item"
@@ -264,6 +268,14 @@ flattenStmt' (Loop body) pos detism = do
     body' <- flattenInner True False detism
              (flattenStmts (body ++ [Unplaced Next]) detism)
     emit pos $ Loop body'
+flattenStmt' (UseResources res body) pos detism = do
+    defined <- gets defdVars
+    body' <- flattenInner False True detism (flattenStmts body detism)
+    defined' <- gets defdVars
+    modify (\s -> s {defdVars = defined'
+                      Set.\\ (Set.fromList $ resourceName <$> res)
+                      `Set.union` defined })
+    emit pos $ UseResources res body'
 flattenStmt' (For itr gen) pos detism = do
     vars <- flattenPExp gen
     case vars of
@@ -348,13 +360,12 @@ flattenExp exp@(Var name dir flowType) ty cast pos = do
         noteVarMention name dir
         let inPart = if isIn
                      then [typeAndPlace (Var name ParamIn flowType')
-                           ty cast pos] 
+                           ty cast pos]
                      else []
         let outPart = if isOut
                       then [typeAndPlace (Var name ParamOut flowType')
-                           ty cast pos] 
+                           ty cast pos]
                       else []
-        
         logFlatten $ "  Arg flattened to " ++ show (inPart ++ outPart)
         return $ inPart ++ outPart
 flattenExp (Where stmts pexp) _ _ _ = do

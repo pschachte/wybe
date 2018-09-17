@@ -253,8 +253,14 @@ paramParser = do
 resourceFlowSpec :: Parser ResourceFlowSpec
 resourceFlowSpec = do
     flow <- flowDirection
+    res <- resourceSpec
+    return $ ResourceFlowSpec res flow
+
+
+resourceSpec :: Parser ResourceSpec
+resourceSpec = do
     m <- modSpecParser
-    return $ ResourceFlowSpec (ResourceSpec (init m) (last m)) flow
+    return $ ResourceSpec (init m) (last m)
 
 
 -- | Optional flow direction symbol prefix.
@@ -300,6 +306,7 @@ stmtParser =
           <|> whenStmt
           <|> untilStmt
           <|> ifStmtParser
+          <|> useStmt
           <|> simpleStmt
 
 
@@ -407,6 +414,14 @@ ifCaseParser = do
 --                     rel
 --     return $ Placed (TestBool e) pos
     
+
+
+useStmt :: Parser (Placed Stmt)
+useStmt = do
+    pos <- tokenPosition <$> ident "use"
+    resources <- resourceSpec `sepBy` comma <* ident "in"
+    body <- many1 stmtParser <* ident "end"
+    return $ Placed (UseResources resources body) pos
 
 
 -- | Parse expression statement.

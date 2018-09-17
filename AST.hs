@@ -1485,6 +1485,8 @@ foldProcCalls' fn comb val Nop ss =
     foldProcCalls fn comb val ss
 foldProcCalls' fn comb val (Loop body) ss =
     foldProcCalls fn comb (foldProcCalls fn comb val body) ss
+foldProcCalls' fn comb val (UseResources _ body) ss =
+    foldProcCalls fn comb (foldProcCalls fn comb val body) ss
 foldProcCalls' fn comb val For{} ss =
     foldProcCalls fn comb val ss
 foldProcCalls' fn comb val Break ss =
@@ -1708,6 +1710,10 @@ data Stmt
      --  execute the second Stmts, else execute the third.
      | Cond (Placed Stmt) [Placed Stmt] [Placed Stmt]
 
+     -- | A scoped construct for resources.  This is eliminated during resource
+     --   processing.
+     | UseResources [ResourceSpec] [Placed Stmt]
+
      -- All the following are eliminated during unbranching.
 
      -- |A test that succeeds iff the expression is true
@@ -1728,6 +1734,7 @@ data Stmt
      -- |Immediately jump to the top of the enclosing loop; only valid in a loop
      | Next  -- holds the variable versions before the next
      deriving (Eq,Ord,Generic)
+
 
 instance Show Stmt where
   show s = "{" ++ showStmt 4 s ++ "}"
@@ -2388,6 +2395,10 @@ showStmt indent (Cond condstmt thn els) =
 showStmt indent (Loop lstmts) =
     "do" ++  showBody (indent + 4) lstmts
     ++ List.replicate indent ' ' ++ " end"
+showStmt indent (UseResources resources stmts) =
+    "use " ++ intercalate ", " (List.map show resources) ++ " in"
+    ++ showBody (indent + 4) stmts
+    ++ List.replicate indent ' ' ++ "end"
 showStmt _ (Nop) = "nop"
 showStmt _ (For itr gen) =
     "for " ++ show itr ++ " in " ++ show gen

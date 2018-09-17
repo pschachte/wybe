@@ -195,7 +195,7 @@ instance Show TypeError where
                    | (v,typs) <- varAmbigs]
     show (ReasonUndef callFrom callTo pos) =
         makeMessage pos $
-            "Call to unknown '" ++ callTo ++ "' from " ++ callFrom
+            "Unknown variable/procedure/function '" ++ callTo ++ "' in " ++ callFrom
     show (ReasonUninit callFrom var pos) =
         makeMessage pos $
             "Unknown variable/constant '" ++ var ++ "'"
@@ -220,21 +220,12 @@ instance Show TypeError where
         makeMessage Nothing "Mysterious typing error"
 
 
--- |Construct the appropriate TypeError for a call to an undefined proc/func.
-undefStmtErr :: Ident -> Placed Stmt -> TypeError
-undefStmtErr caller pstmt =
-    let pos = place pstmt
-    in case content pstmt of
-        ProcCall _ callee _ _ _ _ -> ReasonUndef caller callee pos
-        other -> shouldnt $ "undefStmtErr with non-call stmt " ++ show other
-    
 
 ----------------------------------------------------------------
 --                           Type Assignments
 ----------------------------------------------------------------
 
 -- | A variable type assignment (symbol table), with a list of type errors.
--- 
 data Typing = Typing {
                   typingDict::Map VarName TypeRef,
                   typingErrs::[TypeError]
@@ -521,8 +512,7 @@ typecheckProcSCC m (CyclicSCC list) = do
 --  Bools, the first saying whether any defnition has been udpated,
 --  and the second saying whether any public defnition has been
 --  updated.
-typecheckProcDecls :: ModSpec -> ProcName ->
-                     Compiler (Bool,[TypeError])
+typecheckProcDecls :: ModSpec -> ProcName -> Compiler (Bool,[TypeError])
 typecheckProcDecls m name = do
     logTypes $ "** Type checking " ++ name
     defs <- getModuleImplementationField
@@ -778,6 +768,9 @@ bodyCalls (pstmt:pstmts) detism = do
           els' <- bodyCalls els detism
           return $ cond' ++ thn' ++ els' ++ rest
         Loop nested -> do
+          nested' <- bodyCalls nested detism
+          return $ nested' ++ rest
+        UseResources _ nested -> do
           nested' <- bodyCalls nested detism
           return $ nested' ++ rest
         For _ _ -> shouldnt "bodyCalls: flattening left For stmt"
@@ -1173,6 +1166,14 @@ modecheckStmt m name defPos typing delayed assigned detism
     -- XXX Can only assume vars assigned before first loop exit are
     --     actually assigned by loop
     return ([maybePlace (Loop stmts') pos], delayed, assigned',errs')
+-- XXX Need to implement these:
+modecheckStmt m name defPos typing delayed assigned detism
+    stmt@(UseResources resources stmts) pos = do
+    logTypes $ "Mode checking use ... in stmt " ++ show stmt
+    (stmts', assigned',errs') <-
+      modecheckStmts m name defPos typing [] assigned detism stmts
+    return ([maybePlace (UseResources resources stmts') pos],
+            delayed, assigned',errs')
 -- XXX Need to implement these:
 modecheckStmt m name defPos typing delayed assigned detism
     stmt@(And stmts) pos = do
@@ -1673,6 +1674,8 @@ checkStmtTyped name pos (Cond tst thenstmts elsestmts) _ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) thenstmts
     mapM_ (placedApply (checkStmtTyped name pos)) elsestmts
 checkStmtTyped name pos (Loop stmts) _ppos =
+    mapM_ (placedApply (checkStmtTyped name pos)) stmts
+checkStmtTyped name pos (UseResources _ stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (For itr gen) ppos = do
     checkExpTyped name pos ("for iterator" ++ showMaybeSourcePos ppos) $
