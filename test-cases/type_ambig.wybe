@@ -1,1 +1,1 @@
-proc ambig(x) print(x) end
+proc ambig(x) !print(x) end

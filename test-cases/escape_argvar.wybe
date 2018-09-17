@@ -1,8 +1,8 @@
 use position
 public proc replicate(p1:position, ?p2:position) use !io
   ?pp = position(0,0)
-  print("random print")
-  println(pp.x)
+  !print("random print")
+  !println(pp.x)
   ?p2 = p1
 end
 
@@ -11,8 +11,8 @@ public proc bar use !io
   ?p2 = replicate(p1)
 
   x(!p1, 555)
-  println(p1.x) # expected 555 - is 555
-  println(p2.x) # expected 101 - but is 555
+  !println(p1.x) # expected 555 - is 555
+  !println(p2.x) # expected 101 - but is 555
 end
 
 bar

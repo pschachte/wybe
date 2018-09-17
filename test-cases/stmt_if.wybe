@@ -15,5 +15,5 @@ end
 #if found :: print("found")
 #| false :: print("not found")
 #end
-if lookup(1, tr, ?f) :: print("found")
+if lookup(1, tr, ?f) :: !print("found")
 end

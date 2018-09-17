@@ -2,8 +2,8 @@
 #public proc mod(x:int, y:int, ?r:int) ?r = foreign llvm urem(x, y) end
 
 public proc mod(x:int, y:int, ?r:int) use !io
-  print('x') print(x) print(' ') print('y') println(y)
-  ?r = foreign llvm urem(x, y) 
+  !print('x') !print(x) !print(' ') !print('y') !println(y)
+  ?r = foreign llvm urem(x, y)
 end
 
 public proc gcd(a:int, b:int, ?r:int) use !io
@@ -19,4 +19,4 @@ public proc gcd(a:int, b:int, ?r:int) use !io
   end
 end
 
-print(gcd(18, 24))
+!print(gcd(18, 24))

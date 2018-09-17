@@ -9,7 +9,7 @@ end
 
 public proc foo use !io
   ?p2 = replicate
-  println(p2.x) # 101
+  !println(p2.x) # 101
 end
 
 foo
