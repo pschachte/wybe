@@ -48,6 +48,7 @@
 * Provide scoped way to set resources
 * Provide way to give top-level initial value to resources
 * Support automatic type conversion?
+* Design/implement interface to call wybe from C
 * Support polymorphism
 * Provide switch-on-constructor syntax and implementation
 * Support subtypes
