@@ -332,11 +332,14 @@ unbranchStmts (stmt:stmts) = do
 --   to optimise these things here.
 --
 unbranchStmt :: Stmt -> OptPos -> [Placed Stmt] -> Unbrancher [Placed Stmt]
-unbranchStmt stmt@(ProcCall _ _ _ Det args) pos stmts = do
+unbranchStmt stmt@(ProcCall _ _ _ _ True args) pos _ =
+    shouldnt $ "Resources should have been handled before unbranching: "
+               ++ showStmt 4 stmt
+unbranchStmt stmt@(ProcCall _ _ _ Det False args) pos stmts = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
     defArgs args
     leaveStmtAsIs stmt pos stmts
-unbranchStmt stmt@(ProcCall md name procID SemiDet args) pos stmts =
+unbranchStmt stmt@(ProcCall md name procID SemiDet False args) pos stmts =
     shouldnt $ "Semidet proc call " ++ show stmt ++ " in a Det context"
 unbranchStmt stmt@(ForeignCall _ _ _ args) pos stmts = do
     logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
@@ -485,9 +488,9 @@ buildCond' (stmt:stmts) thn els pos =
 
 buildCond'' :: Stmt -> OptPos -> [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt]
             -> OptPos -> Unbrancher [Placed Stmt]
-buildCond'' stmt@(ProcCall _ _ _ Det _) pos stmts thn els condPos =
+buildCond'' stmt@(ProcCall _ _ _ Det _ _) pos stmts thn els condPos =
     (maybePlace stmt pos:) <$> buildCond' stmts thn els condPos
-buildCond'' stmt@(ProcCall _ _ _ SemiDet _) pos stmts thn els condPos =
+buildCond'' stmt@(ProcCall _ _ _ SemiDet _ _) pos stmts thn els condPos =
     shouldnt $ "Should have transformed SemiDet calls before buildCond "
                ++ show stmt
 buildCond'' stmt@ForeignCall{} pos stmts thn els condPos =
@@ -583,17 +586,17 @@ unbranchSemiDetStmts (stmt:stmts) = do
 --   to optimise these things here.
 --
 unbranchSemiDet :: Stmt -> OptPos -> [Placed Stmt] -> Unbrancher [Placed Stmt]
-unbranchSemiDet stmt@(ProcCall _ _ _ Det args) pos stmts = do
+unbranchSemiDet stmt@(ProcCall _ _ _ Det _ args) pos stmts = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
     defArgs args
     stmts' <- unbranchSemiDetStmts stmts
     return $ maybePlace stmt pos:stmts'
-unbranchSemiDet stmt@(ProcCall md name procID SemiDet args) pos stmts = do
+unbranchSemiDet stmt@(ProcCall md name procID SemiDet _ args) pos stmts = do
     logUnbranch $ "converting SemiDet proc call" ++ show stmt
     testVarName <- tempVar
     let testStmt = TestBool $ varGet testVarName
     stmts' <- unbranchSemiDetStmts stmts
-    let result = maybePlace (ProcCall md name procID Det
+    let result = maybePlace (ProcCall md name procID Det False
                          $ args ++ [Unplaced (boolVarSet testVarName)]) pos
                  : mkCond (maybePlace testStmt pos) pos stmts' [failTest]
     logUnbranch $ "#Converted SemiDet proc call" ++ show stmt
@@ -690,7 +693,7 @@ countRepeats :: Stmt -> (Int,Int)
 countRepeats (TestBool (Typed (IntValue 1) _ _)) = (1,0)
 countRepeats (TestBool (Typed (IntValue 0) _ _)) = (0,1)
 countRepeats (TestBool _) = (1,1)
-countRepeats (ProcCall _ _ _ Det _) = (0,0)
+countRepeats (ProcCall _ _ _ Det _ _) = (0,0)
 countRepeats ForeignCall{} = (0,0)
 countRepeats (Cond stmt thn els) =
     let repeats = countRepeats . content <$> thn ++ els
@@ -806,7 +809,7 @@ newProcCall name inVars pos = do
     let inArgs  = List.map (uncurry $ varExp ParamIn) $ Map.toList inVars
     outArgs <- gets brOutArgs
     currMod <- lift getModuleSpec
-    return $ maybePlace (ProcCall currMod name (Just 0) Det
+    return $ maybePlace (ProcCall currMod name (Just 0) Det False
                          (inArgs ++ outArgs)) pos
 
 

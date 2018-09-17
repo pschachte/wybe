@@ -189,7 +189,7 @@ compileSimpleStmt stmt = do
     return $ maybePlace stmt' (place stmt)
 
 compileSimpleStmt' :: Stmt -> ClauseComp Prim
-compileSimpleStmt' call@(ProcCall maybeMod name procID _ args) = do
+compileSimpleStmt' call@(ProcCall maybeMod name procID _ _ args) = do
     logClause $ "Compiling call " ++ showStmt 4 call
     args' <- mapM (placedApply compileArg) args
     return $ PrimCall (ProcSpec maybeMod name $

@@ -1,19 +1,19 @@
 ======================================================================
 AFTER EVERYTHING:
  Module proc_yorn
-  public submods  : 
-  public types    : 
-  public resources: 
+  public submods  :
+  public types    :
+  public resources:
   public procs    : proc_yorn.<0>
                     proc_yorn.yorn<0>
   imports         : use wybe
-  types           : 
-  resources       : 
-  procs           : 
+  types           :
+  resources       :
+  procs           :
 
 *main* > public inline (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom) aliases []:
-    proc_yorn.gen$1<0>("What's your input?":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$4#0:wybe.bool, ?#wybe.io$io#2:wybe.phantom) @proc_yorn:2:8
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
+    proc_yorn.gen$1<0>("What's your input?":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.bool, ?#wybe.io$io#2:wybe.phantom) @proc_yorn:2:8
 
 
 gen$1 > (2 calls)
@@ -84,7 +84,7 @@ declare i8 @read_char() local_unnamed_addr
 
 define i32 @proc_yorn.main() local_unnamed_addr {
 entry:
-  %"tmp$4#0" = tail call i1 @"proc_yorn.gen$1<0>"(i8* getelementptr inbounds ([19 x i8], [19 x i8]* @proc_yorn.1, i64 0, i64 0))
+  %"tmp$2#0" = tail call i1 @"proc_yorn.gen$1<0>"(i8* getelementptr inbounds ([19 x i8], [19 x i8]* @proc_yorn.1, i64 0, i64 0))
   ret i32 0
 }
 

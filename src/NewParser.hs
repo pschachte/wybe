@@ -325,9 +325,11 @@ testStmt =
 -- | A simple proc call stmt.
 procCallParser :: Parser (Placed Stmt)
 procCallParser = do
+    resourceful <- option False (symbol "!" >> return True)
     p <- identButNot keywords
     args <- option [] argListParser
-    return $ maybePlace (ProcCall [] (content p) Nothing Det args) (place p)
+    return $ maybePlace (ProcCall [] (content p) Nothing Det resourceful args)
+      (place p)
 
 
 
@@ -424,7 +426,7 @@ assignmentParser :: Parser (Placed Stmt)
 assignmentParser = do
     x <- simpleExpTerms <* symbol "="
     y <- expParser
-    return $ maybePlace (ProcCall [] "=" Nothing Det [x,y]) (place x)
+    return $ maybePlace (ProcCall [] "=" Nothing Det False [x,y]) (place x)
 
 
 

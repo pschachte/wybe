@@ -1,4 +1,4 @@
-do read(?c:char)
+do !read(?c:char)
    while (c /= 'a')
-   print(c)
+   !print(c)
 end

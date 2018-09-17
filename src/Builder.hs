@@ -217,7 +217,7 @@ buildModule :: ModSpec -> FilePath -> Compiler ()
 buildModule mspec srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
     -- let parseTree = parse tokens
-    let parseTree = either (error . ("Parser Error: " ++) . show) id $
+    let parseTree = either (error . ("Syntax Error: " ++) . show) id $
             parseWybe tokens srcfile
     compileModule srcfile mspec Nothing parseTree
     -- XXX Rethink parse tree hashing

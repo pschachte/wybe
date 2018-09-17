@@ -3,10 +3,10 @@ public proc beer99 use !io
     # do for ?count in range(99,0,-1)
     ?count = 99
     do  while count >= 0
-        print(count)
-	println(" bottles of beer on the wall")
-	decr(!count)
+        !print(count)
+	!println(" bottles of beer on the wall")
+	 decr(!count)
     end
 end
 
-beer99
+!beer99
