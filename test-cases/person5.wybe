@@ -10,6 +10,6 @@ end
 
 ?personA = person("John", "Smith")
 ?personB = personA
-update_both(!personA, !personB)
-print(personA.firstname) # expect Amy
-print(personB.firstname) # expect Bob
+!update_both(!personA, !personB)
+!print(personA.firstname) # expect Amy
+!print(personB.firstname) # expect Bob

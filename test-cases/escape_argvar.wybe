@@ -8,11 +8,11 @@ end
 
 public proc bar use !io
   ?p1 = position(101,102)
-  ?p2 = replicate(p1)
+  !replicate(p1, ?p2)
 
   x(!p1, 555)
   !println(p1.x) # expected 555 - is 555
   !println(p2.x) # expected 101 - but is 555
 end
 
-bar
+!bar

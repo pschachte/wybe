@@ -12,4 +12,4 @@ public proc foo use !io
   !println(p2.x) # 101
 end
 
-foo
+!foo

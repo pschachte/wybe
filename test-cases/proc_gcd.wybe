@@ -13,10 +13,11 @@ public proc gcd(a:int, b:int, ?r:int) use !io
   do
     while y /= 0
       ?t = y
-      ?y = mod(x, t)
+      !mod(x, t, ?y)
       ?x = t
     ?r = x
   end
 end
 
-!print(gcd(18, 24))
+!gcd(18, 24, ?r)
+!print(r)

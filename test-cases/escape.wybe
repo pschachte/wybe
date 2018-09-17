@@ -8,7 +8,7 @@ end
 
 public proc foo use !io
   ?p1 = position(101,102)
-  ?p2 = replicate(p1)
+  !replicate(p1, ?p2)
 
   !println(p1.x) # expected 101 - is 101
   !println(p2.x) # expected 101 - is 101
@@ -21,7 +21,7 @@ end
 
 public proc bar use !io
   ?p1 = position(101,102)
-  ?p2 = replicate(p1)
+  !replicate(p1, ?p2)
 
   x(!p1, 555)
   !println(p1.x) # expected 555 - is 555
@@ -30,7 +30,7 @@ end
 
 public proc baz use !io
   ?p1 = position(101,102)
-  ?p2 = replicate(p1)
+  !replicate(p1, ?p2)
 
   ?p3 = position(33333333, p2.y)
 
@@ -42,10 +42,10 @@ public proc baz use !io
 end
 
 !print("foo: ")
-foo
+!foo
 !print("---")
 !print("bar: ")
-bar
+!bar
 !print("---")
 !print("baz: ")
-baz
+!baz

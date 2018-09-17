@@ -19,6 +19,6 @@ public func fcopy(p1:position):position =
   let ?p2 = position(0,0) x(!p2, p1.x) y(!p2, p1.y) in p2
 
 !println("copy a position")
-?r = pcopy(position(0,20))
+!pcopy(position(0,20), ?r)
 !println(x(r))
 !println(y(r))
