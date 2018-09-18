@@ -1,0 +1,17 @@
+resource count:int
+
+proc use_test use !io
+    use count in
+        ?count = 0
+        !inc_count
+        !inc_count
+        !println(count)
+?n = count
+    end
+end
+
+proc inc_count use !count
+    ?count = count + 1
+end
+
+!use_test

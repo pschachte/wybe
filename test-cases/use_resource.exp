@@ -1,0 +1,61 @@
+======================================================================
+AFTER EVERYTHING:
+ Module use_resource
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : use_resource.<0>
+  imports         : use wybe
+  types           : 
+  resources       : count: fromList [(use_resource.count,Just wybe.int @use_resource:1:1)] @use_resource:1:1
+  procs           : 
+
+*main* > public inline (0 calls)
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+    foreign c print_int(2:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$1#0:wybe.phantom) @wybe:76:38
+    foreign c putchar('\n':wybe.char, ~tmp$1#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+
+
+inc_count > inline (2 calls)
+0: inc_count(count#0:wybe.int, ?count#1:wybe.int):
+    foreign llvm add(~count#0:wybe.int, 1:wybe.int, ?count#1:wybe.int) @wybe:13:38
+
+
+use_test > inline (1 calls)
+0: use_test(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+    foreign c print_int(2:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$5#0:wybe.phantom) @wybe:76:38
+    foreign c putchar('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+use_resource
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'use_resource'
+source_filename = "test-cases/use_resource.wybe"
+
+declare void @putchar(i8) local_unnamed_addr
+
+declare void @print_int(i64) local_unnamed_addr
+
+define i32 @use_resource.main() local_unnamed_addr {
+entry:
+  tail call void @print_int(i64 2)
+  tail call void @putchar(i8 10)
+  ret i32 0
+}
+
+; Function Attrs: norecurse nounwind readnone
+define i64 @"use_resource.inc_count<0>"(i64 %"count#0") local_unnamed_addr #0 {
+entry:
+  %"count#1" = add i64 %"count#0", 1
+  ret i64 %"count#1"
+}
+
+define void @"use_resource.use_test<0>"() local_unnamed_addr {
+entry:
+  tail call void @print_int(i64 2)
+  tail call void @putchar(i8 10)
+  ret void
+}
+
+attributes #0 = { norecurse nounwind readnone }
+
