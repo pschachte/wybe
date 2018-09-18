@@ -4,4 +4,4 @@ public type person = public person(firstname:string, lastname:string) end
 # is: destructively update A
 ?personA = person("John", "Smith")
 lastname(!personA, "Wang")
-print(personA.lastname)
+!print(personA.lastname)

@@ -9,5 +9,5 @@ public func fcopy(crd1:Coordinate):Coordinate =
 ?crd1 = Coordinate(1000,1000,1000)
 ?crd2 = fcopy(crd1)
 z(!crd1, 8000)
-println(crd1.z)
-println(crd2.z)
+!println(crd1.z)
+!println(crd2.z)

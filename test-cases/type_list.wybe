@@ -11,4 +11,4 @@ public func length(x:intlist) : int =
 
 ?x = [1,2,3]
 ?y = [100, 200]
-print(length(x++y))
+!print(length(x++y))

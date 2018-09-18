@@ -8,5 +8,5 @@ public type person = public person(firstname:string, lastname:string) end
 
 firstname(!personA, "Jane")
 lastname(!personA, "Wang")
-print(personA.lastname)
-print(personB.lastname)
+!print(personA.lastname)
+!print(personB.lastname)
