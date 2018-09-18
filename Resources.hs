@@ -10,6 +10,7 @@ module Resources (resourceCheckMod, canonicaliseProcResources,
 import AST
 import Options (LogSelection(Resources))
 import Util
+import Snippets
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
@@ -89,17 +90,17 @@ resourceCheckProc pd = do
     logResources $ "Adding resources to:" ++ showProcDef 4 pd
     let proto = procProto pd
     let pos = procPos pd
+    let tmp = procTmpCount pd
     let resourceFlows = procProtoResources proto
     let params = procProtoParams proto
     let (ProcDefSrc body) = procImpln pd
     resFlows <- fmap concat $ mapM (simpleResourceFlows pos)
                             $ Set.elems resourceFlows
-    body' <- transformBody resourceFlows body
-    -- let params' = List.filter (not . resourceParam)
-    --               params
+    (body',tmp') <- transformBody resourceFlows tmp body
     resParams <- fmap concat $ mapM (resourceParams pos) resFlows
     let proto' = proto { procProtoParams = params ++ resParams}
-    let pd' = pd { procProto = proto', procImpln = ProcDefSrc body' }
+    let pd' = pd { procProto = proto', procTmpCount = tmp',
+                   procImpln = ProcDefSrc body' }
     logResources $ "Adding resources results in:" ++ showProcDef 4 pd'
     return pd'
 
@@ -154,16 +155,20 @@ resourceVar (ResourceSpec mod name) = do
     else return $ intercalate "." mod ++ "$" ++ name
 
 
-transformBody :: Set.Set ResourceFlowSpec -> [Placed Stmt]
-              -> Compiler [Placed Stmt]
-transformBody resources body =
-    mapM (placedApply (transformStmt resources)) body
+transformBody :: Set.Set ResourceFlowSpec -> Int -> [Placed Stmt]
+              -> Compiler ([Placed Stmt],Int)
+transformBody resources tmp [] = return ([],tmp)
+transformBody resources tmp (stmt:stmts) = do
+    (stmts1,tmp') <- placedApply (transformStmt resources tmp) stmt
+    (stmts2,tmp'') <- transformBody resources tmp' stmts
+    return (stmts1 ++ stmts2, tmp'')
 
 
 
-transformStmt :: Set.Set ResourceFlowSpec -> Stmt -> OptPos
-              -> Compiler (Placed Stmt)
-transformStmt resources stmt@(ProcCall m n id detism resourceful args) pos = do
+transformStmt :: Set.Set ResourceFlowSpec -> Int
+              -> Stmt -> OptPos -> Compiler ([Placed Stmt], Int)
+transformStmt resources tmp
+              stmt@(ProcCall m n id detism resourceful args) pos = do
     let procID = trustFromJust "transformStmt" id
     callResources <-
         procProtoResources . procProto <$> getProcDef (ProcSpec m n procID)
@@ -181,41 +186,48 @@ transformStmt resources stmt@(ProcCall m n id detism resourceful args) pos = do
          (List.map show $ Set.elems $ Set.difference callResources resources))
         pos
     resArgs <- concat <$> mapM (resourceArgs pos) (Set.elems callResources)
-    return $ maybePlace
-      (ProcCall m n (Just procID) detism False (args++resArgs)) pos
-transformStmt resources (ForeignCall lang name flags args) pos = do
-    return $ maybePlace (ForeignCall lang name flags args) pos
-transformStmt resources stmt@(TestBool var) pos = do
-    return $ maybePlace stmt pos
-transformStmt resources (And stmts) pos = do
-    stmts' <- transformBody resources stmts
-    return $ maybePlace (And stmts') pos
-transformStmt resources (Or stmts) pos = do
-    stmts' <- transformBody resources stmts
-    return $ maybePlace (Or stmts') pos
-transformStmt resources (Not stmt) pos = do
-    stmt' <- placedApplyM (transformStmt resources) stmt
-    return $ maybePlace (Not stmt') pos
-transformStmt _ Nop pos =
-    return $ maybePlace Nop pos
-transformStmt resources (Cond test thn els) pos = do
-    test' <- placedApplyM (transformStmt resources) test
-    thn' <- transformBody resources thn
-    els' <- transformBody resources els
-    return $ maybePlace (Cond test' thn' els') pos
-transformStmt resources (Loop body) pos = do
-    body' <- transformBody resources body
-    return $ maybePlace (Loop body') pos
-transformStmt resources (UseResources res body) pos = do
+    return ([maybePlace
+            (ProcCall m n (Just procID) detism False (args++resArgs)) pos],
+            tmp)
+transformStmt resources tmp (ForeignCall lang name flags args) pos = do
+    return ([maybePlace (ForeignCall lang name flags args) pos], tmp)
+transformStmt resources tmp stmt@(TestBool var) pos = do
+    return ([maybePlace stmt pos], tmp)
+transformStmt resources tmp (And stmts) pos = do
+    (stmts',tmp') <- transformBody resources tmp stmts
+    return ([maybePlace (And stmts') pos], tmp')
+transformStmt resources tmp (Or stmts) pos = do
+    (stmts',tmp') <- transformBody resources tmp stmts
+    return ([maybePlace (Or stmts') pos], tmp')
+transformStmt resources tmp (Not stmt) pos = do
+    (stmt',tmp') <- placedApplyM (transformStmt resources tmp) stmt
+    case stmt' of
+      []       -> return ([failTest], tmp') -- shouldn't happen
+      [single] -> return ([maybePlace (Not single) pos], tmp')
+      stmts    -> return ([maybePlace (Not (Unplaced $ And stmts)) pos], tmp')
+transformStmt _ tmp Nop pos =
+    return ([], tmp)
+transformStmt resources tmp (Cond test thn els) pos = do
+    (test',tmp1) <- placedApplyM (transformStmt resources tmp) test
+    (thn',tmp2) <- transformBody resources tmp1 thn
+    (els',tmp3) <- transformBody resources tmp2 els
+    return ([maybePlace (Cond (Unplaced $ And test') thn' els') pos], tmp3)
+transformStmt resources tmp (Loop body) pos = do
+    (body',tmp') <- transformBody resources tmp body
+    return ([maybePlace (Loop body') pos], tmp')
+transformStmt resources tmp (UseResources res body) pos = do
     let resFlows = flip ResourceFlowSpec ParamInOut <$> res
     resFlows' <- mapM (canonicaliseResourceFlow pos) resFlows
     let res' = resourceFlowRes <$> resFlows'
     let resources' = Set.union resources $ Set.fromList resFlows'
-    body' <- transformBody resources' body
-    return $ maybePlace (UseResources res' body') pos
-transformStmt _ (For itr gen) pos = return $ maybePlace (For itr gen) pos
-transformStmt _ Break pos = return $ maybePlace Break pos
-transformStmt _ Next pos = return $ maybePlace Next pos
+    (body',tmp') <- transformBody resources' tmp body
+    return (body', tmp')
+transformStmt _ tmp (For itr gen) pos =
+    return ([maybePlace (For itr gen) pos], tmp)
+transformStmt _ tmp Break pos =
+    return ([maybePlace Break pos], tmp)
+transformStmt _ tmp Next pos =
+    return ([maybePlace Next pos], tmp)
 
 
 -- |Returns the list of args corresponding to the specified resource
