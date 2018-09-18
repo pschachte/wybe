@@ -41,37 +41,23 @@ removeDupTuples =
     List.map List.head . List.group . List.sort . List.map normalise
 
 
---
-tupleToMap :: Ord a => [(a,a)] -> Map a [a]
-tupleToMap [] = Map.empty
-tupleToMap pairs =
-    List.foldl (\connMap (x, y) ->
-                    case Map.lookup x connMap of
-                        Just xConn ->
-                            let f xConn = Just (y:xConn)
-                            in Map.update f x connMap
-                        Nothing -> Map.insert x [y] connMap
-                ) Map.empty pairs
-
-expandMap :: Ord a => Map a [a] -> Map a [a]
-expandMap mp =
-    let mp' = mp
-    in Map.map (\conn ->
-                let expanded = List.foldl (\ls item ->
-                                let itemConn = Map.lookup item mp'
-                                in case itemConn of
-                                    Just itemConn -> itemConn ++ ls
-                                    Nothing       -> ls
-                                ) conn conn
-                in Set.elems (Set.fromList expanded)
-            ) mp
-
--- foldWithKey :: (k -> a -> b -> b) -> b -> Map k a -> b
-mapToTuple :: Ord a => Map a [a] -> [(a,a)]
-mapToTuple = Map.foldrWithKey (\item conn ts ->
-                        let pairs = List.foldr (\c ps -> (item, c):ps) [] conn
-                        in pairs ++ ts
-                        ) []
+-- Helper: to expand alias pairs
+-- e.g. Aliases [(1,2),(2,3),(3,4)] is expanded to
+-- [(1,2),(1,3),(1,4),(2,3),(2,4),(3,4)]
+-- pairs are sorted already
+tuplesToGraph :: [(Int,Int)] -> [(Int,Int)]
+tuplesToGraph [] = []
+tuplesToGraph pairs =
+    let loBound = fst $ List.head pairs
+        upBound = snd $ List.last pairs
+        adj = buildG (loBound, upBound) pairs
+        undirectedAdj = buildG (loBound, upBound) (edges adj ++ reverseE adj)
+        elements = vertices undirectedAdj
+    in List.foldr (\vertex tuples ->
+        let reaches = reachable undirectedAdj vertex
+            vertexPairs = [(vertex, r) | r <- reaches, r /= vertex]
+        in vertexPairs ++ tuples
+        ) [] elements
 
 
 -- Helper: Cartesian product of escaped FlowIn vars to proc output
@@ -101,13 +87,14 @@ checkEscape spec def
         let aliasByProcCalls = _aliasNamesToPairs entryProto aliasNames
         let allPairs = aliasPairs' ++ aliasByProcCalls
         let allPairs' = removeDupTuples allPairs
+        let expandedPairs = removeDupTuples $ tuplesToGraph allPairs'
 
         -- Update body prims with correct destructive flag
         let body' = body { bodyPrims = prims' }
 
         -- Update proc analysis with new aliasPairs
-        let analysis' = analysis { procArgAliases = allPairs' }
-        logAlias $ show entryProto ++ ":\n" ++ show allPairs'
+        let analysis' = analysis { procArgAliases = expandedPairs }
+        logAlias $ show entryProto ++ ":\n" ++ show expandedPairs
 
         return def { procImpln = ProcDefPrim entryProto body' analysis'}
 checkEscape _ def = return def

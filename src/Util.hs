@@ -7,7 +7,7 @@
 --
 
 module Util (sameLength, maybeNth, checkMaybe, setMapInsert,
-             fillLines, nop, sccElts) where
+             fillLines, nop, sccElts, reverseE) where
 
 
 import           Data.Graph
@@ -76,3 +76,10 @@ nop = return ()
 sccElts :: SCC a -> [a]
 sccElts (AcyclicSCC single) = [single]
 sccElts (CyclicSCC multi)   = multi
+
+
+-- King, D.J. and Launchbury, J., 1994, March. Lazy depth-first search and
+-- linear graph algorithms in haskell. In Glasgow Workshop on Functional
+-- Programming (pp. 145-155).
+reverseE :: Graph -> [Edge]
+reverseE g = [ (w,v) | (v,w) <- edges g]
