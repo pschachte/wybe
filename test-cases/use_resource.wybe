@@ -4,9 +4,15 @@ proc use_test use !io
     use count in
         ?count = 0
         !inc_count
-        !inc_count
+        use count in
+            !inc_count
+            !inc_count
+            !inc_count
+            !print("Inner count: ")
+            !println(count)
+        end
+        !print("Outer count: ")
         !println(count)
-?n = count
     end
 end
 

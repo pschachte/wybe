@@ -217,11 +217,21 @@ transformStmt resources tmp (Loop body) pos = do
     return ([maybePlace (Loop body') pos], tmp')
 transformStmt resources tmp (UseResources res body) pos = do
     let resFlows = flip ResourceFlowSpec ParamInOut <$> res
-    resFlows' <- mapM (canonicaliseResourceFlow pos) resFlows
-    let res' = resourceFlowRes <$> resFlows'
-    let resources' = Set.union resources $ Set.fromList resFlows'
-    (body',tmp') <- transformBody resources' tmp body
-    return (body', tmp')
+    scoped <- Set.fromList <$> mapM (canonicaliseResourceFlow pos) resFlows
+    let resources' = Set.union resources scoped
+    -- XXX what about resources with same name and different modules?
+    let toSave = resourceName . resourceFlowRes
+                 <$> Set.elems (Set.intersection resources scoped)
+    let resCount = length toSave
+    let var n f = Unplaced $ Var n f Ordinary
+    let tmp' = tmp + resCount
+    let pairs = zip toSave (mkTempName <$> [tmp..])
+    let saves = (\(r,t) -> Unplaced $ ForeignCall "llvm" "move" []
+                  [var r ParamIn,var t ParamOut]) <$> pairs
+    let restores = (\(r,t) -> Unplaced $ ForeignCall "llvm" "move" []
+                     [var t ParamIn,var r ParamOut]) <$> pairs
+    (body',tmp'') <- transformBody resources' tmp' body
+    return (saves ++ body' ++ restores, tmp'')
 transformStmt _ tmp (For itr gen) pos =
     return ([maybePlace (For itr gen) pos], tmp)
 transformStmt _ tmp Break pos =
