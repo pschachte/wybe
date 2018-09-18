@@ -10,6 +10,8 @@ import           AST
 import           Control.Monad
 import           Data.Graph
 import           Data.List     as List
+import           Data.Map      as Map
+import           Data.Set      as Set
 import           Options       (LogSelection (Optimise))
 import           Util
 
@@ -38,6 +40,40 @@ removeDupTuples :: Ord a => [(a,a)] -> [(a,a)]
 removeDupTuples =
     List.map List.head . List.group . List.sort . List.map normalise
 
+
+--
+tupleToMap :: Ord a => [(a,a)] -> Map a [a]
+tupleToMap [] = Map.empty
+tupleToMap pairs =
+    List.foldl (\connMap (x, y) ->
+                    case Map.lookup x connMap of
+                        Just xConn ->
+                            let f xConn = Just (y:xConn)
+                            in Map.update f x connMap
+                        Nothing -> Map.insert x [y] connMap
+                ) Map.empty pairs
+
+expandMap :: Ord a => Map a [a] -> Map a [a]
+expandMap mp =
+    let mp' = mp
+    in Map.map (\conn ->
+                let expanded = List.foldl (\ls item ->
+                                let itemConn = Map.lookup item mp'
+                                in case itemConn of
+                                    Just itemConn -> itemConn ++ ls
+                                    Nothing       -> ls
+                                ) conn conn
+                in Set.elems (Set.fromList expanded)
+            ) mp
+
+-- foldWithKey :: (k -> a -> b -> b) -> b -> Map k a -> b
+mapToTuple :: Ord a => Map a [a] -> [(a,a)]
+mapToTuple = Map.foldrWithKey (\item conn ts ->
+                        let pairs = List.foldr (\c ps -> (item, c):ps) [] conn
+                        in pairs ++ ts
+                        ) []
+
+
 -- Helper: Cartesian product of escaped FlowIn vars to proc output
 _cartProd :: [a] -> [a] -> [(a, a)]
 _cartProd ins outs = [(i, o) | i <- ins, o <- outs]
@@ -54,7 +90,8 @@ checkEscape spec def
         let aliasPairs = List.foldr
                             (\prim alias ->
                                 let args = escapablePrimArgs $ content prim
-                                in aliasPairsFromArgs entryProto args alias) [] prims
+                                in aliasPairsFromArgs entryProto args alias
+                                ) [] prims
         let aliasPairs' = removeDupTuples aliasPairs
 
         -- Second pass (handle alias pairs incurred by proc calls within
@@ -121,12 +158,14 @@ escapeByProcCalls :: ([Placed Prim], [(PrimVarName, PrimVarName)])
                     -> Compiler ([Placed Prim], [(PrimVarName, PrimVarName)])
 escapeByProcCalls (prims, aliasNames)
     (Placed (PrimForeign lang "mutate" flags args) pos) =
-        return (prims ++ [Placed (PrimForeign lang "mutate" flags args') pos], aliasNames)
-            where args' = _updateMutateForAlias aliasNames args
+        return (prims ++ [Placed (PrimForeign lang "mutate" flags args') pos],
+            aliasNames)
+                where args' = _updateMutateForAlias aliasNames args
 escapeByProcCalls (prims, aliasNames)
     (Unplaced (PrimForeign lang "mutate" flags args)) =
-        return (prims ++ [Unplaced (PrimForeign lang "mutate" flags args')], aliasNames)
-            where args' = _updateMutateForAlias aliasNames args
+        return (prims ++ [Unplaced (PrimForeign lang "mutate" flags args')],
+            aliasNames)
+                where args' = _updateMutateForAlias aliasNames args
 escapeByProcCalls (prims, aliasNames) prim =
     case content prim of
         PrimCall spec args -> do
