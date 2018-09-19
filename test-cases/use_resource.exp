@@ -10,21 +10,29 @@ AFTER EVERYTHING:
   resources       : count: fromList [(use_resource.count,Just wybe.int @use_resource:1:1)] @use_resource:1:1
   procs           : 
 
-*main* > public inline (0 calls)
+*main* > public (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_int(2:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$1#0:wybe.phantom) @wybe:76:38
-    foreign c putchar('\n':wybe.char, ~tmp$1#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+    foreign c print_string("Inner count: ":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$1#0:wybe.phantom) @wybe:88:41
+    foreign c print_int(4:wybe.int, ~tmp$1#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:76:38
+    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?tmp$3#0:wybe.phantom) @wybe:74:28
+    foreign c print_string("Outer count: ":wybe.string, ~tmp$3#0:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:88:41
+    foreign c print_int(1:wybe.int, ~tmp$4#0:wybe.phantom, ?tmp$5#0:wybe.phantom) @wybe:76:38
+    foreign c putchar('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
 
 
-inc_count > inline (2 calls)
+inc_count > inline (4 calls)
 0: inc_count(count#0:wybe.int, ?count#1:wybe.int):
     foreign llvm add(~count#0:wybe.int, 1:wybe.int, ?count#1:wybe.int) @wybe:13:38
 
 
 use_test > inline (1 calls)
-0: use_test(wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_int(2:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$5#0:wybe.phantom) @wybe:76:38
-    foreign c putchar('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+0: use_test(wybe.io$io#0:wybe.phantom, ?wybe.io$io#4:wybe.phantom):
+    foreign c print_string("Inner count: ":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:88:41
+    foreign c print_int(4:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?tmp$10#0:wybe.phantom) @wybe:76:38
+    foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:74:28
+    foreign c print_string("Outer count: ":wybe.string, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @wybe:88:41
+    foreign c print_int(1:wybe.int, ~#wybe.io$io#3:wybe.phantom, ?tmp$15#0:wybe.phantom) @wybe:76:38
+    foreign c putchar('\n':wybe.char, ~tmp$15#0:wybe.phantom, ?#wybe.io$io#4:wybe.phantom) @wybe:74:28
 use_resource
 ======================================================================
 AFTER LLVM IR:
@@ -32,13 +40,24 @@ AFTER LLVM IR:
 ; ModuleID = 'use_resource'
 source_filename = "test-cases/use_resource.wybe"
 
+@use_resource.2 = constant [14 x i8] c"Outer count: \00"
+@use_resource.1 = constant [14 x i8] c"Inner count: \00"
+@use_resource.5 = constant [14 x i8] c"Outer count: \00"
+@use_resource.4 = constant [14 x i8] c"Inner count: \00"
+
 declare void @putchar(i8) local_unnamed_addr
 
 declare void @print_int(i64) local_unnamed_addr
 
+declare void @print_string(i8*) local_unnamed_addr
+
 define i32 @use_resource.main() local_unnamed_addr {
 entry:
-  tail call void @print_int(i64 2)
+  tail call void @print_string(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @use_resource.1, i64 0, i64 0))
+  tail call void @print_int(i64 4)
+  tail call void @putchar(i8 10)
+  tail call void @print_string(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @use_resource.2, i64 0, i64 0))
+  tail call void @print_int(i64 1)
   tail call void @putchar(i8 10)
   ret i32 0
 }
@@ -52,7 +71,11 @@ entry:
 
 define void @"use_resource.use_test<0>"() local_unnamed_addr {
 entry:
-  tail call void @print_int(i64 2)
+  tail call void @print_string(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @use_resource.4, i64 0, i64 0))
+  tail call void @print_int(i64 4)
+  tail call void @putchar(i8 10)
+  tail call void @print_string(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @use_resource.5, i64 0, i64 0))
+  tail call void @print_int(i64 1)
   tail call void @putchar(i8 10)
   ret void
 }
