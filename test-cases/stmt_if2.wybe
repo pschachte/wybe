@@ -1,0 +1,14 @@
+# if case
+
+public type tree = public empty | node(left:tree, key:int, right:tree) end
+
+public func lookup(key:int, tree:tree):bool =
+    if tree = empty then false
+    else if key = tree.key then true
+    else if key < tree.key then lookup(key, tree.left)
+    else lookup(key, tree.right)
+
+?tr = node(empty, 1, empty)
+
+if lookup(1, tr) :: !print("found")
+end
