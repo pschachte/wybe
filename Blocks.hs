@@ -12,6 +12,7 @@ import           AST
 import           BinaryFactory                   ()
 import           Codegen
 import           Config                          (wordSize)
+import           Util                            (maybeNth)
 import           Control.Monad
 import           Control.Monad.Trans             (lift, liftIO)
 import           Control.Monad.Trans.Class
@@ -445,6 +446,7 @@ blockReturn op                                    = op
 -- which do not eventually appear in the prototype.
 cgen :: Prim -> Codegen (Maybe Operand)
 cgen prim@(PrimCall pspec args) = do
+    logCodegen $ "Compiling " ++ show prim
     thisMod <- lift $ getModuleSpec
     let (ProcSpec mod name _) = pspec
     -- let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
@@ -453,6 +455,7 @@ cgen prim@(PrimCall pspec args) = do
     -- and match it's parameters with the args here
     -- and remove the unneeded ones.
     protoFound <- findProto pspec
+    logCodegen $ "ProtoFound = " ++ show protoFound
     let filteredArgs = case protoFound of
             Just callProto -> filterUnneededArgs callProto args
             Nothing        -> args
@@ -462,37 +465,44 @@ cgen prim@(PrimCall pspec args) = do
         (addExtern $ PrimCall pspec filteredArgs)
 
     let inArgs = primInputs filteredArgs
+    logCodegen $ "In args = " ++ show inArgs
     outTy <- lift $ primReturnType filteredArgs
+    logCodegen $ "Out Type = " ++ show outTy
     inops <- mapM cgenArg inArgs
+    logCodegen $ "Translated inputs = " ++ show inops
     let ins =
           call
           (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) nm)
           inops
+    logCodegen $ "Translated ins = " ++ show ins
     addInstruction ins filteredArgs
 
-cgen prim@(PrimForeign lang name flags args)
-     | lang == "llvm" = case (length args) of
-                          2 -> cgenLLVMUnop name flags args
-                          3 -> cgenLLVMBinop name flags args
-                          _ -> shouldnt $ "Instruction " ++ name ++ " not found!"
+cgen prim@(PrimForeign "llvm" name flags args) = do
+    logCodegen $ "Compiling " ++ show prim
+    case (length args) of
+       2 -> cgenLLVMUnop name flags args
+       3 -> cgenLLVMBinop name flags args
+       _ -> shouldnt $ "Instruction " ++ name ++ " not found!"
 
-     | lang == "lpvm" = do
-           cgenLPVM name flags args
+cgen prim@(PrimForeign "lpvm" name flags args) = do
+    logCodegen $ "Compiling " ++ show prim
+    cgenLPVM name flags args
 
-     | otherwise =
-         do addExtern prim
-            let inArgs = primInputs args
-            let nm = LLVMAST.Name $ toSBString name
-            inops <- mapM cgenArg inArgs
-            -- alignedOps <- mapM makeCIntOp inops
-            outty <- lift $ primReturnType args
-            let ins =
-                  call
-                  (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
-                  inops
-            addInstruction ins args
+cgen prim@(PrimForeign lang name flags args) = do
+    logCodegen $ "Compiling " ++ show prim
+    addExtern prim
+    let inArgs = primInputs args
+    let nm = LLVMAST.Name $ toSBString name
+    inops <- mapM cgenArg inArgs
+    -- alignedOps <- mapM makeCIntOp inops
+    outty <- lift $ primReturnType args
+    let ins =
+          call
+          (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
+          inops
+    addInstruction ins args
 
-cgen (PrimTest _) = error "No primitive found."
+cgen (PrimTest _) = error "PrimTest should have been removed before code gen"
 
 
 makeCIntOp :: Operand -> Codegen Operand
@@ -572,8 +582,8 @@ cgenLLVMUnop name flags args
 findProto :: ProcSpec -> Codegen (Maybe PrimProto)
 findProto (ProcSpec _ nm i) = do
     allProtos <- gets Codegen.modProtos
-    let procNm = nm
-    return $ List.find (\p -> primProtoName p == procNm) allProtos
+    let matchingProtos = List.filter ((== nm) . primProtoName) allProtos
+    return $ maybeNth i matchingProtos
 
 
 -- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
@@ -705,10 +715,12 @@ constantType _            = shouldnt "Cannot determine constant type."
 -- inferred depending on the primitive arguments. The name is inferred from
 -- the output argument's name (LPVM is in SSA form).
 addInstruction :: Instruction -> [PrimArg] -> Codegen (Maybe Operand)
-addInstruction ins args =
-     do let outArgs = primOutputs args
-        outTy <- lift $ primReturnType args
-        case length outArgs of
+addInstruction ins args = do
+    logCodegen $ "addInstruction " ++ show ins ++ " " ++ show args
+    let outArgs = primOutputs args
+    outTy <- lift $ primReturnType args
+    logCodegen $ "outTy = " ++ show outTy
+    case length outArgs of
           0 -> case outTy of
             VoidType -> voidInstr ins >> return Nothing
             _        -> Just <$> instr outTy ins
@@ -1218,6 +1230,7 @@ toSBString string = BSS.pack $ unsafeCoerce <$> string
 logBlocks :: String -> Compiler ()
 logBlocks = logMsg Blocks
 
+
 -- | Log with a wrapping line of replicated characters above and below.
 logWrapWith :: Char -> String -> Compiler ()
 logWrapWith ch s = do
@@ -1226,4 +1239,4 @@ logWrapWith ch s = do
     logMsg Blocks (replicate 80 ch)
 
 logCodegen :: String -> Codegen ()
-logCodegen s = lift $ logBlocks $ "=CODEGEN=" ++ s
+logCodegen s = lift $ logBlocks s
