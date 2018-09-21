@@ -93,7 +93,7 @@ blockTransformModule thisMod =
        --------------------------------------------------
        -- Name mangling
        let emptyFilter = List.filter (not . emptyProc)
-       let mangledProcs = mangleProcs $ concat procs
+       let mangledProcs = concat $ mangleProcs <$> procs
 
        --------------------------------------------------
        -- Translate
@@ -107,38 +107,53 @@ blockTransformModule thisMod =
        logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
 
+-- -- |Affix its id number to the end of each proc name
 mangleProcs :: [ProcDef] -> [ProcDef]
-mangleProcs ps = changeNameWith nameMap ps
-  where
-    nameMap = buildNameMap ps
+mangleProcs ps = zipWith mangleProc ps [0..]
 
 
-changeNameWith :: [(String, Int)] -> [ProcDef] -> [ProcDef]
-changeNameWith [] [] = []
-changeNameWith ((s,i):ns) (p:ps) =
-    let (ProcDefPrim proto body) = procImpln p
+mangleProc :: ProcDef -> Int -> ProcDef
+mangleProc def i =
+    let (ProcDefPrim proto body) = procImpln def
+        s = primProtoName proto
         pname = s ++ "<" ++ show i ++ ">"
         newProto = proto {primProtoName = pname}
-        newImpln = ProcDefPrim newProto body
-    in p {procImpln = newImpln} : changeNameWith ns ps
-changeNameWith _ _ = shouldnt "Incorrect name map used for mangling."
-
-buildNameMap :: [ProcDef] -> [(String, Int)]
-buildNameMap ps = List.foldl reduceNameMap [] procNames
-    where
-      procNames = List.map pullDefName ps
-
-reduceNameMap :: [(String, Int)] -> String -> [(String, Int)]
-reduceNameMap namemap name =
-    case List.lookup name namemap of
-        Just val -> namemap ++ [(name, val + 1)]
-        Nothing  -> namemap ++ [(name, 0)]
+    in  def {procImpln = ProcDefPrim newProto body}
 
 
-pullDefName :: ProcDef -> String
-pullDefName p =
-    let (ProcDefPrim proto _) = procImpln p
-    in primProtoName proto
+
+-- mangleProcs :: [ProcDef] -> [ProcDef]
+-- mangleProcs ps = changeNameWith nameMap ps
+--   where
+--     nameMap = buildNameMap ps
+
+
+-- changeNameWith :: [(String, Int)] -> [ProcDef] -> [ProcDef]
+-- changeNameWith [] [] = []
+-- changeNameWith ((s,i):ns) (p:ps) =
+--     let (ProcDefPrim proto body) = procImpln p
+--         pname = s ++ "<" ++ show i ++ ">"
+--         newProto = proto {primProtoName = pname}
+--         newImpln = ProcDefPrim newProto body
+--     in p {procImpln = newImpln} : changeNameWith ns ps
+-- changeNameWith _ _ = shouldnt "Incorrect name map used for mangling."
+
+-- buildNameMap :: [ProcDef] -> [(String, Int)]
+-- buildNameMap ps = List.foldl reduceNameMap [] procNames
+--     where
+--       procNames = List.map pullDefName ps
+
+-- reduceNameMap :: [(String, Int)] -> String -> [(String, Int)]
+-- reduceNameMap namemap name =
+--     case List.lookup name namemap of
+--         Just val -> namemap ++ [(name, val + 1)]
+--         Nothing  -> namemap ++ [(name, 0)]
+
+
+-- pullDefName :: ProcDef -> String
+-- pullDefName p =
+--     let (ProcDefPrim proto _) = procImpln p
+--     in primProtoName proto
 
 
 -- | Extract the LPVM compiled primitive from the procedure definition.
@@ -582,6 +597,7 @@ cgenLLVMUnop name flags args
 findProto :: ProcSpec -> Codegen (Maybe PrimProto)
 findProto (ProcSpec _ nm i) = do
     allProtos <- gets Codegen.modProtos
+    let procNm = nm
     let matchingProtos = List.filter ((== nm) . primProtoName) allProtos
     return $ maybeNth i matchingProtos
 

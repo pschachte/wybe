@@ -1,0 +1,653 @@
+======================================================================
+AFTER EVERYTHING:
+ Module stmt_if
+  public submods  : 
+  public types    : tree: (stmt_if.tree,"pointer")
+  public resources: 
+  public procs    : stmt_if.<0>
+                    stmt_if.lookup<0>
+                    stmt_if.tree.=<0>
+                    stmt_if.tree.=<1>
+                    stmt_if.tree.=<2>
+                    stmt_if.tree.empty<0>
+                    stmt_if.tree.key<0>
+                    stmt_if.tree.key<1>
+                    stmt_if.tree.left<0>
+                    stmt_if.tree.left<1>
+                    stmt_if.tree.node<0>
+                    stmt_if.tree.node<1>
+                    stmt_if.tree.right<0>
+                    stmt_if.tree.right<1>
+  imports         : public use stmt_if.tree
+                    use wybe
+  types           : tree/0 (pointer)  @stmt_if:3:8
+  resources       : 
+  procs           : 
+
+*main* > public (0 calls)
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+    foreign lpvm cast(0:stmt_if.tree, ?tmp$1#0:stmt_if.tree)
+    foreign lpvm alloc(24:wybe.int, ?tmp$8#0:stmt_if.tree)
+    foreign lpvm mutate(~tmp$8#0:stmt_if.tree, ?tmp$9#0:stmt_if.tree, 0:wybe.int, tmp$1#0:stmt_if.tree)
+    foreign lpvm mutate(~tmp$9#0:stmt_if.tree, ?tmp$10#0:stmt_if.tree, 8:wybe.int, 1:wybe.int)
+    foreign lpvm mutate(~tmp$10#0:stmt_if.tree, ?tmp$0#0:stmt_if.tree, 16:wybe.int, ~tmp$1#0:stmt_if.tree)
+    stmt_if.lookup<0>(1:wybe.int, ~tmp$0#0:stmt_if.tree, ?found#0:wybe.bool, ?tmp$3#0:wybe.bool) @stmt_if:15:4
+    case ~tmp$3#0:wybe.bool of
+    0:
+        foreign lpvm cast(1:wybe.bool, ?tmp$4#0:wybe.bool)
+        case ~tmp$4#0:wybe.bool of
+        0:
+            foreign llvm move(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom)
+
+        1:
+            foreign c print_string("not found":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:88:41
+
+
+    1:
+        foreign c print_string("found":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:88:41
+
+
+
+lookup > public test (10 calls)
+0: lookup(key#0:wybe.int, tree#0:stmt_if.tree, ?r#0:wybe.bool, ?$$#0:wybe.bool):
+    foreign lpvm cast(0:stmt_if.tree, ?tmp$0#0:stmt_if.tree)
+    stmt_if.tree.=<2>(tree#0:stmt_if.tree, ~tmp$0#0:stmt_if.tree, ?tmp$7#0:wybe.bool) @stmt_if:6:8
+    case ~tmp$7#0:wybe.bool of
+    0:
+        foreign lpvm cast(tree#0:stmt_if.tree, ?tmp$18#0:wybe.int)
+        foreign llvm icmp ne(~tmp$18#0:wybe.int, 0:wybe.int, ?tmp$19#0:wybe.bool)
+        case tmp$19#0:wybe.bool of
+        0:
+            case tmp$19#0:wybe.bool of
+            0:
+                foreign lpvm cast(1:wybe.bool, ?tmp$14#0:wybe.bool)
+                case ~tmp$14#0:wybe.bool of
+                0:
+                    foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+                1:
+                    case ~tmp$19#0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                    1:
+                        foreign lpvm access(~tree#0:stmt_if.tree, 16:wybe.int, ?tmp$6#0:stmt_if.tree)
+                        stmt_if.lookup<0>(~key#0:wybe.int, ~tmp$6#0:stmt_if.tree, ?result#0:wybe.bool, ?$$#0:wybe.bool) @stmt_if:9:15
+
+
+
+            1:
+                foreign lpvm access(tree#0:stmt_if.tree, 8:wybe.int, ?tmp$4#0:wybe.int)
+                foreign llvm icmp slt(key#0:wybe.int, ~tmp$4#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:24:39
+                case ~tmp$11#0:wybe.bool of
+                0:
+                    foreign lpvm cast(1:wybe.bool, ?tmp$14#0:wybe.bool)
+                    case ~tmp$14#0:wybe.bool of
+                    0:
+                        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+                    1:
+                        case ~tmp$19#0:wybe.bool of
+                        0:
+                            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                        1:
+                            foreign lpvm access(~tree#0:stmt_if.tree, 16:wybe.int, ?tmp$6#0:stmt_if.tree)
+                            stmt_if.lookup<0>(~key#0:wybe.int, ~tmp$6#0:stmt_if.tree, ?result#0:wybe.bool, ?$$#0:wybe.bool) @stmt_if:9:15
+
+
+
+                1:
+                    case ~tmp$19#0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                    1:
+                        foreign lpvm access(~tree#0:stmt_if.tree, 0:wybe.int, ?tmp$5#0:stmt_if.tree)
+                        stmt_if.lookup<0>(~key#0:wybe.int, ~tmp$5#0:stmt_if.tree, ?result#0:wybe.bool, ?$$#0:wybe.bool) @stmt_if:8:25
+
+
+
+
+        1:
+            foreign lpvm access(tree#0:stmt_if.tree, 8:wybe.int, ?tmp$2#0:wybe.int)
+            foreign llvm icmp eq(key#0:wybe.int, ~tmp$2#0:wybe.int, ?tmp$9#0:wybe.bool) @wybe:28:40
+            case ~tmp$9#0:wybe.bool of
+            0:
+                case tmp$19#0:wybe.bool of
+                0:
+                    foreign lpvm cast(1:wybe.bool, ?tmp$14#0:wybe.bool)
+                    case ~tmp$14#0:wybe.bool of
+                    0:
+                        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+                    1:
+                        case ~tmp$19#0:wybe.bool of
+                        0:
+                            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                        1:
+                            foreign lpvm access(~tree#0:stmt_if.tree, 16:wybe.int, ?tmp$6#0:stmt_if.tree)
+                            stmt_if.lookup<0>(~key#0:wybe.int, ~tmp$6#0:stmt_if.tree, ?result#0:wybe.bool, ?$$#0:wybe.bool) @stmt_if:9:15
+
+
+
+                1:
+                    foreign lpvm access(tree#0:stmt_if.tree, 8:wybe.int, ?tmp$4#0:wybe.int)
+                    foreign llvm icmp slt(key#0:wybe.int, ~tmp$4#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:24:39
+                    case ~tmp$11#0:wybe.bool of
+                    0:
+                        foreign lpvm cast(1:wybe.bool, ?tmp$14#0:wybe.bool)
+                        case ~tmp$14#0:wybe.bool of
+                        0:
+                            foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+                        1:
+                            case ~tmp$19#0:wybe.bool of
+                            0:
+                                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                            1:
+                                foreign lpvm access(~tree#0:stmt_if.tree, 16:wybe.int, ?tmp$6#0:stmt_if.tree)
+                                stmt_if.lookup<0>(~key#0:wybe.int, ~tmp$6#0:stmt_if.tree, ?result#0:wybe.bool, ?$$#0:wybe.bool) @stmt_if:9:15
+
+
+
+                    1:
+                        case ~tmp$19#0:wybe.bool of
+                        0:
+                            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                        1:
+                            foreign lpvm access(~tree#0:stmt_if.tree, 0:wybe.int, ?tmp$5#0:stmt_if.tree)
+                            stmt_if.lookup<0>(~key#0:wybe.int, ~tmp$5#0:stmt_if.tree, ?result#0:wybe.bool, ?$$#0:wybe.bool) @stmt_if:8:25
+
+
+
+
+            1:
+                foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+    1:
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+  submodules      : stmt_if.tree
+--------------------------------------------------
+ Module stmt_if.tree([])
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : stmt_if.tree.=<0>
+                    stmt_if.tree.=<1>
+                    stmt_if.tree.=<2>
+                    stmt_if.tree.empty<0>
+                    stmt_if.tree.key<0>
+                    stmt_if.tree.key<1>
+                    stmt_if.tree.left<0>
+                    stmt_if.tree.left<1>
+                    stmt_if.tree.node<0>
+                    stmt_if.tree.node<1>
+                    stmt_if.tree.right<0>
+                    stmt_if.tree.right<1>
+  imports         : use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+= > public inline (0 calls)
+0: =(?out#0:stmt_if.tree, in#0:stmt_if.tree):
+    foreign llvm move(~in#0:stmt_if.tree, ?out#0:stmt_if.tree)
+= > public inline (0 calls)
+1: =(in#0:stmt_if.tree, ?out#0:stmt_if.tree):
+    foreign llvm move(~in#0:stmt_if.tree, ?out#0:stmt_if.tree)
+= > public test (6 calls)
+2: =($left#0:stmt_if.tree, $right#0:stmt_if.tree, ?$$#0:wybe.bool):
+    foreign lpvm cast($left#0:stmt_if.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp eq(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$10#0:wybe.bool)
+        case ~tmp$10#0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+        1:
+            foreign lpvm access($left#0:stmt_if.tree, 0:wybe.int, ?$left$left#0:stmt_if.tree)
+            foreign lpvm access($left#0:stmt_if.tree, 8:wybe.int, ?$left$key#0:wybe.int)
+            foreign lpvm access(~$left#0:stmt_if.tree, 16:wybe.int, ?$left$right#0:stmt_if.tree)
+            foreign lpvm cast($right#0:stmt_if.tree, ?tmp$12#0:wybe.int)
+            foreign llvm icmp ne(~tmp$12#0:wybe.int, 0:wybe.int, ?tmp$13#0:wybe.bool)
+            case ~tmp$13#0:wybe.bool of
+            0:
+                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+            1:
+                foreign lpvm access($right#0:stmt_if.tree, 0:wybe.int, ?$right$left#0:stmt_if.tree)
+                foreign lpvm access($right#0:stmt_if.tree, 8:wybe.int, ?$right$key#0:wybe.int)
+                foreign lpvm access(~$right#0:stmt_if.tree, 16:wybe.int, ?$right$right#0:stmt_if.tree)
+                stmt_if.tree.=<2>(~$left$left#0:stmt_if.tree, ~$right$left#0:stmt_if.tree, ?tmp$5#0:wybe.bool)
+                case ~tmp$5#0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                1:
+                    foreign llvm icmp eq(~$left$key#0:wybe.int, ~$right$key#0:wybe.int, ?tmp$6#0:wybe.bool) @wybe:28:40
+                    case ~tmp$6#0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                    1:
+                        stmt_if.tree.=<2>(~$left$right#0:stmt_if.tree, ~$right$right#0:stmt_if.tree, ?$$#0:wybe.bool)
+
+
+
+
+
+    1:
+        foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?$$#0:wybe.bool)
+
+
+
+empty > public inline (0 calls)
+0: empty(?$#0:stmt_if.tree):
+    foreign lpvm cast(0:stmt_if.tree, ?$#0:stmt_if.tree)
+
+
+key > public inline test (0 calls)
+0: key($rec#0:stmt_if.tree, ?$#0:wybe.int, ?$$#0:wybe.bool):
+    foreign lpvm cast($rec#0:stmt_if.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:stmt_if.tree, 8:wybe.int, ?$#0:wybe.int)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+key > public inline test (0 calls)
+1: key($rec#0:stmt_if.tree, ?$rec#1:stmt_if.tree, $field#0:wybe.int, ?$$#0:wybe.bool):
+    foreign lpvm cast($rec#0:stmt_if.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:stmt_if.tree, ?$rec#1:stmt_if.tree)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:stmt_if.tree, ?%$rec#1:stmt_if.tree, 8:wybe.int, ~$field#0:wybe.int)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+left > public inline test (0 calls)
+0: left($rec#0:stmt_if.tree, ?$#0:stmt_if.tree, ?$$#0:wybe.bool):
+    foreign lpvm cast($rec#0:stmt_if.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:stmt_if.tree, 0:wybe.int, ?$#0:stmt_if.tree)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+left > public inline test (0 calls)
+1: left($rec#0:stmt_if.tree, ?$rec#1:stmt_if.tree, $field#0:stmt_if.tree, ?$$#0:wybe.bool):
+    foreign lpvm cast($rec#0:stmt_if.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:stmt_if.tree, ?$rec#1:stmt_if.tree)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:stmt_if.tree, ?%$rec#1:stmt_if.tree, 0:wybe.int, ~$field#0:stmt_if.tree)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+node > public inline (0 calls)
+0: node(left#0:stmt_if.tree, key#0:wybe.int, right#0:stmt_if.tree, ?$#0:stmt_if.tree):
+    foreign lpvm alloc(24:wybe.int, ?$rec#0:stmt_if.tree)
+    foreign lpvm mutate(~%$rec#0:stmt_if.tree, ?%$rec#1:stmt_if.tree, 0:wybe.int, ~left#0:stmt_if.tree)
+    foreign lpvm mutate(~%$rec#1:stmt_if.tree, ?%$rec#2:stmt_if.tree, 8:wybe.int, ~key#0:wybe.int)
+    foreign lpvm mutate(~%$rec#2:stmt_if.tree, ?%$#0:stmt_if.tree, 16:wybe.int, ~right#0:stmt_if.tree)
+node > public inline test (9 calls)
+1: node(?left#0:stmt_if.tree, ?key#0:wybe.int, ?right#0:stmt_if.tree, $#0:stmt_if.tree, ?$$#0:wybe.bool):
+    foreign lpvm cast($#0:stmt_if.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access($#0:stmt_if.tree, 0:wybe.int, ?left#0:stmt_if.tree)
+        foreign lpvm access($#0:stmt_if.tree, 8:wybe.int, ?key#0:wybe.int)
+        foreign lpvm access(~$#0:stmt_if.tree, 16:wybe.int, ?right#0:stmt_if.tree)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+right > public inline test (0 calls)
+0: right($rec#0:stmt_if.tree, ?$#0:stmt_if.tree, ?$$#0:wybe.bool):
+    foreign lpvm cast($rec#0:stmt_if.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:stmt_if.tree, 16:wybe.int, ?$#0:stmt_if.tree)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+right > public inline test (0 calls)
+1: right($rec#0:stmt_if.tree, ?$rec#1:stmt_if.tree, $field#0:stmt_if.tree, ?$$#0:wybe.bool):
+    foreign lpvm cast($rec#0:stmt_if.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:stmt_if.tree, ?$rec#1:stmt_if.tree)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:stmt_if.tree, ?%$rec#1:stmt_if.tree, 16:wybe.int, ~$field#0:stmt_if.tree)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+stmt_if, stmt_if.tree
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'stmt_if'
+source_filename = "test-cases/stmt_if.wybe"
+
+@stmt_if.9 = local_unnamed_addr constant [6 x i8] c"found\00"
+
+declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+define i32 @stmt_if.main() local_unnamed_addr {
+entry:
+  %0 = tail call i8* @wybe_malloc(i32 24)
+  %1 = bitcast i8* %0 to i64*
+  store i64 0, i64* %1, align 4
+  %2 = getelementptr i8, i8* %0, i64 8
+  %3 = bitcast i8* %2 to i64*
+  store i64 1, i64* %3, align 4
+  %4 = getelementptr i8, i8* %0, i64 16
+  %5 = bitcast i8* %4 to i64*
+  store i64 0, i64* %5, align 4
+  ret i1 true
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i1, i1 } @"stmt_if.lookup<0>"(i64 %"key#0", i64* %"tree#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$7#0" = tail call i1 @"stmt_if.tree.=<2>"(i64* %"tree#0", i64* null)
+  br i1 %"tmp$7#0", label %if.then, label %if.else
+
+if.then:                                          ; preds = %entry
+  ret i1 true
+
+if.else:                                          ; preds = %entry
+  %"tmp$19#0" = icmp ne i64* %"tree#0", null
+  ret i1 %"tmp$19#0"
+}
+
+; Function Attrs: norecurse nounwind readnone
+define i64* @"stmt_if.tree.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
+entry:
+  ret i64* %"in#0"
+}
+
+; Function Attrs: norecurse nounwind readnone
+define i64* @"stmt_if.tree.=<1>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
+entry:
+  ret i64* %"in#0"
+}
+
+; Function Attrs: norecurse nounwind readnone
+define i1 @"stmt_if.tree.=<2>"(i64* readnone %"$left#0", i64* readnone %"$right#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$left#0", null
+  br i1 %"tmp$1#0", label %if.then, label %if.else
+
+if.then:                                          ; preds = %entry
+  %"$$#0" = icmp eq i64* %"$right#0", null
+  ret i1 %"$$#0"
+
+if.else:                                          ; preds = %entry
+  ret i1 true
+}
+
+; Function Attrs: norecurse nounwind readnone
+define noalias i64* @"stmt_if.tree.empty<0>"() local_unnamed_addr #0 {
+entry:
+  ret i64* null
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64, i1 } @"stmt_if.tree.key<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$rec#0", null
+  ret i1 %"tmp$1#0"
+}
+
+; Function Attrs: norecurse nounwind
+define { i64*, i1 } @"stmt_if.tree.key<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #1 {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  br i1 %"tmp$1#0", label %if.else, label %if.then
+
+if.then:                                          ; preds = %entry
+  %0 = getelementptr i64, i64* %"$rec#0", i64 1
+  store i64 %"$field#0", i64* %0, align 4
+  ret i1 true
+
+if.else:                                          ; preds = %entry
+  ret i64* null
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64*, i1 } @"stmt_if.tree.left<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$rec#0", null
+  ret i1 %"tmp$1#0"
+}
+
+; Function Attrs: norecurse nounwind
+define { i64*, i1 } @"stmt_if.tree.left<1>"(i64* %"$rec#0", i64* %"$field#0") local_unnamed_addr #1 {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  br i1 %"tmp$1#0", label %if.else, label %if.then
+
+if.then:                                          ; preds = %entry
+  %0 = ptrtoint i64* %"$field#0" to i64
+  store i64 %0, i64* %"$rec#0", align 4
+  ret i1 true
+
+if.else:                                          ; preds = %entry
+  ret i64* null
+}
+
+define i64* @"stmt_if.tree.node<0>"(i64* %"left#0", i64 %"key#0", i64* %"right#0") local_unnamed_addr {
+entry:
+  %0 = tail call i8* @wybe_malloc(i32 24)
+  %1 = bitcast i8* %0 to i64*
+  %2 = ptrtoint i64* %"left#0" to i64
+  store i64 %2, i64* %1, align 4
+  %3 = getelementptr i8, i8* %0, i64 8
+  %4 = bitcast i8* %3 to i64*
+  store i64 %"key#0", i64* %4, align 4
+  %5 = getelementptr i8, i8* %0, i64 16
+  %6 = bitcast i8* %5 to i64*
+  %7 = ptrtoint i64* %"right#0" to i64
+  store i64 %7, i64* %6, align 4
+  ret i64* %1
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64*, i64, i64*, i1 } @"stmt_if.tree.node<1>"(i64* readnone %"$#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$#0", null
+  ret i1 %"tmp$1#0"
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64*, i1 } @"stmt_if.tree.right<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$rec#0", null
+  ret i1 %"tmp$1#0"
+}
+
+; Function Attrs: norecurse nounwind
+define { i64*, i1 } @"stmt_if.tree.right<1>"(i64* %"$rec#0", i64* %"$field#0") local_unnamed_addr #1 {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  br i1 %"tmp$1#0", label %if.else, label %if.then
+
+if.then:                                          ; preds = %entry
+  %0 = getelementptr i64, i64* %"$rec#0", i64 2
+  %1 = ptrtoint i64* %"$field#0" to i64
+  store i64 %1, i64* %0, align 4
+  ret i1 true
+
+if.else:                                          ; preds = %entry
+  ret i64* null
+}
+
+attributes #0 = { norecurse nounwind readnone }
+attributes #1 = { norecurse nounwind }
+
+--------------------------------------------------
+; ModuleID = 'stmt_if.tree'
+source_filename = "test-cases"
+
+declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+; Function Attrs: norecurse nounwind readnone
+define i64* @"stmt_if.tree.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
+entry:
+  ret i64* %"in#0"
+}
+
+; Function Attrs: norecurse nounwind readnone
+define i64* @"stmt_if.tree.=<1>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
+entry:
+  ret i64* %"in#0"
+}
+
+; Function Attrs: norecurse nounwind readnone
+define i1 @"stmt_if.tree.=<2>"(i64* readnone %"$left#0", i64* readnone %"$right#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$left#0", null
+  br i1 %"tmp$1#0", label %if.then, label %if.else
+
+if.then:                                          ; preds = %entry
+  %"$$#0" = icmp eq i64* %"$right#0", null
+  ret i1 %"$$#0"
+
+if.else:                                          ; preds = %entry
+  ret i1 true
+}
+
+; Function Attrs: norecurse nounwind readnone
+define noalias i64* @"stmt_if.tree.empty<0>"() local_unnamed_addr #0 {
+entry:
+  ret i64* null
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64, i1 } @"stmt_if.tree.key<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$rec#0", null
+  ret i1 %"tmp$1#0"
+}
+
+; Function Attrs: norecurse nounwind
+define { i64*, i1 } @"stmt_if.tree.key<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #1 {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  br i1 %"tmp$1#0", label %if.else, label %if.then
+
+if.then:                                          ; preds = %entry
+  %0 = getelementptr i64, i64* %"$rec#0", i64 1
+  store i64 %"$field#0", i64* %0, align 4
+  ret i1 true
+
+if.else:                                          ; preds = %entry
+  ret i64* null
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64*, i1 } @"stmt_if.tree.left<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$rec#0", null
+  ret i1 %"tmp$1#0"
+}
+
+; Function Attrs: norecurse nounwind
+define { i64*, i1 } @"stmt_if.tree.left<1>"(i64* %"$rec#0", i64* %"$field#0") local_unnamed_addr #1 {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  br i1 %"tmp$1#0", label %if.else, label %if.then
+
+if.then:                                          ; preds = %entry
+  %0 = ptrtoint i64* %"$field#0" to i64
+  store i64 %0, i64* %"$rec#0", align 4
+  ret i1 true
+
+if.else:                                          ; preds = %entry
+  ret i64* null
+}
+
+define i64* @"stmt_if.tree.node<0>"(i64* %"left#0", i64 %"key#0", i64* %"right#0") local_unnamed_addr {
+entry:
+  %0 = tail call i8* @wybe_malloc(i32 24)
+  %1 = bitcast i8* %0 to i64*
+  %2 = ptrtoint i64* %"left#0" to i64
+  store i64 %2, i64* %1, align 4
+  %3 = getelementptr i8, i8* %0, i64 8
+  %4 = bitcast i8* %3 to i64*
+  store i64 %"key#0", i64* %4, align 4
+  %5 = getelementptr i8, i8* %0, i64 16
+  %6 = bitcast i8* %5 to i64*
+  %7 = ptrtoint i64* %"right#0" to i64
+  store i64 %7, i64* %6, align 4
+  ret i64* %1
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64*, i64, i64*, i1 } @"stmt_if.tree.node<1>"(i64* readnone %"$#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$#0", null
+  ret i1 %"tmp$1#0"
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64*, i1 } @"stmt_if.tree.right<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$rec#0", null
+  ret i1 %"tmp$1#0"
+}
+
+; Function Attrs: norecurse nounwind
+define { i64*, i1 } @"stmt_if.tree.right<1>"(i64* %"$rec#0", i64* %"$field#0") local_unnamed_addr #1 {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  br i1 %"tmp$1#0", label %if.else, label %if.then
+
+if.then:                                          ; preds = %entry
+  %0 = getelementptr i64, i64* %"$rec#0", i64 2
+  %1 = ptrtoint i64* %"$field#0" to i64
+  store i64 %1, i64* %0, align 4
+  ret i1 true
+
+if.else:                                          ; preds = %entry
+  ret i64* null
+}
+
+attributes #0 = { norecurse nounwind readnone }
+attributes #1 = { norecurse nounwind }
+

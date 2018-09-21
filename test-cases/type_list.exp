@@ -226,7 +226,7 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define i1 @"type_list.intlist.=<1>.1"(i64* readnone %"$left#0", i64* readnone %"$right#0") local_unnamed_addr #0 {
+define i1 @"type_list.intlist.=<2>"(i64* readnone %"$left#0", i64* readnone %"$right#0") local_unnamed_addr #0 {
 entry:
   %"tmp$1#0" = icmp eq i64* %"$left#0", null
   br i1 %"tmp$1#0", label %if.then, label %if.else
@@ -330,7 +330,7 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define i1 @"type_list.intlist.=<1>.1"(i64* readnone %"$left#0", i64* readnone %"$right#0") local_unnamed_addr #0 {
+define i1 @"type_list.intlist.=<2>"(i64* readnone %"$left#0", i64* readnone %"$right#0") local_unnamed_addr #0 {
 entry:
   %"tmp$1#0" = icmp eq i64* %"$left#0", null
   br i1 %"tmp$1#0", label %if.then, label %if.else
