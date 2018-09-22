@@ -294,16 +294,8 @@ doCodegenBody proto body =
        -- Start with creation of blocks and adding instructions to it
        setBlock entry
        mapM_ assignParam $ List.filter (not . isOutputParam) params
-       codegenBody body   -- Codegen on body prims
-
-       case bodyFork body of
-         NoFork -> case (primProtoName proto) == "<0>" of
-           -- Empty primitive prototype is the main function in LLVM
-           True -> mainReturnCodegen
-           False -> do retOp <- buildOutputOp params
-                       ret retOp
-                       return ()
-         (PrimFork var ty _ fbody) -> codegenForkBody var fbody params
+       codegenBody proto body   -- Codegen on body prims
+       return ()
 
 
 -- | Generate code for returning integer exit code at the end main
@@ -392,12 +384,21 @@ structUnPack st tys = do
 
 -- | Generate basic blocks for a procedure body. The first block is named
 -- 'entry' by default. All parameters go on the symbol table (output too).
-codegenBody :: ProcBody -> Codegen (Maybe Operand)
-codegenBody body =
+codegenBody :: PrimProto -> ProcBody -> Codegen (Maybe Operand)
+codegenBody proto body =
     do let ps = List.map content (bodyPrims body)
        -- Filter out prims which contain only phantom arguments
        -- ops <- mapM cgen $ List.filter (not . phantomPrim) ps
        ops <- mapM cgen ps
+       let params = primProtoParams proto
+       case bodyFork body of
+         NoFork -> if (primProtoName proto) == "<0>"
+                   -- Empty primitive prototype is the main function in LLVM
+                   then mainReturnCodegen
+                   else do retOp <- buildOutputOp params
+                           ret retOp
+                           return ()
+         (PrimFork var ty _ fbody) -> codegenForkBody var fbody proto
        if List.null ops
            then return Nothing
            else return $ last ops
@@ -414,23 +415,26 @@ phantomPrim (PrimTest _) = False
 -- | Code generation for a conditional branch. Currently a binary split
 -- is handled, which each branch returning the left value of their last
 -- instruction.
-codegenForkBody :: PrimVarName -> [ProcBody] -> [PrimParam] -> Codegen ()
-codegenForkBody var (b1:b2:[]) params =
+codegenForkBody :: PrimVarName -> [ProcBody] -> PrimProto -> Codegen ()
+-- XXX Revise this to handle forks with more than two branches using
+--     computed gotos
+codegenForkBody var (b1:b2:[]) proto =
     do ifthen <- addBlock "if.then"
        ifelse <- addBlock "if.else"
        -- ifexit <- addBlock "if.exit"
        testop <- getVar (show var)
        cbr testop ifthen ifelse
+       let params = primProtoParams proto
 
        -- if.then
        setBlock ifthen
-       retop <- codegenBody b2
+       retop <- codegenBody proto b2
        case blockReturn retop of
            Nothing -> buildOutputOp params >>= ret
            bret    -> ret bret
        -- if.else
        setBlock ifelse
-       retop <- codegenBody b1
+       retop <- codegenBody proto b1
        case blockReturn retop of
            Nothing -> buildOutputOp params >>= ret
            bret    -> ret bret

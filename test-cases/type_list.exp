@@ -225,18 +225,44 @@ entry:
   ret i64* %"in#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_list.intlist.=<2>"(i64* readnone %"$left#0", i64* readnone %"$right#0") local_unnamed_addr #0 {
+; Function Attrs: nounwind readonly
+define i1 @"type_list.intlist.=<2>"(i64* readonly %"$left#0", i64* readonly %"$right#0") local_unnamed_addr #1 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$left#0", null
-  br i1 %"tmp$1#0", label %if.then, label %if.else
+  %"tmp$1#04" = icmp eq i64* %"$left#0", null
+  br i1 %"tmp$1#04", label %if.then, label %if.then1.preheader
 
-if.then:                                          ; preds = %entry
-  %"$$#0" = icmp eq i64* %"$right#0", null
+if.then1.preheader:                               ; preds = %entry
+  br label %if.then1
+
+if.then:                                          ; preds = %if.then3, %entry
+  %"$right#0.tr.lcssa" = phi i64* [ %"$right#0", %entry ], [ %7, %if.then3 ]
+  %"$$#0" = icmp eq i64* %"$right#0.tr.lcssa", null
   ret i1 %"$$#0"
 
-if.else:                                          ; preds = %entry
-  ret i1 true
+if.then1:                                         ; preds = %if.then1.preheader, %if.then3
+  %"$right#0.tr6" = phi i64* [ %7, %if.then3 ], [ %"$right#0", %if.then1.preheader ]
+  %"$left#0.tr5" = phi i64* [ %2, %if.then3 ], [ %"$left#0", %if.then1.preheader ]
+  %0 = getelementptr i64, i64* %"$left#0.tr5", i64 1
+  %1 = bitcast i64* %0 to i64**
+  %2 = load i64*, i64** %1, align 8
+  %"tmp$12#0" = icmp eq i64* %"$right#0.tr6", null
+  br i1 %"tmp$12#0", label %if.else2, label %if.then2
+
+if.then2:                                         ; preds = %if.then1
+  %3 = load i64, i64* %"$left#0.tr5", align 4
+  %4 = load i64, i64* %"$right#0.tr6", align 4
+  %"tmp$5#0" = icmp eq i64 %3, %4
+  br i1 %"tmp$5#0", label %if.then3, label %if.else2
+
+if.else2:                                         ; preds = %if.then1, %if.then2
+  ret i1 false
+
+if.then3:                                         ; preds = %if.then2
+  %5 = getelementptr i64, i64* %"$right#0.tr6", i64 1
+  %6 = bitcast i64* %5 to i64**
+  %7 = load i64*, i64** %6, align 8
+  %"tmp$1#0" = icmp eq i64* %2, null
+  br i1 %"tmp$1#0", label %if.then, label %if.then1
 }
 
 ; Function Attrs: norecurse nounwind readnone
@@ -272,7 +298,7 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"type_list.intlist.head<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #1 {
+define { i64*, i1 } @"type_list.intlist.head<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
 entry:
   %"tmp$1#0" = icmp eq i64* %"$rec#0", null
   br i1 %"tmp$1#0", label %if.else, label %if.then
@@ -293,7 +319,7 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"type_list.intlist.tail<1>"(i64* %"$rec#0", i64* %"$field#0") local_unnamed_addr #1 {
+define { i64*, i1 } @"type_list.intlist.tail<1>"(i64* %"$rec#0", i64* %"$field#0") local_unnamed_addr #2 {
 entry:
   %"tmp$1#0" = icmp eq i64* %"$rec#0", null
   br i1 %"tmp$1#0", label %if.else, label %if.then
@@ -309,7 +335,8 @@ if.else:                                          ; preds = %entry
 }
 
 attributes #0 = { norecurse nounwind readnone }
-attributes #1 = { norecurse nounwind }
+attributes #1 = { nounwind readonly }
+attributes #2 = { norecurse nounwind }
 
 --------------------------------------------------
 ; ModuleID = 'type_list.intlist'
@@ -329,18 +356,44 @@ entry:
   ret i64* %"in#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_list.intlist.=<2>"(i64* readnone %"$left#0", i64* readnone %"$right#0") local_unnamed_addr #0 {
+; Function Attrs: nounwind readonly
+define i1 @"type_list.intlist.=<2>"(i64* readonly %"$left#0", i64* readonly %"$right#0") local_unnamed_addr #1 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$left#0", null
-  br i1 %"tmp$1#0", label %if.then, label %if.else
+  %"tmp$1#04" = icmp eq i64* %"$left#0", null
+  br i1 %"tmp$1#04", label %if.then, label %if.then1.preheader
 
-if.then:                                          ; preds = %entry
-  %"$$#0" = icmp eq i64* %"$right#0", null
+if.then1.preheader:                               ; preds = %entry
+  br label %if.then1
+
+if.then:                                          ; preds = %if.then3, %entry
+  %"$right#0.tr.lcssa" = phi i64* [ %"$right#0", %entry ], [ %7, %if.then3 ]
+  %"$$#0" = icmp eq i64* %"$right#0.tr.lcssa", null
   ret i1 %"$$#0"
 
-if.else:                                          ; preds = %entry
-  ret i1 true
+if.then1:                                         ; preds = %if.then1.preheader, %if.then3
+  %"$right#0.tr6" = phi i64* [ %7, %if.then3 ], [ %"$right#0", %if.then1.preheader ]
+  %"$left#0.tr5" = phi i64* [ %2, %if.then3 ], [ %"$left#0", %if.then1.preheader ]
+  %0 = getelementptr i64, i64* %"$left#0.tr5", i64 1
+  %1 = bitcast i64* %0 to i64**
+  %2 = load i64*, i64** %1, align 8
+  %"tmp$12#0" = icmp eq i64* %"$right#0.tr6", null
+  br i1 %"tmp$12#0", label %if.else2, label %if.then2
+
+if.then2:                                         ; preds = %if.then1
+  %3 = load i64, i64* %"$left#0.tr5", align 4
+  %4 = load i64, i64* %"$right#0.tr6", align 4
+  %"tmp$5#0" = icmp eq i64 %3, %4
+  br i1 %"tmp$5#0", label %if.then3, label %if.else2
+
+if.else2:                                         ; preds = %if.then1, %if.then2
+  ret i1 false
+
+if.then3:                                         ; preds = %if.then2
+  %5 = getelementptr i64, i64* %"$right#0.tr6", i64 1
+  %6 = bitcast i64* %5 to i64**
+  %7 = load i64*, i64** %6, align 8
+  %"tmp$1#0" = icmp eq i64* %2, null
+  br i1 %"tmp$1#0", label %if.then, label %if.then1
 }
 
 ; Function Attrs: norecurse nounwind readnone
@@ -376,7 +429,7 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"type_list.intlist.head<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #1 {
+define { i64*, i1 } @"type_list.intlist.head<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
 entry:
   %"tmp$1#0" = icmp eq i64* %"$rec#0", null
   br i1 %"tmp$1#0", label %if.else, label %if.then
@@ -397,7 +450,7 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"type_list.intlist.tail<1>"(i64* %"$rec#0", i64* %"$field#0") local_unnamed_addr #1 {
+define { i64*, i1 } @"type_list.intlist.tail<1>"(i64* %"$rec#0", i64* %"$field#0") local_unnamed_addr #2 {
 entry:
   %"tmp$1#0" = icmp eq i64* %"$rec#0", null
   br i1 %"tmp$1#0", label %if.else, label %if.then
@@ -413,5 +466,6 @@ if.else:                                          ; preds = %entry
 }
 
 attributes #0 = { norecurse nounwind readnone }
-attributes #1 = { norecurse nounwind }
+attributes #1 = { nounwind readonly }
+attributes #2 = { norecurse nounwind }
 
