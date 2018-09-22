@@ -45,7 +45,6 @@
 	* [foo,@bar(baz),zip] = [foo] ++ bar(baz) ++ [zip]
 	* if ++ can run backwards, then [?foo,@?bar] and [@?foo,bar] can be patterns
 	* with this, no need for [ ... | ...] syntax
-* Provide scoped way to set resources
 * Provide way to give top-level initial value to resources
 * Support automatic type conversion?
 * Design/implement interface to call wybe from C
