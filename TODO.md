@@ -7,6 +7,7 @@
 
 
 # Complete the implementation:
+* Infer when test calls are certain to succeed and consider them Det
 * Generate print and comparison methods for user defined types
 * Generate string function for user defined types, once we have decent strings
 * Support many non-constant constructors
