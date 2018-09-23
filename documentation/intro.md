@@ -4,7 +4,7 @@
 
 Wybe is a new programming language intended to combine the best features of
 declarative and imperative programming.  It is rather simple, but quite
-powerful.
+safe and powerful.
 
 ## Hello, World
 
@@ -45,7 +45,7 @@ it cannot produce the requested output, it will print error messages
 describing the problem. If all goes to plan, this file can then be executed
 at the command line:
 
-    % hello
+    % ./hello
     Hello, world!
 
 The compiler can also be used to produce an object (`.o`) file rather than
@@ -87,13 +87,77 @@ as an uninitialised variable by the Wybe compiler.
 Wybe's conditional statement has the form:
 
 >    `if {` *test* `::` *stmts*  
->    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`|` *test* `::` *stmts*  
->    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`|` *test* `::` *stmts*  
+>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`|` *test* `::` *stmts*  
+>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`|` *test* `::` *stmts*  
 >    `}`
 
-Each *stmts* parts can include as many statements as needed.
+Each *stmts* parts can include as many statements as needed. You may have as
+many *test* `::` *stmts* pairs as you like; Wybe will execute the *stmts*
+following the first *test* that succeeds, and ignore all later tests and their
+corresponding statements. If no *test* succeeds, the `if` statement will
+complete without executing any *stmts*.
 
 ### <a name="Loops"></a>Looping statements
+
+Wybe has only one looping construct:
+
+>    `do {`  
+>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  *stmts*  
+>    `}`
+
+Within the *stmts* sequence, however, the following constructs can be used:
+
+`break`
+:   immediately exits the loop
+
+`continue`
+:   immediately returns to the top of the loop and begins the next iteration
+
+`while` *test*
+:   immediately exits the loop unless *test* succeeds.
+    Equivalent to `if {  not` *test* :: break `}`
+
+`until` *test*
+:   immediately exits the loop if *test* succeeds.
+    Equivalent to `if {` *test* :: break `}`
+
+`when` *test*
+:   continues executing the loop body only if the *test* succeeds; otherwise
+    it immediately returns to the top of the loop.
+    Equivalent to `if {  not` *test* :: continue `}`
+
+`unless` *test*
+:   continues executing the loop body unless the *test* succeeds; otherwise
+    it immediately returns to the top of the loop.
+    Equivalent to `if {` *test* :: continue `}`
+
+For example, a traditional `while` loop has the form:
+
+>   `do { while ` *test*  
+>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  *stmts*  
+>   }
+
+and a traditional `do` ... `while` loop has the form:
+
+>   `do {` *stmts*  
+>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `while ` *test*  
+>   }
+
+Alternatively, the `while` can be placed in the middle of the loop, in which
+case, the code before the `while` will be executed one or more times, while the
+code after the `while` will be executed zero or more times.  Also, `until` can
+be used to invert the sense of the test.  For example:
+
+>   `do { ` print prompt  
+>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; read user input  
+>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `until` input is valid  
+>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; print admonition about what input is valid  
+>   }
+
+will repeatedly print a prompt and read user input until valid input is
+received, printing a message indicating that the input was invalid each time it
+is invalid.
+
 ## <a name="Types"></a>Type declarations
 ## <a name="Procedures"></a>Defining procedures
 ## <a name="Functions"></a>Defining functions
