@@ -203,7 +203,7 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readonly
-define i1 @"position.position.=<1>.1"(i64* nocapture readonly %"$left#0", i64* nocapture readonly %"$right#0") local_unnamed_addr #1 {
+define i1 @"position.position.=<2>"(i64* nocapture readonly %"$left#0", i64* nocapture readonly %"$right#0") local_unnamed_addr #1 {
 entry:
   %0 = load i64, i64* %"$left#0", align 4
   %1 = load i64, i64* %"$right#0", align 4

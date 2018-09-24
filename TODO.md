@@ -19,6 +19,7 @@
 
 
 # Complete the implementation:
+* Infer when test calls are certain to succeed and consider them Det
 * Generate print and comparison methods for user defined types
 * Generate string function for user defined types, once we have decent strings
 * Support many non-constant constructors
@@ -57,7 +58,6 @@
 	* [foo,@bar(baz),zip] = [foo] ++ bar(baz) ++ [zip]
 	* if ++ can run backwards, then [?foo,@?bar] and [@?foo,bar] can be patterns
 	* with this, no need for [ ... | ...] syntax
-* Provide scoped way to set resources
 * Provide way to give top-level initial value to resources
 * Support automatic type conversion?
 * Design/implement interface to call wybe from C

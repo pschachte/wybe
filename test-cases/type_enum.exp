@@ -84,7 +84,7 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define i1 @"type_enum.season.=<1>.1"(i2 %"$left#0", i2 %"$right#0") local_unnamed_addr #0 {
+define i1 @"type_enum.season.=<2>"(i2 %"$left#0", i2 %"$right#0") local_unnamed_addr #0 {
 entry:
   %"$$#0" = icmp eq i2 %"$left#0", %"$right#0"
   ret i1 %"$$#0"
@@ -133,7 +133,7 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define i1 @"type_enum.season.=<1>.1"(i2 %"$left#0", i2 %"$right#0") local_unnamed_addr #0 {
+define i1 @"type_enum.season.=<2>"(i2 %"$left#0", i2 %"$right#0") local_unnamed_addr #0 {
 entry:
   %"$$#0" = icmp eq i2 %"$left#0", %"$right#0"
   ret i1 %"$$#0"

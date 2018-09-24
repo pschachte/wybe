@@ -12,6 +12,7 @@ import           AST
 import           BinaryFactory                   ()
 import           Codegen
 import           Config                          (wordSize)
+import           Util                            (maybeNth)
 import           Control.Monad
 import           Control.Monad.Trans             (lift, liftIO)
 import           Control.Monad.Trans.Class
@@ -92,7 +93,7 @@ blockTransformModule thisMod =
        --------------------------------------------------
        -- Name mangling
        let emptyFilter = List.filter (not . emptyProc)
-       let mangledProcs = mangleProcs $ concat procs
+       let mangledProcs = concat $ mangleProcs <$> procs
 
        --------------------------------------------------
        -- Translate
@@ -106,38 +107,53 @@ blockTransformModule thisMod =
        logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
 
+-- -- |Affix its id number to the end of each proc name
 mangleProcs :: [ProcDef] -> [ProcDef]
-mangleProcs ps = changeNameWith nameMap ps
-  where
-    nameMap = buildNameMap ps
+mangleProcs ps = zipWith mangleProc ps [0..]
 
 
-changeNameWith :: [(String, Int)] -> [ProcDef] -> [ProcDef]
-changeNameWith [] [] = []
-changeNameWith ((s,i):ns) (p:ps) =
-    let (ProcDefPrim proto body ans) = procImpln p
+mangleProc :: ProcDef -> Int -> ProcDef
+mangleProc def i =
+    let (ProcDefPrim proto body) = procImpln def
+        s = primProtoName proto
         pname = s ++ "<" ++ show i ++ ">"
         newProto = proto {primProtoName = pname}
-        newImpln = ProcDefPrim newProto body ans
-    in p {procImpln = newImpln} : changeNameWith ns ps
-changeNameWith _ _ = shouldnt "Incorrect name map used for mangling."
-
-buildNameMap :: [ProcDef] -> [(String, Int)]
-buildNameMap ps = List.foldl reduceNameMap [] procNames
-    where
-      procNames = List.map pullDefName ps
-
-reduceNameMap :: [(String, Int)] -> String -> [(String, Int)]
-reduceNameMap namemap name =
-    case List.lookup name namemap of
-        Just val -> namemap ++ [(name, val + 1)]
-        Nothing  -> namemap ++ [(name, 0)]
+    in  def {procImpln = ProcDefPrim newProto body}
 
 
-pullDefName :: ProcDef -> String
-pullDefName p =
-    let (ProcDefPrim proto _ _) = procImpln p
-    in primProtoName proto
+
+-- mangleProcs :: [ProcDef] -> [ProcDef]
+-- mangleProcs ps = changeNameWith nameMap ps
+--   where
+--     nameMap = buildNameMap ps
+
+
+-- changeNameWith :: [(String, Int)] -> [ProcDef] -> [ProcDef]
+-- changeNameWith [] [] = []
+-- changeNameWith ((s,i):ns) (p:ps) =
+--     let (ProcDefPrim proto body) = procImpln p
+--         pname = s ++ "<" ++ show i ++ ">"
+--         newProto = proto {primProtoName = pname}
+--         newImpln = ProcDefPrim newProto body
+--     in p {procImpln = newImpln} : changeNameWith ns ps
+-- changeNameWith _ _ = shouldnt "Incorrect name map used for mangling."
+
+-- buildNameMap :: [ProcDef] -> [(String, Int)]
+-- buildNameMap ps = List.foldl reduceNameMap [] procNames
+--     where
+--       procNames = List.map pullDefName ps
+
+-- reduceNameMap :: [(String, Int)] -> String -> [(String, Int)]
+-- reduceNameMap namemap name =
+--     case List.lookup name namemap of
+--         Just val -> namemap ++ [(name, val + 1)]
+--         Nothing  -> namemap ++ [(name, 0)]
+
+
+-- pullDefName :: ProcDef -> String
+-- pullDefName p =
+--     let (ProcDefPrim proto _) = procImpln p
+--     in primProtoName proto
 
 
 -- | Extract the LPVM compiled primitive from the procedure definition.
@@ -278,16 +294,8 @@ doCodegenBody proto body =
        -- Start with creation of blocks and adding instructions to it
        setBlock entry
        mapM_ assignParam $ List.filter (not . isOutputParam) params
-       codegenBody body   -- Codegen on body prims
-
-       case bodyFork body of
-         NoFork -> case (primProtoName proto) == "<0>" of
-           -- Empty primitive prototype is the main function in LLVM
-           True -> mainReturnCodegen
-           False -> do retOp <- buildOutputOp params
-                       ret retOp
-                       return ()
-         (PrimFork var ty _ fbody) -> codegenForkBody var fbody params
+       codegenBody proto body   -- Codegen on body prims
+       return ()
 
 
 -- | Generate code for returning integer exit code at the end main
@@ -376,12 +384,21 @@ structUnPack st tys = do
 
 -- | Generate basic blocks for a procedure body. The first block is named
 -- 'entry' by default. All parameters go on the symbol table (output too).
-codegenBody :: ProcBody -> Codegen (Maybe Operand)
-codegenBody body =
+codegenBody :: PrimProto -> ProcBody -> Codegen (Maybe Operand)
+codegenBody proto body =
     do let ps = List.map content (bodyPrims body)
        -- Filter out prims which contain only phantom arguments
        -- ops <- mapM cgen $ List.filter (not . phantomPrim) ps
        ops <- mapM cgen ps
+       let params = primProtoParams proto
+       case bodyFork body of
+         NoFork -> if (primProtoName proto) == "<0>"
+                   -- Empty primitive prototype is the main function in LLVM
+                   then mainReturnCodegen
+                   else do retOp <- buildOutputOp params
+                           ret retOp
+                           return ()
+         (PrimFork var ty _ fbody) -> codegenForkBody var fbody proto
        if List.null ops
            then return Nothing
            else return $ last ops
@@ -398,23 +415,26 @@ phantomPrim (PrimTest _) = False
 -- | Code generation for a conditional branch. Currently a binary split
 -- is handled, which each branch returning the left value of their last
 -- instruction.
-codegenForkBody :: PrimVarName -> [ProcBody] -> [PrimParam] -> Codegen ()
-codegenForkBody var (b1:b2:[]) params =
+codegenForkBody :: PrimVarName -> [ProcBody] -> PrimProto -> Codegen ()
+-- XXX Revise this to handle forks with more than two branches using
+--     computed gotos
+codegenForkBody var (b1:b2:[]) proto =
     do ifthen <- addBlock "if.then"
        ifelse <- addBlock "if.else"
        -- ifexit <- addBlock "if.exit"
        testop <- getVar (show var)
        cbr testop ifthen ifelse
+       let params = primProtoParams proto
 
        -- if.then
        setBlock ifthen
-       retop <- codegenBody b2
+       retop <- codegenBody proto b2
        case blockReturn retop of
            Nothing -> buildOutputOp params >>= ret
            bret    -> ret bret
        -- if.else
        setBlock ifelse
-       retop <- codegenBody b1
+       retop <- codegenBody proto b1
        case blockReturn retop of
            Nothing -> buildOutputOp params >>= ret
            bret    -> ret bret
@@ -445,6 +465,7 @@ blockReturn op                                    = op
 -- which do not eventually appear in the prototype.
 cgen :: Prim -> Codegen (Maybe Operand)
 cgen prim@(PrimCall pspec args) = do
+    logCodegen $ "Compiling " ++ show prim
     thisMod <- lift $ getModuleSpec
     let (ProcSpec mod name _) = pspec
     -- let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
@@ -453,6 +474,7 @@ cgen prim@(PrimCall pspec args) = do
     -- and match it's parameters with the args here
     -- and remove the unneeded ones.
     protoFound <- findProto pspec
+    logCodegen $ "ProtoFound = " ++ show protoFound
     let filteredArgs = case protoFound of
             Just callProto -> filterUnneededArgs callProto args
             Nothing        -> args
@@ -462,37 +484,44 @@ cgen prim@(PrimCall pspec args) = do
         (addExtern $ PrimCall pspec filteredArgs)
 
     let inArgs = primInputs filteredArgs
+    logCodegen $ "In args = " ++ show inArgs
     outTy <- lift $ primReturnType filteredArgs
+    logCodegen $ "Out Type = " ++ show outTy
     inops <- mapM cgenArg inArgs
+    logCodegen $ "Translated inputs = " ++ show inops
     let ins =
           call
           (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) nm)
           inops
+    logCodegen $ "Translated ins = " ++ show ins
     addInstruction ins filteredArgs
 
-cgen prim@(PrimForeign lang name flags args)
-     | lang == "llvm" = case (length args) of
-                          2 -> cgenLLVMUnop name flags args
-                          3 -> cgenLLVMBinop name flags args
-                          _ -> shouldnt $ "Instruction " ++ name ++ " not found!"
+cgen prim@(PrimForeign "llvm" name flags args) = do
+    logCodegen $ "Compiling " ++ show prim
+    case (length args) of
+       2 -> cgenLLVMUnop name flags args
+       3 -> cgenLLVMBinop name flags args
+       _ -> shouldnt $ "Instruction " ++ name ++ " not found!"
 
-     | lang == "lpvm" = do
-           cgenLPVM name flags args
+cgen prim@(PrimForeign "lpvm" name flags args) = do
+    logCodegen $ "Compiling " ++ show prim
+    cgenLPVM name flags args
 
-     | otherwise =
-         do addExtern prim
-            let inArgs = primInputs args
-            let nm = LLVMAST.Name $ toSBString name
-            inops <- mapM cgenArg inArgs
-            -- alignedOps <- mapM makeCIntOp inops
-            outty <- lift $ primReturnType args
-            let ins =
-                  call
-                  (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
-                  inops
-            addInstruction ins args
+cgen prim@(PrimForeign lang name flags args) = do
+    logCodegen $ "Compiling " ++ show prim
+    addExtern prim
+    let inArgs = primInputs args
+    let nm = LLVMAST.Name $ toSBString name
+    inops <- mapM cgenArg inArgs
+    -- alignedOps <- mapM makeCIntOp inops
+    outty <- lift $ primReturnType args
+    let ins =
+          call
+          (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
+          inops
+    addInstruction ins args
 
-cgen (PrimTest _) = error "No primitive found."
+cgen (PrimTest _) = error "PrimTest should have been removed before code gen"
 
 
 makeCIntOp :: Operand -> Codegen Operand
@@ -573,7 +602,8 @@ findProto :: ProcSpec -> Codegen (Maybe PrimProto)
 findProto (ProcSpec _ nm i) = do
     allProtos <- gets Codegen.modProtos
     let procNm = nm
-    return $ List.find (\p -> primProtoName p == procNm) allProtos
+    let matchingProtos = List.filter ((== nm) . primProtoName) allProtos
+    return $ maybeNth i matchingProtos
 
 
 -- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
@@ -706,10 +736,12 @@ constantType _            = shouldnt "Cannot determine constant type."
 -- inferred depending on the primitive arguments. The name is inferred from
 -- the output argument's name (LPVM is in SSA form).
 addInstruction :: Instruction -> [PrimArg] -> Codegen (Maybe Operand)
-addInstruction ins args =
-     do let outArgs = primOutputs args
-        outTy <- lift $ primReturnType args
-        case length outArgs of
+addInstruction ins args = do
+    logCodegen $ "addInstruction " ++ show ins ++ " " ++ show args
+    let outArgs = primOutputs args
+    outTy <- lift $ primReturnType args
+    logCodegen $ "outTy = " ++ show outTy
+    case length outArgs of
           0 -> case outTy of
             VoidType -> voidInstr ins >> return Nothing
             _        -> Just <$> instr outTy ins
@@ -1237,6 +1269,7 @@ toSBString string = BSS.pack $ unsafeCoerce <$> string
 logBlocks :: String -> Compiler ()
 logBlocks = logMsg Blocks
 
+
 -- | Log with a wrapping line of replicated characters above and below.
 logWrapWith :: Char -> String -> Compiler ()
 logWrapWith ch s = do
@@ -1245,4 +1278,4 @@ logWrapWith ch s = do
     logMsg Blocks (replicate 80 ch)
 
 logCodegen :: String -> Codegen ()
-logCodegen s = lift $ logBlocks $ "=CODEGEN=" ++ s
+logCodegen s = lift $ logBlocks s

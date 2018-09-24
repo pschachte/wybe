@@ -1,0 +1,257 @@
+%  Emacs    : -*- latex -*-
+%  File     : intro.tex
+%  Author   : Peter Schachte
+%  Purpose  : Introduction to Wybe programming
+%  Copyright: © 2018 Peter Schachte.  All rights reserved.
+%
+
+\documentclass{article}
+\usepackage{a4wide}
+\usepackage{xspace}
+\usepackage{fancyvrb}
+\usepackage{color}
+\usepackage{hyperref}
+%\usepackage{ensuremath}
+
+\newcommand{\lang}{\textsf{Wybe}\xspace}
+\newcommand{\Lang}{\textsf{Wybe}\xspace}
+
+\newcommand{\ie}{\emph{i.e.}\xspace}
+\newcommand{\eg}{\emph{e.g.}\xspace}
+\newcommand{\Ie}{\emph{I.e.}\xspace}
+\newcommand{\Eg}{\emph{E.g.}\xspace}
+\newcommand{\etc}{\emph{etc}}
+
+\newcommand{\nyi}[1]{\underline{#1} \emph{(not yet implemented)}}
+\newcommand{\tbi}[1]{(\underline{Currently}, #1).}
+\newcommand{\possible}[1]{\emph{Possible improvement:} #1}
+
+\newcommand{\tuple}[1]{\ensuremath{\langle#1\rangle}}
+
+\DefineVerbatimEnvironment%
+{wybecode}{Verbatim}
+{numbers=left,frame=single,framerule=1.5pt,rulecolor=\color{blue},commandchars=@[]}
+
+\DefineVerbatimEnvironment%
+{shell}{Verbatim}
+{frame=single,commandchars=@[]}
+
+
+\title{Introduction to \Lang Programming}
+\author{Peter Schachte}
+\begin{document}
+\maketitle
+\noindent
+\Lang is a new programming language intended to combine the best features of
+declarative and imperative programming.  It is rather simple, but quite
+safe and powerful.
+
+\section{Hello, World}
+
+To produce a \lang program, create a file whose name ends in \texttt{.wybe}.
+Ordinary \lang statements at the top level of the file (i.e., not within a
+function or procedure definition) are executed when the file is compiled
+and run.  For example, a \lang program to print "Hello, World" would be
+written like this:
+
+
+\begin{wybecode}
+!println("Hello, world!")
+\end{wybecode}
+
+The \texttt{println} procedure prints out a string followed by a newline
+character.  The exclamation point at the beginning of the line tells \lang
+that the statement performs input/output.  This will be explained in
+greater depth in the section on \hyperref[Resources]{Resources}.
+
+Multiple statements may be written, and they will be executed in order.
+Comments begin with a hash (\verb`#`) character and extend to the end of the line.
+
+\begin{wybecode}
+!print("Hello, ")     # print the first word
+!println("world!")    # print the rest and end the line
+\end{wybecode}
+
+\section{Compiling a \lang program}
+\label{Compiling}
+
+To compile a \lang program from a command line, use the program \texttt{wybemk} and
+specify the \emph{output} file you wish to produce.  For example, if either of
+the above programs is put into a file named \texttt{hello.wybe}, it can be
+compiled using the command
+
+\begin{shell}
+@textbf[%] wybemk hello
+\end{shell}
+
+to produce an executable file named \texttt{hello}.  This works regardless of the
+number of files and libraries used in the project.
+
+Ordinarily, \texttt{wybemk} will simply do its job without printing anything. If
+it cannot produce the requested output, it will print error messages
+describing the problem. If all goes to plan, this file can then be executed
+at the command line:
+
+\begin{shell}
+@textbf[%] ./hello
+Hello, world!
+\end{shell}
+
+The compiler can also be used to produce an object (\texttt{.o}) file rather
+than an executable file by specifying that on the command line:
+
+\begin{shell}
+@textbf[%] wybemk hello.o
+\end{shell}
+
+\section{Variables and assignment}
+\label{Variables}
+
+Variables in \lang begin with a letter (upper or lower case), and follow with
+any number of letters, digits, and underscore (\verb`_`) characters, like any
+number of other programming languages. What is unlike other languages is that a
+variable is only assigned by a statement if it is immediately preceded by a
+question mark (?). A variable may also be both used and assigned by a statement
+by preceding it with an exclamation point (!), as we will see below. If not
+preceded by either of these, the expression only uses the variable.
+
+For example:
+
+\begin{wybecode}
+?msg = "Hello, world!"
+!println(msg)
+\end{wybecode}
+
+The first statement assigns to the variable \texttt{msg} because it has a
+question mark before it, \emph{not} because it appears to the left of the equal
+sign. The second uses \texttt{msg} because it is not preceded by a question
+mark. This code could equally well have been written as:
+
+\begin{wybecode}
+"Hello, world!" = ?msg
+!println(msg)
+\end{wybecode}
+
+Had the first statement omitted the question mark, it would instead have tested
+if \texttt{msg} is equal to \texttt{"Hello, world!"}. But the first mention of a
+variable \emph{must} assign it, so this would be an error, and would be reported
+as an uninitialised variable by the \lang compiler.
+
+\section{Calling procedures and functions}
+\label{Calling}
+\section{Defining procedures and functions}
+\label{Procedures}
+\section{Control statements}
+\label{Control}
+\subsection{Conditional statements}
+\label{Conditional}
+\Lang's conditional statement has the form:
+
+\begin{wybecode}
+if { @emph[test] :: @emph[stmts]
+   | @emph[test] :: @emph[stmts]
+   | @emph[test] :: @emph[stmts]
+   @vdots
+}
+\end{wybecode}
+Each \emph{stmts} parts can include as many statements as needed. You may have
+as many \emph{test} \texttt{::} \emph{stmts} pairs as you like; \lang will
+execute the \emph{stmts} following the first \emph{test} that succeeds, and
+ignore all later tests and their corresponding statements. If no \emph{test}
+succeeds, the \texttt{if} statement will complete without executing any
+\emph{stmts}.
+
+\subsection{Looping statements}
+\label{Loops}
+
+\Lang has only one looping construct:
+
+\begin{wybecode}
+do {@emph[stmt]
+    @emph[stmt]    
+    @emph[stmt]    
+    @vdots
+}
+\end{wybecode}
+The sequence of \emph{stmt}s can contain any normal \lang statements.
+In addition, the following special constructs can be used:
+
+\begin{description}
+\item[\texttt{break}]
+  immediately exits the loop.
+
+\item[\texttt{continue}]
+  immediately returns to the top of the loop and begins the next iteration.
+
+\item[\texttt{while} \emph{test}]
+  immediately exits the loop unless \emph{test} succeeds.
+  Equivalent to \verb`if { not` \emph{test} \verb`::` \verb`break }`
+
+\item[\texttt{until} \emph{test}]
+  immediately exits the loop if \emph{test} succeeds. Equivalent to
+  \verb`if {` \emph{test} \verb`:: break }`
+
+\item[\texttt{when} \emph{test}]
+  continues executing the loop body only if the
+  \emph{test} succeeds; otherwise it immediately returns to the top of the loop.
+  Equivalent to \verb`if { not` \emph{test} \verb`:: continue }`
+
+\item[\texttt{unless} \emph{test} ]
+  continues executing the loop body unless the
+  \emph{test} succeeds; otherwise it immediately returns to the top of the loop.
+  Equivalent to \verb`if {` \emph{test} \verb`:: continue }`
+\end{description}
+
+For example, a traditional \texttt{while} loop has the form:
+
+\begin{wybecode}
+do { while @textit[test]
+     @emph[stmts]
+}
+\end{wybecode}
+and a traditional \texttt{do} ... \texttt{while} loop has the form:
+
+\begin{wybecode}
+do { @emph[stmts]
+     while @emph[test]
+}
+\end{wybecode}
+
+Alternatively, the \texttt{while} can be placed in the middle of the loop, in
+which case, the code before the \texttt{while} will be executed one or more
+times, while the code after the \texttt{while} will be executed zero or more
+times. Also, \texttt{until} can be used to invert the sense of the test. For
+example:
+
+\begin{wybecode}
+do { @textrm[print prompt]
+     @textrm[read user input]
+     until @textrm[user input is valid]
+     @textrm[print admonition about what input is valid]
+}
+\end{wybecode}
+
+will repeatedly print a prompt and read user input until valid input is
+received, printing a message indicating that the input was invalid each time it
+is invalid.
+
+\section{Type declarations}
+\label{Types}
+\section{Tests}
+\label{Tests}
+\section{Resources}
+\label{Resources}
+\section{Interfacing to foreign code}
+\label{Foreign}
+\section{The \lang library}
+\label{Library}
+\section{Contributors}
+\label{Contributors}
+The following people have contributed to the design and implementation of the
+\lang language:
+\begin{itemize}
+\item Peter Schachte
+\item Ashutosh Rishi Ranjan
+\item Ting Lu
+\end{itemize}
+\end{document}
