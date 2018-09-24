@@ -1,0 +1,19 @@
+# passing primitive values instead of data structures
+# primitives won't be aliased
+
+public proc replicate1(v1:int, ?v2:int) use !io
+  !print("random replicate1")
+  !println(2)
+  ?v2 = v1
+end
+
+public proc bar use !io
+  ?p1 = 100
+  !replicate1(p1, ?p2)
+
+  ?p1 = 111
+  !println(p1)
+  !println(p2)
+end
+
+!bar

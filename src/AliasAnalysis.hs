@@ -24,7 +24,7 @@ aliasSccBottomUp procs = mapM_ aliasProcBottomUp $ sccElts procs
 
 aliasProcBottomUp :: ProcSpec -> Compiler ()
 aliasProcBottomUp pspec = do
-    logAlias ">>> Alias analysis (Bottom-up):"
+    logAlias "\n>>> Alias analysis (Bottom-up):"
     updateProcDefM (checkEscape pspec) pspec
     return ()
 
@@ -71,8 +71,11 @@ checkEscape :: ProcSpec -> ProcDef -> Compiler ProcDef
 checkEscape spec def
     | not (procInline def) = do
         let (ProcDefPrim entryProto body analysis) = procImpln def
+        logAlias $ "*** " ++ show spec ++ " " ++ show entryProto
+
         let prims = bodyPrims body
         -- First pass (only process alias pairs incurred by move and mutate)
+        logAlias $ "    " ++ List.intercalate "\n    " (List.map show prims)
         let aliasPairs = List.foldr
                             (\prim alias ->
                                 let args = escapablePrimArgs $ content prim
@@ -94,7 +97,7 @@ checkEscape spec def
 
         -- Update proc analysis with new aliasPairs
         let analysis' = analysis { procArgAliases = expandedPairs }
-        logAlias $ show entryProto ++ ":\n" ++ show expandedPairs
+        logAlias $ "*** expandedPairs: " ++ show expandedPairs
 
         return def { procImpln = ProcDefPrim entryProto body' analysis'}
 checkEscape _ def = return def
@@ -159,7 +162,7 @@ escapeByProcCalls (prims, aliasNames) prim =
             def <- getProcDef spec
             let (ProcDefPrim thisProto body analysis) = procImpln def
             let pairs = procArgAliases analysis
-            logAlias $ show thisProto
+            logAlias $ "call proc: " ++ show thisProto
             logAlias $ "PrimCall args: " ++ show args
             logAlias $ "pairs: " ++ show pairs
             let aliasNames' = _aliasPairsToNames args pairs
@@ -172,9 +175,12 @@ escapeByProcCalls (prims, aliasNames) prim =
 _aliasPairsToNames :: [PrimArg] -> [AliasPair] -> [(PrimVarName, PrimVarName)]
 _aliasPairsToNames primCallArgs =
     List.foldr (\(p1,p2) aliasNames ->
-        let ArgVar n1 _ _ _ _ = primCallArgs !! p1
-            ArgVar n2 _ _ _ _ = primCallArgs !! p2
-        in (n1, n2) : aliasNames
+        let v1 = primCallArgs !! p1
+            v2 = primCallArgs !! p2
+        in case (v1,v2) of
+                (ArgVar n1 _ _ _ _, ArgVar n2 _ _ _ _) ->
+                    (n1, n2) : aliasNames
+                _ -> aliasNames
         ) []
 
 -- Helper: convert aliased var names pair to arg index pair
