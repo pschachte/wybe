@@ -114,11 +114,11 @@ mangleProcs ps = zipWith mangleProc ps [0..]
 
 mangleProc :: ProcDef -> Int -> ProcDef
 mangleProc def i =
-    let (ProcDefPrim proto body) = procImpln def
+    let (ProcDefPrim proto body analysis) = procImpln def
         s = primProtoName proto
         pname = s ++ "<" ++ show i ++ ">"
         newProto = proto {primProtoName = pname}
-    in  def {procImpln = ProcDefPrim newProto body}
+    in  def {procImpln = ProcDefPrim newProto body analysis}
 
 
 
