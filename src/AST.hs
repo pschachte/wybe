@@ -19,7 +19,7 @@ module AST (
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt,
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
-  phantomParam, phantomArg, phantomType, procProtoParamNames, isProcProtoArg,
+  phantomParam, phantomArg, phantomType, primProtoParamNames, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
@@ -1412,7 +1412,7 @@ data ProcBody = ProcBody {
       bodyFork::PrimFork}
               deriving (Eq, Show, Generic)
 
--- | A primitive switch.  This only appears at tne end of a ProcBody.
+-- | A primitive switch.  This only appears at the end of a ProcBody.
 -- This specifies that if forkVar is 0, the first body in forkBodies
 -- should be executed; if it's 1, the second body should be executed, and
 -- so on.  If it's greater or equal to the length of the list, the last
@@ -1804,8 +1804,8 @@ phantomType TypeSpec{typeName="phantom"} = True
 phantomType _ = False
 
 -- |Get proto param names in a list
-procProtoParamNames :: PrimProto -> [PrimVarName]
-procProtoParamNames proto =
+primProtoParamNames :: PrimProto -> [PrimVarName]
+primProtoParamNames proto =
     let protoParams = primProtoParams proto
     in List.foldr (\pram ps -> primParamName pram:ps) [] protoParams
 

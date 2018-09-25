@@ -1,0 +1,45 @@
+# recursive call passing data structures
+
+use position
+
+public proc if_test(a:position, b:position, ?r:position)
+    if a.x > 0 ::
+      ?tmp = b
+      ?b = a
+      ?a = tmp
+      if_test(a, b, ?r)
+    | false :: ?r = a
+    end
+end
+
+?pa = position(100, 101)
+?pb = position(-200, -201)
+!print("--- before proc call: ")
+!print("pa: ")
+!println(pa.x)
+!println(pa.y)
+!print("pb: ")
+!println(pb.x)
+!println(pb.y)
+
+if_test(pa, pb, ?r)
+
+!print("--- after proc call: ")
+!print("pa: ")
+!println(pa.x)
+!println(pa.y)
+!print("pb: ")
+!println(pb.x)
+!println(pb.y)
+
+!print("--- result - expected to be same as pb: ")
+!println(r.x)
+!println(r.y)
+
+!print("--- modify pa.x: ")
+x(!pa, -1000)
+!println(pa.x)
+
+!print("result: ")
+!println(r.x)
+!println(r.y)
