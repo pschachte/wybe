@@ -1,0 +1,6 @@
+public type tree = public empty | node(left:tree, key:int, right:tree) end
+
+public proc printTree(t:tree) use !io
+  if t = node(?l, ?k, ?r) :: !printTree(l) !println(k) !printTree(r)
+  end
+end

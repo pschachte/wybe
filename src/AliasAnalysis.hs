@@ -76,11 +76,11 @@ checkEscape spec def
         let prims = bodyPrims body
         -- First pass (only process alias pairs incurred by move and mutate)
         logAlias $ "    " ++ List.intercalate "\n    " (List.map show prims)
-        let aliasPairs = List.foldr
-                            (\prim alias ->
-                                let args = escapablePrimArgs $ content prim
-                                in aliasPairsFromArgs entryProto args alias
-                                ) [] prims
+        aliasPairs <- foldM
+                        (\alias prim -> do
+                            args <- escapablePrimArgs $ content prim
+                            return $ aliasPairsFromArgs entryProto args alias
+                            ) [] prims
         let aliasPairs' = removeDupTuples aliasPairs
 
         -- Second pass (handle alias pairs incurred by proc calls within
@@ -105,10 +105,11 @@ checkEscape _ def = return def
 
 -- For first pass:
 -- Build up alias pairs triggerred by move and mutate instructions
-escapablePrimArgs :: Prim -> [PrimArg]
-escapablePrimArgs (PrimForeign _ "move" _ args)   = args
-escapablePrimArgs (PrimForeign _ "mutate" _ args) = args
-escapablePrimArgs _                               = []
+escapablePrimArgs :: Prim -> Compiler [PrimArg]
+escapablePrimArgs (PrimForeign _ "move" _ args)   = return args
+escapablePrimArgs (PrimForeign _ "mutate" _ args) = return args
+escapablePrimArgs (PrimForeign _ "access" _ args) = return args
+escapablePrimArgs prim                            = return []
 
 -- Only append to list if the arg is passed in by the enclosing entry proc or is
 -- the return arg of the proc

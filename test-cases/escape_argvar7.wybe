@@ -1,0 +1,20 @@
+# (1) analyse condition switches?
+# (2) how to modify part of a recursive data type?
+
+# Recursive data type:
+# will the part of the data structure escape?
+
+use mytree
+
+public func simpleMerge(tl:tree):tree = node(tl, 200, empty)
+
+?t1 = node(empty, 1, empty)
+?t = simpleMerge(t1)
+!printTree(t)
+
+if t1 = node(?l, ?k, ?r) :: ?t1 = node(l, 1000, r)
+end
+#if key(t1, ?k) :: ?k = 800
+#end
+!printTree(t1)
+#!printTree(t)

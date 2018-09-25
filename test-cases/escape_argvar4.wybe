@@ -1,4 +1,4 @@
-# aliasing partial data structures
+# aliasing part (the part is primitive values) of a data structures
 
 use position
 

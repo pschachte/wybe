@@ -178,7 +178,8 @@ updateFreshness procDef = do
     let (ProcDefPrim proto body _) = procImpln procDef
     let prims = bodyPrims body
     let (freshset, prims') = List.foldl freshInPrim (Set.empty, []) prims
-    logOptimise $ "\n*** Freshness analysis:" ++ show freshset ++ "\n"
+    logOptimise $ "\n*** Freshness analysis" ++ ": "
+                    ++ procName procDef ++ " " ++ show freshset ++ "\n\n"
     let body' = body { bodyPrims = prims' }
     return procDef { procImpln = ProcDefPrim proto body' (ProcAnalysis []) }
 

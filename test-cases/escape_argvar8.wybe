@@ -1,0 +1,21 @@
+# (1) analyse condition switches?
+# (2) how to modify part of a recursive data type?
+
+# Recursive data type:
+# access part of the data structure
+
+use mytree
+
+public func simpleSlice(tr:tree):tree =
+  if tr = node(?l, ?k, ?r) then l
+  else node(empty, -1, empty)
+
+?t1 = node(node(empty, 100, empty), 200, empty)
+?t = simpleSlice(t1)
+!printTree(t)
+
+#?t1 = node(node(empty, -100, empty), 200, empty)
+#!print("t1")
+#!printTree(t1)
+#!print("t")
+#!printTree(t)
