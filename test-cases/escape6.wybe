@@ -9,7 +9,7 @@ public func simpleMerge(tl:tree, tr:tree):tree =
   if tl = node(?l1, ?k1, ?r1) then
     if tr = node(?l2, ?k2, ?r2) then
       if k1 < k2 then node(tl, k2, r2)
-      else node(l1, k1, t2)
+      else node(l1, k1, tr)
     else node(empty, 0, empty)
   else node(empty, 0, empty)
 
