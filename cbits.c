@@ -19,13 +19,13 @@ int print_float(double X) {
 }
 
 int print_string(const char *s) {
-    return puts(s);
+    return printf("%s", s);
 }
 
 int read_char() {
     int ch;
     ch = getchar();
-    return ch;        
+    return ch;
 }
 
 int ipow(int base, int exp) {
