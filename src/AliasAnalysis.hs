@@ -154,6 +154,7 @@ escapablePrimArgs :: Prim -> Compiler [PrimArg]
 escapablePrimArgs (PrimForeign _ "move" _ args)   = return args
 escapablePrimArgs (PrimForeign _ "mutate" _ args) = return args
 escapablePrimArgs (PrimForeign _ "access" _ args) = return args
+escapablePrimArgs (PrimForeign _ "cast" _ args)   = return args
 escapablePrimArgs prim                            = return []
 
 -- Only append to list if the arg is passed in by the enclosing entry proc or is
