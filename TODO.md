@@ -1,7 +1,7 @@
 # Fix bugs:
 * Assertion failed in `test-cases/multictr.wybe`
 * `test-cases/stmt_if` Internal error: Local variable not in scope: "r#0"
-* `test-cases/escape_argvar3.wybe` should alloc a new space to p2
+* `test-cases/escape3.wybe` should alloc a new space to p2
 * `test-cases/escape_recursion1.wybe` should report compiler error if there's a
   false condition branh in if statement
 
