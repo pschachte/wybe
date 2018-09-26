@@ -1,0 +1,13 @@
+# shouldn't alias to the data structure if all
+# properties of a data structure are mutated in the proc
+
+use position
+
+public proc replicate1(p1:position, ?p2:position) use !io
+  ?pp = position(0,0)
+  !print("random replicate1")
+  !println(pp.x)
+  ?p2 = p1
+  x(!p2, 2)
+  y(!p2, 2)
+end

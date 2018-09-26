@@ -1,0 +1,13 @@
+# passing data structures in recursive call
+
+use position
+
+public proc if_test(a:position, b:position, ?r:position)
+    if a.x > 0 ::
+      ?tmp = b
+      ?b = a
+      ?a = tmp
+      if_test(a, b, ?r)
+    | false :: ?r = a
+    end
+end
