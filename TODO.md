@@ -17,6 +17,7 @@ The reason is in `wybe.wybe`, !nl is redundant in println(x:string) proc as the 
 * `test-cases/escape3.wybe` should alloc a new space to p2
 * `test-cases/escape_recursion1.wybe` should report compiler error if there's a
   false condition branh in if statement
+* `test-cases/escape6.wybe` get segmentation fault
 
 # Documentation:
 * Write Wybe intro

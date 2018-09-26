@@ -1,7 +1,5 @@
-# (1) analyse condition switches?
-
 # Recursive data type:
-# will the entire data structure escape?
+# the entire data structure tl and tr escape
 
 use mytree
 
@@ -9,7 +7,7 @@ public func simpleMerge(tl:tree, tr:tree):tree =
   if tl = node(?l1, ?k1, ?r1) then
     if tr = node(?l2, ?k2, ?r2) then
       if k1 < k2 then node(tl, k2, r2)
-      else node(l1, k1, tr)
+      else node(tr, k1, r1)
     else node(empty, 0, empty)
   else node(empty, 0, empty)
 
@@ -17,8 +15,3 @@ public func simpleMerge(tl:tree, tr:tree):tree =
 ?t2 = node(empty, 111, empty)
 ?t = simpleMerge(t1, t2)
 !printTree(t)
-
-#if t1 = node(?l, ?k, ?r) :: ?t1 = node(l, 1000, r)
-#end
-#!printTree(t1)
-#!printTree(t)
