@@ -1,0 +1,74 @@
+======================================================================
+AFTER EVERYTHING:
+ Module stmt_while
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : stmt_while.<0>
+  imports         : use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+*main* > public inline (0 calls)
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
+
+    stmt_while.gen$1<0>(10:wybe.int, ~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) @stmt_while:2:1
+
+
+gen$1 > (2 calls)
+0: gen$1(n#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): Alias Pairs: [(1,2)]
+
+    foreign llvm icmp sgt(n#0:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:26:39
+    case ~tmp$2#0:wybe.bool of
+    0:
+        foreign llvm move(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom)
+
+    1:
+        foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @wybe:16:38
+        foreign c print_int(tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @wybe:76:38
+        foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+        stmt_while.gen$1<0>(~tmp$0#0:wybe.int, ~wybe.io$io#1:wybe.phantom, ?wybe.io$io#2:wybe.phantom) @stmt_while:2:1
+
+
+
+gen$2 > inline (1 calls)
+0: gen$2([n#0:wybe.int], wybe.io$io#0:wybe.phantom, [?wybe.io$io#0:wybe.phantom]): Alias Pairs: []
+
+stmt_while
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'stmt_while'
+source_filename = "test-cases/stmt_while.wybe"
+
+declare void @putchar(i8) local_unnamed_addr
+
+declare void @print_int(i64) local_unnamed_addr
+
+define i32 @stmt_while.main() local_unnamed_addr {
+entry:
+  tail call void @"stmt_while.gen$1<0>"(i64 10)
+  ret i32 0
+}
+
+define void @"stmt_while.gen$1<0>"(i64 %"n#0") local_unnamed_addr {
+entry:
+  %"tmp$2#01" = icmp sgt i64 %"n#0", 0
+  br i1 %"tmp$2#01", label %if.then.preheader, label %if.else
+
+if.then.preheader:                                ; preds = %entry
+  br label %if.then
+
+if.then:                                          ; preds = %if.then.preheader, %if.then
+  %"n#0.tr2" = phi i64 [ %"tmp$0#0", %if.then ], [ %"n#0", %if.then.preheader ]
+  %"tmp$0#0" = add nsw i64 %"n#0.tr2", -1
+  tail call void @print_int(i64 %"tmp$0#0")
+  tail call void @putchar(i8 10)
+  %"tmp$2#0" = icmp sgt i64 %"n#0.tr2", 1
+  br i1 %"tmp$2#0", label %if.then, label %if.else
+
+if.else:                                          ; preds = %if.then, %entry
+  ret void
+}
+

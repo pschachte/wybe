@@ -1,0 +1,70 @@
+======================================================================
+AFTER EVERYTHING:
+ Module io
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : io.<0>
+                    io.myprint_a<0>
+                    io.myprint_b<0>
+  imports         : use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+*main* > public (0 calls)
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): Alias Pairs: []
+
+    foreign c print_int(100:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:76:38
+    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+    foreign c print_int(200:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?tmp$5#0:wybe.phantom) @wybe:76:38
+    foreign c putchar('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:74:28
+
+
+myprint_a > public inline (1 calls)
+0: myprint_a(x#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
+
+    foreign c print_int(~x#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:76:38
+    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+
+
+myprint_b > public inline (1 calls)
+0: myprint_b(x#0:wybe.int, ?y#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
+
+    foreign c print_int(~x#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:76:38
+    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+    foreign llvm move(200:wybe.int, ?y#0:wybe.int)
+io
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'io'
+source_filename = "test-cases/io.wybe"
+
+declare void @putchar(i8) local_unnamed_addr
+
+declare void @print_int(i64) local_unnamed_addr
+
+define i32 @io.main() local_unnamed_addr {
+entry:
+  tail call void @print_int(i64 100)
+  tail call void @putchar(i8 10)
+  tail call void @print_int(i64 200)
+  tail call void @putchar(i8 10)
+  ret i32 0
+}
+
+define void @"io.myprint_a<0>"(i64 %"x#0") local_unnamed_addr {
+entry:
+  tail call void @print_int(i64 %"x#0")
+  tail call void @putchar(i8 10)
+  ret void
+}
+
+define i64 @"io.myprint_b<0>"(i64 %"x#0") local_unnamed_addr {
+entry:
+  tail call void @print_int(i64 %"x#0")
+  tail call void @putchar(i8 10)
+  ret i64 200
+}
+

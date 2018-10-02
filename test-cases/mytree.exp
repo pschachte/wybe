@@ -1,0 +1,602 @@
+======================================================================
+AFTER EVERYTHING:
+ Module mytree
+  public submods  : 
+  public types    : tree: (mytree.tree,"pointer")
+  public resources: 
+  public procs    : mytree.printTree<0>
+                    mytree.tree.=<0>
+                    mytree.tree.=<1>
+                    mytree.tree.=<2>
+                    mytree.tree.empty<0>
+                    mytree.tree.key<0>
+                    mytree.tree.key<1>
+                    mytree.tree.left<0>
+                    mytree.tree.left<1>
+                    mytree.tree.node<0>
+                    mytree.tree.node<1>
+                    mytree.tree.right<0>
+                    mytree.tree.right<1>
+  imports         : public use mytree.tree
+                    use wybe
+  types           : tree/0 (pointer)  @mytree:1:8
+  resources       : 
+  procs           : 
+
+printTree > public (2 calls)
+0: printTree(t#0:mytree.tree, wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom): Alias Pairs: [(1,2)]
+
+    foreign lpvm cast(t#0:mytree.tree, ?tmp$4#0:wybe.int)
+    foreign llvm icmp ne(~tmp$4#0:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
+    case ~tmp$5#0:wybe.bool of
+    0:
+        foreign llvm move(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom)
+
+    1:
+        foreign lpvm access(t#0:mytree.tree, 0:wybe.int, ?l#0:mytree.tree)
+        foreign lpvm access(t#0:mytree.tree, 8:wybe.int, ?k#0:wybe.int)
+        foreign lpvm access(~t#0:mytree.tree, 16:wybe.int, ?r#0:mytree.tree)
+        mytree.printTree<0>(~l#0:mytree.tree, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @mytree:5:6
+        foreign c print_int(~k#0:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:76:38
+        foreign c putchar('\n':wybe.char, ~tmp$8#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:74:28
+        mytree.printTree<0>(~r#0:mytree.tree, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @mytree:7:6
+
+  submodules      : mytree.tree
+--------------------------------------------------
+ Module mytree.tree([])
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : mytree.tree.=<0>
+                    mytree.tree.=<1>
+                    mytree.tree.=<2>
+                    mytree.tree.empty<0>
+                    mytree.tree.key<0>
+                    mytree.tree.key<1>
+                    mytree.tree.left<0>
+                    mytree.tree.left<1>
+                    mytree.tree.node<0>
+                    mytree.tree.node<1>
+                    mytree.tree.right<0>
+                    mytree.tree.right<1>
+  imports         : use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+= > public inline (0 calls)
+0: =(?out#0:mytree.tree, in#0:mytree.tree): Alias Pairs: []
+
+    foreign llvm move(~in#0:mytree.tree, ?out#0:mytree.tree)
+= > public inline (0 calls)
+1: =(in#0:mytree.tree, ?out#0:mytree.tree): Alias Pairs: []
+
+    foreign llvm move(~in#0:mytree.tree, ?out#0:mytree.tree)
+= > public test (6 calls)
+2: =($left#0:mytree.tree, $right#0:mytree.tree, ?$$#0:wybe.bool): Alias Pairs: []
+
+    foreign lpvm cast($left#0:mytree.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp eq(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$10#0:wybe.bool)
+        case ~tmp$10#0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+        1:
+            foreign lpvm access($left#0:mytree.tree, 0:wybe.int, ?$left$left#0:mytree.tree)
+            foreign lpvm access($left#0:mytree.tree, 8:wybe.int, ?$left$key#0:wybe.int)
+            foreign lpvm access(~$left#0:mytree.tree, 16:wybe.int, ?$left$right#0:mytree.tree)
+            foreign lpvm cast($right#0:mytree.tree, ?tmp$12#0:wybe.int)
+            foreign llvm icmp ne(~tmp$12#0:wybe.int, 0:wybe.int, ?tmp$13#0:wybe.bool)
+            case ~tmp$13#0:wybe.bool of
+            0:
+                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+            1:
+                foreign lpvm access($right#0:mytree.tree, 0:wybe.int, ?$right$left#0:mytree.tree)
+                foreign lpvm access($right#0:mytree.tree, 8:wybe.int, ?$right$key#0:wybe.int)
+                foreign lpvm access(~$right#0:mytree.tree, 16:wybe.int, ?$right$right#0:mytree.tree)
+                mytree.tree.=<2>(~$left$left#0:mytree.tree, ~$right$left#0:mytree.tree, ?tmp$5#0:wybe.bool)
+                case ~tmp$5#0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                1:
+                    foreign llvm icmp eq(~$left$key#0:wybe.int, ~$right$key#0:wybe.int, ?tmp$6#0:wybe.bool) @wybe:28:40
+                    case ~tmp$6#0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                    1:
+                        mytree.tree.=<2>(~$left$right#0:mytree.tree, ~$right$right#0:mytree.tree, ?$$#0:wybe.bool)
+
+
+
+
+
+    1:
+        foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?$$#0:wybe.bool)
+
+
+
+empty > public inline (0 calls)
+0: empty(?$#0:mytree.tree): Alias Pairs: []
+
+    foreign lpvm cast(0:mytree.tree, ?$#0:mytree.tree)
+
+
+key > public inline test (0 calls)
+0: key($rec#0:mytree.tree, ?$#0:wybe.int, ?$$#0:wybe.bool): Alias Pairs: []
+
+    foreign lpvm cast($rec#0:mytree.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:mytree.tree, 8:wybe.int, ?$#0:wybe.int)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+key > public inline test (0 calls)
+1: key($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:wybe.int, ?$$#0:wybe.bool): Alias Pairs: []
+
+    foreign lpvm cast($rec#0:mytree.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:mytree.tree, ?$rec#1:mytree.tree)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:mytree.tree, ?%$rec#1:mytree.tree, 24:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+left > public inline test (0 calls)
+0: left($rec#0:mytree.tree, ?$#0:mytree.tree, ?$$#0:wybe.bool): Alias Pairs: []
+
+    foreign lpvm cast($rec#0:mytree.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:mytree.tree, 0:wybe.int, ?$#0:mytree.tree)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+left > public inline test (0 calls)
+1: left($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:mytree.tree, ?$$#0:wybe.bool): Alias Pairs: []
+
+    foreign lpvm cast($rec#0:mytree.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:mytree.tree, ?$rec#1:mytree.tree)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:mytree.tree, ?%$rec#1:mytree.tree, 24:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:mytree.tree)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+node > public inline (0 calls)
+0: node(left#0:mytree.tree, key#0:wybe.int, right#0:mytree.tree, ?$#0:mytree.tree): Alias Pairs: []
+
+    foreign lpvm alloc(24:wybe.int, ?$rec#0:mytree.tree)
+    foreign lpvm mutate(~%$rec#0:mytree.tree, ?%$rec#1:mytree.tree, 24:wybe.int, 0:wybe.int, 1:wybe.int, ~left#0:mytree.tree)
+    foreign lpvm mutate(~%$rec#1:mytree.tree, ?%$rec#2:mytree.tree, 24:wybe.int, 8:wybe.int, 1:wybe.int, ~key#0:wybe.int)
+    foreign lpvm mutate(~%$rec#2:mytree.tree, ?%$#0:mytree.tree, 24:wybe.int, 16:wybe.int, 1:wybe.int, ~right#0:mytree.tree)
+node > public inline test (9 calls)
+1: node(?left#0:mytree.tree, ?key#0:wybe.int, ?right#0:mytree.tree, $#0:mytree.tree, ?$$#0:wybe.bool): Alias Pairs: []
+
+    foreign lpvm cast($#0:mytree.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access($#0:mytree.tree, 0:wybe.int, ?left#0:mytree.tree)
+        foreign lpvm access($#0:mytree.tree, 8:wybe.int, ?key#0:wybe.int)
+        foreign lpvm access(~$#0:mytree.tree, 16:wybe.int, ?right#0:mytree.tree)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+right > public inline test (0 calls)
+0: right($rec#0:mytree.tree, ?$#0:mytree.tree, ?$$#0:wybe.bool): Alias Pairs: []
+
+    foreign lpvm cast($rec#0:mytree.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:mytree.tree, 16:wybe.int, ?$#0:mytree.tree)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+right > public inline test (0 calls)
+1: right($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:mytree.tree, ?$$#0:wybe.bool): Alias Pairs: []
+
+    foreign lpvm cast($rec#0:mytree.tree, ?tmp$0#0:wybe.int)
+    foreign llvm icmp ne(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:mytree.tree, ?$rec#1:mytree.tree)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:mytree.tree, ?%$rec#1:mytree.tree, 24:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:mytree.tree)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+mytree, mytree.tree
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'mytree'
+source_filename = "test-cases/mytree.wybe"
+
+declare void @putchar(i8) local_unnamed_addr
+
+declare void @print_int(i64) local_unnamed_addr
+
+declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+define void @"mytree.printTree<0>"(i64* readonly %"t#0") local_unnamed_addr {
+entry:
+  %"tmp$5#01" = icmp eq i64* %"t#0", null
+  br i1 %"tmp$5#01", label %if.else, label %if.then.preheader
+
+if.then.preheader:                                ; preds = %entry
+  br label %if.then
+
+if.then:                                          ; preds = %if.then.preheader, %if.then
+  %"t#0.tr2" = phi i64* [ %6, %if.then ], [ %"t#0", %if.then.preheader ]
+  %0 = bitcast i64* %"t#0.tr2" to i64**
+  %1 = load i64*, i64** %0, align 8
+  %2 = getelementptr i64, i64* %"t#0.tr2", i64 1
+  %3 = load i64, i64* %2, align 4
+  %4 = getelementptr i64, i64* %"t#0.tr2", i64 2
+  %5 = bitcast i64* %4 to i64**
+  %6 = load i64*, i64** %5, align 8
+  tail call void @"mytree.printTree<0>"(i64* %1)
+  tail call void @print_int(i64 %3)
+  tail call void @putchar(i8 10)
+  %"tmp$5#0" = icmp eq i64* %6, null
+  br i1 %"tmp$5#0", label %if.else, label %if.then
+
+if.else:                                          ; preds = %if.then, %entry
+  ret void
+}
+
+; Function Attrs: norecurse nounwind readnone
+define i64* @"mytree.tree.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
+entry:
+  ret i64* %"in#0"
+}
+
+; Function Attrs: norecurse nounwind readnone
+define i64* @"mytree.tree.=<1>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
+entry:
+  ret i64* %"in#0"
+}
+
+; Function Attrs: nounwind readonly
+define i1 @"mytree.tree.=<2>"(i64* readonly %"$left#0", i64* readonly %"$right#0") local_unnamed_addr #1 {
+entry:
+  %"tmp$1#04" = icmp eq i64* %"$left#0", null
+  br i1 %"tmp$1#04", label %if.then, label %if.then1.preheader
+
+if.then1.preheader:                               ; preds = %entry
+  br label %if.then1
+
+if.then:                                          ; preds = %if.then4, %entry
+  %"$right#0.tr.lcssa" = phi i64* [ %"$right#0", %entry ], [ %13, %if.then4 ]
+  %"$$#0" = icmp eq i64* %"$right#0.tr.lcssa", null
+  ret i1 %"$$#0"
+
+if.then1:                                         ; preds = %if.then1.preheader, %if.then4
+  %"$right#0.tr6" = phi i64* [ %13, %if.then4 ], [ %"$right#0", %if.then1.preheader ]
+  %"$left#0.tr5" = phi i64* [ %2, %if.then4 ], [ %"$left#0", %if.then1.preheader ]
+  %0 = getelementptr i64, i64* %"$left#0.tr5", i64 2
+  %1 = bitcast i64* %0 to i64**
+  %2 = load i64*, i64** %1, align 8
+  %"tmp$13#0" = icmp eq i64* %"$right#0.tr6", null
+  br i1 %"tmp$13#0", label %if.else2, label %if.then2
+
+if.then2:                                         ; preds = %if.then1
+  %3 = getelementptr i64, i64* %"$left#0.tr5", i64 1
+  %4 = load i64, i64* %3, align 4
+  %5 = bitcast i64* %"$left#0.tr5" to i64**
+  %6 = load i64*, i64** %5, align 8
+  %7 = bitcast i64* %"$right#0.tr6" to i64**
+  %8 = load i64*, i64** %7, align 8
+  %9 = getelementptr i64, i64* %"$right#0.tr6", i64 1
+  %10 = load i64, i64* %9, align 4
+  %"tmp$5#0" = tail call i1 @"mytree.tree.=<2>"(i64* %6, i64* %8)
+  %"tmp$6#0" = icmp eq i64 %4, %10
+  %or.cond = and i1 %"tmp$5#0", %"tmp$6#0"
+  br i1 %or.cond, label %if.then4, label %if.else2
+
+if.else2:                                         ; preds = %if.then1, %if.then2
+  ret i1 false
+
+if.then4:                                         ; preds = %if.then2
+  %11 = getelementptr i64, i64* %"$right#0.tr6", i64 2
+  %12 = bitcast i64* %11 to i64**
+  %13 = load i64*, i64** %12, align 8
+  %"tmp$1#0" = icmp eq i64* %2, null
+  br i1 %"tmp$1#0", label %if.then, label %if.then1
+}
+
+; Function Attrs: norecurse nounwind readnone
+define noalias i64* @"mytree.tree.empty<0>"() local_unnamed_addr #0 {
+entry:
+  ret i64* null
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64, i1 } @"mytree.tree.key<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$rec#0", null
+  ret i1 %"tmp$1#0"
+}
+
+define { i64*, i1 } @"mytree.tree.key<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  br i1 %"tmp$1#0", label %if.else, label %if.then
+
+if.then:                                          ; preds = %entry
+  %0 = tail call i8* @wybe_malloc(i32 24)
+  %1 = getelementptr i64, i64* %"$rec#0", i64 1
+  store i64 %"$field#0", i64* %1, align 4
+  ret i1 true
+
+if.else:                                          ; preds = %entry
+  ret i64* null
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64*, i1 } @"mytree.tree.left<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$rec#0", null
+  ret i1 %"tmp$1#0"
+}
+
+define { i64*, i1 } @"mytree.tree.left<1>"(i64* %"$rec#0", i64* %"$field#0") local_unnamed_addr {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  br i1 %"tmp$1#0", label %if.else, label %if.then
+
+if.then:                                          ; preds = %entry
+  %0 = tail call i8* @wybe_malloc(i32 24)
+  %1 = ptrtoint i64* %"$field#0" to i64
+  store i64 %1, i64* %"$rec#0", align 4
+  ret i1 true
+
+if.else:                                          ; preds = %entry
+  ret i64* null
+}
+
+define i64* @"mytree.tree.node<0>"(i64* %"left#0", i64 %"key#0", i64* %"right#0") local_unnamed_addr {
+entry:
+  %0 = tail call i8* @wybe_malloc(i32 24)
+  %1 = bitcast i8* %0 to i64*
+  %2 = ptrtoint i64* %"left#0" to i64
+  store i64 %2, i64* %1, align 4
+  %3 = getelementptr i8, i8* %0, i64 8
+  %4 = bitcast i8* %3 to i64*
+  store i64 %"key#0", i64* %4, align 4
+  %5 = getelementptr i8, i8* %0, i64 16
+  %6 = bitcast i8* %5 to i64*
+  %7 = ptrtoint i64* %"right#0" to i64
+  store i64 %7, i64* %6, align 4
+  ret i64* %1
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64*, i64, i64*, i1 } @"mytree.tree.node<1>"(i64* readnone %"$#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$#0", null
+  ret i1 %"tmp$1#0"
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64*, i1 } @"mytree.tree.right<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$rec#0", null
+  ret i1 %"tmp$1#0"
+}
+
+define { i64*, i1 } @"mytree.tree.right<1>"(i64* %"$rec#0", i64* %"$field#0") local_unnamed_addr {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  br i1 %"tmp$1#0", label %if.else, label %if.then
+
+if.then:                                          ; preds = %entry
+  %0 = tail call i8* @wybe_malloc(i32 24)
+  %1 = getelementptr i64, i64* %"$rec#0", i64 2
+  %2 = ptrtoint i64* %"$field#0" to i64
+  store i64 %2, i64* %1, align 4
+  ret i1 true
+
+if.else:                                          ; preds = %entry
+  ret i64* null
+}
+
+attributes #0 = { norecurse nounwind readnone }
+attributes #1 = { nounwind readonly }
+
+--------------------------------------------------
+; ModuleID = 'mytree.tree'
+source_filename = "test-cases"
+
+declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+; Function Attrs: norecurse nounwind readnone
+define i64* @"mytree.tree.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
+entry:
+  ret i64* %"in#0"
+}
+
+; Function Attrs: norecurse nounwind readnone
+define i64* @"mytree.tree.=<1>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
+entry:
+  ret i64* %"in#0"
+}
+
+; Function Attrs: nounwind readonly
+define i1 @"mytree.tree.=<2>"(i64* readonly %"$left#0", i64* readonly %"$right#0") local_unnamed_addr #1 {
+entry:
+  %"tmp$1#04" = icmp eq i64* %"$left#0", null
+  br i1 %"tmp$1#04", label %if.then, label %if.then1.preheader
+
+if.then1.preheader:                               ; preds = %entry
+  br label %if.then1
+
+if.then:                                          ; preds = %if.then4, %entry
+  %"$right#0.tr.lcssa" = phi i64* [ %"$right#0", %entry ], [ %13, %if.then4 ]
+  %"$$#0" = icmp eq i64* %"$right#0.tr.lcssa", null
+  ret i1 %"$$#0"
+
+if.then1:                                         ; preds = %if.then1.preheader, %if.then4
+  %"$right#0.tr6" = phi i64* [ %13, %if.then4 ], [ %"$right#0", %if.then1.preheader ]
+  %"$left#0.tr5" = phi i64* [ %2, %if.then4 ], [ %"$left#0", %if.then1.preheader ]
+  %0 = getelementptr i64, i64* %"$left#0.tr5", i64 2
+  %1 = bitcast i64* %0 to i64**
+  %2 = load i64*, i64** %1, align 8
+  %"tmp$13#0" = icmp eq i64* %"$right#0.tr6", null
+  br i1 %"tmp$13#0", label %if.else2, label %if.then2
+
+if.then2:                                         ; preds = %if.then1
+  %3 = getelementptr i64, i64* %"$left#0.tr5", i64 1
+  %4 = load i64, i64* %3, align 4
+  %5 = bitcast i64* %"$left#0.tr5" to i64**
+  %6 = load i64*, i64** %5, align 8
+  %7 = bitcast i64* %"$right#0.tr6" to i64**
+  %8 = load i64*, i64** %7, align 8
+  %9 = getelementptr i64, i64* %"$right#0.tr6", i64 1
+  %10 = load i64, i64* %9, align 4
+  %"tmp$5#0" = tail call i1 @"mytree.tree.=<2>"(i64* %6, i64* %8)
+  %"tmp$6#0" = icmp eq i64 %4, %10
+  %or.cond = and i1 %"tmp$5#0", %"tmp$6#0"
+  br i1 %or.cond, label %if.then4, label %if.else2
+
+if.else2:                                         ; preds = %if.then1, %if.then2
+  ret i1 false
+
+if.then4:                                         ; preds = %if.then2
+  %11 = getelementptr i64, i64* %"$right#0.tr6", i64 2
+  %12 = bitcast i64* %11 to i64**
+  %13 = load i64*, i64** %12, align 8
+  %"tmp$1#0" = icmp eq i64* %2, null
+  br i1 %"tmp$1#0", label %if.then, label %if.then1
+}
+
+; Function Attrs: norecurse nounwind readnone
+define noalias i64* @"mytree.tree.empty<0>"() local_unnamed_addr #0 {
+entry:
+  ret i64* null
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64, i1 } @"mytree.tree.key<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$rec#0", null
+  ret i1 %"tmp$1#0"
+}
+
+define { i64*, i1 } @"mytree.tree.key<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  br i1 %"tmp$1#0", label %if.else, label %if.then
+
+if.then:                                          ; preds = %entry
+  %0 = tail call i8* @wybe_malloc(i32 24)
+  %1 = getelementptr i64, i64* %"$rec#0", i64 1
+  store i64 %"$field#0", i64* %1, align 4
+  ret i1 true
+
+if.else:                                          ; preds = %entry
+  ret i64* null
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64*, i1 } @"mytree.tree.left<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$rec#0", null
+  ret i1 %"tmp$1#0"
+}
+
+define { i64*, i1 } @"mytree.tree.left<1>"(i64* %"$rec#0", i64* %"$field#0") local_unnamed_addr {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  br i1 %"tmp$1#0", label %if.else, label %if.then
+
+if.then:                                          ; preds = %entry
+  %0 = tail call i8* @wybe_malloc(i32 24)
+  %1 = ptrtoint i64* %"$field#0" to i64
+  store i64 %1, i64* %"$rec#0", align 4
+  ret i1 true
+
+if.else:                                          ; preds = %entry
+  ret i64* null
+}
+
+define i64* @"mytree.tree.node<0>"(i64* %"left#0", i64 %"key#0", i64* %"right#0") local_unnamed_addr {
+entry:
+  %0 = tail call i8* @wybe_malloc(i32 24)
+  %1 = bitcast i8* %0 to i64*
+  %2 = ptrtoint i64* %"left#0" to i64
+  store i64 %2, i64* %1, align 4
+  %3 = getelementptr i8, i8* %0, i64 8
+  %4 = bitcast i8* %3 to i64*
+  store i64 %"key#0", i64* %4, align 4
+  %5 = getelementptr i8, i8* %0, i64 16
+  %6 = bitcast i8* %5 to i64*
+  %7 = ptrtoint i64* %"right#0" to i64
+  store i64 %7, i64* %6, align 4
+  ret i64* %1
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64*, i64, i64*, i1 } @"mytree.tree.node<1>"(i64* readnone %"$#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$#0", null
+  ret i1 %"tmp$1#0"
+}
+
+; Function Attrs: norecurse nounwind readnone
+define { i64*, i1 } @"mytree.tree.right<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+entry:
+  %"tmp$1#0" = icmp ne i64* %"$rec#0", null
+  ret i1 %"tmp$1#0"
+}
+
+define { i64*, i1 } @"mytree.tree.right<1>"(i64* %"$rec#0", i64* %"$field#0") local_unnamed_addr {
+entry:
+  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  br i1 %"tmp$1#0", label %if.else, label %if.then
+
+if.then:                                          ; preds = %entry
+  %0 = tail call i8* @wybe_malloc(i32 24)
+  %1 = getelementptr i64, i64* %"$rec#0", i64 2
+  %2 = ptrtoint i64* %"$field#0" to i64
+  store i64 %2, i64* %1, align 4
+  ret i1 true
+
+if.else:                                          ; preds = %entry
+  ret i64* null
+}
+
+attributes #0 = { norecurse nounwind readnone }
+attributes #1 = { nounwind readonly }
+
