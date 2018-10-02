@@ -117,8 +117,7 @@ checkEscapePrims caller body callerAlias = do
                         (bodyAliasedVars', pairs') <- aliasPairsFromArgs bodyAliasedVars args pairs
                         return (bodyAliasedVars', pairs')
                         ) (paramNames, []) prims
-    logAlias $ "    ^^^ Alised vars: " ++ show bodyAliases
-
+    logAlias $ "^^^ Aliased vars by prims: " ++ show bodyAliases
     let aliasPairs' = removeDupTuples $ transitiveTuples $ removeDupTuples aliasPairs
     let prunedPairs = pruneTuples aliasPairs' (List.length paramNames)
 
@@ -127,6 +126,7 @@ checkEscapePrims caller body callerAlias = do
     (prims', aliasNames) <- foldM (\(ps, as) prim ->
                                 escapeByProcCalls (ps, as) prim callerAlias)
                                     ([], []) prims
+    logAlias $ "^^^ Aliased vars by proc calls: " ++ show aliasNames
 
     -- convert alias name pairs to index pairs
     let aliasByProcCalls = _aliasNamesToPairs caller aliasNames
@@ -257,16 +257,6 @@ _aliasPairsToVarNames primCallArgs =
                 (ArgVar n1 _ _ _ _, ArgVar n2 _ _ _ _) ->
                     (n1, n2) : aliasNames
                 _ -> aliasNames
-        ) []
-
--- Helper: convert alias index pairs to formal param name pairs
-_aliasPairsToVarNames2 :: [PrimParam] -> [AliasPair]
-                            -> [(PrimVarName, PrimVarName)]
-_aliasPairsToVarNames2 params =
-    List.foldr (\(p1,p2) aliasNames ->
-        let PrimParam n1 _ _ _ _ = params !! p1
-            PrimParam n2 _ _ _ _ = params !! p2
-        in (n1, n2) : aliasNames
         ) []
 
 -- Helper: convert aliased var names pair to arg index pair
