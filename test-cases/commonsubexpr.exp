@@ -11,7 +11,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) aliases []:
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
+
     foreign c print_int(198:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @wybe:76:38
     foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @wybe:74:28
     foreign c print_int(198:wybe.int, ~tmp$7#0:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:76:38
@@ -21,7 +22,8 @@ AFTER EVERYTHING:
 
 
 common_subexpr > inline (1 calls)
-0: common_subexpr(x#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom) aliases []:
+0: common_subexpr(x#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom): Alias Pairs: []
+
     foreign llvm add(x#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:13:38
     foreign llvm sub(~x#0:wybe.int, 1:wybe.int, ?tmp$51#0:wybe.int) @wybe:16:38
     foreign llvm mul(tmp$2#0:wybe.int, ~tmp$51#0:wybe.int, ?tmp$41#0:wybe.int) @wybe:21:38

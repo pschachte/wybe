@@ -11,7 +11,8 @@ AFTER EVERYTHING:
   procs           : 
 
 print2 > public inline (0 calls)
-0: print2(x#0:wybe.int, y#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom) aliases []:
+0: print2(x#0:wybe.int, y#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): Alias Pairs: []
+
     foreign c print_int(~x#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:76:38
     foreign c print_int(~y#0:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:76:38
 proc_print2

@@ -54,70 +54,86 @@ AFTER EVERYTHING:
   procs           : 
 
 * > public inline (0 calls)
-0: *(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint) aliases []:
+0: *(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint): Alias Pairs: []
+
     foreign llvm mul(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:8:44
 
 
 + > public inline (0 calls)
-0: +(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint) aliases []:
+0: +(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint): Alias Pairs: []
+
     foreign llvm add(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:2:44
 + > public inline (0 calls)
-1: +(?x#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint) aliases []:
+1: +(?x#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint): Alias Pairs: []
+
     foreign llvm sub(~z#0:type_int.myint, ~y#0:type_int.myint, ?x#0:type_int.myint) @type_int:3:50
 + > public inline (0 calls)
-2: +(x#0:type_int.myint, ?y#0:type_int.myint, z#0:type_int.myint) aliases []:
+2: +(x#0:type_int.myint, ?y#0:type_int.myint, z#0:type_int.myint): Alias Pairs: []
+
     foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:4:50
 
 
 - > public inline (0 calls)
-0: -(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint) aliases []:
+0: -(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint): Alias Pairs: []
+
     foreign llvm sub(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:5:44
 - > public inline (0 calls)
-1: -(?x#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint) aliases []:
+1: -(?x#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint): Alias Pairs: []
+
     foreign llvm add(~y#0:type_int.myint, ~z#0:type_int.myint, ?x#0:type_int.myint) @type_int:6:50
 - > public inline (0 calls)
-2: -(x#0:type_int.myint, ?y#0:type_int.myint, z#0:type_int.myint) aliases []:
+2: -(x#0:type_int.myint, ?y#0:type_int.myint, z#0:type_int.myint): Alias Pairs: []
+
     foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:7:50
 
 
 / > public inline (0 calls)
-0: /(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint) aliases []:
+0: /(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint): Alias Pairs: []
+
     foreign llvm sdiv(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:9:44
 
 
 /= > public inline (0 calls)
-0: /=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool) aliases []:
+0: /=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool): Alias Pairs: []
+
     foreign llvm icmp ne(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:11:44
 
 
 < > public inline (0 calls)
-0: <(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool) aliases []:
+0: <(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool): Alias Pairs: []
+
     foreign llvm icmp slt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:12:43
 
 
 <= > public inline (0 calls)
-0: <=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool) aliases []:
+0: <=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool): Alias Pairs: []
+
     foreign llvm icmp sle(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:13:44
 
 
 = > public inline (4 calls)
-0: =(?out#0:type_int.myint, in#0:type_int.myint) aliases []:
+0: =(?out#0:type_int.myint, in#0:type_int.myint): Alias Pairs: []
+
     foreign llvm move(~in#0:type_int.myint, ?out#0:type_int.myint)
 = > public inline (0 calls)
-1: =(in#0:type_int.myint, ?out#0:type_int.myint) aliases []:
+1: =(in#0:type_int.myint, ?out#0:type_int.myint): Alias Pairs: []
+
     foreign llvm move(~in#0:type_int.myint, ?out#0:type_int.myint)
 = > public inline (0 calls)
-2: =(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool) aliases []:
+2: =(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool): Alias Pairs: []
+
     foreign llvm icmp eq(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:10:43
 
 
 > > public inline (0 calls)
-0: >(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool) aliases []:
+0: >(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool): Alias Pairs: []
+
     foreign llvm icmp sgt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:14:43
 
 
 >= > public inline (0 calls)
-0: >=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool) aliases []:
+0: >=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool): Alias Pairs: []
+
     foreign llvm icmp sge(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:15:44
 type_int, type_int.myint
 ======================================================================

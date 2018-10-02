@@ -36,33 +36,40 @@ AFTER EVERYTHING:
   procs           : 
 
 = > public inline (0 calls)
-0: =(?out#0:type_enum.season, in#0:type_enum.season) aliases []:
+0: =(?out#0:type_enum.season, in#0:type_enum.season): Alias Pairs: []
+
     foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
 = > public inline (0 calls)
-1: =(in#0:type_enum.season, ?out#0:type_enum.season) aliases []:
+1: =(in#0:type_enum.season, ?out#0:type_enum.season): Alias Pairs: []
+
     foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
 = > public inline test (0 calls)
-2: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool) aliases []:
+2: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?$$#0:wybe.bool)
 
 
 autumn > public inline (0 calls)
-0: autumn(?$#0:type_enum.season) aliases []:
+0: autumn(?$#0:type_enum.season): Alias Pairs: []
+
     foreign lpvm cast(3:type_enum.season, ?$#0:type_enum.season)
 
 
 spring > public inline (0 calls)
-0: spring(?$#0:type_enum.season) aliases []:
+0: spring(?$#0:type_enum.season): Alias Pairs: []
+
     foreign lpvm cast(1:type_enum.season, ?$#0:type_enum.season)
 
 
 summer > public inline (0 calls)
-0: summer(?$#0:type_enum.season) aliases []:
+0: summer(?$#0:type_enum.season): Alias Pairs: []
+
     foreign lpvm cast(2:type_enum.season, ?$#0:type_enum.season)
 
 
 winter > public inline (0 calls)
-0: winter(?$#0:type_enum.season) aliases []:
+0: winter(?$#0:type_enum.season): Alias Pairs: []
+
     foreign lpvm cast(0:type_enum.season, ?$#0:type_enum.season)
 type_enum, type_enum.season
 ======================================================================

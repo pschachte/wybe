@@ -11,7 +11,8 @@ AFTER EVERYTHING:
   procs           : 
 
 plus > public inline (0 calls)
-0: plus(a#0:wybe.int, b#0:wybe.int, ?$#0:wybe.int) aliases []:
+0: plus(a#0:wybe.int, b#0:wybe.int, ?$#0:wybe.int): Alias Pairs: []
+
     foreign llvm add(~a#0:wybe.int, ~b#0:wybe.int, ?$#0:wybe.int) @wybe:13:38
 func_typed
 ======================================================================

@@ -11,7 +11,8 @@ AFTER EVERYTHING:
   procs           : 
 
 quad > public inline (0 calls)
-0: quad(x#0:wybe.int, ?$#0:wybe.int) aliases []:
+0: quad(x#0:wybe.int, ?$#0:wybe.int): Alias Pairs: []
+
     foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:13:38
     foreign llvm add(~tmp$0#0:wybe.int, ~tmp$0#0:wybe.int, ?$#0:wybe.int) @wybe:13:38
 func_where

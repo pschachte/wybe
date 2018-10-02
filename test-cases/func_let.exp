@@ -12,12 +12,14 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public inline (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) aliases []:
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
+
     foreign c print_int(40:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:76:38
 
 
 quad > public inline (1 calls)
-0: quad(x#0:wybe.int, ?$#0:wybe.int) aliases []:
+0: quad(x#0:wybe.int, ?$#0:wybe.int): Alias Pairs: []
+
     foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:13:38
     foreign llvm add(~tmp$0#0:wybe.int, ~tmp$0#0:wybe.int, ?$#0:wybe.int) @wybe:13:38
 func_let
