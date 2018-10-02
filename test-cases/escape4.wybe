@@ -4,7 +4,7 @@ use position
 
 public proc replicate1(p1:position, ?p2:position) use !io
   ?pp = position(0,0)
-  !print("random replicate1")
+  !println("random replicate1")
   !println(pp.x)
   ?p2 = position(p1.x, 200)
 end
@@ -17,11 +17,11 @@ public proc bar use !io
   !print("p1.x")
   !println(p1.x) # expected 555 - is 555
   !print("p1.y")
-  !println(p1.y) # expected 1 - is 100
+  !println(p1.y) # expected 100 - is 100
   !print("p2.x")
-  !println(p2.x) # expected 2 - is 100
+  !println(p2.x) # expected 100 - is 100
   !print("p2.y")
-  !println(p2.y) # expected 2 - is 200
+  !println(p2.y) # expected 200 - is 200
 end
 
 !bar
