@@ -33,7 +33,8 @@ module AST (
   ModSpec, ProcImpln(..), AliasPair, ProcAnalysis(..), ProcDef(..), procCallCount,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
-  argFlowDirection, argType, inArgVar, outArgVar, argDescription, flowsIn, flowsOut,
+  argFlowDirection, argVarIsFlowDirection, argType,
+  inArgVar, inArgVar2, outArgVar2, argDescription, flowsIn, flowsOut,
   foldProcCalls, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp, expFlow,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
@@ -127,6 +128,10 @@ data TypeImpln = TypeRepresentation TypeRepresentation
                | TypeCtors Visibility [Placed FnProto]
                deriving (Generic, Eq)
 
+-- -- |Check if a pointer or primitive variables
+-- isPointer :: TypeImpln -> Bool
+-- isPointer (TypeRepresentation rep) = False
+-- isPointer (TypeCtors _ _) = True
 
 -- |Combine two visibilities, taking the most visible.
 maxVisibility :: Visibility -> Visibility -> Visibility
@@ -1814,6 +1819,7 @@ isProcProtoArg :: [PrimVarName] -> PrimArg -> Bool
 isProcProtoArg paramNames arg@ArgVar {} = argVarName arg `elem` paramNames
 isProcProtoArg _ _ = False
 
+
 -- |A loop generator (ie, an iterator).  These need to be
 --  generalised, allowing them to be user-defined.
 data Generator
@@ -1904,6 +1910,13 @@ argFlowDirection (ArgFloat _ _) = FlowIn
 argFlowDirection (ArgString _ _) = FlowIn
 argFlowDirection (ArgChar _ _) = FlowIn
 
+-- |Check dataflow direction of an actual argument and the arg should be ArgVar
+argVarIsFlowDirection :: PrimFlow -> PrimArg -> Bool
+argVarIsFlowDirection flow' (ArgVar _ _ flow _ _) = flow == flow'
+argVarIsFlowDirection _ (ArgInt _ _) = False
+argVarIsFlowDirection _ (ArgFloat _ _) = False
+argVarIsFlowDirection _ (ArgString _ _) = False
+argVarIsFlowDirection _ (ArgChar _ _) = False
 
 argType :: PrimArg -> TypeSpec
 argType (ArgVar _ typ _ _ _) = typ
@@ -1916,9 +1929,22 @@ inArgVar:: PrimArg -> PrimVarName
 inArgVar (ArgVar var _ flow _ _) | flow == FlowIn = var
 inArgVar _ = shouldnt "inArgVar of input argument"
 
-outArgVar:: PrimArg -> PrimVarName
-outArgVar (ArgVar var _ flow _ _) | flow == FlowOut = var
-outArgVar _ = shouldnt "outArgVar of input argument"
+
+inArgVar2:: PrimArg -> Compiler PrimVarName
+inArgVar2 (ArgVar var ty flow _ _)
+    | flow == FlowIn = do
+        rep <- lookupTypeRepresentation ty
+        -- case rep of
+        --     Just "pointer" -> logAlias "pointer"
+        --     _ -> logAlias "else"
+        -- logAlias $ show $ lookupTypeRepresentation ty
+        return var
+inArgVar2 var = shouldnt "inArgVar2 of input argument"
+
+
+outArgVar2:: PrimArg -> Compiler PrimVarName
+outArgVar2 (ArgVar var _ flow _ _) | flow == FlowOut = return var
+outArgVar2 _ = shouldnt "outArgVar2 of input argument"
 
 
 argDescription :: PrimArg -> String

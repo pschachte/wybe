@@ -1,6 +1,3 @@
-# (1) analyse condition switches?
-# (2) how to modify part of a recursive data type?
-
 # Recursive data type:
 # will the part of the data structure escape?
 

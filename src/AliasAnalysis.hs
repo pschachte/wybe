@@ -40,16 +40,26 @@ removeDupTuples :: Ord a => [(a,a)] -> [(a,a)]
 removeDupTuples =
     List.map List.head . List.group . List.sort . List.map normalise
 
+-- Helper: prune list of tuples with int larger than the range
+pruneTuples :: Ord a => [(a,a)] -> a -> [(a,a)]
+pruneTuples tuples upperBound =
+    List.foldr (\(t1, t2) tps ->
+                if t1 < upperBound && t2 < upperBound then (t1, t2):tps
+                else tps) [] tuples
 
 -- Helper: to expand alias pairs
 -- e.g. Aliases [(1,2),(2,3),(3,4)] is expanded to
 -- [(1,2),(1,3),(1,4),(2,3),(2,4),(3,4)]
--- pairs are sorted already
+-- items in pairs are sorted already
 transitiveTuples :: [(Int,Int)] -> [(Int,Int)]
 transitiveTuples [] = []
 transitiveTuples pairs =
-    let loBound = fst $ List.head pairs
-        upBound = snd $ List.last pairs
+    let loBound = List.foldr (\(p1,p2) bound ->
+                                if p1 < bound then p1
+                                else bound) 0 pairs
+        upBound = List.foldr (\(p1,p2) bound ->
+                    if p2 > bound then p2
+                    else bound) 0 pairs
         adj = buildG (loBound, upBound) pairs
         undirectedAdj = buildG (loBound, upBound) (edges adj ++ reverseE adj)
         elements = vertices undirectedAdj
@@ -91,18 +101,24 @@ checkEscapeDef spec def
 checkEscapeDef _ def = return def
 
 
+-- Check alias created by prims of caller proc
 checkEscapePrims :: PrimProto -> ProcBody -> [AliasPair]
                     -> Compiler([Placed Prim], [AliasPair])
 checkEscapePrims caller body callerAlias = do
+    let paramNames = primProtoParamNames caller
     let prims = bodyPrims body
+
     -- First pass (only process alias pairs incurred by move and mutate)
-    logAlias $ "    " ++ List.intercalate "\n    " (List.map show prims)
-    aliasPairs <- foldM
-                    (\alias prim -> do
+    -- logAlias $ "    " ++ List.intercalate "\n    " (List.map show prims)
+
+    (processedAliasVars, aliasPairs) <- foldM
+                    (\(bodyAliasedVars, pairs) prim -> do
                         args <- escapablePrimArgs $ content prim
-                        return $ aliasPairsFromArgs caller args alias
-                        ) [] prims
-    let aliasPairs' = removeDupTuples aliasPairs
+                        (bodyAliasedVars', pairs') <- aliasPairsFromArgs bodyAliasedVars args pairs
+                        return (bodyAliasedVars', pairs' ++ pairs)
+                        ) (paramNames, []) prims
+    let aliasPairs' = removeDupTuples $ transitiveTuples $ removeDupTuples aliasPairs
+    let prunedPairs = pruneTuples aliasPairs' (List.length paramNames)
 
     -- Second pass (handle alias pairs incurred by proc calls within
     -- caller)
@@ -112,7 +128,7 @@ checkEscapePrims caller body callerAlias = do
 
     -- convert alias name pairs to index pairs
     let aliasByProcCalls = _aliasNamesToPairs caller aliasNames
-    let allPairs = aliasPairs' ++ aliasByProcCalls
+    let allPairs = prunedPairs ++ aliasByProcCalls
     let allPairs' = removeDupTuples allPairs
 
     -- alias pairs are transitive
@@ -155,36 +171,43 @@ escapablePrimArgs (PrimForeign _ "move" _ args)   = return args
 escapablePrimArgs (PrimForeign _ "mutate" _ args) = return args
 escapablePrimArgs (PrimForeign _ "access" _ args) = return args
 escapablePrimArgs (PrimForeign _ "cast" _ args)   = return args
-escapablePrimArgs prim                            = return []
+escapablePrimArgs _                               = return []
 
--- Only append to list if the arg is passed in by the enclosing entry proc or is
--- the return arg of the proc
--- paramNames: a list of PrimVarName of arguments of the enclosing proc
--- args: the list of PrimArg, the arguments of the prim enclosed in caller
-argsOfProcProto :: [PrimVarName] -> (PrimArg -> PrimVarName) -> [PrimArg]
-                    -> [Int]
-argsOfProcProto paramNames varNameGetter =
-    List.foldl (\es arg ->
-        if isProcProtoArg paramNames arg
-            then
-                let vnm = varNameGetter arg
-                    vidx = List.elemIndex vnm paramNames
-                in case vidx of
-                    Just vidx -> vidx : es
-                    Nothing   -> es
-            else es) []
+
+-- get argvar names of aliased args of the prim
+argsOfProcProto :: (PrimArg -> Compiler PrimVarName) -> [PrimArg]
+                    -> Compiler [PrimVarName]
+argsOfProcProto varNameGetter =
+    foldM (\es arg -> do
+            nm <- varNameGetter arg
+            return (nm : es)) []
 
 
 -- Check Arg escape in one prim of prims of a ProcBody
-aliasPairsFromArgs :: PrimProto -> [PrimArg] -> [AliasPair] -> [AliasPair]
-aliasPairsFromArgs _ [] aliasPairs = aliasPairs
-aliasPairsFromArgs caller args aliasPairs =
-    let inputArgs = List.filter ((FlowIn ==) . argFlowDirection) args
-        outputArgs = List.filter ((FlowOut ==) . argFlowDirection) args
-        paramNames = primProtoParamNames caller
-        escapedInputs = argsOfProcProto paramNames inArgVar inputArgs
-        escapedVia = argsOfProcProto paramNames outArgVar outputArgs
-    in _cartProd escapedInputs escapedVia ++ aliasPairs
+aliasPairsFromArgs :: [PrimVarName] -> [PrimArg] -> [AliasPair]
+                        -> Compiler ([PrimVarName], [AliasPair])
+aliasPairsFromArgs allAliased [] pairs = return (allAliased, pairs)
+aliasPairsFromArgs allAliased args pairs = do
+    let inputArgs = List.filter (argVarIsFlowDirection FlowIn) args
+    let outputArgs = List.filter (argVarIsFlowDirection FlowOut) args
+    escapedInputs <- argsOfProcProto inArgVar2 inputArgs
+    escapedVia <- argsOfProcProto outArgVar2 outputArgs
+    let (allAliased1, inIndices) = _mapVarNameIdx allAliased escapedInputs
+        (allAliased2, outIndices) = _mapVarNameIdx allAliased1 escapedVia
+    return (allAliased2, _cartProd inIndices outIndices ++ pairs)
+
+_mapVarNameIdx :: [PrimVarName] -> [PrimVarName] -> ([PrimVarName], [Int])
+_mapVarNameIdx allAliased =
+    List.foldl (
+        \(varNames, indices) nm ->
+            let elemIdx = List.elemIndex nm varNames
+            in case elemIdx of
+                Just idx -> (allAliased, idx : indices)
+                Nothing ->
+                    let allAliased' = nm : allAliased
+                        newIdx = List.length allAliased' - 1
+                    in (allAliased', newIdx : indices)
+    ) (allAliased, [])
 
 
 -- For second pass:
