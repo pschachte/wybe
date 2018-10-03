@@ -24,7 +24,7 @@ aliasSccBottomUp procs = mapM_ aliasProcBottomUp $ sccElts procs
 
 aliasProcBottomUp :: ProcSpec -> Compiler ()
 aliasProcBottomUp pspec = do
-    logAlias "\n>>> Alias analysis (Bottom-up):"
+    -- logAlias "\n>>> Alias analysis (Bottom-up):"
     updateProcDefM (checkEscapeDef pspec) pspec
     return ()
 
@@ -81,7 +81,8 @@ checkEscapeDef :: ProcSpec -> ProcDef -> Compiler ProcDef
 checkEscapeDef spec def
     | not (procInline def) = do
         let (ProcDefPrim caller body analysis) = procImpln def
-        logAlias $ "****** " ++ show spec ++ " " ++ show caller
+        logAlias $ "\n>>> Alias analysis (Bottom-up): " ++ show spec
+        logAlias $ show caller
 
         -- Analysis of caller's prims
         (prims, alias1) <- checkEscapePrims caller body []
@@ -94,7 +95,7 @@ checkEscapeDef spec def
 
         -- Update proc analysis with new aliasPairs
         let analysis' = analysis { procArgAliases = alias2 }
-        logAlias $ "****** alias2: " ++ show alias2
+        logAlias $ ">>>  aliases: " ++ show alias2
 
         return def { procImpln = ProcDefPrim caller body2 analysis'}
 
@@ -109,16 +110,19 @@ checkEscapePrims caller body callerAlias = do
     let prims = bodyPrims body
 
     -- First pass (only process alias pairs incurred by move and mutate)
-    logAlias $ "\n    " ++ List.intercalate "\n    " (List.map show prims)
+    logAlias $ "Analyse prims (checkEscapePrims): \n    "
+                ++ List.intercalate "\n    " (List.map show prims)
 
     (bodyAliases, aliasPairs) <- foldM
                     (\(bodyAliasedVars, pairs) prim -> do
                         args <- escapablePrimArgs $ content prim
-                        (bodyAliasedVars', pairs') <- aliasPairsFromArgs bodyAliasedVars args pairs
+                        (bodyAliasedVars', pairs') <-
+                            aliasPairsFromArgs bodyAliasedVars args pairs
                         return (bodyAliasedVars', pairs')
                         ) (paramNames, []) prims
-    logAlias $ "^^^ Aliased vars by prims: " ++ show bodyAliases
-    let aliasPairs' = removeDupTuples $ transitiveTuples $ removeDupTuples aliasPairs
+    logAlias $ "    ^^^ Aliased vars by prims: " ++ show bodyAliases
+    let aliasPairs' = removeDupTuples $ transitiveTuples
+                        $ removeDupTuples aliasPairs
     let prunedPairs = pruneTuples aliasPairs' (List.length paramNames)
 
     -- Second pass (handle alias pairs incurred by proc calls within
@@ -126,7 +130,7 @@ checkEscapePrims caller body callerAlias = do
     (prims', aliasNames) <- foldM (\(ps, as) prim ->
                                 escapeByProcCalls (ps, as) prim callerAlias)
                                     ([], []) prims
-    logAlias $ "^^^ Aliased vars by proc calls: " ++ show aliasNames
+    logAlias $ "    ^^^ Aliased vars by proc calls: " ++ show aliasNames
 
     -- convert alias name pairs to index pairs
     let aliasByProcCalls = _aliasNamesToPairs caller aliasNames
@@ -146,8 +150,10 @@ checkEscapeFork :: PrimProto -> ProcBody -> [AliasPair]
                     -> Compiler(ProcBody, [AliasPair])
 checkEscapeFork caller body aliases = do
     let fork = bodyFork body
+    logAlias "Analyse forks (checkEscapeFork):"
     case fork of
         PrimFork _ _ _ fBodies -> do
+            logAlias "Forking:"
             (fBodies', aliases') <-
                 foldM (\(bs, as) currBody -> do
                         (ps, as') <- checkEscapePrims caller currBody as
@@ -156,14 +162,17 @@ checkEscapeFork caller body aliases = do
                         (currBody2, as2) <- checkEscapeFork caller currBody1 as1
                         return (bs ++ [currBody2], as2)
                     ) ([], []) fBodies
-            let aliases2 = removeDupTuples $ transitiveTuples (aliases ++ aliases')
+            let aliases2 = removeDupTuples
+                            $ transitiveTuples (aliases ++ aliases')
             return (body { bodyFork = fork {forkBodies=fBodies'} }, aliases2)
         _ -> do
-            -- NoFork: analyse prims directly
-            (ps, as') <- checkEscapePrims caller body aliases
-            let as2 = removeDupTuples $ transitiveTuples (aliases ++ as')
-            let body2 = body { bodyPrims = ps }
-            return (body2, as2)
+            -- NoFork: analyse prims done
+            logAlias "No fork."
+            -- (ps, as') <- checkEscapePrims caller body aliases
+            -- let as2 = removeDupTuples $ transitiveTuples (aliases ++ as')
+            -- let body2 = body { bodyPrims = ps }
+            -- return (body2, as2)
+            return (body, aliases)
 
 
 -- For first pass:
@@ -235,13 +244,14 @@ escapeByProcCalls (prims, aliasNames) prim callerAlias =
             calleeDef <- getProcDef spec
             let (ProcDefPrim calleeProto body analysis) = procImpln calleeDef
             let calleeAlias = procArgAliases analysis
-            logAlias $ "\ncall " ++ show spec ++" (callee): " ++ show calleeProto
-            logAlias $ "PrimCall args: " ++ show args
-            logAlias $ "callerAlias: " ++ show callerAlias
-            logAlias $ "calleeAlias: " ++ show calleeAlias
+            logAlias $ "\n    call " ++ show spec ++" (callee): "
+            logAlias $ "    " ++ show calleeProto
+            logAlias $ "    PrimCall args: " ++ show args
+            logAlias $ "    callerAlias: " ++ show callerAlias
+            logAlias $ "    calleeAlias: " ++ show calleeAlias
             let aliasNames' = _aliasPairsToVarNames args
                                     (callerAlias ++ calleeAlias)
-            logAlias $ "names: " ++ show aliasNames'
+            logAlias $ "    names: " ++ show aliasNames'
             return (prims ++ [prim], aliasNames ++ aliasNames')
         _ ->
             return (prims ++ [prim], aliasNames)
