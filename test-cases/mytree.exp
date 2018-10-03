@@ -24,7 +24,7 @@ AFTER EVERYTHING:
   procs           : 
 
 printTree > public (2 calls)
-0: printTree(t#0:mytree.tree, wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom): Alias Pairs: [(1,2)]
+0: printTree(t#0:mytree.tree, wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom): Alias Pairs: []
 
     foreign lpvm cast(t#0:mytree.tree, ?tmp$4#0:wybe.int)
     foreign llvm icmp ne(~tmp$4#0:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)

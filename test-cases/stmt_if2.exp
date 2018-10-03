@@ -25,7 +25,7 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: [(0,1)]
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
 
     foreign lpvm cast(0:stmt_if2.tree, ?tmp$1#0:stmt_if2.tree)
     foreign lpvm alloc(24:wybe.int, ?tmp$7#0:stmt_if2.tree)

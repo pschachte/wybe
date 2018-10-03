@@ -58,13 +58,16 @@ AFTER EVERYTHING:
   procs           : 
 
 = > public inline (0 calls)
-0: =(?out#0:multictr.number, in#0:multictr.number):
+0: =(?out#0:multictr.number, in#0:multictr.number): Alias Pairs: []
+
     foreign llvm move(~in#0:multictr.number, ?out#0:multictr.number)
 = > public inline (0 calls)
-1: =(in#0:multictr.number, ?out#0:multictr.number):
+1: =(in#0:multictr.number, ?out#0:multictr.number): Alias Pairs: []
+
     foreign llvm move(~in#0:multictr.number, ?out#0:multictr.number)
 = > public test (2 calls)
-2: =($left#0:multictr.number, $right#0:multictr.number, ?$$#0:wybe.bool):
+2: =($left#0:multictr.number, $right#0:multictr.number, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($left#0:multictr.number, ?tmp$0#0:wybe.int)
     foreign llvm and(~tmp$0#0:wybe.int, 7:wybe.int, ?tmp$10#0:wybe.int)
     foreign llvm icmp eq(tmp$10#0:wybe.int, 0:wybe.int, ?tmp$11#0:wybe.bool)
@@ -107,14 +110,16 @@ AFTER EVERYTHING:
 
 
 float > public inline (0 calls)
-0: float(float_value#0:wybe.float, ?$#0:multictr.number):
+0: float(float_value#0:wybe.float, ?$#0:multictr.number): Alias Pairs: []
+
     foreign lpvm alloc(8:wybe.int, ?$rec#0:multictr.number)
-    foreign lpvm mutate(~%$rec#0:multictr.number, ?%$rec#1:multictr.number, 0:wybe.int, ~float_value#0:wybe.float)
+    foreign lpvm mutate(~%$rec#0:multictr.number, ?%$rec#1:multictr.number, 8:wybe.int, 0:wybe.int, 1:wybe.int, ~float_value#0:wybe.float)
     foreign lpvm cast(~$rec#1:multictr.number, ?$recint#0:wybe.int)
     foreign llvm or(~$recint#0, 1:wybe.int, ?$recinttagged#0:wybe.int)
     foreign lpvm cast(~$recinttagged#0, ?$#0:multictr.number)
 float > public inline test (5 calls)
-1: float(?float_value#0:wybe.float, $#0:multictr.number, ?$$#0:wybe.bool):
+1: float(?float_value#0:wybe.float, $#0:multictr.number, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($#0:multictr.number, ?tmp$1#0:wybe.int)
     foreign llvm and(~tmp$1#0:wybe.int, 7:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp eq(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.bool)
@@ -129,7 +134,8 @@ float > public inline test (5 calls)
 
 
 float_value > public inline test (0 calls)
-0: float_value($rec#0:multictr.number, ?$#0:wybe.float, ?$$#0:wybe.bool):
+0: float_value($rec#0:multictr.number, ?$#0:wybe.float, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($rec#0:multictr.number, ?tmp$1#0:wybe.int)
     foreign llvm and(~tmp$1#0:wybe.int, 7:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp eq(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.bool)
@@ -142,7 +148,8 @@ float_value > public inline test (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 float_value > public inline test (0 calls)
-1: float_value($rec#0:multictr.number, ?$rec#1:multictr.number, $field#0:wybe.float, ?$$#0:wybe.bool):
+1: float_value($rec#0:multictr.number, ?$rec#1:multictr.number, $field#0:wybe.float, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($rec#0:multictr.number, ?tmp$1#0:wybe.int)
     foreign llvm and(~tmp$1#0:wybe.int, 7:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp eq(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.bool)
@@ -152,17 +159,19 @@ float_value > public inline test (0 calls)
         foreign llvm move(~$rec#0:multictr.number, ?$rec#1:multictr.number)
 
     1:
-        foreign lpvm mutate(~%$rec#0:multictr.number, ?%$rec#1:multictr.number, -1:wybe.int, ~$field#0:wybe.float)
+        foreign lpvm mutate(~%$rec#0:multictr.number, ?%$rec#1:multictr.number, 8:wybe.int, -1:wybe.int, 0:wybe.int, ~$field#0:wybe.float)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
 
 int > public inline (0 calls)
-0: int(int_value#0:wybe.int, ?$#0:multictr.number):
+0: int(int_value#0:wybe.int, ?$#0:multictr.number): Alias Pairs: []
+
     foreign lpvm alloc(8:wybe.int, ?$rec#0:multictr.number)
-    foreign lpvm mutate(~%$rec#0:multictr.number, ?%$#0:multictr.number, 0:wybe.int, ~int_value#0:wybe.int)
+    foreign lpvm mutate(~%$rec#0:multictr.number, ?%$#0:multictr.number, 8:wybe.int, 0:wybe.int, 1:wybe.int, ~int_value#0:wybe.int)
 int > public inline test (7 calls)
-1: int(?int_value#0:wybe.int, $#0:multictr.number, ?$$#0:wybe.bool):
+1: int(?int_value#0:wybe.int, $#0:multictr.number, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($#0:multictr.number, ?tmp$1#0:wybe.int)
     foreign llvm and(~tmp$1#0:wybe.int, 7:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp eq(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool)
@@ -177,7 +186,8 @@ int > public inline test (7 calls)
 
 
 int_value > public inline test (0 calls)
-0: int_value($rec#0:multictr.number, ?$#0:wybe.int, ?$$#0:wybe.bool):
+0: int_value($rec#0:multictr.number, ?$#0:wybe.int, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($rec#0:multictr.number, ?tmp$1#0:wybe.int)
     foreign llvm and(~tmp$1#0:wybe.int, 7:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp eq(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool)
@@ -190,7 +200,8 @@ int_value > public inline test (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 int_value > public inline test (0 calls)
-1: int_value($rec#0:multictr.number, ?$rec#1:multictr.number, $field#0:wybe.int, ?$$#0:wybe.bool):
+1: int_value($rec#0:multictr.number, ?$rec#1:multictr.number, $field#0:wybe.int, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($rec#0:multictr.number, ?tmp$1#0:wybe.int)
     foreign llvm and(~tmp$1#0:wybe.int, 7:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp eq(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool)
@@ -200,7 +211,7 @@ int_value > public inline test (0 calls)
         foreign llvm move(~$rec#0:multictr.number, ?$rec#1:multictr.number)
 
     1:
-        foreign lpvm mutate(~%$rec#0:multictr.number, ?%$rec#1:multictr.number, 0:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm mutate(~%$rec#0:multictr.number, ?%$rec#1:multictr.number, 8:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 --------------------------------------------------
@@ -226,13 +237,16 @@ int_value > public inline test (0 calls)
   procs           : 
 
 = > public inline (0 calls)
-0: =(?out#0:multictr.simple, in#0:multictr.simple):
+0: =(?out#0:multictr.simple, in#0:multictr.simple): Alias Pairs: []
+
     foreign llvm move(~in#0:multictr.simple, ?out#0:multictr.simple)
 = > public inline (0 calls)
-1: =(in#0:multictr.simple, ?out#0:multictr.simple):
+1: =(in#0:multictr.simple, ?out#0:multictr.simple): Alias Pairs: []
+
     foreign llvm move(~in#0:multictr.simple, ?out#0:multictr.simple)
 = > public test (2 calls)
-2: =($left#0:multictr.simple, $right#0:multictr.simple, ?$$#0:wybe.bool):
+2: =($left#0:multictr.simple, $right#0:multictr.simple, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($left#0:multictr.simple, ?tmp$0#0:wybe.int)
     foreign llvm icmp eq(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -342,11 +356,13 @@ int_value > public inline test (0 calls)
 
 
 one > public inline (0 calls)
-0: one(one_field#0:wybe.int, ?$#0:multictr.simple):
+0: one(one_field#0:wybe.int, ?$#0:multictr.simple): Alias Pairs: []
+
     foreign lpvm alloc(8:wybe.int, ?$rec#0:multictr.simple)
-    foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$#0:multictr.simple, 0:wybe.int, ~one_field#0:wybe.int)
+    foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$#0:multictr.simple, 8:wybe.int, 0:wybe.int, 1:wybe.int, ~one_field#0:wybe.int)
 one > public inline test (7 calls)
-1: one(?one_field#0:wybe.int, $#0:multictr.simple, ?$$#0:wybe.bool):
+1: one(?one_field#0:wybe.int, $#0:multictr.simple, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($#0:multictr.simple, ?tmp$0#0:wybe.int)
     foreign llvm icmp ne(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -368,7 +384,8 @@ one > public inline test (7 calls)
 
 
 one_field > public inline test (0 calls)
-0: one_field($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool):
+0: one_field($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($rec#0:multictr.simple, ?tmp$0#0:wybe.int)
     foreign llvm icmp ne(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -388,7 +405,8 @@ one_field > public inline test (0 calls)
 
 
 one_field > public inline test (0 calls)
-1: one_field($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool):
+1: one_field($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($rec#0:multictr.simple, ?tmp$0#0:wybe.int)
     foreign llvm icmp ne(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -405,21 +423,23 @@ one_field > public inline test (0 calls)
             foreign llvm move(~$rec#0:multictr.simple, ?$rec#1:multictr.simple)
 
         1:
-            foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$rec#1:multictr.simple, 0:wybe.int, ~$field#0:wybe.int)
+            foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$rec#1:multictr.simple, 8:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
 
 
 two > public inline (0 calls)
-0: two(two_field#0:wybe.int, ?$#0:multictr.simple):
+0: two(two_field#0:wybe.int, ?$#0:multictr.simple): Alias Pairs: []
+
     foreign lpvm alloc(8:wybe.int, ?$rec#0:multictr.simple)
-    foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$rec#1:multictr.simple, 0:wybe.int, ~two_field#0:wybe.int)
+    foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$rec#1:multictr.simple, 8:wybe.int, 0:wybe.int, 1:wybe.int, ~two_field#0:wybe.int)
     foreign lpvm cast(~$rec#1:multictr.simple, ?$recint#0:wybe.int)
     foreign llvm or(~$recint#0, 1:wybe.int, ?$recinttagged#0:wybe.int)
     foreign lpvm cast(~$recinttagged#0, ?$#0:multictr.simple)
 two > public inline test (5 calls)
-1: two(?two_field#0:wybe.int, $#0:multictr.simple, ?$$#0:wybe.bool):
+1: two(?two_field#0:wybe.int, $#0:multictr.simple, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($#0:multictr.simple, ?tmp$0#0:wybe.int)
     foreign llvm icmp ne(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -441,7 +461,8 @@ two > public inline test (5 calls)
 
 
 two_field > public inline test (0 calls)
-0: two_field($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool):
+0: two_field($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($rec#0:multictr.simple, ?tmp$0#0:wybe.int)
     foreign llvm icmp ne(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -461,7 +482,8 @@ two_field > public inline test (0 calls)
 
 
 two_field > public inline test (0 calls)
-1: two_field($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool):
+1: two_field($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm cast($rec#0:multictr.simple, ?tmp$0#0:wybe.int)
     foreign llvm icmp ne(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -478,14 +500,15 @@ two_field > public inline test (0 calls)
             foreign llvm move(~$rec#0:multictr.simple, ?$rec#1:multictr.simple)
 
         1:
-            foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$rec#1:multictr.simple, -1:wybe.int, ~$field#0:wybe.int)
+            foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$rec#1:multictr.simple, 8:wybe.int, -1:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
 
 
 zero > public inline (0 calls)
-0: zero(?$#0:multictr.simple):
+0: zero(?$#0:multictr.simple): Alias Pairs: []
+
     foreign lpvm cast(0:multictr.simple, ?$#0:multictr.simple)
 multictr, multictr.number, multictr.simple
 ======================================================================
@@ -508,8 +531,8 @@ entry:
   ret i64* %"in#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i1 @"multictr.number.=<2>"(i64* %"$left#0", i64* %"$right#0") local_unnamed_addr #0 {
+; Function Attrs: norecurse nounwind readonly
+define i1 @"multictr.number.=<2>"(i64* %"$left#0", i64* %"$right#0") local_unnamed_addr #1 {
 entry:
   %0 = ptrtoint i64* %"$left#0" to i64
   %"tmp$10#0" = and i64 %0, 7
@@ -520,11 +543,33 @@ if.then:                                          ; preds = %entry
   %1 = ptrtoint i64* %"$right#0" to i64
   %"tmp$14#0" = and i64 %1, 7
   %"tmp$15#0" = icmp eq i64 %"tmp$14#0", 0
-  ret i1 %"tmp$15#0"
+  br i1 %"tmp$15#0", label %if.then1, label %if.else1
 
 if.else:                                          ; preds = %entry
   %"tmp$15#01" = icmp eq i64 %"tmp$10#0", 1
-  ret i1 %"tmp$15#01"
+  br i1 %"tmp$15#01", label %if.then2, label %if.else1
+
+if.then1:                                         ; preds = %if.then
+  %2 = load i64, i64* %"$left#0", align 4
+  %3 = load i64, i64* %"$right#0", align 4
+  %"$$#0" = icmp eq i64 %2, %3
+  ret i1 %"$$#0"
+
+if.else1:                                         ; preds = %if.then2, %if.else, %if.then
+  %merge = phi i1 [ false, %if.else ], [ %"tmp$15#01", %if.then ], [ false, %if.then2 ]
+  ret i1 %merge
+
+if.then2:                                         ; preds = %if.else
+  %4 = ptrtoint i64* %"$right#0" to i64
+  %"tmp$18#0" = and i64 %4, 7
+  %"tmp$19#0" = icmp eq i64 %"tmp$18#0", 1
+  br i1 %"tmp$19#0", label %if.then3, label %if.else1
+
+if.then3:                                         ; preds = %if.then2
+  %5 = load i64, i64* %"$left#0", align 4
+  %6 = load i64, i64* %"$right#0", align 4
+  %"$$#02" = fcmp oeq i64 %5, %6
+  ret i1 %"$$#02"
 }
 
 define nonnull i64* @"multictr.number.float<0>"(double %"float_value#0") local_unnamed_addr {
@@ -556,8 +601,7 @@ entry:
   ret i1 %"tmp$2#0"
 }
 
-; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"multictr.number.float_value<1>"(i64* %"$rec#0", double %"$field#0") local_unnamed_addr #1 {
+define { i64*, i1 } @"multictr.number.float_value<1>"(i64* %"$rec#0", double %"$field#0") local_unnamed_addr {
 entry:
   %0 = ptrtoint i64* %"$rec#0" to i64
   %"tmp$0#0" = and i64 %0, 7
@@ -565,6 +609,7 @@ entry:
   br i1 %"tmp$2#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
+  %1 = tail call i8* @wybe_malloc(i32 8)
   store double %"$field#0", i64* %"$rec#0", align 8
   ret i1 true
 
@@ -598,8 +643,7 @@ entry:
   ret i1 %"tmp$2#0"
 }
 
-; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"multictr.number.int_value<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #1 {
+define { i64*, i1 } @"multictr.number.int_value<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %0 = ptrtoint i64* %"$rec#0" to i64
   %"tmp$0#0" = and i64 %0, 7
@@ -607,6 +651,7 @@ entry:
   br i1 %"tmp$2#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
+  %1 = tail call i8* @wybe_malloc(i32 8)
   store i64 %"$field#0", i64* %"$rec#0", align 4
   ret i1 true
 
@@ -626,18 +671,58 @@ entry:
   ret i64* %"in#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i1 @"multictr.simple.=<2>"(i64* readnone %"$left#0", i64* readnone %"$right#0") local_unnamed_addr #0 {
+; Function Attrs: norecurse nounwind readonly
+define i1 @"multictr.simple.=<2>"(i64* %"$left#0", i64* %"$right#0") local_unnamed_addr #1 {
 entry:
   %"tmp$1#0" = icmp eq i64* %"$left#0", null
-  br i1 %"tmp$1#0", label %if.then, label %if.else
+  br i1 %"tmp$1#0", label %if.then, label %if.then1
 
 if.then:                                          ; preds = %entry
   %"$$#0" = icmp eq i64* %"$right#0", null
   ret i1 %"$$#0"
 
-if.else:                                          ; preds = %entry
-  ret i1 true
+if.then1:                                         ; preds = %entry
+  %0 = ptrtoint i64* %"$left#0" to i64
+  %trunc = trunc i64 %0 to i3
+  switch i3 %trunc, label %if.else3 [
+    i3 0, label %if.then2
+    i3 1, label %if.then6
+  ]
+
+if.then2:                                         ; preds = %if.then1
+  %1 = load i64, i64* %"$left#0", align 4
+  %"tmp$16#0" = icmp eq i64* %"$right#0", null
+  br i1 %"tmp$16#0", label %if.else3, label %if.then3
+
+if.then3:                                         ; preds = %if.then2
+  %2 = ptrtoint i64* %"$right#0" to i64
+  %"tmp$17#0" = and i64 %2, 7
+  %"tmp$18#0" = icmp eq i64 %"tmp$17#0", 0
+  br i1 %"tmp$18#0", label %if.then4, label %if.else3
+
+if.else3:                                         ; preds = %if.then2, %if.then6, %if.then1, %if.then7, %if.then3
+  ret i1 false
+
+if.then4:                                         ; preds = %if.then3
+  %3 = load i64, i64* %"$right#0", align 4
+  %"$$#01" = icmp eq i64 %1, %3
+  ret i1 %"$$#01"
+
+if.then6:                                         ; preds = %if.then1
+  %4 = load i64, i64* %"$left#0", align 4
+  %"tmp$21#0" = icmp eq i64* %"$right#0", null
+  br i1 %"tmp$21#0", label %if.else3, label %if.then7
+
+if.then7:                                         ; preds = %if.then6
+  %5 = ptrtoint i64* %"$right#0" to i64
+  %"tmp$22#0" = and i64 %5, 7
+  %"tmp$23#0" = icmp eq i64 %"tmp$22#0", 1
+  br i1 %"tmp$23#0", label %if.then8, label %if.else3
+
+if.then8:                                         ; preds = %if.then7
+  %6 = load i64, i64* %"$right#0", align 4
+  %"$$#04" = icmp eq i64 %4, %6
+  ret i1 %"$$#04"
 }
 
 define i64* @"multictr.simple.one<0>"(i64 %"one_field#0") local_unnamed_addr {
@@ -658,10 +743,11 @@ if.then:                                          ; preds = %entry
   %0 = ptrtoint i64* %"$#0" to i64
   %"tmp$2#0" = and i64 %0, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 0
-  ret i1 %"tmp$4#0"
+  br label %if.else
 
-if.else:                                          ; preds = %entry
-  ret i1 false
+if.else:                                          ; preds = %if.then, %entry
+  %merge = phi i1 [ false, %entry ], [ %"tmp$4#0", %if.then ]
+  ret i1 %merge
 }
 
 ; Function Attrs: norecurse nounwind readnone
@@ -674,14 +760,14 @@ if.then:                                          ; preds = %entry
   %0 = ptrtoint i64* %"$rec#0" to i64
   %"tmp$2#0" = and i64 %0, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 0
-  ret i1 %"tmp$4#0"
+  br label %if.else
 
-if.else:                                          ; preds = %entry
-  ret i1 false
+if.else:                                          ; preds = %if.then, %entry
+  %merge = phi i1 [ false, %entry ], [ %"tmp$4#0", %if.then ]
+  ret i1 %merge
 }
 
-; Function Attrs: norecurse nounwind readnone
-define { i64*, i1 } @"multictr.simple.one_field<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #0 {
+define { i64*, i1 } @"multictr.simple.one_field<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %"tmp$1#0" = icmp eq i64* %"$rec#0", null
   br i1 %"tmp$1#0", label %if.else, label %if.then
@@ -690,10 +776,15 @@ if.then:                                          ; preds = %entry
   %0 = ptrtoint i64* %"$rec#0" to i64
   %"tmp$2#0" = and i64 %0, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 0
-  ret i1 %"tmp$4#0"
+  br i1 %"tmp$4#0", label %if.then1, label %if.else
 
-if.else:                                          ; preds = %entry
-  ret i64* null
+if.else:                                          ; preds = %if.then, %entry
+  ret i1 false
+
+if.then1:                                         ; preds = %if.then
+  %1 = tail call i8* @wybe_malloc(i32 8)
+  store i64 %"$field#0", i64* %"$rec#0", align 4
+  ret i1 true
 }
 
 define nonnull i64* @"multictr.simple.two<0>"(i64 %"two_field#0") local_unnamed_addr {
@@ -717,10 +808,11 @@ if.then:                                          ; preds = %entry
   %0 = ptrtoint i64* %"$#0" to i64
   %"tmp$2#0" = and i64 %0, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 1
-  ret i1 %"tmp$4#0"
+  br label %if.else
 
-if.else:                                          ; preds = %entry
-  ret i1 false
+if.else:                                          ; preds = %if.then, %entry
+  %merge = phi i1 [ false, %entry ], [ %"tmp$4#0", %if.then ]
+  ret i1 %merge
 }
 
 ; Function Attrs: norecurse nounwind readnone
@@ -733,14 +825,14 @@ if.then:                                          ; preds = %entry
   %0 = ptrtoint i64* %"$rec#0" to i64
   %"tmp$2#0" = and i64 %0, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 1
-  ret i1 %"tmp$4#0"
+  br label %if.else
 
-if.else:                                          ; preds = %entry
-  ret i1 false
+if.else:                                          ; preds = %if.then, %entry
+  %merge = phi i1 [ false, %entry ], [ %"tmp$4#0", %if.then ]
+  ret i1 %merge
 }
 
-; Function Attrs: norecurse nounwind readnone
-define { i64*, i1 } @"multictr.simple.two_field<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #0 {
+define { i64*, i1 } @"multictr.simple.two_field<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %"tmp$1#0" = icmp eq i64* %"$rec#0", null
   br i1 %"tmp$1#0", label %if.else, label %if.then
@@ -749,10 +841,15 @@ if.then:                                          ; preds = %entry
   %0 = ptrtoint i64* %"$rec#0" to i64
   %"tmp$2#0" = and i64 %0, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 1
-  ret i1 %"tmp$4#0"
+  br i1 %"tmp$4#0", label %if.then1, label %if.else
 
-if.else:                                          ; preds = %entry
-  ret i64* null
+if.else:                                          ; preds = %if.then, %entry
+  ret i1 false
+
+if.then1:                                         ; preds = %if.then
+  %1 = tail call i8* @wybe_malloc(i32 8)
+  store i64 %"$field#0", i64* %"$rec#0", align 4
+  ret i1 true
 }
 
 ; Function Attrs: norecurse nounwind readnone
@@ -762,7 +859,7 @@ entry:
 }
 
 attributes #0 = { norecurse nounwind readnone }
-attributes #1 = { norecurse nounwind }
+attributes #1 = { norecurse nounwind readonly }
 
 --------------------------------------------------
 ; ModuleID = 'multictr.number'
@@ -782,8 +879,8 @@ entry:
   ret i64* %"in#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i1 @"multictr.number.=<2>"(i64* %"$left#0", i64* %"$right#0") local_unnamed_addr #0 {
+; Function Attrs: norecurse nounwind readonly
+define i1 @"multictr.number.=<2>"(i64* %"$left#0", i64* %"$right#0") local_unnamed_addr #1 {
 entry:
   %0 = ptrtoint i64* %"$left#0" to i64
   %"tmp$10#0" = and i64 %0, 7
@@ -794,11 +891,33 @@ if.then:                                          ; preds = %entry
   %1 = ptrtoint i64* %"$right#0" to i64
   %"tmp$14#0" = and i64 %1, 7
   %"tmp$15#0" = icmp eq i64 %"tmp$14#0", 0
-  ret i1 %"tmp$15#0"
+  br i1 %"tmp$15#0", label %if.then1, label %if.else1
 
 if.else:                                          ; preds = %entry
   %"tmp$15#01" = icmp eq i64 %"tmp$10#0", 1
-  ret i1 %"tmp$15#01"
+  br i1 %"tmp$15#01", label %if.then2, label %if.else1
+
+if.then1:                                         ; preds = %if.then
+  %2 = load i64, i64* %"$left#0", align 4
+  %3 = load i64, i64* %"$right#0", align 4
+  %"$$#0" = icmp eq i64 %2, %3
+  ret i1 %"$$#0"
+
+if.else1:                                         ; preds = %if.then2, %if.else, %if.then
+  %merge = phi i1 [ false, %if.else ], [ %"tmp$15#01", %if.then ], [ false, %if.then2 ]
+  ret i1 %merge
+
+if.then2:                                         ; preds = %if.else
+  %4 = ptrtoint i64* %"$right#0" to i64
+  %"tmp$18#0" = and i64 %4, 7
+  %"tmp$19#0" = icmp eq i64 %"tmp$18#0", 1
+  br i1 %"tmp$19#0", label %if.then3, label %if.else1
+
+if.then3:                                         ; preds = %if.then2
+  %5 = load i64, i64* %"$left#0", align 4
+  %6 = load i64, i64* %"$right#0", align 4
+  %"$$#02" = fcmp oeq i64 %5, %6
+  ret i1 %"$$#02"
 }
 
 define nonnull i64* @"multictr.number.float<0>"(double %"float_value#0") local_unnamed_addr {
@@ -830,8 +949,7 @@ entry:
   ret i1 %"tmp$2#0"
 }
 
-; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"multictr.number.float_value<1>"(i64* %"$rec#0", double %"$field#0") local_unnamed_addr #1 {
+define { i64*, i1 } @"multictr.number.float_value<1>"(i64* %"$rec#0", double %"$field#0") local_unnamed_addr {
 entry:
   %0 = ptrtoint i64* %"$rec#0" to i64
   %"tmp$0#0" = and i64 %0, 7
@@ -839,6 +957,7 @@ entry:
   br i1 %"tmp$2#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
+  %1 = tail call i8* @wybe_malloc(i32 8)
   store double %"$field#0", i64* %"$rec#0", align 8
   ret i1 true
 
@@ -872,8 +991,7 @@ entry:
   ret i1 %"tmp$2#0"
 }
 
-; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"multictr.number.int_value<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #1 {
+define { i64*, i1 } @"multictr.number.int_value<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %0 = ptrtoint i64* %"$rec#0" to i64
   %"tmp$0#0" = and i64 %0, 7
@@ -881,6 +999,7 @@ entry:
   br i1 %"tmp$2#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
+  %1 = tail call i8* @wybe_malloc(i32 8)
   store i64 %"$field#0", i64* %"$rec#0", align 4
   ret i1 true
 
@@ -889,7 +1008,7 @@ if.else:                                          ; preds = %entry
 }
 
 attributes #0 = { norecurse nounwind readnone }
-attributes #1 = { norecurse nounwind }
+attributes #1 = { norecurse nounwind readonly }
 
 --------------------------------------------------
 ; ModuleID = 'multictr.simple'
@@ -909,18 +1028,58 @@ entry:
   ret i64* %"in#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i1 @"multictr.simple.=<2>"(i64* readnone %"$left#0", i64* readnone %"$right#0") local_unnamed_addr #0 {
+; Function Attrs: norecurse nounwind readonly
+define i1 @"multictr.simple.=<2>"(i64* %"$left#0", i64* %"$right#0") local_unnamed_addr #1 {
 entry:
   %"tmp$1#0" = icmp eq i64* %"$left#0", null
-  br i1 %"tmp$1#0", label %if.then, label %if.else
+  br i1 %"tmp$1#0", label %if.then, label %if.then1
 
 if.then:                                          ; preds = %entry
   %"$$#0" = icmp eq i64* %"$right#0", null
   ret i1 %"$$#0"
 
-if.else:                                          ; preds = %entry
-  ret i1 true
+if.then1:                                         ; preds = %entry
+  %0 = ptrtoint i64* %"$left#0" to i64
+  %trunc = trunc i64 %0 to i3
+  switch i3 %trunc, label %if.else3 [
+    i3 0, label %if.then2
+    i3 1, label %if.then6
+  ]
+
+if.then2:                                         ; preds = %if.then1
+  %1 = load i64, i64* %"$left#0", align 4
+  %"tmp$16#0" = icmp eq i64* %"$right#0", null
+  br i1 %"tmp$16#0", label %if.else3, label %if.then3
+
+if.then3:                                         ; preds = %if.then2
+  %2 = ptrtoint i64* %"$right#0" to i64
+  %"tmp$17#0" = and i64 %2, 7
+  %"tmp$18#0" = icmp eq i64 %"tmp$17#0", 0
+  br i1 %"tmp$18#0", label %if.then4, label %if.else3
+
+if.else3:                                         ; preds = %if.then2, %if.then6, %if.then1, %if.then7, %if.then3
+  ret i1 false
+
+if.then4:                                         ; preds = %if.then3
+  %3 = load i64, i64* %"$right#0", align 4
+  %"$$#01" = icmp eq i64 %1, %3
+  ret i1 %"$$#01"
+
+if.then6:                                         ; preds = %if.then1
+  %4 = load i64, i64* %"$left#0", align 4
+  %"tmp$21#0" = icmp eq i64* %"$right#0", null
+  br i1 %"tmp$21#0", label %if.else3, label %if.then7
+
+if.then7:                                         ; preds = %if.then6
+  %5 = ptrtoint i64* %"$right#0" to i64
+  %"tmp$22#0" = and i64 %5, 7
+  %"tmp$23#0" = icmp eq i64 %"tmp$22#0", 1
+  br i1 %"tmp$23#0", label %if.then8, label %if.else3
+
+if.then8:                                         ; preds = %if.then7
+  %6 = load i64, i64* %"$right#0", align 4
+  %"$$#04" = icmp eq i64 %4, %6
+  ret i1 %"$$#04"
 }
 
 define i64* @"multictr.simple.one<0>"(i64 %"one_field#0") local_unnamed_addr {
@@ -941,10 +1100,11 @@ if.then:                                          ; preds = %entry
   %0 = ptrtoint i64* %"$#0" to i64
   %"tmp$2#0" = and i64 %0, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 0
-  ret i1 %"tmp$4#0"
+  br label %if.else
 
-if.else:                                          ; preds = %entry
-  ret i1 false
+if.else:                                          ; preds = %if.then, %entry
+  %merge = phi i1 [ false, %entry ], [ %"tmp$4#0", %if.then ]
+  ret i1 %merge
 }
 
 ; Function Attrs: norecurse nounwind readnone
@@ -957,14 +1117,14 @@ if.then:                                          ; preds = %entry
   %0 = ptrtoint i64* %"$rec#0" to i64
   %"tmp$2#0" = and i64 %0, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 0
-  ret i1 %"tmp$4#0"
+  br label %if.else
 
-if.else:                                          ; preds = %entry
-  ret i1 false
+if.else:                                          ; preds = %if.then, %entry
+  %merge = phi i1 [ false, %entry ], [ %"tmp$4#0", %if.then ]
+  ret i1 %merge
 }
 
-; Function Attrs: norecurse nounwind readnone
-define { i64*, i1 } @"multictr.simple.one_field<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #0 {
+define { i64*, i1 } @"multictr.simple.one_field<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %"tmp$1#0" = icmp eq i64* %"$rec#0", null
   br i1 %"tmp$1#0", label %if.else, label %if.then
@@ -973,10 +1133,15 @@ if.then:                                          ; preds = %entry
   %0 = ptrtoint i64* %"$rec#0" to i64
   %"tmp$2#0" = and i64 %0, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 0
-  ret i1 %"tmp$4#0"
+  br i1 %"tmp$4#0", label %if.then1, label %if.else
 
-if.else:                                          ; preds = %entry
-  ret i64* null
+if.else:                                          ; preds = %if.then, %entry
+  ret i1 false
+
+if.then1:                                         ; preds = %if.then
+  %1 = tail call i8* @wybe_malloc(i32 8)
+  store i64 %"$field#0", i64* %"$rec#0", align 4
+  ret i1 true
 }
 
 define nonnull i64* @"multictr.simple.two<0>"(i64 %"two_field#0") local_unnamed_addr {
@@ -1000,10 +1165,11 @@ if.then:                                          ; preds = %entry
   %0 = ptrtoint i64* %"$#0" to i64
   %"tmp$2#0" = and i64 %0, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 1
-  ret i1 %"tmp$4#0"
+  br label %if.else
 
-if.else:                                          ; preds = %entry
-  ret i1 false
+if.else:                                          ; preds = %if.then, %entry
+  %merge = phi i1 [ false, %entry ], [ %"tmp$4#0", %if.then ]
+  ret i1 %merge
 }
 
 ; Function Attrs: norecurse nounwind readnone
@@ -1016,14 +1182,14 @@ if.then:                                          ; preds = %entry
   %0 = ptrtoint i64* %"$rec#0" to i64
   %"tmp$2#0" = and i64 %0, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 1
-  ret i1 %"tmp$4#0"
+  br label %if.else
 
-if.else:                                          ; preds = %entry
-  ret i1 false
+if.else:                                          ; preds = %if.then, %entry
+  %merge = phi i1 [ false, %entry ], [ %"tmp$4#0", %if.then ]
+  ret i1 %merge
 }
 
-; Function Attrs: norecurse nounwind readnone
-define { i64*, i1 } @"multictr.simple.two_field<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #0 {
+define { i64*, i1 } @"multictr.simple.two_field<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %"tmp$1#0" = icmp eq i64* %"$rec#0", null
   br i1 %"tmp$1#0", label %if.else, label %if.then
@@ -1032,10 +1198,15 @@ if.then:                                          ; preds = %entry
   %0 = ptrtoint i64* %"$rec#0" to i64
   %"tmp$2#0" = and i64 %0, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 1
-  ret i1 %"tmp$4#0"
+  br i1 %"tmp$4#0", label %if.then1, label %if.else
 
-if.else:                                          ; preds = %entry
-  ret i64* null
+if.else:                                          ; preds = %if.then, %entry
+  ret i1 false
+
+if.then1:                                         ; preds = %if.then
+  %1 = tail call i8* @wybe_malloc(i32 8)
+  store i64 %"$field#0", i64* %"$rec#0", align 4
+  ret i1 true
 }
 
 ; Function Attrs: norecurse nounwind readnone
@@ -1045,4 +1216,5 @@ entry:
 }
 
 attributes #0 = { norecurse nounwind readnone }
+attributes #1 = { norecurse nounwind readonly }
 

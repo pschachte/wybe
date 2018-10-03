@@ -13,7 +13,7 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: [(0,1)]
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
 
     foreign lpvm cast(0:mytree.tree, ?tmp$2#0:mytree.tree)
     foreign lpvm alloc(24:wybe.int, ?tmp$9#0:mytree.tree)
@@ -70,7 +70,7 @@ simpleSlice > public (1 calls)
   procs           : 
 
 printTree > public (2 calls)
-0: printTree(t#0:mytree.tree, wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom): Alias Pairs: [(1,2)]
+0: printTree(t#0:mytree.tree, wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom): Alias Pairs: []
 
     foreign lpvm cast(t#0:mytree.tree, ?tmp$4#0:wybe.int)
     foreign llvm icmp ne(~tmp$4#0:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)

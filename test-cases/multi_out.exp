@@ -4,14 +4,21 @@ AFTER EVERYTHING:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : multi_out.onetwothree<0>
+  public procs    : multi_out.<0>
+                    multi_out.onetwothree<0>
   imports         : use wybe
   types           : 
   resources       : 
   procs           : 
 
-onetwothree > public inline (0 calls)
-0: onetwothree(?x#0:wybe.int, ?y#0:wybe.int, ?z#0:wybe.int):
+*main* > public inline (0 calls)
+0: (wybe.io$io#0:wybe.phantom, [?wybe.io$io#0:wybe.phantom]): Alias Pairs: []
+
+
+
+onetwothree > public inline (1 calls)
+0: onetwothree(?x#0:wybe.int, ?y#0:wybe.int, ?z#0:wybe.int): Alias Pairs: []
+
     foreign llvm move(1:wybe.int, ?x#0:wybe.int)
     foreign llvm move(2:wybe.int, ?y#0:wybe.int)
     foreign llvm move(3:wybe.int, ?z#0:wybe.int)

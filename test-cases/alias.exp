@@ -1,9 +1,9 @@
 ======================================================================
 AFTER EVERYTHING:
  Module alias
-  public submods  :
+  public submods  : 
   public types    : position: (alias.position,"pointer")
-  public resources:
+  public resources: 
   public procs    : alias.<0>
                     alias.position.=<0>
                     alias.position.=<1>
@@ -17,19 +17,24 @@ AFTER EVERYTHING:
   imports         : public use alias.position
                     use wybe
   types           : position/0 (pointer)  @alias:1:9
-  resources       :
-  procs           :
+  resources       : 
+  procs           : 
 
-*main* > public inline (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_int(7777:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @wybe:76:38
+*main* > public (0 calls)
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
+
+    foreign lpvm alloc(16:wybe.int, ?tmp$4#0:alias.position)
+    foreign lpvm mutate(~tmp$4#0:alias.position, ?tmp$5#0:alias.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 6666:wybe.int)
+    foreign lpvm mutate(~tmp$5#0:alias.position, ?tmp$0#0:alias.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 7777:wybe.int)
+    foreign lpvm access(~tmp$0#0:alias.position, 8:wybe.int, ?tmp$1#0:wybe.int)
+    foreign c print_int(~tmp$1#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @wybe:76:38
     foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
   submodules      : alias.position
 --------------------------------------------------
  Module alias.position([])
-  public submods  :
-  public types    :
-  public resources:
+  public submods  : 
+  public types    : 
+  public resources: 
   public procs    : alias.position.=<0>
                     alias.position.=<1>
                     alias.position.=<2>
@@ -40,18 +45,21 @@ AFTER EVERYTHING:
                     alias.position.y<0>
                     alias.position.y<1>
   imports         : use wybe
-  types           :
-  resources       :
-  procs           :
+  types           : 
+  resources       : 
+  procs           : 
 
 = > public inline (0 calls)
-0: =(?out#0:alias.position, in#0:alias.position) aliases []:
+0: =(?out#0:alias.position, in#0:alias.position): Alias Pairs: []
+
     foreign llvm move(~in#0:alias.position, ?out#0:alias.position)
 = > public inline (0 calls)
-1: =(in#0:alias.position, ?out#0:alias.position) aliases []:
+1: =(in#0:alias.position, ?out#0:alias.position): Alias Pairs: []
+
     foreign llvm move(~in#0:alias.position, ?out#0:alias.position)
 = > public inline test (3 calls)
-2: =($left#0:alias.position, $right#0:alias.position, ?$$#0:wybe.bool) aliases []:
+2: =($left#0:alias.position, $right#0:alias.position, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm access($left#0:alias.position, 0:wybe.int, ?$left$x#0:wybe.int)
     foreign lpvm access(~$left#0:alias.position, 8:wybe.int, ?$left$y#0:wybe.int)
     foreign lpvm access($right#0:alias.position, 0:wybe.int, ?$right$x#0:wybe.int)
@@ -67,30 +75,36 @@ AFTER EVERYTHING:
 
 
 position > public inline (0 calls)
-0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:alias.position) aliases []:
+0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:alias.position): Alias Pairs: []
+
     foreign lpvm alloc(16:wybe.int, ?$rec#0:alias.position)
     foreign lpvm mutate(~%$rec#0:alias.position, ?%$rec#1:alias.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, ~x#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:alias.position, ?%$#0:alias.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~y#0:wybe.int)
 position > public inline (4 calls)
-1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:alias.position) aliases []:
+1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:alias.position): Alias Pairs: []
+
     foreign lpvm access($#0:alias.position, 0:wybe.int, ?x#0:wybe.int)
     foreign lpvm access(~$#0:alias.position, 8:wybe.int, ?y#0:wybe.int)
 
 
 x > public inline (0 calls)
-0: x($rec#0:alias.position, ?$#0:wybe.int) aliases []:
+0: x($rec#0:alias.position, ?$#0:wybe.int): Alias Pairs: []
+
     foreign lpvm access(~$rec#0:alias.position, 0:wybe.int, ?$#0:wybe.int)
 x > public inline (0 calls)
-1: x($rec#0:alias.position, ?$rec#1:alias.position, $field#0:wybe.int) aliases []:
-    foreign lpvm mutate(~%$rec#0:alias.position, ?%$rec#1:alias.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
+1: x($rec#0:alias.position, ?$rec#1:alias.position, $field#0:wybe.int): Alias Pairs: []
+
+    foreign lpvm mutate(~%$rec#0:alias.position, ?%$rec#1:alias.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 y > public inline (0 calls)
-0: y($rec#0:alias.position, ?$#0:wybe.int) aliases []:
+0: y($rec#0:alias.position, ?$#0:wybe.int): Alias Pairs: []
+
     foreign lpvm access(~$rec#0:alias.position, 8:wybe.int, ?$#0:wybe.int)
 y > public inline (0 calls)
-1: y($rec#0:alias.position, ?$rec#1:alias.position, $field#0:wybe.int) aliases []:
-    foreign lpvm mutate(~%$rec#0:alias.position, ?%$rec#1:alias.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
+1: y($rec#0:alias.position, ?$rec#1:alias.position, $field#0:wybe.int): Alias Pairs: []
+
+    foreign lpvm mutate(~%$rec#0:alias.position, ?%$rec#1:alias.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 alias, alias.position
 ======================================================================
 AFTER LLVM IR:
@@ -106,6 +120,12 @@ declare i8* @wybe_malloc(i32) local_unnamed_addr
 
 define i32 @alias.main() local_unnamed_addr {
 entry:
+  %0 = tail call i8* @wybe_malloc(i32 16)
+  %1 = bitcast i8* %0 to i64*
+  store i64 6666, i64* %1, align 4
+  %2 = getelementptr i8, i8* %0, i64 8
+  %3 = bitcast i8* %2 to i64*
+  store i64 7777, i64* %3, align 4
   tail call void @print_int(i64 7777)
   tail call void @putchar(i8 10)
   ret i32 0
@@ -172,9 +192,9 @@ entry:
   ret i64 %0
 }
 
-; Function Attrs: norecurse nounwind
-define i64* @"alias.position.x<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
+define i64* @"alias.position.x<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
+  %0 = tail call i8* @wybe_malloc(i32 16)
   store i64 %"$field#0", i64* %"$rec#0", align 4
   ret i64* %"$rec#0"
 }
@@ -187,17 +207,16 @@ entry:
   ret i64 %1
 }
 
-; Function Attrs: norecurse nounwind
-define i64* @"alias.position.y<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
+define i64* @"alias.position.y<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
-  %0 = getelementptr i64, i64* %"$rec#0", i64 1
-  store i64 %"$field#0", i64* %0, align 4
+  %0 = tail call i8* @wybe_malloc(i32 16)
+  %1 = getelementptr i64, i64* %"$rec#0", i64 1
+  store i64 %"$field#0", i64* %1, align 4
   ret i64* %"$rec#0"
 }
 
 attributes #0 = { norecurse nounwind readnone }
 attributes #1 = { norecurse nounwind readonly }
-attributes #2 = { norecurse nounwind }
 
 --------------------------------------------------
 ; ModuleID = 'alias.position'
@@ -266,9 +285,9 @@ entry:
   ret i64 %0
 }
 
-; Function Attrs: norecurse nounwind
-define i64* @"alias.position.x<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
+define i64* @"alias.position.x<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
+  %0 = tail call i8* @wybe_malloc(i32 16)
   store i64 %"$field#0", i64* %"$rec#0", align 4
   ret i64* %"$rec#0"
 }
@@ -281,15 +300,14 @@ entry:
   ret i64 %1
 }
 
-; Function Attrs: norecurse nounwind
-define i64* @"alias.position.y<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
+define i64* @"alias.position.y<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
-  %0 = getelementptr i64, i64* %"$rec#0", i64 1
-  store i64 %"$field#0", i64* %0, align 4
+  %0 = tail call i8* @wybe_malloc(i32 16)
+  %1 = getelementptr i64, i64* %"$rec#0", i64 1
+  store i64 %"$field#0", i64* %1, align 4
   ret i64* %"$rec#0"
 }
 
 attributes #0 = { norecurse nounwind readnone }
 attributes #1 = { norecurse nounwind readonly }
-attributes #2 = { norecurse nounwind }
 

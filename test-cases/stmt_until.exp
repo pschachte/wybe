@@ -17,7 +17,7 @@ AFTER EVERYTHING:
 
 
 gen$1 > (2 calls)
-0: gen$1(n#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): Alias Pairs: [(1,2)]
+0: gen$1(n#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): Alias Pairs: []
 
     foreign llvm icmp slt(n#0:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:24:39
     case ~tmp$2#0:wybe.bool of

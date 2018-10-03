@@ -1,32 +1,34 @@
 ======================================================================
 AFTER EVERYTHING:
  Module import
-  public submods  :
-  public types    :
-  public resources:
+  public submods  : 
+  public types    : 
+  public resources: 
   public procs    : import.<0>
                     import.distance<0>
   imports         : use position
                     use wybe
-  types           :
-  resources       :
-  procs           :
+  types           : 
+  resources       : 
+  procs           : 
 
 *main* > public (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom) aliases []:
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
+
     foreign lpvm alloc(16:wybe.int, ?tmp$5#0:position.position)
     foreign lpvm mutate(~tmp$5#0:position.position, ?tmp$6#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp$6#0:position.position, ?tmp$1#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 20:wybe.int)
     foreign lpvm alloc(16:wybe.int, ?tmp$9#0:position.position)
-    foreign lpvm mutate(~tmp$9#0:position.position, ?tmp$10#0:position.position, 0:wybe.int, 0:wybe.int)
-    foreign lpvm mutate(~tmp$10#0:position.position, ?tmp$2#0:position.position, 8:wybe.int, 0:wybe.int)
+    foreign lpvm mutate(~tmp$9#0:position.position, ?tmp$10#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 0:wybe.int)
+    foreign lpvm mutate(~tmp$10#0:position.position, ?tmp$2#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 0:wybe.int)
     import.distance<0>(~tmp$1#0:position.position, ~tmp$2#0:position.position, ?tmp$0#0:wybe.int) @import:6:10
     foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$13#0:wybe.phantom) @wybe:76:38
     foreign c putchar('\n':wybe.char, ~tmp$13#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
 
 
 distance > public (1 calls)
-0: distance(p1#0:position.position, p2#0:position.position, ?$#0:wybe.int) aliases []:
+0: distance(p1#0:position.position, p2#0:position.position, ?$#0:wybe.int): Alias Pairs: []
+
     foreign lpvm access(p2#0:position.position, 0:wybe.int, ?tmp$4#0:wybe.int)
     foreign lpvm access(p1#0:position.position, 0:wybe.int, ?tmp$5#0:wybe.int)
     foreign llvm sub(~tmp$4#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$3#0:wybe.int) @wybe:16:38
@@ -39,9 +41,9 @@ distance > public (1 calls)
     foreign C isqrt(~tmp$1#0:wybe.int, ?$#0:wybe.int) @wybe:29:35
 --------------------------------------------------
  Module position
-  public submods  :
+  public submods  : 
   public types    : position: (position.position,"pointer")
-  public resources:
+  public resources: 
   public procs    : position.position.=<0>
                     position.position.=<1>
                     position.position.=<2>
@@ -54,15 +56,15 @@ distance > public (1 calls)
   imports         : public use position.position
                     use wybe
   types           : position/0 (pointer)  @position:1:8
-  resources       :
-  procs           :
+  resources       : 
+  procs           : 
 
   submodules      : position.position
 --------------------------------------------------
  Module position.position([])
-  public submods  :
-  public types    :
-  public resources:
+  public submods  : 
+  public types    : 
+  public resources: 
   public procs    : position.position.=<0>
                     position.position.=<1>
                     position.position.=<2>
@@ -73,18 +75,21 @@ distance > public (1 calls)
                     position.position.y<0>
                     position.position.y<1>
   imports         : use wybe
-  types           :
-  resources       :
-  procs           :
+  types           : 
+  resources       : 
+  procs           : 
 
 = > public inline (0 calls)
-0: =(?out#0:position.position, in#0:position.position) aliases []:
+0: =(?out#0:position.position, in#0:position.position): Alias Pairs: []
+
     foreign llvm move(~in#0:position.position, ?out#0:position.position)
 = > public inline (0 calls)
-1: =(in#0:position.position, ?out#0:position.position) aliases []:
+1: =(in#0:position.position, ?out#0:position.position): Alias Pairs: []
+
     foreign llvm move(~in#0:position.position, ?out#0:position.position)
 = > public inline test (3 calls)
-2: =($left#0:position.position, $right#0:position.position, ?$$#0:wybe.bool) aliases []:
+2: =($left#0:position.position, $right#0:position.position, ?$$#0:wybe.bool): Alias Pairs: []
+
     foreign lpvm access($left#0:position.position, 0:wybe.int, ?$left$x#0:wybe.int)
     foreign lpvm access(~$left#0:position.position, 8:wybe.int, ?$left$y#0:wybe.int)
     foreign lpvm access($right#0:position.position, 0:wybe.int, ?$right$x#0:wybe.int)
@@ -100,30 +105,36 @@ distance > public (1 calls)
 
 
 position > public inline (0 calls)
-0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:position.position) aliases []:
+0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:position.position): Alias Pairs: []
+
     foreign lpvm alloc(16:wybe.int, ?$rec#0:position.position)
     foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, ~x#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:position.position, ?%$#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~y#0:wybe.int)
 position > public inline (4 calls)
-1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position) aliases []:
+1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position): Alias Pairs: []
+
     foreign lpvm access($#0:position.position, 0:wybe.int, ?x#0:wybe.int)
     foreign lpvm access(~$#0:position.position, 8:wybe.int, ?y#0:wybe.int)
 
 
 x > public inline (0 calls)
-0: x($rec#0:position.position, ?$#0:wybe.int) aliases []:
+0: x($rec#0:position.position, ?$#0:wybe.int): Alias Pairs: []
+
     foreign lpvm access(~$rec#0:position.position, 0:wybe.int, ?$#0:wybe.int)
 x > public inline (0 calls)
-1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int) aliases []:
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
+1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): Alias Pairs: []
+
+    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 y > public inline (0 calls)
-0: y($rec#0:position.position, ?$#0:wybe.int) aliases []:
+0: y($rec#0:position.position, ?$#0:wybe.int): Alias Pairs: []
+
     foreign lpvm access(~$rec#0:position.position, 8:wybe.int, ?$#0:wybe.int)
 y > public inline (0 calls)
-1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int) aliases []:
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
+1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): Alias Pairs: []
+
+    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 import, position, position.position
 ======================================================================
 AFTER LLVM IR:
@@ -251,9 +262,9 @@ entry:
   ret i64 %0
 }
 
-; Function Attrs: norecurse nounwind
-define i64* @"position.position.x<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
+define i64* @"position.position.x<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
+  %0 = tail call i8* @wybe_malloc(i32 16)
   store i64 %"$field#0", i64* %"$rec#0", align 4
   ret i64* %"$rec#0"
 }
@@ -266,15 +277,14 @@ entry:
   ret i64 %1
 }
 
-; Function Attrs: norecurse nounwind
-define i64* @"position.position.y<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
+define i64* @"position.position.y<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
-  %0 = getelementptr i64, i64* %"$rec#0", i64 1
-  store i64 %"$field#0", i64* %0, align 4
+  %0 = tail call i8* @wybe_malloc(i32 16)
+  %1 = getelementptr i64, i64* %"$rec#0", i64 1
+  store i64 %"$field#0", i64* %1, align 4
   ret i64* %"$rec#0"
 }
 
 attributes #0 = { norecurse nounwind readnone }
 attributes #1 = { norecurse nounwind readonly }
-attributes #2 = { norecurse nounwind }
 
