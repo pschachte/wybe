@@ -1,11 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
- Module escape7
+ Module escape_fork2
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : escape7.<0>
-                    escape7.simpleMerge<0>
+  public procs    : escape_fork2.<0>
+                    escape_fork2.simpleMerge<0>
   imports         : use mytree
                     use wybe
   types           : 
@@ -20,13 +20,13 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp$10#0:mytree.tree, ?tmp$11#0:mytree.tree, 24:wybe.int, 0:wybe.int, 1:wybe.int, tmp$1#0:mytree.tree)
     foreign lpvm mutate(~tmp$11#0:mytree.tree, ?tmp$12#0:mytree.tree, 24:wybe.int, 8:wybe.int, 1:wybe.int, 1:wybe.int)
     foreign lpvm mutate(~tmp$12#0:mytree.tree, ?tmp$0#0:mytree.tree, 24:wybe.int, 16:wybe.int, 1:wybe.int, ~tmp$1#0:mytree.tree)
-    escape7.simpleMerge<0>(tmp$0#0:mytree.tree, ?tmp$3#0:mytree.tree) @escape7:11:6
-    mytree.printTree<0>(~tmp$3#0:mytree.tree, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape7:12:2
+    escape_fork2.simpleMerge<0>(tmp$0#0:mytree.tree, ?tmp$3#0:mytree.tree) @escape_fork2:11:6
+    mytree.printTree<0>(~tmp$3#0:mytree.tree, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape_fork2:12:2
     foreign lpvm cast(tmp$0#0:mytree.tree, ?tmp$17#0:wybe.int)
     foreign llvm icmp ne(~tmp$17#0:wybe.int, 0:wybe.int, ?tmp$18#0:wybe.bool)
     case ~tmp$18#0:wybe.bool of
     0:
-        mytree.printTree<0>(~tmp$0#0:mytree.tree, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @escape7:18:2
+        mytree.printTree<0>(~tmp$0#0:mytree.tree, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @escape_fork2:18:2
 
     1:
         foreign lpvm access(tmp$0#0:mytree.tree, 0:wybe.int, ?l#0:mytree.tree)
@@ -35,7 +35,7 @@ AFTER EVERYTHING:
         foreign lpvm mutate(~tmp$22#0:mytree.tree, ?tmp$23#0:mytree.tree, 24:wybe.int, 0:wybe.int, 1:wybe.int, ~l#0:mytree.tree)
         foreign lpvm mutate(~tmp$23#0:mytree.tree, ?tmp$24#0:mytree.tree, 24:wybe.int, 8:wybe.int, 1:wybe.int, 1000:wybe.int)
         foreign lpvm mutate(~tmp$24#0:mytree.tree, ?tmp$5#0:mytree.tree, 24:wybe.int, 16:wybe.int, 1:wybe.int, ~r#0:mytree.tree)
-        mytree.printTree<0>(~tmp$5#0:mytree.tree, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @escape7:18:2
+        mytree.printTree<0>(~tmp$5#0:mytree.tree, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @escape_fork2:18:2
 
 
 

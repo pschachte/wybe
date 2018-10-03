@@ -1,11 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
- Module escape6
+ Module escape_fork1
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : escape6.<0>
-                    escape6.simpleMerge<0>
+  public procs    : escape_fork1.<0>
+                    escape_fork1.simpleMerge<0>
   imports         : use mytree
                     use wybe
   types           : 
@@ -24,8 +24,8 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp$17#0:mytree.tree, ?tmp$18#0:mytree.tree, 24:wybe.int, 0:wybe.int, 1:wybe.int, tmp$1#0:mytree.tree)
     foreign lpvm mutate(~tmp$18#0:mytree.tree, ?tmp$19#0:mytree.tree, 24:wybe.int, 8:wybe.int, 1:wybe.int, 111:wybe.int)
     foreign lpvm mutate(~tmp$19#0:mytree.tree, ?tmp$3#0:mytree.tree, 24:wybe.int, 16:wybe.int, 1:wybe.int, ~tmp$1#0:mytree.tree)
-    escape6.simpleMerge<0>(~tmp$0#0:mytree.tree, ~tmp$3#0:mytree.tree, ?tmp$6#0:mytree.tree) @escape6:16:6
-    mytree.printTree<0>(~tmp$6#0:mytree.tree, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape6:17:2
+    escape_fork1.simpleMerge<0>(~tmp$0#0:mytree.tree, ~tmp$3#0:mytree.tree, ?tmp$6#0:mytree.tree) @escape_fork1:16:6
+    mytree.printTree<0>(~tmp$6#0:mytree.tree, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape_fork1:17:2
 
 
 simpleMerge > public (1 calls)
@@ -310,18 +310,18 @@ right > public inline test (0 calls)
         foreign lpvm mutate(~%$rec#0:mytree.tree, ?%$rec#1:mytree.tree, 24:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:mytree.tree)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-escape6, mytree, mytree.tree
+escape_fork1, mytree, mytree.tree
 ======================================================================
 AFTER LLVM IR:
 
-; ModuleID = 'escape6'
-source_filename = "test-cases/escape6.wybe"
+; ModuleID = 'escape_fork1'
+source_filename = "test-cases/escape_fork1.wybe"
 
 declare void @"mytree.printTree<0>"(i64*) local_unnamed_addr
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
 
-define i32 @escape6.main() local_unnamed_addr {
+define i32 @escape_fork1.main() local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 24)
   %1 = bitcast i8* %0 to i64*
@@ -341,12 +341,12 @@ entry:
   %10 = getelementptr i8, i8* %6, i64 16
   %11 = bitcast i8* %10 to i64*
   store i64 0, i64* %11, align 4
-  %"tmp$6#0" = tail call i64* @"escape6.simpleMerge<0>"(i64* %1, i64* %7)
+  %"tmp$6#0" = tail call i64* @"escape_fork1.simpleMerge<0>"(i64* %1, i64* %7)
   tail call void @"mytree.printTree<0>"(i64* %"tmp$6#0")
   ret i32 0
 }
 
-define i64* @"escape6.simpleMerge<0>"(i64* %"tl#0", i64* %"tr#0") local_unnamed_addr {
+define i64* @"escape_fork1.simpleMerge<0>"(i64* %"tl#0", i64* %"tr#0") local_unnamed_addr {
 entry:
   %"tmp$19#0" = icmp eq i64* %"tl#0", null
   br i1 %"tmp$19#0", label %if.else, label %if.then

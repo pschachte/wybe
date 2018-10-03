@@ -1,13 +1,13 @@
 ======================================================================
 AFTER EVERYTHING:
- Module escape2
+ Module escape_nested
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : escape2.<0>
-                    escape2.bar<0>
-                    escape2.replicate1<0>
-                    escape2.replicate2<0>
+  public procs    : escape_nested.<0>
+                    escape_nested.bar<0>
+                    escape_nested.replicate1<0>
+                    escape_nested.replicate2<0>
   imports         : use position
                     use wybe
   types           : 
@@ -17,7 +17,7 @@ AFTER EVERYTHING:
 *main* > public inline (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
 
-    escape2.bar<0>(~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape2:33:2
+    escape_nested.bar<0>(~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape_nested:33:2
 
 
 bar > public (1 calls)
@@ -26,7 +26,7 @@ bar > public (1 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp$6#0:position.position)
     foreign lpvm mutate(~tmp$6#0:position.position, ?tmp$7#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 101:wybe.int)
     foreign lpvm mutate(~tmp$7#0:position.position, ?tmp$0#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 102:wybe.int)
-    escape2.replicate1<0>(tmp$0#0:position.position, ?p2#0:position.position, ?p3#0:position.position, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape2:22:4
+    escape_nested.replicate1<0>(tmp$0#0:position.position, ?p2#0:position.position, ?p3#0:position.position, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape_nested:22:4
     foreign lpvm mutate(~tmp$0#0:position.position, ?%p1#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, 555:wybe.int)
     foreign c print_string("p1":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:88:41
     foreign lpvm access(~p1#1:position.position, 0:wybe.int, ?tmp$1#0:wybe.int)
@@ -53,7 +53,7 @@ replicate1 > public (1 calls)
     foreign c print_int(~tmp$1#0:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?tmp$12#0:wybe.phantom) @wybe:76:38
     foreign c putchar('\n':wybe.char, ~tmp$12#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:74:28
     foreign llvm move(p1#0:position.position, ?p2#0:position.position)
-    escape2.replicate2<0>(~p1#0:position.position, ?p3#0:position.position, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @escape2:17:4
+    escape_nested.replicate2<0>(~p1#0:position.position, ?p3#0:position.position, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @escape_nested:17:4
 
 
 replicate2 > public (1 calls)
@@ -163,18 +163,18 @@ y > public inline (0 calls)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): Alias Pairs: []
 
     foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
-escape2, position, position.position
+escape_nested, position, position.position
 ======================================================================
 AFTER LLVM IR:
 
-; ModuleID = 'escape2'
-source_filename = "test-cases/escape2.wybe"
+; ModuleID = 'escape_nested'
+source_filename = "test-cases/escape_nested.wybe"
 
-@escape2.18 = constant [3 x i8] c"p3\00"
-@escape2.15 = constant [3 x i8] c"p2\00"
-@escape2.12 = constant [3 x i8] c"p1\00"
-@escape2.25 = constant [18 x i8] c"random replicate1\00"
-@escape2.34 = constant [18 x i8] c"random replicate2\00"
+@escape_nested.18 = constant [3 x i8] c"p3\00"
+@escape_nested.15 = constant [3 x i8] c"p2\00"
+@escape_nested.12 = constant [3 x i8] c"p1\00"
+@escape_nested.25 = constant [18 x i8] c"random replicate1\00"
+@escape_nested.34 = constant [18 x i8] c"random replicate2\00"
 
 declare void @putchar(i8) local_unnamed_addr
 
@@ -184,13 +184,13 @@ declare void @print_string(i8*) local_unnamed_addr
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
 
-define i32 @escape2.main() local_unnamed_addr {
+define i32 @escape_nested.main() local_unnamed_addr {
 entry:
-  tail call void @"escape2.bar<0>"()
+  tail call void @"escape_nested.bar<0>"()
   ret i32 0
 }
 
-define void @"escape2.bar<0>"() local_unnamed_addr {
+define void @"escape_nested.bar<0>"() local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
   %1 = bitcast i8* %0 to i64*
@@ -198,47 +198,47 @@ entry:
   %2 = getelementptr i8, i8* %0, i64 8
   %3 = bitcast i8* %2 to i64*
   store i64 102, i64* %3, align 4
-  %4 = tail call { i64*, i64* } @"escape2.replicate1<0>"(i64* %1)
+  %4 = tail call { i64*, i64* } @"escape_nested.replicate1<0>"(i64* %1)
   %5 = extractvalue { i64*, i64* } %4, 0
   %6 = extractvalue { i64*, i64* } %4, 1
   %7 = tail call i8* @wybe_malloc(i32 16)
   store i64 555, i64* %1, align 4
-  tail call void @print_string(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @escape2.12, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @escape_nested.12, i64 0, i64 0))
   %8 = load i64, i64* %1, align 4
   tail call void @print_int(i64 %8)
   tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @escape2.15, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @escape_nested.15, i64 0, i64 0))
   %9 = load i64, i64* %5, align 4
   tail call void @print_int(i64 %9)
   tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @escape2.18, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @escape_nested.18, i64 0, i64 0))
   %10 = load i64, i64* %6, align 4
   tail call void @print_int(i64 %10)
   tail call void @putchar(i8 10)
   ret void
 }
 
-define { i64*, i64* } @"escape2.replicate1<0>"(i64* %"p1#0") local_unnamed_addr {
+define { i64*, i64* } @"escape_nested.replicate1<0>"(i64* %"p1#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
   %1 = bitcast i8* %0 to i64*
   call void @llvm.memset.p0i8.i64(i8* %0, i8 0, i64 16, i32 4, i1 false)
-  tail call void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @escape2.25, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @escape_nested.25, i64 0, i64 0))
   %2 = load i64, i64* %1, align 4
   tail call void @print_int(i64 %2)
   tail call void @putchar(i8 10)
-  %"p3#0" = tail call i64* @"escape2.replicate2<0>"(i64* %"p1#0")
+  %"p3#0" = tail call i64* @"escape_nested.replicate2<0>"(i64* %"p1#0")
   %3 = insertvalue { i64*, i64* } undef, i64* %"p1#0", 0
   %4 = insertvalue { i64*, i64* } %3, i64* %"p3#0", 1
   ret { i64*, i64* } %4
 }
 
-define i64* @"escape2.replicate2<0>"(i64* readnone returned %"p1#0") local_unnamed_addr {
+define i64* @"escape_nested.replicate2<0>"(i64* readnone returned %"p1#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
   %1 = bitcast i8* %0 to i64*
   call void @llvm.memset.p0i8.i64(i8* %0, i8 0, i64 16, i32 4, i1 false)
-  tail call void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @escape2.34, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @escape_nested.34, i64 0, i64 0))
   %2 = load i64, i64* %1, align 4
   tail call void @print_int(i64 %2)
   tail call void @putchar(i8 10)

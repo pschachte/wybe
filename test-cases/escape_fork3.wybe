@@ -1,5 +1,4 @@
-# (1) analyse condition switches?
-# (2) how to modify part of a recursive data type?
+# how to modify part of a recursive data type?
 
 # Recursive data type:
 # access part of the data structure

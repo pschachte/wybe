@@ -1,11 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
- Module escape8
+ Module escape_fork3
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : escape8.<0>
-                    escape8.simpleSlice<0>
+  public procs    : escape_fork3.<0>
+                    escape_fork3.simpleSlice<0>
   imports         : use mytree
                     use wybe
   types           : 
@@ -24,8 +24,8 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp$15#0:mytree.tree, ?tmp$16#0:mytree.tree, 24:wybe.int, 0:wybe.int, 1:wybe.int, ~tmp$1#0:mytree.tree)
     foreign lpvm mutate(~tmp$16#0:mytree.tree, ?tmp$17#0:mytree.tree, 24:wybe.int, 8:wybe.int, 1:wybe.int, 200:wybe.int)
     foreign lpvm mutate(~tmp$17#0:mytree.tree, ?tmp$0#0:mytree.tree, 24:wybe.int, 16:wybe.int, 1:wybe.int, ~tmp$2#0:mytree.tree)
-    escape8.simpleSlice<0>(~tmp$0#0:mytree.tree, ?tmp$5#0:mytree.tree) @escape8:14:6
-    mytree.printTree<0>(~tmp$5#0:mytree.tree, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape8:15:2
+    escape_fork3.simpleSlice<0>(~tmp$0#0:mytree.tree, ?tmp$5#0:mytree.tree) @escape_fork3:13:6
+    mytree.printTree<0>(~tmp$5#0:mytree.tree, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape_fork3:14:2
 
 
 simpleSlice > public (1 calls)
@@ -43,7 +43,7 @@ simpleSlice > public (1 calls)
 
     1:
         foreign lpvm access(~tr#0:mytree.tree, 0:wybe.int, ?l#0:mytree.tree)
-        foreign llvm move(~l#0:mytree.tree, ?$#0:mytree.tree) @escape8:9:8
+        foreign llvm move(~l#0:mytree.tree, ?$#0:mytree.tree) @escape_fork3:8:8
 
 --------------------------------------------------
  Module mytree
@@ -282,18 +282,18 @@ right > public inline test (0 calls)
         foreign lpvm mutate(~%$rec#0:mytree.tree, ?%$rec#1:mytree.tree, 24:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:mytree.tree)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-escape8, mytree, mytree.tree
+escape_fork3, mytree, mytree.tree
 ======================================================================
 AFTER LLVM IR:
 
-; ModuleID = 'escape8'
-source_filename = "test-cases/escape8.wybe"
+; ModuleID = 'escape_fork3'
+source_filename = "test-cases/escape_fork3.wybe"
 
 declare void @"mytree.printTree<0>"(i64*) local_unnamed_addr
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
 
-define i32 @escape8.main() local_unnamed_addr {
+define i32 @escape_fork3.main() local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 24)
   %1 = bitcast i8* %0 to i64*
@@ -314,12 +314,12 @@ entry:
   %11 = getelementptr i8, i8* %6, i64 16
   %12 = bitcast i8* %11 to i64*
   store i64 0, i64* %12, align 4
-  %"tmp$5#0" = tail call i64* @"escape8.simpleSlice<0>"(i64* %7)
+  %"tmp$5#0" = tail call i64* @"escape_fork3.simpleSlice<0>"(i64* %7)
   tail call void @"mytree.printTree<0>"(i64* %"tmp$5#0")
   ret i32 0
 }
 
-define i64* @"escape8.simpleSlice<0>"(i64* readonly %"tr#0") local_unnamed_addr {
+define i64* @"escape_fork3.simpleSlice<0>"(i64* readonly %"tr#0") local_unnamed_addr {
 entry:
   %"tmp$10#0" = icmp eq i64* %"tr#0", null
   br i1 %"tmp$10#0", label %if.else, label %if.then
