@@ -1930,21 +1930,21 @@ inArgVar (ArgVar var _ flow _ _) | flow == FlowIn = var
 inArgVar _ = shouldnt "inArgVar of input argument"
 
 
-inArgVar2:: PrimArg -> Compiler PrimVarName
+inArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
 inArgVar2 (ArgVar var ty flow _ _)
     | flow == FlowIn = do
         rep <- lookupTypeRepresentation ty
-        -- case rep of
-        --     Just "pointer" -> logAlias "pointer"
-        --     _ -> logAlias "else"
-        -- logAlias $ show $ lookupTypeRepresentation ty
-        return var
-inArgVar2 var = shouldnt "inArgVar2 of input argument"
+        case rep of
+            Just "pointer" ->
+                return (Just var)
+            _ ->
+                return Nothing
+inArgVar2 var = return Nothing
 
 
-outArgVar2:: PrimArg -> Compiler PrimVarName
-outArgVar2 (ArgVar var _ flow _ _) | flow == FlowOut = return var
-outArgVar2 _ = shouldnt "outArgVar2 of input argument"
+outArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
+outArgVar2 (ArgVar var _ flow _ _) | flow == FlowOut = return (Just var)
+outArgVar2 _ = return Nothing
 
 
 argDescription :: PrimArg -> String

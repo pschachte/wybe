@@ -186,12 +186,16 @@ escapablePrimArgs _                               = return []
 
 
 -- get argvar names of aliased args of the prim
-argsOfProcProto :: (PrimArg -> Compiler PrimVarName) -> [PrimArg]
+argsOfProcProto :: (PrimArg -> Compiler (Maybe PrimVarName)) -> [PrimArg]
                     -> Compiler [PrimVarName]
-argsOfProcProto varNameGetter =
+argsOfProcProto varNameGetter args =
     foldM (\es arg -> do
             nm <- varNameGetter arg
-            return (nm : es)) []
+            case nm of
+                Just name -> return (name : es)
+                Nothing -> return es
+                ) [] args
+
 
 
 -- Check Arg escape in one prim of prims of a ProcBody
