@@ -1,4 +1,5 @@
 # aliasing part (the part is primitive values) of a data structures
+# p1's int value copied to p2, so p1 and p2 not aliased
 
 use position
 

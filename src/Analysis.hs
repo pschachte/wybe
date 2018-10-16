@@ -9,7 +9,6 @@ module Analysis (analyseMod) where
 import           AliasAnalysis
 import           Control.Monad.Trans
 import           Control.Monad.Trans.State
--- import           FreshnessAnalysis
 import           AST
 import           Control.Monad
 import           Data.Graph
@@ -52,7 +51,7 @@ updateFreshness spec procDef = do
     (freshset, _, prims')
           <- foldM freshInPrim (Set.empty, aliasParams, []) prims
     logAnalysis $ "\n*** Freshness analysis" ++ ": "
-                    ++ procName procDef ++ " " ++ show freshset ++ "\n\n"
+                    ++ procName procDef ++ " " ++ show freshset
     let body' = body { bodyPrims = prims' }
     return procDef { procImpln = ProcDefPrim proto body' analysis }
 
@@ -87,13 +86,11 @@ freshInPrim (freshVars, aliasParams, prims) prim =
           calleeDef <- getProcDef spec
           let (ProcDefPrim calleeProto body analysis) = procImpln calleeDef
           let calleeAlias = procArgAliases analysis
-          logAnalysis $ "\n    call " ++ show spec ++" (callee): "
+          logAnalysis $ "    call " ++ show spec ++" (callee): "
           logAnalysis $ "    " ++ show calleeProto
-          -- logAnalysis $ "    PrimCall args: " ++ show args
-          -- logAnalysis $ "    callerAlias: " ++ show callerAlias
           logAnalysis $ "    calleeAlias: " ++ show calleeAlias
           let aliasNames' = aliasPairsToVarNames args calleeAlias
-          logAnalysis $ "    names: " ++ show aliasNames'
+          logAnalysis $ "    calleeAlias names: " ++ show aliasNames'
           return (freshVars, aliasParams ++ aliasNames', prims ++ [prim])
       _ ->
         return (freshVars, aliasParams, prims ++ [prim])
