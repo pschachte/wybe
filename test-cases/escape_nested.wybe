@@ -8,6 +8,7 @@ public proc replicate2(p1:position, ?p2:position) use !io
   ?p2 = p1
 end
 
+# Expected Alias Pairs: [(0,1),(0,2),(1,2)]
 public proc replicate1(p1:position, ?p2:position, ?p3:position) use !io
   ?pp = position(0,0)
   !print("random replicate1")

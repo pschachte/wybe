@@ -4,7 +4,7 @@
 --  Purpose  : Alias analysis for a single module
 --  Copyright: (c) 2018 Ting Lu.  All rights reserved.
 
-module AliasAnalysis (aliasSccBottomUp) where
+module AliasAnalysis (aliasSccBottomUp, isVarAliased, aliasPairsToVarNames) where
 
 import           AST
 import           Control.Monad
@@ -24,7 +24,6 @@ aliasSccBottomUp procs = mapM_ aliasProcBottomUp $ sccElts procs
 
 aliasProcBottomUp :: ProcSpec -> Compiler ()
 aliasProcBottomUp pspec = do
-    -- logAlias "\n>>> Alias analysis (Bottom-up):"
     updateProcDefM (checkEscapeDef pspec) pspec
     return ()
 
@@ -88,10 +87,11 @@ checkEscapeDef spec def
         (prims, alias1) <- checkEscapePrims caller body []
 
         -- Update body prims with correct destructive flag
-        let body1 = body { bodyPrims = prims }
+        -- let body1 = body { bodyPrims = prims }
 
         -- Analysis of caller's bodyFork
-        (body2, alias2) <- checkEscapeFork caller body1 alias1
+        -- (body2, alias2) <- checkEscapeFork caller body1 alias1
+        (body2, alias2) <- checkEscapeFork caller body alias1
 
         -- Update proc analysis with new aliasPairs
         let analysis' = analysis { procArgAliases = alias2 }
@@ -109,7 +109,8 @@ checkEscapePrims caller body callerAlias = do
     let paramNames = primProtoParamNames caller
     let prims = bodyPrims body
 
-    -- First pass (only process alias pairs incurred by move and mutate)
+    -- First pass (only process alias pairs incurred by move, mutate, access,
+    -- cast)
     logAlias $ "Analyse prims (checkEscapePrims): \n    "
                 ++ List.intercalate "\n    " (List.map show prims)
 
@@ -157,14 +158,16 @@ checkEscapeFork caller body aliases = do
             (fBodies', aliases') <-
                 foldM (\(bs, as) currBody -> do
                         (ps, as') <- checkEscapePrims caller currBody as
-                        let currBody1 = currBody { bodyPrims = ps }
+                        -- let currBody1 = currBody { bodyPrims = ps }
                         let as1 = removeDupTuples $ transitiveTuples (as ++ as')
-                        (currBody2, as2) <- checkEscapeFork caller currBody1 as1
-                        return (bs ++ [currBody2], as2)
+                        -- (currBody2, as2) <- checkEscapeFork caller currBody1 as1
+                        (currBody, as2) <- checkEscapeFork caller currBody as1
+                        return (bs ++ [currBody], as2)
                     ) ([], []) fBodies
             let aliases2 = removeDupTuples
                             $ transitiveTuples (aliases ++ aliases')
-            return (body { bodyFork = fork {forkBodies=fBodies'} }, aliases2)
+            -- return (body { bodyFork = fork {forkBodies=fBodies'} }, aliases2)
+            return (body, aliases2)
         _ -> do
             -- NoFork: analyse prims done
             logAlias "No fork."
@@ -193,7 +196,7 @@ argsOfProcProto varNameGetter args =
             nm <- varNameGetter arg
             case nm of
                 Just name -> return (name : es)
-                Nothing -> return es
+                Nothing   -> return es
                 ) [] args
 
 
@@ -253,7 +256,7 @@ escapeByProcCalls (prims, aliasNames) prim callerAlias =
             logAlias $ "    PrimCall args: " ++ show args
             logAlias $ "    callerAlias: " ++ show callerAlias
             logAlias $ "    calleeAlias: " ++ show calleeAlias
-            let aliasNames' = _aliasPairsToVarNames args
+            let aliasNames' = aliasPairsToVarNames args
                                     (callerAlias ++ calleeAlias)
             logAlias $ "    names: " ++ show aliasNames'
             return (prims ++ [prim], aliasNames ++ aliasNames')
@@ -261,9 +264,9 @@ escapeByProcCalls (prims, aliasNames) prim callerAlias =
             return (prims ++ [prim], aliasNames)
 
 -- Helper: convert alias index pairs to var name pairs
-_aliasPairsToVarNames :: [PrimArg] -> [AliasPair]
+aliasPairsToVarNames :: [PrimArg] -> [AliasPair]
                             -> [(PrimVarName, PrimVarName)]
-_aliasPairsToVarNames primCallArgs =
+aliasPairsToVarNames primCallArgs =
     List.foldr (\(p1,p2) aliasNames ->
         let v1 = primCallArgs !! p1
             v2 = primCallArgs !! p2
@@ -289,16 +292,16 @@ _updateMutateForAlias :: [(PrimVarName, PrimVarName)] -> [PrimArg] -> [PrimArg]
 _updateMutateForAlias aliasNames
     [fIn@(ArgVar inName _ _ _ final), fOut@(ArgVar outName _ _ _ _), size,
     offset, ArgInt des typ, mem] =
-        if _isVarAliased inName aliasNames
+        if isVarAliased inName aliasNames
             then [fIn, fOut, size, offset, ArgInt 0 typ, mem]
             else [fIn, fOut, size, offset, ArgInt des typ, mem]
 _updateMutateForAlias _ args = args
 
 -- Helper: check if FlowIn variable is aliased after previous proc calls
-_isVarAliased :: PrimVarName -> [(PrimVarName, PrimVarName)] -> Bool
-_isVarAliased varName [] = False
-_isVarAliased varName ((n1,n2):as) =
-    (varName == n1 || varName == n2) || _isVarAliased varName as
+isVarAliased :: PrimVarName -> [(PrimVarName, PrimVarName)] -> Bool
+isVarAliased varName [] = False
+isVarAliased varName ((n1,n2):as) =
+    (varName == n1 || varName == n2) || isVarAliased varName as
 
 
 -- |Log a message, if we are logging optimisation activity.

@@ -100,7 +100,7 @@ optimiseProcDefBU :: ProcSpec -> ProcDef -> Compiler ProcDef
 optimiseProcDefBU pspec def = do
     logOptimise $ "*** " ++ show pspec ++
       " before optimisation:" ++ showProcDef 4 def
-    def' <- procExpansion pspec def >>= decideInlining >>= updateFreshness
+    def' <- procExpansion pspec def >>= decideInlining
     logOptimise $ "*** " ++ show pspec ++
       " after optimisation:" ++ showProcDef 4 def' ++ "\n"
     return def'
@@ -166,57 +166,3 @@ localCallees _ _                        = []
 -- |Log a message, if we are logging optimisation activity.
 logOptimise :: String -> Compiler ()
 logOptimise s = logMsg Optimise s
-
-
-----------------------------------------------------------------
---                     Freshness Analysis
-----------------------------------------------------------------
--- Build a set of fresh vars and update destructive flag in lpvm mutate
--- instruction
-updateFreshness :: ProcDef -> Compiler ProcDef
-updateFreshness procDef = do
-    let (ProcDefPrim proto body _) = procImpln procDef
-    let prims = bodyPrims body
-    let (freshset, prims') = List.foldl freshInPrim (Set.empty, []) prims
-    logOptimise $ "\n*** Freshness analysis" ++ ": "
-                    ++ procName procDef ++ " " ++ show freshset ++ "\n\n"
-    let body' = body { bodyPrims = prims' }
-    return procDef { procImpln = ProcDefPrim proto body' (ProcAnalysis []) }
-
-
--- Update args in a signle (alloc/mutate) prim
-freshInPrim :: (Set PrimVarName, [Placed Prim]) -> Placed Prim
-                -> (Set PrimVarName, [Placed Prim])
-freshInPrim (freshVars, prims)
-    (Placed (PrimForeign lang "mutate" flags args) pos) =
-        (freshVars', prims ++ [Placed (PrimForeign lang "mutate" flags args') pos])
-            where (freshVars', args') = freshInMutate freshVars args
-freshInPrim (freshVars, prims)
-    (Unplaced (PrimForeign lang "mutate" flags args)) =
-        (freshVars', prims ++ [Unplaced (PrimForeign lang "mutate" flags args')])
-            where (freshVars', args') = freshInMutate freshVars args
-freshInPrim (freshVars, prims) prim =
-    case content prim of
-        (PrimForeign _ "alloc" _ args) ->
-            (freshVars', prims ++ [prim])
-                where freshVars' = List.foldl freshInAlloc freshVars args
-        _ ->
-            (freshVars, prims ++ [prim])
-
--- newly allocated space is fresh
-freshInAlloc :: Set PrimVarName -> PrimArg -> Set PrimVarName
-freshInAlloc freshVars (ArgVar nm _ FlowOut _ _) = Set.insert nm freshVars
-freshInAlloc freshVars _                         = freshVars
-
--- variable after mutation is also fresh
-freshInMutate :: Set PrimVarName -> [PrimArg] -> (Set PrimVarName, [PrimArg])
-freshInMutate freshVars
-    [fIn@(ArgVar inName _ _ _ final), fOut@(ArgVar outName _ _ _ _), size,
-    offset, ArgInt des typ, mem] =
-        let
-            freshVars' = Set.insert outName freshVars
-        in
-            if Set.member inName freshVars' && final
-            then (freshVars', [fIn, fOut, size, offset, ArgInt 1 typ, mem])
-            else (freshVars', [fIn, fOut, size, offset, ArgInt 0 typ, mem])
-freshInMutate freshVars args = (freshVars, args)
