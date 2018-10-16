@@ -1931,8 +1931,8 @@ inArgVar _ = shouldnt "inArgVar of input argument"
 
 
 inArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
-inArgVar2 (ArgVar var ty flow _ _)
-    | flow == FlowIn = do
+inArgVar2 arg@(ArgVar var ty flow _ _)
+    | flow == FlowIn && not (phantomArg arg) = do
         rep <- lookupTypeRepresentation ty
         case rep of
             Just "pointer" ->
@@ -1943,7 +1943,8 @@ inArgVar2 var = return Nothing
 
 
 outArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
-outArgVar2 (ArgVar var _ flow _ _) | flow == FlowOut = return (Just var)
+outArgVar2 arg@(ArgVar var _ flow _ _)
+    | flow == FlowOut && not (phantomArg arg) = return (Just var)
 outArgVar2 _ = return Nothing
 
 
