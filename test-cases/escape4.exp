@@ -16,7 +16,7 @@ AFTER EVERYTHING:
 *main* > public inline (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
 
-    escape4.bar<0>(~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape4:27:2
+    escape4.bar<0>(~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape4:28:2
 
 
 bar > public (1 calls)
@@ -25,8 +25,8 @@ bar > public (1 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp$7#0:position.position)
     foreign lpvm mutate(~tmp$7#0:position.position, ?tmp$8#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 100:wybe.int)
     foreign lpvm mutate(~tmp$8#0:position.position, ?tmp$0#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 100:wybe.int)
-    escape4.replicate1<0>(tmp$0#0:position.position, ?p2#0:position.position, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape4:14:4
-    foreign lpvm mutate(~tmp$0#0:position.position, ?%p1#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, 555:wybe.int)
+    escape4.replicate1<0>(tmp$0#0:position.position, ?p2#0:position.position, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @escape4:15:4
+    foreign lpvm mutate(~tmp$0#0:position.position, ?%p1#1:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 555:wybe.int)
     foreign c print_string("p1.x":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:88:41
     foreign lpvm access(p1#1:position.position, 0:wybe.int, ?tmp$1#0:wybe.int)
     foreign c print_int(~tmp$1#0:wybe.int, ~#wybe.io$io#2:wybe.phantom, ?tmp$17#0:wybe.phantom) @wybe:76:38
@@ -46,7 +46,7 @@ bar > public (1 calls)
 
 
 replicate1 > public (1 calls)
-0: replicate1(p1#0:position.position, ?p2#0:position.position, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): Alias Pairs: [(0,1)]
+0: replicate1(p1#0:position.position, ?p2#0:position.position, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): Alias Pairs: []
 
     foreign lpvm alloc(16:wybe.int, ?tmp$6#0:position.position)
     foreign lpvm mutate(~tmp$6#0:position.position, ?tmp$7#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 0:wybe.int)
@@ -163,11 +163,11 @@ AFTER LLVM IR:
 ; ModuleID = 'escape4'
 source_filename = "test-cases/escape4.wybe"
 
-@escape4.18 = constant [5 x i8] c"p2.y\00"
-@escape4.15 = constant [5 x i8] c"p2.x\00"
-@escape4.12 = constant [5 x i8] c"p1.y\00"
-@escape4.9 = constant [5 x i8] c"p1.x\00"
-@escape4.25 = constant [18 x i8] c"random replicate1\00"
+@escape4.16 = constant [5 x i8] c"p2.y\00"
+@escape4.13 = constant [5 x i8] c"p2.x\00"
+@escape4.10 = constant [5 x i8] c"p1.y\00"
+@escape4.7 = constant [5 x i8] c"p1.x\00"
+@escape4.23 = constant [18 x i8] c"random replicate1\00"
 
 declare void @putchar(i8) local_unnamed_addr
 
@@ -192,24 +192,23 @@ entry:
   %3 = bitcast i8* %2 to i64*
   store i64 100, i64* %3, align 4
   %"p2#0" = tail call i64* @"escape4.replicate1<0>"(i64* %1)
-  %4 = tail call i8* @wybe_malloc(i32 16)
   store i64 555, i64* %1, align 4
-  tail call void @print_string(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @escape4.9, i64 0, i64 0))
-  %5 = load i64, i64* %1, align 4
+  tail call void @print_string(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @escape4.7, i64 0, i64 0))
+  %4 = load i64, i64* %1, align 4
+  tail call void @print_int(i64 %4)
+  tail call void @putchar(i8 10)
+  tail call void @print_string(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @escape4.10, i64 0, i64 0))
+  %5 = load i64, i64* %3, align 4
   tail call void @print_int(i64 %5)
   tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @escape4.12, i64 0, i64 0))
-  %6 = load i64, i64* %3, align 4
+  tail call void @print_string(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @escape4.13, i64 0, i64 0))
+  %6 = load i64, i64* %"p2#0", align 4
   tail call void @print_int(i64 %6)
   tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @escape4.15, i64 0, i64 0))
-  %7 = load i64, i64* %"p2#0", align 4
-  tail call void @print_int(i64 %7)
-  tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @escape4.18, i64 0, i64 0))
-  %8 = getelementptr i64, i64* %"p2#0", i64 1
-  %9 = load i64, i64* %8, align 4
-  tail call void @print_int(i64 %9)
+  tail call void @print_string(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @escape4.16, i64 0, i64 0))
+  %7 = getelementptr i64, i64* %"p2#0", i64 1
+  %8 = load i64, i64* %7, align 4
+  tail call void @print_int(i64 %8)
   tail call void @putchar(i8 10)
   ret void
 }
@@ -219,7 +218,7 @@ entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
   %1 = bitcast i8* %0 to i64*
   call void @llvm.memset.p0i8.i64(i8* %0, i8 0, i64 16, i32 4, i1 false)
-  tail call void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @escape4.25, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @escape4.23, i64 0, i64 0))
   tail call void @putchar(i8 10)
   %2 = load i64, i64* %1, align 4
   tail call void @print_int(i64 %2)
