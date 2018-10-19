@@ -1,0 +1,4 @@
+
+public resource argc:int
+public resource argv:int # until we support C arrays
+public resource exit_code:int = 0
