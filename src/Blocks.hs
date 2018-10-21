@@ -623,16 +623,21 @@ argsNeeded (a:as) (p:ps)
 
 -- | Code generation for LPVM instructions.
 cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
-cgenLPVM pname flags args
-    | pname == "alloc" = do
+cgenLPVM "alloc" flags args = do
           outTy <- lift $ primReturnType args
           when (length inputs /= 1 ) $ shouldnt "Incorrect alloc instruction."
           let size = valTrust (head inputs)
           op <- gcAllocate size outTy
           assign outNm op
           return $ Just op
+  where
+    inputs = primInputs args
+    outputs = primOutputs args
+    trustMsg = "Argument is not an Integer value."
+    valTrust a = trustFromJust trustMsg $ argIntVal a
+    outNm = pullName $ head outputs
 
-    | pname == "access" = do
+cgenLPVM "access" flags args = do
           let (ptrOpArg, index) = case inputs of
                   (a:b:[]) -> (a, valTrust b)
                   _        -> shouldnt "Incorrect access instruction."
@@ -641,13 +646,19 @@ cgenLPVM pname flags args
           op <- gcAccess ptrOp index outTy
           assign outNm op
           return $ Just op
+  where
+    inputs = primInputs args
+    outputs = primOutputs args
+    trustMsg = "Argument is not an Integer value."
+    valTrust a = trustFromJust trustMsg $ argIntVal a
+    outNm = pullName $ head outputs
 
 -- XXX Revise mutate instruction to take address, size, offset,
 --     destructive (Bool), and new address (output).  If destructive
 --     is True, does in place update and new address = address;
 --     otherwise allocates fresh storage, copies old contents,
 --     and mutates the new storage.
-    | pname == "mutate" = do
+cgenLPVM "mutate" flags args = do
           let (ptrOpArg, size, index, destructiveArg, valArg) = case inputs of
                 -- XXX Using valTrust means the size and offset must be
                 --     constants; fix to allow variable sizes and offsets.
@@ -657,8 +668,14 @@ cgenLPVM pname flags args
           ptrOp <- cgenArg ptrOpArg
           outTy <- lift $ typed' $ argType $ head outputs
           gcMutate ptrOp outNm outTy size index destructiveArg val
+  where
+    inputs = primInputs args
+    outputs = primOutputs args
+    trustMsg = "Argument is not an Integer value."
+    valTrust a = trustFromJust trustMsg $ argIntVal a
+    outNm = pullName $ head outputs
 
-    | pname == "cast" = do
+cgenLPVM "cast" flags args = do
           when (length inputs /= 1) $ shouldnt "Incorrect cast instruction."
           let inArg = head inputs
           let outArg = head outputs
@@ -685,15 +702,14 @@ cgenLPVM pname flags args
 
           assign outNm castOp
           return $ Just castOp
-
-
-    | otherwise = shouldnt $ "Instruction " ++ pname ++ " not imlemented."
   where
     inputs = primInputs args
     outputs = primOutputs args
-    trustMsg = "Argument is not an Integer value."
-    valTrust a = trustFromJust trustMsg $ argIntVal a
     outNm = pullName $ head outputs
+
+
+cgenLPVM pname flags args = do
+  shouldnt $ "Instruction " ++ pname ++ " not imlemented."
 
 
 isNullCons :: C.Constant -> Bool
