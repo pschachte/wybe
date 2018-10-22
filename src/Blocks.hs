@@ -621,64 +621,44 @@ argsNeeded (a:as) (p:ps)
     | otherwise = argsNeeded as ps
 
 
+-- |Return the integer constant from an argument; error if it's not one
+trustArgInt :: PrimArg -> Integer
+trustArgInt arg = trustFromJust
+                  "LPVM instruction argument must be an integer constant."
+                  $ argIntVal arg
+
+
 -- | Code generation for LPVM instructions.
 cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
-cgenLPVM "alloc" flags args = do
-          outTy <- lift $ primReturnType args
-          when (length inputs /= 1 ) $ shouldnt "Incorrect alloc instruction."
-          let size = valTrust (head inputs)
-          op <- gcAllocate size outTy
-          assign outNm op
+cgenLPVM "alloc" [] [sizeArg,addrArg] = do
+          outTy <- lift $ typed' $ argType addrArg
+          op <- gcAllocate (trustArgInt sizeArg) outTy
+          assign (pullName addrArg) op
           return $ Just op
-  where
-    inputs = primInputs args
-    outputs = primOutputs args
-    trustMsg = "Argument is not an Integer value."
-    valTrust a = trustFromJust trustMsg $ argIntVal a
-    outNm = pullName $ head outputs
 
-cgenLPVM "access" flags args = do
-          let (ptrOpArg, index) = case inputs of
-                  (a:b:[]) -> (a, valTrust b)
-                  _        -> shouldnt "Incorrect access instruction."
-          ptrOp <- cgenArg ptrOpArg
-          outTy <- lift $ primReturnType args
-          op <- gcAccess ptrOp index outTy
-          assign outNm op
+cgenLPVM "access" [] [addr,offset,val] = do
+          ptrOp <- cgenArg addr
+          outTy <- lift $ typed' $ argType val
+          -- XXX Currently offset must be a constant; generalise to
+          --     allow variable offsets
+          op <- gcAccess ptrOp (trustArgInt offset) outTy
+          assign (pullName val) op
           return $ Just op
-  where
-    inputs = primInputs args
-    outputs = primOutputs args
-    trustMsg = "Argument is not an Integer value."
-    valTrust a = trustFromJust trustMsg $ argIntVal a
-    outNm = pullName $ head outputs
-
+  
 -- XXX Revise mutate instruction to take address, size, offset,
 --     destructive (Bool), and new address (output).  If destructive
 --     is True, does in place update and new address = address;
 --     otherwise allocates fresh storage, copies old contents,
 --     and mutates the new storage.
-cgenLPVM "mutate" flags args = do
-          let (ptrOpArg, size, index, destructiveArg, valArg) = case inputs of
-                -- XXX Using valTrust means the size and offset must be
-                --     constants; fix to allow variable sizes and offsets.
-                  [a, b, c, d, e] -> (a, valTrust b, valTrust c, d, e)
-                  _         -> shouldnt "Incorrect mutate instruction."
+cgenLPVM "mutate" []
+         [ptrOpArg, outArg, sizeArg, indexArg, destructiveArg, valArg] = do
           val <- cgenArg valArg
           ptrOp <- cgenArg ptrOpArg
-          outTy <- lift $ typed' $ argType $ head outputs
-          gcMutate ptrOp outNm outTy size index destructiveArg val
-  where
-    inputs = primInputs args
-    outputs = primOutputs args
-    trustMsg = "Argument is not an Integer value."
-    valTrust a = trustFromJust trustMsg $ argIntVal a
-    outNm = pullName $ head outputs
+          outTy <- lift $ typed' $ argType outArg
+          gcMutate ptrOp (pullName outArg) outTy (trustArgInt sizeArg)
+                   (trustArgInt indexArg) destructiveArg val
 
-cgenLPVM "cast" flags args = do
-          when (length inputs /= 1) $ shouldnt "Incorrect cast instruction."
-          let inArg = head inputs
-          let outArg = head outputs
+cgenLPVM "cast" [] [inArg,outArg] = do
           outTy <- lift $ typed' (argType outArg)
           inOp <- cgenArg inArg
           let inTy = operandType inOp
@@ -700,13 +680,8 @@ cgenLPVM "cast" flags args = do
                       doCast loaded consTy outTy
               _ -> doCast inOp inTy outTy
 
-          assign outNm castOp
+          assign (pullName outArg) castOp
           return $ Just castOp
-  where
-    inputs = primInputs args
-    outputs = primOutputs args
-    outNm = pullName $ head outputs
-
 
 cgenLPVM pname flags args = do
   shouldnt $ "Instruction " ++ pname ++ " not imlemented."
