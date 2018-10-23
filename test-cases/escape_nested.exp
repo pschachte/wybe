@@ -170,11 +170,11 @@ AFTER LLVM IR:
 ; ModuleID = 'escape_nested'
 source_filename = "test-cases/escape_nested.wybe"
 
-@escape_nested.18 = constant [3 x i8] c"p3\00"
-@escape_nested.15 = constant [3 x i8] c"p2\00"
-@escape_nested.12 = constant [3 x i8] c"p1\00"
-@escape_nested.25 = constant [18 x i8] c"random replicate1\00"
-@escape_nested.34 = constant [18 x i8] c"random replicate2\00"
+@escape_nested.20 = constant [3 x i8] c"p3\00"
+@escape_nested.17 = constant [3 x i8] c"p2\00"
+@escape_nested.14 = constant [3 x i8] c"p1\00"
+@escape_nested.27 = constant [18 x i8] c"random replicate1\00"
+@escape_nested.36 = constant [18 x i8] c"random replicate2\00"
 
 declare void @putchar(i8) local_unnamed_addr
 
@@ -183,6 +183,8 @@ declare void @print_int(i64) local_unnamed_addr
 declare void @print_string(i8*) local_unnamed_addr
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define i32 @escape_nested.main() local_unnamed_addr {
 entry:
@@ -202,18 +204,20 @@ entry:
   %5 = extractvalue { i64*, i64* } %4, 0
   %6 = extractvalue { i64*, i64* } %4, 1
   %7 = tail call i8* @wybe_malloc(i32 16)
-  store i64 555, i64* %1, align 4
-  tail call void @print_string(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @escape_nested.12, i64 0, i64 0))
-  %8 = load i64, i64* %1, align 4
-  tail call void @print_int(i64 %8)
-  tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @escape_nested.15, i64 0, i64 0))
-  %9 = load i64, i64* %5, align 4
+  %8 = bitcast i8* %7 to i64*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %7, i8* %0, i32 16, i1 false)
+  store i64 555, i64* %8, align 4
+  tail call void @print_string(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @escape_nested.14, i64 0, i64 0))
+  %9 = load i64, i64* %8, align 4
   tail call void @print_int(i64 %9)
   tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @escape_nested.18, i64 0, i64 0))
-  %10 = load i64, i64* %6, align 4
+  tail call void @print_string(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @escape_nested.17, i64 0, i64 0))
+  %10 = load i64, i64* %5, align 4
   tail call void @print_int(i64 %10)
+  tail call void @putchar(i8 10)
+  tail call void @print_string(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @escape_nested.20, i64 0, i64 0))
+  %11 = load i64, i64* %6, align 4
+  tail call void @print_int(i64 %11)
   tail call void @putchar(i8 10)
   ret void
 }
@@ -223,7 +227,7 @@ entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
   %1 = bitcast i8* %0 to i64*
   call void @llvm.memset.p0i8.i64(i8* %0, i8 0, i64 16, i32 4, i1 false)
-  tail call void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @escape_nested.25, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @escape_nested.27, i64 0, i64 0))
   %2 = load i64, i64* %1, align 4
   tail call void @print_int(i64 %2)
   tail call void @putchar(i8 10)
@@ -238,7 +242,7 @@ entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
   %1 = bitcast i8* %0 to i64*
   call void @llvm.memset.p0i8.i64(i8* %0, i8 0, i64 16, i32 4, i1 false)
-  tail call void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @escape_nested.34, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @escape_nested.36, i64 0, i64 0))
   %2 = load i64, i64* %1, align 4
   tail call void @print_int(i64 %2)
   tail call void @putchar(i8 10)
@@ -259,6 +263,8 @@ source_filename = "test-cases/position.wybe"
 source_filename = "test-cases"
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 ; Function Attrs: norecurse nounwind readnone
 define i64* @"position.position.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
@@ -321,11 +327,14 @@ entry:
   ret i64 %0
 }
 
-define i64* @"position.position.x<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+define i64* @"position.position.x<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
-  store i64 %"$field#0", i64* %"$rec#0", align 4
-  ret i64* %"$rec#0"
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 16, i1 false)
+  store i64 %"$field#0", i64* %1, align 4
+  ret i64* %1
 }
 
 ; Function Attrs: norecurse nounwind readonly
@@ -336,12 +345,16 @@ entry:
   ret i64 %1
 }
 
-define i64* @"position.position.y<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+define i64* @"position.position.y<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
-  %1 = getelementptr i64, i64* %"$rec#0", i64 1
-  store i64 %"$field#0", i64* %1, align 4
-  ret i64* %"$rec#0"
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 16, i1 false)
+  %3 = getelementptr i8, i8* %0, i64 8
+  %4 = bitcast i8* %3 to i64*
+  store i64 %"$field#0", i64* %4, align 4
+  ret i64* %1
 }
 
 attributes #0 = { norecurse nounwind readnone }

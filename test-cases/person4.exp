@@ -115,7 +115,7 @@ AFTER LLVM IR:
 ; ModuleID = 'person4'
 source_filename = "test-cases/person4.wybe"
 
-@person4.11 = constant [5 x i8] c"Wang\00"
+@person4.13 = constant [5 x i8] c"Wang\00"
 @person4.7 = constant [5 x i8] c"Jane\00"
 @person4.5 = constant [6 x i8] c"Smith\00"
 @person4.3 = constant [5 x i8] c"John\00"
@@ -123,6 +123,8 @@ source_filename = "test-cases/person4.wybe"
 declare void @print_string(i8*) local_unnamed_addr
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define i32 @person4.main() local_unnamed_addr {
 entry:
@@ -133,12 +135,16 @@ entry:
   %3 = bitcast i8* %2 to i64*
   store i8* getelementptr inbounds ([6 x i8], [6 x i8]* @person4.5, i64 0, i64 0), i64* %3, align 8
   %4 = tail call i8* @wybe_malloc(i32 16)
-  store i8* getelementptr inbounds ([5 x i8], [5 x i8]* @person4.7, i64 0, i64 0), i64* %1, align 8
-  store i8* getelementptr inbounds ([5 x i8], [5 x i8]* @person4.11, i64 0, i64 0), i64* %3, align 8
-  tail call void @print_string(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @person4.11, i64 0, i64 0))
-  %5 = bitcast i8* %2 to i8**
-  %6 = load i8*, i8** %5, align 8
-  tail call void @print_string(i8* %6)
+  %5 = bitcast i8* %4 to i64*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %4, i8* %0, i32 16, i1 false)
+  store i8* getelementptr inbounds ([5 x i8], [5 x i8]* @person4.7, i64 0, i64 0), i64* %5, align 8
+  %6 = getelementptr i8, i8* %4, i64 8
+  %7 = bitcast i8* %6 to i64*
+  store i8* getelementptr inbounds ([5 x i8], [5 x i8]* @person4.13, i64 0, i64 0), i64* %7, align 8
+  tail call void @print_string(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @person4.13, i64 0, i64 0))
+  %8 = bitcast i8* %2 to i8**
+  %9 = load i8*, i8** %8, align 8
+  tail call void @print_string(i8* %9)
   ret i32 0
 }
 
@@ -186,13 +192,16 @@ entry:
   ret i8* %1
 }
 
-define i64* @"person4.person.firstname<1>"(i64* returned %"$rec#0", i8* %"$field#0") local_unnamed_addr {
+define i64* @"person4.person.firstname<1>"(i64* %"$rec#0", i8* %"$field#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
-  %1 = ptrtoint i8* %"$field#0" to i64
-  %2 = trunc i64 %1 to i8
-  store i8 %2, i64* %"$rec#0", align 1
-  ret i64* %"$rec#0"
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 16, i1 false)
+  %3 = ptrtoint i8* %"$field#0" to i64
+  %4 = trunc i64 %3 to i8
+  store i8 %4, i64* %1, align 1
+  ret i64* %1
 }
 
 ; Function Attrs: norecurse nounwind readonly
@@ -204,14 +213,18 @@ entry:
   ret i8* %2
 }
 
-define i64* @"person4.person.lastname<1>"(i64* returned %"$rec#0", i8* %"$field#0") local_unnamed_addr {
+define i64* @"person4.person.lastname<1>"(i64* %"$rec#0", i8* %"$field#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
-  %1 = getelementptr i64, i64* %"$rec#0", i64 1
-  %2 = ptrtoint i8* %"$field#0" to i64
-  %3 = trunc i64 %2 to i8
-  store i8 %3, i64* %1, align 1
-  ret i64* %"$rec#0"
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 16, i1 false)
+  %3 = getelementptr i8, i8* %0, i64 8
+  %4 = bitcast i8* %3 to i64*
+  %5 = ptrtoint i8* %"$field#0" to i64
+  %6 = trunc i64 %5 to i8
+  store i8 %6, i64* %4, align 1
+  ret i64* %1
 }
 
 define i64* @"person4.person.person<0>"(i8* %"firstname#0", i8* %"lastname#0") local_unnamed_addr {
@@ -250,6 +263,8 @@ attributes #1 = { norecurse nounwind readonly }
 source_filename = "test-cases"
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 ; Function Attrs: norecurse nounwind readnone
 define i64* @"person4.person.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
@@ -295,13 +310,16 @@ entry:
   ret i8* %1
 }
 
-define i64* @"person4.person.firstname<1>"(i64* returned %"$rec#0", i8* %"$field#0") local_unnamed_addr {
+define i64* @"person4.person.firstname<1>"(i64* %"$rec#0", i8* %"$field#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
-  %1 = ptrtoint i8* %"$field#0" to i64
-  %2 = trunc i64 %1 to i8
-  store i8 %2, i64* %"$rec#0", align 1
-  ret i64* %"$rec#0"
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 16, i1 false)
+  %3 = ptrtoint i8* %"$field#0" to i64
+  %4 = trunc i64 %3 to i8
+  store i8 %4, i64* %1, align 1
+  ret i64* %1
 }
 
 ; Function Attrs: norecurse nounwind readonly
@@ -313,14 +331,18 @@ entry:
   ret i8* %2
 }
 
-define i64* @"person4.person.lastname<1>"(i64* returned %"$rec#0", i8* %"$field#0") local_unnamed_addr {
+define i64* @"person4.person.lastname<1>"(i64* %"$rec#0", i8* %"$field#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
-  %1 = getelementptr i64, i64* %"$rec#0", i64 1
-  %2 = ptrtoint i8* %"$field#0" to i64
-  %3 = trunc i64 %2 to i8
-  store i8 %3, i64* %1, align 1
-  ret i64* %"$rec#0"
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 16, i1 false)
+  %3 = getelementptr i8, i8* %0, i64 8
+  %4 = bitcast i8* %3 to i64*
+  %5 = ptrtoint i8* %"$field#0" to i64
+  %6 = trunc i64 %5 to i8
+  store i8 %6, i64* %4, align 1
+  ret i64* %1
 }
 
 define i64* @"person4.person.person<0>"(i8* %"firstname#0", i8* %"lastname#0") local_unnamed_addr {

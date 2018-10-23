@@ -1063,7 +1063,7 @@ mallocExtern =
 -- Intrinsics are built in to LLVM, so they're always available.
 intrinsicExterns :: [LLVMAST.Definition]
 intrinsicExterns =
-    [external void_t "llvm.memcpy" [
+    [external void_t "llvm.memcpy.p0i8.p0i8.i32" [
         (ptr_t (int_c 8), LLVMAST.Name $ toSBString "dest"),
         (ptr_t (int_c 8), LLVMAST.Name $ toSBString "src"),
         (LLVMAST.IntegerType 32, LLVMAST.Name $ toSBString "len"),
@@ -1179,7 +1179,7 @@ callWybeMalloc size = do
 -- memory from a source address to a non-overlapping destination address.
 callMemCpy :: Operand -> Operand -> Integer -> Codegen ()
 callMemCpy dst src bytes = do
-    let fnName = LLVMAST.Name $ toSBString "llvm.memcpy"
+    let fnName = LLVMAST.Name $ toSBString "llvm.memcpy.p0i8.p0i8.i32"
     let charptr_t = ptr_t (int_c 8)
     dstCast <- instr charptr_t $ LLVMAST.BitCast dst charptr_t []
     srcCast <- instr charptr_t $ LLVMAST.BitCast src charptr_t []
@@ -1189,8 +1189,7 @@ callMemCpy dst src bytes = do
           (externf (ptr_t (FunctionType void_t (typeOf <$> inops) False))
            fnName)
           inops
-    _ <- instr void_t ins
-    return ()
+    voidInstr ins
 
 
 -- | Call the external C-library function for malloc and return

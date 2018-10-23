@@ -519,6 +519,8 @@ source_filename = "test-cases/multictr.wybe"
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
 
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+
 ; Function Attrs: norecurse nounwind readnone
 define i64* @"multictr.number.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
 entry:
@@ -610,7 +612,10 @@ entry:
 
 if.then:                                          ; preds = %entry
   %1 = tail call i8* @wybe_malloc(i32 8)
-  store double %"$field#0", i64* %"$rec#0", align 8
+  %2 = bitcast i8* %1 to i64*
+  %3 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %1, i8* %3, i32 8, i1 false)
+  store double %"$field#0", i64* %2, align 8
   ret i1 true
 
 if.else:                                          ; preds = %entry
@@ -652,7 +657,10 @@ entry:
 
 if.then:                                          ; preds = %entry
   %1 = tail call i8* @wybe_malloc(i32 8)
-  store i64 %"$field#0", i64* %"$rec#0", align 4
+  %2 = bitcast i8* %1 to i64*
+  %3 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %1, i8* %3, i32 8, i1 false)
+  store i64 %"$field#0", i64* %2, align 4
   ret i1 true
 
 if.else:                                          ; preds = %entry
@@ -783,7 +791,10 @@ if.else:                                          ; preds = %if.then, %entry
 
 if.then1:                                         ; preds = %if.then
   %1 = tail call i8* @wybe_malloc(i32 8)
-  store i64 %"$field#0", i64* %"$rec#0", align 4
+  %2 = bitcast i8* %1 to i64*
+  %3 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %1, i8* %3, i32 8, i1 false)
+  store i64 %"$field#0", i64* %2, align 4
   ret i1 true
 }
 
@@ -848,7 +859,10 @@ if.else:                                          ; preds = %if.then, %entry
 
 if.then1:                                         ; preds = %if.then
   %1 = tail call i8* @wybe_malloc(i32 8)
-  store i64 %"$field#0", i64* %"$rec#0", align 4
+  %2 = bitcast i8* %1 to i64*
+  %3 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %1, i8* %3, i32 8, i1 false)
+  store i64 %"$field#0", i64* %2, align 4
   ret i1 true
 }
 
@@ -867,6 +881,8 @@ source_filename = "test-cases"
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
 
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+
 ; Function Attrs: norecurse nounwind readnone
 define i64* @"multictr.number.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
 entry:
@@ -958,7 +974,10 @@ entry:
 
 if.then:                                          ; preds = %entry
   %1 = tail call i8* @wybe_malloc(i32 8)
-  store double %"$field#0", i64* %"$rec#0", align 8
+  %2 = bitcast i8* %1 to i64*
+  %3 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %1, i8* %3, i32 8, i1 false)
+  store double %"$field#0", i64* %2, align 8
   ret i1 true
 
 if.else:                                          ; preds = %entry
@@ -1000,7 +1019,10 @@ entry:
 
 if.then:                                          ; preds = %entry
   %1 = tail call i8* @wybe_malloc(i32 8)
-  store i64 %"$field#0", i64* %"$rec#0", align 4
+  %2 = bitcast i8* %1 to i64*
+  %3 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %1, i8* %3, i32 8, i1 false)
+  store i64 %"$field#0", i64* %2, align 4
   ret i1 true
 
 if.else:                                          ; preds = %entry
@@ -1015,6 +1037,8 @@ attributes #1 = { norecurse nounwind readonly }
 source_filename = "test-cases"
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 ; Function Attrs: norecurse nounwind readnone
 define i64* @"multictr.simple.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
@@ -1140,7 +1164,10 @@ if.else:                                          ; preds = %if.then, %entry
 
 if.then1:                                         ; preds = %if.then
   %1 = tail call i8* @wybe_malloc(i32 8)
-  store i64 %"$field#0", i64* %"$rec#0", align 4
+  %2 = bitcast i8* %1 to i64*
+  %3 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %1, i8* %3, i32 8, i1 false)
+  store i64 %"$field#0", i64* %2, align 4
   ret i1 true
 }
 
@@ -1205,7 +1232,10 @@ if.else:                                          ; preds = %if.then, %entry
 
 if.then1:                                         ; preds = %if.then
   %1 = tail call i8* @wybe_malloc(i32 8)
-  store i64 %"$field#0", i64* %"$rec#0", align 4
+  %2 = bitcast i8* %1 to i64*
+  %3 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %1, i8* %3, i32 8, i1 false)
+  store i64 %"$field#0", i64* %2, align 4
   ret i1 true
 }
 

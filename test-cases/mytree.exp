@@ -249,6 +249,8 @@ declare void @print_int(i64) local_unnamed_addr
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
 
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+
 define void @"mytree.printTree<0>"(i64* readonly %"t#0") local_unnamed_addr {
 entry:
   %"tmp$5#01" = icmp eq i64* %"t#0", null
@@ -356,8 +358,11 @@ entry:
 
 if.then:                                          ; preds = %entry
   %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = getelementptr i64, i64* %"$rec#0", i64 1
-  store i64 %"$field#0", i64* %1, align 4
+  %1 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %1, i32 24, i1 false)
+  %2 = getelementptr i8, i8* %0, i64 8
+  %3 = bitcast i8* %2 to i64*
+  store i64 %"$field#0", i64* %3, align 4
   ret i1 true
 
 if.else:                                          ; preds = %entry
@@ -378,8 +383,11 @@ entry:
 
 if.then:                                          ; preds = %entry
   %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = ptrtoint i64* %"$field#0" to i64
-  store i64 %1, i64* %"$rec#0", align 4
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
+  %3 = ptrtoint i64* %"$field#0" to i64
+  store i64 %3, i64* %1, align 4
   ret i1 true
 
 if.else:                                          ; preds = %entry
@@ -423,9 +431,12 @@ entry:
 
 if.then:                                          ; preds = %entry
   %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = getelementptr i64, i64* %"$rec#0", i64 2
-  %2 = ptrtoint i64* %"$field#0" to i64
-  store i64 %2, i64* %1, align 4
+  %1 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %1, i32 24, i1 false)
+  %2 = getelementptr i8, i8* %0, i64 16
+  %3 = bitcast i8* %2 to i64*
+  %4 = ptrtoint i64* %"$field#0" to i64
+  store i64 %4, i64* %3, align 4
   ret i1 true
 
 if.else:                                          ; preds = %entry
@@ -440,6 +451,8 @@ attributes #1 = { nounwind readonly }
 source_filename = "test-cases"
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 ; Function Attrs: norecurse nounwind readnone
 define i64* @"mytree.tree.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
@@ -521,8 +534,11 @@ entry:
 
 if.then:                                          ; preds = %entry
   %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = getelementptr i64, i64* %"$rec#0", i64 1
-  store i64 %"$field#0", i64* %1, align 4
+  %1 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %1, i32 24, i1 false)
+  %2 = getelementptr i8, i8* %0, i64 8
+  %3 = bitcast i8* %2 to i64*
+  store i64 %"$field#0", i64* %3, align 4
   ret i1 true
 
 if.else:                                          ; preds = %entry
@@ -543,8 +559,11 @@ entry:
 
 if.then:                                          ; preds = %entry
   %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = ptrtoint i64* %"$field#0" to i64
-  store i64 %1, i64* %"$rec#0", align 4
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
+  %3 = ptrtoint i64* %"$field#0" to i64
+  store i64 %3, i64* %1, align 4
   ret i1 true
 
 if.else:                                          ; preds = %entry
@@ -588,9 +607,12 @@ entry:
 
 if.then:                                          ; preds = %entry
   %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = getelementptr i64, i64* %"$rec#0", i64 2
-  %2 = ptrtoint i64* %"$field#0" to i64
-  store i64 %2, i64* %1, align 4
+  %1 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %1, i32 24, i1 false)
+  %2 = getelementptr i8, i8* %0, i64 16
+  %3 = bitcast i8* %2 to i64*
+  %4 = ptrtoint i64* %"$field#0" to i64
+  store i64 %4, i64* %3, align 4
   ret i1 true
 
 if.else:                                          ; preds = %entry

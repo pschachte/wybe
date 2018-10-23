@@ -155,6 +155,8 @@ declare void @print_int(i64) local_unnamed_addr
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
 
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+
 define i32 @coordinate.main() local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 24)
@@ -167,11 +169,14 @@ entry:
   %5 = bitcast i8* %4 to i64*
   store i64 1000, i64* %5, align 4
   %6 = tail call i8* @wybe_malloc(i32 24)
-  store i64 8000, i64* %5, align 4
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %6, i8* %0, i32 24, i1 false)
+  %7 = getelementptr i8, i8* %6, i64 16
+  %8 = bitcast i8* %7 to i64*
+  store i64 8000, i64* %8, align 4
   tail call void @print_int(i64 8000)
   tail call void @putchar(i8 10)
-  %7 = load i64, i64* %5, align 4
-  tail call void @print_int(i64 %7)
+  %9 = load i64, i64* %5, align 4
+  tail call void @print_int(i64 %9)
   tail call void @putchar(i8 10)
   ret i32 0
 }
@@ -257,11 +262,14 @@ entry:
   ret i64 %0
 }
 
-define i64* @"coordinate.Coordinate.x<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+define i64* @"coordinate.Coordinate.x<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 24)
-  store i64 %"$field#0", i64* %"$rec#0", align 4
-  ret i64* %"$rec#0"
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
+  store i64 %"$field#0", i64* %1, align 4
+  ret i64* %1
 }
 
 ; Function Attrs: norecurse nounwind readonly
@@ -272,12 +280,16 @@ entry:
   ret i64 %1
 }
 
-define i64* @"coordinate.Coordinate.y<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+define i64* @"coordinate.Coordinate.y<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = getelementptr i64, i64* %"$rec#0", i64 1
-  store i64 %"$field#0", i64* %1, align 4
-  ret i64* %"$rec#0"
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
+  %3 = getelementptr i8, i8* %0, i64 8
+  %4 = bitcast i8* %3 to i64*
+  store i64 %"$field#0", i64* %4, align 4
+  ret i64* %1
 }
 
 ; Function Attrs: norecurse nounwind readonly
@@ -288,12 +300,16 @@ entry:
   ret i64 %1
 }
 
-define i64* @"coordinate.Coordinate.z<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+define i64* @"coordinate.Coordinate.z<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = getelementptr i64, i64* %"$rec#0", i64 2
-  store i64 %"$field#0", i64* %1, align 4
-  ret i64* %"$rec#0"
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
+  %3 = getelementptr i8, i8* %0, i64 16
+  %4 = bitcast i8* %3 to i64*
+  store i64 %"$field#0", i64* %4, align 4
+  ret i64* %1
 }
 
 attributes #0 = { norecurse nounwind readnone }
@@ -304,6 +320,8 @@ attributes #1 = { norecurse nounwind readonly }
 source_filename = "test-cases"
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 ; Function Attrs: norecurse nounwind readnone
 define i64* @"coordinate.Coordinate.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
@@ -380,11 +398,14 @@ entry:
   ret i64 %0
 }
 
-define i64* @"coordinate.Coordinate.x<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+define i64* @"coordinate.Coordinate.x<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 24)
-  store i64 %"$field#0", i64* %"$rec#0", align 4
-  ret i64* %"$rec#0"
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
+  store i64 %"$field#0", i64* %1, align 4
+  ret i64* %1
 }
 
 ; Function Attrs: norecurse nounwind readonly
@@ -395,12 +416,16 @@ entry:
   ret i64 %1
 }
 
-define i64* @"coordinate.Coordinate.y<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+define i64* @"coordinate.Coordinate.y<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = getelementptr i64, i64* %"$rec#0", i64 1
-  store i64 %"$field#0", i64* %1, align 4
-  ret i64* %"$rec#0"
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
+  %3 = getelementptr i8, i8* %0, i64 8
+  %4 = bitcast i8* %3 to i64*
+  store i64 %"$field#0", i64* %4, align 4
+  ret i64* %1
 }
 
 ; Function Attrs: norecurse nounwind readonly
@@ -411,12 +436,16 @@ entry:
   ret i64 %1
 }
 
-define i64* @"coordinate.Coordinate.z<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+define i64* @"coordinate.Coordinate.z<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = getelementptr i64, i64* %"$rec#0", i64 2
-  store i64 %"$field#0", i64* %1, align 4
-  ret i64* %"$rec#0"
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
+  %3 = getelementptr i8, i8* %0, i64 16
+  %4 = bitcast i8* %3 to i64*
+  store i64 %"$field#0", i64* %4, align 4
+  ret i64* %1
 }
 
 attributes #0 = { norecurse nounwind readnone }
