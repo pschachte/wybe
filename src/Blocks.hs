@@ -221,7 +221,7 @@ translateProc modProtos proc = do
 
 
 -- | Create LLVM's module level Function Definition from the LPVM procedure
--- prototype and it's body as a list of BasicBlock(s). The return type of such
+-- prototype and its body as a list of BasicBlock(s). The return type of such
 -- a definition is decided based on the Ouput parameter of the procedure, or
 -- is made to be phantom.
 makeGlobalDefinition :: String -> PrimProto
@@ -1009,7 +1009,7 @@ newLLVMModule :: String -> String -> [ProcDefBlock] -> LLVMAST.Module
 newLLVMModule name fname blocks
     = let defs = List.map blockDef blocks
           exs  = concat $ List.map blockExterns blocks
-          exs' = uniqueExterns exs ++ [mallocExtern]
+          exs' = uniqueExterns exs ++ [mallocExtern] ++ intrinsicExterns
       in modWithDefinitions name fname $ exs' ++ defs
 
 
@@ -1052,10 +1052,24 @@ makeExArg (index,arg) = do
     return (ty, nm)
 
 
+-- | An extern for wybe_malloc
 mallocExtern :: LLVMAST.Definition
 mallocExtern =
     let ext_arg = [(LLVMAST.IntegerType 32, LLVMAST.Name $ toSBString "size")]
     in external (ptr_t (int_c 8)) "wybe_malloc" ext_arg
+
+
+-- | Externs for any intrinsics we might need.  For now, just memcpy.
+-- Intrinsics are built in to LLVM, so they're always available.
+intrinsicExterns :: [LLVMAST.Definition]
+intrinsicExterns =
+    [external void_t "llvm.memcpy" [
+        (ptr_t (int_c 8), LLVMAST.Name $ toSBString "dest"),
+        (ptr_t (int_c 8), LLVMAST.Name $ toSBString "src"),
+        (LLVMAST.IntegerType 32, LLVMAST.Name $ toSBString "len"),
+        (LLVMAST.IntegerType 1, LLVMAST.Name $ toSBString "isvolatile")]
+    ]
+
 
 ----------------------------------------------------------------------------
 -- Block Modification                                                     --
@@ -1161,6 +1175,24 @@ callWybeMalloc size = do
     instr outTy ins
 
 
+-- | Invoke the LLVM memcpy intrinsic to copy a specified number of bytes of
+-- memory from a source address to a non-overlapping destination address.
+callMemCpy :: Operand -> Operand -> Integer -> Codegen ()
+callMemCpy dst src bytes = do
+    let fnName = LLVMAST.Name $ toSBString "llvm.memcpy"
+    let charptr_t = ptr_t (int_c 8)
+    dstCast <- instr charptr_t $ LLVMAST.BitCast dst charptr_t []
+    srcCast <- instr charptr_t $ LLVMAST.BitCast src charptr_t []
+    let inops = [dstCast, srcCast, cons (C.Int 32 bytes), cons (C.Int 1 0)]
+    let ins =
+          call
+          (externf (ptr_t (FunctionType void_t (typeOf <$> inops) False))
+           fnName)
+          inops
+    _ <- instr void_t ins
+    return ()
+
+
 -- | Call the external C-library function for malloc and return
 -- the bitcasted pointer to that location.
 gcAllocate :: Integer -> LLVMAST.Type -> Codegen Operand
@@ -1196,6 +1228,7 @@ gcAccess ptr offset outTy = do
 gcMutate :: Operand -> String -> Type -> Integer -> Integer -> PrimArg
          -> Operand -> Codegen (Maybe Operand)
 gcMutate ptr outNm _ size offset (ArgInt 1 _) val = do
+    -- Really do destructive mutation
     let opTypePtr = localOperandType ptr
     let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
@@ -1206,9 +1239,11 @@ gcMutate ptr outNm _ size offset (ArgInt 1 _) val = do
     store accessPtr storeOp
     assign outNm ptr
     return $ Just ptr
-gcMutate ptr outNm outTy size offset (ArgInt 0 _) val = do
+gcMutate oldPtr outNm outTy size offset (ArgInt 0 _) val = do
+    -- Non-destructive mutate: copy structure and mutate the copy
     voidPtr <- callWybeMalloc size
-    newObj <- instr outTy $ LLVMAST.BitCast voidPtr outTy []
+    ptr <- instr outTy $ LLVMAST.BitCast voidPtr outTy []
+    callMemCpy ptr oldPtr size
     let opTypePtr = localOperandType ptr
     let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
