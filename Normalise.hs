@@ -82,16 +82,22 @@ normaliseItem _ (ImportMods vis modspecs pos) = do
     mapM_ (\spec -> addImport spec (importSpec Nothing vis)) modspecs
 normaliseItem _ (ImportItems vis modspec imports pos) = do
     addImport modspec (importSpec (Just imports) vis)
-normaliseItem _ (ResourceDecl vis name typ init pos) =
+normaliseItem modCompiler (ResourceDecl vis name typ init pos) = do
   addSimpleResource name (SimpleResource typ init pos) vis
-normaliseItem modCompiler (FuncDecl vis detism inline 
-                           (FnProto name params resources) 
+  -- XXX This should be done, but currently breaks the wybe library
+  -- case init of
+  --   Nothing  -> return ()
+  --   Just val -> normaliseItem modCompiler
+  --               (StmtDecl (ProcCall [] "=" Nothing SemiDet False
+  --                          [Unplaced $ varGet name, val]) pos)
+normaliseItem modCompiler (FuncDecl vis detism inline
+                           (FnProto name params resources)
                            resulttype result pos) =
   let flowType = Implicit pos
   in  normaliseItem modCompiler
    (ProcDecl
     vis detism inline
-    (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType]) 
+    (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType])
      resources)
     [maybePlace (ForeignCall "llvm" "move" []
                  [maybePlace (Typed (content result) resulttype False)
@@ -109,8 +115,8 @@ normaliseItem _ (StmtDecl stmt pos) = do
 
 
 
-normaliseSubmodule :: ([ModSpec] -> Compiler ()) -> Ident -> 
-                      Maybe [Ident] -> Visibility -> OptPos -> 
+normaliseSubmodule :: ([ModSpec] -> Compiler ()) -> Ident ->
+                      Maybe [Ident] -> Visibility -> OptPos ->
                       [Item] -> Compiler ()
 normaliseSubmodule modCompiler name typeParams vis pos items = do
     dir <- getDirectory

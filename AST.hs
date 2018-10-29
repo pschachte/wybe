@@ -973,16 +973,16 @@ refersTo modspec name implMapFn specModFn = do
     logAST $ "*** ALL visible from: " ++ showModSpec modspec ++ ": "
         ++ showModSpecs (Set.toList (Set.map specModFn visible))
     let matched = Set.filter ((modspec `isSuffixOf`) . specModFn) visible
-    case Set.null matched of
-        False -> return matched
+    if Set.null matched 
+      then case getDescendant currMod of
+             Just des -> do
+               reenterModule des
+               desMatched <- refersTo modspec name implMapFn specModFn
+               finishModule
+               return desMatched
+             Nothing -> return matched
+      else return matched
         -- Try and look into the super mod.
-        True -> case getDescendant currMod of
-            Just des -> do
-                reenterModule des
-                desMatched <- refersTo modspec name implMapFn specModFn
-                finishModule
-                return desMatched
-            Nothing -> return matched
 
 
 
