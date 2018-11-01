@@ -8,7 +8,7 @@
 
 -- |Support for normalising wybe code as parsed to a simpler form
 --  to make compiling easier.
-module Normalise (normalise, normaliseItem) where
+module Normalise (normalise, normaliseItem, completeNormalisation) where
 
 import AST
 import Config (wordSize,tagMask,tagMask, smallestAllocatedAddress)
@@ -32,18 +32,43 @@ normalise modCompiler items = do
     -- every module imports stdlib
     useStdLib <- gets (optUseStd . options)
     when useStdLib $ addImport ["wybe"] (ImportSpec (Just Set.empty) Nothing)
-    -- Now generate main proc if needed
-    stmts <- getModule stmtDecls 
-    unless (List.null stmts)
-      $ normaliseItem modCompiler 
-            (ProcDecl Public Det False (ProcProto "" [] initResources) 
+    return ()
+
+-- |Do whatever part of normalisation cannot be done until dependencies
+--  have been loaded.  Currently that means generation of main proc for
+--  the module, which needs to know what resources are available.
+completeNormalisation :: ([ModSpec] -> Compiler ()) -> Compiler ()
+completeNormalisation modCompiler = do
+    stmts <- getModule stmtDecls
+    logNormalise $ "Completing normalisation with top-level statements "
+                   ++ show stmts
+    unless (List.null stmts) $ do
+      resources <- initResources
+      normaliseItem modCompiler
+            (ProcDecl Public Det False (ProcProto "" [] resources)
                           (List.reverse stmts) Nothing)
 
--- |The resources available at the top level
--- XXX this should be all resources with initial values
-initResources :: Set ResourceFlowSpec
-initResources = Set.singleton
-                $ ResourceFlowSpec (ResourceSpec ["wybe","io"] "io") ParamInOut
+-- |The resources available at the top level of this module
+initResources :: Compiler (Set ResourceFlowSpec)
+initResources = do
+    mods <- getModuleImplementationField (Map.keys . modImports)
+    mods' <- concat <$> mapM collectSubModules mods
+    logNormalise $ "in initResources, mods = " ++ show mods'
+    importedMods <- catMaybes <$> mapM getLoadingModule mods'
+    let importImplns = catMaybes (modImplementation <$> importedMods)
+    let importResources = (Map.assocs . content . snd) <$>
+                     (concat $ (Map.assocs . modResources) <$> importImplns)
+    let initialisedImports = List.filter (isJust . snd) $ concat importResources
+    impln <- getModuleImplementationField id
+    let localResources = (Map.assocs . content . snd) <$>
+                         (Map.assocs $ modResources impln)
+    let initialisedLocal = List.filter (isJust . snd) $ concat localResources
+    let resources = ((\spec -> ResourceFlowSpec (fst spec) ParamInOut)
+                     <$> initialisedImports)
+                    ++ ((\spec -> ResourceFlowSpec (fst spec) ParamOut)
+                        <$> initialisedLocal)
+    logNormalise $ "In initResources, resources = " ++ show resources
+    return $ Set.fromList resources
 
 
 -- |Normalise a single file item, storing the result in the current module.
@@ -111,6 +136,7 @@ normaliseItem _ item@(ProcDecl _ _ _ _ _ _) = do
     logNormalise $ "Normalised proc:" ++ show item'
     addProc tmpCtr item'
 normaliseItem _ (StmtDecl stmt pos) = do
+    logNormalise $ "Normalising statement decl " ++ show stmt
     updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
 
 
@@ -122,6 +148,7 @@ normaliseSubmodule modCompiler name typeParams vis pos items = do
     dir <- getDirectory
     parentModSpec <- getModuleSpec
     let subModSpec = parentModSpec ++ [name]
+    logNormalise $ "Normalising submodule " ++ showModSpec subModSpec
     addImport subModSpec (importSpec Nothing vis)
     -- Add the submodule to the submodule list of the implementation
     updateImplementation $

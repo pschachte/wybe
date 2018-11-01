@@ -1,19 +1,16 @@
-resource count:int
+resource count:int = 0
 
-proc use_test use !io
-    use count in
-        ?count = 0
+proc use_test use !io, !count
         !inc_count
         use count in
             !inc_count
             !inc_count
             !inc_count
-            !print("Inner count: ")
+            !print("Inner count (4): ")
             !println(count)
         end
-        !print("Outer count: ")
+        !print("Outer count (1): ")
         !println(count)
-    end
 end
 
 proc inc_count use !count

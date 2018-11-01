@@ -1,4 +1,4 @@
-Error detected during type checking of modules type_ambig
+Error detected during type checking of module(s) type_ambig
 [91mtest-cases/type_ambig.wybe:1:15: Ambiguous overloading: call could refer to:
     wybe.io.print<4>
     wybe.io.print<3>

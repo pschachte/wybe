@@ -51,6 +51,7 @@ test:	wybemk
 	@printf "Testing building wybe library ("
 	@printf wybe
 	@gtimeout 2 ./wybemk --force-all --no-std wybelibs/wybe.o
+
 	@for f in wybelibs/*.wybe ; do \
            [ "$$f" = "wybelibs/wybe.wybe" ] && continue ; \
 	   printf " %s" `basename $$f .wybe` ; \

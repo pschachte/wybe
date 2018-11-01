@@ -100,7 +100,7 @@ AFTER EVERYTHING:
     foreign llvm icmp sle(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:13:44
 
 
-= > public inline (4 calls)
+= > public inline (0 calls)
 0: =(?out#0:type_int.myint, in#0:type_int.myint):
     foreign llvm move(~in#0:type_int.myint, ?out#0:type_int.myint)
 = > public inline (0 calls)

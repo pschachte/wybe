@@ -12,9 +12,9 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public inline (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_string("BBB: Init":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:88:41
-    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+0: (wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
+    foreign c print_string("BBB: Init":wybe.string, ~#wybe.io$io#0:phantom, ?tmp$2#0:phantom) @wybe:93:41
+    foreign c putchar('\n':wybe.char, ~tmp$2#0:phantom, ?#wybe.io$io#1:phantom) @wybe:79:28
 --------------------------------------------------
  Module ddd
   public submods  : 
@@ -27,9 +27,9 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public inline (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_string("DDD: Init":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:88:41
-    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+0: (wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
+    foreign c print_string("DDD: Init":wybe.string, ~#wybe.io$io#0:phantom, ?tmp$2#0:phantom) @wybe:93:41
+    foreign c putchar('\n':wybe.char, ~tmp$2#0:phantom, ?#wybe.io$io#1:phantom) @wybe:79:28
 bbb, ddd
 ======================================================================
 AFTER LLVM IR:

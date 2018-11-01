@@ -51,13 +51,13 @@ AFTER EVERYTHING:
     foreign lpvm access(~$left#0:position.position, 8:wybe.int, ?$left$y#0:wybe.int)
     foreign lpvm access($right#0:position.position, 0:wybe.int, ?$right$x#0:wybe.int)
     foreign lpvm access(~$right#0:position.position, 8:wybe.int, ?$right$y#0:wybe.int)
-    foreign llvm icmp eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:28:40
+    foreign llvm icmp eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:27:40
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?$$#0:wybe.bool) @wybe:28:40
+        foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?$$#0:wybe.bool) @wybe:27:40
 
 
 

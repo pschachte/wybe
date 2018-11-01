@@ -1,4 +1,3 @@
-
 public type bool = public false | true
     # These are syntax errors because they are operators:
     public func and(p:bool, q:bool):bool = foreign llvm and(p,q)
@@ -56,10 +55,15 @@ end
 
 
 public type string is pointer8
+    use wybe.int
     # this whole implementation is completely wrong, but will do for now
-    public func ++(x:string, y:string):string = foreign c strcat(x,y)
-    public func =(x:string, y:string):bool = foreign llvm icmp eq(x,y)
-    public func /=(x:string,y:string):bool = foreign c strcmp(x,y)
+    #wrong: public func ++(x:string, y:string):string = foreign c strcat(x,y)
+    public func =(x:string, y:string):bool  = foreign c strcmp(x,y) = 0
+    public func /=(x:string,y:string):bool  = foreign c strcmp(x,y) /= 0
+    public func <(x:string, y:string):bool  = foreign c strcmp(x,y) < 0
+    public func <=(x:string, y:string):bool = foreign c strcmp(x,y) <= 0
+    public func >(x:string, y:string):bool  = foreign c strcmp(x,y) > 0
+    public func >=(x:string, y:string):bool = foreign c strcmp(x,y) >= 0
 end
 
 
@@ -67,6 +71,7 @@ public type char is i8
     public func =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
     public func /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
 end
+
 
 public module io is
     public resource io:phantom = phantom
@@ -93,3 +98,7 @@ public module io is
 #    public func eof:char = foreign lpvm cast(-1)
 end
 
+# public module allocation is
+#     use wybe.io
+#     foreign c gc_init(!io)
+# end

@@ -1,4 +1,4 @@
-Error detected during resource checking of modules resource_error
+Error detected during resource checking of module(s) resource_error
 [91mtest-cases/resource_error.wybe:6:7: Call to println needs unavailable resource(s) !wybe.io.io
 [0m[91mtest-cases/resource_error.wybe:2:7: Call to println needs unavailable resource(s) !wybe.io.io
 [0m[91mtest-cases/resource_error.wybe:18:5: Call to resourceful proc without ! resource marker: wybe.io.<3>println("shouldn't work: no ! before println call":wybe.string @resource_error:18:13)

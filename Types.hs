@@ -195,7 +195,10 @@ instance Show TypeError where
                    | (v,typs) <- varAmbigs]
     show (ReasonUndef callFrom callTo pos) =
         makeMessage pos $
-            "Unknown variable/procedure/function '" ++ callTo ++ "' in " ++ callFrom
+            "'" ++ callTo ++ "' unknown in "
+            ++ if callFrom == ""
+               then "top-level statement"
+               else "'" ++ callFrom ++ "'"
     show (ReasonUninit callFrom var pos) =
         makeMessage pos $
             "Unknown variable/constant '" ++ var ++ "'"
@@ -369,7 +372,7 @@ subtypeOf :: TypeSpec -> TypeSpec -> Bool
 subtypeOf sub super = sub `properSubtypeOf` super || sub == super
 
 
--- |Return the greatest lower bound of two TypeSpecs.  
+-- |Return the greatest lower bound of two TypeSpecs.
 meetTypes :: TypeSpec -> TypeSpec -> TypeSpec
 meetTypes ty1 ty2
     | ty1 `subtypeOf` ty2       = ty1
@@ -647,7 +650,7 @@ typecheckProcDecl m pdef = do
             logTypes $ "   with resources: " ++ show resources
             let (calls,preTyping) =
                   runState (bodyCalls def detism) resourceTyping
-            logTypes $ "   containing calls: " ++ showBody 4 (fst <$> calls)
+            logTypes $ "   containing calls: " ++ showBody 8 (fst <$> calls)
             let procCalls = List.filter (isProcCall . content . fst) calls
             let unifs = List.concatMap foreignTypeEquivs
                         ((content . fst) <$> calls)
@@ -1383,21 +1386,24 @@ unifyExprTypes pos a1 a2 typing = do
     logTypes $ "Type checking foreign instruction unifying arguments "
                ++ show a1 ++ " and " ++ show a2
     let typing' = List.foldr (noteOutputCast . content) typing args
+    let a1Content = content a1
     case expVar' $ content a2 of
         -- XXX Need new error for move to non-variable
         Nothing -> return
                    $ typeError (shouldnt $ "move to non-variable" ++ show call)
                      typing'
         Just toVar ->
-          case ultimateExp $ content a1 of
+          case ultimateExp a1Content of
               Var fromVar _ _ -> do
                 let typing'' = unifyVarTypes fromVar toVar pos typing'
                 logTypes $ "Resulting typing = " ++ show typing''
                 return typing''
-              expr -> do
-                ty <- expType typing' (Unplaced expr)
+              _ -> do
+                ty <- expType typing' (Unplaced a1Content)
+                logTypes $ "constraining var " ++ show toVar
+                           ++ " to type " ++ show ty
                 return $ constrainVarType
-                         (shouldnt $ "type error in move" ++ show call)
+                         (shouldnt $ "type error in move: " ++ show call)
                          toVar ty typing'
 
 

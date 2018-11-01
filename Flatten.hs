@@ -57,10 +57,10 @@ flattenProcDecl (ProcDecl vis detism inline
     let proto' = proto {procProtoParams = concatMap flattenParam params}
               -- flattenProto proto detism
     let inParams = Set.fromList $
-                   List.map paramName $ 
+                   List.map paramName $
                    List.filter (flowsIn . paramFlow) $
                    procProtoParams proto'
-    let inResources = Set.map (resourceName . resourceFlowRes) $ 
+    let inResources = Set.map (resourceName . resourceFlowRes) $
                    Set.filter (flowsIn . resourceFlowFlow) $
                    procProtoResources proto'
     (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` inResources)
@@ -208,13 +208,36 @@ flattenStmt stmt pos detism = do
 
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
-flattenStmt' (ProcCall [] name procID detism res []) pos _ = do
+-- XXX This doesn't seem to apply
+-- flattenStmt' stmt@(ProcCall [] "phantom" _ Det _ [arg]) pos _ = do
+--     -- Convert unary call to phantom with output var to move instr
+--     let instr = ForeignCall "llvm" "move" []
+--                 [Unplaced $ Typed (IntValue 0) (TypeSpec [] "phantom" []) True,
+--                  arg]
+--     logFlatten $ "   Converting ProcCall " ++ show stmt ++ " to " ++ show instr
+--     emit pos instr
+flattenStmt' stmt@(ProcCall [] "=" _ Det _ [arg1,arg2]) pos _ = do
+    case (content arg1, content arg2) of
+      (Var _ ParamOut Ordinary, _) -> do
+        logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
+        [arg2'] <- flattenStmtArgs [arg2] pos
+        let instr = ForeignCall "llvm" "move" [] [arg2', arg1]
+        logFlatten $ "  transformed to " ++ showStmt 4 instr
+        emit pos instr
+      (_, Var _ ParamOut Ordinary) -> do
+        logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
+        [arg1'] <- flattenStmtArgs [arg1] pos
+        let instr = ForeignCall "llvm" "move" [] [arg1', arg2]
+        logFlatten $ "  transformed to " ++ showStmt 4 instr
+        emit pos instr
+      (_,_) -> emit pos stmt
+flattenStmt' stmt@(ProcCall [] name _ _ _ []) pos _ = do
     defined <- gets defdVars
     -- Convert call to no-arg proc to a bool variable test if there's a
     -- local variable with that name
     if name `elem` defined
         then emit pos $ TestBool $ Var name ParamIn Ordinary
-        else emit pos $ ProcCall [] name procID detism res []
+        else emit pos stmt
 flattenStmt' (ProcCall maybeMod name procID detism res args) pos _ = do
     logFlatten "   call is Det"
     args' <- flattenStmtArgs args pos
@@ -319,6 +342,7 @@ flattenArgs args = do
     logFlatten $ "  Flattened =   " ++ show (concat argListList)
     return $ concat argListList
 
+
 flattenPExp :: Placed Exp -> Flattener [Placed Exp]
 flattenPExp pexp = do
     vs <- gets defdVars
@@ -344,6 +368,8 @@ flattenExp exp@(StringValue a) ty cast pos =
     return $ [typeAndPlace exp ty cast pos]
 flattenExp exp@(CharValue a) ty cast pos =
     return $ [typeAndPlace exp ty cast pos]
+flattenExp exp@(Var "phantom" ParamIn _ ) _ _ pos =
+    return $ [typeAndPlace (IntValue 0) (TypeSpec [] "phantom" []) True pos]
 flattenExp exp@(Var name dir flowType) ty cast pos = do
     logFlatten $ "  Flattening arg " ++ show exp
     let isIn  = flowsIn dir

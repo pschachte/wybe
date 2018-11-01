@@ -55,9 +55,10 @@ import           Control.Monad.Trans
 import           Control.Monad.Trans.State
 import           Data.List                 as List
 import           Data.Map                  as Map
+import           Data.Set                  as Set
 import           Data.Maybe
 import           Emit
-import           Normalise                 (normalise)
+import           Normalise                 (normalise, completeNormalisation)
 import           ObjectInterface
 import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
@@ -72,6 +73,7 @@ import           System.FilePath
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
+import           Snippets
 import           BinaryFactory
 import qualified Data.ByteString.Char8 as BS
 
@@ -295,7 +297,6 @@ compileModule source modspec params items = do
     stopOnError $ "preliminary processing of module " ++ showModSpec modspec
     loadImports
     stopOnError $ "handling imports for module " ++ showModSpec modspec
-    _ <- gets underCompilation
     mods <- exitModule -- may be empty list if module is mutually dependent
     logBuild $ "<=== finished compling module " ++ showModSpec modspec
     compileModSCC mods
@@ -431,30 +432,31 @@ buildArchive arch = do
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
+    mapM_ (inExistingModule (completeNormalisation compileModSCC)) mspecs
+    stopOnError $ "final normalisation of module(s) " ++ showModSpecs mspecs
     logDump Flatten Types "FLATTENING"
     fixpointProcessSCC handleModImports mspecs
     logBuild $ replicate 70 '='
-    logBuild $ "resource and type checking modules "
+    logBuild $ "resource and type checking module(s) "
       ++ showModSpecs mspecs ++ "..."
     mapM_ validateModExportTypes mspecs
-    stopOnError $ "checking parameter type declarations in modules " ++
+    stopOnError $ "checking parameter type declarations in module(s) " ++
       showModSpecs mspecs
     -- Fixed point needed because eventually resources can bundle
     -- resources from other modules
     fixpointProcessSCC resourceCheckMod mspecs
-    stopOnError $ "processing resources for modules " ++
-      showModSpecs mspecs
+    stopOnError $ "processing resources for module(s) " ++ showModSpecs mspecs
     -- No fixed point needed because public procs must have types declared
     mapM_ typeCheckMod mspecs
-    stopOnError $ "type checking of modules " ++
+    stopOnError $ "type checking of module(s) " ++
       showModSpecs mspecs
     logDump Types Unbranch "TYPE CHECK"
     mapM_ (transformModuleProcs canonicaliseProcResources)  mspecs
     mapM_ (transformModuleProcs resourceCheckProc)  mspecs
-    stopOnError $ "resource checking of modules " ++
+    stopOnError $ "resource checking of module(s) " ++
       showModSpecs mspecs
     mapM_ (transformModuleProcs unbranchProc)  mspecs
-    stopOnError $ "handling loops and conditionals in modules " ++
+    stopOnError $ "handling loops and conditionals in module(s) " ++
       showModSpecs mspecs
     logDump Unbranch Clause "UNBRANCHING"
     mapM_ (transformModuleProcs compileProc)  mspecs
@@ -590,11 +592,31 @@ buildExecutable targetMod fpath = do
              ++ showModSpec targetMod ++ "'; not building executable")
             Nothing
         else do
-            -- Filter the modules for which the second element of tuple is True
-            let mainImports = List.foldr (\x a -> if snd x then fst x:a else a)
-                              [] depends
-            logBuild $ show depends
+            -- find dependencies (including module itself) that have a main
+            logBuild $ "Dependencies: " ++ show depends
+            let mainImports = fst <$> List.filter snd depends
             logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
+            -- let assignVar dst src =
+            --       Unplaced $ ProcCall [] "=" Nothing Det False
+            --                    [Unplaced $ Var dst ParamOut Ordinary,
+            --                     Unplaced $ Var src ParamIn Ordinary]
+            let assignInt dst src =
+                  Unplaced $ ProcCall [] "=" Nothing Det False
+                               [Unplaced $ Var dst ParamOut Ordinary,
+                                Unplaced $ IntValue src]
+            let bodyInner = [Unplaced $ ProcCall m "" Nothing Det True []
+                           | m <- mainImports]
+            let bodyCode = [assignInt "exit_code" 0] ++ bodyInner
+            let mainBody = ProcDefSrc bodyCode
+            let proto = ProcProto "main"
+                        [Param "argc" intType ParamIn Ordinary,
+                         Param "argv" intType ParamIn Ordinary,
+                         Param "exit_code" intType ParamOut Ordinary] Set.empty
+            let mainProc = ProcDef "main" proto mainBody Nothing 0 Map.empty
+                           Private Det False NoSuperproc
+            
+
+            logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
             mainMod <- newMainModule mainImports
             logBuild "o Built 'main' module for target: "
             mainModStr <- liftIO $ codeemit mainMod
@@ -612,7 +634,7 @@ buildExecutable targetMod fpath = do
             makeExec allOFiles fpath
             -- return allOFiles
             logBuild "o Object Files to link: "
-            logBuild $ "++ " ++ intercalate "\n++" allOFiles
+            logBuild $ "++ " ++ intercalate "\n++ " allOFiles
             logBuild $ "o Building Target (executable): " ++ fpath
 
 

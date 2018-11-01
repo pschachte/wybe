@@ -27,7 +27,7 @@ module AST (
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   ImportSpec(..), importSpec,
   collectSubModules,
-  enterModule, reenterModule, exitModule, finishModule,
+  enterModule, reenterModule, exitModule, finishModule, inExistingModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
@@ -515,6 +515,7 @@ exitModule = do
         modify (\comp -> comp { deferred = rest })
         return $ List.map modSpec $ mod:bonus
 
+
 finishModule :: Compiler Module
 finishModule = do
     mod <- getModule id
@@ -522,6 +523,15 @@ finishModule = do
       (\comp -> comp { underCompilation = List.tail (underCompilation comp) })
     updateModules $ Map.insert (modSpec mod) mod
     return mod
+
+
+-- |Execute a module compilation task in the context of the specified module
+inExistingModule :: Compiler a -> ModSpec -> Compiler a
+inExistingModule modFn modSpec = do
+    reenterModule modSpec
+    result <- modFn
+    _ <- finishModule
+    return result
 
 
 -- |Return the directory of the current module.
@@ -649,7 +659,7 @@ lookupType :: TypeSpec -> OptPos -> Compiler (Maybe TypeSpec)
 lookupType AnyType _ = return $ Just AnyType
 lookupType InvalidType _ = return $ Just InvalidType
 lookupType (TypeSpec _ "phantom" []) _ =
-    return $ Just $ TypeSpec ["wybe"] "phantom" []
+    return $ Just $ TypeSpec [] "phantom" []
 lookupType ty@(TypeSpec ["wybe"] "int" []) _ = return $ Just ty
 lookupType ty@(TypeSpec mod name args) pos = do
     logAST $ "Looking up type " ++ show ty
@@ -1296,7 +1306,7 @@ type ResourceDef = Placed (Map ResourceSpec (Maybe ResourceImpln))
 data ResourceImpln =
     SimpleResource {
         resourceType::TypeSpec,
-        resourceInit::(Maybe (Placed Exp)),
+        resourceInit::Maybe (Placed Exp),
         resourcePos::OptPos
         } deriving (Generic)
 
@@ -2027,6 +2037,7 @@ logDump selector1 selector2 pass = do
         ++ "\nAFTER " ++ pass ++ ":\n"
         ++ intercalate ("\n" ++ replicate 50 '-' ++ "\n")
         (List.map show $ List.filter ((/="wybe"). List.head . modSpec) modList)
+        -- (List.map show modList)
 
 
 -- |How to show an Item.

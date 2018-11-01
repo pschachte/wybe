@@ -7,7 +7,7 @@
 --
 
 module Util (sameLength, maybeNth, checkMaybe, setMapInsert,
-             fillLines, nop) where
+             applyPair, fillLines, nop) where
 
 
 import Data.Map as Map
@@ -46,6 +46,11 @@ setMapInsert key item dict =
                     Just s -> Just $ Set.insert item s)
     key dict
 
+
+
+-- |Apply a pair of functions to a value and return a pair of results.
+applyPair :: (a->b,a->c) -> a -> (b,c)
+applyPair (f,g) val = (f val, g val)
 
 
 -- |fillLines marginText currColumn lineLength text
