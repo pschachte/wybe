@@ -271,7 +271,11 @@ flowDirection =
 
 -- | Module name, period separated
 modSpecParser :: Parser ModSpec
-modSpecParser = identString `sepBy` symbol "."
+modSpecParser = modSpecComponent `sepBy` symbol "."
+
+
+modSpecComponent :: Parser String
+modSpecComponent = (symbol "^" >> return "^") <|> identString
 
 
 -- | Parser for an optional type.
@@ -889,6 +893,8 @@ determinism = option Det (ident "test" *> return SemiDet)
 
 
 -- | Wybe keywords to exclude from identitfier tokens conditionally.
+-- XXX revisit this list; replace and with &&, or with ||, not with ~,
+-- maybe remove 'import', and probably need to add others.
 keywords :: [String]
 keywords =
     [ "if", "then", "else", "proc", "end", "use"

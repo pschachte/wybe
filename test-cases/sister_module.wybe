@@ -1,11 +1,10 @@
-module m1 is
-    public proc foo(i:int,?j:int) ?j=i+1 end
+module m2 is
+    use ^
+    public proc bar(i:int,?j:int) foo(i,?k) baz(k,?j) end
 end
 
-module m2 is
-    # within this module, we should see public procs in sister modules as
-    # well as all procs in the supermodule, so this should be OK:
-    public proc bar(i:int,?j:int) foo(i,?k) baz(k,?j) end
+module m1 is
+    public proc foo(i:int,?j:int) ?j=i+1 end
 end
 
 proc baz(i:int, ?j:int) foo(i,?j) end

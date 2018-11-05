@@ -754,18 +754,19 @@ publicResource name = getModule (Map.member name . pubResources . modInterface)
 -- |Add the specified module spec as an import of the current module.
 addImport :: ModSpec -> ImportSpec -> Compiler ()
 addImport modspec imports = do
+    modspec' <- resolveModuleM modspec
     updateImplementation
       (updateModImports
        (\moddeps ->
          let imports' =
-                 case Map.lookup modspec moddeps of
+                 case Map.lookup modspec' moddeps of
                      Nothing -> imports
                      Just imports'' -> combineImportSpecs imports'' imports
-         in Map.insert modspec imports' moddeps))
+         in Map.insert modspec' imports' moddeps))
     when (isNothing $ importPublic imports) $
-      updateInterface Public (updateDependencies (Set.insert modspec))
-    maybeMod <- gets (List.find ((==modspec) . modSpec) . underCompilation)
-    logAST $ "Noting import of " ++ showModSpec modspec ++
+      updateInterface Public (updateDependencies (Set.insert modspec'))
+    maybeMod <- gets (List.find ((==modspec') . modSpec) . underCompilation)
+    logAST $ "Noting import of " ++ showModSpec modspec' ++
            ", which is " ++ (if isNothing maybeMod then "NOT " else "") ++
            "currently being loaded"
     case maybeMod of
@@ -980,10 +981,10 @@ refersTo modspec name implMapFn specModFn = do
       name ++ " from module " ++ showModSpec currMod
     visible <- getModule (Map.findWithDefault Set.empty name . implMapFn .
                           fromJust . modImplementation)
-    logAST $ "*** ALL visible from: " ++ showModSpec modspec ++ ": "
+    logAST $ "*** ALL visible from module '" ++ showModSpec modspec ++ "': "
         ++ showModSpecs (Set.toList (Set.map specModFn visible))
     let matched = Set.filter ((modspec `isSuffixOf`) . specModFn) visible
-    if Set.null matched 
+    if Set.null matched
       then case getDescendant currMod of
              Just des -> do
                reenterModule des
@@ -1267,6 +1268,34 @@ doImport mod imports = do
                 pubProcs = Map.unionWith Set.union (pubProcs i) exportedProcs })
     -- Update what's exported from the module
     return ()
+
+
+-- | Resolve a (possibly) relative module spec into an absolute one.  The
+-- first argument is a possibly relative module spec and the second is an
+-- absolute one which the first argument should be interpreted relative to.
+resolveModule :: ModSpec -> ModSpec -> Maybe ModSpec
+resolveModule ("^":_) [] = Nothing
+resolveModule ("^":relspec) absspec@(_:_) =
+    resolveModule' relspec $ init absspec
+resolveModule modspec _ = Just modspec
+
+resolveModule' :: ModSpec -> ModSpec -> Maybe ModSpec
+resolveModule' [] spec = Just spec
+resolveModule' ("^":relspec) absspec@(_:_) =
+    resolveModule' relspec $ init absspec
+resolveModule' relspec absspec = Just $ absspec ++ relspec
+
+resolveModuleM :: ModSpec -> Compiler ModSpec
+resolveModuleM mod = do
+    currMod <- getModuleSpec
+    case resolveModule mod currMod of
+      Nothing -> do
+        message Error ("unresolvable relative module spec '" ++
+                        showModSpec mod ++ "'") Nothing
+        return mod
+      Just m -> return m
+
+
 
 
 importsSelected :: Maybe (Set Ident) -> Map Ident a -> Map Ident a
