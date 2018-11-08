@@ -5,8 +5,6 @@ AFTER EVERYTHING:
   public types    : season: (type_enum.season,"i2")
   public resources: 
   public procs    : type_enum.season.=<0>
-                    type_enum.season.=<1>
-                    type_enum.season.=<2>
                     type_enum.season.autumn<0>
                     type_enum.season.spring<0>
                     type_enum.season.summer<0>
@@ -24,8 +22,6 @@ AFTER EVERYTHING:
   public types    : 
   public resources: 
   public procs    : type_enum.season.=<0>
-                    type_enum.season.=<1>
-                    type_enum.season.=<2>
                     type_enum.season.autumn<0>
                     type_enum.season.spring<0>
                     type_enum.season.summer<0>
@@ -35,14 +31,8 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-= > public inline (0 calls)
-0: =(?out#0:type_enum.season, in#0:type_enum.season):
-    foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
-= > public inline (0 calls)
-1: =(in#0:type_enum.season, ?out#0:type_enum.season):
-    foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
 = > public inline test (0 calls)
-2: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
+0: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
     foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?$$#0:wybe.bool)
 
 
@@ -72,19 +62,7 @@ AFTER LLVM IR:
 source_filename = "test-cases/type_enum.wybe"
 
 ; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.=<0>"(i2 returned %"in#0") local_unnamed_addr #0 {
-entry:
-  ret i2 %"in#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.=<1>"(i2 returned %"in#0") local_unnamed_addr #0 {
-entry:
-  ret i2 %"in#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_enum.season.=<2>"(i2 %"$left#0", i2 %"$right#0") local_unnamed_addr #0 {
+define i1 @"type_enum.season.=<0>"(i2 %"$left#0", i2 %"$right#0") local_unnamed_addr #0 {
 entry:
   %"$$#0" = icmp eq i2 %"$left#0", %"$right#0"
   ret i1 %"$$#0"
@@ -121,19 +99,7 @@ attributes #0 = { norecurse nounwind readnone }
 source_filename = "test-cases"
 
 ; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.=<0>"(i2 returned %"in#0") local_unnamed_addr #0 {
-entry:
-  ret i2 %"in#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.=<1>"(i2 returned %"in#0") local_unnamed_addr #0 {
-entry:
-  ret i2 %"in#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_enum.season.=<2>"(i2 %"$left#0", i2 %"$right#0") local_unnamed_addr #0 {
+define i1 @"type_enum.season.=<0>"(i2 %"$left#0", i2 %"$right#0") local_unnamed_addr #0 {
 entry:
   %"$$#0" = icmp eq i2 %"$left#0", %"$right#0"
   ret i1 %"$$#0"

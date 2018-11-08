@@ -77,9 +77,6 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
   = do
     let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
     ty <- addType name (TypeDef (length params) rep' pos) vis
-    -- XXX Should we special-case handling of = instead of generating these?
-    let eq1 = assignmentProc ty False
-    let eq2 = assignmentProc ty True
     modspec <- getModuleSpec
     let typespec = TypeSpec modspec name
                    $ List.map (\n->TypeSpec [] n []) params
@@ -100,7 +97,7 @@ normaliseItem modCompiler (TypeDecl vis (TypeProto name params) rep items pos)
            $ zip nonconsts [0..]
     let extraItems = implicitItems typespec consts nonconsts items
     normaliseSubmodule modCompiler name (Just params) vis pos
-      $ [eq1,eq2] ++ constItems ++ nonconstItems ++ items ++ extraItems
+      $ constItems ++ nonconstItems ++ items ++ extraItems
 normaliseItem modCompiler (ModuleDecl vis name items pos) = do
     normaliseSubmodule modCompiler name Nothing vis pos items
 normaliseItem _ (ImportMods vis modspecs pos) = do
