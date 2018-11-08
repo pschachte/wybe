@@ -218,17 +218,19 @@ flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
 --     emit pos instr
 flattenStmt' stmt@(ProcCall [] "=" _ Det _ [arg1,arg2]) pos _ = do
     case (content arg1, content arg2) of
-      (Var _ ParamOut Ordinary, _) -> do
+      (Var var ParamOut Ordinary, _) -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
         [arg2'] <- flattenStmtArgs [arg2] pos
         let instr = ForeignCall "llvm" "move" [] [arg2', arg1]
         logFlatten $ "  transformed to " ++ showStmt 4 instr
+        noteVarDef var
         emit pos instr
-      (_, Var _ ParamOut Ordinary) -> do
+      (_, Var var ParamOut Ordinary) -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
         [arg1'] <- flattenStmtArgs [arg1] pos
         let instr = ForeignCall "llvm" "move" [] [arg1', arg2]
         logFlatten $ "  transformed to " ++ showStmt 4 instr
+        noteVarDef var
         emit pos instr
       (_,_) -> emit pos stmt
 flattenStmt' stmt@(ProcCall [] name _ _ _ []) pos _ = do
