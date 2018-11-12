@@ -49,9 +49,15 @@ test:	wybemk
 	@rm -f test-cases/*.bc
 	@rm -f test-cases/*.o
 	@rm -f wybelibs/*.o
-	@printf "Testing building wybe library..."
+	@printf "Testing building wybe library ("
+	@printf wybe
 	@gtimeout 2 ./wybemk --force-all --no-std wybelibs/wybe.o
-	@printf "Done.\n"
+	@for f in wybelibs/*.wybe ; do \
+           [ "$$f" = "wybelibs/wybe.wybe" ] && continue ; \
+	   printf " %s" `basename $$f .wybe` ; \
+	   gtimeout 2 ./wybemk --force $${f/.wybe/.o} ; \
+	done
+	@printf ") done.\n"
 	@printf "Testing test-cases "
 	@ time ( for f in $(TESTCASES) ; do \
 		out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
