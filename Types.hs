@@ -92,7 +92,7 @@ typeCheckMod thisMod = do
     logTypes $ "**** Type checking module " ++ showModSpec thisMod
     reenterModule thisMod
     procs <- getModuleImplementationField (Map.toList . modProcs)
-    let ordered =
+    let ordered = reverse $
             stronglyConnComp
             [(name, name,
               nub $ concatMap (localBodyProcs thisMod . procImpln) procDefs)
@@ -517,7 +517,7 @@ typecheckProcSCC m (CyclicSCC list) = do
 --  updated.
 typecheckProcDecls :: ModSpec -> ProcName -> Compiler (Bool,[TypeError])
 typecheckProcDecls m name = do
-    logTypes $ "** Type checking " ++ name
+    logTypes $ "** Type checking decl of proc " ++ name
     defs <- getModuleImplementationField
             (Map.findWithDefault (error "missing proc definition")
              name . modProcs)

@@ -10,7 +10,7 @@
 --  expressions are turned into statements that bind a variable, and
 --  then the variable is used in place of the expression.  In-out
 --  variable uses, like !x, are expanded into separate input and
---  output expressions, like x, ?x.  
+--  output expressions, like x, ?x.
 --
 --  An expression that assigns one or more variables is an output
 --  expression.  This is turned into an output variable, with
@@ -216,7 +216,7 @@ flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
 --                  arg]
 --     logFlatten $ "   Converting ProcCall " ++ show stmt ++ " to " ++ show instr
 --     emit pos instr
-flattenStmt' stmt@(ProcCall [] "=" _ Det _ [arg1,arg2]) pos _ = do
+flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos _ = do
     case (content arg1, content arg2) of
       (Var var ParamOut Ordinary, _) -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
@@ -232,7 +232,9 @@ flattenStmt' stmt@(ProcCall [] "=" _ Det _ [arg1,arg2]) pos _ = do
         logFlatten $ "  transformed to " ++ showStmt 4 instr
         noteVarDef var
         emit pos instr
-      (_,_) -> emit pos stmt
+      (_,_) -> do
+        args' <- flattenStmtArgs [arg1,arg2] pos
+        emit pos $ ProcCall [] "=" id Det res args'
 flattenStmt' stmt@(ProcCall [] name _ _ _ []) pos _ = do
     defined <- gets defdVars
     -- Convert call to no-arg proc to a bool variable test if there's a
@@ -362,18 +364,18 @@ flattenPExp pexp = do
 --  The first part of the output (a Placed Exp) will always be a list
 --  of only atomic Exps and Var references (in any direction).
 flattenExp :: Exp -> TypeSpec -> Bool -> OptPos -> Flattener [Placed Exp]
-flattenExp exp@(IntValue a) ty cast pos =
-    return $ [typeAndPlace exp ty cast pos]
-flattenExp exp@(FloatValue a) ty cast pos =
-    return $ [typeAndPlace exp ty cast pos]
-flattenExp exp@(StringValue a) ty cast pos =
-    return $ [typeAndPlace exp ty cast pos]
-flattenExp exp@(CharValue a) ty cast pos =
-    return $ [typeAndPlace exp ty cast pos]
-flattenExp exp@(Var "phantom" ParamIn _ ) _ _ pos =
-    return $ [typeAndPlace (IntValue 0) (TypeSpec [] "phantom" []) True pos]
-flattenExp exp@(Var name dir flowType) ty cast pos = do
-    logFlatten $ "  Flattening arg " ++ show exp
+flattenExp expr@(IntValue _) ty cast pos =
+    return [typeAndPlace expr ty cast pos]
+flattenExp expr@(FloatValue _) ty cast pos =
+    return [typeAndPlace expr ty cast pos]
+flattenExp expr@(StringValue _) ty cast pos =
+    return [typeAndPlace expr ty cast pos]
+flattenExp expr@(CharValue _) ty cast pos =
+    return [typeAndPlace expr ty cast pos]
+flattenExp (Var "phantom" ParamIn _ ) _ _ pos =
+    return [typeAndPlace (IntValue 0) (TypeSpec [] "phantom" []) True pos]
+flattenExp expr@(Var name dir flowType) ty cast pos = do
+    logFlatten $ "  Flattening arg " ++ show expr
     let isIn  = flowsIn dir
     let isOut = flowsOut dir
     logFlatten $ "  isIn = " ++ show isIn ++ " isOut = " ++ show isOut
@@ -381,8 +383,10 @@ flattenExp exp@(Var name dir flowType) ty cast pos = do
     logFlatten $ "  flowType' = " ++ show flowType'
     defd <- gets (Set.member name . defdVars)
     if (dir == ParamIn && (not defd))
-      then -- Reference to an undefined variable: assume it's meant to be
-           -- a niladic function instead of a variable reference
+      then do -- Reference to an undefined variable: assume it's meant to be
+              -- a niladic function instead of a variable reference
+        logFlatten $ "  Unknown variable '" ++ show name
+          ++ "' flattened to niladic function call"
         flattenCall (ProcCall [] name Nothing Det False) False ty cast pos []
       else do
         noteVarMention name dir
