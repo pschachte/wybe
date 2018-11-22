@@ -216,23 +216,34 @@ flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
 --                  arg]
 --     logFlatten $ "   Converting ProcCall " ++ show stmt ++ " to " ++ show instr
 --     emit pos instr
-flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos _ = do
+flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
+    let arg1content = content arg1
+    let arg2content = content arg2
+    let arg1Vars = expOutputs arg1content
+    let arg2Vars = expOutputs arg2content
     case (content arg1, content arg2) of
-      (Var var ParamOut Ordinary, _) -> do
+      (Var var ParamOut Ordinary, _) | Set.null arg2Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
         [arg2'] <- flattenStmtArgs [arg2] pos
         let instr = ForeignCall "llvm" "move" [] [arg2', arg1]
         logFlatten $ "  transformed to " ++ showStmt 4 instr
         noteVarDef var
         emit pos instr
-      (_, Var var ParamOut Ordinary) -> do
+      (_, Var var ParamOut Ordinary) | Set.null arg1Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
         [arg1'] <- flattenStmtArgs [arg1] pos
         let instr = ForeignCall "llvm" "move" [] [arg1', arg2]
         logFlatten $ "  transformed to " ++ showStmt 4 instr
         noteVarDef var
         emit pos instr
+      (Fncall mod name args, _) | Set.null arg2Vars -> do
+        let stmt' = ProcCall mod name Nothing Det False (args++[arg2])
+        flattenStmt' stmt' pos detism
+      (_, Fncall mod name args) | Set.null arg1Vars -> do
+        let stmt' = ProcCall mod name Nothing Det False (args++[arg1])
+        flattenStmt' stmt' pos detism
       (_,_) -> do
+        logFlatten $ "Leaving assignment alone: " ++ showStmt 4 stmt
         args' <- flattenStmtArgs [arg1,arg2] pos
         emit pos $ ProcCall [] "=" id Det res args'
 flattenStmt' stmt@(ProcCall [] name _ _ _ []) pos _ = do

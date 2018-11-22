@@ -602,7 +602,7 @@ boolFnToTest (ProcInfo proc args Det)
     | last args == TypeFlow boolType ParamOut =
         Just $ ProcInfo proc (init args) SemiDet
     | otherwise = Nothing
-    
+
 
 -- |Check if ProcInfo is for a test proc, and if so, return a ProcInfo for
 --  the Det proc with a single Bool output as last arg
@@ -610,7 +610,7 @@ testToBoolFn :: ProcInfo -> Maybe ProcInfo
 testToBoolFn (ProcInfo _ _ Det) = Nothing
 testToBoolFn (ProcInfo proc args SemiDet)
     = Just $ ProcInfo proc (args ++ [TypeFlow boolType ParamOut]) Det
-    
+
 
 
 -- |A single call statement together with the determinism context in which
@@ -651,7 +651,7 @@ typecheckProcDecl m pdef = do
             let (calls,preTyping) =
                   runState (bodyCalls def detism) resourceTyping
             logTypes $ "   containing calls: " ++ showBody 8 (fst <$> calls)
-            let procCalls = List.filter (isProcCall . content . fst) calls
+            let procCalls = List.filter (isRealProcCall . content . fst) calls
             let unifs = List.concatMap foreignTypeEquivs
                         ((content . fst) <$> calls)
             unifTyping <- foldM (\t (e1,e2) -> unifyExprTypes pos e1 e2 t)
@@ -781,17 +781,21 @@ bodyCalls (pstmt:pstmts) detism = do
         Next ->  return rest
 
 
-isProcCall :: Stmt -> Bool
-isProcCall ProcCall{} = True
-isProcCall _ = False
+-- |The statement is a ProcCall, other than a call to '='
+isRealProcCall :: Stmt -> Bool
+isRealProcCall (ProcCall _ "=" _ _ False [_,_]) = False
+isRealProcCall ProcCall{} = True
+isRealProcCall _ = False
 
 
 foreignTypeEquivs :: Stmt -> [(Placed Exp,Placed Exp)]
 foreignTypeEquivs (ForeignCall "llvm" "move" _ [v1,v2]) = [(v1,v2)]
 foreignTypeEquivs (ForeignCall "lpvm" "mutate" _ [v1,v2,_,_]) = [(v1,v2)]
+foreignTypeEquivs (ProcCall _ "=" _ _ False [v1,v2]) = [(v1,v2)]
 foreignTypeEquivs _ = []
 
 
+-- |Get matching ProcInfos for the supplied statement (which must be a call)
 callProcInfos :: Placed Stmt -> Compiler [ProcInfo]
 callProcInfos pstmt =
     case content pstmt of
@@ -1095,12 +1099,7 @@ modecheckStmt m name defPos typing delayed assigned detism
                               (procInfoDetism match)
                               resourceful
                               args'
-                  let assigned' = Set.union
-                                  (Set.fromList
-                                  $ List.map (expVar . content)
-                                  $ List.filter
-                                  ((==ParamOut) . expFlow . content) args')
-                                  assigned
+                  let assigned' = Set.union (pexpListOutputs args') assigned
                   return ([maybePlace stmt' pos],delayed,assigned',[])
                 [] -> if delayMatches
                       then do
@@ -1132,10 +1131,7 @@ modecheckStmt m name defPos typing delayed assigned detism
                             $ sel1 <$> actualModes
             let args' = List.zipWith setPExpTypeFlow typeflows args
             let stmt' = ForeignCall lang cname flags args'
-            let assigned' = Set.fromList
-                            $ List.map (expVar . content)
-                            $ List.filter ((==ParamOut) . expFlow . content)
-                              args'
+            let assigned' = pexpListOutputs args'
             logTypes $ "New instr = " ++ show stmt'
             return ([maybePlace stmt' pos],delayed,assigned',[])
 modecheckStmt _ _ _ _ delayed assigned _ Nop pos = do

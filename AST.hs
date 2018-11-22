@@ -35,7 +35,7 @@ module AST (
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, outArgVar, argDescription, flowsIn, flowsOut,
   foldProcCalls, foldBodyPrims, foldBodyDistrib,
-  expToStmt, seqToStmt, procCallToExp, expFlow,
+  expToStmt, seqToStmt, procCallToExp, expOutputs, pexpListOutputs,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
   Prim(..), primArgs, replacePrimArgs, argIsVar, ProcSpec(..),
   PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
@@ -1707,7 +1707,7 @@ data ParamInfo = ParamInfo {
     } deriving (Eq,Generic)
 
 -- |A dataflow direction:  in, out, both, or neither.
-data FlowDirection = ParamIn | ParamOut | ParamInOut | NoFlow | FlowUnknown
+data FlowDirection = ParamIn | ParamOut | ParamInOut | FlowUnknown
                    deriving (Show,Eq,Ord,Generic)
 
 -- |A primitive dataflow direction:  in or out
@@ -1717,7 +1717,6 @@ data PrimFlow = FlowIn | FlowOut
 
 -- |Does the specified flow direction flow in?
 flowsIn :: FlowDirection -> Bool
-flowsIn NoFlow     = False
 flowsIn ParamIn    = True
 flowsIn ParamOut   = False
 flowsIn ParamInOut = True
@@ -1725,7 +1724,6 @@ flowsIn FlowUnknown = shouldnt "checking if unknown flow direction flows in"
 
 -- |Does the specified flow direction flow out?
 flowsOut :: FlowDirection -> Bool
-flowsOut NoFlow     = False
 flowsOut ParamIn = False
 flowsOut ParamOut = True
 flowsOut ParamInOut = True
@@ -1975,10 +1973,22 @@ procCallToExp stmt =
     shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
 
 
-expFlow :: Exp -> FlowDirection
-expFlow (Typed expr _ _) = expFlow expr
-expFlow (Var _ flow _) = flow
-expFlow _ = ParamIn
+-- |Return the set of variables that will definitely be freshly assigned by
+-- the specified expr.  Treats FlowUnknown exprs as *not* assigning anything,
+-- and ParamInOut exprs as not assigning anything, because it does not
+-- *freshly* assign a variable (ie, it's already assigned).
+expOutputs :: Exp -> Set VarName
+expOutputs (Typed expr _ _) = expOutputs expr
+expOutputs (Var name flow _) =
+    if flow == ParamOut then Set.singleton name else Set.empty
+expOutputs (Fncall _ _ args) = pexpListOutputs args
+expOutputs (Where _ pexp) = expOutputs $ content pexp
+expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
+expOutputs _ = Set.empty
+
+
+pexpListOutputs :: [Placed Exp] -> Set VarName
+pexpListOutputs = List.foldr (Set.union . expOutputs . content) Set.empty
 
 
 setExpTypeFlow :: TypeFlow -> Exp -> Exp
@@ -2336,7 +2346,6 @@ showTypeSuffix typ = ":" ++ show typ
 
 -- |How to show a dataflow direction.
 flowPrefix :: FlowDirection -> String
-flowPrefix NoFlow     = "|=|"
 flowPrefix ParamIn    = ""
 flowPrefix ParamOut   = "?"
 flowPrefix ParamInOut = "!"

@@ -6,8 +6,6 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : type_list.++<0>
                     type_list.intlist.=<0>
-                    type_list.intlist.=<1>
-                    type_list.intlist.=<2>
                     type_list.intlist.[]<0>
                     type_list.intlist.[|]<0>
                     type_list.intlist.[|]<1>
@@ -23,19 +21,19 @@ AFTER EVERYTHING:
 
 ++ > public (1 calls)
 0: ++(x#0:type_list.intlist, y#0:type_list.intlist, ?$#0:type_list.intlist):
-    foreign lpvm cast(x#0:type_list.intlist, ?tmp$7#0:wybe.int)
-    foreign llvm icmp ne(~tmp$7#0:wybe.int, 0:wybe.int, ?tmp$8#0:wybe.bool)
-    case ~tmp$8#0:wybe.bool of
+    foreign lpvm cast(x#0:type_list.intlist, ?tmp$5#0:wybe.int)
+    foreign llvm icmp ne(~tmp$5#0:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.bool)
+    case ~tmp$6#0:wybe.bool of
     0:
         foreign llvm move(~y#0:type_list.intlist, ?$#0:type_list.intlist) @type_list:3:8
 
     1:
         foreign lpvm access(x#0:type_list.intlist, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~x#0:type_list.intlist, 8:wybe.int, ?t#0:type_list.intlist)
-        type_list.++<0>(~t#0:type_list.intlist, ~y#0:type_list.intlist, ?tmp$3#0:type_list.intlist) @type_list:5:13
-        foreign lpvm alloc(16:wybe.int, ?tmp$11#0:type_list.intlist)
-        foreign lpvm mutate(~tmp$11#0:type_list.intlist, ?tmp$12#0:type_list.intlist, 0:wybe.int, ~h#0:wybe.int)
-        foreign lpvm mutate(~tmp$12#0:type_list.intlist, ?$#0:type_list.intlist, 8:wybe.int, ~tmp$3#0:type_list.intlist)
+        type_list.++<0>(~t#0:type_list.intlist, ~y#0:type_list.intlist, ?tmp$2#0:type_list.intlist) @type_list:5:13
+        foreign lpvm alloc(16:wybe.int, ?tmp$9#0:type_list.intlist)
+        foreign lpvm mutate(~tmp$9#0:type_list.intlist, ?tmp$10#0:type_list.intlist, 0:wybe.int, ~h#0:wybe.int)
+        foreign lpvm mutate(~tmp$10#0:type_list.intlist, ?$#0:type_list.intlist, 8:wybe.int, ~tmp$2#0:type_list.intlist)
 
   submodules      : type_list.intlist
 --------------------------------------------------
@@ -44,8 +42,6 @@ AFTER EVERYTHING:
   public types    : 
   public resources: 
   public procs    : type_list.intlist.=<0>
-                    type_list.intlist.=<1>
-                    type_list.intlist.=<2>
                     type_list.intlist.[]<0>
                     type_list.intlist.[|]<0>
                     type_list.intlist.[|]<1>
@@ -58,14 +54,8 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-= > public inline (0 calls)
-0: =(?out#0:type_list.intlist, in#0:type_list.intlist):
-    foreign llvm move(~in#0:type_list.intlist, ?out#0:type_list.intlist)
-= > public inline (0 calls)
-1: =(in#0:type_list.intlist, ?out#0:type_list.intlist):
-    foreign llvm move(~in#0:type_list.intlist, ?out#0:type_list.intlist)
 = > public test (3 calls)
-2: =($left#0:type_list.intlist, $right#0:type_list.intlist, ?$$#0:wybe.bool):
+0: =($left#0:type_list.intlist, $right#0:type_list.intlist, ?$$#0:wybe.bool):
     foreign lpvm cast($left#0:type_list.intlist, ?tmp$0#0:wybe.int)
     foreign llvm icmp eq(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -87,13 +77,13 @@ AFTER EVERYTHING:
             1:
                 foreign lpvm access($right#0:type_list.intlist, 0:wybe.int, ?$right$head#0:wybe.int)
                 foreign lpvm access(~$right#0:type_list.intlist, 8:wybe.int, ?$right$tail#0:type_list.intlist)
-                foreign llvm icmp eq(~$left$head#0:wybe.int, ~$right$head#0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:28:40
+                foreign llvm icmp eq(~$left$head#0:wybe.int, ~$right$head#0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:27:40
                 case ~tmp$5#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
-                    type_list.intlist.=<2>(~$left$tail#0:type_list.intlist, ~$right$tail#0:type_list.intlist, ?$$#0:wybe.bool)
+                    type_list.intlist.=<0>(~$left$tail#0:type_list.intlist, ~$right$tail#0:type_list.intlist, ?$$#0:wybe.bool)
 
 
 
@@ -191,21 +181,21 @@ declare i8* @wybe_malloc(i32) local_unnamed_addr
 
 define i64* @"type_list.++<0>"(i64* readonly %"x#0", i64* %"y#0") local_unnamed_addr {
 entry:
-  %"tmp$8#0" = icmp eq i64* %"x#0", null
-  br i1 %"tmp$8#0", label %if.else, label %if.then
+  %"tmp$6#0" = icmp eq i64* %"x#0", null
+  br i1 %"tmp$6#0", label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
   %0 = load i64, i64* %"x#0", align 4
   %1 = getelementptr i64, i64* %"x#0", i64 1
   %2 = bitcast i64* %1 to i64**
   %3 = load i64*, i64** %2, align 8
-  %"tmp$3#0" = tail call i64* @"type_list.++<0>"(i64* %3, i64* %"y#0")
+  %"tmp$2#0" = tail call i64* @"type_list.++<0>"(i64* %3, i64* %"y#0")
   %4 = tail call i8* @wybe_malloc(i32 16)
   %5 = bitcast i8* %4 to i64*
   store i64 %0, i64* %5, align 4
   %6 = getelementptr i8, i8* %4, i64 8
   %7 = bitcast i8* %6 to i64*
-  %8 = ptrtoint i64* %"tmp$3#0" to i64
+  %8 = ptrtoint i64* %"tmp$2#0" to i64
   store i64 %8, i64* %7, align 4
   ret i64* %5
 
@@ -213,20 +203,8 @@ if.else:                                          ; preds = %entry
   ret i64* %"y#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64* @"type_list.intlist.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
-entry:
-  ret i64* %"in#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i64* @"type_list.intlist.=<1>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
-entry:
-  ret i64* %"in#0"
-}
-
 ; Function Attrs: nounwind readonly
-define i1 @"type_list.intlist.=<2>"(i64* readonly %"$left#0", i64* readonly %"$right#0") local_unnamed_addr #1 {
+define i1 @"type_list.intlist.=<0>"(i64* readonly %"$left#0", i64* readonly %"$right#0") local_unnamed_addr #0 {
 entry:
   %"tmp$1#04" = icmp eq i64* %"$left#0", null
   br i1 %"tmp$1#04", label %if.then, label %if.then1.preheader
@@ -266,7 +244,7 @@ if.then3:                                         ; preds = %if.then2
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define noalias i64* @"type_list.intlist.[]<0>"() local_unnamed_addr #0 {
+define noalias i64* @"type_list.intlist.[]<0>"() local_unnamed_addr #1 {
 entry:
   ret i64* null
 }
@@ -284,14 +262,14 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i64*, i1 } @"type_list.intlist.[|]<1>"(i64* readnone %"$#0") local_unnamed_addr #0 {
+define { i64, i64*, i1 } @"type_list.intlist.[|]<1>"(i64* readnone %"$#0") local_unnamed_addr #1 {
 entry:
   %"tmp$1#0" = icmp ne i64* %"$#0", null
   ret i1 %"tmp$1#0"
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"type_list.intlist.head<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+define { i64, i1 } @"type_list.intlist.head<0>"(i64* readnone %"$rec#0") local_unnamed_addr #1 {
 entry:
   %"tmp$1#0" = icmp ne i64* %"$rec#0", null
   ret i1 %"tmp$1#0"
@@ -312,7 +290,7 @@ if.else:                                          ; preds = %entry
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64*, i1 } @"type_list.intlist.tail<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+define { i64*, i1 } @"type_list.intlist.tail<0>"(i64* readnone %"$rec#0") local_unnamed_addr #1 {
 entry:
   %"tmp$1#0" = icmp ne i64* %"$rec#0", null
   ret i1 %"tmp$1#0"
@@ -334,8 +312,8 @@ if.else:                                          ; preds = %entry
   ret i64* null
 }
 
-attributes #0 = { norecurse nounwind readnone }
-attributes #1 = { nounwind readonly }
+attributes #0 = { nounwind readonly }
+attributes #1 = { norecurse nounwind readnone }
 attributes #2 = { norecurse nounwind }
 
 --------------------------------------------------
@@ -344,20 +322,8 @@ source_filename = "test-cases"
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
 
-; Function Attrs: norecurse nounwind readnone
-define i64* @"type_list.intlist.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
-entry:
-  ret i64* %"in#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i64* @"type_list.intlist.=<1>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
-entry:
-  ret i64* %"in#0"
-}
-
 ; Function Attrs: nounwind readonly
-define i1 @"type_list.intlist.=<2>"(i64* readonly %"$left#0", i64* readonly %"$right#0") local_unnamed_addr #1 {
+define i1 @"type_list.intlist.=<0>"(i64* readonly %"$left#0", i64* readonly %"$right#0") local_unnamed_addr #0 {
 entry:
   %"tmp$1#04" = icmp eq i64* %"$left#0", null
   br i1 %"tmp$1#04", label %if.then, label %if.then1.preheader
@@ -397,7 +363,7 @@ if.then3:                                         ; preds = %if.then2
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define noalias i64* @"type_list.intlist.[]<0>"() local_unnamed_addr #0 {
+define noalias i64* @"type_list.intlist.[]<0>"() local_unnamed_addr #1 {
 entry:
   ret i64* null
 }
@@ -415,14 +381,14 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i64*, i1 } @"type_list.intlist.[|]<1>"(i64* readnone %"$#0") local_unnamed_addr #0 {
+define { i64, i64*, i1 } @"type_list.intlist.[|]<1>"(i64* readnone %"$#0") local_unnamed_addr #1 {
 entry:
   %"tmp$1#0" = icmp ne i64* %"$#0", null
   ret i1 %"tmp$1#0"
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"type_list.intlist.head<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+define { i64, i1 } @"type_list.intlist.head<0>"(i64* readnone %"$rec#0") local_unnamed_addr #1 {
 entry:
   %"tmp$1#0" = icmp ne i64* %"$rec#0", null
   ret i1 %"tmp$1#0"
@@ -443,7 +409,7 @@ if.else:                                          ; preds = %entry
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64*, i1 } @"type_list.intlist.tail<0>"(i64* readnone %"$rec#0") local_unnamed_addr #0 {
+define { i64*, i1 } @"type_list.intlist.tail<0>"(i64* readnone %"$rec#0") local_unnamed_addr #1 {
 entry:
   %"tmp$1#0" = icmp ne i64* %"$rec#0", null
   ret i1 %"tmp$1#0"
@@ -465,7 +431,7 @@ if.else:                                          ; preds = %entry
   ret i64* null
 }
 
-attributes #0 = { norecurse nounwind readnone }
-attributes #1 = { nounwind readonly }
+attributes #0 = { nounwind readonly }
+attributes #1 = { norecurse nounwind readnone }
 attributes #2 = { norecurse nounwind }
 
