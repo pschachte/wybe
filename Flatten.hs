@@ -236,16 +236,21 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
         logFlatten $ "  transformed to " ++ showStmt 4 instr
         noteVarDef var
         emit pos instr
-      (Fncall mod name args, _) | Set.null arg2Vars -> do
+      (Fncall mod name args, _)
+        | not (Set.null arg1Vars) && Set.null arg2Vars -> do
         let stmt' = ProcCall mod name Nothing Det False (args++[arg2])
         flattenStmt' stmt' pos detism
-      (_, Fncall mod name args) | Set.null arg1Vars -> do
+      (_, Fncall mod name args)
+        | not (Set.null arg2Vars) && Set.null arg1Vars -> do
         let stmt' = ProcCall mod name Nothing Det False (args++[arg1])
         flattenStmt' stmt' pos detism
-      (_,_) -> do
-        logFlatten $ "Leaving assignment alone: " ++ showStmt 4 stmt
+      (_,_) | Set.null arg1Vars && Set.null arg2Vars -> do
+        logFlatten $ "Leaving equality test alone: " ++ showStmt 4 stmt
         args' <- flattenStmtArgs [arg1,arg2] pos
         emit pos $ ProcCall [] "=" id Det res args'
+      _ -> do
+        -- Must be a mode error:  both sides want to bind variables
+        lift $ message Error "Cannot generate bindings on both sides of '='" pos
 flattenStmt' stmt@(ProcCall [] name _ _ _ []) pos _ = do
     defined <- gets defdVars
     -- Convert call to no-arg proc to a bool variable test if there's a

@@ -459,20 +459,16 @@ expMode' _ expr =
 
 
 -- |Update the typing to assign the specified type to the specified expr
-setExpType :: Placed Exp -> TypeSpec -> Int -> ProcName -> Typing -> Typing
-setExpType pexp typ argnum procName typing
-    = setExpType' (content pexp) (place pexp) typ argnum procName typing
-
-setExpType' :: Exp -> OptPos -> TypeSpec -> Int -> ProcName -> Typing -> Typing
-setExpType' (IntValue _) _ _ _ _ typing = typing
-setExpType' (FloatValue _) _ _ _ _ typing = typing
-setExpType' (StringValue _) _ _ _ _ typing = typing
-setExpType' (CharValue _) _ _ _ _ typing = typing
-setExpType' (Var var _ _) pos typ argnum procName typing
+setExpType :: Exp -> OptPos -> TypeSpec -> Int -> ProcName -> Typing -> Typing
+setExpType (IntValue _) _ _ _ _ typing = typing
+setExpType (FloatValue _) _ _ _ _ typing = typing
+setExpType (StringValue _) _ _ _ _ typing = typing
+setExpType (CharValue _) _ _ _ _ typing = typing
+setExpType (Var var _ _) pos typ argnum procName typing
     = constrainVarType (ReasonArgType procName argnum pos) var typ typing
-setExpType' (Typed expr _ _) pos typ argnum procName typing
-    = setExpType' expr pos typ argnum procName typing
-setExpType' otherExp _ _ _ _ _
+setExpType (Typed expr _ _) pos typ argnum procName typing
+    = setExpType expr pos typ argnum procName typing
+setExpType otherExp _ _ _ _ _
     = shouldnt $ "Invalid expr left after flattening " ++ show otherExp
 
 ----------------------------------------------------------------
@@ -781,9 +777,8 @@ bodyCalls (pstmt:pstmts) detism = do
         Next ->  return rest
 
 
--- |The statement is a ProcCall, other than a call to '='
+-- |The statement is a ProcCall
 isRealProcCall :: Stmt -> Bool
-isRealProcCall (ProcCall _ "=" _ _ False [_,_]) = False
 isRealProcCall ProcCall{} = True
 isRealProcCall _ = False
 
@@ -791,7 +786,6 @@ isRealProcCall _ = False
 foreignTypeEquivs :: Stmt -> [(Placed Exp,Placed Exp)]
 foreignTypeEquivs (ForeignCall "llvm" "move" _ [v1,v2]) = [(v1,v2)]
 foreignTypeEquivs (ForeignCall "lpvm" "mutate" _ [v1,v2,_,_]) = [(v1,v2)]
-foreignTypeEquivs (ProcCall _ "=" _ _ False [v1,v2]) = [(v1,v2)]
 foreignTypeEquivs _ = []
 
 
@@ -894,7 +888,8 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
           return $ typeErrors (concatMap errList matches) typing
         [match] -> do
           let typing' = List.foldr
-                        (\ (pexp,ty,argnum) -> setExpType pexp ty argnum name)
+                        (\ (pexp,ty,argnum) ->
+                           placedApply setExpType pexp ty argnum name)
                         typing
                         $ zip3 pexps match [1..]
           logTypes $ "Resulting typing = " ++ show typing'
