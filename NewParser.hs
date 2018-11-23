@@ -142,6 +142,7 @@ typeImpParser =
 -- | Resource declaration parser.
 resourceItemParser :: Visibility -> Parser Item
 resourceItemParser v = do
+    -- XXX might be better to use the position of the resource name as pos
     pos <- tokenPosition <$> ident "resource"
     let optInit = optionMaybe (symbol "=" *> expParser)
     ResourceDecl v <$> identString
