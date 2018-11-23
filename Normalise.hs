@@ -107,11 +107,11 @@ normaliseItem _ (ImportItems vis modspec imports pos) = do
 normaliseItem modCompiler (ResourceDecl vis name typ init pos) = do
   addSimpleResource name (SimpleResource typ init pos) vis
   -- XXX This should be done, but currently breaks the wybe library
-  -- case init of
-  --   Nothing  -> return ()
-  --   Just val -> normaliseItem modCompiler
-  --               (StmtDecl (ProcCall [] "=" Nothing SemiDet False
-  --                          [Unplaced $ varGet name, val]) pos)
+  case init of
+    Nothing  -> return ()
+    Just val -> normaliseItem modCompiler
+                (StmtDecl (ProcCall [] "=" Nothing Det False
+                           [Unplaced $ varSet name, val]) pos)
 normaliseItem modCompiler (FuncDecl vis detism inline
                            (FnProto name params resources)
                            resulttype result pos) =
