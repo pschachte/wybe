@@ -106,7 +106,6 @@ normaliseItem _ (ImportItems vis modspec imports pos) = do
     addImport modspec (importSpec (Just imports) vis)
 normaliseItem modCompiler (ResourceDecl vis name typ init pos) = do
   addSimpleResource name (SimpleResource typ init pos) vis
-  -- XXX This should be done, but currently breaks the wybe library
   case init of
     Nothing  -> return ()
     Just val -> normaliseItem modCompiler
