@@ -517,7 +517,7 @@ simpleExpTerms =  parenExp
               <|> identifier
               <|> try (emptyBrackets Brace)
               <|> foreignExp
-              <?> "simple expression terms."
+              <?> "simple expression terms"
 
 
 
