@@ -4,7 +4,7 @@
 --  Purpose  : Resource checker for Wybe
 --  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
 
-module Resources (resourceCheckMod, canonicaliseProcResources,
+module Resources (resourceCheckMod, eliminateProcResources,
                   resourceCheckProc) where
 
 import AST
@@ -21,6 +21,8 @@ import Data.Maybe
 import Data.Graph
 
 import Debug.Trace
+
+------------------------- Checking resource decls -------------------------
 
 -- |Check a module's resource declarations.
 resourceCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
@@ -64,10 +66,12 @@ checkOneResource rspec Nothing = do
     nyi "compound resources"
 
 
+------------- Canonicalising resources in proc definitions ---------
+
 -- |Make sure all resource for the specified proc are module qualified,
 --  making them canonical.
-canonicaliseProcResources :: ProcDef -> Compiler ProcDef
-canonicaliseProcResources pd = do
+eliminateProcResources :: ProcDef -> Compiler ProcDef
+eliminateProcResources pd = do
     logResources $ "Canonicalising resources used by proc " ++ procName pd
     let proto = procProto pd
     let pos = procPos pd
@@ -81,6 +85,15 @@ canonicaliseProcResources pd = do
     return pd'
 
 
+canonicaliseResourceFlow :: OptPos -> ResourceFlowSpec
+                         -> Compiler ResourceFlowSpec
+canonicaliseResourceFlow pos spec = do
+    let res = resourceFlowRes spec
+    res' <- canonicaliseResourceSpec pos res
+    return $ spec { resourceFlowRes = res'}
+
+
+--------- Transform resources into variables and parameters ---------
 
 -- |Transform resources into ordinary variables in a single procedure
 --  definition.  Also check that calls to procs that use resources are
@@ -109,67 +122,18 @@ resourceCheckProc pd = do
     return pd'
 
 
-resourcesInOut :: Set ResourceFlowSpec ->
-                  (Set ResourceSpec, Set ResourceSpec)
-resourcesInOut ress =
-    (Set.map resourceFlowRes $ Set.filter (flowsIn . resourceFlowFlow) ress,
-     Set.map resourceFlowRes $ Set.filter (flowsOut . resourceFlowFlow) ress)
-
-
-canonicaliseResourceFlow :: OptPos -> ResourceFlowSpec
-                         -> Compiler ResourceFlowSpec
-canonicaliseResourceFlow pos spec = do
-    let res = resourceFlowRes spec
-    res' <- canonicaliseResourceSpec pos res
-    return $ spec { resourceFlowRes = res'}
-
-
-canonicaliseResourceSpec :: OptPos -> ResourceSpec -> Compiler ResourceSpec
-canonicaliseResourceSpec pos spec = do
-    logResources $ "canonicalising resource " ++ show spec
-    mbRes <- (fst <$>) <$> lookupResource spec pos
-    let res' = fromMaybe spec mbRes
-    logResources $ "    to --> " ++ show res'
-    return res'
-
-
-
--- |Get a list of all the SimpleResources, and their types, referred 
--- to by a ResourceFlowSpec.  This is necessary because a resource spec
--- may refer to a compound resource.
-simpleResourceFlows :: OptPos -> ResourceFlowSpec ->
-                       Compiler [(ResourceFlowSpec,TypeSpec)]
-simpleResourceFlows pos (ResourceFlowSpec spec flow) = do
-    maybeIFace <- lookupResource spec pos
-    case maybeIFace of
-        Nothing -> return []
-        Just (_,iface) ->
-            return $
-            [(ResourceFlowSpec sp flow,ty) |
-             (sp,ty) <- Map.toList iface]
-
-
 resourceParams :: OptPos -> (ResourceFlowSpec,TypeSpec) -> Compiler [Param]
 resourceParams pos (ResourceFlowSpec res flow, typ) = do
     varName <- resourceVar res
-    inParam <- do
+    inParam <-
         if flowsIn flow
         then return [Param varName typ ParamIn (Resource res)]
         else return []
-    outParam <- do
+    outParam <-
         if flowsOut flow
         then return [Param varName typ ParamOut (Resource res)]
         else return []
     return $ inParam ++ outParam
-
-
-resourceVar :: ResourceSpec -> Compiler String
-resourceVar (ResourceSpec [] name) = return name
-resourceVar (ResourceSpec mod name) = do
-    currMod <- getModuleSpec
-    if currMod == mod
-    then return name -- ensure we can use local resources in code
-    else return $ intercalate "." mod ++ "$" ++ name
 
 
 transformBody :: Int -> [Placed Stmt] -> Compiler ([Placed Stmt],Int)
@@ -247,12 +211,10 @@ transformStmt tmp Next pos =
     return ([maybePlace Next pos], tmp)
 
 
-
 makeSingleStmt :: [Placed Stmt] -> Placed Stmt
 makeSingleStmt []       = succeedTest
 makeSingleStmt [single] = single
 makeSingleStmt stmts    = Unplaced $ And stmts
-
 
 -- |Returns the list of args corresponding to the specified resource
 -- flow spec.  This produces up to two arguments for each simple
@@ -262,20 +224,55 @@ resourceArgs ::  OptPos -> ResourceFlowSpec -> Compiler [Placed Exp]
 resourceArgs pos rflow = do
     simpleSpecs <- simpleResourceFlows pos rflow
     -- XXX make separate exps for each direction
-    fmap concat $
-         mapM (\((ResourceFlowSpec res flow),ty) -> do
+    concat <$>
+         mapM (\(ResourceFlowSpec res flow,ty) -> do
                    var <- resourceVar res
                    let ftype = Resource res
                    let inExp = if flowsIn flow
-                            then [Unplaced $ 
+                            then [Unplaced $
                                   Typed (Var var ParamIn ftype) ty False]
                             else []
                    let outExp = if flowsOut flow
-                                then [Unplaced $ 
+                                then [Unplaced $
                                       Typed (Var var ParamOut ftype) ty False]
                                 else []
                    return $ inExp ++ outExp)
          simpleSpecs
+
+
+------------------------- General support code -------------------------
+
+-- |Canonicalise a single resource spec, based on visible modules.
+canonicaliseResourceSpec :: OptPos -> ResourceSpec -> Compiler ResourceSpec
+canonicaliseResourceSpec pos spec = do
+    logResources $ "canonicalising resource " ++ show spec
+    mbRes <- (fst <$>) <$> lookupResource spec pos
+    let res' = fromMaybe spec mbRes
+    logResources $ "    to --> " ++ show res'
+    return res'
+
+
+-- |Get a list of all the SimpleResources, and their types, referred 
+-- to by a ResourceFlowSpec.  This is necessary because a resource spec
+-- may refer to a compound resource.
+simpleResourceFlows :: OptPos -> ResourceFlowSpec ->
+                       Compiler [(ResourceFlowSpec,TypeSpec)]
+simpleResourceFlows pos (ResourceFlowSpec spec flow) = do
+    maybeIFace <- lookupResource spec pos
+    case maybeIFace of
+        Nothing -> return []
+        Just (_,iface) ->
+            return [(ResourceFlowSpec sp flow,ty) |
+                    (sp,ty) <- Map.toList iface]
+
+
+resourceVar :: ResourceSpec -> Compiler String
+resourceVar (ResourceSpec [] name) = return name
+resourceVar (ResourceSpec mod name) = do
+    currMod <- getModuleSpec
+    if currMod == mod
+    then return name -- ensure we can use local resources in code
+    else return $ intercalate "." mod ++ "$" ++ name
 
 
 -- |Log a message, if we are logging resource transformation activity.

@@ -66,7 +66,7 @@ import           Options                   (LogSelection (..), Options,
                                             optUseStd)
 import           NewParser                 (parseWybe)
 import           Resources                 (resourceCheckMod, resourceCheckProc,
-                                            canonicaliseProcResources)
+                                            eliminateProcResources)
 import           Scanner                   (fileTokens)
 import           System.Directory
 import           System.FilePath
@@ -426,9 +426,8 @@ buildArchive arch = do
 
 -- |Actually compile a list of modules that form an SCC in the module
 --  dependency graph.  This is called in a way that guarantees that
---  all modules on which this module depends, other than those on the
---  mods list, will have been processed when this list of modules is
---  reached.
+--  all modules on which these modules depend, other than one another,
+--  will have been processed when this list of modules is reached.
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
@@ -451,7 +450,7 @@ compileModSCC mspecs = do
     stopOnError $ "type checking of module(s) " ++
       showModSpecs mspecs
     logDump Types Unbranch "TYPE CHECK"
-    mapM_ (transformModuleProcs canonicaliseProcResources)  mspecs
+    mapM_ (transformModuleProcs eliminateProcResources)  mspecs
     mapM_ (transformModuleProcs resourceCheckProc)  mspecs
     stopOnError $ "resource checking of module(s) " ++
       showModSpecs mspecs
