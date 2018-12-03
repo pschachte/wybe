@@ -4,8 +4,8 @@
 --  Purpose  : Resource checker for Wybe
 --  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
 
-module Resources (resourceCheckMod, eliminateProcResources,
-                  resourceCheckProc) where
+module Resources (resourceCheckMod, canonicaliseProcResources,
+                  transformProcResources) where
 
 import AST
 import Options (LogSelection(Resources))
@@ -70,8 +70,8 @@ checkOneResource rspec Nothing = do
 
 -- |Make sure all resource for the specified proc are module qualified,
 --  making them canonical.
-eliminateProcResources :: ProcDef -> Compiler ProcDef
-eliminateProcResources pd = do
+canonicaliseProcResources :: ProcDef -> Compiler ProcDef
+canonicaliseProcResources pd = do
     logResources $ "Canonicalising resources used by proc " ++ procName pd
     let proto = procProto pd
     let pos = procPos pd
@@ -101,8 +101,8 @@ canonicaliseResourceFlow pos spec = do
 --  just blindly transforms resources into variables and parameters,
 --  counting on the later variable use/def analysis to ensure that
 --  resources are defined before they're used or returned.
-resourceCheckProc :: ProcDef -> Compiler ProcDef
-resourceCheckProc pd = do
+transformProcResources :: ProcDef -> Compiler ProcDef
+transformProcResources pd = do
     logResources $ "--------------------------------------\n"
     logResources $ "Adding resources to:" ++ showProcDef 4 pd
     let proto = procProto pd

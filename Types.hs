@@ -5,7 +5,8 @@
 --  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
 
 -- |Support for type checking/inference.
-module Types (validateModExportTypes, typeCheckMod, checkFullyTyped) where
+module Types (validateModExportTypes, typeCheckMod, -- modeCheckMod,
+              checkFullyTyped) where
 
 import           AST
 import           Control.Monad.State
@@ -662,8 +663,6 @@ typecheckProcDecl m pdef = do
                 typing <- typecheckCalls m name pos calls' unifTyping [] False
 
                 logTypes $ "Typing independent of mode = " ++ show typing
-                -- (typing''',def') <- typecheckProcDef m name pos preTyping def
-                -- logTypes $ "*resulting types " ++ name ++ ": " ++ show typing'''
                 if validTyping typing
                   then do
                     logTypes "Now mode checking"
