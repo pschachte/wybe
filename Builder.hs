@@ -5,6 +5,7 @@
 --  Purpose  : Handles compilation at the module level.
 --  Copyright: (c) 2012-2015 Peter Schachte.  All rights reserved.
 --
+--  BEGIN MAJOR DOC
 --  The wybe compiler handles module dependencies, and builds
 --  executables by itself, without the need for build tools like
 --  make.  To keep compile times manageable while supporting
@@ -30,16 +31,19 @@
 --
 --  The build process makes these steps for each SCC in the module
 --  dependency graph (with responsible modules):
---    o  The code is read and flattened (happens before this module is invoked)
---    o  Imported modules are loaded, building if needed (this module)
---    o  The types of exported procs are validated (Types)
---    o  Resource imports and exports are checked (Resources)
---    o  Proc argument types and modes are checked (Types)
---    o  Proc resources are checked and transformed to args (Resources)
---    o  Branches, loops, and nondeterminism are transformed away (Unbranch)
---    o  Procs are compiled to clausal form (Clause)
---    o  Procs are optimised (Optimise)
+--
+--    1.  The code is read and flattened (happens before this module is invoked)
+--    2.  Imported modules are loaded, building them if needed (this module)
+--    3.  The types of exported procs are validated (Types)
+--    4.  Resource imports and exports are checked (Resources)
+--    5.  Proc argument types and modes are checked (Types)
+--    6.  Proc resources are checked and transformed to args (Resources)
+--    7.  Branches, loops, and nondeterminism are transformed away (Unbranch)
+--    8.  Procs are compiled to clausal form (Clause)
+--    9.  Procs are optimised (Optimise)
+--
 --  This is the responsibility of the compileModSCC function.
+--  END MAJOR DOC
 
 -- |Code to oversee the compilation process.
 module Builder (buildTargets, compileModule) where

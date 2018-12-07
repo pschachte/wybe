@@ -1,6 +1,3 @@
-Compiler for the Wybe language
-==============================
-
 To build the compiler, do
 
     make

@@ -1,7 +1,7 @@
 --  File     : AST.hs
 --  Author   : Peter Schachte
 --  Origin   : Thu Oct 14 23:30:58 2010
---  Purpose  : Abstract Syntax Tree for Wybe language
+--  Purpose  : Wybe Abstract Syntax Tree and LPVM representation
 --  Copyright:  2010-2015 Peter Schachte.  All rights reserved.
 
 {-# LANGUAGE DeriveGeneric #-}

@@ -28,7 +28,7 @@ doc:	*.hs
 	haddock -h -o $@ *.hs
 
 %.html:	%.md
-	pandoc -f markdown+grid_tables -t html -o $@ $<
+	pandoc -s -f markdown+grid_tables -t html -o $@ $<
 
 Version.lhs:	*.hs
 	@echo "Generating Version.lhs for version $(VERSION)"
@@ -42,8 +42,12 @@ Version.lhs:	*.hs
 TESTCASES = $(wildcard test-cases/*.wybe)
 
 # Assemble README markdown source file automatically
-README.md: *.hs Makefile
-	cp README.md.intro $@
+README.md: *.hs Makefile README.md.intro README.md.outro
+	printf "%% The Wybe Compiler\n" > $@
+	printf "%% The Wybe Team\n%% " >> $@
+	git show | sed -n '/^Date:/{s/^Date: *//p;q;}' >> $@
+	printf "\n\n" >> $@
+	cat README.md.intro >> $@
 
 	printf "\n\n\nSubdirectories\n--------------\n\n" >> $@
 	printf "Subdirectories have the following purposes:\n\n" >> $@
@@ -62,6 +66,15 @@ README.md: *.hs Makefile
 	    printf " |\n" ; \
 	done >> $@
 	printf "+---------------------+-------------------------------------------------+\n" >> $@
+	printf "\n\n" >> $@
+
+	for f in *.hs ; do \
+	    printf "\n%s\n" $$f ; \
+	    echo $$f | sed 's/./-/g' ; \
+	    echo ; \
+	    sed -E -e '/^-- *Purpose *:/{s/^-- *Purpose *:/**Purpose**:/; G; p;}' -e '/BEGIN MAJOR DOC/,/END MAJOR DOC/{//d ; s/^-- ? ?//p;}' -e 'd' <$$f ; \
+	done >> $@
+
 	printf "\n\n" >> $@
 	cat README.md.outro >> $@
 
