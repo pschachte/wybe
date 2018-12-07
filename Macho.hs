@@ -1,11 +1,11 @@
 {-# OPTIONS_GHC -fno-warn-incomplete-patterns #-}
-{- | Data.Macho is a module for parsing a ByteString of a Mach-O file into a
-Macho record. Original: hackage.haskell.org/package/macho-0.22
+--  File     : Macho.hs
+--  Author   : Erik Charlebois, extended by Rishi Ranjan
+--  Purpose  : Extended version of parser for Mach-O object format files 
+--  Original : hackage.haskell.org/package/macho-0.22
 
-This implementation is slightly modified to accomodate new load commands not
-accounted for, instead of quitting in an exception.
-
--}
+-- This implementation is slightly modified to accomodate new load commands not
+-- accounted for, instead of quitting in an exception.
 
 module Macho ( parseMacho
              , Macho(..)

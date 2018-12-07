@@ -1,3 +1,7 @@
+--  File     : Emit.hs
+--  Author   : Rishi Ranjan
+--  Purpose  : Emit LLVM code
+
 module Emit where
 
 import           AST

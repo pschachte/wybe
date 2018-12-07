@@ -43,7 +43,7 @@ import Control.Monad.Trans.State
 -- A ProcBody is considered to have a unique continuation if it either
 -- does not end in a branch, or if all but at most one of the branches
 -- it ends with ends with a definite failure (a PrimTest (ArgInt 0 _)).
--- 
+--
 -- No instructions can be added between buildFork and beginBranch, or
 -- between endBranch and beginBranch, or if the current state does not have
 -- a unique continuation. A new fork can be built within a branch, but must

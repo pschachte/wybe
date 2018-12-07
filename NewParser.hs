@@ -1,16 +1,15 @@
-{-|
-Module      : NewParser
-Description : Re-write of the Wybe parser using Parsec.
-Copyright   : (c) Ashutosh Rishi Ranjan, 2016
-License     : GPL-3
-Maintainer  : ashutoshrishi92@gmail.com
-Stability   : experimental
-Portability : POSIX
+-- Module      : NewParser
+-- Purpose     : Re-write of the Wybe parser using Parsec.
+-- Copyright   : (c) Ashutosh Rishi Ranjan, 2016
+-- License     : GPL-3
+-- Maintainer  : ashutoshrishi92@gmail.com
+-- Stability   : experimental
+-- Portability : POSIX
 
-This module defines the new Wybe language parser written using the Haskell
-parser combinator library, "Parsec". The grammar here follows the grammar of
-the old happy based parser.
--}
+-- This module defines the new Wybe language parser written using the Haskell
+-- parser combinator library, "Parsec". The grammar here follows the grammar of
+-- the old happy based parser.
+
 
 module NewParser where
 
