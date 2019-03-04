@@ -14,15 +14,16 @@
 
 module Expansion (procExpansion) where
 
-import AST
-import BodyBuilder
-import Options (LogSelection(Expansion))
-import Data.Map as Map
-import Data.List as List
-import Data.Set as Set
-import Control.Monad
-import Control.Monad.Trans (lift)
-import Control.Monad.Trans.State
+import           AST
+import           BodyBuilder
+import           Control.Monad
+import           Control.Monad.Trans       (lift)
+import           Control.Monad.Trans.State
+import           Data.List                 as List
+import           Data.Map                  as Map
+import           Data.Set                  as Set
+import           Options                   (LogSelection (Expansion))
+import           Util
 
 
 -- | Expand the supplied ProcDef, inlining as desired.
@@ -31,14 +32,15 @@ procExpansion pspec def = do
     logMsg Expansion $ "*** Try to expand proc " ++ show pspec
     let ProcDefPrim proto body _ = procImpln def
     logMsg Expansion $ "    initial body: "
-                     ++ show (ProcDefPrim proto body (ProcAnalysis []))
+        ++ show (ProcDefPrim proto body (ProcAnalysis [] initUnionFind))
     let tmp = procTmpCount def
     let (ins,outs) = inputOutputParams proto
     (tmp',used,body') <- buildBody tmp (Map.fromSet id outs) $
                         execStateT (expandBody body) initExpanderState
     let proto' = proto {primProtoParams = markParamNeededness used ins
                                           <$> primProtoParams proto}
-    let def' = def { procImpln = ProcDefPrim proto' body' (ProcAnalysis []),
+    let def' = def { procImpln =
+                      ProcDefPrim proto' body' (ProcAnalysis [] initUnionFind),
                      procTmpCount = tmp' }
     if def /= def'
         then
@@ -86,11 +88,11 @@ identityRenaming = Map.empty
 ----------------------------------------------------------------
 
 data ExpanderState = Expander {
-    inlining     :: Bool,         -- ^Whether we are currently inlining (and
+    inlining    :: Bool,         -- ^Whether we are currently inlining (and
                                   --  therefore should not inline calls)
-    renaming     :: Renaming,     -- ^The current variable renaming
-    writeNaming  :: Renaming,     -- ^Renaming for new assignments
-    noFork       :: Bool          -- ^There's no fork at the end of this body
+    renaming    :: Renaming,     -- ^The current variable renaming
+    writeNaming :: Renaming,     -- ^Renaming for new assignments
+    noFork      :: Bool          -- ^There's no fork at the end of this body
     }
 
 

@@ -10,15 +10,15 @@ module BinaryFactory
 import           AST
 import           Control.Monad
 import           Crypto.Hash
-import           Data.Binary as B
+import           Data.Binary          as B
 -- import qualified Data.ByteString.Char8 as BL
+import           Config               (magicVersion)
 import qualified Data.ByteString.Lazy as BL
-import qualified LLVM.AST as LLVMAST
-import           Text.Parsec.Pos
-                 ( SourcePos, sourceName, sourceLine,
-                   sourceColumn, newPos )
-import           Config (magicVersion)
-import qualified Data.List as List
+import qualified Data.List            as List
+import qualified LLVM.AST             as LLVMAST
+import           Text.Parsec.Pos      (SourcePos, newPos, sourceColumn,
+                                       sourceLine, sourceName)
+import           Util
 
 
 -- * Self Deriving instances
@@ -36,6 +36,7 @@ instance Binary ParamInfo
 instance Binary Prim
 instance Binary PrimVarName
 instance Binary PrimArg
+instance Binary a => Binary (UFInfo a)
 instance Binary ProcAnalysis
 
 -- Procedures

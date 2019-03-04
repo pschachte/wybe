@@ -8,18 +8,19 @@
 
 module Clause (compileProc) where
 
-import AST
-import Snippets
-import Options (LogSelection(Clause))
-import Data.Map as Map
-import Data.Set as Set
-import Data.List as List
-import Data.Maybe as Maybe
-import Text.ParserCombinators.Parsec.Pos
-import Control.Monad
-import Control.Monad.Trans.Class
-import Control.Monad.Trans.State
-import Control.Monad.Trans (lift,liftIO)
+import           AST
+import           Control.Monad
+import           Control.Monad.Trans               (lift, liftIO)
+import           Control.Monad.Trans.Class
+import           Control.Monad.Trans.State
+import           Data.List                         as List
+import           Data.Map                          as Map
+import           Data.Maybe                        as Maybe
+import           Data.Set                          as Set
+import           Options                           (LogSelection (Clause))
+import           Snippets
+import           Text.ParserCombinators.Parsec.Pos
+import           Util
 
 
 ----------------------------------------------------------------
@@ -87,7 +88,7 @@ compileProc proc =
         let params = procProtoParams proto
         let params' = case detism of
                          SemiDet -> params ++ [testOutParam]
-                         Det -> params
+                         Det     -> params
         logClause $ "--------------\nCompiling proc " ++ show proto
         mapM_ (nextVar . paramName) $ List.filter (flowsIn . paramFlow) params
         startVars <- get
@@ -100,7 +101,8 @@ compileProc proc =
         let params'' = List.map (compileParam startVars endVars) params'
         let proto' = PrimProto (procProtoName proto) params''
         logClause $ "  comparams: " ++ show params''
-        return $ proc { procImpln = ProcDefPrim proto' compiled (ProcAnalysis [])}
+        return $ proc { procImpln = ProcDefPrim proto' compiled
+                                        (ProcAnalysis [] initUnionFind)}
 
 
 
@@ -144,7 +146,7 @@ compileCond front pos (Typed expr _typ _) thn els params detism =
 compileCond front pos expr thn els params detism = do
           name' <- case expr of
               Var var ParamIn _ -> Just <$> currVar var Nothing
-              _ -> return Nothing
+              _                 -> return Nothing
           logClause $ "conditional on " ++ show expr ++ " new name = " ++ show name'
           beforeTest <- get
           thn' <- compileBody thn params detism

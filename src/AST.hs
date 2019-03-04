@@ -19,7 +19,8 @@ module AST (
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt,
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
-  phantomParam, phantomArg, phantomType, primProtoParamNames, isProcProtoArg,
+  phantomParam, phantomArg, phantomType, primProtoParamNames,
+  protoNonePhantomParams, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
@@ -30,7 +31,8 @@ module AST (
   enterModule, reenterModule, exitModule, finishModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, ProcImpln(..), AliasPair, ProcAnalysis(..), ProcDef(..), procCallCount,
+  ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
+  AliasPair, AliasMap, ProcAnalysis(..),
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argVarIsFlowDirection, argType,
@@ -1372,11 +1374,17 @@ data ProcImpln
       -- defn in SSA (LLVM) form along with any needed extern definitions
     deriving (Eq,Generic)
 
+
+-- | Use UnionFind method to record the alias information
+type AliasMap = UnionFind PrimVarName
+
 type AliasPair = (Int,Int)
 
 -- | Stores whatever analysis results we infer about a proc definition.
 data ProcAnalysis = ProcAnalysis {
-    procArgAliases::[AliasPair]
+    procArgAliases :: [AliasPair],
+    procArgAliasMap :: AliasMap
+    --- interestingness analysis info
 } deriving (Eq,Generic)
 
 isCompiled :: ProcImpln -> Bool
@@ -1389,8 +1397,9 @@ instance Show ProcImpln where
         = show proto ++ ":" ++ show analysis ++ showBlock 4 body
 
 instance Show ProcAnalysis where
-    show (ProcAnalysis procArgAliases) =
-        " Alias Pairs: " ++ show procArgAliases ++ "\n"
+    show (ProcAnalysis procArgAliases procArgAliasMap) =
+        " Alias Pairs: " ++ show procArgAliases ++ "\n" ++
+        " Alias Map: " ++ show procArgAliasMap ++ "\n"
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
 -- possibly containg some guards.  Each guard is a test that succeeds
@@ -1809,10 +1818,18 @@ phantomType TypeSpec{typeName="phantom"} = True
 phantomType _ = False
 
 -- |Get proto param names in a list
+-- TODO: maybe delete this
 primProtoParamNames :: PrimProto -> [PrimVarName]
 primProtoParamNames proto =
-    let protoParams = primProtoParams proto
-    in List.foldr (\pram ps -> primParamName pram:ps) [] protoParams
+    let formalParams = primProtoParams proto
+    in [primParamName primParam | primParam <- formalParams]
+
+-- |Get proto param names in a list
+protoNonePhantomParams :: PrimProto -> [PrimVarName]
+protoNonePhantomParams proto =
+    let primParams = primProtoParams proto
+    in [primParamName pram | pram <- primParams, not (phantomParam pram)]
+
 
 -- |Is the supplied argument a parameter of the proc proto
 isProcProtoArg :: [PrimVarName] -> PrimArg -> Bool
@@ -1930,18 +1947,20 @@ inArgVar (ArgVar var _ flow _ _) | flow == FlowIn = var
 inArgVar _ = shouldnt "inArgVar of input argument"
 
 
+-- Used in AliasAnalysis - only care about pointers & not in final use
+-- so that might incur aliasing
 inArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
-inArgVar2 arg@(ArgVar var ty flow _ _)
-    | flow == FlowIn && not (phantomArg arg) = do
+inArgVar2 arg@(ArgVar var ty flow _ final)
+    | flow == FlowIn && not (phantomArg arg) && not final = do
         rep <- lookupTypeRepresentation ty
         case rep of
             Just "pointer" ->
                 return (Just var)
             _ ->
                 return Nothing
-inArgVar2 var = return Nothing
+inArgVar2 _ = return Nothing
 
-
+-- Used in AliasAnalysis - only care about pointers that might aliasing an input
 outArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
 outArgVar2 arg@(ArgVar var _ flow _ _)
     | flow == FlowOut && not (phantomArg arg) = return (Just var)

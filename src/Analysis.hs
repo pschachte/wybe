@@ -7,8 +7,6 @@
 module Analysis (analyseMod) where
 
 import           AliasAnalysis
-import           Control.Monad.Trans
-import           Control.Monad.Trans.State
 import           AST
 import           Control.Monad
 import           Data.Graph
@@ -20,13 +18,11 @@ import           Util
 
 analyseMod :: [SCC ProcSpec] -> Compiler ()
 analyseMod orderedScc = do
-  mapM_ aliasSccBottomUp orderedScc
-  mapM_ freshnessSccBottomUp orderedScc
+    mapM_ aliasSccBottomUp orderedScc
+    mapM_ freshnessSccBottomUp orderedScc
 
 
-
-
-  ----------------------------------------------------------------
+----------------------------------------------------------------
 --                     Freshness Analysis
 ----------------------------------------------------------------
 freshnessSccBottomUp :: SCC ProcSpec -> Compiler ()

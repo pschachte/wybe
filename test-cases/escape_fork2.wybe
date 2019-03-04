@@ -16,4 +16,4 @@ end
 #if key(t1, ?k) :: ?k = 800
 #end
 !printTree(t1)
-#!printTree(t)
+!printTree(t)
