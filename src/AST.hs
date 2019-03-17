@@ -1824,7 +1824,7 @@ primProtoParamNames proto =
     let formalParams = primProtoParams proto
     in [primParamName primParam | primParam <- formalParams]
 
--- |Get proto param names in a list
+-- |Get names of proto param that are not phantom in a list
 protoNonePhantomParams :: PrimProto -> [PrimVarName]
 protoNonePhantomParams proto =
     let primParams = primProtoParams proto
@@ -1947,11 +1947,12 @@ inArgVar (ArgVar var _ flow _ _) | flow == FlowIn = var
 inArgVar _ = shouldnt "inArgVar of input argument"
 
 
--- Used in AliasAnalysis - only care about pointers & not in final use
--- so that might incur aliasing
+-- Used in AliasAnalysis - only care about non phantom pointers that might incur
+-- aliasing
 inArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
 inArgVar2 arg@(ArgVar var ty flow _ final)
-    | flow == FlowIn && not (phantomArg arg) && not final = do
+    -- | flow == FlowIn && not (phantomArg arg) && not final = do
+    | flow == FlowIn && not (phantomArg arg) = do
         rep <- lookupTypeRepresentation ty
         case rep of
             Just "pointer" ->

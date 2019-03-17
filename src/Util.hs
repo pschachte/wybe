@@ -100,8 +100,7 @@ data UFInfo a = UFInfo {
 
 
 instance Show a => Show (UFInfo a) where
-    show (UFInfo root weight) =
-        "(Root:" ++ show root ++ ",Weight:" ++ show weight ++ ")"
+    show (UFInfo root _) = show root
 
 
 initUnionFind :: UnionFind a
@@ -130,7 +129,10 @@ uniteUf :: Ord a => UnionFind a -> a -> a -> UnionFind a
 uniteUf uf p q =
     case (infoP, infoQ) of
         (Just ip, Just iq) ->
-            updateUf p q ip iq uf
+            -- if root is the same between two existing UFInfo then no need to
+            -- update anything
+            if root ip == root iq then uf
+            else updateUf p q ip iq uf
         (Just ip, _) ->
             -- Insert q to the map
             let iq = ufInfo q
@@ -151,8 +153,6 @@ uniteUf uf p q =
     where
         infoP = Map.lookup p uf
         infoQ = Map.lookup q uf
-        ufInfo :: a -> UFInfo a
-        ufInfo i = UFInfo i 1
         updateUf :: Ord a => a -> a -> UFInfo a -> UFInfo a -> UnionFind a
                                 -> UnionFind a
         updateUf p q ip iq currMap =
@@ -180,6 +180,9 @@ uniteUf uf p q =
                         in Map.insert rp rootP' currMap'
                 (_,_) -> currMap
 
+-- Set default UFInfo that with root to itself and weight to 1
+ufInfo :: a -> UFInfo a
+ufInfo i = UFInfo i 1
 
 -- Convert UnionFind map by mapping value with type 'a' to another value
 convertUf :: (Ord a) => Map.Map a a -> a -> UFInfo a -> UnionFind a
@@ -199,12 +202,17 @@ convertUf mp k info uf =
 -- Combine two UnionFind
 combineUf :: Ord a => UnionFind a -> UnionFind a -> UnionFind a
 combineUf fromUf toUf =
-    Map.foldrWithKey (\k info ufY ->
-                        if k == root info then ufY
-                        else uniteUf ufY k (root info)
+    Map.foldrWithKey (\k info currUf ->
+                        if k == root info then currUf
+                        else uniteUf currUf k (root info)
                         ) toUf fromUf
 
 
 -- Filter out UnionFind where key is not in the given list
 filterUf :: (Ord a) => [a] -> a -> UFInfo a -> UnionFind a -> UnionFind a
 filterUf ls k info uf = if k `elem` ls then Map.insert k info uf else uf
+
+
+-- -- Reset key and value in UnionFind to default (so it's not connected to anyone)
+-- resetUf :: (Ord a) => UnionFind a -> a -> UnionFind a
+-- resetUf uf k = Map.insert k (ufInfo k) uf
