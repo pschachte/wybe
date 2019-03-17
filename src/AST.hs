@@ -1378,6 +1378,12 @@ data ProcImpln
 -- | Use UnionFind method to record the alias information
 type AliasMap = UnionFind PrimVarName
 
+-- | a synonym function to hide the impletation of how unionfind is printed
+showAliasMap :: AliasMap -> String
+showAliasMap = showUnionFind
+
+-- | Original implementation of alias pairs using Int
+-- TODO: to be deleted
 type AliasPair = (Int,Int)
 
 -- | Stores whatever analysis results we infer about a proc definition.
@@ -1398,8 +1404,9 @@ instance Show ProcImpln where
 
 instance Show ProcAnalysis where
     show (ProcAnalysis procArgAliases procArgAliasMap) =
-        " Alias Pairs: " ++ show procArgAliases ++ "\n" ++
-        " Alias Map: " ++ show procArgAliasMap ++ "\n"
+        "\nAlias Int Pairs: " ++ show procArgAliases ++ "\n"
+        ++ "Alias Arg Pairs: " ++ showAliasMap procArgAliasMap ++ "\n"
+        ++ "Alias Map: " ++ show procArgAliasMap ++ "\n"
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
 -- possibly containg some guards.  Each guard is a test that succeeds

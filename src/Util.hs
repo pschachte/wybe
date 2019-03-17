@@ -9,12 +9,15 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Util (sameLength, maybeNth, checkMaybe, setMapInsert,
-             fillLines, nop, sccElts, reverseE,
-             UnionFind, UFInfo, initUnionFind, newUfItem, addUfItem,
-             connectedUf, uniteUf, convertUf, combineUf, filterUf) where
+             fillLines, nop, sccElts,
+             UnionFind, UFInfo, showUnionFind, initUnionFind,
+             newUfItem, addUfItem,
+             connectedUf, uniteUf, convertUf, combineUf, filterUf,
+             removeDupTuples, pruneTuples, transitiveTuples, cartProd) where
 
 
 import           Data.Graph
+import           Data.List    as List
 import           Data.Map     as Map
 import           Data.Set     as Set
 import           GHC.Generics (Generic)
@@ -83,14 +86,71 @@ sccElts (AcyclicSCC single) = [single]
 sccElts (CyclicSCC multi)   = multi
 
 
+----------------------------------------------------------------
+--
+-- Helpers used in AliasAnalysis & UnionFind
+--
+----------------------------------------------------------------
+
 -- King, D.J. and Launchbury, J., 1994, March. Lazy depth-first search and
 -- linear graph algorithms in haskell. In Glasgow Workshop on Functional
 -- Programming (pp. 145-155).
-reverseE :: Graph -> [Edge]
-reverseE g = [ (w,v) | (v,w) <- edges g]
+_reverseE :: Graph -> [Edge]
+_reverseE g = [ (w,v) | (v,w) <- edges g]
+
+-- Helper: normalise alias pairs in order
+_normaliseTuple :: Ord a => (a,a) -> (a,a)
+_normaliseTuple t@(x,y)
+    | y < x    = (y,x)
+    | otherwise = t
+
+-- Helper: then remove duplicated alias pairs
+removeDupTuples :: Ord a => [(a,a)] -> [(a,a)]
+removeDupTuples =
+    List.map List.head . List.group . List.sort . List.map _normaliseTuple
+
+-- Helper: prune list of tuples with int larger than the range
+pruneTuples :: Ord a => [(a,a)] -> a -> [(a,a)]
+pruneTuples tuples upperBound =
+    List.foldr (\(t1, t2) tps ->
+                if t1 < upperBound && t2 < upperBound then (t1, t2):tps
+                else tps) [] tuples
 
 
--- Union Find implemented by Map
+-- Helper: to expand alias pairs
+-- e.g. Aliases [(1,2),(2,3),(3,4)] is expanded to
+-- [(1,2),(1,3),(1,4),(2,3),(2,4),(3,4)]
+-- items in pairs are sorted already
+transitiveTuples :: [(Int,Int)] -> [(Int,Int)]
+transitiveTuples [] = []
+transitiveTuples pairs =
+    let loBound = List.foldr (\(p1,p2) bound ->
+            if p1 < bound then p1
+            else bound) 0 pairs
+        upBound = List.foldr (\(p1,p2) bound ->
+            if p2 > bound then p2
+            else bound) 0 pairs
+        adj = buildG (loBound, upBound) pairs
+        undirectedAdj = buildG (loBound, upBound) (edges adj ++ _reverseE adj)
+        elements = vertices undirectedAdj
+    in List.foldr (\vertex tuples ->
+        let reaches = reachable undirectedAdj vertex
+            vertexPairs = [(vertex, r) | r <- reaches, r /= vertex]
+        in vertexPairs ++ tuples
+        ) [] elements
+
+
+-- Helper: Cartesian product of escaped FlowIn vars to proc output
+cartProd :: [a] -> [a] -> [(a, a)]
+cartProd ins outs = [(i, o) | i <- ins, o <- outs]
+
+
+----------------------------------------------------------------
+--
+-- UnionFind implementation by Map
+--
+----------------------------------------------------------------
+
 type UnionFind a = Map.Map a (UFInfo a)
 
 data UFInfo a = UFInfo {
@@ -98,9 +158,40 @@ data UFInfo a = UFInfo {
     weight :: Int
     } deriving (Eq, Generic)
 
-
 instance Show a => Show (UFInfo a) where
     show (UFInfo root _) = show root
+
+
+-- Print UnionFind as transitive (key, root) tuples
+showUnionFind :: (Ord a, Show a) => UnionFind a -> String
+showUnionFind unionFind =
+    let f k info (aPairs, set) =
+            let r = root info
+                set' = Set.insert k set
+            in if k == r then (aPairs, set')
+                else ((k, r): aPairs, Set.insert r set')
+        (aPairs, distinctA) = foldrWithKey f ([], Set.empty) unionFind
+        (aToIdx, cumu, idxToA) =
+            Set.foldr (\dis (map, cumulator, ls) ->
+                if not $ Map.member dis map
+                then (Map.insert dis cumulator map, cumulator + 1, ls ++ [dis])
+                else (map, cumulator, ls)
+                ) (Map.empty, 0, []) distinctA
+        idxPairs =
+            List.foldr (\(k, r) ls ->
+                let kIdx = Map.lookup k aToIdx
+                    rIdx = Map.lookup r aToIdx
+                in case (kIdx, rIdx) of
+                    (Just kid, Just rid) -> (kid, rid) : ls
+                    _                    -> ls
+                ) [] aPairs
+        transIdxPairs =
+            removeDupTuples $ transitiveTuples $ removeDupTuples idxPairs
+        transIdxAPairs =
+            List.foldr (\(idx1, idx2) ls ->
+                (idxToA !! idx1, idxToA !! idx2) : ls
+                ) [] transIdxPairs
+    in show $ removeDupTuples transIdxAPairs
 
 
 initUnionFind :: UnionFind a

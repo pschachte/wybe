@@ -29,53 +29,6 @@ aliasProcBottomUp pspec = do
     return ()
 
 
--- Helper: normalise alias pairs in order
-normalise :: Ord a => (a,a) -> (a,a)
-normalise t@(x,y)
-    | y < x    = (y,x)
-    | otherwise = t
-
--- Helper: then remove duplicated alias pairs
-removeDupTuples :: Ord a => [(a,a)] -> [(a,a)]
-removeDupTuples =
-    List.map List.head . List.group . List.sort . List.map normalise
-
--- Helper: prune list of tuples with int larger than the range
-pruneTuples :: Ord a => [(a,a)] -> a -> [(a,a)]
-pruneTuples tuples upperBound =
-    List.foldr (\(t1, t2) tps ->
-                if t1 < upperBound && t2 < upperBound then (t1, t2):tps
-                else tps) [] tuples
-
-
--- Helper: to expand alias pairs
--- e.g. Aliases [(1,2),(2,3),(3,4)] is expanded to
--- [(1,2),(1,3),(1,4),(2,3),(2,4),(3,4)]
--- items in pairs are sorted already
-transitiveTuples :: [(Int,Int)] -> [(Int,Int)]
-transitiveTuples [] = []
-transitiveTuples pairs =
-    let loBound = List.foldr (\(p1,p2) bound ->
-                                if p1 < bound then p1
-                                else bound) 0 pairs
-        upBound = List.foldr (\(p1,p2) bound ->
-                    if p2 > bound then p2
-                    else bound) 0 pairs
-        adj = buildG (loBound, upBound) pairs
-        undirectedAdj = buildG (loBound, upBound) (edges adj ++ reverseE adj)
-        elements = vertices undirectedAdj
-    in List.foldr (\vertex tuples ->
-        let reaches = reachable undirectedAdj vertex
-            vertexPairs = [(vertex, r) | r <- reaches, r /= vertex]
-        in vertexPairs ++ tuples
-        ) [] elements
-
-
--- Helper: Cartesian product of escaped FlowIn vars to proc output
-_cartProd :: [a] -> [a] -> [(a, a)]
-_cartProd ins outs = [(i, o) | i <- ins, o <- outs]
-
-
 -- Check any argument become stale after this proc call if this
 -- proc is not inlined
 checkEscapeDef :: ProcSpec -> ProcDef -> Compiler ProcDef
@@ -136,8 +89,8 @@ checkEscapePrims caller body callerAlias = do
                 return (bodyAliasedVars', pairs')
                 ) (paramNames, []) prims
     logAlias $ "    ^^^ Aliased vars by prims: " ++ show bodyAliases
-    let aliasPairs' = removeDupTuples $ transitiveTuples
-                        $ removeDupTuples aliasPairs
+    let aliasPairs' =
+            removeDupTuples $ transitiveTuples $ removeDupTuples aliasPairs
     let aliasSimplePrims = pruneTuples aliasPairs' (List.length paramNames)
 
     -- Second pass (handle alias pairs incurred by proc calls within
@@ -262,7 +215,7 @@ aliasPairsFromArgs bodyAliases args pairs = do
     escapedVia <- foldM (argsOfProcProto outArgVar2) [] outputArgs
     let (bodyAliases1, inIndices) = _mapVarNameIdx bodyAliases escapedInputs
         (bodyAliases2, outIndices) = _mapVarNameIdx bodyAliases1 escapedVia
-    return (bodyAliases2, _cartProd inIndices outIndices ++ pairs)
+    return (bodyAliases2, cartProd inIndices outIndices ++ pairs)
 
 
 -- Check Arg aliases in one of the prims of a ProcBody
@@ -274,7 +227,7 @@ aliasedArgsByPrim aliasMap args = do
     let outputArgs = List.filter (argVarIsFlowDirection FlowOut) args
     escapedInputs <- foldM (argsOfProcProto inArgVar2) [] inputArgs
     escapedVia <- foldM (argsOfProcProto outArgVar2) [] outputArgs
-    let aliases = _cartProd escapedInputs escapedVia
+    let aliases = cartProd escapedInputs escapedVia
     let aliasMap' = List.foldr (\(inArg, outArg) aMap ->
                         uniteUf aMap inArg outArg) aliasMap aliases
     return aliasMap'
