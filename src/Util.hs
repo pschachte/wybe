@@ -11,8 +11,8 @@
 module Util (sameLength, maybeNth, checkMaybe, setMapInsert,
              fillLines, nop, sccElts,
              UnionFind, UFInfo, showUnionFind, initUnionFind,
-             newUfItem, addUfItem,
-             connectedUf, uniteUf, convertUf, combineUf, filterUf,
+             newUfItem, addUfItem, connectedUf, uniteUf, convertUfKey,
+             combineUf, filterUfByKey, convertUfRoot,
              removeDupTuples, pruneTuples, transitiveTuples, cartProd) where
 
 
@@ -151,7 +151,7 @@ cartProd ins outs = [(i, o) | i <- ins, o <- outs]
 --
 ----------------------------------------------------------------
 
-type UnionFind a = Map.Map a (UFInfo a)
+type UnionFind a = Map a (UFInfo a)
 
 data UFInfo a = UFInfo {
     root   :: a,
@@ -275,10 +275,10 @@ uniteUf uf p q =
 ufInfo :: a -> UFInfo a
 ufInfo i = UFInfo i 1
 
--- Convert UnionFind map by mapping value with type 'a' to another value
-convertUf :: (Ord a) => Map.Map a a -> a -> UFInfo a -> UnionFind a
+-- Convert UnionFind map by mapping key with type 'a' to another value
+convertUfKey :: (Ord a) => Map a a -> a -> UFInfo a -> UnionFind a
                         -> UnionFind a
-convertUf mp k info uf =
+convertUfKey mp k info uf =
     case Map.lookup k mp of
         Just y ->
             let rootX = root info
@@ -300,10 +300,36 @@ combineUf fromUf toUf =
 
 
 -- Filter out UnionFind where key is not in the given list
-filterUf :: (Ord a) => [a] -> a -> UFInfo a -> UnionFind a -> UnionFind a
-filterUf ls k info uf = if k `elem` ls then Map.insert k info uf else uf
+filterUfByKey :: (Ord a) => [a] -> a -> UFInfo a -> UnionFind a -> UnionFind a
+filterUfByKey ls k info uf = if k `elem` ls then Map.insert k info uf else uf
 
 
 -- -- Reset key and value in UnionFind to default (so it's not connected to anyone)
 -- resetUf :: (Ord a) => UnionFind a -> a -> UnionFind a
 -- resetUf uf k = Map.insert k (ufInfo k) uf
+
+
+-- convert UnionFind to a new UnionFind so if the any root exists in the ls its
+--     children would all be moved to a newRoot; the newRoot is the first
+--     occurrance of k whose root is in ls
+-- rootMap: map oldRoot to newRoot
+convertUfRoot :: (Ord a) => Set a -> a -> UFInfo a -> (UnionFind a, Map a a)
+                        -> (UnionFind a, Map a a)
+convertUfRoot aSet k info (uf, rootMap) =
+    if Set.member (root info) aSet then
+        -- root needs to be modified
+        if Map.member (root info) rootMap then
+            -- can find mapping to newRoot
+            let newRoot = Map.lookup (root info) rootMap
+            in case newRoot of
+                Just nr ->
+                    let newInfo = info{ root = nr }
+                    in (Map.insert k newInfo uf, rootMap)
+                _ -> (uf, rootMap)
+        else
+            let newRoot = k
+                rootMap' = Map.insert (root info) newRoot rootMap
+                newInfo = info{ root = newRoot }
+                uf' = Map.insert k newInfo uf
+            in (uf', rootMap')
+    else (Map.insert k info uf, rootMap)
