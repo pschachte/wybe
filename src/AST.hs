@@ -1825,7 +1825,6 @@ phantomType TypeSpec{typeName="phantom"} = True
 phantomType _ = False
 
 -- |Get proto param names in a list
--- TODO: maybe delete this
 primProtoParamNames :: PrimProto -> [PrimVarName]
 primProtoParamNames proto =
     let formalParams = primProtoParams proto

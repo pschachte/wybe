@@ -38,34 +38,42 @@ checkEscapeDef spec def
         logAlias $ "\n>>> Alias analysis (Bottom-up): " ++ show spec
         logAlias $ show caller
 
-        -- Analysis of current caller's prims
+        -- (1) Analysis of current caller's prims
         alias1 <- checkEscapePrims caller body []
         (bodyPrimsAliases, finalSet1) <-
             aliasedByPrims caller body (initUnionFind, Set.empty)
 
-        -- Analysis of caller's bodyFork
+        -- (2) Analysis of caller's bodyFork
         alias2 <- checkEscapeFork caller body alias1
         (bodyForkAliases, finalSet2) <-
             aliasedByFork caller body (bodyPrimsAliases, finalSet1)
 
-        -- Clean up summary of aliases by removing phantom params
+        -- (3) Clean up summary of aliases by removing phantom params
         let nonePhantomParams = protoNonePhantomParams caller
         let bodyForkAliases' = Map.foldrWithKey (filterUfByKey nonePhantomParams)
                                         initUnionFind bodyForkAliases
-        let (totalAliases, _) = Map.foldrWithKey (convertUfRoot finalSet2)
+        -- finalSet3 contains all args in final use in this caller excluding
+        -- formal parameters
+        let finalSet3 = Set.difference finalSet2
+                            $ Set.fromList $ primProtoParamNames caller
+        -- Cleanup root that is final
+        let (totalAliases, rootMap) = Map.foldrWithKey (convertUfRoot finalSet3)
                                 (initUnionFind, Map.empty) bodyForkAliases'
+        -- In case key is in final use, so cleanup again
+        let (totalAliases', _) = Map.foldrWithKey (convertUfKey finalSet3)
+                                (initUnionFind, rootMap) totalAliases
 
-        -- Update proc analysis with new aliasPairs
+        -- (4) Update proc analysis with new aliasPairs
         let analysis' = analysis {
                             procArgAliases = alias2,
-                            procArgAliasMap = totalAliases
+                            procArgAliasMap = totalAliases'
                         }
         logAlias $ ">>>  aliases: " ++ show alias2
         logAlias $ ">>>  analyse prims: " ++ show bodyPrimsAliases
         logAlias $ ">>>  and analyse forking: " ++ show bodyForkAliases
         logAlias $ ">>>  (pruned)': " ++ show bodyForkAliases'
-        logAlias $ ">>>  finalset: " ++ show finalSet2
-        logAlias $ ">>>  (final args removed)': " ++ show totalAliases
+        logAlias $ ">>>  finalSet: " ++ show finalSet3
+        logAlias $ ">>>  (final args removed)': " ++ show totalAliases'
 
         return def { procImpln = ProcDefPrim caller body analysis'}
 
@@ -95,7 +103,7 @@ aliasedByPrim (aliasMap, finalSet) prim =
     case content prim of
         PrimCall spec args -> do
             calleeDef <- getProcDef spec
-            let (ProcDefPrim calleeProto body analysis) = procImpln calleeDef
+            let (ProcDefPrim calleeProto _ analysis) = procImpln calleeDef
             let calleeParamAliases = procArgAliasMap analysis
             logAlias $ "\n    --- call " ++ show spec ++" (callee): "
             logAlias $ "    " ++ show calleeProto
@@ -105,16 +113,14 @@ aliasedByPrim (aliasMap, finalSet) prim =
             let paramArgMap = mapParamToArgVar calleeProto args
 
             -- calleeArgsAliasMap is the alias map of actual arguments
-            let calleeArgsAliases = Map.foldrWithKey (convertUfKey paramArgMap)
+            let calleeArgsAliases = Map.foldrWithKey (filterUfKey paramArgMap)
                                             initUnionFind calleeParamAliases
             let combinedAliases = combineUf calleeArgsAliases aliasMap
             return (combinedAliases, _finalArgs args finalSet)
         _ -> do
-            logAlias "\n    --- none-primcall:"
             logAlias $ "    " ++ show prim
-            -- return aliasMap
             escapablePrimArgs (content prim) >>=
-                aliasedArgsByPrim (aliasMap, finalSet)
+                aliasedArgsInPrim (aliasMap, finalSet)
 
 
 -- Recursively analyse forked body's prims
@@ -163,10 +169,10 @@ argsOfProcProto varNameGetter escapedVars arg = do
 
 -- Check Arg aliases in one of the prims of a ProcBody
 -- args: argument in current prim that being analysed
-aliasedArgsByPrim :: (AliasMap, Set PrimVarName) -> [PrimArg]
+aliasedArgsInPrim :: (AliasMap, Set PrimVarName) -> [PrimArg]
                         -> Compiler (AliasMap, Set PrimVarName)
-aliasedArgsByPrim (aliasMap, finalSet) [] = return (aliasMap, finalSet)
-aliasedArgsByPrim (aliasMap, finalSet) args = do
+aliasedArgsInPrim (aliasMap, finalSet) [] = return (aliasMap, finalSet)
+aliasedArgsInPrim (aliasMap, finalSet) args = do
     let inputArgs = List.filter (argVarIsFlowDirection FlowIn) args
     let outputArgs = List.filter (argVarIsFlowDirection FlowOut) args
     escapedInputs <- foldM (argsOfProcProto inArgVar2) [] inputArgs

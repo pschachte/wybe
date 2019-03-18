@@ -11,8 +11,8 @@
 module Util (sameLength, maybeNth, checkMaybe, setMapInsert,
              fillLines, nop, sccElts,
              UnionFind, UFInfo, showUnionFind, initUnionFind,
-             newUfItem, addUfItem, connectedUf, uniteUf, convertUfKey,
-             combineUf, filterUfByKey, convertUfRoot,
+             newUfItem, addUfItem, connectedUf, uniteUf, filterUfKey,
+             combineUf, filterUfByKey, convertUfRoot, convertUfKey,
              removeDupTuples, pruneTuples, transitiveTuples, cartProd) where
 
 
@@ -276,9 +276,9 @@ ufInfo :: a -> UFInfo a
 ufInfo i = UFInfo i 1
 
 -- Convert UnionFind map by mapping key with type 'a' to another value
-convertUfKey :: (Ord a) => Map a a -> a -> UFInfo a -> UnionFind a
+filterUfKey :: (Ord a) => Map a a -> a -> UFInfo a -> UnionFind a
                         -> UnionFind a
-convertUfKey mp k info uf =
+filterUfKey mp k info uf =
     case Map.lookup k mp of
         Just y ->
             let rootX = root info
@@ -325,11 +325,24 @@ convertUfRoot aSet k info (uf, rootMap) =
                 Just nr ->
                     let newInfo = info{ root = nr }
                     in (Map.insert k newInfo uf, rootMap)
-                _ -> (uf, rootMap)
+                _ -> (Map.insert k info uf, rootMap)
         else
+            -- cannot find mapping to newRoot
             let newRoot = k
                 rootMap' = Map.insert (root info) newRoot rootMap
                 newInfo = info{ root = newRoot }
                 uf' = Map.insert k newInfo uf
             in (uf', rootMap')
+    else (Map.insert k info uf, rootMap)
+
+-- Similar to above - but converting key instead
+convertUfKey :: (Ord a) => Set a -> a -> UFInfo a -> (UnionFind a, Map a a)
+                        -> (UnionFind a, Map a a)
+convertUfKey aSet k info (uf, rootMap) =
+    if Set.member k aSet && Map.member k rootMap then
+        -- can find mapping to newKey
+        let newKey = Map.lookup k rootMap
+        in case newKey of
+            Just nk -> (Map.insert nk info uf, rootMap)
+            _ -> (Map.insert k info uf, rootMap)
     else (Map.insert k info uf, rootMap)
