@@ -11,8 +11,8 @@
 module Util (sameLength, maybeNth, checkMaybe, setMapInsert,
              fillLines, nop, sccElts,
              UnionFind, UFInfo, showUnionFind, initUnionFind,
-             newUfItem, addUfItem, connectedUf, uniteUf, filterUfKey,
-             combineUf, filterUfByKey, convertUfRoot, convertUfKey,
+             newUfItem, addUfItem, uniteUf, convertUfVal,
+             combineUf, convertUfRoot, convertUfKey, connectedToOthers,
              removeDupTuples, pruneTuples, transitiveTuples, cartProd) where
 
 
@@ -207,13 +207,14 @@ addUfItem :: Ord a => a -> UFInfo a -> UnionFind a -> UnionFind a
 addUfItem = Map.insert
 
 
-connectedUf :: Ord a => UnionFind a -> a -> a -> Bool
-connectedUf uf p q =
-    let infoP = Map.lookup p uf
-        infoQ = Map.lookup q uf
-    in case (infoP, infoQ) of
-        (Just ip, Just iq) -> root ip == root iq
-        (_, _)             -> False
+-- -- Check if two item is connected
+-- connectedUf :: Ord a => UnionFind a -> a -> a -> Bool
+-- connectedUf uf p q =
+--     let infoP = Map.lookup p uf
+--         infoQ = Map.lookup q uf
+--     in case (infoP, infoQ) of
+--         (Just ip, Just iq) -> root ip == root iq
+--         (_, _)             -> False
 
 
 uniteUf :: Ord a => UnionFind a -> a -> a -> UnionFind a
@@ -276,9 +277,9 @@ ufInfo :: a -> UFInfo a
 ufInfo i = UFInfo i 1
 
 -- Convert UnionFind map by mapping key with type 'a' to another value
-filterUfKey :: (Ord a) => Map a a -> a -> UFInfo a -> UnionFind a
+convertUfVal :: (Ord a) => Map a a -> a -> UFInfo a -> UnionFind a
                         -> UnionFind a
-filterUfKey mp k info uf =
+convertUfVal mp k info uf =
     case Map.lookup k mp of
         Just y ->
             let rootX = root info
@@ -299,19 +300,14 @@ combineUf fromUf toUf =
                         ) toUf fromUf
 
 
--- Filter out UnionFind where key is not in the given list
-filterUfByKey :: (Ord a) => [a] -> a -> UFInfo a -> UnionFind a -> UnionFind a
-filterUfByKey ls k info uf = if k `elem` ls then Map.insert k info uf else uf
-
-
 -- -- Reset key and value in UnionFind to default (so it's not connected to anyone)
 -- resetUf :: (Ord a) => UnionFind a -> a -> UnionFind a
 -- resetUf uf k = Map.insert k (ufInfo k) uf
 
 
--- convert UnionFind to a new UnionFind so if the any root exists in the ls its
---     children would all be moved to a newRoot; the newRoot is the first
---     occurrance of k whose root is in ls
+-- convert UnionFind to a new UnionFind so if any root exists in the aSet then
+--     its children would be moved to a newRoot; the newRoot is the first
+--     occurrance of k whose root is in the aSet
 -- rootMap: map oldRoot to newRoot
 convertUfRoot :: (Ord a) => Set a -> a -> UFInfo a -> (UnionFind a, Map a a)
                         -> (UnionFind a, Map a a)
@@ -346,3 +342,12 @@ convertUfKey aSet k info (uf, rootMap) =
             Just nk -> (Map.insert nk info uf, rootMap)
             _ -> (Map.insert k info uf, rootMap)
     else (Map.insert k info uf, rootMap)
+
+
+-- Check if item is connected to anyone else except itself
+connectedToOthers :: (Eq a, Ord a) => UnionFind a -> a -> Bool
+connectedToOthers uf val =
+    let ufList = Map.toList uf
+        ufList' = [(k, root info) | (k, info) <- ufList,
+                    k /= root info, k == val || root info == val]
+    in not (List.null ufList')

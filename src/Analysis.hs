@@ -19,11 +19,12 @@ import           Util
 analyseMod :: [SCC ProcSpec] -> Compiler ()
 analyseMod orderedScc = do
     mapM_ aliasSccBottomUp orderedScc
-    mapM_ freshnessSccBottomUp orderedScc
+    -- mapM_ freshnessSccBottomUp orderedScc
 
 
 ----------------------------------------------------------------
 --                     Freshness Analysis
+-- TODO: to be deleted
 ----------------------------------------------------------------
 freshnessSccBottomUp :: SCC ProcSpec -> Compiler ()
 freshnessSccBottomUp procs = mapM_ freshnessProcBottomUp $ sccElts procs
