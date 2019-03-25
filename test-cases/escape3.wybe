@@ -1,7 +1,7 @@
 # shouldn't alias to the data structure if all
 # properties of a data structure are mutated in the proc
 
-use data_structure.position
+use position
 
 public proc replicate1(p1:position, ?p2:position) use !io
   ?pp = position(0,0)

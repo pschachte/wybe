@@ -1,4 +1,4 @@
-use data_structure.position
+use position
 
 # cannot say whether p1 is fresh or not because it's passed in from outside
 # p2 is fresh in this proc

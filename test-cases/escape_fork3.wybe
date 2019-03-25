@@ -3,7 +3,7 @@
 # Recursive data type:
 # access part of the data structure
 
-use data_structure.mytree
+use mytree
 
 public func simpleSlice(tr:tree):tree =
   if tr = node(?l, ?k, ?r) then l

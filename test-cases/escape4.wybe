@@ -1,7 +1,7 @@
 # aliasing part (the part is primitive values) of a data structures
 # p1's int value copied to p2, so p1 and p2 not aliased
 
-use data_structure.position
+use position
 
 public proc replicate1(p1:position, ?p2:position) use !io
   ?pp = position(0,0)

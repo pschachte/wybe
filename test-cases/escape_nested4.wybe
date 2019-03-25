@@ -1,6 +1,6 @@
 # partial data structures aliasing in nested proc calls
 
-use data_structure.position
+use position
 
 public proc replicate1(pa:position, ?pb:position, ?pc:position) use !io
     ?pb = pa
@@ -45,9 +45,9 @@ end
 
 # pb and pc is aliased
 !print("????? ")
-!replicate21(?p4, ?p5)
+!replicate21(?p4)
 !println(p4.x)
-!println(p5.x)
+#!println(p5.x)
 !replicate22(?p6, ?p7)
 !println(p6.x)
 !println(p7.x)

@@ -1,6 +1,6 @@
 # aliasing data structures then modify input
 
-use data_structure.position
+use position
 
 public proc replicate1(pa:position, ?pb:position) use !io
     ?pb = pa

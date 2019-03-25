@@ -1,6 +1,6 @@
 # transitive aliasing data structures in nested proc calls
 
-use data_structure.position
+use position
 
 public proc replicate2(p1:position, ?p2:position) use !io
   ?pp = position(0,0)
