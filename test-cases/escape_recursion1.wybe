@@ -1,6 +1,6 @@
 # passing data structures in recursive call
 
-use position
+use data_structure.position
 
 public proc if_test(a:position, b:position, ?r:position)
     if a.x > 0 ::

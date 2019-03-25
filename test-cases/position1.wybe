@@ -1,4 +1,4 @@
-public type position = public position(x:int, y:int) end
+use data_structure.position
 
 # posB is redundant - space not allocated
 ?posA = position(111, 222)

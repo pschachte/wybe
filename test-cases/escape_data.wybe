@@ -1,4 +1,4 @@
-use student
+use data_structure.student
 
 public proc backup(student1:student, ?student2:student) use !io
   ?student2 = student1

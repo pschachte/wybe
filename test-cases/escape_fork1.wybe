@@ -1,7 +1,7 @@
 # Recursive data type:
 # the entire data structure tl and tr escape
 
-use mytree
+use data_structure.mytree
 
 public func simpleMerge(tl:tree, tr:tree):tree =
   if tl = node(?l1, ?k1, ?r1) then

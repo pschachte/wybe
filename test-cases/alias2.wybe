@@ -1,4 +1,4 @@
-public type position = public position(x:int, y:int) end
+use data_structure.position
 
 # cannot say whether p1 is fresh or not because it's passed in from outside
 # p2 is fresh in this proc

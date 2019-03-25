@@ -1,6 +1,7 @@
 # aliasing data structure in a proc
 
-use position
+use data_structure.position
+
 public proc replicate(p1:position, ?p2:position) use !io
   ?pp = position(0,0)
   !print("random print")

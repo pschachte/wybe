@@ -1,4 +1,4 @@
-public type position = public position(x:int, y:int) end
+use data_structure.position
 
 # posB reference posA's y field
 ?posA = position(111, 222)

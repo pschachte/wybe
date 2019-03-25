@@ -1,0 +1,42 @@
+# transitive aliasing data structures in nested proc calls
+
+use data_structure.position
+
+public proc replicate2(p1:position, ?p2:position) use !io
+  ?pp = position(0,0)
+  !print("random replicate2 ")
+  !println(pp.x)
+  ?p2 = p1
+end
+
+# Expected Alias Pairs: [(0,1),(0,2),(1,2)]???
+public proc replicate1(p1:position, ?p2:position, ?p3:position) use !io
+  !replicate2(p1, ?p2)
+  !replicate2(p2, ?p3)
+  x(!p2, 22)
+  !print("expect p2 is 22? ")
+  !println(p2.x)
+  !print("expect p1 is 10? ")
+  !println(p1.x)
+  !print("expect p3 is 10? ")
+  !println(p3.x)
+end
+
+?p1 = position(10,10)
+!replicate1(p1, ?p2, ?p3)
+
+!println("=======")
+
+x(!p1, 11)
+!print("expect p1 is 11? ")
+!println(p1.x)
+
+x(!p2, 22)
+!print("expect p2 is 22? ")
+!println(p2.x)
+
+
+!print("expect p3 is still 10? ")
+!println(p3.x)
+
+

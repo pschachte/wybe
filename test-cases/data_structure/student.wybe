@@ -2,11 +2,11 @@ public type course = public course(code:int, name:string) end
 public type student = public student(id:int, major:course) end
 
 public proc printStudent(stu:student) use !io
-  print("student id: ")
-  println(stu.id)
+  !print("student id: ")
+  !println(stu.id)
   ?cour = stu.course
-  print("course code: ")
-  println(cour.code)
-  print("course name: ")
-  println(cour.name)
+  !print("course code: ")
+  !println(cour.code)
+  !print("course name: ")
+  !println(cour.name)
 end

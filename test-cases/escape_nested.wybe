@@ -1,6 +1,7 @@
-# aliasing data structures in nested proc calls
+# transitive aliasing data structures in nested proc calls
 
-use position
+use data_structure.position
+
 public proc replicate2(p1:position, ?p2:position) use !io
   ?pp = position(0,0)
   !print("random replicate2 ")
