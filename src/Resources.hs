@@ -7,24 +7,24 @@
 module Resources (resourceCheckMod, canonicaliseProcResources,
                   resourceCheckProc) where
 
-import AST
-import Options (LogSelection(Resources))
-import Util
-import Snippets
-import Data.Map as Map
-import Data.Set as Set
-import Data.List as List
-import Control.Monad.Trans.State
-import Control.Monad.Trans
-import Control.Monad
-import Data.Maybe
-import Data.Graph
+import           AST
+import           Control.Monad
+import           Control.Monad.Trans
+import           Control.Monad.Trans.State
+import           Data.Graph
+import           Data.List                 as List
+import           Data.Map                  as Map
+import           Data.Maybe
+import           Data.Set                  as Set
+import           Options                   (LogSelection (Resources))
+import           Snippets
+import           Util
 
-import Debug.Trace
+import           Debug.Trace
 
 -- |Check a module's resource declarations.
 resourceCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
-resourceCheckMod modSCC thisMod = do
+resourceCheckMod _ thisMod = do
     logResources $ "**** resource checking module " ++ showModSpec thisMod
     reenterModule thisMod
     resources <- getModuleImplementationField (Map.toAscList . modResources)
@@ -117,7 +117,7 @@ canonicaliseResourceFlow pos spec = do
     return $ spec { resourceFlowRes = res'}
 
 
--- |Get a list of all the SimpleResources, and their types, referred 
+-- |Get a list of all the SimpleResources, and their types, referred
 -- to by a ResourceFlowSpec.  This is necessary because a resource spec
 -- may refer to a compound resource.
 simpleResourceFlows :: OptPos -> ResourceFlowSpec ->
@@ -253,11 +253,11 @@ resourceArgs pos rflow = do
                    var <- resourceVar res
                    let ftype = Resource res
                    let inExp = if flowsIn flow
-                            then [Unplaced $ 
+                            then [Unplaced $
                                   Typed (Var var ParamIn ftype) ty False]
                             else []
                    let outExp = if flowsOut flow
-                                then [Unplaced $ 
+                                then [Unplaced $
                                       Typed (Var var ParamOut ftype) ty False]
                                 else []
                    return $ inExp ++ outExp)
