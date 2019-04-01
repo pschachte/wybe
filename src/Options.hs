@@ -56,7 +56,7 @@ defaultOptions    = Options
 data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
   | Flatten | Normalise | Optimise | Resources | Types
-  | Unbranch | Blocks | Emit
+  | Unbranch | Blocks | Emit | Analysis
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
 
@@ -91,6 +91,8 @@ logSelectionDescription Blocks
     = "Log translation of LPVM procedures into LLVM "
 logSelectionDescription Emit
     = "Log emiition of LLVM IR from the definitions created."
+logSelectionDescription Analysis
+    = "Log analysis LPVM IR."
 
 
 -- |Command line option parser and help text
