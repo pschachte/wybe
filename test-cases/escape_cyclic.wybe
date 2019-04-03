@@ -1,0 +1,34 @@
+# transitive aliasing data structures in nested proc calls
+
+use position
+
+public proc updateY(p1:position, ?p2:position) use !io
+    if p1.y > 901 :: ?p2 = p1
+    | true :: ?tmp = p1.y
+              y(!p1, tmp + 1)
+              !updateX(p1, ?p2)
+    end
+end
+
+# Expected Alias Pairs: [(0,1),(0,2),(1,2)]
+public proc updateX(p1:position, ?p2:position) use !io
+    if p1.x > 101 :: ?p2 = p1
+    | true :: ?tmp = p1.x
+              x(!p1, tmp + 1)
+              !updateY(p1, ?p2)
+    end
+end
+
+public proc bar use !io
+  ?p1 = position(100,900)
+  !updateX(p1, ?p2)
+
+  !println("p1:")
+  !println(p1.x)
+  !println(p1.y)
+  !println("p2:")
+  !println(p2.x)
+  !println(p2.y)
+end
+
+!bar

@@ -12,34 +12,32 @@ public proc if_test(a:position, b:position, ?r:position)
     end
 end
 
+proc printPos(name:string, p:position) use !io
+  !print(name)
+  !print(": ")
+  !print(p.x)
+  !print(" ")
+  !println(p.y)
+end
+
 ?pa = position(100, 101)
 ?pb = position(-200, -201)
-!print("--- before proc call: ")
-!print("pa: ")
-!println(pa.x)
-!println(pa.y)
-!print("pb: ")
-!println(pb.x)
-!println(pb.y)
+!println("--- before proc call: ")
+!printPos("pa", pa)
+!printPos("pb", pb)
 
 if_test(pa, pb, ?r)
 
-!print("--- after proc call: ")
-!print("pa: ")
-!println(pa.x)
-!println(pa.y)
-!print("pb: ")
-!println(pb.x)
-!println(pb.y)
+!println("--- after proc call: ")
+!printPos("pa", pa)
+!printPos("pb", pb)
 
-!print("--- result - expected to be same as pb: ")
-!println(r.x)
-!println(r.y)
+!println("--- result - expected to be same as pb: ")
+!printPos("r", r)
 
-!print("--- modify pa.x: ")
+!println("--- modify pa.x: ")
 x(!pa, -1000)
-!println(pa.x)
+!printPos("pa", pa)
 
-!print("result: ")
-!println(r.x)
-!println(r.y)
+!println("result: ")
+!printPos("r", r)
