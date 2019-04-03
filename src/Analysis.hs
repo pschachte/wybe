@@ -8,22 +8,47 @@ module Analysis (analyseMod) where
 
 import           AliasAnalysis
 import           AST
+import           Callers       (getSccProcs)
 import           Control.Monad
-import           Data.Graph
-import           Data.List                 as List
-import           Data.Map                  as Map
-import           Data.Set                  as Set
-import           Options                   (LogSelection (Optimise))
+import           Data.List     as List
+import           Data.Map      as Map
+import           Data.Set      as Set
+import           Options       (LogSelection (Analysis))
 import           Util
 
-analyseMod :: [SCC ProcSpec] -> Compiler ()
-analyseMod orderedScc = do
-    mapM_ aliasSccBottomUp orderedScc
-    -- mapM_ freshnessSccBottomUp orderedScc
+
+analyseMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
+analyseMod _ thisMod = do
+    reenterModule thisMod
+    orderedProcs <- getSccProcs thisMod
+
+    -- Some logging
+    logAnalysis $ "\n>>>>>>>>>>>>>>>>>>> analyseMod:" ++ show thisMod
+    logAnalysis "\n>>> orderedProcs:"
+    logAnalysis $ show orderedProcs
+    logAnalysis $ "\n>>> Analyse SCCs:\n" ++
+        unlines (List.map (show . sccElts) orderedProcs)
+
+    ----------------------------------
+    -- ALIAS ANALYSIS
+    -- MODULE LEVEL ALIAS ANALYSIS
+    chg <- mapM aliasSccBottomUp orderedProcs
+    logAnalysis $ "\n>>> module level alias analysis changed? "
+                    ++ show (or chg) ++ " - " ++ show chg
+
+    finishModule
+    return (or chg,[])
+
+
+-- TODO: XXX orginal analyseMod function (to be removed)
+-- analyseMod :: [SCC ProcSpec] -> Compiler ()
+-- analyseMod orderedScc = do
+--     mapM_ aliasSccBottomUp orderedScc
+--     -- mapM_ freshnessSccBottomUp orderedScc
 
 
 -- ----------------------------------------------------------------
--- --                     Freshness Analysis
+--                      Freshness Analysis
 -- -- TODO: to be deleted
 -- ----------------------------------------------------------------
 -- freshnessSccBottomUp :: SCC ProcSpec -> Compiler ()
@@ -127,4 +152,4 @@ analyseMod orderedScc = do
 
 -- |Log a message, if we are logging optimisation activity.
 logAnalysis :: String -> Compiler ()
-logAnalysis = logMsg Optimise
+logAnalysis = logMsg Analysis

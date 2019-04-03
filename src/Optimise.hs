@@ -7,12 +7,11 @@
 
 module Optimise (optimiseMod) where
 
-import           Analysis
 import           AST
+import           Callers                   (getSccProcs)
 import           Control.Monad
 import           Control.Monad.Trans
 import           Control.Monad.Trans.State
-import           Data.Graph
 import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Set                  as Set
@@ -22,29 +21,20 @@ import           Types
 import           Util
 
 
+-- optimiseMod :: ModSpec -> Compiler (Bool,[(String,OptPos)])
 optimiseMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
-optimiseMod mods thisMod = do
+optimiseMod _ thisMod = do
     reenterModule thisMod
     -- checkFullyTyped -- Sanity check: be sure everything is fully typed
-    procs <- getModuleImplementationField (Map.toList . modProcs)
-    let ordered =
-            stronglyConnComp
-            [(pspec,pspec,
-              nub $ concatMap (localBodyCallees thisMod . procBody) procDefs)
-             | (name,procDefs) <- procs,
-               (n,def) <- zip [0..] procDefs,
-               let pspec = ProcSpec thisMod name n
-             ]
+    orderedProcs <- getSccProcs thisMod
     logOptimise $ "Optimise SCCs:\n" ++
-        unlines (List.map (show . sccElts) ordered)
+        unlines (List.map (show . sccElts) orderedProcs)
     -- XXX this is wrong:  it does not do a proper top-down
     -- traversal, as it is not guaranteed to vist all callers before
     -- visiting the called proc.  Need to construct inverse graph instead.
-    mapM_ (mapM_ optimiseProcTopDown .  sccElts) $ reverse ordered
+    mapM_ (mapM_ optimiseProcTopDown .  sccElts) $ reverse orderedProcs
 
-    mapM_ optimiseSccBottomUp ordered
-
-    analyseMod ordered
+    mapM_ optimiseSccBottomUp orderedProcs
 
     finishModule
     return (False,[])
@@ -66,13 +56,6 @@ optimiseSccBottomUp procs = do
     when (or $ tail inlines) $ do
         mapM_ optimiseProcBottomUp $ sccElts procs
         return ()
-
-
-procBody :: ProcDef -> ProcBody
-procBody def =
-    case procImpln def of
-        ProcDefSrc _         -> shouldnt "Optimising un-compiled code"
-        ProcDefPrim _ body _ -> body
 
 
 optimiseProcTopDown :: ProcSpec -> Compiler ()
@@ -146,23 +129,7 @@ primCost (PrimTest _)               = 0
 argCost :: PrimArg -> Int
 argCost arg = if phantomArg arg then 0 else 1
 
-----------------------------------------------------------------
---                     Handling the call graph
-----------------------------------------------------------------
-
-
--- |Finding all procs called by a given proc body
-localBodyCallees :: ModSpec -> ProcBody -> [ProcSpec]
-localBodyCallees modspec body =
-    foldBodyDistrib (\_ prim callees -> localCallees modspec prim ++ callees)
-    [] (++) (++) body
-
-
-localCallees :: ModSpec -> Prim -> [ProcSpec]
-localCallees modspec (PrimCall pspec _) = [pspec]
-localCallees _ _                        = []
-
 
 -- |Log a message, if we are logging optimisation activity.
 logOptimise :: String -> Compiler ()
-logOptimise s = logMsg Optimise s
+logOptimise = logMsg Optimise

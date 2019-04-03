@@ -51,7 +51,7 @@ module AST (
   getModuleImplementationField, getModuleImplementation,
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
-  getModule, getModuleInterface, updateModule, getSpecModule, updateSpecModule,
+  getModule, getModuleInterface, updateModule, getSpecModule,
   updateModImplementation, updateModImplementationM, updateModLLVM,
   updateModInterface, updateAllProcs, updateModSubmods,
   getModuleSpec, getModuleParams, option, getSource, getDirectory,
@@ -275,12 +275,14 @@ runCompiler opts comp = evalStateT comp
 
 
 -- |Apply some transformation function to the compiler state.
+-- XXX updateCompiler :: (CompilerState -> (CompilerState, a)) -> Compiler a
 updateCompiler :: (CompilerState -> CompilerState) -> Compiler ()
 updateCompiler updater = do
     state <- get
     put $ updater state
 
 -- |Apply a monadic transformation function to the compiler state.
+-- XXX updateCompilerM :: (CompilerState -> Compiler (CompilerState, a)) -> Compiler a
 updateCompilerM :: (CompilerState -> Compiler CompilerState) -> Compiler ()
 updateCompilerM updater = do
     state <- get
@@ -316,6 +318,7 @@ getLoadedModule modspec = do
 -- |Apply the given function to the specified module, if it has been loaded;
 -- does nothing if not.  Takes care to handle it if the specified
 -- module is under compilation.
+-- XXX updateLoadedModule :: (Module -> (Module, a)) -> ModSpec -> Compiler a
 updateLoadedModule :: (Module -> Module) -> ModSpec -> Compiler ()
 updateLoadedModule updater modspec = do
     underComp <- gets underCompilation
@@ -333,6 +336,7 @@ updateLoadedModule updater modspec = do
 -- |Apply the given function to the specified module, if it has been loaded;
 -- does nothing if not.  Takes care to handle it if the specified
 -- module is under compilation.
+-- XXX updateLoadedModuleM :: (Module -> Compiler (Module, a)) -> ModSpec -> Compiler a
 updateLoadedModuleM :: (Module -> Compiler Module) -> ModSpec -> Compiler ()
 updateLoadedModuleM updater modspec = do
     underComp <- gets underCompilation
@@ -343,15 +347,15 @@ updateLoadedModuleM updater modspec = do
                 let underComp' = before ++ (mod':tail)
                 updateCompiler (\st -> st { underCompilation = underComp' })
       [] ->
-          updateCompilerM (\st -> do
-                             let mods = modules st
-                             let maybeMod = Map.lookup modspec mods
-                             case maybeMod of
-                               Nothing -> return st
-                               Just mod -> do
-                                 mod' <- updater mod
-                                 return $ st { modules = Map.insert
-                                                         modspec mod' mods})
+          updateCompilerM
+          (\st -> do
+                let mods = modules st
+                let maybeMod = Map.lookup modspec mods
+                case maybeMod of
+                    Nothing -> return st
+                    Just mod -> do
+                        mod' <- updater mod
+                        return st { modules = Map.insert modspec mod' mods})
 
 
 -- |Return the ModuleImplementation of the specified module.  An error
@@ -377,19 +381,22 @@ updateLoadedModuleImpln updater modspec =
 
 -- |Return the ModuleImplementation of the specified module.  An error
 -- if the module is not loaded or does not have an implementation.
+-- XXX updateLoadedModuleImplnM ::
+--     (ModuleImplementation -> Compiler (ModuleImplementation, a)) ->
+--     ModSpec -> Compiler a
 updateLoadedModuleImplnM ::
     (ModuleImplementation -> Compiler ModuleImplementation) ->
     ModSpec -> Compiler ()
-updateLoadedModuleImplnM updater modspec =
-    updateLoadedModuleM (\m -> do
-                           let maybeImpln = modImplementation m
-                           case maybeImpln of
-                             Nothing -> return m
-                             Just imp -> do
-                               updated <- updater imp
-                               return $ m { modImplementation = Just updated })
-    modspec
-
+updateLoadedModuleImplnM updater =
+    updateLoadedModuleM
+    (\m -> do
+        let maybeImpln = modImplementation m
+        case maybeImpln of
+            Nothing -> return m
+            Just imp -> do
+                updated <- updater imp
+                return m { modImplementation = Just updated }
+    )
 
 
 
@@ -443,30 +450,30 @@ getSpecModule context spec getter = do
         [mod] -> return $ getter mod
         _     -> shouldnt "getSpecModule: multiple modules with same spec"
 
--- |Return some function of the specified module; returns a Maybe
-findSpecModule :: ModSpec -> (Module -> t) -> Compiler (Maybe t)
-findSpecModule spec getter =
-    gets (fmap getter . Map.lookup spec . modules)
+-- -- |Return some function of the specified module; returns a Maybe
+-- findSpecModule :: ModSpec -> (Module -> t) -> Compiler (Maybe t)
+-- findSpecModule spec getter =
+--     gets (fmap getter . Map.lookup spec . modules)
 
--- |Transform the specified module.  Does nothing if it does not exist.
-updateSpecModule :: ModSpec -> (Module -> Module) -> Compiler ()
-updateSpecModule spec updater = do
-    modify
-      (\comp -> comp { modules = Map.adjust updater spec (modules comp) })
+-- -- |Transform the specified module.  Does nothing if it does not exist.
+-- updateSpecModule :: ModSpec -> (Module -> Module) -> Compiler ()
+-- updateSpecModule spec updater = do
+--     modify
+--       (\comp -> comp { modules = Map.adjust updater spec (modules comp) })
 
 
--- |Transform the specified module.  An error if it does not exist.
-updateSpecModuleM :: (Module -> Compiler Module) -> ModSpec -> Compiler ()
-updateSpecModuleM updater spec =
-    updateCompilerM
-      (\comp -> do
-            let mods = modules comp
-            let mod = Map.lookup spec mods
-            case mod of
-                Nothing -> shouldnt $ "nonexistent module " ++ show spec
-                Just m -> do
-                    m' <- updater m
-                    return $ comp {modules = Map.insert spec m' mods})
+-- -- |Transform the specified module.  An error if it does not exist.
+-- updateSpecModuleM :: (Module -> Compiler Module) -> ModSpec -> Compiler ()
+-- updateSpecModuleM updater spec =
+--     updateCompilerM
+--       (\comp -> do
+--             let mods = modules comp
+--             let mod = Map.lookup spec mods
+--             case mod of
+--                 Nothing -> shouldnt $ "nonexistent module " ++ show spec
+--                 Just m -> do
+--                     m' <- updater m
+--                     return $ comp {modules = Map.insert spec m' mods})
 
 
 -- |Prepare to compile a module by setting up a new Module on the
@@ -844,23 +851,23 @@ updateProcDef updater pspec@(ProcSpec modspec procName procID) =
     modspec
 
 
+-- XXX updateProcDefM :: (ProcDef -> Compiler (ProcDef, a)) -> ProcSpec -> Compiler a
 updateProcDefM :: (ProcDef -> Compiler ProcDef) -> ProcSpec -> Compiler ()
 updateProcDefM updater pspec@(ProcSpec modspec procName procID) =
     updateLoadedModuleImplnM
     (\imp -> do
-       let procs = modProcs imp
-       case Map.lookup procName procs of
-         Nothing -> return imp
-         Just defs -> do
-           let (front,back) = List.splitAt procID defs
-           updated <-
-               if List.null back
-               then shouldnt $ "invalid proc spec " ++
-                    show pspec
-               else updater $ List.head back
-           let defs' = front ++ updated:List.tail back
-           let procs' = Map.insert procName defs' procs
-           return $ imp { modProcs = procs' })
+        let procs = modProcs imp
+        case Map.lookup procName procs of
+            Nothing -> return imp
+            Just defs -> do
+                let (front,back) = List.splitAt procID defs
+                updated <-
+                    if List.null back
+                    then shouldnt $ "invalid proc spec " ++ show pspec
+                    else updater $ List.head back
+                let defs' = front ++ updated:List.tail back
+                let procs' = Map.insert procName defs' procs
+                return imp { modProcs = procs' })
     modspec
 
 
@@ -1389,8 +1396,9 @@ type AliasPair = (Int,Int)
 -- | Stores whatever analysis results we infer about a proc definition.
 data ProcAnalysis = ProcAnalysis {
     procArgAliases :: [AliasPair],
-    procArgAliasMap :: AliasMap
-    --- interestingness analysis info
+    procArgAliasMap :: AliasMap,
+    procAnalysisFixedPoint :: Bool -- ^XXX wrong way to do this! Need to change type signatures of a bunch of functions start from checkEscapeDef which is called by updateProcDefM
+    --- interestingness analysis info -- ^for future
 } deriving (Eq,Generic)
 
 isCompiled :: ProcImpln -> Bool
@@ -1403,10 +1411,11 @@ instance Show ProcImpln where
         = show proto ++ ":" ++ show analysis ++ showBlock 4 body
 
 instance Show ProcAnalysis where
-    show (ProcAnalysis procArgAliases procArgAliasMap) =
+    show (ProcAnalysis procArgAliases procArgAliasMap procArgAliasFixedPoint) =
         "\nAlias Int Pairs: " ++ show procArgAliases ++ "\n"
         ++ "Alias Arg Pairs: " ++ showAliasMap procArgAliasMap ++ "\n"
         ++ "Alias Map: " ++ show procArgAliasMap ++ "\n"
+        ++ "Alias Fixed Point: " ++ show procArgAliasFixedPoint ++ "\n"
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
 -- possibly containg some guards.  Each guard is a test that succeeds

@@ -44,6 +44,7 @@
 -- |Code to oversee the compilation process.
 module Builder (buildTargets, compileModule) where
 
+import           Analysis
 import           AST
 import           BinaryFactory
 import           Blocks                    (blockTransformModule,
@@ -466,7 +467,7 @@ compileModSCC mspecs = do
     -- AST manipulation before this line
     ----------------------------------
     -- CLAUSE GENERATION
-    mapM_ (transformModuleProcs compileProc)  mspecs
+    mapM_ (transformModuleProcs compileProc) mspecs
     -- LPVM from here
     stopOnError $ "generating low level code in " ++ showModSpecs mspecs
     mapM_ collectCallers mspecs
@@ -476,6 +477,20 @@ compileModSCC mspecs = do
     fixpointProcessSCC optimiseMod mspecs
     stopOnError $ "optimising " ++ showModSpecs mspecs
     logDump Optimise Optimise "OPTIMISATION"
+    ----------------------------------
+    -- ANALYSIS
+    -- TODO: return a boolean and update the return result
+    -- MODULE LEVEL ALIAS ANALYSIS - FIND FIXED POINT
+    -- When will this (certain module changed and need to do it again) happen?
+    logMsg Optimise ">>>>>>>>>>>>>>>>>>>>>>>>>>>> Start ANALYSIS in Builder.hs"
+    logMsg Optimise $ replicate 80 '~'
+    logMsg Optimise $ show mspecs
+    logMsg Optimise $ replicate 80 '~'
+    fixpointProcessSCC analyseMod mspecs
+    -- TODO: Do extra pass to update prim mutate flag after alias analysis for all
+    -- modules, call it Transform.hs
+
+    logDump Analysis Analysis "ANALYSIS"
 
     ----------------------------------
     -- Create an LLVMAST.Module represtation

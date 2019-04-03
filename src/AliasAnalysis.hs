@@ -4,7 +4,7 @@
 --  Purpose  : Alias analysis for a single module
 --  Copyright: (c) 2018 Ting Lu.  All rights reserved.
 
-module AliasAnalysis (aliasSccBottomUp, isVarAliased, aliasPairsToVarNames)
+module AliasAnalysis (aliasSccBottomUp)
     where
 
 import           AST
@@ -13,30 +13,47 @@ import           Data.Graph
 import           Data.List     as List
 import           Data.Map      as Map
 import           Data.Set      as Set
-import           Options       (LogSelection (Optimise))
+import           Options       (LogSelection (Analysis))
 import           Util
 
 
 ----------------------------------------------------------------
 --                     Escape Analysis
 ----------------------------------------------------------------
-aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
-aliasSccBottomUp procs = mapM_ aliasProcBottomUp $ sccElts procs
+-- PROC LEVEL ALIAS ANALYSIS
+-- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
+aliasSccBottomUp :: SCC ProcSpec -> Compiler Bool
+aliasSccBottomUp procs = do
+    changed <- mapM aliasProcBottomUp $ sccElts procs
 
-aliasProcBottomUp :: ProcSpec -> Compiler ()
+    -- TODO: gather all flags (indicating if any proc alias information changed
+    -- or not)
+    -- get a list of booleans; if cyclic(?) and true then do it again
+    -- compare aliasmap changed or not by comparing transitive closure of the
+    -- (key, value) pairs of the map
+
+    return $ or changed
+
+
+-- XXX aliasProcBottomUp :: ProcSpec -> Compiler a
+aliasProcBottomUp :: ProcSpec -> Compiler Bool
 aliasProcBottomUp pspec = do
-    updateProcDefM (checkEscapeDef pspec) pspec
-    return ()
+    logAlias $ "\n>>> Alias analysis (Bottom-up): " ++ show pspec
+    updateProcDefM checkEscapeDef pspec
+    return False
 
 
--- Check any argument become stale after this proc call if this
--- proc is not inlined
-checkEscapeDef :: ProcSpec -> ProcDef -> Compiler ProcDef
-checkEscapeDef spec def
+-- Check if any argument become stale in this (not inlined) proc call
+-- Return updated ProcDef and a flag (indicating if proc analysis info changed)
+-- XXX checkEscapeDef :: ProcDef -> Compiler (ProcDef, a)
+checkEscapeDef :: ProcDef -> Compiler ProcDef
+checkEscapeDef def
     | not (procInline def) = do
-        let (ProcDefPrim caller body analysis) = procImpln def
-        logAlias $ "\n>>> Alias analysis (Bottom-up): " ++ show spec
+        let (ProcDefPrim caller body oldAlias) = procImpln def
         logAlias $ show caller
+
+        -- TODO: don't transform prims here; do it in Transform.hs and do it
+        -- after fixedpoint analysis process finished
 
         -- (1) Analysis of current caller's prims
         alias1 <- checkEscapePrims caller body []
@@ -70,21 +87,27 @@ checkEscapeDef spec def
         let (totalAliases', _) = Map.foldrWithKey (convertUfKey finalSet3)
                                 (initUnionFind, rootMap) totalAliases
 
+        -- Some logging
+        logAlias $ "\n^^^  aliases (int pair):     " ++ show alias2
+        logAlias $ "^^^  after analyse prims:    " ++ show bodyPrimsAliases
+        logAlias $ "^^^  after analyse forks:    " ++ show bodyForkAliases
+        logAlias $ "^^^  alias of formal params: " ++ show bodyForkAliases'
+        logAlias $ "^^^  params in final:        " ++ show finalSet3
+        logAlias $ "^^^  alias without finals:   " ++ show totalAliases'
+
         -- (4) Update proc analysis with new aliasPairs
-        let analysis' = analysis {
+        let newAlias = oldAlias {
                             procArgAliases = alias2,
                             procArgAliasMap = totalAliases'
                         }
-        logAlias $ ">>>  aliases: " ++ show alias2
-        logAlias $ ">>>  analyse prims: " ++ show bodyPrimsAliases
-        logAlias $ ">>>  and analyse forking: " ++ show bodyForkAliases
-        logAlias $ ">>>  (pruned)': " ++ show bodyForkAliases'
-        logAlias $ ">>>  finalSet: " ++ show finalSet3
-        logAlias $ ">>>  (final args removed)': " ++ show totalAliases'
+        let newDef = def { procImpln = ProcDefPrim caller body2 newAlias }
 
-        return def { procImpln = ProcDefPrim caller body2 analysis' }
+        -- XXX return (newDef, newAlias /= oldAlias)
+        return newDef
 
-checkEscapeDef _ def = return def
+checkEscapeDef def =
+    -- XXX return (def, False)
+    return def
 
 
 -- Check alias created by prims of caller proc
@@ -100,9 +123,8 @@ aliasedByPrims caller body (initAliases, initFinalSet, initPrims) = do
     logAlias "\nAnalyse prims (aliasedByPrims):    "
                 -- ++ List.intercalate "\n    " (List.map show prims)
     let aliasMap = List.foldr newUfItem initAliases nonePhantomParams
-    primsAliases <- foldM aliasedByPrim (aliasMap, initFinalSet, []) prims
-    logAlias $ "\n    ^^^ Aliased vars by prims: " ++ show primsAliases
-    return primsAliases
+    foldM aliasedByPrim (aliasMap, initFinalSet, []) prims
+
 
 -- Build up alias pairs triggerred by proc calls
 aliasedByPrim :: (AliasMap, Set PrimVarName, [Placed Prim]) -> Placed Prim
@@ -260,16 +282,9 @@ _updateMutateForAlias aliasMap
 _updateMutateForAlias _ args = return args
 
 
--- Helper: check if FlowIn variable is aliased after previous proc calls
-isVarAliased :: PrimVarName -> [(PrimVarName, PrimVarName)] -> Bool
-isVarAliased varName [] = False
-isVarAliased varName ((n1,n2):as) =
-    (varName == n1 || varName == n2) || isVarAliased varName as
-
-
 -- |Log a message, if we are logging optimisation activity.
 logAlias :: String -> Compiler ()
-logAlias = logMsg Optimise
+logAlias = logMsg Analysis
 
 
 ----------------------------------------------------------------
@@ -287,8 +302,8 @@ checkEscapePrims caller body callerAlias = do
 
     -- First pass (only process alias pairs incurred by move, mutate, access,
     -- cast)
-    logAlias $ "\nAnalyse prims (checkEscapePrims): \n    "
-                ++ List.intercalate "\n    " (List.map show prims)
+    -- logAlias $ "\nAnalyse prims (checkEscapePrims): \n    "
+    --             ++ List.intercalate "\n    " (List.map show prims)
 
     (bodyAliases, aliasPairs) <-
         foldM (\(bodyAliasedVars, pairs) prim -> do
@@ -297,7 +312,7 @@ checkEscapePrims caller body callerAlias = do
                     aliasPairsFromArgs bodyAliasedVars args pairs
                 return (bodyAliasedVars', pairs')
                 ) (paramNames, []) prims
-    logAlias $ "    ^^^ Aliased vars by prims: " ++ show bodyAliases
+    -- logAlias $ "    ^^^ Aliased vars by prims: " ++ show bodyAliases
     let aliasPairs' =
             removeDupTuples $ transitiveTuples $ removeDupTuples aliasPairs
     let aliasSimplePrims = pruneTuples aliasPairs' (List.length paramNames)
@@ -305,7 +320,7 @@ checkEscapePrims caller body callerAlias = do
     -- Second pass (handle alias pairs incurred by proc calls within
     -- caller)
     aliasNames <- foldM (escapeByProcCalls callerAlias) [] prims
-    logAlias $ "    ^^^ Aliased vars by proc calls: " ++ show aliasNames
+    -- logAlias $ "    ^^^ Aliased vars by proc calls: " ++ show aliasNames
     -- convert alias name pairs to index pairs
     let aliasByProcCalls = _aliasNamesToPairs caller aliasNames
 
@@ -325,10 +340,10 @@ checkEscapeFork :: PrimProto -> ProcBody -> [AliasPair]
                     -> Compiler [AliasPair]
 checkEscapeFork caller body aliases = do
     let fork = bodyFork body
-    logAlias "\nAnalyse forks (checkEscapeFork):"
+    -- logAlias "\nAnalyse forks (checkEscapeFork):"
     case fork of
         PrimFork _ _ _ fBodies -> do
-            logAlias "Forking:"
+            -- logAlias "Forking:"
             aliases' <-
                 foldM (\as currBody -> do
                         as' <- checkEscapePrims caller currBody as
@@ -340,7 +355,7 @@ checkEscapeFork caller body aliases = do
             return aliases2
         _ -> do
             -- NoFork: analyse prims done
-            logAlias "No fork."
+            -- logAlias "No fork."
             return aliases
 
 
@@ -369,14 +384,14 @@ escapeByProcCalls callerAlias aliasNames prim =
             calleeDef <- getProcDef spec
             let (ProcDefPrim calleeProto body analysis) = procImpln calleeDef
             let calleeAlias = procArgAliases analysis
-            logAlias $ "\n    --- call " ++ show spec ++" (callee): "
-            logAlias $ "    " ++ show calleeProto
-            logAlias $ "    PrimCall args: " ++ show args
-            logAlias $ "    callerAlias: " ++ show callerAlias
-            logAlias $ "    calleeAlias: " ++ show calleeAlias
+            -- logAlias $ "\n    --- call " ++ show spec ++" (callee): "
+            -- logAlias $ "    " ++ show calleeProto
+            -- logAlias $ "    PrimCall args: " ++ show args
+            -- logAlias $ "    callerAlias: " ++ show callerAlias
+            -- logAlias $ "    calleeAlias: " ++ show calleeAlias
             let aliasNames' = aliasPairsToVarNames args
                                     (callerAlias ++ calleeAlias)
-            logAlias $ "    names: " ++ show aliasNames'
+            -- logAlias $ "    names: " ++ show aliasNames'
             return $ aliasNames ++ aliasNames'
         _ ->
             return aliasNames
@@ -418,3 +433,10 @@ _mapVarNameIdx bodyAliases =
                         newIdx = List.length bodyAliases' - 1
                     in (bodyAliases', newIdx : indices)
     ) (bodyAliases, [])
+
+
+-- Helper: check if FlowIn variable is aliased after previous proc calls
+isVarAliased :: PrimVarName -> [(PrimVarName, PrimVarName)] -> Bool
+isVarAliased varName [] = False
+isVarAliased varName ((n1,n2):as) =
+    (varName == n1 || varName == n2) || isVarAliased varName as

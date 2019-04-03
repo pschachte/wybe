@@ -6,9 +6,10 @@
 --  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
 --
 
-module Callers ( collectCallers ) where
+module Callers ( collectCallers, getSccProcs ) where
 
 import           AST
+import           Data.Graph
 import           Data.List  as List
 import           Data.Map   as Map
 import           Data.Maybe
@@ -80,3 +81,37 @@ adjustNth fn 0 (e:es) = fn e:es
 adjustNth fn n (e:es)
   | n > 0 = e : adjustNth fn (n-1) es
   | True  = error "adjustNth with negative n"
+
+
+----------------------------------------------------------------
+--                     Handling the call graph
+----------------------------------------------------------------
+getSccProcs thisMod = do
+  procs <- getModuleImplementationField (Map.toList . modProcs)
+  let ordered =
+          stronglyConnComp
+          [(pspec,pspec,
+            nub $ concatMap (localBodyCallees thisMod . procBody) procDefs)
+           | (name,procDefs) <- procs,
+             (n,def) <- zip [0..] procDefs,
+             let pspec = ProcSpec thisMod name n
+           ]
+  return ordered
+
+procBody :: ProcDef -> ProcBody
+procBody def =
+  case procImpln def of
+      ProcDefSrc _         -> shouldnt "Analysing un-compiled code"
+      ProcDefPrim _ body _ -> body
+
+
+-- |Finding all procs called by a given proc body
+localBodyCallees :: ModSpec -> ProcBody -> [ProcSpec]
+localBodyCallees modspec body =
+  foldBodyDistrib (\_ prim callees -> localCallees modspec prim ++ callees)
+  [] (++) (++) body
+
+
+localCallees :: ModSpec -> Prim -> [ProcSpec]
+localCallees modspec (PrimCall pspec _) = [pspec]
+localCallees _ _                        = []
