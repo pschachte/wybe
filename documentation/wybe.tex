@@ -820,7 +820,9 @@ What is visible in a module is:
 \item everything that is defined in that module;
 \item everything that is imported into that module, as described in
   Section~\ref{sec:Imports}; and
-\item everything that is visible in the parent module
+\item everything that is implicitly imported into that module by virtue of
+  being exported (declared \texttt{public}) by one of its immediate submodules;
+\item everything that is visible in its parent module
 \end{itemize}
 
 
@@ -905,7 +907,14 @@ For the examples above, \lang will support to following statements (where
 \end{verbatim}
 
 The \lang library supplies a useful little function with only
-a backward mode:
+a backward mode:  \texttt{\_} (underscore).
+This function does nothing in that mode, meaning that a
+statement like:
+\begin{verbatim}
+     c = colour(?r, _, ?b)
+\end{verbatim}
+would set \texttt{r} to the red component of the color \texttt{c} and set
+\texttt{b} to the blue component, and ignore the green component.
 
 The language also supports Myer's uniform access principle.
 Every type is simply a module whose name may be used as a type name.
