@@ -498,8 +498,15 @@ reenterModule modspec = do
     modify (\comp -> comp { underCompilation = mod : underCompilation comp })
 
 
+-- |Finish compilation of the current module.
 exitModule :: Compiler [ModSpec]
 exitModule = do
+    currMod <- getModuleSpec
+    imports <- getModuleImplementationField (Map.assocs . modImports)
+    logAST $ "Exiting module " ++ showModSpec currMod
+              ++ " with imports:\n        "
+              ++ intercalate "\n        "
+                 [showUse 20 mod dep | (mod,dep) <- imports]
     mod <- finishModule
     let num = thisLoadNum mod
     logAST $ "Exiting module " ++ showModSpec (modSpec mod)
@@ -514,6 +521,7 @@ exitModule = do
         let (bonus,rest) = span ((==num) . minDependencyNum) deferred
         modify (\comp -> comp { deferred = rest })
         return $ List.map modSpec $ mod:bonus
+
 
 finishModule :: Compiler Module
 finishModule = do
@@ -664,7 +672,8 @@ lookupType ty@(TypeSpec ["wybe"] "int" []) _ = return $ Just ty
 lookupType ty@(TypeSpec mod name args) pos = do
     logAST $ "Looking up type " ++ show ty
     tspecs <- refersTo mod name modKnownTypes typeMod
-    logAST $ "Candidates: " ++ show tspecs
+    logAST $ "Candidates: "
+             ++ intercalate ", " (List.map show $ Set.toList tspecs)
     case Set.size tspecs of
         0 -> do
             message Error ("Unknown type " ++ show ty) pos
@@ -980,8 +989,12 @@ refersTo modspec name implMapFn specModFn = do
     currMod <- getModuleSpec
     logAST $ "Finding visible symbol " ++ maybeModPrefix modspec ++
       name ++ " from module " ++ showModSpec currMod
-    visible <- getModule (Map.findWithDefault Set.empty name . implMapFn .
-                          fromJust . modImplementation)
+    defined <- getModuleImplementationField
+               (Map.findWithDefault Set.empty name . implMapFn)
+    -- imports <- getModuleImplementationField (Map.assocs . modImports)
+    -- imported <- mapM getLoadingModule imports
+    -- let visible = defined `Set.union` imported
+    let visible = defined
     logAST $ "*** ALL visible modules: "
         ++ showModSpecs (Set.toList (Set.map specModFn visible))
     let matched = Set.filter ((modspec `isSuffixOf`) . specModFn) visible
@@ -1244,6 +1257,12 @@ doImport mod imports = do
     let importedTypes = importsSelected allImports $ pubTypes fromIFace
     let importedResources = importsSelected allImports $ pubResources fromIFace
     let importedProcs = importsSelected allImports $ pubProcs fromIFace
+    logAST $ "    importing types    : "
+             ++ intercalate ", " (Map.keys importedTypes)
+    logAST $ "    importing resources: "
+             ++ intercalate ", " (Map.keys importedResources)
+    logAST $ "    importing procs    : "
+             ++ intercalate ", " (Map.keys importedProcs)
     -- XXX Must report error for imports of non-exported items
     let knownTypes = Map.unionWith Set.union (modKnownTypes impl) $
                      Map.map (Set.singleton . fst) importedTypes
