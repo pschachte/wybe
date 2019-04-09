@@ -72,8 +72,10 @@ validateParamType :: Ident -> OptPos -> Bool -> Param -> Compiler Param
 validateParamType pname ppos public param = do
     let ty = paramType param
     checkDeclIfPublic pname ppos public ty
+    logTypes $ "Checking type " ++ show ty ++ " of param " ++ show param
     ty' <- fromMaybe AnyType <$> lookupType ty ppos
     let param' = param { paramType = ty' }
+    logTypes $ "Param is " ++ show param'
     return param'
 
 

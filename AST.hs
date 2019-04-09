@@ -27,7 +27,7 @@ module AST (
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   ImportSpec(..), importSpec,
   collectSubModules,
-  enterModule, reenterModule, exitModule, finishModule,
+  enterModule, reenterModule, exitModule, finishModule, inModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
@@ -502,10 +502,10 @@ exitModule :: Compiler [ModSpec]
 exitModule = do
     mod <- finishModule
     let num = thisLoadNum mod
-    logAST $ "Finishing module " ++ showModSpec (modSpec mod)
+    logAST $ "Exiting module " ++ showModSpec (modSpec mod)
     logAST $ "    loadNum = " ++ show num ++
            ", minDependencyNum = " ++ show (minDependencyNum mod)
-    if (minDependencyNum mod < num)
+    if minDependencyNum mod < num
       then do
         modify (\comp -> comp { deferred = mod:deferred comp })
         return []
@@ -522,6 +522,16 @@ finishModule = do
       (\comp -> comp { underCompilation = List.tail (underCompilation comp) })
     updateModules $ Map.insert (modSpec mod) mod
     return mod
+
+
+-- | evaluate expr in the context of module mod.  Ie, reenter mod,
+-- evaluate expr, and finish the module.
+inModule :: ModSpec -> Compiler a -> Compiler a
+inModule mod expr = do
+    reenterModule mod
+    val <- expr
+    finishModule
+    return val
 
 
 -- |Return the directory of the current module.
@@ -671,11 +681,11 @@ lookupType ty@(TypeSpec mod name args) pos = do
                 let matchingMod = maybe (shouldnt "lookupType") modSpec maybeMod
                 let matchingType = TypeSpec matchingMod name args'
                 logAST $ "Matching type = " ++ show matchingType
-                return $ Just $ matchingType
+                return $ Just matchingType
               else do
                 message Error
-                  ("Type '" ++ name ++ "' expects " ++ (show $ typeDefArity def) ++
-                   " arguments, but " ++ (show $ length args) ++ " were given")
+                  ("Type '" ++ name ++ "' expects " ++ show (typeDefArity def) ++
+                   " arguments, but " ++ show (length args) ++ " were given")
                   pos
                 logAST "Type constructor arities don't match!"
                 return Nothing
@@ -755,9 +765,10 @@ addImport modspec imports = do
     when (isNothing $ importPublic imports) $
       updateInterface Public (updateDependencies (Set.insert modspec))
     maybeMod <- gets (List.find ((==modspec) . modSpec) . underCompilation)
+    currMod <- getModuleSpec
     logAST $ "Noting import of " ++ showModSpec modspec ++
-           ", which is " ++ (if isNothing maybeMod then "NOT " else "") ++
-           "currently being loaded"
+           ", " ++ (if isNothing maybeMod then "NOT " else "") ++
+           "currently being loaded, into " ++ showModSpec currMod
     case maybeMod of
         Nothing -> return ()  -- not currently loading dependency
         Just mod' -> do
@@ -795,7 +806,7 @@ addProcDef procDef = do
         in imp { modProcs = Map.insert name procs' $ modProcs imp,
                  modKnownProcs = Map.insert name known' $ modKnownProcs imp })
     updateInterface vis (updatePubProcs (mapSetInsert name spec))
-    logAST $ "Adding defnintion for " ++ show spec ++ ":" ++
+    logAST $ "Adding definition of " ++ show spec ++ ":" ++
       showProcDef 4 procDef
     return ()
 
@@ -941,10 +952,10 @@ descendantModuleOf (a:as) (b:bs)
   | a == b = descendantModuleOf as bs
 descendantModuleOf _ _ = False
 
-getDescendant :: ModSpec -> Maybe ModSpec
-getDescendant [] = Nothing
-getDescendant (m:[]) = Nothing
-getDescendant modspec = Just $ init modspec
+parentModule :: ModSpec -> Maybe ModSpec
+parentModule []  = Nothing
+parentModule [m] = Nothing
+parentModule modspec = Just $ init modspec
 
 -- | Collect all the subModules of the given modspec.
 collectSubModules :: ModSpec -> Compiler [ModSpec]
@@ -962,7 +973,8 @@ collectSubModules mspec = do
 --  produces a map that tells whether that module exports that name,
 --  and implMapFn tells whether a module implementation defines that
 --  name.  The reference to this name occurs in the current module.
-refersTo :: ModSpec -> Ident -> (ModuleImplementation -> Map Ident (Set b)) ->
+refersTo :: Ord b => ModSpec -> Ident ->
+            (ModuleImplementation -> Map Ident (Set b)) ->
             (b -> ModSpec) -> Compiler (Set b)
 refersTo modspec name implMapFn specModFn = do
     currMod <- getModuleSpec
@@ -970,19 +982,14 @@ refersTo modspec name implMapFn specModFn = do
       name ++ " from module " ++ showModSpec currMod
     visible <- getModule (Map.findWithDefault Set.empty name . implMapFn .
                           fromJust . modImplementation)
-    logAST $ "*** ALL visible from: " ++ showModSpec modspec ++ ": "
+    logAST $ "*** ALL visible modules: "
         ++ showModSpecs (Set.toList (Set.map specModFn visible))
     let matched = Set.filter ((modspec `isSuffixOf`) . specModFn) visible
-    case Set.null matched of
-        False -> return matched
-        -- Try and look into the super mod.
-        True -> case getDescendant currMod of
-            Just des -> do
-                reenterModule des
-                desMatched <- refersTo modspec name implMapFn specModFn
-                finishModule
-                return desMatched
-            Nothing -> return matched
+    case parentModule currMod of
+        Just par -> Set.union matched
+                    <$>
+                    inModule par (refersTo modspec name implMapFn specModFn)
+        Nothing -> return matched
 
 
 
@@ -1159,7 +1166,7 @@ lookupTypeRepresentation (TypeSpec modSpecs name _) = do
     -- If still not found, search the direct descendant interface and
     -- implementation
     -- case maybeMatch of
-    --     Nothing -> case getDescendant modSpecs of
+    --     Nothing -> case parentModule modSpecs of
     --         Just des -> lookupTypeRepresentation (TypeSpec des name ps)
     --         Nothing -> return Nothing
     --     _ -> return maybeMatch
