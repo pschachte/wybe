@@ -819,10 +819,11 @@ What is visible in a module is:
 \begin{itemize}
 \item everything that is defined in that module;
 \item everything that is imported into that module, as described in
-  Section~\ref{sec:Imports}; and
+  Section~\ref{sec:Imports};
 \item everything that is implicitly imported into that module by virtue of
   being exported (declared \texttt{public}) by one of its immediate submodules;
-\item everything that is visible in its parent module
+\item everything that is visible in its parent module; and
+\item all the built-ins
 \end{itemize}
 
 
