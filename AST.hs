@@ -27,7 +27,7 @@ module AST (
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   ImportSpec(..), importSpec,
   collectSubModules,
-  enterModule, reenterModule, exitModule, reexitModule, inModule,
+  enterModule, reenterModule, exitModule, reexitModule, deferModules, inModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
@@ -517,7 +517,7 @@ exitModule = do
            ", minDependencyNum = " ++ show (minDependencyNum mod)
     if minDependencyNum mod < num
       then do
-        modify (\comp -> comp { deferred = mod:deferred comp })
+        deferModules [mod]
         return []
       else do
         deferred <- gets deferred
@@ -535,6 +535,15 @@ reexitModule = do
       (\comp -> comp { underCompilation = List.tail (underCompilation comp) })
     updateModules $ Map.insert (modSpec mod) mod
     return mod
+
+
+-- |Add the specified module to the list of deferred modules, ie, the
+-- modules in the same module dependency SCC as the current one.  This
+-- is used for submodules, since they can access stuff in the parent
+-- module, and the parent module can access public stuff in submodules.
+deferModules :: [Module] -> Compiler ()
+deferModules mods =
+    modify (\comp -> comp { deferred = mods ++ deferred comp })
 
 
 -- | evaluate expr in the context of module mod.  Ie, reenter mod,
