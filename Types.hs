@@ -46,7 +46,7 @@ validateModExportTypes thisMod = do
 
 loggedFinishModule :: ModSpec -> Compiler ()
 loggedFinishModule thisMod = do
-    _ <- finishModule
+    _ <- reexitModule
     logTypes $ "**** Exiting module " ++ showModSpec thisMod
     return ()
 

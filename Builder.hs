@@ -266,7 +266,7 @@ buildDirectory dir dirmod= do
                 updateModSubmods $ Map.insert (last m) m
     -- The module package imports all wybe modules in its source dir
     mapM_ updateImport wybemods
-    done <- finishModule
+    done <- reexitModule
     liftIO $ print done
     -- Run the compilation passes on this module package to append the
     -- procs from the imports to the interface.
@@ -299,7 +299,6 @@ compileModule source modspec params items = do
     stopOnError $ "preliminary processing of module " ++ showModSpec modspec
     loadImports
     stopOnError $ "handling imports for module " ++ showModSpec modspec
-    _ <- gets underCompilation
     mods <- exitModule -- may be empty list if module is mutually dependent
     logBuild $ "<=== finished compling module " ++ showModSpec modspec
     compileModSCC mods
@@ -372,7 +371,7 @@ loadModuleFromObjFile required objfile = do
             modify (\comp -> let ms = superMod : underCompilation comp
                        in comp { underCompilation = ms })
             mapM_ buildDependency imports
-            _ <- finishModule
+            _ <- reexitModule
             logBuild $ "=== <<< Extracted Module put in it's place from "
                 ++ show objfile
             return True
@@ -531,7 +530,7 @@ transformModuleProcs trans thisMod = do
         (\imp -> imp { modProcs = Map.union
                                   (Map.fromList $ zip names procs')
                                   (modProcs imp) })
-    _ <- finishModule
+    _ <- reexitModule
     logBuild $ "**** Exiting module " ++ showModSpec thisMod
     return ()
 
@@ -567,7 +566,7 @@ handleModImports _ thisMod = do
     kResources' <- getModuleImplementationField modKnownResources
     kProcs' <- getModuleImplementationField modKnownProcs
     iface' <- getModuleInterface
-    _ <- finishModule
+    _ <- reexitModule
     return (kTypes/=kTypes' || kResources/=kResources' ||
             kProcs/=kProcs' || iface/=iface',[])
 
@@ -669,7 +668,7 @@ loadObjectFile thisMod =
      -- Check if we need to re-emit object file
      rebuild <- objectReBuildNeeded thisMod dir
      when rebuild $ emitObjectFile thisMod objFile
-     _ <- finishModule
+     _ <- reexitModule
      return objFile
 
 

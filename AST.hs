@@ -27,7 +27,7 @@ module AST (
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   ImportSpec(..), importSpec,
   collectSubModules,
-  enterModule, reenterModule, exitModule, finishModule, inModule,
+  enterModule, reenterModule, exitModule, reexitModule, inModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
@@ -463,7 +463,8 @@ updateSpecModuleM updater spec =
 
 
 -- |Prepare to compile a module by setting up a new Module on the
---  front of the list of modules underCompilation.
+--  front of the list of modules underCompilation.  Match this with
+--  a later call to exitModule.
 enterModule :: FilePath -> ModSpec -> Maybe [Ident] -> Compiler ()
 enterModule source modspec params = do
     count <- gets ((1+) . loadCount)
@@ -489,7 +490,8 @@ moduleIsPackage spec =  do
 
 
 -- |Go back to compiling a module we have previously finished with.
--- Trusts that the modspec really does specify a module.
+-- Trusts that the modspec really does specify a module.  Match this
+-- with a later call to reexitModule.
 reenterModule :: ModSpec -> Compiler ()
 reenterModule modspec = do
     logAST $ "finding module " ++ showModSpec modspec
@@ -498,7 +500,8 @@ reenterModule modspec = do
     modify (\comp -> comp { underCompilation = mod : underCompilation comp })
 
 
--- |Finish compilation of the current module.
+-- |Finish compilation of the current module.  This matches an earlier
+-- call to enterModule.
 exitModule :: Compiler [ModSpec]
 exitModule = do
     currMod <- getModuleSpec
@@ -507,7 +510,7 @@ exitModule = do
               ++ " with imports:\n        "
               ++ intercalate "\n        "
                  [showUse 20 mod dep | (mod,dep) <- imports]
-    mod <- finishModule
+    mod <- reexitModule
     let num = thisLoadNum mod
     logAST $ "Exiting module " ++ showModSpec (modSpec mod)
     logAST $ "    loadNum = " ++ show num ++
@@ -523,8 +526,10 @@ exitModule = do
         return $ List.map modSpec $ mod:bonus
 
 
-finishModule :: Compiler Module
-finishModule = do
+-- |Finish a module reentry, returning to the previous module.  This
+-- matches an earlier call to reenterModule.
+reexitModule :: Compiler Module
+reexitModule = do
     mod <- getModule id
     modify
       (\comp -> comp { underCompilation = List.tail (underCompilation comp) })
@@ -538,7 +543,7 @@ inModule :: ModSpec -> Compiler a -> Compiler a
 inModule mod expr = do
     reenterModule mod
     val <- expr
-    finishModule
+    reexitModule
     return val
 
 
@@ -1166,7 +1171,7 @@ lookupTypeRepresentation (TypeSpec modSpecs name _) = do
     reenterModule modSpecs
     maybeImpln <- getModuleImplementation
     modInt <- getModuleInterface
-    _ <- finishModule
+    _ <- reexitModule
     -- Try find the TypeRepresentation in the interface
     let maybeIntMatch = fmap snd $ Map.lookup name $ pubTypes modInt
     -- Try find the TypeRepresentation in the implementation if not found
