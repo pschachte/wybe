@@ -53,7 +53,8 @@ AFTER EVERYTHING:
                     type_list.intlist.head<1>
                     type_list.intlist.tail<0>
                     type_list.intlist.tail<1>
-  imports         : use wybe
+  imports         : use type_list
+                    use wybe
   types           : 
   resources       : 
   procs           : 

@@ -19,7 +19,8 @@ AFTER EVERYTHING:
   public types    : 
   public resources: 
   public procs    : submodule.privatetest.semi_hidden<0>
-  imports         : use wybe
+  imports         : use submodule
+                    use wybe
   types           : 
   resources       : 
   procs           : 
@@ -38,7 +39,8 @@ semi_hidden > public inline (0 calls)
   public types    : 
   public resources: 
   public procs    : submodule.publictest.visible<0>
-  imports         : use wybe
+  imports         : use submodule
+                    use wybe
   types           : 
   resources       : 
   procs           : 

@@ -1,4 +1,4 @@
 Syntax Error: "test-cases/syntax_error.wybe" (line 2, column 1):
 unexpected TokIdent "bill" "test-cases/syntax_error.wybe" (line 2, column 1)
 CallStack (from HasCallStack):
-  error, called at Builder.hs:220:29 in main:Builder
+  error, called at Builder.hs:223:29 in main:Builder

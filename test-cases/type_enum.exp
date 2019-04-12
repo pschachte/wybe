@@ -30,7 +30,8 @@ AFTER EVERYTHING:
                     type_enum.season.spring<0>
                     type_enum.season.summer<0>
                     type_enum.season.winter<0>
-  imports         : use wybe
+  imports         : use type_enum
+                    use wybe
   types           : 
   resources       : 
   procs           : 

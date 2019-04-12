@@ -48,7 +48,8 @@ AFTER EVERYTHING:
                     type_int.myint.=<2>
                     type_int.myint.><0>
                     type_int.myint.>=<0>
-  imports         : use wybe
+  imports         : use type_int
+                    use wybe
   types           : 
   resources       : 
   procs           : 

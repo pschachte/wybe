@@ -117,12 +117,11 @@ buildTarget force target = do
               then logBuild $ "Nothing to be done for target: " ++ target
               else
                 do logBuild $ "Emitting Target: " ++ target
-                   when (tType == ObjectFile) $
-                       emitObjectFile [modname] target
-                   when (tType == BitcodeFile) $
-                       emitBitcodeFile [modname] target
-                   when (tType == AssemblyFile) $
-                       emitAssemblyFile [modname] target
+                   case tType of
+                     ObjectFile -> emitObjectFile [modname] target
+                     BitcodeFile -> emitBitcodeFile [modname] target
+                     AssemblyFile -> emitAssemblyFile [modname] target
+                     other -> nyi $ "output file type " ++ show other
                    whenLogging Emit $ logLLVMString [modname]
 
 
@@ -266,12 +265,12 @@ buildDirectory dir dirmod= do
                 updateModSubmods $ Map.insert (last m) m
     -- The module package imports all wybe modules in its source dir
     mapM_ updateImport wybemods
-    done <- reexitModule
-    liftIO $ print done
+    mods <- exitModule
+    logBuild $ "Generated directory module containing" ++ showModSpecs mods
     -- Run the compilation passes on this module package to append the
     -- procs from the imports to the interface.
     -- XXX Maybe run only the import pass, as there is no module source!
-    compileModSCC [dirmod]
+    compileModSCC mods
     return built
 
 
@@ -295,7 +294,7 @@ compileModule source modspec params items = do
     -- module before handling the module.  If we decide we need to do
     -- that, then we'll need to handle the full dependency
     -- relationship explicitly before doing any compilation.
-    Normalise.normalise compileModSCC items
+    Normalise.normalise items
     stopOnError $ "preliminary processing of module " ++ showModSpec modspec
     loadImports
     stopOnError $ "handling imports for module " ++ showModSpec modspec
@@ -433,6 +432,7 @@ buildArchive arch = do
 --  reached.
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
+    logBuild $ "compileModSCC " ++ showModSpecs mspecs
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
     logDump Flatten Types "FLATTENING"
     fixpointProcessSCC handleModImports mspecs

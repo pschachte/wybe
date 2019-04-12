@@ -517,11 +517,17 @@ exitModule = do
            ", minDependencyNum = " ++ show (minDependencyNum mod)
     if minDependencyNum mod < num
       then do
+        logAST $ "not finished with module SCC: deferring module "
+                 ++ showModSpec (modSpec mod)
         deferModules [mod]
         return []
       else do
         deferred <- gets deferred
         let (bonus,rest) = span ((==num) . minDependencyNum) deferred
+        logAST $ "finished with module SCC "
+                 ++ showModSpecs (List.map modSpec $ mod:bonus)
+        logAST $ "remaining deferred modules: "
+                 ++ showModSpecs (List.map modSpec rest)
         modify (\comp -> comp { deferred = rest })
         return $ List.map modSpec $ mod:bonus
 
@@ -542,7 +548,9 @@ reexitModule = do
 -- is used for submodules, since they can access stuff in the parent
 -- module, and the parent module can access public stuff in submodules.
 deferModules :: [Module] -> Compiler ()
-deferModules mods =
+deferModules mods = do
+    logAST $ "deferred modules "
+             ++ showModSpecs (List.map modSpec mods)
     modify (\comp -> comp { deferred = mods ++ deferred comp })
 
 

@@ -34,7 +34,8 @@ AFTER EVERYTHING:
                     position.position.x<1>
                     position.position.y<0>
                     position.position.y<1>
-  imports         : use wybe
+  imports         : use position
+                    use wybe
   types           : 
   resources       : 
   procs           : 
