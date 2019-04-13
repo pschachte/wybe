@@ -22,8 +22,8 @@ AFTER EVERYTHING:
 
 *main* > public inline (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
-    foreign c print_int(7777:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$13#0:wybe.phantom) @wybe:76:38
-    foreign c putchar('\n':wybe.char, ~tmp$13#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+    foreign c print_int(7777:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$13#0:wybe.phantom) @wybe:80:38
+    foreign c putchar('\n':wybe.char, ~tmp$13#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:78:28
   submodules      : alias.position
 --------------------------------------------------
  Module alias.position([])
