@@ -799,6 +799,8 @@ instance Show ModuleSource where
 
 
 
+-- |Return list of wybe module sources in the specified directory.
+-- XXX This should also return subdirectory, which could also be modules.
 wybeSourcesInDir :: FilePath -> IO [FilePath]
 wybeSourcesInDir dir = do
     let isWybe = List.filter ((== ".wybe") . takeExtension)
