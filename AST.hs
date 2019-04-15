@@ -427,7 +427,7 @@ updateModuleM updater = do
 -- |Return some function of the specified module.  Error if it's not a module.
 getSpecModule :: String -> ModSpec -> (Module -> t) -> Compiler t
 getSpecModule context spec getter = do
-    let msg = context ++ " looking up missing module " ++ show spec
+    let msg = context ++ " looking up module " ++ show spec
     curr <- gets (List.filter ((==spec) . modSpec) . underCompilation)
     logAST $ "found " ++ (show $ length curr) ++
       " matching modules under compilation"

@@ -244,6 +244,10 @@ buildDirectory :: FilePath -> ModSpec -> Compiler Bool
 buildDirectory dir dirmod= do
     logBuild $ "Building DIR: " ++ dir ++ ", into MODULE: "
         ++ showModSpec dirmod
+    -- Make the directory a Module package
+    enterModule dir dirmod Nothing
+    updateModule (\m -> m { isPackage = True })
+
     -- Get wybe modules (in the directory) to build
     let makeMod x = dirmod ++ [x]
     wybemods <- liftIO $ List.map (makeMod . dropExtension)
@@ -255,9 +259,6 @@ buildDirectory dir dirmod= do
     let build m = buildModuleIfNeeded force m [takeDirectory dir]
     built <- or <$> mapM build wybemods
 
-    -- Make the directory a Module package
-    enterModule dir dirmod Nothing
-    updateModule (\m -> m { isPackage = True })
     -- Helper to add new import of `m` to current module
     let updateImport m = do
             addImport m (importSpec Nothing Public)
