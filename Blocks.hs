@@ -991,7 +991,6 @@ typeStrToType "int"     = int_c (fromIntegral wordSize)
 typeStrToType "bool"    = int_c 1
 typeStrToType "float"   = float_t
 typeStrToType "double"  = float_t
--- XXX Wrong!  need to distinguish what pointer points to (not just an int!)
 typeStrToType "pointer" = ptr_t $ int_c (fromIntegral wordSize)
 typeStrToType "word"    = int_c (fromIntegral wordSize)
 typeStrToType "phantom" = int_t
@@ -1184,9 +1183,11 @@ gcAllocate size castTy = do
 -- the instruction inttoptr should precede the load instruction.
 gcAccess :: Operand -> Integer -> LLVMAST.Type -> Codegen Operand
 gcAccess ptr offset outTy = do
+    -- XXX Must cast ptr to be a pointer to outTy
     logCodegen $ "gcAccess " ++ show ptr ++ " " ++ show offset
                  ++ " " ++ show outTy
     let opTypePtr = localOperandType ptr
+    -- XXX allow offset to be a variable
     let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
     let getel = LLVMAST.GetElementPtr False ptr indices []
@@ -1206,7 +1207,9 @@ gcAccess ptr offset outTy = do
 -- precede the store instruction, with the int value of the pointer stored.
 gcMutate :: Operand -> Integer -> Operand -> Codegen Operand
 gcMutate ptr offset val = do
+    -- XXX Must cast ptr to be a pointer to the type of val
     let opTypePtr = localOperandType ptr
+    -- XXX allow offset to be a variable
     let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
     let getel = LLVMAST.GetElementPtr False ptr indices []
