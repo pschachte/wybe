@@ -443,7 +443,7 @@ codegenForkBody var (b1:b2:[]) proto =
        -- -- if.exit
        -- setBlock ifexit
        -- phi int_t [(trueval, ifthen), (falseval, ifelse)]
-codegenForkBody _ _ _ = error
+codegenForkBody _ _ _ = shouldnt
   $ "Unrecognized control flow. Too many/few blocks."
 
 -- | A filter transformation to ensure that a Just Void operand is
@@ -521,7 +521,7 @@ cgen prim@(PrimForeign lang name flags args) = do
           inops
     addInstruction ins args
 
-cgen (PrimTest _) = error "PrimTest should have been removed before code gen"
+cgen (PrimTest _) = shouldnt "PrimTest should have been removed before code gen"
 
 
 makeCIntOp :: Operand -> Codegen Operand
@@ -558,7 +558,7 @@ cgenLLVMBinop name flags args =
        case Map.lookup (withFlags name flags) llvmMapBinop of
          (Just f) -> let ins = (apply2 f inOps)
                      in addInstruction ins args
-         Nothing -> error $ "LLVM Instruction not found: " ++ name
+         Nothing -> shouldnt $ "LLVM Instruction not found: " ++ name
 
 
 -- | Similar to 'cgenLLVMBinop', but for unary operations on the
@@ -593,7 +593,7 @@ cgenLLVMUnop name flags args
            case Map.lookup name llvmMapUnop of
              (Just f) -> let ins = f (head inOps)
                          in addInstruction ins args
-             Nothing -> error $ "LLVM Instruction not found : " ++ name
+             Nothing -> shouldnt $ "LLVM Instruction not found : " ++ name
 
 
 -- | Look inside the Prototype list stored in the CodegenState monad and
@@ -757,7 +757,7 @@ addInstruction ins args = do
                   return $ Just $ last fields
 
 pullName (ArgVar var _ _ _ _) = show var
-pullName _                    = error $ "Expected variable as output."
+pullName _                    = shouldnt $ "Expected variable as output."
 
 -- | Generate an expanding instruction name using the passed flags. This is
 -- useful to augment a simple instruction. (Ex: compare instructions can have
@@ -770,7 +770,7 @@ withFlags p f  = p ++ " " ++ (List.intercalate " " f)
 -- instruction from 'Codegen' Module.
 apply2 :: (Operand -> Operand -> Instruction) -> [Operand] -> Instruction
 apply2 f (a:b:[]) = f a b
-apply2 _ _        = error $ "Not a binary operation."
+apply2 _ _        = shouldnt $ "Not a binary operation."
 
 
 ----------------------------------------------------------------------------
@@ -991,6 +991,7 @@ typeStrToType "int"     = int_c (fromIntegral wordSize)
 typeStrToType "bool"    = int_c 1
 typeStrToType "float"   = float_t
 typeStrToType "double"  = float_t
+-- XXX Wrong!  need to distinguish what pointer points to (not just an int!)
 typeStrToType "pointer" = ptr_t $ int_c (fromIntegral wordSize)
 typeStrToType "word"    = int_c (fromIntegral wordSize)
 typeStrToType "phantom" = int_t
@@ -1050,7 +1051,7 @@ declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
     fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
     return $ external retty (show pspec) fnargs
 
-declareExtern (PrimTest _) = error "Can't declare extern for PrimNop."
+declareExtern (PrimTest _) = shouldnt "Can't declare extern for PrimNop."
 
 -- | Helper to make arguments for an extern declaration.
 makeExArg :: (Word, PrimArg) -> Compiler (Type, LLVMAST.Name)
@@ -1183,6 +1184,8 @@ gcAllocate size castTy = do
 -- the instruction inttoptr should precede the load instruction.
 gcAccess :: Operand -> Integer -> LLVMAST.Type -> Codegen Operand
 gcAccess ptr offset outTy = do
+    logCodegen $ "gcAccess " ++ show ptr ++ " " ++ show offset
+                 ++ " " ++ show outTy
     let opTypePtr = localOperandType ptr
     let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
