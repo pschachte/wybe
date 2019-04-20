@@ -1,5 +1,3 @@
-# aliasing data structure in a proc
-
 use position
 
 public proc replicate(p1:position, ?p2:position) use !io
@@ -9,13 +7,46 @@ public proc replicate(p1:position, ?p2:position) use !io
   ?p2 = p1
 end
 
+public proc foo use !io
+  ?p1 = position(101,102)
+  !replicate(p1, ?p2)
+
+  !println(p1.x) # expected 101 - is 101
+  !println(p2.x) # expected 101 - is 101
+
+  x(!p1, 555)
+
+  !println(p1.x) # expected 555 - is 555
+  !println(p2.x) # expected 101 - is 101
+end
+
 public proc bar use !io
   ?p1 = position(101,102)
   !replicate(p1, ?p2)
 
   x(!p1, 555)
   !println(p1.x) # expected 555 - is 555
-  !println(p2.x) # expected 101 - but is 555
+  !println(p2.x) # expected 101 - is 101
 end
 
+public proc baz use !io
+  ?p1 = position(101,102)
+  !replicate(p1, ?p2)
+
+  ?p3 = position(33333333, p2.y)
+
+  x(!p1, 555)
+
+  !println(p1.x) # expected 555 - is 555
+  !println(p2.x) # expected 101 - is 101
+  !println(p3.x) # expected 33333333 - is 33333333
+end
+
+!print("foo: ")
+!foo
+!print("---")
+!print("bar: ")
 !bar
+!print("---")
+!print("baz: ")
+!baz

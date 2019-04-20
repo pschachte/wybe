@@ -482,10 +482,10 @@ compileModSCC mspecs = do
     -- TODO: return a boolean and update the return result
     -- MODULE LEVEL ALIAS ANALYSIS - FIND FIXED POINT
     -- When will this (certain module changed and need to do it again) happen?
-    logMsg Optimise ">>>>>>>>>>>>>>>>>>>>>>>>>>>> Start ANALYSIS in Builder.hs"
-    logMsg Optimise $ replicate 80 '~'
-    logMsg Optimise $ show mspecs
-    logMsg Optimise $ replicate 80 '~'
+    logMsg Analysis ">>>>>>>>>>>>>>>>>>>>>>>>>>>> Start ANALYSIS in Builder.hs"
+    logMsg Analysis $ replicate 80 '~'
+    logMsg Analysis $ show mspecs
+    logMsg Analysis $ replicate 80 '~'
     fixpointProcessSCC analyseMod mspecs
     -- TODO: Do extra pass to update prim mutate flag after alias analysis for all
     -- modules, call it Transform.hs

@@ -86,6 +86,7 @@ adjustNth fn n (e:es)
 ----------------------------------------------------------------
 --                     Handling the call graph
 ----------------------------------------------------------------
+getSccProcs :: ModSpec -> Compiler [SCC ProcSpec]
 getSccProcs thisMod = do
   procs <- getModuleImplementationField (Map.toList . modProcs)
   let ordered =
