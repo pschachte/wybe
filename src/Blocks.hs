@@ -103,7 +103,7 @@ blockTransformModule thisMod =
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) modFile procBlocks
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
-       _ <- finishModule
+       _ <- reexitModule
        logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
 
@@ -443,7 +443,7 @@ codegenForkBody var (b1:b2:[]) proto =
        -- -- if.exit
        -- setBlock ifexit
        -- phi int_t [(trueval, ifthen), (falseval, ifelse)]
-codegenForkBody _ _ _ = error
+codegenForkBody _ _ _ = shouldnt
   $ "Unrecognized control flow. Too many/few blocks."
 
 -- | A filter transformation to ensure that a Just Void operand is
@@ -521,7 +521,7 @@ cgen prim@(PrimForeign lang name flags args) = do
           inops
     addInstruction ins args
 
-cgen (PrimTest _) = error "PrimTest should have been removed before code gen"
+cgen (PrimTest _) = shouldnt "PrimTest should have been removed before code gen"
 
 
 makeCIntOp :: Operand -> Codegen Operand
@@ -558,7 +558,7 @@ cgenLLVMBinop name flags args =
        case Map.lookup (withFlags name flags) llvmMapBinop of
          (Just f) -> let ins = (apply2 f inOps)
                      in addInstruction ins args
-         Nothing -> error $ "LLVM Instruction not found: " ++ name
+         Nothing -> shouldnt $ "LLVM Instruction not found: " ++ name
 
 
 -- | Similar to 'cgenLLVMBinop', but for unary operations on the
@@ -593,7 +593,7 @@ cgenLLVMUnop name flags args
            case Map.lookup name llvmMapUnop of
              (Just f) -> let ins = f (head inOps)
                          in addInstruction ins args
-             Nothing -> error $ "LLVM Instruction not found : " ++ name
+             Nothing -> shouldnt $ "LLVM Instruction not found : " ++ name
 
 
 -- | Look inside the Prototype list stored in the CodegenState monad and
@@ -644,7 +644,7 @@ cgenLPVM "access" [] [addr,offset,val] = do
           op <- gcAccess ptrOp (trustArgInt offset) outTy
           assign (pullName val) op
           return $ Just op
-  
+
 -- XXX Revise mutate instruction to take address, size, offset,
 --     destructive (Bool), and new address (output).  If destructive
 --     is True, does in place update and new address = address;
@@ -749,7 +749,7 @@ addInstruction ins args = do
                   return $ Just $ last fields
 
 pullName (ArgVar var _ _ _ _) = show var
-pullName _                    = error $ "Expected variable as output."
+pullName _                    = shouldnt $ "Expected variable as output."
 
 -- | Generate an expanding instruction name using the passed flags. This is
 -- useful to augment a simple instruction. (Ex: compare instructions can have
@@ -762,7 +762,7 @@ withFlags p f  = p ++ " " ++ (List.intercalate " " f)
 -- instruction from 'Codegen' Module.
 apply2 :: (Operand -> Operand -> Instruction) -> [Operand] -> Instruction
 apply2 f (a:b:[]) = f a b
-apply2 _ _        = error $ "Not a binary operation."
+apply2 _ _        = shouldnt $ "Not a binary operation."
 
 
 ----------------------------------------------------------------------------
@@ -1042,7 +1042,7 @@ declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
     fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
     return $ external retty (show pspec) fnargs
 
-declareExtern (PrimTest _) = error "Can't declare extern for PrimNop."
+declareExtern (PrimTest _) = shouldnt "Can't declare extern for PrimNop."
 
 -- | Helper to make arguments for an extern declaration.
 makeExArg :: (Word, PrimArg) -> Compiler (Type, LLVMAST.Name)
@@ -1206,7 +1206,11 @@ gcAllocate size castTy = do
 -- the instruction inttoptr should precede the load instruction.
 gcAccess :: Operand -> Integer -> LLVMAST.Type -> Codegen Operand
 gcAccess ptr offset outTy = do
+    -- XXX Must cast ptr to be a pointer to outTy
+    logCodegen $ "gcAccess " ++ show ptr ++ " " ++ show offset
+                 ++ " " ++ show outTy
     let opTypePtr = localOperandType ptr
+    -- XXX allow offset to be a variable
     let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
     let getel = LLVMAST.GetElementPtr False ptr indices []
@@ -1244,6 +1248,7 @@ gcMutate oldPtr outNm outTy size offset (ArgInt 0 _) val = do
     ptr <- instr outTy $ LLVMAST.BitCast voidPtr outTy []
     callMemCpy ptr oldPtr size
     let opTypePtr = localOperandType ptr
+    -- XXX allow offset to be a variable
     let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
     let getel = LLVMAST.GetElementPtr False ptr indices []

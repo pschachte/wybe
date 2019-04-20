@@ -1,20 +1,19 @@
 ======================================================================
 AFTER EVERYTHING:
  Module func_let
-  public submods  : 
-  public types    : 
-  public resources: 
+  public submods  :
+  public types    :
+  public resources:
   public procs    : func_let.<0>
                     func_let.quad<0>
   imports         : use wybe
-  types           : 
-  resources       : 
-  procs           : 
+  types           :
+  resources       :
+  procs           :
 
 *main* > public inline (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
-
-    foreign c print_int(40:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:76:38
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom):
+    foreign c print_int(40:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:80:38
 
 
 quad > public inline (1 calls)

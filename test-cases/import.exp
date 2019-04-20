@@ -22,8 +22,8 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp$9#0:position.position, ?tmp$10#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp$10#0:position.position, ?tmp$2#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 0:wybe.int)
     import.distance<0>(~tmp$1#0:position.position, ~tmp$2#0:position.position, ?tmp$0#0:wybe.int) @import:6:10
-    foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$13#0:wybe.phantom) @wybe:76:38
-    foreign c putchar('\n':wybe.char, ~tmp$13#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:74:28
+    foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?tmp$13#0:wybe.phantom) @wybe:80:38
+    foreign c putchar('\n':wybe.char, ~tmp$13#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:78:28
 
 
 distance > public (1 calls)
@@ -74,7 +74,8 @@ distance > public (1 calls)
                     position.position.x<1>
                     position.position.y<0>
                     position.position.y<1>
-  imports         : use wybe
+  imports         : use position
+                    use wybe
   types           : 
   resources       : 
   procs           : 

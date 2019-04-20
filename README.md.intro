@@ -1,0 +1,18 @@
+To build the compiler, do
+
+    make
+
+This will produce an executable file `wybemk`.
+
+To run the test suite, do
+
+    make test
+
+This will print a `.` for each passed test, and an `X` for each failed test.
+Any test that hasn't yet had its expected output specified will print `?`.
+
+The script `update-exp` in this directory goes through all the test cases
+whose output is different than the expected output, show the differences,
+and prompts whether or not to except the new actual output as correct.
+For each test case with no expected output recorded, it also shows the
+actual output and prompts whether to accept this as correct.

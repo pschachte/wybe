@@ -24,7 +24,7 @@
 
 \newcommand{\nyi}[1]{\underline{#1} \emph{(not yet implemented)}}
 \newcommand{\tbi}[1]{(\underline{Currently}, #1).}
-\newcommand{\possible}[1]{\emph{Possible improvement:} #1}
+\newcommand{\possible}[1]{\emph{Possible improvement:} \underline{#1}}
 
 \newcommand{\tuple}[1]{\ensuremath{\langle#1\rangle}}
 
@@ -428,7 +428,7 @@ However, it is considered to be good programming style to include
 the declarations.
 
 \subsection{Functions \emph{are} procedures}
-\label{sec:Functions \emph{are} procedures}
+\label{sec:Functions are procedures}
 
 A function of $n$ arguments is just a procedure with $n$ input arguments
 plus a single output argument.
@@ -734,6 +734,8 @@ and cannot be used outside that module.
   (by preceding the \texttt{use} directive with \texttt{public}) or not.
 \end{itemize}
 This gives the following eight varieties of importation:
+
+\vspace{1ex}
 \begin{center}
   \begin{tabular}{|p{25mm}|p{107mm}|}
     \hline \raggedright
@@ -781,6 +783,7 @@ This gives the following eight varieties of importation:
     \\ \hline
   \end{tabular}
 \end{center}
+\vspace{1ex}
 
 
 \subsection{Submodules}
@@ -807,6 +810,22 @@ module initialisations.
 Top level statements also fill the role a \texttt{main} function or
 method fills in other languages.
 
+\subsection{Visibilty}
+\label{sec:Visibilty}
+
+Code within a module may only refer to types,
+modules, procedures, functions, and resources that are \emph{visible}.
+What is visible in a module is:
+\begin{itemize}
+\item everything that is defined in that module;
+\item everything that is imported into that module, as described in
+  Section~\ref{sec:Imports};
+\item everything that is implicitly imported into that module by virtue of
+  being exported (declared \texttt{public}) by one of its immediate submodules;
+\item everything that is visible in its parent module; and
+\item all the built-ins
+\end{itemize}
+
 
 \section{Types}
 \label{sec:Types}
@@ -829,7 +848,7 @@ and \nyi{subtypes} supporting the Liskov substitution principle.
 
 Type declarations have the form:
 \begin{center}
-  \texttt{type} \emph{typename}(\emph{paramname,\ldots}) \texttt{=} \emph{ctorname}(\emph{membername}\texttt{:}\texttt{membertype},\ldots) $\mid$ \ldots\ \texttt{end}
+  \texttt{type} \emph{typename}(\emph{paramname,\ldots}) \texttt{=} \emph{ctorname}(\emph{membername}\texttt{:}\emph{membertype},\ldots) $\mid$ \ldots\ \texttt{end}
 \end{center}
 where \emph{typename}, \emph{paramname}, \emph{ctorname}, and
 \emph{membername} are identifiers,
@@ -889,7 +908,14 @@ For the examples above, \lang will support to following statements (where
 \end{verbatim}
 
 The \lang library supplies a useful little function with only
-a backward mode:
+a backward mode:  \texttt{\_} (underscore).
+This function does nothing in that mode, meaning that a
+statement like:
+\begin{verbatim}
+     c = colour(?r, _, ?b)
+\end{verbatim}
+would set \texttt{r} to the red component of the color \texttt{c} and set
+\texttt{b} to the blue component, and ignore the green component.
 
 The language also supports Myer's uniform access principle.
 Every type is simply a module whose name may be used as a type name.

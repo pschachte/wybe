@@ -1,14 +1,14 @@
 ======================================================================
 AFTER EVERYTHING:
  Module simple_loop
-  public submods  : 
-  public types    : 
-  public resources: 
+  public submods  :
+  public types    :
+  public resources:
   public procs    : simple_loop.<0>
   imports         : use wybe
-  types           : 
-  resources       : 
-  procs           : 
+  types           :
+  resources       :
+  procs           :
 
 *main* > public inline (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
@@ -17,16 +17,15 @@ AFTER EVERYTHING:
 
 
 gen$1 > (2 calls)
-0: gen$1(wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom): Alias Pairs: []
-
-    foreign c read_char(?c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:86:39
-    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$1#0:wybe.bool) @wybe:68:42
+0: gen$1(wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom):
+    foreign c read_char(?c#0:wybe.char, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:90:39
+    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$1#0:wybe.bool) @wybe:72:42
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(~wybe.io$io#1:wybe.phantom, ?wybe.io$io#3:wybe.phantom)
 
     1:
-        foreign c putchar(~c#0:wybe.char, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:84:39
+        foreign c putchar(~c#0:wybe.char, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:88:39
         simple_loop.gen$1<0>(~wybe.io$io#2:wybe.phantom, ?wybe.io$io#3:wybe.phantom) @simple_loop:1:1
 
 

@@ -1,3 +1,7 @@
+--  File     : Test.hs
+--  Author   : Ashutosh Rishi Ranjan
+--  Purpose  : Test code for NewParser.hs parser
+
 module Test where
 
 import qualified Data.List as List

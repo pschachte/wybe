@@ -56,10 +56,14 @@ end
 
 
 public type string is pointer8
-    # this whole implementation is completely wrong, but will do for now
+    # XXX this whole implementation is completely wrong, but will do for now
     public func ++(x:string, y:string):string = foreign c strcat(x,y)
-    public func =(x:string, y:string):bool = foreign llvm icmp eq(x,y)
-    public func /=(x:string,y:string):bool = foreign c strcmp(x,y)
+    public func  =(x:string,y:string):bool = foreign c strcmp(x,y)  = 0
+    public func /=(x:string,y:string):bool = foreign c strcmp(x,y) /= 0
+    public func  <(x:string,y:string):bool = foreign c strcmp(x,y) <  0
+    public func <=(x:string,y:string):bool = foreign c strcmp(x,y) <= 0
+    public func  >(x:string,y:string):bool = foreign c strcmp(x,y) >  0
+    public func >=(x:string,y:string):bool = foreign c strcmp(x,y) >= 0
 end
 
 
@@ -89,7 +93,10 @@ public module io is
     public proc println(x:string) use !io !print(x) !nl end
     public proc read(?x:string) use !io foreign c read_line(?x,!io) end
 
-    public proc print(x:bool) use !io foreign c printf(x) end
+    public proc print(x:bool) use !io
+       foreign c print_string(if x=false then "false" else "true")
+    end
+    public proc println(x:bool) use !io !print(x) !nl end
 #    public func eof:char = foreign lpvm cast(-1)
 end
 

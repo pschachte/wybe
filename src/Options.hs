@@ -90,10 +90,9 @@ logSelectionDescription Unbranch
 logSelectionDescription Blocks
     = "Log translation of LPVM procedures into LLVM "
 logSelectionDescription Emit
-    = "Log emiition of LLVM IR from the definitions created."
+    = "Log emission of LLVM IR from the definitions created."
 logSelectionDescription Analysis
-    = "Log analysis LPVM IR."
-
+    = "Log analysis of LPVM IR."
 
 -- |Command line option parser and help text
 options :: [OptDescr (Options -> Options)]

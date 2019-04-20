@@ -5,6 +5,7 @@
 --  Purpose  : Handles compilation at the module level.
 --  Copyright: (c) 2012-2015 Peter Schachte.  All rights reserved.
 --
+--  BEGIN MAJOR DOC
 --  The wybe compiler handles module dependencies, and builds
 --  executables by itself, without the need for build tools like
 --  make.  To keep compile times manageable while supporting
@@ -30,16 +31,19 @@
 --
 --  The build process makes these steps for each SCC in the module
 --  dependency graph (with responsible modules):
---    o  The code is read and flattened (happens before this module is invoked)
---    o  Imported modules are loaded, building if needed (this module)
---    o  The types of exported procs are validated (Types)
---    o  Resource imports and exports are checked (Resources)
---    o  Proc argument types and modes are checked (Types)
---    o  Proc resources are checked and transformed to args (Resources)
---    o  Branches, loops, and nondeterminism are transformed away (Unbranch)
---    o  Procs are compiled to clausal form (Clause)
---    o  Procs are optimised (Optimise)
+--
+--    1.  The code is read and flattened (happens before this module is invoked)
+--    2.  Imported modules are loaded, building them if needed (this module)
+--    3.  The types of exported procs are validated (Types)
+--    4.  Resource imports and exports are checked (Resources)
+--    5.  Proc argument types and modes are checked (Types)
+--    6.  Proc resources are checked and transformed to args (Resources)
+--    7.  Branches, loops, and nondeterminism are transformed away (Unbranch)
+--    8.  Procs are compiled to clausal form (Clause)
+--    9.  Procs are optimised (Optimise)
+--
 --  This is the responsibility of the compileModSCC function.
+--  END MAJOR DOC
 
 -- |Code to oversee the compilation process.
 module Builder (buildTargets, compileModule) where
@@ -114,12 +118,11 @@ buildTarget force target = do
               then logBuild $ "Nothing to be done for target: " ++ target
               else
                 do logBuild $ "Emitting Target: " ++ target
-                   when (tType == ObjectFile) $
-                       emitObjectFile [modname] target
-                   when (tType == BitcodeFile) $
-                       emitBitcodeFile [modname] target
-                   when (tType == AssemblyFile) $
-                       emitAssemblyFile [modname] target
+                   case tType of
+                     ObjectFile -> emitObjectFile [modname] target
+                     BitcodeFile -> emitBitcodeFile [modname] target
+                     AssemblyFile -> emitAssemblyFile [modname] target
+                     other -> nyi $ "output file type " ++ show other
                    whenLogging Emit $ logLLVMString [modname]
 
 
@@ -242,6 +245,10 @@ buildDirectory :: FilePath -> ModSpec -> Compiler Bool
 buildDirectory dir dirmod= do
     logBuild $ "Building DIR: " ++ dir ++ ", into MODULE: "
         ++ showModSpec dirmod
+    -- Make the directory a Module package
+    enterModule dir dirmod Nothing
+    updateModule (\m -> m { isPackage = True })
+
     -- Get wybe modules (in the directory) to build
     let makeMod x = dirmod ++ [x]
     wybemods <- liftIO $ List.map (makeMod . dropExtension)
@@ -253,9 +260,6 @@ buildDirectory dir dirmod= do
     let build m = buildModuleIfNeeded force m [takeDirectory dir]
     built <- or <$> mapM build wybemods
 
-    -- Make the directory a Module package
-    enterModule dir dirmod Nothing
-    updateModule (\m -> m { isPackage = True })
     -- Helper to add new import of `m` to current module
     let updateImport m = do
             addImport m (importSpec Nothing Public)
@@ -263,12 +267,12 @@ buildDirectory dir dirmod= do
                 updateModSubmods $ Map.insert (last m) m
     -- The module package imports all wybe modules in its source dir
     mapM_ updateImport wybemods
-    done <- finishModule
-    liftIO $ print done
+    mods <- exitModule
+    logBuild $ "Generated directory module containing" ++ showModSpecs mods
     -- Run the compilation passes on this module package to append the
     -- procs from the imports to the interface.
     -- XXX Maybe run only the import pass, as there is no module source!
-    compileModSCC [dirmod]
+    compileModSCC mods
     return built
 
 
@@ -292,11 +296,10 @@ compileModule source modspec params items = do
     -- module before handling the module.  If we decide we need to do
     -- that, then we'll need to handle the full dependency
     -- relationship explicitly before doing any compilation.
-    Normalise.normalise compileModSCC items
+    Normalise.normalise items
     stopOnError $ "preliminary processing of module " ++ showModSpec modspec
     loadImports
     stopOnError $ "handling imports for module " ++ showModSpec modspec
-    _ <- gets underCompilation
     mods <- exitModule -- may be empty list if module is mutually dependent
     logBuild $ "<=== finished compling module " ++ showModSpec modspec
     compileModSCC mods
@@ -369,7 +372,7 @@ loadModuleFromObjFile required objfile = do
             modify (\comp -> let ms = superMod : underCompilation comp
                        in comp { underCompilation = ms })
             mapM_ buildDependency imports
-            _ <- finishModule
+            _ <- reexitModule
             logBuild $ "=== <<< Extracted Module put in it's place from "
                 ++ show objfile
             return True
@@ -431,6 +434,7 @@ buildArchive arch = do
 --  reached.
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
+    logBuild $ "compileModSCC " ++ showModSpecs mspecs
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
     ----------------------------------
     -- FLATTENING
@@ -555,7 +559,7 @@ transformModuleProcs trans thisMod = do
         (\imp -> imp { modProcs = Map.union
                                   (Map.fromList $ zip names procs')
                                   (modProcs imp) })
-    _ <- finishModule
+    _ <- reexitModule
     logBuild $ "**** Exiting module " ++ showModSpec thisMod
     return ()
 
@@ -591,7 +595,7 @@ handleModImports _ thisMod = do
     kResources' <- getModuleImplementationField modKnownResources
     kProcs' <- getModuleImplementationField modKnownProcs
     iface' <- getModuleInterface
-    _ <- finishModule
+    _ <- reexitModule
     return (kTypes/=kTypes' || kResources/=kResources' ||
             kProcs/=kProcs' || iface/=iface',[])
 
@@ -693,7 +697,7 @@ loadObjectFile thisMod =
      -- Check if we need to re-emit object file
      rebuild <- objectReBuildNeeded thisMod dir
      when rebuild $ emitObjectFile thisMod objFile
-     _ <- finishModule
+     _ <- reexitModule
      return objFile
 
 
@@ -824,6 +828,8 @@ instance Show ModuleSource where
 
 
 
+-- |Return list of wybe module sources in the specified directory.
+-- XXX This should also return subdirectory, which could also be modules.
 wybeSourcesInDir :: FilePath -> IO [FilePath]
 wybeSourcesInDir dir = do
     let isWybe = List.filter ((== ".wybe") . takeExtension)
