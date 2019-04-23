@@ -343,14 +343,13 @@ buildOutputOp params = do
     outputs <- mapM (getVar . show . primParamName) outParams
     logCodegen $ "Built outputs from symbol table: " ++ show outputs
 
-    case length outputs of
+    case outputs of
         -- * No valid output
-        0 -> return Nothing
+        []       -> return Nothing
         -- * single output case
-        1 -> return $ Just $ head outputs
+        [single] -> return $ Just single
         -- * multiple output case
-        n -> do op <- structPack outputs
-                return $ Just op
+        _        -> Just <$> structPack outputs
 
 -- | Pack operands into a structure through a sequence of insertvalue
 -- instructions.
