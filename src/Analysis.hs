@@ -32,12 +32,15 @@ analyseMod _ thisMod = do
     ----------------------------------
     -- ALIAS ANALYSIS
     -- MODULE LEVEL ALIAS ANALYSIS
-    chg <- mapM aliasSccBottomUp orderedProcs
-    logAnalysis $ "\n>>> module level alias analysis changed? "
-                    ++ show (or chg) ++ " - " ++ show chg
+    mapM_ aliasSccBottomUp orderedProcs
+    -- chg <- mapM aliasSccBottomUp orderedProcs
+    -- logAnalysis $ "\n>>>>>> module level alias analysis changed? "
+    --                 ++ show thisMod ++ " - "
+    --                 ++ show (or chg) ++ " - " ++ show chg
 
-    finishModule
-    return (or chg,[])
+    reexitModule
+    -- return (or chg,[])
+    return (False,[]) -- ^TODO: Is module level fixpoint of alias analysis needed
 
 
 -- TODO: XXX orginal analyseMod function (to be removed)

@@ -32,7 +32,7 @@ module AST (
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
-  AliasPair, AliasMap, ProcAnalysis(..),
+  AliasPair, AliasMap, aliasMapToAliasPairs, ProcAnalysis(..),
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argVarIsFlowDirection, argType,
@@ -1435,7 +1435,12 @@ type AliasMap = UnionFind PrimVarName
 
 -- | a synonym function to hide the impletation of how unionfind is printed
 showAliasMap :: AliasMap -> String
-showAliasMap = showUnionFind
+showAliasMap aliasMap = show $ unionFindToTransitivePairs aliasMap
+
+-- | a synonym function to hide the impletation of how unionfind is converted to
+-- alias pairs
+aliasMapToAliasPairs :: AliasMap -> [(PrimVarName, PrimVarName)]
+aliasMapToAliasPairs = unionFindToTransitivePairs
 
 -- | Original implementation of alias pairs using Int
 -- TODO: to be deleted
@@ -1444,8 +1449,7 @@ type AliasPair = (Int,Int)
 -- | Stores whatever analysis results we infer about a proc definition.
 data ProcAnalysis = ProcAnalysis {
     procArgAliases :: [AliasPair],
-    procArgAliasMap :: AliasMap,
-    procAnalysisFixedPoint :: Bool -- ^XXX wrong way to do this! Need to change type signatures of a bunch of functions start from checkEscapeDef which is called by updateProcDefM
+    procArgAliasMap :: AliasMap
     --- interestingness analysis info -- ^for future
 } deriving (Eq,Generic)
 
@@ -1459,11 +1463,11 @@ instance Show ProcImpln where
         = show proto ++ ":" ++ show analysis ++ showBlock 4 body
 
 instance Show ProcAnalysis where
-    show (ProcAnalysis procArgAliases procArgAliasMap procArgAliasFixedPoint) =
+    show (ProcAnalysis procArgAliases procArgAliasMap) =
         "\nAlias Int Pairs: " ++ show procArgAliases ++ "\n"
         ++ "Alias Arg Pairs: " ++ showAliasMap procArgAliasMap ++ "\n"
         ++ "Alias Map: " ++ show procArgAliasMap ++ "\n"
-        ++ "Alias Fixed Point: " ++ show procArgAliasFixedPoint ++ "\n"
+
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
 -- possibly containg some guards.  Each guard is a test that succeeds

@@ -22,25 +22,38 @@ import           Util
 ----------------------------------------------------------------
 -- PROC LEVEL ALIAS ANALYSIS
 -- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
-aliasSccBottomUp :: SCC ProcSpec -> Compiler Bool
-aliasSccBottomUp procs = do
-    changed <- mapM aliasProcBottomUp $ sccElts procs
-
-    -- TODO: gather all flags (indicating if any proc alias information changed
-    -- or not)
-    -- get a list of booleans; if cyclic(?) and true then do it again
-    -- compare aliasmap changed or not by comparing transitive closure of the
-    -- (key, value) pairs of the map
-
-    return $ or changed
+aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
+aliasSccBottomUp (AcyclicSCC single) =
+    mapM_ aliasProcBottomUp [single]
+    -- immediate fixpoint if no mutual dependency
+-- gather all flags (indicating if any proc alias information changed or not) by
+--     comparing transitive closure of the (key, value) pairs of the map; Only
+--     cycclic procs need to reach a fixed point
+-- False means alias info not changed; so that a fixed point is reached
+aliasSccBottomUp procs@(CyclicSCC multi) = do
+    changed <- mapM aliasProcBottomUp multi
+    logAlias $ "\n>>> CyclicSCC procs alias changed? "
+        ++ show (or changed) ++ " - " ++ show changed
+    when (or changed) $ aliasSccBottomUp procs
+    -- TODO: Is module level fixpoint of alias analysis needed? proc level
+    -- analysis will reach fixpoint anyway??
 
 
 -- XXX aliasProcBottomUp :: ProcSpec -> Compiler a
 aliasProcBottomUp :: ProcSpec -> Compiler Bool
 aliasProcBottomUp pspec = do
     logAlias $ "\n>>> Alias analysis (Bottom-up): " ++ show pspec
+    oldDef <- getProcDef pspec
+    let (ProcDefPrim _ _ oldAnalysis) = procImpln oldDef
+    -- Update alias analysis info to this proc
     updateProcDefM checkEscapeDef pspec
-    return False
+    -- Get the new analysis info from the updated proc
+    newDef <- getProcDef pspec
+    let (ProcDefPrim _ _ newAnalysis) = procImpln newDef
+    -- And compare if the alias map changed
+    areDifferentMaps (procArgAliasMap oldAnalysis) (procArgAliasMap newAnalysis)
+    -- ^XXX wrong way to do this?! Need to change type signatures of a bunch of
+    -- functions start from checkEscapeDef which is called by updateProcDefM
 
 
 -- Check if any argument become stale in this (not inlined) proc call
@@ -49,7 +62,7 @@ aliasProcBottomUp pspec = do
 checkEscapeDef :: ProcDef -> Compiler ProcDef
 checkEscapeDef def
     | not (procInline def) = do
-        let (ProcDefPrim caller body oldAlias) = procImpln def
+        let (ProcDefPrim caller body oldAnalysis) = procImpln def
         logAlias $ show caller
 
         -- TODO: don't transform prims here; do it in Transform.hs and do it
@@ -96,13 +109,12 @@ checkEscapeDef def
         logAlias $ "^^^  alias without finals:   " ++ show totalAliases'
 
         -- (4) Update proc analysis with new aliasPairs
-        let newAlias = oldAlias {
+        let newAnalysis = oldAnalysis {
                             procArgAliases = alias2,
                             procArgAliasMap = totalAliases'
                         }
-        let newDef = def { procImpln = ProcDefPrim caller body2 newAlias }
+        let newDef = def { procImpln = ProcDefPrim caller body2 newAnalysis }
 
-        -- XXX return (newDef, newAlias /= oldAlias)
         return newDef
 
 checkEscapeDef def =
@@ -198,6 +210,18 @@ escapablePrimArgs (PrimForeign _ "mutate" _ args) = return args
 escapablePrimArgs (PrimForeign _ "access" _ args) = return args
 escapablePrimArgs (PrimForeign _ "cast" _ args)   = return args
 escapablePrimArgs _                               = return []
+
+
+-- Helper: compare if two AliasMaps are different
+-- Have to convert the map to Alias Pairs because the root could be different in
+-- two maps whereas the alias info are the same instead
+areDifferentMaps :: AliasMap -> AliasMap -> Compiler Bool
+areDifferentMaps aliasMap1 aliasMap2 = do
+    let aliasPair1 = aliasMapToAliasPairs aliasMap1
+    let aliasPair2 = aliasMapToAliasPairs aliasMap2
+    -- don't have to flag the change if the alias is changed from an empty list
+    -- to another list because the list is always changed at the first time
+    return $ not (List.null aliasPair1) && aliasPair1 /= aliasPair2
 
 
 -- Helper: get argvar names of aliased args of the prim

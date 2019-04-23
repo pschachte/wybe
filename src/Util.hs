@@ -10,8 +10,8 @@
 
 module Util (sameLength, maybeNth, checkMaybe, setMapInsert,
              fillLines, nop, sccElts,
-             UnionFind, UFInfo, showUnionFind, initUnionFind,
-             newUfItem, addUfItem, uniteUf, convertUfVal,
+             UnionFind, UFInfo, unionFindToTransitivePairs,
+             initUnionFind, newUfItem, addUfItem, uniteUf, convertUfVal,
              combineUf, convertUfRoot, convertUfKey, connectedToOthers,
              removeDupTuples, pruneTuples, transitiveTuples, cartProd) where
 
@@ -162,9 +162,9 @@ instance Show a => Show (UFInfo a) where
     show (UFInfo root _) = show root
 
 
--- Print UnionFind as transitive (key, root) tuples
-showUnionFind :: (Ord a, Show a) => UnionFind a -> String
-showUnionFind unionFind =
+-- Convert UnionFind as transitive (key, root) tuples
+unionFindToTransitivePairs :: (Ord a, Show a) => UnionFind a -> [(a,a)]
+unionFindToTransitivePairs unionFind =
     let f k info (aPairs, set) =
             let r = root info
                 set' = Set.insert k set
@@ -191,7 +191,7 @@ showUnionFind unionFind =
             List.foldr (\(idx1, idx2) ls ->
                 (idxToA !! idx1, idxToA !! idx2) : ls
                 ) [] transIdxPairs
-    in show $ removeDupTuples transIdxAPairs
+    in removeDupTuples transIdxAPairs
 
 
 initUnionFind :: UnionFind a
@@ -340,7 +340,7 @@ convertUfKey aSet k info (uf, rootMap) =
         let newKey = Map.lookup k rootMap
         in case newKey of
             Just nk -> (Map.insert nk info uf, rootMap)
-            _ -> (Map.insert k info uf, rootMap)
+            _       -> (Map.insert k info uf, rootMap)
     else (Map.insert k info uf, rootMap)
 
 

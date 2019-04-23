@@ -102,7 +102,7 @@ compileProc proc =
         let proto' = PrimProto (procProtoName proto) params''
         logClause $ "  comparams: " ++ show params''
         return $ proc { procImpln = ProcDefPrim proto' compiled
-                                        (ProcAnalysis [] initUnionFind False)}
+                                        (ProcAnalysis [] initUnionFind)}
 
 
 
