@@ -651,8 +651,9 @@ cgenLPVM pname flags args
                   [a, b, c] -> (a, valTrust b , c)
                   _         -> shouldnt "Incorrect mutate instruction."
           val <- cgenArg valArg
+          valTy <- lift $ typed' $ argType valArg
           ptrOp <- cgenArg ptrOpArg
-          op <- gcMutate ptrOp index val
+          op <- gcMutate ptrOp index val valTy
           assign outNm ptrOp
           return $ Just ptrOp
 
@@ -1182,14 +1183,14 @@ gcAllocate size castTy = do
 -- the instruction inttoptr should precede the load instruction.
 gcAccess :: Operand -> Integer -> LLVMAST.Type -> Codegen Operand
 gcAccess ptr offset outTy = do
-    -- XXX Must cast ptr to be a pointer to outTy
-    logCodegen $ "gcAccess " ++ show ptr ++ " " ++ show offset
+    ptr' <- bitcast ptr $ ptr_t outTy
+    logCodegen $ "gcAccess " ++ show ptr' ++ " " ++ show offset
                  ++ " " ++ show outTy
-    let opTypePtr = localOperandType ptr
+    let opTypePtr = localOperandType ptr'
     -- XXX allow offset to be a variable
     let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
-    let getel = LLVMAST.GetElementPtr False ptr indices []
+    let getel = LLVMAST.GetElementPtr False ptr' indices []
     let opType = pullFromPointer opTypePtr
     accessPtr <- instr opTypePtr getel
 
@@ -1204,18 +1205,19 @@ gcAccess ptr offset outTy = do
 -- in that indexed location.
 -- If the operand to be stored is a pointer, the ptrtoint instruction should
 -- precede the store instruction, with the int value of the pointer stored.
-gcMutate :: Operand -> Integer -> Operand -> Codegen Operand
-gcMutate ptr offset val = do
-    -- XXX Must cast ptr to be a pointer to the type of val
-    let opTypePtr = localOperandType ptr
+gcMutate :: Operand -> Integer -> Operand -> LLVMAST.Type -> Codegen Operand
+gcMutate ptr offset val valTy = do
+    ptr' <- bitcast ptr $ ptr_t valTy
+    logCodegen $ "gcMutate " ++ show ptr' ++ " " ++ show offset
+                 ++ " " ++ show val ++ " " ++ show valTy
+    let opTypePtr = localOperandType ptr'
     -- XXX allow offset to be a variable
     let index = getIndex opTypePtr offset
-    let indices = [(cons $ C.Int 64 index)]
-    let getel = LLVMAST.GetElementPtr False ptr indices []
+    let indices = [cons $ C.Int 64 index]
+    let getel = LLVMAST.GetElementPtr False ptr' indices []
     accessPtr <- instr opTypePtr getel
-    -- if val is a pointer then the ptrtoint instruction is needed
-    storeOp <- makeStoreOp ptr val
-    store accessPtr storeOp
+    store accessPtr val
+
 
 -- | Get the LLVMAST.Type the given pointer type points to.
 pullFromPointer :: LLVMAST.Type -> LLVMAST.Type
@@ -1230,17 +1232,6 @@ getIndex (PointerType ty _) bytes =
     let ptrBits = toInteger $ getBits ty
     in quot (bytes * 8) ptrBits
 getIndex _ _ = shouldnt "Can't compute index from a non-pointer."
-
-
-makeStoreOp :: Operand -> Operand -> Codegen Operand
-makeStoreOp ptr v@(LocalReference (PointerType ty _) _) = ptrtoint v ty
-makeStoreOp ptr
-    v@(ConstantOperand (C.Null (PointerType (IntegerType bs) _))) =
-    return $ cons $ C.Int bs 0
-makeStoreOp ptr
-    v@(ConstantOperand (C.IntToPtr c pty)) =
-    return $ cons c
-makeStoreOp ptr v = return v
 
 
 -- Convert string to ShortByteString

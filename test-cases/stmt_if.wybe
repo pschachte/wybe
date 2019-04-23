@@ -2,7 +2,7 @@
 
 public type tree = public empty | node(left:tree, key:int, right:tree) end
 
-public test proc lookup(key:int, tree:tree, ?r:bool)
+public test proc lookup(key:int, tree:tree, ?result:bool)
     if tree = empty:: ?result = false
     |  key = tree.key:: ?result = true
     |  key < tree.key:: lookup(key, tree.left, ?result)

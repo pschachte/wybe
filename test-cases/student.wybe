@@ -10,3 +10,5 @@ public proc printStudent(stu:student) use !io
   !print("course name: ")
   !println(cour.name)
 end
+
+!printStudent(student(12345,course(90048, "Fred")))
