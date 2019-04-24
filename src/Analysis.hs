@@ -23,11 +23,12 @@ analyseMod _ thisMod = do
     orderedProcs <- getSccProcs thisMod
 
     -- Some logging
-    logAnalysis $ "\n>>>>>>>>>>>>>>>>>>> analyseMod:" ++ show thisMod
-    logAnalysis "\n>>> orderedProcs:"
-    logAnalysis $ show orderedProcs
-    logAnalysis $ "\n>>> Analyse SCCs:\n" ++
+    logAnalysis $ replicate 60 '~'
+    logAnalysis $ "analyseMod:" ++ show thisMod
+    logAnalysis $ ">>> orderedProcs:" ++ show orderedProcs
+    logAnalysis $ ">>> Analyse SCCs: \n" ++
         unlines (List.map (show . sccElts) orderedProcs)
+    logAnalysis $ replicate 60 '~'
 
     ----------------------------------
     -- ALIAS ANALYSIS

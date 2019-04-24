@@ -76,6 +76,7 @@ import           Resources                 (canonicaliseProcResources,
 import           Scanner                   (fileTokens)
 import           System.Directory
 import           System.FilePath
+import           Transform                 (transformProc)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
@@ -119,10 +120,10 @@ buildTarget force target = do
               else
                 do logBuild $ "Emitting Target: " ++ target
                    case tType of
-                     ObjectFile -> emitObjectFile [modname] target
-                     BitcodeFile -> emitBitcodeFile [modname] target
+                     ObjectFile   -> emitObjectFile [modname] target
+                     BitcodeFile  -> emitBitcodeFile [modname] target
                      AssemblyFile -> emitAssemblyFile [modname] target
-                     other -> nyi $ "output file type " ++ show other
+                     other        -> nyi $ "output file type " ++ show other
                    whenLogging Emit $ logLLVMString [modname]
 
 
@@ -486,15 +487,22 @@ compileModSCC mspecs = do
     -- TODO: return a boolean and update the return result
     -- MODULE LEVEL ALIAS ANALYSIS - FIND FIXED POINT
     -- When will this (certain module changed and need to do it again) happen?
-    logMsg Analysis ">>>>>>>>>>>>>>>>>>>>>>>>>>>> Start ANALYSIS in Builder.hs"
-    logMsg Analysis $ replicate 80 '~'
-    logMsg Analysis $ show mspecs
-    logMsg Analysis $ replicate 80 '~'
+    logMsg Analysis $ replicate 70 '='
+    logMsg Analysis "Start ANALYSIS in Builder.hs"
+    logMsg Analysis $ "mspecs: " ++ show mspecs
+    logMsg Analysis $ replicate 70 '='
     fixpointProcessSCC analyseMod mspecs
-    -- TODO: Do extra pass to update prim mutate flag after alias analysis for all
-    -- modules, call it Transform.hs
-
     logDump Analysis Analysis "ANALYSIS"
+    ----------------------------------
+    -- TRANSFORM
+    -- TODO: Do extra pass to update prim mutate flag after alias analysis for all
+    -- -- modules, call it Transform.hs
+    logMsg Transform $ replicate 70 '='
+    logMsg Transform "Start TRANSFORM in Builder.hs"
+    logMsg Transform $ "mspecs: " ++ show mspecs
+    logMsg Transform $ replicate 70 '='
+    mapM_ (transformModuleProcs transformProc)  mspecs
+    logDump Analysis Transform "TRANSFORM"
 
     ----------------------------------
     -- Create an LLVMAST.Module represtation

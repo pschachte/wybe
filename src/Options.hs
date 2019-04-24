@@ -56,7 +56,7 @@ defaultOptions    = Options
 data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
   | Flatten | Normalise | Optimise | Resources | Types
-  | Unbranch | Blocks | Emit | Analysis
+  | Unbranch | Blocks | Emit | Analysis | Transform
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
 
@@ -93,6 +93,8 @@ logSelectionDescription Emit
     = "Log emission of LLVM IR from the definitions created."
 logSelectionDescription Analysis
     = "Log analysis of LPVM IR."
+logSelectionDescription Transform
+    = "Log transform of mutate instructions."
 
 -- |Command line option parser and help text
 options :: [OptDescr (Options -> Options)]

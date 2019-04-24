@@ -37,7 +37,7 @@ executable wybemk
   other-modules: AST, BinaryFactory, Blocks, BodyBuilder, Builder, Callers,
                  Clause, Codegen, Config, Emit, Expansion, Flatten,
                  Macho, NewParser, Normalise, ObjectInterface, Optimise,
-                 Analysis, AliasAnalysis,
+                 Analysis, AliasAnalysis, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
                  Version
   hs-source-dirs: src
@@ -64,7 +64,7 @@ test-suite wybe-test
   other-modules: AST, BinaryFactory, Blocks, BodyBuilder, Builder, Callers,
                  Clause, Codegen, Config, Emit, Expansion, Flatten,
                  Macho, NewParser, Normalise, ObjectInterface, Optimise,
-                 Analysis, AliasAnalysis,
+                 Analysis, AliasAnalysis, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
                  Version
   hs-source-dirs: src
