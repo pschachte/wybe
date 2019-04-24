@@ -390,7 +390,8 @@ operandType (ConstantOperand cons) =
         C.Null ty -> ty
         C.GlobalReference ty _ -> ty
         C.GetElementPtr _ (C.GlobalReference ty _) _ -> ty
-        _ -> error "Not a recognised constant operand."
+        C.IntToPtr _ ty -> ty
+        _ -> shouldnt $ "Not a recognised constant operand: " ++ show cons
 operandType _ = void_t
 
 
