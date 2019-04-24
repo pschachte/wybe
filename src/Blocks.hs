@@ -343,14 +343,13 @@ buildOutputOp params = do
     outputs <- mapM (getVar . show . primParamName) outParams
     logCodegen $ "Built outputs from symbol table: " ++ show outputs
 
-    case length outputs of
+    case outputs of
         -- * No valid output
-        0 -> return Nothing
+        []       -> return Nothing
         -- * single output case
-        1 -> return $ Just $ head outputs
+        [single] -> return $ Just single
         -- * multiple output case
-        n -> do op <- structPack outputs
-                return $ Just op
+        _        -> Just <$> structPack outputs
 
 -- | Pack operands into a structure through a sequence of insertvalue
 -- instructions.
@@ -653,6 +652,7 @@ cgenLPVM "access" [] [addr,offset,val] = do
 cgenLPVM "mutate" []
          [ptrOpArg, outArg, sizeArg, indexArg, destructiveArg, valArg] = do
           val <- cgenArg valArg
+          valTy <- lift $ typed' $ argType valArg
           ptrOp <- cgenArg ptrOpArg
           outTy <- lift $ typed' $ argType outArg
           gcMutate ptrOp (pullName outArg) outTy (trustArgInt sizeArg)
@@ -1206,14 +1206,14 @@ gcAllocate size castTy = do
 -- the instruction inttoptr should precede the load instruction.
 gcAccess :: Operand -> Integer -> LLVMAST.Type -> Codegen Operand
 gcAccess ptr offset outTy = do
-    -- XXX Must cast ptr to be a pointer to outTy
-    logCodegen $ "gcAccess " ++ show ptr ++ " " ++ show offset
+    ptr' <- bitcast ptr $ ptr_t outTy
+    logCodegen $ "gcAccess " ++ show ptr' ++ " " ++ show offset
                  ++ " " ++ show outTy
-    let opTypePtr = localOperandType ptr
+    let opTypePtr = localOperandType ptr'
     -- XXX allow offset to be a variable
     let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
-    let getel = LLVMAST.GetElementPtr False ptr indices []
+    let getel = LLVMAST.GetElementPtr False ptr' indices []
     let opType = pullFromPointer opTypePtr
     accessPtr <- instr opTypePtr getel
 
@@ -1232,7 +1232,10 @@ gcMutate :: Operand -> String -> Type -> Integer -> Integer -> PrimArg
          -> Operand -> Codegen (Maybe Operand)
 gcMutate ptr outNm _ size offset (ArgInt 1 _) val = do
     -- Really do destructive mutation
-    let opTypePtr = localOperandType ptr
+    ptr' <- bitcast ptr $ ptr_t valTy
+    logCodegen $ "gcMutate " ++ show ptr' ++ " " ++ show offset
+                ++ " " ++ show val ++ " " ++ show valTy
+    let opTypePtr = localOperandType ptr'
     let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
     let getel = LLVMAST.GetElementPtr False ptr indices []
@@ -1250,8 +1253,8 @@ gcMutate oldPtr outNm outTy size offset (ArgInt 0 _) val = do
     let opTypePtr = localOperandType ptr
     -- XXX allow offset to be a variable
     let index = getIndex opTypePtr offset
-    let indices = [(cons $ C.Int 64 index)]
-    let getel = LLVMAST.GetElementPtr False ptr indices []
+    let indices = [cons $ C.Int 64 index]
+    let getel = LLVMAST.GetElementPtr False ptr' indices []
     accessPtr <- instr opTypePtr getel
     -- if val is a pointer then the ptrtoint instruction is needed
     storeOp <- makeStoreOp ptr val
@@ -1260,6 +1263,18 @@ gcMutate oldPtr outNm outTy size offset (ArgInt 0 _) val = do
     return $ Just ptr
 gcMutate ptr outNm _ size offset destructiveArg val =
     nyi "lpvm mutate instruction with non-constant destructive flag"
+
+
+makeStoreOp :: Operand -> Operand -> Codegen Operand
+makeStoreOp ptr v@(LocalReference (PointerType ty _) _) = ptrtoint v ty
+makeStoreOp ptr
+    v@(ConstantOperand (C.Null (PointerType (IntegerType bs) _))) =
+    return $ cons $ C.Int bs 0
+makeStoreOp ptr
+    v@(ConstantOperand (C.IntToPtr c pty)) =
+    return $ cons c
+makeStoreOp ptr v = return v
+
 
 -- | Get the LLVMAST.Type the given pointer type points to.
 pullFromPointer :: LLVMAST.Type -> LLVMAST.Type
@@ -1274,17 +1289,6 @@ getIndex (PointerType ty _) bytes =
     let ptrBits = toInteger $ getBits ty
     in quot (bytes * 8) ptrBits
 getIndex _ _ = shouldnt "Can't compute index from a non-pointer."
-
-
-makeStoreOp :: Operand -> Operand -> Codegen Operand
-makeStoreOp ptr v@(LocalReference (PointerType ty _) _) = ptrtoint v ty
-makeStoreOp ptr
-    v@(ConstantOperand (C.Null (PointerType (IntegerType bs) _))) =
-    return $ cons $ C.Int bs 0
-makeStoreOp ptr
-    v@(ConstantOperand (C.IntToPtr c pty)) =
-    return $ cons c
-makeStoreOp ptr v = return v
 
 
 -- Convert string to ShortByteString
