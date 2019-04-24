@@ -121,6 +121,7 @@ buildTarget force target = do
                      ObjectFile -> emitObjectFile [modname] target
                      BitcodeFile -> emitBitcodeFile [modname] target
                      AssemblyFile -> emitAssemblyFile [modname] target
+                     ExecutableFile -> return ()
                      other -> nyi $ "output file type " ++ show other
                    whenLogging Emit $ logLLVMString [modname]
 
