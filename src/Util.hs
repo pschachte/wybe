@@ -11,8 +11,9 @@
 module Util (sameLength, maybeNth, checkMaybe, setMapInsert,
              fillLines, nop, sccElts,
              UnionFind, UFInfo, unionFindToTransitivePairs,
-             initUnionFind, newUfItem, addUfItem, uniteUf, convertUfVal,
-             combineUf, convertUfRoot, convertUfKey, connectedToOthers,
+             initUnionFind, newUfItem, addUfItem, uniteUf, transformUfKey,
+             combineUf, convertUfRoot, convertUfKey, filterUfItems,
+             connectedToOthers,
              removeDupTuples, pruneTuples, transitiveTuples, cartProd) where
 
 
@@ -277,9 +278,9 @@ ufInfo :: a -> UFInfo a
 ufInfo i = UFInfo i 1
 
 -- Convert UnionFind map by mapping key with type 'a' to another value
-convertUfVal :: (Ord a) => Map a a -> a -> UFInfo a -> UnionFind a
+transformUfKey :: (Ord a) => Map a a -> a -> UFInfo a -> UnionFind a
                         -> UnionFind a
-convertUfVal mp k info uf =
+transformUfKey mp k info uf =
     case Map.lookup k mp of
         Just y ->
             let rootX = root info
@@ -308,6 +309,7 @@ combineUf fromUf toUf =
 -- convert UnionFind to a new UnionFind so if any root exists in the aSet then
 --     its children would be moved to a newRoot; the newRoot is the first
 --     occurrance of k whose root is in the aSet
+-- aSet: the set containing items that to be filtered out
 -- rootMap: map oldRoot to newRoot
 convertUfRoot :: (Ord a) => Set a -> a -> UFInfo a -> (UnionFind a, Map a a)
                         -> (UnionFind a, Map a a)
@@ -328,7 +330,12 @@ convertUfRoot aSet k info (uf, rootMap) =
                 rootMap' = Map.insert (root info) newRoot rootMap
                 newInfo = info{ root = newRoot }
                 uf' = Map.insert k newInfo uf
-            in (uf', rootMap')
+            in
+                if Set.member k aSet
+                then (uf', rootMap) -- ^ only add this mapping if k is not in aSet
+                else
+                    let rootMap' = Map.insert (root info) newRoot rootMap
+                    in (uf', rootMap')
     else (Map.insert k info uf, rootMap)
 
 -- Similar to above - but converting key instead
@@ -342,6 +349,13 @@ convertUfKey aSet k info (uf, rootMap) =
             Just nk -> (Map.insert nk info uf, rootMap)
             _       -> (Map.insert k info uf, rootMap)
     else (Map.insert k info uf, rootMap)
+
+-- Similar to above - but filtering out item with same key and root that in aSet
+filterUfItems :: (Ord a) => Set a -> a -> UFInfo a -> UnionFind a -> UnionFind a
+filterUfItems aSet k info uf =
+    if Set.member k aSet && k == root info
+    then uf
+    else Map.insert k info uf
 
 
 -- Check if item is connected to anyone else except itself
