@@ -511,16 +511,16 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readonly
-define i1 @"multictr.number.=<2>"(i64* %"$left#0", i64* %"$right#0") local_unnamed_addr #1 {
+define i1 @"multictr.number.=<2>"(i64*, i64*) local_unnamed_addr #1 {
 entry:
-  %0 = ptrtoint i64* %"$left#0" to i64
-  %"tmp$10#0" = and i64 %0, 7
+  %2 = ptrtoint i64* %0 to i64
+  %"tmp$10#0" = and i64 %2, 7
   %"tmp$11#0" = icmp eq i64 %"tmp$10#0", 0
   br i1 %"tmp$11#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
-  %1 = ptrtoint i64* %"$right#0" to i64
-  %"tmp$14#0" = and i64 %1, 7
+  %3 = ptrtoint i64* %1 to i64
+  %"tmp$14#0" = and i64 %3, 7
   %"tmp$15#0" = icmp eq i64 %"tmp$14#0", 0
   br i1 %"tmp$15#0", label %if.then1, label %if.else1
 
@@ -529,9 +529,9 @@ if.else:                                          ; preds = %entry
   br i1 %"tmp$15#01", label %if.then2, label %if.else1
 
 if.then1:                                         ; preds = %if.then
-  %2 = load i64, i64* %"$left#0", align 4
-  %3 = load i64, i64* %"$right#0", align 4
-  %"$$#0" = icmp eq i64 %2, %3
+  %4 = load i64, i64* %0, align 4
+  %5 = load i64, i64* %1, align 4
+  %"$$#0" = icmp eq i64 %4, %5
   ret i1 %"$$#0"
 
 if.else1:                                         ; preds = %if.then2, %if.else, %if.then
@@ -539,23 +539,25 @@ if.else1:                                         ; preds = %if.then2, %if.else,
   ret i1 %merge
 
 if.then2:                                         ; preds = %if.else
-  %4 = ptrtoint i64* %"$right#0" to i64
-  %"tmp$18#0" = and i64 %4, 7
+  %6 = ptrtoint i64* %1 to i64
+  %"tmp$18#0" = and i64 %6, 7
   %"tmp$19#0" = icmp eq i64 %"tmp$18#0", 1
   br i1 %"tmp$19#0", label %if.then3, label %if.else1
 
 if.then3:                                         ; preds = %if.then2
-  %5 = load i64, i64* %"$left#0", align 4
-  %6 = load i64, i64* %"$right#0", align 4
-  %"$$#02" = fcmp oeq i64 %5, %6
+  %7 = bitcast i64* %0 to double*
+  %8 = load double, double* %7, align 8
+  %9 = bitcast i64* %1 to double*
+  %10 = load double, double* %9, align 8
+  %"$$#02" = fcmp oeq double %8, %10
   ret i1 %"$$#02"
 }
 
 define nonnull i64* @"multictr.number.float<0>"(double %"float_value#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 8)
-  %1 = bitcast i8* %0 to i64*
-  store double %"float_value#0", i64* %1, align 8
+  %1 = bitcast i8* %0 to double*
+  store double %"float_value#0", double* %1, align 8
   %2 = ptrtoint i8* %0 to i64
   %"$recinttagged#0" = or i64 %2, 1
   %3 = inttoptr i64 %"$recinttagged#0" to i64*
@@ -589,7 +591,8 @@ entry:
   br i1 %"tmp$2#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
-  store double %"$field#0", i64* %"$rec#0", align 8
+  %1 = bitcast i64* %"$rec#0" to double*
+  store double %"$field#0", double* %1, align 8
   ret i1 true
 
 if.else:                                          ; preds = %entry
@@ -605,37 +608,37 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"multictr.number.int<1>"(i64* %"$#0") local_unnamed_addr #0 {
+define { i64, i1 } @"multictr.number.int<1>"(i64*) local_unnamed_addr #0 {
 entry:
-  %0 = ptrtoint i64* %"$#0" to i64
-  %"tmp$0#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$0#0" = and i64 %1, 7
   %"tmp$2#0" = icmp eq i64 %"tmp$0#0", 0
   ret i1 %"tmp$2#0"
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"multictr.number.int_value<0>"(i64* %"$rec#0") local_unnamed_addr #0 {
+define { i64, i1 } @"multictr.number.int_value<0>"(i64*) local_unnamed_addr #0 {
 entry:
-  %0 = ptrtoint i64* %"$rec#0" to i64
-  %"tmp$0#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$0#0" = and i64 %1, 7
   %"tmp$2#0" = icmp eq i64 %"tmp$0#0", 0
   ret i1 %"tmp$2#0"
 }
 
 ; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"multictr.number.int_value<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
+define { i64*, i1 } @"multictr.number.int_value<1>"(i64*, i64 %"$field#0") local_unnamed_addr #2 {
 entry:
-  %0 = ptrtoint i64* %"$rec#0" to i64
-  %"tmp$0#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$0#0" = and i64 %1, 7
   %"tmp$2#0" = icmp eq i64 %"tmp$0#0", 0
   br i1 %"tmp$2#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
-  store i64 %"$field#0", i64* %"$rec#0", align 4
+  store i64 %"$field#0", i64* %0, align 4
   ret i1 true
 
 if.else:                                          ; preds = %entry
-  ret i64* %"$rec#0"
+  ret i64* %0
 }
 
 ; Function Attrs: norecurse nounwind readnone
@@ -651,31 +654,31 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readonly
-define i1 @"multictr.simple.=<2>"(i64* %"$left#0", i64* %"$right#0") local_unnamed_addr #1 {
+define i1 @"multictr.simple.=<2>"(i64*, i64*) local_unnamed_addr #1 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$left#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.then, label %if.then1
 
 if.then:                                          ; preds = %entry
-  %"$$#0" = icmp eq i64* %"$right#0", null
+  %"$$#0" = icmp eq i64* %1, null
   ret i1 %"$$#0"
 
 if.then1:                                         ; preds = %entry
-  %0 = ptrtoint i64* %"$left#0" to i64
-  %trunc = trunc i64 %0 to i3
+  %2 = ptrtoint i64* %0 to i64
+  %trunc = trunc i64 %2 to i3
   switch i3 %trunc, label %if.else3 [
     i3 0, label %if.then2
     i3 1, label %if.then6
   ]
 
 if.then2:                                         ; preds = %if.then1
-  %1 = load i64, i64* %"$left#0", align 4
-  %"tmp$16#0" = icmp eq i64* %"$right#0", null
+  %3 = load i64, i64* %0, align 4
+  %"tmp$16#0" = icmp eq i64* %1, null
   br i1 %"tmp$16#0", label %if.else3, label %if.then3
 
 if.then3:                                         ; preds = %if.then2
-  %2 = ptrtoint i64* %"$right#0" to i64
-  %"tmp$17#0" = and i64 %2, 7
+  %4 = ptrtoint i64* %1 to i64
+  %"tmp$17#0" = and i64 %4, 7
   %"tmp$18#0" = icmp eq i64 %"tmp$17#0", 0
   br i1 %"tmp$18#0", label %if.then4, label %if.else3
 
@@ -683,24 +686,24 @@ if.else3:                                         ; preds = %if.then2, %if.then6
   ret i1 false
 
 if.then4:                                         ; preds = %if.then3
-  %3 = load i64, i64* %"$right#0", align 4
-  %"$$#01" = icmp eq i64 %1, %3
+  %5 = load i64, i64* %1, align 4
+  %"$$#01" = icmp eq i64 %3, %5
   ret i1 %"$$#01"
 
 if.then6:                                         ; preds = %if.then1
-  %4 = load i64, i64* %"$left#0", align 4
-  %"tmp$21#0" = icmp eq i64* %"$right#0", null
+  %6 = load i64, i64* %0, align 4
+  %"tmp$21#0" = icmp eq i64* %1, null
   br i1 %"tmp$21#0", label %if.else3, label %if.then7
 
 if.then7:                                         ; preds = %if.then6
-  %5 = ptrtoint i64* %"$right#0" to i64
-  %"tmp$22#0" = and i64 %5, 7
+  %7 = ptrtoint i64* %1 to i64
+  %"tmp$22#0" = and i64 %7, 7
   %"tmp$23#0" = icmp eq i64 %"tmp$22#0", 1
   br i1 %"tmp$23#0", label %if.then8, label %if.else3
 
 if.then8:                                         ; preds = %if.then7
-  %6 = load i64, i64* %"$right#0", align 4
-  %"$$#04" = icmp eq i64 %4, %6
+  %8 = load i64, i64* %1, align 4
+  %"$$#04" = icmp eq i64 %6, %8
   ret i1 %"$$#04"
 }
 
@@ -713,14 +716,14 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"multictr.simple.one<1>"(i64* %"$#0") local_unnamed_addr #0 {
+define { i64, i1 } @"multictr.simple.one<1>"(i64*) local_unnamed_addr #0 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
-  %0 = ptrtoint i64* %"$#0" to i64
-  %"tmp$2#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$2#0" = and i64 %1, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 0
   br label %if.else
 
@@ -730,14 +733,14 @@ if.else:                                          ; preds = %if.then, %entry
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"multictr.simple.one_field<0>"(i64* %"$rec#0") local_unnamed_addr #0 {
+define { i64, i1 } @"multictr.simple.one_field<0>"(i64*) local_unnamed_addr #0 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
-  %0 = ptrtoint i64* %"$rec#0" to i64
-  %"tmp$2#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$2#0" = and i64 %1, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 0
   br label %if.else
 
@@ -747,14 +750,14 @@ if.else:                                          ; preds = %if.then, %entry
 }
 
 ; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"multictr.simple.one_field<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
+define { i64*, i1 } @"multictr.simple.one_field<1>"(i64*, i64 %"$field#0") local_unnamed_addr #2 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
-  %0 = ptrtoint i64* %"$rec#0" to i64
-  %"tmp$2#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$2#0" = and i64 %1, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 0
   br i1 %"tmp$4#0", label %if.then1, label %if.else
 
@@ -762,7 +765,7 @@ if.else:                                          ; preds = %if.then, %entry
   ret i1 false
 
 if.then1:                                         ; preds = %if.then
-  store i64 %"$field#0", i64* %"$rec#0", align 4
+  store i64 %"$field#0", i64* %0, align 4
   ret i1 true
 }
 
@@ -778,14 +781,14 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"multictr.simple.two<1>"(i64* %"$#0") local_unnamed_addr #0 {
+define { i64, i1 } @"multictr.simple.two<1>"(i64*) local_unnamed_addr #0 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
-  %0 = ptrtoint i64* %"$#0" to i64
-  %"tmp$2#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$2#0" = and i64 %1, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 1
   br label %if.else
 
@@ -795,14 +798,14 @@ if.else:                                          ; preds = %if.then, %entry
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"multictr.simple.two_field<0>"(i64* %"$rec#0") local_unnamed_addr #0 {
+define { i64, i1 } @"multictr.simple.two_field<0>"(i64*) local_unnamed_addr #0 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
-  %0 = ptrtoint i64* %"$rec#0" to i64
-  %"tmp$2#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$2#0" = and i64 %1, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 1
   br label %if.else
 
@@ -812,14 +815,14 @@ if.else:                                          ; preds = %if.then, %entry
 }
 
 ; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"multictr.simple.two_field<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
+define { i64*, i1 } @"multictr.simple.two_field<1>"(i64*, i64 %"$field#0") local_unnamed_addr #2 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
-  %0 = ptrtoint i64* %"$rec#0" to i64
-  %"tmp$2#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$2#0" = and i64 %1, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 1
   br i1 %"tmp$4#0", label %if.then1, label %if.else
 
@@ -827,7 +830,7 @@ if.else:                                          ; preds = %if.then, %entry
   ret i1 false
 
 if.then1:                                         ; preds = %if.then
-  store i64 %"$field#0", i64* %"$rec#0", align 4
+  store i64 %"$field#0", i64* %0, align 4
   ret i1 true
 }
 
@@ -860,16 +863,16 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readonly
-define i1 @"multictr.number.=<2>"(i64* %"$left#0", i64* %"$right#0") local_unnamed_addr #1 {
+define i1 @"multictr.number.=<2>"(i64*, i64*) local_unnamed_addr #1 {
 entry:
-  %0 = ptrtoint i64* %"$left#0" to i64
-  %"tmp$10#0" = and i64 %0, 7
+  %2 = ptrtoint i64* %0 to i64
+  %"tmp$10#0" = and i64 %2, 7
   %"tmp$11#0" = icmp eq i64 %"tmp$10#0", 0
   br i1 %"tmp$11#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
-  %1 = ptrtoint i64* %"$right#0" to i64
-  %"tmp$14#0" = and i64 %1, 7
+  %3 = ptrtoint i64* %1 to i64
+  %"tmp$14#0" = and i64 %3, 7
   %"tmp$15#0" = icmp eq i64 %"tmp$14#0", 0
   br i1 %"tmp$15#0", label %if.then1, label %if.else1
 
@@ -878,9 +881,9 @@ if.else:                                          ; preds = %entry
   br i1 %"tmp$15#01", label %if.then2, label %if.else1
 
 if.then1:                                         ; preds = %if.then
-  %2 = load i64, i64* %"$left#0", align 4
-  %3 = load i64, i64* %"$right#0", align 4
-  %"$$#0" = icmp eq i64 %2, %3
+  %4 = load i64, i64* %0, align 4
+  %5 = load i64, i64* %1, align 4
+  %"$$#0" = icmp eq i64 %4, %5
   ret i1 %"$$#0"
 
 if.else1:                                         ; preds = %if.then2, %if.else, %if.then
@@ -888,23 +891,25 @@ if.else1:                                         ; preds = %if.then2, %if.else,
   ret i1 %merge
 
 if.then2:                                         ; preds = %if.else
-  %4 = ptrtoint i64* %"$right#0" to i64
-  %"tmp$18#0" = and i64 %4, 7
+  %6 = ptrtoint i64* %1 to i64
+  %"tmp$18#0" = and i64 %6, 7
   %"tmp$19#0" = icmp eq i64 %"tmp$18#0", 1
   br i1 %"tmp$19#0", label %if.then3, label %if.else1
 
 if.then3:                                         ; preds = %if.then2
-  %5 = load i64, i64* %"$left#0", align 4
-  %6 = load i64, i64* %"$right#0", align 4
-  %"$$#02" = fcmp oeq i64 %5, %6
+  %7 = bitcast i64* %0 to double*
+  %8 = load double, double* %7, align 8
+  %9 = bitcast i64* %1 to double*
+  %10 = load double, double* %9, align 8
+  %"$$#02" = fcmp oeq double %8, %10
   ret i1 %"$$#02"
 }
 
 define nonnull i64* @"multictr.number.float<0>"(double %"float_value#0") local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 8)
-  %1 = bitcast i8* %0 to i64*
-  store double %"float_value#0", i64* %1, align 8
+  %1 = bitcast i8* %0 to double*
+  store double %"float_value#0", double* %1, align 8
   %2 = ptrtoint i8* %0 to i64
   %"$recinttagged#0" = or i64 %2, 1
   %3 = inttoptr i64 %"$recinttagged#0" to i64*
@@ -938,7 +943,8 @@ entry:
   br i1 %"tmp$2#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
-  store double %"$field#0", i64* %"$rec#0", align 8
+  %1 = bitcast i64* %"$rec#0" to double*
+  store double %"$field#0", double* %1, align 8
   ret i1 true
 
 if.else:                                          ; preds = %entry
@@ -954,37 +960,37 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"multictr.number.int<1>"(i64* %"$#0") local_unnamed_addr #0 {
+define { i64, i1 } @"multictr.number.int<1>"(i64*) local_unnamed_addr #0 {
 entry:
-  %0 = ptrtoint i64* %"$#0" to i64
-  %"tmp$0#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$0#0" = and i64 %1, 7
   %"tmp$2#0" = icmp eq i64 %"tmp$0#0", 0
   ret i1 %"tmp$2#0"
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"multictr.number.int_value<0>"(i64* %"$rec#0") local_unnamed_addr #0 {
+define { i64, i1 } @"multictr.number.int_value<0>"(i64*) local_unnamed_addr #0 {
 entry:
-  %0 = ptrtoint i64* %"$rec#0" to i64
-  %"tmp$0#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$0#0" = and i64 %1, 7
   %"tmp$2#0" = icmp eq i64 %"tmp$0#0", 0
   ret i1 %"tmp$2#0"
 }
 
 ; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"multictr.number.int_value<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
+define { i64*, i1 } @"multictr.number.int_value<1>"(i64*, i64 %"$field#0") local_unnamed_addr #2 {
 entry:
-  %0 = ptrtoint i64* %"$rec#0" to i64
-  %"tmp$0#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$0#0" = and i64 %1, 7
   %"tmp$2#0" = icmp eq i64 %"tmp$0#0", 0
   br i1 %"tmp$2#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
-  store i64 %"$field#0", i64* %"$rec#0", align 4
+  store i64 %"$field#0", i64* %0, align 4
   ret i1 true
 
 if.else:                                          ; preds = %entry
-  ret i64* %"$rec#0"
+  ret i64* %0
 }
 
 attributes #0 = { norecurse nounwind readnone }
@@ -1010,31 +1016,31 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readonly
-define i1 @"multictr.simple.=<2>"(i64* %"$left#0", i64* %"$right#0") local_unnamed_addr #1 {
+define i1 @"multictr.simple.=<2>"(i64*, i64*) local_unnamed_addr #1 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$left#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.then, label %if.then1
 
 if.then:                                          ; preds = %entry
-  %"$$#0" = icmp eq i64* %"$right#0", null
+  %"$$#0" = icmp eq i64* %1, null
   ret i1 %"$$#0"
 
 if.then1:                                         ; preds = %entry
-  %0 = ptrtoint i64* %"$left#0" to i64
-  %trunc = trunc i64 %0 to i3
+  %2 = ptrtoint i64* %0 to i64
+  %trunc = trunc i64 %2 to i3
   switch i3 %trunc, label %if.else3 [
     i3 0, label %if.then2
     i3 1, label %if.then6
   ]
 
 if.then2:                                         ; preds = %if.then1
-  %1 = load i64, i64* %"$left#0", align 4
-  %"tmp$16#0" = icmp eq i64* %"$right#0", null
+  %3 = load i64, i64* %0, align 4
+  %"tmp$16#0" = icmp eq i64* %1, null
   br i1 %"tmp$16#0", label %if.else3, label %if.then3
 
 if.then3:                                         ; preds = %if.then2
-  %2 = ptrtoint i64* %"$right#0" to i64
-  %"tmp$17#0" = and i64 %2, 7
+  %4 = ptrtoint i64* %1 to i64
+  %"tmp$17#0" = and i64 %4, 7
   %"tmp$18#0" = icmp eq i64 %"tmp$17#0", 0
   br i1 %"tmp$18#0", label %if.then4, label %if.else3
 
@@ -1042,24 +1048,24 @@ if.else3:                                         ; preds = %if.then2, %if.then6
   ret i1 false
 
 if.then4:                                         ; preds = %if.then3
-  %3 = load i64, i64* %"$right#0", align 4
-  %"$$#01" = icmp eq i64 %1, %3
+  %5 = load i64, i64* %1, align 4
+  %"$$#01" = icmp eq i64 %3, %5
   ret i1 %"$$#01"
 
 if.then6:                                         ; preds = %if.then1
-  %4 = load i64, i64* %"$left#0", align 4
-  %"tmp$21#0" = icmp eq i64* %"$right#0", null
+  %6 = load i64, i64* %0, align 4
+  %"tmp$21#0" = icmp eq i64* %1, null
   br i1 %"tmp$21#0", label %if.else3, label %if.then7
 
 if.then7:                                         ; preds = %if.then6
-  %5 = ptrtoint i64* %"$right#0" to i64
-  %"tmp$22#0" = and i64 %5, 7
+  %7 = ptrtoint i64* %1 to i64
+  %"tmp$22#0" = and i64 %7, 7
   %"tmp$23#0" = icmp eq i64 %"tmp$22#0", 1
   br i1 %"tmp$23#0", label %if.then8, label %if.else3
 
 if.then8:                                         ; preds = %if.then7
-  %6 = load i64, i64* %"$right#0", align 4
-  %"$$#04" = icmp eq i64 %4, %6
+  %8 = load i64, i64* %1, align 4
+  %"$$#04" = icmp eq i64 %6, %8
   ret i1 %"$$#04"
 }
 
@@ -1072,14 +1078,14 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"multictr.simple.one<1>"(i64* %"$#0") local_unnamed_addr #0 {
+define { i64, i1 } @"multictr.simple.one<1>"(i64*) local_unnamed_addr #0 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
-  %0 = ptrtoint i64* %"$#0" to i64
-  %"tmp$2#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$2#0" = and i64 %1, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 0
   br label %if.else
 
@@ -1089,14 +1095,14 @@ if.else:                                          ; preds = %if.then, %entry
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"multictr.simple.one_field<0>"(i64* %"$rec#0") local_unnamed_addr #0 {
+define { i64, i1 } @"multictr.simple.one_field<0>"(i64*) local_unnamed_addr #0 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
-  %0 = ptrtoint i64* %"$rec#0" to i64
-  %"tmp$2#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$2#0" = and i64 %1, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 0
   br label %if.else
 
@@ -1106,14 +1112,14 @@ if.else:                                          ; preds = %if.then, %entry
 }
 
 ; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"multictr.simple.one_field<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
+define { i64*, i1 } @"multictr.simple.one_field<1>"(i64*, i64 %"$field#0") local_unnamed_addr #2 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
-  %0 = ptrtoint i64* %"$rec#0" to i64
-  %"tmp$2#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$2#0" = and i64 %1, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 0
   br i1 %"tmp$4#0", label %if.then1, label %if.else
 
@@ -1121,7 +1127,7 @@ if.else:                                          ; preds = %if.then, %entry
   ret i1 false
 
 if.then1:                                         ; preds = %if.then
-  store i64 %"$field#0", i64* %"$rec#0", align 4
+  store i64 %"$field#0", i64* %0, align 4
   ret i1 true
 }
 
@@ -1137,14 +1143,14 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"multictr.simple.two<1>"(i64* %"$#0") local_unnamed_addr #0 {
+define { i64, i1 } @"multictr.simple.two<1>"(i64*) local_unnamed_addr #0 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
-  %0 = ptrtoint i64* %"$#0" to i64
-  %"tmp$2#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$2#0" = and i64 %1, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 1
   br label %if.else
 
@@ -1154,14 +1160,14 @@ if.else:                                          ; preds = %if.then, %entry
 }
 
 ; Function Attrs: norecurse nounwind readnone
-define { i64, i1 } @"multictr.simple.two_field<0>"(i64* %"$rec#0") local_unnamed_addr #0 {
+define { i64, i1 } @"multictr.simple.two_field<0>"(i64*) local_unnamed_addr #0 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
-  %0 = ptrtoint i64* %"$rec#0" to i64
-  %"tmp$2#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$2#0" = and i64 %1, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 1
   br label %if.else
 
@@ -1171,14 +1177,14 @@ if.else:                                          ; preds = %if.then, %entry
 }
 
 ; Function Attrs: norecurse nounwind
-define { i64*, i1 } @"multictr.simple.two_field<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr #2 {
+define { i64*, i1 } @"multictr.simple.two_field<1>"(i64*, i64 %"$field#0") local_unnamed_addr #2 {
 entry:
-  %"tmp$1#0" = icmp eq i64* %"$rec#0", null
+  %"tmp$1#0" = icmp eq i64* %0, null
   br i1 %"tmp$1#0", label %if.else, label %if.then
 
 if.then:                                          ; preds = %entry
-  %0 = ptrtoint i64* %"$rec#0" to i64
-  %"tmp$2#0" = and i64 %0, 7
+  %1 = ptrtoint i64* %0 to i64
+  %"tmp$2#0" = and i64 %1, 7
   %"tmp$4#0" = icmp eq i64 %"tmp$2#0", 1
   br i1 %"tmp$4#0", label %if.then1, label %if.else
 
@@ -1186,7 +1192,7 @@ if.else:                                          ; preds = %if.then, %entry
   ret i1 false
 
 if.then1:                                         ; preds = %if.then
-  store i64 %"$field#0", i64* %"$rec#0", align 4
+  store i64 %"$field#0", i64* %0, align 4
   ret i1 true
 }
 
