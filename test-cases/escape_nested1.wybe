@@ -1,15 +1,14 @@
-# transitive aliasing data structures in nested proc calls
-
 use position
 
 public proc replicate2(p1:position, ?p2:position) use !io
     ?pp = position(0,0)
-    !print("random replicate2 ")
+    !print("some noise...")
     !println(pp.x)
+
     ?p2 = p1
 end
 
-# Expected Alias Pairs: [(0,1),(0,2),(1,2)]???
+# Expected Alias Pairs: [(0,1),(0,2),(1,2)]?
 public proc replicate1(p1:position, ?p2:position, ?p3:position) use !io
     !replicate2(p1, ?p2)
     !replicate2(p2, ?p3)
@@ -21,15 +20,18 @@ end
 
 !println("=======")
 
-# p1 CANNOT be destructively updated
-x(!p1, 11)
-!print("expect p1 is 11? ")
+!print("expect p1 is 10? ")
 !println(p1.x)
 
 !print("expect p2 is 22? ")
 !println(p2.x)
 
-!print("expect p3 is still 10? ")
+!print("expect p3 is 10? ")
 !println(p3.x)
 
+!println("=======")
 
+# p1 can be destructively updated
+x(!p1, 11)
+!print("expect p1 is 11? ")
+!println(p1.x)
