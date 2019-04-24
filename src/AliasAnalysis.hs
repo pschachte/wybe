@@ -77,42 +77,33 @@ checkEscapeDef def
 
         -- (1) Analysis of current caller's prims
         alias1 <- checkEscapePrims caller body []
-        (bodyPrimsAliases, finalSet1, newPrims) <-
-            aliasedByPrims caller body (initUnionFind, Set.empty, [])
+        (aliaseMap1, newPrims) <-
+            aliasedByPrims caller body (initUnionFind, [])
         -- Update bodyPrims of this procbody
         let body1 = body { bodyPrims = newPrims }
 
         -- (2) Analysis of caller's bodyFork
         alias2 <- checkEscapeFork caller body alias1
         -- Update body while checking alias incurred by bodyfork
-        -- finalSet2 contains all args in final use in this caller excluding its
-        -- formal parameters
-        (bodyForkAliases, finalSet2, body2) <-
-            aliasedByFork caller body1 (bodyPrimsAliases, finalSet1)
+        (aliaseMap2, body2) <-
+            aliasedByFork caller body1 aliaseMap1
 
         -- (3) Clean up summary of aliases by removing phantom params
         let nonePhantomParams = protoNonePhantomParams caller
-        let bodyForkAliases' = Map.filterWithKey (\k _ -> List.elem
-                                    k nonePhantomParams) bodyForkAliases
-        -- Cleanup root that is final
-        let (totalAliases, rootMap) = Map.foldrWithKey (convertUfRoot finalSet2)
-                                (initUnionFind, Map.empty) bodyForkAliases'
-        -- In case key is in final use, so cleanup again
-        let (totalAliases', _) = Map.foldrWithKey (convertUfKey finalSet2)
-                                (initUnionFind, rootMap) totalAliases
+        -- ^nonePhantomParams is a list of formal params of this caller
+        let aliaseMap3 = Map.filterWithKey (\k _ -> List.elem
+                                    k nonePhantomParams) aliaseMap2
 
         -- Some logging
         logAlias $ "\n^^^  aliases (int pair):     " ++ show alias2
-        logAlias $ "^^^  after analyse prims:    " ++ show bodyPrimsAliases
-        logAlias $ "^^^  after analyse forks:    " ++ show bodyForkAliases
-        logAlias $ "^^^  alias of formal params: " ++ show bodyForkAliases'
-        logAlias $ "^^^  params in final:        " ++ show finalSet2
-        logAlias $ "^^^  alias without finals:   " ++ show totalAliases'
+        logAlias $ "^^^  after analyse prims:    " ++ show aliaseMap1
+        logAlias $ "^^^  after analyse forks:    " ++ show aliaseMap2
+        logAlias $ "^^^  alias of formal params: " ++ show aliaseMap3
 
         -- (4) Update proc analysis with new aliasPairs
         let newAnalysis = oldAnalysis {
                             procArgAliases = alias2,
-                            procArgAliasMap = totalAliases'
+                            procArgAliasMap = aliaseMap3
                         }
         let newDef = def { procImpln = ProcDefPrim caller body2 newAnalysis }
 
@@ -125,9 +116,9 @@ checkEscapeDef def =
 
 -- Check alias created by prims of caller proc
 aliasedByPrims :: PrimProto -> ProcBody
-                    -> (AliasMap, Set PrimVarName, [Placed Prim])
-                    -> Compiler (AliasMap, Set PrimVarName, [Placed Prim])
-aliasedByPrims caller body (initAliases, initFinalSet, initPrims) = do
+                    -> (AliasMap, [Placed Prim])
+                    -> Compiler (AliasMap, [Placed Prim])
+aliasedByPrims caller body (initAliases, initPrims) = do
     let nonePhantomParams = protoNonePhantomParams caller
     let prims = bodyPrims body
 
@@ -136,78 +127,81 @@ aliasedByPrims caller body (initAliases, initFinalSet, initPrims) = do
     logAlias "\nAnalyse prims (aliasedByPrims):    "
                 -- ++ List.intercalate "\n    " (List.map show prims)
     let aliasMap = List.foldr newUfItem initAliases nonePhantomParams
-    foldM (aliasedByPrim caller) (aliasMap, initFinalSet, []) prims
+    let nonePhantomParams = protoNonePhantomParams caller
+    foldM (aliasedByPrim nonePhantomParams) (aliasMap, []) prims
 
 
 -- Build up alias pairs triggerred by proc calls
-aliasedByPrim :: PrimProto -> (AliasMap, Set PrimVarName, [Placed Prim])
+aliasedByPrim :: [PrimVarName] -> (AliasMap, [Placed Prim])
                     -> Placed Prim
-                    -> Compiler (AliasMap, Set PrimVarName, [Placed Prim])
-aliasedByPrim caller (aliasMap, finalSet, prims) prim =
+                    -> Compiler (AliasMap, [Placed Prim])
+aliasedByPrim nonePhantomParams (aliasMap, prims) prim =
     case content prim of
-        PrimCall spec args -> do -- ^ Analyse proc calls
+        -- | Analyse proc calls
+        PrimCall spec args -> do
             calleeDef <- getProcDef spec
             let (ProcDefPrim calleeProto _ analysis) = procImpln calleeDef
             let calleeParamAliases = procArgAliasMap analysis
-            logAlias $ "--- call          " ++ show spec ++" (callee): "
+            logAlias $ "\n--- call          " ++ show spec ++" (callee): "
             logAlias $ "" ++ show calleeProto
             logAlias $ "PrimCall args:    " ++ show args
             logAlias $ "current aliasMap: " ++ show aliasMap
             logAlias $ "calleeAlias:      " ++ show calleeParamAliases
             let paramArgMap = mapParamToArgVar calleeProto args
-
             -- calleeArgsAliasMap is the alias map of actual arguments passed
             -- into callee
-            let calleeArgsAliases = Map.foldrWithKey (convertUfVal paramArgMap)
+            let calleeArgsAliases = Map.foldrWithKey (transformUfKey paramArgMap)
                                             initUnionFind calleeParamAliases
-            let combinedAliases = combineUf calleeArgsAliases aliasMap
-            finalSet' <-
-                foldM (_finalArgs $ primProtoParamNames caller) finalSet args
-            logAlias $ "combinedAliases:  " ++ show combinedAliases
-            return (combinedAliases, finalSet', prims ++ [prim])
-        _ -> do -- ^ Analyse simple prims
-            logAlias $ "--- simple prim:  " ++ show prim
+            let combinedAliases1 = combineUf calleeArgsAliases aliasMap
+            -- Gather variables in final use
+            finals <-
+                foldM (_finalArgs nonePhantomParams) Set.empty args
+            -- Then remove them from aliasmap
+            combinedAliases2 <- cleanupFinalAliasedVars combinedAliases1 finals
+            return (combinedAliases2, prims ++ [prim])
+        -- | Analyse simple prims
+        _ -> do
+            logAlias $ "\n--- simple prim:  " ++ show prim
             -- escapablePrimArgs (content prim) >>=
             --     aliasedArgsInPrim (aliasMap, finalSet)
             escapableArgs <- escapablePrimArgs (content prim)
             -- Mutate destructive flag if this is a mutate instruction
             prim' <- mutateInstruction prim aliasMap
             -- Update alias map for escapable args
-            (aliasMap', finalSet') <-
-                aliasedArgsInPrim caller (aliasMap, finalSet) escapableArgs
+            aliasMap2 <-
+                aliasedArgsInPrim nonePhantomParams aliasMap escapableArgs
             logAlias $ "current aliasMap: " ++ show aliasMap
-            logAlias $ "after :           " ++ show aliasMap'
-            return (aliasMap', finalSet', prims ++ [prim'])
+            logAlias $ "after :           " ++ show aliasMap2
+            return (aliasMap2, prims ++ [prim'])
 
 
 -- Recursively analyse forked body's prims
 -- PrimFork only appears at the end of a ProcBody
 -- PrimFork = NoFork | PrimFork {}
 aliasedByFork :: PrimProto -> ProcBody
-                    -> (AliasMap, Set PrimVarName)
-                    -> Compiler (AliasMap, Set PrimVarName, ProcBody)
-aliasedByFork caller body (aliasMap, finalSet) = do
+                    -> AliasMap
+                    -> Compiler (AliasMap, ProcBody)
+aliasedByFork caller body aliasMap = do
     logAlias "\nAnalyse forks (aliasedByFork):"
     let fork = bodyFork body
     case fork of
         PrimFork _ _ _ fBodies -> do
             logAlias "Forking:"
-            (aliasMap', finalSet', fBodies') <-
-                foldM (\(amap, fset, bs) currBody -> do
-                    (amap', fset', ps') <-
-                        aliasedByPrims caller currBody (initUnionFind, Set.empty, [])
+            (aliasMap', fBodies') <-
+                foldM (\(amap, bs) currBody -> do
+                    (amap', ps') <-
+                        aliasedByPrims caller currBody (initUnionFind, [])
                     let currBody1 = currBody { bodyPrims = ps' }
-                    (amap'', fset'', currBody2) <-
-                        aliasedByFork caller currBody1 (amap', fset')
+                    (amap'', currBody2) <-
+                        aliasedByFork caller currBody1 amap'
                     let combinedAliases = combineUf amap'' amap
-                    let combinedFinalSet = Set.union fset fset''
-                    return (combinedAliases, combinedFinalSet, bs++[currBody2])
-                ) (aliasMap, finalSet, []) fBodies
-            return (aliasMap', finalSet', body { bodyFork = fork {forkBodies=fBodies'} })
+                    return (combinedAliases, bs++[currBody2])
+                ) (aliasMap, []) fBodies
+            return (aliasMap', body { bodyFork = fork {forkBodies=fBodies'} })
         _ -> do
             -- NoFork: analyse prims done
             logAlias "No fork."
-            return (aliasMap, finalSet, body)
+            return (aliasMap, body)
 
 
 -- Build up alias pairs triggerred by move, mutate, access, cast instructions
@@ -243,19 +237,21 @@ argsOfProcProto varNameGetter escapedVars arg = do
 
 -- Check Arg aliases in one of the prims of a ProcBody
 -- args: argument in current prim that being analysed
-aliasedArgsInPrim :: PrimProto -> (AliasMap, Set PrimVarName) -> [PrimArg]
-                        -> Compiler (AliasMap, Set PrimVarName)
-aliasedArgsInPrim _ (aliasMap, finalSet) [] = return (aliasMap, finalSet)
-aliasedArgsInPrim caller (aliasMap, finalSet) args = do
+aliasedArgsInPrim :: [PrimVarName] -> AliasMap -> [PrimArg]
+                        -> Compiler AliasMap
+aliasedArgsInPrim _ aliasMap [] = return aliasMap
+aliasedArgsInPrim nonePhantomParams aliasMap args = do
     let inputArgs = List.filter (argVarIsFlowDirection FlowIn) args
     let outputArgs = List.filter (argVarIsFlowDirection FlowOut) args
     escapedInputs <- foldM (argsOfProcProto inArgVar2) [] inputArgs
     escapedVia <- foldM (argsOfProcProto outArgVar2) [] outputArgs
     let aliases = cartProd escapedInputs escapedVia
-    let aliasMap' = List.foldr (\(inArg, outArg) aMap ->
+    let aliasMap1 = List.foldr (\(inArg, outArg) aMap ->
                         uniteUf aMap inArg outArg) aliasMap aliases
-    finalSet' <- foldM (_finalArgs $ primProtoParamNames caller) finalSet args
-    return (aliasMap', finalSet')
+    -- Gather variables in final use
+    finals <- foldM (_finalArgs nonePhantomParams) Set.empty args
+    -- Then remove them from aliasmap
+    return $ cleanupFinalAliasedVars aliasMap1 finals
 
 
 -- Helper: map arguments in callee proc to its formal parameters so we can get
@@ -280,10 +276,10 @@ _zipParamToArgVar _ [] = []
 -- Don't add to finalset if the var is a formal parameter in caller's proto
 _finalArgs :: [PrimVarName] -> Set PrimVarName -> PrimArg
                 -> Compiler (Set PrimVarName)
-_finalArgs formalParams finalSet fIn@(ArgVar inName _ _ _ final) =
-    if inName `elem` formalParams
-    then return finalSet
-    else return $ Set.insert inName finalSet
+_finalArgs nonePhantomParams finalSet fIn@(ArgVar inName _ _ _ final) =
+    if List.notElem inName nonePhantomParams && final
+    then return $ Set.insert inName finalSet
+    else return finalSet
 _finalArgs _ finalSet _ = return finalSet
 
 
@@ -316,6 +312,22 @@ _updateMutateForAlias aliasMap
         then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
         else return [fIn, fOut, size, offset, ArgInt des typ, mem]
 _updateMutateForAlias _ args = return args
+
+
+-- Helper: Cleanup aliased variables that are in final use
+cleanupFinalAliasedVars aliasMap finals = do
+    -- Cleanup root that is final and gather a mapping from removed root to
+    -- new root
+    let (totalAliases1, rootMap) = Map.foldrWithKey (convertUfRoot finals)
+                            (initUnionFind, Map.empty) aliasMap
+    -- Now all variables in final use would be converted to map to itself
+    -- Need to remove them from the map
+    let totalAliases2 = Map.foldrWithKey (filterUfItems finals)
+                            initUnionFind totalAliases1
+    -- In case key is in final use, so cleanup again
+    let (totalAliases3, _) = Map.foldrWithKey (convertUfKey finals)
+                            (initUnionFind, rootMap) totalAliases2
+    return totalAliases3
 
 
 -- |Log a message, if we are logging optimisation activity.
