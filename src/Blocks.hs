@@ -1232,10 +1232,7 @@ gcMutate :: Operand -> String -> Type -> Integer -> Integer -> PrimArg
          -> Operand -> Codegen (Maybe Operand)
 gcMutate ptr outNm _ size offset (ArgInt 1 _) val = do
     -- Really do destructive mutation
-    ptr' <- bitcast ptr $ ptr_t valTy
-    logCodegen $ "gcMutate " ++ show ptr' ++ " " ++ show offset
-                ++ " " ++ show val ++ " " ++ show valTy
-    let opTypePtr = localOperandType ptr'
+    let opTypePtr = localOperandType ptr
     let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
     let getel = LLVMAST.GetElementPtr False ptr indices []
@@ -1254,7 +1251,7 @@ gcMutate oldPtr outNm outTy size offset (ArgInt 0 _) val = do
     -- XXX allow offset to be a variable
     let index = getIndex opTypePtr offset
     let indices = [cons $ C.Int 64 index]
-    let getel = LLVMAST.GetElementPtr False ptr' indices []
+    let getel = LLVMAST.GetElementPtr False ptr indices []
     accessPtr <- instr opTypePtr getel
     -- if val is a pointer then the ptrtoint instruction is needed
     storeOp <- makeStoreOp ptr val
