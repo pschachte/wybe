@@ -32,8 +32,12 @@ aliasSccBottomUp (AcyclicSCC single) =
 -- False means alias info not changed; so that a fixed point is reached
 aliasSccBottomUp procs@(CyclicSCC multi) = do
     changed <- mapM aliasProcBottomUp multi
-    logAlias $ "\n>>> CyclicSCC procs alias changed? "
-        ++ show (or changed) ++ " - " ++ show changed
+
+    logAlias $ replicate 60 '-'
+    logAlias $ "CyclicSCC procs alias changed? "
+                 ++ show (or changed) ++ " - " ++ show changed
+    logAlias $ replicate 60 '-'
+
     when (or changed) $ aliasSccBottomUp procs
     -- TODO: Is module level fixpoint of alias analysis needed? proc level
     -- analysis will reach fixpoint anyway??
@@ -42,7 +46,10 @@ aliasSccBottomUp procs@(CyclicSCC multi) = do
 -- XXX aliasProcBottomUp :: ProcSpec -> Compiler a
 aliasProcBottomUp :: ProcSpec -> Compiler Bool
 aliasProcBottomUp pspec = do
-    logAlias $ "\n>>> Alias analysis (Bottom-up): " ++ show pspec
+    logAlias $ replicate 60 '-'
+    logAlias $ "Alias analysis (Bottom-up): " ++ show pspec
+    logAlias $ replicate 60 '-'
+
     oldDef <- getProcDef pspec
     let (ProcDefPrim _ _ oldAnalysis) = procImpln oldDef
     -- Update alias analysis info to this proc
@@ -78,26 +85,20 @@ checkEscapeDef def
         -- (2) Analysis of caller's bodyFork
         alias2 <- checkEscapeFork caller body alias1
         -- Update body while checking alias incurred by bodyfork
+        -- finalSet2 contains all args in final use in this caller excluding its
+        -- formal parameters
         (bodyForkAliases, finalSet2, body2) <-
             aliasedByFork caller body1 (bodyPrimsAliases, finalSet1)
-
-        if body1 /= body2
-            then logAlias "BODY CHANGED AFTER CHECK ALIAS BY FORK"
-            else logAlias "BODY NOT CHANGED"
 
         -- (3) Clean up summary of aliases by removing phantom params
         let nonePhantomParams = protoNonePhantomParams caller
         let bodyForkAliases' = Map.filterWithKey (\k _ -> List.elem
                                     k nonePhantomParams) bodyForkAliases
-        -- finalSet3 contains all args in final use in this caller excluding
-        -- formal parameters
-        let finalSet3 = Set.difference finalSet2
-                            $ Set.fromList $ primProtoParamNames caller
         -- Cleanup root that is final
-        let (totalAliases, rootMap) = Map.foldrWithKey (convertUfRoot finalSet3)
+        let (totalAliases, rootMap) = Map.foldrWithKey (convertUfRoot finalSet2)
                                 (initUnionFind, Map.empty) bodyForkAliases'
         -- In case key is in final use, so cleanup again
-        let (totalAliases', _) = Map.foldrWithKey (convertUfKey finalSet3)
+        let (totalAliases', _) = Map.foldrWithKey (convertUfKey finalSet2)
                                 (initUnionFind, rootMap) totalAliases
 
         -- Some logging
@@ -105,7 +106,7 @@ checkEscapeDef def
         logAlias $ "^^^  after analyse prims:    " ++ show bodyPrimsAliases
         logAlias $ "^^^  after analyse forks:    " ++ show bodyForkAliases
         logAlias $ "^^^  alias of formal params: " ++ show bodyForkAliases'
-        logAlias $ "^^^  params in final:        " ++ show finalSet3
+        logAlias $ "^^^  params in final:        " ++ show finalSet2
         logAlias $ "^^^  alias without finals:   " ++ show totalAliases'
 
         -- (4) Update proc analysis with new aliasPairs
@@ -135,23 +136,24 @@ aliasedByPrims caller body (initAliases, initFinalSet, initPrims) = do
     logAlias "\nAnalyse prims (aliasedByPrims):    "
                 -- ++ List.intercalate "\n    " (List.map show prims)
     let aliasMap = List.foldr newUfItem initAliases nonePhantomParams
-    foldM aliasedByPrim (aliasMap, initFinalSet, []) prims
+    foldM (aliasedByPrim caller) (aliasMap, initFinalSet, []) prims
 
 
 -- Build up alias pairs triggerred by proc calls
-aliasedByPrim :: (AliasMap, Set PrimVarName, [Placed Prim]) -> Placed Prim
+aliasedByPrim :: PrimProto -> (AliasMap, Set PrimVarName, [Placed Prim])
+                    -> Placed Prim
                     -> Compiler (AliasMap, Set PrimVarName, [Placed Prim])
-aliasedByPrim (aliasMap, finalSet, prims) prim =
+aliasedByPrim caller (aliasMap, finalSet, prims) prim =
     case content prim of
-        PrimCall spec args -> do
+        PrimCall spec args -> do -- ^ Analyse proc calls
             calleeDef <- getProcDef spec
             let (ProcDefPrim calleeProto _ analysis) = procImpln calleeDef
             let calleeParamAliases = procArgAliasMap analysis
-            logAlias $ "\n    --- call " ++ show spec ++" (callee): "
-            logAlias $ "    " ++ show calleeProto
-            logAlias $ "    PrimCall args: " ++ show args
-            logAlias $ "    current aliasMap: " ++ show aliasMap
-            logAlias $ "    calleeAlias: " ++ show calleeParamAliases
+            logAlias $ "--- call          " ++ show spec ++" (callee): "
+            logAlias $ "" ++ show calleeProto
+            logAlias $ "PrimCall args:    " ++ show args
+            logAlias $ "current aliasMap: " ++ show aliasMap
+            logAlias $ "calleeAlias:      " ++ show calleeParamAliases
             let paramArgMap = mapParamToArgVar calleeProto args
 
             -- calleeArgsAliasMap is the alias map of actual arguments passed
@@ -159,9 +161,12 @@ aliasedByPrim (aliasMap, finalSet, prims) prim =
             let calleeArgsAliases = Map.foldrWithKey (convertUfVal paramArgMap)
                                             initUnionFind calleeParamAliases
             let combinedAliases = combineUf calleeArgsAliases aliasMap
-            return (combinedAliases, _finalArgs args finalSet, prims ++ [prim])
-        _ -> do
-            logAlias $ "    " ++ show prim
+            finalSet' <-
+                foldM (_finalArgs $ primProtoParamNames caller) finalSet args
+            logAlias $ "combinedAliases:  " ++ show combinedAliases
+            return (combinedAliases, finalSet', prims ++ [prim])
+        _ -> do -- ^ Analyse simple prims
+            logAlias $ "--- simple prim:  " ++ show prim
             -- escapablePrimArgs (content prim) >>=
             --     aliasedArgsInPrim (aliasMap, finalSet)
             escapableArgs <- escapablePrimArgs (content prim)
@@ -169,7 +174,9 @@ aliasedByPrim (aliasMap, finalSet, prims) prim =
             prim' <- mutateInstruction prim aliasMap
             -- Update alias map for escapable args
             (aliasMap', finalSet') <-
-                aliasedArgsInPrim (aliasMap, finalSet) escapableArgs
+                aliasedArgsInPrim caller (aliasMap, finalSet) escapableArgs
+            logAlias $ "current aliasMap: " ++ show aliasMap
+            logAlias $ "after :           " ++ show aliasMap'
             return (aliasMap', finalSet', prims ++ [prim'])
 
 
@@ -236,10 +243,10 @@ argsOfProcProto varNameGetter escapedVars arg = do
 
 -- Check Arg aliases in one of the prims of a ProcBody
 -- args: argument in current prim that being analysed
-aliasedArgsInPrim :: (AliasMap, Set PrimVarName) -> [PrimArg]
+aliasedArgsInPrim :: PrimProto -> (AliasMap, Set PrimVarName) -> [PrimArg]
                         -> Compiler (AliasMap, Set PrimVarName)
-aliasedArgsInPrim (aliasMap, finalSet) [] = return (aliasMap, finalSet)
-aliasedArgsInPrim (aliasMap, finalSet) args = do
+aliasedArgsInPrim _ (aliasMap, finalSet) [] = return (aliasMap, finalSet)
+aliasedArgsInPrim caller (aliasMap, finalSet) args = do
     let inputArgs = List.filter (argVarIsFlowDirection FlowIn) args
     let outputArgs = List.filter (argVarIsFlowDirection FlowOut) args
     escapedInputs <- foldM (argsOfProcProto inArgVar2) [] inputArgs
@@ -247,7 +254,8 @@ aliasedArgsInPrim (aliasMap, finalSet) args = do
     let aliases = cartProd escapedInputs escapedVia
     let aliasMap' = List.foldr (\(inArg, outArg) aMap ->
                         uniteUf aMap inArg outArg) aliasMap aliases
-    return (aliasMap', _finalArgs args finalSet)
+    finalSet' <- foldM (_finalArgs $ primProtoParamNames caller) finalSet args
+    return (aliasMap', finalSet')
 
 
 -- Helper: map arguments in callee proc to its formal parameters so we can get
@@ -269,10 +277,14 @@ _zipParamToArgVar _ [] = []
 
 
 -- Helper: put final arg into the set
-_finalArgs :: [PrimArg] -> Set PrimVarName -> Set PrimVarName
-_finalArgs [fIn@(ArgVar inName _ _ _ final), _, _, _, _, _] finalSet =
-    Set.insert inName finalSet
-_finalArgs _ finalSet = finalSet
+-- Don't add to finalset if the var is a formal parameter in caller's proto
+_finalArgs :: [PrimVarName] -> Set PrimVarName -> PrimArg
+                -> Compiler (Set PrimVarName)
+_finalArgs formalParams finalSet fIn@(ArgVar inName _ _ _ final) =
+    if inName `elem` formalParams
+    then return finalSet
+    else return $ Set.insert inName finalSet
+_finalArgs _ finalSet _ = return finalSet
 
 
 -- Update mutate prim by checking if input is aliased
