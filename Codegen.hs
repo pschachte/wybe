@@ -360,7 +360,7 @@ local ty nm = LocalReference ty nm
 -- | Store a local variable on the front of the symbol table.
 assign :: String -> Operand -> Codegen ()
 assign var x = do
-    -- logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show x
+    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show x
     lcls <- gets symtab
     modify $ \s -> s { symtab = (var, x) : lcls }
 
@@ -390,6 +390,7 @@ operandType (ConstantOperand cons) =
         C.Null ty -> ty
         C.GlobalReference ty _ -> ty
         C.GetElementPtr _ (C.GlobalReference ty _) _ -> ty
+        C.IntToPtr _ ty -> ty
         _ -> shouldnt $ "Not a recognised constant operand: " ++ show cons
 operandType _ = void_t
 

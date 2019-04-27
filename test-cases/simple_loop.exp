@@ -17,14 +17,14 @@ AFTER EVERYTHING:
 
 gen$1 > (2 calls)
 0: gen$1(wybe.io$io#0:phantom, ?wybe.io$io#3:phantom):
-    foreign c read_char(?c#0:wybe.char, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:91:39
-    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$1#0:wybe.bool) @wybe:72:42
+    foreign c read_char(?c#0:wybe.char, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:90:39
+    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$1#0:wybe.bool) @wybe:71:42
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(~wybe.io$io#1:phantom, ?wybe.io$io#3:phantom)
 
     1:
-        foreign c putchar(~c#0:wybe.char, ~#wybe.io$io#1:phantom, ?#wybe.io$io#2:phantom) @wybe:89:39
+        foreign c putchar(~c#0:wybe.char, ~#wybe.io$io#1:phantom, ?#wybe.io$io#2:phantom) @wybe:88:39
         simple_loop.gen$1<0>(~wybe.io$io#2:phantom, ?wybe.io$io#3:phantom) @simple_loop:1:1
 
 

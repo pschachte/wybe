@@ -47,7 +47,7 @@ optimiseMod mods thisMod = do
                let pspec = ProcSpec thisMod name n
              ]
     mapM_ optimiseSccBottomUp ordered
-    finishModule
+    reexitModule
     return (False,[])
 
 

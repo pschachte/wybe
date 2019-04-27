@@ -12,17 +12,17 @@ AFTER EVERYTHING:
 
 gen$1 > (2 calls)
 0: gen$1(prompt#0:wybe.string, wybe.io$io#0:phantom, ?result#1:wybe.bool, ?wybe.io$io#5:phantom):
-    foreign c print_string(prompt#0:wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:93:41
-    foreign c print_string(" (y/n) ":wybe.string, ~#wybe.io$io#1:phantom, ?#wybe.io$io#2:phantom) @wybe:93:41
-    foreign c read_char(?response#0:wybe.char, ~#wybe.io$io#2:phantom, ?#wybe.io$io#3:phantom) @wybe:91:39
-    foreign llvm icmp eq(response#0:wybe.char, 'Y':wybe.char, ?tmp$0#0:wybe.bool) @wybe:71:42
+    foreign c print_string(prompt#0:wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
+    foreign c print_string(" (y/n) ":wybe.string, ~#wybe.io$io#1:phantom, ?#wybe.io$io#2:phantom) @wybe:92:41
+    foreign c read_char(?response#0:wybe.char, ~#wybe.io$io#2:phantom, ?#wybe.io$io#3:phantom) @wybe:90:39
+    foreign llvm icmp eq(response#0:wybe.char, 'Y':wybe.char, ?tmp$0#0:wybe.bool) @wybe:70:42
     case ~tmp$0#0:wybe.bool of
     0:
-        foreign llvm icmp eq(~response#0:wybe.char, 'N':wybe.char, ?tmp$2#0:wybe.bool) @wybe:71:42
+        foreign llvm icmp eq(~response#0:wybe.char, 'N':wybe.char, ?tmp$2#0:wybe.bool) @wybe:70:42
         case ~tmp$2#0:wybe.bool of
         0:
-            foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~#wybe.io$io#3:phantom, ?tmp$14#0:phantom) @wybe:93:41
-            foreign c putchar('\n':wybe.char, ~tmp$14#0:phantom, ?#wybe.io$io#4:phantom) @wybe:79:28
+            foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~#wybe.io$io#3:phantom, ?tmp$14#0:phantom) @wybe:92:41
+            foreign c putchar('\n':wybe.char, ~tmp$14#0:phantom, ?#wybe.io$io#4:phantom) @wybe:78:28
             proc_yorn2.gen$1<0>(~prompt#0:wybe.string, ~wybe.io$io#4:phantom, ?result#1:wybe.bool, ?wybe.io$io#5:phantom) @proc_yorn2:2:5
 
         1:

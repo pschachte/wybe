@@ -37,7 +37,7 @@ withModuleLLVM :: ModSpec -> (LLVMAST.Module -> IO a) -> Compiler a
 withModuleLLVM thisMod action = do
     reenterModule thisMod
     maybeLLMod <- getModuleImplementationField modLLVM
-    _ <- finishModule
+    _ <- reexitModule
     case maybeLLMod of
       (Just llmod) -> liftIO $ action llmod
       Nothing      -> error "No LLVM Module Implementation"
@@ -61,7 +61,7 @@ emitObjectFile m f = do
                modBS <- encodeModule astMod
                liftIO $ makeWrappedObjFile f llmod modBS
         Nothing -> error "No LLVM Module Implementation"
-    _ <- finishModule
+    _ <- reexitModule
     return ()
 
 -- | With the LLVM AST representation of a LPVM Module, create a
@@ -80,7 +80,7 @@ emitBitcodeFile m f = do
           modBS <- encodeModule astMod
           liftIO $ makeWrappedBCFile f llmod modBS
      Nothing -> error "No LLVM Module Implementation"
-   _ <- finishModule
+   _ <- reexitModule
    return ()
 
 -- | With the LLVM AST representation of a LPVM Module, create a
@@ -289,7 +289,7 @@ logLLVMString thisMod =
             logEmit $ TL.unpack llstr
             logEmit $ replicate 80 '-'
        Nothing -> error "No LLVM Module Implementation"
-     _ <- finishModule
+     _ <- reexitModule
      return ()
 
 -- | Pull the LLVMAST representation of the module and generate the LLVM

@@ -103,7 +103,7 @@ blockTransformModule thisMod =
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) modFile procBlocks
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
-       _ <- finishModule
+       _ <- reexitModule
        logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
 
@@ -343,14 +343,13 @@ buildOutputOp params = do
     outputs <- mapM (getVar . show . primParamName) outParams
     logCodegen $ "Built outputs from symbol table: " ++ show outputs
 
-    case length outputs of
+    case outputs of
         -- * No valid output
-        0 -> return Nothing
+        []       -> return Nothing
         -- * single output case
-        1 -> return $ Just $ head outputs
+        [single] -> return $ Just single
         -- * multiple output case
-        n -> do op <- structPack outputs
-                return $ Just op
+        _        -> Just <$> structPack outputs
 
 -- | Pack operands into a structure through a sequence of insertvalue
 -- instructions.
@@ -443,7 +442,7 @@ codegenForkBody var (b1:b2:[]) proto =
        -- -- if.exit
        -- setBlock ifexit
        -- phi int_t [(trueval, ifthen), (falseval, ifelse)]
-codegenForkBody _ _ _ = error
+codegenForkBody _ _ _ = shouldnt
   $ "Unrecognized control flow. Too many/few blocks."
 
 -- | A filter transformation to ensure that a Just Void operand is
@@ -521,7 +520,7 @@ cgen prim@(PrimForeign lang name flags args) = do
           inops
     addInstruction ins args
 
-cgen (PrimTest _) = error "PrimTest should have been removed before code gen"
+cgen (PrimTest _) = shouldnt "PrimTest should have been removed before code gen"
 
 
 makeCIntOp :: Operand -> Codegen Operand
@@ -558,7 +557,7 @@ cgenLLVMBinop name flags args =
        case Map.lookup (withFlags name flags) llvmMapBinop of
          (Just f) -> let ins = (apply2 f inOps)
                      in addInstruction ins args
-         Nothing -> error $ "LLVM Instruction not found: " ++ name
+         Nothing -> shouldnt $ "LLVM Instruction not found: " ++ name
 
 
 -- | Similar to 'cgenLLVMBinop', but for unary operations on the
@@ -593,7 +592,7 @@ cgenLLVMUnop name flags args
            case Map.lookup name llvmMapUnop of
              (Just f) -> let ins = f (head inOps)
                          in addInstruction ins args
-             Nothing -> error $ "LLVM Instruction not found : " ++ name
+             Nothing -> shouldnt $ "LLVM Instruction not found : " ++ name
 
 
 -- | Look inside the Prototype list stored in the CodegenState monad and
@@ -652,8 +651,9 @@ cgenLPVM pname flags args
                   [a, b, c] -> (a, valTrust b , c)
                   _         -> shouldnt "Incorrect mutate instruction."
           val <- cgenArg valArg
+          valTy <- lift $ typed' $ argType valArg
           ptrOp <- cgenArg ptrOpArg
-          op <- gcMutate ptrOp index val
+          op <- gcMutate ptrOp index val valTy
           assign outNm ptrOp
           return $ Just ptrOp
 
@@ -757,7 +757,7 @@ addInstruction ins args = do
                   return $ Just $ last fields
 
 pullName (ArgVar var _ _ _ _) = show var
-pullName _                    = error $ "Expected variable as output."
+pullName _                    = shouldnt $ "Expected variable as output."
 
 -- | Generate an expanding instruction name using the passed flags. This is
 -- useful to augment a simple instruction. (Ex: compare instructions can have
@@ -770,7 +770,7 @@ withFlags p f  = p ++ " " ++ (List.intercalate " " f)
 -- instruction from 'Codegen' Module.
 apply2 :: (Operand -> Operand -> Instruction) -> [Operand] -> Instruction
 apply2 f (a:b:[]) = f a b
-apply2 _ _        = error $ "Not a binary operation."
+apply2 _ _        = shouldnt $ "Not a binary operation."
 
 
 ----------------------------------------------------------------------------
@@ -1050,7 +1050,7 @@ declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
     fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
     return $ external retty (show pspec) fnargs
 
-declareExtern (PrimTest _) = error "Can't declare extern for PrimNop."
+declareExtern (PrimTest _) = shouldnt "Can't declare extern for PrimNop."
 
 -- | Helper to make arguments for an extern declaration.
 makeExArg :: (Word, PrimArg) -> Compiler (Type, LLVMAST.Name)
@@ -1183,10 +1183,14 @@ gcAllocate size castTy = do
 -- the instruction inttoptr should precede the load instruction.
 gcAccess :: Operand -> Integer -> LLVMAST.Type -> Codegen Operand
 gcAccess ptr offset outTy = do
-    let opTypePtr = localOperandType ptr
+    ptr' <- bitcast ptr $ ptr_t outTy
+    logCodegen $ "gcAccess " ++ show ptr' ++ " " ++ show offset
+                 ++ " " ++ show outTy
+    let opTypePtr = localOperandType ptr'
+    -- XXX allow offset to be a variable
     let index = getIndex opTypePtr offset
     let indices = [(cons $ C.Int 64 index)]
-    let getel = LLVMAST.GetElementPtr False ptr indices []
+    let getel = LLVMAST.GetElementPtr False ptr' indices []
     let opType = pullFromPointer opTypePtr
     accessPtr <- instr opTypePtr getel
 
@@ -1201,16 +1205,19 @@ gcAccess ptr offset outTy = do
 -- in that indexed location.
 -- If the operand to be stored is a pointer, the ptrtoint instruction should
 -- precede the store instruction, with the int value of the pointer stored.
-gcMutate :: Operand -> Integer -> Operand -> Codegen Operand
-gcMutate ptr offset val = do
-    let opTypePtr = localOperandType ptr
+gcMutate :: Operand -> Integer -> Operand -> LLVMAST.Type -> Codegen Operand
+gcMutate ptr offset val valTy = do
+    ptr' <- bitcast ptr $ ptr_t valTy
+    logCodegen $ "gcMutate " ++ show ptr' ++ " " ++ show offset
+                 ++ " " ++ show val ++ " " ++ show valTy
+    let opTypePtr = localOperandType ptr'
+    -- XXX allow offset to be a variable
     let index = getIndex opTypePtr offset
-    let indices = [(cons $ C.Int 64 index)]
-    let getel = LLVMAST.GetElementPtr False ptr indices []
+    let indices = [cons $ C.Int 64 index]
+    let getel = LLVMAST.GetElementPtr False ptr' indices []
     accessPtr <- instr opTypePtr getel
-    -- if val is a pointer then the ptrtoint instruction is needed
-    storeOp <- makeStoreOp ptr val
-    store accessPtr storeOp
+    store accessPtr val
+
 
 -- | Get the LLVMAST.Type the given pointer type points to.
 pullFromPointer :: LLVMAST.Type -> LLVMAST.Type
@@ -1225,17 +1232,6 @@ getIndex (PointerType ty _) bytes =
     let ptrBits = toInteger $ getBits ty
     in quot (bytes * 8) ptrBits
 getIndex _ _ = shouldnt "Can't compute index from a non-pointer."
-
-
-makeStoreOp :: Operand -> Operand -> Codegen Operand
-makeStoreOp ptr v@(LocalReference (PointerType ty _) _) = ptrtoint v ty
-makeStoreOp ptr
-    v@(ConstantOperand (C.Null (PointerType (IntegerType bs) _))) =
-    return $ cons $ C.Int bs 0
-makeStoreOp ptr
-    v@(ConstantOperand (C.IntToPtr c pty)) =
-    return $ cons c
-makeStoreOp ptr v = return v
 
 
 -- Convert string to ShortByteString

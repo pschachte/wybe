@@ -55,7 +55,6 @@ end
 
 
 public type string is pointer8
-    use wybe.int
     # this whole implementation is completely wrong, but will do for now
     #wrong: public func ++(x:string, y:string):string = foreign c strcat(x,y)
     public func =(x:string, y:string):bool  = foreign c strcmp(x,y) = 0
@@ -94,7 +93,10 @@ public module io is
     public proc println(x:string) use !io !print(x) !nl end
     public proc read(?x:string) use !io foreign c read_line(?x,!io) end
 
-    public proc print(x:bool) use !io foreign c printf(x) end
+    public proc print(x:bool) use !io
+       foreign c print_string(if x=false then "false" else "true")
+    end
+    public proc println(x:bool) use !io !print(x) !nl end
 #    public func eof:char = foreign lpvm cast(-1)
 end
 

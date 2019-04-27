@@ -27,7 +27,7 @@ module AST (
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   ImportSpec(..), importSpec,
   collectSubModules,
-  enterModule, reenterModule, exitModule, finishModule, inExistingModule,
+  enterModule, reenterModule, exitModule, reexitModule, deferModules, inModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
@@ -427,7 +427,7 @@ updateModuleM updater = do
 -- |Return some function of the specified module.  Error if it's not a module.
 getSpecModule :: String -> ModSpec -> (Module -> t) -> Compiler t
 getSpecModule context spec getter = do
-    let msg = context ++ " looking up missing module " ++ show spec
+    let msg = context ++ " looking up module " ++ show spec
     curr <- gets (List.filter ((==spec) . modSpec) . underCompilation)
     logAST $ "found " ++ (show $ length curr) ++
       " matching modules under compilation"
@@ -463,7 +463,8 @@ updateSpecModuleM updater spec =
 
 
 -- |Prepare to compile a module by setting up a new Module on the
---  front of the list of modules underCompilation.
+--  front of the list of modules underCompilation.  Match this with
+--  a later call to exitModule.
 enterModule :: FilePath -> ModSpec -> Maybe [Ident] -> Compiler ()
 enterModule source modspec params = do
     count <- gets ((1+) . loadCount)
@@ -489,7 +490,8 @@ moduleIsPackage spec =  do
 
 
 -- |Go back to compiling a module we have previously finished with.
--- Trusts that the modspec really does specify a module.
+-- Trusts that the modspec really does specify a module.  Match this
+-- with a later call to reexitModule.
 reenterModule :: ModSpec -> Compiler ()
 reenterModule modspec = do
     logAST $ "finding module " ++ showModSpec modspec
@@ -498,26 +500,42 @@ reenterModule modspec = do
     modify (\comp -> comp { underCompilation = mod : underCompilation comp })
 
 
+-- |Finish compilation of the current module.  This matches an earlier
+-- call to enterModule.
 exitModule :: Compiler [ModSpec]
 exitModule = do
-    mod <- finishModule
+    currMod <- getModuleSpec
+    imports <- getModuleImplementationField (Map.assocs . modImports)
+    logAST $ "Exiting module " ++ showModSpec currMod
+              ++ " with imports:\n        "
+              ++ intercalate "\n        "
+                 [showUse 20 mod dep | (mod,dep) <- imports]
+    mod <- reexitModule
     let num = thisLoadNum mod
-    logAST $ "Finishing module " ++ showModSpec (modSpec mod)
+    logAST $ "Exiting module " ++ showModSpec (modSpec mod)
     logAST $ "    loadNum = " ++ show num ++
            ", minDependencyNum = " ++ show (minDependencyNum mod)
-    if (minDependencyNum mod < num)
+    if minDependencyNum mod < num
       then do
-        modify (\comp -> comp { deferred = mod:deferred comp })
+        logAST $ "not finished with module SCC: deferring module "
+                 ++ showModSpec (modSpec mod)
+        deferModules [mod]
         return []
       else do
         deferred <- gets deferred
         let (bonus,rest) = span ((==num) . minDependencyNum) deferred
+        logAST $ "finished with module SCC "
+                 ++ showModSpecs (List.map modSpec $ mod:bonus)
+        logAST $ "remaining deferred modules: "
+                 ++ showModSpecs (List.map modSpec rest)
         modify (\comp -> comp { deferred = rest })
         return $ List.map modSpec $ mod:bonus
 
 
-finishModule :: Compiler Module
-finishModule = do
+-- |Finish a module reentry, returning to the previous module.  This
+-- matches an earlier call to reenterModule.
+reexitModule :: Compiler Module
+reexitModule = do
     mod <- getModule id
     modify
       (\comp -> comp { underCompilation = List.tail (underCompilation comp) })
@@ -525,13 +543,25 @@ finishModule = do
     return mod
 
 
--- |Execute a module compilation task in the context of the specified module
-inExistingModule :: Compiler a -> ModSpec -> Compiler a
-inExistingModule modFn modSpec = do
-    reenterModule modSpec
-    result <- modFn
-    _ <- finishModule
-    return result
+-- |Add the specified module to the list of deferred modules, ie, the
+-- modules in the same module dependency SCC as the current one.  This
+-- is used for submodules, since they can access stuff in the parent
+-- module, and the parent module can access public stuff in submodules.
+deferModules :: [Module] -> Compiler ()
+deferModules mods = do
+    logAST $ "deferred modules "
+             ++ showModSpecs (List.map modSpec mods)
+    modify (\comp -> comp { deferred = mods ++ deferred comp })
+
+
+-- | evaluate expr in the context of module mod.  Ie, reenter mod,
+-- evaluate expr, and finish the module.
+inModule :: ModSpec -> Compiler a -> Compiler a
+inModule mod expr = do
+    reenterModule mod
+    val <- expr
+    reexitModule
+    return val
 
 
 -- |Return the directory of the current module.
@@ -664,7 +694,8 @@ lookupType ty@(TypeSpec ["wybe"] "int" []) _ = return $ Just ty
 lookupType ty@(TypeSpec mod name args) pos = do
     logAST $ "Looking up type " ++ show ty
     tspecs <- refersTo mod name modKnownTypes typeMod
-    logAST $ "Candidates: " ++ show tspecs
+    logAST $ "Candidates: "
+             ++ intercalate ", " (List.map show $ Set.toList tspecs)
     case Set.size tspecs of
         0 -> do
             message Error ("Unknown type " ++ show ty) pos
@@ -681,11 +712,11 @@ lookupType ty@(TypeSpec mod name args) pos = do
                 let matchingMod = maybe (shouldnt "lookupType") modSpec maybeMod
                 let matchingType = TypeSpec matchingMod name args'
                 logAST $ "Matching type = " ++ show matchingType
-                return $ Just $ matchingType
+                return $ Just matchingType
               else do
                 message Error
-                  ("Type '" ++ name ++ "' expects " ++ (show $ typeDefArity def) ++
-                   " arguments, but " ++ (show $ length args) ++ " were given")
+                  ("Type '" ++ name ++ "' expects " ++ show (typeDefArity def) ++
+                   " arguments, but " ++ show (length args) ++ " were given")
                   pos
                 logAST "Type constructor arities don't match!"
                 return Nothing
@@ -764,11 +795,12 @@ addImport modspec imports = do
                      Just imports'' -> combineImportSpecs imports'' imports
          in Map.insert modspec' imports' moddeps))
     when (isNothing $ importPublic imports) $
-      updateInterface Public (updateDependencies (Set.insert modspec'))
-    maybeMod <- gets (List.find ((==modspec') . modSpec) . underCompilation)
-    logAST $ "Noting import of " ++ showModSpec modspec' ++
-           ", which is " ++ (if isNothing maybeMod then "NOT " else "") ++
-           "currently being loaded"
+      updateInterface Public (updateDependencies (Set.insert modspec))
+    maybeMod <- gets (List.find ((==modspec) . modSpec) . underCompilation)
+    currMod <- getModuleSpec
+    logAST $ "Noting import of " ++ showModSpec modspec ++
+           ", " ++ (if isNothing maybeMod then "NOT " else "") ++
+           "currently being loaded, into " ++ showModSpec currMod
     case maybeMod of
         Nothing -> return ()  -- not currently loading dependency
         Just mod' -> do
@@ -784,7 +816,7 @@ addImport modspec imports = do
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis detism inline proto stmts pos) = do
     let name = procProtoName proto
-    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 
+    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr
                   Map.empty vis detism inline $ initSuperprocSpec vis
     addProcDef procDef
 addProc _ item =
@@ -806,7 +838,7 @@ addProcDef procDef = do
         in imp { modProcs = Map.insert name procs' $ modProcs imp,
                  modKnownProcs = Map.insert name known' $ modKnownProcs imp })
     updateInterface vis (updatePubProcs (mapSetInsert name spec))
-    logAST $ "Adding defnintion for " ++ show spec ++ ":" ++
+    logAST $ "Adding definition of " ++ show spec ++ ":" ++
       showProcDef 4 procDef
     return ()
 
@@ -952,10 +984,10 @@ descendantModuleOf (a:as) (b:bs)
   | a == b = descendantModuleOf as bs
 descendantModuleOf _ _ = False
 
-getDescendant :: ModSpec -> Maybe ModSpec
-getDescendant [] = Nothing
-getDescendant (m:[]) = Nothing
-getDescendant modspec = Just $ init modspec
+parentModule :: ModSpec -> Maybe ModSpec
+parentModule []  = Nothing
+parentModule [m] = Nothing
+parentModule modspec = Just $ init modspec
 
 -- | Collect all the subModules of the given modspec.
 collectSubModules :: ModSpec -> Compiler [ModSpec]
@@ -973,27 +1005,27 @@ collectSubModules mspec = do
 --  produces a map that tells whether that module exports that name,
 --  and implMapFn tells whether a module implementation defines that
 --  name.  The reference to this name occurs in the current module.
-refersTo :: ModSpec -> Ident -> (ModuleImplementation -> Map Ident (Set b)) ->
+refersTo :: Ord b => ModSpec -> Ident ->
+            (ModuleImplementation -> Map Ident (Set b)) ->
             (b -> ModSpec) -> Compiler (Set b)
 refersTo modspec name implMapFn specModFn = do
     currMod <- getModuleSpec
     logAST $ "Finding visible symbol " ++ maybeModPrefix modspec ++
       name ++ " from module " ++ showModSpec currMod
-    visible <- getModule (Map.findWithDefault Set.empty name . implMapFn .
-                          fromJust . modImplementation)
-    logAST $ "*** ALL visible from module '" ++ showModSpec modspec ++ "': "
+    defined <- getModuleImplementationField
+               (Map.findWithDefault Set.empty name . implMapFn)
+    -- imports <- getModuleImplementationField (Map.assocs . modImports)
+    -- imported <- mapM getLoadingModule imports
+    -- let visible = defined `Set.union` imported
+    let visible = defined
+    logAST $ "*** ALL visible modules: "
         ++ showModSpecs (Set.toList (Set.map specModFn visible))
     let matched = Set.filter ((modspec `isSuffixOf`) . specModFn) visible
-    if Set.null matched
-      then case getDescendant currMod of
-             Just des -> do
-               reenterModule des
-               desMatched <- refersTo modspec name implMapFn specModFn
-               finishModule
-               return desMatched
-             Nothing -> return matched
-      else return matched
-        -- Try and look into the super mod.
+    case parentModule currMod of
+        Just par -> Set.union matched
+                    <$>
+                    inModule par (refersTo modspec name implMapFn specModFn)
+        Nothing -> return matched
 
 
 
@@ -1157,7 +1189,7 @@ lookupTypeRepresentation (TypeSpec modSpecs name _) = do
     reenterModule modSpecs
     maybeImpln <- getModuleImplementation
     modInt <- getModuleInterface
-    _ <- finishModule
+    _ <- reexitModule
     -- Try find the TypeRepresentation in the interface
     let maybeIntMatch = fmap snd $ Map.lookup name $ pubTypes modInt
     -- Try find the TypeRepresentation in the implementation if not found
@@ -1170,7 +1202,7 @@ lookupTypeRepresentation (TypeSpec modSpecs name _) = do
     -- If still not found, search the direct descendant interface and
     -- implementation
     -- case maybeMatch of
-    --     Nothing -> case getDescendant modSpecs of
+    --     Nothing -> case parentModule modSpecs of
     --         Just des -> lookupTypeRepresentation (TypeSpec des name ps)
     --         Nothing -> return Nothing
     --     _ -> return maybeMatch
@@ -1248,6 +1280,12 @@ doImport mod imports = do
     let importedTypes = importsSelected allImports $ pubTypes fromIFace
     let importedResources = importsSelected allImports $ pubResources fromIFace
     let importedProcs = importsSelected allImports $ pubProcs fromIFace
+    logAST $ "    importing types    : "
+             ++ intercalate ", " (Map.keys importedTypes)
+    logAST $ "    importing resources: "
+             ++ intercalate ", " (Map.keys importedResources)
+    logAST $ "    importing procs    : "
+             ++ intercalate ", " (Map.keys importedProcs)
     -- XXX Must report error for imports of non-exported items
     let knownTypes = Map.unionWith Set.union (modKnownTypes impl) $
                      Map.map (Set.singleton . fst) importedTypes
@@ -1859,14 +1897,14 @@ instance Show Prim where
 
 -- |The allowed arguments in primitive proc or foreign proc calls,
 --  just variables and constants.
-data PrimArg 
+data PrimArg
      = ArgVar {argVarName     :: PrimVarName, -- ^Name of output variable
                argVarType     :: TypeSpec,    -- ^Its type
                argVarFlow     :: PrimFlow,    -- ^Its flow direction
                argVarFlowType :: ArgFlowType, -- ^Its flow type
                argVarFinal    :: Bool         -- ^Is this a definite last use
                                               -- (one use in the last statement
-                                              -- to use the variable) 
+                                              -- to use the variable)
               }
      | ArgInt Integer TypeSpec
      | ArgFloat Double TypeSpec
@@ -1959,7 +1997,7 @@ expToStmt (Fncall [] "not" [arg]) = Not $ fmap expToStmt arg
 expToStmt (Fncall [] "not" args) = shouldnt $ "non-unary 'not' " ++ show args
 expToStmt (Fncall maybeMod name args) =
     ProcCall maybeMod name Nothing Det False args
-expToStmt (ForeignFn lang name flags args) = 
+expToStmt (ForeignFn lang name flags args) =
     ForeignCall lang name flags args
 expToStmt (Var name ParamIn _) = ProcCall [] name Nothing Det False []
 expToStmt (Var name ParamInOut _) = ProcCall [] name Nothing Det True []
@@ -2423,7 +2461,7 @@ showStmt _ (TestBool test) =
 showStmt indent (And stmts) =
     intercalate (" and\n" ++ replicate indent' ' ')
     (List.map (showStmt indent' . content) stmts) ++
-    ")"  
+    ")"
     where indent' = indent + 4
 showStmt indent (Or stmts) =
     "(   " ++
@@ -2621,4 +2659,3 @@ makeEncodedLPVM ms =
     let makeIndex m = (modSpec m, modSourceFile m)
         index = List.map makeIndex ms
     in  EncodedLPVM index ms
-

@@ -19,38 +19,40 @@ AFTER EVERYTHING:
   public types    : 
   public resources: 
   public procs    : submodule.privatetest.semi_hidden<0>
-  imports         : use wybe
+  imports         : use submodule
+                    use wybe
   types           : 
   resources       : 
   procs           : 
 
 hidden > inline (0 calls)
 0: hidden(wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
-    foreign c print_string("private proc in a private module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:93:41
+    foreign c print_string("private proc in a private module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
 
 
 semi_hidden > public inline (0 calls)
 0: semi_hidden(wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
-    foreign c print_string("public proc in a private module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:93:41
+    foreign c print_string("public proc in a private module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
 --------------------------------------------------
  Module submodule.publictest
   public submods  : 
   public types    : 
   public resources: 
   public procs    : submodule.publictest.visible<0>
-  imports         : use wybe
+  imports         : use submodule
+                    use wybe
   types           : 
   resources       : 
   procs           : 
 
 semi_visible > inline (0 calls)
 0: semi_visible(wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
-    foreign c print_string("private proc in a public module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:93:41
+    foreign c print_string("private proc in a public module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
 
 
 visible > public inline (0 calls)
 0: visible(wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
-    foreign c print_string("public proc in a public module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:93:41
+    foreign c print_string("public proc in a public module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
 submodule, submodule.privatetest, submodule.publictest
 ======================================================================
 AFTER LLVM IR:

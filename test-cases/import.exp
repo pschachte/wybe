@@ -21,8 +21,8 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp$9#0:position.position, ?tmp$10#0:position.position, 0:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp$10#0:position.position, ?tmp$2#0:position.position, 8:wybe.int, 0:wybe.int)
     import.distance<0>(~tmp$1#0:position.position, ~tmp$2#0:position.position, ?tmp$0#0:wybe.int) @import:6:10
-    foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:phantom, ?tmp$13#0:phantom) @wybe:81:38
-    foreign c putchar('\n':wybe.char, ~tmp$13#0:phantom, ?#wybe.io$io#1:phantom) @wybe:79:28
+    foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#0:phantom, ?tmp$13#0:phantom) @wybe:80:38
+    foreign c putchar('\n':wybe.char, ~tmp$13#0:phantom, ?#wybe.io$io#1:phantom) @wybe:78:28
 
 
 distance > public (1 calls)
@@ -68,7 +68,8 @@ distance > public (1 calls)
                     position.position.x<1>
                     position.position.y<0>
                     position.position.y<1>
-  imports         : use wybe
+  imports         : use position
+                    use wybe
   types           : 
   resources       : 
   procs           : 
@@ -148,17 +149,17 @@ entry:
   ret i32 0
 }
 
-define i64 @"import.distance<0>"(i64* nocapture readonly %"p1#0", i64* nocapture readonly %"p2#0") local_unnamed_addr {
+define i64 @"import.distance<0>"(i64* nocapture readonly, i64* nocapture readonly) local_unnamed_addr {
 entry:
-  %0 = load i64, i64* %"p2#0", align 4
-  %1 = load i64, i64* %"p1#0", align 4
-  %"tmp$3#0" = sub i64 %0, %1
+  %2 = load i64, i64* %1, align 4
+  %3 = load i64, i64* %0, align 4
+  %"tmp$3#0" = sub i64 %2, %3
   %"tmp$2#0" = tail call i64 @ipow(i64 %"tmp$3#0", i64 2)
-  %2 = getelementptr i64, i64* %"p2#0", i64 1
-  %3 = load i64, i64* %2, align 4
-  %4 = getelementptr i64, i64* %"p1#0", i64 1
+  %4 = getelementptr i64, i64* %1, i64 1
   %5 = load i64, i64* %4, align 4
-  %"tmp$7#0" = sub i64 %3, %5
+  %6 = getelementptr i64, i64* %0, i64 1
+  %7 = load i64, i64* %6, align 4
+  %"tmp$7#0" = sub i64 %5, %7
   %"tmp$6#0" = tail call i64 @ipow(i64 %"tmp$7#0", i64 2)
   %"tmp$1#0" = add i64 %"tmp$6#0", %"tmp$2#0"
   %"$#0" = tail call i64 @isqrt(i64 %"tmp$1#0")
@@ -181,19 +182,19 @@ source_filename = "test-cases"
 declare i8* @wybe_malloc(i32) local_unnamed_addr
 
 ; Function Attrs: norecurse nounwind readonly
-define i1 @"position.position.=<0>"(i64* nocapture readonly %"$left#0", i64* nocapture readonly %"$right#0") local_unnamed_addr #0 {
+define i1 @"position.position.=<0>"(i64* nocapture readonly, i64* nocapture readonly) local_unnamed_addr #0 {
 entry:
-  %0 = load i64, i64* %"$left#0", align 4
-  %1 = load i64, i64* %"$right#0", align 4
-  %"tmp$2#0" = icmp eq i64 %0, %1
+  %2 = load i64, i64* %0, align 4
+  %3 = load i64, i64* %1, align 4
+  %"tmp$2#0" = icmp eq i64 %2, %3
   br i1 %"tmp$2#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
-  %2 = getelementptr i64, i64* %"$right#0", i64 1
-  %3 = load i64, i64* %2, align 4
-  %4 = getelementptr i64, i64* %"$left#0", i64 1
+  %4 = getelementptr i64, i64* %1, i64 1
   %5 = load i64, i64* %4, align 4
-  %"$$#0" = icmp eq i64 %5, %3
+  %6 = getelementptr i64, i64* %0, i64 1
+  %7 = load i64, i64* %6, align 4
+  %"$$#0" = icmp eq i64 %7, %5
   ret i1 %"$$#0"
 
 if.else:                                          ; preds = %entry
@@ -212,44 +213,44 @@ entry:
 }
 
 ; Function Attrs: norecurse nounwind readonly
-define { i64, i64 } @"position.position.position<1>"(i64* nocapture readonly %"$#0") local_unnamed_addr #0 {
+define { i64, i64 } @"position.position.position<1>"(i64* nocapture readonly) local_unnamed_addr #0 {
 entry:
-  %0 = load i64, i64* %"$#0", align 4
-  %1 = getelementptr i64, i64* %"$#0", i64 1
-  %2 = load i64, i64* %1, align 4
-  %3 = insertvalue { i64, i64 } undef, i64 %0, 0
-  %4 = insertvalue { i64, i64 } %3, i64 %2, 1
-  ret { i64, i64 } %4
+  %1 = load i64, i64* %0, align 4
+  %2 = getelementptr i64, i64* %0, i64 1
+  %3 = load i64, i64* %2, align 4
+  %4 = insertvalue { i64, i64 } undef, i64 %1, 0
+  %5 = insertvalue { i64, i64 } %4, i64 %3, 1
+  ret { i64, i64 } %5
 }
 
 ; Function Attrs: norecurse nounwind readonly
-define i64 @"position.position.x<0>"(i64* nocapture readonly %"$rec#0") local_unnamed_addr #0 {
+define i64 @"position.position.x<0>"(i64* nocapture readonly) local_unnamed_addr #0 {
 entry:
-  %0 = load i64, i64* %"$rec#0", align 4
-  ret i64 %0
-}
-
-; Function Attrs: norecurse nounwind
-define i64* @"position.position.x<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr #1 {
-entry:
-  store i64 %"$field#0", i64* %"$rec#0", align 4
-  ret i64* %"$rec#0"
-}
-
-; Function Attrs: norecurse nounwind readonly
-define i64 @"position.position.y<0>"(i64* nocapture readonly %"$rec#0") local_unnamed_addr #0 {
-entry:
-  %0 = getelementptr i64, i64* %"$rec#0", i64 1
   %1 = load i64, i64* %0, align 4
   ret i64 %1
 }
 
 ; Function Attrs: norecurse nounwind
-define i64* @"position.position.y<1>"(i64* returned %"$rec#0", i64 %"$field#0") local_unnamed_addr #1 {
+define i64* @"position.position.x<1>"(i64* returned, i64 %"$field#0") local_unnamed_addr #1 {
 entry:
-  %0 = getelementptr i64, i64* %"$rec#0", i64 1
   store i64 %"$field#0", i64* %0, align 4
-  ret i64* %"$rec#0"
+  ret i64* %0
+}
+
+; Function Attrs: norecurse nounwind readonly
+define i64 @"position.position.y<0>"(i64* nocapture readonly) local_unnamed_addr #0 {
+entry:
+  %1 = getelementptr i64, i64* %0, i64 1
+  %2 = load i64, i64* %1, align 4
+  ret i64 %2
+}
+
+; Function Attrs: norecurse nounwind
+define i64* @"position.position.y<1>"(i64* returned, i64 %"$field#0") local_unnamed_addr #1 {
+entry:
+  %1 = getelementptr i64, i64* %0, i64 1
+  store i64 %"$field#0", i64* %1, align 4
+  ret i64* %0
 }
 
 attributes #0 = { norecurse nounwind readonly }

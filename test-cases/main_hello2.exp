@@ -12,9 +12,9 @@ AFTER EVERYTHING:
 
 *main* > public (0 calls)
 0: (wybe.io$io#0:phantom, ?wybe.io$io#2:phantom):
-    foreign c print_string("hello, ":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:93:41
-    foreign c print_string("world!":wybe.string, ~#wybe.io$io#1:phantom, ?tmp$4#0:phantom) @wybe:93:41
-    foreign c putchar('\n':wybe.char, ~tmp$4#0:phantom, ?#wybe.io$io#2:phantom) @wybe:79:28
+    foreign c print_string("hello, ":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
+    foreign c print_string("world!":wybe.string, ~#wybe.io$io#1:phantom, ?tmp$4#0:phantom) @wybe:92:41
+    foreign c putchar('\n':wybe.char, ~tmp$4#0:phantom, ?#wybe.io$io#2:phantom) @wybe:78:28
 main_hello2
 ======================================================================
 AFTER LLVM IR:
