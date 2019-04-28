@@ -9,6 +9,7 @@ module Blocks
        where
 
 import           AST
+import           ASTShow
 import           BinaryFactory                   ()
 import           Codegen
 import           Config                          (wordSize)

@@ -49,6 +49,7 @@
 module Builder (buildTargets, compileModule) where
 
 import           AST
+import           ASTShow                   (logDump)
 import           Blocks                    (blockTransformModule,
                                             concatLLVMASTModules, newMainModule)
 import           Callers                   (collectCallers)

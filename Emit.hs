@@ -24,7 +24,7 @@ import           LLVM.PassManager
 import           LLVM.Pretty                (ppllvm)
 import           LLVM.Target
 import           ObjectInterface
-import           Options                    (LogSelection (Blocks, Builder, Emit))
+import           Options                    (LogSelection (Blocks,Builder,Emit))
 import           System.Exit                (ExitCode (..))
 import           System.Process
 
