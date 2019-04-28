@@ -10,10 +10,9 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-mod8
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
 ; ModuleID = 'mod8'
-source_filename = "test-cases/mod8.wybe"
 
+
+declare external ccc i8* @wybe_malloc(i32)

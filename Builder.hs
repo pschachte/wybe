@@ -92,7 +92,6 @@ buildTargets opts targets = do
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     showMessages
     logDump FinalDump FinalDump "EVERYTHING"
-    logLLVMDump FinalDump FinalDump "LLVM IR"
 
 
 -- |Build a single target; flag specifies to re-compile even if the

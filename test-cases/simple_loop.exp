@@ -31,40 +31,34 @@ gen$1 > (2 calls)
 
 gen$2 > inline (1 calls)
 0: gen$2([c#0:wybe.char], wybe.io$io#0:wybe.phantom, [?wybe.io$io#0:wybe.phantom]):
-simple_loop
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
 ; ModuleID = 'simple_loop'
-source_filename = "test-cases/simple_loop.wybe"
 
-declare void @putchar(i8) local_unnamed_addr
 
-declare i8 @read_char() local_unnamed_addr
+declare external ccc void @putchar(i8)
 
-define i32 @simple_loop.main() local_unnamed_addr {
+declare external ccc i8 @read_char()
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i32 @simple_loop.main(){
 entry:
-  tail call void @"simple_loop.gen$1<0>"()
+  tail call ccc void @"simple_loop.gen$1<0>"()
+  %1 = alloca i32
+  store i32 0, i32* %1
   ret i32 0
 }
 
-define void @"simple_loop.gen$1<0>"() local_unnamed_addr {
+define external ccc void @"simple_loop.gen$1<0>"(){
 entry:
-  %"c#01" = tail call i8 @read_char()
-  %"tmp$1#02" = icmp eq i8 %"c#01", 97
-  br i1 %"tmp$1#02", label %if.else, label %if.then.preheader
-
-if.then.preheader:                                ; preds = %entry
-  br label %if.then
-
-if.then:                                          ; preds = %if.then.preheader, %if.then
-  %"c#03" = phi i8 [ %"c#0", %if.then ], [ %"c#01", %if.then.preheader ]
-  tail call void @putchar(i8 %"c#03")
-  %"c#0" = tail call i8 @read_char()
-  %"tmp$1#0" = icmp eq i8 %"c#0", 97
-  br i1 %"tmp$1#0", label %if.else, label %if.then
-
-if.else:                                          ; preds = %if.then, %entry
+  %"c#0" = tail call ccc i8 @read_char()
+  %"tmp$1#0" = icmp ne i8 %"c#0", 97
+  br i1 %"tmp$1#0", label %if.then, label %if.else
+if.then:
+  tail call ccc void @putchar(i8 %"c#0")
+  tail call ccc void @"simple_loop.gen$1<0>"()
+  ret void
+if.else:
   ret void
 }
-

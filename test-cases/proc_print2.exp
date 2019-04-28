@@ -14,19 +14,18 @@ print2 > public inline (0 calls)
 0: print2(x#0:wybe.int, y#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
     foreign c print_int(~x#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:80:38
     foreign c print_int(~y#0:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:80:38
-proc_print2
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
 ; ModuleID = 'proc_print2'
-source_filename = "test-cases/proc_print2.wybe"
 
-declare void @print_int(i64) local_unnamed_addr
 
-define void @"proc_print2.print2<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr {
+declare external ccc void @print_int(i64)
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc void @"proc_print2.print2<0>"(i64 %"x#0", i64 %"y#0"){
 entry:
-  tail call void @print_int(i64 %"x#0")
-  tail call void @print_int(i64 %"y#0")
+  tail call ccc void @print_int(i64 %"x#0")
+  tail call ccc void @print_int(i64 %"y#0")
   ret void
 }
-
