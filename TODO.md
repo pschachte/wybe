@@ -79,11 +79,25 @@
 * Support optional and named arguments
 * Support "commutative" resources, which don't need to be threaded everywhere
 * Support unicode
+* Support relations in place of object identity
+    * Allow identities to be created
+    * Allow attributes to be associated with identities
+    * Allow identities to be related to one another
+    * Allow the database to be searched in flexible ways
+    * Generate code that:
+        * represents rows as data structures;
+        * updates the database by destructively updating the structure when
+          possible;
+        * allows flexible navigation among related objects, flexible search, and
+          flexible update
 * Support special resources the language automatically assigns:
     * sourcefile:  a string naming the file a call appears in
     * sourceline:  the line a call appears in
     * sourcedate:  the file modifcation date of the source file
     * wybeversion:  the version of the wybe compiler that compiled the module
+* Investigate situation calculus
+    * Should resources be called "fluents"?
+    * Does S.C. suggest how resources should be split up and sewn back together?
 
 
 ## Library:
@@ -115,7 +129,6 @@
 * Destructive update transformation (CTGC)
 * delay instructions until their outputs are needed
     * delay into one arm of a branch if only one arm needs the outputs
-*
 
 
 ## Build System:
