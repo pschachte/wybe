@@ -24,6 +24,96 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+  LLVM code       :
+
+; ModuleID = 'type_int'
+
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i64 @"type_int.myint.*<0>"(i64 %"x#0", i64 %"y#0"){
+entry:
+  %"$#0" = mul i64 %"x#0", %"y#0"
+  ret i64 %"$#0"
+}
+
+define external ccc i64 @"type_int.myint.+<0>"(i64 %"x#0", i64 %"y#0"){
+entry:
+  %"$#0" = add i64 %"x#0", %"y#0"
+  ret i64 %"$#0"
+}
+
+define external ccc i64 @"type_int.myint.+<1>"(i64 %"y#0", i64 %"z#0"){
+entry:
+  %"x#0" = sub i64 %"z#0", %"y#0"
+  ret i64 %"x#0"
+}
+
+define external ccc i64 @"type_int.myint.+<2>"(i64 %"x#0", i64 %"z#0"){
+entry:
+  %"y#0" = sub i64 %"z#0", %"x#0"
+  ret i64 %"y#0"
+}
+
+define external ccc i64 @"type_int.myint.-<0>"(i64 %"x#0", i64 %"y#0"){
+entry:
+  %"$#0" = sub i64 %"x#0", %"y#0"
+  ret i64 %"$#0"
+}
+
+define external ccc i64 @"type_int.myint.-<1>"(i64 %"y#0", i64 %"z#0"){
+entry:
+  %"x#0" = add i64 %"y#0", %"z#0"
+  ret i64 %"x#0"
+}
+
+define external ccc i64 @"type_int.myint.-<2>"(i64 %"x#0", i64 %"z#0"){
+entry:
+  %"y#0" = sub i64 %"z#0", %"x#0"
+  ret i64 %"y#0"
+}
+
+define external ccc i64 @"type_int.myint./<0>"(i64 %"x#0", i64 %"y#0"){
+entry:
+  %"$#0" = sdiv i64 %"x#0", %"y#0"
+  ret i64 %"$#0"
+}
+
+define external ccc i1 @"type_int.myint./=<0>"(i64 %"x#0", i64 %"y#0"){
+entry:
+  %"$#0" = icmp ne i64 %"x#0", %"y#0"
+  ret i1 %"$#0"
+}
+
+define external ccc i1 @"type_int.myint.<<0>"(i64 %"x#0", i64 %"y#0"){
+entry:
+  %"$#0" = icmp slt i64 %"x#0", %"y#0"
+  ret i1 %"$#0"
+}
+
+define external ccc i1 @"type_int.myint.<=<0>"(i64 %"x#0", i64 %"y#0"){
+entry:
+  %"$#0" = icmp sle i64 %"x#0", %"y#0"
+  ret i1 %"$#0"
+}
+
+define external ccc i1 @"type_int.myint.=<0>"(i64 %"x#0", i64 %"y#0"){
+entry:
+  %"$#0" = icmp eq i64 %"x#0", %"y#0"
+  ret i1 %"$#0"
+}
+
+define external ccc i1 @"type_int.myint.><0>"(i64 %"x#0", i64 %"y#0"){
+entry:
+  %"$#0" = icmp sgt i64 %"x#0", %"y#0"
+  ret i1 %"$#0"
+}
+
+define external ccc i1 @"type_int.myint.>=<0>"(i64 %"x#0", i64 %"y#0"){
+entry:
+  %"$#0" = icmp sge i64 %"x#0", %"y#0"
+  ret i1 %"$#0"
+}
   submodules      : type_int.myint
 --------------------------------------------------
  Module type_int.myint([])
@@ -110,214 +200,93 @@ AFTER EVERYTHING:
 >= > public inline (0 calls)
 0: >=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
     foreign llvm icmp sge(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:15:44
-type_int, type_int.myint
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
-; ModuleID = 'type_int'
-source_filename = "test-cases/type_int.wybe"
-
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.*<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
-entry:
-  %"$#0" = mul i64 %"y#0", %"x#0"
-  ret i64 %"$#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.+<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
-entry:
-  %"$#0" = add i64 %"y#0", %"x#0"
-  ret i64 %"$#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.+<1>"(i64 %"y#0", i64 %"z#0") local_unnamed_addr #0 {
-entry:
-  %"x#0" = sub i64 %"z#0", %"y#0"
-  ret i64 %"x#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.+<2>"(i64 %"x#0", i64 %"z#0") local_unnamed_addr #0 {
-entry:
-  %"y#0" = sub i64 %"z#0", %"x#0"
-  ret i64 %"y#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.-<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
-entry:
-  %"$#0" = sub i64 %"x#0", %"y#0"
-  ret i64 %"$#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.-<1>"(i64 %"y#0", i64 %"z#0") local_unnamed_addr #0 {
-entry:
-  %"x#0" = add i64 %"z#0", %"y#0"
-  ret i64 %"x#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.-<2>"(i64 %"x#0", i64 %"z#0") local_unnamed_addr #0 {
-entry:
-  %"y#0" = sub i64 %"z#0", %"x#0"
-  ret i64 %"y#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint./<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
-entry:
-  %"$#0" = sdiv exact i64 %"x#0", %"y#0"
-  ret i64 %"$#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_int.myint./=<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
-entry:
-  %"$#0" = icmp ne i64 %"x#0", %"y#0"
-  ret i1 %"$#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_int.myint.<<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
-entry:
-  %"$#0" = icmp slt i64 %"x#0", %"y#0"
-  ret i1 %"$#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_int.myint.<=<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
-entry:
-  %"$#0" = icmp sle i64 %"x#0", %"y#0"
-  ret i1 %"$#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_int.myint.=<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
-entry:
-  %"$#0" = icmp eq i64 %"x#0", %"y#0"
-  ret i1 %"$#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_int.myint.><0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
-entry:
-  %"$#0" = icmp sgt i64 %"x#0", %"y#0"
-  ret i1 %"$#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_int.myint.>=<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
-entry:
-  %"$#0" = icmp sge i64 %"x#0", %"y#0"
-  ret i1 %"$#0"
-}
-
-attributes #0 = { norecurse nounwind readnone }
-
---------------------------------------------------
 ; ModuleID = 'type_int.myint'
-source_filename = "test-cases"
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.*<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i64 @"type_int.myint.*<0>"(i64 %"x#0", i64 %"y#0"){
 entry:
-  %"$#0" = mul i64 %"y#0", %"x#0"
+  %"$#0" = mul i64 %"x#0", %"y#0"
   ret i64 %"$#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.+<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
+define external ccc i64 @"type_int.myint.+<0>"(i64 %"x#0", i64 %"y#0"){
 entry:
-  %"$#0" = add i64 %"y#0", %"x#0"
+  %"$#0" = add i64 %"x#0", %"y#0"
   ret i64 %"$#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.+<1>"(i64 %"y#0", i64 %"z#0") local_unnamed_addr #0 {
+define external ccc i64 @"type_int.myint.+<1>"(i64 %"y#0", i64 %"z#0"){
 entry:
   %"x#0" = sub i64 %"z#0", %"y#0"
   ret i64 %"x#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.+<2>"(i64 %"x#0", i64 %"z#0") local_unnamed_addr #0 {
+define external ccc i64 @"type_int.myint.+<2>"(i64 %"x#0", i64 %"z#0"){
 entry:
   %"y#0" = sub i64 %"z#0", %"x#0"
   ret i64 %"y#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.-<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
+define external ccc i64 @"type_int.myint.-<0>"(i64 %"x#0", i64 %"y#0"){
 entry:
   %"$#0" = sub i64 %"x#0", %"y#0"
   ret i64 %"$#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.-<1>"(i64 %"y#0", i64 %"z#0") local_unnamed_addr #0 {
+define external ccc i64 @"type_int.myint.-<1>"(i64 %"y#0", i64 %"z#0"){
 entry:
-  %"x#0" = add i64 %"z#0", %"y#0"
+  %"x#0" = add i64 %"y#0", %"z#0"
   ret i64 %"x#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint.-<2>"(i64 %"x#0", i64 %"z#0") local_unnamed_addr #0 {
+define external ccc i64 @"type_int.myint.-<2>"(i64 %"x#0", i64 %"z#0"){
 entry:
   %"y#0" = sub i64 %"z#0", %"x#0"
   ret i64 %"y#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"type_int.myint./<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
+define external ccc i64 @"type_int.myint./<0>"(i64 %"x#0", i64 %"y#0"){
 entry:
-  %"$#0" = sdiv exact i64 %"x#0", %"y#0"
+  %"$#0" = sdiv i64 %"x#0", %"y#0"
   ret i64 %"$#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_int.myint./=<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
+define external ccc i1 @"type_int.myint./=<0>"(i64 %"x#0", i64 %"y#0"){
 entry:
   %"$#0" = icmp ne i64 %"x#0", %"y#0"
   ret i1 %"$#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_int.myint.<<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
+define external ccc i1 @"type_int.myint.<<0>"(i64 %"x#0", i64 %"y#0"){
 entry:
   %"$#0" = icmp slt i64 %"x#0", %"y#0"
   ret i1 %"$#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_int.myint.<=<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
+define external ccc i1 @"type_int.myint.<=<0>"(i64 %"x#0", i64 %"y#0"){
 entry:
   %"$#0" = icmp sle i64 %"x#0", %"y#0"
   ret i1 %"$#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_int.myint.=<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
+define external ccc i1 @"type_int.myint.=<0>"(i64 %"x#0", i64 %"y#0"){
 entry:
   %"$#0" = icmp eq i64 %"x#0", %"y#0"
   ret i1 %"$#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_int.myint.><0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
+define external ccc i1 @"type_int.myint.><0>"(i64 %"x#0", i64 %"y#0"){
 entry:
   %"$#0" = icmp sgt i64 %"x#0", %"y#0"
   ret i1 %"$#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_int.myint.>=<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr #0 {
+define external ccc i1 @"type_int.myint.>=<0>"(i64 %"x#0", i64 %"y#0"){
 entry:
   %"$#0" = icmp sge i64 %"x#0", %"y#0"
   ret i1 %"$#0"
 }
-
-attributes #0 = { norecurse nounwind readnone }
-

@@ -39,51 +39,46 @@ gen$1 > (2 calls)
 
 gen$2 > inline (1 calls)
 0: gen$2([count#0:wybe.int], wybe.io$io#0:phantom, [?wybe.io$io#0:phantom]):
-proc_beer
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
 ; ModuleID = 'proc_beer'
-source_filename = "test-cases/proc_beer.wybe"
+
+
+declare external ccc void @putchar(i8)
+
+declare external ccc void @print_string(i8*)
+
+declare external ccc void @print_int(i64)
 
 @proc_beer.2 = constant [29 x i8] c" bottles of beer on the wall\00"
 
-declare void @putchar(i8) local_unnamed_addr
+declare external ccc i8* @wybe_malloc(i32)
 
-declare void @print_string(i8*) local_unnamed_addr
-
-declare void @print_int(i64) local_unnamed_addr
-
-define i32 @proc_beer.main() local_unnamed_addr {
+define external ccc i32 @proc_beer.main(){
 entry:
-  tail call void @"proc_beer.gen$1<0>"(i64 99)
+  tail call ccc void @"proc_beer.gen$1<0>"(i64 99)
+  %1 = alloca i32
+  store i32 0, i32* %1
   ret i32 0
 }
 
-define void @"proc_beer.beer99<0>"() local_unnamed_addr {
+define external ccc void @"proc_beer.beer99<0>"(){
 entry:
-  tail call void @"proc_beer.gen$1<0>"(i64 99)
+  tail call ccc void @"proc_beer.gen$1<0>"(i64 99)
   ret void
 }
 
-define void @"proc_beer.gen$1<0>"(i64 %"count#0") local_unnamed_addr {
+define external ccc void @"proc_beer.gen$1<0>"(i64 %"count#0"){
 entry:
-  %"tmp$1#01" = icmp sgt i64 %"count#0", -1
-  br i1 %"tmp$1#01", label %if.then.preheader, label %if.else
-
-if.then.preheader:                                ; preds = %entry
-  br label %if.then
-
-if.then:                                          ; preds = %if.then.preheader, %if.then
-  %"count#0.tr2" = phi i64 [ %"count#1", %if.then ], [ %"count#0", %if.then.preheader ]
-  tail call void @print_int(i64 %"count#0.tr2")
-  tail call void @print_string(i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_beer.2, i64 0, i64 0))
-  tail call void @putchar(i8 10)
-  %"count#1" = add nsw i64 %"count#0.tr2", -1
-  %"tmp$1#0" = icmp sgt i64 %"count#0.tr2", 0
+  %"tmp$1#0" = icmp sge i64 %"count#0", 0
   br i1 %"tmp$1#0", label %if.then, label %if.else
-
-if.else:                                          ; preds = %if.then, %entry
+if.then:
+  tail call ccc void @print_int(i64 %"count#0")
+  tail call ccc void @print_string(i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_beer.2, i32 0, i32 0))
+  tail call ccc void @putchar(i8 10)
+  %"count#1" = sub i64 %"count#0", 1
+  tail call ccc void @"proc_beer.gen$1<0>"(i64 %"count#1")
+  ret void
+if.else:
   ret void
 }
-

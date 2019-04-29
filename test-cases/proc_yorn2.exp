@@ -43,49 +43,46 @@ gen$2 > inline (2 calls)
 yorn > public inline (0 calls)
 0: yorn(prompt#0:wybe.string, ?result#0:wybe.bool, wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
     proc_yorn2.gen$1<0>(~prompt#0:wybe.string, ~wybe.io$io#0:phantom, ?result#0:wybe.bool, ?wybe.io$io#1:phantom) @proc_yorn2:2:5
-proc_yorn2
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
 ; ModuleID = 'proc_yorn2'
-source_filename = "test-cases/proc_yorn2.wybe"
+
+
+declare external ccc void @putchar(i8)
+
+declare external ccc void @print_string(i8*)
+
+declare external ccc i8 @read_char()
 
 @proc_yorn2.2 = constant [29 x i8] c"Please answer 'yes' or 'no'.\00"
+
 @proc_yorn2.1 = constant [8 x i8] c" (y/n) \00"
 
-declare void @putchar(i8) local_unnamed_addr
+declare external ccc i8* @wybe_malloc(i32)
 
-declare void @print_string(i8*) local_unnamed_addr
-
-declare i8 @read_char() local_unnamed_addr
-
-define i1 @"proc_yorn2.gen$1<0>"(i8* %"prompt#0") local_unnamed_addr {
+define external ccc i1 @"proc_yorn2.gen$1<0>"(i8* %"prompt#0"){
 entry:
-  tail call void @print_string(i8* %"prompt#0")
-  tail call void @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @proc_yorn2.1, i64 0, i64 0))
-  %"response#0" = tail call i8 @read_char()
-  switch i8 %"response#0", label %if.else1 [
-    i8 89, label %if.then
-    i8 78, label %if.then.fold.split
-  ]
-
-if.then.fold.split:                               ; preds = %entry
-  br label %if.then
-
-if.then:                                          ; preds = %entry, %if.then.fold.split
-  %merge = phi i64 [ 1, %entry ], [ 0, %if.then.fold.split ]
-  ret i64 %merge
-
-if.else1:                                         ; preds = %entry
-  tail call void @print_string(i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_yorn2.2, i64 0, i64 0))
-  tail call void @putchar(i8 10)
-  %"result#1" = tail call i1 @"proc_yorn2.gen$1<0>"(i8* %"prompt#0")
-  ret i1 false
+  tail call ccc void @print_string(i8* %"prompt#0")
+  tail call ccc void @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @proc_yorn2.1, i32 0, i32 0))
+  %"response#0" = tail call ccc i8 @read_char()
+  %"tmp$0#0" = icmp eq i8 %"response#0", 89
+  br i1 %"tmp$0#0", label %if.then, label %if.else
+if.then:
+  ret i64 1
+if.else:
+  %"tmp$2#0" = icmp eq i8 %"response#0", 78
+  br i1 %"tmp$2#0", label %if.then1, label %if.else1
+if.then1:
+  ret i64 0
+if.else1:
+  tail call ccc void @print_string(i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_yorn2.2, i32 0, i32 0))
+  tail call ccc void @putchar(i8 10)
+  %"result#1" = tail call ccc i1 @"proc_yorn2.gen$1<0>"(i8* %"prompt#0")
+  ret i1 %"tmp$2#0"
 }
 
-define i1 @"proc_yorn2.yorn<0>"(i8* %"prompt#0") local_unnamed_addr {
+define external ccc i1 @"proc_yorn2.yorn<0>"(i8* %"prompt#0"){
 entry:
-  %"result#0" = tail call i1 @"proc_yorn2.gen$1<0>"(i8* %"prompt#0")
+  %"result#0" = tail call ccc i1 @"proc_yorn2.gen$1<0>"(i8* %"prompt#0")
   ret i1 %"result#0"
 }
-

@@ -40,56 +40,49 @@ gen$2 > inline (1 calls)
 0: gen$2([n#0:wybe.int], result#0:wybe.int, wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
     foreign c print_int(~result#0:wybe.int, ~#wybe.io$io#0:phantom, ?tmp$5#0:phantom) @wybe:80:38
     foreign c putchar('\n':wybe.char, ~tmp$5#0:phantom, ?#wybe.io$io#1:phantom) @wybe:78:28
-proc_factorial
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
 ; ModuleID = 'proc_factorial'
-source_filename = "test-cases/proc_factorial.wybe"
 
-declare void @putchar(i8) local_unnamed_addr
 
-declare void @print_int(i64) local_unnamed_addr
+declare external ccc void @putchar(i8)
 
-define i32 @proc_factorial.main() local_unnamed_addr {
+declare external ccc void @print_int(i64)
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i32 @proc_factorial.main(){
 entry:
-  tail call void @"proc_factorial.gen$1<0>"(i64 5, i64 1)
+  tail call ccc void @"proc_factorial.gen$1<0>"(i64 5, i64 1)
+  %1 = alloca i32
+  store i32 0, i32* %1
   ret i32 0
 }
 
-define void @"proc_factorial.factorial<0>"(i64 %"n#0") local_unnamed_addr {
+define external ccc void @"proc_factorial.factorial<0>"(i64 %"n#0"){
 entry:
-  tail call void @"proc_factorial.gen$1<0>"(i64 %"n#0", i64 1)
+  tail call ccc void @"proc_factorial.gen$1<0>"(i64 %"n#0", i64 1)
   ret void
 }
 
-define void @"proc_factorial.gen$1<0>"(i64 %"n#0", i64 %"result#0") local_unnamed_addr {
+define external ccc void @"proc_factorial.gen$1<0>"(i64 %"n#0", i64 %"result#0"){
 entry:
-  %"tmp$3#01" = icmp sgt i64 %"n#0", 1
-  br i1 %"tmp$3#01", label %if.then.preheader, label %if.else
-
-if.then.preheader:                                ; preds = %entry
-  br label %if.then
-
-if.then:                                          ; preds = %if.then.preheader, %if.then
-  %"result#0.tr3" = phi i64 [ %"tmp$0#0", %if.then ], [ %"result#0", %if.then.preheader ]
-  %"n#0.tr2" = phi i64 [ %"tmp$1#0", %if.then ], [ %"n#0", %if.then.preheader ]
-  %"tmp$0#0" = mul i64 %"result#0.tr3", %"n#0.tr2"
-  %"tmp$1#0" = add nsw i64 %"n#0.tr2", -1
-  %"tmp$3#0" = icmp sgt i64 %"n#0.tr2", 2
+  %"tmp$3#0" = icmp sgt i64 %"n#0", 1
   br i1 %"tmp$3#0", label %if.then, label %if.else
-
-if.else:                                          ; preds = %if.then, %entry
-  %"result#0.tr.lcssa" = phi i64 [ %"result#0", %entry ], [ %"tmp$0#0", %if.then ]
-  tail call void @print_int(i64 %"result#0.tr.lcssa")
-  tail call void @putchar(i8 10)
+if.then:
+  %"tmp$0#0" = mul i64 %"n#0", %"result#0"
+  %"tmp$1#0" = sub i64 %"n#0", 1
+  tail call ccc void @"proc_factorial.gen$1<0>"(i64 %"tmp$1#0", i64 %"tmp$0#0")
+  ret void
+if.else:
+  tail call ccc void @print_int(i64 %"result#0")
+  tail call ccc void @putchar(i8 10)
   ret void
 }
 
-define void @"proc_factorial.gen$2<0>"(i64 %"result#0") local_unnamed_addr {
+define external ccc void @"proc_factorial.gen$2<0>"(i64 %"result#0"){
 entry:
-  tail call void @print_int(i64 %"result#0")
-  tail call void @putchar(i8 10)
+  tail call ccc void @print_int(i64 %"result#0")
+  tail call ccc void @putchar(i8 10)
   ret void
 }
-

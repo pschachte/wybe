@@ -39,7 +39,7 @@ executable wybemk
                  Clause, Codegen, Config, Emit, Expansion, Flatten,
                  Macho, NewParser, Normalise, ObjectInterface, Optimise,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
-                 Version
+                 Version, ASTShow
 
 
 test-suite wybe-test

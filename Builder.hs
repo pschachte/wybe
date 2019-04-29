@@ -49,6 +49,7 @@
 module Builder (buildTargets, compileModule) where
 
 import           AST
+import           ASTShow                   (logDump)
 import           Blocks                    (blockTransformModule,
                                             concatLLVMASTModules, newMainModule)
 import           Callers                   (collectCallers)
@@ -93,7 +94,6 @@ buildTargets opts targets = do
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     showMessages
     logDump FinalDump FinalDump "EVERYTHING"
-    logLLVMDump FinalDump FinalDump "LLVM IR"
 
 
 -- |Build a single target; flag specifies to re-compile even if the

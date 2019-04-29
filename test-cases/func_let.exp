@@ -20,27 +20,26 @@ quad > public inline (1 calls)
 0: quad(x#0:wybe.int, ?$#0:wybe.int):
     foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:12:38
     foreign llvm add(~tmp$0#0:wybe.int, ~tmp$0#0:wybe.int, ?$#0:wybe.int) @wybe:12:38
-func_let
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
 ; ModuleID = 'func_let'
-source_filename = "test-cases/func_let.wybe"
 
-declare void @print_int(i64) local_unnamed_addr
 
-define i32 @func_let.main() local_unnamed_addr {
+declare external ccc void @print_int(i64)
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i32 @func_let.main(){
 entry:
-  tail call void @print_int(i64 40)
+  tail call ccc void @print_int(i64 40)
+  %1 = alloca i32
+  store i32 0, i32* %1
   ret i32 0
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"func_let.quad<0>"(i64 %"x#0") local_unnamed_addr #0 {
+define external ccc i64 @"func_let.quad<0>"(i64 %"x#0"){
 entry:
-  %"$#0" = shl i64 %"x#0", 2
+  %"tmp$0#0" = add i64 %"x#0", %"x#0"
+  %"$#0" = add i64 %"tmp$0#0", %"tmp$0#0"
   ret i64 %"$#0"
 }
-
-attributes #0 = { norecurse nounwind readnone }
-

@@ -14,23 +14,22 @@ print2 > public inline (0 calls)
 0: print2([x#0:wybe.int], [y#0:wybe.int], wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
     foreign c print_string("hello, world":wybe.string, ~#wybe.io$io#0:phantom, ?tmp$2#0:phantom) @wybe:92:41
     foreign c putchar('\n':wybe.char, ~tmp$2#0:phantom, ?#wybe.io$io#1:phantom) @wybe:78:28
-proc_hello
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
 ; ModuleID = 'proc_hello'
-source_filename = "test-cases/proc_hello.wybe"
+
+
+declare external ccc void @putchar(i8)
+
+declare external ccc void @print_string(i8*)
 
 @proc_hello.1 = constant [13 x i8] c"hello, world\00"
 
-declare void @putchar(i8) local_unnamed_addr
+declare external ccc i8* @wybe_malloc(i32)
 
-declare void @print_string(i8*) local_unnamed_addr
-
-define void @"proc_hello.print2<0>"() local_unnamed_addr {
+define external ccc void @"proc_hello.print2<0>"(){
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @proc_hello.1, i64 0, i64 0))
-  tail call void @putchar(i8 10)
+  tail call ccc void @print_string(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @proc_hello.1, i32 0, i32 0))
+  tail call ccc void @putchar(i8 10)
   ret void
 }
-

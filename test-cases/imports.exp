@@ -18,6 +18,12 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+  LLVM code       :
+
+; ModuleID = 'imports'
+
+
+declare external ccc i8* @wybe_malloc(i32)
 --------------------------------------------------
  Module mod1
   public submods  : 
@@ -29,6 +35,12 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+  LLVM code       :
+
+; ModuleID = 'mod1'
+
+
+declare external ccc i8* @wybe_malloc(i32)
 --------------------------------------------------
  Module mod2
   public submods  : 
@@ -40,6 +52,12 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+  LLVM code       :
+
+; ModuleID = 'mod2'
+
+
+declare external ccc i8* @wybe_malloc(i32)
 --------------------------------------------------
  Module mod3
   public submods  : 
@@ -51,6 +69,12 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+  LLVM code       :
+
+; ModuleID = 'mod3'
+
+
+declare external ccc i8* @wybe_malloc(i32)
 --------------------------------------------------
  Module mod4
   public submods  : 
@@ -62,6 +86,12 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+  LLVM code       :
+
+; ModuleID = 'mod4'
+
+
+declare external ccc i8* @wybe_malloc(i32)
 --------------------------------------------------
  Module mod5
   public submods  : 
@@ -73,6 +103,12 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+  LLVM code       :
+
+; ModuleID = 'mod5'
+
+
+declare external ccc i8* @wybe_malloc(i32)
 --------------------------------------------------
  Module mod6
   public submods  : 
@@ -84,6 +120,12 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+  LLVM code       :
+
+; ModuleID = 'mod6'
+
+
+declare external ccc i8* @wybe_malloc(i32)
 --------------------------------------------------
  Module mod7
   public submods  : 
@@ -95,6 +137,12 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+  LLVM code       :
+
+; ModuleID = 'mod7'
+
+
+declare external ccc i8* @wybe_malloc(i32)
 --------------------------------------------------
  Module mod8
   public submods  : 
@@ -106,42 +154,9 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-imports, mod1, mod2, mod3, mod4, mod5, mod6, mod7, mod8
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
-; ModuleID = 'imports'
-source_filename = "test-cases/imports.wybe"
-
---------------------------------------------------
-; ModuleID = 'mod1'
-source_filename = "test-cases/mod1.wybe"
-
---------------------------------------------------
-; ModuleID = 'mod2'
-source_filename = "test-cases/mod2.wybe"
-
---------------------------------------------------
-; ModuleID = 'mod3'
-source_filename = "test-cases/mod3.wybe"
-
---------------------------------------------------
-; ModuleID = 'mod4'
-source_filename = "test-cases/mod4.wybe"
-
---------------------------------------------------
-; ModuleID = 'mod5'
-source_filename = "test-cases/mod5.wybe"
-
---------------------------------------------------
-; ModuleID = 'mod6'
-source_filename = "test-cases/mod6.wybe"
-
---------------------------------------------------
-; ModuleID = 'mod7'
-source_filename = "test-cases/mod7.wybe"
-
---------------------------------------------------
 ; ModuleID = 'mod8'
-source_filename = "test-cases/mod8.wybe"
 
+
+declare external ccc i8* @wybe_malloc(i32)

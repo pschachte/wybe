@@ -13,19 +13,15 @@ AFTER EVERYTHING:
 incr > inline (0 calls)
 0: incr(a#0:wybe.int, ?$#0:wybe.int):
     foreign llvm add(~a#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @wybe:12:38
-func_untyped
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
 ; ModuleID = 'func_untyped'
-source_filename = "test-cases/func_untyped.wybe"
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"func_untyped.incr<0>"(i64 %"a#0") local_unnamed_addr #0 {
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i64 @"func_untyped.incr<0>"(i64 %"a#0"){
 entry:
   %"$#0" = add i64 %"a#0", 1
   ret i64 %"$#0"
 }
-
-attributes #0 = { norecurse nounwind readnone }
-

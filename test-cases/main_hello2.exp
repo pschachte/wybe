@@ -15,25 +15,27 @@ AFTER EVERYTHING:
     foreign c print_string("hello, ":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
     foreign c print_string("world!":wybe.string, ~#wybe.io$io#1:phantom, ?tmp$4#0:phantom) @wybe:92:41
     foreign c putchar('\n':wybe.char, ~tmp$4#0:phantom, ?#wybe.io$io#2:phantom) @wybe:78:28
-main_hello2
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
 ; ModuleID = 'main_hello2'
-source_filename = "test-cases/main_hello2.wybe"
+
+
+declare external ccc void @putchar(i8)
+
+declare external ccc void @print_string(i8*)
 
 @main_hello2.2 = constant [7 x i8] c"world!\00"
+
 @main_hello2.1 = constant [8 x i8] c"hello, \00"
 
-declare void @putchar(i8) local_unnamed_addr
+declare external ccc i8* @wybe_malloc(i32)
 
-declare void @print_string(i8*) local_unnamed_addr
-
-define i32 @main_hello2.main() local_unnamed_addr {
+define external ccc i32 @main_hello2.main(){
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @main_hello2.1, i64 0, i64 0))
-  tail call void @print_string(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @main_hello2.2, i64 0, i64 0))
-  tail call void @putchar(i8 10)
+  tail call ccc void @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @main_hello2.1, i32 0, i32 0))
+  tail call ccc void @print_string(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @main_hello2.2, i32 0, i32 0))
+  tail call ccc void @putchar(i8 10)
+  %3 = alloca i32
+  store i32 0, i32* %3
   ret i32 0
 }
-

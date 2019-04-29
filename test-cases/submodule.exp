@@ -12,6 +12,46 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+  LLVM code       :
+
+; ModuleID = 'submodule'
+
+
+declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @print_string(i8*)
+
+@submodule.privatetest.1 = constant [33 x i8] c"private proc in a private module\00"
+
+@submodule.privatetest.2 = constant [32 x i8] c"public proc in a private module\00"
+
+define external ccc void @"submodule.privatetest.hidden<0>"(){
+entry:
+  tail call ccc void @print_string(i8* getelementptr inbounds ([33 x i8], [33 x i8]* @submodule.privatetest.1, i32 0, i32 0))
+  ret void
+}
+
+define external ccc void @"submodule.privatetest.semi_hidden<0>"(){
+entry:
+  tail call ccc void @print_string(i8* getelementptr inbounds ([32 x i8], [32 x i8]* @submodule.privatetest.2, i32 0, i32 0))
+  ret void
+}
+
+@submodule.publictest.1 = constant [32 x i8] c"private proc in a public module\00"
+
+@submodule.publictest.2 = constant [31 x i8] c"public proc in a public module\00"
+
+define external ccc void @"submodule.publictest.semi_visible<0>"(){
+entry:
+  tail call ccc void @print_string(i8* getelementptr inbounds ([32 x i8], [32 x i8]* @submodule.publictest.1, i32 0, i32 0))
+  ret void
+}
+
+define external ccc void @"submodule.publictest.visible<0>"(){
+entry:
+  tail call ccc void @print_string(i8* getelementptr inbounds ([31 x i8], [31 x i8]* @submodule.publictest.2, i32 0, i32 0))
+  ret void
+}
   submodules      : submodule.privatetest, submodule.publictest
 --------------------------------------------------
  Module submodule.privatetest
@@ -33,6 +73,30 @@ hidden > inline (0 calls)
 semi_hidden > public inline (0 calls)
 0: semi_hidden(wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
     foreign c print_string("public proc in a private module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
+  LLVM code       :
+
+; ModuleID = 'submodule.privatetest'
+
+
+declare external ccc void @print_string(i8*)
+
+@submodule.privatetest.1 = constant [33 x i8] c"private proc in a private module\00"
+
+@submodule.privatetest.2 = constant [32 x i8] c"public proc in a private module\00"
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc void @"submodule.privatetest.hidden<0>"(){
+entry:
+  tail call ccc void @print_string(i8* getelementptr inbounds ([33 x i8], [33 x i8]* @submodule.privatetest.1, i32 0, i32 0))
+  ret void
+}
+
+define external ccc void @"submodule.privatetest.semi_hidden<0>"(){
+entry:
+  tail call ccc void @print_string(i8* getelementptr inbounds ([32 x i8], [32 x i8]* @submodule.privatetest.2, i32 0, i32 0))
+  ret void
+}
 --------------------------------------------------
  Module submodule.publictest
   public submods  : 
@@ -53,83 +117,27 @@ semi_visible > inline (0 calls)
 visible > public inline (0 calls)
 0: visible(wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
     foreign c print_string("public proc in a public module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
-submodule, submodule.privatetest, submodule.publictest
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
-; ModuleID = 'submodule'
-source_filename = "test-cases/submodule.wybe"
-
-@submodule.privatetest.1 = constant [33 x i8] c"private proc in a private module\00"
-@submodule.privatetest.2 = constant [32 x i8] c"public proc in a private module\00"
-@submodule.publictest.1 = constant [32 x i8] c"private proc in a public module\00"
-@submodule.publictest.2 = constant [31 x i8] c"public proc in a public module\00"
-
-declare void @print_string(i8*) local_unnamed_addr
-
-define void @"submodule.privatetest.hidden<0>"() local_unnamed_addr {
-entry:
-  tail call void @print_string(i8* getelementptr inbounds ([33 x i8], [33 x i8]* @submodule.privatetest.1, i64 0, i64 0))
-  ret void
-}
-
-define void @"submodule.privatetest.semi_hidden<0>"() local_unnamed_addr {
-entry:
-  tail call void @print_string(i8* getelementptr inbounds ([32 x i8], [32 x i8]* @submodule.privatetest.2, i64 0, i64 0))
-  ret void
-}
-
-define void @"submodule.publictest.semi_visible<0>"() local_unnamed_addr {
-entry:
-  tail call void @print_string(i8* getelementptr inbounds ([32 x i8], [32 x i8]* @submodule.publictest.1, i64 0, i64 0))
-  ret void
-}
-
-define void @"submodule.publictest.visible<0>"() local_unnamed_addr {
-entry:
-  tail call void @print_string(i8* getelementptr inbounds ([31 x i8], [31 x i8]* @submodule.publictest.2, i64 0, i64 0))
-  ret void
-}
-
---------------------------------------------------
-; ModuleID = 'submodule.privatetest'
-source_filename = "test-cases"
-
-@submodule.privatetest.1 = constant [33 x i8] c"private proc in a private module\00"
-@submodule.privatetest.2 = constant [32 x i8] c"public proc in a private module\00"
-
-declare void @print_string(i8*) local_unnamed_addr
-
-define void @"submodule.privatetest.hidden<0>"() local_unnamed_addr {
-entry:
-  tail call void @print_string(i8* getelementptr inbounds ([33 x i8], [33 x i8]* @submodule.privatetest.1, i64 0, i64 0))
-  ret void
-}
-
-define void @"submodule.privatetest.semi_hidden<0>"() local_unnamed_addr {
-entry:
-  tail call void @print_string(i8* getelementptr inbounds ([32 x i8], [32 x i8]* @submodule.privatetest.2, i64 0, i64 0))
-  ret void
-}
-
---------------------------------------------------
 ; ModuleID = 'submodule.publictest'
-source_filename = "test-cases"
+
+
+declare external ccc void @print_string(i8*)
 
 @submodule.publictest.1 = constant [32 x i8] c"private proc in a public module\00"
+
 @submodule.publictest.2 = constant [31 x i8] c"public proc in a public module\00"
 
-declare void @print_string(i8*) local_unnamed_addr
+declare external ccc i8* @wybe_malloc(i32)
 
-define void @"submodule.publictest.semi_visible<0>"() local_unnamed_addr {
+define external ccc void @"submodule.publictest.semi_visible<0>"(){
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([32 x i8], [32 x i8]* @submodule.publictest.1, i64 0, i64 0))
+  tail call ccc void @print_string(i8* getelementptr inbounds ([32 x i8], [32 x i8]* @submodule.publictest.1, i32 0, i32 0))
   ret void
 }
 
-define void @"submodule.publictest.visible<0>"() local_unnamed_addr {
+define external ccc void @"submodule.publictest.visible<0>"(){
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([31 x i8], [31 x i8]* @submodule.publictest.2, i64 0, i64 0))
+  tail call ccc void @print_string(i8* getelementptr inbounds ([31 x i8], [31 x i8]* @submodule.publictest.2, i32 0, i32 0))
   ret void
 }
-

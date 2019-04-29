@@ -30,46 +30,36 @@ factorial > public (2 calls)
     1:
         foreign llvm move(1:wybe.int, ?$#0:wybe.int) @func_factorial:1:8
 
-func_factorial
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
 ; ModuleID = 'func_factorial'
-source_filename = "test-cases/func_factorial.wybe"
 
-declare void @putchar(i8) local_unnamed_addr
 
-declare void @print_int(i64) local_unnamed_addr
+declare external ccc void @putchar(i8)
 
-define i32 @func_factorial.main() local_unnamed_addr {
+declare external ccc void @print_int(i64)
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i32 @func_factorial.main(){
 entry:
-  %"tmp$0#0" = tail call i64 @"func_factorial.factorial<0>"(i64 5)
-  tail call void @print_int(i64 %"tmp$0#0")
-  tail call void @putchar(i8 10)
+  %"tmp$0#0" = tail call ccc i64 @"func_factorial.factorial<0>"(i64 5)
+  tail call ccc void @print_int(i64 %"tmp$0#0")
+  tail call ccc void @putchar(i8 10)
+  %1 = alloca i32
+  store i32 0, i32* %1
   ret i32 0
 }
 
-; Function Attrs: nounwind readnone
-define i64 @"func_factorial.factorial<0>"(i64 %"n#0") local_unnamed_addr #0 {
+define external ccc i64 @"func_factorial.factorial<0>"(i64 %"n#0"){
 entry:
-  %"tmp$4#01" = icmp slt i64 %"n#0", 1
-  br i1 %"tmp$4#01", label %if.then, label %if.else.preheader
-
-if.else.preheader:                                ; preds = %entry
-  br label %if.else
-
-if.then:                                          ; preds = %if.else, %entry
-  %accumulator.tr.lcssa = phi i64 [ 1, %entry ], [ %"$#0", %if.else ]
-  ret i64 %accumulator.tr.lcssa
-
-if.else:                                          ; preds = %if.else.preheader, %if.else
-  %"n#0.tr3" = phi i64 [ %"tmp$3#0", %if.else ], [ %"n#0", %if.else.preheader ]
-  %accumulator.tr2 = phi i64 [ %"$#0", %if.else ], [ 1, %if.else.preheader ]
-  %"tmp$3#0" = add nsw i64 %"n#0.tr3", -1
-  %"$#0" = mul i64 %"n#0.tr3", %accumulator.tr2
-  %"tmp$4#0" = icmp slt i64 %"n#0.tr3", 2
+  %"tmp$4#0" = icmp sle i64 %"n#0", 0
   br i1 %"tmp$4#0", label %if.then, label %if.else
+if.then:
+  ret i64 1
+if.else:
+  %"tmp$3#0" = sub i64 %"n#0", 1
+  %"tmp$2#0" = tail call ccc i64 @"func_factorial.factorial<0>"(i64 %"tmp$3#0")
+  %"$#0" = mul i64 %"n#0", %"tmp$2#0"
+  ret i64 %"$#0"
 }
-
-attributes #0 = { nounwind readnone }
-

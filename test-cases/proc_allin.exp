@@ -12,10 +12,9 @@ AFTER EVERYTHING:
 
 nada > public inline (0 calls)
 0: nada([x#0:wybe.int], [y#0:wybe.int]):
-proc_allin
-======================================================================
-AFTER LLVM IR:
+  LLVM code       :
 
 ; ModuleID = 'proc_allin'
-source_filename = "test-cases/proc_allin.wybe"
 
+
+declare external ccc i8* @wybe_malloc(i32)

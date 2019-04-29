@@ -56,7 +56,7 @@ defaultOptions    = Options
 data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
   | Flatten | Normalise | Optimise | Resources | Types
-  | Unbranch | Blocks | Emit
+  | Unbranch | CodeGen | Blocks | Emit
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
 
@@ -87,8 +87,10 @@ logSelectionDescription Types
     = "Log type checking"
 logSelectionDescription Unbranch
     = "Log transformation of loops and selections into clausal form"
+logSelectionDescription CodeGen
+    = "Log generation of LLVM code"
 logSelectionDescription Blocks
-    = "Log translation of LPVM procedures into LLVM "
+    = "Log translation of LPVM procedures into LLVM"
 logSelectionDescription Emit
     = "Log emission of LLVM IR from the definitions created."
 
@@ -210,4 +212,3 @@ formatMapping mapping =
         [ let t = show elt
           in  (replicate (width - length t) ' ') ++ t ++ " : " ++ mapping elt
         | elt <- domain]
-
