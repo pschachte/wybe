@@ -4,8 +4,9 @@
 --  Purpose  : Alias analysis for a single module
 --  Copyright: (c) 2018 Ting Lu.  All rights reserved.
 
-module AliasAnalysis (aliasSccBottomUp, escapablePrimArgs, aliasedArgsInSimplePrim, aliasedArgsInPrimCall, mapParamToArgVar)
-    where
+module AliasAnalysis (aliasSccBottomUp, maybeAliasPrimArgs,
+                        aliasedArgsInSimplePrim, aliasedArgsInPrimCall,
+                        mapParamToArgVar) where
 
 import           AST
 import           Control.Monad
@@ -128,13 +129,14 @@ aliasedByPrim nonePhantomParams aliasMap prim =
             let paramArgMap = mapParamToArgVar calleeProto args
             -- calleeArgsAliasMap is the alias map of actual arguments passed
             -- into callee
-            let calleeArgsAliases = Map.foldrWithKey (transformUfKey paramArgMap)
-                                            initUnionFind calleeParamAliases
+            let calleeArgsAliases =
+                    Map.foldrWithKey (transformUfKey paramArgMap)
+                        initUnionFind calleeParamAliases
             aliasedArgsInPrimCall calleeArgsAliases nonePhantomParams aliasMap args
         -- | Analyse simple prims
         _ -> do
             logAlias $ "\n--- simple prim:  " ++ show prim
-            escapablePrimArgs (content prim) >>=
+            maybeAliasPrimArgs (content prim) >>=
                 aliasedArgsInSimplePrim nonePhantomParams aliasMap
 
 
@@ -157,6 +159,34 @@ aliasedByFork caller body aliasMap = do
             -- NoFork: analyse prims done
             logAlias "No fork."
             return aliasMap
+
+
+-- Build up maybe alised inputs and outputs triggerred by move, mutate, access,
+-- cast instructions. Returned triple ([PrimVarName], [PrimVarName], [PrimArg])
+-- is (maybeAliasedInput, maybeAliasedOutput, primArgs)
+maybeAliasPrimArgs :: Prim -> Compiler ([PrimVarName], [PrimVarName], [PrimArg])
+maybeAliasPrimArgs (PrimForeign _ "access" _ args) = _maybeAliasPrimArgs args
+maybeAliasPrimArgs (PrimForeign _ "cast" _ args)   = _maybeAliasPrimArgs args
+maybeAliasPrimArgs (PrimForeign _ "move" _ args)   = _maybeAliasPrimArgs args
+maybeAliasPrimArgs (PrimForeign _ "mutate" _ args@[_, _, _, _, ArgInt 1 _, _]) =
+    -- Only incur aliasing if this is a destructive mutate
+    _maybeAliasPrimArgs args
+maybeAliasPrimArgs (PrimForeign _ "mutate" _ args@[_, _, _, _, ArgInt 0 _, _]) =
+    -- Still need to return all prim args if this is a non-destructive mutate
+    -- because the arg in final use will need to be removed from alias map
+    return ([],[],args)
+maybeAliasPrimArgs _                               = return ([],[],[])
+
+
+-- Helper function for the above maybeAliasPrimArgs function
+_maybeAliasPrimArgs :: [PrimArg]
+                        -> Compiler ([PrimVarName], [PrimVarName], [PrimArg])
+_maybeAliasPrimArgs args = do
+    let inputArgs = List.filter (argVarIsFlowDirection FlowIn) args
+    let outputArgs = List.filter (argVarIsFlowDirection FlowOut) args
+    escapedInputs <- foldM (argsOfProcProto inArgVar2) [] inputArgs
+    escapedVia <- foldM (argsOfProcProto outArgVar2) [] outputArgs
+    return (escapedInputs, escapedVia, args)
 
 
 -- Build up alias pairs triggerred by move, mutate, access, cast instructions
@@ -190,36 +220,36 @@ argsOfProcProto varNameGetter escapedVars arg = do
 
 
 -- Check Arg aliases in one of proc calls inside a ProcBody
--- args: argument in current prim that being analysed
 -- nonePhantomParams: caller's formal params
+-- primArgs: argument in current prim that being analysed
 aliasedArgsInPrimCall :: AliasMap -> [PrimVarName] -> AliasMap -> [PrimArg]
                             -> Compiler AliasMap
-aliasedArgsInPrimCall calleeArgsAliases nonePhantomParams currentAlias args = do
-    let combinedAliases1 = combineUf calleeArgsAliases currentAlias
-    -- Gather variables in final use
-    finals <- foldM (finalArgs nonePhantomParams) Set.empty args
-    -- Then remove them from aliasmap
-    cleanupFinalAliasedVars combinedAliases1 finals
+aliasedArgsInPrimCall calleeArgsAliases nonePhantomParams currentAlias primArgs
+    = do
+        let combinedAliases1 = combineUf calleeArgsAliases currentAlias
+        -- Gather variables in final use
+        finals <- foldM (finalArgs nonePhantomParams) Set.empty primArgs
+        -- Then remove them from aliasmap
+        cleanupFinalAliasedVars combinedAliases1 finals
 
 
--- Check Arg aliases in one of the prims of a ProcBody
--- args: argument in current prim that being analysed
--- nonePhantomParams: caller's formal params
-aliasedArgsInSimplePrim :: [PrimVarName] -> AliasMap -> [PrimArg]
+-- Check Arg aliases in one of the prims of a ProcBody.
+-- nonePhantomParams: caller's formal params;
+-- (maybeAliasedInput, maybeAliasedOutput, primArgs): argument in current prim
+-- that being analysed
+aliasedArgsInSimplePrim :: [PrimVarName] -> AliasMap
+                            -> ([PrimVarName], [PrimVarName], [PrimArg])
                             -> Compiler AliasMap
-aliasedArgsInSimplePrim _ currentAlias [] = return currentAlias
-aliasedArgsInSimplePrim nonePhantomParams currentAlias args = do
-    let inputArgs = List.filter (argVarIsFlowDirection FlowIn) args
-    let outputArgs = List.filter (argVarIsFlowDirection FlowOut) args
-    escapedInputs <- foldM (argsOfProcProto inArgVar2) [] inputArgs
-    escapedVia <- foldM (argsOfProcProto outArgVar2) [] outputArgs
-    let aliases = cartProd escapedInputs escapedVia
-    let aliasMap1 = List.foldr (\(inArg, outArg) aMap ->
-                        uniteUf aMap inArg outArg) currentAlias aliases
-    -- Gather variables in final use
-    finals <- foldM (finalArgs nonePhantomParams) Set.empty args
-    -- Then remove them from aliasmap
-    cleanupFinalAliasedVars aliasMap1 finals
+aliasedArgsInSimplePrim _ currentAlias ([],[],[]) = return currentAlias
+aliasedArgsInSimplePrim nonePhantomParams currentAlias
+    (maybeAliasedInput, maybeAliasedOutput, primArgs) = do
+        let aliases = cartProd maybeAliasedInput maybeAliasedOutput
+        let aliasMap1 = List.foldr (\(inArg, outArg) aMap ->
+                            uniteUf aMap inArg outArg) currentAlias aliases
+        -- Gather variables in final use
+        finals <- foldM (finalArgs nonePhantomParams) Set.empty primArgs
+        -- Then remove them from aliasmap
+        cleanupFinalAliasedVars aliasMap1 finals
 
 
 -- Helper: map arguments in callee proc to its formal parameters so we can get

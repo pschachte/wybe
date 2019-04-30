@@ -4,11 +4,10 @@
 --  Purpose  : Transform LPVM after alias analysis
 --  Copyright: (c) 2018 Ting Lu.  All rights reserved.
 
-module Transform (transformProc)
-    where
+module Transform (transformProc) where
 
 import           AliasAnalysis (aliasedArgsInPrimCall, aliasedArgsInSimplePrim,
-                                escapablePrimArgs, mapParamToArgVar)
+                                mapParamToArgVar, maybeAliasPrimArgs)
 import           AST
 import           Control.Monad
 import           Data.List     as List
@@ -91,15 +90,14 @@ transformPrim nonePhantomParams (aliasMap, prims) prim =
         -- | Transform simple prims
         _ -> do
             logTransform $ "\n--- simple prim:  " ++ show prim
-            escapableArgs <- escapablePrimArgs (content prim)
+            -- Mutate destructive flag if this is a mutate instruction
+            prim' <- mutateInstruction prim aliasMap
+            maybeAliasInfo <- maybeAliasPrimArgs (content prim)
             -- Update alias map for escapable args
-            aliasMap2 <-
-                aliasedArgsInSimplePrim nonePhantomParams aliasMap escapableArgs
+            aliasMap2 <- aliasedArgsInSimplePrim nonePhantomParams aliasMap
+                            maybeAliasInfo
             logTransform $ "current aliasMap: " ++ show aliasMap
             logTransform $ "after :           " ++ show aliasMap2
-            -- Mutate destructive flag if this is a mutate instruction; update
-            --     destructive flag after aliasmap is updated
-            prim' <- mutateInstruction prim aliasMap2
             return (aliasMap2, prims ++ [prim'])
 
 
@@ -142,23 +140,23 @@ mutateInstruction (Unplaced (PrimForeign lang "mutate" flags args)) aliasMap = d
 mutateInstruction prim _ =  return prim
 
 
--- Helper: change mutate destructive flag to true if FlowIn variable is final
--- and not aliased and the original destructive flag is not 1 yet
+-- Helper: change mutate destructive flag to true if FlowIn variable is not
+-- aliased and the original destructive flag is not set to 1 yet
 _updateMutateForAlias :: AliasMap -> [PrimArg] -> Compiler [PrimArg]
 _updateMutateForAlias aliasMap
-    [fIn@(ArgVar inName _ _ _ final1), fOut, size, offset, ArgInt des typ,
-    mem@(ArgVar memName _ _ _ final2)] =
-        -- When the val is also a pointer
-        if not (connectedToOthers aliasMap inName) && final1
-            && not (connectedToOthers aliasMap memName) && final2
-            && des /= 1
-        then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
-        else return [fIn, fOut, size, offset, ArgInt des typ, mem]
+    args@[fIn@(ArgVar inName _ _ _ _), fOut, size, offset, ArgInt des typ,
+        mem@(ArgVar memName _ _ _ _)] =
+            -- When the val is also a pointer
+            if not (connectedToOthers aliasMap inName)
+                && not (connectedToOthers aliasMap memName)
+                && des /= 1
+            then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
+            else return args
 _updateMutateForAlias aliasMap
-    [fIn@(ArgVar inName _ _ _ final), fOut, size, offset, ArgInt des typ, mem] =
-        if not (connectedToOthers aliasMap inName) && final && des /= 1
+    args@[fIn@(ArgVar inName _ _ _ _), fOut, size, offset, ArgInt des typ, mem] =
+        if not (connectedToOthers aliasMap inName) && des /= 1
         then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
-        else return [fIn, fOut, size, offset, ArgInt des typ, mem]
+        else return args
 _updateMutateForAlias _ args = return args
 
 
