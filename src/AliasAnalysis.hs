@@ -23,8 +23,9 @@ import           Util
 -- PROC LEVEL ALIAS ANALYSIS
 -- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
 aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
-aliasSccBottomUp (AcyclicSCC single) =
-    aliasProcBottomUp single -- ^immediate fixpoint if no mutual dependency
+aliasSccBottomUp (AcyclicSCC single) = do
+    _ <- aliasProcBottomUp single -- ^immediate fixpoint if no mutual dependency
+    return ()
 -- | Gather all flags (indicating if any proc alias information changed or not)
 --     by comparing transitive closure of the (key, value) pairs of the map;
 --     Only cyclic procs need to reach a fixed point; False means alias info not
