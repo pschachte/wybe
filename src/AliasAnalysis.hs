@@ -24,16 +24,17 @@ import           Util
 -- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
 aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
 aliasSccBottomUp (AcyclicSCC single) =
-    mapM_ aliasProcBottomUp [single]
-    -- immediate fixpoint if no mutual dependency
--- gather all flags (indicating if any proc alias information changed or not) by
---     comparing transitive closure of the (key, value) pairs of the map; Only
---     cycclic procs need to reach a fixed point
--- False means alias info not changed; so that a fixed point is reached
+    aliasProcBottomUp single -- ^immediate fixpoint if no mutual dependency
+-- | Gather all flags (indicating if any proc alias information changed or not)
+--     by comparing transitive closure of the (key, value) pairs of the map;
+--     Only cyclic procs need to reach a fixed point; False means alias info not
+--     changed, so that a fixed point is reached.
 aliasSccBottomUp procs@(CyclicSCC multi) = do
     changed <- mapM aliasProcBottomUp multi
     logAlias $ replicate 30 '>' ++ "CyclicSCC procs alias changed? "
                  ++ show (or changed) ++ " - " ++ show changed
+    -- Aliasing is always changed after the first run, so cyclic procs are
+    -- analysed at least twice.
     when (or changed) $ aliasSccBottomUp procs
     -- TODO: Is module level fixpoint of alias analysis needed? proc level
     -- analysis will reach fixpoint anyway??
@@ -53,9 +54,9 @@ aliasProcBottomUp pspec = do
     -- Get the new analysis info from the updated proc
     newDef <- getProcDef pspec
     let (ProcDefPrim _ _ newAnalysis) = procImpln newDef
-    -- And compare if the alias map changed
+    -- And compare if the alias map changed.
     areDifferentMaps (procArgAliasMap oldAnalysis) (procArgAliasMap newAnalysis)
-    -- ^XXX wrong way to do this?! Need to change type signatures of a bunch of
+    -- ^XXX wrong way to do this. Need to change type signatures of a bunch of
     -- functions start from checkEscapeDef which is called by updateProcDefM
 
 
@@ -167,15 +168,14 @@ escapablePrimArgs _                               = return []
 
 
 -- Helper: compare if two AliasMaps are different
--- Have to convert the map to Alias Pairs because the root could be different in
--- two maps whereas the alias info are the same instead
+-- Have to ensure the aliasing map is canonical by converting the map to Alias
+-- Pairs because the root could be different in two maps whereas the alias info
+-- are the same
 areDifferentMaps :: AliasMap -> AliasMap -> Compiler Bool
 areDifferentMaps aliasMap1 aliasMap2 = do
     let aliasPair1 = aliasMapToAliasPairs aliasMap1
     let aliasPair2 = aliasMapToAliasPairs aliasMap2
-    -- don't have to flag the change if the alias is changed from an empty list
-    -- to another list because the list is always changed at the first time
-    return $ not (List.null aliasPair1) && aliasPair1 /= aliasPair2
+    return $ aliasPair1 /= aliasPair2
 
 
 -- Helper: get argvar names of aliased args of the prim
