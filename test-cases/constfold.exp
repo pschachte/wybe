@@ -31,6 +31,7 @@ fold_test > public inline (0 calls)
 fortytwo > public inline (0 calls)
 0: fortytwo(?$#0:wybe.int):
     foreign llvm move(42:wybe.int, ?$#0:wybe.int) @constfold:1:8
+
   LLVM code       :
 
 ; ModuleID = 'constfold'

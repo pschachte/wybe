@@ -252,7 +252,7 @@ canonicaliseResourceSpec pos spec = do
     return res'
 
 
--- |Get a list of all the SimpleResources, and their types, referred 
+-- |Get a list of all the SimpleResources, and their types, referred
 -- to by a ResourceFlowSpec.  This is necessary because a resource spec
 -- may refer to a compound resource.
 simpleResourceFlows :: OptPos -> ResourceFlowSpec ->
@@ -269,10 +269,13 @@ simpleResourceFlows pos (ResourceFlowSpec spec flow) = do
 resourceVar :: ResourceSpec -> Compiler String
 resourceVar (ResourceSpec [] name) = return name
 resourceVar (ResourceSpec mod name) = do
-    currMod <- getModuleSpec
-    if currMod == mod
-    then return name -- ensure we can use local resources in code
-    else return $ intercalate "." mod ++ "$" ++ name
+    -- Always use resource name as variable name, regardless of module
+    -- This could cause collisions!
+    return name
+    -- currMod <- getModuleSpec
+    -- if currMod == mod
+    -- then return name -- ensure we can use local resources in code
+    -- else return $ intercalate "." mod ++ "$" ++ name
 
 
 -- |Log a message, if we are logging resource transformation activity.

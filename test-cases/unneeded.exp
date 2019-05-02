@@ -13,6 +13,7 @@ AFTER EVERYTHING:
 unneeded > inline (0 calls)
 0: unneeded(x#0:wybe.int, [y#0:wybe.int], ?z#0:wybe.int, q#0:wybe.int, [?q#0:wybe.int]):
     foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?z#0:wybe.int) @wybe:12:38
+
   LLVM code       :
 
 ; ModuleID = 'unneeded'

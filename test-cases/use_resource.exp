@@ -11,14 +11,14 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (?count#1:wybe.int, wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
-    foreign c print_string("Inner count (4): ":wybe.string, ~#wybe.io$io#0:phantom, ?tmp$6#0:phantom) @wybe:92:41
+0: (?count#1:wybe.int, io#0:phantom, ?io#1:phantom):
+    foreign c print_string("Inner count (4): ":wybe.string, ~#io#0:phantom, ?tmp$6#0:phantom) @wybe:92:41
     foreign c print_int(4:wybe.int, ~tmp$6#0:phantom, ?tmp$7#0:phantom) @wybe:80:38
     foreign c putchar('\n':wybe.char, ~tmp$7#0:phantom, ?tmp$8#0:phantom) @wybe:78:28
     foreign llvm move(1:wybe.int, ?#count#1:wybe.int)
     foreign c print_string("Outer count (1): ":wybe.string, ~tmp$8#0:phantom, ?tmp$9#0:phantom) @wybe:92:41
     foreign c print_int(1:wybe.int, ~tmp$9#0:phantom, ?tmp$10#0:phantom) @wybe:80:38
-    foreign c putchar('\n':wybe.char, ~tmp$10#0:phantom, ?#wybe.io$io#1:phantom) @wybe:78:28
+    foreign c putchar('\n':wybe.char, ~tmp$10#0:phantom, ?#io#1:phantom) @wybe:78:28
 
 
 inc_count > inline (4 calls)
@@ -27,18 +27,19 @@ inc_count > inline (4 calls)
 
 
 use_test > inline (1 calls)
-0: use_test(count#0:wybe.int, ?count#5:wybe.int, wybe.io$io#0:phantom, ?wybe.io$io#4:phantom):
+0: use_test(count#0:wybe.int, ?count#5:wybe.int, io#0:phantom, ?io#4:phantom):
     foreign llvm add(~#count#0:wybe.int, 1:wybe.int, ?#count#1:wybe.int) @wybe:12:38
     foreign llvm add(#count#1:wybe.int, 1:wybe.int, ?#count#2:wybe.int) @wybe:12:38
     foreign llvm add(~#count#2:wybe.int, 1:wybe.int, ?#count#3:wybe.int) @wybe:12:38
     foreign llvm add(~#count#3:wybe.int, 1:wybe.int, ?#count#4:wybe.int) @wybe:12:38
-    foreign c print_string("Inner count (4): ":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
-    foreign c print_int(~count#4:wybe.int, ~#wybe.io$io#1:phantom, ?tmp$9#0:phantom) @wybe:80:38
-    foreign c putchar('\n':wybe.char, ~tmp$9#0:phantom, ?#wybe.io$io#2:phantom) @wybe:78:28
+    foreign c print_string("Inner count (4): ":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:92:41
+    foreign c print_int(~count#4:wybe.int, ~#io#1:phantom, ?tmp$9#0:phantom) @wybe:80:38
+    foreign c putchar('\n':wybe.char, ~tmp$9#0:phantom, ?#io#2:phantom) @wybe:78:28
     foreign llvm move(count#1, ?count#5)
-    foreign c print_string("Outer count (1): ":wybe.string, ~#wybe.io$io#2:phantom, ?#wybe.io$io#3:phantom) @wybe:92:41
-    foreign c print_int(~count#1, ~#wybe.io$io#3:phantom, ?tmp$14#0:phantom) @wybe:80:38
-    foreign c putchar('\n':wybe.char, ~tmp$14#0:phantom, ?#wybe.io$io#4:phantom) @wybe:78:28
+    foreign c print_string("Outer count (1): ":wybe.string, ~#io#2:phantom, ?#io#3:phantom) @wybe:92:41
+    foreign c print_int(~count#1, ~#io#3:phantom, ?tmp$14#0:phantom) @wybe:80:38
+    foreign c putchar('\n':wybe.char, ~tmp$14#0:phantom, ?#io#4:phantom) @wybe:78:28
+
   LLVM code       :
 
 ; ModuleID = 'use_resource'

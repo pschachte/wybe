@@ -15,6 +15,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+
   LLVM code       :
 
 ; ModuleID = 'type_enum'
@@ -103,6 +104,7 @@ summer > public inline (0 calls)
 winter > public inline (0 calls)
 0: winter(?$#0:type_enum.season):
     foreign lpvm cast(0:type_enum.season, ?$#0:type_enum.season)
+
   LLVM code       :
 
 ; ModuleID = 'type_enum.season'

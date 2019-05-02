@@ -690,6 +690,7 @@ lookupType AnyType _ = return $ Just AnyType
 lookupType InvalidType _ = return $ Just InvalidType
 lookupType (TypeSpec _ "phantom" []) _ =
     return $ Just $ TypeSpec [] "phantom" []
+-- XXX shouldn't have to do this:
 lookupType ty@(TypeSpec ["wybe"] "int" []) _ = return $ Just ty
 lookupType ty@(TypeSpec mod name args) pos = do
     logAST $ "Looking up type " ++ show ty
@@ -889,14 +890,13 @@ updateProcDefM updater pspec@(ProcSpec modspec procName procID) =
          Nothing -> return imp
          Just defs -> do
            let (front,back) = List.splitAt procID defs
-           updated <-
-               if List.null back
-               then shouldnt $ "invalid proc spec " ++
-                    show pspec
-               else updater $ List.head back
-           let defs' = front ++ updated:List.tail back
-           let procs' = Map.insert procName defs' procs
-           return $ imp { modProcs = procs' })
+           case back of
+             [] -> shouldnt $ "invalid proc spec " ++ show pspec
+             (this:rest) -> do
+               updated <- updater this
+               let defs' = front ++ updated:rest
+               let procs' = Map.insert procName defs' procs
+               return $ imp { modProcs = procs' })
     modspec
 
 
@@ -1774,7 +1774,7 @@ data Stmt
      --   and args.  We assume every call is Det until type checking.
      --   The Bool flag indicates that the proc is allowed to use resources.
      = ProcCall ModSpec Ident (Maybe Int) Determinism Bool [Placed Exp]
-     -- |A foreign call, with language, tags, and args
+     -- |A foreign call, with language, foreign name, tags, and args
      | ForeignCall Ident Ident [Ident] [Placed Exp]
      -- |Do nothing (and succeed)
      | Nop
@@ -2088,7 +2088,7 @@ varsInPrimArg _ (ArgChar _ _)           = Set.empty
 -- resources and procs it defines, including definitions.  Functions
 -- are converted to procs.
 --
--- Each proc is show including whether it is public, how many calls to
+-- Each proc is shown including whether it is public, how many calls to
 -- it appear statically in that module, and whether calls to it
 -- shoulds be inlined.  Proc signatures are preceded by a number
 -- indicating which overloaded version of the proc is defined.  Formal

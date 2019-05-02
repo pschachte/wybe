@@ -59,8 +59,8 @@ instance Show Module where
 
                  (showMap "\n\n" (const "") (showProcDefs 0)
                   (modProcs impl)) ++
-                 (maybe "\nNo LLVM code\n"
-                  (("\n  LLVM code       :\n\n" ++) . TL.unpack . ppllvm)
+                 (maybe "\n\nNo LLVM code\n"
+                  (("\n\n  LLVM code       :\n\n" ++) . TL.unpack . ppllvm)
                   $ modLLVM impl) ++
                  (if Map.null (modSubmods impl)
                   then ""

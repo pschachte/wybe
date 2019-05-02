@@ -17,6 +17,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+
   LLVM code       :
 
 ; ModuleID = 'position'
@@ -164,6 +165,7 @@ y > public inline (0 calls)
 y > public inline (0 calls)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
     foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 8:wybe.int, ~$field#0:wybe.int)
+
   LLVM code       :
 
 ; ModuleID = 'position.position'

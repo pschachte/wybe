@@ -15,6 +15,7 @@ onetwothree > public inline (0 calls)
     foreign llvm move(1:wybe.int, ?x#0:wybe.int) @multi_out:2:9
     foreign llvm move(2:wybe.int, ?y#0:wybe.int) @multi_out:3:9
     foreign llvm move(3:wybe.int, ?z#0:wybe.int) @multi_out:4:9
+
   LLVM code       :
 
 ; ModuleID = 'multi_out'

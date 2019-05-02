@@ -31,6 +31,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+
   LLVM code       :
 
 ; ModuleID = 'multictr'
@@ -664,6 +665,7 @@ int_value > public inline test (0 calls)
         foreign lpvm mutate(~%$rec#0:multictr.number, ?%$rec#1:multictr.number, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
+
   LLVM code       :
 
 ; ModuleID = 'multictr.number'
@@ -1129,6 +1131,7 @@ two_field > public inline test (0 calls)
 zero > public inline (0 calls)
 0: zero(?$#0:multictr.simple):
     foreign lpvm cast(0:multictr.simple, ?$#0:multictr.simple)
+
   LLVM code       :
 
 ; ModuleID = 'multictr.simple'

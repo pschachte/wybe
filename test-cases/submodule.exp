@@ -12,6 +12,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+
   LLVM code       :
 
 ; ModuleID = 'submodule'
@@ -66,13 +67,14 @@ entry:
   procs           : 
 
 hidden > inline (0 calls)
-0: hidden(wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
-    foreign c print_string("private proc in a private module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
+0: hidden(io#0:phantom, ?io#1:phantom):
+    foreign c print_string("private proc in a private module":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:92:41
 
 
 semi_hidden > public inline (0 calls)
-0: semi_hidden(wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
-    foreign c print_string("public proc in a private module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
+0: semi_hidden(io#0:phantom, ?io#1:phantom):
+    foreign c print_string("public proc in a private module":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:92:41
+
   LLVM code       :
 
 ; ModuleID = 'submodule.privatetest'
@@ -110,13 +112,14 @@ entry:
   procs           : 
 
 semi_visible > inline (0 calls)
-0: semi_visible(wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
-    foreign c print_string("private proc in a public module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
+0: semi_visible(io#0:phantom, ?io#1:phantom):
+    foreign c print_string("private proc in a public module":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:92:41
 
 
 visible > public inline (0 calls)
-0: visible(wybe.io$io#0:phantom, ?wybe.io$io#1:phantom):
-    foreign c print_string("public proc in a public module":wybe.string, ~#wybe.io$io#0:phantom, ?#wybe.io$io#1:phantom) @wybe:92:41
+0: visible(io#0:phantom, ?io#1:phantom):
+    foreign c print_string("public proc in a public module":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:92:41
+
   LLVM code       :
 
 ; ModuleID = 'submodule.publictest'

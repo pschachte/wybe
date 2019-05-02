@@ -35,6 +35,7 @@ AFTER EVERYTHING:
         foreign lpvm mutate(~tmp$9#0:type_list.intlist, ?tmp$10#0:type_list.intlist, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$10#0:type_list.intlist, ?$#0:type_list.intlist, 8:wybe.int, ~tmp$2#0:type_list.intlist)
 
+
   LLVM code       :
 
 ; ModuleID = 'type_list'
@@ -361,6 +362,7 @@ tail > public inline test (0 calls)
     1:
         foreign lpvm mutate(~%$rec#0:type_list.intlist, ?%$rec#1:type_list.intlist, 8:wybe.int, ~$field#0:type_list.intlist)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
 
   LLVM code       :
 

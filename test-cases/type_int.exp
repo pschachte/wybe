@@ -24,6 +24,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
+
   LLVM code       :
 
 ; ModuleID = 'type_int'
@@ -200,6 +201,7 @@ entry:
 >= > public inline (0 calls)
 0: >=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
     foreign llvm icmp sge(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:15:44
+
   LLVM code       :
 
 ; ModuleID = 'type_int.myint'

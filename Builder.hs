@@ -435,7 +435,7 @@ buildArchive arch = do
 --  will have been processed when this list of modules is reached.
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
-    logBuild $ "compileModSCC " ++ showModSpecs mspecs
+    logBuild $ "compileModSCC: [" ++ showModSpecs mspecs ++ "]"
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
     mapM_ (flip inModule (completeNormalisation compileModSCC)) mspecs
     stopOnError $ "final normalisation of module(s) " ++ showModSpecs mspecs
@@ -535,7 +535,7 @@ transformModuleProcs trans thisMod = do
                                   (Map.fromList $ zip names procs')
                                   (modProcs imp) })
     _ <- reexitModule
-    logBuild $ "**** Exiting module " ++ showModSpec thisMod
+    logBuild $ "**** Re-exiting module " ++ showModSpec thisMod
     return ()
 
 
@@ -601,27 +601,41 @@ buildExecutable targetMod fpath = do
             logBuild $ "Dependencies: " ++ show depends
             let mainImports = fst <$> List.filter snd depends
             logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
+
             -- let assignVar dst src =
             --       Unplaced $ ProcCall [] "=" Nothing Det False
             --                    [Unplaced $ Var dst ParamOut Ordinary,
             --                     Unplaced $ Var src ParamIn Ordinary]
-            let assignInt dst src =
-                  Unplaced $ ProcCall [] "=" Nothing Det False
-                               [Unplaced $ Var dst ParamOut Ordinary,
-                                Unplaced $ IntValue src]
+            let cmdResource name =
+                  ResourceFlowSpec (ResourceSpec ["command_line"] name)
             let bodyInner = [Unplaced $ ProcCall m "" Nothing Det True []
-                           | m <- mainImports]
-            let bodyCode = [assignInt "exit_code" 0] ++ bodyInner
+                            | m <- mainImports]
+            -- XXX Shouldn't have to hard code assignment of phantom to io
+            -- XXX Should insert assignments of initialised visible resources
+            let bodyCode = [move (varGet "") (varSet "io"),
+                            move (iVal 0) (varSet "exit_code"),
+                            Unplaced $ ForeignCall "C" "gc_init" [] []]
+                           ++ bodyInner
             let mainBody = ProcDefSrc bodyCode
-            let proto = ProcProto "main"
-                        [Param "argc" intType ParamIn Ordinary,
-                         Param "argv" intType ParamIn Ordinary,
-                         Param "exit_code" intType ParamOut Ordinary] Set.empty
+            let proto = ProcProto "main" []
+                        $ Set.fromList [cmdResource "argc" ParamIn,
+                                        cmdResource "argv" ParamIn,
+                                        cmdResource "exit_code" ParamOut]
             let mainProc = ProcDef "main" proto mainBody Nothing 0 Map.empty
                            Private Det False NoSuperproc
-
-
             logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
+
+            enterModule fpath [] Nothing
+            addImport ["command_line"] $ importSpec Nothing Private
+            addImport ["wybe","io"] $ importSpec (Just ["io"]) Private
+            mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
+                  mainImports
+            addProcDef mainProc
+            mods <- exitModule
+            compileModSCC mods
+
+            logBuild $ "Finished building *main* module: " ++ showModSpecs mods
+
             mainMod <- newMainModule mainImports
             logBuild "o Built 'main' module for target: "
             mainModStr <- liftIO $ codeemit mainMod
@@ -664,7 +678,7 @@ orderedDependencies targetMod =
         -- filter out std lib imports and sub-mod imports from imports
         -- since we are looking for imports which need a physical object file
         let imports =
-                List.filter (\x -> notElem x subMods && (not.isStdLib) x) $
+                List.filter (\x -> notElem x subMods) $ --  && (not.isStdLib) x) $
                 (keys . modImports) thisMod
         -- Check if this module 'm' has a main procedure.
         let mainExists = "" `elem` procs || "<0>" `elem` procs

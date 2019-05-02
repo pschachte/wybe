@@ -515,6 +515,7 @@ cgen prim@(PrimForeign lang name flags args) = do
     inops <- mapM cgenArg inArgs
     -- alignedOps <- mapM makeCIntOp inops
     outty <- lift $ primReturnType args
+    -- XXX this ignores lang and just uses fast cc for all calls
     let ins =
           call
           (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)

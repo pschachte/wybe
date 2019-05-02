@@ -1,4 +1,4 @@
-
+# Wybe resources for command line
 public resource argc:int
-public resource argv:int # until we support C arrays
-public resource exit_code:int = 0
+public resource argv:int      # until we support C arrays
+public resource exit_code:int # = 0 when we support resource initialisation
