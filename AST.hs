@@ -399,29 +399,35 @@ updateImplementations updater = do
                                            (fmap updater) $
                                            modImplementation m }))
 
+-- |Return the module currently being compiled.  The argument says where
+-- this function is called from for error-reporting purposes.
 -- |Return some function of the module currently being compiled.
 getModule :: (Module -> t) -> Compiler t
-getModule getter = gets (getter . List.head . underCompilation)
+getModule getter = do
+    mods <- gets underCompilation
+    case mods of
+      [] -> shouldnt "getModule called when not currently compiling a module."
+      (mod:_) -> return $ getter mod
 
 
 -- |Transform the module currently being compiled.
 updateModule :: (Module -> Module) -> Compiler ()
-updateModule updater = do
-    modify (\comp -> let mods = underCompilation comp
-                     in  if List.null mods
-                         then shouldnt "updateModule with no current module"
-                         else comp { underCompilation =
-                                          updater (List.head mods):List.tail mods })
+updateModule updater =
+    modify (\comp ->
+              case underCompilation comp of
+                [] -> shouldnt "updateModule with no current module"
+                (mod1:mods) -> comp { underCompilation = updater mod1:mods })
+
 
 -- |Transform the module currently being compiled.
 updateModuleM :: (Module -> Compiler Module) -> Compiler ()
-updateModuleM updater = do
-    updateCompilerM (\comp -> do
-                          let mods = underCompilation comp
-                          when (List.null mods) $
-                            shouldnt "updateModuleM with no current module"
-                          mod' <- updater $ List.head mods
-                          return comp { underCompilation = mod':List.tail mods })
+updateModuleM updater =
+    updateCompilerM
+    (\comp -> case underCompilation comp of
+        [] -> shouldnt "updateModuleM with no current module"
+        (mod1:mods) -> do
+          mod' <- updater mod1
+          return comp { underCompilation = mod':mods })
 
 
 -- |Return some function of the specified module.  Error if it's not a module.
@@ -870,13 +876,9 @@ updateProcDef updater pspec@(ProcSpec modspec procName procID) =
     updateLoadedModuleImpln
     (\imp -> imp { modProcs =
                        Map.adjust
-                       (\l -> let (front,back) = List.splitAt procID l
-                                  updated =
-                                      if List.null back
-                                      then shouldnt $ "invalid proc spec " ++
-                                           show pspec
-                                      else updater $ List.head back
-                              in  front ++ updated:List.tail back)
+                       (\l -> case List.splitAt procID l of
+                           (front,this:back) -> front ++ updater this:back
+                           _ -> shouldnt $ "invalid proc spec " ++ show pspec)
                        procName (modProcs imp) })
     modspec
 
