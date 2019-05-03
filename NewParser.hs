@@ -84,7 +84,7 @@ writeItems file to = do
 -- | Parser entry for a Wybe program.
 itemParser :: Parser [Item]
 itemParser =
-    many (visibilityItem <|> topLevelStmtItem)
+    many (pragmaItem <|> visibilityItem <|> topLevelStmtItem)
 
 
 topLevelStmtItem :: Parser Item
@@ -103,6 +103,18 @@ visibilityItem = do
         <|> resourceItemParser v
         <|> useItemParser v
         <|> fromUseItemParser v
+
+pragmaItem :: Parser Item
+pragmaItem = do
+    ident "pragma"
+    prag <- parsePragma
+    return $ PragmaDecl prag
+
+parsePragma :: Parser Pragma
+parsePragma = do
+    ident "no_standard_library"
+    return NoStd
+
 
 
 -----------------------------------------------------------------------------

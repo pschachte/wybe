@@ -67,8 +67,7 @@ import           Normalise                 (normalise, completeNormalisation)
 import           ObjectInterface
 import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
-                                            optForce, optForceAll, optLibDirs,
-                                            optUseStd)
+                                            optForce, optForceAll, optLibDirs)
 import           NewParser                 (parseWybe)
 import           Resources                 (resourceCheckMod, transformProcResources,
                                             canonicaliseProcResources)
@@ -88,9 +87,8 @@ import qualified Data.ByteString.Char8 as BS
 buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
     possDirs <- gets (optLibDirs . options)
-    let useStd = optUseStd opts
-    -- load library first (if option useStd is True)
-    when useStd $ void (buildModuleIfNeeded False ["wybe"] possDirs)
+    -- load library first
+    -- void (buildModuleIfNeeded False ["wybe"] possDirs)
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     showMessages
     logDump FinalDump FinalDump "EVERYTHING"

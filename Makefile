@@ -17,7 +17,7 @@ all:	wybemk
 cbits.so: cbits.c
 	clang -fPIC -shared cbits.c -o cbits.so -lgc -v
 
-wybemk:	*.hs Version.lhs cbits.so 
+wybemk:	*.hs Version.lhs cbits.so
 	stack install && cp ~/.local/bin/$@ ./$@
 	# cabal configure
 	# cabal -j3 install --only-dependencies
@@ -87,8 +87,7 @@ test:	wybemk
 	@rm -f wybelibs/*.o
 	@printf "Testing building wybe library ("
 	@printf wybe
-	@gtimeout 2 ./wybemk --force-all --no-std wybelibs/wybe.o
-
+	@gtimeout 2 ./wybemk --force-all wybelibs/wybe.o
 	@for f in wybelibs/*.wybe ; do \
            [ "$$f" = "wybelibs/wybe.wybe" ] && continue ; \
 	   printf " %s" `basename $$f .wybe` ; \
@@ -100,8 +99,8 @@ test:	wybemk
 		out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
 		exp=`echo "$$f" | sed 's/.wybe$$/.exp/'` ; \
 		targ=`echo "$$f" | sed 's/.wybe$$/.o/'` ; \
-		gtimeout 2 ./wybemk --log=FinalDump $(DEBUG) --force-all $$targ \
-		> $$out 2>&1 ; \
+		gtimeout 2 ./wybemk --log=FinalDump $(DEBUG) --force-all $$targ 2>&1 \
+	  | sed 's/@wybe:[0-9:]*/@wybe:nn:nn/g' > $$out ; \
 		if [ ! -r $$exp ] ; then \
 		printf "[31m?[39m" ; \
 		NEW="$${NEW}\n    $$out" ; \

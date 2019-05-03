@@ -20,7 +20,7 @@ import Data.Map as Map
 import Data.Maybe
 import Data.Set as Set
 import Flatten
-import Options (optUseStd,LogSelection(Normalise))
+import Options (LogSelection(Normalise))
 import Config (wordSize,wordSizeBytes)
 import Snippets
 
@@ -28,11 +28,18 @@ import Snippets
 normalise :: [Item] -> Compiler ()
 normalise items = do
     mapM_ normaliseItem items
-    -- liftIO $ putStrLn "File compiled"
-    -- every module imports stdlib
-    useStdLib <- gets (optUseStd . options)
+    -- import stdlib unless no_standard_library pragma is specified
+    useStdLib <- getModuleImplementationField (Set.notMember NoStd . modPragmas)
     when useStdLib $ addImport ["wybe"] (ImportSpec (Just Set.empty) Nothing)
     return ()
+
+    -- -- Now generate main proc if needed
+    -- stmts <- getModule stmtDecls
+    -- unless (List.null stmts)
+    --   $ normaliseItem
+    --         (ProcDecl Public Det False (ProcProto "" [] initResources)
+    --                       (List.reverse stmts) Nothing)
+
 
 -- |Do whatever part of normalisation cannot be done until dependencies
 --  have been loaded.  Currently that means generation of main proc for
@@ -132,6 +139,8 @@ normaliseItem item@(ProcDecl _ _ _ _ _ _) = do
 normaliseItem (StmtDecl stmt pos) = do
     logNormalise $ "Normalising statement decl " ++ show stmt
     updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
+normaliseItem (PragmaDecl prag) =
+    addPragma prag
 
 
 

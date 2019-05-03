@@ -270,7 +270,7 @@ if.else:
             1:
                 foreign lpvm access($right#0:type_list.intlist, 0:wybe.int, ?$right$head#0:wybe.int)
                 foreign lpvm access(~$right#0:type_list.intlist, 8:wybe.int, ?$right$tail#0:type_list.intlist)
-                foreign llvm icmp eq(~$left$head#0:wybe.int, ~$right$head#0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:27:40
+                foreign llvm icmp eq(~$left$head#0:wybe.int, ~$right$head#0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
                 case ~tmp$5#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)

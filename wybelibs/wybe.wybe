@@ -1,3 +1,5 @@
+pragma no_standard_library  # Standard library can't depend on itself!
+
 public type bool = public false | true
     # These are syntax errors because they are operators:
     public func and(p:bool, q:bool):bool = foreign llvm and(p,q)

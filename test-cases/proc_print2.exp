@@ -12,8 +12,8 @@ AFTER EVERYTHING:
 
 print2 > public inline (0 calls)
 0: print2(x#0:wybe.int, y#0:wybe.int, io#0:phantom, ?io#2:phantom):
-    foreign c print_int(~x#0:wybe.int, ~#io#0:phantom, ?#io#1:phantom) @wybe:80:38
-    foreign c print_int(~y#0:wybe.int, ~#io#1:phantom, ?#io#2:phantom) @wybe:80:38
+    foreign c print_int(~x#0:wybe.int, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
+    foreign c print_int(~y#0:wybe.int, ~#io#1:phantom, ?#io#2:phantom) @wybe:nn:nn
 
   LLVM code       :
 

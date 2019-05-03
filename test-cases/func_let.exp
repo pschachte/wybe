@@ -13,13 +13,13 @@ AFTER EVERYTHING:
 
 *main* > public inline (0 calls)
 0: (io#0:phantom, ?io#1:phantom):
-    foreign c print_int(40:wybe.int, ~#io#0:phantom, ?#io#1:phantom) @wybe:80:38
+    foreign c print_int(40:wybe.int, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
 
 
 quad > public inline (1 calls)
 0: quad(x#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:12:38
-    foreign llvm add(~tmp$0#0:wybe.int, ~tmp$0#0:wybe.int, ?$#0:wybe.int) @wybe:12:38
+    foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
+    foreign llvm add(~tmp$0#0:wybe.int, ~tmp$0#0:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
 
   LLVM code       :
 

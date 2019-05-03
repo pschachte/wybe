@@ -23,23 +23,23 @@ factorial > public inline (1 calls)
 
 gen$1 > (2 calls)
 0: gen$1(io#0:phantom, n#0:wybe.int, result#0:wybe.int, ?io#1:phantom):
-    foreign llvm icmp sgt(n#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.bool) @wybe:25:39
+    foreign llvm icmp sgt(n#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
     case ~tmp$3#0:wybe.bool of
     0:
-        foreign c print_int(~result#0:wybe.int, ~io#0:phantom, ?tmp$9#0:phantom) @wybe:80:38
-        foreign c putchar('\n':wybe.char, ~tmp$9#0:phantom, ?io#1:phantom) @wybe:78:28
+        foreign c print_int(~result#0:wybe.int, ~io#0:phantom, ?tmp$9#0:phantom) @wybe:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$9#0:phantom, ?io#1:phantom) @wybe:nn:nn
 
     1:
-        foreign llvm mul(n#0:wybe.int, ~result#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:20:38
-        foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:15:38
+        foreign llvm mul(n#0:wybe.int, ~result#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
+        foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:nn:nn
         proc_factorial.gen$1<0>(~io#0:phantom, ~tmp$1#0:wybe.int, ~tmp$0#0:wybe.int, ?io#1:phantom) @proc_factorial:3:5
 
 
 
 gen$2 > inline (1 calls)
 0: gen$2(io#0:phantom, [n#0:wybe.int], result#0:wybe.int, ?io#1:phantom):
-    foreign c print_int(~result#0:wybe.int, ~#io#0:phantom, ?tmp$5#0:phantom) @wybe:80:38
-    foreign c putchar('\n':wybe.char, ~tmp$5#0:phantom, ?#io#1:phantom) @wybe:78:28
+    foreign c print_int(~result#0:wybe.int, ~#io#0:phantom, ?tmp$5#0:phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$5#0:phantom, ?#io#1:phantom) @wybe:nn:nn
 
   LLVM code       :
 
