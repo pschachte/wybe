@@ -79,11 +79,11 @@ public module io is
 
     public proc print(x:int) use !io foreign c print_int(x, !io) end
     public proc println(x:int) use !io !print(x) !nl end
-    public proc read(?x:int) use !io foreign c read_int(?x,!io) end
+    # public proc read(?x:int) use !io foreign c read_int(?x,!io) end
 
     public proc print(x:float) use !io foreign c print_float(x,!io) end
     public proc println(x:float) use !io !print(x) !nl end
-    public proc read(?x:float) use !io foreign c read_float(?x,!io) end
+    # public proc read(?x:float) use !io foreign c read_float(?x,!io) end
 
     public proc print(x:char) use !io foreign c putchar(x,!io) end
     public proc println(x:char) use !io !print(x) !nl end
@@ -91,7 +91,7 @@ public module io is
 
     public proc print(x:string) use !io foreign c print_string(x,!io) end
     public proc println(x:string) use !io !print(x) !nl end
-    public proc read(?x:string) use !io foreign c read_line(?x,!io) end
+    # public proc read(?x:string) use !io foreign c read_line(?x,!io) end
 
     public proc print(x:bool) use !io
        foreign c print_string(if x=false then "false" else "true")
