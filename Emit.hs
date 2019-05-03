@@ -243,6 +243,8 @@ makeExec :: [FilePath]          -- Object Files
          -> Compiler ()
 makeExec ofiles target = do
     let args = ofiles ++ sharedLibs ++ ["-o", target]
+    logEmit $ "Generating final executable with command line: cc "
+              ++ unwords args
     (exCode, _, serr) <- liftIO $
         readCreateProcessWithExitCode (proc "cc" args) ""
     case exCode of
