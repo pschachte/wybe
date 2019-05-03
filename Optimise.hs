@@ -136,7 +136,7 @@ decideInlining def = return def
 
 procCost :: PrimProto -> Int
 procCost proto =
-    1 + (length $ List.filter (not . phantomParam) $ primProtoParams proto)
+    1 + (length $ List.filter (not . paramIsPhantom) $ primProtoParams proto)
 
 bodyCost :: [Placed Prim] -> Int
 bodyCost pprims = sum $ List.map (primCost . content) pprims
@@ -149,7 +149,7 @@ primCost (PrimForeign _ _ _ args) = 1 + (sum $ List.map argCost args)
 primCost (PrimTest _) = 0
 
 argCost :: PrimArg -> Int
-argCost arg = if phantomArg arg then 0 else 1
+argCost arg = if argIsPhantom arg then 0 else 1
 
 ----------------------------------------------------------------
 --                     Handling the call graph

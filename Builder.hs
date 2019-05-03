@@ -370,18 +370,19 @@ loadModuleFromObjFile required objfile = do
                 ++ showModSpecs imports
             -- Place the super mod under compilation while
             -- dependencies are built
-            let superMod = head extracted
-            modify (\comp -> let ms = superMod : underCompilation comp
-                       in comp { underCompilation = ms })
-            mapM_ buildDependency imports
-            _ <- reexitModule
-            logBuild $ "=== <<< Extracted Module put in it's place from "
-                ++ show objfile
-            return True
-
+            case extracted of
+              (superMod:_) -> do
+                modify (\comp -> let ms = superMod : underCompilation comp
+                                 in comp { underCompilation = ms })
+                mapM_ buildDependency imports
+                _ <- reexitModule
+                logBuild $ "=== <<< Extracted Module put in it's place from "
+                           ++ show objfile
+                return True
+              [] -> shouldnt "no LPVM extracted from object file"
+            else
             -- The required modspec was not part of the extracted
             -- Return false and try for building
-            else
             return False
 
 
@@ -612,7 +613,7 @@ buildExecutable targetMod fpath = do
                             | m <- mainImports]
             -- XXX Shouldn't have to hard code assignment of phantom to io
             -- XXX Should insert assignments of initialised visible resources
-            let bodyCode = [move (varGet "") (varSet "io"),
+            let bodyCode = [lpvmCast (iVal 0) "io" phantomType,
                             move (iVal 0) (varSet "exit_code"),
                             Unplaced $ ForeignCall "C" "gc_init" [] []]
                            ++ bodyInner
@@ -759,10 +760,9 @@ srcObjFiles modspec possDirs = do
                                       ])
                         splits)
             possDirs
-    let validDirs = concat $ concat dirs
-    if List.null validDirs
-      then return Nothing
-      else return $ Just $ List.head validDirs
+    case concat $ concat dirs of
+      []           -> return Nothing
+      (validDir:_) -> return $ Just validDir
 
 
 

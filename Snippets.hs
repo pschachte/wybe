@@ -4,7 +4,8 @@
 --  Purpose  : Convenience functions for generation of Wybe AST
 --  Copyright: 2016 Peter Schachte.  All rights reserved.
 
-module Snippets (intType, intCast, boolType, boolCast, varSet, varGet,
+module Snippets (intType, intCast, boolType, boolCast, phantomType,
+                 varSet, varGet,
                  boolVarSet, boolVarGet, intVarSet, intVarGet, castTo,
                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
                 comparison, succeedTest, failTest, succeedIfSemiDet) where
@@ -26,6 +27,10 @@ boolType = TypeSpec ["wybe"] "bool" []
 -- |Cast an expr to the bool type
 boolCast :: Exp -> Exp
 boolCast exp = Typed exp boolType True
+
+-- | The phantom type
+phantomType :: TypeSpec
+phantomType = TypeSpec ["wybe"] "phantom" []
 
 -- |An output variable reference (lvalue)
 varSet :: Ident -> Exp

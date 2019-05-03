@@ -447,8 +447,8 @@ expMode' _ expr =
 --       (Just typ1,Just typ2)  ->
 --         return $ enforceType arg1 typ2 arg1 arg2 pos
 --         $ enforceType arg2 typ1 arg1 arg2 pos typing
--- 
--- 
+--
+--
 -- -- |Require the Exp to have the specified type
 -- enforceType :: Exp -> TypeSpec -> Exp -> Exp -> OptPos -> Typing -> Typing
 -- enforceType (Var name _ _) typespec arg1 arg2 pos typing =
@@ -576,7 +576,7 @@ typecheckProcDecls m name = do
 
 -- -- |The resolutions of many proc calls
 -- type StmtResolution = Map Stmt ProcSpec
--- 
+--
 -- emptyStmtResolution = Map.empty
 
 
@@ -678,7 +678,9 @@ typecheckProcDecl m pdef = do
                               ((`elem` [ParamIn,ParamInOut]) . resourceFlowFlow)
                               resources
                     let initialised
-                            = (Set.fromList $ paramName <$> inParams)
+                            = (Set.fromList
+                               -- "phantom" is always defined (as nothing)
+                               $ "phantom":(paramName <$> inParams))
                               `Set.union`
                               (Set.map resourceName inResources)
                     (def',_,modeErrs) <-
@@ -1186,7 +1188,7 @@ modecheckStmt m name defPos typing delayed assigned detism
     (Not stmt) pos = do
     logTypes $ "Mode checking negation " ++ show stmt
     (stmt', delayed', assigned',errs') <-
-      placedApplyM (modecheckStmt m name defPos typing [] assigned detism) stmt 
+      placedApplyM (modecheckStmt m name defPos typing [] assigned detism) stmt
     return ([maybePlace (Not (seqToStmt stmt')) pos],
             delayed'++delayed, assigned',errs')
 modecheckStmt m name defPos typing delayed assigned detism
@@ -1285,16 +1287,16 @@ selectMode _ _ = shouldnt "selectMode with empty list of modes"
 --                 [typing] body
 --     logTypes $ "Body types: " ++ show typings'
 --     return typings'
--- 
--- 
+--
+--
 -- -- |Type check a single placed primitive operation given a list of
 -- --  possible starting typings and corresponding clauses up to this prim.
 -- typecheckPlacedStmt :: ModSpec -> ProcName -> Typing -> Placed Stmt ->
 --                        Compiler [Typing]
 -- typecheckPlacedStmt m caller typing pstmt =
 --     typecheckStmt m caller (content pstmt) (place pstmt) typing
--- 
--- 
+--
+--
 -- -- |Type check a single primitive operation, producing a list of
 -- --  possible typings.
 -- typecheckStmt :: ModSpec -> ProcName -> Stmt -> OptPos -> Typing ->
@@ -1463,8 +1465,8 @@ nonResourceParam _ = True
 --       logTypes $ "type checking " ++ show arg ++ " against " ++ show param
 --       typecheckArg' (content arg) (place arg) AnyType
 --         (paramType param) typing reasonType
--- 
--- 
+--
+--
 -- typecheckArg' :: Exp -> OptPos -> TypeSpec -> TypeSpec -> Typing ->
 --                  TypeError -> Compiler Typing
 -- typecheckArg' texp@(Typed expr typ cast) pos _ paramType typing reason = do
@@ -1501,8 +1503,8 @@ nonResourceParam _ = True
 --       typing reason
 -- typecheckArg' expr _ _ _ _ _ =
 --     shouldnt $ "trying to type check expression " ++ show expr ++ "."
--- 
--- 
+--
+--
 -- typecheckArg'' :: TypeSpec -> TypeSpec -> TypeSpec -> Typing -> TypeError ->
 --                   Typing
 -- typecheckArg'' callType paramType constType typing reason =
@@ -1519,8 +1521,8 @@ nonResourceParam _ = True
 -- firstJust [] = Nothing
 -- firstJust (j@(Just _):_) = j
 -- firstJust (Nothing:rest) = firstJust rest
--- 
--- 
+--
+--
 -- listArity :: (t -> ArgFlowType) -> (t -> PrimFlow) -> [t] -> Int
 -- listArity toFType toDirection lst =
 --     sum [if toFType e == HalfUpdate && toDirection e == FlowOut then 0 else 1
@@ -1530,8 +1532,8 @@ nonResourceParam _ = True
 -- applyBodyTyping :: Typing -> [Placed Stmt] -> Compiler [Placed Stmt]
 -- applyBodyTyping typing =
 --     mapM (placedApply (applyStmtTyping typing))
--- 
--- 
+--
+--
 -- applyStmtTyping :: Typing -> Stmt -> OptPos -> Compiler (Placed Stmt)
 -- applyStmtTyping typing call@(ProcCall cm name id args) pos = do
 --     logTypes $ "typing call " ++ showStmt 4 call
@@ -1577,8 +1579,8 @@ nonResourceParam _ = True
 --     return $ maybePlace (For itr' gen') pos
 -- applyStmtTyping typing Break pos = return $ maybePlace Break pos
 -- applyStmtTyping typing Next pos = return $ maybePlace Next pos
--- 
--- 
+--
+--
 -- applyExpTyping :: Typing -> Exp -> Exp
 -- applyExpTyping _ expr@(IntValue _) =
 --     Typed expr (TypeSpec ["wybe"] "int" []) False
@@ -1720,4 +1722,3 @@ reportUntyped procname pos msg =
 -- |Log a message, if we are logging type checker activity.
 logTypes :: String -> Compiler ()
 logTypes = logMsg Types
-

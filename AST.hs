@@ -19,7 +19,7 @@ module AST (
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt,
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
-  phantomParam, phantomArg, phantomType,
+  paramIsPhantom, argIsPhantom, typeIsPhantom,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
@@ -1855,18 +1855,18 @@ data Exp
 
 
 -- |Is the supplied parameter a phantom?
-phantomParam :: PrimParam -> Bool
-phantomParam = phantomType . primParamType
+paramIsPhantom :: PrimParam -> Bool
+paramIsPhantom = typeIsPhantom . primParamType
 
 -- |Is the supplied argument a phantom?
-phantomArg :: PrimArg -> Bool
-phantomArg (ArgVar _ ty _ _ _) = phantomType ty
-phantomArg _ = False -- Nothing but a var can be a phantom
+argIsPhantom :: PrimArg -> Bool
+argIsPhantom (ArgVar _ ty _ _ _) = typeIsPhantom ty
+argIsPhantom _ = False -- Nothing but a var can be a phantom
 
 -- |Does the supplied type indicate a phantom?
-phantomType :: TypeSpec -> Bool
-phantomType TypeSpec{typeName="phantom"} = True
-phantomType _ = False
+typeIsPhantom :: TypeSpec -> Bool
+typeIsPhantom TypeSpec{typeName="phantom"} = True
+typeIsPhantom _ = False
 
 
 -- |A loop generator (ie, an iterator).  These need to be

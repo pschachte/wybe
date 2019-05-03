@@ -394,9 +394,9 @@ ifStmtParser = do
     cases <- (ifCaseParser `sepBy` symbol "|") <* ident "end"
     let final = List.foldr (\(cond, body) rest ->
                            [Unplaced (Cond cond body rest)]) [] cases
-    if List.null final
-        then unexpected "if cases statement structure."
-        else return $ Placed ((content . head) final) pos
+    case final of
+      []     -> unexpected "if cases statement structure."
+      (hd:_) -> return $ Placed (content hd) pos
 
 
 ifCaseParser :: Parser (Placed Stmt, [Placed Stmt])
@@ -417,7 +417,7 @@ ifCaseParser = do
 --                 _ ->
 --                     rel
 --     return $ Placed (TestBool e) pos
-    
+
 
 
 useStmt :: Parser (Placed Stmt)

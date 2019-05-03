@@ -230,7 +230,7 @@ makeGlobalDefinition :: String -> PrimProto
                      -> Compiler LLVMAST.Definition
 makeGlobalDefinition pname proto bls = do
     modName <- fmap showModSpec getModuleSpec
-    let params = List.filter (not . phantomParam) (primProtoParams proto)
+    let params = List.filter (not . paramIsPhantom) (primProtoParams proto)
         isMain = primProtoName proto == "<0>"
         -- *The top level procedure will be labelled main.
         label = modName ++ "." ++
@@ -260,14 +260,14 @@ makeFnArg param = do
 primOutputType :: [PrimParam] -> Compiler Type
 primOutputType params = do
     let outputs = List.filter isOutputParam params
-    case length outputs of
-        0 -> return void_t
-        1 -> (typed' . primParamType . head) outputs
+    case outputs of
+        [] -> return void_t
+        [o] -> typed' $ primParamType o
         _ -> struct_t <$> mapM (typed' . primParamType) outputs
 
 
 isOutputParam :: PrimParam -> Bool
-isOutputParam p = not (isInputParam p || phantomParam p) &&
+isOutputParam p = not (isInputParam p || paramIsPhantom p) &&
     paramNeeded p
 
 
@@ -317,7 +317,7 @@ assignParam p =
     do let nm = show (primParamName p)
        let ty = primParamType p
        llty <- lift $ typed' ty
-       if phantomType ty
+       if typeIsPhantom ty
          then return () -- No need to assign phantoms
          else case (paramInfoUnneeded . primParamInfo) p of
            True  -> return ()    -- unneeded param
@@ -574,27 +574,25 @@ cgenLLVMUnop name flags args
     | name == "move" =
         do let inArgs = primInputs args
            let outputs = primOutputs args
-           if length outputs == 1 && length inArgs == 1
-               -- then do (outTy, outNm) <- openPrimArg $ head outputs
-               --         ptr <- doAlloca outTy
-               --         inop <- cgenArg $ head inArgs
-               --         store ptr inop
-               --         op <- doLoad outTy ptr
-               --         assign outNm op
-               --         return $ Just op
-               then do (outTy, outNm) <- openPrimArg $ head outputs
-                       inop <- cgenArg $ head inArgs
-                       assign outNm inop
-                       return $ Just inop
-               else return Nothing
+           case (outputs,inArgs) of
+             ([output],[input]) -> do
+               (outTy, outNm) <- openPrimArg output
+               inop <- cgenArg input
+               assign outNm inop
+               return $ Just inop
+             _ ->
+               return Nothing
 
     | otherwise =
         do let inArgs = primInputs args
            inOps <- mapM cgenArg inArgs
-           case Map.lookup name llvmMapUnop of
-             (Just f) -> let ins = f (head inOps)
-                         in addInstruction ins args
-             Nothing -> shouldnt $ "LLVM Instruction not found : " ++ name
+           case (Map.lookup name llvmMapUnop,inOps) of
+             (Just f,[inOp]) -> addInstruction (f inOp) args
+             (Nothing,_)     -> shouldnt $ "LLVM Instruction not found : "
+                                           ++ name
+             (_,_)           -> shouldnt $ "unary LLVM Instruction " ++ name
+                                           ++ " with " ++ show (length inArgs)
+                                           ++ " inputs"
 
 
 -- | Look inside the Prototype list stored in the CodegenState monad and
@@ -627,11 +625,15 @@ cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
 cgenLPVM pname flags args
     | pname == "alloc" = do
           outTy <- lift $ primReturnType args
-          when (length inputs /= 1 ) $ shouldnt "Incorrect alloc instruction."
-          let size = valTrust (head inputs)
-          op <- gcAllocate size outTy
-          assign outNm op
-          return $ Just op
+          case inputs of
+            [input] -> do
+              let size = valTrust input
+              op <- gcAllocate size outTy
+              assign outNm op
+              return $ Just op
+            _ ->
+              shouldnt $ "alloc instruction with " ++ show (length inputs)
+                         ++ " inputs"
 
     | pname == "access" = do
           let (ptrOpArg, index) = case inputs of
@@ -660,20 +662,19 @@ cgenLPVM pname flags args
           return $ Just ptrOp
 
     | pname == "cast" = do
-          when (length inputs /= 1) $ shouldnt "Incorrect cast instruction."
-          let inArg = head inputs
-          let outArg = head outputs
-          outTy <- lift $ typed' (argType outArg)
-          inOp <- cgenArg inArg
-          let inTy = operandType inOp
+          case (inputs,outputs) of
+            ([inArg],[outArg]) -> do
+              outTy <- lift $ typed' (argType outArg)
+              inOp <- cgenArg inArg
+              let inTy = operandType inOp
 
-          lift $ logBlocks $ "CAST IN : " ++ show inArg ++ " -> "
-              ++ show (argType inArg)
-          lift $ logBlocks $ " CAST IN OP " ++ show inOp
-          lift $ logBlocks $ "CAST OUT : " ++ show outArg ++ " -> "
-              ++ show (argType outArg)
-          castOp <- case inOp of
-              (ConstantOperand c) ->
+              lift $ logBlocks $ "CAST IN : " ++ show inArg ++ " -> "
+                                 ++ show (argType inArg)
+              lift $ logBlocks $ " CAST IN OP " ++ show inOp
+              lift $ logBlocks $ "CAST OUT : " ++ show outArg ++ " -> "
+                                 ++ show (argType outArg)
+              castOp <- case inOp of
+                (ConstantOperand c) ->
                   if isPtr outTy
                   then return $ constInttoptr c outTy
                   else do
@@ -682,10 +683,14 @@ cgenLPVM pname flags args
                       store ptr inOp
                       loaded <- doLoad consTy ptr
                       doCast loaded consTy outTy
-              _ -> doCast inOp inTy outTy
+                _ -> doCast inOp inTy outTy
 
-          assign outNm castOp
-          return $ Just castOp
+              assign outNm castOp
+              return $ Just castOp
+
+            _ -> shouldnt $ "cast instruction with " ++ show (length inputs)
+                            ++ " inputs and " ++ show (length outputs)
+                            ++ " outputs"
 
 
     | otherwise = shouldnt $ "Instruction " ++ pname ++ " not imlemented."
@@ -694,7 +699,11 @@ cgenLPVM pname flags args
     outputs = primOutputs args
     trustMsg = "Argument is not an Integer value."
     valTrust a = trustFromJust trustMsg $ argIntVal a
-    outNm = pullName $ head outputs
+    outNm = case outputs of
+              [output] -> pullName output
+              _        -> shouldnt $ "lpvm instruction " ++ pname
+                                     ++ " with " ++ show (length outputs)
+                                     ++ " outputs"
 
 
 isNullCons :: C.Constant -> Bool
@@ -742,21 +751,24 @@ addInstruction ins args = do
     let outArgs = primOutputs args
     outTy <- lift $ primReturnType args
     logCodegen $ "outTy = " ++ show outTy
-    case length outArgs of
-          0 -> case outTy of
+    case outArgs of
+          [] -> case outTy of
             VoidType -> voidInstr ins >> return Nothing
             _        -> Just <$> instr outTy ins
-          1 -> do let outName = pullName $ head outArgs
-                  outop <- namedInstr outTy outName ins
-                  assign outName outop
-                  return (Just outop)
-          n -> do outOp <- instr outTy ins
-                  outTys <- lift $ mapM (typed' . argType) outArgs
-                  fields <- structUnPack outOp outTys
-                  let outNames = List.map pullName outArgs
-                  -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
-                  zipWithM_ assign outNames fields
-                  return $ Just $ last fields
+          [outArg] -> do
+            let outName = pullName outArg
+            outop <- namedInstr outTy outName ins
+            assign outName outop
+            return (Just outop)
+          _ -> do
+            outOp <- instr outTy ins
+            outTys <- lift $ mapM (typed' . argType) outArgs
+            fields <- structUnPack outOp outTys
+            let outNames = List.map pullName outArgs
+            -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
+            zipWithM_ assign outNames fields
+            return $ Just $ last fields
+
 
 pullName (ArgVar var _ _ _ _) = show var
 pullName _                    = shouldnt $ "Expected variable as output."
@@ -798,17 +810,17 @@ primOutputs ps = List.filter isValidOutput ps
 primReturnType :: [PrimArg] -> Compiler Type
 primReturnType ps = do
     let outputs = primOutputs ps
-    case length outputs of
-      0 -> return void_t
-      1 -> typed' $ argType (head outputs)
-      n -> fmap struct_t (mapM (typed' . argType) outputs)
+    case outputs of
+      [] -> return void_t
+      [output] -> typed' $ argType output
+      _ -> fmap struct_t (mapM (typed' . argType) outputs)
 
 
 goesIn :: PrimArg -> Bool
 goesIn p = (argFlowDirection p) == FlowIn
 
 notPhantom :: PrimArg -> Bool
-notPhantom = not . phantomArg
+notPhantom = not . argIsPhantom
 
 -- | Pull out the name of a primitive argument if it is a variable.
 argName :: PrimArg -> Maybe String
@@ -820,13 +832,6 @@ argIntVal :: PrimArg -> Maybe Integer
 argIntVal (ArgInt val _) = Just val
 argIntVal _              = Nothing
 
--- | Split primitive arguments into inputs and output arguments determined
--- by their flow type.
-splitArgs :: [PrimArg] -> ([PrimArg], PrimArg)
-splitArgs args = (inputs, output)
-    where inputs = List.filter isInputP args
-          output = head $ List.filter (not . isInputP) args
-          isInputP a = argFlowDirection a == FlowIn
 
 -- | Open a PrimArg into it's inferred type and string name.
 openPrimArg :: PrimArg -> Codegen (Type, String)

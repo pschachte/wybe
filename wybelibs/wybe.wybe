@@ -100,6 +100,12 @@ public module io is
 #    public func eof:char = foreign lpvm cast(-1)
 end
 
+public type phantom is phantom
+    # public func phantom:phantom = foreign lpvm cast(0)
+    # public proc =(x:phantom,?y:phantom) ?y = foreign lpvm cast(0) end
+    # public proc =(?x:phantom,y:phantom) ?x = foreign lpvm cast(0) end
+end
+
 # public module allocation is
 #     use wybe.io
 #     foreign c gc_init(!io)
