@@ -20,7 +20,7 @@ import Data.Map as Map
 import Data.Maybe
 import Data.Set as Set
 import Flatten
-import Options (optUseStd,LogSelection(Normalise))
+import Options (LogSelection(Normalise))
 import Config (wordSize,wordSizeBytes)
 import Snippets
 
@@ -30,13 +30,13 @@ normalise items = do
     mapM_ normaliseItem items
     -- liftIO $ putStrLn "File compiled"
     -- every module imports stdlib
-    useStdLib <- gets (optUseStd . options)
+    useStdLib <- getModuleImplementationField (Set.notMember NoStd . modPragmas)
     when useStdLib $ addImport ["wybe"] (ImportSpec (Just Set.empty) Nothing)
     -- Now generate main proc if needed
-    stmts <- getModule stmtDecls 
+    stmts <- getModule stmtDecls
     unless (List.null stmts)
-      $ normaliseItem 
-            (ProcDecl Public Det False (ProcProto "" [] initResources) 
+      $ normaliseItem
+            (ProcDecl Public Det False (ProcProto "" [] initResources)
                           (List.reverse stmts) Nothing)
 
 -- |The resources available at the top level
@@ -48,7 +48,7 @@ initResources = Set.singleton
 
 -- |Normalise a single file item, storing the result in the current module.
 normaliseItem :: Item -> Compiler ()
-normaliseItem (TypeDecl vis (TypeProto name params) rep items pos) 
+normaliseItem (TypeDecl vis (TypeProto name params) rep items pos)
   = do
     let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
     ty <- addType name (TypeDef (length params) rep' pos) vis
@@ -84,14 +84,14 @@ normaliseItem (ImportItems vis modspec imports pos) = do
     addImport modspec (importSpec (Just imports) vis)
 normaliseItem (ResourceDecl vis name typ init pos) =
   addSimpleResource name (SimpleResource typ init pos) vis
-normaliseItem (FuncDecl vis detism inline 
-                           (FnProto name params resources) 
+normaliseItem (FuncDecl vis detism inline
+                           (FnProto name params resources)
                            resulttype result pos) =
   let flowType = Implicit pos
   in  normaliseItem
    (ProcDecl
     vis detism inline
-    (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType]) 
+    (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType])
      resources)
     [maybePlace (ForeignCall "llvm" "move" []
                  [maybePlace (Typed (content result) resulttype False)
@@ -106,10 +106,12 @@ normaliseItem item@(ProcDecl _ _ _ _ _ _) = do
     addProc tmpCtr item'
 normaliseItem (StmtDecl stmt pos) = do
     updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
+normaliseItem (PragmaDecl prag) =
+    addPragma prag
 
 
 
-normaliseSubmodule :: Ident -> Maybe [Ident] -> Visibility -> OptPos -> 
+normaliseSubmodule :: Ident -> Maybe [Ident] -> Visibility -> OptPos ->
                       [Item] -> Compiler ()
 normaliseSubmodule name typeParams vis pos items = do
     dir <- getDirectory
@@ -125,7 +127,7 @@ normaliseSubmodule name typeParams vis pos items = do
     case typeParams of
       Nothing -> return ()
       Just _ ->
-        updateImplementation 
+        updateImplementation
         (\imp ->
           let set = Set.singleton $ TypeSpec parentModSpec name []
           in imp { modKnownTypes = Map.insert name set $ modKnownTypes imp })
@@ -209,12 +211,12 @@ nonConstCtorItems vis typeSpec constCount nonConstCount (placedProto,tag) = do
     let params = fnProtoParams $ content placedProto
     fields <- mapM (\(Param var typ _ _) -> fmap (var,typ,) $ fieldSize typ)
               params
-    let (fields',size) = 
+    let (fields',size) =
           List.foldl (\(lst,offset) (var,typ,sz) ->
                        let aligned = alignOffset offset sz
                        in (((var,typ,aligned):lst),aligned + sz))
           ([],0) fields
-    return 
+    return
       $ constructorItems ctorName params typeSpec size fields' tag pos
       ++ deconstructorItems ctorName params typeSpec constCount nonConstCount
          fields' tag pos
@@ -232,23 +234,23 @@ fieldSize _ = return wordSizeBytes
 -- typeSize :: TypeSpec -> Compiler Int
 
 
--- |Given a tentative offset into a structure and the size of the thing at 
+-- |Given a tentative offset into a structure and the size of the thing at
 --  that offset, return the appropriate actual offset based on the size.
 --  Our approach is never to align anything on more than a word size
 --  boundary, anything bigger than that is aligned to the word size.
---  For smaller things 
+--  For smaller things
 alignOffset :: Int -> Int -> Int
 alignOffset offset size =
     let alignment = if size > wordSizeBytes
                     then wordSizeBytes
-                    else fromJust $ find ((0==) . (size`mod`)) $ 
-                         reverse $ List.map (2^) 
+                    else fromJust $ find ((0==) . (size`mod`)) $
+                         reverse $ List.map (2^)
                          [0..floor $ logBase 2 $ fromIntegral wordSizeBytes]
     in ((offset + alignment - 1) `div` alignment) * alignment
 
 
 -- |Generate constructor code for a non-const constructor
-constructorItems :: Ident -> [Param] -> TypeSpec -> Int 
+constructorItems :: Ident -> [Param] -> TypeSpec -> Int
                     -> [(Ident,TypeSpec,Int)] -> Integer -> OptPos -> [Item]
 constructorItems ctorName params typeSpec size fields tag pos =
     let flowType = Implicit pos
@@ -344,7 +346,7 @@ tagCheck constCount nonConstCount tag varName =
 --  of the specified variable, placing the result in the second variable.
 --  We use the stripped name with "$asInt" appended as a temp var name.
 -- | Produce a getter and a setter for one field of the specified type.
-getterSetterItems :: Visibility -> TypeSpec -> Ident -> OptPos 
+getterSetterItems :: Visibility -> TypeSpec -> Ident -> OptPos
                      -> Int -> Int -> Integer -> (VarName,TypeSpec,Int)
                      -> [Item]
 getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
@@ -496,7 +498,7 @@ equalityMultiNonconsts (FnProto name params _:ctrs) =
                          ++ concatMap equalityField params)]
         [equalityMultiNonconsts ctrs]
 
--- |Return code to deconstruct 
+-- |Return code to deconstruct
 deconstructCall :: Ident -> Ident -> [Param] -> Determinism -> Placed Stmt
 deconstructCall ctor arg params detism =
     Unplaced $ ProcCall [] ctor Nothing detism False

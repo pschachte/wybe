@@ -1,3 +1,4 @@
+pragma no_standard_library  # Standard library can't depend on itself!
 
 public type bool = public false | true
     # These are syntax errors because they are operators:
@@ -99,4 +100,3 @@ public module io is
     public proc println(x:bool) use !io !print(x) !nl end
 #    public func eof:char = foreign lpvm cast(-1)
 end
-

@@ -25,7 +25,7 @@ module AST (
   placedApply, placedApplyM, makeMessage, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
-  ImportSpec(..), importSpec,
+  ImportSpec(..), importSpec, Pragma(..), addPragma,
   collectSubModules,
   enterModule, reenterModule, exitModule, reexitModule, deferModules, inModule,
   emptyInterface, emptyImplementation,
@@ -109,6 +109,7 @@ data Item
      | ProcDecl Visibility Determinism Bool ProcProto [Placed Stmt] OptPos
      -- | CtorDecl Visibility FnProto OptPos
      | StmtDecl Stmt OptPos
+     | PragmaDecl Pragma
      deriving (Generic, Eq)
 
 -- |The visibility of a file item.  We only support public and private.
@@ -952,8 +953,8 @@ data Module = Module {
   thisLoadNum :: Int,            -- ^the loadCount when loading this module
   minDependencyNum :: Int,       -- ^the smallest loadNum of all dependencies
   procCount :: Int,              -- ^a counter for gensym-ed proc names
-  stmtDecls :: [Placed Stmt],     -- ^top-level statements in this module
-  itemsHash :: Maybe String -- ^map of proc name to it's hash
+  stmtDecls :: [Placed Stmt],    -- ^top-level statements in this module
+  itemsHash :: Maybe String      -- ^map of proc name to its hash
   } deriving (Generic)
 
 
@@ -1114,6 +1115,7 @@ updateDependencies fn modint = modint {dependencies = fn $ dependencies modint}
 
 -- |Holds everything needed to compile the module itself
 data ModuleImplementation = ModuleImplementation {
+    modPragmas   :: Set Pragma,               -- ^pragmas for this module
     modImports   :: Map ModSpec ImportSpec,   -- ^This module's imports
     modSubmods   :: Map Ident ModSpec,        -- ^This module's submodules
     modTypes     :: Map Ident TypeDef,        -- ^Types defined by this module
@@ -1130,8 +1132,8 @@ data ModuleImplementation = ModuleImplementation {
 
 emptyImplementation :: ModuleImplementation
 emptyImplementation =
-    ModuleImplementation Map.empty Map.empty Map.empty Map.empty Map.empty
-                         Map.empty 0 0 Map.empty Map.empty Nothing
+    ModuleImplementation Set.empty Map.empty Map.empty Map.empty Map.empty
+                         Map.empty Map.empty 0 0 Map.empty Map.empty Nothing
 
 
 -- These functions hack around Haskell's terrible setter syntax
@@ -1311,6 +1313,21 @@ importsSelected :: Maybe (Set Ident) -> Map Ident a -> Map Ident a
 importsSelected Nothing items = items
 importsSelected (Just these) items =
     Map.filterWithKey (\k _ -> Set.member k these) items
+
+
+-- | Pragmas that can be specified for a module
+data Pragma = NoStd        -- ^ Don't import that standard library for this mod
+   deriving (Eq,Ord,Generic)
+
+instance Show Pragma where
+    show NoStd = "no_standard_library"
+
+
+-- |Specify a pragma for the current module
+addPragma :: Pragma -> Compiler ()
+addPragma prag = do
+    updateModImplementation
+        (\imp -> imp { modPragmas = Set.insert prag $ modPragmas imp })
 
 
 -- |A type definition, including the number of type parameters and an
@@ -2114,6 +2131,8 @@ instance Show Item where
     ++ showBody 4 stmts
   show (StmtDecl stmt pos) =
     showStmt 4 stmt ++ showMaybeSourcePos pos
+  show (PragmaDecl prag) =
+    "pragma " ++ show prag
 
 -- |How to show a ModSpec.
 showModSpec :: ModSpec -> String

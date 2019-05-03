@@ -13,12 +13,12 @@ AFTER EVERYTHING:
 
 inc2 > public inline (0 calls)
 0: inc2(x#0:wybe.int, ?$#0:wybe.int):
-    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:13:38
-    foreign llvm add(~tmp$1#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @wybe:13:38
+    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:14:38
+    foreign llvm add(~tmp$1#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @wybe:14:38
 inc2 > public inline (0 calls)
 1: inc2(?x#0:wybe.int, y#0:wybe.int):
-    foreign llvm sub(~y#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:14:44
-    foreign llvm sub(~tmp$1#0:wybe.int, 1:wybe.int, ?x#0:wybe.int) @wybe:14:44
+    foreign llvm sub(~y#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:15:44
+    foreign llvm sub(~tmp$1#0:wybe.int, 1:wybe.int, ?x#0:wybe.int) @wybe:15:44
   LLVM code       :
 
 ; ModuleID = 'update'

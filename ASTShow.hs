@@ -96,6 +96,9 @@ showMap outersep keyFn valFn m =
     Map.assocs m
 
 
+-- |Dump the content of the specified module and all submodules if either
+-- of the specified log selectors have been selected for logging.  This
+-- is called between the passes of those two selectors.
 logDump :: LogSelection -> LogSelection -> String -> Compiler ()
 logDump selector1 selector2 pass = do
     whenLogging2 selector1 selector2 $ do

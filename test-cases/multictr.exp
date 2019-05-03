@@ -579,7 +579,7 @@ entry:
 
             1:
                 foreign lpvm access(~$right#0:multictr.number, -1:wybe.int, ?$right$float_value#0:wybe.float)
-                foreign llvm fcmp eq(~$left$float_value#0:wybe.float, ~$right$float_value#0:wybe.float, ?$$#0:wybe.bool) @wybe:52:44
+                foreign llvm fcmp eq(~$left$float_value#0:wybe.float, ~$right$float_value#0:wybe.float, ?$$#0:wybe.bool) @wybe:53:44
 
 
 
@@ -594,7 +594,7 @@ entry:
 
         1:
             foreign lpvm access(~$right#0:multictr.number, 0:wybe.int, ?$right$int_value#0:wybe.int)
-            foreign llvm icmp eq(~$left$int_value#0:wybe.int, ~$right$int_value#0:wybe.int, ?$$#0:wybe.bool) @wybe:28:40
+            foreign llvm icmp eq(~$left$int_value#0:wybe.int, ~$right$int_value#0:wybe.int, ?$$#0:wybe.bool) @wybe:29:40
 
 
 
@@ -960,7 +960,7 @@ if.else:
 
                         1:
                             foreign lpvm access(~$right#0:multictr.simple, -1:wybe.int, ?$right$two_field#0:wybe.int)
-                            foreign llvm icmp eq(~$left$two_field#0:wybe.int, ~$right$two_field#0:wybe.int, ?$$#0:wybe.bool) @wybe:28:40
+                            foreign llvm icmp eq(~$left$two_field#0:wybe.int, ~$right$two_field#0:wybe.int, ?$$#0:wybe.bool) @wybe:29:40
 
 
 
@@ -999,7 +999,7 @@ if.else:
 
                             1:
                                 foreign lpvm access(~$right#0:multictr.simple, -1:wybe.int, ?$right$two_field#0:wybe.int)
-                                foreign llvm icmp eq(~$left$two_field#0:wybe.int, ~$right$two_field#0:wybe.int, ?$$#0:wybe.bool) @wybe:28:40
+                                foreign llvm icmp eq(~$left$two_field#0:wybe.int, ~$right$two_field#0:wybe.int, ?$$#0:wybe.bool) @wybe:29:40
 
 
 
@@ -1022,7 +1022,7 @@ if.else:
 
                     1:
                         foreign lpvm access(~$right#0:multictr.simple, 0:wybe.int, ?$right$one_field#0:wybe.int)
-                        foreign llvm icmp eq(~$left$one_field#0:wybe.int, ~$right$one_field#0:wybe.int, ?$$#0:wybe.bool) @wybe:28:40
+                        foreign llvm icmp eq(~$left$one_field#0:wybe.int, ~$right$one_field#0:wybe.int, ?$$#0:wybe.bool) @wybe:29:40
 
 
 
