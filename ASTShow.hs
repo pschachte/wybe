@@ -108,4 +108,6 @@ logDump selector1 selector2 pass = do
       liftIO $ hPutStrLn stderr $ replicate 70 '='
         ++ "\nAFTER " ++ pass ++ ":\n"
         ++ intercalate ("\n" ++ replicate 50 '-' ++ "\n")
-        (List.map show $ List.filter (nonWybe . modSpec) modList)
+        (List.map show
+         $ List.filter (nonWybe . modSpec) modList)
+         -- modList)

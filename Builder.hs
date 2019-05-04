@@ -467,6 +467,8 @@ compileModSCC mspecs = do
     stopOnError $ "generating low level code in " ++ showModSpecs mspecs
     mapM_ collectCallers mspecs
     logDump Clause Optimise "COMPILATION TO LPVM"
+    -- XXX Should optimise call graph sccs *across* each module scc
+    -- to ensure inter-module dependencies are optimally optimised
     fixpointProcessSCC optimiseMod mspecs
     stopOnError $ "optimising " ++ showModSpecs mspecs
     logDump Optimise Optimise "OPTIMISATION"

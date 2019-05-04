@@ -11,6 +11,9 @@
 
 
 ## Complete the implementation:
+* Optimise each module dependency SCC by finding call graph SCCs *across*
+  the whole module SCC.  This ensures non-mutually-recursive procs are
+  optimised before callers, even across mutually-dependent modules.
 * Infer when test calls are certain to succeed and consider them Det
 * Generate print and comparison methods for user defined types
 * Generate string function for user defined types, once we have decent strings
@@ -38,6 +41,7 @@
 
 
 ## Improve error handling:
+* Error message for foreign call with no output (need to thread something)
 * Give meaningful message for errors detected in generated procs
 * Detect and report use of uninitialised variables, including update
    of uninitialised variables
