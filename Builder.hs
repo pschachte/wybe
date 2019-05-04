@@ -622,7 +622,10 @@ buildExecutable targetMod fpath = do
             let proto = ProcProto "" []
                         $ Set.fromList [cmdResource "argc" ParamIn,
                                         cmdResource "argv" ParamIn,
-                                        cmdResource "exit_code" ParamOut]
+                                        cmdResource "exit_code" ParamOut,
+                                        ResourceFlowSpec
+                                        (ResourceSpec ["wybe","io"] "io")
+                                        ParamOut]
             let mainProc = ProcDef "" proto mainBody Nothing 0 Map.empty
                            Private Det False NoSuperproc
             logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
