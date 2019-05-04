@@ -5,8 +5,9 @@
 --  Purpose  : Transform a clausal form (LPVM) module to LLVM
 --  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
 
-module Blocks
-       where
+module Blocks (concatLLVMASTModules, blockTransformModule
+                -- newMainModule
+              ) where
 
 import           AST
 import           ASTShow
@@ -222,7 +223,7 @@ translateProc modProtos proc = do
 
 
 -- | Create LLVM's module level Function Definition from the LPVM procedure
--- prototype and it's body as a list of BasicBlock(s). The return type of such
+-- prototype and its body as a list of BasicBlock(s). The return type of such
 -- a definition is decided based on the Ouput parameter of the procedure, or
 -- is made to be phantom.
 makeGlobalDefinition :: String -> PrimProto
@@ -231,10 +232,11 @@ makeGlobalDefinition :: String -> PrimProto
 makeGlobalDefinition pname proto bls = do
     modName <- fmap showModSpec getModuleSpec
     let params = List.filter (not . paramIsPhantom) (primProtoParams proto)
-        isMain = primProtoName proto == "<0>"
-        -- *The top level procedure will be labelled main.
-        label = modName ++ "." ++
-            if isMain then "main" else pname
+        -- *The overall top level procedure will be labelled main.
+        label0 = modName ++ "." ++ pname
+            -- if isMain then "main" else pname
+        isMain = label0 == ".<0>"
+        label  = if isMain then "main" else label0
         inputs = List.filter isInputParam params
     fnargs <- mapM makeFnArg inputs
     retty <- if isMain then return int_t else primOutputType params
@@ -392,12 +394,15 @@ codegenBody proto body =
        ops <- mapM cgen ps
        let params = primProtoParams proto
        case bodyFork body of
-         NoFork -> if (primProtoName proto) == "<0>"
-                   -- Empty primitive prototype is the main function in LLVM
-                   then mainReturnCodegen
-                   else do retOp <- buildOutputOp params
-                           ret retOp
-                           return ()
+         NoFork -> do retOp <- buildOutputOp params
+                      ret retOp
+                      return ()
+         -- NoFork -> if (primProtoName proto) == "<0>"
+         --           -- Empty primitive prototype is the main function in LLVM
+         --           then mainReturnCodegen
+         --           else do retOp <- buildOutputOp params
+         --                   ret retOp
+         --                   return ()
          (PrimFork var ty _ fbody) -> codegenForkBody var fbody proto
        if List.null ops
            then return Nothing
@@ -1076,50 +1081,50 @@ mallocExtern =
 -- Block Modification                                                     --
 ----------------------------------------------------------------------------
 
--- | Create a new LLVMAST.Module with in-order calls to the
--- given modules' mains.
--- A module's main would look like: 'module.main'
--- For each call, an external declaration to that main function is needed.
-newMainModule :: [ModSpec] -> Compiler LLVMAST.Module
-newMainModule depends = do
-    blstate <- execCodegen 0 [] $ mainCodegen depends
-    let bls = createBlocks blstate
-    let mainDef = globalDefine int_t "main" [] bls
-    let externsForMain = [(external (void_t) "gc_init" [])]
-            ++ (mainExterns depends)
-    let newDefs = externsForMain ++ [mainDef]
-    -- XXX Use empty string as source file name; should be main file name
-    return $ modWithDefinitions "tmpMain" "" newDefs
+-- -- | Create a new LLVMAST.Module with in-order calls to the
+-- -- given modules' mains.
+-- -- A module's main would look like: 'module.main'
+-- -- For each call, an external declaration to that main function is needed.
+-- newMainModule :: [ModSpec] -> Compiler LLVMAST.Module
+-- newMainModule depends = do
+--     blstate <- execCodegen 0 [] $ mainCodegen depends
+--     let bls = createBlocks blstate
+--     let mainDef = globalDefine int_t "main" [] bls
+--     let externsForMain = [(external (void_t) "gc_init" [])]
+--             ++ (mainExterns depends)
+--     let newDefs = externsForMain ++ [mainDef]
+--     -- XXX Use empty string as source file name; should be main file name
+--     return $ modWithDefinitions "tmpMain" "" newDefs
 
 
--- | Run the Codegen monad collecting the instructions needed to call
--- the given modules' main(s). This main function returns 0.
-mainCodegen :: [ModSpec] -> Codegen ()
-mainCodegen mods = do
-    entry <- addBlock entryBlockName
-    setBlock entry
-    -- Temp Boehm GC init call
-    voidInstr $
-        call (externf (ptr_t $ FunctionType void_t [] False)
-              (LLVMAST.Name $ toSBString "gc_init")) []
-    -- Call the mods mains in order
-    let mainName m = LLVMAST.Name $ toSBString $ showModSpec m ++ ".main"
-    forM_ mods $ \m -> instr int_t $
-                       call (externf (ptr_t $ FunctionType int_t [] False) (mainName m)) []
-    -- int main returns 0
-    ptr <- instr (ptr_t int_t) (alloca int_t)
-    let retcons = cons (C.Int 32 0)
-    store ptr retcons
-    ret (Just retcons)
-    return ()
+-- -- | Run the Codegen monad collecting the instructions needed to call
+-- -- the given modules' main(s). This main function returns 0.
+-- mainCodegen :: [ModSpec] -> Codegen ()
+-- mainCodegen mods = do
+--     entry <- addBlock entryBlockName
+--     setBlock entry
+--     -- Temp Boehm GC init call
+--     voidInstr $
+--         call (externf (ptr_t $ FunctionType void_t [] False)
+--               (LLVMAST.Name $ toSBString "gc_init")) []
+--     -- Call the mods mains in order
+--     let mainName m = LLVMAST.Name $ toSBString $ showModSpec m ++ ".main"
+--     forM_ mods $ \m -> instr int_t $
+--                        call (externf (ptr_t $ FunctionType int_t [] False) (mainName m)) []
+--     -- int main returns 0
+--     ptr <- instr (ptr_t int_t) (alloca int_t)
+--     let retcons = cons (C.Int 32 0)
+--     store ptr retcons
+--     ret (Just retcons)
+--     return ()
 
--- | Create a list of extern declarations for each call to a foreign
--- module's main.
-mainExterns :: [ModSpec] -> [LLVMAST.Definition]
-mainExterns mods = List.map externalMain mods
-    where
-      mainName m = showModSpec m ++ ".main"
-      externalMain m = external int_t (mainName m) []
+-- -- | Create a list of extern declarations for each call to a foreign
+-- -- module's main.
+-- mainExterns :: [ModSpec] -> [LLVMAST.Definition]
+-- mainExterns mods = List.map externalMain mods
+--     where
+--       mainName m = showModSpec m ++ "."
+--       externalMain m = external int_t (mainName m) []
 
 
 -- | Concat the LLVMAST.Module implementations of a list of loaded modules

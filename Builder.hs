@@ -51,7 +51,8 @@ module Builder (buildTargets, compileModule) where
 import           AST
 import           ASTShow                   (logDump)
 import           Blocks                    (blockTransformModule,
-                                            concatLLVMASTModules, newMainModule)
+                                            concatLLVMASTModules)
+-- , newMainModule)
 import           Callers                   (collectCallers)
 import           Clause                    (compileProc)
 import           Config
@@ -618,11 +619,11 @@ buildExecutable targetMod fpath = do
                             Unplaced $ ForeignCall "C" "gc_init" [] []]
                            ++ bodyInner
             let mainBody = ProcDefSrc bodyCode
-            let proto = ProcProto "main" []
+            let proto = ProcProto "" []
                         $ Set.fromList [cmdResource "argc" ParamIn,
                                         cmdResource "argv" ParamIn,
                                         cmdResource "exit_code" ParamOut]
-            let mainProc = ProcDef "main" proto mainBody Nothing 0 Map.empty
+            let mainProc = ProcDef "" proto mainBody Nothing 0 Map.empty
                            Private Det False NoSuperproc
             logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
 
@@ -634,28 +635,35 @@ buildExecutable targetMod fpath = do
             addProcDef mainProc
             mods <- exitModule
             compileModSCC mods
+            logDump FinalDump FinalDump "BUILDING MAIN"
+            let mainMod = case mods of
+                  [m] -> m
+                  _   -> shouldnt $ "non-singleton main module: "
+                                    ++ showModSpecs mods
 
             logBuild $ "Finished building *main* module: " ++ showModSpecs mods
 
-            mainMod <- newMainModule mainImports
-            logBuild "o Built 'main' module for target: "
-            mainModStr <- liftIO $ codeemit mainMod
-            logEmit $ BS.unpack mainModStr
+            -- mainMod <- newMainModule mainImports
+            -- logBuild "o Built 'main' module for target: "
+            -- mainModStr <- liftIO $ codeemit mainMod
+            -- logEmit $ BS.unpack mainModStr
             ------------
-            logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
+            logBuild "o Creating temp Main module @ .../tmp/tmpMain.o"
             tempDir <- liftIO getTemporaryDirectory
             liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
             let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"
-            liftIO $ makeObjFile tmpMainOFile mainMod
+            emitObjectFile mainMod tmpMainOFile
 
             ofiles <- mapM (loadObjectFile . fst) depends
+
             let allOFiles = tmpMainOFile:ofiles
             -----------
-            makeExec allOFiles fpath
-            -- return allOFiles
             logBuild "o Object Files to link: "
             logBuild $ "++ " ++ intercalate "\n++ " allOFiles
             logBuild $ "o Building Target (executable): " ++ fpath
+
+            makeExec allOFiles fpath
+            -- return allOFiles
 
 
 -- | Traverse and collect a depth first dependency list from the given initial
