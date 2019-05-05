@@ -693,7 +693,9 @@ cgenLPVM pname flags args
               assign outNm castOp
               return $ Just castOp
 
+            -- A cast with no outputs:  do nothing
             (_, []) -> return Nothing
+
             _ -> shouldnt $ "cast instruction with " ++ show (length inputs)
                             ++ " inputs and " ++ show (length outputs)
                             ++ " outputs"
