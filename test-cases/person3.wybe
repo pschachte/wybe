@@ -1,7 +1,6 @@
 public type person = public person(firstname:string, lastname:string) end
 
 # expect: copy B into a new memory and do update
-# is: destructively update the original memory
 ?personA = person("John", "Smith")
 ?personB = personA
 # Here A and B are not fresh

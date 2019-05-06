@@ -1,7 +1,6 @@
 public type person = public person(firstname:string, lastname:string) end
 
 # expect: destructively update A; A is fresh
-# is: destructively update A
 ?personA = person("John", "Smith")
 lastname(!personA, "Wang")
 !print(personA.lastname)

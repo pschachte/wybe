@@ -4,7 +4,7 @@ public type student = public student(id:int, major:course) end
 public proc printStudent(stu:student) use !io
   !print("student id: ")
   !println(stu.id)
-  ?cour = stu.course
+  ?cour = stu.major
   !print("course code: ")
   !println(cour.code)
   !print("course name: ")

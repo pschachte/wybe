@@ -1,6 +1,6 @@
 use position
 
-# posB reference posA's y field
+# posB copy posA's y value
 ?posA = position(111, 222)
 ?posB = position(333, posA.y)
 !println("posA y field")

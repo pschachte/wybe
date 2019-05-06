@@ -2,7 +2,6 @@ public type person = public person(firstname:string, lastname:string) end
 
 # update both objects
 # expect: copy B into a new memory and do update
-# is: destructively update the original memory
 proc update_both(!p1:person, !p2:person) use !io
   firstname(!p1, "Amy")
   firstname(!p2, "Bob")

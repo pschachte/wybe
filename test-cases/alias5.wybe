@@ -15,8 +15,10 @@ public proc bar use !io
   !replicate1(p1, ?p3, 800, ?p4)
 
   ?p1 = 111
-  !println(p1)
-  !println(p2)
+  !println(p1) # 111
+  !println(p2) # 100
+  !println(p3) # 100
+  !println(p4) # 45000
 end
 
 !bar

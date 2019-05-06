@@ -15,13 +15,13 @@ public proc bar use !io
   !replicate1(p1, ?p2)
 
   x(!p1, 555)
-  !print("p1.x")
+  !print("p1.x: ")
   !println(p1.x) # expected 555 - is 555
-  !print("p1.y")
+  !print("p1.y: ")
   !println(p1.y) # expected 100 - is 100
-  !print("p2.x")
+  !print("p2.x: ")
   !println(p2.x) # expected 100 - is 100
-  !print("p2.y")
+  !print("p2.y: ")
   !println(p2.y) # expected 200 - is 200
 end
 
