@@ -4,8 +4,12 @@
 --  Purpose  : Alias analysis for a single module
 --  Copyright: (c) 2018 Ting Lu.  All rights reserved.
 
-module AliasAnalysis (aliasSccBottomUp, maybeAliasPrimArgs,
-                        aliasedArgsInSimplePrim, aliasedArgsInPrimCall,
+module AliasAnalysis (aliasSccBottomUp,
+                        currentAliasInfo,
+                        areDifferentMaps,
+                        maybeAliasPrimArgs,
+                        aliasedArgsInSimplePrim,
+                        aliasedArgsInPrimCall,
                         mapParamToArgVar) where
 
 import           AST
@@ -19,7 +23,7 @@ import           Util
 
 
 ----------------------------------------------------------------
---                     Escape Analysis
+--                 Proc Level Aliasing Analysis
 ----------------------------------------------------------------
 -- PROC LEVEL ALIAS ANALYSIS
 -- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
@@ -38,8 +42,20 @@ aliasSccBottomUp procs@(CyclicSCC multi) = do
     -- Aliasing is always changed after the first run, so cyclic procs are
     -- analysed at least twice.
     when (or changed) $ aliasSccBottomUp procs
-    -- TODO: Is module level fixpoint of alias analysis needed? proc level
-    -- analysis will reach fixpoint anyway??
+
+
+-- | Generate aliasMap for procs
+currentAliasInfo :: SCC ProcSpec -> Compiler [AliasMap]
+currentAliasInfo (AcyclicSCC single) = do
+    def <- getProcDef single
+    let (ProcDefPrim _ _ analysis) = procImpln def
+    return [procArgAliasMap analysis]
+currentAliasInfo procs@(CyclicSCC multi) =
+    foldM (\info pspec -> do
+        def <- getProcDef pspec
+        let (ProcDefPrim _ _ analysis) = procImpln def
+        return $ info ++ [procArgAliasMap analysis]
+        ) [] multi
 
 
 -- XXX aliasProcBottomUp :: ProcSpec -> Compiler a
@@ -57,7 +73,7 @@ aliasProcBottomUp pspec = do
     newDef <- getProcDef pspec
     let (ProcDefPrim _ _ newAnalysis) = procImpln newDef
     -- And compare if the alias map changed.
-    areDifferentMaps (procArgAliasMap oldAnalysis) (procArgAliasMap newAnalysis)
+    return $ areDifferentMaps (procArgAliasMap oldAnalysis) (procArgAliasMap newAnalysis)
     -- ^XXX wrong way to do this. Need to change type signatures of a bunch of
     -- functions start from checkEscapeDef which is called by updateProcDefM
 
@@ -93,9 +109,7 @@ checkEscapeDef def
                             procArgAliasMap = aliaseMap3
                         }
         return $ def { procImpln = ProcDefPrim caller body newAnalysis }
-checkEscapeDef def =
-    -- XXX return (def, False)
-    return def
+checkEscapeDef def = return def -- ^XXX return (def, False)
 
 
 -- Check alias created by prims of caller proc
@@ -190,11 +204,11 @@ _maybeAliasPrimArgs args = do
 -- Have to ensure the aliasing map is canonical by converting the map to Alias
 -- Pairs because the root could be different in two maps whereas the alias info
 -- are the same
-areDifferentMaps :: AliasMap -> AliasMap -> Compiler Bool
-areDifferentMaps aliasMap1 aliasMap2 = do
+areDifferentMaps :: AliasMap -> AliasMap -> Bool
+areDifferentMaps aliasMap1 aliasMap2 =
     let aliasPair1 = aliasMapToAliasPairs aliasMap1
-    let aliasPair2 = aliasMapToAliasPairs aliasMap2
-    return $ aliasPair1 /= aliasPair2
+        aliasPair2 = aliasMapToAliasPairs aliasMap2
+    in aliasPair1 /= aliasPair2
 
 
 -- Helper: get argvar names of aliased args of the prim

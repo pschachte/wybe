@@ -503,7 +503,7 @@ compileModSCC mspecs = do
     logMsg Transform $ "mspecs: " ++ show mspecs
     logMsg Transform $ replicate 70 '='
     mapM_ (transformModuleProcs transformProc)  mspecs
-    logDump Analysis Transform "TRANSFORM"
+    logDump Transform Transform "TRANSFORM"
 
     ----------------------------------
     -- Create an LLVMAST.Module represtation

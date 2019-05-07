@@ -6,7 +6,8 @@
 
 module Analysis (analyseMod) where
 
-import           AliasAnalysis
+import           AliasAnalysis (aliasSccBottomUp, areDifferentMaps,
+                                currentAliasInfo)
 import           AST
 import           Callers       (getSccProcs)
 import           Control.Monad
@@ -30,6 +31,10 @@ analyseMod _ thisMod = do
         unlines (List.map (show . sccElts) orderedProcs)
     logAnalysis $ replicate 60 '~'
 
+    aliasingInfo1 <- foldM (\list procs -> do
+        aliasing <- currentAliasInfo procs
+        return $ list ++ aliasing) [] orderedProcs
+
     ----------------------------------
     -- ALIAS ANALYSIS
     -- MODULE LEVEL ALIAS ANALYSIS
@@ -39,9 +44,19 @@ analyseMod _ thisMod = do
     --                 ++ show thisMod ++ " - "
     --                 ++ show (or chg) ++ " - " ++ show chg
 
+    aliasingInfo2 <- foldM (\list procs -> do
+        aliasing <- currentAliasInfo procs
+        return $ list ++ aliasing) [] orderedProcs
+    logAnalysis $ ">>> aliasingInfo1:" ++ show aliasingInfo1
+    logAnalysis $ ">>> aliasingInfo2:" ++ show aliasingInfo2
+    logAnalysis $ ">>> group:" ++ show (List.group aliasingInfo2)
+    logAnalysis $ ">>> zip:" ++ show (List.zip aliasingInfo1 aliasingInfo2)
+
+    let chg = List.zipWith areDifferentMaps aliasingInfo1 aliasingInfo2
+    logAnalysis $ ">>> chg:" ++ show chg ++ " ----> "++ show (or chg)
+
     reexitModule
-    -- return (or chg,[])
-    return (False,[])
+    return (or chg,[])
 
 
 -- TODO: XXX orginal analyseMod function (to be removed)
