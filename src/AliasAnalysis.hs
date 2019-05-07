@@ -132,7 +132,8 @@ aliasedByPrim nonePhantomParams aliasMap prim =
             let calleeArgsAliases =
                     Map.foldrWithKey (transformUfKey paramArgMap)
                         initUnionFind calleeParamAliases
-            aliasedArgsInPrimCall calleeArgsAliases nonePhantomParams aliasMap args
+            aliasedArgsInPrimCall calleeArgsAliases nonePhantomParams
+                                    aliasMap args
         -- | Analyse simple prims
         _ -> do
             logAlias $ "\n--- simple prim:  " ++ show prim
@@ -161,21 +162,17 @@ aliasedByFork caller body aliasMap = do
             return aliasMap
 
 
--- Build up maybe alised inputs and outputs triggerred by move, mutate, access,
--- cast instructions. Returned triple ([PrimVarName], [PrimVarName], [PrimArg])
--- is (maybeAliasedInput, maybeAliasedOutput, primArgs)
+-- Build up maybe alised inputs and outputs triggerred by move, access, cast
+-- instructions.
+-- Not to compute aliasing from mutate instructions with the assumption that we
+-- always try to do nondestructive update.
+-- Returned triple ([PrimVarName], [PrimVarName]) is
+-- (maybeAliasedInput, maybeAliasedOutput)
 maybeAliasPrimArgs :: Prim -> Compiler ([PrimVarName], [PrimVarName], [PrimArg])
 maybeAliasPrimArgs (PrimForeign _ "access" _ args) = _maybeAliasPrimArgs args
 maybeAliasPrimArgs (PrimForeign _ "cast" _ args)   = _maybeAliasPrimArgs args
 maybeAliasPrimArgs (PrimForeign _ "move" _ args)   = _maybeAliasPrimArgs args
-maybeAliasPrimArgs (PrimForeign _ "mutate" _ args@[_, _, _, _, ArgInt 1 _, _]) =
-    -- Only incur aliasing if this is a destructive mutate
-    _maybeAliasPrimArgs args
-maybeAliasPrimArgs (PrimForeign _ "mutate" _ args@[_, _, _, _, ArgInt 0 _, _]) =
-    -- Still need to return all prim args if this is a non-destructive mutate
-    -- because the arg in final use will need to be removed from alias map
-    return ([],[],args)
-maybeAliasPrimArgs _                               = return ([],[],[])
+maybeAliasPrimArgs prim                            = return ([],[], primArgs prim)
 
 
 -- Helper function for the above maybeAliasPrimArgs function
@@ -187,15 +184,6 @@ _maybeAliasPrimArgs args = do
     escapedInputs <- foldM (argsOfProcProto inArgVar2) [] inputArgs
     escapedVia <- foldM (argsOfProcProto outArgVar2) [] outputArgs
     return (escapedInputs, escapedVia, args)
-
-
--- Build up alias pairs triggerred by move, mutate, access, cast instructions
-escapablePrimArgs :: Prim -> Compiler [PrimArg]
-escapablePrimArgs (PrimForeign _ "move" _ args)   = return args
-escapablePrimArgs (PrimForeign _ "mutate" _ args) = return args
-escapablePrimArgs (PrimForeign _ "access" _ args) = return args
-escapablePrimArgs (PrimForeign _ "cast" _ args)   = return args
-escapablePrimArgs _                               = return []
 
 
 -- Helper: compare if two AliasMaps are different
@@ -240,7 +228,12 @@ aliasedArgsInPrimCall calleeArgsAliases nonePhantomParams currentAlias primArgs
 aliasedArgsInSimplePrim :: [PrimVarName] -> AliasMap
                             -> ([PrimVarName], [PrimVarName], [PrimArg])
                             -> Compiler AliasMap
-aliasedArgsInSimplePrim _ currentAlias ([],[],[]) = return currentAlias
+aliasedArgsInSimplePrim nonePhantomParams currentAlias ([],[], primArgs) = do
+        -- No new aliasing incurred but still need to cleanup final args
+        -- Gather variables in final use
+        finals <- foldM (finalArgs nonePhantomParams) Set.empty primArgs
+        -- Then remove them from aliasmap
+        cleanupFinalAliasedVars currentAlias finals
 aliasedArgsInSimplePrim nonePhantomParams currentAlias
     (maybeAliasedInput, maybeAliasedOutput, primArgs) = do
         let aliases = cartProd maybeAliasedInput maybeAliasedOutput
@@ -412,6 +405,16 @@ escapeByProcCalls callerAlias aliasNames prim =
             return $ aliasNames ++ aliasNames'
         _ ->
             return aliasNames
+
+
+-- Build up alias pairs triggerred by move, mutate, access, cast instructions
+escapablePrimArgs :: Prim -> Compiler [PrimArg]
+escapablePrimArgs (PrimForeign _ "move" _ args)   = return args
+-- escapablePrimArgs (PrimForeign _ "mutate" _ args) = return args
+escapablePrimArgs (PrimForeign _ "access" _ args) = return args
+escapablePrimArgs (PrimForeign _ "cast" _ args)   = return args
+escapablePrimArgs _                               = return []
+
 
 -- Helper: convert alias index pairs to var name pairs
 aliasPairsToVarNames :: [PrimArg] -> [AliasPair]

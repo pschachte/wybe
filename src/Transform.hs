@@ -91,14 +91,14 @@ transformPrim nonePhantomParams (aliasMap, prims) prim =
         _ -> do
             logTransform $ "\n--- simple prim:  " ++ show prim
             -- Mutate destructive flag if this is a mutate instruction
-            prim' <- mutateInstruction prim aliasMap
+            prim2 <- mutateInstruction prim aliasMap
             maybeAliasInfo <- maybeAliasPrimArgs (content prim)
             -- Update alias map for escapable args
             aliasMap2 <- aliasedArgsInSimplePrim nonePhantomParams aliasMap
-                            maybeAliasInfo
+                                                    maybeAliasInfo
             logTransform $ "current aliasMap: " ++ show aliasMap
             logTransform $ "after :           " ++ show aliasMap2
-            return (aliasMap2, prims ++ [prim'])
+            return (aliasMap2, prims ++ [prim2])
 
 
 -- Recursively transform forked body's prims
@@ -141,20 +141,21 @@ mutateInstruction prim _ =  return prim
 
 
 -- Helper: change mutate destructive flag to true if FlowIn variable is not
--- aliased and the original destructive flag is not set to 1 yet
+-- aliased and is dead after this program point and the original destructive
+-- flag is not set to 1 yet
 _updateMutateForAlias :: AliasMap -> [PrimArg] -> Compiler [PrimArg]
 _updateMutateForAlias aliasMap
-    args@[fIn@(ArgVar inName _ _ _ _), fOut, size, offset, ArgInt des typ,
-        mem@(ArgVar memName _ _ _ _)] =
+    args@[fIn@(ArgVar inName _ _ _ final1), fOut, size, offset, ArgInt des typ,
+        mem@(ArgVar memName _ _ _ final2)] =
             -- When the val is also a pointer
-            if not (connectedToOthers aliasMap inName)
-                && not (connectedToOthers aliasMap memName)
+            if not (connectedToOthers aliasMap inName) && final1
+                && not (connectedToOthers aliasMap memName) && final2
                 && des /= 1
             then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
             else return args
 _updateMutateForAlias aliasMap
-    args@[fIn@(ArgVar inName _ _ _ _), fOut, size, offset, ArgInt des typ, mem] =
-        if not (connectedToOthers aliasMap inName) && des /= 1
+    args@[fIn@(ArgVar inName _ _ _ final), fOut, size, offset, ArgInt des typ, mem] =
+        if not (connectedToOthers aliasMap inName) && final && des /= 1
         then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
         else return args
 _updateMutateForAlias _ args = return args

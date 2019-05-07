@@ -41,7 +41,7 @@ analyseMod _ thisMod = do
 
     reexitModule
     -- return (or chg,[])
-    return (False,[]) -- ^TODO: Is module level fixpoint of alias analysis needed
+    return (False,[])
 
 
 -- TODO: XXX orginal analyseMod function (to be removed)
