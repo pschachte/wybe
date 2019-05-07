@@ -218,6 +218,7 @@ addUfItem = Map.insert
 --         (_, _)             -> False
 
 
+-- Unite two nodes in the tree
 uniteUf :: Ord a => UnionFind a -> a -> a -> UnionFind a
 uniteUf uf p q =
     case (infoP, infoQ) of
@@ -295,10 +296,35 @@ transformUfKey mp k info uf =
 -- Combine two UnionFind
 combineUf :: Ord a => UnionFind a -> UnionFind a -> UnionFind a
 combineUf fromUf toUf =
-    Map.foldrWithKey (\k info currUf ->
-                        if k == root info then currUf
-                        else uniteUf currUf k (root info)
-                        ) toUf fromUf
+    Map.foldrWithKey (
+        \key newInfo currFrom ->
+            if key == root newInfo
+            then currFrom -- no need to add to map
+            else -- item in toUf brings in new key-root relation
+                let orgInfo = Map.lookup key currFrom
+                in case orgInfo of
+                    Just justOrgInfo ->
+                        if key == orgRoot then
+                            -- should update this key-root relation in
+                            -- fromUf; update all other nodes that have the
+                            -- root of key.
+                            updateRoot key currFrom
+                        else
+                            -- link the old root to the new root to its key
+                            let newRoot = root newInfo
+                                currFrom' = Map.insert key newInfo currFrom
+                                currFrom'' = Map.insert orgRoot newInfo currFrom'
+                            in updateRoot orgRoot currFrom''
+                        where
+                            orgRoot = root justOrgInfo
+                            updateRoot cond =
+                                Map.foldrWithKey (\k i uf ->
+                                    if root i == cond
+                                    then Map.insert k newInfo uf
+                                    else Map.insert k i uf
+                                    ) Map.empty
+                    _ -> currFrom
+        ) toUf fromUf
 
 
 -- -- Reset key and value in UnionFind to default (so it's not connected to anyone)
@@ -350,7 +376,8 @@ convertUfKey aSet k info (uf, rootMap) =
             _       -> (Map.insert k info uf, rootMap)
     else (Map.insert k info uf, rootMap)
 
--- Similar to above - but filtering out item with same key and root that in aSet
+-- Similar to above - but filtering out item that is in aSet and its key and
+-- root are same
 filterUfItems :: (Ord a) => Set a -> a -> UFInfo a -> UnionFind a -> UnionFind a
 filterUfItems aSet k info uf =
     if Set.member k aSet && k == root info

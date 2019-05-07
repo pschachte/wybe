@@ -146,8 +146,10 @@ aliasedByPrim nonePhantomParams aliasMap prim =
             let calleeArgsAliases =
                     Map.foldrWithKey (transformUfKey paramArgMap)
                         initUnionFind calleeParamAliases
-            aliasedArgsInPrimCall calleeArgsAliases nonePhantomParams
+            combined <- aliasedArgsInPrimCall calleeArgsAliases nonePhantomParams
                                     aliasMap args
+            logAlias $ "combined:         " ++ show combined
+            return combined
         -- | Analyse simple prims
         _ -> do
             logAlias $ "\n--- simple prim:  " ++ show prim
@@ -231,6 +233,7 @@ aliasedArgsInPrimCall calleeArgsAliases nonePhantomParams currentAlias primArgs
         let combinedAliases1 = combineUf calleeArgsAliases currentAlias
         -- Gather variables in final use
         finals <- foldM (finalArgs nonePhantomParams) Set.empty primArgs
+        logAlias $ "finals: " ++ show finals
         -- Then remove them from aliasmap
         cleanupFinalAliasedVars combinedAliases1 finals
 
