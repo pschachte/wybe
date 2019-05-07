@@ -9,7 +9,7 @@ public proc replicate2(p1:position, ?p2:position) use !io
     ?p2 = p1
 end
 
-# Expected Alias Pairs: [(0,1),(0,2),(1,2)]???
+# Expected Alias Pairs: [(p1,p3)]
 public proc replicate1(p1:position, ?p2:position, ?p3:position) use !io
     !replicate2(p1, ?p2)
     !replicate2(p2, ?p3)

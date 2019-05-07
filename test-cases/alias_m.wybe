@@ -1,0 +1,15 @@
+# transitive aliasing data structures incurred by procs in SCC modules
+
+use position
+use alias_mfoo
+
+?p1 = position(1, 1)
+!foo(p1, ?p2, ?p3)
+
+!print("p1:")
+!printPosition(p1)
+!print("p2:")
+!printPosition(p2)
+!print("p3:")
+!printPosition(p3) # (0,0)????
+

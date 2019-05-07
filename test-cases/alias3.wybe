@@ -5,12 +5,14 @@ use position
 
 public proc replicate1(p1:position, ?p2:position) use !io
   ?p2 = p1
-  !print("p1:")
+  !print("p1 expected (1, 1):")
   !printPosition(p1)
-  x(!p2, 2)
-  y(!p2, 2)
-  !print("p1:")
+  x(!p2, 2) # Nondestructive
+  y(!p2, 2) # Destructive
+  !print("p1 expected (1, 1):")
   !printPosition(p1)
+  !print("p2 expected (2, 2):")
+  !printPosition(p2)
 end
 
 public proc bar use !io
@@ -18,14 +20,10 @@ public proc bar use !io
   !replicate1(p1, ?p2)
 
   x(!p1, 555)
-  !print("p1.x: ")
-  !println(p1.x) # expected 555 - is 2
-  !print("p1.y: ")
-  !println(p1.y) # expected 1 - is 2
-  !print("p2.x: ")
-  !println(p2.x) # expected 2 - is 2
-  !print("p2.y: ")
-  !println(p2.y) # expected 2 - is 2
+  !print("p1 expected (555, 1):")
+  !printPosition(p1)
+  !print("p2 expected (2, 2):")
+  !printPosition(p2)
 end
 
 !bar
