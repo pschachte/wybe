@@ -36,7 +36,7 @@ optimiseMod _ thisMod = do
 
     mapM_ optimiseSccBottomUp orderedProcs
 
-    reexitModule
+    _ <- reexitModule
     return (False,[])
 
 
