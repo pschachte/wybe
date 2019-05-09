@@ -12,8 +12,7 @@ module Util (sameLength, maybeNth, checkMaybe, setMapInsert,
              fillLines, nop, sccElts,
              UnionFind, UFInfo, unionFindToTransitivePairs,
              initUnionFind, newUfItem, addUfItem, uniteUf, transformUfKey,
-             combineUf, convertUfRoot, convertUfKey, filterUfItems,
-             connectedToOthers,
+             combineUf, removeFromUf, connectedToOthers,
              removeDupTuples, pruneTuples, transitiveTuples, cartProd) where
 
 
@@ -165,8 +164,9 @@ instance Show a => Show (UFInfo a) where
 
 -- Convert UnionFind as transitive (key, root) tuples
 unionFindToTransitivePairs :: (Ord a, Show a) => UnionFind a -> [(a,a)]
-unionFindToTransitivePairs unionFind =
-    let f k info (aPairs, set) =
+unionFindToTransitivePairs unionFind = removeDupTuples transIdxAPairs
+    where
+        f k info (aPairs, set) =
             let r = root info
                 set' = Set.insert k set
             in if k == r then (aPairs, set')
@@ -192,7 +192,6 @@ unionFindToTransitivePairs unionFind =
             List.foldr (\(idx1, idx2) ls ->
                 (idxToA !! idx1, idxToA !! idx2) : ls
                 ) [] transIdxPairs
-    in removeDupTuples transIdxAPairs
 
 
 initUnionFind :: UnionFind a
@@ -332,14 +331,39 @@ combineUf fromUf toUf =
 -- resetUf uf k = Map.insert k (ufInfo k) uf
 
 
+-- Check if item is connected to anyone else except itself
+connectedToOthers :: (Eq a, Ord a) => UnionFind a -> a -> Bool
+connectedToOthers uf val =
+    let ufList = Map.toList uf
+        ufList' = [(k, root info) | (k, info) <- ufList,
+                    k /= root info, k == val || root info == val]
+    in not (List.null ufList')
+
+
+removeFromUf :: (Ord a) => Set a -> UnionFind a -> UnionFind a
+removeFromUf toBeRemoved unionFind = unionFind3
+    where
+        -- Cleanup root that is in toBeRemoved set and gather a mapping from the
+        -- removed root to the new root
+        (unionFind1, rootMap) = Map.foldrWithKey (_convertUfRoot toBeRemoved)
+                            (initUnionFind, Map.empty) unionFind
+        -- Now all variables in toBeRemoved would be converted to map to itself;
+        -- So we'll need to remove them from the map
+        unionFind2 = Map.foldrWithKey (_filterUfItems toBeRemoved)
+                            initUnionFind unionFind1
+        -- In case the key is in toBeRemoved, we cleanup these keys as well
+        (unionFind3, _) = Map.foldrWithKey (_convertUfKey toBeRemoved)
+                            (initUnionFind, rootMap) unionFind2
+
+
 -- convert UnionFind to a new UnionFind so if any root exists in the aSet then
 --     its children would be moved to a newRoot; the newRoot is the first
 --     occurrance of k whose root is in the aSet
 -- aSet: the set containing items that to be filtered out
 -- rootMap: map oldRoot to newRoot
-convertUfRoot :: (Ord a) => Set a -> a -> UFInfo a -> (UnionFind a, Map a a)
+_convertUfRoot :: (Ord a) => Set a -> a -> UFInfo a -> (UnionFind a, Map a a)
                         -> (UnionFind a, Map a a)
-convertUfRoot aSet k info (uf, rootMap) =
+_convertUfRoot aSet k info (uf, rootMap) =
     if Set.member (root info) aSet then
         -- root needs to be modified
         if Map.member (root info) rootMap then
@@ -365,9 +389,9 @@ convertUfRoot aSet k info (uf, rootMap) =
     else (Map.insert k info uf, rootMap)
 
 -- Similar to above - but converting key instead
-convertUfKey :: (Ord a) => Set a -> a -> UFInfo a -> (UnionFind a, Map a a)
+_convertUfKey :: (Ord a) => Set a -> a -> UFInfo a -> (UnionFind a, Map a a)
                         -> (UnionFind a, Map a a)
-convertUfKey aSet k info (uf, rootMap) =
+_convertUfKey aSet k info (uf, rootMap) =
     if Set.member k aSet && Map.member k rootMap then
         -- can find mapping to newKey
         let newKey = Map.lookup k rootMap
@@ -378,17 +402,8 @@ convertUfKey aSet k info (uf, rootMap) =
 
 -- Similar to above - but filtering out item that is in aSet and its key and
 -- root are same
-filterUfItems :: (Ord a) => Set a -> a -> UFInfo a -> UnionFind a -> UnionFind a
-filterUfItems aSet k info uf =
+_filterUfItems :: (Ord a) => Set a -> a -> UFInfo a -> UnionFind a -> UnionFind a
+_filterUfItems aSet k info uf =
     if Set.member k aSet && k == root info
     then uf
     else Map.insert k info uf
-
-
--- Check if item is connected to anyone else except itself
-connectedToOthers :: (Eq a, Ord a) => UnionFind a -> a -> Bool
-connectedToOthers uf val =
-    let ufList = Map.toList uf
-        ufList' = [(k, root info) | (k, info) <- ufList,
-                    k /= root info, k == val || root info == val]
-    in not (List.null ufList')

@@ -235,7 +235,7 @@ aliasedArgsInPrimCall calleeArgsAliases nonePhantomParams currentAlias primArgs
         finals <- foldM (finalArgs nonePhantomParams) Set.empty primArgs
         logAlias $ "finals: " ++ show finals
         -- Then remove them from aliasmap
-        cleanupFinalAliasedVars combinedAliases1 finals
+        return $ removeFromUf finals combinedAliases1
 
 
 -- Check Arg aliases in one of the prims of a ProcBody.
@@ -250,7 +250,7 @@ aliasedArgsInSimplePrim nonePhantomParams currentAlias ([],[], primArgs) = do
         -- Gather variables in final use
         finals <- foldM (finalArgs nonePhantomParams) Set.empty primArgs
         -- Then remove them from aliasmap
-        cleanupFinalAliasedVars currentAlias finals
+        return $ removeFromUf finals currentAlias
 aliasedArgsInSimplePrim nonePhantomParams currentAlias
     (maybeAliasedInput, maybeAliasedOutput, primArgs) = do
         let aliases = cartProd maybeAliasedInput maybeAliasedOutput
@@ -259,7 +259,7 @@ aliasedArgsInSimplePrim nonePhantomParams currentAlias
         -- Gather variables in final use
         finals <- foldM (finalArgs nonePhantomParams) Set.empty primArgs
         -- Then remove them from aliasmap
-        cleanupFinalAliasedVars aliasMap1 finals
+        return $ removeFromUf finals aliasMap1
 
 
 -- Helper: map arguments in callee proc to its formal parameters so we can get
@@ -290,23 +290,6 @@ finalArgs nonePhantomParams finalSet fIn@(ArgVar inName _ _ _ final) =
     then return $ Set.insert inName finalSet
     else return finalSet
 finalArgs _ finalSet _ = return finalSet
-
-
--- Helper: Cleanup aliased variables that are in final use
-cleanupFinalAliasedVars :: AliasMap -> Set PrimVarName -> Compiler AliasMap
-cleanupFinalAliasedVars aliasMap finals = do
-    -- Cleanup root that is final and gather a mapping from removed root to
-    -- new root
-    let (totalAliases1, rootMap) = Map.foldrWithKey (convertUfRoot finals)
-                            (initUnionFind, Map.empty) aliasMap
-    -- Now all variables in final use would be converted to map to itself
-    -- Need to remove them from the map
-    let totalAliases2 = Map.foldrWithKey (filterUfItems finals)
-                            initUnionFind totalAliases1
-    -- In case key is in final use, so cleanup again
-    let (totalAliases3, _) = Map.foldrWithKey (convertUfKey finals)
-                            (initUnionFind, rootMap) totalAliases2
-    return totalAliases3
 
 
 -- |Log a message, if we are logging optimisation activity.
