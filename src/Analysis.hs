@@ -28,7 +28,7 @@ analyseMod _ thisMod = do
     logAnalysis $ "analyseMod:" ++ show thisMod
     logAnalysis $ ">>> orderedProcs:" ++ show orderedProcs
     logAnalysis $ ">>> Analyse SCCs: \n" ++
-        unlines (List.map (show . sccElts) orderedProcs)
+        unlines (List.map ((++) "    " . show . sccElts) orderedProcs)
     logAnalysis $ replicate 60 '='
 
     ----------------------------------
@@ -43,12 +43,15 @@ analyseMod _ thisMod = do
     aliasingInfo2 <- foldM (\list procs -> do
         aliasing <- currentAliasInfo procs
         return $ list ++ aliasing) [] orderedProcs
-    logAnalysis $ ">>> aliasingInfo1:" ++ show aliasingInfo1
-    logAnalysis $ ">>> aliasingInfo2:" ++ show aliasingInfo2
     let chg = List.zipWith areDifferentMaps aliasingInfo1 aliasingInfo2
-    logAnalysis $ "\n>>>>>> module level alias analysis for "
-                    ++ show thisMod ++ " - "
-                    ++ show chg ++ " => "++ show (or chg)
+
+    logAnalysis $ replicate 60 '>'
+    logAnalysis $ "Check aliasing for module: " ++ show thisMod
+    logAnalysis $ "Module's procs aliasing (old): " ++ show aliasingInfo1
+    logAnalysis $ "Module's procs aliasing (new): " ++ show aliasingInfo2
+    logAnalysis $ "Changes: " ++ show chg
+    logAnalysis $ "Module level alias changed? " ++ show (or chg)
+    logAnalysis $ replicate 60 '>'
 
     reexitModule
     return (or chg,[])

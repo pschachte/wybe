@@ -37,8 +37,13 @@ aliasSccBottomUp (AcyclicSCC single) = do
 --     changed, so that a fixed point is reached.
 aliasSccBottomUp procs@(CyclicSCC multi) = do
     changed <- mapM aliasProcBottomUp multi
-    logAlias $ replicate 30 '>' ++ "CyclicSCC procs alias changed? "
-                 ++ show (or changed) ++ " - " ++ show changed
+
+    logAlias $ replicate 50 '>'
+    logAlias $ "Check aliasing for CyclicSCC procs: " ++ show procs
+    logAlias $ "Changes: " ++ show changed
+    logAlias $ "Proc level alias changed? " ++ show (or changed)
+    logAlias $ replicate 50 '>'
+
     -- Aliasing is always changed after the first run, so cyclic procs are
     -- analysed at least twice.
     when (or changed) $ aliasSccBottomUp procs
@@ -135,7 +140,7 @@ aliasedByPrim nonePhantomParams aliasMap prim =
             calleeDef <- getProcDef spec
             let (ProcDefPrim calleeProto _ analysis) = procImpln calleeDef
             let calleeParamAliases = procArgAliasMap analysis
-            logAlias $ "\n--- call          " ++ show spec ++" (callee): "
+            logAlias $ "--- call          " ++ show spec ++" (callee): "
             logAlias $ "" ++ show calleeProto
             logAlias $ "PrimCall args:    " ++ show args
             logAlias $ "current aliasMap: " ++ show aliasMap
@@ -152,7 +157,7 @@ aliasedByPrim nonePhantomParams aliasMap prim =
             return combined
         -- | Analyse simple prims
         _ -> do
-            logAlias $ "\n--- simple prim:  " ++ show prim
+            logAlias $ "--- simple prim:  " ++ show prim
             maybeAliasPrimArgs (content prim) >>=
                 aliasedArgsInSimplePrim nonePhantomParams aliasMap
 
@@ -166,7 +171,7 @@ aliasedByFork caller body aliasMap = do
     let fork = bodyFork body
     case fork of
         PrimFork _ _ _ fBodies -> do
-            logAlias "Forking:"
+            logAlias ">>> Forking:"
             foldM (\amap currBody -> do
                         amap1 <- aliasedByPrims caller currBody initUnionFind
                         amap2 <- aliasedByFork caller currBody amap1
@@ -174,7 +179,7 @@ aliasedByFork caller body aliasMap = do
                     ) aliasMap fBodies
         _ -> do
             -- NoFork: analyse prims done
-            logAlias "No fork."
+            logAlias ">>> No fork."
             return aliasMap
 
 
