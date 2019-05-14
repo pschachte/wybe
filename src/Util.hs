@@ -398,7 +398,9 @@ _convertUfKey aSet k info (uf, rootMap) =
         in case newKey of
             Just nk -> (Map.insert nk info uf, rootMap)
             _       -> (Map.insert k info uf, rootMap)
-    else (Map.insert k info uf, rootMap)
+    else
+        (uf, rootMap) -- ^TODO: Verify this!
+        -- (Map.insert k info uf, rootMap)
 
 -- Similar to above - but filtering out item that is in aSet and its key and
 -- root are same
