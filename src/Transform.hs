@@ -69,8 +69,8 @@ transformPrim :: [PrimVarName] -> (AliasMap, [Placed Prim]) -> Placed Prim
                     -> Compiler (AliasMap, [Placed Prim])
 transformPrim nonePhantomParams (aliasMap, prims) prim =
     case content prim of
-        -- | Transform proc calls
         PrimCall spec args -> do
+            -- | Transform proc calls
             calleeDef <- getProcDef spec
             let (ProcDefPrim calleeProto _ analysis) = procImpln calleeDef
             let calleeParamAliases = procArgAliasMap analysis
@@ -87,17 +87,17 @@ transformPrim nonePhantomParams (aliasMap, prims) prim =
             combinedAliases <- aliasedArgsInPrimCall calleeArgsAliases
                                         nonePhantomParams aliasMap args
             return (combinedAliases, prims ++ [prim])
-        -- | Transform simple prims
         _ -> do
+            -- | Transform simple prims
             logTransform $ "\n--- simple prim:  " ++ show prim
-            -- Mutate destructive flag if this is a mutate instruction
-            prim2 <- mutateInstruction prim aliasMap
             maybeAliasInfo <- maybeAliasPrimArgs (content prim)
             -- Update alias map for escapable args
             aliasMap2 <- aliasedArgsInSimplePrim nonePhantomParams aliasMap
                                                     maybeAliasInfo
             logTransform $ "current aliasMap: " ++ show aliasMap
             logTransform $ "after :           " ++ show aliasMap2
+            -- Mutate destructive flag if this is a mutate instruction
+            prim2 <- mutateInstruction prim aliasMap
             return (aliasMap2, prims ++ [prim2])
 
 

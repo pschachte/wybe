@@ -135,8 +135,8 @@ aliasedByPrims caller body initAliases = do
 aliasedByPrim :: [PrimVarName] -> AliasMap -> Placed Prim -> Compiler AliasMap
 aliasedByPrim nonePhantomParams aliasMap prim =
     case content prim of
-        -- | Analyse proc calls
         PrimCall spec args -> do
+            -- | Analyse proc calls
             calleeDef <- getProcDef spec
             let (ProcDefPrim calleeProto _ analysis) = procImpln calleeDef
             let calleeParamAliases = procArgAliasMap analysis
@@ -155,8 +155,8 @@ aliasedByPrim nonePhantomParams aliasMap prim =
                                     aliasMap args
             logAlias $ "combined:         " ++ show combined
             return combined
-        -- | Analyse simple prims
         _ -> do
+            -- | Analyse simple prims
             logAlias $ "--- simple prim:  " ++ show prim
             maybeAliasPrimArgs (content prim) >>=
                 aliasedArgsInSimplePrim nonePhantomParams aliasMap
