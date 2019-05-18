@@ -123,7 +123,7 @@ aliasedByPrims caller body initAliases = do
     let nonePhantomParams = protoNonePhantomParams caller
     let prims = bodyPrims body
     -- Analyse simple prims:
-    -- (only process alias pairs incurred by move, mutate, access, cast)
+    -- (only process alias pairs incurred by move, access, cast)
     logAlias "\nAnalyse prims (aliasedByPrims):    "
     let aliasMap = List.foldr newUfItem initAliases nonePhantomParams
     let nonePhantomParams = protoNonePhantomParams caller
@@ -173,10 +173,9 @@ aliasedByFork caller body aliasMap = do
         PrimFork _ _ _ fBodies -> do
             logAlias ">>> Forking:"
             foldM (\amap currBody -> do
-                        amap1 <- aliasedByPrims caller currBody initUnionFind
-                        amap2 <- aliasedByFork caller currBody amap1
-                        return $ combineUf amap2 amap
-                    ) aliasMap fBodies
+                    aliasedByPrims caller currBody amap >>=
+                        aliasedByFork caller currBody
+                ) aliasMap fBodies
         _ -> do
             -- NoFork: analyse prims done
             logAlias ">>> No fork."
@@ -187,8 +186,8 @@ aliasedByFork caller body aliasMap = do
 -- instructions.
 -- Not to compute aliasing from mutate instructions with the assumption that we
 -- always try to do nondestructive update.
--- Returned triple ([PrimVarName], [PrimVarName]) is
--- (maybeAliasedInput, maybeAliasedOutput)
+-- Returned triple ([PrimVarName], [PrimVarName], [PrimArg]) is
+-- (maybeAliasedInput, maybeAliasedOutput, primArgs)
 maybeAliasPrimArgs :: Prim -> Compiler ([PrimVarName], [PrimVarName], [PrimArg])
 maybeAliasPrimArgs (PrimForeign _ "access" _ args) = _maybeAliasPrimArgs args
 maybeAliasPrimArgs (PrimForeign _ "cast" _ args)   = _maybeAliasPrimArgs args
@@ -238,7 +237,6 @@ aliasedArgsInPrimCall calleeArgsAliases nonePhantomParams currentAlias primArgs
         let combinedAliases1 = combineUf calleeArgsAliases currentAlias
         -- Gather variables in final use
         finals <- foldM (finalArgs nonePhantomParams) Set.empty primArgs
-        logAlias $ "finals: " ++ show finals
         -- Then remove them from aliasmap
         return $ removeFromUf finals combinedAliases1
 

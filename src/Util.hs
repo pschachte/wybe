@@ -11,7 +11,7 @@
 module Util (sameLength, maybeNth, checkMaybe, setMapInsert,
              fillLines, nop, sccElts,
              UnionFind, UFInfo, unionFindToTransitivePairs,
-             initUnionFind, newUfItem, addUfItem, uniteUf, transformUfKey,
+             initUnionFind, newUfItem, uniteUf, transformUfKey,
              combineUf, removeFromUf, connectedToOthers,
              removeDupTuples, pruneTuples, transitiveTuples, cartProd) where
 
@@ -198,13 +198,14 @@ initUnionFind :: UnionFind a
 initUnionFind = Map.empty
 
 
--- Insert new item with default UFInfo
+-- Insert new item with default UFInfo if newK not exists in currUf
 newUfItem :: Ord a => a -> UnionFind a -> UnionFind a
-newUfItem k = Map.insert k (UFInfo k 1)
-
-
-addUfItem :: Ord a => a -> UFInfo a -> UnionFind a -> UnionFind a
-addUfItem = Map.insert
+newUfItem newK currUf =
+    let ufList = Map.toList currUf
+        ufList' = [key | (key, info) <- ufList, key == newK || root info == newK]
+    in if List.null ufList'
+        then Map.insert newK (UFInfo newK 1) currUf
+        else currUf
 
 
 -- -- Check if two item is connected
@@ -218,6 +219,9 @@ addUfItem = Map.insert
 
 
 -- Unite two nodes in the tree
+-- e.g.
+--  UnionFind {r: {root: b}, a: {root: a}, b: {root: b}},
+--  p = a, q = r
 uniteUf :: Ord a => UnionFind a -> a -> a -> UnionFind a
 uniteUf uf p q =
     case (infoP, infoQ) of
@@ -225,53 +229,66 @@ uniteUf uf p q =
             -- if root is the same between two existing UFInfo then no need to
             -- update anything
             if root ip == root iq then uf
-            else updateUf p q ip iq uf
+            else _updateUf p q ip iq uf
         (Just ip, _) ->
             -- Insert q to the map
             let iq = ufInfo q
                 uf1 = Map.insert q iq uf
-            in updateUf p q ip iq uf1
+            in _updateUf p q ip iq uf1
         (_, Just iq) ->
             -- Insert p to the map
             let ip = ufInfo p
                 uf1 = Map.insert p ip uf
-            in updateUf p q ip iq uf1
+            in _updateUf p q ip iq uf1
         (_, _) ->
             -- Insert both p and q to the map
             let ip = ufInfo p
                 iq = ufInfo q
                 uf1 = Map.insert p ip uf
                 uf2 = Map.insert q iq uf1
-            in updateUf p q ip iq uf2
+            in _updateUf p q ip iq uf2
     where
         infoP = Map.lookup p uf
         infoQ = Map.lookup q uf
-        updateUf :: Ord a => a -> a -> UFInfo a -> UFInfo a -> UnionFind a
-                                -> UnionFind a
-        updateUf p q ip iq currMap =
-            let rp = root ip
-                rq = root iq
-                currRootP = Map.lookup rp currMap
-                currRootQ = Map.lookup rq currMap
-            in case (currRootP, currRootQ) of
-                (Just rootP, Just rootQ) ->
-                    if weight rootP < weight rootQ then
-                        let
-                            -- update p's root to q's root
-                            ip' = ip {root = rq}
-                            -- append p's weight to q's root's weight
-                            rootQ' = rootQ {weight = weight rootQ + weight ip}
-                            currMap' = Map.insert p ip' currMap
-                        in Map.insert rq rootQ' currMap'
-                    else
-                        let
-                            -- update q's root to p's root
-                            iq' = iq {root = rp}
-                            -- append q's weight to p's root's weight
-                            rootP' = rootP {weight = weight rootP + weight iq}
-                            currMap' = Map.insert q iq' currMap
-                        in Map.insert rp rootP' currMap'
-                (_,_) -> currMap
+
+-- e.g.
+--  UnionFind {r: {root: b}, a: {root: a}, b: {root: b}},
+--  p = a, q = r,
+--  ip = UFInfo{root: a, weight: 1},
+--  iq = UFInfo{root: b, weight: 1}
+-- TODO: Verify if this works for currMap(r,b) and p=a, q=b??
+_updateUf :: Ord a => a -> a -> UFInfo a -> UFInfo a -> UnionFind a
+                        -> UnionFind a
+_updateUf p q ip iq currMap =
+    let rp = root ip -- p=a, rp=a
+        rq = root iq -- q=r, rq=b
+        currRootP = Map.lookup rp currMap -- rootP=UFInfo{root: a, weight: 1}
+        currRootQ = Map.lookup rq currMap -- rootQ=UFInfo{root: b, weight: 2}
+    in case (currRootP, currRootQ) of
+        (Just rootP, Just rootQ)
+            | p == rp ->
+                let rootQ' = rootQ {weight = weight rootQ + 1}
+                in Map.insert p rootQ' currMap
+            | q == rq ->
+                let rootP' = rootP {weight = weight rootP + 1}
+                in Map.insert q rootP' currMap
+            | weight rootP < weight rootQ ->
+                let
+                    -- update p's root to q's root
+                    ip' = ip {root = rq}
+                    -- append p's weight to q's root's weight
+                    rootQ' = rootQ {weight = weight rootQ + weight ip}
+                    currMap' = Map.insert p ip' currMap
+                in Map.insert rq rootQ' currMap'
+            | otherwise ->
+                let
+                    -- update q's root to p's root
+                    iq' = iq {root = rp}
+                    -- append q's weight to p's root's weight
+                    rootP' = rootP {weight = weight rootP + weight iq}
+                    currMap' = Map.insert q iq' currMap
+                in Map.insert rp rootP' currMap'
+        (_,_) -> currMap
 
 -- Set default UFInfo that with root to itself and weight to 1
 ufInfo :: a -> UFInfo a
@@ -287,43 +304,46 @@ transformUfKey mp k info uf =
                 rootY = Map.lookup rootX mp
             in case rootY of
                 Just rootY ->
-                    addUfItem y info{root = rootY} uf
+                    Map.insert y info{root = rootY} uf
                 _ -> uf
         _        -> uf
 
 
 -- Combine two UnionFind
 combineUf :: Ord a => UnionFind a -> UnionFind a -> UnionFind a
-combineUf fromUf toUf =
-    Map.foldrWithKey (
-        \key newInfo currFrom ->
-            if key == root newInfo
-            then currFrom -- no need to add to map
-            else -- item in toUf brings in new key-root relation
-                let orgInfo = Map.lookup key currFrom
-                in case orgInfo of
-                    Just justOrgInfo ->
-                        if key == orgRoot then
-                            -- should update this key-root relation in
-                            -- fromUf; update all other nodes that have the
-                            -- root of key.
-                            updateRoot key currFrom
-                        else
-                            -- link the old root to the new root to its key
-                            let newRoot = root newInfo
-                                currFrom' = Map.insert key newInfo currFrom
-                                currFrom'' = Map.insert orgRoot newInfo currFrom'
-                            in updateRoot orgRoot currFrom''
-                        where
-                            orgRoot = root justOrgInfo
-                            updateRoot cond =
-                                Map.foldrWithKey (\k i uf ->
-                                    if root i == cond
-                                    then Map.insert k newInfo uf
-                                    else Map.insert k i uf
-                                    ) Map.empty
-                    _ -> currFrom
-        ) toUf fromUf
+combineUf fromUf toUf
+    | Map.null fromUf = toUf
+    | Map.null toUf = fromUf
+    | otherwise =
+        Map.foldrWithKey (
+            \key newInfo currFrom ->
+                if key == root newInfo
+                then currFrom -- no need to add to map
+                else -- item in toUf brings in new key-root relation
+                    let orgInfo = Map.lookup key currFrom
+                    in case orgInfo of
+                        Just justOrgInfo ->
+                            if key == orgRoot then
+                                -- should update this key-root relation in
+                                -- fromUf; update all other nodes that have the
+                                -- root of key.
+                                updateRoot key currFrom
+                            else
+                                -- link the old root to the new root to its key
+                                let newRoot = root newInfo
+                                    currFrom' = Map.insert key newInfo currFrom
+                                    currFrom'' = Map.insert orgRoot newInfo currFrom'
+                                in updateRoot orgRoot currFrom''
+                            where
+                                orgRoot = root justOrgInfo
+                                updateRoot cond =
+                                    Map.foldrWithKey (\k i uf ->
+                                        if root i == cond
+                                        then Map.insert k newInfo uf
+                                        else Map.insert k i uf
+                                        ) Map.empty
+                        _ -> currFrom
+            ) toUf fromUf
 
 
 -- -- Reset key and value in UnionFind to default (so it's not connected to anyone)
@@ -341,19 +361,23 @@ connectedToOthers uf val =
 
 
 removeFromUf :: (Ord a) => Set a -> UnionFind a -> UnionFind a
-removeFromUf toBeRemoved unionFind = unionFind3
-    where
-        -- Cleanup root that is in toBeRemoved set and gather a mapping from the
-        -- removed root to the new root
-        (unionFind1, rootMap) = Map.foldrWithKey (_convertUfRoot toBeRemoved)
-                            (initUnionFind, Map.empty) unionFind
-        -- Now all variables in toBeRemoved would be converted to map to itself;
-        -- So we'll need to remove them from the map
-        unionFind2 = Map.foldrWithKey (_filterUfItems toBeRemoved)
-                            initUnionFind unionFind1
-        -- In case the key is in toBeRemoved, we cleanup these keys as well
-        (unionFind3, _) = Map.foldrWithKey (_convertUfKey toBeRemoved)
-                            (initUnionFind, rootMap) unionFind2
+removeFromUf toBeRemoved unionFind
+    | Set.null toBeRemoved = unionFind
+    | otherwise = unionFind3
+        where
+            -- Cleanup root that is in toBeRemoved set and gather a mapping from
+            -- the removed root to the new root
+            (unionFind1, rootMap) =
+                Map.foldrWithKey (_convertUfRoot toBeRemoved)
+                                (initUnionFind, Map.empty) unionFind
+            -- Now all variables in toBeRemoved would be converted to map to
+            -- itself;
+            -- So we'll need to remove them from the map
+            unionFind2 = Map.foldrWithKey (_filterUfItems toBeRemoved)
+                                initUnionFind unionFind1
+            -- In case the key is in toBeRemoved, we cleanup these keys as well
+            (unionFind3, _) = Map.foldrWithKey (_convertUfKey toBeRemoved)
+                                (initUnionFind, rootMap) unionFind2
 
 
 -- convert UnionFind to a new UnionFind so if any root exists in the aSet then
@@ -399,8 +423,8 @@ _convertUfKey aSet k info (uf, rootMap) =
             Just nk -> (Map.insert nk info uf, rootMap)
             _       -> (Map.insert k info uf, rootMap)
     else
-        (uf, rootMap) -- ^TODO: Verify this!
-        -- (Map.insert k info uf, rootMap)
+        -- (uf, rootMap) -- ^TODO: Verify this!
+        (Map.insert k info uf, rootMap)
 
 -- Similar to above - but filtering out item that is in aSet and its key and
 -- root are same

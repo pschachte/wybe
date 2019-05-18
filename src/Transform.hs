@@ -90,14 +90,14 @@ transformPrim nonePhantomParams (aliasMap, prims) prim =
         _ -> do
             -- | Transform simple prims
             logTransform $ "\n--- simple prim:  " ++ show prim
+            -- Mutate destructive flag if this is a mutate instruction
+            prim2 <- mutateInstruction prim aliasMap
             maybeAliasInfo <- maybeAliasPrimArgs (content prim)
             -- Update alias map for escapable args
             aliasMap2 <- aliasedArgsInSimplePrim nonePhantomParams aliasMap
                                                     maybeAliasInfo
             logTransform $ "current aliasMap: " ++ show aliasMap
             logTransform $ "after :           " ++ show aliasMap2
-            -- Mutate destructive flag if this is a mutate instruction
-            prim2 <- mutateInstruction prim aliasMap
             return (aliasMap2, prims ++ [prim2])
 
 
@@ -115,12 +115,11 @@ transformForks caller body aliasMap = do
             (aliasMap', fBodies') <-
                 foldM (\(amap, bs) currBody -> do
                     (amap', ps') <-
-                        transformPrims caller currBody (initUnionFind, [])
+                        transformPrims caller currBody (amap, [])
                     let currBody1 = currBody { bodyPrims = ps' }
                     (amap'', currBody2) <-
                         transformForks caller currBody1 amap'
-                    let combinedAliases = combineUf amap'' amap
-                    return (combinedAliases, bs++[currBody2])
+                    return (amap'', bs++[currBody2])
                 ) (aliasMap, []) fBodies
             return (aliasMap', body { bodyFork = fork {forkBodies=fBodies'} })
         _ -> do
