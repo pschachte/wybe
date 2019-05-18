@@ -143,8 +143,6 @@ aliasedByPrim nonePhantomParams aliasMap prim =
             logAlias $ "--- call          " ++ show spec ++" (callee): "
             logAlias $ "" ++ show calleeProto
             logAlias $ "PrimCall args:    " ++ show args
-            logAlias $ "current aliasMap: " ++ show aliasMap
-            logAlias $ "calleeAlias:      " ++ show calleeParamAliases
             let paramArgMap = mapParamToArgVar calleeProto args
             -- calleeArgsAliasMap is the alias map of actual arguments passed
             -- into callee
@@ -153,6 +151,8 @@ aliasedByPrim nonePhantomParams aliasMap prim =
                         initUnionFind calleeParamAliases
             combined <- aliasedArgsInPrimCall calleeArgsAliases nonePhantomParams
                                     aliasMap args
+            logAlias $ "calleeArgsAliases:" ++ show calleeArgsAliases
+            logAlias $ "current aliasMap: " ++ show aliasMap
             logAlias $ "combined:         " ++ show combined
             return combined
         _ -> do
