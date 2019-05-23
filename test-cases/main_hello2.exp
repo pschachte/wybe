@@ -31,12 +31,10 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @main_hello2.main(){
+define external ccc void @"main_hello2.<0>"(){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @main_hello2.1, i32 0, i32 0))
   tail call ccc void @print_string(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @main_hello2.2, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)
-  %3 = alloca i32
-  store i32 0, i32* %3
-  ret i32 0
+  ret void
 }

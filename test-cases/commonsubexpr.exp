@@ -44,7 +44,7 @@ declare external ccc void @print_int(i64)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @commonsubexpr.main(){
+define external ccc void @"commonsubexpr.<0>"(){
 entry:
   tail call ccc void @print_int(i64 198)
   tail call ccc void @putchar(i8 10)
@@ -52,9 +52,7 @@ entry:
   tail call ccc void @putchar(i8 10)
   tail call ccc void @print_int(i64 11)
   tail call ccc void @putchar(i8 10)
-  %1 = alloca i32
-  store i32 0, i32* %1
-  ret i32 0
+  ret void
 }
 
 define external ccc void @"commonsubexpr.common_subexpr<0>"(i64 %"x#0"){

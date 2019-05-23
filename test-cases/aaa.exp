@@ -30,13 +30,11 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @aaa.main(){
+define external ccc void @"aaa.<0>"(){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @aaa.1, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)
-  %2 = alloca i32
-  store i32 0, i32* %2
-  ret i32 0
+  ret void
 }
 --------------------------------------------------
  Module bbb
@@ -68,13 +66,11 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @bbb.main(){
+define external ccc void @"bbb.<0>"(){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @bbb.1, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)
-  %2 = alloca i32
-  store i32 0, i32* %2
-  ret i32 0
+  ret void
 }
 --------------------------------------------------
  Module ccc
@@ -106,13 +102,11 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @ccc.main(){
+define external ccc void @"ccc.<0>"(){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ccc.1, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)
-  %2 = alloca i32
-  store i32 0, i32* %2
-  ret i32 0
+  ret void
 }
 --------------------------------------------------
  Module ddd
@@ -143,11 +137,9 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @ddd.main(){
+define external ccc void @"ddd.<0>"(){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ddd.1, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)
-  %2 = alloca i32
-  store i32 0, i32* %2
-  ret i32 0
+  ret void
 }

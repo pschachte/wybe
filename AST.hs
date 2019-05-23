@@ -26,7 +26,7 @@ module AST (
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
-  collectSubModules,
+  descendentModules,
   enterModule, reenterModule, exitModule, reexitModule, deferModules, inModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
@@ -992,11 +992,11 @@ parentModule []  = Nothing
 parentModule [m] = Nothing
 parentModule modspec = Just $ init modspec
 
--- | Collect all the subModules of the given modspec.
-collectSubModules :: ModSpec -> Compiler [ModSpec]
-collectSubModules mspec = do
+-- | Collect all the descendent modules of the given modspec.
+descendentModules :: ModSpec -> Compiler [ModSpec]
+descendentModules mspec = do
     subMods <- fmap (Map.elems . modSubmods) $ getLoadedModuleImpln mspec
-    desc <- fmap concat $ mapM collectSubModules subMods
+    desc <- fmap concat $ mapM descendentModules subMods
     return $ subMods ++ desc
 
 

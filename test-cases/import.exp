@@ -53,7 +53,7 @@ declare external ccc i64 @ipow(i64, i64)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @import.main(){
+define external ccc void @"import.<0>"(){
 entry:
   %1 = tail call ccc i8* @wybe_malloc(i32 16)
   %2 = bitcast i8* %1 to i64*
@@ -74,28 +74,26 @@ entry:
   %"tmp$0#0" = tail call ccc i64 @"import.distance<0>"(i64* %2, i64* %8)
   tail call ccc void @print_int(i64 %"tmp$0#0")
   tail call ccc void @putchar(i8 10)
-  %13 = alloca i32
-  store i32 0, i32* %13
-  ret i32 0
+  ret void
 }
 
 define external ccc i64 @"import.distance<0>"(i64* %"p1#0", i64* %"p2#0"){
 entry:
-  %14 = bitcast i64* %"p2#0" to i64*
-  %15 = getelementptr i64, i64* %14, i64 0
-  %16 = load i64, i64* %15
-  %17 = bitcast i64* %"p1#0" to i64*
-  %18 = getelementptr i64, i64* %17, i64 0
-  %19 = load i64, i64* %18
-  %"tmp$3#0" = sub i64 %16, %19
+  %13 = bitcast i64* %"p2#0" to i64*
+  %14 = getelementptr i64, i64* %13, i64 0
+  %15 = load i64, i64* %14
+  %16 = bitcast i64* %"p1#0" to i64*
+  %17 = getelementptr i64, i64* %16, i64 0
+  %18 = load i64, i64* %17
+  %"tmp$3#0" = sub i64 %15, %18
   %"tmp$2#0" = tail call ccc i64 @ipow(i64 %"tmp$3#0", i64 2)
-  %20 = bitcast i64* %"p2#0" to i64*
-  %21 = getelementptr i64, i64* %20, i64 1
-  %22 = load i64, i64* %21
-  %23 = bitcast i64* %"p1#0" to i64*
-  %24 = getelementptr i64, i64* %23, i64 1
-  %25 = load i64, i64* %24
-  %"tmp$7#0" = sub i64 %22, %25
+  %19 = bitcast i64* %"p2#0" to i64*
+  %20 = getelementptr i64, i64* %19, i64 1
+  %21 = load i64, i64* %20
+  %22 = bitcast i64* %"p1#0" to i64*
+  %23 = getelementptr i64, i64* %22, i64 1
+  %24 = load i64, i64* %23
+  %"tmp$7#0" = sub i64 %21, %24
   %"tmp$6#0" = tail call ccc i64 @ipow(i64 %"tmp$7#0", i64 2)
   %"tmp$1#0" = add i64 %"tmp$2#0", %"tmp$6#0"
   %"$#0" = tail call ccc i64 @isqrt(i64 %"tmp$1#0")
@@ -117,6 +115,7 @@ entry:
                     use wybe
   types           : position/0 (pointer)  @position:1:8
   resources       : 
+  submodules      : position.position
   procs           : 
 
 
@@ -126,7 +125,6 @@ entry:
 
 
 declare external ccc i8* @wybe_malloc(i32)
-  submodules      : position.position
 --------------------------------------------------
  Module position.position([])
   public submods  : 

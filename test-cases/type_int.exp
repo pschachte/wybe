@@ -22,6 +22,7 @@ AFTER EVERYTHING:
                     use wybe
   types           : myint/0 (i64)  @type_int:1:8
   resources       : 
+  submodules      : type_int.myint
   procs           : 
 
 
@@ -31,91 +32,6 @@ AFTER EVERYTHING:
 
 
 declare external ccc i8* @wybe_malloc(i32)
-
-define external ccc i64 @"type_int.myint.*<0>"(i64 %"x#0", i64 %"y#0"){
-entry:
-  %"$#0" = mul i64 %"x#0", %"y#0"
-  ret i64 %"$#0"
-}
-
-define external ccc i64 @"type_int.myint.+<0>"(i64 %"x#0", i64 %"y#0"){
-entry:
-  %"$#0" = add i64 %"x#0", %"y#0"
-  ret i64 %"$#0"
-}
-
-define external ccc i64 @"type_int.myint.+<1>"(i64 %"y#0", i64 %"z#0"){
-entry:
-  %"x#0" = sub i64 %"z#0", %"y#0"
-  ret i64 %"x#0"
-}
-
-define external ccc i64 @"type_int.myint.+<2>"(i64 %"x#0", i64 %"z#0"){
-entry:
-  %"y#0" = sub i64 %"z#0", %"x#0"
-  ret i64 %"y#0"
-}
-
-define external ccc i64 @"type_int.myint.-<0>"(i64 %"x#0", i64 %"y#0"){
-entry:
-  %"$#0" = sub i64 %"x#0", %"y#0"
-  ret i64 %"$#0"
-}
-
-define external ccc i64 @"type_int.myint.-<1>"(i64 %"y#0", i64 %"z#0"){
-entry:
-  %"x#0" = add i64 %"y#0", %"z#0"
-  ret i64 %"x#0"
-}
-
-define external ccc i64 @"type_int.myint.-<2>"(i64 %"x#0", i64 %"z#0"){
-entry:
-  %"y#0" = sub i64 %"z#0", %"x#0"
-  ret i64 %"y#0"
-}
-
-define external ccc i64 @"type_int.myint./<0>"(i64 %"x#0", i64 %"y#0"){
-entry:
-  %"$#0" = sdiv i64 %"x#0", %"y#0"
-  ret i64 %"$#0"
-}
-
-define external ccc i1 @"type_int.myint./=<0>"(i64 %"x#0", i64 %"y#0"){
-entry:
-  %"$#0" = icmp ne i64 %"x#0", %"y#0"
-  ret i1 %"$#0"
-}
-
-define external ccc i1 @"type_int.myint.<<0>"(i64 %"x#0", i64 %"y#0"){
-entry:
-  %"$#0" = icmp slt i64 %"x#0", %"y#0"
-  ret i1 %"$#0"
-}
-
-define external ccc i1 @"type_int.myint.<=<0>"(i64 %"x#0", i64 %"y#0"){
-entry:
-  %"$#0" = icmp sle i64 %"x#0", %"y#0"
-  ret i1 %"$#0"
-}
-
-define external ccc i1 @"type_int.myint.=<0>"(i64 %"x#0", i64 %"y#0"){
-entry:
-  %"$#0" = icmp eq i64 %"x#0", %"y#0"
-  ret i1 %"$#0"
-}
-
-define external ccc i1 @"type_int.myint.><0>"(i64 %"x#0", i64 %"y#0"){
-entry:
-  %"$#0" = icmp sgt i64 %"x#0", %"y#0"
-  ret i1 %"$#0"
-}
-
-define external ccc i1 @"type_int.myint.>=<0>"(i64 %"x#0", i64 %"y#0"){
-entry:
-  %"$#0" = icmp sge i64 %"x#0", %"y#0"
-  ret i1 %"$#0"
-}
-  submodules      : type_int.myint
 --------------------------------------------------
  Module type_int.myint([])
   public submods  : 

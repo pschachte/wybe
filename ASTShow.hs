@@ -55,17 +55,16 @@ instance Show Module where
                  --  showSetMapItems $ modKnownProcs impl) ++
                  "\n  types           : " ++ showMapTypes (modTypes impl) ++
                  "\n  resources       : " ++ showMapLines (modResources impl) ++
-                 "\n  procs           : " ++ "\n" ++
-
-                 (showMap "\n\n" (const "") (showProcDefs 0)
-                  (modProcs impl)) ++
-                 (maybe "\n\nNo LLVM code\n"
-                  (("\n\n  LLVM code       :\n\n" ++) . TL.unpack . ppllvm)
-                  $ modLLVM impl) ++
                  (if Map.null (modSubmods impl)
                   then ""
                   else "\n  submodules      : " ++
-                       showMap ", " (const "") showModSpec (modSubmods impl))
+                       showMap ", " (const "") showModSpec (modSubmods impl)) ++
+                 "\n  procs           : " ++ "\n" ++
+                 (showMap "\n\n" (const "") (showProcDefs 0)
+                  (modProcs impl)) ++
+                 (maybe "\n\nLLVM code       : None\n"
+                  (("\n\n  LLVM code       :\n\n" ++) . TL.unpack . ppllvm)
+                  $ modLLVM impl)
 
 
 -- |How to show a map, one line per item.

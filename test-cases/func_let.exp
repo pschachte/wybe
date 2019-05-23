@@ -30,12 +30,10 @@ declare external ccc void @print_int(i64)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @func_let.main(){
+define external ccc void @"func_let.<0>"(){
 entry:
   tail call ccc void @print_int(i64 40)
-  %1 = alloca i32
-  store i32 0, i32* %1
-  ret i32 0
+  ret void
 }
 
 define external ccc i64 @"func_let.quad<0>"(i64 %"x#0"){

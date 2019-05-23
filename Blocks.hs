@@ -67,8 +67,7 @@ blockTransformModule thisMod =
        modRec <- getModule id
        modFile <- getModule modSourceFile
        logWrapWith '-' $ show modRec
-       (_, procs) <- unzip <$>
-                         getModuleImplementationField (Map.toList . modProcs)
+       procs <- getModuleImplementationField (Map.elems . modProcs)
        -- Collect all procedure prototypes in the module
        let protos = List.map extractLPVMProto (concat procs)
        --------------------------------------------------
@@ -105,6 +104,9 @@ blockTransformModule thisMod =
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) modFile procBlocks
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
+       logBlocks $ "*** Translated Module: " ++ showModSpec thisMod
+       modRec' <- getModule id
+       logWrapWith '-' $ show modRec'
        _ <- reexitModule
        logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
@@ -1138,7 +1140,7 @@ mallocExtern =
 -- Concatenation involves uniquely appending the LLVMAST.Definition lists.
 concatLLVMASTModules :: ModSpec      -- ^ Module to append to
                      -> [ModSpec]    -- ^ Modules to append
-                     -> Compiler ()
+                     -> Compiler LLVMAST.Module
 concatLLVMASTModules thisMod mspecs = do
     -- pull LLVMAST.Module implementations of appending modspecs
     maybeLLMods <- mapM ((fmap modLLVM) . getLoadedModuleImpln) mspecs
@@ -1149,8 +1151,10 @@ concatLLVMASTModules thisMod mspecs = do
     thisLLMod <- trustFromJustM trustMsg $
         fmap modLLVM $ getLoadedModuleImpln thisMod
     let updatedLLMod = List.foldl addUniqueDefinitions thisLLMod defs
-    updateLoadedModuleImpln (\imp -> imp { modLLVM = Just updatedLLMod })
-        thisMod
+    -- updateLoadedModuleImpln (\imp -> imp { modLLVM = Just updatedLLMod })
+    --     thisMod
+    return updatedLLMod
+
 
 -- | Extend the LLVMAST.Definition list of the first module with the
 -- LLVMAST.Definition list passed as the second parameter. The concatenation
@@ -1265,9 +1269,9 @@ logBlocks = logMsg Blocks
 -- | Log with a wrapping line of replicated characters above and below.
 logWrapWith :: Char -> String -> Compiler ()
 logWrapWith ch s = do
-    logMsg Blocks (replicate 80 ch)
+    logMsg Blocks (replicate 65 ch)
     logMsg Blocks s
-    logMsg Blocks (replicate 80 ch)
+    logMsg Blocks (replicate 65 ch)
 
 logCodegen :: String -> Codegen ()
 logCodegen s = lift $ logBlocks s

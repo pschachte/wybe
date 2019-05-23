@@ -51,16 +51,14 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc void @print_int(i64)
 
-@proc_beer.2 = constant [29 x i8] c" bottles of beer on the wall\00"
+@proc_beer.1 = constant [29 x i8] c" bottles of beer on the wall\00"
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @proc_beer.main(){
+define external ccc void @"proc_beer.<0>"(){
 entry:
   tail call ccc void @"proc_beer.gen$1<0>"(i64 99)
-  %1 = alloca i32
-  store i32 0, i32* %1
-  ret i32 0
+  ret void
 }
 
 define external ccc void @"proc_beer.beer99<0>"(){
@@ -75,7 +73,7 @@ entry:
   br i1 %"tmp$1#0", label %if.then, label %if.else
 if.then:
   tail call ccc void @print_int(i64 %"count#0")
-  tail call ccc void @print_string(i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_beer.2, i32 0, i32 0))
+  tail call ccc void @print_string(i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_beer.1, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)
   %"count#1" = sub i64 %"count#0", 1
   tail call ccc void @"proc_beer.gen$1<0>"(i64 %"count#1")

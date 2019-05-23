@@ -58,7 +58,7 @@ completeNormalisation modCompiler = do
 initResources :: Compiler (Set ResourceFlowSpec)
 initResources = do
     mods <- getModuleImplementationField (Map.keys . modImports)
-    mods' <- ((mods ++) . concat) <$> mapM collectSubModules mods
+    mods' <- ((mods ++) . concat) <$> mapM descendentModules mods
     logNormalise $ "in initResources, mods = " ++ show mods'
     importedMods <- catMaybes <$> mapM getLoadingModule mods'
     let importImplns = catMaybes (modImplementation <$> importedMods)

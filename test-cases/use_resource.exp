@@ -55,13 +55,13 @@ declare external ccc void @print_string(i8*)
 
 @use_resource.1 = constant [18 x i8] c"Inner count (4): \00"
 
-@use_resource.5 = constant [18 x i8] c"Outer count (1): \00"
+@use_resource.4 = constant [18 x i8] c"Outer count (1): \00"
 
-@use_resource.4 = constant [18 x i8] c"Inner count (4): \00"
+@use_resource.3 = constant [18 x i8] c"Inner count (4): \00"
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @use_resource.main(){
+define external ccc i64 @"use_resource.<0>"(){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @use_resource.1, i32 0, i32 0))
   tail call ccc void @print_int(i64 4)
@@ -69,9 +69,7 @@ entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @use_resource.2, i32 0, i32 0))
   tail call ccc void @print_int(i64 1)
   tail call ccc void @putchar(i8 10)
-  %3 = alloca i32
-  store i32 0, i32* %3
-  ret i32 0
+  ret i64 1
 }
 
 define external ccc i64 @"use_resource.inc_count<0>"(i64 %"count#0"){
@@ -86,10 +84,10 @@ entry:
   %"count#2" = add i64 %"count#1", 1
   %"count#3" = add i64 %"count#2", 1
   %"count#4" = add i64 %"count#3", 1
-  tail call ccc void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @use_resource.4, i32 0, i32 0))
+  tail call ccc void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @use_resource.3, i32 0, i32 0))
   tail call ccc void @print_int(i64 %"count#4")
   tail call ccc void @putchar(i8 10)
-  tail call ccc void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @use_resource.5, i32 0, i32 0))
+  tail call ccc void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @use_resource.4, i32 0, i32 0))
   tail call ccc void @print_int(i64 %"count#1")
   tail call ccc void @putchar(i8 10)
   ret i64 %"count#1"

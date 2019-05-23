@@ -50,13 +50,11 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @numbers.main(){
+define external ccc void @"numbers.<0>"(){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([30 x i8], [30 x i8]* @numbers.1, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)
-  %2 = alloca i32
-  store i32 0, i32* %2
-  ret i32 0
+  ret void
 }
 
 define external ccc i64 @"numbers.factorial<0>"(i64 %"n#0"){

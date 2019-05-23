@@ -81,6 +81,7 @@ import           Unbranch                  (unbranchProc)
 import           Snippets
 import           BinaryFactory
 import qualified Data.ByteString.Char8 as BS
+import qualified LLVM.AST              as LLVMAST
 
 ------------------------ Handling dependencies ------------------------
 
@@ -110,21 +111,17 @@ buildTarget force target = do
             let dir = takeDirectory target
             built <- buildModuleIfNeeded force [modname] [dir]
             stopOnError "BUILDING TARGET"
-            -- Check if the module contains sub modules
-            _ <- concatSubMods [modname]
-
-            when (tType == ExecutableFile) (buildExecutable [modname] target)
-            if not built && tType /= ExecutableFile
+            if not built
               then logBuild $ "Nothing to be done for target: " ++ target
-              else
-                do logBuild $ "Emitting Target: " ++ target
-                   case tType of
-                     ObjectFile -> emitObjectFile [modname] target
-                     BitcodeFile -> emitBitcodeFile [modname] target
-                     AssemblyFile -> emitAssemblyFile [modname] target
-                     ExecutableFile -> return ()
+              else do
+                  logBuild $ "Emitting Target: " ++ target
+                  case tType of
+                     ObjectFile     -> emitObjectFile [modname] target
+                     BitcodeFile    -> emitBitcodeFile [modname] target
+                     AssemblyFile   -> emitAssemblyFile [modname] target
+                     ExecutableFile -> buildExecutable [modname] target
                      other -> nyi $ "output file type " ++ show other
-                   whenLogging Emit $ logLLVMString [modname]
+                  whenLogging Emit $ logLLVMString [modname]
 
 
 -- |Compile or load a module dependency.
@@ -403,18 +400,6 @@ placeExtractedModule thisMod = do
 
 
 
--- | Concatenate the LLVMAST.Module implementations of the submodules to the
--- the given super module.
-concatSubMods :: ModSpec -> Compiler [ModSpec]
-concatSubMods mspec = do
-    someMods <- collectSubModules mspec
-    unless (List.null someMods) $
-        logBuild $ "### Combining descendents of " ++ showModSpec mspec
-        ++ ": " ++ showModSpecs someMods
-    concatLLVMASTModules mspec someMods
-    return someMods
-
-
 -- | Compile and build modules inside a folder, compacting everything into
 -- one object file archive.
 buildArchive :: FilePath -> Compiler ()
@@ -424,7 +409,8 @@ buildArchive arch = do
     logBuild $ "Building modules to archive: " ++ show archiveMods
     mapM_ (\m -> buildModuleIfNeeded False [m] [dir]) archiveMods
     let oFileOf m = joinPath [dir, m] ++ ".o"
-    mapM_ (\m -> emitObjectFile [m] (oFileOf m)) archiveMods
+    mapM_ (\m -> emitObjectFile [m] (oFileOf m))
+          archiveMods
     makeArchive (List.map oFileOf archiveMods) arch
 
 -------------------- Actually compiling some modules --------------------
@@ -433,6 +419,7 @@ buildArchive arch = do
 --  dependency graph.  This is called in a way that guarantees that
 --  all modules on which these modules depend, other than one another,
 --  will have been processed when this list of modules is reached.
+--  This goes as far as producing LLVM code, but does not write it out.
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
     logBuild $ "compileModSCC: [" ++ showModSpecs mspecs ++ "]"
@@ -604,30 +591,7 @@ buildExecutable targetMod fpath = do
             let mainImports = fst <$> List.filter snd depends
             logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
 
-            -- let assignVar dst src =
-            --       Unplaced $ ProcCall [] "=" Nothing Det False
-            --                    [Unplaced $ Var dst ParamOut Ordinary,
-            --                     Unplaced $ Var src ParamIn Ordinary]
-            let cmdResource name =
-                  ResourceFlowSpec (ResourceSpec ["command_line"] name)
-            let bodyInner = [Unplaced $ ProcCall m "" Nothing Det True []
-                            | m <- mainImports]
-            -- XXX Shouldn't have to hard code assignment of phantom to io
-            -- XXX Should insert assignments of initialised visible resources
-            let bodyCode = [lpvmCast (iVal 0) "io" phantomType,
-                            move (iVal 0) (varSet "exit_code"),
-                            Unplaced $ ForeignCall "C" "gc_init" [] []]
-                           ++ bodyInner
-            let mainBody = ProcDefSrc bodyCode
-            let proto = ProcProto "" []
-                        $ Set.fromList [cmdResource "argc" ParamIn,
-                                        cmdResource "argv" ParamIn,
-                                        cmdResource "exit_code" ParamOut,
-                                        ResourceFlowSpec
-                                        (ResourceSpec ["wybe","io"] "io")
-                                        ParamOut]
-            let mainProc = ProcDef "" proto mainBody Nothing 0 Map.empty
-                           Private Det False NoSuperproc
+            let mainProc = buildMain mainImports
             logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
 
             enterModule fpath [] Nothing
@@ -667,6 +631,30 @@ buildExecutable targetMod fpath = do
 
             makeExec allOFiles fpath
             -- return allOFiles
+
+
+buildMain mainImports =
+    let cmdResource name = ResourceFlowSpec (ResourceSpec ["command_line"] name)
+        -- Construct argumentless resourceful calls to all main procs
+        bodyInner = [Unplaced $ ProcCall m "" Nothing Det True []
+                    | m <- mainImports]
+        -- XXX Shouldn't have to hard code assignment of phantom to io
+        -- XXX Should insert assignments of initialised visible resources
+        bodyCode = [lpvmCast (iVal 0) "io" phantomType,
+                    move (iVal 0) (varSet "exit_code"),
+                    Unplaced $ ForeignCall "C" "gc_init" [] []] ++ bodyInner
+        mainBody = ProcDefSrc bodyCode
+        -- Program main has argc, argv, exit_code, and io as resources
+        proto = ProcProto "" []
+                $ Set.fromList [cmdResource "argc" ParamIn,
+                                 cmdResource "argv" ParamIn,
+                                 cmdResource "exit_code" ParamOut,
+                                 ResourceFlowSpec
+                                     (ResourceSpec ["wybe","io"] "io")
+                                     ParamOut]
+    in ProcDef "" proto mainBody Nothing 0 Map.empty
+       Private Det False NoSuperproc
+
 
 
 -- | Traverse and collect a depth first dependency list from the given initial
@@ -737,9 +725,7 @@ objectReBuildNeeded thisMod dir = do
         ModuleSource (Just srcfile) (Just objfile) _ _ -> do
             srcDate <- (liftIO . getModificationTime) srcfile
             dstDate <- (liftIO . getModificationTime) objfile
-            if srcDate > dstDate
-              then return True
-              else return False
+            return $ srcDate > dstDate
         _ -> return True
 
 

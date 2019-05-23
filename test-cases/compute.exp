@@ -34,16 +34,14 @@ declare external ccc i64 @"math.utils.factorial<0>"(i64)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @compute.main(){
+define external ccc void @"compute.<0>"(){
 entry:
   %"tmp$0#0" = tail call ccc i64 @"math.utils.factorial<0>"(i64 4)
   tail call ccc void @print_int(i64 %"tmp$0#0")
   tail call ccc void @putchar(i8 10)
   tail call ccc void @print_float(double 6.555556e1)
   tail call ccc void @putchar(i8 10)
-  %1 = alloca i32
-  store i32 0, i32* %1
-  ret i32 0
+  ret void
 }
 --------------------------------------------------
  Module math
@@ -57,6 +55,7 @@ entry:
                     public use math.utils
   types           : 
   resources       : 
+  submodules      : math.temperature, math.utils
   procs           : 
 
 
@@ -66,7 +65,6 @@ entry:
 
 
 declare external ccc i8* @wybe_malloc(i32)
-  submodules      : math.temperature, math.utils
 --------------------------------------------------
  Module math.temperature
   public submods  : 
@@ -140,13 +138,11 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @math.utils.main(){
+define external ccc void @"math.utils.<0>"(){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([28 x i8], [28 x i8]* @math.utils.1, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)
-  %2 = alloca i32
-  store i32 0, i32* %2
-  ret i32 0
+  ret void
 }
 
 define external ccc i64 @"math.utils.factorial<0>"(i64 %"n#0"){

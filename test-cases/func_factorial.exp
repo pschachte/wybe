@@ -42,14 +42,12 @@ declare external ccc void @print_int(i64)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @func_factorial.main(){
+define external ccc void @"func_factorial.<0>"(){
 entry:
   %"tmp$0#0" = tail call ccc i64 @"func_factorial.factorial<0>"(i64 5)
   tail call ccc void @print_int(i64 %"tmp$0#0")
   tail call ccc void @putchar(i8 10)
-  %1 = alloca i32
-  store i32 0, i32* %1
-  ret i32 0
+  ret void
 }
 
 define external ccc i64 @"func_factorial.factorial<0>"(i64 %"n#0"){

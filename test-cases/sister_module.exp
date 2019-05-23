@@ -10,6 +10,7 @@ AFTER EVERYTHING:
                     use wybe
   types           : 
   resources       : 
+  submodules      : sister_module.m1, sister_module.m2
   procs           : 
 
 baz > inline (0 calls)
@@ -39,22 +40,6 @@ entry:
   %"j#0" = tail call ccc i64 @"sister_module.m2.bar<0>"(i64 %"i#0")
   ret i64 %"j#0"
 }
-
-define external ccc i64 @"sister_module.m1.foo<0>"(i64 %"i#0"){
-entry:
-  %"j#0" = add i64 %"i#0", 1
-  ret i64 %"j#0"
-}
-
-declare external ccc i64 @"sister_module.m1.foo<0>"(i64)
-
-define external ccc i64 @"sister_module.m2.bar<0>"(i64 %"i#0"){
-entry:
-  %"k#0" = add i64 %"i#0", 1
-  %"j#0" = tail call ccc i64 @"sister_module.m1.foo<0>"(i64 %"k#0")
-  ret i64 %"j#0"
-}
-  submodules      : sister_module.m1, sister_module.m2
 --------------------------------------------------
  Module sister_module.m1
   public submods  : 

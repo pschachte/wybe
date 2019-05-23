@@ -43,12 +43,10 @@ declare external ccc i8 @read_char()
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @simple_loop.main(){
+define external ccc void @"simple_loop.<0>"(){
 entry:
   tail call ccc void @"simple_loop.gen$1<0>"()
-  %1 = alloca i32
-  store i32 0, i32* %1
-  ret i32 0
+  ret void
 }
 
 define external ccc void @"simple_loop.gen$1<0>"(){

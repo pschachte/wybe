@@ -58,13 +58,11 @@ declare external ccc void @putchar(i8)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc i32 @main_hello.main(i64 %"argc#0", i64 %"argv#0"){
+define external ccc i64 @"main_hello.<0>"(i64 %"argc#0", i64 %"argv#0"){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @main_hello.1, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)
   tail call ccc void @print_int(i64 %"argc#0")
   tail call ccc void @print_string(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @main_hello.2, i32 0, i32 0))
-  %3 = alloca i32
-  store i32 0, i32* %3
-  ret i32 0
+  ret i64 42
 }
