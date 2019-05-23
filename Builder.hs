@@ -156,12 +156,14 @@ buildModuleIfNeeded force modspec possDirs = do
         if isJust maybemod
           then return False -- already loaded:  nothing more to do
           else do
-            srcOb <- liftIO $ moduleSources modspec possDirs
+            srcOb <- moduleSources modspec possDirs
             logBuild $ show srcOb
             case srcOb of
                 NoSource -> do
-                    Error <!> "Could not find module " ++
-                        showModSpec modspec
+                    Error <!> "Could not find source for module " ++
+                              showModSpec modspec
+                              ++ "\nin directories:\n    "
+                              ++ intercalate "\n    " possDirs
                     return False
 
                 -- only object file exists
@@ -712,7 +714,7 @@ loadObjectFile thisMod =
 
 objectReBuildNeeded :: ModSpec -> FilePath -> Compiler Bool
 objectReBuildNeeded thisMod dir = do
-    srcOb <- liftIO $ moduleSources thisMod [dir]
+    srcOb <- moduleSources thisMod [dir]
     case srcOb of
         NoSource -> return True
 
@@ -766,7 +768,7 @@ srcObjFiles modspec possDirs = do
 -- | Search for different sources module `modspec` in the possible directory
 -- list `possDirs`. This information is encapsulated as a ModuleSource. The
 -- first found non-empty (not of constr NoSource) of ModuleSource is returned.
-moduleSources :: ModSpec -> [FilePath] -> IO ModuleSource
+moduleSources :: ModSpec -> [FilePath] -> Compiler ModuleSource
 moduleSources modspec possDirs = do
     let splits = List.map (`List.take` modspec) [1..length modspec]
     dirs <- mapM (\d -> mapM (sourceInDir d) splits) possDirs
@@ -780,8 +782,9 @@ moduleSources modspec possDirs = do
 -- file (.wybe), an object file (.o), an archive file (.a), or a sub-directory
 -- in the given directory `d`. This information is returned as a `ModuleSource`
 -- record.
-sourceInDir :: FilePath -> ModSpec -> IO ModuleSource
+sourceInDir :: FilePath -> ModSpec -> Compiler ModuleSource
 sourceInDir d ms = do
+    logBuild $ "Looking for source for module " ++ showModSpec ms
     let dirName = joinPath [d, showModSpec ms]
     -- Helper to convert a boolean to a Maybe [maybeFile True f == Just f]
     let maybeFile b f = if b then Just f else Nothing
@@ -790,10 +793,14 @@ sourceInDir d ms = do
     let objfile = moduleFilePath objectExtension d ms
     let arfile = moduleFilePath archiveExtension d ms
     -- Flags checking
-    dirExists <- doesDirectoryExist dirName
-    srcExists <- doesFileExist srcfile
-    objExists <- doesFileExist objfile
-    arExists <- doesFileExist arfile
+    dirExists <- liftIO $ doesDirectoryExist dirName
+    srcExists <- liftIO $ doesFileExist srcfile
+    objExists <- liftIO $ doesFileExist objfile
+    arExists  <- liftIO $ doesFileExist arfile
+    logBuild $ "Directory   " ++ dirName ++ " exists? " ++ show dirExists
+    logBuild $ "Source file " ++ srcfile ++ " exists? " ++ show srcExists
+    logBuild $ "Object file " ++ objfile ++ " exists? " ++ show objExists
+    logBuild $ "Archive     " ++ arfile ++  " exists? " ++ show arExists
     if srcExists || objExists || arExists || dirExists
         then return
              ModuleSource
