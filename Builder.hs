@@ -432,26 +432,26 @@ compileModSCC mspecs = do
     fixpointProcessSCC handleModImports mspecs
     logBuild $ replicate 70 '='
     logBuild $ "resource and type checking module(s) "
-      ++ showModSpecs mspecs ++ "..."
+               ++ showModSpecs mspecs ++ "..."
     mapM_ validateModExportTypes mspecs
-    stopOnError $ "checking parameter type declarations in module(s) " ++
-      showModSpecs mspecs
+    stopOnError $ "checking parameter type declarations in module(s) "
+                  ++ showModSpecs mspecs
     -- Fixed point needed because eventually resources can bundle
     -- resources from other modules
     fixpointProcessSCC resourceCheckMod mspecs
     stopOnError $ "processing resources for module(s) " ++ showModSpecs mspecs
     -- No fixed point needed because public procs must have types declared
     mapM_ typeCheckMod mspecs
-    stopOnError $ "type checking of module(s) " ++
-      showModSpecs mspecs
+    stopOnError $ "type checking of module(s) "
+                  ++ showModSpecs mspecs
     logDump Types Unbranch "TYPE CHECK"
     mapM_ (transformModuleProcs canonicaliseProcResources)  mspecs
     mapM_ (transformModuleProcs transformProcResources)  mspecs
-    stopOnError $ "resource checking of module(s) " ++
-      showModSpecs mspecs
+    stopOnError $ "resource checking of module(s) "
+                  ++ showModSpecs mspecs
     mapM_ (transformModuleProcs unbranchProc)  mspecs
-    stopOnError $ "handling loops and conditionals in module(s) " ++
-      showModSpecs mspecs
+    stopOnError $ "handling loops and conditionals in module(s) "
+                  ++ showModSpecs mspecs
     logDump Unbranch Clause "UNBRANCHING"
     mapM_ (transformModuleProcs compileProc)  mspecs
     stopOnError $ "generating low level code in " ++ showModSpecs mspecs
