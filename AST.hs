@@ -472,13 +472,15 @@ updateSpecModuleM updater spec =
 -- |Prepare to compile a module by setting up a new Module on the
 --  front of the list of modules underCompilation.  Match this with
 --  a later call to exitModule.
-enterModule :: FilePath -> ModSpec -> Maybe [Ident] -> Compiler ()
-enterModule source modspec params = do
+enterModule :: FilePath -> ModSpec -> Maybe ModSpec -> Maybe [Ident]
+            -> Compiler ()
+enterModule source modspec rootMod params = do
     count <- gets ((1+) . loadCount)
     modify (\comp -> comp { loadCount = count })
     logAST $ "Entering module " ++ showModSpec modspec
     modify (\comp -> let newMod = emptyModule
                                   { modSourceFile = source
+                                  , modRootModSpec = rootMod
                                   , modSpec = modspec
                                   , modParams = params
                                   , thisLoadNum = count
@@ -944,7 +946,8 @@ optionallyPutStr opt strcomp = do
 
 -- |Holds everything needed to compile a module
 data Module = Module {
-  modSourceFile :: FilePath,     -- ^Absolute path of the source file
+  modSourceFile :: FilePath,     -- ^Absolute path of the source file/directory
+  modRootModSpec :: Maybe ModSpec, -- ^Root module of the file, if it's a file
   isPackage :: Bool,             -- ^Is module actually a pacakage
   modSpec :: ModSpec,            -- ^The module path name
   modParams :: Maybe [Ident],    -- ^The type parameters, if a type
@@ -965,6 +968,7 @@ data Module = Module {
 emptyModule :: Module
 emptyModule = Module
     { modSourceFile     = error "No Default Source file"
+    , modRootModSpec    = error "No Default root modspec"
     , isPackage         = False
     , modSpec           = error "No Default Modspec"
     , modParams         = Nothing
@@ -1130,7 +1134,7 @@ data ModuleImplementation = ModuleImplementation {
     modKnownResources :: Map Ident (Set ResourceSpec),
                                               -- ^Resources visible to this mod
     modKnownProcs:: Map Ident (Set ProcSpec),  -- ^Procs visible to this module
-    modLLVM :: Maybe LLVMAST.Module  -- ^ Module's LLVM.General.AST.Module representation
+    modLLVM :: Maybe LLVMAST.Module           -- ^ Module's LLVM.General.AST.Module representation
     } deriving (Generic)
 
 emptyImplementation :: ModuleImplementation

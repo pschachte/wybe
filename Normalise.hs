@@ -155,7 +155,7 @@ normaliseSubmodule name typeParams vis pos items = do
     -- Add the submodule to the submodule list of the implementation
     updateImplementation $
         updateModSubmods (\sm-> Map.insert name subModSpec sm)
-    enterModule dir subModSpec typeParams
+    enterModule dir subModSpec (Just parentModSpec) typeParams
     -- submodule always imports parent module
     addImport parentModSpec (importSpec Nothing Private)
     case typeParams of

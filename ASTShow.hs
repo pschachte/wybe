@@ -99,7 +99,7 @@ showMap outersep keyFn valFn m =
 -- of the specified log selectors have been selected for logging.  This
 -- is called between the passes of those two selectors.
 logDump :: LogSelection -> LogSelection -> String -> Compiler ()
-logDump selector1 selector2 pass = do
+logDump selector1 selector2 pass =
     whenLogging2 selector1 selector2 $ do
       modList <- gets (Map.elems . modules)
       let nonWybe []     = True
@@ -108,5 +108,6 @@ logDump selector1 selector2 pass = do
         ++ "\nAFTER " ++ pass ++ ":\n"
         ++ intercalate ("\n" ++ replicate 50 '-' ++ "\n")
         (List.map show
+         -- comment next line and uncomment following to show library code
          $ List.filter (nonWybe . modSpec) modList)
          -- modList)

@@ -473,7 +473,8 @@ blockReturn op                                    = op
 cgen :: Prim -> Codegen (Maybe Operand)
 cgen prim@(PrimCall pspec args) = do
     logCodegen $ "Compiling " ++ show prim
-    thisMod <- lift $ getModuleSpec
+    thisMod <- lift getModuleSpec
+    fileMod <- lift $ getModule modRootModSpec
     let (ProcSpec mod name _) = pspec
     -- let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
     let nm = LLVMAST.Name $ toSBString $ show pspec
@@ -486,8 +487,9 @@ cgen prim@(PrimCall pspec args) = do
             Just callProto -> filterUnneededArgs callProto args
             Nothing        -> args
 
+    -- XXX Only need extern for prims in different object *file*
     -- if the call is to an external module, declare it
-    unless (thisMod == mod || thisMod `List.isPrefixOf` mod)
+    unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
         (addExtern $ PrimCall pspec filteredArgs)
 
     let inArgs = primInputs filteredArgs

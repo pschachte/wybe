@@ -3,4 +3,4 @@ use command_line
 ?exit_code = 42
 !println("hello, world!")
 !print(argc)
-!print(" command line arguments")
+!println(" command line argument(s)")

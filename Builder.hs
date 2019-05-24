@@ -242,11 +242,11 @@ buildModule mspec srcfile = do
 
 -- |Build a directory as the module `dirmod`.
 buildDirectory :: FilePath -> ModSpec -> Compiler Bool
-buildDirectory dir dirmod= do
+buildDirectory dir dirmod = do
     logBuild $ "Building DIR: " ++ dir ++ ", into MODULE: "
         ++ showModSpec dirmod
     -- Make the directory a Module package
-    enterModule dir dirmod Nothing
+    enterModule dir dirmod Nothing Nothing
     updateModule (\m -> m { isPackage = True })
 
     -- Get wybe modules (in the directory) to build
@@ -277,11 +277,11 @@ buildDirectory dir dirmod= do
 
 
 
--- |Compile a module given the parsed source file contents.
+-- |Compile a file module given the parsed source file contents.
 compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
 compileModule source modspec params items = do
     logBuild $ "===> Compiling module " ++ showModSpec modspec
-    enterModule source modspec params
+    enterModule source modspec (Just modspec) params
     -- Hash the parse items and store it in the module
     let hashOfItems = hashItems items
     logBuild $ "HASH: " ++ hashOfItems
@@ -596,7 +596,7 @@ buildExecutable targetMod fpath = do
             let mainProc = buildMain mainImports
             logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
 
-            enterModule fpath [] Nothing
+            enterModule fpath [] (Just targetMod) Nothing
             addImport ["command_line"] $ importSpec Nothing Private
             addImport ["wybe","io"] $ importSpec (Just ["io"]) Private
             mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
