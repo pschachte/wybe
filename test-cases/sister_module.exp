@@ -90,8 +90,6 @@ bar > public inline (0 calls)
 ; ModuleID = 'sister_module.m2'
 
 
-declare external ccc i64 @"sister_module.m1.foo<0>"(i64)
-
 declare external ccc i8* @wybe_malloc(i32)
 
 define external ccc i64 @"sister_module.m2.bar<0>"(i64 %"i#0"){

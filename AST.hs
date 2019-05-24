@@ -1875,9 +1875,12 @@ data Exp
      deriving (Eq,Ord,Generic)
 
 
--- |Is the supplied parameter a phantom?
+-- |Is it unnecessary to actually pass an argument (in or out) for this param?
 paramIsPhantom :: PrimParam -> Bool
-paramIsPhantom = typeIsPhantom . primParamType
+paramIsPhantom param = typeIsPhantom (primParamType param)
+-- XXX should uncomment this to reduce unneeded dataflow, but need to make
+--     corresponding change to calls.
+                       -- || paramInfoUnneeded (primParamInfo param)
 
 -- |Is the supplied argument a phantom?
 argIsPhantom :: PrimArg -> Bool
