@@ -498,7 +498,7 @@ argExpandedPrim :: Prim -> BodyBuilder Prim
 argExpandedPrim call@(PrimCall pspec args) = do
     args' <- mapM expandArg args
     params <- lift $ primProtoParams <$> getProcPrimProto pspec
-    when (length args' /= length params) $
+    unless (sameLength args' params) $
         shouldnt $ "arguments don't match params in call " ++ show call
     args'' <- zipWithM (transformUnneededArg $ zip params args) params args'
     return $ PrimCall pspec args''

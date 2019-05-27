@@ -365,7 +365,7 @@ properSubtypeOf InvalidType _ = True
 properSubtypeOf (TypeSpec mod1 name1 params1) (TypeSpec mod2 name2 params2) =
     name1 == name2
     && (mod1 == mod2 || List.null mod2)
-    && length params1 == length params2
+    && sameLength params1 params2
     && List.all (uncurry subtypeOf) (zip params1 params2)
 properSubtypeOf _ _ = False
 
@@ -842,7 +842,7 @@ ultimateExp expr = expr
 --  the last pass has resolved some statements.  Thus we make multiple
 --  passes over the list of statement typings until it is empty.
 --
---  If we complee a pass over the list without resolving any statements
+--  If we complete a pass over the list without resolving any statements
 --  and a residue remains, then we pick a statement with the fewest remaining
 --  types and try all the types in turn.  If exactly one of these leads to
 --  a valid typing, this is the correct one; otherwise it is a type error.
