@@ -65,3 +65,4 @@ wybelibs/wybe.o
 test-cases/alias
 /TODO.html
 README.html
+dist-newstyle
