@@ -120,6 +120,8 @@
 
 
 ## Optimisation:
+* Update caller counts when inlining proc calls, and don't generate code for
+  uncalled private procs
 * Extend read-after-write to support read with intervening write with different
   offset
 * Keep track of bounds on tags to avoid unnecessary tests and allow tag switches
