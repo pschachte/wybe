@@ -2,19 +2,12 @@
 
 public type tree = public empty | node(left:tree, key:int, right:tree) end
 
-<<<<<<< HEAD
-public test proc lookup(key:int, tree:tree)
-    key = tree.key
-    # || key < tree.key && lookup(key, tree.left, ?result)
-    # || lookup(key, tree.right, ?result)
-=======
 public test proc lookup(key:int, tree:tree, ?result:bool)
     if tree = empty:: ?result = false
     |  key = tree.key:: ?result = true
     |  key < tree.key:: lookup(key, tree.left, ?result)
     |  true:: lookup(key, tree.right, ?result)
     end
->>>>>>> master
 end
 
 ?tr = node(empty, 1, empty)
