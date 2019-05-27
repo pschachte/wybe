@@ -1,0 +1,8 @@
+use position
+
+?pa = position(1,1)
+?pb = pa
+x(pa, ?pa1, pa.x + 10)
+x(pb, ?pb1, pb.x + 20)
+!println(pa1.x)
+!println(pb1.x)
