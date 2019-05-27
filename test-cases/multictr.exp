@@ -664,7 +664,7 @@ two_field > public inline test (0 calls)
 
 zero > public inline (0 calls)
 0: zero(?$#0:multictr.simple):
-    foreign lpvm cast(0:multictr.simple, ?$#0:multictr.simple)
+    foreign llvm move(0:multictr.simple, ?$#0:multictr.simple)
 
   LLVM code       :
 
@@ -954,5 +954,5 @@ if.else1:
 
 define external ccc i64* @"multictr.simple.zero<0>"(){
 entry:
-  ret i64* inttoptr (i64 0 to i64*)
+  ret i64 0
 }

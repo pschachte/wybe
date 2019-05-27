@@ -46,22 +46,22 @@ declare external ccc i8* @wybe_malloc(i32)
 
 autumn > public inline (0 calls)
 0: autumn(?$#0:type_enum.season):
-    foreign lpvm cast(3:type_enum.season, ?$#0:type_enum.season)
+    foreign llvm move(3:type_enum.season, ?$#0:type_enum.season)
 
 
 spring > public inline (0 calls)
 0: spring(?$#0:type_enum.season):
-    foreign lpvm cast(1:type_enum.season, ?$#0:type_enum.season)
+    foreign llvm move(1:type_enum.season, ?$#0:type_enum.season)
 
 
 summer > public inline (0 calls)
 0: summer(?$#0:type_enum.season):
-    foreign lpvm cast(2:type_enum.season, ?$#0:type_enum.season)
+    foreign llvm move(2:type_enum.season, ?$#0:type_enum.season)
 
 
 winter > public inline (0 calls)
 0: winter(?$#0:type_enum.season):
-    foreign lpvm cast(0:type_enum.season, ?$#0:type_enum.season)
+    foreign llvm move(0:type_enum.season, ?$#0:type_enum.season)
 
   LLVM code       :
 
@@ -78,36 +78,20 @@ entry:
 
 define external ccc i2 @"type_enum.season.autumn<0>"(){
 entry:
-  %1 = alloca i2
-  store i2 3, i2* %1
-  %2 = load i2, i2* %1
-  %3 = bitcast i2 %2 to i2
-  ret i2 %3
+  ret i2 3
 }
 
 define external ccc i2 @"type_enum.season.spring<0>"(){
 entry:
-  %4 = alloca i2
-  store i2 1, i2* %4
-  %5 = load i2, i2* %4
-  %6 = bitcast i2 %5 to i2
-  ret i2 %6
+  ret i2 1
 }
 
 define external ccc i2 @"type_enum.season.summer<0>"(){
 entry:
-  %7 = alloca i2
-  store i2 2, i2* %7
-  %8 = load i2, i2* %7
-  %9 = bitcast i2 %8 to i2
-  ret i2 %9
+  ret i2 2
 }
 
 define external ccc i2 @"type_enum.season.winter<0>"(){
 entry:
-  %10 = alloca i2
-  store i2 0, i2* %10
-  %11 = load i2, i2* %10
-  %12 = bitcast i2 %11 to i2
-  ret i2 %12
+  ret i2 0
 }

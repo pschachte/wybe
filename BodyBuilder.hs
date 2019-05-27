@@ -454,12 +454,25 @@ instr' prim@(PrimForeign "lpvm" "alloc" [] [_,argvar]) pos = do
     logBuild $ "  Leaving alloc alone"
     rawInstr prim pos
     recordVarSet argvar
+instr' prim@(PrimForeign "lpvm" "cast" []
+             [from, to@(ArgVar var _ flow _ _)]) pos
+  = do
+    logBuild $ "  Expanding cast(" ++ show from ++ ", " ++ show to ++ ")"
+    unless (argFlowDirection from == FlowIn && flow == FlowOut) $
+        shouldnt "cast instruction with wrong flow"
+    if (argType from == argType to)
+      then instr' (PrimForeign "llvm" "move" [] [from, to]) pos
+      else ordinaryInstr prim pos
 instr' prim@(PrimTest (ArgInt 0 _)) pos = do
     rawInstr prim pos
     logBuild $ "  Found fail instruction; noting failing branch"
     -- note guaranteed failure
     modify (\s -> s { failed=True })
-instr' prim pos = do
+instr' prim pos = ordinaryInstr prim pos
+
+
+ordinaryInstr :: Prim -> OptPos -> BodyBuilder ()
+ordinaryInstr prim pos = do
     let (prim',newOuts) = splitPrimOutputs prim
     logBuild $ "Looking for computed instr " ++ show prim' ++ " ..."
     currSubExprs <- gets subExprs
@@ -481,6 +494,7 @@ instr' prim pos = do
                               [mkInput oldOut, newOut])
                      Nothing)
                   $ zip newOuts oldOuts
+
 
 
 -- | Invert an output arg to be an input arg.

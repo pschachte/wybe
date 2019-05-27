@@ -130,7 +130,7 @@ if.else:
 
 [] > public inline (0 calls)
 0: [](?$#0:type_list.intlist):
-    foreign lpvm cast(0:type_list.intlist, ?$#0:type_list.intlist)
+    foreign llvm move(0:type_list.intlist, ?$#0:type_list.intlist)
 
 
 [|] > public inline (0 calls)
@@ -258,7 +258,7 @@ if.else3:
 
 define external ccc i64* @"type_list.intlist.[]<0>"(){
 entry:
-  ret i64* inttoptr (i64 0 to i64*)
+  ret i64 0
 }
 
 define external ccc i64* @"type_list.intlist.[|]<0>"(i64 %"head#0", i64* %"tail#0"){
