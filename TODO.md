@@ -1,9 +1,9 @@
 # TODO list for the Wybe project
 
 ## Fix bugs:
-* `test-cases/multictr.wybe`:  Assertion failed: All operands to PHI node must be the same type as the PHI node!
-* `test-cases/stmt_if` Assertion failed: Can't find reaching def for virtreg
-
+* `test-cases/stmt_if.wybe`
+* `test-cases/tests.wybe`
+* Have wybemk build executable without -f flag when .o file exists
 
 ## Documentation:
 * Write Wybe intro

@@ -95,7 +95,7 @@ typeCheckMod thisMod = do
     logTypes $ "**** Type checking module " ++ showModSpec thisMod
     reenterModule thisMod
     procs <- getModuleImplementationField (Map.toList . modProcs)
-    let ordered = reverse $
+    let ordered =
             stronglyConnComp
             [(name, name,
               nub $ concatMap (localBodyProcs thisMod . procImpln) procDefs)
