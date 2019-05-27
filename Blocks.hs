@@ -234,9 +234,8 @@ makeGlobalDefinition :: String -> PrimProto
 makeGlobalDefinition pname proto bls = do
     modName <- fmap showModSpec getModuleSpec
     let params = List.filter (not . paramIsPhantom) (primProtoParams proto)
-        -- *The overall top level procedure will be labelled main.
         label0 = modName ++ "." ++ pname
-            -- if isMain then "main" else pname
+        -- For the top-level main program
         isMain = label0 == ".<0>"
         label  = if isMain then "main" else label0
         inputs = List.filter isInputParam params
@@ -248,8 +247,7 @@ makeGlobalDefinition pname proto bls = do
 -- | Predicate to check if a primitive's parameter is of input flow (input)
 -- and the param is needed (inferred by it's param info field)
 isInputParam :: PrimParam -> Bool
-isInputParam p = primParamFlow p == FlowIn &&
-  not ((paramInfoUnneeded . primParamInfo) p)
+isInputParam p = primParamFlow p == FlowIn && paramNeeded p
 
 
 -- | Convert a primitive's input parameter to LLVM's Definition parameter.
@@ -481,13 +479,11 @@ cgen prim@(PrimCall pspec args) = do
     -- Find the prototype of the pspec being called
     -- and match it's parameters with the args here
     -- and remove the unneeded ones.
-    protoFound <- findProto pspec
-    logCodegen $ "ProtoFound = " ++ show protoFound
-    let filteredArgs = case protoFound of
-            Just callProto -> filterUnneededArgs callProto args
-            Nothing        -> args
+    proto <- lift $ getProcPrimProto pspec
+    logCodegen $ "Proto = " ++ show proto
+    let filteredArgs = filterUnneededArgs proto args
+    logCodegen $ "Filtered args = " ++ show filteredArgs
 
-    -- XXX Only need extern for prims in different object *file*
     -- if the call is to an external module, declare it
     unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
         (addExtern $ PrimCall pspec filteredArgs)
@@ -622,11 +618,14 @@ filterUnneededArgs proto args = argsNeeded args (primProtoParams proto)
 
 argsNeeded :: [PrimArg] -> [PrimParam] -> [PrimArg]
 argsNeeded [] [] = []
-argsNeeded (a:_) [] = []
-argsNeeded [] _ = []
+argsNeeded [] (_:_) = shouldnt "more parameters than arguments"
+argsNeeded (_:_) [] = shouldnt "more arguments than parameters"
+argsNeeded (ArgUnneeded _ _:as) (p:ps)
+    | paramNeeded p = shouldnt $ "unneeded arg for needed param " ++ show p
+    | otherwise     = argsNeeded as ps
 argsNeeded (a:as) (p:ps)
-    | paramNeeded p == True = a : (argsNeeded as ps)
-    | otherwise = argsNeeded as ps
+    | paramNeeded p = a : argsNeeded as ps
+    | otherwise     = argsNeeded as ps
 
 
 -- | Code generation for LPVM instructions.
@@ -895,7 +894,7 @@ cgenArg (ArgString s _) =
 cgenArg (ArgChar c ty) = do t <- lift $ typed' ty
                             let bs = getBits t
                             return $ cons $ C.Int bs $ integerOrd c
-
+cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 
 getBits :: LLVMAST.Type -> Word32
 getBits (IntegerType bs)                = bs

@@ -29,7 +29,8 @@ module AST (
   descendentModules,
   enterModule, reenterModule, exitModule, reexitModule, deferModules, inModule,
   emptyInterface, emptyImplementation,
-  getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
+  getParams, getDetism, getProcDef, getProcPrimProto,
+  mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
@@ -872,6 +873,14 @@ getProcDef (ProcSpec modSpec procName procID) = do
     let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $
                modImplementation mod
     return $ (modProcs impl ! procName) !! procID
+
+
+getProcPrimProto :: ProcSpec -> Compiler PrimProto
+getProcPrimProto pspec = do
+    def <- getProcDef pspec
+    case procImpln def of
+        ProcDefPrim proto _ -> return proto
+        _ -> shouldnt $ "get prim proto of uncompiled proc " ++ show pspec
 
 
 updateProcDef :: (ProcDef -> ProcDef) -> ProcSpec -> Compiler ()
@@ -1932,10 +1941,11 @@ data PrimArg
                                               -- (one use in the last statement
                                               -- to use the variable)
               }
-     | ArgInt Integer TypeSpec
-     | ArgFloat Double TypeSpec
-     | ArgString String TypeSpec
-     | ArgChar Char TypeSpec
+     | ArgInt Integer TypeSpec                -- ^Constant integer arg
+     | ArgFloat Double TypeSpec               -- ^Constant floating point arg
+     | ArgString String TypeSpec              -- ^Constant string arg
+     | ArgChar Char TypeSpec                  -- ^Constant character arg
+     | ArgUnneeded PrimFlow TypeSpec          -- ^Unneeded input or output
      deriving (Eq,Ord,Generic)
 
 
@@ -1983,6 +1993,7 @@ argFlowDirection (ArgInt _ _) = FlowIn
 argFlowDirection (ArgFloat _ _) = FlowIn
 argFlowDirection (ArgString _ _) = FlowIn
 argFlowDirection (ArgChar _ _) = FlowIn
+argFlowDirection (ArgUnneeded flow _) = flow
 
 
 argType :: PrimArg -> TypeSpec
@@ -1991,9 +2002,10 @@ argType (ArgInt _ typ) = typ
 argType (ArgFloat _ typ) = typ
 argType (ArgString _ typ) = typ
 argType (ArgChar _ typ) = typ
+argType (ArgUnneeded _ typ) = typ
 
 
-outArgVar:: PrimArg -> PrimVarName
+outArgVar :: PrimArg -> PrimVarName
 outArgVar (ArgVar var _ flow _ _) | flow == FlowOut = var
 outArgVar _ = shouldnt "outArgVar of input argument"
 
@@ -2003,16 +2015,23 @@ argDescription (ArgVar var _ flow ftype _) =
     (case flow of
           FlowIn -> "input "
           FlowOut -> "output ") ++
-    (case ftype of
-        Ordinary -> "variable " ++ primVarName var
-        HalfUpdate -> "update of variable " ++ primVarName var
-        Implicit pos -> "expression" ++ showMaybeSourcePos pos
-        Resource rspec -> "resource " ++ show rspec)
+    argFlowDescription flow
+    ++ (case ftype of
+          Ordinary       -> " variable " ++ primVarName var
+          HalfUpdate     -> " update of variable " ++ primVarName var
+          Implicit pos   -> " expression" ++ showMaybeSourcePos pos
+          Resource rspec -> " resource " ++ show rspec)
 argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgString val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
+argDescription (ArgUnneeded flow _) = "unneeded " ++ argFlowDescription flow
 
+
+-- |A printable description of a primitive flow direction
+argFlowDescription :: PrimFlow -> String
+argFlowDescription FlowIn  = "input"
+argFlowDescription FlowOut = "output"
 
 
 -- |Convert a statement read as an expression to a Stmt.
@@ -2104,6 +2123,7 @@ varsInPrimArg _ (ArgInt _ _)            = Set.empty
 varsInPrimArg _ (ArgFloat _ _)          = Set.empty
 varsInPrimArg _ (ArgString _ _)         = Set.empty
 varsInPrimArg _ (ArgChar _ _)           = Set.empty
+varsInPrimArg _ (ArgUnneeded _ _)       = Set.empty
 
 
 ----------------------------------------------------------------
@@ -2459,6 +2479,8 @@ instance Show PrimArg where
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ
   show (ArgString s typ) = show s ++ showTypeSuffix typ
   show (ArgChar c typ)   = show c ++ showTypeSuffix typ
+  show (ArgUnneeded dir typ) =
+      primFlowPrefix dir ++ "_" ++ showTypeSuffix typ
 
 
 -- |Show a single typed expression.
