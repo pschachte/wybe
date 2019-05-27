@@ -1,6 +1,6 @@
 use command_line
 
-?exit_code = 42
+!set_exit_code(42)
 !println("hello, world!")
 !print(argc-1)
 !println(" command line argument(s)")
