@@ -353,19 +353,19 @@ removeFromUf toBeRemoved unionFind
     | Set.null toBeRemoved = unionFind
     | otherwise = unionFind3
         where
+            -- In case the key is in toBeRemoved, we cleanup these keys as well
+            (unionFind1, rootMap1) = Map.foldrWithKey (_convertUfKey toBeRemoved)
+                                (initUnionFind, Map.empty) unionFind
             -- Cleanup root that is in toBeRemoved set and gather a mapping from
             -- the removed root to the new root
-            (unionFind1, rootMap) =
+            (unionFind2, rootMap2) =
                 Map.foldrWithKey (_convertUfRoot toBeRemoved)
-                                (initUnionFind, Map.empty) unionFind
+                                (initUnionFind, rootMap1) unionFind1
             -- Now all variables in toBeRemoved would be converted to map to
             -- itself;
             -- So we'll need to remove them from the map
-            unionFind2 = Map.foldrWithKey (_filterUfItems toBeRemoved)
-                                initUnionFind unionFind1
-            -- In case the key is in toBeRemoved, we cleanup these keys as well
-            (unionFind3, _) = Map.foldrWithKey (_convertUfKey toBeRemoved)
-                                (initUnionFind, rootMap) unionFind2
+            unionFind3 = Map.foldrWithKey (_filterUfItems toBeRemoved)
+                                initUnionFind unionFind2
 
 
 -- convert UnionFind to a new UnionFind so if any root exists in the aSet then
@@ -404,15 +404,18 @@ _convertUfRoot aSet k info (uf, rootMap) =
 _convertUfKey :: (Ord a) => Set a -> a -> UFInfo a -> (UnionFind a, Map a a)
                         -> (UnionFind a, Map a a)
 _convertUfKey aSet k info (uf, rootMap) =
-    if Set.member k aSet && Map.member k rootMap then
-        -- can find mapping to newKey
-        let newKey = Map.lookup k rootMap
-        in case newKey of
-            Just nk -> (Map.insert nk info uf, rootMap)
-            _       -> (Map.insert k info uf, rootMap)
-    else
-        -- (uf, rootMap) -- ^TODO: Verify this!
-        (Map.insert k info uf, rootMap)
+    if Set.member k aSet && k /= root info
+        then (uf, rootMap)
+        else (Map.insert k info uf, rootMap)
+    -- if Set.member k aSet && Map.member k rootMap then
+    --     -- can find mapping to newKey
+    --     let newKey = Map.lookup k rootMap
+    --     in case newKey of
+    --         Just nk -> (Map.insert nk info uf, rootMap)
+    --         _       -> (Map.insert k info uf, rootMap)
+    -- else
+    --     -- (uf, rootMap) -- ^TODO: Verify this!
+    --     (Map.insert k info uf, rootMap)
 
 -- Similar to above - but filtering out item that is in aSet and its key and
 -- root are same

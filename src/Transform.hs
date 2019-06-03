@@ -91,14 +91,15 @@ transformPrim nonePhantomParams (aliasMap, prims) prim =
         _ -> do
             -- | Transform simple prims
             logTransform $ "\n--- simple prim:  " ++ show prim
-            -- Mutate destructive flag if this is a mutate instruction
-            prim2 <- mutateInstruction prim aliasMap
             maybeAliasInfo <- maybeAliasPrimArgs (content prim)
             -- Update alias map for escapable args
             aliasMap2 <- aliasedArgsInSimplePrim nonePhantomParams aliasMap
                                                     maybeAliasInfo
             logTransform $ "current aliasMap: " ++ show aliasMap
             logTransform $ "after :           " ++ show aliasMap2
+            -- Mutate destructive flag if this is a mutate instruction
+            prim2 <- mutateInstruction prim aliasMap
+            logTransform $ "--- transformed to:  " ++ show prim2
             return (aliasMap2, prims ++ [prim2])
 
 
