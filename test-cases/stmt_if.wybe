@@ -2,16 +2,21 @@
 
 public type tree = public empty | node(left:tree, key:int, right:tree) end
 
-public test proc lookup(key:int, tree:tree, ?result:bool)
-    if tree = empty:: ?result = false
-    |  key = tree.key:: ?result = true
-    |  key < tree.key:: lookup(key, tree.left, ?result)
-    |  true:: lookup(key, tree.right, ?result)
+public proc lookup(key:int, tree:tree, ?result:bool)
+    if tree = node(?left, ?nodekey, ?right)::
+        if  key = nodekey:: ?result = true
+        |   key < nodekey:: lookup(key, left , ?result)
+        |   key > nodekey:: lookup(key, right, ?result)
+        end
+    |   true:: ?result = false
     end
 end
 
 ?tr = node(empty, 1, empty)
 
-if lookup(1, tr) :: !print("found")
-| true :: !print("not found")
+if lookup(1, tr) :: !println("lookup succeeds when it should")
+| true           :: !println("lookup fails when it should succeed")
+end
+if lookup(3, tr) :: !println("lookup fails when it should")
+| true           :: !println("lookup succeeds when it should fail")
 end

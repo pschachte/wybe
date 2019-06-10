@@ -14,7 +14,8 @@
 module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
-  Determinism(..), TypeProto(..), TypeSpec(..), TypeRef(..), TypeImpln(..),
+  Determinism(..), determinismName,
+  TypeProto(..), TypeSpec(..), TypeRef(..), TypeImpln(..),
   FnProto(..), ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt,
@@ -119,6 +120,16 @@ data Visibility = Public | Private
 
 data Determinism = Det | SemiDet
                   deriving (Eq, Ord, Show, Generic)
+-- Ordering for Determinism is significant. If x is a the Determinism of a
+-- calling context and y is the Determinism of the called proc and x < y means
+-- there's a determinism error. This will continue to hold when we add a NonDet
+-- determism after SemiDet.
+
+
+determinismName :: Determinism -> String
+determinismName Det = "ordinary"
+determinismName SemiDet = "test"
+
 
 type TypeRepresentation = String
 
@@ -2226,6 +2237,7 @@ visibilityPrefix Private = ""
 determinismPrefix :: Determinism -> String
 determinismPrefix SemiDet = "test "
 determinismPrefix Det = ""
+
 
 -- |How to show an import or use declaration.
 showUse :: Int -> ModSpec -> ImportSpec -> String

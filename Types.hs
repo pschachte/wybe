@@ -48,7 +48,7 @@ validateModExportTypes thisMod = do
 loggedFinishModule :: ModSpec -> Compiler ()
 loggedFinishModule thisMod = do
     _ <- reexitModule
-    logTypes $ "**** Exiting module " ++ showModSpec thisMod
+    logTypes $ "**** Re-exiting module " ++ showModSpec thisMod
     return ()
 
 
@@ -160,6 +160,8 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Public proc with some undeclared types
                | ReasonEqual Exp Exp OptPos
                    -- ^Expression types should be equal
+               | ReasonDeterminism ProcSpec Determinism OptPos
+                   -- ^Calling a semidet proc in a det context
                | ReasonShouldnt
                    -- ^This error should never happen
                deriving (Eq, Ord)
@@ -222,6 +224,10 @@ instance Show TypeError where
         "Expressions must have compatible types:\n    "
         ++ show exp1 ++ "\n    "
         ++ show exp2
+    show (ReasonDeterminism proc detism pos) =
+        makeMessage pos $
+        "Calling " ++ determinismName detism ++ " proc "
+        ++ show proc ++ " in a det context"
     show ReasonShouldnt =
         makeMessage Nothing "Mysterious typing error"
 
@@ -1086,19 +1092,23 @@ modecheckStmt m name defPos typing delayed assigned detism
             logTypes $ "Delay mode matches: " ++ show delayMatches
             case exactMatches of
                 (match:_) -> do
-                  -- XXX If it's semidet, we need to convert to Det by adding
-                  -- a Boolean output parameter and a TestBool instruction
                   let matchProc = procInfoProc match
+                  let matchDetism = procInfoDetism match
+                  let errs =
+                        -- XXX Should postpone the error until we see if we can
+                        -- work out that the test is certain to succeed
+                        if detism < matchDetism
+                        then [ReasonDeterminism (procInfoProc match)
+                              matchDetism pos]
+                        else []
                   let args' = List.zipWith setPExpTypeFlow
                               (procInfoArgs match) args
                   let stmt' = ProcCall (procSpecMod matchProc)
                               (procSpecName matchProc)
                               (Just $ procSpecID matchProc)
-                              (procInfoDetism match)
-                              resourceful
-                              args'
+                              matchDetism resourceful args'
                   let assigned' = Set.union (pexpListOutputs args') assigned
-                  return ([maybePlace stmt' pos],delayed,assigned',[])
+                  return ([maybePlace stmt' pos],delayed,assigned',errs)
                 [] -> if delayMatches
                       then do
                         logTypes $ "delaying call: " ++ ": " ++ show stmt

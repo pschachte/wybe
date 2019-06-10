@@ -4,6 +4,10 @@
 * `test-cases/stmt_if.wybe`
 * `test-cases/tests.wybe`
 * Have wybemk build executable without -f flag when .o file exists
+* Rework mode checking to treat any argument with any outputs as an
+  output, and to handle any inputs that are part of an output argument
+  by producing the output and then testing for equality with the input.
+
 
 ## Documentation:
 * Write Wybe intro
@@ -47,6 +51,7 @@
    of uninitialised variables
 * Type and mode check foreign call arguments for llvm and lpvm calls;
   don't abort compiler on errors.
+* May want to delay determinism checking until we do inlining, so
 
 
 ## Complete the language:
@@ -102,6 +107,8 @@
 * Investigate situation calculus
     * Should resources be called "fluents"?
     * Does S.C. suggest how resources should be split up and sewn back together?
+* Support argument annotation demanding that value not be cloned (it can
+  be shared and not mutated, or mutated and not shared)
 
 
 ## Library:
@@ -122,6 +129,8 @@
 ## Optimisation:
 * Update caller counts when inlining proc calls, and don't generate code for
   uncalled private procs
+* Generalise common subexpression handling to avoid repeated
+  *equivalent* code, such as testing x/=y after already testing x=y.
 * Extend read-after-write to support read with intervening write with different
   offset
 * Keep track of bounds on tags to avoid unnecessary tests and allow tag switches
@@ -133,6 +142,10 @@
 * Inter-procedure common sub-expression elimination
 * Code hoisting
 * Destructive update transformation (CTGC)
+* Last call modulo construction optimisation (transform proc output
+  into input of the address to store the output in, and then construct
+  the output with uninitialised field(s), and pass the address(es)
+  as argument(s) in the recursive call)
 * delay instructions until their outputs are needed
     * delay into one arm of a branch if only one arm needs the outputs
 
