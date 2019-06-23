@@ -73,21 +73,21 @@ aliasProcBottomUp pspec = do
     oldDef <- getProcDef pspec
     let (ProcDefPrim _ _ oldAnalysis) = procImpln oldDef
     -- Update alias analysis info to this proc
-    updateProcDefM checkEscapeDef pspec
+    updateProcDefM aliasProcDef pspec
     -- Get the new analysis info from the updated proc
     newDef <- getProcDef pspec
     let (ProcDefPrim _ _ newAnalysis) = procImpln newDef
     -- And compare if the alias map changed.
     return $ areDifferentMaps (procArgAliasMap oldAnalysis) (procArgAliasMap newAnalysis)
     -- ^XXX wrong way to do this. Need to change type signatures of a bunch of
-    -- functions start from checkEscapeDef which is called by updateProcDefM
+    -- functions start from aliasProcDef which is called by updateProcDefM
 
 
 -- Check if any argument become stale in this (not inlined) proc call
 -- Return updated ProcDef and a flag (indicating if proc analysis info changed)
--- XXX checkEscapeDef :: ProcDef -> Compiler (ProcDef, a)
-checkEscapeDef :: ProcDef -> Compiler ProcDef
-checkEscapeDef def
+-- XXX aliasProcDef :: ProcDef -> Compiler (ProcDef, a)
+aliasProcDef :: ProcDef -> Compiler ProcDef
+aliasProcDef def
     | not (procInline def) = do
         let (ProcDefPrim caller body oldAnalysis) = procImpln def
         logAlias $ show caller
@@ -109,7 +109,7 @@ checkEscapeDef def
                             procArgAliasMap = aliaseMap3
                         }
         return $ def { procImpln = ProcDefPrim caller body newAnalysis }
-checkEscapeDef def = return def -- ^XXX return (def, False)
+aliasProcDef def = return def -- ^XXX return (def, False)
 
 
 -- Check alias created by prims of caller proc
