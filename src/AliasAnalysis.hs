@@ -98,8 +98,7 @@ aliasProcDef def
         -- (3) Clean up summary of aliases by removing phantom params
         let nonePhantomParams = protoNonePhantomParams caller
         -- ^nonePhantomParams is a list of formal params of this caller
-        let aliaseMap3 = Map.filterWithKey (\k _ -> List.elem
-                                    k nonePhantomParams) aliaseMap2
+        let aliaseMap3 = removeFromUf (Set.fromList nonePhantomParams) aliaseMap2
         -- Some logging
         logAlias $ "\n^^^  after analyse prims:    " ++ show aliaseMap1
         logAlias $ "^^^  after analyse forks:    " ++ show aliaseMap2
@@ -167,7 +166,7 @@ aliasedByFork caller body aliasMap = do
     case fork of
         PrimFork _ _ _ fBodies -> do
             logAlias ">>> Forking:"
-            foldM (\amap currBody -> do
+            foldM (\amap currBody ->
                     aliasedByPrims caller currBody amap >>=
                         aliasedByFork caller currBody
                 ) aliasMap fBodies

@@ -348,19 +348,20 @@ connectedToOthers uf val =
     in not (List.null ufList')
 
 
+-- Remove key/root from map
 removeFromUf :: (Ord a) => Set a -> UnionFind a -> UnionFind a
 removeFromUf toBeRemoved unionFind
     | Set.null toBeRemoved = unionFind
     | otherwise = unionFind3
         where
             -- In case the key is in toBeRemoved, we cleanup these keys as well
-            (unionFind1, rootMap1) = Map.foldrWithKey (_convertUfKey toBeRemoved)
-                                (initUnionFind, Map.empty) unionFind
+            unionFind1 = Map.foldrWithKey (_convertUfKey toBeRemoved)
+                            initUnionFind unionFind
             -- Cleanup root that is in toBeRemoved set and gather a mapping from
             -- the removed root to the new root
-            (unionFind2, rootMap2) =
+            (unionFind2, _) =
                 Map.foldrWithKey (_convertUfRoot toBeRemoved)
-                                (initUnionFind, rootMap1) unionFind1
+                                (initUnionFind, Map.empty) unionFind1
             -- Now all variables in toBeRemoved would be converted to map to
             -- itself;
             -- So we'll need to remove them from the map
@@ -401,21 +402,11 @@ _convertUfRoot aSet k info (uf, rootMap) =
     else (Map.insert k info uf, rootMap)
 
 -- Similar to above - but converting key instead
-_convertUfKey :: (Ord a) => Set a -> a -> UFInfo a -> (UnionFind a, Map a a)
-                        -> (UnionFind a, Map a a)
-_convertUfKey aSet k info (uf, rootMap) =
-    if Set.member k aSet && k /= root info
-        then (uf, rootMap)
-        else (Map.insert k info uf, rootMap)
-    -- if Set.member k aSet && Map.member k rootMap then
-    --     -- can find mapping to newKey
-    --     let newKey = Map.lookup k rootMap
-    --     in case newKey of
-    --         Just nk -> (Map.insert nk info uf, rootMap)
-    --         _       -> (Map.insert k info uf, rootMap)
-    -- else
-    --     -- (uf, rootMap) -- ^TODO: Verify this!
-    --     (Map.insert k info uf, rootMap)
+_convertUfKey :: (Ord a) => Set a -> a -> UFInfo a -> UnionFind a -> UnionFind a
+_convertUfKey aSet k info uf =
+    if Set.member k aSet
+        then uf
+        else Map.insert k info uf
 
 -- Similar to above - but filtering out item that is in aSet and its key and
 -- root are same
