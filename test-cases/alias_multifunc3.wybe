@@ -4,15 +4,13 @@ use position
 
 public proc replicate1(pa:position, ?pb:position) use !io
     ?pb = pa
-    !print("expect pb is 10? ")
-    !println(pb.x)
 
     x(!pa, 1111)
     !println("--- Inside replicate1:")
     !print("expect pa(1111,10):")
     !printPosition(pa)
     !print("expect pb(10,10):")
-    !printPosition(pa)
+    !printPosition(pb)
 end
 
 ?p1 = position(10,10)
