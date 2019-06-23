@@ -14,11 +14,7 @@ The reason is in `wybe.wybe`, !nl is redundant in println(x:string) proc as the 
 * `test-cases/type_list.wybe` gets "Internal error: Semidet proc call {test type_list.intlist.<0>tail(x:type_list.intlist @type_list:9:43, ?tmp$4:type_list.intlist @type_list:9:38)} in a Det context"
 * `test-cases/io.wybe` gets "Error detected during generating low level code in io; Uninitialised variable 'wybe.io$io'"
 * `test-cases/stmt_if.wybe` Internal error: Local variable not in scope: "r#0"
-* `test-cases/escape3.wybe` should alloc a new space to p2
-* `test-cases/escape_recursion1.wybe` should report compiler error if there's a
-  false condition branh in if statement
-* `test-cases/escape6.wybe` get segmentation fault
-* `test-cases/escapse_data.wybe` which imports `test-cases/student.wybe` get lots of type errors
+
 
 # Documentation:
 * Write Wybe intro
