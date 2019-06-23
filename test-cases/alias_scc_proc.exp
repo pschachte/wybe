@@ -14,17 +14,19 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#7:wybe.phantom): AliasPairs: []
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#8:wybe.phantom): AliasPairs: []
     foreign lpvm alloc(16:wybe.int, ?tmp$3#0:position.position)
     foreign lpvm mutate(~tmp$3#0:position.position, ?tmp$4#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 1:wybe.int)
     foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$0#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 1:wybe.int)
     alias_scc_proc.foo<0>(tmp$0#0:position.position, ?p2#0:position.position, ?p3#0:position.position, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @alias_scc_proc:29:2
-    foreign c print_string("p1:":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:92:41
-    position.printPosition<0>(~tmp$0#0:position.position, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @alias_scc_proc:32:2
-    foreign c print_string("p2:":wybe.string, ~#wybe.io$io#3:wybe.phantom, ?#wybe.io$io#4:wybe.phantom) @wybe:92:41
-    position.printPosition<0>(~p2#0:position.position, ~#wybe.io$io#4:wybe.phantom, ?#wybe.io$io#5:wybe.phantom) @alias_scc_proc:34:2
-    foreign c print_string("p3:":wybe.string, ~#wybe.io$io#5:wybe.phantom, ?#wybe.io$io#6:wybe.phantom) @wybe:92:41
-    position.printPosition<0>(~p3#0:position.position, ~#wybe.io$io#6:wybe.phantom, ?#wybe.io$io#7:wybe.phantom) @alias_scc_proc:36:2
+    foreign c print_string("--- After calling foo: ":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:92:41
+    foreign c putchar('\n':wybe.char, ~tmp$8#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:78:28
+    foreign c print_string("expect p1(1,1):":wybe.string, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @wybe:92:41
+    position.printPosition<0>(~tmp$0#0:position.position, ~#wybe.io$io#3:wybe.phantom, ?#wybe.io$io#4:wybe.phantom) @alias_scc_proc:33:2
+    foreign c print_string("expect p2(2,2):":wybe.string, ~#wybe.io$io#4:wybe.phantom, ?#wybe.io$io#5:wybe.phantom) @wybe:92:41
+    position.printPosition<0>(~p2#0:position.position, ~#wybe.io$io#5:wybe.phantom, ?#wybe.io$io#6:wybe.phantom) @alias_scc_proc:35:2
+    foreign c print_string("expect p3(3,3):":wybe.string, ~#wybe.io$io#6:wybe.phantom, ?#wybe.io$io#7:wybe.phantom) @wybe:92:41
+    position.printPosition<0>(~p3#0:position.position, ~#wybe.io$io#7:wybe.phantom, ?#wybe.io$io#8:wybe.phantom) @alias_scc_proc:37:2
 
 
 bar > public (1 calls)
@@ -77,7 +79,7 @@ foo > public (2 calls)
         foreign lpvm mutate(~tmp$13#0:position.position, ?tmp$14#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 3:wybe.int)
         foreign lpvm mutate(~tmp$14#0:position.position, ?tmp$1#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 3:wybe.int)
         foreign llvm move(tmp$1#0:position.position, ?p3#0:position.position)
-        foreign c print_string("p3:":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:92:41
+        foreign c print_string("--- Inside foo: expect p3(3,3):":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:92:41
         position.printPosition<0>(~tmp$1#0:position.position, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @alias_scc_proc:10:22
 
 --------------------------------------------------
@@ -186,14 +188,17 @@ AFTER LLVM IR:
 ; ModuleID = 'alias_scc_proc'
 source_filename = "test-cases/alias_scc_proc.wybe"
 
-@alias_scc_proc.12 = constant [4 x i8] c"p3:\00"
-@alias_scc_proc.11 = constant [4 x i8] c"p2:\00"
-@alias_scc_proc.10 = constant [4 x i8] c"p1:\00"
-@alias_scc_proc.34 = constant [4 x i8] c"p3:\00"
+@alias_scc_proc.13 = constant [16 x i8] c"expect p3(3,3):\00"
+@alias_scc_proc.12 = constant [16 x i8] c"expect p2(2,2):\00"
+@alias_scc_proc.11 = constant [16 x i8] c"expect p1(1,1):\00"
+@alias_scc_proc.10 = constant [24 x i8] c"--- After calling foo: \00"
+@alias_scc_proc.35 = constant [32 x i8] c"--- Inside foo: expect p3(3,3):\00"
 
 declare void @"position.printPosition<0>"(i64*) local_unnamed_addr
 
 declare void @print_string(i8*) local_unnamed_addr
+
+declare void @putchar(i8) local_unnamed_addr
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
 
@@ -208,11 +213,13 @@ entry:
   %4 = tail call { i64*, i64* } @"alias_scc_proc.foo<0>"(i64* %1)
   %5 = extractvalue { i64*, i64* } %4, 0
   %6 = extractvalue { i64*, i64* } %4, 1
-  tail call void @print_string(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @alias_scc_proc.10, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @alias_scc_proc.10, i64 0, i64 0))
+  tail call void @putchar(i8 10)
+  tail call void @print_string(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias_scc_proc.11, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %1)
-  tail call void @print_string(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @alias_scc_proc.11, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias_scc_proc.12, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %5)
-  tail call void @print_string(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @alias_scc_proc.12, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias_scc_proc.13, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %6)
   ret i32 0
 }
@@ -248,7 +255,7 @@ if.then:                                          ; preds = %entry
   %4 = getelementptr i8, i8* %2, i64 8
   %5 = bitcast i8* %4 to i64*
   store i64 3, i64* %5, align 4
-  tail call void @print_string(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @alias_scc_proc.34, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([32 x i8], [32 x i8]* @alias_scc_proc.35, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %3)
   %6 = insertvalue { i64*, i64* } undef, i64* %0, 0
   %7 = insertvalue { i64*, i64* } %6, i64* %3, 1

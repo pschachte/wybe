@@ -32,7 +32,7 @@ AFTER EVERYTHING:
 
 
 simpleSlice > public (1 calls)
-0: simpleSlice(tr#0:mytree.tree, ?$#0:mytree.tree): AliasPairs: []
+0: simpleSlice(tr#0:mytree.tree, ?$#0:mytree.tree): AliasPairs: [($#0,tr#0)]
     foreign lpvm cast(tr#0:mytree.tree, ?tmp$9#0:wybe.int)
     foreign llvm icmp ne(~tmp$9#0:wybe.int, 0:wybe.int, ?tmp$10#0:wybe.bool)
     case ~tmp$10#0:wybe.bool of

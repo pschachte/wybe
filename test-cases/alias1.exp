@@ -40,7 +40,7 @@ bar > public (1 calls)
     position.printPosition<0>(tmp$0#0:position.position, ~#wybe.io$io#3:wybe.phantom, ?#wybe.io$io#4:wybe.phantom) @alias1:35:4
     foreign c print_string("expect p2(101,102):":wybe.string, ~#wybe.io$io#4:wybe.phantom, ?#wybe.io$io#5:wybe.phantom) @wybe:92:41
     position.printPosition<0>(p2#0:position.position, ~#wybe.io$io#5:wybe.phantom, ?#wybe.io$io#6:wybe.phantom) @alias1:37:4
-    foreign lpvm mutate(~%p2#0:position.position, ?%p2#1:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 555:wybe.int)
+    foreign lpvm mutate(~%p2#0:position.position, ?%p2#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, 555:wybe.int)
     foreign c print_string("--- Inside bar, after calling x(!p2, 555): ":wybe.string, ~#wybe.io$io#6:wybe.phantom, ?tmp$17#0:wybe.phantom) @wybe:92:41
     foreign c putchar('\n':wybe.char, ~tmp$17#0:wybe.phantom, ?#wybe.io$io#7:wybe.phantom) @wybe:78:28
     foreign c print_string("expect p1(101,102):":wybe.string, ~#wybe.io$io#7:wybe.phantom, ?#wybe.io$io#8:wybe.phantom) @wybe:92:41
@@ -67,7 +67,7 @@ baz > public (1 calls)
     foreign lpvm mutate(~tmp$19#0:position.position, ?tmp$1#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~tmp$2#0:wybe.int)
     foreign c print_string("expect p3(33333333,102):":wybe.string, ~#wybe.io$io#6:wybe.phantom, ?#wybe.io$io#7:wybe.phantom) @wybe:92:41
     position.printPosition<0>(tmp$1#0:position.position, ~#wybe.io$io#7:wybe.phantom, ?#wybe.io$io#8:wybe.phantom) @alias1:60:4
-    foreign lpvm mutate(~tmp$0#0:position.position, ?%p1#1:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 555:wybe.int)
+    foreign lpvm mutate(~tmp$0#0:position.position, ?%p1#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, 555:wybe.int)
     foreign c print_string("--- Inside baz, after calling x(!p1, 555): ":wybe.string, ~#wybe.io$io#8:wybe.phantom, ?tmp$27#0:wybe.phantom) @wybe:92:41
     foreign c putchar('\n':wybe.char, ~tmp$27#0:wybe.phantom, ?#wybe.io$io#9:wybe.phantom) @wybe:78:28
     foreign c print_string("expect p1(555,102):":wybe.string, ~#wybe.io$io#9:wybe.phantom, ?#wybe.io$io#10:wybe.phantom) @wybe:92:41
@@ -90,7 +90,7 @@ foo > public (1 calls)
     position.printPosition<0>(tmp$0#0:position.position, ~#wybe.io$io#3:wybe.phantom, ?#wybe.io$io#4:wybe.phantom) @alias1:16:4
     foreign c print_string("expect p2(101,102):":wybe.string, ~#wybe.io$io#4:wybe.phantom, ?#wybe.io$io#5:wybe.phantom) @wybe:92:41
     position.printPosition<0>(p2#0:position.position, ~#wybe.io$io#5:wybe.phantom, ?#wybe.io$io#6:wybe.phantom) @alias1:18:4
-    foreign lpvm mutate(~tmp$0#0:position.position, ?%p1#1:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 555:wybe.int)
+    foreign lpvm mutate(~tmp$0#0:position.position, ?%p1#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, 555:wybe.int)
     foreign c print_string("--- Inside foo, after calling x(!p1, 555): ":wybe.string, ~#wybe.io$io#6:wybe.phantom, ?tmp$17#0:wybe.phantom) @wybe:92:41
     foreign c putchar('\n':wybe.char, ~tmp$17#0:wybe.phantom, ?#wybe.io$io#7:wybe.phantom) @wybe:78:28
     foreign c print_string("expect p1(555,102):":wybe.string, ~#wybe.io$io#7:wybe.phantom, ?#wybe.io$io#8:wybe.phantom) @wybe:92:41
@@ -100,7 +100,7 @@ foo > public (1 calls)
 
 
 replicate > public (3 calls)
-0: replicate(p1#0:position.position, ?p2#0:position.position, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): AliasPairs: []
+0: replicate(p1#0:position.position, ?p2#0:position.position, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): AliasPairs: [(p1#0,p2#0)]
     foreign lpvm alloc(16:wybe.int, ?tmp$4#0:position.position)
     foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$5#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp$5#0:position.position, ?tmp$0#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 0:wybe.int)
@@ -218,27 +218,27 @@ source_filename = "test-cases/alias1.wybe"
 @alias1.3 = constant [29 x i8] c"-------------- Calling baz: \00"
 @alias1.2 = constant [29 x i8] c"-------------- Calling bar: \00"
 @alias1.1 = constant [29 x i8] c"-------------- Calling foo: \00"
-@alias1.18 = constant [20 x i8] c"expect p2(555,102):\00"
-@alias1.17 = constant [20 x i8] c"expect p1(101,102):\00"
-@alias1.16 = constant [44 x i8] c"--- Inside bar, after calling x(!p2, 555): \00"
+@alias1.22 = constant [20 x i8] c"expect p2(555,102):\00"
+@alias1.21 = constant [20 x i8] c"expect p1(101,102):\00"
+@alias1.20 = constant [44 x i8] c"--- Inside bar, after calling x(!p2, 555): \00"
 @alias1.13 = constant [20 x i8] c"expect p2(101,102):\00"
 @alias1.12 = constant [20 x i8] c"expect p1(101,102):\00"
 @alias1.11 = constant [17 x i8] c"--- Inside bar: \00"
-@alias1.43 = constant [25 x i8] c"expect p3(33333333,102):\00"
-@alias1.42 = constant [20 x i8] c"expect p2(101,102):\00"
-@alias1.41 = constant [20 x i8] c"expect p1(555,102):\00"
-@alias1.40 = constant [44 x i8] c"--- Inside baz, after calling x(!p1, 555): \00"
-@alias1.37 = constant [25 x i8] c"expect p3(33333333,102):\00"
-@alias1.27 = constant [20 x i8] c"expect p2(101,102):\00"
-@alias1.26 = constant [20 x i8] c"expect p1(101,102):\00"
-@alias1.25 = constant [17 x i8] c"--- Inside baz: \00"
-@alias1.57 = constant [20 x i8] c"expect p2(101,102):\00"
-@alias1.56 = constant [20 x i8] c"expect p1(555,102):\00"
-@alias1.55 = constant [44 x i8] c"--- Inside foo, after calling x(!p1, 555): \00"
-@alias1.52 = constant [20 x i8] c"expect p2(101,102):\00"
-@alias1.51 = constant [20 x i8] c"expect p1(101,102):\00"
-@alias1.50 = constant [17 x i8] c"--- Inside foo: \00"
-@alias1.64 = constant [13 x i8] c"random print\00"
+@alias1.51 = constant [25 x i8] c"expect p3(33333333,102):\00"
+@alias1.50 = constant [20 x i8] c"expect p2(101,102):\00"
+@alias1.49 = constant [20 x i8] c"expect p1(555,102):\00"
+@alias1.48 = constant [44 x i8] c"--- Inside baz, after calling x(!p1, 555): \00"
+@alias1.41 = constant [25 x i8] c"expect p3(33333333,102):\00"
+@alias1.31 = constant [20 x i8] c"expect p2(101,102):\00"
+@alias1.30 = constant [20 x i8] c"expect p1(101,102):\00"
+@alias1.29 = constant [17 x i8] c"--- Inside baz: \00"
+@alias1.69 = constant [20 x i8] c"expect p2(101,102):\00"
+@alias1.68 = constant [20 x i8] c"expect p1(555,102):\00"
+@alias1.67 = constant [44 x i8] c"--- Inside foo, after calling x(!p1, 555): \00"
+@alias1.60 = constant [20 x i8] c"expect p2(101,102):\00"
+@alias1.59 = constant [20 x i8] c"expect p1(101,102):\00"
+@alias1.58 = constant [17 x i8] c"--- Inside foo: \00"
+@alias1.76 = constant [13 x i8] c"random print\00"
 
 declare void @putchar(i8) local_unnamed_addr
 
@@ -249,6 +249,8 @@ declare void @"position.printPosition<0>"(i64*) local_unnamed_addr
 declare void @print_int(i64) local_unnamed_addr
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define i32 @alias1.main() local_unnamed_addr {
 entry:
@@ -272,20 +274,24 @@ entry:
   %2 = getelementptr i8, i8* %0, i64 8
   %3 = bitcast i8* %2 to i64*
   store i64 102, i64* %3, align 4
-  %4 = tail call i64* @"alias1.replicate<0>"(i64* %1)
+  %"p2#0" = tail call i64* @"alias1.replicate<0>"(i64* %1)
   tail call void @print_string(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @alias1.11, i64 0, i64 0))
   tail call void @putchar(i8 10)
   tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.12, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %1)
   tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.13, i64 0, i64 0))
-  tail call void @"position.printPosition<0>"(i64* %4)
-  store i64 555, i64* %4, align 4
-  tail call void @print_string(i8* getelementptr inbounds ([44 x i8], [44 x i8]* @alias1.16, i64 0, i64 0))
+  tail call void @"position.printPosition<0>"(i64* %"p2#0")
+  %4 = tail call i8* @wybe_malloc(i32 16)
+  %5 = bitcast i8* %4 to i64*
+  %6 = bitcast i64* %"p2#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %4, i8* %6, i32 16, i1 false)
+  store i64 555, i64* %5, align 4
+  tail call void @print_string(i8* getelementptr inbounds ([44 x i8], [44 x i8]* @alias1.20, i64 0, i64 0))
   tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.17, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.21, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %1)
-  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.18, i64 0, i64 0))
-  tail call void @"position.printPosition<0>"(i64* %4)
+  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.22, i64 0, i64 0))
+  tail call void @"position.printPosition<0>"(i64* %5)
   ret void
 }
 
@@ -298,11 +304,11 @@ entry:
   %3 = bitcast i8* %2 to i64*
   store i64 102, i64* %3, align 4
   %4 = tail call i64* @"alias1.replicate<0>"(i64* %1)
-  tail call void @print_string(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @alias1.25, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @alias1.29, i64 0, i64 0))
   tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.26, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.30, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %1)
-  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.27, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.31, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %4)
   %5 = getelementptr i64, i64* %4, i64 1
   %6 = load i64, i64* %5, align 4
@@ -312,16 +318,19 @@ entry:
   %9 = getelementptr i8, i8* %7, i64 8
   %10 = bitcast i8* %9 to i64*
   store i64 %6, i64* %10, align 4
-  tail call void @print_string(i8* getelementptr inbounds ([25 x i8], [25 x i8]* @alias1.37, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([25 x i8], [25 x i8]* @alias1.41, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %8)
-  store i64 555, i64* %1, align 4
-  tail call void @print_string(i8* getelementptr inbounds ([44 x i8], [44 x i8]* @alias1.40, i64 0, i64 0))
+  %11 = tail call i8* @wybe_malloc(i32 16)
+  %12 = bitcast i8* %11 to i64*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %11, i8* %0, i32 16, i1 false)
+  store i64 555, i64* %12, align 4
+  tail call void @print_string(i8* getelementptr inbounds ([44 x i8], [44 x i8]* @alias1.48, i64 0, i64 0))
   tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.41, i64 0, i64 0))
-  tail call void @"position.printPosition<0>"(i64* %1)
-  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.42, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.49, i64 0, i64 0))
+  tail call void @"position.printPosition<0>"(i64* %12)
+  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.50, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %4)
-  tail call void @print_string(i8* getelementptr inbounds ([25 x i8], [25 x i8]* @alias1.43, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([25 x i8], [25 x i8]* @alias1.51, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %8)
   ret void
 }
@@ -335,18 +344,21 @@ entry:
   %3 = bitcast i8* %2 to i64*
   store i64 102, i64* %3, align 4
   %"p2#0" = tail call i64* @"alias1.replicate<0>"(i64* %1)
-  tail call void @print_string(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @alias1.50, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @alias1.58, i64 0, i64 0))
   tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.51, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.59, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %1)
-  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.52, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.60, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %"p2#0")
-  store i64 555, i64* %1, align 4
-  tail call void @print_string(i8* getelementptr inbounds ([44 x i8], [44 x i8]* @alias1.55, i64 0, i64 0))
+  %4 = tail call i8* @wybe_malloc(i32 16)
+  %5 = bitcast i8* %4 to i64*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %4, i8* %0, i32 16, i1 false)
+  store i64 555, i64* %5, align 4
+  tail call void @print_string(i8* getelementptr inbounds ([44 x i8], [44 x i8]* @alias1.67, i64 0, i64 0))
   tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.56, i64 0, i64 0))
-  tail call void @"position.printPosition<0>"(i64* %1)
-  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.57, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.68, i64 0, i64 0))
+  tail call void @"position.printPosition<0>"(i64* %5)
+  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.69, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %"p2#0")
   ret void
 }
@@ -356,7 +368,7 @@ entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
   %1 = bitcast i8* %0 to i64*
   call void @llvm.memset.p0i8.i64(i8* %0, i8 0, i64 16, i32 4, i1 false)
-  tail call void @print_string(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @alias1.64, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @alias1.76, i64 0, i64 0))
   %2 = load i64, i64* %1, align 4
   tail call void @print_int(i64 %2)
   tail call void @putchar(i8 10)
