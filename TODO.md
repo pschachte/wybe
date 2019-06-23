@@ -2,18 +2,17 @@
 
 * Assertion failed in `test-cases/multictr.wybe`
 * `test-cases/stmt_for.wybe` gets "Internal error: Generator expression producing unexpected vars?"
-* `test-cases/stmt_when.wybe` and `test-cases/stmt_unless.wybe`: compiled but not generating expected outputs
+* `test-cases/stmt_if.wybe` Internal error: Local variable not in scope: "r#0"
 * `test-cases/proc_gcd.wybe` gets "Internal error: Local variable not in scope: "r#0""
 * `test-cases/multi_out.wybe` gets "clang: error: linker command failed with exit code 1 (use -v to see invocation)..." - should fix accessing to multi return variables
 * `test-cases/exp_print.wybe` when println a double quoted string, it always produces an extra newline:
 
 The reason is in `wybe.wybe`, !nl is redundant in println(x:string) proc as the puts() function in C has a new line character appended to the output already. In turn, if we remove the !nl, then print() and println() are duplicated to each other.
 
-* `test-cases/alias.wybe` Still gets seg faults; cannot access data structure fields
+* `test-cases/alias.wybe` Still gets seg faults; cannot access data structure fields
 * `test-cases/import.wybe` Still get the error "No main (top-level) code in module 'import'; not building executable"
 * `test-cases/type_list.wybe` gets "Internal error: Semidet proc call {test type_list.intlist.<0>tail(x:type_list.intlist @type_list:9:43, ?tmp$4:type_list.intlist @type_list:9:38)} in a Det context"
 * `test-cases/io.wybe` gets "Error detected during generating low level code in io; Uninitialised variable 'wybe.io$io'"
-* `test-cases/stmt_if.wybe` Internal error: Local variable not in scope: "r#0"
 
 
 # Documentation:
