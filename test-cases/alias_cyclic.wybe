@@ -1,4 +1,4 @@
-# transitive aliasing data structures in nested proc calls
+# transitive aliasing data structures in recursive proc calls
 
 use position
 
@@ -24,12 +24,10 @@ public proc bar use !io
   ?p1 = position(100,900)
   !updateX(p1, ?p2)
 
-  !println("p1:")
-  !println(p1.x)
-  !println(p1.y)
-  !println("p2:")
-  !println(p2.x)
-  !println(p2.y)
+  !print("p1(100,900):")
+  !printPosition(p1)
+  !print("p2(102,900):")
+  !printPosition(p2)
 end
 
 !bar

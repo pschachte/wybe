@@ -6,10 +6,10 @@ use alias_mfoo
 ?p1 = position(1, 1)
 !foo(p1, ?p2, ?p3)
 
-!print("p1:")
+!print("expect p1(2,2)")
 !printPosition(p1)
-!print("p2:")
+!print("expect p2(2,2)")
 !printPosition(p2)
-!print("p3:")
-!printPosition(p3) # (0,0)????
+!print("expect p3(3,3)")
+!printPosition(p3)
 

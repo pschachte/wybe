@@ -3,7 +3,7 @@
 use position
 use alias_mfoo
 
-# Expected Alias Pairs: [(p1, p2)]
+# Expected Alias Pairs: [(p1, p3)]
 public proc bar(p1:position, ?p3:position) use !io
     if p1.y > 1 :: ?p3 = p1
     | true :: ?tmp = p1.y

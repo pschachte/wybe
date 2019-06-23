@@ -3,14 +3,12 @@ use position
 # cannot say whether p1 is fresh or not because it's passed in from outside
 # p2 is fresh in this proc
 public proc pcopy(p1:position, ?p2:position) use !io
-  !println("in proc")
-  !println(p1.x)
-  !println(p1.y)
   ?p2 = position(0,0)
   x(!p2, p1.x)
   y(!p2, p1.y)
-  !println(p2.x)
-  !println(p2.y)
+  !println("--- Inside pcopy: ")
+  !print("expect p2(0,20):")
+  !printPosition(p2)
 end
 
 # copy as a function
@@ -20,5 +18,6 @@ public func fcopy(p1:position):position =
 
 !println("copy a position")
 !pcopy(position(0,20), ?r)
-!println(x(r))
-!println(y(r))
+!println("--- After calling pcopy: ")
+!print("expect r(0,20):")
+!printPosition(r)

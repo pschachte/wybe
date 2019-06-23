@@ -1,5 +1,4 @@
 # Recursive data type:
-# the entire data structure tl and tr escape
 
 use mytree
 

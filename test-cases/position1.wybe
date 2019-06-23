@@ -4,4 +4,5 @@ use position
 ?posA = position(111, 222)
 ?posB = position(333, 444)
 y(!posA, 112)
-!println(posA.y)
+!print("expect posA(112,222):")
+!printPosition(posA)

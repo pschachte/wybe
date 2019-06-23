@@ -4,16 +4,21 @@
 
 use mytree
 
-# tl is alised to the return result
+# put tl as result's left tree node
 public func simpleMerge(tl:tree):tree = node(tl, 200, empty)
 
 ?t1 = node(empty, 1, empty)
 ?t = simpleMerge(t1)
+!println("expect t -  1 200:")
 !printTree(t)
+!println("")
 
 if t1 = node(?l, ?k, ?r) :: ?t1 = node(l, 1000, r)
 end
-#if key(t1, ?k) :: ?k = 800
-#end
+
+!println("expect t1 - 1000:")
 !printTree(t1)
+!println("")
+!println("expect t1 - 1 200:")
 !printTree(t)
+!println("")

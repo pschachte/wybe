@@ -12,6 +12,5 @@ end
 
 ?tr = node(empty, 1, empty)
 
-if lookup(1, tr, ?found) :: !print("found")
-| true :: !print("not found")
-end
+lookup(1, tr, ?found)
+!print(found)

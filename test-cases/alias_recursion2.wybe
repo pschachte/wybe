@@ -9,10 +9,9 @@ public proc printMyNode(nd:mynode) use !io
 end
 
 # reverse linked list and return the new head
-public proc reverseList(head:mynode, ?resutl1:mynode)
-    if head = empty :: ?resutl1 = head
-    | head = mynode(?data1, ?next1) ::
-        if next1 = empty :: ?resutl1 = head
+public proc reverseList(head:mynode, ?result1:mynode)
+    if head = mynode(?data1, ?next1) ::
+        if next1 = empty :: ?result1 = head
         | true ::
             reverseList(next1, ?result2)
             ?t1 = next1
@@ -20,6 +19,7 @@ public proc reverseList(head:mynode, ?resutl1:mynode)
             next(!head, empty)
             ?result1 = result2
         end
+    | true :: ?result1 = head
     end
 end
 

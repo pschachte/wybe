@@ -3,10 +3,11 @@ use position
 # posB copy posA's y value
 ?posA = position(111, 222)
 ?posB = position(333, posA.y)
-!println("posA y field")
-!print(posA.y)
+!print("expect posA(111,222):")
+!printPosition(posA)
+
 y(!posA, 20000)
-!println("posA new y field")
-!print(posA.y)
-!println("posB y field")
-!print(posB.y)
+!print("expect posA(111,20000):")
+!printPosition(posA)
+!print("expect posB(333,222):")
+!printPosition(posB)

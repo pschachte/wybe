@@ -5,13 +5,16 @@
 
 use mytree
 
+# return the left tree node
 public func simpleSlice(tr:tree):tree =
   if tr = node(?l, ?k, ?r) then l
   else node(empty, -1, empty)
 
 ?t1 = node(node(empty, 100, empty), 200, empty)
 ?t = simpleSlice(t1)
+!println("expect t - 100:")
 !printTree(t)
+!println("")
 
 #?t1 = node(node(empty, -100, empty), 200, empty)
 #!print("t1")

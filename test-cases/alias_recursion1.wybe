@@ -12,32 +12,30 @@ public proc if_test(a:position, b:position, ?r:position)
     end
 end
 
-proc printPos(name:string, p:position) use !io
-  !print(name)
-  !print(": ")
-  !print(p.x)
-  !print(" ")
-  !println(p.y)
-end
-
 ?pa = position(100, 101)
 ?pb = position(-200, -201)
 !println("--- before proc call: ")
-!printPos("pa", pa)
-!printPos("pb", pb)
+!print("expect pa(100,101):")
+!printPosition(pa)
+!print("expect pb(-200,-201):")
+!printPosition(pb)
 
 if_test(pa, pb, ?r)
 
-!println("--- after proc call: ")
-!printPos("pa", pa)
-!printPos("pb", pb)
+!println("--- after calling if_test, pa and pb should be the same: ")
+!print("expect pa(100,101):")
+!printPosition(pa)
+!print("expect pb(-200,-201):")
+!printPosition(pb)
 
-!println("--- result - expected to be same as pb: ")
-!printPos("r", r)
+!println("--- expected result to be same as pb: ")
+!print("expect r(-200,-201):")
+!printPosition(r)
 
 !println("--- modify pa.x: ")
 x(!pa, -1000)
-!printPos("pa", pa)
+!print("expect pa(-1000,101):")
+!printPosition(pa)
 
-!println("result: ")
-!printPos("r", r)
+!print("expect r still (-200,-201):")
+!printPosition(r)
