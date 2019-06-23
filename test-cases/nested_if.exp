@@ -11,8 +11,7 @@ AFTER EVERYTHING:
   procs           : 
 
 nested_if > public (0 calls)
-0: nested_if(i#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
-
+0: nested_if(i#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): AliasPairs: []
     foreign llvm icmp eq(i#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:28:40
     case ~tmp$0#0:wybe.bool of
     0:

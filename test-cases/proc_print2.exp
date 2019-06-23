@@ -1,17 +1,17 @@
 ======================================================================
 AFTER EVERYTHING:
  Module proc_print2
-  public submods  :
-  public types    :
-  public resources:
+  public submods  : 
+  public types    : 
+  public resources: 
   public procs    : proc_print2.print2<0>
   imports         : use wybe
-  types           :
-  resources       :
-  procs           :
+  types           : 
+  resources       : 
+  procs           : 
 
 print2 > public inline (0 calls)
-0: print2(x#0:wybe.int, y#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom):
+0: print2(x#0:wybe.int, y#0:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): AliasPairs: []
     foreign c print_int(~x#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:80:38
     foreign c print_int(~y#0:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:80:38
 proc_print2

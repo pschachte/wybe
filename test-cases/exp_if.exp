@@ -12,15 +12,13 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public inline (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): Alias Pairs: []
-
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): AliasPairs: []
     exp_if.if_test<0>(3:wybe.int, ?tmp$0#0:wybe.string) @exp_if:4:8
-    foreign c print_string(~tmp$0#0:wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:88:41
+    foreign c print_string(~tmp$0#0:wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:92:41
 
 
 if_test > public (1 calls)
-0: if_test(x#0:wybe.int, ?$#0:wybe.string): Alias Pairs: []
-
+0: if_test(x#0:wybe.int, ?$#0:wybe.string): AliasPairs: []
     foreign llvm icmp sgt(~x#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:26:39
     case ~tmp$1#0:wybe.bool of
     0:

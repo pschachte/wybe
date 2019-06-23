@@ -1,0 +1,3 @@
+Internal error: Semidet proc call {test alias_recursion2.mynode.<1>next(%t1:alias_recursion2.mynode @alias_recursion2:19:18, %?t1:alias_recursion2.mynode @alias_recursion2:19:18, head:alias_recursion2.mynode @alias_recursion2:19:23)} in a Det context
+CallStack (from HasCallStack):
+  error, called at src/AST.hs:2592:17 in main:AST

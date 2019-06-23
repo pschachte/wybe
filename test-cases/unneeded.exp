@@ -11,8 +11,7 @@ AFTER EVERYTHING:
   procs           : 
 
 unneeded > inline (0 calls)
-0: unneeded(x#0:wybe.int, [y#0:wybe.int], ?z#0:wybe.int, q#0:wybe.int, [?q#0:wybe.int]): Alias Pairs: []
-
+0: unneeded(x#0:wybe.int, [y#0:wybe.int], ?z#0:wybe.int, q#0:wybe.int, [?q#0:wybe.int]): AliasPairs: []
     foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?z#0:wybe.int) @wybe:13:38
 unneeded
 ======================================================================

@@ -1,0 +1,380 @@
+======================================================================
+AFTER EVERYTHING:
+ Module alias_mbar
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : alias_mbar.bar<0>
+  imports         : use alias_mfoo
+                    use position
+                    use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+bar > public (0 calls)
+0: bar(p1#0:position.position, ?p3#0:position.position, wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): AliasPairs: [(p1#0,p3#0)]
+    foreign lpvm access(p1#0:position.position, 8:wybe.int, ?tmp$0#0:wybe.int)
+    foreign llvm icmp sgt(tmp$0#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.bool) @wybe:26:39
+    case ~tmp$3#0:wybe.bool of
+    0:
+        foreign lpvm cast(1:wybe.bool, ?tmp$4#0:wybe.bool)
+        case ~tmp$4#0:wybe.bool of
+        0:
+            foreign llvm move(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom)
+
+        1:
+            foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:13:38
+            foreign lpvm mutate(~%p1#0:position.position, ?%p1#1:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~tmp$2#0:wybe.int)
+            foreign llvm move(p1#1:position.position, ?p3#0:position.position)
+            alias_mfoo.foo<0>(~p1#1:position.position, ?p2#0:position.position, ?p3#1:position.position, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @alias_mbar:12:16
+
+
+    1:
+        foreign llvm move(~p1#0:position.position, ?p3#0:position.position)
+        foreign llvm move(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom)
+
+--------------------------------------------------
+ Module alias_mfoo
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : alias_mfoo.foo<0>
+  imports         : use alias_mbar
+                    use position
+                    use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+foo > public (0 calls)
+0: foo(p1#0:position.position, ?p2#0:position.position, ?p3#0:position.position, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): AliasPairs: [(p1#0,p2#0)]
+    foreign lpvm access(p1#0:position.position, 0:wybe.int, ?tmp$0#0:wybe.int)
+    foreign llvm icmp sgt(tmp$0#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.bool) @wybe:26:39
+    case ~tmp$5#0:wybe.bool of
+    0:
+        foreign lpvm cast(1:wybe.bool, ?tmp$6#0:wybe.bool)
+        case ~tmp$6#0:wybe.bool of
+        0:
+            foreign llvm move(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom)
+
+        1:
+            foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:13:38
+            foreign lpvm mutate(~%p1#0:position.position, ?%p1#1:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, ~tmp$3#0:wybe.int)
+            alias_mbar.bar<0>(~p1#1:position.position, ?p3#0:position.position, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @alias_mfoo:14:16
+            foreign lpvm alloc(16:wybe.int, ?tmp$18#0:position.position)
+            foreign lpvm mutate(~tmp$18#0:position.position, ?tmp$19#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 2:wybe.int)
+            foreign lpvm mutate(~tmp$19#0:position.position, ?p2#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 2:wybe.int)
+
+
+    1:
+        foreign llvm move(~p1#0:position.position, ?p2#0:position.position)
+        foreign lpvm alloc(16:wybe.int, ?tmp$13#0:position.position)
+        foreign lpvm mutate(~tmp$13#0:position.position, ?tmp$14#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 3:wybe.int)
+        foreign lpvm mutate(~tmp$14#0:position.position, ?tmp$1#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 3:wybe.int)
+        foreign llvm move(tmp$1#0:position.position, ?p3#0:position.position)
+        foreign c print_string("p3:":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:92:41
+        position.printPosition<0>(~tmp$1#0:position.position, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @alias_mfoo:11:22
+
+--------------------------------------------------
+ Module position
+  public submods  : 
+  public types    : position: (position.position,"pointer")
+  public resources: 
+  public procs    : position.printPosition<0>
+                    position.position.=<0>
+                    position.position.=<1>
+                    position.position.=<2>
+                    position.position.position<0>
+                    position.position.position<1>
+                    position.position.x<0>
+                    position.position.x<1>
+                    position.position.y<0>
+                    position.position.y<1>
+  imports         : public use position.position
+                    use wybe
+  types           : position/0 (pointer)  @position:1:8
+  resources       : 
+  procs           : 
+
+printPosition > public (0 calls)
+0: printPosition(pos#0:position.position, wybe.io$io#0:wybe.phantom, ?wybe.io$io#5:wybe.phantom): AliasPairs: []
+    foreign c print_string(" (":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:92:41
+    foreign lpvm access(pos#0:position.position, 0:wybe.int, ?tmp$0#0:wybe.int)
+    foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:80:38
+    foreign c print_string(",":wybe.string, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @wybe:92:41
+    foreign lpvm access(~pos#0:position.position, 8:wybe.int, ?tmp$1#0:wybe.int)
+    foreign c print_int(~tmp$1#0:wybe.int, ~#wybe.io$io#3:wybe.phantom, ?#wybe.io$io#4:wybe.phantom) @wybe:80:38
+    foreign c print_string(")":wybe.string, ~#wybe.io$io#4:wybe.phantom, ?tmp$14#0:wybe.phantom) @wybe:92:41
+    foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?#wybe.io$io#5:wybe.phantom) @wybe:78:28
+  submodules      : position.position
+--------------------------------------------------
+ Module position.position([])
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : position.position.=<0>
+                    position.position.=<1>
+                    position.position.=<2>
+                    position.position.position<0>
+                    position.position.position<1>
+                    position.position.x<0>
+                    position.position.x<1>
+                    position.position.y<0>
+                    position.position.y<1>
+  imports         : use position
+                    use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+= > public inline (0 calls)
+0: =(?out#0:position.position, in#0:position.position): AliasPairs: []
+    foreign llvm move(~in#0:position.position, ?out#0:position.position)
+= > public inline (0 calls)
+1: =(in#0:position.position, ?out#0:position.position): AliasPairs: []
+    foreign llvm move(~in#0:position.position, ?out#0:position.position)
+= > public inline test (3 calls)
+2: =($left#0:position.position, $right#0:position.position, ?$$#0:wybe.bool): AliasPairs: []
+    foreign lpvm access($left#0:position.position, 0:wybe.int, ?$left$x#0:wybe.int)
+    foreign lpvm access(~$left#0:position.position, 8:wybe.int, ?$left$y#0:wybe.int)
+    foreign lpvm access($right#0:position.position, 0:wybe.int, ?$right$x#0:wybe.int)
+    foreign lpvm access(~$right#0:position.position, 8:wybe.int, ?$right$y#0:wybe.int)
+    foreign llvm icmp eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:28:40
+    case ~tmp$2#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?$$#0:wybe.bool) @wybe:28:40
+
+
+
+position > public inline (0 calls)
+0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:position.position): AliasPairs: []
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:position.position)
+    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, ~x#0:wybe.int)
+    foreign lpvm mutate(~%$rec#1:position.position, ?%$#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~y#0:wybe.int)
+position > public inline (4 calls)
+1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position): AliasPairs: []
+    foreign lpvm access($#0:position.position, 0:wybe.int, ?x#0:wybe.int)
+    foreign lpvm access(~$#0:position.position, 8:wybe.int, ?y#0:wybe.int)
+
+
+x > public inline (0 calls)
+0: x($rec#0:position.position, ?$#0:wybe.int): AliasPairs: []
+    foreign lpvm access(~$rec#0:position.position, 0:wybe.int, ?$#0:wybe.int)
+x > public inline (0 calls)
+1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): AliasPairs: []
+    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+
+
+y > public inline (0 calls)
+0: y($rec#0:position.position, ?$#0:wybe.int): AliasPairs: []
+    foreign lpvm access(~$rec#0:position.position, 8:wybe.int, ?$#0:wybe.int)
+y > public inline (0 calls)
+1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): AliasPairs: []
+    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+alias_mbar, alias_mfoo, position, position.position
+======================================================================
+AFTER LLVM IR:
+
+; ModuleID = 'alias_mbar'
+source_filename = "test-cases/alias_mbar.wybe"
+
+declare { i64*, i64* } @"alias_mfoo.foo<0>"(i64*) local_unnamed_addr
+
+define i64* @"alias_mbar.bar<0>"(i64*) local_unnamed_addr {
+entry:
+  %1 = getelementptr i64, i64* %0, i64 1
+  %2 = load i64, i64* %1, align 4
+  %"tmp$3#0" = icmp sgt i64 %2, 1
+  br i1 %"tmp$3#0", label %if.then, label %if.then1
+
+if.then:                                          ; preds = %entry
+  ret i64* %0
+
+if.then1:                                         ; preds = %entry
+  %"tmp$2#0" = add i64 %2, 1
+  store i64 %"tmp$2#0", i64* %1, align 4
+  %3 = tail call { i64*, i64* } @"alias_mfoo.foo<0>"(i64* nonnull %0)
+  %4 = extractvalue { i64*, i64* } %3, 1
+  ret i64* %4
+}
+
+--------------------------------------------------
+; ModuleID = 'alias_mfoo'
+source_filename = "test-cases/alias_mfoo.wybe"
+
+@alias_mfoo.10 = constant [4 x i8] c"p3:\00"
+
+declare i64* @"alias_mbar.bar<0>"(i64*) local_unnamed_addr
+
+declare void @"position.printPosition<0>"(i64*) local_unnamed_addr
+
+declare void @print_string(i8*) local_unnamed_addr
+
+declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+define { i64*, i64* } @"alias_mfoo.foo<0>"(i64*) local_unnamed_addr {
+entry:
+  %1 = load i64, i64* %0, align 4
+  %"tmp$5#0" = icmp sgt i64 %1, 1
+  br i1 %"tmp$5#0", label %if.then, label %if.then1
+
+if.then:                                          ; preds = %entry
+  %2 = tail call i8* @wybe_malloc(i32 16)
+  %3 = bitcast i8* %2 to i64*
+  store i64 3, i64* %3, align 4
+  %4 = getelementptr i8, i8* %2, i64 8
+  %5 = bitcast i8* %4 to i64*
+  store i64 3, i64* %5, align 4
+  tail call void @print_string(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @alias_mfoo.10, i64 0, i64 0))
+  tail call void @"position.printPosition<0>"(i64* %3)
+  %6 = insertvalue { i64*, i64* } undef, i64* %0, 0
+  %7 = insertvalue { i64*, i64* } %6, i64* %3, 1
+  ret { i64*, i64* } %7
+
+if.then1:                                         ; preds = %entry
+  %"tmp$3#0" = add i64 %1, 1
+  store i64 %"tmp$3#0", i64* %0, align 4
+  %"p3#0" = tail call i64* @"alias_mbar.bar<0>"(i64* nonnull %0)
+  %8 = tail call i8* @wybe_malloc(i32 16)
+  %9 = bitcast i8* %8 to i64*
+  store i64 2, i64* %9, align 4
+  %10 = getelementptr i8, i8* %8, i64 8
+  %11 = bitcast i8* %10 to i64*
+  store i64 2, i64* %11, align 4
+  ret i64* %9
+}
+
+--------------------------------------------------
+; ModuleID = 'position'
+source_filename = "test-cases/position.wybe"
+
+@position.9 = constant [2 x i8] c")\00"
+@position.5 = constant [2 x i8] c",\00"
+@position.1 = constant [3 x i8] c" (\00"
+
+declare void @putchar(i8) local_unnamed_addr
+
+declare void @print_string(i8*) local_unnamed_addr
+
+declare void @print_int(i64) local_unnamed_addr
+
+define void @"position.printPosition<0>"(i64* nocapture readonly) local_unnamed_addr {
+entry:
+  tail call void @print_string(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @position.1, i64 0, i64 0))
+  %1 = load i64, i64* %0, align 4
+  tail call void @print_int(i64 %1)
+  tail call void @print_string(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @position.5, i64 0, i64 0))
+  %2 = getelementptr i64, i64* %0, i64 1
+  %3 = load i64, i64* %2, align 4
+  tail call void @print_int(i64 %3)
+  tail call void @print_string(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @position.9, i64 0, i64 0))
+  tail call void @putchar(i8 10)
+  ret void
+}
+
+--------------------------------------------------
+; ModuleID = 'position.position'
+source_filename = "test-cases"
+
+declare i8* @wybe_malloc(i32) local_unnamed_addr
+
+declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+
+; Function Attrs: norecurse nounwind readnone
+define i64* @"position.position.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
+entry:
+  ret i64* %"in#0"
+}
+
+; Function Attrs: norecurse nounwind readnone
+define i64* @"position.position.=<1>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
+entry:
+  ret i64* %"in#0"
+}
+
+; Function Attrs: norecurse nounwind readonly
+define i1 @"position.position.=<2>"(i64* nocapture readonly, i64* nocapture readonly) local_unnamed_addr #1 {
+entry:
+  %2 = load i64, i64* %0, align 4
+  %3 = load i64, i64* %1, align 4
+  %"tmp$2#0" = icmp eq i64 %2, %3
+  br i1 %"tmp$2#0", label %if.then, label %if.else
+
+if.then:                                          ; preds = %entry
+  %4 = getelementptr i64, i64* %1, i64 1
+  %5 = load i64, i64* %4, align 4
+  %6 = getelementptr i64, i64* %0, i64 1
+  %7 = load i64, i64* %6, align 4
+  %"$$#0" = icmp eq i64 %7, %5
+  ret i1 %"$$#0"
+
+if.else:                                          ; preds = %entry
+  ret i1 false
+}
+
+define i64* @"position.position.position<0>"(i64 %"x#0", i64 %"y#0") local_unnamed_addr {
+entry:
+  %0 = tail call i8* @wybe_malloc(i32 16)
+  %1 = bitcast i8* %0 to i64*
+  store i64 %"x#0", i64* %1, align 4
+  %2 = getelementptr i8, i8* %0, i64 8
+  %3 = bitcast i8* %2 to i64*
+  store i64 %"y#0", i64* %3, align 4
+  ret i64* %1
+}
+
+; Function Attrs: norecurse nounwind readonly
+define { i64, i64 } @"position.position.position<1>"(i64* nocapture readonly) local_unnamed_addr #1 {
+entry:
+  %1 = load i64, i64* %0, align 4
+  %2 = getelementptr i64, i64* %0, i64 1
+  %3 = load i64, i64* %2, align 4
+  %4 = insertvalue { i64, i64 } undef, i64 %1, 0
+  %5 = insertvalue { i64, i64 } %4, i64 %3, 1
+  ret { i64, i64 } %5
+}
+
+; Function Attrs: norecurse nounwind readonly
+define i64 @"position.position.x<0>"(i64* nocapture readonly) local_unnamed_addr #1 {
+entry:
+  %1 = load i64, i64* %0, align 4
+  ret i64 %1
+}
+
+define i64* @"position.position.x<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+entry:
+  %0 = tail call i8* @wybe_malloc(i32 16)
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 16, i1 false)
+  store i64 %"$field#0", i64* %1, align 4
+  ret i64* %1
+}
+
+; Function Attrs: norecurse nounwind readonly
+define i64 @"position.position.y<0>"(i64* nocapture readonly) local_unnamed_addr #1 {
+entry:
+  %1 = getelementptr i64, i64* %0, i64 1
+  %2 = load i64, i64* %1, align 4
+  ret i64 %2
+}
+
+define i64* @"position.position.y<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+entry:
+  %0 = tail call i8* @wybe_malloc(i32 16)
+  %1 = bitcast i8* %0 to i64*
+  %2 = bitcast i64* %"$rec#0" to i8*
+  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 16, i1 false)
+  %3 = getelementptr i8, i8* %0, i64 8
+  %4 = bitcast i8* %3 to i64*
+  store i64 %"$field#0", i64* %4, align 4
+  ret i64* %1
+}
+
+attributes #0 = { norecurse nounwind readnone }
+attributes #1 = { norecurse nounwind readonly }
+

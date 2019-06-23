@@ -11,8 +11,7 @@ AFTER EVERYTHING:
   procs           : 
 
 nada > public inline (0 calls)
-0: nada([x#0:wybe.int], [y#0:wybe.int]): Alias Pairs: []
-
+0: nada([x#0:wybe.int], [y#0:wybe.int]): AliasPairs: []
 proc_allin
 ======================================================================
 AFTER LLVM IR:

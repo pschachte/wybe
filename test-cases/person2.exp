@@ -21,18 +21,17 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): Alias Pairs: []
-
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): AliasPairs: []
     foreign lpvm alloc(16:wybe.int, ?tmp$6#0:person2.person)
     foreign lpvm mutate(~tmp$6#0:person2.person, ?tmp$7#0:person2.person, 16:wybe.int, 0:wybe.int, 1:wybe.int, "John":wybe.string)
-    foreign lpvm mutate(~tmp$7#0:person2.person, ?tmp$0#0:person2.person, 16:wybe.int, 8:wybe.int, 1:wybe.int, "Smith":wybe.string)
-    foreign lpvm alloc(16:wybe.int, ?tmp$11#0:person2.person)
-    foreign lpvm mutate(~tmp$11#0:person2.person, ?tmp$12#0:person2.person, 16:wybe.int, 0:wybe.int, 1:wybe.int, "John":wybe.string)
-    foreign lpvm mutate(~tmp$12#0:person2.person, ?tmp$1#0:person2.person, 16:wybe.int, 8:wybe.int, 1:wybe.int, "Smith":wybe.string)
-    foreign lpvm access(~tmp$0#0:person2.person, 8:wybe.int, ?tmp$2#0:wybe.string)
-    foreign c print_string(~tmp$2#0:wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:88:41
-    foreign lpvm access(~tmp$1#0:person2.person, 8:wybe.int, ?tmp$3#0:wybe.string)
-    foreign c print_string(~tmp$3#0:wybe.string, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:88:41
+    foreign lpvm mutate(~tmp$7#0:person2.person, ?tmp$8#0:person2.person, 16:wybe.int, 8:wybe.int, 1:wybe.int, "Smith":wybe.string)
+    foreign lpvm alloc(16:wybe.int, ?tmp$14#0:person2.person)
+    foreign lpvm mutate(~tmp$14#0:person2.person, ?tmp$15#0:person2.person, 16:wybe.int, 0:wybe.int, 1:wybe.int, "John":wybe.string)
+    foreign lpvm mutate(~tmp$15#0:person2.person, ?tmp$16#0:person2.person, 16:wybe.int, 8:wybe.int, 1:wybe.int, "Smith":wybe.string)
+    foreign lpvm access(~tmp$8#0:person2.person, 8:wybe.int, ?tmp$2#0:wybe.string)
+    foreign c print_string(~tmp$2#0:wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:92:41
+    foreign lpvm access(~tmp$16#0:person2.person, 8:wybe.int, ?tmp$3#0:wybe.string)
+    foreign c print_string(~tmp$3#0:wybe.string, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:92:41
   submodules      : person2.person
 --------------------------------------------------
  Module person2.person([])
@@ -48,65 +47,59 @@ AFTER EVERYTHING:
                     person2.person.lastname<1>
                     person2.person.person<0>
                     person2.person.person<1>
-  imports         : use wybe
+  imports         : use person2
+                    use wybe
   types           : 
   resources       : 
   procs           : 
 
 = > public inline (0 calls)
-0: =(?out#0:person2.person, in#0:person2.person): Alias Pairs: []
-
+0: =(?out#0:person2.person, in#0:person2.person): AliasPairs: []
     foreign llvm move(~in#0:person2.person, ?out#0:person2.person)
 = > public inline (0 calls)
-1: =(in#0:person2.person, ?out#0:person2.person): Alias Pairs: []
-
+1: =(in#0:person2.person, ?out#0:person2.person): AliasPairs: []
     foreign llvm move(~in#0:person2.person, ?out#0:person2.person)
 = > public inline test (3 calls)
-2: =($left#0:person2.person, $right#0:person2.person, ?$$#0:wybe.bool): Alias Pairs: []
-
+2: =($left#0:person2.person, $right#0:person2.person, ?$$#0:wybe.bool): AliasPairs: []
     foreign lpvm access($left#0:person2.person, 0:wybe.int, ?$left$firstname#0:wybe.string)
     foreign lpvm access(~$left#0:person2.person, 8:wybe.int, ?$left$lastname#0:wybe.string)
     foreign lpvm access($right#0:person2.person, 0:wybe.int, ?$right$firstname#0:wybe.string)
     foreign lpvm access(~$right#0:person2.person, 8:wybe.int, ?$right$lastname#0:wybe.string)
-    foreign llvm icmp eq(~$left$firstname#0:wybe.string, ~$right$firstname#0:wybe.string, ?tmp$2#0:wybe.bool) @wybe:61:46
+    foreign c strcmp(~$left$firstname#0:wybe.string, ~$right$firstname#0:wybe.string, ?tmp$8#0:wybe.int) @wybe:61:46
+    wybe.int.=<2>(~tmp$8#0:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:61:46
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm icmp eq(~$left$lastname#0:wybe.string, ~$right$lastname#0:wybe.string, ?$$#0:wybe.bool) @wybe:61:46
+        foreign c strcmp(~$left$lastname#0:wybe.string, ~$right$lastname#0:wybe.string, ?tmp$11#0:wybe.int) @wybe:61:46
+        wybe.int.=<2>(~tmp$11#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:61:46
 
 
 
 firstname > public inline (0 calls)
-0: firstname($rec#0:person2.person, ?$#0:wybe.string): Alias Pairs: []
-
+0: firstname($rec#0:person2.person, ?$#0:wybe.string): AliasPairs: []
     foreign lpvm access(~$rec#0:person2.person, 0:wybe.int, ?$#0:wybe.string)
 firstname > public inline (0 calls)
-1: firstname($rec#0:person2.person, ?$rec#1:person2.person, $field#0:wybe.string): Alias Pairs: []
-
+1: firstname($rec#0:person2.person, ?$rec#1:person2.person, $field#0:wybe.string): AliasPairs: []
     foreign lpvm mutate(~%$rec#0:person2.person, ?%$rec#1:person2.person, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
 
 
 lastname > public inline (0 calls)
-0: lastname($rec#0:person2.person, ?$#0:wybe.string): Alias Pairs: []
-
+0: lastname($rec#0:person2.person, ?$#0:wybe.string): AliasPairs: []
     foreign lpvm access(~$rec#0:person2.person, 8:wybe.int, ?$#0:wybe.string)
 lastname > public inline (0 calls)
-1: lastname($rec#0:person2.person, ?$rec#1:person2.person, $field#0:wybe.string): Alias Pairs: []
-
+1: lastname($rec#0:person2.person, ?$rec#1:person2.person, $field#0:wybe.string): AliasPairs: []
     foreign lpvm mutate(~%$rec#0:person2.person, ?%$rec#1:person2.person, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
 
 
 person > public inline (0 calls)
-0: person(firstname#0:wybe.string, lastname#0:wybe.string, ?$#0:person2.person): Alias Pairs: []
-
+0: person(firstname#0:wybe.string, lastname#0:wybe.string, ?$#0:person2.person): AliasPairs: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:person2.person)
     foreign lpvm mutate(~%$rec#0:person2.person, ?%$rec#1:person2.person, 16:wybe.int, 0:wybe.int, 1:wybe.int, ~firstname#0:wybe.string)
     foreign lpvm mutate(~%$rec#1:person2.person, ?%$#0:person2.person, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~lastname#0:wybe.string)
 person > public inline (4 calls)
-1: person(?firstname#0:wybe.string, ?lastname#0:wybe.string, $#0:person2.person): Alias Pairs: []
-
+1: person(?firstname#0:wybe.string, ?lastname#0:wybe.string, $#0:person2.person): AliasPairs: []
     foreign lpvm access($#0:person2.person, 0:wybe.int, ?firstname#0:wybe.string)
     foreign lpvm access(~$#0:person2.person, 8:wybe.int, ?lastname#0:wybe.string)
 person2, person2.person
@@ -116,9 +109,9 @@ AFTER LLVM IR:
 ; ModuleID = 'person2'
 source_filename = "test-cases/person2.wybe"
 
-@person2.11 = constant [6 x i8] c"Smith\00"
-@person2.9 = constant [5 x i8] c"John\00"
-@person2.5 = constant [6 x i8] c"Smith\00"
+@person2.14 = constant [6 x i8] c"Smith\00"
+@person2.11 = constant [5 x i8] c"John\00"
+@person2.6 = constant [6 x i8] c"Smith\00"
 @person2.3 = constant [5 x i8] c"John\00"
 
 declare void @print_string(i8*) local_unnamed_addr
@@ -130,25 +123,27 @@ declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 define i32 @person2.main() local_unnamed_addr {
 entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
-  %1 = bitcast i8* %0 to i64*
-  store i8* getelementptr inbounds ([5 x i8], [5 x i8]* @person2.3, i64 0, i64 0), i64* %1, align 8
-  %2 = getelementptr i8, i8* %0, i64 8
-  %3 = bitcast i8* %2 to i64*
-  store i8* getelementptr inbounds ([6 x i8], [6 x i8]* @person2.5, i64 0, i64 0), i64* %3, align 8
+  %1 = bitcast i8* %0 to i8**
+  store i8* getelementptr inbounds ([5 x i8], [5 x i8]* @person2.3, i64 0, i64 0), i8** %1, align 8
+  %2 = getelementptr i8, i8* %0, i64 64
+  %3 = bitcast i8* %2 to i8**
+  store i8* getelementptr inbounds ([6 x i8], [6 x i8]* @person2.6, i64 0, i64 0), i8** %3, align 8
   %4 = tail call i8* @wybe_malloc(i32 16)
-  %5 = bitcast i8* %4 to i64*
-  store i8* getelementptr inbounds ([5 x i8], [5 x i8]* @person2.9, i64 0, i64 0), i64* %5, align 8
-  %6 = getelementptr i8, i8* %4, i64 8
-  %7 = bitcast i8* %6 to i64*
-  store i8* getelementptr inbounds ([6 x i8], [6 x i8]* @person2.11, i64 0, i64 0), i64* %7, align 8
-  %8 = bitcast i8* %2 to i8**
-  %9 = load i8*, i8** %8, align 8
+  %5 = bitcast i8* %4 to i8**
+  store i8* getelementptr inbounds ([5 x i8], [5 x i8]* @person2.11, i64 0, i64 0), i8** %5, align 8
+  %6 = getelementptr i8, i8* %4, i64 64
+  %7 = bitcast i8* %6 to i8**
+  store i8* getelementptr inbounds ([6 x i8], [6 x i8]* @person2.14, i64 0, i64 0), i8** %7, align 8
+  %8 = load i8*, i8** %3, align 8
+  tail call void @print_string(i8* %8)
+  %9 = load i8*, i8** %7, align 8
   tail call void @print_string(i8* %9)
-  %10 = bitcast i8* %6 to i8**
-  %11 = load i8*, i8** %10, align 8
-  tail call void @print_string(i8* %11)
   ret i32 0
 }
+
+declare i1 @"wybe.int.=<2>"(i64, i64) local_unnamed_addr
+
+declare i64 @strcmp(i8*, i8*) local_unnamed_addr
 
 ; Function Attrs: norecurse nounwind readnone
 define i64* @"person2.person.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
@@ -162,24 +157,25 @@ entry:
   ret i64* %"in#0"
 }
 
-; Function Attrs: norecurse nounwind readonly
-define i1 @"person2.person.=<2>"(i64* nocapture readonly %"$left#0", i64* nocapture readonly %"$right#0") local_unnamed_addr #1 {
+define i1 @"person2.person.=<2>"(i64* nocapture readonly %"$left#0", i64* nocapture readonly %"$right#0") local_unnamed_addr {
 entry:
   %0 = bitcast i64* %"$left#0" to i8**
   %1 = load i8*, i8** %0, align 8
-  %2 = bitcast i64* %"$right#0" to i8**
-  %3 = load i8*, i8** %2, align 8
-  %"tmp$2#0" = icmp eq i8* %1, %3
+  %2 = getelementptr i64, i64* %"$left#0", i64 8
+  %3 = bitcast i64* %2 to i8**
+  %4 = load i8*, i8** %3, align 8
+  %5 = bitcast i64* %"$right#0" to i8**
+  %6 = load i8*, i8** %5, align 8
+  %7 = getelementptr i64, i64* %"$right#0", i64 8
+  %8 = bitcast i64* %7 to i8**
+  %9 = load i8*, i8** %8, align 8
+  %"tmp$8#0" = tail call i64 @strcmp(i8* %1, i8* %6)
+  %"tmp$2#0" = tail call i1 @"wybe.int.=<2>"(i64 %"tmp$8#0", i64 0)
   br i1 %"tmp$2#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
-  %4 = getelementptr i64, i64* %"$right#0", i64 1
-  %5 = bitcast i64* %4 to i8**
-  %6 = load i8*, i8** %5, align 8
-  %7 = getelementptr i64, i64* %"$left#0", i64 1
-  %8 = bitcast i64* %7 to i8**
-  %9 = load i8*, i8** %8, align 8
-  %"$$#0" = icmp eq i8* %9, %6
+  %"tmp$11#0" = tail call i64 @strcmp(i8* %4, i8* %9)
+  %"$$#0" = tail call i1 @"wybe.int.=<2>"(i64 %"tmp$11#0", i64 0)
   ret i1 %"$$#0"
 
 if.else:                                          ; preds = %entry
@@ -200,16 +196,15 @@ entry:
   %1 = bitcast i8* %0 to i64*
   %2 = bitcast i64* %"$rec#0" to i8*
   tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 16, i1 false)
-  %3 = ptrtoint i8* %"$field#0" to i64
-  %4 = trunc i64 %3 to i8
-  store i8 %4, i64* %1, align 1
+  %3 = bitcast i8* %0 to i8**
+  store i8* %"$field#0", i8** %3, align 8
   ret i64* %1
 }
 
 ; Function Attrs: norecurse nounwind readonly
 define i8* @"person2.person.lastname<0>"(i64* nocapture readonly %"$rec#0") local_unnamed_addr #1 {
 entry:
-  %0 = getelementptr i64, i64* %"$rec#0", i64 1
+  %0 = getelementptr i64, i64* %"$rec#0", i64 8
   %1 = bitcast i64* %0 to i8**
   %2 = load i8*, i8** %1, align 8
   ret i8* %2
@@ -221,11 +216,9 @@ entry:
   %1 = bitcast i8* %0 to i64*
   %2 = bitcast i64* %"$rec#0" to i8*
   tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 16, i1 false)
-  %3 = getelementptr i8, i8* %0, i64 8
-  %4 = bitcast i8* %3 to i64*
-  %5 = ptrtoint i8* %"$field#0" to i64
-  %6 = trunc i64 %5 to i8
-  store i8 %6, i64* %4, align 1
+  %3 = getelementptr i8, i8* %0, i64 64
+  %4 = bitcast i8* %3 to i8**
+  store i8* %"$field#0", i8** %4, align 8
   ret i64* %1
 }
 
@@ -233,14 +226,11 @@ define i64* @"person2.person.person<0>"(i8* %"firstname#0", i8* %"lastname#0") l
 entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
   %1 = bitcast i8* %0 to i64*
-  %2 = ptrtoint i8* %"firstname#0" to i64
-  %3 = trunc i64 %2 to i8
-  store i8 %3, i64* %1, align 1
-  %4 = getelementptr i8, i8* %0, i64 8
-  %5 = bitcast i8* %4 to i64*
-  %6 = ptrtoint i8* %"lastname#0" to i64
-  %7 = trunc i64 %6 to i8
-  store i8 %7, i64* %5, align 1
+  %2 = bitcast i8* %0 to i8**
+  store i8* %"firstname#0", i8** %2, align 8
+  %3 = getelementptr i8, i8* %0, i64 64
+  %4 = bitcast i8* %3 to i8**
+  store i8* %"lastname#0", i8** %4, align 8
   ret i64* %1
 }
 
@@ -249,7 +239,7 @@ define { i8*, i8* } @"person2.person.person<1>"(i64* nocapture readonly %"$#0") 
 entry:
   %0 = bitcast i64* %"$#0" to i8**
   %1 = load i8*, i8** %0, align 8
-  %2 = getelementptr i64, i64* %"$#0", i64 1
+  %2 = getelementptr i64, i64* %"$#0", i64 8
   %3 = bitcast i64* %2 to i8**
   %4 = load i8*, i8** %3, align 8
   %5 = insertvalue { i8*, i8* } undef, i8* %1, 0
@@ -264,6 +254,10 @@ attributes #1 = { norecurse nounwind readonly }
 ; ModuleID = 'person2.person'
 source_filename = "test-cases"
 
+declare i1 @"wybe.int.=<2>"(i64, i64) local_unnamed_addr
+
+declare i64 @strcmp(i8*, i8*) local_unnamed_addr
+
 declare i8* @wybe_malloc(i32) local_unnamed_addr
 
 declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
@@ -280,24 +274,25 @@ entry:
   ret i64* %"in#0"
 }
 
-; Function Attrs: norecurse nounwind readonly
-define i1 @"person2.person.=<2>"(i64* nocapture readonly %"$left#0", i64* nocapture readonly %"$right#0") local_unnamed_addr #1 {
+define i1 @"person2.person.=<2>"(i64* nocapture readonly %"$left#0", i64* nocapture readonly %"$right#0") local_unnamed_addr {
 entry:
   %0 = bitcast i64* %"$left#0" to i8**
   %1 = load i8*, i8** %0, align 8
-  %2 = bitcast i64* %"$right#0" to i8**
-  %3 = load i8*, i8** %2, align 8
-  %"tmp$2#0" = icmp eq i8* %1, %3
+  %2 = getelementptr i64, i64* %"$left#0", i64 8
+  %3 = bitcast i64* %2 to i8**
+  %4 = load i8*, i8** %3, align 8
+  %5 = bitcast i64* %"$right#0" to i8**
+  %6 = load i8*, i8** %5, align 8
+  %7 = getelementptr i64, i64* %"$right#0", i64 8
+  %8 = bitcast i64* %7 to i8**
+  %9 = load i8*, i8** %8, align 8
+  %"tmp$8#0" = tail call i64 @strcmp(i8* %1, i8* %6)
+  %"tmp$2#0" = tail call i1 @"wybe.int.=<2>"(i64 %"tmp$8#0", i64 0)
   br i1 %"tmp$2#0", label %if.then, label %if.else
 
 if.then:                                          ; preds = %entry
-  %4 = getelementptr i64, i64* %"$right#0", i64 1
-  %5 = bitcast i64* %4 to i8**
-  %6 = load i8*, i8** %5, align 8
-  %7 = getelementptr i64, i64* %"$left#0", i64 1
-  %8 = bitcast i64* %7 to i8**
-  %9 = load i8*, i8** %8, align 8
-  %"$$#0" = icmp eq i8* %9, %6
+  %"tmp$11#0" = tail call i64 @strcmp(i8* %4, i8* %9)
+  %"$$#0" = tail call i1 @"wybe.int.=<2>"(i64 %"tmp$11#0", i64 0)
   ret i1 %"$$#0"
 
 if.else:                                          ; preds = %entry
@@ -318,16 +313,15 @@ entry:
   %1 = bitcast i8* %0 to i64*
   %2 = bitcast i64* %"$rec#0" to i8*
   tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 16, i1 false)
-  %3 = ptrtoint i8* %"$field#0" to i64
-  %4 = trunc i64 %3 to i8
-  store i8 %4, i64* %1, align 1
+  %3 = bitcast i8* %0 to i8**
+  store i8* %"$field#0", i8** %3, align 8
   ret i64* %1
 }
 
 ; Function Attrs: norecurse nounwind readonly
 define i8* @"person2.person.lastname<0>"(i64* nocapture readonly %"$rec#0") local_unnamed_addr #1 {
 entry:
-  %0 = getelementptr i64, i64* %"$rec#0", i64 1
+  %0 = getelementptr i64, i64* %"$rec#0", i64 8
   %1 = bitcast i64* %0 to i8**
   %2 = load i8*, i8** %1, align 8
   ret i8* %2
@@ -339,11 +333,9 @@ entry:
   %1 = bitcast i8* %0 to i64*
   %2 = bitcast i64* %"$rec#0" to i8*
   tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 16, i1 false)
-  %3 = getelementptr i8, i8* %0, i64 8
-  %4 = bitcast i8* %3 to i64*
-  %5 = ptrtoint i8* %"$field#0" to i64
-  %6 = trunc i64 %5 to i8
-  store i8 %6, i64* %4, align 1
+  %3 = getelementptr i8, i8* %0, i64 64
+  %4 = bitcast i8* %3 to i8**
+  store i8* %"$field#0", i8** %4, align 8
   ret i64* %1
 }
 
@@ -351,14 +343,11 @@ define i64* @"person2.person.person<0>"(i8* %"firstname#0", i8* %"lastname#0") l
 entry:
   %0 = tail call i8* @wybe_malloc(i32 16)
   %1 = bitcast i8* %0 to i64*
-  %2 = ptrtoint i8* %"firstname#0" to i64
-  %3 = trunc i64 %2 to i8
-  store i8 %3, i64* %1, align 1
-  %4 = getelementptr i8, i8* %0, i64 8
-  %5 = bitcast i8* %4 to i64*
-  %6 = ptrtoint i8* %"lastname#0" to i64
-  %7 = trunc i64 %6 to i8
-  store i8 %7, i64* %5, align 1
+  %2 = bitcast i8* %0 to i8**
+  store i8* %"firstname#0", i8** %2, align 8
+  %3 = getelementptr i8, i8* %0, i64 64
+  %4 = bitcast i8* %3 to i8**
+  store i8* %"lastname#0", i8** %4, align 8
   ret i64* %1
 }
 
@@ -367,7 +356,7 @@ define { i8*, i8* } @"person2.person.person<1>"(i64* nocapture readonly %"$#0") 
 entry:
   %0 = bitcast i64* %"$#0" to i8**
   %1 = load i8*, i8** %0, align 8
-  %2 = getelementptr i64, i64* %"$#0", i64 1
+  %2 = getelementptr i64, i64* %"$#0", i64 8
   %3 = bitcast i64* %2 to i8**
   %4 = load i8*, i8** %3, align 8
   %5 = insertvalue { i8*, i8* } undef, i8* %1, 0
