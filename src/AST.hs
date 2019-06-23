@@ -1459,8 +1459,8 @@ instance Show ProcImpln where
 
 instance Show ProcAnalysis where
     show (ProcAnalysis procArgAliasMap) =
-       "\nAlias Arg Pairs: " ++ showAliasMap procArgAliasMap ++ "\n"
-        ++ "Alias Map: " ++ show procArgAliasMap ++ "\n"
+       " AliasPairs: " ++ showAliasMap procArgAliasMap
+        -- ++ "Alias Map: " ++ show procArgAliasMap ++ "\n"
 
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
