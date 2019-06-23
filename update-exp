@@ -19,6 +19,8 @@ for f in test-cases/*.wybe ; do
     if [ -r "$exp" ] ; then
 	if ! diff -q $exp $out > /dev/null ; then
 	    echo
+		echo
+		echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 	    echo '======='
 	    echo $f:
 	    cat $f
@@ -34,6 +36,9 @@ for f in test-cases/*.wybe ; do
 	    fi
 	fi
     else
+	echo
+	echo
+	echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 	echo "New test case $f"
 	echo 'Output:'
 	cat "$out"
