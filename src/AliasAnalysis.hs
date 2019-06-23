@@ -78,6 +78,9 @@ aliasProcBottomUp pspec = do
     newDef <- getProcDef pspec
     let (ProcDefPrim _ _ newAnalysis) = procImpln newDef
     -- And compare if the alias map changed.
+    logAlias "================================================="
+    logAlias $ "old: " ++ show (procArgAliasMap oldAnalysis)
+    logAlias $ "new: " ++ show (procArgAliasMap newAnalysis)
     return $ areDifferentMaps (procArgAliasMap oldAnalysis) (procArgAliasMap newAnalysis)
     -- ^XXX wrong way to do this. Need to change type signatures of a bunch of
     -- functions start from aliasProcDef which is called by updateProcDefM
@@ -98,10 +101,12 @@ aliasProcDef def
         -- (3) Clean up summary of aliases by removing phantom params
         let nonePhantomParams = protoNonePhantomParams caller
         -- ^nonePhantomParams is a list of formal params of this caller
-        let aliaseMap3 = removeFromUf (Set.fromList nonePhantomParams) aliaseMap2
+        let aliaseMap3 = Map.filterWithKey (\k _ -> List.elem
+                            k nonePhantomParams) aliaseMap2
         -- Some logging
         logAlias $ "\n^^^  after analyse prims:    " ++ show aliaseMap1
         logAlias $ "^^^  after analyse forks:    " ++ show aliaseMap2
+        logAlias $ "^^^  remove phantom params: " ++ show nonePhantomParams
         logAlias $ "^^^  alias of formal params: " ++ show aliaseMap3
         -- (4) Update proc analysis with new aliasPairs
         let newAnalysis = oldAnalysis {
