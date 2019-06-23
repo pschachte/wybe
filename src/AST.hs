@@ -32,7 +32,7 @@ module AST (
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
-  AliasPair, AliasMap, aliasMapToAliasPairs, ProcAnalysis(..),
+  AliasMap, aliasMapToAliasPairs, ProcAnalysis(..),
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argVarIsFlowDirection, argType,
@@ -1442,13 +1442,8 @@ showAliasMap aliasMap = show $ unionFindToTransitivePairs aliasMap
 aliasMapToAliasPairs :: AliasMap -> [(PrimVarName, PrimVarName)]
 aliasMapToAliasPairs = unionFindToTransitivePairs
 
--- | Original implementation of alias pairs using Int
--- TODO: to be deleted
-type AliasPair = (Int,Int)
-
 -- | Stores whatever analysis results we infer about a proc definition.
 data ProcAnalysis = ProcAnalysis {
-    procArgAliases :: [AliasPair],
     procArgAliasMap :: AliasMap
     --- interestingness analysis info -- ^for future
 } deriving (Eq,Generic)
@@ -1463,9 +1458,8 @@ instance Show ProcImpln where
         = show proto ++ ":" ++ show analysis ++ showBlock 4 body
 
 instance Show ProcAnalysis where
-    show (ProcAnalysis procArgAliases procArgAliasMap) =
-        "\nAlias Int Pairs: " ++ show procArgAliases ++ "\n"
-        ++ "Alias Arg Pairs: " ++ showAliasMap procArgAliasMap ++ "\n"
+    show (ProcAnalysis procArgAliasMap) =
+       "\nAlias Arg Pairs: " ++ showAliasMap procArgAliasMap ++ "\n"
         ++ "Alias Map: " ++ show procArgAliasMap ++ "\n"
 
 
