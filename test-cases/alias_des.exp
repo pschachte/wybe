@@ -15,15 +15,15 @@ AFTER EVERYTHING:
 
 *main* > public inline (0 calls)
 0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): AliasPairs: []
-    alias_des.foo<0>(~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @alias_des:24:2
+    alias_des.foo<0>(~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @alias_des:21:2
 
 
 foo > public (1 calls)
 0: foo(wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom): AliasPairs: []
-    alias_des.replicate<0>(?p2#0:position.position, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @alias_des:18:4
+    alias_des.replicate<0>(?p2#0:position.position, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @alias_des:15:4
     foreign lpvm mutate(~%p2#0:position.position, ?%p2#1:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 20000:wybe.int)
-    foreign c print_string("after x(!p2, 20000) - p2:":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:92:41
-    position.printPosition<0>(~p2#1:position.position, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @alias_des:21:4
+    foreign c print_string("--- after x(!p2, 20000) - expect p2(20000,103):":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:92:41
+    position.printPosition<0>(~p2#1:position.position, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @alias_des:18:4
 
 
 replicate > public (1 calls)
@@ -36,14 +36,14 @@ replicate > public (1 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp$15#0:position.position)
     foreign lpvm mutate(~tmp$15#0:position.position, ?tmp$16#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, ~tmp$2#0:wybe.int)
     foreign lpvm mutate(~tmp$16#0:position.position, ?tmp$1#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~tmp$3#0:wybe.int)
-    foreign lpvm mutate(~tmp$0#0:position.position, ?%p1#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, 10000:wybe.int)
+    foreign lpvm mutate(~tmp$0#0:position.position, ?%p1#1:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 10000:wybe.int)
     foreign lpvm access(p1#1:position.position, 8:wybe.int, ?tmp$5#0:wybe.int)
     foreign llvm add(~tmp$5#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @wybe:13:38
     foreign lpvm mutate(~tmp$1#0:position.position, ?%p2#1:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~tmp$4#0:wybe.int)
-    foreign c print_string("p1:":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:92:41
-    position.printPosition<0>(~p1#1:position.position, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @alias_des:12:4
-    foreign c print_string("p2:":wybe.string, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @wybe:92:41
-    position.printPosition<0>(p2#1:position.position, ~#wybe.io$io#3:wybe.phantom, ?#wybe.io$io#4:wybe.phantom) @alias_des:14:4
+    foreign c print_string("expect p1(10000,102):":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:92:41
+    position.printPosition<0>(~p1#1:position.position, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @alias_des:9:4
+    foreign c print_string("expect p2(101,103):":wybe.string, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @wybe:92:41
+    position.printPosition<0>(p2#1:position.position, ~#wybe.io$io#3:wybe.phantom, ?#wybe.io$io#4:wybe.phantom) @alias_des:11:4
 --------------------------------------------------
  Module position
   public submods  : 
@@ -150,17 +150,15 @@ AFTER LLVM IR:
 ; ModuleID = 'alias_des'
 source_filename = "test-cases/alias_des.wybe"
 
-@alias_des.4 = constant [26 x i8] c"after x(!p2, 20000) - p2:\00"
-@alias_des.35 = constant [4 x i8] c"p2:\00"
-@alias_des.34 = constant [4 x i8] c"p1:\00"
+@alias_des.4 = constant [48 x i8] c"--- after x(!p2, 20000) - expect p2(20000,103):\00"
+@alias_des.31 = constant [20 x i8] c"expect p2(101,103):\00"
+@alias_des.30 = constant [22 x i8] c"expect p1(10000,102):\00"
 
 declare void @"position.printPosition<0>"(i64*) local_unnamed_addr
 
 declare void @print_string(i8*) local_unnamed_addr
 
 declare i8* @wybe_malloc(i32) local_unnamed_addr
-
-declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define i32 @alias_des.main() local_unnamed_addr {
 entry:
@@ -172,7 +170,7 @@ define void @"alias_des.foo<0>"() local_unnamed_addr {
 entry:
   %0 = tail call i64* @"alias_des.replicate<0>"()
   store i64 20000, i64* %0, align 4
-  tail call void @print_string(i8* getelementptr inbounds ([26 x i8], [26 x i8]* @alias_des.4, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([48 x i8], [48 x i8]* @alias_des.4, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %0)
   ret void
 }
@@ -191,18 +189,13 @@ entry:
   %6 = getelementptr i8, i8* %4, i64 8
   %7 = bitcast i8* %6 to i64*
   store i64 102, i64* %7, align 4
-  %8 = tail call i8* @wybe_malloc(i32 16)
-  %9 = bitcast i8* %8 to i64*
-  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %8, i8* %0, i32 16, i1 false)
-  store i64 10000, i64* %9, align 4
-  %10 = getelementptr i8, i8* %8, i64 8
-  %11 = bitcast i8* %10 to i64*
-  %12 = load i64, i64* %11, align 4
-  %"tmp$4#0" = add i64 %12, 1
+  store i64 10000, i64* %1, align 4
+  %8 = load i64, i64* %3, align 4
+  %"tmp$4#0" = add i64 %8, 1
   store i64 %"tmp$4#0", i64* %7, align 4
-  tail call void @print_string(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @alias_des.34, i64 0, i64 0))
-  tail call void @"position.printPosition<0>"(i64* %9)
-  tail call void @print_string(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @alias_des.35, i64 0, i64 0))
+  tail call void @print_string(i8* getelementptr inbounds ([22 x i8], [22 x i8]* @alias_des.30, i64 0, i64 0))
+  tail call void @"position.printPosition<0>"(i64* %1)
+  tail call void @print_string(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias_des.31, i64 0, i64 0))
   tail call void @"position.printPosition<0>"(i64* %5)
   ret i64* %5
 }

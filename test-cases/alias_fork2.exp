@@ -13,31 +13,47 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom): AliasPairs: []
+0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#4:wybe.phantom): AliasPairs: []
     foreign lpvm cast(0:mytree.tree, ?tmp$1#0:mytree.tree)
     foreign lpvm alloc(24:wybe.int, ?tmp$10#0:mytree.tree)
     foreign lpvm mutate(~tmp$10#0:mytree.tree, ?tmp$11#0:mytree.tree, 24:wybe.int, 0:wybe.int, 1:wybe.int, tmp$1#0:mytree.tree)
     foreign lpvm mutate(~tmp$11#0:mytree.tree, ?tmp$12#0:mytree.tree, 24:wybe.int, 8:wybe.int, 1:wybe.int, 1:wybe.int)
-    foreign lpvm mutate(~tmp$12#0:mytree.tree, ?tmp$0#0:mytree.tree, 24:wybe.int, 16:wybe.int, 1:wybe.int, ~tmp$1#0:mytree.tree)
+    foreign lpvm mutate(~tmp$12#0:mytree.tree, ?tmp$0#0:mytree.tree, 24:wybe.int, 16:wybe.int, 1:wybe.int, tmp$1#0:mytree.tree)
     alias_fork2.simpleMerge<0>(tmp$0#0:mytree.tree, ?tmp$3#0:mytree.tree) @alias_fork2:11:6
-    mytree.printTree<0>(tmp$3#0:mytree.tree, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @alias_fork2:12:2
-    foreign lpvm cast(tmp$0#0:mytree.tree, ?tmp$17#0:wybe.int)
-    foreign llvm icmp ne(~tmp$17#0:wybe.int, 0:wybe.int, ?tmp$18#0:wybe.bool)
-    case ~tmp$18#0:wybe.bool of
+    foreign c print_string("expect t -  1 200:":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$17#0:wybe.phantom) @wybe:92:41
+    foreign c putchar('\n':wybe.char, ~tmp$17#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:78:28
+    mytree.printTree<0>(tmp$3#0:mytree.tree, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @alias_fork2:13:2
+    foreign c print_string("":wybe.string, ~#wybe.io$io#2:wybe.phantom, ?tmp$20#0:wybe.phantom) @wybe:92:41
+    foreign c putchar('\n':wybe.char, ~tmp$20#0:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @wybe:78:28
+    foreign lpvm cast(tmp$0#0:mytree.tree, ?tmp$23#0:wybe.int)
+    foreign llvm icmp ne(~tmp$23#0:wybe.int, 0:wybe.int, ?tmp$24#0:wybe.bool)
+    case ~tmp$24#0:wybe.bool of
     0:
-        mytree.printTree<0>(~tmp$0#0:mytree.tree, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @alias_fork2:18:2
-        mytree.printTree<0>(~tmp$3#0:mytree.tree, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @alias_fork2:19:2
+        alias_fork2.gen$1<0>(~tmp$3#0:mytree.tree, ~tmp$0#0:mytree.tree, ~tmp$0#0:mytree.tree, ~tmp$1#0:mytree.tree, ~tmp$1#0:mytree.tree, ~tmp$3#0:mytree.tree, ~wybe.io$io#3:wybe.phantom, ?wybe.io$io#4:wybe.phantom)
 
     1:
         foreign lpvm access(tmp$0#0:mytree.tree, 0:wybe.int, ?l#0:mytree.tree)
         foreign lpvm access(tmp$0#0:mytree.tree, 16:wybe.int, ?r#0:mytree.tree)
-        foreign lpvm alloc(24:wybe.int, ?tmp$22#0:mytree.tree)
-        foreign lpvm mutate(~tmp$22#0:mytree.tree, ?tmp$23#0:mytree.tree, 24:wybe.int, 0:wybe.int, 1:wybe.int, ~l#0:mytree.tree)
-        foreign lpvm mutate(~tmp$23#0:mytree.tree, ?tmp$24#0:mytree.tree, 24:wybe.int, 8:wybe.int, 1:wybe.int, 1000:wybe.int)
-        foreign lpvm mutate(~tmp$24#0:mytree.tree, ?tmp$5#0:mytree.tree, 24:wybe.int, 16:wybe.int, 1:wybe.int, ~r#0:mytree.tree)
-        mytree.printTree<0>(~tmp$5#0:mytree.tree, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @alias_fork2:18:2
-        mytree.printTree<0>(~tmp$3#0:mytree.tree, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @alias_fork2:19:2
+        foreign lpvm alloc(24:wybe.int, ?tmp$28#0:mytree.tree)
+        foreign lpvm mutate(~tmp$28#0:mytree.tree, ?tmp$29#0:mytree.tree, 24:wybe.int, 0:wybe.int, 1:wybe.int, ~l#0:mytree.tree)
+        foreign lpvm mutate(~tmp$29#0:mytree.tree, ?tmp$30#0:mytree.tree, 24:wybe.int, 8:wybe.int, 1:wybe.int, 1000:wybe.int)
+        foreign lpvm mutate(~tmp$30#0:mytree.tree, ?tmp$5#0:mytree.tree, 24:wybe.int, 16:wybe.int, 1:wybe.int, ~r#0:mytree.tree)
+        alias_fork2.gen$1<0>(~tmp$3#0:mytree.tree, ~tmp$5#0:mytree.tree, ~tmp$0#0:mytree.tree, ~tmp$1#0:mytree.tree, ~tmp$1#0:mytree.tree, ~tmp$3#0:mytree.tree, ~wybe.io$io#3:wybe.phantom, ?wybe.io$io#4:wybe.phantom)
 
+
+
+gen$1 > (2 calls)
+0: gen$1(t#0:mytree.tree, t1#0:mytree.tree, [tmp$0#0:mytree.tree], [tmp$1#0:mytree.tree], [tmp$2#0:mytree.tree], [tmp$3#0:mytree.tree], wybe.io$io#0:wybe.phantom, ?wybe.io$io#6:wybe.phantom): AliasPairs: []
+    foreign c print_string("expect t1 - 1000:":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?tmp$9#0:wybe.phantom) @wybe:92:41
+    foreign c putchar('\n':wybe.char, ~tmp$9#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:78:28
+    mytree.printTree<0>(~t1#0:mytree.tree, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @alias_fork2:20:2
+    foreign c print_string("":wybe.string, ~#wybe.io$io#2:wybe.phantom, ?tmp$12#0:wybe.phantom) @wybe:92:41
+    foreign c putchar('\n':wybe.char, ~tmp$12#0:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @wybe:78:28
+    foreign c print_string("expect t1 - 1 200:":wybe.string, ~#wybe.io$io#3:wybe.phantom, ?tmp$15#0:wybe.phantom) @wybe:92:41
+    foreign c putchar('\n':wybe.char, ~tmp$15#0:wybe.phantom, ?#wybe.io$io#4:wybe.phantom) @wybe:78:28
+    mytree.printTree<0>(~t#0:mytree.tree, ~#wybe.io$io#4:wybe.phantom, ?#wybe.io$io#5:wybe.phantom) @alias_fork2:23:2
+    foreign c print_string("":wybe.string, ~#wybe.io$io#5:wybe.phantom, ?tmp$18#0:wybe.phantom) @wybe:92:41
+    foreign c putchar('\n':wybe.char, ~tmp$18#0:wybe.phantom, ?#wybe.io$io#6:wybe.phantom) @wybe:78:28
 
 
 simpleMerge > public (3 calls)
@@ -72,21 +88,22 @@ simpleMerge > public (3 calls)
   procs           : 
 
 printTree > public (2 calls)
-0: printTree(t#0:mytree.tree, wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom): AliasPairs: []
+0: printTree(t#0:mytree.tree, wybe.io$io#0:wybe.phantom, ?wybe.io$io#5:wybe.phantom): AliasPairs: []
     foreign lpvm cast(t#0:mytree.tree, ?tmp$4#0:wybe.int)
     foreign llvm icmp ne(~tmp$4#0:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
-        foreign llvm move(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#3:wybe.phantom)
+        foreign llvm move(~wybe.io$io#0:wybe.phantom, ?wybe.io$io#5:wybe.phantom)
 
     1:
         foreign lpvm access(t#0:mytree.tree, 0:wybe.int, ?l#0:mytree.tree)
         foreign lpvm access(t#0:mytree.tree, 8:wybe.int, ?k#0:wybe.int)
         foreign lpvm access(~t#0:mytree.tree, 16:wybe.int, ?r#0:mytree.tree)
         mytree.printTree<0>(~l#0:mytree.tree, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @mytree:5:6
-        foreign c print_int(~k#0:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:80:38
-        foreign c putchar('\n':wybe.char, ~tmp$8#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:78:28
-        mytree.printTree<0>(~r#0:mytree.tree, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @mytree:7:6
+        foreign c print_string(" ":wybe.string, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:92:41
+        foreign c print_int(~k#0:wybe.int, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @wybe:80:38
+        foreign c print_string(" ":wybe.string, ~#wybe.io$io#3:wybe.phantom, ?#wybe.io$io#4:wybe.phantom) @wybe:92:41
+        mytree.printTree<0>(~r#0:mytree.tree, ~#wybe.io$io#4:wybe.phantom, ?#wybe.io$io#5:wybe.phantom) @mytree:9:6
 
   submodules      : mytree.tree
 --------------------------------------------------
@@ -119,7 +136,7 @@ printTree > public (2 calls)
 1: =(in#0:mytree.tree, ?out#0:mytree.tree): AliasPairs: []
     foreign llvm move(~in#0:mytree.tree, ?out#0:mytree.tree)
 = > public test (6 calls)
-2: =($left#0:mytree.tree, $right#0:mytree.tree, ?$$#0:wybe.bool): AliasPairs: [($left#0,$left$left#0),($right#0,$right$left#0)]
+2: =($left#0:mytree.tree, $right#0:mytree.tree, ?$$#0:wybe.bool): AliasPairs: []
     foreign lpvm cast($left#0:mytree.tree, ?tmp$0#0:wybe.int)
     foreign llvm icmp eq(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of

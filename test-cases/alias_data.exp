@@ -82,7 +82,7 @@ bar > public (1 calls)
 
 
 printStudent > public (1 calls)
-0: printStudent(stu#0:student.student, wybe.io$io#0:wybe.phantom, ?wybe.io$io#6:wybe.phantom): AliasPairs: [(stu#0,tmp$1#0)]
+0: printStudent(stu#0:student.student, wybe.io$io#0:wybe.phantom, ?wybe.io$io#6:wybe.phantom): AliasPairs: []
     foreign c print_string("student id: ":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:92:41
     foreign lpvm access(stu#0:student.student, 0:wybe.int, ?tmp$0#0:wybe.int)
     foreign c print_int(~tmp$0#0:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?tmp$9#0:wybe.phantom) @wybe:80:38

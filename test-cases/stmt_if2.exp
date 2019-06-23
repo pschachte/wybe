@@ -108,7 +108,7 @@ lookup > public (5 calls)
 1: =(in#0:stmt_if2.tree, ?out#0:stmt_if2.tree): AliasPairs: []
     foreign llvm move(~in#0:stmt_if2.tree, ?out#0:stmt_if2.tree)
 = > public test (6 calls)
-2: =($left#0:stmt_if2.tree, $right#0:stmt_if2.tree, ?$$#0:wybe.bool): AliasPairs: [($left#0,$left$left#0),($right#0,$right$left#0)]
+2: =($left#0:stmt_if2.tree, $right#0:stmt_if2.tree, ?$$#0:wybe.bool): AliasPairs: []
     foreign lpvm cast($left#0:stmt_if2.tree, ?tmp$0#0:wybe.int)
     foreign llvm icmp eq(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
