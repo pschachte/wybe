@@ -38,7 +38,7 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argVarIsFlowDirection, argType,
-  inArgVar, inArgVar2, outArgVar2, argDescription, flowsIn, flowsOut,
+  inArgVar2, outArgVar2, argDescription, flowsIn, flowsOut,
   foldProcCalls, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp, expOutputs, pexpListOutputs,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
@@ -2077,9 +2077,9 @@ argType (ArgString _ typ) = typ
 argType (ArgChar _ typ) = typ
 argType (ArgUnneeded _ typ) = typ
 
-inArgVar:: PrimArg -> PrimVarName
-inArgVar (ArgVar var _ flow _ _) | flow == FlowIn = var
-inArgVar _ = shouldnt "inArgVar of input argument"
+-- inArgVar:: PrimArg -> PrimVarName
+-- inArgVar (ArgVar var _ flow _ _) | flow == FlowIn = var
+-- inArgVar _ = shouldnt "inArgVar of input argument"
 
 
 -- Used in AliasAnalysis - only care about non phantom pointers that might incur
@@ -2101,9 +2101,9 @@ outArgVar2 arg@(ArgVar var _ flow _ _)
     | flow == FlowOut && not (argIsPhantom arg) = return (Just var)
 outArgVar2 _ = return Nothing
 
-outArgVar :: PrimArg -> PrimVarName
-outArgVar (ArgVar var _ flow _ _) | flow == FlowOut = var
-outArgVar _ = shouldnt "outArgVar of input argument"
+-- outArgVar :: PrimArg -> PrimVarName
+-- outArgVar (ArgVar var _ flow _ _) | flow == FlowOut = var
+-- outArgVar _ = shouldnt "outArgVar of input argument"
 
 
 argDescription :: PrimArg -> String
