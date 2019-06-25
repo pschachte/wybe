@@ -1,0 +1,190 @@
+======================================================================
+AFTER EVERYTHING:
+ Module alias
+  public submods  : 
+  public types    : position: (alias.position,"pointer")
+  public resources: 
+  public procs    : alias.<0>
+                    alias.position.=<0>
+                    alias.position.position<0>
+                    alias.position.position<1>
+                    alias.position.x<0>
+                    alias.position.x<1>
+                    alias.position.y<0>
+                    alias.position.y<1>
+  imports         : public use alias.position
+                    use wybe
+  types           : position/0 (pointer)  @alias:1:9
+  resources       : 
+  submodules      : alias.position
+  procs           : 
+
+*main* > public inline (0 calls)
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom):
+    foreign c print_int(7777:wybe.int, ~#io#0:phantom, ?tmp$12#0:phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$12#0:phantom, ?#io#1:phantom) @wybe:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'alias'
+
+
+declare external ccc void @putchar(i8)
+
+declare external ccc void @print_int(i64)
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc void @"alias.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
+entry:
+  tail call ccc void @print_int(i64 7777)
+  tail call ccc void @putchar(i8 10)
+  ret void
+}
+--------------------------------------------------
+ Module alias.position([])
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : alias.position.=<0>
+                    alias.position.position<0>
+                    alias.position.position<1>
+                    alias.position.x<0>
+                    alias.position.x<1>
+                    alias.position.y<0>
+                    alias.position.y<1>
+  imports         : use alias
+                    use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+= > public inline test (3 calls)
+0: =($left#0:alias.position, $right#0:alias.position, ?$$#0:wybe.bool):
+    foreign lpvm access($left#0:alias.position, 0:wybe.int, ?$left$x#0:wybe.int)
+    foreign lpvm access(~$left#0:alias.position, 8:wybe.int, ?$left$y#0:wybe.int)
+    foreign lpvm access($right#0:alias.position, 0:wybe.int, ?$right$x#0:wybe.int)
+    foreign lpvm access(~$right#0:alias.position, 8:wybe.int, ?$right$y#0:wybe.int)
+    foreign llvm icmp eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$2#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+
+
+
+position > public inline (0 calls)
+0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:alias.position):
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:alias.position)
+    foreign lpvm mutate(~%$rec#0:alias.position, ?%$rec#1:alias.position, 0:wybe.int, ~x#0:wybe.int)
+    foreign lpvm mutate(~%$rec#1:alias.position, ?%$#0:alias.position, 8:wybe.int, ~y#0:wybe.int)
+position > public inline (4 calls)
+1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:alias.position):
+    foreign lpvm access($#0:alias.position, 0:wybe.int, ?x#0:wybe.int)
+    foreign lpvm access(~$#0:alias.position, 8:wybe.int, ?y#0:wybe.int)
+
+
+x > public inline (0 calls)
+0: x($rec#0:alias.position, ?$#0:wybe.int):
+    foreign lpvm access(~$rec#0:alias.position, 0:wybe.int, ?$#0:wybe.int)
+x > public inline (0 calls)
+1: x($rec#0:alias.position, ?$rec#1:alias.position, $field#0:wybe.int):
+    foreign lpvm mutate(~%$rec#0:alias.position, ?%$rec#1:alias.position, 0:wybe.int, ~$field#0:wybe.int)
+
+
+y > public inline (0 calls)
+0: y($rec#0:alias.position, ?$#0:wybe.int):
+    foreign lpvm access(~$rec#0:alias.position, 8:wybe.int, ?$#0:wybe.int)
+y > public inline (0 calls)
+1: y($rec#0:alias.position, ?$rec#1:alias.position, $field#0:wybe.int):
+    foreign lpvm mutate(~%$rec#0:alias.position, ?%$rec#1:alias.position, 8:wybe.int, ~$field#0:wybe.int)
+
+  LLVM code       :
+
+; ModuleID = 'alias.position'
+
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i1 @"alias.position.=<0>"(i64* %"$left#0", i64* %"$right#0"){
+entry:
+  %1 = bitcast i64* %"$left#0" to i64*
+  %2 = getelementptr i64, i64* %1, i64 0
+  %3 = load i64, i64* %2
+  %4 = bitcast i64* %"$left#0" to i64*
+  %5 = getelementptr i64, i64* %4, i64 1
+  %6 = load i64, i64* %5
+  %7 = bitcast i64* %"$right#0" to i64*
+  %8 = getelementptr i64, i64* %7, i64 0
+  %9 = load i64, i64* %8
+  %10 = bitcast i64* %"$right#0" to i64*
+  %11 = getelementptr i64, i64* %10, i64 1
+  %12 = load i64, i64* %11
+  %"tmp$2#0" = icmp eq i64 %3, %9
+  br i1 %"tmp$2#0", label %if.then, label %if.else
+if.then:
+  %"$$#0" = icmp eq i64 %6, %12
+  ret i1 %"$$#0"
+if.else:
+  ret i1 0
+}
+
+define external ccc i64* @"alias.position.position<0>"(i64 %"x#0", i64 %"y#0"){
+entry:
+  %13 = tail call ccc i8* @wybe_malloc(i32 16)
+  %14 = bitcast i8* %13 to i64*
+  %15 = bitcast i64* %14 to i64*
+  %16 = getelementptr i64, i64* %15, i64 0
+  store i64 %"x#0", i64* %16
+  %17 = bitcast i64* %14 to i64*
+  %18 = getelementptr i64, i64* %17, i64 1
+  store i64 %"y#0", i64* %18
+  ret i64* %14
+}
+
+define external ccc {i64, i64} @"alias.position.position<1>"(i64* %"$#0"){
+entry:
+  %19 = bitcast i64* %"$#0" to i64*
+  %20 = getelementptr i64, i64* %19, i64 0
+  %21 = load i64, i64* %20
+  %22 = bitcast i64* %"$#0" to i64*
+  %23 = getelementptr i64, i64* %22, i64 1
+  %24 = load i64, i64* %23
+  %25 = insertvalue {i64, i64} undef, i64 %21, 0
+  %26 = insertvalue {i64, i64} %25, i64 %24, 1
+  ret {i64, i64} %26
+}
+
+define external ccc i64 @"alias.position.x<0>"(i64* %"$rec#0"){
+entry:
+  %27 = bitcast i64* %"$rec#0" to i64*
+  %28 = getelementptr i64, i64* %27, i64 0
+  %29 = load i64, i64* %28
+  ret i64 %29
+}
+
+define external ccc i64* @"alias.position.x<1>"(i64* %"$rec#0", i64 %"$field#0"){
+entry:
+  %30 = bitcast i64* %"$rec#0" to i64*
+  %31 = getelementptr i64, i64* %30, i64 0
+  store i64 %"$field#0", i64* %31
+  ret i64* %"$rec#0"
+}
+
+define external ccc i64 @"alias.position.y<0>"(i64* %"$rec#0"){
+entry:
+  %32 = bitcast i64* %"$rec#0" to i64*
+  %33 = getelementptr i64, i64* %32, i64 1
+  %34 = load i64, i64* %33
+  ret i64 %34
+}
+
+define external ccc i64* @"alias.position.y<1>"(i64* %"$rec#0", i64 %"$field#0"){
+entry:
+  %35 = bitcast i64* %"$rec#0" to i64*
+  %36 = getelementptr i64, i64* %35, i64 1
+  store i64 %"$field#0", i64* %36
+  ret i64* %"$rec#0"
+}

@@ -11,8 +11,8 @@ AFTER EVERYTHING:
   resources       :
   procs           :
 
-*main* > public (0 calls)
-0: (io#0:phantom, ?io#2:phantom):
+*main* > public inline (0 calls)
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#2:phantom):
     math.utils.factorial<0>(4:wybe.int, ?tmp$0#0:wybe.int) @compute:3:10
     foreign c print_int(~tmp$0#0:wybe.int, ~#io#0:phantom, ?tmp$4#0:phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$4#0:phantom, ?#io#1:phantom) @wybe:nn:nn
@@ -34,7 +34,7 @@ declare external ccc i64 @"math.utils.factorial<0>"(i64)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc void @"compute.<0>"(){
+define external ccc void @"compute.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
   %"tmp$0#0" = tail call ccc i64 @"math.utils.factorial<0>"(i64 4)
   tail call ccc void @print_int(i64 %"tmp$0#0")
@@ -107,7 +107,7 @@ entry:
   procs           :
 
 *main* > public inline (0 calls)
-0: (io#0:phantom, ?io#1:phantom):
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom):
     foreign c print_string("Utils has been initialised.":wybe.string, ~#io#0:phantom, ?tmp$2#0:phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$2#0:phantom, ?#io#1:phantom) @wybe:nn:nn
 
@@ -138,7 +138,7 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc void @"math.utils.<0>"(){
+define external ccc void @"math.utils.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([28 x i8], [28 x i8]* @math.utils.1, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)

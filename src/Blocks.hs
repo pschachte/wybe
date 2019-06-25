@@ -316,20 +316,11 @@ mainReturnCodegen = do
 -- param's name on the symbol table. Don't assign if phantom.
 assignParam :: PrimParam -> Codegen ()
 assignParam p =
-    do let nm = show (primParamName p)
-       let ty = primParamType p
-       llty <- lift $ typed' ty
-       if typeIsPhantom ty
-         then return () -- No need to assign phantoms
-         else case (paramInfoUnneeded . primParamInfo) p of
-           True  -> return ()    -- unneeded param
-           -- False -> do
-           --     let varType = typed ty
-           --     ptr <- instr (ptr_t varType) $ alloca varType
-           --     store ptr (localVar varType nm)
-           --     op <- instr varType $ load ptr
-           --     assign nm op
-           False -> assign nm (localVar llty nm)
+    do let ty = primParamType p
+       unless (typeIsPhantom ty || paramInfoUnneeded (primParamInfo p))
+         $ do let nm = show (primParamName p)
+              llty <- lift $ typed' ty
+              assign nm (localVar llty nm)
 
 
 -- | Retrive or build the output operand from the given parameters.

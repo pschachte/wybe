@@ -13,7 +13,7 @@ AFTER EVERYTHING:
   procs           :
 
 *main* > public (0 calls)
-0: (io#0:phantom, ?io#1:phantom):
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp$5#0:position.position)
     foreign lpvm mutate(~tmp$5#0:position.position, ?tmp$6#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp$6#0:position.position, ?tmp$1#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 20:wybe.int)
@@ -53,7 +53,7 @@ declare external ccc i64 @ipow(i64, i64)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc void @"import.<0>"(){
+define external ccc void @"import.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
   %1 = tail call ccc i8* @wybe_malloc(i32 16)
   %2 = bitcast i8* %1 to i64*

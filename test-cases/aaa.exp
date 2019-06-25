@@ -13,7 +13,7 @@ AFTER EVERYTHING:
   procs           :
 
 *main* > public inline (0 calls)
-0: (io#0:phantom, ?io#1:phantom):
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom):
     foreign c print_string("AAA: Init":wybe.string, ~#io#0:phantom, ?tmp$2#0:phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$2#0:phantom, ?#io#1:phantom) @wybe:nn:nn
 
@@ -30,7 +30,7 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc void @"aaa.<0>"(){
+define external ccc void @"aaa.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @aaa.1, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)
@@ -49,7 +49,7 @@ entry:
   procs           :
 
 *main* > public inline (0 calls)
-0: (io#0:phantom, ?io#1:phantom):
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom):
     foreign c print_string("BBB: Init":wybe.string, ~#io#0:phantom, ?tmp$2#0:phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$2#0:phantom, ?#io#1:phantom) @wybe:nn:nn
 
@@ -66,7 +66,7 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc void @"bbb.<0>"(){
+define external ccc void @"bbb.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @bbb.1, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)
@@ -85,7 +85,7 @@ entry:
   procs           :
 
 *main* > public inline (0 calls)
-0: (io#0:phantom, ?io#1:phantom):
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom):
     foreign c print_string("CCC: Init":wybe.string, ~#io#0:phantom, ?tmp$2#0:phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$2#0:phantom, ?#io#1:phantom) @wybe:nn:nn
 
@@ -102,7 +102,7 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc void @"ccc.<0>"(){
+define external ccc void @"ccc.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ccc.1, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)
@@ -120,31 +120,9 @@ entry:
   procs           :
 
 *main* > public inline (0 calls)
-AFTER LLVM IR:
-
-; ModuleID = 'aaa'
-source_filename = "test-cases/aaa.wybe"
-
-@aaa.1 = constant [10 x i8] c"AAA: Init\00"
-
-declare void @putchar(i8) local_unnamed_addr
-
-declare void @print_string(i8*) local_unnamed_addr
-
-define i32 @aaa.main() local_unnamed_addr {
-entry:
-  tail call void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @aaa.1, i64 0, i64 0))
-  tail call void @putchar(i8 10)
-  ret i32 0
-}
-
---------------------------------------------------
-; ModuleID = 'bbb'
-source_filename = "test-cases/bbb.wybe"
-
-@bbb.1 = constant [10 x i8] c"BBB: Init\00"
-=======
 0: (io#0:phantom, ?io#1:phantom):
+=======
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom):
     foreign c print_string("DDD: Init":wybe.string, ~#io#0:phantom, ?tmp$2#0:phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$2#0:phantom, ?#io#1:phantom) @wybe:nn:nn
 
@@ -161,7 +139,7 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc void @"ddd.<0>"(){
+define external ccc void @"ddd.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ddd.1, i32 0, i32 0))
   tail call ccc void @putchar(i8 10)

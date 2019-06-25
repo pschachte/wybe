@@ -1,42 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
- Module command_line
-  public submods  :
-  public types    :
-  public resources: argc: command_line.argc
-                    argv: command_line.argv
-                    exit_code: command_line.exit_code
-  public procs    : command_line.set_exit_code<0>
-  imports         : use wybe
-  types           :
-  resources       : argc: fromList [(command_line.argc,Just wybe.int @command_line:5:8)] @command_line:5:8
-                    argv: fromList [(command_line.argv,Just wybe.int @command_line:11:8)] @command_line:11:8
-                    exit_code: fromList [(command_line.exit_code,Just wybe.int @command_line:15:8)] @command_line:15:8
-  procs           :
-
-set_exit_code > public inline (0 calls)
-0: set_exit_code(code#0:wybe.int, [exit_code#0:wybe.int], ?exit_code#1:wybe.int):
-    foreign llvm move(~code#0:wybe.int, ?exit_code#1:wybe.int) @command_line:19:5
-
-  LLVM code       :
-
-; ModuleID = 'command_line'
-
-
-declare external ccc i8* @wybe_malloc(i32)
-
-define external ccc i64 @"command_line.set_exit_code<0>"(i64 %"code#0"){
-entry:
-  ret i64 %"code#0"
-}
---------------------------------------------------
  Module main_hello
   public submods  :
   public types    :
   public resources:
   public procs    : main_hello.<0>
-  imports         : use command_line
-                    use wybe
+  imports         : use wybe
   types           :
   resources       :
   procs           :
@@ -45,7 +14,7 @@ AFTER LLVM IR:
 =======
 *main* > public (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], [exit_code#0:wybe.int], ?exit_code#1:wybe.int, io#0:phantom, ?io#3:phantom):
-    foreign llvm move(42:wybe.int, ?#exit_code#1:wybe.int) @command_line:19:5
+    foreign llvm move(42:wybe.int, ?#exit_code#1:wybe.int) @wybe:nn:nn
     foreign c print_string("hello, world!":wybe.string, ~#io#0:phantom, ?tmp$5#0:phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$5#0:phantom, ?#io#1:phantom) @wybe:nn:nn
     foreign llvm sub(argc#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
