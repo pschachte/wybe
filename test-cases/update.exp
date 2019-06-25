@@ -1,44 +1,44 @@
 ======================================================================
 AFTER EVERYTHING:
  Module update
-  public submods  : 
-  public types    : 
-  public resources: 
+  public submods  :
+  public types    :
+  public resources:
   public procs    : update.inc2<0>
                     update.inc2<1>
   imports         : use wybe
-  types           : 
-  resources       : 
-  procs           : 
+  types           :
+  resources       :
+  procs           :
 
 inc2 > public inline (0 calls)
-0: inc2(x#0:wybe.int, ?$#0:wybe.int): AliasPairs: []
-    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:13:38
-    foreign llvm add(~tmp$1#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @wybe:13:38
-inc2 > public inline (0 calls)
-1: inc2(?x#0:wybe.int, y#0:wybe.int): AliasPairs: []
-    foreign llvm sub(~y#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:14:44
-    foreign llvm sub(~tmp$1#0:wybe.int, 1:wybe.int, ?x#0:wybe.int) @wybe:14:44
-update
-======================================================================
 AFTER LLVM IR:
+=======
+0: inc2(x#0:wybe.int, ?$#0:wybe.int):
+    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:nn:nn
+    foreign llvm add(~tmp$1#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
+inc2 > public inline (0 calls)
+1: inc2(?x#0:wybe.int, y#0:wybe.int):
+    foreign llvm sub(~y#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
+    foreign llvm sub(~tmp$0#0:wybe.int, 1:wybe.int, ?x#0:wybe.int) @wybe:nn:nn
+
+  LLVM code       :
 
 ; ModuleID = 'update'
-source_filename = "test-cases/update.wybe"
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"update.inc2<0>"(i64 %"x#0") local_unnamed_addr #0 {
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i64 @"update.inc2<0>"(i64 %"x#0"){
 entry:
-  %"$#0" = add i64 %"x#0", 2
+  %"tmp$1#0" = add i64 %"x#0", 1
+  %"$#0" = add i64 %"tmp$1#0", 1
   ret i64 %"$#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"update.inc2<1>"(i64 %"y#0") local_unnamed_addr #0 {
+define external ccc i64 @"update.inc2<1>"(i64 %"y#0"){
 entry:
-  %"x#0" = add i64 %"y#0", -2
+  %"tmp$0#0" = sub i64 %"y#0", 1
+  %"x#0" = sub i64 %"tmp$0#0", 1
   ret i64 %"x#0"
 }
-
-attributes #0 = { norecurse nounwind readnone }
-

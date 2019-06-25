@@ -31,36 +31,30 @@ fold_test > public inline (0 calls)
 fortytwo > public inline (0 calls)
 0: fortytwo(?$#0:wybe.int): AliasPairs: []
     foreign llvm move(42:wybe.int, ?$#0:wybe.int) @constfold:1:8
-constfold
-======================================================================
-AFTER LLVM IR:
+
+  LLVM code       :
 
 ; ModuleID = 'constfold'
-source_filename = "test-cases/constfold.wybe"
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"constfold.fold_add<0>"() local_unnamed_addr #0 {
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i64 @"constfold.fold_add<0>"(){
 entry:
   ret i64 42
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"constfold.fold_mult<0>"() local_unnamed_addr #0 {
+define external ccc i64 @"constfold.fold_mult<0>"(){
 entry:
   ret i64 42
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"constfold.fold_test<0>"() local_unnamed_addr #0 {
+define external ccc i64 @"constfold.fold_test<0>"(){
 entry:
   ret i64 42
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"constfold.fortytwo<0>"() local_unnamed_addr #0 {
+define external ccc i64 @"constfold.fortytwo<0>"(){
 entry:
   ret i64 42
 }
-
-attributes #0 = { norecurse nounwind readnone }
-

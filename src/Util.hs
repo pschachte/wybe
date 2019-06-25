@@ -9,7 +9,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Util (sameLength, maybeNth, checkMaybe, setMapInsert,
-             fillLines, nop, sccElts,
+             applyPair, fillLines, nop, sccElts,
              UnionFind, UFInfo, unionFindToTransitivePairs,
              initUnionFind, newUfItem, uniteUf, transformUfKey,
              combineUf, removeFromUf, connectedToOthers,
@@ -25,9 +25,9 @@ import           GHC.Generics (Generic)
 
 -- |Do the the two lists have the same length?
 sameLength :: [a] -> [b] -> Bool
-sameLength [] []         = True
+sameLength [] [] = True
 sameLength (_:as) (_:bs) = sameLength as bs
-sameLength _ _           = False
+sameLength _ _ = False
 
 
 -- |Return the nth element of the list, if present, else Nothing.
@@ -41,7 +41,7 @@ maybeNth n (_:es)
 
 -- |Test the value in a maybe, and if it fails, return Nothing.
 checkMaybe :: (a -> Bool) -> Maybe a -> Maybe a
-checkMaybe test Nothing    = Nothing
+checkMaybe test Nothing = Nothing
 checkMaybe test (Just val) = if test val then Just val else Nothing
 
 
@@ -52,9 +52,14 @@ setMapInsert :: (Ord a, Ord b) => a -> b -> Map a (Set b) -> Map a (Set b)
 setMapInsert key item dict =
     Map.alter (\ms -> case ms of
                     Nothing -> Just $ Set.singleton item
-                    Just s  -> Just $ Set.insert item s)
+                    Just s -> Just $ Set.insert item s)
     key dict
 
+
+
+-- |Apply a pair of functions to a value and return a pair of results.
+applyPair :: (a->b,a->c) -> a -> (b,c)
+applyPair (f,g) val = (f val, g val)
 
 
 -- |fillLines marginText currColumn lineLength text

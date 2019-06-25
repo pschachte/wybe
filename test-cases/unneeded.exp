@@ -1,31 +1,30 @@
 ======================================================================
 AFTER EVERYTHING:
  Module unneeded
-  public submods  : 
-  public types    : 
-  public resources: 
-  public procs    : 
+  public submods  :
+  public types    :
+  public resources:
+  public procs    :
   imports         : use wybe
-  types           : 
-  resources       : 
-  procs           : 
+  types           :
+  resources       :
+  procs           :
 
 unneeded > inline (0 calls)
-0: unneeded(x#0:wybe.int, [y#0:wybe.int], ?z#0:wybe.int, q#0:wybe.int, [?q#0:wybe.int]): AliasPairs: []
-    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?z#0:wybe.int) @wybe:13:38
-unneeded
-======================================================================
 AFTER LLVM IR:
+=======
+0: unneeded(x#0:wybe.int, [y#0:wybe.int], ?z#0:wybe.int, q#0:wybe.int, [?q#0:wybe.int]):
+    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?z#0:wybe.int) @wybe:nn:nn
+
+  LLVM code       :
 
 ; ModuleID = 'unneeded'
-source_filename = "test-cases/unneeded.wybe"
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"unneeded.unneeded<0>"(i64 %"x#0", i64 %"q#0") local_unnamed_addr #0 {
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i64 @"unneeded.unneeded<0>"(i64 %"x#0", i64 %"q#0"){
 entry:
   %"z#0" = add i64 %"x#0", 1
   ret i64 %"z#0"
 }
-
-attributes #0 = { norecurse nounwind readnone }
-

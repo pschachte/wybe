@@ -1,21 +1,23 @@
 ======================================================================
 AFTER EVERYTHING:
  Module proc_allin
-  public submods  : 
-  public types    : 
-  public resources: 
+  public submods  :
+  public types    :
+  public resources:
   public procs    : proc_allin.nada<0>
   imports         : use wybe
-  types           : 
-  resources       : 
-  procs           : 
+  types           :
+  resources       :
+  procs           :
 
 nada > public inline (0 calls)
-0: nada([x#0:wybe.int], [y#0:wybe.int]): AliasPairs: []
-proc_allin
-======================================================================
 AFTER LLVM IR:
+=======
+0: nada([x#0:wybe.int], [y#0:wybe.int]):
+
+  LLVM code       :
 
 ; ModuleID = 'proc_allin'
-source_filename = "test-cases/proc_allin.wybe"
 
+
+declare external ccc i8* @wybe_malloc(i32)

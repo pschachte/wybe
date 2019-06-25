@@ -13,18 +13,15 @@ AFTER EVERYTHING:
 nothing_interesting > public inline (0 calls)
 0: nothing_interesting(?$#0:wybe.int): AliasPairs: []
     foreign llvm move(7:wybe.int, ?$#0:wybe.int) @mainless:4:8
-mainless
-======================================================================
-AFTER LLVM IR:
+
+  LLVM code       :
 
 ; ModuleID = 'mainless'
-source_filename = "test-cases/mainless.wybe"
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"mainless.nothing_interesting<0>"() local_unnamed_addr #0 {
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i64 @"mainless.nothing_interesting<0>"(){
 entry:
   ret i64 7
 }
-
-attributes #0 = { norecurse nounwind readnone }
-

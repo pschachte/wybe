@@ -1,3 +1,4 @@
+pragma no_standard_library  # Standard library can't depend on itself!
 
 public type bool = public false | true
     # These are syntax errors because they are operators:
@@ -56,14 +57,14 @@ end
 
 
 public type string is pointer8
-    # XXX this whole implementation is completely wrong, but will do for now
-    public func ++(x:string, y:string):string = foreign c strcat(x,y)
-    public func  =(x:string,y:string):bool = foreign c strcmp(x,y)  = 0
-    public func /=(x:string,y:string):bool = foreign c strcmp(x,y) /= 0
-    public func  <(x:string,y:string):bool = foreign c strcmp(x,y) <  0
-    public func <=(x:string,y:string):bool = foreign c strcmp(x,y) <= 0
-    public func  >(x:string,y:string):bool = foreign c strcmp(x,y) >  0
-    public func >=(x:string,y:string):bool = foreign c strcmp(x,y) >= 0
+    # this whole implementation is completely wrong, but will do for now
+    #wrong: public func ++(x:string, y:string):string = foreign c strcat(x,y)
+    public func =(x:string, y:string):bool  = foreign c strcmp(x,y) = 0
+    public func /=(x:string,y:string):bool  = foreign c strcmp(x,y) /= 0
+    public func <(x:string, y:string):bool  = foreign c strcmp(x,y) < 0
+    public func <=(x:string, y:string):bool = foreign c strcmp(x,y) <= 0
+    public func >(x:string, y:string):bool  = foreign c strcmp(x,y) > 0
+    public func >=(x:string, y:string):bool = foreign c strcmp(x,y) >= 0
 end
 
 
@@ -72,6 +73,7 @@ public type char is i8
     public func /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
 end
 
+
 public module io is
     public resource io:phantom = phantom
 
@@ -79,11 +81,11 @@ public module io is
 
     public proc print(x:int) use !io foreign c print_int(x, !io) end
     public proc println(x:int) use !io !print(x) !nl end
-    public proc read(?x:int) use !io foreign c read_int(?x,!io) end
+    # public proc read(?x:int) use !io foreign c read_int(?x,!io) end
 
     public proc print(x:float) use !io foreign c print_float(x,!io) end
     public proc println(x:float) use !io !print(x) !nl end
-    public proc read(?x:float) use !io foreign c read_float(?x,!io) end
+    # public proc read(?x:float) use !io foreign c read_float(?x,!io) end
 
     public proc print(x:char) use !io foreign c putchar(x,!io) end
     public proc println(x:char) use !io !print(x) !nl end
@@ -91,12 +93,22 @@ public module io is
 
     public proc print(x:string) use !io foreign c print_string(x,!io) end
     public proc println(x:string) use !io !print(x) !nl end
-    public proc read(?x:string) use !io foreign c read_line(?x,!io) end
+    # public proc read(?x:string) use !io foreign c read_line(?x,!io) end
 
     public proc print(x:bool) use !io
-       foreign c print_string(if x=false then "false" else "true")
+       !print(if x=false then "false" else "true")
     end
     public proc println(x:bool) use !io !print(x) !nl end
 #    public func eof:char = foreign lpvm cast(-1)
 end
 
+public type phantom is phantom
+    # public func phantom:phantom = foreign lpvm cast(0)
+    # public proc =(x:phantom,?y:phantom) ?y = foreign lpvm cast(0) end
+    # public proc =(?x:phantom,y:phantom) ?x = foreign lpvm cast(0) end
+end
+
+# public module allocation is
+#     use wybe.io
+#     foreign c gc_init(!io)
+# end

@@ -28,7 +28,7 @@ for f in test-cases/*.wybe ; do
 	    echo 'Output changes:'
 	    dwdiff -c -d '()<>~!@:?.%#' "$exp" "$out"
 	    echo
-	    if agree "Is the green version appropriate? " ; then
+	    if agree "Is the green version of $out appropriate? " ; then
 		mv "$out" "$exp"
 		echo "Green version now expected"
 	    else
@@ -43,7 +43,7 @@ for f in test-cases/*.wybe ; do
 	echo 'Output:'
 	cat "$out"
 	echo
-	if agree "Is this output appropriate? " ; then
+	if agree "Is $out appropriate? " ; then
 	    mv "$out" "$exp"
 	    echo "This output is now expected"
 	else

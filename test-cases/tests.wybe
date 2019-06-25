@@ -3,7 +3,7 @@
 public test proc lt(x:int, y:int)
     # use a test to implement another test
     # x < y # this should work, but is currently a syntax error, so do this:
-    `<`(x, y)
+    if x < y :: true | true :: false end
 end
 
 public proc lt2(x:int, y:int, ?res:bool)

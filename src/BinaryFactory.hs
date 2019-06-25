@@ -59,7 +59,7 @@ instance Binary ImportSpec
 -- Module
 instance Binary Module
 instance Binary ModuleInterface
-
+instance Binary Pragma
 
 instance Binary Item
 instance Binary FnProto
@@ -96,14 +96,14 @@ instance Binary LLVMAST.Module where
 -- | A Module is encoding by creating an 'EncodedLPVM' type which wraps the
 -- Module `m` and all its sub-modules. This type is serialised and prefixed
 -- with 4 magic bytes.
-encodeModule :: Module -> Compiler BL.ByteString
+encodeModule :: ModSpec -> Compiler BL.ByteString
 encodeModule m = do
     let msg = "Unable to get loaded Module for binary encoding."
     -- func to get get a trusted loaded Module from it's spec
     let getm name = trustFromJustM msg $ getLoadedModule name
-    subModSpecs <- collectSubModules (modSpec m)
-    subMods <- mapM getm subModSpecs
-    let encoded = B.encode $ makeEncodedLPVM (m:subMods)
+    descendents <- descendentModules m
+    mods <- mapM getm (m:descendents)
+    let encoded = B.encode $ makeEncodedLPVM mods
     return $ BL.append (BL.pack magicVersion) encoded
 
 

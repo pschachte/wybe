@@ -1,3 +1,3 @@
-Error detected during type checking of modules in_before_out
+Error detected during type checking of module(s) in_before_out
 [91mtest-cases/in_before_out.wybe:2:8: Uninitialised argument in call to incr, argument 1
 [0m

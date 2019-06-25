@@ -50,9 +50,10 @@ module Builder (buildTargets, compileModule) where
 
 import           Analysis
 import           AST
-import           BinaryFactory
+import           ASTShow                   (logDump)
 import           Blocks                    (blockTransformModule,
-                                            concatLLVMASTModules, newMainModule)
+                                            concatLLVMASTModules)
+-- , newMainModule)
 import           Callers                   (collectCallers)
 import           Clause                    (compileProc)
 import           Config
@@ -62,17 +63,17 @@ import           Control.Monad.Trans.State
 import qualified Data.ByteString.Char8     as BS
 import           Data.List                 as List
 import           Data.Map                  as Map
+import           Data.Set                  as Set
 import           Data.Maybe
 import           Emit
-import           NewParser                 (parseWybe)
-import           Normalise                 (normalise)
+import           Normalise                 (normalise, completeNormalisation)
 import           ObjectInterface
 import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
-                                            optForce, optForceAll, optLibDirs,
-                                            optUseStd)
-import           Resources                 (canonicaliseProcResources,
-                                            resourceCheckMod, resourceCheckProc)
+                                            optForce, optForceAll, optLibDirs)
+import           NewParser                 (parseWybe)
+import           Resources                 (resourceCheckMod, transformProcResources,
+                                            canonicaliseProcResources)
 import           Scanner                   (fileTokens)
 import           System.Directory
 import           System.FilePath
@@ -80,6 +81,10 @@ import           Transform                 (transformProc)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
+import           Snippets
+import           BinaryFactory
+import qualified Data.ByteString.Char8 as BS
+import qualified LLVM.AST              as LLVMAST
 
 ------------------------ Handling dependencies ------------------------
 
@@ -87,13 +92,11 @@ import           Unbranch                  (unbranchProc)
 buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
     possDirs <- gets (optLibDirs . options)
-    let useStd = optUseStd opts
-    -- load library first (if option useStd is True)
-    when useStd $ void (buildModuleIfNeeded False ["wybe"] possDirs)
+    -- load library first
+    -- void (buildModuleIfNeeded False ["wybe"] possDirs)
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     showMessages
     logDump FinalDump FinalDump "EVERYTHING"
-    logLLVMDump FinalDump FinalDump "LLVM IR"
 
 
 -- |Build a single target; flag specifies to re-compile even if the
@@ -111,21 +114,17 @@ buildTarget force target = do
             let dir = takeDirectory target
             built <- buildModuleIfNeeded force [modname] [dir]
             stopOnError "BUILDING TARGET"
-            -- Check if the module contains sub modules
-            _ <- concatSubMods [modname]
-
-            when (tType == ExecutableFile) (buildExecutable [modname] target)
-            if not built && tType /= ExecutableFile
+            if not built
               then logBuild $ "Nothing to be done for target: " ++ target
-              else
-                do logBuild $ "Emitting Target: " ++ target
-                   case tType of
-                     ObjectFile   -> emitObjectFile [modname] target
-                     BitcodeFile  -> emitBitcodeFile [modname] target
-                     AssemblyFile -> emitAssemblyFile [modname] target
-                     ExecutableFile -> return ()
+              else do
+                  logBuild $ "Emitting Target: " ++ target
+                  case tType of
+                     ObjectFile     -> emitObjectFile [modname] target
+                     BitcodeFile    -> emitBitcodeFile [modname] target
+                     AssemblyFile   -> emitAssemblyFile [modname] target
+                     ExecutableFile -> buildExecutable [modname] target
                      other -> nyi $ "output file type " ++ show other
-                   whenLogging Emit $ logLLVMString [modname]
+                  whenLogging Emit $ logLLVMString [modname]
 
 
 -- |Compile or load a module dependency.
@@ -160,12 +159,14 @@ buildModuleIfNeeded force modspec possDirs = do
         if isJust maybemod
           then return False -- already loaded:  nothing more to do
           else do
-            srcOb <- liftIO $ moduleSources modspec possDirs
+            srcOb <- moduleSources modspec possDirs
             logBuild $ show srcOb
             case srcOb of
                 NoSource -> do
-                    Error <!> "Could not find module " ++
-                        showModSpec modspec
+                    Error <!> "Could not find source for module " ++
+                              showModSpec modspec
+                              ++ "\nin directories:\n    "
+                              ++ intercalate "\n    " possDirs
                     return False
 
                 -- only object file exists
@@ -244,11 +245,11 @@ buildModule mspec srcfile = do
 
 -- |Build a directory as the module `dirmod`.
 buildDirectory :: FilePath -> ModSpec -> Compiler Bool
-buildDirectory dir dirmod= do
+buildDirectory dir dirmod = do
     logBuild $ "Building DIR: " ++ dir ++ ", into MODULE: "
         ++ showModSpec dirmod
     -- Make the directory a Module package
-    enterModule dir dirmod Nothing
+    enterModule dir dirmod Nothing Nothing
     updateModule (\m -> m { isPackage = True })
 
     -- Get wybe modules (in the directory) to build
@@ -279,11 +280,11 @@ buildDirectory dir dirmod= do
 
 
 
--- |Compile a module given the parsed source file contents.
+-- |Compile a file module given the parsed source file contents.
 compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
 compileModule source modspec params items = do
     logBuild $ "===> Compiling module " ++ showModSpec modspec
-    enterModule source modspec params
+    enterModule source modspec (Just modspec) params
     -- Hash the parse items and store it in the module
     let hashOfItems = hashItems items
     logBuild $ "HASH: " ++ hashOfItems
@@ -370,18 +371,19 @@ loadModuleFromObjFile required objfile = do
                 ++ showModSpecs imports
             -- Place the super mod under compilation while
             -- dependencies are built
-            let superMod = head extracted
-            modify (\comp -> let ms = superMod : underCompilation comp
-                       in comp { underCompilation = ms })
-            mapM_ buildDependency imports
-            _ <- reexitModule
-            logBuild $ "=== <<< Extracted Module put in it's place from "
-                ++ show objfile
-            return True
-
+            case extracted of
+              (superMod:_) -> do
+                modify (\comp -> let ms = superMod : underCompilation comp
+                                 in comp { underCompilation = ms })
+                mapM_ buildDependency imports
+                _ <- reexitModule
+                logBuild $ "=== <<< Extracted Module put in it's place from "
+                           ++ show objfile
+                return True
+              [] -> shouldnt "no LPVM extracted from object file"
+            else
             -- The required modspec was not part of the extracted
             -- Return false and try for building
-            else
             return False
 
 
@@ -403,18 +405,6 @@ placeExtractedModule thisMod = do
 
 
 
--- | Concatenate the LLVMAST.Module implementations of the submodules to the
--- the given super module.
-concatSubMods :: ModSpec -> Compiler [ModSpec]
-concatSubMods mspec = do
-    someMods <- collectSubModules mspec
-    unless (List.null someMods) $
-        logBuild $ "### Combining descendents of " ++ showModSpec mspec
-        ++ ": " ++ showModSpecs someMods
-    concatLLVMASTModules mspec someMods
-    return someMods
-
-
 -- | Compile and build modules inside a folder, compacting everything into
 -- one object file archive.
 buildArchive :: FilePath -> Compiler ()
@@ -424,20 +414,23 @@ buildArchive arch = do
     logBuild $ "Building modules to archive: " ++ show archiveMods
     mapM_ (\m -> buildModuleIfNeeded False [m] [dir]) archiveMods
     let oFileOf m = joinPath [dir, m] ++ ".o"
-    mapM_ (\m -> emitObjectFile [m] (oFileOf m)) archiveMods
+    mapM_ (\m -> emitObjectFile [m] (oFileOf m))
+          archiveMods
     makeArchive (List.map oFileOf archiveMods) arch
 
 -------------------- Actually compiling some modules --------------------
 
 -- |Actually compile a list of modules that form an SCC in the module
 --  dependency graph.  This is called in a way that guarantees that
---  all modules on which this module depends, other than those on the
---  mods list, will have been processed when this list of modules is
---  reached.
+--  all modules on which these modules depend, other than one another,
+--  will have been processed when this list of modules is reached.
+--  This goes as far as producing LLVM code, but does not write it out.
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
-    logBuild $ "compileModSCC " ++ showModSpecs mspecs
+    logBuild $ "compileModSCC: [" ++ showModSpecs mspecs ++ "]"
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
+    mapM_ (flip inModule (completeNormalisation compileModSCC)) mspecs
+    stopOnError $ "final normalisation of module(s) " ++ showModSpecs mspecs
     ----------------------------------
     -- FLATTENING
     logDump Flatten Types "FLATTENING"
@@ -445,30 +438,29 @@ compileModSCC mspecs = do
     logBuild $ replicate 70 '='
     ----------------------------------
     -- TYPE CHECKING
-    logBuild $ "resource and type checking modules "
-      ++ showModSpecs mspecs ++ "..."
+    logBuild $ "resource and type checking module(s) "
+               ++ showModSpecs mspecs ++ "..."
     mapM_ validateModExportTypes mspecs
-    stopOnError $ "checking parameter type declarations in modules " ++
-      showModSpecs mspecs
+    stopOnError $ "checking parameter type declarations in module(s) "
+                  ++ showModSpecs mspecs
     -- Fixed point needed because eventually resources can bundle
     -- resources from other modules
     fixpointProcessSCC resourceCheckMod mspecs
-    stopOnError $ "processing resources for modules " ++
-      showModSpecs mspecs
+    stopOnError $ "processing resources for module(s) " ++ showModSpecs mspecs
     -- No fixed point needed because public procs must have types declared
     mapM_ typeCheckMod mspecs
-    stopOnError $ "type checking of modules " ++
-      showModSpecs mspecs
+    stopOnError $ "type checking of module(s) "
+                  ++ showModSpecs mspecs
     logDump Types Unbranch "TYPE CHECK"
     mapM_ (transformModuleProcs canonicaliseProcResources)  mspecs
-    mapM_ (transformModuleProcs resourceCheckProc)  mspecs
-    stopOnError $ "resource checking of modules " ++
-      showModSpecs mspecs
+    mapM_ (transformModuleProcs transformProcResources)  mspecs
+    stopOnError $ "resource checking of module(s) "
+                  ++ showModSpecs mspecs
     ----------------------------------
     -- UNBRANCHING
     mapM_ (transformModuleProcs unbranchProc)  mspecs
-    stopOnError $ "handling loops and conditionals in modules " ++
-      showModSpecs mspecs
+    stopOnError $ "handling loops and conditionals in module(s) "
+                  ++ showModSpecs mspecs
     logDump Unbranch Clause "UNBRANCHING"
     -- AST manipulation before this line
     ----------------------------------
@@ -480,6 +472,8 @@ compileModSCC mspecs = do
     logDump Clause Optimise "COMPILATION TO LPVM"
     ----------------------------------
     -- EXPANSION (INLINING)
+    -- XXX Should optimise call graph sccs *across* each module scc
+    -- to ensure inter-module dependencies are optimally optimised
     fixpointProcessSCC optimiseMod mspecs
     stopOnError $ "optimising " ++ showModSpecs mspecs
     logDump Optimise Optimise "OPTIMISATION"
@@ -567,7 +561,7 @@ transformModuleProcs trans thisMod = do
                                   (Map.fromList $ zip names procs')
                                   (modProcs imp) })
     _ <- reexitModule
-    logBuild $ "**** Exiting module " ++ showModSpec thisMod
+    logBuild $ "**** Re-exiting module " ++ showModSpec thisMod
     return ()
 
 
@@ -629,30 +623,75 @@ buildExecutable targetMod fpath = do
              ++ showModSpec targetMod ++ "'; not building executable")
             Nothing
         else do
-            -- Filter the modules for which the second element of tuple is True
-            let mainImports = List.foldr (\x a -> if snd x then fst x:a else a)
-                              [] depends
-            logBuild $ show depends
+            -- find dependencies (including module itself) that have a main
+            logBuild $ "Dependencies: " ++ show depends
+            let mainImports = fst <$> List.filter snd depends
             logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
-            mainMod <- newMainModule mainImports
-            logBuild "o Built 'main' module for target: "
-            mainModStr <- liftIO $ codeemit mainMod
-            logEmit $ BS.unpack mainModStr
+
+            let mainProc = buildMain mainImports
+            logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
+
+            enterModule fpath [] Nothing Nothing
+            addImport ["command_line"] $ importSpec Nothing Private
+            addImport ["wybe","io"] $ importSpec (Just ["io"]) Private
+            mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
+                  mainImports
+            addProcDef mainProc
+            mods <- exitModule
+            compileModSCC mods
+            logDump FinalDump FinalDump "BUILDING MAIN"
+            let mainMod = case mods of
+                  [m] -> m
+                  _   -> shouldnt $ "non-singleton main module: "
+                                    ++ showModSpecs mods
+
+            logBuild $ "Finished building *main* module: " ++ showModSpecs mods
+
+            -- mainMod <- newMainModule mainImports
+            -- logBuild "o Built 'main' module for target: "
+            -- mainModStr <- liftIO $ codeemit mainMod
+            -- logEmit $ BS.unpack mainModStr
             ------------
-            logBuild "o Creating temp Main module @ ...../tmp/tmpMain.o"
+            logBuild "o Creating temp Main module @ .../tmp/tmpMain.o"
             tempDir <- liftIO getTemporaryDirectory
             liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
             let tmpMainOFile = tempDir ++ "wybetemp/" ++ "tmpMain.o"
-            liftIO $ makeObjFile tmpMainOFile mainMod
+            emitObjectFile mainMod tmpMainOFile
 
             ofiles <- mapM (loadObjectFile . fst) depends
+
             let allOFiles = tmpMainOFile:ofiles
             -----------
+            logBuild "o Object Files to link: "
+            logBuild $ "++ " ++ intercalate "\n++ " allOFiles
+            logBuild $ "o Building Target (executable): " ++ fpath
+
             makeExec allOFiles fpath
             -- return allOFiles
-            logBuild "o Object Files to link: "
-            logBuild $ "++ " ++ intercalate "\n++" allOFiles
-            logBuild $ "o Building Target (executable): " ++ fpath
+
+
+buildMain mainImports =
+    let cmdResource name = ResourceFlowSpec (ResourceSpec ["command_line"] name)
+        -- Construct argumentless resourceful calls to all main procs
+        bodyInner = [Unplaced $ ProcCall m "" Nothing Det True []
+                    | m <- mainImports]
+        -- XXX Shouldn't have to hard code assignment of phantom to io
+        -- XXX Should insert assignments of initialised visible resources
+        bodyCode = [lpvmCast (iVal 0) "io" phantomType,
+                    move (iVal 0) (varSet "exit_code"),
+                    Unplaced $ ForeignCall "C" "gc_init" [] []] ++ bodyInner
+        mainBody = ProcDefSrc bodyCode
+        -- Program main has argc, argv, exit_code, and io as resources
+        proto = ProcProto "" []
+                $ Set.fromList [cmdResource "argc" ParamIn,
+                                 cmdResource "argv" ParamIn,
+                                 cmdResource "exit_code" ParamOut,
+                                 ResourceFlowSpec
+                                     (ResourceSpec ["wybe","io"] "io")
+                                     ParamOut]
+    in ProcDef "" proto mainBody Nothing 0 Map.empty
+       Private Det False NoSuperproc
+
 
 
 -- | Traverse and collect a depth first dependency list from the given initial
@@ -676,7 +715,7 @@ orderedDependencies targetMod =
         -- filter out std lib imports and sub-mod imports from imports
         -- since we are looking for imports which need a physical object file
         let imports =
-                List.filter (\x -> notElem x subMods && (not.isStdLib) x) $
+                List.filter (\x -> notElem x subMods) $ --  && (not.isStdLib) x) $
                 (keys . modImports) thisMod
         -- Check if this module 'm' has a main procedure.
         let mainExists = "" `elem` procs || "<0>" `elem` procs
@@ -710,7 +749,7 @@ loadObjectFile thisMod =
 
 objectReBuildNeeded :: ModSpec -> FilePath -> Compiler Bool
 objectReBuildNeeded thisMod dir = do
-    srcOb <- liftIO $ moduleSources thisMod [dir]
+    srcOb <- moduleSources thisMod [dir]
     case srcOb of
         NoSource -> return True
 
@@ -723,9 +762,7 @@ objectReBuildNeeded thisMod dir = do
         ModuleSource (Just srcfile) (Just objfile) _ _ -> do
             srcDate <- (liftIO . getModificationTime) srcfile
             dstDate <- (liftIO . getModificationTime) objfile
-            if srcDate > dstDate
-              then return True
-              else return False
+            return $ srcDate > dstDate
         _ -> return True
 
 
@@ -757,17 +794,16 @@ srcObjFiles modspec possDirs = do
                                       ])
                         splits)
             possDirs
-    let validDirs = concat $ concat dirs
-    if List.null validDirs
-      then return Nothing
-      else return $ Just $ List.head validDirs
+    case concat $ concat dirs of
+      []           -> return Nothing
+      (validDir:_) -> return $ Just validDir
 
 
 
 -- | Search for different sources module `modspec` in the possible directory
 -- list `possDirs`. This information is encapsulated as a ModuleSource. The
 -- first found non-empty (not of constr NoSource) of ModuleSource is returned.
-moduleSources :: ModSpec -> [FilePath] -> IO ModuleSource
+moduleSources :: ModSpec -> [FilePath] -> Compiler ModuleSource
 moduleSources modspec possDirs = do
     let splits = List.map (`List.take` modspec) [1..length modspec]
     dirs <- mapM (\d -> mapM (sourceInDir d) splits) possDirs
@@ -781,8 +817,9 @@ moduleSources modspec possDirs = do
 -- file (.wybe), an object file (.o), an archive file (.a), or a sub-directory
 -- in the given directory `d`. This information is returned as a `ModuleSource`
 -- record.
-sourceInDir :: FilePath -> ModSpec -> IO ModuleSource
+sourceInDir :: FilePath -> ModSpec -> Compiler ModuleSource
 sourceInDir d ms = do
+    logBuild $ "Looking for source for module " ++ showModSpec ms
     let dirName = joinPath [d, showModSpec ms]
     -- Helper to convert a boolean to a Maybe [maybeFile True f == Just f]
     let maybeFile b f = if b then Just f else Nothing
@@ -791,10 +828,14 @@ sourceInDir d ms = do
     let objfile = moduleFilePath objectExtension d ms
     let arfile = moduleFilePath archiveExtension d ms
     -- Flags checking
-    dirExists <- doesDirectoryExist dirName
-    srcExists <- doesFileExist srcfile
-    objExists <- doesFileExist objfile
-    arExists <- doesFileExist arfile
+    dirExists <- liftIO $ doesDirectoryExist dirName
+    srcExists <- liftIO $ doesFileExist srcfile
+    objExists <- liftIO $ doesFileExist objfile
+    arExists  <- liftIO $ doesFileExist arfile
+    logBuild $ "Directory   " ++ dirName ++ " exists? " ++ show dirExists
+    logBuild $ "Source file " ++ srcfile ++ " exists? " ++ show srcExists
+    logBuild $ "Object file " ++ objfile ++ " exists? " ++ show objExists
+    logBuild $ "Archive     " ++ arfile ++  " exists? " ++ show arExists
     if srcExists || objExists || arExists || dirExists
         then return
              ModuleSource

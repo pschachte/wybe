@@ -1,0 +1,100 @@
+======================================================================
+AFTER EVERYTHING:
+ Module sister_module
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
+  imports         : use sister_module.m1
+                    use sister_module.m2
+                    use wybe
+  types           : 
+  resources       : 
+  submodules      : sister_module.m1, sister_module.m2
+  procs           : 
+
+baz > inline (0 calls)
+0: baz(i#0:wybe.int, ?j#0:wybe.int):
+    sister_module.m1.foo<0>(~i#0:wybe.int, ?j#0:wybe.int) @sister_module:10:25
+
+
+buzz > inline (0 calls)
+0: buzz(i#0:wybe.int, ?j#0:wybe.int):
+    sister_module.m2.bar<0>(~i#0:wybe.int, ?j#0:wybe.int) @sister_module:12:26
+
+  LLVM code       :
+
+; ModuleID = 'sister_module'
+
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i64 @"sister_module.baz<0>"(i64 %"i#0"){
+entry:
+  %"j#0" = tail call ccc i64 @"sister_module.m1.foo<0>"(i64 %"i#0")
+  ret i64 %"j#0"
+}
+
+define external ccc i64 @"sister_module.buzz<0>"(i64 %"i#0"){
+entry:
+  %"j#0" = tail call ccc i64 @"sister_module.m2.bar<0>"(i64 %"i#0")
+  ret i64 %"j#0"
+}
+--------------------------------------------------
+ Module sister_module.m1
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : sister_module.m1.foo<0>
+  imports         : use sister_module
+                    use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+foo > public inline (0 calls)
+0: foo(i#0:wybe.int, ?j#0:wybe.int):
+    foreign llvm add(~i#0:wybe.int, 1:wybe.int, ?j#0:wybe.int) @wybe:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'sister_module.m1'
+
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i64 @"sister_module.m1.foo<0>"(i64 %"i#0"){
+entry:
+  %"j#0" = add i64 %"i#0", 1
+  ret i64 %"j#0"
+}
+--------------------------------------------------
+ Module sister_module.m2
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : sister_module.m2.bar<0>
+  imports         : use sister_module
+                    use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+bar > public inline (0 calls)
+0: bar(i#0:wybe.int, ?j#0:wybe.int):
+    foreign llvm add(~i#0:wybe.int, 1:wybe.int, ?k#0:wybe.int) @wybe:nn:nn
+    sister_module.m1.foo<0>(~k#0:wybe.int, ?j#0:wybe.int) @sister_module:10:25
+
+  LLVM code       :
+
+; ModuleID = 'sister_module.m2'
+
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i64 @"sister_module.m2.bar<0>"(i64 %"i#0"){
+entry:
+  %"k#0" = add i64 %"i#0", 1
+  %"j#0" = tail call ccc i64 @"sister_module.m1.foo<0>"(i64 %"k#0")
+  ret i64 %"j#0"
+}

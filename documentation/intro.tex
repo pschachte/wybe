@@ -235,6 +235,56 @@ will repeatedly print a prompt and read user input until valid input is
 received, printing a message indicating that the input was invalid each time it
 is invalid.
 
+\section{Modules}
+\label{Modules}
+The role of modules is to present an interface to other modules, and to allow
+that interface to be implemented.
+Each module may define any number of functions, procedures, types, and
+resources.
+Each of these may optionally be declared to be part of the module's
+interface by preceding its declaration with the keyword ``\texttt{public}''.
+Any element not declared \texttt{public} is not visible outside the module.
+
+Each \lang source file is automatically a module whose name is the same as the
+source file, with the ``\texttt{.wybe}'' extension omitted.  Module names
+(and hence source file names) may
+include letters (upper and lower case), digits, and underscore characters.
+
+A module may import other modules, making all their public elements accessible,
+with the declaration
+\begin{wybecode}
+    use @emph[modspec]
+\end{wybecode}
+where \emph{modspec} names the module to import.
+Multiple modules may be imported with a single declaration by separating their
+names with commas.
+Module names are specified relative to the current module; for example,
+\texttt{use~foo} imports the sibling module \texttt{foo}.
+That is, a \texttt{use} declaration begins looking for the specified module in
+the same directory as the current file.
+If the module is not found there, it is looked for in the library.
+
+Modules may be nested in either of two ways.
+First, a directory containing \lang source files is considered to be a module.
+Second, a module may contain a declaration of the form:
+\begin{wybecode}
+  module @emph[name] is
+  \ldots
+  end
+\end{wybecode}
+Between the \texttt{is} and \texttt{end} keywords, all elements are considered
+to be in the \emph{name} submodule of the module containing that declaration.
+
+By default, submodules do not import anything from their supermodules, but
+this can be done explicitly with the declaration:
+\begin{wybecode}
+    use ^
+\end{wybecode}
+where \texttt{\^} is a special syntax referring to the supermodule.
+Similarly the supermodule's supermodule can be specified as \texttt{\^.\^},
+and so on.
+
+
 \section{Type declarations}
 \label{Types}
 \section{Tests}

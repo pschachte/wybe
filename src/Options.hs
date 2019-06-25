@@ -31,7 +31,6 @@ data Options = Options{
     , optLibDirs     :: [String] -- ^Directories where library files live
     , optLogAspects  :: Set LogSelection
                                  -- ^Which aspects to log
-    , optUseStd      :: Bool     -- ^Use the standard library or not
     , optNoLLVMOpt   :: Bool     -- ^Don't run the LLVM optimisation passes
     , optVerbose     :: Bool     -- ^Be verbose in compiler output
     } deriving Show
@@ -47,7 +46,6 @@ defaultOptions    = Options
  , optShowHelp    = False
  , optLibDirs     = ["wybelibs"]
  , optLogAspects  = Set.empty
- , optUseStd      = True
  , optNoLLVMOpt   = False
  , optVerbose     = False
  }
@@ -56,7 +54,7 @@ defaultOptions    = Options
 data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
   | Flatten | Normalise | Optimise | Resources | Types
-  | Unbranch | Blocks | Emit | Analysis | Transform
+  | Unbranch | CodeGen | Blocks | Emit | Analysis | Transform
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
 
@@ -87,8 +85,10 @@ logSelectionDescription Types
     = "Log type checking"
 logSelectionDescription Unbranch
     = "Log transformation of loops and selections into clausal form"
+logSelectionDescription CodeGen
+    = "Log generation of LLVM code"
 logSelectionDescription Blocks
-    = "Log translation of LPVM procedures into LLVM "
+    = "Log translation of LPVM procedures into LLVM"
 logSelectionDescription Emit
     = "Log emission of LLVM IR from the definitions created."
 logSelectionDescription Analysis
@@ -122,9 +122,6 @@ options =
  , Option ['h'] ["help"]
      (NoArg (\ opts -> opts { optShowHelp = True }))
      "display this help text and exit"
- , Option ['x'] ["no-std"]
-     (NoArg (\opts -> opts { optUseStd = False }))
-     "avoid loading the standard wybe library"
  , Option ['s'] ["no-llvm-opt"]
      (NoArg (\opts -> opts { optNoLLVMOpt = True }))
      "don't run the LLVM optimisation pass manager on the emitted LLVM"
@@ -213,4 +210,3 @@ formatMapping mapping =
         [ let t = show elt
           in  (replicate (width - length t) ' ') ++ t ++ " : " ++ mapping elt
         | elt <- domain]
-

@@ -435,7 +435,7 @@ instr' prim@(PrimForeign "llvm" "move" []
            [val, argvar@(ArgVar var _ flow _ _)]) pos
   = do
     logBuild $ "  Expanding move(" ++ show val ++ ", " ++ show argvar ++ ")"
-    unless (flow == FlowOut && argFlowDirection val == FlowIn) $ 
+    unless (flow == FlowOut && argFlowDirection val == FlowIn) $
       shouldnt "move instruction with wrong flow"
     outVar <- gets (Map.findWithDefault var var . outSubst)
     addSubst outVar val
@@ -454,12 +454,25 @@ instr' prim@(PrimForeign "lpvm" "alloc" [] [_,argvar]) pos = do
     logBuild $ "  Leaving alloc alone"
     rawInstr prim pos
     recordVarSet argvar
+instr' prim@(PrimForeign "lpvm" "cast" []
+             [from, to@(ArgVar var _ flow _ _)]) pos
+  = do
+    logBuild $ "  Expanding cast(" ++ show from ++ ", " ++ show to ++ ")"
+    unless (argFlowDirection from == FlowIn && flow == FlowOut) $
+        shouldnt "cast instruction with wrong flow"
+    if (argType from == argType to)
+      then instr' (PrimForeign "llvm" "move" [] [from, to]) pos
+      else ordinaryInstr prim pos
 instr' prim@(PrimTest (ArgInt 0 _)) pos = do
     rawInstr prim pos
     logBuild $ "  Found fail instruction; noting failing branch"
     -- note guaranteed failure
     modify (\s -> s { failed=True })
-instr' prim pos = do
+instr' prim pos = ordinaryInstr prim pos
+
+
+ordinaryInstr :: Prim -> OptPos -> BodyBuilder ()
+ordinaryInstr prim pos = do
     let (prim',newOuts) = splitPrimOutputs prim
     logBuild $ "Looking for computed instr " ++ show prim' ++ " ..."
     currSubExprs <- gets subExprs
@@ -483,6 +496,7 @@ instr' prim pos = do
                   $ zip newOuts oldOuts
 
 
+
 -- | Invert an output arg to be an input arg.
 mkInput :: PrimArg -> PrimArg
 mkInput (ArgVar name ty _ ftype lst) = ArgVar name ty FlowIn Ordinary False
@@ -490,18 +504,51 @@ mkInput arg@ArgInt{} = arg
 mkInput arg@ArgFloat{} = arg
 mkInput arg@ArgString{} = arg
 mkInput arg@ArgChar{} = arg
+mkInput (ArgUnneeded FlowOut ty) = ArgUnneeded FlowIn ty
+mkInput arg@ArgUnneeded{} = arg
 
 
 argExpandedPrim :: Prim -> BodyBuilder Prim
-argExpandedPrim (PrimCall pspec args) = do
+argExpandedPrim call@(PrimCall pspec args) = do
     args' <- mapM expandArg args
-    return $ PrimCall pspec args'
+    params <- lift $ primProtoParams <$> getProcPrimProto pspec
+    unless (sameLength args' params) $
+        shouldnt $ "arguments don't match params in call " ++ show call
+    args'' <- zipWithM (transformUnneededArg $ zip params args) params args'
+    return $ PrimCall pspec args''
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
     return $ simplifyForeign lang nm flags args'
 argExpandedPrim (PrimTest arg) = do
     arg' <- expandArg arg
     return $ PrimTest arg'
+
+
+-- |Replace any arguments corresponding to unneeded parameters with
+--  ArgUnneeded.  For unneeded *output* parameters, there must be an
+--  input with the same name.  We must set the output argument variable
+--  to the corresponding input argument, so the value is defined.
+transformUnneededArg :: [(PrimParam,PrimArg)] -> PrimParam -> PrimArg
+                     -> BodyBuilder PrimArg
+transformUnneededArg pairs
+    PrimParam{primParamInfo=ParamInfo{paramInfoUnneeded=True},
+               primParamFlow=flow, primParamType=typ, primParamName=name}
+    arg = do
+        logBuild $ "Marking unneeded argument " ++ show arg
+        when (flow == FlowOut) $ do
+            case List.filter
+                 (\(p,a)-> primParamName p == name && primParamFlow p == FlowIn)
+                 pairs of
+              []      -> shouldnt $ "No input param matching output "
+                                    ++ show name
+              [(_,a)] -> do
+                logBuild $ "Adding move instruction for unneeded output "
+                           ++ show arg
+                instr' (PrimForeign "llvm" "move" [] [a, arg]) Nothing
+              _       -> shouldnt $ "Multiple input params match output "
+                                    ++ show name
+        return $ ArgUnneeded flow typ
+transformUnneededArg _ _ arg = return arg
 
 
 -- |Construct a fake version of a Prim instruction containing only its
@@ -533,6 +580,7 @@ addSubst var val = do
 recordVarSet :: PrimArg -> BodyBuilder ()
 recordVarSet (ArgVar nm _ FlowOut _ _) =
     modify (\s -> s { blockDefs = Set.insert nm $ blockDefs s })
+recordVarSet (ArgUnneeded FlowOut _) = return ()
 recordVarSet arg =
     shouldnt $ "recordVarSet of non-output argument " ++ show arg
 
@@ -643,6 +691,7 @@ canonicaliseArg (ArgInt v _)         = ArgInt v AnyType
 canonicaliseArg (ArgFloat v _)       = ArgFloat v AnyType
 canonicaliseArg (ArgString v _)      = ArgString v AnyType
 canonicaliseArg (ArgChar v _)        = ArgChar v AnyType
+canonicaliseArg (ArgUnneeded dir _)  = ArgUnneeded dir AnyType
 
 
 validateInstr :: Prim -> BodyBuilder ()
@@ -650,12 +699,15 @@ validateInstr i@(PrimCall _ args)        = mapM_ (validateArg i) args
 validateInstr i@(PrimForeign _ _ _ args) = mapM_ (validateArg i) args
 validateInstr (PrimTest _)               = return ()
 
+
 validateArg :: Prim -> PrimArg -> BodyBuilder ()
 validateArg instr (ArgVar _ ty _ _ _) = validateType ty instr
 validateArg instr (ArgInt    _ ty)    = validateType ty instr
 validateArg instr (ArgFloat  _ ty)    = validateType ty instr
 validateArg instr (ArgString _ ty)    = validateType ty instr
 validateArg instr (ArgChar   _ ty)    = validateType ty instr
+validateArg instr (ArgUnneeded _ ty)  = validateType ty instr
+
 
 validateType :: TypeSpec -> Prim -> BodyBuilder ()
 validateType InvalidType instr =
@@ -1000,10 +1052,11 @@ bkwdBuildStmt defs prim pos = do
             modify (\s -> s { asmRenaming = Map.insert fromVar toVar
                                             $ asmRenaming s })
       _ -> do
-        let (ins, outs) = splitArgsByMode args'
-        when (any (`Set.member` usedLater) $ argVarName <$> outs) $ do
+        let (ins, outs) = splitArgsByMode $ List.filter argIsVar args'
+        when (any (`Set.member` usedLater)
+              $ argVarName <$> outs) $ do
           let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args'
-          let inVars = argVarName <$> List.filter argIsVar ins
+          let inVars = argVarName <$> ins
           let usedLater' = List.foldr Set.insert usedLater inVars
           st@BkwdBuilderState{asmFollowing=bd@ProcBody{bodyPrims=prims}} <- get
           put $ st { asmFollowing =

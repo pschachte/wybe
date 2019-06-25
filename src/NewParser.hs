@@ -84,7 +84,7 @@ writeItems file to = do
 -- | Parser entry for a Wybe program.
 itemParser :: Parser [Item]
 itemParser =
-    many (visibilityItem <|> topLevelStmtItem)
+    many (pragmaItem <|> visibilityItem <|> topLevelStmtItem)
 
 
 topLevelStmtItem :: Parser Item
@@ -103,6 +103,18 @@ visibilityItem = do
         <|> resourceItemParser v
         <|> useItemParser v
         <|> fromUseItemParser v
+
+pragmaItem :: Parser Item
+pragmaItem = do
+    ident "pragma"
+    prag <- parsePragma
+    return $ PragmaDecl prag
+
+parsePragma :: Parser Pragma
+parsePragma = do
+    ident "no_standard_library"
+    return NoStd
+
 
 
 -----------------------------------------------------------------------------
@@ -141,6 +153,7 @@ typeImpParser =
 -- | Resource declaration parser.
 resourceItemParser :: Visibility -> Parser Item
 resourceItemParser v = do
+    -- XXX might be better to use the position of the resource name as pos
     pos <- tokenPosition <$> ident "resource"
     let optInit = optionMaybe (symbol "=" *> expParser)
     ResourceDecl v <$> identString
@@ -270,7 +283,11 @@ flowDirection =
 
 -- | Module name, period separated
 modSpecParser :: Parser ModSpec
-modSpecParser = identString `sepBy` symbol "."
+modSpecParser = modSpecComponent `sepBy` symbol "."
+
+
+modSpecComponent :: Parser String
+modSpecComponent = (symbol "^" >> return "^") <|> identString
 
 
 -- | Parser for an optional type.
@@ -388,9 +405,9 @@ ifStmtParser = do
     cases <- (ifCaseParser `sepBy` symbol "|") <* ident "end"
     let final = List.foldr (\(cond, body) rest ->
                            [Unplaced (Cond cond body rest)]) [] cases
-    if List.null final
-        then unexpected "if cases statement structure."
-        else return $ Placed ((content . head) final) pos
+    case final of
+      []     -> unexpected "if cases statement structure."
+      (hd:_) -> return $ Placed (content hd) pos
 
 
 ifCaseParser :: Parser (Placed Stmt, [Placed Stmt])
@@ -511,7 +528,7 @@ simpleExpTerms =  parenExp
               <|> identifier
               <|> try (emptyBrackets Brace)
               <|> foreignExp
-              <?> "simple expression terms."
+              <?> "simple expression terms"
 
 
 
@@ -887,6 +904,8 @@ determinism = option Det (ident "test" *> return SemiDet)
 
 
 -- | Wybe keywords to exclude from identitfier tokens conditionally.
+-- XXX revisit this list; replace and with &&, or with ||, not with ~,
+-- maybe remove 'import', and probably need to add others.
 keywords :: [String]
 keywords =
     [ "if", "then", "else", "proc", "end", "use"

@@ -5,10 +5,12 @@
 --  Purpose  : Transform a clausal form (LPVM) module to LLVM
 --  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
 
-module Blocks
-       where
+module Blocks (concatLLVMASTModules, blockTransformModule
+                -- newMainModule
+              ) where
 
 import           AST
+import           ASTShow
 import           BinaryFactory                   ()
 import           Codegen
 import           Config                          (wordSize)
@@ -65,8 +67,7 @@ blockTransformModule thisMod =
        modRec <- getModule id
        modFile <- getModule modSourceFile
        logWrapWith '-' $ show modRec
-       (_, procs) <- unzip <$>
-                         getModuleImplementationField (Map.toList . modProcs)
+       procs <- getModuleImplementationField (Map.elems . modProcs)
        -- Collect all procedure prototypes in the module
        let protos = List.map extractLPVMProto (concat procs)
        --------------------------------------------------
@@ -103,6 +104,9 @@ blockTransformModule thisMod =
        -- Init LLVM Module and fill it
        let llmod = newLLVMModule (showModSpec thisMod) modFile procBlocks
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
+       logBlocks $ "*** Translated Module: " ++ showModSpec thisMod
+       modRec' <- getModule id
+       logWrapWith '-' $ show modRec'
        _ <- reexitModule
        logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
@@ -229,11 +233,11 @@ makeGlobalDefinition :: String -> PrimProto
                      -> Compiler LLVMAST.Definition
 makeGlobalDefinition pname proto bls = do
     modName <- fmap showModSpec getModuleSpec
-    let params = List.filter (not . phantomParam) (primProtoParams proto)
-        isMain = primProtoName proto == "<0>"
-        -- *The top level procedure will be labelled main.
-        label = modName ++ "." ++
-            if isMain then "main" else pname
+    let params = List.filter (not . paramIsPhantom) (primProtoParams proto)
+        label0 = modName ++ "." ++ pname
+        -- For the top-level main program
+        isMain = label0 == ".<0>"
+        label  = if isMain then "main" else label0
         inputs = List.filter isInputParam params
     fnargs <- mapM makeFnArg inputs
     retty <- if isMain then return int_t else primOutputType params
@@ -243,8 +247,7 @@ makeGlobalDefinition pname proto bls = do
 -- | Predicate to check if a primitive's parameter is of input flow (input)
 -- and the param is needed (inferred by it's param info field)
 isInputParam :: PrimParam -> Bool
-isInputParam p = primParamFlow p == FlowIn &&
-  not ((paramInfoUnneeded . primParamInfo) p)
+isInputParam p = primParamFlow p == FlowIn && paramNeeded p
 
 
 -- | Convert a primitive's input parameter to LLVM's Definition parameter.
@@ -259,14 +262,14 @@ makeFnArg param = do
 primOutputType :: [PrimParam] -> Compiler Type
 primOutputType params = do
     let outputs = List.filter isOutputParam params
-    case length outputs of
-        0 -> return void_t
-        1 -> (typed' . primParamType . head) outputs
+    case outputs of
+        [] -> return void_t
+        [o] -> typed' $ primParamType o
         _ -> struct_t <$> mapM (typed' . primParamType) outputs
 
 
 isOutputParam :: PrimParam -> Bool
-isOutputParam p = not (isInputParam p || phantomParam p) &&
+isOutputParam p = not (isInputParam p || paramIsPhantom p) &&
     paramNeeded p
 
 
@@ -316,7 +319,7 @@ assignParam p =
     do let nm = show (primParamName p)
        let ty = primParamType p
        llty <- lift $ typed' ty
-       if phantomType ty
+       if typeIsPhantom ty
          then return () -- No need to assign phantoms
          else case (paramInfoUnneeded . primParamInfo) p of
            True  -> return ()    -- unneeded param
@@ -391,12 +394,15 @@ codegenBody proto body =
        ops <- mapM cgen ps
        let params = primProtoParams proto
        case bodyFork body of
-         NoFork -> if (primProtoName proto) == "<0>"
-                   -- Empty primitive prototype is the main function in LLVM
-                   then mainReturnCodegen
-                   else do retOp <- buildOutputOp params
-                           ret retOp
-                           return ()
+         NoFork -> do retOp <- buildOutputOp params
+                      ret retOp
+                      return ()
+         -- NoFork -> if (primProtoName proto) == "<0>"
+         --           -- Empty primitive prototype is the main function in LLVM
+         --           then mainReturnCodegen
+         --           else do retOp <- buildOutputOp params
+         --                   ret retOp
+         --                   return ()
          (PrimFork var ty _ fbody) -> codegenForkBody var fbody proto
        if List.null ops
            then return Nothing
@@ -465,21 +471,21 @@ blockReturn op                                    = op
 cgen :: Prim -> Codegen (Maybe Operand)
 cgen prim@(PrimCall pspec args) = do
     logCodegen $ "Compiling " ++ show prim
-    thisMod <- lift $ getModuleSpec
+    thisMod <- lift getModuleSpec
+    fileMod <- lift $ getModule modRootModSpec
     let (ProcSpec mod name _) = pspec
     -- let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
     let nm = LLVMAST.Name $ toSBString $ show pspec
     -- Find the prototype of the pspec being called
     -- and match it's parameters with the args here
     -- and remove the unneeded ones.
-    protoFound <- findProto pspec
-    logCodegen $ "ProtoFound = " ++ show protoFound
-    let filteredArgs = case protoFound of
-            Just callProto -> filterUnneededArgs callProto args
-            Nothing        -> args
+    proto <- lift $ getProcPrimProto pspec
+    logCodegen $ "Proto = " ++ show proto
+    let filteredArgs = filterUnneededArgs proto args
+    logCodegen $ "Filtered args = " ++ show filteredArgs
 
     -- if the call is to an external module, declare it
-    unless (thisMod == mod || thisMod `List.isPrefixOf` mod)
+    unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
         (addExtern $ PrimCall pspec filteredArgs)
 
     let inArgs = primInputs filteredArgs
@@ -514,6 +520,7 @@ cgen prim@(PrimForeign lang name flags args) = do
     inops <- mapM cgenArg inArgs
     -- alignedOps <- mapM makeCIntOp inops
     outty <- lift $ primReturnType args
+    -- XXX this ignores lang and just uses fast cc for all calls
     let ins =
           call
           (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
@@ -572,27 +579,25 @@ cgenLLVMUnop name flags args
     | name == "move" =
         do let inArgs = primInputs args
            let outputs = primOutputs args
-           if length outputs == 1 && length inArgs == 1
-               -- then do (outTy, outNm) <- openPrimArg $ head outputs
-               --         ptr <- doAlloca outTy
-               --         inop <- cgenArg $ head inArgs
-               --         store ptr inop
-               --         op <- doLoad outTy ptr
-               --         assign outNm op
-               --         return $ Just op
-               then do (outTy, outNm) <- openPrimArg $ head outputs
-                       inop <- cgenArg $ head inArgs
-                       assign outNm inop
-                       return $ Just inop
-               else return Nothing
+           case (outputs,inArgs) of
+             ([output],[input]) -> do
+               (outTy, outNm) <- openPrimArg output
+               inop <- cgenArg input
+               assign outNm inop
+               return $ Just inop
+             _ ->
+               return Nothing
 
     | otherwise =
         do let inArgs = primInputs args
            inOps <- mapM cgenArg inArgs
-           case Map.lookup name llvmMapUnop of
-             (Just f) -> let ins = f (head inOps)
-                         in addInstruction ins args
-             Nothing -> shouldnt $ "LLVM Instruction not found : " ++ name
+           case (Map.lookup name llvmMapUnop,inOps) of
+             (Just f,[inOp]) -> addInstruction (f inOp) args
+             (Nothing,_)     -> shouldnt $ "LLVM Instruction not found : "
+                                           ++ name
+             (_,_)           -> shouldnt $ "unary LLVM Instruction " ++ name
+                                           ++ " with " ++ show (length inArgs)
+                                           ++ " inputs"
 
 
 -- | Look inside the Prototype list stored in the CodegenState monad and
@@ -613,11 +618,14 @@ filterUnneededArgs proto args = argsNeeded args (primProtoParams proto)
 
 argsNeeded :: [PrimArg] -> [PrimParam] -> [PrimArg]
 argsNeeded [] [] = []
-argsNeeded (a:_) [] = []
-argsNeeded [] _ = []
+argsNeeded [] (_:_) = shouldnt "more parameters than arguments"
+argsNeeded (_:_) [] = shouldnt "more arguments than parameters"
+argsNeeded (ArgUnneeded _ _:as) (p:ps)
+    | paramNeeded p = shouldnt $ "unneeded arg for needed param " ++ show p
+    | otherwise     = argsNeeded as ps
 argsNeeded (a:as) (p:ps)
-    | paramNeeded p == True = a : (argsNeeded as ps)
-    | otherwise = argsNeeded as ps
+    | paramNeeded p = a : argsNeeded as ps
+    | otherwise     = argsNeeded as ps
 
 
 -- |Return the integer constant from an argument; error if it's not one
@@ -629,11 +637,18 @@ trustArgInt arg = trustFromJust
 
 -- | Code generation for LPVM instructions.
 cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
-cgenLPVM "alloc" [] [sizeArg,addrArg] = do
-          outTy <- lift $ typed' $ argType addrArg
-          op <- gcAllocate (trustArgInt sizeArg) outTy
-          assign (pullName addrArg) op
-          return $ Just op
+cgenLPVM pname flags args
+    | pname == "alloc" = do
+          outTy <- lift $ primReturnType args
+          case inputs of
+            [input] -> do
+              let size = valTrust input
+              op <- gcAllocate size outTy
+              assign outNm op
+              return $ Just op
+            _ ->
+              shouldnt $ "alloc instruction with " ++ show (length inputs)
+                         ++ " inputs"
 
 cgenLPVM "access" [] [addr,offset,val] = do
           ptrOp <- cgenArg addr
@@ -659,32 +674,42 @@ cgenLPVM "mutate" []
                    (trustArgInt indexArg) destructiveArg val valTy
 
 cgenLPVM "cast" [] [inArg,outArg] = do
-          outTy <- lift $ typed' (argType outArg)
-          inOp <- cgenArg inArg
-          let inTy = operandType inOp
+    let inputs = primInputs args
+    let outputs = primOutputs args
+    case (inputs,outputs) of
+        ([inArg],[outArg]) -> do
+            outTy <- lift $ typed' (argType outArg)
+            inOp <- cgenArg inArg
+            let inTy = operandType inOp
 
-          lift $ logBlocks $ "CAST IN : " ++ show inArg ++ " -> "
-              ++ show (argType inArg)
-          lift $ logBlocks $ " CAST IN OP " ++ show inOp
-          lift $ logBlocks $ "CAST OUT : " ++ show outArg ++ " -> "
-              ++ show (argType outArg)
-          castOp <- case inOp of
-              (ConstantOperand c) ->
-                  if isPtr outTy
-                  then return $ constInttoptr c outTy
-                  else do
-                      let consTy = constantType c
-                      ptr <- doAlloca consTy
-                      store ptr inOp
-                      loaded <- doLoad consTy ptr
-                      doCast loaded consTy outTy
-              _ -> doCast inOp inTy outTy
+            lift $ logBlocks $ "CAST IN : " ++ show inArg ++ " -> "
+                                ++ show (argType inArg)
+            lift $ logBlocks $ " CAST IN OP " ++ show inOp
+            lift $ logBlocks $ "CAST OUT : " ++ show outArg ++ " -> "
+                                ++ show (argType outArg)
+            castOp <- case inOp of
+                (ConstantOperand c) ->
+                    if isPtr outTy
+                    then return $ constInttoptr c outTy
+                    else do
+                        let consTy = constantType c
+                        ptr <- doAlloca consTy
+                        store ptr inOp
+                        loaded <- doLoad consTy ptr
+                        doCast loaded consTy outTy
+                _ -> doCast inOp inTy outTy
 
-          assign (pullName outArg) castOp
-          return $ Just castOp
+            assign (pullName outArg) castOp
+            return $ Just castOp
+
+        -- A cast with no outputs:  do nothing
+        (_, []) -> return Nothing
+        _ -> shouldnt $ "cast instruction with " ++ show (length inputs)
+                            ++ " inputs and " ++ show (length outputs)
+                            ++ " outputs"
 
 cgenLPVM pname flags args = do
-  shouldnt $ "Instruction " ++ pname ++ " not imlemented."
+    shouldnt $ "Instruction " ++ pname ++ " not imlemented."
 
 
 isNullCons :: C.Constant -> Bool
@@ -732,21 +757,24 @@ addInstruction ins args = do
     let outArgs = primOutputs args
     outTy <- lift $ primReturnType args
     logCodegen $ "outTy = " ++ show outTy
-    case length outArgs of
-          0 -> case outTy of
+    case outArgs of
+          [] -> case outTy of
             VoidType -> voidInstr ins >> return Nothing
             _        -> Just <$> instr outTy ins
-          1 -> do let outName = pullName $ head outArgs
-                  outop <- namedInstr outTy outName ins
-                  assign outName outop
-                  return (Just outop)
-          n -> do outOp <- instr outTy ins
-                  outTys <- lift $ mapM (typed' . argType) outArgs
-                  fields <- structUnPack outOp outTys
-                  let outNames = List.map pullName outArgs
-                  -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
-                  zipWithM_ assign outNames fields
-                  return $ Just $ last fields
+          [outArg] -> do
+            let outName = pullName outArg
+            outop <- namedInstr outTy outName ins
+            assign outName outop
+            return (Just outop)
+          _ -> do
+            outOp <- instr outTy ins
+            outTys <- lift $ mapM (typed' . argType) outArgs
+            fields <- structUnPack outOp outTys
+            let outNames = List.map pullName outArgs
+            -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
+            zipWithM_ assign outNames fields
+            return $ Just $ last fields
+
 
 pullName (ArgVar var _ _ _ _) = show var
 pullName _                    = shouldnt $ "Expected variable as output."
@@ -788,17 +816,17 @@ primOutputs ps = List.filter isValidOutput ps
 primReturnType :: [PrimArg] -> Compiler Type
 primReturnType ps = do
     let outputs = primOutputs ps
-    case length outputs of
-      0 -> return void_t
-      1 -> typed' $ argType (head outputs)
-      n -> fmap struct_t (mapM (typed' . argType) outputs)
+    case outputs of
+      [] -> return void_t
+      [output] -> typed' $ argType output
+      _ -> fmap struct_t (mapM (typed' . argType) outputs)
 
 
 goesIn :: PrimArg -> Bool
 goesIn p = (argFlowDirection p) == FlowIn
 
 notPhantom :: PrimArg -> Bool
-notPhantom = not . phantomArg
+notPhantom = not . argIsPhantom
 
 -- | Pull out the name of a primitive argument if it is a variable.
 argName :: PrimArg -> Maybe String
@@ -810,13 +838,6 @@ argIntVal :: PrimArg -> Maybe Integer
 argIntVal (ArgInt val _) = Just val
 argIntVal _              = Nothing
 
--- | Split primitive arguments into inputs and output arguments determined
--- by their flow type.
-splitArgs :: [PrimArg] -> ([PrimArg], PrimArg)
-splitArgs args = (inputs, output)
-    where inputs = List.filter isInputP args
-          output = head $ List.filter (not . isInputP) args
-          isInputP a = argFlowDirection a == FlowIn
 
 -- | Open a PrimArg into it's inferred type and string name.
 openPrimArg :: PrimArg -> Codegen (Type, String)
@@ -868,7 +889,7 @@ cgenArg (ArgString s _) =
 cgenArg (ArgChar c ty) = do t <- lift $ typed' ty
                             let bs = getBits t
                             return $ cons $ C.Int bs $ integerOrd c
-
+cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 
 getBits :: LLVMAST.Type -> Word32
 getBits (IntegerType bs)                = bs
@@ -1075,50 +1096,50 @@ intrinsicExterns =
 -- Block Modification                                                     --
 ----------------------------------------------------------------------------
 
--- | Create a new LLVMAST.Module with in-order calls to the
--- given modules' mains.
--- A module's main would look like: 'module.main'
--- For each call, an external declaration to that main function is needed.
-newMainModule :: [ModSpec] -> Compiler LLVMAST.Module
-newMainModule depends = do
-    blstate <- execCodegen 0 [] $ mainCodegen depends
-    let bls = createBlocks blstate
-    let mainDef = globalDefine int_t "main" [] bls
-    let externsForMain = [(external (void_t) "gc_init" [])]
-            ++ (mainExterns depends)
-    let newDefs = externsForMain ++ [mainDef]
-    -- XXX Use empty string as source file name; should be main file name
-    return $ modWithDefinitions "tmpMain" "" newDefs
+-- -- | Create a new LLVMAST.Module with in-order calls to the
+-- -- given modules' mains.
+-- -- A module's main would look like: 'module.main'
+-- -- For each call, an external declaration to that main function is needed.
+-- newMainModule :: [ModSpec] -> Compiler LLVMAST.Module
+-- newMainModule depends = do
+--     blstate <- execCodegen 0 [] $ mainCodegen depends
+--     let bls = createBlocks blstate
+--     let mainDef = globalDefine int_t "main" [] bls
+--     let externsForMain = [(external (void_t) "gc_init" [])]
+--             ++ (mainExterns depends)
+--     let newDefs = externsForMain ++ [mainDef]
+--     -- XXX Use empty string as source file name; should be main file name
+--     return $ modWithDefinitions "tmpMain" "" newDefs
 
 
--- | Run the Codegen monad collecting the instructions needed to call
--- the given modules' main(s). This main function returns 0.
-mainCodegen :: [ModSpec] -> Codegen ()
-mainCodegen mods = do
-    entry <- addBlock entryBlockName
-    setBlock entry
-    -- Temp Boehm GC init call
-    voidInstr $
-        call (externf (ptr_t $ FunctionType void_t [] False)
-              (LLVMAST.Name $ toSBString "gc_init")) []
-    -- Call the mods mains in order
-    let mainName m = LLVMAST.Name $ toSBString $ showModSpec m ++ ".main"
-    forM_ mods $ \m -> instr int_t $
-                       call (externf (ptr_t $ FunctionType int_t [] False) (mainName m)) []
-    -- int main returns 0
-    ptr <- instr (ptr_t int_t) (alloca int_t)
-    let retcons = cons (C.Int 32 0)
-    store ptr retcons
-    ret (Just retcons)
-    return ()
+-- -- | Run the Codegen monad collecting the instructions needed to call
+-- -- the given modules' main(s). This main function returns 0.
+-- mainCodegen :: [ModSpec] -> Codegen ()
+-- mainCodegen mods = do
+--     entry <- addBlock entryBlockName
+--     setBlock entry
+--     -- Temp Boehm GC init call
+--     voidInstr $
+--         call (externf (ptr_t $ FunctionType void_t [] False)
+--               (LLVMAST.Name $ toSBString "gc_init")) []
+--     -- Call the mods mains in order
+--     let mainName m = LLVMAST.Name $ toSBString $ showModSpec m ++ ".main"
+--     forM_ mods $ \m -> instr int_t $
+--                        call (externf (ptr_t $ FunctionType int_t [] False) (mainName m)) []
+--     -- int main returns 0
+--     ptr <- instr (ptr_t int_t) (alloca int_t)
+--     let retcons = cons (C.Int 32 0)
+--     store ptr retcons
+--     ret (Just retcons)
+--     return ()
 
--- | Create a list of extern declarations for each call to a foreign
--- module's main.
-mainExterns :: [ModSpec] -> [LLVMAST.Definition]
-mainExterns mods = List.map externalMain mods
-    where
-      mainName m = showModSpec m ++ ".main"
-      externalMain m = external int_t (mainName m) []
+-- -- | Create a list of extern declarations for each call to a foreign
+-- -- module's main.
+-- mainExterns :: [ModSpec] -> [LLVMAST.Definition]
+-- mainExterns mods = List.map externalMain mods
+--     where
+--       mainName m = showModSpec m ++ "."
+--       externalMain m = external int_t (mainName m) []
 
 
 -- | Concat the LLVMAST.Module implementations of a list of loaded modules
@@ -1129,7 +1150,7 @@ mainExterns mods = List.map externalMain mods
 -- Concatenation involves uniquely appending the LLVMAST.Definition lists.
 concatLLVMASTModules :: ModSpec      -- ^ Module to append to
                      -> [ModSpec]    -- ^ Modules to append
-                     -> Compiler ()
+                     -> Compiler LLVMAST.Module
 concatLLVMASTModules thisMod mspecs = do
     -- pull LLVMAST.Module implementations of appending modspecs
     maybeLLMods <- mapM ((fmap modLLVM) . getLoadedModuleImpln) mspecs
@@ -1140,8 +1161,10 @@ concatLLVMASTModules thisMod mspecs = do
     thisLLMod <- trustFromJustM trustMsg $
         fmap modLLVM $ getLoadedModuleImpln thisMod
     let updatedLLMod = List.foldl addUniqueDefinitions thisLLMod defs
-    updateLoadedModuleImpln (\imp -> imp { modLLVM = Just updatedLLMod })
-        thisMod
+    -- updateLoadedModuleImpln (\imp -> imp { modLLVM = Just updatedLLMod })
+    --     thisMod
+    return updatedLLMod
+
 
 -- | Extend the LLVMAST.Definition list of the first module with the
 -- LLVMAST.Definition list passed as the second parameter. The concatenation
@@ -1291,9 +1314,9 @@ logBlocks = logMsg Blocks
 -- | Log with a wrapping line of replicated characters above and below.
 logWrapWith :: Char -> String -> Compiler ()
 logWrapWith ch s = do
-    logMsg Blocks (replicate 80 ch)
+    logMsg Blocks (replicate 65 ch)
     logMsg Blocks s
-    logMsg Blocks (replicate 80 ch)
+    logMsg Blocks (replicate 65 ch)
 
 logCodegen :: String -> Codegen ()
 logCodegen s = lift $ logBlocks s

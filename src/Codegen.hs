@@ -62,7 +62,7 @@ import           AST                             (Compiler, Prim, PrimProto,
                                                   shouldnt, showModSpec)
 import           LLVM.Context
 import           LLVM.Module
-import           Options                         (LogSelection (Blocks))
+import           Options                         (LogSelection (Blocks,CodeGen))
 import           Unsafe.Coerce
 
 ----------------------------------------------------------------------------
@@ -420,7 +420,9 @@ instr ty ins =
        let ref = UnName n
        blk <- current
        let i = stack blk
-       modifyBlock $ blk { stack = i ++ [ref := ins] }
+       let instruction = ref := ins
+       modifyBlock $ blk { stack = i ++ [instruction] }
+       logCodegen $ "add instruction " ++ show instruction
        return $ local ty ref
 
 voidInstr :: Instruction -> Codegen ()
@@ -614,4 +616,4 @@ phi ty incoming = instr ty $ Phi ty incoming []
 
 
 logCodegen :: String -> Codegen ()
-logCodegen s = lift $ logMsg Blocks $ "=CODEGEN=" ++ s
+logCodegen s = lift $ logMsg CodeGen s

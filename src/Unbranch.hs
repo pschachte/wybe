@@ -40,7 +40,7 @@
 --  the procedure, and must be a subset of the variables defined prior
 --  to the generated call.  Similarly, the output parameters must be a
 --  a subset of the variables defined in the generated procedure, and
---  must be superset of the variables that will be used following the 
+--  must be superset of the variables that will be used following the
 --  generated call.
 ----------------------------------------------------------------
 
@@ -109,7 +109,7 @@ unbranchBody tmpCtr params detism body = do
 --                  Handling the Unbrancher monad
 ----------------------------------------------------------------
 
--- |The Unbrancher monad is a state transformer monad carrying the 
+-- |The Unbrancher monad is a state transformer monad carrying the
 --  unbrancher state over the compiler monad.
 type Unbrancher = StateT UnbrancherState Compiler
 
@@ -119,7 +119,7 @@ type VarDict = Map VarName TypeSpec
 data UnbrancherState = Unbrancher {
     brLoopInfo   :: LoopInfo,     -- ^If in a loop, the break and continue stmts
     brVars       :: VarDict,      -- ^Types of variables defined up to here
-    brTempCtr    :: Int,          -- ^Number of next temp variable to make 
+    brTempCtr    :: Int,          -- ^Number of next temp variable to make
     brDryRun     :: Bool,         -- ^Whether to suppress code generation
     brOutParams  :: [Param],      -- ^Output arguments for generated procs
     brOutArgs    :: [Placed Exp], -- ^Output arguments for call to gen procs
@@ -335,12 +335,12 @@ unbranchStmt :: Stmt -> OptPos -> [Placed Stmt] -> Unbrancher [Placed Stmt]
 unbranchStmt stmt@(ProcCall _ _ _ _ True args) pos _ =
     shouldnt $ "Resources should have been handled before unbranching: "
                ++ showStmt 4 stmt
-unbranchStmt stmt@(ProcCall _ _ _ Det False args) pos stmts = do
+unbranchStmt stmt@(ProcCall _ _ _ _ False args) pos stmts = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
     defArgs args
     leaveStmtAsIs stmt pos stmts
-unbranchStmt stmt@(ProcCall md name procID SemiDet False args) pos stmts =
-    shouldnt $ "Semidet proc call " ++ show stmt ++ " in a Det context"
+-- unbranchStmt stmt@(ProcCall md name procID SemiDet False args) pos stmts =
+--     shouldnt $ "Semidet proc call " ++ show stmt ++ " in a Det context"
 unbranchStmt stmt@(ForeignCall _ _ _ args) pos stmts = do
     logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
     defArgs args
@@ -757,10 +757,10 @@ varsAfterITE thnVars False elsVars False = Map.intersection thnVars elsVars
 -- |A symbol table containing all input parameters
 inputParams :: [Param] -> VarDict
 inputParams params =
-    List.foldr 
-    (\(Param v ty dir _) vdict -> 
+    List.foldr
+    (\(Param v ty dir _) vdict ->
          if flowsIn dir then Map.insert v ty vdict else vdict)
-    Map.empty params    
+    Map.empty params
 
 
 -- |Add all output arguments of a param list to the symbol table
@@ -789,7 +789,7 @@ ifIsVarDef' _ v _ _ = v
 
 
 outputVars :: VarDict -> [Placed Exp] -> VarDict
-outputVars = 
+outputVars =
     List.foldr ((ifIsVarDef Map.insert id)  . content)
 
 

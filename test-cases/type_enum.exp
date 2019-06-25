@@ -1,12 +1,10 @@
 ======================================================================
 AFTER EVERYTHING:
  Module type_enum
-  public submods  : 
+  public submods  :
   public types    : season: (type_enum.season,"i2")
-  public resources: 
+  public resources:
   public procs    : type_enum.season.=<0>
-                    type_enum.season.=<1>
-                    type_enum.season.=<2>
                     type_enum.season.autumn<0>
                     type_enum.season.spring<0>
                     type_enum.season.summer<0>
@@ -14,59 +12,39 @@ AFTER EVERYTHING:
   imports         : public use type_enum.season
                     use wybe
   types           : season/0 (i2)  @type_enum:1:8
-  resources       : 
-  procs           : 
-
+  resources       :
   submodules      : type_enum.season
+  procs           :
+
+
+  LLVM code       :
+
+; ModuleID = 'type_enum'
+
+
+declare external ccc i8* @wybe_malloc(i32)
 --------------------------------------------------
  Module type_enum.season([])
-  public submods  : 
-  public types    : 
-  public resources: 
+  public submods  :
+  public types    :
+  public resources:
   public procs    : type_enum.season.=<0>
-                    type_enum.season.=<1>
-                    type_enum.season.=<2>
                     type_enum.season.autumn<0>
                     type_enum.season.spring<0>
                     type_enum.season.summer<0>
                     type_enum.season.winter<0>
   imports         : use type_enum
                     use wybe
-  types           : 
-  resources       : 
-  procs           : 
+  types           :
+  resources       :
+  procs           :
 
-= > public inline (0 calls)
-0: =(?out#0:type_enum.season, in#0:type_enum.season): AliasPairs: []
-    foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
-= > public inline (0 calls)
-1: =(in#0:type_enum.season, ?out#0:type_enum.season): AliasPairs: []
-    foreign llvm move(~in#0:type_enum.season, ?out#0:type_enum.season)
 = > public inline test (0 calls)
-2: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool): AliasPairs: []
+0: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
     foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?$$#0:wybe.bool)
 
 
 autumn > public inline (0 calls)
-0: autumn(?$#0:type_enum.season): AliasPairs: []
-    foreign lpvm cast(3:type_enum.season, ?$#0:type_enum.season)
-
-
-spring > public inline (0 calls)
-0: spring(?$#0:type_enum.season): AliasPairs: []
-    foreign lpvm cast(1:type_enum.season, ?$#0:type_enum.season)
-
-
-summer > public inline (0 calls)
-0: summer(?$#0:type_enum.season): AliasPairs: []
-    foreign lpvm cast(2:type_enum.season, ?$#0:type_enum.season)
-
-
-winter > public inline (0 calls)
-0: winter(?$#0:type_enum.season): AliasPairs: []
-    foreign lpvm cast(0:type_enum.season, ?$#0:type_enum.season)
-type_enum, type_enum.season
-======================================================================
 AFTER LLVM IR:
 
 ; ModuleID = 'type_enum'
@@ -90,79 +68,54 @@ entry:
   %"$$#0" = icmp eq i2 %"$left#0", %"$right#0"
   ret i1 %"$$#0"
 }
+=======
+0: autumn(?$#0:type_enum.season):
+    foreign llvm move(3:type_enum.season, ?$#0:type_enum.season)
 
-; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.autumn<0>"() local_unnamed_addr #0 {
-entry:
-  ret i2 -1
-}
 
-; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.spring<0>"() local_unnamed_addr #0 {
-entry:
-  ret i2 1
-}
+spring > public inline (0 calls)
+0: spring(?$#0:type_enum.season):
+    foreign llvm move(1:type_enum.season, ?$#0:type_enum.season)
 
-; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.summer<0>"() local_unnamed_addr #0 {
-entry:
-  ret i2 -2
-}
 
-; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.winter<0>"() local_unnamed_addr #0 {
-entry:
-  ret i2 0
-}
+summer > public inline (0 calls)
+0: summer(?$#0:type_enum.season):
+    foreign llvm move(2:type_enum.season, ?$#0:type_enum.season)
 
-attributes #0 = { norecurse nounwind readnone }
 
---------------------------------------------------
+winter > public inline (0 calls)
+0: winter(?$#0:type_enum.season):
+    foreign llvm move(0:type_enum.season, ?$#0:type_enum.season)
+
+  LLVM code       :
+
 ; ModuleID = 'type_enum.season'
-source_filename = "test-cases"
 
-; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.=<0>"(i2 returned %"in#0") local_unnamed_addr #0 {
-entry:
-  ret i2 %"in#0"
-}
 
-; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.=<1>"(i2 returned %"in#0") local_unnamed_addr #0 {
-entry:
-  ret i2 %"in#0"
-}
+declare external ccc i8* @wybe_malloc(i32)
 
-; Function Attrs: norecurse nounwind readnone
-define i1 @"type_enum.season.=<2>"(i2 %"$left#0", i2 %"$right#0") local_unnamed_addr #0 {
+define external ccc i1 @"type_enum.season.=<0>"(i2 %"$left#0", i2 %"$right#0"){
 entry:
   %"$$#0" = icmp eq i2 %"$left#0", %"$right#0"
   ret i1 %"$$#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.autumn<0>"() local_unnamed_addr #0 {
+define external ccc i2 @"type_enum.season.autumn<0>"(){
 entry:
-  ret i2 -1
+  ret i2 3
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.spring<0>"() local_unnamed_addr #0 {
+define external ccc i2 @"type_enum.season.spring<0>"(){
 entry:
   ret i2 1
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.summer<0>"() local_unnamed_addr #0 {
+define external ccc i2 @"type_enum.season.summer<0>"(){
 entry:
-  ret i2 -2
+  ret i2 2
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i2 @"type_enum.season.winter<0>"() local_unnamed_addr #0 {
+define external ccc i2 @"type_enum.season.winter<0>"(){
 entry:
   ret i2 0
 }
-
-attributes #0 = { norecurse nounwind readnone }
-

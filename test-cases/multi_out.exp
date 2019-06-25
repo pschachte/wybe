@@ -1,37 +1,35 @@
 ======================================================================
 AFTER EVERYTHING:
  Module multi_out
-  public submods  : 
-  public types    : 
-  public resources: 
+  public submods  :
+  public types    :
+  public resources:
   public procs    : multi_out.<0>
                     multi_out.onetwothree<0>
   imports         : use wybe
-  types           : 
-  resources       : 
-  procs           : 
+  types           :
+  resources       :
+  procs           :
 
-*main* > public inline (0 calls)
-0: (wybe.io$io#0:wybe.phantom, [?wybe.io$io#0:wybe.phantom]): AliasPairs: []
-
-
-onetwothree > public inline (1 calls)
-0: onetwothree(?x#0:wybe.int, ?y#0:wybe.int, ?z#0:wybe.int): AliasPairs: []
-    foreign llvm move(1:wybe.int, ?x#0:wybe.int)
-    foreign llvm move(2:wybe.int, ?y#0:wybe.int)
-    foreign llvm move(3:wybe.int, ?z#0:wybe.int)
-multi_out
-======================================================================
 AFTER LLVM IR:
+=======
+onetwothree > public inline (0 calls)
+0: onetwothree(?x#0:wybe.int, ?y#0:wybe.int, ?z#0:wybe.int):
+    foreign llvm move(1:wybe.int, ?x#0:wybe.int) @multi_out:2:9
+    foreign llvm move(2:wybe.int, ?y#0:wybe.int) @multi_out:3:9
+    foreign llvm move(3:wybe.int, ?z#0:wybe.int) @multi_out:4:9
+
+  LLVM code       :
 
 ; ModuleID = 'multi_out'
-source_filename = "test-cases/multi_out.wybe"
 
-; Function Attrs: norecurse nounwind readnone
-define { i64, i64, i64 } @"multi_out.onetwothree<0>"() local_unnamed_addr #0 {
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc {i64, i64, i64} @"multi_out.onetwothree<0>"(){
 entry:
-  ret { i64, i64, i64 } { i64 1, i64 2, i64 3 }
+  %1 = insertvalue {i64, i64, i64} undef, i64 1, 0
+  %2 = insertvalue {i64, i64, i64} %1, i64 2, 1
+  %3 = insertvalue {i64, i64, i64} %2, i64 3, 2
+  ret {i64, i64, i64} %3
 }
-
-attributes #0 = { norecurse nounwind readnone }
-

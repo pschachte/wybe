@@ -39,7 +39,7 @@ executable wybemk
                  Macho, NewParser, Normalise, ObjectInterface, Optimise,
                  Analysis, AliasAnalysis, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
-                 Version
+                 Version, ASTShow
   hs-source-dirs: src
 
 

@@ -1,30 +1,29 @@
 ======================================================================
 AFTER EVERYTHING:
  Module chain_assign
-  public submods  : 
-  public types    : 
-  public resources: 
-  public procs    : 
+  public submods  :
+  public types    :
+  public resources:
+  public procs    :
   imports         : use wybe
-  types           : 
-  resources       : 
-  procs           : 
+  types           :
+  resources       :
+  procs           :
 
 chain > inline (0 calls)
-0: chain(?z#0:wybe.int): AliasPairs: []
-    foreign llvm move(1:wybe.int, ?z#0:wybe.int)
-chain_assign
-======================================================================
 AFTER LLVM IR:
+=======
+0: chain(?z#0:wybe.int):
+    foreign llvm move(1:wybe.int, ?z#0:wybe.int) @chain_assign:4:5
+
+  LLVM code       :
 
 ; ModuleID = 'chain_assign'
-source_filename = "test-cases/chain_assign.wybe"
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"chain_assign.chain<0>"() local_unnamed_addr #0 {
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i64 @"chain_assign.chain<0>"(){
 entry:
   ret i64 1
 }
-
-attributes #0 = { norecurse nounwind readnone }
-

@@ -1,3 +1,3 @@
-Error detected during type checking of modules call_unknown
-[91mtest-cases/call_unknown.wybe:1:24: Unknown variable/procedure/function 'nonexistent_proc' in foo
+Error detected during type checking of module(s) call_unknown
+[91mtest-cases/call_unknown.wybe:1:24: 'nonexistent_proc' unknown in 'foo'
 [0m

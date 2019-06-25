@@ -1,45 +1,44 @@
 ======================================================================
 AFTER EVERYTHING:
  Module func_quadruple
-  public submods  : 
-  public types    : 
-  public resources: 
+  public submods  :
+  public types    :
+  public resources:
   public procs    : func_quadruple.double<0>
                     func_quadruple.quadruple<0>
   imports         : use wybe
-  types           : 
-  resources       : 
-  procs           : 
+  types           :
+  resources       :
+  procs           :
 
 double > public inline (2 calls)
-0: double(a#0:wybe.int, ?$#0:wybe.int): AliasPairs: []
-    foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?$#0:wybe.int) @wybe:13:38
+AFTER LLVM IR:
+=======
+0: double(a#0:wybe.int, ?$#0:wybe.int):
+    foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
 
 
 quadruple > public inline (0 calls)
-0: quadruple(a#0:wybe.int, ?$#0:wybe.int): AliasPairs: []
-    foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?tmp$1#0:wybe.int) @wybe:13:38
-    foreign llvm add(~tmp$1#0:wybe.int, ~tmp$1#0:wybe.int, ?$#0:wybe.int) @wybe:13:38
-func_quadruple
-======================================================================
-AFTER LLVM IR:
+0: quadruple(a#0:wybe.int, ?$#0:wybe.int):
+    foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?tmp$1#0:wybe.int) @wybe:nn:nn
+    foreign llvm add(~tmp$1#0:wybe.int, ~tmp$1#0:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
+
+  LLVM code       :
 
 ; ModuleID = 'func_quadruple'
-source_filename = "test-cases/func_quadruple.wybe"
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"func_quadruple.double<0>"(i64 %"a#0") local_unnamed_addr #0 {
+
+declare external ccc i8* @wybe_malloc(i32)
+
+define external ccc i64 @"func_quadruple.double<0>"(i64 %"a#0"){
 entry:
-  %"$#0" = shl i64 %"a#0", 1
+  %"$#0" = add i64 %"a#0", %"a#0"
   ret i64 %"$#0"
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64 @"func_quadruple.quadruple<0>"(i64 %"a#0") local_unnamed_addr #0 {
+define external ccc i64 @"func_quadruple.quadruple<0>"(i64 %"a#0"){
 entry:
-  %"$#0" = shl i64 %"a#0", 2
+  %"tmp$1#0" = add i64 %"a#0", %"a#0"
+  %"$#0" = add i64 %"tmp$1#0", %"tmp$1#0"
   ret i64 %"$#0"
 }
-
-attributes #0 = { norecurse nounwind readnone }
-

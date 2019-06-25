@@ -1,0 +1,12 @@
+module m2 is
+    use ^
+    public proc bar(i:int,?j:int) foo(i,?k) baz(k,?j) end
+end
+
+module m1 is
+    public proc foo(i:int,?j:int) ?j=i+1 end
+end
+
+proc baz(i:int, ?j:int) foo(i,?j) end
+
+proc buzz(i:int, ?j:int) bar(i,?j) end
