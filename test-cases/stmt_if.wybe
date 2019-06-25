@@ -12,11 +12,13 @@ public proc lookup(key:int, tree:tree, ?result:bool)
     end
 end
 
-?tr = node(empty, 1, empty)
+proc foobar use !io
+    ?tr = node(empty, 1, empty)
 
-if lookup(1, tr) :: !println("lookup succeeds when it should")
-| true           :: !println("lookup fails when it should succeed")
-end
-if lookup(3, tr) :: !println("lookup fails when it should")
-| true           :: !println("lookup succeeds when it should fail")
+    if lookup(1, tr) :: !println("lookup succeeds when it should")
+    | true           :: !println("lookup fails when it should succeed")
+    end
+# if lookup(3, tr) :: !println("lookup fails when it should")
+# | true           :: !println("lookup succeeds when it should fail")
+# end
 end
