@@ -378,9 +378,9 @@ tagCheck constCount nonConstCount tag varName =
 --  We use the stripped name with "$asInt" appended as a temp var name.
 -- | Produce a getter and a setter for one field of the specified type.
 getterSetterItems :: Visibility -> TypeSpec -> Ident -> OptPos
-                     -> Int -> Int -> Integer -> (VarName,TypeSpec,Int)
-                     -> [Item]
-getterSetterItems vis rectype ctorName pos constCount nonConstCount tag
+                    -> Int -> Int -> Int -> Integer
+                    -> (VarName,TypeSpec,Int) -> [Item]
+getterSetterItems vis rectype ctorName pos constCount nonConstCount size tag
     (field,fieldtype,offset) =
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names

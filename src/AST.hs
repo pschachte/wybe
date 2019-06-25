@@ -904,7 +904,7 @@ getProcPrimProto :: ProcSpec -> Compiler PrimProto
 getProcPrimProto pspec = do
     def <- getProcDef pspec
     case procImpln def of
-        ProcDefPrim proto _ -> return proto
+        ProcDefPrim proto _ _ -> return proto
         _ -> shouldnt $ "get prim proto of uncompiled proc " ++ show pspec
 
 
@@ -2067,10 +2067,7 @@ argFlowDirection (ArgUnneeded flow _) = flow
 -- |Check dataflow direction of an actual argument and the arg should be ArgVar
 argVarIsFlowDirection :: PrimFlow -> PrimArg -> Bool
 argVarIsFlowDirection flow' (ArgVar _ _ flow _ _) = flow == flow'
-argVarIsFlowDirection _ (ArgInt _ _) = False
-argVarIsFlowDirection _ (ArgFloat _ _) = False
-argVarIsFlowDirection _ (ArgString _ _) = False
-argVarIsFlowDirection _ (ArgChar _ _) = False
+argVarIsFlowDirection _ _ = False
 
 argType :: PrimArg -> TypeSpec
 argType (ArgVar _ typ _ _ _) = typ
@@ -2089,8 +2086,7 @@ inArgVar _ = shouldnt "inArgVar of input argument"
 -- aliasing
 inArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
 inArgVar2 arg@(ArgVar var ty flow _ final)
-    -- | flow == FlowIn && not (phantomArg arg) && not final = do
-    | flow == FlowIn && not (phantomArg arg) = do
+    | flow == FlowIn && not (argIsPhantom arg) = do
         rep <- lookupTypeRepresentation ty
         case rep of
             Just "pointer" ->
@@ -2102,7 +2098,7 @@ inArgVar2 _ = return Nothing
 -- Used in AliasAnalysis - only care about pointers that might aliasing an input
 outArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
 outArgVar2 arg@(ArgVar var _ flow _ _)
-    | flow == FlowOut && not (phantomArg arg) = return (Just var)
+    | flow == FlowOut && not (argIsPhantom arg) = return (Just var)
 outArgVar2 _ = return Nothing
 
 outArgVar :: PrimArg -> PrimVarName

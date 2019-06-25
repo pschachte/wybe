@@ -637,15 +637,14 @@ trustArgInt arg = trustFromJust
 
 -- | Code generation for LPVM instructions.
 cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
-cgenLPVM pname flags args
-    | pname == "alloc" = do
-          outTy <- lift $ primReturnType args
+cgenLPVM "alloc" [] args@[sizeArg,addrArg] = do
+          let inputs = primInputs args
           case inputs of
             [input] -> do
-              let size = valTrust input
-              op <- gcAllocate size outTy
-              assign outNm op
-              return $ Just op
+                outTy <- lift $ typed' $ argType addrArg
+                op <- gcAllocate (trustArgInt sizeArg) outTy
+                assign (pullName addrArg) op
+                return $ Just op
             _ ->
               shouldnt $ "alloc instruction with " ++ show (length inputs)
                          ++ " inputs"
@@ -673,7 +672,7 @@ cgenLPVM "mutate" []
           gcMutate ptrOp (pullName outArg) outTy (trustArgInt sizeArg)
                    (trustArgInt indexArg) destructiveArg val valTy
 
-cgenLPVM "cast" [] [inArg,outArg] = do
+cgenLPVM "cast" [] args@[inArg,outArg] = do
     let inputs = primInputs args
     let outputs = primOutputs args
     case (inputs,outputs) of
