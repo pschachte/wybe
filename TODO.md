@@ -7,7 +7,7 @@
 * Rework mode checking to treat any argument with any outputs as an
   output, and to handle any inputs that are part of an output argument
   by producing the output and then testing for equality with the input.
-
+* Fix regression:  unused input argument testing not working
 
 ## Documentation:
 * Write Wybe intro

@@ -12,7 +12,7 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public inline (0 calls)
-0: (io#0:phantom, ?io#1:phantom):
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom):
     proc_factorial.gen$1<0>(~#io#0:phantom, 5:wybe.int, 1:wybe.int, ?#io#1:phantom) @proc_factorial:3:5
 
 
@@ -52,7 +52,7 @@ declare external ccc void @print_int(i64)
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc void @"proc_factorial.<0>"(){
+define external ccc void @"proc_factorial.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
   tail call ccc void @"proc_factorial.gen$1<0>"(i64 5, i64 1)
   ret void

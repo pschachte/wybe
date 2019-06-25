@@ -1,5 +1,3 @@
-use command_line
-
 !set_exit_code(42)
 !println("hello, world!")
 !print(argc-1)

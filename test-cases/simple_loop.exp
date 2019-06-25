@@ -11,26 +11,29 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public inline (0 calls)
-0: (io#0:phantom, ?io#1:phantom):
-    simple_loop.gen$1<0>(~io#0:phantom, ?io#1:phantom) @simple_loop:1:1
+0: (argc#0:wybe.int, ?argc#1:wybe.int, argv#0:wybe.int, ?argv#1:wybe.int, exit_code#0:wybe.int, ?exit_code#1:wybe.int, io#0:phantom, ?io#1:phantom):
+    simple_loop.gen$1<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, ~io#0:phantom, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#1:phantom) @simple_loop:1:1
 
 
 gen$1 > (2 calls)
-0: gen$1(io#0:phantom, ?io#3:phantom):
+0: gen$1(argc#0:wybe.int, argv#0:wybe.int, exit_code#0:wybe.int, io#0:phantom, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#3:phantom):
     foreign c read_char(?c#0:wybe.char, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
     foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$1#0:wybe.bool) @wybe:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
+        foreign llvm move(~argc#0:wybe.int, ?argc#1:wybe.int)
+        foreign llvm move(~argv#0:wybe.int, ?argv#1:wybe.int)
+        foreign llvm move(~exit_code#0:wybe.int, ?exit_code#1:wybe.int)
         foreign llvm move(~io#1:phantom, ?io#3:phantom)
 
     1:
         foreign c putchar(~c#0:wybe.char, ~#io#1:phantom, ?#io#2:phantom) @wybe:nn:nn
-        simple_loop.gen$1<0>(~io#2:phantom, ?io#3:phantom) @simple_loop:1:1
+        simple_loop.gen$1<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, ~io#2:phantom, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#3:phantom) @simple_loop:1:1
 
 
 
 gen$2 > inline (1 calls)
-0: gen$2([c#0:wybe.char], io#0:phantom, [?io#0:phantom]):
+0: gen$2(argc#0:wybe.int, argv#0:wybe.int, [c#0:wybe.char], exit_code#0:wybe.int, io#0:phantom, [?argc#0:wybe.int], [?argv#0:wybe.int], [?exit_code#0:wybe.int], [?io#0:phantom]):
 
   LLVM code       :
 
@@ -43,21 +46,39 @@ declare external ccc i8 @read_char()
 
 declare external ccc i8* @wybe_malloc(i32)
 
-define external ccc void @"simple_loop.<0>"(){
+define external ccc {i64, i64, i64} @"simple_loop.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
-  tail call ccc void @"simple_loop.gen$1<0>"()
-  ret void
+  %1 = tail call ccc {i64, i64, i64} @"simple_loop.gen$1<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0")
+  %2 = extractvalue {i64, i64, i64} %1, 0
+  %3 = extractvalue {i64, i64, i64} %1, 1
+  %4 = extractvalue {i64, i64, i64} %1, 2
+  %5 = insertvalue {i64, i64, i64} undef, i64 %2, 0
+  %6 = insertvalue {i64, i64, i64} %5, i64 %3, 1
+  %7 = insertvalue {i64, i64, i64} %6, i64 %4, 2
+  ret {i64, i64, i64} %7
 }
 
-define external ccc void @"simple_loop.gen$1<0>"(){
+define external ccc {i64, i64, i64} @"simple_loop.gen$1<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
   %"c#0" = tail call ccc i8 @read_char()
   %"tmp$1#0" = icmp ne i8 %"c#0", 97
   br i1 %"tmp$1#0", label %if.then, label %if.else
 if.then:
   tail call ccc void @putchar(i8 %"c#0")
-  tail call ccc void @"simple_loop.gen$1<0>"()
-  ret void
+  %8 = tail call ccc {i64, i64, i64} @"simple_loop.gen$1<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0")
+  %9 = extractvalue {i64, i64, i64} %8, 0
+  %10 = extractvalue {i64, i64, i64} %8, 1
+  %11 = extractvalue {i64, i64, i64} %8, 2
+  %12 = insertvalue {i64, i64, i64} undef, i64 %9, 0
+  %13 = insertvalue {i64, i64, i64} %12, i64 %10, 1
+  %14 = insertvalue {i64, i64, i64} %13, i64 %11, 2
+  ret i64 %11
 if.else:
-  ret void
+  %15 = insertvalue {i64, i64, i64} undef, i64 %"argc#0", 0
+  %16 = insertvalue {i64, i64, i64} %15, i64 %"argv#0", 1
+  %17 = insertvalue {i64, i64, i64} %16, i64 %"exit_code#0", 2
+  %18 = insertvalue {i64, i64, i64} undef, i64 %"argc#0", 0
+  %19 = insertvalue {i64, i64, i64} %18, i64 %"argv#0", 1
+  %20 = insertvalue {i64, i64, i64} %19, i64 %"exit_code#0", 2
+  ret {i64, i64, i64} %20
 }

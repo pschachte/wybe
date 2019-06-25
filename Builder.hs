@@ -597,7 +597,7 @@ buildExecutable targetMod fpath = do
             logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
 
             enterModule fpath [] Nothing Nothing
-            addImport ["command_line"] $ importSpec Nothing Private
+            addImport ["wybe","command_line"] $ importSpec Nothing Private
             addImport ["wybe","io"] $ importSpec (Just ["io"]) Private
             mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
                   mainImports
