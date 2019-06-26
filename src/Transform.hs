@@ -152,12 +152,14 @@ _updateMutateForAlias aliasMap
             if not (connectedToOthers aliasMap inName) && final1
                 && not (connectedToOthers aliasMap memName) && final2
                 && des /= 1
-            then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
+            -- XXX then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
+            then return args
             else return args
 _updateMutateForAlias aliasMap
     args@[fIn@(ArgVar inName _ _ _ final), fOut, size, offset, ArgInt des typ, mem] =
         if not (connectedToOthers aliasMap inName) && final && des /= 1
-        then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
+        -- XXX then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
+        then return args
         else return args
 _updateMutateForAlias _ args = return args
 
