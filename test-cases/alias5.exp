@@ -13,94 +13,101 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public inline (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#1:wybe.phantom): AliasPairs: []
-    alias5.bar<0>(~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @alias5:28:2
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom): AliasPairs: []
+    alias5.bar<0>(~#io#0:phantom, ?#io#1:phantom) @alias5:28:2
 
 
 bar > public (1 calls)
-0: bar(wybe.io$io#0:wybe.phantom, ?wybe.io$io#10:wybe.phantom): AliasPairs: []
-    alias5.replicate1<0>(100:wybe.int, ?p2#0:wybe.int, 800:wybe.int, ?p4#0:wybe.int, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @alias5:14:4
-    alias5.replicate1<0>(100:wybe.int, ?p3#0:wybe.int, 800:wybe.int, ?p4#1:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @alias5:15:4
-    foreign c print_string("expect p1=111: ":wybe.string, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @wybe:92:41
-    foreign c print_int(111:wybe.int, ~#wybe.io$io#3:wybe.phantom, ?tmp$6#0:wybe.phantom) @wybe:80:38
-    foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#wybe.io$io#4:wybe.phantom) @wybe:78:28
-    foreign c print_string("expect p2=100: ":wybe.string, ~#wybe.io$io#4:wybe.phantom, ?#wybe.io$io#5:wybe.phantom) @wybe:92:41
-    foreign c print_int(~p2#0:wybe.int, ~#wybe.io$io#5:wybe.phantom, ?tmp$11#0:wybe.phantom) @wybe:80:38
-    foreign c putchar('\n':wybe.char, ~tmp$11#0:wybe.phantom, ?#wybe.io$io#6:wybe.phantom) @wybe:78:28
-    foreign c print_string("expect p3=100: ":wybe.string, ~#wybe.io$io#6:wybe.phantom, ?#wybe.io$io#7:wybe.phantom) @wybe:92:41
-    foreign c print_int(~p3#0:wybe.int, ~#wybe.io$io#7:wybe.phantom, ?tmp$16#0:wybe.phantom) @wybe:80:38
-    foreign c putchar('\n':wybe.char, ~tmp$16#0:wybe.phantom, ?#wybe.io$io#8:wybe.phantom) @wybe:78:28
-    foreign c print_string("expect p4=45000: ":wybe.string, ~#wybe.io$io#8:wybe.phantom, ?#wybe.io$io#9:wybe.phantom) @wybe:92:41
-    foreign c print_int(~p4#1:wybe.int, ~#wybe.io$io#9:wybe.phantom, ?tmp$21#0:wybe.phantom) @wybe:80:38
-    foreign c putchar('\n':wybe.char, ~tmp$21#0:wybe.phantom, ?#wybe.io$io#10:wybe.phantom) @wybe:78:28
+0: bar(io#0:phantom, ?io#10:phantom): AliasPairs: []
+    alias5.replicate1<0>(100:wybe.int, ?p2#0:wybe.int, 800:wybe.int, ?p4#0:wybe.int, ~#io#0:phantom, ?#io#1:phantom) @alias5:14:4
+    alias5.replicate1<0>(100:wybe.int, ?p3#0:wybe.int, 800:wybe.int, ?p4#1:wybe.int, ~#io#1:phantom, ?#io#2:phantom) @alias5:15:4
+    foreign c print_string("expect p1=111: ":wybe.string, ~#io#2:phantom, ?#io#3:phantom) @wybe:nn:nn
+    foreign c print_int(111:wybe.int, ~#io#3:phantom, ?tmp$4#0:phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$4#0:phantom, ?#io#4:phantom) @wybe:nn:nn
+    foreign c print_string("expect p2=100: ":wybe.string, ~#io#4:phantom, ?#io#5:phantom) @wybe:nn:nn
+    foreign c print_int(~p2#0:wybe.int, ~#io#5:phantom, ?tmp$9#0:phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$9#0:phantom, ?#io#6:phantom) @wybe:nn:nn
+    foreign c print_string("expect p3=100: ":wybe.string, ~#io#6:phantom, ?#io#7:phantom) @wybe:nn:nn
+    foreign c print_int(~p3#0:wybe.int, ~#io#7:phantom, ?tmp$14#0:phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$14#0:phantom, ?#io#8:phantom) @wybe:nn:nn
+    foreign c print_string("expect p4=45000: ":wybe.string, ~#io#8:phantom, ?#io#9:phantom) @wybe:nn:nn
+    foreign c print_int(~p4#1:wybe.int, ~#io#9:phantom, ?tmp$19#0:phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$19#0:phantom, ?#io#10:phantom) @wybe:nn:nn
 
 
 replicate1 > public (2 calls)
-0: replicate1(v1#0:wybe.int, ?v2#0:wybe.int, v3#0:wybe.int, ?v4#1:wybe.int, wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): AliasPairs: []
-    foreign c print_string("random replicate1":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:92:41
-    foreign c print_int(2:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?tmp$7#0:wybe.phantom) @wybe:80:38
-    foreign c putchar('\n':wybe.char, ~tmp$7#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:78:28
-    foreign llvm add(~v3#0:wybe.int, 100:wybe.int, ?tmp$0#0:wybe.int) @wybe:13:38
-    foreign llvm mul(~tmp$0#0:wybe.int, 200:wybe.int, ?tmp$2#0:wybe.int) @wybe:21:38
-    foreign llvm sdiv(~tmp$2#0:wybe.int, 4:wybe.int, ?v4#1:wybe.int) @wybe:22:38
-    foreign llvm move(~v1#0:wybe.int, ?v2#0:wybe.int)
-alias5
-======================================================================
-AFTER LLVM IR:
+0: replicate1(v1#0:wybe.int, ?v2#0:wybe.int, v3#0:wybe.int, ?v4#1:wybe.int, io#0:phantom, ?io#2:phantom): AliasPairs: []
+    foreign c print_string("random replicate1":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
+    foreign c print_int(2:wybe.int, ~#io#1:phantom, ?tmp$7#0:phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$7#0:phantom, ?#io#2:phantom) @wybe:nn:nn
+    foreign llvm add(~v3#0:wybe.int, 100:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
+    foreign llvm mul(~tmp$0#0:wybe.int, 200:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
+    foreign llvm sdiv(~tmp$2#0:wybe.int, 4:wybe.int, ?v4#1:wybe.int) @wybe:nn:nn
+    foreign llvm move(~v1#0:wybe.int, ?v2#0:wybe.int) @alias5:9:3
+
+  LLVM code       :
 
 ; ModuleID = 'alias5'
-source_filename = "test-cases/alias5.wybe"
 
-@alias5.11 = constant [18 x i8] c"expect p4=45000: \00"
-@alias5.10 = constant [16 x i8] c"expect p3=100: \00"
-@alias5.9 = constant [16 x i8] c"expect p2=100: \00"
-@alias5.8 = constant [16 x i8] c"expect p1=111: \00"
-@alias5.12 = constant [18 x i8] c"random replicate1\00"
 
-declare void @putchar(i8) local_unnamed_addr
+declare external ccc void @putchar(i8)
 
-declare void @print_int(i64) local_unnamed_addr
+declare external ccc void @print_int(i64)
 
-declare void @print_string(i8*) local_unnamed_addr
+declare external ccc void @print_string(i8*)
 
-define i32 @alias5.main() local_unnamed_addr {
+@alias5.10 = constant [18 x i8] c"expect p4=45000: \00"
+
+@alias5.9 = constant [16 x i8] c"expect p3=100: \00"
+
+@alias5.8 = constant [16 x i8] c"expect p2=100: \00"
+
+@alias5.7 = constant [16 x i8] c"expect p1=111: \00"
+
+@alias5.11 = constant [18 x i8] c"random replicate1\00"
+
+declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+
+define external ccc void @"alias5.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
-  tail call void @"alias5.bar<0>"()
-  ret i32 0
-}
-
-define void @"alias5.bar<0>"() local_unnamed_addr {
-entry:
-  %0 = tail call { i64, i64 } @"alias5.replicate1<0>"(i64 100, i64 800)
-  %1 = extractvalue { i64, i64 } %0, 0
-  %2 = tail call { i64, i64 } @"alias5.replicate1<0>"(i64 100, i64 800)
-  %3 = extractvalue { i64, i64 } %2, 0
-  %4 = extractvalue { i64, i64 } %2, 1
-  tail call void @print_string(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias5.8, i64 0, i64 0))
-  tail call void @print_int(i64 111)
-  tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias5.9, i64 0, i64 0))
-  tail call void @print_int(i64 %1)
-  tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias5.10, i64 0, i64 0))
-  tail call void @print_int(i64 %3)
-  tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @alias5.11, i64 0, i64 0))
-  tail call void @print_int(i64 %4)
-  tail call void @putchar(i8 10)
+  tail call ccc void @"alias5.bar<0>"()
   ret void
 }
 
-define { i64, i64 } @"alias5.replicate1<0>"(i64 %"v1#0", i64 %"v3#0") local_unnamed_addr {
+define external ccc void @"alias5.bar<0>"(){
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @alias5.12, i64 0, i64 0))
-  tail call void @print_int(i64 2)
-  tail call void @putchar(i8 10)
-  %0 = mul i64 %"v3#0", 200
-  %"tmp$2#0" = add i64 %0, 20000
-  %"v4#1" = ashr exact i64 %"tmp$2#0", 2
-  %1 = insertvalue { i64, i64 } undef, i64 %"v1#0", 0
-  %2 = insertvalue { i64, i64 } %1, i64 %"v4#1", 1
-  ret { i64, i64 } %2
+  %1 = tail call ccc {i64, i64} @"alias5.replicate1<0>"(i64 100, i64 800)
+  %2 = extractvalue {i64, i64} %1, 0
+  %3 = extractvalue {i64, i64} %1, 1
+  %4 = tail call ccc {i64, i64} @"alias5.replicate1<0>"(i64 100, i64 800)
+  %5 = extractvalue {i64, i64} %4, 0
+  %6 = extractvalue {i64, i64} %4, 1
+  tail call ccc void @print_string(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias5.7, i32 0, i32 0))
+  tail call ccc void @print_int(i64 111)
+  tail call ccc void @putchar(i8 10)
+  tail call ccc void @print_string(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias5.8, i32 0, i32 0))
+  tail call ccc void @print_int(i64 %2)
+  tail call ccc void @putchar(i8 10)
+  tail call ccc void @print_string(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias5.9, i32 0, i32 0))
+  tail call ccc void @print_int(i64 %5)
+  tail call ccc void @putchar(i8 10)
+  tail call ccc void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @alias5.10, i32 0, i32 0))
+  tail call ccc void @print_int(i64 %6)
+  tail call ccc void @putchar(i8 10)
+  ret void
 }
 
+define external ccc {i64, i64} @"alias5.replicate1<0>"(i64 %"v1#0", i64 %"v3#0"){
+entry:
+  tail call ccc void @print_string(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @alias5.11, i32 0, i32 0))
+  tail call ccc void @print_int(i64 2)
+  tail call ccc void @putchar(i8 10)
+  %"tmp$0#0" = add i64 %"v3#0", 100
+  %"tmp$2#0" = mul i64 %"tmp$0#0", 200
+  %"v4#1" = sdiv i64 %"tmp$2#0", 4
+  %12 = insertvalue {i64, i64} undef, i64 %"v1#0", 0
+  %13 = insertvalue {i64, i64} %12, i64 %"v4#1", 1
+  ret {i64, i64} %13
+}

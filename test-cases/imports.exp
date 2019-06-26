@@ -25,6 +25,8 @@ AFTER EVERYTHING:
 
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 --------------------------------------------------
  Module mod1
   public submods  : 
@@ -43,6 +45,8 @@ declare external ccc i8* @wybe_malloc(i32)
 
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 --------------------------------------------------
  Module mod2
   public submods  : 
@@ -61,6 +65,8 @@ declare external ccc i8* @wybe_malloc(i32)
 
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 --------------------------------------------------
  Module mod3
   public submods  : 
@@ -79,6 +85,8 @@ declare external ccc i8* @wybe_malloc(i32)
 
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 --------------------------------------------------
  Module mod4
   public submods  : 
@@ -97,6 +105,8 @@ declare external ccc i8* @wybe_malloc(i32)
 
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 --------------------------------------------------
  Module mod5
   public submods  : 
@@ -115,6 +125,8 @@ declare external ccc i8* @wybe_malloc(i32)
 
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 --------------------------------------------------
  Module mod6
   public submods  : 
@@ -133,6 +145,8 @@ declare external ccc i8* @wybe_malloc(i32)
 
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 --------------------------------------------------
  Module mod7
   public submods  : 
@@ -151,6 +165,8 @@ declare external ccc i8* @wybe_malloc(i32)
 
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 --------------------------------------------------
  Module mod8
   public submods  : 
@@ -169,3 +185,5 @@ declare external ccc i8* @wybe_malloc(i32)
 
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)

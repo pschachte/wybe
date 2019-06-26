@@ -1,19 +1,19 @@
 ======================================================================
 AFTER EVERYTHING:
  Module aaa
-  public submods  :
-  public types    :
-  public resources:
+  public submods  : 
+  public types    : 
+  public resources: 
   public procs    : aaa.<0>
   imports         : use bbb
                     use ccc
                     use wybe
-  types           :
-  resources       :
-  procs           :
+  types           : 
+  resources       : 
+  procs           : 
 
 *main* > public inline (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom):
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom): AliasPairs: []
     foreign c print_string("AAA: Init":wybe.string, ~#io#0:phantom, ?tmp$2#0:phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$2#0:phantom, ?#io#1:phantom) @wybe:nn:nn
 
@@ -30,6 +30,8 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+
 define external ccc void @"aaa.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @aaa.1, i32 0, i32 0))
@@ -38,18 +40,18 @@ entry:
 }
 --------------------------------------------------
  Module bbb
-  public submods  :
-  public types    :
-  public resources:
+  public submods  : 
+  public types    : 
+  public resources: 
   public procs    : bbb.<0>
   imports         : use ddd
                     use wybe
-  types           :
-  resources       :
-  procs           :
+  types           : 
+  resources       : 
+  procs           : 
 
 *main* > public inline (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom):
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom): AliasPairs: []
     foreign c print_string("BBB: Init":wybe.string, ~#io#0:phantom, ?tmp$2#0:phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$2#0:phantom, ?#io#1:phantom) @wybe:nn:nn
 
@@ -66,6 +68,8 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+
 define external ccc void @"bbb.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @bbb.1, i32 0, i32 0))
@@ -74,18 +78,18 @@ entry:
 }
 --------------------------------------------------
  Module ccc
-  public submods  :
-  public types    :
-  public resources:
+  public submods  : 
+  public types    : 
+  public resources: 
   public procs    : ccc.<0>
   imports         : use ddd
                     use wybe
-  types           :
-  resources       :
-  procs           :
+  types           : 
+  resources       : 
+  procs           : 
 
 *main* > public inline (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom):
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom): AliasPairs: []
     foreign c print_string("CCC: Init":wybe.string, ~#io#0:phantom, ?tmp$2#0:phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$2#0:phantom, ?#io#1:phantom) @wybe:nn:nn
 
@@ -102,6 +106,8 @@ declare external ccc void @print_string(i8*)
 
 declare external ccc i8* @wybe_malloc(i32)
 
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+
 define external ccc void @"ccc.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
   tail call ccc void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ccc.1, i32 0, i32 0))
@@ -110,19 +116,17 @@ entry:
 }
 --------------------------------------------------
  Module ddd
-  public submods  :
-  public types    :
-  public resources:
+  public submods  : 
+  public types    : 
+  public resources: 
   public procs    : ddd.<0>
   imports         : use wybe
-  types           :
-  resources       :
-  procs           :
+  types           : 
+  resources       : 
+  procs           : 
 
 *main* > public inline (0 calls)
-0: (io#0:phantom, ?io#1:phantom):
-=======
-0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom):
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom): AliasPairs: []
     foreign c print_string("DDD: Init":wybe.string, ~#io#0:phantom, ?tmp$2#0:phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$2#0:phantom, ?#io#1:phantom) @wybe:nn:nn
 
@@ -138,6 +142,8 @@ declare external ccc void @print_string(i8*)
 @ddd.1 = constant [10 x i8] c"DDD: Init\00"
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external ccc void @"ddd.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:

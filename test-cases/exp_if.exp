@@ -11,16 +11,16 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#2:wybe.phantom): AliasPairs: []
-    foreign c print_string("expect larger: ":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:92:41
+*main* > public inline (0 calls)
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#2:phantom): AliasPairs: []
+    foreign c print_string("expect larger: ":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
     exp_if.if_test<0>(3:wybe.int, ?tmp$0#0:wybe.string) @exp_if:5:8
-    foreign c print_string(~tmp$0#0:wybe.string, ~#wybe.io$io#1:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:92:41
+    foreign c print_string(~tmp$0#0:wybe.string, ~#io#1:phantom, ?#io#2:phantom) @wybe:nn:nn
 
 
 if_test > public (1 calls)
 0: if_test(x#0:wybe.int, ?$#0:wybe.string): AliasPairs: []
-    foreign llvm icmp sgt(~x#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:26:39
+    foreign llvm icmp sgt(~x#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move("smaller":wybe.string, ?$#0:wybe.string) @exp_if:2:8
@@ -28,34 +28,38 @@ if_test > public (1 calls)
     1:
         foreign llvm move("larger":wybe.string, ?$#0:wybe.string) @exp_if:2:8
 
-exp_if
-======================================================================
-AFTER LLVM IR:
+
+  LLVM code       :
 
 ; ModuleID = 'exp_if'
-source_filename = "test-cases/exp_if.wybe"
+
+
+declare external ccc void @print_string(i8*)
 
 @exp_if.1 = constant [16 x i8] c"expect larger: \00"
-@exp_if.4 = constant [8 x i8] c"smaller\00"
-@exp_if.3 = constant [7 x i8] c"larger\00"
 
-declare void @print_string(i8*) local_unnamed_addr
+@exp_if.3 = constant [8 x i8] c"smaller\00"
 
-define i32 @exp_if.main() local_unnamed_addr {
+@exp_if.2 = constant [7 x i8] c"larger\00"
+
+declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+
+define external ccc void @"exp_if.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
 entry:
-  tail call void @print_string(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @exp_if.1, i64 0, i64 0))
-  %"tmp$0#0" = tail call i8* @"exp_if.if_test<0>"(i64 3)
-  tail call void @print_string(i8* %"tmp$0#0")
-  ret i32 0
+  tail call ccc void @print_string(i8* getelementptr inbounds ([16 x i8], [16 x i8]* @exp_if.1, i32 0, i32 0))
+  %"tmp$0#0" = tail call ccc i8* @"exp_if.if_test<0>"(i64 3)
+  tail call ccc void @print_string(i8* %"tmp$0#0")
+  ret void
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i8* @"exp_if.if_test<0>"(i64 %"x#0") local_unnamed_addr #0 {
+define external ccc i8* @"exp_if.if_test<0>"(i64 %"x#0"){
 entry:
   %"tmp$1#0" = icmp sgt i64 %"x#0", 0
-  %spec.select = select i1 %"tmp$1#0", i8* getelementptr inbounds ([7 x i8], [7 x i8]* @exp_if.3, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @exp_if.4, i64 0, i64 0)
-  ret i8* %spec.select
+  br i1 %"tmp$1#0", label %if.then, label %if.else
+if.then:
+  ret i8* getelementptr inbounds ([7 x i8], [7 x i8]* @exp_if.2, i32 0, i32 0)
+if.else:
+  ret i8* getelementptr inbounds ([8 x i8], [8 x i8]* @exp_if.3, i32 0, i32 0)
 }
-
-attributes #0 = { norecurse nounwind readnone }
-

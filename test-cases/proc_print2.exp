@@ -1,19 +1,17 @@
 ======================================================================
 AFTER EVERYTHING:
  Module proc_print2
-  public submods  :
-  public types    :
-  public resources:
+  public submods  : 
+  public types    : 
+  public resources: 
   public procs    : proc_print2.print2<0>
   imports         : use wybe
-  types           :
-  resources       :
-  procs           :
+  types           : 
+  resources       : 
+  procs           : 
 
 print2 > public inline (0 calls)
-AFTER LLVM IR:
-=======
-0: print2(x#0:wybe.int, y#0:wybe.int, io#0:phantom, ?io#2:phantom):
+0: print2(x#0:wybe.int, y#0:wybe.int, io#0:phantom, ?io#2:phantom): AliasPairs: []
     foreign c print_int(~x#0:wybe.int, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
     foreign c print_int(~y#0:wybe.int, ~#io#1:phantom, ?#io#2:phantom) @wybe:nn:nn
 
@@ -25,6 +23,8 @@ AFTER LLVM IR:
 declare external ccc void @print_int(i64)
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external ccc void @"proc_print2.print2<0>"(i64 %"x#0", i64 %"y#0"){
 entry:

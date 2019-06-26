@@ -3,7 +3,7 @@ use position
 public proc replicate(?p2:position) use !io
   ?p1 = position(101,102)
   ?p2 = position(p1.x, p1.y)
-  x(!p1, 10000) # non-destructive update
+  x(!p1, 10000) # destructive update
   y(!p2, p1.y+1) # destructive update
   !print("expect p1(10000,102):")
   !printPosition(p1)

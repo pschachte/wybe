@@ -1,19 +1,17 @@
 ======================================================================
 AFTER EVERYTHING:
  Module proc_allin
-  public submods  :
-  public types    :
-  public resources:
+  public submods  : 
+  public types    : 
+  public resources: 
   public procs    : proc_allin.nada<0>
   imports         : use wybe
-  types           :
-  resources       :
-  procs           :
+  types           : 
+  resources       : 
+  procs           : 
 
 nada > public inline (0 calls)
-AFTER LLVM IR:
-=======
-0: nada([x#0:wybe.int], [y#0:wybe.int]):
+0: nada([x#0:wybe.int], [y#0:wybe.int]): AliasPairs: []
 
   LLVM code       :
 
@@ -21,3 +19,5 @@ AFTER LLVM IR:
 
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)

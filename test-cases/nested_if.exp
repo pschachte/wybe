@@ -1,17 +1,17 @@
 ======================================================================
 AFTER EVERYTHING:
  Module nested_if
-  public submods  :
-  public types    :
-  public resources:
+  public submods  : 
+  public types    : 
+  public resources: 
   public procs    : nested_if.nested_if<0>
   imports         : use wybe
-  types           :
-  resources       :
-  procs           :
+  types           : 
+  resources       : 
+  procs           : 
 
 nested_if > public (0 calls)
-0: nested_if(i#0:wybe.int, io#0:phantom, ?io#1:phantom):
+0: nested_if(i#0:wybe.int, io#0:phantom, ?io#1:phantom): AliasPairs: []
     foreign llvm icmp eq(i#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
     case ~tmp$0#0:wybe.bool of
     0:
@@ -57,6 +57,8 @@ declare external ccc void @print_string(i8*)
 @nested_if.1 = constant [5 x i8] c"zero\00"
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external ccc void @"nested_if.nested_if<0>"(i64 %"i#0"){
 entry:

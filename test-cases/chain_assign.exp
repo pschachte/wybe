@@ -1,19 +1,17 @@
 ======================================================================
 AFTER EVERYTHING:
  Module chain_assign
-  public submods  :
-  public types    :
-  public resources:
-  public procs    :
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : 
   imports         : use wybe
-  types           :
-  resources       :
-  procs           :
+  types           : 
+  resources       : 
+  procs           : 
 
 chain > inline (0 calls)
-AFTER LLVM IR:
-=======
-0: chain(?z#0:wybe.int):
+0: chain(?z#0:wybe.int): AliasPairs: []
     foreign llvm move(1:wybe.int, ?z#0:wybe.int) @chain_assign:4:5
 
   LLVM code       :
@@ -22,6 +20,8 @@ AFTER LLVM IR:
 
 
 declare external ccc i8* @wybe_malloc(i32)
+
+declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external ccc i64 @"chain_assign.chain<0>"(){
 entry:
