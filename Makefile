@@ -16,7 +16,7 @@ all:	wybemk
 #	happy -a -g $<
 
 cbits.so: cbits.c
-	clang -fPIC -shared cbits.c -o cbits.so -lgc -v
+	clang -fPIC -shared -isysroot `xcrun --show-sdk-path` cbits.c -o cbits.so -lgc -v
 
 wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs cbits.so
 	stack install && cp ~/.local/bin/$@ ./$@
