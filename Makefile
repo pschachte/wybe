@@ -124,4 +124,5 @@ test:	wybemk
 	fi )
 
 clean:
+	stack clean
 	rm -f $(SRCDIR)/*.o $(SRCDIR)/*.hi Parser.hs $(SRCDIR)/Version.lhs *.pdf *.aux wybelibs/*.o test-cases/*.o
