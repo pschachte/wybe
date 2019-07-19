@@ -60,6 +60,7 @@
     * Pass a closure
     * Lazy arguments are evaluated before passing to any other func/proc except
       as a lazy input argument
+* Provide syntax for specifying foreign dependencies, including libraries
 * Fix the syntax!
     * At expression level, support infix ops, where the ops are sequences of
       operator characters
