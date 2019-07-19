@@ -20,7 +20,7 @@ executable wybemk
                , hex
                , llvm-hs == 6.3.0
                , llvm-hs-pure == 6.2.1
-               , llvm-hs-pretty == 6.1.0
+               , llvm-hs-pretty == 0.6.0.0
                , text
                , mtl
                , old-time
@@ -38,6 +38,7 @@ executable wybemk
                  Analysis, AliasAnalysis, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
                  Version, ASTShow
+  extra-libraries: gc
   hs-source-dirs: src
 
 
