@@ -70,3 +70,8 @@ require-stack-version: ">=1.6"
 
 ghc-options:
   "$everything": -fwarn-incomplete-patterns -O2
+
+
+flags:
+  llvm-hs:
+    shared-llvm: true
