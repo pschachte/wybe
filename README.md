@@ -19,32 +19,51 @@ Note that Wybe has only been ported to Mac OS X so far.
 
     This needs to be redone after each OS upgrade.
 
-2.  Install the Boehm Garbage Collector development tools:
+2.  Install [Homebrew](https://brew.sh/).
 
-      `brew install bdw-gc`
+3.  Install
+[The Haskell Tool Stack](https://docs.haskellstack.org/en/stable/README/).
 
-3.  Install LLVM version 6
+```
+    brew install haskell-stack
+```
 
-      `brew install llvm-hs/llvm/llvm-6.0`
+4.  Install the Boehm Garbage Collector development tools:
 
-4.  Install dwdiff
+```
+    brew install bdw-gc
+```
 
-      `brew install llvm-hs/llvm/llvm-6.0`
+5.  Install LLVM version 6
 
-5.  LaTeX is needed for building the documentation.  We recommend
+```
+    brew install llvm-hs/llvm/llvm-6.0
+```
+
+6.  Install dwdiff (for testing)
+
+```
+    brew install llvm-hs/llvm/llvm-6.0
+```
+
+7.  LaTeX is needed for building the documentation.  We recommend
 [MacTeX](https://www.tug.org/mactex/).
 
 
 ### Building
 
 1.  Just do:
-      `make`
+```
+    make
+```
 
 
 ### Testing
 
 1.  Just do:
-      `make test`
+```
+    make test
+```
 
 This will show a . for each passed test, an X for each failed test, and a ?
 for each new test (which hasn't had expected output specified yet).
