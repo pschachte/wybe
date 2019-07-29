@@ -29,9 +29,6 @@ doc:	*.hs
 	rm -rf $@
 	haddock -h -o $@ *.hs
 
-%.html:	%.md
-	pandoc -s -f markdown+grid_tables -t html -o $@ $<
-
 $(SRCDIR)/Version.lhs:	*.hs
 	@echo "Generating Version.lhs for version $(VERSION)"
 	@rm -f $@
@@ -44,41 +41,32 @@ $(SRCDIR)/Version.lhs:	*.hs
 TESTCASES = $(wildcard test-cases/*.wybe)
 
 # Assemble README markdown source file automatically
-README.md: *.hs Makefile README.md.intro README.md.outro
-	printf "%% The Wybe Compiler\n" > $@
-	printf "%% The Wybe Team\n%% " >> $@
-	git show | sed -n '/^Date:/{s/^Date: *//p;q;}' >> $@
-	printf "\n\n" >> $@
-	cat README.md.intro >> $@
+src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
+	cat src/README.md.intro > $@
 
-	printf "\n\n\nSubdirectories\n--------------\n\n" >> $@
-	printf "Subdirectories have the following purposes:\n\n" >> $@
-	for f in */README ; do \
-	    printf "+---------------------+-------------------------------------------------+\n" ; \
-	    printf '| %-20s| %s |\n' "`dirname $$f`" "`cat $$f`" ; \
-	    sed -n "s/^-- *Purpose *: *\(.*\)/\1/p" $$f | tr -d '\n' ; \
-	done >> $@
-	printf "+---------------------+-------------------------------------------------+\n" >> $@
-
-	printf "\n\n\nTour of the compiler\n--------------------\n\n" >> $@
 	printf "The source files in this directory and their purposes are:\n\n" >> $@
-	for f in *.hs ; do \
-	    printf "+---------------------+-------------------------------------------------+\n| `printf '%-20s' $$f`| " ; \
+	printf "| File                         " >> $@
+	printf "| Purpose                                                  |\n" >> $@
+	printf "| ---------------------------- " >> $@
+	printf "| -------------------------------------------------------- |\n" >> $@
+	for f in src/*.hs ; do \
+      b=`basename $$f` ; \
+      m=`basename $$f .hs` ; \
+	    printf "| `printf '%-29s' [$$b]\($$m\)`| " ; \
 	    sed -n "s/^-- *Purpose *: *\(.*\)/\1/p" $$f | tr -d '\n' ; \
 	    printf " |\n" ; \
 	done >> $@
-	printf "+---------------------+-------------------------------------------------+\n" >> $@
-	printf "\n\n" >> $@
+	printf "\n\n# Modules in more detail\n\n" >> $@
 
-	for f in *.hs ; do \
-	    printf "\n%s\n" $$f ; \
-	    echo $$f | sed 's/./-/g' ; \
+	for f in src/*.hs ; do \
+      m=`basename $$f .hs` ; \
+	    printf "\n## %s\n" $$m ; \
 	    echo ; \
 	    sed -E -e '/^-- *Purpose *:/{s/^-- *Purpose *:/**Purpose**:/; G; p;}' -e '/BEGIN MAJOR DOC/,/END MAJOR DOC/{//d ; s/^-- ? ?//p;}' -e 'd' <$$f ; \
 	done >> $@
 
 	printf "\n\n" >> $@
-	cat README.md.outro >> $@
+	cat src/README.md.outro >> $@
 
 
 # On Mac OS X, gtimeout is in homebrew coreutils package
