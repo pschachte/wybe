@@ -52,7 +52,7 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 	for f in src/*.hs ; do \
       b=`basename $$f` ; \
       m=`basename $$f .hs` ; \
-	    printf "| `printf '%-29s' [$$b]\($$m\)`| " ; \
+	    printf "| `printf '%-29s' [$$b]\(#$$m\)`| " ; \
 	    sed -n "s/^-- *Purpose *: *\(.*\)/\1/p" $$f | tr -d '\n' ; \
 	    printf " |\n" ; \
 	done >> $@

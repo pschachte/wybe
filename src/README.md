@@ -3,36 +3,36 @@ The source files in this directory and their purposes are:
 
 | File                         | Purpose                                                  |
 | ---------------------------- | -------------------------------------------------------- |
-| [AST.hs](AST)                | Wybe Abstract Syntax Tree and LPVM representation |
-| [ASTShow.hs](ASTShow)        | Show Wybe intermediate representation |
-| [AliasAnalysis.hs](AliasAnalysis)| Alias analysis for a single module |
-| [Analysis.hs](Analysis)      | Entry point of all kinds of analysis for a single module |
-| [BinaryFactory.hs](BinaryFactory)| Deriving AST Types to be Binary instances |
-| [Blocks.hs](Blocks)          | Transform a clausal form (LPVM) module to LLVM |
-| [BodyBuilder.hs](BodyBuilder)| A monad to build up a procedure Body, with copy propagation |
-| [Builder.hs](Builder)        | Handles compilation at the module level. |
-| [Callers.hs](Callers)        | Find all callers for each proc and count static calls per caller |
-| [Clause.hs](Clause)          | Convert Wybe code to clausal (LPVM) form |
-| [Codegen.hs](Codegen)        | Generate and emit LLVM from basic blocks of a module |
-| [Config.hs](Config)          | Configuration for wybe compiler |
-| [DefUse.hs](DefUse)          | Compute defined and used variables for statements and exprs |
-| [Emit.hs](Emit)              | Emit LLVM code |
-| [Expansion.hs](Expansion)    | Replace certain procedure calls with others |
-| [Flatten.hs](Flatten)        | Flatten function calls (expressions) into procedure calls |
-| [Macho.hs](Macho)            | Extended version of parser for Mach-O object format files  |
-| [NewParser.hs](NewParser)    | Re-write of the Wybe parser using Parsec. |
-| [Normalise.hs](Normalise)    | Convert parse tree into AST |
-| [ObjectInterface.hs](ObjectInterface)| Parse and edit a object file. |
-| [Optimise.hs](Optimise)      | Framework to optimise a single module |
-| [Options.hs](Options)        | Handle compiler options/switches |
-| [Resources.hs](Resources)    | Resource checker for Wybe |
-| [Scanner.hs](Scanner)        | Scanner for the Wybe language |
-| [Snippets.hs](Snippets)      | Convenience functions for generation of Wybe AST |
-| [Transform.hs](Transform)    | Transform LPVM after alias analysis |
-| [Types.hs](Types)            | Type checker/inferencer for Wybe |
-| [Unbranch.hs](Unbranch)      | Turn loops and conditionals into separate procedures |
-| [Util.hs](Util)              | Various small utility functions |
-| [wybemk.hs](wybemk)          | Wybe compiler/builder main code |
+| [AST.hs](#AST)               | Wybe Abstract Syntax Tree and LPVM representation |
+| [ASTShow.hs](#ASTShow)       | Show Wybe intermediate representation |
+| [AliasAnalysis.hs](#AliasAnalysis)| Alias analysis for a single module |
+| [Analysis.hs](#Analysis)     | Entry point of all kinds of analysis for a single module |
+| [BinaryFactory.hs](#BinaryFactory)| Deriving AST Types to be Binary instances |
+| [Blocks.hs](#Blocks)         | Transform a clausal form (LPVM) module to LLVM |
+| [BodyBuilder.hs](#BodyBuilder)| A monad to build up a procedure Body, with copy propagation |
+| [Builder.hs](#Builder)       | Handles compilation at the module level. |
+| [Callers.hs](#Callers)       | Find all callers for each proc and count static calls per caller |
+| [Clause.hs](#Clause)         | Convert Wybe code to clausal (LPVM) form |
+| [Codegen.hs](#Codegen)       | Generate and emit LLVM from basic blocks of a module |
+| [Config.hs](#Config)         | Configuration for wybe compiler |
+| [DefUse.hs](#DefUse)         | Compute defined and used variables for statements and exprs |
+| [Emit.hs](#Emit)             | Emit LLVM code |
+| [Expansion.hs](#Expansion)   | Replace certain procedure calls with others |
+| [Flatten.hs](#Flatten)       | Flatten function calls (expressions) into procedure calls |
+| [Macho.hs](#Macho)           | Extended version of parser for Mach-O object format files  |
+| [NewParser.hs](#NewParser)   | Re-write of the Wybe parser using Parsec. |
+| [Normalise.hs](#Normalise)   | Convert parse tree into AST |
+| [ObjectInterface.hs](#ObjectInterface)| Parse and edit a object file. |
+| [Optimise.hs](#Optimise)     | Framework to optimise a single module |
+| [Options.hs](#Options)       | Handle compiler options/switches |
+| [Resources.hs](#Resources)   | Resource checker for Wybe |
+| [Scanner.hs](#Scanner)       | Scanner for the Wybe language |
+| [Snippets.hs](#Snippets)     | Convenience functions for generation of Wybe AST |
+| [Transform.hs](#Transform)   | Transform LPVM after alias analysis |
+| [Types.hs](#Types)           | Type checker/inferencer for Wybe |
+| [Unbranch.hs](#Unbranch)     | Turn loops and conditionals into separate procedures |
+| [Util.hs](#Util)             | Various small utility functions |
+| [wybemk.hs](#wybemk)         | Wybe compiler/builder main code |
 
 
 # Modules in more detail
