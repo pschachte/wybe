@@ -165,8 +165,9 @@ equal sign the variable appears; only its prefix determines whether the
 variable is assigned or used.
 
 ```
-    ?x = 42    # gives x the value 42
-    42 = ?x    # also gives x the value 42
+    ?x = 42              # gives x the value 42
+    42 = ?x              # also gives x the value 42
+    some_proc(x, ?y, ?z) # uses x, assigns y and z
 ```
 
 A variable mention may *both* use and assign its value if it is preceded
