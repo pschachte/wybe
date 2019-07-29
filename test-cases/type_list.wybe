@@ -6,7 +6,7 @@ public func ++(x:intlist, y:intlist):intlist =
     else y
 
 public func length(x:intlist) : int =
-    if x = [] then 0 else 1 + length(tail(x))
+    if x = [ ?h | ?t] then 1 + length(t) else 0
 
 
 ?x = [1,2,3]
