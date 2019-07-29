@@ -31,6 +31,10 @@ Note that Wybe has only been ported to Mac OS X so far.
 
       `brew install llvm-hs/llvm/llvm-6.0`
 
+5.  LaTeX is needed for building the documentation.  We recommend
+[MacTeX](https://www.tug.org/mactex/).
+
+
 ### Building
 
 1.  Just do:
@@ -76,10 +80,36 @@ Subdirectories have the following purposes:
 ## The Wybe Language
 
 The Wybe language is intended to be easy to learn and easy to use, but
-powerful enough for for practical use.  It is intended to support best
-programming practice, but not necessarily *common* practice.
+powerful and efficient enough for for practical use.  It is intended to
+support best programming practice, but not necessarily *common* practice.
 
 Wybe combines the best features of declarative and imperative languages,
 in particular borrowing features from functional, logic, imperative, and
-object oriented languages, but does not neatly fit in any of these
-paradigms.
+object oriented languages, but does not neatly fit into any of these
+paradigms.  Its main organising principle is that *values* are
+immutable, but *variables* may be reassigned.  This means that values
+may be passed around a will without worrying that they may be modified.
+
+### Variables
+Variable names begin with a letter (upper or lower case) and follow with
+any number of letters, digits, and underscores.
+
+A variable mention may *use* or *assign* its value.  If the variable
+name is preceded by a question mark (`?`), the mention assigns the
+variable a (new) value; without the question mark prefix, the mention
+uses the variable's current value.  It does not matter which side of an
+equal sign the variable appears; only its prefix determines whether the
+variable is assigned or used.
+
+```
+    ?x = 42    # give x the value 42
+    42 = ?x    # also give x the value 42
+```
+
+A variable mention may *both* use and assign its value if it is preceded
+with an exclamation mark (`!`).
+
+```
+    incr(!x)   # increment x (both uses and reassigns x)
+```
+
