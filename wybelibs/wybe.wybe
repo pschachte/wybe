@@ -96,7 +96,7 @@ public module io is
     # public proc read(?x:string) use !io foreign c read_line(?x,!io) end
 
     public proc print(x:bool) use !io
-       !print(if x=false then "false" else "true")
+       !print(if false(x) then "false" else "true")
     end
     public proc println(x:bool) use !io !print(x) !nl end
 #    public func eof:char = foreign lpvm cast(-1)

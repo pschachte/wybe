@@ -406,11 +406,6 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount size tag
         ([tagCheck constCount nonConstCount tag "$rec"]
          ++
         -- Code to mutate the selected field
--- XXX Revise mutate instruction to take address, new address (output),
---     size, offset, and destructive (Bool).  If destructive
---     is True, does in place update and new address = address;
---     otherwise allocates fresh storage, copies old contents,
---     and mutates the new storage.
          [Unplaced $ ForeignCall "lpvm" "mutate" []
           [Unplaced $ Typed (Var "$rec" ParamInOut $ Implicit pos)
                       rectype False,

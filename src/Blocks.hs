@@ -1078,6 +1078,7 @@ intrinsicExterns =
         (ptr_t (int_c 8), LLVMAST.Name $ toSBString "dest"),
         (ptr_t (int_c 8), LLVMAST.Name $ toSBString "src"),
         (LLVMAST.IntegerType 32, LLVMAST.Name $ toSBString "len"),
+        (LLVMAST.IntegerType 32, LLVMAST.Name $ toSBString "alignment"),
         (LLVMAST.IntegerType 1, LLVMAST.Name $ toSBString "isvolatile")]
     ]
 
@@ -1196,7 +1197,9 @@ callMemCpy dst src bytes = do
     let charptr_t = ptr_t (int_c 8)
     dstCast <- instr charptr_t $ LLVMAST.BitCast dst charptr_t []
     srcCast <- instr charptr_t $ LLVMAST.BitCast src charptr_t []
-    let inops = [dstCast, srcCast, cons (C.Int 32 bytes), cons (C.Int 1 0)]
+    let inops = [dstCast, srcCast, cons (C.Int 32 bytes),
+                 cons (C.Int 32 $ fromIntegral wordSize `div` 8),
+                 cons (C.Int 1 0)]
     let ins =
           call
           (externf (ptr_t (FunctionType void_t (typeOf <$> inops) False))

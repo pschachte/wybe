@@ -61,7 +61,7 @@ declare external ccc  i64 @ipow(i64, i64)
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
 define external ccc  void @"import.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
@@ -171,7 +171,7 @@ declare external ccc  void @print_int(i64)
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
 define external ccc  void @"position.printPosition<0>"(i64*  %"pos#0")    {
@@ -261,7 +261,7 @@ y > public inline (0 calls)
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
 define external ccc  i1 @"position.position.=<0>"(i64*  %"$left#0", i64*  %"$right#0")    {
@@ -331,7 +331,7 @@ entry:
   %31 = bitcast i8* %30 to i64* 
   %32 = bitcast i64* %31 to i8* 
   %33 = bitcast i64* %"$rec#0" to i8* 
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %32, i8*  %33, i32  16, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %32, i8*  %33, i32  16, i32  8, i1  0)  
   %34 = bitcast i64* %31 to i64* 
   %35 = getelementptr  i64, i64* %34, i64 0 
   store  i64 %"$field#0", i64* %35 
@@ -354,7 +354,7 @@ entry:
   %40 = bitcast i8* %39 to i64* 
   %41 = bitcast i64* %40 to i8* 
   %42 = bitcast i64* %"$rec#0" to i8* 
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %41, i8*  %42, i32  16, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %41, i8*  %42, i32  16, i32  8, i1  0)  
   %43 = bitcast i64* %40 to i64* 
   %44 = getelementptr  i64, i64* %43, i64 1 
   store  i64 %"$field#0", i64* %44 

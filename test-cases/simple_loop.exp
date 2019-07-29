@@ -52,7 +52,7 @@ declare external ccc  i8 @read_char()
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
 define external ccc  {i64, i64, i64} @"simple_loop.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
