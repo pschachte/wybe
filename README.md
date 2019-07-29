@@ -90,6 +90,50 @@ paradigms.  Its main organising principle is that *values* are
 immutable, but *variables* may be reassigned.  This means that values
 may be passed around a will without worrying that they may be modified.
 
+### Hello, World!
+
+Code appearing at the top level of a file is executed when the program
+is run, so Hello, World! in Wybe is quite simple:
+```
+    # Print a friendly greeting
+    !println("Hello, World!")
+```
+
+Wybe comments begin with a hash (`#`) character and continue to the end
+of the line.
+
+The need for the opening exclamation point will be explained in Section
+[Resources](#resources).
+
+
+### Building
+
+Use `wybemk` to build object and executable files.  If the above program
+is put in a file named `hello.wybe`, then an executable program can be
+built with the command:
+
+```
+    wybemk hello
+```
+
+Note that `wybemk` is like `make` in that you give it the name of the
+file you want it to build, and it figures out what files it needs
+to compile.
+
+
+### Types
+
+Wybe has the usual complement of primitive types:
+
+| Type     | Meaning                                  |
+| -------- | ---------------------------------------- |
+| `int`    | Fixed precision integer (32 or 64 bits)  |
+| `float`  | Double precision floating point number   |
+| `bool`   | Boolean; either `true` or `false`        |
+| `string`   | Character string (double quotes)   |
+| `char`   | Individual ascii character (single quotes) |
+
+
 ### Variables
 Variable names begin with a letter (upper or lower case) and follow with
 any number of letters, digits, and underscores.
@@ -102,8 +146,8 @@ equal sign the variable appears; only its prefix determines whether the
 variable is assigned or used.
 
 ```
-    ?x = 42    # give x the value 42
-    42 = ?x    # also give x the value 42
+    ?x = 42    # gives x the value 42
+    42 = ?x    # also gives x the value 42
 ```
 
 A variable mention may *both* use and assign its value if it is preceded
@@ -113,3 +157,13 @@ with an exclamation mark (`!`).
     incr(!x)   # increment x (both uses and reassigns x)
 ```
 
+### Functions
+### Procedures
+### Functions *are* procedures
+### Resources
+### Modes
+### Tests
+### Selection and iteration
+### Modules
+### User defined types
+### Foreign interface
