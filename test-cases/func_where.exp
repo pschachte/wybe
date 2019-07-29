@@ -20,13 +20,18 @@ quad > public inline (0 calls)
 ; ModuleID = 'func_where'
 
 
-declare external ccc i8* @wybe_malloc(i32)
+ 
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
-define external ccc i64 @"func_where.quad<0>"(i64 %"x#0"){
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external ccc  i64 @"func_where.quad<0>"(i64  %"x#0")    {
 entry:
-  %"tmp$0#0" = add i64 %"x#0", %"x#0"
-  %"$#0" = add i64 %"tmp$0#0", %"tmp$0#0"
-  ret i64 %"$#0"
+  %"tmp$0#0" = add   i64 %"x#0", %"x#0" 
+  %"$#0" = add   i64 %"tmp$0#0", %"tmp$0#0" 
+  ret i64 %"$#0" 
 }

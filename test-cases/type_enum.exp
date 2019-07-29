@@ -22,9 +22,13 @@ AFTER EVERYTHING:
 ; ModuleID = 'type_enum'
 
 
-declare external ccc i8* @wybe_malloc(i32)
+ 
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 --------------------------------------------------
  Module type_enum.season([])
   public submods  : 
@@ -70,32 +74,41 @@ winter > public inline (0 calls)
 ; ModuleID = 'type_enum.season'
 
 
-declare external ccc i8* @wybe_malloc(i32)
+ 
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
-define external ccc i1 @"type_enum.season.=<0>"(i2 %"$left#0", i2 %"$right#0"){
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external ccc  i1 @"type_enum.season.=<0>"(i2  %"$left#0", i2  %"$right#0")    {
 entry:
-  %"$$#0" = icmp eq i2 %"$left#0", %"$right#0"
-  ret i1 %"$$#0"
+  %"$$#0" = icmp eq i2 %"$left#0", %"$right#0" 
+  ret i1 %"$$#0" 
 }
 
-define external ccc i2 @"type_enum.season.autumn<0>"(){
+
+define external ccc  i2 @"type_enum.season.autumn<0>"()    {
 entry:
-  ret i2 3
+  ret i2 3 
 }
 
-define external ccc i2 @"type_enum.season.spring<0>"(){
+
+define external ccc  i2 @"type_enum.season.spring<0>"()    {
 entry:
-  ret i2 1
+  ret i2 1 
 }
 
-define external ccc i2 @"type_enum.season.summer<0>"(){
+
+define external ccc  i2 @"type_enum.season.summer<0>"()    {
 entry:
-  ret i2 2
+  ret i2 2 
 }
 
-define external ccc i2 @"type_enum.season.winter<0>"(){
+
+define external ccc  i2 @"type_enum.season.winter<0>"()    {
 entry:
-  ret i2 0
+  ret i2 0 
 }

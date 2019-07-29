@@ -43,58 +43,71 @@ bar > public (1 calls)
 ; ModuleID = 'alias_data'
 
 
-declare external ccc void @"student.printStudent<0>"(i64*)
+ 
 
-declare external ccc void @putchar(i8)
 
-declare external ccc void @print_string(i8*)
+declare external ccc  void @"student.printStudent<0>"(i64*)    
 
-@alias_data.15 = constant [9 x i8] c"student2\00"
 
-@alias_data.14 = constant [9 x i8] c"student1\00"
+declare external ccc  void @putchar(i8)    
 
-@alias_data.5 = constant [12 x i8] c"intro to cs\00"
 
-declare external ccc i8* @wybe_malloc(i32)
+declare external ccc  void @print_string(i8*)    
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
-define external ccc void @"alias_data.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
+@alias_data.15 =    constant [9 x i8] c"student2\00"
+
+
+@alias_data.14 =    constant [9 x i8] c"student1\00"
+
+
+@alias_data.5 =    constant [12 x i8] c"intro to cs\00"
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external ccc  void @"alias_data.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
-  tail call ccc void @"alias_data.bar<0>"()
-  ret void
+  tail call ccc  void  @"alias_data.bar<0>"()  
+  ret void 
 }
 
-define external ccc i64* @"alias_data.backup<0>"(i64* %"student1#0"){
+
+define external ccc  i64* @"alias_data.backup<0>"(i64*  %"student1#0")    {
 entry:
-  ret i64* %"student1#0"
+  ret i64* %"student1#0" 
 }
 
-define external ccc void @"alias_data.bar<0>"(){
+
+define external ccc  void @"alias_data.bar<0>"()    {
 entry:
-  %1 = tail call ccc i8* @wybe_malloc(i32 16)
-  %2 = bitcast i8* %1 to i64*
-  %3 = bitcast i64* %2 to i64*
-  %4 = getelementptr i64, i64* %3, i64 0
-  store i64 101, i64* %4
-  %6 = bitcast i64* %2 to i8**
-  %7 = getelementptr i8*, i8** %6, i64 8
-  store i8* getelementptr inbounds ([12 x i8], [12 x i8]* @alias_data.5, i32 0, i32 0), i8** %7
-  %8 = tail call ccc i8* @wybe_malloc(i32 16)
-  %9 = bitcast i8* %8 to i64*
-  %10 = bitcast i64* %9 to i64*
-  %11 = getelementptr i64, i64* %10, i64 0
-  store i64 9401, i64* %11
-  %12 = bitcast i64* %9 to i64**
-  %13 = getelementptr i64*, i64** %12, i64 1
-  store i64* %2, i64** %13
-  tail call ccc void @print_string(i8* getelementptr inbounds ([9 x i8], [9 x i8]* @alias_data.14, i32 0, i32 0))
-  tail call ccc void @putchar(i8 10)
-  tail call ccc void @"student.printStudent<0>"(i64* %9)
-  tail call ccc void @print_string(i8* getelementptr inbounds ([9 x i8], [9 x i8]* @alias_data.15, i32 0, i32 0))
-  tail call ccc void @putchar(i8 10)
-  tail call ccc void @"student.printStudent<0>"(i64* %9)
-  ret void
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  16)  
+  %2 = bitcast i8* %1 to i64* 
+  %3 = bitcast i64* %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 101, i64* %4 
+  %6 = bitcast i64* %2 to i8** 
+  %7 = getelementptr  i8*, i8** %6, i64 8 
+  store  i8* getelementptr inbounds ([12 x i8], [12 x i8]* @alias_data.5, i32 0, i32 0), i8** %7 
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  16)  
+  %9 = bitcast i8* %8 to i64* 
+  %10 = bitcast i64* %9 to i64* 
+  %11 = getelementptr  i64, i64* %10, i64 0 
+  store  i64 9401, i64* %11 
+  %12 = bitcast i64* %9 to i64** 
+  %13 = getelementptr  i64*, i64** %12, i64 1 
+  store  i64* %2, i64** %13 
+  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([9 x i8], [9 x i8]* @alias_data.14, i32 0, i32 0))  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call ccc  void  @"student.printStudent<0>"(i64*  %9)  
+  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([9 x i8], [9 x i8]* @alias_data.15, i32 0, i32 0))  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call ccc  void  @"student.printStudent<0>"(i64*  %9)  
+  ret void 
 }
 --------------------------------------------------
  Module student
@@ -158,72 +171,85 @@ printStudent > public (1 calls)
 ; ModuleID = 'student'
 
 
-@student.5 = constant [24 x i8] c"Declarative Programming\00"
+ 
 
-declare external ccc void @putchar(i8)
 
-declare external ccc void @print_string(i8*)
+@student.5 =    constant [24 x i8] c"Declarative Programming\00"
 
-declare external ccc void @print_int(i64)
 
-@student.26 = constant [14 x i8] c"course name: \00"
+declare external ccc  void @putchar(i8)    
 
-@student.22 = constant [14 x i8] c"course code: \00"
 
-@student.14 = constant [13 x i8] c"student id: \00"
+declare external ccc  void @print_string(i8*)    
 
-declare external ccc i8* @wybe_malloc(i32)
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+declare external ccc  void @print_int(i64)    
 
-define external ccc void @"student.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
+
+@student.26 =    constant [14 x i8] c"course name: \00"
+
+
+@student.22 =    constant [14 x i8] c"course code: \00"
+
+
+@student.14 =    constant [13 x i8] c"student id: \00"
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external ccc  void @"student.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
-  %1 = tail call ccc i8* @wybe_malloc(i32 16)
-  %2 = bitcast i8* %1 to i64*
-  %3 = bitcast i64* %2 to i64*
-  %4 = getelementptr i64, i64* %3, i64 0
-  store i64 90048, i64* %4
-  %6 = bitcast i64* %2 to i8**
-  %7 = getelementptr i8*, i8** %6, i64 8
-  store i8* getelementptr inbounds ([24 x i8], [24 x i8]* @student.5, i32 0, i32 0), i8** %7
-  %8 = tail call ccc i8* @wybe_malloc(i32 16)
-  %9 = bitcast i8* %8 to i64*
-  %10 = bitcast i64* %9 to i64*
-  %11 = getelementptr i64, i64* %10, i64 0
-  store i64 12345, i64* %11
-  %12 = bitcast i64* %9 to i64**
-  %13 = getelementptr i64*, i64** %12, i64 1
-  store i64* %2, i64** %13
-  tail call ccc void @"student.printStudent<0>"(i64* %9)
-  ret void
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  16)  
+  %2 = bitcast i8* %1 to i64* 
+  %3 = bitcast i64* %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 90048, i64* %4 
+  %6 = bitcast i64* %2 to i8** 
+  %7 = getelementptr  i8*, i8** %6, i64 8 
+  store  i8* getelementptr inbounds ([24 x i8], [24 x i8]* @student.5, i32 0, i32 0), i8** %7 
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  16)  
+  %9 = bitcast i8* %8 to i64* 
+  %10 = bitcast i64* %9 to i64* 
+  %11 = getelementptr  i64, i64* %10, i64 0 
+  store  i64 12345, i64* %11 
+  %12 = bitcast i64* %9 to i64** 
+  %13 = getelementptr  i64*, i64** %12, i64 1 
+  store  i64* %2, i64** %13 
+  tail call ccc  void  @"student.printStudent<0>"(i64*  %9)  
+  ret void 
 }
 
-define external ccc void @"student.printStudent<0>"(i64* %"stu#0"){
+
+define external ccc  void @"student.printStudent<0>"(i64*  %"stu#0")    {
 entry:
-  tail call ccc void @print_string(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @student.14, i32 0, i32 0))
-  %15 = bitcast i64* %"stu#0" to i64*
-  %16 = getelementptr i64, i64* %15, i64 0
-  %17 = load i64, i64* %16
-  tail call ccc void @print_int(i64 %17)
-  tail call ccc void @putchar(i8 10)
-  %18 = bitcast i64* %"stu#0" to i64**
-  %19 = getelementptr i64*, i64** %18, i64 1
-  %20 = load i64*, i64** %19
-  %21 = inttoptr i64* %20 to i64*
-  tail call ccc void @print_string(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @student.22, i32 0, i32 0))
-  %23 = bitcast i64* %21 to i64*
-  %24 = getelementptr i64, i64* %23, i64 0
-  %25 = load i64, i64* %24
-  tail call ccc void @print_int(i64 %25)
-  tail call ccc void @putchar(i8 10)
-  tail call ccc void @print_string(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @student.26, i32 0, i32 0))
-  %27 = bitcast i64* %21 to i8**
-  %28 = getelementptr i8*, i8** %27, i64 8
-  %29 = load i8*, i8** %28
-  %30 = inttoptr i8* %29 to i8*
-  tail call ccc void @print_string(i8* %30)
-  tail call ccc void @putchar(i8 10)
-  ret void
+  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([13 x i8], [13 x i8]* @student.14, i32 0, i32 0))  
+  %15 = bitcast i64* %"stu#0" to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  %17 = load  i64, i64* %16 
+  tail call ccc  void  @print_int(i64  %17)  
+  tail call ccc  void  @putchar(i8  10)  
+  %18 = bitcast i64* %"stu#0" to i64** 
+  %19 = getelementptr  i64*, i64** %18, i64 1 
+  %20 = load  i64*, i64** %19 
+  %21 = inttoptr i64* %20 to i64* 
+  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([14 x i8], [14 x i8]* @student.22, i32 0, i32 0))  
+  %23 = bitcast i64* %21 to i64* 
+  %24 = getelementptr  i64, i64* %23, i64 0 
+  %25 = load  i64, i64* %24 
+  tail call ccc  void  @print_int(i64  %25)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([14 x i8], [14 x i8]* @student.26, i32 0, i32 0))  
+  %27 = bitcast i64* %21 to i8** 
+  %28 = getelementptr  i8*, i8** %27, i64 8 
+  %29 = load  i8*, i8** %28 
+  %30 = inttoptr i8* %29 to i8* 
+  tail call ccc  void  @print_string(i8*  %30)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
 }
 --------------------------------------------------
  Module student.course([])
@@ -291,108 +317,121 @@ name > public inline (0 calls)
 ; ModuleID = 'student.course'
 
 
-declare external ccc i1 @"wybe.int.=<0>"(i64, i64)
+ 
 
-declare external ccc i64 @strcmp(i8*, i8*)
 
-declare external ccc i8* @wybe_malloc(i32)
+declare external ccc  i1 @"wybe.int.=<0>"(i64, i64)    
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
-define external ccc i1 @"student.course.=<0>"(i64* %"$left#0", i64* %"$right#0"){
+declare external ccc  i64 @strcmp(i8*, i8*)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external ccc  i1 @"student.course.=<0>"(i64*  %"$left#0", i64*  %"$right#0")    {
 entry:
-  %1 = bitcast i64* %"$left#0" to i64*
-  %2 = getelementptr i64, i64* %1, i64 0
-  %3 = load i64, i64* %2
-  %4 = bitcast i64* %"$left#0" to i8**
-  %5 = getelementptr i8*, i8** %4, i64 8
-  %6 = load i8*, i8** %5
-  %7 = inttoptr i8* %6 to i8*
-  %8 = bitcast i64* %"$right#0" to i64*
-  %9 = getelementptr i64, i64* %8, i64 0
-  %10 = load i64, i64* %9
-  %11 = bitcast i64* %"$right#0" to i8**
-  %12 = getelementptr i8*, i8** %11, i64 8
-  %13 = load i8*, i8** %12
-  %14 = inttoptr i8* %13 to i8*
-  %"tmp$2#0" = icmp eq i64 %3, %10
-  br i1 %"tmp$2#0", label %if.then, label %if.else
+  %1 = bitcast i64* %"$left#0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = bitcast i64* %"$left#0" to i8** 
+  %5 = getelementptr  i8*, i8** %4, i64 8 
+  %6 = load  i8*, i8** %5 
+  %7 = inttoptr i8* %6 to i8* 
+  %8 = bitcast i64* %"$right#0" to i64* 
+  %9 = getelementptr  i64, i64* %8, i64 0 
+  %10 = load  i64, i64* %9 
+  %11 = bitcast i64* %"$right#0" to i8** 
+  %12 = getelementptr  i8*, i8** %11, i64 8 
+  %13 = load  i8*, i8** %12 
+  %14 = inttoptr i8* %13 to i8* 
+  %"tmp$2#0" = icmp eq i64 %3, %10 
+  br i1 %"tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$10#0" = tail call ccc i64 @strcmp(i8* %7, i8* %14)
-  %"$$#0" = tail call ccc i1 @"wybe.int.=<0>"(i64 %"tmp$10#0", i64 0)
-  ret i1 %"$$#0"
+  %"tmp$10#0" = tail call ccc  i64  @strcmp(i8*  %7, i8*  %14)  
+  %"$$#0" = tail call ccc  i1  @"wybe.int.=<0>"(i64  %"tmp$10#0", i64  0)  
+  ret i1 %"$$#0" 
 if.else:
-  ret i1 0
+  ret i1 0 
 }
 
-define external ccc i64 @"student.course.code<0>"(i64* %"$rec#0"){
+
+define external ccc  i64 @"student.course.code<0>"(i64*  %"$rec#0")    {
 entry:
-  %15 = bitcast i64* %"$rec#0" to i64*
-  %16 = getelementptr i64, i64* %15, i64 0
-  %17 = load i64, i64* %16
-  ret i64 %17
+  %15 = bitcast i64* %"$rec#0" to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  %17 = load  i64, i64* %16 
+  ret i64 %17 
 }
 
-define external ccc i64* @"student.course.code<1>"(i64* %"$rec#0", i64 %"$field#0"){
+
+define external ccc  i64* @"student.course.code<1>"(i64*  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %18 = tail call ccc i8* @wybe_malloc(i32 16)
-  %19 = bitcast i8* %18 to i64*
-  %20 = bitcast i64* %19 to i8*
-  %21 = bitcast i64* %"$rec#0" to i8*
-  tail call ccc void @llvm.memcpy.p0i8.p0i8.i32(i8* %20, i8* %21, i32 16, i1 0)
-  %22 = bitcast i64* %19 to i64*
-  %23 = getelementptr i64, i64* %22, i64 0
-  store i64 %"$field#0", i64* %23
-  ret i64* %19
+  %18 = tail call ccc  i8*  @wybe_malloc(i32  16)  
+  %19 = bitcast i8* %18 to i64* 
+  %20 = bitcast i64* %19 to i8* 
+  %21 = bitcast i64* %"$rec#0" to i8* 
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %20, i8*  %21, i32  16, i1  0)  
+  %22 = bitcast i64* %19 to i64* 
+  %23 = getelementptr  i64, i64* %22, i64 0 
+  store  i64 %"$field#0", i64* %23 
+  ret i64* %19 
 }
 
-define external ccc i64* @"student.course.course<0>"(i64 %"code#0", i8* %"name#0"){
+
+define external ccc  i64* @"student.course.course<0>"(i64  %"code#0", i8*  %"name#0")    {
 entry:
-  %24 = tail call ccc i8* @wybe_malloc(i32 16)
-  %25 = bitcast i8* %24 to i64*
-  %26 = bitcast i64* %25 to i64*
-  %27 = getelementptr i64, i64* %26, i64 0
-  store i64 %"code#0", i64* %27
-  %28 = bitcast i64* %25 to i8**
-  %29 = getelementptr i8*, i8** %28, i64 8
-  store i8* %"name#0", i8** %29
-  ret i64* %25
+  %24 = tail call ccc  i8*  @wybe_malloc(i32  16)  
+  %25 = bitcast i8* %24 to i64* 
+  %26 = bitcast i64* %25 to i64* 
+  %27 = getelementptr  i64, i64* %26, i64 0 
+  store  i64 %"code#0", i64* %27 
+  %28 = bitcast i64* %25 to i8** 
+  %29 = getelementptr  i8*, i8** %28, i64 8 
+  store  i8* %"name#0", i8** %29 
+  ret i64* %25 
 }
 
-define external ccc {i64, i8*} @"student.course.course<1>"(i64* %"$#0"){
+
+define external ccc  {i64, i8*} @"student.course.course<1>"(i64*  %"$#0")    {
 entry:
-  %30 = bitcast i64* %"$#0" to i64*
-  %31 = getelementptr i64, i64* %30, i64 0
-  %32 = load i64, i64* %31
-  %33 = bitcast i64* %"$#0" to i8**
-  %34 = getelementptr i8*, i8** %33, i64 8
-  %35 = load i8*, i8** %34
-  %36 = inttoptr i8* %35 to i8*
-  %37 = insertvalue {i64, i8*} undef, i64 %32, 0
-  %38 = insertvalue {i64, i8*} %37, i8* %36, 1
-  ret {i64, i8*} %38
+  %30 = bitcast i64* %"$#0" to i64* 
+  %31 = getelementptr  i64, i64* %30, i64 0 
+  %32 = load  i64, i64* %31 
+  %33 = bitcast i64* %"$#0" to i8** 
+  %34 = getelementptr  i8*, i8** %33, i64 8 
+  %35 = load  i8*, i8** %34 
+  %36 = inttoptr i8* %35 to i8* 
+  %37 = insertvalue {i64, i8*} undef, i64 %32, 0 
+  %38 = insertvalue {i64, i8*} %37, i8* %36, 1 
+  ret {i64, i8*} %38 
 }
 
-define external ccc i8* @"student.course.name<0>"(i64* %"$rec#0"){
+
+define external ccc  i8* @"student.course.name<0>"(i64*  %"$rec#0")    {
 entry:
-  %39 = bitcast i64* %"$rec#0" to i8**
-  %40 = getelementptr i8*, i8** %39, i64 8
-  %41 = load i8*, i8** %40
-  %42 = inttoptr i8* %41 to i8*
-  ret i8* %42
+  %39 = bitcast i64* %"$rec#0" to i8** 
+  %40 = getelementptr  i8*, i8** %39, i64 8 
+  %41 = load  i8*, i8** %40 
+  %42 = inttoptr i8* %41 to i8* 
+  ret i8* %42 
 }
 
-define external ccc i64* @"student.course.name<1>"(i64* %"$rec#0", i8* %"$field#0"){
+
+define external ccc  i64* @"student.course.name<1>"(i64*  %"$rec#0", i8*  %"$field#0")    {
 entry:
-  %43 = tail call ccc i8* @wybe_malloc(i32 16)
-  %44 = bitcast i8* %43 to i64*
-  %45 = bitcast i64* %44 to i8*
-  %46 = bitcast i64* %"$rec#0" to i8*
-  tail call ccc void @llvm.memcpy.p0i8.p0i8.i32(i8* %45, i8* %46, i32 16, i1 0)
-  %47 = bitcast i64* %44 to i8**
-  %48 = getelementptr i8*, i8** %47, i64 8
-  store i8* %"$field#0", i8** %48
-  ret i64* %44
+  %43 = tail call ccc  i8*  @wybe_malloc(i32  16)  
+  %44 = bitcast i8* %43 to i64* 
+  %45 = bitcast i64* %44 to i8* 
+  %46 = bitcast i64* %"$rec#0" to i8* 
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %45, i8*  %46, i32  16, i1  0)  
+  %47 = bitcast i64* %44 to i8** 
+  %48 = getelementptr  i8*, i8** %47, i64 8 
+  store  i8* %"$field#0", i8** %48 
+  ret i64* %44 
 }
 --------------------------------------------------
  Module student.student([])
@@ -470,116 +509,129 @@ student > public inline (4 calls)
 ; ModuleID = 'student.student'
 
 
-declare external ccc i1 @"wybe.string.=<0>"(i8*, i8*)
+ 
 
-declare external ccc i1 @"wybe.int.=<0>"(i64, i64)
 
-declare external ccc i8* @wybe_malloc(i32)
+declare external ccc  i1 @"wybe.string.=<0>"(i8*, i8*)    
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
-define external ccc i1 @"student.student.=<0>"(i64* %"$left#0", i64* %"$right#0"){
+declare external ccc  i1 @"wybe.int.=<0>"(i64, i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external ccc  i1 @"student.student.=<0>"(i64*  %"$left#0", i64*  %"$right#0")    {
 entry:
-  %1 = bitcast i64* %"$left#0" to i64*
-  %2 = getelementptr i64, i64* %1, i64 0
-  %3 = load i64, i64* %2
-  %4 = bitcast i64* %"$left#0" to i64**
-  %5 = getelementptr i64*, i64** %4, i64 1
-  %6 = load i64*, i64** %5
-  %7 = inttoptr i64* %6 to i64*
-  %8 = bitcast i64* %"$right#0" to i64*
-  %9 = getelementptr i64, i64* %8, i64 0
-  %10 = load i64, i64* %9
-  %11 = bitcast i64* %"$right#0" to i64**
-  %12 = getelementptr i64*, i64** %11, i64 1
-  %13 = load i64*, i64** %12
-  %14 = inttoptr i64* %13 to i64*
-  %"tmp$2#0" = icmp eq i64 %3, %10
-  br i1 %"tmp$2#0", label %if.then, label %if.else
+  %1 = bitcast i64* %"$left#0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = bitcast i64* %"$left#0" to i64** 
+  %5 = getelementptr  i64*, i64** %4, i64 1 
+  %6 = load  i64*, i64** %5 
+  %7 = inttoptr i64* %6 to i64* 
+  %8 = bitcast i64* %"$right#0" to i64* 
+  %9 = getelementptr  i64, i64* %8, i64 0 
+  %10 = load  i64, i64* %9 
+  %11 = bitcast i64* %"$right#0" to i64** 
+  %12 = getelementptr  i64*, i64** %11, i64 1 
+  %13 = load  i64*, i64** %12 
+  %14 = inttoptr i64* %13 to i64* 
+  %"tmp$2#0" = icmp eq i64 %3, %10 
+  br i1 %"tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %15 = tail call ccc {i64, i8*} @"student.course.course<1>"(i64* %7)
-  %16 = extractvalue {i64, i8*} %15, 0
-  %17 = extractvalue {i64, i8*} %15, 1
-  %18 = tail call ccc {i64, i8*} @"student.course.course<1>"(i64* %14)
-  %19 = extractvalue {i64, i8*} %18, 0
-  %20 = extractvalue {i64, i8*} %18, 1
-  %"tmp$16#0" = tail call ccc i1 @"wybe.int.=<0>"(i64 %16, i64 %19)
-  br i1 %"tmp$16#0", label %if.then1, label %if.else1
+  %15 = tail call ccc  {i64, i8*}  @"student.course.course<1>"(i64*  %7)  
+  %16 = extractvalue {i64, i8*} %15, 0 
+  %17 = extractvalue {i64, i8*} %15, 1 
+  %18 = tail call ccc  {i64, i8*}  @"student.course.course<1>"(i64*  %14)  
+  %19 = extractvalue {i64, i8*} %18, 0 
+  %20 = extractvalue {i64, i8*} %18, 1 
+  %"tmp$16#0" = tail call ccc  i1  @"wybe.int.=<0>"(i64  %16, i64  %19)  
+  br i1 %"tmp$16#0", label %if.then1, label %if.else1 
 if.else:
-  ret i1 0
+  ret i1 0 
 if.then1:
-  %"tmp$3#0" = tail call ccc i1 @"wybe.string.=<0>"(i8* %17, i8* %20)
-  ret i1 %"tmp$3#0"
+  %"tmp$3#0" = tail call ccc  i1  @"wybe.string.=<0>"(i8*  %17, i8*  %20)  
+  ret i1 %"tmp$3#0" 
 if.else1:
-  ret i1 %"tmp$16#0"
+  ret i1 %"tmp$16#0" 
 }
 
-define external ccc i64 @"student.student.id<0>"(i64* %"$rec#0"){
+
+define external ccc  i64 @"student.student.id<0>"(i64*  %"$rec#0")    {
 entry:
-  %21 = bitcast i64* %"$rec#0" to i64*
-  %22 = getelementptr i64, i64* %21, i64 0
-  %23 = load i64, i64* %22
-  ret i64 %23
+  %21 = bitcast i64* %"$rec#0" to i64* 
+  %22 = getelementptr  i64, i64* %21, i64 0 
+  %23 = load  i64, i64* %22 
+  ret i64 %23 
 }
 
-define external ccc i64* @"student.student.id<1>"(i64* %"$rec#0", i64 %"$field#0"){
+
+define external ccc  i64* @"student.student.id<1>"(i64*  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %24 = tail call ccc i8* @wybe_malloc(i32 16)
-  %25 = bitcast i8* %24 to i64*
-  %26 = bitcast i64* %25 to i8*
-  %27 = bitcast i64* %"$rec#0" to i8*
-  tail call ccc void @llvm.memcpy.p0i8.p0i8.i32(i8* %26, i8* %27, i32 16, i1 0)
-  %28 = bitcast i64* %25 to i64*
-  %29 = getelementptr i64, i64* %28, i64 0
-  store i64 %"$field#0", i64* %29
-  ret i64* %25
+  %24 = tail call ccc  i8*  @wybe_malloc(i32  16)  
+  %25 = bitcast i8* %24 to i64* 
+  %26 = bitcast i64* %25 to i8* 
+  %27 = bitcast i64* %"$rec#0" to i8* 
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %26, i8*  %27, i32  16, i1  0)  
+  %28 = bitcast i64* %25 to i64* 
+  %29 = getelementptr  i64, i64* %28, i64 0 
+  store  i64 %"$field#0", i64* %29 
+  ret i64* %25 
 }
 
-define external ccc i64* @"student.student.major<0>"(i64* %"$rec#0"){
+
+define external ccc  i64* @"student.student.major<0>"(i64*  %"$rec#0")    {
 entry:
-  %30 = bitcast i64* %"$rec#0" to i64**
-  %31 = getelementptr i64*, i64** %30, i64 1
-  %32 = load i64*, i64** %31
-  %33 = inttoptr i64* %32 to i64*
-  ret i64* %33
+  %30 = bitcast i64* %"$rec#0" to i64** 
+  %31 = getelementptr  i64*, i64** %30, i64 1 
+  %32 = load  i64*, i64** %31 
+  %33 = inttoptr i64* %32 to i64* 
+  ret i64* %33 
 }
 
-define external ccc i64* @"student.student.major<1>"(i64* %"$rec#0", i64* %"$field#0"){
+
+define external ccc  i64* @"student.student.major<1>"(i64*  %"$rec#0", i64*  %"$field#0")    {
 entry:
-  %34 = tail call ccc i8* @wybe_malloc(i32 16)
-  %35 = bitcast i8* %34 to i64*
-  %36 = bitcast i64* %35 to i8*
-  %37 = bitcast i64* %"$rec#0" to i8*
-  tail call ccc void @llvm.memcpy.p0i8.p0i8.i32(i8* %36, i8* %37, i32 16, i1 0)
-  %38 = bitcast i64* %35 to i64**
-  %39 = getelementptr i64*, i64** %38, i64 1
-  store i64* %"$field#0", i64** %39
-  ret i64* %35
+  %34 = tail call ccc  i8*  @wybe_malloc(i32  16)  
+  %35 = bitcast i8* %34 to i64* 
+  %36 = bitcast i64* %35 to i8* 
+  %37 = bitcast i64* %"$rec#0" to i8* 
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %36, i8*  %37, i32  16, i1  0)  
+  %38 = bitcast i64* %35 to i64** 
+  %39 = getelementptr  i64*, i64** %38, i64 1 
+  store  i64* %"$field#0", i64** %39 
+  ret i64* %35 
 }
 
-define external ccc i64* @"student.student.student<0>"(i64 %"id#0", i64* %"major#0"){
+
+define external ccc  i64* @"student.student.student<0>"(i64  %"id#0", i64*  %"major#0")    {
 entry:
-  %40 = tail call ccc i8* @wybe_malloc(i32 16)
-  %41 = bitcast i8* %40 to i64*
-  %42 = bitcast i64* %41 to i64*
-  %43 = getelementptr i64, i64* %42, i64 0
-  store i64 %"id#0", i64* %43
-  %44 = bitcast i64* %41 to i64**
-  %45 = getelementptr i64*, i64** %44, i64 1
-  store i64* %"major#0", i64** %45
-  ret i64* %41
+  %40 = tail call ccc  i8*  @wybe_malloc(i32  16)  
+  %41 = bitcast i8* %40 to i64* 
+  %42 = bitcast i64* %41 to i64* 
+  %43 = getelementptr  i64, i64* %42, i64 0 
+  store  i64 %"id#0", i64* %43 
+  %44 = bitcast i64* %41 to i64** 
+  %45 = getelementptr  i64*, i64** %44, i64 1 
+  store  i64* %"major#0", i64** %45 
+  ret i64* %41 
 }
 
-define external ccc {i64, i64*} @"student.student.student<1>"(i64* %"$#0"){
+
+define external ccc  {i64, i64*} @"student.student.student<1>"(i64*  %"$#0")    {
 entry:
-  %46 = bitcast i64* %"$#0" to i64*
-  %47 = getelementptr i64, i64* %46, i64 0
-  %48 = load i64, i64* %47
-  %49 = bitcast i64* %"$#0" to i64**
-  %50 = getelementptr i64*, i64** %49, i64 1
-  %51 = load i64*, i64** %50
-  %52 = inttoptr i64* %51 to i64*
-  %53 = insertvalue {i64, i64*} undef, i64 %48, 0
-  %54 = insertvalue {i64, i64*} %53, i64* %52, 1
-  ret {i64, i64*} %54
+  %46 = bitcast i64* %"$#0" to i64* 
+  %47 = getelementptr  i64, i64* %46, i64 0 
+  %48 = load  i64, i64* %47 
+  %49 = bitcast i64* %"$#0" to i64** 
+  %50 = getelementptr  i64*, i64** %49, i64 1 
+  %51 = load  i64*, i64** %50 
+  %52 = inttoptr i64* %51 to i64* 
+  %53 = insertvalue {i64, i64*} undef, i64 %48, 0 
+  %54 = insertvalue {i64, i64*} %53, i64* %52, 1 
+  ret {i64, i64*} %54 
 }

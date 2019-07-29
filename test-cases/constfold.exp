@@ -37,26 +37,34 @@ fortytwo > public inline (0 calls)
 ; ModuleID = 'constfold'
 
 
-declare external ccc i8* @wybe_malloc(i32)
+ 
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
-define external ccc i64 @"constfold.fold_add<0>"(){
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external ccc  i64 @"constfold.fold_add<0>"()    {
 entry:
-  ret i64 42
+  ret i64 42 
 }
 
-define external ccc i64 @"constfold.fold_mult<0>"(){
+
+define external ccc  i64 @"constfold.fold_mult<0>"()    {
 entry:
-  ret i64 42
+  ret i64 42 
 }
 
-define external ccc i64 @"constfold.fold_test<0>"(){
+
+define external ccc  i64 @"constfold.fold_test<0>"()    {
 entry:
-  ret i64 42
+  ret i64 42 
 }
 
-define external ccc i64 @"constfold.fortytwo<0>"(){
+
+define external ccc  i64 @"constfold.fortytwo<0>"()    {
 entry:
-  ret i64 42
+  ret i64 42 
 }

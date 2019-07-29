@@ -26,14 +26,19 @@ onetwothree > public inline (1 calls)
 ; ModuleID = 'multi_out'
 
 
-declare external ccc i8* @wybe_malloc(i32)
+ 
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
-define external ccc {i64, i64, i64} @"multi_out.onetwothree<0>"(){
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external ccc  {i64, i64, i64} @"multi_out.onetwothree<0>"()    {
 entry:
-  %1 = insertvalue {i64, i64, i64} undef, i64 1, 0
-  %2 = insertvalue {i64, i64, i64} %1, i64 2, 1
-  %3 = insertvalue {i64, i64, i64} %2, i64 3, 2
-  ret {i64, i64, i64} %3
+  %1 = insertvalue {i64, i64, i64} undef, i64 1, 0 
+  %2 = insertvalue {i64, i64, i64} %1, i64 2, 1 
+  %3 = insertvalue {i64, i64, i64} %2, i64 3, 2 
+  ret {i64, i64, i64} %3 
 }

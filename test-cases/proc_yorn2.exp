@@ -49,43 +49,54 @@ yorn > public inline (0 calls)
 ; ModuleID = 'proc_yorn2'
 
 
-declare external ccc void @putchar(i8)
+ 
 
-declare external ccc void @print_string(i8*)
 
-declare external ccc i8 @read_char()
+declare external ccc  void @putchar(i8)    
 
-@proc_yorn2.2 = constant [29 x i8] c"Please answer 'yes' or 'no'.\00"
 
-@proc_yorn2.1 = constant [8 x i8] c" (y/n) \00"
+declare external ccc  void @print_string(i8*)    
 
-declare external ccc i8* @wybe_malloc(i32)
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+declare external ccc  i8 @read_char()    
 
-define external ccc i1 @"proc_yorn2.gen$1<0>"(i8* %"prompt#0"){
+
+@proc_yorn2.2 =    constant [29 x i8] c"Please answer 'yes' or 'no'.\00"
+
+
+@proc_yorn2.1 =    constant [8 x i8] c" (y/n) \00"
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external ccc  i1 @"proc_yorn2.gen$1<0>"(i8*  %"prompt#0")    {
 entry:
-  tail call ccc void @print_string(i8* %"prompt#0")
-  tail call ccc void @print_string(i8* getelementptr inbounds ([8 x i8], [8 x i8]* @proc_yorn2.1, i32 0, i32 0))
-  %"response#0" = tail call ccc i8 @read_char()
-  %"tmp$0#0" = icmp eq i8 %"response#0", 89
-  br i1 %"tmp$0#0", label %if.then, label %if.else
+  tail call ccc  void  @print_string(i8*  %"prompt#0")  
+  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([8 x i8], [8 x i8]* @proc_yorn2.1, i32 0, i32 0))  
+  %"response#0" = tail call ccc  i8  @read_char()  
+  %"tmp$0#0" = icmp eq i8 %"response#0", 89 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
 if.then:
-  ret i64 1
+  ret i64 1 
 if.else:
-  %"tmp$2#0" = icmp eq i8 %"response#0", 78
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1
+  %"tmp$2#0" = icmp eq i8 %"response#0", 78 
+  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
 if.then1:
-  ret i64 0
+  ret i64 0 
 if.else1:
-  tail call ccc void @print_string(i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_yorn2.2, i32 0, i32 0))
-  tail call ccc void @putchar(i8 10)
-  %"result#1" = tail call ccc i1 @"proc_yorn2.gen$1<0>"(i8* %"prompt#0")
-  ret i1 %"tmp$2#0"
+  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([29 x i8], [29 x i8]* @proc_yorn2.2, i32 0, i32 0))  
+  tail call ccc  void  @putchar(i8  10)  
+  %"result#1" = tail call ccc  i1  @"proc_yorn2.gen$1<0>"(i8*  %"prompt#0")  
+  ret i1 %"tmp$2#0" 
 }
 
-define external ccc i1 @"proc_yorn2.yorn<0>"(i8* %"prompt#0"){
+
+define external ccc  i1 @"proc_yorn2.yorn<0>"(i8*  %"prompt#0")    {
 entry:
-  %"result#0" = tail call ccc i1 @"proc_yorn2.gen$1<0>"(i8* %"prompt#0")
-  ret i1 %"result#0"
+  %"result#0" = tail call ccc  i1  @"proc_yorn2.gen$1<0>"(i8*  %"prompt#0")  
+  ret i1 %"result#0" 
 }

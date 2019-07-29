@@ -40,47 +40,55 @@ gen$2 > inline (1 calls)
 ; ModuleID = 'simple_loop'
 
 
-declare external ccc void @putchar(i8)
+ 
 
-declare external ccc i8 @read_char()
 
-declare external ccc i8* @wybe_malloc(i32)
+declare external ccc  void @putchar(i8)    
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
-define external ccc {i64, i64, i64} @"simple_loop.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
+declare external ccc  i8 @read_char()    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external ccc  {i64, i64, i64} @"simple_loop.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
-  %1 = tail call ccc {i64, i64, i64} @"simple_loop.gen$1<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0")
-  %2 = extractvalue {i64, i64, i64} %1, 0
-  %3 = extractvalue {i64, i64, i64} %1, 1
-  %4 = extractvalue {i64, i64, i64} %1, 2
-  %5 = insertvalue {i64, i64, i64} undef, i64 %2, 0
-  %6 = insertvalue {i64, i64, i64} %5, i64 %3, 1
-  %7 = insertvalue {i64, i64, i64} %6, i64 %4, 2
-  ret {i64, i64, i64} %7
+  %1 = tail call ccc  {i64, i64, i64}  @"simple_loop.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")  
+  %2 = extractvalue {i64, i64, i64} %1, 0 
+  %3 = extractvalue {i64, i64, i64} %1, 1 
+  %4 = extractvalue {i64, i64, i64} %1, 2 
+  %5 = insertvalue {i64, i64, i64} undef, i64 %2, 0 
+  %6 = insertvalue {i64, i64, i64} %5, i64 %3, 1 
+  %7 = insertvalue {i64, i64, i64} %6, i64 %4, 2 
+  ret {i64, i64, i64} %7 
 }
 
-define external ccc {i64, i64, i64} @"simple_loop.gen$1<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
+
+define external ccc  {i64, i64, i64} @"simple_loop.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
-  %"c#0" = tail call ccc i8 @read_char()
-  %"tmp$1#0" = icmp ne i8 %"c#0", 97
-  br i1 %"tmp$1#0", label %if.then, label %if.else
+  %"c#0" = tail call ccc  i8  @read_char()  
+  %"tmp$1#0" = icmp ne i8 %"c#0", 97 
+  br i1 %"tmp$1#0", label %if.then, label %if.else 
 if.then:
-  tail call ccc void @putchar(i8 %"c#0")
-  %8 = tail call ccc {i64, i64, i64} @"simple_loop.gen$1<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0")
-  %9 = extractvalue {i64, i64, i64} %8, 0
-  %10 = extractvalue {i64, i64, i64} %8, 1
-  %11 = extractvalue {i64, i64, i64} %8, 2
-  %12 = insertvalue {i64, i64, i64} undef, i64 %9, 0
-  %13 = insertvalue {i64, i64, i64} %12, i64 %10, 1
-  %14 = insertvalue {i64, i64, i64} %13, i64 %11, 2
-  ret i64 %11
+  tail call ccc  void  @putchar(i8  %"c#0")  
+  %8 = tail call ccc  {i64, i64, i64}  @"simple_loop.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")  
+  %9 = extractvalue {i64, i64, i64} %8, 0 
+  %10 = extractvalue {i64, i64, i64} %8, 1 
+  %11 = extractvalue {i64, i64, i64} %8, 2 
+  %12 = insertvalue {i64, i64, i64} undef, i64 %9, 0 
+  %13 = insertvalue {i64, i64, i64} %12, i64 %10, 1 
+  %14 = insertvalue {i64, i64, i64} %13, i64 %11, 2 
+  ret i64 %11 
 if.else:
-  %15 = insertvalue {i64, i64, i64} undef, i64 %"argc#0", 0
-  %16 = insertvalue {i64, i64, i64} %15, i64 %"argv#0", 1
-  %17 = insertvalue {i64, i64, i64} %16, i64 %"exit_code#0", 2
-  %18 = insertvalue {i64, i64, i64} undef, i64 %"argc#0", 0
-  %19 = insertvalue {i64, i64, i64} %18, i64 %"argv#0", 1
-  %20 = insertvalue {i64, i64, i64} %19, i64 %"exit_code#0", 2
-  ret {i64, i64, i64} %20
+  %15 = insertvalue {i64, i64, i64} undef, i64 %"argc#0", 0 
+  %16 = insertvalue {i64, i64, i64} %15, i64 %"argv#0", 1 
+  %17 = insertvalue {i64, i64, i64} %16, i64 %"exit_code#0", 2 
+  %18 = insertvalue {i64, i64, i64} undef, i64 %"argc#0", 0 
+  %19 = insertvalue {i64, i64, i64} %18, i64 %"argv#0", 1 
+  %20 = insertvalue {i64, i64, i64} %19, i64 %"exit_code#0", 2 
+  ret {i64, i64, i64} %20 
 }

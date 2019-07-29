@@ -26,21 +26,28 @@ quad > public inline (1 calls)
 ; ModuleID = 'func_let'
 
 
-declare external ccc void @print_int(i64)
+ 
 
-declare external ccc i8* @wybe_malloc(i32)
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+declare external ccc  void @print_int(i64)    
 
-define external ccc void @"func_let.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external ccc  void @"func_let.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
-  tail call ccc void @print_int(i64 40)
-  ret void
+  tail call ccc  void  @print_int(i64  40)  
+  ret void 
 }
 
-define external ccc i64 @"func_let.quad<0>"(i64 %"x#0"){
+
+define external ccc  i64 @"func_let.quad<0>"(i64  %"x#0")    {
 entry:
-  %"tmp$0#0" = add i64 %"x#0", %"x#0"
-  %"$#0" = add i64 %"tmp$0#0", %"tmp$0#0"
-  ret i64 %"$#0"
+  %"tmp$0#0" = add   i64 %"x#0", %"x#0" 
+  %"$#0" = add   i64 %"tmp$0#0", %"tmp$0#0" 
+  ret i64 %"$#0" 
 }

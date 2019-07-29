@@ -21,21 +21,29 @@ AFTER EVERYTHING:
 ; ModuleID = 'ccc'
 
 
-declare external ccc void @putchar(i8)
+ 
 
-declare external ccc void @print_string(i8*)
 
-@ccc.1 = constant [10 x i8] c"CCC: Init\00"
+declare external ccc  void @putchar(i8)    
 
-declare external ccc i8* @wybe_malloc(i32)
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+declare external ccc  void @print_string(i8*)    
 
-define external ccc void @"ccc.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
+
+@ccc.1 =    constant [10 x i8] c"CCC: Init\00"
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external ccc  void @"ccc.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
-  tail call ccc void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ccc.1, i32 0, i32 0))
-  tail call ccc void @putchar(i8 10)
-  ret void
+  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([10 x i8], [10 x i8]* @ccc.1, i32 0, i32 0))  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
 }
 --------------------------------------------------
  Module ddd
@@ -58,19 +66,27 @@ entry:
 ; ModuleID = 'ddd'
 
 
-declare external ccc void @putchar(i8)
+ 
 
-declare external ccc void @print_string(i8*)
 
-@ddd.1 = constant [10 x i8] c"DDD: Init\00"
+declare external ccc  void @putchar(i8)    
 
-declare external ccc i8* @wybe_malloc(i32)
 
-declare external ccc void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+declare external ccc  void @print_string(i8*)    
 
-define external ccc void @"ddd.<0>"(i64 %"argc#0", i64 %"argv#0", i64 %"exit_code#0"){
+
+@ddd.1 =    constant [10 x i8] c"DDD: Init\00"
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external ccc  void @"ddd.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
-  tail call ccc void @print_string(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ddd.1, i32 0, i32 0))
-  tail call ccc void @putchar(i8 10)
-  ret void
+  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([10 x i8], [10 x i8]* @ddd.1, i32 0, i32 0))  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
 }
