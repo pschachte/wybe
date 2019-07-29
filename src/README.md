@@ -226,18 +226,22 @@ This is the responsibility of the compileModSCC function.
 
 
 
-This Document
--------------
+# This Document
 
-This document is assembled from the source code of the Wybe compiler.
-Directories are documented if they contain a file named `README`;
-this file should contain a single line describing the purpose of the
-directory.
+This document is assembled from the source code of the Wybe compiler
+by the top-level Makefile with the command
+
+```
+    make src/README.md
+```
+This command should be rerun whenever new modules are added to the
+compiler, or when the documentation is updated, and the resulting
+src/README.md file should be pushed to github.
 
 Haskell source files with extension `.hs` should contain a line beginning
 with `-- Purpose :` followed by a one-line description.
 
-In Haskell source files, any text between markers of the form:
+In Haskell source files, any text between marker lines of the form:
 ```
 -- BEGIN MAJOR DOC
 ```
@@ -248,7 +252,6 @@ and
 will be included in this `README.md` file.  One or more spaces
 may separate the `--` from the `BEGIN` or `END` text.
 
-The documentation should be written in markdown notation (as understood by
-pandoc, with the `grid_tables` option enabled, so tables can be used). Of
+The documentation should be written in markdown notation. Of
 course, `--` comment markers at the beginnings of lines, and up to two following
 spaces, will be stripped before being interpreted as markdown.
