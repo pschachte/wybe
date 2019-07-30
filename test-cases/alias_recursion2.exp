@@ -1,3 +1,4 @@
-Internal error: Semidet proc call {test alias_recursion2.mynode.<1>next(%t1:alias_recursion2.mynode @alias_recursion2:18:18, %?t1:alias_recursion2.mynode @alias_recursion2:18:18, head:alias_recursion2.mynode @alias_recursion2:18:23)} in a Det context
-CallStack (from HasCallStack):
-  error, called at src/AST.hs:2592:17 in main:AST
+Error detected during type checking of module(s) alias_recursion2, alias_recursion2.mynode
+[91mtest-cases/alias_recursion2.wybe:19:13: Calling test proc alias_recursion2.mynode.next<1> in a det context
+[0m[91mtest-cases/alias_recursion2.wybe:18:13: Calling test proc alias_recursion2.mynode.next<1> in a det context
+[0m
