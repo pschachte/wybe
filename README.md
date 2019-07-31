@@ -14,8 +14,9 @@ Note that Wybe has only been ported to Mac OS X so far.
 ### Installing prerequisites
 
 1.  Ensure XCode is installed:
-
-      `xcode-select --install`
+```
+    xcode-select --install
+```
 
     This needs to be redone after each OS upgrade.
 
