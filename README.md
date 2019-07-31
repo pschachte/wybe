@@ -44,7 +44,7 @@ Note that Wybe has only been ported to Mac OS X so far.
 6.  Install dwdiff (for testing)
 
 ```
-    brew install llvm-hs/llvm/llvm-6.0
+    brew install dwdiff
 ```
 
 7.  LaTeX is needed for building the documentation.  We recommend
