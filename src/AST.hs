@@ -1403,9 +1403,9 @@ addPragma prag = do
 -- |A type definition, including the number of type parameters and an
 --  optional source position.
 data TypeDef = TypeDef {
-    typeDefArity :: Int,
-    typeDefRepresentation :: TypeRepresentation,
-    typeDefOptPos :: OptPos
+    typeDefArity :: Int,                          -- number of type params
+    typeDefRepresentation :: TypeRepresentation,  -- low level representation
+    typeDefOptPos :: OptPos                       -- source position of decl
     } deriving (Eq, Generic)
 
 

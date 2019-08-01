@@ -261,6 +261,7 @@ nonConstCtorItems vis typeSpec constCount nonConstCount (placedProto,tag) = do
 -- |The number of bytes occupied by a value of the specified type.  If the
 --  type is boxed, this is the word size.
 fieldSize :: TypeSpec -> Compiler Int
+-- XXX Generalise to allow non-word size fields
 fieldSize _ = return wordSizeBytes
 
 -- |The number of bytes occupied by a value of the specified type.  This is
@@ -411,7 +412,7 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount size tag
                       rectype False,
            Unplaced $ IntValue $ fromIntegral size,
            Unplaced $ IntValue $ fromIntegral offset - tag,
-           Unplaced $ IntValue 0,
+           Unplaced $ IntValue 0,    -- May be changed to 1 by CTGC transform
            Unplaced $ varGet "$field"]])
         pos]
 
