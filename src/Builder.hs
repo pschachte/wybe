@@ -117,7 +117,7 @@ buildTarget force target = do
             stopOnError "BUILDING TARGET"
             -- XXX not quite right:  we shouldn't build an executable if
             -- it already exists and none of the dependencies have changed
-            if not built && targetExists
+            if not built && targetExists && tType /= ExecutableFile
               then logBuild $ "Nothing to be done for target: " ++ target
               else do
                   logBuild $ "Emitting Target: " ++ target
