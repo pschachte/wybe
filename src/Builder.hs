@@ -113,8 +113,11 @@ buildTarget force target = do
             let modname = takeBaseName target
             let dir = takeDirectory target
             built <- buildModuleIfNeeded force [modname] [dir]
+            targetExists <- (liftIO . doesFileExist) target
             stopOnError "BUILDING TARGET"
-            if not built
+            -- XXX not quite right:  we shouldn't build an executable if
+            -- it already exists and none of the dependencies have changed
+            if not built && targetExists && tType /= ExecutableFile
               then logBuild $ "Nothing to be done for target: " ++ target
               else do
                   logBuild $ "Emitting Target: " ++ target
@@ -377,7 +380,7 @@ loadModuleFromObjFile required objfile = do
                                  in comp { underCompilation = ms })
                 mapM_ buildDependency imports
                 _ <- reexitModule
-                logBuild $ "=== <<< Extracted Module put in it's place from "
+                logBuild $ "=== <<< Extracted Module put in its place from "
                            ++ show objfile
                 return True
               [] -> shouldnt "no LPVM extracted from object file"
