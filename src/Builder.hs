@@ -77,6 +77,7 @@ import           Resources                 (resourceCheckMod, transformProcResou
 import           Scanner                   (fileTokens)
 import           System.Directory
 import           System.FilePath
+import           System.Exit
 import           Transform                 (transformProc)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
@@ -93,9 +94,9 @@ buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
     possDirs <- gets (optLibDirs . options)
     -- load library first
-    -- void (buildModuleIfNeeded False ["wybe"] possDirs)
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     showMessages
+    stopOnError "building outputs"
     logDump FinalDump FinalDump "EVERYTHING"
 
 
@@ -108,15 +109,13 @@ buildTarget force target = do
     case tType of
         UnknownFile ->
             Error <!> "Unknown target file type: " ++ target
-        ArchiveFile -> buildArchive target
         _ -> do
             let modname = takeBaseName target
             let dir = takeDirectory target
             built <- buildModuleIfNeeded force [modname] [dir]
             targetExists <- (liftIO . doesFileExist) target
-            stopOnError "BUILDING TARGET"
-            -- XXX not quite right:  we shouldn't build an executable if
-            -- it already exists and none of the dependencies have changed
+            -- XXX not quite right:  we shouldn't build executable or archive
+            -- if it already exists and none of the dependencies have changed
             if not built && targetExists && tType /= ExecutableFile
               then logBuild $ "Nothing to be done for target: " ++ target
               else do
@@ -125,20 +124,20 @@ buildTarget force target = do
                      ObjectFile     -> emitObjectFile [modname] target
                      BitcodeFile    -> emitBitcodeFile [modname] target
                      AssemblyFile   -> emitAssemblyFile [modname] target
+                     ArchiveFile    -> buildArchive target
                      ExecutableFile -> buildExecutable [modname] target
-                     other -> nyi $ "output file type " ++ show other
+                     other          -> nyi $ "output file type " ++ show other
                   whenLogging Emit $ logLLVMString [modname]
 
 
 -- |Compile or load a module dependency.
-buildDependency :: ModSpec -> Compiler ()
+buildDependency :: ModSpec -> Compiler Bool
 buildDependency modspec = do
     logBuild $ "Load dependency: " ++ showModSpec modspec
     force <- option optForceAll
     possDirs <- gets (optLibDirs . options)
     localDir <- getDirectory
-    _ <- buildModuleIfNeeded force modspec (localDir:possDirs)
-    return ()
+    buildModuleIfNeeded force modspec (localDir:possDirs)
 
 
 -- | Run compilation passes on a single module specified by [modspec] resulting
@@ -152,6 +151,9 @@ buildModuleIfNeeded :: Bool    -- ^Force compilation of this module
                               -- actually needed to be compiled
 buildModuleIfNeeded force modspec possDirs = do
     loading <- gets (List.elem modspec . List.map modSpec . underCompilation)
+    let clash kind1 f1 kind2 f2 = do
+          Error <!> kind1 ++ " " ++ f1 ++ " and "
+                    ++ kind2 ++ " " ++ f2 ++ " clash. There can only be one!"
     if loading
       then return False -- Already loading it; we'll handle it later
       else do
@@ -173,32 +175,24 @@ buildModuleIfNeeded force modspec possDirs = do
                     return False
 
                 -- only object file exists
-                ModuleSource Nothing (Just objfile) Nothing _ -> do
+                ModuleSource Nothing (Just objfile) Nothing Nothing -> do
                     loaded <- loadModuleFromObjFile modspec objfile
-                    if not loaded
+                    unless loaded $ do
                         -- if extraction failed, it is uncrecoverable now
-                        then do
                         let err = "Object file " ++ objfile ++
                                   " yielded no LPVM modules for " ++
                                   showModSpec modspec ++ "."
                         Error <!> "No other options to pursue."
                         Error <!> err
-                        stopOnError "Building only object file"
-                        return False
-                        -- extraction successful, no need to build
-                        else return False
+                    return False
 
-
-                ModuleSource (Just srcfile) Nothing _ _ -> do
+                ModuleSource (Just srcfile) Nothing Nothing Nothing -> do
                     -- only source file exists
                     buildModule modspec srcfile
                     return True
 
-                ModuleSource Nothing _ (Just dir) _ -> do
-                    logBuild $ "Modname for directory: " ++ showModSpec modspec
-                    buildDirectory dir modspec
-
-                ModuleSource (Just srcfile) (Just objfile) _ _ -> do
+                ModuleSource (Just srcfile) (Just objfile) Nothing Nothing -> do
+                    -- both source and object exist:  rebuild if necessary
                     srcDate <- (liftIO . getModificationTime) srcfile
                     dstDate <- (liftIO . getModificationTime) objfile
                     if force || srcDate > dstDate
@@ -215,6 +209,29 @@ buildModuleIfNeeded force modspec possDirs = do
                             buildModule modspec srcfile
                         return $ not loaded
 
+                ModuleSource Nothing Nothing (Just dir) _ -> do
+                    -- directory exists:  rebuild contents if necessary
+                    logBuild $ "Modname for directory: " ++ showModSpec modspec
+                    buildDirectory dir modspec
+
+                -- Error cases:
+
+                ModuleSource (Just srcfile) Nothing (Just dir) _ -> do
+                    clash "Directory" dir "source file" srcfile
+                    return False
+
+                ModuleSource (Just srcfile) Nothing _ (Just archive) -> do
+                    clash "Archive" archive "source file" srcfile
+                    return False
+
+                ModuleSource Nothing (Just objfile) (Just dir) _ -> do
+                    clash "Directory" dir "object file" objfile
+                    return False
+
+                ModuleSource Nothing (Just objfile) _ (Just archive) -> do
+                    clash "Archive" archive "object file" objfile
+                    return False
+
                 _ -> shouldnt "inconsistent file existence"
 
 
@@ -227,9 +244,12 @@ buildModule :: ModSpec -> FilePath -> Compiler ()
 buildModule mspec srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
     -- let parseTree = parse tokens
-    let parseTree = either (error . ("Syntax Error: " ++) . show) id $
-            parseWybe tokens srcfile
-    compileModule srcfile mspec Nothing parseTree
+    let parseTree = parseWybe tokens srcfile
+    either (\er -> do
+               liftIO $ putStrLn $ "Syntax Error: " ++ show er
+               liftIO exitFailure)
+           (compileModule srcfile mspec Nothing)
+           parseTree
     -- XXX Rethink parse tree hashing
     -- let currHash = hashItems parseTree
     -- extractedHash <- extractedItemsHash mspec
@@ -378,7 +398,7 @@ loadModuleFromObjFile required objfile = do
               (superMod:_) -> do
                 modify (\comp -> let ms = superMod : underCompilation comp
                                  in comp { underCompilation = ms })
-                mapM_ buildDependency imports
+                built <- or <$> mapM buildDependency imports
                 _ <- reexitModule
                 logBuild $ "=== <<< Extracted Module put in its place from "
                            ++ show objfile
@@ -415,7 +435,8 @@ buildArchive arch = do
     let dir = dropExtension arch
     archiveMods <- liftIO $ List.map dropExtension <$> wybeSourcesInDir dir
     logBuild $ "Building modules to archive: " ++ show archiveMods
-    mapM_ (\m -> buildModuleIfNeeded False [m] [dir]) archiveMods
+    build <- or <$> mapM (\m -> buildModuleIfNeeded False [m] [dir])
+                    archiveMods
     let oFileOf m = joinPath [dir, m] ++ ".o"
     mapM_ (\m -> emitObjectFile [m] (oFileOf m))
           archiveMods
@@ -774,33 +795,6 @@ objectReBuildNeeded thisMod dir = do
 -----------------------------------------------------------------------------
 -- Module Source Handlers                                                  --
 -----------------------------------------------------------------------------
-
--- |Find the source and/or object files for the specified module. We search
--- the library search path for the files.
-{-# DEPRECATED srcObjFiles "Use moduleSources instead, more variety." #-}
-srcObjFiles :: ModSpec -> [FilePath] ->
-               Compiler (Maybe (FilePath,Bool,FilePath,Bool,Ident))
-srcObjFiles modspec possDirs = do
-    let splits = List.map (`List.take` modspec) [1..length modspec]
-    dirs <- mapM (\d -> mapM (\ms -> do
-                                  let srcfile = moduleFilePath sourceExtension
-                                                d ms
-                                  let objfile = moduleFilePath objectExtension
-                                                d ms
-                                  let modname = List.last ms
-                                  srcExists <- (liftIO . doesFileExist) srcfile
-                                  objExists <- (liftIO . doesFileExist) objfile
-                                  return
-                                      [ (srcfile, srcExists,
-                                         objfile, objExists, modname)
-                                      | srcExists || objExists
-                                      ])
-                        splits)
-            possDirs
-    case concat $ concat dirs of
-      []           -> return Nothing
-      (validDir:_) -> return $ Just validDir
-
 
 
 -- | Search for different sources module `modspec` in the possible directory
