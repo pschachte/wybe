@@ -1,0 +1,1 @@
+public type position = public position(x:float, y:float) end
