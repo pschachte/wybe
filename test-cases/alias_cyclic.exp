@@ -38,7 +38,7 @@ updateX > public (2 calls)
     case ~tmp$3#0:wybe.bool of
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
-        foreign lpvm mutate(~%p1#0:position.position, ?%p1#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
+        foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
         alias_cyclic.updateY<0>(~p1#1:position.position, ?p2#0:position.position, ~#io#0:phantom, ?#io#1:phantom) @alias_cyclic:19:16
 
     1:
@@ -54,7 +54,7 @@ updateY > public (1 calls)
     case ~tmp$3#0:wybe.bool of
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
-        foreign lpvm mutate(~%p1#0:position.position, ?%p1#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
+        foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
         alias_cyclic.updateX<0>(~p1#1:position.position, ?p2#0:position.position, ~#io#0:phantom, ?#io#1:phantom) @alias_cyclic:10:16
 
     1:
@@ -289,7 +289,7 @@ x > public inline (0 calls)
     foreign lpvm access(~$rec#0:position.position, 0:wybe.int, ?$#0:wybe.int)
 x > public inline (0 calls)
 1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 y > public inline (0 calls)
@@ -297,7 +297,7 @@ y > public inline (0 calls)
     foreign lpvm access(~$rec#0:position.position, 8:wybe.int, ?$#0:wybe.int)
 y > public inline (0 calls)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
   LLVM code       :
 

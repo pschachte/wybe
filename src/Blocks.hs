@@ -654,7 +654,7 @@ cgenLPVM "access" [] [addr,offset,val] = do
 --     is True, does in place update and new address = address;
 --     otherwise allocates fresh storage, copies old contents,
 --     and mutates the new storage.
-cgenLPVM "mutate" []
+cgenLPVM "mutate" _
          [ptrOpArg, outArg, sizeArg, indexArg, destructiveArg, valArg] = do
           val <- cgenArg valArg
           valTy <- lift $ typed' $ argType valArg

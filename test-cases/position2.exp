@@ -128,7 +128,7 @@ x > public inline (0 calls)
     foreign lpvm access(~$rec#0:position.position, 0:wybe.int, ?$#0:wybe.int)
 x > public inline (0 calls)
 1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 y > public inline (0 calls)
@@ -136,7 +136,7 @@ y > public inline (0 calls)
     foreign lpvm access(~$rec#0:position.position, 8:wybe.int, ?$#0:wybe.int)
 y > public inline (0 calls)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
   LLVM code       :
 
@@ -271,7 +271,7 @@ entry:
     foreign lpvm mutate(~tmp$11#0:position.position, ?tmp$1#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~tmp$2#0:wybe.int)
     foreign c print_string("expect posA(111,222):":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
     position.printPosition<0>(tmp$0#0:position.position, ~#io#1:phantom, ?#io#2:phantom) @position2:7:2
-    foreign lpvm mutate(~tmp$0#0:position.position, ?%posA#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, 20000:wybe.int)
+    foreign lpvm mutate noalias(~tmp$0#0:position.position, ?%posA#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, 20000:wybe.int)
     foreign c print_string("expect posA(111,20000):":wybe.string, ~#io#2:phantom, ?#io#3:phantom) @wybe:nn:nn
     position.printPosition<0>(~posA#1:position.position, ~#io#3:phantom, ?#io#4:phantom) @position2:11:2
     foreign c print_string("expect posB(333,222):":wybe.string, ~#io#4:phantom, ?#io#5:phantom) @wybe:nn:nn

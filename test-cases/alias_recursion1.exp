@@ -39,7 +39,7 @@ AFTER EVERYTHING:
     position.printPosition<0>(r#0:position.position, ~#io#12:phantom, ?#io#13:phantom) @alias_recursion1:33:2
     foreign c print_string("--- modify pa.x: ":wybe.string, ~#io#13:phantom, ?tmp$36#0:phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$36#0:phantom, ?#io#14:phantom) @wybe:nn:nn
-    foreign lpvm mutate(~tmp$0#0:position.position, ?%pa#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, -1000:wybe.int)
+    foreign lpvm mutate noalias(~tmp$0#0:position.position, ?%pa#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, -1000:wybe.int)
     foreign c print_string("expect pa(-1000,101):":wybe.string, ~#io#14:phantom, ?#io#15:phantom) @wybe:nn:nn
     position.printPosition<0>(~pa#1:position.position, ~#io#15:phantom, ?#io#16:phantom) @alias_recursion1:38:2
     foreign c print_string("expect r still (-200,-201):":wybe.string, ~#io#16:phantom, ?#io#17:phantom) @wybe:nn:nn
@@ -309,7 +309,7 @@ x > public inline (0 calls)
     foreign lpvm access(~$rec#0:position.position, 0:wybe.int, ?$#0:wybe.int)
 x > public inline (0 calls)
 1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 y > public inline (0 calls)
@@ -317,7 +317,7 @@ y > public inline (0 calls)
     foreign lpvm access(~$rec#0:position.position, 8:wybe.int, ?$#0:wybe.int)
 y > public inline (0 calls)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
   LLVM code       :
 

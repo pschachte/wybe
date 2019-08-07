@@ -727,6 +727,9 @@ lookupType (TypeSpec _ "phantom" []) _ =
     return $ Just $ TypeSpec [] "phantom" []
 -- XXX shouldn't have to do this:
 lookupType ty@(TypeSpec ["wybe"] "int" []) _ = return $ Just ty
+-- XXX really shouldn't do this, as it makes 'int' in every module the int type.
+lookupType ty@(TypeSpec _ "int" []) _ =
+    return $ Just (TypeSpec ["wybe"] "int" [])
 lookupType ty@(TypeSpec mod name args) pos = do
     logAST $ "Looking up type " ++ show ty
     tspecs <- refersTo mod name modKnownTypes typeMod
