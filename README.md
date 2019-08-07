@@ -108,7 +108,7 @@ in particular borrowing features from functional, logic, imperative, and
 object oriented languages, but does not neatly fit into any of these
 paradigms.  Its main organising principle is that *values* are
 immutable, but *variables* may be reassigned.  This means that values
-may be passed around a will without worrying that they may be modified.
+may be passed around at will without worrying that they may be modified.
 
 ### Hello, World!
 
@@ -133,7 +133,17 @@ is put in a file named `hello.wybe`, then an executable program can be
 built with the command:
 
 ```
-    wybemk hello
+    % wybemk hello
+```
+
+where '%' is your operating system prompt. This will print error messages if
+there are errors in your code; otherwise it completes without printing anything,
+and produces an executable program, which you can run as usual for your
+operating system.
+
+```
+    % ./hello
+    Hello, World!
 ```
 
 Note that `wybemk` is like `make` in that you give it the name of the
