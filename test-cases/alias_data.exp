@@ -112,8 +112,8 @@ entry:
 --------------------------------------------------
  Module student
   public submods  : 
-  public types    : course: (student.course,"pointer")
-                    student: (student.student,"pointer")
+  public types    : course: (student.course,Just "pointer")
+                    student: (student.student,Just "pointer")
   public resources: 
   public procs    : student.<0>
                     student.printStudent<0>

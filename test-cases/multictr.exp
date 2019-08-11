@@ -2,8 +2,8 @@
 AFTER EVERYTHING:
  Module multictr
   public submods  : 
-  public types    : number: (multictr.number,"pointer")
-                    simple: (multictr.simple,"pointer")
+  public types    : number: (multictr.number,Just "pointer")
+                    simple: (multictr.simple,Just "pointer")
   public resources: 
   public procs    : multictr.number.=<0>
                     multictr.number.float<0>

@@ -82,7 +82,8 @@ normaliseItem :: Item -> Compiler ()
 normaliseItem (TypeDecl vis (TypeProto name params) rep items pos)
   = do
     let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
-    ty <- addType name (TypeDef (length params) rep' pos) vis
+    ty <- addType name
+          (TypeDef (length params) rep' (consts++nonconsts) ctorVis pos) vis
     modspec <- getModuleSpec
     let typespec = TypeSpec modspec name
                    $ List.map (\n->TypeSpec [] n []) params
@@ -188,17 +189,17 @@ normaliseSubmodule name typeParams vis pos items = do
 --  of its constructors, and the constructors divided into constant (arity 0)
 --  and non-constant ones.
 normaliseTypeImpln :: TypeImpln ->
-                      (TypeRepresentation,Visibility,
+                      (Maybe TypeRepresentation,Visibility,
                        [Placed FnProto],[Placed FnProto])
 normaliseTypeImpln (TypeRepresentation repName) =
-    (normaliseTypeRepresntation repName, Private, [], [])
+    (Just $ normaliseTypeRepresntation repName, Private, [], [])
 normaliseTypeImpln (TypeCtors vis ctors) =
     let (constCtrs,nonConstCtrs) =
             List.partition (List.null . fnProtoParams . content) ctors
-    in ((if List.null nonConstCtrs
-         then "i" ++
-              (show $ ceiling $ logBase 2 $ fromIntegral $ length constCtrs)
-         else "pointer"),
+    in (Just (if List.null nonConstCtrs
+              then "i" ++
+               (show $ ceiling $ logBase 2 $ fromIntegral $ length constCtrs)
+              else "pointer"),
         vis,constCtrs,nonConstCtrs)
 
 

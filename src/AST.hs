@@ -102,7 +102,6 @@ import qualified LLVM.AST as LLVMAST
 
 -- |An item appearing at the top level of a source file.
 data Item
-     -- = TypeDecl Visibility TypeProto TypeRepresentation [Item] OptPos
      = TypeDecl Visibility TypeProto TypeImpln [Item] OptPos
      | ModuleDecl Visibility Ident [Item] OptPos
      | ImportMods Visibility [ModSpec] OptPos
@@ -134,6 +133,9 @@ determinismName Det = "ordinary"
 determinismName SemiDet = "test"
 
 
+-- XXX Switch to a more explicit representation supporting n bit integers
+-- for n >= 1, 2^n bit floating point for 4 <= n <= 7, phantom, and pointer.
+-- Or maybe phantom is 0 bit integer?
 type TypeRepresentation = String
 
 defaultTypeRepresentation :: TypeRepresentation
@@ -705,7 +707,7 @@ updateImplementation implOp = do
 
 -- |Add the specified type definition to the current module.
 addType :: Ident -> TypeDef -> Visibility -> Compiler (TypeSpec)
-addType name def@(TypeDef arity rep _) vis = do
+addType name def@(TypeDef arity rep _ _ _) vis = do
     currMod <- getModuleSpec
     let spec = TypeSpec currMod name [] -- XXX what about type params?
     updateImplementation
@@ -1110,7 +1112,7 @@ updateModInterface fn =
 
 -- |Holds everything needed to compile code that uses a module
 data ModuleInterface = ModuleInterface {
-    pubTypes :: Map Ident (TypeSpec,TypeRepresentation),
+    pubTypes :: Map Ident (TypeSpec,Maybe TypeRepresentation),
                                      -- ^The types this module exports
     pubResources :: Map ResourceName ResourceSpec,
                                      -- ^The resources this module exports
@@ -1128,8 +1130,8 @@ emptyInterface =
 -- These functions hack around Haskell's terrible setter syntax
 
 -- |Update the public types of a module interface.
-updatePubTypes :: (Map Ident (TypeSpec,TypeRepresentation)
-                   -> Map Ident (TypeSpec,TypeRepresentation)) ->
+updatePubTypes :: (Map Ident (TypeSpec,Maybe TypeRepresentation)
+                   -> Map Ident (TypeSpec,Maybe TypeRepresentation)) ->
                  ModuleInterface -> ModuleInterface
 updatePubTypes fn modint = modint {pubTypes = fn $ pubTypes modint}
 
@@ -1221,6 +1223,7 @@ updateModLLVM fn modimp = do
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
 lookupTypeRepresentation AnyType = return $ Just "pointer"
 lookupTypeRepresentation InvalidType = return Nothing
+-- XXX These 4 shouldn't be here; they shouldn't be necessary
 lookupTypeRepresentation (TypeSpec ["wybe"] "bool" _) = return $ Just "bool"
 lookupTypeRepresentation (TypeSpec ["wybe"] "int" _) = return $ Just "int"
 lookupTypeRepresentation (TypeSpec ["wybe"] "float" _) = return $ Just "float"
@@ -1234,13 +1237,13 @@ lookupTypeRepresentation (TypeSpec modSpecs name _) = do
     modInt <- getModuleInterface
     _ <- reexitModule
     -- Try find the TypeRepresentation in the interface
-    let maybeIntMatch = fmap snd $ Map.lookup name $ pubTypes modInt
+    let maybeIntMatch = Map.lookup name (pubTypes modInt) >>= snd
     -- Try find the TypeRepresentation in the implementation if not found
     -- in the interface
     let maybeMatch = case maybeIntMatch of
             Nothing ->
                 maybeImpln >>=
-                (fmap typeDefRepresentation . Map.lookup name . modTypes)
+                (Map.lookup name . modTypes) >>= typeDefRepresentation
             _ -> maybeIntMatch
     -- If still not found, search the direct descendant interface and
     -- implementation
@@ -1404,7 +1407,10 @@ addPragma prag = do
 --  optional source position.
 data TypeDef = TypeDef {
     typeDefArity :: Int,                          -- number of type params
-    typeDefRepresentation :: TypeRepresentation,  -- low level representation
+    typeDefRepresentation :: Maybe TypeRepresentation,
+                                                  -- low level representation
+    typeDefMembers :: [Placed FnProto],           -- high level representation
+    typeDefMemberVis :: Visibility,               -- are members public?
     typeDefOptPos :: OptPos                       -- source position of decl
     } deriving (Eq, Generic)
 
@@ -2377,8 +2383,9 @@ showIdSet set = intercalate ", " $ Set.elems set
 
 -- |How to show a type definition.
 instance Show TypeDef where
-  show (TypeDef arity rep pos) =
-    show arity ++ " (" ++ rep ++ ") " ++ showMaybeSourcePos pos
+  show (TypeDef arity rep _ _ pos) =
+    show arity ++ maybe ""  ((" (" ++) . (++") ")) rep
+    ++ showMaybeSourcePos pos
 
 
 -- |How to show a resource definition.
@@ -2601,7 +2608,7 @@ instance Show Exp where
   show (Typed exp typ cast) =
       show exp ++ (if cast then "!" else "") ++ showTypeSuffix typ
 
--- |maybeShow pre maybe pos
+-- |maybeShow pre maybe post
 --  if maybe has something, show pre, the maybe payload, and post
 --  if the maybe is Nothing, don't show anything
 maybeShow :: Show t => String -> Maybe t -> String -> String

@@ -2,7 +2,7 @@
 AFTER EVERYTHING:
  Module type_int
   public submods  : 
-  public types    : myint: (type_int.myint,"i64")
+  public types    : myint: (type_int.myint,Just "i64")
   public resources: 
   public procs    : type_int.myint.*<0>
                     type_int.myint.+<0>

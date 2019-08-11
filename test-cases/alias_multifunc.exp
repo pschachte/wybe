@@ -216,7 +216,7 @@ entry:
 --------------------------------------------------
  Module position
   public submods  : 
-  public types    : position: (position.position,"pointer")
+  public types    : position: (position.position,Just "pointer")
   public resources: 
   public procs    : position.printPosition<0>
                     position.position.=<0>

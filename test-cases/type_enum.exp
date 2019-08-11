@@ -2,7 +2,7 @@
 AFTER EVERYTHING:
  Module type_enum
   public submods  : 
-  public types    : season: (type_enum.season,"i2")
+  public types    : season: (type_enum.season,Just "i2")
   public resources: 
   public procs    : type_enum.season.=<0>
                     type_enum.season.autumn<0>
