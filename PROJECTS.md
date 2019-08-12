@@ -11,3 +11,6 @@ This, of course, raises significant security concerns, which this
 project must also address, by providing a permission system, so that
 external packages must request access to any capabilities that have
 security implications, such as file system or operating system access.
+Other considerations include supporting package versions, and
+downloading the right version of each package, and supporting both local
+and system-wide download of packages.
