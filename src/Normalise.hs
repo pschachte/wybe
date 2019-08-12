@@ -33,19 +33,20 @@ normalise items = do
     when useStdLib $ addImport ["wybe"] (ImportSpec (Just Set.empty) Nothing)
     return ()
 
-    -- -- Now generate main proc if needed
-    -- stmts <- getModule stmtDecls
-    -- unless (List.null stmts)
-    --   $ normaliseItem
-    --         (ProcDecl Public Det False (ProcProto "" [] initResources)
-    --                       (List.reverse stmts) Nothing)
-
 
 -- |Do whatever part of normalisation cannot be done until dependencies
 --  have been loaded.  Currently that means generation of main proc for
 --  the module, which needs to know what resources are available.
-completeNormalisation :: ([ModSpec] -> Compiler ()) -> Compiler ()
-completeNormalisation modCompiler = do
+completeNormalisation :: Compiler ()
+completeNormalisation = do
+    normaliseModMain
+
+
+----------------------------------------------------------------
+-- Generating top-level code for a module
+
+normaliseModMain :: Compiler ()
+normaliseModMain = do
     stmts <- getModule stmtDecls
     logNormalise $ "Completing normalisation with top-level statements "
                    ++ show stmts
@@ -76,6 +77,12 @@ initResources = do
     logNormalise $ "In initResources, resources = " ++ show resources
     return $ Set.fromList resources
 
+
+----------------------------------------------------------------
+-- Normalising a module item
+--
+-- This only handles what can be handled without having loaded dependencies.
+----------------------------------------------------------------
 
 -- |Normalise a single file item, storing the result in the current module.
 normaliseItem :: Item -> Compiler ()
@@ -431,7 +438,7 @@ implicitItems :: TypeSpec -> [Placed FnProto] -> [Placed FnProto] -> [Item]
                  -> [Item]
 implicitItems typespec consts nonconsts items =
     implicitEquality typespec consts nonconsts items
-    -- XXX add print, display, maybe prettyprint, and lots more
+    -- XXX add comparison, print, display, maybe prettyprint, and lots more
 
 
 implicitEquality :: TypeSpec -> [Placed FnProto] -> [Placed FnProto] -> [Item]

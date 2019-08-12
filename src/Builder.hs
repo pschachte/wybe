@@ -68,6 +68,7 @@ import           Data.Maybe
 import           Emit
 import           Normalise                 (normalise, completeNormalisation)
 import           ObjectInterface
+
 import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
                                             optForce, optForceAll, optLibDirs)
@@ -457,7 +458,7 @@ compileModSCC mspecs = do
     -- FLATTENING
     logDump Flatten Types "FLATTENING"
     fixpointProcessSCC handleModImports mspecs
-    mapM_ (flip inModule (completeNormalisation compileModSCC)) mspecs
+    mapM_ (flip inModule completeNormalisation) mspecs
     stopOnError $ "final normalisation of module(s) " ++ showModSpecs mspecs
     logBuild $ replicate 70 '='
     ----------------------------------
