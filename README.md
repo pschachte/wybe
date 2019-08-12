@@ -97,6 +97,12 @@ Subdirectories have the following purposes:
 
 </details>
 
+## Wybe projects
+
+There is a (growing) [list of programming and research projects](PROJECTS.md)
+to further develop the Wybe language.
+
+
 ## The Wybe Language
 
 The Wybe language is intended to be easy to learn and easy to use, but
