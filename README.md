@@ -4,98 +4,13 @@ Wybe is a programming language intended to combine the best features of
 declarative and imperative programming.  It is in an early state of
 development.
 
+To build the Wybe compiler, follow the instructions in the
+[INSTALL.md file](INSTALL.md).
+See the [SUBDIRECTORIES.md file](SUBDIRECTORIES.md) file for
+a tour of the directories making up the Wybe project.
+There is a (growing) [list of programming and research projects](PROJECTS.md)
+to further develop the Wybe language.
 
-## Building Wybe
-<details>
-<summary>Click to expand installation instructions</summary>
-
-Note that Wybe has only been ported to Mac OS X so far.
-
-### Installing prerequisites
-
-1.  Ensure XCode is installed:
-```
-    xcode-select --install
-```
-
-    This needs to be redone after each OS upgrade.
-
-2.  Install [Homebrew](https://brew.sh/).
-
-3.  Install
-[The Haskell Tool Stack](https://docs.haskellstack.org/en/stable/README/).
-
-```
-    brew install haskell-stack
-```
-
-4.  Install the Boehm Garbage Collector development tools:
-
-```
-    brew install bdw-gc
-```
-
-5.  Install LLVM version 6
-
-```
-    brew install llvm-hs/llvm/llvm-6.0
-```
-
-6.  Install dwdiff (for testing)
-
-```
-    brew install dwdiff
-```
-
-7.  LaTeX is needed for building the documentation.  We recommend
-[MacTeX](https://www.tug.org/mactex/).
-
-
-### Building
-
-1.  Just do:
-```
-    make
-```
-
-
-### Testing
-
-1.  Just do:
-```
-    make test
-```
-
-This will show a . for each passed test, an X for each failed test, and a ?
-for each new test (which hasn't had expected output specified yet).
-Currently, some tests fail.
-
-The script `update-exp` in this directory goes through all the test cases
-whose output is different than the expected output, show the differences,
-and prompts whether or not to except the new actual output as correct.
-For each test case with no expected output recorded, it also shows the
-actual output and prompts whether to accept this as correct.
-</details>
-
-
-## Subdirectories
-<details>
-<summary>Click to expand documentation of subdirectories</summary>
-
-Subdirectories have the following purposes:
-
-
-| subdirectory        | Purpose                             |
-|---------------------|------------------------------------ |
-| src                 | Compiler source code                |
-| documentation       | Documentation of the Wybe language  |
-| test-cases          | The current test suite              |
-| wybelibs            | The Wybe standard library           |
-| publications        | Papers and presentations about wybe |
-| legacy              | Old, obsolete stuff                 |
-| speculative         | Some musings about the language     |
-
-</details>
 
 ## The Wybe Language
 
@@ -108,7 +23,7 @@ in particular borrowing features from functional, logic, imperative, and
 object oriented languages, but does not neatly fit into any of these
 paradigms.  Its main organising principle is that *values* are
 immutable, but *variables* may be reassigned.  This means that values
-may be passed around a will without worrying that they may be modified.
+may be passed around at will without worrying that they may be modified.
 
 ### Hello, World!
 
@@ -133,7 +48,17 @@ is put in a file named `hello.wybe`, then an executable program can be
 built with the command:
 
 ```
-    wybemk hello
+    % wybemk hello
+```
+
+where '%' is your operating system prompt. This will print error messages if
+there are errors in your code; otherwise it completes without printing anything,
+and produces an executable program, which you can run as usual for your
+operating system.
+
+```
+    % ./hello
+    Hello, World!
 ```
 
 Note that `wybemk` is like `make` in that you give it the name of the
