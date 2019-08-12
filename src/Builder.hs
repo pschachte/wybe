@@ -453,12 +453,12 @@ compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
     logBuild $ "compileModSCC: [" ++ showModSpecs mspecs ++ "]"
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
-    mapM_ (flip inModule (completeNormalisation compileModSCC)) mspecs
-    stopOnError $ "final normalisation of module(s) " ++ showModSpecs mspecs
     ----------------------------------
     -- FLATTENING
     logDump Flatten Types "FLATTENING"
     fixpointProcessSCC handleModImports mspecs
+    mapM_ (flip inModule (completeNormalisation compileModSCC)) mspecs
+    stopOnError $ "final normalisation of module(s) " ++ showModSpecs mspecs
     logBuild $ replicate 70 '='
     ----------------------------------
     -- TYPE CHECKING
