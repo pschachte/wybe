@@ -214,21 +214,20 @@ Hello, World!
 \frametitle{Procedures}
 \begin{itemize}
 \item Same adornments are used in formal parameters
-\item \texttt{def foo(w, x, ?y, !z):} \ldots\ defines procedure with two
+\item \texttt{proc foo(w, x, ?y, !z):} \ldots\ defines procedure with two
   inputs, one output, and one in-out parameter
 \item Adornments in call must match definition (but see below\ldots)
 \item Body of a procedure definition is a sequence of
   statements
 \item There are a few built-in statement types, discussed below
 \item Procedure calls are statements
-\item \texttt{=} and \texttt{incr} are library procedures
 \end{itemize}
 \end{frame}
 
 
 %-----------------------------------------------------------------------%
 \begin{frame}[fragile]
-\frametitle{Expressions}
+\frametitle{Expressions and Functions}
 \begin{itemize}
 \item Procedure call arguments can be expressions
 \item Expression is just a procedure call with last argument omitted
@@ -256,6 +255,50 @@ Hello, World!
 
 %-----------------------------------------------------------------------%
 \begin{frame}[fragile]
+\frametitle{Value semantics}
+\begin{itemize}
+\item Wybe has value semantics:
+  \begin{itemize}
+  \item Aliasing is not semantically significant
+  \item Data structures cannot be mutated
+  \item Variables can be re-assigned
+  \end{itemize}
+\item Eg, \texttt{x(!pos,new\_x)} assigns \texttt{pos}
+  a \emph{new} position structure whose \texttt{x} member is \texttt{new\_x} and
+  whose other members are the same as the original \texttt{pos}
+\item Gives the feeling of changing values without action at a distance
+\item So after \texttt{?old\_pos = pos ; x(!pos,new\_x)}, \texttt{old\_pos}
+  still holds the old position, and \texttt{pos} holds the new one
+\item Compile-time garbage collection:  when unique (unaliased),
+  compiler transforms this (back) into destructive modification
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Types}
+\begin{itemize}
+\item A Wybe type is just a (sub)module that's 
+  \begin{itemize}
+  \item Aliasing is not semantically significant
+  \item Data structures cannot be mutated
+  \item Variables can be re-assigned
+  \end{itemize}
+\item Eg, \texttt{x(!pos,new\_x)} assigns \texttt{pos}
+  a \emph{new} position structure whose \texttt{x} member is \texttt{new\_x} and
+  whose other members are the same as the original \texttt{pos}
+\item Gives the feeling of changing values without action at a distance
+\item So after \texttt{?old\_pos = pos ; x(!pos,new\_x)}, \texttt{old\_pos}
+  still holds the old position, and \texttt{pos} holds the new one
+\item Compile-time garbage collection:  when unique (unaliased),
+  compiler transforms this (back) into destructive modification
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
 \frametitle{Reversibility}
 \begin{itemize}
 \item Procedures can be overloaded based on mode
@@ -276,23 +319,6 @@ Expression \texttt{cons(?h,?t)} deconstructs
   mode of the last
 % \item \texttt{def \_(x):} defines \texttt{\_} as a ``don't
 %   care'' output
-\end{itemize}
-\end{frame}
-
-
-%-----------------------------------------------------------------------%
-\begin{frame}[fragile]
-\frametitle{Value semantics}
-\begin{itemize}
-\item Wybe has value semantics:  aliasing is not semantically significant
-\item \texttt{head(!list,val)} does \emph{not} mean \texttt{RPLACA}
-\item Equivalent to \texttt{?list = cons(val,tail(list))}
-\item Gives the feeling of changing values without action at a distance
-\item Compile-time garbage collection:  when unique (unaliased),
-  compiler transforms this (back) into destructive modification
-\item Can this be made predictable enough for programmers
-  to have a good performance model and to write efficient code?
-\item Can this make declarative programming with arrays \texttt{etc.} practical?
 \end{itemize}
 \end{frame}
 
