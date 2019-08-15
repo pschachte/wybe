@@ -79,11 +79,24 @@ The source files in this directory and their purposes are:
 
 The wybe compiler handles module dependencies, and builds
 executables by itself, without the need for build tools like
-make.  To keep compile times manageable while supporting
-optimisation, we build bottom-up, ensuring that all a module's
-imports are compiled before compling the module itself.  In the
+make.  The function buildTarget is responsible for determining
+what source files need to be compiled, and for building the
+final outputs (whether executable, object file, archive, etc.).
+
+To keep compile times manageable while supporting optimisation,
+we compile modules bottom-up, ensuring that all a module's
+imports are compiled before compling the module itself. In the
 case of circular module dependencies, each strongly-connected
 component in the module dependency graph is compiled as a unit.
+This is handled by the compileModule function, which includes
+the functionality for finding the SCCs in the module dependency
+graph. The monadic functions enterModule and exitModule,
+imported from the AST module, implement the SCC functionality,
+with exitModule returning a list of modules that form an SCC.
+Between enterModule and exitModule, the Normalise.normalise
+function is called to record the code of the module and to
+record all its dependencies. Each SCC is compiled by the
+compileModSCC function.
 
 One shortcoming of the bottom-up approach is that some analyses
 are best performed top-down.  For example, we can only eliminate
@@ -100,20 +113,28 @@ enough that the time saved by not usually having to make separate
 traversals for analysis and compilation will more than make up
 for the few times we need to recompile.
 
-The build process makes these steps for each SCC in the module
-dependency graph (with responsible modules):
+Once the code and dependencies for all modules in an SCC are
+read, flattened, and recorded in each of the modules, and all
+dependent (but not mutually dependent) modules are fully
+compiled, the build process makes these steps for each module
+SCC:
 
-  1.  The code is read and flattened (happens before this module is invoked)
-  2.  Imported modules are loaded, building them if needed (this module)
+  1.  The type dependencies are topologically sorted and SCCs
+      identified, type representations are determined one SCC at a time,
+      and code is generated for all constructors, accessors,
+      mutators, and utilities (Types)
+  2.  Resource imports and exports are checked (Resources)
   3.  The types of exported procs are validated (Types)
-  4.  Resource imports and exports are checked (Resources)
-  5.  Proc argument types and modes are checked (Types)
-  6.  Proc resources are checked and transformed to args (Resources)
-  7.  Branches, loops, and nondeterminism are transformed away (Unbranch)
-  8.  Procs are compiled to clausal form (Clause)
+  4.  Proc argument types and modes are checked, and called
+      procs are resolved (Types)
+  5.  Proc resources are checked and transformed to args (Resources)
+  6.  Branches, loops, and nondeterminism are transformed away (Unbranch)
+  7.  Call graph SCCs are identified and topologically sorted.
+      The following steps are performed on call graph SCC at a
+      time, buttom up.
+  8   Procs are compiled to clausal form (Clause)
   9.  Procs are optimised (Optimise)
 
-This is the responsibility of the compileModSCC function.
 
 ## Callers
 
