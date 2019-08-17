@@ -593,8 +593,8 @@ deferModules mods = do
 
 -- | evaluate expr in the context of module mod.  Ie, reenter mod,
 -- evaluate expr, and finish the module.
-inModule :: ModSpec -> Compiler a -> Compiler a
-inModule mod expr = do
+inModule :: Compiler a -> ModSpec -> Compiler a
+inModule expr mod = do
     reenterModule mod
     val <- expr
     reexitModule
@@ -1068,7 +1068,7 @@ refersTo modspec name implMapFn specModFn = do
     case parentModule currMod of
         Just par -> Set.union matched
                     <$>
-                    inModule par (refersTo modspec name implMapFn specModFn)
+                    (refersTo modspec name implMapFn specModFn) `inModule` par
         Nothing -> return matched
 
 

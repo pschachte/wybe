@@ -74,7 +74,6 @@ import           AST
 import           ASTShow                   (logDump)
 import           Blocks                    (blockTransformModule,
                                             concatLLVMASTModules)
--- , newMainModule)
 import           Callers                   (collectCallers)
 import           Clause                    (compileProc)
 import           Config
@@ -479,7 +478,7 @@ compileModSCC mspecs = do
     -- FLATTENING
     logDump Flatten Types "FLATTENING"
     fixpointProcessSCC handleModImports mspecs
-    mapM_ (flip inModule completeNormalisation) mspecs
+    mapM_ (completeNormalisation `inModule`) mspecs
     stopOnError $ "final normalisation of module(s) " ++ showModSpecs mspecs
     logBuild $ replicate 70 '='
     ----------------------------------
