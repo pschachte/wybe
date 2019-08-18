@@ -11,7 +11,7 @@
 module Normalise (normalise, normaliseItem, completeNormalisation) where
 
 import AST
-import Config (wordSize,tagMask,tagMask, smallestAllocatedAddress)
+import Config (wordSize, wordSizeBytes, tagMask, smallestAllocatedAddress)
 import Control.Monad
 import Control.Monad.State (gets)
 import Control.Monad.Trans (lift,liftIO)
@@ -21,7 +21,6 @@ import Data.Maybe
 import Data.Set as Set
 import Flatten
 import Options (LogSelection(Normalise))
-import Config (wordSize,wordSizeBytes)
 import Snippets
 
 -- |Normalise a list of file items, storing the results in the current module.
