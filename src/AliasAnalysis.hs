@@ -191,7 +191,12 @@ maybeAliasPrimArgs :: Prim -> Compiler ([PrimVarName], [PrimVarName], [PrimArg])
 maybeAliasPrimArgs (PrimForeign _ "access" _ args) = _maybeAliasPrimArgs args
 maybeAliasPrimArgs (PrimForeign _ "cast" _ args)   = _maybeAliasPrimArgs args
 maybeAliasPrimArgs (PrimForeign _ "move" _ args)   = _maybeAliasPrimArgs args
-maybeAliasPrimArgs prim                            = return ([],[], primArgs prim)
+maybeAliasPrimArgs prim@(PrimForeign _ "mutate" flags args) =
+    if "noalias" `elem` flags
+        then return ([],[], primArgs prim)
+        else _maybeAliasPrimArgs args
+maybeAliasPrimArgs prim =
+    return ([],[], primArgs prim)
 
 
 -- Helper function for the above maybeAliasPrimArgs function
@@ -255,6 +260,9 @@ aliasedArgsInSimplePrim nonePhantomParams currentAlias ([],[], primArgs) = do
         return $ removeFromUf finals currentAlias
 aliasedArgsInSimplePrim nonePhantomParams currentAlias
     (maybeAliasedInput, maybeAliasedOutput, primArgs) = do
+        logAlias $ "      primArgs:           " ++ show primArgs
+        logAlias $ "      maybeAliasedInput:  " ++ show maybeAliasedInput
+        logAlias $ "      maybeAliasedOutput: " ++ show maybeAliasedOutput
         let aliases = cartProd maybeAliasedInput maybeAliasedOutput
         let aliasMap1 = List.foldr (\(inArg, outArg) aMap ->
                             uniteUf aMap inArg outArg) currentAlias aliases
