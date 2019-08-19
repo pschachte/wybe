@@ -1,0 +1,587 @@
+\documentclass[12pt]{beamer}
+\mode<presentation>
+\usetheme{Boadilla}
+%\usepackage{beamerthemeGoettingen}
+%\usepackage{beamerthemeDresden}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% If true  then we have a longer  version for a 40 minutes talk
+% If false then we have a shorter version for a 25 minutes talk
+\newcommand{\longflag}{false}       
+\newcommand{\includelongversion}[2]{\ifthenelse{\equal{\longflag}{true}}{#1}{#2}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{graphicx}
+\usepackage{latexsym}
+\usepackage{amssymb, amsmath, stmaryrd}
+\usepackage{hhline}
+\usepackage{subfig}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{minibox}
+\usepackage{ifthen}
+\usepackage{xspace}
+\usepackage{mathabx}
+\usepackage{url}
+\usepackage{framed,color}
+
+\usetikzlibrary{arrows,shapes,calc,decorations.pathreplacing}
+\definecolor{pinegreen}{rgb}{0,0.55,0.45}
+
+% don't bother me with fulsome warning messages
+\tolerance=100000
+
+\renewcommand{\topfraction}{.9}
+\renewcommand{\bottomfraction}{.9}
+\renewcommand{\textfraction}{0.1}
+
+\definecolor{shadecolor}{rgb}{0.8,0.9,1.0}
+
+\newcommand{\sys}[1]{\textsc{#1}}
+\newcommand{\re}[1]{\ensuremath{\mathtt{#1}}}
+\newcommand{\svar}[1]{\ensuremath{\left \llbracket #1 \right \rrbracket}}
+
+\DeclareMathOperator{\pl}{\!+}
+
+\newcommand{\ceil}[1]{\left\lceil#1\right\rceil}
+\newcommand{\bexists}{\overline{\exists}}
+\newcommand{\entails}{\vDash}
+\newcommand{\essential}[1]{\left \llbracket #1 \right \rrbracket}
+\newcommand{\fail}{\bf fail}
+\newcommand{\lra}{\leftrightarrow}
+\newcommand{\lu}{{L\overline{U}}}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\fff}{{\cal F}}
+\newcommand{\ttt}{{\cal T}}
+\providecommand{\abs}[1]{\lvert#1\rvert}
+
+\newcommand{\pset}[1]{{\cal P}(#1)}
+
+%% Wrapping a tabular environment in a macro,
+%% so it doesn't conflict with Tikz stuff.
+\newcommand{\wtab}[1]{
+  \begin{tabular}{c}
+    #1
+  \end{tabular}
+}
+
+
+
+%\xyoption{ps}
+%\xyoption{color}
+%\UseCrayolaColors
+%\newcommand{\xyo}[1]{*+[o][F-]{#1}}
+%\newcommand{\xyco}[2]{*+[o][F-:#1]{#2}}
+
+
+%-----------------------------------------------------------------------%
+\title[Introducing Wybe]{The Design and Implementation of Wybe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Abstract:
+%
+% We present Wybe, a new language in the early stages of development.
+% Wybe combines the best of declarative and imperative programming in
+% a principled way.  It is intended to be easy to learn for beginner
+% programmers, and also to scale up to large projects through good
+% support for software engineering principles.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\author[Peter Schachte]
+{\textbf{Peter Schachte} }
+
+\institute[Melbourne Uni]{The University of Melbourne \\ School of
+  Computing and Information Systems}
+
+\date{4 September 2019}
+
+%% \ignore{
+%%   \AtBeginSection[]
+%%   {
+%%      \begin{frame}<beamer>
+%%      \frametitle{Outline}
+%%      \tableofcontents[currentsection]
+%%      \end{frame}
+%%   }
+%% }
+
+\begin{document}
+
+\frame{\titlepage}
+
+%=======================================================================%
+\section{Introduction}
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Motivation --- Wybe goals:}
+\begin{itemize}
+\item Be simple and easy to learn (but not necessarily orthodox)
+\item Support declarative programming
+\item Support imperative programming
+\item Support best software engineering practice
+\item Be efficient
+\end{itemize}
+\vspace{2ex}
+\begin{quote}
+  The lurking suspicion that something could be simplified is the
+world's richest source of rewarding challenges. \\
+\hspace*{1cm} --- Edsger Wybe Dijkstra
+\end{quote}
+\end{frame}
+
+%=======================================================================%
+\section{Interface Integrity}
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Interface Integrity}
+\begin{itemize}
+\item Major advantage of declarative languages:  
+  no \emph{action at a distance} --- where change happens for no apparent reason
+\item Caused by destructive update of aliased structures
+\item Requires the programmer to have (and maintain!) a \emph{global}
+  understanding of dynamic aliasing in program
+\item Every function has two interfaces:
+  \begin{itemize}
+  \item \textbf{Apparent interface} appears in function declaration
+    or call
+  \item \textbf{Effective interface} is the information that passes into and out of function
+  \end{itemize}
+\item A function exhibits \textbf{interface integrity} if its apparent and
+effective interfaces are identical --- no action at a distance
+
+\end{itemize}
+
+\end{frame}
+
+
+%=======================================================================%
+\section{Wybe Basics}
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Hello World}
+\vspace*{-2ex}
+\begin{itemize}
+\item Like a scripting language, top-level statements in a module are executed
+\item Top-level statements in a module are executed before top-level statements
+  in any module that imports it
+\item Hello World in Wybe:\vspace*{-1ex}
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+!println("Hello, World!")
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\item I'll explain the leading \texttt{!} a little later
+\item Every Wybe source file is a module whose name is the file name with the
+  \texttt{.wybe} extension removed.
+\item Compiler is like make:  takes name of file to \emph{produce}\vspace*{-1ex}
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+\textbf{% }wybemk hello
+\textbf{% }./hello
+Hello, World!
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Information flow}
+\begin{itemize}
+\item Direction of information flow (\emph{mode}) is explicit
+\item A bit like Ada's \texttt{in}, \texttt{out}, and \texttt{in out}
+\item Unadorned variable name denotes variable value (call by value)
+\item Question mark (\texttt{?}) in front of variable name indicates
+  variable (re-)assignment (call by result)
+\item Exclamation point (\texttt{!}) indicates both (call by value-result)
+\item Which side of \texttt{=} code is on is irrelevant
+\item \texttt{?x = x + 1} or \texttt{x + 1 = ?x} increments x
+\item so does \texttt{incr(!x)}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Procedures}
+\begin{itemize}
+\item Same adornments are used in formal parameters
+\item \texttt{proc foo(w, x, ?y, !z):} \ldots\ defines procedure with two
+  inputs, one output, and one in-out parameter
+\item Adornments in call must match definition (but see below\ldots)
+\item Body of a procedure definition is a sequence of
+  statements
+\item There are a few built-in statement types, discussed below
+\item Procedure calls are statements
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Expressions and Functions}
+\begin{itemize}
+\item Procedure call arguments can be expressions
+\item Expression is just a procedure call with last argument omitted
+\item The value of such an expression is the value that would be assigned
+  to its omitted argument
+\item \emph{E.g.,} \texttt{bar(x,y)} as an expression means call
+  \texttt{bar(x,y,?temp)} and use \texttt{temp} as the value of
+  \texttt{bar(x,y)}
+\item \texttt{foo(bar(x,y),?z)} \quad means \quad
+  \begin{minipage}[c]{0.4\linewidth}
+  \texttt{bar(x,y,?temp)} \\
+  \texttt{foo(temp,?z)}
+  \end{minipage}
+\item \texttt{def foo(x) = bar(x,x)} is syntactic sugar for \\
+\texttt{def foo(x,?result): bar(x,x,?result)}
+\item Can use \texttt{foo} with either syntax regardless of which
+  definition was used
+\item A few built-in expressions like \texttt{let} \emph{stmts}
+  \texttt{in} \emph{expr} and \emph{expr} \texttt{where} \emph{stmts}
+% \item \texttt{a.b(c,\ldots)} is syntactic sugar for
+%   \texttt{b(a,c,\ldots)}, to allow dot notation for member access and update
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Value semantics}
+\begin{itemize}
+\item Wybe has value semantics:
+  \begin{itemize}
+  \item Aliasing is not semantically significant
+  \item Data structures cannot be mutated
+  \item Variables can be re-assigned
+  \end{itemize}
+\item Eg, \texttt{x(!pos,new\_x)} assigns \texttt{pos}
+  a \emph{new} position structure whose \texttt{x} member is \texttt{new\_x} and
+  whose other members are the same as the original \texttt{pos}
+\item Gives the feeling of changing values without action at a distance
+\item So after \texttt{?old\_pos = pos ; x(!pos,new\_x)}, \texttt{old\_pos}
+  still holds the old position, and \texttt{pos} holds the new one
+\item Compile-time garbage collection:  when unique (unaliased),
+  compiler transforms this (back) into destructive modification
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Types}
+\begin{itemize}
+\item A Wybe type is just a (sub)module that's 
+  \begin{itemize}
+  \item Aliasing is not semantically significant
+  \item Data structures cannot be mutated
+  \item Variables can be re-assigned
+  \end{itemize}
+\item Eg, \texttt{x(!pos,new\_x)} assigns \texttt{pos}
+  a \emph{new} position structure whose \texttt{x} member is \texttt{new\_x} and
+  whose other members are the same as the original \texttt{pos}
+\item Gives the feeling of changing values without action at a distance
+\item So after \texttt{?old\_pos = pos ; x(!pos,new\_x)}, \texttt{old\_pos}
+  still holds the old position, and \texttt{pos} holds the new one
+\item Compile-time garbage collection:  when unique (unaliased),
+  compiler transforms this (back) into destructive modification
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Reversibility}
+\begin{itemize}
+\item Procedures can be overloaded based on mode
+\item \texttt{cons(head,tail,?list)}  constructs \\
+\texttt{cons(?head,?tail,list)}  deconstructs \\
+\item Expressions can be \emph{outputs} (patterns) as well as inputs
+\item Expression \texttt{cons(h,t)} constructs list \\
+Expression \texttt{cons(?h,?t)} deconstructs
+\item tail(!x, y) replaces tail of x with y
+\item tail(!x) = y is exactly the same
+\item head(tail(!x), y) \quad transforms to \quad
+  \begin{minipage}[c]{0.4\linewidth}
+  \texttt{tail(x,?temp)} \\
+  \texttt{head(!temp,y)} \\
+  \texttt{tail(!x, temp)}
+  \end{minipage}
+\item Modes of all parameters but the last must uniquely determine the
+  mode of the last
+% \item \texttt{def \_(x):} defines \texttt{\_} as a ``don't
+%   care'' output
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Resources}
+\begin{itemize}
+\item A \emph{resource} is data that can be used and/or defined
+  without being explicitly passed as a parameter
+\item Similar to State and IO monads
+\item Specified in procedure declaration, but not in call
+\item Calls to procedures that use resources must be preceded with
+  \texttt{!} to signify that they use some resources
+\item Procedures can use as many resources as they want to declare
+\item Resource can be declared as a name for several other resources
+\item Useful for data that is widely used/modified in a module
+\item I/O, command line arguments are resources visible at top level
+  \begin{semiverbatim}
+def hello(name) use io:
+    !print("Hello, ")
+    !println(name)
+  \end{semiverbatim}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Tests}
+\begin{itemize}
+\item Some procedure calls, called \emph{tests}, can succeed or fail
+\item Some modes of a procedure can be tests while others are not
+\item Definition specifies that call can fail with \texttt{?} at left
+  of signature
+\item A test can also produce output: use it in place of a Maybe
+\item \emph{e.g.,} \texttt{def ?cons(?head,?tail,list):} \ldots
+\item A test with no outputs can be used as an expression:  it is
+  reified into a \texttt{bool}
+\item A call supplying an input where an output is expected is
+  automatically a test that compares the output with the supplied input
+(like Mercury's implied modes)
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{If statement}
+\begin{itemize}
+\item Tests can be used in \texttt{if} statements
+\item \texttt{if} \emph{test1}\texttt{::} \emph{statements} \ldots \\
+\hspace*{1em} \emph{test2}\texttt{::} \emph{statements} \ldots \\
+\hspace*{1em} \ldots \\
+\texttt{end}
+\item Tests are tried in order; body of first to succeed is executed
+\item If none succeeds, none is executed
+\item Boolean expression \emph{e} is de-reified into the test \emph{e}
+  \texttt{= true}
+\item \texttt{else} is a test that always succeeds
+\item Also an expression version of \texttt{if}, where
+  \emph{statements} are replaced with \emph{expressions}
+\item Tests of an \texttt{if} expression must be exhaustive
+% \item Variables bound in tests are scoped to the corresponding statements
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Tests as statements}
+\begin{itemize}
+\item A test can be used as a statement
+\item Call must be preceded with \texttt{?}
+\item Sequence of statements is a test if any of them are tests
+\item Procedure is a test if its body is a test
+\item All tests must be declared with \texttt{?} at left
+\item Statement sequence fails if any of the tests fail
+\item Like logic programming or the Maybe monad
+\item If test fails, its effects are rolled back
+\item I/O is not allowed in tests
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Case statement and expression}
+\begin{itemize}
+\item \texttt{case} \emph{expr} \texttt{of} \\
+\hspace*{1em} \emph{case1}\texttt{:} \emph{body1} \ldots \\
+\hspace*{1em} \emph{case2}\texttt{:} \emph{body2} \ldots \\
+\hspace*{1em} \ldots \\[2ex]
+is equivalent to \\[2ex]
+ \texttt{if} \emph{case1(expr)}\texttt{:} \emph{body1} \ldots \\
+\hspace*{1em} \emph{case2(expr)}\texttt{:} \emph{body2} \ldots \\
+\hspace*{1em} \ldots
+\item Except that tests must be exhaustive: checked at compile-time
+\item Can declare sets of exhaustive tests
+\item \emph{E.g.:}\\
+  \texttt{def ++(x,y) = case x of} \\
+\hspace*{3em}
+\begin{tabular}{rl}
+\texttt{[]:} & \texttt{y}\\
+\texttt{[?h|?t]:} & \texttt{[h|t++y]}\\
+\end{tabular}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Loops}
+\begin{itemize}
+\item One modular looping construct:
+  \texttt{do} \emph{loop-statements} \ldots \texttt{end}
+\item \emph{loop-statements} are any normal statements plus any
+  special looping statements, including:
+  \begin{itemize}
+  \item \texttt{while} \emph{test} and \texttt{until} \emph{test}
+    \begin{itemize}
+    \item like conditional \texttt{break}
+    \end{itemize}
+  \item \texttt{when} \emph{test} and \texttt{unless} \emph{test}
+    \begin{itemize}
+    \item like conditional \texttt{continue}
+    \end{itemize}
+  \item \texttt{for} \emph{generator}
+  \end{itemize}
+\item Include as many of these constructs as you like in the loop,
+  wherever you like, \emph{e.g.:} \\
+\begin{semiverbatim}
+    do  !print(prompt)
+        !readln(?answer)
+        until answer in ["y","n"]
+        !println("Please answer 'y' or 'n'.")
+    end
+\end{semiverbatim}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Generators}
+\begin{itemize}
+\item Generators are procedures that return any number of times
+\item Like \texttt{nondet} predicates in Mercury; similar to the list monad
+\item Generators are declared with a \texttt{*} before the signature
+\item Generators use \texttt{generate} statements to specify
+  multiple results
+\item Each \texttt{generate} encloses multiple statements producing
+  results from initial state
+\item Results are produced in the specified order
+\item Generators can call tests; if test fails, skip to next \texttt{generate}
+\item \emph{E.g.,} \\
+  \hspace*{2em}\texttt{def *in(?elt,list):} \\
+  \hspace*{4em}\texttt{generate ??elt = head(list)} \\
+  \hspace*{4em}\texttt{generate *?elt in tail(list)} \\
+
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Generators}
+\begin{itemize}
+\item A procedure that calls a generator outside of a \texttt{for}
+  construct is also a generator
+\item A sequence of calls to generators generates the cross-product of
+  their results
+\item A test is like a generator restricted to at most one result
+\item Generators can be used for logic programming-like coding
+\item \texttt{for} statements allow iteration over generators,
+  accumulating results
+\item \texttt{do} loop can have multiple \texttt{for} statements to
+  support lock-step iteration
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Types}
+\begin{itemize}
+\item Type system is not designed yet; much work to be done
+\item These are some goals:
+  \begin{itemize}
+  \item Strongly typed
+  \item Type inference for local variables and formal parameters of
+    private procedures
+  \item Parametric polymorphism
+  \item Declaration of algebraic types produces constructors,
+    deconstructors, accessors, mutators
+  \item Also possible to define all these as normal procedures, so one
+    can directly implement types by defining their primitive
+    operations
+  \item \emph{E.g.,} can generate  constructors, deconstructors,
+    accessors, mutators for C structs passed through foreign interface
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Types}
+\begin{itemize}
+\item Interface inheritance: unify types with type classes
+  \begin{itemize}
+  \item Abstract type $\equiv$ type class
+  \item Allow a type $A$ to ``implement'' another type $B$, by
+    defining all $B$'s primitive operations for type $A$
+  \item Then an $A$ \emph{is-a} $B$: pass an $A$ where a $B$ is expected
+  \item \emph{E.g.,} allow list processing functions to work on arrays
+  by defining \texttt{car}, \texttt{cdr}, and \texttt{cons} for arrays
+\end{itemize}
+\item Implementation inheritance: declarative delegation
+  \begin{itemize}
+  \item For a specified set of procedures, 
+    declare a function $f: a \to b$ to convert an $a$ argument to a $b$
+  \item Allows passing an $a$ for any $b$ type parameter to these procedures
+  \item Controlled coercion, or easy overloading
+  \item Allows composition to substitute for (multiple) inheritance
+  \item But no overriding
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Conclusion}
+\begin{quotation}
+\noindent
+Simplicity does not precede complexity, but follows it.
+\hspace*{3em}--- Alan Perlis
+\end{quotation}
+\vspace{3ex}
+\begin{itemize}
+\item Looking for ways to simplify Wybe while satisfying its goals
+\item More to add, too:
+  \begin{itemize}
+  \item Higher order
+  \item Declared non-strict parameters
+  \item Lightweight parallelism (generators can support this)
+  \item ``Identities'' and relations among them, to allow
+    networks of objects to be navigated and mutated OO-style
+  \end{itemize}
+
+\end{itemize}
+\end{frame}
+
+
+% %-----------------------------------------------------------------------%
+% \begin{frame}
+% \frametitle{Type classes}
+% \begin{itemize}
+% \item 
+% \end{itemize}
+% \end{frame}
+
+
+
+\end{document}
