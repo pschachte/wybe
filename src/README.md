@@ -135,10 +135,10 @@ resource, and all module dependencies, must have been processed
 at least enough to know they have been defined to process the
 resource declaration.
 
-* Top-level statements in a module:  these are transformed to
+* Top-level statements in a module: these are transformed to
 statements in a special procedure whose name is the empty string
-as the statements are read, so their dependencies are the same
-as for statements in ordinary procedure bodies.
+as the statements are processed, so their dependencies are the
+same as for statements in ordinary procedure bodies.
 
 * Functions: functions and function calls are transformed to
 procedures and procedure calls without reference to anything
@@ -153,12 +153,12 @@ themselves be analysed/optimised. All the procedures in the
 parameter or local variable type, must have been processed the
 same way before processing the procedure itself.
 
-* Submodules:  the submodules of a module, including the types,
-must be processed as mutual dependencies of that module, as they
-are.  The nested submodules of a module (including types) have
-access to all public and private members of the parent module,
-and the parent has access to all public members of the parent,
-so they are mutual dependencies.
+* Submodules: the submodules of a module, including the types,
+must be processed as mutual dependencies of that module, which
+they are. The nested submodules of a module (including types)
+have access to all public and private members of the parent
+module, and the parent has access to all public members of the
+parent, so they are mutual dependencies.
 
 This means only minimal processing can be done before module
 dependencies are noted and read in.  So we handle all these
@@ -191,11 +191,17 @@ compileModSCC, which does the following:
 
   1. Traverse all recorded type submodules in the module list
      finding all type dependencies; topologically sort them and
-     identify SCCs. For each SCC: determine type representation
-     for all constructors, and generate and normalise all
-     constructor, accessor, mutator, and utility functions.
-     Record the primitive representation of the type. This is
-     handled in the Normalise module.
+     identify SCCs. For each SCC:
+
+       1. Determine the type representation for all
+          constructors.
+
+       2. Record the primitive representation of the type.
+
+       3. Generate and record all constructor, accessor,
+          mutator, and utility procs.
+
+     This is handled in the Normalise module.
 
   2. Check all resource imports and exports. (Resources)
 
