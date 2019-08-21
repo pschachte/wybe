@@ -125,8 +125,8 @@ parsePragma = do
 moduleItemParser :: Visibility -> Parser Item
 moduleItemParser v = do
     pos <- tokenPosition <$> ident "module"
-    modName <- identString <* ident "is"
-    body <- itemParser <* ident "end"
+    modName <- identString
+    body <- betweenB Brace itemParser
     return $ ModuleDecl v modName body (Just pos)
 
 

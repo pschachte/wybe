@@ -74,7 +74,7 @@ public type char is i8
 end
 
 
-public module io is
+public module io {
     public resource io:phantom = phantom
 
     public proc nl use !io foreign c putchar('\n', !io) end
@@ -100,7 +100,7 @@ public module io is
     end
     public proc println(x:bool) use !io !print(x) !nl end
 #    public func eof:char = foreign lpvm cast(-1)
-end
+}
 
 public type phantom is phantom
     # public func phantom:phantom = foreign lpvm cast(0)
@@ -114,7 +114,7 @@ end
 # end
 
 
-public module command_line is
+public module command_line {
     # The number of command line arguments.  This is automatically
     # initialised by the code that builds executables.
     public resource argc:int
@@ -133,4 +133,4 @@ public module command_line is
     public proc set_exit_code(code:int) use !exit_code
         ?exit_code = code
     end
-end
+}
