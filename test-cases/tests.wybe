@@ -16,7 +16,7 @@ public test proc lt3(x:int, y:int)
     lt2(y,x)
 end
 
-public type map = public empty | node(left:map, key:int, value:int, right:map) end
+public type map { public empty | node(left:map, key:int, value:int, right:map) }
 
 public test proc lookup(key:int, map:map, ?result:int)
     if map = empty:: false

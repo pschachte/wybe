@@ -1,4 +1,4 @@
-public type person = public person(firstname:string, lastname:string) end
+public type person { public person(firstname:string, lastname:string) }
 
 # expect: copy A into a new memory and do update
 ?personA = person("John", "Smith")

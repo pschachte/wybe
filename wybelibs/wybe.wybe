@@ -1,16 +1,16 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
-public type bool = public false | true
+public type bool { public false | true
     # These are syntax errors because they are operators:
     public func and(p:bool, q:bool):bool = foreign llvm and(p,q)
     public func or(p:bool, q:bool):bool = foreign llvm or(p,q)
     public func not(p:bool):bool = foreign llvm xor(p,true)
     public func =(x:bool, y:bool):bool = foreign llvm icmp eq(x,y)
     public func /=(x:bool,y:bool):bool = foreign llvm icmp ne(x,y)
-end
+}
 
 
-public type int is i64
+public type int is i64 {
     public func +(x:int,y:int):int = foreign llvm add(x,y)
     public proc +(?x:int,y:int,z:int) ?x = foreign llvm sub(z,y) end
     public proc +(x:int,?y:int,z:int) ?y = foreign llvm sub(z,x) end
@@ -31,10 +31,10 @@ public type int is i64
     public func power(x:int,y:int):int = foreign C ipow(x,y)
     public proc incr(!x:int) ?x = x + 1 end
     public proc decr(!x:int) ?x = x - 1 end
-end
+}
 
 
-public type float is f64
+public type float is f64 {
     public func +(x:float,y:float):float = foreign llvm fadd(x,y)
     public proc +(?x:float,y:float,z:float) ?x = foreign llvm fsub(z,y) end
     public proc +(x:float,?y:float,z:float) ?y = foreign llvm fsub(z,x) end
@@ -53,10 +53,10 @@ public type float is f64
     public func =(x:float, y:float):bool = foreign llvm fcmp eq(x,y)
     public func sqrt(x:float):float = foreign C sqrt(x)
     public func power(x:float,y:float):float = foreign C pow(x,y)
-end
+}
 
 
-public type string is pointer8
+public type string is pointer8 {
     # this whole implementation is completely wrong, but will do for now
     #wrong: public func ++(x:string, y:string):string = foreign c strcat(x,y)
     public func =(x:string, y:string):bool  = foreign c strcmp(x,y) = 0
@@ -65,13 +65,13 @@ public type string is pointer8
     public func <=(x:string, y:string):bool = foreign c strcmp(x,y) <= 0
     public func >(x:string, y:string):bool  = foreign c strcmp(x,y) > 0
     public func >=(x:string, y:string):bool = foreign c strcmp(x,y) >= 0
-end
+}
 
 
-public type char is i8
+public type char is i8 {
     public func =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
     public func /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
-end
+}
 
 
 public module io {
@@ -102,11 +102,11 @@ public module io {
 #    public func eof:char = foreign lpvm cast(-1)
 }
 
-public type phantom is phantom
+public type phantom is phantom {
     # public func phantom:phantom = foreign lpvm cast(0)
     # public proc =(x:phantom,?y:phantom) ?y = foreign lpvm cast(0) end
     # public proc =(?x:phantom,y:phantom) ?x = foreign lpvm cast(0) end
-end
+}
 
 # public module allocation is
 #     use wybe.io

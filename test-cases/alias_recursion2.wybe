@@ -1,4 +1,4 @@
-public type mynode = public empty | mynode(data:int, next:mynode) end
+public type mynode { public empty | mynode(data:int, next:mynode) }
 
 
 public proc printMyNode(nd:mynode) use !io

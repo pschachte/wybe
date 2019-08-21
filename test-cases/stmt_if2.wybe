@@ -1,6 +1,6 @@
 # if case
 
-public type tree = public empty | node(left:tree, key:int, right:tree) end
+public type tree { public empty | node(left:tree, key:int, right:tree) }
 
 public func lookup(key:int, tree:tree):bool =
     if tree = empty then false

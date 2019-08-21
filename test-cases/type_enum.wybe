@@ -1,1 +1,1 @@
-public type season = public winter | spring | summer | autumn end
+public type season { public winter | spring | summer | autumn }

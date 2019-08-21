@@ -1,5 +1,5 @@
-public type course = public course(code:int, name:string) end
-public type student = public student(id:int, major:course) end
+public type course  { public course(code:int, name:string) }
+public type student { public student(id:int, major:course) }
 
 public proc printStudent(stu:student) use !io
   !print("student id: ")

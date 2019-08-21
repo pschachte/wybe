@@ -1,4 +1,4 @@
-public type Coordinate = public Coordinate(x:int, y:int, z:int) end
+public type Coordinate { public Coordinate(x:int, y:int, z:int) }
 
 # Two fields of crd1 are referenced by crd2
 # crd2 points to same space as crd1

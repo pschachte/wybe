@@ -136,18 +136,24 @@ typeItemParser v = do
     pos <- tokenPosition <$> ident "type"
     proto <- TypeProto <$> identString <*>
              option [] (betweenB Paren (identString `sepBy` comma))
-    imp <- typeImpParser
-    items <- itemParser <* ident "end"
+    (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto imp items (Just pos)
 
 
--- | Type implementation parser.
-typeImpParser :: Parser TypeImpln
-typeImpParser =
-        TypeRepresentation <$> (ident "is" *> identString)
-    <|> TypeCtors <$> (symbol "=" *> visibility) <*>
-        funcProtoParser `sepBy` symbol "|"
+-- | Type declaration body where representation and items are given
+typeImpln = do
+    impln <- TypeRepresentation <$> (ident "is" *> identString)
+    items <- betweenB Brace itemParser
+    return (impln,items)
 
+
+-- | Type declaration body where visibility, constructors, and items are given
+typeCtors :: Parser (TypeImpln,[Item])
+typeCtors = betweenB Brace $ do
+    vis <- visibility
+    ctors <- funcProtoParser `sepBy` symbol "|"
+    items <- itemParser
+    return $ (TypeCtors vis ctors,items)
 
 
 -- | Resource declaration parser.

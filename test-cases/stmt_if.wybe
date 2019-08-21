@@ -1,6 +1,6 @@
 # if case
 
-public type tree = public empty | node(left:tree, key:int, right:tree) end
+public type tree { public empty | node(left:tree, key:int, right:tree) }
 
 public proc lookup(key:int, tree:tree, ?result:bool)
     if tree = node(?left, ?nodekey, ?right)::
