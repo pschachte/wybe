@@ -2,7 +2,7 @@
 
 use position
 
-public proc replicate1(pa:position, ?pb:position) use !io
+public def replicate1(pa:position, ?pb:position) use !io {
     ?pb = pa
 
     x(!pa, 1111)
@@ -11,7 +11,7 @@ public proc replicate1(pa:position, ?pb:position) use !io
     !printPosition(pa)
     !print("expect pb(10,10):")
     !printPosition(pb)
-end
+}
 
 ?p1 = position(10,10)
 !replicate1(p1, ?p2)

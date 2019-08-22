@@ -1,4 +1,4 @@
-public proc yorn(prompt:string, ?result:bool) use !io
+public def yorn(prompt:string, ?result:bool) use !io {
        do  ! print(prompt)
        	   ! print(" (y/n) ")
            ! read(?response)
@@ -6,10 +6,10 @@ public proc yorn(prompt:string, ?result:bool) use !io
 	   until is_yes_or_no(response)
 	   ! println("Please answer 'yes' or 'no'.")
 	end
- end
+}
 
-func is_yes(ch) = ch='y' or ch='Y'
-func is_yes_or_no(ch) = is_yes(ch) or ch='n' or ch='N'
+def is_yes(ch) = ch='y' or ch='Y'
+def is_yes_or_no(ch) = is_yes(ch) or ch='n' or ch='N'
 
 !yorn("Well, yes or no?", ?r)
 !println(r)

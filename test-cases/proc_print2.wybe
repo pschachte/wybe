@@ -1,4 +1,4 @@
-public proc print2(x:int, y:int) use !io
+public def print2(x:int, y:int) use !io {
        !print(x)
        !print(y)
- end
+}

@@ -2,7 +2,7 @@
 
 use position
 
-public proc if_test(a:position, b:position, ?r:position)
+public def if_test(a:position, b:position, ?r:position) {
     if a.x > 0 ::
       ?tmp = b
       ?b = a
@@ -10,7 +10,7 @@ public proc if_test(a:position, b:position, ?r:position)
       if_test(a, b, ?r)
     | true :: ?r = a
     end
-end
+}
 
 ?pa = position(100, 101)
 ?pb = position(-200, -201)

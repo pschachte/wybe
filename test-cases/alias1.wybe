@@ -1,13 +1,13 @@
 use position
 
-public proc replicate(p1:position, ?p2:position) use !io
+public def replicate(p1:position, ?p2:position) use !io {
   ?pp = position(0,0)
   !print("random print")
   !println(pp.x)
   ?p2 = p1
-end
+}
 
-public proc foo use !io
+public def foo use !io {
   ?p1 = position(101,102)
   !replicate(p1, ?p2)
 
@@ -24,9 +24,9 @@ public proc foo use !io
   !printPosition(p1)
   !print("expect p2(101,102):")
   !printPosition(p2)
-end
+}
 
-public proc bar use !io
+public def bar use !io {
   ?p1 = position(101,102)
   !replicate(p1, ?p2)
 
@@ -43,9 +43,9 @@ public proc bar use !io
   !printPosition(p1)
   !print("expect p2(555,102):")
   !printPosition(p2)
-end
+}
 
-public proc baz use !io
+public def baz use !io {
   ?p1 = position(101,102)
   !replicate(p1, ?p2)
 
@@ -68,7 +68,7 @@ public proc baz use !io
   !printPosition(p2)
   !print("expect p3(33333333,102):")
   !printPosition(p3)
-end
+}
 
 !println("-------------- Calling foo: ")
 !foo

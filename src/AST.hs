@@ -16,7 +16,7 @@ module AST (
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
   Determinism(..), determinismName,
   TypeProto(..), TypeSpec(..), TypeRef(..), TypeImpln(..),
-  FnProto(..), ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
+  ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt,
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
@@ -110,9 +110,9 @@ data Item
      | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
        -- The Bool in the next two indicates whether inlining is forced
      | FuncDecl Visibility Determinism Bool
-       FnProto TypeSpec (Placed Exp) OptPos
+       ProcProto TypeSpec (Placed Exp) OptPos
      | ProcDecl Visibility Determinism Bool ProcProto [Placed Stmt] OptPos
-     -- | CtorDecl Visibility FnProto OptPos
+     -- | CtorDecl Visibility ProcProto OptPos
      | StmtDecl Stmt OptPos
      | PragmaDecl Pragma
      deriving (Generic, Eq)
@@ -140,7 +140,7 @@ defaultTypeRepresentation :: TypeRepresentation
 defaultTypeRepresentation = "pointer"
 
 data TypeImpln = TypeRepresentation TypeRepresentation
-               | TypeCtors Visibility [Placed FnProto]
+               | TypeCtors Visibility [Placed ProcProto]
                deriving (Generic, Eq)
 
 -- -- |Check if a pointer or primitive variables
@@ -168,14 +168,6 @@ isPublic = (==Public)
 -- |A type prototype consists of a type name and zero or more type parameters.
 data TypeProto = TypeProto Ident [Ident]
                  deriving (Generic, Eq)
-
--- |A function prototype consists of a function name and zero or more formal
---  parameters.
-data FnProto = FnProto {
-    fnProtoName::Ident,
-    fnProtoParams::[Param],
-    fnProtoResourceFlows::Set.Set ResourceFlowSpec
-    } deriving (Generic, Eq)
 
 
 ----------------------------------------------------------------
@@ -1770,7 +1762,7 @@ data Constant = Int Int
               | String String
                 deriving (Show,Eq)
 
--- |A proc prototype, including name and formal parameters.
+-- |A proc or func prototype, including name and formal parameters.
 data ProcProto = ProcProto {
     procProtoName::ProcName,
     procProtoParams::[Param],
@@ -2344,13 +2336,6 @@ showUse tab mod (ImportSpec pubs privs) =
 instance Show TypeProto where
   show (TypeProto name []) = name
   show (TypeProto name args) = name ++ "(" ++ intercalate "," args ++ ")"
-
--- |How to show a function prototype.
-instance Show FnProto where
-  show (FnProto name [] resources) = name ++ showResources resources
-  show (FnProto name params resources) =
-    name ++ "(" ++ intercalate "," (List.map show params) ++ ")" ++
-    showResources resources
 
 -- |How to show something that may have a source position
 instance Show t => Show (Placed t) where

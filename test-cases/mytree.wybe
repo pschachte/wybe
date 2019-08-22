@@ -1,6 +1,6 @@
 public type tree { public empty | node(left:tree, key:int, right:tree) }
 
-public proc printTree(t:tree) use !io
+public def printTree(t:tree) use !io {
   if t = node(?l, ?k, ?r) ::
     !printTree(l)
     !print(" ")
@@ -8,4 +8,4 @@ public proc printTree(t:tree) use !io
     !print(" ")
     !printTree(r)
   end
-end
+}

@@ -2,7 +2,7 @@
 
 public type tree { public empty | node(left:tree, key:int, right:tree) }
 
-public proc lookup(key:int, tree:tree, ?result:bool)
+public def lookup(key:int, tree:tree, ?result:bool) {
     if tree = node(?left, ?nodekey, ?right)::
         if  key = nodekey:: ?result = true
         |   key < nodekey:: lookup(key, left , ?result)
@@ -10,9 +10,9 @@ public proc lookup(key:int, tree:tree, ?result:bool)
         end
     |   true:: ?result = false
     end
-end
+}
 
-proc foobar use !io
+def foobar use !io {
     ?tr = node(empty, 1, empty)
 
     if lookup(1, tr) :: !println("lookup succeeds when it should")
@@ -21,4 +21,4 @@ proc foobar use !io
 # if lookup(3, tr) :: !println("lookup fails when it should")
 # | true           :: !println("lookup succeeds when it should fail")
 # end
-end
+}

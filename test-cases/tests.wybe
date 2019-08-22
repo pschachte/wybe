@@ -1,34 +1,34 @@
-# Tests for wybe's support for test procs, ie, procs that can succeed or fail
+# Tests for wybe's support for test defs {, ie, defs  {that can succeed or fail
 
-public test proc lt(x:int, y:int)
+public def test lt(x:int, y:int) {
     # use a test to implement another test
     # x < y # this should work, but is currently a syntax error, so do this:
     if x < y :: true | true :: false end
-end
+}
 
-public proc lt2(x:int, y:int, ?res:bool)
+public def lt2(x:int, y:int, ?res:bool) {
     # reify a test as a bool to implement a non-test
     ?res = lt(x, y)
-end
+}
 
-public test proc lt3(x:int, y:int)
+public def test lt3(x:int, y:int) {
     # use a boolean expr to implement a test
     lt2(y,x)
-end
+}
 
 public type map { public empty | node(left:map, key:int, value:int, right:map) }
 
-public test proc lookup(key:int, map:map, ?result:int)
+public def test lookup(key:int, map:map, ?result:int) {
     if map = empty:: false
     |  key = map.key:: ?result = map.value
     |  key < map.key:: lookup(key, map.left, ?result)
     |  true:: lookup(key, map.right, ?result)
     end
-end
+}
 
 # # this should work, too, since map.key should fail if map is empty
 # # hopefully we can optimise this to be the same as lookup
-# public test proc lookup2(key:int, map:map, ?result:int)
+# public test def lookup2(key:int, map:map, ?result:int) {
 #     if key = map.key:: ?result = map.value
 #     |  key < map.key:: lookup2(key, map.left, ?result)
 #     |  key > map.key:: lookup2(key, map.right, ?result)

@@ -1,6 +1,6 @@
 use position
 
-public func distance(p1:position, p2:position):int =
+public def distance(p1:position, p2:position):int =
     sqrt(power((p2.x-p1.x),2) + power((p2.y-p1.y),2))
 
 !println(distance(position(0,20), position(0,0)))

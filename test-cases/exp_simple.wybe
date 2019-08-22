@@ -21,11 +21,11 @@
 incr(!x)
 !println(x)
 
-# funcCallParser
+# defCallParser
 # identifier
 # (emptyBrackets Brace)
 
 # foreignExp
 # Placed (ForeignFn group fname flags args) pos
-func foreign_add():int = foreign llvm add(1,2)
+def foreign_add():int = foreign llvm add(1,2)
 !print(foreign_add())

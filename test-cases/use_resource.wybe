@@ -1,6 +1,6 @@
 resource count:int = 0
 
-proc use_test use !io, !count
+def use_test use !io, !count {
         !inc_count
         use count in
             !inc_count
@@ -11,10 +11,10 @@ proc use_test use !io, !count
         end
         !print("Outer count (1): ")
         !println(count)
-end
+}
 
-proc inc_count use !count
+def inc_count use !count {
     ?count = count + 1
-end
+}
 
 !use_test

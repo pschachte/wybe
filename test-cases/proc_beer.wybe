@@ -1,4 +1,4 @@
-public proc beer99 use !io
+public def beer99 use !io {
     # 'for' doesn't currently work
     # do for ?count in range(99,0,-1)
     ?count = 99
@@ -7,6 +7,6 @@ public proc beer99 use !io
 	!println(" bottles of beer on the wall")
 	 decr(!count)
     end
-end
+}
 
 !beer99

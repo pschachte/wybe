@@ -186,9 +186,33 @@ fromUseItemParser v = do
 -- | Parse a procedure or function, since both items share the same prefix of
 -- 'visibility' 'determinism'.
 procOrFuncItemParser :: Visibility -> Parser Item
-procOrFuncItemParser v = do
-    d <- determinism
-    procItemParser v d <|> funcItemParser v d <?> "Procedure/Function"
+procOrFuncItemParser vis = do
+    pos <- tokenPosition <$> ident "def"
+    det <- determinism
+    name <- funcNamePlaced <?> "no keywords"
+    params <- option [] $ betweenB Paren (procParamParser `sepBy` comma)
+    ty <- optType
+    -- Resources
+    rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
+    let proto = ProcProto (content name) params $ fromList rs
+    funcBody vis det proto ty pos <|> procBody vis det proto ty pos
+
+
+
+funcBody :: Visibility -> Determinism -> ProcProto -> TypeSpec -> SourcePos
+         -> Parser Item
+funcBody vis det proto ty pos = do
+    body <- symbol "=" *> expParser
+    return $ FuncDecl vis det False proto ty body (Just pos)
+
+
+procBody :: Visibility -> Determinism -> ProcProto -> TypeSpec -> SourcePos
+         -> Parser Item
+procBody vis det proto ty pos = do
+    body <- betweenB Brace $ many stmtParser
+    -- XXX must test that ty is AnyType, otherwise syntax error
+    return $ ProcDecl vis det False proto body (Just pos)
+
 
 
 -- | Procedure parser.
@@ -209,8 +233,7 @@ procItemParser vis det = do
     -- ProcBody
     body <- many stmtParser <* ident "end"
     -- Final
-    return $
-        ProcDecl vis det False proto body (Just pos)
+    return $ ProcDecl vis det False proto body (Just pos)
 
 
 -- | A procedure param parser.
@@ -245,14 +268,14 @@ funcItemParser vis det = do
         FuncDecl vis det False proto ty body (Just pos)
 
 
--- | Function prototype parser : FnProto
-funcProtoParser :: Parser (Placed FnProto)
+-- | Function prototype parser : ProcProto
+funcProtoParser :: Parser (Placed ProcProto)
 funcProtoParser = do
     pName <- funcNamePlaced <?> "no keywords"
     params <- option [] $ betweenB Paren (paramParser `sepBy` comma)
     -- Resource flow specs, optional
     rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
-    return $ maybePlace (FnProto (content pName) params $fromList rs)
+    return $ maybePlace (ProcProto (content pName) params $fromList rs)
              (place pName)
 
 
@@ -914,7 +937,7 @@ determinism = option Det (ident "test" *> return SemiDet)
 -- maybe remove 'import', and probably need to add others.
 keywords :: [String]
 keywords =
-    [ "if", "then", "else", "proc", "end", "use"
+    [ "if", "then", "else", "def", "end", "use"
     , "do",  "until", "unless", "and", "or", "not", "test", "import"
     , "while", "foreign", "in", "when"
     ]

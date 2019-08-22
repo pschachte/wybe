@@ -1,1 +1,1 @@
-func messup(x:int, y:float) = x * y
+def messup(x:int, y:float) = x * y

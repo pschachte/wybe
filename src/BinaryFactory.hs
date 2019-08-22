@@ -62,7 +62,6 @@ instance Binary ModuleInterface
 instance Binary Pragma
 
 instance Binary Item
-instance Binary FnProto
 instance Binary TypeProto
 instance Binary TypeImpln
 -- * Manual Serialisation

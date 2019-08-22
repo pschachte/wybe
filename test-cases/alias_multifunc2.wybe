@@ -1,20 +1,20 @@
-# transitive aliasing data structures in multi proc calls
+# transitive aliasing data structures in multi def calls {
 
 use position
 
-public proc replicate2(p1:position, ?p2:position) use !io
+public def replicate2(p1:position, ?p2:position) use !io {
     ?pp = position(0,0)
     !print("random replicate2 ")
     !println(pp.x)
     ?p2 = p1
-end
+}
 
 # Expected Alias Pairs: [(p1,p3)]
-public proc replicate1(p1:position, ?p2:position, ?p3:position) use !io
+public def replicate1(p1:position, ?p2:position, ?p3:position) use !io {
     !replicate2(p1, ?p2)
     !replicate2(p2, ?p3)
     x(!p2, 22)
-end
+}
 
 ?p1 = position(10,10)
 !replicate1(p1, ?p2, ?p3)

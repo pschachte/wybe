@@ -1,6 +1,6 @@
-public func inc2(x:int):int = (x+1)+1
+public def inc2(x:int):int = (x+1)+1
 
-public proc inc2(?x:int,y:int)
+public def inc2(?x:int,y:int) {
     # until wybe allows !x to be treated as ?x, this doesn't work:
     ((?x+1)+1) = y
-end
+}

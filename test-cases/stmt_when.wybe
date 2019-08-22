@@ -1,4 +1,4 @@
-public func mod(x:int, y:int):int = foreign llvm urem(x, y)
+public def mod(x:int, y:int):int = foreign llvm urem(x, y)
 
 ?n = 10
 do

@@ -1,9 +1,9 @@
 module privatetest {
-    proc hidden use !io !print("private proc in a private module") end
-    public proc semi_hidden use !io !print("public proc in a private module") end
+    def hidden use !io { !print("private proc in a private module") }
+    public def semi_hidden use !io { !print("public proc in a private module") }
 }
 
 public module publictest {
-    proc semi_visible use !io !print("private proc in a public module") end
-    public proc visible use !io !print("public proc in a public module") end
+    def semi_visible use !io { !print("private proc in a public module") }
+    public def visible use !io { !print("public proc in a public module") }
 }

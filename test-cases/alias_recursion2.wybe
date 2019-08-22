@@ -1,15 +1,15 @@
 public type mynode { public empty | mynode(data:int, next:mynode) }
 
 
-public proc printMyNode(nd:mynode) use !io
+public def printMyNode(nd:mynode) use !io {
   if nd = mynode(?data, ?next) ::
     !println(data)
     !printMyNode(next)
   end
-end
+}
 
 # reverse linked list and return the new head
-public proc reverseList(head:mynode, ?result1:mynode)
+public def reverseList(head:mynode, ?result1:mynode) {
     if head = mynode(?data1, ?next1) ::
         if next1 = empty :: ?result1 = head
         | true ::
@@ -21,7 +21,7 @@ public proc reverseList(head:mynode, ?result1:mynode)
         end
     | true :: ?result1 = head
     end
-end
+}
 
 ?n3 = mynode(3, empty)
 ?n2 = mynode(2, n3)

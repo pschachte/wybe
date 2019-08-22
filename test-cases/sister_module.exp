@@ -15,12 +15,12 @@ AFTER EVERYTHING:
 
 baz > inline (0 calls)
 0: baz(i#0:wybe.int, ?j#0:wybe.int): AliasPairs: []
-    sister_module.m1.foo<0>(~i#0:wybe.int, ?j#0:wybe.int) @sister_module:10:25
+    sister_module.m1.foo<0>(~i#0:wybe.int, ?j#0:wybe.int) @sister_module:10:26
 
 
 buzz > inline (0 calls)
 0: buzz(i#0:wybe.int, ?j#0:wybe.int): AliasPairs: []
-    sister_module.m2.bar<0>(~i#0:wybe.int, ?j#0:wybe.int) @sister_module:12:26
+    sister_module.m2.bar<0>(~i#0:wybe.int, ?j#0:wybe.int) @sister_module:12:27
 
   LLVM code       :
 
@@ -98,7 +98,7 @@ entry:
 bar > public inline (0 calls)
 0: bar(i#0:wybe.int, ?j#0:wybe.int): AliasPairs: []
     foreign llvm add(~i#0:wybe.int, 1:wybe.int, ?k#0:wybe.int) @wybe:nn:nn
-    sister_module.m1.foo<0>(~k#0:wybe.int, ?j#0:wybe.int) @sister_module:10:25
+    sister_module.m1.foo<0>(~k#0:wybe.int, ?j#0:wybe.int) @sister_module:10:26
 
   LLVM code       :
 

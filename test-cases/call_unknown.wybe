@@ -1,1 +1,1 @@
-proc foo(x:int,?y:int) nonexistent_proc(x,?y) end
+def foo(x:int,?y:int)  { nonexistent_proc(x,?y) }

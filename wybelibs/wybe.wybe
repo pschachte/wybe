@@ -2,116 +2,116 @@ pragma no_standard_library  # Standard library can't depend on itself!
 
 public type bool { public false | true
     # These are syntax errors because they are operators:
-    public func and(p:bool, q:bool):bool = foreign llvm and(p,q)
-    public func or(p:bool, q:bool):bool = foreign llvm or(p,q)
-    public func not(p:bool):bool = foreign llvm xor(p,true)
-    public func =(x:bool, y:bool):bool = foreign llvm icmp eq(x,y)
-    public func /=(x:bool,y:bool):bool = foreign llvm icmp ne(x,y)
+    public def and(p:bool, q:bool):bool = foreign llvm and(p,q)
+    public def or(p:bool, q:bool):bool = foreign llvm or(p,q)
+    public def not(p:bool):bool = foreign llvm xor(p,true)
+    public def =(x:bool, y:bool):bool = foreign llvm icmp eq(x,y)
+    public def /=(x:bool,y:bool):bool = foreign llvm icmp ne(x,y)
 }
 
 
 public type int is i64 {
-    public func +(x:int,y:int):int = foreign llvm add(x,y)
-    public proc +(?x:int,y:int,z:int) ?x = foreign llvm sub(z,y) end
-    public proc +(x:int,?y:int,z:int) ?y = foreign llvm sub(z,x) end
-    public func -(x:int,y:int):int = foreign llvm sub(x,y)
-    public proc -(?x:int,y:int,z:int) ?x = foreign llvm add(z,y) end
-    public proc -(x:int,?y:int,z:int) ?y = foreign llvm sub(z,x) end
-    public func -(x:int):int = foreign llvm sub(0,x)
-    public proc -(?x:int,y:int) ?x = foreign llvm sub(0,y) end
-    public func *(x:int,y:int):int = foreign llvm mul(x,y)
-    public func /(x:int,y:int):int = foreign llvm sdiv(x,y)
-    public func /=(x:int,y:int):bool = foreign llvm icmp ne(x,y)
-    public func <(x:int,y:int):bool = foreign llvm icmp slt(x,y)
-    public func <=(x:int,y:int):bool = foreign llvm icmp sle(x,y)
-    public func >(x:int,y:int):bool = foreign llvm icmp sgt(x,y)
-    public func >=(x:int,y:int):bool = foreign llvm icmp sge(x,y)
-    public func =(x:int, y:int):bool = foreign llvm icmp eq(x,y)
-    public func sqrt(x:int):int = foreign C isqrt(x)
-    public func power(x:int,y:int):int = foreign C ipow(x,y)
-    public proc incr(!x:int) ?x = x + 1 end
-    public proc decr(!x:int) ?x = x - 1 end
+    public def +(x:int,y:int):int = foreign llvm add(x,y)
+    public def +(?x:int,y:int,z:int) { ?x = foreign llvm sub(z,y) }
+    public def +(x:int,?y:int,z:int) { ?y = foreign llvm sub(z,x) }
+    public def -(x:int,y:int):int = foreign llvm sub(x,y)
+    public def -(?x:int,y:int,z:int) { ?x = foreign llvm add(z,y) }
+    public def -(x:int,?y:int,z:int) { ?y = foreign llvm sub(z,x) }
+    public def -(x:int):int = foreign llvm sub(0,x)
+    public def -(?x:int,y:int) { ?x = foreign llvm sub(0,y) }
+    public def *(x:int,y:int):int = foreign llvm mul(x,y)
+    public def /(x:int,y:int):int = foreign llvm sdiv(x,y)
+    public def /=(x:int,y:int):bool = foreign llvm icmp ne(x,y)
+    public def <(x:int,y:int):bool = foreign llvm icmp slt(x,y)
+    public def <=(x:int,y:int):bool = foreign llvm icmp sle(x,y)
+    public def >(x:int,y:int):bool = foreign llvm icmp sgt(x,y)
+    public def >=(x:int,y:int):bool = foreign llvm icmp sge(x,y)
+    public def =(x:int, y:int):bool = foreign llvm icmp eq(x,y)
+    public def sqrt(x:int):int = foreign C isqrt(x)
+    public def power(x:int,y:int):int = foreign C ipow(x,y)
+    public def incr(!x:int) { ?x = x + 1 }
+    public def decr(!x:int) { ?x = x - 1 }
 }
 
 
 public type float is f64 {
-    public func +(x:float,y:float):float = foreign llvm fadd(x,y)
-    public proc +(?x:float,y:float,z:float) ?x = foreign llvm fsub(z,y) end
-    public proc +(x:float,?y:float,z:float) ?y = foreign llvm fsub(z,x) end
-    public func -(x:float,y:float):float = foreign llvm fsub(x,y)
-    public proc -(?x:float,y:float,z:float) ?x = foreign llvm fadd(z,y) end
-    public proc -(x:float,?y:float,z:float) ?y = foreign llvm fsub(z,x) end
-    # public func -(x:float):float = foreign llvm fsub(0,x)
-    # public proc -(?x:float,y:float) ?x = foreign llvm fsub(0,y) end
-    public func *(x:float,y:float):float = foreign llvm fmul(x,y)
-    public func /(x:float,y:float):float = foreign llvm fdiv(x,y)
-    public func /=(x:float,y:float):bool = foreign llvm fcmp ne(x,y)
-    public func <(x:float,y:float):bool = foreign llvm fcmp slt(x,y)
-    public func <=(x:float,y:float):bool = foreign llvm fcmp sle(x,y)
-    public func >(x:float,y:float):bool = foreign llvm fcmp sgt(x,y)
-    public func >=(x:float,y:float):bool = foreign llvm fcmp sge(x,y)
-    public func =(x:float, y:float):bool = foreign llvm fcmp eq(x,y)
-    public func sqrt(x:float):float = foreign C sqrt(x)
-    public func power(x:float,y:float):float = foreign C pow(x,y)
+    public def +(x:float,y:float):float = foreign llvm fadd(x,y)
+    public def +(?x:float,y:float,z:float) { ?x = foreign llvm fsub(z,y) }
+    public def +(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
+    public def -(x:float,y:float):float = foreign llvm fsub(x,y)
+    public def -(?x:float,y:float,z:float) { ?x = foreign llvm fadd(z,y) }
+    public def -(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
+    # public def -(x:float):float = foreign llvm fsub(0,x)
+    # public def -(?x:float,y:float) { ?x = foreign llvm fsub(0,y) }
+    public def *(x:float,y:float):float = foreign llvm fmul(x,y)
+    public def /(x:float,y:float):float = foreign llvm fdiv(x,y)
+    public def /=(x:float,y:float):bool = foreign llvm fcmp ne(x,y)
+    public def <(x:float,y:float):bool = foreign llvm fcmp slt(x,y)
+    public def <=(x:float,y:float):bool = foreign llvm fcmp sle(x,y)
+    public def >(x:float,y:float):bool = foreign llvm fcmp sgt(x,y)
+    public def >=(x:float,y:float):bool = foreign llvm fcmp sge(x,y)
+    public def =(x:float, y:float):bool = foreign llvm fcmp eq(x,y)
+    public def sqrt(x:float):float = foreign C sqrt(x)
+    public def power(x:float,y:float):float = foreign C pow(x,y)
 }
 
 
 public type string is pointer8 {
     # this whole implementation is completely wrong, but will do for now
-    #wrong: public func ++(x:string, y:string):string = foreign c strcat(x,y)
-    public func =(x:string, y:string):bool  = foreign c strcmp(x,y) = 0
-    public func /=(x:string,y:string):bool  = foreign c strcmp(x,y) /= 0
-    public func <(x:string, y:string):bool  = foreign c strcmp(x,y) < 0
-    public func <=(x:string, y:string):bool = foreign c strcmp(x,y) <= 0
-    public func >(x:string, y:string):bool  = foreign c strcmp(x,y) > 0
-    public func >=(x:string, y:string):bool = foreign c strcmp(x,y) >= 0
+    #wrong: public def ++(x:string, y:string):string = foreign c strcat(x,y)
+    public def =(x:string, y:string):bool  = foreign c strcmp(x,y) = 0
+    public def /=(x:string,y:string):bool  = foreign c strcmp(x,y) /= 0
+    public def <(x:string, y:string):bool  = foreign c strcmp(x,y) < 0
+    public def <=(x:string, y:string):bool = foreign c strcmp(x,y) <= 0
+    public def >(x:string, y:string):bool  = foreign c strcmp(x,y) > 0
+    public def >=(x:string, y:string):bool = foreign c strcmp(x,y) >= 0
 }
 
 
 public type char is i8 {
-    public func =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
-    public func /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
+    public def =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
+    public def /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
 }
 
 
 public module io {
     public resource io:phantom = phantom
 
-    public proc nl use !io foreign c putchar('\n', !io) end
+    public def nl use !io { foreign c putchar('\n', !io) }
 
-    public proc print(x:int) use !io foreign c print_int(x, !io) end
-    public proc println(x:int) use !io !print(x) !nl end
-    # public proc read(?x:int) use !io foreign c read_int(?x,!io) end
+    public def print(x:int) use !io { foreign c print_int(x, !io) }
+    public def println(x:int) use !io { !print(x) !nl }
+    # public def read(?x:int) use !io { foreign c read_int(?x,!io) }
 
-    public proc print(x:float) use !io foreign c print_float(x,!io) end
-    public proc println(x:float) use !io !print(x) !nl end
-    # public proc read(?x:float) use !io foreign c read_float(?x,!io) end
+    public def print(x:float) use !io { foreign c print_float(x,!io) }
+    public def println(x:float) use !io { !print(x) !nl }
+    # public def read(?x:float) use !io { foreign c read_float(?x,!io) }
 
-    public proc print(x:char) use !io foreign c putchar(x,!io) end
-    public proc println(x:char) use !io !print(x) !nl end
-    public proc read(?x:char) use !io foreign c read_char(?x,!io) end
+    public def print(x:char) use !io { foreign c putchar(x,!io) }
+    public def println(x:char) use !io { !print(x) !nl }
+    public def read(?x:char) use !io { foreign c read_char(?x,!io) }
 
-    public proc print(x:string) use !io foreign c print_string(x,!io) end
-    public proc println(x:string) use !io !print(x) !nl end
-    # public proc read(?x:string) use !io foreign c read_line(?x,!io) end
+    public def print(x:string) use !io { foreign c print_string(x,!io) }
+    public def println(x:string) use !io { !print(x) !nl }
+    # public def read(?x:string) use !io { foreign c read_line(?x,!io) }
 
-    public proc print(x:bool) use !io
+    public def print(x:bool) use !io {
        !print(if false(x) then "false" else "true")
-    end
-    public proc println(x:bool) use !io !print(x) !nl end
-#    public func eof:char = foreign lpvm cast(-1)
+    }
+    public def println(x:bool) use !io { !print(x) !nl }
+#    public def eof:char = foreign lpvm cast(-1)
 }
 
 public type phantom is phantom {
-    # public func phantom:phantom = foreign lpvm cast(0)
-    # public proc =(x:phantom,?y:phantom) ?y = foreign lpvm cast(0) end
-    # public proc =(?x:phantom,y:phantom) ?x = foreign lpvm cast(0) end
+    # public def phantom:phantom = foreign lpvm cast(0)
+    # public def =(x:phantom,?y:phantom) { ?y = foreign lpvm cast(0) }
+    # public def =(?x:phantom,y:phantom) { ?x = foreign lpvm cast(0) }
 }
 
-# public module allocation is
+# public module allocation {
 #     use wybe.io
 #     foreign c gc_init(!io)
-# end
+# }
 
 
 public module command_line {
@@ -130,7 +130,7 @@ public module command_line {
     public resource exit_code:int # = 0 when we support resource initialisation
 
     # Set the exit code, but don't exit immediately.
-    public proc set_exit_code(code:int) use !exit_code
+    public def set_exit_code(code:int) use !exit_code {
         ?exit_code = code
-    end
+    }
 }

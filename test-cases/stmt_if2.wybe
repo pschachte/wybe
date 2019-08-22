@@ -2,7 +2,7 @@
 
 public type tree { public empty | node(left:tree, key:int, right:tree) }
 
-public func lookup(key:int, tree:tree):bool =
+public def lookup(key:int, tree:tree):bool =
     if tree = empty then false
     else if tree = node(?l, ?k, ?r) then
         if key = k then true

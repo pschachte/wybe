@@ -1,11 +1,11 @@
 public type intlist { public [] | [|](head:int, tail:intlist) }
 
-public func ++(x:intlist, y:intlist):intlist =
+public def ++(x:intlist, y:intlist):intlist =
     if x = [ ?h | ?t]
     then [h|t++y]
     else y
 
-public func length(x:intlist) : int =
+public def length(x:intlist) : int =
     if x = [ ?h | ?t] then 1 + length(t) else 0
 
 
