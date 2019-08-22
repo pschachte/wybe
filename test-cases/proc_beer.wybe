@@ -2,11 +2,11 @@ public def beer99 use !io {
     # 'for' doesn't currently work
     # do for ?count in range(99,0,-1)
     ?count = 99
-    do  while count >= 0
+    do {while count >= 0
         !print(count)
-	!println(" bottles of beer on the wall")
-	 decr(!count)
-    end
+        !println(" bottles of beer on the wall")
+        decr(!count)
+    }
 }
 
 !beer99

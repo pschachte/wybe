@@ -215,27 +215,6 @@ procBody vis det proto ty pos = do
 
 
 
--- | Procedure parser.
--- Proc -> Vis Det 'proc' ProcProto ProcBody
--- ProcProto -> FuncProcName OptProcParamlist UseResources
--- FuncProcName -> ident | Symbol
--- OptProcparamlist -> '(' ProcParams ')'
--- ProcParam -> FlowDirection ident OptType
-procItemParser :: Visibility -> Determinism -> Parser Item
-procItemParser vis det = do
-    pos <- tokenPosition <$> ident "proc"
-    -- Proc proto
-    name <- funcNamePlaced <?> "no keywords"
-    params <- option [] $ betweenB Paren (procParamParser `sepBy` comma)
-    -- Resources
-    rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
-    let proto = ProcProto (content name) params $ fromList rs
-    -- ProcBody
-    body <- many stmtParser <* ident "end"
-    -- Final
-    return $ ProcDecl vis det False proto body (Just pos)
-
-
 -- | A procedure param parser.
 -- ProcParam -> FlowDirection ident OptType
 procParamParser :: Parser Param
@@ -244,28 +223,6 @@ procParamParser = do
     name <- identString
     ty <- optType
     return $ Param name ty flow Ordinary
-
-
--- | Function parser.
--- Func -> Vis Det func Proto Opttype '=' Exp
--- Proto -> PlacedFuncName OptParamList UseResources
--- PlacedFuncName -> ident | Symbol
--- OptParamList ->   | '(' Params ')'
--- Params -> ident OptType
--- UseResources -> 'use' ResourceFlowSpecs
--- ResourceFlowSpecs -> FlowDirection modIdent
--- modIdent -> ident
--- FlowDirection -> '?' | '!' |
-funcItemParser :: Visibility -> Determinism -> Parser Item
-funcItemParser vis det = do
-    pos <- tokenPosition <$> ident "func"
-    proto <- content <$> funcProtoParser
-    -- Optional return type
-    ty <- optType
-    -- Function body
-    body <- symbol "=" *> expParser
-    return $
-        FuncDecl vis det False proto ty body (Just pos)
 
 
 -- | Function prototype parser : ProcProto
@@ -388,7 +345,7 @@ procCallParser = do
 doStmt :: Parser (Placed Stmt)
 doStmt = do
     pos <- tokenPosition <$> ident "do"
-    body <- many1 stmtParser <* ident "end"
+    body <- betweenB Brace $ many1 stmtParser
     return $ Placed (Loop body) pos
 
 

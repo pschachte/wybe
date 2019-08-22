@@ -10,11 +10,11 @@ public def printMyNode(nd:mynode) use !io {
 
 # reverse linked list and return the new head
 public def foo(head:mynode, ?resutl1:mynode) {
-    do
+    do {
         while head.next /= empty
             foo(head.next, ?result1)
             next(!result1, head.next)
-    end
+    }
 }
 
 ?n3 = mynode(3, empty)

@@ -10,13 +10,13 @@ public def gcd(a:int, b:int, ?r:int) use !io {
   ?x = a
   ?y = b
   ?t = a
-  do
+  do {
     while y /= 0
       ?t = y
       !mod(x, t, ?y)
       ?x = t
     ?r = x
-  end
+  }
 }
 
 !gcd(18, 24, ?r)

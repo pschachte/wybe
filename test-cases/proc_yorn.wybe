@@ -1,11 +1,11 @@
 public def yorn(prompt:string, ?result:bool) use !io {
-       do  ! print(prompt)
+       do {! print(prompt)
        	   ! print(" (y/n) ")
            ! read(?response)
-	     ?result = is_yes(response)
-	   until is_yes_or_no(response)
-	   ! println("Please answer 'yes' or 'no'.")
-	end
+             ?result = is_yes(response)
+           until is_yes_or_no(response)
+           ! println("Please answer 'yes' or 'no'.")
+        }
 }
 
 def is_yes(ch) = ch='y' or ch='Y'
