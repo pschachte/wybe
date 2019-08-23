@@ -633,7 +633,8 @@ typedExp = do
 
 whereBodyParser :: Parser (Placed Exp -> Placed Exp)
 whereBodyParser = do
-    body <- ident "where" *> many1 stmtParser <* ident "end"
+    ident "where"
+    body <- betweenB Brace $ many1 stmtParser
     return $ \e -> maybePlace (Where body e) (place e)
 
 
