@@ -421,7 +421,7 @@ useStmt :: Parser (Placed Stmt)
 useStmt = do
     pos <- tokenPosition <$> ident "use"
     resources <- resourceSpec `sepBy` comma <* ident "in"
-    body <- many1 stmtParser <* ident "end"
+    body <- betweenB Brace $ many1 stmtParser
     return $ Placed (UseResources resources body) pos
 
 

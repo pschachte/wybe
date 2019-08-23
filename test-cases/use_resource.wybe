@@ -2,13 +2,13 @@ resource count:int = 0
 
 def use_test use !io, !count {
         !inc_count
-        use count in
+        use count in {
             !inc_count
             !inc_count
             !inc_count
             !print("Inner count (4): ")
             !println(count)
-        end
+        }
         !print("Outer count (1): ")
         !println(count)
 }
