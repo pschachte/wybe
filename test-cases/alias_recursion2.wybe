@@ -2,25 +2,25 @@ public type mynode { public empty | mynode(data:int, next:mynode) }
 
 
 public def printMyNode(nd:mynode) use !io {
-  if nd = mynode(?data, ?next) ::
-    !println(data)
-    !printMyNode(next)
-  end
+  if { nd = mynode(?data, ?next) ::
+           !println(data)
+           !printMyNode(next)
+  }
 }
 
 # reverse linked list and return the new head
 public def reverseList(head:mynode, ?result1:mynode) {
-    if head = mynode(?data1, ?next1) ::
-        if next1 = empty :: ?result1 = head
-        | true ::
-            reverseList(next1, ?result2)
-            ?t1 = next1
-            next(!t1, head)
-            next(!head, empty)
-            ?result1 = result2
-        end
+    if { head = mynode(?data1, ?next1) ::
+            if { next1 = empty :: ?result1 = head
+               | true ::
+                   reverseList(next1, ?result2)
+                   ?t1 = next1
+                   next(!t1, head)
+                   next(!head, empty)
+                   ?result1 = result2
+               }
     | true :: ?result1 = head
-    end
+    }
 }
 
 ?n3 = mynode(3, empty)

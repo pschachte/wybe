@@ -13,8 +13,7 @@ public def simpleMerge(tl:tree):tree = node(tl, 200, empty)
 !printTree(t)
 !println("")
 
-if t1 = node(?l, ?k, ?r) :: ?t1 = node(l, 1000, r)
-end
+if { t1 = node(?l, ?k, ?r) :: ?t1 = node(l, 1000, r) }
 
 !println("expect t1 - 1000:")
 !printTree(t1)

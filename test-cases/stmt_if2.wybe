@@ -12,5 +12,4 @@ public def lookup(key:int, tree:tree):bool =
 
 ?tr = node(empty, 1, empty)
 
-if lookup(1, tr) :: !print("found")
-end
+if{ lookup(1, tr) :: !print("found") }

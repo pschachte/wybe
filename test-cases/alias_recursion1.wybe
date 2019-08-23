@@ -3,13 +3,14 @@
 use position
 
 public def if_test(a:position, b:position, ?r:position) {
-    if a.x > 0 ::
-      ?tmp = b
-      ?b = a
-      ?a = tmp
-      if_test(a, b, ?r)
-    | true :: ?r = a
-    end
+    if { a.x > 0 ::
+            ?tmp = b
+            ?b = a
+            ?a = tmp
+            if_test(a, b, ?r)
+       | true ::
+            ?r = a
+    }
 }
 
 ?pa = position(100, 101)

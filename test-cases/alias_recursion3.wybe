@@ -2,10 +2,10 @@ public type mynode { public empty | mynode(data:int, next:mynode) }
 
 
 public def printMyNode(nd:mynode) use !io {
-  if nd = mynode(?data, ?next) ::
-    !println(data)
-    !printMyNode(next)
-  end
+  if { nd = mynode(?data, ?next) ::
+          !println(data)
+          !printMyNode(next)
+  }
 }
 
 # reverse linked list and return the new head

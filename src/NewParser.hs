@@ -388,7 +388,7 @@ whenStmt = do
 ifStmtParser :: Parser (Placed Stmt)
 ifStmtParser = do
     pos <- tokenPosition <$> ident "if"
-    cases <- (ifCaseParser `sepBy` symbol "|") <* ident "end"
+    cases <- betweenB Brace $ ifCaseParser `sepBy` symbol "|"
     let final = List.foldr (\(cond, body) rest ->
                            [Unplaced (Cond cond body rest)]) [] cases
     case final of
@@ -895,7 +895,7 @@ determinism = option Det (ident "test" *> return SemiDet)
 -- maybe remove 'import', and probably need to add others.
 keywords :: [String]
 keywords =
-    [ "if", "then", "else", "def", "end", "use"
+    [ "if", "then", "else", "def", "use"
     , "do",  "until", "unless", "and", "or", "not", "test", "import"
     , "while", "foreign", "in", "when"
     ]

@@ -5,10 +5,11 @@ use alias_mfoo
 
 # Expected Alias Pairs: [(p1, p3)]
 public def bar(p1:position, ?p3:position) use !io {
-    if p1.y > 1 :: ?p3 = p1
-    | true :: ?tmp = p1.y
-              y(!p1, tmp + 1) # p1 (2, 2)
-              ?p3 = p1
-              !foo(p1, ?p2, ?p3)
-    end
+    if { p1.y > 1 :: ?p3 = p1
+       | true ::
+           ?tmp = p1.y
+           y(!p1, tmp + 1) # p1 (2, 2)
+           ?p3 = p1
+           !foo(p1, ?p2, ?p3)
+    }
 }

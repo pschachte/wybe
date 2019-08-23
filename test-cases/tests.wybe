@@ -3,7 +3,7 @@
 public def test lt(x:int, y:int) {
     # use a test to implement another test
     # x < y # this should work, but is currently a syntax error, so do this:
-    if x < y :: true | true :: false end
+    if { x < y :: true | true :: false }
 }
 
 public def lt2(x:int, y:int, ?res:bool) {
@@ -19,11 +19,11 @@ public def test lt3(x:int, y:int) {
 public type map { public empty | node(left:map, key:int, value:int, right:map) }
 
 public def test lookup(key:int, map:map, ?result:int) {
-    if map = empty:: false
-    |  key = map.key:: ?result = map.value
-    |  key < map.key:: lookup(key, map.left, ?result)
-    |  true:: lookup(key, map.right, ?result)
-    end
+    if{ map = empty:: false
+    |   key = map.key:: ?result = map.value
+    |   key < map.key:: lookup(key, map.left, ?result)
+    |   true:: lookup(key, map.right, ?result)
+    }
 }
 
 # # this should work, too, since map.key should fail if map is empty
