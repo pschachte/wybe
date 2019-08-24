@@ -557,7 +557,7 @@ completeOperatorTable =
       ]
     , [ prefix "not" ]
     , [ binary "&&" AssocLeft ]
-    , [ binary "or"  AssocLeft ]
+    , [ binary "||"  AssocLeft ]
     , [ Postfix whereBodyParser]
     ]
 
@@ -817,7 +817,7 @@ funcSymbolPlaced =
         placeToken _ = error "Only ident and symbol token expected."
     in choice [ placeToken <$> symbolAny
               , placeToken <$> ident "&&"
-              , placeToken <$> ident "or"
+              , placeToken <$> ident "||"
               , placeToken <$> ident "not"
 
               -- [] or [|]
@@ -896,6 +896,6 @@ determinism = option Det (ident "test" *> return SemiDet)
 keywords :: [String]
 keywords =
     [ "if", "then", "else", "def", "use"
-    , "do",  "until", "unless", "or", "not", "test", "import"
+    , "do",  "until", "unless", "not", "test", "import"
     , "while", "foreign", "in", "when"
     ]

@@ -794,17 +794,17 @@ simplifyOp "div" _ [ArgInt n1 ty, ArgInt n2 _, output] =
 simplifyOp "div" _ [arg, ArgInt 1 _, output] =
   primMove arg output
 -- Bitstring ops
-simplifyOp "&&" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+simplifyOp "and" _ [ArgInt n1 ty, ArgInt n2 _, output] =
   primMove (ArgInt (fromIntegral n1 .&. fromIntegral n2) ty) output
-simplifyOp "&&" _ [ArgInt 0 ty, _, output] =
+simplifyOp "and" _ [ArgInt 0 ty, _, output] =
   primMove (ArgInt 0 ty) output
-simplifyOp "&&" _ [_, ArgInt 0 ty, output] =
+simplifyOp "and" _ [_, ArgInt 0 ty, output] =
   primMove (ArgInt 0 ty) output
-simplifyOp "&&" _ [ArgInt (-1) _, arg, output] =
+simplifyOp "and" _ [ArgInt (-1) _, arg, output] =
   primMove arg output
-simplifyOp "&&" _ [arg, ArgInt (-1) _, output] =
+simplifyOp "and" _ [arg, ArgInt (-1) _, output] =
   primMove arg output
-simplifyOp "&&" flags [arg1, arg2, output]
+simplifyOp "and" flags [arg1, arg2, output]
     | arg2 < arg1 = PrimForeign "llvm" "and" flags [arg2, arg1, output]
 simplifyOp "or" _ [ArgInt n1 ty, ArgInt n2 _, output] =
   primMove (ArgInt (fromIntegral n1 .|. fromIntegral n2) ty) output
