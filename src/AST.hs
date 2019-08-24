@@ -2126,8 +2126,8 @@ argFlowDescription FlowOut = "output"
 expToStmt :: Exp -> Stmt
 expToStmt (Fncall [] "&&" args) = And $ List.map (fmap expToStmt) args
 expToStmt (Fncall [] "||"  args) = Or  $ List.map (fmap expToStmt) args
-expToStmt (Fncall [] "not" [arg]) = Not $ fmap expToStmt arg
-expToStmt (Fncall [] "not" args) = shouldnt $ "non-unary 'not' " ++ show args
+expToStmt (Fncall [] "~" [arg]) = Not $ fmap expToStmt arg
+expToStmt (Fncall [] "~" args) = shouldnt $ "non-unary 'not' " ++ show args
 expToStmt (Fncall maybeMod name args) =
     ProcCall maybeMod name Nothing Det False args
 expToStmt (ForeignFn lang name flags args) =

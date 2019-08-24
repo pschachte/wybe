@@ -8,8 +8,8 @@ public def yorn(prompt:string, ?result:bool) use !io {
         }
 }
 
-def is_yes(ch) = ch='y' or ch='Y'
-def is_yes_or_no(ch) = is_yes(ch) or ch='n' or ch='N'
+def is_yes(ch) = ~(ch/='y' && ch/='Y') # test of ~ and &&
+def is_yes_or_no(ch) = is_yes(ch) || ch='n' || ch='N' # test of ||
 
 !yorn("Well, yes or no?", ?r)
 !println(r)

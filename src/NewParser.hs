@@ -555,7 +555,7 @@ completeOperatorTable =
     , [ binary "/=" AssocNone
       , binary "="  AssocNone
       ]
-    , [ prefix "not" ]
+    , [ prefix "~" ]
     , [ binary "&&" AssocLeft ]
     , [ binary "||"  AssocLeft ]
     , [ Postfix whereBodyParser]
@@ -818,7 +818,7 @@ funcSymbolPlaced =
     in choice [ placeToken <$> symbolAny
               , placeToken <$> ident "&&"
               , placeToken <$> ident "||"
-              , placeToken <$> ident "not"
+              , placeToken <$> ident "~"
 
               -- [] or [|]
               , do p <- tokenPosition <$> leftBracket Bracket
@@ -896,6 +896,6 @@ determinism = option Det (ident "test" *> return SemiDet)
 keywords :: [String]
 keywords =
     [ "if", "then", "else", "def", "use"
-    , "do",  "until", "unless", "not", "test", "import"
+    , "do",  "until", "unless", "test", "import"
     , "while", "foreign", "in", "when"
     ]
