@@ -2124,7 +2124,7 @@ argFlowDescription FlowOut = "output"
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
-expToStmt (Fncall [] "and" args) = And $ List.map (fmap expToStmt) args
+expToStmt (Fncall [] "&&" args) = And $ List.map (fmap expToStmt) args
 expToStmt (Fncall [] "or"  args) = Or  $ List.map (fmap expToStmt) args
 expToStmt (Fncall [] "not" [arg]) = Not $ fmap expToStmt arg
 expToStmt (Fncall [] "not" args) = shouldnt $ "non-unary 'not' " ++ show args

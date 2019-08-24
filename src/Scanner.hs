@@ -127,7 +127,7 @@ tokenise pos str@(c:cs)
                     '\'' -> tokeniseChar pos cs
                     '\"' -> tokeniseString DoubleQuote pos cs
                     -- backquote makes anything an identifier
-                    '`' -> let (name,rest) = span (not . (=='`')) str
+                    '`' -> let (name,_:rest) = break (=='`') cs
                            in  multiCharTok name rest (TokIdent name pos) pos
                     '#' -> tokenise (setSourceColumn pos 1)
                            $ dropWhile (not . (=='\n')) cs
