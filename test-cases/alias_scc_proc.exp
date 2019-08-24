@@ -37,11 +37,11 @@ bar > public (1 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate(~%p1#0:position.position, ?%p1#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        foreign llvm move(p1#1:position.position, ?p3#0:position.position) @alias_scc_proc:23:15
-        alias_scc_proc.foo<0>(~p1#1:position.position, ?p2#0:position.position, ?p3#1:position.position, ~#io#0:phantom, ?#io#1:phantom) @alias_scc_proc:24:16
+        foreign llvm move(p1#1:position.position, ?p3#0:position.position) @alias_scc_proc:23:18
+        alias_scc_proc.foo<0>(~p1#1:position.position, ?p2#0:position.position, ?p3#1:position.position, ~#io#0:phantom, ?#io#1:phantom) @alias_scc_proc:24:19
 
     1:
-        foreign llvm move(~p1#0:position.position, ?p3#0:position.position) @alias_scc_proc:20:20
+        foreign llvm move(~p1#0:position.position, ?p3#0:position.position) @alias_scc_proc:20:22
         foreign llvm move(~io#0:phantom, ?io#1:phantom)
 
 
@@ -60,7 +60,7 @@ foo > public (2 calls)
         foreign lpvm mutate(~tmp$18#0:position.position, ?p2#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 2:wybe.int)
 
     1:
-        foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_scc_proc:7:20
+        foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_scc_proc:7:21
         foreign lpvm alloc(16:wybe.int, ?tmp$12#0:position.position)
         foreign lpvm mutate(~tmp$12#0:position.position, ?tmp$13#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 3:wybe.int)
         foreign lpvm mutate(~tmp$13#0:position.position, ?tmp$1#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 3:wybe.int)

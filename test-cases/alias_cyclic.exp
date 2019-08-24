@@ -42,7 +42,7 @@ updateX > public (2 calls)
         alias_cyclic.updateY<0>(~p1#1:position.position, ?p2#0:position.position, ~#io#0:phantom, ?#io#1:phantom) @alias_cyclic:19:16
 
     1:
-        foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:16:22
+        foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:16:24
         foreign llvm move(~io#0:phantom, ?io#1:phantom)
 
 
@@ -55,10 +55,10 @@ updateY > public (1 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate(~%p1#0:position.position, ?%p1#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_cyclic.updateX<0>(~p1#1:position.position, ?p2#0:position.position, ~#io#0:phantom, ?#io#1:phantom) @alias_cyclic:10:16
+        alias_cyclic.updateX<0>(~p1#1:position.position, ?p2#0:position.position, ~#io#0:phantom, ?#io#1:phantom) @alias_cyclic:10:19
 
     1:
-        foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:7:22
+        foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:7:24
         foreign llvm move(~io#0:phantom, ?io#1:phantom)
 
 
