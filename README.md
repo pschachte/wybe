@@ -110,7 +110,7 @@ is passed by result, and with a `!` prefix, it is passed by value-result.
 
 Functions are defined with the syntax:
 
-> `def` *name*(*param*`:`*type*, ... *param*`:`*type*)`:`*type* `=` *expr*
+> `def` *name*`(`*param*`:`*type*, ... *param*`:`*type*`):`*type* `=` *expr*
 
 Here *name* is the function name, each *param* is a parameter name, the
 corresponding *type* is its type, the final *type* is the function
@@ -120,10 +120,61 @@ type.  If there are no parameters, the parentheses are also omitted.
 
 This syntax declares a private (not exported) function.  To export the
 function, the definition should be preceded by the `pub` keyword.
+All types must be included in public function definitions.
+
+For example:
+
+```
+pub def toCelsius(f:float):float = (f - 32.0) / 1.8
+```
 
 
 ### Procedures
+
+Procedures are defined with the syntax:
+
+> `def` *name*`(`*dir* *param*`:`*type*, ... *dir* *param*`:`*type*`) {` *body* `}`
+
+Again *name* is the procedure name, each *param* is a parameter name, the
+corresponding *type* is its type, and *body* is a sequence of statements
+making up the body of the procedure.  Each *dir* is a dataflow
+direction annotation, either nothing to indicate an input, `?` for an
+output, or `!` to indicate both an input and an output.
+Again each `:`*type* is optional, with types inferred if omitted,
+and parentheses omitted for niladic procedures.
+
+The procedure is private unless preceded by the `pub` keyword.
+All types must be included in public procedure definitions.
+
+For example:
+
+```
+pub def incr(!x:int) { ?x = x + 1 }
+```
+
+
 ### Functions *are* procedures
+
+Wybe functions are the same as procedures with one extra output
+argument, and in fact the compiler implements them that way.  Therefore,
+the definition
+```
+pub def toCelsius(f:float):float = (f - 32.0) / 1.8
+```
+is exactly equivalent to
+```
+pub def toCelsius(f:float, ?result:float) { ?result = (f - 32.0) / 1.8 }
+```
+
+Likewise, every function call is transformed into a procedure call, so:
+```
+pub def example(f:float, ?c:float) {?c = toCelsius(f) }
+```
+is exactly equivalent to
+```
+pub def example(f:float, ?c:float) {toCelsius(f, ?c) }
+```
+
 ### Resources
 ### Modes
 ### Tests
