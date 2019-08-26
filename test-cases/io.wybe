@@ -1,8 +1,8 @@
-public def myprint_a(x:int) use !io {
+pub def myprint_a(x:int) use !io {
   !println(x)
 }
 
-public def myprint_b(x:int, ?y:int) use !io {
+pub def myprint_b(x:int, ?y:int) use !io {
   !myprint_a(x)
   ?y = 200
 }

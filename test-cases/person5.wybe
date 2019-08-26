@@ -1,4 +1,4 @@
-public type person { public person(firstname:string, lastname:string) }
+pub type person { pub person(firstname:string, lastname:string) }
 
 # update both objects
 # expect: copy B into a new memory and do update

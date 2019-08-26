@@ -1,4 +1,4 @@
-public def beer99 use !io {
+pub def beer99 use !io {
     # 'for' doesn't currently work
     # do for ?count in range(99,0,-1)
     ?count = 99

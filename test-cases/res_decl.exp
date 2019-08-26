@@ -7,7 +7,7 @@ AFTER EVERYTHING:
   public procs    : 
   imports         : use wybe
   types           : 
-  resources       : count: fromList [(res_decl.count,Just wybe.int @res_decl:1:8)] @res_decl:1:8
+  resources       : count: fromList [(res_decl.count,Just wybe.int @res_decl:1:5)] @res_decl:1:5
   procs           : 
 
 

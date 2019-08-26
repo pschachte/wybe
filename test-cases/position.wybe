@@ -1,6 +1,6 @@
-public type position { public position(x:int, y:int) }
+pub type position { pub position(x:int, y:int) }
 
-public def printPosition(pos:position) use !io {
+pub def printPosition(pos:position) use !io {
     !print(" (")
     !print(pos.x)
     !print(",")

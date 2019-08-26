@@ -1,4 +1,4 @@
-public def yorn(prompt:string, ?result:bool) use !io {
+pub def yorn(prompt:string, ?result:bool) use !io {
        do {! print(prompt)
        	   ! print(" (y/n) ")
            ! read(?response)

@@ -1,7 +1,7 @@
-public type mynode { public empty | mynode(data:int, next:mynode) }
+pub type mynode { pub empty | mynode(data:int, next:mynode) }
 
 
-public def printMyNode(nd:mynode) use !io {
+pub def printMyNode(nd:mynode) use !io {
   if { nd = mynode(?data, ?next) ::
            !println(data)
            !printMyNode(next)
@@ -9,7 +9,7 @@ public def printMyNode(nd:mynode) use !io {
 }
 
 # reverse linked list and return the new head
-public def reverseList(head:mynode, ?result1:mynode) {
+pub def reverseList(head:mynode, ?result1:mynode) {
     if { head = mynode(?data1, ?next1) ::
             if { next1 = empty :: ?result1 = head
                | true ::

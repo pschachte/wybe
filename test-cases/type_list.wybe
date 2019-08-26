@@ -1,11 +1,11 @@
-public type intlist { public [] | [|](head:int, tail:intlist) }
+pub type intlist { pub [] | [|](head:int, tail:intlist) }
 
-public def ++(x:intlist, y:intlist):intlist =
+pub def ++(x:intlist, y:intlist):intlist =
     if x = [ ?h | ?t]
     then [h|t++y]
     else y
 
-public def length(x:intlist) : int =
+pub def length(x:intlist) : int =
     if x = [ ?h | ?t] then 1 + length(t) else 0
 
 

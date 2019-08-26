@@ -1,4 +1,4 @@
-public type person { public person(firstname:string, lastname:string) }
+pub type person { pub person(firstname:string, lastname:string) }
 
 # expect: destructively update A; A is fresh
 ?personA = person("John", "Smith")

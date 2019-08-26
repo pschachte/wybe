@@ -1,9 +1,9 @@
-public type Coordinate { public Coordinate(x:int, y:int, z:int) }
+pub type Coordinate { pub Coordinate(x:int, y:int, z:int) }
 
 # Two fields of crd1 are referenced by crd2
 # crd2 points to same space as crd1
 # expect: to create a new memory block if crd1 or crd2 is ever going to be updated?
-public def fcopy(crd1:Coordinate):Coordinate =
+pub def fcopy(crd1:Coordinate):Coordinate =
   crd1
 
 ?crd1 = Coordinate(1000,1000,1000)

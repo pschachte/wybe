@@ -3,7 +3,7 @@
 use position
 
 # Expected Alias Pairs: [(0,1))]
-public def updateY(p1:position, ?p2:position) use !io {
+pub def updateY(p1:position, ?p2:position) use !io {
     if { p1.y > 901 :: ?p2 = p1
        | true :: ?tmp = p1.y
                  y(!p1, tmp + 1)
@@ -12,7 +12,7 @@ public def updateY(p1:position, ?p2:position) use !io {
 }
 
 # Expected Alias Pairs: [(0,1))]
-public def updateX(p1:position, ?p2:position) use !io {
+pub def updateX(p1:position, ?p2:position) use !io {
     if { p1.x > 101 :: ?p2 = p1
        | true :: ?tmp = p1.x
               x(!p1, tmp + 1)
@@ -20,7 +20,7 @@ public def updateX(p1:position, ?p2:position) use !io {
     }
 }
 
-public def bar use !io {
+pub def bar use !io {
   ?p1 = position(100,900)
   !updateX(p1, ?p2)
 

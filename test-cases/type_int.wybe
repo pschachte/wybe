@@ -1,16 +1,16 @@
-public type myint is int {
-    public def +(x:myint,y:myint):myint = foreign llvm add(x,y)
-    public def +(?x:myint,y:myint,z:myint) { ?x = foreign llvm sub(z,y) }
-    public def +(x:myint,?y:myint,z:myint) { ?y = foreign llvm sub(z,x) }
-    public def -(x:myint,y:myint):myint = foreign llvm sub(x,y)
-    public def -(?x:myint,y:myint,z:myint) { ?x = foreign llvm add(z,y) }
-    public def -(x:myint,?y:myint,z:myint) { ?y = foreign llvm sub(z,x) }
-    public def *(x:myint,y:myint):myint = foreign llvm mul(x,y)
-    public def /(x:myint,y:myint):myint = foreign llvm sdiv(x,y)
-    public def =(x:myint,y:myint):bool = foreign llvm icmp eq(x,y)
-    public def /=(x:myint,y:myint):bool = foreign llvm icmp ne(x,y)
-    public def <(x:myint,y:myint):bool = foreign llvm icmp slt(x,y)
-    public def <=(x:myint,y:myint):bool = foreign llvm icmp sle(x,y)
-    public def >(x:myint,y:myint):bool = foreign llvm icmp sgt(x,y)
-    public def >=(x:myint,y:myint):bool = foreign llvm icmp sge(x,y)
+pub type myint is int {
+    pub def +(x:myint,y:myint):myint = foreign llvm add(x,y)
+    pub def +(?x:myint,y:myint,z:myint) { ?x = foreign llvm sub(z,y) }
+    pub def +(x:myint,?y:myint,z:myint) { ?y = foreign llvm sub(z,x) }
+    pub def -(x:myint,y:myint):myint = foreign llvm sub(x,y)
+    pub def -(?x:myint,y:myint,z:myint) { ?x = foreign llvm add(z,y) }
+    pub def -(x:myint,?y:myint,z:myint) { ?y = foreign llvm sub(z,x) }
+    pub def *(x:myint,y:myint):myint = foreign llvm mul(x,y)
+    pub def /(x:myint,y:myint):myint = foreign llvm sdiv(x,y)
+    pub def =(x:myint,y:myint):bool = foreign llvm icmp eq(x,y)
+    pub def /=(x:myint,y:myint):bool = foreign llvm icmp ne(x,y)
+    pub def <(x:myint,y:myint):bool = foreign llvm icmp slt(x,y)
+    pub def <=(x:myint,y:myint):bool = foreign llvm icmp sle(x,y)
+    pub def >(x:myint,y:myint):bool = foreign llvm icmp sgt(x,y)
+    pub def >=(x:myint,y:myint):bool = foreign llvm icmp sge(x,y)
 }

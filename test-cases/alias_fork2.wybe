@@ -5,7 +5,7 @@
 use mytree
 
 # put tl as result's left tree node
-public def simpleMerge(tl:tree):tree = node(tl, 200, empty)
+pub def simpleMerge(tl:tree):tree = node(tl, 200, empty)
 
 ?t1 = node(empty, 1, empty)
 ?t = simpleMerge(t1)

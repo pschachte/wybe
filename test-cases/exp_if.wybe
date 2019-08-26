@@ -1,5 +1,5 @@
 # ifExpParser
-public def if_test(x:int) : string =
+pub def if_test(x:int) : string =
   if x > 0 then "larger" else "smaller"
 !print("expect larger: ")
 !print(if_test(3))

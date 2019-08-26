@@ -2,7 +2,7 @@
 
 use position
 
-public def if_test(a:position, b:position, ?r:position) {
+pub def if_test(a:position, b:position, ?r:position) {
     if { a.x > 0 ::
             ?tmp = b
             ?b = a

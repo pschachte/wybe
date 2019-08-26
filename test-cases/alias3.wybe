@@ -3,7 +3,7 @@
 
 use position
 
-public def replicate1(p1:position, ?p2:position) use !io {
+pub def replicate1(p1:position, ?p2:position) use !io {
   !println("--- Inside replicate1: ")
   ?p2 = p1
   !print("expect p1(1,1):")
@@ -16,7 +16,7 @@ public def replicate1(p1:position, ?p2:position) use !io {
   !printPosition(p2)
 }
 
-public def bar use !io {
+pub def bar use !io {
   ?p1 = position(1,1)
   !replicate1(p1, ?p2)
 

@@ -4,7 +4,7 @@ use position
 use alias_mbar
 
 # Expected Alias Pairs: [(p1, p2)]
-public def foo(p1:position, ?p2:position, ?p3:position) use !io {
+pub def foo(p1:position, ?p2:position, ?p3:position) use !io {
     if { p1.x > 1 ::
             ?p2 = p1 # p1 and p2 aliased
             ?p3 = position(3,3)

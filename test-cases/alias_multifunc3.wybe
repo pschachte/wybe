@@ -2,7 +2,7 @@
 
 use position
 
-public def replicate1(pa:position, ?pb:position) use !io {
+pub def replicate1(pa:position, ?pb:position) use !io {
     ?pb = pa
 
     x(!pa, 1111)

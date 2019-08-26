@@ -1,4 +1,4 @@
-public def nested_if(i:int) use !io {
+pub def nested_if(i:int) use !io {
     if { i =    0 :: !println("zero")
     |    i = 1001 :: !println("one thousand and one")
     |    i =    2 :: !println("two")

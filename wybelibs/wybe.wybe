@@ -1,135 +1,135 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
-public type bool { public false | true
-    public def `&&`(p:bool, q:bool):bool = foreign llvm and(p,q)
-    public def `||`(p:bool, q:bool):bool = foreign llvm or(p,q)
-    public def `~`(p:bool):bool = foreign llvm xor(p,true)
-    public def =(x:bool, y:bool):bool = foreign llvm icmp eq(x,y)
-    public def /=(x:bool,y:bool):bool = foreign llvm icmp ne(x,y)
+pub type bool { pub false | true
+    pub def `&&`(p:bool, q:bool):bool = foreign llvm and(p,q)
+    pub def `||`(p:bool, q:bool):bool = foreign llvm or(p,q)
+    pub def `~`(p:bool):bool = foreign llvm xor(p,true)
+    pub def =(x:bool, y:bool):bool = foreign llvm icmp eq(x,y)
+    pub def /=(x:bool,y:bool):bool = foreign llvm icmp ne(x,y)
 }
 
 
-public type int is i64 {
-    public def +(x:int,y:int):int = foreign llvm add(x,y)
-    public def +(?x:int,y:int,z:int) { ?x = foreign llvm sub(z,y) }
-    public def +(x:int,?y:int,z:int) { ?y = foreign llvm sub(z,x) }
-    public def -(x:int,y:int):int = foreign llvm sub(x,y)
-    public def -(?x:int,y:int,z:int) { ?x = foreign llvm add(z,y) }
-    public def -(x:int,?y:int,z:int) { ?y = foreign llvm sub(z,x) }
-    public def -(x:int):int = foreign llvm sub(0,x)
-    public def -(?x:int,y:int) { ?x = foreign llvm sub(0,y) }
-    public def *(x:int,y:int):int = foreign llvm mul(x,y)
-    public def /(x:int,y:int):int = foreign llvm sdiv(x,y)
-    public def /=(x:int,y:int):bool = foreign llvm icmp ne(x,y)
-    public def <(x:int,y:int):bool = foreign llvm icmp slt(x,y)
-    public def <=(x:int,y:int):bool = foreign llvm icmp sle(x,y)
-    public def >(x:int,y:int):bool = foreign llvm icmp sgt(x,y)
-    public def >=(x:int,y:int):bool = foreign llvm icmp sge(x,y)
-    public def =(x:int, y:int):bool = foreign llvm icmp eq(x,y)
-    public def sqrt(x:int):int = foreign C isqrt(x)
-    public def power(x:int,y:int):int = foreign C ipow(x,y)
-    public def incr(!x:int) { ?x = x + 1 }
-    public def decr(!x:int) { ?x = x - 1 }
+pub type int is i64 {
+    pub def +(x:int,y:int):int = foreign llvm add(x,y)
+    pub def +(?x:int,y:int,z:int) { ?x = foreign llvm sub(z,y) }
+    pub def +(x:int,?y:int,z:int) { ?y = foreign llvm sub(z,x) }
+    pub def -(x:int,y:int):int = foreign llvm sub(x,y)
+    pub def -(?x:int,y:int,z:int) { ?x = foreign llvm add(z,y) }
+    pub def -(x:int,?y:int,z:int) { ?y = foreign llvm sub(z,x) }
+    pub def -(x:int):int = foreign llvm sub(0,x)
+    pub def -(?x:int,y:int) { ?x = foreign llvm sub(0,y) }
+    pub def *(x:int,y:int):int = foreign llvm mul(x,y)
+    pub def /(x:int,y:int):int = foreign llvm sdiv(x,y)
+    pub def /=(x:int,y:int):bool = foreign llvm icmp ne(x,y)
+    pub def <(x:int,y:int):bool = foreign llvm icmp slt(x,y)
+    pub def <=(x:int,y:int):bool = foreign llvm icmp sle(x,y)
+    pub def >(x:int,y:int):bool = foreign llvm icmp sgt(x,y)
+    pub def >=(x:int,y:int):bool = foreign llvm icmp sge(x,y)
+    pub def =(x:int, y:int):bool = foreign llvm icmp eq(x,y)
+    pub def sqrt(x:int):int = foreign C isqrt(x)
+    pub def power(x:int,y:int):int = foreign C ipow(x,y)
+    pub def incr(!x:int) { ?x = x + 1 }
+    pub def decr(!x:int) { ?x = x - 1 }
 }
 
 
-public type float is f64 {
-    public def +(x:float,y:float):float = foreign llvm fadd(x,y)
-    public def +(?x:float,y:float,z:float) { ?x = foreign llvm fsub(z,y) }
-    public def +(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
-    public def -(x:float,y:float):float = foreign llvm fsub(x,y)
-    public def -(?x:float,y:float,z:float) { ?x = foreign llvm fadd(z,y) }
-    public def -(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
-    # public def -(x:float):float = foreign llvm fsub(0,x)
-    # public def -(?x:float,y:float) { ?x = foreign llvm fsub(0,y) }
-    public def *(x:float,y:float):float = foreign llvm fmul(x,y)
-    public def /(x:float,y:float):float = foreign llvm fdiv(x,y)
-    public def /=(x:float,y:float):bool = foreign llvm fcmp ne(x,y)
-    public def <(x:float,y:float):bool = foreign llvm fcmp slt(x,y)
-    public def <=(x:float,y:float):bool = foreign llvm fcmp sle(x,y)
-    public def >(x:float,y:float):bool = foreign llvm fcmp sgt(x,y)
-    public def >=(x:float,y:float):bool = foreign llvm fcmp sge(x,y)
-    public def =(x:float, y:float):bool = foreign llvm fcmp eq(x,y)
-    public def sqrt(x:float):float = foreign C sqrt(x)
-    public def power(x:float,y:float):float = foreign C pow(x,y)
+pub type float is f64 {
+    pub def +(x:float,y:float):float = foreign llvm fadd(x,y)
+    pub def +(?x:float,y:float,z:float) { ?x = foreign llvm fsub(z,y) }
+    pub def +(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
+    pub def -(x:float,y:float):float = foreign llvm fsub(x,y)
+    pub def -(?x:float,y:float,z:float) { ?x = foreign llvm fadd(z,y) }
+    pub def -(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
+    # pub def -(x:float):float = foreign llvm fsub(0,x)
+    # pub def -(?x:float,y:float) { ?x = foreign llvm fsub(0,y) }
+    pub def *(x:float,y:float):float = foreign llvm fmul(x,y)
+    pub def /(x:float,y:float):float = foreign llvm fdiv(x,y)
+    pub def /=(x:float,y:float):bool = foreign llvm fcmp ne(x,y)
+    pub def <(x:float,y:float):bool = foreign llvm fcmp slt(x,y)
+    pub def <=(x:float,y:float):bool = foreign llvm fcmp sle(x,y)
+    pub def >(x:float,y:float):bool = foreign llvm fcmp sgt(x,y)
+    pub def >=(x:float,y:float):bool = foreign llvm fcmp sge(x,y)
+    pub def =(x:float, y:float):bool = foreign llvm fcmp eq(x,y)
+    pub def sqrt(x:float):float = foreign C sqrt(x)
+    pub def power(x:float,y:float):float = foreign C pow(x,y)
 }
 
 
-public type string is pointer8 {
+pub type string is pointer8 {
     # this whole implementation is completely wrong, but will do for now
-    #wrong: public def ++(x:string, y:string):string = foreign c strcat(x,y)
-    public def =(x:string, y:string):bool  = foreign c strcmp(x,y) = 0
-    public def /=(x:string,y:string):bool  = foreign c strcmp(x,y) /= 0
-    public def <(x:string, y:string):bool  = foreign c strcmp(x,y) < 0
-    public def <=(x:string, y:string):bool = foreign c strcmp(x,y) <= 0
-    public def >(x:string, y:string):bool  = foreign c strcmp(x,y) > 0
-    public def >=(x:string, y:string):bool = foreign c strcmp(x,y) >= 0
+    #wrong: pub def ++(x:string, y:string):string = foreign c strcat(x,y)
+    pub def =(x:string, y:string):bool  = foreign c strcmp(x,y) = 0
+    pub def /=(x:string,y:string):bool  = foreign c strcmp(x,y) /= 0
+    pub def <(x:string, y:string):bool  = foreign c strcmp(x,y) < 0
+    pub def <=(x:string, y:string):bool = foreign c strcmp(x,y) <= 0
+    pub def >(x:string, y:string):bool  = foreign c strcmp(x,y) > 0
+    pub def >=(x:string, y:string):bool = foreign c strcmp(x,y) >= 0
 }
 
 
-public type char is i8 {
-    public def =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
-    public def /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
+pub type char is i8 {
+    pub def =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
+    pub def /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
 }
 
 
-public module io {
-    public resource io:phantom = phantom
+pub module io {
+    pub resource io:phantom = phantom
 
-    public def nl use !io { foreign c putchar('\n', !io) }
+    pub def nl use !io { foreign c putchar('\n', !io) }
 
-    public def print(x:int) use !io { foreign c print_int(x, !io) }
-    public def println(x:int) use !io { !print(x) !nl }
-    # public def read(?x:int) use !io { foreign c read_int(?x,!io) }
+    pub def print(x:int) use !io { foreign c print_int(x, !io) }
+    pub def println(x:int) use !io { !print(x) !nl }
+    # pub def read(?x:int) use !io { foreign c read_int(?x,!io) }
 
-    public def print(x:float) use !io { foreign c print_float(x,!io) }
-    public def println(x:float) use !io { !print(x) !nl }
-    # public def read(?x:float) use !io { foreign c read_float(?x,!io) }
+    pub def print(x:float) use !io { foreign c print_float(x,!io) }
+    pub def println(x:float) use !io { !print(x) !nl }
+    # pub def read(?x:float) use !io { foreign c read_float(?x,!io) }
 
-    public def print(x:char) use !io { foreign c putchar(x,!io) }
-    public def println(x:char) use !io { !print(x) !nl }
-    public def read(?x:char) use !io { foreign c read_char(?x,!io) }
+    pub def print(x:char) use !io { foreign c putchar(x,!io) }
+    pub def println(x:char) use !io { !print(x) !nl }
+    pub def read(?x:char) use !io { foreign c read_char(?x,!io) }
 
-    public def print(x:string) use !io { foreign c print_string(x,!io) }
-    public def println(x:string) use !io { !print(x) !nl }
-    # public def read(?x:string) use !io { foreign c read_line(?x,!io) }
+    pub def print(x:string) use !io { foreign c print_string(x,!io) }
+    pub def println(x:string) use !io { !print(x) !nl }
+    # pub def read(?x:string) use !io { foreign c read_line(?x,!io) }
 
-    public def print(x:bool) use !io {
+    pub def print(x:bool) use !io {
        !print(if false(x) then "false" else "true")
     }
-    public def println(x:bool) use !io { !print(x) !nl }
-#    public def eof:char = foreign lpvm cast(-1)
+    pub def println(x:bool) use !io { !print(x) !nl }
+#    pub def eof:char = foreign lpvm cast(-1)
 }
 
-public type phantom is phantom {
-    # public def phantom:phantom = foreign lpvm cast(0)
-    # public def =(x:phantom,?y:phantom) { ?y = foreign lpvm cast(0) }
-    # public def =(?x:phantom,y:phantom) { ?x = foreign lpvm cast(0) }
+pub type phantom is phantom {
+    # pub def phantom:phantom = foreign lpvm cast(0)
+    # pub def =(x:phantom,?y:phantom) { ?y = foreign lpvm cast(0) }
+    # pub def =(?x:phantom,y:phantom) { ?x = foreign lpvm cast(0) }
 }
 
-# public module allocation {
+# pub module allocation {
 #     use wybe.io
 #     foreign c gc_init(!io)
 # }
 
 
-public module command_line {
+pub module command_line {
     # The number of command line arguments.  This is automatically
     # initialised by the code that builds executables.
-    public resource argc:int
+    pub resource argc:int
 
     # The actual command line arguments. This is really a C array of
     # strings, but we don't support them yet, so I'm just calling it an int
     # for now. That means you can't actually get the arguments yet. This is
     # automatically initialised by the code that builds executables.
-    public resource argv:int      # until we support C arrays
+    pub resource argv:int      # until we support C arrays
 
     # The exit code to return to the invoking shell.  This is initialised to
     # zero, so it only needs to be assigned for error cases.
-    public resource exit_code:int # = 0 when we support resource initialisation
+    pub resource exit_code:int # = 0 when we support resource initialisation
 
     # Set the exit code, but don't exit immediately.
-    public def set_exit_code(code:int) use !exit_code {
+    pub def set_exit_code(code:int) use !exit_code {
         ?exit_code = code
     }
 }

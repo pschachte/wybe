@@ -1,4 +1,4 @@
-public def use_before_def(?result:int)        {
+pub def use_before_def(?result:int)        {
        ?result = result + 1
        
 }

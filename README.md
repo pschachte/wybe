@@ -103,7 +103,25 @@ with an exclamation mark (`!`).
     incr(!x)   # increment x (both uses and reassigns x)
 ```
 
+So a variable mention without adornment is passed by value, with a `?` prefix it
+is passed by result, and with a `!` prefix, it is passed by value-result.
+
 ### Functions
+
+Functions are defined with the syntax:
+
+> `def` *name*(*param*`:`*type*, ... *param*`:`*type*)`:`*type* `=` *expr*
+
+Here *name* is the function name, each *param* is a parameter name, the
+corresponding *type* is its type, the final *type* is the function
+result type, and *expr* is an expression giving the function value.
+Each `:`*type* is optional; if omitted, the compiler will infer the
+type.  If there are no parameters, the parentheses are also omitted.
+
+This syntax declares a private (not exported) function.  To export the
+function, the definition should be preceded by the `pub` keyword.
+
+
 ### Procedures
 ### Functions *are* procedures
 ### Resources

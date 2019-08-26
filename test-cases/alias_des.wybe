@@ -1,6 +1,6 @@
 use position
 
-public def replicate(?p2:position) use !io {
+pub def replicate(?p2:position) use !io {
   ?p1 = position(101,102)
   ?p2 = position(p1.x, p1.y)
   x(!p1, 10000) # destructive update
@@ -11,7 +11,7 @@ public def replicate(?p2:position) use !io {
   !printPosition(p2)
 }
 
-public def foo use !io {
+pub def foo use !io {
   !replicate(?p2)
   x(!p2, 20000)
   !print("--- after x(!p2, 20000) - expect p2(20000,103):")

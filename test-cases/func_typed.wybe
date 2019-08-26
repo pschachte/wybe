@@ -1,1 +1,1 @@
-public def plus(a:int, b:int) : int = a+b
+pub def plus(a:int, b:int) : int = a+b

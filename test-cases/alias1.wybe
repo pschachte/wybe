@@ -1,13 +1,13 @@
 use position
 
-public def replicate(p1:position, ?p2:position) use !io {
+pub def replicate(p1:position, ?p2:position) use !io {
   ?pp = position(0,0)
   !print("random print")
   !println(pp.x)
   ?p2 = p1
 }
 
-public def foo use !io {
+pub def foo use !io {
   ?p1 = position(101,102)
   !replicate(p1, ?p2)
 
@@ -26,7 +26,7 @@ public def foo use !io {
   !printPosition(p2)
 }
 
-public def bar use !io {
+pub def bar use !io {
   ?p1 = position(101,102)
   !replicate(p1, ?p2)
 
@@ -45,7 +45,7 @@ public def bar use !io {
   !printPosition(p2)
 }
 
-public def baz use !io {
+pub def baz use !io {
   ?p1 = position(101,102)
   !replicate(p1, ?p2)
 

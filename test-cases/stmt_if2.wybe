@@ -1,8 +1,8 @@
 # if case
 
-public type tree { public empty | node(left:tree, key:int, right:tree) }
+pub type tree { pub empty | node(left:tree, key:int, right:tree) }
 
-public def lookup(key:int, tree:tree):bool =
+pub def lookup(key:int, tree:tree):bool =
     if tree = empty then false
     else if tree = node(?l, ?k, ?r) then
         if key = k then true

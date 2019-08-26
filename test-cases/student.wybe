@@ -1,7 +1,7 @@
-public type course  { public course(code:int, name:string) }
-public type student { public student(id:int, major:course) }
+pub type course  { pub course(code:int, name:string) }
+pub type student { pub student(id:int, major:course) }
 
-public def printStudent(stu:student) use !io {
+pub def printStudent(stu:student) use !io {
   !print("student id: ")
   !println(stu.id)
   ?cour = stu.major

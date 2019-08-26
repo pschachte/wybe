@@ -882,7 +882,7 @@ betweenB bs = between (leftBracket bs) (rightBracket bs)
 
 -- | Terminal "public" / "private".
 visibility :: Parser Visibility
-visibility = option Private (ident "public" *> return Public)
+visibility = option Private (ident "pub" *> return Public)
 
 
 -- | Terminal for determinism.

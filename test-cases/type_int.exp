@@ -20,7 +20,7 @@ AFTER EVERYTHING:
                     type_int.myint.>=<0>
   imports         : public use type_int.myint
                     use wybe
-  types           : myint/0 (i64)  @type_int:1:8
+  types           : myint/0 (i64)  @type_int:1:5
   resources       : 
   submodules      : type_int.myint
   procs           : 
@@ -65,64 +65,64 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 * > public inline (0 calls)
 0: *(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint): AliasPairs: []
-    foreign llvm mul(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:8:43
+    foreign llvm mul(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:8:40
 
 
 + > public inline (0 calls)
 0: +(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint): AliasPairs: []
-    foreign llvm add(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:2:43
+    foreign llvm add(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:2:40
 + > public inline (0 calls)
 1: +(?x#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint): AliasPairs: []
-    foreign llvm sub(~z#0:type_int.myint, ~y#0:type_int.myint, ?x#0:type_int.myint) @type_int:3:51
+    foreign llvm sub(~z#0:type_int.myint, ~y#0:type_int.myint, ?x#0:type_int.myint) @type_int:3:48
 + > public inline (0 calls)
 2: +(x#0:type_int.myint, ?y#0:type_int.myint, z#0:type_int.myint): AliasPairs: []
-    foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:4:51
+    foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:4:48
 
 
 - > public inline (0 calls)
 0: -(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint): AliasPairs: []
-    foreign llvm sub(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:5:43
+    foreign llvm sub(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:5:40
 - > public inline (0 calls)
 1: -(?x#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint): AliasPairs: []
-    foreign llvm add(~y#0:type_int.myint, ~z#0:type_int.myint, ?x#0:type_int.myint) @type_int:6:51
+    foreign llvm add(~y#0:type_int.myint, ~z#0:type_int.myint, ?x#0:type_int.myint) @type_int:6:48
 - > public inline (0 calls)
 2: -(x#0:type_int.myint, ?y#0:type_int.myint, z#0:type_int.myint): AliasPairs: []
-    foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:7:51
+    foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:7:48
 
 
 / > public inline (0 calls)
 0: /(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint): AliasPairs: []
-    foreign llvm sdiv(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:9:43
+    foreign llvm sdiv(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:9:40
 
 
 /= > public inline (0 calls)
 0: /=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool): AliasPairs: []
-    foreign llvm icmp ne(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:11:43
+    foreign llvm icmp ne(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:11:40
 
 
 < > public inline (0 calls)
 0: <(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool): AliasPairs: []
-    foreign llvm icmp slt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:12:42
+    foreign llvm icmp slt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:12:39
 
 
 <= > public inline (0 calls)
 0: <=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool): AliasPairs: []
-    foreign llvm icmp sle(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:13:43
+    foreign llvm icmp sle(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:13:40
 
 
 = > public inline (0 calls)
 0: =(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool): AliasPairs: []
-    foreign llvm icmp eq(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:10:42
+    foreign llvm icmp eq(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:10:39
 
 
 > > public inline (0 calls)
 0: >(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool): AliasPairs: []
-    foreign llvm icmp sgt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:14:42
+    foreign llvm icmp sgt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:14:39
 
 
 >= > public inline (0 calls)
 0: >=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool): AliasPairs: []
-    foreign llvm icmp sge(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:15:43
+    foreign llvm icmp sge(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:15:40
 
   LLVM code       :
 

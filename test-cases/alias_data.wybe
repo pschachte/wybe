@@ -1,10 +1,10 @@
 use student
 
-public def backup(student1:student, ?student2:student) use !io {
+pub def backup(student1:student, ?student2:student) use !io {
   ?student2 = student1
 }
 
-public def bar use !io {
+pub def bar use !io {
   ?course1 = course(101, "intro to cs")
   ?student1 = student(9401, course1)
   !backup(student1, ?student2)

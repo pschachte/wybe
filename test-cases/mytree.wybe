@@ -1,6 +1,6 @@
-public type tree { public empty | node(left:tree, key:int, right:tree) }
+pub type tree { pub empty | node(left:tree, key:int, right:tree) }
 
-public def printTree(t:tree) use !io {
+pub def printTree(t:tree) use !io {
   if { t = node(?l, ?k, ?r) ::
            !printTree(l)
            !print(" ")

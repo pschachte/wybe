@@ -1,1 +1,1 @@
-public def nada(x:int, y:int) { ?z=x+y }
+pub def nada(x:int, y:int) { ?z=x+y }

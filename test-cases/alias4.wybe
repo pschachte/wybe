@@ -3,14 +3,14 @@
 
 use position
 
-public def replicate1(p1:position, ?p2:position) use !io {
+pub def replicate1(p1:position, ?p2:position) use !io {
   ?pp = position(0,0)
   !println("random replicate1")
   !println(pp.x)
   ?p2 = position(p1.x, 200)
 }
 
-public def bar use !io {
+pub def bar use !io {
   ?p1 = position(100,100)
   !replicate1(p1, ?p2)
 

@@ -3,7 +3,7 @@
 use position
 
 # AliasPairs: [(pa#0,pc#0)]
-public def replicate1(pa:position, ?pb:position, ?pc:position) use !io {
+pub def replicate1(pa:position, ?pb:position, ?pc:position) use !io {
     ?pb = pa
     ?pc = pa
 
@@ -11,7 +11,7 @@ public def replicate1(pa:position, ?pb:position, ?pc:position) use !io {
     x(!pb, pp.x)
 }
 
-public def replicate21(?pb:position) use !io {
+pub def replicate21(?pb:position) use !io {
     ?pa = position(99999,99999)
     ?pb = pa
     ?pc = pa
@@ -20,7 +20,7 @@ public def replicate21(?pb:position) use !io {
     !printPosition(pc)
 }
 
-public def replicate22(?pb:position, ?pc:position) use !io {
+pub def replicate22(?pb:position, ?pc:position) use !io {
     ?pa = position(99999,99999)
     ?pb = pa
     ?pc = pa

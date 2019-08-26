@@ -1,12 +1,12 @@
-#public def mod(x:int, y:int):int = foreign llvm urem(x, y)
-#public def mod(x:int, y:int, ?r:int)  {?r = foreign llvm urem(x, y) end
+#pub def mod(x:int, y:int):int = foreign llvm urem(x, y)
+#pub def mod(x:int, y:int, ?r:int)  {?r = foreign llvm urem(x, y) end
 
-public def mod(x:int, y:int, ?r:int) use !io {
+pub def mod(x:int, y:int, ?r:int) use !io {
   !print('x') !print(x) !print(' ') !print('y') !println(y)
   ?r = foreign llvm urem(x, y)
 }
 
-public def gcd(a:int, b:int, ?r:int) use !io {
+pub def gcd(a:int, b:int, ?r:int) use !io {
   ?x = a
   ?y = b
   ?t = a

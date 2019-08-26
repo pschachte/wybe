@@ -1,6 +1,6 @@
 use position
 
-public def replicate2(p1:position, ?p2:position) use !io {
+pub def replicate2(p1:position, ?p2:position) use !io {
     ?pp = position(0,0)
     !print("some noise...")
     !println(pp.x)
@@ -9,7 +9,7 @@ public def replicate2(p1:position, ?p2:position) use !io {
 }
 
 # Expected Alias Pairs: [(p1#0,p3#0)]
-public def replicate1(p1:position, ?p2:position, ?p3:position) use !io {
+pub def replicate1(p1:position, ?p2:position, ?p3:position) use !io {
     !replicate2(p1, ?p2)
     !replicate2(p2, ?p3)
     x(!p2, 22)
