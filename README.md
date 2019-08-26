@@ -66,7 +66,7 @@ file you want it to build, and it figures out what files it needs
 to compile.
 
 
-### Types
+### Primitive types
 
 Wybe has the usual complement of primitive types:
 
@@ -140,6 +140,8 @@ corresponding *type* is its type, and *body* is a sequence of statements
 making up the body of the procedure.  Each *dir* is a dataflow
 direction annotation, either nothing to indicate an input, `?` for an
 output, or `!` to indicate both an input and an output.
+Procedures may have any number of input, output, and input/output
+arguments in any order.
 Again each `:`*type* is optional, with types inferred if omitted,
 and parentheses omitted for niladic procedures.
 
@@ -175,10 +177,42 @@ is exactly equivalent to
 pub def example(f:float, ?c:float) {toCelsius(f, ?c) }
 ```
 
-### Resources
+This means that what you define as a procedure, you can still call as a
+function, and what you define as a function, you can still call as a
+procedure.
+
+
 ### Modes
+
+It is permitted to define multiple procedures with the same name, as
+long as all of them have the same number and types of arguments in the
+same order, and different *modes*.  A mode is a combination of argument
+directions.  This can be used to carry out computations in different
+directions.  For example:
+
+```
+pub def add(x:int, y:int, ?xy:int) { ?xy = x + y }
+pub def add(x:int, ?y:int, xy:int) { ?y = xy - x }
+pub def add(?x:int, y:int, xy:int) { ?x = xy - y }
+```
+
+The compiler expects that these definitions are consistent, as they are
+in this case.  That means, for example, that for any values of `a` and
+`b`, after
+```
+add(a, b, ?ab)
+add(?z, b, ab)
+```
+`z` would equal `a`.
+The compiler is entitled to count on this equality holding, and would
+actually replace the second statement with
+```
+?z = a
+```
+
+### Type declarations
+### Resources
 ### Tests
 ### Selection and iteration
 ### Modules
-### User defined types
 ### Foreign interface
