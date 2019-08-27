@@ -90,16 +90,18 @@ transformPrim nonePhantomParams (aliasMap, prims) prim =
             return (combinedAliases, prims ++ [prim])
         _ -> do
             -- | Transform simple prims
-            logTransform $ "\n--- simple prim:  " ++ show prim
+            logTransform $ "\n--- simple prim:    " ++ show prim
+            logTransform $ "current aliasMap: " ++ show aliasMap
             maybeAliasInfo <- maybeAliasPrimArgs (content prim)
             -- Update alias map for escapable args
             aliasMap2 <- aliasedArgsInSimplePrim nonePhantomParams aliasMap
-                                                    maybeAliasInfo
-            logTransform $ "current aliasMap: " ++ show aliasMap
-            logTransform $ "after :           " ++ show aliasMap2
+                                                maybeAliasInfo
             -- Mutate destructive flag if this is a mutate instruction
             prim2 <- mutateInstruction prim aliasMap
-            logTransform $ "--- transformed to:  " ++ show prim2
+            logTransform $ "--- transformed to: " ++ show prim2
+            logTransform $ "updated aliasMap: " ++ show aliasMap2
+            -- Final arguments get removed from aliasmap after mutate
+            --   instruction is transformed
             return (aliasMap2, prims ++ [prim2])
 
 
@@ -152,14 +154,14 @@ _updateMutateForAlias aliasMap
             if not (connectedToOthers aliasMap inName) && final1
                 && not (connectedToOthers aliasMap memName) && final2
                 && des /= 1
-            -- XXX then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
-            then return args
+            then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
+            -- then return args
             else return args
 _updateMutateForAlias aliasMap
     args@[fIn@(ArgVar inName _ _ _ final), fOut, size, offset, ArgInt des typ, mem] =
         if not (connectedToOthers aliasMap inName) && final && des /= 1
-        -- XXX then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
-        then return args
+        then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
+        -- then return args
         else return args
 _updateMutateForAlias _ args = return args
 

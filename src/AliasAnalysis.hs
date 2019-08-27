@@ -265,7 +265,7 @@ aliasedArgsInSimplePrim nonePhantomParams currentAlias
         logAlias $ "      maybeAliasedOutput: " ++ show maybeAliasedOutput
         let aliases = cartProd maybeAliasedInput maybeAliasedOutput
         let aliasMap1 = List.foldr (\(inArg, outArg) aMap ->
-                            uniteUf aMap inArg outArg) currentAlias aliases
+                            uniteUf aMap outArg inArg) currentAlias aliases
         -- Gather variables in final use
         finals <- foldM (finalArgs nonePhantomParams) Set.empty primArgs
         -- Then remove them from aliasmap
