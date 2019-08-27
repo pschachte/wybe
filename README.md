@@ -178,8 +178,15 @@ pub def example(f:float, ?c:float) {toCelsius(f, ?c) }
 ```
 
 This means that what you define as a procedure, you can still call as a
-function, and what you define as a function, you can still call as a
-procedure.
+function whose output is the final procedure argument, and what you
+define as a function, you can still call as a procedure by giving it an
+extra argument to stand for the function output.  Thus
+
+``` ?y = f(x)
+```
+is always equivalent to
+``` f(x, ?y)
+```
 
 
 ### Modes
@@ -196,6 +203,16 @@ pub def add(x:int, ?y:int, xy:int) { ?y = xy - x }
 pub def add(?x:int, y:int, xy:int) { ?x = xy - y }
 ```
 
+Like any procedures, all of these can be called as functions, so with
+these definitions, all of the following are valid:
+```
+?z = add(x, 1)
+z = add(?x, 1)
+z = add(1, ?x)
+```
+That is, functions can be run "backwards", if defined to support this.
+In fact, `+` and `-` are already defined this way.
+
 The compiler expects that these definitions are consistent, as they are
 in this case.  That means, for example, that for any values of `a` and
 `b`, after
@@ -210,9 +227,37 @@ actually replace the second statement with
 ?z = a
 ```
 
+### Tests
+
+Some procedure and function calls are *tests*.  This means that instead
+of returning whatever outputs they ordinarily produce, they can *fail*,
+in which case they do not produce their usual output(s).  You can think
+of a test function as a partial function, and a test procedure as one
+that can throw a special *failure* exception.
+
+Test procedures and functions must be explicitly declared by inserting
+the keyword `test` after the `def` keyword.
+
+Calls to test procedures and functions are only permitted in two
+contexts:  in a conditional, or in the definition of a test procedure or
+function.
+
+Any procedure or function call can become a test if an input is provided
+where and output argument is expected.  In this case, the call is made
+producing the output, and then the output is compared for equality with
+supplied input.  Equality `=` with two input arguments is a test, so
+these two calls are equivalent tests:
+
+```
+add(x, y, xy)
+xy = add(x, y)
+```
+
+### Statements
+#### Selection
+#### Iteration
+### Modules
 ### Type declarations
 ### Resources
-### Tests
 ### Selection and iteration
-### Modules
 ### Foreign interface
