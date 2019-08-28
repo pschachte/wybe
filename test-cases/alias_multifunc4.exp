@@ -49,7 +49,7 @@ replicate1 > public (1 calls)
     foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$5#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 99:wybe.int)
     foreign lpvm mutate(~tmp$5#0:position.position, ?tmp$0#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 99:wybe.int)
     foreign lpvm access(~tmp$0#0:position.position, 0:wybe.int, ?tmp$1#0:wybe.int)
-    foreign lpvm mutate(~pa#0:position.position, ?%pb#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~tmp$1#0:wybe.int)
+    foreign lpvm mutate noalias(~pa#0:position.position, ?%pb#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~tmp$1#0:wybe.int)
 
 
 replicate21 > public (1 calls)
@@ -58,7 +58,7 @@ replicate21 > public (1 calls)
     foreign lpvm mutate(~tmp$3#0:position.position, ?tmp$4#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 99999:wybe.int)
     foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$0#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 99999:wybe.int)
     foreign llvm move(tmp$0#0:position.position, ?pb#0:position.position) @alias_multifunc4:16:5
-    foreign lpvm mutate(~tmp$0#0:position.position, ?%pc#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, 1111111111:wybe.int)
+    foreign lpvm mutate noalias(~tmp$0#0:position.position, ?%pc#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, 1111111111:wybe.int)
     foreign c print_string("--- Inside replicate21, expect pc(1111111111,99999): ":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
     position.printPosition<0>(~pc#1:position.position, ~#io#1:phantom, ?#io#2:phantom) @alias_multifunc4:20:6
 
@@ -71,7 +71,7 @@ replicate22 > public (1 calls)
     foreign llvm move(tmp$0#0:position.position, ?pb#0:position.position) @alias_multifunc4:25:5
     foreign c print_string("--- Inside replicate22, expect pc(99999,99999):":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
     position.printPosition<0>(tmp$0#0:position.position, ~#io#1:phantom, ?#io#2:phantom) @alias_multifunc4:28:6
-    foreign lpvm mutate(~tmp$0#0:position.position, ?%pc#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, 1111111111:wybe.int)
+    foreign lpvm mutate noalias(~tmp$0#0:position.position, ?%pc#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, 1111111111:wybe.int)
     foreign c print_string("--- Inside replicate22, after calling x(!pc,1111111111), expect pc(1111111111,99999): ":wybe.string, ~#io#2:phantom, ?#io#3:phantom) @wybe:nn:nn
     position.printPosition<0>(pc#1:position.position, ~#io#3:phantom, ?#io#4:phantom) @alias_multifunc4:32:6
 
@@ -379,7 +379,7 @@ x > public inline (0 calls)
     foreign lpvm access(~$rec#0:position.position, 0:wybe.int, ?$#0:wybe.int)
 x > public inline (0 calls)
 1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 y > public inline (0 calls)
@@ -387,7 +387,7 @@ y > public inline (0 calls)
     foreign lpvm access(~$rec#0:position.position, 8:wybe.int, ?$#0:wybe.int)
 y > public inline (0 calls)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
   LLVM code       :
 

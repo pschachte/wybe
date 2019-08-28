@@ -21,7 +21,7 @@ module AST (
   Exp(..), Generator(..), Stmt(..), detStmt,
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
   paramIsPhantom, argIsPhantom, typeIsPhantom, primProtoParamNames,
-  protoNonePhantomParams, isProcProtoArg,
+  protoNonePhantomParams, protoInputParamNames, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
@@ -727,6 +727,9 @@ lookupType (TypeSpec _ "phantom" []) _ =
     return $ Just $ TypeSpec [] "phantom" []
 -- XXX shouldn't have to do this:
 lookupType ty@(TypeSpec ["wybe"] "int" []) _ = return $ Just ty
+-- XXX really shouldn't do this, as it makes 'int' in every module the int type.
+lookupType ty@(TypeSpec _ "int" []) _ =
+    return $ Just (TypeSpec ["wybe"] "int" [])
 lookupType ty@(TypeSpec mod name args) pos = do
     logAST $ "Looking up type " ++ show ty
     tspecs <- refersTo mod name modKnownTypes typeMod
@@ -1965,6 +1968,12 @@ protoNonePhantomParams proto =
     let primParams = primProtoParams proto
     in [primParamName pram | pram <- primParams, not (paramIsPhantom pram)]
 
+-- |Get names of proto input params
+protoInputParamNames :: PrimProto -> [PrimVarName]
+protoInputParamNames proto =
+    let primParams = primProtoParams proto
+    in [name | pram@(PrimParam name _ FlowIn _ (ParamInfo False)) <- primParams,
+                not (paramIsPhantom pram)]
 
 -- |Is the supplied argument a parameter of the proc proto
 isProcProtoArg :: [PrimVarName] -> PrimArg -> Bool

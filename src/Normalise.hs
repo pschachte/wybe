@@ -243,19 +243,28 @@ nonConstCtorItems vis typeSpec constCount nonConstCount (placedProto,tag) = do
     let pos = place placedProto
     let ctorName = fnProtoName $ content placedProto
     let params = fnProtoParams $ content placedProto
-    fields <- mapM (\(Param var typ _ _) -> fmap (var,typ,) $ fieldSize typ)
+    fields <- mapM (\(Param var typ _ _) -> do
+                       maybeSpec <- lookupType typ pos
+                       maybeRep <- if isJust maybeSpec
+                         then lookupTypeRepresentation $ fromJust maybeSpec
+                         else return Nothing
+                       let rep = fromMaybe "pointer" maybeRep
+                       sz  <- fieldSize typ
+                       return (var,typ,rep,sz))
               params
+    let ptrCount = length
+                   $ List.filter (\(_,_,rep,_) -> rep == "pointer") fields
     let (fields',size) =
-          List.foldl (\(lst,offset) (var,typ,sz) ->
+          List.foldl (\(lst,offset) (var,typ,rep,sz) ->
                        let aligned = alignOffset offset sz
-                       in (((var,typ,aligned):lst),aligned + sz))
+                       in (((var,typ,rep,aligned):lst),aligned + sz))
           ([],0) fields
     return
       $ constructorItems ctorName params typeSpec size fields' tag pos
       ++ deconstructorItems ctorName params typeSpec constCount nonConstCount
          fields' tag pos
       ++ concatMap (getterSetterItems vis typeSpec ctorName pos
-                    constCount nonConstCount size tag) fields'
+                    constCount nonConstCount ptrCount size tag) fields'
 
 
 -- |The number of bytes occupied by a value of the specified type.  If the
@@ -286,7 +295,8 @@ alignOffset offset size =
 
 -- |Generate constructor code for a non-const constructor
 constructorItems :: Ident -> [Param] -> TypeSpec -> Int
-                    -> [(Ident,TypeSpec,Int)] -> Integer -> OptPos -> [Item]
+                 -> [(Ident,TypeSpec,TypeRepresentation,Int)] -> Integer
+                 -> OptPos -> [Item]
 constructorItems ctorName params typeSpec size fields tag pos =
     let flowType = Implicit pos
     in [ProcDecl Public Det True
@@ -298,7 +308,7 @@ constructorItems ctorName params typeSpec size fields tag pos =
            Unplaced $ Typed (varSet "$rec") typeSpec True]]
          ++
        -- Code to fill all the fields
-         (reverse $ List.map (\(var,_,aligned) ->
+         (reverse $ List.map (\(var,_,_,aligned) ->
                                (Unplaced $ ForeignCall "lpvm" "mutate" []
                                 [Unplaced $ Typed
                                    (Var "$rec" ParamInOut flowType)
@@ -321,7 +331,8 @@ constructorItems ctorName params typeSpec size fields tag pos =
 
 -- |Generate deconstructor code for a non-const constructor
 deconstructorItems :: Ident -> [Param] -> TypeSpec -> Int -> Int
-                    -> [(Ident,TypeSpec,Int)] -> Integer -> OptPos -> [Item]
+                   -> [(Ident,TypeSpec,TypeRepresentation,Int)] -> Integer
+                   -> OptPos -> [Item]
 deconstructorItems ctorName params typeSpec constCount nonConstCount
     fields tag pos =
     -- XXX this needs to take the tag into account
@@ -337,7 +348,7 @@ deconstructorItems ctorName params typeSpec constCount nonConstCount
         ([tagCheck constCount nonConstCount tag "$"]
          ++
         -- Code to fetch all the fields
-        reverse (List.map (\(var,_,aligned) ->
+        reverse (List.map (\(var,_,_,aligned) ->
                               (Unplaced $ ForeignCall "lpvm" "access" []
                                [Unplaced $ Var "$" ParamIn flowType,
                                 Unplaced $ IntValue
@@ -379,13 +390,15 @@ tagCheck constCount nonConstCount tag varName =
 --  We use the stripped name with "$asInt" appended as a temp var name.
 -- | Produce a getter and a setter for one field of the specified type.
 getterSetterItems :: Visibility -> TypeSpec -> Ident -> OptPos
-                    -> Int -> Int -> Int -> Integer
-                    -> (VarName,TypeSpec,Int) -> [Item]
-getterSetterItems vis rectype ctorName pos constCount nonConstCount size tag
-    (field,fieldtype,offset) =
+                    -> Int -> Int -> Int -> Int -> Integer
+                    -> (VarName,TypeSpec,TypeRepresentation,Int) -> [Item]
+getterSetterItems vis rectype ctorName pos constCount nonConstCount
+    ptrCount size tag (field,fieldtype,rep,offset) =
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
     let detism = if constCount + nonConstCount == 1 then Det else SemiDet
+        otherPtrCount = if rep == "pointer" then ptrCount-1 else ptrCount
+        flags = if otherPtrCount == 0 then ["noalias"] else []
     in [ProcDecl vis detism True
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
                           Param "$" fieldtype ParamOut Ordinary]
@@ -407,7 +420,7 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount size tag
         ([tagCheck constCount nonConstCount tag "$rec"]
          ++
         -- Code to mutate the selected field
-         [Unplaced $ ForeignCall "lpvm" "mutate" []
+         [Unplaced $ ForeignCall "lpvm" "mutate" flags
           [Unplaced $ Typed (Var "$rec" ParamInOut $ Implicit pos)
                       rectype False,
            Unplaced $ IntValue $ fromIntegral size,

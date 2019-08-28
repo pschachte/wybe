@@ -128,7 +128,7 @@ x > public inline (0 calls)
     foreign lpvm access(~$rec#0:position.position, 0:wybe.int, ?$#0:wybe.int)
 x > public inline (0 calls)
 1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 y > public inline (0 calls)
@@ -136,7 +136,7 @@ y > public inline (0 calls)
     foreign lpvm access(~$rec#0:position.position, 8:wybe.int, ?$#0:wybe.int)
 y > public inline (0 calls)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:position.position, ?%$rec#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
   LLVM code       :
 
@@ -271,7 +271,7 @@ entry:
     foreign lpvm mutate(~tmp$11#0:position.position, ?tmp$1#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~tmp$2#0:wybe.int)
     foreign c print_string("expect posA(111,222):":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
     position.printPosition<0>(tmp$0#0:position.position, ~#io#1:phantom, ?#io#2:phantom) @position2:7:2
-    foreign lpvm mutate(~tmp$0#0:position.position, ?%posA#1:position.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, 20000:wybe.int)
+    foreign lpvm mutate noalias(~tmp$0#0:position.position, ?%posA#1:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 20000:wybe.int)
     foreign c print_string("expect posA(111,20000):":wybe.string, ~#io#2:phantom, ?#io#3:phantom) @wybe:nn:nn
     position.printPosition<0>(~posA#1:position.position, ~#io#3:phantom, ?#io#4:phantom) @position2:11:2
     foreign c print_string("expect posB(333,222):":wybe.string, ~#io#4:phantom, ?#io#5:phantom) @wybe:nn:nn
@@ -291,10 +291,10 @@ declare external ccc  void @"position.printPosition<0>"(i64*)
 declare external ccc  void @print_string(i8*)    
 
 
-@position2.24 =    constant [22 x i8] c"expect posB(333,222):\00"
+@position2.20 =    constant [22 x i8] c"expect posB(333,222):\00"
 
 
-@position2.23 =    constant [24 x i8] c"expect posA(111,20000):\00"
+@position2.19 =    constant [24 x i8] c"expect posA(111,20000):\00"
 
 
 @position2.16 =    constant [22 x i8] c"expect posA(111,222):\00"
@@ -329,17 +329,12 @@ entry:
   store  i64 %9, i64* %15 
   tail call ccc  void  @print_string(i8*  getelementptr inbounds ([22 x i8], [22 x i8]* @position2.16, i32 0, i32 0))  
   tail call ccc  void  @"position.printPosition<0>"(i64*  %2)  
-  %17 = tail call ccc  i8*  @wybe_malloc(i32  16)  
-  %18 = bitcast i8* %17 to i64* 
-  %19 = bitcast i64* %18 to i8* 
-  %20 = bitcast i64* %2 to i8* 
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %19, i8*  %20, i32  16, i32  8, i1  0)  
-  %21 = bitcast i64* %18 to i64* 
-  %22 = getelementptr  i64, i64* %21, i64 1 
-  store  i64 20000, i64* %22 
-  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([24 x i8], [24 x i8]* @position2.23, i32 0, i32 0))  
-  tail call ccc  void  @"position.printPosition<0>"(i64*  %18)  
-  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([22 x i8], [22 x i8]* @position2.24, i32 0, i32 0))  
+  %17 = bitcast i64* %2 to i64* 
+  %18 = getelementptr  i64, i64* %17, i64 1 
+  store  i64 20000, i64* %18 
+  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([24 x i8], [24 x i8]* @position2.19, i32 0, i32 0))  
+  tail call ccc  void  @"position.printPosition<0>"(i64*  %2)  
+  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([22 x i8], [22 x i8]* @position2.20, i32 0, i32 0))  
   tail call ccc  void  @"position.printPosition<0>"(i64*  %11)  
   ret void 
 }

@@ -38,7 +38,7 @@ x(!p2, 2222222)
 # update p1!
 # However, compiler doesn't know p3 is dead...
 
-x(!p1, 11)
+x(!p1, 11) # Non-destructive
 
 !println("--- After calling x(!p1, 11): ")
 !print("expect p1(11,10):")

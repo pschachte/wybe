@@ -72,7 +72,8 @@ import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
                                             optForce, optForceAll, optLibDirs)
 import           NewParser                 (parseWybe)
-import           Resources                 (resourceCheckMod, transformProcResources,
+import           Resources                 (resourceCheckMod,
+                                            transformProcResources,
                                             canonicaliseProcResources)
 import           Scanner                   (fileTokens)
 import           System.Directory

@@ -7,8 +7,6 @@ AFTER EVERYTHING:
   public procs    : coordinate.<0>
                     coordinate.fcopy<0>
                     coordinate.Coordinate.=<0>
-                    coordinate.Coordinate.=<1>
-                    coordinate.Coordinate.=<2>
                     coordinate.Coordinate.Coordinate<0>
                     coordinate.Coordinate.Coordinate<1>
                     coordinate.Coordinate.x<0>
@@ -21,37 +19,106 @@ AFTER EVERYTHING:
                     use wybe
   types           : Coordinate/0 (pointer)  @coordinate:1:8
   resources       : 
+  submodules      : coordinate.Coordinate
   procs           : 
 
 *main* > public (0 calls)
-0: (wybe.io$io#0:wybe.phantom, ?wybe.io$io#4:wybe.phantom): AliasPairs: []
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#4:phantom): AliasPairs: []
     foreign lpvm alloc(24:wybe.int, ?tmp$7#0:coordinate.Coordinate)
     foreign lpvm mutate(~tmp$7#0:coordinate.Coordinate, ?tmp$8#0:coordinate.Coordinate, 24:wybe.int, 0:wybe.int, 1:wybe.int, 1000:wybe.int)
     foreign lpvm mutate(~tmp$8#0:coordinate.Coordinate, ?tmp$9#0:coordinate.Coordinate, 24:wybe.int, 8:wybe.int, 1:wybe.int, 1000:wybe.int)
     foreign lpvm mutate(~tmp$9#0:coordinate.Coordinate, ?tmp$10#0:coordinate.Coordinate, 24:wybe.int, 16:wybe.int, 1:wybe.int, 1000:wybe.int)
-    foreign lpvm mutate(tmp$10#0:coordinate.Coordinate, ?%crd1#1:coordinate.Coordinate, 24:wybe.int, 16:wybe.int, 0:wybe.int, 8000:wybe.int)
-    foreign c print_string("expect crd1.z=8000: ":wybe.string, ~#wybe.io$io#0:wybe.phantom, ?#wybe.io$io#1:wybe.phantom) @wybe:92:41
+    foreign lpvm mutate noalias(tmp$10#0:coordinate.Coordinate, ?%crd1#1:coordinate.Coordinate, 24:wybe.int, 16:wybe.int, 0:wybe.int, 8000:wybe.int)
+    foreign c print_string("expect crd1.z=8000: ":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
     foreign lpvm access(~crd1#1:coordinate.Coordinate, 16:wybe.int, ?tmp$2#0:wybe.int)
-    foreign c print_int(~tmp$2#0:wybe.int, ~#wybe.io$io#1:wybe.phantom, ?tmp$23#0:wybe.phantom) @wybe:80:38
-    foreign c putchar('\n':wybe.char, ~tmp$23#0:wybe.phantom, ?#wybe.io$io#2:wybe.phantom) @wybe:78:28
-    foreign c print_string("expect crd2.z=1000: ":wybe.string, ~#wybe.io$io#2:wybe.phantom, ?#wybe.io$io#3:wybe.phantom) @wybe:92:41
+    foreign c print_int(~tmp$2#0:wybe.int, ~#io#1:phantom, ?tmp$21#0:phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$21#0:phantom, ?#io#2:phantom) @wybe:nn:nn
+    foreign c print_string("expect crd2.z=1000: ":wybe.string, ~#io#2:phantom, ?#io#3:phantom) @wybe:nn:nn
     foreign lpvm access(~tmp$10#0:coordinate.Coordinate, 16:wybe.int, ?tmp$3#0:wybe.int)
-    foreign c print_int(~tmp$3#0:wybe.int, ~#wybe.io$io#3:wybe.phantom, ?tmp$29#0:wybe.phantom) @wybe:80:38
-    foreign c putchar('\n':wybe.char, ~tmp$29#0:wybe.phantom, ?#wybe.io$io#4:wybe.phantom) @wybe:78:28
+    foreign c print_int(~tmp$3#0:wybe.int, ~#io#3:phantom, ?tmp$27#0:phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$27#0:phantom, ?#io#4:phantom) @wybe:nn:nn
 
 
 fcopy > public inline (1 calls)
 0: fcopy(crd1#0:coordinate.Coordinate, ?$#0:coordinate.Coordinate): AliasPairs: []
     foreign llvm move(~crd1#0:coordinate.Coordinate, ?$#0:coordinate.Coordinate) @coordinate:6:8
-  submodules      : coordinate.Coordinate
+
+  LLVM code       :
+
+; ModuleID = 'coordinate'
+
+
+ 
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external ccc  void @print_string(i8*)    
+
+
+@coordinate.19 =    constant [21 x i8] c"expect crd2.z=1000: \00"
+
+
+@coordinate.15 =    constant [21 x i8] c"expect crd1.z=8000: \00"
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external ccc  void @"coordinate.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
+entry:
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  24)  
+  %2 = bitcast i8* %1 to i64* 
+  %3 = bitcast i64* %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 1000, i64* %4 
+  %5 = bitcast i64* %2 to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 1 
+  store  i64 1000, i64* %6 
+  %7 = bitcast i64* %2 to i64* 
+  %8 = getelementptr  i64, i64* %7, i64 2 
+  store  i64 1000, i64* %8 
+  %9 = tail call ccc  i8*  @wybe_malloc(i32  24)  
+  %10 = bitcast i8* %9 to i64* 
+  %11 = bitcast i64* %10 to i8* 
+  %12 = bitcast i64* %2 to i8* 
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %11, i8*  %12, i32  24, i32  8, i1  0)  
+  %13 = bitcast i64* %10 to i64* 
+  %14 = getelementptr  i64, i64* %13, i64 2 
+  store  i64 8000, i64* %14 
+  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([21 x i8], [21 x i8]* @coordinate.15, i32 0, i32 0))  
+  %16 = bitcast i64* %10 to i64* 
+  %17 = getelementptr  i64, i64* %16, i64 2 
+  %18 = load  i64, i64* %17 
+  tail call ccc  void  @print_int(i64  %18)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([21 x i8], [21 x i8]* @coordinate.19, i32 0, i32 0))  
+  %20 = bitcast i64* %2 to i64* 
+  %21 = getelementptr  i64, i64* %20, i64 2 
+  %22 = load  i64, i64* %21 
+  tail call ccc  void  @print_int(i64  %22)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external ccc  i64* @"coordinate.fcopy<0>"(i64*  %"crd1#0")    {
+entry:
+  ret i64* %"crd1#0" 
+}
 --------------------------------------------------
  Module coordinate.Coordinate([])
   public submods  : 
   public types    : 
   public resources: 
   public procs    : coordinate.Coordinate.=<0>
-                    coordinate.Coordinate.=<1>
-                    coordinate.Coordinate.=<2>
                     coordinate.Coordinate.Coordinate<0>
                     coordinate.Coordinate.Coordinate<1>
                     coordinate.Coordinate.x<0>
@@ -66,33 +133,27 @@ fcopy > public inline (1 calls)
   resources       : 
   procs           : 
 
-= > public inline (0 calls)
-0: =(?out#0:coordinate.Coordinate, in#0:coordinate.Coordinate): AliasPairs: []
-    foreign llvm move(~in#0:coordinate.Coordinate, ?out#0:coordinate.Coordinate)
-= > public inline (0 calls)
-1: =(in#0:coordinate.Coordinate, ?out#0:coordinate.Coordinate): AliasPairs: []
-    foreign llvm move(~in#0:coordinate.Coordinate, ?out#0:coordinate.Coordinate)
 = > public inline test (6 calls)
-2: =($left#0:coordinate.Coordinate, $right#0:coordinate.Coordinate, ?$$#0:wybe.bool): AliasPairs: []
+0: =($left#0:coordinate.Coordinate, $right#0:coordinate.Coordinate, ?$$#0:wybe.bool): AliasPairs: []
     foreign lpvm access($left#0:coordinate.Coordinate, 0:wybe.int, ?$left$x#0:wybe.int)
     foreign lpvm access($left#0:coordinate.Coordinate, 8:wybe.int, ?$left$y#0:wybe.int)
     foreign lpvm access(~$left#0:coordinate.Coordinate, 16:wybe.int, ?$left$z#0:wybe.int)
     foreign lpvm access($right#0:coordinate.Coordinate, 0:wybe.int, ?$right$x#0:wybe.int)
     foreign lpvm access($right#0:coordinate.Coordinate, 8:wybe.int, ?$right$y#0:wybe.int)
     foreign lpvm access(~$right#0:coordinate.Coordinate, 16:wybe.int, ?$right$z#0:wybe.int)
-    foreign llvm icmp eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:28:40
+    foreign llvm icmp eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:28:40
+        foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
         case ~tmp$3#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign llvm icmp eq(~$left$z#0:wybe.int, ~$right$z#0:wybe.int, ?$$#0:wybe.bool) @wybe:28:40
+            foreign llvm icmp eq(~$left$z#0:wybe.int, ~$right$z#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
 
@@ -115,7 +176,7 @@ x > public inline (0 calls)
     foreign lpvm access(~$rec#0:coordinate.Coordinate, 0:wybe.int, ?$#0:wybe.int)
 x > public inline (0 calls)
 1: x($rec#0:coordinate.Coordinate, ?$rec#1:coordinate.Coordinate, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:coordinate.Coordinate, ?%$rec#1:coordinate.Coordinate, 24:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:coordinate.Coordinate, ?%$rec#1:coordinate.Coordinate, 24:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 y > public inline (0 calls)
@@ -123,7 +184,7 @@ y > public inline (0 calls)
     foreign lpvm access(~$rec#0:coordinate.Coordinate, 8:wybe.int, ?$#0:wybe.int)
 y > public inline (0 calls)
 1: y($rec#0:coordinate.Coordinate, ?$rec#1:coordinate.Coordinate, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:coordinate.Coordinate, ?%$rec#1:coordinate.Coordinate, 24:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:coordinate.Coordinate, ?%$rec#1:coordinate.Coordinate, 24:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 z > public inline (0 calls)
@@ -131,321 +192,156 @@ z > public inline (0 calls)
     foreign lpvm access(~$rec#0:coordinate.Coordinate, 16:wybe.int, ?$#0:wybe.int)
 z > public inline (0 calls)
 1: z($rec#0:coordinate.Coordinate, ?$rec#1:coordinate.Coordinate, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:coordinate.Coordinate, ?%$rec#1:coordinate.Coordinate, 24:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
-coordinate, coordinate.Coordinate
-======================================================================
-AFTER LLVM IR:
+    foreign lpvm mutate noalias(~%$rec#0:coordinate.Coordinate, ?%$rec#1:coordinate.Coordinate, 24:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
-; ModuleID = 'coordinate'
-source_filename = "test-cases/coordinate.wybe"
+  LLVM code       :
 
-@coordinate.19 = constant [21 x i8] c"expect crd2.z=1000: \00"
-@coordinate.15 = constant [21 x i8] c"expect crd1.z=8000: \00"
-
-declare void @putchar(i8) local_unnamed_addr
-
-declare void @print_int(i64) local_unnamed_addr
-
-declare void @print_string(i8*) local_unnamed_addr
-
-declare i8* @wybe_malloc(i32) local_unnamed_addr
-
-declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
-
-define i32 @coordinate.main() local_unnamed_addr {
-entry:
-  %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = bitcast i8* %0 to i64*
-  store i64 1000, i64* %1, align 4
-  %2 = getelementptr i8, i8* %0, i64 8
-  %3 = bitcast i8* %2 to i64*
-  store i64 1000, i64* %3, align 4
-  %4 = getelementptr i8, i8* %0, i64 16
-  %5 = bitcast i8* %4 to i64*
-  store i64 1000, i64* %5, align 4
-  %6 = tail call i8* @wybe_malloc(i32 24)
-  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %6, i8* %0, i32 24, i1 false)
-  %7 = getelementptr i8, i8* %6, i64 16
-  %8 = bitcast i8* %7 to i64*
-  store i64 8000, i64* %8, align 4
-  tail call void @print_string(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @coordinate.15, i64 0, i64 0))
-  %9 = load i64, i64* %8, align 4
-  tail call void @print_int(i64 %9)
-  tail call void @putchar(i8 10)
-  tail call void @print_string(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @coordinate.19, i64 0, i64 0))
-  %10 = load i64, i64* %5, align 4
-  tail call void @print_int(i64 %10)
-  tail call void @putchar(i8 10)
-  ret i32 0
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i64* @"coordinate.fcopy<0>"(i64* readnone returned %"crd1#0") local_unnamed_addr #0 {
-entry:
-  ret i64* %"crd1#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i64* @"coordinate.Coordinate.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
-entry:
-  ret i64* %"in#0"
-}
-
-; Function Attrs: norecurse nounwind readnone
-define i64* @"coordinate.Coordinate.=<1>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
-entry:
-  ret i64* %"in#0"
-}
-
-; Function Attrs: norecurse nounwind readonly
-define i1 @"coordinate.Coordinate.=<2>"(i64* nocapture readonly, i64* nocapture readonly) local_unnamed_addr #1 {
-entry:
-  %2 = load i64, i64* %0, align 4
-  %3 = getelementptr i64, i64* %0, i64 2
-  %4 = load i64, i64* %3, align 4
-  %5 = load i64, i64* %1, align 4
-  %6 = getelementptr i64, i64* %1, i64 2
-  %7 = load i64, i64* %6, align 4
-  %"tmp$2#0" = icmp eq i64 %2, %5
-  br i1 %"tmp$2#0", label %if.then, label %if.else
-
-if.then:                                          ; preds = %entry
-  %8 = getelementptr i64, i64* %1, i64 1
-  %9 = load i64, i64* %8, align 4
-  %10 = getelementptr i64, i64* %0, i64 1
-  %11 = load i64, i64* %10, align 4
-  %"tmp$3#0" = icmp eq i64 %11, %9
-  br i1 %"tmp$3#0", label %if.then1, label %if.else
-
-if.else:                                          ; preds = %if.then, %entry
-  ret i1 false
-
-if.then1:                                         ; preds = %if.then
-  %"$$#0" = icmp eq i64 %4, %7
-  ret i1 %"$$#0"
-}
-
-define i64* @"coordinate.Coordinate.Coordinate<0>"(i64 %"x#0", i64 %"y#0", i64 %"z#0") local_unnamed_addr {
-entry:
-  %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = bitcast i8* %0 to i64*
-  store i64 %"x#0", i64* %1, align 4
-  %2 = getelementptr i8, i8* %0, i64 8
-  %3 = bitcast i8* %2 to i64*
-  store i64 %"y#0", i64* %3, align 4
-  %4 = getelementptr i8, i8* %0, i64 16
-  %5 = bitcast i8* %4 to i64*
-  store i64 %"z#0", i64* %5, align 4
-  ret i64* %1
-}
-
-; Function Attrs: norecurse nounwind readonly
-define { i64, i64, i64 } @"coordinate.Coordinate.Coordinate<1>"(i64* nocapture readonly) local_unnamed_addr #1 {
-entry:
-  %1 = load i64, i64* %0, align 4
-  %2 = getelementptr i64, i64* %0, i64 1
-  %3 = load i64, i64* %2, align 4
-  %4 = getelementptr i64, i64* %0, i64 2
-  %5 = load i64, i64* %4, align 4
-  %6 = insertvalue { i64, i64, i64 } undef, i64 %1, 0
-  %7 = insertvalue { i64, i64, i64 } %6, i64 %3, 1
-  %8 = insertvalue { i64, i64, i64 } %7, i64 %5, 2
-  ret { i64, i64, i64 } %8
-}
-
-; Function Attrs: norecurse nounwind readonly
-define i64 @"coordinate.Coordinate.x<0>"(i64* nocapture readonly) local_unnamed_addr #1 {
-entry:
-  %1 = load i64, i64* %0, align 4
-  ret i64 %1
-}
-
-define i64* @"coordinate.Coordinate.x<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
-entry:
-  %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = bitcast i8* %0 to i64*
-  %2 = bitcast i64* %"$rec#0" to i8*
-  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
-  store i64 %"$field#0", i64* %1, align 4
-  ret i64* %1
-}
-
-; Function Attrs: norecurse nounwind readonly
-define i64 @"coordinate.Coordinate.y<0>"(i64* nocapture readonly) local_unnamed_addr #1 {
-entry:
-  %1 = getelementptr i64, i64* %0, i64 1
-  %2 = load i64, i64* %1, align 4
-  ret i64 %2
-}
-
-define i64* @"coordinate.Coordinate.y<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
-entry:
-  %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = bitcast i8* %0 to i64*
-  %2 = bitcast i64* %"$rec#0" to i8*
-  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
-  %3 = getelementptr i8, i8* %0, i64 8
-  %4 = bitcast i8* %3 to i64*
-  store i64 %"$field#0", i64* %4, align 4
-  ret i64* %1
-}
-
-; Function Attrs: norecurse nounwind readonly
-define i64 @"coordinate.Coordinate.z<0>"(i64* nocapture readonly) local_unnamed_addr #1 {
-entry:
-  %1 = getelementptr i64, i64* %0, i64 2
-  %2 = load i64, i64* %1, align 4
-  ret i64 %2
-}
-
-define i64* @"coordinate.Coordinate.z<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
-entry:
-  %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = bitcast i8* %0 to i64*
-  %2 = bitcast i64* %"$rec#0" to i8*
-  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
-  %3 = getelementptr i8, i8* %0, i64 16
-  %4 = bitcast i8* %3 to i64*
-  store i64 %"$field#0", i64* %4, align 4
-  ret i64* %1
-}
-
-attributes #0 = { norecurse nounwind readnone }
-attributes #1 = { norecurse nounwind readonly }
-
---------------------------------------------------
 ; ModuleID = 'coordinate.Coordinate'
-source_filename = "test-cases"
 
-declare i8* @wybe_malloc(i32) local_unnamed_addr
 
-declare void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
+ 
 
-; Function Attrs: norecurse nounwind readnone
-define i64* @"coordinate.Coordinate.=<0>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external ccc  i1 @"coordinate.Coordinate.=<0>"(i64*  %"$left#0", i64*  %"$right#0")    {
 entry:
-  ret i64* %"in#0"
+  %1 = bitcast i64* %"$left#0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = bitcast i64* %"$left#0" to i64* 
+  %5 = getelementptr  i64, i64* %4, i64 1 
+  %6 = load  i64, i64* %5 
+  %7 = bitcast i64* %"$left#0" to i64* 
+  %8 = getelementptr  i64, i64* %7, i64 2 
+  %9 = load  i64, i64* %8 
+  %10 = bitcast i64* %"$right#0" to i64* 
+  %11 = getelementptr  i64, i64* %10, i64 0 
+  %12 = load  i64, i64* %11 
+  %13 = bitcast i64* %"$right#0" to i64* 
+  %14 = getelementptr  i64, i64* %13, i64 1 
+  %15 = load  i64, i64* %14 
+  %16 = bitcast i64* %"$right#0" to i64* 
+  %17 = getelementptr  i64, i64* %16, i64 2 
+  %18 = load  i64, i64* %17 
+  %"tmp$2#0" = icmp eq i64 %3, %12 
+  br i1 %"tmp$2#0", label %if.then, label %if.else 
+if.then:
+  %"tmp$3#0" = icmp eq i64 %6, %15 
+  br i1 %"tmp$3#0", label %if.then1, label %if.else1 
+if.else:
+  ret i1 0 
+if.then1:
+  %"$$#0" = icmp eq i64 %9, %18 
+  ret i1 %"$$#0" 
+if.else1:
+  ret i1 %"tmp$3#0" 
 }
 
-; Function Attrs: norecurse nounwind readnone
-define i64* @"coordinate.Coordinate.=<1>"(i64* readnone returned %"in#0") local_unnamed_addr #0 {
+
+define external ccc  i64* @"coordinate.Coordinate.Coordinate<0>"(i64  %"x#0", i64  %"y#0", i64  %"z#0")    {
 entry:
-  ret i64* %"in#0"
+  %19 = tail call ccc  i8*  @wybe_malloc(i32  24)  
+  %20 = bitcast i8* %19 to i64* 
+  %21 = bitcast i64* %20 to i64* 
+  %22 = getelementptr  i64, i64* %21, i64 0 
+  store  i64 %"x#0", i64* %22 
+  %23 = bitcast i64* %20 to i64* 
+  %24 = getelementptr  i64, i64* %23, i64 1 
+  store  i64 %"y#0", i64* %24 
+  %25 = bitcast i64* %20 to i64* 
+  %26 = getelementptr  i64, i64* %25, i64 2 
+  store  i64 %"z#0", i64* %26 
+  ret i64* %20 
 }
 
-; Function Attrs: norecurse nounwind readonly
-define i1 @"coordinate.Coordinate.=<2>"(i64* nocapture readonly, i64* nocapture readonly) local_unnamed_addr #1 {
+
+define external ccc  {i64, i64, i64} @"coordinate.Coordinate.Coordinate<1>"(i64*  %"$#0")    {
 entry:
-  %2 = load i64, i64* %0, align 4
-  %3 = getelementptr i64, i64* %0, i64 2
-  %4 = load i64, i64* %3, align 4
-  %5 = load i64, i64* %1, align 4
-  %6 = getelementptr i64, i64* %1, i64 2
-  %7 = load i64, i64* %6, align 4
-  %"tmp$2#0" = icmp eq i64 %2, %5
-  br i1 %"tmp$2#0", label %if.then, label %if.else
-
-if.then:                                          ; preds = %entry
-  %8 = getelementptr i64, i64* %1, i64 1
-  %9 = load i64, i64* %8, align 4
-  %10 = getelementptr i64, i64* %0, i64 1
-  %11 = load i64, i64* %10, align 4
-  %"tmp$3#0" = icmp eq i64 %11, %9
-  br i1 %"tmp$3#0", label %if.then1, label %if.else
-
-if.else:                                          ; preds = %if.then, %entry
-  ret i1 false
-
-if.then1:                                         ; preds = %if.then
-  %"$$#0" = icmp eq i64 %4, %7
-  ret i1 %"$$#0"
+  %27 = bitcast i64* %"$#0" to i64* 
+  %28 = getelementptr  i64, i64* %27, i64 0 
+  %29 = load  i64, i64* %28 
+  %30 = bitcast i64* %"$#0" to i64* 
+  %31 = getelementptr  i64, i64* %30, i64 1 
+  %32 = load  i64, i64* %31 
+  %33 = bitcast i64* %"$#0" to i64* 
+  %34 = getelementptr  i64, i64* %33, i64 2 
+  %35 = load  i64, i64* %34 
+  %36 = insertvalue {i64, i64, i64} undef, i64 %29, 0 
+  %37 = insertvalue {i64, i64, i64} %36, i64 %32, 1 
+  %38 = insertvalue {i64, i64, i64} %37, i64 %35, 2 
+  ret {i64, i64, i64} %38 
 }
 
-define i64* @"coordinate.Coordinate.Coordinate<0>"(i64 %"x#0", i64 %"y#0", i64 %"z#0") local_unnamed_addr {
+
+define external ccc  i64 @"coordinate.Coordinate.x<0>"(i64*  %"$rec#0")    {
 entry:
-  %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = bitcast i8* %0 to i64*
-  store i64 %"x#0", i64* %1, align 4
-  %2 = getelementptr i8, i8* %0, i64 8
-  %3 = bitcast i8* %2 to i64*
-  store i64 %"y#0", i64* %3, align 4
-  %4 = getelementptr i8, i8* %0, i64 16
-  %5 = bitcast i8* %4 to i64*
-  store i64 %"z#0", i64* %5, align 4
-  ret i64* %1
+  %39 = bitcast i64* %"$rec#0" to i64* 
+  %40 = getelementptr  i64, i64* %39, i64 0 
+  %41 = load  i64, i64* %40 
+  ret i64 %41 
 }
 
-; Function Attrs: norecurse nounwind readonly
-define { i64, i64, i64 } @"coordinate.Coordinate.Coordinate<1>"(i64* nocapture readonly) local_unnamed_addr #1 {
+
+define external ccc  i64* @"coordinate.Coordinate.x<1>"(i64*  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %1 = load i64, i64* %0, align 4
-  %2 = getelementptr i64, i64* %0, i64 1
-  %3 = load i64, i64* %2, align 4
-  %4 = getelementptr i64, i64* %0, i64 2
-  %5 = load i64, i64* %4, align 4
-  %6 = insertvalue { i64, i64, i64 } undef, i64 %1, 0
-  %7 = insertvalue { i64, i64, i64 } %6, i64 %3, 1
-  %8 = insertvalue { i64, i64, i64 } %7, i64 %5, 2
-  ret { i64, i64, i64 } %8
+  %42 = tail call ccc  i8*  @wybe_malloc(i32  24)  
+  %43 = bitcast i8* %42 to i64* 
+  %44 = bitcast i64* %43 to i8* 
+  %45 = bitcast i64* %"$rec#0" to i8* 
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %44, i8*  %45, i32  24, i32  8, i1  0)  
+  %46 = bitcast i64* %43 to i64* 
+  %47 = getelementptr  i64, i64* %46, i64 0 
+  store  i64 %"$field#0", i64* %47 
+  ret i64* %43 
 }
 
-; Function Attrs: norecurse nounwind readonly
-define i64 @"coordinate.Coordinate.x<0>"(i64* nocapture readonly) local_unnamed_addr #1 {
+
+define external ccc  i64 @"coordinate.Coordinate.y<0>"(i64*  %"$rec#0")    {
 entry:
-  %1 = load i64, i64* %0, align 4
-  ret i64 %1
+  %48 = bitcast i64* %"$rec#0" to i64* 
+  %49 = getelementptr  i64, i64* %48, i64 1 
+  %50 = load  i64, i64* %49 
+  ret i64 %50 
 }
 
-define i64* @"coordinate.Coordinate.x<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+
+define external ccc  i64* @"coordinate.Coordinate.y<1>"(i64*  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = bitcast i8* %0 to i64*
-  %2 = bitcast i64* %"$rec#0" to i8*
-  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
-  store i64 %"$field#0", i64* %1, align 4
-  ret i64* %1
+  %51 = tail call ccc  i8*  @wybe_malloc(i32  24)  
+  %52 = bitcast i8* %51 to i64* 
+  %53 = bitcast i64* %52 to i8* 
+  %54 = bitcast i64* %"$rec#0" to i8* 
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %53, i8*  %54, i32  24, i32  8, i1  0)  
+  %55 = bitcast i64* %52 to i64* 
+  %56 = getelementptr  i64, i64* %55, i64 1 
+  store  i64 %"$field#0", i64* %56 
+  ret i64* %52 
 }
 
-; Function Attrs: norecurse nounwind readonly
-define i64 @"coordinate.Coordinate.y<0>"(i64* nocapture readonly) local_unnamed_addr #1 {
+
+define external ccc  i64 @"coordinate.Coordinate.z<0>"(i64*  %"$rec#0")    {
 entry:
-  %1 = getelementptr i64, i64* %0, i64 1
-  %2 = load i64, i64* %1, align 4
-  ret i64 %2
+  %57 = bitcast i64* %"$rec#0" to i64* 
+  %58 = getelementptr  i64, i64* %57, i64 2 
+  %59 = load  i64, i64* %58 
+  ret i64 %59 
 }
 
-define i64* @"coordinate.Coordinate.y<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
+
+define external ccc  i64* @"coordinate.Coordinate.z<1>"(i64*  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = bitcast i8* %0 to i64*
-  %2 = bitcast i64* %"$rec#0" to i8*
-  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
-  %3 = getelementptr i8, i8* %0, i64 8
-  %4 = bitcast i8* %3 to i64*
-  store i64 %"$field#0", i64* %4, align 4
-  ret i64* %1
+  %60 = tail call ccc  i8*  @wybe_malloc(i32  24)  
+  %61 = bitcast i8* %60 to i64* 
+  %62 = bitcast i64* %61 to i8* 
+  %63 = bitcast i64* %"$rec#0" to i8* 
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %62, i8*  %63, i32  24, i32  8, i1  0)  
+  %64 = bitcast i64* %61 to i64* 
+  %65 = getelementptr  i64, i64* %64, i64 2 
+  store  i64 %"$field#0", i64* %65 
+  ret i64* %61 
 }
-
-; Function Attrs: norecurse nounwind readonly
-define i64 @"coordinate.Coordinate.z<0>"(i64* nocapture readonly) local_unnamed_addr #1 {
-entry:
-  %1 = getelementptr i64, i64* %0, i64 2
-  %2 = load i64, i64* %1, align 4
-  ret i64 %2
-}
-
-define i64* @"coordinate.Coordinate.z<1>"(i64* %"$rec#0", i64 %"$field#0") local_unnamed_addr {
-entry:
-  %0 = tail call i8* @wybe_malloc(i32 24)
-  %1 = bitcast i8* %0 to i64*
-  %2 = bitcast i64* %"$rec#0" to i8*
-  tail call void @llvm.memcpy.p0i8.p0i8.i32(i8* %0, i8* %2, i32 24, i1 false)
-  %3 = getelementptr i8, i8* %0, i64 16
-  %4 = bitcast i8* %3 to i64*
-  store i64 %"$field#0", i64* %4, align 4
-  ret i64* %1
-}
-
-attributes #0 = { norecurse nounwind readnone }
-attributes #1 = { norecurse nounwind readonly }
-

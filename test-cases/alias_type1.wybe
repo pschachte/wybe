@@ -1,0 +1,15 @@
+# define a type t that has a position as one member and an int as the other,
+# assign a fresh position to p, assign a fresh instance of t holding p to variable v.
+# Then modify p.  This should not be destructive.
+
+#use position
+public type position = public position(x:int, y:int) end
+
+public type posrec = public posrec(p:position, a:int) end
+
+?pos = position(100,100)
+?rec = posrec(pos, 1)
+
+x(!pos, 200) # Non-destructive
+!println(pos.x)
+!println(rec.a)
