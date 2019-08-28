@@ -54,20 +54,21 @@ transformPrims :: PrimProto -> ProcBody -> (AliasMap, [Placed Prim])
                     -> Compiler (AliasMap, [Placed Prim])
 transformPrims caller body (initAliases, initPrims) = do
     let nonePhantomParams = protoNonePhantomParams caller
+    let inputParams = protoInputParamNames caller
     let prims = bodyPrims body
     -- Transform simple prims:
     -- (only process alias pairs incurred by move, mutate, access, cast)
-    logTransform "\nTransform prims (transformPrims):    "
-                -- ++ List.intercalate "\n    " (List.map show prims)
+    logTransform "\nTransform prims (transformPrims):   "
+    logTransform $ "nonePhantomParams: " ++ show nonePhantomParams
+    logTransform $ "input params: " ++ show inputParams
     let aliasMap = List.foldr newUfItem initAliases nonePhantomParams
-    let nonePhantomParams = protoNonePhantomParams caller
-    foldM (transformPrim nonePhantomParams) (aliasMap, []) prims
+    foldM (transformPrim nonePhantomParams inputParams) (aliasMap, []) prims
 
 
 -- Build up alias pairs triggerred by proc calls
-transformPrim :: [PrimVarName] -> (AliasMap, [Placed Prim]) -> Placed Prim
-                    -> Compiler (AliasMap, [Placed Prim])
-transformPrim nonePhantomParams (aliasMap, prims) prim =
+transformPrim :: [PrimVarName] -> [PrimVarName] -> (AliasMap, [Placed Prim])
+                    -> Placed Prim -> Compiler (AliasMap, [Placed Prim])
+transformPrim nonePhantomParams inputParams (aliasMap, prims) prim =
     case content prim of
         PrimCall spec args -> do
             -- | Transform proc calls
@@ -97,7 +98,7 @@ transformPrim nonePhantomParams (aliasMap, prims) prim =
             aliasMap2 <- aliasedArgsInSimplePrim nonePhantomParams aliasMap
                                                 maybeAliasInfo
             -- Mutate destructive flag if this is a mutate instruction
-            prim2 <- mutateInstruction prim aliasMap
+            prim2 <- mutateInstruction prim aliasMap inputParams
             logTransform $ "--- transformed to: " ++ show prim2
             logTransform $ "updated aliasMap: " ++ show aliasMap2
             -- Final arguments get removed from aliasmap after mutate
@@ -133,37 +134,40 @@ transformForks caller body aliasMap = do
 
 
 -- Update mutate prim by checking if input is aliased
-mutateInstruction :: Placed Prim -> AliasMap -> Compiler (Placed Prim)
-mutateInstruction (Placed (PrimForeign lang "mutate" flags args) pos) aliasMap = do
-    args' <- _updateMutateForAlias aliasMap args
+mutateInstruction :: Placed Prim -> AliasMap -> [PrimVarName] -> Compiler (Placed Prim)
+mutateInstruction (Placed (PrimForeign lang "mutate" flags args) pos) aliasMap inputParams = do
+    args' <- _updateMutateForAlias aliasMap inputParams args
     return (Placed (PrimForeign lang "mutate" flags args') pos)
-mutateInstruction (Unplaced (PrimForeign lang "mutate" flags args)) aliasMap = do
-    args' <- _updateMutateForAlias aliasMap args
+mutateInstruction (Unplaced (PrimForeign lang "mutate" flags args)) aliasMap inputParams = do
+    args' <- _updateMutateForAlias aliasMap inputParams args
     return (Unplaced (PrimForeign lang "mutate" flags args'))
-mutateInstruction prim _ =  return prim
+mutateInstruction prim _ _ =  return prim
 
 
 -- Helper: change mutate destructive flag to true if FlowIn variable is not
 -- aliased and is dead after this program point and the original destructive
 -- flag is not set to 1 yet
-_updateMutateForAlias :: AliasMap -> [PrimArg] -> Compiler [PrimArg]
-_updateMutateForAlias aliasMap
+_updateMutateForAlias :: AliasMap -> [PrimVarName] -> [PrimArg] -> Compiler [PrimArg]
+_updateMutateForAlias aliasMap inputParams
     args@[fIn@(ArgVar inName _ _ _ final1), fOut, size, offset, ArgInt des typ,
         mem@(ArgVar memName _ _ _ final2)] =
             -- When the val is also a pointer
-            if not (connectedToOthers aliasMap inName) && final1
+            if notElem inName inputParams
+                && not (connectedToOthers aliasMap inName) && final1
                 && not (connectedToOthers aliasMap memName) && final2
                 && des /= 1
             then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
             -- then return args
             else return args
-_updateMutateForAlias aliasMap
+_updateMutateForAlias aliasMap inputParams
     args@[fIn@(ArgVar inName _ _ _ final), fOut, size, offset, ArgInt des typ, mem] =
-        if not (connectedToOthers aliasMap inName) && final && des /= 1
+        if notElem inName inputParams
+            && not (connectedToOthers aliasMap inName) && final
+            && des /= 1
         then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
         -- then return args
         else return args
-_updateMutateForAlias _ args = return args
+_updateMutateForAlias _ _ args = return args
 
 
 -- |Log a message, if we are logging optimisation activity.

@@ -21,7 +21,7 @@ module AST (
   Exp(..), Generator(..), Stmt(..), detStmt,
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
   paramIsPhantom, argIsPhantom, typeIsPhantom, primProtoParamNames,
-  protoNonePhantomParams, isProcProtoArg,
+  protoNonePhantomParams, protoInputParamNames, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
@@ -1968,6 +1968,12 @@ protoNonePhantomParams proto =
     let primParams = primProtoParams proto
     in [primParamName pram | pram <- primParams, not (paramIsPhantom pram)]
 
+-- |Get names of proto input params
+protoInputParamNames :: PrimProto -> [PrimVarName]
+protoInputParamNames proto =
+    let primParams = primProtoParams proto
+    in [name | pram@(PrimParam name _ FlowIn _ (ParamInfo False)) <- primParams,
+                not (paramIsPhantom pram)]
 
 -- |Is the supplied argument a parameter of the proc proto
 isProcProtoArg :: [PrimVarName] -> PrimArg -> Bool
