@@ -211,16 +211,92 @@ Hello, World!
 
 %-----------------------------------------------------------------------%
 \begin{frame}[fragile]
+\frametitle{Value semantics}
+\begin{itemize}
+\item Wybe has value semantics:
+  \begin{itemize}
+  \item Aliasing is not semantically significant
+  \item Data structures cannot be mutated,
+  \item But variables can be re-assigned
+  \end{itemize}
+\item Eg, \texttt{!pos.x = new\_x} assigns \texttt{pos}
+  a \emph{new} position structure whose \texttt{x} member is
+  \texttt{new\_x} and
+  whose other members are the same as the original \texttt{pos}
+\item Aliases of \texttt{pos} are not affected
+\item Compile-time garbage collection:  when structure is unaliased,
+  compiler implements this with mutation
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
 \frametitle{Procedures}
 \begin{itemize}
 \item Same adornments are used in formal parameters
-\item \texttt{proc foo(w, x, ?y, !z):} \ldots\ defines procedure with two
+\item \texttt{def foo(w, x, ?y, !z) \{ \ldots \}} defines procedure with two
   inputs, one output, and one in-out parameter
 \item Adornments in call must match definition (but see below\ldots)
 \item Body of a procedure definition is a sequence of
   statements
 \item There are a few built-in statement types, discussed below
 \item Procedure calls are statements
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{If statement}
+\begin{itemize}
+\item Tests can be used in \texttt{if} statements
+\item \texttt{if \{} \emph{test1}\texttt{::} \emph{statements} \ldots \\
+\hspace*{1.5em} \texttt{$\mid$} \emph{test2}\texttt{::} \emph{statements} \ldots \\
+\hspace*{1.5em} \ldots \\
+\texttt{\}}
+\item Tests are tried in order; body of first to succeed is executed
+\item If none succeeds, none is executed
+% \item Boolean expression \emph{e} is de-reified into the test \emph{e}
+%   \texttt{= true}
+\item \texttt{else} is a test that always succeeds
+% \item Also an expression version of \texttt{if}, where
+%   \emph{statements} are replaced with \emph{expressions}
+% \item Tests of an \texttt{if} expression must be exhaustive
+% \item Variables bound in tests are scoped to the corresponding statements
+\item There will be a \texttt{case} statement with similar syntax
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Loops}
+\begin{itemize}
+\item One modular looping construct:
+  \texttt{do \{} \emph{loop-statements} \ldots \texttt{\}}
+\item \emph{loop-statements} are any normal statements plus any
+  special looping statements, including:
+  \begin{itemize}
+  \item \texttt{while} \emph{test} and \texttt{until} \emph{test}
+    \begin{itemize}
+    \item like conditional \texttt{break}
+    \end{itemize}
+  \item \texttt{when} \emph{test} and \texttt{unless} \emph{test}
+    \begin{itemize}
+    \item like conditional \texttt{continue}
+    \end{itemize}
+  % \item \texttt{for} \emph{generator}
+  \end{itemize}
+\item Include as many of these constructs as you like in the loop,
+  wherever you like, \emph{e.g.:} \\
+\begin{semiverbatim}
+    do \{!print(prompt)
+        !readln(?answer)
+        until answer in ["y","n"]
+        !println("Please answer 'y' or 'n'.")
+    \}
+\end{semiverbatim}
 \end{itemize}
 \end{frame}
 
@@ -242,11 +318,12 @@ Hello, World!
   \texttt{foo(temp,?z)}
   \end{minipage}
 \item \texttt{def foo(x) = bar(x,x)} is syntactic sugar for \\
-\texttt{def foo(x,?result): bar(x,x,?result)}
+\texttt{def foo(x,?result) \{ bar(x,x,?result) \}}
 \item Can use \texttt{foo} with either syntax regardless of which
   definition was used
-\item A few built-in expressions like \texttt{let} \emph{stmts}
-  \texttt{in} \emph{expr} and \emph{expr} \texttt{where} \emph{stmts}
+\item A few built-in expressions like \texttt{let \{} \emph{stmts}
+  \texttt{\} in} \emph{expr} and \emph{expr} \texttt{where \{} \emph{stmts}
+  \texttt{\}}
 % \item \texttt{a.b(c,\ldots)} is syntactic sugar for
 %   \texttt{b(a,c,\ldots)}, to allow dot notation for member access and update
 \end{itemize}
@@ -255,9 +332,41 @@ Hello, World!
 
 %-----------------------------------------------------------------------%
 \begin{frame}[fragile]
-\frametitle{Value semantics}
+\frametitle{Reversibility}
 \begin{itemize}
-\item Wybe has value semantics:
+\item Procedures can be overloaded based on mode:
+  \begin{itemize}
+    \item \texttt{position(x, y, ?pos)}  constructs a position
+    \item \texttt{position(?x, ?y, pos)}  deconstructs
+  \end{itemize}
+\item This is nicer as an expression (pattern matching)
+  \begin{itemize}
+  \item  \texttt{?pos = position(x,t)} constructs
+  \item  \texttt{pos = position(?h,?t)} or deconstructs
+  \end{itemize}
+% \item \texttt{!pos.x = new\_x} replaces \texttt{x} of \texttt{pos} with
+%   \texttt{new\_x}
+% \item This is transformed to \quad
+%   \begin{minipage}[c]{0.4\linewidth}
+%   \texttt{x(pos,?temp)} \\
+%   \texttt{x(!temp,y)} \\
+%   \texttt{y(!x, temp)}
+%   \end{minipage}
+% \item Modes of all parameters but the last must uniquely determine the
+%   mode of the last
+% \item \texttt{def \_(x):} defines \texttt{\_} as a ``don't
+%   care'' output
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Modules}
+\begin{itemize}
+\item Each source file is a module
+\item A directory of source files is also a module
+\item A (sub)-module can be declared within a module
   \begin{itemize}
   \item Aliasing is not semantically significant
   \item Data structures cannot be mutated
@@ -293,32 +402,6 @@ Hello, World!
   still holds the old position, and \texttt{pos} holds the new one
 \item Compile-time garbage collection:  when unique (unaliased),
   compiler transforms this (back) into destructive modification
-\end{itemize}
-\end{frame}
-
-
-%-----------------------------------------------------------------------%
-\begin{frame}[fragile]
-\frametitle{Reversibility}
-\begin{itemize}
-\item Procedures can be overloaded based on mode
-\item \texttt{cons(head,tail,?list)}  constructs \\
-\texttt{cons(?head,?tail,list)}  deconstructs \\
-\item Expressions can be \emph{outputs} (patterns) as well as inputs
-\item Expression \texttt{cons(h,t)} constructs list \\
-Expression \texttt{cons(?h,?t)} deconstructs
-\item tail(!x, y) replaces tail of x with y
-\item tail(!x) = y is exactly the same
-\item head(tail(!x), y) \quad transforms to \quad
-  \begin{minipage}[c]{0.4\linewidth}
-  \texttt{tail(x,?temp)} \\
-  \texttt{head(!temp,y)} \\
-  \texttt{tail(!x, temp)}
-  \end{minipage}
-\item Modes of all parameters but the last must uniquely determine the
-  mode of the last
-% \item \texttt{def \_(x):} defines \texttt{\_} as a ``don't
-%   care'' output
 \end{itemize}
 \end{frame}
 
@@ -367,28 +450,6 @@ def hello(name) use io:
 
 %-----------------------------------------------------------------------%
 \begin{frame}[fragile]
-\frametitle{If statement}
-\begin{itemize}
-\item Tests can be used in \texttt{if} statements
-\item \texttt{if} \emph{test1}\texttt{::} \emph{statements} \ldots \\
-\hspace*{1em} \emph{test2}\texttt{::} \emph{statements} \ldots \\
-\hspace*{1em} \ldots \\
-\texttt{end}
-\item Tests are tried in order; body of first to succeed is executed
-\item If none succeeds, none is executed
-\item Boolean expression \emph{e} is de-reified into the test \emph{e}
-  \texttt{= true}
-\item \texttt{else} is a test that always succeeds
-\item Also an expression version of \texttt{if}, where
-  \emph{statements} are replaced with \emph{expressions}
-\item Tests of an \texttt{if} expression must be exhaustive
-% \item Variables bound in tests are scoped to the corresponding statements
-\end{itemize}
-\end{frame}
-
-
-%-----------------------------------------------------------------------%
-\begin{frame}[fragile]
 \frametitle{Tests as statements}
 \begin{itemize}
 \item A test can be used as a statement
@@ -425,38 +486,6 @@ is equivalent to \\[2ex]
 \texttt{[]:} & \texttt{y}\\
 \texttt{[?h|?t]:} & \texttt{[h|t++y]}\\
 \end{tabular}
-\end{itemize}
-\end{frame}
-
-
-%-----------------------------------------------------------------------%
-\begin{frame}[fragile]
-\frametitle{Loops}
-\begin{itemize}
-\item One modular looping construct:
-  \texttt{do} \emph{loop-statements} \ldots \texttt{end}
-\item \emph{loop-statements} are any normal statements plus any
-  special looping statements, including:
-  \begin{itemize}
-  \item \texttt{while} \emph{test} and \texttt{until} \emph{test}
-    \begin{itemize}
-    \item like conditional \texttt{break}
-    \end{itemize}
-  \item \texttt{when} \emph{test} and \texttt{unless} \emph{test}
-    \begin{itemize}
-    \item like conditional \texttt{continue}
-    \end{itemize}
-  \item \texttt{for} \emph{generator}
-  \end{itemize}
-\item Include as many of these constructs as you like in the loop,
-  wherever you like, \emph{e.g.:} \\
-\begin{semiverbatim}
-    do  !print(prompt)
-        !readln(?answer)
-        until answer in ["y","n"]
-        !println("Please answer 'y' or 'n'.")
-    end
-\end{semiverbatim}
 \end{itemize}
 \end{frame}
 
