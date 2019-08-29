@@ -366,20 +366,14 @@ Hello, World!
 \begin{itemize}
 \item Each source file is a module
 \item A directory of source files is also a module
-\item A (sub)-module can be declared within a module
-  \begin{itemize}
-  \item Aliasing is not semantically significant
-  \item Data structures cannot be mutated
-  \item Variables can be re-assigned
-  \end{itemize}
-\item Eg, \texttt{x(!pos,new\_x)} assigns \texttt{pos}
-  a \emph{new} position structure whose \texttt{x} member is \texttt{new\_x} and
-  whose other members are the same as the original \texttt{pos}
-\item Gives the feeling of changing values without action at a distance
-\item So after \texttt{?old\_pos = pos ; x(!pos,new\_x)}, \texttt{old\_pos}
-  still holds the old position, and \texttt{pos} holds the new one
-\item Compile-time garbage collection:  when unique (unaliased),
-  compiler transforms this (back) into destructive modification
+\item A (sub)-module can be declared within a module: \\
+  \begin{center}
+    \texttt{module} \emph{name} \texttt{\{} \emph{items} \texttt{\}}
+  \end{center}
+\item Items in a submodule can be anything that can be in a module
+\item Submodule has access to everything in parent module
+\item Parent module can only access public contents of submodule
+\item Can import public contents of a module with \texttt{use} \emph{module}
 \end{itemize}
 \end{frame}
 
@@ -388,20 +382,17 @@ Hello, World!
 \begin{frame}[fragile]
 \frametitle{Types}
 \begin{itemize}
-\item A Wybe type is just a (sub)module that's 
-  \begin{itemize}
-  \item Aliasing is not semantically significant
-  \item Data structures cannot be mutated
-  \item Variables can be re-assigned
-  \end{itemize}
-\item Eg, \texttt{x(!pos,new\_x)} assigns \texttt{pos}
-  a \emph{new} position structure whose \texttt{x} member is \texttt{new\_x} and
-  whose other members are the same as the original \texttt{pos}
-\item Gives the feeling of changing values without action at a distance
-\item So after \texttt{?old\_pos = pos ; x(!pos,new\_x)}, \texttt{old\_pos}
-  still holds the old position, and \texttt{pos} holds the new one
-\item Compile-time garbage collection:  when unique (unaliased),
-  compiler transforms this (back) into destructive modification
+\item A Wybe type is just a (sub)module that can be used as a type
+\item \texttt{type} \emph{name} \texttt{\{} \emph{constructors items}
+  \texttt{\}}
+\item \emph{constructors} is a \texttt{$\mid$}-separated sequence of
+  constructors (they look like function declarations)
+\item \emph{items} are other module items
+\item Compiler automatically generates code for constructors, deconstructors,
+  accessors, and mutators
+\item But these are ordinary Wybe code; you could write them yourself
+\item Mayer's Uniform Access Principle: can change representation without
+  changing type users
 \end{itemize}
 \end{frame}
 
@@ -410,21 +401,20 @@ Hello, World!
 \begin{frame}[fragile]
 \frametitle{Resources}
 \begin{itemize}
-\item A \emph{resource} is data that can be used and/or defined
-  without being explicitly passed as a parameter
-\item Similar to State and IO monads
-\item Specified in procedure declaration, but not in call
-\item Calls to procedures that use resources must be preceded with
-  \texttt{!} to signify that they use some resources
-\item Procedures can use as many resources as they want to declare
-\item Resource can be declared as a name for several other resources
+\item Resources provide an alternative, non-positional argument passing style
+\item A \emph{resource} is declared as a name and type that some
+  procedures use as arguments: \\
+  \begin{center}
+    \texttt{resource} \emph{name}\texttt{:}\emph{type}
+  \end{center}
+\item A procedure indicates that it uses a resource by adding
+  \texttt{use} \emph{resources} before body
+\item \emph{resources} is comma-separated set of resource names,
+  optionally prefixed with \texttt{?} or \texttt{!} to indicate flow
+\item Procedures calls do not list resource, but must be preceded with
+  \texttt{!} to signify that they use some resourcess; order is significant
 \item Useful for data that is widely used/modified in a module
-\item I/O, command line arguments are resources visible at top level
-  \begin{semiverbatim}
-def hello(name) use io:
-    !print("Hello, ")
-    !println(name)
-  \end{semiverbatim}
+\item Predefined resources:  \texttt{io}, \texttt{exit\_code}, command line
 \end{itemize}
 \end{frame}
 
@@ -433,150 +423,135 @@ def hello(name) use io:
 \begin{frame}[fragile]
 \frametitle{Tests}
 \begin{itemize}
-\item Some procedure calls, called \emph{tests}, can succeed or fail
+\item Tests in conditional statements can be Boolean-valued expressions
+\item They can also be \emph{test statements}: statements that can fail
+\item For example, \texttt{lst = cons(?h,?t)} fails if \texttt{lst} is
+  \texttt{nil}
+\item So does \texttt{head(lst)} and \texttt{tail(lst)}
+\item Can only use a test as a condition or in definition of a test
 \item Some modes of a procedure can be tests while others are not
-\item Definition specifies that call can fail with \texttt{?} at left
-  of signature
-\item A test can also produce output: use it in place of a Maybe
-\item \emph{e.g.,} \texttt{def ?cons(?head,?tail,list):} \ldots
-\item A test with no outputs can be used as an expression:  it is
-  reified into a \texttt{bool}
+\item Declare a test by inserting \texttt{test} after \texttt{def} in
+  declaration
+\item Types with more than one constructor automatically do this for
+  deconstructors, accessors, and mutators
 \item A call supplying an input where an output is expected is
-  automatically a test that compares the output with the supplied input
-(like Mercury's implied modes)
+  automatically a test that compares output with supplied input
 \end{itemize}
 \end{frame}
 
 
-%-----------------------------------------------------------------------%
-\begin{frame}[fragile]
-\frametitle{Tests as statements}
-\begin{itemize}
-\item A test can be used as a statement
-\item Call must be preceded with \texttt{?}
-\item Sequence of statements is a test if any of them are tests
-\item Procedure is a test if its body is a test
-\item All tests must be declared with \texttt{?} at left
-\item Statement sequence fails if any of the tests fail
-\item Like logic programming or the Maybe monad
-\item If test fails, its effects are rolled back
-\item I/O is not allowed in tests
-\end{itemize}
-\end{frame}
+% %-----------------------------------------------------------------------%
+% \begin{frame}[fragile]
+% \frametitle{Case statement and expression}
+% \begin{itemize}
+% \item \texttt{case} \emph{expr} \texttt{of} \\
+% \hspace*{1em} \emph{case1}\texttt{:} \emph{body1} \ldots \\
+% \hspace*{1em} \emph{case2}\texttt{:} \emph{body2} \ldots \\
+% \hspace*{1em} \ldots \\[2ex]
+% is equivalent to \\[2ex]
+%  \texttt{if} \emph{case1(expr)}\texttt{:} \emph{body1} \ldots \\
+% \hspace*{1em} \emph{case2(expr)}\texttt{:} \emph{body2} \ldots \\
+% \hspace*{1em} \ldots
+% \item Except that tests must be exhaustive: checked at compile-time
+% \item Can declare sets of exhaustive tests
+% \item \emph{E.g.:}\\
+%   \texttt{def ++(x,y) = case x of} \\
+% \hspace*{3em}
+% \begin{tabular}{rl}
+% \texttt{[]:} & \texttt{y}\\
+% \texttt{[?h|?t]:} & \texttt{[h|t++y]}\\
+% \end{tabular}
+% \end{itemize}
+% \end{frame}
 
 
-%-----------------------------------------------------------------------%
-\begin{frame}[fragile]
-\frametitle{Case statement and expression}
-\begin{itemize}
-\item \texttt{case} \emph{expr} \texttt{of} \\
-\hspace*{1em} \emph{case1}\texttt{:} \emph{body1} \ldots \\
-\hspace*{1em} \emph{case2}\texttt{:} \emph{body2} \ldots \\
-\hspace*{1em} \ldots \\[2ex]
-is equivalent to \\[2ex]
- \texttt{if} \emph{case1(expr)}\texttt{:} \emph{body1} \ldots \\
-\hspace*{1em} \emph{case2(expr)}\texttt{:} \emph{body2} \ldots \\
-\hspace*{1em} \ldots
-\item Except that tests must be exhaustive: checked at compile-time
-\item Can declare sets of exhaustive tests
-\item \emph{E.g.:}\\
-  \texttt{def ++(x,y) = case x of} \\
-\hspace*{3em}
-\begin{tabular}{rl}
-\texttt{[]:} & \texttt{y}\\
-\texttt{[?h|?t]:} & \texttt{[h|t++y]}\\
-\end{tabular}
-\end{itemize}
-\end{frame}
+% %-----------------------------------------------------------------------%
+% \begin{frame}[fragile]
+% \frametitle{Generators}
+% \begin{itemize}
+% \item Generators are procedures that return any number of times
+% \item Like \texttt{nondet} predicates in Mercury; similar to the list monad
+% \item Generators are declared with a \texttt{*} before the signature
+% \item Generators use \texttt{generate} statements to specify
+%   multiple results
+% \item Each \texttt{generate} encloses multiple statements producing
+%   results from initial state
+% \item Results are produced in the specified order
+% \item Generators can call tests; if test fails, skip to next \texttt{generate}
+% \item \emph{E.g.,} \\
+%   \hspace*{2em}\texttt{def *in(?elt,list):} \\
+%   \hspace*{4em}\texttt{generate ??elt = head(list)} \\
+%   \hspace*{4em}\texttt{generate *?elt in tail(list)} \\
+
+% \end{itemize}
+% \end{frame}
 
 
-%-----------------------------------------------------------------------%
-\begin{frame}[fragile]
-\frametitle{Generators}
-\begin{itemize}
-\item Generators are procedures that return any number of times
-\item Like \texttt{nondet} predicates in Mercury; similar to the list monad
-\item Generators are declared with a \texttt{*} before the signature
-\item Generators use \texttt{generate} statements to specify
-  multiple results
-\item Each \texttt{generate} encloses multiple statements producing
-  results from initial state
-\item Results are produced in the specified order
-\item Generators can call tests; if test fails, skip to next \texttt{generate}
-\item \emph{E.g.,} \\
-  \hspace*{2em}\texttt{def *in(?elt,list):} \\
-  \hspace*{4em}\texttt{generate ??elt = head(list)} \\
-  \hspace*{4em}\texttt{generate *?elt in tail(list)} \\
-
-\end{itemize}
-\end{frame}
+% %-----------------------------------------------------------------------%
+% \begin{frame}[fragile]
+% \frametitle{Generators}
+% \begin{itemize}
+% \item A procedure that calls a generator outside of a \texttt{for}
+%   construct is also a generator
+% \item A sequence of calls to generators generates the cross-product of
+%   their results
+% \item A test is like a generator restricted to at most one result
+% \item Generators can be used for logic programming-like coding
+% \item \texttt{for} statements allow iteration over generators,
+%   accumulating results
+% \item \texttt{do} loop can have multiple \texttt{for} statements to
+%   support lock-step iteration
+% \end{itemize}
+% \end{frame}
 
 
-%-----------------------------------------------------------------------%
-\begin{frame}[fragile]
-\frametitle{Generators}
-\begin{itemize}
-\item A procedure that calls a generator outside of a \texttt{for}
-  construct is also a generator
-\item A sequence of calls to generators generates the cross-product of
-  their results
-\item A test is like a generator restricted to at most one result
-\item Generators can be used for logic programming-like coding
-\item \texttt{for} statements allow iteration over generators,
-  accumulating results
-\item \texttt{do} loop can have multiple \texttt{for} statements to
-  support lock-step iteration
-\end{itemize}
-\end{frame}
+% %-----------------------------------------------------------------------%
+% \begin{frame}[fragile]
+% \frametitle{Types}
+% \begin{itemize}
+% \item Type system is not designed yet; much work to be done
+% \item These are some goals:
+%   \begin{itemize}
+%   \item Strongly typed
+%   \item Type inference for local variables and formal parameters of
+%     private procedures
+%   \item Parametric polymorphism
+%   \item Declaration of algebraic types produces constructors,
+%     deconstructors, accessors, mutators
+%   \item Also possible to define all these as normal procedures, so one
+%     can directly implement types by defining their primitive
+%     operations
+%   \item \emph{E.g.,} can generate  constructors, deconstructors,
+%     accessors, mutators for C structs passed through foreign interface
+%   \end{itemize}
+% \end{itemize}
+% \end{frame}
 
 
-%-----------------------------------------------------------------------%
-\begin{frame}[fragile]
-\frametitle{Types}
-\begin{itemize}
-\item Type system is not designed yet; much work to be done
-\item These are some goals:
-  \begin{itemize}
-  \item Strongly typed
-  \item Type inference for local variables and formal parameters of
-    private procedures
-  \item Parametric polymorphism
-  \item Declaration of algebraic types produces constructors,
-    deconstructors, accessors, mutators
-  \item Also possible to define all these as normal procedures, so one
-    can directly implement types by defining their primitive
-    operations
-  \item \emph{E.g.,} can generate  constructors, deconstructors,
-    accessors, mutators for C structs passed through foreign interface
-  \end{itemize}
-\end{itemize}
-\end{frame}
-
-
-%-----------------------------------------------------------------------%
-\begin{frame}[fragile]
-\frametitle{Types}
-\begin{itemize}
-\item Interface inheritance: unify types with type classes
-  \begin{itemize}
-  \item Abstract type $\equiv$ type class
-  \item Allow a type $A$ to ``implement'' another type $B$, by
-    defining all $B$'s primitive operations for type $A$
-  \item Then an $A$ \emph{is-a} $B$: pass an $A$ where a $B$ is expected
-  \item \emph{E.g.,} allow list processing functions to work on arrays
-  by defining \texttt{car}, \texttt{cdr}, and \texttt{cons} for arrays
-\end{itemize}
-\item Implementation inheritance: declarative delegation
-  \begin{itemize}
-  \item For a specified set of procedures, 
-    declare a function $f: a \to b$ to convert an $a$ argument to a $b$
-  \item Allows passing an $a$ for any $b$ type parameter to these procedures
-  \item Controlled coercion, or easy overloading
-  \item Allows composition to substitute for (multiple) inheritance
-  \item But no overriding
-  \end{itemize}
-\end{itemize}
-\end{frame}
+% %-----------------------------------------------------------------------%
+% \begin{frame}[fragile]
+% \frametitle{Types}
+% \begin{itemize}
+% \item Interface inheritance: unify types with type classes
+%   \begin{itemize}
+%   \item Abstract type $\equiv$ type class
+%   \item Allow a type $A$ to ``implement'' another type $B$, by
+%     defining all $B$'s primitive operations for type $A$
+%   \item Then an $A$ \emph{is-a} $B$: pass an $A$ where a $B$ is expected
+%   \item \emph{E.g.,} allow list processing functions to work on arrays
+%   by defining \texttt{car}, \texttt{cdr}, and \texttt{cons} for arrays
+% \end{itemize}
+% \item Implementation inheritance: declarative delegation
+%   \begin{itemize}
+%   \item For a specified set of procedures, 
+%     declare a function $f: a \to b$ to convert an $a$ argument to a $b$
+%   \item Allows passing an $a$ for any $b$ type parameter to these procedures
+%   \item Controlled coercion, or easy overloading
+%   \item Allows composition to substitute for (multiple) inheritance
+%   \item But no overriding
+%   \end{itemize}
+% \end{itemize}
+% \end{frame}
 
 
 %-----------------------------------------------------------------------%
