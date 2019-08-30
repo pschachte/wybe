@@ -57,3 +57,4 @@ README.html
 # IDE
 .vscode
 dist-newstyle
+stack.yaml.lock
