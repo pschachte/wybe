@@ -10,6 +10,8 @@ See the [SUBDIRECTORIES.md file](SUBDIRECTORIES.md) file for
 a tour of the directories making up the Wybe project.
 There is a (growing) [list of programming and research projects](PROJECTS.md)
 to further develop the Wybe language.
+We are indebted to the several [contributors](CONTRIBUTORS.md)
+to the Wybe project.
 
 
 ## The Wybe Language
