@@ -134,7 +134,7 @@ entry:
   imports         : public use student.course
                     public use student.student
                     use wybe
-  types           : course/0 (pointer)  @student:1:8, student/0 (pointer)  @student:2:8
+  types           : course/0 (pointer)  @student:1:5, student/0 (pointer)  @student:2:5
   resources       : 
   submodules      : student.course, student.student
   procs           : 

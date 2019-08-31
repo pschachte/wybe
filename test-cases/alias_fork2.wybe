@@ -5,7 +5,7 @@
 use mytree
 
 # put tl as result's left tree node
-public func simpleMerge(tl:tree):tree = node(tl, 200, empty)
+pub def simpleMerge(tl:tree):tree = node(tl, 200, empty)
 
 ?t1 = node(empty, 1, empty)
 ?t = simpleMerge(t1)
@@ -13,8 +13,7 @@ public func simpleMerge(tl:tree):tree = node(tl, 200, empty)
 !printTree(t)
 !println("")
 
-if t1 = node(?l, ?k, ?r) :: ?t1 = node(l, 1000, r)
-end
+if { t1 = node(?l, ?k, ?r) :: ?t1 = node(l, 1000, r) }
 
 !println("expect t1 - 1000:")
 !printTree(t1)

@@ -1,5 +1,5 @@
-public func fortytwo : int = 42
-public func fold_add : int = 21 + 21
-public func fold_mult : int = 6 * 7
-public func fold_test : int =
+pub def fortytwo : int = 42
+pub def fold_add : int = 21 + 21
+pub def fold_mult : int = 6 * 7
+pub def fold_test : int =
        if fold_mult = fold_add then 42 else 41

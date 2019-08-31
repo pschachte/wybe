@@ -1,3 +1,3 @@
 Internal error: Local variable not in scope: "r#0"
 CallStack (from HasCallStack):
-  error, called at src/AST.hs:2592:17 in main:AST
+  error, called at src/AST.hs:2600:17 in main:AST

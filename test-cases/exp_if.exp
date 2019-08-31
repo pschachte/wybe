@@ -23,10 +23,10 @@ if_test > public (1 calls)
     foreign llvm icmp sgt(~x#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
-        foreign llvm move("smaller":wybe.string, ?$#0:wybe.string) @exp_if:2:8
+        foreign llvm move("smaller":wybe.string, ?$#0:wybe.string) @exp_if:2:5
 
     1:
-        foreign llvm move("larger":wybe.string, ?$#0:wybe.string) @exp_if:2:8
+        foreign llvm move("larger":wybe.string, ?$#0:wybe.string) @exp_if:2:5
 
 
   LLVM code       :

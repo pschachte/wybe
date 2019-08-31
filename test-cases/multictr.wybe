@@ -1,18 +1,18 @@
 # Test case for type with multiple non-constant constructors
 
-public type number = public
+pub type number { pub
        int(int_value:int)
      | float(float_value:float)
-end
+}
 
-public type simple = public
+pub type simple { pub
        zero
      | one(one_field:int)
      | two(two_field:int)
-end
+}
 
 # Skip this test until we can handle secondary tags:
-# public type complicated = public
+# pub type complicated { pub
 #        winter | spring | summer | autumn
 #      | c01(f01:int)
 #      | c02(f02:int)
@@ -34,5 +34,4 @@ end
 #      | c18(f18:int)
 #      | c19(f19:int)
 #      | c20(f20:int)
-# end
-
+# }

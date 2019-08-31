@@ -1,9 +1,9 @@
-public type position = public position(x:int, y:int) end
+pub type position { pub position(x:int, y:int) }
 
-public proc printPosition(pos:position) use !io
+pub def printPosition(pos:position) use !io {
     !print(" (")
     !print(pos.x)
     !print(",")
     !print(pos.y)
     !println(")")
-end
+}

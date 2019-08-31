@@ -14,7 +14,7 @@ AFTER EVERYTHING:
                     position.position.y<1>
   imports         : public use position.position
                     use wybe
-  types           : position/0 (pointer)  @position:1:8
+  types           : position/0 (pointer)  @position:1:5
   resources       : 
   submodules      : position.position
   procs           : 
@@ -266,7 +266,7 @@ entry:
     foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$5#0:position.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 111:wybe.int)
     foreign lpvm mutate(~tmp$5#0:position.position, ?tmp$0#0:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 222:wybe.int)
     foreign lpvm mutate noalias(~tmp$0#0:position.position, ?%posA#1:position.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 112:wybe.int)
-    foreign c print_string("expect posA(112,222):":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
+    foreign c print_string("expect posA(111,112):":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
     position.printPosition<0>(~posA#1:position.position, ~#io#1:phantom, ?#io#2:phantom) @position1:8:2
 
   LLVM code       :
@@ -283,7 +283,7 @@ declare external ccc  void @"position.printPosition<0>"(i64*)
 declare external ccc  void @print_string(i8*)    
 
 
-@position1.9 =    constant [22 x i8] c"expect posA(112,222):\00"
+@position1.9 =    constant [22 x i8] c"expect posA(111,112):\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

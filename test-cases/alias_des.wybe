@@ -1,6 +1,6 @@
 use position
 
-public proc replicate(?p2:position) use !io
+pub def replicate(?p2:position) use !io {
   ?p1 = position(101,102)
   ?p2 = position(p1.x, p1.y)
   x(!p1, 10000) # destructive update
@@ -9,13 +9,13 @@ public proc replicate(?p2:position) use !io
   !printPosition(p1)
   !print("expect p2(101,103):")
   !printPosition(p2)
-end
+}
 
-public proc foo use !io
+pub def foo use !io {
   !replicate(?p2)
   x(!p2, 20000)
   !print("--- after x(!p2, 20000) - expect p2(20000,103):")
   !printPosition(p2)
-end
+}
 
 !foo

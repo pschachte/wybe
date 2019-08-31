@@ -3,9 +3,9 @@
 # Then modify p.  This should not be destructive.
 
 #use position
-public type position = public position(x:int, y:int) end
+pub type position { pub position(x:int, y:int) }
 
-public type posrec = public posrec(p:position, a:int) end
+pub type posrec { pub posrec(p:position, a:int) }
 
 ?pos = position(100,100)
 ?rec = posrec(pos, 1)

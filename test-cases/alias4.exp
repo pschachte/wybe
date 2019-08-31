@@ -183,7 +183,7 @@ entry:
                     position.position.y<1>
   imports         : public use position.position
                     use wybe
-  types           : position/0 (pointer)  @position:1:8
+  types           : position/0 (pointer)  @position:1:5
   resources       : 
   submodules      : position.position
   procs           : 

@@ -68,7 +68,7 @@ file you want it to build, and it figures out what files it needs
 to compile.
 
 
-### Types
+### Primitive types
 
 Wybe has the usual complement of primitive types:
 
@@ -105,13 +105,161 @@ with an exclamation mark (`!`).
     incr(!x)   # increment x (both uses and reassigns x)
 ```
 
+So a variable mention without adornment is passed by value, with a `?` prefix it
+is passed by result, and with a `!` prefix, it is passed by value-result.
+
 ### Functions
+
+Functions are defined with the syntax:
+
+> `def` *name*`(`*param*`:`*type*, ... *param*`:`*type*`):`*type* `=` *expr*
+
+Here *name* is the function name, each *param* is a parameter name, the
+corresponding *type* is its type, the final *type* is the function
+result type, and *expr* is an expression giving the function value.
+Each `:`*type* is optional; if omitted, the compiler will infer the
+type.  If there are no parameters, the parentheses are also omitted.
+
+This syntax declares a private (not exported) function.  To export the
+function, the definition should be preceded by the `pub` keyword.
+All types must be included in public function definitions.
+
+For example:
+
+```
+pub def toCelsius(f:float):float = (f - 32.0) / 1.8
+```
+
+
 ### Procedures
+
+Procedures are defined with the syntax:
+
+> `def` *name*`(`*dir* *param*`:`*type*, ... *dir* *param*`:`*type*`) {` *body* `}`
+
+Again *name* is the procedure name, each *param* is a parameter name, the
+corresponding *type* is its type, and *body* is a sequence of statements
+making up the body of the procedure.  Each *dir* is a dataflow
+direction annotation, either nothing to indicate an input, `?` for an
+output, or `!` to indicate both an input and an output.
+Procedures may have any number of input, output, and input/output
+arguments in any order.
+Again each `:`*type* is optional, with types inferred if omitted,
+and parentheses omitted for niladic procedures.
+
+The procedure is private unless preceded by the `pub` keyword.
+All types must be included in public procedure definitions.
+
+For example:
+
+```
+pub def incr(!x:int) { ?x = x + 1 }
+```
+
+
 ### Functions *are* procedures
-### Resources
+
+Wybe functions are the same as procedures with one extra output
+argument, and in fact the compiler implements them that way.  Therefore,
+the definition
+```
+pub def toCelsius(f:float):float = (f - 32.0) / 1.8
+```
+is exactly equivalent to
+```
+pub def toCelsius(f:float, ?result:float) { ?result = (f - 32.0) / 1.8 }
+```
+
+Likewise, every function call is transformed into a procedure call, so:
+```
+pub def example(f:float, ?c:float) {?c = toCelsius(f) }
+```
+is exactly equivalent to
+```
+pub def example(f:float, ?c:float) {toCelsius(f, ?c) }
+```
+
+This means that what you define as a procedure, you can still call as a
+function whose output is the final procedure argument, and what you
+define as a function, you can still call as a procedure by giving it an
+extra argument to stand for the function output.  Thus
+
+``` ?y = f(x)
+```
+is always equivalent to
+``` f(x, ?y)
+```
+
+
 ### Modes
+
+It is permitted to define multiple procedures with the same name, as
+long as all of them have the same number and types of arguments in the
+same order, and different *modes*.  A mode is a combination of argument
+directions.  This can be used to carry out computations in different
+directions.  For example:
+
+```
+pub def add(x:int, y:int, ?xy:int) { ?xy = x + y }
+pub def add(x:int, ?y:int, xy:int) { ?y = xy - x }
+pub def add(?x:int, y:int, xy:int) { ?x = xy - y }
+```
+
+Like any procedures, all of these can be called as functions, so with
+these definitions, all of the following are valid:
+```
+?z = add(x, 1)
+z = add(?x, 1)
+z = add(1, ?x)
+```
+That is, functions can be run "backwards", if defined to support this.
+In fact, `+` and `-` are already defined this way.
+
+The compiler expects that these definitions are consistent, as they are
+in this case.  That means, for example, that for any values of `a` and
+`b`, after
+```
+add(a, b, ?ab)
+add(?z, b, ab)
+```
+`z` would equal `a`.
+The compiler is entitled to count on this equality holding, and would
+actually replace the second statement with
+```
+?z = a
+```
+
 ### Tests
-### Selection and iteration
+
+Some procedure and function calls are *tests*.  This means that instead
+of returning whatever outputs they ordinarily produce, they can *fail*,
+in which case they do not produce their usual output(s).  You can think
+of a test function as a partial function, and a test procedure as one
+that can throw a special *failure* exception.
+
+Test procedures and functions must be explicitly declared by inserting
+the keyword `test` after the `def` keyword.
+
+Calls to test procedures and functions are only permitted in two
+contexts:  in a conditional, or in the definition of a test procedure or
+function.
+
+Any procedure or function call can become a test if an input is provided
+where and output argument is expected.  In this case, the call is made
+producing the output, and then the output is compared for equality with
+supplied input.  Equality `=` with two input arguments is a test, so
+these two calls are equivalent tests:
+
+```
+add(x, y, xy)
+xy = add(x, y)
+```
+
+### Statements
+#### Selection
+#### Iteration
 ### Modules
-### User defined types
+### Type declarations
+### Resources
+### Selection and iteration
 ### Foreign interface

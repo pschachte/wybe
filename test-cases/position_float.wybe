@@ -1,1 +1,1 @@
-public type position = public position(x:float, y:float) end
+pub type position { pub position(x:float, y:float) }

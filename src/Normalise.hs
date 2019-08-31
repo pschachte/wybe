@@ -117,7 +117,7 @@ normaliseItem (ResourceDecl vis name typ init pos) = do
     Just val -> normaliseItem (StmtDecl (ProcCall [] "=" Nothing Det False
                                          [Unplaced $ varSet name, val]) pos)
 normaliseItem (FuncDecl vis detism inline
-                           (FnProto name params resources)
+                           (ProcProto name params resources)
                            resulttype result pos) =
   let flowType = Implicit pos
   in  normaliseItem
@@ -189,12 +189,12 @@ normaliseSubmodule name typeParams vis pos items = do
 --  and non-constant ones.
 normaliseTypeImpln :: TypeImpln ->
                       (TypeRepresentation,Visibility,
-                       [Placed FnProto],[Placed FnProto])
+                       [Placed ProcProto],[Placed ProcProto])
 normaliseTypeImpln (TypeRepresentation repName) =
     (normaliseTypeRepresntation repName, Private, [], [])
 normaliseTypeImpln (TypeCtors vis ctors) =
     let (constCtrs,nonConstCtrs) =
-            List.partition (List.null . fnProtoParams . content) ctors
+            List.partition (List.null . procProtoParams . content) ctors
     in ((if List.null nonConstCtrs
          then "i" ++
               (show $ ceiling $ logBase 2 $ fromIntegral $ length constCtrs)
@@ -224,10 +224,10 @@ assignmentProc ty leftToRight =
 
 
 -- |All items needed to implement a const contructor for the specified type.
-constCtorItems :: Visibility -> TypeSpec -> (Placed FnProto,Integer) -> [Item]
+constCtorItems :: Visibility -> TypeSpec -> (Placed ProcProto,Integer) -> [Item]
 constCtorItems  vis typeSpec (placedProto,num) =
     let pos = place placedProto
-        constName = fnProtoName $ content placedProto
+        constName = procProtoName $ content placedProto
     in [ProcDecl vis Det True
         (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] Set.empty)
         [lpvmCastToVar (castTo (IntValue num) typeSpec) "$"] pos
@@ -238,11 +238,12 @@ constCtorItems  vis typeSpec (placedProto,num) =
 -- XXX need to handle the case of too many constructors for the number of tag
 -- bits available
 nonConstCtorItems :: Visibility -> TypeSpec -> Int -> Int
-                  -> (Placed FnProto,Integer) -> Compiler [Item]
+                  -> (Placed ProcProto,Integer) -> Compiler [Item]
 nonConstCtorItems vis typeSpec constCount nonConstCount (placedProto,tag) = do
     let pos = place placedProto
-    let ctorName = fnProtoName $ content placedProto
-    let params = fnProtoParams $ content placedProto
+    let ctorName = procProtoName $ content placedProto
+    let params = procProtoParams $ content placedProto
+    -- fields <- mapM (\(Param var typ _ _) -> fmap (var,typ,) $ fieldSize typ)
     fields <- mapM (\(Param var typ _ _) -> do
                        maybeSpec <- lookupType typ pos
                        maybeRep <- if isJust maybeSpec
@@ -439,14 +440,14 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount
 --
 ----------------------------------------------------------------
 
-implicitItems :: TypeSpec -> [Placed FnProto] -> [Placed FnProto] -> [Item]
+implicitItems :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto] -> [Item]
                  -> [Item]
 implicitItems typespec consts nonconsts items =
     implicitEquality typespec consts nonconsts items
     -- XXX add print, display, maybe prettyprint, and lots more
 
 
-implicitEquality :: TypeSpec -> [Placed FnProto] -> [Placed FnProto] -> [Item]
+implicitEquality :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto] -> [Item]
                  -> [Item]
 implicitEquality typespec consts nonconsts items =
     if List.any equalityTest items || consts==[] && nonconsts==[]
@@ -461,7 +462,7 @@ implicitEquality typespec consts nonconsts items =
 -- |Does the item declare an = test or function?
 equalityTest :: Item -> Bool
 equalityTest (ProcDecl _ SemiDet _ (ProcProto "=" [_,_] _) _ _) = True
-equalityTest (FuncDecl _ Det _ (FnProto "=" [_,_] _) ty _ _) =
+equalityTest (FuncDecl _ Det _ (ProcProto "=" [_,_] _) ty _ _) =
     ty == boolType
 equalityTest _ = False
 
@@ -483,7 +484,7 @@ equalityTest _ = False
 --   there is no more than one non-const constructor and either it has no more
 --   than two arguments or there are no const constructors.
 --
-equalityBody :: [Placed FnProto] -> [Placed FnProto] -> ([Placed Stmt],Bool)
+equalityBody :: [Placed ProcProto] -> [Placed ProcProto] -> ([Placed Stmt],Bool)
 equalityBody [] [] = shouldnt "trying to generate = test with no constructors"
 equalityBody consts [] = ([equalityConsts consts],True)
 equalityBody consts nonconsts =
@@ -496,14 +497,14 @@ equalityBody consts nonconsts =
      -- Decide to inline if only 1 non-const constructor, no non-const
      -- constructors (so not recursive), and at most 4 fields
      case List.map content nonconsts of
-         [FnProto _ params _ ] -> length params <= 4 && List.null consts
+         [ProcProto _ params _ ] -> length params <= 4 && List.null consts
          _ -> False
         )
 
 
 -- |Return code to check of two const values values are equal, given that we
 --  know that the $left value is a const.
-equalityConsts :: [Placed FnProto] -> Placed Stmt
+equalityConsts :: [Placed ProcProto] -> Placed Stmt
 equalityConsts [] = failTest
 equalityConsts _ =
     comparison "eq" (intCast $ varGet "$left") (intCast $ varGet "$right")
@@ -512,10 +513,10 @@ equalityConsts _ =
 -- |Return code to check that two values are equal when the first is known
 --  not to be a const constructor.  The first argument is the list of
 --  nonconsts, second is the list of consts.
-equalityNonconsts :: [FnProto] -> Bool -> Placed Stmt
+equalityNonconsts :: [ProcProto] -> Bool -> Placed Stmt
 equalityNonconsts [] _ =
     shouldnt "type with no non-const constructors should have been handled"
-equalityNonconsts [FnProto name params _] noConsts =
+equalityNonconsts [ProcProto name params _] noConsts =
     -- single non-const and no const constructors:  just compare fields
     let detism = if noConsts then Det else SemiDet
     in  Unplaced $ And ([deconstructCall name "$left" params detism,
@@ -531,9 +532,9 @@ equalityNonconsts ctrs _ =
 --  $left against each possible constructor; if it matches, it tests
 --  that $right is also that constructor and all the fields match; if
 --  it doesn't match, it tests the next possible constructor, etc.
-equalityMultiNonconsts :: [FnProto] -> Placed Stmt
+equalityMultiNonconsts :: [ProcProto] -> Placed Stmt
 equalityMultiNonconsts [] = failTest
-equalityMultiNonconsts (FnProto name params _:ctrs) =
+equalityMultiNonconsts (ProcProto name params _:ctrs) =
     Unplaced
      $ Cond (deconstructCall name "$left" params SemiDet)
         [Unplaced $ And ([deconstructCall name "$right" params SemiDet]

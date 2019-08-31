@@ -1,4 +1,4 @@
-# transitive aliasing data structures incurred by procs in SCC modules
+# transitive aliasing data structures incurred by defs  {in SCC modules
 
 use position
 use alias_mfoo

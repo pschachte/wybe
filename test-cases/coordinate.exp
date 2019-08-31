@@ -17,7 +17,7 @@ AFTER EVERYTHING:
                     coordinate.Coordinate.z<1>
   imports         : public use coordinate.Coordinate
                     use wybe
-  types           : Coordinate/0 (pointer)  @coordinate:1:8
+  types           : Coordinate/0 (pointer)  @coordinate:1:5
   resources       : 
   submodules      : coordinate.Coordinate
   procs           : 
@@ -41,7 +41,7 @@ AFTER EVERYTHING:
 
 fcopy > public inline (1 calls)
 0: fcopy(crd1#0:coordinate.Coordinate, ?$#0:coordinate.Coordinate): AliasPairs: []
-    foreign llvm move(~crd1#0:coordinate.Coordinate, ?$#0:coordinate.Coordinate) @coordinate:6:8
+    foreign llvm move(~crd1#0:coordinate.Coordinate, ?$#0:coordinate.Coordinate) @coordinate:6:5
 
   LLVM code       :
 

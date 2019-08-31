@@ -28,7 +28,7 @@ factorial > public (2 calls)
         foreign llvm mul(~n#0:wybe.int, ~tmp$2#0:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
 
     1:
-        foreign llvm move(1:wybe.int, ?$#0:wybe.int) @func_factorial:1:8
+        foreign llvm move(1:wybe.int, ?$#0:wybe.int) @func_factorial:1:5
 
 
   LLVM code       :

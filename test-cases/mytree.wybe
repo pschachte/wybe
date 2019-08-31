@@ -1,11 +1,11 @@
-public type tree = public empty | node(left:tree, key:int, right:tree) end
+pub type tree { pub empty | node(left:tree, key:int, right:tree) }
 
-public proc printTree(t:tree) use !io
-  if t = node(?l, ?k, ?r) ::
-    !printTree(l)
-    !print(" ")
-    !print(k)
-    !print(" ")
-    !printTree(r)
-  end
-end
+pub def printTree(t:tree) use !io {
+  if { t = node(?l, ?k, ?r) ::
+           !printTree(l)
+           !print(" ")
+           !print(k)
+           !print(" ")
+           !printTree(r)
+  }
+}

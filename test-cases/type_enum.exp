@@ -11,7 +11,7 @@ AFTER EVERYTHING:
                     type_enum.season.winter<0>
   imports         : public use type_enum.season
                     use wybe
-  types           : season/0 (i2)  @type_enum:1:8
+  types           : season/0 (i2)  @type_enum:1:5
   resources       : 
   submodules      : type_enum.season
   procs           : 

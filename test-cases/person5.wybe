@@ -1,11 +1,11 @@
-public type person = public person(firstname:string, lastname:string) end
+pub type person { pub person(firstname:string, lastname:string) }
 
 # update both objects
 # expect: copy B into a new memory and do update
-proc update_both(!p1:person, !p2:person) use !io
+def update_both(!p1:person, !p2:person) use !io {
   firstname(!p1, "Amy")
   firstname(!p2, "Bob")
-end
+}
 
 ?personA = person("John", "Smith")
 ?personB = personA
