@@ -51,7 +51,7 @@ gen$2 > inline (1 calls)
 declare external ccc  void @putchar(i8)    
 
 
-declare external ccc  void @print_string(i8*)    
+declare external ccc  void @print_string(i64)    
 
 
 declare external ccc  void @print_int(i64)    
@@ -86,7 +86,8 @@ entry:
   br i1 %"tmp$1#0", label %if.then, label %if.else 
 if.then:
   tail call ccc  void  @print_int(i64  %"count#0")  
-  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([29 x i8], [29 x i8]* @proc_beer.1, i32 0, i32 0))  
+  %2 = ptrtoint i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_beer.1, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
   %"count#1" = sub   i64 %"count#0", 1 
   tail call ccc  void  @"proc_beer.gen$1<0>"(i64  %"count#1")  

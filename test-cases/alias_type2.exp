@@ -23,7 +23,7 @@ AFTER EVERYTHING:
   imports         : public use alias_type2.position
                     public use alias_type2.posrec
                     use wybe
-  types           : position/0 (pointer)  @alias_type2:2:8, posrec/0 (pointer)  @alias_type2:4:8
+  types           : position/0 (pointer)  @alias_type2:2:5, posrec/0 (pointer)  @alias_type2:4:5
   resources       : 
   submodules      : alias_type2.position, alias_type2.posrec
   procs           : 
@@ -31,20 +31,20 @@ AFTER EVERYTHING:
 *main* > public (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#2:phantom): AliasPairs: []
     foreign lpvm alloc(16:wybe.int, ?tmp$7#0:alias_type2.position)
-    foreign lpvm mutate(~tmp$7#0:alias_type2.position, ?tmp$8#0:alias_type2.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, 100:wybe.int)
-    foreign lpvm mutate(~tmp$8#0:alias_type2.position, ?tmp$9#0:alias_type2.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, 100:wybe.int)
-    foreign lpvm alloc(16:wybe.int, ?tmp$14#0:alias_type2.posrec)
-    foreign lpvm mutate(~tmp$14#0:alias_type2.posrec, ?tmp$15#0:alias_type2.posrec, 16:wybe.int, 0:wybe.int, 1:wybe.int, tmp$9#0:alias_type2.position)
-    foreign lpvm mutate(~tmp$15#0:alias_type2.posrec, ?tmp$16#0:alias_type2.posrec, 16:wybe.int, 8:wybe.int, 1:wybe.int, 1:wybe.int)
-    foreign lpvm mutate(~tmp$16#0:alias_type2.posrec, ?%rec#1:alias_type2.posrec, 16:wybe.int, 8:wybe.int, 0:wybe.int, 2:wybe.int)
-    foreign lpvm mutate noalias(~tmp$9#0:alias_type2.position, ?%pos#1:alias_type2.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, 200:wybe.int)
+    foreign lpvm mutate(~tmp$7#0:alias_type2.position, ?tmp$8#0:alias_type2.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int)
+    foreign lpvm mutate(~tmp$8#0:alias_type2.position, ?tmp$9#0:alias_type2.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int)
+    foreign lpvm alloc(16:wybe.int, ?tmp$12#0:alias_type2.posrec)
+    foreign lpvm mutate(~tmp$12#0:alias_type2.posrec, ?tmp$13#0:alias_type2.posrec, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp$9#0:alias_type2.position)
+    foreign lpvm mutate(~tmp$13#0:alias_type2.posrec, ?tmp$14#0:alias_type2.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int)
+    foreign lpvm mutate(~tmp$14#0:alias_type2.posrec, ?%rec#1:alias_type2.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
+    foreign lpvm mutate noalias(~tmp$9#0:alias_type2.position, ?%pos#1:alias_type2.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int)
     foreign lpvm access(~pos#1:alias_type2.position, 0:wybe.int, ?tmp$2#0:wybe.int)
-    foreign c print_int(~tmp$2#0:wybe.int, ~#io#0:phantom, ?tmp$26#0:phantom) @wybe:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$26#0:phantom, ?#io#1:phantom) @wybe:nn:nn
+    foreign c print_int(~tmp$2#0:wybe.int, ~#io#0:phantom, ?tmp$22#0:phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$22#0:phantom, ?#io#1:phantom) @wybe:nn:nn
     foreign lpvm access(~rec#1:alias_type2.posrec, 0:wybe.int, ?tmp$3#0:alias_type2.position)
     foreign lpvm access(~tmp$3#0:alias_type2.position, 0:wybe.int, ?tmp$4#0:wybe.int)
-    foreign c print_int(~tmp$4#0:wybe.int, ~#io#1:phantom, ?tmp$31#0:phantom) @wybe:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$31#0:phantom, ?#io#2:phantom) @wybe:nn:nn
+    foreign c print_int(~tmp$4#0:wybe.int, ~#io#1:phantom, ?tmp$27#0:phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$27#0:phantom, ?#io#2:phantom) @wybe:nn:nn
 
   LLVM code       :
 
@@ -68,51 +68,59 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external ccc  void @"alias_type2.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
-  %1 = tail call ccc  i8*  @wybe_malloc(i32  16)  
-  %2 = bitcast i8* %1 to i64* 
-  %3 = bitcast i64* %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 100, i64* %4 
-  %5 = bitcast i64* %2 to i64* 
-  %6 = getelementptr  i64, i64* %5, i64 1 
-  store  i64 100, i64* %6 
-  %7 = tail call ccc  i8*  @wybe_malloc(i32  16)  
-  %8 = bitcast i8* %7 to i64* 
-  %9 = bitcast i64* %8 to i64** 
-  %10 = getelementptr  i64*, i64** %9, i64 0 
-  store  i64* %2, i64** %10 
-  %11 = bitcast i64* %8 to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 1 
-  store  i64 1, i64* %12 
-  %13 = tail call ccc  i8*  @wybe_malloc(i32  16)  
-  %14 = bitcast i8* %13 to i64* 
-  %15 = bitcast i64* %14 to i8* 
-  %16 = bitcast i64* %8 to i8* 
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %15, i8*  %16, i32  16, i32  8, i1  0)  
-  %17 = bitcast i64* %14 to i64* 
-  %18 = getelementptr  i64, i64* %17, i64 1 
-  store  i64 2, i64* %18 
-  %19 = tail call ccc  i8*  @wybe_malloc(i32  16)  
-  %20 = bitcast i8* %19 to i64* 
-  %21 = bitcast i64* %20 to i8* 
-  %22 = bitcast i64* %2 to i8* 
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %21, i8*  %22, i32  16, i32  8, i1  0)  
-  %23 = bitcast i64* %20 to i64* 
-  %24 = getelementptr  i64, i64* %23, i64 0 
-  store  i64 200, i64* %24 
-  %25 = bitcast i64* %20 to i64* 
-  %26 = getelementptr  i64, i64* %25, i64 0 
-  %27 = load  i64, i64* %26 
-  tail call ccc  void  @print_int(i64  %27)  
-  tail call ccc  void  @putchar(i8  10)  
-  %28 = bitcast i64* %14 to i64** 
-  %29 = getelementptr  i64*, i64** %28, i64 0 
-  %30 = load  i64*, i64** %29 
-  %31 = inttoptr i64* %30 to i64* 
-  %32 = bitcast i64* %31 to i64* 
+  %1 = trunc i64 16 to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = getelementptr  i64, i64* %4, i64 0 
+  store  i64 100, i64* %5 
+  %6 = add   i64 %3, 8 
+  %7 = inttoptr i64 %6 to i64* 
+  %8 = getelementptr  i64, i64* %7, i64 0 
+  store  i64 100, i64* %8 
+  %9 = trunc i64 16 to i32  
+  %10 = tail call ccc  i8*  @wybe_malloc(i32  %9)  
+  %11 = ptrtoint i8* %10 to i64 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  store  i64 %3, i64* %13 
+  %14 = add   i64 %11, 8 
+  %15 = inttoptr i64 %14 to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  store  i64 1, i64* %16 
+  %17 = trunc i64 16 to i32  
+  %18 = tail call ccc  i8*  @wybe_malloc(i32  %17)  
+  %19 = ptrtoint i8* %18 to i64 
+  %20 = inttoptr i64 %19 to i8* 
+  %21 = inttoptr i64 %11 to i8* 
+  %22 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %20, i8*  %21, i32  %22, i32  8, i1  0)  
+  %23 = add   i64 %19, 8 
+  %24 = inttoptr i64 %23 to i64* 
+  %25 = getelementptr  i64, i64* %24, i64 0 
+  store  i64 2, i64* %25 
+  %26 = trunc i64 16 to i32  
+  %27 = tail call ccc  i8*  @wybe_malloc(i32  %26)  
+  %28 = ptrtoint i8* %27 to i64 
+  %29 = inttoptr i64 %28 to i8* 
+  %30 = inttoptr i64 %3 to i8* 
+  %31 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %29, i8*  %30, i32  %31, i32  8, i1  0)  
+  %32 = inttoptr i64 %28 to i64* 
   %33 = getelementptr  i64, i64* %32, i64 0 
-  %34 = load  i64, i64* %33 
-  tail call ccc  void  @print_int(i64  %34)  
+  store  i64 200, i64* %33 
+  %34 = inttoptr i64 %28 to i64* 
+  %35 = getelementptr  i64, i64* %34, i64 0 
+  %36 = load  i64, i64* %35 
+  tail call ccc  void  @print_int(i64  %36)  
+  tail call ccc  void  @putchar(i8  10)  
+  %37 = inttoptr i64 %19 to i64* 
+  %38 = getelementptr  i64, i64* %37, i64 0 
+  %39 = load  i64, i64* %38 
+  %40 = inttoptr i64 %39 to i64* 
+  %41 = getelementptr  i64, i64* %40, i64 0 
+  %42 = load  i64, i64* %41 
+  tail call ccc  void  @print_int(i64  %42)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -153,8 +161,8 @@ entry:
 position > public inline (0 calls)
 0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:alias_type2.position): AliasPairs: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:alias_type2.position)
-    foreign lpvm mutate(~%$rec#0:alias_type2.position, ?%$rec#1:alias_type2.position, 16:wybe.int, 0:wybe.int, 1:wybe.int, ~x#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:alias_type2.position, ?%$#0:alias_type2.position, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~y#0:wybe.int)
+    foreign lpvm mutate(~%$rec#0:alias_type2.position, ?%$rec#1:alias_type2.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:wybe.int)
+    foreign lpvm mutate(~%$rec#1:alias_type2.position, ?%$#0:alias_type2.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y#0:wybe.int)
 position > public inline (4 calls)
 1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:alias_type2.position): AliasPairs: []
     foreign lpvm access($#0:alias_type2.position, 0:wybe.int, ?x#0:wybe.int)
@@ -166,7 +174,7 @@ x > public inline (0 calls)
     foreign lpvm access(~$rec#0:alias_type2.position, 0:wybe.int, ?$#0:wybe.int)
 x > public inline (0 calls)
 1: x($rec#0:alias_type2.position, ?$rec#1:alias_type2.position, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate noalias(~%$rec#0:alias_type2.position, ?%$rec#1:alias_type2.position, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:alias_type2.position, ?%$rec#1:alias_type2.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 y > public inline (0 calls)
@@ -174,7 +182,7 @@ y > public inline (0 calls)
     foreign lpvm access(~$rec#0:alias_type2.position, 8:wybe.int, ?$#0:wybe.int)
 y > public inline (0 calls)
 1: y($rec#0:alias_type2.position, ?$rec#1:alias_type2.position, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate noalias(~%$rec#0:alias_type2.position, ?%$rec#1:alias_type2.position, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:alias_type2.position, ?%$rec#1:alias_type2.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
   LLVM code       :
 
@@ -190,101 +198,112 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"alias_type2.position.=<0>"(i64*  %"$left#0", i64*  %"$right#0")    {
+define external ccc  i1 @"alias_type2.position.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %1 = bitcast i64* %"$left#0" to i64* 
+  %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %4 = bitcast i64* %"$left#0" to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 1 
-  %6 = load  i64, i64* %5 
-  %7 = bitcast i64* %"$right#0" to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  %9 = load  i64, i64* %8 
-  %10 = bitcast i64* %"$right#0" to i64* 
-  %11 = getelementptr  i64, i64* %10, i64 1 
-  %12 = load  i64, i64* %11 
-  %"tmp$2#0" = icmp eq i64 %3, %9 
+  %4 = add   i64 %"$left#0", 8 
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
+  %7 = load  i64, i64* %6 
+  %8 = inttoptr i64 %"$right#0" to i64* 
+  %9 = getelementptr  i64, i64* %8, i64 0 
+  %10 = load  i64, i64* %9 
+  %11 = add   i64 %"$right#0", 8 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  %14 = load  i64, i64* %13 
+  %"tmp$2#0" = icmp eq i64 %3, %10 
   br i1 %"tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %6, %12 
+  %"$$#0" = icmp eq i64 %7, %14 
   ret i1 %"$$#0" 
 if.else:
   ret i1 0 
 }
 
 
-define external ccc  i64* @"alias_type2.position.position<0>"(i64  %"x#0", i64  %"y#0")    {
+define external ccc  i64 @"alias_type2.position.position<0>"(i64  %"x#0", i64  %"y#0")    {
 entry:
-  %13 = tail call ccc  i8*  @wybe_malloc(i32  16)  
-  %14 = bitcast i8* %13 to i64* 
-  %15 = bitcast i64* %14 to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
-  store  i64 %"x#0", i64* %16 
-  %17 = bitcast i64* %14 to i64* 
-  %18 = getelementptr  i64, i64* %17, i64 1 
-  store  i64 %"y#0", i64* %18 
-  ret i64* %14 
+  %15 = trunc i64 16 to i32  
+  %16 = tail call ccc  i8*  @wybe_malloc(i32  %15)  
+  %17 = ptrtoint i8* %16 to i64 
+  %18 = inttoptr i64 %17 to i64* 
+  %19 = getelementptr  i64, i64* %18, i64 0 
+  store  i64 %"x#0", i64* %19 
+  %20 = add   i64 %17, 8 
+  %21 = inttoptr i64 %20 to i64* 
+  %22 = getelementptr  i64, i64* %21, i64 0 
+  store  i64 %"y#0", i64* %22 
+  ret i64 %17 
 }
 
 
-define external ccc  {i64, i64} @"alias_type2.position.position<1>"(i64*  %"$#0")    {
+define external ccc  {i64, i64} @"alias_type2.position.position<1>"(i64  %"$#0")    {
 entry:
-  %19 = bitcast i64* %"$#0" to i64* 
-  %20 = getelementptr  i64, i64* %19, i64 0 
-  %21 = load  i64, i64* %20 
-  %22 = bitcast i64* %"$#0" to i64* 
-  %23 = getelementptr  i64, i64* %22, i64 1 
-  %24 = load  i64, i64* %23 
-  %25 = insertvalue {i64, i64} undef, i64 %21, 0 
-  %26 = insertvalue {i64, i64} %25, i64 %24, 1 
-  ret {i64, i64} %26 
-}
-
-
-define external ccc  i64 @"alias_type2.position.x<0>"(i64*  %"$rec#0")    {
-entry:
-  %27 = bitcast i64* %"$rec#0" to i64* 
+  %23 = inttoptr i64 %"$#0" to i64* 
+  %24 = getelementptr  i64, i64* %23, i64 0 
+  %25 = load  i64, i64* %24 
+  %26 = add   i64 %"$#0", 8 
+  %27 = inttoptr i64 %26 to i64* 
   %28 = getelementptr  i64, i64* %27, i64 0 
   %29 = load  i64, i64* %28 
-  ret i64 %29 
+  %30 = insertvalue {i64, i64} undef, i64 %25, 0 
+  %31 = insertvalue {i64, i64} %30, i64 %29, 1 
+  ret {i64, i64} %31 
 }
 
 
-define external ccc  i64* @"alias_type2.position.x<1>"(i64*  %"$rec#0", i64  %"$field#0")    {
+define external ccc  i64 @"alias_type2.position.x<0>"(i64  %"$rec#0")    {
 entry:
-  %30 = tail call ccc  i8*  @wybe_malloc(i32  16)  
-  %31 = bitcast i8* %30 to i64* 
-  %32 = bitcast i64* %31 to i8* 
-  %33 = bitcast i64* %"$rec#0" to i8* 
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %32, i8*  %33, i32  16, i32  8, i1  0)  
-  %34 = bitcast i64* %31 to i64* 
-  %35 = getelementptr  i64, i64* %34, i64 0 
-  store  i64 %"$field#0", i64* %35 
-  ret i64* %31 
+  %32 = inttoptr i64 %"$rec#0" to i64* 
+  %33 = getelementptr  i64, i64* %32, i64 0 
+  %34 = load  i64, i64* %33 
+  ret i64 %34 
 }
 
 
-define external ccc  i64 @"alias_type2.position.y<0>"(i64*  %"$rec#0")    {
+define external ccc  i64 @"alias_type2.position.x<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %36 = bitcast i64* %"$rec#0" to i64* 
-  %37 = getelementptr  i64, i64* %36, i64 1 
-  %38 = load  i64, i64* %37 
-  ret i64 %38 
+  %35 = trunc i64 16 to i32  
+  %36 = tail call ccc  i8*  @wybe_malloc(i32  %35)  
+  %37 = ptrtoint i8* %36 to i64 
+  %38 = inttoptr i64 %37 to i8* 
+  %39 = inttoptr i64 %"$rec#0" to i8* 
+  %40 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %38, i8*  %39, i32  %40, i32  8, i1  0)  
+  %41 = inttoptr i64 %37 to i64* 
+  %42 = getelementptr  i64, i64* %41, i64 0 
+  store  i64 %"$field#0", i64* %42 
+  ret i64 %37 
 }
 
 
-define external ccc  i64* @"alias_type2.position.y<1>"(i64*  %"$rec#0", i64  %"$field#0")    {
+define external ccc  i64 @"alias_type2.position.y<0>"(i64  %"$rec#0")    {
 entry:
-  %39 = tail call ccc  i8*  @wybe_malloc(i32  16)  
-  %40 = bitcast i8* %39 to i64* 
-  %41 = bitcast i64* %40 to i8* 
-  %42 = bitcast i64* %"$rec#0" to i8* 
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %41, i8*  %42, i32  16, i32  8, i1  0)  
-  %43 = bitcast i64* %40 to i64* 
-  %44 = getelementptr  i64, i64* %43, i64 1 
-  store  i64 %"$field#0", i64* %44 
-  ret i64* %40 
+  %43 = add   i64 %"$rec#0", 8 
+  %44 = inttoptr i64 %43 to i64* 
+  %45 = getelementptr  i64, i64* %44, i64 0 
+  %46 = load  i64, i64* %45 
+  ret i64 %46 
+}
+
+
+define external ccc  i64 @"alias_type2.position.y<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+entry:
+  %47 = trunc i64 16 to i32  
+  %48 = tail call ccc  i8*  @wybe_malloc(i32  %47)  
+  %49 = ptrtoint i8* %48 to i64 
+  %50 = inttoptr i64 %49 to i8* 
+  %51 = inttoptr i64 %"$rec#0" to i8* 
+  %52 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %50, i8*  %51, i32  %52, i32  8, i1  0)  
+  %53 = add   i64 %49, 8 
+  %54 = inttoptr i64 %53 to i64* 
+  %55 = getelementptr  i64, i64* %54, i64 0 
+  store  i64 %"$field#0", i64* %55 
+  ret i64 %49 
 }
 --------------------------------------------------
  Module alias_type2.posrec([])
@@ -334,7 +353,7 @@ a > public inline (0 calls)
     foreign lpvm access(~$rec#0:alias_type2.posrec, 8:wybe.int, ?$#0:wybe.int)
 a > public inline (0 calls)
 1: a($rec#0:alias_type2.posrec, ?$rec#1:alias_type2.posrec, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:alias_type2.posrec, ?%$rec#1:alias_type2.posrec, 16:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate(~%$rec#0:alias_type2.posrec, ?%$rec#1:alias_type2.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 p > public inline (0 calls)
@@ -342,14 +361,14 @@ p > public inline (0 calls)
     foreign lpvm access(~$rec#0:alias_type2.posrec, 0:wybe.int, ?$#0:alias_type2.position)
 p > public inline (0 calls)
 1: p($rec#0:alias_type2.posrec, ?$rec#1:alias_type2.posrec, $field#0:alias_type2.position): AliasPairs: []
-    foreign lpvm mutate noalias(~%$rec#0:alias_type2.posrec, ?%$rec#1:alias_type2.posrec, 16:wybe.int, 0:wybe.int, 0:wybe.int, ~$field#0:alias_type2.position)
+    foreign lpvm mutate noalias(~%$rec#0:alias_type2.posrec, ?%$rec#1:alias_type2.posrec, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:alias_type2.position)
 
 
 posrec > public inline (0 calls)
 0: posrec(p#0:alias_type2.position, a#0:wybe.int, ?$#0:alias_type2.posrec): AliasPairs: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:alias_type2.posrec)
-    foreign lpvm mutate(~%$rec#0:alias_type2.posrec, ?%$rec#1:alias_type2.posrec, 16:wybe.int, 0:wybe.int, 1:wybe.int, ~p#0:alias_type2.position)
-    foreign lpvm mutate(~%$rec#1:alias_type2.posrec, ?%$#0:alias_type2.posrec, 16:wybe.int, 8:wybe.int, 1:wybe.int, ~a#0:wybe.int)
+    foreign lpvm mutate(~%$rec#0:alias_type2.posrec, ?%$rec#1:alias_type2.posrec, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~p#0:alias_type2.position)
+    foreign lpvm mutate(~%$rec#1:alias_type2.posrec, ?%$#0:alias_type2.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~a#0:wybe.int)
 posrec > public inline (4 calls)
 1: posrec(?p#0:alias_type2.position, ?a#0:wybe.int, $#0:alias_type2.posrec): AliasPairs: []
     foreign lpvm access($#0:alias_type2.posrec, 0:wybe.int, ?p#0:alias_type2.position)
@@ -372,26 +391,26 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"alias_type2.posrec.=<0>"(i64*  %"$left#0", i64*  %"$right#0")    {
+define external ccc  i1 @"alias_type2.posrec.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %1 = bitcast i64* %"$left#0" to i64** 
-  %2 = getelementptr  i64*, i64** %1, i64 0 
-  %3 = load  i64*, i64** %2 
-  %4 = inttoptr i64* %3 to i64* 
-  %5 = bitcast i64* %"$left#0" to i64* 
-  %6 = getelementptr  i64, i64* %5, i64 1 
+  %1 = inttoptr i64 %"$left#0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = add   i64 %"$left#0", 8 
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
   %7 = load  i64, i64* %6 
-  %8 = bitcast i64* %"$right#0" to i64** 
-  %9 = getelementptr  i64*, i64** %8, i64 0 
-  %10 = load  i64*, i64** %9 
-  %11 = inttoptr i64* %10 to i64* 
-  %12 = bitcast i64* %"$right#0" to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 1 
+  %8 = inttoptr i64 %"$right#0" to i64* 
+  %9 = getelementptr  i64, i64* %8, i64 0 
+  %10 = load  i64, i64* %9 
+  %11 = add   i64 %"$right#0", 8 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %15 = tail call ccc  {i64, i64}  @"alias_type2.position.position<1>"(i64*  %4)  
+  %15 = tail call ccc  {i64, i64}  @"alias_type2.position.position<1>"(i64  %3)  
   %16 = extractvalue {i64, i64} %15, 0 
   %17 = extractvalue {i64, i64} %15, 1 
-  %18 = tail call ccc  {i64, i64}  @"alias_type2.position.position<1>"(i64*  %11)  
+  %18 = tail call ccc  {i64, i64}  @"alias_type2.position.position<1>"(i64  %10)  
   %19 = extractvalue {i64, i64} %18, 0 
   %20 = extractvalue {i64, i64} %18, 1 
   %"tmp$14#0" = tail call ccc  i1  @"wybe.int.=<0>"(i64  %16, i64  %19)  
@@ -409,77 +428,84 @@ if.else1:
 }
 
 
-define external ccc  i64 @"alias_type2.posrec.a<0>"(i64*  %"$rec#0")    {
+define external ccc  i64 @"alias_type2.posrec.a<0>"(i64  %"$rec#0")    {
 entry:
-  %21 = bitcast i64* %"$rec#0" to i64* 
-  %22 = getelementptr  i64, i64* %21, i64 1 
-  %23 = load  i64, i64* %22 
-  ret i64 %23 
+  %21 = add   i64 %"$rec#0", 8 
+  %22 = inttoptr i64 %21 to i64* 
+  %23 = getelementptr  i64, i64* %22, i64 0 
+  %24 = load  i64, i64* %23 
+  ret i64 %24 
 }
 
 
-define external ccc  i64* @"alias_type2.posrec.a<1>"(i64*  %"$rec#0", i64  %"$field#0")    {
+define external ccc  i64 @"alias_type2.posrec.a<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %24 = tail call ccc  i8*  @wybe_malloc(i32  16)  
-  %25 = bitcast i8* %24 to i64* 
-  %26 = bitcast i64* %25 to i8* 
-  %27 = bitcast i64* %"$rec#0" to i8* 
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %26, i8*  %27, i32  16, i32  8, i1  0)  
-  %28 = bitcast i64* %25 to i64* 
-  %29 = getelementptr  i64, i64* %28, i64 1 
-  store  i64 %"$field#0", i64* %29 
-  ret i64* %25 
+  %25 = trunc i64 16 to i32  
+  %26 = tail call ccc  i8*  @wybe_malloc(i32  %25)  
+  %27 = ptrtoint i8* %26 to i64 
+  %28 = inttoptr i64 %27 to i8* 
+  %29 = inttoptr i64 %"$rec#0" to i8* 
+  %30 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %28, i8*  %29, i32  %30, i32  8, i1  0)  
+  %31 = add   i64 %27, 8 
+  %32 = inttoptr i64 %31 to i64* 
+  %33 = getelementptr  i64, i64* %32, i64 0 
+  store  i64 %"$field#0", i64* %33 
+  ret i64 %27 
 }
 
 
-define external ccc  i64* @"alias_type2.posrec.p<0>"(i64*  %"$rec#0")    {
+define external ccc  i64 @"alias_type2.posrec.p<0>"(i64  %"$rec#0")    {
 entry:
-  %30 = bitcast i64* %"$rec#0" to i64** 
-  %31 = getelementptr  i64*, i64** %30, i64 0 
-  %32 = load  i64*, i64** %31 
-  %33 = inttoptr i64* %32 to i64* 
-  ret i64* %33 
+  %34 = inttoptr i64 %"$rec#0" to i64* 
+  %35 = getelementptr  i64, i64* %34, i64 0 
+  %36 = load  i64, i64* %35 
+  ret i64 %36 
 }
 
 
-define external ccc  i64* @"alias_type2.posrec.p<1>"(i64*  %"$rec#0", i64*  %"$field#0")    {
+define external ccc  i64 @"alias_type2.posrec.p<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %34 = tail call ccc  i8*  @wybe_malloc(i32  16)  
-  %35 = bitcast i8* %34 to i64* 
-  %36 = bitcast i64* %35 to i8* 
-  %37 = bitcast i64* %"$rec#0" to i8* 
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %36, i8*  %37, i32  16, i32  8, i1  0)  
-  %38 = bitcast i64* %35 to i64** 
-  %39 = getelementptr  i64*, i64** %38, i64 0 
-  store  i64* %"$field#0", i64** %39 
-  ret i64* %35 
+  %37 = trunc i64 16 to i32  
+  %38 = tail call ccc  i8*  @wybe_malloc(i32  %37)  
+  %39 = ptrtoint i8* %38 to i64 
+  %40 = inttoptr i64 %39 to i8* 
+  %41 = inttoptr i64 %"$rec#0" to i8* 
+  %42 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %40, i8*  %41, i32  %42, i32  8, i1  0)  
+  %43 = inttoptr i64 %39 to i64* 
+  %44 = getelementptr  i64, i64* %43, i64 0 
+  store  i64 %"$field#0", i64* %44 
+  ret i64 %39 
 }
 
 
-define external ccc  i64* @"alias_type2.posrec.posrec<0>"(i64*  %"p#0", i64  %"a#0")    {
+define external ccc  i64 @"alias_type2.posrec.posrec<0>"(i64  %"p#0", i64  %"a#0")    {
 entry:
-  %40 = tail call ccc  i8*  @wybe_malloc(i32  16)  
-  %41 = bitcast i8* %40 to i64* 
-  %42 = bitcast i64* %41 to i64** 
-  %43 = getelementptr  i64*, i64** %42, i64 0 
-  store  i64* %"p#0", i64** %43 
-  %44 = bitcast i64* %41 to i64* 
-  %45 = getelementptr  i64, i64* %44, i64 1 
-  store  i64 %"a#0", i64* %45 
-  ret i64* %41 
+  %45 = trunc i64 16 to i32  
+  %46 = tail call ccc  i8*  @wybe_malloc(i32  %45)  
+  %47 = ptrtoint i8* %46 to i64 
+  %48 = inttoptr i64 %47 to i64* 
+  %49 = getelementptr  i64, i64* %48, i64 0 
+  store  i64 %"p#0", i64* %49 
+  %50 = add   i64 %47, 8 
+  %51 = inttoptr i64 %50 to i64* 
+  %52 = getelementptr  i64, i64* %51, i64 0 
+  store  i64 %"a#0", i64* %52 
+  ret i64 %47 
 }
 
 
-define external ccc  {i64*, i64} @"alias_type2.posrec.posrec<1>"(i64*  %"$#0")    {
+define external ccc  {i64, i64} @"alias_type2.posrec.posrec<1>"(i64  %"$#0")    {
 entry:
-  %46 = bitcast i64* %"$#0" to i64** 
-  %47 = getelementptr  i64*, i64** %46, i64 0 
-  %48 = load  i64*, i64** %47 
-  %49 = inttoptr i64* %48 to i64* 
-  %50 = bitcast i64* %"$#0" to i64* 
-  %51 = getelementptr  i64, i64* %50, i64 1 
-  %52 = load  i64, i64* %51 
-  %53 = insertvalue {i64*, i64} undef, i64* %49, 0 
-  %54 = insertvalue {i64*, i64} %53, i64 %52, 1 
-  ret {i64*, i64} %54 
+  %53 = inttoptr i64 %"$#0" to i64* 
+  %54 = getelementptr  i64, i64* %53, i64 0 
+  %55 = load  i64, i64* %54 
+  %56 = add   i64 %"$#0", 8 
+  %57 = inttoptr i64 %56 to i64* 
+  %58 = getelementptr  i64, i64* %57, i64 0 
+  %59 = load  i64, i64* %58 
+  %60 = insertvalue {i64, i64} undef, i64 %55, 0 
+  %61 = insertvalue {i64, i64} %60, i64 %59, 1 
+  ret {i64, i64} %61 
 }

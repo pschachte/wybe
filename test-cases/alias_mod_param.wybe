@@ -1,10 +1,10 @@
 use position
 
-pub proc foo(pa:position) use !io
+pub def foo(pa:position) use !io {
     x(!pa, 1111) # Non-destructive
     !print("expect pa(1111,10):")
     !printPosition(pa)
-end
+}
 
 ?p1 = position(10,10)
 !foo(p1)

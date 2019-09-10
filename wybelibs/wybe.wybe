@@ -98,7 +98,7 @@ pub module io {
        !print(if false(x) then "false" else "true")
     }
     pub def println(x:bool) use !io { !print(x) !nl }
-#    pub def eof:char = foreign lpvm cast(-1)
+    pub def eof:char = foreign lpvm cast(-1)
 }
 
 pub type phantom is phantom {

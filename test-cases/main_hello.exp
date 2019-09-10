@@ -31,13 +31,13 @@ AFTER EVERYTHING:
 declare external ccc  void @putchar(i8)    
 
 
-declare external ccc  void @print_string(i8*)    
+declare external ccc  void @print_string(i64)    
 
 
 declare external ccc  void @print_int(i64)    
 
 
-@main_hello.2 =    constant [26 x i8] c" command line argument(s)\00"
+@main_hello.3 =    constant [26 x i8] c" command line argument(s)\00"
 
 
 @main_hello.1 =    constant [14 x i8] c"hello, world!\00"
@@ -51,11 +51,13 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external ccc  i64 @"main_hello.<0>"(i64  %"argc#0", i64  %"argv#0")    {
 entry:
-  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([14 x i8], [14 x i8]* @main_hello.1, i32 0, i32 0))  
+  %2 = ptrtoint i8* getelementptr inbounds ([14 x i8], [14 x i8]* @main_hello.1, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
   %"tmp$0#0" = sub   i64 %"argc#0", 1 
   tail call ccc  void  @print_int(i64  %"tmp$0#0")  
-  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([26 x i8], [26 x i8]* @main_hello.2, i32 0, i32 0))  
+  %4 = ptrtoint i8* getelementptr inbounds ([26 x i8], [26 x i8]* @main_hello.3, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %4)  
   tail call ccc  void  @putchar(i8  10)  
   ret i64 42 
 }

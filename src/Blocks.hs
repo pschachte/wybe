@@ -1,3 +1,4 @@
+{-# OPTIONS -XTupleSections #-}
 --  File     : Blocks.hs
 --  RCS      : $Id$
 --  author   : Ashutosh Rishi Ranjan
@@ -13,7 +14,7 @@ import           AST
 import           ASTShow
 import           BinaryFactory                   ()
 import           Codegen
-import           Config                          (wordSize)
+import           Config                          (wordSize, wordSizeBytes)
 import           Util                            (maybeNth)
 import           Control.Monad
 import           Control.Monad.Trans             (lift, liftIO)
@@ -25,6 +26,7 @@ import           Data.List                       as List
 import           Data.Map                        as Map
 import qualified Data.Set                        as Set
 import           Data.Word                       (Word32)
+import           Data.Maybe                      (fromJust)
 import qualified LLVM.AST                        as LLVMAST
 import qualified LLVM.AST.Constant               as C
 import qualified LLVM.AST.Float                  as F
@@ -84,7 +86,7 @@ blockTransformModule thisMod =
        knownTypesSet <- Map.elems <$>
                          getModuleImplementationField modKnownTypes
        let knownTypes = concatMap Set.toList knownTypesSet
-       trs <- mapM typed' knownTypes
+       trs <- mapM llvmType knownTypes
        -- typeList :: [(TypeSpec, LLVMAST.Type)]
        let typeList = zip knownTypes trs
        -- log the assoc list typeList
@@ -253,7 +255,7 @@ isInputParam p = primParamFlow p == FlowIn && paramNeeded p
 -- | Convert a primitive's input parameter to LLVM's Definition parameter.
 makeFnArg :: PrimParam -> Compiler (Type, LLVMAST.Name)
 makeFnArg param = do
-    ty <- typed' $ primParamType param
+    ty <- llvmType $ primParamType param
     let nm = LLVMAST.Name $ toSBString $ show $ primParamName param
     return (ty, nm)
 
@@ -264,8 +266,8 @@ primOutputType params = do
     let outputs = List.filter isOutputParam params
     case outputs of
         [] -> return void_t
-        [o] -> typed' $ primParamType o
-        _ -> struct_t <$> mapM (typed' . primParamType) outputs
+        [o] -> llvmType $ primParamType o
+        _ -> struct_t <$> mapM (llvmType . primParamType) outputs
 
 
 isOutputParam :: PrimParam -> Bool
@@ -319,7 +321,7 @@ assignParam p =
     do let ty = primParamType p
        unless (typeIsPhantom ty || paramInfoUnneeded (primParamInfo p))
          $ do let nm = show (primParamName p)
-              llty <- lift $ typed' ty
+              llty <- lift $ llvmType ty
               assign nm (localVar llty nm)
 
 
@@ -401,11 +403,11 @@ codegenBody proto body =
 
 -- | Predicate to check whether a Prim is a phantom prim i.e Contains only
 -- phantom arguments.
-phantomPrim :: Prim -> Bool
-phantomPrim (PrimCall _ args) = List.null $ List.filter notPhantom args
-phantomPrim (PrimForeign _ _ _ args) =
-  List.null $ List.filter notPhantom args
-phantomPrim (PrimTest _) = False
+-- phantomPrim :: Prim -> Bool
+-- phantomPrim (PrimCall _ args) = List.null $ List.filter notPhantom args
+-- phantomPrim (PrimForeign _ _ _ args) =
+--   List.null $ List.filter notPhantom args
+-- phantomPrim (PrimTest _) = False
 
 
 -- | Code generation for a conditional branch. Currently a binary split
@@ -511,7 +513,7 @@ cgen prim@(PrimForeign lang name flags args) = do
     inops <- mapM cgenArg inArgs
     -- alignedOps <- mapM makeCIntOp inops
     outty <- lift $ primReturnType args
-    -- XXX this ignores lang and just uses fast cc for all calls
+    -- XXX this ignores lang and just uses C calling conventions for all calls
     let ins =
           call
           (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
@@ -629,46 +631,73 @@ trustArgInt arg = trustFromJust
 -- | Code generation for LPVM instructions.
 cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
 cgenLPVM "alloc" [] args@[sizeArg,addrArg] = do
+          logCodegen $ "lpvm alloc " ++ show sizeArg ++ " " ++ show addrArg
           let inputs = primInputs args
           case inputs of
             [input] -> do
-                outTy <- lift $ typed' $ argType addrArg
-                op <- gcAllocate (trustArgInt sizeArg) outTy
+                outTy <- lift $ llvmType $ argType addrArg
+                op <- gcAllocate sizeArg outTy
                 assign (pullName addrArg) op
                 return $ Just op
             _ ->
               shouldnt $ "alloc instruction with " ++ show (length inputs)
                          ++ " inputs"
 
-cgenLPVM "access" [] [addr,offset,val] = do
-          ptrOp <- cgenArg addr
-          outTy <- lift $ typed' $ argType val
-          -- XXX Currently offset must be a constant; generalise to
-          --     allow variable offsets
-          op <- gcAccess ptrOp (trustArgInt offset) outTy
+cgenLPVM "access" [] args@[addrArg,offsetArg,val] = do
+          logCodegen $ "lpvm access " ++ show addrArg ++ " " ++ show offsetArg
+                 ++ " " ++ show val
+          baseAddr <- cgenArg addrArg
+          finalAddr <- offsetAddr baseAddr iadd offsetArg
+          outTy <- lift $ llvmType $ argType val
+          logCodegen $ "outTy = " ++ show outTy
+          op <- gcAccess finalAddr outTy
           assign (pullName val) op
           return $ Just op
 
--- XXX Revise mutate instruction to take address, size, offset,
---     destructive (Bool), and new address (output).  If destructive
---     is True, does in place update and new address = address;
---     otherwise allocates fresh storage, copies old contents,
---     and mutates the new storage.
+cgenLPVM "mutate" flags
+    [addrArg, outArg, offsetArg, ArgInt 0 intTy, sizeArg, tagArg, valArg] = do
+         -- Non-destructive case:  copy structure before mutating
+          logCodegen $ "lpvm mutate " ++ show addrArg
+                       ++ " " ++ show outArg
+                       ++ " " ++ show offsetArg ++ " *nondestructive*"
+                       ++ " " ++ show sizeArg
+                       ++ " " ++ show tagArg
+                       ++ " " ++ show valArg
+          -- First copy the structure
+          outTy <- lift $ llvmType $ argType addrArg
+          op <- gcAllocate sizeArg outTy
+          assign (pullName outArg) op
+          taggedAddr <- cgenArg addrArg
+          baseAddr <- offsetAddr taggedAddr isub tagArg
+          callMemCpy op baseAddr sizeArg
+          -- Now destructively mutate the copy
+          cgenLPVM "mutate" flags
+            [outArg, addrArg, offsetArg, ArgInt 1 intTy, sizeArg, tagArg,
+             valArg]
 cgenLPVM "mutate" _
-         [ptrOpArg, outArg, sizeArg, indexArg, destructiveArg, valArg] = do
-          val <- cgenArg valArg
-          valTy <- lift $ typed' $ argType valArg
-          ptrOp <- cgenArg ptrOpArg
-          outTy <- lift $ typed' $ argType outArg
-          gcMutate ptrOp (pullName outArg) outTy (trustArgInt sizeArg)
-                   (trustArgInt indexArg) destructiveArg val valTy
+    [addrArg, outArg, offsetArg, (ArgInt 1 _), sizeArg, tagArg, valArg] = do
+         -- Destructive case:  just mutate
+          logCodegen $ "lpvm mutate " ++ show addrArg
+                       ++ " " ++ show outArg
+                       ++ " " ++ show offsetArg ++ " *destructive*"
+                       ++ " " ++ show sizeArg
+                       ++ " " ++ show tagArg
+                       ++ " " ++ show valArg
+          baseAddr <- cgenArg addrArg
+          gcMutate baseAddr offsetArg valArg
+          assign (pullName outArg) baseAddr
+          return $ Just baseAddr
+
+cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
+      nyi "lpvm mutate instruction with non-constant destructive flag"
+
 
 cgenLPVM "cast" [] args@[inArg,outArg] = do
     let inputs = primInputs args
     let outputs = primOutputs args
     case (inputs,outputs) of
         ([inArg],[outArg]) -> do
-            outTy <- lift $ typed' (argType outArg)
+            outTy <- lift $ llvmType (argType outArg)
             inOp <- cgenArg inArg
             let inTy = operandType inOp
 
@@ -698,8 +727,26 @@ cgenLPVM "cast" [] args@[inArg,outArg] = do
                             ++ " inputs and " ++ show (length outputs)
                             ++ " outputs"
 
+
 cgenLPVM pname flags args = do
     shouldnt $ "Instruction " ++ pname ++ " not imlemented."
+
+
+-- | Generate code to add an offset to an address
+
+offsetAddr :: Operand -> (Operand -> Operand -> Instruction) -> PrimArg
+           -> Codegen Operand
+offsetAddr baseAddr offsetFn offset = do
+    offsetOp <- cgenArg offset
+    case argIntVal offset of
+      Just 0 -> return baseAddr
+      _      -> do
+          offsetArg <- cgenArg offset
+          instr address_t (offsetFn baseAddr offsetArg)
+
+
+
+
 
 
 isNullCons :: C.Constant -> Bool
@@ -713,13 +760,24 @@ isPtr _                 = False
 
 
 doCast :: Operand -> LLVMAST.Type -> LLVMAST.Type -> Codegen Operand
-doCast op (IntegerType _) ty2@(PointerType _ _) = inttoptr op ty2
-doCast op (PointerType _ _) ty2@(IntegerType _) = ptrtoint op ty2
-doCast op (IntegerType bs1) ty2@(IntegerType bs2)
-    | bs1 == bs2 = bitcast op ty2
-    | bs2 > bs1 = zext op ty2
-    | bs1 > bs2 = trunc op ty2
-doCast op _ ty2 = bitcast op ty2
+doCast op ty1 ty2 = do
+    (op,caseStr) <- doCast' op ty1 ty2
+    logCodegen $ "doCast from " ++ show op ++ " to " ++ show ty2
+                 ++ ":  " ++ caseStr
+    return op
+
+
+doCast' :: Operand -> LLVMAST.Type -> LLVMAST.Type -> Codegen (Operand,String)
+doCast' op (IntegerType _) ty2@(PointerType _ _) =
+    (,"inttoptr") <$> inttoptr op ty2
+doCast' op (PointerType _ _) ty2@(IntegerType _) =
+    (,"ptrtoint") <$> ptrtoint op ty2
+doCast' op (IntegerType bs1) ty2@(IntegerType bs2)
+    | bs1 == bs2 = (,"bitcast no-op") <$> bitcast op ty2
+    | bs2 > bs1 = (,"zext") <$> zext op ty2
+    | bs1 > bs2 = (,"trunc") <$> trunc op ty2
+doCast' op ty1 ty2 =
+    (,"bitcast from " ++ show ty1 ++ " case") <$> bitcast op ty2
 
 
 
@@ -758,7 +816,7 @@ addInstruction ins args = do
             return (Just outop)
           _ -> do
             outOp <- instr outTy ins
-            outTys <- lift $ mapM (typed' . argType) outArgs
+            outTys <- lift $ mapM (llvmType . argType) outArgs
             fields <- structUnPack outOp outTys
             let outNames = List.map pullName outArgs
             -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
@@ -808,8 +866,8 @@ primReturnType ps = do
     let outputs = primOutputs ps
     case outputs of
       [] -> return void_t
-      [output] -> typed' $ argType output
-      _ -> fmap struct_t (mapM (typed' . argType) outputs)
+      [output] -> llvmType $ argType output
+      _ -> fmap struct_t (mapM (llvmType . argType) outputs)
 
 
 goesIn :: PrimArg -> Bool
@@ -832,7 +890,7 @@ argIntVal _              = Nothing
 -- | Open a PrimArg into it's inferred type and string name.
 openPrimArg :: PrimArg -> Codegen (Type, String)
 openPrimArg (ArgVar nm ty _ _ _) = do
-    lltype <- lift $ typed' ty
+    lltype <- lift $ llvmType ty
     return (lltype, show nm)
 openPrimArg a = shouldnt $ "Can't Open!: "
                 ++ argDescription a
@@ -861,7 +919,7 @@ localOperandType _                     = void_t
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
 cgenArg (ArgVar nm _ _ _ _) = getVar (show nm)
 cgenArg (ArgInt val ty) = do
-    reprTy <- lift $ typed' ty
+    reprTy <- lift $ llvmType ty
     lift $ logBlocks $ show val ++ " :: " ++ show ty
         ++ " -> " ++ show reprTy
     let bs = getBits reprTy
@@ -875,8 +933,11 @@ cgenArg (ArgString s _) =
        conName <- addGlobalConstant conType conStr
        let conPtr = C.GlobalReference (ptr_t conType) conName
        let conElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
-       return $ cons conElem
-cgenArg (ArgChar c ty) = do t <- lift $ typed' ty
+       -- return $ cons conElem
+       -- ptrtoint (cons conElem) $ ptr_t (int_c 8)
+       -- We return integer address for strings
+       ptrtoint (cons conElem) address_t
+cgenArg (ArgChar c ty) = do t <- lift $ llvmType ty
                             let bs = getBits t
                             return $ cons $ C.Int bs $ integerOrd c
 cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
@@ -965,44 +1026,46 @@ llvmMapUnop =
 ----------------------------------------------------------------------------
 -- Helpers                                                                --
 ----------------------------------------------------------------------------
-typed :: TypeSpec -> LLVMAST.Type
-typed AnyType                      = ptr_t char_t -- XXX should be a word type
-typed TypeSpec{typeName="int"}     = int_t
-typed TypeSpec{typeName="char"}    = char_t
-typed TypeSpec{typeName="float"}   = float_t
-typed TypeSpec{typeName="double"}  = float_t
-typed TypeSpec{typeName="bool"}    = int_c 1
-typed TypeSpec{typeName="string"}  = ptr_t char_t
-typed TypeSpec{typeName="phantom"} = void_t
-typed _                            = void_t
+-- XXX unused?
+-- typed :: TypeSpec -> LLVMAST.Type
+-- typed AnyType                      = ptr_t char_t -- XXX should be a word type
+-- typed TypeSpec{typeName="int"}     = int_t
+-- typed TypeSpec{typeName="char"}    = char_t
+-- typed TypeSpec{typeName="float"}   = float_t
+-- typed TypeSpec{typeName="double"}  = float_t
+-- typed TypeSpec{typeName="bool"}    = int_c 1
+-- typed TypeSpec{typeName="string"}  = ptr_t char_t
+-- typed TypeSpec{typeName="phantom"} = void_t
+-- typed _                            = void_t
 
 
-typed' :: TypeSpec -> Compiler LLVMAST.Type
-typed' ty = do
+llvmType :: TypeSpec -> Compiler LLVMAST.Type
+llvmType ty = do
     repr <- lookupTypeRepresentation ty
     case repr of
         Just typeStr -> return $ typeStrToType typeStr
         Nothing ->
-            shouldnt $ "typed' applied to InvalidType or unknown type ("
+            shouldnt $ "llvmType applied to InvalidType or unknown type ("
             ++ show ty
             ++ ")"
 
 
 typeStrToType :: String -> LLVMAST.Type
 typeStrToType []        = void_t
-typeStrToType "int"     = int_c (fromIntegral wordSize)
+typeStrToType "int"     = address_t
 typeStrToType "bool"    = int_c 1
 typeStrToType "float"   = float_t
 typeStrToType "double"  = float_t
-typeStrToType "pointer" = ptr_t $ int_c (fromIntegral wordSize)
-typeStrToType "word"    = int_c (fromIntegral wordSize)
+typeStrToType "pointer" = address_t
+typeStrToType "word"    = address_t
 typeStrToType "phantom" = int_t
 typeStrToType (c:cs)
     | c == 'i' = int_c (fromIntegral bytes)
     | c == 'f' = float_c (fromIntegral bytes)
     | c == 'p' = if List.take 6 cs == "ointer"
-                 then let bs = read (List.drop 6 cs) :: Int
-                      in ptr_t $ int_c (fromIntegral bs)
+                 then address_t
+                 -- then let bs = read (List.drop 6 cs) :: Int
+                 --      in ptr_t $ int_c (fromIntegral bs)
                  else void_t
     | otherwise = void_t
   where
@@ -1058,7 +1121,7 @@ declareExtern (PrimTest _) = shouldnt "Can't declare extern for PrimNop."
 -- | Helper to make arguments for an extern declaration.
 makeExArg :: (Word, PrimArg) -> Compiler (Type, LLVMAST.Name)
 makeExArg (index,arg) = do
-    ty <- (typed' . argType) arg
+    ty <- (llvmType . argType) arg
     let nm = LLVMAST.UnName index
     return (ty, nm)
 
@@ -1176,12 +1239,15 @@ addUniqueDefinitions (LLVMAST.Module n fn l t ds) defs =
 
 -- | Call "wybe_malloc" from external C shared lib. Returns an i8* pointer.
 -- XXX What will be the type of 'size' we pass to extern C's malloc?
-callWybeMalloc :: Integer -> Codegen Operand
+callWybeMalloc :: PrimArg -> Codegen Operand
 callWybeMalloc size = do
     let outTy = (ptr_t (int_c 8))
     let fnName = LLVMAST.Name $ toSBString "wybe_malloc"
-    let inOp = cons $ C.Int 32 size
-    let inops = [inOp]
+    sizeOp <- cgenArg size
+    sizeTy <- lift $ llvmType $ argType size
+    logCodegen $ "callWybeMalloc casting size " ++ show sizeOp
+                 ++ " to " ++ show int_t
+    inops <- (:[]) <$> doCast sizeOp sizeTy int_t
     let ins =
           call
           (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) fnName)
@@ -1191,14 +1257,20 @@ callWybeMalloc size = do
 
 -- | Invoke the LLVM memcpy intrinsic to copy a specified number of bytes of
 -- memory from a source address to a non-overlapping destination address.
-callMemCpy :: Operand -> Operand -> Integer -> Codegen ()
+callMemCpy :: Operand -> Operand -> PrimArg -> Codegen ()
 callMemCpy dst src bytes = do
     let fnName = LLVMAST.Name $ toSBString "llvm.memcpy.p0i8.p0i8.i32"
     let charptr_t = ptr_t (int_c 8)
-    dstCast <- instr charptr_t $ LLVMAST.BitCast dst charptr_t []
-    srcCast <- instr charptr_t $ LLVMAST.BitCast src charptr_t []
-    let inops = [dstCast, srcCast, cons (C.Int 32 bytes),
-                 cons (C.Int 32 $ fromIntegral wordSize `div` 8),
+    dstCast <- doCast dst address_t charptr_t
+    srcCast <- doCast src address_t charptr_t
+    bytesOp <- cgenArg bytes
+    bytesCast <- doCast bytesOp address_t int_t
+    -- dstCast <- instr charptr_t $ LLVMAST.BitCast dst charptr_t []
+    -- srcCast <- instr charptr_t $ LLVMAST.BitCast src charptr_t []
+    -- bytesOp <- cgenArg bytes
+    -- bytesCast <- instr int_t   $ LLVMAST.BitCast bytesOp int_t []
+    let inops = [dstCast, srcCast, bytesCast,
+                 cons (C.Int 32 $ fromIntegral wordSizeBytes),
                  cons (C.Int 1 0)]
     let ins =
           call
@@ -1210,70 +1282,65 @@ callMemCpy dst src bytes = do
 
 -- | Call the external C-library function for malloc and return
 -- the bitcasted pointer to that location.
-gcAllocate :: Integer -> LLVMAST.Type -> Codegen Operand
+gcAllocate :: PrimArg -> LLVMAST.Type -> Codegen Operand
 gcAllocate size castTy = do
     voidPtr <- callWybeMalloc size
-    instr castTy $ LLVMAST.BitCast voidPtr castTy []
+    ptrtoint voidPtr address_t
+
 
 
 -- | Index and return the value in the memory field referenced by the pointer
 -- at the given offset.
 -- If expected return type/value at that location is a pointer, then
 -- the instruction inttoptr should precede the load instruction.
-gcAccess :: Operand -> Integer -> LLVMAST.Type -> Codegen Operand
-gcAccess ptr offset outTy = do
-    ptr' <- bitcast ptr $ ptr_t outTy
-    logCodegen $ "gcAccess " ++ show ptr' ++ " " ++ show offset
-                 ++ " " ++ show outTy
-    let opTypePtr = localOperandType ptr'
-    -- XXX allow offset to be a variable
-    let index = getIndex opTypePtr offset
-    let indices = [(cons $ C.Int 64 index)]
-    let getel = LLVMAST.GetElementPtr False ptr' indices []
-    let opType = pullFromPointer opTypePtr
-    accessPtr <- instr opTypePtr getel
+gcAccess :: Operand -> LLVMAST.Type -> Codegen Operand
+gcAccess ptr outTy = do
+    logCodegen $ "gcAccess " ++ show ptr ++ " " ++ show outTy
+    let ptrTy = ptr_t outTy
+    ptr' <- inttoptr ptr ptrTy
+    logCodegen $ "inttoptr " ++ show ptr ++ " " ++ show (ptr_t outTy)
+    logCodegen $ "inttoptr produced " ++ show ptr'
 
-    case outTy of
-        (PointerType ty _) -> do
-            loadedOp <- instr opType $ load accessPtr
-            inttoptr loadedOp outTy
-        _ -> instr opType $ load accessPtr
+    let indices = [cons $ C.Int (fromIntegral wordSize) 0]
+    let getel = LLVMAST.GetElementPtr False ptr' indices []
+    logCodegen $ "getel = " ++ show getel
+    accessPtr <- instr ptrTy getel
+    logCodegen $ "accessPtr = " ++ show accessPtr
+    let loadInstr = load accessPtr
+    logCodegen $ "loadInstr = " ++ show loadInstr
+    instr outTy $ load accessPtr
+
+
+    -- inttoptr loadedOp outTy
+    -- case outTy of
+    --     (PointerType ty _) -> do
+    --         loadedOp <- instr opType $ load accessPtr
+    --         inttoptr loadedOp outTy
+    --     _ -> instr opType $ load accessPtr
 
 
 -- | Index the pointer at the given offset and store the given operand value
 -- in that indexed location.
 -- If the operand to be stored is a pointer, the ptrtoint instruction should
 -- precede the store instruction, with the int value of the pointer stored.
-gcMutate :: Operand -> String -> Type -> Integer -> Integer -> PrimArg
-         -> Operand -> LLVMAST.Type -> Codegen (Maybe Operand)
-gcMutate ptr outNm _ size offset (ArgInt 1 _) val valTy = do
-    -- Really do destructive mutation
-    ptr' <- bitcast ptr $ ptr_t valTy
-    let opTypePtr = localOperandType ptr'
-    let index = getIndex opTypePtr offset
-    let indices = [(cons $ C.Int 64 index)]
+gcMutate :: Operand -> PrimArg -> PrimArg -> Codegen ()
+gcMutate baseAddr offsetArg valArg = do
+    logCodegen $ "gcMutate " ++ show baseAddr ++ " " ++ show offsetArg
+                 ++ " " ++ show valArg
+    finalAddr <- offsetAddr baseAddr iadd offsetArg
+    valTy <- lift $ llvmType $ argType valArg
+    let ptrTy = ptr_t valTy
+    ptr' <- inttoptr finalAddr ptrTy
+    logCodegen $ "inttoptr " ++ show finalAddr ++ " " ++ show ptrTy
+    logCodegen $ "inttoptr produced " ++ show ptr'
+    let indices = [cons $ C.Int (fromIntegral wordSize) 0]
     let getel = LLVMAST.GetElementPtr False ptr' indices []
-    accessPtr <- instr opTypePtr getel
+    logCodegen $ "getel = " ++ show getel
+    accessPtr <- instr ptrTy getel
+    logCodegen $ "accessPtr = " ++ show accessPtr
+    val <- cgenArg valArg
     store accessPtr val
-    assign outNm ptr
-    return $ Just ptr
-gcMutate oldPtr outNm outTy size offset (ArgInt 0 _) val valTy = do
-    -- Non-destructive mutate: copy structure and mutate the copy
-    voidPtr <- callWybeMalloc size
-    ptr <- instr outTy $ LLVMAST.BitCast voidPtr outTy []
-    callMemCpy ptr oldPtr size
-    ptr' <- bitcast ptr $ ptr_t valTy
-    let opTypePtr = localOperandType ptr'
-    -- XXX allow offset to be a variable
-    let index = getIndex opTypePtr offset
-    let indices = [cons $ C.Int 64 index]
-    let getel = LLVMAST.GetElementPtr False ptr' indices []
-    accessPtr <- instr opTypePtr getel
-    store accessPtr val
-    assign outNm ptr
-    return $ Just ptr
-gcMutate ptr outNm _ size offset destructiveArg val valTy =
-    nyi "lpvm mutate instruction with non-constant destructive flag"
+    return ()
 
 
 -- | Get the LLVMAST.Type the given pointer type points to.

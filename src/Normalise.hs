@@ -314,19 +314,18 @@ constructorItems ctorName params typeSpec size fields tag pos =
                                 [Unplaced $ Typed
                                    (Var "$rec" ParamInOut flowType)
                                    typeSpec True,
-                                 Unplaced $ IntValue $ fromIntegral size,
                                  Unplaced $ IntValue $ fromIntegral aligned,
                                  Unplaced $ IntValue $ 1,
+                                 Unplaced $ IntValue $ fromIntegral size,
+                                 Unplaced $ IntValue $ 0,
                                  Unplaced $ Var var ParamIn flowType]))
           fields)
          ++
        -- Finally, code to tag the reference and cast to the right type
-         [lpvmCast (varGet "$rec") "$recint" intType,
-          Unplaced $ ForeignCall "llvm" "or" []
-          [Unplaced $ varGet "$recint",
+         [Unplaced $ ForeignCall "llvm" "or" []
+          [Unplaced $ varGet "$rec",
            Unplaced $ IntValue $ fromIntegral tag,
-           Unplaced $ intCast (varSet "$recinttagged")],
-          lpvmCastToVar (varGet "$recinttagged") "$"])
+           Unplaced $ intCast (varSet "$")]])
         pos]
 
 
@@ -369,7 +368,7 @@ tagCheck constCount nonConstCount tag varName =
           (case constCount of
                0 -> []
                _ -> [comparison "uge"
-                     (lpvmCastExp (varGet varName) intType)
+                     (varGet varName)
                      (intCast $ iVal constCount)]
            ++
            -- If there is more than one non-const constructors, check that
@@ -378,7 +377,7 @@ tagCheck constCount nonConstCount tag varName =
                1 -> []  -- Nothing to do if it's the only non-const constructor
                _ -> [comparison "eq"
                      (intCast $ ForeignFn "llvm" "and" []
-                      [Unplaced $ lpvmCastExp (varGet varName) intType,
+                      [Unplaced $ varGet varName,
                        Unplaced $ iVal tagMask])
                      (intCast $ iVal tag)])
     in if List.null tests
@@ -424,9 +423,10 @@ getterSetterItems vis rectype ctorName pos constCount nonConstCount
          [Unplaced $ ForeignCall "lpvm" "mutate" flags
           [Unplaced $ Typed (Var "$rec" ParamInOut $ Implicit pos)
                       rectype False,
-           Unplaced $ IntValue $ fromIntegral size,
            Unplaced $ IntValue $ fromIntegral offset - tag,
            Unplaced $ IntValue 0,    -- May be changed to 1 by CTGC transform
+           Unplaced $ IntValue $ fromIntegral size,
+           Unplaced $ IntValue tag,
            Unplaced $ varGet "$field"]])
         pos]
 
