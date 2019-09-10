@@ -181,17 +181,20 @@ aliasedByFork caller body aliasMap = do
             return aliasMap
 
 
--- Build up maybe alised inputs and outputs triggerred by move, access, cast
+-- Build up maybe aliased inputs and outputs triggered by move, access, cast
 -- instructions.
 -- Not to compute aliasing from mutate instructions with the assumption that we
 -- always try to do nondestructive update.
 -- Returned triple ([PrimVarName], [PrimVarName], [PrimArg]) is
 -- (maybeAliasedInput, maybeAliasedOutput, primArgs)
 maybeAliasPrimArgs :: Prim -> Compiler ([PrimVarName], [PrimVarName], [PrimArg])
-maybeAliasPrimArgs (PrimForeign _ "access" _ args) = _maybeAliasPrimArgs args
-maybeAliasPrimArgs (PrimForeign _ "cast" _ args)   = _maybeAliasPrimArgs args
-maybeAliasPrimArgs (PrimForeign _ "move" _ args)   = _maybeAliasPrimArgs args
-maybeAliasPrimArgs prim@(PrimForeign _ "mutate" flags args) =
+maybeAliasPrimArgs (PrimForeign "lpvm" "access" _ args) =
+    _maybeAliasPrimArgs args
+maybeAliasPrimArgs (PrimForeign "lpvm" "cast" _ args) =
+    _maybeAliasPrimArgs args
+maybeAliasPrimArgs (PrimForeign "llvm" "move" _ args) =
+    _maybeAliasPrimArgs args
+maybeAliasPrimArgs prim@(PrimForeign "lpvm" "mutate" flags args) =
     if "noalias" `elem` flags
         then return ([],[], primArgs prim)
         else _maybeAliasPrimArgs args

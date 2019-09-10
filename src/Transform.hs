@@ -135,12 +135,12 @@ transformForks caller body aliasMap = do
 
 -- Update mutate prim by checking if input is aliased
 mutateInstruction :: Placed Prim -> AliasMap -> [PrimVarName] -> Compiler (Placed Prim)
-mutateInstruction (Placed (PrimForeign lang "mutate" flags args) pos) aliasMap inputParams = do
+mutateInstruction (Placed (PrimForeign "lpvm" "mutate" flags args) pos) aliasMap inputParams = do
     args' <- _updateMutateForAlias aliasMap inputParams args
-    return (Placed (PrimForeign lang "mutate" flags args') pos)
-mutateInstruction (Unplaced (PrimForeign lang "mutate" flags args)) aliasMap inputParams = do
+    return (Placed (PrimForeign "lpvm" "mutate" flags args') pos)
+mutateInstruction (Unplaced (PrimForeign "lpvm" "mutate" flags args)) aliasMap inputParams = do
     args' <- _updateMutateForAlias aliasMap inputParams args
-    return (Unplaced (PrimForeign lang "mutate" flags args'))
+    return (Unplaced (PrimForeign "lpvm" "mutate" flags args'))
 mutateInstruction prim _ _ =  return prim
 
 
@@ -149,23 +149,22 @@ mutateInstruction prim _ _ =  return prim
 -- flag is not set to 1 yet
 _updateMutateForAlias :: AliasMap -> [PrimVarName] -> [PrimArg] -> Compiler [PrimArg]
 _updateMutateForAlias aliasMap inputParams
-    args@[fIn@(ArgVar inName _ _ _ final1), fOut, size, offset, ArgInt des typ,
-        mem@(ArgVar memName _ _ _ final2)] =
+    args@[fIn@(ArgVar inName _ _ _ final1), fOut, offset, ArgInt des typ,
+        size, offset2, mem@(ArgVar memName _ _ _ final2)] =
             -- When the val is also a pointer
             if notElem inName inputParams
                 && not (connectedToOthers aliasMap inName) && final1
                 && not (connectedToOthers aliasMap memName) && final2
                 && des /= 1
-            then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
-            -- then return args
+            then return [fIn, fOut, offset, ArgInt 1 typ, size, offset2, mem]
             else return args
 _updateMutateForAlias aliasMap inputParams
-    args@[fIn@(ArgVar inName _ _ _ final), fOut, size, offset, ArgInt des typ, mem] =
+    args@[fIn@(ArgVar inName _ _ _ final), fOut, offset, ArgInt des typ,
+          size, offset2, mem] =
         if notElem inName inputParams
             && not (connectedToOthers aliasMap inName) && final
             && des /= 1
-        then return [fIn, fOut, size, offset, ArgInt 1 typ, mem]
-        -- then return args
+        then return [fIn, fOut, offset, ArgInt 1 typ, size, offset2, mem]
         else return args
 _updateMutateForAlias _ _ args = return args
 
