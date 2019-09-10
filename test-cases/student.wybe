@@ -1,7 +1,7 @@
-public type course = public course(code:int, name:string) end
-public type student = public student(id:int, major:course) end
+pub type course  { pub course(code:int, name:string) }
+pub type student { pub student(id:int, major:course) }
 
-public proc printStudent(stu:student) use !io
+pub def printStudent(stu:student) use !io {
   !print("student id: ")
   !println(stu.id)
   ?cour = stu.major
@@ -9,6 +9,6 @@ public proc printStudent(stu:student) use !io
   !println(cour.code)
   !print("course name: ")
   !println(cour.name)
-end
+}
 
 !printStudent(student(12345,course(90048, "Declarative Programming")))

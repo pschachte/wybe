@@ -238,7 +238,10 @@ makeExec :: [FilePath]          -- Object Files
          -> FilePath            -- Target File
          -> Compiler ()
 makeExec ofiles target = do
-    let args = ofiles ++ sharedLibs ++ ["-o", target]
+    -- dead code elimination during static linking
+    -- This is a linker feature, cc (clang) will pass this flag to the linker
+    let options = ["-dead_strip"]
+    let args = options ++ ofiles ++ sharedLibs ++ ["-o", target]
     logEmit $ "Generating final executable with command line: cc "
               ++ unwords args
     (exCode, _, serr) <- liftIO $

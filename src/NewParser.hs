@@ -125,8 +125,8 @@ parsePragma = do
 moduleItemParser :: Visibility -> Parser Item
 moduleItemParser v = do
     pos <- tokenPosition <$> ident "module"
-    modName <- identString <* ident "is"
-    body <- itemParser <* ident "end"
+    modName <- identString
+    body <- betweenB Brace itemParser
     return $ ModuleDecl v modName body (Just pos)
 
 
@@ -136,18 +136,24 @@ typeItemParser v = do
     pos <- tokenPosition <$> ident "type"
     proto <- TypeProto <$> identString <*>
              option [] (betweenB Paren (identString `sepBy` comma))
-    imp <- typeImpParser
-    items <- itemParser <* ident "end"
+    (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto imp items (Just pos)
 
 
--- | Type implementation parser.
-typeImpParser :: Parser TypeImpln
-typeImpParser =
-        TypeRepresentation <$> (ident "is" *> identString)
-    <|> TypeCtors <$> (symbol "=" *> visibility) <*>
-        funcProtoParser `sepBy` symbol "|"
+-- | Type declaration body where representation and items are given
+typeImpln = do
+    impln <- TypeRepresentation <$> (ident "is" *> identString)
+    items <- betweenB Brace itemParser
+    return (impln,items)
 
+
+-- | Type declaration body where visibility, constructors, and items are given
+typeCtors :: Parser (TypeImpln,[Item])
+typeCtors = betweenB Brace $ do
+    vis <- visibility
+    ctors <- funcProtoParser `sepBy` symbol "|"
+    items <- itemParser
+    return $ (TypeCtors vis ctors,items)
 
 
 -- | Resource declaration parser.
@@ -180,31 +186,33 @@ fromUseItemParser v = do
 -- | Parse a procedure or function, since both items share the same prefix of
 -- 'visibility' 'determinism'.
 procOrFuncItemParser :: Visibility -> Parser Item
-procOrFuncItemParser v = do
-    d <- determinism
-    procItemParser v d <|> funcItemParser v d <?> "Procedure/Function"
-
-
--- | Procedure parser.
--- Proc -> Vis Det 'proc' ProcProto ProcBody
--- ProcProto -> FuncProcName OptProcParamlist UseResources
--- FuncProcName -> ident | Symbol
--- OptProcparamlist -> '(' ProcParams ')'
--- ProcParam -> FlowDirection ident OptType
-procItemParser :: Visibility -> Determinism -> Parser Item
-procItemParser vis det = do
-    pos <- tokenPosition <$> ident "proc"
-    -- Proc proto
+procOrFuncItemParser vis = do
+    pos <- tokenPosition <$> ident "def"
+    det <- determinism
     name <- funcNamePlaced <?> "no keywords"
     params <- option [] $ betweenB Paren (procParamParser `sepBy` comma)
+    ty <- optType
     -- Resources
     rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
     let proto = ProcProto (content name) params $ fromList rs
-    -- ProcBody
-    body <- many stmtParser <* ident "end"
-    -- Final
-    return $
-        ProcDecl vis det False proto body (Just pos)
+    funcBody vis det proto ty pos <|> procBody vis det proto ty pos
+
+
+
+funcBody :: Visibility -> Determinism -> ProcProto -> TypeSpec -> SourcePos
+         -> Parser Item
+funcBody vis det proto ty pos = do
+    body <- symbol "=" *> expParser
+    return $ FuncDecl vis det False proto ty body (Just pos)
+
+
+procBody :: Visibility -> Determinism -> ProcProto -> TypeSpec -> SourcePos
+         -> Parser Item
+procBody vis det proto ty pos = do
+    body <- betweenB Brace $ many stmtParser
+    -- XXX must test that ty is AnyType, otherwise syntax error
+    return $ ProcDecl vis det False proto body (Just pos)
+
 
 
 -- | A procedure param parser.
@@ -217,36 +225,14 @@ procParamParser = do
     return $ Param name ty flow Ordinary
 
 
--- | Function parser.
--- Func -> Vis Det func Proto Opttype '=' Exp
--- Proto -> PlacedFuncName OptParamList UseResources
--- PlacedFuncName -> ident | Symbol
--- OptParamList ->   | '(' Params ')'
--- Params -> ident OptType
--- UseResources -> 'use' ResourceFlowSpecs
--- ResourceFlowSpecs -> FlowDirection modIdent
--- modIdent -> ident
--- FlowDirection -> '?' | '!' |
-funcItemParser :: Visibility -> Determinism -> Parser Item
-funcItemParser vis det = do
-    pos <- tokenPosition <$> ident "func"
-    proto <- content <$> funcProtoParser
-    -- Optional return type
-    ty <- optType
-    -- Function body
-    body <- symbol "=" *> expParser
-    return $
-        FuncDecl vis det False proto ty body (Just pos)
-
-
--- | Function prototype parser : FnProto
-funcProtoParser :: Parser (Placed FnProto)
+-- | Function prototype parser : ProcProto
+funcProtoParser :: Parser (Placed ProcProto)
 funcProtoParser = do
     pName <- funcNamePlaced <?> "no keywords"
     params <- option [] $ betweenB Paren (paramParser `sepBy` comma)
     -- Resource flow specs, optional
     rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
-    return $ maybePlace (FnProto (content pName) params $fromList rs)
+    return $ maybePlace (ProcProto (content pName) params $fromList rs)
              (place pName)
 
 
@@ -359,7 +345,7 @@ procCallParser = do
 doStmt :: Parser (Placed Stmt)
 doStmt = do
     pos <- tokenPosition <$> ident "do"
-    body <- many1 stmtParser <* ident "end"
+    body <- betweenB Brace $ many1 stmtParser
     return $ Placed (Loop body) pos
 
 
@@ -402,7 +388,7 @@ whenStmt = do
 ifStmtParser :: Parser (Placed Stmt)
 ifStmtParser = do
     pos <- tokenPosition <$> ident "if"
-    cases <- (ifCaseParser `sepBy` symbol "|") <* ident "end"
+    cases <- betweenB Brace $ ifCaseParser `sepBy` symbol "|"
     let final = List.foldr (\(cond, body) rest ->
                            [Unplaced (Cond cond body rest)]) [] cases
     case final of
@@ -435,7 +421,7 @@ useStmt :: Parser (Placed Stmt)
 useStmt = do
     pos <- tokenPosition <$> ident "use"
     resources <- resourceSpec `sepBy` comma <* ident "in"
-    body <- many1 stmtParser <* ident "end"
+    body <- betweenB Brace $ many1 stmtParser
     return $ Placed (UseResources resources body) pos
 
 
@@ -569,9 +555,9 @@ completeOperatorTable =
     , [ binary "/=" AssocNone
       , binary "="  AssocNone
       ]
-    , [ prefix "not" ]
-    , [ binary "and" AssocLeft ]
-    , [ binary "or"  AssocLeft ]
+    , [ prefix "~" ]
+    , [ binary "&&" AssocLeft ]
+    , [ binary "||"  AssocLeft ]
     , [ Postfix whereBodyParser]
     ]
 
@@ -647,7 +633,8 @@ typedExp = do
 
 whereBodyParser :: Parser (Placed Exp -> Placed Exp)
 whereBodyParser = do
-    body <- ident "where" *> many1 stmtParser <* ident "end"
+    ident "where"
+    body <- betweenB Brace $ many1 stmtParser
     return $ \e -> maybePlace (Where body e) (place e)
 
 
@@ -829,9 +816,9 @@ funcSymbolPlaced =
         placeToken (TokSymbol s p) = Placed s p
         placeToken _ = error "Only ident and symbol token expected."
     in choice [ placeToken <$> symbolAny
-              , placeToken <$> ident "and"
-              , placeToken <$> ident "or"
-              , placeToken <$> ident "not"
+              , placeToken <$> ident "&&"
+              , placeToken <$> ident "||"
+              , placeToken <$> ident "~"
 
               -- [] or [|]
               , do p <- tokenPosition <$> leftBracket Bracket
@@ -895,7 +882,7 @@ betweenB bs = between (leftBracket bs) (rightBracket bs)
 
 -- | Terminal "public" / "private".
 visibility :: Parser Visibility
-visibility = option Private (ident "public" *> return Public)
+visibility = option Private (ident "pub" *> return Public)
 
 
 -- | Terminal for determinism.
@@ -908,7 +895,7 @@ determinism = option Det (ident "test" *> return SemiDet)
 -- maybe remove 'import', and probably need to add others.
 keywords :: [String]
 keywords =
-    [ "if", "then", "else", "proc", "end", "use"
-    , "do",  "until", "unless", "and", "or", "not", "test", "import"
+    [ "if", "then", "else", "def", "use"
+    , "do",  "until", "unless", "test", "import"
     , "while", "foreign", "in", "when"
     ]

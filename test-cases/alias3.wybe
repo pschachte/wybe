@@ -1,9 +1,9 @@
 # shouldn't alias to the data structure if all
-# properties of a data structure are mutated in the proc
+# properties of a data structure are mutated in the def {
 
 use position
 
-public proc replicate1(p1:position, ?p2:position) use !io
+pub def replicate1(p1:position, ?p2:position) use !io {
   !println("--- Inside replicate1: ")
   ?p2 = p1
   !print("expect p1(1,1):")
@@ -14,9 +14,9 @@ public proc replicate1(p1:position, ?p2:position) use !io
   !printPosition(p1)
   !print("expect p2(2,2):")
   !printPosition(p2)
-end
+}
 
-public proc bar use !io
+pub def bar use !io {
   ?p1 = position(1,1)
   !replicate1(p1, ?p2)
 
@@ -33,6 +33,6 @@ public proc bar use !io
   !printPosition(p1)
   !print("expect p2(2,2):")
   !printPosition(p2)
-end
+}
 
 !bar

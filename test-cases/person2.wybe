@@ -1,4 +1,4 @@
-public type person = public person(firstname:string, lastname:string) end
+pub type person { pub person(firstname:string, lastname:string) }
 
 # expect: A and B are fresh
 ?personA = person("John", "Smith")

@@ -83,7 +83,7 @@ factorial > public (1 calls)
         foreign llvm mul(~n#0:wybe.int, ~tmp$2#0:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
 
     1:
-        foreign llvm move(1:wybe.int, ?$#0:wybe.int) @numbers:3:8
+        foreign llvm move(1:wybe.int, ?$#0:wybe.int) @numbers:3:5
 
 
 
@@ -103,7 +103,7 @@ toCelsius > public inline (0 calls)
 declare external ccc  void @putchar(i8)    
 
 
-declare external ccc  void @print_string(i8*)    
+declare external ccc  void @print_string(i64)    
 
 
 @numbers.1 =    constant [30 x i8] c"Numbers has been initialised.\00"
@@ -117,7 +117,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external ccc  void @"numbers.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
-  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([30 x i8], [30 x i8]* @numbers.1, i32 0, i32 0))  
+  %2 = ptrtoint i8* getelementptr inbounds ([30 x i8], [30 x i8]* @numbers.1, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

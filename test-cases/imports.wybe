@@ -2,7 +2,7 @@ use mod1
 use mod2
 from mod3 use fn1
 from mod4 use fn2
-public use mod5
-public use mod6
-public from mod7 use fn3
-public from mod8 use fn4
+pub use mod5
+pub use mod6
+pub from mod7 use fn3
+pub from mod8 use fn4

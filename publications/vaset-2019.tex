@@ -1,0 +1,880 @@
+\documentclass[12pt]{beamer}
+\mode<presentation>
+\usetheme{Boadilla}
+%\usepackage{beamerthemeGoettingen}
+%\usepackage{beamerthemeDresden}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% If true  then we have a longer  version for a 40 minutes talk
+% If false then we have a shorter version for a 25 minutes talk
+\newcommand{\longflag}{false}
+\newcommand{\includelongversion}[2]{\ifthenelse{\equal{\longflag}{true}}{#1}{#2}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{graphicx}
+\usepackage{latexsym}
+\usepackage{amssymb, amsmath, stmaryrd}
+\usepackage{hhline}
+\usepackage{subfig}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{minibox}
+\usepackage{ifthen}
+\usepackage{xspace}
+\usepackage{mathabx}
+\usepackage{url}
+\usepackage{framed,color}
+
+\usetikzlibrary{arrows,shapes,calc,decorations.pathreplacing}
+\definecolor{pinegreen}{rgb}{0,0.55,0.45}
+
+% don't bother me with fulsome warning messages
+\tolerance=100000
+
+\renewcommand{\topfraction}{.9}
+\renewcommand{\bottomfraction}{.9}
+\renewcommand{\textfraction}{0.1}
+
+\definecolor{shadecolor}{rgb}{0.8,0.9,1.0}
+
+\newcommand{\sys}[1]{\textsc{#1}}
+\newcommand{\re}[1]{\ensuremath{\mathtt{#1}}}
+\newcommand{\svar}[1]{\ensuremath{\left \llbracket #1 \right \rrbracket}}
+
+\newcommand{\ceil}[1]{\left\lceil#1\right\rceil}
+\newcommand{\bexists}{\overline{\exists}}
+\newcommand{\entails}{\vDash}
+\newcommand{\essential}[1]{\left \llbracket #1 \right \rrbracket}
+\newcommand{\fail}{\bf fail}
+\newcommand{\lra}{\leftrightarrow}
+\newcommand{\lu}{{L\overline{U}}}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\fff}{{\cal F}}
+\newcommand{\ttt}{{\cal T}}
+\providecommand{\abs}[1]{\lvert#1\rvert}
+
+\newcommand{\pset}[1]{{\cal P}(#1)}
+
+%% Wrapping a tabular environment in a macro,
+%% so it doesn't conflict with Tikz stuff.
+\newcommand{\wtab}[1]{
+  \begin{tabular}{c}
+    #1
+  \end{tabular}
+}
+
+
+
+%\xyoption{ps}
+%\xyoption{color}
+%\UseCrayolaColors
+%\newcommand{\xyo}[1]{*+[o][F-]{#1}}
+%\newcommand{\xyco}[2]{*+[o][F-:#1]{#2}}
+
+
+%-----------------------------------------------------------------------%
+\title[Introducing Wybe]{The Design and Implementation of Wybe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Abstract:
+%
+% We present Wybe, a new language in the early stages of development.
+% Wybe combines the best of declarative and imperative programming in
+% a principled way.  It is intended to be easy to learn for beginner
+% programmers, and also to scale up to large projects through good
+% support for software engineering principles.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\author[Peter Schachte]
+{Peter Schachte}
+
+\institute[Melbourne Uni]{The University of Melbourne \\ School of
+  Computing and Information Systems}
+
+\date{4 September 2019}
+
+%% \ignore{
+%%   \AtBeginSection[]
+%%   {
+%%      \begin{frame}<beamer>
+%%      \frametitle{Outline}
+%%      \tableofcontents[currentsection]
+%%      \end{frame}
+%%   }
+%% }
+
+\begin{document}
+
+\frame{\titlepage}
+
+%=======================================================================%
+\section{Introduction}
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Motivation --- Wybe goals:}
+\begin{itemize}
+\item Be simple and easy to learn (but not necessarily orthodox)
+\item Support declarative programming
+\item Support imperative programming
+\item Support best software engineering principles
+\item Be efficient
+\end{itemize}
+\vspace{2ex}
+\begin{quote}
+  The lurking suspicion that something could be simplified is the
+world's richest source of rewarding challenges. \\
+\hspace*{1cm} --- Edsger Wybe Dijkstra
+\end{quote}
+\end{frame}
+
+%=======================================================================%
+\section{Interface Integrity}
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Interface Integrity}
+\begin{itemize}
+\item Major advantage of declarative languages:  
+  no \emph{action at a distance} --- where change happens for no apparent reason
+\item Caused by destructive update of aliased structures
+\item Requires the programmer to have (and maintain!) a \emph{global}
+  understanding of dynamic aliasing in program
+\item Every function has two interfaces:
+  \begin{itemize}
+  \item \alert<2>{Apparent interface} appears in function declaration
+    or call
+  \item \alert<3>{Effective interface} is the information that passes into and out of function
+  \end{itemize}
+\item A function exhibits \alert<4>{interface integrity} if its apparent and
+effective interfaces are identical --- no action at a distance
+
+\end{itemize}
+
+\end{frame}
+
+
+%=======================================================================%
+\section{Wybe Basics}
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Hello World}
+\vspace*{-2ex}
+\begin{itemize}
+\item Like a scripting language, top-level statements in a module are executed
+\item Top-level statements in a module are executed before top-level statements
+  in any module that imports it
+\item Hello World in Wybe:\vspace*{-1ex}
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+!println("Hello, World!")
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\item I'll explain the leading \texttt{!} a little later
+\item Every Wybe source file is a module whose name is the file name with the
+  \texttt{.wybe} extension removed.
+\item Compiler is like make:  takes name of file to \emph{produce}\vspace*{-1ex}
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+\textbf{% }wybemk hello
+\textbf{% }./hello
+Hello, World!
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Information flow}
+\begin{itemize}
+\item Direction of information flow (\emph{mode}) is explicit
+\item A bit like Ada's \texttt{in}, \texttt{out}, and \texttt{in out}
+\item Unadorned variable name denotes variable value (call by value)
+\item Question mark (\alert<2>{\texttt{?}}) in front of variable name indicates
+  variable (re-)assignment (call by result)
+\item Exclamation point (\alert<3>{\texttt{!}}) indicates both (call by value-result)
+\item Which side of \texttt{=} code is on is irrelevant
+\item Both of these increment \texttt{x}: \\[-1ex]
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+?x = x + 1
+\end{semiverbatim}
+    \end{block}
+  \end{minipage} \\[-1ex]
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+x + 1 = ?x
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+  \begin{minipage}[c]{0.4\linewidth}
+  \end{minipage}
+\item So does this: \\[-1ex]
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+incr(!x)
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Value semantics}
+\begin{itemize}
+\item Wybe has value semantics:
+  \begin{itemize}
+  \item Aliasing is not semantically significant
+  \item Data structures cannot be mutated,
+  \item But variables can be re-assigned
+  \end{itemize}
+\item \emph{Eg}, \texttt{!pos.x = new\_x} assigns \texttt{pos}
+  a \emph{new} position structure whose \texttt{x} member is
+  \texttt{new\_x} and
+  whose other members are the same as the original \texttt{pos}
+\item Aliases of \texttt{pos} are not affected
+\item Compile-time garbage collection:  when analysis reveals structure is
+  unaliased, compiler implements this with mutation
+\item \\[-1ex]
+  \begin{minipage}{0.15\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+pos.x
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+  \quad is syntactic sugar for \quad
+  \begin{minipage}{0.15\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+x(pos)
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\item \\[-1ex]
+  \begin{minipage}{0.15\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+!pos.x
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+  \quad is syntactic sugar for \quad
+  \begin{minipage}{0.15\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+x(!pos)
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\end{itemize}
+\end{frame}
+
+\section{Procedures and Statements}
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Procedures}
+\begin{itemize}
+\item Same adornments are used in formal parameters \\[-1ex]
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+def foo(w, x, \alert{?}y, \alert{!}z) \{
+    \ldots
+\}
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\item Defines procedure with two
+  inputs, one output, and one in-out parameter
+\item Adornments in call must match definition (but see below\ldots)
+\item This declares a private procedure; precede with \alert{\texttt{pub}}
+  to export it
+\item Body of a procedure definition is a sequence of
+  statements
+\item Procedure calls are statements
+\item Plus there are a few built-in statement types, discussed below
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{If statement}
+\begin{itemize}
+\item Form of conditional statement: \\[-1ex]
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+if \{ \emph{test1} :: \emph{statements} \ldots
+   | \emph{test2} :: \emph{statements} \ldots
+   \ldots
+\}
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\item Tests are tried in order; body of first to succeed is executed
+\item If no test succeeds, no body is executed
+% \item Boolean expression \emph{e} is de-reified into the test \emph{e}
+%   \texttt{= true}
+% \item \texttt{else} is a test that always succeeds
+% \item Also an expression version of \texttt{if}, where
+%   \emph{statements} are replaced with \emph{expressions}
+% \item Tests of an \texttt{if} expression must be exhaustive
+\item Variables bound in tests are scoped to the corresponding statements
+\item There will be an \texttt{if} expression
+\item There will be \texttt{case} expressions/statements with similar syntax
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Loops}
+\begin{itemize}
+\item One modular looping construct: \\[-1ex]
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+    do \{}
+        \emph{loop-statements} \ldots
+    \}
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\item \emph{loop-statements} are any normal statements plus any
+  special looping statements, including:
+  \begin{itemize}
+  \item \alert{\texttt{while} \emph{test}} and
+    \alert{\texttt{until} \emph{test}}
+    --- like conditional \texttt{break}
+  \item \alert{\texttt{when} \emph{test}} and
+    \alert{\texttt{unless} \emph{test}}
+  --- like conditional \texttt{continue}
+  \end{itemize}
+\item Include as many of these as you like wherever you like \\[-1ex]
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+    do \{!print(prompt)
+        !readln(?answer)
+        until answer in ["y","n"]
+        !println("Please answer 'y' or 'n'.")
+    \}
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Expressions and Functions}
+\begin{itemize}
+\item Procedure call arguments are expressions
+\item Expressions are just procedure calls with last argument omitted
+\item The value of such an expression is the value that would be assigned
+  to its omitted argument
+\item \emph{E.g.,} \alert{\texttt{bar(x,y)}} as an expression means call
+  \alert{\texttt{bar(x,y,?temp)}} and use \alert{\texttt{temp}} as the value of
+  \alert{\texttt{bar(x,y)}}
+\item \\[-1ex]
+  \begin{minipage}{0.35\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+foo(bar(x,y),?z)
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+  \quad means \quad
+  \begin{minipage}{0.3\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+bar(x,y,?temp)
+foo(temp,?z)
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+  \begin{minipage}[c]{0.4\linewidth}
+  \end{minipage}
+\item \\[-1ex]
+  \begin{minipage}{0.45\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+def foo(x) = bar(x,x)
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\quad is syntactic sugar for \\[-.5ex]
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+def foo(x,?result) \{ bar(x,x,?result) \}
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\item Either definition allows \alert{\texttt{foo}} to be used with
+  either syntax
+% \item A few built-in expressions like \texttt{let \{} \emph{stmts}
+%   \texttt{\} in} \emph{expr} and \emph{expr} \texttt{where \{} \emph{stmts}
+%   \texttt{\}}
+% \item \texttt{a.b(c,\ldots)} is syntactic sugar for
+%   \texttt{b(a,c,\ldots)}, to allow dot notation for member access and update
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Reversibility}
+\begin{itemize}
+\item Procedures can be overloaded based on mode:
+  \begin{itemize}
+  \item \\[-1ex]
+    \begin{minipage}{0.45\linewidth}
+      \begin{block}{}
+\begin{semiverbatim}
+position(x, y, ?pos)
+\end{semiverbatim}
+      \end{block}
+    \end{minipage} \quad constructs a position
+  \item \\[-1ex]
+    \begin{minipage}{0.45\linewidth}
+      \begin{block}{}
+\begin{semiverbatim}
+position(?x, ?y, pos)
+\end{semiverbatim}
+      \end{block}
+    \end{minipage} \quad deconstructs
+  \end{itemize}
+\item This is nicer as an expression (pattern matching):
+  \begin{itemize}
+  \item \\[-1ex]
+    \begin{minipage}{0.45\linewidth}
+      \begin{block}{}
+\begin{semiverbatim}
+?pos = position(x, y)
+\end{semiverbatim}
+      \end{block}
+    \end{minipage} \quad constructs a position
+  \item \\[-1ex]
+    \begin{minipage}{0.45\linewidth}
+      \begin{block}{}
+\begin{semiverbatim}
+pos = position(?x, ?y)
+\end{semiverbatim}
+      \end{block}
+    \end{minipage} \quad deconstructs
+  \item Use deconstructor expression for any output argument
+    (pattern match anywhere)
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Modules, Types, and Resources}
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Modules}
+\begin{itemize}
+\item Each source file is a module
+\item A directory of source files is also a module
+\item A (sub)-module can be declared within a module: \\[-1ex]
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+module \emph{name} \{
+    \emph{items}
+\}
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\item Items in a submodule can be anything that can be in a module
+\item Submodule has access to everything in parent module
+\item Parent module can only access public contents of submodule
+\item Can import public contents of a module with \\[-1ex]
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+use \emph{module}
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Types}
+\begin{itemize}
+\item A Wybe type is just a (sub)module that can be used as a type \\[-1ex]
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+type \emph{name} \{
+    \emph{constructor} | \emph{constructor} | \ldots
+    \emph{items}
+\}
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\item each constructor looks like function declaration without a body
+\item \emph{items} are other module items (procedures, types, \emph{etc}.)
+\item Automatically generates code for constructors, deconstructors
+\item Automatically generates accessor and mutator for each member
+\item These are all ordinary Wybe code; you could write them yourself
+\item Mayer's Uniform Access Principle: can change representation without
+  changing type users
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Resources}
+\begin{itemize}
+\item Resources provide convenient, non-positional argument passing
+\item A \emph{resource} is declared as a name and type: \\[-1ex]
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+resource \emph{name} : \emph{type}
+\end{semiverbatim}
+    \end{block}
+  \end{minipage}
+\item A procedure indicates resources it uses with a \texttt{use}
+  clause:
+\\[-1ex]
+  \begin{minipage}{0.95\linewidth}
+    \begin{block}{}
+\begin{semiverbatim}
+def \emph{name}(\ldots) \alert{use \emph{resources}} \{ \ldots
+\end{semiverbatim}
+    \end{block}
+  \end{minipage} \\[1ex]
+\item \emph{resources} is comma-separated set of resource names,
+  optionally prefixed with \texttt{?} or \texttt{!} to indicate flow
+\item Resources become variables in procedure body, like parameters
+\item Procedures calls do not explicitly list resources, they come from caller
+  variables
+\item Resourceful calls must be preceded with \texttt{!}
+\item Useful for data that is widely used in a module
+\item Predefined resources:  \texttt{io}, command line, \texttt{exit\_code}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Tests}
+\begin{itemize}
+\item Tests in conditionals can be Boolean-valued expressions
+\item They can also be \alert{\emph{test statements}}: statements that can fail
+\item For example,\quad
+    \begin{minipage}{0.35\linewidth}
+      \begin{block}{}
+\begin{semiverbatim}
+lst = cons(?h,?t)
+\end{semiverbatim}
+      \end{block}
+    \end{minipage}\quad
+ fails if \texttt{lst} is \texttt{nil}
+\item So do\quad
+    \begin{minipage}{0.2\linewidth}
+      \begin{block}{}
+\begin{semiverbatim}
+head(lst)
+\end{semiverbatim}
+      \end{block}
+    \end{minipage}\quad
+ \texttt{} and\quad
+    \begin{minipage}{0.2\linewidth}
+      \begin{block}{}
+\begin{semiverbatim}
+tail(lst)
+\end{semiverbatim}
+      \end{block}
+    \end{minipage}
+\item Test outputs can only be used when test has succeeded
+\item Can only use a test as a condition or in definition of a test
+\item Some modes of a procedure can be tests while others are not
+\item Declare with \texttt{test} keyword:
+    \begin{minipage}{0.5\linewidth}
+      \begin{block}{}
+\begin{semiverbatim}
+def \alert{test} \textit{name}(\ldots) \ldots
+\end{semiverbatim}
+      \end{block}
+    \end{minipage}\quad
+
+
+\item Types with more than one constructor automatically do this for
+  deconstructors, accessors, and mutators
+\item A call supplying an input where an output is expected is
+  automatically a test that compares output with supplied input
+\end{itemize}
+\end{frame}
+
+
+\section{Implementation}
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Intermediate Representation}
+\begin{itemize}
+\item Source code is compiled to low-level Prolog-like deterministic
+  strongly moded declarative language (LPVM)
+\item Actually quite close to machine language
+\item Instructions are low level arithmetic, comparisons, memory allocation,
+  access, mutation, and procedure calls
+\item Code is tree-structured, with exclusive, exhaustive branching on variable
+  value (deterministic)
+\item Loops are transformed into recursion
+\item Branches do not merge
+\item Code after conditionals and loops is turned into a separate procedure
+  called at the end of each branch and each loop exit
+\item Each variable only assigned once along any branch
+\item Heavy use of inlining to avoid unnecessary calls
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+  \frametitle{LPVM example (types omitted for brevity)}
+  \begin{minipage}{.35\linewidth}
+\centerline{\textbf{Wybe source}}
+\begin{semiverbatim}
+def fact(n, ?f) \{
+    ?f = 1
+    do \{while n > 1
+        ?f = f * n
+        ?n = n - 1
+    \}
+\}
+\end{semiverbatim}
+  \end{minipage}
+\qquad
+  \begin{minipage}{.55\linewidth}
+\centerline{\textbf{LPVM code}}
+\begin{semiverbatim}
+fact(n, ?f) :-
+    gen1(n, 1, ?f).
+
+gen1(n, f, ?f#2):
+    llvm icmp sgt(n, 1, ?tmp3)
+    ( tmp3 = 0
+    ->  llvm move(f, ?f#2)
+    ; tmp3 = 1
+    ->  llvm mul(n, f, ?tmp0)
+        llvm sub(n, 1, ?tmp1)
+        gen1(tmp1, tmp0, ?f#2)
+    ).
+\end{semiverbatim}
+  \end{minipage}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{LPVM advantages}
+\begin{itemize}
+\item Clean simple semantics:
+  \begin{itemize}
+  \item each path is just a conjunction
+  \item each branch point is just a disjunction
+  \end{itemize}
+\item Easy reordering:  just keep variable assignment before first use
+\item Dead code elimination: omit instructions with unused outputs
+\item Inlining:  just whack in procedure body with renamed variables
+\item Easy analysis:
+  \begin{itemize}
+  \item Single assignment on each branch
+  \item No Phi nodes
+  \item commutative conjunction:
+    forward and backward analysis are equally easy
+  \item Each branch includes its path conditions (though reification of
+    conditions complicates analysis)
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Data structure implementation}
+\begin{itemize}
+\item Low-level instructions used for data structures:
+  \begin{itemize}
+  \item \texttt{alloc(}\emph{size}, \emph{?addr}\texttt{)} \\
+    allocate a block of \emph{size} byes of memory
+  \item \texttt{access(}\emph{addr}, \emph{offset}, \emph{?value}\texttt{)} \\
+    access the value at \emph{offset} bytes beyond \emph{addr} in memory
+  \item \texttt{mutate(}\emph{addr}, \emph{?newaddr}, \emph{size},
+    \emph{offset}, \emph{destr}, \emph{newvalue}\texttt{)} \\
+    if \emph{destr} is 1, \emph{newaddr = addr}, and destructively store
+    \emph{newvalue} in memory at the address \emph{offset} bytes beyond
+    \emph{addr}; if \emph{destr} is 0, then allocate \emph{size} bytes at
+    \emph{newaddr} and copy from \emph{addr} to \emph{newaddr} before storing
+  \end{itemize}
+\item Aliasing and liveness analysis determine when a mutated structure is not
+  aliased, and sets the \emph{destr} arg to 1.
+\item For this to work inter-procedurally, need multiple specialisation
+\item Currently using Boehm conservative garbage collector
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Compilation process}
+\begin{itemize}
+\item Compilation bottom-up by SCCs in module dependency graph
+\item If target is older than source file:
+\begin{enumerate}
+\item Read source file; compile code as far as possible without
+  considering dependencies
+\item Recursively load dependencies, compiling if necessary,
+  producing a single SCC in module dependency graph
+\item For each SCC in type dependency graph, generate code for types
+\item Type and mode check procedures
+\item Flatten procedure definitions and generate LPVM
+\item Analyse and optimise each call graph SCC bottom-up:
+  constant folding,
+  common subexpression elimination, dead code elimination, unneeded
+  argument elimination, liveness analysis, inlining,
+  aliasing analysis, compile-time garbage collection
+\item LLVM code is generated, object files are written
+\end{enumerate}
+\item Executables are generated
+\end{itemize}
+\end{frame}
+
+\section{Conclusions}
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Future work}
+\begin{itemize}
+\item Higher order procedures/functions
+\item Parametric polymorphism
+\item User-defined control structures through declared lazy parameters
+\item Tooling:  incremental compilation, debugging, wybedoc, etc
+\item Support downward analysis by using info from past compilations
+\item Generators:  produce multiple outputs one at a time
+\item Open types: a type can add constructors to another type
+  \begin{itemize}
+  \item extended type can be used where the extending type is required
+  \item extending type can be used where the extended type is required if the
+  extra constructors have been excluded
+  \item For example, \texttt{list(t)} extends \texttt{nonempty\_list(t)}
+  \end{itemize}
+\item Interface inheritance through type re-implementation
+  \begin{itemize}
+  \item Declare type implements another concrete or abstract type
+  \item Can use that type wherever you could use the other one
+  \item \emph{Eg}, use \texttt{int} as \texttt{number} or \texttt{array} as
+    \texttt{list}
+  \end{itemize}
+\item Improved automatic memory management
+\end{itemize}
+\end{frame}
+
+
+% %-----------------------------------------------------------------------%
+% \begin{frame}[fragile]
+% \frametitle{Types}
+% \begin{itemize}
+% \item Type system is not designed yet; much work to be done
+% \item These are some goals:
+%   \begin{itemize}
+%   \item Strongly typed
+%   \item Type inference for local variables and formal parameters of
+%     private procedures
+%   \item Parametric polymorphism
+%   \item Declaration of algebraic types produces constructors,
+%     deconstructors, accessors, mutators
+%   \item Also possible to define all these as normal procedures, so one
+%     can directly implement types by defining their primitive
+%     operations
+%   \item \emph{E.g.,} can generate  constructors, deconstructors,
+%     accessors, mutators for C structs passed through foreign interface
+%   \end{itemize}
+% \end{itemize}
+% \end{frame}
+
+
+% %-----------------------------------------------------------------------%
+% \begin{frame}[fragile]
+% \frametitle{Types}
+% \begin{itemize}
+% \item Interface inheritance: unify types with type classes
+%   \begin{itemize}
+%   \item Abstract type $\equiv$ type class
+%   \item Allow a type $A$ to ``implement'' another type $B$, by
+%     defining all $B$'s primitive operations for type $A$
+%   \item Then an $A$ \emph{is-a} $B$: pass an $A$ where a $B$ is expected
+%   \item \emph{E.g.,} allow list processing functions to work on arrays
+%   by defining \texttt{car}, \texttt{cdr}, and \texttt{cons} for arrays
+% \end{itemize}
+% \item Implementation inheritance: declarative delegation
+%   \begin{itemize}
+%   \item For a specified set of procedures, 
+%     declare a function $f: a \to b$ to convert an $a$ argument to a $b$
+%   \item Allows passing an $a$ for any $b$ type parameter to these procedures
+%   \item Controlled coercion, or easy overloading
+%   \item Allows composition to substitute for (multiple) inheritance
+%   \item But no overriding
+%   \end{itemize}
+% \end{itemize}
+% \end{frame}
+
+
+%-----------------------------------------------------------------------%
+\begin{frame}[fragile]
+\frametitle{Conclusion}
+% \begin{quotation}
+% \noindent
+% Simplicity does not precede complexity, but follows it.
+% \hspace*{3em}--- Alan Perlis
+% \end{quotation}
+
+% \vspace{2ex}
+% Always looking for ways to simplify Wybe while satisfying its goals
+
+\begin{center}
+\large
+\vspace{-8ex}
+Always interested in collaborative projects
+
+\vspace{8ex}
+Questions?
+\end{center}
+\end{frame}
+
+% %-----------------------------------------------------------------------%
+% \begin{frame}
+% \frametitle{Type classes}
+% \begin{itemize}
+% \item 
+% \end{itemize}
+% \end{frame}
+
+
+
+\end{document}

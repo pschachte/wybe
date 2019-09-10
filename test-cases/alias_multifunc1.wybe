@@ -1,19 +1,19 @@
 use position
 
-public proc replicate2(p1:position, ?p2:position) use !io
+pub def replicate2(p1:position, ?p2:position) use !io {
     ?pp = position(0,0)
     !print("some noise...")
     !println(pp.x)
 
     ?p2 = p1
-end
+}
 
 # Expected Alias Pairs: [(p1#0,p3#0)]
-public proc replicate1(p1:position, ?p2:position, ?p3:position) use !io
+pub def replicate1(p1:position, ?p2:position, ?p3:position) use !io {
     !replicate2(p1, ?p2)
     !replicate2(p2, ?p3)
     x(!p2, 22)
-end
+}
 
 ?p1 = position(10,10)
 !replicate1(p1, ?p2, ?p3)
@@ -38,7 +38,7 @@ x(!p2, 2222222)
 # update p1!
 # However, compiler doesn't know p3 is dead...
 
-x(!p1, 11)
+x(!p1, 11) # Non-destructive
 
 !println("--- After calling x(!p1, 11): ")
 !print("expect p1(11,10):")

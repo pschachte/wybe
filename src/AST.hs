@@ -16,12 +16,12 @@ module AST (
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
   Determinism(..), determinismName,
   TypeProto(..), TypeSpec(..), TypeRef(..), TypeImpln(..),
-  FnProto(..), ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
+  ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt,
   TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
   paramIsPhantom, argIsPhantom, typeIsPhantom, primProtoParamNames,
-  protoNonePhantomParams, isProcProtoArg,
+  protoNonePhantomParams, protoInputParamNames, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
@@ -109,9 +109,9 @@ data Item
      | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
        -- The Bool in the next two indicates whether inlining is forced
      | FuncDecl Visibility Determinism Bool
-       FnProto TypeSpec (Placed Exp) OptPos
+       ProcProto TypeSpec (Placed Exp) OptPos
      | ProcDecl Visibility Determinism Bool ProcProto [Placed Stmt] OptPos
-     -- | CtorDecl Visibility FnProto OptPos
+     -- | CtorDecl Visibility ProcProto OptPos
      | StmtDecl Stmt OptPos
      | PragmaDecl Pragma
      deriving (Generic, Eq)
@@ -142,7 +142,7 @@ defaultTypeRepresentation :: TypeRepresentation
 defaultTypeRepresentation = "pointer"
 
 data TypeImpln = TypeRepresentation TypeRepresentation
-               | TypeCtors Visibility [Placed FnProto]
+               | TypeCtors Visibility [Placed ProcProto]
                deriving (Generic, Eq)
 
 -- -- |Check if a pointer or primitive variables
@@ -170,14 +170,6 @@ isPublic = (==Public)
 -- |A type prototype consists of a type name and zero or more type parameters.
 data TypeProto = TypeProto Ident [Ident]
                  deriving (Generic, Eq)
-
--- |A function prototype consists of a function name and zero or more formal
---  parameters.
-data FnProto = FnProto {
-    fnProtoName::Ident,
-    fnProtoParams::[Param],
-    fnProtoResourceFlows::Set.Set ResourceFlowSpec
-    } deriving (Generic, Eq)
 
 
 ----------------------------------------------------------------
@@ -729,6 +721,9 @@ lookupType (TypeSpec _ "phantom" []) _ =
     return $ Just $ TypeSpec [] "phantom" []
 -- XXX shouldn't have to do this:
 lookupType ty@(TypeSpec ["wybe"] "int" []) _ = return $ Just ty
+-- XXX really shouldn't do this, as it makes 'int' in every module the int type.
+lookupType ty@(TypeSpec _ "int" []) _ =
+    return $ Just (TypeSpec ["wybe"] "int" [])
 lookupType ty@(TypeSpec mod name args) pos = do
     logAST $ "Looking up type " ++ show ty
     tspecs <- refersTo mod name modKnownTypes typeMod
@@ -1409,7 +1404,7 @@ data TypeDef = TypeDef {
     typeDefArity :: Int,                          -- number of type params
     typeDefRepresentation :: Maybe TypeRepresentation,
                                                   -- low level representation
-    typeDefMembers :: [Placed FnProto],           -- high level representation
+    typeDefMembers :: [Placed ProcProto],         -- high level representation
     typeDefMemberVis :: Visibility,               -- are members public?
     typeDefOptPos :: OptPos                       -- source position of decl
     } deriving (Eq, Generic)
@@ -1776,7 +1771,7 @@ data Constant = Int Int
               | String String
                 deriving (Show,Eq)
 
--- |A proc prototype, including name and formal parameters.
+-- |A proc or func prototype, including name and formal parameters.
 data ProcProto = ProcProto {
     procProtoName::ProcName,
     procProtoParams::[Param],
@@ -1971,6 +1966,12 @@ protoNonePhantomParams proto =
     let primParams = primProtoParams proto
     in [primParamName pram | pram <- primParams, not (paramIsPhantom pram)]
 
+-- |Get names of proto input params
+protoInputParamNames :: PrimProto -> [PrimVarName]
+protoInputParamNames proto =
+    let primParams = primProtoParams proto
+    in [name | pram@(PrimParam name _ FlowIn _ (ParamInfo False)) <- primParams,
+                not (paramIsPhantom pram)]
 
 -- |Is the supplied argument a parameter of the proc proto
 isProcProtoArg :: [PrimVarName] -> PrimArg -> Bool
@@ -2138,10 +2139,10 @@ argFlowDescription FlowOut = "output"
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
-expToStmt (Fncall [] "and" args) = And $ List.map (fmap expToStmt) args
-expToStmt (Fncall [] "or"  args) = Or  $ List.map (fmap expToStmt) args
-expToStmt (Fncall [] "not" [arg]) = Not $ fmap expToStmt arg
-expToStmt (Fncall [] "not" args) = shouldnt $ "non-unary 'not' " ++ show args
+expToStmt (Fncall [] "&&" args) = And $ List.map (fmap expToStmt) args
+expToStmt (Fncall [] "||"  args) = Or  $ List.map (fmap expToStmt) args
+expToStmt (Fncall [] "~" [arg]) = Not $ fmap expToStmt arg
+expToStmt (Fncall [] "~" args) = shouldnt $ "non-unary 'not' " ++ show args
 expToStmt (Fncall maybeMod name args) =
     ProcCall maybeMod name Nothing Det False args
 expToStmt (ForeignFn lang name flags args) =
@@ -2350,13 +2351,6 @@ showUse tab mod (ImportSpec pubs privs) =
 instance Show TypeProto where
   show (TypeProto name []) = name
   show (TypeProto name args) = name ++ "(" ++ intercalate "," args ++ ")"
-
--- |How to show a function prototype.
-instance Show FnProto where
-  show (FnProto name [] resources) = name ++ showResources resources
-  show (FnProto name params resources) =
-    name ++ "(" ++ intercalate "," (List.map show params) ++ ")" ++
-    showResources resources
 
 -- |How to show something that may have a source position
 instance Show t => Show (Placed t) where

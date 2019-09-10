@@ -1,6 +1,6 @@
-public func toCelsius(f:float):float = (f - 32.0) / 1.8
+pub def toCelsius(f:float):float = (f - 32.0) / 1.8
 
-public func factorial(n:int):int =
+pub def factorial(n:int):int =
        if n <= 0 then 1 else n * factorial(n-1)
 
 !println("Numbers has been initialised.")

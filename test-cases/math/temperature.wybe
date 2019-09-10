@@ -1,1 +1,1 @@
-public func toCelsius(f:float):float = (f - 32.0) / 1.8
+pub def toCelsius(f:float):float = (f - 32.0) / 1.8

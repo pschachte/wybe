@@ -181,17 +181,25 @@ aliasedByFork caller body aliasMap = do
             return aliasMap
 
 
--- Build up maybe alised inputs and outputs triggerred by move, access, cast
+-- Build up maybe aliased inputs and outputs triggered by move, access, cast
 -- instructions.
 -- Not to compute aliasing from mutate instructions with the assumption that we
 -- always try to do nondestructive update.
 -- Returned triple ([PrimVarName], [PrimVarName], [PrimArg]) is
 -- (maybeAliasedInput, maybeAliasedOutput, primArgs)
 maybeAliasPrimArgs :: Prim -> Compiler ([PrimVarName], [PrimVarName], [PrimArg])
-maybeAliasPrimArgs (PrimForeign _ "access" _ args) = _maybeAliasPrimArgs args
-maybeAliasPrimArgs (PrimForeign _ "cast" _ args)   = _maybeAliasPrimArgs args
-maybeAliasPrimArgs (PrimForeign _ "move" _ args)   = _maybeAliasPrimArgs args
-maybeAliasPrimArgs prim                            = return ([],[], primArgs prim)
+maybeAliasPrimArgs (PrimForeign "lpvm" "access" _ args) =
+    _maybeAliasPrimArgs args
+maybeAliasPrimArgs (PrimForeign "lpvm" "cast" _ args) =
+    _maybeAliasPrimArgs args
+maybeAliasPrimArgs (PrimForeign "llvm" "move" _ args) =
+    _maybeAliasPrimArgs args
+maybeAliasPrimArgs prim@(PrimForeign "lpvm" "mutate" flags args) =
+    if "noalias" `elem` flags
+        then return ([],[], primArgs prim)
+        else _maybeAliasPrimArgs args
+maybeAliasPrimArgs prim =
+    return ([],[], primArgs prim)
 
 
 -- Helper function for the above maybeAliasPrimArgs function
@@ -255,9 +263,12 @@ aliasedArgsInSimplePrim nonePhantomParams currentAlias ([],[], primArgs) = do
         return $ removeFromUf finals currentAlias
 aliasedArgsInSimplePrim nonePhantomParams currentAlias
     (maybeAliasedInput, maybeAliasedOutput, primArgs) = do
+        logAlias $ "      primArgs:           " ++ show primArgs
+        logAlias $ "      maybeAliasedInput:  " ++ show maybeAliasedInput
+        logAlias $ "      maybeAliasedOutput: " ++ show maybeAliasedOutput
         let aliases = cartProd maybeAliasedInput maybeAliasedOutput
         let aliasMap1 = List.foldr (\(inArg, outArg) aMap ->
-                            uniteUf aMap inArg outArg) currentAlias aliases
+                            uniteUf aMap outArg inArg) currentAlias aliases
         -- Gather variables in final use
         finals <- foldM (finalArgs nonePhantomParams) Set.empty primArgs
         -- Then remove them from aliasmap

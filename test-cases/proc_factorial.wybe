@@ -1,10 +1,9 @@
-public proc factorial(n:int) use !io
+pub def factorial(n:int, ?result:int) {
     ?result = 1
-    do while n > 1
-       ?result = result * n
-       ?n = n - 1
-    end
-    !println(result)
-end
+    do {while n > 1
+        ?result = result * n
+        ?n = n - 1
+    }
+}
 
-!factorial(5)
+!println(factorial(5))

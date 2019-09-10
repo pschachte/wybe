@@ -59,22 +59,22 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_int(i64)    
 
 
-declare external ccc  void @print_string(i8*)    
+declare external ccc  void @print_string(i64)    
 
 
-@alias5.10 =    constant [18 x i8] c"expect p4=45000: \00"
+@alias5.13 =    constant [18 x i8] c"expect p4=45000: \00"
 
 
-@alias5.9 =    constant [16 x i8] c"expect p3=100: \00"
+@alias5.11 =    constant [16 x i8] c"expect p3=100: \00"
 
 
-@alias5.8 =    constant [16 x i8] c"expect p2=100: \00"
+@alias5.9 =    constant [16 x i8] c"expect p2=100: \00"
 
 
 @alias5.7 =    constant [16 x i8] c"expect p1=111: \00"
 
 
-@alias5.11 =    constant [18 x i8] c"random replicate1\00"
+@alias5.15 =    constant [18 x i8] c"random replicate1\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -98,16 +98,20 @@ entry:
   %4 = tail call ccc  {i64, i64}  @"alias5.replicate1<0>"(i64  100, i64  800)  
   %5 = extractvalue {i64, i64} %4, 0 
   %6 = extractvalue {i64, i64} %4, 1 
-  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([16 x i8], [16 x i8]* @alias5.7, i32 0, i32 0))  
+  %8 = ptrtoint i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias5.7, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %8)  
   tail call ccc  void  @print_int(i64  111)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([16 x i8], [16 x i8]* @alias5.8, i32 0, i32 0))  
+  %10 = ptrtoint i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias5.9, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %10)  
   tail call ccc  void  @print_int(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([16 x i8], [16 x i8]* @alias5.9, i32 0, i32 0))  
+  %12 = ptrtoint i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias5.11, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %12)  
   tail call ccc  void  @print_int(i64  %5)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([18 x i8], [18 x i8]* @alias5.10, i32 0, i32 0))  
+  %14 = ptrtoint i8* getelementptr inbounds ([18 x i8], [18 x i8]* @alias5.13, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %14)  
   tail call ccc  void  @print_int(i64  %6)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -116,13 +120,14 @@ entry:
 
 define external ccc  {i64, i64} @"alias5.replicate1<0>"(i64  %"v1#0", i64  %"v3#0")    {
 entry:
-  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([18 x i8], [18 x i8]* @alias5.11, i32 0, i32 0))  
+  %16 = ptrtoint i8* getelementptr inbounds ([18 x i8], [18 x i8]* @alias5.15, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %16)  
   tail call ccc  void  @print_int(i64  2)  
   tail call ccc  void  @putchar(i8  10)  
   %"tmp$0#0" = add   i64 %"v3#0", 100 
   %"tmp$2#0" = mul   i64 %"tmp$0#0", 200 
   %"v4#1" = sdiv exact i64 %"tmp$2#0", 4 
-  %12 = insertvalue {i64, i64} undef, i64 %"v1#0", 0 
-  %13 = insertvalue {i64, i64} %12, i64 %"v4#1", 1 
-  ret {i64, i64} %13 
+  %17 = insertvalue {i64, i64} undef, i64 %"v1#0", 0 
+  %18 = insertvalue {i64, i64} %17, i64 %"v4#1", 1 
+  ret {i64, i64} %18 
 }

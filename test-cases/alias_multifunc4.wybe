@@ -1,26 +1,26 @@
-# partial data structures aliasing in multi proc calls
+# partial data structures aliasing in multi def calls {
 
 use position
 
 # AliasPairs: [(pa#0,pc#0)]
-public proc replicate1(pa:position, ?pb:position, ?pc:position) use !io
+pub def replicate1(pa:position, ?pb:position, ?pc:position) use !io {
     ?pb = pa
     ?pc = pa
 
     ?pp = position(99,99)
     x(!pb, pp.x)
-end
+}
 
-public proc replicate21(?pb:position) use !io
+pub def replicate21(?pb:position) use !io {
     ?pa = position(99999,99999)
     ?pb = pa
     ?pc = pa
     x(!pc,1111111111)
     !print("--- Inside replicate21, expect pc(1111111111,99999): ")
     !printPosition(pc)
-end
+}
 
-public proc replicate22(?pb:position, ?pc:position) use !io
+pub def replicate22(?pb:position, ?pc:position) use !io {
     ?pa = position(99999,99999)
     ?pb = pa
     ?pc = pa
@@ -30,7 +30,7 @@ public proc replicate22(?pb:position, ?pc:position) use !io
     x(!pc,1111111111)
     !print("--- Inside replicate22, after calling x(!pc,1111111111), expect pc(1111111111,99999): ")
     !printPosition(pc)
-end
+}
 
 ?p1 = position(10,10)
 !replicate1(p1, ?p2, ?p3)

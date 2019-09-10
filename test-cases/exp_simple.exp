@@ -44,7 +44,7 @@ declare external ccc  void @print_int(i64)
 declare external ccc  void @putchar(i8)    
 
 
-declare external ccc  void @print_string(i8*)    
+declare external ccc  void @print_string(i64)    
 
 
 declare external ccc  void @print_float(double)    
@@ -67,7 +67,8 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   tail call ccc  void  @putchar(i8  104)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call ccc  void  @print_string(i8*  getelementptr inbounds ([6 x i8], [6 x i8]* @exp_simple.1, i32 0, i32 0))  
+  %2 = ptrtoint i8* getelementptr inbounds ([6 x i8], [6 x i8]* @exp_simple.1, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @print_int(i64  3)  
   tail call ccc  void  @putchar(i8  10)  
   tail call ccc  void  @print_int(i64  1001)  

@@ -6,7 +6,7 @@
 use mytree
 
 # return the left tree node
-public func simpleSlice(tr:tree):tree =
+pub def simpleSlice(tr:tree):tree =
   if tr = node(?l, ?k, ?r) then l
   else node(empty, -1, empty)
 

@@ -20,7 +20,7 @@ module Codegen (
   trunc, zext, sext,
   -- * Types
   int_t, phantom_t, float_t, char_t, ptr_t, void_t, string_t, array_t,
-  struct_t,
+  struct_t, address_t, byte_ptr_t,
   -- * Custom Types
   int_c, float_c,
   -- * Instructions
@@ -63,6 +63,7 @@ import           AST                             (Compiler, Prim, PrimProto,
 import           LLVM.Context
 import           LLVM.Module
 import           Options                         (LogSelection (Blocks,CodeGen))
+import           Config                          (wordSize)
 import           Unsafe.Coerce
 
 ----------------------------------------------------------------------------
@@ -95,6 +96,12 @@ array_t = ArrayType
 
 struct_t :: [LLVMAST.Type] -> LLVMAST.Type
 struct_t types = LLVMAST.StructureType False types
+
+address_t :: Type
+address_t = int_c $ fromIntegral wordSize
+
+byte_ptr_t :: Type
+byte_ptr_t = ptr_t char_t
 
 -- Custom Types
 int_c :: Word32 -> Type
