@@ -52,7 +52,7 @@ agree () {
 	    [yYaA]*) return 0 ;;
 	    [nNrR]*) return 1 ;;
 	    [qQ]*) echo "Quitting..." ; exit 0 ;;
-            [dDpP]) if [ -n "$3" ] ; then
+            [dDpP]) if [ -z "$3" ] ; then
                         echo "No previous expected output!"
                         action=ask
                     fi ;;
