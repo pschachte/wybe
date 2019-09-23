@@ -5,7 +5,7 @@
 --  Copyright: 2016 Peter Schachte.  All rights reserved.
 
 module Snippets (intType, intCast, boolType, boolCast, phantomType,
-                 varSet, varGet,
+                 varSet, varGet, varGetSet,
                  boolVarSet, boolVarGet, intVarSet, intVarGet, castTo,
                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
                 comparison, succeedTest, failTest, succeedIfSemiDet) where
@@ -39,6 +39,10 @@ varSet name = Var name ParamOut Ordinary
 -- |An input variable reference (rvalue)
 varGet :: Ident -> Exp
 varGet name = Var name ParamIn Ordinary
+
+-- |An input variable reference (rvalue)
+varGetSet :: Ident -> ArgFlowType -> Exp
+varGetSet name flowType = Var name ParamInOut flowType
 
 -- |A Boolean typed output variable reference (lvalue)
 boolVarSet :: Ident -> Exp

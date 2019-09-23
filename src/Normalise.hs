@@ -493,6 +493,7 @@ nonConstCtorItems vis typeSpec constCount tagBits tagLimit
                       (shift+sz,((paramName param,shift,sz):flds)))
                    (tagBits,[])
                    paramsReps
+      -- XXX should include maximum sizes of the constructors
       let rep = "i" ++ (show $ ceiling $ logBase 2 $ fromIntegral constCount)
       return (rep, [])
         -- $ unboxedConstructorItems ctorProto typeSpec tag fields pos
@@ -504,15 +505,13 @@ nonConstCtorItems vis typeSpec constCount tagBits tagLimit
           ++ ": " ++ show fields
       let ptrCount = length $ List.filter ((=="address") . snd3) paramsReps
       logNormalise $ "Structure contains " ++ show ptrCount ++ " pointers"
-      return ("address", [])
-      -- return
-      --   $ constructorItems ctorProto typeSpec bytes
-      --                      fields' tag pos
+      return ("address",
+              constructorItems ctorProto typeSpec size fields tag pos
       --   ++ deconstructorItems ctorName params typeSpec constCount nonConstCount
       --                         fields' tag pos
       --   ++ concatMap (getterSetterItems vis typeSpec ctorName pos
       --                constCount nonConstCount ptrCount size tag) fields'
-
+             )
 
 -- |The number of bytes occupied by a value of the specified type.  If the
 --  type is boxed, this is the word size.
@@ -566,38 +565,36 @@ alignOffset offset alignment =
 
 -- |Generate constructor code for a non-const constructor
 --  XXX generalise to generate unboxed constructors
--- constructorItems :: TypeSpec -> CtorInfo -> [Item]
--- constructorItems typeSpec (CtorInfo name paramsInfo pos tag bitSize) =
---     let flowType = Implicit pos
---         params = fst3 <$> paramsInfo
---         size = (sum (thd3 <$> paramsInfo) + 7) `div` 8
---     in [ProcDecl Public Det True
---         (ProcProto name (params++[Param "$" typeSpec ParamOut Ordinary])
---          Set.empty)
---        -- Code to allocate memory for the value
---         ([Unplaced $ ForeignCall "lpvm" "alloc" []
---           [Unplaced $ IntValue $ fromIntegral size,
---            Unplaced $ Typed (varSet "$rec") typeSpec True]]
---          ++
---        -- Code to fill all the fields
---          (reverse $ List.map (\((var,_,_),aligned) ->
---                                (Unplaced $ ForeignCall "lpvm" "mutate" []
---                                 [Unplaced $ Typed
---                                    (Var "$rec" ParamInOut flowType)
---                                    typeSpec True,
---                                  Unplaced $ IntValue $ fromIntegral aligned,
---                                  Unplaced $ IntValue $ 1,
---                                  Unplaced $ IntValue $ fromIntegral size,
---                                  Unplaced $ IntValue $ 0,
---                                  Unplaced $ Var var ParamIn flowType]))
---           paramsInfo)
---          ++
---        -- Finally, code to tag the reference and cast to the right type
---          [Unplaced $ ForeignCall "llvm" "or" []
---           [Unplaced $ varGet "$rec",
---            Unplaced $ IntValue $ fromIntegral tag,
---            Unplaced $ intCast (varSet "$")]])
---         pos]
+constructorItems :: ProcProto -> TypeSpec -> Int
+                 -> [(VarName,TypeSpec,Int)] -> Int -> OptPos -> [Item]
+constructorItems proto typeSpec size fields tag pos =
+    let flowType = Implicit pos
+        params = fst3 <$> fields
+        size = (sum (thd3 <$> fields) + 7) `div` 8
+    in [ProcDecl Public Det True proto -- Code to allocate memory for the value
+        ([Unplaced $ ForeignCall "lpvm" "alloc" []
+          [Unplaced $ iVal size,
+           Unplaced $ Typed (varSet "$rec") typeSpec True]]
+         ++
+       -- Code to fill all the fields
+         (reverse
+          $ List.map
+           (\(var,ty,offset) ->
+               (Unplaced $ ForeignCall "lpvm" "mutate" []
+                 [Unplaced $ Typed (varGetSet "$rec" flowType) typeSpec True,
+                  Unplaced $ iVal offset,
+                  Unplaced $ iVal 1,
+                  Unplaced $ iVal size,
+                  Unplaced $ iVal 0,
+                  Unplaced $ Typed (Var var ParamIn flowType) ty False]))
+           fields)
+         ++
+       -- Finally, code to tag the reference and cast to the right type
+         [Unplaced $ ForeignCall "llvm" "or" []
+          [Unplaced $ varGet "$rec",
+           Unplaced $ iVal tag,
+           Unplaced $ varSet "$"]])
+        pos]
 
 
 -- |Generate deconstructor code for a non-const constructor
