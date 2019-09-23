@@ -94,11 +94,11 @@ pub module io {
     pub def println(x:string) use !io { !print(x) !nl }
     # pub def read(?x:string) use !io { foreign c read_line(?x,!io) }
 
-    pub def print(x:bool) use !io {
-       !print(if false(x) then "false" else "true")
-    }
-    pub def println(x:bool) use !io { !print(x) !nl }
-    pub def eof:char = foreign lpvm cast(-1)
+    # pub def print(x:bool) use !io {
+    #    !print(if false(x) then "false" else "true")
+    # }
+    # pub def println(x:bool) use !io { !print(x) !nl }
+    # pub def eof:char = foreign lpvm cast(-1)
 }
 
 pub type phantom is phantom {

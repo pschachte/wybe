@@ -570,7 +570,7 @@ compileModSCC mspecs = do
     -- FLATTENING
     logDump Flatten Types "FLATTENING"
     fixpointProcessSCC handleModImports mspecs
-    mapM_ (completeNormalisation `inModule`) mspecs
+    completeNormalisation mspecs
     stopOnError $ "final normalisation of module(s) " ++ showModSpecs mspecs
     logBuild $ replicate 70 '='
     ----------------------------------
@@ -723,17 +723,17 @@ loadImports = do
 handleModImports :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 handleModImports _ thisMod = do
     reenterModule thisMod
-    imports <- getModuleImplementationField modImports
-    kTypes <- getModuleImplementationField modKnownTypes
-    kResources <- getModuleImplementationField modKnownResources
-    kProcs <- getModuleImplementationField modKnownProcs
-    iface <- getModuleInterface
+    imports     <- getModuleImplementationField modImports
+    kTypes      <- getModuleImplementationField modKnownTypes
+    kResources  <- getModuleImplementationField modKnownResources
+    kProcs      <- getModuleImplementationField modKnownProcs
+    iface       <- getModuleInterface
     mapM_ (uncurry doImport) $ Map.toList imports
-    kTypes' <- getModuleImplementationField modKnownTypes
+    kTypes'     <- getModuleImplementationField modKnownTypes
     kResources' <- getModuleImplementationField modKnownResources
-    kProcs' <- getModuleImplementationField modKnownProcs
-    iface' <- getModuleInterface
-    _ <- reexitModule
+    kProcs'     <- getModuleImplementationField modKnownProcs
+    iface'      <- getModuleInterface
+    _           <- reexitModule
     return (kTypes/=kTypes' || kResources/=kResources' ||
             kProcs/=kProcs' || iface/=iface',[])
 

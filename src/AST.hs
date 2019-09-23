@@ -23,7 +23,7 @@ module AST (
   paramIsPhantom, argIsPhantom, typeIsPhantom, primProtoParamNames,
   protoNonePhantomParams, protoInputParamNames, isProcProtoArg,
   -- *Source Position Types
-  OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace,
+  OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
@@ -211,6 +211,12 @@ maybePlace t Nothing    = Unplaced t
 rePlace :: t -> Placed t -> Placed t
 rePlace t (Placed _ pos) = Placed t pos
 rePlace t (Unplaced _)   = Unplaced t
+
+
+-- |Extract the place and payload of a Placed value
+unPlace :: Placed t -> (t, OptPos)
+unPlace (Placed x pos) = (x, Just pos)
+unPlace (Unplaced x)   = (x, Nothing)
 
 
 -- |Apply a function that takes a thing and an optional place to a
@@ -455,8 +461,10 @@ updateModuleM updater =
 getSpecModule :: String -> ModSpec -> (Module -> t) -> Compiler t
 getSpecModule context spec getter = do
     let msg = context ++ " looking up module " ++ show spec
-    curr <- gets (List.filter ((==spec) . modSpec) . underCompilation)
-    logAST $ "found " ++ (show $ length curr) ++
+    underComp <- gets underCompilation
+    let curr = List.filter ((==spec) . modSpec) underComp
+    logAST $ "Under compilation: " ++ showModSpecs (modSpec <$> underComp)
+    logAST $ "found " ++ show (length curr) ++
       " matching modules under compilation"
     case curr of
         []    -> gets (maybe (error msg) getter . Map.lookup spec . modules)
@@ -523,7 +531,7 @@ moduleIsPackage spec =  do
 -- with a later call to reexitModule.
 reenterModule :: ModSpec -> Compiler ()
 reenterModule modspec = do
-    logAST $ "finding module " ++ showModSpec modspec
+    logAST $ "reentering module " ++ showModSpec modspec
     mod <- getSpecModule "reenterModule" modspec id
     logAST $ "found it"
     modify (\comp -> comp { underCompilation = mod : underCompilation comp })
@@ -569,6 +577,7 @@ reexitModule = do
     modify
       (\comp -> comp { underCompilation = List.tail (underCompilation comp) })
     updateModules $ Map.insert (modSpec mod) mod
+    logAST $ "Reexiting module " ++ showModSpec (modSpec mod)
     return mod
 
 
@@ -698,8 +707,8 @@ updateImplementation implOp = do
             updateModule (\mod -> mod { modImplementation = Just $ implOp impl })
 
 -- |Add the specified type definition to the current module.
-addType :: Ident -> TypeDef -> Visibility -> Compiler (TypeSpec)
-addType name def@(TypeDef arity rep _ _ _) vis = do
+addType :: Ident -> TypeDef -> Compiler TypeSpec
+addType name def@(TypeDef vis params rep _ _ _ _) = do
     currMod <- getModuleSpec
     let spec = TypeSpec currMod name [] -- XXX what about type params?
     updateImplementation
@@ -717,13 +726,13 @@ addType name def@(TypeDef arity rep _ _ _) vis = do
 lookupType :: TypeSpec -> OptPos -> Compiler (Maybe TypeSpec)
 lookupType AnyType _ = return $ Just AnyType
 lookupType InvalidType _ = return $ Just InvalidType
-lookupType (TypeSpec _ "phantom" []) _ =
-    return $ Just $ TypeSpec [] "phantom" []
+-- lookupType (TypeSpec _ "phantom" []) _ =
+--     return $ Just $ TypeSpec [] "phantom" []
 -- XXX shouldn't have to do this:
-lookupType ty@(TypeSpec ["wybe"] "int" []) _ = return $ Just ty
+-- lookupType ty@(TypeSpec ["wybe"] "int" []) _ = return $ Just ty
 -- XXX really shouldn't do this, as it makes 'int' in every module the int type.
-lookupType ty@(TypeSpec _ "int" []) _ =
-    return $ Just (TypeSpec ["wybe"] "int" [])
+-- lookupType ty@(TypeSpec _ "int" []) _ =
+--     return $ Just (TypeSpec ["wybe"] "int" [])
 lookupType ty@(TypeSpec mod name args) pos = do
     logAST $ "Looking up type " ++ show ty
     tspecs <- refersTo mod name modKnownTypes typeMod
@@ -739,7 +748,7 @@ lookupType ty@(TypeSpec mod name args) pos = do
             let maybeDef = maybeMod >>= modImplementation >>=
                         (Map.lookup (typeName tspec) . modTypes)
             let def = trustFromJust "lookupType" maybeDef
-            if typeDefArity def == length args
+            if length (typeDefParams def) == length args
               then do
                 args' <- fmap catMaybes $ mapM (flip lookupType pos) args
                 let matchingMod = maybe (shouldnt "lookupType") modSpec maybeMod
@@ -748,7 +757,8 @@ lookupType ty@(TypeSpec mod name args) pos = do
                 return $ Just matchingType
               else do
                 message Error
-                  ("Type '" ++ name ++ "' expects " ++ show (typeDefArity def) ++
+                  ("Type '" ++ name ++ "' expects "
+                   ++ show (length $ typeDefParams def) ++
                    " arguments, but " ++ show (length args) ++ " were given")
                   pos
                 logAST "Type constructor arities don't match!"
@@ -983,8 +993,8 @@ data Module = Module {
   isPackage :: Bool,             -- ^Is module actually a pacakage
   modSpec :: ModSpec,            -- ^The module path name
   modParams :: Maybe [Ident],    -- ^The type parameters, if a type
-  modConstants :: Int,           -- ^Num constant constructors, if a type
-  modNonConstants :: Int,        -- ^Num non-constant constructors, if a type
+  -- modConstants :: Int,           -- ^Num constant constructors, if a type
+  -- modNonConstants :: Int,        -- ^Num non-constant constructors, if a type
   modInterface :: ModuleInterface, -- ^The public face of this module
   modImplementation :: Maybe ModuleImplementation,
                                  -- ^the module's implementation
@@ -1004,8 +1014,8 @@ emptyModule = Module
     , isPackage         = False
     , modSpec           = error "No Default Modspec"
     , modParams         = Nothing
-    , modConstants      = 0
-    , modNonConstants   = 0
+    -- , modConstants      = 0
+    -- , modNonConstants   = 0
     , modInterface      = emptyInterface
     , modImplementation = Just emptyImplementation
     , thisLoadNum       = 0
@@ -1161,8 +1171,8 @@ data ModuleImplementation = ModuleImplementation {
     modResources :: Map Ident ResourceDef,    -- ^Resources defined by this mod
     modProcs     :: Map Ident [ProcDef],      -- ^Procs defined by this module
     modKnownTypes:: Map Ident (Set TypeSpec), -- ^Type visible to this module
-    modConstCtorCount :: Int,                 -- ^Number of consts constructors
-    modNonConstCtorCount :: Int,              -- ^Num of arity >=1 constructors
+    -- modConstCtorCount :: Int,                 -- ^Number of consts constructors
+    -- modNonConstCtorCount :: Int,              -- ^Num of arity >=1 constructors
     modKnownResources :: Map Ident (Set ResourceSpec),
                                               -- ^Resources visible to this mod
     modKnownProcs:: Map Ident (Set ProcSpec),  -- ^Procs visible to this module
@@ -1172,7 +1182,7 @@ data ModuleImplementation = ModuleImplementation {
 emptyImplementation :: ModuleImplementation
 emptyImplementation =
     ModuleImplementation Set.empty Map.empty Map.empty Map.empty Map.empty
-                         Map.empty Map.empty 0 0 Map.empty Map.empty Nothing
+                         Map.empty Map.empty Map.empty Map.empty Nothing
 
 
 -- These functions hack around Haskell's terrible setter syntax
@@ -1218,12 +1228,12 @@ updateModLLVM fn modimp = do
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
 lookupTypeRepresentation AnyType = return $ Just "pointer"
 lookupTypeRepresentation InvalidType = return Nothing
--- XXX These 4 shouldn't be here; they shouldn't be necessary
-lookupTypeRepresentation (TypeSpec ["wybe"] "bool" _) = return $ Just "bool"
-lookupTypeRepresentation (TypeSpec ["wybe"] "int" _) = return $ Just "int"
-lookupTypeRepresentation (TypeSpec ["wybe"] "float" _) = return $ Just "float"
-lookupTypeRepresentation (TypeSpec ["wybe"] "double" _) = return $ Just "double"
-lookupTypeRepresentation (TypeSpec _ "phantom" _) = return $ Just "phantom"
+-- XXX These 5 shouldn't be here; they shouldn't be necessary
+-- lookupTypeRepresentation (TypeSpec ["wybe"] "bool" _) = return $ Just "bool"
+-- lookupTypeRepresentation (TypeSpec ["wybe"] "int" _) = return $ Just "int"
+-- lookupTypeRepresentation (TypeSpec ["wybe"] "float" _) = return $ Just "float"
+-- lookupTypeRepresentation (TypeSpec ["wybe"] "double" _) = return $ Just "double"
+-- lookupTypeRepresentation (TypeSpec _ "phantom" _) = return $ Just "phantom"
 lookupTypeRepresentation (TypeSpec modSpecs name _) = do
     -- logMsg Blocks $ "Looking for " ++ name ++ " in mod: " ++
     --      showModSpec modSpecs
@@ -1401,12 +1411,14 @@ addPragma prag = do
 -- |A type definition, including the number of type parameters and an
 --  optional source position.
 data TypeDef = TypeDef {
-    typeDefArity :: Int,                          -- number of type params
+    typeDefVis    :: Visibility,                  -- type visibility
+    typeDefParams :: [Ident],                     -- the type parameters
     typeDefRepresentation :: Maybe TypeRepresentation,
                                                   -- low level representation
     typeDefMembers :: [Placed ProcProto],         -- high level representation
     typeDefMemberVis :: Visibility,               -- are members public?
-    typeDefOptPos :: OptPos                       -- source position of decl
+    typeDefOptPos :: OptPos,                      -- source position of decl
+    typeDefItems  :: [Item]                       -- other items in decl
     } deriving (Eq, Generic)
 
 
@@ -2377,8 +2389,15 @@ showIdSet set = intercalate ", " $ Set.elems set
 
 -- |How to show a type definition.
 instance Show TypeDef where
-  show (TypeDef arity rep _ _ pos) =
-    show arity ++ maybe ""  ((" (" ++) . (++") ")) rep
+  show (TypeDef vis params rep members _ pos items) =
+    visibilityPrefix vis
+    ++ (if List.null params then "" else "(" ++ intercalate "," params ++ ")")
+    ++ maybe "" (" is " ++) rep
+    ++ " { "
+    ++ intercalate " | " (show <$> members)
+    ++ " "
+    ++ intercalate " ; " (show <$> items)
+    ++ " } "
     ++ showMaybeSourcePos pos
 
 
