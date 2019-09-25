@@ -2274,14 +2274,14 @@ instance Show Item where
     ++ " is" ++ repn
     ++ showMaybeSourcePos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
-    ++ "\nend\n"
+    ++ "\n}\n"
   show (TypeDecl vis name (TypeCtors ctorvis ctors) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
     ++ " " ++ visibilityPrefix ctorvis
     ++ showMaybeSourcePos pos ++ "\n    "
     ++ intercalate "\n  | " (List.map show ctors) ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
-    ++ "\nend\n"
+    ++ "\n}\n"
   show (ImportMods vis mods pos) =
       visibilityPrefix vis ++ "use " ++
       showModSpecs mods ++ showMaybeSourcePos pos ++ "\n  "
@@ -2293,9 +2293,9 @@ instance Show Item where
     visibilityPrefix vis ++ "module " ++ show name ++ " is"
     ++ showMaybeSourcePos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
-    ++ "\nend\n"
+    ++ "\n}\n"
   show (ResourceDecl vis name typ init pos) =
-    visibilityPrefix vis ++ "resource " ++ show name ++ ":" ++ show typ
+    visibilityPrefix vis ++ "resource " ++ name ++ ":" ++ show typ
     ++ maybeShow " = " init " "
     ++ showMaybeSourcePos pos
   show (FuncDecl vis detism inline proto typ exp pos) =
@@ -2311,7 +2311,9 @@ instance Show Item where
     ++ (if inline then "inline " else "")
     ++ "proc " ++ show proto
     ++ showMaybeSourcePos pos
+    ++ " {"
     ++ showBody 4 stmts
+    ++ "\n  }"
   show (StmtDecl stmt pos) =
     showStmt 4 stmt ++ showMaybeSourcePos pos
   show (PragmaDecl prag) =
@@ -2396,7 +2398,7 @@ instance Show TypeDef where
     ++ " { "
     ++ intercalate " | " (show <$> members)
     ++ " "
-    ++ intercalate " ; " (show <$> items)
+    ++ intercalate "\n  " (show <$> items)
     ++ " } "
     ++ showMaybeSourcePos pos
 
@@ -2564,14 +2566,14 @@ showStmt indent (Cond condstmt thn els) =
        ++ showBody (indent+4) thn ++ "\n"
        ++ leadIn ++ "else::"
        ++ showBody (indent+4) els ++ "\n"
-       ++ leadIn ++ "end"
+       ++ leadIn ++ "}"
 showStmt indent (Loop lstmts) =
     "do" ++  showBody (indent + 4) lstmts
-    ++ List.replicate indent ' ' ++ " end"
+    ++ List.replicate indent ' ' ++ "}"
 showStmt indent (UseResources resources stmts) =
     "use " ++ intercalate ", " (List.map show resources) ++ " in"
     ++ showBody (indent + 4) stmts
-    ++ List.replicate indent ' ' ++ "end"
+    ++ List.replicate indent ' ' ++ "}"
 showStmt _ (Nop) = "nop"
 showStmt _ (For itr gen) =
     "for " ++ show itr ++ " in " ++ show gen
