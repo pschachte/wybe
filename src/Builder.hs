@@ -441,6 +441,7 @@ compileModule source modspec params items = do
     stopOnError $ "handling imports for module " ++ showModSpec modspec
     mods <- exitModule -- may be empty list if module is mutually dependent
     logBuild $ "<=== finished compling module " ++ showModSpec modspec
+    logBuild $ "     module dependency SCC: " ++ showModSpecs mods
     compileModSCC mods
 
 
