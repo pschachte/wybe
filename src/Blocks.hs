@@ -165,7 +165,10 @@ mangleProc def i =
 -- | Extract the LPVM compiled primitive from the procedure definition.
 extractLPVMProto :: ProcDef -> PrimProto
 extractLPVMProto procdef =
-    let (ProcDefPrim proto _ _) = procImpln procdef in proto
+    case procImpln procdef of
+       (ProcDefPrim proto _ _) -> proto
+       uncompiled ->
+         shouldnt $ "Proc reached backend uncompiled: " ++ show uncompiled
 
 -- | Go into a (compiled) Module and pull out the PrimProto implementation
 -- of all ProcDefs in the module implementation.
@@ -303,15 +306,16 @@ doCodegenBody proto body =
        return ()
 
 
+-- XXX not using
 -- | Generate code for returning integer exit code at the end main
 -- function.
-mainReturnCodegen :: Codegen ()
-mainReturnCodegen = do
-    ptr <- instr (ptr_t int_t) (alloca int_t)
-    let retcons = cons (C.Int 32 0)
-    store ptr retcons
-    ret (Just retcons)
-    return ()
+-- mainReturnCodegen :: Codegen ()
+-- mainReturnCodegen = do
+--     ptr <- instr (ptr_t int_t) (alloca int_t)
+--     let retcons = cons (C.Int 32 0)
+--     store ptr retcons
+--     ret (Just retcons)
+--     return ()
 
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
@@ -425,24 +429,29 @@ codegenForkBody var (b1:b2:[]) proto =
        let params = primProtoParams proto
 
        -- if.then
-       setBlock ifthen
-       retop <- codegenBody proto b2
-       case blockReturn retop of
-           Nothing -> buildOutputOp params >>= ret
-           bret    -> ret bret
+       preservingSymtab $ do
+           setBlock ifthen
+           retop <- codegenBody proto b2
+           case blockReturn retop of
+             Nothing -> buildOutputOp params >>= ret
+             bret    -> ret bret
+
        -- if.else
-       setBlock ifelse
-       retop <- codegenBody proto b1
-       case blockReturn retop of
-           Nothing -> buildOutputOp params >>= ret
-           bret    -> ret bret
+       preservingSymtab $ do
+           setBlock ifelse
+           retop <- codegenBody proto b1
+           case blockReturn retop of
+             Nothing -> buildOutputOp params >>= ret
+             bret    -> ret bret
+
        return ()
 
        -- -- if.exit
        -- setBlock ifexit
        -- phi int_t [(trueval, ifthen), (falseval, ifelse)]
-codegenForkBody _ _ _ = shouldnt
-  $ "Unrecognized control flow. Too many/few blocks."
+codegenForkBody var _ _ =
+    nyi $ "Fork on non-Boolean variable " ++ show var
+
 
 -- | A filter transformation to ensure that a Just Void operand is
 -- treated as a Nothing instead of an existing value.
@@ -1056,21 +1065,13 @@ typeStrToType "int"     = address_t
 typeStrToType "bool"    = int_c 1
 typeStrToType "float"   = float_t
 typeStrToType "double"  = float_t
-typeStrToType "pointer" = address_t
+typeStrToType "address" = address_t
 typeStrToType "word"    = address_t
 typeStrToType "phantom" = int_t
-typeStrToType (c:cs)
-    | c == 'i' = int_c (fromIntegral bytes)
-    | c == 'f' = float_c (fromIntegral bytes)
-    | c == 'p' = if List.take 6 cs == "ointer"
-                 then address_t
-                 -- then let bs = read (List.drop 6 cs) :: Int
-                 --      in ptr_t $ int_c (fromIntegral bs)
-                 else void_t
-    | otherwise = void_t
-  where
-    bytes = read cs :: Int
-
+typeStrToType ('i':cs)  = int_c (read cs)
+typeStrToType ('f':cs)  = float_c (read cs)
+typeStrToType typename  = shouldnt $ "Unrecognised type string '" ++ typename
+                                     ++ "'"
 
 ------------------------------------------------------------------------------
 -- -- * Creating LLVM AST module from global definitions                    --

@@ -15,7 +15,7 @@ module Codegen (
   call, externf, ret, globalDefine, external, phi, br, cbr,
   getBlock, retNothing, fresh,
   -- * Symbol storage
-  alloca, store, local, assign, load, getVar, localVar,
+  alloca, store, local, assign, load, getVar, localVar, preservingSymtab,
   operandType, doAlloca, doLoad, bitcast, inttoptr, ptrtoint,
   trunc, zext, sext,
   -- * Types
@@ -381,6 +381,19 @@ getVar var = do
     Just x  -> return x
     -- Nothing -> return $ ConstantOperand $ C.Undef -- XXX type of variable var
     Nothing -> shouldnt $ "Local variable not in scope: " ++ show var
+
+
+-- | Evaluate nested code generating code, and reset the symtab to its original
+-- state afterwards. Other parts of the CodeGen state are allowed to change.
+-- This is needed when generating a branch, because symtabs in one branch won't
+-- apply an another branch.
+preservingSymtab :: Codegen a -> Codegen a
+preservingSymtab code = do
+    oldSymtab <- gets symtab
+    result <- code
+    modify $ \s -> s { symtab = oldSymtab }
+    return result
+
 
 
 -- | Look inside an operand and determine it's type.
