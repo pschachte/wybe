@@ -139,7 +139,7 @@ determinismName SemiDet = "test"
 type TypeRepresentation = String
 
 defaultTypeRepresentation :: TypeRepresentation
-defaultTypeRepresentation = "pointer"
+defaultTypeRepresentation = "address"
 
 data TypeImpln = TypeRepresentation TypeRepresentation
                | TypeCtors Visibility [Placed ProcProto]
@@ -503,9 +503,14 @@ getSpecModule context spec getter = do
 enterModule :: FilePath -> ModSpec -> Maybe ModSpec -> Maybe [Ident]
             -> Compiler ()
 enterModule source modspec rootMod params = do
+    -- First make sure there's not already such a module
+    oldMod <- getLoadingModule modspec
+    when (isJust oldMod)
+      $ shouldnt $ "enterModule " ++ showModSpec modspec ++ " already exists"
     count <- gets ((1+) . loadCount)
     modify (\comp -> comp { loadCount = count })
     logAST $ "Entering module " ++ showModSpec modspec
+             ++ " with count " ++ show count
     modify (\comp -> let newMod = emptyModule
                                   { modSourceFile = source
                                   , modRootModSpec = rootMod
@@ -533,7 +538,6 @@ reenterModule :: ModSpec -> Compiler ()
 reenterModule modspec = do
     logAST $ "reentering module " ++ showModSpec modspec
     mod <- getSpecModule "reenterModule" modspec id
-    logAST $ "found it"
     modify (\comp -> comp { underCompilation = mod : underCompilation comp })
 
 
@@ -904,7 +908,10 @@ getProcDef (ProcSpec modSpec procName procID) = do
            getLoadingModule modSpec
     let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $
                modImplementation mod
-    return $ (modProcs impl ! procName) !! procID
+    logAST $ "Looking up proc '" ++ procName ++ "' ID " ++ show procID
+    let proc = (modProcs impl ! procName) !! procID
+    logAST $ "  proc = " ++ showProcDef 9 proc
+    return proc
 
 
 getProcPrimProto :: ProcSpec -> Compiler PrimProto
@@ -1226,7 +1233,7 @@ updateModLLVM fn modimp = do
 -- | Given a type spec, find its internal representation (a string),
 --   if possible.
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
-lookupTypeRepresentation AnyType = return $ Just "pointer"
+lookupTypeRepresentation AnyType = return $ Just "address"
 lookupTypeRepresentation InvalidType = return Nothing
 -- XXX These 5 shouldn't be here; they shouldn't be necessary
 -- lookupTypeRepresentation (TypeSpec ["wybe"] "bool" _) = return $ Just "bool"
@@ -2108,7 +2115,7 @@ inArgVar2 arg@(ArgVar var ty flow _ final)
     | flow == FlowIn && not (argIsPhantom arg) = do
         rep <- lookupTypeRepresentation ty
         case rep of
-            Just "pointer" ->
+            Just "address" ->
                 return (Just var)
             _ ->
                 return Nothing
