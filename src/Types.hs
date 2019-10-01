@@ -403,7 +403,11 @@ localCalls _ _ _ _ _ _ _ = []
 
 
 expType :: Typing -> Placed Exp -> Compiler TypeSpec
-expType typing = placedApply (expType' typing)
+expType typing expr = do
+    logTypes $ "Finding type of expr " ++ show expr
+    ty <- placedApply (expType' typing) expr
+    logTypes $ "  Type = " ++ show ty
+    return ty
 
 
 expType' :: Typing -> Exp -> OptPos -> Compiler TypeSpec
