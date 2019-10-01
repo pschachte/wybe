@@ -51,6 +51,7 @@ normaliseItem (TypeDecl vis (TypeProto name params) rep items pos)
     -- let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
     let (rep', ctorVis, ctors) = normaliseTypeImpln rep
     _ <- addType name (TypeDef vis params rep' ctors ctorVis pos items)
+    normaliseSubmodule name Nothing vis pos items
     return ()
 normaliseItem (ModuleDecl vis name items pos) = do
     normaliseSubmodule name Nothing vis pos items
@@ -103,23 +104,28 @@ normaliseSubmodule name typeParams vis pos items = do
     logNormalise "}"
     addImport subModSpec (importSpec Nothing vis)
     -- Add the submodule to the submodule list of the implementation
-    updateImplementation $
-        updateModSubmods (\sm-> Map.insert name subModSpec sm)
-    enterModule dir subModSpec (Just parentModSpec) typeParams
+    updateImplementation $ updateModSubmods (Map.insert name subModSpec)
+    alreadyExists <- isJust <$> getLoadingModule subModSpec
+    if alreadyExists
+      then reenterModule subModSpec
+      else enterModule dir subModSpec (Just parentModSpec) typeParams
     -- submodule always imports parent module
     addImport parentModSpec (importSpec Nothing Private)
-    case typeParams of
-      Nothing -> return ()
-      Just _ ->
-        updateImplementation
+    when (isJust typeParams)
+      $ updateImplementation
         (\imp ->
           let set = Set.singleton $ TypeSpec parentModSpec name []
           in imp { modKnownTypes = Map.insert name set $ modKnownTypes imp })
     normalise items
-    modSpecs <- exitModule
-    unless (List.null modSpecs)
-      $ shouldnt $ "finish normalising submodule left modules to compile: "
-                   ++ showModSpecs modSpecs
+    if alreadyExists
+      then do
+        reexitModule
+        return ()
+      else do
+        modSpecs <- exitModule
+        unless (List.null modSpecs)
+          $ shouldnt $ "finish normalising submodule left modules to compile: "
+                       ++ showModSpecs modSpecs
     -- logNormalise $ "Deferring compilation of submodules "
     --                ++ showModSpecs modSpecs
     -- mods <- List.map (trustFromJust "lookup submodule after normalising")
@@ -296,7 +302,7 @@ completeType (name,modspec)
                      ++ " = " ++ rep
       addType name (typedef {typeDefRepresentation = Just rep })
       normaliseSubmodule name (Just params) vis pos
-        $ constItems ++ concat nonconstItemsList ++ items ++ extraItems
+        $ constItems ++ concat nonconstItemsList ++ extraItems
       reexitModule
       return ()
 
@@ -550,6 +556,8 @@ layoutRecord paramsReps tag tagLimit =
           ordFields = sortOn snd fields
           -- add secondary tag if necessary
           ordFields' = if tag > tagLimit
+                            -- XXX wybe.short doesn't exist; this should be
+                            -- an unnamed unsigned 16 bit int type
                        then (("$tag",TypeSpec ["wybe"] "short" [],"i16",2),2)
                             :ordFields
                        else ordFields
@@ -617,8 +625,6 @@ constructorItems ctorName typeSpec fields size tag pos =
 deconstructorItems :: Ident -> TypeSpec -> Int -> Int -> Int -> OptPos
                    -> [(Ident,TypeSpec,TypeRepresentation,Int)] -> [Item]
 deconstructorItems ctorName typeSpec constCount nonConstCount tag pos fields =
-    -- XXX this needs to take the tag into account
-    -- XXX this needs to be able to fail if the constructor doesn't match
     let flowType = Implicit pos
         detism = if constCount + nonConstCount > 1 then SemiDet else Det
     in [ProcDecl Public detism True
@@ -683,8 +689,7 @@ getterSetterItems vis rectype pos constCount nonConstCount ptrCount size tag
         flags = if otherPtrCount == 0 then ["noalias"] else []
     in [ProcDecl vis detism True
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
-                          Param "$" fieldtype ParamOut Ordinary]
-         Set.empty)
+                          Param "$" fieldtype ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
         ([tagCheck constCount nonConstCount tag "$rec"]
          ++
@@ -695,9 +700,8 @@ getterSetterItems vis rectype pos constCount nonConstCount ptrCount size tag
            Unplaced $ varSet "$"]])
         pos,
         ProcDecl vis detism True
-        (ProcProto field
-         [Param "$rec" rectype ParamInOut Ordinary,
-          Param "$field" fieldtype ParamIn Ordinary] Set.empty)
+        (ProcProto field [Param "$rec" rectype ParamInOut Ordinary,
+                          Param "$field" fieldtype ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
         ([tagCheck constCount nonConstCount tag "$rec"]
          ++
@@ -784,7 +788,7 @@ equalityBody consts nonconsts =
         )
 
 
--- |Return code to check of two const values values are equal, given that we
+-- |Return code to check if two const values values are equal, given that we
 --  know that the $left value is a const.
 equalityConsts :: [Placed ProcProto] -> Placed Stmt
 equalityConsts [] = failTest
