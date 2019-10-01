@@ -55,7 +55,7 @@ pub type float is f64 {
 }
 
 
-pub type string is pointer8 {
+pub type string is address {
     # this whole implementation is completely wrong, but will do for now
     #wrong: pub def ++(x:string, y:string):string = foreign c strcat(x,y)
     pub def =(x:string, y:string):bool  = foreign c strcmp(x,y) = 0
