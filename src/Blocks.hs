@@ -302,6 +302,7 @@ doCodegenBody proto body =
        -- Start with creation of blocks and adding instructions to it
        setBlock entry
        mapM_ assignParam $ List.filter (not . isOutputParam) params
+       mapM_ preassignOutput $ List.filter isOutputParam params
        codegenBody proto body   -- Codegen on body prims
        return ()
 
@@ -327,6 +328,16 @@ assignParam p =
          $ do let nm = show (primParamName p)
               llty <- lift $ llvmType ty
               assign nm (localVar llty nm)
+
+
+-- | Convert a PrimParam to an Operand value and reference this value by the
+-- param's name on the symbol table. Don't assign if phantom.
+preassignOutput :: PrimParam -> Codegen ()
+preassignOutput p =
+    do let ty = primParamType p
+       let nm = show (primParamName p)
+       llty <- lift $ llvmType ty
+       assign nm $ cons $ C.Undef llty
 
 
 -- | Retrive or build the output operand from the given parameters.
