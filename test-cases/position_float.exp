@@ -1,0 +1,214 @@
+======================================================================
+AFTER EVERYTHING:
+ Module position_float
+  public submods  : 
+  public types    : position: (position_float.position,Just "address")
+  public resources: 
+  public procs    : position_float.position.=<0>
+                    position_float.position.position<0>
+                    position_float.position.position<1>
+                    position_float.position.x<0>
+                    position_float.position.x<1>
+                    position_float.position.y<0>
+                    position_float.position.y<1>
+  imports         : public use position_float.position
+                    use wybe
+  types           : position/public  is address { position(x:float, y:float) @position_float:1:25  }  @position_float:1:5
+  resources       : 
+  submodules      : position_float.position
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'position_float'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+--------------------------------------------------
+ Module position_float.position
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : position_float.position.=<0>
+                    position_float.position.position<0>
+                    position_float.position.position<1>
+                    position_float.position.x<0>
+                    position_float.position.x<1>
+                    position_float.position.y<0>
+                    position_float.position.y<1>
+  imports         : use position_float
+                    use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+= > public inline test (3 calls)
+0: =($left#0:position_float.position, $right#0:position_float.position, ?$$#0:wybe.bool): AliasPairs: []
+    foreign lpvm access($left#0:position_float.position, 0:wybe.int, ?$left$x#0:wybe.float)
+    foreign lpvm access(~$left#0:position_float.position, 8:wybe.int, ?$left$y#0:wybe.float)
+    foreign lpvm access($right#0:position_float.position, 0:wybe.int, ?$right$x#0:wybe.float)
+    foreign lpvm access(~$right#0:position_float.position, 8:wybe.int, ?$right$y#0:wybe.float)
+    foreign llvm fcmp eq(~$left$x#0:wybe.float, ~$right$x#0:wybe.float, ?tmp$2#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$2#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign llvm fcmp eq(~$left$y#0:wybe.float, ~$right$y#0:wybe.float, ?$$#0:wybe.bool) @wybe:nn:nn
+
+
+
+position > public inline (0 calls)
+0: position(x#0:wybe.float, y#0:wybe.float, ?$#0:position_float.position): AliasPairs: []
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:position_float.position)
+    foreign lpvm mutate(~%$rec#0:position_float.position, ?%$rec#1:position_float.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:wybe.float)
+    foreign lpvm mutate(~%$rec#1:position_float.position, ?%$#0:position_float.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y#0:wybe.float)
+position > public inline (4 calls)
+1: position(?x#0:wybe.float, ?y#0:wybe.float, $#0:position_float.position): AliasPairs: []
+    foreign lpvm access($#0:position_float.position, 0:wybe.int, ?x#0:wybe.float)
+    foreign lpvm access(~$#0:position_float.position, 8:wybe.int, ?y#0:wybe.float)
+
+
+x > public inline (0 calls)
+0: x($rec#0:position_float.position, ?$#0:wybe.float): AliasPairs: []
+    foreign lpvm access(~$rec#0:position_float.position, 0:wybe.int, ?$#0:wybe.float)
+x > public inline (0 calls)
+1: x($rec#0:position_float.position, ?$rec#1:position_float.position, $field#0:wybe.float): AliasPairs: []
+    foreign lpvm mutate noalias(~%$rec#0:position_float.position, ?%$rec#1:position_float.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.float)
+
+
+y > public inline (0 calls)
+0: y($rec#0:position_float.position, ?$#0:wybe.float): AliasPairs: []
+    foreign lpvm access(~$rec#0:position_float.position, 8:wybe.int, ?$#0:wybe.float)
+y > public inline (0 calls)
+1: y($rec#0:position_float.position, ?$rec#1:position_float.position, $field#0:wybe.float): AliasPairs: []
+    foreign lpvm mutate noalias(~%$rec#0:position_float.position, ?%$rec#1:position_float.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.float)
+
+  LLVM code       :
+
+; ModuleID = 'position_float.position'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external ccc  i1 @"position_float.position.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %1 = inttoptr i64 %"$left#0" to double* 
+  %2 = getelementptr  double, double* %1, i64 0 
+  %3 = load  double, double* %2 
+  %4 = add   i64 %"$left#0", 8 
+  %5 = inttoptr i64 %4 to double* 
+  %6 = getelementptr  double, double* %5, i64 0 
+  %7 = load  double, double* %6 
+  %8 = inttoptr i64 %"$right#0" to double* 
+  %9 = getelementptr  double, double* %8, i64 0 
+  %10 = load  double, double* %9 
+  %11 = add   i64 %"$right#0", 8 
+  %12 = inttoptr i64 %11 to double* 
+  %13 = getelementptr  double, double* %12, i64 0 
+  %14 = load  double, double* %13 
+  %"tmp$2#0" = fcmp oeq double %3, %10 
+  br i1 %"tmp$2#0", label %if.then, label %if.else 
+if.then:
+  %"$$#0" = fcmp oeq double %7, %14 
+  ret i1 %"$$#0" 
+if.else:
+  ret i1 0 
+}
+
+
+define external ccc  i64 @"position_float.position.position<0>"(double  %"x#0", double  %"y#0")    {
+entry:
+  %15 = trunc i64 16 to i32  
+  %16 = tail call ccc  i8*  @wybe_malloc(i32  %15)  
+  %17 = ptrtoint i8* %16 to i64 
+  %18 = inttoptr i64 %17 to double* 
+  %19 = getelementptr  double, double* %18, i64 0 
+  store  double %"x#0", double* %19 
+  %20 = add   i64 %17, 8 
+  %21 = inttoptr i64 %20 to double* 
+  %22 = getelementptr  double, double* %21, i64 0 
+  store  double %"y#0", double* %22 
+  ret i64 %17 
+}
+
+
+define external ccc  {double, double} @"position_float.position.position<1>"(i64  %"$#0")    {
+entry:
+  %23 = inttoptr i64 %"$#0" to double* 
+  %24 = getelementptr  double, double* %23, i64 0 
+  %25 = load  double, double* %24 
+  %26 = add   i64 %"$#0", 8 
+  %27 = inttoptr i64 %26 to double* 
+  %28 = getelementptr  double, double* %27, i64 0 
+  %29 = load  double, double* %28 
+  %30 = insertvalue {double, double} undef, double %25, 0 
+  %31 = insertvalue {double, double} %30, double %29, 1 
+  ret {double, double} %31 
+}
+
+
+define external ccc  double @"position_float.position.x<0>"(i64  %"$rec#0")    {
+entry:
+  %32 = inttoptr i64 %"$rec#0" to double* 
+  %33 = getelementptr  double, double* %32, i64 0 
+  %34 = load  double, double* %33 
+  ret double %34 
+}
+
+
+define external ccc  i64 @"position_float.position.x<1>"(i64  %"$rec#0", double  %"$field#0")    {
+entry:
+  %35 = trunc i64 16 to i32  
+  %36 = tail call ccc  i8*  @wybe_malloc(i32  %35)  
+  %37 = ptrtoint i8* %36 to i64 
+  %38 = inttoptr i64 %37 to i8* 
+  %39 = inttoptr i64 %"$rec#0" to i8* 
+  %40 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %38, i8*  %39, i32  %40, i32  8, i1  0)  
+  %41 = inttoptr i64 %37 to double* 
+  %42 = getelementptr  double, double* %41, i64 0 
+  store  double %"$field#0", double* %42 
+  ret i64 %37 
+}
+
+
+define external ccc  double @"position_float.position.y<0>"(i64  %"$rec#0")    {
+entry:
+  %43 = add   i64 %"$rec#0", 8 
+  %44 = inttoptr i64 %43 to double* 
+  %45 = getelementptr  double, double* %44, i64 0 
+  %46 = load  double, double* %45 
+  ret double %46 
+}
+
+
+define external ccc  i64 @"position_float.position.y<1>"(i64  %"$rec#0", double  %"$field#0")    {
+entry:
+  %47 = trunc i64 16 to i32  
+  %48 = tail call ccc  i8*  @wybe_malloc(i32  %47)  
+  %49 = ptrtoint i8* %48 to i64 
+  %50 = inttoptr i64 %49 to i8* 
+  %51 = inttoptr i64 %"$rec#0" to i8* 
+  %52 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %50, i8*  %51, i32  %52, i32  8, i1  0)  
+  %53 = add   i64 %49, 8 
+  %54 = inttoptr i64 %53 to double* 
+  %55 = getelementptr  double, double* %54, i64 0 
+  store  double %"$field#0", double* %55 
+  ret i64 %49 
+}

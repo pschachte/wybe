@@ -1088,7 +1088,7 @@ refersTo modspec name implMapFn specModFn = do
 -- |Returns a list of the potential targets of a proc call.
 callTargets :: ModSpec -> ProcName -> Compiler [ProcSpec]
 callTargets modspec name = do
-    pspecs <- fmap Set.toList $ refersTo modspec name modKnownProcs procSpecMod
+    pspecs <- Set.toList <$> refersTo modspec name modKnownProcs procSpecMod
     logAST $ "   name '" ++ name ++ "' for module spec '" ++
       showModSpec modspec ++ "' matches: " ++
       intercalate ", " (List.map show pspecs)
