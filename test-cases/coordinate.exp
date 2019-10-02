@@ -2,7 +2,7 @@
 AFTER EVERYTHING:
  Module coordinate
   public submods  : 
-  public types    : Coordinate: (coordinate.Coordinate,"pointer")
+  public types    : Coordinate: (coordinate.Coordinate,Just "address")
   public resources: 
   public procs    : coordinate.<0>
                     coordinate.fcopy<0>
@@ -17,26 +17,25 @@ AFTER EVERYTHING:
                     coordinate.Coordinate.z<1>
   imports         : public use coordinate.Coordinate
                     use wybe
-  types           : Coordinate/0 (pointer)  @coordinate:1:5
+  types           : Coordinate/public  is address { Coordinate(x:int, y:int, z:int) @coordinate:1:27  }  @coordinate:1:5
   resources       : 
   submodules      : coordinate.Coordinate
   procs           : 
 
 *main* > public (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#4:phantom): AliasPairs: []
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#4:wybe.phantom): AliasPairs: []
     foreign lpvm alloc(24:wybe.int, ?tmp$7#0:coordinate.Coordinate)
     foreign lpvm mutate(~tmp$7#0:coordinate.Coordinate, ?tmp$8#0:coordinate.Coordinate, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int)
     foreign lpvm mutate(~tmp$8#0:coordinate.Coordinate, ?tmp$9#0:coordinate.Coordinate, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int)
-    foreign lpvm mutate(~tmp$9#0:coordinate.Coordinate, ?tmp$10#0:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int)
-    foreign lpvm mutate noalias(tmp$10#0:coordinate.Coordinate, ?%crd1#1:coordinate.Coordinate, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, 8000:wybe.int)
-    foreign c print_string("expect crd1.z=8000: ":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
+    foreign lpvm mutate(~tmp$9#0:coordinate.Coordinate, ?tmp$22#0:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int)
+    foreign lpvm mutate noalias(~tmp$22#0:coordinate.Coordinate, ?%crd1#1:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 8000:wybe.int)
+    foreign c print_string("expect crd1.z=8000: ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
     foreign lpvm access(~crd1#1:coordinate.Coordinate, 16:wybe.int, ?tmp$2#0:wybe.int)
-    foreign c print_int(~tmp$2#0:wybe.int, ~#io#1:phantom, ?tmp$19#0:phantom) @wybe:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$19#0:phantom, ?#io#2:phantom) @wybe:nn:nn
-    foreign c print_string("expect crd2.z=1000: ":wybe.string, ~#io#2:phantom, ?#io#3:phantom) @wybe:nn:nn
-    foreign lpvm access(~tmp$10#0:coordinate.Coordinate, 16:wybe.int, ?tmp$3#0:wybe.int)
-    foreign c print_int(~tmp$3#0:wybe.int, ~#io#3:phantom, ?tmp$25#0:phantom) @wybe:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$25#0:phantom, ?#io#4:phantom) @wybe:nn:nn
+    foreign c print_int(~tmp$2#0:wybe.int, ~#io#1:wybe.phantom, ?tmp$19#0:wybe.phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$19#0:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+    foreign c print_string("expect crd2.z=1000: ":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
+    foreign c print_int(1000:wybe.int, ~#io#3:wybe.phantom, ?tmp$25#0:wybe.phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$25#0:wybe.phantom, ?#io#4:wybe.phantom) @wybe:nn:nn
 
 
 fcopy > public inline (1 calls)
@@ -60,10 +59,10 @@ declare external ccc  void @print_int(i64)
 declare external ccc  void @print_string(i64)    
 
 
-@coordinate.27 =    constant [21 x i8] c"expect crd2.z=1000: \00"
+@coordinate.21 =    constant [21 x i8] c"expect crd2.z=1000: \00"
 
 
-@coordinate.21 =    constant [21 x i8] c"expect crd1.z=8000: \00"
+@coordinate.15 =    constant [21 x i8] c"expect crd1.z=8000: \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -88,32 +87,21 @@ entry:
   %10 = inttoptr i64 %9 to i64* 
   %11 = getelementptr  i64, i64* %10, i64 0 
   store  i64 1000, i64* %11 
-  %12 = trunc i64 24 to i32  
-  %13 = tail call ccc  i8*  @wybe_malloc(i32  %12)  
-  %14 = ptrtoint i8* %13 to i64 
-  %15 = inttoptr i64 %14 to i8* 
-  %16 = inttoptr i64 %3 to i8* 
-  %17 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %15, i8*  %16, i32  %17, i32  8, i1  0)  
-  %18 = add   i64 %14, 16 
-  %19 = inttoptr i64 %18 to i64* 
-  %20 = getelementptr  i64, i64* %19, i64 0 
-  store  i64 8000, i64* %20 
+  %12 = add   i64 %3, 16 
+  %13 = inttoptr i64 %12 to i64* 
+  %14 = getelementptr  i64, i64* %13, i64 0 
+  store  i64 8000, i64* %14 
+  %16 = ptrtoint i8* getelementptr inbounds ([21 x i8], [21 x i8]* @coordinate.15, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %16)  
+  %17 = add   i64 %3, 16 
+  %18 = inttoptr i64 %17 to i64* 
+  %19 = getelementptr  i64, i64* %18, i64 0 
+  %20 = load  i64, i64* %19 
+  tail call ccc  void  @print_int(i64  %20)  
+  tail call ccc  void  @putchar(i8  10)  
   %22 = ptrtoint i8* getelementptr inbounds ([21 x i8], [21 x i8]* @coordinate.21, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %22)  
-  %23 = add   i64 %14, 16 
-  %24 = inttoptr i64 %23 to i64* 
-  %25 = getelementptr  i64, i64* %24, i64 0 
-  %26 = load  i64, i64* %25 
-  tail call ccc  void  @print_int(i64  %26)  
-  tail call ccc  void  @putchar(i8  10)  
-  %28 = ptrtoint i8* getelementptr inbounds ([21 x i8], [21 x i8]* @coordinate.27, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %28)  
-  %29 = add   i64 %14, 16 
-  %30 = inttoptr i64 %29 to i64* 
-  %31 = getelementptr  i64, i64* %30, i64 0 
-  %32 = load  i64, i64* %31 
-  tail call ccc  void  @print_int(i64  %32)  
+  tail call ccc  void  @print_int(i64  1000)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -124,7 +112,7 @@ entry:
   ret i64 %"crd1#0" 
 }
 --------------------------------------------------
- Module coordinate.Coordinate([])
+ Module coordinate.Coordinate
   public submods  : 
   public types    : 
   public resources: 

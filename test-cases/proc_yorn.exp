@@ -12,17 +12,17 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public inline (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#2:phantom): AliasPairs: []
-    proc_yorn.gen$1<0>(~#io#0:phantom, "Well, yes or no?":wybe.string, ?tmp$2#0:wybe.bool, ?#io#1:phantom) @proc_yorn:2:8
-    foreign c print_string("false":wybe.string, ~#io#1:phantom, ?tmp$4#0:phantom) @wybe:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$4#0:phantom, ?#io#2:phantom) @wybe:nn:nn
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#2:wybe.phantom): AliasPairs: []
+    proc_yorn.gen$1<0>(~#io#0:wybe.phantom, "Well, yes or no?":wybe.string, ?tmp$2#0:wybe.bool, ?#io#1:wybe.phantom) @proc_yorn:2:8
+    foreign c print_string("false":wybe.string, ~#io#1:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
 
 
 gen$1 > (2 calls)
-0: gen$1(io#0:phantom, prompt#0:wybe.string, ?result#1:wybe.bool, ?io#5:phantom): AliasPairs: []
-    foreign c print_string(prompt#0:wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
-    foreign c print_string(" (y/n) ":wybe.string, ~#io#1:phantom, ?#io#2:phantom) @wybe:nn:nn
-    foreign c read_char(?response#0:wybe.char, ~#io#2:phantom, ?#io#3:phantom) @wybe:nn:nn
+0: gen$1(io#0:wybe.phantom, prompt#0:wybe.string, ?result#1:wybe.bool, ?io#5:wybe.phantom): AliasPairs: []
+    foreign c print_string(prompt#0:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
+    foreign c print_string(" (y/n) ":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+    foreign c read_char(?response#0:wybe.char, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
     foreign llvm icmp ne(response#0:wybe.char, 'y':wybe.char, ?tmp$9#0:wybe.bool) @wybe:nn:nn
     foreign llvm icmp ne(response#0:wybe.char, 'Y':wybe.char, ?tmp$10#0:wybe.bool) @wybe:nn:nn
     foreign llvm and(~tmp$10#0:wybe.bool, ~tmp$9#0:wybe.bool, ?tmp$11#0:wybe.bool) @wybe:nn:nn
@@ -30,18 +30,18 @@ gen$1 > (2 calls)
     proc_yorn.is_yes_or_no<0>(~response#0:wybe.char, ?tmp$2#0:wybe.bool) @proc_yorn:6:18
     case ~tmp$2#0:wybe.bool of
     0:
-        foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~#io#3:phantom, ?tmp$14#0:phantom) @wybe:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp$14#0:phantom, ?#io#4:phantom) @wybe:nn:nn
-        proc_yorn.gen$1<0>(~io#4:phantom, ~prompt#0:wybe.string, ?result#1:wybe.bool, ?io#5:phantom) @proc_yorn:2:8
+        foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~#io#3:wybe.phantom, ?tmp$14#0:wybe.phantom) @wybe:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?#io#4:wybe.phantom) @wybe:nn:nn
+        proc_yorn.gen$1<0>(~io#4:wybe.phantom, ~prompt#0:wybe.string, ?result#1:wybe.bool, ?io#5:wybe.phantom) @proc_yorn:2:8
 
     1:
         foreign llvm move(~tmp$0#0:wybe.bool, ?result#1:wybe.bool)
-        foreign llvm move(~io#3:phantom, ?io#5:phantom)
+        foreign llvm move(~io#3:wybe.phantom, ?io#5:wybe.phantom)
 
 
 
 gen$2 > inline (1 calls)
-0: gen$2(io#0:phantom, [prompt#0:wybe.string], [response#0:wybe.char], result#0:wybe.bool, [tmp$0#0:wybe.bool], [?result#0:wybe.bool], [?io#0:phantom]): AliasPairs: []
+0: gen$2(io#0:wybe.phantom, [prompt#0:wybe.string], [response#0:wybe.char], result#0:wybe.bool, [tmp$0#0:wybe.bool], [?result#0:wybe.bool], [?io#0:wybe.phantom]): AliasPairs: []
 
 
 is_yes > inline (4 calls)
@@ -65,8 +65,8 @@ is_yes_or_no > (3 calls)
 
 
 yorn > public inline (1 calls)
-0: yorn(prompt#0:wybe.string, ?result#0:wybe.bool, io#0:phantom, ?io#1:phantom): AliasPairs: []
-    proc_yorn.gen$1<0>(~io#0:phantom, ~prompt#0:wybe.string, ?result#0:wybe.bool, ?io#1:phantom) @proc_yorn:2:8
+0: yorn(prompt#0:wybe.string, ?result#0:wybe.bool, io#0:wybe.phantom, ?io#1:wybe.phantom): AliasPairs: []
+    proc_yorn.gen$1<0>(~io#0:wybe.phantom, ~prompt#0:wybe.string, ?result#0:wybe.bool, ?io#1:wybe.phantom) @proc_yorn:2:8
 
   LLVM code       :
 

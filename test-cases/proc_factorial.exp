@@ -12,10 +12,10 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public inline (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom): AliasPairs: []
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom): AliasPairs: []
     proc_factorial.gen$1<0>(5:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @proc_factorial:3:5
-    foreign c print_int(~tmp$0#0:wybe.int, ~#io#0:phantom, ?tmp$4#0:phantom) @wybe:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$4#0:phantom, ?#io#1:phantom) @wybe:nn:nn
+    foreign c print_int(~tmp$0#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
 
 
 factorial > public inline (1 calls)

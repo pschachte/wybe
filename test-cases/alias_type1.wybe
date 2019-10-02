@@ -5,10 +5,10 @@
 #use position
 pub type position { pub position(x:int, y:int) }
 
-pub type posrec { pub posrec(p:position, a:int) }
+pub type posrec { pub posrec(a:int, p:position) }
 
 ?pos = position(100,100)
-?rec = posrec(pos, 1)
+?rec = posrec(1, pos)
 
 x(!pos, 200) # Non-destructive
 !println(pos.x)

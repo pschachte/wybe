@@ -15,8 +15,8 @@ pub def gcd(a:int, b:int, ?r:int) use !io {
       ?t = y
       !mod(x, t, ?y)
       ?x = t
-    ?r = x
   }
+  ?r = x
 }
 
 !gcd(18, 24, ?r)

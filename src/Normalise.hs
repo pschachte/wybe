@@ -293,7 +293,8 @@ completeType (name,modspec)
       infos <- zipWithM nonConstCtorInfo nonConstCtors [0..]
       (reps,nonconstItemsList) <-
            unzip <$> mapM
-           (nonConstCtorItems ctorVis typespec numConsts tagBits tagLimit)
+           (nonConstCtorItems ctorVis typespec numConsts numNonConsts
+            tagBits tagLimit)
            infos
       let extraItems = implicitItems typespec constCtors nonConstCtors items
       let rep = typeRepresentation reps numConsts
@@ -359,31 +360,6 @@ typeRepresentation :: [TypeRepresentation] -> Int -> TypeRepresentation
 typeRepresentation [] numConsts =
     "i" ++ (show $ ceiling $ logBase 2 $ fromIntegral numConsts)
 typeRepresentation _ _ = "address"
-
-
-    -- modspec <- getModuleSpec
-    -- let typespec = TypeSpec modspec name
-    --                $ List.map (\n->TypeSpec [] n []) params
-    -- let constCount = length consts
-    -- let nonConstCount = length nonconsts
-    -- -- XXX Handle these cases by boxing the const constructors and by
-    -- --     boxing the extra non-const constructors
-    -- when (constCount >= fromIntegral smallestAllocatedAddress)
-    --     $ nyi $ "Type '" ++ name ++ "' has too many constant constructors"
-    -- when (nonConstCount > tagMask)
-    --     $ nyi $ "Type '" ++ name ++ "' has too many non-constant constructors"
-    -- updateImplementation (\imp -> imp { modConstCtorCount = constCount,
-    --                                     modNonConstCtorCount = nonConstCount })
-    -- let constItems =
-    --       concatMap (constCtorItems ctorVis typespec) $ zip consts [0..]
-    -- nonconstItems <- fmap concat $
-    --        mapM (nonConstCtorItems ctorVis ty pespec constCount nonConstCount)
-    --        $ zip nonconsts [0..]
-    -- let extraItems = implicitItems typespec consts nonconsts items
-    -- normaliseSubmodule name (Just params) vis pos
-    --   $ constItems ++ nonconstItems ++ items ++ extraItems
-
-
 
 
 ----------------------------------------------------------------
@@ -478,13 +454,13 @@ constCtorItems  vis typeSpec (placedProto,num) =
 -- |All items needed to implement a non-const contructor for the specified type.
 -- XXX need to handle the case of too many constructors for the number of tag
 -- bits available
-nonConstCtorItems :: Visibility -> TypeSpec -> Int -> Int -> Int -> CtorInfo
-                  -> Compiler (TypeRepresentation,[Item])
-nonConstCtorItems vis typeSpec constCount tagBits tagLimit
+nonConstCtorItems :: Visibility -> TypeSpec -> Int -> Int -> Int -> Int
+                  -> CtorInfo -> Compiler (TypeRepresentation,[Item])
+nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
                   info@(CtorInfo ctorName paramsReps pos tag bits) = do
     -- If we're unboxed and there are const ctors, then we need an extra
     -- bit to make sure the unboxed value is > than any const value
-    let isNonConstBits = if constCount == 0 then 0 else 1
+    let isNonConstBits = if numConsts == 0 then 0 else 1
     let dectorProto = (ProcProto ctorName
                        (List.map (\((Param n t _ ft),_,_) ->
                                     (Param n t ParamOut ft)) paramsReps
@@ -505,7 +481,7 @@ nonConstCtorItems vis typeSpec constCount tagBits tagLimit
               (tagBits,[])
               paramsReps
       -- XXX should include maximum sizes of the non-const constructors
-      let rep = "i" ++ (show $ ceiling $ logBase 2 $ fromIntegral constCount)
+      let rep = "i" ++ (show $ ceiling $ logBase 2 $ fromIntegral numConsts)
       return (rep, [])
         -- $ unboxedConstructorItems ctorProto typeSpec tag fields pos
         -- ++ unboxedDeconstructorItems dectorName typeSpec tag fields pos
@@ -515,14 +491,15 @@ nonConstCtorItems vis typeSpec constCount tagBits tagLimit
       logNormalise $ "Laid out structure size " ++ show size
           ++ ": " ++ show fields
       let ptrCount = length $ List.filter ((=="address") . snd3) paramsReps
-      logNormalise $ "Structure contains " ++ show ptrCount ++ " pointers"
-      let nonConstCount = length fields
+      logNormalise $ "Structure contains " ++ show ptrCount ++ " pointers, "
+                     ++ show numConsts ++ " const constructors, "
+                     ++ show numNonConsts ++ " non-const constructors"
       return ("address",
               constructorItems ctorName typeSpec fields size tag pos
-              ++ deconstructorItems ctorName typeSpec constCount nonConstCount
+              ++ deconstructorItems ctorName typeSpec numConsts numNonConsts
                  tag pos fields
               ++ concatMap
-                 (getterSetterItems vis typeSpec pos constCount nonConstCount
+                 (getterSetterItems vis typeSpec pos numConsts numNonConsts
                   ptrCount size tag)
                  fields
              )
@@ -601,9 +578,8 @@ constructorItems ctorName typeSpec fields size tag pos =
            Unplaced $ Typed (varSet "$rec") typeSpec True]]
          ++
        -- Code to fill all the fields
-         (reverse
-          $ List.map
-           (\(var,ty,_,offset) ->
+         (List.map
+          (\(var,ty,_,offset) ->
                (Unplaced $ ForeignCall "lpvm" "mutate" []
                  [Unplaced $ Typed (varGetSet "$rec" flowType) typeSpec True,
                   Unplaced $ iVal offset,
@@ -611,7 +587,7 @@ constructorItems ctorName typeSpec fields size tag pos =
                   Unplaced $ iVal size,
                   Unplaced $ iVal 0,
                   Unplaced $ Typed (Var var ParamIn flowType) ty False]))
-           fields)
+          fields)
          ++
        -- Finally, code to tag the reference and cast to the right type
          [Unplaced $ ForeignCall "llvm" "or" []
@@ -624,25 +600,24 @@ constructorItems ctorName typeSpec fields size tag pos =
 -- |Generate deconstructor code for a non-const constructor
 deconstructorItems :: Ident -> TypeSpec -> Int -> Int -> Int -> OptPos
                    -> [(Ident,TypeSpec,TypeRepresentation,Int)] -> [Item]
-deconstructorItems ctorName typeSpec constCount nonConstCount tag pos fields =
+deconstructorItems ctorName typeSpec numConsts numNonConsts tag pos fields =
     let flowType = Implicit pos
-        detism = if constCount + nonConstCount > 1 then SemiDet else Det
+        detism = if numConsts + numNonConsts > 1 then SemiDet else Det
     in [ProcDecl Public detism True
         (ProcProto ctorName
          (List.map (\(n,t,_,_) -> (Param n t ParamOut Ordinary)) fields
           ++ [Param "$" typeSpec ParamIn Ordinary])
          Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck constCount nonConstCount tag "$"]
-         ++
-        -- Code to fetch all the fields
-        reverse (List.map (\(var,_,_,aligned) ->
+        ([tagCheck numConsts numNonConsts tag "$"]
+         -- Code to fetch all the fields
+         ++ List.map (\(var,_,_,aligned) ->
                               (Unplaced $ ForeignCall "lpvm" "access" []
                                [Unplaced $ Var "$" ParamIn flowType,
                                 Unplaced $ IntValue
                                   $ fromIntegral (aligned - tag),
                                 Unplaced $ Var var ParamOut flowType]))
-                 fields))
+            fields)
         pos]
 
 
@@ -650,18 +625,18 @@ deconstructorItems ctorName typeSpec constCount nonConstCount tag pos fields =
 --  of the specified variable matches the specified tag.  If not checking
 --  is necessary, just generate a Nop, rather than a true test.
 tagCheck :: Int -> Int -> Int -> Ident -> Placed Stmt
-tagCheck constCount nonConstCount tag varName =
+tagCheck numConsts numNonConsts tag varName =
     -- If there are any constant constructors, be sure it's not one of them
     let tests =
-          (case constCount of
+          (case numConsts of
                0 -> []
                _ -> [comparison "uge"
                      (varGet varName)
-                     (intCast $ iVal constCount)]
+                     (intCast $ iVal numConsts)]
            ++
            -- If there is more than one non-const constructors, check that
            -- it's the right one
-           case nonConstCount of
+           case numNonConsts of
                1 -> []  -- Nothing to do if it's the only non-const constructor
                _ -> [comparison "eq"
                      (intCast $ ForeignFn "llvm" "and" []
@@ -680,18 +655,18 @@ tagCheck constCount nonConstCount tag varName =
 getterSetterItems :: Visibility -> TypeSpec -> OptPos
                     -> Int -> Int -> Int -> Int -> Int
                     -> (VarName,TypeSpec,TypeRepresentation,Int) -> [Item]
-getterSetterItems vis rectype pos constCount nonConstCount ptrCount size tag
+getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size tag
                   (field,fieldtype,rep,offset) =
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
-    let detism = if constCount + nonConstCount == 1 then Det else SemiDet
+    let detism = if numConsts + numNonConsts == 1 then Det else SemiDet
         otherPtrCount = if rep == "address" then ptrCount-1 else ptrCount
         flags = if otherPtrCount == 0 then ["noalias"] else []
     in [ProcDecl vis detism True
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
                           Param "$" fieldtype ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck constCount nonConstCount tag "$rec"]
+        ([tagCheck numConsts numNonConsts tag "$rec"]
          ++
         -- Code to access the selected field
          [Unplaced $ ForeignCall "lpvm" "access" []
@@ -703,7 +678,7 @@ getterSetterItems vis rectype pos constCount nonConstCount ptrCount size tag
         (ProcProto field [Param "$rec" rectype ParamInOut Ordinary,
                           Param "$field" fieldtype ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck constCount nonConstCount tag "$rec"]
+        ([tagCheck numConsts numNonConsts tag "$rec"]
          ++
         -- Code to mutate the selected field
          [Unplaced $ ForeignCall "lpvm" "mutate" flags

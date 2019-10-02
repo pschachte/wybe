@@ -20,7 +20,28 @@ AFTER EVERYTHING:
                     type_int.myint.>=<0>
   imports         : public use type_int.myint
                     use wybe
-  types           : myint/0 (i64)  @type_int:1:5
+  types           : myint/public  is i64 {  public func +(x:myint, y:myint):myint @type_int:2:9 = foreign llvm add(x @type_int:2:57, y @type_int:2:59) @type_int:2:40
+  public proc +(?x:myint, y:myint, z:myint) @type_int:3:9 {
+    =(?x @type_int:3:43, foreign llvm sub(z @type_int:3:65, y @type_int:3:67) @type_int:3:48)
+  }
+  public proc +(x:myint, ?y:myint, z:myint) @type_int:4:9 {
+    =(?y @type_int:4:43, foreign llvm sub(z @type_int:4:65, x @type_int:4:67) @type_int:4:48)
+  }
+  public func -(x:myint, y:myint):myint @type_int:5:9 = foreign llvm sub(x @type_int:5:57, y @type_int:5:59) @type_int:5:40
+  public proc -(?x:myint, y:myint, z:myint) @type_int:6:9 {
+    =(?x @type_int:6:43, foreign llvm add(z @type_int:6:65, y @type_int:6:67) @type_int:6:48)
+  }
+  public proc -(x:myint, ?y:myint, z:myint) @type_int:7:9 {
+    =(?y @type_int:7:43, foreign llvm sub(z @type_int:7:65, x @type_int:7:67) @type_int:7:48)
+  }
+  public func *(x:myint, y:myint):myint @type_int:8:9 = foreign llvm mul(x @type_int:8:57, y @type_int:8:59) @type_int:8:40
+  public func /(x:myint, y:myint):myint @type_int:9:9 = foreign llvm sdiv(x @type_int:9:58, y @type_int:9:60) @type_int:9:40
+  public func =(x:myint, y:myint):bool @type_int:10:9 = foreign llvm icmp eq(x @type_int:10:60, y @type_int:10:62) @type_int:10:39
+  public func /=(x:myint, y:myint):bool @type_int:11:9 = foreign llvm icmp ne(x @type_int:11:61, y @type_int:11:63) @type_int:11:40
+  public func <(x:myint, y:myint):bool @type_int:12:9 = foreign llvm icmp slt(x @type_int:12:61, y @type_int:12:63) @type_int:12:39
+  public func <=(x:myint, y:myint):bool @type_int:13:9 = foreign llvm icmp sle(x @type_int:13:62, y @type_int:13:64) @type_int:13:40
+  public func >(x:myint, y:myint):bool @type_int:14:9 = foreign llvm icmp sgt(x @type_int:14:61, y @type_int:14:63) @type_int:14:39
+  public func >=(x:myint, y:myint):bool @type_int:15:9 = foreign llvm icmp sge(x @type_int:15:62, y @type_int:15:64) @type_int:15:40 }  @type_int:1:5
   resources       : 
   submodules      : type_int.myint
   procs           : 
@@ -39,7 +60,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 --------------------------------------------------
- Module type_int.myint([])
+ Module type_int.myint
   public submods  : 
   public types    : 
   public resources: 

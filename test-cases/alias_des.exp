@@ -14,20 +14,20 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public inline (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:phantom, ?io#1:phantom): AliasPairs: []
-    alias_des.foo<0>(~#io#0:phantom, ?#io#1:phantom) @alias_des:21:2
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom): AliasPairs: []
+    alias_des.foo<0>(~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_des:21:2
 
 
 foo > public (1 calls)
-0: foo(io#0:phantom, ?io#3:phantom): AliasPairs: []
-    alias_des.replicate<0>(?p2#0:position.position, ~#io#0:phantom, ?#io#1:phantom) @alias_des:15:4
+0: foo(io#0:wybe.phantom, ?io#3:wybe.phantom): AliasPairs: []
+    alias_des.replicate<0>(?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_des:15:4
     foreign lpvm mutate noalias(~%p2#0:position.position, ?%p2#1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 20000:wybe.int)
-    foreign c print_string("--- after x(!p2, 20000) - expect p2(20000,103):":wybe.string, ~#io#1:phantom, ?#io#2:phantom) @wybe:nn:nn
-    position.printPosition<0>(~p2#1:position.position, ~#io#2:phantom, ?#io#3:phantom) @alias_des:18:4
+    foreign c print_string("--- after x(!p2, 20000) - expect p2(20000,103):":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+    position.printPosition<0>(~p2#1:position.position, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @alias_des:18:4
 
 
 replicate > public (1 calls)
-0: replicate(?p2#1:position.position, io#0:phantom, ?io#4:phantom): AliasPairs: []
+0: replicate(?p2#1:position.position, io#0:wybe.phantom, ?io#4:wybe.phantom): AliasPairs: []
     foreign lpvm alloc(16:wybe.int, ?tmp$8#0:position.position)
     foreign lpvm mutate(~tmp$8#0:position.position, ?tmp$9#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 101:wybe.int)
     foreign lpvm mutate(~tmp$9#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 102:wybe.int)
@@ -39,10 +39,10 @@ replicate > public (1 calls)
     foreign lpvm access(p1#1:position.position, 8:wybe.int, ?tmp$5#0:wybe.int)
     foreign llvm add(~tmp$5#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @wybe:nn:nn
     foreign lpvm mutate noalias(~tmp$1#0:position.position, ?%p2#1:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$4#0:wybe.int)
-    foreign c print_string("expect p1(10000,102):":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
-    position.printPosition<0>(~p1#1:position.position, ~#io#1:phantom, ?#io#2:phantom) @alias_des:9:4
-    foreign c print_string("expect p2(101,103):":wybe.string, ~#io#2:phantom, ?#io#3:phantom) @wybe:nn:nn
-    position.printPosition<0>(p2#1:position.position, ~#io#3:phantom, ?#io#4:phantom) @alias_des:11:4
+    foreign c print_string("expect p1(10000,102):":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
+    position.printPosition<0>(~p1#1:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @alias_des:9:4
+    foreign c print_string("expect p2(101,103):":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
+    position.printPosition<0>(p2#1:position.position, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @alias_des:11:4
 
   LLVM code       :
 
@@ -141,7 +141,7 @@ entry:
 --------------------------------------------------
  Module position
   public submods  : 
-  public types    : position: (position.position,Just "pointer")
+  public types    : position: (position.position,Just "address")
   public resources: 
   public procs    : position.printPosition<0>
                     position.position.=<0>
@@ -153,21 +153,21 @@ entry:
                     position.position.y<1>
   imports         : public use position.position
                     use wybe
-  types           : position/0 (pointer)  @position:1:5
+  types           : position/public  is address { position(x:int, y:int) @position:1:25  }  @position:1:5
   resources       : 
   submodules      : position.position
   procs           : 
 
 printPosition > public (0 calls)
-0: printPosition(pos#0:position.position, io#0:phantom, ?io#5:phantom): AliasPairs: []
-    foreign c print_string(" (":wybe.string, ~#io#0:phantom, ?#io#1:phantom) @wybe:nn:nn
+0: printPosition(pos#0:position.position, io#0:wybe.phantom, ?io#5:wybe.phantom): AliasPairs: []
+    foreign c print_string(" (":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
     foreign lpvm access(pos#0:position.position, 0:wybe.int, ?tmp$0#0:wybe.int)
-    foreign c print_int(~tmp$0#0:wybe.int, ~#io#1:phantom, ?#io#2:phantom) @wybe:nn:nn
-    foreign c print_string(",":wybe.string, ~#io#2:phantom, ?#io#3:phantom) @wybe:nn:nn
+    foreign c print_int(~tmp$0#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+    foreign c print_string(",":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
     foreign lpvm access(~pos#0:position.position, 8:wybe.int, ?tmp$1#0:wybe.int)
-    foreign c print_int(~tmp$1#0:wybe.int, ~#io#3:phantom, ?#io#4:phantom) @wybe:nn:nn
-    foreign c print_string(")":wybe.string, ~#io#4:phantom, ?tmp$14#0:phantom) @wybe:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$14#0:phantom, ?#io#5:phantom) @wybe:nn:nn
+    foreign c print_int(~tmp$1#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @wybe:nn:nn
+    foreign c print_string(")":wybe.string, ~#io#4:wybe.phantom, ?tmp$14#0:wybe.phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?#io#5:wybe.phantom) @wybe:nn:nn
 
   LLVM code       :
 
@@ -222,7 +222,7 @@ entry:
   ret void 
 }
 --------------------------------------------------
- Module position.position([])
+ Module position.position
   public submods  : 
   public types    : 
   public resources: 
