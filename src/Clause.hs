@@ -151,11 +151,14 @@ compileCond front pos expr thn els params detism = do
           beforeTest <- get
           thn' <- compileBody thn params detism
           afterThen <- get
+          logClause $ "  vars after then: " ++ show afterThen
           put beforeTest
           els' <- compileBody els params detism
           afterElse <- get
+          logClause $ "  vars after else: " ++ show afterElse
           let final = Map.intersectionWith max afterThen afterElse
           put final
+          logClause $ "  vars after ite: " ++ show final
           let thnAssigns = reconcilingAssignments afterThen final params
           let elsAssigns = reconcilingAssignments afterElse final params
           case expr of
