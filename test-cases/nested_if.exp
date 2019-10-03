@@ -100,5 +100,5 @@ if.else2:
   %8 = ptrtoint i8* getelementptr inbounds ([6 x i8], [6 x i8]* @nested_if.7, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %8)  
   tail call ccc  void  @putchar(i8  10)  
-  ret i1 %"tmp$1#0" 
+  ret void 
 }

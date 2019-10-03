@@ -155,7 +155,7 @@ if.else:
   %14 = tail call ccc  {i64, i64}  @"alias_mfoo.foo<0>"(i64  %7)  
   %15 = extractvalue {i64, i64} %14, 0 
   %16 = extractvalue {i64, i64} %14, 1 
-  ret i64 %16 
+  ret i64 %7 
 }
 --------------------------------------------------
  Module alias_mfoo
@@ -242,35 +242,33 @@ if.then:
   tail call ccc  void  @"position.printPosition<0>"(i64  %6)  
   %14 = insertvalue {i64, i64} undef, i64 %"p1#0", 0 
   %15 = insertvalue {i64, i64} %14, i64 %6, 1 
-  %16 = insertvalue {i64, i64} undef, i64 %"p1#0", 0 
-  %17 = insertvalue {i64, i64} %16, i64 %6, 1 
-  ret {i64, i64} %17 
+  ret {i64, i64} %15 
 if.else:
   %"tmp$3#0" = add   i64 %3, 1 
-  %18 = trunc i64 16 to i32  
-  %19 = tail call ccc  i8*  @wybe_malloc(i32  %18)  
-  %20 = ptrtoint i8* %19 to i64 
-  %21 = inttoptr i64 %20 to i8* 
-  %22 = inttoptr i64 %"p1#0" to i8* 
-  %23 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %21, i8*  %22, i32  %23, i32  8, i1  0)  
-  %24 = inttoptr i64 %20 to i64* 
-  %25 = getelementptr  i64, i64* %24, i64 0 
-  store  i64 %"tmp$3#0", i64* %25 
-  %"p3#0" = tail call ccc  i64  @"alias_mbar.bar<0>"(i64  %20)  
-  %26 = trunc i64 16 to i32  
-  %27 = tail call ccc  i8*  @wybe_malloc(i32  %26)  
-  %28 = ptrtoint i8* %27 to i64 
-  %29 = inttoptr i64 %28 to i64* 
-  %30 = getelementptr  i64, i64* %29, i64 0 
-  store  i64 2, i64* %30 
-  %31 = add   i64 %28, 8 
-  %32 = inttoptr i64 %31 to i64* 
-  %33 = getelementptr  i64, i64* %32, i64 0 
-  store  i64 2, i64* %33 
-  %34 = insertvalue {i64, i64} undef, i64 %28, 0 
-  %35 = insertvalue {i64, i64} %34, i64 %"p3#0", 1 
-  ret i64 %28 
+  %16 = trunc i64 16 to i32  
+  %17 = tail call ccc  i8*  @wybe_malloc(i32  %16)  
+  %18 = ptrtoint i8* %17 to i64 
+  %19 = inttoptr i64 %18 to i8* 
+  %20 = inttoptr i64 %"p1#0" to i8* 
+  %21 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %19, i8*  %20, i32  %21, i32  8, i1  0)  
+  %22 = inttoptr i64 %18 to i64* 
+  %23 = getelementptr  i64, i64* %22, i64 0 
+  store  i64 %"tmp$3#0", i64* %23 
+  %"p3#0" = tail call ccc  i64  @"alias_mbar.bar<0>"(i64  %18)  
+  %24 = trunc i64 16 to i32  
+  %25 = tail call ccc  i8*  @wybe_malloc(i32  %24)  
+  %26 = ptrtoint i8* %25 to i64 
+  %27 = inttoptr i64 %26 to i64* 
+  %28 = getelementptr  i64, i64* %27, i64 0 
+  store  i64 2, i64* %28 
+  %29 = add   i64 %26, 8 
+  %30 = inttoptr i64 %29 to i64* 
+  %31 = getelementptr  i64, i64* %30, i64 0 
+  store  i64 2, i64* %31 
+  %32 = insertvalue {i64, i64} undef, i64 %26, 0 
+  %33 = insertvalue {i64, i64} %32, i64 %"p3#0", 1 
+  ret {i64, i64} %33 
 }
 --------------------------------------------------
  Module position

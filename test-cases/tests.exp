@@ -1,0 +1,876 @@
+======================================================================
+AFTER EVERYTHING:
+ Module tests
+  public submods  : 
+  public types    : map: (tests.map,Just "address")
+  public resources: 
+  public procs    : tests.lookup<0>
+                    tests.lt<0>
+                    tests.lt2<0>
+                    tests.lt3<0>
+                    tests.map.=<0>
+                    tests.map.empty<0>
+                    tests.map.key<0>
+                    tests.map.key<1>
+                    tests.map.left<0>
+                    tests.map.left<1>
+                    tests.map.node<0>
+                    tests.map.node<1>
+                    tests.map.right<0>
+                    tests.map.right<1>
+                    tests.map.value<0>
+                    tests.map.value<1>
+  imports         : public use tests.map
+                    use wybe
+  types           : map/public  is address { empty() @tests:19:20 | node(left:map, key:int, value:int, right:map) @tests:19:28  }  @tests:19:5
+  resources       : 
+  submodules      : tests.map
+  procs           : 
+
+lookup > public test (6 calls)
+0: lookup(key#0:wybe.int, map#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+    tests.map.=<0>(map#0:tests.map, 0:tests.map, ?tmp$6#0:wybe.bool) @tests:22:9
+    case ~tmp$6#0:wybe.bool of
+    0:
+        foreign llvm icmp ne(map#0:tests.map, 0:wybe.int, ?tmp$19#0:wybe.bool)
+        case tmp$19#0:wybe.bool of
+        0:
+            case tmp$19#0:wybe.bool of
+            0:
+                case ~tmp$19#0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                1:
+                    foreign lpvm access(~map#0:tests.map, 24:wybe.int, ?tmp$5#0:tests.map)
+                    tests.lookup<0>(~key#0:wybe.int, ~tmp$5#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) @tests:25:16
+
+
+            1:
+                foreign lpvm access(map#0:tests.map, 8:wybe.int, ?tmp$3#0:wybe.int)
+                foreign llvm icmp slt(key#0:wybe.int, ~tmp$3#0:wybe.int, ?tmp$12#0:wybe.bool) @wybe:nn:nn
+                case ~tmp$12#0:wybe.bool of
+                0:
+                    case ~tmp$19#0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                    1:
+                        foreign lpvm access(~map#0:tests.map, 24:wybe.int, ?tmp$5#0:tests.map)
+                        tests.lookup<0>(~key#0:wybe.int, ~tmp$5#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) @tests:25:16
+
+
+                1:
+                    case ~tmp$19#0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                    1:
+                        foreign lpvm access(~map#0:tests.map, 0:wybe.int, ?tmp$4#0:tests.map)
+                        tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) @tests:24:25
+
+
+
+
+        1:
+            foreign lpvm access(map#0:tests.map, 8:wybe.int, ?tmp$1#0:wybe.int)
+            foreign llvm icmp eq(key#0:wybe.int, ~tmp$1#0:wybe.int, ?tmp$9#0:wybe.bool) @wybe:nn:nn
+            case ~tmp$9#0:wybe.bool of
+            0:
+                case tmp$19#0:wybe.bool of
+                0:
+                    case ~tmp$19#0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                    1:
+                        foreign lpvm access(~map#0:tests.map, 24:wybe.int, ?tmp$5#0:tests.map)
+                        tests.lookup<0>(~key#0:wybe.int, ~tmp$5#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) @tests:25:16
+
+
+                1:
+                    foreign lpvm access(map#0:tests.map, 8:wybe.int, ?tmp$3#0:wybe.int)
+                    foreign llvm icmp slt(key#0:wybe.int, ~tmp$3#0:wybe.int, ?tmp$12#0:wybe.bool) @wybe:nn:nn
+                    case ~tmp$12#0:wybe.bool of
+                    0:
+                        case ~tmp$19#0:wybe.bool of
+                        0:
+                            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                        1:
+                            foreign lpvm access(~map#0:tests.map, 24:wybe.int, ?tmp$5#0:tests.map)
+                            tests.lookup<0>(~key#0:wybe.int, ~tmp$5#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) @tests:25:16
+
+
+                    1:
+                        case ~tmp$19#0:wybe.bool of
+                        0:
+                            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                        1:
+                            foreign lpvm access(~map#0:tests.map, 0:wybe.int, ?tmp$4#0:tests.map)
+                            tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) @tests:24:25
+
+
+
+
+            1:
+                case ~tmp$19#0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                1:
+                    foreign lpvm access(~map#0:tests.map, 16:wybe.int, ?tmp$2#0:wybe.int)
+                    foreign llvm move(~tmp$2#0:wybe.int, ?result#0:wybe.int) @tests:23:25
+                    foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+
+    1:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool) @tests:22:23
+
+
+
+lt > public test (1 calls)
+0: lt(x#0:wybe.int, y#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp slt(~x#0:wybe.int, ~y#0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool) @tests:6:34
+
+    1:
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool) @tests:6:19
+
+
+
+lt2 > public inline (1 calls)
+0: lt2(x#0:wybe.int, y#0:wybe.int, ?res#0:wybe.bool): AliasPairs: []
+    tests.lt<0>(~x#0:wybe.int, ~y#0:wybe.int, ?res#0:wybe.bool) @tests:11:12
+
+
+lt3 > public inline test (0 calls)
+0: lt3(x#0:wybe.int, y#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+    tests.lt<0>(~y#0:wybe.int, ~x#0:wybe.int, ?$$#0:wybe.bool) @tests:11:12
+
+  LLVM code       :
+
+; ModuleID = 'tests'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external ccc  {i64, i1} @"tests.lookup<0>"(i64  %"key#0", i64  %"map#0")    {
+entry:
+  %"tmp$6#0" = tail call ccc  i1  @"tests.map.=<0>"(i64  %"map#0", i64  0)  
+  br i1 %"tmp$6#0", label %if.then, label %if.else 
+if.then:
+  %1 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %2 = insertvalue {i64, i1} %1, i1 0, 1 
+  ret {i64, i1} %2 
+if.else:
+  %"tmp$19#0" = icmp ne i64 %"map#0", 0 
+  br i1 %"tmp$19#0", label %if.then1, label %if.else1 
+if.then1:
+  %3 = add   i64 %"map#0", 8 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = getelementptr  i64, i64* %4, i64 0 
+  %6 = load  i64, i64* %5 
+  %"tmp$9#0" = icmp eq i64 %"key#0", %6 
+  br i1 %"tmp$9#0", label %if.then2, label %if.else2 
+if.else1:
+  br i1 %"tmp$19#0", label %if.then9, label %if.else9 
+if.then2:
+  br i1 %"tmp$19#0", label %if.then3, label %if.else3 
+if.else2:
+  br i1 %"tmp$19#0", label %if.then4, label %if.else4 
+if.then3:
+  %7 = add   i64 %"map#0", 16 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = getelementptr  i64, i64* %8, i64 0 
+  %10 = load  i64, i64* %9 
+  %11 = insertvalue {i64, i1} undef, i64 %10, 0 
+  %12 = insertvalue {i64, i1} %11, i1 1, 1 
+  ret {i64, i1} %12 
+if.else3:
+  %13 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %14 = insertvalue {i64, i1} %13, i1 0, 1 
+  ret {i64, i1} %14 
+if.then4:
+  %15 = add   i64 %"map#0", 8 
+  %16 = inttoptr i64 %15 to i64* 
+  %17 = getelementptr  i64, i64* %16, i64 0 
+  %18 = load  i64, i64* %17 
+  %"tmp$12#0" = icmp slt i64 %"key#0", %18 
+  br i1 %"tmp$12#0", label %if.then5, label %if.else5 
+if.else4:
+  br i1 %"tmp$19#0", label %if.then8, label %if.else8 
+if.then5:
+  br i1 %"tmp$19#0", label %if.then6, label %if.else6 
+if.else5:
+  br i1 %"tmp$19#0", label %if.then7, label %if.else7 
+if.then6:
+  %19 = inttoptr i64 %"map#0" to i64* 
+  %20 = getelementptr  i64, i64* %19, i64 0 
+  %21 = load  i64, i64* %20 
+  %22 = tail call ccc  {i64, i1}  @"tests.lookup<0>"(i64  %"key#0", i64  %21)  
+  %23 = extractvalue {i64, i1} %22, 0 
+  %24 = extractvalue {i64, i1} %22, 1 
+  %25 = insertvalue {i64, i1} undef, i64 %23, 0 
+  %26 = insertvalue {i64, i1} %25, i1 %24, 1 
+  ret {i64, i1} %26 
+if.else6:
+  %27 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %28 = insertvalue {i64, i1} %27, i1 0, 1 
+  ret {i64, i1} %28 
+if.then7:
+  %29 = add   i64 %"map#0", 24 
+  %30 = inttoptr i64 %29 to i64* 
+  %31 = getelementptr  i64, i64* %30, i64 0 
+  %32 = load  i64, i64* %31 
+  %33 = tail call ccc  {i64, i1}  @"tests.lookup<0>"(i64  %"key#0", i64  %32)  
+  %34 = extractvalue {i64, i1} %33, 0 
+  %35 = extractvalue {i64, i1} %33, 1 
+  %36 = insertvalue {i64, i1} undef, i64 %34, 0 
+  %37 = insertvalue {i64, i1} %36, i1 %35, 1 
+  ret {i64, i1} %37 
+if.else7:
+  %38 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %39 = insertvalue {i64, i1} %38, i1 0, 1 
+  ret {i64, i1} %39 
+if.then8:
+  %40 = add   i64 %"map#0", 24 
+  %41 = inttoptr i64 %40 to i64* 
+  %42 = getelementptr  i64, i64* %41, i64 0 
+  %43 = load  i64, i64* %42 
+  %44 = tail call ccc  {i64, i1}  @"tests.lookup<0>"(i64  %"key#0", i64  %43)  
+  %45 = extractvalue {i64, i1} %44, 0 
+  %46 = extractvalue {i64, i1} %44, 1 
+  %47 = insertvalue {i64, i1} undef, i64 %45, 0 
+  %48 = insertvalue {i64, i1} %47, i1 %46, 1 
+  ret {i64, i1} %48 
+if.else8:
+  %49 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %50 = insertvalue {i64, i1} %49, i1 0, 1 
+  ret {i64, i1} %50 
+if.then9:
+  %51 = add   i64 %"map#0", 8 
+  %52 = inttoptr i64 %51 to i64* 
+  %53 = getelementptr  i64, i64* %52, i64 0 
+  %54 = load  i64, i64* %53 
+  %"tmp$12#0" = icmp slt i64 %"key#0", %54 
+  br i1 %"tmp$12#0", label %if.then10, label %if.else10 
+if.else9:
+  br i1 %"tmp$19#0", label %if.then13, label %if.else13 
+if.then10:
+  br i1 %"tmp$19#0", label %if.then11, label %if.else11 
+if.else10:
+  br i1 %"tmp$19#0", label %if.then12, label %if.else12 
+if.then11:
+  %55 = inttoptr i64 %"map#0" to i64* 
+  %56 = getelementptr  i64, i64* %55, i64 0 
+  %57 = load  i64, i64* %56 
+  %58 = tail call ccc  {i64, i1}  @"tests.lookup<0>"(i64  %"key#0", i64  %57)  
+  %59 = extractvalue {i64, i1} %58, 0 
+  %60 = extractvalue {i64, i1} %58, 1 
+  %61 = insertvalue {i64, i1} undef, i64 %59, 0 
+  %62 = insertvalue {i64, i1} %61, i1 %60, 1 
+  ret {i64, i1} %62 
+if.else11:
+  %63 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %64 = insertvalue {i64, i1} %63, i1 0, 1 
+  ret {i64, i1} %64 
+if.then12:
+  %65 = add   i64 %"map#0", 24 
+  %66 = inttoptr i64 %65 to i64* 
+  %67 = getelementptr  i64, i64* %66, i64 0 
+  %68 = load  i64, i64* %67 
+  %69 = tail call ccc  {i64, i1}  @"tests.lookup<0>"(i64  %"key#0", i64  %68)  
+  %70 = extractvalue {i64, i1} %69, 0 
+  %71 = extractvalue {i64, i1} %69, 1 
+  %72 = insertvalue {i64, i1} undef, i64 %70, 0 
+  %73 = insertvalue {i64, i1} %72, i1 %71, 1 
+  ret {i64, i1} %73 
+if.else12:
+  %74 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %75 = insertvalue {i64, i1} %74, i1 0, 1 
+  ret {i64, i1} %75 
+if.then13:
+  %76 = add   i64 %"map#0", 24 
+  %77 = inttoptr i64 %76 to i64* 
+  %78 = getelementptr  i64, i64* %77, i64 0 
+  %79 = load  i64, i64* %78 
+  %80 = tail call ccc  {i64, i1}  @"tests.lookup<0>"(i64  %"key#0", i64  %79)  
+  %81 = extractvalue {i64, i1} %80, 0 
+  %82 = extractvalue {i64, i1} %80, 1 
+  %83 = insertvalue {i64, i1} undef, i64 %81, 0 
+  %84 = insertvalue {i64, i1} %83, i1 %82, 1 
+  ret {i64, i1} %84 
+if.else13:
+  %85 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %86 = insertvalue {i64, i1} %85, i1 0, 1 
+  ret {i64, i1} %86 
+}
+
+
+define external ccc  i1 @"tests.lt<0>"(i64  %"x#0", i64  %"y#0")    {
+entry:
+  %"tmp$0#0" = icmp slt i64 %"x#0", %"y#0" 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  ret i1 1 
+if.else:
+  ret i1 0 
+}
+
+
+define external ccc  i1 @"tests.lt2<0>"(i64  %"x#0", i64  %"y#0")    {
+entry:
+  %"res#0" = tail call ccc  i1  @"tests.lt<0>"(i64  %"x#0", i64  %"y#0")  
+  ret i1 %"res#0" 
+}
+
+
+define external ccc  i1 @"tests.lt3<0>"(i64  %"x#0", i64  %"y#0")    {
+entry:
+  %"$$#0" = tail call ccc  i1  @"tests.lt<0>"(i64  %"y#0", i64  %"x#0")  
+  ret i1 %"$$#0" 
+}
+--------------------------------------------------
+ Module tests.map
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : tests.map.=<0>
+                    tests.map.empty<0>
+                    tests.map.key<0>
+                    tests.map.key<1>
+                    tests.map.left<0>
+                    tests.map.left<1>
+                    tests.map.node<0>
+                    tests.map.node<1>
+                    tests.map.right<0>
+                    tests.map.right<1>
+                    tests.map.value<0>
+                    tests.map.value<1>
+  imports         : use tests
+                    use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+= > public test (10 calls)
+0: =($left#0:tests.map, $right#0:tests.map, ?$$#0:wybe.bool): AliasPairs: []
+    foreign lpvm cast($left#0:tests.map, ?tmp$0#0:wybe.int)
+    foreign llvm icmp eq(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm icmp ne($left#0:tests.map, 0:wybe.int, ?tmp$10#0:wybe.bool)
+        case ~tmp$10#0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+        1:
+            foreign lpvm access($left#0:tests.map, 0:wybe.int, ?$left$left#0:tests.map)
+            foreign lpvm access($left#0:tests.map, 8:wybe.int, ?$left$key#0:wybe.int)
+            foreign lpvm access($left#0:tests.map, 16:wybe.int, ?$left$value#0:wybe.int)
+            foreign lpvm access(~$left#0:tests.map, 24:wybe.int, ?$left$right#0:tests.map)
+            foreign llvm icmp ne($right#0:tests.map, 0:wybe.int, ?tmp$12#0:wybe.bool)
+            case ~tmp$12#0:wybe.bool of
+            0:
+                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+            1:
+                foreign lpvm access($right#0:tests.map, 0:wybe.int, ?$right$left#0:tests.map)
+                foreign lpvm access($right#0:tests.map, 8:wybe.int, ?$right$key#0:wybe.int)
+                foreign lpvm access($right#0:tests.map, 16:wybe.int, ?$right$value#0:wybe.int)
+                foreign lpvm access(~$right#0:tests.map, 24:wybe.int, ?$right$right#0:tests.map)
+                tests.map.=<0>(~$left$left#0:tests.map, ~$right$left#0:tests.map, ?tmp$5#0:wybe.bool)
+                case ~tmp$5#0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                1:
+                    foreign llvm icmp eq(~$left$key#0:wybe.int, ~$right$key#0:wybe.int, ?tmp$6#0:wybe.bool) @wybe:nn:nn
+                    case ~tmp$6#0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                    1:
+                        foreign llvm icmp eq(~$left$value#0:wybe.int, ~$right$value#0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:nn:nn
+                        case ~tmp$7#0:wybe.bool of
+                        0:
+                            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                        1:
+                            tests.map.=<0>(~$left$right#0:tests.map, ~$right$right#0:tests.map, ?$$#0:wybe.bool)
+
+
+
+
+
+
+    1:
+        foreign llvm icmp eq(~$left#0:wybe.int, ~$right#0:wybe.int, ?$$#0:wybe.bool)
+
+
+
+empty > public inline (0 calls)
+0: empty(?$#0:tests.map): AliasPairs: []
+    foreign llvm move(0:tests.map, ?$#0:tests.map)
+
+
+key > public inline test (0 calls)
+0: key($rec#0:tests.map, ?$#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:tests.map, 8:wybe.int, ?$#0:wybe.int)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+key > public inline test (0 calls)
+1: key($rec#0:tests.map, ?$rec#1:tests.map, $field#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:tests.map, ?$rec#1:tests.map)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:tests.map, ?%$rec#1:tests.map, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+left > public inline test (0 calls)
+0: left($rec#0:tests.map, ?$#0:tests.map, ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:tests.map, 0:wybe.int, ?$#0:tests.map)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+left > public inline test (0 calls)
+1: left($rec#0:tests.map, ?$rec#1:tests.map, $field#0:tests.map, ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:tests.map, ?$rec#1:tests.map)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:tests.map, ?%$rec#1:tests.map, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:tests.map)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+node > public inline (0 calls)
+0: node(left#0:tests.map, key#0:wybe.int, value#0:wybe.int, right#0:tests.map, ?$#0:tests.map): AliasPairs: []
+    foreign lpvm alloc(32:wybe.int, ?$rec#0:tests.map)
+    foreign lpvm mutate(~%$rec#0:tests.map, ?%$rec#1:tests.map, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~left#0:tests.map)
+    foreign lpvm mutate(~%$rec#1:tests.map, ?%$rec#2:tests.map, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~key#0:wybe.int)
+    foreign lpvm mutate(~%$rec#2:tests.map, ?%$rec#3:tests.map, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~value#0:wybe.int)
+    foreign lpvm mutate(~%$rec#3:tests.map, ?%$#0:tests.map, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~right#0:tests.map)
+node > public inline test (11 calls)
+1: node(?left#0:tests.map, ?key#0:wybe.int, ?value#0:wybe.int, ?right#0:tests.map, $#0:tests.map, ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access($#0:tests.map, 0:wybe.int, ?left#0:tests.map)
+        foreign lpvm access($#0:tests.map, 8:wybe.int, ?key#0:wybe.int)
+        foreign lpvm access($#0:tests.map, 16:wybe.int, ?value#0:wybe.int)
+        foreign lpvm access(~$#0:tests.map, 24:wybe.int, ?right#0:tests.map)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+right > public inline test (0 calls)
+0: right($rec#0:tests.map, ?$#0:tests.map, ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:tests.map, 24:wybe.int, ?$#0:tests.map)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+right > public inline test (0 calls)
+1: right($rec#0:tests.map, ?$rec#1:tests.map, $field#0:tests.map, ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:tests.map, ?$rec#1:tests.map)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:tests.map, ?%$rec#1:tests.map, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:tests.map)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+value > public inline test (0 calls)
+0: value($rec#0:tests.map, ?$#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:tests.map, 16:wybe.int, ?$#0:wybe.int)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+value > public inline test (0 calls)
+1: value($rec#0:tests.map, ?$rec#1:tests.map, $field#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:tests.map, ?$rec#1:tests.map)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:tests.map, ?%$rec#1:tests.map, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+  LLVM code       :
+
+; ModuleID = 'tests.map'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external ccc  i1 @"tests.map.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %1 = bitcast i64 %"$left#0" to i64 
+  %"tmp$1#0" = icmp eq i64 %1, 0 
+  br i1 %"tmp$1#0", label %if.then, label %if.else 
+if.then:
+  %"$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"$$#0" 
+if.else:
+  %"tmp$10#0" = icmp ne i64 %"$left#0", 0 
+  br i1 %"tmp$10#0", label %if.then1, label %if.else1 
+if.then1:
+  %2 = inttoptr i64 %"$left#0" to i64* 
+  %3 = getelementptr  i64, i64* %2, i64 0 
+  %4 = load  i64, i64* %3 
+  %5 = add   i64 %"$left#0", 8 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = getelementptr  i64, i64* %6, i64 0 
+  %8 = load  i64, i64* %7 
+  %9 = add   i64 %"$left#0", 16 
+  %10 = inttoptr i64 %9 to i64* 
+  %11 = getelementptr  i64, i64* %10, i64 0 
+  %12 = load  i64, i64* %11 
+  %13 = add   i64 %"$left#0", 24 
+  %14 = inttoptr i64 %13 to i64* 
+  %15 = getelementptr  i64, i64* %14, i64 0 
+  %16 = load  i64, i64* %15 
+  %"tmp$12#0" = icmp ne i64 %"$right#0", 0 
+  br i1 %"tmp$12#0", label %if.then2, label %if.else2 
+if.else1:
+  ret i1 0 
+if.then2:
+  %17 = inttoptr i64 %"$right#0" to i64* 
+  %18 = getelementptr  i64, i64* %17, i64 0 
+  %19 = load  i64, i64* %18 
+  %20 = add   i64 %"$right#0", 8 
+  %21 = inttoptr i64 %20 to i64* 
+  %22 = getelementptr  i64, i64* %21, i64 0 
+  %23 = load  i64, i64* %22 
+  %24 = add   i64 %"$right#0", 16 
+  %25 = inttoptr i64 %24 to i64* 
+  %26 = getelementptr  i64, i64* %25, i64 0 
+  %27 = load  i64, i64* %26 
+  %28 = add   i64 %"$right#0", 24 
+  %29 = inttoptr i64 %28 to i64* 
+  %30 = getelementptr  i64, i64* %29, i64 0 
+  %31 = load  i64, i64* %30 
+  %"tmp$5#0" = tail call ccc  i1  @"tests.map.=<0>"(i64  %4, i64  %19)  
+  br i1 %"tmp$5#0", label %if.then3, label %if.else3 
+if.else2:
+  ret i1 0 
+if.then3:
+  %"tmp$6#0" = icmp eq i64 %8, %23 
+  br i1 %"tmp$6#0", label %if.then4, label %if.else4 
+if.else3:
+  ret i1 0 
+if.then4:
+  %"tmp$7#0" = icmp eq i64 %12, %27 
+  br i1 %"tmp$7#0", label %if.then5, label %if.else5 
+if.else4:
+  ret i1 0 
+if.then5:
+  %"$$#0" = tail call ccc  i1  @"tests.map.=<0>"(i64  %16, i64  %31)  
+  ret i1 %"$$#0" 
+if.else5:
+  ret i1 0 
+}
+
+
+define external ccc  i64 @"tests.map.empty<0>"()    {
+entry:
+  ret i64 0 
+}
+
+
+define external ccc  {i64, i1} @"tests.map.key<0>"(i64  %"$rec#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %32 = add   i64 %"$rec#0", 8 
+  %33 = inttoptr i64 %32 to i64* 
+  %34 = getelementptr  i64, i64* %33, i64 0 
+  %35 = load  i64, i64* %34 
+  %36 = insertvalue {i64, i1} undef, i64 %35, 0 
+  %37 = insertvalue {i64, i1} %36, i1 1, 1 
+  ret {i64, i1} %37 
+if.else:
+  %38 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %39 = insertvalue {i64, i1} %38, i1 0, 1 
+  ret {i64, i1} %39 
+}
+
+
+define external ccc  {i64, i1} @"tests.map.key<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %40 = trunc i64 32 to i32  
+  %41 = tail call ccc  i8*  @wybe_malloc(i32  %40)  
+  %42 = ptrtoint i8* %41 to i64 
+  %43 = inttoptr i64 %42 to i8* 
+  %44 = inttoptr i64 %"$rec#0" to i8* 
+  %45 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %43, i8*  %44, i32  %45, i32  8, i1  0)  
+  %46 = add   i64 %42, 8 
+  %47 = inttoptr i64 %46 to i64* 
+  %48 = getelementptr  i64, i64* %47, i64 0 
+  store  i64 %"$field#0", i64* %48 
+  %49 = insertvalue {i64, i1} undef, i64 %42, 0 
+  %50 = insertvalue {i64, i1} %49, i1 1, 1 
+  ret {i64, i1} %50 
+if.else:
+  %51 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %52 = insertvalue {i64, i1} %51, i1 0, 1 
+  ret {i64, i1} %52 
+}
+
+
+define external ccc  {i64, i1} @"tests.map.left<0>"(i64  %"$rec#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %53 = inttoptr i64 %"$rec#0" to i64* 
+  %54 = getelementptr  i64, i64* %53, i64 0 
+  %55 = load  i64, i64* %54 
+  %56 = insertvalue {i64, i1} undef, i64 %55, 0 
+  %57 = insertvalue {i64, i1} %56, i1 1, 1 
+  ret {i64, i1} %57 
+if.else:
+  %58 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %59 = insertvalue {i64, i1} %58, i1 0, 1 
+  ret {i64, i1} %59 
+}
+
+
+define external ccc  {i64, i1} @"tests.map.left<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %60 = trunc i64 32 to i32  
+  %61 = tail call ccc  i8*  @wybe_malloc(i32  %60)  
+  %62 = ptrtoint i8* %61 to i64 
+  %63 = inttoptr i64 %62 to i8* 
+  %64 = inttoptr i64 %"$rec#0" to i8* 
+  %65 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %63, i8*  %64, i32  %65, i32  8, i1  0)  
+  %66 = inttoptr i64 %62 to i64* 
+  %67 = getelementptr  i64, i64* %66, i64 0 
+  store  i64 %"$field#0", i64* %67 
+  %68 = insertvalue {i64, i1} undef, i64 %62, 0 
+  %69 = insertvalue {i64, i1} %68, i1 1, 1 
+  ret {i64, i1} %69 
+if.else:
+  %70 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %71 = insertvalue {i64, i1} %70, i1 0, 1 
+  ret {i64, i1} %71 
+}
+
+
+define external ccc  i64 @"tests.map.node<0>"(i64  %"left#0", i64  %"key#0", i64  %"value#0", i64  %"right#0")    {
+entry:
+  %72 = trunc i64 32 to i32  
+  %73 = tail call ccc  i8*  @wybe_malloc(i32  %72)  
+  %74 = ptrtoint i8* %73 to i64 
+  %75 = inttoptr i64 %74 to i64* 
+  %76 = getelementptr  i64, i64* %75, i64 0 
+  store  i64 %"left#0", i64* %76 
+  %77 = add   i64 %74, 8 
+  %78 = inttoptr i64 %77 to i64* 
+  %79 = getelementptr  i64, i64* %78, i64 0 
+  store  i64 %"key#0", i64* %79 
+  %80 = add   i64 %74, 16 
+  %81 = inttoptr i64 %80 to i64* 
+  %82 = getelementptr  i64, i64* %81, i64 0 
+  store  i64 %"value#0", i64* %82 
+  %83 = add   i64 %74, 24 
+  %84 = inttoptr i64 %83 to i64* 
+  %85 = getelementptr  i64, i64* %84, i64 0 
+  store  i64 %"right#0", i64* %85 
+  ret i64 %74 
+}
+
+
+define external ccc  {i64, i64, i64, i64, i1} @"tests.map.node<1>"(i64  %"$#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %86 = inttoptr i64 %"$#0" to i64* 
+  %87 = getelementptr  i64, i64* %86, i64 0 
+  %88 = load  i64, i64* %87 
+  %89 = add   i64 %"$#0", 8 
+  %90 = inttoptr i64 %89 to i64* 
+  %91 = getelementptr  i64, i64* %90, i64 0 
+  %92 = load  i64, i64* %91 
+  %93 = add   i64 %"$#0", 16 
+  %94 = inttoptr i64 %93 to i64* 
+  %95 = getelementptr  i64, i64* %94, i64 0 
+  %96 = load  i64, i64* %95 
+  %97 = add   i64 %"$#0", 24 
+  %98 = inttoptr i64 %97 to i64* 
+  %99 = getelementptr  i64, i64* %98, i64 0 
+  %100 = load  i64, i64* %99 
+  %101 = insertvalue {i64, i64, i64, i64, i1} undef, i64 %88, 0 
+  %102 = insertvalue {i64, i64, i64, i64, i1} %101, i64 %92, 1 
+  %103 = insertvalue {i64, i64, i64, i64, i1} %102, i64 %96, 2 
+  %104 = insertvalue {i64, i64, i64, i64, i1} %103, i64 %100, 3 
+  %105 = insertvalue {i64, i64, i64, i64, i1} %104, i1 1, 4 
+  ret {i64, i64, i64, i64, i1} %105 
+if.else:
+  %106 = insertvalue {i64, i64, i64, i64, i1} undef, i64 undef, 0 
+  %107 = insertvalue {i64, i64, i64, i64, i1} %106, i64 undef, 1 
+  %108 = insertvalue {i64, i64, i64, i64, i1} %107, i64 undef, 2 
+  %109 = insertvalue {i64, i64, i64, i64, i1} %108, i64 undef, 3 
+  %110 = insertvalue {i64, i64, i64, i64, i1} %109, i1 0, 4 
+  ret {i64, i64, i64, i64, i1} %110 
+}
+
+
+define external ccc  {i64, i1} @"tests.map.right<0>"(i64  %"$rec#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %111 = add   i64 %"$rec#0", 24 
+  %112 = inttoptr i64 %111 to i64* 
+  %113 = getelementptr  i64, i64* %112, i64 0 
+  %114 = load  i64, i64* %113 
+  %115 = insertvalue {i64, i1} undef, i64 %114, 0 
+  %116 = insertvalue {i64, i1} %115, i1 1, 1 
+  ret {i64, i1} %116 
+if.else:
+  %117 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %118 = insertvalue {i64, i1} %117, i1 0, 1 
+  ret {i64, i1} %118 
+}
+
+
+define external ccc  {i64, i1} @"tests.map.right<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %119 = trunc i64 32 to i32  
+  %120 = tail call ccc  i8*  @wybe_malloc(i32  %119)  
+  %121 = ptrtoint i8* %120 to i64 
+  %122 = inttoptr i64 %121 to i8* 
+  %123 = inttoptr i64 %"$rec#0" to i8* 
+  %124 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %122, i8*  %123, i32  %124, i32  8, i1  0)  
+  %125 = add   i64 %121, 24 
+  %126 = inttoptr i64 %125 to i64* 
+  %127 = getelementptr  i64, i64* %126, i64 0 
+  store  i64 %"$field#0", i64* %127 
+  %128 = insertvalue {i64, i1} undef, i64 %121, 0 
+  %129 = insertvalue {i64, i1} %128, i1 1, 1 
+  ret {i64, i1} %129 
+if.else:
+  %130 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %131 = insertvalue {i64, i1} %130, i1 0, 1 
+  ret {i64, i1} %131 
+}
+
+
+define external ccc  {i64, i1} @"tests.map.value<0>"(i64  %"$rec#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %132 = add   i64 %"$rec#0", 16 
+  %133 = inttoptr i64 %132 to i64* 
+  %134 = getelementptr  i64, i64* %133, i64 0 
+  %135 = load  i64, i64* %134 
+  %136 = insertvalue {i64, i1} undef, i64 %135, 0 
+  %137 = insertvalue {i64, i1} %136, i1 1, 1 
+  ret {i64, i1} %137 
+if.else:
+  %138 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %139 = insertvalue {i64, i1} %138, i1 0, 1 
+  ret {i64, i1} %139 
+}
+
+
+define external ccc  {i64, i1} @"tests.map.value<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %140 = trunc i64 32 to i32  
+  %141 = tail call ccc  i8*  @wybe_malloc(i32  %140)  
+  %142 = ptrtoint i8* %141 to i64 
+  %143 = inttoptr i64 %142 to i8* 
+  %144 = inttoptr i64 %"$rec#0" to i8* 
+  %145 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %143, i8*  %144, i32  %145, i32  8, i1  0)  
+  %146 = add   i64 %142, 16 
+  %147 = inttoptr i64 %146 to i64* 
+  %148 = getelementptr  i64, i64* %147, i64 0 
+  store  i64 %"$field#0", i64* %148 
+  %149 = insertvalue {i64, i1} undef, i64 %142, 0 
+  %150 = insertvalue {i64, i1} %149, i1 1, 1 
+  ret {i64, i1} %150 
+if.else:
+  %151 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %152 = insertvalue {i64, i1} %151, i1 0, 1 
+  ret {i64, i1} %152 
+}

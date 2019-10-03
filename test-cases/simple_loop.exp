@@ -82,13 +82,10 @@ if.then:
   %12 = insertvalue {i64, i64, i64} undef, i64 %9, 0 
   %13 = insertvalue {i64, i64, i64} %12, i64 %10, 1 
   %14 = insertvalue {i64, i64, i64} %13, i64 %11, 2 
-  ret i64 %11 
+  ret {i64, i64, i64} %14 
 if.else:
   %15 = insertvalue {i64, i64, i64} undef, i64 %"argc#0", 0 
   %16 = insertvalue {i64, i64, i64} %15, i64 %"argv#0", 1 
   %17 = insertvalue {i64, i64, i64} %16, i64 %"exit_code#0", 2 
-  %18 = insertvalue {i64, i64, i64} undef, i64 %"argc#0", 0 
-  %19 = insertvalue {i64, i64, i64} %18, i64 %"argv#0", 1 
-  %20 = insertvalue {i64, i64, i64} %19, i64 %"exit_code#0", 2 
-  ret {i64, i64, i64} %20 
+  ret {i64, i64, i64} %17 
 }

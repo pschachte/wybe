@@ -93,7 +93,7 @@ if.else1:
   tail call ccc  void  @print_string(i64  %4)  
   tail call ccc  void  @putchar(i8  10)  
   %"result#1" = tail call ccc  i1  @"proc_yorn2.gen$1<0>"(i64  %"prompt#0")  
-  ret i1 %"tmp$2#0" 
+  ret i1 %"result#1" 
 }
 
 

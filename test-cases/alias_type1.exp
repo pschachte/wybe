@@ -410,7 +410,7 @@ if.then1:
   %"tmp$3#0" = tail call ccc  i1  @"wybe.int.=<0>"(i64  %17, i64  %20)  
   ret i1 %"tmp$3#0" 
 if.else1:
-  ret i1 %"tmp$16#0" 
+  ret i1 0 
 }
 
 

@@ -434,7 +434,6 @@ codegenForkBody :: PrimVarName -> [ProcBody] -> PrimProto -> Codegen ()
 codegenForkBody var (b1:b2:[]) proto =
     do ifthen <- addBlock "if.then"
        ifelse <- addBlock "if.else"
-       -- ifexit <- addBlock "if.exit"
        testop <- getVar (show var)
        cbr testop ifthen ifelse
        let params = primProtoParams proto
@@ -443,18 +442,13 @@ codegenForkBody var (b1:b2:[]) proto =
        preservingSymtab $ do
            setBlock ifthen
            retop <- codegenBody proto b2
-           case blockReturn retop of
-             Nothing -> buildOutputOp params >>= ret
-             bret    -> ret bret
+           return ()
 
        -- if.else
        preservingSymtab $ do
            setBlock ifelse
            retop <- codegenBody proto b1
-           case blockReturn retop of
-             Nothing -> buildOutputOp params >>= ret
-             bret    -> ret bret
-
+           return ()
        return ()
 
        -- -- if.exit
@@ -463,12 +457,6 @@ codegenForkBody var (b1:b2:[]) proto =
 codegenForkBody var _ _ =
     nyi $ "Fork on non-Boolean variable " ++ show var
 
-
--- | A filter transformation to ensure that a Just Void operand is
--- treated as a Nothing instead of an existing value.
-blockReturn :: Maybe Operand -> Maybe Operand
-blockReturn op@(Just (LocalReference VoidType _)) = Nothing
-blockReturn op                                    = op
 
 -- | Translate a Primitive statement (in clausal form) to a LLVM instruction.
 -- Foreign calls are resolved through numerous instruction maps which map

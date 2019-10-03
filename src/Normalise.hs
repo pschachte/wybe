@@ -224,17 +224,15 @@ completeTypeSCC (AcyclicSCC ((name,mod),typedef)) = do
     completeType (name,mod) typedef
 completeTypeSCC (CyclicSCC nameTypedefs) = do
     logNormalise $ "Completing recursive type(s):" ++ show nameTypedefs
-    let nameTypedefs' =
-          List.filter (isJust . typeDefRepresentation . snd) nameTypedefs
     mapM_ (\((name,mod),typedef) ->
              logNormalise $ "   " ++ showModSpec mod ++ "." ++ name ++ " = "
-               ++ show typedef) nameTypedefs'
+               ++ show typedef) nameTypedefs
     -- Update type representations for recursive types to addresses
     mapM_ (\((name,mod),typedef) ->
              addType name (typedef {typeDefRepresentation = Just "address"})
                `inModule` mod)
-          nameTypedefs'
-    mapM_ (uncurry completeType) nameTypedefs'
+          nameTypedefs
+    mapM_ (uncurry completeType) nameTypedefs
 
 
 -- | Information about a non-constant constructor

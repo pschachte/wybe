@@ -417,7 +417,7 @@ if.then1:
   %"$$#0" = icmp eq i64 %7, %14 
   ret i1 %"$$#0" 
 if.else1:
-  ret i1 %"tmp$2#0" 
+  ret i1 0 
 }
 
 
