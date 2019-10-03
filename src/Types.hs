@@ -677,7 +677,7 @@ typecheckProcDecl m pdef = do
                 logTypes $ "Typing independent of mode = " ++ show typing
                 if validTyping typing
                   then do
-                    logTypes "Now mode checking"
+                    logTypes $ "Now mode checking proc " ++ name
                     let inParams =
                           List.filter
                           ((`elem` [ParamIn,ParamInOut]) . paramFlow)
@@ -1161,7 +1161,7 @@ modecheckStmt m name defPos typing delayed assigned detism
       modecheckStmts m name defPos typing [] assigned2 detism elsStmts
     return ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts') pos],
             delayed'++delayed,
-            assigned1 `Set.union` (assigned2 `Set.intersection` assigned3),
+            (assigned1 `Set.union` assigned2) `Set.intersection` assigned3,
             errs1++errs2++errs3)
 modecheckStmt m name defPos typing delayed assigned detism
     stmt@(TestBool exp) pos = do
