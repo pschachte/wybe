@@ -168,7 +168,8 @@ completeNormalisation mods = do
 completeTypeNormalisation :: [ModSpec] -> Compiler ()
 completeTypeNormalisation mods = do
     logNormalise $ "Completing normalisation of modules " ++ showModSpecs mods
-    types <- concatMapM (modTypeDeps mods `inModule`) mods
+    types <- modSCCTypeDeps mods
+    logNormalise $ "Ordered type dependency SCCs: " ++ show types
     mapM_ completeTypeSCC types
 
 
@@ -177,12 +178,20 @@ type TypeKey = (Ident,ModSpec)
 
 -- | Return a topologically sorted list of type dependency SCCs in the
 --   specified modules.
-modTypeDeps :: [ModSpec] -> Compiler [SCC (TypeKey,TypeDef)]
+modSCCTypeDeps :: [ModSpec] -> Compiler [SCC (TypeKey,TypeDef)]
+modSCCTypeDeps sccMods =
+    stronglyConnComp <$>
+      concatMapM (modTypeDeps sccMods `inModule`) sccMods
+
+
+-- | Return a list of type dependencies on types defined in the specified
+-- modules that are defined in the current module
+modTypeDeps :: [ModSpec] -> Compiler [((TypeKey,TypeDef), TypeKey, [TypeKey])]
 modTypeDeps sccMods = do
     modspec <- getModuleSpec
     pairs <- Map.toList <$> getModuleImplementationField modTypes
-    stronglyConnComp <$>
-      mapM (typeDeps sccMods) [((name,modspec),def) | (name,def) <- pairs]
+    mapM (typeDeps sccMods) [((name,modspec),def) | (name,def) <- pairs]
+
 
 -- | Produce the input needed to construct a list of SCCs.
 typeDeps :: [ModSpec] -> (TypeKey,TypeDef)
@@ -263,6 +272,7 @@ data CtorInfo = CtorInfo {
 completeType :: TypeKey -> TypeDef -> Compiler ()
 completeType (name,modspec)
              typedef@(TypeDef vis params rep ctors ctorVis pos items) = do
+    logNormalise $ "Completing type " ++ showModSpec modspec ++ "." ++ name
     let rep0  = trustFromJust "completeType with equiv type decl" rep
     if List.null ctors
       then return () -- we should have already determined the representation
