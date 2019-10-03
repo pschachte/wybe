@@ -89,7 +89,7 @@ checkDeclIfPublic pname ppos public ty =
 
 -- |Type check a single module named in the second argument; the
 --  first argument is a list of all the modules in this module
--- dependency SCC.
+--  dependency SCC.
 typeCheckMod :: ModSpec -> Compiler ()
 typeCheckMod thisMod = do
     logTypes $ "**** Type checking module " ++ showModSpec thisMod
@@ -693,8 +693,9 @@ typecheckProcDecl m pdef = do
                                $ "phantom":(paramName <$> inParams))
                               `Set.union`
                               (Set.map resourceName inResources)
-                    (def',_,modeErrs) <-
+                    (def',assigned,modeErrs) <-
                       modecheckStmts m name pos typing [] initialised detism def
+                    -- XXX need to check that all outputs are asssigned
                     let typing' = typeErrors modeErrs typing
                     let params' = updateParamTypes typing' params
                     let proto' = proto { procProtoParams = params' }
