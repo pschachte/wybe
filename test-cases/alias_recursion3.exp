@@ -1,12 +1,5 @@
-Error detected during type checking of modules alias_recursion3, alias_recursion3.mynode
-[91mtest-cases/alias_recursion3.wybe:14:15: Type error in call to /=, argument 2
-[0m[91mtest-cases/alias_recursion3.wybe:14:15: Type error in call to /=, argument 1
-[0m[91mtest-cases/alias_recursion3.wybe:14:15: Type error in call to /=, argument 2
-[0m[91mtest-cases/alias_recursion3.wybe:14:15: Type error in call to /=, argument 1
-[0m[91mtest-cases/alias_recursion3.wybe:14:15: Type error in call to /=, argument 2
-[0m[91mtest-cases/alias_recursion3.wybe:14:15: Type error in call to /=, argument 1
-[0m[91mtest-cases/alias_recursion3.wybe:14:15: Type error in call to /=, argument 2
-[0m[91mtest-cases/alias_recursion3.wybe:14:15: Type error in call to /=, argument 1
-[0m[91mtest-cases/alias_recursion3.wybe:14:15: Type error in call to /=, argument 2
-[0m[91mtest-cases/alias_recursion3.wybe:14:15: Type error in call to /=, argument 1
+Error detected during type checking of module(s) alias_recursion3, alias_recursion3.mynode
+[91mtest-cases/alias_recursion3.wybe:16:13: Calling test proc alias_recursion3.mynode.next<1> in a det context
+[0m[91mtest-cases/alias_recursion3.wybe:16:28: Calling test proc alias_recursion3.mynode.next<0> in a det context
+[0m[91mtest-cases/alias_recursion3.wybe:15:17: Calling test proc alias_recursion3.mynode.next<0> in a det context
 [0m

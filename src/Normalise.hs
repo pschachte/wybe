@@ -713,27 +713,47 @@ implicitItems :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto] -> [Item]
                  -> [Item]
 implicitItems typespec consts nonconsts items =
     implicitEquality typespec consts nonconsts items
+    ++ implicitDisequality typespec consts nonconsts items
     -- XXX add comparison, print, display, maybe prettyprint, and lots more
 
 
 implicitEquality :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
                  -> [Item] -> [Item]
 implicitEquality typespec consts nonconsts items =
-    if List.any equalityTest items || consts==[] && nonconsts==[]
+    if consts==[] && nonconsts==[] || List.any (isTestProc "=" 2) items
     then [] -- don't generate if user-defined or if no constructors at all
     else
-      let proto = ProcProto "=" [Param "$left" typespec ParamIn Ordinary,
-                                 Param "$right" typespec ParamIn Ordinary]
-                  Set.empty
+      let eqProto = ProcProto "=" [Param "$left" typespec ParamIn Ordinary,
+                                   Param "$right" typespec ParamIn Ordinary]
+                    Set.empty
           (body,inline) = equalityBody consts nonconsts
-      in [ProcDecl Public SemiDet inline proto body Nothing]
+      in [ProcDecl Public SemiDet inline eqProto body Nothing]
 
--- |Does the item declare an = test or function?
-equalityTest :: Item -> Bool
-equalityTest (ProcDecl _ SemiDet _ (ProcProto "=" [_,_] _) _ _) = True
-equalityTest (FuncDecl _ Det _ (ProcProto "=" [_,_] _) ty _ _) =
-    ty == boolType
-equalityTest _ = False
+
+
+implicitDisequality :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
+                    -> [Item] -> [Item]
+implicitDisequality typespec consts nonconsts items =
+    if consts==[] && nonconsts==[] || List.any (isTestProc "/=" 2) items
+    then [] -- don't generate if user-defined or if no constructors at all
+    else
+      let neProto = ProcProto "/=" [Param "$left" typespec ParamIn Ordinary,
+                                     Param "$right" typespec ParamIn Ordinary]
+                    Set.empty
+          neBody = [Unplaced $ Not $ Unplaced $
+                    ProcCall [] "=" Nothing SemiDet False
+                    [Unplaced $ varGet "$left", Unplaced $ varGet "$right"]]
+      in [ProcDecl Public SemiDet True neProto neBody Nothing]
+
+
+-- |Does the item declare a test or Boolean function with the specified
+-- name and arity?
+isTestProc :: ProcName -> Int -> Item -> Bool
+isTestProc name arity (ProcDecl _ SemiDet _ (ProcProto n params _) _ _) =
+    n == name && length params == arity
+isTestProc name arity (FuncDecl _ Det _ (ProcProto n params _) ty _ _) =
+    n == name && length params == arity && ty == boolType
+isTestProc _ _ _ = False
 
 
 -- | Generate the body of an equality test proc given the const and

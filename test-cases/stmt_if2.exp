@@ -6,6 +6,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : stmt_if2.<0>
                     stmt_if2.lookup<0>
+                    stmt_if2.tree./=<0>
                     stmt_if2.tree.=<0>
                     stmt_if2.tree.empty<0>
                     stmt_if2.tree.key<0>
@@ -163,7 +164,8 @@ if.else3:
   public submods  : 
   public types    : 
   public resources: 
-  public procs    : stmt_if2.tree.=<0>
+  public procs    : stmt_if2.tree./=<0>
+                    stmt_if2.tree.=<0>
                     stmt_if2.tree.empty<0>
                     stmt_if2.tree.key<0>
                     stmt_if2.tree.key<1>
@@ -179,7 +181,19 @@ if.else3:
   resources       : 
   procs           : 
 
-= > public test (6 calls)
+/= > public inline test (0 calls)
+0: /=($left#0:stmt_if2.tree, $right#0:stmt_if2.tree, ?$$#0:wybe.bool): AliasPairs: []
+    stmt_if2.tree.=<0>(~$left#0:stmt_if2.tree, ~$right#0:stmt_if2.tree, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+= > public test (9 calls)
 0: =($left#0:stmt_if2.tree, $right#0:stmt_if2.tree, ?$$#0:wybe.bool): AliasPairs: []
     foreign lpvm cast($left#0:stmt_if2.tree, ?tmp$0#0:wybe.int)
     foreign llvm icmp eq(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
@@ -338,6 +352,17 @@ declare external ccc  i8* @wybe_malloc(i32)
 
 
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external ccc  i1 @"stmt_if2.tree./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %"tmp$1#0" = tail call ccc  i1  @"stmt_if2.tree.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  br i1 %"tmp$1#0", label %if.then, label %if.else 
+if.then:
+  ret i1 0 
+if.else:
+  ret i1 1 
+}
 
 
 define external ccc  i1 @"stmt_if2.tree.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
