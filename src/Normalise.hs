@@ -3,7 +3,7 @@
 --  RCS      : $Id$
 --  Author   : Peter Schachte
 --  Origin   : Fri Jan  6 11:28:23 2012
---  Purpose  : Convert parse tree into AST
+--  Purpose  : Convert parse tree int AST
 --  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
 
 -- |Support for normalising wybe code as parsed to a simpler form
@@ -21,6 +21,7 @@ import Data.List as List
 import Data.Map as Map
 import Data.Maybe
 import Data.Set as Set
+import Data.Bits
 import Data.Graph
 import Data.Tuple.HT
 import Data.Tuple.Select
@@ -418,9 +419,7 @@ initResources = do
 --  of its constructors, and the constructors divided into constant (arity 0)
 --  and non-constant ones.
 normaliseTypeImpln :: TypeImpln
-                   -> (Maybe TypeRepresentation,
-                       Visibility,
-                       [Placed ProcProto])
+                   -> (Maybe TypeRepresentation,Visibility,[Placed ProcProto])
 normaliseTypeImpln (TypeRepresentation repName) =
     (Just $ normaliseTypeRepresntation repName, Private, [])
 normaliseTypeImpln (TypeCtors vis ctors) =
@@ -434,20 +433,6 @@ normaliseTypeRepresntation "double" = "f64"
 normaliseTypeRepresntation other = other
 
 
--- -- |Generate an assignment proc (a definition of '=')
--- assignmentProc :: TypeSpec -> Bool -> Item
--- assignmentProc ty leftToRight =
---     let (lname,lflow,rname,rflow)
---             = if leftToRight
---               then ("in", ParamIn,"out", ParamOut)
---               else ("out", ParamOut,"in", ParamIn)
---     in ProcDecl Public Det True
---        (ProcProto "=" [Param lname ty lflow Ordinary,
---                        Param rname ty rflow Ordinary] Set.empty)
---        [move (varGet "in") (varSet "out")]
---        Nothing
-
-
 -- |All items needed to implement a const contructor for the specified type.
 constCtorItems :: Visibility -> TypeSpec -> (Placed ProcProto,Integer) -> [Item]
 constCtorItems  vis typeSpec (placedProto,num) =
@@ -455,7 +440,7 @@ constCtorItems  vis typeSpec (placedProto,num) =
         constName = procProtoName proto
     in [ProcDecl vis Det True
         (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] Set.empty)
-        [lpvmCastToVar (castTo (IntValue num) typeSpec) "$"] pos
+        [lpvmCastToVar (castTo (iVal num) typeSpec) "$"] pos
        ]
 
 
@@ -468,17 +453,18 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
                   info@(CtorInfo ctorName paramsReps pos tag bits) = do
     -- If we're unboxed and there are const ctors, then we need an extra
     -- bit to make sure the unboxed value is > than any const value
-    let isNonConstBits = if numConsts == 0 then 0 else 1
-    let dectorProto = (ProcProto ctorName
-                       (List.map (\((Param n t _ ft),_,_) ->
-                                    (Param n t ParamOut ft)) paramsReps
-                        ++ [Param "$" typeSpec ParamIn Ordinary])
-                       Set.empty)
+    let nonConstsize = bits + tagBits
+    let (size,nonConstBit)
+          = if numConsts == 0
+            then (nonConstsize,Nothing)
+            else let constSize = ceiling $ logBase 2 $ fromIntegral numConsts
+                     size' = 1 + max nonConstsize constSize
+                 in (size', Just $ size' - 1)
     logNormalise $ "Making constructor items for " ++ show info
     logNormalise $ show bits ++ " data bit(s)"
     logNormalise $ show tagBits ++ " tag bit(s)"
-    logNormalise $ show isNonConstBits ++ " filler bit(s)"
-    if bits + tagBits + isNonConstBits <= wordSize
+    logNormalise $ "nonConst bit = " ++ show nonConstBit
+    if size <= wordSize
       then do -- unboxed representation
       let fields =
             reverse
@@ -488,12 +474,15 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
                   (shift+sz,(paramName param,paramType param,shift,sz):flds))
               (tagBits,[])
               paramsReps
-      -- XXX should include maximum sizes of the non-const constructors
-      let rep = "i" ++ (show $ ceiling $ logBase 2 $ fromIntegral numConsts)
-      return (rep, [])
-        -- $ unboxedConstructorItems ctorProto typeSpec tag fields pos
-        -- ++ unboxedDeconstructorItems dectorName typeSpec tag fields pos
-        -- ++ concatMap (unboxedGetterSetterItems typeSpec tag pos) fields
+      let rep = "i" ++ show size
+      return (rep,
+              unboxedConstructorItems vis ctorName typeSpec tag nonConstBit
+               fields pos
+               ++ unboxedDeconstructorItems vis ctorName typeSpec
+                  numConsts numNonConsts tag pos fields
+               ++ concatMap (unboxedGetterSetterItems vis typeSpec
+                             numConsts numNonConsts tag pos) fields
+             )
       else do -- boxed representation
       let (fields,size) = layoutRecord paramsReps tag tagLimit
       logNormalise $ "Laid out structure size " ++ show size
@@ -518,6 +507,10 @@ fieldSize :: TypeSpec -> Compiler Int
 -- XXX Generalise to allow non-word size fields
 fieldSize _ = return wordSizeBytes
 
+
+----------------------------------------------------------------
+--                Generating code for boxed types
+----------------------------------------------------------------
 
 -- | Lay out a record in memory, returning the size of the record and a
 -- list of the fields and offsets of the structure.  This ensures that
@@ -622,8 +615,7 @@ deconstructorItems ctorName typeSpec numConsts numNonConsts tag pos fields =
          ++ List.map (\(var,_,_,aligned) ->
                               (Unplaced $ ForeignCall "lpvm" "access" []
                                [Unplaced $ Var "$" ParamIn flowType,
-                                Unplaced $ IntValue
-                                  $ fromIntegral (aligned - tag),
+                                Unplaced $ iVal (aligned - tag),
                                 Unplaced $ Var var ParamOut flowType]))
             fields)
         pos]
@@ -679,7 +671,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size tag
         -- Code to access the selected field
          [Unplaced $ ForeignCall "lpvm" "access" []
           [Unplaced $ varGet "$rec",
-           Unplaced $ IntValue $ fromIntegral (offset - tag),
+           Unplaced $ iVal (offset - tag),
            Unplaced $ varSet "$"]])
         pos,
         ProcDecl vis detism True
@@ -692,11 +684,146 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size tag
          [Unplaced $ ForeignCall "lpvm" "mutate" flags
           [Unplaced $ Typed (Var "$rec" ParamInOut $ Implicit pos)
                       rectype False,
-           Unplaced $ IntValue $ fromIntegral (offset - tag),
-           Unplaced $ IntValue 0,    -- May be changed to 1 by CTGC transform
-           Unplaced $ IntValue $ fromIntegral size,
-           Unplaced $ IntValue $ fromIntegral tag,
+           Unplaced $ iVal (offset - tag),
+           Unplaced $ iVal 0,    -- May be changed to 1 by CTGC transform
+           Unplaced $ iVal size,
+           Unplaced $ iVal tag,
            Unplaced $ varGet "$field"]])
+        pos]
+
+
+----------------------------------------------------------------
+--                Generating code for unboxed types
+----------------------------------------------------------------
+
+-- |Generate constructor code for a non-const constructor
+-- unboxedConstructorItems
+unboxedConstructorItems :: Visibility -> ProcName -> TypeSpec -> Int
+                        -> Maybe Int -> [(VarName,TypeSpec,Int,Int)]
+                        -> OptPos -> [Item]
+unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
+    let flowType = Implicit pos
+        params = sel1 <$> fields
+        proto = (ProcProto ctorName
+                 ([Param name paramType ParamIn Ordinary
+                  | (name,paramType,_,_) <- fields]
+                   ++[Param "$" typeSpec ParamOut Ordinary])
+                 Set.empty)
+    in [ProcDecl vis Det True proto
+        -- Code to allocate memory for the value
+        ([Unplaced $ ForeignCall "llvm" "move" []
+          [Unplaced $ Typed (iVal 0) typeSpec True,
+           Unplaced $ Typed (varSet "$") typeSpec False]]
+         ++
+       -- Code to fill all the fields
+         (List.concatMap
+          (\(var,ty,shift,sz) ->
+               [Unplaced $ ForeignCall "llvm" "shl" []
+                 [Unplaced $ Typed (varGet var) typeSpec True,
+                  Unplaced $ Typed (iVal shift) typeSpec True,
+                  Unplaced $ Typed (varSet "$temp") typeSpec False],
+                Unplaced $ ForeignCall "llvm" "or" []
+                 [Unplaced $ Typed (varGet "$") typeSpec False,
+                  Unplaced $ Typed (varGet "$temp") typeSpec False,
+                  Unplaced $ Typed (varSet "$") typeSpec False]])
+          fields)
+         ++
+         (case nonConstBit of
+            Nothing -> []
+            Just shift ->
+              [Unplaced $ ForeignCall "llvm" "or" []
+               [Unplaced $ Typed (varGet "$") typeSpec False,
+                Unplaced $ Typed (iVal (bit shift::Int)) typeSpec True,
+                Unplaced $ Typed (varSet "$") typeSpec False]])
+          ++ [Unplaced $ ForeignCall "llvm" "or" []
+               [Unplaced $ Typed (varGet "$") typeSpec False,
+                Unplaced $ Typed (iVal tag) typeSpec True,
+                Unplaced $ Typed (varSet "$") typeSpec False]]
+        ) pos]
+
+
+-- |Generate deconstructor code for a unboxed non-const constructor
+unboxedDeconstructorItems :: Visibility -> ProcName -> TypeSpec -> Int -> Int
+                          -> Int -> OptPos -> [(VarName,TypeSpec,Int,Int)]
+                          -> [Item]
+unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
+                          pos fields =
+    let flowType = Implicit pos
+        detism = if numConsts + numNonConsts > 1 then SemiDet else Det
+    in [ProcDecl vis detism True
+        (ProcProto ctorName
+         (List.map (\(n,recType,_,_) -> (Param n recType ParamOut Ordinary))
+          fields
+          ++ [Param "$" recType ParamIn Ordinary])
+         Set.empty)
+        -- Code to check we have the right constructor
+        ([tagCheck numConsts numNonConsts tag "$"]
+         -- Code to fetch all the fields
+         ++ List.concatMap
+            (\(var,recType,shift,sz) ->
+               -- Code to access the selected field
+               [Unplaced $ ForeignCall "llvm" "lshr" []
+                 [Unplaced $ Typed (varGet "$") recType False,
+                  Unplaced $ Typed (iVal shift)
+                             recType True,
+                  Unplaced $ Typed (varSet "$temp") recType False],
+                Unplaced $ ForeignCall "llvm" "and" []
+                 [Unplaced $ Typed (varGet "$temp") recType False,
+                  Unplaced $ Typed (iVal $ (bit sz::Int) - 1) recType True,
+                  Unplaced $ Typed (varSet var) recType True]
+               ])
+            fields)
+        pos]
+
+
+-- -- | Produce a getter and a setter for one field of the specified type.
+unboxedGetterSetterItems :: Visibility -> TypeSpec -> Int -> Int -> Int
+                         -> OptPos -> (VarName,TypeSpec,Int,Int) -> [Item]
+unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
+                         (field,fieldtype,shift,sz) =
+    -- XXX generate cleverer code if multiple constructors have some of
+    --     the same field names
+    let detism = if numConsts + numNonConsts == 1 then Det else SemiDet
+        fieldmask = ((bit sz::Int) - 1) `shiftL` shift
+        holemask = complement fieldmask
+    in [ProcDecl vis detism True
+        (ProcProto field [Param "$rec" recType ParamIn Ordinary,
+                          Param "$" fieldtype ParamOut Ordinary] Set.empty)
+        -- Code to check we have the right constructor
+        ([tagCheck numConsts numNonConsts tag "$rec"]
+         ++
+        -- Code to access the selected field
+         [Unplaced $ ForeignCall "llvm" "and" []
+           [Unplaced $ Typed (varGet "$rec") recType False,
+            Unplaced $ Typed (iVal fieldmask) recType True,
+            Unplaced $ Typed (varSet "$rec") recType False],
+          Unplaced $ ForeignCall "llvm" "lshr" []
+           [Unplaced $ Typed (varGet "$rec") recType False,
+            Unplaced $ Typed (iVal shift) recType True,
+            Unplaced $ Typed (varSet "$") fieldtype True]
+         ])
+        pos,
+        ProcDecl vis detism True
+        (ProcProto field [Param "$rec" recType ParamInOut Ordinary,
+                          Param "$field" fieldtype ParamIn Ordinary] Set.empty)
+        -- Code to check we have the right constructor
+        ([tagCheck numConsts numNonConsts tag "$rec"]
+         ++
+        -- Code to mutate the selected field by masking out the current
+        -- value, shifting the new value into place and bitwise or-ing it
+         [Unplaced $ ForeignCall "llvm" "and" []
+           [Unplaced $ Typed (varGet "$rec") recType False,
+            Unplaced $ Typed (iVal holemask) recType True,
+            Unplaced $ Typed (varSet "$rec") recType False],
+          Unplaced $ ForeignCall "llvm" "shl" []
+           [Unplaced $ Typed (varGet "$field") recType False,
+            Unplaced $ Typed (iVal shift) recType True,
+            Unplaced $ Typed (varSet "field") recType False],
+          Unplaced $ ForeignCall "llvm" "or" []
+           [Unplaced $ Typed (varGet "$field") recType False,
+            Unplaced $ Typed (varGet "$rec") recType False,
+            Unplaced $ Typed (varSet "$rec") fieldtype False]
+         ])
         pos]
 
 

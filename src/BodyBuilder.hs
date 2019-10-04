@@ -827,7 +827,21 @@ simplifyOp "xor" _ [arg, ArgInt 0 _, output] =
   primMove arg output
 simplifyOp "xor" flags [arg1, arg2, output]
     | arg2 < arg1 = PrimForeign "llvm" "xor" flags [arg2, arg1, output]
--- XXX should probably put shift ops here, too
+simplifyOp "shl" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+  primMove (ArgInt (n1 `shiftL` fromIntegral n2) ty) output
+simplifyOp "shl" _ [arg, ArgInt 0 _, output] =
+  primMove arg output
+simplifyOp "shl" _ [arg@(ArgInt 0 _), _, output] =
+  primMove arg output
+simplifyOp "ashr" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+  primMove (ArgInt (n1 `shiftR` fromIntegral n2) ty) output
+simplifyOp "ashr" _ [arg, ArgInt 0 _, output] =
+  primMove arg output
+-- XXX Need to convert both to unsigned before shifting
+-- simplifyOp "lshr" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+--   primMove (ArgInt (n1 `shiftR` fromIntegral n2) ty) output
+simplifyOp "lshr" _ [arg, ArgInt 0 _, output] =
+  primMove arg output
 -- Integer comparisons, including special handling of unsigned comparison to 0
 simplifyOp "icmp" ["eq"] [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1==n2) output
