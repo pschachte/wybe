@@ -173,7 +173,7 @@ if.else:
 --------------------------------------------------
  Module position
   public submods  : 
-  public types    : position: (position.position,Just "address")
+  public types    : position: (position.position,Just address)
   public resources: 
   public procs    : position.printPosition<0>
                     position.position./=<0>

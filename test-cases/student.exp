@@ -2,8 +2,8 @@
 AFTER EVERYTHING:
  Module student
   public submods  : 
-  public types    : course: (student.course,Just "address")
-                    student: (student.student,Just "address")
+  public types    : course: (student.course,Just address)
+                    student: (student.student,Just address)
   public resources: 
   public procs    : student.<0>
                     student.printStudent<0>

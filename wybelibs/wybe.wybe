@@ -9,7 +9,7 @@ pub type bool { pub false | true
 }
 
 
-pub type int is i64 {
+pub type int is int {
     pub def +(x:int,y:int):int = foreign llvm add(x,y)
     pub def +(?x:int,y:int,z:int) { ?x = foreign llvm sub(z,y) }
     pub def +(x:int,?y:int,z:int) { ?y = foreign llvm sub(z,x) }
@@ -33,7 +33,7 @@ pub type int is i64 {
 }
 
 
-pub type float is f64 {
+pub type float is 64 bit float {
     pub def +(x:float,y:float):float = foreign llvm fadd(x,y)
     pub def +(?x:float,y:float,z:float) { ?x = foreign llvm fsub(z,y) }
     pub def +(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
@@ -67,7 +67,7 @@ pub type string is address {
 }
 
 
-pub type char is i8 {
+pub type char is 8 bit int {
     pub def =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
     pub def /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
 }
@@ -101,7 +101,7 @@ pub module io {
     # pub def eof:char = foreign lpvm cast(-1)
 }
 
-pub type phantom is phantom {
+pub type phantom is 0 bit int {
     # pub def phantom:phantom = foreign lpvm cast(0)
     # pub def =(x:phantom,?y:phantom) { ?y = foreign lpvm cast(0) }
     # pub def =(?x:phantom,y:phantom) { ?x = foreign lpvm cast(0) }

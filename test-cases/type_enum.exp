@@ -2,7 +2,7 @@
 AFTER EVERYTHING:
  Module type_enum
   public submods  : 
-  public types    : season: (type_enum.season,Just "i2")
+  public types    : season: (type_enum.season,Just 2 bit int)
   public resources: 
   public procs    : type_enum.season./=<0>
                     type_enum.season.=<0>
@@ -12,7 +12,7 @@ AFTER EVERYTHING:
                     type_enum.season.winter<0>
   imports         : public use type_enum.season
                     use wybe
-  types           : season/public  is i2 { winter() @type_enum:1:23 | spring() @type_enum:1:32 | summer() @type_enum:1:41 | autumn() @type_enum:1:50  }  @type_enum:1:5
+  types           : season/public  is 2 bit int { winter() @type_enum:1:23 | spring() @type_enum:1:32 | summer() @type_enum:1:41 | autumn() @type_enum:1:50  }  @type_enum:1:5
   resources       : 
   submodules      : type_enum.season
   procs           : 

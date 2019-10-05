@@ -1051,26 +1051,20 @@ llvmType :: TypeSpec -> Compiler LLVMAST.Type
 llvmType ty = do
     repr <- lookupTypeRepresentation ty
     case repr of
-        Just typeStr -> return $ typeStrToType typeStr
+        Just Address        -> return address_t
+        Just (Bits bits)    -> return $ int_c $ fromIntegral bits
+        Just (Floating 16)  -> return $ FloatingPointType HalfFP
+        Just (Floating 32)  -> return $ FloatingPointType FloatFP
+        Just (Floating 64)  -> return $ FloatingPointType DoubleFP
+        Just (Floating 80)  -> return $ FloatingPointType X86_FP80FP
+        Just (Floating 128) -> return $ FloatingPointType FP128FP
+        Just (Floating b)   -> shouldnt $ "unknown floating point width "
+                                          ++ show b
         Nothing ->
             shouldnt $ "llvmType applied to InvalidType or unknown type ("
             ++ show ty
             ++ ")"
 
-
-typeStrToType :: String -> LLVMAST.Type
-typeStrToType []        = void_t
-typeStrToType "int"     = address_t
-typeStrToType "bool"    = int_c 1
-typeStrToType "float"   = float_t
-typeStrToType "double"  = float_t
-typeStrToType "address" = address_t
-typeStrToType "word"    = address_t
-typeStrToType "phantom" = int_t
-typeStrToType ('i':cs)  = int_c (read cs)
-typeStrToType ('f':cs)  = float_c (read cs)
-typeStrToType typename  = shouldnt $ "Unrecognised type string '" ++ typename
-                                     ++ "'"
 
 ------------------------------------------------------------------------------
 -- -- * Creating LLVM AST module from global definitions                    --

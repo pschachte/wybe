@@ -2,7 +2,7 @@
 AFTER EVERYTHING:
  Module stmt_if2
   public submods  : 
-  public types    : tree: (stmt_if2.tree,Just "address")
+  public types    : tree: (stmt_if2.tree,Just address)
   public resources: 
   public procs    : stmt_if2.<0>
                     stmt_if2.lookup<0>

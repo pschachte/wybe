@@ -19,7 +19,8 @@ module AST (
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt,
-  TypeRepresentation(..), defaultTypeRepresentation, lookupTypeRepresentation,
+  TypeRepresentation(..), defaultTypeRepresentation, typeRepSize,
+  lookupTypeRepresentation,
   paramIsPhantom, argIsPhantom, typeIsPhantom, primProtoParamNames,
   protoNonePhantomParams, protoInputParamNames, isProcProtoArg,
   -- *Source Position Types
@@ -73,7 +74,7 @@ module AST (
   EncodedLPVM(..), ModuleIndex, makeEncodedLPVM
   ) where
 
-import           Config (magicVersion)
+import           Config (magicVersion, wordSize)
 import           Control.Monad
 import           Control.Monad.Trans (lift,liftIO)
 import           Control.Monad.Trans.State
@@ -133,13 +134,25 @@ determinismName Det = "ordinary"
 determinismName SemiDet = "test"
 
 
--- XXX Switch to a more explicit representation supporting n bit integers
--- for n >= 1, 2^n bit floating point for 4 <= n <= 7, phantom, and pointer.
--- Or maybe phantom is 0 bit integer?
-type TypeRepresentation = String
+-- | Internal representation of data
+data TypeRepresentation
+    = Address           -- * A pointer; occupies wordSize bits
+    | Bits Int          -- * An integer representation
+    | Floating Int      -- * A floating point representation
+    deriving (Eq, Generic)
 
+
+-- | Type representation for opaque things
 defaultTypeRepresentation :: TypeRepresentation
-defaultTypeRepresentation = "address"
+defaultTypeRepresentation = Bits wordSize
+
+
+-- | How many bits a type representation occupies
+typeRepSize :: TypeRepresentation -> Int
+typeRepSize Address         = wordSize
+typeRepSize (Bits bits)     = bits
+typeRepSize (Floating bits) = bits
+
 
 data TypeImpln = TypeRepresentation TypeRepresentation
                | TypeCtors Visibility [Placed ProcProto]
@@ -1233,14 +1246,8 @@ updateModLLVM fn modimp = do
 -- | Given a type spec, find its internal representation (a string),
 --   if possible.
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
-lookupTypeRepresentation AnyType = return $ Just "address"
+lookupTypeRepresentation AnyType = return $ Just defaultTypeRepresentation
 lookupTypeRepresentation InvalidType = return Nothing
--- XXX These 5 shouldn't be here; they shouldn't be necessary
--- lookupTypeRepresentation (TypeSpec ["wybe"] "bool" _) = return $ Just "bool"
--- lookupTypeRepresentation (TypeSpec ["wybe"] "int" _) = return $ Just "int"
--- lookupTypeRepresentation (TypeSpec ["wybe"] "float" _) = return $ Just "float"
--- lookupTypeRepresentation (TypeSpec ["wybe"] "double" _) = return $ Just "double"
--- lookupTypeRepresentation (TypeSpec _ "phantom" _) = return $ Just "phantom"
 lookupTypeRepresentation (TypeSpec modSpecs name _) = do
     -- logMsg Blocks $ "Looking for " ++ name ++ " in mod: " ++
     --      showModSpec modSpecs
@@ -2115,7 +2122,7 @@ inArgVar2 arg@(ArgVar var ty flow _ final)
     | flow == FlowIn && not (argIsPhantom arg) = do
         rep <- lookupTypeRepresentation ty
         case rep of
-            Just "address" ->
+            Just Address ->
                 return (Just var)
             _ ->
                 return Nothing
@@ -2278,7 +2285,7 @@ varsInPrimArg _ (ArgUnneeded _ _)       = Set.empty
 instance Show Item where
   show (TypeDecl vis name (TypeRepresentation repn) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
-    ++ " is" ++ repn
+    ++ " is" ++ show repn
     ++ showMaybeSourcePos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
@@ -2325,6 +2332,14 @@ instance Show Item where
     showStmt 4 stmt ++ showMaybeSourcePos pos
   show (PragmaDecl prag) =
     "pragma " ++ show prag
+
+
+-- |How to show a type representation
+instance Show TypeRepresentation where
+  show Address = "address"
+  show (Bits bits) = show bits ++ " bit int"
+  show (Floating bits) = show bits ++ " bit float"
+
 
 -- |How to show a ModSpec.
 showModSpec :: ModSpec -> String
@@ -2401,7 +2416,7 @@ instance Show TypeDef where
   show (TypeDef vis params rep members _ pos items) =
     visibilityPrefix vis
     ++ (if List.null params then "" else "(" ++ intercalate "," params ++ ")")
-    ++ maybe "" (" is " ++) rep
+    ++ maybe "" (" is " ++) (show <$> rep)
     ++ " { "
     ++ intercalate " | " (show <$> members)
     ++ " "

@@ -2,7 +2,7 @@
 AFTER EVERYTHING:
  Module position_float
   public submods  : 
-  public types    : position: (position_float.position,Just "address")
+  public types    : position: (position_float.position,Just address)
   public resources: 
   public procs    : position_float.position./=<0>
                     position_float.position.=<0>

@@ -19,6 +19,7 @@ import Data.Set as Set
 import Data.List as List
 import Control.Monad.Identity (Identity)
 import Scanner
+import Config
 import Text.Parsec
 -- import qualified Parser as OldParser
 -- import           Data.Algorithm.Diff       (getGroupedDiff)
@@ -142,9 +143,18 @@ typeItemParser v = do
 
 -- | Type declaration body where representation and items are given
 typeImpln = do
-    impln <- TypeRepresentation <$> (ident "is" *> identString)
+    impln <- TypeRepresentation <$> (ident "is" *> typeRep)
     items <- betweenB Brace itemParser
     return (impln,items)
+
+
+-- | Type declaration body where representation and items are given
+typeRep = do
+    ident "address" *> return Address
+    <|> do bits <- option wordSize
+                   (fromIntegral <$> content <$> intLiteral <* ident "bit")
+           (ident "int" *> return (Bits bits)
+            <|> ident "float" *> return (Floating bits))
 
 
 -- | Type declaration body where visibility, constructors, and items are given
@@ -714,9 +724,12 @@ floatExp = takeToken test
 
 -- | Parse an integer literal token.
 intExp :: Parser (Placed Exp)
-intExp = takeToken test
+intExp = (IntValue <$>) <$> intLiteral
+
+
+intLiteral = takeToken test
   where
-    test (TokInt i p) = Just $ Placed (IntValue i) p
+    test (TokInt i p) = Just $ Placed i p
     test _            = Nothing
 
 

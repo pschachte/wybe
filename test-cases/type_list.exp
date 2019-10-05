@@ -2,7 +2,7 @@
 AFTER EVERYTHING:
  Module type_list
   public submods  : 
-  public types    : intlist: (type_list.intlist,Just "address")
+  public types    : intlist: (type_list.intlist,Just address)
   public resources: 
   public procs    : type_list.<0>
                     type_list.++<0>

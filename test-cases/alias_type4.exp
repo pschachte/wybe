@@ -2,8 +2,8 @@
 AFTER EVERYTHING:
  Module alias_type4
   public submods  : 
-  public types    : position: (alias_type4.position,Just "address")
-                    posrec: (alias_type4.posrec,Just "address")
+  public types    : position: (alias_type4.position,Just address)
+                    posrec: (alias_type4.posrec,Just address)
   public resources: 
   public procs    : alias_type4.<0>
                     alias_type4.foo<0>

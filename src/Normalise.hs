@@ -230,7 +230,7 @@ completeTypeSCC (CyclicSCC nameTypedefs) = do
                ++ show typedef) nameTypedefs
     -- Update type representations for recursive types to addresses
     mapM_ (\((name,mod),typedef) ->
-             addType name (typedef {typeDefRepresentation = Just "address"})
+             addType name (typedef {typeDefRepresentation = Just Address})
                `inModule` mod)
           nameTypedefs
     mapM_ (uncurry completeType) nameTypedefs
@@ -309,7 +309,7 @@ completeType (name,modspec)
       let rep = typeRepresentation reps numConsts
       logNormalise $ "Representation of type "
                      ++ showModSpec modspec ++ "." ++ name
-                     ++ " = " ++ rep
+                     ++ " is " ++ show rep
       addType name (typedef {typeDefRepresentation = Just rep })
       normaliseSubmodule name (Just params) vis pos
         $ constItems ++ concat nonconstItemsList ++ extraItems
@@ -337,7 +337,8 @@ nonConstCtorInfo placedProto tag = do
     unless (all isJust reps)
       $ shouldnt $ "Some member types with unknown rep: " ++ show reps
     let reps' = fromJust <$> reps
-    logNormalise $ "Member representations: " ++ intercalate ", " reps'
+    logNormalise $ "Member representations: "
+                   ++ intercalate ", " (show <$> reps')
     let bitSizes = typeRepSize <$> reps'
     let bitSize  = sum bitSizes
     let typeReps = zip3 params' reps' bitSizes
@@ -353,22 +354,14 @@ fixParamType pos param = do
     return $ param { paramType = ty' }
 
 
--- XXX These two need to be revisited when TypeRepresentation is revised
-
--- | The number of bits needed for the specified representation
-typeRepSize :: TypeRepresentation -> Int
-typeRepSize "address" = wordSize
-typeRepSize _ = wordSize -- XXX find the appropriate size for each rep
-
-
 -- | Determine the appropriate representation for a type based on a list of
 -- the representations of all the non-constant constructors and the number
 -- of constant constructors.
 
 typeRepresentation :: [TypeRepresentation] -> Int -> TypeRepresentation
 typeRepresentation [] numConsts =
-    "i" ++ (show $ ceiling $ logBase 2 $ fromIntegral numConsts)
-typeRepresentation _ _ = "address"
+    Bits $ ceiling $ logBase 2 $ fromIntegral numConsts
+typeRepresentation _ _ = Address
 
 
 ----------------------------------------------------------------
@@ -420,17 +413,10 @@ initResources = do
 --  and non-constant ones.
 normaliseTypeImpln :: TypeImpln
                    -> (Maybe TypeRepresentation,Visibility,[Placed ProcProto])
-normaliseTypeImpln (TypeRepresentation repName) =
-    (Just $ normaliseTypeRepresntation repName, Private, [])
+normaliseTypeImpln (TypeRepresentation rep) =
+    (Just rep, Private, [])
 normaliseTypeImpln (TypeCtors vis ctors) =
     (Nothing, vis, ctors)
-
-
-normaliseTypeRepresntation :: String -> String
-normaliseTypeRepresntation "int" = "i" ++ show wordSize
-normaliseTypeRepresntation "float" = "f" ++ show wordSize
-normaliseTypeRepresntation "double" = "f64"
-normaliseTypeRepresntation other = other
 
 
 -- |All items needed to implement a const contructor for the specified type.
@@ -474,8 +460,7 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
                   (shift+sz,(paramName param,paramType param,shift,sz):flds))
               (tagBits,[])
               paramsReps
-      let rep = "i" ++ show size
-      return (rep,
+      return (Bits size,
               unboxedConstructorItems vis ctorName typeSpec tag nonConstBit
                fields pos
                ++ unboxedDeconstructorItems vis ctorName typeSpec
@@ -487,11 +472,11 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
       let (fields,size) = layoutRecord paramsReps tag tagLimit
       logNormalise $ "Laid out structure size " ++ show size
           ++ ": " ++ show fields
-      let ptrCount = length $ List.filter ((=="address") . snd3) paramsReps
+      let ptrCount = length $ List.filter ((==Address) . snd3) paramsReps
       logNormalise $ "Structure contains " ++ show ptrCount ++ " pointers, "
                      ++ show numConsts ++ " const constructors, "
                      ++ show numNonConsts ++ " non-const constructors"
-      return ("address",
+      return (Address,
               constructorItems ctorName typeSpec fields size tag pos
               ++ deconstructorItems ctorName typeSpec numConsts numNonConsts
                  tag pos fields
@@ -536,7 +521,7 @@ layoutRecord paramsReps tag tagLimit =
           ordFields' = if tag > tagLimit
                             -- XXX wybe.short doesn't exist; this should be
                             -- an unnamed unsigned 16 bit int type
-                       then (("$tag",TypeSpec ["wybe"] "short" [],"i16",2),2)
+                       then (("$tag",TypeSpec ["wybe"] "short" [],Bits 16,2),2)
                             :ordFields
                        else ordFields
           offsets = List.foldl align ([],0) ordFields'
@@ -660,7 +645,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size tag
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
     let detism = if numConsts + numNonConsts == 1 then Det else SemiDet
-        otherPtrCount = if rep == "address" then ptrCount-1 else ptrCount
+        otherPtrCount = if rep == Address then ptrCount-1 else ptrCount
         flags = if otherPtrCount == 0 then ["noalias"] else []
     in [ProcDecl vis detism True
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,

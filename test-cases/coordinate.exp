@@ -2,7 +2,7 @@
 AFTER EVERYTHING:
  Module coordinate
   public submods  : 
-  public types    : Coordinate: (coordinate.Coordinate,Just "address")
+  public types    : Coordinate: (coordinate.Coordinate,Just address)
   public resources: 
   public procs    : coordinate.<0>
                     coordinate.fcopy<0>

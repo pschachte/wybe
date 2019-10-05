@@ -2,7 +2,7 @@
 AFTER EVERYTHING:
  Module person2
   public submods  : 
-  public types    : person: (person2.person,Just "address")
+  public types    : person: (person2.person,Just address)
   public resources: 
   public procs    : person2.<0>
                     person2.person./=<0>

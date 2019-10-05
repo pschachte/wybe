@@ -2,7 +2,7 @@
 AFTER EVERYTHING:
  Module stmt_if
   public submods  : 
-  public types    : tree: (stmt_if.tree,Just "address")
+  public types    : tree: (stmt_if.tree,Just address)
   public resources: 
   public procs    : stmt_if.lookup<0>
                     stmt_if.tree./=<0>

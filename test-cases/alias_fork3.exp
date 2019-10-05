@@ -145,7 +145,7 @@ if.else:
 --------------------------------------------------
  Module mytree
   public submods  : 
-  public types    : tree: (mytree.tree,Just "address")
+  public types    : tree: (mytree.tree,Just address)
   public resources: 
   public procs    : mytree.printTree<0>
                     mytree.tree./=<0>

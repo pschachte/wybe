@@ -2,7 +2,7 @@
 AFTER EVERYTHING:
  Module tests
   public submods  : 
-  public types    : map: (tests.map,Just "address")
+  public types    : map: (tests.map,Just address)
   public resources: 
   public procs    : tests.lookup<0>
                     tests.lt<0>
