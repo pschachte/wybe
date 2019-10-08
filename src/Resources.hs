@@ -81,7 +81,8 @@ canonicaliseProcResources pd = do
     logResources $ "Available resources: " ++ show resourceFlows
     let proto' = proto {procProtoResources = resourceFlows}
     let pd' = pd {procProto = proto'}
-    logResources $ "Adding resources results in:" ++ showProcDef 4 pd'
+    logResources $ "Canonicalising resources results in:"
+                   ++ showProcDef 4 pd'
     return pd'
 
 
@@ -111,8 +112,9 @@ transformProcResources pd = do
     let resourceFlows = procProtoResources proto
     let params = procProtoParams proto
     let (ProcDefSrc body) = procImpln pd
-    resFlows <- fmap concat $ mapM (simpleResourceFlows pos)
-                            $ Set.elems resourceFlows
+    resFlows <- concat <$> mapM (simpleResourceFlows pos)
+                           (Set.elems resourceFlows)
+    logResources $ "Declared resources: " ++ show resFlows
     (body',tmp') <- transformBody tmp body
     resParams <- concat <$> mapM (resourceParams pos) resFlows
     let proto' = proto { procProtoParams = params ++ resParams}
