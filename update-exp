@@ -21,12 +21,12 @@ prefix () {
 #    compiler output file name
 #    current expected output file name, or empty for new test cases
 agree () {
-    if [ -n "$3" ] ; then
+    if [ -r "$3" ] ; then
         action=diff
-        valid="yes accept|no keep|diff|(show) previous|(show) current|quit"
+        valid="yes accept|no keep|diff|unified|previous|current|quit"
     else
         action=current
-        valid="yes accept|no reject|(show) current|quit"
+        valid="yes accept|no reject|current|quit"
     fi
     while true ; do
         destination=$PAGER
@@ -37,6 +37,9 @@ agree () {
             [dD]*)
                 (prefix "$1" 'Output Changes' ; \
 	         dwdiff -c -d '()<>~!@:?.%#' "$3" "$2" ) | $destination ;;
+            [uU]*)
+                (prefix "$1" 'Output Changes' ; \
+	         diff -u "$3" "$2" ) | $destination ;;
             [pP]*)
                 (prefix "$1" 'Previous Expected Output' ; \
 	         cat "$3" ) | $destination ;;
@@ -49,10 +52,10 @@ agree () {
         echo "(upper case to see output without paging)"
 	read -p "$valid: " action
 	case "$action" in
-	    [yYaA]*) return 0 ;;
-	    [nNrR]*) return 1 ;;
+	    [yYaA]*) return 0 ;;   # 0 means true
+	    [nNrR]*) return 1 ;;   # non-0 means false
 	    [qQ]*) echo "Quitting..." ; exit 0 ;;
-            [dDpP]) if [ -z "$3" ] ; then
+            [dDuUpP]*) if [ ! -r "$3" ] ; then
                         echo "No previous expected output!"
                         action=ask
                     fi ;;
@@ -70,10 +73,7 @@ updatefile () {
         exit 1
     fi
 
-    if ! [ -r "$exp" ] ; then
-        exp='' # no previous expected output
-    fi
-    if [ -n "$exp" ] && diff -q "$exp" "$out" > /dev/null ; then
+    if [ -r "$exp" ] && diff -q "$exp" "$out" > /dev/null ; then
         echo "Output for $f unchanged"
     else
 	if agree "$f" "$out" "$exp" ; then
