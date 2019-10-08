@@ -319,29 +319,33 @@ flattenStmt' (UseResources res body) pos detism = do
                       Set.\\ (Set.fromList $ resourceName <$> res)
                       `Set.union` defined })
     emit pos $ UseResources res body'
-flattenStmt' (For itr gen) pos detism = do
-    vars <- flattenPExp gen
-    case vars of
-        [] -> lift $
-              message Error "'for' generator does not produce a value" 
-              (place gen)
-        (_:_:_) -> lift $
-                   message Error "'for' generator has invalid flow" (place gen)
-        [genVar@(Unplaced (Var genVarName ParamIn flowType))] -> do
-            -- XXX not generating the right code until we have polymorphism
-            flattenStmt 
-              (Cond (maybePlace (ProcCall [] "[|]" Nothing SemiDet False
-                                 [itr,
-                                  Unplaced $ 
-                                  Var genVarName ParamOut flowType,
-                                  genVar])
-                     pos)
-                  []
-                  [maybePlace (ProcCall [] "[]" Nothing SemiDet False [genVar])
-                      pos,
-                   Unplaced Break]
-              ) pos detism
-        _ -> shouldnt "Generator expression producing unexpected vars"
+-- flattenStmt' (For itr gen) pos detism = do
+--     vars <- flattenPExp gen
+--     logFlatten $ "Flattening For " ++ show itr ++ " in " ++ show gen
+--     logFlatten $ "  For vars = " ++ show vars
+--     case vars of
+--         [] -> lift $
+--               message Error "'for' generator does not produce a value"
+--               (place gen)
+--         (_:_:_) -> lift $
+--                    message Error "'for' generator has invalid flow" (place gen)
+--         [genVar@(Unplaced (Var genVarName direction flowType))] -> do
+--             -- XXX not generating the right code until we have polymorphism
+--             flattenStmt
+--               (Cond (maybePlace (ProcCall [] "[|]" Nothing SemiDet False
+--                                  [itr,
+--                                   Unplaced $
+--                                   Var genVarName ParamOut flowType,
+--                                   Unplaced $
+--                                   Var genVarName ParamIn flowType])
+--                      pos)
+--                   []
+--                   [maybePlace (ProcCall [] "[]" Nothing SemiDet False
+--                                [Unplaced $ Var genVarName ParamIn flowType])
+--                     pos,
+--                    Unplaced Break]
+--               ) pos detism
+--         _ -> shouldnt "Generator expression producing unexpected vars"
 flattenStmt' Nop pos detism = emit pos Nop
 flattenStmt' Break pos detism = emit pos Break
 flattenStmt' Next pos detism = emit pos Next

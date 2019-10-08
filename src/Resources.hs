@@ -203,8 +203,8 @@ transformStmt tmp (UseResources res body) pos = do
                      [var t ParamIn,var r ParamOut]) <$> pairs
     (body',tmp'') <- transformBody tmp' body
     return (saves ++ body' ++ restores, tmp'')
-transformStmt tmp (For itr gen) pos =
-    return ([maybePlace (For itr gen) pos], tmp)
+-- transformStmt tmp (For itr gen) pos =
+--     return ([maybePlace (For itr gen) pos], tmp)
 transformStmt tmp Break pos =
     return ([maybePlace Break pos], tmp)
 transformStmt tmp Next pos =

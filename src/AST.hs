@@ -1677,8 +1677,8 @@ foldProcCalls' fn comb val (Loop body) ss =
     foldProcCalls fn comb (foldProcCalls fn comb val body) ss
 foldProcCalls' fn comb val (UseResources _ body) ss =
     foldProcCalls fn comb (foldProcCalls fn comb val body) ss
-foldProcCalls' fn comb val For{} ss =
-    foldProcCalls fn comb val ss
+-- foldProcCalls' fn comb val For{} ss =
+--     foldProcCalls fn comb val ss
 foldProcCalls' fn comb val Break ss =
     foldProcCalls fn comb val ss
 foldProcCalls' fn comb val Next ss =
@@ -1915,8 +1915,9 @@ data Stmt
 
      -- |A loop body; the loop is controlled by Breaks and Nexts
      | Loop [Placed Stmt]
-     -- |An enumerator; only valid in a loop
-     | For (Placed Exp) (Placed Exp)
+     -- XXX to handle for loops, need to hoist generator expr out of the loop
+     -- -- |An enumerator; only valid in a loop
+     -- | For (Placed Exp) (Placed Exp)
      -- |Immediately exit the enclosing loop; only valid in a loop
      | Break  -- holds the variable versions before the break
      -- |Immediately jump to the top of the enclosing loop; only valid in a loop
@@ -2603,8 +2604,8 @@ showStmt indent (UseResources resources stmts) =
     ++ showBody (indent + 4) stmts
     ++ List.replicate indent ' ' ++ "}"
 showStmt _ (Nop) = "nop"
-showStmt _ (For itr gen) =
-    "for " ++ show itr ++ " in " ++ show gen
+-- showStmt _ (For itr gen) =
+--     "for " ++ show itr ++ " in " ++ show gen
 showStmt _ (Break) = "break"
 showStmt _ (Next) = "next"
 

@@ -313,7 +313,7 @@ typeParser = do
 stmtParser :: Parser (Placed Stmt)
 stmtParser =
           doStmt
-          <|> forStmt
+          -- <|> forStmt
           <|> whileStmt
           <|> untilStmt
           <|> unlessStmt
@@ -361,12 +361,12 @@ doStmt = do
     return $ Placed (Loop body) pos
 
 
-forStmt :: Parser (Placed Stmt)
-forStmt = do
-    pos <- tokenPosition <$> ident "for"
-    cond <- expParser <* ident "in"
-    body <- expParser
-    return $ Placed (For cond body) pos
+-- forStmt :: Parser (Placed Stmt)
+-- forStmt = do
+--     pos <- tokenPosition <$> ident "for"
+--     cond <- expParser <* ident "in"
+--     body <- expParser
+--     return $ Placed (For cond body) pos
 
 
 whileStmt :: Parser (Placed Stmt)

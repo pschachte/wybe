@@ -393,8 +393,8 @@ unbranchStmt (Loop body) pos stmts = do
     return [next]
 unbranchStmt (UseResources _ _) _ _ =
     shouldnt "resource handling should have removed use ... in statements"
-unbranchStmt (For _ _) _ _ =
-    shouldnt "flattening should have removed For statements"
+-- unbranchStmt (For _ _) _ _ =
+--     shouldnt "flattening should have removed For statements"
 unbranchStmt Nop _ stmts = do
     logUnbranch "Unbranching a Nop"
     unbranchStmts stmts         -- might as well filter out Nops
@@ -668,8 +668,8 @@ unbranchSemiDet (Loop body) pos stmts = do
             logUnbranch $ "Finished handling loop"
     endLoop prevState
     return [next]
-unbranchSemiDet (For _ _) _ _ =
-    shouldnt "flattening should have removed For statements"
+-- unbranchSemiDet (For _ _) _ _ =
+--     shouldnt "flattening should have removed For statements"
 unbranchSemiDet (UseResources _ _) _ _ =
     shouldnt "resource handling should have removed use ... in statements"
 unbranchSemiDet Nop _ stmts = do

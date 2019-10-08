@@ -53,7 +53,7 @@ stmtDefUse (Cond exp thn els _ _) =
     (pstmtsDefUse thn `joinDefUse` pstmtsDefUse els)
 stmtDefUse (Loop loop _ _) = pstmtsDefUse loop
 stmtDefUse Nop = noDefUse
-stmtDefUse (For gen _ _) = generatorDefUse gen
+-- stmtDefUse (For gen _ _) = generatorDefUse gen
 stmtDefUse Break = noDefUse
 stmtDefUse Next = noDefUse
 
