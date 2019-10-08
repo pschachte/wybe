@@ -270,7 +270,8 @@ buildFork var ty = do
               case arg' of
                   ArgInt n _ -> -- result known at compile-time
                     (var,Just n)
-                  ArgVar var' varType _ _ _ -> -- statically unknown result
+                  ArgVar{argVarName=var',argVarType=varType} ->
+                    -- statically unknown result
                     (var',Nothing)
                   _ -> shouldnt "switch on non-integer variable"
         put $ childState st $  Forked fvar ty fval [] False
@@ -432,7 +433,7 @@ instr prim pos = do
 
 instr' :: Prim -> OptPos -> BodyBuilder ()
 instr' prim@(PrimForeign "llvm" "move" []
-           [val, argvar@(ArgVar var _ flow _ _)]) pos
+           [val, argvar@ArgVar{argVarName=var, argVarFlow=flow}]) pos
   = do
     logBuild $ "  Expanding move(" ++ show val ++ ", " ++ show argvar ++ ")"
     unless (flow == FlowOut && argFlowDirection val == FlowIn) $
@@ -455,7 +456,7 @@ instr' prim@(PrimForeign "lpvm" "alloc" [] [_,argvar]) pos = do
     rawInstr prim pos
     recordVarSet argvar
 instr' prim@(PrimForeign "lpvm" "cast" []
-             [from, to@(ArgVar var _ flow _ _)]) pos
+             [from, to@ArgVar{argVarName=var, argVarFlow=flow}]) pos
   = do
     logBuild $ "  Expanding cast(" ++ show from ++ ", " ++ show to ++ ")"
     unless (argFlowDirection from == FlowIn && flow == FlowOut) $
@@ -499,7 +500,8 @@ ordinaryInstr prim pos = do
 
 -- | Invert an output arg to be an input arg.
 mkInput :: PrimArg -> PrimArg
-mkInput (ArgVar name ty _ ftype lst) = ArgVar name ty FlowIn Ordinary False
+mkInput (ArgVar name ty coerce _ ftype lst) =
+    ArgVar name ty coerce FlowIn Ordinary False
 mkInput arg@ArgInt{} = arg
 mkInput arg@ArgFloat{} = arg
 mkInput arg@ArgString{} = arg
@@ -578,7 +580,7 @@ addSubst var val = do
 
 -- |Reconrd that the specified arg (which must be a variable) has been set.
 recordVarSet :: PrimArg -> BodyBuilder ()
-recordVarSet (ArgVar nm _ FlowOut _ _) =
+recordVarSet ArgVar{argVarName=nm, argVarFlow=FlowOut} =
     modify (\s -> s { blockDefs = Set.insert nm $ blockDefs s })
 recordVarSet (ArgUnneeded FlowOut _) = return ()
 recordVarSet arg =
@@ -687,7 +689,8 @@ canonicalisePrim (PrimTest arg) =
 -- |Standardise unimportant info in an arg, so that it is equal to any
 --  other arg with the same content.
 canonicaliseArg :: PrimArg -> PrimArg
-canonicaliseArg (ArgVar nm _ fl _ _) = ArgVar nm AnyType fl Ordinary False
+canonicaliseArg ArgVar{argVarName=nm, argVarFlow=fl} =
+    ArgVar nm AnyType False fl Ordinary False
 canonicaliseArg (ArgInt v _)         = ArgInt v AnyType
 canonicaliseArg (ArgFloat v _)       = ArgFloat v AnyType
 canonicaliseArg (ArgString v _)      = ArgString v AnyType
@@ -702,7 +705,7 @@ validateInstr (PrimTest _)               = return ()
 
 
 validateArg :: Prim -> PrimArg -> BodyBuilder ()
-validateArg instr (ArgVar _ ty _ _ _) = validateType ty instr
+validateArg instr ArgVar{argVarType=ty} = validateType ty instr
 validateArg instr (ArgInt    _ ty)    = validateType ty instr
 validateArg instr (ArgFloat  _ ty)    = validateType ty instr
 validateArg instr (ArgString _ ty)    = validateType ty instr
@@ -730,18 +733,18 @@ addInstrToState ins st@BodyState{buildState=bld@Forked{complete=True,bodies=bods
 
 -- |Return the current ultimate value of the specified variable name and type
 expandVar :: PrimVarName -> TypeSpec -> BodyBuilder PrimArg
-expandVar var ty = expandArg $ ArgVar var ty FlowIn Ordinary False
+expandVar var ty = expandArg $ ArgVar var ty False FlowIn Ordinary False
 
 
 -- |Return the current ultimate value of the input argument.
 expandArg :: PrimArg -> BodyBuilder PrimArg
-expandArg arg@(ArgVar var _ FlowIn _ _) = do
+expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowIn} = do
     var' <- gets (Map.lookup var . currSubst)
     logBuild $ "Expanded " ++ show var ++ " to variable " ++ show var'
     maybe (return arg) expandArg var'
-expandArg (ArgVar var typ FlowOut ftype lst) = do
+expandArg (ArgVar var typ coerce FlowOut ftype lst) = do
     var' <- gets (Map.findWithDefault var var . outSubst)
-    return $ ArgVar var' typ FlowOut ftype lst
+    return $ ArgVar var' typ coerce FlowOut ftype lst
 expandArg arg = return arg
 
 
@@ -1082,7 +1085,7 @@ bkwdBuildStmt defs prim pos = do
 renameArg :: PrimArg -> BkwdBuilder PrimArg
 renameArg arg@ArgVar{argVarName=name} = do
     name' <- gets (Map.findWithDefault name name . asmRenaming)
-    return $ arg { argVarName = name' }
+    return $ arg {argVarName=name'}
 renameArg arg = return arg
 
 

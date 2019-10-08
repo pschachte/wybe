@@ -2,7 +2,7 @@
 AFTER EVERYTHING:
  Module type_int
   public submods  : 
-  public types    : myint: (type_int.myint,Just 64 bit int)
+  public types    : myint: (type_int.myint,Just 64 bit signed)
   public resources: 
   public procs    : type_int.myint.*<0>
                     type_int.myint.+<0>
@@ -20,7 +20,7 @@ AFTER EVERYTHING:
                     type_int.myint.>=<0>
   imports         : public use type_int.myint
                     use wybe
-  types           : myint/public  is 64 bit int {  public func +(x:myint, y:myint):myint @type_int:2:9 = foreign llvm add(x @type_int:2:57, y @type_int:2:59) @type_int:2:40
+  types           : myint/public  is 64 bit signed {  public func +(x:myint, y:myint):myint @type_int:2:9 = foreign llvm add(x @type_int:2:57, y @type_int:2:59) @type_int:2:40
   public proc +(?x:myint, y:myint, z:myint) @type_int:3:9 {
     =(?x @type_int:3:43, foreign llvm sub(z @type_int:3:65, y @type_int:3:67) @type_int:3:48)
   }

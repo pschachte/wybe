@@ -137,7 +137,8 @@ determinismName SemiDet = "test"
 -- | Internal representation of data
 data TypeRepresentation
     = Address           -- * A pointer; occupies wordSize bits
-    | Bits Int          -- * An integer representation
+    | Bits Int          -- * An unsigned integer representation
+    | Signed Int        -- * A signed integer representation
     | Floating Int      -- * A floating point representation
     deriving (Eq, Generic)
 
@@ -151,6 +152,7 @@ defaultTypeRepresentation = Bits wordSize
 typeRepSize :: TypeRepresentation -> Int
 typeRepSize Address         = wordSize
 typeRepSize (Bits bits)     = bits
+typeRepSize (Signed bits)   = bits
 typeRepSize (Floating bits) = bits
 
 
@@ -1972,7 +1974,7 @@ paramIsPhantom param = typeIsPhantom (primParamType param)
 
 -- |Is the supplied argument a phantom?
 argIsPhantom :: PrimArg -> Bool
-argIsPhantom (ArgVar _ ty _ _ _) = typeIsPhantom ty
+argIsPhantom ArgVar{argVarType=ty} = typeIsPhantom ty
 argIsPhantom _ = False -- Nothing but a var can be a phantom
 
 -- |Does the supplied type indicate a phantom?
@@ -2036,8 +2038,9 @@ instance Show Prim where
 -- |The allowed arguments in primitive proc or foreign proc calls,
 --  just variables and constants.
 data PrimArg
-     = ArgVar {argVarName     :: PrimVarName, -- ^Name of output variable
+     = ArgVar {argVarName     :: PrimVarName, -- ^Name of argument variable
                argVarType     :: TypeSpec,    -- ^Its type
+               argVarCoerce   :: Bool,        -- ^Whether it must be converted
                argVarFlow     :: PrimFlow,    -- ^Its flow direction
                argVarFlowType :: ArgFlowType, -- ^Its flow type
                argVarFinal    :: Bool         -- ^Is this a definite last use
@@ -2090,20 +2093,20 @@ instance Show ArgFlowType where
 
 -- |The dataflow direction of an actual argument.
 argFlowDirection :: PrimArg -> PrimFlow
-argFlowDirection (ArgVar _ _ flow _ _) = flow
-argFlowDirection (ArgInt _ _) = FlowIn
-argFlowDirection (ArgFloat _ _) = FlowIn
-argFlowDirection (ArgString _ _) = FlowIn
-argFlowDirection (ArgChar _ _) = FlowIn
+argFlowDirection ArgVar{argVarFlow=flow} = flow
+argFlowDirection ArgInt{} = FlowIn
+argFlowDirection ArgFloat{} = FlowIn
+argFlowDirection ArgString{} = FlowIn
+argFlowDirection ArgChar{} = FlowIn
 argFlowDirection (ArgUnneeded flow _) = flow
 
 -- |Check dataflow direction of an actual argument and the arg should be ArgVar
 argVarIsFlowDirection :: PrimFlow -> PrimArg -> Bool
-argVarIsFlowDirection flow' (ArgVar _ _ flow _ _) = flow == flow'
+argVarIsFlowDirection flow' ArgVar{argVarFlow=flow} = flow == flow'
 argVarIsFlowDirection _ _ = False
 
 argType :: PrimArg -> TypeSpec
-argType (ArgVar _ typ _ _ _) = typ
+argType ArgVar{argVarType=typ} = typ
 argType (ArgInt _ typ) = typ
 argType (ArgFloat _ typ) = typ
 argType (ArgString _ typ) = typ
@@ -2118,7 +2121,7 @@ argType (ArgUnneeded _ typ) = typ
 -- Used in AliasAnalysis - only care about non phantom pointers that might incur
 -- aliasing
 inArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
-inArgVar2 arg@(ArgVar var ty flow _ final)
+inArgVar2 arg@(ArgVar var ty _ flow _ final)
     | flow == FlowIn && not (argIsPhantom arg) = do
         rep <- lookupTypeRepresentation ty
         case rep of
@@ -2130,7 +2133,7 @@ inArgVar2 _ = return Nothing
 
 -- Used in AliasAnalysis - only care about pointers that might aliasing an input
 outArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
-outArgVar2 arg@(ArgVar var _ flow _ _)
+outArgVar2 arg@(ArgVar var _ _ flow _ _)
     | flow == FlowOut && not (argIsPhantom arg) = return (Just var)
 outArgVar2 _ = return Nothing
 
@@ -2140,7 +2143,7 @@ outArgVar2 _ = return Nothing
 
 
 argDescription :: PrimArg -> String
-argDescription (ArgVar var _ flow ftype _) =
+argDescription (ArgVar var _ _ flow ftype _) =
     (case flow of
           FlowIn -> "input "
           FlowOut -> "output ") ++
@@ -2246,7 +2249,7 @@ isHalfUpdate _ _ = False
 --     List.foldr Set.union Set.empty $ List.map (varsInPrimArg dir) args
 
 varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
-varsInPrimArg dir (ArgVar var _ dir' _ _) =
+varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'} =
   if dir == dir' then Set.singleton var else Set.empty
 varsInPrimArg _ (ArgInt _ _)            = Set.empty
 varsInPrimArg _ (ArgFloat _ _)          = Set.empty
@@ -2337,7 +2340,8 @@ instance Show Item where
 -- |How to show a type representation
 instance Show TypeRepresentation where
   show Address = "address"
-  show (Bits bits) = show bits ++ " bit int"
+  show (Bits bits) = show bits ++ " bit unsigned"
+  show (Signed bits) = show bits ++ " bit signed"
   show (Floating bits) = show bits ++ " bit float"
 
 
@@ -2479,17 +2483,19 @@ instance Show ProcProto where
 -- |How to show a formal parameter.
 instance Show Param where
   show (Param name typ dir flowType) =
-    (show flowType) ++ flowPrefix dir ++ name ++ showTypeSuffix typ
+    (show flowType) ++ flowPrefix dir ++ name ++ showTypeSuffix typ False
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
   show (PrimParam name typ dir _ (ParamInfo unneeded)) =
       let (pre,post) = if unneeded then ("[","]") else ("","")
-      in  pre ++ primFlowPrefix dir ++ show name ++ showTypeSuffix typ ++ post
+      in  pre ++ primFlowPrefix dir ++ show name ++ showTypeSuffix typ False
+          ++ post
 
-showTypeSuffix :: TypeSpec -> String
-showTypeSuffix AnyType = ""
-showTypeSuffix typ = ":" ++ show typ
+showTypeSuffix :: TypeSpec -> Bool -> String
+showTypeSuffix AnyType _ = ""
+showTypeSuffix typ True  = ":!" ++ show typ
+showTypeSuffix typ False = ":" ++ show typ
 
 
 -- |How to show a dataflow direction.
@@ -2611,17 +2617,17 @@ showBody indent stmts =
 
 -- |Show a primitive argument.
 instance Show PrimArg where
-  show (ArgVar name typ dir ftype final) =
+  show (ArgVar name typ coerce dir ftype final) =
       (if final then "~" else "") ++
       primFlowPrefix dir ++
       show ftype ++
-      show name ++ showTypeSuffix typ
-  show (ArgInt i typ)    = show i ++ showTypeSuffix typ
-  show (ArgFloat f typ)  = show f ++ showTypeSuffix typ
-  show (ArgString s typ) = show s ++ showTypeSuffix typ
-  show (ArgChar c typ)   = show c ++ showTypeSuffix typ
+      show name ++ showTypeSuffix typ coerce
+  show (ArgInt i typ)    = show i ++ showTypeSuffix typ False
+  show (ArgFloat f typ)  = show f ++ showTypeSuffix typ False
+  show (ArgString s typ) = show s ++ showTypeSuffix typ False
+  show (ArgChar c typ)   = show c ++ showTypeSuffix typ False
   show (ArgUnneeded dir typ) =
-      primFlowPrefix dir ++ "_" ++ showTypeSuffix typ
+      primFlowPrefix dir ++ "_" ++ showTypeSuffix typ False
 
 
 -- |Show a single typed expression.
@@ -2643,7 +2649,7 @@ instance Show Exp where
     ++ (if List.null flags then "" else " " ++ unwords flags)
     ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
   show (Typed exp typ cast) =
-      show exp ++ (if cast then "!" else "") ++ showTypeSuffix typ
+      show exp ++ showTypeSuffix typ cast
 
 -- |maybeShow pre maybe post
 --  if maybe has something, show pre, the maybe payload, and post

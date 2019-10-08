@@ -170,7 +170,7 @@ entry:
 
 position > public inline (0 calls)
 0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:alias_type1.position): AliasPairs: []
-    foreign lpvm alloc(16:wybe.int, ?$rec#0:alias_type1.position)
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:!alias_type1.position)
     foreign lpvm mutate(~%$rec#0:alias_type1.position, ?%$rec#1:alias_type1.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:alias_type1.position, ?%$#0:alias_type1.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y#0:wybe.int)
 position > public inline (4 calls)
@@ -441,7 +441,7 @@ p > public inline (0 calls)
 
 posrec > public inline (0 calls)
 0: posrec(a#0:wybe.int, p#0:alias_type1.position, ?$#0:alias_type1.posrec): AliasPairs: []
-    foreign lpvm alloc(16:wybe.int, ?$rec#0:alias_type1.posrec)
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:!alias_type1.posrec)
     foreign lpvm mutate(~%$rec#0:alias_type1.posrec, ?%$rec#1:alias_type1.posrec, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~a#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:alias_type1.posrec, ?%$#0:alias_type1.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~p#0:alias_type1.position)
 posrec > public inline (4 calls)

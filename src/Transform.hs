@@ -149,8 +149,9 @@ mutateInstruction prim _ _ =  return prim
 -- flag is not set to 1 yet
 _updateMutateForAlias :: AliasMap -> [PrimVarName] -> [PrimArg] -> Compiler [PrimArg]
 _updateMutateForAlias aliasMap inputParams
-    args@[fIn@(ArgVar inName _ _ _ final1), fOut, offset, ArgInt des typ,
-        size, offset2, mem@(ArgVar memName _ _ _ final2)] =
+    args@[fIn@ArgVar{argVarName=inName,argVarFinal=final1},
+          fOut, offset, ArgInt des typ,
+        size, offset2, mem@ArgVar{argVarName=memName,argVarFinal=final2}] =
             -- When the val is also a pointer
             if notElem inName inputParams
                 && not (connectedToOthers aliasMap inName) && final1
@@ -159,7 +160,8 @@ _updateMutateForAlias aliasMap inputParams
             then return [fIn, fOut, offset, ArgInt 1 typ, size, offset2, mem]
             else return args
 _updateMutateForAlias aliasMap inputParams
-    args@[fIn@(ArgVar inName _ _ _ final), fOut, offset, ArgInt des typ,
+    args@[fIn@ArgVar{argVarName=inName,argVarFinal=final},
+          fOut, offset, ArgInt des typ,
           size, offset2, mem] =
         if notElem inName inputParams
             && not (connectedToOthers aliasMap inName) && final

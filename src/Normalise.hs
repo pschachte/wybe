@@ -431,8 +431,6 @@ constCtorItems  vis typeSpec (placedProto,num) =
 
 
 -- |All items needed to implement a non-const contructor for the specified type.
--- XXX need to handle the case of too many constructors for the number of tag
--- bits available
 nonConstCtorItems :: Visibility -> TypeSpec -> Int -> Int -> Int -> Int
                   -> CtorInfo -> Compiler (TypeRepresentation,[Item])
 nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
@@ -567,7 +565,7 @@ constructorItems ctorName typeSpec fields size tag pos =
          (List.map
           (\(var,ty,_,offset) ->
                (Unplaced $ ForeignCall "lpvm" "mutate" []
-                 [Unplaced $ Typed (varGetSet "$rec" flowType) typeSpec True,
+                 [Unplaced $ Typed (varGetSet "$rec" flowType) typeSpec False,
                   Unplaced $ iVal offset,
                   Unplaced $ iVal 1,
                   Unplaced $ iVal size,

@@ -16,10 +16,12 @@ import           Data.Map            as Map
 import           Data.Maybe          as Maybe
 import           Data.Set            as Set
 import           Data.Tuple.Select
+import           Data.Foldable
 import           Options             (LogSelection (Types))
 -- import           Resources
 import           Util
 import           Snippets
+import           Blocks              (llvmMapBinop, llvmMapUnop)
 
 -- import           Debug.Trace
 
@@ -87,9 +89,13 @@ checkDeclIfPublic pname ppos public ty =
                         "' with undeclared parameter or return type") ppos
 
 
--- |Type check a single module named in the second argument; the
---  first argument is a list of all the modules in this module
---  dependency SCC.
+-- |Type check a single module.  Since all public procs/functions must have
+-- their types fully declared, no fixed across modules is needed.  Our type
+-- inference is flow sensitive, that is, types from from callers to callees, but
+-- not vice versa.  Therefore we analyse bottom-up by intra-module potential
+-- call graph SCCs.  Type and mode inference are responsible for resolving
+-- overloading, which means that the SCCs inferred at this point include all
+-- *potential* calls, which are a superset of the actual calls.
 typeCheckMod :: ModSpec -> Compiler ()
 typeCheckMod thisMod = do
     logTypes $ "**** Type checking module " ++ showModSpec thisMod
@@ -162,6 +168,14 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Expression types should be equal
                | ReasonDeterminism ProcSpec Determinism OptPos
                    -- ^Calling a semidet proc in a det context
+               | ReasonForeignLanguage String String OptPos
+                   -- ^Foreign call with bogus language
+               | ReasonForeignArgType String Int OptPos
+                   -- ^Foreign call with unknown argument type
+               | ReasonForeignArity String Int Int OptPos
+                   -- ^Foreign call with wrong arity
+               | ReasonBadForeign String String OptPos
+                   -- ^Unknown foreign llvm/lpvm instruction
                | ReasonShouldnt
                    -- ^This error should never happen
                deriving (Eq, Ord)
@@ -228,6 +242,20 @@ instance Show TypeError where
         makeMessage pos $
         "Calling " ++ determinismName detism ++ " proc "
         ++ show proc ++ " in a det context"
+    show (ReasonForeignLanguage lang instr pos) =
+        makeMessage pos $
+        "Foreign call '" ++ instr ++ "' with unknown language '" ++ lang ++ "'"
+    show (ReasonForeignArgType instr argNum pos) =
+        makeMessage pos $
+        "Foreign call '" ++ instr ++ "' with unknown type in argument "
+        ++ show argNum
+    show (ReasonForeignArity instr actualArity expectedArity pos) =
+        makeMessage pos $
+        "Foreign call '" ++ instr ++ "' with arity " ++ show actualArity
+        ++ "; should be " ++ show expectedArity
+    show (ReasonBadForeign lang instr pos) =
+        makeMessage pos $
+        "Unknown " ++ lang ++ " instruction '" ++ instr ++ "'"
     show ReasonShouldnt =
         makeMessage Nothing "Mysterious typing error"
 
@@ -520,10 +548,9 @@ typecheckProcSCC m (CyclicSCC list) = do
 
 
 -- |Type check a list of procedure definitions and update the
---  definitions stored in the Compiler monad.  Returns a pair of
---  Bools, the first saying whether any defnition has been udpated,
---  and the second saying whether any public defnition has been
---  updated.
+--  definitions stored in the Compiler monad.  Returns a pair of a Bool,
+--  the first saying whether any defnition has been udpated, and the
+--  second listing the type errors detected.
 typecheckProcDecls :: ModSpec -> ProcName -> Compiler (Bool,[TypeError])
 typecheckProcDecls m name = do
     logTypes $ "** Type checking decl of proc " ++ name
@@ -710,7 +737,10 @@ typecheckProcDecl m pdef = do
                                     ++ showProcDef 4 pdef
                                     ++ "\n-----------------NEW:"
                                     ++ showProcDef 4 pdef' ++ "\n")
-                    return (pdef',sccAgain,typingErrs typing')
+                    typing'' <-
+                      foldlM validateForeign typing'
+                      (List.filter (isForeign . content) (fst <$> calls))
+                    return (pdef',sccAgain,typingErrs typing'')
                   else
                     return (pdef,False,typingErrs typing)
               else
@@ -795,6 +825,12 @@ bodyCalls (pstmt:pstmts) detism = do
 isRealProcCall :: Stmt -> Bool
 isRealProcCall ProcCall{} = True
 isRealProcCall _ = False
+
+
+-- |The statement is a ForeignCall
+isForeign :: Stmt -> Bool
+isForeign ForeignCall{} = True
+isForeign _ = False
 
 
 foreignTypeEquivs :: Stmt -> [(Placed Exp,Placed Exp)]
@@ -1632,6 +1668,106 @@ nonResourceParam _ = True
 --                 then return $ Just (as,p)
 --                 else return Nothing
 
+
+----------------------------------------------------------------
+--                    Check foreign calls
+----------------------------------------------------------------
+
+-- | Make sure a foreign call is valid; otherwise report an error
+validateForeign :: Typing -> Placed Stmt -> Compiler Typing
+validateForeign typing placed =
+    case content placed of
+      stmt@(ForeignCall lang name tags args) -> do
+        logTypes $ "Sanity checking foreign call " ++ showStmt 4 stmt
+        let pos = place placed
+        argTypes <- mapM (expType typing) args
+        maybeReps <- mapM lookupTypeRepresentation argTypes
+        let numberedMaybes = zip maybeReps [1..]
+        let untyped = snd <$> List.filter (isNothing . fst) numberedMaybes
+        if List.null untyped
+          then do
+          let argReps = trustFromJust "validateForeign" <$> maybeReps
+          validateForeignCall lang name tags argReps stmt pos typing
+          else
+          return $ typeErrors
+                   (flip (ReasonForeignArgType name) pos <$> untyped)
+                   typing
+      stmt ->
+        shouldnt $ "validateForeign of non-foreign stmt " ++ showStmt 4 stmt
+
+
+-- | Make sure a foreign call is valid; otherwise report an error
+-- XXX These should check that argument representations are appropriate
+--     for the instructions, too
+validateForeignCall :: String -> ProcName -> [String] -> [TypeRepresentation]
+                    -> Stmt -> OptPos -> Typing -> Compiler Typing
+-- just assume C calls are OK
+validateForeignCall "c" _ _ _ _ _ typing = return typing
+validateForeignCall "llvm" "move" _ argReps stmt pos typing = do
+    let arity = length argReps
+    if arity == 2
+      then return typing
+      else return $ typeError (ReasonForeignArity "move" arity 2 pos) typing
+validateForeignCall "llvm" name flags argReps stmt pos typing = do
+    let arity = length argReps
+    let opName = intercalate " " (name:flags)
+    return $
+      case arity of
+        3 -> if isJust $ Map.lookup opName llvmMapBinop
+             then typing
+             else if isJust $ Map.lookup opName llvmMapUnop
+                  then typeError (ReasonForeignArity name arity 2 pos)
+                       typing
+                  else typeError (ReasonBadForeign "llvm" name pos) typing
+        2 -> if isJust $ Map.lookup opName llvmMapUnop
+             then typing
+             else if isJust $ Map.lookup opName llvmMapBinop
+                  then typeError (ReasonForeignArity name arity 3 pos)
+                       typing
+                  else typeError (ReasonBadForeign "llvm" name pos) typing
+        _ -> if isJust $ Map.lookup opName llvmMapBinop
+             then typeError (ReasonForeignArity name arity 3 pos) typing
+             else if isJust $ Map.lookup opName llvmMapUnop
+                  then typeError (ReasonForeignArity name arity 2 pos) typing
+                  else typeError (ReasonBadForeign "llvm" name pos) typing
+
+
+validateForeignCall "lpvm" "alloc" flags argReps stmt pos typing = do
+    let arity = length argReps
+    if arity == 2
+      then return typing
+      else return $ typeError (ReasonForeignArity "alloc" arity 2 pos) typing
+validateForeignCall "lpvm" name flags argReps stmt pos typing = do
+    return $ checkLPVMArgs name flags argReps stmt pos typing
+validateForeignCall lang name flags argReps stmt pos typing =
+    return $ typeError (ReasonForeignLanguage lang name pos) typing
+
+
+checkLPVMArgs :: String -> [String] -> [TypeRepresentation] -> Stmt -> OptPos
+              -> Typing -> Typing
+checkLPVMArgs "alloc" _ args stmt pos typing =
+    let arity = length args
+    in if arity == 2
+       then typing
+       else typeError (ReasonForeignArity "alloc" arity 2 pos) typing
+checkLPVMArgs "access" _ args stmt pos typing =
+    let arity = length args
+    in if length args == 3
+       then typing
+       else typeError (ReasonForeignArity "access" arity 3 pos) typing
+checkLPVMArgs "mutate" _ args stmt pos typing =
+    let arity = length args
+    in if length args == 7
+       then typing
+       else typeError (ReasonForeignArity "mutate" arity 7 pos) typing
+-- XXX do we still need this instruction?
+checkLPVMArgs "cast" _ args stmt pos typing =
+    let arity = length args
+    in if length args == 2
+       then typing
+       else typeError (ReasonForeignArity "cast" arity 2 pos) typing
+checkLPVMArgs name _ args stmt pos typing =
+    typeError (ReasonBadForeign "lpvm" name pos) typing
 
 ----------------------------------------------------------------
 --                    Check that everything is typed

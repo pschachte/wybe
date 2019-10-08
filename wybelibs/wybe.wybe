@@ -9,7 +9,7 @@ pub type bool { pub false | true
 }
 
 
-pub type int is int {
+pub type int is signed {
     pub def +(x:int,y:int):int = foreign llvm add(x,y)
     pub def +(?x:int,y:int,z:int) { ?x = foreign llvm sub(z,y) }
     pub def +(x:int,?y:int,z:int) { ?y = foreign llvm sub(z,x) }
@@ -26,8 +26,8 @@ pub type int is int {
     pub def >(x:int,y:int):bool = foreign llvm icmp sgt(x,y)
     pub def >=(x:int,y:int):bool = foreign llvm icmp sge(x,y)
     pub def =(x:int, y:int):bool = foreign llvm icmp eq(x,y)
-    pub def sqrt(x:int):int = foreign C isqrt(x)
-    pub def power(x:int,y:int):int = foreign C ipow(x,y)
+    pub def sqrt(x:int):int = foreign c isqrt(x)
+    pub def power(x:int,y:int):int = foreign c ipow(x,y)
     pub def incr(!x:int) { ?x = x + 1 }
     pub def decr(!x:int) { ?x = x - 1 }
 }
@@ -50,8 +50,8 @@ pub type float is 64 bit float {
     pub def >(x:float,y:float):bool = foreign llvm fcmp sgt(x,y)
     pub def >=(x:float,y:float):bool = foreign llvm fcmp sge(x,y)
     pub def =(x:float, y:float):bool = foreign llvm fcmp eq(x,y)
-    pub def sqrt(x:float):float = foreign C sqrt(x)
-    pub def power(x:float,y:float):float = foreign C pow(x,y)
+    pub def sqrt(x:float):float = foreign c sqrt(x)
+    pub def power(x:float,y:float):float = foreign c pow(x,y)
 }
 
 
@@ -67,7 +67,7 @@ pub type string is address {
 }
 
 
-pub type char is 8 bit int {
+pub type char is 8 bit unsigned {
     pub def =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
     pub def /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
 }
@@ -101,10 +101,8 @@ pub module io {
     # pub def eof:char = foreign lpvm cast(-1)
 }
 
-pub type phantom is 0 bit int {
+pub type phantom is 0 bit unsigned {
     # pub def phantom:phantom = foreign lpvm cast(0)
-    # pub def =(x:phantom,?y:phantom) { ?y = foreign lpvm cast(0) }
-    # pub def =(?x:phantom,y:phantom) { ?x = foreign lpvm cast(0) }
 }
 
 # pub module allocation {

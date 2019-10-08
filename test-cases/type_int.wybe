@@ -1,4 +1,4 @@
-pub type myint is int {
+pub type myint is signed {
     pub def +(x:myint,y:myint):myint = foreign llvm add(x,y)
     pub def +(?x:myint,y:myint,z:myint) { ?x = foreign llvm sub(z,y) }
     pub def +(x:myint,?y:myint,z:myint) { ?y = foreign llvm sub(z,x) }

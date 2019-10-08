@@ -21,6 +21,7 @@ import Control.Monad.Identity (Identity)
 import Scanner
 import Config
 import Text.Parsec
+import Data.Functor
 -- import qualified Parser as OldParser
 -- import           Data.Algorithm.Diff       (getGroupedDiff)
 -- import           Data.Algorithm.DiffOutput (ppDiff)
@@ -150,11 +151,12 @@ typeImpln = do
 
 -- | Type declaration body where representation and items are given
 typeRep = do
-    ident "address" *> return Address
+    ident "address" $> Address
     <|> do bits <- option wordSize
                    (fromIntegral <$> content <$> intLiteral <* ident "bit")
-           (ident "int" *> return (Bits bits)
-            <|> ident "float" *> return (Floating bits))
+           ident "unsigned" $> Bits bits
+            <|> ident "signed" $> Signed bits
+            <|> ident "float" $> Floating bits
 
 
 -- | Type declaration body where visibility, constructors, and items are given
@@ -636,9 +638,9 @@ funcAppExp = do
 
 typedExp :: Parser (Placed Exp -> Placed Exp)
 typedExp = do
-    _ <- symbol ":"
+    coerce <- symbol ":!" $> True <|> symbol ":" $> False
     ty <- typeParser
-    return $ \e -> maybePlace (Typed (content e) ty False) (place e)
+    return $ \e -> maybePlace (Typed (content e) ty coerce) (place e)
 
 
 whereBodyParser :: Parser (Placed Exp -> Placed Exp)

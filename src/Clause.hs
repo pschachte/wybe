@@ -66,7 +66,7 @@ closingStmts SemiDet = do
              then []
              else [Unplaced $ primMove
                    (ArgInt 1 boolType)
-                   (ArgVar (PrimVarName "$$" 0) boolType
+                   (ArgVar (PrimVarName "$$" 0) boolType False
                     FlowOut Ordinary False)]
 
 
@@ -214,21 +214,21 @@ compileSimpleStmt' stmt =
 
 
 compileArg :: Exp -> OptPos -> ClauseComp PrimArg
-compileArg = compileArg' AnyType
+compileArg = compileArg' AnyType False
 
-compileArg' :: TypeSpec -> Exp -> OptPos -> ClauseComp PrimArg
-compileArg' typ (IntValue int) _ = return $ ArgInt int typ
-compileArg' typ (FloatValue float) _ = return $ ArgFloat float typ
-compileArg' typ (StringValue string) _ = return $ ArgString string typ
-compileArg' typ (CharValue char) _ = return $ ArgChar char typ
-compileArg' typ (Var name ParamIn flowType) pos = do
+compileArg' :: TypeSpec -> Bool -> Exp -> OptPos -> ClauseComp PrimArg
+compileArg' typ _ (IntValue int) _ = return $ ArgInt int typ
+compileArg' typ _ (FloatValue float) _ = return $ ArgFloat float typ
+compileArg' typ _ (StringValue string) _ = return $ ArgString string typ
+compileArg' typ _ (CharValue char) _ = return $ ArgChar char typ
+compileArg' typ coerce (Var name ParamIn flowType) pos = do
     name' <- currVar name pos
-    return $ ArgVar name' typ FlowIn flowType False
-compileArg' typ (Var name ParamOut flowType) _ = do
+    return $ ArgVar name' typ coerce FlowIn flowType False
+compileArg' typ coerce (Var name ParamOut flowType) _ = do
     name' <- nextVar name
-    return $ ArgVar name' typ FlowOut flowType False
-compileArg' _ (Typed exp typ _) pos = compileArg' typ exp pos
-compileArg' _ arg _ =
+    return $ ArgVar name' typ coerce FlowOut flowType False
+compileArg' _   _ (Typed exp typ coerce) pos = compileArg' typ coerce exp pos
+compileArg' _   _ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 
 
@@ -247,8 +247,10 @@ reconcileOne caseVars jointVars (Param name ty flow ftype) =
          if caseNum /= jointNum && elem flow [ParamOut, ParamInOut]
          then Just $ Unplaced $
               PrimForeign "llvm" "move" []
-              [ArgVar (PrimVarName name caseNum) ty FlowIn Ordinary False,
-               ArgVar (PrimVarName name jointNum) ty FlowOut Ordinary False]
+              [ArgVar (PrimVarName name caseNum) ty False FlowIn
+                      Ordinary False,
+               ArgVar (PrimVarName name jointNum) ty False FlowOut
+                      Ordinary False]
          else Nothing
        _ -> Nothing
 

@@ -38,6 +38,7 @@ module Codegen (
 import           Data.Function
 import           Data.List
 import qualified Data.Map                        as Map
+import           Data.Maybe                      (fromMaybe)
 import           Data.String
 import           Data.Word
 
@@ -58,6 +59,7 @@ import qualified LLVM.AST.FloatingPointPredicate as FP
 import qualified LLVM.AST.IntegerPredicate       as IP
 
 import           AST                             (Compiler, Prim, PrimProto,
+                                                  TypeRepresentation,
                                                   getModuleSpec, logMsg,
                                                   shouldnt, showModSpec)
 import           LLVM.Context
@@ -121,9 +123,10 @@ float_c n   = error $ "Invalid floating point width " ++ show n
 ----------------------------------------------------------------------------
 -- | 'SymbolTable' is a simple mapping of scope variable names and their
 -- representation as an LLVM.AST.Operand.Operand.
-type SymbolTable = [(String, Operand)]
+type SymbolTable = Map.Map String (Operand,TypeRepresentation)
 
--- | A Map of all the assigned names to assist in supllying new unique names.
+
+-- | A Map of all the assigned names to assist in supplying new unique names.
 type Names = Map.Map String Int
 
 
@@ -262,7 +265,7 @@ emptyCodegen startCount =
   CodegenState
     (Name $ fromString entryBlockName)
     Map.empty
-    []
+    Map.empty
     1
     startCount
     Map.empty
@@ -365,22 +368,20 @@ local ty nm = LocalReference ty nm
 ----------------------------------------------------------------------------
 
 -- | Store a local variable on the front of the symbol table.
-assign :: String -> Operand -> Codegen ()
-assign var x = do
-    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show x
-    lcls <- gets symtab
-    modify $ \s -> s { symtab = (var, x) : lcls }
+assign :: String -> Operand -> TypeRepresentation -> Codegen ()
+assign var opd trep = do
+    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show opd ++ ":" ++ show trep
+    modify $ \s -> s { symtab = Map.insert var (opd,trep) $ symtab s }
+
 
 -- | Find and return the local operand by its given name from the symbol
 -- table. Only the first find will be returned so new names can shadow
 -- the same older names.
-getVar :: String -> Codegen Operand
+getVar :: String -> Codegen (Operand,TypeRepresentation)
 getVar var = do
+  let err = shouldnt $ "Local variable not in scope: " ++ show var
   lcls <- gets symtab
-  case lookup var lcls of
-    Just x  -> return x
-    -- Nothing -> return $ ConstantOperand $ C.Undef -- XXX type of variable var
-    Nothing -> shouldnt $ "Local variable not in scope: " ++ show var
+  return $ fromMaybe err $ Map.lookup var lcls
 
 
 -- | Evaluate nested code generating code, and reset the symtab to its original

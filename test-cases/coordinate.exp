@@ -192,7 +192,7 @@ entry:
 
 Coordinate > public inline (0 calls)
 0: Coordinate(x#0:wybe.int, y#0:wybe.int, z#0:wybe.int, ?$#0:coordinate.Coordinate): AliasPairs: []
-    foreign lpvm alloc(24:wybe.int, ?$rec#0:coordinate.Coordinate)
+    foreign lpvm alloc(24:wybe.int, ?$rec#0:!coordinate.Coordinate)
     foreign lpvm mutate(~%$rec#0:coordinate.Coordinate, ?%$rec#1:coordinate.Coordinate, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~x#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:coordinate.Coordinate, ?%$rec#2:coordinate.Coordinate, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~y#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:coordinate.Coordinate, ?%$#0:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~z#0:wybe.int)

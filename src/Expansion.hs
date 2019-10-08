@@ -108,8 +108,8 @@ freshVar oldVar typ = do
         Nothing -> do
             newVar <- lift freshVarName
             logExpansion $ "    Generated fresh name " ++ show newVar
-            addRenaming oldVar $ ArgVar newVar typ FlowIn Ordinary False
-            return $ ArgVar newVar typ FlowOut Ordinary False
+            addRenaming oldVar $ ArgVar newVar typ False FlowIn Ordinary False
+            return $ ArgVar newVar typ False FlowOut Ordinary False
         Just newArg -> do
             logExpansion $ "    Already named it " ++ show newArg
             return newArg
@@ -153,7 +153,7 @@ expandBody (ProcBody prims fork) = do
         logExpansion $ "  with renaming = " ++ show (renaming st)
         let var' = case Map.lookup var $ renaming st of
               Nothing -> var
-              Just (ArgVar v _ _ _ _) -> v
+              Just ArgVar{argVarName=v} -> v
               Just _ -> shouldnt "expansion led to non-var conditional"
         logExpansion $ "  fork on " ++ show var' ++ ":" ++ show ty
                        ++ " with " ++ show (length bodies) ++ " branches"
@@ -238,7 +238,7 @@ inlineCall proto args body pos = do
 
 
 expandArg :: PrimArg -> Expander PrimArg
-expandArg arg@(ArgVar var typ flow _ _) = do
+expandArg arg@(ArgVar var typ _ flow _ _) = do
     renameAll <- gets inlining
     if renameAll
       then case flow of
@@ -272,7 +272,7 @@ inputOutputParams proto =
 --  generating a temp variable name.
 addOutputNaming :: OptPos -> (PrimParam,PrimArg) -> Expander ()
 addOutputNaming _ (param@(PrimParam pname ty FlowOut _ _),
-                     v@(ArgVar vname _ _ _ _)) = do
+                     v@ArgVar{argVarName=vname}) = do
     when (AnyType == ty) $
       shouldnt $ "Danger: untyped param: " ++ show param
     when (AnyType == argType v) $

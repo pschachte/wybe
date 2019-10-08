@@ -286,7 +286,7 @@ mapParamToArgVar proto args =
 
 -- Helper: zip formal param to PrimArg with ArgVar data constructor
 _zipParamToArgVar :: [PrimVarName] -> [PrimArg] -> [(PrimVarName, PrimVarName)]
-_zipParamToArgVar (p:params) (ArgVar nm _ _ _ _:args) =
+_zipParamToArgVar (p:params) (ArgVar{argVarName=nm}:args) =
     (p, nm):_zipParamToArgVar params args
 _zipParamToArgVar (_:params) (_:args) = _zipParamToArgVar params args
 _zipParamToArgVar [] _ = []
@@ -298,7 +298,8 @@ _zipParamToArgVar _ [] = []
 -- nonePhantomParams: caller's formal params
 finalArgs :: [PrimVarName] -> Set PrimVarName -> PrimArg
                 -> Compiler (Set PrimVarName)
-finalArgs nonePhantomParams finalSet fIn@(ArgVar inName _ _ _ final) =
+finalArgs nonePhantomParams finalSet
+          fIn@ArgVar{argVarName=inName,argVarFinal=final} =
     if List.notElem inName nonePhantomParams && final
     then return $ Set.insert inName finalSet
     else return finalSet
