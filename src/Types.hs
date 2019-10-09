@@ -142,6 +142,8 @@ catOKs lst = let toMaybe (OK a) =  Just a
 -- |The reason a variable is given a certain type
 data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Formal param type/flow inconsistent
+               | ReasonOutputUndef ProcName Ident OptPos
+                   -- ^Output param not defined by proc body
                | ReasonResource ProcName Ident OptPos
                    -- ^Declared resource inconsistent
                | ReasonUndef ProcName ProcName OptPos
@@ -176,6 +178,10 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Foreign call with wrong arity
                | ReasonBadForeign String String OptPos
                    -- ^Unknown foreign llvm/lpvm instruction
+               | ReasonResourceUndef ProcName Ident OptPos
+                   -- ^Output resource not defined in proc body
+               | ReasonResourceUnavail ProcName Ident OptPos
+                   -- ^Input resource not available in proc call
                | ReasonShouldnt
                    -- ^This error should never happen
                deriving (Eq, Ord)
@@ -186,6 +192,9 @@ instance Show TypeError where
         makeMessage pos $
             "Type/flow error in definition of " ++ name ++
             ", parameter " ++ show num
+    show (ReasonOutputUndef proc param pos) =
+        makeMessage pos $
+        "Output parameter " ++ param ++ " not defined by proc " ++ show proc
     show (ReasonResource name resName pos) =
             "Type/flow error in definition of " ++ name ++
             ", resource " ++ resName
@@ -256,6 +265,13 @@ instance Show TypeError where
     show (ReasonBadForeign lang instr pos) =
         makeMessage pos $
         "Unknown " ++ lang ++ " instruction '" ++ instr ++ "'"
+    show (ReasonResourceUndef proc res pos) =
+        makeMessage pos $
+        "Output resource " ++ res ++ " not defined by proc " ++ show proc
+    show (ReasonResourceUnavail proc res pos) =
+        makeMessage pos $
+        "Input resource " ++ res ++ " not available at call to proc "
+        ++ show proc
     show ReasonShouldnt =
         makeMessage Nothing "Mysterious typing error"
 
@@ -705,23 +721,30 @@ typecheckProcDecl m pdef = do
                 if validTyping typing
                   then do
                     logTypes $ "Now mode checking proc " ++ name
-                    let inParams =
-                          List.filter
-                          ((`elem` [ParamIn,ParamInOut]) . paramFlow)
-                          params
+                    let inParams = Set.fromList $ paramName <$>
+                          List.filter (flowsIn . paramFlow) params
+                    let outParams = Set.fromList $ paramName <$>
+                          List.filter (flowsOut . paramFlow) params
                     let inResources =
-                          Set.map resourceFlowRes
-                          $ Set.filter
-                              ((`elem` [ParamIn,ParamInOut]) . resourceFlowFlow)
-                              resources
+                          Set.map (resourceName . resourceFlowRes)
+                          $ Set.filter (flowsIn . resourceFlowFlow) resources
+                    let outResources =
+                          Set.map (resourceName . resourceFlowRes)
+                          $ Set.filter (flowsIn . resourceFlowFlow) resources
                     let initialised
-                            = (Set.fromList
+                               -- XXX should not be necessary
                                -- "phantom" is always defined (as nothing)
-                               $ "phantom":(paramName <$> inParams))
-                              `Set.union`
-                              (Set.map resourceName inResources)
-                    (def',assigned,modeErrs) <-
+                            = Set.insert "phantom" inParams
+                              `Set.union` inResources
+                    (def',assigned,modeErrs0) <-
                       modecheckStmts m name pos typing [] initialised detism def
+                    let modeErrs =
+                          [ReasonResourceUndef name res pos
+                          | res <- Set.toList $ outResources Set.\\ assigned]
+                          ++
+                          [ReasonOutputUndef name param pos
+                          | param <- Set.toList $ outParams Set.\\ assigned]
+                          ++ modeErrs0
                     -- XXX need to check that all outputs are asssigned
                     let typing' = typeErrors modeErrs typing
                     let params' = updateParamTypes typing' params

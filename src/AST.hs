@@ -58,7 +58,7 @@ module AST (
   updateModImplementation, updateModImplementationM, updateModLLVM,
   updateModInterface, updateAllProcs, updateModSubmods,
   getModuleSpec, getModuleParams, option, getSource, getDirectory,
-  optionallyPutStr, message, (<!>), genProcName,
+  optionallyPutStr, message, errmsg, (<!>), genProcName,
   addImport, doImport, addType, lookupType, publicType,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource,
@@ -681,6 +681,12 @@ message lvl msg pos = do
     modify (\bldr ->
                 bldr { msgs = msgs bldr ++ [(lvl, posMsg)] })
     when (lvl == Error) (modify (\bldr -> bldr { errorState = True }))
+
+
+-- |Add the specified string as an error message referring to the optionally
+--  specified source location to the collected compiler output messages.
+errmsg :: String -> OptPos -> Compiler ()
+errmsg = message Error
 
 
 -- |Pretty helper operator for adding messages to the compiler state.

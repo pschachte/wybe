@@ -2,4 +2,5 @@ Error detected during type checking of module(s) alias_recursion3, alias_recursi
 [91mtest-cases/alias_recursion3.wybe:16:13: Calling test proc alias_recursion3.mynode.next<1> in a det context
 [0m[91mtest-cases/alias_recursion3.wybe:16:28: Calling test proc alias_recursion3.mynode.next<0> in a det context
 [0m[91mtest-cases/alias_recursion3.wybe:15:17: Calling test proc alias_recursion3.mynode.next<0> in a det context
+[0m[91mtest-cases/alias_recursion3.wybe:12:5: Output parameter resutl1 not defined by proc "foo"
 [0m
