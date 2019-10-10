@@ -914,13 +914,13 @@ addProcDef procDef = do
 getParams :: ProcSpec -> Compiler [Param]
 getParams pspec =
     -- XXX shouldn't have to grovel in implementation to find prototype
-    fmap (procProtoParams . procProto) $ getProcDef pspec
+    procProtoParams . procProto <$> getProcDef pspec
 
 
 getDetism :: ProcSpec -> Compiler Determinism
 getDetism pspec =
     -- XXX shouldn't have to grovel in implementation to find prototype
-    fmap procDetism $ getProcDef pspec
+    procDetism <$> getProcDef pspec
 
 
 getProcDef :: ProcSpec -> Compiler ProcDef
