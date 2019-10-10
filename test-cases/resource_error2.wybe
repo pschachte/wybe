@@ -2,9 +2,10 @@ pub def resource_error {
     ! println("shouldn't work: no use !io")
 }
 
-pub def resource_error2 use io {
-    ! println("shouldn't work: only uses io read-only")
-}
+# We don't have a way to make this illegal yet.
+# pub def resource_error2 use io {
+#     ! println("shouldn't work: only uses io read-only")
+# }
 
 pub def should_be_ok use !io {
     ! should_be_ok2

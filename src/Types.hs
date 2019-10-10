@@ -267,11 +267,10 @@ instance Show TypeError where
         "Unknown " ++ lang ++ " instruction '" ++ instr ++ "'"
     show (ReasonResourceUndef proc res pos) =
         makeMessage pos $
-        "Output resource " ++ res ++ " not defined by proc " ++ show proc
+        "Output resource " ++ res ++ " not defined by proc " ++ proc
     show (ReasonResourceUnavail proc res pos) =
         makeMessage pos $
-        "Input resource " ++ res ++ " not available at call to proc "
-        ++ show proc
+        "Input resource " ++ res ++ " not available at call to proc " ++ proc
     show ReasonShouldnt =
         makeMessage Nothing "Mysterious typing error"
 
@@ -635,9 +634,11 @@ typecheckProcDecls m name = do
 
 -- |An individual proc, its formal parameter types and modes, and determinism
 data ProcInfo = ProcInfo {
-  procInfoProc :: ProcSpec,
-  procInfoArgs :: [TypeFlow],
-  procInfoDetism:: Determinism
+  procInfoProc  :: ProcSpec,
+  procInfoArgs  :: [TypeFlow],
+  procInfoDetism:: Determinism,
+  procInfoInRes :: Set ResourceName,
+  procInfoOutRes:: Set ResourceName
   } deriving (Eq,Show)
 
 
@@ -648,21 +649,21 @@ procInfoTypes call = typeFlowType <$> procInfoArgs call
 -- |Check if ProcInfo is for a proc with a single Bool output as last arg,
 --  and if so, return Just the ProcInfo for the equivalent test proc
 boolFnToTest :: ProcInfo -> Maybe ProcInfo
-boolFnToTest (ProcInfo _ _ SemiDet) = Nothing
-boolFnToTest (ProcInfo proc args Det)
+boolFnToTest ProcInfo{procInfoDetism=SemiDet} = Nothing
+boolFnToTest pinfo@ProcInfo{procInfoDetism=Det, procInfoArgs=args}
     | List.null args = Nothing
     | last args == TypeFlow boolType ParamOut =
-        Just $ ProcInfo proc (init args) SemiDet
+        Just $ pinfo {procInfoArgs=init args, procInfoDetism=SemiDet}
     | otherwise = Nothing
 
 
 -- |Check if ProcInfo is for a test proc, and if so, return a ProcInfo for
 --  the Det proc with a single Bool output as last arg
 testToBoolFn :: ProcInfo -> Maybe ProcInfo
-testToBoolFn (ProcInfo _ _ Det) = Nothing
-testToBoolFn (ProcInfo proc args SemiDet)
-    = Just $ ProcInfo proc (args ++ [TypeFlow boolType ParamOut]) Det
-
+testToBoolFn ProcInfo{procInfoDetism=Det} = Nothing
+testToBoolFn pinfo@ProcInfo{procInfoDetism=SemiDet, procInfoArgs=args}
+    = Just $ pinfo {procInfoDetism=Det
+                   ,procInfoArgs=args ++ [TypeFlow boolType ParamOut]}
 
 
 -- |A single call statement together with the determinism context in which
@@ -736,8 +737,16 @@ typecheckProcDecl m pdef = do
                                -- "phantom" is always defined (as nothing)
                             = Set.insert "phantom" inParams
                               `Set.union` inResources
+                    logTypes $ "Initialised vars: "
+                               ++ intercalate ", " (Set.toList initialised)
                     (def',assigned,modeErrs0) <-
                       modecheckStmts m name pos typing [] initialised detism def
+                    logTypes $ "Vars defined by body: "
+                               ++ intercalate ", " (Set.toList assigned)
+                    logTypes $ "Output parameters   : "
+                               ++ intercalate ", " (Set.toList outParams)
+                    logTypes $ "Output resources    : "
+                               ++ intercalate ", " (Set.toList outResources)
                     let modeErrs =
                           [ReasonResourceUndef name res pos
                           | res <- Set.toList $ outResources Set.\\ assigned]
@@ -870,13 +879,21 @@ callProcInfos pstmt =
           procs <- case procId of
               Nothing   -> callTargets m name
               Just pid -> return [ProcSpec m name pid]
-          typflows <- mapM (fmap (List.map paramTypeFlow
-                                  . List.filter nonResourceParam)
-                            . getParams)
-                      procs
-          detisms <- mapM getDetism procs
-          return $ zipWith3 ProcInfo procs typflows detisms
-
+          defs <- mapM getProcDef procs
+          return [ ProcInfo proc typflow detism inResources outResources
+                 | (proc,def) <- zip procs defs
+                 , let params = procProtoParams $ procProto def
+                 , let (resourceParams,realParams) =
+                         List.partition resourceParam params
+                 , let typflow = paramTypeFlow <$> realParams
+                 , let inResources =
+                         Set.fromList $ paramName <$>
+                         List.filter (flowsIn . paramFlow) resourceParams
+                 , let outResources =
+                         Set.fromList $ paramName <$>
+                         List.filter (flowsOut . paramFlow) resourceParams
+                 , let detism = procDetism def
+                 ]
         stmt ->
           shouldnt $ "callProcInfos with non-call statement "
                      ++ showStmt 4 stmt
@@ -1151,29 +1168,33 @@ modecheckStmt m name defPos typing delayed assigned detism
             let exactMatches
                     = List.filter (exactModeMatch actualModes) modeMatches
             logTypes $ "Exact mode matches: " ++ show exactMatches
-            let delayMatches
-                    = List.any (delayModeMatch actualModes) modeMatches
-            logTypes $ "Delay mode matches: " ++ show delayMatches
             case exactMatches of
                 (match:_) -> do
                   let matchProc = procInfoProc match
                   let matchDetism = procInfoDetism match
-                  let errs =
+                  let detismErrs =
                         -- XXX Should postpone the error until we see if we can
                         -- work out that the test is certain to succeed
                         if detism < matchDetism
                         then [ReasonDeterminism (procInfoProc match)
                               matchDetism pos]
                         else []
+                  let undefResErrs =
+                        [ReasonResourceUnavail name res pos
+                        | res <- Set.toList
+                                 $ procInfoInRes match Set.\\ assigned]
                   let args' = List.zipWith setPExpTypeFlow
                               (procInfoArgs match) args
                   let stmt' = ProcCall (procSpecMod matchProc)
                               (procSpecName matchProc)
                               (Just $ procSpecID matchProc)
                               matchDetism resourceful args'
-                  let assigned' = Set.union (pexpListOutputs args') assigned
-                  return ([maybePlace stmt' pos],delayed,assigned',errs)
-                [] -> if delayMatches
+                  let assigned' =
+                        Set.union (pexpListOutputs args')
+                        $ Set.union (procInfoOutRes match) assigned
+                  return ([maybePlace stmt' pos],delayed,assigned',
+                          detismErrs++undefResErrs)
+                [] -> if List.any (delayModeMatch actualModes) modeMatches
                       then do
                         logTypes $ "delaying call: " ++ ": " ++ show stmt
                         let vars = Set.fromList $ catMaybes
@@ -1524,9 +1545,9 @@ noteOutputCast _ typing = typing
 
 
 -- |Does this parameter correspond to a manifest argument?
-nonResourceParam :: Param -> Bool
-nonResourceParam (Param _ _ _ (Resource _)) = False
-nonResourceParam _ = True
+resourceParam :: Param -> Bool
+resourceParam (Param _ _ _ (Resource _)) = True
+resourceParam _ = False
 
 
 -- typecheckArg :: OptPos -> [Param] -> ProcName ->
