@@ -101,8 +101,8 @@ pub module io {
     # pub def eof:char = foreign lpvm cast(-1)
 }
 
-pub type phantom is 0 bit unsigned {
-    # pub def phantom:phantom = foreign lpvm cast(0)
+pub type phantom {
+    pub phantom
 }
 
 # pub module allocation {

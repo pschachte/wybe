@@ -2,7 +2,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Thu Oct 14 23:30:58 2010
 --  Purpose  : Wybe Abstract Syntax Tree and LPVM representation
---  Copyright:  2010-2015 Peter Schachte.  All rights reserved.
+--  Copyright: 2010-2019 Peter Schachte.  All rights reserved.
 
 {-# LANGUAGE DeriveGeneric #-}
 
@@ -21,8 +21,10 @@ module AST (
   Exp(..), Generator(..), Stmt(..), detStmt,
   TypeRepresentation(..), defaultTypeRepresentation, typeRepSize,
   lookupTypeRepresentation,
-  paramIsPhantom, argIsPhantom, typeIsPhantom, primProtoParamNames,
-  protoNonePhantomParams, protoInputParamNames, isProcProtoArg,
+  paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
+  primProtoParamNames,
+  protoRealParams, realParams, paramIsReal,
+  protoInputParamNames, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
   placedApply, placedApplyM, makeMessage, updatePlacedM,
@@ -1854,7 +1856,7 @@ data PrimParam = PrimParam {
     primParamType::TypeSpec,
     primParamFlow::PrimFlow,
     primParamFlowType::ArgFlowType, -- XXX Not sure this is still needed
-    primParamInfo::ParamInfo  -- ^What we've inferred about this param
+    primParamInfo::ParamInfo        -- ^What we've inferred about this param
     } deriving (Eq, Generic)
 
 
@@ -1973,40 +1975,61 @@ data Exp
 
 
 -- |Is it unnecessary to actually pass an argument (in or out) for this param?
-paramIsPhantom :: PrimParam -> Bool
+paramIsPhantom :: PrimParam -> Compiler Bool
 paramIsPhantom param = typeIsPhantom (primParamType param)
--- XXX should uncomment this to reduce unneeded dataflow, but need to make
---     corresponding change to calls.
-                       -- || paramInfoUnneeded (primParamInfo param)
+
 
 -- |Is the supplied argument a phantom?
-argIsPhantom :: PrimArg -> Bool
-argIsPhantom ArgVar{argVarType=ty} = typeIsPhantom ty
-argIsPhantom _ = False -- Nothing but a var can be a phantom
+argIsPhantom :: PrimArg -> Compiler Bool
+argIsPhantom arg = typeIsPhantom $ argType arg
+
 
 -- |Does the supplied type indicate a phantom?
-typeIsPhantom :: TypeSpec -> Bool
-typeIsPhantom TypeSpec{typeName="phantom"} = True
-typeIsPhantom _ = False
+typeIsPhantom :: TypeSpec -> Compiler Bool
+typeIsPhantom ty = do
+    rep <- lookupTypeRepresentation ty
+    let result = isJust rep && repIsPhantom (fromJust rep)
+    logAST $ "Type " ++ show ty ++ " is "
+             ++ (if result then "" else "NOT ") ++ "phantom"
+    return result
+
+
+-- |Is the specified type representation a phantom type?
+repIsPhantom :: TypeRepresentation -> Bool
+repIsPhantom (Bits 0) = True
+repIsPhantom _        = False  -- Only 0 bit unsigned ints are phantoms
+
 
 -- |Get proto param names in a list
 primProtoParamNames :: PrimProto -> [PrimVarName]
-primProtoParamNames proto =
-    let formalParams = primProtoParams proto
-    in [primParamName primParam | primParam <- formalParams]
+primProtoParamNames proto = primParamName <$> primProtoParams proto
+    -- let formalParams = primProtoParams proto
+    -- in [primParamName primParam | primParam <- formalParams]
 
--- |Get names of proto param that are not phantom in a list
-protoNonePhantomParams :: PrimProto -> [PrimVarName]
-protoNonePhantomParams proto =
-    let primParams = primProtoParams proto
-    in [primParamName pram | pram <- primParams, not (paramIsPhantom pram)]
+
+-- |Get names of proto params that will turn into actual arguments,
+--  ie, params that are not phantoms and are not unneeded
+protoRealParams :: PrimProto -> Compiler [PrimParam]
+protoRealParams = realParams . primProtoParams
+
+
+-- |Filter a list of params down to the ones that are actually useful,
+--  ie, params that are not phantoms and are not unneeded.
+realParams :: [PrimParam] -> Compiler [PrimParam]
+realParams = filterM paramIsReal
+
+
+-- |The param actually needs to be passed; ie, it is needed and not phantom.
+paramIsReal :: PrimParam -> Compiler Bool
+paramIsReal param =
+    ((not $ paramInfoUnneeded $ primParamInfo param) &&) . not
+      <$> paramIsPhantom param
+
 
 -- |Get names of proto input params
-protoInputParamNames :: PrimProto -> [PrimVarName]
-protoInputParamNames proto =
-    let primParams = primProtoParams proto
-    in [name | pram@(PrimParam name _ FlowIn _ (ParamInfo False)) <- primParams,
-                not (paramIsPhantom pram)]
+protoInputParamNames :: PrimProto -> Compiler [PrimVarName]
+protoInputParamNames proto = (primParamName <$>) <$> protoRealParams proto
+
 
 -- |Is the supplied argument a parameter of the proc proto
 isProcProtoArg :: [PrimVarName] -> PrimArg -> Bool
@@ -2061,6 +2084,7 @@ data PrimArg
      | ArgUnneeded PrimFlow TypeSpec          -- ^Unneeded input or output
      deriving (Eq,Ord,Generic)
 
+
 -- |Returns a list of all arguments to a prim
 primArgs :: Prim -> [PrimArg]
 primArgs (PrimCall _ args) = args
@@ -2107,11 +2131,14 @@ argFlowDirection ArgString{} = FlowIn
 argFlowDirection ArgChar{} = FlowIn
 argFlowDirection (ArgUnneeded flow _) = flow
 
+
 -- |Check dataflow direction of an actual argument and the arg should be ArgVar
 argVarIsFlowDirection :: PrimFlow -> PrimArg -> Bool
 argVarIsFlowDirection flow' ArgVar{argVarFlow=flow} = flow == flow'
 argVarIsFlowDirection _ _ = False
 
+
+-- |Extract the Wybe type of a PrimArg.
 argType :: PrimArg -> TypeSpec
 argType ArgVar{argVarType=typ} = typ
 argType (ArgInt _ typ) = typ
@@ -2128,20 +2155,21 @@ argType (ArgUnneeded _ typ) = typ
 -- Used in AliasAnalysis - only care about non phantom pointers that might incur
 -- aliasing
 inArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
-inArgVar2 arg@(ArgVar var ty _ flow _ final)
-    | flow == FlowIn && not (argIsPhantom arg) = do
-        rep <- lookupTypeRepresentation ty
-        case rep of
-            Just Address ->
-                return (Just var)
-            _ ->
-                return Nothing
+inArgVar2 arg@(ArgVar var ty _ flow _ final) = do
+    phantom <- argIsPhantom arg
+    rep <- lookupTypeRepresentation ty
+    if flow == FlowIn && not phantom && rep == Just Address
+      then return $ Just var
+      else return Nothing
 inArgVar2 _ = return Nothing
 
 -- Used in AliasAnalysis - only care about pointers that might aliasing an input
 outArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
-outArgVar2 arg@(ArgVar var _ _ flow _ _)
-    | flow == FlowOut && not (argIsPhantom arg) = return (Just var)
+outArgVar2 arg@(ArgVar var _ _ flow _ _) = do
+    phantom <- argIsPhantom arg
+    if flow == FlowOut && not phantom
+      then return $ Just var
+      else return Nothing
 outArgVar2 _ = return Nothing
 
 -- outArgVar :: PrimArg -> PrimVarName

@@ -3,7 +3,7 @@
 --  Author   : Peter Schachte
 --  Origin   : Tue Apr 29 19:02:05 EST 2014
 --  Purpose  : Framework to optimise a single module
---  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2014-2019 Peter Schachte.  All rights reserved.
 
 module Optimise (optimiseMod) where
 
@@ -32,7 +32,7 @@ optimiseMod _ thisMod = do
     -- XXX this is wrong:  it does not do a proper top-down
     -- traversal, as it is not guaranteed to vist all callers before
     -- visiting the called proc.  Need to construct inverse graph instead.
-    mapM_ (mapM_ optimiseProcTopDown .  sccElts) $ reverse orderedProcs
+    -- mapM_ (mapM_ optimiseProcTopDown .  sccElts) $ reverse orderedProcs
 
     mapM_ optimiseSccBottomUp orderedProcs
 
@@ -53,9 +53,11 @@ optimiseMod _ thisMod = do
 --   is monotone and I don't want an infinite loop.
 optimiseSccBottomUp procs = do
     inlines <- mapM optimiseProcBottomUp $ sccElts procs
-    when (or $ tail inlines) $ do
-        mapM_ optimiseProcBottomUp $ sccElts procs
-        return ()
+    -- XXX Don't bother to repeat optimisation to a fixed point.  That doesn't
+    --     seem to hurt us.
+    -- when (or $ tail inlines) $ do
+    --     mapM_ optimiseProcBottomUp $ sccElts procs
+    return ()
 
 
 optimiseProcTopDown :: ProcSpec -> Compiler ()
@@ -99,9 +101,9 @@ decideInlining :: ProcDef -> Compiler ProcDef
 decideInlining def
     |  NoFork == bodyFork body && not (procInline def) = do
     logOptimise $ "Considering inline of " ++ procName def
-    let benefit = 4 + procCost proto -- add 4 for time saving
+    benefit <- (4 +) <$> procCost proto -- add 4 for time saving
     logOptimise $ "  benefit = " ++ show benefit
-    let cost = bodyCost $ bodyPrims body
+    cost <- bodyCost $ bodyPrims body
     logOptimise $ "  cost = " ++ show cost
     -- Inline procs where benefit >= cost and private procs with only one use
     if benefit >= cost
@@ -112,22 +114,36 @@ decideInlining def
 decideInlining def = return def
 
 
-procCost :: PrimProto -> Int
-procCost proto =
-    1 + (length $ List.filter (not . paramIsPhantom) $ primProtoParams proto)
+-- |Estimate the "cost" of a call to a proc; ie, how much space the call will
+--  occupy.
+procCost :: PrimProto -> Compiler Int
+procCost proto = do
+    nonPhantoms <- filterM ((not <$>) . paramIsPhantom) $ primProtoParams proto
+    return $ 1 + length nonPhantoms
 
-bodyCost :: [Placed Prim] -> Int
-bodyCost pprims = sum $ List.map (primCost . content) pprims
 
-primCost :: Prim -> Int
-primCost (PrimCall _ args)          = 1 + (sum $ List.map argCost args)
-primCost (PrimForeign "llvm" _ _ _) = 1 -- single instuction, so cost = 1
-primCost (PrimForeign "$" _ _ _)    = 1    -- single instuction, so cost = 1
-primCost (PrimForeign _ _ _ args)   = 1 + (sum $ List.map argCost args)
-primCost (PrimTest _)               = 0
+-- |Estimate the "cost" of a proc body; ie, how much space the code occupies.
+bodyCost :: [Placed Prim] -> Compiler Int
+bodyCost pprims = sum <$> mapM (primCost . content) pprims
 
-argCost :: PrimArg -> Int
-argCost arg = if argIsPhantom arg then 0 else 1
+
+-- |Estimate the "cost" of an individual instruction, in terms of code size. We
+--  approximate the cost of a LLVM instruction as 1, a Wybe or C call as 1 + the
+--  cost of the arguments, and a test instruction as free.
+primCost :: Prim -> Compiler Int
+primCost (PrimForeign "llvm" _ _ _) = return 1
+primCost (PrimCall _ args)          = (1+) . sum <$> mapM argCost args
+primCost (PrimForeign _ _ _ args)   = (1+) . sum <$> mapM argCost args
+primCost (PrimTest _)               = return 0
+
+
+-- |Estimate the "cost" of an argument to a C or Wybe call.  This is 0 for
+--  phantoms and unneeded arguments, which generate no code, and 1 otherwise.
+argCost :: PrimArg -> Compiler Int
+argCost ArgUnneeded{} = return 0
+argCost arg = do
+    isPhantom <- argIsPhantom arg
+    return $ if isPhantom then 0 else 1
 
 
 -- |Log a message, if we are logging optimisation activity.

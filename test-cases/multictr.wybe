@@ -1,31 +1,36 @@
 # Test case for type with multiple non-constant constructors
 
-# This type should be an i2
-pub type suit { pub
-        clubs | diamonds | hearts | spades
-}
+# # This type should be an i2
+# pub type suit { pub
+#         clubs | diamonds | hearts | spades
+# }
 
-# This type should be an i4
-pub type rank { pub
-        r2 | r3 | r4 | r5 | r6 | r7 | r8
-      | r9 | r10 | jack | queen | king | ace
-}
+# # This type should be an i4
+# pub type rank { pub
+#         r2 | r3 | r4 | r5 | r6 | r7 | r8
+#       | r9 | r10 | jack | queen | king | ace
+# }
 
 # # This type should be an i6
-pub type card { pub
-        card(rank:rank, suit:suit)
-}
+# pub type card { pub
+#         card(rank:rank, suit:suit)
+# }
 
-# This type should be a 0 bit integer
-# pub type unit { pub unit }
+# # This type should be a 0 bit integer
+pub type unit { pub unit }
 
 
-# # This type should be unboxed
+# This type should be unboxed
 # pub type length { pub
 #         metres(value:float)
 # }
 
-# # This should not use any tag bits, but should be boxed
+# # This type should be unboxed
+# pub type perhaps { pub
+#         perhaps(content:maybe_int)
+# }
+
+# This should not use any tag bits, but should be boxed
 # pub type maybe_int { pub
 #         nothing
 #       | just(value:int)

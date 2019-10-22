@@ -54,7 +54,7 @@ defaultOptions    = Options
 data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
   | Flatten | Normalise | Optimise | Resources | Types
-  | Unbranch | CodeGen | Blocks | Emit | Analysis | Transform
+  | Unbranch | Codegen | Blocks | Emit | Analysis | Transform
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
 
@@ -85,7 +85,7 @@ logSelectionDescription Types
     = "Log type checking"
 logSelectionDescription Unbranch
     = "Log transformation of loops and selections into clausal form"
-logSelectionDescription CodeGen
+logSelectionDescription Codegen
     = "Log generation of LLVM code"
 logSelectionDescription Blocks
     = "Log translation of LPVM procedures into LLVM"

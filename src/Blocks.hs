@@ -4,11 +4,10 @@
 --  author   : Ashutosh Rishi Ranjan
 --  Origin   : Thu Mar 26 14:25:37 AEDT 2015
 --  Purpose  : Transform a clausal form (LPVM) module to LLVM
---  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2015-2019 Peter Schachte.  All rights reserved.
 
 module Blocks (concatLLVMASTModules, blockTransformModule,
                llvmMapBinop, llvmMapUnop
-                -- newMainModule
               ) where
 
 import           AST
@@ -238,13 +237,13 @@ makeGlobalDefinition :: String -> PrimProto
                      -> [LLVMAST.BasicBlock]
                      -> Compiler LLVMAST.Definition
 makeGlobalDefinition pname proto bls = do
-    modName <- fmap showModSpec getModuleSpec
-    let params = List.filter (not . paramIsPhantom) (primProtoParams proto)
-        label0 = modName ++ "." ++ pname
-        -- For the top-level main program
-        isMain = label0 == ".<0>"
-        label  = if isMain then "main" else label0
-        inputs = List.filter isInputParam params
+    modName <- showModSpec <$> getModuleSpec
+    params <- protoRealParams proto
+    let label0 = modName ++ "." ++ pname
+    -- For the top-level main program
+    let isMain = label0 == ".<0>"
+    let label  = if isMain then "main" else label0
+    let inputs = List.filter isInputParam params
     fnargs <- mapM makeFnArg inputs
     retty <- if isMain then return int_t else primOutputType params
     return $ globalDefine retty label fnargs bls
@@ -267,16 +266,18 @@ makeFnArg param = do
 -- inferred 'Type' and name.
 primOutputType :: [PrimParam] -> Compiler Type
 primOutputType params = do
-    let outputs = List.filter isOutputParam params
+    reals <- realParams params
+    let outputs = List.filter ((FlowOut==) . primParamFlow) reals
     case outputs of
         [] -> return void_t
         [o] -> llvmType $ primParamType o
         _ -> struct_t <$> mapM (llvmType . primParamType) outputs
 
 
-isOutputParam :: PrimParam -> Bool
-isOutputParam p = not (isInputParam p || paramIsPhantom p) &&
-    paramNeeded p
+isOutputParam :: PrimParam -> Compiler Bool
+isOutputParam p = do
+    phantom <- paramIsPhantom p
+    return $ not (isInputParam p || phantom) && paramNeeded p
 
 
 paramNeeded :: PrimParam -> Bool
@@ -298,12 +299,13 @@ paramNeeded = not . paramInfoUnneeded . primParamInfo
 -- | Generate LLVM instructions for a procedure.
 doCodegenBody :: PrimProto -> ProcBody -> Codegen ()
 doCodegenBody proto body =
-    do let params = primProtoParams proto
-       entry <- addBlock entryBlockName
+    do entry <- addBlock entryBlockName
        -- Start with creation of blocks and adding instructions to it
        setBlock entry
-       mapM_ assignParam $ List.filter (not . isOutputParam) params
-       mapM_ preassignOutput $ List.filter isOutputParam params
+       params <- lift $ protoRealParams proto
+       let (ins,outs) = List.partition ((== FlowIn) . primParamFlow) params
+       mapM_ assignParam ins
+       mapM_ preassignOutput outs
        codegenBody proto body   -- Codegen on body prims
        return ()
 
@@ -323,13 +325,15 @@ doCodegenBody proto body =
 -- | Convert a PrimParam to an Operand value and reference this value by the
 -- param's name on the symbol table. Don't assign if phantom.
 assignParam :: PrimParam -> Codegen ()
-assignParam p =
-    do let ty = primParamType p
-       trep <- lift $ typeRep ty
-       unless (typeIsPhantom ty || paramInfoUnneeded (primParamInfo p))
-         $ do let nm = show (primParamName p)
-              let llty = repLLVMType trep
-              assign nm (localVar llty nm) trep
+assignParam p = do
+    let ty = primParamType p
+    trep <- lift $ typeRep ty
+    logCodegen $ "Maybe generating parameter " ++ show p
+                 ++ " (" ++ show trep ++ ")"
+    unless (repIsPhantom trep || paramInfoUnneeded (primParamInfo p))
+      $ do let nm = show (primParamName p)
+           let llty = repLLVMType trep
+           assign nm (localVar llty nm) trep
 
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
@@ -350,7 +354,7 @@ preassignOutput p =
 -- structure, pack the operands into it and return it.
 buildOutputOp :: [PrimParam] -> Codegen (Maybe Operand)
 buildOutputOp params = do
-    let outParams = List.filter isOutputParam params
+    outParams <- lift $ filterM isOutputParam params
     -- outputsMaybe <- mapM (getVarMaybe . show . primParamName) outParams
     -- let outputs = catMaybes outputsMaybe
     logCodegen $ "OutParams: " ++ show outParams
@@ -485,7 +489,7 @@ cgen prim@(PrimCall pspec args) = do
     -- and remove the unneeded ones.
     proto <- lift $ getProcPrimProto pspec
     logCodegen $ "Proto = " ++ show proto
-    let filteredArgs = filterUnneededArgs proto args
+    filteredArgs <- filterUnneededArgs proto args
     logCodegen $ "Filtered args = " ++ show filteredArgs
 
     -- if the call is to an external module, declare it
@@ -507,31 +511,34 @@ cgen prim@(PrimCall pspec args) = do
 
 cgen prim@(PrimForeign "llvm" name flags args) = do
     logCodegen $ "Compiling " ++ show prim
+    args' <- filterPhantomArgs args
     case (length args) of
-       2 -> cgenLLVMUnop name flags args
-       3 -> cgenLLVMBinop name flags args
-       _ -> shouldnt $ "Instruction " ++ name ++ " not found!"
+      -- XXX deconstruct args' in these calls
+       2 -> cgenLLVMUnop name flags args'
+       3 -> cgenLLVMBinop name flags args'
+       _ -> shouldnt $ "LLVM instruction " ++ name ++ " with wrong arity!"
 
 cgen prim@(PrimForeign "lpvm" name flags args) = do
     logCodegen $ "Compiling " ++ show prim
-    cgenLPVM name flags args
+    filterPhantomArgs args >>= cgenLPVM name flags
 
 cgen prim@(PrimForeign lang name flags args) = do
     logCodegen $ "Compiling " ++ show prim
     when (lang /= "c") $
       shouldnt $ "Unknown foreign language " ++ lang ++ " in call " ++ show prim
-    addExtern prim
-    let inArgs = primInputs args
+    args' <- filterPhantomArgs args
+    addExtern $ PrimForeign lang name flags args'
+    let inArgs = primInputs args'
     let nm = LLVMAST.Name $ toSBString name
     inops <- mapM cgenArg inArgs
     -- alignedOps <- mapM makeCIntOp inops
-    outty <- lift $ primReturnType args
+    outty <- lift $ primReturnType args'
     -- XXX this ignores lang and just uses C calling conventions for all calls
     let ins =
           call
           (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
           inops
-    addInstruction ins args
+    addInstruction ins args'
 
 cgen (PrimTest _) = shouldnt "PrimTest should have been removed before code gen"
 
@@ -620,19 +627,24 @@ findProto (ProcSpec _ nm i) = do
 -- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
 -- counterpart in the prototype is unneeded, filtered out. Positional matching
 -- is used for this.
-filterUnneededArgs :: PrimProto -> [PrimArg] -> [PrimArg]
+filterUnneededArgs :: PrimProto -> [PrimArg] -> Codegen [PrimArg]
 filterUnneededArgs proto args = argsNeeded args (primProtoParams proto)
 
-argsNeeded :: [PrimArg] -> [PrimParam] -> [PrimArg]
-argsNeeded [] [] = []
+argsNeeded :: [PrimArg] -> [PrimParam] -> Codegen [PrimArg]
+argsNeeded [] []    = return []
 argsNeeded [] (_:_) = shouldnt "more parameters than arguments"
 argsNeeded (_:_) [] = shouldnt "more arguments than parameters"
 argsNeeded (ArgUnneeded _ _:as) (p:ps)
     | paramNeeded p = shouldnt $ "unneeded arg for needed param " ++ show p
     | otherwise     = argsNeeded as ps
-argsNeeded (a:as) (p:ps)
-    | paramNeeded p = a : argsNeeded as ps
-    | otherwise     = argsNeeded as ps
+argsNeeded (a:as) (p:ps) = do
+    real <- lift $ paramIsReal p
+    rest <- argsNeeded as ps
+    return $ if real then a:rest else rest
+
+
+filterPhantomArgs :: [PrimArg] -> Codegen [PrimArg]
+filterPhantomArgs = filterM ((not <$>) . lift . argIsPhantom)
 
 
 -- |Return the integer constant from an argument; error if it's not one
@@ -868,26 +880,25 @@ withFlags p f  = p ++ " " ++ (List.intercalate " " f)
 -- instruction from 'Codegen' Module.
 apply2 :: (Operand -> Operand -> Instruction) -> [Operand] -> Instruction
 apply2 f (a:b:[]) = f a b
-apply2 _ _        = shouldnt $ "Not a binary operation."
+apply2 _ operands = shouldnt $ "Not a binary operation: " ++ show operands
 
 
 ----------------------------------------------------------------------------
 -- Helpers for primitive arguments                                        --
 ----------------------------------------------------------------------------
 
+-- XXX replace primInputs and primOutputs with a partitionArgs function
+
 -- | Filter valid inputs from given primitive argument list.
 -- A valid input flows in and is not phantom.
 primInputs :: [PrimArg] -> [PrimArg]
-primInputs ps = List.filter isValidInput ps
-    where
-      isValidInput p = (goesIn p) && (notPhantom p)
+primInputs = List.filter goesIn
 
 
 -- | If it exists, return the valid primitive output argument.
 primOutputs :: [PrimArg] -> [PrimArg]
-primOutputs ps = List.filter isValidOutput ps
-    where
-      isValidOutput p = (not $ goesIn p) && (notPhantom p)
+primOutputs = List.filter (not . goesIn)
+
 
 -- | Get the 'Type' of the valid output from the given primitive argument
 -- list. If there is no output arg, return void_t.
@@ -897,14 +908,12 @@ primReturnType ps = do
     case outputs of
       [] -> return void_t
       [output] -> llvmType $ argType output
-      _ -> fmap struct_t (mapM (llvmType . argType) outputs)
+      _ -> struct_t <$> mapM (llvmType . argType) outputs
 
 
 goesIn :: PrimArg -> Bool
-goesIn p = (argFlowDirection p) == FlowIn
+goesIn p = argFlowDirection p == FlowIn
 
-notPhantom :: PrimArg -> Bool
-notPhantom = not . argIsPhantom
 
 -- | Pull out the name of a primitive argument if it is a variable.
 argName :: PrimArg -> Maybe String
@@ -936,7 +945,10 @@ openPrimArg a = shouldnt $ "Can't Open!: "
 -- it a global declaration 'addGlobalConstant' creates a G.Global Value for
 -- it, generating a UnName name for it.
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
-cgenArg ArgVar{argVarName=nm} = fst <$> getVar (show nm)
+cgenArg ArgVar{argVarName=nm, argVarCoerce=False} = fst <$> getVar (show nm)
+cgenArg ArgVar{argVarName=nm, argVarCoerce=True, argVarType=ty} = do
+    lift $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
+    fst <$> getVar (show nm)
 cgenArg (ArgInt val ty) = do
     reprTy <- lift $ llvmType ty
     lift $ logBlocks $ show val ++ " :: " ++ show ty
@@ -1064,7 +1076,8 @@ typeRep ty =
 repLLVMType :: TypeRepresentation -> LLVMAST.Type
 repLLVMType Address        = address_t
 repLLVMType (Bits bits)
-  | bits > 0               = int_c $ fromIntegral bits
+  | bits == 0              = void_t
+  | bits >  0              = int_c $ fromIntegral bits
   | otherwise              = shouldnt $ "unsigned type with non-positive width "
                                         ++ show bits
 repLLVMType (Signed bits)
@@ -1113,11 +1126,15 @@ modWithDefinitions nm filename defs =
 
 -- | Build an extern declaration definition from a given LPVM primitive.
 declareExtern :: Prim -> Compiler LLVMAST.Definition
-declareExtern (PrimForeign _ name _ args) = do
+declareExtern (PrimForeign "c" name _ args) = do
     fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
     retty <- primReturnType args
     let ex = external retty name fnargs
     return ex
+
+declareExtern (PrimForeign otherlang name _ _) =
+    shouldnt $ "Don't know how to declare extern foreign function " ++ name
+      ++ " in language " ++ otherlang
 
 declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
     retty <- primReturnType args
@@ -1377,6 +1394,7 @@ logWrapWith ch s = do
     logMsg Blocks (replicate 65 ch)
     logMsg Blocks s
     logMsg Blocks (replicate 65 ch)
+
 
 logCodegen :: String -> Codegen ()
 logCodegen s = lift $ logBlocks s

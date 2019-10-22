@@ -64,7 +64,7 @@ import           AST                             (Compiler, Prim, PrimProto,
                                                   shouldnt, showModSpec)
 import           LLVM.Context
 import           LLVM.Module
-import           Options                         (LogSelection (Blocks,CodeGen))
+import           Options                         (LogSelection (Blocks,Codegen))
 import           Config                          (wordSize)
 import           Unsafe.Coerce
 
@@ -385,7 +385,7 @@ getVar var = do
 
 
 -- | Evaluate nested code generating code, and reset the symtab to its original
--- state afterwards. Other parts of the CodeGen state are allowed to change.
+-- state afterwards. Other parts of the Codegen state are allowed to change.
 -- This is needed when generating a branch, because symtabs in one branch won't
 -- apply an another branch.
 preservingSymtab :: Codegen a -> Codegen a
@@ -634,4 +634,4 @@ phi ty incoming = instr ty $ Phi ty incoming []
 
 
 logCodegen :: String -> Codegen ()
-logCodegen s = lift $ logMsg CodeGen s
+logCodegen s = lift $ logMsg Codegen s

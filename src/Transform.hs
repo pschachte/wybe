@@ -2,7 +2,7 @@
 --  Author   : Ting Lu
 --  Origin   : Mon Apr 01 14:58:00 EST 2019
 --  Purpose  : Transform LPVM after alias analysis
---  Copyright: (c) 2018 Ting Lu.  All rights reserved.
+--  Copyright: (c) 2018-2019 Ting Lu.  All rights reserved.
 
 module Transform (transformProc) where
 
@@ -53,22 +53,22 @@ transformProc def = return def
 transformPrims :: PrimProto -> ProcBody -> (AliasMap, [Placed Prim])
                     -> Compiler (AliasMap, [Placed Prim])
 transformPrims caller body (initAliases, initPrims) = do
-    let nonePhantomParams = protoNonePhantomParams caller
-    let inputParams = protoInputParamNames caller
+    realParams <- (primParamName <$>) <$> protoRealParams caller
+    inputParams <- protoInputParamNames caller
     let prims = bodyPrims body
     -- Transform simple prims:
     -- (only process alias pairs incurred by move, mutate, access, cast)
     logTransform "\nTransform prims (transformPrims):   "
-    logTransform $ "nonePhantomParams: " ++ show nonePhantomParams
+    logTransform $ "realParams: " ++ show realParams
     logTransform $ "input params: " ++ show inputParams
-    let aliasMap = List.foldr newUfItem initAliases nonePhantomParams
-    foldM (transformPrim nonePhantomParams inputParams) (aliasMap, []) prims
+    let aliasMap = List.foldr newUfItem initAliases realParams
+    foldM (transformPrim realParams inputParams) (aliasMap, []) prims
 
 
 -- Build up alias pairs triggerred by proc calls
 transformPrim :: [PrimVarName] -> [PrimVarName] -> (AliasMap, [Placed Prim])
                     -> Placed Prim -> Compiler (AliasMap, [Placed Prim])
-transformPrim nonePhantomParams inputParams (aliasMap, prims) prim =
+transformPrim realParams inputParams (aliasMap, prims) prim =
     case content prim of
         PrimCall spec args -> do
             -- | Transform proc calls
@@ -84,7 +84,7 @@ transformPrim nonePhantomParams inputParams (aliasMap, prims) prim =
             let calleeArgsAliases = Map.foldrWithKey (transformUfKey paramArgMap)
                                             initUnionFind calleeParamAliases
             combinedAliases <- aliasedArgsInPrimCall calleeArgsAliases
-                                        nonePhantomParams aliasMap args
+                                        realParams aliasMap args
             logTransform $ "calleeArgsAliases:" ++ show calleeArgsAliases
             logTransform $ "current aliasMap: " ++ show aliasMap
             logTransform $ "combinedAliases:  " ++ show combinedAliases
@@ -95,7 +95,7 @@ transformPrim nonePhantomParams inputParams (aliasMap, prims) prim =
             logTransform $ "current aliasMap: " ++ show aliasMap
             maybeAliasInfo <- maybeAliasPrimArgs (content prim)
             -- Update alias map for escapable args
-            aliasMap2 <- aliasedArgsInSimplePrim nonePhantomParams aliasMap
+            aliasMap2 <- aliasedArgsInSimplePrim realParams aliasMap
                                                 maybeAliasInfo
             -- Mutate destructive flag if this is a mutate instruction
             prim2 <- mutateInstruction prim aliasMap inputParams

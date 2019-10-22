@@ -305,8 +305,9 @@ completeType (name,modspec)
            (nonConstCtorItems ctorVis typespec numConsts numNonConsts
             tagBits tagLimit)
            infos
-      let extraItems = implicitItems typespec constCtors nonConstCtors items
       let rep = typeRepresentation reps numConsts
+      let extraItems =
+            implicitItems typespec constCtors nonConstCtors rep items
       logNormalise $ "Representation of type "
                      ++ showModSpec modspec ++ "." ++ name
                      ++ " is " ++ show rep
@@ -361,7 +362,8 @@ fixParamType pos param = do
 typeRepresentation :: [TypeRepresentation] -> Int -> TypeRepresentation
 typeRepresentation [] numConsts =
     Bits $ ceiling $ logBase 2 $ fromIntegral numConsts
-typeRepresentation _ _ = Address
+typeRepresentation [rep] 0      = rep
+typeRepresentation _ _          = Address
 
 
 ----------------------------------------------------------------
@@ -819,31 +821,31 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
 --
 ----------------------------------------------------------------
 
-implicitItems :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto] -> [Item]
-                 -> [Item]
-implicitItems typespec consts nonconsts items =
-    implicitEquality typespec consts nonconsts items
-    ++ implicitDisequality typespec consts nonconsts items
+implicitItems :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
+              -> TypeRepresentation -> [Item] -> [Item]
+implicitItems typespec consts nonconsts rep items =
+    implicitEquality typespec consts nonconsts rep items
+    ++ implicitDisequality typespec consts nonconsts rep items
     -- XXX add comparison, print, display, maybe prettyprint, and lots more
 
 
 implicitEquality :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
-                 -> [Item] -> [Item]
-implicitEquality typespec consts nonconsts items =
+                 -> TypeRepresentation -> [Item] -> [Item]
+implicitEquality typespec consts nonconsts rep items =
     if consts==[] && nonconsts==[] || List.any (isTestProc "=" 2) items
     then [] -- don't generate if user-defined or if no constructors at all
     else
       let eqProto = ProcProto "=" [Param "$left" typespec ParamIn Ordinary,
                                    Param "$right" typespec ParamIn Ordinary]
                     Set.empty
-          (body,inline) = equalityBody consts nonconsts
+          (body,inline) = equalityBody consts nonconsts rep
       in [ProcDecl Public SemiDet inline eqProto body Nothing]
 
 
 
 implicitDisequality :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
-                    -> [Item] -> [Item]
-implicitDisequality typespec consts nonconsts items =
+                    -> TypeRepresentation -> [Item] -> [Item]
+implicitDisequality typespec consts nonconsts _ items =
     if consts==[] && nonconsts==[] || List.any (isTestProc "/=" 2) items
     then [] -- don't generate if user-defined or if no constructors at all
     else
@@ -883,10 +885,13 @@ isTestProc _ _ _ = False
 --   there is no more than one non-const constructor and either it has no more
 --   than two arguments or there are no const constructors.
 --
-equalityBody :: [Placed ProcProto] -> [Placed ProcProto] -> ([Placed Stmt],Bool)
-equalityBody [] [] = shouldnt "trying to generate = test with no constructors"
-equalityBody consts [] = ([equalityConsts consts],True)
-equalityBody consts nonconsts =
+equalityBody :: [Placed ProcProto] -> [Placed ProcProto] -> TypeRepresentation
+             -> ([Placed Stmt],Bool)
+-- Special case for phantom (void) types
+equalityBody _ _ (Bits 0) = ([succeedTest], True)
+equalityBody [] [] _ = shouldnt "trying to generate = test with no constructors"
+equalityBody consts [] _ = ([equalityConsts consts],True)
+equalityBody consts nonconsts _ =
     -- decide whether $left is const or non const, and handle accordingly
     ([Unplaced $ Cond (comparison "ult"
                          (lpvmCastExp (varGet "$left") intType)
