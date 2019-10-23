@@ -647,7 +647,8 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size tag
     let detism = if numConsts + numNonConsts == 1 then Det else SemiDet
         otherPtrCount = if rep == Address then ptrCount-1 else ptrCount
         flags = if otherPtrCount == 0 then ["noalias"] else []
-    in [ProcDecl vis detism True
+    in [-- The getter:
+        ProcDecl vis detism True
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
                           Param "$" fieldtype ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
@@ -659,6 +660,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size tag
            Unplaced $ iVal (offset - tag),
            Unplaced $ varSet "$"]])
         pos,
+        -- The setter:
         ProcDecl vis detism True
         (ProcProto field [Param "$rec" rectype ParamInOut Ordinary,
                           Param "$field" fieldtype ParamIn Ordinary] Set.empty)
@@ -695,17 +697,17 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
                    ++[Param "$" typeSpec ParamOut Ordinary])
                  Set.empty)
     in [ProcDecl vis Det True proto
-        -- Code to allocate memory for the value
+         -- Initialise result to 0
         ([Unplaced $ ForeignCall "llvm" "move" []
-          [Unplaced $ Typed (iVal 0) typeSpec True,
+          [Unplaced $ Typed (iVal 0) typeSpec False,
            Unplaced $ Typed (varSet "$") typeSpec False]]
          ++
-       -- Code to fill all the fields
+         -- Shift each field into place and or with the result
          (List.concatMap
           (\(var,ty,shift,sz) ->
                [Unplaced $ ForeignCall "llvm" "shl" []
                  [Unplaced $ Typed (varGet var) typeSpec True,
-                  Unplaced $ Typed (iVal shift) typeSpec True,
+                  Unplaced $ Typed (iVal shift) typeSpec False,
                   Unplaced $ Typed (varSet "$temp") typeSpec False],
                 Unplaced $ ForeignCall "llvm" "or" []
                  [Unplaced $ Typed (varGet "$") typeSpec False,
@@ -713,16 +715,19 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
                   Unplaced $ Typed (varSet "$") typeSpec False]])
           fields)
          ++
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- possible const value, if necessary
          (case nonConstBit of
             Nothing -> []
             Just shift ->
               [Unplaced $ ForeignCall "llvm" "or" []
                [Unplaced $ Typed (varGet "$") typeSpec False,
-                Unplaced $ Typed (iVal (bit shift::Int)) typeSpec True,
+                Unplaced $ Typed (iVal (bit shift::Int)) typeSpec False,
                 Unplaced $ Typed (varSet "$") typeSpec False]])
+         -- Or in the tag value
           ++ [Unplaced $ ForeignCall "llvm" "or" []
                [Unplaced $ Typed (varGet "$") typeSpec False,
-                Unplaced $ Typed (iVal tag) typeSpec True,
+                Unplaced $ Typed (iVal tag) typeSpec False,
                 Unplaced $ Typed (varSet "$") typeSpec False]]
         ) pos]
 
@@ -737,25 +742,24 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
         detism = if numConsts + numNonConsts > 1 then SemiDet else Det
     in [ProcDecl vis detism True
         (ProcProto ctorName
-         (List.map (\(n,recType,_,_) -> (Param n recType ParamOut Ordinary))
+         (List.map (\(n,fieldType,_,_) -> (Param n fieldType ParamOut Ordinary))
           fields
           ++ [Param "$" recType ParamIn Ordinary])
          Set.empty)
-        -- Code to check we have the right constructor
+         -- Code to check we have the right constructor
         ([tagCheck numConsts numNonConsts tag "$"]
          -- Code to fetch all the fields
          ++ List.concatMap
-            (\(var,recType,shift,sz) ->
+            (\(var,fieldType,shift,sz) ->
                -- Code to access the selected field
                [Unplaced $ ForeignCall "llvm" "lshr" []
                  [Unplaced $ Typed (varGet "$") recType False,
-                  Unplaced $ Typed (iVal shift)
-                             recType True,
+                  Unplaced $ Typed (iVal shift) recType False,
                   Unplaced $ Typed (varSet "$temp") recType False],
                 Unplaced $ ForeignCall "llvm" "and" []
                  [Unplaced $ Typed (varGet "$temp") recType False,
-                  Unplaced $ Typed (iVal $ (bit sz::Int) - 1) recType True,
-                  Unplaced $ Typed (varSet var) recType True]
+                  Unplaced $ Typed (iVal $ (bit sz::Int) - 1) recType False,
+                  Unplaced $ Typed (varSet var) fieldType True]
                ])
             fields)
         pos]
@@ -769,25 +773,28 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
     let detism = if numConsts + numNonConsts == 1 then Det else SemiDet
-        fieldmask = ((bit sz::Int) - 1) `shiftL` shift
-        holemask = complement fieldmask
-    in [ProcDecl vis detism True
+        fieldMask = (bit sz::Int) - 1
+        shiftedHoleMask = complement $ fieldMask `shiftL` shift
+    in [-- The getter:
+        ProcDecl vis detism True
         (ProcProto field [Param "$rec" recType ParamIn Ordinary,
                           Param "$" fieldtype ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
         ([tagCheck numConsts numNonConsts tag "$rec"]
          ++
         -- Code to access the selected field
-         [Unplaced $ ForeignCall "llvm" "and" []
+         [Unplaced $ ForeignCall "llvm" "lshr" []
            [Unplaced $ Typed (varGet "$rec") recType False,
-            Unplaced $ Typed (iVal fieldmask) recType True,
+            Unplaced $ Typed (iVal shift) recType False,
             Unplaced $ Typed (varSet "$rec") recType False],
-          Unplaced $ ForeignCall "llvm" "lshr" []
+          -- XXX Don't need to do this for the most significant field:
+          Unplaced $ ForeignCall "llvm" "and" []
            [Unplaced $ Typed (varGet "$rec") recType False,
-            Unplaced $ Typed (iVal shift) recType True,
+            Unplaced $ Typed (iVal fieldMask) recType False,
             Unplaced $ Typed (varSet "$") fieldtype True]
          ])
         pos,
+        -- The setter:
         ProcDecl vis detism True
         (ProcProto field [Param "$rec" recType ParamInOut Ordinary,
                           Param "$field" fieldtype ParamIn Ordinary] Set.empty)
@@ -798,16 +805,16 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
         -- value, shifting the new value into place and bitwise or-ing it
          [Unplaced $ ForeignCall "llvm" "and" []
            [Unplaced $ Typed (varGet "$rec") recType False,
-            Unplaced $ Typed (iVal holemask) recType True,
+            Unplaced $ Typed (iVal shiftedHoleMask) recType False,
             Unplaced $ Typed (varSet "$rec") recType False],
           Unplaced $ ForeignCall "llvm" "shl" []
-           [Unplaced $ Typed (varGet "$field") recType False,
-            Unplaced $ Typed (iVal shift) recType True,
-            Unplaced $ Typed (varSet "field") recType False],
+           [Unplaced $ Typed (varGet "$field") recType True,
+            Unplaced $ Typed (iVal shift) recType False,
+            Unplaced $ Typed (varSet "$field") recType False],
           Unplaced $ ForeignCall "llvm" "or" []
-           [Unplaced $ Typed (varGet "$field") recType False,
-            Unplaced $ Typed (varGet "$rec") recType False,
-            Unplaced $ Typed (varSet "$rec") fieldtype False]
+           [Unplaced $ Typed (varGet "$rec") recType False,
+            Unplaced $ Typed (varGet "$field") recType False,
+            Unplaced $ Typed (varSet "$rec") recType False]
          ])
         pos]
 
@@ -890,6 +897,7 @@ equalityBody :: [Placed ProcProto] -> [Placed ProcProto] -> TypeRepresentation
 -- Special case for phantom (void) types
 equalityBody _ _ (Bits 0) = ([succeedTest], True)
 equalityBody [] [] _ = shouldnt "trying to generate = test with no constructors"
+equalityBody _ _ (Bits _) = ([simpleEqualityTest],True)
 equalityBody consts [] _ = ([equalityConsts consts],True)
 equalityBody consts nonconsts _ =
     -- decide whether $left is const or non const, and handle accordingly
@@ -910,9 +918,12 @@ equalityBody consts nonconsts _ =
 --  know that the $left value is a const.
 equalityConsts :: [Placed ProcProto] -> Placed Stmt
 equalityConsts [] = failTest
-equalityConsts _ =
-    -- XXX can we forego the intCasts here?
-    comparison "eq" (intCast $ varGet "$left") (intCast $ varGet "$right")
+equalityConsts _  = simpleEqualityTest
+
+
+-- |An equality test that just compares $left and $right for identity
+simpleEqualityTest :: Placed Stmt
+simpleEqualityTest = comparison "eq" (varGet "$left") (varGet "$right")
 
 
 -- |Return code to check that two values are equal when the first is known
