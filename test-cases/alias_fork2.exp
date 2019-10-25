@@ -376,7 +376,7 @@ if.else:
 
 
     1:
-        foreign llvm icmp eq(~$left#0:!wybe.int, ~$right#0:!wybe.int, ?$$#0:wybe.bool)
+        foreign llvm icmp eq(~$left#0:mytree.tree, ~$right#0:mytree.tree, ?$$#0:wybe.bool)
 
 
 

@@ -261,7 +261,7 @@ if.else:
 
 
     1:
-        foreign llvm icmp eq(~$left#0:!wybe.int, ~$right#0:!wybe.int, ?$$#0:wybe.bool)
+        foreign llvm icmp eq(~$left#0:type_list.intlist, ~$right#0:type_list.intlist, ?$$#0:wybe.bool)
 
 
 

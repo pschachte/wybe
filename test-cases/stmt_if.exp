@@ -246,7 +246,7 @@ if.else3:
 
 
     1:
-        foreign llvm icmp eq(~$left#0:!wybe.int, ~$right#0:!wybe.int, ?$$#0:wybe.bool)
+        foreign llvm icmp eq(~$left#0:stmt_if.tree, ~$right#0:stmt_if.tree, ?$$#0:wybe.bool)
 
 
 

@@ -61,7 +61,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 = > public inline test (3 calls)
 0: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool): AliasPairs: []
-    foreign llvm icmp eq(~$left#0:!wybe.int, ~$right#0:!wybe.int, ?$$#0:wybe.bool)
+    foreign llvm icmp eq(~$left#0:type_enum.season, ~$right#0:type_enum.season, ?$$#0:wybe.bool)
 
 
 autumn > public inline (0 calls)
