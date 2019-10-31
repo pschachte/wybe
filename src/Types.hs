@@ -771,7 +771,7 @@ typecheckProcDecl m pdef = do
                                     ++ showProcDef 4 pdef' ++ "\n")
                     typing'' <-
                       foldlM validateForeign typing'
-                      (List.filter (isForeign . content) (fst <$> calls))
+                      (List.filter (isForeign . content) def')
                     return (pdef',sccAgain,typingErrs typing'')
                   else
                     return (pdef,False,typingErrs typing)
