@@ -798,6 +798,8 @@ doCast op ty1 ty2 = do
 
 
 doCast' :: Operand -> LLVMAST.Type -> LLVMAST.Type -> Codegen (Operand,String)
+doCast' op fromTy toTy
+    | fromTy == toTy = return (op, "identity cast")
 doCast' op (IntegerType _) ty2@(PointerType _ _) =
     (,"inttoptr") <$> inttoptr op ty2
 doCast' op (PointerType _ _) ty2@(IntegerType _) =
@@ -942,7 +944,10 @@ cgenArg :: PrimArg -> Codegen LLVMAST.Operand
 cgenArg ArgVar{argVarName=nm, argVarCoerce=False} = fst <$> getVar (show nm)
 cgenArg ArgVar{argVarName=nm, argVarCoerce=True, argVarType=ty} = do
     lift $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
-    fst <$> getVar (show nm)
+    toTy <- lift $ llvmType ty
+    (varOp,rep) <- getVar (show nm)
+    let fromTy = repLLVMType rep
+    doCast varOp fromTy toTy
 cgenArg (ArgInt val ty) = do
     reprTy <- lift $ llvmType ty
     lift $ logBlocks $ show val ++ " :: " ++ show ty
