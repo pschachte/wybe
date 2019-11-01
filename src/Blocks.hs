@@ -496,9 +496,9 @@ cgen prim@(PrimCall pspec args) = do
     unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
         (addExtern $ PrimCall pspec filteredArgs)
 
-    let inArgs = primInputs filteredArgs
+    let (inArgs,outArgs) = partitionArgs filteredArgs
     logCodegen $ "In args = " ++ show inArgs
-    outTy <- lift $ primReturnType filteredArgs
+    outTy <- lift $ primReturnType outArgs
     logCodegen $ "Out Type = " ++ show outTy
     inops <- mapM cgenArg inArgs
     logCodegen $ "Translated inputs = " ++ show inops
@@ -507,13 +507,14 @@ cgen prim@(PrimCall pspec args) = do
           (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) nm)
           inops
     logCodegen $ "Translated ins = " ++ show ins
-    addInstruction ins filteredArgs
+    addInstruction ins outArgs
 
 cgen prim@(PrimForeign "llvm" name flags args) = do
     logCodegen $ "Compiling " ++ show prim
     args' <- filterPhantomArgs args
-    case length args of
+    case length args' of
       -- XXX deconstruct args' in these calls
+       0 | name == "move" -> return Nothing -- move phantom to phantom
        2 -> cgenLLVMUnop name flags args'
        3 -> cgenLLVMBinop name flags args'
        _ -> shouldnt $ "LLVM instruction " ++ name ++ " with wrong arity!"
@@ -528,17 +529,17 @@ cgen prim@(PrimForeign lang name flags args) = do
       shouldnt $ "Unknown foreign language " ++ lang ++ " in call " ++ show prim
     args' <- filterPhantomArgs args
     addExtern $ PrimForeign lang name flags args'
-    let inArgs = primInputs args'
+    let (inArgs,outArgs) = partitionArgs args'
     let nm = LLVMAST.Name $ toSBString name
     inops <- mapM cgenArg inArgs
     -- alignedOps <- mapM makeCIntOp inops
-    outty <- lift $ primReturnType args'
+    outty <- lift $ primReturnType outArgs
     -- XXX this ignores lang and just uses C calling conventions for all calls
     let ins =
           call
           (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
           inops
-    addInstruction ins args'
+    addInstruction ins outArgs
 
 cgen (PrimTest _) = shouldnt "PrimTest should have been removed before code gen"
 
@@ -572,10 +573,10 @@ isIntOp _                                          = False
 -- Operand of the instruction.
 cgenLLVMBinop :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
 cgenLLVMBinop name flags args =
-    do let inArgs = primInputs args
+    do let (inArgs,outArgs) = partitionArgs args
        inOps <- mapM cgenArg inArgs
        case (inOps, Map.lookup (withFlags name flags) llvmMapBinop) of
-         ([a1,a2], Just (f,_,_)) -> addInstruction (f a1 a2) args
+         ([a1,a2], Just (f,_,_)) -> addInstruction (f a1 a2) outArgs
          ([_,_],Nothing) -> shouldnt $ "LLVM Instruction not found: " ++ name
          (_,_) -> shouldnt $ "Binary instruction with /= 2 inputs: " ++ name
 
@@ -589,24 +590,22 @@ cgenLLVMBinop name flags args =
 -- it.
 cgenLLVMUnop :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
 cgenLLVMUnop "move" flags args =
-    do let inArgs = primInputs args
-       let outputs = primOutputs args
-       case (outputs,inArgs) of
-         ([output],[input]) -> do
+    case partitionArgs args of
+      ([input],[output]) -> do
            inRep <- lift $ typeRep $ argType input
            outRep <- lift $ typeRep $ argType output
            (outTy, outNm) <- openPrimArg output
            inop <- cgenArg input
            assign outNm inop outRep
            return $ Just inop
-         _ ->
-           return Nothing -- XXX should be a shouldnt
+      _ ->
+           shouldnt "llvm move instruction with wrong arity"
 
 cgenLLVMUnop name flags args =
-    do let inArgs = primInputs args
+    do let (inArgs,outArgs) = partitionArgs args
        inOps <- mapM cgenArg inArgs
        case (Map.lookup name llvmMapUnop,inOps) of
-         (Just (f,_,_),[inOp]) -> addInstruction (f inOp) args
+         (Just (f,_,_),[inOp]) -> addInstruction (f inOp) outArgs
          (Just _,_)            -> shouldnt $ "unary LLVM Instruction " ++ name
                                   ++ " with " ++ show (length inArgs)
                                   ++ " inputs"
@@ -658,7 +657,7 @@ trustArgInt arg = trustFromJust
 cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
 cgenLPVM "alloc" [] args@[sizeArg,addrArg] = do
           logCodegen $ "lpvm alloc " ++ show sizeArg ++ " " ++ show addrArg
-          let inputs = primInputs args
+          let (inputs,outputs) = partitionArgs args
           case inputs of
             [input] -> do
                 outRep <- lift $ typeRep $ argType addrArg
@@ -721,10 +720,8 @@ cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
       nyi "lpvm mutate instruction with non-constant destructive flag"
 
 
-cgenLPVM "cast" [] args@[inArg,outArg] = do
-    let inputs = primInputs args
-    let outputs = primOutputs args
-    case (inputs,outputs) of
+cgenLPVM "cast" [] args@[inArg,outArg] =
+    case partitionArgs args of
         ([inArg],[outArg]) -> do
             outRep <- lift $ typeRep $ argType outArg
             let outTy = repLLVMType outRep
@@ -753,9 +750,10 @@ cgenLPVM "cast" [] args@[inArg,outArg] = do
 
         -- A cast with no outputs:  do nothing
         (_, []) -> return Nothing
-        _ -> shouldnt $ "cast instruction with " ++ show (length inputs)
-                            ++ " inputs and " ++ show (length outputs)
-                            ++ " outputs"
+        (inputs,outputs) ->
+            shouldnt $ "cast instruction with " ++ show (length inputs)
+                       ++ " inputs and " ++ show (length outputs)
+                       ++ " outputs"
 
 
 cgenLPVM pname flags args = do
@@ -829,13 +827,12 @@ constantType _            = shouldnt "Cannot determine constant type."
 
 -- | Append an 'Instruction' to the current basic block's instruction stack.
 -- The return type of the operand value generated by the instruction call is
--- inferred depending on the primitive arguments. The name is inferred from
+-- inferred depending on the output arguments. The name is inferred from
 -- the output argument's name (LPVM is in SSA form).
 addInstruction :: Instruction -> [PrimArg] -> Codegen (Maybe Operand)
-addInstruction ins args = do
-    logCodegen $ "addInstruction " ++ show ins ++ " " ++ show args
-    let outArgs = primOutputs args
-    outTy <- lift $ primReturnType args
+addInstruction ins outArgs = do
+    logCodegen $ "addInstruction " ++ show ins ++ " " ++ show outArgs
+    outTy <- lift $ primReturnType outArgs
     logCodegen $ "outTy = " ++ show outTy
     case outArgs of
           [] -> case outTy of
@@ -883,28 +880,18 @@ withFlags p f  = unwords (p:f)
 -- Helpers for primitive arguments                                        --
 ----------------------------------------------------------------------------
 
--- XXX replace primInputs and primOutputs with a partitionArgs function
 
--- | Filter valid inputs from given primitive argument list.
--- A valid input flows in and is not phantom.
-primInputs :: [PrimArg] -> [PrimArg]
-primInputs = List.filter goesIn
+-- | Partition the argument list into inputs and outputs
+partitionArgs :: [PrimArg] -> ([PrimArg],[PrimArg])
+partitionArgs = List.partition goesIn
 
 
--- | If it exists, return the valid primitive output argument.
-primOutputs :: [PrimArg] -> [PrimArg]
-primOutputs = List.filter (not . goesIn)
-
-
--- | Get the 'Type' of the valid output from the given primitive argument
+-- | Get the LLVM 'Type' of the given primitive output argument
 -- list. If there is no output arg, return void_t.
 primReturnType :: [PrimArg] -> Compiler Type
-primReturnType ps = do
-    let outputs = primOutputs ps
-    case outputs of
-      [] -> return void_t
-      [output] -> llvmType $ argType output
-      _ -> struct_t <$> mapM (llvmType . argType) outputs
+primReturnType [] = return void_t
+primReturnType [output] = llvmType $ argType output
+primReturnType outputs = struct_t <$> mapM (llvmType . argType) outputs
 
 
 goesIn :: PrimArg -> Bool
@@ -1133,8 +1120,9 @@ modWithDefinitions nm filename defs =
 -- | Build an extern declaration definition from a given LPVM primitive.
 declareExtern :: Prim -> Compiler LLVMAST.Definition
 declareExtern (PrimForeign "c" name _ args) = do
-    fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
-    retty <- primReturnType args
+    let (inArgs,outArgs) = partitionArgs args
+    fnargs <- mapM makeExArg $ zip [1..] inArgs
+    retty <- primReturnType outArgs
     let ex = external retty name fnargs
     return ex
 
@@ -1143,8 +1131,9 @@ declareExtern (PrimForeign otherlang name _ _) =
       ++ " in language " ++ otherlang
 
 declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
-    retty <- primReturnType args
-    fnargs <- mapM makeExArg $ zip [1..] (primInputs args)
+    let (inArgs,outArgs) = partitionArgs args
+    retty <- primReturnType outArgs
+    fnargs <- mapM makeExArg $ zip [1..] inArgs
     return $ external retty (show pspec) fnargs
 
 declareExtern (PrimTest _) = shouldnt "Can't declare extern for PrimNop."
