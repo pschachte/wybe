@@ -182,6 +182,11 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Output resource not defined in proc body
                | ReasonResourceUnavail ProcName Ident OptPos
                    -- ^Input resource not available in proc call
+               | ReasonWrongFamily Ident Int TypeFamily OptPos
+                   -- ^LLVM instruction expected different argument family
+               | ReasonIncompatible Ident TypeRepresentation
+                 TypeRepresentation OptPos
+                   -- ^Inconsistent arguments to binary LLVM instruction
                | ReasonShouldnt
                    -- ^This error should never happen
                deriving (Eq, Ord)
@@ -271,6 +276,14 @@ instance Show TypeError where
     show (ReasonResourceUnavail proc res pos) =
         makeMessage pos $
         "Input resource " ++ res ++ " not available at call to proc " ++ proc
+    show (ReasonWrongFamily instr argNum fam pos) =
+        makeMessage pos $
+        "LLVM instruction '" ++ instr ++ "' argument " ++ show argNum
+        ++ ": expected " ++ show fam ++ " argument"
+    show (ReasonIncompatible instr rep1 rep2 pos) =
+        makeMessage pos $
+        "LLVM instruction '" ++ instr ++ "' inconsistent arguments "
+        ++ show rep1 ++ " and " ++ show rep2
     show ReasonShouldnt =
         makeMessage Nothing "Mysterious typing error"
 
@@ -1741,8 +1754,8 @@ validateForeign typing placed =
 
 
 -- | Make sure a foreign call is valid; otherwise report an error
--- XXX These should check that argument representations are appropriate
---     for the instructions, too
+-- XXX Check that the outputs of LLVM instructions are correct, after
+--     considering casting.
 validateForeignCall :: String -> ProcName -> [String] -> [TypeRepresentation]
                     -> Stmt -> OptPos -> Typing -> Compiler Typing
 -- just assume C calls are OK
@@ -1756,16 +1769,27 @@ validateForeignCall "llvm" name flags argReps stmt pos typing = do
     let arity = length argReps
     let opName = intercalate " " (name:flags)
     return $
-      case arity of
-        3 -> if isJust $ Map.lookup opName llvmMapBinop
-             then typing
-             else if isJust $ Map.lookup opName llvmMapUnop
-                  then typeError (ReasonForeignArity name arity 2 pos)
-                       typing
+      case argReps of
+        [inRep1,inRep2,outRep] ->
+          case Map.lookup opName llvmMapBinop of
+             Just (_,fam,outTy) ->
+               if fam /= typeFamily inRep1
+               then typeError (ReasonWrongFamily name 1 fam pos) typing
+               else if fam /= typeFamily inRep2
+               then typeError (ReasonWrongFamily name 2 fam pos) typing
+               else if not $ compatibleReps inRep1 inRep2
+               then typeError (ReasonIncompatible name inRep1 inRep2 pos) typing
+               else typing
+             _ -> if isJust $ Map.lookup opName llvmMapUnop
+                  then typeError (ReasonForeignArity name arity 2 pos) typing
                   else typeError (ReasonBadForeign "llvm" name pos) typing
-        2 -> if isJust $ Map.lookup opName llvmMapUnop
-             then typing
-             else if isJust $ Map.lookup opName llvmMapBinop
+        [inRep,outRep] ->
+          case Map.lookup opName llvmMapUnop of
+             Just (_,famIn,famOut) ->
+               if famIn /= typeFamily inRep
+               then typeError (ReasonWrongFamily name 1 famIn pos) typing
+               else typing
+             _ -> if isJust $ Map.lookup opName llvmMapBinop
                   then typeError (ReasonForeignArity name arity 3 pos)
                        typing
                   else typeError (ReasonBadForeign "llvm" name pos) typing
@@ -1774,8 +1798,6 @@ validateForeignCall "llvm" name flags argReps stmt pos typing = do
              else if isJust $ Map.lookup opName llvmMapUnop
                   then typeError (ReasonForeignArity name arity 2 pos) typing
                   else typeError (ReasonBadForeign "llvm" name pos) typing
-
-
 validateForeignCall "lpvm" "alloc" flags argReps stmt pos typing = do
     let arity = length argReps
     if arity == 2
@@ -1785,6 +1807,27 @@ validateForeignCall "lpvm" name flags argReps stmt pos typing = do
     return $ checkLPVMArgs name flags argReps stmt pos typing
 validateForeignCall lang name flags argReps stmt pos typing =
     return $ typeError (ReasonForeignLanguage lang name pos) typing
+
+
+-- | Are two types compatible for use as inputs to a binary LLVM op?
+--   Used for type checking LLVM instructions.
+compatibleReps :: TypeRepresentation -> TypeRepresentation -> Bool
+compatibleReps Address           Address           = True
+compatibleReps Address           (Bits wordSize)   = True
+compatibleReps Address           (Signed wordSize) = True
+compatibleReps Address           (Floating _)      = False
+compatibleReps (Bits wordSize)   Address           = True
+compatibleReps (Bits m)          (Bits n)          = m == n
+compatibleReps (Bits m)          (Signed n)        = m == n
+compatibleReps (Bits _)          (Floating _)      = False
+compatibleReps (Signed wordSize) Address           = True
+compatibleReps (Signed m)        (Bits n)          = m == n
+compatibleReps (Signed m)        (Signed n)        = m == n
+compatibleReps (Signed _)        (Floating _)      = False
+compatibleReps (Floating _)      Address           = False
+compatibleReps (Floating _)      (Bits _)          = False
+compatibleReps (Floating _)      (Signed _)        = False
+compatibleReps (Floating m)      (Floating n)      = m == n
 
 
 checkLPVMArgs :: String -> [String] -> [TypeRepresentation] -> Stmt -> OptPos

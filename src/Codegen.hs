@@ -26,7 +26,8 @@ module Codegen (
   -- * Instructions
   instr, namedInstr, voidInstr,
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv, urem, srem, frem,
-  cons, uitofp, fptoui, icmp, fcmp, lOr, lAnd, lXor, shl, lshr, ashr,
+  cons, uitofp, sitofp, fptoui, fptosi,
+  icmp, fcmp, lOr, lAnd, lXor, shl, lshr, ashr,
   constInttoptr,
   -- * Structure instructions
   insertvalue, extractvalue
@@ -530,8 +531,14 @@ icmp p a b = ICmp p a b []
 uitofp :: Operand -> Instruction
 uitofp a = UIToFP a float_t []
 
+sitofp :: Operand -> Instruction
+sitofp a = SIToFP a float_t []
+
 fptoui :: Operand -> Instruction
 fptoui a = FPToUI a int_t []
+
+fptosi :: Operand -> Instruction
+fptosi a = FPToSI a int_t []
 
 -- | Create a constant operand (function parameters).
 cons :: C.Constant -> Operand

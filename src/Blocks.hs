@@ -512,7 +512,7 @@ cgen prim@(PrimCall pspec args) = do
 cgen prim@(PrimForeign "llvm" name flags args) = do
     logCodegen $ "Compiling " ++ show prim
     args' <- filterPhantomArgs args
-    case (length args) of
+    case length args of
       -- XXX deconstruct args' in these calls
        2 -> cgenLLVMUnop name flags args'
        3 -> cgenLLVMBinop name flags args'
@@ -575,8 +575,7 @@ cgenLLVMBinop name flags args =
     do let inArgs = primInputs args
        inOps <- mapM cgenArg inArgs
        case Map.lookup (withFlags name flags) llvmMapBinop of
-         (Just f) -> let ins = (apply2 f inOps)
-                     in addInstruction ins args
+         (Just (f,_,_)) -> addInstruction (apply2 f inOps) args
          Nothing -> shouldnt $ "LLVM Instruction not found: " ++ name
 
 
@@ -606,12 +605,12 @@ cgenLLVMUnop name flags args =
     do let inArgs = primInputs args
        inOps <- mapM cgenArg inArgs
        case (Map.lookup name llvmMapUnop,inOps) of
-         (Just f,[inOp]) -> addInstruction (f inOp) args
-         (Nothing,_)     -> shouldnt $ "LLVM Instruction not found : "
-                            ++ name
-         (_,_)           -> shouldnt $ "unary LLVM Instruction " ++ name
-                            ++ " with " ++ show (length inArgs)
-                            ++ " inputs"
+         (Just (f,_,_),[inOp]) -> addInstruction (f inOp) args
+         (Just _,_)            -> shouldnt $ "unary LLVM Instruction " ++ name
+                                  ++ " with " ++ show (length inArgs)
+                                  ++ " inputs"
+         (Nothing,_)           -> shouldnt $ "LLVM Instruction not found : "
+                                  ++ name
 
 
 -- | Look inside the Prototype list stored in the CodegenState monad and
@@ -1004,54 +1003,61 @@ integerOrd = toInteger . ord
 
 -- | A map of arithmetic binary operations supported through LLVM to
 -- their Codegen module counterpart.
+llvmMapBinop :: Map String
+                (Operand -> Operand -> Instruction,
+                 TypeFamily, TypeRepresentation -> TypeRepresentation)
 llvmMapBinop =
     Map.fromList [
-            ("add", iadd),
-            ("sub", isub),
-            ("mul", imul),
-            ("div", idiv),
-            ("sdiv", sdiv),
-            ("urem", urem),
-            ("srem", srem),
-            -- * Floating point instruction
-            ("fadd", fadd),
-            ("fsub", fsub),
-            ("fmul", fmul),
-            ("fdiv", fdiv),
-            ("frem", frem),
-            -- * Comparisions
-            ("icmp eq", icmp IP.EQ),
-            ("icmp ne", icmp IP.NE),
-            ("icmp ugt", icmp IP.UGT),
-            ("icmp uge", icmp IP.UGE),
-            ("icmp ult", icmp IP.ULT),
-            ("icmp ule", icmp IP.ULE),
-            ("icmp sgt", icmp IP.SGT),
-            ("icmp sge", icmp IP.SGE),
-            ("icmp slt", icmp IP.SLT),
-            ("icmp sle", icmp IP.SLE),
-
-            -- * Floating point comparisions
-            ("fcmp eq", fcmp FP.OEQ),
-            ("fcmp ne", fcmp FP.ONE),
-            ("fcmp slt", fcmp FP.OLT),
-            ("fcmp sle", fcmp FP.OLE),
-            ("fcmp sgt", fcmp FP.OGT),
-            ("fcmp sge", fcmp FP.OGE),
+            -- * Integer arithmetic
+            ("add",  (iadd, IntFamily, id)),
+            ("sub",  (isub, IntFamily, id)),
+            ("mul",  (imul, IntFamily, id)),
+            ("div",  (idiv, IntFamily, id)),
+            ("sdiv", (sdiv, IntFamily, id)),
+            ("urem", (urem, IntFamily, id)),
+            ("srem", (srem, IntFamily, id)),
+            -- * Integer comparisions
+            ("icmp eq",  (icmp IP.EQ,  IntFamily, const $ Bits 1)),
+            ("icmp ne",  (icmp IP.NE,  IntFamily, const $ Bits 1)),
+            ("icmp ugt", (icmp IP.UGT, IntFamily, const $ Bits 1)),
+            ("icmp uge", (icmp IP.UGE, IntFamily, const $ Bits 1)),
+            ("icmp ult", (icmp IP.ULT, IntFamily, const $ Bits 1)),
+            ("icmp ule", (icmp IP.ULE, IntFamily, const $ Bits 1)),
+            ("icmp sgt", (icmp IP.SGT, IntFamily, const $ Bits 1)),
+            ("icmp sge", (icmp IP.SGE, IntFamily, const $ Bits 1)),
+            ("icmp slt", (icmp IP.SLT, IntFamily, const $ Bits 1)),
+            ("icmp sle", (icmp IP.SLE, IntFamily, const $ Bits 1)),
             -- * Bitwise operations
-            ("shl", shl),
-            ("lshr", lshr),
-            ("ashr", ashr),
-            ("or", lOr),
-            ("and", lAnd),
-            ("xor", lXor)
+            ("shl",  (shl,  IntFamily, id)),
+            ("lshr", (lshr, IntFamily, id)),
+            ("ashr", (ashr, IntFamily, id)),
+            ("or",   (lOr,  IntFamily, id)),
+            ("and",  (lAnd, IntFamily, id)),
+            ("xor",  (lXor, IntFamily, id)),
+
+            -- * Floating point arithmetic
+            ("fadd", (fadd, FloatFamily, id)),
+            ("fsub", (fsub, FloatFamily, id)),
+            ("fmul", (fmul, FloatFamily, id)),
+            ("fdiv", (fdiv, FloatFamily, id)),
+            ("frem", (frem, FloatFamily, id)),
+            -- * Floating point comparisions
+            ("fcmp eq",  (fcmp FP.OEQ, FloatFamily, const $ Bits 1)),
+            ("fcmp ne",  (fcmp FP.ONE, FloatFamily, const $ Bits 1)),
+            ("fcmp slt", (fcmp FP.OLT, FloatFamily, const $ Bits 1)),
+            ("fcmp sle", (fcmp FP.OLE, FloatFamily, const $ Bits 1)),
+            ("fcmp sgt", (fcmp FP.OGT, FloatFamily, const $ Bits 1)),
+            ("fcmp sge", (fcmp FP.OGE, FloatFamily, const $ Bits 1))
            ]
 
 -- | A map of unary llvm operations wrapped in the 'Codegen' module.
+llvmMapUnop :: Map String (Operand -> Instruction, TypeFamily, TypeFamily)
 llvmMapUnop =
     Map.fromList [
-            ("uitofp", uitofp),
-            ("fptoui", fptoui)
+            ("uitofp", (uitofp, IntFamily, FloatFamily)),
+            ("sitofp", (sitofp, IntFamily, FloatFamily)),
+            ("fptoui", (fptoui, FloatFamily, IntFamily)),
+            ("fptosi", (fptosi, FloatFamily, IntFamily))
            ]
 
 

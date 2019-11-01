@@ -19,7 +19,8 @@ module AST (
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt,
-  TypeRepresentation(..), defaultTypeRepresentation, typeRepSize,
+  TypeRepresentation(..), TypeFamily(..), typeFamily,
+  defaultTypeRepresentation, typeRepSize,
   lookupTypeRepresentation,
   paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
   primProtoParamNames,
@@ -142,7 +143,7 @@ data TypeRepresentation
     | Bits Int          -- * An unsigned integer representation
     | Signed Int        -- * A signed integer representation
     | Floating Int      -- * A floating point representation
-    deriving (Eq, Generic)
+    deriving (Eq, Ord, Generic)
 
 
 -- | Type representation for opaque things
@@ -158,14 +159,23 @@ typeRepSize (Signed bits)   = bits
 typeRepSize (Floating bits) = bits
 
 
+-- | Crude division of types useful for categorising primitive operations
+data TypeFamily = IntFamily | FloatFamily
+  deriving (Eq, Ord)
+
+
+-- | Categorise a type representation as either int or float
+typeFamily :: TypeRepresentation -> TypeFamily
+typeFamily (Floating _) = FloatFamily
+typeFamily _            = IntFamily
+
+
+-- | Declared implementation of a type, either in terms of representation or by
+--   listing constructors and having the compiler determine the representation.
 data TypeImpln = TypeRepresentation TypeRepresentation
                | TypeCtors Visibility [Placed ProcProto]
                deriving (Generic, Eq)
 
--- -- |Check if a pointer or primitive variables
--- isPointer :: TypeImpln -> Bool
--- isPointer (TypeRepresentation rep) = False
--- isPointer (TypeCtors _ _) = True
 
 -- |Combine two visibilities, taking the most visible.
 maxVisibility :: Visibility -> Visibility -> Visibility
@@ -173,11 +183,13 @@ maxVisibility Public _ = Public
 maxVisibility _ Public = Public
 maxVisibility _      _ = Private
 
+
 -- |Combine two visibilities, taking the least visible.
 minVisibility :: Visibility -> Visibility -> Visibility
 minVisibility Private _ = Private
 minVisibility _ Private = Private
 minVisibility _       _ = Public
+
 
 -- |Does the specified visibility make the item public?
 isPublic :: Visibility -> Bool
@@ -2378,6 +2390,12 @@ instance Show TypeRepresentation where
   show (Bits bits) = show bits ++ " bit unsigned"
   show (Signed bits) = show bits ++ " bit signed"
   show (Floating bits) = show bits ++ " bit float"
+
+
+-- |How to show a type family
+instance Show TypeFamily where
+  show IntFamily   = "integer/address type"
+  show FloatFamily = "floating point type"
 
 
 -- |How to show a ModSpec.
