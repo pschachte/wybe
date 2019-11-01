@@ -574,9 +574,10 @@ cgenLLVMBinop :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
 cgenLLVMBinop name flags args =
     do let inArgs = primInputs args
        inOps <- mapM cgenArg inArgs
-       case Map.lookup (withFlags name flags) llvmMapBinop of
-         (Just (f,_,_)) -> addInstruction (apply2 f inOps) args
-         Nothing -> shouldnt $ "LLVM Instruction not found: " ++ name
+       case (inOps, Map.lookup (withFlags name flags) llvmMapBinop) of
+         ([a1,a2], Just (f,_,_)) -> addInstruction (f a1 a2) args
+         ([_,_],Nothing) -> shouldnt $ "LLVM Instruction not found: " ++ name
+         (_,_) -> shouldnt $ "Binary instruction with /= 2 inputs: " ++ name
 
 
 -- | Similar to 'cgenLLVMBinop', but for unary operations on the
@@ -873,13 +874,7 @@ pullName _                    = shouldnt $ "Expected variable as output."
 -- the comparision type specified as a flag).
 withFlags :: ProcName -> [Ident] -> String
 withFlags p [] = p
-withFlags p f  = p ++ " " ++ (List.intercalate " " f)
-
--- | Apply Operands from the operand list (2 items) to the wrapped LLVM
--- instruction from 'Codegen' Module.
-apply2 :: (Operand -> Operand -> Instruction) -> [Operand] -> Instruction
-apply2 f (a:b:[]) = f a b
-apply2 _ operands = shouldnt $ "Not a binary operation: " ++ show operands
+withFlags p f  = unwords (p:f)
 
 
 ----------------------------------------------------------------------------
