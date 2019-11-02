@@ -162,7 +162,7 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Multiple procs with same types/flows
                | ReasonAmbig ProcName OptPos [(VarName,[TypeRef])]
                    -- ^Proc defn has ambiguous types
-               |  ReasonArity ProcName ProcName OptPos Int Int
+               | ReasonArity ProcName ProcName OptPos Int Int
                    -- ^Call to proc with wrong arity
                | ReasonUndeclared ProcName OptPos
                    -- ^Public proc with some undeclared types
@@ -187,6 +187,12 @@ data TypeError = ReasonParam ProcName Int OptPos
                | ReasonIncompatible Ident TypeRepresentation
                  TypeRepresentation OptPos
                    -- ^Inconsistent arguments to binary LLVM instruction
+               | ReasonWrongOutput Ident TypeRepresentation
+                 TypeRepresentation OptPos
+                   -- ^Wrong output type representation to LLVM instruction
+               | ReasonForeignArgRep Ident Int TypeRepresentation
+                 String OptPos
+                   -- ^Foreign call with wrong argument type
                | ReasonShouldnt
                    -- ^This error should never happen
                deriving (Eq, Ord)
@@ -284,6 +290,14 @@ instance Show TypeError where
         makeMessage pos $
         "LLVM instruction '" ++ instr ++ "' inconsistent arguments "
         ++ show rep1 ++ " and " ++ show rep2
+    show (ReasonWrongOutput instr wrongRep rightRep pos) =
+        makeMessage pos $
+        "LLVM instruction '" ++ instr ++ "' wrong output "
+        ++ show wrongRep ++ ", should be " ++ show rightRep
+    show (ReasonForeignArgRep instr argNum wrongRep rightDesc pos) =
+        makeMessage pos $
+        "LLVM instruction '" ++ instr ++ "' argument " ++ show argNum
+        ++ " is " ++ show wrongRep ++ ", should be " ++ rightDesc
     show ReasonShouldnt =
         makeMessage Nothing "Mysterious typing error"
 
@@ -1735,7 +1749,6 @@ validateForeign :: Typing -> Placed Stmt -> Compiler Typing
 validateForeign typing placed =
     case content placed of
       stmt@(ForeignCall lang name tags args) -> do
-        logTypes $ "Sanity checking foreign call " ++ showStmt 4 stmt
         let pos = place placed
         argTypes <- mapM (expType typing) args
         maybeReps <- mapM lookupTypeRepresentation argTypes
@@ -1743,12 +1756,16 @@ validateForeign typing placed =
         let untyped = snd <$> List.filter (isNothing . fst) numberedMaybes
         if List.null untyped
           then do
-          let argReps = trustFromJust "validateForeign" <$> maybeReps
-          validateForeignCall lang name tags argReps stmt pos typing
+              let argReps = List.filter (not . repIsPhantom)
+                            $ trustFromJust "validateForeign" <$> maybeReps
+              logTypes $ "Type checking foreign " ++ lang ++ " call "
+                         ++ unwords (name:tags)
+                         ++ "(" ++ intercalate ", " (show <$> argReps) ++ ")"
+              validateForeignCall lang name tags argReps stmt pos typing
           else
-          return $ typeErrors
-                   (flip (ReasonForeignArgType name) pos <$> untyped)
-                   typing
+              return $ typeErrors
+                       (flip (ReasonForeignArgType name) pos <$> untyped)
+                       typing
       stmt ->
         shouldnt $ "validateForeign of non-foreign stmt " ++ showStmt 4 stmt
 
@@ -1760,11 +1777,15 @@ validateForeignCall :: String -> ProcName -> [String] -> [TypeRepresentation]
                     -> Stmt -> OptPos -> Typing -> Compiler Typing
 -- just assume C calls are OK
 validateForeignCall "c" _ _ _ _ _ typing = return typing
-validateForeignCall "llvm" "move" _ argReps stmt pos typing = do
-    let arity = length argReps
-    if arity == 2
-      then return typing
-      else return $ typeError (ReasonForeignArity "move" arity 2 pos) typing
+-- A move with no non-phantom arguments:  all OK
+validateForeignCall "llvm" "move" _ [] stmt pos typing = return typing
+validateForeignCall "llvm" "move" _ [inRep,outRep] stmt pos typing
+  | inRep == outRep = return typing
+  | otherwise       = return
+                      $ typeError (ReasonWrongOutput "move" outRep inRep pos)
+                        typing
+validateForeignCall "llvm" "move" _ argReps stmt pos typing =
+    return $ typeError (ReasonForeignArity "move" (length argReps) 2 pos) typing
 validateForeignCall "llvm" name flags argReps stmt pos typing = do
     let arity = length argReps
     let opName = intercalate " " (name:flags)
@@ -1780,30 +1801,26 @@ validateForeignCall "llvm" name flags argReps stmt pos typing = do
                else if not $ compatibleReps inRep1 inRep2
                then typeError (ReasonIncompatible name inRep1 inRep2 pos) typing
                else typing
-             _ -> if isJust $ Map.lookup opName llvmMapUnop
-                  then typeError (ReasonForeignArity name arity 2 pos) typing
-                  else typeError (ReasonBadForeign "llvm" name pos) typing
+             Nothing ->
+               if isJust $ Map.lookup opName llvmMapUnop
+               then typeError (ReasonForeignArity name arity 2 pos) typing
+               else typeError (ReasonBadForeign "llvm" name pos) typing
         [inRep,outRep] ->
           case Map.lookup opName llvmMapUnop of
              Just (_,famIn,famOut) ->
                if famIn /= typeFamily inRep
                then typeError (ReasonWrongFamily name 1 famIn pos) typing
                else typing
-             _ -> if isJust $ Map.lookup opName llvmMapBinop
-                  then typeError (ReasonForeignArity name arity 3 pos)
-                       typing
-                  else typeError (ReasonBadForeign "llvm" name pos) typing
+             Nothing ->
+               if isJust $ Map.lookup opName llvmMapBinop
+               then typeError (ReasonForeignArity name arity 3 pos) typing
+               else typeError (ReasonBadForeign "llvm" name pos) typing
         _ -> if isJust $ Map.lookup opName llvmMapBinop
              then typeError (ReasonForeignArity name arity 3 pos) typing
              else if isJust $ Map.lookup opName llvmMapUnop
                   then typeError (ReasonForeignArity name arity 2 pos) typing
                   else typeError (ReasonBadForeign "llvm" name pos) typing
-validateForeignCall "lpvm" "alloc" flags argReps stmt pos typing = do
-    let arity = length argReps
-    if arity == 2
-      then return typing
-      else return $ typeError (ReasonForeignArity "alloc" arity 2 pos) typing
-validateForeignCall "lpvm" name flags argReps stmt pos typing = do
+validateForeignCall "lpvm" name flags argReps stmt pos typing =
     return $ checkLPVMArgs name flags argReps stmt pos typing
 validateForeignCall lang name flags argReps stmt pos typing =
     return $ typeError (ReasonForeignLanguage lang name pos) typing
@@ -1830,29 +1847,55 @@ compatibleReps (Floating _)      (Signed _)        = False
 compatibleReps (Floating m)      (Floating n)      = m == n
 
 
+-- | Add the specified type error if the specified test fails
+reportErrorUnless :: TypeError -> Bool -> Typing -> Typing
+reportErrorUnless err False typing = typeError err typing
+reportErrorUnless err True typing = typing
+
+
+-- | Check arg types of an LPVM instruction
 checkLPVMArgs :: String -> [String] -> [TypeRepresentation] -> Stmt -> OptPos
               -> Typing -> Typing
+-- XXX must check arg type representations
+checkLPVMArgs "alloc" _ [Bits _,Address] stmt pos typing = typing
+checkLPVMArgs "alloc" _ [Signed _,Address] stmt pos typing = typing
+checkLPVMArgs "alloc" _ [sz,struct] stmt pos typing =
+    reportErrorUnless (ReasonForeignArgRep "alloc" 1 sz "integer" pos)
+    (integerTypeRep sz)
+    $ reportErrorUnless (ReasonForeignArgRep "alloc" 2 struct "address" pos)
+      (struct == Address)
+      typing
 checkLPVMArgs "alloc" _ args stmt pos typing =
-    let arity = length args
-    in if arity == 2
-       then typing
-       else typeError (ReasonForeignArity "alloc" arity 2 pos) typing
+    typeError (ReasonForeignArity "alloc" (length args) 2 pos) typing
+checkLPVMArgs "access" _ [struct,offset,val] stmt pos typing =
+    reportErrorUnless (ReasonForeignArgRep "access" 1 struct "address" pos)
+    (struct == Address)
+    $ reportErrorUnless (ReasonForeignArgRep "access" 2 offset "integer" pos)
+      (integerTypeRep offset)
+    typing
 checkLPVMArgs "access" _ args stmt pos typing =
-    let arity = length args
-    in if length args == 3
-       then typing
-       else typeError (ReasonForeignArity "access" arity 3 pos) typing
+    typeError (ReasonForeignArity "access" (length args) 3 pos) typing
+checkLPVMArgs "mutate" _ [old,new,offset,destr,sz,start,val] stmt pos typing =
+    reportErrorUnless (ReasonForeignArgRep "mutate" 1 old "address" pos)
+    (old == Address)
+    $ reportErrorUnless (ReasonForeignArgRep "mutate" 2 new "address" pos)
+      (new == Address)
+    $ reportErrorUnless (ReasonForeignArgRep "mutate" 3 offset "integer" pos)
+      (integerTypeRep offset)
+    $ reportErrorUnless (ReasonForeignArgRep "mutate" 4 destr "Boolean" pos)
+      (integerTypeRep destr)
+    $ reportErrorUnless (ReasonForeignArgRep "mutate" 5 sz "integer" pos)
+      (integerTypeRep sz)
+    $ reportErrorUnless (ReasonForeignArgRep "mutate" 6 start "integer" pos)
+      (integerTypeRep start)
+      typing
 checkLPVMArgs "mutate" _ args stmt pos typing =
-    let arity = length args
-    in if length args == 7
-       then typing
-       else typeError (ReasonForeignArity "mutate" arity 7 pos) typing
--- XXX do we still need this instruction?
+    typeError (ReasonForeignArity "mutate" (length args) 7 pos) typing
+-- XXX do we still need a cast instruction?
+checkLPVMArgs "cast" _ [old,new] stmt pos typing = typing
+checkLPVMArgs "cast" _ [] stmt pos typing = typing
 checkLPVMArgs "cast" _ args stmt pos typing =
-    let arity = length args
-    in if length args == 2
-       then typing
-       else typeError (ReasonForeignArity "cast" arity 2 pos) typing
+    typeError (ReasonForeignArity "cast" (length args) 2 pos) typing
 checkLPVMArgs name _ args stmt pos typing =
     typeError (ReasonBadForeign "lpvm" name pos) typing
 

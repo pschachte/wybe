@@ -20,7 +20,7 @@ module AST (
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
-  defaultTypeRepresentation, typeRepSize,
+  defaultTypeRepresentation, typeRepSize, integerTypeRep,
   lookupTypeRepresentation,
   paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
   primProtoParamNames,
@@ -157,6 +157,14 @@ typeRepSize Address         = wordSize
 typeRepSize (Bits bits)     = bits
 typeRepSize (Signed bits)   = bits
 typeRepSize (Floating bits) = bits
+
+
+-- | The type representation is for a (signed or unsigned) integer type
+integerTypeRep :: TypeRepresentation -> Bool
+integerTypeRep Address         = False
+integerTypeRep (Bits bits)     = True
+integerTypeRep (Signed bits)   = True
+integerTypeRep (Floating bits) = False
 
 
 -- | Crude division of types useful for categorising primitive operations
