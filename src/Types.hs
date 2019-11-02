@@ -1744,6 +1744,12 @@ resourceParam _ = False
 --                    Check foreign calls
 ----------------------------------------------------------------
 
+-- | Add the specified type error if the specified test fails
+reportErrorUnless :: TypeError -> Bool -> Typing -> Typing
+reportErrorUnless err False typing = typeError err typing
+reportErrorUnless err True typing = typing
+
+
 -- | Make sure a foreign call is valid; otherwise report an error
 validateForeign :: Typing -> Placed Stmt -> Compiler Typing
 validateForeign typing placed =
@@ -1794,13 +1800,13 @@ validateForeignCall "llvm" name flags argReps stmt pos typing = do
         [inRep1,inRep2,outRep] ->
           case Map.lookup opName llvmMapBinop of
              Just (_,fam,outTy) ->
-               if fam /= typeFamily inRep1
-               then typeError (ReasonWrongFamily name 1 fam pos) typing
-               else if fam /= typeFamily inRep2
-               then typeError (ReasonWrongFamily name 2 fam pos) typing
-               else if not $ compatibleReps inRep1 inRep2
-               then typeError (ReasonIncompatible name inRep1 inRep2 pos) typing
-               else typing
+               reportErrorUnless (ReasonWrongFamily name 1 fam pos)
+               (fam == typeFamily inRep1)
+               $ reportErrorUnless (ReasonWrongFamily name 2 fam pos)
+                 (fam == typeFamily inRep2)
+               $ reportErrorUnless (ReasonIncompatible name inRep1 inRep2 pos)
+                 (compatibleReps inRep1 inRep2)
+               typing
              Nothing ->
                if isJust $ Map.lookup opName llvmMapUnop
                then typeError (ReasonForeignArity name arity 2 pos) typing
@@ -1808,9 +1814,9 @@ validateForeignCall "llvm" name flags argReps stmt pos typing = do
         [inRep,outRep] ->
           case Map.lookup opName llvmMapUnop of
              Just (_,famIn,famOut) ->
-               if famIn /= typeFamily inRep
-               then typeError (ReasonWrongFamily name 1 famIn pos) typing
-               else typing
+               reportErrorUnless (ReasonWrongFamily name 1 famIn pos)
+               (famIn == typeFamily inRep)
+               typing
              Nothing ->
                if isJust $ Map.lookup opName llvmMapBinop
                then typeError (ReasonForeignArity name arity 3 pos) typing
@@ -1845,12 +1851,6 @@ compatibleReps (Floating _)      Address           = False
 compatibleReps (Floating _)      (Bits _)          = False
 compatibleReps (Floating _)      (Signed _)        = False
 compatibleReps (Floating m)      (Floating n)      = m == n
-
-
--- | Add the specified type error if the specified test fails
-reportErrorUnless :: TypeError -> Bool -> Typing -> Typing
-reportErrorUnless err False typing = typeError err typing
-reportErrorUnless err True typing = typing
 
 
 -- | Check arg types of an LPVM instruction
