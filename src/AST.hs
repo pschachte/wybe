@@ -28,7 +28,7 @@ module AST (
   protoInputParamNames, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
-  placedApply, placedApplyM, makeMessage, updatePlacedM,
+  placedApply, placedApply1, placedApplyM, makeMessage, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
@@ -260,6 +260,12 @@ unPlace (Unplaced x)   = (x, Nothing)
 --  placed thing.
 placedApply :: (a -> OptPos -> b) -> Placed a -> b
 placedApply f placed = f (content placed) (place placed)
+
+
+-- |Apply a function that takes a thing and an optional place to a
+--  placed thing.
+placedApply1 :: (c -> a -> OptPos -> b) -> c -> Placed a -> b
+placedApply1 f x placed = f x (content placed) (place placed)
 
 
 -- |Apply a function that takes a thing and an optional place to a

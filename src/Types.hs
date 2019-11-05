@@ -769,7 +769,7 @@ typecheckProcDecl m pdef = do
                                     ++ "\n-----------------NEW:"
                                     ++ showProcDef 4 pdef' ++ "\n")
                     typing'' <-
-                      foldlM validateForeign typing'
+                      foldlM (placedApply1 validateForeign) typing'
                       (List.filter (isForeign . content) def')
                     return (pdef',sccAgain,typingErrs typing'')
                   else
@@ -1353,29 +1353,26 @@ reportErrorUnless err True typing = typing
 
 
 -- | Make sure a foreign call is valid; otherwise report an error
-validateForeign :: Typing -> Placed Stmt -> Compiler Typing
-validateForeign typing placed =
-    case content placed of
-      stmt@(ForeignCall lang name tags args) -> do
-        let pos = place placed
-        argTypes <- mapM (expType typing) args
-        maybeReps <- mapM lookupTypeRepresentation argTypes
-        let numberedMaybes = zip maybeReps [1..]
-        let untyped = snd <$> List.filter (isNothing . fst) numberedMaybes
-        if List.null untyped
-          then do
-              let argReps = List.filter (not . repIsPhantom)
-                            $ trustFromJust "validateForeign" <$> maybeReps
-              logTypes $ "Type checking foreign " ++ lang ++ " call "
-                         ++ unwords (name:tags)
-                         ++ "(" ++ intercalate ", " (show <$> argReps) ++ ")"
-              validateForeignCall lang name tags argReps stmt pos typing
-          else
-              return $ typeErrors
-                       (flip (ReasonForeignArgType name) pos <$> untyped)
-                       typing
-      stmt ->
-        shouldnt $ "validateForeign of non-foreign stmt " ++ showStmt 4 stmt
+validateForeign :: Typing -> Stmt -> OptPos -> Compiler Typing
+validateForeign typing stmt@(ForeignCall lang name tags args) pos = do
+    argTypes <- mapM (expType typing) args
+    maybeReps <- mapM lookupTypeRepresentation argTypes
+    let numberedMaybes = zip maybeReps [1..]
+    let untyped = snd <$> List.filter (isNothing . fst) numberedMaybes
+    if List.null untyped
+      then do
+        let argReps = List.filter (not . repIsPhantom)
+                      $ trustFromJust "validateForeign" <$> maybeReps
+        logTypes $ "Type checking foreign " ++ lang ++ " call "
+                   ++ unwords (name:tags)
+                   ++ "(" ++ intercalate ", " (show <$> argReps) ++ ")"
+        validateForeignCall lang name tags argReps stmt pos typing
+      else
+        return $ typeErrors
+                 (flip (ReasonForeignArgType name) pos <$> untyped)
+                 typing
+validateForeign typing stmt _ =
+    shouldnt $ "validateForeign of non-foreign stmt " ++ showStmt 4 stmt
 
 
 -- | Make sure a foreign call is valid; otherwise report an error
