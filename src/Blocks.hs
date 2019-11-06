@@ -928,8 +928,9 @@ openPrimArg a = shouldnt $ "Can't Open!: "
 -- it a global declaration 'addGlobalConstant' creates a G.Global Value for
 -- it, generating a UnName name for it.
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
-cgenArg ArgVar{argVarName=nm, argVarCoerce=False} = fst <$> getVar (show nm)
-cgenArg ArgVar{argVarName=nm, argVarCoerce=True, argVarType=ty} = do
+-- cgenArg ArgVar{argVarName=nm, argVarCoerce=False} = fst <$> getVar (show nm)
+-- cgenArg ArgVar{argVarName=nm, argVarCoerce=True, argVarType=ty} = do
+cgenArg ArgVar{argVarName=nm, argVarType=ty} = do
     lift $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
     toTy <- lift $ llvmType ty
     (varOp,rep) <- getVar (show nm)
