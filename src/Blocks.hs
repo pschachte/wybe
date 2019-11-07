@@ -831,7 +831,7 @@ constantType _            = shouldnt "Cannot determine constant type."
 -- the output argument's name (LPVM is in SSA form).
 addInstruction :: Instruction -> [PrimArg] -> Codegen (Maybe Operand)
 addInstruction ins outArgs = do
-    logCodegen $ "addInstruction " ++ show ins ++ " " ++ show outArgs
+    logCodegen $ "addInstruction " ++ show outArgs ++ " = " ++ show ins
     outTy <- lift $ primReturnType outArgs
     logCodegen $ "outTy = " ++ show outTy
     case outArgs of
@@ -840,6 +840,7 @@ addInstruction ins outArgs = do
             _        -> Just <$> instr outTy ins
           [outArg] -> do
             outRep <- lift $ typeRep $ argType outArg
+            logCodegen $ "outRep = " ++ show outRep
             let outName = pullName outArg
             outop <- namedInstr outTy outName ins
             assign outName outop outRep
@@ -853,7 +854,7 @@ addInstruction ins outArgs = do
             let outNames = List.map pullName outArgs
             -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
             zipWith3M_ assign outNames fields treps
-            return $ Just $ last fields -- XXX this looks SUSE
+            return $ Just $ last fields -- XXX this looks bogus!
 
 
 zipWith3M_ :: Monad m => (a -> b -> c -> m ()) -> [a] -> [b] -> [c] -> m ()

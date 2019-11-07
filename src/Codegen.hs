@@ -418,37 +418,39 @@ operandType _ = void_t
 -- Instructions                                                           --
 ----------------------------------------------------------------------------
 
--- | The `namedInstr` function appends a named instruction into the instruction
--- stack of the current BasicBlock. This action also produces a Operand value
--- of the given type (this will be the result type of performing that
--- instruction).
+-- | Append a named instruction into the instruction stack of the current
+-- BasicBlock. This action also produces a Operand value of the given type (this
+-- will be the result type of performing that instruction).
 namedInstr :: Type -> String -> Instruction -> Codegen Operand
-namedInstr ty nm ins =
-    do let ref = Name $ fromString nm
-       blk <- current
-       let i = stack blk
-       modifyBlock $ blk { stack = i ++ [ref := ins] }
-       return $ local ty ref
+namedInstr ty nm ins = do
+    let ref = Name $ fromString nm
+    addInstr $ ref := ins
+    return $ local ty ref
 
--- | The `instr` function appends an unnamed instruction intp the instruction
--- stack of the current BasicBlock. The temp name is generated using a fresh
--- word counter.
+
+-- | Append an unnamed instruction to the instruction stack of the current
+-- BasicBlock. The temp name is generated using a fresh word counter.
 instr :: Type -> Instruction -> Codegen Operand
-instr ty ins =
-    do n <- fresh
-       let ref = UnName n
+instr ty ins = do
+    ref <- UnName <$> fresh
+    addInstr $ ref := ins
+    return $ local ty ref
+
+
+-- | Append a void instruction to the instruction stack of the current
+-- BasicBlock.
+voidInstr :: Instruction -> Codegen ()
+voidInstr inst = addInstr $ Do inst
+
+
+-- | Append an instruction to the instruction stack of the current BasicBlock.
+addInstr :: Named Instruction -> Codegen ()
+addInstr namedIns = do
        blk <- current
        let i = stack blk
-       let instruction = ref := ins
-       modifyBlock $ blk { stack = i ++ [instruction] }
-       logCodegen $ "add instruction " ++ show instruction
-       return $ local ty ref
+       modifyBlock $ blk { stack = i ++ [namedIns] }
+       logCodegen $ "add instruction " ++ show namedIns
 
-voidInstr :: Instruction -> Codegen ()
-voidInstr inst = do
-  blk <- current
-  let i = stack blk
-  modifyBlock $ blk { stack = i ++ [Do inst] }
 
 -- | 'terminator' provides the last instruction of a basic block.
 terminator :: Named Terminator -> Codegen (Named Terminator)
