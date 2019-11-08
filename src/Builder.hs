@@ -821,7 +821,7 @@ buildMain mainImports =
         -- XXX Should insert assignments of initialised visible resources
         bodyCode = [lpvmCast (iVal 0) "io" phantomType,
                     move (iVal 0) (varSet "exit_code"),
-                    Unplaced $ ForeignCall "C" "gc_init" [] []] ++ bodyInner
+                    Unplaced $ ForeignCall "c" "gc_init" [] []] ++ bodyInner
         mainBody = ProcDefSrc bodyCode
         -- Program main has argc, argv, exit_code, and io as resources
         proto = ProcProto "" []
