@@ -774,8 +774,9 @@ buildExecutable targetMod fpath = do
             logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
 
             enterModule fpath [] Nothing Nothing
-            addImport ["wybe","command_line"] $ importSpec Nothing Private
-            addImport ["wybe","io"] $ importSpec (Just ["io"]) Private
+            -- XXX this shouldn't be needed; imports should come from
+            --     resource initialisations
+            addImport ["wybe"] $ importSpec Nothing Private
             mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
                   mainImports
             addProcDef mainProc
@@ -819,8 +820,8 @@ buildMain mainImports =
                     | m <- mainImports]
         -- XXX Shouldn't have to hard code assignment of phantom to io
         -- XXX Should insert assignments of initialised visible resources
-        bodyCode = [lpvmCast (iVal 0) "io" phantomType,
-                    move (iVal 0) (varSet "exit_code"),
+        bodyCode = [move (castTo (iVal 0) phantomType) (varSet "io"),
+                    move (intCast $ iVal 0) (intVarSet "exit_code"),
                     Unplaced $ ForeignCall "c" "gc_init" [] []] ++ bodyInner
         mainBody = ProcDefSrc bodyCode
         -- Program main has argc, argv, exit_code, and io as resources
