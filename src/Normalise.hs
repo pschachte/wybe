@@ -450,7 +450,7 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
     logNormalise $ show bits ++ " data bit(s)"
     logNormalise $ show tagBits ++ " tag bit(s)"
     logNormalise $ "nonConst bit = " ++ show nonConstBit
-    if size <= wordSize
+    if size <= wordSize && tag <= tagLimit
       then do -- unboxed representation
       let fields =
             reverse
@@ -477,12 +477,12 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
                      ++ show numConsts ++ " const constructors, "
                      ++ show numNonConsts ++ " non-const constructors"
       return (Address,
-              constructorItems ctorName typeSpec fields size tag pos
+              constructorItems ctorName typeSpec fields size tag tagLimit pos
               ++ deconstructorItems ctorName typeSpec numConsts numNonConsts
-                 tag pos fields
+                 tag tagLimit pos fields
               ++ concatMap
                  (getterSetterItems vis typeSpec pos numConsts numNonConsts
-                  ptrCount size tag)
+                  ptrCount size tag tagLimit)
                  fields
              )
 
@@ -518,13 +518,8 @@ layoutRecord paramsReps tag tagLimit =
           -- put fields in order of increasing alignment
           ordFields = sortOn snd fields
           -- add secondary tag if necessary
-          ordFields' = if tag > tagLimit
-                            -- XXX wybe.short doesn't exist; this should be
-                            -- an unnamed unsigned 16 bit int type
-                       then (("$tag",TypeSpec ["wybe"] "short" [],Bits 16,2),2)
-                            :ordFields
-                       else ordFields
-          offsets = List.foldl align ([],0) ordFields'
+          initOffset = if tag > tagLimit then wordSizeBytes else 0
+          offsets = List.foldl align ([],initOffset) ordFields
       in mapFst reverse offsets
 
 
@@ -548,8 +543,8 @@ alignOffset offset alignment =
 --  XXX generalise to generate unboxed constructors
 constructorItems :: ProcName -> TypeSpec
                  -> [(VarName,TypeSpec,TypeRepresentation,Int)]
-                 -> Int -> Int -> OptPos -> [Item]
-constructorItems ctorName typeSpec fields size tag pos =
+                 -> Int -> Int -> Int -> OptPos -> [Item]
+constructorItems ctorName typeSpec fields size tag tagLimit pos =
     let flowType = Implicit pos
         params = sel1 <$> fields
         proto = (ProcProto ctorName
@@ -563,7 +558,18 @@ constructorItems ctorName typeSpec fields size tag pos =
           [Unplaced $ iVal size,
            Unplaced $ Typed (varSet "$rec") typeSpec True]]
          ++
-       -- Code to fill all the fields
+         -- fill in the secondary tag, if necessary
+         (if tag > tagLimit
+          then [Unplaced $ ForeignCall "lpvm" "mutate" []
+                 [Unplaced $ Typed (varGetSet "$rec" flowType) typeSpec False,
+                  Unplaced $ iVal 0,
+                  Unplaced $ iVal 1,
+                  Unplaced $ iVal size,
+                  Unplaced $ iVal 0,
+                  Unplaced $ iVal tag]]
+          else [])
+         ++
+         -- Code to fill all the fields
          (List.map
           (\(var,ty,_,offset) ->
                (Unplaced $ ForeignCall "lpvm" "mutate" []
@@ -575,18 +581,19 @@ constructorItems ctorName typeSpec fields size tag pos =
                   Unplaced $ Typed (Var var ParamIn flowType) ty False]))
           fields)
          ++
-       -- Finally, code to tag the reference and cast to the right type
+         -- Finally, code to tag the reference
          [Unplaced $ ForeignCall "llvm" "or" []
           [Unplaced $ varGet "$rec",
-           Unplaced $ iVal tag,
+           Unplaced $ iVal (if tag > tagLimit then tagLimit+1 else tag),
            Unplaced $ varSet "$"]])
         pos]
 
 
 -- |Generate deconstructor code for a non-const constructor
-deconstructorItems :: Ident -> TypeSpec -> Int -> Int -> Int -> OptPos
+deconstructorItems :: Ident -> TypeSpec -> Int -> Int -> Int -> Int -> OptPos
                    -> [(Ident,TypeSpec,TypeRepresentation,Int)] -> [Item]
-deconstructorItems ctorName typeSpec numConsts numNonConsts tag pos fields =
+deconstructorItems ctorName typeSpec numConsts numNonConsts tag tagLimit
+                   pos fields =
     let flowType = Implicit pos
         detism = if numConsts + numNonConsts > 1 then SemiDet else Det
     in [ProcDecl Public detism True
@@ -595,7 +602,7 @@ deconstructorItems ctorName typeSpec numConsts numNonConsts tag pos fields =
           ++ [Param "$" typeSpec ParamIn Ordinary])
          Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag "$"]
+        ([tagCheck numConsts numNonConsts tag tagLimit "$"]
          -- Code to fetch all the fields
          ++ List.map (\(var,_,_,aligned) ->
                               (Unplaced $ ForeignCall "lpvm" "access" []
@@ -609,8 +616,8 @@ deconstructorItems ctorName typeSpec numConsts numNonConsts tag pos fields =
 -- |Generate the needed Test statements to check that the tag of the value
 --  of the specified variable matches the specified tag.  If not checking
 --  is necessary, just generate a Nop, rather than a true test.
-tagCheck :: Int -> Int -> Int -> Ident -> Placed Stmt
-tagCheck numConsts numNonConsts tag varName =
+tagCheck :: Int -> Int -> Int -> Int -> Ident -> Placed Stmt
+tagCheck numConsts numNonConsts tag tagLimit varName =
     -- If there are any constant constructors, be sure it's not one of them
     let tests =
           (case numConsts of
@@ -621,13 +628,25 @@ tagCheck numConsts numNonConsts tag varName =
            ++
            -- If there is more than one non-const constructors, check that
            -- it's the right one
-           case numNonConsts of
+           (case numNonConsts of
                1 -> []  -- Nothing to do if it's the only non-const constructor
                _ -> [comparison "eq"
                      (intCast $ ForeignFn "llvm" "and" []
                       [Unplaced $ varGet varName,
                        Unplaced $ iVal tagMask])
-                     (intCast $ iVal tag)])
+                     (intCast $ iVal (if tag > tagLimit
+                                      then wordSizeBytes-1
+                                      else tag))])
+           ++
+           -- If there's a secondary tag, check that, too.
+           if tag > tagLimit
+           then [Unplaced $ ForeignCall "lpvm" "access" []
+                 [Unplaced $ varGet varName,
+                  Unplaced $ iVal 0,
+                  Unplaced $ varSet "$tag"],
+                 comparison "eq" (varGet "$tag") (iVal tag)]
+           else [])
+
     in if List.null tests
        then Unplaced Nop
        else seqToStmt tests
@@ -638,10 +657,10 @@ tagCheck numConsts numNonConsts tag varName =
 --  We use the stripped name with "$asInt" appended as a temp var name.
 -- | Produce a getter and a setter for one field of the specified type.
 getterSetterItems :: Visibility -> TypeSpec -> OptPos
-                    -> Int -> Int -> Int -> Int -> Int
+                    -> Int -> Int -> Int -> Int -> Int -> Int
                     -> (VarName,TypeSpec,TypeRepresentation,Int) -> [Item]
-getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size tag
-                  (field,fieldtype,rep,offset) =
+getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
+                  tag tagLimit (field,fieldtype,rep,offset) =
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
     let detism = if numConsts + numNonConsts == 1 then Det else SemiDet
@@ -652,7 +671,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size tag
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
                           Param "$" fieldtype ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag "$rec"]
+        ([tagCheck numConsts numNonConsts tag tagLimit "$rec"]
          ++
         -- Code to access the selected field
          [Unplaced $ ForeignCall "lpvm" "access" []
@@ -665,7 +684,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size tag
         (ProcProto field [Param "$rec" rectype ParamInOut Ordinary,
                           Param "$field" fieldtype ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag "$rec"]
+        ([tagCheck numConsts numNonConsts tag tagLimit "$rec"]
          ++
         -- Code to mutate the selected field
          [Unplaced $ ForeignCall "lpvm" "mutate" flags
@@ -747,7 +766,7 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
           ++ [Param "$" recType ParamIn Ordinary])
          Set.empty)
          -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag "$"]
+        ([tagCheck numConsts numNonConsts tag (wordSizeBytes-1) "$"]
          -- Code to fetch all the fields
          ++ List.concatMap
             (\(var,fieldType,shift,sz) ->
@@ -759,7 +778,10 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
                 Unplaced $ ForeignCall "llvm" "and" []
                  [Unplaced $ Typed (varGet "$temp") recType False,
                   Unplaced $ Typed (iVal $ (bit sz::Int) - 1) recType False,
-                  Unplaced $ Typed (varSet var) fieldType True]
+                  Unplaced $ Typed (varSet "$temp2") recType False],
+                Unplaced $ ForeignCall "lpvm" "cast" []
+                 [Unplaced $ Typed (varGet "$temp2") recType False,
+                  Unplaced $ Typed (varSet var) fieldType False]
                ])
             fields)
         pos]
@@ -769,7 +791,7 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
 unboxedGetterSetterItems :: Visibility -> TypeSpec -> Int -> Int -> Int
                          -> OptPos -> (VarName,TypeSpec,Int,Int) -> [Item]
 unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
-                         (field,fieldtype,shift,sz) =
+                         (field,fieldType,shift,sz) =
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
     let detism = if numConsts + numNonConsts == 1 then Det else SemiDet
@@ -778,9 +800,9 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
     in [-- The getter:
         ProcDecl vis detism True
         (ProcProto field [Param "$rec" recType ParamIn Ordinary,
-                          Param "$" fieldtype ParamOut Ordinary] Set.empty)
+                          Param "$" fieldType ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag "$rec"]
+        ([tagCheck numConsts numNonConsts tag (wordSizeBytes-1) "$rec"]
          ++
         -- Code to access the selected field
          [Unplaced $ ForeignCall "llvm" "lshr" []
@@ -791,15 +813,18 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
           Unplaced $ ForeignCall "llvm" "and" []
            [Unplaced $ Typed (varGet "$rec") recType False,
             Unplaced $ Typed (iVal fieldMask) recType False,
-            Unplaced $ Typed (varSet "$") fieldtype True]
+            Unplaced $ Typed (varSet "$field") recType False],
+          Unplaced $ ForeignCall "lpvm" "cast" []
+           [Unplaced $ Typed (varGet "$field") recType False,
+            Unplaced $ Typed (varSet "$") fieldType False]
          ])
         pos,
         -- The setter:
         ProcDecl vis detism True
         (ProcProto field [Param "$rec" recType ParamInOut Ordinary,
-                          Param "$field" fieldtype ParamIn Ordinary] Set.empty)
+                          Param "$field" fieldType ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag "$rec"]
+        ([tagCheck numConsts numNonConsts tag (wordSizeBytes-1) "$rec"]
          ++
         -- Code to mutate the selected field by masking out the current
         -- value, shifting the new value into place and bitwise or-ing it
