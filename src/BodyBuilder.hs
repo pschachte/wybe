@@ -135,8 +135,8 @@ data BuildState
     = Unforked           -- ^Still building; ready for more instrs
     | Forked {           -- ^Building a new fork
         forkingVar    :: PrimVarName,  -- ^Variable that selects branch to take
-        forkingVarTy  :: TypeSpec,     -- ^Type of stForkVar
-        knownVal   :: Maybe Integer,   -- ^Definite value of stForkVar if known
+        forkingVarTy  :: TypeSpec,     -- ^Type of forkingVar
+        knownVal   :: Maybe Integer,   -- ^Definite value of forkingVar if known
         bodies     :: [BodyState],     -- ^BodyStates of all branches so far
         complete   :: Bool             -- ^Whether the fork has been completed
         } deriving (Eq,Show)
@@ -354,65 +354,6 @@ buildPrims :: BodyState -> BodyBuilder a -> Compiler (a,BodyState)
 buildPrims st builder = runStateT builder st
 
 
--- -- |Augment st with whatever consequences can be deduced from the fact
--- --  that prim assigned var the value val.
--- propagateBinding :: PrimVarName -> TypeSpec -> Int -> Prim -> BodyBuilder ()
--- propagateBinding var ty val (PrimForeign "llvm" "icmp" [cmp] [a1, a2, _]) = do
---     propagateComparison var ty val cmp a1 a2
--- propagateBinding _ _ _ _ = return ()
-
-
--- -- |Augment st with whatever consequences can be deduced from the fact
--- --  that the specified LLVM comparison assigned var the value val.
--- propagateComparison :: PrimVarName -> TypeSpec -> Int -> String
---                     -> PrimArg -> PrimArg -> BodyBuilder ()
--- propagateComparison var ty val cmp a1 a2 = do
---     -- note that the negation of the test gives the negation of the result
---     let (oppositeCmp,trues0,falses0) = comparisonRelatives cmp
---     let (_,trues,falses) = if val == 0
---                            then comparisonRelatives oppositeCmp
---                            else ("", trues0, falses0)
---     let allConsequences = (oppositeCmp,1-val)
---                           :  zip trues (repeat 1)
---                           ++ zip falses (repeat 0)
---     logBuild $ "Adding consequences of branch:  "
---                ++ show (List.map (\(c,v) ->
---                                   PrimForeign "llvm" "icmp" [c]
---                                   [a1, a2, ArgInt (fromIntegral v) ty])
---                         allConsequences)
---     let insertInstr (c,v)
---             = Map.insert
---               (PrimForeign "llvm" "icmp" [c] [canonicaliseArg a1,
---                                               canonicaliseArg a2])
---               [ArgInt (fromIntegral v) ty]
---     modify (\s -> s {subExprs = List.foldr insertInstr (subExprs s)
---                                 allConsequences
---                     })
---     mp <- gets subExprs
---     logBuild $ "After adding consequences, subExprs = " ++ show mp
-
-
--- -- |Given an LLVM comparison instruction name, returns a triple of
--- --  (1) the negation of the comparison
--- --  (2) a list of comparisons that are true whenever it is true
--- --  (3) a list of comparisons that are false whenever it is true, other than
--- --      the negation (1)
--- comparisonRelatives :: String -> (String,[String],[String])
--- comparisonRelatives "eq"  = ("ne", ["sle", "sge", "ule", "uge"],
---                           ["slt", "sgt", "ult", "ugt"])
--- comparisonRelatives "ne"  = ("eq", [], [])
--- comparisonRelatives "slt" = ("sge", ["sle", "ne"], [])
--- comparisonRelatives "sge" = ("slt", [], [])
--- comparisonRelatives "sgt" = ("sle", ["sge", "ne"], [])
--- comparisonRelatives "sle" = ("sgt", [], [])
--- comparisonRelatives "ult" = ("uge", ["ule", "ne"], [])
--- comparisonRelatives "uge" = ("ult", [], [])
--- comparisonRelatives "ugt" = ("ule", ["uge", "ne"], [])
--- comparisonRelatives "ule" = ("ugt", [], [])
--- comparisonRelatives comp = shouldnt $ "unknown llvm comparison " ++ comp
-
-
-
 -- |Add an instruction to the current body, after applying the current
 --  substitution. If it's a move instruction, add it to the current
 --  substitution.
@@ -452,7 +393,7 @@ instr' prim@(PrimForeign "llvm" "move" []
 --     by threading a heap through, because it's fine to reorder calls
 --     to alloc.
 instr' prim@(PrimForeign "lpvm" "alloc" [] [_,argvar]) pos = do
-    logBuild $ "  Leaving alloc alone"
+    logBuild "  Leaving alloc alone"
     rawInstr prim pos
     recordVarSet argvar
 instr' prim@(PrimForeign "lpvm" "cast" []
@@ -461,12 +402,12 @@ instr' prim@(PrimForeign "lpvm" "cast" []
     logBuild $ "  Expanding cast(" ++ show from ++ ", " ++ show to ++ ")"
     unless (argFlowDirection from == FlowIn && flow == FlowOut) $
         shouldnt "cast instruction with wrong flow"
-    if (argType from == argType to)
+    if argType from == argType to
       then instr' (PrimForeign "llvm" "move" [] [from, to]) pos
       else ordinaryInstr prim pos
 instr' prim@(PrimTest (ArgInt 0 _)) pos = do
     rawInstr prim pos
-    logBuild $ "  Found fail instruction; noting failing branch"
+    logBuild "  Found fail instruction; noting failing branch"
     -- note guaranteed failure
     modify (\s -> s { failed=True })
 instr' prim pos = ordinaryInstr prim pos
@@ -989,11 +930,11 @@ rebuildBody :: BodyState -> BkwdBuilder ()
 rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
                          buildState=bldst, parent=par} = do
     bkwdSt <- get
-    logBkwd $ "Rebuilding body:" ++ fst (showState 8 st)
-              ++ "\nwith currSubst = " ++ show subst
-              ++ "\n and followed by:" ++ showBlock 8 (asmFollowing bkwdSt)
     let usedLater = asmUsedLater bkwdSt
     let following = asmFollowing bkwdSt
+    logBkwd $ "Rebuilding body:" ++ fst (showState 8 st)
+              ++ "\nwith currSubst = " ++ show subst
+              ++ "\n and followed by:" ++ showBlock 8 following
     let (usedLater',following') = pruneBody subst usedLater following
     modify (\s -> s { asmFollowing = following', asmUsedLater = usedLater' })
     case bldst of
