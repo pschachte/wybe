@@ -1,4 +1,4 @@
 Error detected during type checking of module(s) error_mode, error_mode.tree
-[91mtest-cases/error_mode.wybe:9:30: Calling test proc error_mode.tree.right<0> in a det context
+[91mtest-cases/error_mode.wybe:9:35: Calling test proc error_mode.tree.right<0> in a det context
 [0m[91mtest-cases/error_mode.wybe:8:40: Calling test proc error_mode.tree.left<0> in a det context
 [0m

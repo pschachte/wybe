@@ -6,9 +6,12 @@ pub def lookup(key:int, tree:tree, ?result:bool) {
     if {tree = node(?left, ?nodekey, ?right)::
         if{ key = nodekey:: ?result = true
         |   key < nodekey:: lookup(key, left , ?result)
-        |   key > nodekey:: lookup(key, right, ?result)
+# This should work, if we handled exhaustive tests:
+#       |   key > nodekey:: lookup(key, right, ?result)
+# For now, just do this:
+        |   otherwise    :: lookup(key, right, ?result)
         }
-    |   true:: ?result = false
+    |   otherwise:: ?result = false
     }
 }
 
@@ -16,9 +19,9 @@ def foobar use !io {
     ?tr = node(empty, 1, empty)
 
     if{ lookup(1, tr) :: !println("lookup succeeds when it should")
-    |    true         :: !println("lookup fails when it should succeed")
+    |   otherwise     :: !println("lookup fails when it should succeed")
     }
-# if lookup(3, tr) :: !println("lookup fails when it should")
-# | true           :: !println("lookup succeeds when it should fail")
-# end
+    if{ lookup(3, tr) :: !println("lookup fails when it should")
+    |   otherwise     :: !println("lookup succeeds when it should fail")
+    }
 }

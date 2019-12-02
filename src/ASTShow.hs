@@ -102,12 +102,9 @@ logDump :: LogSelection -> LogSelection -> String -> Compiler ()
 logDump selector1 selector2 pass =
     whenLogging2 selector1 selector2 $ do
       modList <- gets (Map.elems . modules)
-      let nonWybe []     = True
-          nonWybe (m1:_) = m1 /= "wybe"
+      let toLog mod = let spec  = modSpec mod
+                      in  List.null spec || head spec /= "wybe"
       liftIO $ hPutStrLn stderr $ replicate 70 '='
         ++ "\nAFTER " ++ pass ++ ":\n"
         ++ intercalate ("\n" ++ replicate 50 '-' ++ "\n")
-        (List.map show
-         -- comment next line and uncomment following to show library code
-         $ List.filter (nonWybe . modSpec) modList)
-         -- modList)
+        (List.map show $ List.filter toLog modList)

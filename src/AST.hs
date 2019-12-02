@@ -18,7 +18,7 @@ module AST (
   TypeProto(..), TypeSpec(..), TypeRef(..), TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
-  Exp(..), Generator(..), Stmt(..), detStmt,
+  Exp(..), Generator(..), Stmt(..), detStmt, expIsConstant,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
   lookupTypeRepresentation,
@@ -1991,6 +1991,17 @@ data Exp
       | Fncall ModSpec Ident [Placed Exp]
       | ForeignFn Ident Ident [Ident] [Placed Exp]
      deriving (Eq,Ord,Generic)
+
+
+-- | If the input is a constant value, return it (with any Typed wrapper
+-- removed).  Return Nothing if it's not a constant.
+expIsConstant :: Exp -> Maybe Exp
+expIsConstant exp@IntValue{}    = Just exp
+expIsConstant exp@FloatValue{}  = Just exp
+expIsConstant exp@StringValue{} = Just exp
+expIsConstant exp@CharValue{}   = Just exp
+expIsConstant (Typed exp _ _)   = expIsConstant exp
+expIsConstant _                 = Nothing
 
 
 -- |Is it unnecessary to actually pass an argument (in or out) for this param?

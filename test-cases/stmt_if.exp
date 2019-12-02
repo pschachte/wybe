@@ -24,29 +24,49 @@ AFTER EVERYTHING:
   procs           : 
 
 foobar > (0 calls)
-0: foobar(io#0:wybe.phantom, ?io#1:wybe.phantom): AliasPairs: []
+0: foobar(io#0:wybe.phantom, ?io#2:wybe.phantom): AliasPairs: []
     foreign lpvm alloc(24:wybe.int, ?tmp$8#0:stmt_if.tree)
     foreign lpvm mutate(~tmp$8#0:stmt_if.tree, ?tmp$9#0:stmt_if.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:stmt_if.tree)
     foreign lpvm mutate(~tmp$9#0:stmt_if.tree, ?tmp$10#0:stmt_if.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int)
     foreign lpvm mutate(~tmp$10#0:stmt_if.tree, ?tmp$11#0:stmt_if.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:stmt_if.tree)
-    stmt_if.lookup<0>(1:wybe.int, ~tmp$11#0:stmt_if.tree, ?tmp$3#0:wybe.bool) @stmt_if:18:9
+    stmt_if.lookup<0>(1:wybe.int, tmp$11#0:stmt_if.tree, ?tmp$3#0:wybe.bool) @stmt_if:21:9
     case ~tmp$3#0:wybe.bool of
     0:
         foreign c print_string("lookup fails when it should succeed":wybe.string, ~#io#0:wybe.phantom, ?tmp$14#0:wybe.phantom) @wybe:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
+        stmt_if.lookup<0>(3:wybe.int, ~tmp$11#0:stmt_if.tree, ?tmp$4#0:wybe.bool) @stmt_if:24:9
+        case ~tmp$4#0:wybe.bool of
+        0:
+            foreign c print_string("lookup succeeds when it should fail":wybe.string, ~#io#1:wybe.phantom, ?tmp$17#0:wybe.phantom) @wybe:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp$17#0:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+
+        1:
+            foreign c print_string("lookup fails when it should":wybe.string, ~#io#1:wybe.phantom, ?tmp$17#0:wybe.phantom) @wybe:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp$17#0:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+
 
     1:
         foreign c print_string("lookup succeeds when it should":wybe.string, ~#io#0:wybe.phantom, ?tmp$14#0:wybe.phantom) @wybe:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
+        stmt_if.lookup<0>(3:wybe.int, ~tmp$11#0:stmt_if.tree, ?tmp$4#0:wybe.bool) @stmt_if:24:9
+        case ~tmp$4#0:wybe.bool of
+        0:
+            foreign c print_string("lookup succeeds when it should fail":wybe.string, ~#io#1:wybe.phantom, ?tmp$17#0:wybe.phantom) @wybe:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp$17#0:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+
+        1:
+            foreign c print_string("lookup fails when it should":wybe.string, ~#io#1:wybe.phantom, ?tmp$17#0:wybe.phantom) @wybe:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp$17#0:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
 
 
 
-lookup > public (6 calls)
+
+lookup > public (13 calls)
 0: lookup(key#0:wybe.int, tree#0:stmt_if.tree, ?result#0:wybe.bool): AliasPairs: []
-    foreign llvm icmp ne(tree#0:stmt_if.tree, 0:wybe.int, ?tmp$8#0:wybe.bool)
-    case ~tmp$8#0:wybe.bool of
+    foreign llvm icmp ne(tree#0:stmt_if.tree, 0:wybe.int, ?tmp$6#0:wybe.bool)
+    case ~tmp$6#0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?result#0:wybe.bool) @stmt_if:11:16
+        foreign llvm move(0:wybe.bool, ?result#0:wybe.bool) @stmt_if:14:21
 
     1:
         foreign lpvm access(tree#0:stmt_if.tree, 0:wybe.int, ?left#0:stmt_if.tree)
@@ -55,16 +75,10 @@ lookup > public (6 calls)
         foreign llvm icmp eq(key#0:wybe.int, nodekey#0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
         case ~tmp$3#0:wybe.bool of
         0:
-            foreign llvm icmp slt(key#0:wybe.int, nodekey#0:wybe.int, ?tmp$4#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp slt(key#0:wybe.int, ~nodekey#0:wybe.int, ?tmp$4#0:wybe.bool) @wybe:nn:nn
             case ~tmp$4#0:wybe.bool of
             0:
-                foreign llvm icmp sgt(key#0:wybe.int, ~nodekey#0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
-                case ~tmp$5#0:wybe.bool of
-                0:
-
-                1:
-                    stmt_if.lookup<0>(~key#0:wybe.int, ~right#0:stmt_if.tree, ?result#0:wybe.bool) @stmt_if:9:29
-
+                stmt_if.lookup<0>(~key#0:wybe.int, ~right#0:stmt_if.tree, ?result#0:wybe.bool) @stmt_if:12:29
 
             1:
                 stmt_if.lookup<0>(~key#0:wybe.int, ~left#0:stmt_if.tree, ?result#0:wybe.bool) @stmt_if:8:29
@@ -89,7 +103,19 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_string(i64)    
 
 
-@stmt_if.14 =    constant [36 x i8] c"lookup fails when it should succeed\00"
+@stmt_if.22 =    constant [36 x i8] c"lookup succeeds when it should fail\00"
+
+
+@stmt_if.20 =    constant [28 x i8] c"lookup fails when it should\00"
+
+
+@stmt_if.18 =    constant [36 x i8] c"lookup fails when it should succeed\00"
+
+
+@stmt_if.16 =    constant [36 x i8] c"lookup succeeds when it should fail\00"
+
+
+@stmt_if.14 =    constant [28 x i8] c"lookup fails when it should\00"
 
 
 @stmt_if.12 =    constant [31 x i8] c"lookup succeeds when it should\00"
@@ -123,10 +149,32 @@ if.then:
   %13 = ptrtoint i8* getelementptr inbounds ([31 x i8], [31 x i8]* @stmt_if.12, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %13)  
   tail call ccc  void  @putchar(i8  10)  
-  ret void 
+  %"tmp$4#0" = tail call ccc  i1  @"stmt_if.lookup<0>"(i64  3, i64  %3)  
+  br i1 %"tmp$4#0", label %if.then1, label %if.else1 
 if.else:
-  %15 = ptrtoint i8* getelementptr inbounds ([36 x i8], [36 x i8]* @stmt_if.14, i32 0, i32 0) to i64 
+  %19 = ptrtoint i8* getelementptr inbounds ([36 x i8], [36 x i8]* @stmt_if.18, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %19)  
+  tail call ccc  void  @putchar(i8  10)  
+  %"tmp$4#0" = tail call ccc  i1  @"stmt_if.lookup<0>"(i64  3, i64  %3)  
+  br i1 %"tmp$4#0", label %if.then2, label %if.else2 
+if.then1:
+  %15 = ptrtoint i8* getelementptr inbounds ([28 x i8], [28 x i8]* @stmt_if.14, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %15)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+if.else1:
+  %17 = ptrtoint i8* getelementptr inbounds ([36 x i8], [36 x i8]* @stmt_if.16, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %17)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+if.then2:
+  %21 = ptrtoint i8* getelementptr inbounds ([28 x i8], [28 x i8]* @stmt_if.20, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %21)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+if.else2:
+  %23 = ptrtoint i8* getelementptr inbounds ([36 x i8], [36 x i8]* @stmt_if.22, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %23)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -134,40 +182,35 @@ if.else:
 
 define external ccc  i1 @"stmt_if.lookup<0>"(i64  %"key#0", i64  %"tree#0")    {
 entry:
-  %"tmp$8#0" = icmp ne i64 %"tree#0", 0 
-  br i1 %"tmp$8#0", label %if.then, label %if.else 
+  %"tmp$6#0" = icmp ne i64 %"tree#0", 0 
+  br i1 %"tmp$6#0", label %if.then, label %if.else 
 if.then:
-  %16 = inttoptr i64 %"tree#0" to i64* 
-  %17 = getelementptr  i64, i64* %16, i64 0 
-  %18 = load  i64, i64* %17 
-  %19 = add   i64 %"tree#0", 8 
-  %20 = inttoptr i64 %19 to i64* 
-  %21 = getelementptr  i64, i64* %20, i64 0 
-  %22 = load  i64, i64* %21 
-  %23 = add   i64 %"tree#0", 16 
-  %24 = inttoptr i64 %23 to i64* 
+  %24 = inttoptr i64 %"tree#0" to i64* 
   %25 = getelementptr  i64, i64* %24, i64 0 
   %26 = load  i64, i64* %25 
-  %"tmp$3#0" = icmp eq i64 %"key#0", %22 
+  %27 = add   i64 %"tree#0", 8 
+  %28 = inttoptr i64 %27 to i64* 
+  %29 = getelementptr  i64, i64* %28, i64 0 
+  %30 = load  i64, i64* %29 
+  %31 = add   i64 %"tree#0", 16 
+  %32 = inttoptr i64 %31 to i64* 
+  %33 = getelementptr  i64, i64* %32, i64 0 
+  %34 = load  i64, i64* %33 
+  %"tmp$3#0" = icmp eq i64 %"key#0", %30 
   br i1 %"tmp$3#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
   ret i1 1 
 if.else1:
-  %"tmp$4#0" = icmp slt i64 %"key#0", %22 
+  %"tmp$4#0" = icmp slt i64 %"key#0", %30 
   br i1 %"tmp$4#0", label %if.then2, label %if.else2 
 if.then2:
-  %"result#0" = tail call ccc  i1  @"stmt_if.lookup<0>"(i64  %"key#0", i64  %18)  
-  ret i1 %"result#0" 
-if.else2:
-  %"tmp$5#0" = icmp sgt i64 %"key#0", %22 
-  br i1 %"tmp$5#0", label %if.then3, label %if.else3 
-if.then3:
   %"result#0" = tail call ccc  i1  @"stmt_if.lookup<0>"(i64  %"key#0", i64  %26)  
   ret i1 %"result#0" 
-if.else3:
-  ret i1 undef 
+if.else2:
+  %"result#0" = tail call ccc  i1  @"stmt_if.lookup<0>"(i64  %"key#0", i64  %34)  
+  ret i1 %"result#0" 
 }
 --------------------------------------------------
  Module stmt_if.tree

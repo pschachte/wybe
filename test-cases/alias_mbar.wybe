@@ -6,7 +6,7 @@ use alias_mfoo
 # Expected Alias Pairs: [(p1, p3)]
 pub def bar(p1:position, ?p3:position) use !io {
     if { p1.y > 1 :: ?p3 = p1
-       | true ::
+       | otherwise ::
            ?tmp = p1.y
            y(!p1, tmp + 1) # p1 (2, 2)
            ?p3 = p1

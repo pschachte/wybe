@@ -10,7 +10,7 @@ pub def foo(p1:position, ?p2:position, ?p3:position) use !io {
             ?p3 = position(3,3)
             !print("p3:")
             !printPosition(p3)
-       | true :: ?tmp = p1.x
+       | otherwise :: ?tmp = p1.x
             x(!p1, tmp + 1)
             !bar(p1, ?p3) # p1(2,1), p1 and p3 aliased
             ?p2 = position(2,2) # p1 is dead, so p3 is not aliased

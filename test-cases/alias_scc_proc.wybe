@@ -8,7 +8,7 @@ pub def foo(p1:position, ?p2:position, ?p3:position) use !io {
                     ?p3 = position(3,3)
                     !print("--- Inside foo: expect p3(3,3):")
                     !printPosition(p3)
-       | true :: ?tmp = p1.x
+       | otherwise :: ?tmp = p1.x
               x(!p1, tmp + 1) # p1 (2, 1)
               !bar(p1, ?p3) # p1 and p3 aliased
               ?p2 = position(2,2)
@@ -18,7 +18,7 @@ pub def foo(p1:position, ?p2:position, ?p3:position) use !io {
 # Expected Alias Pairs: [(p1#0,p3#0)]
 pub def bar(p1:position, ?p3:position) use !io {
     if { p1.y > 1 :: ?p3 = p1
-       | true :: ?tmp = p1.y
+       | otherwise :: ?tmp = p1.y
                  y(!p1, tmp + 1) # p1 (2, 2)
                  ?p3 = p1
                  !foo(p1, ?p2, ?p3) # p1 = p3 = (2,2)

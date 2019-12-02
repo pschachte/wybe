@@ -19,10 +19,9 @@ pub def test lt3(x:int, y:int) {
 pub type map { pub empty | node(left:map, key:int, value:int, right:map) }
 
 pub def test lookup(key:int, map:map, ?result:int) {
-    if{ map = empty:: false
-    |   key = map.key:: ?result = map.value
+    if{ key = map.key:: ?result = map.value
     |   key < map.key:: lookup(key, map.left, ?result)
-    |   true:: lookup(key, map.right, ?result)
+    |   otherwise    :: lookup(key, map.right, ?result)
     }
 }
 

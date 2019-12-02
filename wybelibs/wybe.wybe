@@ -131,3 +131,7 @@ pub module command_line {
         ?exit_code = code
     }
 }
+
+pub module util {
+    pub def otherwise { } # not a test, empty body, so always true
+}
