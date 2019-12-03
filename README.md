@@ -184,10 +184,12 @@ function whose output is the final procedure argument, and what you
 define as a function, you can still call as a procedure by giving it an
 extra argument to stand for the function output.  Thus
 
-``` ?y = f(x)
+```
+?y = f(x)
 ```
 is always equivalent to
-``` f(x, ?y)
+```
+f(x, ?y)
 ```
 
 
@@ -245,7 +247,7 @@ contexts:  in a conditional, or in the definition of a test procedure or
 function.
 
 Any procedure or function call can become a test if an input is provided
-where and output argument is expected.  In this case, the call is made
+where an output argument is expected.  In this case, the call is made
 producing the output, and then the output is compared for equality with
 supplied input.  Equality `=` with two input arguments is a test, so
 these two calls are equivalent tests:
