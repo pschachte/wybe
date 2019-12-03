@@ -22,7 +22,7 @@ import           Data.Maybe (isJust)
 import           System.Process
 import           System.Directory          (createDirectoryIfMissing
                                            ,getTemporaryDirectory)
-import System.FilePath (takeBaseName)
+import System.FilePath (takeBaseName, (</>))
 import Control.Monad.Trans (liftIO)
 import Macho
 
@@ -38,9 +38,9 @@ import Macho
 insertLPVMDataLd :: BL.ByteString -> FilePath -> IO ()
 insertLPVMDataLd bs obj =
     do tempDir <- getTemporaryDirectory
-       liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
+       liftIO $ createDirectoryIfMissing False (tempDir </> "wybetemp")
        let modFile = takeBaseName obj ++ ".module"
-       let lpvmFile = tempDir ++ "wybetemp/" ++ modFile
+       let lpvmFile = tempDir </> "wybetemp/" ++ modFile
        BL.writeFile lpvmFile bs
        let args = [obj] ++ ["-r"]
                   ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
