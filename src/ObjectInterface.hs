@@ -45,7 +45,7 @@ insertLPVMDataLd bs obj =
        let args = [obj] ++ ["-r"]
                   ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
                   ++ ["-o", obj]
-       _ <- createProcess (proc "ld" args)
+       callProcess "ld" args
        -- Cleanup
        return ()
 
