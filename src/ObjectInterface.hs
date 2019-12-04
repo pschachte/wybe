@@ -19,6 +19,7 @@ import           Data.Hex
 import           Data.Int
 import           Data.List as List
 import           Data.Maybe (isJust)
+import           System.Exit                (ExitCode (..))
 import           System.Process
 import           System.Directory          (createDirectoryIfMissing
                                            ,getTemporaryDirectory)
@@ -45,7 +46,10 @@ insertLPVMDataLd bs obj =
        let args = [obj] ++ ["-r"]
                   ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
                   ++ ["-o", obj]
-       callProcess "ld" args
+       (exCode, _, serr) <- readCreateProcessWithExitCode (proc "ld" args) ""
+       case exCode of
+           ExitSuccess -> return ()
+           _ -> shouldnt $ "ld: " ++ serr
        -- Cleanup
        return ()
 
