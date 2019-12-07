@@ -2790,7 +2790,8 @@ showMessage (lvl, msg) =
           setSGR [Reset]
 
 
-
+-- |Check if any errors have been detected, and if so, print the error messages
+-- and exit.
 stopOnError :: String -> Compiler ()
 stopOnError incident = do
     err <- gets errorState
@@ -2805,6 +2806,8 @@ logAST :: String -> Compiler ()
 logAST s = logMsg AST s
 
 
+-- | Execute the specified Compiler action if the specified compiler phase is
+-- being logged.
 whenLogging :: LogSelection -> Compiler () -> Compiler ()
 whenLogging selector action = do
     loggingSet <- gets (optLogAspects . options)
@@ -2812,6 +2815,8 @@ whenLogging selector action = do
       action
 
 
+-- | Execute the specified Compiler action if either of the specified compiler
+-- phased is being logged.
 whenLogging2 :: LogSelection -> LogSelection -> Compiler () -> Compiler ()
 whenLogging2 selector1 selector2 action = do
     loggingSet <- gets (optLogAspects . options)
