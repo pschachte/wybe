@@ -1,9 +1,6 @@
 # TODO list for the Wybe project
 
 ## Fix bugs:
-* `test-cases/stmt_if.wybe`
-* `test-cases/tests.wybe`
-* Have wybemk build executable without -f flag when .o file exists
 * Rework mode checking to treat any argument with any outputs as an
   output, and to handle any inputs that are part of an output argument
   by producing the output and then testing for equality with the input.
@@ -30,8 +27,6 @@
 * Correctly handle top-level resources, making them initialised variables in the
   generated main function.
     * commandline resource initialised from argc and argv command line
-    * exitstatus resource initialised to 0, can be set, determines main exit
-      status
 * Generate multi-way switches (computed gotos) for cascading if-then-else
   testing equality on the same variable
 * Pull procs only called from one proc into the definition of the caller proc,
@@ -49,13 +44,12 @@
 * Give meaningful message for errors detected in generated procs
 * Detect and report use of uninitialised variables, including update
    of uninitialised variables
-* Type and mode check foreign call arguments for llvm and lpvm calls;
-  don't abort compiler on errors.
-* May want to delay determinism checking until we do inlining, so
+* May want to delay determinism checking until we do inlining
 
 
 ## Complete the language:
 * Support higher order procs and functions
+* Support polymorphic types
 * Support laziness declaration for func/proc arguments
     * Pass a closure
     * Lazy arguments are evaluated before passing to any other func/proc except
@@ -82,7 +76,6 @@
     * The function is required to be an injection
     * The function is required not to "lose information"
 * Design/implement interface to call wybe from C
-* Support polymorphism
 * Provide switch-on-constructor syntax and implementation
 * Support subtypes
 * Support generators (nondet procs/lazy lists)
