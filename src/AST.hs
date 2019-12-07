@@ -2420,9 +2420,11 @@ instance Show TypeFamily where
 showModSpec :: ModSpec -> String
 showModSpec spec = intercalate "." spec
 
+
 -- |How to show a list of ModSpecs.
 showModSpecs :: [ModSpec] -> String
 showModSpecs specs = intercalate ", " $ List.map showModSpec specs
+
 
 -- |Show a module prefix if specified
 maybeModPrefix :: ModSpec -> String
@@ -2538,6 +2540,7 @@ instance Show TypeSpec where
       if List.null args then ""
       else "(" ++ (intercalate "," $ List.map show args) ++ ")"
 
+-- |Show the use declaration for a set of resources, if it's non-empty.
 showResources :: Set.Set ResourceFlowSpec -> String
 showResources resources
   | Set.null resources = ""
@@ -2563,6 +2566,8 @@ instance Show PrimParam where
       in  pre ++ primFlowPrefix dir ++ show name ++ showTypeSuffix typ False
           ++ post
 
+
+-- |Show the type of an expression, if it's known.
 showTypeSuffix :: TypeSpec -> Bool -> String
 showTypeSuffix AnyType _ = ""
 showTypeSuffix typ True  = ":!" ++ show typ
@@ -2591,6 +2596,8 @@ showBlock :: Int -> ProcBody -> String
 showBlock ind (ProcBody stmts fork) =
     showPlacedPrims ind stmts ++ showFork ind fork
 
+
+-- |Show a primitive fork.
 showFork :: Int -> PrimFork -> String
 showFork ind NoFork = ""
 showFork ind (PrimFork var ty last bodies) =
@@ -2602,7 +2609,7 @@ showFork ind (PrimFork var ty last bodies) =
     (zip [0..] bodies)
 
 
--- |Show a list of placed prims
+-- |Show a list of placed prims.
 showPlacedPrims :: Int -> [Placed Prim] -> String
 showPlacedPrims ind stmts = List.concatMap (showPlacedPrim ind) stmts
 
@@ -2611,12 +2618,15 @@ showPlacedPrims ind stmts = List.concatMap (showPlacedPrim ind) stmts
 showPlacedPrim :: Int -> Placed Prim -> String
 showPlacedPrim ind stmt = showPlacedPrim' ind (content stmt) (place stmt)
 
+
 -- |Show a single primitive statement with the specified indent and
 --  optional source position.
 showPlacedPrim' :: Int -> Prim -> OptPos -> String
 showPlacedPrim' ind prim pos =
   startLine ind ++ showPrim ind prim ++ showMaybeSourcePos pos
 
+
+-- |Show a single primitive statement.
 showPrim :: Int -> Prim -> String
 showPrim _ (PrimCall pspec args) =
         show pspec ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
@@ -2627,11 +2637,13 @@ showPrim _ (PrimForeign lang name flags args) =
 showPrim _ (PrimTest arg) =
         "test " ++ show arg
 
--- |Show a variable, with its suffix
+
+-- |Show a variable, with its suffix.
 instance Show PrimVarName where
     show (PrimVarName var suffix) = var ++ "#" ++ show suffix
 
 
+-- |Show a single statement.
 showStmt :: Int -> Stmt -> String
 showStmt _ (ProcCall maybeMod name procID detism resourceful args) =
     determinismPrefix detism
@@ -2680,6 +2692,7 @@ showStmt _ (Break) = "break"
 showStmt _ (Next) = "next"
 
 
+-- |Show a proc body, with the specified indent.
 showBody :: Int -> [Placed Stmt] -> String
 showBody indent stmts =
   List.concatMap (\s -> "\n" ++ List.replicate indent ' '
@@ -2702,7 +2715,6 @@ instance Show PrimArg where
 
 
 -- |Show a single typed expression.
--- |Show a single expression.
 instance Show Exp where
   show (IntValue i) = show i
   show (FloatValue f) = show f
@@ -2722,6 +2734,7 @@ instance Show Exp where
   show (Typed exp typ cast) =
       show exp ++ showTypeSuffix typ cast
 
+
 -- |maybeShow pre maybe post
 --  if maybe has something, show pre, the maybe payload, and post
 --  if the maybe is Nothing, don't show anything
@@ -2731,31 +2744,33 @@ maybeShow pre (Just something) post =
   pre ++ show something ++ post
 
 
--- |Report an internal error and abort
+-- |Report an internal error and abort.
 shouldnt :: String -> a
 shouldnt what = error $ "Internal error: " ++ what
 
 
+-- |Report that some feature is not yet implemented and abort.
 nyi :: String -> a
 nyi what = error $ "Not yet implemented: " ++ what
 
--- |Check that all is well, else abort
+
+-- |Check that all is well, else abort.
 checkError :: Monad m => String -> Bool -> m ()
 checkError msg bad = when bad $ shouldnt msg
 
 
--- |Check that a value is OK; if so, return it, else abort
+-- |Check that a value is OK; if so, return it, else abort.
 checkValue :: (t -> Bool) -> String -> t -> t
 checkValue tst msg val = if tst val then val else shouldnt msg
 
 
--- |Like fromJust, but with its own error message
+-- |Like fromJust, but with its own error message.
 trustFromJust :: String -> (Maybe t) -> t
 trustFromJust msg Nothing = shouldnt $ "trustFromJust in " ++ msg
 trustFromJust _ (Just val) = val
 
 
--- |Monadic version of trustFromJust
+-- |Monadic version of trustFromJust.
 trustFromJustM :: Monad m => String -> (m (Maybe t)) -> m t
 trustFromJustM msg computation = do
     maybe <- computation
@@ -2775,6 +2790,7 @@ showMessages = do
     liftIO $ mapM_ showMessage filtered
 
 
+-- |Prettify and show one compiler message.
 showMessage :: (MessageLevel, String) -> IO ()
 showMessage (lvl, msg) =
   case lvl of
