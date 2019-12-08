@@ -798,7 +798,7 @@ buildExecutable targetMod fpath = do
             logBuild "o Creating temp Main module @ .../tmp/tmpMain.o"
             tempDir <- liftIO getTemporaryDirectory
             liftIO $ createDirectoryIfMissing False (tempDir </> "wybetemp")
-            let tmpMainOFile = tempDir </> "wybetemp/" </> "tmpMain.o"
+            let tmpMainOFile = tempDir </> "wybetemp" </> "tmpMain.o"
             emitObjectFile mainMod tmpMainOFile
 
             ofiles <- mapM (loadObjectFile . fst) depends

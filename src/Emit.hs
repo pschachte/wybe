@@ -50,7 +50,7 @@ emitObjectFile m f = do
     -- modBS <- encodeModule astMod
     modBS <- encodeModule m
     llmod <- descendentModuleLLVM m
-    liftIO $ makeWrappedObjFile f llmod modBS
+    makeWrappedObjFile f llmod modBS
 
 
 -- | With the LLVM AST representation of a LPVM Module, create a
@@ -200,23 +200,29 @@ makeAssemblyFile file llmod =
 
 -- | Create a Macho-O object file and embed a 'AST.Module' bytestring
 -- representation into the '__lpvm' section in it.
-makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
-makeWrappedObjFile file llmod modBS =
-    withContext $ \_ ->
+makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> Compiler ()
+makeWrappedObjFile file llmod modBS = do
+    result <- liftIO $ withContext $ \_ ->
         withModule llmod $ \m -> do
             withHostTargetMachine $ \tm ->
                 writeObjectToFile tm (File file) m
             insertLPVMDataLd modBS file
+    case result of
+        Right () -> return ()
+        Left serr -> Error <!> serr
 
 
 -- | Binary encode 'AST.Module', create object file out of 'Mod.Module' and
 -- insert the encoded binary string into the "__LPVM" section of the created
 -- object file.
-encodeAndWriteFile :: FilePath -> BL.ByteString -> Mod.Module -> IO ()
+encodeAndWriteFile :: FilePath -> BL.ByteString -> Mod.Module -> Compiler ()
 encodeAndWriteFile file modBS m = do
-    withHostTargetMachine $ \tm ->
+    liftIO $ withHostTargetMachine $ \tm ->
         writeObjectToFile tm (File file) m
-    insertLPVMDataLd modBS file
+    result <- liftIO $ insertLPVMDataLd modBS file
+    case result of
+        Right () -> return ()
+        Left serr -> Error <!> serr
 
 
 
@@ -252,7 +258,7 @@ makeExec ofiles target = do
                 ++ "$ cc " ++ unwords args
                 ++ "\nCC Log:\n" ++ suppressLdWarnings serr
                 ++ "\n-------\n"
-        _ -> shouldnt serr
+        _ -> Error <!> serr
 
 
 -- | Use `ar' system util to link object files into an archive file.
@@ -269,7 +275,7 @@ makeArchive ofiles target = do
                 ++ "$ ar " ++ unwords args
                 ++ "\nAR Log:\n" ++ suppressLdWarnings serr
                 ++ "\n-------\n"
-        _ -> shouldnt serr
+        _ -> Error <!> serr
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --
