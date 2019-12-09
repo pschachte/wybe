@@ -19,10 +19,11 @@ import           Data.Hex
 import           Data.Int
 import           Data.List as List
 import           Data.Maybe (isJust)
+import           System.Exit                (ExitCode (..))
 import           System.Process
 import           System.Directory          (createDirectoryIfMissing
                                            ,getTemporaryDirectory)
-import System.FilePath (takeBaseName)
+import System.FilePath (takeBaseName, (</>))
 import Control.Monad.Trans (liftIO)
 import Macho
 
@@ -35,19 +36,20 @@ import Macho
 -- 'BL.ByteString' into it.
 -- ld reads the bs from a new tmpFile which is created with the contents
 -- of the given 'BL.ByteString'.
-insertLPVMDataLd :: BL.ByteString -> FilePath -> IO ()
-insertLPVMDataLd bs obj =
-    do tempDir <- getTemporaryDirectory
-       liftIO $ createDirectoryIfMissing False (tempDir ++ "wybetemp")
-       let modFile = takeBaseName obj ++ ".module"
-       let lpvmFile = tempDir ++ "wybetemp/" ++ modFile
-       BL.writeFile lpvmFile bs
-       let args = [obj] ++ ["-r"]
-                  ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
-                  ++ ["-o", obj]
-       _ <- createProcess (proc "ld" args)
-       -- Cleanup
-       return ()
+insertLPVMDataLd :: BL.ByteString -> FilePath -> IO (Either String ())
+insertLPVMDataLd bs obj = do
+    tempDir <- getTemporaryDirectory
+    createDirectoryIfMissing False (tempDir </> "wybetemp")
+    let modFile = takeBaseName obj ++ ".module"
+    let lpvmFile = tempDir </> "wybetemp" </> modFile
+    BL.writeFile lpvmFile bs
+    let args = [obj] ++ ["-r"]
+                ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
+                ++ ["-o", obj]
+    (exCode, _, serr) <- readCreateProcessWithExitCode (proc "ld" args) ""
+    case exCode of
+        ExitSuccess  -> return $ Right ()
+        _ -> return $ Left serr
 
 -- | Extract string data from the segment __LPVM, section __lpvm of the
 -- given object file. An empty string is returned if there is no data
