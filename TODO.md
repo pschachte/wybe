@@ -8,7 +8,6 @@
 
 ## Documentation:
 * Write Wybe intro
-* Write setup/build/install document
 
 
 ## Complete the implementation:
