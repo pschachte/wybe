@@ -300,13 +300,14 @@ between the procedure header and body:
 
 > `def` *name*`(`*params*`)` `use` *dir* *resource<sub>1</sub>*, ... *dir* *resource<sub>n</sub>* `{` *body* `}`
 
-The order in which the resources is listed is not significant, and any number of
-resources may be specified.
-This allows the resource to be used as a local variable in the procedure body.
 Each *dir* indicates the direction of information flow for the following
 resource; as for parameters, no flow prefix indicates that the resource is only
-an input, a question mark `?` indicates only an output, and an exclamation point
-indicates that the resource is both input and output.
+an input, a question mark (`?`) indicates only an output, and an exclamation
+point (`!`) indicates that the resource is both input and output.
+The order in which the resources is listed is not significant, and any number of
+resources may be specified.
+This allows the resource name to be used as a local variable in the procedure
+body, just as if it were an ordinary parameter.
 
 #### Calling a resourceful procedure
 
