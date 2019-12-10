@@ -298,7 +298,7 @@ providing the resource is visible in the enclosing module
 by adding a `use` clause to the procedure declaration
 between the procedure header and body:
 
-> `def` *name*`(*params*) `use` *dir* *resource<sub>1</sub>*, ... *dir* *resource<sub>n</sub>* `{` *body* `}`
+> `def` *name*`(`*params*`)` `use` *dir* *resource<sub>1</sub>*, ... *dir* *resource<sub>n</sub>* `{` *body* `}`
 
 The order in which the resources is listed is not significant, and any number of
 resources may be specified.
