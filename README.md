@@ -1,7 +1,7 @@
 # The Wybe Programming Language
 
 Wybe is a programming language intended to combine the best features of
-declarative and imperative programming.  It is in an early state of
+declarative and imperative programming.  It is at an early stage of
 development.
 
 To build the Wybe compiler, follow the instructions in the
@@ -17,7 +17,7 @@ to the Wybe project.
 ## The Wybe Language
 
 The Wybe language is intended to be easy to learn and easy to use, but
-powerful and efficient enough for for practical use.  It is intended to
+powerful and efficient enough for practical use.  It is intended to
 support best programming practice, but not necessarily *common* practice.
 
 Wybe combines the best features of declarative and imperative languages,
@@ -32,8 +32,8 @@ may be passed around at will without worrying that they may be modified.
 Code appearing at the top level of a file is executed when the program
 is run, so Hello, World! in Wybe is quite simple:
 ```
-    # Print a friendly greeting
-    !println("Hello, World!")
+# Print a friendly greeting
+!println("Hello, World!")
 ```
 
 Wybe comments begin with a hash (`#`) character and continue to the end
@@ -50,7 +50,7 @@ is put in a file named `hello.wybe`, then an executable program can be
 built with the command:
 
 ```
-    % wybemk hello
+% wybemk hello
 ```
 
 where '%' is your operating system prompt. This will print error messages if
@@ -59,8 +59,8 @@ and produces an executable program, which you can run as usual for your
 operating system.
 
 ```
-    % ./hello
-    Hello, World!
+% ./hello
+Hello, World!
 ```
 
 Note that `wybemk` is like `make` in that you give it the name of the
@@ -93,16 +93,16 @@ equal sign the variable appears; only its prefix determines whether the
 variable is assigned or used.
 
 ```
-    ?x = 42              # gives x the value 42
-    42 = ?x              # also gives x the value 42
-    some_proc(x, ?y, ?z) # uses x, assigns y and z
+?x = 42              # gives x the value 42
+42 = ?x              # also gives x the value 42
+some_proc(x, ?y, ?z) # uses x, assigns y and z
 ```
 
 A variable mention may *both* use and assign its value if it is preceded
 with an exclamation mark (`!`).
 
 ```
-    incr(!x)   # increment x (both uses and reassigns x)
+incr(!x)   # increment x (both uses and reassigns x)
 ```
 
 So a variable mention without adornment is passed by value, with a `?` prefix it
@@ -257,6 +257,78 @@ add(x, y, xy)
 xy = add(x, y)
 ```
 
+### Resources
+
+Resources provide an alternative argument passing mechanism,
+based on name rather than argument position.
+They are intended for values that are unique in the computation,
+where there is only one value of that sort in each part of the computation,
+yet the value is used in many parts of the computation.
+For example, the command line parameters of an application may be widely used in
+the code, but explicitly passing that throughout the application may be a
+nuisance.
+An application may build up logging message throughout, but explicitly threading
+the logging text through the entire application can become painful.
+Resources are often useful where an imperative application would use a global or
+static variable, or where an object oriented application would use a class
+variable.
+
+#### Declaring a resource
+
+The benefit of resources is that they are very lightweight,
+because they do not need to be explicitly passed between procedures.
+Where a resource is declared, at the top level of any module,
+its type must be specified.
+
+> `resource` *name*`:`*type*
+
+[//]: # (It may optionally specify an initial value, in which case the resource is)
+[//]: # (defined throughout the execution of the program.)
+
+[//]: # (> `resource` *name*`:`*type* `=` *expr*)
+
+A resource may be exported, allowing it to be referred to in other modules, by
+preceding the `resource` declaration with the `pub` keyword.
+
+#### Defining a resourceful procedure
+
+Any procedure may declare that it uses any number of resources,
+providing the resource is visible in the enclosing module
+(i.e., defined in that module or any imported module),
+by adding a `use` clause to the procedure declaration
+between the procedure header and body:
+
+> `def` *name*`(*params*) `use` *dir* *resource<sub>1</sub>*, ... *dir* *resource<sub>n</sub>* `{` *body* `}`
+
+The order in which the resources is listed is not significant, and any number of
+resources may be specified.
+This allows the resource to be used as a local variable in the procedure body.
+Each *dir* indicates the direction of information flow for the following
+resource; as for parameters, no flow prefix indicates that the resource is only
+an input, a question mark `?` indicates only an output, and an exclamation point
+indicates that the resource is both input and output.
+
+#### Calling a resourceful procedure
+
+A procedure may only be called in a context in which all the resources it uses
+are defined, and a call to a resourceful procedure must be preceded by an
+exclamation point (`!`) to signify that it receives inputs or produces outputs
+that do not appear in its argument list.
+This exclamation point serves as a warning that some values not explicitly
+listed among the arguments in the call are used or defined or both, and the
+declaration of the procedure must be consulted to see which values they are.
+
+Most commonly, a procedure that uses a resource is called in the
+definition of another procedure that uses that resource.
+However, it may also be called from a procedure where the resource name is used
+as a local variable, or inside a scoped resource use (see [below](#scoping)).
+
+
+#### <a name="scoping"></a>Scoping a resource use
+
+#### Predefined resources
+
+
 ### Statements
 #### Procedure calls
 #### Selection
@@ -267,6 +339,5 @@ xy = add(x, y)
 #### Iteration
 ### Modules
 ### Type declarations
-### Resources
 ### Selection and iteration
 ### Foreign interface
