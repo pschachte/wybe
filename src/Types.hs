@@ -1,8 +1,9 @@
 --  File     : Types.hs
 --  Author   : Peter Schachte
---  Origin   : Sun Jan 15 16:00:18 2012
 --  Purpose  : Type checker/inferencer for Wybe
 --  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 
 -- |Support for type checking/inference.
 module Types (validateModExportTypes, typeCheckMod, -- modeCheckMod,

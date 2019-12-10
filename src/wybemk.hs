@@ -1,9 +1,9 @@
 --  File     : wybemk.hs
 --  Author   : Peter Schachte
---  Origin   : Sun Dec  4 18:39:16 2011
 --  Purpose  : Wybe compiler/builder main code
 --  Copyright: (c) 2011-2015 Peter Schachte.  All rights reserved.
---
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 
 -- |The top level of the compiler.  Delegates the compilation process
 --  to the Builder module.  The Options module handles the compiler

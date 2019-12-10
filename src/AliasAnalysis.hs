@@ -1,8 +1,9 @@
 --  File     : AliasAnalysis.hs
 --  Author   : Ting Lu
---  Origin   : Sun Sep 16 16:08:00 EST 2018
 --  Purpose  : Alias analysis for a single module
 --  Copyright: (c) 2018-2019 Ting Lu.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 
 module AliasAnalysis (aliasSccBottomUp,
                         currentAliasInfo,

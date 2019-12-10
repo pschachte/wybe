@@ -1,8 +1,9 @@
 --  File     : AST.hs
 --  Author   : Peter Schachte
---  Origin   : Thu Oct 14 23:30:58 2010
 --  Purpose  : Wybe Abstract Syntax Tree and LPVM representation
---  Copyright: 2010-2019 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2010-2019 Peter Schachte.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 
 {-# LANGUAGE DeriveGeneric #-}
 

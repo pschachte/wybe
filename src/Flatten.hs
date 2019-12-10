@@ -1,9 +1,9 @@
 --  File     : Flatten.hs
---  RCS      : $Id$
 --  Author   : Peter Schachte
---  Origin   : Fri Jan  6 11:28:23 2012
 --  Purpose  : Flatten function calls (expressions) into procedure calls
 --  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 --
 --  We transform away all expression types except for constants and
 --  variables.  Where, let, conditional, and function call

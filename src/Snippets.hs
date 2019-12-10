@@ -1,8 +1,9 @@
 --  File     : Snippets.hs
 --  Author   : Peter Schachte
---  Origin   : Thu 21 Apr 2016 23:17:48 AEST
 --  Purpose  : Convenience functions for generation of Wybe AST
 --  Copyright: 2016 Peter Schachte.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 
 module Snippets (intType, intCast, boolType, boolCast, phantomType,
                  varSet, varGet, varGetSet,

@@ -1,10 +1,9 @@
-{-# LANGUAGE OverloadedStrings #-}
 --  File     : Unbranch.hs
---  RCS      : $Id$
 --  Author   : Peter Schachte
---  Origin   : Thu Apr 17 13:48:52 2014
 --  Purpose  : Turn loops and conditionals into separate procedures
 --  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 --
 --  This code transforms loops into fresh recursive procs, and ensures
 --  that all conditionals are the last statements in their respective
@@ -43,6 +42,8 @@
 --  must be superset of the variables that will be used following the
 --  generated call.
 ----------------------------------------------------------------
+
+{-# LANGUAGE OverloadedStrings #-}
 
 module Unbranch (unbranchProc) where
 

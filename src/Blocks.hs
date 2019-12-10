@@ -1,10 +1,11 @@
-{-# LANGUAGE TupleSections #-}
 --  File     : Blocks.hs
---  RCS      : $Id$
---  author   : Ashutosh Rishi Ranjan
---  Origin   : Thu Mar 26 14:25:37 AEDT 2015
+--  Author   : Ashutosh Rishi Ranjan
 --  Purpose  : Transform a clausal form (LPVM) module to LLVM
 --  Copyright: (c) 2015-2019 Peter Schachte.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
+
+{-# LANGUAGE TupleSections #-}
 
 module Blocks (concatLLVMASTModules, blockTransformModule,
                llvmMapBinop, llvmMapUnop

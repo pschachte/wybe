@@ -1,10 +1,9 @@
 --  File     : Util.hs
---  RCS      : $Id$
 --  Author   : Peter Schachte
---  Origin   : Thu May 22 14:43:47 2014
 --  Purpose  : Various small utility functions
 --  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
---
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 
 {-# LANGUAGE DeriveGeneric #-}
 

@@ -1,8 +1,10 @@
 --  File     : Transform.hs
 --  Author   : Ting Lu
---  Origin   : Mon Apr 01 14:58:00 EST 2019
 --  Purpose  : Transform LPVM after alias analysis
 --  Copyright: (c) 2018-2019 Ting Lu.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
+
 
 module Transform (transformProc) where
 

@@ -1,10 +1,11 @@
 --  File     : Scanner.hs
 --  Author   : Peter Schachte
---  Origin   : Thu Oct 21 17:42:28 2010
---  Purpose  : Scanner for the Wybe language
+--  Purpose  : Lexical scanner for the Wybe language
 --  Copyright: (c) 2010-2012 Peter Schachte.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 
--- |The tokeniser for wybe.
+
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
                 charValue, identName, symbolName, showPosition, 
                 StringDelim(..), BracketStyle(..), fileTokens, tokenise,

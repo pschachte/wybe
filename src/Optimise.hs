@@ -1,9 +1,9 @@
 --  File     : Normalise.hs
---  RCS      : $Id$
 --  Author   : Peter Schachte
---  Origin   : Tue Apr 29 19:02:05 EST 2014
 --  Purpose  : Framework to optimise a single module
 --  Copyright: (c) 2014-2019 Peter Schachte.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 
 module Optimise (optimiseMod) where
 

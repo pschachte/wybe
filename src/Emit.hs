@@ -1,6 +1,9 @@
 --  File     : Emit.hs
 --  Author   : Rishi Ranjan
 --  Purpose  : Emit LLVM code
+--  Copyright: (c) 2016 Peter Schachte.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 
 module Emit (emitObjectFile, emitBitcodeFile, emitAssemblyFile,
              makeArchive, makeExec,

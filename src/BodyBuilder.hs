@@ -1,10 +1,10 @@
 --  File     : BodyBuilder.hs
---  RCS      : $Id$
 --  Author   : Peter Schachte
---  Origin   : Fri 22 May 2015 10:59:56 AEST
 --  Purpose  : A monad to build up a procedure Body, with copy propagation
 --  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
---
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
+
 
 module BodyBuilder (
   BodyBuilder, buildBody, freshVarName, instr, buildFork, completeFork,

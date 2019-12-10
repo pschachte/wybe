@@ -1,10 +1,10 @@
 --  File     : Callers.hs
---  RCS      : $Id$
 --  Author   : Peter Schachte
---  Origin   : Thu Mar 26 14:25:37 AEDT 2015
 --  Purpose  : Find all callers for each proc and count static calls per caller
 --  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
---
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
+
 
 module Callers ( collectCallers, getSccProcs ) where
 

@@ -1,13 +1,14 @@
-{-# OPTIONS -XTupleSections #-}
 --  File     : Normalise.hs
---  RCS      : $Id$
 --  Author   : Peter Schachte
---  Origin   : Fri Jan  6 11:28:23 2012
---  Purpose  : Convert parse tree int AST
+--  Purpose  : Convert parse tree into an AST
 --  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 
 -- |Support for normalising wybe code as parsed to a simpler form
 --  to make compiling easier.
+
+
 module Normalise (normalise, normaliseItem, completeNormalisation) where
 
 import AST

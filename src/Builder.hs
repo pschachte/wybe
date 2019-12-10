@@ -1,9 +1,9 @@
 --  File     : Builder.hs
---  RCS      : $Id$
 --  Author   : Peter Schachte
---  Origin   : Tue Jan 31 16:37:48 2012
 --  Purpose  : Handles compilation at the module level.
 --  Copyright: (c) 2012-2015 Peter Schachte.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 --
 --  BEGIN MAJOR DOC
 --  The wybe compiler handles module dependencies, and builds

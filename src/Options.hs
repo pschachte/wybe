@@ -1,9 +1,9 @@
 --  File     : Options.hs
---  RCS      : $Id$
 --  Author   : Peter Schachte
---  Origin   : Thu Jan 19 17:15:01 2012
 --  Purpose  : Handle compiler options/switches
 --  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
 --
 ----------------------------------------------------------------
 --                      Compiler Options
