@@ -1,7 +1,7 @@
 -- Module      : NewParser
 -- Purpose     : Re-write of the Wybe parser using Parsec.
 -- Copyright   : (c) Ashutosh Rishi Ranjan, 2016
--- License     : GPL-3
+-- License     : MIT
 -- Maintainer  : ashutoshrishi92@gmail.com
 -- Stability   : experimental
 -- Portability : POSIX
