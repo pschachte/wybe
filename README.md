@@ -287,7 +287,7 @@ A resource can be declared at the level of a module, as follows:
 
 > `resource` *name*`:`*type*
 
-[//]: # This doesn't work; see issue #7:
+[//]: # (This does not work; see issue #7.)
 
 [//]: # (It may optionally specify an initial value, in which case the resource is)
 [//]: # (defined throughout the execution of the program.)
