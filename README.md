@@ -263,24 +263,31 @@ Resources provide an alternative argument passing mechanism,
 based on name rather than argument position.
 They are intended for values that are unique in the computation,
 where there is only one value of that sort in each part of the computation,
-yet the value is used in many parts of the computation.
-For example, the command line parameters of an application may be widely used in
-the code, but explicitly passing that throughout the application may be a
-nuisance.
+yet the value is used widely in the program.
+For example, the command line parameters of an application may used in many
+parts of the code, but explicitly passing that throughout the application 
+may be a nuisance.
 An application may build up logging message throughout, but explicitly threading
-the logging text through the entire application can become painful.
+the log through the entire application can become painful.
 Resources are often useful where an imperative application would use a global or
 static variable, or where an object oriented application would use a class
 variable.
 
 #### Declaring a resource
 
-The benefit of resources is that they are very lightweight,
-because they do not need to be explicitly passed between procedures.
-Where a resource is declared, at the top level of any module,
-its type must be specified.
+The benefit of resources is that they are lightweight,
+because they do not need to be explicitly passed between procedures
+and their type only needs to be specified once,
+Where it is declared.
+Passing a value as a resource
+also ensures that it is named and used consistently
+throughout the module that declares it, and any modules that import it.
+
+A resource can be declared at the level of a module, as follows:
 
 > `resource` *name*`:`*type*
+
+[//]: # This doesn't work; see issue #7:
 
 [//]: # (It may optionally specify an initial value, in which case the resource is)
 [//]: # (defined throughout the execution of the program.)
@@ -293,14 +300,14 @@ preceding the `resource` declaration with the `pub` keyword.
 #### Defining a resourceful procedure
 
 Any procedure may declare that it uses any number of resources,
-providing the resource is visible in the enclosing module
+providing the named resources are visible in the enclosing module
 (i.e., defined in that module or any imported module),
 by adding a `use` clause to the procedure declaration
 between the procedure header and body:
 
 > `def` *name*`(`*params*`)` `use` *dir* *resource<sub>1</sub>*, ... *dir* *resource<sub>n</sub>* `{` *body* `}`
 
-Each *dir* indicates the direction of information flow for the following
+Each *dir* indicates the direction of information flow for the indicated
 resource; as for parameters, no flow prefix indicates that the resource is only
 an input, a question mark (`?`) indicates only an output, and an exclamation
 point (`!`) indicates that the resource is both input and output.
@@ -308,6 +315,9 @@ The order in which the resources is listed is not significant, and any number of
 resources may be specified.
 This allows the resource name to be used as a local variable in the procedure
 body, just as if it were an ordinary parameter.
+
+Importantly, resources available in a procedure become available in any
+procedures it calls that also declare that they `use` that resource.
 
 #### Calling a resourceful procedure
 
@@ -324,11 +334,47 @@ definition of another procedure that uses that resource.
 However, it may also be called from a procedure where the resource name is used
 as a local variable, or inside a scoped resource use (see [below](#scoping)).
 
-
 #### <a name="scoping"></a>Scoping a resource use
+
+A resource may have its value scoped to a number of statements and the
+procedures called by those statements, and so on recursively.
+This creates a scope in which the resource is defined;
+on leaving that scope, the resource ceases to exist.
+
+A scope introducing one or more resources may be specified with a statement of
+the form:
+
+> `use` *resource<sub>1</sub>*`,` ... *resource<sub>n</sub>* `in` `{` *body* `}`
+
+In this case, at the start of the *body*, the resource will be undefined,
+as it will at the completion of *body*.
+If the resource is already defined outside the scope of the `use` statement,
+the value at the start of *body* will be the same as the value before the `use`
+statement, and the value at the completion of the *body* will again be the same
+as the value before entering the `use` statement.
+Thus a `use` statement will not alter the existence or the values of the
+resources it names.
 
 #### Predefined resources
 
+Wybe uses predefined resources for a few key language features.
+In particular, the `io` resource holds a representation of the state of the
+world outside the computation being performed, including the file system.
+Thus all procedures that perform input/output are declared to `use !io`,
+the `!` being necessary because any procedure that does I/O changes the state of
+the world outside the computation, either by outputting something, or by
+changing the part of an input stream being read.
+Therefore, any call to a procedure that performs I/O (or that calls a procedure
+that performs I/O) must be preceded with an `!` to indicate that it modifies a
+resource.
+
+The `io` resource is implicitly defined at the top level of a Wybe program.
+There is also a predefined `argc` and `argv` resource holding the number of
+command line arguments and an array of the arguments themselves.
+Finally, the `exit_code` resource is initialised to 0 at the start of execution,
+and may be changed to any integer during the computation to set the exit
+condition that will be returned to the operating system at the termination of
+the program.
 
 ### Statements
 #### Procedure calls
