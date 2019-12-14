@@ -11,6 +11,7 @@ paradigms.  Its main organising principle is that *values* are
 immutable, but *variables* may be reassigned.  This means that values
 may be passed around at will without worrying that they may be modified.
 
+
 ## Hello, World!
 
 Code appearing at the top level of a file is executed when the program
@@ -23,7 +24,7 @@ is run, so Hello, World! in Wybe is quite simple:
 Wybe comments begin with a hash (`#`) character and continue to the end
 of the line.
 
-The need for the opening exclamation point will be explained in Section
+The need for the leading exclamation point will be explained in Section
 [Resources](#resources).
 
 
@@ -52,20 +53,111 @@ file you want it to build, and it figures out what files it needs
 to compile.
 
 
+## Module items
+
+The following items may be written at the top level of a source file:
+
+| Item                  |
+| --------------------- |
+| Statements            |
+| Function definitions  |
+| Procedure definitions |
+| Type declarations     |
+| Resource declarations |
+| Module declarations   |
+| Module imports        |
+| Pragmas               |
+
+Each of these will be described in due course.
+
+
 ## Primitive types
 
 Wybe has the usual complement of primitive types:
 
-| Type     | Meaning                                  |
-| -------- | ---------------------------------------- |
-| `int`    | Fixed precision integer (32 or 64 bits)  |
-| `float`  | Double precision floating point number   |
-| `bool`   | Boolean; either `true` or `false`        |
-| `string`   | Character string (double quotes)   |
-| `char`   | Individual ascii character (single quotes) |
+| Type       | Meaning                                    |
+| ---------- | ------------------------------------------ |
+| `int`      | Fixed precision integer (32 or 64 bits)    |
+| `float`    | Double precision floating point number     |
+| `bool`     | Boolean; either `true` or `false`          |
+| `string`   | Character string (double quotes)           |
+| `char`     | Individual ascii character (single quotes) |
 
 
-## Variables
+## Constants
+
+Wybe also supports a conventional syntax for various constant types.
+
+Integer constants begin with a digit character.
+If the first two characters are `0x` or `0X`, then the integer is written in
+hexadecimal notation (so in addition to digit characters, it may contain upper
+or lower case letters `a`-`f`);
+otherwise if the first character is `0`, then the integer is written in octal
+notation (so it may only contain digits `0`-`7`);
+otherwise it is written in decimal notation, made of any number of decimal
+digits.
+In any radix, underscore characters (`_`) are ignored; these may be used to
+make numbers more readable, such as by grouping digits into thousands, millions,
+and billions, or by grouping pairs of hexadecimal characters into bytes.
+
+Floating point constants consist of 1 or more decimal digits followed
+by a decimal point (`.`) character, followed by one or more decimal digits.
+This may be followed by an `e` or `E` and one or more decimal digits specifying
+a power of ten to multiply the earlier number by.
+If the `e` or `E` is present, the decimal point (`.`) and fractional part may be
+omitted.
+
+The only Boolean constants are `true` and `false`.
+
+String constants are written as any number of characters between double quote
+(`"`) characters.
+
+Character constants are written as a single character between single quote (`'`)
+characters.
+If the first character following the opening quote is a backslash (`\`), then
+the following character is considered part of the character constant, and is
+interpreted as follows:
+
+| Character  | Meaning                                    |
+| ---------- | ------------------------------------------ |
+| `a`        | Alert or bell (ASCII code 0x07)            |
+| `b`        | Backspace (ASCII code 0x08)                |
+| `f`        | Formfeed (ASCII code 0x0c)                 |
+| `n`        | Newline or Line feed (ASCII code 0x0a)     |
+| `r`        | Carriage return (ASCII code 0x0d)          |
+| `t`        | Horizontal tab (ASCII code 0x09)           |
+| `v`        | Vertical tab (ASCII code 0x0b)             |
+
+Any other character following a backslash is interpreted as itself.
+In particular, `'\\'` specifies a backslash character and `'\''`
+specifies a single quote character.
+
+
+## Procedure calls
+
+`!println("Hello, World!")` is a call the procedure `println` with the string
+`Hello, World` as its only argument.
+In general, procedure calls have the form:
+> *name*`(`*arg*, ... *arg*`)`,
+where *name* is the name of the procedure to call,
+and each *arg* is an expression specifying an input or output
+to that procedure.
+
+A procedure call must be preceded by an exclamation point (`!`) if it uses any
+resources, as described in the section on
+[calling a resourceful procedure](calling resourceful).
+
+A procedure whose name consists of any number of the operator characters
+```
+~ @ $ % ^ & * - + = \ < > /
+```
+may use the alternative infix syntax:
+> *arg* *op* *arg*,
+where *op* is the procedure name (there must be exactly two arguments).
+
+
+## <a name="variables"></a>Variables
+The simplest form of expression is a variable reference.
 Variable names begin with a letter (upper or lower case) and follow with
 any number of letters, digits, and underscores.
 
@@ -92,7 +184,25 @@ incr(!x)   # increment x (both uses and reassigns x)
 So a variable mention without adornment is passed by value, with a `?` prefix it
 is passed by result, and with a `!` prefix, it is passed by value-result.
 
-## Functions
+
+## Function calls
+
+A second kind of expression is a function call.
+In general, these have the syntax:
+> *name*`(`*arg*, ... *arg*`)`,
+(that is, the same as procedure calls).
+Again, each *arg* is an expression.
+
+A function whose name consists of any number of the operator characters
+```
+~ @ $ % ^ & * - + = \ < > /
+```
+may use the alternative infix syntax:
+> *arg* *op* *arg*,
+where *op* is the function name (there must be exactly two arguments).
+
+
+## Function definitions
 
 Functions are defined with the syntax:
 
@@ -115,7 +225,7 @@ pub def toCelsius(f:float):float = (f - 32.0) / 1.8
 ```
 
 
-## Procedures
+## Procedure definitions
 
 Procedures are defined with the syntax:
 
@@ -227,8 +337,8 @@ Test procedures and functions must be explicitly declared by inserting
 the keyword `test` after the `def` keyword.
 
 Calls to test procedures and functions are only permitted in two
-contexts:  in a conditional, or in the definition of a test procedure or
-function.
+contexts:  in a conditional, described [below](#conditionals),
+or in the definition of a test procedure.
 
 Any procedure or function call can become a test if an input is provided
 where an output argument is expected.  In this case, the call is made
@@ -241,6 +351,189 @@ add(x, y, xy)
 xy = add(x, y)
 ```
 
+
+## <a name="conditionals"></a>Conditional statements
+
+Wybe's conditional construct has the form:
+> `if` `{` *cases* `}`
+where *cases* is one more more case, separated by vertical bar characters (`|`).
+Each case takes the form:
+> *test* `::` *statements*
+where *test* is a test statement and *statements* is one or more statements.
+Execution proceeds by executing the first *test*, and if it succeeds, executing
+the corresponding *statements*, thereby completing the `if` statement.
+If the first *test* fails, its corresponding *statements* are skipped and
+the second *test* is tried.
+If this test succeeds, its corresponding *statements* are executed, and so on.
+At most one *statements* sequence is executed, but if none of the specified
+*test*s succeed, none of the *statements* are executed.
+The predefined `otherwise` test always succeeds, so it may be used as the final
+test to provide code to execute if none of the preceding tests succeeds.
+
+For example:
+```
+if {x < 0     :: !println("negative")
+    x = 0     :: !println("zero")
+    otherwise :: !println("positive")
+}
+```
+
+
+## Iteration statements
+
+Iteration is specified with the `do` statement, of the form:
+> `do` `{` *statements* `}`
+This executes the enclosed *statements* repeatedly, until a termination
+condition is reached.
+
+The enclosed *statements* may include any ordinary Wybe statements, plus any of
+the following:
+
+> `while` *test*
+If *test* fails, exit the loop immediately, otherwise continue
+
+> `until` *test*
+If *test* succeeds, exit the loop immediately, otherwise continue
+
+> `when` *test*
+If *test* fails, restart the loop immediately, otherwise continue
+
+> `unless` *test*
+If *test* succeeds, restart the loop immediately, otherwise continue
+
+These special loop control statements may be used anywhere inside a `do`
+statement.
+For example:
+
+```
+do {!print(prompt)
+    !read(?response)
+    until valid_answer(response)
+    !println("Invalid response; please try again.")
+}
+```
+
+## Modules
+
+
+## Type declarations
+
+Wybe provides an algebraic type system.
+Types may be declared with the syntax:
+> `type` *type* `{` *ctors* *defs* `}`
+where *ctors* is one or more constructor declaration, separated by vertical bar
+characters (`|`).
+To make the declared *type* public, precede the `type` keyword with the keyword
+`pub`.
+If you wish for the constructors of the type public,
+precede the first constructor declaration with the `pub` keyword
+(this makes all the constructors public).
+
+The *defs* part may be empty, but if specified, may include any number of
+procedure and function declarations, which will have full access to the
+constructors of the type, whether or not they are public.
+
+Each constructor declaration takes the form of a function declaration (with no
+function body):
+> *ctor*`(`*member*`:`*memtype*, ... *member*`:`*memtype*`)`
+Each *ctor* is a distinct constructor name specifying an alternative constructor
+for the *type* being defined.
+Any number of *member*`:`*memtype* pairs may be specified, specifying information
+that must be supplied for that constructor.
+If no members are specified, the parentheses are omitted.
+
+Each constructor defined automatically becomes a function that may be used to
+construct a value of the *type* being defined.
+It also becomes a function that can be used backwards, extracting the
+constructor
+arguments as *outputs*, allowing a value to be deconstructed into its parts.
+For example, given the definition
+```
+type coordinate { coordinate(x:int, y:int) }
+```
+the following statement may be used to construct a Cartesian coordinate with X
+component 7 and Y component 4:
+```
+?pos = coordinate(7,4)
+```
+And this statement will unpack a coordinate `pos` into variables `x` and `y`:
+```
+coordinate(?x,?y) = pos
+```
+
+Additionally, two procedures are automatically generate for each *member*:
+one to access the member, and one to mutate it.
+The first has the prototype:
+> *member*`(structure:`*type*`,` `?value:`*memtype*`)`
+and the second has the form:
+> *member*`(!structure:`*type*`,` `value:`*memtype*`)`
+These are more conveniently used as functions, for example:
+```
+print("X coordinate: ")
+println(x(pos))
+x(!pos) = x(pos) + 1  # shift position to the right
+```
+
+It is important to note that "mutating" a value does not actually modify it in
+place; it creates a fresh value of that type that is identical except for the
+member being changed.
+Wybe does not have the concept of
+[object identity](https://en.wikipedia.org/wiki/Identity_(object-oriented_programming)),
+nor the concepts of pointers or references.
+You can safely have multiple variables refer to the same data without worrying
+that modifying the data through one of them will change the values of the
+others.
+For example
+```
+?pos = coordinate(7,4)
+println(x(pos))
+?oldpos = pos
+x(!pos) = x(pos) + 1  # shift position to the right
+println(x(pos))
+println(x(oldpos))
+```
+will print
+```
+7
+8
+7
+```
+
+The Wybe compiler, however, will optimise mutations when it determines that it
+can safely do so.
+For example, the compiler will optimise this code
+```
+?pos = coordinate(7,4)
+println(x(pos))
+x(!pos) = x(pos) + 1  # shift position to the right
+println(x(pos))
+```
+so that it does in fact mutate the coordinate object in place,
+saving an unnecessary object creation.
+
+Deconstructing a value of a type with multiple constructors,
+or accessing or altering any of its members, is a test, since the
+value may not have the intended constructor.
+This ensures that it is not possible to mistake a value created with one
+constructor for one made with a different constructor.
+For example, if a tree type is defined as:
+```
+type tree { empty | node(left:tree, value:int, right:tree) }
+```
+then it may be used as follows:
+```
+def test member(elt:int, tree:tree) {
+    if {node(?left, ?value, ?right) = tree ::
+            if {key = value:: succeed
+                key < value:: member(elt, left)
+                otherwise  :: member(elt, right)
+            }
+        otherwise:: fail
+    }
+}
+```
+
+
 ## Resources
 
 Resources provide an alternative argument passing mechanism,
@@ -249,7 +542,7 @@ They are intended for values that are unique in the computation,
 where there is only one value of that sort in each part of the computation,
 yet the value is used widely in the program.
 For example, the command line parameters of an application may used in many
-parts of the code, but explicitly passing that throughout the application 
+parts of the code, but explicitly passing that throughout the application
 may be a nuisance.
 An application may build up logging message throughout, but explicitly threading
 the log through the entire application can become painful.
@@ -303,7 +596,7 @@ body, just as if it were an ordinary parameter.
 Importantly, resources available in a procedure become available in any
 procedures it calls that also declare that they `use` that resource.
 
-### Calling a resourceful procedure
+### <a name="calling resourceful"></a>Calling a resourceful procedure
 
 A procedure may only be called in a context in which all the resources it uses
 are defined, and a call to a resourceful procedure must be preceded by an
@@ -360,15 +653,4 @@ and may be changed to any integer during the computation to set the exit
 condition that will be returned to the operating system at the termination of
 the program.
 
-## Statements
-### Procedure calls
-### Selection
-### Iteration
-## Expressions
-### Function calls
-### Selection
-### Iteration
-## Modules
-## Type declarations
-## Selection and iteration
-## Foreign interface
+## Low-level features (foreign interface)

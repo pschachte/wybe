@@ -6,6 +6,9 @@ pub type bool { pub false | true
     pub def `~`(p:bool):bool = foreign llvm xor(p,true)
     pub def =(x:bool, y:bool):bool = foreign llvm icmp eq(x,y)
     pub def /=(x:bool,y:bool):bool = foreign llvm icmp ne(x,y)
+    pub def otherwise { } # not a test, empty body, so always true
+    pub def succeed { } # always succeed
+    pub def test fail { false } # always fail (compiler will optimise)
 }
 
 
@@ -132,6 +135,3 @@ pub module command_line {
     }
 }
 
-pub module util {
-    pub def otherwise { } # not a test, empty body, so always true
-}
