@@ -73,7 +73,9 @@ you gain access to them.
 
 To import a module into your own module, you need only include a declaration of
 the form:
+
 > `use` *module*`,` ... *module*
+
 naming one or more modules to import.
 If you precede the `use` keyword with `pub`, you automatically make any public
 items in the named *module*s also visible to any module that imports the module
@@ -162,7 +164,9 @@ A procedure whose name consists of any number of the operator characters
 ~ @ $ % ^ & * - + = \ < > /
 ```
 may use the alternative infix syntax:
+
 > *arg* *op* *arg*,
+
 where *op* is the procedure name (there must be exactly two arguments).
 
 
@@ -199,7 +203,9 @@ is passed by result, and with a `!` prefix, it is passed by value-result.
 
 A second kind of expression is a function call.
 In general, these have the syntax:
+
 > *name*`(`*arg*, ... *arg*`)`,
+
 (that is, the same as procedure calls).
 Again, each *arg* is an expression.
 
@@ -208,7 +214,9 @@ A function whose name consists of any number of the operator characters
 ~ @ $ % ^ & * - + = \ < > /
 ```
 may use the alternative infix syntax:
+
 > *arg* *op* *arg*,
+
 where *op* is the function name (there must be exactly two arguments).
 
 
@@ -365,10 +373,14 @@ xy = add(x, y)
 ## <a name="conditionals"></a>Conditional statements
 
 Wybe's conditional construct has the form:
+
 > `if` `{` *cases* `}`
+
 where *cases* is one more more case, separated by vertical bar characters (`|`).
 Each case takes the form:
+
 > *test* `::` *statements*
+
 where *test* is a test statement and *statements* is one or more statements.
 Execution proceeds by executing the first *test*, and if it succeeds, executing
 the corresponding *statements*, thereby completing the `if` statement.
@@ -400,15 +412,19 @@ The enclosed *statements* may include any ordinary Wybe statements, plus any of
 the following:
 
 > `while` *test*
+
 If *test* fails, exit the loop immediately, otherwise continue
 
 > `until` *test*
+
 If *test* succeeds, exit the loop immediately, otherwise continue
 
 > `when` *test*
+
 If *test* fails, restart the loop immediately, otherwise continue
 
 > `unless` *test*
+
 If *test* succeeds, restart the loop immediately, otherwise continue
 
 These special loop control statements may be used anywhere inside a `do`
@@ -434,7 +450,9 @@ The parent module need not explicitly import its submodules; this is done
 automatically.
 
 A submodule is declared as follows:
+
 > `module` *name* `{` *items* `}`
+
 where *name* is the module name and *items* are the contents of the submodule.
 
 
@@ -442,7 +460,9 @@ where *name* is the module name and *items* are the contents of the submodule.
 
 Wybe provides an algebraic type system.
 Types may be declared with the syntax:
+
 > `type` *type* `{` *ctors* *defs* `}`
+
 where *ctors* is one or more constructor declaration, separated by vertical bar
 characters (`|`).
 To make the declared *type* public, precede the `type` keyword with the keyword
@@ -457,7 +477,9 @@ constructors of the type, whether or not they are public.
 
 Each constructor declaration takes the form of a function declaration (with no
 function body):
+
 > *ctor*`(`*member*`:`*memtype*, ... *member*`:`*memtype*`)`
+
 Each *ctor* is a distinct constructor name specifying an alternative constructor
 for the *type* being defined.
 Any number of *member*`:`*memtype* pairs may be specified, specifying
@@ -486,9 +508,13 @@ coordinate(?x,?y) = pos
 Additionally, two procedures are automatically generate for each *member*:
 one to access the member, and one to mutate it.
 The first has the prototype:
+
 > *member*`(structure:`*type*`,` `?value:`*memtype*`)`
+
 and the second has the form:
+
 > *member*`(!structure:`*type*`,` `value:`*memtype*`)`
+
 These are more conveniently used as functions, for example:
 ```
 print("X coordinate: ")
