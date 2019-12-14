@@ -813,6 +813,8 @@ buildExecutable targetMod fpath = do
             -- return allOFiles
 
 
+-- |Generate a main function by piecing together calls to the main procs of all
+-- the module dependencies that have them.
 buildMain mainImports =
     let cmdResource name = ResourceFlowSpec (ResourceSpec ["command_line"] name)
         -- Construct argumentless resourceful calls to all main procs
@@ -839,7 +841,7 @@ buildMain mainImports =
 
 -- | Traverse and collect a depth first dependency list from the given initial
 -- Module, along with a boolean flag which indicates if that node has a defined
--- top level procedure (a main proc) i.e @[(a, True), (b, False), (c, True)]@
+-- top level procedure (a main proc), e.g., @[(a, True), (b, False), (c, True)]@
 -- means that modules a & c have a main procedure.
 -- Only those dependencies are followed which will have a corresponding object
 -- file, that means no sub-mod dependencies and no standard library (for now).
@@ -890,6 +892,8 @@ loadObjectFile thisMod =
      return objFile
 
 
+-- |Does the specified module, defined in the specified file, need to be
+-- recompiled?
 objectReBuildNeeded :: ModSpec -> FilePath -> Compiler Bool
 objectReBuildNeeded thisMod dir = do
     srcOb <- moduleSources thisMod [dir]
@@ -902,6 +906,7 @@ objectReBuildNeeded thisMod dir = do
         -- only source file exists
         ModuleSource (Just _) Nothing _ _ -> return True
 
+        -- both exist:  is source younger?
         ModuleSource (Just srcfile) (Just objfile) _ _ -> do
             srcDate <- (liftIO . getModificationTime) srcfile
             dstDate <- (liftIO . getModificationTime) objfile
@@ -1024,7 +1029,7 @@ targetType filename
   | ext' == bitcodeExtension    = BitcodeFile
   | ext' == assemblyExtension   = AssemblyFile
   | ext' == archiveExtension    = ArchiveFile
-  | otherwise                  = UnknownFile
+  | otherwise                   = UnknownFile
       where ext' = dropWhile (=='.') $ takeExtension filename
 
 
