@@ -150,7 +150,9 @@ specifies a single quote character.
 `!println("Hello, World!")` is a call the procedure `println` with the string
 `Hello, World` as its only argument.
 In general, procedure calls have the form:
+
 > *name*`(`*arg*, ... *arg*`)`,
+
 where *name* is the name of the procedure to call,
 and each *arg* is an expression specifying an input or output
 to that procedure.
@@ -231,6 +233,8 @@ corresponding *type* is its type, the final *type* is the function
 result type, and *expr* is an expression giving the function value.
 Each `:`*type* is optional; if omitted, the compiler will infer the
 type.  If there are no parameters, the parentheses are also omitted.
+If the function name comprises operator characters, it should be surrounded with
+backquote characters (`` ` ``).
 
 This syntax declares a private (not exported) function.  To export the
 function, the definition should be preceded by the `pub` keyword.
@@ -258,6 +262,8 @@ Procedures may have any number of input, output, and input/output
 arguments in any order.
 Again each `:`*type* is optional, with types inferred if omitted,
 and parentheses omitted for niladic procedures.
+If the procedure name comprises operator characters, it should be surrounded
+with backquote characters (`` ` ``).
 
 The procedure is private unless preceded by the `pub` keyword.
 All types must be included in public procedure definitions.
