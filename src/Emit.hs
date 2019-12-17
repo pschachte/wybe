@@ -250,7 +250,7 @@ makeExec ofiles target = do
     -- dead code elimination during static linking
     -- This is a linker feature, cc (clang) will pass this flag to the linker
     let options = ["-dead_strip"]
-    let args = options ++ ofiles ++ sharedLibs ++ ["-o", target]
+    let args = options ++ ofiles ++ ["-o", target]
     logEmit $ "Generating final executable with command line: cc "
               ++ unwords args
     (exCode, _, serr) <- liftIO $

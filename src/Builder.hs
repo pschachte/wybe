@@ -348,10 +348,6 @@ buildModuleIfNeeded force modspec possDirs = do
                 _ -> shouldnt "inconsistent file existence"
 
 
-
-
-
-
 -- |Actually load and compile the module
 buildModule :: ModSpec -> FilePath -> Compiler ()
 buildModule mspec srcfile = do
@@ -413,7 +409,6 @@ buildDirectory dir dirmod = do
     -- XXX Maybe run only the import pass, as there is no module source!
     compileModSCC mods
     return built
-
 
 
 -- |Compile a file module given the parsed source file contents.
@@ -774,8 +769,6 @@ buildExecutable targetMod fpath = do
             logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
 
             enterModule fpath [] Nothing Nothing
-            -- XXX this shouldn't be needed; imports should come from
-            --     resource initialisations
             addImport ["wybe"] $ importSpec Nothing Private
             mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
                   mainImports
@@ -789,12 +782,6 @@ buildExecutable targetMod fpath = do
                                     ++ showModSpecs mods
 
             logBuild $ "Finished building *main* module: " ++ showModSpecs mods
-
-            -- mainMod <- newMainModule mainImports
-            -- logBuild "o Built 'main' module for target: "
-            -- mainModStr <- liftIO $ codeemit mainMod
-            -- logEmit $ BS.unpack mainModStr
-            ------------
             logBuild "o Creating temp Main module @ .../tmp/tmpMain.o"
             tempDir <- liftIO getTemporaryDirectory
             liftIO $ createDirectoryIfMissing False (tempDir </> "wybetemp")
@@ -803,8 +790,17 @@ buildExecutable targetMod fpath = do
 
             ofiles <- mapM (loadObjectFile . fst) depends
 
-            let allOFiles = tmpMainOFile:ofiles
-            -----------
+            implns <- mapM (getLoadedModuleImpln . fst) depends
+            let foreignOs =
+                  Set.toList
+                  $ List.foldr (Set.union . modForeignObjects) Set.empty
+                    implns
+            let foreignLibs =
+                  Set.toList
+                  $ List.foldr (Set.union . modForeignLibs) Set.empty
+                    implns
+            let allOFiles = tmpMainOFile:(ofiles ++ foreignOs ++ foreignLibs)
+
             logBuild "o Object Files to link: "
             logBuild $ "++ " ++ intercalate "\n++ " allOFiles
             logBuild $ "o Building Target (executable): " ++ fpath

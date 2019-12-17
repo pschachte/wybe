@@ -6,24 +6,19 @@ VERSION=0.1
 # OPTS = -no-user-package-db -package-db .cabal-sandbox/*-packages.conf.d
 COPTS = -lgc -I/usr/local/include -L/usr/local/lib
 SRCDIR = src
+LIBDIR = wybelibs
 
 all:	wybemk
 
 %.pdf:	%.tex
 	rubber -m pdftex $<
 
-# %.hs:	%.y
-#	happy -a -g $<
+$(LIBDIR)/cbits.o: $(LIBDIR)/cbits.c
+	clang -isysroot `xcrun --show-sdk-path` -I /usr/local/include -c $< -o $@
 
-cbits.so: cbits.c
-	clang -fPIC -shared -isysroot `xcrun --show-sdk-path` -v \
-	    -I /usr/local/include -L /usr/local/lib cbits.c -o cbits.so -lgc
-
-wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs cbits.so
+wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs $(LIBDIR)/cbits.o
 	stack install && cp ~/.local/bin/$@ ./$@
-	# cabal configure
-	# cabal -j3 install --only-dependencies
-	# cabal -j3 build && cp dist/build/$@/$@ $@
+
 
 doc:	*.hs
 	rm -rf $@
@@ -74,12 +69,14 @@ test:	wybemk
 	@rm -f ERRS ; touch ERRS
 	@rm -f test-cases/*.bc
 	@rm -f test-cases/*.o
-	@rm -f wybelibs/*.o
+	@rm -f $(LIBDIR)/*.o
+	@echo "Building $(LIBDIR)/cbits.o"
+	@make $(LIBDIR)/cbits.o
 	@printf "Testing building wybe library ("
 	@printf wybe
-	@gtimeout 2 ./wybemk --force-all wybelibs/wybe.o
-	@for f in wybelibs/*.wybe ; do \
-           [ "$$f" = "wybelibs/wybe.wybe" ] && continue ; \
+	@gtimeout 5 ./wybemk --force-all $(LIBDIR)/wybe.o
+	@for f in $(LIBDIR)/*.wybe ; do \
+           [ "$$f" = "$(LIBDIR)/wybe.wybe" ] && continue ; \
 	   printf " %s" `basename $$f .wybe` ; \
 	   gtimeout 2 ./wybemk --force $${f/.wybe/.o} ; \
 	done
@@ -114,4 +111,4 @@ test:	wybemk
 
 clean:
 	stack clean
-	rm -f $(SRCDIR)/*.o $(SRCDIR)/*.hi Parser.hs $(SRCDIR)/Version.lhs *.pdf *.aux wybelibs/*.o test-cases/*.o
+	rm -f $(SRCDIR)/*.o $(SRCDIR)/*.hi Parser.hs $(SRCDIR)/Version.lhs *.pdf *.aux $(LIBDIR)/*.o test-cases/*.o

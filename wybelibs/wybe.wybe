@@ -1,5 +1,8 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
+use foreign object cbits
+use foreign library gc
+
 pub type bool { pub false | true
     pub def `&&`(p:bool, q:bool):bool = foreign llvm and(p,q)
     pub def `||`(p:bool, q:bool):bool = foreign llvm or(p,q)

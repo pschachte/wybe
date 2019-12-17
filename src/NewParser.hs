@@ -180,8 +180,24 @@ resourceItemParser v = do
 
 useItemParser :: Visibility -> Parser Item
 useItemParser v = do
-    pos <- tokenPosition <$> ident "use"
-    ImportMods v <$> (modSpecParser `sepBy` comma) <*> return (Just pos)
+    pos <- Just . tokenPosition <$> ident "use"
+    ( ident "foreign" *> foreignFileOrLib v pos
+      <|> ImportMods v <$> (modSpecParser `sepBy` comma) <*> return pos)
+    -- useForeignOrMod v (Just pos)
+
+
+-- useForeignOrMod :: Visibility -> OptPos -> Parser Item
+-- useForeignOrMod v pos =
+--     ident "foreign" *> foreignFileOrLib v pos
+--     <|> ImportMods v <$> (modSpecParser `sepBy` comma) <*> return pos
+
+
+foreignFileOrLib :: Visibility -> OptPos -> Parser Item
+foreignFileOrLib v pos =
+    ImportForeignLib
+        <$> (ident "library" *> identString `sepBy` comma) <*> return pos
+    <|> ImportForeign
+            <$> (ident "object" *> identString `sepBy` comma) <*> return pos
 
 
 fromUseItemParser :: Visibility -> Parser Item

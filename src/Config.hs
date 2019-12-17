@@ -9,7 +9,7 @@
 -- |Compiler configuration parameters.  These may vary between
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
-               interfaceExtension, bitcodeExtension, sharedLibs,
+               interfaceExtension, bitcodeExtension,
                ldArgs, ldSystemArgs, wordSize, wordSizeBytes,
                availableTagBits, tagMask, smallestAllocatedAddress,
                assemblyExtension, archiveExtension, magicVersion)
@@ -90,10 +90,6 @@ smallestAllocatedAddress = 65536 -- this is a pretty safe guess
 -- |Foreign shared library directory name
 sharedLibDirName :: String
 sharedLibDirName = "lib/"
-
-
-sharedLibs :: [FilePath]
-sharedLibs = ["cbits.so"]
 
 
 ldArgs :: [String]

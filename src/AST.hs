@@ -60,6 +60,7 @@ module AST (
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, getModuleInterface, updateModule, getSpecModule,
   updateModImplementation, updateModImplementationM, updateModLLVM,
+  addForeignImport, addForeignLib,
   updateModInterface, updateAllProcs, updateModSubmods,
   getModuleSpec, getModuleParams, option, getSource, getDirectory,
   optionallyPutStr, message, errmsg, (<!>), genProcName,
@@ -78,7 +79,7 @@ module AST (
   EncodedLPVM(..), ModuleIndex, makeEncodedLPVM
   ) where
 
-import           Config (magicVersion, wordSize)
+import           Config (magicVersion, wordSize, objectExtension)
 import           Control.Monad
 import           Control.Monad.Trans (lift,liftIO)
 import           Control.Monad.Trans.State
@@ -111,6 +112,8 @@ data Item
      | ModuleDecl Visibility Ident [Item] OptPos
      | ImportMods Visibility [ModSpec] OptPos
      | ImportItems Visibility ModSpec [Ident] OptPos
+     | ImportForeign [FilePath] OptPos
+     | ImportForeignLib [Ident] OptPos
      | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
        -- The Bool in the next two indicates whether inlining is forced
      | FuncDecl Visibility Determinism Bool
@@ -1221,18 +1224,19 @@ data ModuleImplementation = ModuleImplementation {
     modResources :: Map Ident ResourceDef,    -- ^Resources defined by this mod
     modProcs     :: Map Ident [ProcDef],      -- ^Procs defined by this module
     modKnownTypes:: Map Ident (Set TypeSpec), -- ^Type visible to this module
-    -- modConstCtorCount :: Int,                 -- ^Number of consts constructors
-    -- modNonConstCtorCount :: Int,              -- ^Num of arity >=1 constructors
     modKnownResources :: Map Ident (Set ResourceSpec),
                                               -- ^Resources visible to this mod
-    modKnownProcs:: Map Ident (Set ProcSpec),  -- ^Procs visible to this module
-    modLLVM :: Maybe LLVMAST.Module           -- ^ Module's LLVM.General.AST.Module representation
+    modKnownProcs:: Map Ident (Set ProcSpec), -- ^Procs visible to this module
+    modForeignObjects:: Set FilePath,         -- ^Foreign object files used
+    modForeignLibs:: Set FilePath,            -- ^Foreign libraries used
+    modLLVM :: Maybe LLVMAST.Module           -- ^Module's LLVM representation
     } deriving (Generic)
 
 emptyImplementation :: ModuleImplementation
 emptyImplementation =
     ModuleImplementation Set.empty Map.empty Map.empty Map.empty Map.empty
-                         Map.empty Map.empty Map.empty Map.empty Nothing
+                         Map.empty Map.empty Map.empty Map.empty
+                         Set.empty Set.empty Nothing
 
 
 -- These functions hack around Haskell's terrible setter syntax
@@ -1263,6 +1267,23 @@ updateModProcsM :: (Map Ident [ProcDef] -> Compiler (Map Ident [ProcDef])) ->
 updateModProcsM fn modimp = do
     procs' <- fn $ modProcs modimp
     return $ modimp {modProcs = procs'}
+
+-- |Add a file to the set of foreign files used by the current module
+addForeignImport :: Ident -> Compiler ()
+addForeignImport objName = do
+    path <- getModule (takeDirectory . modSourceFile)
+    let fl = path </> objName -<.> objectExtension
+    updateModImplementation
+        (\imp ->
+           imp { modForeignObjects = Set.insert fl $ modForeignObjects imp })
+
+-- |Add a file to the set of foreign files used by the current module
+addForeignLib :: Ident -> Compiler ()
+addForeignLib lib = do
+    let arg = "-l" ++ lib
+    updateModImplementation
+        (\imp ->
+           imp { modForeignLibs = Set.insert arg $ modForeignLibs imp })
 
 -- | Update the LLVMAST.Module representation of the module
 updateModLLVM :: (Maybe LLVMAST.Module -> Maybe LLVMAST.Module)
@@ -2371,6 +2392,12 @@ instance Show Item where
   show (ImportItems vis mod specs pos) =
       visibilityPrefix vis ++ "from " ++ showModSpec mod ++
       " use " ++ intercalate ", " specs
+      ++ showMaybeSourcePos pos ++ "\n  "
+  show (ImportForeign files pos) =
+      "use foreign " ++ intercalate ", " files
+      ++ showMaybeSourcePos pos ++ "\n  "
+  show (ImportForeignLib names pos) =
+      "use foreign library " ++ intercalate ", " names
       ++ showMaybeSourcePos pos ++ "\n  "
   show (ModuleDecl vis name items pos) =
     visibilityPrefix vis ++ "module " ++ show name ++ " is"

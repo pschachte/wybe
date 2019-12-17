@@ -55,12 +55,16 @@ normaliseItem (TypeDecl vis (TypeProto name params) rep items pos)
     _ <- addType name (TypeDef vis params rep' ctors ctorVis pos items)
     normaliseSubmodule name Nothing vis pos items
     return ()
-normaliseItem (ModuleDecl vis name items pos) = do
+normaliseItem (ModuleDecl vis name items pos) =
     normaliseSubmodule name Nothing vis pos items
-normaliseItem (ImportMods vis modspecs pos) = do
+normaliseItem (ImportMods vis modspecs pos) =
     mapM_ (\spec -> addImport spec (importSpec Nothing vis)) modspecs
-normaliseItem (ImportItems vis modspec imports pos) = do
+normaliseItem (ImportItems vis modspec imports pos) =
     addImport modspec (importSpec (Just imports) vis)
+normaliseItem (ImportForeign files _) =
+    mapM_ addForeignImport files
+normaliseItem (ImportForeignLib files _) =
+    mapM_ addForeignLib files
 normaliseItem (ResourceDecl vis name typ init pos) = do
   addSimpleResource name (SimpleResource typ init pos) vis
   case init of
