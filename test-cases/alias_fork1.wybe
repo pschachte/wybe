@@ -14,3 +14,4 @@ pub def simpleMerge(tl:tree, tr:tree):tree =
 ?t2 = node(empty, 111, empty)
 ?t = simpleMerge(t1, t2)
 !printTree(t)
+!nl
