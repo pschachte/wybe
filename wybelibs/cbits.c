@@ -1,5 +1,5 @@
-/* cbits
-   $ clang -fPIC -shared cbits.c -o cbits.so -lgc -v
+/* cbits -- support code for the wybe library
+   $ clang -c cbits.c -o cbits.o
 */
 
 #include <stdio.h>
