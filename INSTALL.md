@@ -66,3 +66,21 @@ whose output is different than the expected output, show the differences,
 and prompts whether or not to except the new actual output as correct.
 For each test case with no expected output recorded, it also shows the
 actual output and prompts whether to accept this as correct.
+
+## Installing
+
+1.  Decide on installation location.  The default location for the executable is
+    `/usr/local/bin`, with libraries installed in `/usr/local/lib/wybe`.
+
+2.  If the defaults are not what you want, edit the `Makefile` and change the
+installation locations `INSTALLBIN` and `INSTALLLIB` to suit.
+
+3.  Do either:
+```
+    make install
+```
+(if you have write access to your chosen installation locations), or:
+```
+    sudo make install
+```
+(if not).

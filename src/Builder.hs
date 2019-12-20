@@ -263,6 +263,8 @@ buildModuleIfNeeded :: Bool    -- ^Force compilation of this module
               -> Compiler Bool -- ^Returns whether or not file
                               -- actually needed to be compiled
 buildModuleIfNeeded force modspec possDirs = do
+    logBuild $ "Building " ++ showModSpec modspec
+               ++ " with library directories " ++ intercalate ", " possDirs
     loading <- gets (List.elem modspec . List.map modSpec . underCompilation)
     let clash kind1 f1 kind2 f2 = do
           Error <!> kind1 ++ " " ++ f1 ++ " and "

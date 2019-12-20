@@ -55,7 +55,7 @@ data ProcDefBlock =
                  } deriving (Show, Eq)
 
 
--- | Transofrorm the module's procedures (in LPVM by now) into LLVM function
+-- | Transform the module's procedures (in LPVM by now) into LLVM function
 -- definitions. A LLVMAST.Module is built up using these global definitions
 -- and then stored in the modLLVM field of 'ModuleImplementation'.
 -- Before translation of ProcDefs, all the prototypes of the ProcDef's LPVM

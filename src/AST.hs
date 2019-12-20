@@ -92,6 +92,7 @@ import           Options
 import           System.Exit
 import           System.FilePath
 import           System.IO
+import           System.Directory (makeAbsolute)
 -- import           Text.ParserCombinators.Parsec.Pos
 import           Text.Parsec.Pos
                  ( SourcePos, sourceName, sourceColumn, sourceLine )
@@ -558,8 +559,9 @@ enterModule source modspec rootMod params = do
     modify (\comp -> comp { loadCount = count })
     logAST $ "Entering module " ++ showModSpec modspec
              ++ " with count " ++ show count
+    absSource <- liftIO $ makeAbsolute source
     modify (\comp -> let newMod = emptyModule
-                                  { modSourceFile = source
+                                  { modSourceFile = absSource
                                   , modRootModSpec = rootMod
                                   , modSpec = modspec
                                   , modParams = params
@@ -1228,7 +1230,7 @@ data ModuleImplementation = ModuleImplementation {
                                               -- ^Resources visible to this mod
     modKnownProcs:: Map Ident (Set ProcSpec), -- ^Procs visible to this module
     modForeignObjects:: Set FilePath,         -- ^Foreign object files used
-    modForeignLibs:: Set FilePath,            -- ^Foreign libraries used
+    modForeignLibs:: Set String,              -- ^Foreign libraries used
     modLLVM :: Maybe LLVMAST.Module           -- ^Module's LLVM representation
     } deriving (Generic)
 

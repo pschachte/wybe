@@ -1,37 +1,61 @@
 #  File     : Makefile
-#  RCS      : $Id: Makefile,v 1.1 2003/03/30 13:43:53 schachte Exp $
 #  Author   : Peter Schachte
+#  Purpose  : Build and install the Wybe compiler
 
+
+# Configure these to your preferred installation locations
+INSTALLBIN=/usr/local/bin
+INSTALLLIB=/usr/local/lib/wybe
+
+
+# You shouldn't need to edit anything below here
 VERSION=0.1
-# OPTS = -no-user-package-db -package-db .cabal-sandbox/*-packages.conf.d
-COPTS = -lgc -I/usr/local/include -L/usr/local/lib
 SRCDIR = src
 LIBDIR = wybelibs
+LIBS=cbits.o wybe.o
 
-all:	wybemk
+all:	wybemk libs
 
-%.pdf:	%.tex
-	rubber -m pdftex $<
+install:	wybemk libs
+	cp wybemk $(INSTALLBIN)
+	rm -rf $(INSTALLLIB)
+	mkdir -p $(INSTALLLIB)
+	for f in $(LIBS) ; do \
+		cp -r $(LIBDIR)/$$f $(INSTALLLIB) ; \
+	done
+
+
+wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs
+	stack -j3 build && cp `stack path --local-install-root`/bin/$@ $@
+
+libs:	wybemk
+	for f in $(LIBS) ; do \
+		$(MAKE) $(LIBDIR)/$$f ; \
+	done
+
+$(LIBDIR)%.o:	$(LIBDIR)/%.wybe wybemk
+	./wybemk $@
+
 
 $(LIBDIR)/cbits.o: $(LIBDIR)/cbits.c
 	clang -isysroot `xcrun --show-sdk-path` -I /usr/local/include -c $< -o $@
 
-wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs $(LIBDIR)/cbits.o
-	stack install && cp ~/.local/bin/$@ ./$@
+
+$(LIBDIR)/wybe.o:	wybemk $(LIBDIR)/wybe.wybe
+	./wybemk $@
 
 
-doc:	*.hs
-	rm -rf $@
-	haddock -h -o $@ *.hs
-
-$(SRCDIR)/Version.lhs:	*.hs
+$(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
 	@echo "Generating Version.lhs for version $(VERSION)"
 	@rm -f $@
 	@printf "Version.lhs automatically generated:  DO NOT EDIT\n" > $@
 	@printf "\n" >> $@
-	@printf "> module Version (version,buildDate) where\n" >> $@
-	@printf "> version :: String\n> version = \"%s\"\n" "$(VERSION)" >> $@
-	@printf "> buildDate :: String\n> buildDate = \"%s\"\n" "`date`" >> $@
+	@printf "> module Version (version,gitHash,buildDate,libDir) where\n\n" >> $@
+	@printf "> version :: String\n> version = \"%s\"\n\n" "$(VERSION)" >> $@
+	@printf "> gitHash :: String\n> gitHash = \"%s\"\n\n" "`git rev-parse --short HEAD`" >> $@
+	@printf "> buildDate :: String\n> buildDate = \"%s\"\n\n" "`date`" >> $@
+	@printf "> libDir :: String\n> libDir = \"%s\"\n\n" "$(INSTALLLIB)" >> $@
+
 
 TESTCASES = $(wildcard test-cases/*.wybe)
 
@@ -78,7 +102,7 @@ test:	wybemk
 	@for f in $(LIBDIR)/*.wybe ; do \
            [ "$$f" = "$(LIBDIR)/wybe.wybe" ] && continue ; \
 	   printf " %s" `basename $$f .wybe` ; \
-	   gtimeout 2 ./wybemk --force $${f/.wybe/.o} ; \
+	   gtimeout 2 ./wybemk --force -L $(LIBDIR) $${f/.wybe/.o} ; \
 	done
 	@printf ") done.\n"
 	@printf "Testing test-cases "
@@ -86,8 +110,8 @@ test:	wybemk
 		out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
 		exp=`echo "$$f" | sed 's/.wybe$$/.exp/'` ; \
 		targ=`echo "$$f" | sed 's/.wybe$$/.o/'` ; \
-		gtimeout 2 ./wybemk --log=FinalDump $(DEBUG) --force-all $$targ 2>&1 \
-	  | sed 's/@wybe:[0-9:]*/@wybe:nn:nn/g' > $$out ; \
+		gtimeout 2 ./wybemk --log=FinalDump $(DEBUG) --force-all -L $(LIBDIR) $$targ 2>&1 \
+	  | sed -e 's/@wybe:[0-9:]*/@wybe:nn:nn/g' -e "s|`pwd`|!ROOT!|g" > $$out ; \
 		if [ ! -r $$exp ] ; then \
 		printf "[31m?[39m" ; \
 		NEW="$${NEW}\n    $$out" ; \
@@ -111,4 +135,4 @@ test:	wybemk
 
 clean:
 	stack clean
-	rm -f $(SRCDIR)/*.o $(SRCDIR)/*.hi Parser.hs $(SRCDIR)/Version.lhs *.pdf *.aux $(LIBDIR)/*.o test-cases/*.o
+	rm -f $(SRCDIR)/*.o $(SRCDIR)/*.hi $(SRCDIR)/Version.lhs documentation/*.pdf publications/*.pdf $(LIBDIR)/*.o test-cases/*.o

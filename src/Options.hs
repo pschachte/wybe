@@ -44,7 +44,7 @@ defaultOptions    = Options
  , optShowVersion = False
  , optHelpLog     = False
  , optShowHelp    = False
- , optLibDirs     = ["wybelibs"]
+ , optLibDirs     = []
  , optLogAspects  = Set.empty
  , optNoLLVMOpt   = False
  , optVerbose     = False
@@ -99,33 +99,33 @@ logSelectionDescription Transform
 -- |Command line option parser and help text
 options :: [OptDescr (Options -> Options)]
 options =
- [ Option ['f'] ["force"]
+ [ Option ['f']     ["force"]
      (NoArg (\ opts -> opts { optForce = True }))
    "force compilation of specified files"
- , Option [] ["force-all"]
+ , Option []        ["force-all"]
      (NoArg (\ opts -> opts { optForceAll = True }))
    "force compilation of all dependencies"
  , Option ['L']     ["libdir"]
    (ReqArg (\ d opts -> opts { optLibDirs = optLibDirs opts ++ [d] }) "DIR")
-         "specify a library directory [default $WYBELIBS]"
+         ("specify a library directory [default $WYBELIBS or " ++ libDir ++ "]")
  , Option ['l']     ["log"]
    (ReqArg (\ a opts -> opts { optLogAspects = addLogRequest
                                                (optLogAspects opts)
                                                a }) "ASPECT")
          "add comma-separated aspects to log, or 'all'"
- , Option [] ["log-help"]
+ , Option []        ["log-help"]
      (NoArg (\ opts -> opts { optHelpLog = True }))
      "display help on logging options and exit"
- , Option ['V'] ["version"]
+ , Option ['V']     ["version"]
      (NoArg (\ opts -> opts { optShowVersion = True }))
      "show version number"
- , Option ['h'] ["help"]
+ , Option ['h']     ["help"]
      (NoArg (\ opts -> opts { optShowHelp = True }))
      "display this help text and exit"
- , Option ['s'] ["no-llvm-opt"]
+ , Option ['s']     ["no-llvm-opt"]
      (NoArg (\opts -> opts { optNoLLVMOpt = True }))
      "don't run the LLVM optimisation pass manager on the emitted LLVM"
- , Option ['v'] ["verbose"]
+ , Option ['v']     ["verbose"]
      (NoArg (\opts -> opts { optVerbose = True }))
      "dump verbose messages after compilation"
  ]
@@ -151,7 +151,7 @@ handleCmdline = do
     let env = Map.fromList assocList
     (opts0,files) <- compilerOpts argv
     let opts = if List.null $ optLibDirs opts0
-                then maybe (opts0  { optLibDirs = ["."] })
+                then maybe (opts0  { optLibDirs = [libDir] })
                      (\l -> opts0 { optLibDirs = splitSearchPath l }) $
                      Map.lookup "WYBELIBS" env
                 else opts0
@@ -168,9 +168,9 @@ handleCmdline = do
              exitSuccess
       else if optShowVersion opts
            then do
-               putStrLn $ "wybemk " ++ version ++ "\nBuilt " ++ buildDate
-               putStrLn $ "Using " ++ show (length (optLibDirs opts)) ++
-                 " library directories:\n    " ++
+               putStrLn $ "wybemk " ++ version ++ " (git " ++ gitHash ++ ")"
+               putStrLn $ "Built " ++ buildDate
+               putStrLn $ "Using library directories:\n    " ++
                  intercalate "\n    " (optLibDirs opts)
                exitSuccess
            else if List.null files
