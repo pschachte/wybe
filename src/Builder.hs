@@ -261,7 +261,7 @@ buildModuleIfNeeded :: Bool    -- ^Force compilation of this module
               -> ModSpec       -- ^Module name
               -> [FilePath]    -- ^Directories to look in
               -> Compiler Bool -- ^Returns whether or not file
-                              -- actually needed to be compiled
+                               -- actually needed to be compiled
 buildModuleIfNeeded force modspec possDirs = do
     logBuild $ "Building " ++ showModSpec modspec
                ++ " with library directories " ++ intercalate ", " possDirs
@@ -459,14 +459,12 @@ extractedItemsHash modspec = do
 extractModules :: FilePath -> Compiler ()
 extractModules objfile = do
     logBuild $ "=== Preloading Wybe-LPVM modules from " ++ objfile
-    extracted <- machoLPVMSection objfile []
+    extracted <- loadLPVMFromObjFile objfile []
     if List.null extracted
-
         then
         Warning <!> "Unable to preload serialised LPVM from " ++ objfile
-
         else do
-        logBuild $ ">>> Extracted Module bytestring from " ++ show objfile
+        logBuild $ ">>> Extracted Module bytestring from " ++ objfile
         let extractedSpecs = List.map modSpec extracted
         logBuild $ "+++ Recording modules: " ++ showModSpecs extractedSpecs
         -- Add the extracted modules in the 'objectModules' Map
@@ -485,7 +483,7 @@ extractModules objfile = do
 loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler Bool
 loadModuleFromObjFile required objfile = do
     logBuild $ "=== ??? Trying to load LPVM Module(s) from " ++ objfile
-    extracted <- machoLPVMSection objfile [required]
+    extracted <- loadLPVMFromObjFile objfile [required]
     if List.null extracted
         then do
         logBuild $ "xxx Failed extraction of LPVM Modules from object file "
@@ -493,14 +491,14 @@ loadModuleFromObjFile required objfile = do
         return False
         -- Some module was extracted
         else do
-        logBuild $ "=== >>> Extracted Module bytes from " ++ show objfile
+        logBuild $ "=== >>> Extracted Module bytes from " ++ objfile
         let extractedSpecs = List.map modSpec extracted
         logBuild $ "=== >>> Found modules: " ++ showModSpecs extractedSpecs
         -- Check if the `required` modspec is in the extracted ones.
         if required `elem` extractedSpecs
             then do
             -- Collect the imports
-            imports <- concat <$> mapM placeExtractedModule extracted
+            imports <- concat <$> mapM (placeExtractedModule objfile) extracted
             logBuild $ "=== >>> Building dependencies: "
                 ++ showModSpecs imports
             -- Place the super mod under compilation while
@@ -521,9 +519,15 @@ loadModuleFromObjFile required objfile = do
             return False
 
 
+-- |Extract all the LPVM modules from the specified object file.
+loadLPVMFromObjFile :: FilePath -> [ModSpec] -> Compiler [Module]
+loadLPVMFromObjFile objfile required = do
+    mods <- machoLPVMSection objfile required
+    return $ List.map (\m -> m { modOrigin = objfile } ) mods
 
-placeExtractedModule :: Module -> Compiler [ModSpec]
-placeExtractedModule thisMod = do
+
+placeExtractedModule :: FilePath -> Module -> Compiler [ModSpec]
+placeExtractedModule objFile thisMod = do
     let modspec = modSpec thisMod
     count <- gets ((1+) . loadCount)
     modify (\comp -> comp { loadCount = count })
@@ -752,7 +756,7 @@ handleModImports _ thisMod = do
 -- imports in the correct order. The target module and imports have
 -- mains defined as 'modName.main'.
 buildExecutable :: ModSpec -> FilePath -> Compiler ()
-buildExecutable targetMod fpath = do
+buildExecutable targetMod target = do
     depends <- orderedDependencies targetMod
     if List.null depends || not (snd (last depends))
         then
@@ -770,7 +774,7 @@ buildExecutable targetMod fpath = do
             let mainProc = buildMain mainImports
             logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
 
-            enterModule fpath [] Nothing Nothing
+            enterModule target [] Nothing Nothing
             addImport ["wybe"] $ importSpec Nothing Private
             mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
                   mainImports
@@ -791,24 +795,30 @@ buildExecutable targetMod fpath = do
             emitObjectFile mainMod tmpMainOFile
 
             ofiles <- mapM (loadObjectFile . fst) depends
-
-            implns <- mapM (getLoadedModuleImpln . fst) depends
-            let foreignOs =
-                  Set.toList
-                  $ List.foldr (Set.union . modForeignObjects) Set.empty
-                    implns
-            let foreignLibs =
-                  Set.toList
-                  $ List.foldr (Set.union . modForeignLibs) Set.empty
-                    implns
-            let allOFiles = tmpMainOFile:(ofiles ++ foreignOs ++ foreignLibs)
+            depMods <- catMaybes <$> mapM (getLoadedModule . fst) depends
+            let foreigns = foreignDependencies depMods
+            let allOFiles = tmpMainOFile:(ofiles ++ foreigns)
 
             logBuild "o Object Files to link: "
             logBuild $ "++ " ++ intercalate "\n++ " allOFiles
-            logBuild $ "o Building Target (executable): " ++ fpath
+            logBuild $ "o Building Target (executable): " ++ target
 
-            makeExec allOFiles fpath
-            -- return allOFiles
+            makeExec allOFiles target
+
+
+-- | Return the list of foreign object file dependencies, each with the
+-- appropriate directory attached, followed by the foreign library dependencies.
+foreignDependencies :: [Module] -> [String]
+foreignDependencies mods =
+    let dirFns = (</>) . takeDirectory . modOrigin <$> mods
+        implns = modImplementation <$> mods
+        foreignOs = Set.toList $ Set.unions
+                    $ zipWith Set.map dirFns
+                    $ maybe Set.empty modForeignObjects <$> implns
+        foreignLibs = Set.toList
+                      $ Set.unions
+                      $ maybe Set.empty modForeignLibs <$> implns
+    in foreignOs ++ foreignLibs
 
 
 -- |Generate a main function by piecing together calls to the main procs of all
@@ -881,8 +891,8 @@ loadObjectFile thisMod =
      source <- getSource
      logBuild $ "SOURCE for " ++ showModSpec thisMod ++ " :: " ++ show source
      logBuild $ "DIR is: "  ++ show dir
-     -- generating an name + extension for our object file
-     let objFile = replaceExtension source $ "." ++ objectExtension
+     -- generating a name + extension for our object file
+     let objFile = source -<.> objectExtension
      -- Check if we need to re-emit object file
      rebuild <- objectReBuildNeeded thisMod dir
      when rebuild $ emitObjectFile thisMod objFile

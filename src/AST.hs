@@ -62,7 +62,7 @@ module AST (
   updateModImplementation, updateModImplementationM, updateModLLVM,
   addForeignImport, addForeignLib,
   updateModInterface, updateAllProcs, updateModSubmods,
-  getModuleSpec, getModuleParams, option, getSource, getDirectory,
+  getModuleSpec, getModuleParams, option, getOrigin, getSource, getDirectory,
   optionallyPutStr, message, errmsg, (<!>), genProcName,
   addImport, doImport, addType, lookupType, publicType,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
@@ -79,7 +79,8 @@ module AST (
   EncodedLPVM(..), ModuleIndex, makeEncodedLPVM
   ) where
 
-import           Config (magicVersion, wordSize, objectExtension)
+import           Config (magicVersion, wordSize, objectExtension,
+                         sourceExtension)
 import           Control.Monad
 import           Control.Monad.Trans (lift,liftIO)
 import           Control.Monad.Trans.State
@@ -561,11 +562,11 @@ enterModule source modspec rootMod params = do
              ++ " with count " ++ show count
     absSource <- liftIO $ makeAbsolute source
     modify (\comp -> let newMod = emptyModule
-                                  { modSourceFile = absSource
-                                  , modRootModSpec = rootMod
-                                  , modSpec = modspec
-                                  , modParams = params
-                                  , thisLoadNum = count
+                                  { modOrigin        = absSource
+                                  , modRootModSpec   = rootMod
+                                  , modSpec          = modspec
+                                  , modParams        = params
+                                  , thisLoadNum      = count
                                   , minDependencyNum = count
                                   }
                          mods = newMod : underCompilation comp
@@ -657,10 +658,17 @@ inModule expr mod = do
 
 -- |Return the directory of the current module.
 getDirectory :: Compiler FilePath
-getDirectory = takeDirectory <$> getSource
+getDirectory = takeDirectory <$> getOrigin
 
+-- |Return the absolute path of the file the module was loaded from.  This may
+-- be a source file or an object file.
+getOrigin :: Compiler FilePath
+getOrigin = getModule modOrigin
+
+-- |Return the absolute path of the file the source code for the current module
+-- *should* be in.  It might not actually be there.
 getSource :: Compiler FilePath
-getSource = getModule modSourceFile
+getSource = (-<.> sourceExtension) <$> getOrigin
 
 -- |Return the module spec of the current module.
 getModuleSpec :: Compiler ModSpec
@@ -1043,28 +1051,26 @@ optionallyPutStr opt strcomp = do
 
 -- |Holds everything needed to compile a module
 data Module = Module {
-  modSourceFile :: FilePath,     -- ^Absolute path of the source file/directory
+  modOrigin :: FilePath,           -- ^Absolute path module is loaded from
   modRootModSpec :: Maybe ModSpec, -- ^Root module of the file, if it's a file
-  isPackage :: Bool,             -- ^Is module actually a pacakage
-  modSpec :: ModSpec,            -- ^The module path name
-  modParams :: Maybe [Ident],    -- ^The type parameters, if a type
-  -- modConstants :: Int,           -- ^Num constant constructors, if a type
-  -- modNonConstants :: Int,        -- ^Num non-constant constructors, if a type
+  isPackage :: Bool,               -- ^Is module actually a package
+  modSpec :: ModSpec,              -- ^The module path name
+  modParams :: Maybe [Ident],      -- ^The type parameters, if a type
   modInterface :: ModuleInterface, -- ^The public face of this module
   modImplementation :: Maybe ModuleImplementation,
-                                 -- ^the module's implementation
-  thisLoadNum :: Int,            -- ^the loadCount when loading this module
-  minDependencyNum :: Int,       -- ^the smallest loadNum of all dependencies
-  procCount :: Int,              -- ^a counter for gensym-ed proc names
-  stmtDecls :: [Placed Stmt],    -- ^top-level statements in this module
-  itemsHash :: Maybe String      -- ^map of proc name to its hash
+                                   -- ^the module's implementation
+  thisLoadNum :: Int,              -- ^the loadCount when loading this module
+  minDependencyNum :: Int,         -- ^the smallest loadNum of all dependencies
+  procCount :: Int,                -- ^a counter for gensym-ed proc names
+  stmtDecls :: [Placed Stmt],      -- ^top-level statements in this module
+  itemsHash :: Maybe String        -- ^map of proc name to its hash
   } deriving (Generic)
 
 
 -- | Empty deafult for Module.
 emptyModule :: Module
 emptyModule = Module
-    { modSourceFile     = error "No Default Source file"
+    { modOrigin         = error "No Default module origin"
     , modRootModSpec    = error "No Default root modspec"
     , isPackage         = False
     , modSpec           = error "No Default Modspec"
@@ -1273,8 +1279,7 @@ updateModProcsM fn modimp = do
 -- |Add a file to the set of foreign files used by the current module
 addForeignImport :: Ident -> Compiler ()
 addForeignImport objName = do
-    path <- getModule (takeDirectory . modSourceFile)
-    let fl = path </> objName -<.> objectExtension
+    let fl = objName -<.> objectExtension
     updateModImplementation
         (\imp ->
            imp { modForeignObjects = Set.insert fl $ modForeignObjects imp })
@@ -2896,6 +2901,6 @@ type ModuleIndex = [(ModSpec, FilePath)]
 
 makeEncodedLPVM :: [Module] -> EncodedLPVM
 makeEncodedLPVM ms =
-    let makeIndex m = (modSpec m, modSourceFile m)
+    let makeIndex m = (modSpec m, takeDirectory $ modOrigin m)
         index = List.map makeIndex ms
     in  EncodedLPVM index ms

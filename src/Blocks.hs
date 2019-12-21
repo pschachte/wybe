@@ -39,13 +39,13 @@ import           LLVM.AST.Operand                hiding (PointerType)
 import           LLVM.AST.Type
 import           LLVM.AST.Typed
 
--- import           LLVM.PrettyPrint
 import qualified Data.ByteString                 as BS
 import qualified Data.ByteString.Char8           as B8
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Short           as BSS
 import           Options                         (LogSelection (Blocks))
 import           Unsafe.Coerce
+import           System.FilePath
 
 -- | Holds information on the LLVM representation of the LPVM procedure.
 data ProcDefBlock =
@@ -68,7 +68,7 @@ blockTransformModule thisMod =
     do reenterModule thisMod
        logBlocks $ "*** Translating Module: " ++ showModSpec thisMod
        modRec <- getModule id
-       modFile <- getModule modSourceFile
+       modFile <- getSource
        logWrapWith '-' $ show modRec
        procs <- getModuleImplementationField (Map.elems . modProcs)
        -- Collect all procedure prototypes in the module
