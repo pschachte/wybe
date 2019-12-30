@@ -340,9 +340,7 @@ nonConstCtorInfo placedProto tag = do
     params' <- mapM (fixParamType pos) params
     logNormalise $ "With types resolved: " ++ show placedProto
     reps <- mapM ( lookupTypeRepresentation . paramType ) params'
-    unless (all isJust reps)
-      $ shouldnt $ "Some member types with unknown rep: " ++ show reps
-    let reps' = fromJust <$> reps
+    let reps' = catMaybes reps
     logNormalise $ "Member representations: "
                    ++ intercalate ", " (show <$> reps')
     let bitSizes = typeRepSize <$> reps'
@@ -355,9 +353,10 @@ nonConstCtorInfo placedProto tag = do
 fixParamType :: OptPos -> Param -> Compiler Param
 fixParamType pos param = do
     let ty = paramType param
-    ty' <- trustFromJust ("fixParamType failed for type " ++ show ty)
-           <$> lookupType ty pos
-    return $ param { paramType = ty' }
+    ty' <- lookupType ty pos
+    when (isNothing ty') (message Error ("Unknown type " ++ show ty) pos)
+    let ty'' = fromMaybe InvalidType ty'
+    return $ param { paramType = ty'' }
 
 
 -- | Determine the appropriate representation for a type based on a list of

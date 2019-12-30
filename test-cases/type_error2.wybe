@@ -1,0 +1,1 @@
+type foo { foo(bar:notatype) }
