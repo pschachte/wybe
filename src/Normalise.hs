@@ -50,10 +50,9 @@ normalise items = do
 normaliseItem :: Item -> Compiler ()
 normaliseItem (TypeDecl vis (TypeProto name params) rep items pos)
   = do
-    -- let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
     let (rep', ctorVis, ctors) = normaliseTypeImpln rep
     _ <- addType name (TypeDef vis params rep' ctors ctorVis pos items)
-    normaliseSubmodule name Nothing vis pos items
+    normaliseSubmodule name (Just params) vis pos items
     return ()
 normaliseItem (ModuleDecl vis name items pos) =
     normaliseSubmodule name Nothing vis pos items
