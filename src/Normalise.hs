@@ -117,10 +117,14 @@ normaliseSubmodule name typeParams vis pos items = do
     -- submodule always imports parent module
     addImport parentModSpec (importSpec Nothing Private)
     when (isJust typeParams)
-      $ updateImplementation
-        (\imp ->
-          let set = Set.singleton $ TypeSpec parentModSpec name []
-          in imp { modKnownTypes = Map.insert name set $ modKnownTypes imp })
+      $ do
+        updateImplementation
+          (\imp ->
+             let set = Set.singleton $ TypeSpec parentModSpec name []
+             in imp { modKnownTypes = Map.insert name set $ modKnownTypes imp })
+        mapM_
+          (flip addType (TypeDef Private [] (Just Address) [] Private pos []))
+          (fromJust typeParams)
     normalise items
     if alreadyExists
       then do
@@ -220,7 +224,6 @@ protoKeys sccMods proto pos = do
 -- | Layout the types defined in the specified type dependency SCC, and then
 --   generate constructors, deconstructors, accessors, mutators, and
 --   auxiliary procedures.
-
 completeTypeSCC :: SCC (TypeKey,TypeDef) -> Compiler ()
 completeTypeSCC (AcyclicSCC ((name,mod),typedef)) = do
     logNormalise $ "Completing non-recursive type "
@@ -276,11 +279,12 @@ completeType :: TypeKey -> TypeDef -> Compiler ()
 completeType (name,modspec)
              typedef@(TypeDef vis params rep ctors ctorVis pos items) = do
     logNormalise $ "Completing type " ++ showModSpec modspec ++ "." ++ name
+    let subModSpec = modspec ++ [name]
     let rep0  = trustFromJust "completeType with equiv type decl" rep
     if List.null ctors
       then return () -- we should have already determined the representation
       else do
-      reenterModule modspec
+      reenterModule modspec -- XXX should be subModSpec?
       let (constCtors,nonConstCtors) =
             List.partition (List.null . procProtoParams . content) ctors
       let numConsts = length constCtors
@@ -298,9 +302,8 @@ completeType (name,modspec)
                      ++ show tagLimit ++ " tag limit"
       when (numConsts >= fromIntegral smallestAllocatedAddress)
         $ nyi $ "Type '" ++ name ++ "' has too many constant constructors"
-      let typespec = TypeSpec modspec name []
-                   -- XXX not right:  these should be param names, not types
-                   -- $ List.map (\n->TypeSpec [] n []) params
+      let typespec = TypeSpec modspec name
+                     $ List.map (\n->TypeSpec [] n []) params
       let constItems =
             concatMap (constCtorItems ctorVis typespec) $ zip constCtors [0..]
       infos <- zipWithM nonConstCtorInfo nonConstCtors [0..]
