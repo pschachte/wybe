@@ -488,7 +488,8 @@ loadModuleFromObjFile required objfile = do
         then do
         logBuild $ "xxx Failed extraction of LPVM Modules from object file "
             ++ objfile
-        return False
+        shouldnt $ "Invalid Wybe object file " ++ objfile
+                   ++ ":  module data missing"
         -- Some module was extracted
         else do
         logBuild $ "=== >>> Extracted Module bytes from " ++ objfile
