@@ -43,6 +43,7 @@ insertLPVMData modBS objFile = do
     BL.writeFile lpvmFile modBS
     case buildOS of 
         OSX   -> insertLPVMDataMacOS lpvmFile objFile
+        Linux -> insertLPVMDataLinux lpvmFile objFile
         _     -> shouldnt "Unsupported operation system"
 
 
@@ -50,6 +51,7 @@ extractLPVMData :: FilePath -> IO (Either String BL.ByteString)
 extractLPVMData objFile =
     case buildOS of 
         OSX   -> extractLPVMDataMacOS objFile 
+        Linux -> extractLPVMDataLinux objFile 
         _     -> shouldnt "Unsupported operation system"
 
 -- | Use system `ld' to create a __lpvm section and put the given
@@ -62,6 +64,15 @@ insertLPVMDataMacOS lpvmFile objFile = do
                 ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
                 ++ ["-o", objFile]
     (exCode, _, serr) <- readCreateProcessWithExitCode (proc "ld" args) ""
+    case exCode of
+        ExitSuccess  -> return $ Right ()
+        _ -> return $ Left serr
+
+
+insertLPVMDataLinux :: FilePath -> FilePath -> IO (Either String ())
+insertLPVMDataLinux lpvmFile objFile = do
+    let args = ["--add-section", "__LPVM.__lpvm=" ++ lpvmFile] ++ [objFile]
+    (exCode, _, serr) <- readCreateProcessWithExitCode (proc "objcopy" args) ""
     case exCode of
         ExitSuccess  -> return $ Right ()
         _ -> return $ Left serr
@@ -80,6 +91,21 @@ extractLPVMDataMacOS objFile = do
                     return $ Right modBS
                 Nothing ->
                     return $ Left ("No LPVM Segment found." ++ objFile)
+
+
+extractLPVMDataLinux :: FilePath -> IO (Either String BL.ByteString)
+extractLPVMDataLinux objFile = do
+    tempDir <- getTemporaryDirectory
+    createDirectoryIfMissing False (tempDir </> "wybetemp")
+    let modFile = takeBaseName objFile ++ ".out.module"
+    let lpvmFile = tempDir </> "wybetemp" </> modFile
+    let args = ["--dump-section", "__LPVM.__lpvm=" ++ lpvmFile] ++ [objFile]
+    (exCode, _, serr) <- readCreateProcessWithExitCode (proc "objcopy" args) ""
+    case exCode of
+        ExitSuccess  -> do
+            modBS <- BL.readFile lpvmFile
+            return $ Right modBS
+        _  -> return $ Left serr
 
 ---------------------------------------------------------------------------------
 -- Bitcode Wrapper Structure                                                   --
