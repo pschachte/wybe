@@ -1,5 +1,5 @@
 --  File     : ObjectInterface.hs
---  Author   : Ashutosh Rishi Ranjan
+--  Author   : Ashutosh Rishi Ranjan, Modified by Zed(Zijun) Chen.
 --  Purpose  : Parse and edit a object file.
 --  Copyright: (c) 2015 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
@@ -28,12 +28,14 @@ import System.FilePath (takeBaseName, (</>))
 import Control.Monad.Trans (liftIO)
 import Macho
 
--- TODO: fix comments
-
 ----------------------------------------------------------------------------
 -- -- * Object file manipulation                                          --
 ----------------------------------------------------------------------------
 
+-- | Save LPVM data [BL.ByteString] into the given object file.
+-- Currently supports macOS & Linux.
+-- On macOS, it stores in segment [__LPVM], section [__lpvm].
+-- On Linux, it sotres in section [__LPVM.__lpvm].
 insertLPVMData :: BL.ByteString -> FilePath -> IO (Either String ())
 insertLPVMData modBS objFile = do
     tempDir <- getTemporaryDirectory
@@ -47,6 +49,8 @@ insertLPVMData modBS objFile = do
         _     -> shouldnt "Unsupported operation system"
 
 
+-- | Extract LPVM data from the given object file 
+-- and return it as [BL.ByteString].
 extractLPVMData :: FilePath -> IO (Either String BL.ByteString)
 extractLPVMData objFile =
     case buildOS of 
@@ -54,10 +58,26 @@ extractLPVMData objFile =
         Linux -> extractLPVMDataLinux objFile 
         _     -> shouldnt "Unsupported operation system"
 
--- | Use system `ld' to create a __lpvm section and put the given
--- 'BL.ByteString' into it.
--- ld reads the bs from a new tmpFile which is created with the contents
--- of the given 'BL.ByteString'.
+----------------------------------------------------------------------------
+-- -- * Object file manipulation (Internal)                               --
+----------------------------------------------------------------------------
+
+-- TODO:
+-- The current implementation is a bit hacky, here are something we should
+-- consider improving:
+-- 1. Unit test for Roundtrip.
+-- 2. We currently use tools that aren't in Wybe dependencies such as [ld]
+--    and [objcopy]. Once we start to use a LLVM version that fully supports
+--    [mach-o], we can use [llvm-objcopy] instead and unify the logic for 
+--    different os.
+-- 3. The currently code is highly depends on tmp files and the we write 
+--    the object file first then update it. It would be better if we could
+--    insert the LPVM data when we creating the object file and read LPVM
+--    data from it directly.
+
+
+-- | Actual implementation of [insertLPVMData] for macOS
+-- Uses system [ld]
 insertLPVMDataMacOS :: FilePath -> FilePath -> IO (Either String ())
 insertLPVMDataMacOS lpvmFile objFile = do
     let args = [objFile] ++ ["-r"]
@@ -69,6 +89,11 @@ insertLPVMDataMacOS lpvmFile objFile = do
         _ -> return $ Left serr
 
 
+-- | Use system [objcopy] to create a __LPVM.__lpvm section and put the 
+-- given [BL.ByteString] into it. The section of ELF doesn't have a 
+-- [Segment] field, so the section name is bit different.
+-- | Actual implementation of [insertLPVMData] for Linux
+-- Uses system [objcopy]
 insertLPVMDataLinux :: FilePath -> FilePath -> IO (Either String ())
 insertLPVMDataLinux lpvmFile objFile = do
     let args = ["--add-section", "__LPVM.__lpvm=" ++ lpvmFile] ++ [objFile]
@@ -77,7 +102,7 @@ insertLPVMDataLinux lpvmFile objFile = do
         ExitSuccess  -> return $ Right ()
         _ -> return $ Left serr
 
-
+-- | Actual implementation of [extractLPVMData] for macOS
 extractLPVMDataMacOS :: FilePath -> IO (Either String BL.ByteString)
 extractLPVMDataMacOS objFile = do
     objBS <- liftIO $ BL.readFile objFile
@@ -93,6 +118,8 @@ extractLPVMDataMacOS objFile = do
                     return $ Left ("No LPVM Segment found." ++ objFile)
 
 
+-- | Actual implementation of [extractLPVMData] for Linux
+-- Uses system [objcopy]
 extractLPVMDataLinux :: FilePath -> IO (Either String BL.ByteString)
 extractLPVMDataLinux objFile = do
     tempDir <- getTemporaryDirectory
