@@ -5,7 +5,7 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-module ObjectInterface where
+module ObjectInterface (insertLPVMData, extractLPVMData, getWrappedBitcode) where
 
 import           AST
 import Options (LogSelection(Builder))
@@ -19,7 +19,8 @@ import           Data.Hex
 import           Data.Int
 import           Data.List as List
 import           Data.Maybe (isJust)
-import           System.Exit                (ExitCode (..))
+import           Distribution.System       (buildOS, OS (..)) 
+import           System.Exit               (ExitCode (..))
 import           System.Process
 import           System.Directory          (createDirectoryIfMissing
                                            ,getTemporaryDirectory)
@@ -27,58 +28,58 @@ import System.FilePath (takeBaseName, (</>))
 import Control.Monad.Trans (liftIO)
 import Macho
 
+-- TODO: fix comments
 
 ----------------------------------------------------------------------------
 -- -- * Object file manipulation                                          --
 ----------------------------------------------------------------------------
 
+insertLPVMData :: BL.ByteString -> FilePath -> IO (Either String ())
+insertLPVMData modBS objFile = do
+    tempDir <- getTemporaryDirectory
+    createDirectoryIfMissing False (tempDir </> "wybetemp")
+    let modFile = takeBaseName objFile ++ ".module"
+    let lpvmFile = tempDir </> "wybetemp" </> modFile
+    BL.writeFile lpvmFile modBS
+    case buildOS of 
+        OSX   -> insertLPVMDataMacOS lpvmFile objFile
+        _     -> shouldnt "Unsupported operation system"
+
+
+extractLPVMData :: FilePath -> IO (Either String BL.ByteString)
+extractLPVMData objFile =
+    case buildOS of 
+        OSX   -> extractLPVMDataMacOS objFile 
+        _     -> shouldnt "Unsupported operation system"
+
 -- | Use system `ld' to create a __lpvm section and put the given
 -- 'BL.ByteString' into it.
 -- ld reads the bs from a new tmpFile which is created with the contents
 -- of the given 'BL.ByteString'.
-insertLPVMDataLd :: BL.ByteString -> FilePath -> IO (Either String ())
-insertLPVMDataLd bs obj = do
-    tempDir <- getTemporaryDirectory
-    createDirectoryIfMissing False (tempDir </> "wybetemp")
-    let modFile = takeBaseName obj ++ ".module"
-    let lpvmFile = tempDir </> "wybetemp" </> modFile
-    BL.writeFile lpvmFile bs
-    let args = [obj] ++ ["-r"]
+insertLPVMDataMacOS :: FilePath -> FilePath -> IO (Either String ())
+insertLPVMDataMacOS lpvmFile objFile = do
+    let args = [objFile] ++ ["-r"]
                 ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
-                ++ ["-o", obj]
+                ++ ["-o", objFile]
     (exCode, _, serr) <- readCreateProcessWithExitCode (proc "ld" args) ""
     case exCode of
         ExitSuccess  -> return $ Right ()
         _ -> return $ Left serr
 
--- | Extract string data from the segment __LPVM, section __lpvm of the
--- given object file. An empty string is returned if there is no data
--- in that section. The program 'otool' is used to read the object file.
-extractLPVMData :: FilePath -> IO String
-extractLPVMData obj =
-    do let args = ["-s", "__LPVM", "__lpvm", obj]
-       sout <- readProcess "otool" args []
-       return $ parseSegmentData sout
 
--- | Parse the returned segment/section contents from it's HEX form to
--- ASCII form.
--- Sample:
--- "test-cases/foo.o:\nContents of (__LPVM,__lpvm) section
--- 0000000000000000    23 20 70 75 62 6c 69 63 20 66 75 6e ...
-parseSegmentData :: String -> String
-parseSegmentData str = concat hexLines
-    where
-      tillHex = dropWhile (/= '\t') -- Actual data after \t
-      mappedLines = List.map tillHex (lines str)
-      filteredLines = List.filter (not . List.null) mappedLines
-      hexLines = List.map (hex2char . tail) filteredLines
-
--- | Convert a string of 2 digit hex values to string of ascii
--- characters.
--- | Example: "23 20 70 75 62 6c 69 63" -> "# public"
-hex2char :: String -> String
-hex2char s = (concat . join) $ mapM unhex (words s)
-
+extractLPVMDataMacOS :: FilePath -> IO (Either String BL.ByteString)
+extractLPVMDataMacOS objFile = do
+    objBS <- liftIO $ BL.readFile objFile
+    if not $ isMachoBytes objBS 
+        then return $ Left ("Not a recognised object file: " ++ objFile)
+        else do
+            let (_, macho) = parseMacho (BL.toStrict objBS)
+            case findLPVMSegment (m_commands macho) of
+                Just seg -> do
+                    let modBS = uncurry (readBytes objBS) (lpvmFileOffset seg)
+                    return $ Right modBS
+                Nothing ->
+                    return $ Left ("No LPVM Segment found." ++ objFile)
 
 ---------------------------------------------------------------------------------
 -- Bitcode Wrapper Structure                                                   --
@@ -151,55 +152,6 @@ dataFromBitcode = do
 -------------------------------------------------------------------------------
 -- Segment Parsing and Extraction                                            --
 -------------------------------------------------------------------------------
-
-
--- |Read the contents of the Mach-O object file 'ofile', checking if the
--- modules in 'required' all have a serialised LPVM module form in the __LPVM
--- section of the object file, and then extracting their serialised Module type
--- along with each of theirs' submodules Module types.  The action fails by
--- returning an empty list of Modules if o Not a Macho File structure o No
--- __LPVM Section
--- o Incompatible version of serialised modules
--- o The required modules are not found
-machoLPVMSection :: FilePath -> [ModSpec] -> Compiler [Module]
-machoLPVMSection ofile required =
-    withMachoFile ofile (decodeLPVMSegment required)
-
-
--- | Given a bytestring representation 'bs' of a Mach-O object file, find the
--- __LPVM section and segment and decode the encoded structure in the data part
--- of the segment as a List of Module(s). The ModSpecs 'required' should all be
--- present in this list, or it's an error.
-decodeLPVMSegment :: [ModSpec] -> BL.ByteString -> Compiler [Module]
-decodeLPVMSegment required bs = do
-    let (_, macho) = parseMacho (BL.toStrict bs)
-    case findLPVMSegment (m_commands macho) of
-        Just seg -> do
-            ms <- decodeModule required $
-                  uncurry (readBytes bs) (lpvmFileOffset seg)
-            unless (List.null ms) $ logMsg Builder "Decoding successful!"
-            return ms
-        Nothing -> do
-            logMsg Builder "No LPVM Segment found."
-            return []
-
-
--- | Bracket pattern to run an action on the bytestring of a valid Mach-O
--- file. Default return is 'mempty' if the file is not a valid file.
-withMachoFile :: Monoid a => FilePath -> (BL.ByteString -> Compiler a)
-              -> Compiler a
-withMachoFile mfile action = do
-    bs <- liftIO $ BL.readFile mfile
-    if isMachoBytes bs then action bs
-        else do
-        logMsg Builder $ "Not a recognised object file: "
-            ++ mfile
-        return mempty
-
-
-withMachoSegment :: MachoSegment -> (MachoSegment -> Compiler a) -> Compiler a
-withMachoSegment with f = f with
-
 
 -- | Find the load command from a 'LC_COMMAND' list which contains
 -- section '__lpvm'. This section will usually by in a general segment

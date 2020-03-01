@@ -209,24 +209,10 @@ makeWrappedObjFile file llmod modBS = do
         withModule llmod $ \m -> do
             withHostTargetMachine $ \tm ->
                 writeObjectToFile tm (File file) m
-            insertLPVMDataLd modBS file
+            insertLPVMData modBS file
     case result of
         Right () -> return ()
         Left serr -> Error <!> serr
-
-
--- | Binary encode 'AST.Module', create object file out of 'Mod.Module' and
--- insert the encoded binary string into the "__LPVM" section of the created
--- object file.
-encodeAndWriteFile :: FilePath -> BL.ByteString -> Mod.Module -> Compiler ()
-encodeAndWriteFile file modBS m = do
-    liftIO $ withHostTargetMachine $ \tm ->
-        writeObjectToFile tm (File file) m
-    result <- liftIO $ insertLPVMDataLd modBS file
-    case result of
-        Right () -> return ()
-        Left serr -> Error <!> serr
-
 
 
 
