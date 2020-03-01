@@ -125,7 +125,7 @@ test:	wybemk
 		targ=`echo -e "$$f" | sed 's/.wybe$$/.o/'` ; \
 		timeout 2 ./wybemk --log=FinalDump $(DEBUG) --force-all -L $(LIBDIR) $$targ 2>&1 \
 	  | sed -e 's/@wybe:[0-9:]*/@wybe:nn:nn/g' -e "s|`pwd`|!ROOT!|g" > $$out ; \
-	#   Add a newline to the end of a file if there isn't to resolve platform differences. \
+	    echo "Comment: Add a newline to the end of a file if there isn't to resolve platform differences." > /dev/null ; \
 	    ed -s $$out <<< w > /dev/null 2>&1 ; \
 		if [ ! -r $$exp ] ; then \
 		printf "[31m?[39m" ; \
