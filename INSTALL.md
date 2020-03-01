@@ -1,6 +1,6 @@
 # Building Wybe
 
-Note that Wybe has been ported to macOS and Linux(Ubuntu) so far.
+Note that Wybe has been ported to macOS and Linux (Ubuntu) so far.
 
 ## Installing prerequisites
 
