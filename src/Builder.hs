@@ -522,9 +522,16 @@ loadModuleFromObjFile required objfile = do
 
 -- |Extract all the LPVM modules from the specified object file.
 loadLPVMFromObjFile :: FilePath -> [ModSpec] -> Compiler [Module]
-loadLPVMFromObjFile objfile required = do
-    mods <- machoLPVMSection objfile required
-    return $ List.map (\m -> m { modOrigin = objfile } ) mods
+loadLPVMFromObjFile objFile required = do
+    result <- liftIO $ extractLPVMData objFile
+    case result of 
+        Left err -> do 
+            logMsg Builder err
+            return []
+        Right modBS -> do
+            mods <- decodeModule required modBS 
+            unless (List.null mods) $ logMsg Builder "Decoding successful!"
+            return $ List.map (\m -> m { modOrigin = objFile } ) mods
 
 
 placeExtractedModule :: FilePath -> Module -> Compiler [ModSpec]

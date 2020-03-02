@@ -1,8 +1,10 @@
 # Building Wybe
 
-Note that Wybe has only been ported to Mac OS X so far.
+Note that Wybe has been ported to macOS and Linux (Ubuntu) so far.
 
 ## Installing prerequisites
+
+### macOS
 
 1.  Ensure XCode is installed:
 ```
@@ -20,7 +22,7 @@ Note that Wybe has only been ported to Mac OS X so far.
     brew install haskell-stack
 ```
 
-4.  Install the Boehm Garbage Collector development tools:
+4.  Install the Boehm Garbage Collector development tools
 
 ```
     brew install bdw-gc
@@ -32,15 +34,56 @@ Note that Wybe has only been ported to Mac OS X so far.
     brew install llvm-hs/llvm/llvm-6.0
 ```
 
-6.  Install dwdiff (for testing)
+6.  Install dwdiff & gtimeout (for testing)
 
 ```
-    brew install dwdiff
+    brew install dwdiff coreutils
 ```
 
 7.  LaTeX is needed for building the documentation.  We recommend
 [MacTeX](https://www.tug.org/mactex/).
 
+
+### Linux (Ubuntu)
+
+Note that this is an experimental support and only has been tested on Ubuntu 18.04.4 LTS.
+
+1.  Install Clang
+
+```
+    sudo apt-get install clang
+```
+
+2.  Install
+[The Haskell Tool Stack](https://docs.haskellstack.org/en/stable/README/).
+
+```
+    wget -qO- https://get.haskellstack.org/ | sh
+``` 
+
+3.  Install the Boehm Garbage Collector development tools
+
+```
+     sudo apt-get install libgc-dev
+```
+
+4.  Install LLVM version 6
+
+```
+    sudo apt-get install llvm-6.0
+```
+
+5.  Install libtinfo-dev
+
+```
+    sudo apt-get install libtinfo-dev
+```
+
+6.  Install dwdiff (for testing)
+
+```
+    sudo apt-get install dwdiff
+```
 
 ## Building
 

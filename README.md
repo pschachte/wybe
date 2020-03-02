@@ -17,8 +17,7 @@ To use it, you will need to build the compiler.
 This requires a recent [Haskell compiler](https://www.haskell.org/)
 and many of its libraries,
 as well as the [LLVM compiler infrastructure](https://llvm.org/).
-Currently, the compiler only supports recent MacOS versions,
-and the recommended package system is [Homebrew](https://brew.sh/).
+Currently, the compiler supports recent versions of macOS and Linux (Ubuntu).
 All this is documented in the
 [installation instructions](INSTALL.md).
 

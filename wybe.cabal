@@ -14,6 +14,7 @@ executable wybemk
                , binary >= 0.7.5.0
                , bytedump
                , bytestring
+               , Cabal
                , containers
                , directory >= 1.2.5.0
                , filepath >= 1.4.0.0

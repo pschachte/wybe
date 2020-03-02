@@ -9,10 +9,24 @@ INSTALLLIB=/usr/local/lib/wybe
 
 
 # You shouldn't need to edit anything below here
-VERSION=0.1
+VERSION = 0.1
 SRCDIR = src
 LIBDIR = wybelibs
-LIBS=cbits.o wybe.o
+LIBS = cbits.o wybe.o
+SHELL := /bin/bash
+
+
+ifeq ($(shell uname), Darwin)
+    ISSYSROOT = -isysroot `xcrun --show-sdk-path`
+    # On Mac OS X, gtimeout is in homebrew coreutils package
+	TIMEOUT = gtimeout
+endif
+
+ifeq ($(shell uname), Linux)
+    ISSYSROOT =
+	TIMEOUT = timeout
+endif
+
 
 all:	wybemk libs
 
@@ -38,7 +52,7 @@ $(LIBDIR)%.o:	$(LIBDIR)/%.wybe wybemk
 
 
 $(LIBDIR)/cbits.o: $(LIBDIR)/cbits.c
-	clang -isysroot `xcrun --show-sdk-path` -I /usr/local/include -c $< -o $@
+	clang $(ISSYSROOT) -I /usr/local/include -c $< -o $@
 
 
 $(LIBDIR)/wybe.o:	wybemk $(LIBDIR)/wybe.wybe
@@ -46,7 +60,7 @@ $(LIBDIR)/wybe.o:	wybemk $(LIBDIR)/wybe.wybe
 
 
 $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
-	@echo "Generating Version.lhs for version $(VERSION)"
+	@echo -e "Generating Version.lhs for version $(VERSION)"
 	@rm -f $@
 	@printf "Version.lhs automatically generated:  DO NOT EDIT\n" > $@
 	@printf "\n" >> $@
@@ -80,7 +94,7 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 	for f in src/*.hs ; do \
       m=`basename $$f .hs` ; \
 	    printf "\n## %s\n" $$m ; \
-	    echo ; \
+	    echo -e ; \
 	    sed -E -e '/^-- *Purpose *:/{s/^-- *Purpose *:/**Purpose**:/; G; p;}' -e '/BEGIN MAJOR DOC/,/END MAJOR DOC/{//d ; s/^-- ? ?//p;}' -e 'd' <$$f ; \
 	done >> $@
 
@@ -88,30 +102,31 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 	cat src/README.md.outro >> $@
 
 
-# On Mac OS X, gtimeout is in homebrew coreutils package
 test:	wybemk
 	@rm -f ERRS ; touch ERRS
 	@rm -f test-cases/*.bc
 	@rm -f test-cases/*.o
 	@rm -f $(LIBDIR)/*.o
-	@echo "Building $(LIBDIR)/cbits.o"
+	@echo -e "Building $(LIBDIR)/cbits.o"
 	@make $(LIBDIR)/cbits.o
 	@printf "Testing building wybe library ("
 	@printf wybe
-	@gtimeout 5 ./wybemk --force-all $(LIBDIR)/wybe.o
+	@$(TIMEOUT) 5 ./wybemk --force-all $(LIBDIR)/wybe.o
 	@for f in $(LIBDIR)/*.wybe ; do \
            [ "$$f" = "$(LIBDIR)/wybe.wybe" ] && continue ; \
 	   printf " %s" `basename $$f .wybe` ; \
-	   gtimeout 2 ./wybemk --force -L $(LIBDIR) $${f/.wybe/.o} ; \
+	   timeout 2 ./wybemk --force -L $(LIBDIR) $${f/.wybe/.o} ; \
 	done
 	@printf ") done.\n"
 	@printf "Testing test-cases "
-	@ time ( for f in $(TESTCASES) ; do \
-		out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
-		exp=`echo "$$f" | sed 's/.wybe$$/.exp/'` ; \
-		targ=`echo "$$f" | sed 's/.wybe$$/.o/'` ; \
-		gtimeout 2 ./wybemk --log=FinalDump $(DEBUG) --force-all -L $(LIBDIR) $$targ 2>&1 \
+	@time ( for f in $(TESTCASES) ; do \
+		out=`echo -e "$$f" | sed 's/.wybe$$/.out/'` ; \
+		exp=`echo -e "$$f" | sed 's/.wybe$$/.exp/'` ; \
+		targ=`echo -e "$$f" | sed 's/.wybe$$/.o/'` ; \
+		timeout 2 ./wybemk --log=FinalDump $(DEBUG) --force-all -L $(LIBDIR) $$targ 2>&1 \
 	  | sed -e 's/@wybe:[0-9:]*/@wybe:nn:nn/g' -e "s|`pwd`|!ROOT!|g" > $$out ; \
+	    echo "Comment: Add a newline to the end of a file if there isn't to resolve platform differences." > /dev/null ; \
+	    ed -s $$out <<< w > /dev/null 2>&1 ; \
 		if [ ! -r $$exp ] ; then \
 		printf "[31m?[39m" ; \
 		NEW="$${NEW}\n    $$out" ; \
@@ -124,13 +139,13 @@ test:	wybemk
 		FAILS="$${FAILS}\n    $$out" ; \
 		fi \
 	done ; \
-	echo ; \
+	echo -e ; \
 	if [ -n "$$FAILS" ] ; \
-		then echo "Failed: $$FAILS\nSee ERRS for differences." ; \
-		else echo "ALL TESTS PASS" ; rm -f ERRS ; \
+		then echo -e "Failed: $$FAILS\nSee ERRS for differences." ; \
+		else echo -e "ALL TESTS PASS" ; rm -f ERRS ; \
 	fi ; \
 	if [ -n "$$NEW" ] ; \
-		then echo "New tests: $$NEW\nDo .\update-exp to specify expected output" ; \
+		then echo -e "New tests: $$NEW\nDo .\update-exp to specify expected output" ; \
 	fi )
 
 clean:
