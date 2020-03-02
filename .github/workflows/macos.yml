@@ -1,0 +1,36 @@
+name: CI (macOS)
+
+# Disabled, the [brew install llvm-hs/llvm/llvm-6.0] below
+# is way too slow. 
+on:
+    push:
+      branches-ignore:
+        - '**'
+# on:
+#     push:
+#       branches:
+#       - master
+#     pull_request:
+#       branches:
+#       - master
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        brew install haskell-stack
+        brew install bdw-gc
+        brew install llvm-hs/llvm/llvm-6.0
+        brew install dwdiff
+        brew install coreutils
+    - name: Install & build Haskell Stack dependencies
+        run: stack build --only-dependencies
+    #   TODO: cache things above?
+    - name: Build
+      run: make
+    - name: Run tests
+      run: make test

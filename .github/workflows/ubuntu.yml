@@ -1,0 +1,34 @@
+name: CI (Ubuntu)
+
+on:
+    push:
+      branches:
+      - master
+    pull_request:
+      branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        sudo apt-get install clang
+        sudo apt-get install libgc-dev
+        sudo apt-get install llvm-6.0
+        sudo apt-get install libtinfo-dev
+        sudo apt-get install dwdiff
+    # GitHub-hosted runners provide Haskell Stack
+    # https://github.com/actions/virtual-environments/blob/master/images/linux/Ubuntu1804-README.md
+    # - name: Install Haskell Stack
+    #   run: wget -qO- https://get.haskellstack.org/ | sh
+    - name: Install & build Haskell Stack dependencies
+      run: stack build --only-dependencies
+    #   TODO: cache things above?
+    - name: Build
+      run: make
+    - name: Run tests
+      run: make test
