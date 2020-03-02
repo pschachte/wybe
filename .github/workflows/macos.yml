@@ -28,7 +28,7 @@ jobs:
         brew install dwdiff
         brew install coreutils
     - name: Install & build Haskell Stack dependencies
-        run: stack build --only-dependencies
+      run: stack build --only-dependencies
     #   TODO: cache things above?
     - name: Build
       run: make
