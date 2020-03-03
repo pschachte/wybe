@@ -23,6 +23,7 @@ executable wybemk
                , llvm-hs == 6.3.0
                , llvm-hs-pure == 6.2.1
                , llvm-hs-pretty == 0.6.0.0
+               , temporary
                , text
                , mtl
                , old-time

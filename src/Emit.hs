@@ -205,11 +205,12 @@ makeAssemblyFile file llmod =
 -- representation into the '__lpvm' section in it.
 makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> Compiler ()
 makeWrappedObjFile file llmod modBS = do
+    tmpDir <- gets tmpDir
     result <- liftIO $ withContext $ \_ ->
         withModule llmod $ \m -> do
             withHostTargetMachine $ \tm ->
                 writeObjectToFile tm (File file) m
-            insertLPVMData modBS file
+            insertLPVMData tmpDir modBS file
     case result of
         Right () -> return ()
         Left serr -> Error <!> serr
