@@ -126,7 +126,10 @@ extractLPVMDataLinux objFile = do
     createDirectoryIfMissing False (tempDir </> "wybetemp")
     let modFile = takeBaseName objFile ++ ".out.module"
     let lpvmFile = tempDir </> "wybetemp" </> modFile
+    -- [objcopy] tries to write to the file even we only need read permission.
+    -- We force it to write to /dev/null so it's "read-only".
     let args = ["--dump-section", "__LPVM.__lpvm=" ++ lpvmFile] ++ [objFile]
+               ++ ["/dev/null"]
     (exCode, _, serr) <- readCreateProcessWithExitCode (proc "objcopy" args) ""
     case exCode of
         ExitSuccess  -> do
