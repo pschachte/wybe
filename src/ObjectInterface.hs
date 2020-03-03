@@ -22,8 +22,6 @@ import           Data.Maybe (isJust)
 import           Distribution.System       (buildOS, OS (..)) 
 import           System.Exit               (ExitCode (..))
 import           System.Process
-import           System.Directory          (createDirectoryIfMissing
-                                           ,getTemporaryDirectory)
 import System.FilePath (takeBaseName, (</>))
 import Control.Monad.Trans (liftIO)
 import Macho
