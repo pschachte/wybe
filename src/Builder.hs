@@ -191,6 +191,7 @@ import           Scanner                   (fileTokens)
 import           System.Directory
 import           System.FilePath
 import           System.Exit
+import           System.IO.Temp            (createTempDirectory)
 import           Transform                 (transformProc)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
@@ -217,6 +218,11 @@ buildTargets opts targets = do
 --  target is up-to-date.
 buildTarget :: Bool -> FilePath -> Compiler ()
 buildTarget force target = do
+    -- Create a clean temp directory for each build
+    sysTmpDir <- liftIO getTemporaryDirectory
+    tmpDir <- liftIO $ createTempDirectory sysTmpDir "wybe"
+    logBuild $ "Temp Directory: " ++ tmpDir
+    updateCompiler (\st -> st { tmpDir = tmpDir })
     Informational <!> "Building target: " ++ target
     let tType = targetType target
     case tType of
@@ -241,6 +247,7 @@ buildTarget force target = do
                      ExecutableFile -> buildExecutable [modname] target
                      other          -> nyi $ "output file type " ++ show other
                   whenLogging Emit $ logLLVMString [modname]
+    liftIO $ removeDirectoryRecursive tmpDir
 
 
 -- |Compile or load a module dependency.
@@ -523,7 +530,8 @@ loadModuleFromObjFile required objfile = do
 -- |Extract all the LPVM modules from the specified object file.
 loadLPVMFromObjFile :: FilePath -> [ModSpec] -> Compiler [Module]
 loadLPVMFromObjFile objFile required = do
-    result <- liftIO $ extractLPVMData objFile
+    tmpDir <- gets tmpDir
+    result <- liftIO $ extractLPVMData tmpDir objFile
     case result of 
         Left err -> do 
             logMsg Builder err
@@ -797,9 +805,8 @@ buildExecutable targetMod target = do
 
             logBuild $ "Finished building *main* module: " ++ showModSpecs mods
             logBuild "o Creating temp Main module @ .../tmp/tmpMain.o"
-            tempDir <- liftIO getTemporaryDirectory
-            liftIO $ createDirectoryIfMissing False (tempDir </> "wybetemp")
-            let tmpMainOFile = tempDir </> "wybetemp" </> "tmpMain.o"
+            tmpDir <- gets tmpDir
+            let tmpMainOFile = tmpDir </> "tmpMain.o"
             emitObjectFile mainMod tmpMainOFile
 
             ofiles <- mapM (loadObjectFile . fst) depends

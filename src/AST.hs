@@ -317,6 +317,7 @@ data MessageLevel = Informational | Warning | Error
 --  compiling the module's dependencies.
 data CompilerState = Compiler {
   options :: Options,            -- ^compiler options specified on command line
+  tmpDir  :: FilePath,             -- ^tmp directory for this build
   msgs :: [(MessageLevel, String)],  -- ^warnings, error messages, and info messages
   errorState :: Bool,            -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
@@ -333,7 +334,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp
-                        (Compiler opts [] False Map.empty 0 [] [] Map.empty)
+                        (Compiler opts "" [] False Map.empty 0 [] [] Map.empty)
 
 
 -- |Apply some transformation function to the compiler state.

@@ -22,8 +22,6 @@ import           Data.Maybe (isJust)
 import           Distribution.System       (buildOS, OS (..)) 
 import           System.Exit               (ExitCode (..))
 import           System.Process
-import           System.Directory          (createDirectoryIfMissing
-                                           ,getTemporaryDirectory)
 import System.FilePath (takeBaseName, (</>))
 import Control.Monad.Trans (liftIO)
 import Macho
@@ -33,15 +31,14 @@ import Macho
 ----------------------------------------------------------------------------
 
 -- | Save LPVM data [BL.ByteString] into the given object file.
+-- The first [FilePath] is for [tmpDir]
 -- Currently supports macOS & Linux.
 -- On macOS, it stores in segment [__LPVM], section [__lpvm].
 -- On Linux, it sotres in section [__LPVM.__lpvm].
-insertLPVMData :: BL.ByteString -> FilePath -> IO (Either String ())
-insertLPVMData modBS objFile = do
-    tempDir <- getTemporaryDirectory
-    createDirectoryIfMissing False (tempDir </> "wybetemp")
+insertLPVMData :: FilePath -> BL.ByteString -> FilePath -> IO (Either String ())
+insertLPVMData tmpDir modBS objFile = do
     let modFile = takeBaseName objFile ++ ".module"
-    let lpvmFile = tempDir </> "wybetemp" </> modFile
+    let lpvmFile = tmpDir </> modFile
     BL.writeFile lpvmFile modBS
     case buildOS of 
         OSX   -> insertLPVMDataMacOS lpvmFile objFile
@@ -51,11 +48,12 @@ insertLPVMData modBS objFile = do
 
 -- | Extract LPVM data from the given object file 
 -- and return it as [BL.ByteString].
-extractLPVMData :: FilePath -> IO (Either String BL.ByteString)
-extractLPVMData objFile =
+-- The first [FilePath] is for [tmpDir]
+extractLPVMData :: FilePath -> FilePath -> IO (Either String BL.ByteString)
+extractLPVMData tmpDir objFile =
     case buildOS of 
-        OSX   -> extractLPVMDataMacOS objFile 
-        Linux -> extractLPVMDataLinux objFile 
+        OSX   -> extractLPVMDataMacOS tmpDir objFile 
+        Linux -> extractLPVMDataLinux tmpDir objFile
         _     -> shouldnt "Unsupported operation system"
 
 ----------------------------------------------------------------------------
@@ -103,8 +101,8 @@ insertLPVMDataLinux lpvmFile objFile = do
         _ -> return $ Left serr
 
 -- | Actual implementation of [extractLPVMData] for macOS
-extractLPVMDataMacOS :: FilePath -> IO (Either String BL.ByteString)
-extractLPVMDataMacOS objFile = do
+extractLPVMDataMacOS :: FilePath -> FilePath -> IO (Either String BL.ByteString)
+extractLPVMDataMacOS _ objFile = do
     objBS <- liftIO $ BL.readFile objFile
     if not $ isMachoBytes objBS 
         then return $ Left ("Not a recognised object file: " ++ objFile)
@@ -120,13 +118,14 @@ extractLPVMDataMacOS objFile = do
 
 -- | Actual implementation of [extractLPVMData] for Linux
 -- Uses system [objcopy]
-extractLPVMDataLinux :: FilePath -> IO (Either String BL.ByteString)
-extractLPVMDataLinux objFile = do
-    tempDir <- getTemporaryDirectory
-    createDirectoryIfMissing False (tempDir </> "wybetemp")
+extractLPVMDataLinux :: FilePath -> FilePath -> IO (Either String BL.ByteString)
+extractLPVMDataLinux tmpDir objFile = do
     let modFile = takeBaseName objFile ++ ".out.module"
-    let lpvmFile = tempDir </> "wybetemp" </> modFile
+    let lpvmFile = tmpDir </> modFile
+    -- [objcopy] tries to write to the file even we only need read permission.
+    -- We force it to write to /dev/null so it's "read-only".
     let args = ["--dump-section", "__LPVM.__lpvm=" ++ lpvmFile] ++ [objFile]
+               ++ ["/dev/null"]
     (exCode, _, serr) <- readCreateProcessWithExitCode (proc "objcopy" args) ""
     case exCode of
         ExitSuccess  -> do
