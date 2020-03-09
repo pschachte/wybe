@@ -89,10 +89,9 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 
 
 # On Mac OS X, gtimeout is in homebrew coreutils package
-test:	wybemk
-	@rm -f ERRS ; touch ERRS
-	@rm -f test-cases/*.bc
-	@rm -f test-cases/*.o
+test:	testlib testnonlib
+
+testlib:	wybemk
 	@rm -f $(LIBDIR)/*.o
 	@echo "Building $(LIBDIR)/cbits.o"
 	@make $(LIBDIR)/cbits.o
@@ -105,6 +104,11 @@ test:	wybemk
 	   gtimeout 2 ./wybemk --force -L $(LIBDIR) $${f/.wybe/.o} ; \
 	done
 	@printf ") done.\n"
+
+testnonlib:	wybemk
+	@rm -f ERRS ; touch ERRS
+	@rm -f test-cases/*.bc
+	@rm -f test-cases/*.o
 	@printf "Testing test-cases "
 	@ time ( for f in $(TESTCASES) ; do \
 		out=`echo "$$f" | sed 's/.wybe$$/.out/'` ; \
