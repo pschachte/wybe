@@ -701,7 +701,7 @@ cgenLPVM "mutate" flags
           callMemCpy op baseAddr sizeArg
           -- Now destructively mutate the copy
           cgenLPVM "mutate" flags
-            [outArg, addrArg, offsetArg, ArgInt 1 intTy, sizeArg, tagArg,
+            [outArg, outArg, offsetArg, ArgInt 1 intTy, sizeArg, tagArg,
              valArg]
 cgenLPVM "mutate" _
     [addrArg, outArg, offsetArg, (ArgInt 1 _), sizeArg, tagArg, valArg] = do
