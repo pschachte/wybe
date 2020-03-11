@@ -1,3 +1,3 @@
 Error detected during type checking of module(s) use_before_def
-[91mtest-cases/use_before_def.wybe:2:18: 'result' unknown in 'use_before_def'
+[91mfinal-dump/use_before_def.wybe:2:18: 'result' unknown in 'use_before_def'
 [0m

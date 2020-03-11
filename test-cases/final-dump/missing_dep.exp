@@ -1,6 +1,6 @@
 Error detected during preliminary processing of module wybe
 [91mCould not find source for module does_not_exist
 in directories:
-    !ROOT!/test-cases
-    wybelibs
+    !ROOT!/final-dump
+    ../wybelibs
 [0m
