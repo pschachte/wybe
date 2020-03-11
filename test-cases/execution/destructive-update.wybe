@@ -1,0 +1,22 @@
+# related to issue: https://github.com/pschachte/wybe/issues/16
+
+pub type position { pub position(x:int, y:int) }
+
+pub def printPosition(pos:position) use !io {
+    !print(" (")
+    !print(pos.x)
+    !print(",")
+    !print(pos.y)
+    !println(")")
+}
+
+?pos = position(100,150)
+?pos2 = pos
+!println("-------")
+x(!pos, 200) 
+!printPosition(pos)
+!printPosition(pos2)
+!println("-------")
+y(!pos2, 90) 
+!printPosition(pos)
+!printPosition(pos2)
