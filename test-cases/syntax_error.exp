@@ -1,2 +1,0 @@
-Syntax Error: "test-cases/syntax_error.wybe" (line 2, column 1):
-unexpected TokIdent "bill" "test-cases/syntax_error.wybe" (line 2, column 1)

@@ -159,7 +159,7 @@ entry:
   tail call ccc  void  @"position.printPosition<0>"(i64  %31)  
   %42 = ptrtoint i8* getelementptr inbounds ([18 x i8], [18 x i8]* @alias_multifunc3.41, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %42)  
-  tail call ccc  void  @"position.printPosition<0>"(i64  %31)  
+  tail call ccc  void  @"position.printPosition<0>"(i64  %"pa#0")  
   ret i64 %"pa#0" 
 }
 --------------------------------------------------

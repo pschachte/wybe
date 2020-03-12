@@ -174,7 +174,7 @@ entry:
   store  i64 2, i64* %37 
   %39 = ptrtoint i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias3.38, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %39)  
-  tail call ccc  void  @"position.printPosition<0>"(i64  %29)  
+  tail call ccc  void  @"position.printPosition<0>"(i64  %"p1#0")  
   %41 = ptrtoint i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias3.40, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %41)  
   tail call ccc  void  @"position.printPosition<0>"(i64  %29)  

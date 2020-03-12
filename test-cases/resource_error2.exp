@@ -1,3 +1,0 @@
-Error detected during type checking of module(s) resource_error2
-[91mtest-cases/resource_error2.wybe:2:7: Input resource io not available at call to proc resource_error
-[0m

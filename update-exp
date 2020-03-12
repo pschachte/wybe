@@ -87,7 +87,10 @@ updatefile () {
 
 if [ $# -eq 0 ] ; then
     make test
-    for f in test-cases/*.wybe ; do
+    for f in test-cases/final-dump/*.wybe ; do
+        updatefile "$f"
+    done
+    for f in test-cases/execution/*.wybe ; do
         updatefile "$f"
     done
 else
