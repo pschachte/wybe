@@ -39,11 +39,10 @@ transformProc def
 
         -- (2) Analysis of caller's bodyFork
         -- Update body while checking alias incurred by bodyfork
-        (aliaseMap2, body2) <- transformForks caller body1 aliaseMap1
+        body2 <- transformForks caller body1 aliaseMap1
 
         -- Some logging
         logTransform $ "\n^^^  after transform prims:    " ++ show aliaseMap1
-        logTransform $ "^^^  after transform forks:    " ++ show aliaseMap2
 
         -- (4) Update procImpln with updated body prims
         return def { procImpln = ProcDefPrim caller body2 oldAnalysis }
@@ -111,28 +110,26 @@ transformPrim realParams inputParams (aliasMap, prims) prim =
 -- Recursively transform forked body's prims
 -- PrimFork only appears at the end of a ProcBody
 -- PrimFork = NoFork | PrimFork {}
-transformForks :: PrimProto -> ProcBody -> AliasMap
-                    -> Compiler (AliasMap, ProcBody)
+transformForks :: PrimProto -> ProcBody -> AliasMap -> Compiler ProcBody
 transformForks caller body aliasMap = do
     logTransform "\nTransform forks (transformForks):"
     let fork = bodyFork body
     case fork of
         PrimFork _ _ _ fBodies -> do
             logTransform "Forking:"
-            (aliasMap', fBodies') <-
-                foldM (\(amap, bs) currBody -> do
+            fBodies' <-
+                foldM (\bs currBody -> do
                     (amap', ps') <-
-                        transformPrims caller currBody (amap, [])
+                        transformPrims caller currBody (aliasMap, [])
                     let currBody1 = currBody { bodyPrims = ps' }
-                    (amap'', currBody2) <-
-                        transformForks caller currBody1 amap'
-                    return (amap'', bs++[currBody2])
-                ) (aliasMap, []) fBodies
-            return (aliasMap', body { bodyFork = fork {forkBodies=fBodies'} })
-        _ -> do
+                    currBody2 <- transformForks caller currBody1 amap'
+                    return (bs++[currBody2])
+                ) [] fBodies
+            return body { bodyFork = fork {forkBodies=fBodies'} }
+        NoFork -> do
             -- NoFork: transform prims done
             logTransform "No fork."
-            return (aliasMap, body)
+            return body
 
 
 -- Update mutate prim by checking if input is aliased
