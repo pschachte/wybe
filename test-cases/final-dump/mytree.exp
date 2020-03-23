@@ -218,7 +218,7 @@ key > public inline test (0 calls)
         foreign llvm move(~$rec#0:mytree.tree, ?$rec#1:mytree.tree)
 
     1:
-        foreign lpvm mutate(~%$rec#0:mytree.tree, ?%$rec#1:mytree.tree, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm mutate noalias(~%$rec#0:mytree.tree, ?%$rec#1:mytree.tree, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 

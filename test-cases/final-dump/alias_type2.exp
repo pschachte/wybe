@@ -38,8 +38,8 @@ AFTER EVERYTHING:
     foreign lpvm alloc(16:wybe.int, ?tmp$12#0:alias_type2.posrec)
     foreign lpvm mutate(~tmp$12#0:alias_type2.posrec, ?tmp$13#0:alias_type2.posrec, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp$9#0:alias_type2.position)
     foreign lpvm mutate(~tmp$13#0:alias_type2.posrec, ?tmp$14#0:alias_type2.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int)
-    foreign lpvm mutate(~tmp$14#0:alias_type2.posrec, ?%rec#1:alias_type2.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
-    foreign lpvm mutate noalias(~tmp$9#0:alias_type2.position, ?%pos#1:alias_type2.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int)
+    foreign lpvm mutate noalias(~tmp$14#0:alias_type2.posrec, ?%rec#1:alias_type2.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
+    foreign lpvm mutate noalias(~tmp$9#0:alias_type2.position, ?%pos#1:alias_type2.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int)
     foreign lpvm access(~pos#1:alias_type2.position, 0:wybe.int, ?tmp$2#0:wybe.int)
     foreign c print_int(~tmp$2#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$22#0:wybe.phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$22#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
@@ -101,28 +101,21 @@ entry:
   %24 = inttoptr i64 %23 to i64* 
   %25 = getelementptr  i64, i64* %24, i64 0 
   store  i64 2, i64* %25 
-  %26 = trunc i64 16 to i32  
-  %27 = tail call ccc  i8*  @wybe_malloc(i32  %26)  
-  %28 = ptrtoint i8* %27 to i64 
-  %29 = inttoptr i64 %28 to i8* 
-  %30 = inttoptr i64 %3 to i8* 
-  %31 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %29, i8*  %30, i32  %31, i32  8, i1  0)  
-  %32 = inttoptr i64 %28 to i64* 
-  %33 = getelementptr  i64, i64* %32, i64 0 
-  store  i64 200, i64* %33 
-  %34 = inttoptr i64 %28 to i64* 
+  %26 = inttoptr i64 %3 to i64* 
+  %27 = getelementptr  i64, i64* %26, i64 0 
+  store  i64 200, i64* %27 
+  %28 = inttoptr i64 %3 to i64* 
+  %29 = getelementptr  i64, i64* %28, i64 0 
+  %30 = load  i64, i64* %29 
+  tail call ccc  void  @print_int(i64  %30)  
+  tail call ccc  void  @putchar(i8  10)  
+  %31 = inttoptr i64 %19 to i64* 
+  %32 = getelementptr  i64, i64* %31, i64 0 
+  %33 = load  i64, i64* %32 
+  %34 = inttoptr i64 %33 to i64* 
   %35 = getelementptr  i64, i64* %34, i64 0 
   %36 = load  i64, i64* %35 
   tail call ccc  void  @print_int(i64  %36)  
-  tail call ccc  void  @putchar(i8  10)  
-  %37 = inttoptr i64 %19 to i64* 
-  %38 = getelementptr  i64, i64* %37, i64 0 
-  %39 = load  i64, i64* %38 
-  %40 = inttoptr i64 %39 to i64* 
-  %41 = getelementptr  i64, i64* %40, i64 0 
-  %42 = load  i64, i64* %41 
-  tail call ccc  void  @print_int(i64  %42)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -442,7 +435,7 @@ a > public inline (0 calls)
     foreign lpvm access(~$rec#0:alias_type2.posrec, 8:wybe.int, ?$#0:wybe.int)
 a > public inline (0 calls)
 1: a($rec#0:alias_type2.posrec, ?$rec#1:alias_type2.posrec, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:alias_type2.posrec, ?%$rec#1:alias_type2.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:alias_type2.posrec, ?%$rec#1:alias_type2.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 p > public inline (0 calls)
@@ -450,7 +443,7 @@ p > public inline (0 calls)
     foreign lpvm access(~$rec#0:alias_type2.posrec, 0:wybe.int, ?$#0:alias_type2.position)
 p > public inline (0 calls)
 1: p($rec#0:alias_type2.posrec, ?$rec#1:alias_type2.posrec, $field#0:alias_type2.position): AliasPairs: []
-    foreign lpvm mutate noalias(~%$rec#0:alias_type2.posrec, ?%$rec#1:alias_type2.posrec, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:alias_type2.position)
+    foreign lpvm mutate(~%$rec#0:alias_type2.posrec, ?%$rec#1:alias_type2.posrec, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:alias_type2.position)
 
 
 posrec > public inline (0 calls)

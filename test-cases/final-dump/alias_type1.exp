@@ -428,7 +428,7 @@ a > public inline (0 calls)
     foreign lpvm access(~$rec#0:alias_type1.posrec, 0:wybe.int, ?$#0:wybe.int)
 a > public inline (0 calls)
 1: a($rec#0:alias_type1.posrec, ?$rec#1:alias_type1.posrec, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:alias_type1.posrec, ?%$rec#1:alias_type1.posrec, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:alias_type1.posrec, ?%$rec#1:alias_type1.posrec, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 p > public inline (0 calls)
@@ -436,7 +436,7 @@ p > public inline (0 calls)
     foreign lpvm access(~$rec#0:alias_type1.posrec, 8:wybe.int, ?$#0:alias_type1.position)
 p > public inline (0 calls)
 1: p($rec#0:alias_type1.posrec, ?$rec#1:alias_type1.posrec, $field#0:alias_type1.position): AliasPairs: []
-    foreign lpvm mutate noalias(~%$rec#0:alias_type1.posrec, ?%$rec#1:alias_type1.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:alias_type1.position)
+    foreign lpvm mutate(~%$rec#0:alias_type1.posrec, ?%$rec#1:alias_type1.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:alias_type1.position)
 
 
 posrec > public inline (0 calls)

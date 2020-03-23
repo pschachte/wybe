@@ -216,7 +216,7 @@ code > public inline (0 calls)
     foreign lpvm access(~$rec#0:student.course, 0:wybe.int, ?$#0:wybe.int)
 code > public inline (0 calls)
 1: code($rec#0:student.course, ?$rec#1:student.course, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:student.course, ?%$rec#1:student.course, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:student.course, ?%$rec#1:student.course, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 course > public inline (0 calls)
@@ -235,7 +235,7 @@ name > public inline (0 calls)
     foreign lpvm access(~$rec#0:student.course, 8:wybe.int, ?$#0:wybe.string)
 name > public inline (0 calls)
 1: name($rec#0:student.course, ?$rec#1:student.course, $field#0:wybe.string): AliasPairs: []
-    foreign lpvm mutate noalias(~%$rec#0:student.course, ?%$rec#1:student.course, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
+    foreign lpvm mutate(~%$rec#0:student.course, ?%$rec#1:student.course, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
 
   LLVM code       :
 
@@ -479,7 +479,7 @@ id > public inline (0 calls)
     foreign lpvm access(~$rec#0:student.student, 0:wybe.int, ?$#0:wybe.int)
 id > public inline (0 calls)
 1: id($rec#0:student.student, ?$rec#1:student.student, $field#0:wybe.int): AliasPairs: []
-    foreign lpvm mutate(~%$rec#0:student.student, ?%$rec#1:student.student, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate noalias(~%$rec#0:student.student, ?%$rec#1:student.student, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 major > public inline (0 calls)
@@ -487,7 +487,7 @@ major > public inline (0 calls)
     foreign lpvm access(~$rec#0:student.student, 8:wybe.int, ?$#0:student.course)
 major > public inline (0 calls)
 1: major($rec#0:student.student, ?$rec#1:student.student, $field#0:student.course): AliasPairs: []
-    foreign lpvm mutate noalias(~%$rec#0:student.student, ?%$rec#1:student.student, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:student.course)
+    foreign lpvm mutate(~%$rec#0:student.student, ?%$rec#1:student.student, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:student.course)
 
 
 student > public inline (0 calls)
