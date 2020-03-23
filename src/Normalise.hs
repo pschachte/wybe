@@ -668,8 +668,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
     let detism = if numConsts + numNonConsts == 1 then Det else SemiDet
-        otherPtrCount = if rep == Address then ptrCount-1 else ptrCount
-        flags = if otherPtrCount == 0 then ["noalias"] else []
+        flags = if rep /= Address then ["noalias"] else []
     in [-- The getter:
         ProcDecl vis detism True
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
