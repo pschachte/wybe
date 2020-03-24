@@ -20,6 +20,7 @@ import           Data.List    as List
 import           Data.Map     as Map
 import           Data.Set     as Set
 import           GHC.Generics (Generic)
+import           Flow ((|>))
 
 
 -- |Do the the two lists have the same length?
@@ -151,9 +152,94 @@ cartProd ins outs = [(i, o) | i <- ins, o <- outs]
 
 ----------------------------------------------------------------
 --
--- UnionFind implementation by Map
+-- Disjoint set for alias map
 --
 ----------------------------------------------------------------
+-- TODO: Using Union-Find instead of this naive implementation
+-- The old implement is wrong https://github.com/pschachte/wybe/issues/25
+-- So we use this version as a quick fix.
+
+type DisjointSet a = Set (Set a)
+
+emptyDS = Set.empty
+
+_findFristInSet :: (a -> Bool) -> Set a -> Maybe a
+_findFristInSet f set = 
+    Set.foldr 
+        (\x result -> 
+            case result of
+            Just _ -> result
+            Nothing -> if f x then Just x else Nothing
+            ) Nothing set
+
+addOneToDS :: Ord a => a -> DisjointSet a -> DisjointSet a
+addOneToDS x ds = 
+    case _findFristInSet (Set.member x) ds of
+        Just _ -> ds
+        Nothing -> 
+            Set.insert (Set.singleton x) ds
+
+unionTwoInDS :: Ord a => a -> a -> DisjointSet a -> DisjointSet a
+unionTwoInDS x y ds = 
+    let xSet = _findFristInSet (Set.member x) ds in 
+    let ySet = _findFristInSet (Set.member y) ds in 
+        if (xSet == ySet) && (xSet /= Nothing)
+        then ds
+        else 
+            let (ds', newSet') = case xSet of 
+                                Nothing -> (ds, Set.singleton x)
+                                Just xSet -> ((Set.delete xSet ds), xSet)
+            in
+            let (ds'', newSet'') = case ySet of
+                                Nothing -> (ds', Set.insert y newSet')
+                                Just ySet -> ((Set.delete ySet ds'), Set.union newSet' ySet)
+            in
+                Set.insert newSet'' ds''
+
+combineTwoDS :: Ord a => DisjointSet a -> DisjointSet a -> DisjointSet a
+combineTwoDS ds1 ds2 =
+    Set.foldr
+        (\singleSet resultDs ->
+            case Set.toList singleSet of
+                [] -> resultDs -- can't be empty
+                x:xs -> 
+                    let resultDs' = addOneToDS x resultDs in
+                    List.foldl (\ds y -> unionTwoInDS x y ds) resultDs' xs
+            ) ds1 ds2 
+
+
+removeOneFromDS :: Ord a => a -> DisjointSet a -> DisjointSet a
+removeOneFromDS x ds = 
+    case _findFristInSet (Set.member x) ds of 
+        Nothing -> ds
+        Just xSet -> 
+            let xSet' = Set.delete x xSet in
+            let ds' = Set.delete xSet ds in
+                if Set.null xSet' 
+                    then ds'
+                    else  Set.insert xSet' ds'
+
+connectedToOthersInDS :: Ord a => a -> DisjointSet a -> Bool
+connectedToOthersInDS x ds =
+    case _findFristInSet (Set.member x) ds of 
+        Nothing -> False
+        Just xSet -> Set.size xSet > 1
+
+-- The map function must be a bijection, i.e. 1-to-1 mapping.
+mapDS :: Ord a => (a -> a) -> DisjointSet a -> DisjointSet a
+mapDS f ds = 
+    Set.map (Set.map f) ds
+
+dsToTransitivePairs :: Ord a => DisjointSet a -> Set (a, a)
+dsToTransitivePairs ds =
+    Set.foldr
+        (\singleSet result ->
+            cartesianProduct singleSet singleSet
+            |> Set.union result |> Set.filter (\(a, b) -> a < b)
+            ) Set.empty ds
+
+
+
 
 type UnionFind a = Map a (UFInfo a)
 

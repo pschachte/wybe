@@ -18,6 +18,7 @@ executable wybemk
                , containers
                , directory >= 1.2.5.0
                , filepath >= 1.4.0.0
+               , flow
                , haskeline
                , hex
                , llvm-hs == 6.3.0
