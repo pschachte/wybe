@@ -37,7 +37,6 @@ instance Binary ParamInfo
 instance Binary Prim
 instance Binary PrimVarName
 instance Binary PrimArg
-instance Binary a => Binary (UFInfo a)
 instance Binary ProcAnalysis
 
 -- Procedures

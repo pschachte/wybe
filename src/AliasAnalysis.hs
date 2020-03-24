@@ -96,14 +96,14 @@ aliasProcDef def
         let (ProcDefPrim caller body oldAnalysis) = procImpln def
         logAlias $ show caller
         -- (1) Analysis of current caller's prims
-        aliasMap1 <- aliasedByPrims caller body initUnionFind
+        aliasMap1 <- aliasedByPrims caller body emptyDS
         -- (2) Analysis of caller's bodyFork
         aliasMap2 <- aliasedByFork caller body aliasMap1
         -- (3) Clean up summary of aliases by removing phantom params
         realParams <- (Set.fromList . (primParamName <$>))
                       <$> protoRealParams caller
         -- ^realParams is a list of formal params of this caller
-        let aliasMap3 = Map.restrictKeys aliasMap2 realParams
+        let aliasMap3 = filterDS (\x -> Set.member x realParams) aliasMap2
         -- Some logging
         logAlias $ "\n^^^  after analyse prims:    " ++ show aliasMap1
         logAlias $ "^^^  after analyse forks:    " ++ show aliasMap2
@@ -125,7 +125,7 @@ aliasedByPrims caller body initAliases = do
     -- Analyse simple prims:
     -- (only process alias pairs incurred by move, access, cast)
     logAlias "\nAnalyse prims (aliasedByPrims):    "
-    let aliasMap = List.foldr newUfItem initAliases realParams
+    let aliasMap = List.foldr addOneToDS initAliases realParams
     -- realParams <- protoRealParams caller
     foldM (aliasedByPrim realParams) aliasMap prims
 
@@ -146,9 +146,12 @@ aliasedByPrim realParams aliasMap prim =
             let paramArgMap = mapParamToArgVar calleeProto args
             -- calleeArgsAliasMap is the alias map of actual arguments passed
             -- into callee
-            let calleeArgsAliases =
-                    Map.foldrWithKey (transformUfKey paramArgMap)
-                        initUnionFind calleeParamAliases
+            let calleeArgsAliases = 
+                    mapDS (\x -> 
+                        case Map.lookup x paramArgMap of 
+                            Nothing -> x -- shouldn't happen
+                            Just y -> y
+                    ) calleeParamAliases
             combined <- aliasedArgsInPrimCall calleeArgsAliases realParams
                                     aliasMap args
             logAlias $ "calleeArgsAliases:" ++ show calleeArgsAliases
@@ -177,7 +180,7 @@ aliasedByFork caller body aliasMap = do
                         aliasedByPrims caller currBody aliasMap >>=
                             aliasedByFork caller currBody
                     ) fBodies
-            let aliasMap' = List.foldl combineUf initUnionFind aliasMaps
+            let aliasMap' = List.foldl combineTwoDS emptyDS aliasMaps
             return aliasMap'
         NoFork -> do
             -- NoFork: analyse prims done
@@ -245,11 +248,11 @@ aliasedArgsInPrimCall :: AliasMap -> [PrimVarName] -> AliasMap -> [PrimArg]
                             -> Compiler AliasMap
 aliasedArgsInPrimCall calleeArgsAliases realParams currentAlias primArgs
     = do
-        let combinedAliases1 = combineUf calleeArgsAliases currentAlias
+        let combinedAliases1 = combineTwoDS calleeArgsAliases currentAlias
         -- Gather variables in final use
         finals <- foldM (finalArgs realParams) Set.empty primArgs
         -- Then remove them from aliasmap
-        return $ removeFromUf finals combinedAliases1
+        return $ removeFromDS finals combinedAliases1
 
 
 -- Check Arg aliases in one of the prims of a ProcBody.
@@ -264,7 +267,7 @@ aliasedArgsInSimplePrim realParams currentAlias ([],[], primArgs) = do
         -- Gather variables in final use
         finals <- foldM (finalArgs realParams) Set.empty primArgs
         -- Then remove them from aliasmap
-        return $ removeFromUf finals currentAlias
+        return $ removeFromDS finals currentAlias
 aliasedArgsInSimplePrim realParams currentAlias
     (maybeAliasedInput, maybeAliasedOutput, primArgs) = do
         logAlias $ "      primArgs:           " ++ show primArgs
@@ -272,11 +275,11 @@ aliasedArgsInSimplePrim realParams currentAlias
         logAlias $ "      maybeAliasedOutput: " ++ show maybeAliasedOutput
         let aliases = cartProd maybeAliasedInput maybeAliasedOutput
         let aliasMap1 = List.foldr (\(inArg, outArg) aMap ->
-                            uniteUf aMap outArg inArg) currentAlias aliases
+                            unionTwoInDS outArg inArg aMap) currentAlias aliases
         -- Gather variables in final use
         finals <- foldM (finalArgs realParams) Set.empty primArgs
         -- Then remove them from aliasmap
-        return $ removeFromUf finals aliasMap1
+        return $ removeFromDS finals aliasMap1
 
 
 -- Helper: map arguments in callee proc to its formal parameters so we can get

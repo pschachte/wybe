@@ -1590,16 +1590,16 @@ data ProcImpln
 
 
 -- | Use UnionFind method to record the alias information
-type AliasMap = UnionFind PrimVarName
+type AliasMap = DisjointSet PrimVarName
 
 -- | a synonym function to hide the impletation of how unionfind is printed
 showAliasMap :: AliasMap -> String
-showAliasMap aliasMap = show $ unionFindToTransitivePairs aliasMap
+showAliasMap aliasMap = show $ dsToTransitivePairs aliasMap
 
 -- | a synonym function to hide the impletation of how unionfind is converted to
 -- alias pairs
 aliasMapToAliasPairs :: AliasMap -> [(PrimVarName, PrimVarName)]
-aliasMapToAliasPairs = unionFindToTransitivePairs
+aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 
 -- | Stores whatever analysis results we infer about a proc definition.
 data ProcAnalysis = ProcAnalysis {

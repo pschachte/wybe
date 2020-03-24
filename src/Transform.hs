@@ -33,7 +33,7 @@ transformProc def
         logTransform $ replicate 60 '~'
 
         -- (1) Analysis of current caller's prims
-        (aliaseMap1, newPrims) <- transformPrims caller body (initUnionFind, [])
+        (aliaseMap1, newPrims) <- transformPrims caller body (emptyDS, [])
         -- Update bodyPrims of this procbody
         let body1 = body { bodyPrims = newPrims }
 
@@ -62,7 +62,7 @@ transformPrims caller body (initAliases, initPrims) = do
     logTransform "\nTransform prims (transformPrims):   "
     logTransform $ "realParams: " ++ show realParams
     logTransform $ "input params: " ++ show inputParams
-    let aliasMap = List.foldr newUfItem initAliases realParams
+    let aliasMap = List.foldr addOneToDS initAliases realParams
     foldM (transformPrim realParams inputParams) (aliasMap, []) prims
 
 
@@ -82,8 +82,12 @@ transformPrim realParams inputParams (aliasMap, prims) prim =
             let paramArgMap = mapParamToArgVar calleeProto args
             -- calleeArgsAliasMap is the alias map of actual arguments passed
             -- into callee
-            let calleeArgsAliases = Map.foldrWithKey (transformUfKey paramArgMap)
-                                            initUnionFind calleeParamAliases
+            let calleeArgsAliases = 
+                    mapDS (\x -> 
+                        case Map.lookup x paramArgMap of 
+                            Nothing -> x -- shouldn't happen
+                            Just y -> y
+                    ) calleeParamAliases
             combinedAliases <- aliasedArgsInPrimCall calleeArgsAliases
                                         realParams aliasMap args
             logTransform $ "calleeArgsAliases:" ++ show calleeArgsAliases
@@ -153,8 +157,8 @@ _updateMutateForAlias aliasMap inputParams
         size, offset2, mem@ArgVar{argVarName=memName,argVarFinal=final2}] =
             -- When the val is also a pointer
             if notElem inName inputParams
-                && not (connectedToOthers aliasMap inName) && final1
-                && not (connectedToOthers aliasMap memName) && final2
+                && not (connectedToOthersInDS inName aliasMap) && final1
+                && not (connectedToOthersInDS memName aliasMap) && final2
                 && des /= 1
             then return [fIn, fOut, offset, ArgInt 1 typ, size, offset2, mem]
             else return args
@@ -163,7 +167,7 @@ _updateMutateForAlias aliasMap inputParams
           fOut, offset, ArgInt des typ,
           size, offset2, mem] =
         if notElem inName inputParams
-            && not (connectedToOthers aliasMap inName) && final
+            && not (connectedToOthersInDS inName aliasMap) && final
             && des /= 1
         then return [fIn, fOut, offset, ArgInt 1 typ, size, offset2, mem]
         else return args
