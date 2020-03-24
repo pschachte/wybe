@@ -172,11 +172,14 @@ aliasedByFork caller body aliasMap = do
     case fork of
         PrimFork _ _ _ fBodies -> do
             logAlias ">>> Forking:"
-            foldM (\amap currBody ->
-                    aliasedByPrims caller currBody amap >>=
-                        aliasedByFork caller currBody
-                ) aliasMap fBodies
-        _ -> do
+            aliasMaps <- 
+                mapM (\currBody ->
+                        aliasedByPrims caller currBody aliasMap >>=
+                            aliasedByFork caller currBody
+                    ) fBodies
+            let aliasMap' = List.foldl combineUf initUnionFind aliasMaps
+            return aliasMap'
+        NoFork -> do
             -- NoFork: analyse prims done
             logAlias ">>> No fork."
             return aliasMap
