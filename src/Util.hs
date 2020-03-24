@@ -19,6 +19,7 @@ import           Data.Graph
 import           Data.List    as List
 import           Data.Map     as Map
 import           Data.Set     as Set
+import           Data.Maybe (isJust)
 import           GHC.Generics (Generic)
 import           Flow ((|>))
 
@@ -183,7 +184,7 @@ unionTwoInDS :: Ord a => a -> a -> DisjointSet a -> DisjointSet a
 unionTwoInDS x y ds = 
     let xSet = _findFristInSet (Set.member x) ds in 
     let ySet = _findFristInSet (Set.member y) ds in 
-        if (xSet == ySet) && (xSet /= Nothing)
+        if (xSet == ySet) && (isJust xSet)
         then ds
         else 
             let (ds', newSet') = case xSet of 

@@ -1594,7 +1594,7 @@ type AliasMap = DisjointSet PrimVarName
 
 -- | a synonym function to hide the impletation of how unionfind is printed
 showAliasMap :: AliasMap -> String
-showAliasMap aliasMap = show $ dsToTransitivePairs aliasMap
+showAliasMap aliasMap = show $ aliasMapToAliasPairs aliasMap
 
 -- | a synonym function to hide the impletation of how unionfind is converted to
 -- alias pairs
