@@ -136,7 +136,7 @@ unionTwoInDS :: Ord a => a -> a -> DisjointSet a -> DisjointSet a
 unionTwoInDS x y ds = 
     let xSet = _findFristInSet (Set.member x) ds in 
     let ySet = _findFristInSet (Set.member y) ds in 
-        if (xSet == ySet) && (isJust xSet)
+        if (isJust xSet) && (xSet == ySet)
         then ds
         else 
             let (ds', newSet') = case xSet of 
