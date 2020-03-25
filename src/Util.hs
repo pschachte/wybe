@@ -17,9 +17,9 @@ import           Data.Graph
 import           Data.List    as List
 import           Data.Map     as Map
 import           Data.Set     as Set
-import           Data.Maybe (isJust)
+import           Data.Maybe   (isJust)
 import           GHC.Generics (Generic)
-import           Flow ((|>))
+import           Flow         ((|>))
 
 
 -- |Do the the two lists have the same length?
