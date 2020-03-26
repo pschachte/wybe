@@ -98,10 +98,12 @@ transformPrim realParams inputParams (aliasMap, prims) prim =
             -- | Transform simple prims
             logTransform $ "\n--- simple prim:    " ++ show prim
             logTransform $ "current aliasMap: " ++ show aliasMap
-            maybeAliasInfo <- maybeAliasPrimArgs (content prim)
+            let prim' = content prim
+            maybeAliasedVariables <- maybeAliasPrimArgs prim'
             -- Update alias map for escapable args
             aliasMap2 <- aliasedArgsInSimplePrim realParams aliasMap
-                                                maybeAliasInfo
+                                                maybeAliasedVariables 
+                                                (primArgs prim')
             -- Mutate destructive flag if this is a mutate instruction
             prim2 <- mutateInstruction prim aliasMap inputParams
             logTransform $ "--- transformed to: " ++ show prim2

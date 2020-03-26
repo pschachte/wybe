@@ -42,8 +42,7 @@ module AST (
   AliasMap, aliasMapToAliasPairs, ProcAnalysis(..),
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
-  argFlowDirection, argVarIsFlowDirection, argType,
-  inArgVar2, outArgVar2, argDescription, flowsIn, flowsOut,
+  argFlowDirection, argType, argDescription, flowsIn, flowsOut,
   foldProcCalls, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp, expOutputs, pexpListOutputs,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
@@ -2192,12 +2191,6 @@ argFlowDirection ArgChar{} = FlowIn
 argFlowDirection (ArgUnneeded flow _) = flow
 
 
--- |Check dataflow direction of an actual argument and the arg should be ArgVar
-argVarIsFlowDirection :: PrimFlow -> PrimArg -> Bool
-argVarIsFlowDirection flow' ArgVar{argVarFlow=flow} = flow == flow'
-argVarIsFlowDirection _ _ = False
-
-
 -- |Extract the Wybe type of a PrimArg.
 argType :: PrimArg -> TypeSpec
 argType ArgVar{argVarType=typ} = typ
@@ -2206,35 +2199,6 @@ argType (ArgFloat _ typ) = typ
 argType (ArgString _ typ) = typ
 argType (ArgChar _ typ) = typ
 argType (ArgUnneeded _ typ) = typ
-
--- inArgVar:: PrimArg -> PrimVarName
--- inArgVar (ArgVar var _ flow _ _) | flow == FlowIn = var
--- inArgVar _ = shouldnt "inArgVar of input argument"
-
-
--- Used in AliasAnalysis - only care about non phantom pointers that might incur
--- aliasing
-inArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
-inArgVar2 arg@(ArgVar var ty _ flow _ final) = do
-    phantom <- argIsPhantom arg
-    rep <- lookupTypeRepresentation ty
-    if flow == FlowIn && not phantom && rep == Just Address
-      then return $ Just var
-      else return Nothing
-inArgVar2 _ = return Nothing
-
--- Used in AliasAnalysis - only care about pointers that might aliasing an input
-outArgVar2:: PrimArg -> Compiler (Maybe PrimVarName)
-outArgVar2 arg@(ArgVar var _ _ flow _ _) = do
-    phantom <- argIsPhantom arg
-    if flow == FlowOut && not phantom
-      then return $ Just var
-      else return Nothing
-outArgVar2 _ = return Nothing
-
--- outArgVar :: PrimArg -> PrimVarName
--- outArgVar (ArgVar var _ flow _ _) | flow == FlowOut = var
--- outArgVar _ = shouldnt "outArgVar of input argument"
 
 
 argDescription :: PrimArg -> String

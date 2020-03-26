@@ -10,8 +10,7 @@ module Util (sameLength, maybeNth, setMapInsert,
              emptyDS, addOneToDS, unionTwoInDS, combineTwoDS, 
              addConnectedGroupToDS, removeOneFromDS,
              removeFromDS, connectedToOthersInDS,
-             mapDS, filterDS, dsToTransitivePairs,
-             cartProd) where
+             mapDS, filterDS, dsToTransitivePairs) where
 
 
 import           Data.Graph
@@ -78,30 +77,6 @@ nop = return ()
 sccElts :: SCC a -> [a]
 sccElts (AcyclicSCC single) = [single]
 sccElts (CyclicSCC multi)   = multi
-
-
-----------------------------------------------------------------
---
--- Helpers used in AliasAnalysis & UnionFind
---
-----------------------------------------------------------------
-
--- King, D.J. and Launchbury, J., 1994, March. Lazy depth-first search and
--- linear graph algorithms in haskell. In Glasgow Workshop on Functional
--- Programming (pp. 145-155).
-_reverseE :: Graph -> [Edge]
-_reverseE g = [ (w,v) | (v,w) <- edges g]
-
--- Helper: normalise alias pairs in order
-_normaliseTuple :: Ord a => (a,a) -> (a,a)
-_normaliseTuple t@(x,y)
-    | y < x    = (y,x)
-    | otherwise = t
-
-
--- Helper: Cartesian product of escaped FlowIn vars to proc output
-cartProd :: [a] -> [a] -> [(a, a)]
-cartProd ins outs = [(i, o) | i <- ins, o <- outs]
 
 
 ----------------------------------------------------------------
@@ -194,7 +169,7 @@ mapDS f =
 
 filterDS :: Ord a => (a -> Bool) -> DisjointSet a -> DisjointSet a
 filterDS f ds =
-    Set.map (\x -> Set.filter f x) ds
+    Set.map (Set.filter f) ds
     |> Set.filter (not . Set.null)
 
 

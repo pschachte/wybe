@@ -33,9 +33,9 @@ fcopy > public (0 calls)
     foreign lpvm mutate(~tmp$5#0:position.position, ?tmp$6#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp$6#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
     foreign lpvm access(p1#0:position.position, 0:wybe.int, ?tmp$1#0:wybe.int)
-    foreign lpvm mutate noalias(~tmp$0#0:position.position, ?%p2#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$1#0:wybe.int)
+    foreign lpvm mutate noalias(~tmp$0#0:position.position, ?%p2#1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$1#0:wybe.int)
     foreign lpvm access(~p1#0:position.position, 8:wybe.int, ?tmp$2#0:wybe.int)
-    foreign lpvm mutate noalias(~%p2#1:position.position, ?%$#0:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
+    foreign lpvm mutate noalias(~%p2#1:position.position, ?%$#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
 
 
 pcopy > public (1 calls)
@@ -44,9 +44,9 @@ pcopy > public (1 calls)
     foreign lpvm mutate(~tmp$5#0:position.position, ?tmp$6#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp$6#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
     foreign lpvm access(p1#0:position.position, 0:wybe.int, ?tmp$1#0:wybe.int)
-    foreign lpvm mutate noalias(~tmp$0#0:position.position, ?%p2#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$1#0:wybe.int)
+    foreign lpvm mutate noalias(~tmp$0#0:position.position, ?%p2#1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$1#0:wybe.int)
     foreign lpvm access(~p1#0:position.position, 8:wybe.int, ?tmp$2#0:wybe.int)
-    foreign lpvm mutate noalias(~%p2#1:position.position, ?%p2#2:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
+    foreign lpvm mutate noalias(~%p2#1:position.position, ?%p2#2:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
     foreign c print_string("--- Inside pcopy: ":wybe.string, ~#io#0:wybe.phantom, ?tmp$15#0:wybe.phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$15#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
     foreign c print_string("expect p2(0,20):":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
@@ -78,10 +78,10 @@ declare external ccc  void @putchar(i8)
 @alias2.1 =    constant [16 x i8] c"copy a position\00"
 
 
-@alias2.81 =    constant [17 x i8] c"expect p2(0,20):\00"
+@alias2.57 =    constant [17 x i8] c"expect p2(0,20):\00"
 
 
-@alias2.79 =    constant [19 x i8] c"--- Inside pcopy: \00"
+@alias2.55 =    constant [19 x i8] c"--- Inside pcopy: \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -131,82 +131,54 @@ entry:
   %23 = inttoptr i64 %"p1#0" to i64* 
   %24 = getelementptr  i64, i64* %23, i64 0 
   %25 = load  i64, i64* %24 
-  %26 = trunc i64 16 to i32  
-  %27 = tail call ccc  i8*  @wybe_malloc(i32  %26)  
-  %28 = ptrtoint i8* %27 to i64 
-  %29 = inttoptr i64 %28 to i8* 
-  %30 = inttoptr i64 %17 to i8* 
-  %31 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %29, i8*  %30, i32  %31, i32  8, i1  0)  
-  %32 = inttoptr i64 %28 to i64* 
-  %33 = getelementptr  i64, i64* %32, i64 0 
-  store  i64 %25, i64* %33 
-  %34 = add   i64 %"p1#0", 8 
-  %35 = inttoptr i64 %34 to i64* 
-  %36 = getelementptr  i64, i64* %35, i64 0 
-  %37 = load  i64, i64* %36 
-  %38 = trunc i64 16 to i32  
-  %39 = tail call ccc  i8*  @wybe_malloc(i32  %38)  
-  %40 = ptrtoint i8* %39 to i64 
-  %41 = inttoptr i64 %40 to i8* 
-  %42 = inttoptr i64 %28 to i8* 
-  %43 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %41, i8*  %42, i32  %43, i32  8, i1  0)  
-  %44 = add   i64 %40, 8 
-  %45 = inttoptr i64 %44 to i64* 
-  %46 = getelementptr  i64, i64* %45, i64 0 
-  store  i64 %37, i64* %46 
-  ret i64 %40 
+  %26 = inttoptr i64 %17 to i64* 
+  %27 = getelementptr  i64, i64* %26, i64 0 
+  store  i64 %25, i64* %27 
+  %28 = add   i64 %"p1#0", 8 
+  %29 = inttoptr i64 %28 to i64* 
+  %30 = getelementptr  i64, i64* %29, i64 0 
+  %31 = load  i64, i64* %30 
+  %32 = add   i64 %17, 8 
+  %33 = inttoptr i64 %32 to i64* 
+  %34 = getelementptr  i64, i64* %33, i64 0 
+  store  i64 %31, i64* %34 
+  ret i64 %17 
 }
 
 
 define external ccc  i64 @"alias2.pcopy<0>"(i64  %"p1#0")    {
 entry:
-  %47 = trunc i64 16 to i32  
-  %48 = tail call ccc  i8*  @wybe_malloc(i32  %47)  
-  %49 = ptrtoint i8* %48 to i64 
-  %50 = inttoptr i64 %49 to i64* 
-  %51 = getelementptr  i64, i64* %50, i64 0 
-  store  i64 0, i64* %51 
-  %52 = add   i64 %49, 8 
+  %35 = trunc i64 16 to i32  
+  %36 = tail call ccc  i8*  @wybe_malloc(i32  %35)  
+  %37 = ptrtoint i8* %36 to i64 
+  %38 = inttoptr i64 %37 to i64* 
+  %39 = getelementptr  i64, i64* %38, i64 0 
+  store  i64 0, i64* %39 
+  %40 = add   i64 %37, 8 
+  %41 = inttoptr i64 %40 to i64* 
+  %42 = getelementptr  i64, i64* %41, i64 0 
+  store  i64 0, i64* %42 
+  %43 = inttoptr i64 %"p1#0" to i64* 
+  %44 = getelementptr  i64, i64* %43, i64 0 
+  %45 = load  i64, i64* %44 
+  %46 = inttoptr i64 %37 to i64* 
+  %47 = getelementptr  i64, i64* %46, i64 0 
+  store  i64 %45, i64* %47 
+  %48 = add   i64 %"p1#0", 8 
+  %49 = inttoptr i64 %48 to i64* 
+  %50 = getelementptr  i64, i64* %49, i64 0 
+  %51 = load  i64, i64* %50 
+  %52 = add   i64 %37, 8 
   %53 = inttoptr i64 %52 to i64* 
   %54 = getelementptr  i64, i64* %53, i64 0 
-  store  i64 0, i64* %54 
-  %55 = inttoptr i64 %"p1#0" to i64* 
-  %56 = getelementptr  i64, i64* %55, i64 0 
-  %57 = load  i64, i64* %56 
-  %58 = trunc i64 16 to i32  
-  %59 = tail call ccc  i8*  @wybe_malloc(i32  %58)  
-  %60 = ptrtoint i8* %59 to i64 
-  %61 = inttoptr i64 %60 to i8* 
-  %62 = inttoptr i64 %49 to i8* 
-  %63 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %61, i8*  %62, i32  %63, i32  8, i1  0)  
-  %64 = inttoptr i64 %60 to i64* 
-  %65 = getelementptr  i64, i64* %64, i64 0 
-  store  i64 %57, i64* %65 
-  %66 = add   i64 %"p1#0", 8 
-  %67 = inttoptr i64 %66 to i64* 
-  %68 = getelementptr  i64, i64* %67, i64 0 
-  %69 = load  i64, i64* %68 
-  %70 = trunc i64 16 to i32  
-  %71 = tail call ccc  i8*  @wybe_malloc(i32  %70)  
-  %72 = ptrtoint i8* %71 to i64 
-  %73 = inttoptr i64 %72 to i8* 
-  %74 = inttoptr i64 %60 to i8* 
-  %75 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %73, i8*  %74, i32  %75, i32  8, i1  0)  
-  %76 = add   i64 %72, 8 
-  %77 = inttoptr i64 %76 to i64* 
-  %78 = getelementptr  i64, i64* %77, i64 0 
-  store  i64 %69, i64* %78 
-  %80 = ptrtoint i8* getelementptr inbounds ([19 x i8], [19 x i8]* @alias2.79, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %80)  
+  store  i64 %51, i64* %54 
+  %56 = ptrtoint i8* getelementptr inbounds ([19 x i8], [19 x i8]* @alias2.55, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %56)  
   tail call ccc  void  @putchar(i8  10)  
-  %82 = ptrtoint i8* getelementptr inbounds ([17 x i8], [17 x i8]* @alias2.81, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %82)  
-  tail call ccc  void  @"position.printPosition<0>"(i64  %72)  
-  ret i64 %72 
+  %58 = ptrtoint i8* getelementptr inbounds ([17 x i8], [17 x i8]* @alias2.57, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %58)  
+  tail call ccc  void  @"position.printPosition<0>"(i64  %37)  
+  ret i64 %37 
 }
 --------------------------------------------------
  Module position
