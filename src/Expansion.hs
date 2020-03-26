@@ -32,7 +32,7 @@ procExpansion pspec def = do
     logMsg Expansion $ "*** Try to expand proc " ++ show pspec
     let ProcDefPrim proto body _ = procImpln def
     logMsg Expansion $ "    initial body: "
-        ++ show (ProcDefPrim proto body (ProcAnalysis initUnionFind))
+        ++ show (ProcDefPrim proto body (ProcAnalysis emptyDS))
     let tmp = procTmpCount def
     let (ins,outs) = inputOutputParams proto
     (tmp',used,body') <- buildBody tmp (Map.fromSet id outs) $
@@ -40,7 +40,7 @@ procExpansion pspec def = do
     let proto' = proto {primProtoParams = markParamNeededness used ins
                                           <$> primProtoParams proto}
     let def' = def { procImpln =
-                      ProcDefPrim proto' body' (ProcAnalysis initUnionFind),
+                      ProcDefPrim proto' body' (ProcAnalysis emptyDS),
                      procTmpCount = tmp' }
     if def /= def'
         then

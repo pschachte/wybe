@@ -29,7 +29,7 @@ AFTER EVERYTHING:
 
 
 simpleMerge > public (1 calls)
-0: simpleMerge(tl#0:mytree.tree, tr#0:mytree.tree, ?$#0:mytree.tree): AliasPairs: [($#0,tr#0)]
+0: simpleMerge(tl#0:mytree.tree, tr#0:mytree.tree, ?$#0:mytree.tree): AliasPairs: [($#0,tl#0),($#0,tr#0),(tl#0,tr#0)]
     foreign llvm icmp ne(tl#0:mytree.tree, 0:wybe.int, ?tmp$15#0:wybe.bool)
     case ~tmp$15#0:wybe.bool of
     0:
