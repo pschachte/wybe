@@ -116,8 +116,8 @@ type DisjointSet a = Set (Set a)
 
 emptyDS = Set.empty
 
-_findFristInSet :: (a -> Bool) -> Set a -> Maybe a
-_findFristInSet f = 
+_findOneInSet :: (a -> Bool) -> Set a -> Maybe a
+_findOneInSet f = 
     Set.foldr 
         (\x result -> 
             case result of
@@ -127,15 +127,15 @@ _findFristInSet f =
 
 addOneToDS :: Ord a => a -> DisjointSet a -> DisjointSet a
 addOneToDS x ds = 
-    case _findFristInSet (Set.member x) ds of
+    case _findOneInSet (Set.member x) ds of
         Just _ -> ds
         Nothing -> 
             Set.insert (Set.singleton x) ds
 
 unionTwoInDS :: Ord a => a -> a -> DisjointSet a -> DisjointSet a
 unionTwoInDS x y ds = 
-    let xSet = _findFristInSet (Set.member x) ds in 
-    let ySet = _findFristInSet (Set.member y) ds in 
+    let xSet = _findOneInSet (Set.member x) ds in 
+    let ySet = _findOneInSet (Set.member y) ds in 
         if (isJust xSet) && (xSet == ySet)
         then ds
         else 
@@ -162,7 +162,7 @@ combineTwoDS =
 
 removeOneFromDS :: Ord a => a -> DisjointSet a -> DisjointSet a
 removeOneFromDS x ds = 
-    case _findFristInSet (Set.member x) ds of 
+    case _findOneInSet (Set.member x) ds of 
         Nothing -> ds
         Just xSet -> 
             let xSet' = Set.delete x xSet in
@@ -178,7 +178,7 @@ removeFromDS set =
 
 connectedToOthersInDS :: Ord a => a -> DisjointSet a -> Bool
 connectedToOthersInDS x ds =
-    case _findFristInSet (Set.member x) ds of 
+    case _findOneInSet (Set.member x) ds of 
         Nothing -> False
         Just xSet -> Set.size xSet > 1
 
@@ -198,6 +198,6 @@ dsToTransitivePairs =
     Set.foldr
         (\singleSet result ->
             cartesianProduct singleSet singleSet
-            |> Set.union result |> Set.filter (\(a, b) -> a < b)
+            |> Set.union result |> Set.filter (uncurry (<))
             ) Set.empty
 
