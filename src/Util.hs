@@ -8,7 +8,8 @@
 module Util (sameLength, maybeNth, setMapInsert,
              fillLines, nop, sccElts, DisjointSet, 
              emptyDS, addOneToDS, unionTwoInDS, combineTwoDS, 
-             removeOneFromDS, removeFromDS, connectedToOthersInDS,
+             addConnectedGroupToDS, removeOneFromDS,
+             removeFromDS, connectedToOthersInDS,
              mapDS, filterDS, dsToTransitivePairs,
              cartProd) where
 
@@ -132,6 +133,16 @@ addOneToDS x ds =
         Nothing -> 
             Set.insert (Set.singleton x) ds
 
+
+addConnectedGroupToDS :: Ord a => [a] -> DisjointSet a -> DisjointSet a
+addConnectedGroupToDS l ds = 
+    case l of 
+        [] -> ds
+        x:xs -> 
+            let ds' = addOneToDS x ds in
+            List.foldl (flip (unionTwoInDS x)) ds' xs
+
+
 unionTwoInDS :: Ord a => a -> a -> DisjointSet a -> DisjointSet a
 unionTwoInDS x y ds = 
     let xSet = _findOneInSet (Set.member x) ds in 
@@ -141,23 +152,17 @@ unionTwoInDS x y ds =
         else 
             let (ds', newSet') = case xSet of 
                     Nothing -> (ds, Set.singleton x)
-                    Just xSet -> ((Set.delete xSet ds), xSet)
+                    Just xSet -> (Set.delete xSet ds, xSet)
             in
             let (ds'', newSet'') = case ySet of
                     Nothing -> (ds', Set.insert y newSet')
-                    Just ySet -> ((Set.delete ySet ds'), Set.union newSet' ySet)
+                    Just ySet -> (Set.delete ySet ds', Set.union newSet' ySet)
             in
                 Set.insert newSet'' ds''
 
 combineTwoDS :: Ord a => DisjointSet a -> DisjointSet a -> DisjointSet a
 combineTwoDS =
-    Set.foldr
-        (\singleSet resultDs ->
-            case Set.toList singleSet of
-                [] -> resultDs -- can't be empty
-                x:xs -> 
-                    let resultDs' = addOneToDS x resultDs in
-                    List.foldl (\ds y -> unionTwoInDS x y ds) resultDs' xs)
+    Set.foldr (\set ds -> addConnectedGroupToDS (Set.toList set) ds)
 
 
 removeOneFromDS :: Ord a => a -> DisjointSet a -> DisjointSet a
