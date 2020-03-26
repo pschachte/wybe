@@ -1,0 +1,38 @@
+# related to issue: https://github.com/pschachte/wybe/issues/23
+
+pub type intlist { pub [] | [|](head:int, tail:intlist) }
+
+pub def list_print(x:intlist) use !io {
+    if { x = [ ?h | ?t] :: 
+        !print(h)
+        !print(" ")
+        !list_print(t)
+    }
+}
+
+pub def list_println(x:intlist) use !io {
+    !list_print(x)
+    !println("")
+}
+
+?x = [1,2,3]
+?y = [0]
+!println("----------")
+!list_println(x)
+!list_println(y)
+
+if { tail(!y, x) ::
+    !println("----------")
+    !print("x: ")
+    !list_println(x)
+    !print("y: ")
+    !list_println(y)
+}
+
+if { head(!x, 999) ::
+    !println("----------")
+    !print("x: ")
+    !list_println(x)
+    !print("y: ")
+    !list_println(y)
+}
