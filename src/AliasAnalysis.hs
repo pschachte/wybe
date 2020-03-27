@@ -1,5 +1,5 @@
 --  File     : AliasAnalysis.hs
---  Author   : Ting Lu
+--  Author   : Ting Lu, Zed(Zijun) Chen
 --  Purpose  : Alias analysis for a single module
 --  Copyright: (c) 2018-2019 Ting Lu.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
@@ -24,10 +24,6 @@ import           Options       (LogSelection (Analysis))
 import           Util
 
 
-----------------------------------------------------------------
---                 Proc Level Aliasing Analysis
-----------------------------------------------------------------
--- PROC LEVEL ALIAS ANALYSIS
 -- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
 aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
 aliasSccBottomUp (AcyclicSCC single) = do
@@ -49,20 +45,6 @@ aliasSccBottomUp procs@(CyclicSCC multi) = do
     -- Aliasing is always changed after the first run, so cyclic procs are
     -- analysed at least twice.
     when (or changed) $ aliasSccBottomUp procs
-
-
--- | Generate aliasMap for procs
-currentAliasInfo :: SCC ProcSpec -> Compiler [AliasMap]
-currentAliasInfo (AcyclicSCC single) = do
-    def <- getProcDef single
-    let (ProcDefPrim _ _ analysis) = procImpln def
-    return [procArgAliasMap analysis]
-currentAliasInfo procs@(CyclicSCC multi) =
-    foldM (\info pspec -> do
-        def <- getProcDef pspec
-        let (ProcDefPrim _ _ analysis) = procImpln def
-        return $ info ++ [procArgAliasMap analysis]
-        ) [] multi
 
 
 -- XXX aliasProcBottomUp :: ProcSpec -> Compiler a
@@ -127,14 +109,66 @@ aliasedByPrims caller body initAliases = do
     -- (only process alias pairs incurred by move, access, cast)
     logAlias "\nAnalyse prims (aliasedByPrims):    "
     let aliasMap = List.foldr addOneToDS initAliases realParams
-    -- realParams <- protoRealParams caller
     foldM (aliasedByPrim realParams) aliasMap prims
+
+
+-- Recursively analyse forked body's prims
+-- PrimFork only appears at the end of a ProcBody
+-- PrimFork = NoFork | PrimFork {}
+aliasedByFork :: PrimProto -> ProcBody -> AliasMap -> Compiler AliasMap
+aliasedByFork caller body aliasMap = do
+    logAlias "\nAnalyse forks (aliasedByFork):"
+    let fork = bodyFork body
+    case fork of
+        PrimFork _ _ _ fBodies -> do
+            logAlias ">>> Forking:"
+            aliasMaps <- 
+                mapM (\currBody ->
+                        aliasedByPrims caller currBody aliasMap >>=
+                            aliasedByFork caller currBody
+                    ) fBodies
+            let aliasMap' = List.foldl combineTwoDS emptyDS aliasMaps
+            return aliasMap'
+        NoFork -> do
+            -- NoFork: analyse prims done
+            logAlias ">>> No fork."
+            return aliasMap
+
+
+aliasedByPrim :: [PrimVarName] -> AliasMap -> Placed Prim -> Compiler AliasMap
+aliasedByPrim realParams aliasMap = do
+    aliasMap' <- updateAliasedByPrim realParams aliasMap
+    return aliasMap'
+
+
+-- |Log a message, if we are logging optimisation activity.
+logAlias :: String -> Compiler ()
+logAlias = logMsg Analysis
+
+----------------------------------------------------------------
+--                 Proc Level Aliasing Analysis
+----------------------------------------------------------------
+-- Compute aliasMap on parameters for each procedure
+
+
+-- | Generate aliasMap for procs
+currentAliasInfo :: SCC ProcSpec -> Compiler [AliasMap]
+currentAliasInfo (AcyclicSCC single) = do
+    def <- getProcDef single
+    let (ProcDefPrim _ _ analysis) = procImpln def
+    return [procArgAliasMap analysis]
+currentAliasInfo procs@(CyclicSCC multi) =
+    foldM (\info pspec -> do
+        def <- getProcDef pspec
+        let (ProcDefPrim _ _ analysis) = procImpln def
+        return $ info ++ [procArgAliasMap analysis]
+        ) [] multi
 
 
 -- Build up alias pairs triggerred by proc calls
 -- realParams: caller's formal params
-aliasedByPrim :: [PrimVarName] -> AliasMap -> Placed Prim -> Compiler AliasMap
-aliasedByPrim realParams aliasMap prim =
+updateAliasedByPrim :: [PrimVarName] -> AliasMap -> Placed Prim -> Compiler AliasMap
+updateAliasedByPrim realParams aliasMap prim =
     case content prim of
         PrimCall spec args -> do
             -- | Analyse proc calls
@@ -166,29 +200,6 @@ aliasedByPrim realParams aliasMap prim =
             maybeAliasedVariables <- maybeAliasPrimArgs prim'
             aliasedArgsInSimplePrim realParams aliasMap maybeAliasedVariables
                                         (primArgs prim')
-
-
--- Recursively analyse forked body's prims
--- PrimFork only appears at the end of a ProcBody
--- PrimFork = NoFork | PrimFork {}
-aliasedByFork :: PrimProto -> ProcBody -> AliasMap -> Compiler AliasMap
-aliasedByFork caller body aliasMap = do
-    logAlias "\nAnalyse forks (aliasedByFork):"
-    let fork = bodyFork body
-    case fork of
-        PrimFork _ _ _ fBodies -> do
-            logAlias ">>> Forking:"
-            aliasMaps <- 
-                mapM (\currBody ->
-                        aliasedByPrims caller currBody aliasMap >>=
-                            aliasedByFork caller currBody
-                    ) fBodies
-            let aliasMap' = List.foldl combineTwoDS emptyDS aliasMaps
-            return aliasMap'
-        NoFork -> do
-            -- NoFork: analyse prims done
-            logAlias ">>> No fork."
-            return aliasMap
 
 
 -- Build up maybe aliased inputs and outputs triggered by move, access, cast
@@ -317,6 +328,13 @@ finalArgs realParams finalSet
 finalArgs _ finalSet _ = return finalSet
 
 
--- |Log a message, if we are logging optimisation activity.
-logAlias :: String -> Compiler ()
-logAlias = logMsg Analysis
+----------------------------------------------------------------
+--                 Global Level Aliasing Analysis
+----------------------------------------------------------------
+-- For each procedure, compute potential specialized versions 
+-- of the current procedure and list specialized versions of 
+-- other procedures that this procedure can make use of
+
+
+
+
