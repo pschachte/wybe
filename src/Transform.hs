@@ -41,9 +41,6 @@ transformProc def
         -- Update body while checking alias incurred by bodyfork
         body2 <- transformForks caller body1 aliaseMap1
 
-        -- Some logging
-        logTransform $ "\n^^^  after transform prims:    " ++ show aliaseMap1
-
         -- (4) Update procImpln with updated body prims
         return def { procImpln = ProcDefPrim caller body2 oldAnalysis }
 
@@ -153,17 +150,6 @@ mutateInstruction prim _ _ =  return prim
 -- aliased and is dead after this program point and the original destructive
 -- flag is not set to 1 yet
 _updateMutateForAlias :: AliasMap -> [PrimVarName] -> [PrimArg] -> Compiler [PrimArg]
-_updateMutateForAlias aliasMap inputParams
-    args@[fIn@ArgVar{argVarName=inName,argVarFinal=final1},
-          fOut, offset, ArgInt des typ,
-        size, offset2, mem@ArgVar{argVarName=memName,argVarFinal=final2}] =
-            -- When the val is also a pointer
-            if notElem inName inputParams
-                && not (connectedToOthersInDS inName aliasMap) && final1
-                && not (connectedToOthersInDS memName aliasMap) && final2
-                && des /= 1
-            then return [fIn, fOut, offset, ArgInt 1 typ, size, offset2, mem]
-            else return args
 _updateMutateForAlias aliasMap inputParams
     args@[fIn@ArgVar{argVarName=inName,argVarFinal=final},
           fOut, offset, ArgInt des typ,
