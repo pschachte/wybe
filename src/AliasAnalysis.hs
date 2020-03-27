@@ -25,6 +25,8 @@ import           Options       (LogSelection (Analysis))
 import           Util
 
 
+type AliasInfo = (AliasMap, MultiSpeczInfo)
+
 -- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
 aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
 aliasSccBottomUp (AcyclicSCC single) = do
@@ -79,69 +81,65 @@ aliasProcDef def
     | not (procInline def) = do
         let (ProcDefPrim caller body oldAnalysis) = procImpln def
         logAlias $ show caller
-        -- (1) Analysis of current caller's prims
-        aliasMap1 <- aliasedByPrims caller body emptyDS
-        -- (2) Analysis of caller's bodyFork
-        aliasMap2 <- aliasedByFork caller body aliasMap1
-        -- (3) Clean up summary of aliases by removing phantom params
-        realParams <- (Set.fromList . (primParamName <$>))
-                      <$> protoRealParams caller
-        -- ^realParams is a list of formal params of this caller
-        -- clean up
-        let aliasMap3 = filterDS (\x -> Set.member x realParams) aliasMap2
-                            |> removeSingletonFromDS
-        -- Some logging
-        logAlias $ "\n^^^  after analyse prims:    " ++ show aliasMap1
-        logAlias $ "^^^  after analyse forks:    " ++ show aliasMap2
-        logAlias $ "^^^  remove phantom params: " ++ show realParams
-        logAlias $ "^^^  alias of formal params: " ++ show aliasMap3
-        -- (4) Update proc analysis with new aliasPairs
+
+        -- Actual analysis
+        (aliasMap, multiSpeczInfo) <- 
+                aliasedByBody caller body (emptyDS, emptyMultiSpeczInfo)
+        
+        logAlias $ "~=~ multiSpeczInfo:" ++ show multiSpeczInfo 
+
+        aliasMap' <- completeAliasMap caller aliasMap
+        -- Update proc analysis with new aliasPairs
         let newAnalysis = oldAnalysis {
-                            procArgAliasMap = aliasMap3
+                            procArgAliasMap = aliasMap'
                         }
         return $ def { procImpln = ProcDefPrim caller body newAnalysis }
-aliasProcDef def = return def -- ^XXX return (def, False)
+aliasProcDef def = return def
+
+
+aliasedByBody :: PrimProto -> ProcBody -> AliasInfo -> Compiler AliasInfo
+aliasedByBody caller body aliasInfo =
+    aliasedByPrims caller body aliasInfo >>=
+    aliasedByFork caller body
 
 
 -- Check alias created by prims of caller proc
-aliasedByPrims :: PrimProto -> ProcBody -> AliasMap -> Compiler AliasMap
-aliasedByPrims caller body initAliases = do
+aliasedByPrims :: PrimProto -> ProcBody -> AliasInfo -> Compiler AliasInfo
+aliasedByPrims caller body aliasInfo = do
     realParams <- (primParamName <$>) <$> protoRealParams caller
     let prims = bodyPrims body
     -- Analyse simple prims:
     -- (only process alias pairs incurred by move, access, cast)
     logAlias "\nAnalyse prims (aliasedByPrims):    "
-    let aliasMap = List.foldr addOneToDS initAliases realParams
-    foldM (aliasedByPrim realParams) aliasMap prims
+    foldM (aliasedByPrim realParams) aliasInfo prims
 
 
 -- Recursively analyse forked body's prims
 -- PrimFork only appears at the end of a ProcBody
--- PrimFork = NoFork | PrimFork {}
-aliasedByFork :: PrimProto -> ProcBody -> AliasMap -> Compiler AliasMap
-aliasedByFork caller body aliasMap = do
+aliasedByFork :: PrimProto -> ProcBody -> AliasInfo -> Compiler AliasInfo
+aliasedByFork caller body aliasInfo = do
     logAlias "\nAnalyse forks (aliasedByFork):"
     let fork = bodyFork body
     case fork of
         PrimFork _ _ _ fBodies -> do
             logAlias ">>> Forking:"
-            aliasMaps <- 
-                mapM (\currBody ->
-                        aliasedByPrims caller currBody aliasMap >>=
-                            aliasedByFork caller currBody
-                    ) fBodies
+            aliasInfos <- 
+                mapM (\body' -> aliasedByBody caller body' aliasInfo) fBodies
+            let (aliasMaps, multiSpeczInfos) = unzip aliasInfos
             let aliasMap' = List.foldl combineTwoDS emptyDS aliasMaps
-            return aliasMap'
+            let multiSpeczInfo' = mergeMultiSpeczInfo multiSpeczInfos 
+            return (aliasMap', multiSpeczInfo')
         NoFork -> do
-            -- NoFork: analyse prims done
             logAlias ">>> No fork."
-            return aliasMap
+            return aliasInfo
 
 
-aliasedByPrim :: [PrimVarName] -> AliasMap -> Placed Prim -> Compiler AliasMap
-aliasedByPrim realParams aliasMap = do
-    aliasMap' <- updateAliasedByPrim realParams aliasMap
-    return aliasMap'
+aliasedByPrim :: [PrimVarName] -> AliasInfo -> Placed Prim -> Compiler AliasInfo
+aliasedByPrim realParams (aliasMap, multiSpeczInfo) prim = do
+    multiSpeczInfo' 
+        <- updateMultiSpeczInfoByPrim realParams (aliasMap, multiSpeczInfo) prim
+    aliasMap' <- updateAliasedByPrim realParams aliasMap prim
+    return (aliasMap', multiSpeczInfo')
 
 
 -- |Log a message, if we are logging optimisation activity.
@@ -152,7 +150,6 @@ logAlias = logMsg Analysis
 --                 Proc Level Aliasing Analysis
 ----------------------------------------------------------------
 -- Compute aliasMap on parameters for each procedure
-
 
 -- | Generate aliasMap for procs
 currentAliasInfo :: SCC ProcSpec -> Compiler [AliasMap]
@@ -166,6 +163,22 @@ currentAliasInfo procs@(CyclicSCC multi) =
         let (ProcDefPrim _ _ analysis) = procImpln def
         return $ info ++ [procArgAliasMap analysis]
         ) [] multi
+
+
+completeAliasMap :: PrimProto -> AliasMap -> Compiler AliasMap
+completeAliasMap caller aliasMap = do
+    -- Clean up summary of aliases by removing phantom params
+    -- and singletons
+    realParams <- (Set.fromList . (primParamName <$>))
+                    <$> protoRealParams caller
+    -- ^realParams is a list of formal params of this caller
+    let aliasMap' = filterDS (\x -> Set.member x realParams) aliasMap
+                        |> removeSingletonFromDS
+    -- Some logging
+    logAlias $ "^^^  after analyse:    " ++ show aliasMap
+    logAlias $ "^^^  remove phantom params: " ++ show realParams
+    logAlias $ "^^^  alias of formal params: " ++ show aliasMap'
+    return aliasMap'
 
 
 -- Build up alias pairs triggerred by proc calls
@@ -334,6 +347,27 @@ finalArgs _ finalSet _ = return finalSet
 -- of the current procedure and list specialized versions of 
 -- other procedures that this procedure can make use of
 
+type MultiSpeczInfo = Set PrimVarName
 
+emptyMultiSpeczInfo :: MultiSpeczInfo
+emptyMultiSpeczInfo = Set.empty
 
+mergeMultiSpeczInfo :: [MultiSpeczInfo] -> MultiSpeczInfo
+mergeMultiSpeczInfo = List.foldl Set.union Set.empty
 
+-- we say a real param is interesting if it can be updated
+-- destructively when it doesn't alias to anything from outside
+updateMultiSpeczInfoByPrim realParams (aliasMap, multiSpeczInfo) prim =
+    case content prim of
+        PrimCall spec args -> do
+            return multiSpeczInfo
+        PrimForeign "lpvm" "mutate" flags args -> do
+            let [fIn, _, _, _, _, _, mem] = args
+            let ArgVar{argVarName=inName, argVarFinal=final} = fIn
+            if elem inName realParams 
+                && Set.notMember inName multiSpeczInfo
+                -- whether it has alias (interesting)
+                && not (connectedToOthersInDS inName aliasMap) && final
+            then return $ Set.insert inName multiSpeczInfo
+            else return multiSpeczInfo
+        _ -> return multiSpeczInfo
