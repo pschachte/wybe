@@ -195,7 +195,7 @@ aliasedByFork caller body aliasMap = do
 -- instructions.
 -- Not to compute aliasing from mutate instructions with the assumption that we
 -- always try to do nondestructive update.
--- Returned triple ([PrimVarName], [PrimArg]) is (maybeAliasedVariables, primArgs)
+-- Retruns maybeAliasedVariables
 maybeAliasPrimArgs :: Prim -> Compiler [PrimVarName]
 maybeAliasPrimArgs (PrimForeign "lpvm" "access" _ args) =
     _maybeAliasPrimArgs args
@@ -203,10 +203,14 @@ maybeAliasPrimArgs (PrimForeign "lpvm" "cast" _ args) =
     _maybeAliasPrimArgs args
 maybeAliasPrimArgs (PrimForeign "llvm" "move" _ args) =
     _maybeAliasPrimArgs args
-maybeAliasPrimArgs prim@(PrimForeign "lpvm" "mutate" flags args) =
-    if "noalias" `elem` flags
-        then return []
-        else _maybeAliasPrimArgs args
+maybeAliasPrimArgs prim@(PrimForeign "lpvm" "mutate" flags args) = do
+    let [fIn, fOut, _, _, _, _, mem] = args
+    -- [fIn] is not alised to [fOut] when "noalias" flag is set
+    -- Primitive types will be removed in [_maybeAliasPrimArgs]
+    let args' =if "noalias" `elem` flags
+        then [fOut, mem]
+        else [fIn, fOut, mem]
+    _maybeAliasPrimArgs args'
 maybeAliasPrimArgs prim = return []
 
 

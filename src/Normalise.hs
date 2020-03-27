@@ -668,6 +668,9 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
     let detism = if numConsts + numNonConsts == 1 then Det else SemiDet
+        -- Set the "noalias" flag when all other fields (exclude the one
+        -- that is being changed) in this struct aren't [Address].
+        -- This flag is used in [AliasAnalysis.hs]
         otherPtrCount = if rep == Address then ptrCount-1 else ptrCount
         flags = if otherPtrCount == 0 then ["noalias"] else []
     in [-- The getter:
