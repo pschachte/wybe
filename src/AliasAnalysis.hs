@@ -20,6 +20,7 @@ import           Data.List     as List
 import           Data.Map      as Map
 import           Data.Set      as Set
 import           Data.Maybe    (catMaybes)
+import           Flow          ((|>))
 import           Options       (LogSelection (Analysis))
 import           Util
 
@@ -86,7 +87,9 @@ aliasProcDef def
         realParams <- (Set.fromList . (primParamName <$>))
                       <$> protoRealParams caller
         -- ^realParams is a list of formal params of this caller
+        -- clean up
         let aliasMap3 = filterDS (\x -> Set.member x realParams) aliasMap2
+                            |> removeSingletonFromDS
         -- Some logging
         logAlias $ "\n^^^  after analyse prims:    " ++ show aliasMap1
         logAlias $ "^^^  after analyse forks:    " ++ show aliasMap2
@@ -249,14 +252,10 @@ _maybeAliasPrimArgs args = do
 
 
 -- Helper: compare if two AliasMaps are different
--- Have to ensure the aliasing map is canonical by converting the map to Alias
--- Pairs because the root could be different in two maps whereas the alias info
--- are the same
 areDifferentMaps :: AliasMap -> AliasMap -> Bool
 areDifferentMaps aliasMap1 aliasMap2 =
-    let aliasPair1 = aliasMapToAliasPairs aliasMap1
-        aliasPair2 = aliasMapToAliasPairs aliasMap2
-    in aliasPair1 /= aliasPair2
+    -- The current implementation supports comparing directly
+    aliasMap1 /= aliasMap2
 
 
 -- Check Arg aliases in one of proc calls inside a ProcBody

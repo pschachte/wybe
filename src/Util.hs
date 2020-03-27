@@ -7,7 +7,8 @@
 
 module Util (sameLength, maybeNth, setMapInsert,
              fillLines, nop, sccElts, DisjointSet, 
-             emptyDS, addOneToDS, unionTwoInDS, combineTwoDS, 
+             emptyDS, addOneToDS, unionTwoInDS, 
+             combineTwoDS, removeSingletonFromDS,
              addConnectedGroupToDS, removeOneFromDS,
              removeFromDS, connectedToOthersInDS,
              mapDS, filterDS, dsToTransitivePairs) where
@@ -151,10 +152,15 @@ removeOneFromDS x ds =
                     then ds'
                     else  Set.insert xSet' ds'
 
+
 removeFromDS :: Ord a => Set a -> DisjointSet a -> DisjointSet a
 removeFromDS set = 
     filterDS (\x -> not $ Set.member x set)
 
+
+removeSingletonFromDS :: Ord a => DisjointSet a -> DisjointSet a
+removeSingletonFromDS =
+    Set.filter (\x -> Set.size x > 1)
 
 connectedToOthersInDS :: Ord a => a -> DisjointSet a -> Bool
 connectedToOthersInDS x ds =
