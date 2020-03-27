@@ -7,7 +7,7 @@
 
 module AliasAnalysis (aliasSccBottomUp,
                         currentAliasInfo,
-                        areDifferentMaps,
+                        isAliasInfoChanged,
                         maybeAliasPrimArgs,
                         aliasedArgsInSimplePrim,
                         aliasedArgsInPrimCall,
@@ -25,7 +25,7 @@ import           Options       (LogSelection (Analysis))
 import           Util
 
 
-type AliasInfo = (AliasMap, MultiSpeczInfo)
+type AliasInfo = (AliasMap, AliasMultiSpeczInfo)
 
 -- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
 aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
@@ -50,6 +50,28 @@ aliasSccBottomUp procs@(CyclicSCC multi) = do
     when (or changed) $ aliasSccBottomUp procs
 
 
+currentAliasInfo :: SCC ProcSpec -> Compiler [AliasInfo]
+currentAliasInfo (AcyclicSCC single) = do
+    def <- getProcDef single
+    let (ProcDefPrim _ _ analysis) = procImpln def
+    return [extractAliasInfoFromAnalysis analysis]
+currentAliasInfo procs@(CyclicSCC multi) =
+    foldM (\info pspec -> do
+        def <- getProcDef pspec
+        let (ProcDefPrim _ _ analysis) = procImpln def
+        return $ info ++ [extractAliasInfoFromAnalysis analysis]
+        ) [] multi
+
+
+extractAliasInfoFromAnalysis :: ProcAnalysis -> AliasInfo
+extractAliasInfoFromAnalysis analysis = 
+    (procArgAliasMap analysis, procArgAliasMultiSpeczInfo analysis)
+
+-- This comparison is CRUCIAL. The underlying data struct should
+-- handle equal CORRECTLY.
+isAliasInfoChanged :: AliasInfo -> AliasInfo -> Bool
+isAliasInfoChanged = (/=)
+
 -- XXX aliasProcBottomUp :: ProcSpec -> Compiler a
 aliasProcBottomUp :: ProcSpec -> Compiler Bool
 aliasProcBottomUp pspec = do
@@ -64,11 +86,13 @@ aliasProcBottomUp pspec = do
     -- Get the new analysis info from the updated proc
     newDef <- getProcDef pspec
     let (ProcDefPrim _ _ newAnalysis) = procImpln newDef
-    -- And compare if the alias map changed.
+    -- And compare if the [AliasInfo] changed.
+    let oldAliasInfo = extractAliasInfoFromAnalysis oldAnalysis
+    let newAliasInfo = extractAliasInfoFromAnalysis newAnalysis
     logAlias "================================================="
-    logAlias $ "old: " ++ show (procArgAliasMap oldAnalysis)
-    logAlias $ "new: " ++ show (procArgAliasMap newAnalysis)
-    return $ areDifferentMaps (procArgAliasMap oldAnalysis) (procArgAliasMap newAnalysis)
+    logAlias $ "old: " ++ show oldAliasInfo
+    logAlias $ "new: " ++ show newAliasInfo
+    return $ isAliasInfoChanged oldAliasInfo newAliasInfo
     -- ^XXX wrong way to do this. Need to change type signatures of a bunch of
     -- functions start from aliasProcDef which is called by updateProcDefM
 
@@ -84,14 +108,15 @@ aliasProcDef def
 
         -- Actual analysis
         (aliasMap, multiSpeczInfo) <- 
-                aliasedByBody caller body (emptyDS, emptyMultiSpeczInfo)
+                aliasedByBody caller body (emptyDS, emptyAliasMultiSpeczInfo)
         
         logAlias $ "~=~ multiSpeczInfo:" ++ show multiSpeczInfo 
 
         aliasMap' <- completeAliasMap caller aliasMap
         -- Update proc analysis with new aliasPairs
         let newAnalysis = oldAnalysis {
-                            procArgAliasMap = aliasMap'
+                            procArgAliasMap = aliasMap',
+                            procArgAliasMultiSpeczInfo = multiSpeczInfo
                         }
         return $ def { procImpln = ProcDefPrim caller body newAnalysis }
 aliasProcDef def = return def
@@ -150,19 +175,6 @@ logAlias = logMsg Analysis
 --                 Proc Level Aliasing Analysis
 ----------------------------------------------------------------
 -- Compute aliasMap on parameters for each procedure
-
--- | Generate aliasMap for procs
-currentAliasInfo :: SCC ProcSpec -> Compiler [AliasMap]
-currentAliasInfo (AcyclicSCC single) = do
-    def <- getProcDef single
-    let (ProcDefPrim _ _ analysis) = procImpln def
-    return [procArgAliasMap analysis]
-currentAliasInfo procs@(CyclicSCC multi) =
-    foldM (\info pspec -> do
-        def <- getProcDef pspec
-        let (ProcDefPrim _ _ analysis) = procImpln def
-        return $ info ++ [procArgAliasMap analysis]
-        ) [] multi
 
 
 completeAliasMap :: PrimProto -> AliasMap -> Compiler AliasMap
@@ -264,13 +276,6 @@ _maybeAliasPrimArgs args = do
         _   -> return Nothing 
 
 
--- Helper: compare if two AliasMaps are different
-areDifferentMaps :: AliasMap -> AliasMap -> Bool
-areDifferentMaps aliasMap1 aliasMap2 =
-    -- The current implementation supports comparing directly
-    aliasMap1 /= aliasMap2
-
-
 -- Check Arg aliases in one of proc calls inside a ProcBody
 -- realParams: caller's formal params
 -- primArgs: argument in current prim that being analysed
@@ -347,12 +352,8 @@ finalArgs _ finalSet _ = return finalSet
 -- of the current procedure and list specialized versions of 
 -- other procedures that this procedure can make use of
 
-type MultiSpeczInfo = Set PrimVarName
 
-emptyMultiSpeczInfo :: MultiSpeczInfo
-emptyMultiSpeczInfo = Set.empty
-
-mergeMultiSpeczInfo :: [MultiSpeczInfo] -> MultiSpeczInfo
+mergeMultiSpeczInfo :: [AliasMultiSpeczInfo] -> AliasMultiSpeczInfo
 mergeMultiSpeczInfo = List.foldl Set.union Set.empty
 
 -- we say a real param is interesting if it can be updated
