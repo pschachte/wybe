@@ -55,9 +55,9 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  {i64, i64, i64} @"simple_loop.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
+define external fastcc  {i64, i64, i64} @"simple_loop.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
-  %1 = tail call ccc  {i64, i64, i64}  @"simple_loop.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")  
+  %1 = tail call fastcc  {i64, i64, i64}  @"simple_loop.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")  
   %2 = extractvalue {i64, i64, i64} %1, 0 
   %3 = extractvalue {i64, i64, i64} %1, 1 
   %4 = extractvalue {i64, i64, i64} %1, 2 
@@ -68,14 +68,14 @@ entry:
 }
 
 
-define external ccc  {i64, i64, i64} @"simple_loop.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
+define external fastcc  {i64, i64, i64} @"simple_loop.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
   %"c#0" = tail call ccc  i8  @read_char()  
   %"tmp$1#0" = icmp ne i8 %"c#0", 97 
   br i1 %"tmp$1#0", label %if.then, label %if.else 
 if.then:
   tail call ccc  void  @putchar(i8  %"c#0")  
-  %8 = tail call ccc  {i64, i64, i64}  @"simple_loop.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")  
+  %8 = tail call fastcc  {i64, i64, i64}  @"simple_loop.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")  
   %9 = extractvalue {i64, i64, i64} %8, 0 
   %10 = extractvalue {i64, i64, i64} %8, 1 
   %11 = extractvalue {i64, i64, i64} %8, 2 

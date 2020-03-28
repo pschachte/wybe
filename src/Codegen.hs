@@ -14,8 +14,8 @@ module Codegen (
   execCodegen, emptyCodegen, evalTranslation, getCount, putCount,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
-  call, externf, ret, globalDefine, external, phi, br, cbr,
-  getBlock, retNothing, fresh,
+  callWybe, callC, externf, ret, globalDefine, externalC, externalWybe,
+  phi, br, cbr, getBlock, retNothing, fresh,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, localVar, preservingSymtab,
   operandType, doAlloca, doLoad, bitcast, inttoptr, ptrtoint,
@@ -229,22 +229,36 @@ emptyModule label = defaultModule { moduleName = fromString label }
 globalDefine :: Type -> String -> [(Type, Name)] -> [BasicBlock] -> Definition
 globalDefine rettype label argtypes body
              = GlobalDefinition $ functionDefaults {
-                 name = Name $ fromString label
+                 G.callingConvention = CC.Fast
+               , name = Name $ fromString label
                , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes],
                                False)
                , returnType = rettype
                , basicBlocks = body
                }
 
--- | 'external' creates a global declaration of an external function
-external :: Type -> String -> [(Type, Name)] -> Definition
-external rettype label argtypes
+-- | create a global declaration of an external function for the specified
+-- calling convention
+external :: CC.CallingConvention -> Type -> String -> [(Type, Name)]
+         -> Definition
+external cconv rettype label argtypes
     = GlobalDefinition $ functionDefaults {
-        name = Name $ fromString label
+        G.callingConvention = cconv
+      , name = Name $ fromString label
       , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes], False)
       , returnType = rettype
       , basicBlocks = []
       }
+
+
+-- | 'externalC' creates a global declaration of an external C function
+externalC :: Type -> String -> [(Type, Name)] -> Definition
+externalC = external CC.C
+
+
+-- | 'externalC' creates a global declaration of an external C function
+externalWybe :: Type -> String -> [(Type, Name)] -> Definition
+externalWybe = external CC.Fast
 
 
 ----------------------------------------------------------------------------
@@ -550,11 +564,14 @@ cons = ConstantOperand
 
 -- * Memory effecting instructions
 
--- | The 'call' instruction represents a simple function call.
--- TODO: Look into and make a TCO version of the function
--- TODO: Look into calling conventions (is fast cc alright?)
-call :: Operand -> [Operand] -> Instruction
-call fn args = Call (Just Tail) CC.C [] (Right fn) (toArgs args) [] []
+-- | The 'call' instruction represents a simple function call to wybe code
+callWybe :: Operand -> [Operand] -> Instruction
+callWybe fn args = Call (Just Tail) CC.Fast [] (Right fn) (toArgs args) [] []
+
+-- | A foreign call instruction, using C calling conventions
+callC :: Operand -> [Operand] -> Instruction
+callC fn args = Call (Just Tail) CC.C [] (Right fn) (toArgs args) [] []
+
 
 toArgs :: [Operand] -> [(Operand, [A.ParameterAttribute])]
 toArgs xs = map (\x -> (x, [])) xs

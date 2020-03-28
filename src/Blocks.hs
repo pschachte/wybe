@@ -504,7 +504,7 @@ cgen prim@(PrimCall pspec args) = do
     inops <- mapM cgenArg inArgs
     logCodegen $ "Translated inputs = " ++ show inops
     let ins =
-          call
+          callWybe
           (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) nm)
           inops
     logCodegen $ "Translated ins = " ++ show ins
@@ -537,7 +537,7 @@ cgen prim@(PrimForeign lang name flags args) = do
     outty <- lift $ primReturnType outArgs
     -- XXX this ignores lang and just uses C calling conventions for all calls
     let ins =
-          call
+          callC
           (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
           inops
     addInstruction ins outArgs
@@ -1126,7 +1126,7 @@ declareExtern (PrimForeign "c" name _ args) = do
     let (inArgs,outArgs) = partitionArgs args
     fnargs <- mapM makeExArg $ zip [1..] inArgs
     retty <- primReturnType outArgs
-    let ex = external retty name fnargs
+    let ex = externalC retty name fnargs
     return ex
 
 declareExtern (PrimForeign otherlang name _ _) =
@@ -1137,7 +1137,7 @@ declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
     let (inArgs,outArgs) = partitionArgs args
     retty <- primReturnType outArgs
     fnargs <- mapM makeExArg $ zip [1..] inArgs
-    return $ external retty (show pspec) fnargs
+    return $ externalWybe retty (show pspec) fnargs
 
 declareExtern (PrimTest _) = shouldnt "Can't declare extern for PrimNop."
 
@@ -1153,14 +1153,14 @@ makeExArg (index,arg) = do
 mallocExtern :: LLVMAST.Definition
 mallocExtern =
     let ext_arg = [(LLVMAST.IntegerType 32, LLVMAST.Name $ toSBString "size")]
-    in external (ptr_t (int_c 8)) "wybe_malloc" ext_arg
+    in externalC (ptr_t (int_c 8)) "wybe_malloc" ext_arg
 
 
 -- | Externs for any intrinsics we might need.  For now, just memcpy.
 -- Intrinsics are built in to LLVM, so they're always available.
 intrinsicExterns :: [LLVMAST.Definition]
 intrinsicExterns =
-    [external void_t "llvm.memcpy.p0i8.p0i8.i32" [
+    [externalC void_t "llvm.memcpy.p0i8.p0i8.i32" [
         (ptr_t (int_c 8), LLVMAST.Name $ toSBString "dest"),
         (ptr_t (int_c 8), LLVMAST.Name $ toSBString "src"),
         (LLVMAST.IntegerType 32, LLVMAST.Name $ toSBString "len"),
@@ -1272,7 +1272,7 @@ callWybeMalloc size = do
                  ++ " to " ++ show int_t
     inops <- (:[]) <$> doCast sizeOp sizeTy int_t
     let ins =
-          call
+          callC
           (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) fnName)
           inops
     instr outTy ins
@@ -1296,7 +1296,7 @@ callMemCpy dst src bytes = do
                  cons (C.Int 32 $ fromIntegral wordSizeBytes),
                  cons (C.Int 1 0)]
     let ins =
-          call
+          callC
           (externf (ptr_t (FunctionType void_t (typeOf <$> inops) False))
            fnName)
           inops

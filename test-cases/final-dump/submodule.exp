@@ -70,7 +70,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  void @"submodule.privatetest.hidden<0>"()    {
+define external fastcc  void @"submodule.privatetest.hidden<0>"()    {
 entry:
   %2 = ptrtoint i8* getelementptr inbounds ([33 x i8], [33 x i8]* @submodule.privatetest.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
@@ -78,7 +78,7 @@ entry:
 }
 
 
-define external ccc  void @"submodule.privatetest.semi_hidden<0>"()    {
+define external fastcc  void @"submodule.privatetest.semi_hidden<0>"()    {
 entry:
   %4 = ptrtoint i8* getelementptr inbounds ([32 x i8], [32 x i8]* @submodule.privatetest.3, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %4)  
@@ -128,7 +128,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  void @"submodule.publictest.semi_visible<0>"()    {
+define external fastcc  void @"submodule.publictest.semi_visible<0>"()    {
 entry:
   %2 = ptrtoint i8* getelementptr inbounds ([32 x i8], [32 x i8]* @submodule.publictest.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
@@ -136,7 +136,7 @@ entry:
 }
 
 
-define external ccc  void @"submodule.publictest.visible<0>"()    {
+define external fastcc  void @"submodule.publictest.visible<0>"()    {
 entry:
   %4 = ptrtoint i8* getelementptr inbounds ([31 x i8], [31 x i8]* @submodule.publictest.3, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %4)  
