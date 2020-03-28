@@ -11,12 +11,16 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public inline (0 calls)
-0: (argc#0:wybe.int, ?argc#1:wybe.int, argv#0:wybe.int, ?argv#1:wybe.int, exit_code#0:wybe.int, ?exit_code#1:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom): AliasPairs: []
+0: (argc#0:wybe.int, ?argc#1:wybe.int, argv#0:wybe.int, ?argv#1:wybe.int, exit_code#0:wybe.int, ?exit_code#1:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     simple_loop.gen$1<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, ~io#0:wybe.phantom, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom) @simple_loop:1:1
 
 
 gen$1 > (2 calls)
-0: gen$1(argc#0:wybe.int, argv#0:wybe.int, exit_code#0:wybe.int, io#0:wybe.phantom, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#3:wybe.phantom): AliasPairs: []
+0: gen$1(argc#0:wybe.int, argv#0:wybe.int, exit_code#0:wybe.int, io#0:wybe.phantom, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#3:wybe.phantom):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign c read_char(?c#0:wybe.char, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
     foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$1#0:wybe.bool) @wybe:nn:nn
     case ~tmp$1#0:wybe.bool of
@@ -33,7 +37,9 @@ gen$1 > (2 calls)
 
 
 gen$2 > inline (1 calls)
-0: gen$2(argc#0:wybe.int, argv#0:wybe.int, [c#0:wybe.char], exit_code#0:wybe.int, io#0:wybe.phantom, [?argc#0:wybe.int], [?argv#0:wybe.int], [?exit_code#0:wybe.int], [?io#0:wybe.phantom]): AliasPairs: []
+0: gen$2(argc#0:wybe.int, argv#0:wybe.int, [c#0:wybe.char], exit_code#0:wybe.int, io#0:wybe.phantom, [?argc#0:wybe.int], [?argv#0:wybe.int], [?exit_code#0:wybe.int], [?io#0:wybe.phantom]):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
 
   LLVM code       :
 
