@@ -243,11 +243,11 @@ makeGlobalDefinition pname proto bls = do
     let label0 = modName ++ "." ++ pname
     -- For the top-level main program
     let isMain = label0 == ".<0>"
-    let label  = if isMain then "main" else label0
+    let (label,isForeign)  = if isMain then ("main",True) else (label0,False)
     let inputs = List.filter isInputParam params
     fnargs <- mapM makeFnArg inputs
     retty <- if isMain then return int_t else primOutputType params
-    return $ globalDefine retty label fnargs bls
+    return $ globalDefine isForeign retty label fnargs bls
 
 
 -- | Predicate to check if a primitive's parameter is of input flow (input)

@@ -225,17 +225,21 @@ emptyModule label = defaultModule { moduleName = fromString label }
 
 -- | Create a global Function Definition to store in the LLVMAST.Module.
 -- A Definition body is a list of BasicBlocks. A LPVM procedure roughly
--- correspond to this global function definition.
-globalDefine :: Type -> String -> [(Type, Name)] -> [BasicBlock] -> Definition
-globalDefine rettype label argtypes body
+-- correspond to this global function definition.  isForeign means the
+-- function will be called from foreign code, so it should use C calling
+-- conventions.
+globalDefine :: Bool -> Type -> String -> [(Type, Name)]
+             -> [BasicBlock] -> Definition
+globalDefine isForeign rettype label argtypes body
              = GlobalDefinition $ functionDefaults {
-                 G.callingConvention = CC.Fast
+                 G.callingConvention = if isForeign then CC.C else CC.Fast
                , name = Name $ fromString label
                , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes],
                                False)
                , returnType = rettype
                , basicBlocks = body
                }
+
 
 -- | create a global declaration of an external function for the specified
 -- calling convention
