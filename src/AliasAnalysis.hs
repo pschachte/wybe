@@ -110,8 +110,6 @@ aliasProcDef def
         (aliasMap, multiSpeczInfo) <- 
                 aliasedByBody caller body (emptyDS, emptyAliasMultiSpeczInfo)
         
-        logAlias $ "~=~ multiSpeczInfo:" ++ show multiSpeczInfo 
-
         aliasMap' <- completeAliasMap caller aliasMap
         -- Update proc analysis with new aliasPairs
         let newAnalysis = oldAnalysis {
@@ -161,9 +159,9 @@ aliasedByFork caller body aliasInfo = do
 
 aliasedByPrim :: [PrimVarName] -> AliasInfo -> Placed Prim -> Compiler AliasInfo
 aliasedByPrim realParams (aliasMap, multiSpeczInfo) prim = do
+    aliasMap' <- updateAliasedByPrim realParams aliasMap prim
     multiSpeczInfo' 
         <- updateMultiSpeczInfoByPrim realParams (aliasMap, multiSpeczInfo) prim
-    aliasMap' <- updateAliasedByPrim realParams aliasMap prim
     return (aliasMap', multiSpeczInfo')
 
 
@@ -212,7 +210,7 @@ updateAliasedByPrim realParams aliasMap prim =
             let calleeArgsAliases = 
                     mapDS (\x -> 
                         case Map.lookup x paramArgMap of 
-                            Nothing -> x -- shouldn't happen
+                            Nothing -> shouldnt "invalid [paramArgMap]"
                             Just y -> y
                     ) calleeParamAliases
             combined <- aliasedArgsInPrimCall calleeArgsAliases realParams
@@ -361,14 +359,43 @@ mergeMultiSpeczInfo = List.foldl Set.union Set.empty
 updateMultiSpeczInfoByPrim realParams (aliasMap, multiSpeczInfo) prim =
     case content prim of
         PrimCall spec args -> do
-            return multiSpeczInfo
+            calleeDef <- getProcDef spec
+            let (ProcDefPrim calleeProto _ analysis) = procImpln calleeDef
+            let calleeMultiSpeczInfo = procArgAliasMultiSpeczInfo analysis
+            let interestingArgWithCalleeParam = 
+                    List.filter (\(arg, param) -> 
+                        Set.member param calleeMultiSpeczInfo
+                        && isArgVarInteresting aliasMap arg
+                    ) (pairArgVarWithParam args calleeProto)
+            logAlias $ "interestingArgWithCalleeParam: " ++ show interestingArgWithCalleeParam
+            let interestingParams = 
+                    interestingArgWithCalleeParam
+                    |> List.map (argVarName . fst)
+                    |> List.filter (flip List.elem realParams)
+            unless (List.null interestingParams) $ logAlias $ "Found interesting params: " 
+                        ++ show interestingParams
+            let multiSpeczInfo' = 
+                    List.foldr Set.insert multiSpeczInfo interestingParams
+            return multiSpeczInfo'
         PrimForeign "lpvm" "mutate" flags args -> do
-            let [fIn, _, _, _, _, _, mem] = args
-            let ArgVar{argVarName=inName, argVarFinal=final} = fIn
-            if elem inName realParams 
-                && Set.notMember inName multiSpeczInfo
-                -- whether it has alias (interesting)
-                && not (connectedToOthersInDS inName aliasMap) && final
-            then return $ Set.insert inName multiSpeczInfo
+            let [fIn, _, _, _, _, _, _] = args
+            let ArgVar{argVarName=inName} = fIn
+            if List.elem inName realParams 
+                && isArgVarInteresting aliasMap fIn
+            then do 
+                logAlias $ "Found interesting param: " ++ show inName
+                return $ Set.insert inName multiSpeczInfo
             else return multiSpeczInfo
         _ -> return multiSpeczInfo
+
+
+pairArgVarWithParam :: [PrimArg] -> PrimProto -> [(PrimArg, PrimVarName)]
+pairArgVarWithParam args proto =
+    let formalParamNames = primProtoParamNames proto in
+    List.zip args formalParamNames
+
+isArgVarInteresting :: AliasMap -> PrimArg -> Bool
+isArgVarInteresting aliasMap 
+            ArgVar{argVarName=inName, argVarFinal=final} =
+    not (connectedToOthersInDS inName aliasMap) && final 
+isArgVarInteresting _aliasMap _ = False
