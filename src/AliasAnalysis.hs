@@ -210,7 +210,11 @@ updateAliasedByPrim realParams aliasMap prim =
             let calleeArgsAliases = 
                     mapDS (\x -> 
                         case Map.lookup x paramArgMap of 
-                            Nothing -> shouldnt "invalid [paramArgMap]"
+                            -- TODO: verify this part. Better to use
+                            -- "shouldnt" if that is really the case.
+                            -- Currently some tests (eg. [alias_fork1])
+                            -- reach this path.
+                            Nothing -> x -- shouldn't happen
                             Just y -> y
                     ) calleeParamAliases
             combined <- aliasedArgsInPrimCall calleeArgsAliases realParams

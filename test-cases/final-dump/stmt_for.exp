@@ -1,3 +1,0 @@
-Internal error: Generator expression producing unexpected vars
-CallStack (from HasCallStack):
-  error, called at src/AST.hs:2600:17 in main:AST

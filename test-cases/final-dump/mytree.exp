@@ -25,13 +25,17 @@ AFTER EVERYTHING:
   procs           : 
 
 printTree > public inline (0 calls)
-0: printTree(t#0:mytree.tree, io#0:wybe.phantom, ?io#2:wybe.phantom): AliasPairs: []
+0: printTree(t#0:mytree.tree, io#0:wybe.phantom, ?io#2:wybe.phantom):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     mytree.printTree1<0>(~t#0:mytree.tree, "{":wybe.string, ?%prefix#1:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @mytree:8:10
     foreign c print_string("}":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
 
 
 printTree1 > public (3 calls)
-0: printTree1(t#0:mytree.tree, prefix#0:wybe.string, ?prefix#3:wybe.string, io#0:wybe.phantom, ?io#4:wybe.phantom): AliasPairs: [(prefix#0,prefix#3)]
+0: printTree1(t#0:mytree.tree, prefix#0:wybe.string, ?prefix#3:wybe.string, io#0:wybe.phantom, ?io#4:wybe.phantom):
+ AliasPairs: [(prefix#0,prefix#3)]
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne(t#0:mytree.tree, 0:wybe.int, ?tmp$2#0:wybe.bool)
     case ~tmp$2#0:wybe.bool of
     0:
@@ -135,7 +139,9 @@ if.else:
   procs           : 
 
 /= > public inline test (0 calls)
-0: /=($left#0:mytree.tree, $right#0:mytree.tree, ?$$#0:wybe.bool): AliasPairs: []
+0: /=($left#0:mytree.tree, $right#0:mytree.tree, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     mytree.tree.=<0>(~$left#0:mytree.tree, ~$right#0:mytree.tree, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
     0:
@@ -147,7 +153,9 @@ if.else:
 
 
 = > public test (9 calls)
-0: =($left#0:mytree.tree, $right#0:mytree.tree, ?$$#0:wybe.bool): AliasPairs: []
+0: =($left#0:mytree.tree, $right#0:mytree.tree, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm cast($left#0:mytree.tree, ?tmp$0#0:!wybe.int)
     foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -194,12 +202,16 @@ if.else:
 
 
 empty > public inline (0 calls)
-0: empty(?$#0:mytree.tree): AliasPairs: []
+0: empty(?$#0:mytree.tree):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(0:mytree.tree, ?$#0:mytree.tree)
 
 
 key > public inline test (0 calls)
-0: key($rec#0:mytree.tree, ?$#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+0: key($rec#0:mytree.tree, ?$#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:mytree.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -210,7 +222,9 @@ key > public inline test (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 key > public inline test (0 calls)
-1: key($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+1: key($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:mytree.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -224,7 +238,9 @@ key > public inline test (0 calls)
 
 
 left > public inline test (0 calls)
-0: left($rec#0:mytree.tree, ?$#0:mytree.tree, ?$$#0:wybe.bool): AliasPairs: []
+0: left($rec#0:mytree.tree, ?$#0:mytree.tree, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:mytree.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -235,7 +251,9 @@ left > public inline test (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 left > public inline test (0 calls)
-1: left($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:mytree.tree, ?$$#0:wybe.bool): AliasPairs: []
+1: left($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:mytree.tree, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:mytree.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -249,13 +267,17 @@ left > public inline test (0 calls)
 
 
 node > public inline (0 calls)
-0: node(left#0:mytree.tree, key#0:wybe.int, right#0:mytree.tree, ?$#0:mytree.tree): AliasPairs: []
+0: node(left#0:mytree.tree, key#0:wybe.int, right#0:mytree.tree, ?$#0:mytree.tree):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm alloc(24:wybe.int, ?$rec#0:!mytree.tree)
     foreign lpvm mutate(~%$rec#0:mytree.tree, ?%$rec#1:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~left#0:mytree.tree)
     foreign lpvm mutate(~%$rec#1:mytree.tree, ?%$rec#2:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~key#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:mytree.tree, ?%$#0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right#0:mytree.tree)
 node > public inline test (9 calls)
-1: node(?left#0:mytree.tree, ?key#0:wybe.int, ?right#0:mytree.tree, $#0:mytree.tree, ?$$#0:wybe.bool): AliasPairs: []
+1: node(?left#0:mytree.tree, ?key#0:wybe.int, ?right#0:mytree.tree, $#0:mytree.tree, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($#0:mytree.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -270,7 +292,9 @@ node > public inline test (9 calls)
 
 
 right > public inline test (0 calls)
-0: right($rec#0:mytree.tree, ?$#0:mytree.tree, ?$$#0:wybe.bool): AliasPairs: []
+0: right($rec#0:mytree.tree, ?$#0:mytree.tree, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:mytree.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -281,7 +305,9 @@ right > public inline test (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 right > public inline test (0 calls)
-1: right($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:mytree.tree, ?$$#0:wybe.bool): AliasPairs: []
+1: right($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:mytree.tree, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:mytree.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
