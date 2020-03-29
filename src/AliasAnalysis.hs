@@ -371,12 +371,25 @@ updateMultiSpeczInfoByPrim realParams (aliasMap, multiSpeczInfo) prim =
                         Set.member param calleeMultiSpeczInfo
                         && isArgVarInteresting aliasMap arg
                     ) (pairArgVarWithParam args calleeProto)
-            logAlias $ "interestingArgWithCalleeParam: " ++ show interestingArgWithCalleeParam
+            -- If a variable is in this list more than once, then it should
+            -- be removed since it's aliased.
+            let interestingArgWithCalleeParam' = 
+                    List.filter (\(arg, param) ->
+                        let count = 
+                                interestingArgWithCalleeParam
+                                |> List.filter ((arg ==) . fst) 
+                                |> List.length
+                        in
+                            count == 1
+                    ) interestingArgWithCalleeParam
+            logAlias $ "interestingArgWithCalleeParam: " 
+                            ++ show interestingArgWithCalleeParam'
             let interestingParams = 
-                    interestingArgWithCalleeParam
+                    interestingArgWithCalleeParam'
                     |> List.map (argVarName . fst)
                     |> List.filter (flip List.elem realParams)
-            unless (List.null interestingParams) $ logAlias $ "Found interesting params: " 
+            unless (List.null interestingParams) 
+                        $ logAlias $ "Found interesting params: " 
                         ++ show interestingParams
             let multiSpeczInfo' = 
                     List.foldr Set.insert multiSpeczInfo interestingParams
