@@ -83,19 +83,19 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  void @"alias5.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
+define external fastcc  void @"alias5.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
-  tail call ccc  void  @"alias5.bar<0>"()  
+  tail call fastcc  void  @"alias5.bar<0>"()  
   ret void 
 }
 
 
-define external ccc  void @"alias5.bar<0>"()    {
+define external fastcc  void @"alias5.bar<0>"()    {
 entry:
-  %1 = tail call ccc  {i64, i64}  @"alias5.replicate1<0>"(i64  100, i64  800)  
+  %1 = tail call fastcc  {i64, i64}  @"alias5.replicate1<0>"(i64  100, i64  800)  
   %2 = extractvalue {i64, i64} %1, 0 
   %3 = extractvalue {i64, i64} %1, 1 
-  %4 = tail call ccc  {i64, i64}  @"alias5.replicate1<0>"(i64  100, i64  800)  
+  %4 = tail call fastcc  {i64, i64}  @"alias5.replicate1<0>"(i64  100, i64  800)  
   %5 = extractvalue {i64, i64} %4, 0 
   %6 = extractvalue {i64, i64} %4, 1 
   %8 = ptrtoint i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias5.7, i32 0, i32 0) to i64 
@@ -118,7 +118,7 @@ entry:
 }
 
 
-define external ccc  {i64, i64} @"alias5.replicate1<0>"(i64  %"v1#0", i64  %"v3#0")    {
+define external fastcc  {i64, i64} @"alias5.replicate1<0>"(i64  %"v1#0", i64  %"v3#0")    {
 entry:
   %16 = ptrtoint i8* getelementptr inbounds ([18 x i8], [18 x i8]* @alias5.15, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %16)  

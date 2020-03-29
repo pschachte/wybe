@@ -35,7 +35,7 @@ bar > public (0 calls)
  
 
 
-declare external ccc  {i64, i64} @"alias_mfoo.foo<0>"(i64)    
+declare external fastcc  {i64, i64} @"alias_mfoo.foo<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -44,7 +44,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i64 @"alias_mbar.bar<0>"(i64  %"p1#0")    {
+define external fastcc  i64 @"alias_mbar.bar<0>"(i64  %"p1#0")    {
 entry:
   %1 = add   i64 %"p1#0", 8 
   %2 = inttoptr i64 %1 to i64* 
@@ -67,7 +67,7 @@ if.else:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   store  i64 %"tmp$2#0", i64* %13 
-  %14 = tail call ccc  {i64, i64}  @"alias_mfoo.foo<0>"(i64  %7)  
+  %14 = tail call fastcc  {i64, i64}  @"alias_mfoo.foo<0>"(i64  %7)  
   %15 = extractvalue {i64, i64} %14, 0 
   %16 = extractvalue {i64, i64} %14, 1 
   ret i64 %16 
@@ -116,10 +116,10 @@ foo > public (0 calls)
  
 
 
-declare external ccc  i64 @"alias_mbar.bar<0>"(i64)    
+declare external fastcc  i64 @"alias_mbar.bar<0>"(i64)    
 
 
-declare external ccc  void @"position.printPosition<0>"(i64)    
+declare external fastcc  void @"position.printPosition<0>"(i64)    
 
 
 declare external ccc  void @print_string(i64)    
@@ -134,7 +134,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  {i64, i64} @"alias_mfoo.foo<0>"(i64  %"p1#0")    {
+define external fastcc  {i64, i64} @"alias_mfoo.foo<0>"(i64  %"p1#0")    {
 entry:
   %1 = inttoptr i64 %"p1#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
@@ -154,7 +154,7 @@ if.then:
   store  i64 3, i64* %11 
   %13 = ptrtoint i8* getelementptr inbounds ([4 x i8], [4 x i8]* @alias_mfoo.12, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %13)  
-  tail call ccc  void  @"position.printPosition<0>"(i64  %6)  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %6)  
   %14 = insertvalue {i64, i64} undef, i64 %"p1#0", 0 
   %15 = insertvalue {i64, i64} %14, i64 %6, 1 
   ret {i64, i64} %15 
@@ -170,7 +170,7 @@ if.else:
   %22 = inttoptr i64 %18 to i64* 
   %23 = getelementptr  i64, i64* %22, i64 0 
   store  i64 %"tmp$3#0", i64* %23 
-  %"p3#0" = tail call ccc  i64  @"alias_mbar.bar<0>"(i64  %18)  
+  %"p3#0" = tail call fastcc  i64  @"alias_mbar.bar<0>"(i64  %18)  
   %24 = trunc i64 16 to i32  
   %25 = tail call ccc  i8*  @wybe_malloc(i32  %24)  
   %26 = ptrtoint i8* %25 to i64 
@@ -249,7 +249,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  void @"position.printPosition<0>"(i64  %"pos#0")    {
+define external fastcc  void @"position.printPosition<0>"(i64  %"pos#0")    {
 entry:
   %2 = ptrtoint i8* getelementptr inbounds ([3 x i8], [3 x i8]* @position.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
@@ -367,7 +367,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"position.position./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"position.position./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
@@ -397,7 +397,7 @@ if.else1:
 }
 
 
-define external ccc  i1 @"position.position.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"position.position.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %15 = inttoptr i64 %"$left#0" to i64* 
   %16 = getelementptr  i64, i64* %15, i64 0 
@@ -423,7 +423,7 @@ if.else:
 }
 
 
-define external ccc  i64 @"position.position.position<0>"(i64  %"x#0", i64  %"y#0")    {
+define external fastcc  i64 @"position.position.position<0>"(i64  %"x#0", i64  %"y#0")    {
 entry:
   %29 = trunc i64 16 to i32  
   %30 = tail call ccc  i8*  @wybe_malloc(i32  %29)  
@@ -439,7 +439,7 @@ entry:
 }
 
 
-define external ccc  {i64, i64} @"position.position.position<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i64} @"position.position.position<1>"(i64  %"$#0")    {
 entry:
   %37 = inttoptr i64 %"$#0" to i64* 
   %38 = getelementptr  i64, i64* %37, i64 0 
@@ -454,7 +454,7 @@ entry:
 }
 
 
-define external ccc  i64 @"position.position.x<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"position.position.x<0>"(i64  %"$rec#0")    {
 entry:
   %46 = inttoptr i64 %"$rec#0" to i64* 
   %47 = getelementptr  i64, i64* %46, i64 0 
@@ -463,7 +463,7 @@ entry:
 }
 
 
-define external ccc  i64 @"position.position.x<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  i64 @"position.position.x<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %49 = trunc i64 16 to i32  
   %50 = tail call ccc  i8*  @wybe_malloc(i32  %49)  
@@ -479,7 +479,7 @@ entry:
 }
 
 
-define external ccc  i64 @"position.position.y<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"position.position.y<0>"(i64  %"$rec#0")    {
 entry:
   %57 = add   i64 %"$rec#0", 8 
   %58 = inttoptr i64 %57 to i64* 
@@ -489,7 +489,7 @@ entry:
 }
 
 
-define external ccc  i64 @"position.position.y<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  i64 @"position.position.y<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %61 = trunc i64 16 to i32  
   %62 = tail call ccc  i8*  @wybe_malloc(i32  %61)  
