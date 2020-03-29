@@ -97,7 +97,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  void @"student.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
+define external fastcc  void @"student.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
   %1 = trunc i64 16 to i32  
   %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
@@ -120,12 +120,12 @@ entry:
   %17 = inttoptr i64 %16 to i64* 
   %18 = getelementptr  i64, i64* %17, i64 0 
   store  i64 %3, i64* %18 
-  tail call ccc  void  @"student.printStudent<0>"(i64  %13)  
+  tail call fastcc  void  @"student.printStudent<0>"(i64  %13)  
   ret void 
 }
 
 
-define external ccc  void @"student.printStudent<0>"(i64  %"stu#0")    {
+define external fastcc  void @"student.printStudent<0>"(i64  %"stu#0")    {
 entry:
   %20 = ptrtoint i8* getelementptr inbounds ([13 x i8], [13 x i8]* @student.19, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %20)  
@@ -265,7 +265,7 @@ name > public inline (0 calls)
  
 
 
-declare external ccc  i1 @"wybe.int.=<0>"(i64, i64)    
+declare external fastcc  i1 @"wybe.int.=<0>"(i64, i64)    
 
 
 declare external ccc  i64 @strcmp(i64, i64)    
@@ -277,7 +277,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"student.course./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"student.course./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
@@ -297,7 +297,7 @@ entry:
   br i1 %"tmp$8#0", label %if.then, label %if.else 
 if.then:
   %"tmp$9#0" = tail call ccc  i64  @strcmp(i64  %7, i64  %14)  
-  %"tmp$1#0" = tail call ccc  i1  @"wybe.int.=<0>"(i64  %"tmp$9#0", i64  0)  
+  %"tmp$1#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %"tmp$9#0", i64  0)  
   br i1 %"tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
@@ -308,7 +308,7 @@ if.else1:
 }
 
 
-define external ccc  i1 @"student.course.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"student.course.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %15 = inttoptr i64 %"$left#0" to i64* 
   %16 = getelementptr  i64, i64* %15, i64 0 
@@ -328,14 +328,14 @@ entry:
   br i1 %"tmp$2#0", label %if.then, label %if.else 
 if.then:
   %"tmp$10#0" = tail call ccc  i64  @strcmp(i64  %21, i64  %28)  
-  %"$$#0" = tail call ccc  i1  @"wybe.int.=<0>"(i64  %"tmp$10#0", i64  0)  
+  %"$$#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %"tmp$10#0", i64  0)  
   ret i1 %"$$#0" 
 if.else:
   ret i1 0 
 }
 
 
-define external ccc  i64 @"student.course.code<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"student.course.code<0>"(i64  %"$rec#0")    {
 entry:
   %29 = inttoptr i64 %"$rec#0" to i64* 
   %30 = getelementptr  i64, i64* %29, i64 0 
@@ -344,7 +344,7 @@ entry:
 }
 
 
-define external ccc  i64 @"student.course.code<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  i64 @"student.course.code<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %32 = trunc i64 16 to i32  
   %33 = tail call ccc  i8*  @wybe_malloc(i32  %32)  
@@ -360,7 +360,7 @@ entry:
 }
 
 
-define external ccc  i64 @"student.course.course<0>"(i64  %"code#0", i64  %"name#0")    {
+define external fastcc  i64 @"student.course.course<0>"(i64  %"code#0", i64  %"name#0")    {
 entry:
   %40 = trunc i64 16 to i32  
   %41 = tail call ccc  i8*  @wybe_malloc(i32  %40)  
@@ -376,7 +376,7 @@ entry:
 }
 
 
-define external ccc  {i64, i64} @"student.course.course<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i64} @"student.course.course<1>"(i64  %"$#0")    {
 entry:
   %48 = inttoptr i64 %"$#0" to i64* 
   %49 = getelementptr  i64, i64* %48, i64 0 
@@ -391,7 +391,7 @@ entry:
 }
 
 
-define external ccc  i64 @"student.course.name<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"student.course.name<0>"(i64  %"$rec#0")    {
 entry:
   %57 = add   i64 %"$rec#0", 8 
   %58 = inttoptr i64 %57 to i64* 
@@ -401,7 +401,7 @@ entry:
 }
 
 
-define external ccc  i64 @"student.course.name<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  i64 @"student.course.name<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %61 = trunc i64 16 to i32  
   %62 = tail call ccc  i8*  @wybe_malloc(i32  %61)  
@@ -544,10 +544,10 @@ student > public inline (4 calls)
  
 
 
-declare external ccc  i1 @"wybe.string.=<0>"(i64, i64)    
+declare external fastcc  i1 @"wybe.string.=<0>"(i64, i64)    
 
 
-declare external ccc  i1 @"wybe.int.=<0>"(i64, i64)    
+declare external fastcc  i1 @"wybe.int.=<0>"(i64, i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -556,7 +556,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"student.student./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"student.student./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
@@ -575,18 +575,18 @@ entry:
   %"tmp$8#0" = icmp eq i64 %3, %10 
   br i1 %"tmp$8#0", label %if.then, label %if.else 
 if.then:
-  %15 = tail call ccc  {i64, i64}  @"student.course.course<1>"(i64  %7)  
+  %15 = tail call fastcc  {i64, i64}  @"student.course.course<1>"(i64  %7)  
   %16 = extractvalue {i64, i64} %15, 0 
   %17 = extractvalue {i64, i64} %15, 1 
-  %18 = tail call ccc  {i64, i64}  @"student.course.course<1>"(i64  %14)  
+  %18 = tail call fastcc  {i64, i64}  @"student.course.course<1>"(i64  %14)  
   %19 = extractvalue {i64, i64} %18, 0 
   %20 = extractvalue {i64, i64} %18, 1 
-  %"tmp$13#0" = tail call ccc  i1  @"wybe.int.=<0>"(i64  %16, i64  %19)  
+  %"tmp$13#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %16, i64  %19)  
   br i1 %"tmp$13#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
-  %"tmp$1#0" = tail call ccc  i1  @"wybe.string.=<0>"(i64  %17, i64  %20)  
+  %"tmp$1#0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %17, i64  %20)  
   br i1 %"tmp$1#0", label %if.then2, label %if.else2 
 if.else1:
   ret i1 1 
@@ -597,7 +597,7 @@ if.else2:
 }
 
 
-define external ccc  i1 @"student.student.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"student.student.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %21 = inttoptr i64 %"$left#0" to i64* 
   %22 = getelementptr  i64, i64* %21, i64 0 
@@ -616,25 +616,25 @@ entry:
   %"tmp$2#0" = icmp eq i64 %23, %30 
   br i1 %"tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %35 = tail call ccc  {i64, i64}  @"student.course.course<1>"(i64  %27)  
+  %35 = tail call fastcc  {i64, i64}  @"student.course.course<1>"(i64  %27)  
   %36 = extractvalue {i64, i64} %35, 0 
   %37 = extractvalue {i64, i64} %35, 1 
-  %38 = tail call ccc  {i64, i64}  @"student.course.course<1>"(i64  %34)  
+  %38 = tail call fastcc  {i64, i64}  @"student.course.course<1>"(i64  %34)  
   %39 = extractvalue {i64, i64} %38, 0 
   %40 = extractvalue {i64, i64} %38, 1 
-  %"tmp$16#0" = tail call ccc  i1  @"wybe.int.=<0>"(i64  %36, i64  %39)  
+  %"tmp$16#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %36, i64  %39)  
   br i1 %"tmp$16#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
-  %"tmp$3#0" = tail call ccc  i1  @"wybe.string.=<0>"(i64  %37, i64  %40)  
+  %"tmp$3#0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %37, i64  %40)  
   ret i1 %"tmp$3#0" 
 if.else1:
   ret i1 0 
 }
 
 
-define external ccc  i64 @"student.student.id<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"student.student.id<0>"(i64  %"$rec#0")    {
 entry:
   %41 = inttoptr i64 %"$rec#0" to i64* 
   %42 = getelementptr  i64, i64* %41, i64 0 
@@ -643,7 +643,7 @@ entry:
 }
 
 
-define external ccc  i64 @"student.student.id<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  i64 @"student.student.id<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %44 = trunc i64 16 to i32  
   %45 = tail call ccc  i8*  @wybe_malloc(i32  %44)  
@@ -659,7 +659,7 @@ entry:
 }
 
 
-define external ccc  i64 @"student.student.major<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"student.student.major<0>"(i64  %"$rec#0")    {
 entry:
   %52 = add   i64 %"$rec#0", 8 
   %53 = inttoptr i64 %52 to i64* 
@@ -669,7 +669,7 @@ entry:
 }
 
 
-define external ccc  i64 @"student.student.major<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  i64 @"student.student.major<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %56 = trunc i64 16 to i32  
   %57 = tail call ccc  i8*  @wybe_malloc(i32  %56)  
@@ -686,7 +686,7 @@ entry:
 }
 
 
-define external ccc  i64 @"student.student.student<0>"(i64  %"id#0", i64  %"major#0")    {
+define external fastcc  i64 @"student.student.student<0>"(i64  %"id#0", i64  %"major#0")    {
 entry:
   %65 = trunc i64 16 to i32  
   %66 = tail call ccc  i8*  @wybe_malloc(i32  %65)  
@@ -702,7 +702,7 @@ entry:
 }
 
 
-define external ccc  {i64, i64} @"student.student.student<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i64} @"student.student.student<1>"(i64  %"$#0")    {
 entry:
   %73 = inttoptr i64 %"$#0" to i64* 
   %74 = getelementptr  i64, i64* %73, i64 0 

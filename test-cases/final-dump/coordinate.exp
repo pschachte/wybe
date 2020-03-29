@@ -76,7 +76,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  void @"coordinate.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
+define external fastcc  void @"coordinate.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
   %1 = trunc i64 24 to i32  
   %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
@@ -112,7 +112,7 @@ entry:
 }
 
 
-define external ccc  i64 @"coordinate.fcopy<0>"(i64  %"crd1#0")    {
+define external fastcc  i64 @"coordinate.fcopy<0>"(i64  %"crd1#0")    {
 entry:
   ret i64 %"crd1#0" 
 }
@@ -264,7 +264,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"coordinate.Coordinate./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"coordinate.Coordinate./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
@@ -307,7 +307,7 @@ if.else2:
 }
 
 
-define external ccc  i1 @"coordinate.Coordinate.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"coordinate.Coordinate.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %23 = inttoptr i64 %"$left#0" to i64* 
   %24 = getelementptr  i64, i64* %23, i64 0 
@@ -346,7 +346,7 @@ if.else1:
 }
 
 
-define external ccc  i64 @"coordinate.Coordinate.Coordinate<0>"(i64  %"x#0", i64  %"y#0", i64  %"z#0")    {
+define external fastcc  i64 @"coordinate.Coordinate.Coordinate<0>"(i64  %"x#0", i64  %"y#0", i64  %"z#0")    {
 entry:
   %45 = trunc i64 24 to i32  
   %46 = tail call ccc  i8*  @wybe_malloc(i32  %45)  
@@ -366,7 +366,7 @@ entry:
 }
 
 
-define external ccc  {i64, i64, i64} @"coordinate.Coordinate.Coordinate<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i64, i64} @"coordinate.Coordinate.Coordinate<1>"(i64  %"$#0")    {
 entry:
   %56 = inttoptr i64 %"$#0" to i64* 
   %57 = getelementptr  i64, i64* %56, i64 0 
@@ -386,7 +386,7 @@ entry:
 }
 
 
-define external ccc  i64 @"coordinate.Coordinate.x<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"coordinate.Coordinate.x<0>"(i64  %"$rec#0")    {
 entry:
   %70 = inttoptr i64 %"$rec#0" to i64* 
   %71 = getelementptr  i64, i64* %70, i64 0 
@@ -395,7 +395,7 @@ entry:
 }
 
 
-define external ccc  i64 @"coordinate.Coordinate.x<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  i64 @"coordinate.Coordinate.x<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %73 = trunc i64 24 to i32  
   %74 = tail call ccc  i8*  @wybe_malloc(i32  %73)  
@@ -411,7 +411,7 @@ entry:
 }
 
 
-define external ccc  i64 @"coordinate.Coordinate.y<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"coordinate.Coordinate.y<0>"(i64  %"$rec#0")    {
 entry:
   %81 = add   i64 %"$rec#0", 8 
   %82 = inttoptr i64 %81 to i64* 
@@ -421,7 +421,7 @@ entry:
 }
 
 
-define external ccc  i64 @"coordinate.Coordinate.y<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  i64 @"coordinate.Coordinate.y<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %85 = trunc i64 24 to i32  
   %86 = tail call ccc  i8*  @wybe_malloc(i32  %85)  
@@ -438,7 +438,7 @@ entry:
 }
 
 
-define external ccc  i64 @"coordinate.Coordinate.z<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"coordinate.Coordinate.z<0>"(i64  %"$rec#0")    {
 entry:
   %94 = add   i64 %"$rec#0", 16 
   %95 = inttoptr i64 %94 to i64* 
@@ -448,7 +448,7 @@ entry:
 }
 
 
-define external ccc  i64 @"coordinate.Coordinate.z<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  i64 @"coordinate.Coordinate.z<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %98 = trunc i64 24 to i32  
   %99 = tail call ccc  i8*  @wybe_malloc(i32  %98)  

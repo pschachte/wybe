@@ -1,0 +1,10 @@
+# test a big loop for performance and stack usage (check TRO)
+
+?sum = 0
+?i = 0
+do {
+   while i < 1_000_000_000
+   incr(!i)
+   ?sum = sum + 2
+}
+!println(sum)

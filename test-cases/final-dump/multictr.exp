@@ -230,7 +230,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"multictr.card./=<0>"(i6  %"$left#0", i6  %"$right#0")    {
+define external fastcc  i1 @"multictr.card./=<0>"(i6  %"$left#0", i6  %"$right#0")    {
 entry:
   %"tmp$1#0" = icmp eq i6 %"$left#0", %"$right#0" 
   br i1 %"tmp$1#0", label %if.then, label %if.else 
@@ -241,14 +241,14 @@ if.else:
 }
 
 
-define external ccc  i1 @"multictr.card.=<0>"(i6  %"$left#0", i6  %"$right#0")    {
+define external fastcc  i1 @"multictr.card.=<0>"(i6  %"$left#0", i6  %"$right#0")    {
 entry:
   %"$$#0" = icmp eq i6 %"$left#0", %"$right#0" 
   ret i1 %"$$#0" 
 }
 
 
-define external ccc  i6 @"multictr.card.card<0>"(i2  %"suit#0", i4  %"rank#0")    {
+define external fastcc  i6 @"multictr.card.card<0>"(i2  %"suit#0", i4  %"rank#0")    {
 entry:
   %1 = zext i4 %"rank#0" to i6  
   %"$temp#1" = shl   i6 %1, 2 
@@ -258,7 +258,7 @@ entry:
 }
 
 
-define external ccc  {i2, i4} @"multictr.card.card<1>"(i6  %"$#0")    {
+define external fastcc  {i2, i4} @"multictr.card.card<1>"(i6  %"$#0")    {
 entry:
   %"$temp2#0" = and i6 %"$#0", 3 
   %3 = trunc i6 %"$temp2#0" to i2  
@@ -271,7 +271,7 @@ entry:
 }
 
 
-define external ccc  i4 @"multictr.card.rank<0>"(i6  %"$rec#0")    {
+define external fastcc  i4 @"multictr.card.rank<0>"(i6  %"$rec#0")    {
 entry:
   %"$rec#1" = lshr  i6 %"$rec#0", 2 
   %"$field#0" = and i6 %"$rec#1", 15 
@@ -280,7 +280,7 @@ entry:
 }
 
 
-define external ccc  i6 @"multictr.card.rank<1>"(i6  %"$rec#0", i4  %"$field#0")    {
+define external fastcc  i6 @"multictr.card.rank<1>"(i6  %"$rec#0", i4  %"$field#0")    {
 entry:
   %"$rec#1" = and i6 %"$rec#0", -61 
   %8 = zext i4 %"$field#0" to i6  
@@ -290,7 +290,7 @@ entry:
 }
 
 
-define external ccc  i2 @"multictr.card.suit<0>"(i6  %"$rec#0")    {
+define external fastcc  i2 @"multictr.card.suit<0>"(i6  %"$rec#0")    {
 entry:
   %"$field#0" = and i6 %"$rec#0", 3 
   %9 = trunc i6 %"$field#0" to i2  
@@ -298,7 +298,7 @@ entry:
 }
 
 
-define external ccc  i6 @"multictr.card.suit<1>"(i6  %"$rec#0", i2  %"$field#0")    {
+define external fastcc  i6 @"multictr.card.suit<1>"(i6  %"$rec#0", i2  %"$field#0")    {
 entry:
   %"$rec#1" = and i6 %"$rec#0", -4 
   %10 = zext i2 %"$field#0" to i6  
@@ -645,9 +645,9 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"multictr.complicated./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multictr.complicated./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = tail call ccc  i1  @"multictr.complicated.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"tmp$1#0" = tail call fastcc  i1  @"multictr.complicated.=<0>"(i64  %"$left#0", i64  %"$right#0")  
   br i1 %"tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
@@ -656,7 +656,7 @@ if.else:
 }
 
 
-define external ccc  i1 @"multictr.complicated.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multictr.complicated.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %"tmp$1#0" = icmp ult i64 %"$left#0", 4 
   br i1 %"tmp$1#0", label %if.then, label %if.else 
@@ -757,13 +757,13 @@ if.else12:
 }
 
 
-define external ccc  i64 @"multictr.complicated.autumn<0>"()    {
+define external fastcc  i64 @"multictr.complicated.autumn<0>"()    {
 entry:
   ret i64 3 
 }
 
 
-define external ccc  i64 @"multictr.complicated.c01<0>"(i64  %"f01#0")    {
+define external fastcc  i64 @"multictr.complicated.c01<0>"(i64  %"f01#0")    {
 entry:
   %23 = trunc i64 8 to i32  
   %24 = tail call ccc  i8*  @wybe_malloc(i32  %23)  
@@ -775,7 +775,7 @@ entry:
 }
 
 
-define external ccc  {i64, i1} @"multictr.complicated.c01<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c01<1>"(i64  %"$#0")    {
 entry:
   %"tmp$0#0" = icmp uge i64 %"$#0", 4 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -801,7 +801,7 @@ if.else1:
 }
 
 
-define external ccc  i64 @"multictr.complicated.c02<0>"(i64  %"f02#0")    {
+define external fastcc  i64 @"multictr.complicated.c02<0>"(i64  %"f02#0")    {
 entry:
   %37 = trunc i64 8 to i32  
   %38 = tail call ccc  i8*  @wybe_malloc(i32  %37)  
@@ -814,7 +814,7 @@ entry:
 }
 
 
-define external ccc  {i64, i1} @"multictr.complicated.c02<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c02<1>"(i64  %"$#0")    {
 entry:
   %"tmp$0#0" = icmp uge i64 %"$#0", 4 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -841,7 +841,7 @@ if.else1:
 }
 
 
-define external ccc  {i64, i1} @"multictr.complicated.f01<0>"(i64  %"$rec#0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.f01<0>"(i64  %"$rec#0")    {
 entry:
   %"tmp$0#0" = icmp uge i64 %"$rec#0", 4 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -867,7 +867,7 @@ if.else1:
 }
 
 
-define external ccc  {i64, i1} @"multictr.complicated.f01<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.f01<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %"tmp$0#0" = icmp uge i64 %"$rec#0", 4 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -900,7 +900,7 @@ if.else1:
 }
 
 
-define external ccc  {i64, i1} @"multictr.complicated.f02<0>"(i64  %"$rec#0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.f02<0>"(i64  %"$rec#0")    {
 entry:
   %"tmp$0#0" = icmp uge i64 %"$rec#0", 4 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -927,7 +927,7 @@ if.else1:
 }
 
 
-define external ccc  {i64, i1} @"multictr.complicated.f02<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.f02<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %"tmp$0#0" = icmp uge i64 %"$rec#0", 4 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -962,19 +962,19 @@ if.else1:
 }
 
 
-define external ccc  i64 @"multictr.complicated.spring<0>"()    {
+define external fastcc  i64 @"multictr.complicated.spring<0>"()    {
 entry:
   ret i64 1 
 }
 
 
-define external ccc  i64 @"multictr.complicated.summer<0>"()    {
+define external fastcc  i64 @"multictr.complicated.summer<0>"()    {
 entry:
   ret i64 2 
 }
 
 
-define external ccc  i64 @"multictr.complicated.winter<0>"()    {
+define external fastcc  i64 @"multictr.complicated.winter<0>"()    {
 entry:
   ret i64 0 
 }
@@ -1053,7 +1053,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"multictr.length./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multictr.length./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %"tmp$1#0" = icmp eq i64 %"$left#0", %"$right#0" 
   br i1 %"tmp$1#0", label %if.then, label %if.else 
@@ -1064,35 +1064,35 @@ if.else:
 }
 
 
-define external ccc  i1 @"multictr.length.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multictr.length.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %"$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
   ret i1 %"$$#0" 
 }
 
 
-define external ccc  i64 @"multictr.length.metres<0>"(double  %"value#0")    {
+define external fastcc  i64 @"multictr.length.metres<0>"(double  %"value#0")    {
 entry:
   %1 = bitcast double %"value#0" to i64 
   ret i64 %1 
 }
 
 
-define external ccc  double @"multictr.length.metres<1>"(i64  %"$#0")    {
+define external fastcc  double @"multictr.length.metres<1>"(i64  %"$#0")    {
 entry:
   %2 = bitcast i64 %"$#0" to double 
   ret double %2 
 }
 
 
-define external ccc  double @"multictr.length.value<0>"(i64  %"$rec#0")    {
+define external fastcc  double @"multictr.length.value<0>"(i64  %"$rec#0")    {
 entry:
   %3 = bitcast i64 %"$rec#0" to double 
   ret double %3 
 }
 
 
-define external ccc  i64 @"multictr.length.value<1>"(double  %"$field#0")    {
+define external fastcc  i64 @"multictr.length.value<1>"(double  %"$field#0")    {
 entry:
   %4 = bitcast double %"$field#0" to i64 
   ret i64 %4 
@@ -1230,9 +1230,9 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"multictr.maybe_int./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multictr.maybe_int./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = tail call ccc  i1  @"multictr.maybe_int.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"tmp$1#0" = tail call fastcc  i1  @"multictr.maybe_int.=<0>"(i64  %"$left#0", i64  %"$right#0")  
   br i1 %"tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
@@ -1241,7 +1241,7 @@ if.else:
 }
 
 
-define external ccc  i1 @"multictr.maybe_int.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multictr.maybe_int.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %"tmp$1#0" = icmp eq i64 %"$left#0", 0 
   br i1 %"tmp$1#0", label %if.then, label %if.else 
@@ -1270,7 +1270,7 @@ if.else2:
 }
 
 
-define external ccc  i64 @"multictr.maybe_int.just<0>"(i64  %"value#0")    {
+define external fastcc  i64 @"multictr.maybe_int.just<0>"(i64  %"value#0")    {
 entry:
   %7 = trunc i64 8 to i32  
   %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
@@ -1282,7 +1282,7 @@ entry:
 }
 
 
-define external ccc  {i64, i1} @"multictr.maybe_int.just<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i1} @"multictr.maybe_int.just<1>"(i64  %"$#0")    {
 entry:
   %"tmp$0#0" = icmp ne i64 %"$#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -1300,13 +1300,13 @@ if.else:
 }
 
 
-define external ccc  i64 @"multictr.maybe_int.nothing<0>"()    {
+define external fastcc  i64 @"multictr.maybe_int.nothing<0>"()    {
 entry:
   ret i64 0 
 }
 
 
-define external ccc  {i64, i1} @"multictr.maybe_int.value<0>"(i64  %"$rec#0")    {
+define external fastcc  {i64, i1} @"multictr.maybe_int.value<0>"(i64  %"$rec#0")    {
 entry:
   %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -1324,7 +1324,7 @@ if.else:
 }
 
 
-define external ccc  {i64, i1} @"multictr.maybe_int.value<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  {i64, i1} @"multictr.maybe_int.value<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -1544,9 +1544,9 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"multictr.number./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multictr.number./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = tail call ccc  i1  @"multictr.number.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"tmp$1#0" = tail call fastcc  i1  @"multictr.number.=<0>"(i64  %"$left#0", i64  %"$right#0")  
   br i1 %"tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
@@ -1555,7 +1555,7 @@ if.else:
 }
 
 
-define external ccc  i1 @"multictr.number.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multictr.number.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %"tmp$9#0" = and i64 %"$left#0", 7 
   %"tmp$10#0" = icmp eq i64 %"tmp$9#0", 0 
@@ -1600,7 +1600,7 @@ if.else3:
 }
 
 
-define external ccc  i64 @"multictr.number.float<0>"(double  %"float_value#0")    {
+define external fastcc  i64 @"multictr.number.float<0>"(double  %"float_value#0")    {
 entry:
   %15 = trunc i64 8 to i32  
   %16 = tail call ccc  i8*  @wybe_malloc(i32  %15)  
@@ -1613,7 +1613,7 @@ entry:
 }
 
 
-define external ccc  {double, i1} @"multictr.number.float<1>"(i64  %"$#0")    {
+define external fastcc  {double, i1} @"multictr.number.float<1>"(i64  %"$#0")    {
 entry:
   %"tmp$0#0" = and i64 %"$#0", 7 
   %"tmp$1#0" = icmp eq i64 %"tmp$0#0", 1 
@@ -1633,7 +1633,7 @@ if.else:
 }
 
 
-define external ccc  {double, i1} @"multictr.number.float_value<0>"(i64  %"$rec#0")    {
+define external fastcc  {double, i1} @"multictr.number.float_value<0>"(i64  %"$rec#0")    {
 entry:
   %"tmp$0#0" = and i64 %"$rec#0", 7 
   %"tmp$1#0" = icmp eq i64 %"tmp$0#0", 1 
@@ -1653,7 +1653,7 @@ if.else:
 }
 
 
-define external ccc  {i64, i1} @"multictr.number.float_value<1>"(i64  %"$rec#0", double  %"$field#0")    {
+define external fastcc  {i64, i1} @"multictr.number.float_value<1>"(i64  %"$rec#0", double  %"$field#0")    {
 entry:
   %"tmp$0#0" = and i64 %"$rec#0", 7 
   %"tmp$1#0" = icmp eq i64 %"tmp$0#0", 1 
@@ -1681,7 +1681,7 @@ if.else:
 }
 
 
-define external ccc  i64 @"multictr.number.int<0>"(i64  %"int_value#0")    {
+define external fastcc  i64 @"multictr.number.int<0>"(i64  %"int_value#0")    {
 entry:
   %50 = trunc i64 8 to i32  
   %51 = tail call ccc  i8*  @wybe_malloc(i32  %50)  
@@ -1693,7 +1693,7 @@ entry:
 }
 
 
-define external ccc  {i64, i1} @"multictr.number.int<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i1} @"multictr.number.int<1>"(i64  %"$#0")    {
 entry:
   %"tmp$0#0" = and i64 %"$#0", 7 
   %"tmp$1#0" = icmp eq i64 %"tmp$0#0", 0 
@@ -1712,7 +1712,7 @@ if.else:
 }
 
 
-define external ccc  {i64, i1} @"multictr.number.int_value<0>"(i64  %"$rec#0")    {
+define external fastcc  {i64, i1} @"multictr.number.int_value<0>"(i64  %"$rec#0")    {
 entry:
   %"tmp$0#0" = and i64 %"$rec#0", 7 
   %"tmp$1#0" = icmp eq i64 %"tmp$0#0", 0 
@@ -1731,7 +1731,7 @@ if.else:
 }
 
 
-define external ccc  {i64, i1} @"multictr.number.int_value<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  {i64, i1} @"multictr.number.int_value<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %"tmp$0#0" = and i64 %"$rec#0", 7 
   %"tmp$1#0" = icmp eq i64 %"tmp$0#0", 0 
@@ -1830,7 +1830,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"multictr.perhaps./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multictr.perhaps./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %"tmp$1#0" = icmp eq i64 %"$left#0", %"$right#0" 
   br i1 %"tmp$1#0", label %if.then, label %if.else 
@@ -1841,32 +1841,32 @@ if.else:
 }
 
 
-define external ccc  i1 @"multictr.perhaps.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multictr.perhaps.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %"$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
   ret i1 %"$$#0" 
 }
 
 
-define external ccc  i64 @"multictr.perhaps.content<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"multictr.perhaps.content<0>"(i64  %"$rec#0")    {
 entry:
   ret i64 %"$rec#0" 
 }
 
 
-define external ccc  i64 @"multictr.perhaps.content<1>"(i64  %"$field#0")    {
+define external fastcc  i64 @"multictr.perhaps.content<1>"(i64  %"$field#0")    {
 entry:
   ret i64 %"$field#0" 
 }
 
 
-define external ccc  i64 @"multictr.perhaps.perhaps<0>"(i64  %"content#0")    {
+define external fastcc  i64 @"multictr.perhaps.perhaps<0>"(i64  %"content#0")    {
 entry:
   ret i64 %"content#0" 
 }
 
 
-define external ccc  i64 @"multictr.perhaps.perhaps<1>"(i64  %"$#0")    {
+define external fastcc  i64 @"multictr.perhaps.perhaps<1>"(i64  %"$#0")    {
 entry:
   ret i64 %"$#0" 
 }
@@ -2021,7 +2021,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"multictr.rank./=<0>"(i4  %"$left#0", i4  %"$right#0")    {
+define external fastcc  i1 @"multictr.rank./=<0>"(i4  %"$left#0", i4  %"$right#0")    {
 entry:
   %"tmp$1#0" = icmp eq i4 %"$left#0", %"$right#0" 
   br i1 %"tmp$1#0", label %if.then, label %if.else 
@@ -2032,86 +2032,86 @@ if.else:
 }
 
 
-define external ccc  i1 @"multictr.rank.=<0>"(i4  %"$left#0", i4  %"$right#0")    {
+define external fastcc  i1 @"multictr.rank.=<0>"(i4  %"$left#0", i4  %"$right#0")    {
 entry:
   %"$$#0" = icmp eq i4 %"$left#0", %"$right#0" 
   ret i1 %"$$#0" 
 }
 
 
-define external ccc  i4 @"multictr.rank.ace<0>"()    {
+define external fastcc  i4 @"multictr.rank.ace<0>"()    {
 entry:
   ret i4 12 
 }
 
 
-define external ccc  i4 @"multictr.rank.jack<0>"()    {
+define external fastcc  i4 @"multictr.rank.jack<0>"()    {
 entry:
   ret i4 9 
 }
 
 
-define external ccc  i4 @"multictr.rank.king<0>"()    {
+define external fastcc  i4 @"multictr.rank.king<0>"()    {
 entry:
   ret i4 11 
 }
 
 
-define external ccc  i4 @"multictr.rank.queen<0>"()    {
+define external fastcc  i4 @"multictr.rank.queen<0>"()    {
 entry:
   ret i4 10 
 }
 
 
-define external ccc  i4 @"multictr.rank.r10<0>"()    {
+define external fastcc  i4 @"multictr.rank.r10<0>"()    {
 entry:
   ret i4 8 
 }
 
 
-define external ccc  i4 @"multictr.rank.r2<0>"()    {
+define external fastcc  i4 @"multictr.rank.r2<0>"()    {
 entry:
   ret i4 0 
 }
 
 
-define external ccc  i4 @"multictr.rank.r3<0>"()    {
+define external fastcc  i4 @"multictr.rank.r3<0>"()    {
 entry:
   ret i4 1 
 }
 
 
-define external ccc  i4 @"multictr.rank.r4<0>"()    {
+define external fastcc  i4 @"multictr.rank.r4<0>"()    {
 entry:
   ret i4 2 
 }
 
 
-define external ccc  i4 @"multictr.rank.r5<0>"()    {
+define external fastcc  i4 @"multictr.rank.r5<0>"()    {
 entry:
   ret i4 3 
 }
 
 
-define external ccc  i4 @"multictr.rank.r6<0>"()    {
+define external fastcc  i4 @"multictr.rank.r6<0>"()    {
 entry:
   ret i4 4 
 }
 
 
-define external ccc  i4 @"multictr.rank.r7<0>"()    {
+define external fastcc  i4 @"multictr.rank.r7<0>"()    {
 entry:
   ret i4 5 
 }
 
 
-define external ccc  i4 @"multictr.rank.r8<0>"()    {
+define external fastcc  i4 @"multictr.rank.r8<0>"()    {
 entry:
   ret i4 6 
 }
 
 
-define external ccc  i4 @"multictr.rank.r9<0>"()    {
+define external fastcc  i4 @"multictr.rank.r9<0>"()    {
 entry:
   ret i4 7 
 }
@@ -2499,9 +2499,9 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"multictr.simple./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multictr.simple./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = tail call ccc  i1  @"multictr.simple.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"tmp$1#0" = tail call fastcc  i1  @"multictr.simple.=<0>"(i64  %"$left#0", i64  %"$right#0")  
   br i1 %"tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
@@ -2510,7 +2510,7 @@ if.else:
 }
 
 
-define external ccc  i1 @"multictr.simple.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multictr.simple.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %"tmp$1#0" = icmp eq i64 %"$left#0", 0 
   br i1 %"tmp$1#0", label %if.then, label %if.else 
@@ -2637,7 +2637,7 @@ if.else14:
 }
 
 
-define external ccc  i64 @"multictr.simple.one<0>"(i64  %"one_field#0")    {
+define external fastcc  i64 @"multictr.simple.one<0>"(i64  %"one_field#0")    {
 entry:
   %39 = trunc i64 8 to i32  
   %40 = tail call ccc  i8*  @wybe_malloc(i32  %39)  
@@ -2649,7 +2649,7 @@ entry:
 }
 
 
-define external ccc  {i64, i1} @"multictr.simple.one<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i1} @"multictr.simple.one<1>"(i64  %"$#0")    {
 entry:
   %"tmp$0#0" = icmp ne i64 %"$#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -2675,7 +2675,7 @@ if.else1:
 }
 
 
-define external ccc  {i64, i1} @"multictr.simple.one_field<0>"(i64  %"$rec#0")    {
+define external fastcc  {i64, i1} @"multictr.simple.one_field<0>"(i64  %"$rec#0")    {
 entry:
   %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -2701,7 +2701,7 @@ if.else1:
 }
 
 
-define external ccc  {i64, i1} @"multictr.simple.one_field<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  {i64, i1} @"multictr.simple.one_field<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -2734,7 +2734,7 @@ if.else1:
 }
 
 
-define external ccc  i64 @"multictr.simple.two<0>"(i64  %"two_field1#0", i64  %"two_field2#0")    {
+define external fastcc  i64 @"multictr.simple.two<0>"(i64  %"two_field1#0", i64  %"two_field2#0")    {
 entry:
   %76 = trunc i64 16 to i32  
   %77 = tail call ccc  i8*  @wybe_malloc(i32  %76)  
@@ -2751,7 +2751,7 @@ entry:
 }
 
 
-define external ccc  {i64, i64, i1} @"multictr.simple.two<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i64, i1} @"multictr.simple.two<1>"(i64  %"$#0")    {
 entry:
   %"tmp$0#0" = icmp ne i64 %"$#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -2785,7 +2785,7 @@ if.else1:
 }
 
 
-define external ccc  {i64, i1} @"multictr.simple.two_field1<0>"(i64  %"$rec#0")    {
+define external fastcc  {i64, i1} @"multictr.simple.two_field1<0>"(i64  %"$rec#0")    {
 entry:
   %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -2812,7 +2812,7 @@ if.else1:
 }
 
 
-define external ccc  {i64, i1} @"multictr.simple.two_field1<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  {i64, i1} @"multictr.simple.two_field1<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -2847,7 +2847,7 @@ if.else1:
 }
 
 
-define external ccc  {i64, i1} @"multictr.simple.two_field2<0>"(i64  %"$rec#0")    {
+define external fastcc  {i64, i1} @"multictr.simple.two_field2<0>"(i64  %"$rec#0")    {
 entry:
   %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -2874,7 +2874,7 @@ if.else1:
 }
 
 
-define external ccc  {i64, i1} @"multictr.simple.two_field2<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  {i64, i1} @"multictr.simple.two_field2<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
   %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
@@ -2909,7 +2909,7 @@ if.else1:
 }
 
 
-define external ccc  i64 @"multictr.simple.zero<0>"()    {
+define external fastcc  i64 @"multictr.simple.zero<0>"()    {
 entry:
   ret i64 0 
 }
@@ -2992,7 +2992,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"multictr.suit./=<0>"(i2  %"$left#0", i2  %"$right#0")    {
+define external fastcc  i1 @"multictr.suit./=<0>"(i2  %"$left#0", i2  %"$right#0")    {
 entry:
   %"tmp$1#0" = icmp eq i2 %"$left#0", %"$right#0" 
   br i1 %"tmp$1#0", label %if.then, label %if.else 
@@ -3003,32 +3003,32 @@ if.else:
 }
 
 
-define external ccc  i1 @"multictr.suit.=<0>"(i2  %"$left#0", i2  %"$right#0")    {
+define external fastcc  i1 @"multictr.suit.=<0>"(i2  %"$left#0", i2  %"$right#0")    {
 entry:
   %"$$#0" = icmp eq i2 %"$left#0", %"$right#0" 
   ret i1 %"$$#0" 
 }
 
 
-define external ccc  i2 @"multictr.suit.clubs<0>"()    {
+define external fastcc  i2 @"multictr.suit.clubs<0>"()    {
 entry:
   ret i2 0 
 }
 
 
-define external ccc  i2 @"multictr.suit.diamonds<0>"()    {
+define external fastcc  i2 @"multictr.suit.diamonds<0>"()    {
 entry:
   ret i2 1 
 }
 
 
-define external ccc  i2 @"multictr.suit.hearts<0>"()    {
+define external fastcc  i2 @"multictr.suit.hearts<0>"()    {
 entry:
   ret i2 2 
 }
 
 
-define external ccc  i2 @"multictr.suit.spades<0>"()    {
+define external fastcc  i2 @"multictr.suit.spades<0>"()    {
 entry:
   ret i2 3 
 }
@@ -3080,19 +3080,19 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external ccc  i1 @"multictr.unit./=<0>"()    {
+define external fastcc  i1 @"multictr.unit./=<0>"()    {
 entry:
   ret i1 0 
 }
 
 
-define external ccc  i1 @"multictr.unit.=<0>"()    {
+define external fastcc  i1 @"multictr.unit.=<0>"()    {
 entry:
   ret i1 1 
 }
 
 
-define external ccc  void @"multictr.unit.unit<0>"()    {
+define external fastcc  void @"multictr.unit.unit<0>"()    {
 entry:
   ret void 
 }
