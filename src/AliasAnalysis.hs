@@ -370,6 +370,9 @@ mergeMultiSpeczInfo = List.foldl Set.union Set.empty
 
 -- we say a real param is interesting if it can be updated
 -- destructively when it doesn't alias to anything from outside
+updateMultiSpeczInfoByPrim :: [PrimVarName]
+                    -> (AliasMap, AliasMultiSpeczInfoLocal)
+                    -> Placed Prim -> Compiler AliasMultiSpeczInfoLocal
 updateMultiSpeczInfoByPrim realParams (aliasMap, multiSpeczInfo) prim =
     case content prim of
         PrimCall spec args -> do
