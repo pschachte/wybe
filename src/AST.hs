@@ -1592,10 +1592,10 @@ data ProcImpln
 -- | Use UnionFind method to record the alias information
 type AliasMap = DisjointSet PrimVarName
 -- | Multiple specialization info for global alias 
-type AliasMultiSpeczInfo = Set PrimVarName
+type AliasMultiSpeczInfo = [PrimVarName]
 
 emptyAliasMultiSpeczInfo :: AliasMultiSpeczInfo
-emptyAliasMultiSpeczInfo = Set.empty
+emptyAliasMultiSpeczInfo = []
 
 -- | a synonym function to hide the impletation of how unionfind is printed
 showAliasMap :: AliasMap -> String
@@ -1625,7 +1625,7 @@ instance Show ProcAnalysis where
     show (ProcAnalysis procArgAliasMap procArgAliasMultiSpeczInfo) =
        "\n AliasPairs: " ++ showAliasMap procArgAliasMap 
        ++ "\n AliasMultiSpeczInfo: "  
-       ++ show (Set.toList procArgAliasMultiSpeczInfo)
+       ++ show procArgAliasMultiSpeczInfo
 
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each

@@ -25,7 +25,10 @@ import           Options       (LogSelection (Analysis))
 import           Util
 
 
-type AliasInfo = (AliasMap, AliasMultiSpeczInfo)
+-- for local use only
+type AliasMultiSpeczInfoLocal = Set PrimVarName
+
+type AliasInfo = (AliasMap, AliasMultiSpeczInfoLocal)
 
 -- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
 aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
@@ -50,7 +53,8 @@ aliasSccBottomUp procs@(CyclicSCC multi) = do
     when (or changed) $ aliasSccBottomUp procs
 
 
-currentAliasInfo :: SCC ProcSpec -> Compiler [AliasInfo]
+currentAliasInfo :: SCC ProcSpec 
+                    -> Compiler [(AliasMap, AliasMultiSpeczInfo)]
 currentAliasInfo (AcyclicSCC single) = do
     def <- getProcDef single
     let (ProcDefPrim _ _ analysis) = procImpln def
@@ -63,13 +67,15 @@ currentAliasInfo procs@(CyclicSCC multi) =
         ) [] multi
 
 
-extractAliasInfoFromAnalysis :: ProcAnalysis -> AliasInfo
+extractAliasInfoFromAnalysis :: ProcAnalysis 
+                                -> (AliasMap, AliasMultiSpeczInfo) 
 extractAliasInfoFromAnalysis analysis = 
     (procArgAliasMap analysis, procArgAliasMultiSpeczInfo analysis)
 
 -- This comparison is CRUCIAL. The underlying data struct should
 -- handle equal CORRECTLY.
-isAliasInfoChanged :: AliasInfo -> AliasInfo -> Bool
+isAliasInfoChanged :: (AliasMap, AliasMultiSpeczInfo) 
+                    -> (AliasMap, AliasMultiSpeczInfo) -> Bool
 isAliasInfoChanged = (/=)
 
 -- XXX aliasProcBottomUp :: ProcSpec -> Compiler a
@@ -106,15 +112,19 @@ aliasProcDef def
         let (ProcDefPrim caller body oldAnalysis) = procImpln def
         logAlias $ show caller
 
+        realParams <- (primParamName <$>) <$> protoRealParams caller
+
         -- Actual analysis
         (aliasMap, multiSpeczInfo) <- 
-                aliasedByBody caller body (emptyDS, emptyAliasMultiSpeczInfo)
+                aliasedByBody caller body (emptyDS, Set.empty)
         
         aliasMap' <- completeAliasMap caller aliasMap
+        let multiSpeczInfo' =
+                    completeMultiSpeczInfo realParams multiSpeczInfo
         -- Update proc analysis with new aliasPairs
         let newAnalysis = oldAnalysis {
                             procArgAliasMap = aliasMap',
-                            procArgAliasMultiSpeczInfo = multiSpeczInfo
+                            procArgAliasMultiSpeczInfo = multiSpeczInfo'
                         }
         return $ def { procImpln = ProcDefPrim caller body newAnalysis }
 aliasProcDef def = return def
@@ -355,7 +365,7 @@ finalArgs _ finalSet _ = return finalSet
 -- other procedures that this procedure can make use of
 
 
-mergeMultiSpeczInfo :: [AliasMultiSpeczInfo] -> AliasMultiSpeczInfo
+mergeMultiSpeczInfo :: [AliasMultiSpeczInfoLocal] -> AliasMultiSpeczInfoLocal
 mergeMultiSpeczInfo = List.foldl Set.union Set.empty
 
 -- we say a real param is interesting if it can be updated
@@ -368,7 +378,7 @@ updateMultiSpeczInfoByPrim realParams (aliasMap, multiSpeczInfo) prim =
             let calleeMultiSpeczInfo = procArgAliasMultiSpeczInfo analysis
             let interestingArgWithCalleeParam = 
                     List.filter (\(arg, param) -> 
-                        Set.member param calleeMultiSpeczInfo
+                        List.elem param calleeMultiSpeczInfo
                         && isArgVarInteresting aliasMap arg
                     ) (pairArgVarWithParam args calleeProto)
             -- If a variable is in this list more than once, then it should
@@ -416,3 +426,10 @@ isArgVarInteresting aliasMap
             ArgVar{argVarName=inName, argVarFinal=final} =
     not (connectedToOthersInDS inName aliasMap) && final 
 isArgVarInteresting _aliasMap _ = False
+
+
+-- Convert the set of interesting params to list
+-- The order matters, we keep it the same as the [realParams].
+completeMultiSpeczInfo :: [PrimVarName] -> AliasMultiSpeczInfoLocal -> AliasMultiSpeczInfo
+completeMultiSpeczInfo realParams info = 
+    List.filter (flip Set.member info) realParams
