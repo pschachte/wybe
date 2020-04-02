@@ -277,7 +277,7 @@ _maybeAliasPrimArgs args = do
   where
     filterArg arg =
         case arg of 
-        ArgVar{argVarName=var, argVarType=ty, argVarFinal=final}
+        ArgVar{argVarName=var, argVarType=ty}
             -> do
                 isPhantom <- argIsPhantom arg
                 rep <- lookupTypeRepresentation ty 
