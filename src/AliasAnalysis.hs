@@ -19,6 +19,7 @@ import           Data.Graph
 import           Data.List     as List
 import           Data.Map      as Map
 import           Data.Set      as Set
+import           Data.Maybe    (catMaybes)
 import           Options       (LogSelection (Analysis))
 import           Util
 
@@ -161,8 +162,10 @@ aliasedByPrim realParams aliasMap prim =
         _ -> do
             -- | Analyse simple prims
             logAlias $ "--- simple prim:  " ++ show prim
-            maybeAliasPrimArgs (content prim) >>=
-                aliasedArgsInSimplePrim realParams aliasMap
+            let prim' = content prim
+            maybeAliasedVariables <- maybeAliasPrimArgs prim'
+            aliasedArgsInSimplePrim realParams aliasMap maybeAliasedVariables
+                                        (primArgs prim')
 
 
 -- Recursively analyse forked body's prims
@@ -192,32 +195,46 @@ aliasedByFork caller body aliasMap = do
 -- instructions.
 -- Not to compute aliasing from mutate instructions with the assumption that we
 -- always try to do nondestructive update.
--- Returned triple ([PrimVarName], [PrimVarName], [PrimArg]) is
--- (maybeAliasedInput, maybeAliasedOutput, primArgs)
-maybeAliasPrimArgs :: Prim -> Compiler ([PrimVarName], [PrimVarName], [PrimArg])
+-- Retruns maybeAliasedVariables
+maybeAliasPrimArgs :: Prim -> Compiler [PrimVarName]
 maybeAliasPrimArgs (PrimForeign "lpvm" "access" _ args) =
     _maybeAliasPrimArgs args
 maybeAliasPrimArgs (PrimForeign "lpvm" "cast" _ args) =
     _maybeAliasPrimArgs args
 maybeAliasPrimArgs (PrimForeign "llvm" "move" _ args) =
     _maybeAliasPrimArgs args
-maybeAliasPrimArgs prim@(PrimForeign "lpvm" "mutate" flags args) =
-    if "noalias" `elem` flags
-        then return ([],[], primArgs prim)
-        else _maybeAliasPrimArgs args
-maybeAliasPrimArgs prim =
-    return ([],[], primArgs prim)
+maybeAliasPrimArgs prim@(PrimForeign "lpvm" "mutate" flags args) = do
+    let [fIn, fOut, _, _, _, _, mem] = args
+    -- [fIn] is not alised to [fOut] when "noalias" flag is set
+    -- Primitive types will be removed in [_maybeAliasPrimArgs]
+    let args' =if "noalias" `elem` flags
+        then [fOut, mem]
+        else [fIn, fOut, mem]
+    _maybeAliasPrimArgs args'
+maybeAliasPrimArgs prim = return []
 
 
 -- Helper function for the above maybeAliasPrimArgs function
-_maybeAliasPrimArgs :: [PrimArg]
-                        -> Compiler ([PrimVarName], [PrimVarName], [PrimArg])
+-- It filters the args and keeps those may aliased with others
+-- We don't care about the Flow of args
+-- since the aliasMap is undirectional
+_maybeAliasPrimArgs :: [PrimArg] -> Compiler [PrimVarName]
 _maybeAliasPrimArgs args = do
-    let inputArgs = List.filter (argVarIsFlowDirection FlowIn) args
-    let outputArgs = List.filter (argVarIsFlowDirection FlowOut) args
-    escapedInputs <- foldM (argsOfProcProto inArgVar2) [] inputArgs
-    escapedVia <- foldM (argsOfProcProto outArgVar2) [] outputArgs
-    return (escapedInputs, escapedVia, args)
+    args' <- mapM filterArg args
+    let escapedVars = catMaybes args'
+    return escapedVars
+  where
+    filterArg arg =
+        case arg of 
+        ArgVar{argVarName=var, argVarType=ty}
+            -> do
+                isPhantom <- argIsPhantom arg
+                rep <- lookupTypeRepresentation ty 
+                -- Only Address type will create alias
+                if not isPhantom && rep == Just Address
+                    then return $ Just var
+                    else return Nothing
+        _   -> return Nothing 
 
 
 -- Helper: compare if two AliasMaps are different
@@ -229,16 +246,6 @@ areDifferentMaps aliasMap1 aliasMap2 =
     let aliasPair1 = aliasMapToAliasPairs aliasMap1
         aliasPair2 = aliasMapToAliasPairs aliasMap2
     in aliasPair1 /= aliasPair2
-
-
--- Helper: get argvar names of aliased args of the prim
-argsOfProcProto :: (PrimArg -> Compiler (Maybe PrimVarName))
-                    -> [PrimVarName] -> PrimArg -> Compiler [PrimVarName]
-argsOfProcProto varNameGetter escapedVars arg = do
-    nm <- varNameGetter arg
-    case nm of
-        Just name -> return (name : escapedVars)
-        Nothing   -> return escapedVars
 
 
 -- Check Arg aliases in one of proc calls inside a ProcBody
@@ -259,23 +266,20 @@ aliasedArgsInPrimCall calleeArgsAliases realParams currentAlias primArgs
 -- realParams: caller's formal params;
 -- (maybeAliasedInput, maybeAliasedOutput, primArgs): argument in current prim
 -- that being analysed
-aliasedArgsInSimplePrim :: [PrimVarName] -> AliasMap
-                            -> ([PrimVarName], [PrimVarName], [PrimArg])
-                            -> Compiler AliasMap
-aliasedArgsInSimplePrim realParams currentAlias ([],[], primArgs) = do
+aliasedArgsInSimplePrim :: [PrimVarName] -> AliasMap -> [PrimVarName] 
+                            -> [PrimArg] -> Compiler AliasMap
+aliasedArgsInSimplePrim realParams currentAlias [] primArgs = do
         -- No new aliasing incurred but still need to cleanup final args
         -- Gather variables in final use
         finals <- foldM (finalArgs realParams) Set.empty primArgs
         -- Then remove them from aliasmap
         return $ removeFromDS finals currentAlias
 aliasedArgsInSimplePrim realParams currentAlias
-    (maybeAliasedInput, maybeAliasedOutput, primArgs) = do
+                            maybeAliasedVariables primArgs = do
         logAlias $ "      primArgs:           " ++ show primArgs
-        logAlias $ "      maybeAliasedInput:  " ++ show maybeAliasedInput
-        logAlias $ "      maybeAliasedOutput: " ++ show maybeAliasedOutput
-        let aliases = cartProd maybeAliasedInput maybeAliasedOutput
-        let aliasMap1 = List.foldr (\(inArg, outArg) aMap ->
-                            unionTwoInDS outArg inArg aMap) currentAlias aliases
+        logAlias $ "      maybeAliasedVariables:  " 
+                                    ++ show maybeAliasedVariables 
+        let aliasMap1 = addConnectedGroupToDS maybeAliasedVariables currentAlias
         -- Gather variables in final use
         finals <- foldM (finalArgs realParams) Set.empty primArgs
         -- Then remove them from aliasmap

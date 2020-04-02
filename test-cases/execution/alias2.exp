@@ -1,0 +1,5 @@
+copy a position
+--- Inside pcopy: 
+expect p2(0,20): (0,20)
+--- After calling pcopy: 
+expect r(0,20): (0,20)
