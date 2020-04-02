@@ -435,4 +435,4 @@ isArgVarInteresting _aliasMap _ = False
 -- The order matters, we keep it the same as the [realParams].
 completeMultiSpeczInfo :: [PrimVarName] -> AliasMultiSpeczInfoLocal -> AliasMultiSpeczInfo
 completeMultiSpeczInfo realParams info = 
-    List.filter (flip Set.member info) realParams
+    List.filter (`Set.member` info) realParams
