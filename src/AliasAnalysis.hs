@@ -28,7 +28,9 @@ import           Util
 -- This type is for local use only. It stores interesting
 -- parameters during the analysis. After the analysis, it
 -- will be converted to [AliasMultiSpeczInfo] and stored
--- in LPVM modure.
+-- in LPVM modure. 
+-- More on this can be found under the 
+-- "Global Level Aliasing Analysis" section below.
 type AliasMultiSpeczInfoLocal = Set PrimVarName
 
 type AliasInfo = (AliasMap, AliasMultiSpeczInfoLocal)
@@ -135,6 +137,7 @@ aliasProcDef def
 aliasProcDef def = return def
 
 
+-- analysis a [ProcBody]
 aliasedByBody :: PrimProto -> ProcBody -> AliasInfo -> Compiler AliasInfo
 aliasedByBody caller body aliasInfo =
     aliasedByPrims caller body aliasInfo >>=
@@ -365,13 +368,19 @@ finalArgs _ finalSet _ = return finalSet
 ----------------------------------------------------------------
 --                 Global Level Aliasing Analysis
 ----------------------------------------------------------------
--- For each procedure, compute potential specialized versions 
--- of the current procedure and list specialized versions of 
--- other procedures that this procedure can make use of
+-- The local above consider all parameters as aliased, and this global
+-- one is to extend that by generating specialized procedures where 
+-- some parameters aren't aliased.
+-- The code here is to analysis each procedure and list parameters
+-- that are interesting for further use (in [Transform.hs]).
+-- We consider a parameter is intersting when the alias
+-- information of that parameter can help us generate a
+-- better version of that procedure. 
 
 
 mergeMultiSpeczInfo :: [AliasMultiSpeczInfoLocal] -> AliasMultiSpeczInfoLocal
 mergeMultiSpeczInfo = List.foldl Set.union Set.empty
+
 
 -- we say a real param is interesting if it can be updated
 -- destructively when it doesn't alias to anything from outside
@@ -424,11 +433,15 @@ updateMultiSpeczInfoByPrim realParams (aliasMap, multiSpeczInfo) prim =
         _ -> return multiSpeczInfo
 
 
+-- pair up argument variables of the caller with parameters of the callee
 pairArgVarWithParam :: [PrimArg] -> PrimProto -> [(PrimArg, PrimVarName)]
 pairArgVarWithParam args proto =
     let formalParamNames = primProtoParamNames proto in
     List.zip args formalParamNames
 
+
+-- we consider a varibale is interesting when it isn't aliased and not used
+-- after this
 isArgVarInteresting :: AliasMap -> PrimArg -> Bool
 isArgVarInteresting aliasMap 
             ArgVar{argVarName=inName, argVarFinal=final} =
