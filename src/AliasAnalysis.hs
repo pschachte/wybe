@@ -25,7 +25,10 @@ import           Options       (LogSelection (Analysis))
 import           Util
 
 
--- for local use only
+-- This type is for local use only. It stores interesting
+-- parameters during the analysis. After the analysis, it
+-- will be converted to [AliasMultiSpeczInfo] and stored
+-- in LPVM modure.
 type AliasMultiSpeczInfoLocal = Set PrimVarName
 
 type AliasInfo = (AliasMap, AliasMultiSpeczInfoLocal)
@@ -67,6 +70,8 @@ currentAliasInfo procs@(CyclicSCC multi) =
         ) [] multi
 
 
+-- extract [AliasMap] and [AliasMultiSpeczInfo] from the given
+-- [ProcAnalysis]
 extractAliasInfoFromAnalysis :: ProcAnalysis 
                                 -> (AliasMap, AliasMultiSpeczInfo) 
 extractAliasInfoFromAnalysis analysis = 
