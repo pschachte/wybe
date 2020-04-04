@@ -236,6 +236,8 @@ translateProc modProtos proc = do
     return blocks'
 
 
+-- Helper for [translateProc]. Translate the given [ProcBody] 
+-- (A specialized version of a procedure).
 _translateProcImpl :: [PrimProto] -> PrimProto -> ProcBody -> Word 
                                 -> Compiler (ProcDefBlock, Word)
 _translateProcImpl modProtos proto body startCount = do

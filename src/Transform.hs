@@ -59,6 +59,7 @@ transformProc def
 
 transformProc def = return def
 
+
 transformBody :: PrimProto -> ProcBody -> AliasMap -> [PrimVarName]
                              -> Compiler ProcBody
 transformBody caller body aliasMap aliasedParams = do
@@ -135,6 +136,8 @@ transformPrim realParams aliasedParams (aliasMap, prims) prim = do
     return (aliasMap', prims ++ [prim'])
 
 
+-- Update PrimCall to make it uses a better specialized version
+-- than the general version based on the current [AliasMap]
 _updatePrimCallForSpecz :: ProcSpec -> [PrimArg] -> [PrimVarName]
                             -> AliasMap -> Compiler ProcSpec
 _updatePrimCallForSpecz spec args aliasedParams aliasMap = do
@@ -197,6 +200,8 @@ _updateMutateForAlias _ _ args = args
 -- of the [Int]
 
 
+-- List all possible specialized version ids since we are
+-- generating all versions for now.
 allPossiblespeczIds :: AliasMultiSpeczInfo -> [SpeczVersionId]
 allPossiblespeczIds speczInfo = 
     let maxId = (2 ^ List.length speczInfo) - 1 in
@@ -206,15 +211,20 @@ allPossiblespeczIds speczInfo =
         else [1..maxId] 
 
 
+-- Return a list of non aliased parameters based on the given id
 speczIdToNonAliasedParams :: AliasMultiSpeczInfo
                             -> SpeczVersionId -> [PrimVarName]
 speczIdToNonAliasedParams = _speczIdToXAliasedParams False
 
 
+-- Return a list of aliased parameters based on the given id
 speczIdToAliasedParams :: AliasMultiSpeczInfo
                             -> SpeczVersionId -> [PrimVarName]
 speczIdToAliasedParams = _speczIdToXAliasedParams True
 
+
+-- Helper for [speczIdToNonAliasedParams]
+-- and [speczIdToAliasedParams].
 -- [True] for aliased and [False] for non-aliased.
 _speczIdToXAliasedParams :: Bool -> AliasMultiSpeczInfo
                             -> SpeczVersionId -> [PrimVarName]
@@ -225,6 +235,8 @@ _speczIdToXAliasedParams bool speczInfo speczId =
     |> List.map snd
 
 
+-- Return the corresponding [SpeczVersionId] of the given 
+-- non aliased parameters.
 nonAliasedParamsToSpeczId :: AliasMultiSpeczInfo
                             -> [PrimVarName] -> SpeczVersionId
 nonAliasedParamsToSpeczId speczInfo nonAliasedParams =
@@ -234,6 +246,7 @@ nonAliasedParamsToSpeczId speczInfo nonAliasedParams =
             then Bits.bit idx
             else Bits.zeroBits)
     |> List.foldl (Bits..|.) Bits.zeroBits 
+
 
 -- |Log a message, if we are logging optimisation activity.
 logTransform :: String -> Compiler ()

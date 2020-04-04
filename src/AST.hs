@@ -1598,6 +1598,8 @@ data ProcImpln
 type SpeczVersionId = Int
 
 
+-- Convert [SpeczVersionId] to [String] so it can be shorter in function
+-- name.
 speczIdToString :: SpeczVersionId -> String
 speczIdToString speczId = 
     showHex speczId ""
@@ -1623,6 +1625,7 @@ aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 
 -- | Multiple specialization info for global alias 
 type AliasMultiSpeczInfo = [PrimVarName]
+
 
 emptyAliasMultiSpeczInfo :: AliasMultiSpeczInfo
 emptyAliasMultiSpeczInfo = []

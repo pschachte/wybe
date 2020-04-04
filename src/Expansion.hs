@@ -30,7 +30,7 @@ import           Util
 procExpansion :: ProcSpec -> ProcDef -> Compiler ProcDef
 procExpansion pspec def = do
     logMsg Expansion $ "*** Try to expand proc " ++ show pspec
-    let ProcDefPrim proto body _ _= procImpln def
+    let ProcDefPrim proto body _ _ = procImpln def
     logMsg Expansion $ "    initial body: "
         ++ show (ProcDefPrim proto body 
                   (ProcAnalysis emptyDS emptyAliasMultiSpeczInfo)
