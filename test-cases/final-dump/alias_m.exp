@@ -108,7 +108,7 @@ bar > public (0 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_mfoo.foo<0>(~p1#1:position.position, ?p2#0:position.position, ?p3#1:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_mbar:13:13
+        alias_mfoo.foo<0>[1](~p1#1:position.position, ?p2#0:position.position, ?p3#1:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_mbar:13:13
 
     1:
         foreign llvm move(~p1#0:position.position, ?p3#1:position.position)
@@ -123,7 +123,7 @@ bar > public (0 calls)
  
 
 
-declare external fastcc  {i64, i64} @"alias_mfoo.foo<0>"(i64)    
+declare external fastcc  {i64, i64} @"alias_mfoo.foo<0>[1]"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -155,10 +155,33 @@ if.else:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   store  i64 %"tmp$2#0", i64* %13 
-  %14 = tail call fastcc  {i64, i64}  @"alias_mfoo.foo<0>"(i64  %7)  
+  %14 = tail call fastcc  {i64, i64}  @"alias_mfoo.foo<0>[1]"(i64  %7)  
   %15 = extractvalue {i64, i64} %14, 0 
   %16 = extractvalue {i64, i64} %14, 1 
   ret i64 %16 
+}
+
+
+define external fastcc  i64 @"alias_mbar.bar<0>[1]"(i64  %"p1#0")    {
+entry:
+  %17 = add   i64 %"p1#0", 8 
+  %18 = inttoptr i64 %17 to i64* 
+  %19 = getelementptr  i64, i64* %18, i64 0 
+  %20 = load  i64, i64* %19 
+  %"tmp$3#0" = icmp sgt i64 %20, 1 
+  br i1 %"tmp$3#0", label %if.then, label %if.else 
+if.then:
+  ret i64 %"p1#0" 
+if.else:
+  %"tmp$2#0" = add   i64 %20, 1 
+  %21 = add   i64 %"p1#0", 8 
+  %22 = inttoptr i64 %21 to i64* 
+  %23 = getelementptr  i64, i64* %22, i64 0 
+  store  i64 %"tmp$2#0", i64* %23 
+  %24 = tail call fastcc  {i64, i64}  @"alias_mfoo.foo<0>[1]"(i64  %"p1#0")  
+  %25 = extractvalue {i64, i64} %24, 0 
+  %26 = extractvalue {i64, i64} %24, 1 
+  ret i64 %26 
 }
 --------------------------------------------------
  Module alias_mfoo
@@ -183,7 +206,7 @@ foo > public (0 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:wybe.int)
-        alias_mbar.bar<0>(~p1#1:position.position, ?p3#0:position.position, ~#io#0:wybe.phantom, ?#io#2:wybe.phantom) @alias_mfoo:15:14
+        alias_mbar.bar<0>[1](~p1#1:position.position, ?p3#0:position.position, ~#io#0:wybe.phantom, ?#io#2:wybe.phantom) @alias_mfoo:15:14
         foreign lpvm alloc(16:wybe.int, ?tmp$16#0:position.position)
         foreign lpvm mutate(~tmp$16#0:position.position, ?tmp$17#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
         foreign lpvm mutate(~tmp$17#0:position.position, ?p2#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
@@ -206,7 +229,7 @@ foo > public (0 calls)
  
 
 
-declare external fastcc  i64 @"alias_mbar.bar<0>"(i64)    
+declare external fastcc  i64 @"alias_mbar.bar<0>[1]"(i64)    
 
 
 declare external fastcc  void @"position.printPosition<0>"(i64)    
@@ -216,6 +239,9 @@ declare external ccc  void @print_string(i64)
 
 
 @alias_mfoo.12 =    constant [4 x i8] c"p3:\00"
+
+
+@alias_mfoo.45 =    constant [4 x i8] c"p3:\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -260,7 +286,7 @@ if.else:
   %22 = inttoptr i64 %18 to i64* 
   %23 = getelementptr  i64, i64* %22, i64 0 
   store  i64 %"tmp$3#0", i64* %23 
-  %"p3#0" = tail call fastcc  i64  @"alias_mbar.bar<0>"(i64  %18)  
+  %"p3#0" = tail call fastcc  i64  @"alias_mbar.bar<0>[1]"(i64  %18)  
   %24 = trunc i64 16 to i32  
   %25 = tail call ccc  i8*  @wybe_malloc(i32  %24)  
   %26 = ptrtoint i8* %25 to i64 
@@ -274,6 +300,52 @@ if.else:
   %32 = insertvalue {i64, i64} undef, i64 %26, 0 
   %33 = insertvalue {i64, i64} %32, i64 %"p3#0", 1 
   ret {i64, i64} %33 
+}
+
+
+define external fastcc  {i64, i64} @"alias_mfoo.foo<0>[1]"(i64  %"p1#0")    {
+entry:
+  %34 = inttoptr i64 %"p1#0" to i64* 
+  %35 = getelementptr  i64, i64* %34, i64 0 
+  %36 = load  i64, i64* %35 
+  %"tmp$5#0" = icmp sgt i64 %36, 1 
+  br i1 %"tmp$5#0", label %if.then, label %if.else 
+if.then:
+  %37 = trunc i64 16 to i32  
+  %38 = tail call ccc  i8*  @wybe_malloc(i32  %37)  
+  %39 = ptrtoint i8* %38 to i64 
+  %40 = inttoptr i64 %39 to i64* 
+  %41 = getelementptr  i64, i64* %40, i64 0 
+  store  i64 3, i64* %41 
+  %42 = add   i64 %39, 8 
+  %43 = inttoptr i64 %42 to i64* 
+  %44 = getelementptr  i64, i64* %43, i64 0 
+  store  i64 3, i64* %44 
+  %46 = ptrtoint i8* getelementptr inbounds ([4 x i8], [4 x i8]* @alias_mfoo.45, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %46)  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %39)  
+  %47 = insertvalue {i64, i64} undef, i64 %"p1#0", 0 
+  %48 = insertvalue {i64, i64} %47, i64 %39, 1 
+  ret {i64, i64} %48 
+if.else:
+  %"tmp$3#0" = add   i64 %36, 1 
+  %49 = inttoptr i64 %"p1#0" to i64* 
+  %50 = getelementptr  i64, i64* %49, i64 0 
+  store  i64 %"tmp$3#0", i64* %50 
+  %"p3#0" = tail call fastcc  i64  @"alias_mbar.bar<0>[1]"(i64  %"p1#0")  
+  %51 = trunc i64 16 to i32  
+  %52 = tail call ccc  i8*  @wybe_malloc(i32  %51)  
+  %53 = ptrtoint i8* %52 to i64 
+  %54 = inttoptr i64 %53 to i64* 
+  %55 = getelementptr  i64, i64* %54, i64 0 
+  store  i64 2, i64* %55 
+  %56 = add   i64 %53, 8 
+  %57 = inttoptr i64 %56 to i64* 
+  %58 = getelementptr  i64, i64* %57, i64 0 
+  store  i64 2, i64* %58 
+  %59 = insertvalue {i64, i64} undef, i64 %53, 0 
+  %60 = insertvalue {i64, i64} %59, i64 %"p3#0", 1 
+  ret {i64, i64} %60 
 }
 --------------------------------------------------
  Module position
