@@ -39,8 +39,9 @@ module AST (
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
-  AliasMap, aliasMapToAliasPairs, ProcAnalysis(..),
-  ProcBody(..), PrimFork(..), Ident, VarName,
+  AliasMap, aliasMapToAliasPairs,
+  AliasMultiSpeczInfo, emptyAliasMultiSpeczInfo,
+  ProcAnalysis(..), ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
   foldProcCalls, foldBodyPrims, foldBodyDistrib,
@@ -1590,6 +1591,11 @@ data ProcImpln
 
 -- | Use UnionFind method to record the alias information
 type AliasMap = DisjointSet PrimVarName
+-- | Multiple specialization info for global alias 
+type AliasMultiSpeczInfo = [PrimVarName]
+
+emptyAliasMultiSpeczInfo :: AliasMultiSpeczInfo
+emptyAliasMultiSpeczInfo = []
 
 -- | a synonym function to hide the impletation of how unionfind is printed
 showAliasMap :: AliasMap -> String
@@ -1602,8 +1608,8 @@ aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 
 -- | Stores whatever analysis results we infer about a proc definition.
 data ProcAnalysis = ProcAnalysis {
-    procArgAliasMap :: AliasMap
-    --- interestingness analysis info -- ^for future
+    procArgAliasMap :: AliasMap,
+    procArgAliasMultiSpeczInfo :: AliasMultiSpeczInfo
 } deriving (Eq,Generic)
 
 isCompiled :: ProcImpln -> Bool
@@ -1616,9 +1622,10 @@ instance Show ProcImpln where
         = show proto ++ ":" ++ show analysis ++ showBlock 4 body
 
 instance Show ProcAnalysis where
-    show (ProcAnalysis procArgAliasMap) =
-       " AliasPairs: " ++ showAliasMap procArgAliasMap
-        -- ++ "Alias Map: " ++ show procArgAliasMap ++ "\n"
+    show (ProcAnalysis procArgAliasMap procArgAliasMultiSpeczInfo) =
+       "\n AliasPairs: " ++ showAliasMap procArgAliasMap 
+       ++ "\n AliasMultiSpeczInfo: "  
+       ++ show procArgAliasMultiSpeczInfo
 
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each

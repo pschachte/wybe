@@ -150,7 +150,9 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
   procs           : 
 
 /= > public inline test (0 calls)
-0: /=($left#0:multictr.card, $right#0:multictr.card, ?$$#0:wybe.bool): AliasPairs: []
+0: /=($left#0:multictr.card, $right#0:multictr.card, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp eq(~$left#0:multictr.card, ~$right#0:multictr.card, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
     0:
@@ -162,16 +164,22 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 
 = > public inline test (3 calls)
-0: =($left#0:multictr.card, $right#0:multictr.card, ?$$#0:wybe.bool): AliasPairs: []
+0: =($left#0:multictr.card, $right#0:multictr.card, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp eq(~$left#0:multictr.card, ~$right#0:multictr.card, ?$$#0:wybe.bool)
 
 
 card > public inline (0 calls)
-0: card(suit#0:multictr.suit, rank#0:multictr.rank, ?$#3:multictr.card): AliasPairs: []
+0: card(suit#0:multictr.suit, rank#0:multictr.rank, ?$#3:multictr.card):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm shl(~rank#0:!multictr.card, 2:multictr.card, ?$temp#1:multictr.card)
     foreign llvm or(~$temp#1:multictr.card, ~suit#0:!multictr.card, ?$#3:multictr.card)
 card > public inline (0 calls)
-1: card(?suit#0:multictr.suit, ?rank#0:multictr.rank, $#0:multictr.card): AliasPairs: []
+1: card(?suit#0:multictr.suit, ?rank#0:multictr.rank, $#0:multictr.card):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm and($#0:multictr.card, 3:multictr.card, ?$temp2#0:multictr.card)
     foreign lpvm cast(~$temp2#0:multictr.card, ?suit#0:multictr.suit)
     foreign llvm lshr(~$#0:multictr.card, 2:multictr.card, ?$temp#1:multictr.card)
@@ -180,23 +188,31 @@ card > public inline (0 calls)
 
 
 rank > public inline (0 calls)
-0: rank($rec#0:multictr.card, ?$#0:multictr.rank): AliasPairs: []
+0: rank($rec#0:multictr.card, ?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm lshr(~$rec#0:multictr.card, 2:multictr.card, ?$rec#1:multictr.card)
     foreign llvm and(~$rec#1:multictr.card, 15:multictr.card, ?$field#0:multictr.card)
     foreign lpvm cast(~$field#0:multictr.card, ?$#0:multictr.rank)
 rank > public inline (0 calls)
-1: rank($rec#0:multictr.card, ?$rec#2:multictr.card, $field#0:multictr.rank): AliasPairs: []
+1: rank($rec#0:multictr.card, ?$rec#2:multictr.card, $field#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm and(~$rec#0:multictr.card, -61:multictr.card, ?$rec#1:multictr.card)
     foreign llvm shl(~$field#0:!multictr.card, 2:multictr.card, ?$field#1:multictr.card)
     foreign llvm or(~$field#1:multictr.card, ~$rec#1:multictr.card, ?$rec#2:multictr.card)
 
 
 suit > public inline (0 calls)
-0: suit($rec#0:multictr.card, ?$#0:multictr.suit): AliasPairs: []
+0: suit($rec#0:multictr.card, ?$#0:multictr.suit):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm and(~$rec#0:multictr.card, 3:multictr.card, ?$field#0:multictr.card)
     foreign lpvm cast(~$field#0:multictr.card, ?$#0:multictr.suit)
 suit > public inline (0 calls)
-1: suit($rec#0:multictr.card, ?$rec#2:multictr.card, $field#0:multictr.suit): AliasPairs: []
+1: suit($rec#0:multictr.card, ?$rec#2:multictr.card, $field#0:multictr.suit):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm and(~$rec#0:multictr.card, -4:multictr.card, ?$rec#1:multictr.card)
     foreign llvm or(~$field#0:!multictr.card, ~$rec#1:multictr.card, ?$rec#2:multictr.card)
 
@@ -315,7 +331,9 @@ entry:
   procs           : 
 
 /= > public inline test (0 calls)
-0: /=($left#0:multictr.complicated, $right#0:multictr.complicated, ?$$#0:wybe.bool): AliasPairs: []
+0: /=($left#0:multictr.complicated, $right#0:multictr.complicated, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     multictr.complicated.=<0>(~$left#0:multictr.complicated, ~$right#0:multictr.complicated, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
     0:
@@ -327,7 +345,9 @@ entry:
 
 
 = > public test (5 calls)
-0: =($left#0:multictr.complicated, $right#0:multictr.complicated, ?$$#0:wybe.bool): AliasPairs: []
+0: =($left#0:multictr.complicated, $right#0:multictr.complicated, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm cast($left#0:multictr.complicated, ?tmp$0#0:!wybe.int)
     foreign llvm icmp ult(~tmp$0#0:!wybe.int, 4:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -434,16 +454,22 @@ entry:
 
 
 autumn > public inline (0 calls)
-0: autumn(?$#0:multictr.complicated): AliasPairs: []
+0: autumn(?$#0:multictr.complicated):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(3:multictr.complicated, ?$#0:multictr.complicated)
 
 
 c01 > public inline (0 calls)
-0: c01(f01#0:wybe.int, ?$#0:multictr.complicated): AliasPairs: []
+0: c01(f01#0:wybe.int, ?$#0:multictr.complicated):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.complicated)
     foreign lpvm mutate(~%$rec#0:multictr.complicated, ?%$#0:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01#0:wybe.int)
 c01 > public inline test (7 calls)
-1: c01(?f01#0:wybe.int, $#0:multictr.complicated, ?$$#0:wybe.bool): AliasPairs: []
+1: c01(?f01#0:wybe.int, $#0:multictr.complicated, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp uge($#0:multictr.complicated, 4:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -464,12 +490,16 @@ c01 > public inline test (7 calls)
 
 
 c02 > public inline (0 calls)
-0: c02(f02#0:wybe.int, ?$#0:multictr.complicated): AliasPairs: []
+0: c02(f02#0:wybe.int, ?$#0:multictr.complicated):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.complicated)
     foreign lpvm mutate(~%$rec#0:multictr.complicated, ?%$rec#1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f02#0:wybe.int)
     foreign llvm or(~$rec#1, 1:wybe.int, ?$#0:multictr.complicated)
 c02 > public inline test (5 calls)
-1: c02(?f02#0:wybe.int, $#0:multictr.complicated, ?$$#0:wybe.bool): AliasPairs: []
+1: c02(?f02#0:wybe.int, $#0:multictr.complicated, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp uge($#0:multictr.complicated, 4:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -490,7 +520,9 @@ c02 > public inline test (5 calls)
 
 
 f01 > public inline test (0 calls)
-0: f01($rec#0:multictr.complicated, ?$#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+0: f01($rec#0:multictr.complicated, ?$#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp uge($rec#0:multictr.complicated, 4:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -509,7 +541,9 @@ f01 > public inline test (0 calls)
 
 
 f01 > public inline test (0 calls)
-1: f01($rec#0:multictr.complicated, ?$rec#1:multictr.complicated, $field#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+1: f01($rec#0:multictr.complicated, ?$rec#1:multictr.complicated, $field#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp uge($rec#0:multictr.complicated, 4:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -532,7 +566,9 @@ f01 > public inline test (0 calls)
 
 
 f02 > public inline test (0 calls)
-0: f02($rec#0:multictr.complicated, ?$#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+0: f02($rec#0:multictr.complicated, ?$#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp uge($rec#0:multictr.complicated, 4:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -551,7 +587,9 @@ f02 > public inline test (0 calls)
 
 
 f02 > public inline test (0 calls)
-1: f02($rec#0:multictr.complicated, ?$rec#1:multictr.complicated, $field#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+1: f02($rec#0:multictr.complicated, ?$rec#1:multictr.complicated, $field#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp uge($rec#0:multictr.complicated, 4:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -574,17 +612,23 @@ f02 > public inline test (0 calls)
 
 
 spring > public inline (0 calls)
-0: spring(?$#0:multictr.complicated): AliasPairs: []
+0: spring(?$#0:multictr.complicated):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(1:multictr.complicated, ?$#0:multictr.complicated)
 
 
 summer > public inline (0 calls)
-0: summer(?$#0:multictr.complicated): AliasPairs: []
+0: summer(?$#0:multictr.complicated):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(2:multictr.complicated, ?$#0:multictr.complicated)
 
 
 winter > public inline (0 calls)
-0: winter(?$#0:multictr.complicated): AliasPairs: []
+0: winter(?$#0:multictr.complicated):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(0:multictr.complicated, ?$#0:multictr.complicated)
 
   LLVM code       :
@@ -952,7 +996,9 @@ entry:
   procs           : 
 
 /= > public inline test (0 calls)
-0: /=($left#0:multictr.length, $right#0:multictr.length, ?$$#0:wybe.bool): AliasPairs: []
+0: /=($left#0:multictr.length, $right#0:multictr.length, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp eq(~$left#0:multictr.length, ~$right#0:multictr.length, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
     0:
@@ -964,23 +1010,33 @@ entry:
 
 
 = > public inline test (3 calls)
-0: =($left#0:multictr.length, $right#0:multictr.length, ?$$#0:wybe.bool): AliasPairs: []
+0: =($left#0:multictr.length, $right#0:multictr.length, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp eq(~$left#0:multictr.length, ~$right#0:multictr.length, ?$$#0:wybe.bool)
 
 
 metres > public inline (0 calls)
-0: metres(value#0:wybe.float, ?$#2:multictr.length): AliasPairs: []
+0: metres(value#0:wybe.float, ?$#2:multictr.length):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(~value#0:!multictr.length, ?$#2:multictr.length)
 metres > public inline (0 calls)
-1: metres(?value#0:wybe.float, $#0:multictr.length): AliasPairs: []
+1: metres(?value#0:wybe.float, $#0:multictr.length):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm cast(~$#0:multictr.length, ?value#0:wybe.float)
 
 
 value > public inline (0 calls)
-0: value($rec#0:multictr.length, ?$#0:wybe.float): AliasPairs: []
+0: value($rec#0:multictr.length, ?$#0:wybe.float):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm cast(~$rec#0:multictr.length, ?$#0:wybe.float)
 value > public inline (0 calls)
-1: value([$rec#0:multictr.length], ?$rec#2:multictr.length, $field#0:wybe.float): AliasPairs: []
+1: value([$rec#0:multictr.length], ?$rec#2:multictr.length, $field#0:wybe.float):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(~$field#0:!multictr.length, ?$rec#2:multictr.length)
 
   LLVM code       :
@@ -1060,7 +1116,9 @@ entry:
   procs           : 
 
 /= > public inline test (0 calls)
-0: /=($left#0:multictr.maybe_int, $right#0:multictr.maybe_int, ?$$#0:wybe.bool): AliasPairs: []
+0: /=($left#0:multictr.maybe_int, $right#0:multictr.maybe_int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     multictr.maybe_int.=<0>(~$left#0:multictr.maybe_int, ~$right#0:multictr.maybe_int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
     0:
@@ -1072,7 +1130,9 @@ entry:
 
 
 = > public test (4 calls)
-0: =($left#0:multictr.maybe_int, $right#0:multictr.maybe_int, ?$$#0:wybe.bool): AliasPairs: []
+0: =($left#0:multictr.maybe_int, $right#0:multictr.maybe_int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm cast($left#0:multictr.maybe_int, ?tmp$0#0:!wybe.int)
     foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -1101,11 +1161,15 @@ entry:
 
 
 just > public inline (0 calls)
-0: just(value#0:wybe.int, ?$#0:multictr.maybe_int): AliasPairs: []
+0: just(value#0:wybe.int, ?$#0:multictr.maybe_int):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.maybe_int)
     foreign lpvm mutate(~%$rec#0:multictr.maybe_int, ?%$#0:multictr.maybe_int, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value#0:wybe.int)
 just > public inline test (5 calls)
-1: just(?value#0:wybe.int, $#0:multictr.maybe_int, ?$$#0:wybe.bool): AliasPairs: []
+1: just(?value#0:wybe.int, $#0:multictr.maybe_int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($#0:multictr.maybe_int, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -1118,12 +1182,16 @@ just > public inline test (5 calls)
 
 
 nothing > public inline (0 calls)
-0: nothing(?$#0:multictr.maybe_int): AliasPairs: []
+0: nothing(?$#0:multictr.maybe_int):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(0:multictr.maybe_int, ?$#0:multictr.maybe_int)
 
 
 value > public inline test (0 calls)
-0: value($rec#0:multictr.maybe_int, ?$#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+0: value($rec#0:multictr.maybe_int, ?$#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:multictr.maybe_int, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -1134,7 +1202,9 @@ value > public inline test (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 value > public inline test (0 calls)
-1: value($rec#0:multictr.maybe_int, ?$rec#1:multictr.maybe_int, $field#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+1: value($rec#0:multictr.maybe_int, ?$rec#1:multictr.maybe_int, $field#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:multictr.maybe_int, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -1299,7 +1369,9 @@ if.else:
   procs           : 
 
 /= > public inline test (0 calls)
-0: /=($left#0:multictr.number, $right#0:multictr.number, ?$$#0:wybe.bool): AliasPairs: []
+0: /=($left#0:multictr.number, $right#0:multictr.number, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     multictr.number.=<0>(~$left#0:multictr.number, ~$right#0:multictr.number, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
     0:
@@ -1311,7 +1383,9 @@ if.else:
 
 
 = > public test (5 calls)
-0: =($left#0:multictr.number, $right#0:multictr.number, ?$$#0:wybe.bool): AliasPairs: []
+0: =($left#0:multictr.number, $right#0:multictr.number, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm and($left#0:multictr.number, 7:wybe.int, ?tmp$9#0:wybe.int)
     foreign llvm icmp eq(tmp$9#0:wybe.int, 0:wybe.int, ?tmp$10#0:wybe.bool)
     case ~tmp$10#0:wybe.bool of
@@ -1351,12 +1425,16 @@ if.else:
 
 
 float > public inline (0 calls)
-0: float(float_value#0:wybe.float, ?$#0:multictr.number): AliasPairs: []
+0: float(float_value#0:wybe.float, ?$#0:multictr.number):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.number)
     foreign lpvm mutate(~%$rec#0:multictr.number, ?%$rec#1:multictr.number, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~float_value#0:wybe.float)
     foreign llvm or(~$rec#1, 1:wybe.int, ?$#0:multictr.number)
 float > public inline test (5 calls)
-1: float(?float_value#0:wybe.float, $#0:multictr.number, ?$$#0:wybe.bool): AliasPairs: []
+1: float(?float_value#0:wybe.float, $#0:multictr.number, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm and($#0:multictr.number, 7:wybe.int, ?tmp$0#0:!wybe.int)
     foreign llvm icmp eq(~tmp$0#0:!wybe.int, 1:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -1370,7 +1448,9 @@ float > public inline test (5 calls)
 
 
 float_value > public inline test (0 calls)
-0: float_value($rec#0:multictr.number, ?$#0:wybe.float, ?$$#0:wybe.bool): AliasPairs: []
+0: float_value($rec#0:multictr.number, ?$#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm and($rec#0:multictr.number, 7:wybe.int, ?tmp$0#0:!wybe.int)
     foreign llvm icmp eq(~tmp$0#0:!wybe.int, 1:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -1382,7 +1462,9 @@ float_value > public inline test (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 float_value > public inline test (0 calls)
-1: float_value($rec#0:multictr.number, ?$rec#1:multictr.number, $field#0:wybe.float, ?$$#0:wybe.bool): AliasPairs: []
+1: float_value($rec#0:multictr.number, ?$rec#1:multictr.number, $field#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm and($rec#0:multictr.number, 7:wybe.int, ?tmp$0#0:!wybe.int)
     foreign llvm icmp eq(~tmp$0#0:!wybe.int, 1:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -1397,11 +1479,15 @@ float_value > public inline test (0 calls)
 
 
 int > public inline (0 calls)
-0: int(int_value#0:wybe.int, ?$#0:multictr.number): AliasPairs: []
+0: int(int_value#0:wybe.int, ?$#0:multictr.number):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.number)
     foreign lpvm mutate(~%$rec#0:multictr.number, ?%$#0:multictr.number, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~int_value#0:wybe.int)
 int > public inline test (7 calls)
-1: int(?int_value#0:wybe.int, $#0:multictr.number, ?$$#0:wybe.bool): AliasPairs: []
+1: int(?int_value#0:wybe.int, $#0:multictr.number, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm and($#0:multictr.number, 7:wybe.int, ?tmp$0#0:!wybe.int)
     foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -1415,7 +1501,9 @@ int > public inline test (7 calls)
 
 
 int_value > public inline test (0 calls)
-0: int_value($rec#0:multictr.number, ?$#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+0: int_value($rec#0:multictr.number, ?$#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm and($rec#0:multictr.number, 7:wybe.int, ?tmp$0#0:!wybe.int)
     foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -1427,7 +1515,9 @@ int_value > public inline test (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 int_value > public inline test (0 calls)
-1: int_value($rec#0:multictr.number, ?$rec#1:multictr.number, $field#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+1: int_value($rec#0:multictr.number, ?$rec#1:multictr.number, $field#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm and($rec#0:multictr.number, 7:wybe.int, ?tmp$0#0:!wybe.int)
     foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -1683,7 +1773,9 @@ if.else:
   procs           : 
 
 /= > public inline test (0 calls)
-0: /=($left#0:multictr.perhaps, $right#0:multictr.perhaps, ?$$#0:wybe.bool): AliasPairs: []
+0: /=($left#0:multictr.perhaps, $right#0:multictr.perhaps, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp eq(~$left#0:multictr.perhaps, ~$right#0:multictr.perhaps, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
     0:
@@ -1695,23 +1787,33 @@ if.else:
 
 
 = > public inline test (3 calls)
-0: =($left#0:multictr.perhaps, $right#0:multictr.perhaps, ?$$#0:wybe.bool): AliasPairs: []
+0: =($left#0:multictr.perhaps, $right#0:multictr.perhaps, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp eq(~$left#0:multictr.perhaps, ~$right#0:multictr.perhaps, ?$$#0:wybe.bool)
 
 
 content > public inline (0 calls)
-0: content($rec#0:multictr.perhaps, ?$#0:multictr.maybe_int): AliasPairs: []
+0: content($rec#0:multictr.perhaps, ?$#0:multictr.maybe_int):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm cast(~$rec#0:multictr.perhaps, ?$#0:multictr.maybe_int)
 content > public inline (0 calls)
-1: content([$rec#0:multictr.perhaps], ?$rec#2:multictr.perhaps, $field#0:multictr.maybe_int): AliasPairs: []
+1: content([$rec#0:multictr.perhaps], ?$rec#2:multictr.perhaps, $field#0:multictr.maybe_int):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(~$field#0:!multictr.perhaps, ?$rec#2:multictr.perhaps)
 
 
 perhaps > public inline (0 calls)
-0: perhaps(content#0:multictr.maybe_int, ?$#2:multictr.perhaps): AliasPairs: []
+0: perhaps(content#0:multictr.maybe_int, ?$#2:multictr.perhaps):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(~content#0:!multictr.perhaps, ?$#2:multictr.perhaps)
 perhaps > public inline (0 calls)
-1: perhaps(?content#0:multictr.maybe_int, $#0:multictr.perhaps): AliasPairs: []
+1: perhaps(?content#0:multictr.maybe_int, $#0:multictr.perhaps):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm cast(~$#0:multictr.perhaps, ?content#0:multictr.maybe_int)
 
   LLVM code       :
@@ -1795,7 +1897,9 @@ entry:
   procs           : 
 
 /= > public inline test (0 calls)
-0: /=($left#0:multictr.rank, $right#0:multictr.rank, ?$$#0:wybe.bool): AliasPairs: []
+0: /=($left#0:multictr.rank, $right#0:multictr.rank, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp eq(~$left#0:multictr.rank, ~$right#0:multictr.rank, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
     0:
@@ -1807,72 +1911,100 @@ entry:
 
 
 = > public inline test (3 calls)
-0: =($left#0:multictr.rank, $right#0:multictr.rank, ?$$#0:wybe.bool): AliasPairs: []
+0: =($left#0:multictr.rank, $right#0:multictr.rank, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp eq(~$left#0:multictr.rank, ~$right#0:multictr.rank, ?$$#0:wybe.bool)
 
 
 ace > public inline (0 calls)
-0: ace(?$#0:multictr.rank): AliasPairs: []
+0: ace(?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(12:multictr.rank, ?$#0:multictr.rank)
 
 
 jack > public inline (0 calls)
-0: jack(?$#0:multictr.rank): AliasPairs: []
+0: jack(?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(9:multictr.rank, ?$#0:multictr.rank)
 
 
 king > public inline (0 calls)
-0: king(?$#0:multictr.rank): AliasPairs: []
+0: king(?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(11:multictr.rank, ?$#0:multictr.rank)
 
 
 queen > public inline (0 calls)
-0: queen(?$#0:multictr.rank): AliasPairs: []
+0: queen(?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(10:multictr.rank, ?$#0:multictr.rank)
 
 
 r10 > public inline (0 calls)
-0: r10(?$#0:multictr.rank): AliasPairs: []
+0: r10(?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(8:multictr.rank, ?$#0:multictr.rank)
 
 
 r2 > public inline (0 calls)
-0: r2(?$#0:multictr.rank): AliasPairs: []
+0: r2(?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(0:multictr.rank, ?$#0:multictr.rank)
 
 
 r3 > public inline (0 calls)
-0: r3(?$#0:multictr.rank): AliasPairs: []
+0: r3(?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(1:multictr.rank, ?$#0:multictr.rank)
 
 
 r4 > public inline (0 calls)
-0: r4(?$#0:multictr.rank): AliasPairs: []
+0: r4(?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(2:multictr.rank, ?$#0:multictr.rank)
 
 
 r5 > public inline (0 calls)
-0: r5(?$#0:multictr.rank): AliasPairs: []
+0: r5(?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(3:multictr.rank, ?$#0:multictr.rank)
 
 
 r6 > public inline (0 calls)
-0: r6(?$#0:multictr.rank): AliasPairs: []
+0: r6(?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(4:multictr.rank, ?$#0:multictr.rank)
 
 
 r7 > public inline (0 calls)
-0: r7(?$#0:multictr.rank): AliasPairs: []
+0: r7(?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(5:multictr.rank, ?$#0:multictr.rank)
 
 
 r8 > public inline (0 calls)
-0: r8(?$#0:multictr.rank): AliasPairs: []
+0: r8(?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(6:multictr.rank, ?$#0:multictr.rank)
 
 
 r9 > public inline (0 calls)
-0: r9(?$#0:multictr.rank): AliasPairs: []
+0: r9(?$#0:multictr.rank):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(7:multictr.rank, ?$#0:multictr.rank)
 
   LLVM code       :
@@ -2008,7 +2140,9 @@ entry:
   procs           : 
 
 /= > public inline test (0 calls)
-0: /=($left#0:multictr.simple, $right#0:multictr.simple, ?$$#0:wybe.bool): AliasPairs: []
+0: /=($left#0:multictr.simple, $right#0:multictr.simple, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     multictr.simple.=<0>(~$left#0:multictr.simple, ~$right#0:multictr.simple, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
     0:
@@ -2020,7 +2154,9 @@ entry:
 
 
 = > public test (7 calls)
-0: =($left#0:multictr.simple, $right#0:multictr.simple, ?$$#0:wybe.bool): AliasPairs: []
+0: =($left#0:multictr.simple, $right#0:multictr.simple, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm cast($left#0:multictr.simple, ?tmp$0#0:!wybe.int)
     foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -2145,11 +2281,15 @@ entry:
 
 
 one > public inline (0 calls)
-0: one(one_field#0:wybe.int, ?$#0:multictr.simple): AliasPairs: []
+0: one(one_field#0:wybe.int, ?$#0:multictr.simple):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.simple)
     foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$#0:multictr.simple, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~one_field#0:wybe.int)
 one > public inline test (8 calls)
-1: one(?one_field#0:wybe.int, $#0:multictr.simple, ?$$#0:wybe.bool): AliasPairs: []
+1: one(?one_field#0:wybe.int, $#0:multictr.simple, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($#0:multictr.simple, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -2170,7 +2310,9 @@ one > public inline test (8 calls)
 
 
 one_field > public inline test (0 calls)
-0: one_field($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+0: one_field($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:multictr.simple, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -2189,7 +2331,9 @@ one_field > public inline test (0 calls)
 
 
 one_field > public inline test (0 calls)
-1: one_field($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+1: one_field($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:multictr.simple, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -2212,13 +2356,17 @@ one_field > public inline test (0 calls)
 
 
 two > public inline (0 calls)
-0: two(two_field1#0:wybe.int, two_field2#0:wybe.int, ?$#0:multictr.simple): AliasPairs: []
+0: two(two_field1#0:wybe.int, two_field2#0:wybe.int, ?$#0:multictr.simple):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!multictr.simple)
     foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$rec#1:multictr.simple, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~two_field1#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:multictr.simple, ?%$rec#2:multictr.simple, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~two_field2#0:wybe.int)
     foreign llvm or(~$rec#2, 1:wybe.int, ?$#0:multictr.simple)
 two > public inline test (7 calls)
-1: two(?two_field1#0:wybe.int, ?two_field2#0:wybe.int, $#0:multictr.simple, ?$$#0:wybe.bool): AliasPairs: []
+1: two(?two_field1#0:wybe.int, ?two_field2#0:wybe.int, $#0:multictr.simple, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($#0:multictr.simple, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -2240,7 +2388,9 @@ two > public inline test (7 calls)
 
 
 two_field1 > public inline test (0 calls)
-0: two_field1($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+0: two_field1($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:multictr.simple, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -2259,7 +2409,9 @@ two_field1 > public inline test (0 calls)
 
 
 two_field1 > public inline test (0 calls)
-1: two_field1($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+1: two_field1($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:multictr.simple, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -2282,7 +2434,9 @@ two_field1 > public inline test (0 calls)
 
 
 two_field2 > public inline test (0 calls)
-0: two_field2($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+0: two_field2($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:multictr.simple, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -2301,7 +2455,9 @@ two_field2 > public inline test (0 calls)
 
 
 two_field2 > public inline test (0 calls)
-1: two_field2($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+1: two_field2($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:multictr.simple, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -2324,7 +2480,9 @@ two_field2 > public inline test (0 calls)
 
 
 zero > public inline (0 calls)
-0: zero(?$#0:multictr.simple): AliasPairs: []
+0: zero(?$#0:multictr.simple):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(0:multictr.simple, ?$#0:multictr.simple)
 
   LLVM code       :
@@ -2773,7 +2931,9 @@ entry:
   procs           : 
 
 /= > public inline test (0 calls)
-0: /=($left#0:multictr.suit, $right#0:multictr.suit, ?$$#0:wybe.bool): AliasPairs: []
+0: /=($left#0:multictr.suit, $right#0:multictr.suit, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp eq(~$left#0:multictr.suit, ~$right#0:multictr.suit, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
     0:
@@ -2785,27 +2945,37 @@ entry:
 
 
 = > public inline test (3 calls)
-0: =($left#0:multictr.suit, $right#0:multictr.suit, ?$$#0:wybe.bool): AliasPairs: []
+0: =($left#0:multictr.suit, $right#0:multictr.suit, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp eq(~$left#0:multictr.suit, ~$right#0:multictr.suit, ?$$#0:wybe.bool)
 
 
 clubs > public inline (0 calls)
-0: clubs(?$#0:multictr.suit): AliasPairs: []
+0: clubs(?$#0:multictr.suit):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(0:multictr.suit, ?$#0:multictr.suit)
 
 
 diamonds > public inline (0 calls)
-0: diamonds(?$#0:multictr.suit): AliasPairs: []
+0: diamonds(?$#0:multictr.suit):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(1:multictr.suit, ?$#0:multictr.suit)
 
 
 hearts > public inline (0 calls)
-0: hearts(?$#0:multictr.suit): AliasPairs: []
+0: hearts(?$#0:multictr.suit):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(2:multictr.suit, ?$#0:multictr.suit)
 
 
 spades > public inline (0 calls)
-0: spades(?$#0:multictr.suit): AliasPairs: []
+0: spades(?$#0:multictr.suit):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(3:multictr.suit, ?$#0:multictr.suit)
 
   LLVM code       :
@@ -2877,17 +3047,23 @@ entry:
   procs           : 
 
 /= > public inline test (0 calls)
-0: /=([$left#0:multictr.unit], [$right#0:multictr.unit], ?$$#0:wybe.bool): AliasPairs: []
+0: /=([$left#0:multictr.unit], [$right#0:multictr.unit], ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
 
 = > public inline test (3 calls)
-0: =([$left#0:multictr.unit], [$right#0:multictr.unit], ?$$#0:wybe.bool): AliasPairs: []
+0: =([$left#0:multictr.unit], [$right#0:multictr.unit], ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
 unit > public inline (0 calls)
-0: unit(?$#0:multictr.unit): AliasPairs: []
+0: unit(?$#0:multictr.unit):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(0:multictr.unit, ?$#0:multictr.unit)
 
   LLVM code       :

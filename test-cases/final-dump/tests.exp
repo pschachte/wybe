@@ -29,7 +29,9 @@ AFTER EVERYTHING:
   procs           : 
 
 lookup > public test (6 calls)
-0: lookup(key#0:wybe.int, map#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+0: lookup(key#0:wybe.int, map#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne(map#0:tests.map, 0:wybe.int, ?tmp$15#0:wybe.bool)
     case tmp$15#0:wybe.bool of
     0:
@@ -127,7 +129,9 @@ lookup > public test (6 calls)
 
 
 lt > public test (1 calls)
-0: lt(x#0:wybe.int, y#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+0: lt(x#0:wybe.int, y#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp slt(~x#0:wybe.int, ~y#0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
     case ~tmp$0#0:wybe.bool of
     0:
@@ -139,12 +143,16 @@ lt > public test (1 calls)
 
 
 lt2 > public inline (1 calls)
-0: lt2(x#0:wybe.int, y#0:wybe.int, ?res#0:wybe.bool): AliasPairs: []
+0: lt2(x#0:wybe.int, y#0:wybe.int, ?res#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     tests.lt<0>(~x#0:wybe.int, ~y#0:wybe.int, ?res#0:wybe.bool) @tests:11:12
 
 
 lt3 > public inline test (0 calls)
-0: lt3(x#0:wybe.int, y#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+0: lt3(x#0:wybe.int, y#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     tests.lt<0>(~y#0:wybe.int, ~x#0:wybe.int, ?$$#0:wybe.bool) @tests:11:12
 
   LLVM code       :
@@ -355,7 +363,9 @@ entry:
   procs           : 
 
 /= > public inline test (0 calls)
-0: /=($left#0:tests.map, $right#0:tests.map, ?$$#0:wybe.bool): AliasPairs: []
+0: /=($left#0:tests.map, $right#0:tests.map, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     tests.map.=<0>(~$left#0:tests.map, ~$right#0:tests.map, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
     0:
@@ -367,7 +377,9 @@ entry:
 
 
 = > public test (13 calls)
-0: =($left#0:tests.map, $right#0:tests.map, ?$$#0:wybe.bool): AliasPairs: []
+0: =($left#0:tests.map, $right#0:tests.map, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm cast($left#0:tests.map, ?tmp$0#0:!wybe.int)
     foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -423,12 +435,16 @@ entry:
 
 
 empty > public inline (0 calls)
-0: empty(?$#0:tests.map): AliasPairs: []
+0: empty(?$#0:tests.map):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(0:tests.map, ?$#0:tests.map)
 
 
 key > public inline test (0 calls)
-0: key($rec#0:tests.map, ?$#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+0: key($rec#0:tests.map, ?$#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -439,7 +455,9 @@ key > public inline test (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 key > public inline test (0 calls)
-1: key($rec#0:tests.map, ?$rec#1:tests.map, $field#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+1: key($rec#0:tests.map, ?$rec#1:tests.map, $field#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -453,7 +471,9 @@ key > public inline test (0 calls)
 
 
 left > public inline test (0 calls)
-0: left($rec#0:tests.map, ?$#0:tests.map, ?$$#0:wybe.bool): AliasPairs: []
+0: left($rec#0:tests.map, ?$#0:tests.map, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -464,7 +484,9 @@ left > public inline test (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 left > public inline test (0 calls)
-1: left($rec#0:tests.map, ?$rec#1:tests.map, $field#0:tests.map, ?$$#0:wybe.bool): AliasPairs: []
+1: left($rec#0:tests.map, ?$rec#1:tests.map, $field#0:tests.map, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -478,14 +500,18 @@ left > public inline test (0 calls)
 
 
 node > public inline (0 calls)
-0: node(left#0:tests.map, key#0:wybe.int, value#0:wybe.int, right#0:tests.map, ?$#0:tests.map): AliasPairs: []
+0: node(left#0:tests.map, key#0:wybe.int, value#0:wybe.int, right#0:tests.map, ?$#0:tests.map):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign lpvm alloc(32:wybe.int, ?$rec#0:!tests.map)
     foreign lpvm mutate(~%$rec#0:tests.map, ?%$rec#1:tests.map, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~left#0:tests.map)
     foreign lpvm mutate(~%$rec#1:tests.map, ?%$rec#2:tests.map, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~key#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:tests.map, ?%$rec#3:tests.map, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~value#0:wybe.int)
     foreign lpvm mutate(~%$rec#3:tests.map, ?%$#0:tests.map, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~right#0:tests.map)
 node > public inline test (11 calls)
-1: node(?left#0:tests.map, ?key#0:wybe.int, ?value#0:wybe.int, ?right#0:tests.map, $#0:tests.map, ?$$#0:wybe.bool): AliasPairs: []
+1: node(?left#0:tests.map, ?key#0:wybe.int, ?value#0:wybe.int, ?right#0:tests.map, $#0:tests.map, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -501,7 +527,9 @@ node > public inline test (11 calls)
 
 
 right > public inline test (0 calls)
-0: right($rec#0:tests.map, ?$#0:tests.map, ?$$#0:wybe.bool): AliasPairs: []
+0: right($rec#0:tests.map, ?$#0:tests.map, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -512,7 +540,9 @@ right > public inline test (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 right > public inline test (0 calls)
-1: right($rec#0:tests.map, ?$rec#1:tests.map, $field#0:tests.map, ?$$#0:wybe.bool): AliasPairs: []
+1: right($rec#0:tests.map, ?$rec#1:tests.map, $field#0:tests.map, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -526,7 +556,9 @@ right > public inline test (0 calls)
 
 
 value > public inline test (0 calls)
-0: value($rec#0:tests.map, ?$#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+0: value($rec#0:tests.map, ?$#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -537,7 +569,9 @@ value > public inline test (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 value > public inline test (0 calls)
-1: value($rec#0:tests.map, ?$rec#1:tests.map, $field#0:wybe.int, ?$$#0:wybe.bool): AliasPairs: []
+1: value($rec#0:tests.map, ?$rec#1:tests.map, $field#0:wybe.int, ?$$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm icmp ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:

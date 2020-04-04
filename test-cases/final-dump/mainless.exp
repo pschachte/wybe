@@ -11,7 +11,9 @@ AFTER EVERYTHING:
   procs           : 
 
 nothing_interesting > public inline (0 calls)
-0: nothing_interesting(?$#0:wybe.int): AliasPairs: []
+0: nothing_interesting(?$#0:wybe.int):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
     foreign llvm move(7:wybe.int, ?$#0:wybe.int) @mainless:4:5
 
   LLVM code       :

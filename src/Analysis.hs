@@ -7,8 +7,9 @@
 
 module Analysis (analyseMod) where
 
-import           AliasAnalysis (aliasSccBottomUp, areDifferentMaps,
-                                currentAliasInfo)
+import           AliasAnalysis (aliasSccBottomUp,
+                                currentAliasInfo,
+                                isAliasInfoChanged)
 import           AST
 import           Callers       (getSccProcs)
 import           Control.Monad
@@ -35,21 +36,21 @@ analyseMod _ thisMod = do
     ----------------------------------
     -- ALIAS ANALYSIS
     -- MODULE LEVEL ALIAS ANALYSIS
-    aliasingInfo1 <- foldM (\list procs -> do
-        aliasing <- currentAliasInfo procs
-        return $ list ++ aliasing) [] orderedProcs
+    aliasingInfos1 <- foldM (\list procs -> do
+        aliasInfo <- currentAliasInfo procs
+        return $ list ++ aliasInfo) [] orderedProcs
 
     mapM_ aliasSccBottomUp orderedProcs
 
-    aliasingInfo2 <- foldM (\list procs -> do
-        aliasing <- currentAliasInfo procs
-        return $ list ++ aliasing) [] orderedProcs
-    let chg = List.zipWith areDifferentMaps aliasingInfo1 aliasingInfo2
+    aliasingInfos2 <- foldM (\list procs -> do
+        aliasInfo <- currentAliasInfo procs
+        return $ list ++ aliasInfo) [] orderedProcs
+    let chg = List.zipWith isAliasInfoChanged aliasingInfos1 aliasingInfos2
 
     logAnalysis $ replicate 60 '>'
     logAnalysis $ "Check aliasing for module: " ++ show thisMod
-    logAnalysis $ "Module's procs aliasing (old): " ++ show aliasingInfo1
-    logAnalysis $ "Module's procs aliasing (new): " ++ show aliasingInfo2
+    logAnalysis $ "Module's procs alias info (old): " ++ show aliasingInfos1
+    logAnalysis $ "Module's procs alias info (new): " ++ show aliasingInfos2
     logAnalysis $ "Changes: " ++ show chg
     logAnalysis $ "Module level alias changed? " ++ show (or chg)
     logAnalysis $ replicate 60 '>'
