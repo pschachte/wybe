@@ -102,7 +102,8 @@ compileProc proc =
         let proto' = PrimProto (procProtoName proto) params''
         logClause $ "  comparams: " ++ show params''
         return $ proc { procImpln = ProcDefPrim proto' compiled
-                                        (ProcAnalysis emptyDS emptyAliasMultiSpeczInfo)}
+                                        (ProcAnalysis emptyDS emptyAliasMultiSpeczInfo)
+                                        Map.empty}
 
 
 
@@ -197,10 +198,10 @@ compileSimpleStmt' :: Stmt -> ClauseComp Prim
 compileSimpleStmt' call@(ProcCall maybeMod name procID _ _ args) = do
     logClause $ "Compiling call " ++ showStmt 4 call
     args' <- mapM (placedApply compileArg) args
-    return $ PrimCall (ProcSpec maybeMod name $
-                       trustFromJust
+    return $ PrimCall (ProcSpec maybeMod name
+                       (trustFromJust
                        ("compileSimpleStmt' for " ++ showStmt 4 call)
-                       procID)
+                       procID) Nothing)
         args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- mapM (placedApply compileArg) args

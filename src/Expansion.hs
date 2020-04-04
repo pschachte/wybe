@@ -30,10 +30,11 @@ import           Util
 procExpansion :: ProcSpec -> ProcDef -> Compiler ProcDef
 procExpansion pspec def = do
     logMsg Expansion $ "*** Try to expand proc " ++ show pspec
-    let ProcDefPrim proto body _ = procImpln def
+    let ProcDefPrim proto body _ _= procImpln def
     logMsg Expansion $ "    initial body: "
         ++ show (ProcDefPrim proto body 
-                  (ProcAnalysis emptyDS emptyAliasMultiSpeczInfo))
+                  (ProcAnalysis emptyDS emptyAliasMultiSpeczInfo)
+                  Map.empty)
     let tmp = procTmpCount def
     let (ins,outs) = inputOutputParams proto
     (tmp',used,body') <- buildBody tmp (Map.fromSet id outs) $
@@ -42,7 +43,8 @@ procExpansion pspec def = do
                                           <$> primProtoParams proto}
     let def' = def { procImpln =
                       ProcDefPrim proto' body' 
-                          (ProcAnalysis emptyDS emptyAliasMultiSpeczInfo),
+                          (ProcAnalysis emptyDS emptyAliasMultiSpeczInfo)
+                          Map.empty,
                      procTmpCount = tmp' }
     if def /= def'
         then
@@ -194,7 +196,7 @@ expandPrim (PrimCall pspec args) pos = do
         addInstr call' pos
       else do
         def <- lift $ lift $ getProcDef pspec
-        let ProcDefPrim proto body _ = procImpln def
+        let ProcDefPrim proto body _ _ = procImpln def
         if procInline def
           then inlineCall proto args' body pos
           else do

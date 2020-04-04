@@ -23,11 +23,13 @@ import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
 import           Data.Char                       (ord)
+import           Data.Foldable
 import           Data.List                       as List
 import           Data.Map                        as Map
 import qualified Data.Set                        as Set
 import           Data.Word                       (Word32)
 import           Data.Maybe                      (fromMaybe)
+import           Flow                            ((|>))
 import qualified LLVM.AST                        as LLVMAST
 import qualified LLVM.AST.Constant               as C
 import qualified LLVM.AST.Float                  as F
@@ -103,9 +105,10 @@ blockTransformModule thisMod =
        -- Translate
        procBlocks <- evalTranslation 0 $
          mapM (translateProc allProtos) $ emptyFilter mangledProcs
+       let procBlocks' = List.concat procBlocks
        --------------------------------------------------
        -- Init LLVM Module and fill it
-       let llmod = newLLVMModule (showModSpec thisMod) modFile procBlocks
+       let llmod = newLLVMModule (showModSpec thisMod) modFile procBlocks'
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
        logBlocks $ "*** Translated Module: " ++ showModSpec thisMod
        modRec' <- getModule id
@@ -121,11 +124,13 @@ mangleProcs ps = zipWith mangleProc ps [0..]
 
 mangleProc :: ProcDef -> Int -> ProcDef
 mangleProc def i =
-    let (ProcDefPrim proto body analysis) = procImpln def
+    let (ProcDefPrim proto body analysis speczBodies) = 
+                procImpln def
         s = primProtoName proto
         pname = s ++ "<" ++ show i ++ ">"
         newProto = proto {primProtoName = pname}
-    in  def {procImpln = ProcDefPrim newProto body analysis}
+    in 
+    def {procImpln = ProcDefPrim newProto body analysis speczBodies}
 
 
 
@@ -167,7 +172,7 @@ mangleProc def i =
 extractLPVMProto :: ProcDef -> PrimProto
 extractLPVMProto procdef =
     case procImpln procdef of
-       (ProcDefPrim proto _ _) -> proto
+       (ProcDefPrim proto _ _ _) -> proto
        uncompiled ->
          shouldnt $ "Proc reached backend uncompiled: " ++ show uncompiled
 
@@ -191,7 +196,7 @@ isStdLib (m:_) = m == "wybe"
 emptyProc :: ProcDef -> Bool
 emptyProc p = case procImpln p of
   ProcDefSrc pps       -> List.null pps
-  ProcDefPrim _ body _ -> List.null $ bodyPrims body
+  ProcDefPrim _ body _ _ -> List.null $ bodyPrims body
 
 
 
@@ -204,16 +209,43 @@ emptyProc p = case procImpln p of
 -- require some global variable/constant declarations which is represented as
 -- G.Global values in the neededGlobalVars field of LLVMCompstate. All in all,
 -- externs and globals go on the top of the module.
-translateProc :: [PrimProto] -> ProcDef -> Translation ProcDefBlock
+translateProc :: [PrimProto] -> ProcDef -> Translation [ProcDefBlock]
 translateProc modProtos proc = do
-  startCount <- getCount
-  (block, endCount) <- lift $ do
+    count <- getCount
+    let ProcDefPrim proto body _ speczBodies = procImpln proc
+    -- translate the standard version
+    (block, count') <- 
+            lift $ _translateProcImpl modProtos proto body count
+    -- translate the specialized versions
+    let speczBodies' = Map.toList speczBodies
+    (blocks, count'') <-
+            foldlM (\(currBlocks, currCount) (id, currBody) -> do
+                    -- rename this version of proc
+                    let strId = speczIdToString id
+                    let pname = (primProtoName proto) 
+                                ++ "[" ++ strId ++ "]"
+                    let proto' = proto {primProtoName = pname}
+                    -- codegen
+                    (currBlock, currCount') <- 
+                            lift $ _translateProcImpl modProtos 
+                                        proto' currBody currCount
+                    return (currBlock:currBlocks, currCount') 
+            ) ([], count') speczBodies'
+    let blocks' = block:blocks
+    putCount count''
+    return blocks'
+
+
+_translateProcImpl :: [PrimProto] -> PrimProto -> ProcBody -> Word 
+                                -> Compiler (ProcDefBlock, Word)
+_translateProcImpl modProtos proto body startCount = do
     modspec <- getModuleSpec
-    let def@(ProcDefPrim proto body _) = procImpln proc
     logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
     logBlocks $ "In Module: " ++ showModSpec modspec
-      ++ ", creating definition of: "
-    logBlocks $ show def ++ "\n" ++ replicate 50 '-' ++ "\n"
+                ++ ", creating definition of: "
+    logBlocks $ "proto: " ++ show proto 
+                ++ "body: " ++ show body
+                ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
     codestate <- execCodegen startCount modProtos (doCodegenBody proto body)
     let pname = primProtoName proto
@@ -226,8 +258,6 @@ translateProc modProtos proc = do
     let block = ProcDefBlock proto lldef (exs ++ globals)
     let endCount = Codegen.count codestate
     return (block, endCount)
-  putCount endCount
-  return block
 
 
 -- | Create LLVM's module level Function Definition from the LPVM procedure
@@ -482,8 +512,7 @@ cgen prim@(PrimCall pspec args) = do
     logCodegen $ "Compiling " ++ show prim
     thisMod <- lift getModuleSpec
     fileMod <- lift $ getModule modRootModSpec
-    let (ProcSpec mod name _) = pspec
-    -- let nm = LLVMAST.Name (showModSpec mod ++ "." ++ name)
+    let (ProcSpec mod name _ _) = pspec
     let nm = LLVMAST.Name $ toSBString $ show pspec
     -- Find the prototype of the pspec being called
     -- and match it's parameters with the args here
@@ -616,8 +645,9 @@ cgenLLVMUnop name flags args =
 
 -- | Look inside the Prototype list stored in the CodegenState monad and
 -- find a matching ProcSpec.
+-- TODO: This one is not used.
 findProto :: ProcSpec -> Codegen (Maybe PrimProto)
-findProto (ProcSpec _ nm i) = do
+findProto (ProcSpec _ nm i _) = do
     allProtos <- gets Codegen.modProtos
     let procNm = nm
     let matchingProtos = List.filter ((== nm) . primProtoName) allProtos
@@ -1133,7 +1163,7 @@ declareExtern (PrimForeign otherlang name _ _) =
     shouldnt $ "Don't know how to declare extern foreign function " ++ name
       ++ " in language " ++ otherlang
 
-declareExtern (PrimCall pspec@(ProcSpec m n _) args) = do
+declareExtern (PrimCall pspec@(ProcSpec m n _ _) args) = do
     let (inArgs,outArgs) = partitionArgs args
     retty <- primReturnType outArgs
     fnargs <- mapM makeExArg $ zip [1..] inArgs

@@ -29,14 +29,14 @@ noteProcCallers :: ModSpec -> ProcName -> [ProcDef] ->
                        Map Ident [ProcDef] -> Map Ident [ProcDef]
 noteProcCallers mod name defs procs =
   List.foldr (\(def,n) ->
-               noteImplnCallers (ProcSpec mod name n) (procImpln def))
+               noteImplnCallers (ProcSpec mod name n Nothing) (procImpln def))
   procs $ zip defs [0..]
 
 noteImplnCallers :: ProcSpec -> ProcImpln ->
                        Map Ident [ProcDef] -> Map Ident [ProcDef]
 noteImplnCallers _ (ProcDefSrc _) _ =
   shouldnt "scanning unprocessed code for calls"
-noteImplnCallers caller (ProcDefPrim _ body _) procs =
+noteImplnCallers caller (ProcDefPrim _ body _ _) procs =
   let callers = foldBodyDistrib (noteCall caller)
                 Map.empty mergeCallers mergeCallers
                 body
@@ -95,7 +95,7 @@ getSccProcs thisMod = do
             nub $ concatMap (localBodyCallees thisMod . procBody) procDefs)
            | (name,procDefs) <- procs,
              (n,def) <- zip [0..] procDefs,
-             let pspec = ProcSpec thisMod name n
+             let pspec = ProcSpec thisMod name n Nothing
            ]
   return ordered
 
@@ -103,7 +103,7 @@ procBody :: ProcDef -> ProcBody
 procBody def =
   case procImpln def of
       ProcDefSrc _         -> shouldnt "Analysing un-compiled code"
-      ProcDefPrim _ body _ -> body
+      ProcDefPrim _ body _ _-> body
 
 
 -- |Finding all procs called by a given proc body

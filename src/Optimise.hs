@@ -110,7 +110,7 @@ decideInlining def
        || procCallCount def <= 1 && procVis def == Private
     then return $ def { procInline = True }
     else return def
-    where ProcDefPrim proto body _ = procImpln def
+    where ProcDefPrim proto body _ _ = procImpln def
 decideInlining def = return def
 
 
