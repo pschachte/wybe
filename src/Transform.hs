@@ -8,13 +8,15 @@
 
 module Transform (transformProc) where
 
-import           AliasAnalysis (updateAliasedByPrim, 
-                                pairArgVarWithParam)
+import           AliasAnalysis (updateAliasedByPrim, pairArgVarWithParam,
+                                DeadCells, updateDeadCellsByAccessArgs,
+                                assignDeadCellsByAllocArgs)
 import           AST
 import           Control.Monad
 import           Data.Bits     as Bits
 import           Data.List     as List
 import           Data.Map      as Map
+import           Data.Maybe    as Maybe
 import           Flow          ((|>))
 import           Options       (LogSelection (Transform))
 import           Util
@@ -39,7 +41,7 @@ transformProc def
         -- transform the standard body
         -- In this case, all input params are aliased
         inputParams <- protoInputParamNames caller
-        body' <- transformBody caller body emptyDS inputParams
+        body' <- transformBody caller body (emptyDS, Map.empty) inputParams
 
         -- generate&transform all specz versions
         let speczInfo = procArgAliasMultiSpeczInfo analysis
@@ -49,7 +51,8 @@ transformProc def
                 logTransform $ "Generating specialized version: "
                                 ++ show id ++ " alisedParams: "
                                 ++ show aliasedParams
-                sbody <- transformBody caller body emptyDS aliasedParams
+                sbody <- 
+                    transformBody caller body (emptyDS, Map.empty) aliasedParams
                 return (id, sbody)
             ) versions
 
@@ -60,24 +63,24 @@ transformProc def
 transformProc def = return def
 
 
-transformBody :: PrimProto -> ProcBody -> AliasMap -> [PrimVarName]
+transformBody :: PrimProto -> ProcBody -> (AliasMap, DeadCells) -> [PrimVarName]
                              -> Compiler ProcBody
-transformBody caller body aliasMap aliasedParams = do
+transformBody caller body (aliasMap, deadCells) aliasedParams = do
     -- (1) Analysis of current caller's prims
-    (aliaseMap', newPrims) <- 
-            transformPrims caller body aliasMap aliasedParams
+    ((aliaseMap', deadCells'), newPrims) <- 
+            transformPrims caller body (aliasMap, deadCells) aliasedParams
     -- Update bodyPrims of this procbody
     let body' = body { bodyPrims = newPrims }
 
     -- (2) Analysis of caller's bodyFork
     -- Update body while checking alias incurred by bodyfork
-    transformForks caller body' aliaseMap' aliasedParams
+    transformForks caller body' (aliaseMap', deadCells') aliasedParams
 
 
 -- Check alias created by prims of caller proc
-transformPrims :: PrimProto -> ProcBody -> AliasMap -> [PrimVarName]
-                    -> Compiler (AliasMap, [Placed Prim])
-transformPrims caller body initAliases aliasedParams = do
+transformPrims :: PrimProto -> ProcBody -> (AliasMap, DeadCells) 
+            -> [PrimVarName] -> Compiler ((AliasMap, DeadCells), [Placed Prim])
+transformPrims caller body (aliasMap, deadCells) aliasedParams = do
     realParams <- (primParamName <$>) <$> protoRealParams caller
     let prims = bodyPrims body
     -- Transform simple prims:
@@ -85,16 +88,17 @@ transformPrims caller body initAliases aliasedParams = do
     logTransform "\nTransform prims (transformPrims):   "
     logTransform $ "realParams: " ++ show realParams
     logTransform $ "aliased params: " ++ show aliasedParams
-    let aliasMap = List.foldr addOneToDS initAliases realParams
-    foldM (transformPrim realParams aliasedParams) (aliasMap, []) prims
+    let aliasMap' = List.foldr addOneToDS aliasMap realParams
+    foldM (transformPrim realParams aliasedParams) 
+                        ((aliasMap', deadCells), []) prims
 
 
 -- Recursively transform forked body's prims
 -- PrimFork only appears at the end of a ProcBody
 -- PrimFork = NoFork | PrimFork {}
-transformForks :: PrimProto -> ProcBody -> AliasMap 
+transformForks :: PrimProto -> ProcBody -> (AliasMap, DeadCells)
                     -> [PrimVarName] -> Compiler ProcBody
-transformForks caller body aliasMap aliasedParams = do
+transformForks caller body (aliasMap, deadCells) aliasedParams = do
     logTransform "\nTransform forks (transformForks):"
     let fork = bodyFork body
     case fork of
@@ -103,7 +107,7 @@ transformForks caller body aliasMap aliasedParams = do
             fBodies' <-
                 mapM (\currBody -> 
                         transformBody caller currBody 
-                                        aliasMap aliasedParams
+                                        (aliasMap, deadCells) aliasedParams
                 ) fBodies
             return body { bodyFork = fork {forkBodies=fBodies'} }
         NoFork -> do
@@ -113,27 +117,51 @@ transformForks caller body aliasMap aliasedParams = do
 
 
 -- Build up alias pairs triggerred by proc calls
-transformPrim :: [PrimVarName] -> [PrimVarName] -> (AliasMap, [Placed Prim])
-                    -> Placed Prim -> Compiler (AliasMap, [Placed Prim])
-transformPrim realParams aliasedParams (aliasMap, prims) prim = do
+transformPrim :: [PrimVarName] -> [PrimVarName]
+    -> ((AliasMap, DeadCells), [Placed Prim])
+    -> Placed Prim -> Compiler ((AliasMap, DeadCells), [Placed Prim])
+transformPrim realParams aliasedParams ((aliasMap, deadCells), prims) prim = do
     -- TODO: Redundent work here. We should change the current design.
     aliasMap' <- updateAliasedByPrim realParams aliasMap prim
-    logTransform $ "\n--- prim:    " ++ show prim
-    prim' <- updatePlacedM (\primc -> case primc of
-            PrimCall spec args
-                    -> do
-                        spec' <- _updatePrimCallForSpecz
-                                    spec args aliasedParams aliasMap
-                        return $ PrimCall spec' args
-            PrimForeign "lpvm" "mutate" flags args
-                    -> do
-                        let args' = _updateMutateForAlias aliasMap 
-                                        aliasedParams args
-                        return $ PrimForeign "lpvm" "mutate" flags args'
-            _       -> return primc
-        ) prim
+    logTransform $ "\n--- prim:           " ++ show prim
+    let primc = content prim
+    
+    (primc', deadCells') <- case primc of
+            PrimCall spec args -> do
+                spec' <- _updatePrimCallForSpecz 
+                            spec args aliasedParams aliasMap
+                return $ (PrimCall spec' args, deadCells)
+            PrimForeign "lpvm" "mutate" flags args -> do
+                let args' = _updateMutateForAlias aliasMap aliasedParams args
+                return $ (PrimForeign "lpvm" "mutate" flags args', deadCells)
+            -- dead cell transform
+            PrimForeign "lpvm" "access" _ args -> do
+                deadCells' 
+                    <- updateDeadCellsByAccessArgs aliasedParams 
+                                        (aliasMap, deadCells) args
+                return (primc, deadCells')
+            PrimForeign "lpvm" "alloc" _ args  -> do
+                let (result, deadCells') =
+                        assignDeadCellsByAllocArgs realParams deadCells args
+                let primc' = case result of 
+                        Nothing -> primc
+                        Just (selectedCell, _) -> 
+                            let [_, varOut] = args in
+                            let varIn = 
+                                    varOut {argVarName = selectedCell,
+                                            argVarFlow = FlowIn,
+                                            argVarFinal = True}
+                            in
+                            PrimForeign "llvm" "move" [] [varIn, varOut]
+                when (Maybe.isJust result) $ 
+                        logTransform "replacing [alloc] with [move]."
+                return (primc', deadCells')
+            -- default case
+            _ -> return (primc, deadCells)
+    
+    prim' <- updatePlacedM (\_ -> return primc') prim
     logTransform $ "--- transformed to: " ++ show prim'
-    return (aliasMap', prims ++ [prim'])
+    return ((aliasMap', deadCells'), prims ++ [prim'])
 
 
 -- Update PrimCall to make it uses a better specialized version

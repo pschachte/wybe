@@ -5,11 +5,11 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-module AliasAnalysis (aliasSccBottomUp,
-                        currentAliasInfo,
-                        isAliasInfoChanged,
-                        updateAliasedByPrim,
-                        pairArgVarWithParam) where
+module AliasAnalysis (
+    aliasSccBottomUp, currentAliasInfo, isAliasInfoChanged, updateAliasedByPrim,
+    pairArgVarWithParam, DeadCells, updateDeadCellsByAccessArgs,
+    assignDeadCellsByAllocArgs
+    ) where
 
 import           AST
 import           Control.Monad
@@ -526,8 +526,9 @@ updateDeadCellsByAccessArgs aliasedParams (aliasMap, deadCells) primArgs = do
     -- [struct:type, offset:int, ?member:type2]
     let [struct, _, _] = primArgs
     let ArgVar{argVarName=varName, argVarType=ty, argVarFinal=final} = struct
+    rep <- lookupTypeRepresentation ty
     if not (connectedToOthersInDS varName aliasMap) && final 
-        && List.notElem varName aliasedParams
+        && List.notElem varName aliasedParams && rep == Just Address
     then do
         logAlias $ "Found new dead cell: " ++ show varName 
                     ++ " type:" ++ show ty
