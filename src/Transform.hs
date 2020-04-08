@@ -45,7 +45,11 @@ transformProc def
         let speczInfo = procArgAliasMultiSpeczInfo analysis
         let versions = allPossiblespeczIds speczInfo
         speczBodies' <- mapM (\id -> do
-                let aliasedParams = speczIdToAliasedParams speczInfo id
+                let nonAliasedParams = speczIdToNonAliasedParams speczInfo id 
+                realParams <- (primParamName <$>) <$> protoRealParams caller
+                let aliasedParams = 
+                        List.filter (`List.notElem` nonAliasedParams) realParams
+                logTransform $ replicate 60 '~'
                 logTransform $ "Generating specialized version: "
                                 ++ show id ++ " alisedParams: "
                                 ++ show aliasedParams
@@ -214,24 +218,10 @@ allPossiblespeczIds speczInfo =
 -- Return a list of non aliased parameters based on the given id
 speczIdToNonAliasedParams :: AliasMultiSpeczInfo
                             -> SpeczVersionId -> [PrimVarName]
-speczIdToNonAliasedParams = _speczIdToXAliasedParams False
-
-
--- Return a list of aliased parameters based on the given id
-speczIdToAliasedParams :: AliasMultiSpeczInfo
-                            -> SpeczVersionId -> [PrimVarName]
-speczIdToAliasedParams = _speczIdToXAliasedParams True
-
-
--- Helper for [speczIdToNonAliasedParams]
--- and [speczIdToAliasedParams].
--- [True] for aliased and [False] for non-aliased.
-_speczIdToXAliasedParams :: Bool -> AliasMultiSpeczInfo
-                            -> SpeczVersionId -> [PrimVarName]
-_speczIdToXAliasedParams bool speczInfo speczId =
+speczIdToNonAliasedParams speczInfo speczId =
     List.zip [0..] speczInfo 
     |> List.filter (\(idx, _) -> 
-            Bits.testBitDefault speczId idx /= bool)
+            Bits.testBitDefault speczId idx)
     |> List.map snd
 
 
