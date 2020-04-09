@@ -92,8 +92,8 @@ transformPrims caller body (aliasMap, deadCells) aliasedParams = do
     logTransform "\nTransform prims (transformPrims):   "
     logTransform $ "realParams: " ++ show realParams
     logTransform $ "aliased params: " ++ show aliasedParams
-    let aliasMap' = List.foldr addOneToDS aliasMap realParams
-    foldM (transformPrim realParams aliasedParams) 
+    let aliasMap' = List.foldr addOneToDS aliasMap aliasedParams
+    foldM (transformPrim aliasedParams) 
                         ((aliasMap', deadCells), []) prims
 
 
@@ -121,12 +121,12 @@ transformForks caller body (aliasMap, deadCells) aliasedParams = do
 
 
 -- Build up alias pairs triggerred by proc calls
-transformPrim :: [PrimVarName] -> [PrimVarName]
+transformPrim :: [PrimVarName]
     -> ((AliasMap, DeadCells), [Placed Prim])
     -> Placed Prim -> Compiler ((AliasMap, DeadCells), [Placed Prim])
-transformPrim realParams aliasedParams ((aliasMap, deadCells), prims) prim = do
+transformPrim aliasedParams ((aliasMap, deadCells), prims) prim = do
     -- TODO: Redundent work here. We should change the current design.
-    aliasMap' <- updateAliasedByPrim realParams aliasMap prim
+    aliasMap' <- updateAliasedByPrim aliasedParams aliasMap prim
     logTransform $ "\n--- prim:           " ++ show prim
     let primc = content prim
     
@@ -146,7 +146,7 @@ transformPrim realParams aliasedParams ((aliasMap, deadCells), prims) prim = do
                 return (primc, deadCells')
             PrimForeign "lpvm" "alloc" _ args  -> do
                 let (result, deadCells') =
-                        assignDeadCellsByAllocArgs realParams deadCells args
+                        assignDeadCellsByAllocArgs aliasedParams deadCells args
                 let primc' = case result of 
                         Nothing -> primc
                         Just (selectedCell, _) -> 
