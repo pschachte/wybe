@@ -1,0 +1,37 @@
+pub type intlist { pub [] | [|](head:int, tail:intlist) }
+
+pub def list_print(x:intlist) use !io {
+    if { x = [ ?h | ?t] :: 
+        !print(h)
+        !print(" ")
+        !list_print(t)
+    }
+}
+
+pub def list_reverse(!x:intlist) {
+    ?result = []
+    list_reverse_helper(x, !result)
+    ?x = result
+}
+
+pub def list_reverse_helper(x:intlist, !result:intlist) {
+    if { x = [ ?h | ?t] ::
+        ?result = [h | result]
+        list_reverse_helper(t, !result)
+    }
+}
+
+
+?foo = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+list_reverse(!foo)
+!list_print(foo)
+!nl
+
+!println("============================")
+
+?bar = foo
+list_reverse(!foo)
+!list_print(foo)
+!nl
+!list_print(bar)
+!nl
