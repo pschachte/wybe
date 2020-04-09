@@ -150,6 +150,8 @@ transformPrim aliasedParams ((aliasMap, deadCells), prims) prim = do
                 let primc' = case result of 
                         Nothing -> primc
                         Just (selectedCell, _) -> 
+                            -- replace "access" with "move" by reusing the 
+                            -- "selectedCell".
                             let [_, varOut] = args in
                             let varIn = 
                                     varOut {argVarName = selectedCell,

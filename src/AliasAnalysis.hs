@@ -481,17 +481,19 @@ completeMultiSpeczInfo realParams info =
 -- if there is an access instruction that reads some value from x,
 -- then we consider x is dead if x is unaliased and final.
 --
--- The transform part can be found in [Tranform.hs]
+-- The transform part can be found in "Tranform.hs".
 
 -- TODO: reuse cells that are different types but has the same size.
--- TODO: call [GC_free] on large unused dead cells.
+-- TODO: call "GC_free" on large unused dead cells.
 
+-- Update dead cells info based on the given prim. If a dead cell comes from a
+-- parameter, then we mark that parameter as interesting.
 updateDeadCellsByPrim :: [PrimVarName] -> AnalysisInfo -> Placed Prim 
-                            -> Compiler (AliasMultiSpeczInfoLocal, DeadCells)
+        -> Compiler (AliasMultiSpeczInfoLocal, DeadCells)
 updateDeadCellsByPrim realParams (aliasMap, multiSpeczInfo, deadCells) prim =
     case content prim of
         PrimForeign "lpvm" "access" _ args -> do
-            -- During analysis, we consider all [realParams] are non-aliased
+            -- During analysis, we consider all "realParams" are non-aliased
             deadCells' 
                 <- updateDeadCellsByAccessArgs [] (aliasMap, deadCells) args
             return (multiSpeczInfo, deadCells')
@@ -504,9 +506,9 @@ updateDeadCellsByPrim realParams (aliasMap, multiSpeczInfo, deadCells) prim =
                     Just (selectedCell, possibleCells) -> 
                         if List.elem selectedCell realParams
                         then do
-                            -- Mark all [possibleCells] as interesting. Since 
-                            -- it trys to avoid [realParams] if possible,
-                            -- [possibleCells] here are all from [realParams].
+                            -- Mark all "possibleCells" as interesting. Since 
+                            -- it trys to avoid "realParams" if possible,
+                            -- [possibleCells] here are all from "realParams".
                             -- TODO: we need something better than this. this 
                             -- may create some specialized versions that are 
                             -- identical.
@@ -521,7 +523,9 @@ updateDeadCellsByPrim realParams (aliasMap, multiSpeczInfo, deadCells) prim =
             return (multiSpeczInfo, deadCells)
 
 
--- [PrimArg]
+-- Find new dead cell from the given "primArgs" of "access" instruction.
+updateDeadCellsByAccessArgs :: [PrimVarName] -> (AliasMap, DeadCells) 
+        -> [PrimArg] -> Compiler DeadCells
 updateDeadCellsByAccessArgs aliasedParams (aliasMap, deadCells) primArgs = do
     -- [struct:type, offset:int, ?member:type2]
     let [struct, _, _] = primArgs
@@ -542,6 +546,13 @@ updateDeadCellsByAccessArgs aliasedParams (aliasMap, deadCells) primArgs = do
         return deadCells
 
 
+-- Try to assign a dead cell to reuse for the given "alloc" instruction.
+-- It returns (result, deadCells). result is "Nothing" when there isn't a
+-- suitable dead cell to reuse. Otherwise, result is Just 
+-- (selectedCell, possibleCells). "possibleCells" contains cells that can be 
+-- selected (used for analysis).
+assignDeadCellsByAllocArgs :: [PrimVarName] -> DeadCells -> [PrimArg] -> 
+        (Maybe (PrimVarName, [PrimVarName]), DeadCells)
 assignDeadCellsByAllocArgs realParams deadCells primArgs =
     -- [size:int, ?struct:type]
     let [_, struct] = primArgs in
