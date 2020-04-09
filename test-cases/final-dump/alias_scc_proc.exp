@@ -41,7 +41,7 @@ bar > public (1 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_scc_proc.foo<0>(~p1#1:position.position, ?p2#0:position.position, ?p3#1:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_scc_proc:24:19
+        alias_scc_proc.foo<0>[1](~p1#1:position.position, ?p2#0:position.position, ?p3#1:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_scc_proc:24:19
 
     1:
         foreign llvm move(~p1#0:position.position, ?p3#1:position.position)
@@ -59,7 +59,7 @@ foo > public (2 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:wybe.int)
-        alias_scc_proc.bar<0>(~p1#1:position.position, ?p3#0:position.position, ~#io#0:wybe.phantom, ?#io#2:wybe.phantom) @alias_scc_proc:13:16
+        alias_scc_proc.bar<0>[1](~p1#1:position.position, ?p3#0:position.position, ~#io#0:wybe.phantom, ?#io#2:wybe.phantom) @alias_scc_proc:13:16
         foreign lpvm alloc(16:wybe.int, ?tmp$16#0:position.position)
         foreign lpvm mutate(~tmp$16#0:position.position, ?tmp$17#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
         foreign lpvm mutate(~tmp$17#0:position.position, ?p2#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
@@ -103,7 +103,10 @@ declare external ccc  void @putchar(i8)
 @alias_scc_proc.12 =    constant [24 x i8] c"--- After calling foo: \00"
 
 
-@alias_scc_proc.47 =    constant [32 x i8] c"--- Inside foo: expect p3(3,3):\00"
+@alias_scc_proc.57 =    constant [32 x i8] c"--- Inside foo: expect p3(3,3):\00"
+
+
+@alias_scc_proc.90 =    constant [32 x i8] c"--- Inside foo: expect p3(3,3):\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -166,63 +169,132 @@ if.else:
   %31 = inttoptr i64 %30 to i64* 
   %32 = getelementptr  i64, i64* %31, i64 0 
   store  i64 %"tmp$2#0", i64* %32 
-  %33 = tail call fastcc  {i64, i64}  @"alias_scc_proc.foo<0>"(i64  %26)  
+  %33 = tail call fastcc  {i64, i64}  @"alias_scc_proc.foo<0>[1]"(i64  %26)  
   %34 = extractvalue {i64, i64} %33, 0 
   %35 = extractvalue {i64, i64} %33, 1 
   ret i64 %35 
 }
 
 
+define external fastcc  i64 @"alias_scc_proc.bar<0>[1]"(i64  %"p1#0")    {
+entry:
+  %36 = add   i64 %"p1#0", 8 
+  %37 = inttoptr i64 %36 to i64* 
+  %38 = getelementptr  i64, i64* %37, i64 0 
+  %39 = load  i64, i64* %38 
+  %"tmp$3#0" = icmp sgt i64 %39, 1 
+  br i1 %"tmp$3#0", label %if.then, label %if.else 
+if.then:
+  ret i64 %"p1#0" 
+if.else:
+  %"tmp$2#0" = add   i64 %39, 1 
+  %40 = add   i64 %"p1#0", 8 
+  %41 = inttoptr i64 %40 to i64* 
+  %42 = getelementptr  i64, i64* %41, i64 0 
+  store  i64 %"tmp$2#0", i64* %42 
+  %43 = tail call fastcc  {i64, i64}  @"alias_scc_proc.foo<0>[1]"(i64  %"p1#0")  
+  %44 = extractvalue {i64, i64} %43, 0 
+  %45 = extractvalue {i64, i64} %43, 1 
+  ret i64 %45 
+}
+
+
 define external fastcc  {i64, i64} @"alias_scc_proc.foo<0>"(i64  %"p1#0")    {
 entry:
-  %36 = inttoptr i64 %"p1#0" to i64* 
-  %37 = getelementptr  i64, i64* %36, i64 0 
-  %38 = load  i64, i64* %37 
-  %"tmp$5#0" = icmp sgt i64 %38, 1 
+  %46 = inttoptr i64 %"p1#0" to i64* 
+  %47 = getelementptr  i64, i64* %46, i64 0 
+  %48 = load  i64, i64* %47 
+  %"tmp$5#0" = icmp sgt i64 %48, 1 
   br i1 %"tmp$5#0", label %if.then, label %if.else 
 if.then:
-  %39 = trunc i64 16 to i32  
-  %40 = tail call ccc  i8*  @wybe_malloc(i32  %39)  
-  %41 = ptrtoint i8* %40 to i64 
-  %42 = inttoptr i64 %41 to i64* 
-  %43 = getelementptr  i64, i64* %42, i64 0 
-  store  i64 3, i64* %43 
-  %44 = add   i64 %41, 8 
-  %45 = inttoptr i64 %44 to i64* 
-  %46 = getelementptr  i64, i64* %45, i64 0 
-  store  i64 3, i64* %46 
-  %48 = ptrtoint i8* getelementptr inbounds ([32 x i8], [32 x i8]* @alias_scc_proc.47, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %48)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %41)  
-  %49 = insertvalue {i64, i64} undef, i64 %"p1#0", 0 
-  %50 = insertvalue {i64, i64} %49, i64 %41, 1 
-  ret {i64, i64} %50 
+  %49 = trunc i64 16 to i32  
+  %50 = tail call ccc  i8*  @wybe_malloc(i32  %49)  
+  %51 = ptrtoint i8* %50 to i64 
+  %52 = inttoptr i64 %51 to i64* 
+  %53 = getelementptr  i64, i64* %52, i64 0 
+  store  i64 3, i64* %53 
+  %54 = add   i64 %51, 8 
+  %55 = inttoptr i64 %54 to i64* 
+  %56 = getelementptr  i64, i64* %55, i64 0 
+  store  i64 3, i64* %56 
+  %58 = ptrtoint i8* getelementptr inbounds ([32 x i8], [32 x i8]* @alias_scc_proc.57, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %58)  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %51)  
+  %59 = insertvalue {i64, i64} undef, i64 %"p1#0", 0 
+  %60 = insertvalue {i64, i64} %59, i64 %51, 1 
+  ret {i64, i64} %60 
 if.else:
-  %"tmp$3#0" = add   i64 %38, 1 
-  %51 = trunc i64 16 to i32  
-  %52 = tail call ccc  i8*  @wybe_malloc(i32  %51)  
-  %53 = ptrtoint i8* %52 to i64 
-  %54 = inttoptr i64 %53 to i8* 
-  %55 = inttoptr i64 %"p1#0" to i8* 
-  %56 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %54, i8*  %55, i32  %56, i32  8, i1  0)  
-  %57 = inttoptr i64 %53 to i64* 
-  %58 = getelementptr  i64, i64* %57, i64 0 
-  store  i64 %"tmp$3#0", i64* %58 
-  %"p3#0" = tail call fastcc  i64  @"alias_scc_proc.bar<0>"(i64  %53)  
-  %59 = trunc i64 16 to i32  
-  %60 = tail call ccc  i8*  @wybe_malloc(i32  %59)  
-  %61 = ptrtoint i8* %60 to i64 
-  %62 = inttoptr i64 %61 to i64* 
-  %63 = getelementptr  i64, i64* %62, i64 0 
-  store  i64 2, i64* %63 
-  %64 = add   i64 %61, 8 
-  %65 = inttoptr i64 %64 to i64* 
-  %66 = getelementptr  i64, i64* %65, i64 0 
-  store  i64 2, i64* %66 
-  %67 = insertvalue {i64, i64} undef, i64 %61, 0 
-  %68 = insertvalue {i64, i64} %67, i64 %"p3#0", 1 
-  ret {i64, i64} %68 
+  %"tmp$3#0" = add   i64 %48, 1 
+  %61 = trunc i64 16 to i32  
+  %62 = tail call ccc  i8*  @wybe_malloc(i32  %61)  
+  %63 = ptrtoint i8* %62 to i64 
+  %64 = inttoptr i64 %63 to i8* 
+  %65 = inttoptr i64 %"p1#0" to i8* 
+  %66 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %64, i8*  %65, i32  %66, i32  8, i1  0)  
+  %67 = inttoptr i64 %63 to i64* 
+  %68 = getelementptr  i64, i64* %67, i64 0 
+  store  i64 %"tmp$3#0", i64* %68 
+  %"p3#0" = tail call fastcc  i64  @"alias_scc_proc.bar<0>[1]"(i64  %63)  
+  %69 = trunc i64 16 to i32  
+  %70 = tail call ccc  i8*  @wybe_malloc(i32  %69)  
+  %71 = ptrtoint i8* %70 to i64 
+  %72 = inttoptr i64 %71 to i64* 
+  %73 = getelementptr  i64, i64* %72, i64 0 
+  store  i64 2, i64* %73 
+  %74 = add   i64 %71, 8 
+  %75 = inttoptr i64 %74 to i64* 
+  %76 = getelementptr  i64, i64* %75, i64 0 
+  store  i64 2, i64* %76 
+  %77 = insertvalue {i64, i64} undef, i64 %71, 0 
+  %78 = insertvalue {i64, i64} %77, i64 %"p3#0", 1 
+  ret {i64, i64} %78 
+}
+
+
+define external fastcc  {i64, i64} @"alias_scc_proc.foo<0>[1]"(i64  %"p1#0")    {
+entry:
+  %79 = inttoptr i64 %"p1#0" to i64* 
+  %80 = getelementptr  i64, i64* %79, i64 0 
+  %81 = load  i64, i64* %80 
+  %"tmp$5#0" = icmp sgt i64 %81, 1 
+  br i1 %"tmp$5#0", label %if.then, label %if.else 
+if.then:
+  %82 = trunc i64 16 to i32  
+  %83 = tail call ccc  i8*  @wybe_malloc(i32  %82)  
+  %84 = ptrtoint i8* %83 to i64 
+  %85 = inttoptr i64 %84 to i64* 
+  %86 = getelementptr  i64, i64* %85, i64 0 
+  store  i64 3, i64* %86 
+  %87 = add   i64 %84, 8 
+  %88 = inttoptr i64 %87 to i64* 
+  %89 = getelementptr  i64, i64* %88, i64 0 
+  store  i64 3, i64* %89 
+  %91 = ptrtoint i8* getelementptr inbounds ([32 x i8], [32 x i8]* @alias_scc_proc.90, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %91)  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %84)  
+  %92 = insertvalue {i64, i64} undef, i64 %"p1#0", 0 
+  %93 = insertvalue {i64, i64} %92, i64 %84, 1 
+  ret {i64, i64} %93 
+if.else:
+  %"tmp$3#0" = add   i64 %81, 1 
+  %94 = inttoptr i64 %"p1#0" to i64* 
+  %95 = getelementptr  i64, i64* %94, i64 0 
+  store  i64 %"tmp$3#0", i64* %95 
+  %"p3#0" = tail call fastcc  i64  @"alias_scc_proc.bar<0>[1]"(i64  %"p1#0")  
+  %96 = trunc i64 16 to i32  
+  %97 = tail call ccc  i8*  @wybe_malloc(i32  %96)  
+  %98 = ptrtoint i8* %97 to i64 
+  %99 = inttoptr i64 %98 to i64* 
+  %100 = getelementptr  i64, i64* %99, i64 0 
+  store  i64 2, i64* %100 
+  %101 = add   i64 %98, 8 
+  %102 = inttoptr i64 %101 to i64* 
+  %103 = getelementptr  i64, i64* %102, i64 0 
+  store  i64 2, i64* %103 
+  %104 = insertvalue {i64, i64} undef, i64 %98, 0 
+  %105 = insertvalue {i64, i64} %104, i64 %"p3#0", 1 
+  ret {i64, i64} %105 
 }
 --------------------------------------------------
  Module position

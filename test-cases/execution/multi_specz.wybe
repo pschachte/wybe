@@ -1,0 +1,52 @@
+pub type position { pub position(x:int, y:int) }
+
+pub def printPosition(pos:position) use !io {
+    !print(" (")
+    !print(pos.x)
+    !print(",")
+    !print(pos.y)
+    !println(")")
+}
+
+pub def modifyAndPrint(pos:position, v:int) use !io {
+    x(!pos, v)
+    !printPosition(pos)
+}
+
+pub def foo(x1:position, x2:position, x3:position, x4:position) use !io {
+    !modifyAndPrint(x1, 111)
+    !modifyAndPrint(x2, 222)
+    !modifyAndPrint(x3, 333)
+    !modifyAndPrint(x4, 444)
+}
+
+pub def bar1() use !io {
+    ?a = position(0, 1)
+    ?b = position(0, 2)
+    ?c = position(0, 3)
+    ?d = position(0, 4)
+    !println("=============")
+    !foo(a, b, c, d)
+    !println("-------------")
+    !printPosition(c)
+    !printPosition(d)
+    !println("=============")
+}
+
+pub def bar2() use !io {
+    ?a = position(0, 1)
+    ?b = position(0, 2)
+    ?c = position(0, 3)
+    ?d = position(0, 4)
+    !println("=============")
+    !foo(a, b, c, d)
+    !println("-------------")
+    !printPosition(a)
+    !printPosition(b)
+    !printPosition(c)
+    !printPosition(d)
+    !println("=============")
+}
+
+!bar1()
+!bar2()

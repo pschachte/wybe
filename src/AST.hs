@@ -41,6 +41,7 @@ module AST (
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
   AliasMap, aliasMapToAliasPairs,
   AliasMultiSpeczInfo, emptyAliasMultiSpeczInfo,
+  SpeczVersionId, speczIdToString, SpeczProcBodies,
   ProcAnalysis(..), ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
@@ -89,6 +90,7 @@ import           Data.Map as Map
 import           Data.Maybe
 import           Data.Set as Set
 import           Data.Word (Word8)
+import           Numeric          (showHex)
 import           Options
 import           System.Exit
 import           System.FilePath
@@ -934,7 +936,7 @@ addProcDef procDef = do
     currMod <- getModuleSpec
     procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
     let procs' = procs ++ [procDef]
-    let spec = ProcSpec currMod name (length procs)
+    let spec = ProcSpec currMod name (length procs) Nothing
     updateImplementation
       (\imp ->
         let known = findWithDefault Set.empty name $ modKnownProcs imp
@@ -960,7 +962,7 @@ getDetism pspec =
 
 
 getProcDef :: ProcSpec -> Compiler ProcDef
-getProcDef (ProcSpec modSpec procName procID) = do
+getProcDef (ProcSpec modSpec procName procID _) = do
     mod <- trustFromJustM ("no such module " ++ showModSpec modSpec) $
            getLoadingModule modSpec
     let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $
@@ -975,12 +977,12 @@ getProcPrimProto :: ProcSpec -> Compiler PrimProto
 getProcPrimProto pspec = do
     def <- getProcDef pspec
     case procImpln def of
-        ProcDefPrim proto _ _ -> return proto
+        ProcDefPrim proto _ _ _-> return proto
         _ -> shouldnt $ "get prim proto of uncompiled proc " ++ show pspec
 
 
 updateProcDef :: (ProcDef -> ProcDef) -> ProcSpec -> Compiler ()
-updateProcDef updater pspec@(ProcSpec modspec procName procID) =
+updateProcDef updater pspec@(ProcSpec modspec procName procID _) =
     updateLoadedModuleImpln
     (\imp -> imp { modProcs =
                        Map.adjust
@@ -993,7 +995,7 @@ updateProcDef updater pspec@(ProcSpec modspec procName procID) =
 
 -- XXX updateProcDefM :: (ProcDef -> Compiler (ProcDef, a)) -> ProcSpec -> Compiler a
 updateProcDefM :: (ProcDef -> Compiler ProcDef) -> ProcSpec -> Compiler ()
-updateProcDefM updater pspec@(ProcSpec modspec procName procID) =
+updateProcDefM updater pspec@(ProcSpec modspec procName procID _) =
     updateLoadedModuleImplnM
     (\imp -> do
        let procs = modProcs imp
@@ -1583,19 +1585,34 @@ showSuperProc (SuperprocIs super) =
 -- Finally it is turned into SSA form (LLVM).
 data ProcImpln
     = ProcDefSrc [Placed Stmt]           -- ^defn in source-like form
-    | ProcDefPrim PrimProto ProcBody ProcAnalysis
+    | ProcDefPrim PrimProto ProcBody ProcAnalysis SpeczProcBodies
                                          -- ^defn in LPVM (clausal) form
       -- defn in SSA (LLVM) form along with any needed extern definitions
     deriving (Eq,Generic)
 
 
+-- | The identity of each specialized version. It needs to be a bijection
+-- between this Id and the specialized condition. 
+-- Currently, [Int] is enought. We can change it to [Tuple] when there 
+-- are more things to consider. More detial can be found in [Transform.hs]
+type SpeczVersionId = Int
+
+
+-- Convert [SpeczVersionId] to [String] so it can be shorter in function
+-- name.
+speczIdToString :: SpeczVersionId -> String
+speczIdToString speczId = 
+    showHex speczId ""
+
+
+-- | A map contains different specialization versions.
+-- The key is the id of each version and the value is the 
+-- actual implementation
+type SpeczProcBodies = Map SpeczVersionId ProcBody
+
 -- | Use UnionFind method to record the alias information
 type AliasMap = DisjointSet PrimVarName
--- | Multiple specialization info for global alias 
-type AliasMultiSpeczInfo = [PrimVarName]
 
-emptyAliasMultiSpeczInfo :: AliasMultiSpeczInfo
-emptyAliasMultiSpeczInfo = []
 
 -- | a synonym function to hide the impletation of how unionfind is printed
 showAliasMap :: AliasMap -> String
@@ -1606,6 +1623,14 @@ showAliasMap aliasMap = show $ aliasMapToAliasPairs aliasMap
 aliasMapToAliasPairs :: AliasMap -> [(PrimVarName, PrimVarName)]
 aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 
+-- | Multiple specialization info for global alias 
+type AliasMultiSpeczInfo = [PrimVarName]
+
+
+emptyAliasMultiSpeczInfo :: AliasMultiSpeczInfo
+emptyAliasMultiSpeczInfo = []
+
+
 -- | Stores whatever analysis results we infer about a proc definition.
 data ProcAnalysis = ProcAnalysis {
     procArgAliasMap :: AliasMap,
@@ -1613,12 +1638,13 @@ data ProcAnalysis = ProcAnalysis {
 } deriving (Eq,Generic)
 
 isCompiled :: ProcImpln -> Bool
-isCompiled (ProcDefPrim _ _ _) = True
+isCompiled (ProcDefPrim _ _ _ _) = True
 isCompiled (ProcDefSrc _) = False
 
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
-    show (ProcDefPrim proto body analysis)
+    -- TODO: show [SpeczProcBodies]
+    show (ProcDefPrim proto body analysis _)
         = show proto ++ ":" ++ show analysis ++ showBlock 4 body
 
 instance Show ProcAnalysis where
@@ -1804,14 +1830,18 @@ foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
 -- |Info about a proc call, including the ID, prototype, and an
 --  optional source position.
 data ProcSpec = ProcSpec {
-      procSpecMod::ModSpec,
-      procSpecName::ProcName,
-      procSpecID::ProcID}
+      procSpecMod :: ModSpec,
+      procSpecName :: ProcName,
+      procSpecID :: ProcID,
+      procSpeczVersionID :: Maybe SpeczVersionId}
                 deriving (Eq,Ord,Generic)
 
 instance Show ProcSpec where
-    show (ProcSpec mod name pid) =
+    show (ProcSpec mod name pid speczId) =
         showModSpec mod ++ "." ++ name ++ "<" ++ show pid ++ ">"
+                ++ case speczId of 
+                    Nothing -> ""
+                    Just id -> "[" ++ speczIdToString id ++ "]"
 
 -- |An ID for a proc.
 type ProcID = Int

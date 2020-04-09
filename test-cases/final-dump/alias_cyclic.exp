@@ -45,7 +45,7 @@ updateX > public (2 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_cyclic.updateY<0>(~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:19:16
+        alias_cyclic.updateY<0>[1](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:19:16
 
     1:
         foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:16:24
@@ -63,7 +63,7 @@ updateY > public (1 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_cyclic.updateX<0>(~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:10:19
+        alias_cyclic.updateX<0>[1](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:10:19
 
     1:
         foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:7:24
@@ -147,35 +147,75 @@ if.else:
   %22 = inttoptr i64 %18 to i64* 
   %23 = getelementptr  i64, i64* %22, i64 0 
   store  i64 %"tmp$2#0", i64* %23 
-  %"p2#0" = tail call fastcc  i64  @"alias_cyclic.updateY<0>"(i64  %18)  
+  %"p2#0" = tail call fastcc  i64  @"alias_cyclic.updateY<0>[1]"(i64  %18)  
+  ret i64 %"p2#0" 
+}
+
+
+define external fastcc  i64 @"alias_cyclic.updateX<0>[1]"(i64  %"p1#0")    {
+entry:
+  %24 = inttoptr i64 %"p1#0" to i64* 
+  %25 = getelementptr  i64, i64* %24, i64 0 
+  %26 = load  i64, i64* %25 
+  %"tmp$3#0" = icmp sgt i64 %26, 101 
+  br i1 %"tmp$3#0", label %if.then, label %if.else 
+if.then:
+  ret i64 %"p1#0" 
+if.else:
+  %"tmp$2#0" = add   i64 %26, 1 
+  %27 = inttoptr i64 %"p1#0" to i64* 
+  %28 = getelementptr  i64, i64* %27, i64 0 
+  store  i64 %"tmp$2#0", i64* %28 
+  %"p2#0" = tail call fastcc  i64  @"alias_cyclic.updateY<0>[1]"(i64  %"p1#0")  
   ret i64 %"p2#0" 
 }
 
 
 define external fastcc  i64 @"alias_cyclic.updateY<0>"(i64  %"p1#0")    {
 entry:
-  %24 = add   i64 %"p1#0", 8 
-  %25 = inttoptr i64 %24 to i64* 
-  %26 = getelementptr  i64, i64* %25, i64 0 
-  %27 = load  i64, i64* %26 
-  %"tmp$3#0" = icmp sgt i64 %27, 901 
+  %29 = add   i64 %"p1#0", 8 
+  %30 = inttoptr i64 %29 to i64* 
+  %31 = getelementptr  i64, i64* %30, i64 0 
+  %32 = load  i64, i64* %31 
+  %"tmp$3#0" = icmp sgt i64 %32, 901 
   br i1 %"tmp$3#0", label %if.then, label %if.else 
 if.then:
   ret i64 %"p1#0" 
 if.else:
-  %"tmp$2#0" = add   i64 %27, 1 
-  %28 = trunc i64 16 to i32  
-  %29 = tail call ccc  i8*  @wybe_malloc(i32  %28)  
-  %30 = ptrtoint i8* %29 to i64 
-  %31 = inttoptr i64 %30 to i8* 
-  %32 = inttoptr i64 %"p1#0" to i8* 
+  %"tmp$2#0" = add   i64 %32, 1 
   %33 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %31, i8*  %32, i32  %33, i32  8, i1  0)  
-  %34 = add   i64 %30, 8 
-  %35 = inttoptr i64 %34 to i64* 
-  %36 = getelementptr  i64, i64* %35, i64 0 
-  store  i64 %"tmp$2#0", i64* %36 
-  %"p2#0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>"(i64  %30)  
+  %34 = tail call ccc  i8*  @wybe_malloc(i32  %33)  
+  %35 = ptrtoint i8* %34 to i64 
+  %36 = inttoptr i64 %35 to i8* 
+  %37 = inttoptr i64 %"p1#0" to i8* 
+  %38 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %36, i8*  %37, i32  %38, i32  8, i1  0)  
+  %39 = add   i64 %35, 8 
+  %40 = inttoptr i64 %39 to i64* 
+  %41 = getelementptr  i64, i64* %40, i64 0 
+  store  i64 %"tmp$2#0", i64* %41 
+  %"p2#0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>[1]"(i64  %35)  
+  ret i64 %"p2#0" 
+}
+
+
+define external fastcc  i64 @"alias_cyclic.updateY<0>[1]"(i64  %"p1#0")    {
+entry:
+  %42 = add   i64 %"p1#0", 8 
+  %43 = inttoptr i64 %42 to i64* 
+  %44 = getelementptr  i64, i64* %43, i64 0 
+  %45 = load  i64, i64* %44 
+  %"tmp$3#0" = icmp sgt i64 %45, 901 
+  br i1 %"tmp$3#0", label %if.then, label %if.else 
+if.then:
+  ret i64 %"p1#0" 
+if.else:
+  %"tmp$2#0" = add   i64 %45, 1 
+  %46 = add   i64 %"p1#0", 8 
+  %47 = inttoptr i64 %46 to i64* 
+  %48 = getelementptr  i64, i64* %47, i64 0 
+  store  i64 %"tmp$2#0", i64* %48 
+  %"p2#0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>[1]"(i64  %"p1#0")  
   ret i64 %"p2#0" 
 }
 --------------------------------------------------

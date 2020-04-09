@@ -463,7 +463,7 @@ meetTypes ty1 ty2
 localBodyProcs :: ModSpec -> ProcImpln -> [Ident]
 localBodyProcs thisMod (ProcDefSrc body) =
     foldProcCalls (localCalls thisMod) (++) [] body
-localBodyProcs thisMod (ProcDefPrim _ _ _) =
+localBodyProcs thisMod (ProcDefPrim _ _ _ _) =
     shouldnt "Type checking compiled code"
 
 localCalls :: ModSpec -> ModSpec -> Ident -> Maybe Int -> Determinism
@@ -868,7 +868,7 @@ callProcInfos pstmt =
         ProcCall m name procId _ _ _ -> do
           procs <- case procId of
               Nothing   -> callTargets m name
-              Just pid -> return [ProcSpec m name pid]
+              Just pid -> return [ProcSpec m name pid Nothing]
           defs <- mapM getProcDef procs
           return [ ProcInfo proc typflow detism inResources outResources
                  | (proc,def) <- zip procs defs
@@ -1667,7 +1667,7 @@ checkProcDefFullytyped def = do
 
 procDefSrc :: ProcImpln -> [Placed Stmt]
 procDefSrc (ProcDefSrc def) = def
-procDefSrc (ProcDefPrim _ _ _) = shouldnt "procDefSrc applied to ProcDefPrim"
+procDefSrc (ProcDefPrim _ _ _ _) = shouldnt "procDefSrc applied to ProcDefPrim"
 
 
 checkParamTyped :: ProcName -> OptPos -> (Int,Param) -> Compiler ()
