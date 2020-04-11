@@ -1,5 +1,5 @@
 Error detected during final normalisation of module(s) type_error2, type_error2.foo
-[91mtest-cases/type_error2.wybe:1:12: Unknown type notatype
+[91mtest-cases/type_error2.wybe:1:12: Unknown parameter type notatype
 [0m[91mtest-cases/type_error2.wybe:1:12: Unknown type notatype
 [0m[91mtest-cases/type_error2.wybe:1:12: Unknown type notatype
 [0m

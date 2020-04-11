@@ -1,14 +1,19 @@
 ======================================================================
 AFTER EVERYTHING:
  Module compute
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : compute.<0>
   imports         : use math
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -56,16 +61,17 @@ entry:
 }
 --------------------------------------------------
  Module math
-  public submods  : 
-  public types    : 
+  representation  : (not a type)
+  public submods  : temperature -> math.temperature
+                    utils -> math.utils
   public resources: 
   public procs    : math.temperature.toCelsius<0>
                     math.utils.<0>
                     math.utils.factorial<0>
   imports         : public use math.temperature
                     public use math.utils
-  types           : 
   resources       : 
+  known types     : 
   submodules      : math.temperature, math.utils
   procs           : 
 
@@ -84,13 +90,18 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 --------------------------------------------------
  Module math.temperature
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : math.temperature.toCelsius<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 toCelsius > public inline (0 calls)
@@ -120,14 +131,19 @@ entry:
 }
 --------------------------------------------------
  Module math.utils
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : math.utils.<0>
                     math.utils.factorial<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -193,3 +209,4 @@ if.else:
   %"$#0" = mul   i64 %"n#0", %"tmp$2#0" 
   ret i64 %"$#0" 
 }
+======================================================================

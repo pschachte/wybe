@@ -1,14 +1,19 @@
 ======================================================================
 AFTER EVERYTHING:
  Module func_factorial
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : func_factorial.<0>
                     func_factorial.factorial<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -72,3 +77,4 @@ if.else:
   %"$#0" = mul   i64 %"n#0", %"tmp$2#0" 
   ret i64 %"$#0" 
 }
+======================================================================

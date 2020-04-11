@@ -1,13 +1,18 @@
 ======================================================================
 AFTER EVERYTHING:
  Module func_untyped
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : 
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 incr > inline (0 calls)
@@ -33,3 +38,4 @@ entry:
   %"$#0" = add   i64 %"a#0", 1 
   ret i64 %"$#0" 
 }
+======================================================================

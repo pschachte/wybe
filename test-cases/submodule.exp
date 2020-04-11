@@ -1,15 +1,20 @@
 ======================================================================
 AFTER EVERYTHING:
  Module submodule
-  public submods  : 
-  public types    : 
+  representation  : (not a type)
+  public submods  : publictest -> submodule.publictest
   public resources: 
   public procs    : submodule.publictest.visible<0>
   imports         : use submodule.privatetest
                     public use submodule.publictest
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   submodules      : submodule.privatetest, submodule.publictest
   procs           : 
 
@@ -28,14 +33,19 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 --------------------------------------------------
  Module submodule.privatetest
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : submodule.privatetest.semi_hidden<0>
   imports         : use submodule
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 hidden > inline (0 calls)
@@ -86,14 +96,19 @@ entry:
 }
 --------------------------------------------------
  Module submodule.publictest
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : submodule.publictest.visible<0>
   imports         : use submodule
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 semi_visible > inline (0 calls)
@@ -142,3 +157,4 @@ entry:
   tail call ccc  void  @print_string(i64  %4)  
   ret void 
 }
+======================================================================

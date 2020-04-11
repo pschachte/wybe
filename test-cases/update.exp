@@ -1,14 +1,19 @@
 ======================================================================
 AFTER EVERYTHING:
  Module update
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : update.inc2<0>
                     update.inc2<1>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 inc2 > public inline (0 calls)
@@ -48,3 +53,4 @@ entry:
   %"x#0" = sub   i64 %"tmp$0#0", 1 
   ret i64 %"x#0" 
 }
+======================================================================

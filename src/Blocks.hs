@@ -75,9 +75,10 @@ blockTransformModule thisMod =
        let protos = List.map extractLPVMProto (concat procs)
        --------------------------------------------------
        -- Collect prototypes of imported modules
-       imports <- getModuleImplementationField (keys . modImports)
+       imports <- getModuleImplementationField modImportSpecs
        importProtos <- mapM getPrimProtos
-                         (List.filter (not . isStdLib) imports)
+                         (List.filter (not . isStdLib)
+                          $ importedMod <$> imports)
        let allProtos = protos ++ concat importProtos
 
        logBlocks $ "Prototypes:\n\t"
@@ -87,7 +88,7 @@ blockTransformModule thisMod =
        knownTypesSet <- Map.elems <$>
                          getModuleImplementationField modKnownTypes
        let knownTypes = concatMap Set.toList knownTypesSet
-       trs <- mapM llvmType knownTypes
+       trs <- mapM moduleLLVMType knownTypes
        -- typeList :: [(TypeSpec, LLVMAST.Type)]
        let typeList = zip knownTypes trs
        -- log the assoc list typeList
@@ -1057,10 +1058,13 @@ llvmMapUnop =
 ----------------------------------------------------------------------------
 
 
+-- |The LLVM type of the specified Wybe type; error if it's not a type.
 llvmType :: TypeSpec -> Compiler LLVMAST.Type
 llvmType ty = repLLVMType <$> typeRep ty
 
 
+-- |The low-level Wybe representation of the specified type; error if it's not a
+-- type.
 typeRep :: TypeSpec -> Compiler TypeRepresentation
 typeRep ty =
     let err = shouldnt $ "llvmType applied to InvalidType or unknown type ("
@@ -1068,6 +1072,12 @@ typeRep ty =
             ++ ")"
     in fromMaybe err <$> lookupTypeRepresentation ty
 
+
+-- |The LLVM type of the specified module spec; error if it's not a type.
+moduleLLVMType :: ModSpec -> Compiler LLVMAST.Type
+moduleLLVMType mspec =
+    repLLVMType . trustFromJust "moduleLLVMType of non-type"
+    <$> lookupModuleRepresentation mspec
 
 repLLVMType :: TypeRepresentation -> LLVMAST.Type
 repLLVMType Address        = address_t

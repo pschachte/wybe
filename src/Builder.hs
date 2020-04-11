@@ -182,7 +182,8 @@ import           ObjectInterface
 
 import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
-                                            optForce, optForceAll, optLibDirs)
+                                            optForceThis, optForceAll,
+                                            optLibDirs)
 import           NewParser                 (parseWybe)
 import           Resources                 (resourceCheckMod,
                                             transformProcResources,
@@ -203,11 +204,10 @@ import qualified LLVM.AST              as LLVMAST
 ------------------------ Handling dependencies ------------------------
 
 -- |Build the specified targets with the specified options.
-buildTargets :: Options -> [FilePath] -> Compiler ()
-buildTargets opts targets = do
-    possDirs <- gets (optLibDirs . options)
-    -- load library first
-    mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
+buildTargets :: [FilePath] -> Compiler ()
+buildTargets targets = do
+    force <- option optForceThis
+    mapM_ (buildTarget force) targets
     showMessages
     stopOnError "building outputs"
     logDump FinalDump FinalDump "EVERYTHING"
@@ -246,9 +246,11 @@ buildTarget force target = do
 -- |Compile or load a module dependency.
 buildDependency :: ModSpec -> Compiler Bool
 buildDependency modspec = do
-    logBuild $ "Load dependency: " ++ showModSpec modspec
+    currMod <- getModule modSpec
+    logBuild $ "Load dependency " ++ showModSpec modspec
+               ++ " into module " ++ showModSpec currMod
     force <- option optForceAll
-    possDirs <- gets (optLibDirs . options)
+    possDirs <- option  optLibDirs
     localDir <- getDirectory
     buildModuleIfNeeded force modspec (localDir:possDirs)
 
@@ -263,15 +265,15 @@ buildModuleIfNeeded :: Bool    -- ^Force compilation of this module
               -> Compiler Bool -- ^Returns whether or not file
                                -- actually needed to be compiled
 buildModuleIfNeeded force modspec possDirs = do
-    logBuild $ "Building " ++ showModSpec modspec
-               ++ " with library directories " ++ intercalate ", " possDirs
     loading <- gets (List.elem modspec . List.map modSpec . underCompilation)
-    let clash kind1 f1 kind2 f2 = do
+    let clash kind1 f1 kind2 f2 =
           Error <!> kind1 ++ " " ++ f1 ++ " and "
                     ++ kind2 ++ " " ++ f2 ++ " clash. There can only be one!"
     if loading
       then return False -- Already loading it; we'll handle it later
       else do
+        logBuild $ "Building " ++ showModSpec modspec
+                   ++ " with library directories " ++ intercalate ", " possDirs
         maybemod <- getLoadedModule modspec
         logBuild $ "module " ++ showModSpec modspec ++ " is " ++
           (if isNothing maybemod then "not yet" else "already") ++
@@ -359,7 +361,7 @@ buildModule mspec srcfile = do
     either (\er -> do
                liftIO $ putStrLn $ "Syntax Error: " ++ show er
                liftIO exitFailure)
-           (compileModule srcfile mspec Nothing)
+           (compileModule srcfile mspec)
            parseTree
     -- XXX Rethink parse tree hashing
     -- let currHash = hashItems parseTree
@@ -383,27 +385,27 @@ buildDirectory dir dirmod = do
     logBuild $ "Building DIR: " ++ dir ++ ", into MODULE: "
         ++ showModSpec dirmod
     -- Make the directory a Module package
-    enterModule dir dirmod Nothing Nothing
+    enterModule dir dirmod Nothing
     updateModule (\m -> m { isPackage = True })
 
     -- Get wybe modules (in the directory) to build
     let makeMod x = dirmod ++ [x]
-    wybemods <- liftIO $ List.map (makeMod . dropExtension)
-        <$> wybeSourcesInDir dir
+    sources <- liftIO $ wybeSourcesInDir dir
+    let wybemods = List.map (makeMod . dropExtension) sources
     -- Build the above list of modules
-    opts <- gets options
-    let force = optForceAll opts || optForce opts
+    force <- option optForceThis
     -- quick shortcut to build a module
     let build m = buildModuleIfNeeded force m [takeDirectory dir]
     built <- or <$> mapM build wybemods
 
     -- Helper to add new import of `m` to current module
-    let updateImport m = do
-            addImport m (importSpec Nothing Public)
+    let updateImport (m,f) = do
+            addImport (importSpec m Nothing Public)
             updateImplementation $
                 updateModSubmods $ Map.insert (last m) m
+            addPubSubmod m $ wholeFilePlace f
     -- The module package imports all wybe modules in its source dir
-    mapM_ updateImport wybemods
+    mapM_ updateImport $ zip wybemods sources
     mods <- exitModule
     logBuild $ "Generated directory module containing" ++ showModSpecs mods
     -- Run the compilation passes on this module package to append the
@@ -414,10 +416,10 @@ buildDirectory dir dirmod = do
 
 
 -- |Compile a file module given the parsed source file contents.
-compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
-compileModule source modspec params items = do
+compileModule :: FilePath -> ModSpec -> [Item] -> Compiler ()
+compileModule source modspec items = do
     logBuild $ "===> Compiling module " ++ showModSpec modspec
-    enterModule source modspec (Just modspec) params
+    enterModule source modspec (Just modspec)
     -- Hash the parse items and store it in the module
     let hashOfItems = hashItems items
     logBuild $ "HASH: " ++ hashOfItems
@@ -446,12 +448,12 @@ extractedItemsHash :: ModSpec -> Compiler (Maybe String)
 extractedItemsHash modspec = do
     storedMods <- gets extractedMods
     -- Get the force options
-    opts <- gets options
-    if optForce opts || optForceAll opts
-        then return Nothing
-        else case Map.lookup modspec storedMods of
-                 Nothing -> return Nothing
-                 Just m  -> return $ itemsHash m
+    force <- option optForceThis
+    if force
+      then return Nothing
+      else case Map.lookup modspec storedMods of
+             Nothing -> return Nothing
+             Just m  -> return $ itemsHash m
 
 
 -- | Parse the stored module bytestring in the 'objfile' and record them in the
@@ -498,7 +500,8 @@ loadModuleFromObjFile required objfile = do
         if required `elem` extractedSpecs
             then do
             -- Collect the imports
-            imports <- concat <$> mapM (placeExtractedModule objfile) extracted
+            imports <- nub . concat
+                       <$> mapM (placeExtractedModule objfile) extracted
             logBuild $ "=== >>> Building dependencies: "
                 ++ showModSpecs imports
             -- Place the super mod under compilation while
@@ -538,9 +541,7 @@ placeExtractedModule objFile thisMod = do
     let thisModImpln = trustFromJust
             "==== >>> Pulling Module implementation from loaded module"
             (modImplementation loadMod)
-    let imports = (keys . modImports) thisModImpln
-    return imports
-
+    return $ importedMod <$> modImportSpecs thisModImpln
 
 
 -- | Compile and build modules inside a folder, compacting everything into
@@ -570,17 +571,13 @@ compileModSCC mspecs = do
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
     ----------------------------------
     -- FLATTENING
-    logDump Flatten Types "FLATTENING"
-    fixpointProcessSCC handleModImports mspecs
-    -- XXX should probably just handle imports here
+    logDump Flatten Normalise "FLATTENING"
     completeNormalisation mspecs
-    -- repeat this to handle imports of procs generated by completeNormalisation
-    -- XXX should probably handle everything but imports here
     fixpointProcessSCC handleModImports mspecs
     stopOnError $ "final normalisation of module(s) " ++ showModSpecs mspecs
-    logBuild $ replicate 70 '='
     ----------------------------------
     -- TYPE CHECKING
+    logDump Normalise Types "NORMALISING"
     logBuild $ "resource and type checking module(s) "
                ++ showModSpecs mspecs ++ "..."
     mapM_ validateModExportTypes mspecs
@@ -713,7 +710,7 @@ transformModuleProcs trans thisMod = do
 -- |Load all the imports of the current module.
 loadImports :: Compiler ()
 loadImports = do
-    imports <- getModuleImplementationField (keys . modImports)
+    imports <- (importedMod <$>) <$> getModuleImplementationField modImportSpecs
     logBuild $ "building dependencies: " ++ showModSpecs imports
     mapM_ buildDependency imports
     -- modspec <- getModuleSpec
@@ -729,19 +726,25 @@ loadImports = do
 handleModImports :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 handleModImports _ thisMod = do
     reenterModule thisMod
-    imports     <- getModuleImplementationField modImports
-    kTypes      <- getModuleImplementationField modKnownTypes
-    kResources  <- getModuleImplementationField modKnownResources
-    kProcs      <- getModuleImplementationField modKnownProcs
-    iface       <- getModuleInterface
-    mapM_ (uncurry doImport) $ Map.toList imports
-    kTypes'     <- getModuleImplementationField modKnownTypes
-    kResources' <- getModuleImplementationField modKnownResources
-    kProcs'     <- getModuleImplementationField modKnownProcs
-    iface'      <- getModuleInterface
-    _           <- reexitModule
-    return (kTypes/=kTypes' || kResources/=kResources' ||
-            kProcs/=kProcs' || iface/=iface',[])
+    imports     <- getModuleImplementationField modImportSpecs
+    case imports of
+      [single] -> do
+        doImport single -- only one module in SCC, so immediate fixed point
+        _ <- reexitModule
+        return (False, [])
+      _        -> do
+        kTypes      <- getModuleImplementationField modKnownTypes
+        kResources  <- getModuleImplementationField modKnownResources
+        kProcs      <- getModuleImplementationField modKnownProcs
+        iface       <- getModuleInterface
+        mapM_ doImport imports
+        kTypes'     <- getModuleImplementationField modKnownTypes
+        kResources' <- getModuleImplementationField modKnownResources
+        kProcs'     <- getModuleImplementationField modKnownProcs
+        iface'      <- getModuleInterface
+        _           <- reexitModule
+        return (kTypes/=kTypes' || kResources/=kResources' ||
+                kProcs/=kProcs' || iface/=iface',[])
 
 
 
@@ -774,9 +777,9 @@ buildExecutable targetMod target = do
             let mainProc = buildMain mainImports
             logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
 
-            enterModule target [] Nothing Nothing
-            addImport ["wybe"] $ importSpec Nothing Private
-            mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
+            enterModule target [] Nothing
+            addImport $ importSpec ["wybe"] Nothing Private
+            mapM_ (\m -> addImport $ importSpec m (Just [""]) Private)
                   mainImports
             addProcDef mainProc
             mods <- exitModule
@@ -869,7 +872,7 @@ orderedDependencies targetMod =
         -- since we are looking for imports which need a physical object file
         let imports =
                 List.filter (\x -> notElem x subMods) $ --  && (not.isStdLib) x) $
-                (keys . modImports) thisMod
+                importedMod <$> modImportSpecs thisMod
         -- Check if this module 'm' has a main procedure.
         let mainExists = "" `elem` procs || "<0>" `elem` procs
         let collected' =

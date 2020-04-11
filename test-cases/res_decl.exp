@@ -1,13 +1,18 @@
 ======================================================================
 AFTER EVERYTHING:
  Module res_decl
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: count: res_decl.count
   public procs    : 
   imports         : use wybe
-  types           : 
   resources       : count: fromList [(res_decl.count,Just wybe.int @res_decl:1:5)] @res_decl:1:5
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 
@@ -23,3 +28,4 @@ declare external ccc  i8* @wybe_malloc(i32)
 
 
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+======================================================================

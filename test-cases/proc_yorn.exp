@@ -1,14 +1,19 @@
 ======================================================================
 AFTER EVERYTHING:
  Module proc_yorn
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : proc_yorn.<0>
                     proc_yorn.yorn<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -166,3 +171,4 @@ entry:
   %"result#0" = tail call ccc  i1  @"proc_yorn.gen$1<0>"(i64  %"prompt#0")  
   ret i1 %"result#0" 
 }
+======================================================================

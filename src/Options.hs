@@ -10,7 +10,8 @@
 ----------------------------------------------------------------
 
 -- |The wybe compiler command line options.
-module Options (Options(..), LogSelection(..), handleCmdline, defaultOptions) where
+module Options (Options(..), LogSelection(..),
+                optForceThis, handleCmdline, defaultOptions) where
 
 import           Data.List             as List
 import           Data.Map              as Map
@@ -31,6 +32,7 @@ data Options = Options{
     , optLibDirs     :: [String] -- ^Directories where library files live
     , optLogAspects  :: Set LogSelection
                                  -- ^Which aspects to log
+    , optShowWybe    :: Bool     -- ^Don't suppress dumping the Wybe library
     , optNoLLVMOpt   :: Bool     -- ^Don't run the LLVM optimisation passes
     , optVerbose     :: Bool     -- ^Be verbose in compiler output
     } deriving Show
@@ -46,9 +48,17 @@ defaultOptions    = Options
  , optShowHelp    = False
  , optLibDirs     = []
  , optLogAspects  = Set.empty
+ , optShowWybe    = False
  , optNoLLVMOpt   = False
  , optVerbose     = False
  }
+
+
+-- |Return whether compilation is forced for files specified on the command
+-- line.  This is true if optForce or optForceAll is specified.
+optForceThis :: Options -> Bool
+optForceThis opts = optForce opts || optForceAll opts
+
 
 -- |All compiler features we may want to log
 data LogSelection =
@@ -113,6 +123,9 @@ options =
                                                (optLogAspects opts)
                                                a }) "ASPECT")
          "add comma-separated aspects to log, or 'all'"
+ , Option []        ["dump-lib"]
+     (NoArg (\ opts -> opts { optShowWybe = True }))
+   "don't suppress dumping of Wybe library during logging"
  , Option []        ["log-help"]
      (NoArg (\ opts -> opts { optHelpLog = True }))
      "display help on logging options and exit"

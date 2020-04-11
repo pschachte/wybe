@@ -1,15 +1,20 @@
 ======================================================================
 AFTER EVERYTHING:
  Module aaa
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : aaa.<0>
   imports         : use bbb
                     use ccc
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -49,14 +54,19 @@ entry:
 }
 --------------------------------------------------
  Module bbb
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : bbb.<0>
   imports         : use ddd
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -96,14 +106,19 @@ entry:
 }
 --------------------------------------------------
  Module ccc
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : ccc.<0>
   imports         : use ddd
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -143,13 +158,18 @@ entry:
 }
 --------------------------------------------------
  Module ddd
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : ddd.<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -187,3 +207,4 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
+======================================================================

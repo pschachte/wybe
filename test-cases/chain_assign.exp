@@ -1,13 +1,18 @@
 ======================================================================
 AFTER EVERYTHING:
  Module chain_assign
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : 
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 chain > inline (0 calls)
@@ -32,3 +37,4 @@ define external ccc  i64 @"chain_assign.chain<0>"()    {
 entry:
   ret i64 1 
 }
+======================================================================

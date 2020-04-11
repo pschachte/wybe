@@ -1,13 +1,18 @@
 ======================================================================
 AFTER EVERYTHING:
  Module exp_print
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : exp_print.<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public (0 calls)
@@ -72,3 +77,4 @@ entry:
   tail call ccc  void  @print_int(i64  1)  
   ret void 
 }
+======================================================================

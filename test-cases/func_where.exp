@@ -1,13 +1,18 @@
 ======================================================================
 AFTER EVERYTHING:
  Module func_where
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : func_where.quad<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 quad > public inline (0 calls)
@@ -35,3 +40,4 @@ entry:
   %"$#0" = add   i64 %"tmp$0#0", %"tmp$0#0" 
   ret i64 %"$#0" 
 }
+======================================================================

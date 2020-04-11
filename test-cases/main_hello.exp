@@ -1,13 +1,18 @@
 ======================================================================
 AFTER EVERYTHING:
  Module main_hello
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : main_hello.<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public (0 calls)
@@ -61,3 +66,4 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   ret i64 42 
 }
+======================================================================

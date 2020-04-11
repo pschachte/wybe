@@ -1,14 +1,19 @@
 ======================================================================
 AFTER EVERYTHING:
  Module multi_out
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multi_out.<0>
                     multi_out.onetwothree<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -42,3 +47,4 @@ entry:
   %3 = insertvalue {i64, i64, i64} %2, i64 3, 2 
   ret {i64, i64, i64} %3 
 }
+======================================================================

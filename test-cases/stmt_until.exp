@@ -1,13 +1,18 @@
 ======================================================================
 AFTER EVERYTHING:
  Module stmt_until
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : stmt_until.<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -91,3 +96,4 @@ if.else:
   %17 = insertvalue {i64, i64, i64} %16, i64 %14, 2 
   ret {i64, i64, i64} %17 
 }
+======================================================================

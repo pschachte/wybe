@@ -3,7 +3,10 @@ pragma no_standard_library  # Standard library can't depend on itself!
 use foreign object cbits
 use foreign library gc
 
-pub type bool { pub false | true
+# pub type bool { pub false | true
+pub type bool is 1 bit unsigned {
+    pub def false:bool = 0
+    pub def true:bool  = 1
     pub def `&&`(p:bool, q:bool):bool = foreign llvm and(p,q)
     pub def `||`(p:bool, q:bool):bool = foreign llvm or(p,q)
     pub def `~`(p:bool):bool = foreign llvm xor(p,true)
@@ -107,8 +110,9 @@ pub module io {
     # pub def eof:char = foreign lpvm cast(-1)
 }
 
-pub type phantom {
-    pub phantom
+# pub type phantom {
+pub type phantom is 0 bit unsigned {
+    pub def phantom:phantom = 0
 }
 
 # pub module allocation {

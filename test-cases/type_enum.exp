@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module type_enum
-  public submods  : 
-  public types    : season: (type_enum.season,Just 2 bit unsigned)
+  representation  : (not a type)
+  public submods  : season -> type_enum.season
   public resources: 
   public procs    : type_enum.season./=<0>
                     type_enum.season.=<0>
@@ -12,8 +12,14 @@ AFTER EVERYTHING:
                     type_enum.season.winter<0>
   imports         : public use type_enum.season
                     use wybe
-  types           : season/public  is 2 bit unsigned { winter() @type_enum:1:23 | spring() @type_enum:1:32 | summer() @type_enum:1:41 | autumn() @type_enum:1:50  }  @type_enum:1:5
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    season: type_enum.season
+                    string: wybe.string
   submodules      : type_enum.season
   procs           : 
 
@@ -32,8 +38,8 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 --------------------------------------------------
  Module type_enum.season
+  representation  : 2 bit unsigned
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : type_enum.season./=<0>
                     type_enum.season.=<0>
@@ -43,8 +49,14 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
                     type_enum.season.winter<0>
   imports         : use type_enum
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    season: type_enum.season
+                    string: wybe.string
   procs           : 
 
 /= > public inline test (0 calls)
@@ -137,3 +149,4 @@ define external ccc  i2 @"type_enum.season.winter<0>"()    {
 entry:
   ret i2 0 
 }
+======================================================================

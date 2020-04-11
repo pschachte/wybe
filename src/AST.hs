@@ -22,13 +22,14 @@ module AST (
   Exp(..), Generator(..), Stmt(..), detStmt, expIsConstant,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
-  lookupTypeRepresentation,
+  lookupTypeRepresentation, lookupModuleRepresentation,
   paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
   primProtoParamNames,
   protoRealParams, realParams, paramIsReal,
   protoInputParamNames, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
+  wholeFilePlace,
   placedApply, placedApply1, placedApplyM, makeMessage, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
@@ -41,7 +42,7 @@ module AST (
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
   AliasMap, aliasMapToAliasPairs, ProcAnalysis(..),
   ProcBody(..), PrimFork(..), Ident, VarName,
-  ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
+  ProcName, ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argVarIsFlowDirection, argType,
   inArgVar2, outArgVar2, argDescription, flowsIn, flowsOut,
   foldProcCalls, foldBodyPrims, foldBodyDistrib,
@@ -58,17 +59,17 @@ module AST (
   getModuleImplementationField, getModuleImplementation,
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
-  getModule, getModuleInterface, updateModule, getSpecModule,
+  getModule, getModuleInterface, updateModule, getSpecModule, moduleIsType,
   updateModImplementation, updateModImplementationM, updateModLLVM,
   addForeignImport, addForeignLib,
-  updateModInterface, updateAllProcs, updateModSubmods,
+  updateModInterface, updateAllProcs, updateModSubmods, addPubSubmod,
   getModuleSpec, getModuleParams, option, getOrigin, getSource, getDirectory,
-  optionallyPutStr, message, errmsg, (<!>), genProcName,
-  addImport, doImport, addType, lookupType, publicType,
+  optionallyPutStr, message, errmsg, unplacedErr, (<!>), genProcName,
+  addImport, doImport, addParameters, addTypeRep, setTypeRep, addConstructor,
+  modImportSpecs, addKnownType, lookupType, typeSpecModule,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource,
-  addProc, addProcDef, lookupProc, publicProc,
-  refersTo, callTargets,
+  addProc, addProcDef, lookupProc, publicProc, callTargets,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showMaybeSourcePos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
@@ -89,15 +90,15 @@ import           Data.List as List
 import           Data.Map as Map
 import           Data.Maybe
 import           Data.Set as Set
+import           Data.Tuple.HT
 import           Data.Word (Word8)
 import           Options
 import           System.Exit
 import           System.FilePath
 import           System.IO
 import           System.Directory (makeAbsolute)
--- import           Text.ParserCombinators.Parsec.Pos
 import           Text.Parsec.Pos
-                 ( SourcePos, sourceName, sourceColumn, sourceLine )
+                 ( SourcePos, sourceName, sourceColumn, sourceLine, newPos )
 import           Util
 import           System.Console.ANSI
 
@@ -113,6 +114,9 @@ import qualified LLVM.AST as LLVMAST
 data Item
      = TypeDecl Visibility TypeProto TypeImpln [Item] OptPos
      | ModuleDecl Visibility Ident [Item] OptPos
+     | ModuleParamsDecl [Ident] OptPos
+     | RepresentationDecl TypeRepresentation OptPos
+     | ConstructorDecl Visibility [Placed ProcProto]
      | ImportMods Visibility [ModSpec] OptPos
      | ImportItems Visibility ModSpec [Ident] OptPos
      | ImportForeign [FilePath] OptPos
@@ -120,9 +124,8 @@ data Item
      | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
        -- The Bool in the next two indicates whether inlining is forced
      | FuncDecl Visibility Determinism Bool
-       ProcProto TypeSpec (Placed Exp) OptPos
+                ProcProto TypeSpec (Placed Exp) OptPos
      | ProcDecl Visibility Determinism Bool ProcProto [Placed Stmt] OptPos
-     -- | CtorDecl Visibility ProcProto OptPos
      | StmtDecl Stmt OptPos
      | PragmaDecl Pragma
      deriving (Generic, Eq)
@@ -187,6 +190,8 @@ typeFamily _            = IntFamily
 
 -- | Declared implementation of a type, either in terms of representation or by
 --   listing constructors and having the compiler determine the representation.
+
+-- XXX Get rid of this type?
 data TypeImpln = TypeRepresentation TypeRepresentation
                | TypeCtors Visibility [Placed ProcProto]
                deriving (Generic, Eq)
@@ -261,6 +266,11 @@ rePlace t (Unplaced _)   = Unplaced t
 unPlace :: Placed t -> (t, OptPos)
 unPlace (Placed x pos) = (x, Just pos)
 unPlace (Unplaced x)   = (x, Nothing)
+
+
+-- |Return a place for the (start of) a whole file
+wholeFilePlace :: FilePath -> OptPos
+wholeFilePlace f = Just $ newPos f 1 1
 
 
 -- |Apply a function that takes a thing and an optional place to a
@@ -373,9 +383,9 @@ getLoadingModule modspec = do
 -- Nothing.
 getLoadedModule :: ModSpec -> Compiler (Maybe Module)
 getLoadedModule modspec = do
-    logAST $ "Get loaded module " ++ showModSpec modspec
     maybeMod <- gets (Map.lookup modspec . modules)
-    logAST $ if isNothing maybeMod then " got nothing!" else " worked"
+    logAST $ "Get loaded module " ++ showModSpec modspec
+             ++ if isNothing maybeMod then ": got nothing!" else ": worked"
     return maybeMod
 
 -- |Apply the given function to the specified module, if it has been loaded;
@@ -521,6 +531,18 @@ getSpecModule context spec getter = do
         [mod] -> return $ getter mod
         _     -> shouldnt "getSpecModule: multiple modules with same spec"
 
+
+-- | Is the specified module a type?  Determined by checking if it has a
+-- known representation.
+moduleIsType :: ModSpec -> Compiler Bool
+moduleIsType mspec = do
+    foundMod <- getSpecModule "moduleIsType" mspec modSpec
+    rep <- getSpecModule "moduleIsType" mspec modTypeRep
+    logAST $ "Module " ++ showModSpec mspec ++ " (found "
+             ++ showModSpec foundMod ++ ") rep = " ++ show rep
+    return $ isJust rep
+
+
 -- -- |Return some function of the specified module; returns a Maybe
 -- findSpecModule :: ModSpec -> (Module -> t) -> Compiler (Maybe t)
 -- findSpecModule spec getter =
@@ -550,9 +572,8 @@ getSpecModule context spec getter = do
 -- |Prepare to compile a module by setting up a new Module on the
 --  front of the list of modules underCompilation.  Match this with
 --  a later call to exitModule.
-enterModule :: FilePath -> ModSpec -> Maybe ModSpec -> Maybe [Ident]
-            -> Compiler ()
-enterModule source modspec rootMod params = do
+enterModule :: FilePath -> ModSpec -> Maybe ModSpec -> Compiler ()
+enterModule source modspec rootMod = do
     -- First make sure there's not already such a module
     oldMod <- getLoadingModule modspec
     when (isJust oldMod)
@@ -566,7 +587,6 @@ enterModule source modspec rootMod params = do
                                   { modOrigin        = absSource
                                   , modRootModSpec   = rootMod
                                   , modSpec          = modspec
-                                  , modParams        = params
                                   , thisLoadNum      = count
                                   , minDependencyNum = count
                                   }
@@ -587,7 +607,7 @@ moduleIsPackage spec =  do
 -- with a later call to reexitModule.
 reenterModule :: ModSpec -> Compiler ()
 reenterModule modspec = do
-    logAST $ "reentering module " ++ showModSpec modspec
+    logAST $ "Reentering module " ++ showModSpec modspec
     mod <- getSpecModule "reenterModule" modspec id
     modify (\comp -> comp { underCompilation = mod : underCompilation comp })
 
@@ -597,16 +617,16 @@ reenterModule modspec = do
 exitModule :: Compiler [ModSpec]
 exitModule = do
     currMod <- getModuleSpec
-    imports <- getModuleImplementationField (Map.assocs . modImports)
+    imports <- concat <$> getModuleImplementationField (Map.elems . modImports)
     logAST $ "Exiting module " ++ showModSpec currMod
               ++ " with imports:\n        "
               ++ intercalate "\n        "
-                 [showUse 20 mod dep | (mod,dep) <- imports]
-    mod <- reexitModule
+                 (List.map (showUse 20) imports)
+    mod <- popModule
     let num = thisLoadNum mod
     logAST $ "Exiting module " ++ showModSpec (modSpec mod)
-    logAST $ "    loadNum = " ++ show num ++
-           ", minDependencyNum = " ++ show (minDependencyNum mod)
+             ++ "; loadNum = " ++ show num
+             ++ ", minDependencyNum = " ++ show (minDependencyNum mod)
     if minDependencyNum mod < num
       then do
         logAST $ "not finished with module SCC: deferring module "
@@ -628,11 +648,19 @@ exitModule = do
 -- matches an earlier call to reenterModule.
 reexitModule :: Compiler Module
 reexitModule = do
+    mod <- popModule
+    logAST $ "Reexiting module " ++ showModSpec (modSpec mod)
+    return mod
+
+
+-- |Pop the current module off of the compilation stack, so it's no longer
+-- the current module, and add it to the map of modules.
+popModule :: Compiler Module
+popModule = do
     mod <- getModule id
     modify
       (\comp -> comp { underCompilation = List.tail (underCompilation comp) })
     updateModules $ Map.insert (modSpec mod) mod
-    logAST $ "Reexiting module " ++ showModSpec (modSpec mod)
     return mod
 
 
@@ -700,9 +728,7 @@ getModuleImplementationMaybe :: (ModuleImplementation -> Maybe t) ->
                                Compiler (Maybe t)
 getModuleImplementationMaybe fn = do
   imp <- getModuleImplementation
-  case imp of
-      Nothing -> return Nothing
-      Just imp' -> return $ fn imp'
+  return $ imp >>= fn
 
 
 getExtractedModuleImpln :: ModSpec -> Compiler (Maybe ModuleImplementation)
@@ -728,14 +754,21 @@ message lvl msg pos = do
 
 -- |Add the specified string as an error message referring to the optionally
 --  specified source location to the collected compiler output messages.
-errmsg :: String -> OptPos -> Compiler ()
-errmsg = message Error
+errmsg :: OptPos -> String -> Compiler ()
+errmsg pos txt = message Error txt pos
+
+
+-- |Add the specified string as an error message with no associated code
+--  location to the collected compiler output messages.
+unplacedErr :: String -> Compiler ()
+unplacedErr txt = message Error txt Nothing
 
 
 -- |Pretty helper operator for adding messages to the compiler state.
 (<!>) :: MessageLevel -> String -> Compiler ()
 lvl <!> msg = message lvl msg Nothing
 infix 0 <!>
+
 
 -- |Construct a message string from the specified text and location.
 makeMessage :: OptPos -> String -> String
@@ -774,70 +807,122 @@ updateImplementation implOp = do
         Just impl ->
             updateModule (\mod -> mod { modImplementation = Just $ implOp impl })
 
--- |Add the specified type definition to the current module.
-addType :: Ident -> TypeDef -> Compiler TypeSpec
-addType name def@(TypeDef vis params rep _ _ _ _) = do
+-- |Add the specified type/module parameters to the current module.
+addParameters :: [Ident] -> OptPos -> Compiler ()
+addParameters params pos = do
     currMod <- getModuleSpec
-    let spec = TypeSpec currMod name (flip (TypeSpec currMod) [] <$> params)
-    updateImplementation
-      (\imp ->
-        let set = Set.singleton spec
-        in imp { modTypes = Map.insert name def $ modTypes imp,
-                 modKnownTypes = Map.insert name set $ modKnownTypes imp })
-    updateInterface vis (updatePubTypes (Map.insert name (spec,rep)))
-    return spec
+    currParams <- getModule modParams
+    if (nub params /= params)
+      then errmsg pos
+           $ "duplicated type/module parameter in: " ++ intercalate ", " params
+      else if isJust currParams
+      then errmsg pos
+           $ "repeated parameter declaration: " ++ intercalate ", " params
+      else updateModule (\m -> m { modParams = Just params })
 
+
+-- |Add the specified type representation to the current module.  This makes the
+-- module a type.  Checks that the type doesn't already have a representation or
+-- constructors defined.
+addTypeRep :: TypeRepresentation -> OptPos -> Compiler ()
+addTypeRep repn pos = do
+    currMod <- getModuleSpec
+    hasRepn <- isJust <$> getModule modTypeRep
+    hasCtors <- isJust <$> getModuleImplementationField modConstructors
+    if hasRepn
+      then errmsg pos
+           $ "Multiple representations specified for type " ++ show currMod
+      else if hasCtors
+      then errmsg pos
+           $ "Can't declare representation of type " ++ show currMod
+             ++ " with constructors"
+      else updateModule (\m -> m { modTypeRep = Just repn })
+
+
+-- |Set the type representation of the current module.
+setTypeRep :: TypeRepresentation -> Compiler ()
+setTypeRep repn = updateModule (\m -> m { modTypeRep = Just repn })
+
+
+-- |Add the specified data constructor to the current module.  This makes the
+-- module a type.
+addConstructor :: Visibility -> Placed ProcProto -> Compiler ()
+addConstructor vis pctor = do
+    let pos = place pctor
+    let ctor = content pctor
+    currMod <- getModuleSpec
+    hasRepn <- isJust <$> getModule modTypeRep
+    pctors <- fromMaybe [] <$> getModuleImplementationField modConstructors
+    let redundant =
+          any (\c -> procProtoName c == procProtoName ctor
+                && length (procProtoParams c) == length (procProtoParams ctor))
+          $ (content . snd) <$> pctors
+    if hasRepn
+      then errmsg pos
+           $ "Declaring constructor for type " ++ show currMod
+           ++ " with declared representation"
+      else if redundant
+      then  errmsg pos
+           $ "Declaring constructor for type " ++ show currMod
+           ++ " with repeated name/arity"
+      else updateImplementation (\m -> m { modConstructors =
+                                           Just ((vis,pctor):pctors) })
+
+
+-- |Record that the specified type is known in the current module.
+addKnownType :: Ident -> ModSpec -> Compiler ()
+addKnownType name mspec = do
+    currMod <- getModuleSpec
+    logAST $ "In module " ++ showModSpec currMod
+             ++ ", adding type " ++ name ++ " (" ++ showModSpec mspec ++ ")"
+    newSet <- Set.insert mspec . Map.findWithDefault Set.empty name
+              <$> getModuleImplementationField modKnownTypes
+    updateImplementation
+      (\imp -> imp {modKnownTypes = Map.insert name newSet (modKnownTypes imp)})
 
 
 -- |Find the definition of the specified type visible from the current module.
-
 lookupType :: TypeSpec -> OptPos -> Compiler (Maybe TypeSpec)
-lookupType AnyType _ = return $ Just AnyType
-lookupType InvalidType _ = return $ Just InvalidType
+lookupType spec@TypeParam{} _ = return $ Just spec
+lookupType AnyType          _ = return $ Just AnyType
+lookupType InvalidType      _ = return $ Just InvalidType
 lookupType ty@(TypeSpec mod name args) pos = do
-    logAST $ "Looking up type " ++ show ty
-    tspecs <- refersTo mod name modKnownTypes typeMod
+    currMod <- getModuleSpec
+    logAST $ "In module " ++ showModSpec currMod
+             ++ ", looking up type " ++ show ty
+    mspecs <- refersTo mod name modKnownTypes
     logAST $ "Candidates: "
-             ++ intercalate ", " (List.map show $ Set.toList tspecs)
-    case Set.size tspecs of
+             ++ intercalate ", " (List.map show $ Set.toList mspecs)
+    case Set.size mspecs of
         0 -> do
-            message Error ("Unknown type " ++ show ty) pos
+            errmsg pos $ "Unknown type " ++ show ty
             return Nothing
         1 -> do
-            let tspec = Set.findMin tspecs
-            maybeMod <- getLoadingModule $ typeMod tspec
-            let maybeDef = maybeMod >>= modImplementation >>=
-                        (Map.lookup (typeName tspec) . modTypes)
-            let def = trustFromJust "lookupType" maybeDef
-            if length (typeDefParams def) == length args
+            let mspec = Set.findMin mspecs
+            maybeMod <- getLoadingModule mspec
+            let params = fromMaybe [] (maybeMod >>= modParams)
+            if isNothing (maybeMod >>= modTypeRep)
+              then shouldnt $ "Found type isn't a type: " ++ show mspec
+              else if length params == length args
               then do
-                args' <- fmap catMaybes $ mapM (flip lookupType pos) args
-                let matchingMod = maybe (shouldnt "lookupType") modSpec maybeMod
-                let matchingType = TypeSpec matchingMod name args'
+                args' <- catMaybes <$> mapM (flip lookupType pos) args
+                let matchingType = TypeSpec (init mspec) (last mspec) args'
                 logAST $ "Matching type = " ++ show matchingType
                 return $ Just matchingType
               else do
-                message Error
-                  ("Type '" ++ name ++ "' expects "
-                   ++ show (length $ typeDefParams def) ++
-                   " arguments, but " ++ show (length args) ++ " were given")
-                  pos
+                errmsg pos $
+                  "Type '" ++ name ++ "' expects "
+                  ++ show (length params)
+                  ++ " arguments, but " ++ show (length args)
+                  ++ " were given"
                 logAST "Type constructor arities don't match!"
                 return Nothing
-        _   -> do
-            message Error ("Ambiguous type " ++ show ty ++
-                           " defined in modules: " ++
-                           showModSpecs (List.map typeMod $
-                                         Set.toList tspecs))
-              pos
+        _ -> do
+            errmsg pos $ "Ambiguous type " ++ show ty ++
+                         " defined in modules: " ++
+                         showModSpecs (Set.toList mspecs)
             return Nothing
 
-
--- |Is the specified type exported by the current module.
-publicType :: Ident -> Compiler Bool
-publicType name = do
-  int <- getModuleInterface
-  return $ Map.member name (pubTypes int)
 
 -- |Add the specified resource to the current module.
 addSimpleResource :: ResourceName -> ResourceImpln -> Visibility -> Compiler ()
@@ -858,11 +943,11 @@ lookupResource :: ResourceSpec -> OptPos
                -> Compiler (Maybe (ResourceSpec,ResourceIFace))
 lookupResource res@(ResourceSpec mod name) pos = do
     logAST $ "Looking up resource " ++ show res
-    rspecs <- refersTo mod name modKnownResources resourceMod
+    rspecs <- refersTo mod name modKnownResources
     logAST $ "Candidates: " ++ show rspecs
     case Set.size rspecs of
         0 -> do
-            message Error ("Unknown resource " ++ show res) pos
+            errmsg pos $ "Unknown resource " ++ show res
             return Nothing
         1 -> do
             let rspec = Set.findMin rspecs
@@ -873,11 +958,9 @@ lookupResource res@(ResourceSpec mod name) pos = do
                         trustFromJust "lookupResource" maybeDef
             return $ Just (rspec,iface)
         _   -> do
-            message Error ("Ambiguous resource " ++ show res ++
-                           " defined in modules: " ++
-                           showModSpecs (List.map resourceMod $
-                                         Set.toList rspecs))
-              pos
+            errmsg pos $ "Ambiguous resource " ++ show res ++
+                         " defined in modules: " ++
+                         showModSpecs (List.map resourceMod $ Set.toList rspecs)
             return Nothing
 
 
@@ -886,23 +969,26 @@ publicResource :: Ident -> Compiler Bool
 publicResource name = getModule (Map.member name . pubResources . modInterface)
 
 
--- |Add the specified module spec as an import of the current module.
-addImport :: ModSpec -> ImportSpec -> Compiler ()
-addImport modspec imports = do
-    modspec' <- resolveModuleM modspec
+-- |Add the specified module spec as an import of the current module, recording
+-- the dependency.  Update the current module's minDependencyNum if the new
+-- dependency's load number is smaller, to find module dependency SCCs.
+addImport :: ImportSpec -> Compiler ()
+addImport ispec@(ImportSpec mspec pubs privs) = do
+    mspec' <- resolveModuleM mspec
+    let key = last mspec'
     updateImplementation
       (updateModImports
        (\moddeps ->
          let imports' =
-                 case Map.lookup modspec' moddeps of
-                     Nothing -> imports
-                     Just imports'' -> combineImportSpecs imports'' imports
-         in Map.insert modspec' imports' moddeps))
-    when (isNothing $ importPublic imports) $
-      updateInterface Public (updateDependencies (Set.insert modspec))
-    maybeMod <- gets (List.find ((==modspec) . modSpec) . underCompilation)
+                 case Map.lookup key moddeps of
+                     Nothing -> [ispec]
+                     Just imports'' -> addImportSpec imports'' ispec
+         in Map.insert key imports' moddeps))
+    when (isNothing $ importPublic ispec) $
+      updateInterface Public (updateDependencies (Set.insert mspec))
+    maybeMod <- gets (List.find ((==mspec) . modSpec) . underCompilation)
     currMod <- getModuleSpec
-    logAST $ "Noting import of " ++ showModSpec modspec ++
+    logAST $ "Noting import of " ++ showModSpec mspec ++
            ", " ++ (if isNothing maybeMod then "NOT " else "") ++
            "currently being loaded, into " ++ showModSpec currMod
     case maybeMod of
@@ -932,7 +1018,7 @@ addProcDef procDef = do
     let name = procName procDef
     let vis = procVis procDef
     currMod <- getModuleSpec
-    procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
+    procs <- lookupProc name
     let procs' = procs ++ [procDef]
     let spec = ProcSpec currMod name (length procs)
     updateImplementation
@@ -1018,10 +1104,11 @@ mapSetInsert key elt =
     Map.alter (\maybe -> Just $ Set.insert elt $ fromMaybe Set.empty maybe) key
 
 
--- |Return the definition of the specified proc in the current module.
-lookupProc :: Ident -> Compiler (Maybe [ProcDef])
+-- |Return the definition of the named proc with the specified argument types
+-- as visible in the current module, if it exists.
+lookupProc :: Ident -> Compiler [ProcDef]
 lookupProc name =
-    getModuleImplementationMaybe (\imp -> Map.lookup name $ modProcs imp)
+    getModuleImplementationField (findWithDefault [] name . modProcs)
 
 
 -- |Is the specified proc exported from the current module?
@@ -1033,9 +1120,8 @@ publicProc name = do
 
 -- |Return some function applied to the user's specified compiler options.
 option :: (Options -> t) -> Compiler t
-option opt = do
-    opts <- gets options
-    return $ opt opts
+option opt = opt <$> gets options
+
 
 -- |If the specified Boolean option is selected, print out the result
 --  of applying the compiler state state output function.
@@ -1056,7 +1142,8 @@ data Module = Module {
   modRootModSpec :: Maybe ModSpec, -- ^Root module of the file, if it's a file
   isPackage :: Bool,               -- ^Is module actually a package
   modSpec :: ModSpec,              -- ^The module path name
-  modParams :: Maybe [Ident],      -- ^The type parameters, if a type
+  modParams :: Maybe [Ident],      -- ^The type parameters, iff a type
+  modTypeRep :: Maybe TypeRepresentation, -- ^Representation if module is a type
   modInterface :: ModuleInterface, -- ^The public face of this module
   modImplementation :: Maybe ModuleImplementation,
                                    -- ^the module's implementation
@@ -1076,8 +1163,7 @@ emptyModule = Module
     , isPackage         = False
     , modSpec           = error "No Default Modspec"
     , modParams         = Nothing
-    -- , modConstants      = 0
-    -- , modNonConstants   = 0
+    , modTypeRep        = Nothing
     , modInterface      = emptyInterface
     , modImplementation = Just emptyImplementation
     , thisLoadNum       = 0
@@ -1103,8 +1189,8 @@ parentModule modspec = Just $ init modspec
 -- | Collect all the descendent modules of the given modspec.
 descendentModules :: ModSpec -> Compiler [ModSpec]
 descendentModules mspec = do
-    subMods <- fmap (Map.elems . modSubmods) $ getLoadedModuleImpln mspec
-    desc <- fmap concat $ mapM descendentModules subMods
+    subMods <- Map.elems . modSubmods <$> getLoadedModuleImpln mspec
+    desc <- concat <$> mapM descendentModules subMods
     return $ subMods ++ desc
 
 
@@ -1117,33 +1203,25 @@ descendentModules mspec = do
 --  and implMapFn tells whether a module implementation defines that
 --  name.  The reference to this name occurs in the current module.
 refersTo :: Ord b => ModSpec -> Ident ->
-            (ModuleImplementation -> Map Ident (Set b)) ->
-            (b -> ModSpec) -> Compiler (Set b)
-refersTo modspec name implMapFn specModFn = do
+            (ModuleImplementation -> Map Ident (Set b)) -> Compiler (Set b)
+refersTo modspec name implMapFn = do
     currMod <- getModuleSpec
     logAST $ "Finding visible symbol " ++ maybeModPrefix modspec ++
       name ++ " from module " ++ showModSpec currMod
     defined <- getModuleImplementationField
                (Map.findWithDefault Set.empty name . implMapFn)
-    -- imports <- getModuleImplementationField (Map.assocs . modImports)
-    -- imported <- mapM getLoadingModule imports
-    -- let visible = defined `Set.union` imported
-    let visible = defined
-    logAST $ "*** ALL visible modules: "
-        ++ showModSpecs (Set.toList (Set.map specModFn visible))
-    let matched = Set.filter ((modspec `isSuffixOf`) . specModFn) visible
     case parentModule currMod of
-        Just par -> Set.union matched
+        Just par -> Set.union defined
                     <$>
-                    (refersTo modspec name implMapFn specModFn) `inModule` par
-        Nothing -> return matched
+                    (refersTo modspec name implMapFn) `inModule` par
+        Nothing -> return defined
 
 
 
 -- |Returns a list of the potential targets of a proc call.
 callTargets :: ModSpec -> ProcName -> Compiler [ProcSpec]
 callTargets modspec name = do
-    pspecs <- Set.toList <$> refersTo modspec name modKnownProcs procSpecMod
+    pspecs <- Set.toList <$> refersTo modspec name modKnownProcs
     logAST $ "   name '" ++ name ++ "' for module spec '" ++
       showModSpec modspec ++ "' matches: " ++
       intercalate ", " (List.map show pspecs)
@@ -1179,28 +1257,26 @@ updateModInterface fn =
 
 -- |Holds everything needed to compile code that uses a module
 data ModuleInterface = ModuleInterface {
-    pubTypes :: Map Ident (TypeSpec,Maybe TypeRepresentation),
-                                     -- ^The types this module exports
     pubResources :: Map ResourceName ResourceSpec,
                                      -- ^The resources this module exports
-    pubProcs :: Map Ident (Set ProcSpec), -- ^The procs this module exports
-    pubDependencies :: Map Ident OptPos,
-                                    -- ^The other modules this module exports
-    dependencies :: Set ModSpec      -- ^The other modules that must be linked
-    }                               --  in by modules that depend on this one
+    pubProcs     :: Map Ident (Set ProcSpec), -- ^The procs this module exports
+    pubSubmods   :: Map Ident ModSpec, -- ^The submodules this module exports
+    dependencies :: Set ModSpec       -- ^The other modules that must be linked
+    }                                 --  in by modules that depend on this one
     deriving (Eq, Generic)
 
 emptyInterface :: ModuleInterface
 emptyInterface =
-    ModuleInterface Map.empty Map.empty Map.empty Map.empty Set.empty
+    ModuleInterface -- Map.empty
+    Map.empty Map.empty Map.empty Set.empty
 
 -- These functions hack around Haskell's terrible setter syntax
 
--- |Update the public types of a module interface.
-updatePubTypes :: (Map Ident (TypeSpec,Maybe TypeRepresentation)
-                   -> Map Ident (TypeSpec,Maybe TypeRepresentation)) ->
-                 ModuleInterface -> ModuleInterface
-updatePubTypes fn modint = modint {pubTypes = fn $ pubTypes modint}
+-- -- |Update the public types of a module interface.
+-- updatePubTypes :: (Map Ident (TypeSpec,Maybe TypeRepresentation)
+--                    -> Map Ident (TypeSpec,Maybe TypeRepresentation)) ->
+--                  ModuleInterface -> ModuleInterface
+-- updatePubTypes fn modint = modint {pubTypes = fn $ pubTypes modint}
 
 -- |Update the public resources of a module interface.
 updatePubResources :: (Map Ident ResourceSpec -> Map Ident ResourceSpec) ->
@@ -1212,13 +1288,13 @@ updatePubProcs :: (Map Ident (Set ProcSpec) -> Map Ident (Set ProcSpec)) ->
                  ModuleInterface -> ModuleInterface
 updatePubProcs fn modint = modint {pubProcs = fn $ pubProcs modint}
 
--- |Update the public dependencies of a module interface.
-updatePubDependencies ::
-    (Map Ident OptPos -> Map Ident OptPos) ->
-    ModuleInterface -> ModuleInterface
-updatePubDependencies fn modint =
-    modint {pubDependencies = fn $ pubDependencies modint}
-
+-- |Add the specified module as a public submodule of the current module.
+addPubSubmod :: ModSpec -> OptPos -> Compiler ()
+addPubSubmod mspec pos = do
+    logAST $ "Recording public submodule " ++ showModSpec mspec
+    updateInterface Public
+      (\modint -> modint {pubSubmods = Map.insert (last mspec) mspec
+                                       (pubSubmods modint)})
 -- |Update the set of all dependencies of a module interface.
 updateDependencies :: (Set ModSpec -> Set ModSpec) ->
                       ModuleInterface -> ModuleInterface
@@ -1227,12 +1303,15 @@ updateDependencies fn modint = modint {dependencies = fn $ dependencies modint}
 -- |Holds everything needed to compile the module itself
 data ModuleImplementation = ModuleImplementation {
     modPragmas   :: Set Pragma,               -- ^pragmas for this module
-    modImports   :: Map ModSpec ImportSpec,   -- ^This module's imports
+    modImports   :: Map Ident [ImportSpec],   -- ^This module's imports
     modSubmods   :: Map Ident ModSpec,        -- ^This module's submodules
-    modTypes     :: Map Ident TypeDef,        -- ^Types defined by this module
     modResources :: Map Ident ResourceDef,    -- ^Resources defined by this mod
     modProcs     :: Map Ident [ProcDef],      -- ^Procs defined by this module
-    modKnownTypes:: Map Ident (Set TypeSpec), -- ^Type visible to this module
+    modConstructors :: Maybe [(Visibility,Placed ProcProto)],
+                                              -- ^reversed list of data
+                                              -- constructors for this
+                                              -- type, if it is a type
+    modKnownTypes:: Map Ident (Set ModSpec), -- ^Types visible to this module
     modKnownResources :: Map Ident (Set ResourceSpec),
                                               -- ^Resources visible to this mod
     modKnownProcs:: Map Ident (Set ProcSpec), -- ^Procs visible to this module
@@ -1241,17 +1320,22 @@ data ModuleImplementation = ModuleImplementation {
     modLLVM :: Maybe LLVMAST.Module           -- ^Module's LLVM representation
     } deriving (Generic)
 
+
 emptyImplementation :: ModuleImplementation
 emptyImplementation =
     ModuleImplementation Set.empty Map.empty Map.empty Map.empty Map.empty
-                         Map.empty Map.empty Map.empty Map.empty
+                         Nothing Map.empty Map.empty Map.empty
                          Set.empty Set.empty Nothing
 
 
 -- These functions hack around Haskell's terrible setter syntax
 
+-- |A list of the ImportSpecs for a given module's imports
+modImportSpecs :: ModuleImplementation -> [ImportSpec]
+modImportSpecs = concat . Map.elems . modImports
+
 -- |Update the dependencies of a module implementation.
-updateModImports :: (Map ModSpec ImportSpec -> Map ModSpec ImportSpec) ->
+updateModImports :: (Map Ident [ImportSpec] -> Map Ident [ImportSpec]) ->
                    ModuleImplementation -> ModuleImplementation
 updateModImports fn modimp = modimp {modImports = fn $ modImports modimp}
 
@@ -1305,34 +1389,17 @@ updateModLLVM fn modimp = do
 -- | Given a type spec, find its internal representation (a string),
 --   if possible.
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
-lookupTypeRepresentation AnyType = return $ Just defaultTypeRepresentation
+lookupTypeRepresentation TypeParam{} = return $ Just defaultTypeRepresentation
+lookupTypeRepresentation AnyType     = return $ Just defaultTypeRepresentation
 lookupTypeRepresentation InvalidType = return Nothing
-lookupTypeRepresentation (TypeSpec modSpecs name _) = do
-    -- logMsg Blocks $ "Looking for " ++ name ++ " in mod: " ++
-    --      showModSpec modSpecs
-    reenterModule modSpecs
-    maybeImpln <- getModuleImplementation
-    modInt <- getModuleInterface
-    _ <- reexitModule
-    -- Try find the TypeRepresentation in the interface
-    let maybeIntMatch = Map.lookup name (pubTypes modInt) >>= snd
-    -- Try find the TypeRepresentation in the implementation if not found
-    -- in the interface
-    let maybeMatch = case maybeIntMatch of
-            Nothing ->
-                maybeImpln >>=
-                (Map.lookup name . modTypes) >>= typeDefRepresentation
-            _ -> maybeIntMatch
-    -- If still not found, search the direct descendant interface and
-    -- implementation
-    -- case maybeMatch of
-    --     Nothing -> case parentModule modSpecs of
-    --         Just des -> lookupTypeRepresentation (TypeSpec des name ps)
-    --         Nothing -> return Nothing
-    --     _ -> return maybeMatch
-    return maybeMatch
+lookupTypeRepresentation (TypeSpec modSpec name _) =
+    lookupModuleRepresentation $ modSpec ++ [name]
 
 
+-- |Given a module spec, find its representation, if it is a type.
+lookupModuleRepresentation :: ModSpec -> Compiler (Maybe TypeRepresentation)
+lookupModuleRepresentation mspec =
+    getSpecModule "lookupModuleRepresentation" mspec modTypeRep
 
 -- |An identifier.
 type Ident = String
@@ -1355,30 +1422,35 @@ type ModSpec = [Ident]
 --  then the privates.  Each is either Nothing, meaning all exported
 --  names are imported, or Just a set of the specific names to import.
 data ImportSpec = ImportSpec {
-    importPublic::(Maybe (Set Ident)),
-    importPrivate::(Maybe (Set Ident))
+    importedMod  :: ModSpec,
+    importPublic :: Maybe (Set Ident),
+    importPrivate:: Maybe (Set Ident)
     } deriving (Show, Generic)
 
 
 -- |Create an import spec to import the identifiers specified by the
 --  first argument (or everything public if it is Nothing), either
 --  publicly or privately, as specified by the second argument.
-importSpec :: Maybe [Ident] -> Visibility -> ImportSpec
-importSpec Nothing Public =
-    ImportSpec Nothing (Just Set.empty)
-importSpec Nothing Private =
-    ImportSpec (Just Set.empty) Nothing
-importSpec (Just items) Public =
-    ImportSpec (Just $ Set.fromList items) (Just Set.empty)
-importSpec (Just items) Private =
-    ImportSpec (Just Set.empty) (Just $ Set.fromList items)
+importSpec :: ModSpec -> Maybe [Ident] -> Visibility -> ImportSpec
+importSpec mspec Nothing Public =
+    ImportSpec mspec Nothing (Just Set.empty)
+importSpec mspec Nothing Private =
+    ImportSpec mspec (Just Set.empty) Nothing
+importSpec mspec (Just items) Public =
+    ImportSpec mspec (Just $ Set.fromList items) (Just Set.empty)
+importSpec mspec (Just items) Private =
+    ImportSpec mspec (Just Set.empty) (Just $ Set.fromList items)
 
 
 -- |Merge two import specs to create a single one that imports
 --  exactly what the two together specify.
-combineImportSpecs :: ImportSpec -> ImportSpec -> ImportSpec
-combineImportSpecs (ImportSpec pub1 priv1) (ImportSpec pub2 priv2) =
-    ImportSpec (combineImportPart pub1 pub2) (combineImportPart priv1 priv2)
+addImportSpec :: [ImportSpec] -> ImportSpec -> [ImportSpec]
+addImportSpec [] spec = [spec]
+addImportSpec (spec1@(ImportSpec m1 pub1 priv1):specs)
+              spec2@(ImportSpec m2 pub2 priv2)
+  | m1 == m2  = ImportSpec m1 (combineImportPart pub1 pub2)
+                              (combineImportPart priv1 priv2):specs
+  | otherwise = spec1:addImportSpec specs spec2
 
 
 combineImportPart :: Maybe (Set Ident) -> Maybe (Set Ident) -> Maybe (Set Ident)
@@ -1389,43 +1461,47 @@ combineImportPart (Just set1) (Just set2) = Just (set1 `Set.union` set2)
 
 -- |Actually import into the current module.  The ImportSpec says what
 -- to import.
-doImport :: ModSpec -> ImportSpec -> Compiler ()
-doImport mod imports = do
+doImport :: ImportSpec -> Compiler ()
+doImport imports@(ImportSpec mod pubs privs) = do
     currMod <- getModuleSpec
     impl <- getModuleImplementationField id
     logAST $ "Handle importation from " ++ showModSpec mod ++
       " into " ++
       let modStr = showModSpec currMod
-      in modStr ++ ":  " ++ showUse (27 + length modStr) mod imports
+      in modStr ++ ":  " ++ showUse (27 + length modStr) imports
     fromIFace <- modInterface . trustFromJust "doImport" <$>
                  getLoadingModule mod
-    let pubImports = importPublic imports
-    let allImports = combineImportPart pubImports $ importPrivate imports
-    let importedTypes = importsSelected allImports $ pubTypes fromIFace
+    let allImports = combineImportPart pubs privs
+    let importedSubmods = importsSelected allImports $ pubSubmods fromIFace
+    importedTypes <- filterM (moduleIsType . snd)
+                     $ Map.toAscList importedSubmods
     let importedResources = importsSelected allImports $ pubResources fromIFace
     let importedProcs = importsSelected allImports $ pubProcs fromIFace
+    logAST $ "    importing submods  : "
+             ++ showModSpecs (Map.elems importedSubmods)
     logAST $ "    importing types    : "
-             ++ intercalate ", " (Map.keys importedTypes)
+             ++ showModSpecs (snd <$> importedTypes)
     logAST $ "    importing resources: "
              ++ intercalate ", " (Map.keys importedResources)
     logAST $ "    importing procs    : "
              ++ intercalate ", " (Map.keys importedProcs)
     -- XXX Must report error for imports of non-exported items
-    let knownTypes = Map.unionWith Set.union (modKnownTypes impl) $
-                     Map.map (Set.singleton . fst) importedTypes
     let knownResources =
             Map.unionWith Set.union (modKnownResources impl) $
             Map.map Set.singleton importedResources
     let knownProcs = Map.unionWith Set.union (modKnownProcs impl) importedProcs
+    let knownTypes = Map.unionWith Set.union (modKnownTypes impl)
+                     $ Map.fromAscList
+                     $ List.map (mapSnd Set.singleton) importedTypes
     -- Update what's visible in the module
-    updateModImplementation (\imp -> imp { modKnownTypes = knownTypes,
-                                          modKnownResources = knownResources,
-                                          modKnownProcs = knownProcs })
-    let exportedTypes = importsSelected pubImports $ pubTypes fromIFace
-    let exportedResources = importsSelected pubImports $ pubResources fromIFace
-    let exportedProcs = importsSelected pubImports $ pubProcs fromIFace
+    updateModImplementation (\imp -> imp { modKnownTypes = knownTypes
+                                         , modKnownResources = knownResources
+                                         , modKnownProcs = knownProcs })
+    let exportedSubmods = importsSelected pubs $ pubSubmods fromIFace
+    let exportedResources = importsSelected pubs $ pubResources fromIFace
+    let exportedProcs = importsSelected pubs $ pubProcs fromIFace
     updateModInterface
-      (\i -> i { pubTypes = Map.union (pubTypes i) exportedTypes,
+      (\i -> i {pubSubmods = Map.union (pubSubmods i) exportedSubmods,
                 pubResources = Map.union (pubResources i) exportedResources,
                 pubProcs = Map.unionWith Set.union (pubProcs i) exportedProcs })
     -- Update what's exported from the module
@@ -1452,8 +1528,8 @@ resolveModuleM mod = do
     currMod <- getModuleSpec
     case resolveModule mod currMod of
       Nothing -> do
-        message Error ("unresolvable relative module spec '" ++
-                        showModSpec mod ++ "'") Nothing
+        unplacedErr $ "unresolvable relative module spec '" ++
+                      showModSpec mod ++ "'"
         return mod
       Just m -> return m
 
@@ -1479,20 +1555,6 @@ addPragma :: Pragma -> Compiler ()
 addPragma prag = do
     updateModImplementation
         (\imp -> imp { modPragmas = Set.insert prag $ modPragmas imp })
-
-
--- |A type definition, including the number of type parameters and an
---  optional source position.
-data TypeDef = TypeDef {
-    typeDefVis    :: Visibility,                  -- type visibility
-    typeDefParams :: [Ident],                     -- the type parameters
-    typeDefRepresentation :: Maybe TypeRepresentation,
-                                                  -- low level representation
-    typeDefMembers :: [Placed ProcProto],         -- high level representation
-    typeDefMemberVis :: Visibility,               -- are members public?
-    typeDefOptPos :: OptPos,                      -- source position of decl
-    typeDefItems  :: [Item]                       -- other items in decl
-    } deriving (Eq, Generic)
 
 
 -- |A resource interface: everything a module needs to know to use
@@ -1813,12 +1875,24 @@ type ProcID = Int
 -- |A type specification:  the type name and type parameters.  Also
 --  could be AnyType or InvalidType, the top and bottom of the type lattice,
 --  respectively.
+-- XXX should probably combine typeMod and typeName into a single ModSpec
 data TypeSpec = TypeSpec {
     typeMod::ModSpec,
     typeName::Ident,
     typeParams::[TypeSpec]
-    } | AnyType | InvalidType
+    }
+  | TypeParam { typeParamName::Ident }
+  | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
+
+-- | Return the module referenced by the specified TypeSpec, assuming that it
+-- has been looked up and fully qualified.
+typeSpecModule :: TypeSpec -> Maybe ModSpec
+typeSpecModule (TypeSpec mod name _) = Just $ mod ++ [name]
+typeSpecModule (TypeParam _)         = Nothing
+typeSpecModule AnyType               = Nothing
+typeSpecModule InvalidType           = Nothing
+
 
 -- |This specifies a type, but permits a type to be specified indirectly,
 --  as simply identical to the type of another variable, or directly.
@@ -2394,6 +2468,13 @@ instance Show Item where
     ++ intercalate "\n  | " (List.map show ctors) ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
+  show (ModuleParamsDecl [] pos) = "" -- if no parameters, don't mention it
+  show (ModuleParamsDecl params pos) =
+    "parameters " ++ intercalate ", " params ++ showMaybeSourcePos pos ++ "\n"
+  show (RepresentationDecl repn pos) =
+    "representation " ++ show repn ++ showMaybeSourcePos pos ++ "\n"
+  show (ConstructorDecl vis ctors) =
+    visibilityPrefix vis ++ "constructors " ++ show ctors ++ "\n"
   show (ImportMods vis mods pos) =
       visibilityPrefix vis ++ "use " ++
       showModSpecs mods ++ showMaybeSourcePos pos ++ "\n  "
@@ -2481,8 +2562,8 @@ determinismPrefix Det = ""
 
 
 -- |How to show an import or use declaration.
-showUse :: Int -> ModSpec -> ImportSpec -> String
-showUse tab mod (ImportSpec pubs privs) =
+showUse :: Int -> ImportSpec -> String
+showUse tab (ImportSpec mod pubs privs) =
     let pubstr = showImports "public " mod pubs
         privstr = showImports "" mod privs
     in  if List.null pubstr || List.null privstr
@@ -2518,25 +2599,9 @@ showMaybeSourcePos (Just pos) =
 showMaybeSourcePos Nothing = ""
 
 
---showTypeMap :: Map Ident TypeDef -> String
-
 -- |How to show a set of identifiers as a comma-separated list
 showIdSet :: Set Ident -> String
 showIdSet set = intercalate ", " $ Set.elems set
-
--- |How to show a type definition.
-instance Show TypeDef where
-  show (TypeDef vis params rep members _ pos items) =
-    visibilityPrefix vis
-    ++ (if List.null params then "" else "(" ++ intercalate "," params ++ ")")
-    ++ maybe "" (" is " ++) (show <$> rep)
-    ++ " { "
-    ++ intercalate " | " (show <$> members)
-    ++ " "
-    ++ intercalate "\n  " (show <$> items)
-    ++ " } "
-    ++ showMaybeSourcePos pos
-
 
 -- |How to show a resource definition.
 instance Show ResourceImpln where
@@ -2569,8 +2634,9 @@ showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis detism inline sub) =
 
 -- |How to show a type specification.
 instance Show TypeSpec where
+  show TypeParam{typeParamName=name} = name
   show AnyType = "?"
-  show InvalidType = "XXX"
+  show InvalidType = "!INVALID!"
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++
       if List.null args then ""

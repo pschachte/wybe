@@ -1,13 +1,18 @@
 ======================================================================
 AFTER EVERYTHING:
  Module mainless
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : mainless.nothing_interesting<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 nothing_interesting > public inline (0 calls)
@@ -32,3 +37,4 @@ define external ccc  i64 @"mainless.nothing_interesting<0>"()    {
 entry:
   ret i64 7 
 }
+======================================================================

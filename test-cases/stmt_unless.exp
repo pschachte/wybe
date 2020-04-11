@@ -1,14 +1,19 @@
 ======================================================================
 AFTER EVERYTHING:
  Module stmt_unless
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : stmt_unless.<0>
                     stmt_unless.mod<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -125,3 +130,4 @@ entry:
   %"$#0" = urem i64 %"x#0", %"y#0" 
   ret i64 %"$#0" 
 }
+======================================================================

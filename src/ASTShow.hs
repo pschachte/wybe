@@ -10,7 +10,7 @@ module ASTShow (
   ) where
 
 import AST
-import Options (LogSelection)
+import Options (LogSelection, optShowWybe)
 import Data.List as List
 import Data.Set  as Set
 import Data.Map  as Map
@@ -30,8 +30,11 @@ instance Show Module where
             maybeimpl = modImplementation mod
         in " Module " ++ showModSpec (modSpec mod) ++
            maybe "" (bracketList "(" ", " ")") (modParams mod) ++
-           "\n  public submods  : " ++ showMapPoses (pubDependencies int) ++
-           "\n  public types    : " ++ showMapLines (pubTypes int) ++
+           "\n  representation  : " ++ maybe "(not a type)" show
+                                       (modTypeRep mod) ++
+           "\n  public submods  : " ++
+           showMap "\n                    " (++ " -> ")
+                   showModSpec (pubSubmods int) ++
            "\n  public resources: " ++ showMapLines (pubResources int) ++
            "\n  public procs    : " ++
            intercalate "\n                    "
@@ -43,19 +46,12 @@ instance Show Module where
                 in
                  "\n  imports         : " ++
                  intercalate "\n                    "
-                 [showUse 20 mod dep |
-                  (mod,dep) <- Map.assocs $ modImports impl] ++
-                 -- "\n  vis types       : " ++
-                 -- (fillLines indent 20 80 $
-                 --  showSetMapItems $ modKnownTypes impl) ++
-                 -- "\n  vis resources   : " ++
-                 -- (fillLines indent 20 80 $
-                 --  showSetMapItems $ modKnownResources impl) ++
-                 -- "\n  vis procs       : " ++
-                 -- (fillLines indent 20 80 $
-                 --  showSetMapItems $ modKnownProcs impl) ++
-                 "\n  types           : " ++ showMapTypes (modTypes impl) ++
+                 (List.map (showUse 20)
+                  $ concat $ Map.elems $ modImports impl) ++
                  "\n  resources       : " ++ showMapLines (modResources impl) ++
+                 "\n  known types     : " ++
+                 showMap "\n                    " (++": ")
+                     (showModSpecs . Set.toList) (modKnownTypes impl) ++
                  (if Map.null (modSubmods impl)
                   then ""
                   else "\n  submodules      : " ++
@@ -79,14 +75,6 @@ showSetMapItems setMap =
     List.foldr Set.union Set.empty $ Map.elems setMap
 
 
--- |How to show a map, items separated by commas.
-showMapTypes :: Map Ident TypeDef -> String
-showMapTypes = showMap ", " (++ "/") show
-
--- |How to show a map to source positions, one line per item.
-showMapPoses :: Map Ident OptPos -> String
-showMapPoses = showMap ", " id showMaybeSourcePos
-
 -- |How to show a map from identifiers to values, given a separator
 --  for items, and a separator for keys from values, and a function
 --  to show the values.
@@ -102,10 +90,12 @@ showMap outersep keyFn valFn m =
 logDump :: LogSelection -> LogSelection -> String -> Compiler ()
 logDump selector1 selector2 pass =
     whenLogging2 selector1 selector2 $ do
+      logAll <- gets (optShowWybe . options)
       modList <- gets (Map.elems . modules)
       let toLog mod = let spec  = modSpec mod
-                      in  List.null spec || head spec /= "wybe"
+                      in  logAll || List.null spec || head spec /= "wybe"
       liftIO $ hPutStrLn stderr $ replicate 70 '='
         ++ "\nAFTER " ++ pass ++ ":\n"
         ++ intercalate ("\n" ++ replicate 50 '-' ++ "\n")
-        (List.map show $ List.filter toLog modList)
+           (List.map show $ List.filter toLog modList)
+        ++ "\n" ++ replicate 70 '='

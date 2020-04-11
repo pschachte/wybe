@@ -1,14 +1,19 @@
 ======================================================================
 AFTER EVERYTHING:
  Module bar
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : bar.<0>
   imports         : use numbers
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -56,15 +61,20 @@ entry:
 }
 --------------------------------------------------
  Module numbers
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : numbers.<0>
                     numbers.factorial<0>
                     numbers.toCelsius<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -144,3 +154,4 @@ entry:
   %"$#0" = fdiv double %"tmp$1#0", 1.800000e0 
   ret double %"$#0" 
 }
+======================================================================

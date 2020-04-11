@@ -1,16 +1,21 @@
 ======================================================================
 AFTER EVERYTHING:
  Module constfold
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : constfold.fold_add<0>
                     constfold.fold_mult<0>
                     constfold.fold_test<0>
                     constfold.fortytwo<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 fold_add > public inline (3 calls)
@@ -68,3 +73,4 @@ define external ccc  i64 @"constfold.fortytwo<0>"()    {
 entry:
   ret i64 42 
 }
+======================================================================

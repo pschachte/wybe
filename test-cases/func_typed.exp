@@ -1,13 +1,18 @@
 ======================================================================
 AFTER EVERYTHING:
  Module func_typed
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : func_typed.plus<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 plus > public inline (0 calls)
@@ -33,3 +38,4 @@ entry:
   %"$#0" = add   i64 %"a#0", %"b#0" 
   ret i64 %"$#0" 
 }
+======================================================================
