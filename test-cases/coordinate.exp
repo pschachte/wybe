@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module coordinate
-  public submods  : 
-  public types    : Coordinate: (coordinate.Coordinate,Just address)
+  representation  : (not a type)
+  public submods  : Coordinate -> coordinate.Coordinate
   public resources: 
   public procs    : coordinate.<0>
                     coordinate.fcopy<0>
@@ -18,8 +18,14 @@ AFTER EVERYTHING:
                     coordinate.Coordinate.z<1>
   imports         : public use coordinate.Coordinate
                     use wybe
-  types           : Coordinate/public  is address { Coordinate(x:int, y:int, z:int) @coordinate:1:27  }  @coordinate:1:5
   resources       : 
+  known types     : Coordinate: coordinate.Coordinate
+                    bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   submodules      : coordinate.Coordinate
   procs           : 
 
@@ -114,8 +120,8 @@ entry:
 }
 --------------------------------------------------
  Module coordinate.Coordinate
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : coordinate.Coordinate./=<0>
                     coordinate.Coordinate.=<0>
@@ -129,8 +135,14 @@ entry:
                     coordinate.Coordinate.z<1>
   imports         : use coordinate
                     use wybe
-  types           : 
   resources       : 
+  known types     : Coordinate: coordinate.Coordinate
+                    bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 /= > public inline test (0 calls)
@@ -439,3 +451,4 @@ entry:
   store  i64 %"$field#0", i64* %106 
   ret i64 %100 
 }
+======================================================================

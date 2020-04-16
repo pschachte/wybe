@@ -1,15 +1,21 @@
 ======================================================================
 AFTER EVERYTHING:
  Module alias_mbar
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : alias_mbar.bar<0>
   imports         : use alias_mfoo
                     use position
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    position: position.position
+                    string: wybe.string
   procs           : 
 
 bar > public (0 calls)
@@ -74,15 +80,21 @@ if.else:
 }
 --------------------------------------------------
  Module alias_mfoo
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : alias_mfoo.foo<0>
   imports         : use alias_mbar
                     use position
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    position: position.position
+                    string: wybe.string
   procs           : 
 
 foo > public (0 calls)
@@ -187,8 +199,8 @@ if.else:
 }
 --------------------------------------------------
  Module position
-  public submods  : 
-  public types    : position: (position.position,Just address)
+  representation  : (not a type)
+  public submods  : position -> position.position
   public resources: 
   public procs    : position.printPosition<0>
                     position.position./=<0>
@@ -201,8 +213,14 @@ if.else:
                     position.position.y<1>
   imports         : public use position.position
                     use wybe
-  types           : position/public  is address { position(x:int, y:int) @position:1:25  }  @position:1:5
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    position: position.position
+                    string: wybe.string
   submodules      : position.position
   procs           : 
 
@@ -271,8 +289,8 @@ entry:
 }
 --------------------------------------------------
  Module position.position
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : position.position./=<0>
                     position.position.=<0>
@@ -284,8 +302,14 @@ entry:
                     position.position.y<1>
   imports         : use position
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    position: position.position
+                    string: wybe.string
   procs           : 
 
 /= > public inline test (0 calls)
@@ -504,3 +528,4 @@ entry:
   store  i64 %"$field#0", i64* %69 
   ret i64 %63 
 }
+======================================================================

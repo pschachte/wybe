@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module position_float
-  public submods  : 
-  public types    : position: (position_float.position,Just address)
+  representation  : (not a type)
+  public submods  : position -> position_float.position
   public resources: 
   public procs    : position_float.position./=<0>
                     position_float.position.=<0>
@@ -14,8 +14,14 @@ AFTER EVERYTHING:
                     position_float.position.y<1>
   imports         : public use position_float.position
                     use wybe
-  types           : position/public  is address { position(x:float, y:float) @position_float:1:25  }  @position_float:1:5
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    position: position_float.position
+                    string: wybe.string
   submodules      : position_float.position
   procs           : 
 
@@ -34,8 +40,8 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 --------------------------------------------------
  Module position_float.position
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : position_float.position./=<0>
                     position_float.position.=<0>
@@ -47,8 +53,14 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
                     position_float.position.y<1>
   imports         : use position_float
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    position: position_float.position
+                    string: wybe.string
   procs           : 
 
 /= > public inline test (0 calls)
@@ -267,3 +279,4 @@ entry:
   store  double %"$field#0", double* %69 
   ret i64 %63 
 }
+======================================================================

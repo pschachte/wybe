@@ -1,14 +1,19 @@
 ======================================================================
 AFTER EVERYTHING:
  Module exp_if
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : exp_if.<0>
                     exp_if.if_test<0>
   imports         : use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 *main* > public inline (0 calls)
@@ -76,3 +81,4 @@ if.else:
   %6 = ptrtoint i8* getelementptr inbounds ([8 x i8], [8 x i8]* @exp_if.5, i32 0, i32 0) to i64 
   ret i64 %6 
 }
+======================================================================

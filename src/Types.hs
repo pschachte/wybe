@@ -45,14 +45,8 @@ validateModExportTypes thisMod = do
     procs <- getModuleImplementationField (Map.toAscList . modProcs)
     procs' <- mapM (uncurry validateProcDefsTypes) procs
     updateModImplementation (\imp -> imp { modProcs = Map.fromAscList procs'})
-    loggedFinishModule thisMod
-
-
-loggedFinishModule :: ModSpec -> Compiler ()
-loggedFinishModule thisMod = do
     _ <- reexitModule
     logTypes $ "**** Re-exiting module " ++ showModSpec thisMod
-    return ()
 
 
 validateProcDefsTypes :: Ident -> [ProcDef] -> Compiler (Ident,[ProcDef])
@@ -115,7 +109,8 @@ typeCheckMod thisMod = do
                              CyclicSCC list -> list)) ordered)
     errs <- mapM (typecheckProcSCC thisMod) ordered
     mapM_ (\e -> message Error (show e) Nothing) $ concat $ reverse errs
-    loggedFinishModule thisMod
+    _ <- reexitModule
+    logTypes $ "**** Re-exiting module " ++ showModSpec thisMod
 
 
 ----------------------------------------------------------------

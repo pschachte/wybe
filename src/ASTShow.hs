@@ -29,9 +29,11 @@ instance Show Module where
         let int  = modInterface mod
             maybeimpl = modImplementation mod
         in " Module " ++ showModSpec (modSpec mod) ++
-           maybe "" (bracketList "(" ", " ")") (modParams mod) ++
-           "\n  representation  : " ++ maybe "(not a type)" show
-                                       (modTypeRep mod) ++
+           (bracketList "(" ", " ")" $ modParams mod) ++
+           "\n  representation  : " ++
+           (if modIsType mod
+            then maybe "(not yet known)" show (modTypeRep mod)
+            else "(not a type)") ++
            "\n  public submods  : " ++
            showMap "\n                    " (++ " -> ")
                    showModSpec (pubSubmods int) ++

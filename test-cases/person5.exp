@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module person5
-  public submods  : 
-  public types    : person: (person5.person,Just address)
+  representation  : (not a type)
+  public submods  : person -> person5.person
   public resources: 
   public procs    : person5.<0>
                     person5.person./=<0>
@@ -15,8 +15,14 @@ AFTER EVERYTHING:
                     person5.person.person<1>
   imports         : public use person5.person
                     use wybe
-  types           : person/public  is address { person(firstname:string, lastname:string) @person5:1:23  }  @person5:1:5
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    person: person5.person
+                    phantom: wybe.phantom
+                    string: wybe.string
   submodules      : person5.person
   procs           : 
 
@@ -100,8 +106,8 @@ entry:
 }
 --------------------------------------------------
  Module person5.person
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : person5.person./=<0>
                     person5.person.=<0>
@@ -113,8 +119,14 @@ entry:
                     person5.person.person<1>
   imports         : use person5
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    person: person5.person
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 /= > public inline test (0 calls)
@@ -347,3 +359,4 @@ entry:
   %69 = insertvalue {i64, i64} %68, i64 %67, 1 
   ret {i64, i64} %69 
 }
+======================================================================

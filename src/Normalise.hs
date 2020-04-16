@@ -182,15 +182,16 @@ normaliseSubmodule name vis pos items = do
     unless (List.null modSpecs)
           $ shouldnt $ "finish normalising submodule left modules to compile: "
                        ++ showModSpecs modSpecs
-    -- logNormalise $ "Deferring compilation of submodules "
-    --                ++ showModSpecs modSpecs
-    -- mods <- List.map (trustFromJust "lookup submodule after normalising")
-    --         <$> mapM getLoadingModule modSpecs
-    -- deferModules mods
     logNormalise $ "Finished normalising submodule " ++ showModSpec subModSpec
     return ()
 
 
+
+----------------------------------------------------------------
+--                         Completing Module
+--
+-- This only handles what cannot be handled until dependencies are loaded.
+----------------------------------------------------------------
 
 ----------------------------------------------------------------
 --                         Completing Normalisation
@@ -224,13 +225,15 @@ completeNormalisation mods = do
 completeTypeNormalisation :: [ModSpec] -> Compiler ()
 completeTypeNormalisation mods = do
     logNormalise $ "Completing normalisation of modules " ++ showModSpecs mods
+    mapM_ recordTypeImports mods
+    -- XXX Must ensure that module dependencies and which modules are types is
+    -- established before this, so that lookupType works.
     types <- modSCCTypeDeps mods
     logNormalise $ "Ordered type dependency SCCs: " ++ show types
     -- Some of these may ultimately not be reference types, but for now what
     -- matters is that they have representations, so we can tell they're types.
     mapM_ recordRefType $ concat [ typeDefMod <$> sccElts scc | scc <- types]
     -- Now all types used by any types in this module SCC have representations
-    mapM_ recordTypeImports mods
     mapM_ completeTypeSCC types
 
 
@@ -295,9 +298,9 @@ recordRefType :: ModSpec -> Compiler ()
 recordRefType = updateLoadedModule (\m -> m { modTypeRep = Just Address })
 
 
--- Every type the specified module imports has a representation defined (which
--- may be changed later). Now record all the types visible to this module, which
--- is the set of modules it imports that have type representations.
+-- Every type the specified module imports is marked as a type.  Now record all
+-- the types visible to this module, which is the set of modules it imports that
+-- have type representations.
 recordTypeImports :: ModSpec -> Compiler ()
 recordTypeImports modspec = do
     reenterModule modspec
@@ -306,7 +309,7 @@ recordTypeImports modspec = do
     logNormalise $ "Module " ++ showModSpec modspec ++ " imports: "
                    ++ showModSpecs imports
     knownTypes <- filterM moduleIsType imports
-    logNormalise $ "  Adding known types from: " ++ showModSpecs imports
+    logNormalise $ "  Known types: " ++ showModSpecs knownTypes
     mapM_ (\m -> addKnownType (last m) m) knownTypes
     _ <- reexitModule
     return ()

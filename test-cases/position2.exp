@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module position
-  public submods  : 
-  public types    : position: (position.position,Just address)
+  representation  : (not a type)
+  public submods  : position -> position.position
   public resources: 
   public procs    : position.printPosition<0>
                     position.position./=<0>
@@ -15,8 +15,14 @@ AFTER EVERYTHING:
                     position.position.y<1>
   imports         : public use position.position
                     use wybe
-  types           : position/public  is address { position(x:int, y:int) @position:1:25  }  @position:1:5
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    position: position.position
+                    string: wybe.string
   submodules      : position.position
   procs           : 
 
@@ -85,8 +91,8 @@ entry:
 }
 --------------------------------------------------
  Module position.position
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : position.position./=<0>
                     position.position.=<0>
@@ -98,8 +104,14 @@ entry:
                     position.position.y<1>
   imports         : use position
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    position: position.position
+                    string: wybe.string
   procs           : 
 
 /= > public inline test (0 calls)
@@ -320,14 +332,20 @@ entry:
 }
 --------------------------------------------------
  Module position2
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : position2.<0>
   imports         : use position
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    position: position.position
+                    string: wybe.string
   procs           : 
 
 *main* > public (0 calls)
@@ -412,3 +430,4 @@ entry:
   tail call ccc  void  @"position.printPosition<0>"(i64  %11)  
   ret void 
 }
+======================================================================

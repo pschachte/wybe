@@ -567,17 +567,20 @@ buildArchive arch = do
 --  This goes as far as producing LLVM code, but does not write it out.
 compileModSCC :: [ModSpec] -> Compiler ()
 compileModSCC mspecs = do
-    logBuild $ "compileModSCC: [" ++ showModSpecs mspecs ++ "]"
+    logBuild $ "compileModSCC: " ++ showModSpecs mspecs
+    -- First work out all module imports and exports in this SCC.
+    fixpointProcessSCC handleModImports mspecs
+    -- resolveImportsExports mspecs
+    logDump Flatten Normalise "FLATTENING"
     stopOnError $ "preliminary compilation of module(s) " ++ showModSpecs mspecs
     ----------------------------------
-    -- FLATTENING
-    logDump Flatten Normalise "FLATTENING"
-    completeNormalisation mspecs
-    fixpointProcessSCC handleModImports mspecs
+    -- NORMALISATION
+    completeNormalisation mspecs -- generates constructor procs, etc.
+    fixpointProcessSCC handleProcImports mspecs
+    logDump Normalise Types "NORMALISATION"
     stopOnError $ "final normalisation of module(s) " ++ showModSpecs mspecs
     ----------------------------------
     -- TYPE CHECKING
-    logDump Normalise Types "NORMALISING"
     logBuild $ "resource and type checking module(s) "
                ++ showModSpecs mspecs ++ "..."
     mapM_ validateModExportTypes mspecs
@@ -589,19 +592,19 @@ compileModSCC mspecs = do
     stopOnError $ "processing resources for module(s) " ++ showModSpecs mspecs
     -- No fixed point needed because public procs must have types declared
     mapM_ typeCheckMod mspecs
+    logDump Types Unbranch "TYPE CHECKING"
     stopOnError $ "type checking of module(s) "
                   ++ showModSpecs mspecs
-    logDump Types Unbranch "TYPE CHECK"
+    ----------------------------------
+    -- UNBRANCHING
     mapM_ (transformModuleProcs canonicaliseProcResources)  mspecs
     mapM_ (transformModuleProcs transformProcResources)  mspecs
     stopOnError $ "resource checking of module(s) "
                   ++ showModSpecs mspecs
-    ----------------------------------
-    -- UNBRANCHING
     mapM_ (transformModuleProcs unbranchProc)  mspecs
+    logDump Unbranch Clause "UNBRANCHING"
     stopOnError $ "handling loops and conditionals in module(s) "
                   ++ showModSpecs mspecs
-    logDump Unbranch Clause "UNBRANCHING"
     -- AST manipulation before this line
     ----------------------------------
     -- CLAUSE GENERATION
@@ -615,8 +618,8 @@ compileModSCC mspecs = do
     -- XXX Should optimise call graph sccs *across* each module scc
     -- to ensure inter-module dependencies are optimally optimised
     fixpointProcessSCC optimiseMod mspecs
-    stopOnError $ "optimising " ++ showModSpecs mspecs
     logDump Optimise Optimise "OPTIMISATION"
+    stopOnError $ "optimising " ++ showModSpecs mspecs
     ----------------------------------
     -- ANALYSIS
     -- MODULE LEVEL ALIAS ANALYSIS - FIND FIXED POINT
@@ -635,7 +638,7 @@ compileModSCC mspecs = do
     logMsg Transform $ "mspecs: " ++ show mspecs
     logMsg Transform $ replicate 70 '='
     mapM_ (transformModuleProcs transformProc)  mspecs
-    logDump Transform Transform "TRANSFORM"
+    logDump Transform Transform "TRANSFORMATION"
 
     ----------------------------------
     -- Create an LLVMAST.Module represtation
@@ -653,6 +656,23 @@ compileModSCC mspecs = do
 isStdLib :: ModSpec -> Bool
 isStdLib []    = False
 isStdLib (m:_) = m == "wybe"
+
+
+-- Work out all the imports and exports of all the modules in this
+-- SCC.  Because a module may re-export its imports, this must be done
+-- across the module SCC, to a fixed point.
+resolveImportsExports :: [ModSpec] -> Compiler ()
+resolveImportsExports mspecs = do
+    logBuild $ "Resolving Imports/Exports for modules: " ++ showModSpecs mspecs
+    fixpointProcessSCC resolveModImportsExports mspecs
+
+
+-- |Handle the imports and exports for the specified module.
+resolveModImportsExports :: [ModSpec] -> ModSpec
+                         -> Compiler (Bool,[(String,OptPos)])
+resolveModImportsExports sccmods modspec = do
+    return (False,[])
+
 
 
 -- |A Processor processes the specified module one iteration in a
@@ -673,7 +693,6 @@ fixpointProcessSCC processor [modspec] = do
     (_,errors) <- processor [modspec] modspec
     -- immediate fixpoint if no mutual dependency
     mapM_ (uncurry (message Error)) errors
-    return ()
 fixpointProcessSCC processor scc = do        -- must find fixpoint
     (changed,errors) <-
         foldM (\(chg,errs) mod' -> do
@@ -719,25 +738,60 @@ loadImports = do
 
 ------------------------ Handling Imports ------------------------
 
--- |Handle all the imports of the current module.  When called, all
--- modules imported by all the listed modules have been loaded, so we
--- can finally work out what is exported by, and what is visible in,
--- each of these modules.
+-- |Handle all the module, type, and resource imports of the current module.
+-- When called, all modules imported by all the listed modules have been loaded,
+-- so we can finally work out what is exported by, and what is visible in, each
+-- of these modules.  This does not handle proc imports, however; they are
+-- handled by handleProcImports, once all procs are generated.  Returns True
+-- when this function changed something that will require another iteration to
+-- ensure a fixed point is reached, plus a list of errors found.
 handleModImports :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
-handleModImports _ thisMod = do
+handleModImports thisSCC thisMod = do
     reenterModule thisMod
     imports     <- getModuleImplementationField modImportSpecs
-    case imports of
-      [single] -> do
-        doImport single -- only one module in SCC, so immediate fixed point
+    case thisSCC of
+      [_] -> do
+        -- only one module in SCC, so immediate fixed point
+        mapM_ doImport imports
         _ <- reexitModule
         return (False, [])
-      _        -> do
+      _   -> do
         kTypes      <- getModuleImplementationField modKnownTypes
         kResources  <- getModuleImplementationField modKnownResources
         kProcs      <- getModuleImplementationField modKnownProcs
         iface       <- getModuleInterface
         mapM_ doImport imports
+        kTypes'     <- getModuleImplementationField modKnownTypes
+        kResources' <- getModuleImplementationField modKnownResources
+        kProcs'     <- getModuleImplementationField modKnownProcs
+        iface'      <- getModuleInterface
+        _           <- reexitModule
+        return (kTypes/=kTypes' || kResources/=kResources' ||
+                kProcs/=kProcs' || iface/=iface',[])
+
+
+
+-- |Handle all the proc imports of the current module.  When called, all
+-- module, type, and resource imports have already been handled, and all procs
+-- in all modules in thisSCC have been recorded, and all constructor,
+-- deconstructor, accessor, mutator, equality, and other generated procs in
+-- thisSCC have been generated.
+handleProcImports :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
+handleProcImports thisSCC thisMod = do
+    reenterModule thisMod
+    imports     <- getModuleImplementationField modImportSpecs
+    case thisSCC of
+      [_] -> do
+        -- only one module in SCC, so immediate fixed point
+        mapM_ doImport imports
+        _ <- reexitModule
+        return (False, [])
+      _   -> do
+        kTypes      <- getModuleImplementationField modKnownTypes
+        kResources  <- getModuleImplementationField modKnownResources
+        kProcs      <- getModuleImplementationField modKnownProcs
+        iface       <- getModuleInterface
+        mapM_ doImportProcs imports
         kTypes'     <- getModuleImplementationField modKnownTypes
         kResources' <- getModuleImplementationField modKnownResources
         kProcs'     <- getModuleImplementationField modKnownProcs
