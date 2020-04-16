@@ -523,8 +523,8 @@ and the second has the form:
 
 These are more conveniently used as functions, for example:
 ```
-print("X coordinate: ")
-println(x(pos))
+!print("X coordinate: ")
+!println(x(pos))
 x(!pos) = x(pos) + 1  # shift position to the right
 ```
 
@@ -540,11 +540,11 @@ others.
 For example
 ```
 ?pos = coordinate(7,4)
-println(x(pos))
+!println(x(pos))
 ?oldpos = pos
 x(!pos) = x(pos) + 1  # shift position to the right
-println(x(pos))
-println(x(oldpos))
+!println(x(pos))
+!println(x(oldpos))
 ```
 will print
 ```
@@ -558,9 +558,9 @@ can safely do so.
 For example, the compiler will optimise this code
 ```
 ?pos = coordinate(7,4)
-println(x(pos))
+!println(x(pos))
 x(!pos) = x(pos) + 1  # shift position to the right
-println(x(pos))
+!println(x(pos))
 ```
 so that it does in fact mutate the coordinate object in place,
 saving an unnecessary object creation.
