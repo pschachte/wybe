@@ -872,8 +872,7 @@ lookupType ty@(TypeSpec mod name args) pos = do
     logAST $ "In module " ++ showModSpec currMod
              ++ ", looking up type " ++ show ty
     mspecs <- refersTo mod name modKnownTypes
-    logAST $ "Candidates: "
-             ++ intercalate ", " (List.map show $ Set.toList mspecs)
+    logAST $ "Candidates: " ++ showModSpecs (Set.toList mspecs)
     case Set.size mspecs of
         0 -> do
             errmsg pos $ "Unknown type " ++ show ty
@@ -882,7 +881,7 @@ lookupType ty@(TypeSpec mod name args) pos = do
             let mspec = Set.findMin mspecs
             maybeMod <- getLoadingModule mspec
             let params = maybe [] modParams maybeMod
-            if isNothing (maybeMod >>= modTypeRep)
+            if not $ maybe False modIsType maybeMod
               then shouldnt $ "Found type isn't a type: " ++ show mspec
               else if length params == length args
               then do

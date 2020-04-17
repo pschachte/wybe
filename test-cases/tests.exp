@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module tests
-  public submods  : 
-  public types    : map: (tests.map,Just address)
+  representation  : (not a type)
+  public submods  : map -> tests.map
   public resources: 
   public procs    : tests.lookup<0>
                     tests.lt<0>
@@ -23,8 +23,14 @@ AFTER EVERYTHING:
                     tests.map.value<1>
   imports         : public use tests.map
                     use wybe
-  types           : map/public  is address { empty() @tests:19:20 | node(left:map, key:int, value:int, right:map) @tests:19:28  }  @tests:19:5
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    map: tests.map
+                    phantom: wybe.phantom
+                    string: wybe.string
   submodules      : tests.map
   procs           : 
 
@@ -332,8 +338,8 @@ entry:
 }
 --------------------------------------------------
  Module tests.map
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : tests.map./=<0>
                     tests.map.=<0>
@@ -350,8 +356,14 @@ entry:
                     tests.map.value<1>
   imports         : use tests
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    map: tests.map
+                    phantom: wybe.phantom
+                    string: wybe.string
   procs           : 
 
 /= > public inline test (0 calls)
@@ -884,3 +896,4 @@ if.else:
   %151 = insertvalue {i64, i1} %150, i1 0, 1 
   ret {i64, i1} %151 
 }
+======================================================================

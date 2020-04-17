@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module stmt_if2
-  public submods  : 
-  public types    : tree: (stmt_if2.tree,Just address)
+  representation  : (not a type)
+  public submods  : tree -> stmt_if2.tree
   public resources: 
   public procs    : stmt_if2.<0>
                     stmt_if2.lookup<0>
@@ -19,8 +19,14 @@ AFTER EVERYTHING:
                     stmt_if2.tree.right<1>
   imports         : public use stmt_if2.tree
                     use wybe
-  types           : tree/public  is address { empty() @stmt_if2:3:21 | node(left:tree, key:int, right:tree) @stmt_if2:3:29  }  @stmt_if2:3:5
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
+                    tree: stmt_if2.tree
   submodules      : stmt_if2.tree
   procs           : 
 
@@ -161,8 +167,8 @@ if.else3:
 }
 --------------------------------------------------
  Module stmt_if2.tree
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : stmt_if2.tree./=<0>
                     stmt_if2.tree.=<0>
@@ -177,8 +183,14 @@ if.else3:
                     stmt_if2.tree.right<1>
   imports         : use stmt_if2
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    char: wybe.char
+                    float: wybe.float
+                    int: wybe.int
+                    phantom: wybe.phantom
+                    string: wybe.string
+                    tree: stmt_if2.tree
   procs           : 
 
 /= > public inline test (0 calls)
@@ -607,3 +619,4 @@ if.else:
   %113 = insertvalue {i64, i1} %112, i1 0, 1 
   ret {i64, i1} %113 
 }
+======================================================================

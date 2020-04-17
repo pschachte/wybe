@@ -1,17 +1,17 @@
 ======================================================================
 AFTER EVERYTHING:
  Module multictr
-  public submods  : 
-  public types    : card: (multictr.card,Just 6 bit unsigned)
-                    complicated: (multictr.complicated,Just address)
-                    length: (multictr.length,Just 64 bit unsigned)
-                    maybe_int: (multictr.maybe_int,Just address)
-                    number: (multictr.number,Just address)
-                    perhaps: (multictr.perhaps,Just 64 bit unsigned)
-                    rank: (multictr.rank,Just 4 bit unsigned)
-                    simple: (multictr.simple,Just address)
-                    suit: (multictr.suit,Just 2 bit unsigned)
-                    unit: (multictr.unit,Just 0 bit unsigned)
+  representation  : (not a type)
+  public submods  : card -> multictr.card
+                    complicated -> multictr.complicated
+                    length -> multictr.length
+                    maybe_int -> multictr.maybe_int
+                    number -> multictr.number
+                    perhaps -> multictr.perhaps
+                    rank -> multictr.rank
+                    simple -> multictr.simple
+                    suit -> multictr.suit
+                    unit -> multictr.unit
   public resources: 
   public procs    : multictr.card./=<0>
                     multictr.card.=<0>
@@ -112,8 +112,23 @@ AFTER EVERYTHING:
                     public use multictr.suit
                     public use multictr.unit
                     use wybe
-  types           : card/public  is 6 bit unsigned { card(rank:rank, suit:suit) @multictr:16:9  }  @multictr:15:5, complicated/public  is address { winter() @multictr:54:8 | spring() @multictr:54:17 | summer() @multictr:54:26 | autumn() @multictr:54:35 | c01(f01:int) @multictr:55:8 | c02(f02:int) @multictr:56:8  }  @multictr:53:5, length/public  is 64 bit unsigned { metres(value:float) @multictr:25:9  }  @multictr:24:5, maybe_int/public  is address { nothing() @multictr:35:9 | just(value:int) @multictr:36:9  }  @multictr:34:5, number/public  is address { int(int_value:int) @multictr:41:8 | float(float_value:float) @multictr:42:8  }  @multictr:40:5, perhaps/public  is 64 bit unsigned { perhaps(content:maybe_int) @multictr:30:9  }  @multictr:29:5, rank/public  is 4 bit unsigned { r2() @multictr:10:9 | r3() @multictr:10:14 | r4() @multictr:10:19 | r5() @multictr:10:24 | r6() @multictr:10:29 | r7() @multictr:10:34 | r8() @multictr:10:39 | r9() @multictr:11:9 | r10() @multictr:11:14 | jack() @multictr:11:20 | queen() @multictr:11:27 | king() @multictr:11:35 | ace() @multictr:11:42  }  @multictr:9:5, simple/public  is address { zero() @multictr:47:8 | one(one_field:int) @multictr:48:8 | two(two_field1:int, two_field2:int) @multictr:49:8  }  @multictr:46:5, suit/public  is 2 bit unsigned { clubs() @multictr:5:9 | diamonds() @multictr:5:17 | hearts() @multictr:5:28 | spades() @multictr:5:37  }  @multictr:4:5, unit/public  is 0 bit unsigned { unit() @multictr:20:21  }  @multictr:20:5
   resources       : 
+  known types     : bool: wybe.bool
+                    card: multictr.card
+                    char: wybe.char
+                    complicated: multictr.complicated
+                    float: wybe.float
+                    int: wybe.int
+                    length: multictr.length
+                    maybe_int: multictr.maybe_int
+                    number: multictr.number
+                    perhaps: multictr.perhaps
+                    phantom: wybe.phantom
+                    rank: multictr.rank
+                    simple: multictr.simple
+                    string: wybe.string
+                    suit: multictr.suit
+                    unit: multictr.unit
   submodules      : multictr.card, multictr.complicated, multictr.length, multictr.maybe_int, multictr.number, multictr.perhaps, multictr.rank, multictr.simple, multictr.suit, multictr.unit
   procs           : 
 
@@ -132,8 +147,8 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 --------------------------------------------------
  Module multictr.card
+  representation  : 6 bit unsigned
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multictr.card./=<0>
                     multictr.card.=<0>
@@ -145,8 +160,23 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
                     multictr.card.suit<1>
   imports         : use multictr
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    card: multictr.card
+                    char: wybe.char
+                    complicated: multictr.complicated
+                    float: wybe.float
+                    int: wybe.int
+                    length: multictr.length
+                    maybe_int: multictr.maybe_int
+                    number: multictr.number
+                    perhaps: multictr.perhaps
+                    phantom: wybe.phantom
+                    rank: multictr.rank
+                    simple: multictr.simple
+                    string: wybe.string
+                    suit: multictr.suit
+                    unit: multictr.unit
   procs           : 
 
 /= > public inline test (0 calls)
@@ -291,8 +321,8 @@ entry:
 }
 --------------------------------------------------
  Module multictr.complicated
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multictr.complicated./=<0>
                     multictr.complicated.=<0>
@@ -310,8 +340,23 @@ entry:
                     multictr.complicated.winter<0>
   imports         : use multictr
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    card: multictr.card
+                    char: wybe.char
+                    complicated: multictr.complicated
+                    float: wybe.float
+                    int: wybe.int
+                    length: multictr.length
+                    maybe_int: multictr.maybe_int
+                    number: multictr.number
+                    perhaps: multictr.perhaps
+                    phantom: wybe.phantom
+                    rank: multictr.rank
+                    simple: multictr.simple
+                    string: wybe.string
+                    suit: multictr.suit
+                    unit: multictr.unit
   procs           : 
 
 /= > public inline test (0 calls)
@@ -936,8 +981,8 @@ entry:
 }
 --------------------------------------------------
  Module multictr.length
+  representation  : 64 bit unsigned
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multictr.length./=<0>
                     multictr.length.=<0>
@@ -947,8 +992,23 @@ entry:
                     multictr.length.value<1>
   imports         : use multictr
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    card: multictr.card
+                    char: wybe.char
+                    complicated: multictr.complicated
+                    float: wybe.float
+                    int: wybe.int
+                    length: multictr.length
+                    maybe_int: multictr.maybe_int
+                    number: multictr.number
+                    perhaps: multictr.perhaps
+                    phantom: wybe.phantom
+                    rank: multictr.rank
+                    simple: multictr.simple
+                    string: wybe.string
+                    suit: multictr.suit
+                    unit: multictr.unit
   procs           : 
 
 /= > public inline test (0 calls)
@@ -1043,8 +1103,8 @@ entry:
 }
 --------------------------------------------------
  Module multictr.maybe_int
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multictr.maybe_int./=<0>
                     multictr.maybe_int.=<0>
@@ -1055,8 +1115,23 @@ entry:
                     multictr.maybe_int.value<1>
   imports         : use multictr
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    card: multictr.card
+                    char: wybe.char
+                    complicated: multictr.complicated
+                    float: wybe.float
+                    int: wybe.int
+                    length: multictr.length
+                    maybe_int: multictr.maybe_int
+                    number: multictr.number
+                    perhaps: multictr.perhaps
+                    phantom: wybe.phantom
+                    rank: multictr.rank
+                    simple: multictr.simple
+                    string: wybe.string
+                    suit: multictr.suit
+                    unit: multictr.unit
   procs           : 
 
 /= > public inline test (0 calls)
@@ -1279,8 +1354,8 @@ if.else:
 }
 --------------------------------------------------
  Module multictr.number
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multictr.number./=<0>
                     multictr.number.=<0>
@@ -1294,8 +1369,23 @@ if.else:
                     multictr.number.int_value<1>
   imports         : use multictr
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    card: multictr.card
+                    char: wybe.char
+                    complicated: multictr.complicated
+                    float: wybe.float
+                    int: wybe.int
+                    length: multictr.length
+                    maybe_int: multictr.maybe_int
+                    number: multictr.number
+                    perhaps: multictr.perhaps
+                    phantom: wybe.phantom
+                    rank: multictr.rank
+                    simple: multictr.simple
+                    string: wybe.string
+                    suit: multictr.suit
+                    unit: multictr.unit
   procs           : 
 
 /= > public inline test (0 calls)
@@ -1667,8 +1757,8 @@ if.else:
 }
 --------------------------------------------------
  Module multictr.perhaps
+  representation  : 64 bit unsigned
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multictr.perhaps./=<0>
                     multictr.perhaps.=<0>
@@ -1678,8 +1768,23 @@ if.else:
                     multictr.perhaps.perhaps<1>
   imports         : use multictr
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    card: multictr.card
+                    char: wybe.char
+                    complicated: multictr.complicated
+                    float: wybe.float
+                    int: wybe.int
+                    length: multictr.length
+                    maybe_int: multictr.maybe_int
+                    number: multictr.number
+                    perhaps: multictr.perhaps
+                    phantom: wybe.phantom
+                    rank: multictr.rank
+                    simple: multictr.simple
+                    string: wybe.string
+                    suit: multictr.suit
+                    unit: multictr.unit
   procs           : 
 
 /= > public inline test (0 calls)
@@ -1770,8 +1875,8 @@ entry:
 }
 --------------------------------------------------
  Module multictr.rank
+  representation  : 4 bit unsigned
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multictr.rank./=<0>
                     multictr.rank.=<0>
@@ -1790,8 +1895,23 @@ entry:
                     multictr.rank.r9<0>
   imports         : use multictr
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    card: multictr.card
+                    char: wybe.char
+                    complicated: multictr.complicated
+                    float: wybe.float
+                    int: wybe.int
+                    length: multictr.length
+                    maybe_int: multictr.maybe_int
+                    number: multictr.number
+                    perhaps: multictr.perhaps
+                    phantom: wybe.phantom
+                    rank: multictr.rank
+                    simple: multictr.simple
+                    string: wybe.string
+                    suit: multictr.suit
+                    unit: multictr.unit
   procs           : 
 
 /= > public inline test (0 calls)
@@ -1985,8 +2105,8 @@ entry:
 }
 --------------------------------------------------
  Module multictr.simple
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multictr.simple./=<0>
                     multictr.simple.=<0>
@@ -2003,8 +2123,23 @@ entry:
                     multictr.simple.zero<0>
   imports         : use multictr
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    card: multictr.card
+                    char: wybe.char
+                    complicated: multictr.complicated
+                    float: wybe.float
+                    int: wybe.int
+                    length: multictr.length
+                    maybe_int: multictr.maybe_int
+                    number: multictr.number
+                    perhaps: multictr.perhaps
+                    phantom: wybe.phantom
+                    rank: multictr.rank
+                    simple: multictr.simple
+                    string: wybe.string
+                    suit: multictr.suit
+                    unit: multictr.unit
   procs           : 
 
 /= > public inline test (0 calls)
@@ -2757,8 +2892,8 @@ entry:
 }
 --------------------------------------------------
  Module multictr.suit
+  representation  : 2 bit unsigned
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multictr.suit./=<0>
                     multictr.suit.=<0>
@@ -2768,8 +2903,23 @@ entry:
                     multictr.suit.spades<0>
   imports         : use multictr
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    card: multictr.card
+                    char: wybe.char
+                    complicated: multictr.complicated
+                    float: wybe.float
+                    int: wybe.int
+                    length: multictr.length
+                    maybe_int: multictr.maybe_int
+                    number: multictr.number
+                    perhaps: multictr.perhaps
+                    phantom: wybe.phantom
+                    rank: multictr.rank
+                    simple: multictr.simple
+                    string: wybe.string
+                    suit: multictr.suit
+                    unit: multictr.unit
   procs           : 
 
 /= > public inline test (0 calls)
@@ -2864,16 +3014,31 @@ entry:
 }
 --------------------------------------------------
  Module multictr.unit
+  representation  : 0 bit unsigned
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multictr.unit./=<0>
                     multictr.unit.=<0>
                     multictr.unit.unit<0>
   imports         : use multictr
                     use wybe
-  types           : 
   resources       : 
+  known types     : bool: wybe.bool
+                    card: multictr.card
+                    char: wybe.char
+                    complicated: multictr.complicated
+                    float: wybe.float
+                    int: wybe.int
+                    length: multictr.length
+                    maybe_int: multictr.maybe_int
+                    number: multictr.number
+                    perhaps: multictr.perhaps
+                    phantom: wybe.phantom
+                    rank: multictr.rank
+                    simple: multictr.simple
+                    string: wybe.string
+                    suit: multictr.suit
+                    unit: multictr.unit
   procs           : 
 
 /= > public inline test (0 calls)
@@ -2920,3 +3085,4 @@ define external ccc  void @"multictr.unit.unit<0>"()    {
 entry:
   ret void 
 }
+======================================================================
