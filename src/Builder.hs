@@ -758,16 +758,13 @@ handleModImports thisSCC thisMod = do
       _   -> do
         kTypes      <- getModuleImplementationField modKnownTypes
         kResources  <- getModuleImplementationField modKnownResources
-        kProcs      <- getModuleImplementationField modKnownProcs
         iface       <- getModuleInterface
         mapM_ doImport imports
         kTypes'     <- getModuleImplementationField modKnownTypes
         kResources' <- getModuleImplementationField modKnownResources
-        kProcs'     <- getModuleImplementationField modKnownProcs
         iface'      <- getModuleInterface
         _           <- reexitModule
-        return (kTypes/=kTypes' || kResources/=kResources' ||
-                kProcs/=kProcs' || iface/=iface',[])
+        return (kTypes/=kTypes' || kResources/=kResources' || iface/=iface',[])
 
 
 
@@ -778,27 +775,23 @@ handleModImports thisSCC thisMod = do
 -- thisSCC have been generated.
 handleProcImports :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
 handleProcImports thisSCC thisMod = do
+    logBuild $ " Handle proc imports for module " ++ showModSpec thisMod
     reenterModule thisMod
     imports     <- getModuleImplementationField modImportSpecs
     case thisSCC of
       [_] -> do
         -- only one module in SCC, so immediate fixed point
-        mapM_ doImport imports
+        mapM_ doImportProcs imports
         _ <- reexitModule
         return (False, [])
       _   -> do
-        kTypes      <- getModuleImplementationField modKnownTypes
-        kResources  <- getModuleImplementationField modKnownResources
         kProcs      <- getModuleImplementationField modKnownProcs
         iface       <- getModuleInterface
         mapM_ doImportProcs imports
-        kTypes'     <- getModuleImplementationField modKnownTypes
-        kResources' <- getModuleImplementationField modKnownResources
         kProcs'     <- getModuleImplementationField modKnownProcs
         iface'      <- getModuleInterface
         _           <- reexitModule
-        return (kTypes/=kTypes' || kResources/=kResources' ||
-                kProcs/=kProcs' || iface/=iface',[])
+        return (kProcs/=kProcs' || iface/=iface',[])
 
 
 

@@ -541,7 +541,7 @@ moduleIsType mspec = do
     isType <- getSpecModule "moduleIsType" mspec modIsType
     logAST $ "Module " ++ showModSpec mspec ++ " (found "
              ++ showModSpec foundMod ++ ") "
-             ++ if isType then "IS" else "is NOT"
+             ++ (if isType then "IS" else "is NOT")
              ++ " a type"
     return isType
 
@@ -1450,10 +1450,10 @@ doImport :: ImportSpec -> Compiler ()
 doImport imports@(ImportSpec mod pubs privs) = do
     currMod <- getModuleSpec
     impl <- getModuleImplementationField id
-    logAST $ "Handle importation from " ++ showModSpec mod ++
-      " into " ++
+    logAST $ "Handle submod/type/recource importation from " ++
+      showModSpec mod ++ " into " ++
       let modStr = showModSpec currMod
-      in modStr ++ ":  " ++ showUse (27 + length modStr) imports
+      in modStr ++ ":  " ++ showUse (47 + length modStr) imports
     fromIFace <- modInterface . trustFromJust "doImport" <$>
                  getLoadingModule mod
     let allImports = combineImportPart pubs privs
@@ -1461,34 +1461,27 @@ doImport imports@(ImportSpec mod pubs privs) = do
     importedTypes <- filterM (moduleIsType . snd)
                      $ Map.toAscList importedSubmods
     let importedResources = importsSelected allImports $ pubResources fromIFace
-    let importedProcs = importsSelected allImports $ pubProcs fromIFace
     logAST $ "    importing submods  : "
              ++ showModSpecs (Map.elems importedSubmods)
     logAST $ "    importing types    : "
              ++ showModSpecs (snd <$> importedTypes)
     logAST $ "    importing resources: "
              ++ intercalate ", " (Map.keys importedResources)
-    logAST $ "    importing procs    : "
-             ++ intercalate ", " (Map.keys importedProcs)
     -- XXX Must report error for imports of non-exported items
     let knownResources =
             Map.unionWith Set.union (modKnownResources impl) $
             Map.map Set.singleton importedResources
-    let knownProcs = Map.unionWith Set.union (modKnownProcs impl) importedProcs
     let knownTypes = Map.unionWith Set.union (modKnownTypes impl)
                      $ Map.fromAscList
                      $ List.map (mapSnd Set.singleton) importedTypes
     -- Update what's visible in the module
     updateModImplementation (\imp -> imp { modKnownTypes = knownTypes
-                                         , modKnownResources = knownResources
-                                         , modKnownProcs = knownProcs })
+                                         , modKnownResources = knownResources })
     let exportedSubmods = importsSelected pubs $ pubSubmods fromIFace
     let exportedResources = importsSelected pubs $ pubResources fromIFace
-    let exportedProcs = importsSelected pubs $ pubProcs fromIFace
     updateModInterface
       (\i -> i {pubSubmods = Map.union (pubSubmods i) exportedSubmods,
-                pubResources = Map.union (pubResources i) exportedResources,
-                pubProcs = Map.unionWith Set.union (pubProcs i) exportedProcs })
+                pubResources = Map.union (pubResources i) exportedResources })
     -- Update what's exported from the module
     return ()
 
@@ -1501,47 +1494,24 @@ doImport imports@(ImportSpec mod pubs privs) = do
 doImportProcs :: ImportSpec -> Compiler ()
 doImportProcs imports@(ImportSpec mod pubs privs) = do
     currMod <- getModuleSpec
-    impl <- getModuleImplementationField id
-    logAST $ "Handle importation from " ++ showModSpec mod ++
+    logAST $ "Handle proc importation from " ++ showModSpec mod ++
       " into " ++
       let modStr = showModSpec currMod
-      in modStr ++ ":  " ++ showUse (27 + length modStr) imports
-    fromIFace <- modInterface . trustFromJust "doImport" <$>
+      in modStr ++ ":  " ++ showUse (32 + length modStr) imports
+    newProcs <- pubProcs . modInterface . trustFromJust "doImport" <$>
                  getLoadingModule mod
-    let allImports = combineImportPart pubs privs
-    let importedSubmods = importsSelected allImports $ pubSubmods fromIFace
-    importedTypes <- filterM (moduleIsType . snd)
-                     $ Map.toAscList importedSubmods
-    let importedResources = importsSelected allImports $ pubResources fromIFace
-    let importedProcs = importsSelected allImports $ pubProcs fromIFace
-    logAST $ "    importing submods  : "
-             ++ showModSpecs (Map.elems importedSubmods)
-    logAST $ "    importing types    : "
-             ++ showModSpecs (snd <$> importedTypes)
-    logAST $ "    importing resources: "
-             ++ intercalate ", " (Map.keys importedResources)
+    let importedProcs = importsSelected (combineImportPart pubs privs) newProcs
     logAST $ "    importing procs    : "
              ++ intercalate ", " (Map.keys importedProcs)
     -- XXX Must report error for imports of non-exported items
-    let knownResources =
-            Map.unionWith Set.union (modKnownResources impl) $
-            Map.map Set.singleton importedResources
-    let knownProcs = Map.unionWith Set.union (modKnownProcs impl) importedProcs
-    let knownTypes = Map.unionWith Set.union (modKnownTypes impl)
-                     $ Map.fromAscList
-                     $ List.map (mapSnd Set.singleton) importedTypes
+    knownProcs <- getModuleImplementationField modKnownProcs
+    let knownProcs' = Map.unionWith Set.union knownProcs importedProcs
     -- Update what's visible in the module
-    updateModImplementation (\imp -> imp { modKnownTypes = knownTypes
-                                         , modKnownResources = knownResources
-                                         , modKnownProcs = knownProcs })
-    let exportedSubmods = importsSelected pubs $ pubSubmods fromIFace
-    let exportedResources = importsSelected pubs $ pubResources fromIFace
-    let exportedProcs = importsSelected pubs $ pubProcs fromIFace
-    updateModInterface
-      (\i -> i {pubSubmods = Map.union (pubSubmods i) exportedSubmods,
-                pubResources = Map.union (pubResources i) exportedResources,
-                pubProcs = Map.unionWith Set.union (pubProcs i) exportedProcs })
+    updateModImplementation (\imp -> imp { modKnownProcs = knownProcs' })
+    let exportedProcs = importsSelected pubs newProcs
     -- Update what's exported from the module
+    updateModInterface
+      (\i -> i {pubProcs = Map.unionWith Set.union (pubProcs i) exportedProcs })
     return ()
 
 
