@@ -376,8 +376,13 @@ completeType (TypeDef modspec ctors) = do
       infos
     let rep = typeRepresentation reps numConsts
     setTypeRep rep
-    extraItems <- implicitItems typespec (snd <$> constCtors)
-                  (snd <$> nonConstCtors) rep
+    -- Don't generate implicit = and /= tests for generic types, because
+    -- we don't know if the parametric types will support equality.
+    -- XXX This will need revision when we support something like type classes
+    extraItems <- if List.null params
+                  then implicitItems typespec (snd <$> constCtors)
+                       (snd <$> nonConstCtors) rep
+                  else return []
     logNormalise $ "Representation of type "
                    ++ showModSpec modspec
                    ++ " is " ++ show rep
