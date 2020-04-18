@@ -173,6 +173,7 @@ normaliseSubmodule name vis pos items = do
 --                         Completing Normalisation
 --
 -- This only handles what cannot be handled until dependencies are loaded.
+-- That means laying out types and handling top-level code.
 ----------------------------------------------------------------
 
 -- |Do whatever part of normalisation cannot be done until dependencies
@@ -363,9 +364,9 @@ completeType (TypeDef modspec ctors) = do
     when (numConsts >= fromIntegral smallestAllocatedAddress)
       $ nyi $ "Type '" ++ showModSpec modspec
               ++ "' has too many constant constructors"
-    let typespec = TypeSpec (init modspec) (last modspec) []
-                   -- XXX need the right type parameters
-                   -- $ List.map TypeParam params
+    params <- getModule modParams
+    let typespec = TypeSpec (init modspec) (last modspec)
+                   $ List.map TypeParam params
     let constItems = concatMap (constCtorItems typespec) $ zip constCtors [0..]
     infos <- zipWithM nonConstCtorInfo nonConstCtors [0..]
     (reps,nonconstItemsList) <-
