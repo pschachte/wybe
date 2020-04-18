@@ -9,7 +9,6 @@
 #include <stdint.h>
 #include <math.h>
 
-// putchard - putchar that takes a double and returns 0.
 int print_int(int x) {
     return printf("%d", x);
 }
