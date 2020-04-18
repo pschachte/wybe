@@ -200,6 +200,17 @@ incr(!x)   # increment x (both uses and reassigns x)
 So a variable mention without adornment is passed by value, with a `?` prefix it
 is passed by result, and with a `!` prefix, it is passed by value-result.
 
+The compiler can usually infer the type of a variable based on how it is used,
+but sometimes the uses of a variable are not sufficient to determine a single
+type.  In such cases, the programmer must explicitly specify the type.  In other
+cases an explicit type may serve as useful documentation.  A variable's type may
+be specified by following the variable name by a colon (`:`) and the variable's
+intended type where the variable is first assigned.  For example, the following
+code reads a single character, storing it in the variable `ch`:
+```
+!read(?ch:char)
+```
+
 
 ## Function calls
 

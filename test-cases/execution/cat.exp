@@ -1,0 +1,6 @@
+# unix cat program in wybe
+do {
+    !read(?ch:char)
+    until ch = eof
+    !print(ch)
+}
