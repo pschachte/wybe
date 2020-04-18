@@ -727,6 +727,7 @@ message lvl msg pos = do
     modify (\bldr ->
                 bldr { msgs = msgs bldr ++ [(lvl, posMsg)] })
     when (lvl == Error) (modify (\bldr -> bldr { errorState = True }))
+    logAST $ "Reporting " ++ show lvl ++ ": " ++ msg
 
 
 -- |Add the specified string as an error message referring to the optionally
@@ -871,13 +872,19 @@ lookupType ty@(TypeSpec mod name args) pos = do
     currMod <- getModuleSpec
     logAST $ "In module " ++ showModSpec currMod
              ++ ", looking up type " ++ show ty
-    mspecs <- refersTo mod name modKnownTypes
-    logAST $ "Candidates: " ++ showModSpecs (Set.toList mspecs)
-    case Set.size mspecs of
-        0 -> do
+    params <- getModule modParams
+    if List.null mod && name `elem` params
+      then do
+        logAST $ "It's a type param:  Matching type = "++ name
+        return $ Just $ TypeParam name
+      else do
+        mspecs <- refersTo mod name modKnownTypes
+        logAST $ "Not a param; candidates: " ++ showModSpecs (Set.toList mspecs)
+        case Set.size mspecs of
+          0 -> do
             errmsg pos $ "Unknown type " ++ show ty
             return Nothing
-        1 -> do
+          1 -> do
             let mspec = Set.findMin mspecs
             maybeMod <- getLoadingModule mspec
             let params = maybe [] modParams maybeMod
@@ -895,9 +902,8 @@ lookupType ty@(TypeSpec mod name args) pos = do
                   ++ show (length params)
                   ++ " arguments, but " ++ show (length args)
                   ++ " were given"
-                logAST "Type constructor arities don't match!"
                 return Nothing
-        _ -> do
+          _ -> do
             errmsg pos $ "Ambiguous type " ++ show ty ++
                          " defined in modules: " ++
                          showModSpecs (Set.toList mspecs)
@@ -1450,7 +1456,7 @@ doImport :: ImportSpec -> Compiler ()
 doImport imports@(ImportSpec mod pubs privs) = do
     currMod <- getModuleSpec
     impl <- getModuleImplementationField id
-    logAST $ "Handle submod/type/recource importation from " ++
+    logAST $ "Handle submod/type/resource importation from " ++
       showModSpec mod ++ " into " ++
       let modStr = showModSpec currMod
       in modStr ++ ":  " ++ showUse (47 + length modStr) imports
@@ -2410,19 +2416,6 @@ isHalfUpdate _ _ = False
 -- by single assignment form:  we just need to find all variable uses
 -- or definitions.
 ----------------------------------------------------------------
-
--- varsInPrims :: PrimFlow -> [Prim] -> Set PrimVarName
--- varsInPrims dir prims =
---     List.foldr Set.union Set.empty $ List.map (varsInPrim dir) prims
-
--- varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
--- varsInPrim dir (PrimCall _ args)      = varsInPrimArgs dir args
--- varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
--- varsInPrim dir (PrimTest arg)         = varsInPrimArgs dir [arg]
-
--- varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
--- varsInPrimArgs dir args =
---     List.foldr Set.union Set.empty $ List.map (varsInPrimArg dir) args
 
 varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
 varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'} =

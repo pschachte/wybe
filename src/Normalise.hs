@@ -159,24 +159,6 @@ normaliseSubmodule name vis pos items = do
     addImport (importSpec parentModSpec Nothing Private)
     -- Pragmas of the father are visited upon the sons
     updateImplementation (\imp -> imp { modPragmas = pragmas})
-    -- when (isJust typeParams)
-    --   $ do
-    --     logNormalise $ "Adding known type " ++ name
-    --                    ++ " to module " ++ intercalate "." subModSpec
-    --     updateImplementation
-    --       (\imp ->
-    --          let set = Set.singleton $ TypeSpec parentModSpec name []
-    --          in imp { modKnownTypes = Map.insert name set $ modKnownTypes imp })
-    --     mapM_
-    --       (\param -> do
-    --           logNormalise $ "Adding type parameter " ++ param
-    --                          ++ " to module " ++ intercalate "." subModSpec
-    --           updateImplementation
-    --            (\imp ->
-    --               let set = Set.singleton $ TypeParam param
-    --               in imp { modKnownTypes = Map.insert param set
-    --                        $ modKnownTypes imp }))
-    --       (fromJust typeParams)
     normalise items
     modSpecs <- exitModule
     unless (List.null modSpecs)
@@ -186,12 +168,6 @@ normaliseSubmodule name vis pos items = do
     return ()
 
 
-
-----------------------------------------------------------------
---                         Completing Module
---
--- This only handles what cannot be handled until dependencies are loaded.
-----------------------------------------------------------------
 
 ----------------------------------------------------------------
 --                         Completing Normalisation
@@ -313,33 +289,6 @@ recordTypeImports modspec = do
     mapM_ (\m -> addKnownType (last m) m) knownTypes
     _ <- reexitModule
     return ()
-
-
-
--- modTypeDeps :: [ModSpec] -> Compiler [((TypeKey,TypeDef), TypeKey, [TypeKey])]
--- modTypeDeps sccMods = do
---     modspec <- getModuleSpec
---     pairs <- Map.toList <$> getModuleImplementationField modTypes
---     mapM (typeDeps sccMods) [((name,modspec),def) | (name,def) <- pairs]
-
-
--- | Produce the input needed to construct a list of SCCs.
--- typeDeps :: [ModSpec] -> (TypeKey,TypeDef)
---          -> Compiler ((TypeKey,TypeDef), TypeKey, [TypeKey])
--- typeDeps sccMods (key,def) = do
---     let deps = typeDefMembers def
---     depKeys <- (Set.toList . Set.fromList . concat)
---                <$> mapM (placedApplyM $ protoKeys sccMods) deps
---     return ((key,def), key, depKeys)
-
--- | Return a list of all the types defined in any of the sccMods that are
---   used as parameter types of any of the parameters of the provided ProcProto
--- protoKeys :: [ModSpec] -> ProcProto -> OptPos -> Compiler [TypeKey]
--- protoKeys sccMods proto pos = do
---     let types = paramType <$> procProtoParams proto
---     -- XXX to handle parametric types, we need to include the type parameters
---     types' <- catMaybes <$> mapM (`lookupType` pos) types
---     return [(name,mod) | (TypeSpec mod name _) <- types', mod `elem` sccMods]
 
 
 -- | Layout the types defined in the specified type dependency SCC, and then

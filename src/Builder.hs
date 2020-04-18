@@ -710,7 +710,6 @@ transformModuleProcs :: (ProcDef -> Compiler ProcDef) -> ModSpec ->
 transformModuleProcs trans thisMod = do
     logBuild $ "**** Reentering module " ++ showModSpec thisMod
     reenterModule thisMod
-    -- (names, procs) <- :: StateT CompilerState IO ([Ident], [[ProcDef]])
     (names,procs) <- unzip <$>
                      getModuleImplementationField (Map.toList . modProcs)
     -- for each name we have a list of procdefs, so we must double map
@@ -732,9 +731,7 @@ loadImports = do
     imports <- (importedMod <$>) <$> getModuleImplementationField modImportSpecs
     logBuild $ "building dependencies: " ++ showModSpecs imports
     mapM_ buildDependency imports
-    -- modspec <- getModuleSpec
-    -- mod <- getModule id
-    -- updateModules (Map.insert modspec mod)
+
 
 ------------------------ Handling Imports ------------------------
 
