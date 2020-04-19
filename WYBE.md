@@ -464,33 +464,21 @@ where *name* is the module name and *items* are the contents of the submodule.
 
 ## Type declarations
 
-Wybe provides an algebraic type system.
-Types may be declared with the syntax:
+Types in Wybe are just special kinds of modules that have constructors defined.
+In this way, Wybe supports data encapsulation, as well as providing an algebraic
+type system.
 
-> `type` *type* `{` *ctors* *defs* `}`
+Any module may be made a type with a `constructor` declaration, of the form:
 
-where *ctors* is one or more constructor declaration, separated by vertical bar
-characters (`|`).
-To make the declared *type* public, precede the `type` keyword with the keyword
-`pub`.
-If you wish for the constructors of the type public,
-precede the first constructor declaration with the `pub` keyword
-(this makes all the constructors public).
+> `constructor` *name*`(`*member*`:`*type*, ... *member*`:`*type*`)`
 
-The *defs* part may be empty, but if specified, may include any number of
-procedure and function declarations, which will have full access to the
-constructors of the type, whether or not they are public.
-
-Each constructor declaration takes the form of a function declaration (with no
-function body):
-
-> *ctor*`(`*member*`:`*memtype*, ... *member*`:`*memtype*`)`
-
-Each *ctor* is a distinct constructor name specifying an alternative constructor
-for the *type* being defined.
-Any number of *member*`:`*memtype* pairs may be specified, specifying
-information that must be supplied for that constructor.
-If no members are specified, the parentheses are omitted.
+If the `constructor` keyword is preceded with the `pub` keyword, the constructor
+is visible outside the module. A constructor with no arguments omits the
+parentheses. A module may have as many `constructor` declarations as desired,
+but as a convenience, multiple constructors may be specified with a single
+`constructor` keyword by separating the constructors with vertical bars (`|`).
+To improve readability, you may optionally substitute the keyword
+`constructors`.
 
 Each constructor defined automatically becomes a function that may be used to
 construct a value of the *type* being defined.
@@ -499,7 +487,9 @@ constructor
 arguments as *outputs*, allowing a value to be deconstructed into its parts.
 For example, given the definition
 ```
-type coordinate { coordinate(x:int, y:int) }
+module coordinate {
+    pub constructor coordinate(x:int, y:int)
+}
 ```
 the following statement may be used to construct a Cartesian coordinate with X
 component 7 and Y component 4:
@@ -511,7 +501,7 @@ And this statement will unpack a coordinate `pos` into variables `x` and `y`:
 coordinate(?x,?y) = pos
 ```
 
-Additionally, two procedures are automatically generate for each *member*:
+Additionally, two procedures are automatically generated for each *member*:
 one to access the member, and one to mutate it.
 The first has the prototype:
 
@@ -572,7 +562,9 @@ This ensures that it is not possible to mistake a value created with one
 constructor for one made with a different constructor.
 For example, if a tree type is defined as:
 ```
-type tree { empty | node(left:tree, value:int, right:tree) }
+module tree {
+    pub constructors empty | node(left:tree, value:int, right:tree)
+}
 ```
 then it may be used as follows:
 ```

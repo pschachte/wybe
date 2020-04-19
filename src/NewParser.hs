@@ -101,6 +101,9 @@ visibilityItem = do
     procOrFuncItemParser v
         <|> moduleItemParser v
         <|> typeItemParser v
+        <|> moduleParamItemParser v
+        <|> typeRepItemParser v
+        <|> dataCtorItemParser v
         <|> resourceItemParser v
         <|> useItemParser v
         <|> fromUseItemParser v
@@ -139,6 +142,33 @@ typeItemParser v = do
              option [] (betweenB Paren (identString `sepBy` comma))
     (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto imp items (Just pos)
+
+
+-- | Module parameter declaration
+moduleParamItemParser :: Visibility -> Parser Item
+moduleParamItemParser v = do
+    -- XXX should check that v is not Public
+    keypos <- tokenPosition <$> (ident "parameter" <|> ident "parameters")
+    params <- identString `sepBy` comma
+    return $ ModuleParamsDecl params $ Just keypos
+
+
+-- | Module type representation declaration
+typeRepItemParser :: Visibility -> Parser Item
+typeRepItemParser v = do
+    -- XXX should check that v is not Public
+    keypos <- tokenPosition <$> ident "representation"
+    ident "is"
+    rep <- typeRep
+    return $ RepresentationDecl rep $ Just keypos
+
+
+-- | Module type representation declaration
+dataCtorItemParser :: Visibility -> Parser Item
+dataCtorItemParser v = do
+    (ident "constructor" <|> ident "constructors")
+    ctors <- funcProtoParser `sepBy` symbol "|"
+    return $ ConstructorDecl v ctors
 
 
 -- | Type declaration body where representation and items are given

@@ -814,8 +814,8 @@ addTypeRep repn pos = do
       then errmsg pos
            $ "Can't declare representation of type " ++ show currMod
              ++ " with constructors"
-      else updateModule (\m -> m { modTypeRep = Just repn
-                                 , modIsType  = True })
+      else do setTypeRep repn
+              addKnownType (last currMod) currMod
 
 
 -- |Set the type representation of the current module.
@@ -849,6 +849,7 @@ addConstructor vis pctor = do
            updateImplementation (\m -> m { modConstructors =
                                            Just ((vis,pctor):pctors) })
            updateModule (\m -> m { modIsType  = True })
+           addKnownType (last currMod) currMod
 
 
 -- |Record that the specified type is known in the current module.
