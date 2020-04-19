@@ -7,8 +7,10 @@ AFTER EVERYTHING:
   public procs    : generic_list.list.[]<0>
                     generic_list.list.[|]<0>
                     generic_list.list.[|]<1>
+                    generic_list.list.append<0>
                     generic_list.list.head<0>
                     generic_list.list.head<1>
+                    generic_list.list.length<0>
                     generic_list.list.tail<0>
                     generic_list.list.tail<1>
   imports         : public use generic_list.list
@@ -45,8 +47,10 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
   public procs    : generic_list.list.[]<0>
                     generic_list.list.[|]<0>
                     generic_list.list.[|]<1>
+                    generic_list.list.append<0>
                     generic_list.list.head<0>
                     generic_list.list.head<1>
+                    generic_list.list.length<0>
                     generic_list.list.tail<0>
                     generic_list.list.tail<1>
   imports         : use generic_list
@@ -66,12 +70,12 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
     foreign llvm move(0:generic_list.list(t), ?$#0:generic_list.list(t))
 
 
-[|] > public inline (0 calls)
+[|] > public inline (1 calls)
 0: [|](head#0:t, tail#0:generic_list.list(t), ?$#0:generic_list.list(t)): AliasPairs: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!generic_list.list(t))
     foreign lpvm mutate(~%$rec#0:generic_list.list(t), ?%$rec#1:generic_list.list(t), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:t)
     foreign lpvm mutate(~%$rec#1:generic_list.list(t), ?%$#0:generic_list.list(t), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:generic_list.list(t))
-[|] > public inline test (0 calls)
+[|] > public inline test (6 calls)
 1: [|](?head#0:t, ?tail#0:generic_list.list(t), $#0:generic_list.list(t), ?$$#0:wybe.bool): AliasPairs: []
     foreign llvm icmp ne($#0:generic_list.list(t), 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
@@ -82,6 +86,23 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
         foreign lpvm access($#0:generic_list.list(t), 0:wybe.int, ?head#0:t)
         foreign lpvm access(~$#0:generic_list.list(t), 8:wybe.int, ?tail#0:generic_list.list(t))
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+append > public (1 calls)
+0: append(a#0:generic_list.list(t), b#0:generic_list.list(t), ?$#0:generic_list.list(t)): AliasPairs: [($#0,b#0)]
+    foreign llvm icmp ne(a#0:generic_list.list(t), 0:wybe.int, ?tmp$5#0:wybe.bool)
+    case ~tmp$5#0:wybe.bool of
+    0:
+        foreign llvm move(~b#0:generic_list.list(t), ?$#0:generic_list.list(t)) @generic_list:8:9
+
+    1:
+        foreign lpvm access(a#0:generic_list.list(t), 0:wybe.int, ?head#0:t)
+        foreign lpvm access(~a#0:generic_list.list(t), 8:wybe.int, ?tail#0:generic_list.list(t))
+        generic_list.list.append<0>(~tail#0:generic_list.list(t), ~b#0:generic_list.list(t), ?tmp$2#0:generic_list.list(t)) @generic_list:9:43
+        foreign lpvm alloc(16:wybe.int, ?tmp$8#0:generic_list.list(t))
+        foreign lpvm mutate(~tmp$8#0:generic_list.list(t), ?tmp$9#0:generic_list.list(t), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:t)
+        foreign lpvm mutate(~tmp$9#0:generic_list.list(t), ?$#0:generic_list.list(t), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:generic_list.list(t))
 
 
 
@@ -107,6 +128,25 @@ head > public inline test (0 calls)
     1:
         foreign lpvm mutate(~%$rec#0:generic_list.list(t), ?%$rec#1:generic_list.list(t), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:t)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+length > public inline (0 calls)
+0: length(list#0:generic_list.list(t), ?$#0:wybe.int): AliasPairs: []
+    generic_list.list.length1<0>(~list#0:generic_list.list(t), 0:wybe.int, ?$#0:wybe.int) @generic_list:4:42
+
+
+length1 > (2 calls)
+0: length1(list#0:generic_list.list(t), acc#0:wybe.int, ?$#0:wybe.int): AliasPairs: []
+    foreign llvm icmp ne(list#0:generic_list.list(t), 0:wybe.int, ?tmp$5#0:wybe.bool)
+    case ~tmp$5#0:wybe.bool of
+    0:
+        foreign llvm move(~acc#0:wybe.int, ?$#0:wybe.int) @generic_list:5:5
+
+    1:
+        foreign lpvm access(~list#0:generic_list.list(t), 8:wybe.int, ?tail#0:generic_list.list(t))
+        foreign llvm add(~acc#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
+        generic_list.list.length1<0>(~tail#0:generic_list.list(t), ~tmp$2#0:wybe.int, ?$#0:wybe.int) @generic_list:6:40
 
 
 
@@ -194,21 +234,50 @@ if.else:
 }
 
 
+define external ccc  i64 @"generic_list.list.append<0>"(i64  %"a#0", i64  %"b#0")    {
+entry:
+  %"tmp$5#0" = icmp ne i64 %"a#0", 0 
+  br i1 %"tmp$5#0", label %if.then, label %if.else 
+if.then:
+  %22 = inttoptr i64 %"a#0" to i64* 
+  %23 = getelementptr  i64, i64* %22, i64 0 
+  %24 = load  i64, i64* %23 
+  %25 = add   i64 %"a#0", 8 
+  %26 = inttoptr i64 %25 to i64* 
+  %27 = getelementptr  i64, i64* %26, i64 0 
+  %28 = load  i64, i64* %27 
+  %"tmp$2#0" = tail call ccc  i64  @"generic_list.list.append<0>"(i64  %28, i64  %"b#0")  
+  %29 = trunc i64 16 to i32  
+  %30 = tail call ccc  i8*  @wybe_malloc(i32  %29)  
+  %31 = ptrtoint i8* %30 to i64 
+  %32 = inttoptr i64 %31 to i64* 
+  %33 = getelementptr  i64, i64* %32, i64 0 
+  store  i64 %24, i64* %33 
+  %34 = add   i64 %31, 8 
+  %35 = inttoptr i64 %34 to i64* 
+  %36 = getelementptr  i64, i64* %35, i64 0 
+  store  i64 %"tmp$2#0", i64* %36 
+  ret i64 %31 
+if.else:
+  ret i64 %"b#0" 
+}
+
+
 define external ccc  {i64, i1} @"generic_list.list.head<0>"(i64  %"$rec#0")    {
 entry:
   %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %22 = inttoptr i64 %"$rec#0" to i64* 
-  %23 = getelementptr  i64, i64* %22, i64 0 
-  %24 = load  i64, i64* %23 
-  %25 = insertvalue {i64, i1} undef, i64 %24, 0 
-  %26 = insertvalue {i64, i1} %25, i1 1, 1 
-  ret {i64, i1} %26 
+  %37 = inttoptr i64 %"$rec#0" to i64* 
+  %38 = getelementptr  i64, i64* %37, i64 0 
+  %39 = load  i64, i64* %38 
+  %40 = insertvalue {i64, i1} undef, i64 %39, 0 
+  %41 = insertvalue {i64, i1} %40, i1 1, 1 
+  ret {i64, i1} %41 
 if.else:
-  %27 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %28 = insertvalue {i64, i1} %27, i1 0, 1 
-  ret {i64, i1} %28 
+  %42 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %43 = insertvalue {i64, i1} %42, i1 0, 1 
+  ret {i64, i1} %43 
 }
 
 
@@ -217,23 +286,47 @@ entry:
   %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %29 = trunc i64 16 to i32  
-  %30 = tail call ccc  i8*  @wybe_malloc(i32  %29)  
-  %31 = ptrtoint i8* %30 to i64 
-  %32 = inttoptr i64 %31 to i8* 
-  %33 = inttoptr i64 %"$rec#0" to i8* 
-  %34 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %32, i8*  %33, i32  %34, i32  8, i1  0)  
-  %35 = inttoptr i64 %31 to i64* 
-  %36 = getelementptr  i64, i64* %35, i64 0 
-  store  i64 %"$field#0", i64* %36 
-  %37 = insertvalue {i64, i1} undef, i64 %31, 0 
-  %38 = insertvalue {i64, i1} %37, i1 1, 1 
-  ret {i64, i1} %38 
+  %44 = trunc i64 16 to i32  
+  %45 = tail call ccc  i8*  @wybe_malloc(i32  %44)  
+  %46 = ptrtoint i8* %45 to i64 
+  %47 = inttoptr i64 %46 to i8* 
+  %48 = inttoptr i64 %"$rec#0" to i8* 
+  %49 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %47, i8*  %48, i32  %49, i32  8, i1  0)  
+  %50 = inttoptr i64 %46 to i64* 
+  %51 = getelementptr  i64, i64* %50, i64 0 
+  store  i64 %"$field#0", i64* %51 
+  %52 = insertvalue {i64, i1} undef, i64 %46, 0 
+  %53 = insertvalue {i64, i1} %52, i1 1, 1 
+  ret {i64, i1} %53 
 if.else:
-  %39 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
-  %40 = insertvalue {i64, i1} %39, i1 0, 1 
-  ret {i64, i1} %40 
+  %54 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %55 = insertvalue {i64, i1} %54, i1 0, 1 
+  ret {i64, i1} %55 
+}
+
+
+define external ccc  i64 @"generic_list.list.length<0>"(i64  %"list#0")    {
+entry:
+  %"$#0" = tail call ccc  i64  @"generic_list.list.length1<0>"(i64  %"list#0", i64  0)  
+  ret i64 %"$#0" 
+}
+
+
+define external ccc  i64 @"generic_list.list.length1<0>"(i64  %"list#0", i64  %"acc#0")    {
+entry:
+  %"tmp$5#0" = icmp ne i64 %"list#0", 0 
+  br i1 %"tmp$5#0", label %if.then, label %if.else 
+if.then:
+  %56 = add   i64 %"list#0", 8 
+  %57 = inttoptr i64 %56 to i64* 
+  %58 = getelementptr  i64, i64* %57, i64 0 
+  %59 = load  i64, i64* %58 
+  %"tmp$2#0" = add   i64 %"acc#0", 1 
+  %"$#0" = tail call ccc  i64  @"generic_list.list.length1<0>"(i64  %59, i64  %"tmp$2#0")  
+  ret i64 %"$#0" 
+if.else:
+  ret i64 %"acc#0" 
 }
 
 
@@ -242,17 +335,17 @@ entry:
   %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %41 = add   i64 %"$rec#0", 8 
-  %42 = inttoptr i64 %41 to i64* 
-  %43 = getelementptr  i64, i64* %42, i64 0 
-  %44 = load  i64, i64* %43 
-  %45 = insertvalue {i64, i1} undef, i64 %44, 0 
-  %46 = insertvalue {i64, i1} %45, i1 1, 1 
-  ret {i64, i1} %46 
+  %60 = add   i64 %"$rec#0", 8 
+  %61 = inttoptr i64 %60 to i64* 
+  %62 = getelementptr  i64, i64* %61, i64 0 
+  %63 = load  i64, i64* %62 
+  %64 = insertvalue {i64, i1} undef, i64 %63, 0 
+  %65 = insertvalue {i64, i1} %64, i1 1, 1 
+  ret {i64, i1} %65 
 if.else:
-  %47 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %48 = insertvalue {i64, i1} %47, i1 0, 1 
-  ret {i64, i1} %48 
+  %66 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %67 = insertvalue {i64, i1} %66, i1 0, 1 
+  ret {i64, i1} %67 
 }
 
 
@@ -261,23 +354,23 @@ entry:
   %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %49 = trunc i64 16 to i32  
-  %50 = tail call ccc  i8*  @wybe_malloc(i32  %49)  
-  %51 = ptrtoint i8* %50 to i64 
-  %52 = inttoptr i64 %51 to i8* 
-  %53 = inttoptr i64 %"$rec#0" to i8* 
-  %54 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %52, i8*  %53, i32  %54, i32  8, i1  0)  
-  %55 = add   i64 %51, 8 
-  %56 = inttoptr i64 %55 to i64* 
-  %57 = getelementptr  i64, i64* %56, i64 0 
-  store  i64 %"$field#0", i64* %57 
-  %58 = insertvalue {i64, i1} undef, i64 %51, 0 
-  %59 = insertvalue {i64, i1} %58, i1 1, 1 
-  ret {i64, i1} %59 
+  %68 = trunc i64 16 to i32  
+  %69 = tail call ccc  i8*  @wybe_malloc(i32  %68)  
+  %70 = ptrtoint i8* %69 to i64 
+  %71 = inttoptr i64 %70 to i8* 
+  %72 = inttoptr i64 %"$rec#0" to i8* 
+  %73 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %71, i8*  %72, i32  %73, i32  8, i1  0)  
+  %74 = add   i64 %70, 8 
+  %75 = inttoptr i64 %74 to i64* 
+  %76 = getelementptr  i64, i64* %75, i64 0 
+  store  i64 %"$field#0", i64* %76 
+  %77 = insertvalue {i64, i1} undef, i64 %70, 0 
+  %78 = insertvalue {i64, i1} %77, i1 1, 1 
+  ret {i64, i1} %78 
 if.else:
-  %60 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
-  %61 = insertvalue {i64, i1} %60, i1 0, 1 
-  ret {i64, i1} %61 
+  %79 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %80 = insertvalue {i64, i1} %79, i1 0, 1 
+  ret {i64, i1} %80 
 }
 ======================================================================

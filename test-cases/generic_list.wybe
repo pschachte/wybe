@@ -1,1 +1,10 @@
-pub type list(t) { pub [] | `[|]`(head:t, tail:list(t)) }
+pub type list(t) {
+    pub [] | `[|]`(head:t, tail:list(t))
+
+    pub def length(list:list(t)) : int = length1(list, 0)
+    def length1(list:list(t), acc:int) : int =
+        if list = [?head | ?tail] then length1(tail, acc+1) else acc
+
+    pub def append(a:list(t), b:list(t)) : list(t) =
+        if a = [?head | ?tail] then [head|append(tail,b)] else b
+}
