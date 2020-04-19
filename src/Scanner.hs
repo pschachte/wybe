@@ -125,6 +125,8 @@ tokenise pos str@(c:cs)
                     ')' -> singleCharTok c cs pos $ TokRBracket Paren pos
                     ']' -> singleCharTok c cs pos $ TokRBracket Bracket pos
                     '}' -> singleCharTok c cs pos $ TokRBracket Brace pos
+                    '?' -> singleCharTok c cs pos $ TokSymbol [c] pos
+                    '!' -> singleCharTok c cs pos $ TokSymbol [c] pos
                     '\'' -> tokeniseChar pos cs
                     '\"' -> tokeniseString DoubleQuote pos cs
                     -- backquote makes anything an identifier
@@ -244,4 +246,4 @@ isIdentChar ch = isAlphaNum ch || ch == '_'
 -- |Is this a character that can appear in a symbol?
 isSymbolChar :: Char -> Bool
 isSymbolChar ch = not (isAlphaNum ch || isSpace ch || isControl ch 
-                       || ch `elem` ",.([{)]}#'\"\\")
+                       || ch `elem` ",.([{)]}#'\"\\?!")
