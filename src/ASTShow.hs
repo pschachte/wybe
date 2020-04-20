@@ -29,7 +29,7 @@ instance Show Module where
         let int  = modInterface mod
             maybeimpl = modImplementation mod
         in " Module " ++ showModSpec (modSpec mod) ++
-           (bracketList "(" ", " ")" $ modParams mod) ++
+           (bracketList "(" ", " ")" $ ("@"++) <$> modParams mod) ++
            "\n  representation  : " ++
            (if modIsType mod
             then maybe "(not yet known)" show (modTypeRep mod)

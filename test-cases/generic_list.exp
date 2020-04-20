@@ -1,6 +1,6 @@
 ======================================================================
 AFTER EVERYTHING:
- Module generic_list(t)
+ Module generic_list(@ty)
   representation  : address
   public submods  : 
   public resources: 
@@ -25,111 +25,111 @@ AFTER EVERYTHING:
   procs           : 
 
 [] > public inline (0 calls)
-0: [](?$#0:generic_list(t)): AliasPairs: []
-    foreign llvm move(0:generic_list(t), ?$#0:generic_list(t))
+0: [](?$#0:generic_list(@ty)): AliasPairs: []
+    foreign llvm move(0:generic_list(@ty), ?$#0:generic_list(@ty))
 
 
 [|] > public inline (1 calls)
-0: [|](head#0:t, tail#0:generic_list(t), ?$#0:generic_list(t)): AliasPairs: []
-    foreign lpvm alloc(16:wybe.int, ?$rec#0:!generic_list(t))
-    foreign lpvm mutate(~%$rec#0:generic_list(t), ?%$rec#1:generic_list(t), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:t)
-    foreign lpvm mutate(~%$rec#1:generic_list(t), ?%$#0:generic_list(t), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:generic_list(t))
+0: [|](head#0:@ty, tail#0:generic_list(@ty), ?$#0:generic_list(@ty)): AliasPairs: []
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:!generic_list(@ty))
+    foreign lpvm mutate(~%$rec#0:generic_list(@ty), ?%$rec#1:generic_list(@ty), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:@ty)
+    foreign lpvm mutate(~%$rec#1:generic_list(@ty), ?%$#0:generic_list(@ty), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:generic_list(@ty))
 [|] > public inline test (6 calls)
-1: [|](?head#0:t, ?tail#0:generic_list(t), $#0:generic_list(t), ?$$#0:wybe.bool): AliasPairs: []
-    foreign llvm icmp ne($#0:generic_list(t), 0:wybe.int, ?tmp$0#0:wybe.bool)
+1: [|](?head#0:@ty, ?tail#0:generic_list(@ty), $#0:generic_list(@ty), ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($#0:generic_list(@ty), 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access($#0:generic_list(t), 0:wybe.int, ?head#0:t)
-        foreign lpvm access(~$#0:generic_list(t), 8:wybe.int, ?tail#0:generic_list(t))
+        foreign lpvm access($#0:generic_list(@ty), 0:wybe.int, ?head#0:@ty)
+        foreign lpvm access(~$#0:generic_list(@ty), 8:wybe.int, ?tail#0:generic_list(@ty))
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
 
 append > public (1 calls)
-0: append(a#0:generic_list(t), b#0:generic_list(t), ?$#0:generic_list(t)): AliasPairs: [($#0,b#0)]
-    foreign llvm icmp ne(a#0:generic_list(t), 0:wybe.int, ?tmp$5#0:wybe.bool)
+0: append(a#0:generic_list(@ty), b#0:generic_list(@ty), ?$#0:generic_list(@ty)): AliasPairs: [($#0,b#0)]
+    foreign llvm icmp ne(a#0:generic_list(@ty), 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
-        foreign llvm move(~b#0:generic_list(t), ?$#0:generic_list(t)) @generic_list:8:5
+        foreign llvm move(~b#0:generic_list(@ty), ?$#0:generic_list(@ty)) @generic_list:8:5
 
     1:
-        foreign lpvm access(a#0:generic_list(t), 0:wybe.int, ?head#0:t)
-        foreign lpvm access(~a#0:generic_list(t), 8:wybe.int, ?tail#0:generic_list(t))
-        generic_list.append<0>(~tail#0:generic_list(t), ~b#0:generic_list(t), ?tmp$2#0:generic_list(t)) @generic_list:9:39
-        foreign lpvm alloc(16:wybe.int, ?tmp$8#0:generic_list(t))
-        foreign lpvm mutate(~tmp$8#0:generic_list(t), ?tmp$9#0:generic_list(t), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:t)
-        foreign lpvm mutate(~tmp$9#0:generic_list(t), ?$#0:generic_list(t), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:generic_list(t))
+        foreign lpvm access(a#0:generic_list(@ty), 0:wybe.int, ?head#0:@ty)
+        foreign lpvm access(~a#0:generic_list(@ty), 8:wybe.int, ?tail#0:generic_list(@ty))
+        generic_list.append<0>(~tail#0:generic_list(@ty), ~b#0:generic_list(@ty), ?tmp$2#0:generic_list(@ty)) @generic_list:9:39
+        foreign lpvm alloc(16:wybe.int, ?tmp$8#0:generic_list(@ty))
+        foreign lpvm mutate(~tmp$8#0:generic_list(@ty), ?tmp$9#0:generic_list(@ty), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:@ty)
+        foreign lpvm mutate(~tmp$9#0:generic_list(@ty), ?$#0:generic_list(@ty), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:generic_list(@ty))
 
 
 
 head > public inline test (0 calls)
-0: head($rec#0:generic_list(t), ?$#0:t, ?$$#0:wybe.bool): AliasPairs: []
-    foreign llvm icmp ne($rec#0:generic_list(t), 0:wybe.int, ?tmp$0#0:wybe.bool)
+0: head($rec#0:generic_list(@ty), ?$#0:@ty, ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($rec#0:generic_list(@ty), 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access(~$rec#0:generic_list(t), 0:wybe.int, ?$#0:t)
+        foreign lpvm access(~$rec#0:generic_list(@ty), 0:wybe.int, ?$#0:@ty)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 head > public inline test (0 calls)
-1: head($rec#0:generic_list(t), ?$rec#1:generic_list(t), $field#0:t, ?$$#0:wybe.bool): AliasPairs: []
-    foreign llvm icmp ne($rec#0:generic_list(t), 0:wybe.int, ?tmp$0#0:wybe.bool)
+1: head($rec#0:generic_list(@ty), ?$rec#1:generic_list(@ty), $field#0:@ty, ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($rec#0:generic_list(@ty), 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-        foreign llvm move(~$rec#0:generic_list(t), ?$rec#1:generic_list(t))
+        foreign llvm move(~$rec#0:generic_list(@ty), ?$rec#1:generic_list(@ty))
 
     1:
-        foreign lpvm mutate(~%$rec#0:generic_list(t), ?%$rec#1:generic_list(t), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:t)
+        foreign lpvm mutate(~%$rec#0:generic_list(@ty), ?%$rec#1:generic_list(@ty), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:@ty)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
 
 length > public inline (0 calls)
-0: length(list#0:generic_list(t), ?$#0:wybe.int): AliasPairs: []
-    generic_list.length1<0>(~list#0:generic_list(t), 0:wybe.int, ?$#0:wybe.int) @generic_list:4:46
+0: length(list#0:generic_list(@ty), ?$#0:wybe.int): AliasPairs: []
+    generic_list.length1<0>(~list#0:generic_list(@ty), 0:wybe.int, ?$#0:wybe.int) @generic_list:4:48
 
 
 length1 > (2 calls)
-0: length1(list#0:generic_list(t), acc#0:wybe.int, ?$#0:wybe.int): AliasPairs: []
-    foreign llvm icmp ne(list#0:generic_list(t), 0:wybe.int, ?tmp$5#0:wybe.bool)
+0: length1(list#0:generic_list(@ty), acc#0:wybe.int, ?$#0:wybe.int): AliasPairs: []
+    foreign llvm icmp ne(list#0:generic_list(@ty), 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm move(~acc#0:wybe.int, ?$#0:wybe.int) @generic_list:5:1
 
     1:
-        foreign lpvm access(~list#0:generic_list(t), 8:wybe.int, ?tail#0:generic_list(t))
+        foreign lpvm access(~list#0:generic_list(@ty), 8:wybe.int, ?tail#0:generic_list(@ty))
         foreign llvm add(~acc#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
-        generic_list.length1<0>(~tail#0:generic_list(t), ~tmp$2#0:wybe.int, ?$#0:wybe.int) @generic_list:6:36
+        generic_list.length1<0>(~tail#0:generic_list(@ty), ~tmp$2#0:wybe.int, ?$#0:wybe.int) @generic_list:6:36
 
 
 
 tail > public inline test (0 calls)
-0: tail($rec#0:generic_list(t), ?$#0:generic_list(t), ?$$#0:wybe.bool): AliasPairs: []
-    foreign llvm icmp ne($rec#0:generic_list(t), 0:wybe.int, ?tmp$0#0:wybe.bool)
+0: tail($rec#0:generic_list(@ty), ?$#0:generic_list(@ty), ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($rec#0:generic_list(@ty), 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access(~$rec#0:generic_list(t), 8:wybe.int, ?$#0:generic_list(t))
+        foreign lpvm access(~$rec#0:generic_list(@ty), 8:wybe.int, ?$#0:generic_list(@ty))
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 tail > public inline test (0 calls)
-1: tail($rec#0:generic_list(t), ?$rec#1:generic_list(t), $field#0:generic_list(t), ?$$#0:wybe.bool): AliasPairs: []
-    foreign llvm icmp ne($rec#0:generic_list(t), 0:wybe.int, ?tmp$0#0:wybe.bool)
+1: tail($rec#0:generic_list(@ty), ?$rec#1:generic_list(@ty), $field#0:generic_list(@ty), ?$$#0:wybe.bool): AliasPairs: []
+    foreign llvm icmp ne($rec#0:generic_list(@ty), 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-        foreign llvm move(~$rec#0:generic_list(t), ?$rec#1:generic_list(t))
+        foreign llvm move(~$rec#0:generic_list(@ty), ?$rec#1:generic_list(@ty))
 
     1:
-        foreign lpvm mutate noalias(~%$rec#0:generic_list(t), ?%$rec#1:generic_list(t), 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:generic_list(t))
+        foreign lpvm mutate noalias(~%$rec#0:generic_list(@ty), ?%$rec#1:generic_list(@ty), 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:generic_list(@ty))
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 

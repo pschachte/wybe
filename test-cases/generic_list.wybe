@@ -1,4 +1,4 @@
-parameter @t
+parameter @ty
 pub constructors [] | `[|]`(head:@ty, tail:generic_list(@ty))
 
 pub def length(list:generic_list(@ty)) : int = length1(list, 0)
