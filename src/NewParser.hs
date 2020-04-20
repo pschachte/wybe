@@ -149,7 +149,7 @@ moduleParamItemParser :: Visibility -> Parser Item
 moduleParamItemParser v = do
     -- XXX should check that v is not Public
     keypos <- tokenPosition <$> (ident "parameter" <|> ident "parameters")
-    params <- identString `sepBy` comma
+    params <- (symbol "@" *> identString) `sepBy1` comma
     return $ ModuleParamsDecl params $ Just keypos
 
 
@@ -194,7 +194,7 @@ typeCtors = betweenB Brace $ do
     vis <- visibility
     ctors <- funcProtoParser `sepBy` symbol "|"
     items <- itemParser
-    return $ (TypeCtors vis ctors,items)
+    return (TypeCtors vis ctors,items)
 
 
 -- | Resource declaration parser.
@@ -341,13 +341,15 @@ optType = option AnyType (symbol ":" *> typeParser)
 -- | Parser a type.
 -- Type -> ident OptTypeList
 typeParser :: Parser TypeSpec
-typeParser = do
-    name <- identString
-    optTypeList <- option [] $ betweenB Paren (typeParser `sepBy` comma)
-    case name of
-        "any"     -> return AnyType
-        "invalid" -> return InvalidType
-        _         -> return $ TypeSpec [] name optTypeList
+typeParser =
+    symbol "@" *> (TypeParam <$> identString)
+    <|> do
+        name <- identString
+        optTypeList <- option [] $ betweenB Paren (typeParser `sepBy` comma)
+        case name of
+            "any"     -> return AnyType
+            "invalid" -> return InvalidType
+            _         -> return $ TypeSpec [] name optTypeList
 
 
 

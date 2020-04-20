@@ -2635,7 +2635,7 @@ showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis detism inline sub) =
 
 -- |How to show a type specification.
 instance Show TypeSpec where
-  show TypeParam{typeParamName=name} = name
+  show TypeParam{typeParamName=name} = "@" ++ name
   show AnyType = "?"
   show InvalidType = "!INVALID!"
   show (TypeSpec optmod ident args) =

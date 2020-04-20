@@ -127,13 +127,14 @@ tokenise pos str@(c:cs)
                     '}' -> singleCharTok c cs pos $ TokRBracket Brace pos
                     '?' -> singleCharTok c cs pos $ TokSymbol [c] pos
                     '!' -> singleCharTok c cs pos $ TokSymbol [c] pos
+                    '@' -> singleCharTok c cs pos $ TokSymbol [c] pos
                     '\'' -> tokeniseChar pos cs
                     '\"' -> tokeniseString DoubleQuote pos cs
                     -- backquote makes anything an identifier
                     '`' -> let (name,_:rest) = break (=='`') cs
                            in  multiCharTok name rest (TokIdent name pos) pos
                     '#' -> tokenise (setSourceColumn pos 1)
-                           $ dropWhile (not . (=='\n')) cs
+                           $ dropWhile (/='\n') cs
                     _   -> tokeniseSymbol pos str
 
 -- |Handle a single character token and tokenize the rest of the input.
@@ -246,4 +247,4 @@ isIdentChar ch = isAlphaNum ch || ch == '_'
 -- |Is this a character that can appear in a symbol?
 isSymbolChar :: Char -> Bool
 isSymbolChar ch = not (isAlphaNum ch || isSpace ch || isControl ch 
-                       || ch `elem` ",.([{)]}#'\"\\?!")
+                       || ch `elem` ",.([{)]}#'\"\\?!@")
