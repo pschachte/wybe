@@ -342,7 +342,7 @@ optType = option AnyType (symbol ":" *> typeParser)
 -- Type -> ident OptTypeList
 typeParser :: Parser TypeSpec
 typeParser =
-    symbol "@" *> (TypeParam <$> identString)
+    symbol "@" *> (TypeVar <$> identString)
     <|> do
         name <- identString
         optTypeList <- option [] $ betweenB Paren (typeParser `sepBy` comma)

@@ -366,7 +366,7 @@ completeType (TypeDef modspec ctors) = do
               ++ "' has too many constant constructors"
     params <- getModule modParams
     let typespec = TypeSpec (init modspec) (last modspec)
-                   $ List.map TypeParam params
+                   $ List.map TypeVar params
     let constItems = concatMap (constCtorItems typespec) $ zip constCtors [0..]
     infos <- zipWithM nonConstCtorInfo nonConstCtors [0..]
     (reps,nonconstItemsList) <-

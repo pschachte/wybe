@@ -866,7 +866,7 @@ addKnownType name mspec = do
 
 -- |Find the definition of the specified type visible from the current module.
 lookupType :: TypeSpec -> OptPos -> Compiler (Maybe TypeSpec)
-lookupType spec@TypeParam{} _ = return $ Just spec
+lookupType spec@TypeVar{} _ = return $ Just spec
 lookupType AnyType          _ = return $ Just AnyType
 lookupType InvalidType      _ = return $ Just InvalidType
 lookupType ty@(TypeSpec mod name args) pos = do
@@ -877,7 +877,7 @@ lookupType ty@(TypeSpec mod name args) pos = do
     if List.null mod && name `elem` params
       then do
         logAST $ "It's a type param:  Matching type = "++ name
-        return $ Just $ TypeParam name
+        return $ Just $ TypeVar name
       else do
         mspecs <- refersTo mod name modKnownTypes
         logAST $ "Not a param; candidates: " ++ showModSpecs (Set.toList mspecs)
@@ -1378,7 +1378,7 @@ updateModLLVM fn modimp = do
 -- | Given a type spec, find its internal representation (a string),
 --   if possible.
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
-lookupTypeRepresentation TypeParam{} = return $ Just defaultTypeRepresentation
+lookupTypeRepresentation TypeVar{} = return $ Just defaultTypeRepresentation
 lookupTypeRepresentation AnyType     = return $ Just defaultTypeRepresentation
 lookupTypeRepresentation InvalidType = return Nothing
 lookupTypeRepresentation (TypeSpec modSpec name _) =
@@ -1895,7 +1895,7 @@ data TypeSpec = TypeSpec {
     typeName::Ident,
     typeParams::[TypeSpec]
     }
-  | TypeParam { typeParamName::Ident }
+  | TypeVar { typeParamName::Ident }
   | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
 
@@ -1903,7 +1903,7 @@ data TypeSpec = TypeSpec {
 -- has been looked up and fully qualified.
 typeSpecModule :: TypeSpec -> Maybe ModSpec
 typeSpecModule (TypeSpec mod name _) = Just $ mod ++ [name]
-typeSpecModule (TypeParam _)         = Nothing
+typeSpecModule (TypeVar _)         = Nothing
 typeSpecModule AnyType               = Nothing
 typeSpecModule InvalidType           = Nothing
 
@@ -2625,7 +2625,7 @@ showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis detism inline sub) =
 
 -- |How to show a type specification.
 instance Show TypeSpec where
-  show TypeParam{typeParamName=name} = "@" ++ name
+  show TypeVar{typeParamName=name} = "@" ++ name
   show AnyType = "?"
   show InvalidType = "!INVALID!"
   show (TypeSpec optmod ident args) =
