@@ -310,6 +310,18 @@ data Typing = Typing {
                   }
             deriving (Show,Eq,Ord)
 
+-- |This specifies a type, but permits a type to be specified indirectly,
+--  as simply identical to the type of another variable, or directly.
+data TypeRef = DirectType {typeRefType :: TypeSpec}
+             | IndirectType {typeRefVar :: VarName}
+             deriving (Eq,Ord)
+
+
+instance Show TypeRef where
+    show (DirectType tspec) = show tspec
+    show (IndirectType var) = "typeof(" ++ show var ++ ")"
+
+
 -- |The empty typing, assigning every var the type AnyType.
 initTyping :: Typing
 initTyping = Typing Map.empty []
