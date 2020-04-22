@@ -16,7 +16,7 @@ module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
   Determinism(..), determinismName,
-  TypeProto(..), TypeSpec(..), TypeImpln(..),
+  TypeProto(..), TypeSpec(..), TypeVarName, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt, expIsConstant,
@@ -1129,7 +1129,7 @@ data Module = Module {
   modRootModSpec :: Maybe ModSpec, -- ^Root module of the file, if it's a file
   isPackage :: Bool,               -- ^Is module actually a package
   modSpec :: ModSpec,              -- ^The module path name
-  modParams :: [Ident],            -- ^The module/type parameters
+  modParams :: [TypeVarName],      -- ^The module/type parameters
   modIsType :: Bool,               -- ^Is this module a type, defined early
   modTypeRep :: Maybe TypeRepresentation, -- ^Type representation, when known
   modInterface :: ModuleInterface, -- ^The public face of this module
@@ -1895,9 +1895,14 @@ data TypeSpec = TypeSpec {
     typeName::Ident,
     typeParams::[TypeSpec]
     }
-  | TypeVar { typeParamName::Ident }
+  | TypeVar { typeParamName::TypeVarName }
   | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
+
+
+-- |A specifier for a type variable
+type TypeVarName = Ident
+
 
 -- | Return the module referenced by the specified TypeSpec, assuming that it
 -- has been looked up and fully qualified.
