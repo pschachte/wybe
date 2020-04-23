@@ -15,18 +15,17 @@ The source files in this directory and their purposes are:
 | [Clause.hs](#Clause)         | Convert Wybe code to clausal (LPVM) form |
 | [Codegen.hs](#Codegen)       | Generate and emit LLVM from basic blocks of a module |
 | [Config.hs](#Config)         | Configuration for wybe compiler |
-| [DefUse.hs](#DefUse)         | Compute defined and used variables for statements and exprs |
 | [Emit.hs](#Emit)             | Emit LLVM code |
 | [Expansion.hs](#Expansion)   | Replace certain procedure calls with others |
 | [Flatten.hs](#Flatten)       | Flatten function calls (expressions) into procedure calls |
 | [Macho.hs](#Macho)           | Extended version of parser for Mach-O object format files  |
-| [NewParser.hs](#NewParser)   | Re-write of the Wybe parser using Parsec. |
-| [Normalise.hs](#Normalise)   | Convert parse tree into AST |
+| [NewParser.hs](#NewParser)   | Parser for the Wybe language using Parsec. |
+| [Normalise.hs](#Normalise)   | Convert parse tree into an AST |
 | [ObjectInterface.hs](#ObjectInterface)| Parse and edit a object file. |
 | [Optimise.hs](#Optimise)     | Framework to optimise a single module |
 | [Options.hs](#Options)       | Handle compiler options/switches |
 | [Resources.hs](#Resources)   | Resource checker for Wybe |
-| [Scanner.hs](#Scanner)       | Scanner for the Wybe language |
+| [Scanner.hs](#Scanner)       | Lexical scanner for the Wybe language |
 | [Snippets.hs](#Snippets)     | Convenience functions for generation of Wybe AST |
 | [Transform.hs](#Transform)   | Transform LPVM after alias analysis |
 | [Types.hs](#Types)           | Type checker/inferencer for Wybe |
@@ -247,11 +246,6 @@ compileModSCC, which does the following:
 **Purpose**: Configuration for wybe compiler
 
 
-## DefUse
-
-**Purpose**: Compute defined and used variables for statements and exprs
-
-
 ## Emit
 
 **Purpose**: Emit LLVM code
@@ -274,12 +268,12 @@ compileModSCC, which does the following:
 
 ## NewParser
 
-**Purpose**: Re-write of the Wybe parser using Parsec.
+**Purpose**: Parser for the Wybe language using Parsec.
 
 
 ## Normalise
 
-**Purpose**: Convert parse tree into AST
+**Purpose**: Convert parse tree into an AST
 
 
 ## ObjectInterface
@@ -304,7 +298,7 @@ compileModSCC, which does the following:
 
 ## Scanner
 
-**Purpose**: Scanner for the Wybe language
+**Purpose**: Lexical scanner for the Wybe language
 
 
 ## Snippets

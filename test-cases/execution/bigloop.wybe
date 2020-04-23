@@ -3,7 +3,7 @@
 ?sum = 0
 ?i = 0
 do {
-   while i < 1_000_000_000
+   while i < 100_000_000
    incr(!i)
    ?sum = sum + 2
 }
