@@ -1638,7 +1638,7 @@ data ProcAnalysis = ProcAnalysis {
 } deriving (Eq,Generic)
 
 isCompiled :: ProcImpln -> Bool
-isCompiled (ProcDefPrim _ _ _ _) = True
+isCompiled ProcDefPrim {} = True
 isCompiled (ProcDefSrc _) = False
 
 instance Show ProcImpln where
