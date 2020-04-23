@@ -1,0 +1,9 @@
+!read(?i:int)
+!read(?f:float)
+# get rid of '\n'
+!read(?tmp:char)
+!read(?s:string)
+!println("----------")
+!println(i)
+!println(f)
+!println(s)

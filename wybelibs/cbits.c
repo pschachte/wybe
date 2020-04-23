@@ -9,13 +9,12 @@
 #include <stdint.h>
 #include <math.h>
 
-// putchard - putchar that takes a double and returns 0.
-int print_int(int X) {
-    return printf("%d", X);
+int print_int(int x) {
+    return printf("%d", x);
 }
 
-int print_float(double X) {
-    return printf("%f", X);
+int print_float(double x) {
+    return printf("%f", x);
 }
 
 int print_string(const char *s) {
@@ -26,6 +25,34 @@ int read_char() {
     int ch;
     ch = getchar();
     return ch;
+}
+
+int read_int() {
+    int x;
+    scanf("%d", &x);
+    return x;
+}
+
+double read_float() {
+    double x;
+    scanf("%lf", &x);
+    return x;
+}
+
+char *read_line() {
+    // init size
+    size_t size = 32;
+    // "string" can't contain pointers, so we can use the atomic version
+    // to avoid GC scans it.
+    char *str = GC_malloc_atomic(sizeof(char) * size);
+    int c;
+    size_t len = 0;
+    while (EOF != (c = getchar()) && c != '\n') {
+        str[len++] = c;
+        if(len == size) str = GC_realloc(str, sizeof(char) * (size *= 2));
+    }
+    str[len++] = '\0';
+    return GC_realloc(str, sizeof(char) * len);
 }
 
 int ipow(int base, int exp) {

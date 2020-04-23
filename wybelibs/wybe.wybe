@@ -87,11 +87,11 @@ pub module io {
 
     pub def print(x:int) use !io { foreign c print_int(x, !io) }
     pub def println(x:int) use !io { !print(x) !nl }
-    # pub def read(?x:int) use !io { foreign c read_int(?x,!io) }
+    pub def read(?x:int) use !io { foreign c read_int(?x,!io) }
 
     pub def print(x:float) use !io { foreign c print_float(x,!io) }
     pub def println(x:float) use !io { !print(x) !nl }
-    # pub def read(?x:float) use !io { foreign c read_float(?x,!io) }
+    pub def read(?x:float) use !io { foreign c read_float(?x,!io) }
 
     pub def print(x:char) use !io { foreign c putchar(x,!io) }
     pub def println(x:char) use !io { !print(x) !nl }
@@ -99,7 +99,7 @@ pub module io {
 
     pub def print(x:string) use !io { foreign c print_string(x,!io) }
     pub def println(x:string) use !io { !print(x) !nl }
-    # pub def read(?x:string) use !io { foreign c read_line(?x,!io) }
+    pub def read(?x:string) use !io { foreign c read_line(?x,!io) }
 
     pub def print(x:bool) use !io {
        !print(if false(x) then "false" else "true")
