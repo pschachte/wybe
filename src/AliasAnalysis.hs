@@ -485,6 +485,11 @@ completeMultiSpeczInfo realParams info =
 
 -- TODO: reuse cells that are different types but has the same size.
 -- TODO: call "GC_free" on large unused dead cells.
+-- TODO: we'd like this analysis to detect structures that are dead aside from
+--       later access instructions, which could be moved earlier to allow the
+--       structure to be reused.
+-- TODO: consider re-run the optimiser after this or even run this before the
+--       optimiser.
 
 -- Update dead cells info based on the given prim. If a dead cell comes from a
 -- parameter, then we mark that parameter as interesting.

@@ -134,10 +134,10 @@ transformPrim aliasedParams ((aliasMap, deadCells), prims) prim = do
             PrimCall spec args -> do
                 spec' <- _updatePrimCallForSpecz 
                             spec args aliasedParams aliasMap
-                return $ (PrimCall spec' args, deadCells)
+                return (PrimCall spec' args, deadCells)
             PrimForeign "lpvm" "mutate" flags args -> do
                 let args' = _updateMutateForAlias aliasMap aliasedParams args
-                return $ (PrimForeign "lpvm" "mutate" flags args', deadCells)
+                return (PrimForeign "lpvm" "mutate" flags args', deadCells)
             -- dead cell transform
             PrimForeign "lpvm" "access" _ args -> do
                 deadCells' 
@@ -150,7 +150,7 @@ transformPrim aliasedParams ((aliasMap, deadCells), prims) prim = do
                 let primc' = case result of 
                         Nothing -> primc
                         Just (selectedCell, _) -> 
-                            -- replace "access" with "move" by reusing the 
+                            -- replace "alloc" with "move" by reusing the 
                             -- "selectedCell".
                             let [_, varOut] = args in
                             let varIn = 
