@@ -5,11 +5,11 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-module AliasAnalysis (aliasSccBottomUp,
-                        currentAliasInfo,
-                        isAliasInfoChanged,
-                        updateAliasedByPrim,
-                        pairArgVarWithParam) where
+module AliasAnalysis (
+    aliasSccBottomUp, currentAliasInfo, isAliasInfoChanged, updateAliasedByPrim,
+    pairArgVarWithParam, DeadCells, updateDeadCellsByAccessArgs,
+    assignDeadCellsByAllocArgs
+    ) where
 
 import           AST
 import           Control.Monad
@@ -31,7 +31,11 @@ import           Util
 -- "Global Level Aliasing Analysis" section below.
 type AliasMultiSpeczInfoLocal = Set PrimVarName
 
-type AliasInfo = (AliasMap, AliasMultiSpeczInfoLocal)
+-- For each type, record all reusable cells, more on this can be found under
+-- the "Dead Memory Cell Analysis" section below.
+type DeadCells = Map TypeSpec [PrimVarName]
+
+type AnalysisInfo = (AliasMap, AliasMultiSpeczInfoLocal, DeadCells)
 
 -- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
 aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
@@ -121,7 +125,7 @@ aliasProcDef def
 
         -- Actual analysis
         (aliasMap, multiSpeczInfo) <- 
-                aliasedByBody caller body (emptyDS, Set.empty)
+                aliasedByBody caller body (emptyDS, Set.empty, Map.empty)
         
         aliasMap' <- completeAliasMap caller aliasMap
         let multiSpeczInfo' =
@@ -136,50 +140,60 @@ aliasProcDef def
 aliasProcDef def = return def
 
 
--- analysis a [ProcBody]
-aliasedByBody :: PrimProto -> ProcBody -> AliasInfo -> Compiler AliasInfo
-aliasedByBody caller body aliasInfo =
-    aliasedByPrims caller body aliasInfo >>=
+-- Analysis a [ProcBody]
+-- It doesn't return [DeadCells].
+aliasedByBody :: PrimProto -> ProcBody -> AnalysisInfo 
+                                -> Compiler (AliasMap, AliasMultiSpeczInfoLocal)
+aliasedByBody caller body analysisInfo =
+    aliasedByPrims caller body analysisInfo >>=
     aliasedByFork caller body
 
 
 -- Check alias created by prims of caller proc
-aliasedByPrims :: PrimProto -> ProcBody -> AliasInfo -> Compiler AliasInfo
-aliasedByPrims caller body aliasInfo = do
+aliasedByPrims :: PrimProto -> ProcBody -> AnalysisInfo -> Compiler AnalysisInfo
+aliasedByPrims caller body analysisInfo = do
     realParams <- (primParamName <$>) <$> protoRealParams caller
     let prims = bodyPrims body
     -- Analyse simple prims:
     -- (only process alias pairs incurred by move, access, cast)
     logAlias "\nAnalyse prims (aliasedByPrims):    "
-    foldM (aliasedByPrim realParams) aliasInfo prims
+    foldM (aliasedByPrim realParams) analysisInfo prims
 
 
 -- Recursively analyse forked body's prims
 -- PrimFork only appears at the end of a ProcBody
-aliasedByFork :: PrimProto -> ProcBody -> AliasInfo -> Compiler AliasInfo
-aliasedByFork caller body aliasInfo = do
+-- It doesn't return [DeadCells].
+aliasedByFork :: PrimProto -> ProcBody -> AnalysisInfo
+                                -> Compiler (AliasMap, AliasMultiSpeczInfoLocal)
+aliasedByFork caller body analysisInfo = do
     logAlias "\nAnalyse forks (aliasedByFork):"
     let fork = bodyFork body
     case fork of
         PrimFork _ _ _ fBodies -> do
             logAlias ">>> Forking:"
-            aliasInfos <- 
-                mapM (\body' -> aliasedByBody caller body' aliasInfo) fBodies
-            let (aliasMaps, multiSpeczInfos) = unzip aliasInfos
+            analysisInfos <- 
+                mapM (\body' -> aliasedByBody caller body' analysisInfo) fBodies
+            let (aliasMaps, multiSpeczInfos) = unzip analysisInfos
             let aliasMap' = List.foldl combineTwoDS emptyDS aliasMaps
             let multiSpeczInfo' = mergeMultiSpeczInfo multiSpeczInfos 
             return (aliasMap', multiSpeczInfo')
         NoFork -> do
             logAlias ">>> No fork."
-            return aliasInfo
+            -- drop [deadCells], we don't need it after fork
+            let (aliasMap, multiSpeczInfo, _) = analysisInfo
+            return (aliasMap, multiSpeczInfo)
 
 
-aliasedByPrim :: [PrimVarName] -> AliasInfo -> Placed Prim -> Compiler AliasInfo
-aliasedByPrim realParams (aliasMap, multiSpeczInfo) prim = do
+aliasedByPrim :: [PrimVarName] -> AnalysisInfo -> Placed Prim
+                                                -> Compiler AnalysisInfo
+aliasedByPrim realParams (aliasMap, multiSpeczInfo, deadCells) prim = do
     aliasMap' <- updateAliasedByPrim realParams aliasMap prim
     multiSpeczInfo' 
         <- updateMultiSpeczInfoByPrim realParams (aliasMap, multiSpeczInfo) prim
-    return (aliasMap', multiSpeczInfo')
+    (multiSpeczInfo'', deadCells')
+        <- updateDeadCellsByPrim realParams 
+                            (aliasMap, multiSpeczInfo', deadCells) prim
+    return (aliasMap', multiSpeczInfo'', deadCells')
 
 
 -- |Log a message, if we are logging optimisation activity.
@@ -196,10 +210,10 @@ completeAliasMap :: PrimProto -> AliasMap -> Compiler AliasMap
 completeAliasMap caller aliasMap = do
     -- Clean up summary of aliases by removing phantom params
     -- and singletons
-    realParams <- (Set.fromList . (primParamName <$>))
+    realParams <- Set.fromList . (primParamName <$>)
                     <$> protoRealParams caller
     -- ^realParams is a list of formal params of this caller
-    let aliasMap' = filterDS (\x -> Set.member x realParams) aliasMap
+    let aliasMap' = filterDS (`Set.member` realParams) aliasMap
                         |> removeSingletonFromDS
     -- Some logging
     logAlias $ "^^^  after analyse:    " ++ show aliasMap
@@ -210,7 +224,8 @@ completeAliasMap caller aliasMap = do
 
 -- Build up alias pairs triggerred by proc calls
 -- realParams: caller's formal params
-updateAliasedByPrim :: [PrimVarName] -> AliasMap -> Placed Prim -> Compiler AliasMap
+updateAliasedByPrim :: [PrimVarName] -> AliasMap -> Placed Prim 
+                                                -> Compiler AliasMap
 updateAliasedByPrim realParams aliasMap prim =
     case content prim of
         PrimCall spec args -> do
@@ -367,7 +382,7 @@ finalArgs _ finalSet _ = return finalSet
 ----------------------------------------------------------------
 --                 Global Level Aliasing Analysis
 ----------------------------------------------------------------
--- The local above consider all parameters as aliased, and this global
+-- The local one above considers all parameters as aliased, and this global
 -- one is to extend that by generating specialized procedures where 
 -- some parameters aren't aliased.
 -- The code here is to analysis each procedure and list parameters
@@ -450,6 +465,116 @@ isArgVarInteresting _aliasMap _ = False
 
 -- Convert the set of interesting params to list
 -- The order matters, we keep it the same as the [realParams].
-completeMultiSpeczInfo :: [PrimVarName] -> AliasMultiSpeczInfoLocal -> AliasMultiSpeczInfo
+completeMultiSpeczInfo :: [PrimVarName] -> AliasMultiSpeczInfoLocal
+                                                -> AliasMultiSpeczInfo
 completeMultiSpeczInfo realParams info = 
     List.filter (`Set.member` info) realParams
+
+
+----------------------------------------------------------------
+--                 Dead Memory Cell Analysis
+----------------------------------------------------------------
+-- This analyser finds dead memory cells so we can reuse them to
+-- avoid some alloc instructions.
+-- The currently alias map is undirectional, so we have to identify
+-- dead cells using access instruction. 
+-- if there is an access instruction that reads some value from x,
+-- then we consider x is dead if x is unaliased and final.
+--
+-- The transform part can be found in "Tranform.hs".
+
+-- TODO: reuse cells that are different types but has the same size.
+-- TODO: call "GC_free" on large unused dead cells.
+-- TODO: we'd like this analysis to detect structures that are dead aside from
+--       later access instructions, which could be moved earlier to allow the
+--       structure to be reused.
+-- TODO: consider re-run the optimiser after this or even run this before the
+--       optimiser.
+
+-- Update dead cells info based on the given prim. If a dead cell comes from a
+-- parameter, then we mark that parameter as interesting.
+updateDeadCellsByPrim :: [PrimVarName] -> AnalysisInfo -> Placed Prim 
+        -> Compiler (AliasMultiSpeczInfoLocal, DeadCells)
+updateDeadCellsByPrim realParams (aliasMap, multiSpeczInfo, deadCells) prim =
+    case content prim of
+        PrimForeign "lpvm" "access" _ args -> do
+            -- During analysis, we consider all "realParams" are non-aliased
+            deadCells' 
+                <- updateDeadCellsByAccessArgs [] (aliasMap, deadCells) args
+            return (multiSpeczInfo, deadCells')
+        PrimForeign "lpvm" "alloc" _ args  -> do
+            let (result, deadCells') =
+                    assignDeadCellsByAllocArgs realParams deadCells args
+            multiSpeczInfo' <- 
+                case result of
+                    Nothing -> return multiSpeczInfo
+                    Just (selectedCell, possibleCells) -> 
+                        if List.elem selectedCell realParams
+                        then do
+                            -- Mark all "possibleCells" as interesting. Since 
+                            -- it trys to avoid "realParams" if possible,
+                            -- [possibleCells] here are all from "realParams".
+                            -- TODO: we need something better than this. this 
+                            -- may create some specialized versions that are 
+                            -- identical.
+                            logAlias $ "Found interesting parameters in dead "
+                                    ++ "cell analysis. " ++ show possibleCells
+                            return (possibleCells 
+                                |> Set.fromList 
+                                |> Set.union multiSpeczInfo)
+                        else return multiSpeczInfo
+            return (multiSpeczInfo', deadCells')
+        _ ->
+            return (multiSpeczInfo, deadCells)
+
+
+-- Find new dead cell from the given "primArgs" of "access" instruction.
+updateDeadCellsByAccessArgs :: [PrimVarName] -> (AliasMap, DeadCells) 
+        -> [PrimArg] -> Compiler DeadCells
+updateDeadCellsByAccessArgs aliasedParams (aliasMap, deadCells) primArgs = do
+    -- [struct:type, offset:int, ?member:type2]
+    let [struct, _, _] = primArgs
+    let ArgVar{argVarName=varName, argVarType=ty, argVarFinal=final} = struct
+    rep <- lookupTypeRepresentation ty
+    if not (connectedToOthersInDS varName aliasMap) && final 
+        && List.notElem varName aliasedParams && rep == Just Address
+    then do
+        logAlias $ "Found new dead cell: " ++ show varName 
+                    ++ " type:" ++ show ty
+        return $ Map.alter (\x ->
+            (case x of 
+                Nothing -> [varName]
+                Just cells -> varName:cells)
+            |> Just
+            ) ty deadCells
+    else
+        return deadCells
+
+
+-- Try to assign a dead cell to reuse for the given "alloc" instruction.
+-- It returns (result, deadCells). result is "Nothing" when there isn't a
+-- suitable dead cell to reuse. Otherwise, result is Just 
+-- (selectedCell, possibleCells). "possibleCells" contains cells that can be 
+-- selected (used for analysis).
+assignDeadCellsByAllocArgs :: [PrimVarName] -> DeadCells -> [PrimArg] -> 
+        (Maybe (PrimVarName, [PrimVarName]), DeadCells)
+assignDeadCellsByAllocArgs realParams deadCells primArgs =
+    -- [size:int, ?struct:type]
+    let [_, struct] = primArgs in
+    let ArgVar{argVarName=varName, argVarType=ty} = struct in
+    case Map.lookup ty deadCells of 
+        Nothing    -> (Nothing, deadCells)
+        Just cells -> 
+            let assigned = 
+                    -- Always try to avoid realParams if possible
+                    case List.find (`List.notElem` realParams) cells of
+                        Just x  -> Just x
+                        Nothing -> case cells of 
+                            []    -> Nothing
+                            (x:_) -> Just x
+            in
+            case assigned of 
+                Nothing -> (Nothing, deadCells)
+                Just x  -> 
+                    let cells' = List.delete x cells in
+                    (Just (x, cells), Map.insert ty cells' deadCells)
