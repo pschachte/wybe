@@ -10,7 +10,7 @@ module Util (sameLength, maybeNth, setMapInsert,
              emptyDS, addOneToDS, unionTwoInDS, 
              combineTwoDS, removeSingletonFromDS,
              addConnectedGroupToDS, removeOneFromDS,
-             removeFromDS, connectedToOthersInDS,
+             removeFromDS, connectedItemsInDS,
              mapDS, filterDS, dsToTransitivePairs) where
 
 
@@ -93,6 +93,7 @@ type DisjointSet a = Set (Set a)
 
 emptyDS = Set.empty
 
+
 _findOneInSet :: (a -> Bool) -> Set a -> Maybe a
 _findOneInSet f = 
     Set.foldr 
@@ -101,6 +102,7 @@ _findOneInSet f =
                 Just _ -> result
                 Nothing -> if f x then Just x else Nothing
             ) Nothing
+
 
 addOneToDS :: Ord a => a -> DisjointSet a -> DisjointSet a
 addOneToDS x ds = 
@@ -136,6 +138,7 @@ unionTwoInDS x y ds =
             in
                 Set.insert newSet'' ds''
 
+
 combineTwoDS :: Ord a => DisjointSet a -> DisjointSet a -> DisjointSet a
 combineTwoDS =
     Set.foldr (\set ds -> addConnectedGroupToDS (Set.toList set) ds)
@@ -162,16 +165,20 @@ removeSingletonFromDS :: Ord a => DisjointSet a -> DisjointSet a
 removeSingletonFromDS =
     Set.filter (\x -> Set.size x > 1)
 
-connectedToOthersInDS :: Ord a => a -> DisjointSet a -> Bool
-connectedToOthersInDS x ds =
+
+-- return a set of items that the given item is connected to.
+connectedItemsInDS :: Ord a => a -> DisjointSet a -> Set a
+connectedItemsInDS x ds =
     case _findOneInSet (Set.member x) ds of 
-        Nothing -> False
-        Just xSet -> Set.size xSet > 1
+        Nothing -> Set.empty
+        Just xSet -> Set.delete x xSet
+
 
 -- The map function must be a bijection, i.e. 1-to-1 mapping.
-mapDS :: Ord a => (a -> a) -> DisjointSet a -> DisjointSet a
+mapDS :: (Ord a, Ord b) => (a -> b) -> DisjointSet a -> DisjointSet b
 mapDS f = 
     Set.map (Set.map f)
+
 
 filterDS :: Ord a => (a -> Bool) -> DisjointSet a -> DisjointSet a
 filterDS f ds =

@@ -1593,12 +1593,12 @@ data ProcImpln
 
 -- | The identity of each specialized version. It needs to be a bijection
 -- between this Id and the specialized condition. 
--- Currently, [Int] is enought. We can change it to [Tuple] when there 
--- are more things to consider. More detial can be found in [Transform.hs]
+-- Currently, "Int" is enought. We can change it to "Tuple" when there 
+-- are more things to consider. More detial can be found in "Transform.hs"
 type SpeczVersionId = Int
 
 
--- Convert [SpeczVersionId] to [String] so it can be shorter in function
+-- Convert "SpeczVersionId" to "String" so it can be shorter in function
 -- name.
 speczIdToString :: SpeczVersionId -> String
 speczIdToString speczId = 
@@ -1610,7 +1610,8 @@ speczIdToString speczId =
 -- actual implementation
 type SpeczProcBodies = Map SpeczVersionId ProcBody
 
--- | Use UnionFind method to record the alias information
+
+-- | Use to record the alias relation between arguments of a procedure.
 type AliasMap = DisjointSet PrimVarName
 
 
@@ -1618,10 +1619,12 @@ type AliasMap = DisjointSet PrimVarName
 showAliasMap :: AliasMap -> String
 showAliasMap aliasMap = show $ aliasMapToAliasPairs aliasMap
 
+
 -- | a synonym function to hide the impletation of how unionfind is converted to
 -- alias pairs
 aliasMapToAliasPairs :: AliasMap -> [(PrimVarName, PrimVarName)]
 aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
+
 
 -- | Multiple specialization info for global alias 
 type AliasMultiSpeczInfo = [PrimVarName]

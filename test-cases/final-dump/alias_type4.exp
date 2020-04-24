@@ -41,13 +41,13 @@ AFTER EVERYTHING:
     foreign lpvm alloc(16:wybe.int, ?tmp$9#0:alias_type4.posrec)
     foreign lpvm mutate(~tmp$9#0:alias_type4.posrec, ?tmp$10#0:alias_type4.posrec, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$6#0:alias_type4.position)
     foreign lpvm mutate(~tmp$10#0:alias_type4.posrec, ?tmp$11#0:alias_type4.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int)
-    alias_type4.foo<0>(~tmp$11#0:alias_type4.posrec, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_type4:16:2
+    alias_type4.foo<0>[1](~tmp$11#0:alias_type4.posrec, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_type4:16:2
 
 
 foo > public (1 calls)
 0: foo(r1#0:alias_type4.posrec, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasMultiSpeczInfo: [r1#0]
     foreign lpvm access(~r1#0:alias_type4.posrec, 0:wybe.int, ?tmp$0#0:alias_type4.position)
     foreign lpvm mutate noalias(~tmp$0#0:alias_type4.position, ?%pos1#1:alias_type4.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 1111:wybe.int)
     foreign lpvm access(~pos1#1:alias_type4.position, 0:wybe.int, ?tmp$1#0:wybe.int)
@@ -96,7 +96,7 @@ entry:
   %15 = inttoptr i64 %14 to i64* 
   %16 = getelementptr  i64, i64* %15, i64 0 
   store  i64 1, i64* %16 
-  tail call fastcc  void  @"alias_type4.foo<0>"(i64  %11)  
+  tail call fastcc  void  @"alias_type4.foo<0>[1]"(i64  %11)  
   ret void 
 }
 
@@ -120,6 +120,23 @@ entry:
   %29 = getelementptr  i64, i64* %28, i64 0 
   %30 = load  i64, i64* %29 
   tail call ccc  void  @print_int(i64  %30)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  void @"alias_type4.foo<0>[1]"(i64  %"r1#0")    {
+entry:
+  %31 = inttoptr i64 %"r1#0" to i64* 
+  %32 = getelementptr  i64, i64* %31, i64 0 
+  %33 = load  i64, i64* %32 
+  %34 = inttoptr i64 %33 to i64* 
+  %35 = getelementptr  i64, i64* %34, i64 0 
+  store  i64 1111, i64* %35 
+  %36 = inttoptr i64 %33 to i64* 
+  %37 = getelementptr  i64, i64* %36, i64 0 
+  %38 = load  i64, i64* %37 
+  tail call ccc  void  @print_int(i64  %38)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
