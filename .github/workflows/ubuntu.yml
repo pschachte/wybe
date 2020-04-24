@@ -21,13 +21,37 @@ jobs:
         sudo apt-get install llvm-6.0
         sudo apt-get install libtinfo-dev
         sudo apt-get install dwdiff
+
     # GitHub-hosted runners provide Haskell Stack
     # https://github.com/actions/virtual-environments/blob/master/images/linux/Ubuntu1804-README.md
     # - name: Install Haskell Stack
     #   run: wget -qO- https://get.haskellstack.org/ | sh
+
+    # cache Haskell Stack stuff
+    - name: Cache stack global package db
+      uses: actions/cache@v1
+      with:
+        path: ~/.stack
+        key: ${{ runner.os }}-stack-global-${{ hashFiles('stack.yaml') }}-${{ hashFiles('wybe.cabal') }}
+        restore-keys: |
+          ${{ runner.os }}-stack-global
+    - name: Cache stack-installed programs in ~/.local/bin
+      uses: actions/cache@v1
+      with:
+        path: ~/.local/bin
+        key: ${{ runner.os }}-stack-programs-${{ hashFiles('stack.yaml') }}-${{ hashFiles('wybe.cabal') }}
+        restore-keys: |
+          ${{ runner.os }}-stack-programs
+    - name: Cache .stack-work
+      uses: actions/cache@v1
+      with:
+        path: .stack-work
+        key: ${{ runner.os }}-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('wybe.cabal') }}
+        restore-keys: |
+          ${{ runner.os }}-stack-work
+
     - name: Install & build Haskell Stack dependencies
       run: stack build --only-dependencies
-    #   TODO: cache things above?
     - name: Build
       run: make
     - name: Run tests
