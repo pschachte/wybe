@@ -320,7 +320,8 @@ data TypeCheckState = TypeCheckState {
 type TypeChecker = StateT TypeCheckState Compiler
 
 
--- |Run a TypeChecker monad, specifying an initial typing.
+-- |Run a TypeChecker monad, specifying the proc being check and an initial
+-- typing, and returning the result plus the final typing.
 typeCheck :: ProcDef -> Typing -> TypeChecker a -> Compiler (a,Typing)
 typeCheck pdef typ checker = do
     (a,st) <- runStateT checker (TypeCheckState pdef typ)
@@ -332,23 +333,23 @@ getProcMember :: (ProcDef -> a) -> TypeChecker a
 getProcMember fn = fn <$> gets tcheckProcDef
 
 
+-- |Apply a function to the current typing
+modifyTyping :: (Typing -> Typing) -> TypeChecker ()
+modifyTyping fn = modify $ \st -> st {tcheckTyping = fn $ tcheckTyping st}
+
+
 -- |Apply a function to the current type dictionary.
 modifyDict :: (Map VarName TypeSpec -> Map VarName TypeSpec) -> TypeChecker ()
 modifyDict fn =
-    modify $ \st ->
-               st {tcheckTyping =
-                   let typing = tcheckTyping st
-                   in typing {typingDict = fn $ typingDict typing}
-                  }
+    modifyTyping $ \typing -> typing {typingDict = fn $ typingDict typing}
 
+
+-- |Apply a function to the current type variable dictionary.
 modifyTVDict :: (Map TypeVarName TypeSpec -> Map TypeVarName TypeSpec)
              -> TypeChecker ()
 modifyTVDict fn =
-    modify $ \st ->
-               st {tcheckTyping =
-                   let typing = tcheckTyping st
-                   in typing {tvarDict = fn $ tvarDict typing}
-                  }
+    modifyTyping $ \typing -> typing {tvarDict = fn $ tvarDict typing}
+
 
 -- |Lookup the ultimate type of a variable.
 lookupVar :: VarName -> TypeChecker TypeSpec
@@ -383,14 +384,16 @@ lookupTVar tvar = do
 -- |Constrain the type of a program variable, with the specified error applying
 -- if the type conflicts with the current typing.  The specified type is trusted
 -- to have already been looked up.  Returns whether successful.
-typeVar :: TypeError -> VarName -> TypeSpec -> TypeChecker Bool
-typeVar err var ty = do
+setVarType :: TypeError -> VarName -> TypeSpec -> TypeChecker Bool
+setVarType err var ty = do
     typing <- gets tcheckTyping
     let dict = typingDict typing
     let currType = fromMaybe AnyType $ Map.lookup var dict
     let newType  = meetTypes currType ty
     if newType == InvalidType
-      then return False
+      then do
+        modifyTyping $ typeError err
+        return False
       else do
         let dict' = Map.insert var newType dict
         modify (\st -> st { tcheckTyping = typing { typingDict = dict' } })
@@ -864,10 +867,10 @@ typecheckProcDecl m pdef = do
 
 
 -- |Record the types of all parameters of the current proc in the TypeChecker.
-setupParamTyping :: TypeChecker Bool
+setupParamTyping :: TypeChecker ()
 setupParamTyping = do
     params <- getProcMember (procProtoParams . procProto)
-    and <$> zipWithM setupParam params [1..]
+    zipWithM_ setupParam params [1..]
 
 
 -- |Record the types of the specified parameter with its specified argument
@@ -878,16 +881,7 @@ setupParam (Param name typ flow _) argNum = do
     typ' <- fromMaybe AnyType <$> lift (lookupType typ pos)
     procname <- getProcMember procName
     logTypeCheck $ "    type of '" ++ name ++ "' is " ++ show typ'
-    typeVar (ReasonParam procname argNum pos) name typ'
-
-
-addDeclaredType :: ProcDef -> Typing -> (Param,Int) -> Compiler Typing
-addDeclaredType pdef typs (Param name typ flow _,argNum) = do
-    let procname = procName pdef
-    let pos = procPos pdef
-    let arity = length $ procProtoParams $ procProto pdef
-    typ' <- fromMaybe AnyType <$> lookupType typ pos
-    return $ constrainVarType (ReasonParam procname arity pos) name typ' typs
+    setVarType (ReasonParam procname argNum pos) name typ'
 
 
 addResourceType :: ProcName -> OptPos -> Typing -> ResourceFlowSpec ->
