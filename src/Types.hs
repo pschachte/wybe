@@ -156,7 +156,7 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Call argument flow does not match any definition
                | ReasonOverload [ProcSpec] OptPos
                    -- ^Multiple procs with same types/flows
-               | ReasonAmbig ProcName OptPos [(VarName,[TypeRef])]
+               | ReasonAmbig ProcName OptPos [(VarName,[TypeSpec])]
                    -- ^Proc defn has ambiguous types
                | ReasonArity ProcName ProcName OptPos Int Int
                    -- ^Call to proc with wrong arity
@@ -305,33 +305,96 @@ instance Show TypeError where
 
 -- | A variable type assignment (symbol table), with a list of type errors.
 data Typing = Typing {
-      typingDict::Map VarName TypeRef,         -- ^type of each data var
-      tvarDict::Map ContextualTypeVar TypeRef, -- ^type of each type var
-      typingErrs::[TypeError]                  -- ^type errors found
+      typingDict::Map VarName TypeSpec,         -- ^type of each data var
+      tvarDict::Map TypeVarName TypeSpec, -- ^type of each type var
+      typingErrs::[TypeError]                   -- ^type errors found
       } deriving (Show,Eq,Ord)
 
 
--- |This specifies a type, but permits a type to be specified indirectly,
---  as simply identical to the type of another variable, or directly.
-data TypeRef = DirectType   {typeRefType :: TypeSpec}
-             | IndirectType {typeRefVar :: VarName}
-             | TypeVarRef   {typeVarRef :: ContextualTypeVar}
-             deriving (Eq,Ord)
+data TypeCheckState = TypeCheckState {
+      tcheckProcDef::ProcDef,
+      tcheckTyping ::Typing
+      }
 
-instance Show TypeRef where
-    show (DirectType tspec) = show tspec
-    show (IndirectType var) = "typeof(" ++ show var ++ ")"
-    show (TypeVarRef tvar) = "@" ++ show tvar
+-- |A monad to carry a Typing state.
+type TypeChecker = StateT TypeCheckState Compiler
 
 
--- |A type variable together with the context in which it occurs (caller or
--- callee).
-data ContextualTypeVar = TVarCaller TypeVarName  -- ^A type var in the caller
-                       | TVarCallee TypeVarName  -- ^A type var in the callee
-                       deriving (Eq,Ord)
-instance Show ContextualTypeVar where
-    show (TVarCaller name) = name
-    show (TVarCallee name) = "_" ++ name
+-- |Run a TypeChecker monad, specifying an initial typing.
+typeCheck :: ProcDef -> Typing -> TypeChecker a -> Compiler (a,Typing)
+typeCheck pdef typ checker = do
+    (a,st) <- runStateT checker (TypeCheckState pdef typ)
+    return (a,tcheckTyping st)
+
+
+-- |Get some attribute of the proc being type checked.
+getProcMember :: (ProcDef -> a) -> TypeChecker a
+getProcMember fn = fn <$> gets tcheckProcDef
+
+
+-- |Apply a function to the current type dictionary.
+modifyDict :: (Map VarName TypeSpec -> Map VarName TypeSpec) -> TypeChecker ()
+modifyDict fn =
+    modify $ \st ->
+               st {tcheckTyping =
+                   let typing = tcheckTyping st
+                   in typing {typingDict = fn $ typingDict typing}
+                  }
+
+modifyTVDict :: (Map TypeVarName TypeSpec -> Map TypeVarName TypeSpec)
+             -> TypeChecker ()
+modifyTVDict fn =
+    modify $ \st ->
+               st {tcheckTyping =
+                   let typing = tcheckTyping st
+                   in typing {tvarDict = fn $ tvarDict typing}
+                  }
+
+-- |Lookup the ultimate type of a variable.
+lookupVar :: VarName -> TypeChecker TypeSpec
+lookupVar var = do
+    dict <- gets $ typingDict . tcheckTyping
+    case Map.lookup var dict of
+      Nothing             -> return $ TypeRef var
+      Just (TypeVar tvar) -> lookupTVar tvar
+      Just (TypeRef var') -> do
+        ref <- lookupVar var'
+        -- implement path compression for faster later lookups:
+        modifyDict $ Map.insert var ref
+        return ref
+      Just tspec          -> return tspec
+
+-- |Lookup the ultimate type of a variable.
+lookupTVar :: TypeVarName -> TypeChecker TypeSpec
+lookupTVar tvar = do
+    tvdict <- gets $ tvarDict . tcheckTyping
+    case Map.lookup tvar tvdict of
+      Nothing              -> return $ TypeVar tvar
+      Just (TypeRef var')  -> lookupVar var'
+      Just (TypeVar tvar') -> do
+        ty <- lookupTVar tvar'
+        -- Path compression to speed up later type var lookup
+        modifyTVDict $ Map.insert tvar ty
+        return ty
+      Just tspec          -> return tspec
+
+
+
+-- |Constrain the type of a program variable, with the specified error applying
+-- if the type conflicts with the current typing.  The specified type is trusted
+-- to have already been looked up.  Returns whether successful.
+typeVar :: TypeError -> VarName -> TypeSpec -> TypeChecker Bool
+typeVar err var ty = do
+    typing <- gets tcheckTyping
+    let dict = typingDict typing
+    let currType = fromMaybe AnyType $ Map.lookup var dict
+    let newType  = meetTypes currType ty
+    if newType == InvalidType
+      then return False
+      else do
+        let dict' = Map.insert var newType dict
+        modify (\st -> st { tcheckTyping = typing { typingDict = dict' } })
+        return True
 
 
 -- |The empty typing, assigning every var the type AnyType.
@@ -343,38 +406,40 @@ validTyping :: Typing -> Bool
 validTyping (Typing _ _ errs) = List.null errs
 
 
--- |Follow a chain of TypeRefs to find the final IndirectType reference.
---  This code also sort-circuits all the keys along the path to the
---  ultimate reference, where possible, so future lookups will be faster.
+-- -- |Follow a chain of type references to find the final type.
+-- --  This code also sort-circuits all the keys along the path to the
+-- --  ultimate reference, where possible, so future lookups will be faster.
 ultimateRef :: VarName -> Typing -> (VarName,Typing)
 ultimateRef var typing
     = let (var',dict') = ultimateRef' var $ typingDict typing
       in  (var', typing {typingDict = dict' })
 
-ultimateRef' :: VarName -> Map VarName TypeRef
-             -> (VarName,Map VarName TypeRef)
+ultimateRef' :: VarName -> Map VarName TypeSpec
+             -> (VarName,Map VarName TypeSpec)
 ultimateRef' var dict
     = case Map.lookup var dict of
-          Just (IndirectType v) ->
+          Just (TypeRef v) ->
             let (var',dict') = ultimateRef' v dict
-            in (var', Map.insert var (IndirectType var') dict')
+            in (var', Map.insert var (TypeRef var') dict')
           _ -> (var,dict)
 
 
 -- |Get the type associated with a variable; AnyType if no constraint has
 --  been imposed on that variable.
 varType :: VarName -> Typing -> TypeSpec
-varType var typing = varType' typing $ IndirectType var
+varType var typing = varType' typing $ TypeRef var
 
 
 -- |Get the type associated with a variable; AnyType if no constraint has
 --  been imposed on that variable.
-varType' :: Typing -> TypeRef -> TypeSpec
-varType' _ (DirectType t) = t
-varType' typing spec@(IndirectType v) =
-    maybe AnyType (varType' typing) $ Map.lookup v $ typingDict typing
-varType' typing spec@(TypeVarRef tv) =
+varType' :: Typing -> TypeSpec -> TypeSpec
+varType' _ t@TypeSpec{} = t
+varType' _ AnyType      = AnyType
+varType' _ InvalidType  = InvalidType
+varType' typing (TypeVar tv) =
     maybe AnyType (varType' typing) $ Map.lookup tv $ tvarDict typing
+varType' typing spec@(TypeRef v) =
+    maybe AnyType (varType' typing) $ Map.lookup v $ typingDict typing
 
 
 -- |Constrain the type of the specified variable to be a subtype of the
@@ -385,7 +450,7 @@ constrainVarType reason var ty typing
     = let (var',typing') = ultimateRef var typing
       in  case meetTypes ty $ varType var' typing' of
           InvalidType -> typeError reason typing'
-          newType -> typing {typingDict = Map.insert var' (DirectType newType)
+          newType -> typing {typingDict = Map.insert var' newType
                                           $ typingDict typing' }
 
 
@@ -402,8 +467,8 @@ unifyVarTypes var1 var2 pos typing
                          (ReasonEqual (varGet var1) (varGet var2) pos)
                          typing2
           newType -> typing2 {typingDict =
-                              Map.insert vLow (DirectType newType)
-                              $ Map.insert vHigh (IndirectType vLow)
+                              Map.insert vLow newType
+                              $ Map.insert vHigh newType
                               $ typingDict typing2 }
 
 
@@ -482,7 +547,7 @@ meetTypes ty1 ty2
 localBodyProcs :: ModSpec -> ProcImpln -> [Ident]
 localBodyProcs thisMod (ProcDefSrc body) =
     foldProcCalls (localCalls thisMod) (++) [] body
-localBodyProcs thisMod (ProcDefPrim _ _ _) =
+localBodyProcs thisMod ProcDefPrim{} =
     shouldnt "Type checking compiled code"
 
 localCalls :: ModSpec -> ModSpec -> Ident -> Maybe Int -> Determinism
@@ -562,7 +627,7 @@ setExpType otherExp _ _ _ _ _
 typecheckProcSCC :: ModSpec -> SCC ProcName -> Compiler [TypeError]
 typecheckProcSCC m (AcyclicSCC name) = do
     -- A single pass is always enough for non-cyclic SCCs
-    logTypes $ "Type checking non-recursive proc " ++ name
+    logTypes $ "**** Type checking non-recursive proc " ++ name
     (_,reasons) <- typecheckProcDecls m name
     return reasons
 typecheckProcSCC m (CyclicSCC list) = do
@@ -702,16 +767,15 @@ typecheckProcDecl m pdef = do
     if vis == Public && any ((==AnyType) . paramType) params
       then return (pdef,False,[ReasonUndeclared name pos])
       else do
-        paramTyping <- foldM (addDeclaredType name pos (length params))
-                  initTyping $ zip params [1..]
+        paramTyping <- snd <$> typeCheck pdef initTyping setupParamTyping
         resourceTyping <- foldM (addResourceType name pos) paramTyping resources
         if validTyping resourceTyping
           then do
             logTypes $ "** Type checking proc " ++ name ++ ": "
                        ++ show resourceTyping
             logTypes $ "   with resources: " ++ show resources
-            let (calls,preTyping) =
-                  runState (bodyCalls def detism) resourceTyping
+            (calls,preTyping)
+                <- typeCheck pdef resourceTyping $ bodyCalls def detism
             logTypes $ "   containing calls: " ++ showBody 8 (fst <$> calls)
             let procCalls = List.filter (isRealProcCall . content . fst) calls
             let unifs = List.concatMap foreignTypeEquivs
@@ -769,10 +833,12 @@ typecheckProcDecl m pdef = do
                     let proto' = proto { procProtoParams = params' }
                     let pdef' = pdef { procProto = proto',
                                        procImpln = ProcDefSrc def' }
+                    -- XXX should just check if params changed
                     let sccAgain = validTyping typing' && pdef' /= pdef
                     logTypes $ "===== "
                                ++ (if sccAgain then "" else "NO ")
-                               ++ "Need to check again."
+                               ++ "Need to check again"
+                               ++ (if sccAgain then " (if recursive)." else ".")
                     when sccAgain
                         (logTypes $ "\n-----------------OLD:"
                                     ++ showProcDef 4 pdef
@@ -797,11 +863,30 @@ typecheckProcDecl m pdef = do
             return (pdef,False,typingErrs resourceTyping)
 
 
-addDeclaredType :: ProcName -> OptPos -> Int -> Typing -> (Param,Int) ->
-                   Compiler Typing
-addDeclaredType procname pos arity typs (Param name typ flow _,argNum) = do
+-- |Record the types of all parameters of the current proc in the TypeChecker.
+setupParamTyping :: TypeChecker Bool
+setupParamTyping = do
+    params <- getProcMember (procProtoParams . procProto)
+    and <$> zipWithM setupParam params [1..]
+
+
+-- |Record the types of the specified parameter with its specified argument
+-- number in the TypeChecker monad.
+setupParam :: Param -> Int -> TypeChecker Bool
+setupParam (Param name typ flow _) argNum = do
+    pos <- getProcMember procPos
+    typ' <- fromMaybe AnyType <$> lift (lookupType typ pos)
+    procname <- getProcMember procName
+    logTypeCheck $ "    type of '" ++ name ++ "' is " ++ show typ'
+    typeVar (ReasonParam procname argNum pos) name typ'
+
+
+addDeclaredType :: ProcDef -> Typing -> (Param,Int) -> Compiler Typing
+addDeclaredType pdef typs (Param name typ flow _,argNum) = do
+    let procname = procName pdef
+    let pos = procPos pdef
+    let arity = length $ procProtoParams $ procProto pdef
     typ' <- fromMaybe AnyType <$> lookupType typ pos
-    logTypes $ "    type of '" ++ name ++ "' is " ++ show typ'
     return $ constrainVarType (ReasonParam procname arity pos) name typ' typs
 
 
@@ -822,14 +907,14 @@ addResourceType procname pos typs rfspec = do
 
 updateParamTypes :: Typing -> [Param] -> [Param]
 updateParamTypes typing =
-    List.map (\p@(Param name typ fl afl) ->
+    List.map (\p@(Param name _ fl afl) ->
                   Param name (varType name typing) fl afl)
 
 
 -- |Return a list of the proc and foreign calls recursively in a list of
 --  statements, paired with all the possible resolutions.
 bodyCalls :: [Placed Stmt] -> Determinism
-          -> State Typing [(Placed Stmt, Determinism)]
+          -> TypeChecker [(Placed Stmt, Determinism)]
 bodyCalls [] _ = return []
 bodyCalls (pstmt:pstmts) detism = do
     rest <- bodyCalls pstmts detism
@@ -837,7 +922,6 @@ bodyCalls (pstmt:pstmts) detism = do
     let pos  = place pstmt
     case stmt of
         ProcCall{} -> return $  (pstmt,detism):rest
-        -- need to handle move instructions:
         ForeignCall{} -> return $ (pstmt,detism):rest
         TestBool _ -> return rest
         And stmts -> bodyCalls stmts detism
@@ -973,13 +1057,13 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
                                         $ "typecheckCalls with non-call stmt"
                                           ++ show noncall
     actualTypes <- mapM (expType typing) pexps
-    logTypes $ "Actual types: " ++ show actualTypes
+    logTypes $ "Actual arg types: " ++ show actualTypes
     let matches = List.map
                   (matchTypeList name callee (place pstmt) actualTypes detism)
                   typs
     let validMatches = catOKs matches
     let validTypes = nub $ procInfoTypes <$> validMatches
-    logTypes $ "Valid types = " ++ show validTypes
+    logTypes $ "Valid arg types = " ++ show validTypes
     logTypes $ "Converted types = " ++ show (boolFnToTest <$> typs)
     case validTypes of
         [] -> do
@@ -1765,3 +1849,8 @@ reportUntyped procname pos msg =
 -- |Log a message, if we are logging type checker activity.
 logTypes :: String -> Compiler ()
 logTypes = logMsg Types
+
+
+-- |Log a message in the TypeChecker monad, if we are logging type checking.
+logTypeCheck :: String -> TypeChecker ()
+logTypeCheck = lift . logTypes

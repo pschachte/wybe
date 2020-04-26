@@ -867,8 +867,9 @@ addKnownType name mspec = do
 -- |Find the definition of the specified type visible from the current module.
 lookupType :: TypeSpec -> OptPos -> Compiler (Maybe TypeSpec)
 lookupType spec@TypeVar{} _ = return $ Just spec
-lookupType AnyType          _ = return $ Just AnyType
-lookupType InvalidType      _ = return $ Just InvalidType
+lookupType spec@TypeRef{} _ = return $ Just spec
+lookupType AnyType        _ = return $ Just AnyType
+lookupType InvalidType    _ = return $ Just InvalidType
 lookupType ty@(TypeSpec mod name args) pos = do
     currMod <- getModuleSpec
     logAST $ "In module " ++ showModSpec currMod
@@ -1378,11 +1379,13 @@ updateModLLVM fn modimp = do
 -- | Given a type spec, find its internal representation (a string),
 --   if possible.
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
+lookupTypeRepresentation (TypeSpec modSpec name _) =
+    lookupModuleRepresentation $ modSpec ++ [name]
 lookupTypeRepresentation TypeVar{} = return $ Just defaultTypeRepresentation
 lookupTypeRepresentation AnyType     = return $ Just defaultTypeRepresentation
 lookupTypeRepresentation InvalidType = return Nothing
-lookupTypeRepresentation (TypeSpec modSpec name _) =
-    lookupModuleRepresentation $ modSpec ++ [name]
+lookupTypeRepresentation (TypeRef var) =
+    shouldnt $ "lookup representation of reference to type of " ++ var
 
 
 -- |Given a module spec, find its representation, if it is a type.
@@ -1896,8 +1899,10 @@ data TypeSpec = TypeSpec {
     typeParams::[TypeSpec]
     }
   | TypeVar { typeParamName::TypeVarName }
-  | AnyType | InvalidType
-              deriving (Eq,Ord,Generic)
+  | AnyType
+  | InvalidType
+  | TypeRef { typeRefVar::VarName }
+  deriving (Eq,Ord,Generic)
 
 
 -- |A specifier for a type variable
@@ -1908,10 +1913,10 @@ type TypeVarName = Ident
 -- has been looked up and fully qualified.
 typeSpecModule :: TypeSpec -> Maybe ModSpec
 typeSpecModule (TypeSpec mod name _) = Just $ mod ++ [name]
-typeSpecModule (TypeVar _)         = Nothing
+typeSpecModule TypeVar{}             = Nothing
 typeSpecModule AnyType               = Nothing
 typeSpecModule InvalidType           = Nothing
-
+typeSpecModule TypeRef{}             = Nothing
 
 data ResourceSpec = ResourceSpec {
     resourceMod::ModSpec,
@@ -2630,13 +2635,14 @@ showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis detism inline sub) =
 
 -- |How to show a type specification.
 instance Show TypeSpec where
-  show TypeVar{typeParamName=name} = "@" ++ name
-  show AnyType = "?"
-  show InvalidType = "!INVALID!"
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++
       if List.null args then ""
       else "(" ++ (intercalate "," $ List.map show args) ++ ")"
+  show TypeVar{typeParamName=name} = "@" ++ name
+  show AnyType = "?"
+  show InvalidType = "!INVALID!"
+  show (TypeRef var) = "typeof(" ++ var ++ ")"
 
 -- |Show the use declaration for a set of resources, if it's non-empty.
 showResources :: Set.Set ResourceFlowSpec -> String
