@@ -177,6 +177,7 @@ import           Data.Map                  as Map
 import           Data.Set                  as Set
 import           Data.Maybe
 import           Emit
+import           Flow                      ((|>))
 import           Normalise                 (normalise, completeNormalisation)
 import           ObjectInterface
 
@@ -273,7 +274,7 @@ buildModuleIfNeeded force modspec possDirs = do
     logBuild $ "Building " ++ showModSpec modspec
                ++ " with library directories " ++ intercalate ", " possDirs
     loading <- gets (List.elem modspec . List.map modSpec . underCompilation)
-    let clash kind1 f1 kind2 f2 = do
+    let clash kind1 f1 kind2 f2 =
           Error <!> kind1 ++ " " ++ f1 ++ " and "
                     ++ kind2 ++ " " ++ f2 ++ " clash. There can only be one!"
     if loading
@@ -883,7 +884,7 @@ orderedDependencies targetMod =
         -- filter out std lib imports and sub-mod imports from imports
         -- since we are looking for imports which need a physical object file
         let imports =
-                List.filter (\x -> notElem x subMods) $ --  && (not.isStdLib) x) $
+                List.filter (`notElem` subMods) $ --  && (not.isStdLib) x) $
                 (keys . modImports) thisMod
         -- Check if this module 'm' has a main procedure.
         let mainExists = "" `elem` procs || "<0>" `elem` procs
@@ -892,8 +893,11 @@ orderedDependencies targetMod =
                     (True, _)     -> collected
                     (False, flag) -> (m, flag) : collected
         -- Don't visit any modspec already in `ms' (will be visited as it is)
-        let remains = List.foldr (\x acc -> if x `elem` acc then acc else x:acc)
-                ms imports
+        -- Don't visit any modspec already in `collected''
+        let remains = 
+                List.foldr (\x acc -> if x `elem` acc then acc else x:acc)
+                        ms imports
+                |> List.filter (\x -> x `notElem` List.map fst collected')
         visit remains collected'
 
 
