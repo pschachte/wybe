@@ -167,7 +167,8 @@ aliasProcDef def = return def
 
 
 -- Analysis a "ProcBody"
--- It doesn't return "DeadCells".
+-- It returns "AliasMap" and "AliasMultiSpeczInfoLocal" but not "DeadCells"
+-- since we don't need to merge it and have the result after the analysis.
 aliasedByBody :: PrimProto -> ProcBody -> AnalysisInfo 
         -> Compiler (AliasMapLocal, AliasMultiSpeczInfoLocal)
 aliasedByBody caller body analysisInfo =
@@ -187,7 +188,8 @@ aliasedByPrims caller body analysisInfo = do
 
 -- Recursively analyse forked body's prims
 -- PrimFork only appears at the end of a ProcBody
--- It doesn't return "DeadCells".
+-- It returns "AliasMap" and "AliasMultiSpeczInfoLocal" but not "DeadCells"
+-- since we don't need to merge it and have the result after the analysis.
 aliasedByFork :: PrimProto -> ProcBody -> AnalysisInfo
         -> Compiler (AliasMapLocal, AliasMultiSpeczInfoLocal)
 aliasedByFork caller body analysisInfo = do
@@ -450,20 +452,25 @@ updateMultiSpeczInfoByPrim (aliasMap, multiSpeczInfo) prim =
             let multiSpeczInfo' = 
                     List.foldr Set.insert multiSpeczInfo interestingParams
             return multiSpeczInfo'
-        PrimForeign "lpvm" "mutate" flags args -> do
-            let [fIn, _, _, ArgInt des _, _, _, _] = args
-            -- Skip "mutate" that is set to be destructive by previous optimizer
-            if des /= 1
-            then
-                -- mutate only happens on struct(address)
-                case isArgVarInteresting aliasMap fIn of
-                Right requiredParams -> do
-                    logAlias $ "Found interesting params: " 
-                            ++ show requiredParams
-                    return $ List.foldr Set.insert multiSpeczInfo requiredParams
-                Left () ->
-                    return multiSpeczInfo 
-            else return multiSpeczInfo
+        PrimForeign "lpvm" "mutate" flags args ->
+            case args of
+                [fIn, _, _, ArgInt des _, _, _, _] ->
+                    -- Skip "mutate" that is set to be destructive by 
+                    -- previous optimizer
+                    if des /= 1
+                    then
+                        -- mutate only happens on struct(address)
+                        case isArgVarInteresting aliasMap fIn of
+                        Right requiredParams -> do
+                            logAlias $ "Found interesting params: " 
+                                    ++ show requiredParams
+                            return $ List.foldr 
+                                    Set.insert multiSpeczInfo requiredParams
+                        Left () ->
+                            return multiSpeczInfo 
+                    else return multiSpeczInfo
+                _ ->
+                    shouldnt "unable to match args of lpvm mutate instruction"
         _ -> return multiSpeczInfo
 
 
