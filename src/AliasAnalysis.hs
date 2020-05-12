@@ -461,7 +461,17 @@ updateMultiSpeczInfoByPrim (aliasMap, multiSpeczInfo) prim =
                         ++ show interestingParams
             let multiSpeczInfo' = 
                     addInterestingParams multiSpeczInfo interestingParams
-            return multiSpeczInfo'
+            -- update dependencies
+            let speczVersion = List.map (\calleeParam ->
+                    let result =
+                            List.find (\(_, param, _) -> param == calleeParam)
+                                    interestingPrimCallInfo
+                    in
+                    case result of 
+                        Just (_, _, requiredParams) -> BasedOn requiredParams
+                        Nothing                     -> Aliased
+                    ) calleeInterestingParams
+            addSpeczVersion multiSpeczInfo' spec speczVersion
         PrimForeign "lpvm" "mutate" flags args ->
             case args of
                 [fIn, _, _, ArgInt des _, _, _, _] ->
@@ -522,6 +532,23 @@ addInterestingParams :: AliasMultiSpeczInfoLocal -> [PrimVarName]
 addInterestingParams info vars = 
     let (params, dependencies) = info in
         (List.foldr Set.insert params vars, dependencies)
+
+
+-- update "AliasMultiSpeczInfoLocal" by adding new specz version dependency
+addSpeczVersion :: AliasMultiSpeczInfoLocal -> ProcSpec
+        -> AliasMultiSpeczDepVersion -> Compiler AliasMultiSpeczInfoLocal
+addSpeczVersion info proc version = 
+    if List.all (== Aliased) version
+    then
+        return info
+    else do
+        logAlias $ "Found required specz version: " ++ show proc
+                ++ " :" ++ show version
+        let (params, dependencies) = info
+        let ProcSpec mod procName procID _ = proc
+        let dependencies' = Set.insert 
+                ((mod, procName, procID), version) dependencies
+        return (params, dependencies')
 
 
 -- Convert the set of interesting params to list
