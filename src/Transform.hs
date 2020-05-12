@@ -281,7 +281,7 @@ expandRequiredSpeczVersions :: [ModSpec] -> ModSpec
         -> Compiler (Bool,[(String,OptPos)])
 expandRequiredSpeczVersions scc thisMod = do
     reenterModule thisMod
-    -- logBuild $ "~=~ mod:" ++ show thisMod
+    logTransform $ "Expanding required specz versions for:" ++ show thisMod
     -- Get all specz versions that required by others
     procs <- getModuleImplementationField modProcs
     -- Go through all specz versions in this mod that required by others,
@@ -291,6 +291,7 @@ expandRequiredSpeczVersions scc thisMod = do
                 let (ProcDefPrim _ _ analysis speczBodies) = 
                         procImpln procDef
                 in
+                -- we always need the non-specialized version
                 let speczVersions = 
                         Map.keysSet speczBodies
                         |> Set.insert speczIdForStandardVersion
@@ -298,7 +299,7 @@ expandRequiredSpeczVersions scc thisMod = do
                 -- for each specz version, expand it's dependencies
                 Set.foldl (\required version ->
                     let multiSpeczInfo = procArgAliasMultiSpeczInfo analysis in
-                    let nonAliasParams = 
+                    let nonAliasParams =
                             speczIdToNonAliasedParams multiSpeczInfo version 
                     in
                     -- go through dependencies and find matches
@@ -308,15 +309,15 @@ expandRequiredSpeczVersions scc thisMod = do
                                     |> List.map (\case
                                         Aliased -> False
                                         BasedOn requiredParams ->
-                                            List.all 
+                                            List.all
                                                 (`List.elem` nonAliasParams)
-                                                requiredParams) 
+                                                requiredParams)
                                     |> nonAliasedBoolListToSpeczId
                             in
                             let (mod, procName, procId) = procSpec in
                                 ((mod, procName, procId), version)
                             ) (snd multiSpeczInfo)
-                            -- remove standard versions
+                            -- remove the standard version
                             |> Set.filter ((/= speczIdForStandardVersion) . snd)
                     in
                     -- record all matches
@@ -325,44 +326,58 @@ expandRequiredSpeczVersions scc thisMod = do
                 ) required (List.zip procDefs [0..])
             ) Set.empty procs
             |> Set.toAscList
-    -- logBuild $ "~=~ requiredVersions: " ++ show requiredVersions
+    logTransform $ "requiredVersions: " ++ show requiredVersions
     _ <- reexitModule
     -- Update each module based on the requirements
     let requiredVersions' = List.map (\((mod, procName, procId), version) ->
             (mod, (procName, (procId, version)))) requiredVersions
-    let groupByFst l = 
-            List.groupBy (\x y -> fst x == fst y) l
-            |> List.map (\xs -> (fst(head xs), List.map snd xs))
     changedList <- mapM (\(mod, versions) -> do
-            -- logBuild $ "Updating specz requirements in mod: " ++ show mod
-            reenterModule mod
-            procMap <- getModuleImplementationField modProcs
-            let procMap' = List.foldl (\procMap (procName, versions) ->
-                    let idToVersions = 
-                            versions |> groupByFst |> Map.fromAscList
-                    in
-                    Map.adjust (\procs ->
-                        List.map (\(proc, id) -> 
-                            case Map.lookup id idToVersions of
-                                Nothing -> proc
-                                Just versions ->
-                                    let procImp = procImpln proc in
-                                    let ProcDefPrim pp pb pa speczBodies = procImp in
-                                    let speczBodies' = List.foldl (\bodies version ->
-                                            Map.insertWith (\_ old -> old) version Nothing bodies
-                                            ) speczBodies versions
-                                    in
-                                    proc {procImpln = ProcDefPrim pp pb pa speczBodies'}
-                                    ) (List.zip procs [0..])
-                        ) procName procMap
-                    ) procMap (groupByFst versions)
-            let changed = procMap /= procMap' 
-            -- when changed 
-            --         (logBuild $ "new specz requirements in mod: " ++ show mod)
-            updateModImplementation (updateModProcs (const procMap'))
-            _ <- reexitModule
+            changed <- updateRequiredMultiSpeczInMod mod versions
             --  we only care about changes in current scc
             return $ changed && List.elem mod scc
         ) (groupByFst requiredVersions')
 
     return (or changedList, [])
+
+
+-- Mark a list of specz versions as required in the given module.
+-- It returns false if all the new versions already exist.
+updateRequiredMultiSpeczInMod :: ModSpec  -> [(ProcName, (Int, SpeczVersionId))] 
+        -> Compiler Bool
+updateRequiredMultiSpeczInMod mod versions = do
+    logTransform $ "Updating specz requirements in mod: " ++ show mod
+    reenterModule mod
+    procMap <- getModuleImplementationField modProcs
+    let procMap' = List.foldl (\procMap (procName, versions) ->
+            let idToVersions =
+                    versions |> groupByFst |> Map.fromAscList
+            in
+            Map.adjust (\procs ->
+                List.map (\(proc, id) ->
+                    case Map.lookup id idToVersions of
+                        Nothing -> proc
+                        Just versions ->
+                            let procImp = procImpln proc in
+                            let ProcDefPrim pp pb pa speczBodies = procImp in
+                            let speczBodies' = List.foldl (\bodies version ->
+                                    Map.insertWith (\_ old -> old) 
+                                            version Nothing bodies
+                                    ) speczBodies versions
+                            in
+                            proc {procImpln = ProcDefPrim pp pb pa speczBodies'}
+                            ) (List.zip procs [0..])
+                ) procName procMap
+            ) procMap (groupByFst versions)
+    updateModImplementation (updateModProcs (const procMap'))
+    _ <- reexitModule
+    let changed = procMap /= procMap'
+    when changed 
+            (logTransform $ "new specz requirements in mod: " ++ show mod)
+    return changed
+
+
+-- Similar to "List.groupBy"
+groupByFst :: Eq a => [(a, b)] -> [(a, [b])]
+groupByFst l = 
+    List.groupBy (\x y -> fst x == fst y) l
+    |> List.map (\xs -> (fst(head xs), List.map snd xs))
