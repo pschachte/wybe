@@ -18,8 +18,9 @@ do
 	out=`echo -e "$f" | sed 's/.wybe$/.out/'`
 	exp=`echo -e "$f" | sed 's/.wybe$/.exp/'`
 	targ=`echo -e "$f" | sed 's/.wybe$//'`
-	$TIMEOUT 2 ../wybemk --force-all -L $LIBDIR $targ
-    $TIMEOUT 2 $targ < $in > $out
+	rm -f $targ
+	$TIMEOUT 2 ../wybemk --force-all -L $LIBDIR $targ >/dev/null
+    $TIMEOUT 2 $targ < $in &> $out
 	if [ ! -r $exp ] ; then 
 		printf "[31m?[39m"
 		NEW="$NEW\n    $out"
