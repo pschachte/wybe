@@ -38,6 +38,7 @@ instance Binary Prim
 instance Binary PrimVarName
 instance Binary PrimArg
 instance Binary ProcAnalysis
+instance Binary AliasMultiSpeczDepVersionParamInfo
 
 -- Procedures
 instance Binary ProcSpec

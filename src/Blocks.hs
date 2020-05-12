@@ -28,7 +28,7 @@ import           Data.List                       as List
 import           Data.Map                        as Map
 import qualified Data.Set                        as Set
 import           Data.Word                       (Word32)
-import           Data.Maybe                      (fromMaybe)
+import           Data.Maybe                      (fromMaybe, fromJust)
 import           Flow                            ((|>))
 import qualified LLVM.AST                        as LLVMAST
 import qualified LLVM.AST.Constant               as C
@@ -217,7 +217,9 @@ translateProc modProtos proc = do
     (block, count') <- 
             lift $ _translateProcImpl modProtos proto body count
     -- translate the specialized versions
-    let speczBodies' = Map.toList speczBodies
+    let speczBodies' = speczBodies
+                        |> Map.toList
+                        |> List.map (\(id, body) -> (id, fromJust body))
     (blocks, count'') <-
             foldlM (\(currBlocks, currCount) (id, currBody) -> do
                     -- rename this version of proc

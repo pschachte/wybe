@@ -52,7 +52,7 @@ transformProc def
                 logTransform $ "Generating specialized version: " ++ show id
                 sbody <- 
                     transformBody caller body (aliasMap, Map.empty)
-                return (id, sbody)
+                return (id, Just sbody)
             ) versions
 
         return def { procImpln = 
@@ -177,9 +177,10 @@ _updatePrimCallForSpecz spec args aliasMap = do
     calleeDef <- getProcDef spec
     let (ProcDefPrim calleeProto _ analysis _) = procImpln calleeDef
     let calleeMultiSpeczInfo = procArgAliasMultiSpeczInfo analysis
+    let calleeInterestingParams = fst calleeMultiSpeczInfo
     let nonAliasedArgWithParams = List.filter (\(arg, param) ->
                 -- it should be in callee's interesting params list
-                List.elem param calleeMultiSpeczInfo
+                List.elem param calleeInterestingParams
                 -- it should be an interesting variable
                 && Right [] == isArgVarInteresting aliasMap arg
             ) (pairArgVarWithParam args calleeProto)
@@ -226,8 +227,9 @@ _updateMutateForAlias _ args = args
 -- generating all versions for now.
 allPossiblespeczIds :: AliasMultiSpeczInfo -> [SpeczVersionId]
 allPossiblespeczIds speczInfo = 
-    let maxId = (2 ^ List.length speczInfo) - 1 in
-        if List.length speczInfo >= 20
+    let interestingParams = fst speczInfo in
+    let maxId = (2 ^ List.length interestingParams) - 1 in
+        if List.length interestingParams >= 20
         -- TODO: handle this
         then shouldnt "Too many versions"
         else [1..maxId] 
@@ -237,7 +239,7 @@ allPossiblespeczIds speczInfo =
 speczIdToNonAliasedParams :: AliasMultiSpeczInfo
                             -> SpeczVersionId -> [PrimVarName]
 speczIdToNonAliasedParams speczInfo speczId =
-    List.zip [0..] speczInfo 
+    List.zip [0..] (fst speczInfo)
     |> List.filter (\(idx, _) -> 
             Bits.testBitDefault speczId idx)
     |> List.map snd
@@ -248,7 +250,7 @@ speczIdToNonAliasedParams speczInfo speczId =
 nonAliasedParamsToSpeczId :: AliasMultiSpeczInfo
                             -> [PrimVarName] -> SpeczVersionId
 nonAliasedParamsToSpeczId speczInfo nonAliasedParams =
-    List.zip [0..] speczInfo
+    List.zip [0..] (fst speczInfo)
     |> List.map (\(idx, param) ->
         if List.elem param nonAliasedParams
             then Bits.bit idx
