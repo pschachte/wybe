@@ -63,7 +63,7 @@ module AST (
   getModule, getModuleInterface, updateModule, getSpecModule,
   updateModImplementation, updateModImplementationM, updateModLLVM,
   addForeignImport, addForeignLib,
-  updateModInterface, updateAllProcs, updateModSubmods,
+  updateModInterface, updateAllProcs, updateModSubmods, updateModProcs,
   getModuleSpec, getModuleParams, option, getOrigin, getSource, getDirectory,
   optionallyPutStr, message, errmsg, (<!>), genProcName,
   addImport, doImport, addType, lookupType, publicType,

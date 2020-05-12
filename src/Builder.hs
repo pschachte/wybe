@@ -172,6 +172,7 @@ import           Control.Monad
 import           Control.Monad.Trans
 import           Control.Monad.Trans.State
 import qualified Data.ByteString.Char8     as BS
+import           Data.Graph                as Graph
 import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Set                  as Set
@@ -193,7 +194,9 @@ import           System.Directory
 import           System.FilePath
 import           System.Exit
 import           System.IO.Temp            (createTempDirectory)
-import           Transform                 (transformProc)
+import           Transform                 (transformProc,
+                                            generateSpeczVersionInProc,
+                                            expandRequiredSpeczVersions)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
@@ -240,6 +243,11 @@ buildTarget force target = do
               then logBuild $ "Nothing to be done for target: " ++ target
               else do
                   logBuild $ "Emitting Target: " ++ target
+                  -- For the executable case, the top-level module is the one
+                  -- that contains main. So we'll run 
+                  -- "expandRequiredSpeczVersions" inside "buildExecutable"
+                  unless (tType == ExecutableFile) 
+                          (multiSpeczTopDownPass [modname])
                   case tType of
                      ObjectFile     -> emitObjectFile [modname] target
                      BitcodeFile    -> emitBitcodeFile [modname] target
@@ -657,12 +665,6 @@ compileModSCC mspecs = do
     mapM_ (transformModuleProcs transformProc)  mspecs
     logDump Transform Transform "TRANSFORM"
 
-    ----------------------------------
-    -- Create an LLVMAST.Module represtation
-    -- mapM_ blockTransformModule (List.filter (not . isStdLib) mspecs)
-    mapM_ blockTransformModule mspecs
-    stopOnError $ "translating " ++ showModSpecs mspecs
-
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs .
@@ -693,7 +695,6 @@ fixpointProcessSCC processor [modspec] = do
     (_,errors) <- processor [modspec] modspec
     -- immediate fixpoint if no mutual dependency
     mapM_ (uncurry (message Error)) errors
-    return ()
 fixpointProcessSCC processor scc = do        -- must find fixpoint
     (changed,errors) <-
         foldM (\(chg,errs) mod' -> do
@@ -808,7 +809,14 @@ buildExecutable targetMod target = do
             logBuild "o Creating temp Main module @ .../tmp/tmpMain.o"
             tmpDir <- gets tmpDir
             let tmpMainOFile = tmpDir </> "tmpMain.o"
+            -- main module only contain a signle proc that doesn't have a specz
+            -- version, we build it first.
+            blockTransformModule mainMod
+            stopOnError $ "translating " ++ showModSpecs [mainMod]
             emitObjectFile mainMod tmpMainOFile
+
+            -- run top-down pass here
+            multiSpeczTopDownPass mainMod
 
             ofiles <- mapM (loadObjectFile . fst) depends
             depMods <- catMaybes <$> mapM (getLoadedModule . fst) depends
@@ -941,7 +949,58 @@ objectReBuildNeeded thisMod dir = do
         _ -> return True
 
 
+-----------------------------------------------------------------------------
+-- Top-Down Pass for Multiple Specialization                               --
+-----------------------------------------------------------------------------
 
+-- | Run a top-down pass starting form the given module.
+-- It will find all required specialized versions and generate them.
+-- It also calls "blockTransformModule" to transform LPVM code to LLVM code.
+-- TODO: handle stdlib such as "wybe". It's read-only so we can't fill in specz
+-- versions like this. Currently it's ok because it does not have a specz
+-- version.
+multiSpeczTopDownPass :: ModSpec -> Compiler ()
+multiSpeczTopDownPass mainMod = do
+    logBuild $ " === Running top-down pass starting form: " ++ show mainMod
+    dependencies <- topDownOrderedDependencySCCs mainMod
+    mapM_ (\ms -> do
+        logBuild $ " --- Running on: " ++ show ms
+        -- collecting all required spec versions
+        fixpointProcessSCC expandRequiredSpeczVersions ms
+
+        -- generating required specz versions
+        mapM_ (transformModuleProcs generateSpeczVersionInProc) ms
+
+        -- transform lpvm code to llvm code.
+        -- TODO: skip this if the module is unchanged.
+        mapM_ blockTransformModule ms
+        stopOnError $ "translating " ++ showModSpecs ms
+        ) dependencies
+
+
+-- | Given the entry module, compute the dependency graph and topological sort
+-- it based on the top-down order.
+topDownOrderedDependencySCCs :: ModSpec -> Compiler [[ModSpec]]
+topDownOrderedDependencySCCs m = do
+    dependencies <- dfs m Map.empty
+    dependencies
+        |> Map.toList
+        |> List.map (\(m, imports) -> (m, m, imports))
+        |> Graph.stronglyConnComp
+        |> List.map (\x -> case x of 
+                AcyclicSCC m -> [m]
+                CyclicSCC ms -> ms)
+        |> List.reverse
+        |> return
+    where
+    dfs m visited =
+        if Map.member m visited
+        then return visited
+        else do
+            thisMod <- getLoadedModuleImpln m
+            let imports = (keys . modImports) thisMod
+            let visited' = Map.insert m imports visited
+            foldM (flip dfs) visited' imports
 
 -----------------------------------------------------------------------------
 -- Module Source Handlers                                                  --
