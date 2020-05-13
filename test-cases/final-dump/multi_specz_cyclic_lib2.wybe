@@ -1,0 +1,13 @@
+use multi_specz_cyclic_lib
+
+pub def foo2(x1:position, x2:position, x3:position, x4:position, n:int) use !io {
+    ?n = n - 1
+    if { n < 0 :: 
+            !modifyAndPrint(x1, 111)
+            !modifyAndPrint(x2, 222)
+            !modifyAndPrint(x3, 333)
+            !modifyAndPrint(x4, 444)
+        | otherwise ::
+            !foo1(x2, x3, x4, x1, n)
+    }
+}
