@@ -943,9 +943,14 @@ objectReBuildNeeded thisMod dir = do
 
         -- both exist:  is source younger?
         ModuleSource (Just srcfile) (Just objfile) _ _ -> do
-            srcDate <- (liftIO . getModificationTime) srcfile
-            dstDate <- (liftIO . getModificationTime) objfile
-            return $ srcDate > dstDate
+            -- TODO: Multiple specialization make this part not working because
+            -- the object file can change (new specz requirement) even if the 
+            -- source code is not changed. Need something better.
+
+            -- srcDate <- (liftIO . getModificationTime) srcfile
+            -- dstDate <- (liftIO . getModificationTime) objfile
+            -- return $ srcDate > dstDate
+            return True
         _ -> return True
 
 
