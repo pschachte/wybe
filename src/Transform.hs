@@ -101,6 +101,9 @@ transformBody caller body (aliasMap, deadCells) = do
     -- Update body while checking alias incurred by bodyfork
     transformForks caller body' (aliaseMap', deadCells')
 
+    -- TODO: run (or re-run) optimizations here since after the transform, there
+    -- might be some new opportunities.
+
 
 -- Check alias created by prims of caller proc
 transformPrims :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells) 
@@ -298,6 +301,7 @@ expandRequiredSpeczVersions scc thisMod = do
                 in
                 -- for each specz version, expand it's dependencies
                 Set.foldl (\required version ->
+                    -- TODO: select which specializations to use
                     let multiSpeczInfo = procArgAliasMultiSpeczInfo analysis in
                     let nonAliasParams =
                             speczIdToNonAliasedParams multiSpeczInfo version 
@@ -353,7 +357,7 @@ updateRequiredMultiSpeczInMod mod versions = do
                     versions |> groupByFst |> Map.fromAscList
             in
             Map.adjust (\procs ->
-                List.map (\(proc, id) ->
+                List.zipWith (\proc id ->
                     case Map.lookup id idToVersions of
                         Nothing -> proc
                         Just versions ->
@@ -365,7 +369,7 @@ updateRequiredMultiSpeczInMod mod versions = do
                                     ) speczBodies versions
                             in
                             proc {procImpln = ProcDefPrim pp pb pa speczBodies'}
-                            ) (List.zip procs [0..])
+                            ) procs [0..]
                 ) procName procMap
             ) procMap (groupByFst versions)
     updateModImplementation (updateModProcs (const procMap'))

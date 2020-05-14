@@ -200,6 +200,7 @@ import           Transform                 (transformProc,
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
+import           Util                      (sccElts)
 import           Snippets
 import           BinaryFactory
 import qualified Data.ByteString.Char8 as BS
@@ -945,7 +946,9 @@ objectReBuildNeeded thisMod dir = do
         ModuleSource (Just srcfile) (Just objfile) _ _ -> do
             -- TODO: Multiple specialization make this part not working because
             -- the object file can change (new specz requirement) even if the 
-            -- source code is not changed. Need something better.
+            -- source code is not changed. Need something better. Also that the
+            -- original version doesn't work anyway. Due to inlining, a object
+            -- file can be changed if its dependencies changes.
 
             -- srcDate <- (liftIO . getModificationTime) srcfile
             -- dstDate <- (liftIO . getModificationTime) objfile
@@ -961,12 +964,14 @@ objectReBuildNeeded thisMod dir = do
 -- | Run a top-down pass starting form the given module.
 -- It will find all required specialized versions and generate them.
 -- It also calls "blockTransformModule" to transform LPVM code to LLVM code.
--- TODO: handle stdlib such as "wybe". It's read-only so we can't fill in specz
--- versions like this. Currently it's ok because it does not have a specz
--- version.
+-- TODO: handle read-only object file such as stdlib "wybe". We can't fill in
+-- specz versions like this. Currently it's ok because it does not have a specz
+-- version. Tt's probably a good idea to only revise .o files in the current
+-- directory, and handle any object files in a different directory the same way
+-- we handle stdlib.
 multiSpeczTopDownPass :: ModSpec -> Compiler ()
 multiSpeczTopDownPass mainMod = do
-    logBuild $ " === Running top-down pass starting form: " ++ show mainMod
+    logBuild $ " === Running top-down pass starting from: " ++ show mainMod
     dependencies <- topDownOrderedDependencySCCs mainMod
     mapM_ (\ms -> do
         logBuild $ " --- Running on: " ++ show ms
@@ -992,9 +997,7 @@ topDownOrderedDependencySCCs m = do
         |> Map.toList
         |> List.map (\(m, imports) -> (m, m, imports))
         |> Graph.stronglyConnComp
-        |> List.map (\x -> case x of 
-                AcyclicSCC m -> [m]
-                CyclicSCC ms -> ms)
+        |> List.map sccElts
         |> List.reverse
         |> return
     where
