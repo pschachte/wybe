@@ -42,5 +42,4 @@ else
 fi
 if [ -n "$NEW" ] ; then
 	echo -e "New tests: $NEW\nDo .\update-exp to specify expected output"
-	exit 1
 fi

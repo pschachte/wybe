@@ -5,8 +5,10 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
+{-# LANGUAGE LambdaCase #-}
 
-module Transform (transformProc) where
+module Transform (transformProc,
+        generateSpeczVersionInProc, expandRequiredSpeczVersions) where
 
 import           AliasAnalysis
 import           AST
@@ -15,6 +17,7 @@ import           Data.Bits     as Bits
 import           Data.List     as List
 import           Data.Map      as Map
 import           Data.Maybe    as Maybe
+import           Data.Set      as Set
 import           Flow          ((|>))
 import           Options       (LogSelection (Transform))
 import           Util
@@ -34,32 +37,42 @@ transformProc def
         logTransform $ show caller
         logTransform $ replicate 60 '~'
 
-        unless (Map.null speczBodies) $ shouldnt "speczBodies should be empty"
-
         -- transform the standard body
         -- In this case, all input params are aliased
         inputParams <- protoInputParamNames caller
         aliasMap <- initAliasMap inputParams []
         body' <- transformBody caller body (aliasMap, Map.empty)
 
-        -- generate&transform all specz versions
-        let speczInfo = procArgAliasMultiSpeczInfo analysis
-        let versions = allPossiblespeczIds speczInfo
-        speczBodies' <- mapM (\id -> do
-                let nonAliasedParams = speczIdToNonAliasedParams speczInfo id 
-                aliasMap <- initAliasMap inputParams nonAliasedParams
-                logTransform $ replicate 60 '~'
-                logTransform $ "Generating specialized version: " ++ show id
-                sbody <- 
-                    transformBody caller body (aliasMap, Map.empty)
-                return (id, sbody)
-            ) versions
-
-        return def { procImpln = 
-                        ProcDefPrim caller body' 
-                        analysis (Map.fromList speczBodies')}
+        return def { procImpln = ProcDefPrim caller body' analysis speczBodies}
 
 transformProc def = return def
+
+
+-- For the given "ProcDef", generates all specz versions that are required but
+-- haven't got generated.
+generateSpeczVersionInProc :: ProcDef -> Compiler ProcDef
+generateSpeczVersionInProc def
+    | not (procInline def) = do
+        let procImp = procImpln def
+        let ProcDefPrim caller body analysis speczBodies = procImp
+        let speczInfo = procArgAliasMultiSpeczInfo analysis
+        inputParams <- protoInputParamNames caller
+        speczBodiesList <- mapM (\(id, sbody) ->
+            case sbody of 
+                Just b -> return (id, Just b)
+                Nothing -> do
+                    let nonAliasedParams =
+                            speczIdToNonAliasedParams speczInfo id 
+                    aliasMap <- initAliasMap inputParams nonAliasedParams
+                    logTransform $ replicate 60 '~'
+                    logTransform $ "Generating specialized version: " ++ show id
+                    sbody' <- transformBody caller body (aliasMap, Map.empty)
+                    return (id, Just sbody')
+                    ) (Map.toAscList speczBodies)
+        let speczBodies' = Map.fromDistinctAscList speczBodiesList
+        return $ def {procImpln = ProcDefPrim caller body analysis speczBodies'}
+
+generateSpeczVersionInProc def = return def
 
 
 -- init aliasMap based on the given "nonAliasedParams",
@@ -87,6 +100,9 @@ transformBody caller body (aliasMap, deadCells) = do
     -- (2) Analysis of caller's bodyFork
     -- Update body while checking alias incurred by bodyfork
     transformForks caller body' (aliaseMap', deadCells')
+
+    -- TODO: run (or re-run) optimizations here since after the transform, there
+    -- might be some new opportunities.
 
 
 -- Check alias created by prims of caller proc
@@ -177,9 +193,10 @@ _updatePrimCallForSpecz spec args aliasMap = do
     calleeDef <- getProcDef spec
     let (ProcDefPrim calleeProto _ analysis _) = procImpln calleeDef
     let calleeMultiSpeczInfo = procArgAliasMultiSpeczInfo analysis
+    let calleeInterestingParams = fst calleeMultiSpeczInfo
     let nonAliasedArgWithParams = List.filter (\(arg, param) ->
                 -- it should be in callee's interesting params list
-                List.elem param calleeMultiSpeczInfo
+                List.elem param calleeInterestingParams
                 -- it should be an interesting variable
                 && Right [] == isArgVarInteresting aliasMap arg
             ) (pairArgVarWithParam args calleeProto)
@@ -222,22 +239,11 @@ _updateMutateForAlias _ args = args
 -- of the [Int]
 
 
--- List all possible specialized version ids since we are
--- generating all versions for now.
-allPossiblespeczIds :: AliasMultiSpeczInfo -> [SpeczVersionId]
-allPossiblespeczIds speczInfo = 
-    let maxId = (2 ^ List.length speczInfo) - 1 in
-        if List.length speczInfo >= 20
-        -- TODO: handle this
-        then shouldnt "Too many versions"
-        else [1..maxId] 
-
-
 -- Return a list of non aliased parameters based on the given id
 speczIdToNonAliasedParams :: AliasMultiSpeczInfo
                             -> SpeczVersionId -> [PrimVarName]
 speczIdToNonAliasedParams speczInfo speczId =
-    List.zip [0..] speczInfo 
+    List.zip [0..] (fst speczInfo)
     |> List.filter (\(idx, _) -> 
             Bits.testBitDefault speczId idx)
     |> List.map snd
@@ -248,14 +254,134 @@ speczIdToNonAliasedParams speczInfo speczId =
 nonAliasedParamsToSpeczId :: AliasMultiSpeczInfo
                             -> [PrimVarName] -> SpeczVersionId
 nonAliasedParamsToSpeczId speczInfo nonAliasedParams =
-    List.zip [0..] speczInfo
-    |> List.map (\(idx, param) ->
-        if List.elem param nonAliasedParams
-            then Bits.bit idx
-            else Bits.zeroBits)
-    |> List.foldl (Bits..|.) Bits.zeroBits 
+    List.map (`List.elem` nonAliasedParams) (fst speczInfo)
+    |> nonAliasedBoolListToSpeczId
+
+
+-- Compute the "SpeczVersionId" based on the given list of bool. "True" means
+-- that the corresponding params is non-aliased.
+nonAliasedBoolListToSpeczId :: [Bool] -> SpeczVersionId
+nonAliasedBoolListToSpeczId bools = 
+    List.zip [0..] bools
+    |> List.map (\(idx, bool) -> if bool then Bits.bit idx else Bits.zeroBits)
+    |> List.foldl (Bits..|.) Bits.zeroBits
+
+
+-- The "SpeczVersionId" for the standard (non-specialized) version
+speczIdForStandardVersion :: SpeczVersionId
+speczIdForStandardVersion = 0
 
 
 -- |Log a message, if we are logging optimisation activity.
 logTransform :: String -> Compiler ()
 logTransform = logMsg Transform
+
+
+-- Fix point processor for expanding required specz versions.
+-- TODO: This part can be optimized by using "getSccProcs" and tracking the diff
+-- between each run.
+expandRequiredSpeczVersions :: [ModSpec] -> ModSpec 
+        -> Compiler (Bool,[(String,OptPos)])
+expandRequiredSpeczVersions scc thisMod = do
+    reenterModule thisMod
+    logTransform $ "Expanding required specz versions for:" ++ show thisMod
+    -- Get all specz versions that required by others
+    procs <- getModuleImplementationField modProcs
+    -- Go through all specz versions in this mod that required by others,
+    -- expand those to find all required versions
+    let requiredVersions = Map.foldlWithKey (\required procName procDefs ->
+            List.foldl (\required (procDef, procId) -> 
+                let (ProcDefPrim _ _ analysis speczBodies) = 
+                        procImpln procDef
+                in
+                -- we always need the non-specialized version
+                let speczVersions = 
+                        Map.keysSet speczBodies
+                        |> Set.insert speczIdForStandardVersion
+                in
+                -- for each specz version, expand it's dependencies
+                Set.foldl (\required version ->
+                    -- TODO: select which specializations to use
+                    let multiSpeczInfo = procArgAliasMultiSpeczInfo analysis in
+                    let nonAliasParams =
+                            speczIdToNonAliasedParams multiSpeczInfo version 
+                    in
+                    -- go through dependencies and find matches
+                    let depMatches = Set.map (\(procSpec, dep) ->
+                            let version =
+                                    dep
+                                    |> List.map (\case
+                                        Aliased -> False
+                                        BasedOn requiredParams ->
+                                            List.all
+                                                (`List.elem` nonAliasParams)
+                                                requiredParams)
+                                    |> nonAliasedBoolListToSpeczId
+                            in
+                            let (mod, procName, procId) = procSpec in
+                                ((mod, procName, procId), version)
+                            ) (snd multiSpeczInfo)
+                            -- remove the standard version
+                            |> Set.filter ((/= speczIdForStandardVersion) . snd)
+                    in
+                    -- record all matches
+                    Set.union required depMatches
+                    ) required speczVersions
+                ) required (List.zip procDefs [0..])
+            ) Set.empty procs
+            |> Set.toAscList
+    logTransform $ "requiredVersions: " ++ show requiredVersions
+    _ <- reexitModule
+    -- Update each module based on the requirements
+    let requiredVersions' = List.map (\((mod, procName, procId), version) ->
+            (mod, (procName, (procId, version)))) requiredVersions
+    changedList <- mapM (\(mod, versions) -> do
+            changed <- updateRequiredMultiSpeczInMod mod versions
+            --  we only care about changes in current scc
+            return $ changed && List.elem mod scc
+        ) (groupByFst requiredVersions')
+
+    return (or changedList, [])
+
+
+-- Mark a list of specz versions as required in the given module.
+-- It returns false if all the new versions already exist.
+updateRequiredMultiSpeczInMod :: ModSpec  -> [(ProcName, (Int, SpeczVersionId))] 
+        -> Compiler Bool
+updateRequiredMultiSpeczInMod mod versions = do
+    logTransform $ "Updating specz requirements in mod: " ++ show mod
+    reenterModule mod
+    procMap <- getModuleImplementationField modProcs
+    let procMap' = List.foldl (\procMap (procName, versions) ->
+            let idToVersions =
+                    versions |> groupByFst |> Map.fromAscList
+            in
+            Map.adjust (\procs ->
+                List.zipWith (\proc id ->
+                    case Map.lookup id idToVersions of
+                        Nothing -> proc
+                        Just versions ->
+                            let procImp = procImpln proc in
+                            let ProcDefPrim pp pb pa speczBodies = procImp in
+                            let speczBodies' = List.foldl (\bodies version ->
+                                    Map.insertWith (\_ old -> old) 
+                                            version Nothing bodies
+                                    ) speczBodies versions
+                            in
+                            proc {procImpln = ProcDefPrim pp pb pa speczBodies'}
+                            ) procs [0..]
+                ) procName procMap
+            ) procMap (groupByFst versions)
+    updateModImplementation (updateModProcs (const procMap'))
+    _ <- reexitModule
+    let changed = procMap /= procMap'
+    when changed 
+            (logTransform $ "new specz requirements in mod: " ++ show mod)
+    return changed
+
+
+-- Similar to "List.groupBy"
+groupByFst :: Eq a => [(a, b)] -> [(a, [b])]
+groupByFst l = 
+    List.groupBy (\x y -> fst x == fst y) l
+    |> List.map (\xs -> (fst(head xs), List.map snd xs))

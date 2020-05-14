@@ -26,12 +26,13 @@ import           Options       (LogSelection (Analysis))
 import           Util
 
 
--- This type is for local use only. It stores interesting parameters during
--- the analysis. After the analysis, it will be converted to 
--- "AliasMultiSpeczInfo" and stored in LPVM module. 
+-- This type is for local use only. After the analysis, it will be converted to 
+-- "AliasMultiSpeczInfo" and stored in LPVM module. It's almost the same as
+-- "AliasMultiSpeczInfo" but it use "Set" so it can be easier to use during
+-- analysis. Original definition can be found in "AST.hs".
 -- More on this can be found under the 
 -- "Global Level Aliasing Analysis" section below.
-type AliasMultiSpeczInfoLocal = Set PrimVarName
+type AliasMultiSpeczInfoLocal = (Set PrimVarName, AliasMultiSpeczDep)
 
 
 -- This "AliasMapLocal" is used during analysis and it will be converted to
@@ -151,7 +152,8 @@ aliasProcDef def
 
         -- Actual analysis
         (aliasMap, multiSpeczInfo) <- 
-                aliasedByBody caller body (initAliasMap, Set.empty, Map.empty)
+                aliasedByBody caller body
+                        (initAliasMap, (Set.empty, Set.empty), Map.empty)
         
         aliasMap' <- completeAliasMap caller aliasMap
         let multiSpeczInfo' =
@@ -413,7 +415,13 @@ removeDeadVar aliasMap args =
 
 
 mergeMultiSpeczInfo :: [AliasMultiSpeczInfoLocal] -> AliasMultiSpeczInfoLocal
-mergeMultiSpeczInfo = List.foldl Set.union Set.empty
+mergeMultiSpeczInfo info =
+    let (interestingParamsList, dependenciesList) = List.unzip info in
+    let interestingParams = 
+            List.foldl Set.union Set.empty interestingParamsList
+    in 
+    let dependencies = Set.unions dependenciesList in
+        (interestingParams, dependencies)
 
 
 -- we say a real param is interesting if it can be updated
@@ -426,13 +434,14 @@ updateMultiSpeczInfoByPrim (aliasMap, multiSpeczInfo) prim =
             calleeDef <- getProcDef spec
             let (ProcDefPrim calleeProto _ analysis _) = procImpln calleeDef
             let calleeMultiSpeczInfo = procArgAliasMultiSpeczInfo analysis
+            let calleeInterestingParams = fst calleeMultiSpeczInfo
             -- [(arg, calleeParam, [requiredCallerParam])]
             let interestingPrimCallInfo = 
                     pairArgVarWithParam args calleeProto
                     |> List.filter (\(arg, param) -> 
                         -- we only care parameters that are interesting,
                         -- args that aren't struct(address) are removed.
-                        List.elem param calleeMultiSpeczInfo
+                        List.elem param calleeInterestingParams
                         -- if a argument is used more than once,
                         -- then it should be aliased
                         && List.length (List.filter (== arg) args) == 1) 
@@ -444,14 +453,25 @@ updateMultiSpeczInfoByPrim (aliasMap, multiSpeczInfo) prim =
                                 Nothing)
             logAlias $ "interestingPrimCallInfo: " 
                     ++ show interestingPrimCallInfo
+            -- update interesting params
             let interestingParams = 
                     List.concatMap (\(_, _, x) -> x) interestingPrimCallInfo
             unless (List.null interestingParams) 
                         $ logAlias $ "Found interesting params: " 
                         ++ show interestingParams
             let multiSpeczInfo' = 
-                    List.foldr Set.insert multiSpeczInfo interestingParams
-            return multiSpeczInfo'
+                    addInterestingParams multiSpeczInfo interestingParams
+            -- update dependencies
+            let speczVersion = List.map (\calleeParam ->
+                    let result =
+                            List.find (\(_, param, _) -> param == calleeParam)
+                                    interestingPrimCallInfo
+                    in
+                    case result of 
+                        Just (_, _, requiredParams) -> BasedOn requiredParams
+                        Nothing                     -> Aliased
+                    ) calleeInterestingParams
+            addSpeczVersion multiSpeczInfo' spec speczVersion
         PrimForeign "lpvm" "mutate" flags args ->
             case args of
                 [fIn, _, _, ArgInt des _, _, _, _] ->
@@ -464,8 +484,8 @@ updateMultiSpeczInfoByPrim (aliasMap, multiSpeczInfo) prim =
                         Right requiredParams -> do
                             logAlias $ "Found interesting params: " 
                                     ++ show requiredParams
-                            return $ List.foldr 
-                                    Set.insert multiSpeczInfo requiredParams
+                            return $ addInterestingParams multiSpeczInfo
+                                        requiredParams
                         Left () ->
                             return multiSpeczInfo 
                     else return multiSpeczInfo
@@ -506,12 +526,38 @@ isArgVarInteresting aliasMap ArgVar{argVarName=varName, argVarFinal=final} =
 isArgVarInteresting _ _ = Left ()
 
 
+-- update "AliasMultiSpeczInfoLocal" by adding interesting params
+addInterestingParams :: AliasMultiSpeczInfoLocal -> [PrimVarName]
+        -> AliasMultiSpeczInfoLocal
+addInterestingParams info vars = 
+    let (params, dependencies) = info in
+        (List.foldr Set.insert params vars, dependencies)
+
+
+-- update "AliasMultiSpeczInfoLocal" by adding new specz version dependency
+addSpeczVersion :: AliasMultiSpeczInfoLocal -> ProcSpec
+        -> AliasMultiSpeczDepVersion -> Compiler AliasMultiSpeczInfoLocal
+addSpeczVersion info proc version = 
+    if List.all (== Aliased) version
+    then
+        return info
+    else do
+        logAlias $ "Found required specz version: " ++ show proc
+                ++ " :" ++ show version
+        let (params, dependencies) = info
+        let ProcSpec mod procName procID _ = proc
+        let dependencies' = Set.insert 
+                ((mod, procName, procID), version) dependencies
+        return (params, dependencies')
+
+
 -- Convert the set of interesting params to list
 -- The order matters, we keep it the same as the "realParams".
 completeMultiSpeczInfo :: [PrimVarName] -> AliasMultiSpeczInfoLocal
         -> AliasMultiSpeczInfo
 completeMultiSpeczInfo realParams info = 
-    List.filter (`Set.member` info) realParams
+    let (params, dependencies) = info in
+    (List.filter (`Set.member` params) realParams, dependencies)
 
 
 ----------------------------------------------------------------
@@ -554,9 +600,8 @@ updateDeadCellsByPrim (aliasMap, multiSpeczInfo, deadCells) prim =
                         then do
                             logAlias $ "Found interesting parameters in dead "
                                     ++ "cell analysis. " ++ show requiredParams
-                            return (requiredParams 
-                                    |> Set.fromList 
-                                    |> Set.union multiSpeczInfo)
+                            return $ addInterestingParams 
+                                        multiSpeczInfo requiredParams
                         else return multiSpeczInfo
             return (multiSpeczInfo', deadCells')
         _ ->

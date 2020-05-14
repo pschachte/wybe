@@ -196,21 +196,23 @@ expandPrim (PrimCall pspec args) pos = do
         addInstr call' pos
       else do
         def <- lift $ lift $ getProcDef pspec
-        let ProcDefPrim proto body _ _ = procImpln def
-        if procInline def
-          then inlineCall proto args' body pos
-          else do
-            -- inlinableLast <- gets (((final && singleCaller def
-            --                          && procVis def == Private) &&)
-            --                        . noFork)
-            let inlinableLast = False
-            if inlinableLast
-              then do
-                logExpansion $ "  Inlining tail call to branching proc"
-                inlineCall proto args' body pos
+        case procImpln def of
+          ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
+          ProcDefPrim proto body _ _ ->
+            if procInline def
+              then inlineCall proto args' body pos
               else do
-                logExpansion $ "  Not inlinable"
-                addInstr call' pos
+                -- inlinableLast <- gets (((final && singleCaller def
+                --                          && procVis def == Private) &&)
+                --                        . noFork)
+                let inlinableLast = False
+                if inlinableLast
+                  then do
+                    logExpansion "  Inlining tail call to branching proc"
+                    inlineCall proto args' body pos
+                  else do
+                    logExpansion "  Not inlinable"
+                    addInstr call' pos
 expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)

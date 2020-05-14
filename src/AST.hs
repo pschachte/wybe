@@ -41,7 +41,8 @@ module AST (
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
   AliasMap, aliasMapToAliasPairs,
   AliasMultiSpeczInfo, emptyAliasMultiSpeczInfo,
-  SpeczVersionId, speczIdToString, SpeczProcBodies,
+  SpeczVersionId, speczIdToString, SpeczProcBodies, AliasMultiSpeczDep,
+  AliasMultiSpeczDepVersion, AliasMultiSpeczDepVersionParamInfo(..),
   ProcAnalysis(..), ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
@@ -62,7 +63,7 @@ module AST (
   getModule, getModuleInterface, updateModule, getSpecModule,
   updateModImplementation, updateModImplementationM, updateModLLVM,
   addForeignImport, addForeignLib,
-  updateModInterface, updateAllProcs, updateModSubmods,
+  updateModInterface, updateAllProcs, updateModSubmods, updateModProcs,
   getModuleSpec, getModuleParams, option, getOrigin, getSource, getDirectory,
   optionallyPutStr, message, errmsg, (<!>), genProcName,
   addImport, doImport, addType, lookupType, publicType,
@@ -1607,8 +1608,10 @@ speczIdToString speczId =
 
 -- | A map contains different specialization versions.
 -- The key is the id of each version and the value is the 
--- actual implementation
-type SpeczProcBodies = Map SpeczVersionId ProcBody
+-- actual implementation. A procBody can be "Nothing" when it's required but
+-- haven't been generated. All procBody will be generated before converting to
+-- llvm code.
+type SpeczProcBodies = Map SpeczVersionId (Maybe ProcBody)
 
 
 -- | Use to record the alias relation between arguments of a procedure.
@@ -1626,12 +1629,34 @@ aliasMapToAliasPairs :: AliasMap -> [(PrimVarName, PrimVarName)]
 aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 
 
--- | Multiple specialization info for global alias 
-type AliasMultiSpeczInfo = [PrimVarName]
+-- | Multiple specialization info for global alias. For each procedure, it
+-- records the interesting parameters and it's dependencies(specialized 
+-- versions that this proc uses directly).
+type AliasMultiSpeczInfo = ([PrimVarName], AliasMultiSpeczDep)
+
+
+-- | Specialization versions the current proc directly uses. A set of procIdent
+-- and version.
+type AliasMultiSpeczDep = 
+        Set ((ModSpec, ProcName, ProcID), AliasMultiSpeczDepVersion)
+
+
+-- | Each version is described by a list of "ParamInfo" that matches
+-- the interesting parameters of that proc.
+type AliasMultiSpeczDepVersion = [AliasMultiSpeczDepVersionParamInfo]
+
+
+-- | This matches the each param of the callee. Each param can be 
+-- definitely "Aliased" or "BasedOn" some params of the caller.
+-- If it is "BasedOn" Nothing, then it is always non-aliased.
+data AliasMultiSpeczDepVersionParamInfo
+    = Aliased 
+    | BasedOn [PrimVarName]
+    deriving (Eq, Generic, Ord, Show)
 
 
 emptyAliasMultiSpeczInfo :: AliasMultiSpeczInfo
-emptyAliasMultiSpeczInfo = []
+emptyAliasMultiSpeczInfo = ([], Set.empty)
 
 
 -- | Stores whatever analysis results we infer about a proc definition.
@@ -1652,9 +1677,10 @@ instance Show ProcImpln where
 
 instance Show ProcAnalysis where
     show (ProcAnalysis procArgAliasMap procArgAliasMultiSpeczInfo) =
-       "\n AliasPairs: " ++ showAliasMap procArgAliasMap 
-       ++ "\n AliasMultiSpeczInfo: "  
-       ++ show procArgAliasMultiSpeczInfo
+        "\n AliasPairs: " ++ showAliasMap procArgAliasMap 
+        ++ "\n AliasMultiSpeczInfo: "  
+        -- TODO: show dependencies info in "AliasMultiSpeczInfo"
+        ++ show (fst procArgAliasMultiSpeczInfo)
 
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each

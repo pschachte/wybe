@@ -52,9 +52,6 @@ declare external ccc  void @print_string(i64)
 @alias_mod_param.19 =    constant [20 x i8] c"expect pa(1111,10):\00"
 
 
-@alias_mod_param.23 =    constant [20 x i8] c"expect pa(1111,10):\00"
-
-
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
@@ -96,18 +93,6 @@ entry:
   %20 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias_mod_param.19, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %20)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %13)  
-  ret void 
-}
-
-
-define external fastcc  void @"alias_mod_param.foo<0>[1]"(i64  %"pa#0")    {
-entry:
-  %21 = inttoptr i64 %"pa#0" to i64* 
-  %22 = getelementptr  i64, i64* %21, i64 0 
-  store  i64 1111, i64* %22 
-  %24 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias_mod_param.23, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %24)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"pa#0")  
   ret void 
 }
 --------------------------------------------------
