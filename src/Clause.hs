@@ -77,7 +77,7 @@ currVar name pos = do
 
 
 -- |Get the current numbering
-getCurrNumbering :: ClauseComp (Numbering)
+getCurrNumbering :: ClauseComp Numbering
 getCurrNumbering = gets nextVars
 
 
@@ -279,7 +279,7 @@ reconcilingAssignments caseVars jointVars params =
     Maybe.mapMaybe (reconcileOne caseVars jointVars) params
 
 
-reconcileOne :: (Numbering) -> (Numbering) -> Param
+reconcileOne :: Numbering -> Numbering -> Param
              -> Maybe (Placed Prim)
 reconcileOne caseVars jointVars (Param name ty flow ftype) =
     case (Map.lookup name caseVars,
