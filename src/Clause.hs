@@ -32,24 +32,42 @@ import           Util
 type ClauseComp = StateT ClauseCompState Compiler
 
 
--- |The state of compilation of a clause; used by the ClauseComp
--- monad.
-type ClauseCompState = Map VarName Int   -- ^current var number for each var
+-- |Associate a version number with each variable name.
+type Numbering = Map VarName Int
+
+
+-- |The state of compilation of a clause; used by the ClauseComp monad.
+-- This allows us to assign a "version" number to each variable; each
+-- time a variable is assigned, the number increments.  All input uses
+-- (reads) of a variable in a given statement use the current number of
+-- the variable, and output (write) uses use the next number.  This
+-- ensures that even a input use that follows an output use in the same
+-- statement gets the current number.  At the end of each statement, the
+-- next variable map is copied to the current variable map, so input
+-- uses of a variable in the following statement refer to the output
+-- variables of the previous statement.
+data ClauseCompState = ClauseCompState {
+        currVars :: Numbering,   -- ^current var number for each var
+        nextVars :: Numbering    -- ^var numbers after current stmt
+        }
 
 
 initClauseComp :: ClauseCompState
-initClauseComp = Map.empty
+initClauseComp = ClauseCompState Map.empty Map.empty
 
 
+-- |Get the next versioned name of the specified variable
 nextVar :: String -> ClauseComp PrimVarName
 nextVar name = do
-    modify (Map.alter (Just . maybe 0 (+1)) name)
-    currVar name Nothing
+    newNum <- gets (maybe 0 (+1) . Map.lookup name . nextVars)
+    modify $ \st -> st {nextVars = Map.insert name newNum $ nextVars st}
+    return $ PrimVarName name newNum
 
 
+-- |Get the current versioned name of the specified variable
 currVar :: String -> OptPos -> ClauseComp PrimVarName
 currVar name pos = do
-    dict <- get
+    dict <- gets currVars
     case Map.lookup name dict of
         Nothing -> do
             lift $ message Error
@@ -58,10 +76,30 @@ currVar name pos = do
         Just n -> return $ PrimVarName name n
 
 
+-- |Get the current numbering
+getCurrNumbering :: ClauseComp (Numbering)
+getCurrNumbering = gets nextVars
+
+
+-- |Set both current and next numberings to the specified mapping.
+putNumberings :: Numbering -> ClauseComp ()
+putNumberings numbering = put $ ClauseCompState numbering numbering
+
+
+-- |Prepare for the next statement, promoting the final variable
+-- numbering of the previous statement to be the current variable
+-- numbering for the next statement.
+finishStmt :: ClauseComp ()
+finishStmt = getCurrNumbering >>= putNumberings
+
+
+-- |Return a list of prims to complete a proc body.  For a SemiDet body
+-- that hasn't already had $$ assigned a value, this will assign it
+-- False; otherwise it'll be empty.
 closingStmts :: Determinism -> ClauseComp [Placed Prim]
 closingStmts Det = return []
 closingStmts SemiDet = do
-    tested <- gets $ Map.member "$$"
+    tested <- Map.member "$$" <$> getCurrNumbering
     return $ if tested
              then []
              else [Unplaced $ primMove
@@ -91,10 +129,11 @@ compileProc proc =
                          Det     -> params
         logClause $ "--------------\nCompiling proc " ++ show proto
         mapM_ (nextVar . paramName) $ List.filter (flowsIn . paramFlow) params
-        startVars <- get
+        finishStmt
+        startVars <- getCurrNumbering
         compiled <- compileBody body params' detism
         logClause $ "Compiled to:"  ++ showBlock 4 compiled
-        endVars <- get
+        endVars <- getCurrNumbering
         logClause $ "  startVars: " ++ show startVars
         logClause $ "  endVars  : " ++ show endVars
         logClause $ "  params   : " ++ show params
@@ -149,16 +188,16 @@ compileCond front pos expr thn els params detism = do
               Var var ParamIn _ -> Just <$> currVar var Nothing
               _                 -> return Nothing
           logClause $ "conditional on " ++ show expr ++ " new name = " ++ show name'
-          beforeTest <- get
+          beforeTest <- getCurrNumbering
           thn' <- compileBody thn params detism
-          afterThen <- get
+          afterThen <- getCurrNumbering
           logClause $ "  vars after then: " ++ show afterThen
-          put beforeTest
+          putNumberings beforeTest
           els' <- compileBody els params detism
-          afterElse <- get
+          afterElse <- getCurrNumbering
           logClause $ "  vars after else: " ++ show afterElse
           let final = Map.intersectionWith max afterThen afterElse
-          put final
+          putNumberings final
           logClause $ "  vars after ite: " ++ show final
           let thnAssigns = reconcilingAssignments afterThen final params
           let elsAssigns = reconcilingAssignments afterElse final params
@@ -191,6 +230,7 @@ compileSimpleStmt :: Placed Stmt -> ClauseComp (Placed Prim)
 compileSimpleStmt stmt = do
     logClause $ "Compiling " ++ showStmt 4 (content stmt)
     stmt' <- compileSimpleStmt' (content stmt)
+    finishStmt
     logClause $ "Compiled to " ++ show stmt'
     return $ maybePlace stmt' (place stmt)
 
@@ -233,13 +273,13 @@ compileArg' _   _ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 
 
-reconcilingAssignments :: Map VarName Int -> Map VarName Int
+reconcilingAssignments :: Numbering -> Numbering
                        -> [Param] -> [Placed Prim]
 reconcilingAssignments caseVars jointVars params =
     Maybe.mapMaybe (reconcileOne caseVars jointVars) params
 
 
-reconcileOne :: (Map VarName Int) -> (Map VarName Int) -> Param
+reconcileOne :: (Numbering) -> (Numbering) -> Param
              -> Maybe (Placed Prim)
 reconcileOne caseVars jointVars (Param name ty flow ftype) =
     case (Map.lookup name caseVars,
@@ -256,7 +296,7 @@ reconcileOne caseVars jointVars (Param name ty flow ftype) =
        _ -> Nothing
 
 
-compileParam :: ClauseCompState -> ClauseCompState -> Param -> PrimParam
+compileParam :: Numbering -> Numbering -> Param -> PrimParam
 compileParam startVars endVars param@(Param name ty flow ftype) =
     let (pflow,num) =
             case flow of

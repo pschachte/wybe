@@ -1,0 +1,10 @@
+def backwards_assign(?output, input) {
+    ?output = input + 1
+}
+
+?i = 0
+do {
+    !println(i)
+    backwards_assign(?i, i)
+    while i < 10
+}
