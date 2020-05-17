@@ -6,7 +6,7 @@
 --           : LICENSE in the root directory of this project.
 
 module Snippets (intType, intCast, boolType, boolCast, phantomType,
-                 varSet, varGet, varGetSet,
+                 floatType, charType, stringType, varSet, varGet, varGetSet,
                  boolVarSet, boolVarGet, intVarSet, intVarGet, castTo,
                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
                 comparison, succeedTest, failTest, succeedIfSemiDet) where
@@ -24,6 +24,18 @@ intCast exp = Typed exp intType True
 -- |The bool type
 boolType :: TypeSpec
 boolType = TypeSpec ["wybe"] "bool" []
+
+-- |The float type
+floatType :: TypeSpec
+floatType = TypeSpec ["wybe"] "float" []
+
+-- |The char type
+charType :: TypeSpec
+charType = TypeSpec ["wybe"] "char" []
+
+-- |The string type
+stringType :: TypeSpec
+stringType = TypeSpec ["wybe"] "string" []
 
 -- |Cast an expr to the bool type
 boolCast :: Exp -> Exp

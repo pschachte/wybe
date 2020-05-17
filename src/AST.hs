@@ -867,7 +867,6 @@ addKnownType name mspec = do
 -- |Find the definition of the specified type visible from the current module.
 lookupType :: TypeSpec -> OptPos -> Compiler (Maybe TypeSpec)
 lookupType spec@TypeVar{} _ = return $ Just spec
-lookupType spec@TypeRef{} _ = return $ Just spec
 lookupType AnyType        _ = return $ Just AnyType
 lookupType InvalidType    _ = return $ Just InvalidType
 lookupType ty@(TypeSpec mod name args) pos = do
@@ -1384,8 +1383,6 @@ lookupTypeRepresentation (TypeSpec modSpec name _) =
 lookupTypeRepresentation TypeVar{} = return $ Just defaultTypeRepresentation
 lookupTypeRepresentation AnyType     = return $ Just defaultTypeRepresentation
 lookupTypeRepresentation InvalidType = return Nothing
-lookupTypeRepresentation (TypeRef var) =
-    shouldnt $ "lookup representation of reference to type of " ++ var
 
 
 -- |Given a module spec, find its representation, if it is a type.
@@ -1605,12 +1602,12 @@ data ResourceImpln =
 --  normalised to a list of primitives, and an optional source
 --  position.
 data ProcDef = ProcDef {
-    procName :: Ident,          -- the proc's name
-    procProto :: ProcProto,     -- the proc's prototype
-    procImpln :: ProcImpln,     -- the actual implementation
-    procPos :: OptPos,          -- where this proc is defined
+    procName     :: Ident,      -- the proc's name
+    procProto    :: ProcProto,  -- the proc's prototype
+    procImpln    :: ProcImpln,  -- the actual implementation
+    procPos      :: OptPos,     -- where this proc is defined
     procTmpCount :: Int,        -- the next temp variable number to use
-    procCallers :: Map ProcSpec Int,
+    procCallers  :: Map ProcSpec Int,
                                 -- callers to this proc from this mod in the
                                 -- source code (before inlining) and the
                                 -- count of calls for each caller
@@ -1901,7 +1898,6 @@ data TypeSpec = TypeSpec {
   | TypeVar { typeParamName::TypeVarName }
   | AnyType
   | InvalidType
-  | TypeRef { typeRefVar::VarName }
   deriving (Eq,Ord,Generic)
 
 
@@ -1916,7 +1912,6 @@ typeSpecModule (TypeSpec mod name _) = Just $ mod ++ [name]
 typeSpecModule TypeVar{}             = Nothing
 typeSpecModule AnyType               = Nothing
 typeSpecModule InvalidType           = Nothing
-typeSpecModule TypeRef{}             = Nothing
 
 data ResourceSpec = ResourceSpec {
     resourceMod::ModSpec,
@@ -2037,7 +2032,7 @@ data Stmt
      -- |Do nothing (and succeed)
      | Nop
 
-     -- After unbranching, this con only appear as the last Stmt in a body.
+     -- After unbranching, this can only appear as the last Stmt in a body.
 
      -- |A conditional; execute the first (SemiDet) Stmts; if they succeed
      --  execute the second Stmts, else execute the third.
@@ -2642,7 +2637,6 @@ instance Show TypeSpec where
   show TypeVar{typeParamName=name} = "@" ++ name
   show AnyType = "?"
   show InvalidType = "!INVALID!"
-  show (TypeRef var) = "typeof(" ++ var ++ ")"
 
 -- |Show the use declaration for a set of resources, if it's non-empty.
 showResources :: Set.Set ResourceFlowSpec -> String
