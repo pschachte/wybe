@@ -302,7 +302,7 @@ data TypeCheckState = TypeCheckState {
       tcheckTyping  :: Typing,       -- ^The typing we've deduced so far
       -- XXX don't check determinism here any more; that's done later in a
       -- full-fledged determinism analysis incorporating a value analysis.
-      -- tcheckDetism  :: Determinism,  -- ^The determinism of the current stmt
+      tcheckDetism  :: Determinism,  -- ^Determinism context of the current stmt
       tcheckBinding :: BindingState, -- ^Variables bound at the current stmt
       tcheckDelayed :: [(Set VarName,Placed Stmt)]
                                      -- ^Statements delayed pending var bindings
@@ -339,7 +339,8 @@ type TypeChecker = StateT TypeCheckState Compiler
 typeCheck :: ProcDef -> TypeChecker a -> Compiler (a,ProcDef,[TypeError])
 typeCheck pdef checker = do
     (a,st) <- runStateT checker
-              $ TypeCheckState pdef initTyping initBindingState []
+              $ TypeCheckState pdef initTyping (procDetism pdef)
+                initBindingState []
     return (a, tcheckProcDef st, typingErrs $ tcheckTyping st)
 
 
@@ -363,28 +364,28 @@ getSuccessful :: TypeChecker Bool
 getSuccessful = List.null <$> getTypingMember typingErrs
 
 
--- -- |Get the current determism
--- getDeterminism :: TypeChecker Determinism
--- getDeterminism = gets tcheckDetism
+-- |Get the current determism
+getDeterminism :: TypeChecker Determinism
+getDeterminism = gets tcheckDetism
 
 
--- -- |Set the current determism
--- putDeterminism :: Determinism -> TypeChecker ()
--- putDeterminism detism = do
---     st <- get
---     put $ st { tcheckDetism = detism }
--- -- putDeterminism detism = modify $ \st -> st { tcheckDetism = detism }
+-- |Set the current determism
+putDeterminism :: Determinism -> TypeChecker ()
+putDeterminism detism = do
+    st <- get
+    put $ st { tcheckDetism = detism }
+-- putDeterminism detism = modify $ \st -> st { tcheckDetism = detism }
 
 
--- -- |Execute some code in the context of the specified determinism, leaving
--- -- the determinism as it is.
--- withDeterminism :: Determinism -> TypeChecker a -> TypeChecker a
--- withDeterminism detism checker = do
---     olddetism <- getDeterminism
---     putDeterminism detism
---     result <- checker
---     putDeterminism olddetism
---     return result
+-- |Execute some code in the context of the specified determinism, leaving
+-- the determinism as it is.
+withDeterminism :: Determinism -> TypeChecker a -> TypeChecker a
+withDeterminism detism checker = do
+    olddetism <- getDeterminism
+    putDeterminism detism
+    result <- checker
+    putDeterminism olddetism
+    return result
 
 
 -- |Apply a function to the current typing
@@ -592,7 +593,7 @@ typeCompatible t1 t2 =
         (_, TypeVar _)    -> True
         (TypeSpec m1 n1 p1,
          TypeSpec m2 n2 p2) ->
-           n1 == n2 && m1 == m2
+           n1 == n2 && m1 == m2 && length p1 == length p2
            && and (zipWith typeCompatible p1 p2)
 
 
@@ -1060,7 +1061,7 @@ typeCheckStmt Nop _                     = return ()
 typeCheckStmt stmt@(Cond cond thn els) _ = do
     -- withDeterminism SemiDet $ placedApplyM typeCheckStmt cond
     logTypeCheck $ "Type checking conditional:\n    " ++ showStmt 4 stmt
-    placedApplyM typeCheckStmt cond
+    withDeterminism SemiDet $ placedApplyM typeCheckStmt cond
     typeCheckBody thn
     typeCheckBody els
 typeCheckStmt (Loop nested) _           = typeCheckBody nested
@@ -1176,15 +1177,17 @@ typeCheckStmt Next _                    =  return ()
 -- uniquely determined, we remove that ambiguity.
 typeCheckCall :: ModSpec -> Ident -> Maybe Int -> Determinism -> Bool
               -> [Placed Exp] -> OptPos -> TypeChecker ()
-typeCheckCall m callee procId detism res args pos = do
+typeCheckCall m callee procId _ res args pos = do
+    -- All calls are assumed Det at this point
     logTypeCheck $ "Type checking call "
-                   ++ showStmt 4 (ProcCall m callee procId detism res args)
+                   ++ showStmt 4 (ProcCall m callee procId Det res args)
     procs <- case procId of
       Nothing  -> lift $ callTargets m callee
       Just pid -> return [ProcSpec m callee pid]
-    -- XXX probably need to filter on arity
     -- XXX probably need to handle test reification and bool testification
     let callArity = length args
+    detism <- getDeterminism
+    logTypeCheck $ "Call context is " ++ show detism
     paramLists <- lift $ mapM getParams procs
     let arityMatches = List.filter ((== callArity) . length) paramLists
     let paramTypesSet =
@@ -1206,6 +1209,11 @@ typeCheckCall m callee procId detism res args pos = do
       0 -> if List.null procs
            then reportTypeError $ ReasonUndef caller callee pos
            else if List.null arityMatches
+           -- XXX If detism is SemiDet, then try again for a match with one
+           -- extra bool output arg; also if the last call argument is a bool
+           -- output and there's a match with a semidet proc with one fewer
+           -- argument, then consider it a match.  Use boolFnToTest and
+           -- testToBoolFn.
            then reportTypeError
                 $ ReasonArity caller callee pos callArity
                   (Set.fromList $ length <$> paramLists)
@@ -1840,7 +1848,7 @@ modecheckStmt stmt@(ProcCall cmod cname _ _ resourceful args) pos = do
                 (match:_) -> do
                   let matchProc = procInfoProc match
                   let matchDetism = procInfoDetism match
-                  joinDeterminism matchDetism
+                  -- joinDeterminism matchDetism
                   reportTypeErrors
                         -- XXX Should postpone the error until we see if we can
                         -- work out that the test is certain to succeed
@@ -1871,6 +1879,7 @@ modecheckStmt stmt@(ProcCall cmod cname _ _ resourceful args) pos = do
                         delayStmt vars $ maybePlace stmt pos
                         return []
                       else do
+                        -- XXX handle implied input mode
                         reportTypeError $ ReasonUndefinedFlow cname pos
                         return []
 modecheckStmt stmt@(ForeignCall lang cname flags args) pos = do
