@@ -135,7 +135,7 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Multiple procs with same types/flows
                | ReasonAmbig ProcName OptPos [(VarName,[TypeSpec])]
                    -- ^Proc defn has ambiguous types
-               | ReasonArity ProcName ProcName OptPos Int Int
+               | ReasonArity ProcName ProcName OptPos Int (Set Int)
                    -- ^Call to proc with wrong arity
                | ReasonUndeclared ProcName ProcProto OptPos
                    -- ^Public proc with some undeclared types and inferred proto
@@ -222,15 +222,17 @@ instance Show TypeError where
     show (ReasonUninit callFrom var pos) =
         makeMessage pos $
             "Unknown variable/constant '" ++ var ++ "'"
-    show (ReasonArity callFrom callTo pos callArity procArity) =
+    show (ReasonArity callFrom callTo pos callArity procArities) =
         makeMessage pos $
             (if callFrom == ""
              then "Toplevel call"
              else "Call from " ++ callFrom) ++
             " to " ++ callTo ++ " with " ++
-            (if callArity == procArity
-             then "unsupported argument flow"
-             else show callArity ++ " arguments, expected " ++ show procArity)
+            show callArity ++ " arguments, expected "
+            ++ case show <$> Set.toAscList procArities of
+                 []  -> shouldnt "empty list of arities in ReasonArity"
+                 [n] -> n
+                 as  -> intercalate ", " (init as) ++ " or " ++ (last as)
     show (ReasonUndeclared name proto pos) =
         makeMessage pos $
         "Public definition of '" ++ name ++ "' with some undeclared types,"
@@ -450,6 +452,25 @@ setImpossible = modify $ \st -> st {tcheckBinding = Impossible}
 -- |Set that the forward execution cannot reach this point.
 setFailing :: TypeChecker ()
 setFailing = modify $ \st -> st {tcheckBinding = Failing}
+
+
+-- -- | Returns the meet of the binding state and the binding state corresponding
+-- -- to the specified determinism.
+-- meetDeterminism :: Determinism -> BindingState -> BindingState
+-- meetDeterminism Det     Impossible     = Impossible
+-- meetDeterminism Det     Failing        = Impossible
+-- meetDeterminism Det     (Possible set) = Succeeding set
+-- meetDeterminism Det     succeeding     = succeeding
+-- meetDeterminism SemiDet state          = state
+
+
+-- | Returns the join of the binding state and the binding state corresponding
+-- to the specified determinism.
+joinDeterminism :: Determinism -> TypeChecker ()
+joinDeterminism Det     = return ()
+joinDeterminism SemiDet = do
+    st <- getBindingState
+    putBindingState $ joinState Failing st
 
 
 -- |Set that the forward execution cannot reach this point.
@@ -756,23 +777,6 @@ addBindings set Impossible         = Impossible   -- XXX error case?
 addBindings set Failing            = Failing         -- XXX error case?
 addBindings set1 (Succeeding set2) = Succeeding $ set1 `Set.union` set2
 addBindings set1 (Possible set2)   = Possible $ set1 `Set.union` set2
-
-
--- -- | Returns the meet of the binding state and the binding state corresponding
--- -- to the specified determinism.
--- meetDeterminism :: Determinism -> BindingState -> BindingState
--- meetDeterminism Det     Impossible     = Impossible
--- meetDeterminism Det     Failing        = Impossible
--- meetDeterminism Det     (Possible set) = Succeeding set
--- meetDeterminism Det     succeeding     = succeeding
--- meetDeterminism SemiDet state          = state
-
-
--- | Returns the join of the binding state and the binding state corresponding
--- to the specified determinism.
-joinDeterminism :: Determinism -> BindingState -> BindingState
-joinDeterminism Det     = id
-joinDeterminism SemiDet = joinState Failing
 
 
 -- -- |Constrain the type of the specified variable to be a subtype of the
@@ -1180,8 +1184,11 @@ typeCheckCall m callee procId detism res args pos = do
       Just pid -> return [ProcSpec m callee pid]
     -- XXX probably need to filter on arity
     -- XXX probably need to handle test reification and bool testification
+    let callArity = length args
     paramLists <- lift $ mapM getParams procs
-    let paramTypesSet = Set.fromList $ List.map (List.map paramType) paramLists
+    let arityMatches = List.filter ((== callArity) . length) paramLists
+    let paramTypesSet =
+          Set.fromList $ List.map (List.map paramType) arityMatches
     logTypeCheck $ "Available argument types : "
                    ++ intercalate "\n                           "
                       (show <$> Set.toList paramTypesSet)
@@ -1196,8 +1203,12 @@ typeCheckCall m callee procId detism res args pos = do
                       (show <$> Set.toList consistent)
     caller <- getProcMember procName
     case Set.size consistent of
-      0 -> if Set.null paramTypesSet
+      0 -> if List.null procs
            then reportTypeError $ ReasonUndef caller callee pos
+           else if List.null arityMatches
+           then reportTypeError
+                $ ReasonArity caller callee pos callArity
+                  (Set.fromList $ length <$> paramLists)
            else reportTypeError $ ReasonNoMatch caller callee pos
       1 -> do
         let err n = ReasonArgType callee n pos
@@ -1639,7 +1650,8 @@ matchTypeList caller callee pos callArgTypes detismContext calleeInfo
       && sameLength callArgTypes (procInfoArgs calleeInfo'')
     = matchTypeList' callee pos callArgTypes calleeInfo''
     | otherwise
-    = Err [ReasonArity caller callee pos (length callArgTypes) (length args)]
+    = Err [ReasonArity caller callee pos (length callArgTypes)
+           (Set.singleton $ length args)]
     where args = procInfoArgs calleeInfo
           testInfo = boolFnToTest calleeInfo
           calleeInfo' = fromJust testInfo
@@ -1828,6 +1840,7 @@ modecheckStmt stmt@(ProcCall cmod cname _ _ resourceful args) pos = do
                 (match:_) -> do
                   let matchProc = procInfoProc match
                   let matchDetism = procInfoDetism match
+                  joinDeterminism matchDetism
                   reportTypeErrors
                         -- XXX Should postpone the error until we see if we can
                         -- work out that the test is certain to succeed
@@ -1845,10 +1858,8 @@ modecheckStmt stmt@(ProcCall cmod cname _ _ resourceful args) pos = do
                               (procSpecName matchProc)
                               (Just $ procSpecID matchProc)
                               matchDetism resourceful args'
-                  let assigned' =
-                        joinDeterminism matchDetism
-                        $ addBindings (pexpListOutputs args')
-                        $ addBindings (procInfoOutRes match) assigned
+                  setVarsBound $ pexpListOutputs args'
+                  setVarsBound $ procInfoOutRes match
                   return [maybePlace stmt' pos]
                 [] -> if List.any (delayModeMatch actualModes) modeMatches
                       then do
@@ -1994,6 +2005,7 @@ validateForeign "llvm" "move" _ [inArg,outArg] pos = do
     inType  <- placedApply getExpType inArg
     outType <- placedApply getExpType outArg
     setExpType (ReasonBadMove inType outType pos) (content outArg) inType
+    setExpType (ReasonBadMove inType outType pos) (content inArg) outType
 validateForeign lang name tags args pos = do
     argTypes <- mapM (placedApply getExpType) args
     maybeReps <- lift $ mapM lookupTypeRepresentation argTypes
