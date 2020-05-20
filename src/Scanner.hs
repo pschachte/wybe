@@ -30,6 +30,7 @@ data Token = TokFloat Double SourcePos          -- ^A floating point number
               | TokComma SourcePos              -- ^A comma
               | TokSymbol String SourcePos      -- ^A symbol of made up of
                                                 --  non-identifier chars
+              | TokError String SourcePos       -- ^A lexical error
               deriving (Show)
 
 -- |Returns the source position of a token.
@@ -43,6 +44,7 @@ tokenPosition (TokLBracket _  pos) = pos
 tokenPosition (TokRBracket _  pos) = pos
 tokenPosition (TokComma       pos) = pos
 tokenPosition (TokSymbol _    pos) = pos
+tokenPosition (TokError _     pos) = pos
 
 -- |Returns the value of a float token.
 floatValue :: Token -> Double
@@ -105,16 +107,11 @@ inputTokens =
 
 
 -- |Convert a sequence of characters to a sequence of tokens.
--- XXX Still not handling backslash-delimited strings; still want them?
 tokenise :: SourcePos -> String -> [Token]
 tokenise _ [] = []
 tokenise pos str@(c:cs)
   | isSpace c || isControl c = tokenise (updatePosChar pos c) cs
-  | isDigit c = let (tok,rest,newpos) = 
-                      scanNumberToken (if c=='0' then 8 else 10)
-                      (fromIntegral $ digitToInt c) 
-                      (updatePosChar pos c) cs
-                in  tok:(tokenise newpos rest)
+  | isDigit c = scanNumberToken pos str
   | isAlpha c = let (name,rest) = span isIdentChar str
                 in  multiCharTok name rest (TokIdent name pos) pos
   | otherwise = case c of
@@ -196,46 +193,75 @@ escapedChar 't' = '\t'
 escapedChar 'v' = '\v'
 escapedChar c = c
 
--- |Scan a number token.  Handles decimal and hex ints, floats with
---  decimal point and/or e notation, and ignores embedded underscores.
--- XXX doesn't put position of *start* of number in token.
-scanNumberToken :: Integer -> Integer -> SourcePos -> String -> 
-                   (Token,String,SourcePos)
-scanNumberToken _ n pos "" = (TokInt n pos, "",pos)
-scanNumberToken radix n pos str@(c:cs)
-  | isHexDigit c && (fromIntegral $ digitToInt c) < radix = 
-                scanNumberToken radix 
-                (radix*n + (fromIntegral $ digitToInt c)) 
-                (updatePosChar pos c) cs
-  | (c == 'x' || c == 'X') && n == 0 = scanNumberToken 16 0 
-                                       (updatePosChar pos c) cs
-  | c == '_' = scanNumberToken radix n (updatePosChar pos c) cs
-  | c == '.' && radix == 10 = scanNumberFrac (fromIntegral n) 0.1 
-                              (updatePosChar pos c) cs
-  | c == 'e' || c == 'E' = scanNumberExponent (fromIntegral n) 
-                           (updatePosChar pos c) cs
-  | otherwise = (TokInt n pos, str, pos)
+-- |Scan a number token and the rest of the input.  Handles decimal and hex
+--  ints, floats with decimal point and/or e notation, and ignores embedded
+--  underscores in integers. Doesn't handle negative numbers.
+scanNumberToken :: SourcePos -> [Char] -> [Token]
+scanNumberToken pos cs =
+    -- parse integer part
+    let (num,rest) = span isNumberChar cs
+        num' = map toLower $ filter (/='_') num
+        pos' = foldl updatePosChar pos num
+    in  (case num' of
+          '0':'x':hexDigits
+            -> parseInteger 16 hexDigits pos
+          '0':'b':binaryDigits
+            -> parseInteger 2 binaryDigits pos
+          '0':d:octal | isOctDigit d
+            -> parseInteger 8 num' pos
+          _ -> let (numPart,expPart) = span (/='e') num'
+                   (wholePart,fracPart) = span (/='.') numPart
+                   intTok = parseInteger 10 wholePart pos
+               in case (intTok,expPart,fracPart) of
+                    (TokInt int _, [], [])
+                      -> intTok
+                    (TokError _ _, _, _)
+                      -> intTok
+                    (_, 'e':expDigits, _)
+                      | null expDigits || any (not . isDigit) expDigits
+                      -> TokError ("Invalid float '" ++ cs ++ "'") pos
+                    (_, _, '.':fracDigits)
+                      | null fracDigits || any (not . isDigit) fracDigits
+                      -> TokError ("Invalid float '" ++ cs ++ "'") pos
+                    (TokInt intPart _, _, _) ->
+                      let fracDigits =
+                            if null fracPart then [] else tail fracPart
+                          frac =
+                            foldr
+                            (\c f -> (f + fromIntegral (digitToInt c)) / 10.0)
+                            0
+                            fracDigits
+                          expDigits =
+                            if null expPart then [] else tail expPart
+                          exponent =
+                            foldl (\e c -> e * 10 + (digitToInt c)) 0 expDigits
+                          multiplier = 10.0 ** fromIntegral exponent
+                          value = (fromIntegral intPart + frac) * multiplier
+                      in TokFloat value pos
+                    (tok, _, _) -> shouldnt $ "unexpected token "
+                                            ++ show tok
+                                            ++ " when parsing a number ")
+        : tokenise pos' rest
 
 
--- |Scan the fractional part of a float.
-scanNumberFrac :: Double -> Double -> SourcePos -> String -> 
-                  (Token,String,SourcePos)
-scanNumberFrac n weight pos "" = (TokFloat n pos, "",pos)
-scanNumberFrac n weight pos str@(c:cs)
-  | '0' <= c && c <= '9' = scanNumberFrac 
-                           (n+weight*(fromIntegral $ digitToInt c))
-                           (weight * 0.1) (updatePosChar pos c) cs
-  | c == 'e' || c == 'E' = scanNumberExponent n (updatePosChar pos c) cs
-  | otherwise = (TokFloat n pos, str,pos)
+-- |Convert the string to a non-negative integer in the specified radix.  The
+-- string has already been vetted to contain only alphanumeric characters.  This
+-- handles radices up to 36.
+parseInteger :: Integer -> [Char] -> SourcePos -> Token
+parseInteger radix str pos =
+    if all (<radix) charValues
+    then TokInt (foldl (\num val -> num * radix + val) 0 charValues) pos
+    else TokError ("Invalid integer '" ++ str ++ "'") pos
+  where charValues = map alNumToInteger str
 
 
--- |Scan the exponent part of a float.
-scanNumberExponent :: Double -> SourcePos -> String -> 
-                      (Token,String,SourcePos)
-scanNumberExponent n pos cs =
-  let (digits,rest) = span isDigit cs
-  in (TokFloat (n*10**(fromIntegral $ read digits)) pos, rest,
-      updatePosString pos digits)
+-- |Returns the integer value of the specified char which is either a digit or
+-- a lower case letter.
+alNumToInteger :: Char -> Integer
+alNumToInteger ch
+  | isDigit ch = fromIntegral $ digitToInt ch
+  | otherwise  = 10 + fromIntegral (fromEnum ch - fromEnum 'a')
+
 
 -- |Is this a character that can appear in an identifier?
 isIdentChar :: Char -> Bool
@@ -245,3 +271,9 @@ isIdentChar ch = isAlphaNum ch || ch == '_'
 isSymbolChar :: Char -> Bool
 isSymbolChar ch = not (isAlphaNum ch || isSpace ch || isControl ch 
                        || ch `elem` ",.([{)]}#'\"\\")
+
+-- |Is this character part of a single (not necessarily valid) number token,
+-- following a digit character?  This means any alphanumeric character or a
+-- decimal point.
+isNumberChar :: Char -> Bool
+isNumberChar ch = isIdentChar ch || ch == '.'
