@@ -198,9 +198,13 @@ escapedChar c = c
 --  underscores in integers. Doesn't handle negative numbers.
 scanNumberToken :: SourcePos -> [Char] -> [Token]
 scanNumberToken pos cs =
-    -- parse integer part
-    let (num,rest) = span isNumberChar cs
-        num' = map toLower $ filter (/='_') num
+    let (num0,rest0) = span isNumberChar cs
+        num = map toLower $ filter (/='_') num0
+        (num',rest) = case (last num,rest0) of
+          -- Handle negative exponents in scientific notation
+          ('e','-':remains) -> let (negexp,remains') = span isDigit remains
+                               in (num++'-':negexp, remains')
+          _ -> (num, rest0)
         pos' = foldl updatePosChar pos num
     in  (case num' of
           '0':'x':hexDigits
@@ -212,17 +216,22 @@ scanNumberToken pos cs =
           _ -> let (numPart,expPart) = span (/='e') num'
                    (wholePart,fracPart) = span (/='.') numPart
                    intTok = parseInteger 10 wholePart pos
+                   errFloat = TokError ("Invalid float '" ++ num' ++ "'") pos
                in case (intTok,expPart,fracPart) of
                     (TokInt int _, [], [])
                       -> intTok
                     (TokError _ _, _, _)
                       -> intTok
-                    (_, 'e':expDigits, _)
-                      | null expDigits || any (not . isDigit) expDigits
-                      -> TokError ("Invalid float '" ++ cs ++ "'") pos
+                    (_, "e", _)  -> errFloat
+                    (_, "e-", _) -> errFloat
+                    (_, 'e':'-':expDigits, _)
+                      | any (not . isDigit) expDigits -> errFloat
+                    (_, 'e':digit1:expDigits, _)
+                      | not (digit1 == '-' || isDigit digit1)
+                        || any (not . isDigit) expDigits -> errFloat
+                    (_, _, ".")  -> errFloat
                     (_, _, '.':fracDigits)
-                      | null fracDigits || any (not . isDigit) fracDigits
-                      -> TokError ("Invalid float '" ++ cs ++ "'") pos
+                      | any (not . isDigit) fracDigits -> errFloat
                     (TokInt intPart _, _, _) ->
                       let fracDigits =
                             if null fracPart then [] else tail fracPart
@@ -231,11 +240,15 @@ scanNumberToken pos cs =
                             (\c f -> (f + fromIntegral (digitToInt c)) / 10.0)
                             0
                             fracDigits
-                          expDigits =
-                            if null expPart then [] else tail expPart
+                          (expDigits,expMult) =
+                            case expPart of
+                              []             -> ([],1)
+                              ('e':'-':rest) -> (rest,-1)
+                              ('e':rest)     -> (rest,1)
+                              _ -> shouldnt "exponent must begin with e"
                           exponent =
                             foldl (\e c -> e * 10 + (digitToInt c)) 0 expDigits
-                          multiplier = 10.0 ** fromIntegral exponent
+                          multiplier = 10.0 ** fromIntegral (expMult * exponent)
                           value = (fromIntegral intPart + frac) * multiplier
                       in TokFloat value pos
                     (tok, _, _) -> shouldnt $ "unexpected token "
