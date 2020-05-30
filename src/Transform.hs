@@ -199,6 +199,9 @@ _updatePrimCallForSpecz spec args aliasMap = do
                 List.elem param calleeInterestingParams
                 -- it should be an interesting variable
                 && Right [] == isArgVarInteresting aliasMap arg
+                -- if a argument is used more than once,
+                -- then it should be aliased
+                && isArgVarUsedOnceInArgs arg args
             ) (pairArgVarWithParam args calleeProto)
     let nonAliasedParams = List.map snd nonAliasedArgWithParams
     return 
@@ -206,7 +209,8 @@ _updatePrimCallForSpecz spec args aliasMap = do
         then spec
         else
             let speczId = 
-                    Just $ nonAliasedParamsToSpeczId calleeMultiSpeczInfo nonAliasedParams
+                    Just $ nonAliasedParamsToSpeczId
+                            calleeMultiSpeczInfo nonAliasedParams
             in
             spec { procSpeczVersionID = speczId })
 
