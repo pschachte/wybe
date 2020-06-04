@@ -23,31 +23,33 @@ import           Version
 
 -- |Command line options for the wybe compiler.
 data Options = Options{
-    optForce         :: Bool     -- ^Compile specified files even if up to date
-    , optForceAll    :: Bool     -- ^Compile all files even if up to date
-    , optShowVersion :: Bool     -- ^Print compiler version and exit
-    , optHelpLog     :: Bool     -- ^Print log option help and exit
-    , optShowHelp    :: Bool     -- ^Print compiler help and exit
-    , optLibDirs     :: [String] -- ^Directories where library files live
-    , optLogAspects  :: Set LogSelection
+    optForce          :: Bool     -- ^Compile specified files even if up to date
+    , optForceAll     :: Bool     -- ^Compile all files even if up to date
+    , optShowVersion  :: Bool     -- ^Print compiler version and exit
+    , optHelpLog      :: Bool     -- ^Print log option help and exit
+    , optShowHelp     :: Bool     -- ^Print compiler help and exit
+    , optLibDirs      :: [String] -- ^Directories where library files live
+    , optLogAspects   :: Set LogSelection
                                  -- ^Which aspects to log
-    , optNoLLVMOpt   :: Bool     -- ^Don't run the LLVM optimisation passes
-    , optVerbose     :: Bool     -- ^Be verbose in compiler output
+    , optNoLLVMOpt    :: Bool     -- ^Don't run the LLVM optimisation passes
+    , optNoMultiSpecz :: Bool     -- ^Disable multiple specializatio
+    , optVerbose      :: Bool     -- ^Be verbose in compiler output
     } deriving Show
 
 
 -- |Defaults for all compiler options
 defaultOptions :: Options
-defaultOptions    = Options
- { optForce       = False
- , optForceAll    = False
- , optShowVersion = False
- , optHelpLog     = False
- , optShowHelp    = False
- , optLibDirs     = []
- , optLogAspects  = Set.empty
- , optNoLLVMOpt   = False
- , optVerbose     = False
+defaultOptions     = Options
+ { optForce        = False
+ , optForceAll     = False
+ , optShowVersion  = False
+ , optHelpLog      = False
+ , optShowHelp     = False
+ , optLibDirs      = []
+ , optLogAspects   = Set.empty
+ , optNoLLVMOpt    = False
+ , optNoMultiSpecz = False 
+ , optVerbose      = False
  }
 
 -- |All compiler features we may want to log
@@ -125,6 +127,9 @@ options =
  , Option ['s']     ["no-llvm-opt"]
      (NoArg (\opts -> opts { optNoLLVMOpt = True }))
      "don't run the LLVM optimisation pass manager on the emitted LLVM"
+ , Option []     ["no-multi-specz"]
+     (NoArg (\opts -> opts { optNoMultiSpecz = True }))
+     "disable multiple specialization"
  , Option ['v']     ["verbose"]
      (NoArg (\opts -> opts { optVerbose = True }))
      "dump verbose messages after compilation"
