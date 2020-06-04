@@ -132,11 +132,11 @@ data BodyState = BodyState {
 data BuildState
     = Unforked           -- ^Still building; ready for more instrs
     | Forked {           -- ^Building a new fork
-        forkingVar    :: PrimVarName,  -- ^Variable that selects branch to take
-        forkingVarTy  :: TypeSpec,     -- ^Type of forkingVar
-        knownVal   :: Maybe Integer,   -- ^Definite value of forkingVar if known
-        bodies     :: [BodyState],     -- ^BodyStates of all branches so far
-        complete   :: Bool             -- ^Whether the fork has been completed
+        forkingVar   :: PrimVarName,   -- ^Variable that selects branch to take
+        forkingVarTy :: TypeSpec,      -- ^Type of forkingVar
+        knownVal     :: Maybe Integer, -- ^Definite value of forkingVar if known
+        bodies       :: [BodyState],   -- ^BodyStates of all branches so far
+        complete     :: Bool           -- ^Whether the fork has been completed
         } deriving (Eq,Show)
 
 
