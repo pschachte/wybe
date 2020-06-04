@@ -51,6 +51,7 @@ procExpansion pspec def = do
         logMsg Expansion
         $ "*** Expanded:" ++ showProcDef 4 def
           ++ "\n*** To:" ++ showProcDef 4 def'
+          ++ "\nTemp counter = " ++ show (procTmpCount def')
         else
         logMsg Expansion
         $ "*** Expansion did not change proc " ++ show (procName def)

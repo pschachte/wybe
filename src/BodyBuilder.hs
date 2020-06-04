@@ -122,8 +122,6 @@ data BodyState = BodyState {
       blockDefs   :: Set PrimVarName, -- ^All variables defined in this block
       outSubst    :: VarSubstitution, -- ^Substitutions for var assignments
       subExprs    :: ComputedCalls,   -- ^Previously computed calls to reuse
-      -- XXX I don't think definers is actually used; get rid of it?
-      definers    :: VarDefiner,      -- ^The call that defined each var
       failed      :: Bool,            -- ^True if this body always fails
       tmpCount    :: Int,             -- ^The next temp variable number to use
       buildState  :: BuildState,      -- ^What state this node is in
@@ -145,15 +143,14 @@ data BuildState
 -- | A fresh BodyState with specified temp counter and output var substitution
 initState :: Int -> VarSubstitution -> BodyState
 initState tmp oSubst =
-    BodyState [] Map.empty Set.empty oSubst Map.empty Map.empty False
-              tmp Unforked Nothing
+    BodyState [] Map.empty Set.empty oSubst Map.empty False tmp Unforked Nothing
 
 
 -- | A BodyState as a new child of the specified BodyState
 childState :: BodyState -> BuildState -> BodyState
 childState st@BodyState{currSubst=iSubst,outSubst=oSubst,subExprs=subs,
-                        definers=defs,tmpCount=tmp} bld =
-    BodyState [] iSubst Set.empty oSubst subs defs False tmp bld $ Just st
+                        tmpCount=tmp} bld =
+    BodyState [] iSubst Set.empty oSubst subs False tmp bld $ Just st
 
 
 logState :: BodyBuilder ()
@@ -217,13 +214,6 @@ type VarSubstitution = Map PrimVarName PrimVarName
 -- calls with their outputs removed to the outputs.  This type encapsulates
 -- that.  In the Prim keys, all PrimArgs are inputs.
 type ComputedCalls = Map Prim [PrimArg]
-
-
--- To handle branch conditions, we keep track of the statement that bound
--- each variable.  For each arm of a branch, this lets us work out what
--- must be true and what must be false for that arm, so we can avoid
--- redundant tests.
-type VarDefiner = Map PrimVarName Prim
 
 
 -- |Allocate the next temp variable name and ensure it's not allocated again
@@ -290,6 +280,8 @@ completeFork = do
       Forked var ty val bods False -> do
         logBuild $ ">>>> ending fork on " ++ show var
         -- Prepare for any instructions coming after the fork
+        -- let substs = (fst . List.filter (expIsConstant . snd)
+        --               . Map.toAscList . currSubst) <$> bods
         let parent = st {buildState = Forked var ty val bods True,
                          tmpCount = maximum $ tmpCount <$> bods}
         put $ childState parent Unforked
@@ -310,8 +302,6 @@ beginBranch = do
         logBuild $ "<<<< <<<< Beginning to build branch "
                    ++ show branchNum ++ " on " ++ show var
         put $ childState st Unforked
-        -- XXX Do we want to maintain this field?
-        -- let failed' = failed st || maybe False (/=branchNum) val
         -- XXX also add consequences of this, eg if var is result of X==Y
         --     comparison and var == 1, then record that X==Y.
         when (isNothing val) $ addSubst var $ ArgInt branchNum intType
@@ -542,10 +532,7 @@ recordEntailedPrims prim = do
                   (\(p,o)-> "\n        " ++ show p ++ " -> " ++ show o)
                   instrPairs
     modify (\s -> s {subExprs = List.foldr (uncurry Map.insert) (subExprs s)
-                                instrPairs,
-                     definers = List.foldr
-                                (flip Map.insert prim . argVarName)
-                                (definers s) $ snd pair1})
+                                instrPairs})
 
 
 -- |Return a list of instructions that have effectively already been
@@ -614,8 +601,7 @@ rawInstr prim pos = do
 
 
 splitArgsByMode :: [PrimArg] -> ([PrimArg], [PrimArg])
-splitArgsByMode args =
-    List.partition ((==FlowIn) . argFlowDirection) args
+splitArgsByMode = List.partition ((==FlowIn) . argFlowDirection)
 
 
 canonicalisePrim :: Prim -> Prim
@@ -906,9 +892,11 @@ boolConstant bool = ArgInt (fromIntegral $ fromEnum bool) boolType
 
 currBody :: ProcBody -> BodyState -> Compiler (Int,Set PrimVarName,ProcBody)
 currBody body st = do
+    logMsg BodyBuilder $ "Now reconstructing body with usedLater = "
+      ++ intercalate ", " (show <$> Map.keys (outSubst st))
     st' <- execStateT (rebuildBody st)
            $ BkwdBuilderState (Map.keysSet $ outSubst st) Map.empty 0 body
-    return (asmTmpCount st', asmUsedLater st', asmFollowing st')
+    return (tmpCount st, asmUsedLater st', asmFollowing st')
 
 
 type BkwdBuilder = StateT BkwdBuilderState Compiler
@@ -934,9 +922,9 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
     let following = asmFollowing bkwdSt
     logBkwd $ "Rebuilding body:" ++ fst (showState 8 st)
               ++ "\nwith currSubst = " ++ show subst
-              ++ "\n and followed by:" ++ showBlock 8 following
-    let (usedLater',following') = pruneBody subst usedLater following
-    modify (\s -> s { asmFollowing = following', asmUsedLater = usedLater' })
+              ++ "\n     usedLater = " ++ show usedLater
+    -- First see if we can prune away a later fork based on
+    pruneBody subst
     case bldst of
       Unforked -> nop
       Forked{complete=False} ->
@@ -950,6 +938,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             -- cases where it's more than a few prims.  Currently UnBranch
             -- ensures that's not needed, but maybe it shouldn't.
             sts <- mapM (rebuildBranch subst) $ reverse bods
+            usedLater' <- gets asmUsedLater
             let usedLater'' = List.foldr Set.union usedLater'
                               $ asmUsedLater <$> sts
             logBkwd $ "Switch on " ++ show var
@@ -961,7 +950,9 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             put $ BkwdBuilderState usedLater''' Map.empty tmp
                   $ ProcBody [] $ PrimFork var ty lastUse followingBranches
     mapM_ (placedApply (bkwdBuildStmt defs)) prims
+    finalUsedLater <- gets asmUsedLater
     maybe nop rebuildBody par
+    logBkwd $ "Finished rebuild with usedLater = " ++ show finalUsedLater
 
 
 -- |Select the element of bods specified by num
@@ -985,25 +976,31 @@ rebuildBranch subst bod = do
 -- the returned used var set should only included the bodies that are not
 -- pruned.  But to do that, ProcBody needs to track used variables, or else
 -- we have to recompute it from scratch.
-pruneBody :: Substitution -> Set PrimVarName -> ProcBody
-          -> (Set PrimVarName,ProcBody)
-pruneBody subst used body@ProcBody{bodyPrims=prims,
-                                   bodyFork=PrimFork{forkVar=var,
-                                                     forkBodies=bods}} =
-    case Map.lookup var subst of
-      Just (ArgInt num _) ->
-        let bod = selectFork num bods
-        in  (Set.delete var used, bod { bodyPrims = prims ++ bodyPrims bod })
-      _ -> (used,body)
-pruneBody _ used body = (used,body)
-
+pruneBody :: Substitution -> BkwdBuilder ()
+pruneBody subst = do
+    body <- gets asmFollowing
+    case bodyFork body of
+      PrimFork{forkVar=var, forkBodies=bods} ->
+        case Map.lookup var subst of
+          Just (ArgInt num _) -> do
+            used <- gets asmUsedLater
+            let prevBody = selectFork num bods
+            let prims = bodyPrims body
+            let newBody = prevBody { bodyPrims = prims ++ bodyPrims prevBody }
+            modify $ \st -> st { asmUsedLater = Set.delete var used
+                               , asmFollowing = newBody}
+          _ -> return ()
+      _ -> return ()
 
 
 bkwdBuildStmt :: Set PrimVarName -> Prim -> OptPos -> BkwdBuilder ()
 bkwdBuildStmt defs prim pos = do
     usedLater <- gets asmUsedLater
+    logBkwd $ "  Rebuilding prim:" ++ show prim
+              ++ "\n    with usedLater = " ++ show usedLater
     let args = primArgs prim
     args' <- mapM renameArg args
+    logBkwd $ "    renamed args = " ++ show args'
     case (prim,args') of
       (PrimForeign "llvm" "move" [] _, [ArgVar{argVarName=fromVar},
                                         ArgVar{argVarName=toVar}])
@@ -1015,6 +1012,7 @@ bkwdBuildStmt defs prim pos = do
         when (any (`Set.member` usedLater)
               $ argVarName <$> outs) $ do
           let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args'
+          logBkwd $ "    updated prim = " ++ show prim'
           let inVars = argVarName <$> ins
           let usedLater' = List.foldr Set.insert usedLater inVars
           st@BkwdBuilderState{asmFollowing=bd@ProcBody{bodyPrims=prims}} <- get
