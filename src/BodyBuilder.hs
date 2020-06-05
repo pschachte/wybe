@@ -907,8 +907,8 @@ boolConstant bool = ArgInt (fromIntegral $ fromEnum bool) boolType
 currBody :: ProcBody -> BodyState -> Compiler (Int,Set PrimVarName,ProcBody)
 currBody body st = do
     st' <- execStateT (rebuildBody st)
-           $ BkwdBuilderState (Map.keysSet $ outSubst st) Map.empty 0 body
-    return (asmTmpCount st', asmUsedLater st', asmFollowing st')
+           $ BkwdBuilderState (Map.keysSet $ outSubst st) Map.empty body
+    return (tmpCount st, asmUsedLater st', asmFollowing st')
 
 
 type BkwdBuilder = StateT BkwdBuilderState Compiler
@@ -920,7 +920,6 @@ type BkwdBuilder = StateT BkwdBuilderState Compiler
 data BkwdBuilderState = BkwdBuilderState {
       asmUsedLater :: Set PrimVarName,  -- ^Variables used later in computation
       asmRenaming  :: VarSubstitution,  -- ^Variable substitution to apply
-      asmTmpCount  :: Int,              -- ^Highest temporary variable number
       asmFollowing :: ProcBody          -- ^Code to come later
       } deriving (Eq,Show)
 
@@ -956,9 +955,8 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
                       ++ " with usedLater " ++ show usedLater''
             let lastUse = Set.notMember var usedLater''
             let usedLater''' = Set.insert var usedLater''
-            let tmp = maximum $ List.map asmTmpCount sts
             let followingBranches = List.map asmFollowing sts
-            put $ BkwdBuilderState usedLater''' Map.empty tmp
+            put $ BkwdBuilderState usedLater''' Map.empty
                   $ ProcBody [] $ PrimFork var ty lastUse followingBranches
     mapM_ (placedApply (bkwdBuildStmt defs)) prims
     maybe nop rebuildBody par
@@ -1031,8 +1029,8 @@ renameArg arg = return arg
 
 
 markIfLastUse :: Set PrimVarName -> PrimArg -> PrimArg
-markIfLastUse usedLater arg@ArgVar{argVarName=nm,argVarFlow=FlowIn}
-  | Set.notMember nm usedLater = arg {argVarFinal=True}
+markIfLastUse usedLater arg@ArgVar{argVarName=nm,argVarFlow=FlowIn} =
+  arg {argVarFinal=Set.notMember nm usedLater}
 markIfLastUse _ arg = arg
 
 

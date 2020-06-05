@@ -86,9 +86,10 @@ optimiseProcDefBU pspec def = do
     logOptimise $ "*** " ++ show pspec ++
       " before optimisation:" ++ showProcDef 4 def
     def' <- procExpansion pspec def >>= decideInlining
+    def'' <- procExpansion pspec def' >>= decideInlining
     logOptimise $ "*** " ++ show pspec ++
-      " after optimisation:" ++ showProcDef 4 def' ++ "\n"
-    return def'
+      " after optimisation:" ++ showProcDef 4 def'' ++ "\n"
+    return def''
 
 
 ----------------------------------------------------------------
