@@ -86,9 +86,17 @@ optimiseProcDefBU pspec def = do
     logOptimise $ "*** " ++ show pspec ++
       " before optimisation:" ++ showProcDef 4 def
     def' <- procExpansion pspec def >>= decideInlining
+    -- XXX The second run of "procExpansion" is just a temporary fix, we need
+    -- something better.
+    -- The actual issue is in the BodyBuilder, some optimizations after the
+    -- "final marking" can make the final flag become outdated (fails to flag a
+    -- last use of some variables).
+    -- However, this fix might not solve the problem entirely since the second
+    -- run actually expands some codes that are not expanded in the first run.
+    def'' <- procExpansion pspec def' >>= decideInlining
     logOptimise $ "*** " ++ show pspec ++
-      " after optimisation:" ++ showProcDef 4 def' ++ "\n"
-    return def'
+      " after optimisation:" ++ showProcDef 4 def'' ++ "\n"
+    return def''
 
 
 ----------------------------------------------------------------
