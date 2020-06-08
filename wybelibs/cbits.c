@@ -7,6 +7,7 @@
 #include <gc.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <math.h>
 
 int print_int(int x) {
@@ -80,7 +81,10 @@ void *wybe_malloc(int size) {
     return GC_MALLOC(size);
 }
 
-void gc_init(){
+void gc_init() {
+    // XXX this is a workaround, more detail can be found here:
+    // https://github.com/pschachte/wybe/issues/59
+    setenv("GC_MARKERS", "1", false);
     GC_INIT();
 }
 
