@@ -856,9 +856,10 @@ buildMain mainImports =
                     | m <- mainImports]
         -- XXX Shouldn't have to hard code assignment of phantom to io
         -- XXX Should insert assignments of initialised visible resources
-        bodyCode = [move (castTo (iVal 0) phantomType) (varSet "io"),
-                    move (intCast $ iVal 0) (intVarSet "exit_code"),
-                    Unplaced $ ForeignCall "c" "gc_init" [] []] ++ bodyInner
+        bodyCode = [move (intCast $ iVal 0) (intVarSet "exit_code"),
+                    Unplaced $ 
+                        ForeignCall "c" "gc_init" [] [Unplaced (varSet "io")]] 
+                        ++ bodyInner
         mainBody = ProcDefSrc bodyCode
         -- Program main has argc, argv, exit_code, and io as resources
         proto = ProcProto "" []
