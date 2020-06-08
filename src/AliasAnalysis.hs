@@ -273,7 +273,7 @@ updateAliasedByPrim aliasMap prim =
             let calleeArgsAliases = 
                     mapDS (\x -> 
                         case Map.lookup x paramArgMap of 
-                            -- TODO: verify this part. Better to use
+                            -- XXX verify this part. Better to use
                             -- "shouldnt" if that is really the case.
                             -- Currently some tests (eg. "alias_fork1")
                             -- reach this path.
@@ -583,12 +583,12 @@ completeMultiSpeczInfo realParams info =
 --
 -- The transform part can be found in "Tranform.hs".
 
--- TODO: reuse cells that are different types but has the same size.
--- TODO: call "GC_free" on large unused dead cells.
--- TODO: we'd like this analysis to detect structures that are dead aside from
+-- XXX reuse cells that are different types but has the same size.
+-- XXX call "GC_free" on large unused dead cells.
+-- XXX we'd like this analysis to detect structures that are dead aside from
 --       later access instructions, which could be moved earlier to allow the
 --       structure to be reused.
--- TODO: consider re-run the optimiser after this or even run this before the
+-- XXX consider re-run the optimiser after this or even run this before the
 --       optimiser.
 
 
@@ -671,7 +671,7 @@ assignDeadCellsByAllocArgs deadCells primArgs =
             case assigned of 
                 Nothing -> (Nothing, deadCells)
                 Just x  -> 
-                    -- TODO: we need something better than this. In order to
+                    -- XXX we need something better than this. In order to
                     -- have better optimization, we combine "requiredParams"
                     -- from all possible cells. However, it may create some
                     -- specialized versions that are identical.

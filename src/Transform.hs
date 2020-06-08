@@ -102,7 +102,7 @@ transformBody caller body (aliasMap, deadCells) = do
     -- Update body while checking alias incurred by bodyfork
     transformForks caller body' (aliaseMap', deadCells')
 
-    -- TODO: run (or re-run) optimizations here since after the transform, there
+    -- XXX run (or re-run) optimizations here since after the transform, there
     -- might be some new opportunities.
 
 
@@ -142,7 +142,7 @@ transformForks caller body (aliasMap, deadCells) = do
 transformPrim :: ((AliasMapLocal, DeadCells), [Placed Prim])
         -> Placed Prim -> Compiler ((AliasMapLocal, DeadCells), [Placed Prim])
 transformPrim ((aliasMap, deadCells), prims) prim = do
-    -- TODO: Redundent work here. We should change the current design.
+    -- XXX Redundent work here. We should change the current design.
     aliasMap' <- updateAliasedByPrim aliasMap prim
     logTransform $ "\n--- prim:           " ++ show prim
     let primc = content prim
@@ -286,7 +286,7 @@ logTransform = logMsg Transform
 
 
 -- Fix point processor for expanding required specz versions.
--- TODO: This part can be optimized by using "getSccProcs" and tracking the diff
+-- XXX This part can be optimized by using "getSccProcs" and tracking the diff
 -- between each run.
 expandRequiredSpeczVersions :: [ModSpec] -> ModSpec 
         -> Compiler (Bool,[(String,OptPos)])
@@ -309,7 +309,7 @@ expandRequiredSpeczVersions scc thisMod = do
                 in
                 -- for each specz version, expand it's dependencies
                 Set.foldl (\required version ->
-                    -- TODO: select which specializations to use
+                    -- XXX select which specializations to use
                     let multiSpeczInfo = procArgAliasMultiSpeczInfo analysis in
                     let nonAliasParams =
                             speczIdToNonAliasedParams multiSpeczInfo version 

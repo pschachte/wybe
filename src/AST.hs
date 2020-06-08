@@ -1689,7 +1689,7 @@ instance Show ProcAnalysis where
     show (ProcAnalysis procArgAliasMap procArgAliasMultiSpeczInfo) =
         "\n AliasPairs: " ++ showAliasMap procArgAliasMap 
         ++ "\n AliasMultiSpeczInfo: "  
-        -- TODO: show dependencies info in "AliasMultiSpeczInfo"
+        -- XXX show dependencies info in "AliasMultiSpeczInfo"
         ++ show (fst procArgAliasMultiSpeczInfo)
 
 

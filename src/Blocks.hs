@@ -652,7 +652,7 @@ cgenLLVMUnop name flags args =
 
 -- | Look inside the Prototype list stored in the CodegenState monad and
 -- find a matching ProcSpec.
--- TODO: This one is not used.
+-- XXX This one is not used.
 findProto :: ProcSpec -> Codegen (Maybe PrimProto)
 findProto (ProcSpec _ nm i _) = do
     allProtos <- gets Codegen.modProtos
