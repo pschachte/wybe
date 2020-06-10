@@ -23,7 +23,7 @@ AFTER EVERYTHING:
 *main* > public inline (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasInterestingParams: []
     foreign c print_string("Smith":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
     foreign c print_string("Smith":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
 
@@ -80,7 +80,7 @@ entry:
 /= > public inline test (0 calls)
 0: /=($left#0:person2.person, $right#0:person2.person, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasInterestingParams: []
     foreign lpvm access($left#0:person2.person, 0:wybe.int, ?tmp$4#0:wybe.string)
     foreign lpvm access(~$left#0:person2.person, 8:wybe.int, ?tmp$5#0:wybe.string)
     foreign lpvm access($right#0:person2.person, 0:wybe.int, ?tmp$6#0:wybe.string)
@@ -107,7 +107,7 @@ entry:
 = > public inline test (6 calls)
 0: =($left#0:person2.person, $right#0:person2.person, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasInterestingParams: []
     foreign lpvm access($left#0:person2.person, 0:wybe.int, ?$left$firstname#0:wybe.string)
     foreign lpvm access(~$left#0:person2.person, 8:wybe.int, ?$left$lastname#0:wybe.string)
     foreign lpvm access($right#0:person2.person, 0:wybe.int, ?$right$firstname#0:wybe.string)
@@ -127,38 +127,38 @@ entry:
 firstname > public inline (0 calls)
 0: firstname($rec#0:person2.person, ?$#0:wybe.string):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasInterestingParams: []
     foreign lpvm access(~$rec#0:person2.person, 0:wybe.int, ?$#0:wybe.string)
 firstname > public inline (0 calls)
 1: firstname($rec#0:person2.person, ?$rec#1:person2.person, $field#0:wybe.string):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasInterestingParams: []
     foreign lpvm mutate(~%$rec#0:person2.person, ?%$rec#1:person2.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
 
 
 lastname > public inline (0 calls)
 0: lastname($rec#0:person2.person, ?$#0:wybe.string):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasInterestingParams: []
     foreign lpvm access(~$rec#0:person2.person, 8:wybe.int, ?$#0:wybe.string)
 lastname > public inline (0 calls)
 1: lastname($rec#0:person2.person, ?$rec#1:person2.person, $field#0:wybe.string):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasInterestingParams: []
     foreign lpvm mutate(~%$rec#0:person2.person, ?%$rec#1:person2.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
 
 
 person > public inline (0 calls)
 0: person(firstname#0:wybe.string, lastname#0:wybe.string, ?$#0:person2.person):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasInterestingParams: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!person2.person)
     foreign lpvm mutate(~%$rec#0:person2.person, ?%$rec#1:person2.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname#0:wybe.string)
     foreign lpvm mutate(~%$rec#1:person2.person, ?%$#0:person2.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname#0:wybe.string)
 person > public inline (4 calls)
 1: person(?firstname#0:wybe.string, ?lastname#0:wybe.string, $#0:person2.person):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasInterestingParams: []
     foreign lpvm access($#0:person2.person, 0:wybe.int, ?firstname#0:wybe.string)
     foreign lpvm access(~$#0:person2.person, 8:wybe.int, ?lastname#0:wybe.string)
 

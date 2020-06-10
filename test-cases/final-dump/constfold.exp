@@ -16,28 +16,28 @@ AFTER EVERYTHING:
 fold_add > public inline (3 calls)
 0: fold_add(?$#0:wybe.int):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasInterestingParams: []
     foreign llvm move(42:wybe.int, ?$#0:wybe.int) @constfold:2:5
 
 
 fold_mult > public inline (3 calls)
 0: fold_mult(?$#0:wybe.int):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasInterestingParams: []
     foreign llvm move(42:wybe.int, ?$#0:wybe.int) @constfold:3:5
 
 
 fold_test > public inline (0 calls)
 0: fold_test(?$#0:wybe.int):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasInterestingParams: []
     foreign llvm move(42:wybe.int, ?$#0:wybe.int) @constfold:4:5
 
 
 fortytwo > public inline (0 calls)
 0: fortytwo(?$#0:wybe.int):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ AliasInterestingParams: []
     foreign llvm move(42:wybe.int, ?$#0:wybe.int) @constfold:1:5
 
   LLVM code       :
