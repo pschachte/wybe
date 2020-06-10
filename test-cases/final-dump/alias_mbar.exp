@@ -16,7 +16,7 @@ bar > public (0 calls)
 0: bar(p1#0:position.position, ?p3#1:position.position, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: [(p1#0,p3#1)]
  AliasInterestingParams: [p1#0]
- MultiSpeczDepInfo:[((["alias_mfoo"],"foo",0),[BasedOn []])]
+ MultiSpeczDepInfo: [((["alias_mfoo"],"foo",0),MultiSpeczDepVersion {aliasDepVersion = [BasedOn []]})]
     foreign lpvm access(p1#0:position.position, 8:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp sgt(tmp$0#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
     case ~tmp$3#0:wybe.bool of
@@ -128,7 +128,7 @@ foo > public (0 calls)
 0: foo(p1#0:position.position, ?p2#0:position.position, ?p3#0:position.position, io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: [(p1#0,p2#0)]
  AliasInterestingParams: [p1#0]
- MultiSpeczDepInfo:[((["alias_mbar"],"bar",0),[BasedOn []])]
+ MultiSpeczDepInfo: [((["alias_mbar"],"bar",0),MultiSpeczDepVersion {aliasDepVersion = [BasedOn []]})]
     foreign lpvm access(p1#0:position.position, 0:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp sgt(tmp$0#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
     case ~tmp$5#0:wybe.bool of

@@ -40,8 +40,8 @@ module AST (
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
   AliasMap, aliasMapToAliasPairs,
-  SpeczVersionId, speczIdToString, SpeczProcBodies, 
-  MultiSpeczDepInfo, MultiSpeczDepVersion, AliasInterestingParams,
+  SpeczVersionId(..), speczIdToString, SpeczProcBodies,
+  MultiSpeczDepInfo, MultiSpeczDepVersion(..), AliasInterestingParams,
   AliasMultiSpeczDepVersion, AliasMultiSpeczDepVersionParamInfo(..),
   ProcAnalysis(..), emptyProcAnalysis, 
   ProcBody(..), PrimFork(..), Ident, VarName,
@@ -1594,18 +1594,17 @@ data ProcImpln
     deriving (Eq,Generic)
 
 
--- | The identity of each specialized version. It needs to be a bijection
--- between this Id and the specialized condition. 
--- Currently, "Int" is enought. We can change it to "Tuple" when there 
--- are more things to consider. More detial can be found in "Transform.hs"
-type SpeczVersionId = Int
+-- | The identity of each specialized version.
+newtype SpeczVersionId = SpeczVersionId {
+    -- More detial can be found in "Transform.hs"
+    paramAliasInfo :: Int
+} deriving (Eq, Ord, Show, Generic)
 
 
--- Convert "SpeczVersionId" to "String" so it can be shorter in function
--- name.
+-- Convert "SpeczVersionId" to "String" so it can be shorter in function name.
 speczIdToString :: SpeczVersionId -> String
 speczIdToString speczId = 
-    showHex speczId ""
+    showHex (paramAliasInfo speczId) ""
 
 
 -- | A map contains different specialization versions.
@@ -1640,7 +1639,9 @@ type MultiSpeczDepInfo =
 
 -- | Describing a multi specz version dependency.
 -- Currently it's only about aliasing.
-type MultiSpeczDepVersion = AliasMultiSpeczDepVersion
+newtype MultiSpeczDepVersion = MultiSpeczDepVersion {
+    aliasDepVersion :: AliasMultiSpeczDepVersion
+} deriving (Eq, Generic, Ord, Show)
 
 
 -- | Each version is described by a list of "ParamInfo" that matches
@@ -1700,7 +1701,7 @@ instance Show ProcAnalysis where
      ++ "\n AliasInterestingParams: " ++ show aliasInterestingParams
      ++ if Set.null multiSpeczDepInfo 
          then "" 
-         else "\n MultiSpeczDepInfo:" ++ show (Set.toList multiSpeczDepInfo)
+         else "\n MultiSpeczDepInfo: " ++ show (Set.toList multiSpeczDepInfo)
 
 
 

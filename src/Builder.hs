@@ -197,7 +197,7 @@ import           System.Exit
 import           System.IO.Temp            (createTempDirectory)
 import           Transform                 (transformProc,
                                             generateSpeczVersionInProc,
-                                            expandRequiredSpeczVersions)
+                                            expandRequiredSpeczVersionsByMod)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
@@ -981,7 +981,7 @@ multiSpeczTopDownPass mainMod = do
         unless noMultiSpecz $ do
             logBuild $ " --- Running on: " ++ show ms
             -- collecting all required spec versions
-            fixpointProcessSCC expandRequiredSpeczVersions ms
+            fixpointProcessSCC expandRequiredSpeczVersionsByMod ms
 
             -- generating required specz versions
             mapM_ (transformModuleProcs generateSpeczVersionInProc) ms

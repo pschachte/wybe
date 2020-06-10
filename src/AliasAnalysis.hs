@@ -458,7 +458,7 @@ updateMultiSpeczInfoByPrim (aliasMap, interestingParams, multiSpeczDepInfo)
             let interestingParams' = 
                     addInterestingParams interestingParams newInterestingParams
             -- update dependencies
-            let speczVersion = List.map (\calleeParam ->
+            let aliasSpeczVersion = List.map (\calleeParam ->
                     let result =
                             List.find (\(_, param, _) -> param == calleeParam)
                                     interestingPrimCallInfo
@@ -467,6 +467,8 @@ updateMultiSpeczInfoByPrim (aliasMap, interestingParams, multiSpeczDepInfo)
                         Just (_, _, requiredParams) -> BasedOn requiredParams
                         Nothing                     -> Aliased
                     ) calleeInterestingParams
+            -- XXX TODO
+            let speczVersion = MultiSpeczDepVersion aliasSpeczVersion
             multiSpeczDepInfo' <- 
                     addSpeczVersion multiSpeczDepInfo spec speczVersion
             return (interestingParams', multiSpeczDepInfo')
@@ -545,7 +547,7 @@ addInterestingParams = List.foldr Set.insert
 addSpeczVersion :: MultiSpeczDepInfo -> ProcSpec 
     -> MultiSpeczDepVersion -> Compiler MultiSpeczDepInfo
 addSpeczVersion multiSpeczDepInfo proc version = 
-    if List.all (== Aliased) version
+    if List.all (== Aliased) (aliasDepVersion version)
     then
         return multiSpeczDepInfo
     else do
