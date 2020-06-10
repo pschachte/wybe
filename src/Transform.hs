@@ -56,14 +56,14 @@ generateSpeczVersionInProc def
     | not (procInline def) = do
         let procImp = procImpln def
         let ProcDefPrim caller body analysis speczBodies = procImp
-        let speczInfo = procArgAliasMultiSpeczInfo analysis
+        let interestingParams = procAliasInterestingParams analysis
         inputParams <- protoInputParamNames caller
         speczBodiesList <- mapM (\(id, sbody) ->
             case sbody of 
                 Just b -> return (id, Just b)
                 Nothing -> do
                     let nonAliasedParams =
-                            speczIdToNonAliasedParams speczInfo id 
+                            speczIdToNonAliasedParams interestingParams id 
                     aliasMap <- initAliasMap inputParams nonAliasedParams
                     logTransform $ replicate 60 '~'
                     logTransform $ "Generating specialized version: " ++ show id
@@ -196,8 +196,7 @@ _updatePrimCallForSpecz :: ProcSpec -> [PrimArg] -> AliasMapLocal
 _updatePrimCallForSpecz spec args aliasMap = do
     calleeDef <- getProcDef spec
     let (ProcDefPrim calleeProto _ analysis _) = procImpln calleeDef
-    let calleeMultiSpeczInfo = procArgAliasMultiSpeczInfo analysis
-    let calleeInterestingParams = fst calleeMultiSpeczInfo
+    let calleeInterestingParams = procAliasInterestingParams analysis
     let nonAliasedArgWithParams = List.filter (\(arg, param) ->
                 -- it should be in callee's interesting params list
                 List.elem param calleeInterestingParams
@@ -214,7 +213,7 @@ _updatePrimCallForSpecz spec args aliasMap = do
         else
             let speczId = 
                     Just $ nonAliasedParamsToSpeczId
-                            calleeMultiSpeczInfo nonAliasedParams
+                            calleeInterestingParams nonAliasedParams
             in
             spec { procSpeczVersionID = speczId })
 
@@ -248,21 +247,20 @@ _updateMutateForAlias _ args = args
 
 
 -- Return a list of non aliased parameters based on the given id
-speczIdToNonAliasedParams :: AliasMultiSpeczInfo
-                            -> SpeczVersionId -> [PrimVarName]
-speczIdToNonAliasedParams speczInfo speczId =
-    List.zip [0..] (fst speczInfo)
-    |> List.filter (\(idx, _) -> 
-            Bits.testBitDefault speczId idx)
+speczIdToNonAliasedParams :: AliasInterestingParams -> SpeczVersionId
+        -> [PrimVarName]
+speczIdToNonAliasedParams interestingParams speczId =
+    List.zip [0..] interestingParams
+    |> List.filter (\(idx, _) -> Bits.testBitDefault speczId idx)
     |> List.map snd
 
 
--- Return the corresponding [SpeczVersionId] of the given 
+-- Return the corresponding "SpeczVersionId" of the given 
 -- non aliased parameters.
-nonAliasedParamsToSpeczId :: AliasMultiSpeczInfo
-                            -> [PrimVarName] -> SpeczVersionId
-nonAliasedParamsToSpeczId speczInfo nonAliasedParams =
-    List.map (`List.elem` nonAliasedParams) (fst speczInfo)
+nonAliasedParamsToSpeczId :: AliasInterestingParams -> [PrimVarName]
+        -> SpeczVersionId
+nonAliasedParamsToSpeczId interestingParams nonAliasedParams =
+    List.map (`List.elem` nonAliasedParams) interestingParams
     |> nonAliasedBoolListToSpeczId
 
 
@@ -310,10 +308,13 @@ expandRequiredSpeczVersions scc thisMod = do
                 -- for each specz version, expand it's dependencies
                 Set.foldl (\required version ->
                     -- XXX select which specializations to use
-                    let multiSpeczInfo = procArgAliasMultiSpeczInfo analysis in
-                    let nonAliasParams =
-                            speczIdToNonAliasedParams multiSpeczInfo version 
+                    let interestingParams = 
+                            procAliasInterestingParams analysis
                     in
+                    let nonAliasParams =
+                            speczIdToNonAliasedParams interestingParams version 
+                    in
+                    let multiSpeczDepInfo = procMultiSpeczDepInfo analysis in
                     -- go through dependencies and find matches
                     let depMatches = Set.map (\(procSpec, dep) ->
                             let version =
@@ -328,7 +329,7 @@ expandRequiredSpeczVersions scc thisMod = do
                             in
                             let (mod, procName, procId) = procSpec in
                                 ((mod, procName, procId), version)
-                            ) (snd multiSpeczInfo)
+                            ) multiSpeczDepInfo
                             -- remove the standard version
                             |> Set.filter ((/= speczIdForStandardVersion) . snd)
                     in
