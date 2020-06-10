@@ -27,6 +27,7 @@ AFTER EVERYTHING:
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  AliasInterestingParams: []
+ MultiSpeczDepInfo:[((["type_list"],"++",0),[BasedOn []])]
     foreign lpvm alloc(16:wybe.int, ?tmp$11#0:type_list.intlist)
     foreign lpvm mutate(~tmp$11#0:type_list.intlist, ?tmp$12#0:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int)
     foreign lpvm mutate(~tmp$12#0:type_list.intlist, ?tmp$13#0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:type_list.intlist)
@@ -51,6 +52,7 @@ AFTER EVERYTHING:
 0: ++(x#0:type_list.intlist, y#0:type_list.intlist, ?$#0:type_list.intlist):
  AliasPairs: [($#0,y#0)]
  AliasInterestingParams: [x#0]
+ MultiSpeczDepInfo:[((["type_list"],"++",0),[BasedOn [x#0]])]
     foreign llvm icmp ne(x#0:type_list.intlist, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:

@@ -37,6 +37,7 @@ bar1 > public (1 calls)
 0: bar1(io#0:wybe.phantom, ?io#6:wybe.phantom):
  AliasPairs: []
  AliasInterestingParams: []
+ MultiSpeczDepInfo:[((["multi_specz"],"foo",0),[BasedOn [],BasedOn [],Aliased,Aliased])]
     foreign lpvm alloc(16:wybe.int, ?tmp$6#0:multi_specz.position)
     foreign lpvm mutate(~tmp$6#0:multi_specz.position, ?tmp$7#0:multi_specz.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp$7#0:multi_specz.position, ?tmp$8#0:multi_specz.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int)
@@ -93,6 +94,7 @@ foo > public (2 calls)
 0: foo(x1#0:multi_specz.position, x2#0:multi_specz.position, x3#0:multi_specz.position, x4#0:multi_specz.position, io#0:wybe.phantom, ?io#4:wybe.phantom):
  AliasPairs: []
  AliasInterestingParams: [x1#0,x2#0,x3#0,x4#0]
+ MultiSpeczDepInfo:[((["multi_specz"],"modifyAndPrint",0),[BasedOn [x1#0]]),((["multi_specz"],"modifyAndPrint",0),[BasedOn [x2#0]]),((["multi_specz"],"modifyAndPrint",0),[BasedOn [x3#0]]),((["multi_specz"],"modifyAndPrint",0),[BasedOn [x4#0]])]
     multi_specz.modifyAndPrint<0>(~x1#0:multi_specz.position, 111:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @multi_specz:17:6
     multi_specz.modifyAndPrint<0>(~x2#0:multi_specz.position, 222:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @multi_specz:18:6
     multi_specz.modifyAndPrint<0>(~x3#0:multi_specz.position, 333:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @multi_specz:19:6

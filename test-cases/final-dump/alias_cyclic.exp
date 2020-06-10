@@ -39,6 +39,7 @@ updateX > public (2 calls)
 0: updateX(p1#0:position.position, ?p2#0:position.position, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: [(p1#0,p2#0)]
  AliasInterestingParams: [p1#0]
+ MultiSpeczDepInfo:[((["alias_cyclic"],"updateY",0),[BasedOn []])]
     foreign lpvm access(p1#0:position.position, 0:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp sgt(tmp$0#0:wybe.int, 101:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
     case ~tmp$3#0:wybe.bool of
@@ -70,6 +71,7 @@ updateY > public (1 calls)
 0: updateY(p1#0:position.position, ?p2#0:position.position, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: [(p1#0,p2#0)]
  AliasInterestingParams: [p1#0]
+ MultiSpeczDepInfo:[((["alias_cyclic"],"updateX",0),[BasedOn []])]
     foreign lpvm access(p1#0:position.position, 8:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp sgt(tmp$0#0:wybe.int, 901:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
     case ~tmp$3#0:wybe.bool of

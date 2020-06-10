@@ -35,6 +35,7 @@ AFTER EVERYTHING:
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  AliasInterestingParams: []
+ MultiSpeczDepInfo:[((["alias_type4"],"foo",0),[BasedOn []])]
     foreign lpvm alloc(16:wybe.int, ?tmp$4#0:alias_type4.position)
     foreign lpvm mutate(~tmp$4#0:alias_type4.position, ?tmp$5#0:alias_type4.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int)
     foreign lpvm mutate(~tmp$5#0:alias_type4.position, ?tmp$6#0:alias_type4.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int)

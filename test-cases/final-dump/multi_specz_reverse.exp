@@ -28,6 +28,7 @@ AFTER EVERYTHING:
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#7:wybe.phantom):
  AliasPairs: []
  AliasInterestingParams: []
+ MultiSpeczDepInfo:[((["multi_specz_reverse"],"list_reverse_helper",0),[BasedOn []])]
     foreign lpvm alloc(16:wybe.int, ?tmp$13#0:multi_specz_reverse.intlist)
     foreign lpvm mutate(~tmp$13#0:multi_specz_reverse.intlist, ?tmp$14#0:multi_specz_reverse.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
     foreign lpvm mutate(~tmp$14#0:multi_specz_reverse.intlist, ?tmp$15#0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:multi_specz_reverse.intlist)
@@ -99,6 +100,7 @@ list_reverse_helper > public (2 calls)
 0: list_reverse_helper(lst#0:multi_specz_reverse.intlist, acc#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist):
  AliasPairs: [($#0,acc#0)]
  AliasInterestingParams: [lst#0]
+ MultiSpeczDepInfo:[((["multi_specz_reverse"],"list_reverse_helper",0),[BasedOn [lst#0]])]
     foreign llvm icmp ne(lst#0:multi_specz_reverse.intlist, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
