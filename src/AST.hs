@@ -39,7 +39,7 @@ module AST (
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
-  AliasMap, aliasMapToAliasPairs,
+  AliasMap, aliasMapToAliasPairs, AliasSpeczVersionId,
   SpeczVersionId(..), speczIdToString, SpeczProcBodies,
   MultiSpeczDepInfo, MultiSpeczDepVersion(..), AliasInterestingParams,
   AliasMultiSpeczDepVersion, AliasMultiSpeczDepVersionParamInfo(..),
@@ -1594,17 +1594,20 @@ data ProcImpln
     deriving (Eq,Generic)
 
 
+-- | SpeczVersionId for global CTGC
+type AliasSpeczVersionId = Int
+
 -- | The identity of each specialized version.
 newtype SpeczVersionId = SpeczVersionId {
     -- More detial can be found in "Transform.hs"
-    paramAliasInfo :: Int
+    aliasSpeczId :: AliasSpeczVersionId
 } deriving (Eq, Ord, Show, Generic)
 
 
 -- Convert "SpeczVersionId" to "String" so it can be shorter in function name.
 speczIdToString :: SpeczVersionId -> String
 speczIdToString speczId = 
-    showHex (paramAliasInfo speczId) ""
+    showHex (aliasSpeczId speczId) ""
 
 
 -- | A map contains different specialization versions.

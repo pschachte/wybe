@@ -467,7 +467,13 @@ updateMultiSpeczInfoByPrim (aliasMap, interestingParams, multiSpeczDepInfo)
                         Just (_, _, requiredParams) -> BasedOn requiredParams
                         Nothing                     -> Aliased
                     ) calleeInterestingParams
-            -- XXX TODO
+            -- XXX We build the whole "MultiSpeczDepInfo" in the Alias Analysis
+            -- pass because currently multiple specialization only supports
+            -- aliasing. We need to factor this when we have more things.
+            -- Maybe storing "speczVersion" in PrimCall then collects them 
+            -- afterwards. This approach can also help us reuse more code and
+            -- avoid some duplicated computation ("Transform.hs" doesn't need to
+            -- re-run the AliasAnalysis part).
             let speczVersion = MultiSpeczDepVersion aliasSpeczVersion
             multiSpeczDepInfo' <- 
                     addSpeczVersion multiSpeczDepInfo spec speczVersion

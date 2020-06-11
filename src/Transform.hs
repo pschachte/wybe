@@ -235,30 +235,49 @@ _updateMutateForAlias _ args = args
 --
 ----------------------------------------------------------------
 
--- Currently we use [Int] as [SpeczVersionId]. 
+-- To support a new kind of multiple specialization:
+--   1. (optional) Record constrains and related info about specialized versions
+--      in "ProcDefPrim". (eg. "AliasInterestingParams")
+--   2. Add a new data structure for describing specialized version dependencies
+--      in "MultiSpeczDepVersion". (eg. "AliasMultiSpeczDepVersion")
+--   3. In Analysis pass, compute "MultiSpeczDepVersion" for each "PrimCall".
+--      Currently, this is happened in "updateMultiSpeczInfoByPrim" 
+--      in "AliasAnalysis.hs". This might not suit all cases, plz look for "XXX"
+--      tag in that function for more detail.
+--   4. Add a new data structure for describing specialized versions in
+--      "SpeczVersionId" and update "speczIdToString".
+--      (eg. "AliasSpeczVersionId")
+--   5. Update "expandRequiredSpeczVersionsByProcVersion" to expand correct
+--      "SpeczVersionId" from "MultiSpeczDepVersion".
+--   6. Update "generateSpeczVersionInProc" to generate specialized code based
+--      on given "SpeczVersionId".
+
+
+
+-- Currently we use [Int] as [AliasSpeczVersionId]. 
 -- The bijection works as: 
 -- InterestingParams: ["x", "y", "z"]
 --  NonAliasedParams: ["x", "y"]
 --            Bitmap: 011
 -- (the least significant bit is for the first in the list)
 --    SpeczVersionId: 5
--- The [String] representation of [SpeczVersionId] is just the hex
+-- The [String] representation of [AliasSpeczVersionId] is just the hex
 -- of the [Int]
-
 
 -- Return a list of non aliased parameters based on the given id
 speczIdToNonAliasedParams :: AliasInterestingParams -> SpeczVersionId
         -> [PrimVarName]
 speczIdToNonAliasedParams interestingParams speczId =
-    let aliasInfo = paramAliasInfo speczId in
+    let aliasId = aliasSpeczId speczId in
     List.zip [0..] interestingParams
-    |> List.filter (\(idx, _) -> Bits.testBitDefault aliasInfo idx)
+    |> List.filter (\(idx, _) -> Bits.testBitDefault aliasId idx)
     |> List.map snd
 
 
 -- Return the corresponding "SpeczVersionId" of the given 
 -- non aliased parameters.
-nonAliasedParamsToAliasSpeczId :: AliasInterestingParams -> [PrimVarName] -> Int
+nonAliasedParamsToAliasSpeczId :: AliasInterestingParams -> [PrimVarName]
+        -> AliasSpeczVersionId
 nonAliasedParamsToAliasSpeczId interestingParams nonAliasedParams =
     List.map (`List.elem` nonAliasedParams) interestingParams
     |> nonAliasedBoolListToAliasSpeczId
@@ -266,7 +285,7 @@ nonAliasedParamsToAliasSpeczId interestingParams nonAliasedParams =
 
 -- Compute the "SpeczVersionId" based on the given list of bool. "True" means
 -- that the corresponding params is non-aliased.
-nonAliasedBoolListToAliasSpeczId :: [Bool] -> Int
+nonAliasedBoolListToAliasSpeczId :: [Bool] -> AliasSpeczVersionId
 nonAliasedBoolListToAliasSpeczId bools = 
     List.zip [0..] bools
     |> List.map (\(idx, bool) -> if bool then Bits.bit idx else Bits.zeroBits)
@@ -330,6 +349,8 @@ expandRequiredSpeczVersionsByMod scc thisMod = do
     return (or changedList, [])
 
 
+-- For a given proc and a "SpeczVersionId" of it, compute all specialized procs
+-- it required.
 expandRequiredSpeczVersionsByProcVersion :: ProcAnalysis -> SpeczVersionId
         -> Set ((ModSpec, ProcName, Int), SpeczVersionId)
 expandRequiredSpeczVersionsByProcVersion procAnalysis version = 
@@ -359,7 +380,6 @@ expandRequiredSpeczVersionsByProcVersion procAnalysis version =
             ) multiSpeczDepInfo
     -- remove the standard version
     |> Set.filter ((/= speczIdForStandardVersion) . snd)
-
 
 
 -- Mark a list of specz versions as required in the given module.
