@@ -412,10 +412,11 @@ test to provide code to execute if none of the preceding tests succeeds.
 For example:
 ```
 if {x < 0     :: !println("negative")
-    x = 0     :: !println("zero")
-    otherwise :: !println("positive")
+    | x = 0     :: !println("zero")
+    | otherwise :: !println("positive")
 }
 ```
+
 
 
 ## Iteration statements
