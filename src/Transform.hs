@@ -13,13 +13,14 @@ module Transform (transformProc,
 import           AliasAnalysis
 import           AST
 import           Control.Monad
+import           Control.Monad.Trans.State
 import           Data.Bits     as Bits
 import           Data.List     as List
 import           Data.Map      as Map
 import           Data.Maybe    as Maybe
 import           Data.Set      as Set
 import           Flow          ((|>))
-import           Options       (LogSelection (Transform))
+import           Options       (LogSelection (Transform), optNoMultiSpecz)
 import           Util
 
 
@@ -148,7 +149,10 @@ transformPrim ((aliasMap, deadCells), prims) prim = do
     
     (primc', deadCells') <- case primc of
             PrimCall spec args -> do
-                spec' <- _updatePrimCallForSpecz spec args aliasMap
+                noMultiSpecz <- gets (optNoMultiSpecz . options)
+                spec' <- if noMultiSpecz
+                    then return spec
+                    else _updatePrimCallForSpecz spec args aliasMap
                 return (PrimCall spec' args, deadCells)
             PrimForeign "lpvm" "mutate" flags args -> do
                 let args' = _updateMutateForAlias aliasMap args
@@ -199,6 +203,9 @@ _updatePrimCallForSpecz spec args aliasMap = do
                 List.elem param calleeInterestingParams
                 -- it should be an interesting variable
                 && Right [] == isArgVarInteresting aliasMap arg
+                -- if a argument is used more than once,
+                -- then it should be aliased
+                && isArgVarUsedOnceInArgs arg args
             ) (pairArgVarWithParam args calleeProto)
     let nonAliasedParams = List.map snd nonAliasedArgWithParams
     return 
@@ -206,7 +213,8 @@ _updatePrimCallForSpecz spec args aliasMap = do
         then spec
         else
             let speczId = 
-                    Just $ nonAliasedParamsToSpeczId calleeMultiSpeczInfo nonAliasedParams
+                    Just $ nonAliasedParamsToSpeczId
+                            calleeMultiSpeczInfo nonAliasedParams
             in
             spec { procSpeczVersionID = speczId })
 

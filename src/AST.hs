@@ -91,6 +91,7 @@ import           Data.Map as Map
 import           Data.Maybe
 import           Data.Set as Set
 import           Data.Word (Word8)
+import           Flow             ((|>))
 import           Numeric          (showHex)
 import           Options
 import           System.Exit
@@ -1671,9 +1672,18 @@ isCompiled (ProcDefSrc _) = False
 
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
-    -- TODO: show [SpeczProcBodies]
-    show (ProcDefPrim proto body analysis _)
-        = show proto ++ ":" ++ show analysis ++ showBlock 4 body
+    show (ProcDefPrim proto body analysis speczVersions) =
+        let speczBodies = Map.toList speczVersions
+                |> List.map (\(ver, body) ->
+                        "\n  [" ++ speczIdToString ver ++ "]:" ++
+                        case body of
+                            Nothing -> " Missing"
+                            Just body -> showBlock 4 body)
+                |> intercalate "\n"
+        in
+            show proto ++ ":" ++ show analysis ++ showBlock 4 body 
+                    ++ speczBodies
+
 
 instance Show ProcAnalysis where
     show (ProcAnalysis procArgAliasMap procArgAliasMultiSpeczInfo) =

@@ -10,8 +10,8 @@
 module AliasAnalysis (
     AliasMapLocal, AliasMapLocalItem(..), aliasSccBottomUp, currentAliasInfo,
     isAliasInfoChanged, updateAliasedByPrim, isArgVarInteresting,
-    pairArgVarWithParam, DeadCells, updateDeadCellsByAccessArgs,
-    assignDeadCellsByAllocArgs
+    pairArgVarWithParam, isArgVarUsedOnceInArgs,
+    DeadCells, updateDeadCellsByAccessArgs, assignDeadCellsByAllocArgs
     ) where
 
 import           AST
@@ -444,7 +444,7 @@ updateMultiSpeczInfoByPrim (aliasMap, multiSpeczInfo) prim =
                         List.elem param calleeInterestingParams
                         -- if a argument is used more than once,
                         -- then it should be aliased
-                        && List.length (List.filter (== arg) args) == 1) 
+                        && isArgVarUsedOnceInArgs arg args)
                     |> Maybe.mapMaybe (\(arg, param) ->
                         case isArgVarInteresting aliasMap arg of
                             Right requiredParams -> 
@@ -524,6 +524,17 @@ isArgVarInteresting aliasMap ArgVar{argVarName=varName, argVarFinal=final} =
     else
         Left ()
 isArgVarInteresting _ _ = Left ()
+
+
+-- return True if the given arg is only used once in given list of arg.
+-- no need to worry about output var since it's in SSA form. 
+isArgVarUsedOnceInArgs :: PrimArg -> [PrimArg] -> Bool
+isArgVarUsedOnceInArgs ArgVar{argVarName=varName} args =
+    List.filter (\case
+        ArgVar{argVarName=varName'} -> varName == varName'
+        _ -> False) args
+    |> List.length |> (== 1)
+isArgVarUsedOnceInArgs _ _ = True -- we don't care about constant value
 
 
 -- update "AliasMultiSpeczInfoLocal" by adding interesting params

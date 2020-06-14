@@ -64,6 +64,20 @@ AFTER EVERYTHING:
         foreign lpvm mutate(~tmp$8#0:type_list.intlist, ?tmp$9#0:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$9#0:type_list.intlist, ?$#0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:type_list.intlist)
 
+  [1]:
+    foreign llvm icmp ne(x#0:type_list.intlist, 0:wybe.int, ?tmp$5#0:wybe.bool)
+    case ~tmp$5#0:wybe.bool of
+    0:
+        foreign llvm move(~y#0:type_list.intlist, ?$#0:type_list.intlist) @type_list:3:5
+
+    1:
+        foreign lpvm access(x#0:type_list.intlist, 0:wybe.int, ?h#0:wybe.int)
+        foreign lpvm access(~x#0:type_list.intlist, 8:wybe.int, ?t#0:type_list.intlist)
+        type_list.++<0>[1](~t#0:type_list.intlist, ~y#0:type_list.intlist, ?tmp$2#0:type_list.intlist) @type_list:5:13
+        foreign llvm move(~x#0:type_list.intlist, ?tmp$8#0:type_list.intlist)
+        foreign lpvm mutate(~tmp$8#0:type_list.intlist, ?tmp$9#0:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
+        foreign lpvm mutate(~tmp$9#0:type_list.intlist, ?$#0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:type_list.intlist)
+
 
 
 length > public (2 calls)

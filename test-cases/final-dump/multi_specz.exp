@@ -97,6 +97,11 @@ foo > public (2 calls)
     multi_specz.modifyAndPrint<0>(~x2#0:multi_specz.position, 222:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @multi_specz:18:6
     multi_specz.modifyAndPrint<0>(~x3#0:multi_specz.position, 333:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @multi_specz:19:6
     multi_specz.modifyAndPrint<0>(~x4#0:multi_specz.position, 444:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @multi_specz:20:6
+  [3]:
+    multi_specz.modifyAndPrint<0>[1](~x1#0:multi_specz.position, 111:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @multi_specz:17:6
+    multi_specz.modifyAndPrint<0>[1](~x2#0:multi_specz.position, 222:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @multi_specz:18:6
+    multi_specz.modifyAndPrint<0>(~x3#0:multi_specz.position, 333:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @multi_specz:19:6
+    multi_specz.modifyAndPrint<0>(~x4#0:multi_specz.position, 444:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @multi_specz:20:6
 
 
 modifyAndPrint > public (4 calls)
@@ -104,6 +109,9 @@ modifyAndPrint > public (4 calls)
  AliasPairs: []
  AliasMultiSpeczInfo: [pos#0]
     foreign lpvm mutate noalias(~%pos#0:multi_specz.position, ?%pos#1:multi_specz.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~v#0:wybe.int)
+    multi_specz.printPosition<0>(~pos#1:multi_specz.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @multi_specz:13:6
+  [1]:
+    foreign lpvm mutate noalias(~%pos#0:multi_specz.position, ?%pos#1:multi_specz.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~v#0:wybe.int)
     multi_specz.printPosition<0>(~pos#1:multi_specz.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @multi_specz:13:6
 
 

@@ -86,14 +86,14 @@ entry:
     foreign lpvm access($right#0:person4.person, 0:wybe.int, ?tmp$6#0:wybe.string)
     foreign lpvm access(~$right#0:person4.person, 8:wybe.int, ?tmp$7#0:wybe.string)
     foreign c strcmp(~tmp$4#0:wybe.string, ~tmp$6#0:wybe.string, ?tmp$8#0:wybe.int) @wybe:nn:nn
-    wybe.int.=<0>(~tmp$8#0:wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp eq(~tmp$8#0:wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool) @wybe:nn:nn
     case ~tmp$9#0:wybe.bool of
     0:
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
     1:
         foreign c strcmp(~tmp$5#0:wybe.string, ~tmp$7#0:wybe.string, ?tmp$10#0:wybe.int) @wybe:nn:nn
-        wybe.int.=<0>(~tmp$10#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp eq(~tmp$10#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
@@ -113,14 +113,14 @@ entry:
     foreign lpvm access($right#0:person4.person, 0:wybe.int, ?$right$firstname#0:wybe.string)
     foreign lpvm access(~$right#0:person4.person, 8:wybe.int, ?$right$lastname#0:wybe.string)
     foreign c strcmp(~$left$firstname#0:wybe.string, ~$right$firstname#0:wybe.string, ?tmp$8#0:wybe.int) @wybe:nn:nn
-    wybe.int.=<0>(~tmp$8#0:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp eq(~tmp$8#0:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
         foreign c strcmp(~$left$lastname#0:wybe.string, ~$right$lastname#0:wybe.string, ?tmp$11#0:wybe.int) @wybe:nn:nn
-        wybe.int.=<0>(~tmp$11#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp eq(~tmp$11#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
 
@@ -170,9 +170,6 @@ person > public inline (4 calls)
  
 
 
-declare external fastcc  i1 @"wybe.int.=<0>"(i64, i64)    
-
-
 declare external ccc  i64 @strcmp(i64, i64)    
 
 
@@ -199,11 +196,11 @@ entry:
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
   %"tmp$8#0" = tail call ccc  i64  @strcmp(i64  %3, i64  %10)  
-  %"tmp$9#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %"tmp$8#0", i64  0)  
+  %"tmp$9#0" = icmp eq i64 %"tmp$8#0", 0 
   br i1 %"tmp$9#0", label %if.then, label %if.else 
 if.then:
   %"tmp$10#0" = tail call ccc  i64  @strcmp(i64  %7, i64  %14)  
-  %"tmp$1#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %"tmp$10#0", i64  0)  
+  %"tmp$1#0" = icmp eq i64 %"tmp$10#0", 0 
   br i1 %"tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
@@ -231,11 +228,11 @@ entry:
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
   %"tmp$8#0" = tail call ccc  i64  @strcmp(i64  %17, i64  %24)  
-  %"tmp$2#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %"tmp$8#0", i64  0)  
+  %"tmp$2#0" = icmp eq i64 %"tmp$8#0", 0 
   br i1 %"tmp$2#0", label %if.then, label %if.else 
 if.then:
   %"tmp$11#0" = tail call ccc  i64  @strcmp(i64  %21, i64  %28)  
-  %"$$#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %"tmp$11#0", i64  0)  
+  %"$$#0" = icmp eq i64 %"tmp$11#0", 0 
   ret i1 %"$$#0" 
 if.else:
   ret i1 0 

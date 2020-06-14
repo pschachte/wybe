@@ -184,7 +184,8 @@ import           ObjectInterface
 
 import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
-                                            optForce, optForceAll, optLibDirs)
+                                            optForce, optForceAll, optLibDirs,
+                                            optNoMultiSpecz)
 import           NewParser                 (parseWybe)
 import           Resources                 (resourceCheckMod,
                                             transformProcResources,
@@ -857,7 +858,9 @@ buildMain mainImports =
         -- XXX Should insert assignments of initialised visible resources
         bodyCode = [move (castTo (iVal 0) phantomType) (varSet "io"),
                     move (intCast $ iVal 0) (intVarSet "exit_code"),
-                    Unplaced $ ForeignCall "c" "gc_init" [] []] ++ bodyInner
+                    Unplaced $ ForeignCall "c" "gc_init" [] 
+                            [Unplaced (varGet "io"), Unplaced (varSet "io")]] 
+                        ++ bodyInner
         mainBody = ProcDefSrc bodyCode
         -- Program main has argc, argv, exit_code, and io as resources
         proto = ProcProto "" []
@@ -974,12 +977,14 @@ multiSpeczTopDownPass mainMod = do
     logBuild $ " === Running top-down pass starting from: " ++ show mainMod
     dependencies <- topDownOrderedDependencySCCs mainMod
     mapM_ (\ms -> do
-        logBuild $ " --- Running on: " ++ show ms
-        -- collecting all required spec versions
-        fixpointProcessSCC expandRequiredSpeczVersions ms
+        noMultiSpecz <- gets (optNoMultiSpecz . options)
+        unless noMultiSpecz $ do
+            logBuild $ " --- Running on: " ++ show ms
+            -- collecting all required spec versions
+            fixpointProcessSCC expandRequiredSpeczVersions ms
 
-        -- generating required specz versions
-        mapM_ (transformModuleProcs generateSpeczVersionInProc) ms
+            -- generating required specz versions
+            mapM_ (transformModuleProcs generateSpeczVersionInProc) ms
 
         -- transform lpvm code to llvm code.
         -- TODO: skip this if the module is unchanged.
