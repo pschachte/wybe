@@ -38,6 +38,7 @@ redesign.pdf
 TAGS
 *.so
 cbits.so
+temp_for
 .DS_Store
 
 Parser.info

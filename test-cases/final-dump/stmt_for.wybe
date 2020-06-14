@@ -1,0 +1,51 @@
+#pub type int_sequence {
+#    pub int_sequence(start:int, stride:int, end_ex:int)
+#    pub def test `[|]`(?first:int, ?rest:int_sequence, sequence:int_sequence) {
+#        int_sequence(?first, ?stride, ?end_ex, sequence)
+#        if {
+#            stride > 0 && first < end_ex :: int_sequence(first + stride, stride, end_ex, ?rest)
+#            | stride < 0 && first > end_ex :: int_sequence(first + stride, stride, end_ex, ?rest)
+#            | otherwise :: ?rest = sequence fail
+#       }
+#    }
+#}
+
+#pub def say_hello use !io {
+    #!println("In Hello")
+#}
+
+do {
+    !println("Outer")
+    do {
+        !println("Inner")
+    }
+}
+
+#!say_hello
+
+#do {
+#    !println("Running")
+#    for x in int_sequence(0, 1, 5) {
+#        !println(x)
+#    }
+#}
+
+#?temp = y
+#do {
+#    `[|]`(?v, ?temp3, temp, ?temp2)
+#    if {
+#        temp2                    :: ?temp = temp3
+#        | otherwise              :: break
+#    }
+#    !println(v)
+#}
+
+#?temp = y
+#do {
+#    if {
+#        `[|]`(?v, ?temp, temp) :: true
+#        | otherwise :: ?v = v break
+#    }
+#    !println(v)
+#}
+
