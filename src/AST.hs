@@ -49,8 +49,8 @@ module AST (
   foldProcCalls, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp, expOutputs, pexpListOutputs,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
-  Prim(..), primArgs, replacePrimArgs, argIsVar, ProcSpec(..),
-  PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
+  Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
+  ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
@@ -2231,6 +2231,23 @@ replacePrimArgs instr args =
 argIsVar :: PrimArg -> Bool
 argIsVar ArgVar{} = True
 argIsVar _ = False
+
+
+-- | Test if a PrimArg is a compile-time constant.
+argIsConst :: PrimArg -> Bool
+argIsConst ArgVar{} = False
+argIsConst ArgInt{} = True
+argIsConst ArgFloat{} = True
+argIsConst ArgString{} = True
+argIsConst ArgChar{} = True
+argIsConst ArgUnneeded{} = False
+
+
+-- | Return Just the integer constant value if a PrimArg iff it is an integer
+-- constant.
+argIntegerValue :: PrimArg -> Maybe Integer
+argIntegerValue (ArgInt val _) = Just val
+argIntegerValue _              = Nothing
 
 
 -- |Relates a primitive argument to the corresponding source argument
