@@ -226,7 +226,7 @@ translateProc modProtos proc = do
     (blocks, count'') <-
             foldlM (\(currBlocks, currCount) (id, currBody) -> do
                     -- rename this version of proc
-                    let strId = speczIdToString id
+                    let strId = speczVersionToId id
                     let pname = (primProtoName proto) 
                                 ++ "[" ++ strId ++ "]"
                     let proto' = proto {primProtoName = pname}

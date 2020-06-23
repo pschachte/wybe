@@ -148,7 +148,7 @@ aliasProcDef def
         -- Actual analysis
         (aliasMap, interestingParams, multiSpeczDepInfo, _) <- 
                 aliasedByBody caller body 
-                    (initAliasMap, Set.empty, Set.empty, Map.empty)
+                    (initAliasMap, Set.empty, Map.empty, Map.empty)
         
         aliasMap' <- completeAliasMap caller aliasMap
         let interestingParams' =
@@ -223,7 +223,8 @@ mergeAnalysisInfo infos =
     let interestingParams = 
             List.foldl Set.union Set.empty interestingParamsList
     in 
-    let multiSpeczDepInfo = Set.unions multiSpeczDepInfoList in
+    -- XXX there could be something better than "Map.unions"
+    let multiSpeczDepInfo = Map.unions multiSpeczDepInfoList in
     -- We don't need "deadCells" after fork for now.
     let deadCells = Map.empty in
     (aliasMap, interestingParams, multiSpeczDepInfo, deadCells)
@@ -458,25 +459,18 @@ updateMultiSpeczInfoByPrim (aliasMap, interestingParams, multiSpeczDepInfo)
             let interestingParams' = 
                     addInterestingParams interestingParams newInterestingParams
             -- update dependencies
-            let aliasSpeczVersion = List.map (\calleeParam ->
+            let infoItems = Maybe.mapMaybe (\calleeParam ->
                     let result =
                             List.find (\(_, param, _) -> param == calleeParam)
                                     interestingPrimCallInfo
                     in
                     case result of 
-                        Just (_, _, requiredParams) -> BasedOn requiredParams
-                        Nothing                     -> Aliased
+                        Just (_, _, requiredParams) -> Just $ 
+                                NonAliasedParamCond calleeParam requiredParams
+                        Nothing                     -> Nothing
                     ) calleeInterestingParams
-            -- XXX We build the whole "MultiSpeczDepInfo" in the Alias Analysis
-            -- pass because currently multiple specialization only supports
-            -- aliasing. We need to factor this when we have more things.
-            -- Maybe storing "speczVersion" in PrimCall then collects them 
-            -- afterwards. This approach can also help us reuse more code and
-            -- avoid some duplicated computation ("Transform.hs" doesn't need to
-            -- re-run the AliasAnalysis part).
-            let speczVersion = MultiSpeczDepVersion aliasSpeczVersion
-            multiSpeczDepInfo' <- 
-                    addSpeczVersion multiSpeczDepInfo spec speczVersion
+            multiSpeczDepInfo' <- updateMultiSpeczDepInfo multiSpeczDepInfo 
+                    (spec, args) infoItems
             return (interestingParams', multiSpeczDepInfo')
         PrimForeign "lpvm" "mutate" flags args ->
             case args of
@@ -550,17 +544,19 @@ addInterestingParams = List.foldr Set.insert
 
 
 -- adding new specz version dependency
-addSpeczVersion :: MultiSpeczDepInfo -> ProcSpec 
-    -> MultiSpeczDepVersion -> Compiler MultiSpeczDepInfo
-addSpeczVersion multiSpeczDepInfo proc version = 
-    if List.all (== Aliased) (aliasDepVersion version)
+updateMultiSpeczDepInfo :: MultiSpeczDepInfo -> (ProcSpec, [PrimArg])
+    -> [MultiSpeczDepInfoItem] -> Compiler MultiSpeczDepInfo
+updateMultiSpeczDepInfo multiSpeczDepInfo primCall items = 
+    if List.null items
     then
         return multiSpeczDepInfo
     else do
-        logAlias $ "Found required specz version: " ++ show proc
-                ++ " :" ++ show version
-        let ProcSpec mod procName procID _ = proc
-        return $ Set.insert ((mod, procName, procID), version) multiSpeczDepInfo
+        logAlias $ "Update MultiSpeczDepInfo, primCall: " ++ show primCall
+                ++ " items:" ++ show items
+        return $ Map.alter (\x ->
+            maybe Set.empty id x
+            |> Set.union (Set.fromList items)
+            |> Just) primCall multiSpeczDepInfo
 
 
 -- Convert the set of interesting params to list

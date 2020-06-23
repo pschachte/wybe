@@ -39,10 +39,9 @@ module AST (
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
-  AliasMap, aliasMapToAliasPairs, AliasSpeczVersionId,
-  SpeczVersionId(..), speczIdToString, SpeczProcBodies,
-  MultiSpeczDepInfo, MultiSpeczDepVersion(..), AliasInterestingParams,
-  AliasMultiSpeczDepVersion, AliasMultiSpeczDepVersionParamInfo(..),
+  AliasMap, aliasMapToAliasPairs, SpeczVersion, SpeczVersionItem(..),
+  speczVersionToId, SpeczProcBodies,
+  MultiSpeczDepInfo, MultiSpeczDepInfoItem(..), AliasInterestingParams,
   ProcAnalysis(..), emptyProcAnalysis, 
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
@@ -87,6 +86,9 @@ import           Config (magicVersion, wordSize, objectExtension,
 import           Control.Monad
 import           Control.Monad.Trans (lift,liftIO)
 import           Control.Monad.Trans.State
+import           Crypto.Hash
+import qualified Data.Binary
+import qualified Data.ByteString.Lazy as BL
 import           Data.List as List
 import           Data.Map as Map
 import           Data.Maybe
@@ -1594,20 +1596,26 @@ data ProcImpln
     deriving (Eq,Generic)
 
 
--- | SpeczVersionId for global CTGC
-type AliasSpeczVersionId = Int
 
--- | The identity of each specialized version.
-newtype SpeczVersionId = SpeczVersionId {
-    -- More detial can be found in "Transform.hs"
-    aliasSpeczId :: AliasSpeczVersionId
-} deriving (Eq, Ord, Show, Generic)
+-- TODO doc!
+type SpeczVersion = Set SpeczVersionItem
 
+data SpeczVersionItem
+    = NonAliasedParam PrimVarName
+    deriving (Eq, Ord, Show, Generic)
+
+-- TODO doc!
+instance Data.Binary.Binary PrimVarName
+instance Data.Binary.Binary SpeczVersionItem
 
 -- Convert "SpeczVersionId" to "String" so it can be shorter in function name.
-speczIdToString :: SpeczVersionId -> String
-speczIdToString speczId = 
-    showHex (aliasSpeczId speczId) ""
+-- TODO: doc!
+speczVersionToId :: SpeczVersion -> String
+speczVersionToId speczVersion = 
+    (show . sha1 . Data.Binary.encode) speczVersion
+    where
+        sha1 :: BL.ByteString -> Digest SHA1
+        sha1 = hashlazy
 
 
 -- | A map contains different specialization versions.
@@ -1615,7 +1623,7 @@ speczIdToString speczId =
 -- actual implementation. A procBody can be "Nothing" when it's required but
 -- haven't been generated. All procBody will be generated before converting to
 -- llvm code.
-type SpeczProcBodies = Map SpeczVersionId (Maybe ProcBody)
+type SpeczProcBodies = Map SpeczVersion (Maybe ProcBody)
 
 
 -- | Use to record the alias relation between arguments of a procedure.
@@ -1636,28 +1644,17 @@ aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 -- | Infomation about specialization versions the current proc directly uses. 
 -- For a given specialization version of the current proc, this info should be
 -- enough to compute all required specz versions it required.
+-- TODO: doc!
 type MultiSpeczDepInfo = 
-        Set ((ModSpec, ProcName, ProcID), MultiSpeczDepVersion)
-
-
--- | Describing a multi specz version dependency.
--- Currently it's only about aliasing.
-newtype MultiSpeczDepVersion = MultiSpeczDepVersion {
-    aliasDepVersion :: AliasMultiSpeczDepVersion
-} deriving (Eq, Generic, Ord, Show)
-
-
--- | Each version is described by a list of "ParamInfo" that matches
--- the interesting parameters of that proc.
-type AliasMultiSpeczDepVersion = [AliasMultiSpeczDepVersionParamInfo]
+        Map (ProcSpec, [PrimArg]) (Set MultiSpeczDepInfoItem)
 
 
 -- | This matches the each param of the callee. Each param can be 
 -- definitely "Aliased" or "BasedOn" some params of the caller.
 -- If it is "BasedOn" Nothing, then it is always non-aliased.
-data AliasMultiSpeczDepVersionParamInfo
-    = Aliased 
-    | BasedOn [PrimVarName]
+-- TODO: doc!
+data MultiSpeczDepInfoItem
+    = NonAliasedParamCond PrimVarName [PrimVarName]
     deriving (Eq, Generic, Ord, Show)
 
 
@@ -1676,7 +1673,7 @@ data ProcAnalysis = ProcAnalysis {
 
 -- | The empty ProcAnalysis
 emptyProcAnalysis :: ProcAnalysis
-emptyProcAnalysis = ProcAnalysis emptyDS [] Set.empty
+emptyProcAnalysis = ProcAnalysis emptyDS [] Map.empty
 
 
 isCompiled :: ProcImpln -> Bool
@@ -1688,8 +1685,9 @@ instance Show ProcImpln where
     show (ProcDefPrim proto body analysis speczVersions) =
         let speczBodies = Map.toList speczVersions
                 |> List.map (\(ver, body) ->
-                        "\n  [" ++ speczIdToString ver ++ "]:" ++
-                        case body of
+                        "\n [" ++ speczVersionToId ver ++ "] "
+                        ++ show ver ++ " :"
+                        ++ case body of
                             Nothing -> " Missing"
                             Just body -> showBlock 4 body)
                 |> intercalate "\n"
@@ -1700,11 +1698,14 @@ instance Show ProcImpln where
 
 instance Show ProcAnalysis where
     show (ProcAnalysis argAliasMap aliasInterestingParams multiSpeczDepInfo) =
+        let multiSpeczDepInfo' = Map.toList multiSpeczDepInfo
+                |> List.map (not . List.null . snd)
+        in
         "\n AliasPairs: " ++ showAliasMap argAliasMap 
-     ++ "\n AliasInterestingParams: " ++ show aliasInterestingParams
-     ++ if Set.null multiSpeczDepInfo 
-         then "" 
-         else "\n MultiSpeczDepInfo: " ++ show (Set.toList multiSpeczDepInfo)
+        ++ "\n AliasInterestingParams: " ++ show aliasInterestingParams
+        ++ if List.null multiSpeczDepInfo'
+            then "" 
+            else "\n MultiSpeczDepInfo: " ++ show multiSpeczDepInfo'
 
 
 
@@ -1887,7 +1888,7 @@ data ProcSpec = ProcSpec {
       procSpecMod :: ModSpec,
       procSpecName :: ProcName,
       procSpecID :: ProcID,
-      procSpeczVersionID :: Maybe SpeczVersionId}
+      procSpeczVersion :: Maybe SpeczVersion}
                 deriving (Eq,Ord,Generic)
 
 instance Show ProcSpec where
@@ -1895,7 +1896,7 @@ instance Show ProcSpec where
         showModSpec mod ++ "." ++ name ++ "<" ++ show pid ++ ">"
                 ++ case speczId of 
                     Nothing -> ""
-                    Just id -> "[" ++ speczIdToString id ++ "]"
+                    Just id -> "[" ++ speczVersionToId id ++ "]"
 
 -- |An ID for a proc.
 type ProcID = Int
