@@ -247,7 +247,6 @@ _updateMutateForAlias _ args = args
 --      (eg. see the call to "updateMultiSpeczDepInfo" in "AliasAnalysis.hs")
 --   4. Update "SpeczVersionItem" in "AST.hs" for describing a new specialized
 --      information.
-
 --   5. Implement a new expansion that can generate those "SpeczVersionItem" for
 --      each callee based on the caller's "SpeczVersion" and
 --      "MultiSpeczDepInfo". Add the expansion to 
