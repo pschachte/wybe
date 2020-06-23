@@ -1595,21 +1595,27 @@ data ProcImpln
       -- defn in SSA (LLVM) form along with any needed extern definitions
     deriving (Eq,Generic)
 
-
-
--- TODO doc!
+-- |Used for describing a specific specialized version
 type SpeczVersion = Set SpeczVersionItem
 
+
+-- |Each one represents some additional information about the specialization.
+-- Removing one "SpeczVersionItem" should only make the specialization a bit
+-- more general and shouldn't break it.
+-- "NonAliasedParam param" is used for global CTGC.
 data SpeczVersionItem
     = NonAliasedParam PrimVarName
     deriving (Eq, Ord, Show, Generic)
 
--- TODO doc!
+-- XXX Those should be put in "BinaryFactory.hs". However we need to compute the
+-- hash of "SpeczVersion" in "AST.hs".
 instance Data.Binary.Binary PrimVarName
 instance Data.Binary.Binary SpeczVersionItem
 
--- Convert "SpeczVersionId" to "String" so it can be shorter in function name.
--- TODO: doc!
+
+-- |Convert a "SpeczVersion" to a string as part of the proc identifier.
+-- It's first 40 bits (out of 160 bits) of the sha1 hash. Collision will be
+-- detected in "Blocks.hs".
 speczVersionToId :: SpeczVersion -> String
 speczVersionToId = List.take 10 . show . sha1 . Data.Binary.encode
     where
@@ -1640,18 +1646,20 @@ aliasMapToAliasPairs :: AliasMap -> [(PrimVarName, PrimVarName)]
 aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 
 
--- | Infomation about specialization versions the current proc directly uses. 
+-- |Infomation about specialization versions the current proc directly uses. 
 -- For a given specialization version of the current proc, this info should be
--- enough to compute all required specz versions it required.
--- TODO: doc!
+-- enough to compute all specz versions it required. A sample case is
+-- "expandSpeczVersionsAlias" in "Transform.hs".
+-- XXX this map is per call site, so the args is included to separate different
+-- calls to the same proc. We may need something better than this.
 type MultiSpeczDepInfo = 
         Map (ProcSpec, [PrimArg]) (Set MultiSpeczDepInfoItem)
 
 
--- | This matches the each param of the callee. Each param can be 
--- definitely "Aliased" or "BasedOn" some params of the caller.
--- If it is "BasedOn" Nothing, then it is always non-aliased.
--- TODO: doc!
+-- |Specific items for "MultiSpeczDepInfo".
+-- "NonAliasedParamCond calleeParam [callerParam]" is used for global CTGC. If
+-- all [callerParam] is non-aliased (could be empty), then the calleeParam is 
+-- non-aliased.
 data MultiSpeczDepInfoItem
     = NonAliasedParamCond PrimVarName [PrimVarName]
     deriving (Eq, Generic, Ord, Show)
