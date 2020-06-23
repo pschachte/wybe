@@ -1611,8 +1611,7 @@ instance Data.Binary.Binary SpeczVersionItem
 -- Convert "SpeczVersionId" to "String" so it can be shorter in function name.
 -- TODO: doc!
 speczVersionToId :: SpeczVersion -> String
-speczVersionToId speczVersion = 
-    (show . sha1 . Data.Binary.encode) speczVersion
+speczVersionToId = List.take 10 . show . sha1 . Data.Binary.encode
     where
         sha1 :: BL.ByteString -> Digest SHA1
         sha1 = hashlazy
