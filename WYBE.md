@@ -411,11 +411,12 @@ test to provide code to execute if none of the preceding tests succeeds.
 
 For example:
 ```
-if {x < 0     :: !println("negative")
-    x = 0     :: !println("zero")
-    otherwise :: !println("positive")
+if { x < 0     :: !println("negative")
+   | x = 0     :: !println("zero")
+   | otherwise :: !println("positive")
 }
 ```
+
 
 
 ## Iteration statements
@@ -588,12 +589,12 @@ type tree { empty | node(left:tree, value:int, right:tree) }
 then it may be used as follows:
 ```
 def test member(elt:int, tree:tree) {
-    if {node(?left, ?value, ?right) = tree ::
-            if {key = value:: succeed
-                key < value:: member(elt, left)
-                otherwise  :: member(elt, right)
+    if { node(?left, ?value, ?right) = tree ::
+            if { elt = value:: succeed
+               | elt < value:: member(elt, left)
+               | otherwise  :: member(elt, right)
             }
-        otherwise:: fail
+       | otherwise:: fail
     }
 }
 ```
