@@ -238,57 +238,23 @@ _updateMutateForAlias _ args = args
 -- Multiple specialization
 --
 ----------------------------------------------------------------
-
--- TODO: doc!
 -- To support a new kind of multiple specialization:
 --   1. (optional) Record constrains and related info about specialized versions
 --      in "ProcDefPrim". (eg. "AliasInterestingParams")
---   2. Add a new data structure for describing specialized version dependencies
---      in "MultiSpeczDepVersion". (eg. "AliasMultiSpeczDepVersion")
---   3. In Analysis pass, compute "MultiSpeczDepVersion" for each "PrimCall".
---      Currently, this is happened in "updateMultiSpeczInfoByPrim" 
---      in "AliasAnalysis.hs". This might not suit all cases, plz look for "XXX"
---      tag in that function for more detail.
---   4. Add a new data structure for describing specialized versions in
---      "SpeczVersionId" and update "speczIdToString".
---      (eg. "AliasSpeczVersionId")
---   5. Update "expandRequiredSpeczVersionsByProcVersion" to expand correct
---      "SpeczVersionId" from "MultiSpeczDepVersion".
+--   2. Update "MultiSpeczDepInfoItem" in "AST.hs" to record corresponding info.
+--   3. In Analysis pass, generate some "MultiSpeczDepInfoItem"s for each
+--      "PrimCall" call site and add them into "MultiSpeczDepInfo".
+--      (eg. see the call to "updateMultiSpeczDepInfo" in "AliasAnalysis.hs")
+--   4. Update "SpeczVersionItem" in "AST.hs" for describing a new specialized
+--      information.
+
+--   5. Implement a new expansion that can generate those "SpeczVersionItem" for
+--      each callee based on the caller's "SpeczVersion" and
+--      "MultiSpeczDepInfo". Add the expansion to 
+--      "expandRequiredSpeczVersionsByProcVersion".
+--      (eg. expandSpeczVersionsAlias)
 --   6. Update "generateSpeczVersionInProc" to generate specialized code based
---      on given "SpeczVersionId".
-
-
--- -- Return a list of non aliased parameters based on the given id
--- speczIdToNonAliasedParams :: AliasInterestingParams -> SpeczVersionId
---         -> [PrimVarName]
--- speczIdToNonAliasedParams interestingParams speczId =
---     let aliasId = aliasSpeczId speczId in
---     List.zip [0..] interestingParams
---     |> List.filter (\(idx, _) -> Bits.testBitDefault aliasId idx)
---     |> List.map snd
-
-
--- -- Return the corresponding "SpeczVersionId" of the given 
--- -- non aliased parameters.
--- nonAliasedParamsToAliasSpeczId :: AliasInterestingParams -> [PrimVarName]
---         -> AliasSpeczVersionId
--- nonAliasedParamsToAliasSpeczId interestingParams nonAliasedParams =
---     List.map (`List.elem` nonAliasedParams) interestingParams
---     |> nonAliasedBoolListToAliasSpeczId
-
-
--- -- Compute the "SpeczVersionId" based on the given list of bool. "True" means
--- -- that the corresponding params is non-aliased.
--- nonAliasedBoolListToAliasSpeczId :: [Bool] -> AliasSpeczVersionId
--- nonAliasedBoolListToAliasSpeczId bools = 
---     List.zip [0..] bools
---     |> List.map (\(idx, bool) -> if bool then Bits.bit idx else Bits.zeroBits)
---     |> List.foldl (Bits..|.) Bits.zeroBits
-
-
--- |Log a message, if we are logging optimisation activity.
-logTransform :: String -> Compiler ()
-logTransform = logMsg Transform
+--      on given "SpeczVersion".
 
 
 -- Fix point processor for expanding required specz versions.
@@ -338,7 +304,7 @@ expandRequiredSpeczVersionsByMod scc thisMod = do
     return (or changedList, [])
 
 
--- For a given proc and a "SpeczVersionId" of it, compute all specialized procs
+-- For a given proc and a "SpeczVersion" of it, compute all specialized procs
 -- it required.
 expandRequiredSpeczVersionsByProcVersion :: ProcAnalysis -> SpeczVersion
         -> Set ((ModSpec, ProcName, Int), SpeczVersion)
@@ -350,9 +316,8 @@ expandRequiredSpeczVersionsByProcVersion procAnalysis callerVersion =
     let multiSpeczDepInfo = procMultiSpeczDepInfo procAnalysis in
     -- go through dependencies and find matches
     List.map (\((procSpec, _), items) ->
-            let version =
-                    expandSpeczVersionsAlias callerVersion items
-            in
+            -- Add other expansion here and union the results
+            let version = expandSpeczVersionsAlias callerVersion items in
             let ProcSpec mod procName procId _ = procSpec in
                 ((mod, procName, procId), version)
             ) (Map.toList multiSpeczDepInfo)
@@ -361,6 +326,7 @@ expandRequiredSpeczVersionsByProcVersion procAnalysis callerVersion =
     |> Set.fromList
 
 
+-- expand specz versions for global CTGC
 expandSpeczVersionsAlias :: SpeczVersion -> Set MultiSpeczDepInfoItem
         -> SpeczVersion
 expandSpeczVersionsAlias callerVersion items =
@@ -371,10 +337,11 @@ expandSpeczVersionsAlias callerVersion items =
                         Set.member (NonAliasedParam x) callerVersion
                     ) requiredParams
             in
-            if meetCond then (Just param) else Nothing
+            if meetCond then Just param else Nothing
         _ -> Nothing
     ) (Set.toList items)
     |> List.map NonAliasedParam |> Set.fromList
+
 
 -- Mark a list of specz versions as required in the given module.
 -- It returns false if all the new versions already exist.
@@ -417,3 +384,8 @@ groupByFst :: Eq a => [(a, b)] -> [(a, [b])]
 groupByFst l = 
     List.groupBy (\x y -> fst x == fst y) l
     |> List.map (\xs -> (fst(head xs), List.map snd xs))
+
+
+-- |Log a message, if we are logging optimisation activity.
+logTransform :: String -> Compiler ()
+logTransform = logMsg Transform

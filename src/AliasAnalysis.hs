@@ -31,7 +31,7 @@ import           Util
 -- The "AliasMap" records the relation between parameters of each procedure.
 -- The "AliasMapLocal" records all variables during the analysis. "LiveVar" is
 -- for variables, it can be added to and removed from the map during analysis.
--- For parameters, we consider it's a nomarl variable ("LiveVar") aliased with 
+-- For parameters, we consider it's a normal variable ("LiveVar") aliased with 
 -- something outside the procedure scope ("AliasByParam" / "MaybeAliasByParam").
 -- "AliasByParam" and "MaybeAliasByParam" won't be removed during the analysis,
 -- but if the existence of a "MaybeAliasByParam" can change the outcome then we
@@ -49,7 +49,7 @@ type AliasMapLocal = DisjointSet AliasMapLocalItem
 -- the "Dead Memory Cell Analysis" section below.
 -- Each reusable cell is recorded as "(varName, requiredParams)"". "varName" is
 -- the name of the variable that can be reused and requiredParams is a list of 
--- parameters that need to be non-aliased before reusing that cell (casused by
+-- parameters that need to be non-aliased before reusing that cell (caused by
 -- "MaybeAliasByParam").
 type DeadCells = Map TypeSpec [(PrimVarName, [PrimVarName])]
 
@@ -415,7 +415,7 @@ removeDeadVar aliasMap args =
 -- some parameters aren't aliased.
 -- The code here is to analysis each procedure and list parameters
 -- that are interesting for further use (in "Transform.hs").
--- We consider a parameter is intersting when the alias
+-- We consider a parameter is interesting when the alias
 -- information of that parameter can help us generate a
 -- better version of that procedure. 
 
@@ -502,7 +502,7 @@ pairArgVarWithParam args proto =
     List.zip args formalParamNames
 
 
--- we consider a varibale is interesting when it isn't aliased and not used
+-- we consider a variable is interesting when it isn't aliased and not used
 -- after this point. Note that it doesn't check whether the given "PrimArg"
 -- is a pointer.
 -- It returns "Right requiredParams" if it's interesting.
@@ -554,7 +554,7 @@ updateMultiSpeczDepInfo multiSpeczDepInfo primCall items =
         logAlias $ "Update MultiSpeczDepInfo, primCall: " ++ show primCall
                 ++ " items:" ++ show items
         return $ Map.alter (\x ->
-            maybe Set.empty id x
+            fromMaybe Set.empty x
             |> Set.union (Set.fromList items)
             |> Just) primCall multiSpeczDepInfo
 
