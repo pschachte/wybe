@@ -1686,7 +1686,7 @@ instance Show ProcImpln where
         let speczBodies = Map.toList speczVersions
                 |> List.map (\(ver, body) ->
                         "\n [" ++ speczVersionToId ver ++ "] "
-                        ++ show ver ++ " :"
+                        ++ show (Set.toList ver) ++ " :"
                         ++ case body of
                             Nothing -> " Missing"
                             Just body -> showBlock 4 body)
@@ -1699,7 +1699,7 @@ instance Show ProcImpln where
 instance Show ProcAnalysis where
     show (ProcAnalysis argAliasMap aliasInterestingParams multiSpeczDepInfo) =
         let multiSpeczDepInfo' = Map.toList multiSpeczDepInfo
-                |> List.map (not . List.null . snd)
+                |> List.filter (not . List.null . snd)
         in
         "\n AliasPairs: " ++ showAliasMap argAliasMap 
         ++ "\n AliasInterestingParams: " ++ show aliasInterestingParams
