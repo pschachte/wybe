@@ -326,7 +326,7 @@ expandRequiredSpeczVersionsByProcVersion procAnalysis callerVersion =
 
 
 -- expand specz versions for global CTGC
-expandSpeczVersionsAlias :: SpeczVersion -> Set MultiSpeczDepInfoItem
+expandSpeczVersionsAlias :: SpeczVersion -> Set CallSiteProperty 
         -> SpeczVersion
 expandSpeczVersionsAlias callerVersion items =
     Maybe.mapMaybe (\case

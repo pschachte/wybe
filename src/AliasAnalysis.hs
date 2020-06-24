@@ -545,7 +545,7 @@ addInterestingParams = List.foldr Set.insert
 
 -- adding new specz version dependency
 updateMultiSpeczDepInfo :: MultiSpeczDepInfo -> (ProcSpec, [PrimArg])
-    -> [MultiSpeczDepInfoItem] -> Compiler MultiSpeczDepInfo
+    -> [CallSiteProperty] -> Compiler MultiSpeczDepInfo
 updateMultiSpeczDepInfo multiSpeczDepInfo primCall items = 
     if List.null items
     then

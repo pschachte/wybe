@@ -39,9 +39,9 @@ module AST (
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
-  AliasMap, aliasMapToAliasPairs, SpeczVersion, SpeczVersionItem(..),
+  AliasMap, aliasMapToAliasPairs, SpeczVersion, CallProperty(..),
   speczVersionToId, SpeczProcBodies,
-  MultiSpeczDepInfo, MultiSpeczDepInfoItem(..), AliasInterestingParams,
+  MultiSpeczDepInfo, CallSiteProperty(..), AliasInterestingParams,
   ProcAnalysis(..), emptyProcAnalysis, 
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
@@ -1595,22 +1595,42 @@ data ProcImpln
       -- defn in SSA (LLVM) form along with any needed extern definitions
     deriving (Eq,Generic)
 
+
+-- |An ID for a parameter of a proc
+type ParameterID = Int
+
+
+-- |Convert "ParameterID" to "PrimVarName"
+parameterIDToVarName :: PrimProto -> ParameterID -> PrimVarName
+parameterIDToVarName proto paramID =
+    let params = primProtoParams proto in
+    primParamName (params !! paramID)
+
+
+-- |Convert "PrimVarName" to "ParameterID"
+parameterVarNameToID :: PrimProto -> PrimVarName -> ParameterID
+parameterVarNameToID proto varName =
+    let params = primProtoParams proto in
+    let idx = List.findIndex ((== varName) . primParamName) params in
+    trustFromJust "parameterVarNameToID" idx
+
+
 -- |Used for describing a specific specialized version
-type SpeczVersion = Set SpeczVersionItem
+type SpeczVersion = Set CallProperty
 
 
 -- |Each one represents some additional information about the specialization.
 -- Removing one "SpeczVersionItem" should only make the specialization a bit
 -- more general and shouldn't break it.
 -- "NonAliasedParam param" is used for global CTGC.
-data SpeczVersionItem
+data CallProperty
     = NonAliasedParam PrimVarName
     deriving (Eq, Ord, Show, Generic)
 
 -- XXX Those should be put in "BinaryFactory.hs". However we need to compute the
 -- hash of "SpeczVersion" in "AST.hs".
 instance Data.Binary.Binary PrimVarName
-instance Data.Binary.Binary SpeczVersionItem
+instance Data.Binary.Binary CallProperty
 
 
 -- |Convert a "SpeczVersion" to a string as part of the proc identifier.
@@ -1653,14 +1673,14 @@ aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 -- XXX this map is per call site, so the args is included to separate different
 -- calls to the same proc. We may need something better than this.
 type MultiSpeczDepInfo = 
-        Map (ProcSpec, [PrimArg]) (Set MultiSpeczDepInfoItem)
+        Map (ProcSpec, [PrimArg]) (Set CallSiteProperty)
 
 
 -- |Specific items for "MultiSpeczDepInfo".
 -- "NonAliasedParamCond calleeParam [callerParam]" is used for global CTGC. If
 -- all [callerParam] is non-aliased (could be empty), then the calleeParam is 
 -- non-aliased.
-data MultiSpeczDepInfoItem
+data CallSiteProperty
     = NonAliasedParamCond PrimVarName [PrimVarName]
     deriving (Eq, Generic, Ord, Show)
 

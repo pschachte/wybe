@@ -37,7 +37,7 @@ instance Binary ParamInfo
 instance Binary Prim
 instance Binary PrimArg
 instance Binary ProcAnalysis
-instance Binary MultiSpeczDepInfoItem
+instance Binary CallSiteProperty
 
 -- Procedures
 instance Binary ProcSpec
