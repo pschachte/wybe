@@ -237,17 +237,17 @@ _updateMutateForAlias _ args = args
 -- Multiple specialization
 --
 ----------------------------------------------------------------
--- TODO: doc!
 -- To support a new kind of multiple specialization:
 --   1. (optional) Record constrains and related info about specialized versions
---      in "ProcDefPrim". (eg. "AliasInterestingParams")
---   2. Update "MultiSpeczDepInfoItem" in "AST.hs" to record corresponding info.
---   3. In Analysis pass, generate some "MultiSpeczDepInfoItem"s for each
+--      in "InterestingCallProperty".
+--   2. Update "CallSiteProperty" in "AST.hs" so it can record corresponding
+--      info.
+--   3. In Analysis pass, generate some "CallSiteProperty"s for each
 --      "PrimCall" call site and add them into "MultiSpeczDepInfo".
 --      (eg. see the call to "updateMultiSpeczDepInfo" in "AliasAnalysis.hs")
---   4. Update "SpeczVersionItem" in "AST.hs" for describing a new specialized
+--   4. Update "CallProperty" in "AST.hs" for describing a new specialized
 --      information.
---   5. Implement a new expansion that can generate those "SpeczVersionItem" for
+--   5. Implement a new expansion that can generate those "CallProperty" for
 --      each callee based on the caller's "SpeczVersion" and
 --      "MultiSpeczDepInfo". Add the expansion to 
 --      "expandRequiredSpeczVersionsByProcVersion".
