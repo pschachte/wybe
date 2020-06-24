@@ -178,7 +178,7 @@ aliasedByPrims caller body analysisInfo = do
     -- Analyse simple prims:
     -- (only process alias pairs incurred by move, access, cast)
     logAlias "\nAnalyse prims (aliasedByPrims):    "
-    foldM aliasedByPrim analysisInfo prims
+    foldM (aliasedByPrim caller) analysisInfo prims
 
 
 -- Recursively analyse forked body's prims
@@ -199,13 +199,13 @@ aliasedByFork caller body analysisInfo = do
             return analysisInfo
 
 
-aliasedByPrim :: AnalysisInfo -> Placed Prim
-                                                -> Compiler AnalysisInfo
-aliasedByPrim info prim = do
+aliasedByPrim :: PrimProto -> AnalysisInfo -> Placed Prim
+        -> Compiler AnalysisInfo
+aliasedByPrim proto info prim = do
     let (aliasMap, interestingParams, multiSpeczDepInfo, deadCells) = info
     aliasMap' <- updateAliasedByPrim aliasMap prim
     (interestingParams', multiSpeczDepInfo')
-        <- updateMultiSpeczInfoByPrim 
+        <- updateMultiSpeczInfoByPrim proto
             (aliasMap, interestingParams, multiSpeczDepInfo) prim
     (interestingParams'', deadCells')
         <- updateDeadCellsByPrim 
@@ -422,11 +422,11 @@ removeDeadVar aliasMap args =
 
 -- we say a real param is interesting if it can be updated
 -- destructively when it doesn't alias to anything from outside
-updateMultiSpeczInfoByPrim :: 
-        (AliasMapLocal, Set PrimVarName, MultiSpeczDepInfo) -> Placed Prim 
+updateMultiSpeczInfoByPrim :: PrimProto
+        -> (AliasMapLocal, Set PrimVarName, MultiSpeczDepInfo) -> Placed Prim 
         -> Compiler (Set PrimVarName, MultiSpeczDepInfo) 
-updateMultiSpeczInfoByPrim (aliasMap, interestingParams, multiSpeczDepInfo)
-        prim =
+updateMultiSpeczInfoByPrim proto 
+        (aliasMap, interestingParams, multiSpeczDepInfo) prim =
     case content prim of
         PrimCall spec args -> do
             calleeDef <- getProcDef spec
@@ -465,8 +465,16 @@ updateMultiSpeczInfoByPrim (aliasMap, interestingParams, multiSpeczDepInfo)
                                     interestingPrimCallInfo
                     in
                     case result of 
-                        Just (_, _, requiredParams) -> Just $ 
-                                NonAliasedParamCond calleeParam requiredParams
+                        Just (_, _, requiredParams) ->
+                            let calleeParamID = 
+                                    parameterVarNameToID calleeProto calleeParam
+                            in
+                            let requiredParamIDs = 
+                                    List.map (parameterVarNameToID proto)
+                                        requiredParams
+                            in
+                            Just $ NonAliasedParamCond
+                                    calleeParamID requiredParamIDs
                         Nothing                     -> Nothing
                     ) calleeInterestingParams
             multiSpeczDepInfo' <- updateMultiSpeczDepInfo multiSpeczDepInfo 

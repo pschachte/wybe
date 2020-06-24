@@ -35,6 +35,7 @@ instance Binary Exp
 instance Binary Stmt
 instance Binary ParamInfo
 instance Binary Prim
+instance Binary PrimVarName
 instance Binary PrimArg
 instance Binary ProcAnalysis
 instance Binary CallSiteProperty

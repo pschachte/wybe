@@ -39,7 +39,8 @@ module AST (
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
-  AliasMap, aliasMapToAliasPairs, SpeczVersion, CallProperty(..),
+  AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
+  parameterVarNameToID, SpeczVersion, CallProperty(..),
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), AliasInterestingParams,
   ProcAnalysis(..), emptyProcAnalysis, 
@@ -1624,12 +1625,11 @@ type SpeczVersion = Set CallProperty
 -- more general and shouldn't break it.
 -- "NonAliasedParam param" is used for global CTGC.
 data CallProperty
-    = NonAliasedParam PrimVarName
+    = NonAliasedParam ParameterID
     deriving (Eq, Ord, Show, Generic)
 
 -- XXX Those should be put in "BinaryFactory.hs". However we need to compute the
 -- hash of "SpeczVersion" in "AST.hs".
-instance Data.Binary.Binary PrimVarName
 instance Data.Binary.Binary CallProperty
 
 
@@ -1681,7 +1681,7 @@ type MultiSpeczDepInfo =
 -- all [callerParam] is non-aliased (could be empty), then the calleeParam is 
 -- non-aliased.
 data CallSiteProperty
-    = NonAliasedParamCond PrimVarName [PrimVarName]
+    = NonAliasedParamCond ParameterID [ParameterID]
     deriving (Eq, Generic, Ord, Show)
 
 

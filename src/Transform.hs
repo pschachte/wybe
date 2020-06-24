@@ -41,7 +41,7 @@ transformProc def
         -- transform the standard body
         -- In this case, all input params are aliased
         inputParams <- protoInputParamNames caller
-        aliasMap <- initAliasMap inputParams Set.empty
+        aliasMap <- initAliasMap caller Set.empty
         body' <- transformBody caller body (aliasMap, Map.empty)
 
         return def { procImpln = ProcDefPrim caller body' analysis speczBodies}
@@ -56,13 +56,11 @@ generateSpeczVersionInProc def
     | not (procInline def) = do
         let procImp = procImpln def
         let ProcDefPrim caller body analysis speczBodies = procImp
-        let interestingParams = procAliasInterestingParams analysis
-        inputParams <- protoInputParamNames caller
         speczBodiesList <- mapM (\(ver, sbody) ->
             case sbody of 
                 Just b -> return (ver, Just b)
                 Nothing -> do
-                    aliasMap <- initAliasMap inputParams ver
+                    aliasMap <- initAliasMap caller ver
                     logTransform $ replicate 60 '~'
                     logTransform $ "Generating specialized version: "
                             ++ show ver
@@ -77,13 +75,15 @@ generateSpeczVersionInProc def = return def
 
 -- init aliasMap based on the given "nonAliasedParams",
 -- in the transform step, we don't have "MaybeAliasByParam".
-initAliasMap :: [PrimVarName] -> SpeczVersion -> Compiler AliasMapLocal
-initAliasMap inputParams speczVersion = do
+initAliasMap :: PrimProto -> SpeczVersion -> Compiler AliasMapLocal
+initAliasMap proto speczVersion = do
     let nonAliasedParams = Set.toList speczVersion
             |> Maybe.mapMaybe (\case 
-                NonAliasedParam param -> Just param
+                NonAliasedParam paramID -> Just $
+                        parameterIDToVarName proto paramID
                 _ -> Nothing
             )
+    inputParams <- protoInputParamNames proto
     logTransform $ "inputParams:      " ++ show inputParams
     logTransform $ "nonAliasedParams: " ++ show nonAliasedParams
     return $ 
@@ -211,12 +211,13 @@ _updatePrimCallForSpecz spec args aliasMap = do
                 -- then it should be aliased
                 && isArgVarUsedOnceInArgs arg args
             ) (pairArgVarWithParam args calleeProto)
-    let nonAliasedParams = List.map snd nonAliasedArgWithParams
+    let nonAliasedParamIDs = List.map (parameterVarNameToID calleeProto . snd)
+            nonAliasedArgWithParams
     return 
-        (if List.null nonAliasedParams
+        (if List.null nonAliasedParamIDs
         then spec
         else
-            let speczVersion = nonAliasedParams
+            let speczVersion = nonAliasedParamIDs
                     |> List.map NonAliasedParam |> Set.fromList |> Just
             in
             spec { procSpeczVersion = speczVersion })
