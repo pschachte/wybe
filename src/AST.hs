@@ -1617,14 +1617,16 @@ parameterVarNameToID proto varName =
 
 
 -- |Used for describing a specific specialized version
+-- Removing one "CallProperty" should only make the specialization a bit
+-- more general and shouldn't break it. ie. the empty set signifies no
+-- specialization and should be valid for all call site.
 type SpeczVersion = Set CallProperty
 
 
 -- |Each one represents some additional information about the specialization.
--- Removing one "SpeczVersionItem" should only make the specialization a bit
--- more general and shouldn't break it.
--- "NonAliasedParam param" is used for global CTGC.
 data CallProperty
+-- "NonAliasedParam v1" is used for global CTGC, it means that the argument
+-- passed to parameter v1 is nonaliased.
     = NonAliasedParam ParameterID
     deriving (Eq, Ord, Show, Generic)
 
@@ -1671,22 +1673,30 @@ aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 -- enough to compute all specz versions it required. A sample case is
 -- "expandSpeczVersionsAlias" in "Transform.hs".
 -- XXX this map is per call site, so the args is included to separate different
--- calls to the same proc. We may need something better than this.
+-- calls to the same proc. The current approach is not currect, we should give
+-- each call site a unique id similar to the tmep variable count in
+-- "BodyBuilder" and use it as the key.
 type MultiSpeczDepInfo = 
         Map (ProcSpec, [PrimArg]) (Set CallSiteProperty)
 
 
--- |Specific items for "MultiSpeczDepInfo".
--- "NonAliasedParamCond calleeParam [callerParam]" is used for global CTGC. If
--- all [callerParam] is non-aliased (could be empty), then the calleeParam is 
--- non-aliased.
+-- |Specific items for "MultiSpeczDepInfo", it describing the information about
+-- the related call site.
 data CallSiteProperty
+    -- "NonAliasedParamCond calleeParam [callerParam]" is used for global CTGC.
+    -- eg. NonAliasedParamCond v1 [v2, v3] means that if the paramenters v2, v3
+    -- of the caller proc is nonaliased, then the parameter v1 of the callee is
+    -- nonaliased and we could specialize it.
     = NonAliasedParamCond ParameterID [ParameterID]
     deriving (Eq, Generic, Ord, Show)
 
 
--- TODO: doc!
+-- |Describing the interestingness of a proc. if something is interesting, that
+-- means if we could provide some information about that thing, then we can 
+-- generate more specialized code.
 data InterestingCallProperty
+    -- "InterestingUnaliased v" means that if parameter v is known as unaliased,
+    -- then we can make use of it.
     = InterestingUnaliased ParameterID
     deriving (Eq, Generic, Ord, Show)
 

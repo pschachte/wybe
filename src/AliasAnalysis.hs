@@ -420,6 +420,7 @@ removeDeadVar aliasMap args =
 -- We consider a parameter is interesting when the alias
 -- information of that parameter can help us generate a
 -- better version of that procedure. 
+-- More detail about Multiple Specialization can be found in "Transform.hs"
 
 
 -- we say a real param is interesting if it can be updated
@@ -566,7 +567,7 @@ updateMultiSpeczDepInfo multiSpeczDepInfo primCall items =
 -- if there is an access instruction that reads some value from x,
 -- then we consider x is dead if x is unaliased and final.
 --
--- The transform part can be found in "Tranform.hs".
+-- The transform part can be found in "Transform.hs".
 
 -- XXX reuse cells that are different types but has the same size.
 -- XXX call "GC_free" on large unused dead cells.
@@ -636,8 +637,8 @@ updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
 -- It returns "(result, deadCells)". "result" is "Nothing" when there isn't a
 -- suitable dead cell to reuse. Otherwise, result is 
 -- "Just (selectedCell, requiredParams)". "requiredParams" contains parameters
--- that need to be non-aliased before reusing the "seletedCell" (Caused by
--- "MaybeAliasByParam"). Note that this always trys to assigned a cell with
+-- that need to be non-aliased before reusing the "selectedCell" (Caused by
+-- "MaybeAliasByParam"). Note that this always tries to assigned a cell with
 -- empty "requiredParams" first.
 assignDeadCellsByAllocArgs :: DeadCells -> [PrimArg] 
         -> (Maybe (PrimVarName, [PrimVarName]), DeadCells)

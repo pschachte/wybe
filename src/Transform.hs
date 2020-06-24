@@ -237,6 +237,7 @@ _updateMutateForAlias _ args = args
 -- Multiple specialization
 --
 ----------------------------------------------------------------
+-- TODO: doc!
 -- To support a new kind of multiple specialization:
 --   1. (optional) Record constrains and related info about specialized versions
 --      in "ProcDefPrim". (eg. "AliasInterestingParams")
