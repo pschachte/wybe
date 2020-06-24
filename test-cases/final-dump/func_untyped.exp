@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 incr > inline (0 calls)
 0: incr(a#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm add(~a#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
 
   LLVM code       :

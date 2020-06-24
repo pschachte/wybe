@@ -26,8 +26,8 @@ AFTER EVERYTHING:
 *main* > public (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
- AliasInterestingParams: []
- MultiSpeczDepInfo: [((type_list.++<0>,[~tmp$23#0:type_list.intlist,~tmp$33#0:type_list.intlist,?tmp$8#0:type_list.intlist]),fromList [NonAliasedParamCond x#0 []])]
+ InterestingCallProperties: []
+ MultiSpeczDepInfo: [((type_list.++<0>,[~tmp$23#0:type_list.intlist,~tmp$33#0:type_list.intlist,?tmp$8#0:type_list.intlist]),fromList [NonAliasedParamCond 0 []])]
     foreign lpvm alloc(16:wybe.int, ?tmp$11#0:type_list.intlist)
     foreign lpvm mutate(~tmp$11#0:type_list.intlist, ?tmp$12#0:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int)
     foreign lpvm mutate(~tmp$12#0:type_list.intlist, ?tmp$13#0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:type_list.intlist)
@@ -43,7 +43,7 @@ AFTER EVERYTHING:
     foreign lpvm alloc(16:wybe.int, ?tmp$31#0:type_list.intlist)
     foreign lpvm mutate(~tmp$31#0:type_list.intlist, ?tmp$32#0:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int)
     foreign lpvm mutate(~tmp$32#0:type_list.intlist, ?tmp$33#0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$28#0:type_list.intlist)
-    type_list.++<0>[961dd0bce3](~tmp$23#0:type_list.intlist, ~tmp$33#0:type_list.intlist, ?tmp$8#0:type_list.intlist) @type_list:14:15
+    type_list.++<0>[04d1467a4d](~tmp$23#0:type_list.intlist, ~tmp$33#0:type_list.intlist, ?tmp$8#0:type_list.intlist) @type_list:14:15
     type_list.length<0>(~tmp$8#0:type_list.intlist, ?tmp$7#0:wybe.int) @type_list:14:8
     foreign c print_int(~tmp$7#0:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
 
@@ -51,8 +51,8 @@ AFTER EVERYTHING:
 ++ > public (2 calls)
 0: ++(x#0:type_list.intlist, y#0:type_list.intlist, ?$#0:type_list.intlist):
  AliasPairs: [($#0,y#0)]
- AliasInterestingParams: [x#0]
- MultiSpeczDepInfo: [((type_list.++<0>,[~t#0:type_list.intlist,~y#0:type_list.intlist,?tmp$2#0:type_list.intlist]),fromList [NonAliasedParamCond x#0 [x#0]])]
+ InterestingCallProperties: [InterestingUnaliased 0]
+ MultiSpeczDepInfo: [((type_list.++<0>,[~t#0:type_list.intlist,~y#0:type_list.intlist,?tmp$2#0:type_list.intlist]),fromList [NonAliasedParamCond 0 [0]])]
     foreign llvm icmp ne(x#0:type_list.intlist, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
@@ -66,7 +66,7 @@ AFTER EVERYTHING:
         foreign lpvm mutate(~tmp$8#0:type_list.intlist, ?tmp$9#0:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$9#0:type_list.intlist, ?$#0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:type_list.intlist)
 
- [961dd0bce3] [NonAliasedParam x#0] :
+ [04d1467a4d] [NonAliasedParam 0] :
     foreign llvm icmp ne(x#0:type_list.intlist, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
@@ -75,7 +75,7 @@ AFTER EVERYTHING:
     1:
         foreign lpvm access(x#0:type_list.intlist, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~x#0:type_list.intlist, 8:wybe.int, ?t#0:type_list.intlist)
-        type_list.++<0>[961dd0bce3](~t#0:type_list.intlist, ~y#0:type_list.intlist, ?tmp$2#0:type_list.intlist) @type_list:5:13
+        type_list.++<0>[04d1467a4d](~t#0:type_list.intlist, ~y#0:type_list.intlist, ?tmp$2#0:type_list.intlist) @type_list:5:13
         foreign llvm move(~x#0:type_list.intlist, ?tmp$8#0:type_list.intlist)
         foreign lpvm mutate(~tmp$8#0:type_list.intlist, ?tmp$9#0:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$9#0:type_list.intlist, ?$#0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:type_list.intlist)
@@ -85,7 +85,7 @@ AFTER EVERYTHING:
 length > public (2 calls)
 0: length(x#0:type_list.intlist, ?$#0:wybe.int):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp ne(x#0:type_list.intlist, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
@@ -166,7 +166,7 @@ entry:
   %39 = inttoptr i64 %38 to i64* 
   %40 = getelementptr  i64, i64* %39, i64 0 
   store  i64 %27, i64* %40 
-  %"tmp$8#0" = tail call fastcc  i64  @"type_list.++<0>[961dd0bce3]"(i64  %19, i64  %35)  
+  %"tmp$8#0" = tail call fastcc  i64  @"type_list.++<0>[04d1467a4d]"(i64  %19, i64  %35)  
   %"tmp$7#0" = tail call fastcc  i64  @"type_list.length<0>"(i64  %"tmp$8#0")  
   tail call ccc  void  @print_int(i64  %"tmp$7#0")  
   ret void 
@@ -202,7 +202,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"type_list.++<0>[961dd0bce3]"(i64  %"x#0", i64  %"y#0")    {
+define external fastcc  i64 @"type_list.++<0>[04d1467a4d]"(i64  %"x#0", i64  %"y#0")    {
 entry:
   %"tmp$5#0" = icmp ne i64 %"x#0", 0 
   br i1 %"tmp$5#0", label %if.then, label %if.else 
@@ -214,7 +214,7 @@ if.then:
   %60 = inttoptr i64 %59 to i64* 
   %61 = getelementptr  i64, i64* %60, i64 0 
   %62 = load  i64, i64* %61 
-  %"tmp$2#0" = tail call fastcc  i64  @"type_list.++<0>[961dd0bce3]"(i64  %62, i64  %"y#0")  
+  %"tmp$2#0" = tail call fastcc  i64  @"type_list.++<0>[04d1467a4d]"(i64  %62, i64  %"y#0")  
   %63 = inttoptr i64 %"x#0" to i64* 
   %64 = getelementptr  i64, i64* %63, i64 0 
   store  i64 %58, i64* %64 
@@ -266,7 +266,7 @@ if.else:
 /= > public inline test (0 calls)
 0: /=($left#0:type_list.intlist, $right#0:type_list.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     type_list.intlist.=<0>(~$left#0:type_list.intlist, ~$right#0:type_list.intlist, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
     0:
@@ -280,7 +280,7 @@ if.else:
 = > public test (6 calls)
 0: =($left#0:type_list.intlist, $right#0:type_list.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign lpvm cast($left#0:type_list.intlist, ?tmp$0#0:!wybe.int)
     foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -320,21 +320,21 @@ if.else:
 [] > public inline (0 calls)
 0: [](?$#0:type_list.intlist):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm move(0:type_list.intlist, ?$#0:type_list.intlist)
 
 
 [|] > public inline (0 calls)
 0: [|](head#0:wybe.int, tail#0:type_list.intlist, ?$#0:type_list.intlist):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!type_list.intlist)
     foreign lpvm mutate(~%$rec#0:type_list.intlist, ?%$rec#1:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:type_list.intlist, ?%$#0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:type_list.intlist)
 [|] > public inline test (7 calls)
 1: [|](?head#0:wybe.int, ?tail#0:type_list.intlist, $#0:type_list.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp ne($#0:type_list.intlist, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -350,7 +350,7 @@ if.else:
 head > public inline test (0 calls)
 0: head($rec#0:type_list.intlist, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp ne($rec#0:type_list.intlist, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -363,7 +363,7 @@ head > public inline test (0 calls)
 head > public inline test (0 calls)
 1: head($rec#0:type_list.intlist, ?$rec#1:type_list.intlist, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp ne($rec#0:type_list.intlist, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -379,7 +379,7 @@ head > public inline test (0 calls)
 tail > public inline test (0 calls)
 0: tail($rec#0:type_list.intlist, ?$#0:type_list.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp ne($rec#0:type_list.intlist, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -392,7 +392,7 @@ tail > public inline test (0 calls)
 tail > public inline test (0 calls)
 1: tail($rec#0:type_list.intlist, ?$rec#1:type_list.intlist, $field#0:type_list.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp ne($rec#0:type_list.intlist, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:

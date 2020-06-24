@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 *main* > public (0 calls)
 0: (?count#1:wybe.int, argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign c print_string("Inner count (4): ":wybe.string, ~#io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @wybe:nn:nn
     foreign c print_int(4:wybe.int, ~tmp$6#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$7#0:wybe.phantom, ?tmp$8#0:wybe.phantom) @wybe:nn:nn
@@ -26,14 +26,14 @@ AFTER EVERYTHING:
 inc_count > inline (4 calls)
 0: inc_count(count#0:wybe.int, ?count#1:wybe.int):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm add(~count#0:wybe.int, 1:wybe.int, ?count#1:wybe.int) @wybe:nn:nn
 
 
 use_test > inline (1 calls)
 0: use_test(count#0:wybe.int, ?count#5:wybe.int, io#0:wybe.phantom, ?io#4:wybe.phantom):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm add(~#count#0:wybe.int, 1:wybe.int, ?#count#1:wybe.int) @wybe:nn:nn
     foreign llvm add(#count#1:wybe.int, 1:wybe.int, ?#count#2:wybe.int) @wybe:nn:nn
     foreign llvm add(~#count#2:wybe.int, 1:wybe.int, ?#count#3:wybe.int) @wybe:nn:nn

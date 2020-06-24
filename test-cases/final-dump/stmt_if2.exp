@@ -27,7 +27,7 @@ AFTER EVERYTHING:
 *main* > public (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp$7#0:stmt_if2.tree)
     foreign lpvm mutate(~tmp$7#0:stmt_if2.tree, ?tmp$8#0:stmt_if2.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:stmt_if2.tree)
     foreign lpvm mutate(~tmp$8#0:stmt_if2.tree, ?tmp$9#0:stmt_if2.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int)
@@ -45,7 +45,7 @@ AFTER EVERYTHING:
 lookup > public (5 calls)
 0: lookup(key#0:wybe.int, tree#0:stmt_if2.tree, ?$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     stmt_if2.tree.=<0>(tree#0:stmt_if2.tree, 0:stmt_if2.tree, ?tmp$10#0:wybe.bool) @stmt_if2:6:8
     case ~tmp$10#0:wybe.bool of
     0:
@@ -188,7 +188,7 @@ if.else3:
 /= > public inline test (0 calls)
 0: /=($left#0:stmt_if2.tree, $right#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     stmt_if2.tree.=<0>(~$left#0:stmt_if2.tree, ~$right#0:stmt_if2.tree, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
     0:
@@ -202,7 +202,7 @@ if.else3:
 = > public test (9 calls)
 0: =($left#0:stmt_if2.tree, $right#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign lpvm cast($left#0:stmt_if2.tree, ?tmp$0#0:!wybe.int)
     foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
     case ~tmp$1#0:wybe.bool of
@@ -251,14 +251,14 @@ if.else3:
 empty > public inline (0 calls)
 0: empty(?$#0:stmt_if2.tree):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm move(0:stmt_if2.tree, ?$#0:stmt_if2.tree)
 
 
 key > public inline test (0 calls)
 0: key($rec#0:stmt_if2.tree, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp ne($rec#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -271,7 +271,7 @@ key > public inline test (0 calls)
 key > public inline test (0 calls)
 1: key($rec#0:stmt_if2.tree, ?$rec#1:stmt_if2.tree, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp ne($rec#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -287,7 +287,7 @@ key > public inline test (0 calls)
 left > public inline test (0 calls)
 0: left($rec#0:stmt_if2.tree, ?$#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp ne($rec#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -300,7 +300,7 @@ left > public inline test (0 calls)
 left > public inline test (0 calls)
 1: left($rec#0:stmt_if2.tree, ?$rec#1:stmt_if2.tree, $field#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp ne($rec#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -316,7 +316,7 @@ left > public inline test (0 calls)
 node > public inline (0 calls)
 0: node(left#0:stmt_if2.tree, key#0:wybe.int, right#0:stmt_if2.tree, ?$#0:stmt_if2.tree):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?$rec#0:!stmt_if2.tree)
     foreign lpvm mutate(~%$rec#0:stmt_if2.tree, ?%$rec#1:stmt_if2.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~left#0:stmt_if2.tree)
     foreign lpvm mutate(~%$rec#1:stmt_if2.tree, ?%$rec#2:stmt_if2.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~key#0:wybe.int)
@@ -324,7 +324,7 @@ node > public inline (0 calls)
 node > public inline test (9 calls)
 1: node(?left#0:stmt_if2.tree, ?key#0:wybe.int, ?right#0:stmt_if2.tree, $#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp ne($#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -341,7 +341,7 @@ node > public inline test (9 calls)
 right > public inline test (0 calls)
 0: right($rec#0:stmt_if2.tree, ?$#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp ne($rec#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
@@ -354,7 +354,7 @@ right > public inline test (0 calls)
 right > public inline test (0 calls)
 1: right($rec#0:stmt_if2.tree, ?$rec#1:stmt_if2.tree, $field#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp ne($rec#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:

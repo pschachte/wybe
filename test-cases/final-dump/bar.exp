@@ -14,7 +14,7 @@ AFTER EVERYTHING:
 *main* > public inline (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     numbers.factorial<0>(4:wybe.int, ?tmp$0#0:wybe.int) @bar:3:10
     foreign c print_int(~tmp$0#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
@@ -72,7 +72,7 @@ entry:
 *main* > public inline (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign c print_string("Numbers has been initialised.":wybe.string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
 
@@ -80,7 +80,7 @@ entry:
 factorial > public (1 calls)
 0: factorial(n#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm icmp sle(n#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @wybe:nn:nn
     case ~tmp$4#0:wybe.bool of
     0:
@@ -96,7 +96,7 @@ factorial > public (1 calls)
 toCelsius > public inline (0 calls)
 0: toCelsius(f#0:wybe.float, ?$#0:wybe.float):
  AliasPairs: []
- AliasInterestingParams: []
+ InterestingCallProperties: []
     foreign llvm fsub(~f#0:wybe.float, 32.0:wybe.float, ?tmp$1#0:wybe.float) @wybe:nn:nn
     foreign llvm fdiv(~tmp$1#0:wybe.float, 1.8:wybe.float, ?$#0:wybe.float) @wybe:nn:nn
 
