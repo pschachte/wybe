@@ -201,18 +201,16 @@ _updatePrimCallForSpecz :: ProcSpec -> [PrimArg] -> AliasMapLocal
 _updatePrimCallForSpecz spec args aliasMap = do
     calleeDef <- getProcDef spec
     let (ProcDefPrim calleeProto _ analysis _) = procImpln calleeDef
-    let calleeInterestingParams = procAliasInterestingParams analysis
-    let nonAliasedArgWithParams = List.filter (\(arg, param) ->
-                -- it should be in callee's interesting params list
-                List.elem param calleeInterestingParams
+    let nonAliasedParamIDs = List.filter (\(arg, paramID) ->
+                -- it should be an interesting param of callee
+                Set.member (InterestingUnaliased paramID)
+                        (procInterestingCallProperties analysis)
                 -- it should be an interesting variable
                 && Right [] == isArgVarInteresting aliasMap arg
                 -- if a argument is used more than once,
                 -- then it should be aliased
                 && isArgVarUsedOnceInArgs arg args
-            ) (pairArgVarWithParam args calleeProto)
-    let nonAliasedParamIDs = List.map (parameterVarNameToID calleeProto . snd)
-            nonAliasedArgWithParams
+            ) (List.zip args [0..]) |> List.map snd
     return 
         (if List.null nonAliasedParamIDs
         then spec
@@ -306,13 +304,10 @@ expandRequiredSpeczVersionsByMod scc thisMod = do
 
 -- For a given proc and a "SpeczVersion" of it, compute all specialized procs
 -- it required.
+-- XXX Add heuristic to select which specializations to use
 expandRequiredSpeczVersionsByProcVersion :: ProcAnalysis -> SpeczVersion
         -> Set ((ModSpec, ProcName, Int), SpeczVersion)
 expandRequiredSpeczVersionsByProcVersion procAnalysis callerVersion = 
-    -- XXX Add heuristic to select which specializations to use
-    let interestingParams =
-            procAliasInterestingParams procAnalysis
-    in
     let multiSpeczDepInfo = procMultiSpeczDepInfo procAnalysis in
     -- go through dependencies and find matches
     List.map (\((procSpec, _), items) ->

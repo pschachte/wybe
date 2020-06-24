@@ -39,6 +39,7 @@ instance Binary PrimVarName
 instance Binary PrimArg
 instance Binary ProcAnalysis
 instance Binary CallSiteProperty
+instance Binary InterestingCallProperty
 
 -- Procedures
 instance Binary ProcSpec

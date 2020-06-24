@@ -42,7 +42,7 @@ module AST (
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..),
   speczVersionToId, SpeczProcBodies,
-  MultiSpeczDepInfo, CallSiteProperty(..), AliasInterestingParams,
+  MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis, 
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
@@ -1685,22 +1685,23 @@ data CallSiteProperty
     deriving (Eq, Generic, Ord, Show)
 
 
--- | Records all interesting parameters in term of alias analysis.
--- More detail can be found under "Global Level Aliasing Analysis" section
--- in "AliasAnalysis.hs".
-type AliasInterestingParams = [PrimVarName]
+-- TODO: doc!
+data InterestingCallProperty
+    = InterestingUnaliased ParameterID
+    deriving (Eq, Generic, Ord, Show)
+
 
 -- | Stores whatever analysis results we infer about a proc definition.
 data ProcAnalysis = ProcAnalysis {
-    procArgAliasMap :: AliasMap,
-    procAliasInterestingParams :: AliasInterestingParams,
-    procMultiSpeczDepInfo :: MultiSpeczDepInfo
+    procArgAliasMap               :: AliasMap,
+    procInterestingCallProperties :: Set InterestingCallProperty,
+    procMultiSpeczDepInfo         :: MultiSpeczDepInfo
 } deriving (Eq,Generic)
 
 
 -- | The empty ProcAnalysis
 emptyProcAnalysis :: ProcAnalysis
-emptyProcAnalysis = ProcAnalysis emptyDS [] Map.empty
+emptyProcAnalysis = ProcAnalysis emptyDS Set.empty Map.empty
 
 
 isCompiled :: ProcImpln -> Bool
@@ -1724,12 +1725,13 @@ instance Show ProcImpln where
 
 
 instance Show ProcAnalysis where
-    show (ProcAnalysis argAliasMap aliasInterestingParams multiSpeczDepInfo) =
+    show (ProcAnalysis aliasMap interestingCallProperties multiSpeczDepInfo) =
         let multiSpeczDepInfo' = Map.toList multiSpeczDepInfo
                 |> List.filter (not . List.null . snd)
         in
-        "\n AliasPairs: " ++ showAliasMap argAliasMap 
-        ++ "\n AliasInterestingParams: " ++ show aliasInterestingParams
+        "\n AliasPairs: " ++ showAliasMap aliasMap
+        ++ "\n InterestingCallProperties: "
+        ++ show (Set.toAscList interestingCallProperties)
         ++ if List.null multiSpeczDepInfo'
             then "" 
             else "\n MultiSpeczDepInfo: " ++ show multiSpeczDepInfo'
