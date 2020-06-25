@@ -29,10 +29,11 @@ import           Util
 -- | Expand the supplied ProcDef, inlining as desired.
 procExpansion :: ProcSpec -> ProcDef -> Compiler ProcDef
 procExpansion pspec def = do
+    logMsg Expansion $ replicate 50 '='
     logMsg Expansion $ "*** Try to expand proc " ++ show pspec
     let ProcDefPrim proto body _ _ = procImpln def
     logMsg Expansion $ "    initial body: "
-        ++ show (ProcDefPrim proto body 
+        ++ show (ProcDefPrim proto body
                   (ProcAnalysis emptyDS emptyAliasMultiSpeczInfo)
                   Map.empty)
     let tmp = procTmpCount def
@@ -42,7 +43,7 @@ procExpansion pspec def = do
     let proto' = proto {primProtoParams = markParamNeededness used ins
                                           <$> primProtoParams proto}
     let def' = def { procImpln =
-                      ProcDefPrim proto' body' 
+                      ProcDefPrim proto' body'
                           (ProcAnalysis emptyDS emptyAliasMultiSpeczInfo)
                           Map.empty,
                      procTmpCount = tmp' }
@@ -51,6 +52,7 @@ procExpansion pspec def = do
         logMsg Expansion
         $ "*** Expanded:" ++ showProcDef 4 def
           ++ "\n*** To:" ++ showProcDef 4 def'
+          ++ "\nTemp counter = " ++ show (procTmpCount def')
         else
         logMsg Expansion
         $ "*** Expansion did not change proc " ++ show (procName def)
@@ -146,10 +148,12 @@ expandBody :: ProcBody -> Expander ()
 expandBody (ProcBody prims fork) = do
     logExpansion $ "Expanding unforked part of body:" ++ showPlacedPrims 4 prims
     modify (\s -> s { noFork = fork == NoFork })
-    expandPrims prims
+    mapM_ (placedApply expandPrim) prims
     logExpansion $ "Finished expanding unforked part of body"
     case fork of
-      NoFork -> return ()
+      NoFork -> do
+        logExpansion "No fork for this body"
+        return ()
       PrimFork var ty final bodies -> do
         st <- get
         logExpansion $ "Now expanding fork (" ++
@@ -162,23 +166,31 @@ expandBody (ProcBody prims fork) = do
         logExpansion $ "  fork on " ++ show var' ++ ":" ++ show ty
                        ++ " with " ++ show (length bodies) ++ " branches"
         expandFork var' ty bodies
-        logExpansion $ "Finished expanding fork"
+        logExpansion $ "Finished expanding fork on " ++ show var'
 
 
 expandFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Expander ()
 expandFork var ty bodies = do
     maybeVal <- lift $ definiteVariableValue var
     case maybeVal of
-      Just (ArgInt n _) | n < fromIntegral (length bodies) -> expandBody $ bodies !! fromIntegral n
+      Just (ArgInt n _) | n < fromIntegral (length bodies) -> do
+        logExpansion $ "Value of " ++ show var ++ " known to be " ++ show n
+                       ++ ": expanding only that branch"
+        expandBody $ bodies !! fromIntegral n
       _ -> do
         lift $ buildFork var ty
-        mapM_ (\b -> lift beginBranch >> expandBody b >> lift endBranch) bodies
+        zipWithM_ (\b n -> do
+                  logExpansion $ "Beginning expansion of branch " ++ show n
+                                 ++ " on " ++ show var
+                  lift beginBranch
+                  expandBody b
+                  lift endBranch
+                  logExpansion $ "Finished expansion of branch " ++ show n
+                                 ++ " on " ++ show var)
+               bodies [0..]
         lift completeFork
 
 
-
-expandPrims :: [Placed Prim] -> Expander ()
-expandPrims = mapM_ (\p -> expandPrim (content p) (place p))
 
 -- XXX allow this to handle primitives that can fail with all inputs known,
 -- like less than, removing ops that succeed and killing branches that

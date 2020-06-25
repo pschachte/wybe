@@ -6,17 +6,19 @@
 --           : LICENSE in the root directory of this project.
 
 module Util (sameLength, maybeNth, setMapInsert,
-             fillLines, nop, sccElts, DisjointSet, 
-             emptyDS, addOneToDS, unionTwoInDS, 
+             fillLines, nop, sccElts, DisjointSet,
+             emptyDS, addOneToDS, unionTwoInDS,
              combineTwoDS, removeSingletonFromDS,
              addConnectedGroupToDS, removeOneFromDS,
              removeFromDS, connectedItemsInDS,
-             mapDS, filterDS, dsToTransitivePairs) where
+             mapDS, filterDS, dsToTransitivePairs,
+             intersectMapIdentity) where
 
 
 import           Data.Graph
 import           Data.List    as List
 import           Data.Map     as Map
+import           Data.Map.Merge.Lazy (merge,dropMissing,zipWithMaybeMatched)
 import           Data.Set     as Set
 import           Data.Maybe   (isJust)
 import           GHC.Generics (Generic)
@@ -194,3 +196,11 @@ dsToTransitivePairs =
             |> Set.union result |> Set.filter (uncurry (<))
             ) Set.empty
 
+
+-- | Intersect two maps keeping only mappings that are identical between the two
+-- maps, eliminating any mappings that are not present in both and not identical
+-- in both.
+intersectMapIdentity :: (Ord k, Eq v) => Map k v -> Map k v -> Map k v
+intersectMapIdentity = merge dropMissing dropMissing
+                       (zipWithMaybeMatched
+                        $ \_ v1 v2 -> if v1 == v2 then Just v1 else Nothing)
