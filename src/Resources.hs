@@ -185,14 +185,15 @@ transformStmt tmp (Not stmt) pos = do
     return ([maybePlace (Not $ makeSingleStmt stmt') pos], tmp')
 transformStmt tmp Nop _ =
     return ([], tmp)
-transformStmt tmp (Cond test thn els) pos = do
+transformStmt tmp (Cond test thn els defVars) pos = do
     (test',tmp1) <- placedApplyM (transformStmt tmp) test
     (thn',tmp2) <- transformBody tmp1 thn
     (els',tmp3) <- transformBody tmp2 els
-    return ([maybePlace (Cond (Unplaced $ And test') thn' els') pos], tmp3)
-transformStmt tmp (Loop body) pos = do
+    return ([maybePlace (Cond (Unplaced $ And test') thn' els' defVars) pos],
+            tmp3)
+transformStmt tmp (Loop body defVars) pos = do
     (body',tmp') <- transformBody tmp body
-    return ([maybePlace (Loop body') pos], tmp')
+    return ([maybePlace (Loop body' defVars) pos], tmp')
 transformStmt tmp (UseResources res body) pos = do
     scoped <- mapM (canonicaliseResourceSpec pos) res
     -- XXX what about resources with same name and different modules?

@@ -825,14 +825,14 @@ bodyCalls (pstmt:pstmts) detism = do
         Or stmts -> bodyCalls stmts detism
         Not stmt -> bodyCalls [stmt] detism
         Nop -> return rest
-        Cond cond thn els -> do
+        Cond cond thn els _ -> do
           -- modify $ constrainVarType (ReasonCond pos)
           --          (expVar $ content expr) boolType
           cond' <- bodyCalls [cond] SemiDet
           thn' <- bodyCalls thn detism
           els' <- bodyCalls els detism
           return $ cond' ++ thn' ++ els' ++ rest
-        Loop nested -> do
+        Loop nested _ -> do
           nested' <- bodyCalls nested detism
           return $ nested' ++ rest
         UseResources _ nested -> do
@@ -1350,7 +1350,7 @@ modecheckStmt _ _ _ _ delayed assigned _ Nop pos = do
     logTypes $ "Mode checking Nop"
     return ([maybePlace Nop pos], delayed, assigned,[])
 modecheckStmt m name defPos typing delayed assigned detism
-    stmt@(Cond tstStmt thnStmts elsStmts) pos = do
+    stmt@(Cond tstStmt thnStmts elsStmts _) pos = do
     logTypes $ "Mode checking conditional " ++ show stmt
     (tstStmt', delayed', assigned1, errs1) <-
       placedApplyM (modecheckStmt m name defPos typing delayed assigned SemiDet)
@@ -1376,7 +1376,8 @@ modecheckStmt m name defPos typing delayed assigned detism
         let finalAssigned = assigned2 `joinState` assigned3
         logTypes $ "Assigned by conditional: " ++ show finalAssigned
         return
-          ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts') pos],
+          ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts' Nothing)
+            pos],
            delayed'++delayed, finalAssigned, errs1++errs2++errs3)
 modecheckStmt m name defPos typing delayed assigned detism
     stmt@(TestBool exp) pos = do
@@ -1393,13 +1394,13 @@ modecheckStmt m name defPos typing delayed assigned detism
                                    delayed, assigned, [])
       _ -> return (exp', delayed, joinDeterminism SemiDet assigned, [])
 modecheckStmt m name defPos typing delayed assigned detism
-    stmt@(Loop stmts) pos = do
+    stmt@(Loop stmts _) pos = do
     logTypes $ "Mode checking loop " ++ show stmt
     (stmts', assigned', errs') <-
       modecheckStmts m name defPos typing [] assigned detism stmts
     -- XXX Can only assume vars assigned before first possible loop exit are
     --     actually assigned by loop
-    return ([maybePlace (Loop stmts') pos], delayed, assigned', errs')
+    return ([maybePlace (Loop stmts' Nothing) pos], delayed, assigned', errs')
 -- XXX Need to implement these:
 modecheckStmt m name defPos typing delayed assigned detism
     stmt@(UseResources resources stmts) pos = do
@@ -1693,11 +1694,11 @@ checkStmtTyped name pos (Or stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (Not stmt) _ppos =
     placedApply (checkStmtTyped name pos) stmt
-checkStmtTyped name pos (Cond tst thenstmts elsestmts) _ppos = do
+checkStmtTyped name pos (Cond tst thenstmts elsestmts _) _ppos = do
     placedApply (checkStmtTyped name pos) tst
     mapM_ (placedApply (checkStmtTyped name pos)) thenstmts
     mapM_ (placedApply (checkStmtTyped name pos)) elsestmts
-checkStmtTyped name pos (Loop stmts) _ppos =
+checkStmtTyped name pos (Loop stmts _) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (UseResources _ stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts

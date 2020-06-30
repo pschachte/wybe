@@ -165,7 +165,7 @@ compileBody stmts params detism = do
     logClause $ "Compiling body:" ++ showBody 4 stmts
     let final = last stmts
     case content final of
-        Cond tst thn els ->
+        Cond tst thn els _ ->
           case content tst of
               TestBool var -> do
                 front <- mapM compileSimpleStmt $ init stmts
