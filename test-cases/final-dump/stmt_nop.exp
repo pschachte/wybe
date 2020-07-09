@@ -1,0 +1,29 @@
+======================================================================
+AFTER EVERYTHING:
+ Module stmt_nop
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : stmt_nop.<0>
+  imports         : use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+*main* > public inline (0 calls)
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, [?io#0:wybe.phantom]):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
+
+  LLVM code       :
+
+; ModuleID = 'stmt_nop'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
