@@ -329,6 +329,7 @@ stmtParser :: Parser (Placed Stmt)
 stmtParser =
           doStmt
           -- <|> forStmt
+          <|> nopStmt
           <|> whileStmt
           <|> untilStmt
           <|> unlessStmt
@@ -336,6 +337,11 @@ stmtParser =
           <|> ifStmtParser
           <|> useStmt
           <|> simpleStmt
+
+nopStmt :: Parser (Placed Stmt)
+nopStmt = do
+    pos <- tokenPosition <$> ident "pass"
+    return $ Placed Nop pos
 
 
 simpleStmt :: Parser (Placed Stmt)
