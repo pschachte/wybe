@@ -238,6 +238,7 @@ globalDefine isForeign rettype label argtypes body
                                False)
                , returnType = rettype
                , basicBlocks = body
+               , section = Just $ fromString $ ".text." ++ label
                }
 
 
