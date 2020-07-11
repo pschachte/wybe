@@ -13,14 +13,15 @@ module Config (sourceExtension, objectExtension, executableExtension,
                wordSize, wordSizeBytes,
                availableTagBits, tagMask, smallestAllocatedAddress,
                assemblyExtension, archiveExtension, magicVersion,
-               linkerDeadStripArgs, functionDefSection)
+               linkerDeadStripArgs, functionDefSection, removeLPVMSection)
     where
 
 import Data.Word
 import qualified Data.List as List
 import Distribution.System (buildOS, OS (..))
 import Foreign.Storable
-
+import System.Exit (ExitCode (..))
+import System.Process
 
 -- |The file extension for source files.
 sourceExtension :: String
@@ -119,4 +120,20 @@ functionDefSection label =
     case buildOS of 
         OSX   -> Nothing
         Linux -> Just $ ".text." ++ label
+        _     -> error "Unsupported operation system"
+
+
+-- | Remove the lpvm section from the given file. It's only effective on Linux,
+-- since we don't need it on macOS.
+removeLPVMSection :: FilePath -> IO (Either String ())
+removeLPVMSection target =
+    case buildOS of 
+        OSX   -> return $ Right ()
+        Linux -> do
+            let args = ["--remove-section", "__LPVM.__lpvm", target]
+            (exCode, _, serr) <-
+                    readCreateProcessWithExitCode (proc "objcopy" args) ""
+            case exCode of
+                ExitSuccess  -> return $ Right ()
+                _ -> return $ Left serr
         _     -> error "Unsupported operation system"

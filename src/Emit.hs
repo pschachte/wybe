@@ -237,22 +237,6 @@ suppressLdWarnings s = intercalate "\n" $ List.filter notWarning $ lines s
     notWarning l = not ("ld: warning:" `List.isPrefixOf` l)
 
 
--- | Remove the lpvm section from the given file. It's only effective on Linux,
--- since we don't need it on macOS.
-removeLPVMSection :: FilePath -> IO (Either String ())
-removeLPVMSection target =
-    case buildOS of 
-        OSX   -> return $ Right ()
-        Linux -> do
-            let args = ["--remove-section", "__LPVM.__lpvm", target]
-            (exCode, _, serr) <-
-                    readCreateProcessWithExitCode (proc "objcopy" args) ""
-            case exCode of
-                ExitSuccess  -> return $ Right ()
-                _ -> return $ Left serr
-        _     -> shouldnt "Unsupported operation system"
-
-
 -- | With the `ld` linker, link the object files and create target
 -- executable.
 makeExec :: [FilePath]          -- Object Files
