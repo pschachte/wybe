@@ -10,13 +10,15 @@
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
                interfaceExtension, bitcodeExtension,
-               ldArgs, wordSize, wordSizeBytes,
+               wordSize, wordSizeBytes,
                availableTagBits, tagMask, smallestAllocatedAddress,
-               assemblyExtension, archiveExtension, magicVersion)
+               assemblyExtension, archiveExtension, magicVersion,
+               linkerDeadStripArgs, functionDefSection)
     where
 
 import Data.Word
 import qualified Data.List as List
+import Distribution.System (buildOS, OS (..))
 import Foreign.Storable
 
 
@@ -92,12 +94,29 @@ sharedLibDirName :: String
 sharedLibDirName = "lib/"
 
 
-ldArgs :: [String]
-ldArgs = ["-demangle", "-dynamic"]
-
-
 -- | Magic version number for the current iteration of LPVM.
 magicVersion :: [Word8]
 magicVersion =
     let magicStr = "WB01"
     in List.map (fromIntegral . fromEnum) magicStr
+
+
+-- | Arguments of dead code elimination for linker
+-- Look for "Link time dead code elimination" in "Emit.hs" for more detail
+linkerDeadStripArgs :: [String]
+linkerDeadStripArgs =
+    case buildOS of 
+        OSX   -> ["-dead_strip"]
+        Linux -> ["-Wl,--gc-sections"]
+        _     -> error "Unsupported operation system"
+
+
+-- | Given the name of a function and return which section to store it,
+-- Nothing means the default section. For now, we put functions in separate
+-- sections on Linux to fit the "-Wl,--gc-sections" above.
+functionDefSection :: String -> Maybe String
+functionDefSection label =
+    case buildOS of 
+        OSX   -> Nothing
+        Linux -> Just $ ".text." ++ label
+        _     -> error "Unsupported operation system"

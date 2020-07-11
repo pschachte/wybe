@@ -68,7 +68,7 @@ import           AST                             (Compiler, Prim, PrimProto,
 import           LLVM.Context
 import           LLVM.Module
 import           Options                         (LogSelection (Blocks,Codegen))
-import           Config                          (wordSize)
+import           Config                          (wordSize, functionDefSection)
 import           Unsafe.Coerce
 
 ----------------------------------------------------------------------------
@@ -238,7 +238,7 @@ globalDefine isForeign rettype label argtypes body
                                False)
                , returnType = rettype
                , basicBlocks = body
-               , section = Just $ fromString $ ".text." ++ label
+               , section = fmap fromString $ functionDefSection label
                }
 
 

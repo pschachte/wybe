@@ -221,16 +221,7 @@ makeWrappedObjFile file llmod modBS = do
 ----------------------------------------------------------------------------
 -- -- * Linking                                                           --
 ----------------------------------------------------------------------------
-
--- | Remove OSX Ld warnings of incompatible built object file version.
-suppressLdWarnings :: String -> String
-suppressLdWarnings s = intercalate "\n" $ List.filter notWarning $ lines s
-  where
-    notWarning l = not ("ld: warning:" `List.isPrefixOf` l)
-
---------------------------------------
--- * Link time dead code elimination
--- More detail can be found here: https://github.com/pschachte/wybe/issues/60
+-- * Link time dead code elimination -- More detail can be found here: https://github.com/pschachte/wybe/issues/60
 -- There are two goals: (1) remove unused code. (2) remove the lpvm section
 -- On macOS (1) (2) are done by using linker arg: `-dead_strip`
 -- On Linux (1) is done by using linker arg: `--gc-sections` (requires separate
@@ -238,13 +229,12 @@ suppressLdWarnings s = intercalate "\n" $ List.filter notWarning $ lines s
 -- linker build the executable.
 -- XXX it's better to use the linker to remove the lpvm section.
 
--- | Arguments of dead code elimination for linker
-deadStripArgs :: [String]
-deadStripArgs =
-    case buildOS of 
-        OSX   -> ["-dead_strip"]
-        Linux -> ["-Wl,--gc-sections"]
-        _     -> shouldnt "Unsupported operation system"
+
+-- | Remove OSX Ld warnings of incompatible built object file version.
+suppressLdWarnings :: String -> String
+suppressLdWarnings s = intercalate "\n" $ List.filter notWarning $ lines s
+  where
+    notWarning l = not ("ld: warning:" `List.isPrefixOf` l)
 
 
 -- | Remove the lpvm section from the given file. It's only effective on Linux,
@@ -262,7 +252,6 @@ removeLPVMSection target =
                 _ -> return $ Left serr
         _     -> shouldnt "Unsupported operation system"
 
---------------------------------------
 
 -- | With the `ld` linker, link the object files and create target
 -- executable.
@@ -270,7 +259,7 @@ makeExec :: [FilePath]          -- Object Files
          -> FilePath            -- Target File
          -> Compiler ()
 makeExec ofiles target = do
-    let options = ["-no-pie"] ++ deadStripArgs
+    let options = ["-no-pie"] ++ linkerDeadStripArgs
     let args = options ++ ofiles ++ ["-o", target]
     logEmit $ "Generating final executable with command line: cc "
               ++ unwords args
