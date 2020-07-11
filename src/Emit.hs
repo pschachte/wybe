@@ -1,5 +1,5 @@
 --  File     : Emit.hs
---  Author   : Rishi Ranjan
+--  Author   : Rishi Ranjan, Modified by Zed(Zijun) Chen.
 --  Purpose  : Emit LLVM code
 --  Copyright: (c) 2016 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
@@ -25,6 +25,7 @@ import qualified Data.ByteString.Lazy       as BL
 import           Data.List                  as List
 import           Data.Map                   as Map
 import qualified Data.Text.Lazy             as TL
+import           Distribution.System        (buildOS, OS (..)) 
 import qualified LLVM.AST                   as LLVMAST
 import           LLVM.Context
 import           LLVM.Module                as Mod
@@ -220,6 +221,14 @@ makeWrappedObjFile file llmod modBS = do
 ----------------------------------------------------------------------------
 -- -- * Linking                                                           --
 ----------------------------------------------------------------------------
+-- * Link time dead code elimination -- More detail can be found here: https://github.com/pschachte/wybe/issues/60
+-- There are two goals: (1) remove unused code. (2) remove the lpvm section
+-- On macOS (1) (2) are done by using linker arg: `-dead_strip`
+-- On Linux (1) is done by using linker arg: `--gc-sections` (requires separate
+-- ELF section for each function). (2) is done by calling `objcopy` after the
+-- linker build the executable.
+-- XXX it's better to use the linker to remove the lpvm section.
+
 
 -- | Remove OSX Ld warnings of incompatible built object file version.
 suppressLdWarnings :: String -> String
@@ -234,20 +243,22 @@ makeExec :: [FilePath]          -- Object Files
          -> FilePath            -- Target File
          -> Compiler ()
 makeExec ofiles target = do
-    -- dead code elimination during static linking
-    -- This is a linker feature, cc (clang) will pass this flag to the linker
-    let options = ["-dead_strip", "-no-pie"]
+    let options = ["-no-pie"] ++ linkerDeadStripArgs
     let args = options ++ ofiles ++ ["-o", target]
     logEmit $ "Generating final executable with command line: cc "
               ++ unwords args
     (exCode, _, serr) <- liftIO $
         readCreateProcessWithExitCode (proc "cc" args) ""
     case exCode of
-        ExitSuccess ->
+        ExitSuccess -> do
             logMsg Blocks $ "--- CC ---\n"
                 ++ "$ cc " ++ unwords args
                 ++ "\nCC Log:\n" ++ suppressLdWarnings serr
                 ++ "\n-------\n"
+            result <- liftIO $ removeLPVMSection target
+            case result of
+                Right ()  -> return ()
+                Left serr -> Error <!> serr
         _ -> Error <!> serr
 
 
