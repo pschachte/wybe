@@ -329,8 +329,10 @@ data CompilerState = Compiler {
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
   deferred :: [Module],          -- ^modules in the same SCC as the current one
   extractedMods :: Map ModSpec Module, -- XXX seems to be useless
-  orderedSCCs :: [[ModSpec]]     -- ^stores the topological sorted order of
+  orderedSCCs :: [[ModSpec]],    -- ^stores the topological sorted order of
                                  --  all modules (top-down)
+  unchangedMods :: Set ModSpec   -- ^record mods that are loaded from object
+                                 --  and unchanged.
 }
 
 -- |The compiler monad is a state transformer monad carrying the
@@ -340,7 +342,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp
-                        (Compiler opts "" [] False Map.empty 0 [] [] Map.empty [])
+                        (Compiler opts "" [] False Map.empty 0 [] [] Map.empty [] Set.empty)
 
 
 -- |Apply some transformation function to the compiler state.
@@ -531,7 +533,8 @@ getSpecModule context spec getter = do
 -- |Add the given mod SCC to the front of the ordered list
 addModSCC :: [ModSpec] -> Compiler ()
 addModSCC scc =
-    updateCompiler (\st -> st { orderedSCCs = scc:orderedSCCs st})
+    unless (List.null scc)
+        $ updateCompiler (\st -> st { orderedSCCs = scc:orderedSCCs st})
     
 
 -- -- |Return some function of the specified module; returns a Maybe
