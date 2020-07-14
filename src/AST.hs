@@ -33,7 +33,7 @@ module AST (
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
-  descendentModules,
+  descendentModules, addModSCC, 
   enterModule, reenterModule, exitModule, reexitModule, deferModules, inModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, getProcPrimProto,
@@ -66,7 +66,7 @@ module AST (
   updateModInterface, updateAllProcs, updateModSubmods, updateModProcs,
   getModuleSpec, getModuleParams, option, getOrigin, getSource, getDirectory,
   optionallyPutStr, message, errmsg, (<!>), genProcName,
-  addImport, doImport, addType, lookupType, publicType,
+  addImport, addImportDummy, doImport, addType, lookupType, publicType,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource,
   addProc, addProcDef, lookupProc, publicProc,
@@ -328,7 +328,9 @@ data CompilerState = Compiler {
   loadCount :: Int,              -- ^counter of module load order
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
   deferred :: [Module],          -- ^modules in the same SCC as the current one
-  extractedMods :: Map ModSpec Module
+  extractedMods :: Map ModSpec Module, -- XXX seems to be useless
+  orderedSCCs :: [[ModSpec]]     -- ^stores the topological sorted order of
+                                 --  all modules (top-down)
 }
 
 -- |The compiler monad is a state transformer monad carrying the
@@ -338,7 +340,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp
-                        (Compiler opts "" [] False Map.empty 0 [] [] Map.empty)
+                        (Compiler opts "" [] False Map.empty 0 [] [] Map.empty [])
 
 
 -- |Apply some transformation function to the compiler state.
@@ -524,6 +526,13 @@ getSpecModule context spec getter = do
         []    -> gets (maybe (error msg) getter . Map.lookup spec . modules)
         [mod] -> return $ getter mod
         _     -> shouldnt "getSpecModule: multiple modules with same spec"
+
+
+-- |Add the given mod SCC to the front of the ordered list
+addModSCC :: [ModSpec] -> Compiler ()
+addModSCC scc =
+    updateCompiler (\st -> st { orderedSCCs = scc:orderedSCCs st})
+    
 
 -- -- |Return some function of the specified module; returns a Maybe
 -- findSpecModule :: ModSpec -> (Module -> t) -> Compiler (Maybe t)
@@ -904,6 +913,14 @@ addImport modspec imports = do
          in Map.insert modspec' imports' moddeps))
     when (isNothing $ importPublic imports) $
       updateInterface Public (updateDependencies (Set.insert modspec))
+    addImportDummy modspec
+
+
+-- |Similar to "addImport", but instead of actual adding the import to the
+-- module, it only updates the "minDependencyNum" for computing the dependency
+-- SCCs. Used for loading a compiled module from object file.
+addImportDummy :: ModSpec -> Compiler ()
+addImportDummy modspec = do
     maybeMod <- gets (List.find ((==modspec) . modSpec) . underCompilation)
     currMod <- getModuleSpec
     logAST $ "Noting import of " ++ showModSpec modspec ++
@@ -917,7 +934,6 @@ addImport modspec imports = do
             updateModule (\m -> m { minDependencyNum =
                                         min (thisLoadNum mod')
                                             (minDependencyNum m) })
-
 
 
 -- |Add the specified proc definition to the current module.
