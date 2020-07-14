@@ -14,14 +14,14 @@ AFTER EVERYTHING:
 *main* > public inline (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign c print_int(40:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
 
 
 quad > public inline (1 calls)
 0: quad(x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
     foreign llvm add(~tmp$0#0:wybe.int, ~tmp$0#0:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
 

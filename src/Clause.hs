@@ -141,8 +141,7 @@ compileProc proc =
         let proto' = PrimProto (procProtoName proto) params''
         logClause $ "  comparams: " ++ show params''
         return $ proc { procImpln = ProcDefPrim proto' compiled
-                                        (ProcAnalysis emptyDS emptyAliasMultiSpeczInfo)
-                                        Map.empty}
+                                        emptyProcAnalysis Map.empty}
 
 
 

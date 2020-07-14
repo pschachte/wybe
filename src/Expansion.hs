@@ -31,21 +31,16 @@ procExpansion :: ProcSpec -> ProcDef -> Compiler ProcDef
 procExpansion pspec def = do
     logMsg Expansion $ replicate 50 '='
     logMsg Expansion $ "*** Try to expand proc " ++ show pspec
-    let ProcDefPrim proto body _ _ = procImpln def
-    logMsg Expansion $ "    initial body: "
-        ++ show (ProcDefPrim proto body
-                  (ProcAnalysis emptyDS emptyAliasMultiSpeczInfo)
-                  Map.empty)
+    let ProcDefPrim proto body analysis speczBodies = procImpln def
+    logMsg Expansion $ "    initial body: " ++ show (procImpln def)
     let tmp = procTmpCount def
     let (ins,outs) = inputOutputParams proto
+    -- XXX Only body is expanded currently (not specz bodies).
     (tmp',used,body') <- buildBody tmp (Map.fromSet id outs) $
                         execStateT (expandBody body) initExpanderState
     let proto' = proto {primProtoParams = markParamNeededness used ins
                                           <$> primProtoParams proto}
-    let def' = def { procImpln =
-                      ProcDefPrim proto' body'
-                          (ProcAnalysis emptyDS emptyAliasMultiSpeczInfo)
-                          Map.empty,
+    let def' = def { procImpln = ProcDefPrim proto' body' analysis speczBodies,
                      procTmpCount = tmp' }
     if def /= def'
         then

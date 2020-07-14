@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 chain > inline (0 calls)
 0: chain(?z#0:wybe.int):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign llvm move(1:wybe.int, ?z#0:wybe.int) @chain_assign:4:5
 
   LLVM code       :

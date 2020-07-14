@@ -16,21 +16,21 @@ AFTER EVERYTHING:
 *main* > public inline (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     alias_data.bar<0>(~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_data:19:2
 
 
 backup > public inline (1 calls)
 0: backup(student1#0:student.student, ?student2#0:student.student, io#0:wybe.phantom, [?io#0:wybe.phantom]):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign llvm move(~student1#0:student.student, ?student2#0:student.student) @alias_data:4:3
 
 
 bar > public (1 calls)
 0: bar(io#0:wybe.phantom, ?io#5:wybe.phantom):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp$4#0:student.course)
     foreign lpvm mutate(~tmp$4#0:student.course, ?tmp$5#0:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 101:wybe.int)
     foreign lpvm mutate(~tmp$5#0:student.course, ?tmp$0#0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, "intro to cs":wybe.string)
@@ -157,7 +157,7 @@ entry:
 *main* > public (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp$4#0:student.course)
     foreign lpvm mutate(~tmp$4#0:student.course, ?tmp$5#0:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 90048:wybe.int)
     foreign lpvm mutate(~tmp$5#0:student.course, ?tmp$6#0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, "Declarative Programming":wybe.string)
@@ -170,7 +170,7 @@ entry:
 printStudent > public (1 calls)
 0: printStudent(stu#0:student.student, io#0:wybe.phantom, ?io#6:wybe.phantom):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign c print_string("student id: ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
     foreign lpvm access(stu#0:student.student, 0:wybe.int, ?tmp$0#0:wybe.int)
     foreign c print_int(~tmp$0#0:wybe.int, ~#io#1:wybe.phantom, ?tmp$9#0:wybe.phantom) @wybe:nn:nn
@@ -300,7 +300,7 @@ entry:
 /= > public inline test (0 calls)
 0: /=($left#0:student.course, $right#0:student.course, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm access($left#0:student.course, 0:wybe.int, ?tmp$4#0:wybe.int)
     foreign lpvm access(~$left#0:student.course, 8:wybe.int, ?tmp$5#0:wybe.string)
     foreign lpvm access($right#0:student.course, 0:wybe.int, ?tmp$6#0:wybe.int)
@@ -326,7 +326,7 @@ entry:
 = > public inline test (6 calls)
 0: =($left#0:student.course, $right#0:student.course, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm access($left#0:student.course, 0:wybe.int, ?$left$code#0:wybe.int)
     foreign lpvm access(~$left#0:student.course, 8:wybe.int, ?$left$name#0:wybe.string)
     foreign lpvm access($right#0:student.course, 0:wybe.int, ?$right$code#0:wybe.int)
@@ -345,26 +345,26 @@ entry:
 code > public inline (0 calls)
 0: code($rec#0:student.course, ?$#0:wybe.int):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm access(~$rec#0:student.course, 0:wybe.int, ?$#0:wybe.int)
 code > public inline (0 calls)
 1: code($rec#0:student.course, ?$rec#1:student.course, $field#0:wybe.int):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm mutate(~%$rec#0:student.course, ?%$rec#1:student.course, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 course > public inline (0 calls)
 0: course(code#0:wybe.int, name#0:wybe.string, ?$#0:student.course):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!student.course)
     foreign lpvm mutate(~%$rec#0:student.course, ?%$rec#1:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~code#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:student.course, ?%$#0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~name#0:wybe.string)
 course > public inline (4 calls)
 1: course(?code#0:wybe.int, ?name#0:wybe.string, $#0:student.course):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm access($#0:student.course, 0:wybe.int, ?code#0:wybe.int)
     foreign lpvm access(~$#0:student.course, 8:wybe.int, ?name#0:wybe.string)
 
@@ -372,12 +372,12 @@ course > public inline (4 calls)
 name > public inline (0 calls)
 0: name($rec#0:student.course, ?$#0:wybe.string):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm access(~$rec#0:student.course, 8:wybe.int, ?$#0:wybe.string)
 name > public inline (0 calls)
 1: name($rec#0:student.course, ?$rec#1:student.course, $field#0:wybe.string):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm mutate noalias(~%$rec#0:student.course, ?%$rec#1:student.course, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
 
   LLVM code       :
@@ -558,7 +558,7 @@ entry:
 /= > public inline test (0 calls)
 0: /=($left#0:student.student, $right#0:student.student, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm access($left#0:student.student, 0:wybe.int, ?tmp$4#0:wybe.int)
     foreign lpvm access(~$left#0:student.student, 8:wybe.int, ?tmp$5#0:student.course)
     foreign lpvm access($right#0:student.student, 0:wybe.int, ?tmp$6#0:wybe.int)
@@ -595,7 +595,7 @@ entry:
 = > public inline test (6 calls)
 0: =($left#0:student.student, $right#0:student.student, ?$$#0:wybe.bool):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm access($left#0:student.student, 0:wybe.int, ?$left$id#0:wybe.int)
     foreign lpvm access(~$left#0:student.student, 8:wybe.int, ?$left$major#0:student.course)
     foreign lpvm access($right#0:student.student, 0:wybe.int, ?$right$id#0:wybe.int)
@@ -625,38 +625,38 @@ entry:
 id > public inline (0 calls)
 0: id($rec#0:student.student, ?$#0:wybe.int):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm access(~$rec#0:student.student, 0:wybe.int, ?$#0:wybe.int)
 id > public inline (0 calls)
 1: id($rec#0:student.student, ?$rec#1:student.student, $field#0:wybe.int):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm mutate(~%$rec#0:student.student, ?%$rec#1:student.student, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 major > public inline (0 calls)
 0: major($rec#0:student.student, ?$#0:student.course):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm access(~$rec#0:student.student, 8:wybe.int, ?$#0:student.course)
 major > public inline (0 calls)
 1: major($rec#0:student.student, ?$rec#1:student.student, $field#0:student.course):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm mutate noalias(~%$rec#0:student.student, ?%$rec#1:student.student, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:student.course)
 
 
 student > public inline (0 calls)
 0: student(id#0:wybe.int, major#0:student.course, ?$#0:student.student):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!student.student)
     foreign lpvm mutate(~%$rec#0:student.student, ?%$rec#1:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~id#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:student.student, ?%$#0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~major#0:student.course)
 student > public inline (4 calls)
 1: student(?id#0:wybe.int, ?major#0:student.course, $#0:student.student):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign lpvm access($#0:student.student, 0:wybe.int, ?id#0:wybe.int)
     foreign lpvm access(~$#0:student.student, 8:wybe.int, ?major#0:student.course)
 

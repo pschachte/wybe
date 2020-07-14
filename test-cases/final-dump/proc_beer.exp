@@ -14,21 +14,21 @@ AFTER EVERYTHING:
 *main* > public inline (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     proc_beer.gen$1<0>(99:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @proc_beer:5:5
 
 
 beer99 > public inline (1 calls)
 0: beer99(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     proc_beer.gen$1<0>(99:wybe.int, ~io#0:wybe.phantom, ?io#1:wybe.phantom) @proc_beer:5:5
 
 
 gen$1 > (2 calls)
 0: gen$1(count#0:wybe.int, io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign llvm icmp sge(count#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
@@ -46,7 +46,7 @@ gen$1 > (2 calls)
 gen$2 > inline (1 calls)
 0: gen$2([count#0:wybe.int], io#0:wybe.phantom, [?io#0:wybe.phantom]):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
 
   LLVM code       :
 

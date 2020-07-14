@@ -87,7 +87,7 @@ sccElts (CyclicSCC multi)   = multi
 -- Disjoint set for alias map
 --
 ----------------------------------------------------------------
--- TODO: Using Union-Find instead of this naive implementation
+-- XXX Using Union-Find instead of this naive implementation
 -- The old implement is wrong https://github.com/pschachte/wybe/issues/25
 -- So we use this version as a quick fix.
 
