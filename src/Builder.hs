@@ -157,6 +157,8 @@
 --
 --  END MAJOR DOC
 
+{-# LANGUAGE LambdaCase #-}
+
 -- |Code to oversee the compilation process.
 module Builder (buildTargets) where
 
@@ -416,10 +418,59 @@ isCompileNeeded modSCC = do
 -- reload it from source code.
 -- XXX reload will break the Tarjan's algorithm we used for sorting mods
 prepareToCompileModSCC :: [ModSpec] -> Compiler ()
-prepareToCompileModSCC =
-    mapM_ (\m ->
+prepareToCompileModSCC modSCC = do
+    unchanged <- gets unchangedMods
+    let compiledMods = List.filter (`Set.member` unchanged) modSCC
+    if List.null compiledMods
+    then 
         return ()
-        )
+    else do
+        logBuild $ "Mods that need to be reloaded: " 
+            ++ showModSpecs compiledMods
+        rootMods <- foldM (\rootMods m -> do
+            reenterModule m
+            origin <- getModule modOrigin
+            rootMod <- getModule modRootModSpec
+            _ <- reexitModule
+            -- modOrigin records its source file if there is one, otherwise it 
+            -- records its object file.
+            -- XXX check whether this approach is correct, can we use modOrigin
+            -- like this
+            if takeExtension origin == "." ++ sourceExtension
+            then
+                case rootMod of
+                    -- XXX check whether this approach is correct
+                    Just mod -> rootMods
+                                |> Map.alter (\case
+                                    Just ms -> Just (m:ms)
+                                    Nothing -> Just [m]) (mod, origin)
+                                |> return
+                    _      -> return rootMods
+            else do
+                Error <!>
+                    "Object file " ++ origin ++ " contains outdated module " ++
+                    showModSpec m ++ " . Could not find source to rebuild it."
+                return rootMods
+            ) Map.empty compiledMods
+        stopOnError "reload outdated module"
+
+        logBuild $ "Root mods: " ++ show rootMods
+        -- reload
+        mapM_ (\((rootM, src), ms) -> do
+            logBuild $ "Reload root mod: " ++ showModSpec rootM ++ " contains: "
+                ++ showModSpecs ms ++ " from: " ++ show src
+            -- Remove outdated mods, we can only delete mods from a single
+            -- source at once. Otherwise the "loadImports" during loading 
+            -- will break things.
+            -- XXX we should refactor it to separate loading a module and
+            -- loading it's dependencies.
+            updateCompiler (\st ->
+                    let mMap = modules st in
+                    let mMap' = List.foldr Map.delete mMap ms in
+                    st { modules = mMap' })
+            buildModule rootM src
+            ) (Map.toList rootMods)
+    
 
 
 -- |Actually load and compile the module
