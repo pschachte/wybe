@@ -336,7 +336,6 @@ buildModuleIfNeeded force modspec possDirs topLevel = do
                     dstDate <- (liftIO . getModificationTime) objfile
                     if force || srcDate > dstDate
                       then do
-                        unless force (extractModules objfile)
                         buildModule modspec srcfile
                         return True
                       else do
@@ -561,42 +560,7 @@ compileModule source modspec params items = do
     mods <- exitModule -- may be empty list if module is mutually dependent
     logBuild $ "<=== finished compling module " ++ showModSpec modspec
     logBuild $ "     module dependency SCC: " ++ showModSpecs mods
-    ms <- gets modules
-    logBuild $ "~=~ " ++ show (Map.keys ms)
     addModSCC mods
-
-
-extractedItemsHash :: ModSpec -> Compiler (Maybe String)
-extractedItemsHash modspec = do
-    storedMods <- gets extractedMods
-    -- Get the force options
-    opts <- gets options
-    if optForce opts || optForceAll opts
-        then return Nothing
-        else case Map.lookup modspec storedMods of
-                 Nothing -> return Nothing
-                 Just m  -> return $ itemsHash m
-
-
--- | Parse the stored module bytestring in the 'objfile' and record them in the
--- compiler state for later access.
-extractModules :: FilePath -> Compiler ()
-extractModules objfile = do
-    logBuild $ "=== Preloading Wybe-LPVM modules from " ++ objfile
-    extracted <- loadLPVMFromObjFile objfile []
-    if List.null extracted
-        then
-        Warning <!> "Unable to preload serialised LPVM from " ++ objfile
-        else do
-        logBuild $ ">>> Extracted Module bytestring from " ++ objfile
-        let extractedSpecs = List.map modSpec extracted
-        logBuild $ "+++ Recording modules: " ++ showModSpecs extractedSpecs
-        -- Add the extracted modules in the 'objectModules' Map
-        exMods <- gets extractedMods
-        let addMod m = Map.insert (modSpec m) m
-        let exMods' = List.foldr addMod exMods extracted
-        modify (\s -> s { extractedMods = exMods' })
-
 
 
 -- | Load all serialised modules present in the LPVM section of the object

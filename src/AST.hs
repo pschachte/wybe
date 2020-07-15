@@ -56,7 +56,6 @@ module AST (
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
   updateModules, updateImplementations, updateImplementation,
-  getExtractedModuleImpln,
   getModuleImplementationField, getModuleImplementation,
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
@@ -328,7 +327,6 @@ data CompilerState = Compiler {
   loadCount :: Int,              -- ^counter of module load order
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
   deferred :: [Module],          -- ^modules in the same SCC as the current one
-  extractedMods :: Map ModSpec Module, -- XXX seems to be useless
   orderedSCCs :: [[ModSpec]],    -- ^stores the topological sorted order of
                                  --  all modules (top-down)
   unchangedMods :: Set ModSpec   -- ^record mods that are loaded from object
@@ -342,7 +340,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp
-                        (Compiler opts "" [] False Map.empty 0 [] [] Map.empty [] Set.empty)
+                        (Compiler opts "" [] False Map.empty 0 [] [] [] Set.empty)
 
 
 -- |Apply some transformation function to the compiler state.
@@ -719,16 +717,6 @@ getModuleImplementationMaybe fn = do
   case imp of
       Nothing -> return Nothing
       Just imp' -> return $ fn imp'
-
-
-getExtractedModuleImpln :: ModSpec -> Compiler (Maybe ModuleImplementation)
-getExtractedModuleImpln mspec = do
-    maybeMod <- Map.lookup mspec <$> gets extractedMods
-    case maybeMod of
-        Nothing -> return Nothing
-        Just m -> return $ modImplementation m
-
-
 
 
 -- |Add the specified string as a message of the specified severity
