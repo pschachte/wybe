@@ -250,8 +250,7 @@ buildTarget force target = do
                   -- For the executable case, the top-level module is the one
                   -- that contains main. So we'll run 
                   -- "expandRequiredSpeczVersions" inside "buildExecutable"
-                  unless (tType == ExecutableFile) 
-                          (multiSpeczTopDownPass [modname])
+                  unless (tType == ExecutableFile) multiSpeczTopDownPass
                   case tType of
                      ObjectFile     -> emitObjectFile [modname] target
                      BitcodeFile    -> emitBitcodeFile [modname] target
@@ -962,7 +961,7 @@ buildExecutable targetMod target = do
             emitObjectFile mainMod tmpMainOFile
 
             -- run top-down pass here
-            multiSpeczTopDownPass mainMod
+            multiSpeczTopDownPass
 
             ofiles <- mapM (loadObjectFile . fst) depends
             depMods <- catMaybes <$> mapM (getLoadedModule . fst) depends
@@ -1116,10 +1115,10 @@ objectReBuildNeeded thisMod dir = do
 -- version. Tt's probably a good idea to only revise .o files in the current
 -- directory, and handle any object files in a different directory the same way
 -- we handle stdlib.
-multiSpeczTopDownPass :: ModSpec -> Compiler ()
-multiSpeczTopDownPass mainMod = do
-    logBuild $ " === Running top-down pass starting from: " ++ show mainMod
-    dependencies <- topDownOrderedDependencySCCs mainMod
+multiSpeczTopDownPass :: Compiler ()
+multiSpeczTopDownPass = do
+    logBuild " === Running top-down pass"
+    topDownSCCs <- gets orderedSCCs
     mapM_ (\ms -> do
         noMultiSpecz <- gets (optNoMultiSpecz . options)
         unless noMultiSpecz $ do
@@ -1134,30 +1133,8 @@ multiSpeczTopDownPass mainMod = do
         -- TODO: skip this if the module is unchanged.
         mapM_ blockTransformModule ms
         stopOnError $ "translating " ++ showModSpecs ms
-        ) dependencies
+        ) topDownSCCs
 
-
--- | Given the entry module, compute the dependency graph and topological sort
--- it based on the top-down order.
-topDownOrderedDependencySCCs :: ModSpec -> Compiler [[ModSpec]]
-topDownOrderedDependencySCCs m = do
-    dependencies <- dfs m Map.empty
-    dependencies
-        |> Map.toList
-        |> List.map (\(m, imports) -> (m, m, imports))
-        |> Graph.stronglyConnComp
-        |> List.map sccElts
-        |> List.reverse
-        |> return
-    where
-    dfs m visited =
-        if Map.member m visited
-        then return visited
-        else do
-            thisMod <- getLoadedModuleImpln m
-            let imports = (keys . modImports) thisMod
-            let visited' = Map.insert m imports visited
-            foldM (flip dfs) visited' imports
 
 -----------------------------------------------------------------------------
 -- Module Source Handlers                                                  --
