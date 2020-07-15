@@ -39,11 +39,12 @@ module AST (
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
-  AliasMap, aliasMapToAliasPairs,
-  AliasMultiSpeczInfo, emptyAliasMultiSpeczInfo,
-  SpeczVersionId, speczIdToString, SpeczProcBodies, AliasMultiSpeczDep,
-  AliasMultiSpeczDepVersion, AliasMultiSpeczDepVersionParamInfo(..),
-  ProcAnalysis(..), ProcBody(..), PrimFork(..), Ident, VarName,
+  AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
+  parameterVarNameToID, SpeczVersion, CallProperty(..),
+  speczVersionToId, SpeczProcBodies,
+  MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
+  ProcAnalysis(..), emptyProcAnalysis, 
+  ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
   foldProcCalls, foldBodyPrims, foldBodyDistrib,
@@ -85,6 +86,9 @@ import           Config (magicVersion, wordSize, objectExtension,
 import           Control.Monad
 import           Control.Monad.Trans (lift,liftIO)
 import           Control.Monad.Trans.State
+import           Crypto.Hash
+import qualified Data.Binary
+import qualified Data.ByteString.Lazy as BL
 import           Data.List as List
 import           Data.Map as Map
 import           Data.Maybe
@@ -1600,18 +1604,52 @@ data ProcImpln
     deriving (Eq,Generic)
 
 
--- | The identity of each specialized version. It needs to be a bijection
--- between this Id and the specialized condition. 
--- Currently, "Int" is enought. We can change it to "Tuple" when there 
--- are more things to consider. More detial can be found in "Transform.hs"
-type SpeczVersionId = Int
+-- |An ID for a parameter of a proc
+type ParameterID = Int
 
 
--- Convert "SpeczVersionId" to "String" so it can be shorter in function
--- name.
-speczIdToString :: SpeczVersionId -> String
-speczIdToString speczId = 
-    showHex speczId ""
+-- |Convert "ParameterID" to "PrimVarName"
+parameterIDToVarName :: PrimProto -> ParameterID -> PrimVarName
+parameterIDToVarName proto paramID =
+    let params = primProtoParams proto in
+    primParamName (params !! paramID)
+
+
+-- |Convert "PrimVarName" to "ParameterID"
+parameterVarNameToID :: PrimProto -> PrimVarName -> ParameterID
+parameterVarNameToID proto varName =
+    let params = primProtoParams proto in
+    let idx = List.findIndex ((== varName) . primParamName) params in
+    trustFromJust "parameterVarNameToID" idx
+
+
+-- |Used for describing a specific specialized version
+-- Removing one "CallProperty" should only make the specialization a bit
+-- more general and shouldn't break it. ie. the empty set signifies no
+-- specialization and should be valid for all call site.
+type SpeczVersion = Set CallProperty
+
+
+-- |Each one represents some additional information about the specialization.
+data CallProperty
+-- "NonAliasedParam v1" is used for global CTGC, it means that the argument
+-- passed to parameter v1 is nonaliased.
+    = NonAliasedParam ParameterID
+    deriving (Eq, Ord, Show, Generic)
+
+-- XXX Those should be put in "BinaryFactory.hs". However we need to compute the
+-- hash of "SpeczVersion" in "AST.hs".
+instance Data.Binary.Binary CallProperty
+
+
+-- |Convert a "SpeczVersion" to a string as part of the proc identifier.
+-- It's first 40 bits (out of 160 bits) of the sha1 hash. Collision will be
+-- detected in "Blocks.hs".
+speczVersionToId :: SpeczVersion -> String
+speczVersionToId = List.take 10 . show . sha1 . Data.Binary.encode
+    where
+        sha1 :: BL.ByteString -> Digest SHA1
+        sha1 = hashlazy
 
 
 -- | A map contains different specialization versions.
@@ -1619,7 +1657,7 @@ speczIdToString speczId =
 -- actual implementation. A procBody can be "Nothing" when it's required but
 -- haven't been generated. All procBody will be generated before converting to
 -- llvm code.
-type SpeczProcBodies = Map SpeczVersionId (Maybe ProcBody)
+type SpeczProcBodies = Map SpeczVersion (Maybe ProcBody)
 
 
 -- | Use to record the alias relation between arguments of a procedure.
@@ -1637,41 +1675,51 @@ aliasMapToAliasPairs :: AliasMap -> [(PrimVarName, PrimVarName)]
 aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 
 
--- | Multiple specialization info for global alias. For each procedure, it
--- records the interesting parameters and it's dependencies(specialized 
--- versions that this proc uses directly).
-type AliasMultiSpeczInfo = ([PrimVarName], AliasMultiSpeczDep)
+-- |Infomation about specialization versions the current proc directly uses. 
+-- For a given specialization version of the current proc, this info should be
+-- enough to compute all specz versions it required. A sample case is
+-- "expandSpeczVersionsAlias" in "Transform.hs".
+-- XXX this map is per call site, so the args is included to separate different
+-- calls to the same proc. The current approach is not currect, we should give
+-- each call site a unique id similar to the tmep variable count in
+-- "BodyBuilder" and use it as the key.
+type MultiSpeczDepInfo = 
+        Map (ProcSpec, [PrimArg]) (Set CallSiteProperty)
 
 
--- | Specialization versions the current proc directly uses. A set of procIdent
--- and version.
-type AliasMultiSpeczDep = 
-        Set ((ModSpec, ProcName, ProcID), AliasMultiSpeczDepVersion)
-
-
--- | Each version is described by a list of "ParamInfo" that matches
--- the interesting parameters of that proc.
-type AliasMultiSpeczDepVersion = [AliasMultiSpeczDepVersionParamInfo]
-
-
--- | This matches the each param of the callee. Each param can be 
--- definitely "Aliased" or "BasedOn" some params of the caller.
--- If it is "BasedOn" Nothing, then it is always non-aliased.
-data AliasMultiSpeczDepVersionParamInfo
-    = Aliased 
-    | BasedOn [PrimVarName]
+-- |Specific items for "MultiSpeczDepInfo", it describing the information about
+-- the related call site.
+data CallSiteProperty
+    -- "NonAliasedParamCond calleeParam [callerParam]" is used for global CTGC.
+    -- eg. NonAliasedParamCond v1 [v2, v3] means that if the paramenters v2, v3
+    -- of the caller proc is nonaliased, then the parameter v1 of the callee is
+    -- nonaliased and we could specialize it.
+    = NonAliasedParamCond ParameterID [ParameterID]
     deriving (Eq, Generic, Ord, Show)
 
 
-emptyAliasMultiSpeczInfo :: AliasMultiSpeczInfo
-emptyAliasMultiSpeczInfo = ([], Set.empty)
+-- |Describing the interestingness of a proc. if something is interesting, that
+-- means if we could provide some information about that thing, then we can 
+-- generate more specialized code.
+data InterestingCallProperty
+    -- "InterestingUnaliased v" means that if parameter v is known as unaliased,
+    -- then we can make use of it.
+    = InterestingUnaliased ParameterID
+    deriving (Eq, Generic, Ord, Show)
 
 
 -- | Stores whatever analysis results we infer about a proc definition.
 data ProcAnalysis = ProcAnalysis {
-    procArgAliasMap :: AliasMap,
-    procArgAliasMultiSpeczInfo :: AliasMultiSpeczInfo
+    procArgAliasMap               :: AliasMap,
+    procInterestingCallProperties :: Set InterestingCallProperty,
+    procMultiSpeczDepInfo         :: MultiSpeczDepInfo
 } deriving (Eq,Generic)
+
+
+-- | The empty ProcAnalysis
+emptyProcAnalysis :: ProcAnalysis
+emptyProcAnalysis = ProcAnalysis emptyDS Set.empty Map.empty
+
 
 isCompiled :: ProcImpln -> Bool
 isCompiled ProcDefPrim {} = True
@@ -1682,8 +1730,9 @@ instance Show ProcImpln where
     show (ProcDefPrim proto body analysis speczVersions) =
         let speczBodies = Map.toList speczVersions
                 |> List.map (\(ver, body) ->
-                        "\n  [" ++ speczIdToString ver ++ "]:" ++
-                        case body of
+                        "\n [" ++ speczVersionToId ver ++ "] "
+                        ++ show (Set.toList ver) ++ " :"
+                        ++ case body of
                             Nothing -> " Missing"
                             Just body -> showBlock 4 body)
                 |> intercalate "\n"
@@ -1693,11 +1742,17 @@ instance Show ProcImpln where
 
 
 instance Show ProcAnalysis where
-    show (ProcAnalysis procArgAliasMap procArgAliasMultiSpeczInfo) =
-        "\n AliasPairs: " ++ showAliasMap procArgAliasMap 
-        ++ "\n AliasMultiSpeczInfo: "  
-        -- TODO: show dependencies info in "AliasMultiSpeczInfo"
-        ++ show (fst procArgAliasMultiSpeczInfo)
+    show (ProcAnalysis aliasMap interestingCallProperties multiSpeczDepInfo) =
+        let multiSpeczDepInfo' = Map.toList multiSpeczDepInfo
+                |> List.filter (not . List.null . snd)
+        in
+        "\n AliasPairs: " ++ showAliasMap aliasMap
+        ++ "\n InterestingCallProperties: "
+        ++ show (Set.toAscList interestingCallProperties)
+        ++ if List.null multiSpeczDepInfo'
+            then "" 
+            else "\n MultiSpeczDepInfo: " ++ show multiSpeczDepInfo'
+
 
 
 -- |A Primitve procedure body.  In principle, a body is a set of clauses, each
@@ -1879,7 +1934,7 @@ data ProcSpec = ProcSpec {
       procSpecMod :: ModSpec,
       procSpecName :: ProcName,
       procSpecID :: ProcID,
-      procSpeczVersionID :: Maybe SpeczVersionId}
+      procSpeczVersion :: Maybe SpeczVersion}
                 deriving (Eq,Ord,Generic)
 
 instance Show ProcSpec where
@@ -1887,7 +1942,7 @@ instance Show ProcSpec where
         showModSpec mod ++ "." ++ name ++ "<" ++ show pid ++ ">"
                 ++ case speczId of 
                     Nothing -> ""
-                    Just id -> "[" ++ speczIdToString id ++ "]"
+                    Just id -> "[" ++ speczVersionToId id ++ "]"
 
 -- |An ID for a proc.
 type ProcID = Int

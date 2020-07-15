@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 nested_if > public (0 calls)
 0: nested_if(i#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign llvm icmp eq(i#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
     case ~tmp$0#0:wybe.bool of
     0:

@@ -199,7 +199,7 @@ import           System.Exit
 import           System.IO.Temp            (createTempDirectory)
 import           Transform                 (transformProc,
                                             generateSpeczVersionInProc,
-                                            expandRequiredSpeczVersions)
+                                            expandRequiredSpeczVersionsByMod)
 import           Types                     (typeCheckMod,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
@@ -1054,7 +1054,7 @@ objectReBuildNeeded thisMod dir = do
 
         -- both exist:  is source younger?
         ModuleSource (Just srcfile) (Just objfile) _ _ -> do
-            -- TODO: Multiple specialization make this part not working because
+            -- XXX Multiple specialization make this part not working because
             -- the object file can change (new specz requirement) even if the 
             -- source code is not changed. Need something better. Also that the
             -- original version doesn't work anyway. Due to inlining, a object
@@ -1074,7 +1074,7 @@ objectReBuildNeeded thisMod dir = do
 -- | Run a top-down pass starting form the given module.
 -- It will find all required specialized versions and generate them.
 -- It also calls "blockTransformModule" to transform LPVM code to LLVM code.
--- TODO: handle read-only object file such as stdlib "wybe". We can't fill in
+-- XXX handle read-only object file such as stdlib "wybe". We can't fill in
 -- specz versions like this. Currently it's ok because it does not have a specz
 -- version. Tt's probably a good idea to only revise .o files in the current
 -- directory, and handle any object files in a different directory the same way
@@ -1088,13 +1088,13 @@ multiSpeczTopDownPass = do
         unless noMultiSpecz $ do
             logBuild $ " --- Running on: " ++ showModSpecs ms
             -- collecting all required spec versions
-            fixpointProcessSCC expandRequiredSpeczVersions ms
+            fixpointProcessSCC expandRequiredSpeczVersionsByMod ms
 
             -- generating required specz versions
             mapM_ (transformModuleProcs generateSpeczVersionInProc) ms
 
         -- transform lpvm code to llvm code.
-        -- TODO: skip this if the module is unchanged.
+        -- XXX skip this if the module is unchanged.
         mapM_ blockTransformModule ms
         stopOnError $ "translating " ++ showModSpecs ms
         ) topDownSCCs

@@ -60,7 +60,7 @@ extractLPVMData tmpDir objFile =
 -- -- * Object file manipulation (Internal)                               --
 ----------------------------------------------------------------------------
 
--- TODO:
+-- XXX
 -- The current implementation is a bit hacky, here are something we should
 -- consider improving:
 -- 1. Unit test for Roundtrip.
