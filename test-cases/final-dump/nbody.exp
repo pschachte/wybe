@@ -1,0 +1,2448 @@
+======================================================================
+AFTER EVERYTHING:
+ Module nbody
+  public submods  : 
+  public types    : bodylist: (nbody.bodylist,Just address)
+  public resources: 
+  public procs    : nbody.<0>
+                    nbody.advance<0>
+                    nbody.energy_inner_loop<0>
+                    nbody.energy_outer_loop<0>
+                    nbody.get_bodies<0>
+                    nbody.offset_momentum<0>
+                    nbody.offset_momentum_loop<0>
+                    nbody.print_bodylist<0>
+                    nbody.report_energy<0>
+                    nbody.update_bodies_pos<0>
+                    nbody.update_bodies_v<0>
+                    nbody.update_body_v_inner<0>
+                    nbody.bodylist./=<0>
+                    nbody.bodylist.=<0>
+                    nbody.bodylist.body<0>
+                    nbody.bodylist.body<1>
+                    nbody.bodylist.empty<0>
+                    nbody.bodylist.m<0>
+                    nbody.bodylist.m<1>
+                    nbody.bodylist.tail<0>
+                    nbody.bodylist.tail<1>
+                    nbody.bodylist.vx<0>
+                    nbody.bodylist.vx<1>
+                    nbody.bodylist.vy<0>
+                    nbody.bodylist.vy<1>
+                    nbody.bodylist.vz<0>
+                    nbody.bodylist.vz<1>
+                    nbody.bodylist.x<0>
+                    nbody.bodylist.x<1>
+                    nbody.bodylist.y<0>
+                    nbody.bodylist.y<1>
+                    nbody.bodylist.z<0>
+                    nbody.bodylist.z<1>
+  imports         : public use nbody.bodylist
+                    use wybe
+  types           : bodylist/public  is address { empty() @nbody:3:25 | body(x:float, y:float, z:float, vx:float, vy:float, vz:float, m:float, tail:bodylist) @nbody:3:33  }  @nbody:3:5
+  resources       : 
+  submodules      : nbody.bodylist
+  procs           : 
+
+*main* > public (0 calls)
+0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#4:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+ MultiSpeczDepInfo: [((nbody.advance<0>,[1.0e-2:wybe.float,~n#0:wybe.int,~%bodies#1:nbody.bodylist,?%bodies#2:nbody.bodylist]),fromList [NonAliasedParamCond 2 []]),((nbody.offset_momentum<0>,[~%bodies#0:nbody.bodylist,?%bodies#1:nbody.bodylist]),fromList [NonAliasedParamCond 0 []])]
+    foreign c print_string("n: ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
+    foreign c read_int(?n#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+    nbody.get_bodies<0>(?bodies#0:nbody.bodylist) @nbody:195:1
+    nbody.offset_momentum<0>[04d1467a4d](~%bodies#0:nbody.bodylist, ?%bodies#1:nbody.bodylist) @nbody:196:1
+    nbody.report_energy<0>(bodies#1:nbody.bodylist, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @nbody:197:2
+    nbody.advance<0>[869b3badfb](1.0e-2:wybe.float, ~n#0:wybe.int, ~%bodies#1:nbody.bodylist, ?%bodies#2:nbody.bodylist) @nbody:199:1
+    nbody.report_energy<0>(~bodies#2:nbody.bodylist, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @nbody:201:2
+
+
+advance > public (2 calls)
+0: advance(dt#0:wybe.float, n#0:wybe.int, bodies#0:nbody.bodylist, ?bodies#3:nbody.bodylist):
+ AliasPairs: [(bodies#0,bodies#3)]
+ InterestingCallProperties: [InterestingUnaliased 2]
+ MultiSpeczDepInfo: [((nbody.advance<0>,[~dt#0:wybe.float,~tmp$0#0:wybe.int,~%bodies#2:nbody.bodylist,?%bodies#3:nbody.bodylist]),fromList [NonAliasedParamCond 2 [2]]),((nbody.update_bodies_pos<0>,[dt#0:wybe.float,~%bodies#1:nbody.bodylist,?%bodies#2:nbody.bodylist]),fromList [NonAliasedParamCond 1 [2]])]
+    foreign llvm icmp sgt(n#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(~bodies#0:nbody.bodylist, ?bodies#3:nbody.bodylist)
+
+    1:
+        foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
+        nbody.update_bodies_v<0>(dt#0:wybe.float, ~bodies#0:nbody.bodylist, ~%bodies#0:nbody.bodylist, ?%bodies#1:nbody.bodylist) @nbody:144:9
+        nbody.update_bodies_pos<0>(dt#0:wybe.float, ~%bodies#1:nbody.bodylist, ?%bodies#2:nbody.bodylist) @nbody:145:9
+        nbody.advance<0>(~dt#0:wybe.float, ~tmp$0#0:wybe.int, ~%bodies#2:nbody.bodylist, ?%bodies#3:nbody.bodylist) @nbody:147:9
+
+ [869b3badfb] [NonAliasedParam 2] :
+    foreign llvm icmp sgt(n#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(~bodies#0:nbody.bodylist, ?bodies#3:nbody.bodylist)
+
+    1:
+        foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
+        nbody.update_bodies_v<0>(dt#0:wybe.float, ~bodies#0:nbody.bodylist, ~%bodies#0:nbody.bodylist, ?%bodies#1:nbody.bodylist) @nbody:144:9
+        nbody.update_bodies_pos<0>[145401e434](dt#0:wybe.float, ~%bodies#1:nbody.bodylist, ?%bodies#2:nbody.bodylist) @nbody:145:9
+        nbody.advance<0>[869b3badfb](~dt#0:wybe.float, ~tmp$0#0:wybe.int, ~%bodies#2:nbody.bodylist, ?%bodies#3:nbody.bodylist) @nbody:147:9
+
+
+
+energy_inner_loop > public (2 calls)
+0: energy_inner_loop(bodies#0:nbody.bodylist, x1#0:wybe.float, y1#0:wybe.float, z1#0:wybe.float, m1#0:wybe.float, e#0:wybe.float, ?e#2:wybe.float):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne(bodies#0:nbody.bodylist, 0:wybe.int, ?tmp$14#0:wybe.bool)
+    case ~tmp$14#0:wybe.bool of
+    0:
+        foreign llvm move(~e#0:wybe.float, ?e#2:wybe.float)
+
+    1:
+        foreign lpvm access(bodies#0:nbody.bodylist, 0:wybe.int, ?x2#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 8:wybe.int, ?y2#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 16:wybe.int, ?z2#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 48:wybe.int, ?m2#0:wybe.float)
+        foreign lpvm access(~bodies#0:nbody.bodylist, 56:wybe.int, ?remain_bodies#0:nbody.bodylist)
+        foreign llvm fsub(x1#0:wybe.float, ~x2#0:wybe.float, ?tmp$0#0:wybe.float) @wybe:nn:nn
+        foreign llvm fsub(y1#0:wybe.float, ~y2#0:wybe.float, ?tmp$1#0:wybe.float) @wybe:nn:nn
+        foreign llvm fsub(z1#0:wybe.float, ~z2#0:wybe.float, ?tmp$2#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(~tmp$0#0:wybe.float, ~tmp$0#0:wybe.float, ?tmp$6#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(~tmp$1#0:wybe.float, ~tmp$1#0:wybe.float, ?tmp$7#0:wybe.float) @wybe:nn:nn
+        foreign llvm fadd(~tmp$6#0:wybe.float, ~tmp$7#0:wybe.float, ?tmp$5#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(~tmp$2#0:wybe.float, ~tmp$2#0:wybe.float, ?tmp$8#0:wybe.float) @wybe:nn:nn
+        foreign llvm fadd(~tmp$5#0:wybe.float, ~tmp$8#0:wybe.float, ?tmp$4#0:wybe.float) @wybe:nn:nn
+        foreign c sqrt(~tmp$4#0:wybe.float, ?tmp$3#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(m1#0:wybe.float, ~m2#0:wybe.float, ?tmp$11#0:wybe.float) @wybe:nn:nn
+        foreign llvm fdiv(~tmp$11#0:wybe.float, ~tmp$3#0:wybe.float, ?tmp$10#0:wybe.float) @wybe:nn:nn
+        foreign llvm fsub(~e#0:wybe.float, ~tmp$10#0:wybe.float, ?tmp$9#0:wybe.float) @wybe:nn:nn
+        nbody.energy_inner_loop<0>(~remain_bodies#0:nbody.bodylist, ~x1#0:wybe.float, ~y1#0:wybe.float, ~z1#0:wybe.float, ~m1#0:wybe.float, ~tmp$9#0:wybe.float, ?%e#2:wybe.float) @nbody:133:9
+
+
+
+energy_outer_loop > public (2 calls)
+0: energy_outer_loop(bodies#0:nbody.bodylist, e#0:wybe.float, ?e#3:wybe.float):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne(bodies#0:nbody.bodylist, 0:wybe.int, ?tmp$10#0:wybe.bool)
+    case ~tmp$10#0:wybe.bool of
+    0:
+        foreign llvm move(~e#0:wybe.float, ?e#3:wybe.float)
+
+    1:
+        foreign lpvm access(bodies#0:nbody.bodylist, 0:wybe.int, ?x#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 8:wybe.int, ?y#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 16:wybe.int, ?z#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 24:wybe.int, ?vx#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 32:wybe.int, ?vy#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 40:wybe.int, ?vz#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 48:wybe.int, ?m#0:wybe.float)
+        foreign lpvm access(~bodies#0:nbody.bodylist, 56:wybe.int, ?remain_bodies#0:nbody.bodylist)
+        foreign llvm fmul(~vx#0:wybe.float, ~vx#0:wybe.float, ?tmp$5#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(~vy#0:wybe.float, ~vy#0:wybe.float, ?tmp$6#0:wybe.float) @wybe:nn:nn
+        foreign llvm fadd(~tmp$5#0:wybe.float, ~tmp$6#0:wybe.float, ?tmp$4#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(~vz#0:wybe.float, ~vz#0:wybe.float, ?tmp$7#0:wybe.float) @wybe:nn:nn
+        foreign llvm fadd(~tmp$4#0:wybe.float, ~tmp$7#0:wybe.float, ?tmp$3#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(m#0:wybe.float, ~tmp$3#0:wybe.float, ?tmp$2#0:wybe.float) @wybe:nn:nn
+        foreign llvm fdiv(~tmp$2#0:wybe.float, 2.0:wybe.float, ?tmp$1#0:wybe.float) @wybe:nn:nn
+        foreign llvm fadd(~e#0:wybe.float, ~tmp$1#0:wybe.float, ?tmp$0#0:wybe.float) @wybe:nn:nn
+        nbody.energy_inner_loop<0>(remain_bodies#0:nbody.bodylist, ~x#0:wybe.float, ~y#0:wybe.float, ~z#0:wybe.float, ~m#0:wybe.float, ~tmp$0#0:wybe.float, ?%e#2:wybe.float) @nbody:120:9
+        nbody.energy_outer_loop<0>(~remain_bodies#0:nbody.bodylist, ~%e#2:wybe.float, ?%e#3:wybe.float) @nbody:122:9
+
+
+
+get_bodies > public (1 calls)
+0: get_bodies(?bodies#5:nbody.bodylist):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm alloc(64:wybe.int, ?tmp$58#0:nbody.bodylist)
+    foreign lpvm mutate(~tmp$58#0:nbody.bodylist, ?tmp$59#0:nbody.bodylist, 0:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 15.379697114850917:wybe.float)
+    foreign lpvm mutate(~tmp$59#0:nbody.bodylist, ?tmp$60#0:nbody.bodylist, 8:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, -25.919314609987964:wybe.float)
+    foreign lpvm mutate(~tmp$60#0:nbody.bodylist, ?tmp$61#0:nbody.bodylist, 16:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 0.17925877295037118:wybe.float)
+    foreign lpvm mutate(~tmp$61#0:nbody.bodylist, ?tmp$62#0:nbody.bodylist, 24:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 0.979090732243898:wybe.float)
+    foreign lpvm mutate(~tmp$62#0:nbody.bodylist, ?tmp$63#0:nbody.bodylist, 32:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 0.5946989986476762:wybe.float)
+    foreign lpvm mutate(~tmp$63#0:nbody.bodylist, ?tmp$64#0:nbody.bodylist, 40:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, -3.47559555040781e-2:wybe.float)
+    foreign lpvm mutate(~tmp$64#0:nbody.bodylist, ?tmp$65#0:nbody.bodylist, 48:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 2.03368686992463e-3:wybe.float)
+    foreign lpvm mutate(~tmp$65#0:nbody.bodylist, ?tmp$66#0:nbody.bodylist, 56:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 0:nbody.bodylist)
+    foreign lpvm alloc(64:wybe.int, ?tmp$89#0:nbody.bodylist)
+    foreign lpvm mutate(~tmp$89#0:nbody.bodylist, ?tmp$90#0:nbody.bodylist, 0:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 12.894369562139131:wybe.float)
+    foreign lpvm mutate(~tmp$90#0:nbody.bodylist, ?tmp$91#0:nbody.bodylist, 8:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, -15.111151401698631:wybe.float)
+    foreign lpvm mutate(~tmp$91#0:nbody.bodylist, ?tmp$92#0:nbody.bodylist, 16:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, -0.22330757889265573:wybe.float)
+    foreign lpvm mutate(~tmp$92#0:nbody.bodylist, ?tmp$93#0:nbody.bodylist, 24:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 1.0827910064415356:wybe.float)
+    foreign lpvm mutate(~tmp$93#0:nbody.bodylist, ?tmp$94#0:nbody.bodylist, 32:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 0.8687130181696084:wybe.float)
+    foreign lpvm mutate(~tmp$94#0:nbody.bodylist, ?tmp$95#0:nbody.bodylist, 40:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, -1.0832637401363636e-2:wybe.float)
+    foreign lpvm mutate(~tmp$95#0:nbody.bodylist, ?tmp$96#0:nbody.bodylist, 48:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 1.7237240570597112e-3:wybe.float)
+    foreign lpvm mutate(~tmp$96#0:nbody.bodylist, ?tmp$97#0:nbody.bodylist, 56:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$66#0:nbody.bodylist)
+    foreign lpvm alloc(64:wybe.int, ?tmp$118#0:nbody.bodylist)
+    foreign lpvm mutate(~tmp$118#0:nbody.bodylist, ?tmp$119#0:nbody.bodylist, 0:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 8.34336671824458:wybe.float)
+    foreign lpvm mutate(~tmp$119#0:nbody.bodylist, ?tmp$120#0:nbody.bodylist, 8:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 4.124798564124305:wybe.float)
+    foreign lpvm mutate(~tmp$120#0:nbody.bodylist, ?tmp$121#0:nbody.bodylist, 16:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, -0.40352341711432144:wybe.float)
+    foreign lpvm mutate(~tmp$121#0:nbody.bodylist, ?tmp$122#0:nbody.bodylist, 24:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, -1.0107743461787924:wybe.float)
+    foreign lpvm mutate(~tmp$122#0:nbody.bodylist, ?tmp$123#0:nbody.bodylist, 32:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 1.8256623712304119:wybe.float)
+    foreign lpvm mutate(~tmp$123#0:nbody.bodylist, ?tmp$124#0:nbody.bodylist, 40:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 8.415761376584154e-3:wybe.float)
+    foreign lpvm mutate(~tmp$124#0:nbody.bodylist, ?tmp$125#0:nbody.bodylist, 48:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 1.1286326131968767e-2:wybe.float)
+    foreign lpvm mutate(~tmp$125#0:nbody.bodylist, ?tmp$126#0:nbody.bodylist, 56:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$97#0:nbody.bodylist)
+    foreign lpvm alloc(64:wybe.int, ?tmp$149#0:nbody.bodylist)
+    foreign lpvm mutate(~tmp$149#0:nbody.bodylist, ?tmp$150#0:nbody.bodylist, 0:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 4.841431442464721:wybe.float)
+    foreign lpvm mutate(~tmp$150#0:nbody.bodylist, ?tmp$151#0:nbody.bodylist, 8:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, -1.1603200440274284:wybe.float)
+    foreign lpvm mutate(~tmp$151#0:nbody.bodylist, ?tmp$152#0:nbody.bodylist, 16:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, -0.10362204447112311:wybe.float)
+    foreign lpvm mutate(~tmp$152#0:nbody.bodylist, ?tmp$153#0:nbody.bodylist, 24:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 0.6063263929958321:wybe.float)
+    foreign lpvm mutate(~tmp$153#0:nbody.bodylist, ?tmp$154#0:nbody.bodylist, 32:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 2.81198684491626:wybe.float)
+    foreign lpvm mutate(~tmp$154#0:nbody.bodylist, ?tmp$155#0:nbody.bodylist, 40:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, -2.5218361659887622e-2:wybe.float)
+    foreign lpvm mutate(~tmp$155#0:nbody.bodylist, ?tmp$156#0:nbody.bodylist, 48:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 3.76936748703895e-2:wybe.float)
+    foreign lpvm mutate(~tmp$156#0:nbody.bodylist, ?tmp$157#0:nbody.bodylist, 56:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$126#0:nbody.bodylist)
+    foreign lpvm alloc(64:wybe.int, ?tmp$166#0:nbody.bodylist)
+    foreign lpvm mutate(~tmp$166#0:nbody.bodylist, ?tmp$167#0:nbody.bodylist, 0:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 0.0:wybe.float)
+    foreign lpvm mutate(~tmp$167#0:nbody.bodylist, ?tmp$168#0:nbody.bodylist, 8:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 0.0:wybe.float)
+    foreign lpvm mutate(~tmp$168#0:nbody.bodylist, ?tmp$169#0:nbody.bodylist, 16:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 0.0:wybe.float)
+    foreign lpvm mutate(~tmp$169#0:nbody.bodylist, ?tmp$170#0:nbody.bodylist, 24:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 0.0:wybe.float)
+    foreign lpvm mutate(~tmp$170#0:nbody.bodylist, ?tmp$171#0:nbody.bodylist, 32:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 0.0:wybe.float)
+    foreign lpvm mutate(~tmp$171#0:nbody.bodylist, ?tmp$172#0:nbody.bodylist, 40:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 0.0:wybe.float)
+    foreign lpvm mutate(~tmp$172#0:nbody.bodylist, ?tmp$173#0:nbody.bodylist, 48:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, 39.47841760435743:wybe.float)
+    foreign lpvm mutate(~tmp$173#0:nbody.bodylist, ?bodies#5:nbody.bodylist, 56:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$157#0:nbody.bodylist)
+
+
+offset_momentum > public (1 calls)
+0: offset_momentum(bodies#0:nbody.bodylist, ?bodies#1:nbody.bodylist):
+ AliasPairs: [(bodies#0,bodies#1)]
+ InterestingCallProperties: [InterestingUnaliased 0]
+    nbody.offset_momentum_loop<0>(bodies#0:nbody.bodylist, 0.0:wybe.float, ?%px#1:wybe.float, 0.0:wybe.float, ?%py#1:wybe.float, 0.0:wybe.float, ?%pz#1:wybe.float) @nbody:89:5
+    foreign llvm icmp ne(bodies#0:nbody.bodylist, 0:wybe.int, ?tmp$6#0:wybe.bool)
+    case ~tmp$6#0:wybe.bool of
+    0:
+        foreign llvm move(~bodies#0:nbody.bodylist, ?bodies#1:nbody.bodylist)
+
+    1:
+        foreign lpvm access(bodies#0:nbody.bodylist, 0:wybe.int, ?x#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 8:wybe.int, ?y#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 16:wybe.int, ?z#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 48:wybe.int, ?m#0:wybe.float)
+        foreign lpvm access(~bodies#0:nbody.bodylist, 56:wybe.int, ?remain_bodies#0:nbody.bodylist)
+        foreign llvm fdiv(~px#1:wybe.float, m#0:wybe.float, ?tmp$0#0:wybe.float) @wybe:nn:nn
+        foreign llvm fdiv(~py#1:wybe.float, m#0:wybe.float, ?tmp$1#0:wybe.float) @wybe:nn:nn
+        foreign llvm fdiv(~pz#1:wybe.float, m#0:wybe.float, ?tmp$2#0:wybe.float) @wybe:nn:nn
+        foreign lpvm alloc(64:wybe.int, ?tmp$21#0:nbody.bodylist)
+        foreign lpvm mutate(~tmp$21#0:nbody.bodylist, ?tmp$22#0:nbody.bodylist, 0:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~x#0:wybe.float)
+        foreign lpvm mutate(~tmp$22#0:nbody.bodylist, ?tmp$23#0:nbody.bodylist, 8:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~y#0:wybe.float)
+        foreign lpvm mutate(~tmp$23#0:nbody.bodylist, ?tmp$24#0:nbody.bodylist, 16:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~z#0:wybe.float)
+        foreign lpvm mutate(~tmp$24#0:nbody.bodylist, ?tmp$25#0:nbody.bodylist, 24:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$0#0:wybe.float)
+        foreign lpvm mutate(~tmp$25#0:nbody.bodylist, ?tmp$26#0:nbody.bodylist, 32:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$1#0:wybe.float)
+        foreign lpvm mutate(~tmp$26#0:nbody.bodylist, ?tmp$27#0:nbody.bodylist, 40:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.float)
+        foreign lpvm mutate(~tmp$27#0:nbody.bodylist, ?tmp$28#0:nbody.bodylist, 48:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~m#0:wybe.float)
+        foreign lpvm mutate(~tmp$28#0:nbody.bodylist, ?bodies#1:nbody.bodylist, 56:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~remain_bodies#0:nbody.bodylist)
+
+ [04d1467a4d] [NonAliasedParam 0] :
+    nbody.offset_momentum_loop<0>(bodies#0:nbody.bodylist, 0.0:wybe.float, ?%px#1:wybe.float, 0.0:wybe.float, ?%py#1:wybe.float, 0.0:wybe.float, ?%pz#1:wybe.float) @nbody:89:5
+    foreign llvm icmp ne(bodies#0:nbody.bodylist, 0:wybe.int, ?tmp$6#0:wybe.bool)
+    case ~tmp$6#0:wybe.bool of
+    0:
+        foreign llvm move(~bodies#0:nbody.bodylist, ?bodies#1:nbody.bodylist)
+
+    1:
+        foreign lpvm access(bodies#0:nbody.bodylist, 0:wybe.int, ?x#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 8:wybe.int, ?y#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 16:wybe.int, ?z#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 48:wybe.int, ?m#0:wybe.float)
+        foreign lpvm access(~bodies#0:nbody.bodylist, 56:wybe.int, ?remain_bodies#0:nbody.bodylist)
+        foreign llvm fdiv(~px#1:wybe.float, m#0:wybe.float, ?tmp$0#0:wybe.float) @wybe:nn:nn
+        foreign llvm fdiv(~py#1:wybe.float, m#0:wybe.float, ?tmp$1#0:wybe.float) @wybe:nn:nn
+        foreign llvm fdiv(~pz#1:wybe.float, m#0:wybe.float, ?tmp$2#0:wybe.float) @wybe:nn:nn
+        foreign llvm move(~bodies#0:nbody.bodylist, ?tmp$21#0:nbody.bodylist)
+        foreign lpvm mutate(~tmp$21#0:nbody.bodylist, ?tmp$22#0:nbody.bodylist, 0:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~x#0:wybe.float)
+        foreign lpvm mutate(~tmp$22#0:nbody.bodylist, ?tmp$23#0:nbody.bodylist, 8:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~y#0:wybe.float)
+        foreign lpvm mutate(~tmp$23#0:nbody.bodylist, ?tmp$24#0:nbody.bodylist, 16:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~z#0:wybe.float)
+        foreign lpvm mutate(~tmp$24#0:nbody.bodylist, ?tmp$25#0:nbody.bodylist, 24:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$0#0:wybe.float)
+        foreign lpvm mutate(~tmp$25#0:nbody.bodylist, ?tmp$26#0:nbody.bodylist, 32:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$1#0:wybe.float)
+        foreign lpvm mutate(~tmp$26#0:nbody.bodylist, ?tmp$27#0:nbody.bodylist, 40:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.float)
+        foreign lpvm mutate(~tmp$27#0:nbody.bodylist, ?tmp$28#0:nbody.bodylist, 48:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~m#0:wybe.float)
+        foreign lpvm mutate(~tmp$28#0:nbody.bodylist, ?bodies#1:nbody.bodylist, 56:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~remain_bodies#0:nbody.bodylist)
+
+
+
+offset_momentum_loop > public (4 calls)
+0: offset_momentum_loop(bodies#0:nbody.bodylist, px#0:wybe.float, ?px#2:wybe.float, py#0:wybe.float, ?py#2:wybe.float, pz#0:wybe.float, ?pz#2:wybe.float):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne(bodies#0:nbody.bodylist, 0:wybe.int, ?tmp$8#0:wybe.bool)
+    case ~tmp$8#0:wybe.bool of
+    0:
+        foreign llvm move(~px#0:wybe.float, ?px#2:wybe.float)
+        foreign llvm move(~py#0:wybe.float, ?py#2:wybe.float)
+        foreign llvm move(~pz#0:wybe.float, ?pz#2:wybe.float)
+
+    1:
+        foreign lpvm access(bodies#0:nbody.bodylist, 24:wybe.int, ?vx#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 32:wybe.int, ?vy#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 40:wybe.int, ?vz#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 48:wybe.int, ?m#0:wybe.float)
+        foreign lpvm access(~bodies#0:nbody.bodylist, 56:wybe.int, ?remain_bodies#0:nbody.bodylist)
+        foreign llvm fmul(~vx#0:wybe.float, m#0:wybe.float, ?tmp$1#0:wybe.float) @wybe:nn:nn
+        foreign llvm fsub(~px#0:wybe.float, ~tmp$1#0:wybe.float, ?tmp$0#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(~vy#0:wybe.float, m#0:wybe.float, ?tmp$3#0:wybe.float) @wybe:nn:nn
+        foreign llvm fsub(~py#0:wybe.float, ~tmp$3#0:wybe.float, ?tmp$2#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(~vz#0:wybe.float, ~m#0:wybe.float, ?tmp$5#0:wybe.float) @wybe:nn:nn
+        foreign llvm fsub(~pz#0:wybe.float, ~tmp$5#0:wybe.float, ?tmp$4#0:wybe.float) @wybe:nn:nn
+        nbody.offset_momentum_loop<0>(~remain_bodies#0:nbody.bodylist, ~tmp$0#0:wybe.float, ?%px#2:wybe.float, ~tmp$2#0:wybe.float, ?%py#2:wybe.float, ~tmp$4#0:wybe.float, ?%pz#2:wybe.float) @nbody:103:9
+
+
+
+print_bodylist > public (1 calls)
+0: print_bodylist(bodies#0:nbody.bodylist, io#0:wybe.phantom, ?io#16:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne(bodies#0:nbody.bodylist, 0:wybe.int, ?tmp$2#0:wybe.bool)
+    case ~tmp$2#0:wybe.bool of
+    0:
+        foreign llvm move(~io#0:wybe.phantom, ?io#16:wybe.phantom)
+
+    1:
+        foreign lpvm access(bodies#0:nbody.bodylist, 0:wybe.int, ?x#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 8:wybe.int, ?y#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 16:wybe.int, ?z#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 24:wybe.int, ?vx#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 32:wybe.int, ?vy#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 40:wybe.int, ?vz#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 48:wybe.int, ?m#0:wybe.float)
+        foreign lpvm access(~bodies#0:nbody.bodylist, 56:wybe.int, ?remain_bodies#0:nbody.bodylist)
+        foreign c print_string("x: ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
+        foreign c print_float(~x#0:wybe.float, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+        foreign c print_string(" y: ":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
+        foreign c print_float(~y#0:wybe.float, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @wybe:nn:nn
+        foreign c print_string(" z: ":wybe.string, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @wybe:nn:nn
+        foreign c print_float(~z#0:wybe.float, ~#io#5:wybe.phantom, ?#io#6:wybe.phantom) @wybe:nn:nn
+        foreign c print_string(" vx: ":wybe.string, ~#io#6:wybe.phantom, ?#io#7:wybe.phantom) @wybe:nn:nn
+        foreign c print_float(~vx#0:wybe.float, ~#io#7:wybe.phantom, ?#io#8:wybe.phantom) @wybe:nn:nn
+        foreign c print_string(" vy: ":wybe.string, ~#io#8:wybe.phantom, ?#io#9:wybe.phantom) @wybe:nn:nn
+        foreign c print_float(~vy#0:wybe.float, ~#io#9:wybe.phantom, ?#io#10:wybe.phantom) @wybe:nn:nn
+        foreign c print_string(" vz: ":wybe.string, ~#io#10:wybe.phantom, ?#io#11:wybe.phantom) @wybe:nn:nn
+        foreign c print_float(~vz#0:wybe.float, ~#io#11:wybe.phantom, ?#io#12:wybe.phantom) @wybe:nn:nn
+        foreign c print_string(" m: ":wybe.string, ~#io#12:wybe.phantom, ?#io#13:wybe.phantom) @wybe:nn:nn
+        foreign c print_float(~m#0:wybe.float, ~#io#13:wybe.phantom, ?#io#14:wybe.phantom) @wybe:nn:nn
+        foreign c putchar('\n':wybe.char, ~#io#14:wybe.phantom, ?#io#15:wybe.phantom) @wybe:nn:nn
+        nbody.print_bodylist<0>(~remain_bodies#0:nbody.bodylist, ~#io#15:wybe.phantom, ?#io#16:wybe.phantom) @nbody:79:10
+
+
+
+report_energy > public (2 calls)
+0: report_energy(bodies#0:nbody.bodylist, io#0:wybe.phantom, ?io#2:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    nbody.energy_outer_loop<0>(~bodies#0:nbody.bodylist, 0.0:wybe.float, ?%e#1:wybe.float) @nbody:112:5
+    foreign c print_string("energy: ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
+    foreign c print_float(~e#1:wybe.float, ~#io#1:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+
+
+update_bodies_pos > public (2 calls)
+0: update_bodies_pos(dt#0:wybe.float, bodies#0:nbody.bodylist, ?bodies#1:nbody.bodylist):
+ AliasPairs: [(bodies#0,bodies#1)]
+ InterestingCallProperties: [InterestingUnaliased 1]
+ MultiSpeczDepInfo: [((nbody.update_bodies_pos<0>,[~dt#0:wybe.float,~%remain_bodies#0:nbody.bodylist,?%remain_bodies#1:nbody.bodylist]),fromList [NonAliasedParamCond 1 [1]])]
+    foreign llvm icmp ne(bodies#0:nbody.bodylist, 0:wybe.int, ?tmp$9#0:wybe.bool)
+    case ~tmp$9#0:wybe.bool of
+    0:
+        foreign llvm move(~bodies#0:nbody.bodylist, ?bodies#1:nbody.bodylist)
+
+    1:
+        foreign lpvm access(bodies#0:nbody.bodylist, 0:wybe.int, ?x#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 8:wybe.int, ?y#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 16:wybe.int, ?z#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 24:wybe.int, ?vx#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 32:wybe.int, ?vy#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 40:wybe.int, ?vz#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 48:wybe.int, ?m#0:wybe.float)
+        foreign lpvm access(~bodies#0:nbody.bodylist, 56:wybe.int, ?remain_bodies#0:nbody.bodylist)
+        foreign llvm fmul(dt#0:wybe.float, vx#0:wybe.float, ?tmp$1#0:wybe.float) @wybe:nn:nn
+        foreign llvm fadd(~x#0:wybe.float, ~tmp$1#0:wybe.float, ?tmp$0#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(dt#0:wybe.float, vy#0:wybe.float, ?tmp$3#0:wybe.float) @wybe:nn:nn
+        foreign llvm fadd(~y#0:wybe.float, ~tmp$3#0:wybe.float, ?tmp$2#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(dt#0:wybe.float, vz#0:wybe.float, ?tmp$5#0:wybe.float) @wybe:nn:nn
+        foreign llvm fadd(~z#0:wybe.float, ~tmp$5#0:wybe.float, ?tmp$4#0:wybe.float) @wybe:nn:nn
+        nbody.update_bodies_pos<0>(~dt#0:wybe.float, ~%remain_bodies#0:nbody.bodylist, ?%remain_bodies#1:nbody.bodylist) @nbody:186:9
+        foreign lpvm alloc(64:wybe.int, ?tmp$30#0:nbody.bodylist)
+        foreign lpvm mutate(~tmp$30#0:nbody.bodylist, ?tmp$31#0:nbody.bodylist, 0:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$0#0:wybe.float)
+        foreign lpvm mutate(~tmp$31#0:nbody.bodylist, ?tmp$32#0:nbody.bodylist, 8:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.float)
+        foreign lpvm mutate(~tmp$32#0:nbody.bodylist, ?tmp$33#0:nbody.bodylist, 16:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$4#0:wybe.float)
+        foreign lpvm mutate(~tmp$33#0:nbody.bodylist, ?tmp$34#0:nbody.bodylist, 24:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~vx#0:wybe.float)
+        foreign lpvm mutate(~tmp$34#0:nbody.bodylist, ?tmp$35#0:nbody.bodylist, 32:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~vy#0:wybe.float)
+        foreign lpvm mutate(~tmp$35#0:nbody.bodylist, ?tmp$36#0:nbody.bodylist, 40:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~vz#0:wybe.float)
+        foreign lpvm mutate(~tmp$36#0:nbody.bodylist, ?tmp$37#0:nbody.bodylist, 48:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~m#0:wybe.float)
+        foreign lpvm mutate(~tmp$37#0:nbody.bodylist, ?bodies#1:nbody.bodylist, 56:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~remain_bodies#1:nbody.bodylist)
+
+ [145401e434] [NonAliasedParam 1] :
+    foreign llvm icmp ne(bodies#0:nbody.bodylist, 0:wybe.int, ?tmp$9#0:wybe.bool)
+    case ~tmp$9#0:wybe.bool of
+    0:
+        foreign llvm move(~bodies#0:nbody.bodylist, ?bodies#1:nbody.bodylist)
+
+    1:
+        foreign lpvm access(bodies#0:nbody.bodylist, 0:wybe.int, ?x#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 8:wybe.int, ?y#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 16:wybe.int, ?z#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 24:wybe.int, ?vx#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 32:wybe.int, ?vy#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 40:wybe.int, ?vz#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 48:wybe.int, ?m#0:wybe.float)
+        foreign lpvm access(~bodies#0:nbody.bodylist, 56:wybe.int, ?remain_bodies#0:nbody.bodylist)
+        foreign llvm fmul(dt#0:wybe.float, vx#0:wybe.float, ?tmp$1#0:wybe.float) @wybe:nn:nn
+        foreign llvm fadd(~x#0:wybe.float, ~tmp$1#0:wybe.float, ?tmp$0#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(dt#0:wybe.float, vy#0:wybe.float, ?tmp$3#0:wybe.float) @wybe:nn:nn
+        foreign llvm fadd(~y#0:wybe.float, ~tmp$3#0:wybe.float, ?tmp$2#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(dt#0:wybe.float, vz#0:wybe.float, ?tmp$5#0:wybe.float) @wybe:nn:nn
+        foreign llvm fadd(~z#0:wybe.float, ~tmp$5#0:wybe.float, ?tmp$4#0:wybe.float) @wybe:nn:nn
+        nbody.update_bodies_pos<0>[145401e434](~dt#0:wybe.float, ~%remain_bodies#0:nbody.bodylist, ?%remain_bodies#1:nbody.bodylist) @nbody:186:9
+        foreign llvm move(~bodies#0:nbody.bodylist, ?tmp$30#0:nbody.bodylist)
+        foreign lpvm mutate(~tmp$30#0:nbody.bodylist, ?tmp$31#0:nbody.bodylist, 0:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$0#0:wybe.float)
+        foreign lpvm mutate(~tmp$31#0:nbody.bodylist, ?tmp$32#0:nbody.bodylist, 8:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.float)
+        foreign lpvm mutate(~tmp$32#0:nbody.bodylist, ?tmp$33#0:nbody.bodylist, 16:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tmp$4#0:wybe.float)
+        foreign lpvm mutate(~tmp$33#0:nbody.bodylist, ?tmp$34#0:nbody.bodylist, 24:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~vx#0:wybe.float)
+        foreign lpvm mutate(~tmp$34#0:nbody.bodylist, ?tmp$35#0:nbody.bodylist, 32:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~vy#0:wybe.float)
+        foreign lpvm mutate(~tmp$35#0:nbody.bodylist, ?tmp$36#0:nbody.bodylist, 40:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~vz#0:wybe.float)
+        foreign lpvm mutate(~tmp$36#0:nbody.bodylist, ?tmp$37#0:nbody.bodylist, 48:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~m#0:wybe.float)
+        foreign lpvm mutate(~tmp$37#0:nbody.bodylist, ?bodies#1:nbody.bodylist, 56:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~remain_bodies#1:nbody.bodylist)
+
+
+
+update_bodies_v > public (2 calls)
+0: update_bodies_v(dt#0:wybe.float, allbodies#0:nbody.bodylist, bodies#0:nbody.bodylist, ?bodies#1:nbody.bodylist):
+ AliasPairs: [(bodies#0,bodies#1)]
+ InterestingCallProperties: [InterestingUnaliased 2]
+ MultiSpeczDepInfo: [((nbody.update_bodies_v<0>,[~dt#0:wybe.float,~allbodies#0:nbody.bodylist,~%remain_bodies#0:nbody.bodylist,?%remain_bodies#1:nbody.bodylist]),fromList [NonAliasedParamCond 2 [2]])]
+    foreign llvm icmp ne(bodies#0:nbody.bodylist, 0:wybe.int, ?tmp$3#0:wybe.bool)
+    case ~tmp$3#0:wybe.bool of
+    0:
+        foreign llvm move(~bodies#0:nbody.bodylist, ?bodies#1:nbody.bodylist)
+
+    1:
+        foreign lpvm access(bodies#0:nbody.bodylist, 0:wybe.int, ?x1#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 8:wybe.int, ?y1#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 16:wybe.int, ?z1#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 24:wybe.int, ?vx1#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 32:wybe.int, ?vy1#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 40:wybe.int, ?vz1#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 48:wybe.int, ?m1#0:wybe.float)
+        foreign lpvm access(~bodies#0:nbody.bodylist, 56:wybe.int, ?remain_bodies#0:nbody.bodylist)
+        nbody.update_body_v_inner<0>(dt#0:wybe.float, x1#0:wybe.float, y1#0:wybe.float, z1#0:wybe.float, ~%vx1#0:wybe.float, ?%vx1#1:wybe.float, ~%vy1#0:wybe.float, ?%vy1#1:wybe.float, ~%vz1#0:wybe.float, ?%vz1#1:wybe.float, allbodies#0:nbody.bodylist) @nbody:154:9
+        nbody.update_bodies_v<0>(~dt#0:wybe.float, ~allbodies#0:nbody.bodylist, ~%remain_bodies#0:nbody.bodylist, ?%remain_bodies#1:nbody.bodylist) @nbody:156:9
+        foreign lpvm alloc(64:wybe.int, ?tmp$12#0:nbody.bodylist)
+        foreign lpvm mutate(~tmp$12#0:nbody.bodylist, ?tmp$13#0:nbody.bodylist, 0:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~x1#0:wybe.float)
+        foreign lpvm mutate(~tmp$13#0:nbody.bodylist, ?tmp$14#0:nbody.bodylist, 8:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~y1#0:wybe.float)
+        foreign lpvm mutate(~tmp$14#0:nbody.bodylist, ?tmp$15#0:nbody.bodylist, 16:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~z1#0:wybe.float)
+        foreign lpvm mutate(~tmp$15#0:nbody.bodylist, ?tmp$16#0:nbody.bodylist, 24:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~vx1#1:wybe.float)
+        foreign lpvm mutate(~tmp$16#0:nbody.bodylist, ?tmp$17#0:nbody.bodylist, 32:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~vy1#1:wybe.float)
+        foreign lpvm mutate(~tmp$17#0:nbody.bodylist, ?tmp$18#0:nbody.bodylist, 40:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~vz1#1:wybe.float)
+        foreign lpvm mutate(~tmp$18#0:nbody.bodylist, ?tmp$19#0:nbody.bodylist, 48:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~m1#0:wybe.float)
+        foreign lpvm mutate(~tmp$19#0:nbody.bodylist, ?bodies#1:nbody.bodylist, 56:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~remain_bodies#1:nbody.bodylist)
+
+
+
+update_body_v_inner > public (3 calls)
+0: update_body_v_inner(dt#0:wybe.float, x1#0:wybe.float, y1#0:wybe.float, z1#0:wybe.float, vx1#0:wybe.float, ?vx1#2:wybe.float, vy1#0:wybe.float, ?vy1#2:wybe.float, vz1#0:wybe.float, ?vz1#2:wybe.float, bodies#0:nbody.bodylist):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne(bodies#0:nbody.bodylist, 0:wybe.int, ?tmp$21#0:wybe.bool)
+    case ~tmp$21#0:wybe.bool of
+    0:
+        foreign llvm move(~vx1#0:wybe.float, ?vx1#2:wybe.float)
+        foreign llvm move(~vy1#0:wybe.float, ?vy1#2:wybe.float)
+        foreign llvm move(~vz1#0:wybe.float, ?vz1#2:wybe.float)
+
+    1:
+        foreign lpvm access(bodies#0:nbody.bodylist, 0:wybe.int, ?x2#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 8:wybe.int, ?y2#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 16:wybe.int, ?z2#0:wybe.float)
+        foreign lpvm access(bodies#0:nbody.bodylist, 48:wybe.int, ?m2#0:wybe.float)
+        foreign lpvm access(~bodies#0:nbody.bodylist, 56:wybe.int, ?remain_bodies#0:nbody.bodylist)
+        foreign llvm fsub(x1#0:wybe.float, ~x2#0:wybe.float, ?tmp$0#0:wybe.float) @wybe:nn:nn
+        foreign llvm fsub(y1#0:wybe.float, ~y2#0:wybe.float, ?tmp$1#0:wybe.float) @wybe:nn:nn
+        foreign llvm fsub(z1#0:wybe.float, ~z2#0:wybe.float, ?tmp$2#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(tmp$0#0:wybe.float, tmp$0#0:wybe.float, ?tmp$5#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(tmp$1#0:wybe.float, tmp$1#0:wybe.float, ?tmp$6#0:wybe.float) @wybe:nn:nn
+        foreign llvm fadd(~tmp$5#0:wybe.float, ~tmp$6#0:wybe.float, ?tmp$4#0:wybe.float) @wybe:nn:nn
+        foreign llvm fmul(tmp$2#0:wybe.float, tmp$2#0:wybe.float, ?tmp$7#0:wybe.float) @wybe:nn:nn
+        foreign llvm fadd(~tmp$4#0:wybe.float, ~tmp$7#0:wybe.float, ?tmp$3#0:wybe.float) @wybe:nn:nn
+        foreign llvm fcmp eq(tmp$3#0:wybe.float, 0.0:wybe.float, ?tmp$19#0:wybe.bool) @wybe:nn:nn
+        case ~tmp$19#0:wybe.bool of
+        0:
+            foreign c pow(~tmp$3#0:wybe.float, -1.5:wybe.float, ?tmp$9#0:wybe.float) @wybe:nn:nn
+            foreign llvm fmul(dt#0:wybe.float, ~tmp$9#0:wybe.float, ?tmp$8#0:wybe.float) @wybe:nn:nn
+            foreign llvm fmul(~m2#0:wybe.float, ~tmp$8#0:wybe.float, ?tmp$11#0:wybe.float) @wybe:nn:nn
+            foreign llvm fmul(~tmp$0#0:wybe.float, tmp$11#0:wybe.float, ?tmp$13#0:wybe.float) @wybe:nn:nn
+            foreign llvm fsub(~vx1#0:wybe.float, ~tmp$13#0:wybe.float, ?tmp$12#0:wybe.float) @wybe:nn:nn
+            foreign llvm fmul(~tmp$1#0:wybe.float, tmp$11#0:wybe.float, ?tmp$15#0:wybe.float) @wybe:nn:nn
+            foreign llvm fsub(~vy1#0:wybe.float, ~tmp$15#0:wybe.float, ?tmp$14#0:wybe.float) @wybe:nn:nn
+            foreign llvm fmul(~tmp$2#0:wybe.float, ~tmp$11#0:wybe.float, ?tmp$17#0:wybe.float) @wybe:nn:nn
+            foreign llvm fsub(~vz1#0:wybe.float, ~tmp$17#0:wybe.float, ?tmp$16#0:wybe.float) @wybe:nn:nn
+            nbody.update_body_v_inner<0>(~dt#0:wybe.float, ~x1#0:wybe.float, ~y1#0:wybe.float, ~z1#0:wybe.float, ~tmp$12#0:wybe.float, ?%vx1#2:wybe.float, ~tmp$14#0:wybe.float, ?%vy1#2:wybe.float, ~tmp$16#0:wybe.float, ?%vz1#2:wybe.float, ~remain_bodies#0:nbody.bodylist) @nbody:175:13
+
+        1:
+            nbody.update_body_v_inner<0>(~dt#0:wybe.float, ~x1#0:wybe.float, ~y1#0:wybe.float, ~z1#0:wybe.float, ~%vx1#0:wybe.float, ?%vx1#2:wybe.float, ~%vy1#0:wybe.float, ?%vy1#2:wybe.float, ~%vz1#0:wybe.float, ?%vz1#2:wybe.float, ~remain_bodies#0:nbody.bodylist) @nbody:175:13
+
+
+
+  LLVM code       :
+
+; ModuleID = 'nbody'
+
+
+ 
+
+
+declare external ccc  i64 @read_int()    
+
+
+declare external ccc  void @print_string(i64)    
+
+
+@nbody.1 =    constant [4 x i8] c"n: \00"
+
+
+declare external ccc  double @sqrt(double)    
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_float(double)    
+
+
+@nbody.351 =    constant [5 x i8] c" m: \00"
+
+
+@nbody.349 =    constant [6 x i8] c" vz: \00"
+
+
+@nbody.347 =    constant [6 x i8] c" vy: \00"
+
+
+@nbody.345 =    constant [6 x i8] c" vx: \00"
+
+
+@nbody.343 =    constant [5 x i8] c" z: \00"
+
+
+@nbody.341 =    constant [5 x i8] c" y: \00"
+
+
+@nbody.339 =    constant [4 x i8] c"x: \00"
+
+
+@nbody.353 =    constant [9 x i8] c"energy: \00"
+
+
+declare external ccc  double @pow(double, double)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external fastcc  void @"nbody.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
+entry:
+  %2 = ptrtoint i8* getelementptr inbounds ([4 x i8], [4 x i8]* @nbody.1, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %2)  
+  %"n#0" = tail call ccc  i64  @read_int()  
+  %"bodies#0" = tail call fastcc  i64  @"nbody.get_bodies<0>"()  
+  %"bodies#1" = tail call fastcc  i64  @"nbody.offset_momentum<0>[04d1467a4d]"(i64  %"bodies#0")  
+  tail call fastcc  void  @"nbody.report_energy<0>"(i64  %"bodies#1")  
+  %"bodies#2" = tail call fastcc  i64  @"nbody.advance<0>[869b3badfb]"(double  1.000000e-2, i64  %"n#0", i64  %"bodies#1")  
+  tail call fastcc  void  @"nbody.report_energy<0>"(i64  %"bodies#2")  
+  ret void 
+}
+
+
+define external fastcc  i64 @"nbody.advance<0>"(double  %"dt#0", i64  %"n#0", i64  %"bodies#0")    {
+entry:
+  %"tmp$1#0" = icmp sgt i64 %"n#0", 0 
+  br i1 %"tmp$1#0", label %if.then, label %if.else 
+if.then:
+  %"tmp$0#0" = sub   i64 %"n#0", 1 
+  %"bodies#1" = tail call fastcc  i64  @"nbody.update_bodies_v<0>"(double  %"dt#0", i64  %"bodies#0", i64  %"bodies#0")  
+  %"bodies#2" = tail call fastcc  i64  @"nbody.update_bodies_pos<0>"(double  %"dt#0", i64  %"bodies#1")  
+  %"bodies#3" = tail call fastcc  i64  @"nbody.advance<0>"(double  %"dt#0", i64  %"tmp$0#0", i64  %"bodies#2")  
+  ret i64 %"bodies#3" 
+if.else:
+  ret i64 %"bodies#0" 
+}
+
+
+define external fastcc  i64 @"nbody.advance<0>[869b3badfb]"(double  %"dt#0", i64  %"n#0", i64  %"bodies#0")    {
+entry:
+  %"tmp$1#0" = icmp sgt i64 %"n#0", 0 
+  br i1 %"tmp$1#0", label %if.then, label %if.else 
+if.then:
+  %"tmp$0#0" = sub   i64 %"n#0", 1 
+  %"bodies#1" = tail call fastcc  i64  @"nbody.update_bodies_v<0>"(double  %"dt#0", i64  %"bodies#0", i64  %"bodies#0")  
+  %"bodies#2" = tail call fastcc  i64  @"nbody.update_bodies_pos<0>[145401e434]"(double  %"dt#0", i64  %"bodies#1")  
+  %"bodies#3" = tail call fastcc  i64  @"nbody.advance<0>[869b3badfb]"(double  %"dt#0", i64  %"tmp$0#0", i64  %"bodies#2")  
+  ret i64 %"bodies#3" 
+if.else:
+  ret i64 %"bodies#0" 
+}
+
+
+define external fastcc  double @"nbody.energy_inner_loop<0>"(i64  %"bodies#0", double  %"x1#0", double  %"y1#0", double  %"z1#0", double  %"m1#0", double  %"e#0")    {
+entry:
+  %"tmp$14#0" = icmp ne i64 %"bodies#0", 0 
+  br i1 %"tmp$14#0", label %if.then, label %if.else 
+if.then:
+  %3 = inttoptr i64 %"bodies#0" to double* 
+  %4 = getelementptr  double, double* %3, i64 0 
+  %5 = load  double, double* %4 
+  %6 = add   i64 %"bodies#0", 8 
+  %7 = inttoptr i64 %6 to double* 
+  %8 = getelementptr  double, double* %7, i64 0 
+  %9 = load  double, double* %8 
+  %10 = add   i64 %"bodies#0", 16 
+  %11 = inttoptr i64 %10 to double* 
+  %12 = getelementptr  double, double* %11, i64 0 
+  %13 = load  double, double* %12 
+  %14 = add   i64 %"bodies#0", 48 
+  %15 = inttoptr i64 %14 to double* 
+  %16 = getelementptr  double, double* %15, i64 0 
+  %17 = load  double, double* %16 
+  %18 = add   i64 %"bodies#0", 56 
+  %19 = inttoptr i64 %18 to i64* 
+  %20 = getelementptr  i64, i64* %19, i64 0 
+  %21 = load  i64, i64* %20 
+  %"tmp$0#0" = fsub double %"x1#0", %5 
+  %"tmp$1#0" = fsub double %"y1#0", %9 
+  %"tmp$2#0" = fsub double %"z1#0", %13 
+  %"tmp$6#0" = fmul double %"tmp$0#0", %"tmp$0#0" 
+  %"tmp$7#0" = fmul double %"tmp$1#0", %"tmp$1#0" 
+  %"tmp$5#0" = fadd double %"tmp$6#0", %"tmp$7#0" 
+  %"tmp$8#0" = fmul double %"tmp$2#0", %"tmp$2#0" 
+  %"tmp$4#0" = fadd double %"tmp$5#0", %"tmp$8#0" 
+  %"tmp$3#0" = tail call ccc  double  @sqrt(double  %"tmp$4#0")  
+  %"tmp$11#0" = fmul double %"m1#0", %17 
+  %"tmp$10#0" = fdiv double %"tmp$11#0", %"tmp$3#0" 
+  %"tmp$9#0" = fsub double %"e#0", %"tmp$10#0" 
+  %"e#2" = tail call fastcc  double  @"nbody.energy_inner_loop<0>"(i64  %21, double  %"x1#0", double  %"y1#0", double  %"z1#0", double  %"m1#0", double  %"tmp$9#0")  
+  ret double %"e#2" 
+if.else:
+  ret double %"e#0" 
+}
+
+
+define external fastcc  double @"nbody.energy_outer_loop<0>"(i64  %"bodies#0", double  %"e#0")    {
+entry:
+  %"tmp$10#0" = icmp ne i64 %"bodies#0", 0 
+  br i1 %"tmp$10#0", label %if.then, label %if.else 
+if.then:
+  %22 = inttoptr i64 %"bodies#0" to double* 
+  %23 = getelementptr  double, double* %22, i64 0 
+  %24 = load  double, double* %23 
+  %25 = add   i64 %"bodies#0", 8 
+  %26 = inttoptr i64 %25 to double* 
+  %27 = getelementptr  double, double* %26, i64 0 
+  %28 = load  double, double* %27 
+  %29 = add   i64 %"bodies#0", 16 
+  %30 = inttoptr i64 %29 to double* 
+  %31 = getelementptr  double, double* %30, i64 0 
+  %32 = load  double, double* %31 
+  %33 = add   i64 %"bodies#0", 24 
+  %34 = inttoptr i64 %33 to double* 
+  %35 = getelementptr  double, double* %34, i64 0 
+  %36 = load  double, double* %35 
+  %37 = add   i64 %"bodies#0", 32 
+  %38 = inttoptr i64 %37 to double* 
+  %39 = getelementptr  double, double* %38, i64 0 
+  %40 = load  double, double* %39 
+  %41 = add   i64 %"bodies#0", 40 
+  %42 = inttoptr i64 %41 to double* 
+  %43 = getelementptr  double, double* %42, i64 0 
+  %44 = load  double, double* %43 
+  %45 = add   i64 %"bodies#0", 48 
+  %46 = inttoptr i64 %45 to double* 
+  %47 = getelementptr  double, double* %46, i64 0 
+  %48 = load  double, double* %47 
+  %49 = add   i64 %"bodies#0", 56 
+  %50 = inttoptr i64 %49 to i64* 
+  %51 = getelementptr  i64, i64* %50, i64 0 
+  %52 = load  i64, i64* %51 
+  %"tmp$5#0" = fmul double %36, %36 
+  %"tmp$6#0" = fmul double %40, %40 
+  %"tmp$4#0" = fadd double %"tmp$5#0", %"tmp$6#0" 
+  %"tmp$7#0" = fmul double %44, %44 
+  %"tmp$3#0" = fadd double %"tmp$4#0", %"tmp$7#0" 
+  %"tmp$2#0" = fmul double %48, %"tmp$3#0" 
+  %"tmp$1#0" = fdiv double %"tmp$2#0", 2.000000e0 
+  %"tmp$0#0" = fadd double %"e#0", %"tmp$1#0" 
+  %"e#2" = tail call fastcc  double  @"nbody.energy_inner_loop<0>"(i64  %52, double  %24, double  %28, double  %32, double  %48, double  %"tmp$0#0")  
+  %"e#3" = tail call fastcc  double  @"nbody.energy_outer_loop<0>"(i64  %52, double  %"e#2")  
+  ret double %"e#3" 
+if.else:
+  ret double %"e#0" 
+}
+
+
+define external fastcc  i64 @"nbody.get_bodies<0>"()    {
+entry:
+  %53 = trunc i64 64 to i32  
+  %54 = tail call ccc  i8*  @wybe_malloc(i32  %53)  
+  %55 = ptrtoint i8* %54 to i64 
+  %56 = inttoptr i64 %55 to double* 
+  %57 = getelementptr  double, double* %56, i64 0 
+  store  double 1.537970e1, double* %57 
+  %58 = add   i64 %55, 8 
+  %59 = inttoptr i64 %58 to double* 
+  %60 = getelementptr  double, double* %59, i64 0 
+  store  double -2.591931e1, double* %60 
+  %61 = add   i64 %55, 16 
+  %62 = inttoptr i64 %61 to double* 
+  %63 = getelementptr  double, double* %62, i64 0 
+  store  double 1.792588e-1, double* %63 
+  %64 = add   i64 %55, 24 
+  %65 = inttoptr i64 %64 to double* 
+  %66 = getelementptr  double, double* %65, i64 0 
+  store  double 9.790907e-1, double* %66 
+  %67 = add   i64 %55, 32 
+  %68 = inttoptr i64 %67 to double* 
+  %69 = getelementptr  double, double* %68, i64 0 
+  store  double 5.946990e-1, double* %69 
+  %70 = add   i64 %55, 40 
+  %71 = inttoptr i64 %70 to double* 
+  %72 = getelementptr  double, double* %71, i64 0 
+  store  double -3.475596e-2, double* %72 
+  %73 = add   i64 %55, 48 
+  %74 = inttoptr i64 %73 to double* 
+  %75 = getelementptr  double, double* %74, i64 0 
+  store  double 2.033687e-3, double* %75 
+  %76 = add   i64 %55, 56 
+  %77 = inttoptr i64 %76 to i64* 
+  %78 = getelementptr  i64, i64* %77, i64 0 
+  store  i64 0, i64* %78 
+  %79 = trunc i64 64 to i32  
+  %80 = tail call ccc  i8*  @wybe_malloc(i32  %79)  
+  %81 = ptrtoint i8* %80 to i64 
+  %82 = inttoptr i64 %81 to double* 
+  %83 = getelementptr  double, double* %82, i64 0 
+  store  double 1.289437e1, double* %83 
+  %84 = add   i64 %81, 8 
+  %85 = inttoptr i64 %84 to double* 
+  %86 = getelementptr  double, double* %85, i64 0 
+  store  double -1.511115e1, double* %86 
+  %87 = add   i64 %81, 16 
+  %88 = inttoptr i64 %87 to double* 
+  %89 = getelementptr  double, double* %88, i64 0 
+  store  double -2.233076e-1, double* %89 
+  %90 = add   i64 %81, 24 
+  %91 = inttoptr i64 %90 to double* 
+  %92 = getelementptr  double, double* %91, i64 0 
+  store  double 1.082791e0, double* %92 
+  %93 = add   i64 %81, 32 
+  %94 = inttoptr i64 %93 to double* 
+  %95 = getelementptr  double, double* %94, i64 0 
+  store  double 8.687130e-1, double* %95 
+  %96 = add   i64 %81, 40 
+  %97 = inttoptr i64 %96 to double* 
+  %98 = getelementptr  double, double* %97, i64 0 
+  store  double -1.083264e-2, double* %98 
+  %99 = add   i64 %81, 48 
+  %100 = inttoptr i64 %99 to double* 
+  %101 = getelementptr  double, double* %100, i64 0 
+  store  double 1.723724e-3, double* %101 
+  %102 = add   i64 %81, 56 
+  %103 = inttoptr i64 %102 to i64* 
+  %104 = getelementptr  i64, i64* %103, i64 0 
+  store  i64 %55, i64* %104 
+  %105 = trunc i64 64 to i32  
+  %106 = tail call ccc  i8*  @wybe_malloc(i32  %105)  
+  %107 = ptrtoint i8* %106 to i64 
+  %108 = inttoptr i64 %107 to double* 
+  %109 = getelementptr  double, double* %108, i64 0 
+  store  double 8.343367e0, double* %109 
+  %110 = add   i64 %107, 8 
+  %111 = inttoptr i64 %110 to double* 
+  %112 = getelementptr  double, double* %111, i64 0 
+  store  double 4.124799e0, double* %112 
+  %113 = add   i64 %107, 16 
+  %114 = inttoptr i64 %113 to double* 
+  %115 = getelementptr  double, double* %114, i64 0 
+  store  double -4.035234e-1, double* %115 
+  %116 = add   i64 %107, 24 
+  %117 = inttoptr i64 %116 to double* 
+  %118 = getelementptr  double, double* %117, i64 0 
+  store  double -1.010774e0, double* %118 
+  %119 = add   i64 %107, 32 
+  %120 = inttoptr i64 %119 to double* 
+  %121 = getelementptr  double, double* %120, i64 0 
+  store  double 1.825662e0, double* %121 
+  %122 = add   i64 %107, 40 
+  %123 = inttoptr i64 %122 to double* 
+  %124 = getelementptr  double, double* %123, i64 0 
+  store  double 8.415761e-3, double* %124 
+  %125 = add   i64 %107, 48 
+  %126 = inttoptr i64 %125 to double* 
+  %127 = getelementptr  double, double* %126, i64 0 
+  store  double 1.128633e-2, double* %127 
+  %128 = add   i64 %107, 56 
+  %129 = inttoptr i64 %128 to i64* 
+  %130 = getelementptr  i64, i64* %129, i64 0 
+  store  i64 %81, i64* %130 
+  %131 = trunc i64 64 to i32  
+  %132 = tail call ccc  i8*  @wybe_malloc(i32  %131)  
+  %133 = ptrtoint i8* %132 to i64 
+  %134 = inttoptr i64 %133 to double* 
+  %135 = getelementptr  double, double* %134, i64 0 
+  store  double 4.841431e0, double* %135 
+  %136 = add   i64 %133, 8 
+  %137 = inttoptr i64 %136 to double* 
+  %138 = getelementptr  double, double* %137, i64 0 
+  store  double -1.160320e0, double* %138 
+  %139 = add   i64 %133, 16 
+  %140 = inttoptr i64 %139 to double* 
+  %141 = getelementptr  double, double* %140, i64 0 
+  store  double -1.036220e-1, double* %141 
+  %142 = add   i64 %133, 24 
+  %143 = inttoptr i64 %142 to double* 
+  %144 = getelementptr  double, double* %143, i64 0 
+  store  double 6.063264e-1, double* %144 
+  %145 = add   i64 %133, 32 
+  %146 = inttoptr i64 %145 to double* 
+  %147 = getelementptr  double, double* %146, i64 0 
+  store  double 2.811987e0, double* %147 
+  %148 = add   i64 %133, 40 
+  %149 = inttoptr i64 %148 to double* 
+  %150 = getelementptr  double, double* %149, i64 0 
+  store  double -2.521836e-2, double* %150 
+  %151 = add   i64 %133, 48 
+  %152 = inttoptr i64 %151 to double* 
+  %153 = getelementptr  double, double* %152, i64 0 
+  store  double 3.769367e-2, double* %153 
+  %154 = add   i64 %133, 56 
+  %155 = inttoptr i64 %154 to i64* 
+  %156 = getelementptr  i64, i64* %155, i64 0 
+  store  i64 %107, i64* %156 
+  %157 = trunc i64 64 to i32  
+  %158 = tail call ccc  i8*  @wybe_malloc(i32  %157)  
+  %159 = ptrtoint i8* %158 to i64 
+  %160 = inttoptr i64 %159 to double* 
+  %161 = getelementptr  double, double* %160, i64 0 
+  store  double 0.000000e0, double* %161 
+  %162 = add   i64 %159, 8 
+  %163 = inttoptr i64 %162 to double* 
+  %164 = getelementptr  double, double* %163, i64 0 
+  store  double 0.000000e0, double* %164 
+  %165 = add   i64 %159, 16 
+  %166 = inttoptr i64 %165 to double* 
+  %167 = getelementptr  double, double* %166, i64 0 
+  store  double 0.000000e0, double* %167 
+  %168 = add   i64 %159, 24 
+  %169 = inttoptr i64 %168 to double* 
+  %170 = getelementptr  double, double* %169, i64 0 
+  store  double 0.000000e0, double* %170 
+  %171 = add   i64 %159, 32 
+  %172 = inttoptr i64 %171 to double* 
+  %173 = getelementptr  double, double* %172, i64 0 
+  store  double 0.000000e0, double* %173 
+  %174 = add   i64 %159, 40 
+  %175 = inttoptr i64 %174 to double* 
+  %176 = getelementptr  double, double* %175, i64 0 
+  store  double 0.000000e0, double* %176 
+  %177 = add   i64 %159, 48 
+  %178 = inttoptr i64 %177 to double* 
+  %179 = getelementptr  double, double* %178, i64 0 
+  store  double 3.947842e1, double* %179 
+  %180 = add   i64 %159, 56 
+  %181 = inttoptr i64 %180 to i64* 
+  %182 = getelementptr  i64, i64* %181, i64 0 
+  store  i64 %133, i64* %182 
+  ret i64 %159 
+}
+
+
+define external fastcc  i64 @"nbody.offset_momentum<0>"(i64  %"bodies#0")    {
+entry:
+  %183 = tail call fastcc  {double, double, double}  @"nbody.offset_momentum_loop<0>"(i64  %"bodies#0", double  0.000000e0, double  0.000000e0, double  0.000000e0)  
+  %184 = extractvalue {double, double, double} %183, 0 
+  %185 = extractvalue {double, double, double} %183, 1 
+  %186 = extractvalue {double, double, double} %183, 2 
+  %"tmp$6#0" = icmp ne i64 %"bodies#0", 0 
+  br i1 %"tmp$6#0", label %if.then, label %if.else 
+if.then:
+  %187 = inttoptr i64 %"bodies#0" to double* 
+  %188 = getelementptr  double, double* %187, i64 0 
+  %189 = load  double, double* %188 
+  %190 = add   i64 %"bodies#0", 8 
+  %191 = inttoptr i64 %190 to double* 
+  %192 = getelementptr  double, double* %191, i64 0 
+  %193 = load  double, double* %192 
+  %194 = add   i64 %"bodies#0", 16 
+  %195 = inttoptr i64 %194 to double* 
+  %196 = getelementptr  double, double* %195, i64 0 
+  %197 = load  double, double* %196 
+  %198 = add   i64 %"bodies#0", 48 
+  %199 = inttoptr i64 %198 to double* 
+  %200 = getelementptr  double, double* %199, i64 0 
+  %201 = load  double, double* %200 
+  %202 = add   i64 %"bodies#0", 56 
+  %203 = inttoptr i64 %202 to i64* 
+  %204 = getelementptr  i64, i64* %203, i64 0 
+  %205 = load  i64, i64* %204 
+  %"tmp$0#0" = fdiv double %184, %201 
+  %"tmp$1#0" = fdiv double %185, %201 
+  %"tmp$2#0" = fdiv double %186, %201 
+  %206 = trunc i64 64 to i32  
+  %207 = tail call ccc  i8*  @wybe_malloc(i32  %206)  
+  %208 = ptrtoint i8* %207 to i64 
+  %209 = inttoptr i64 %208 to double* 
+  %210 = getelementptr  double, double* %209, i64 0 
+  store  double %189, double* %210 
+  %211 = add   i64 %208, 8 
+  %212 = inttoptr i64 %211 to double* 
+  %213 = getelementptr  double, double* %212, i64 0 
+  store  double %193, double* %213 
+  %214 = add   i64 %208, 16 
+  %215 = inttoptr i64 %214 to double* 
+  %216 = getelementptr  double, double* %215, i64 0 
+  store  double %197, double* %216 
+  %217 = add   i64 %208, 24 
+  %218 = inttoptr i64 %217 to double* 
+  %219 = getelementptr  double, double* %218, i64 0 
+  store  double %"tmp$0#0", double* %219 
+  %220 = add   i64 %208, 32 
+  %221 = inttoptr i64 %220 to double* 
+  %222 = getelementptr  double, double* %221, i64 0 
+  store  double %"tmp$1#0", double* %222 
+  %223 = add   i64 %208, 40 
+  %224 = inttoptr i64 %223 to double* 
+  %225 = getelementptr  double, double* %224, i64 0 
+  store  double %"tmp$2#0", double* %225 
+  %226 = add   i64 %208, 48 
+  %227 = inttoptr i64 %226 to double* 
+  %228 = getelementptr  double, double* %227, i64 0 
+  store  double %201, double* %228 
+  %229 = add   i64 %208, 56 
+  %230 = inttoptr i64 %229 to i64* 
+  %231 = getelementptr  i64, i64* %230, i64 0 
+  store  i64 %205, i64* %231 
+  ret i64 %208 
+if.else:
+  ret i64 %"bodies#0" 
+}
+
+
+define external fastcc  i64 @"nbody.offset_momentum<0>[04d1467a4d]"(i64  %"bodies#0")    {
+entry:
+  %232 = tail call fastcc  {double, double, double}  @"nbody.offset_momentum_loop<0>"(i64  %"bodies#0", double  0.000000e0, double  0.000000e0, double  0.000000e0)  
+  %233 = extractvalue {double, double, double} %232, 0 
+  %234 = extractvalue {double, double, double} %232, 1 
+  %235 = extractvalue {double, double, double} %232, 2 
+  %"tmp$6#0" = icmp ne i64 %"bodies#0", 0 
+  br i1 %"tmp$6#0", label %if.then, label %if.else 
+if.then:
+  %236 = inttoptr i64 %"bodies#0" to double* 
+  %237 = getelementptr  double, double* %236, i64 0 
+  %238 = load  double, double* %237 
+  %239 = add   i64 %"bodies#0", 8 
+  %240 = inttoptr i64 %239 to double* 
+  %241 = getelementptr  double, double* %240, i64 0 
+  %242 = load  double, double* %241 
+  %243 = add   i64 %"bodies#0", 16 
+  %244 = inttoptr i64 %243 to double* 
+  %245 = getelementptr  double, double* %244, i64 0 
+  %246 = load  double, double* %245 
+  %247 = add   i64 %"bodies#0", 48 
+  %248 = inttoptr i64 %247 to double* 
+  %249 = getelementptr  double, double* %248, i64 0 
+  %250 = load  double, double* %249 
+  %251 = add   i64 %"bodies#0", 56 
+  %252 = inttoptr i64 %251 to i64* 
+  %253 = getelementptr  i64, i64* %252, i64 0 
+  %254 = load  i64, i64* %253 
+  %"tmp$0#0" = fdiv double %233, %250 
+  %"tmp$1#0" = fdiv double %234, %250 
+  %"tmp$2#0" = fdiv double %235, %250 
+  %255 = inttoptr i64 %"bodies#0" to double* 
+  %256 = getelementptr  double, double* %255, i64 0 
+  store  double %238, double* %256 
+  %257 = add   i64 %"bodies#0", 8 
+  %258 = inttoptr i64 %257 to double* 
+  %259 = getelementptr  double, double* %258, i64 0 
+  store  double %242, double* %259 
+  %260 = add   i64 %"bodies#0", 16 
+  %261 = inttoptr i64 %260 to double* 
+  %262 = getelementptr  double, double* %261, i64 0 
+  store  double %246, double* %262 
+  %263 = add   i64 %"bodies#0", 24 
+  %264 = inttoptr i64 %263 to double* 
+  %265 = getelementptr  double, double* %264, i64 0 
+  store  double %"tmp$0#0", double* %265 
+  %266 = add   i64 %"bodies#0", 32 
+  %267 = inttoptr i64 %266 to double* 
+  %268 = getelementptr  double, double* %267, i64 0 
+  store  double %"tmp$1#0", double* %268 
+  %269 = add   i64 %"bodies#0", 40 
+  %270 = inttoptr i64 %269 to double* 
+  %271 = getelementptr  double, double* %270, i64 0 
+  store  double %"tmp$2#0", double* %271 
+  %272 = add   i64 %"bodies#0", 48 
+  %273 = inttoptr i64 %272 to double* 
+  %274 = getelementptr  double, double* %273, i64 0 
+  store  double %250, double* %274 
+  %275 = add   i64 %"bodies#0", 56 
+  %276 = inttoptr i64 %275 to i64* 
+  %277 = getelementptr  i64, i64* %276, i64 0 
+  store  i64 %254, i64* %277 
+  ret i64 %"bodies#0" 
+if.else:
+  ret i64 %"bodies#0" 
+}
+
+
+define external fastcc  {double, double, double} @"nbody.offset_momentum_loop<0>"(i64  %"bodies#0", double  %"px#0", double  %"py#0", double  %"pz#0")    {
+entry:
+  %"tmp$8#0" = icmp ne i64 %"bodies#0", 0 
+  br i1 %"tmp$8#0", label %if.then, label %if.else 
+if.then:
+  %278 = add   i64 %"bodies#0", 24 
+  %279 = inttoptr i64 %278 to double* 
+  %280 = getelementptr  double, double* %279, i64 0 
+  %281 = load  double, double* %280 
+  %282 = add   i64 %"bodies#0", 32 
+  %283 = inttoptr i64 %282 to double* 
+  %284 = getelementptr  double, double* %283, i64 0 
+  %285 = load  double, double* %284 
+  %286 = add   i64 %"bodies#0", 40 
+  %287 = inttoptr i64 %286 to double* 
+  %288 = getelementptr  double, double* %287, i64 0 
+  %289 = load  double, double* %288 
+  %290 = add   i64 %"bodies#0", 48 
+  %291 = inttoptr i64 %290 to double* 
+  %292 = getelementptr  double, double* %291, i64 0 
+  %293 = load  double, double* %292 
+  %294 = add   i64 %"bodies#0", 56 
+  %295 = inttoptr i64 %294 to i64* 
+  %296 = getelementptr  i64, i64* %295, i64 0 
+  %297 = load  i64, i64* %296 
+  %"tmp$1#0" = fmul double %281, %293 
+  %"tmp$0#0" = fsub double %"px#0", %"tmp$1#0" 
+  %"tmp$3#0" = fmul double %285, %293 
+  %"tmp$2#0" = fsub double %"py#0", %"tmp$3#0" 
+  %"tmp$5#0" = fmul double %289, %293 
+  %"tmp$4#0" = fsub double %"pz#0", %"tmp$5#0" 
+  %298 = tail call fastcc  {double, double, double}  @"nbody.offset_momentum_loop<0>"(i64  %297, double  %"tmp$0#0", double  %"tmp$2#0", double  %"tmp$4#0")  
+  %299 = extractvalue {double, double, double} %298, 0 
+  %300 = extractvalue {double, double, double} %298, 1 
+  %301 = extractvalue {double, double, double} %298, 2 
+  %302 = insertvalue {double, double, double} undef, double %299, 0 
+  %303 = insertvalue {double, double, double} %302, double %300, 1 
+  %304 = insertvalue {double, double, double} %303, double %301, 2 
+  ret {double, double, double} %304 
+if.else:
+  %305 = insertvalue {double, double, double} undef, double %"px#0", 0 
+  %306 = insertvalue {double, double, double} %305, double %"py#0", 1 
+  %307 = insertvalue {double, double, double} %306, double %"pz#0", 2 
+  ret {double, double, double} %307 
+}
+
+
+define external fastcc  void @"nbody.print_bodylist<0>"(i64  %"bodies#0")    {
+entry:
+  %"tmp$2#0" = icmp ne i64 %"bodies#0", 0 
+  br i1 %"tmp$2#0", label %if.then, label %if.else 
+if.then:
+  %308 = inttoptr i64 %"bodies#0" to double* 
+  %309 = getelementptr  double, double* %308, i64 0 
+  %310 = load  double, double* %309 
+  %311 = add   i64 %"bodies#0", 8 
+  %312 = inttoptr i64 %311 to double* 
+  %313 = getelementptr  double, double* %312, i64 0 
+  %314 = load  double, double* %313 
+  %315 = add   i64 %"bodies#0", 16 
+  %316 = inttoptr i64 %315 to double* 
+  %317 = getelementptr  double, double* %316, i64 0 
+  %318 = load  double, double* %317 
+  %319 = add   i64 %"bodies#0", 24 
+  %320 = inttoptr i64 %319 to double* 
+  %321 = getelementptr  double, double* %320, i64 0 
+  %322 = load  double, double* %321 
+  %323 = add   i64 %"bodies#0", 32 
+  %324 = inttoptr i64 %323 to double* 
+  %325 = getelementptr  double, double* %324, i64 0 
+  %326 = load  double, double* %325 
+  %327 = add   i64 %"bodies#0", 40 
+  %328 = inttoptr i64 %327 to double* 
+  %329 = getelementptr  double, double* %328, i64 0 
+  %330 = load  double, double* %329 
+  %331 = add   i64 %"bodies#0", 48 
+  %332 = inttoptr i64 %331 to double* 
+  %333 = getelementptr  double, double* %332, i64 0 
+  %334 = load  double, double* %333 
+  %335 = add   i64 %"bodies#0", 56 
+  %336 = inttoptr i64 %335 to i64* 
+  %337 = getelementptr  i64, i64* %336, i64 0 
+  %338 = load  i64, i64* %337 
+  %340 = ptrtoint i8* getelementptr inbounds ([4 x i8], [4 x i8]* @nbody.339, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %340)  
+  tail call ccc  void  @print_float(double  %310)  
+  %342 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @nbody.341, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %342)  
+  tail call ccc  void  @print_float(double  %314)  
+  %344 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @nbody.343, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %344)  
+  tail call ccc  void  @print_float(double  %318)  
+  %346 = ptrtoint i8* getelementptr inbounds ([6 x i8], [6 x i8]* @nbody.345, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %346)  
+  tail call ccc  void  @print_float(double  %322)  
+  %348 = ptrtoint i8* getelementptr inbounds ([6 x i8], [6 x i8]* @nbody.347, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %348)  
+  tail call ccc  void  @print_float(double  %326)  
+  %350 = ptrtoint i8* getelementptr inbounds ([6 x i8], [6 x i8]* @nbody.349, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %350)  
+  tail call ccc  void  @print_float(double  %330)  
+  %352 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @nbody.351, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %352)  
+  tail call ccc  void  @print_float(double  %334)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"nbody.print_bodylist<0>"(i64  %338)  
+  ret void 
+if.else:
+  ret void 
+}
+
+
+define external fastcc  void @"nbody.report_energy<0>"(i64  %"bodies#0")    {
+entry:
+  %"e#1" = tail call fastcc  double  @"nbody.energy_outer_loop<0>"(i64  %"bodies#0", double  0.000000e0)  
+  %354 = ptrtoint i8* getelementptr inbounds ([9 x i8], [9 x i8]* @nbody.353, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %354)  
+  tail call ccc  void  @print_float(double  %"e#1")  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  i64 @"nbody.update_bodies_pos<0>"(double  %"dt#0", i64  %"bodies#0")    {
+entry:
+  %"tmp$9#0" = icmp ne i64 %"bodies#0", 0 
+  br i1 %"tmp$9#0", label %if.then, label %if.else 
+if.then:
+  %355 = inttoptr i64 %"bodies#0" to double* 
+  %356 = getelementptr  double, double* %355, i64 0 
+  %357 = load  double, double* %356 
+  %358 = add   i64 %"bodies#0", 8 
+  %359 = inttoptr i64 %358 to double* 
+  %360 = getelementptr  double, double* %359, i64 0 
+  %361 = load  double, double* %360 
+  %362 = add   i64 %"bodies#0", 16 
+  %363 = inttoptr i64 %362 to double* 
+  %364 = getelementptr  double, double* %363, i64 0 
+  %365 = load  double, double* %364 
+  %366 = add   i64 %"bodies#0", 24 
+  %367 = inttoptr i64 %366 to double* 
+  %368 = getelementptr  double, double* %367, i64 0 
+  %369 = load  double, double* %368 
+  %370 = add   i64 %"bodies#0", 32 
+  %371 = inttoptr i64 %370 to double* 
+  %372 = getelementptr  double, double* %371, i64 0 
+  %373 = load  double, double* %372 
+  %374 = add   i64 %"bodies#0", 40 
+  %375 = inttoptr i64 %374 to double* 
+  %376 = getelementptr  double, double* %375, i64 0 
+  %377 = load  double, double* %376 
+  %378 = add   i64 %"bodies#0", 48 
+  %379 = inttoptr i64 %378 to double* 
+  %380 = getelementptr  double, double* %379, i64 0 
+  %381 = load  double, double* %380 
+  %382 = add   i64 %"bodies#0", 56 
+  %383 = inttoptr i64 %382 to i64* 
+  %384 = getelementptr  i64, i64* %383, i64 0 
+  %385 = load  i64, i64* %384 
+  %"tmp$1#0" = fmul double %"dt#0", %369 
+  %"tmp$0#0" = fadd double %357, %"tmp$1#0" 
+  %"tmp$3#0" = fmul double %"dt#0", %373 
+  %"tmp$2#0" = fadd double %361, %"tmp$3#0" 
+  %"tmp$5#0" = fmul double %"dt#0", %377 
+  %"tmp$4#0" = fadd double %365, %"tmp$5#0" 
+  %"remain_bodies#1" = tail call fastcc  i64  @"nbody.update_bodies_pos<0>"(double  %"dt#0", i64  %385)  
+  %386 = trunc i64 64 to i32  
+  %387 = tail call ccc  i8*  @wybe_malloc(i32  %386)  
+  %388 = ptrtoint i8* %387 to i64 
+  %389 = inttoptr i64 %388 to double* 
+  %390 = getelementptr  double, double* %389, i64 0 
+  store  double %"tmp$0#0", double* %390 
+  %391 = add   i64 %388, 8 
+  %392 = inttoptr i64 %391 to double* 
+  %393 = getelementptr  double, double* %392, i64 0 
+  store  double %"tmp$2#0", double* %393 
+  %394 = add   i64 %388, 16 
+  %395 = inttoptr i64 %394 to double* 
+  %396 = getelementptr  double, double* %395, i64 0 
+  store  double %"tmp$4#0", double* %396 
+  %397 = add   i64 %388, 24 
+  %398 = inttoptr i64 %397 to double* 
+  %399 = getelementptr  double, double* %398, i64 0 
+  store  double %369, double* %399 
+  %400 = add   i64 %388, 32 
+  %401 = inttoptr i64 %400 to double* 
+  %402 = getelementptr  double, double* %401, i64 0 
+  store  double %373, double* %402 
+  %403 = add   i64 %388, 40 
+  %404 = inttoptr i64 %403 to double* 
+  %405 = getelementptr  double, double* %404, i64 0 
+  store  double %377, double* %405 
+  %406 = add   i64 %388, 48 
+  %407 = inttoptr i64 %406 to double* 
+  %408 = getelementptr  double, double* %407, i64 0 
+  store  double %381, double* %408 
+  %409 = add   i64 %388, 56 
+  %410 = inttoptr i64 %409 to i64* 
+  %411 = getelementptr  i64, i64* %410, i64 0 
+  store  i64 %"remain_bodies#1", i64* %411 
+  ret i64 %388 
+if.else:
+  ret i64 %"bodies#0" 
+}
+
+
+define external fastcc  i64 @"nbody.update_bodies_pos<0>[145401e434]"(double  %"dt#0", i64  %"bodies#0")    {
+entry:
+  %"tmp$9#0" = icmp ne i64 %"bodies#0", 0 
+  br i1 %"tmp$9#0", label %if.then, label %if.else 
+if.then:
+  %412 = inttoptr i64 %"bodies#0" to double* 
+  %413 = getelementptr  double, double* %412, i64 0 
+  %414 = load  double, double* %413 
+  %415 = add   i64 %"bodies#0", 8 
+  %416 = inttoptr i64 %415 to double* 
+  %417 = getelementptr  double, double* %416, i64 0 
+  %418 = load  double, double* %417 
+  %419 = add   i64 %"bodies#0", 16 
+  %420 = inttoptr i64 %419 to double* 
+  %421 = getelementptr  double, double* %420, i64 0 
+  %422 = load  double, double* %421 
+  %423 = add   i64 %"bodies#0", 24 
+  %424 = inttoptr i64 %423 to double* 
+  %425 = getelementptr  double, double* %424, i64 0 
+  %426 = load  double, double* %425 
+  %427 = add   i64 %"bodies#0", 32 
+  %428 = inttoptr i64 %427 to double* 
+  %429 = getelementptr  double, double* %428, i64 0 
+  %430 = load  double, double* %429 
+  %431 = add   i64 %"bodies#0", 40 
+  %432 = inttoptr i64 %431 to double* 
+  %433 = getelementptr  double, double* %432, i64 0 
+  %434 = load  double, double* %433 
+  %435 = add   i64 %"bodies#0", 48 
+  %436 = inttoptr i64 %435 to double* 
+  %437 = getelementptr  double, double* %436, i64 0 
+  %438 = load  double, double* %437 
+  %439 = add   i64 %"bodies#0", 56 
+  %440 = inttoptr i64 %439 to i64* 
+  %441 = getelementptr  i64, i64* %440, i64 0 
+  %442 = load  i64, i64* %441 
+  %"tmp$1#0" = fmul double %"dt#0", %426 
+  %"tmp$0#0" = fadd double %414, %"tmp$1#0" 
+  %"tmp$3#0" = fmul double %"dt#0", %430 
+  %"tmp$2#0" = fadd double %418, %"tmp$3#0" 
+  %"tmp$5#0" = fmul double %"dt#0", %434 
+  %"tmp$4#0" = fadd double %422, %"tmp$5#0" 
+  %"remain_bodies#1" = tail call fastcc  i64  @"nbody.update_bodies_pos<0>[145401e434]"(double  %"dt#0", i64  %442)  
+  %443 = inttoptr i64 %"bodies#0" to double* 
+  %444 = getelementptr  double, double* %443, i64 0 
+  store  double %"tmp$0#0", double* %444 
+  %445 = add   i64 %"bodies#0", 8 
+  %446 = inttoptr i64 %445 to double* 
+  %447 = getelementptr  double, double* %446, i64 0 
+  store  double %"tmp$2#0", double* %447 
+  %448 = add   i64 %"bodies#0", 16 
+  %449 = inttoptr i64 %448 to double* 
+  %450 = getelementptr  double, double* %449, i64 0 
+  store  double %"tmp$4#0", double* %450 
+  %451 = add   i64 %"bodies#0", 24 
+  %452 = inttoptr i64 %451 to double* 
+  %453 = getelementptr  double, double* %452, i64 0 
+  store  double %426, double* %453 
+  %454 = add   i64 %"bodies#0", 32 
+  %455 = inttoptr i64 %454 to double* 
+  %456 = getelementptr  double, double* %455, i64 0 
+  store  double %430, double* %456 
+  %457 = add   i64 %"bodies#0", 40 
+  %458 = inttoptr i64 %457 to double* 
+  %459 = getelementptr  double, double* %458, i64 0 
+  store  double %434, double* %459 
+  %460 = add   i64 %"bodies#0", 48 
+  %461 = inttoptr i64 %460 to double* 
+  %462 = getelementptr  double, double* %461, i64 0 
+  store  double %438, double* %462 
+  %463 = add   i64 %"bodies#0", 56 
+  %464 = inttoptr i64 %463 to i64* 
+  %465 = getelementptr  i64, i64* %464, i64 0 
+  store  i64 %"remain_bodies#1", i64* %465 
+  ret i64 %"bodies#0" 
+if.else:
+  ret i64 %"bodies#0" 
+}
+
+
+define external fastcc  i64 @"nbody.update_bodies_v<0>"(double  %"dt#0", i64  %"allbodies#0", i64  %"bodies#0")    {
+entry:
+  %"tmp$3#0" = icmp ne i64 %"bodies#0", 0 
+  br i1 %"tmp$3#0", label %if.then, label %if.else 
+if.then:
+  %466 = inttoptr i64 %"bodies#0" to double* 
+  %467 = getelementptr  double, double* %466, i64 0 
+  %468 = load  double, double* %467 
+  %469 = add   i64 %"bodies#0", 8 
+  %470 = inttoptr i64 %469 to double* 
+  %471 = getelementptr  double, double* %470, i64 0 
+  %472 = load  double, double* %471 
+  %473 = add   i64 %"bodies#0", 16 
+  %474 = inttoptr i64 %473 to double* 
+  %475 = getelementptr  double, double* %474, i64 0 
+  %476 = load  double, double* %475 
+  %477 = add   i64 %"bodies#0", 24 
+  %478 = inttoptr i64 %477 to double* 
+  %479 = getelementptr  double, double* %478, i64 0 
+  %480 = load  double, double* %479 
+  %481 = add   i64 %"bodies#0", 32 
+  %482 = inttoptr i64 %481 to double* 
+  %483 = getelementptr  double, double* %482, i64 0 
+  %484 = load  double, double* %483 
+  %485 = add   i64 %"bodies#0", 40 
+  %486 = inttoptr i64 %485 to double* 
+  %487 = getelementptr  double, double* %486, i64 0 
+  %488 = load  double, double* %487 
+  %489 = add   i64 %"bodies#0", 48 
+  %490 = inttoptr i64 %489 to double* 
+  %491 = getelementptr  double, double* %490, i64 0 
+  %492 = load  double, double* %491 
+  %493 = add   i64 %"bodies#0", 56 
+  %494 = inttoptr i64 %493 to i64* 
+  %495 = getelementptr  i64, i64* %494, i64 0 
+  %496 = load  i64, i64* %495 
+  %497 = tail call fastcc  {double, double, double}  @"nbody.update_body_v_inner<0>"(double  %"dt#0", double  %468, double  %472, double  %476, double  %480, double  %484, double  %488, i64  %"allbodies#0")  
+  %498 = extractvalue {double, double, double} %497, 0 
+  %499 = extractvalue {double, double, double} %497, 1 
+  %500 = extractvalue {double, double, double} %497, 2 
+  %"remain_bodies#1" = tail call fastcc  i64  @"nbody.update_bodies_v<0>"(double  %"dt#0", i64  %"allbodies#0", i64  %496)  
+  %501 = trunc i64 64 to i32  
+  %502 = tail call ccc  i8*  @wybe_malloc(i32  %501)  
+  %503 = ptrtoint i8* %502 to i64 
+  %504 = inttoptr i64 %503 to double* 
+  %505 = getelementptr  double, double* %504, i64 0 
+  store  double %468, double* %505 
+  %506 = add   i64 %503, 8 
+  %507 = inttoptr i64 %506 to double* 
+  %508 = getelementptr  double, double* %507, i64 0 
+  store  double %472, double* %508 
+  %509 = add   i64 %503, 16 
+  %510 = inttoptr i64 %509 to double* 
+  %511 = getelementptr  double, double* %510, i64 0 
+  store  double %476, double* %511 
+  %512 = add   i64 %503, 24 
+  %513 = inttoptr i64 %512 to double* 
+  %514 = getelementptr  double, double* %513, i64 0 
+  store  double %498, double* %514 
+  %515 = add   i64 %503, 32 
+  %516 = inttoptr i64 %515 to double* 
+  %517 = getelementptr  double, double* %516, i64 0 
+  store  double %499, double* %517 
+  %518 = add   i64 %503, 40 
+  %519 = inttoptr i64 %518 to double* 
+  %520 = getelementptr  double, double* %519, i64 0 
+  store  double %500, double* %520 
+  %521 = add   i64 %503, 48 
+  %522 = inttoptr i64 %521 to double* 
+  %523 = getelementptr  double, double* %522, i64 0 
+  store  double %492, double* %523 
+  %524 = add   i64 %503, 56 
+  %525 = inttoptr i64 %524 to i64* 
+  %526 = getelementptr  i64, i64* %525, i64 0 
+  store  i64 %"remain_bodies#1", i64* %526 
+  ret i64 %503 
+if.else:
+  ret i64 %"bodies#0" 
+}
+
+
+define external fastcc  {double, double, double} @"nbody.update_body_v_inner<0>"(double  %"dt#0", double  %"x1#0", double  %"y1#0", double  %"z1#0", double  %"vx1#0", double  %"vy1#0", double  %"vz1#0", i64  %"bodies#0")    {
+entry:
+  %"tmp$21#0" = icmp ne i64 %"bodies#0", 0 
+  br i1 %"tmp$21#0", label %if.then, label %if.else 
+if.then:
+  %527 = inttoptr i64 %"bodies#0" to double* 
+  %528 = getelementptr  double, double* %527, i64 0 
+  %529 = load  double, double* %528 
+  %530 = add   i64 %"bodies#0", 8 
+  %531 = inttoptr i64 %530 to double* 
+  %532 = getelementptr  double, double* %531, i64 0 
+  %533 = load  double, double* %532 
+  %534 = add   i64 %"bodies#0", 16 
+  %535 = inttoptr i64 %534 to double* 
+  %536 = getelementptr  double, double* %535, i64 0 
+  %537 = load  double, double* %536 
+  %538 = add   i64 %"bodies#0", 48 
+  %539 = inttoptr i64 %538 to double* 
+  %540 = getelementptr  double, double* %539, i64 0 
+  %541 = load  double, double* %540 
+  %542 = add   i64 %"bodies#0", 56 
+  %543 = inttoptr i64 %542 to i64* 
+  %544 = getelementptr  i64, i64* %543, i64 0 
+  %545 = load  i64, i64* %544 
+  %"tmp$0#0" = fsub double %"x1#0", %529 
+  %"tmp$1#0" = fsub double %"y1#0", %533 
+  %"tmp$2#0" = fsub double %"z1#0", %537 
+  %"tmp$5#0" = fmul double %"tmp$0#0", %"tmp$0#0" 
+  %"tmp$6#0" = fmul double %"tmp$1#0", %"tmp$1#0" 
+  %"tmp$4#0" = fadd double %"tmp$5#0", %"tmp$6#0" 
+  %"tmp$7#0" = fmul double %"tmp$2#0", %"tmp$2#0" 
+  %"tmp$3#0" = fadd double %"tmp$4#0", %"tmp$7#0" 
+  %"tmp$19#0" = fcmp oeq double %"tmp$3#0", 0.000000e0 
+  br i1 %"tmp$19#0", label %if.then1, label %if.else1 
+if.else:
+  %560 = insertvalue {double, double, double} undef, double %"vx1#0", 0 
+  %561 = insertvalue {double, double, double} %560, double %"vy1#0", 1 
+  %562 = insertvalue {double, double, double} %561, double %"vz1#0", 2 
+  ret {double, double, double} %562 
+if.then1:
+  %546 = tail call fastcc  {double, double, double}  @"nbody.update_body_v_inner<0>"(double  %"dt#0", double  %"x1#0", double  %"y1#0", double  %"z1#0", double  %"vx1#0", double  %"vy1#0", double  %"vz1#0", i64  %545)  
+  %547 = extractvalue {double, double, double} %546, 0 
+  %548 = extractvalue {double, double, double} %546, 1 
+  %549 = extractvalue {double, double, double} %546, 2 
+  %550 = insertvalue {double, double, double} undef, double %547, 0 
+  %551 = insertvalue {double, double, double} %550, double %548, 1 
+  %552 = insertvalue {double, double, double} %551, double %549, 2 
+  ret {double, double, double} %552 
+if.else1:
+  %"tmp$9#0" = tail call ccc  double  @pow(double  %"tmp$3#0", double  -1.500000e0)  
+  %"tmp$8#0" = fmul double %"dt#0", %"tmp$9#0" 
+  %"tmp$11#0" = fmul double %541, %"tmp$8#0" 
+  %"tmp$13#0" = fmul double %"tmp$0#0", %"tmp$11#0" 
+  %"tmp$12#0" = fsub double %"vx1#0", %"tmp$13#0" 
+  %"tmp$15#0" = fmul double %"tmp$1#0", %"tmp$11#0" 
+  %"tmp$14#0" = fsub double %"vy1#0", %"tmp$15#0" 
+  %"tmp$17#0" = fmul double %"tmp$2#0", %"tmp$11#0" 
+  %"tmp$16#0" = fsub double %"vz1#0", %"tmp$17#0" 
+  %553 = tail call fastcc  {double, double, double}  @"nbody.update_body_v_inner<0>"(double  %"dt#0", double  %"x1#0", double  %"y1#0", double  %"z1#0", double  %"tmp$12#0", double  %"tmp$14#0", double  %"tmp$16#0", i64  %545)  
+  %554 = extractvalue {double, double, double} %553, 0 
+  %555 = extractvalue {double, double, double} %553, 1 
+  %556 = extractvalue {double, double, double} %553, 2 
+  %557 = insertvalue {double, double, double} undef, double %554, 0 
+  %558 = insertvalue {double, double, double} %557, double %555, 1 
+  %559 = insertvalue {double, double, double} %558, double %556, 2 
+  ret {double, double, double} %559 
+}
+--------------------------------------------------
+ Module nbody.bodylist
+  public submods  : 
+  public types    : 
+  public resources: 
+  public procs    : nbody.bodylist./=<0>
+                    nbody.bodylist.=<0>
+                    nbody.bodylist.body<0>
+                    nbody.bodylist.body<1>
+                    nbody.bodylist.empty<0>
+                    nbody.bodylist.m<0>
+                    nbody.bodylist.m<1>
+                    nbody.bodylist.tail<0>
+                    nbody.bodylist.tail<1>
+                    nbody.bodylist.vx<0>
+                    nbody.bodylist.vx<1>
+                    nbody.bodylist.vy<0>
+                    nbody.bodylist.vy<1>
+                    nbody.bodylist.vz<0>
+                    nbody.bodylist.vz<1>
+                    nbody.bodylist.x<0>
+                    nbody.bodylist.x<1>
+                    nbody.bodylist.y<0>
+                    nbody.bodylist.y<1>
+                    nbody.bodylist.z<0>
+                    nbody.bodylist.z<1>
+  imports         : use nbody
+                    use wybe
+  types           : 
+  resources       : 
+  procs           : 
+
+/= > public inline test (0 calls)
+0: /=($left#0:nbody.bodylist, $right#0:nbody.bodylist, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    nbody.bodylist.=<0>(~$left#0:nbody.bodylist, ~$right#0:nbody.bodylist, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+= > public test (39 calls)
+0: =($left#0:nbody.bodylist, $right#0:nbody.bodylist, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm cast($left#0:nbody.bodylist, ?tmp$0#0:!wybe.int)
+    foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm icmp ne($left#0:nbody.bodylist, 0:wybe.int, ?tmp$14#0:wybe.bool)
+        case ~tmp$14#0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+        1:
+            foreign lpvm access($left#0:nbody.bodylist, 0:wybe.int, ?$left$x#0:wybe.float)
+            foreign lpvm access($left#0:nbody.bodylist, 8:wybe.int, ?$left$y#0:wybe.float)
+            foreign lpvm access($left#0:nbody.bodylist, 16:wybe.int, ?$left$z#0:wybe.float)
+            foreign lpvm access($left#0:nbody.bodylist, 24:wybe.int, ?$left$vx#0:wybe.float)
+            foreign lpvm access($left#0:nbody.bodylist, 32:wybe.int, ?$left$vy#0:wybe.float)
+            foreign lpvm access($left#0:nbody.bodylist, 40:wybe.int, ?$left$vz#0:wybe.float)
+            foreign lpvm access($left#0:nbody.bodylist, 48:wybe.int, ?$left$m#0:wybe.float)
+            foreign lpvm access(~$left#0:nbody.bodylist, 56:wybe.int, ?$left$tail#0:nbody.bodylist)
+            foreign llvm icmp ne($right#0:nbody.bodylist, 0:wybe.int, ?tmp$16#0:wybe.bool)
+            case ~tmp$16#0:wybe.bool of
+            0:
+                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+            1:
+                foreign lpvm access($right#0:nbody.bodylist, 0:wybe.int, ?$right$x#0:wybe.float)
+                foreign lpvm access($right#0:nbody.bodylist, 8:wybe.int, ?$right$y#0:wybe.float)
+                foreign lpvm access($right#0:nbody.bodylist, 16:wybe.int, ?$right$z#0:wybe.float)
+                foreign lpvm access($right#0:nbody.bodylist, 24:wybe.int, ?$right$vx#0:wybe.float)
+                foreign lpvm access($right#0:nbody.bodylist, 32:wybe.int, ?$right$vy#0:wybe.float)
+                foreign lpvm access($right#0:nbody.bodylist, 40:wybe.int, ?$right$vz#0:wybe.float)
+                foreign lpvm access($right#0:nbody.bodylist, 48:wybe.int, ?$right$m#0:wybe.float)
+                foreign lpvm access(~$right#0:nbody.bodylist, 56:wybe.int, ?$right$tail#0:nbody.bodylist)
+                foreign llvm fcmp eq(~$left$x#0:wybe.float, ~$right$x#0:wybe.float, ?tmp$5#0:wybe.bool) @wybe:nn:nn
+                case ~tmp$5#0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                1:
+                    foreign llvm fcmp eq(~$left$y#0:wybe.float, ~$right$y#0:wybe.float, ?tmp$6#0:wybe.bool) @wybe:nn:nn
+                    case ~tmp$6#0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                    1:
+                        foreign llvm fcmp eq(~$left$z#0:wybe.float, ~$right$z#0:wybe.float, ?tmp$7#0:wybe.bool) @wybe:nn:nn
+                        case ~tmp$7#0:wybe.bool of
+                        0:
+                            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                        1:
+                            foreign llvm fcmp eq(~$left$vx#0:wybe.float, ~$right$vx#0:wybe.float, ?tmp$8#0:wybe.bool) @wybe:nn:nn
+                            case ~tmp$8#0:wybe.bool of
+                            0:
+                                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                            1:
+                                foreign llvm fcmp eq(~$left$vy#0:wybe.float, ~$right$vy#0:wybe.float, ?tmp$9#0:wybe.bool) @wybe:nn:nn
+                                case ~tmp$9#0:wybe.bool of
+                                0:
+                                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                                1:
+                                    foreign llvm fcmp eq(~$left$vz#0:wybe.float, ~$right$vz#0:wybe.float, ?tmp$10#0:wybe.bool) @wybe:nn:nn
+                                    case ~tmp$10#0:wybe.bool of
+                                    0:
+                                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                                    1:
+                                        foreign llvm fcmp eq(~$left$m#0:wybe.float, ~$right$m#0:wybe.float, ?tmp$11#0:wybe.bool) @wybe:nn:nn
+                                        case ~tmp$11#0:wybe.bool of
+                                        0:
+                                            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                                        1:
+                                            nbody.bodylist.=<0>(~$left$tail#0:nbody.bodylist, ~$right$tail#0:nbody.bodylist, ?$$#0:wybe.bool)
+
+
+
+
+
+
+
+
+
+
+    1:
+        foreign llvm icmp eq(~$left#0:nbody.bodylist, ~$right#0:nbody.bodylist, ?$$#0:wybe.bool)
+
+
+
+body > public inline (0 calls)
+0: body(x#0:wybe.float, y#0:wybe.float, z#0:wybe.float, vx#0:wybe.float, vy#0:wybe.float, vz#0:wybe.float, m#0:wybe.float, tail#0:nbody.bodylist, ?$#0:nbody.bodylist):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm alloc(64:wybe.int, ?$rec#0:!nbody.bodylist)
+    foreign lpvm mutate(~%$rec#0:nbody.bodylist, ?%$rec#1:nbody.bodylist, 0:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~x#0:wybe.float)
+    foreign lpvm mutate(~%$rec#1:nbody.bodylist, ?%$rec#2:nbody.bodylist, 8:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~y#0:wybe.float)
+    foreign lpvm mutate(~%$rec#2:nbody.bodylist, ?%$rec#3:nbody.bodylist, 16:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~z#0:wybe.float)
+    foreign lpvm mutate(~%$rec#3:nbody.bodylist, ?%$rec#4:nbody.bodylist, 24:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~vx#0:wybe.float)
+    foreign lpvm mutate(~%$rec#4:nbody.bodylist, ?%$rec#5:nbody.bodylist, 32:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~vy#0:wybe.float)
+    foreign lpvm mutate(~%$rec#5:nbody.bodylist, ?%$rec#6:nbody.bodylist, 40:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~vz#0:wybe.float)
+    foreign lpvm mutate(~%$rec#6:nbody.bodylist, ?%$rec#7:nbody.bodylist, 48:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~m#0:wybe.float)
+    foreign lpvm mutate(~%$rec#7:nbody.bodylist, ?%$#0:nbody.bodylist, 56:wybe.int, 1:wybe.int, 64:wybe.int, 0:wybe.int, ~tail#0:nbody.bodylist)
+body > public inline test (19 calls)
+1: body(?x#0:wybe.float, ?y#0:wybe.float, ?z#0:wybe.float, ?vx#0:wybe.float, ?vy#0:wybe.float, ?vz#0:wybe.float, ?m#0:wybe.float, ?tail#0:nbody.bodylist, $#0:nbody.bodylist, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access($#0:nbody.bodylist, 0:wybe.int, ?x#0:wybe.float)
+        foreign lpvm access($#0:nbody.bodylist, 8:wybe.int, ?y#0:wybe.float)
+        foreign lpvm access($#0:nbody.bodylist, 16:wybe.int, ?z#0:wybe.float)
+        foreign lpvm access($#0:nbody.bodylist, 24:wybe.int, ?vx#0:wybe.float)
+        foreign lpvm access($#0:nbody.bodylist, 32:wybe.int, ?vy#0:wybe.float)
+        foreign lpvm access($#0:nbody.bodylist, 40:wybe.int, ?vz#0:wybe.float)
+        foreign lpvm access($#0:nbody.bodylist, 48:wybe.int, ?m#0:wybe.float)
+        foreign lpvm access(~$#0:nbody.bodylist, 56:wybe.int, ?tail#0:nbody.bodylist)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+empty > public inline (0 calls)
+0: empty(?$#0:nbody.bodylist):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm move(0:nbody.bodylist, ?$#0:nbody.bodylist)
+
+
+m > public inline test (0 calls)
+0: m($rec#0:nbody.bodylist, ?$#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:nbody.bodylist, 48:wybe.int, ?$#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+m > public inline test (0 calls)
+1: m($rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist, $field#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:nbody.bodylist, ?%$rec#1:nbody.bodylist, 48:wybe.int, 0:wybe.int, 64:wybe.int, 0:wybe.int, ~$field#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+tail > public inline test (0 calls)
+0: tail($rec#0:nbody.bodylist, ?$#0:nbody.bodylist, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:nbody.bodylist, 56:wybe.int, ?$#0:nbody.bodylist)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+tail > public inline test (0 calls)
+1: tail($rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist, $field#0:nbody.bodylist, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist)
+
+    1:
+        foreign lpvm mutate noalias(~%$rec#0:nbody.bodylist, ?%$rec#1:nbody.bodylist, 56:wybe.int, 0:wybe.int, 64:wybe.int, 0:wybe.int, ~$field#0:nbody.bodylist)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+vx > public inline test (0 calls)
+0: vx($rec#0:nbody.bodylist, ?$#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:nbody.bodylist, 24:wybe.int, ?$#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+vx > public inline test (0 calls)
+1: vx($rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist, $field#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:nbody.bodylist, ?%$rec#1:nbody.bodylist, 24:wybe.int, 0:wybe.int, 64:wybe.int, 0:wybe.int, ~$field#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+vy > public inline test (0 calls)
+0: vy($rec#0:nbody.bodylist, ?$#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:nbody.bodylist, 32:wybe.int, ?$#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+vy > public inline test (0 calls)
+1: vy($rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist, $field#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:nbody.bodylist, ?%$rec#1:nbody.bodylist, 32:wybe.int, 0:wybe.int, 64:wybe.int, 0:wybe.int, ~$field#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+vz > public inline test (0 calls)
+0: vz($rec#0:nbody.bodylist, ?$#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:nbody.bodylist, 40:wybe.int, ?$#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+vz > public inline test (0 calls)
+1: vz($rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist, $field#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:nbody.bodylist, ?%$rec#1:nbody.bodylist, 40:wybe.int, 0:wybe.int, 64:wybe.int, 0:wybe.int, ~$field#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+x > public inline test (0 calls)
+0: x($rec#0:nbody.bodylist, ?$#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:nbody.bodylist, 0:wybe.int, ?$#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+x > public inline test (0 calls)
+1: x($rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist, $field#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:nbody.bodylist, ?%$rec#1:nbody.bodylist, 0:wybe.int, 0:wybe.int, 64:wybe.int, 0:wybe.int, ~$field#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+y > public inline test (0 calls)
+0: y($rec#0:nbody.bodylist, ?$#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:nbody.bodylist, 8:wybe.int, ?$#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+y > public inline test (0 calls)
+1: y($rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist, $field#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:nbody.bodylist, ?%$rec#1:nbody.bodylist, 8:wybe.int, 0:wybe.int, 64:wybe.int, 0:wybe.int, ~$field#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+z > public inline test (0 calls)
+0: z($rec#0:nbody.bodylist, ?$#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$rec#0:nbody.bodylist, 16:wybe.int, ?$#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+z > public inline test (0 calls)
+1: z($rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist, $field#0:wybe.float, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp ne($rec#0:nbody.bodylist, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(~$rec#0:nbody.bodylist, ?$rec#1:nbody.bodylist)
+
+    1:
+        foreign lpvm mutate(~%$rec#0:nbody.bodylist, ?%$rec#1:nbody.bodylist, 16:wybe.int, 0:wybe.int, 64:wybe.int, 0:wybe.int, ~$field#0:wybe.float)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+  LLVM code       :
+
+; ModuleID = 'nbody.bodylist'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external fastcc  i1 @"nbody.bodylist./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %"tmp$1#0" = tail call fastcc  i1  @"nbody.bodylist.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  br i1 %"tmp$1#0", label %if.then, label %if.else 
+if.then:
+  ret i1 0 
+if.else:
+  ret i1 1 
+}
+
+
+define external fastcc  i1 @"nbody.bodylist.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %"tmp$1#0" = icmp eq i64 %"$left#0", 0 
+  br i1 %"tmp$1#0", label %if.then, label %if.else 
+if.then:
+  %"$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"$$#0" 
+if.else:
+  %"tmp$14#0" = icmp ne i64 %"$left#0", 0 
+  br i1 %"tmp$14#0", label %if.then1, label %if.else1 
+if.then1:
+  %1 = inttoptr i64 %"$left#0" to double* 
+  %2 = getelementptr  double, double* %1, i64 0 
+  %3 = load  double, double* %2 
+  %4 = add   i64 %"$left#0", 8 
+  %5 = inttoptr i64 %4 to double* 
+  %6 = getelementptr  double, double* %5, i64 0 
+  %7 = load  double, double* %6 
+  %8 = add   i64 %"$left#0", 16 
+  %9 = inttoptr i64 %8 to double* 
+  %10 = getelementptr  double, double* %9, i64 0 
+  %11 = load  double, double* %10 
+  %12 = add   i64 %"$left#0", 24 
+  %13 = inttoptr i64 %12 to double* 
+  %14 = getelementptr  double, double* %13, i64 0 
+  %15 = load  double, double* %14 
+  %16 = add   i64 %"$left#0", 32 
+  %17 = inttoptr i64 %16 to double* 
+  %18 = getelementptr  double, double* %17, i64 0 
+  %19 = load  double, double* %18 
+  %20 = add   i64 %"$left#0", 40 
+  %21 = inttoptr i64 %20 to double* 
+  %22 = getelementptr  double, double* %21, i64 0 
+  %23 = load  double, double* %22 
+  %24 = add   i64 %"$left#0", 48 
+  %25 = inttoptr i64 %24 to double* 
+  %26 = getelementptr  double, double* %25, i64 0 
+  %27 = load  double, double* %26 
+  %28 = add   i64 %"$left#0", 56 
+  %29 = inttoptr i64 %28 to i64* 
+  %30 = getelementptr  i64, i64* %29, i64 0 
+  %31 = load  i64, i64* %30 
+  %"tmp$16#0" = icmp ne i64 %"$right#0", 0 
+  br i1 %"tmp$16#0", label %if.then2, label %if.else2 
+if.else1:
+  ret i1 0 
+if.then2:
+  %32 = inttoptr i64 %"$right#0" to double* 
+  %33 = getelementptr  double, double* %32, i64 0 
+  %34 = load  double, double* %33 
+  %35 = add   i64 %"$right#0", 8 
+  %36 = inttoptr i64 %35 to double* 
+  %37 = getelementptr  double, double* %36, i64 0 
+  %38 = load  double, double* %37 
+  %39 = add   i64 %"$right#0", 16 
+  %40 = inttoptr i64 %39 to double* 
+  %41 = getelementptr  double, double* %40, i64 0 
+  %42 = load  double, double* %41 
+  %43 = add   i64 %"$right#0", 24 
+  %44 = inttoptr i64 %43 to double* 
+  %45 = getelementptr  double, double* %44, i64 0 
+  %46 = load  double, double* %45 
+  %47 = add   i64 %"$right#0", 32 
+  %48 = inttoptr i64 %47 to double* 
+  %49 = getelementptr  double, double* %48, i64 0 
+  %50 = load  double, double* %49 
+  %51 = add   i64 %"$right#0", 40 
+  %52 = inttoptr i64 %51 to double* 
+  %53 = getelementptr  double, double* %52, i64 0 
+  %54 = load  double, double* %53 
+  %55 = add   i64 %"$right#0", 48 
+  %56 = inttoptr i64 %55 to double* 
+  %57 = getelementptr  double, double* %56, i64 0 
+  %58 = load  double, double* %57 
+  %59 = add   i64 %"$right#0", 56 
+  %60 = inttoptr i64 %59 to i64* 
+  %61 = getelementptr  i64, i64* %60, i64 0 
+  %62 = load  i64, i64* %61 
+  %"tmp$5#0" = fcmp oeq double %3, %34 
+  br i1 %"tmp$5#0", label %if.then3, label %if.else3 
+if.else2:
+  ret i1 0 
+if.then3:
+  %"tmp$6#0" = fcmp oeq double %7, %38 
+  br i1 %"tmp$6#0", label %if.then4, label %if.else4 
+if.else3:
+  ret i1 0 
+if.then4:
+  %"tmp$7#0" = fcmp oeq double %11, %42 
+  br i1 %"tmp$7#0", label %if.then5, label %if.else5 
+if.else4:
+  ret i1 0 
+if.then5:
+  %"tmp$8#0" = fcmp oeq double %15, %46 
+  br i1 %"tmp$8#0", label %if.then6, label %if.else6 
+if.else5:
+  ret i1 0 
+if.then6:
+  %"tmp$9#0" = fcmp oeq double %19, %50 
+  br i1 %"tmp$9#0", label %if.then7, label %if.else7 
+if.else6:
+  ret i1 0 
+if.then7:
+  %"tmp$10#0" = fcmp oeq double %23, %54 
+  br i1 %"tmp$10#0", label %if.then8, label %if.else8 
+if.else7:
+  ret i1 0 
+if.then8:
+  %"tmp$11#0" = fcmp oeq double %27, %58 
+  br i1 %"tmp$11#0", label %if.then9, label %if.else9 
+if.else8:
+  ret i1 0 
+if.then9:
+  %"$$#0" = tail call fastcc  i1  @"nbody.bodylist.=<0>"(i64  %31, i64  %62)  
+  ret i1 %"$$#0" 
+if.else9:
+  ret i1 0 
+}
+
+
+define external fastcc  i64 @"nbody.bodylist.body<0>"(double  %"x#0", double  %"y#0", double  %"z#0", double  %"vx#0", double  %"vy#0", double  %"vz#0", double  %"m#0", i64  %"tail#0")    {
+entry:
+  %63 = trunc i64 64 to i32  
+  %64 = tail call ccc  i8*  @wybe_malloc(i32  %63)  
+  %65 = ptrtoint i8* %64 to i64 
+  %66 = inttoptr i64 %65 to double* 
+  %67 = getelementptr  double, double* %66, i64 0 
+  store  double %"x#0", double* %67 
+  %68 = add   i64 %65, 8 
+  %69 = inttoptr i64 %68 to double* 
+  %70 = getelementptr  double, double* %69, i64 0 
+  store  double %"y#0", double* %70 
+  %71 = add   i64 %65, 16 
+  %72 = inttoptr i64 %71 to double* 
+  %73 = getelementptr  double, double* %72, i64 0 
+  store  double %"z#0", double* %73 
+  %74 = add   i64 %65, 24 
+  %75 = inttoptr i64 %74 to double* 
+  %76 = getelementptr  double, double* %75, i64 0 
+  store  double %"vx#0", double* %76 
+  %77 = add   i64 %65, 32 
+  %78 = inttoptr i64 %77 to double* 
+  %79 = getelementptr  double, double* %78, i64 0 
+  store  double %"vy#0", double* %79 
+  %80 = add   i64 %65, 40 
+  %81 = inttoptr i64 %80 to double* 
+  %82 = getelementptr  double, double* %81, i64 0 
+  store  double %"vz#0", double* %82 
+  %83 = add   i64 %65, 48 
+  %84 = inttoptr i64 %83 to double* 
+  %85 = getelementptr  double, double* %84, i64 0 
+  store  double %"m#0", double* %85 
+  %86 = add   i64 %65, 56 
+  %87 = inttoptr i64 %86 to i64* 
+  %88 = getelementptr  i64, i64* %87, i64 0 
+  store  i64 %"tail#0", i64* %88 
+  ret i64 %65 
+}
+
+
+define external fastcc  {double, double, double, double, double, double, double, i64, i1} @"nbody.bodylist.body<1>"(i64  %"$#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %89 = inttoptr i64 %"$#0" to double* 
+  %90 = getelementptr  double, double* %89, i64 0 
+  %91 = load  double, double* %90 
+  %92 = add   i64 %"$#0", 8 
+  %93 = inttoptr i64 %92 to double* 
+  %94 = getelementptr  double, double* %93, i64 0 
+  %95 = load  double, double* %94 
+  %96 = add   i64 %"$#0", 16 
+  %97 = inttoptr i64 %96 to double* 
+  %98 = getelementptr  double, double* %97, i64 0 
+  %99 = load  double, double* %98 
+  %100 = add   i64 %"$#0", 24 
+  %101 = inttoptr i64 %100 to double* 
+  %102 = getelementptr  double, double* %101, i64 0 
+  %103 = load  double, double* %102 
+  %104 = add   i64 %"$#0", 32 
+  %105 = inttoptr i64 %104 to double* 
+  %106 = getelementptr  double, double* %105, i64 0 
+  %107 = load  double, double* %106 
+  %108 = add   i64 %"$#0", 40 
+  %109 = inttoptr i64 %108 to double* 
+  %110 = getelementptr  double, double* %109, i64 0 
+  %111 = load  double, double* %110 
+  %112 = add   i64 %"$#0", 48 
+  %113 = inttoptr i64 %112 to double* 
+  %114 = getelementptr  double, double* %113, i64 0 
+  %115 = load  double, double* %114 
+  %116 = add   i64 %"$#0", 56 
+  %117 = inttoptr i64 %116 to i64* 
+  %118 = getelementptr  i64, i64* %117, i64 0 
+  %119 = load  i64, i64* %118 
+  %120 = insertvalue {double, double, double, double, double, double, double, i64, i1} undef, double %91, 0 
+  %121 = insertvalue {double, double, double, double, double, double, double, i64, i1} %120, double %95, 1 
+  %122 = insertvalue {double, double, double, double, double, double, double, i64, i1} %121, double %99, 2 
+  %123 = insertvalue {double, double, double, double, double, double, double, i64, i1} %122, double %103, 3 
+  %124 = insertvalue {double, double, double, double, double, double, double, i64, i1} %123, double %107, 4 
+  %125 = insertvalue {double, double, double, double, double, double, double, i64, i1} %124, double %111, 5 
+  %126 = insertvalue {double, double, double, double, double, double, double, i64, i1} %125, double %115, 6 
+  %127 = insertvalue {double, double, double, double, double, double, double, i64, i1} %126, i64 %119, 7 
+  %128 = insertvalue {double, double, double, double, double, double, double, i64, i1} %127, i1 1, 8 
+  ret {double, double, double, double, double, double, double, i64, i1} %128 
+if.else:
+  %129 = insertvalue {double, double, double, double, double, double, double, i64, i1} undef, double undef, 0 
+  %130 = insertvalue {double, double, double, double, double, double, double, i64, i1} %129, double undef, 1 
+  %131 = insertvalue {double, double, double, double, double, double, double, i64, i1} %130, double undef, 2 
+  %132 = insertvalue {double, double, double, double, double, double, double, i64, i1} %131, double undef, 3 
+  %133 = insertvalue {double, double, double, double, double, double, double, i64, i1} %132, double undef, 4 
+  %134 = insertvalue {double, double, double, double, double, double, double, i64, i1} %133, double undef, 5 
+  %135 = insertvalue {double, double, double, double, double, double, double, i64, i1} %134, double undef, 6 
+  %136 = insertvalue {double, double, double, double, double, double, double, i64, i1} %135, i64 undef, 7 
+  %137 = insertvalue {double, double, double, double, double, double, double, i64, i1} %136, i1 0, 8 
+  ret {double, double, double, double, double, double, double, i64, i1} %137 
+}
+
+
+define external fastcc  i64 @"nbody.bodylist.empty<0>"()    {
+entry:
+  ret i64 0 
+}
+
+
+define external fastcc  {double, i1} @"nbody.bodylist.m<0>"(i64  %"$rec#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %138 = add   i64 %"$rec#0", 48 
+  %139 = inttoptr i64 %138 to double* 
+  %140 = getelementptr  double, double* %139, i64 0 
+  %141 = load  double, double* %140 
+  %142 = insertvalue {double, i1} undef, double %141, 0 
+  %143 = insertvalue {double, i1} %142, i1 1, 1 
+  ret {double, i1} %143 
+if.else:
+  %144 = insertvalue {double, i1} undef, double undef, 0 
+  %145 = insertvalue {double, i1} %144, i1 0, 1 
+  ret {double, i1} %145 
+}
+
+
+define external fastcc  {i64, i1} @"nbody.bodylist.m<1>"(i64  %"$rec#0", double  %"$field#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %146 = trunc i64 64 to i32  
+  %147 = tail call ccc  i8*  @wybe_malloc(i32  %146)  
+  %148 = ptrtoint i8* %147 to i64 
+  %149 = inttoptr i64 %148 to i8* 
+  %150 = inttoptr i64 %"$rec#0" to i8* 
+  %151 = trunc i64 64 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %149, i8*  %150, i32  %151, i32  8, i1  0)  
+  %152 = add   i64 %148, 48 
+  %153 = inttoptr i64 %152 to double* 
+  %154 = getelementptr  double, double* %153, i64 0 
+  store  double %"$field#0", double* %154 
+  %155 = insertvalue {i64, i1} undef, i64 %148, 0 
+  %156 = insertvalue {i64, i1} %155, i1 1, 1 
+  ret {i64, i1} %156 
+if.else:
+  %157 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %158 = insertvalue {i64, i1} %157, i1 0, 1 
+  ret {i64, i1} %158 
+}
+
+
+define external fastcc  {i64, i1} @"nbody.bodylist.tail<0>"(i64  %"$rec#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %159 = add   i64 %"$rec#0", 56 
+  %160 = inttoptr i64 %159 to i64* 
+  %161 = getelementptr  i64, i64* %160, i64 0 
+  %162 = load  i64, i64* %161 
+  %163 = insertvalue {i64, i1} undef, i64 %162, 0 
+  %164 = insertvalue {i64, i1} %163, i1 1, 1 
+  ret {i64, i1} %164 
+if.else:
+  %165 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %166 = insertvalue {i64, i1} %165, i1 0, 1 
+  ret {i64, i1} %166 
+}
+
+
+define external fastcc  {i64, i1} @"nbody.bodylist.tail<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %167 = trunc i64 64 to i32  
+  %168 = tail call ccc  i8*  @wybe_malloc(i32  %167)  
+  %169 = ptrtoint i8* %168 to i64 
+  %170 = inttoptr i64 %169 to i8* 
+  %171 = inttoptr i64 %"$rec#0" to i8* 
+  %172 = trunc i64 64 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %170, i8*  %171, i32  %172, i32  8, i1  0)  
+  %173 = add   i64 %169, 56 
+  %174 = inttoptr i64 %173 to i64* 
+  %175 = getelementptr  i64, i64* %174, i64 0 
+  store  i64 %"$field#0", i64* %175 
+  %176 = insertvalue {i64, i1} undef, i64 %169, 0 
+  %177 = insertvalue {i64, i1} %176, i1 1, 1 
+  ret {i64, i1} %177 
+if.else:
+  %178 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %179 = insertvalue {i64, i1} %178, i1 0, 1 
+  ret {i64, i1} %179 
+}
+
+
+define external fastcc  {double, i1} @"nbody.bodylist.vx<0>"(i64  %"$rec#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %180 = add   i64 %"$rec#0", 24 
+  %181 = inttoptr i64 %180 to double* 
+  %182 = getelementptr  double, double* %181, i64 0 
+  %183 = load  double, double* %182 
+  %184 = insertvalue {double, i1} undef, double %183, 0 
+  %185 = insertvalue {double, i1} %184, i1 1, 1 
+  ret {double, i1} %185 
+if.else:
+  %186 = insertvalue {double, i1} undef, double undef, 0 
+  %187 = insertvalue {double, i1} %186, i1 0, 1 
+  ret {double, i1} %187 
+}
+
+
+define external fastcc  {i64, i1} @"nbody.bodylist.vx<1>"(i64  %"$rec#0", double  %"$field#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %188 = trunc i64 64 to i32  
+  %189 = tail call ccc  i8*  @wybe_malloc(i32  %188)  
+  %190 = ptrtoint i8* %189 to i64 
+  %191 = inttoptr i64 %190 to i8* 
+  %192 = inttoptr i64 %"$rec#0" to i8* 
+  %193 = trunc i64 64 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %191, i8*  %192, i32  %193, i32  8, i1  0)  
+  %194 = add   i64 %190, 24 
+  %195 = inttoptr i64 %194 to double* 
+  %196 = getelementptr  double, double* %195, i64 0 
+  store  double %"$field#0", double* %196 
+  %197 = insertvalue {i64, i1} undef, i64 %190, 0 
+  %198 = insertvalue {i64, i1} %197, i1 1, 1 
+  ret {i64, i1} %198 
+if.else:
+  %199 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %200 = insertvalue {i64, i1} %199, i1 0, 1 
+  ret {i64, i1} %200 
+}
+
+
+define external fastcc  {double, i1} @"nbody.bodylist.vy<0>"(i64  %"$rec#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %201 = add   i64 %"$rec#0", 32 
+  %202 = inttoptr i64 %201 to double* 
+  %203 = getelementptr  double, double* %202, i64 0 
+  %204 = load  double, double* %203 
+  %205 = insertvalue {double, i1} undef, double %204, 0 
+  %206 = insertvalue {double, i1} %205, i1 1, 1 
+  ret {double, i1} %206 
+if.else:
+  %207 = insertvalue {double, i1} undef, double undef, 0 
+  %208 = insertvalue {double, i1} %207, i1 0, 1 
+  ret {double, i1} %208 
+}
+
+
+define external fastcc  {i64, i1} @"nbody.bodylist.vy<1>"(i64  %"$rec#0", double  %"$field#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %209 = trunc i64 64 to i32  
+  %210 = tail call ccc  i8*  @wybe_malloc(i32  %209)  
+  %211 = ptrtoint i8* %210 to i64 
+  %212 = inttoptr i64 %211 to i8* 
+  %213 = inttoptr i64 %"$rec#0" to i8* 
+  %214 = trunc i64 64 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %212, i8*  %213, i32  %214, i32  8, i1  0)  
+  %215 = add   i64 %211, 32 
+  %216 = inttoptr i64 %215 to double* 
+  %217 = getelementptr  double, double* %216, i64 0 
+  store  double %"$field#0", double* %217 
+  %218 = insertvalue {i64, i1} undef, i64 %211, 0 
+  %219 = insertvalue {i64, i1} %218, i1 1, 1 
+  ret {i64, i1} %219 
+if.else:
+  %220 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %221 = insertvalue {i64, i1} %220, i1 0, 1 
+  ret {i64, i1} %221 
+}
+
+
+define external fastcc  {double, i1} @"nbody.bodylist.vz<0>"(i64  %"$rec#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %222 = add   i64 %"$rec#0", 40 
+  %223 = inttoptr i64 %222 to double* 
+  %224 = getelementptr  double, double* %223, i64 0 
+  %225 = load  double, double* %224 
+  %226 = insertvalue {double, i1} undef, double %225, 0 
+  %227 = insertvalue {double, i1} %226, i1 1, 1 
+  ret {double, i1} %227 
+if.else:
+  %228 = insertvalue {double, i1} undef, double undef, 0 
+  %229 = insertvalue {double, i1} %228, i1 0, 1 
+  ret {double, i1} %229 
+}
+
+
+define external fastcc  {i64, i1} @"nbody.bodylist.vz<1>"(i64  %"$rec#0", double  %"$field#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %230 = trunc i64 64 to i32  
+  %231 = tail call ccc  i8*  @wybe_malloc(i32  %230)  
+  %232 = ptrtoint i8* %231 to i64 
+  %233 = inttoptr i64 %232 to i8* 
+  %234 = inttoptr i64 %"$rec#0" to i8* 
+  %235 = trunc i64 64 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %233, i8*  %234, i32  %235, i32  8, i1  0)  
+  %236 = add   i64 %232, 40 
+  %237 = inttoptr i64 %236 to double* 
+  %238 = getelementptr  double, double* %237, i64 0 
+  store  double %"$field#0", double* %238 
+  %239 = insertvalue {i64, i1} undef, i64 %232, 0 
+  %240 = insertvalue {i64, i1} %239, i1 1, 1 
+  ret {i64, i1} %240 
+if.else:
+  %241 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %242 = insertvalue {i64, i1} %241, i1 0, 1 
+  ret {i64, i1} %242 
+}
+
+
+define external fastcc  {double, i1} @"nbody.bodylist.x<0>"(i64  %"$rec#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %243 = inttoptr i64 %"$rec#0" to double* 
+  %244 = getelementptr  double, double* %243, i64 0 
+  %245 = load  double, double* %244 
+  %246 = insertvalue {double, i1} undef, double %245, 0 
+  %247 = insertvalue {double, i1} %246, i1 1, 1 
+  ret {double, i1} %247 
+if.else:
+  %248 = insertvalue {double, i1} undef, double undef, 0 
+  %249 = insertvalue {double, i1} %248, i1 0, 1 
+  ret {double, i1} %249 
+}
+
+
+define external fastcc  {i64, i1} @"nbody.bodylist.x<1>"(i64  %"$rec#0", double  %"$field#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %250 = trunc i64 64 to i32  
+  %251 = tail call ccc  i8*  @wybe_malloc(i32  %250)  
+  %252 = ptrtoint i8* %251 to i64 
+  %253 = inttoptr i64 %252 to i8* 
+  %254 = inttoptr i64 %"$rec#0" to i8* 
+  %255 = trunc i64 64 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %253, i8*  %254, i32  %255, i32  8, i1  0)  
+  %256 = inttoptr i64 %252 to double* 
+  %257 = getelementptr  double, double* %256, i64 0 
+  store  double %"$field#0", double* %257 
+  %258 = insertvalue {i64, i1} undef, i64 %252, 0 
+  %259 = insertvalue {i64, i1} %258, i1 1, 1 
+  ret {i64, i1} %259 
+if.else:
+  %260 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %261 = insertvalue {i64, i1} %260, i1 0, 1 
+  ret {i64, i1} %261 
+}
+
+
+define external fastcc  {double, i1} @"nbody.bodylist.y<0>"(i64  %"$rec#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %262 = add   i64 %"$rec#0", 8 
+  %263 = inttoptr i64 %262 to double* 
+  %264 = getelementptr  double, double* %263, i64 0 
+  %265 = load  double, double* %264 
+  %266 = insertvalue {double, i1} undef, double %265, 0 
+  %267 = insertvalue {double, i1} %266, i1 1, 1 
+  ret {double, i1} %267 
+if.else:
+  %268 = insertvalue {double, i1} undef, double undef, 0 
+  %269 = insertvalue {double, i1} %268, i1 0, 1 
+  ret {double, i1} %269 
+}
+
+
+define external fastcc  {i64, i1} @"nbody.bodylist.y<1>"(i64  %"$rec#0", double  %"$field#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %270 = trunc i64 64 to i32  
+  %271 = tail call ccc  i8*  @wybe_malloc(i32  %270)  
+  %272 = ptrtoint i8* %271 to i64 
+  %273 = inttoptr i64 %272 to i8* 
+  %274 = inttoptr i64 %"$rec#0" to i8* 
+  %275 = trunc i64 64 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %273, i8*  %274, i32  %275, i32  8, i1  0)  
+  %276 = add   i64 %272, 8 
+  %277 = inttoptr i64 %276 to double* 
+  %278 = getelementptr  double, double* %277, i64 0 
+  store  double %"$field#0", double* %278 
+  %279 = insertvalue {i64, i1} undef, i64 %272, 0 
+  %280 = insertvalue {i64, i1} %279, i1 1, 1 
+  ret {i64, i1} %280 
+if.else:
+  %281 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %282 = insertvalue {i64, i1} %281, i1 0, 1 
+  ret {i64, i1} %282 
+}
+
+
+define external fastcc  {double, i1} @"nbody.bodylist.z<0>"(i64  %"$rec#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %283 = add   i64 %"$rec#0", 16 
+  %284 = inttoptr i64 %283 to double* 
+  %285 = getelementptr  double, double* %284, i64 0 
+  %286 = load  double, double* %285 
+  %287 = insertvalue {double, i1} undef, double %286, 0 
+  %288 = insertvalue {double, i1} %287, i1 1, 1 
+  ret {double, i1} %288 
+if.else:
+  %289 = insertvalue {double, i1} undef, double undef, 0 
+  %290 = insertvalue {double, i1} %289, i1 0, 1 
+  ret {double, i1} %290 
+}
+
+
+define external fastcc  {i64, i1} @"nbody.bodylist.z<1>"(i64  %"$rec#0", double  %"$field#0")    {
+entry:
+  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
+if.then:
+  %291 = trunc i64 64 to i32  
+  %292 = tail call ccc  i8*  @wybe_malloc(i32  %291)  
+  %293 = ptrtoint i8* %292 to i64 
+  %294 = inttoptr i64 %293 to i8* 
+  %295 = inttoptr i64 %"$rec#0" to i8* 
+  %296 = trunc i64 64 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %294, i8*  %295, i32  %296, i32  8, i1  0)  
+  %297 = add   i64 %293, 16 
+  %298 = inttoptr i64 %297 to double* 
+  %299 = getelementptr  double, double* %298, i64 0 
+  store  double %"$field#0", double* %299 
+  %300 = insertvalue {i64, i1} undef, i64 %293, 0 
+  %301 = insertvalue {i64, i1} %300, i1 1, 1 
+  ret {i64, i1} %301 
+if.else:
+  %302 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %303 = insertvalue {i64, i1} %302, i1 0, 1 
+  ret {i64, i1} %303 
+}
