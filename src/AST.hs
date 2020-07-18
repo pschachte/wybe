@@ -331,6 +331,7 @@ data CompilerState = Compiler {
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
   loadCount :: Int,              -- ^counter of module load order
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
+  recentlyLoaded :: [ModSpec],   -- ^TODO
   deferred :: [Module],          -- ^modules in the same SCC as the current one
   extractedMods :: Map ModSpec Module
 }
@@ -342,7 +343,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp
-                        (Compiler opts "" [] False Map.empty 0 [] [] Map.empty)
+                        (Compiler opts "" [] False Map.empty 0 [] [] [] Map.empty)
 
 
 -- |Apply some transformation function to the compiler state.
@@ -610,6 +611,8 @@ exitModule = do
               ++ " with imports:\n        "
               ++ intercalate "\n        "
                  [showUse 20 mod dep | (mod,dep) <- imports]
+    -- TODO: reexitModule don't return mod
+    modify (\comp -> comp { recentlyLoaded = currMod:(recentlyLoaded comp) })
     mod <- reexitModule
     let num = thisLoadNum mod
     logAST $ "Exiting module " ++ showModSpec (modSpec mod)

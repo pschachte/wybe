@@ -1,5 +1,5 @@
 --  File     : Builder.hs
---  Author   : Peter Schachte
+--  Author   : Peter Schachte, Modified by Zed(Zijun) Chen.
 --  Purpose  : Handles compilation at the module level.
 --  Copyright: (c) 2012-2015 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
@@ -158,7 +158,7 @@
 --  END MAJOR DOC
 
 -- |Code to oversee the compilation process.
-module Builder (buildTargets, compileModule) where
+module Builder (buildTargets) where
 
 import           Analysis
 import           AST
@@ -212,8 +212,6 @@ import qualified LLVM.AST              as LLVMAST
 -- |Build the specified targets with the specified options.
 buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
-    possDirs <- gets (optLibDirs . options)
-    -- load library first
     mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
     showMessages
     stopOnError "building outputs"
@@ -229,6 +227,7 @@ buildTarget force target = do
     tmpDir <- liftIO $ createTempDirectory sysTmpDir "wybe"
     logBuild $ "Temp Directory: " ++ tmpDir
     updateCompiler (\st -> st { tmpDir = tmpDir })
+
     Informational <!> "Building target: " ++ target
     let tType = targetType target
     case tType of
@@ -237,7 +236,19 @@ buildTarget force target = do
         _ -> do
             let modname = takeBaseName target
             let dir = takeDirectory target
-            built <- buildModuleIfNeeded force [modname] [dir]
+            -- target should be in the working directory, lib dir will be added
+            -- later
+            (built, depGraph) <- loadAllNeededModules force [modname] [dir]
+
+            -- topological sort (bottom-up)
+            let orderedSCCs = List.map (\(m, ms) -> (m, m, ms)) depGraph
+                                |> Graph.stronglyConnComp
+                                |> List.map sccElts
+            
+            
+            compileModBottomUpPass orderedSCCs
+
+
             targetExists <- (liftIO . doesFileExist) target
             -- XXX not quite right:  we shouldn't build executable or archive
             -- if it already exists and none of the dependencies have changed
@@ -261,6 +272,12 @@ buildTarget force target = do
     liftIO $ removeDirectoryRecursive tmpDir
 
 
+compileModBottomUpPass orderedSCCs = do
+    mapM_ (\scc ->
+        compileModSCC scc
+        ) orderedSCCs
+    return ()
+
 -- |Compile or load a module dependency.
 buildDependency :: ModSpec -> Compiler Bool
 buildDependency modspec = do
@@ -269,6 +286,39 @@ buildDependency modspec = do
     possDirs <- gets (optLibDirs . options)
     localDir <- getDirectory
     buildModuleIfNeeded force modspec (localDir:possDirs)
+
+
+loadAllNeededModules force rootMod possDirs = do
+    let concatMapM f l = fmap concat (mapM f l)
+
+    buildModuleIfNeeded force rootMod possDirs
+    stopOnError $ "loading module: " ++ showModSpec rootMod
+
+    mods <- gets recentlyLoaded
+    updateCompiler (\st -> st {recentlyLoaded = []})
+    logBuild $ "~=~" ++ showModSpecs mods
+
+    -- add lib dir if it's not in "possDirs"
+    libDirs <- gets (optLibDirs . options)
+    let possDirs' = case possDirs of
+            [dir] -> dir:libDirs
+            _     -> possDirs
+
+    depGraph <- concatMapM (\m -> do
+        reenterModule m
+        
+        imports <- getModuleImplementationField (keys . modImports)
+        logBuild $ "~=~ imports:" ++ showModSpecs imports
+        logBuild $ "building dependencies: " ++ showModSpecs imports
+        depGraph <- concatMapM (\importMod -> do
+            (_, depGraph) <- loadAllNeededModules force importMod possDirs'
+            return depGraph
+            ) imports
+        
+        _ <- reexitModule
+        return $ (m, imports):depGraph
+        ) mods
+    return (True, depGraph)
 
 
 -- | Run compilation passes on a single module specified by [modspec] resulting
@@ -297,9 +347,11 @@ buildModuleIfNeeded force modspec possDirs = do
         if isJust maybemod
           then return False -- already loaded:  nothing more to do
           else do
-            srcOb <- moduleSources modspec possDirs
-            logBuild $ show srcOb
-            case srcOb of
+            -- XXX the "modSrc" might pointing at the parent mod of "modspec".
+            -- We doesn't handle that correctly for now.
+            modSrc <- moduleSources modspec possDirs
+            logBuild $ show modSrc
+            case modSrc of
                 NoSource -> do
                     Error <!> "Could not find source for module " ++
                               showModSpec modspec
@@ -321,7 +373,7 @@ buildModuleIfNeeded force modspec possDirs = do
 
                 ModuleSource (Just srcfile) Nothing Nothing Nothing -> do
                     -- only source file exists
-                    buildModule modspec srcfile
+                    loadModuleFromSrcFile modspec srcfile
                     return True
 
                 ModuleSource (Just srcfile) (Just objfile) Nothing Nothing -> do
@@ -330,8 +382,7 @@ buildModuleIfNeeded force modspec possDirs = do
                     dstDate <- (liftIO . getModificationTime) objfile
                     if force || srcDate > dstDate
                       then do
-                        unless force (extractModules objfile)
-                        buildModule modspec srcfile
+                        loadModuleFromSrcFile modspec srcfile
                         return True
                       else do
                         loaded <- loadModuleFromObjFile modspec objfile
@@ -339,7 +390,7 @@ buildModuleIfNeeded force modspec possDirs = do
                             -- Loading failed, fallback on source building
                             logBuild $ "Falling back on building " ++
                                 showModSpec modspec
-                            buildModule modspec srcfile
+                            loadModuleFromSrcFile modspec srcfile
                         return $ not loaded
 
                 ModuleSource Nothing Nothing (Just dir) _ -> do
@@ -369,29 +420,16 @@ buildModuleIfNeeded force modspec possDirs = do
 
 
 -- |Actually load and compile the module
-buildModule :: ModSpec -> FilePath -> Compiler ()
-buildModule mspec srcfile = do
+loadModuleFromSrcFile :: ModSpec -> FilePath -> Compiler ()
+loadModuleFromSrcFile mspec srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
     -- let parseTree = parse tokens
     let parseTree = parseWybe tokens srcfile
     either (\er -> do
                liftIO $ putStrLn $ "Syntax Error: " ++ show er
                liftIO exitFailure)
-           (compileModule srcfile mspec Nothing)
+           (compileParseTree srcfile mspec Nothing)
            parseTree
-    -- XXX Rethink parse tree hashing
-    -- let currHash = hashItems parseTree
-    -- extractedHash <- extractedItemsHash mspec
-    -- case extractedHash of
-    --     Nothing -> compileModule srcfile mspec Nothing parseTree
-    --     Just otherHash ->
-    --         if currHash == otherHash
-    --         then do
-    --             logBuild $ "... Hash for module " ++ showModSpec mspec ++
-    --                 " matches the old hash."
-    --             _ <- loadModuleFromObjFile mspec objfile
-    --             return ()
-    --         else compileModule srcfile mspec Nothing parseTree
 
 
 
@@ -432,8 +470,8 @@ buildDirectory dir dirmod = do
 
 
 -- |Compile a file module given the parsed source file contents.
-compileModule :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
-compileModule source modspec params items = do
+compileParseTree :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
+compileParseTree source modspec params items = do
     logBuild $ "===> Compiling module " ++ showModSpec modspec
     enterModule source modspec (Just modspec) params
     -- Hash the parse items and store it in the module
@@ -452,12 +490,13 @@ compileModule source modspec params items = do
     -- relationship explicitly before doing any compilation.
     Normalise.normalise items
     stopOnError $ "preliminary processing of module " ++ showModSpec modspec
-    loadImports
+    -- loadImports
     stopOnError $ "handling imports for module " ++ showModSpec modspec
     mods <- exitModule -- may be empty list if module is mutually dependent
     logBuild $ "<=== finished compling module " ++ showModSpec modspec
     logBuild $ "     module dependency SCC: " ++ showModSpecs mods
-    compileModSCC mods
+    -- compileModSCC mods
+
 
 
 extractedItemsHash :: ModSpec -> Compiler (Maybe String)
