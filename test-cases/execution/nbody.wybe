@@ -199,3 +199,7 @@ offset_momentum(!bodies)
 advance(0.01, n, !bodies)
 # !print_bodylist(bodies)
 !report_energy(bodies)
+!nl
+!malloc_count(?mc)
+!println("malloc count: (should be 5005 with multi-specz and 10006 without it)")
+!println(mc)
