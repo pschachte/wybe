@@ -272,9 +272,23 @@ buildTarget force target = do
     liftIO $ removeDirectoryRecursive tmpDir
 
 
+-- |Return whether the given SCC is needed for compilation.
+-- XXX the current approach is incorrect. We need to consider changes of their
+-- dependency. Related: https://github.com/pschachte/wybe/issues/66
+isCompileNeeded :: [ModSpec] -> Compiler Bool
+isCompileNeeded modSCC = do
+    unchanged <- gets unchangedMods
+    return $ not $ List.all (`Set.member` unchanged) modSCC
+
+
 compileModBottomUpPass orderedSCCs = do
-    mapM_ (\scc ->
-        compileModSCC scc
+    mapM_ (\scc -> do
+        needed <- isCompileNeeded scc
+        if needed
+        then do
+            compileModSCC scc
+        else do
+            return ()
         ) orderedSCCs
     return ()
 
@@ -550,28 +564,54 @@ loadModuleFromObjFile required objfile = do
         -- Some module was extracted
         else do
         logBuild $ "=== >>> Extracted Module bytes from " ++ objfile
-        let extractedSpecs = List.map modSpec extracted
-        logBuild $ "=== >>> Found modules: " ++ showModSpecs extractedSpecs
+        logBuild $ "=== >>> Found modules: "
+                ++ showModSpecs (List.map modSpec extracted)
+        
+        -- This object should contain the required mod (parent mod) and some
+        -- sub mods.
+        let (requiredMods, subMods) = List.partition (\m ->
+                modSpec m == required) extracted
+
         -- Check if the `required` modspec is in the extracted ones.
-        if required `elem` extractedSpecs
-            then do
-            -- Collect the imports
-            imports <- concat <$> mapM (placeExtractedModule objfile) extracted
-            logBuild $ "=== >>> Building dependencies: "
-                ++ showModSpecs imports
-            -- Place the super mod under compilation while
-            -- dependencies are built
-            case extracted of
-              (superMod:_) -> do
-                modify (\comp -> let ms = superMod : underCompilation comp
-                                 in comp { underCompilation = ms })
-                built <- or <$> mapM buildDependency imports
-                _ <- reexitModule
-                logBuild $ "=== <<< Extracted Module put in its place from "
-                           ++ show objfile
-                return True
-              [] -> shouldnt "no LPVM extracted from object file"
-            else
+        if List.length requiredMods == 1
+        then do
+            let requiredMod = head requiredMods
+            -- TODO:
+            -- set modOrigin to srcfile if it exists, use objfile otherwise
+            let mOrigin = objfile
+                -- fromMaybe objfile srcfile
+            -- don't need to worried about root mod, it will be overridden
+            enterModule mOrigin required Nothing Nothing
+            -- replace the module
+            updateModule (\m -> requiredMod {
+                modOrigin        = modOrigin m
+            })
+            -- inserts sub modules
+            mapM_ (\mod -> do
+                let spec = modSpec mod
+                enterModule mOrigin spec Nothing Nothing
+                -- replace the module
+                updateModule (\m -> mod {
+                    thisLoadNum      = thisLoadNum m,
+                    minDependencyNum = minDependencyNum m,
+                    modOrigin        = modOrigin m
+                })
+
+                _ <- exitModule
+                return ()
+                ) subMods
+
+            loadImports
+            mods <- exitModule
+                        -- mark mods as unchanged
+            updateCompiler (\st ->
+                let unchanged = List.map modSpec extracted
+                        |> Set.fromList
+                        |> Set.union (unchangedMods st)
+                in
+                    st {unchangedMods = unchanged})
+            return True
+        else
             -- The required modspec was not part of the extracted
             -- Return false and try for building
             return False

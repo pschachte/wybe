@@ -333,7 +333,9 @@ data CompilerState = Compiler {
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
   recentlyLoaded :: [ModSpec],   -- ^TODO
   deferred :: [Module],          -- ^modules in the same SCC as the current one
-  extractedMods :: Map ModSpec Module
+  extractedMods :: Map ModSpec Module,
+  unchangedMods :: Set ModSpec   -- ^record mods that are loaded from object
+                                 --  and unchanged.
 }
 
 -- |The compiler monad is a state transformer monad carrying the
@@ -343,7 +345,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp
-                        (Compiler opts "" [] False Map.empty 0 [] [] [] Map.empty)
+                        (Compiler opts "" [] False Map.empty 0 [] [] [] Map.empty Set.empty)
 
 
 -- |Apply some transformation function to the compiler state.
