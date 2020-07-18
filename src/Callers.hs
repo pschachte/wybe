@@ -21,7 +21,7 @@ collectCallers mod = do
   procs <- getModuleImplementationField modProcs
   let procs' = Map.foldrWithKey (noteProcCallers mod) procs procs
   updateImplementation (\imp -> imp {modProcs = procs'})
-  _ <- reexitModule
+  reexitModule
   return ()
 
 

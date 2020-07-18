@@ -36,7 +36,7 @@ resourceCheckMod _ thisMod = do
         fmap unzip3 $ mapM (uncurry checkResourceDef) resources
     updateModImplementation (\imp -> imp { modResources =
                                               Map.fromAscList resources'})
-    _ <- reexitModule
+    reexitModule
     logResources $ "**** finished resource checking module "
                    ++ showModSpec thisMod
     return (or chg,concat errs)

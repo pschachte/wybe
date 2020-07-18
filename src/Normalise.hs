@@ -124,19 +124,8 @@ normaliseSubmodule name typeParams vis pos items = do
           in imp { modKnownTypes = Map.insert name set $ modKnownTypes imp })
     normalise items
     if alreadyExists
-      then do
-        reexitModule
-        return ()
-      else do
-        modSpecs <- exitModule
-        unless (List.null modSpecs)
-          $ shouldnt $ "finish normalising submodule left modules to compile: "
-                       ++ showModSpecs modSpecs
-    -- logNormalise $ "Deferring compilation of submodules "
-    --                ++ showModSpecs modSpecs
-    -- mods <- List.map (trustFromJust "lookup submodule after normalising")
-    --         <$> mapM getLoadingModule modSpecs
-    -- deferModules mods
+    then reexitModule
+    else exitModule
     logNormalise $ "Finished normalising submodule " ++ showModSpec subModSpec
     return ()
 

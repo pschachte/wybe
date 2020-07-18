@@ -113,7 +113,7 @@ blockTransformModule thisMod =
        logBlocks $ "*** Translated Module: " ++ showModSpec thisMod
        modRec' <- getModule id
        logWrapWith '-' $ show modRec'
-       _ <- reexitModule
+       reexitModule
        logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
 

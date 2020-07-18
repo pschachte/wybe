@@ -290,7 +290,7 @@ expandRequiredSpeczVersionsByMod scc thisMod = do
             ) Set.empty procs
             |> Set.toAscList
     logTransform $ "requiredVersions: " ++ show requiredVersions
-    _ <- reexitModule
+    reexitModule
     -- Update each module based on the requirements
     let requiredVersions' = List.map (\((mod, procName, procId), version) ->
             (mod, (procName, (procId, version)))) requiredVersions
@@ -368,7 +368,7 @@ updateRequiredMultiSpeczInMod mod versions = do
                 ) procName procMap
             ) procMap (groupByFst versions)
     updateModImplementation (updateModProcs (const procMap'))
-    _ <- reexitModule
+    reexitModule
     let changed = procMap /= procMap'
     when changed 
             (logTransform $ "new specz requirements in mod: " ++ show mod)

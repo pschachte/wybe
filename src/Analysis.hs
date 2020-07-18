@@ -55,7 +55,7 @@ analyseMod _ thisMod = do
     logAnalysis $ "Module level alias changed? " ++ show (or chg)
     logAnalysis $ replicate 60 '>'
 
-    _ <- reexitModule
+    reexitModule
     return (or chg,[])
 
 

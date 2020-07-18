@@ -34,7 +34,7 @@ module AST (
   Module(..), ModuleInterface(..), ModuleImplementation(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules,
-  enterModule, reenterModule, exitModule, reexitModule, deferModules, inModule,
+  enterModule, reenterModule, exitModule, reexitModule, inModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
@@ -57,7 +57,6 @@ module AST (
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
   updateModules, updateImplementations, updateImplementation,
-  getExtractedModuleImpln,
   getModuleImplementationField, getModuleImplementation,
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
@@ -329,11 +328,8 @@ data CompilerState = Compiler {
   msgs :: [(MessageLevel, String)],  -- ^warnings, error messages, and info messages
   errorState :: Bool,            -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
-  loadCount :: Int,              -- ^counter of module load order
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
   recentlyLoaded :: [ModSpec],   -- ^TODO
-  deferred :: [Module],          -- ^modules in the same SCC as the current one
-  extractedMods :: Map ModSpec Module,
   unchangedMods :: Set ModSpec   -- ^record mods that are loaded from object
                                  --  and unchanged.
 }
@@ -345,7 +341,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp
-                        (Compiler opts "" [] False Map.empty 0 [] [] [] Map.empty Set.empty)
+                        (Compiler opts "" [] False Map.empty [] [] Set.empty)
 
 
 -- |Apply some transformation function to the compiler state.
@@ -568,18 +564,12 @@ enterModule source modspec rootMod params = do
     oldMod <- getLoadingModule modspec
     when (isJust oldMod)
       $ shouldnt $ "enterModule " ++ showModSpec modspec ++ " already exists"
-    count <- gets ((1+) . loadCount)
-    modify (\comp -> comp { loadCount = count })
-    logAST $ "Entering module " ++ showModSpec modspec
-             ++ " with count " ++ show count
     absSource <- liftIO $ makeAbsolute source
     modify (\comp -> let newMod = emptyModule
                                   { modOrigin        = absSource
                                   , modRootModSpec   = rootMod
                                   , modSpec          = modspec
                                   , modParams        = params
-                                  , thisLoadNum      = count
-                                  , minDependencyNum = count
                                   }
                          mods = newMod : underCompilation comp
                      in  comp { underCompilation = mods })
@@ -605,7 +595,7 @@ reenterModule modspec = do
 
 -- |Finish compilation of the current module.  This matches an earlier
 -- call to enterModule.
-exitModule :: Compiler [ModSpec]
+exitModule :: Compiler ()
 exitModule = do
     currMod <- getModuleSpec
     imports <- getModuleImplementationField (Map.assocs . modImports)
@@ -613,51 +603,19 @@ exitModule = do
               ++ " with imports:\n        "
               ++ intercalate "\n        "
                  [showUse 20 mod dep | (mod,dep) <- imports]
-    -- TODO: reexitModule don't return mod
-    modify (\comp -> comp { recentlyLoaded = currMod:(recentlyLoaded comp) })
-    mod <- reexitModule
-    let num = thisLoadNum mod
-    logAST $ "Exiting module " ++ showModSpec (modSpec mod)
-    logAST $ "    loadNum = " ++ show num ++
-           ", minDependencyNum = " ++ show (minDependencyNum mod)
-    if minDependencyNum mod < num
-      then do
-        logAST $ "not finished with module SCC: deferring module "
-                 ++ showModSpec (modSpec mod)
-        deferModules [mod]
-        return []
-      else do
-        deferred <- gets deferred
-        let (bonus,rest) = span ((==num) . minDependencyNum) deferred
-        logAST $ "finished with module SCC "
-                 ++ showModSpecs (List.map modSpec $ mod:bonus)
-        logAST $ "remaining deferred modules: "
-                 ++ showModSpecs (List.map modSpec rest)
-        modify (\comp -> comp { deferred = rest })
-        return $ List.map modSpec $ mod:bonus
+    modify (\comp -> comp { recentlyLoaded = currMod:recentlyLoaded comp })
+    reexitModule
 
 
 -- |Finish a module reentry, returning to the previous module.  This
 -- matches an earlier call to reenterModule.
-reexitModule :: Compiler Module
+reexitModule :: Compiler ()
 reexitModule = do
     mod <- getModule id
     modify
       (\comp -> comp { underCompilation = List.tail (underCompilation comp) })
     updateModules $ Map.insert (modSpec mod) mod
     logAST $ "Reexiting module " ++ showModSpec (modSpec mod)
-    return mod
-
-
--- |Add the specified module to the list of deferred modules, ie, the
--- modules in the same module dependency SCC as the current one.  This
--- is used for submodules, since they can access stuff in the parent
--- module, and the parent module can access public stuff in submodules.
-deferModules :: [Module] -> Compiler ()
-deferModules mods = do
-    logAST $ "deferred modules "
-             ++ showModSpecs (List.map modSpec mods)
-    modify (\comp -> comp { deferred = mods ++ deferred comp })
 
 
 -- | evaluate expr in the context of module mod.  Ie, reenter mod,
@@ -716,16 +674,6 @@ getModuleImplementationMaybe fn = do
   case imp of
       Nothing -> return Nothing
       Just imp' -> return $ fn imp'
-
-
-getExtractedModuleImpln :: ModSpec -> Compiler (Maybe ModuleImplementation)
-getExtractedModuleImpln mspec = do
-    maybeMod <- Map.lookup mspec <$> gets extractedMods
-    case maybeMod of
-        Nothing -> return Nothing
-        Just m -> return $ modImplementation m
-
-
 
 
 -- |Add the specified string as a message of the specified severity
@@ -913,20 +861,6 @@ addImport modspec imports = do
          in Map.insert modspec' imports' moddeps))
     when (isNothing $ importPublic imports) $
       updateInterface Public (updateDependencies (Set.insert modspec))
-    maybeMod <- gets (List.find ((==modspec) . modSpec) . underCompilation)
-    currMod <- getModuleSpec
-    logAST $ "Noting import of " ++ showModSpec modspec ++
-           ", " ++ (if isNothing maybeMod then "NOT " else "") ++
-           "currently being loaded, into " ++ showModSpec currMod
-    case maybeMod of
-        Nothing -> return ()  -- not currently loading dependency
-        Just mod' -> do
-            logAST $ "Limiting minDependencyNum to " ++
-                    show (thisLoadNum mod')
-            updateModule (\m -> m { minDependencyNum =
-                                        min (thisLoadNum mod')
-                                            (minDependencyNum m) })
-
 
 
 -- |Add the specified proc definition to the current module.
@@ -1073,8 +1007,6 @@ data Module = Module {
   modInterface :: ModuleInterface, -- ^The public face of this module
   modImplementation :: Maybe ModuleImplementation,
                                    -- ^the module's implementation
-  thisLoadNum :: Int,              -- ^the loadCount when loading this module
-  minDependencyNum :: Int,         -- ^the smallest loadNum of all dependencies
   procCount :: Int,                -- ^a counter for gensym-ed proc names
   stmtDecls :: [Placed Stmt],      -- ^top-level statements in this module
   itemsHash :: Maybe String        -- ^map of proc name to its hash
@@ -1093,8 +1025,6 @@ emptyModule = Module
     -- , modNonConstants   = 0
     , modInterface      = emptyInterface
     , modImplementation = Just emptyImplementation
-    , thisLoadNum       = 0
-    , minDependencyNum  = 0
     , procCount         = 0
     , stmtDecls         = []
     , itemsHash         = Nothing
@@ -1326,7 +1256,7 @@ lookupTypeRepresentation (TypeSpec modSpecs name _) = do
     reenterModule modSpecs
     maybeImpln <- getModuleImplementation
     modInt <- getModuleInterface
-    _ <- reexitModule
+    reexitModule
     -- Try find the TypeRepresentation in the interface
     let maybeIntMatch = Map.lookup name (pubTypes modInt) >>= snd
     -- Try find the TypeRepresentation in the implementation if not found

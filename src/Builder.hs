@@ -329,7 +329,7 @@ loadAllNeededModules force rootMod possDirs = do
             return depGraph
             ) imports
         
-        _ <- reexitModule
+        reexitModule
         return $ (m, imports):depGraph
         ) mods
     return (True, depGraph)
@@ -474,19 +474,20 @@ buildDirectory dir dirmod = do
                 updateModSubmods $ Map.insert (last m) m
     -- The module package imports all wybe modules in its source dir
     mapM_ updateImport wybemods
-    mods <- exitModule
-    logBuild $ "Generated directory module containing" ++ showModSpecs mods
-    -- Run the compilation passes on this module package to append the
-    -- procs from the imports to the interface.
-    -- XXX Maybe run only the import pass, as there is no module source!
-    compileModSCC mods
+    -- TODO:
+    -- exitModule
+    -- logBuild $ "Generated directory module containing" ++ showModSpecs mods
+    -- -- Run the compilation passes on this module package to append the
+    -- -- procs from the imports to the interface.
+    -- -- XXX Maybe run only the import pass, as there is no module source!
+    -- compileModSCC mods
     return built
 
 
 -- |Compile a file module given the parsed source file contents.
 compileParseTree :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
 compileParseTree source modspec params items = do
-    logBuild $ "===> Compiling module " ++ showModSpec modspec
+    logBuild $ "===> Compiling module parse tree" ++ showModSpec modspec
     enterModule source modspec (Just modspec) params
     -- Hash the parse items and store it in the module
     let hashOfItems = hashItems items
@@ -504,46 +505,9 @@ compileParseTree source modspec params items = do
     -- relationship explicitly before doing any compilation.
     Normalise.normalise items
     stopOnError $ "preliminary processing of module " ++ showModSpec modspec
-    -- loadImports
-    stopOnError $ "handling imports for module " ++ showModSpec modspec
-    mods <- exitModule -- may be empty list if module is mutually dependent
-    logBuild $ "<=== finished compling module " ++ showModSpec modspec
-    logBuild $ "     module dependency SCC: " ++ showModSpecs mods
-    -- compileModSCC mods
-
-
-
-extractedItemsHash :: ModSpec -> Compiler (Maybe String)
-extractedItemsHash modspec = do
-    storedMods <- gets extractedMods
-    -- Get the force options
-    opts <- gets options
-    if optForce opts || optForceAll opts
-        then return Nothing
-        else case Map.lookup modspec storedMods of
-                 Nothing -> return Nothing
-                 Just m  -> return $ itemsHash m
-
-
--- | Parse the stored module bytestring in the 'objfile' and record them in the
--- compiler state for later access.
-extractModules :: FilePath -> Compiler ()
-extractModules objfile = do
-    logBuild $ "=== Preloading Wybe-LPVM modules from " ++ objfile
-    extracted <- loadLPVMFromObjFile objfile []
-    if List.null extracted
-        then
-        Warning <!> "Unable to preload serialised LPVM from " ++ objfile
-        else do
-        logBuild $ ">>> Extracted Module bytestring from " ++ objfile
-        let extractedSpecs = List.map modSpec extracted
-        logBuild $ "+++ Recording modules: " ++ showModSpecs extractedSpecs
-        -- Add the extracted modules in the 'objectModules' Map
-        exMods <- gets extractedMods
-        let addMod m = Map.insert (modSpec m) m
-        let exMods' = List.foldr addMod exMods extracted
-        modify (\s -> s { extractedMods = exMods' })
-
+    exitModule
+    logBuild $ "<=== finished Compiling module parse tree"
+            ++ showModSpec modspec
 
 
 -- | Load all serialised modules present in the LPVM section of the object
@@ -592,17 +556,15 @@ loadModuleFromObjFile required objfile = do
                 enterModule mOrigin spec Nothing Nothing
                 -- replace the module
                 updateModule (\m -> mod {
-                    thisLoadNum      = thisLoadNum m,
-                    minDependencyNum = minDependencyNum m,
                     modOrigin        = modOrigin m
                 })
 
-                _ <- exitModule
+                exitModule
                 return ()
                 ) subMods
 
             loadImports
-            mods <- exitModule
+            exitModule
                         -- mark mods as unchanged
             updateCompiler (\st ->
                 let unchanged = List.map modSpec extracted
@@ -630,23 +592,6 @@ loadLPVMFromObjFile objFile required = do
             mods <- decodeModule required modBS 
             unless (List.null mods) $ logMsg Builder "Decoding successful!"
             return $ List.map (\m -> m { modOrigin = objFile } ) mods
-
-
-placeExtractedModule :: FilePath -> Module -> Compiler [ModSpec]
-placeExtractedModule objFile thisMod = do
-    let modspec = modSpec thisMod
-    count <- gets ((1+) . loadCount)
-    modify (\comp -> comp { loadCount = count })
-    let loadMod = thisMod { thisLoadNum = count
-                          , minDependencyNum = count }
-    updateModules $ Map.insert modspec loadMod
-    -- Load the dependencies
-    let thisModImpln = trustFromJust
-            "==== >>> Pulling Module implementation from loaded module"
-            (modImplementation loadMod)
-    let imports = (keys . modImports) thisModImpln
-    return imports
-
 
 
 -- | Compile and build modules inside a folder, compacting everything into
@@ -802,7 +747,7 @@ transformModuleProcs trans thisMod = do
         (\imp -> imp { modProcs = Map.union
                                   (Map.fromList $ zip names procs')
                                   (modProcs imp) })
-    _ <- reexitModule
+    reexitModule
     logBuild $ "**** Re-exiting module " ++ showModSpec thisMod
     return ()
 
@@ -838,7 +783,7 @@ handleModImports _ thisMod = do
     kResources' <- getModuleImplementationField modKnownResources
     kProcs'     <- getModuleImplementationField modKnownProcs
     iface'      <- getModuleInterface
-    _           <- reexitModule
+    reexitModule
     return (kTypes/=kTypes' || kResources/=kResources' ||
             kProcs/=kProcs' || iface/=iface',[])
 
@@ -878,7 +823,8 @@ buildExecutable targetMod target = do
             mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
                   mainImports
             addProcDef mainProc
-            mods <- exitModule
+            exitModule
+            let mods = [[]]
             compileModSCC mods
             logDump FinalDump FinalDump "BUILDING MAIN"
             let mainMod = case mods of
@@ -1006,7 +952,7 @@ loadObjectFile thisMod =
      -- Check if we need to re-emit object file
      rebuild <- objectReBuildNeeded thisMod dir
      when rebuild $ emitObjectFile thisMod objFile
-     _ <- reexitModule
+     reexitModule
      return objFile
 
 
