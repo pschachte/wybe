@@ -320,20 +320,29 @@ loadAllNeededModules force rootMod possDirs = do
 
     depGraph <- concatMapM (\m -> do
         reenterModule m
-        
         imports <- getModuleImplementationField (keys . modImports)
+        isPkg <- getModule isPackage
+        origin <- getModule modOrigin
+        reexitModule
+        -- if the mod is a package (directory), then we need to change the
+        -- search directory for its imports
+        let possDirs'' = if isPkg
+            then [takeDirectory origin]
+            else possDirs'
+        
         logBuild $ "~=~ imports:" ++ showModSpecs imports
         logBuild $ "building dependencies: " ++ showModSpecs imports
         depGraph <- concatMapM (\importMod -> do
-            (_, depGraph) <- loadAllNeededModules force importMod possDirs'
+            (_, depGraph) <- loadAllNeededModules force importMod possDirs''
             return depGraph
             ) imports
         
-        reexitModule
         return $ (m, imports):depGraph
         ) mods
     return (True, depGraph)
 
+
+-- TODO: fix the compile flag
 
 -- | Run compilation passes on a single module specified by [modspec] resulting
 -- in the LPVM and LLVM forms of the module to be placed in the Compiler State
@@ -461,11 +470,11 @@ buildDirectory dir dirmod = do
     wybemods <- liftIO $ List.map (makeMod . dropExtension)
         <$> wybeSourcesInDir dir
     -- Build the above list of modules
-    opts <- gets options
-    let force = optForceAll opts || optForce opts
-    -- quick shortcut to build a module
-    let build m = buildModuleIfNeeded force m [takeDirectory dir]
-    built <- or <$> mapM build wybemods
+    -- opts <- gets options
+    -- let force = optForceAll opts || optForce opts
+    -- -- quick shortcut to build a module
+    -- let build m = buildModuleIfNeeded force m [takeDirectory dir]
+    -- built <- or <$> mapM build wybemods
 
     -- Helper to add new import of `m` to current module
     let updateImport m = do
@@ -474,14 +483,12 @@ buildDirectory dir dirmod = do
                 updateModSubmods $ Map.insert (last m) m
     -- The module package imports all wybe modules in its source dir
     mapM_ updateImport wybemods
-    -- TODO:
-    -- exitModule
-    -- logBuild $ "Generated directory module containing" ++ showModSpecs mods
-    -- -- Run the compilation passes on this module package to append the
-    -- -- procs from the imports to the interface.
-    -- -- XXX Maybe run only the import pass, as there is no module source!
-    -- compileModSCC mods
-    return built
+    exitModule
+    logBuild $ "Generated directory module containing" ++ showModSpecs wybemods
+    -- Run the compilation passes on this module package to append the
+    -- procs from the imports to the interface.
+    -- XXX Maybe run only the import pass, as there is no module source!
+    return True
 
 
 -- |Compile a file module given the parsed source file contents.

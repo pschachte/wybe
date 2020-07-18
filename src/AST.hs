@@ -2945,6 +2945,7 @@ data EncodedLPVM = EncodedLPVM ModuleIndex [Module]
                    deriving (Generic)
 
 
+-- TODO: Why we need this index
 type ModuleIndex = [(ModSpec, FilePath)]
 
 makeEncodedLPVM :: [Module] -> EncodedLPVM
