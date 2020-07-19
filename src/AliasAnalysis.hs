@@ -10,8 +10,8 @@
 module AliasAnalysis (
     AliasMapLocal, AliasMapLocalItem(..), aliasSccBottomUp, currentAliasInfo,
     isAliasInfoChanged, updateAliasedByPrim, isArgVarInteresting,
-    pairArgVarWithParam, isArgVarUsedOnceInArgs,
-    DeadCells, updateDeadCellsByAccessArgs, assignDeadCellsByAllocArgs
+    isArgVarUsedOnceInArgs, DeadCells, updateDeadCellsByAccessArgs,
+    assignDeadCellsByAllocArgs
     ) where
 
 import           AST
@@ -26,21 +26,12 @@ import           Options       (LogSelection (Analysis))
 import           Util
 
 
--- This type is for local use only. After the analysis, it will be converted to 
--- "AliasMultiSpeczInfo" and stored in LPVM module. It's almost the same as
--- "AliasMultiSpeczInfo" but it use "Set" so it can be easier to use during
--- analysis. Original definition can be found in "AST.hs".
--- More on this can be found under the 
--- "Global Level Aliasing Analysis" section below.
-type AliasMultiSpeczInfoLocal = (Set PrimVarName, AliasMultiSpeczDep)
-
-
 -- This "AliasMapLocal" is used during analysis and it will be converted to
 -- "AliasMap" (defined in "AST.hs") and stored in LPVM module.
 -- The "AliasMap" records the relation between parameters of each procedure.
 -- The "AliasMapLocal" records all variables during the analysis. "LiveVar" is
 -- for variables, it can be added to and removed from the map during analysis.
--- For parameters, we consider it's a nomarl variable ("LiveVar") aliased with 
+-- For parameters, we consider it's a normal variable ("LiveVar") aliased with 
 -- something outside the procedure scope ("AliasByParam" / "MaybeAliasByParam").
 -- "AliasByParam" and "MaybeAliasByParam" won't be removed during the analysis,
 -- but if the existence of a "MaybeAliasByParam" can change the outcome then we
@@ -58,11 +49,15 @@ type AliasMapLocal = DisjointSet AliasMapLocalItem
 -- the "Dead Memory Cell Analysis" section below.
 -- Each reusable cell is recorded as "(varName, requiredParams)"". "varName" is
 -- the name of the variable that can be reused and requiredParams is a list of 
--- parameters that need to be non-aliased before reusing that cell (casused by
+-- parameters that need to be non-aliased before reusing that cell (caused by
 -- "MaybeAliasByParam").
 type DeadCells = Map TypeSpec [(PrimVarName, [PrimVarName])]
 
-type AnalysisInfo = (AliasMapLocal, AliasMultiSpeczInfoLocal, DeadCells)
+
+-- Intermediate data structure used during the analysis
+type AnalysisInfo = 
+    (AliasMapLocal, Set InterestingCallProperty, MultiSpeczDepInfo, DeadCells)
+
 
 -- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
 aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
@@ -87,7 +82,8 @@ aliasSccBottomUp procs@(CyclicSCC multi) = do
     when (or changed) $ aliasSccBottomUp procs
 
 
-currentAliasInfo :: SCC ProcSpec -> Compiler [(AliasMap, AliasMultiSpeczInfo)]
+currentAliasInfo :: SCC ProcSpec
+        -> Compiler [(AliasMap, Set InterestingCallProperty)]
 currentAliasInfo (AcyclicSCC single) = do
     def <- getProcDef single
     let (ProcDefPrim _ _ analysis _) = procImpln def
@@ -100,16 +96,17 @@ currentAliasInfo procs@(CyclicSCC multi) =
         ) [] multi
 
 
--- extract "AliasMap" and "AliasMultiSpeczInfo" from the given
--- "ProcAnalysis"
-extractAliasInfoFromAnalysis :: ProcAnalysis -> (AliasMap, AliasMultiSpeczInfo) 
+-- extract "AliasMap" and "Set InterestingCallProperty" from 
+-- the given "ProcAnalysis"
+extractAliasInfoFromAnalysis :: ProcAnalysis
+        -> (AliasMap, Set InterestingCallProperty)
 extractAliasInfoFromAnalysis analysis = 
-    (procArgAliasMap analysis, procArgAliasMultiSpeczInfo analysis)
+    (procArgAliasMap analysis, procInterestingCallProperties analysis)
 
 -- This comparison is CRUCIAL. The underlying data struct should
 -- handle equal CORRECTLY.
-isAliasInfoChanged :: (AliasMap, AliasMultiSpeczInfo) 
-                    -> (AliasMap, AliasMultiSpeczInfo) -> Bool
+isAliasInfoChanged :: (AliasMap, Set InterestingCallProperty) 
+                    -> (AliasMap, Set InterestingCallProperty) -> Bool
 isAliasInfoChanged = (/=)
 
 -- XXX aliasProcBottomUp :: ProcSpec -> Compiler a
@@ -151,28 +148,24 @@ aliasProcDef def
                                 (MaybeAliasByParam param) am) emptyDS realParams
 
         -- Actual analysis
-        (aliasMap, multiSpeczInfo) <- 
-                aliasedByBody caller body
-                        (initAliasMap, (Set.empty, Set.empty), Map.empty)
+        (aliasMap, interestingCallProperties, multiSpeczDepInfo, _) <- 
+                aliasedByBody caller body 
+                    (initAliasMap, Set.empty, Map.empty, Map.empty)
         
         aliasMap' <- completeAliasMap caller aliasMap
-        let multiSpeczInfo' =
-                    completeMultiSpeczInfo realParams multiSpeczInfo
         -- Update proc analysis with new aliasPairs
-        let newAnalysis = oldAnalysis {
-                            procArgAliasMap = aliasMap',
-                            procArgAliasMultiSpeczInfo = multiSpeczInfo'
-                        }
+        let newAnalysis = 
+                oldAnalysis {
+                    procArgAliasMap = aliasMap',
+                    procInterestingCallProperties = interestingCallProperties,
+                    procMultiSpeczDepInfo = multiSpeczDepInfo}
         return $ 
             def { procImpln = ProcDefPrim caller body newAnalysis speczBodies}
 aliasProcDef def = return def
 
 
--- Analysis a "ProcBody"
--- It returns "AliasMap" and "AliasMultiSpeczInfoLocal" but not "DeadCells"
--- since we don't need to merge it and have the result after the analysis.
-aliasedByBody :: PrimProto -> ProcBody -> AnalysisInfo 
-        -> Compiler (AliasMapLocal, AliasMultiSpeczInfoLocal)
+-- Analysis a "ProcBody".
+aliasedByBody :: PrimProto -> ProcBody -> AnalysisInfo -> Compiler AnalysisInfo
 aliasedByBody caller body analysisInfo =
     aliasedByPrims caller body analysisInfo >>=
     aliasedByFork caller body
@@ -185,15 +178,12 @@ aliasedByPrims caller body analysisInfo = do
     -- Analyse simple prims:
     -- (only process alias pairs incurred by move, access, cast)
     logAlias "\nAnalyse prims (aliasedByPrims):    "
-    foldM aliasedByPrim analysisInfo prims
+    foldM (aliasedByPrim caller) analysisInfo prims
 
 
 -- Recursively analyse forked body's prims
 -- PrimFork only appears at the end of a ProcBody
--- It returns "AliasMap" and "AliasMultiSpeczInfoLocal" but not "DeadCells"
--- since we don't need to merge it and have the result after the analysis.
-aliasedByFork :: PrimProto -> ProcBody -> AnalysisInfo
-        -> Compiler (AliasMapLocal, AliasMultiSpeczInfoLocal)
+aliasedByFork :: PrimProto -> ProcBody -> AnalysisInfo -> Compiler AnalysisInfo
 aliasedByFork caller body analysisInfo = do
     logAlias "\nAnalyse forks (aliasedByFork):"
     let fork = bodyFork body
@@ -202,26 +192,44 @@ aliasedByFork caller body analysisInfo = do
             logAlias ">>> Forking:"
             analysisInfos <- 
                 mapM (\body' -> aliasedByBody caller body' analysisInfo) fBodies
-            let (aliasMaps, multiSpeczInfos) = unzip analysisInfos
-            let aliasMap' = List.foldl combineTwoDS emptyDS aliasMaps
-            let multiSpeczInfo' = mergeMultiSpeczInfo multiSpeczInfos 
-            return (aliasMap', multiSpeczInfo')
+            return $ mergeAnalysisInfo analysisInfos
         NoFork -> do
             logAlias ">>> No fork."
             -- drop "deadCells", we don't need it after fork
-            let (aliasMap, multiSpeczInfo, _) = analysisInfo
-            return (aliasMap, multiSpeczInfo)
+            return analysisInfo
 
 
-aliasedByPrim :: AnalysisInfo -> Placed Prim
-                                                -> Compiler AnalysisInfo
-aliasedByPrim (aliasMap, multiSpeczInfo, deadCells) prim = do
+aliasedByPrim :: PrimProto -> AnalysisInfo -> Placed Prim
+        -> Compiler AnalysisInfo
+aliasedByPrim proto info prim = do
+    let (aliasMap, interestingCallProperties, multiSpeczDepInfo, deadCells) =
+            info
     aliasMap' <- updateAliasedByPrim aliasMap prim
-    multiSpeczInfo' 
-        <- updateMultiSpeczInfoByPrim (aliasMap, multiSpeczInfo) prim
-    (multiSpeczInfo'', deadCells')
-        <- updateDeadCellsByPrim (aliasMap, multiSpeczInfo', deadCells) prim
-    return (aliasMap', multiSpeczInfo'', deadCells')
+    (interestingCallProperties', multiSpeczDepInfo')
+        <- updateMultiSpeczInfoByPrim 
+            proto (aliasMap, interestingCallProperties, multiSpeczDepInfo) prim
+    (interestingCallProperties'', deadCells')
+        <- updateDeadCellsByPrim 
+            proto (aliasMap, interestingCallProperties', deadCells) prim
+    return 
+        (aliasMap', interestingCallProperties'', multiSpeczDepInfo', deadCells')
+
+
+-- merge a list of "AnalysisInfo" after fork.
+mergeAnalysisInfo :: [AnalysisInfo] -> AnalysisInfo
+mergeAnalysisInfo infos =
+    let (aliasMapList, interestingCallPropertiesList, 
+            multiSpeczDepInfoList, deadCellsList) = List.unzip4 infos
+    in
+    let aliasMap = List.foldl combineTwoDS emptyDS aliasMapList in
+    let interestingCallProperties = 
+            List.foldl Set.union Set.empty interestingCallPropertiesList
+    in 
+    -- XXX there could be something better than "Map.unions"
+    let multiSpeczDepInfo = Map.unions multiSpeczDepInfoList in
+    -- We don't need "deadCells" after fork for now.
+    let deadCells = Map.empty in
+    (aliasMap, interestingCallProperties, multiSpeczDepInfo, deadCells)
 
 
 -- |Log a message, if we are logging optimisation activity.
@@ -273,7 +281,7 @@ updateAliasedByPrim aliasMap prim =
             let calleeArgsAliases = 
                     mapDS (\x -> 
                         case Map.lookup x paramArgMap of 
-                            -- TODO: verify this part. Better to use
+                            -- XXX verify this part. Better to use
                             -- "shouldnt" if that is really the case.
                             -- Currently some tests (eg. "alias_fork1")
                             -- reach this path.
@@ -409,69 +417,60 @@ removeDeadVar aliasMap args =
 -- some parameters aren't aliased.
 -- The code here is to analysis each procedure and list parameters
 -- that are interesting for further use (in "Transform.hs").
--- We consider a parameter is intersting when the alias
+-- We consider a parameter is interesting when the alias
 -- information of that parameter can help us generate a
 -- better version of that procedure. 
-
-
-mergeMultiSpeczInfo :: [AliasMultiSpeczInfoLocal] -> AliasMultiSpeczInfoLocal
-mergeMultiSpeczInfo info =
-    let (interestingParamsList, dependenciesList) = List.unzip info in
-    let interestingParams = 
-            List.foldl Set.union Set.empty interestingParamsList
-    in 
-    let dependencies = Set.unions dependenciesList in
-        (interestingParams, dependencies)
+-- More detail about Multiple Specialization can be found in "Transform.hs"
 
 
 -- we say a real param is interesting if it can be updated
 -- destructively when it doesn't alias to anything from outside
-updateMultiSpeczInfoByPrim :: (AliasMapLocal, AliasMultiSpeczInfoLocal)
-        -> Placed Prim -> Compiler AliasMultiSpeczInfoLocal
-updateMultiSpeczInfoByPrim (aliasMap, multiSpeczInfo) prim =
+updateMultiSpeczInfoByPrim :: PrimProto
+        -> (AliasMapLocal, Set InterestingCallProperty, MultiSpeczDepInfo)
+        -> Placed Prim
+        -> Compiler (Set InterestingCallProperty, MultiSpeczDepInfo) 
+updateMultiSpeczInfoByPrim proto 
+        (aliasMap, interestingCallProperties, multiSpeczDepInfo) prim =
     case content prim of
         PrimCall spec args -> do
             calleeDef <- getProcDef spec
             let (ProcDefPrim calleeProto _ analysis _) = procImpln calleeDef
-            let calleeMultiSpeczInfo = procArgAliasMultiSpeczInfo analysis
-            let calleeInterestingParams = fst calleeMultiSpeczInfo
-            -- [(arg, calleeParam, [requiredCallerParam])]
-            let interestingPrimCallInfo = 
-                    pairArgVarWithParam args calleeProto
-                    |> List.filter (\(arg, param) -> 
+            let interestingPrimCallInfo = List.zip args [0..]
+                    |> List.filter (\(arg, paramID) -> 
                         -- we only care parameters that are interesting,
                         -- args that aren't struct(address) are removed.
-                        List.elem param calleeInterestingParams
+                        Set.member (InterestingUnaliased paramID)
+                                (procInterestingCallProperties analysis)
                         -- if a argument is used more than once,
                         -- then it should be aliased
                         && isArgVarUsedOnceInArgs arg args)
-                    |> Maybe.mapMaybe (\(arg, param) ->
+                    |> Maybe.mapMaybe (\(arg, paramID) ->
                         case isArgVarInteresting aliasMap arg of
                             Right requiredParams -> 
-                                Just (arg, param, requiredParams)
+                                Just (arg, paramID, requiredParams)
                             Left () ->
                                 Nothing)
             logAlias $ "interestingPrimCallInfo: " 
                     ++ show interestingPrimCallInfo
             -- update interesting params
-            let interestingParams = 
+            let newInterestingParams = 
                     List.concatMap (\(_, _, x) -> x) interestingPrimCallInfo
-            unless (List.null interestingParams) 
+            unless (List.null newInterestingParams) 
                         $ logAlias $ "Found interesting params: " 
-                        ++ show interestingParams
-            let multiSpeczInfo' = 
-                    addInterestingParams multiSpeczInfo interestingParams
+                        ++ show newInterestingParams
+            let interestingCallProperties' = 
+                    addInterestingUnaliasedParams proto 
+                        interestingCallProperties newInterestingParams
             -- update dependencies
-            let speczVersion = List.map (\calleeParam ->
-                    let result =
-                            List.find (\(_, param, _) -> param == calleeParam)
-                                    interestingPrimCallInfo
+            let infoItems = List.map (\(_, calleeParamID, requiredParams) ->
+                    let requiredParamIDs = 
+                            List.map (parameterVarNameToID proto) requiredParams
                     in
-                    case result of 
-                        Just (_, _, requiredParams) -> BasedOn requiredParams
-                        Nothing                     -> Aliased
-                    ) calleeInterestingParams
-            addSpeczVersion multiSpeczInfo' spec speczVersion
+                    NonAliasedParamCond calleeParamID requiredParamIDs
+                    ) interestingPrimCallInfo
+            multiSpeczDepInfo' <- updateMultiSpeczDepInfo multiSpeczDepInfo 
+                    (spec, args) infoItems
+            return (interestingCallProperties', multiSpeczDepInfo')
         PrimForeign "lpvm" "mutate" flags args ->
             case args of
                 [fIn, _, _, ArgInt des _, _, _, _] ->
@@ -484,24 +483,21 @@ updateMultiSpeczInfoByPrim (aliasMap, multiSpeczInfo) prim =
                         Right requiredParams -> do
                             logAlias $ "Found interesting params: " 
                                     ++ show requiredParams
-                            return $ addInterestingParams multiSpeczInfo
-                                        requiredParams
+                            let interestingCallProperties' = 
+                                    addInterestingUnaliasedParams proto
+                                        interestingCallProperties requiredParams
+                            return
+                                (interestingCallProperties', multiSpeczDepInfo)
                         Left () ->
-                            return multiSpeczInfo 
-                    else return multiSpeczInfo
+                            return 
+                                (interestingCallProperties, multiSpeczDepInfo) 
+                    else return (interestingCallProperties, multiSpeczDepInfo)
                 _ ->
                     shouldnt "unable to match args of lpvm mutate instruction"
-        _ -> return multiSpeczInfo
+        _ -> return (interestingCallProperties, multiSpeczDepInfo)
 
 
--- pair up argument variables of the caller with parameters of the callee
-pairArgVarWithParam :: [PrimArg] -> PrimProto -> [(PrimArg, PrimVarName)]
-pairArgVarWithParam args proto =
-    let formalParamNames = primProtoParamNames proto in
-    List.zip args formalParamNames
-
-
--- we consider a varibale is interesting when it isn't aliased and not used
+-- we consider a variable is interesting when it isn't aliased and not used
 -- after this point. Note that it doesn't check whether the given "PrimArg"
 -- is a pointer.
 -- It returns "Right requiredParams" if it's interesting.
@@ -537,38 +533,28 @@ isArgVarUsedOnceInArgs ArgVar{argVarName=varName} args =
 isArgVarUsedOnceInArgs _ _ = True -- we don't care about constant value
 
 
--- update "AliasMultiSpeczInfoLocal" by adding interesting params
-addInterestingParams :: AliasMultiSpeczInfoLocal -> [PrimVarName]
-        -> AliasMultiSpeczInfoLocal
-addInterestingParams info vars = 
-    let (params, dependencies) = info in
-        (List.foldr Set.insert params vars, dependencies)
+-- adding interesting unaliased params
+addInterestingUnaliasedParams :: PrimProto -> Set InterestingCallProperty
+        -> [PrimVarName] -> Set InterestingCallProperty
+addInterestingUnaliasedParams proto properties params = 
+    List.map (InterestingUnaliased . (parameterVarNameToID proto)) params
+    |> (List.foldr Set.insert) properties
 
 
--- update "AliasMultiSpeczInfoLocal" by adding new specz version dependency
-addSpeczVersion :: AliasMultiSpeczInfoLocal -> ProcSpec
-        -> AliasMultiSpeczDepVersion -> Compiler AliasMultiSpeczInfoLocal
-addSpeczVersion info proc version = 
-    if List.all (== Aliased) version
+-- adding new specz version dependency
+updateMultiSpeczDepInfo :: MultiSpeczDepInfo -> (ProcSpec, [PrimArg])
+    -> [CallSiteProperty] -> Compiler MultiSpeczDepInfo
+updateMultiSpeczDepInfo multiSpeczDepInfo primCall items = 
+    if List.null items
     then
-        return info
+        return multiSpeczDepInfo
     else do
-        logAlias $ "Found required specz version: " ++ show proc
-                ++ " :" ++ show version
-        let (params, dependencies) = info
-        let ProcSpec mod procName procID _ = proc
-        let dependencies' = Set.insert 
-                ((mod, procName, procID), version) dependencies
-        return (params, dependencies')
-
-
--- Convert the set of interesting params to list
--- The order matters, we keep it the same as the "realParams".
-completeMultiSpeczInfo :: [PrimVarName] -> AliasMultiSpeczInfoLocal
-        -> AliasMultiSpeczInfo
-completeMultiSpeczInfo realParams info = 
-    let (params, dependencies) = info in
-    (List.filter (`Set.member` params) realParams, dependencies)
+        logAlias $ "Update MultiSpeczDepInfo, primCall: " ++ show primCall
+                ++ " items:" ++ show items
+        return $ Map.alter (\x ->
+            fromMaybe Set.empty x
+            |> Set.union (Set.fromList items)
+            |> Just) primCall multiSpeczDepInfo
 
 
 ----------------------------------------------------------------
@@ -581,42 +567,44 @@ completeMultiSpeczInfo realParams info =
 -- if there is an access instruction that reads some value from x,
 -- then we consider x is dead if x is unaliased and final.
 --
--- The transform part can be found in "Tranform.hs".
+-- The transform part can be found in "Transform.hs".
 
--- TODO: reuse cells that are different types but has the same size.
--- TODO: call "GC_free" on large unused dead cells.
--- TODO: we'd like this analysis to detect structures that are dead aside from
+-- XXX reuse cells that are different types but has the same size.
+-- XXX call "GC_free" on large unused dead cells.
+-- XXX we'd like this analysis to detect structures that are dead aside from
 --       later access instructions, which could be moved earlier to allow the
 --       structure to be reused.
--- TODO: consider re-run the optimiser after this or even run this before the
+-- XXX consider re-run the optimiser after this or even run this before the
 --       optimiser.
 
 
 -- Update dead cells info based on the given prim. If a dead cell comes from a
 -- parameter, then we mark that parameter as interesting.
-updateDeadCellsByPrim :: AnalysisInfo -> Placed Prim 
-        -> Compiler (AliasMultiSpeczInfoLocal, DeadCells)
-updateDeadCellsByPrim (aliasMap, multiSpeczInfo, deadCells) prim =
+updateDeadCellsByPrim :: PrimProto
+        -> (AliasMapLocal, Set InterestingCallProperty, DeadCells)
+        -> Placed Prim -> Compiler (Set InterestingCallProperty, DeadCells)
+updateDeadCellsByPrim proto (aliasMap, interestingCallProperties, deadCells)
+        prim =
     case content prim of
         PrimForeign "lpvm" "access" _ args -> do
             deadCells' 
                 <- updateDeadCellsByAccessArgs (aliasMap, deadCells) args
-            return (multiSpeczInfo, deadCells')
+            return (interestingCallProperties, deadCells')
         PrimForeign "lpvm" "alloc" _ args  -> do
             let (result, deadCells') = assignDeadCellsByAllocArgs deadCells args
-            multiSpeczInfo' <- case result of
-                    Nothing -> return multiSpeczInfo
+            interestingCallProperties' <- case result of
+                    Nothing -> return interestingCallProperties
                     Just (selectedCell, requiredParams) -> 
                         if requiredParams /= []
                         then do
                             logAlias $ "Found interesting parameters in dead "
                                     ++ "cell analysis. " ++ show requiredParams
-                            return $ addInterestingParams 
-                                        multiSpeczInfo requiredParams
-                        else return multiSpeczInfo
-            return (multiSpeczInfo', deadCells')
+                            return $ addInterestingUnaliasedParams proto
+                                        interestingCallProperties requiredParams
+                        else return interestingCallProperties
+            return (interestingCallProperties', deadCells')
         _ ->
-            return (multiSpeczInfo, deadCells)
+            return (interestingCallProperties, deadCells)
 
 
 -- Find new dead cell from the given "primArgs" of "access" instruction.
@@ -649,8 +637,8 @@ updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
 -- It returns "(result, deadCells)". "result" is "Nothing" when there isn't a
 -- suitable dead cell to reuse. Otherwise, result is 
 -- "Just (selectedCell, requiredParams)". "requiredParams" contains parameters
--- that need to be non-aliased before reusing the "seletedCell" (Caused by
--- "MaybeAliasByParam"). Note that this always trys to assigned a cell with
+-- that need to be non-aliased before reusing the "selectedCell" (Caused by
+-- "MaybeAliasByParam"). Note that this always tries to assigned a cell with
 -- empty "requiredParams" first.
 assignDeadCellsByAllocArgs :: DeadCells -> [PrimArg] 
         -> (Maybe (PrimVarName, [PrimVarName]), DeadCells)
@@ -671,7 +659,7 @@ assignDeadCellsByAllocArgs deadCells primArgs =
             case assigned of 
                 Nothing -> (Nothing, deadCells)
                 Just x  -> 
-                    -- TODO: we need something better than this. In order to
+                    -- XXX we need something better than this. In order to
                     -- have better optimization, we combine "requiredParams"
                     -- from all possible cells. However, it may create some
                     -- specialized versions that are identical.

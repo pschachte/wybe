@@ -13,14 +13,14 @@ AFTER EVERYTHING:
 *main* > public inline (0 calls)
 0: (argc#0:wybe.int, ?argc#1:wybe.int, argv#0:wybe.int, ?argv#1:wybe.int, exit_code#0:wybe.int, ?exit_code#1:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     stmt_while.gen$1<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, ~io#0:wybe.phantom, 10:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom) @stmt_while:2:1
 
 
 gen$1 > (2 calls)
 0: gen$1(argc#0:wybe.int, argv#0:wybe.int, exit_code#0:wybe.int, io#0:wybe.phantom, n#0:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
     foreign llvm icmp sgt(n#0:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
     case ~tmp$2#0:wybe.bool of
     0:
@@ -40,7 +40,7 @@ gen$1 > (2 calls)
 gen$2 > inline (1 calls)
 0: gen$2(argc#0:wybe.int, argv#0:wybe.int, exit_code#0:wybe.int, io#0:wybe.phantom, [n#0:wybe.int], [?argc#0:wybe.int], [?argv#0:wybe.int], [?exit_code#0:wybe.int], [?io#0:wybe.phantom]):
  AliasPairs: []
- AliasMultiSpeczInfo: []
+ InterestingCallProperties: []
 
   LLVM code       :
 
