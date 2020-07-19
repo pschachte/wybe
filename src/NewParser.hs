@@ -371,20 +371,26 @@ procCallParser = do
 
 
 
+-- do {}
 doStmt :: Parser (Placed Stmt)
 doStmt = do
     pos <- tokenPosition <$> ident "do"
     body <- betweenB Brace $ many1 stmtParser
     return $ Placed (Loop body) pos
 
+-- Generator parser -- var in expr
+generatorStmt :: Parser Generator
+generatorStmt = do
+    loopVar <- content <$> identButNot keywords <* ident "in"
+    In loopVar <$> expParser
 
+-- for var1 in gen1, var2 in gen2 {}
 forStmt :: Parser (Placed Stmt)
 forStmt = do
     pos <- tokenPosition <$> ident "for"
-    loopVar <- identButNot keywords <* ident "in"
-    genExp <- expParser
+    generators <- generatorStmt `sepBy` symbol ","
     body <- betweenB Brace $ many1 stmtParser
-    return $ Placed (For loopVar genExp body) pos
+    return $ Placed (For generators body) pos
 
 
 whileStmt :: Parser (Placed Stmt)

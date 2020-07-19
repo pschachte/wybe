@@ -1803,7 +1803,7 @@ foldProcCalls' fn comb val Nop ss =
     foldProcCalls fn comb val ss
 foldProcCalls' fn comb val (Loop body) ss =
     foldProcCalls fn comb (foldProcCalls fn comb val body) ss
-foldProcCalls' fn comb val (For _ _ body) ss =
+foldProcCalls' fn comb val (For _ body) ss = -- TODO: Apply to iterator?
     foldProcCalls fn comb (foldProcCalls fn comb val body) ss
 foldProcCalls' fn comb val (UseResources _ body) ss =
     foldProcCalls fn comb (foldProcCalls fn comb val body) ss
@@ -2050,7 +2050,7 @@ data Stmt
      -- XXX to handle for loops, need to hoist generator expr out of the loop
      -- -- |An enumerator; only valid in a loop
      -- | A loop that iterates over a sequence of values
-     | For (Placed Ident) (Placed Exp) [Placed Stmt]
+     | For [Generator] [Placed Stmt]
      -- |Immediately exit the enclosing loop; only valid in a loop
      | Break  -- holds the variable versions before the break
      -- |Immediately jump to the top of the enclosing loop; only valid in a loop
@@ -2177,6 +2177,7 @@ isProcProtoArg _ _ = False
 --  generalised, allowing them to be user-defined.
 data Generator
       = In VarName (Placed Exp)
+      deriving (Eq,Ord,Generic)
 
 -- |A variable name in SSA form, ie, a name and an natural number suffix,
 --  where the suffix is used to specify which assignment defines the value.
