@@ -447,17 +447,17 @@ entry:
     foreign lpvm access(~$left#0:alias_type3.posrec, 8:wybe.int, ?$left$a#0:wybe.int)
     foreign lpvm access($right#0:alias_type3.posrec, 0:wybe.int, ?$right$p#0:alias_type3.position)
     foreign lpvm access(~$right#0:alias_type3.posrec, 8:wybe.int, ?$right$a#0:wybe.int)
-    foreign lpvm access($left$p#0:alias_type3.position, 0:wybe.int, ?tmp$10#0:wybe.int)
-    foreign lpvm access(~$left$p#0:alias_type3.position, 8:wybe.int, ?tmp$11#0:wybe.int)
-    foreign lpvm access($right$p#0:alias_type3.position, 0:wybe.int, ?tmp$12#0:wybe.int)
-    foreign lpvm access(~$right$p#0:alias_type3.position, 8:wybe.int, ?tmp$13#0:wybe.int)
-    foreign llvm icmp eq(~tmp$10#0:wybe.int, ~tmp$12#0:wybe.int, ?tmp$14#0:wybe.bool) @wybe:nn:nn
-    case ~tmp$14#0:wybe.bool of
+    foreign lpvm access($left$p#0:alias_type3.position, 0:wybe.int, ?tmp$8#0:wybe.int)
+    foreign lpvm access(~$left$p#0:alias_type3.position, 8:wybe.int, ?tmp$9#0:wybe.int)
+    foreign lpvm access($right$p#0:alias_type3.position, 0:wybe.int, ?tmp$10#0:wybe.int)
+    foreign lpvm access(~$right$p#0:alias_type3.position, 8:wybe.int, ?tmp$11#0:wybe.int)
+    foreign llvm icmp eq(~tmp$10#0:wybe.int, ~tmp$8#0:wybe.int, ?tmp$12#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$12#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm icmp eq(~tmp$11#0:wybe.int, ~tmp$13#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp eq(~tmp$11#0:wybe.int, ~tmp$9#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
         case ~tmp$2#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -599,10 +599,10 @@ entry:
   %54 = inttoptr i64 %53 to i64* 
   %55 = getelementptr  i64, i64* %54, i64 0 
   %56 = load  i64, i64* %55 
-  %"tmp$14#0" = icmp eq i64 %45, %52 
-  br i1 %"tmp$14#0", label %if.then, label %if.else 
+  %"tmp$12#0" = icmp eq i64 %52, %45 
+  br i1 %"tmp$12#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$2#0" = icmp eq i64 %49, %56 
+  %"tmp$2#0" = icmp eq i64 %56, %49 
   br i1 %"tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
