@@ -240,37 +240,33 @@ buildTarget force target = do
             let dir = takeDirectory target
             -- target should be in the working directory, lib dir will be added
             -- later
-            (built, depGraph) <- loadAllNeededModules force [modname] [dir]
+            depGraph <- loadAllNeededModules force [modname] [dir]
 
             -- topological sort (bottom-up)
             let orderedSCCs = List.map (\(m, ms) -> (m, m, ms)) depGraph
                                 |> Graph.stronglyConnComp
                                 |> List.map sccElts
             
-            
             compileModBottomUpPass orderedSCCs
 
-
-            targetExists <- (liftIO . doesFileExist) target
-            -- XXX not quite right:  we shouldn't build executable or archive
-            -- if it already exists and none of the dependencies have changed
-            if not built && targetExists && tType /= ExecutableFile
-              then logBuild $ "Nothing to be done for target: " ++ target
-              else do
-                  logBuild $ "Emitting Target: " ++ target
-                  -- For the executable case, the top-level module is the one
-                  -- that contains main. So we'll run 
-                  -- "expandRequiredSpeczVersions" inside "buildExecutable"
-                  unless (tType == ExecutableFile) 
-                          (multiSpeczTopDownPass [modname])
-                  case tType of
-                     ObjectFile     -> emitObjectFile [modname] target
-                     BitcodeFile    -> emitBitcodeFile [modname] target
-                     AssemblyFile   -> emitAssemblyFile [modname] target
-                     ArchiveFile    -> buildArchive target
-                     ExecutableFile -> buildExecutable [modname] target
-                     other          -> nyi $ "output file type " ++ show other
-                  whenLogging Emit $ logLLVMString [modname]
+            logBuild $ "Emitting Target: " ++ target
+            if tType == ExecutableFile
+            then
+                buildExecutable orderedSCCs [modname] target
+            else do
+                multiSpeczTopDownPass orderedSCCs
+                case tType of
+                    -- XXX I think we need to rethink the behavior of those
+                    -- emitting below, eg. for "emitObjectFile", I think we need
+                    -- to emit object files of all it's dependencies. Especially
+                    -- we now have multiple specialization, an object file is
+                    -- useless without its dependencies.
+                    ObjectFile     -> emitObjectFile [modname] target
+                    BitcodeFile    -> emitBitcodeFile [modname] target
+                    AssemblyFile   -> emitAssemblyFile [modname] target
+                    ArchiveFile    -> buildArchive target
+                    other          -> nyi $ "output file type " ++ show other
+            whenLogging Emit $ logLLVMString [modname]
     liftIO $ removeDirectoryRecursive tmpDir
 
 
@@ -333,8 +329,8 @@ prepareToCompileModSCC modSCC = do
             then do
                 srcDate <- (liftIO . getModificationTime) src
                 dstDate <- (liftIO . getModificationTime) obj
-                -- XXX we should consider using "itemsHash" after checking the
-                -- last modification time. Same in "buildModuleIfNeeded".
+                -- XXX we should consider checking "itemsHash" after checking
+                -- the last modification time. Same in "buildModuleIfNeeded".
                 if srcDate > dstDate
                 then
                     Error <!> "Source: " ++ src ++ " has been changed during "
@@ -379,25 +375,21 @@ loadAllNeededModules force rootMod possDirs = do
             [dir] -> dir:libDirs
             _     -> possDirs
 
-    depGraph <- concatMapM (\m -> do
+    concatMapM (\m -> do
         reenterModule m
         imports <- getModuleImplementationField (keys . modImports)
         reexitModule
         
         logBuild $ "~=~ imports:" ++ showModSpecs imports
         logBuild $ "building dependencies: " ++ showModSpecs imports
-        depGraph <- concatMapM (\importMod -> do
-            (_, depGraph) <- loadAllNeededModules force importMod possDirs'
-            return depGraph
-            ) imports
-        
+        depGraph <- concatMapM (\importMod ->
+            loadAllNeededModules force importMod possDirs') imports
+
         return $ (m, imports):depGraph
         ) mods
-    return (True, depGraph)
 
 
--- TODO: fix the compile flag
-
+-- TODO: update this
 -- | Run compilation passes on a single module specified by [modspec] resulting
 -- in the LPVM and LLVM forms of the module to be placed in the Compiler State
 -- monad. The [force] flag determines whether the module is built from source
@@ -507,7 +499,6 @@ loadModuleFromSrcFile mspec srcfile = do
                liftIO exitFailure)
            (compileParseTree srcfile mspec Nothing)
            parseTree
-
 
 
 -- |Build a directory as the module `dirmod`.
@@ -648,11 +639,8 @@ buildArchive arch = do
     let dir = dropExtension arch
     archiveMods <- liftIO $ List.map dropExtension <$> wybeSourcesInDir dir
     logBuild $ "Building modules to archive: " ++ show archiveMods
-    build <- or <$> mapM (\m -> buildModuleIfNeeded False [m] [dir])
-                    archiveMods
     let oFileOf m = joinPath [dir, m] ++ ".o"
-    mapM_ (\m -> emitObjectFile [m] (oFileOf m))
-          archiveMods
+    mapM_ (\m -> emitObjectFile [m] (oFileOf m)) archiveMods
     makeArchive (List.map oFileOf archiveMods) arch
 
 -------------------- Actually compiling some modules --------------------
@@ -835,8 +823,8 @@ handleModImports _ thisMod = do
 -- function (LLVM) which calls the mains of the target module and the
 -- imports in the correct order. The target module and imports have
 -- mains defined as 'modName.main'.
-buildExecutable :: ModSpec -> FilePath -> Compiler ()
-buildExecutable targetMod target = do
+buildExecutable :: [[ModSpec]] -> ModSpec -> FilePath -> Compiler ()
+buildExecutable orderedSCCs targetMod target = do
     depends <- orderedDependencies targetMod
     if List.null depends || not (snd (last depends))
         then
@@ -872,14 +860,13 @@ buildExecutable targetMod target = do
             logBuild "o Creating temp Main module @ .../tmp/tmpMain.o"
             tmpDir <- gets tmpDir
             let tmpMainOFile = tmpDir </> "tmpMain.o"
-            -- main module only contain a signle proc that doesn't have a specz
+            -- main module only contain a single proc that doesn't have a specz
             -- version, we build it first.
             blockTransformModule mainMod
             stopOnError $ "translating " ++ showModSpecs [mainMod]
             emitObjectFile mainMod tmpMainOFile
 
-            -- run top-down pass here
-            multiSpeczTopDownPass mainMod
+            multiSpeczTopDownPass orderedSCCs
 
             ofiles <- mapM (loadObjectFile . fst) depends
             depMods <- catMaybes <$> mapM (getLoadedModule . fst) depends
@@ -1033,49 +1020,26 @@ objectReBuildNeeded thisMod dir = do
 -- version. Tt's probably a good idea to only revise .o files in the current
 -- directory, and handle any object files in a different directory the same way
 -- we handle stdlib.
-multiSpeczTopDownPass :: ModSpec -> Compiler ()
-multiSpeczTopDownPass mainMod = do
-    logBuild $ " ====> Running top-down pass starting from: " ++ show mainMod
-    dependencies <- topDownOrderedDependencySCCs mainMod
-    mapM_ (\ms -> do
+multiSpeczTopDownPass :: [[ModSpec]] -> Compiler ()
+multiSpeczTopDownPass orderedSCCs = do
+    logBuild " ====> Start top-down pass"
+    mapM_ (\scc -> do
         noMultiSpecz <- gets (optNoMultiSpecz . options)
         unless noMultiSpecz $ do
-            logBuild $ " ---- Running on: " ++ show ms
+            logBuild $ " ---- Running on: " ++ showModSpecs scc
             -- collecting all required spec versions
-            fixpointProcessSCC expandRequiredSpeczVersionsByMod ms
+            fixpointProcessSCC expandRequiredSpeczVersionsByMod scc
 
             -- generating required specz versions
-            mapM_ (transformModuleProcs generateSpeczVersionInProc) ms
+            mapM_ (transformModuleProcs generateSpeczVersionInProc) scc
 
         -- transform lpvm code to llvm code.
         -- XXX skip this if the module is unchanged.
-        mapM_ blockTransformModule ms
-        stopOnError $ "translating " ++ showModSpecs ms
-        ) dependencies
+        mapM_ blockTransformModule scc
+        stopOnError $ "translating: " ++ showModSpecs scc
+        ) (List.reverse orderedSCCs)
     logBuild " <==== Complete top-down pass"
 
-
--- | Given the entry module, compute the dependency graph and topological sort
--- it based on the top-down order.
-topDownOrderedDependencySCCs :: ModSpec -> Compiler [[ModSpec]]
-topDownOrderedDependencySCCs m = do
-    dependencies <- dfs m Map.empty
-    dependencies
-        |> Map.toList
-        |> List.map (\(m, imports) -> (m, m, imports))
-        |> Graph.stronglyConnComp
-        |> List.map sccElts
-        |> List.reverse
-        |> return
-    where
-    dfs m visited =
-        if Map.member m visited
-        then return visited
-        else do
-            thisMod <- getLoadedModuleImpln m
-            let imports = (keys . modImports) thisMod
-            let visited' = Map.insert m imports visited
-            foldM (flip dfs) visited' imports
 
 -----------------------------------------------------------------------------
 -- Module Source Handlers                                                  --
