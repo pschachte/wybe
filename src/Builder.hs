@@ -298,14 +298,15 @@ prepareToCompileModSCC modSCC = do
         -- to worry about it.
         modsGroupByRoot <- foldM (\modsGroupByRoot m -> do
             reenterModule m
-            source <- getSource
+            obj <- getOrigin
+            src <- getSource
             rootMod <- getModule modRootModSpec
             reexitModule
             case rootMod of
                 Just rootMod -> modsGroupByRoot
                                 |> Map.alter (\case
                                     Just ms -> Just (m:ms)
-                                    Nothing -> Just [m]) (rootMod, source)
+                                    Nothing -> Just [m]) (rootMod, obj, src)
                                 |> return
                 _            -> return modsGroupByRoot
             ) Map.empty compiledMods
@@ -324,17 +325,25 @@ prepareToCompileModSCC modSCC = do
         logBuild $ "ModsGroupByRoot: " ++ show modsGroupByRoot
 
         -- reload
-        mapM_ (\((rootM, src), ms) -> do
+        mapM_ (\((rootM, obj, src), ms) -> do
             logBuild $ "Reload root mod: " ++ showModSpec rootM ++ " contains: "
                 ++ showModSpecs ms ++ " from: " ++ show src
             exist <- liftIO $ doesFileExist src
             if exist
-            then
-                loadModuleFromSrcFile rootM src
+            then do
+                srcDate <- (liftIO . getModificationTime) src
+                dstDate <- (liftIO . getModificationTime) obj
+                -- XXX we should consider using "itemsHash" after checking the
+                -- last modification time. Same in "buildModuleIfNeeded".
+                if srcDate > dstDate
+                then
+                    Error <!> "Source: " ++ src ++ " has been changed during "
+                        ++ "the compilation."
+                else
+                    loadModuleFromSrcFile rootM src
             else Error <!>
-                    "Object file: " ++ replaceExtension src objectExtension ++
-                    " contains outdated modules: " ++ showModSpecs ms ++ 
-                    ". Could not find source to rebuild it."
+                    "Object file: " ++ obj ++ " contains outdated modules: " ++
+                    showModSpecs ms ++ ". Could not find source to rebuild it."
             ) (Map.toList modsGroupByRoot)
 
 
