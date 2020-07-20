@@ -633,14 +633,19 @@ getDirectory :: Compiler FilePath
 getDirectory = takeDirectory <$> getOrigin
 
 -- |Return the absolute path of the file the module was loaded from.  This may
--- be a source file or an object file.
+-- be a source file or an object file or a directory.
 getOrigin :: Compiler FilePath
 getOrigin = getModule modOrigin
 
 -- |Return the absolute path of the file the source code for the current module
--- *should* be in.  It might not actually be there.
+-- *should* be in.  It might not actually be there. For package, it returns the
+-- path to the directory
 getSource :: Compiler FilePath
-getSource = (-<.> sourceExtension) <$> getOrigin
+getSource = do
+    isPkg <- getModule isPackage
+    if isPkg
+    then getOrigin
+    else (-<.> sourceExtension) <$> getOrigin
 
 -- |Return the module spec of the current module.
 getModuleSpec :: Compiler ModSpec

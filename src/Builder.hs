@@ -157,6 +157,8 @@
 --
 --  END MAJOR DOC
 
+{-# LANGUAGE LambdaCase #-}
+
 -- |Code to oversee the compilation process.
 module Builder (buildTargets) where
 
@@ -281,25 +283,75 @@ isCompileNeeded modSCC = do
     return $ not $ List.all (`Set.member` unchanged) modSCC
 
 
+-- |Make sure all mods in the given SCC are un-compiled. For compiled module,
+-- reload it from source code.
+prepareToCompileModSCC :: [ModSpec] -> Compiler ()
+prepareToCompileModSCC modSCC = do
+    unchanged <- gets unchangedMods
+    let compiledMods = List.filter (`Set.member` unchanged) modSCC
+    if List.null compiledMods
+    then 
+        return ()
+    else do
+        logBuild $ "Mods that need reload: " ++ showModSpecs compiledMods
+        -- Package (directory mod) can't be loaded from object file, don't need
+        -- to worry about it.
+        modsGroupByRoot <- foldM (\modsGroupByRoot m -> do
+            reenterModule m
+            source <- getSource
+            rootMod <- getModule modRootModSpec
+            reexitModule
+            case rootMod of
+                Just rootMod -> modsGroupByRoot
+                                |> Map.alter (\case
+                                    Just ms -> Just (m:ms)
+                                    Nothing -> Just [m]) (rootMod, source)
+                                |> return
+                _            -> return modsGroupByRoot
+            ) Map.empty compiledMods
+
+        -- clean up compiled mods for reloading
+        updateCompiler (\st ->
+                let mods = modules st
+                        |> Map.filterWithKey (\k _ -> k `notElem` compiledMods)
+                in
+                let unchanged = unchangedMods st
+                        |> Set.filter (`notElem` compiledMods)
+                in
+                st { modules = mods, unchangedMods = unchanged }
+            )
+        
+        logBuild $ "ModsGroupByRoot: " ++ show modsGroupByRoot
+
+        -- reload
+        mapM_ (\((rootM, src), ms) -> do
+            logBuild $ "Reload root mod: " ++ showModSpec rootM ++ " contains: "
+                ++ showModSpecs ms ++ " from: " ++ show src
+            exist <- liftIO $ doesFileExist src
+            if exist
+            then
+                loadModuleFromSrcFile rootM src
+            else Error <!>
+                    "Object file: " ++ replaceExtension src objectExtension ++
+                    " contains outdated modules: " ++ showModSpecs ms ++ 
+                    ". Could not find source to rebuild it."
+            ) (Map.toList modsGroupByRoot)
+
+
 compileModBottomUpPass orderedSCCs = do
+    logBuild " ====> Start bottom-up pass"
     mapM_ (\scc -> do
         needed <- isCompileNeeded scc
         if needed
         then do
+            logBuild $ " ---- Running on SCC: " ++ showModSpecs scc
+            prepareToCompileModSCC scc
+            stopOnError "reload outdated module"
             compileModSCC scc
-        else do
-            return ()
+        else
+            logBuild $ " ---- Skip SCC: " ++ showModSpecs scc
         ) orderedSCCs
-    return ()
-
--- |Compile or load a module dependency.
-buildDependency :: ModSpec -> Compiler Bool
-buildDependency modspec = do
-    logBuild $ "Load dependency: " ++ showModSpec modspec
-    force <- option optForceAll
-    possDirs <- gets (optLibDirs . options)
-    localDir <- getDirectory
-    buildModuleIfNeeded force modspec (localDir:possDirs)
+    logBuild " <==== Complete bottom-up pass"
 
 
 loadAllNeededModules force rootMod possDirs = do
@@ -321,19 +373,12 @@ loadAllNeededModules force rootMod possDirs = do
     depGraph <- concatMapM (\m -> do
         reenterModule m
         imports <- getModuleImplementationField (keys . modImports)
-        isPkg <- getModule isPackage
-        origin <- getModule modOrigin
         reexitModule
-        -- if the mod is a package (directory), then we need to change the
-        -- search directory for its imports
-        let possDirs'' = if isPkg
-            then [takeDirectory origin]
-            else possDirs'
         
         logBuild $ "~=~ imports:" ++ showModSpecs imports
         logBuild $ "building dependencies: " ++ showModSpecs imports
         depGraph <- concatMapM (\importMod -> do
-            (_, depGraph) <- loadAllNeededModules force importMod possDirs''
+            (_, depGraph) <- loadAllNeededModules force importMod possDirs'
             return depGraph
             ) imports
         
@@ -370,7 +415,7 @@ buildModuleIfNeeded force modspec possDirs = do
         if isJust maybemod
           then return False -- already loaded:  nothing more to do
           else do
-            -- XXX the "modSrc" might pointing at the parent mod of "modspec".
+            -- XXX the "modSrc" might be describing the parent mod of "modspec".
             -- We doesn't handle that correctly for now.
             modSrc <- moduleSources modspec possDirs
             logBuild $ show modSrc
@@ -494,7 +539,9 @@ buildDirectory dir dirmod = do
 -- |Compile a file module given the parsed source file contents.
 compileParseTree :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
 compileParseTree source modspec params items = do
-    logBuild $ "===> Compiling module parse tree" ++ showModSpec modspec
+    logBuild $ "===> Compiling module parse tree: " ++ showModSpec modspec
+    underComp <- gets underCompilation
+    logBuild $ "~=~" ++ show underComp
     enterModule source modspec (Just modspec) params
     -- Hash the parse items and store it in the module
     let hashOfItems = hashItems items
@@ -547,38 +594,22 @@ loadModuleFromObjFile required objfile = do
         if List.length requiredMods == 1
         then do
             let requiredMod = head requiredMods
-            -- TODO:
-            -- set modOrigin to srcfile if it exists, use objfile otherwise
-            let mOrigin = objfile
-                -- fromMaybe objfile srcfile
             -- don't need to worried about root mod, it will be overridden
-            enterModule mOrigin required Nothing Nothing
-            -- replace the module
-            updateModule (\m -> requiredMod {
-                modOrigin        = modOrigin m
-            })
+            enterModule objfile required Nothing Nothing
+            updateModule (\m -> requiredMod {modOrigin = modOrigin m})
             -- inserts sub modules
             mapM_ (\mod -> do
                 let spec = modSpec mod
-                enterModule mOrigin spec Nothing Nothing
-                -- replace the module
-                updateModule (\m -> mod {
-                    modOrigin        = modOrigin m
-                })
-
+                enterModule objfile spec Nothing Nothing
+                updateModule (\m -> mod {modOrigin = modOrigin m})
                 exitModule
-                return ()
                 ) subMods
-
-            loadImports
             exitModule
-                        -- mark mods as unchanged
+            -- mark mods as unchanged
             updateCompiler (\st ->
                 let unchanged = List.map modSpec extracted
-                        |> Set.fromList
-                        |> Set.union (unchangedMods st)
-                in
-                    st {unchangedMods = unchanged})
+                        |> Set.fromList |> Set.union (unchangedMods st)
+                in st {unchangedMods = unchanged})
             return True
         else
             -- The required modspec was not part of the extracted
@@ -759,17 +790,6 @@ transformModuleProcs trans thisMod = do
     return ()
 
 
------------------------- Loading Imports ------------------------
-
--- |Load all the imports of the current module.
-loadImports :: Compiler ()
-loadImports = do
-    imports <- getModuleImplementationField (keys . modImports)
-    logBuild $ "building dependencies: " ++ showModSpecs imports
-    mapM_ buildDependency imports
-    -- modspec <- getModuleSpec
-    -- mod <- getModule id
-    -- updateModules (Map.insert modspec mod)
 
 ------------------------ Handling Imports ------------------------
 
@@ -1006,12 +1026,12 @@ objectReBuildNeeded thisMod dir = do
 -- we handle stdlib.
 multiSpeczTopDownPass :: ModSpec -> Compiler ()
 multiSpeczTopDownPass mainMod = do
-    logBuild $ " === Running top-down pass starting from: " ++ show mainMod
+    logBuild $ " ====> Running top-down pass starting from: " ++ show mainMod
     dependencies <- topDownOrderedDependencySCCs mainMod
     mapM_ (\ms -> do
         noMultiSpecz <- gets (optNoMultiSpecz . options)
         unless noMultiSpecz $ do
-            logBuild $ " --- Running on: " ++ show ms
+            logBuild $ " ---- Running on: " ++ show ms
             -- collecting all required spec versions
             fixpointProcessSCC expandRequiredSpeczVersionsByMod ms
 
@@ -1023,6 +1043,7 @@ multiSpeczTopDownPass mainMod = do
         mapM_ blockTransformModule ms
         stopOnError $ "translating " ++ showModSpecs ms
         ) dependencies
+    logBuild " <==== Complete top-down pass"
 
 
 -- | Given the entry module, compute the dependency graph and topological sort
