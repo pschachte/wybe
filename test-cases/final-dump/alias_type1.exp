@@ -439,10 +439,12 @@ entry:
         foreign llvm icmp eq(~tmp$10#0:wybe.int, ~tmp$12#0:wybe.int, ?tmp$14#0:wybe.bool) @wybe:nn:nn
         case ~tmp$14#0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(0:wybe.bool, ?tmp$3#0:wybe.bool)
+            foreign llvm move(~tmp$3#0:!wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign llvm icmp eq(~tmp$11#0:wybe.int, ~tmp$13#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp eq(~tmp$11#0:wybe.int, ~tmp$13#0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
+            foreign llvm move(~tmp$3#0:!wybe.bool, ?$$#0:wybe.bool)
 
 
 
@@ -586,8 +588,8 @@ if.then:
 if.else:
   ret i1 0 
 if.then1:
-  %"$$#0" = icmp eq i64 %49, %56 
-  ret i1 %"$$#0" 
+  %"tmp$3#0" = icmp eq i64 %49, %56 
+  ret i1 %"tmp$3#0" 
 if.else1:
   ret i1 0 
 }
