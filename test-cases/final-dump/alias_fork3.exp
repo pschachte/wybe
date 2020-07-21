@@ -46,7 +46,8 @@ simpleSlice > public (1 calls)
         foreign lpvm mutate(~tmp$14#0:mytree.tree, ?$#0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree)
 
     1:
-        foreign lpvm access(~tr#0:mytree.tree, 0:wybe.int, ?$#0:mytree.tree)
+        foreign lpvm access(~tr#0:mytree.tree, 0:wybe.int, ?l#0:mytree.tree)
+        foreign llvm move(~l#0:mytree.tree, ?$#0:mytree.tree) @alias_fork3:9:5
 
 
   LLVM code       :

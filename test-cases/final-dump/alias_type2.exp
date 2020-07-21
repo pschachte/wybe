@@ -406,17 +406,15 @@ entry:
     foreign lpvm access(~$left#0:alias_type2.posrec, 8:wybe.int, ?tmp$5#0:wybe.int)
     foreign lpvm access($right#0:alias_type2.posrec, 0:wybe.int, ?tmp$6#0:alias_type2.position)
     foreign lpvm access(~$right#0:alias_type2.posrec, 8:wybe.int, ?tmp$7#0:wybe.int)
-    foreign lpvm access(tmp$4#0:alias_type2.position, 0:wybe.int, ?tmp$8#0:wybe.int)
-    foreign lpvm access(~tmp$4#0:alias_type2.position, 8:wybe.int, ?tmp$9#0:wybe.int)
-    foreign lpvm access(tmp$6#0:alias_type2.position, 0:wybe.int, ?tmp$10#0:wybe.int)
-    foreign lpvm access(~tmp$6#0:alias_type2.position, 8:wybe.int, ?tmp$11#0:wybe.int)
-    foreign llvm icmp eq(~tmp$10#0:wybe.int, ~tmp$8#0:wybe.int, ?tmp$12#0:wybe.bool) @wybe:nn:nn
+    alias_type2.position.position<1>(?tmp$8#0:wybe.int, ?tmp$9#0:wybe.int, ~tmp$4#0:alias_type2.position)
+    alias_type2.position.position<1>(?tmp$10#0:wybe.int, ?tmp$11#0:wybe.int, ~tmp$6#0:alias_type2.position)
+    wybe.int.=<0>(~tmp$8#0:wybe.int, ~tmp$10#0:wybe.int, ?tmp$12#0:wybe.bool)
     case ~tmp$12#0:wybe.bool of
     0:
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm icmp eq(~tmp$11#0:wybe.int, ~tmp$9#0:wybe.int, ?tmp$13#0:wybe.bool) @wybe:nn:nn
+        wybe.int.=<0>(~tmp$9#0:wybe.int, ~tmp$11#0:wybe.int, ?tmp$13#0:wybe.bool)
         case ~tmp$13#0:wybe.bool of
         0:
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
@@ -442,17 +440,15 @@ entry:
     foreign lpvm access(~$left#0:alias_type2.posrec, 8:wybe.int, ?$left$a#0:wybe.int)
     foreign lpvm access($right#0:alias_type2.posrec, 0:wybe.int, ?$right$p#0:alias_type2.position)
     foreign lpvm access(~$right#0:alias_type2.posrec, 8:wybe.int, ?$right$a#0:wybe.int)
-    foreign lpvm access($left$p#0:alias_type2.position, 0:wybe.int, ?tmp$10#0:wybe.int)
-    foreign lpvm access(~$left$p#0:alias_type2.position, 8:wybe.int, ?tmp$11#0:wybe.int)
-    foreign lpvm access($right$p#0:alias_type2.position, 0:wybe.int, ?tmp$12#0:wybe.int)
-    foreign lpvm access(~$right$p#0:alias_type2.position, 8:wybe.int, ?tmp$13#0:wybe.int)
-    foreign llvm icmp eq(~tmp$10#0:wybe.int, ~tmp$12#0:wybe.int, ?tmp$14#0:wybe.bool) @wybe:nn:nn
+    alias_type2.position.position<1>(?tmp$10#0:wybe.int, ?tmp$11#0:wybe.int, ~$left$p#0:alias_type2.position)
+    alias_type2.position.position<1>(?tmp$12#0:wybe.int, ?tmp$13#0:wybe.int, ~$right$p#0:alias_type2.position)
+    wybe.int.=<0>(~tmp$10#0:wybe.int, ~tmp$12#0:wybe.int, ?tmp$14#0:wybe.bool)
     case ~tmp$14#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm icmp eq(~tmp$11#0:wybe.int, ~tmp$13#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
+        wybe.int.=<0>(~tmp$11#0:wybe.int, ~tmp$13#0:wybe.int, ?tmp$2#0:wybe.bool)
         case ~tmp$2#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -509,6 +505,9 @@ posrec > public inline (4 calls)
  
 
 
+declare external fastcc  i1 @"wybe.int.=<0>"(i64, i64)    
+
+
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
@@ -531,24 +530,16 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %15 = inttoptr i64 %3 to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
-  %17 = load  i64, i64* %16 
-  %18 = add   i64 %3, 8 
-  %19 = inttoptr i64 %18 to i64* 
-  %20 = getelementptr  i64, i64* %19, i64 0 
-  %21 = load  i64, i64* %20 
-  %22 = inttoptr i64 %10 to i64* 
-  %23 = getelementptr  i64, i64* %22, i64 0 
-  %24 = load  i64, i64* %23 
-  %25 = add   i64 %10, 8 
-  %26 = inttoptr i64 %25 to i64* 
-  %27 = getelementptr  i64, i64* %26, i64 0 
-  %28 = load  i64, i64* %27 
-  %"tmp$12#0" = icmp eq i64 %24, %17 
+  %15 = tail call fastcc  {i64, i64}  @"alias_type2.position.position<1>"(i64  %3)  
+  %16 = extractvalue {i64, i64} %15, 0 
+  %17 = extractvalue {i64, i64} %15, 1 
+  %18 = tail call fastcc  {i64, i64}  @"alias_type2.position.position<1>"(i64  %10)  
+  %19 = extractvalue {i64, i64} %18, 0 
+  %20 = extractvalue {i64, i64} %18, 1 
+  %"tmp$12#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %16, i64  %19)  
   br i1 %"tmp$12#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$13#0" = icmp eq i64 %28, %21 
+  %"tmp$13#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %17, i64  %20)  
   br i1 %"tmp$13#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
@@ -566,43 +557,35 @@ if.else2:
 
 define external fastcc  i1 @"alias_type2.posrec.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %29 = inttoptr i64 %"$left#0" to i64* 
-  %30 = getelementptr  i64, i64* %29, i64 0 
-  %31 = load  i64, i64* %30 
-  %32 = add   i64 %"$left#0", 8 
-  %33 = inttoptr i64 %32 to i64* 
-  %34 = getelementptr  i64, i64* %33, i64 0 
-  %35 = load  i64, i64* %34 
-  %36 = inttoptr i64 %"$right#0" to i64* 
-  %37 = getelementptr  i64, i64* %36, i64 0 
-  %38 = load  i64, i64* %37 
-  %39 = add   i64 %"$right#0", 8 
-  %40 = inttoptr i64 %39 to i64* 
-  %41 = getelementptr  i64, i64* %40, i64 0 
-  %42 = load  i64, i64* %41 
-  %43 = inttoptr i64 %31 to i64* 
-  %44 = getelementptr  i64, i64* %43, i64 0 
-  %45 = load  i64, i64* %44 
-  %46 = add   i64 %31, 8 
-  %47 = inttoptr i64 %46 to i64* 
-  %48 = getelementptr  i64, i64* %47, i64 0 
-  %49 = load  i64, i64* %48 
-  %50 = inttoptr i64 %38 to i64* 
-  %51 = getelementptr  i64, i64* %50, i64 0 
-  %52 = load  i64, i64* %51 
-  %53 = add   i64 %38, 8 
-  %54 = inttoptr i64 %53 to i64* 
-  %55 = getelementptr  i64, i64* %54, i64 0 
-  %56 = load  i64, i64* %55 
-  %"tmp$14#0" = icmp eq i64 %45, %52 
+  %21 = inttoptr i64 %"$left#0" to i64* 
+  %22 = getelementptr  i64, i64* %21, i64 0 
+  %23 = load  i64, i64* %22 
+  %24 = add   i64 %"$left#0", 8 
+  %25 = inttoptr i64 %24 to i64* 
+  %26 = getelementptr  i64, i64* %25, i64 0 
+  %27 = load  i64, i64* %26 
+  %28 = inttoptr i64 %"$right#0" to i64* 
+  %29 = getelementptr  i64, i64* %28, i64 0 
+  %30 = load  i64, i64* %29 
+  %31 = add   i64 %"$right#0", 8 
+  %32 = inttoptr i64 %31 to i64* 
+  %33 = getelementptr  i64, i64* %32, i64 0 
+  %34 = load  i64, i64* %33 
+  %35 = tail call fastcc  {i64, i64}  @"alias_type2.position.position<1>"(i64  %23)  
+  %36 = extractvalue {i64, i64} %35, 0 
+  %37 = extractvalue {i64, i64} %35, 1 
+  %38 = tail call fastcc  {i64, i64}  @"alias_type2.position.position<1>"(i64  %30)  
+  %39 = extractvalue {i64, i64} %38, 0 
+  %40 = extractvalue {i64, i64} %38, 1 
+  %"tmp$14#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %36, i64  %39)  
   br i1 %"tmp$14#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$2#0" = icmp eq i64 %49, %56 
+  %"tmp$2#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %37, i64  %40)  
   br i1 %"tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
-  %"$$#0" = icmp eq i64 %35, %42 
+  %"$$#0" = icmp eq i64 %27, %34 
   ret i1 %"$$#0" 
 if.else1:
   ret i1 0 
@@ -611,82 +594,82 @@ if.else1:
 
 define external fastcc  i64 @"alias_type2.posrec.a<0>"(i64  %"$rec#0")    {
 entry:
-  %57 = add   i64 %"$rec#0", 8 
-  %58 = inttoptr i64 %57 to i64* 
-  %59 = getelementptr  i64, i64* %58, i64 0 
-  %60 = load  i64, i64* %59 
-  ret i64 %60 
+  %41 = add   i64 %"$rec#0", 8 
+  %42 = inttoptr i64 %41 to i64* 
+  %43 = getelementptr  i64, i64* %42, i64 0 
+  %44 = load  i64, i64* %43 
+  ret i64 %44 
 }
 
 
 define external fastcc  i64 @"alias_type2.posrec.a<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %61 = trunc i64 16 to i32  
-  %62 = tail call ccc  i8*  @wybe_malloc(i32  %61)  
-  %63 = ptrtoint i8* %62 to i64 
-  %64 = inttoptr i64 %63 to i8* 
-  %65 = inttoptr i64 %"$rec#0" to i8* 
-  %66 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %64, i8*  %65, i32  %66, i32  8, i1  0)  
-  %67 = add   i64 %63, 8 
-  %68 = inttoptr i64 %67 to i64* 
-  %69 = getelementptr  i64, i64* %68, i64 0 
-  store  i64 %"$field#0", i64* %69 
-  ret i64 %63 
+  %45 = trunc i64 16 to i32  
+  %46 = tail call ccc  i8*  @wybe_malloc(i32  %45)  
+  %47 = ptrtoint i8* %46 to i64 
+  %48 = inttoptr i64 %47 to i8* 
+  %49 = inttoptr i64 %"$rec#0" to i8* 
+  %50 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %48, i8*  %49, i32  %50, i32  8, i1  0)  
+  %51 = add   i64 %47, 8 
+  %52 = inttoptr i64 %51 to i64* 
+  %53 = getelementptr  i64, i64* %52, i64 0 
+  store  i64 %"$field#0", i64* %53 
+  ret i64 %47 
 }
 
 
 define external fastcc  i64 @"alias_type2.posrec.p<0>"(i64  %"$rec#0")    {
 entry:
-  %70 = inttoptr i64 %"$rec#0" to i64* 
-  %71 = getelementptr  i64, i64* %70, i64 0 
-  %72 = load  i64, i64* %71 
-  ret i64 %72 
+  %54 = inttoptr i64 %"$rec#0" to i64* 
+  %55 = getelementptr  i64, i64* %54, i64 0 
+  %56 = load  i64, i64* %55 
+  ret i64 %56 
 }
 
 
 define external fastcc  i64 @"alias_type2.posrec.p<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %73 = trunc i64 16 to i32  
-  %74 = tail call ccc  i8*  @wybe_malloc(i32  %73)  
-  %75 = ptrtoint i8* %74 to i64 
-  %76 = inttoptr i64 %75 to i8* 
-  %77 = inttoptr i64 %"$rec#0" to i8* 
-  %78 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %76, i8*  %77, i32  %78, i32  8, i1  0)  
-  %79 = inttoptr i64 %75 to i64* 
-  %80 = getelementptr  i64, i64* %79, i64 0 
-  store  i64 %"$field#0", i64* %80 
-  ret i64 %75 
+  %57 = trunc i64 16 to i32  
+  %58 = tail call ccc  i8*  @wybe_malloc(i32  %57)  
+  %59 = ptrtoint i8* %58 to i64 
+  %60 = inttoptr i64 %59 to i8* 
+  %61 = inttoptr i64 %"$rec#0" to i8* 
+  %62 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %60, i8*  %61, i32  %62, i32  8, i1  0)  
+  %63 = inttoptr i64 %59 to i64* 
+  %64 = getelementptr  i64, i64* %63, i64 0 
+  store  i64 %"$field#0", i64* %64 
+  ret i64 %59 
 }
 
 
 define external fastcc  i64 @"alias_type2.posrec.posrec<0>"(i64  %"p#0", i64  %"a#0")    {
 entry:
-  %81 = trunc i64 16 to i32  
-  %82 = tail call ccc  i8*  @wybe_malloc(i32  %81)  
-  %83 = ptrtoint i8* %82 to i64 
-  %84 = inttoptr i64 %83 to i64* 
-  %85 = getelementptr  i64, i64* %84, i64 0 
-  store  i64 %"p#0", i64* %85 
-  %86 = add   i64 %83, 8 
-  %87 = inttoptr i64 %86 to i64* 
-  %88 = getelementptr  i64, i64* %87, i64 0 
-  store  i64 %"a#0", i64* %88 
-  ret i64 %83 
+  %65 = trunc i64 16 to i32  
+  %66 = tail call ccc  i8*  @wybe_malloc(i32  %65)  
+  %67 = ptrtoint i8* %66 to i64 
+  %68 = inttoptr i64 %67 to i64* 
+  %69 = getelementptr  i64, i64* %68, i64 0 
+  store  i64 %"p#0", i64* %69 
+  %70 = add   i64 %67, 8 
+  %71 = inttoptr i64 %70 to i64* 
+  %72 = getelementptr  i64, i64* %71, i64 0 
+  store  i64 %"a#0", i64* %72 
+  ret i64 %67 
 }
 
 
 define external fastcc  {i64, i64} @"alias_type2.posrec.posrec<1>"(i64  %"$#0")    {
 entry:
-  %89 = inttoptr i64 %"$#0" to i64* 
-  %90 = getelementptr  i64, i64* %89, i64 0 
-  %91 = load  i64, i64* %90 
-  %92 = add   i64 %"$#0", 8 
-  %93 = inttoptr i64 %92 to i64* 
-  %94 = getelementptr  i64, i64* %93, i64 0 
-  %95 = load  i64, i64* %94 
-  %96 = insertvalue {i64, i64} undef, i64 %91, 0 
-  %97 = insertvalue {i64, i64} %96, i64 %95, 1 
-  ret {i64, i64} %97 
+  %73 = inttoptr i64 %"$#0" to i64* 
+  %74 = getelementptr  i64, i64* %73, i64 0 
+  %75 = load  i64, i64* %74 
+  %76 = add   i64 %"$#0", 8 
+  %77 = inttoptr i64 %76 to i64* 
+  %78 = getelementptr  i64, i64* %77, i64 0 
+  %79 = load  i64, i64* %78 
+  %80 = insertvalue {i64, i64} undef, i64 %75, 0 
+  %81 = insertvalue {i64, i64} %80, i64 %79, 1 
+  ret {i64, i64} %81 
 }
