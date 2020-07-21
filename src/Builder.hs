@@ -257,7 +257,7 @@ buildTarget force target = do
                 multiSpeczTopDownPass orderedSCCs
                 case tType of
                     -- XXX I think we need to rethink the behavior of those
-                    -- emitting below, eg. for "emitObjectFile", I think we need
+                    -- emitting below, eg. for "emitObjectFile", we need
                     -- to emit object files of all it's dependencies. Especially
                     -- we now have multiple specialization, an object file is
                     -- useless without its dependencies.
@@ -270,96 +270,14 @@ buildTarget force target = do
     liftIO $ removeDirectoryRecursive tmpDir
 
 
--- |Return whether the given SCC is needed for compilation.
--- XXX the current approach is incorrect. We need to consider changes of their
--- dependency. Related: https://github.com/pschachte/wybe/issues/66
-isCompileNeeded :: [ModSpec] -> Compiler Bool
-isCompileNeeded modSCC = do
-    unchanged <- gets unchangedMods
-    return $ not $ List.all (`Set.member` unchanged) modSCC
-
-
--- |Make sure all mods in the given SCC are un-compiled. For compiled module,
--- reload it from source code.
-prepareToCompileModSCC :: [ModSpec] -> Compiler ()
-prepareToCompileModSCC modSCC = do
-    unchanged <- gets unchangedMods
-    let compiledMods = List.filter (`Set.member` unchanged) modSCC
-    if List.null compiledMods
-    then 
-        return ()
-    else do
-        logBuild $ "Mods that need reload: " ++ showModSpecs compiledMods
-        -- Package (directory mod) can't be loaded from object file, don't need
-        -- to worry about it.
-        modsGroupByRoot <- foldM (\modsGroupByRoot m -> do
-            reenterModule m
-            obj <- getOrigin
-            src <- getSource
-            rootMod <- getModule modRootModSpec
-            reexitModule
-            case rootMod of
-                Just rootMod -> modsGroupByRoot
-                                |> Map.alter (\case
-                                    Just ms -> Just (m:ms)
-                                    Nothing -> Just [m]) (rootMod, obj, src)
-                                |> return
-                _            -> return modsGroupByRoot
-            ) Map.empty compiledMods
-
-        -- clean up compiled mods for reloading
-        updateCompiler (\st ->
-                let mods = modules st
-                        |> Map.filterWithKey (\k _ -> k `notElem` compiledMods)
-                in
-                let unchanged = unchangedMods st
-                        |> Set.filter (`notElem` compiledMods)
-                in
-                st { modules = mods, unchangedMods = unchanged }
-            )
-        
-        logBuild $ "ModsGroupByRoot: " ++ show modsGroupByRoot
-
-        -- reload
-        mapM_ (\((rootM, obj, src), ms) -> do
-            logBuild $ "Reload root mod: " ++ showModSpec rootM ++ " contains: "
-                ++ showModSpecs ms ++ " from: " ++ show src
-            exist <- liftIO $ doesFileExist src
-            if exist
-            then do
-                srcDate <- (liftIO . getModificationTime) src
-                dstDate <- (liftIO . getModificationTime) obj
-                -- XXX we should consider checking "itemsHash" after checking
-                -- the last modification time. Same in "loadModuleIfNeeded".
-                if srcDate > dstDate
-                then
-                    Error <!> "Source: " ++ src ++ " has been changed during "
-                        ++ "the compilation."
-                else
-                    loadModuleFromSrcFile rootM src
-            else Error <!>
-                    "Object file: " ++ obj ++ " contains outdated modules: " ++
-                    showModSpecs ms ++ ". Could not find source to rebuild it."
-            ) (Map.toList modsGroupByRoot)
-        updateCompiler (\st -> st {recentlyLoaded = []})
-
-
-compileModBottomUpPass orderedSCCs = do
-    logBuild " ====> Start bottom-up pass"
-    mapM_ (\scc -> do
-        needed <- isCompileNeeded scc
-        if needed
-        then do
-            logBuild $ " ---- Running on SCC: " ++ showModSpecs scc
-            prepareToCompileModSCC scc
-            stopOnError "reload outdated module"
-            compileModSCC scc
-        else
-            logBuild $ " ---- Skip SCC: " ++ showModSpecs scc
-        ) orderedSCCs
-    logBuild " <==== Complete bottom-up pass"
-
-
+-- |Search and load all needed modules starting from the given "rootMod".
+-- For "possDirs" only need to provide the dir containing the "rootMod", lib dir
+-- will be added later.
+-- Return a directed graph representing its dependencies.
+loadAllNeededModules :: Bool   -- ^Force compilation of this module
+              -> ModSpec       -- ^Module name
+              -> [FilePath]    -- ^Directories to look in
+              -> Compiler [(ModSpec, [ModSpec])]
 loadAllNeededModules force rootMod possDirs = do
     loadModuleIfNeeded force rootMod possDirs
     stopOnError $ "loading module: " ++ showModSpec rootMod
@@ -392,11 +310,8 @@ loadAllNeededModules force rootMod possDirs = do
             ) mods
 
 
--- TODO: update this
--- | Run compilation passes on a single module specified by [modspec] resulting
--- in the LPVM and LLVM forms of the module to be placed in the Compiler State
--- monad. The [force] flag determines whether the module is built from source
--- or its previous compilation is extracted from its corresponding object file.
+-- | Try to load the given "modspec" and try to use the compiled version from
+-- object files if possible.
 loadModuleIfNeeded :: Bool    -- ^Force compilation of this module
               -> ModSpec       -- ^Module name
               -> [FilePath]    -- ^Directories to look in
@@ -477,7 +392,7 @@ loadModuleIfNeeded force modspec possDirs = do
             _ -> shouldnt "inconsistent file existence"
 
 
--- |Actually load and compile the module
+-- |Actually load the module from source code.
 loadModuleFromSrcFile :: ModSpec -> FilePath -> Compiler ()
 loadModuleFromSrcFile mspec srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
@@ -545,7 +460,7 @@ compileParseTree source modspec params items = do
 
 
 -- | Load all serialised modules present in the LPVM section of the object
--- file.  The returned boolean flag indicates whether this was successful. A
+-- file. The returned boolean flag indicates whether this was successful. A
 -- False flag is returned in the scenarios:
 -- o Extraction failed
 -- o Extracted modules didn't contain the `required` Module.
@@ -622,6 +537,98 @@ buildArchive arch = do
     makeArchive (List.map oFileOf archiveMods) arch
 
 -------------------- Actually compiling some modules --------------------
+
+-- |Compile each SCC in a bottom-up order.
+compileModBottomUpPass :: [[ModSpec]] -> Compiler ()
+compileModBottomUpPass orderedSCCs = do
+    logBuild " ====> Start bottom-up pass"
+    mapM_ (\scc -> do
+        needed <- isCompileNeeded scc
+        if needed
+        then do
+            logBuild $ " ---- Running on SCC: " ++ showModSpecs scc
+            prepareToCompileModSCC scc
+            stopOnError "reload outdated module"
+            compileModSCC scc
+        else
+            logBuild $ " ---- Skip SCC: " ++ showModSpecs scc
+        ) orderedSCCs
+    logBuild " <==== Complete bottom-up pass"
+
+
+-- |Return whether the given SCC is needed for compilation.
+-- XXX the current approach is incorrect. We need to consider changes of their
+-- dependency. Related: https://github.com/pschachte/wybe/issues/66
+isCompileNeeded :: [ModSpec] -> Compiler Bool
+isCompileNeeded modSCC = do
+    unchanged <- gets unchangedMods
+    return $ not $ List.all (`Set.member` unchanged) modSCC
+
+
+-- |Make sure all mods in the given SCC are un-compiled. For compiled module,
+-- reload it from source code.
+prepareToCompileModSCC :: [ModSpec] -> Compiler ()
+prepareToCompileModSCC modSCC = do
+    unchanged <- gets unchangedMods
+    let compiledMods = List.filter (`Set.member` unchanged) modSCC
+    if List.null compiledMods
+    then 
+        return ()
+    else do
+        logBuild $ "Mods that need reload: " ++ showModSpecs compiledMods
+        -- Package (directory mod) can't be loaded from object file, don't need
+        -- to worry about it.
+        modsGroupByRoot <- foldM (\modsGroupByRoot m -> do
+            reenterModule m
+            obj <- getOrigin
+            src <- getSource
+            rootMod <- getModule modRootModSpec
+            reexitModule
+            case rootMod of
+                Just rootMod -> modsGroupByRoot
+                                |> Map.alter (\case
+                                    Just ms -> Just (m:ms)
+                                    Nothing -> Just [m]) (rootMod, obj, src)
+                                |> return
+                _            -> return modsGroupByRoot
+            ) Map.empty compiledMods
+
+        -- clean up compiled mods for reloading
+        updateCompiler (\st ->
+                let mods = modules st
+                        |> Map.filterWithKey (\k _ -> k `notElem` compiledMods)
+                in
+                let unchanged = unchangedMods st
+                        |> Set.filter (`notElem` compiledMods)
+                in
+                st { modules = mods, unchangedMods = unchanged }
+            )
+        
+        logBuild $ "ModsGroupByRoot: " ++ show modsGroupByRoot
+
+        -- reload
+        mapM_ (\((rootM, obj, src), ms) -> do
+            logBuild $ "Reload root mod: " ++ showModSpec rootM ++ " contains: "
+                ++ showModSpecs ms ++ " from: " ++ show src
+            exist <- liftIO $ doesFileExist src
+            if exist
+            then do
+                srcDate <- (liftIO . getModificationTime) src
+                dstDate <- (liftIO . getModificationTime) obj
+                -- XXX we should consider checking "itemsHash" after checking
+                -- the last modification time. Same in "loadModuleIfNeeded".
+                if srcDate > dstDate
+                then
+                    Error <!> "Source: " ++ src ++ " has been changed during "
+                        ++ "the compilation."
+                else
+                    loadModuleFromSrcFile rootM src
+            else Error <!>
+                    "Object file: " ++ obj ++ " contains outdated modules: " ++
+                    showModSpecs ms ++ ". Could not find source to rebuild it."
+            ) (Map.toList modsGroupByRoot)
+        updateCompiler (\st -> st {recentlyLoaded = []})
+
 
 -- |Actually compile a list of modules that form an SCC in the module
 --  dependency graph.  This is called in a way that guarantees that
@@ -855,6 +862,8 @@ buildExecutable orderedSCCs targetMod target = do
             makeExec allOFiles target
 
 
+-- |Visit all dependencies that have a corresponding object file, emit object
+-- files that does not exist or are outdated.
 emitObjectFilesIfNeeded :: [(ModSpec, Bool)] -> Compiler [FilePath]
 emitObjectFilesIfNeeded depends = do
     unchangedSet <- gets unchangedMods
@@ -897,6 +906,7 @@ foreignDependencies mods =
 
 -- |Generate a main function by piecing together calls to the main procs of all
 -- the module dependencies that have them.
+buildMain :: [ModSpec] -> ProcDef
 buildMain mainImports =
     let cmdResource name = ResourceFlowSpec (ResourceSpec ["command_line"] name)
         -- Construct argumentless resourceful calls to all main procs
@@ -920,7 +930,6 @@ buildMain mainImports =
                                      ParamOut]
     in ProcDef "" proto mainBody Nothing 0 Map.empty
        Private Det False NoSuperproc
-
 
 
 -- | Traverse and collect a depth first dependency list from the given initial
