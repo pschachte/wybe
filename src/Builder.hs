@@ -341,6 +341,7 @@ prepareToCompileModSCC modSCC = do
                     "Object file: " ++ obj ++ " contains outdated modules: " ++
                     showModSpecs ms ++ ". Could not find source to rebuild it."
             ) (Map.toList modsGroupByRoot)
+        updateCompiler (\st -> st {recentlyLoaded = []})
 
 
 compileModBottomUpPass orderedSCCs = do

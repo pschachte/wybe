@@ -329,7 +329,7 @@ data CompilerState = Compiler {
   errorState :: Bool,            -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
-  recentlyLoaded :: [ModSpec],   -- ^TODO
+  recentlyLoaded :: [ModSpec],   -- ^record recently loaded modules
   unchangedMods :: Set ModSpec   -- ^record mods that are loaded from object
                                  --  and unchanged.
 }
@@ -2950,7 +2950,7 @@ data EncodedLPVM = EncodedLPVM ModuleIndex [Module]
                    deriving (Generic)
 
 
--- TODO: Why we need this index
+-- XXX unused
 type ModuleIndex = [(ModSpec, FilePath)]
 
 makeEncodedLPVM :: [Module] -> EncodedLPVM
