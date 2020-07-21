@@ -330,7 +330,7 @@ prepareToCompileModSCC modSCC = do
                 srcDate <- (liftIO . getModificationTime) src
                 dstDate <- (liftIO . getModificationTime) obj
                 -- XXX we should consider checking "itemsHash" after checking
-                -- the last modification time. Same in "buildModuleIfNeeded".
+                -- the last modification time. Same in "loadModuleIfNeeded".
                 if srcDate > dstDate
                 then
                     Error <!> "Source: " ++ src ++ " has been changed during "
@@ -360,9 +360,7 @@ compileModBottomUpPass orderedSCCs = do
 
 
 loadAllNeededModules force rootMod possDirs = do
-    let concatMapM f l = fmap concat (mapM f l)
-
-    buildModuleIfNeeded force rootMod possDirs
+    loadModuleIfNeeded force rootMod possDirs
     stopOnError $ "loading module: " ++ showModSpec rootMod
 
     mods <- gets recentlyLoaded
@@ -377,6 +375,7 @@ loadAllNeededModules force rootMod possDirs = do
                 [dir] -> dir:libDirs
                 _     -> possDirs
 
+        let concatMapM f l = fmap concat (mapM f l)
         -- handle dependencies of recently loaded modules
         concatMapM (\m -> do
             reenterModule m
@@ -397,98 +396,84 @@ loadAllNeededModules force rootMod possDirs = do
 -- in the LPVM and LLVM forms of the module to be placed in the Compiler State
 -- monad. The [force] flag determines whether the module is built from source
 -- or its previous compilation is extracted from its corresponding object file.
-buildModuleIfNeeded :: Bool    -- ^Force compilation of this module
+loadModuleIfNeeded :: Bool    -- ^Force compilation of this module
               -> ModSpec       -- ^Module name
               -> [FilePath]    -- ^Directories to look in
-              -> Compiler Bool -- ^Returns whether or not file
-                               -- actually needed to be compiled
-buildModuleIfNeeded force modspec possDirs = do
+              -> Compiler ()
+loadModuleIfNeeded force modspec possDirs = do
     logBuild $ "Loading " ++ showModSpec modspec
                ++ " with library directories " ++ intercalate ", " possDirs
-    loading <- gets (List.elem modspec . List.map modSpec . underCompilation)
     let clash kind1 f1 kind2 f2 =
           Error <!> kind1 ++ " " ++ f1 ++ " and "
                     ++ kind2 ++ " " ++ f2 ++ " clash. There can only be one!"
-    if loading
-      then return False -- Already loading it; we'll handle it later
-      else do
-        maybemod <- getLoadedModule modspec
-        logBuild $ "module " ++ showModSpec modspec ++ " is " ++
-          (if isNothing maybemod then "not yet" else "already") ++
-          " loaded"
-        if isJust maybemod
-          then return False -- already loaded:  nothing more to do
-          else do
-            -- XXX the "modSrc" might be describing the parent mod of "modspec".
-            -- We doesn't handle that correctly for now.
-            modSrc <- moduleSources modspec possDirs
-            logBuild $ show modSrc
-            case modSrc of
-                NoSource -> do
-                    Error <!> "Could not find source for module " ++
-                              showModSpec modspec
-                              ++ "\nin directories:\n    "
-                              ++ intercalate "\n    " possDirs
-                    return False
+        
+    maybemod <- getLoadedModule modspec
+    logBuild $ "module " ++ showModSpec modspec ++ " is " ++
+        (if isNothing maybemod then "not yet" else "already") ++
+        " loaded"
+    if isJust maybemod
+        then return () -- already loaded:  nothing more to do
+        else do
+        -- XXX the "modSrc" might be describing the parent mod of "modspec".
+        -- We doesn't handle that correctly for now.
+        modSrc <- moduleSources modspec possDirs
+        logBuild $ show modSrc
+        case modSrc of
+            NoSource ->
+                Error <!> "Could not find source for module " ++
+                            showModSpec modspec
+                            ++ "\nin directories:\n    "
+                            ++ intercalate "\n    " possDirs
 
-                -- only object file exists
-                ModuleSource Nothing (Just objfile) Nothing Nothing -> do
+            -- only object file exists
+            ModuleSource Nothing (Just objfile) Nothing Nothing -> do
+                loaded <- loadModuleFromObjFile modspec objfile
+                unless loaded $ do
+                    -- if extraction failed, it is uncrecoverable now
+                    let err = "Object file " ++ objfile ++
+                                " yielded no LPVM modules for " ++
+                                showModSpec modspec ++ "."
+                    Error <!> "No other options to pursue."
+                    Error <!> err
+
+            ModuleSource (Just srcfile) Nothing Nothing Nothing ->
+                -- only source file exists
+                loadModuleFromSrcFile modspec srcfile
+
+            ModuleSource (Just srcfile) (Just objfile) Nothing Nothing -> do
+                -- both source and object exist:  rebuild if necessary
+                srcDate <- (liftIO . getModificationTime) srcfile
+                dstDate <- (liftIO . getModificationTime) objfile
+                if force || srcDate > dstDate
+                then
+                    loadModuleFromSrcFile modspec srcfile
+                else do
                     loaded <- loadModuleFromObjFile modspec objfile
                     unless loaded $ do
-                        -- if extraction failed, it is uncrecoverable now
-                        let err = "Object file " ++ objfile ++
-                                  " yielded no LPVM modules for " ++
-                                  showModSpec modspec ++ "."
-                        Error <!> "No other options to pursue."
-                        Error <!> err
-                    return False
-
-                ModuleSource (Just srcfile) Nothing Nothing Nothing -> do
-                    -- only source file exists
-                    loadModuleFromSrcFile modspec srcfile
-                    return True
-
-                ModuleSource (Just srcfile) (Just objfile) Nothing Nothing -> do
-                    -- both source and object exist:  rebuild if necessary
-                    srcDate <- (liftIO . getModificationTime) srcfile
-                    dstDate <- (liftIO . getModificationTime) objfile
-                    if force || srcDate > dstDate
-                      then do
+                        -- Loading failed, fallback on source building
+                        logBuild $ "Falling back on building " ++
+                            showModSpec modspec
                         loadModuleFromSrcFile modspec srcfile
-                        return True
-                      else do
-                        loaded <- loadModuleFromObjFile modspec objfile
-                        unless loaded $ do
-                            -- Loading failed, fallback on source building
-                            logBuild $ "Falling back on building " ++
-                                showModSpec modspec
-                            loadModuleFromSrcFile modspec srcfile
-                        return $ not loaded
 
-                ModuleSource Nothing Nothing (Just dir) _ -> do
-                    -- directory exists:  rebuild contents if necessary
-                    logBuild $ "Modname for directory: " ++ showModSpec modspec
-                    buildDirectory dir modspec
+            ModuleSource Nothing Nothing (Just dir) _ -> do
+                -- directory exists:  rebuild contents if necessary
+                logBuild $ "Modname for directory: " ++ showModSpec modspec
+                buildDirectory dir modspec
 
-                -- Error cases:
+            -- Error cases:
+            ModuleSource (Just srcfile) Nothing (Just dir) _ ->
+                clash "Directory" dir "source file" srcfile
 
-                ModuleSource (Just srcfile) Nothing (Just dir) _ -> do
-                    clash "Directory" dir "source file" srcfile
-                    return False
+            ModuleSource (Just srcfile) Nothing _ (Just archive) ->
+                clash "Archive" archive "source file" srcfile
 
-                ModuleSource (Just srcfile) Nothing _ (Just archive) -> do
-                    clash "Archive" archive "source file" srcfile
-                    return False
+            ModuleSource Nothing (Just objfile) (Just dir) _ ->
+                clash "Directory" dir "object file" objfile
 
-                ModuleSource Nothing (Just objfile) (Just dir) _ -> do
-                    clash "Directory" dir "object file" objfile
-                    return False
+            ModuleSource Nothing (Just objfile) _ (Just archive) ->
+                clash "Archive" archive "object file" objfile
 
-                ModuleSource Nothing (Just objfile) _ (Just archive) -> do
-                    clash "Archive" archive "object file" objfile
-                    return False
-
-                _ -> shouldnt "inconsistent file existence"
+            _ -> shouldnt "inconsistent file existence"
 
 
 -- |Actually load and compile the module
@@ -505,7 +490,7 @@ loadModuleFromSrcFile mspec srcfile = do
 
 
 -- |Build a directory as the module `dirmod`.
-buildDirectory :: FilePath -> ModSpec -> Compiler Bool
+buildDirectory :: FilePath -> ModSpec -> Compiler ()
 buildDirectory dir dirmod = do
     logBuild $ "Building DIR: " ++ dir ++ ", into MODULE: "
         ++ showModSpec dirmod
@@ -517,12 +502,6 @@ buildDirectory dir dirmod = do
     let makeMod x = dirmod ++ [x]
     wybemods <- liftIO $ List.map (makeMod . dropExtension)
         <$> wybeSourcesInDir dir
-    -- Build the above list of modules
-    -- opts <- gets options
-    -- let force = optForceAll opts || optForce opts
-    -- -- quick shortcut to build a module
-    -- let build m = buildModuleIfNeeded force m [takeDirectory dir]
-    -- built <- or <$> mapM build wybemods
 
     -- Helper to add new import of `m` to current module
     let updateImport m = do
@@ -535,12 +514,11 @@ buildDirectory dir dirmod = do
     logBuild $ "Generated directory module containing" ++ showModSpecs wybemods
     -- Run the compilation passes on this module package to append the
     -- procs from the imports to the interface.
-    -- XXX Maybe run only the import pass, as there is no module source!
-    return True
 
 
 -- |Compile a file module given the parsed source file contents.
-compileParseTree :: FilePath -> ModSpec -> Maybe [Ident] -> [Item] -> Compiler ()
+compileParseTree :: FilePath -> ModSpec -> Maybe [Ident] -> [Item]
+        -> Compiler ()
 compileParseTree source modspec params items = do
     logBuild $ "===> Compiling module parse tree: " ++ showModSpec modspec
     enterModule source modspec (Just modspec) params
