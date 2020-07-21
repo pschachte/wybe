@@ -129,7 +129,7 @@ decodeModule required bs = do
 
 
 decodeEncodedLPVM ::  [ModSpec] -> EncodedLPVM -> Compiler [Module]
-decodeEncodedLPVM required (EncodedLPVM _ ms) =
+decodeEncodedLPVM required (EncodedLPVM ms) =
     if List.all (`elem` specs) required
     then return ms
     else return []

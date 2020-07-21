@@ -78,7 +78,7 @@ module AST (
   -- *Helper functions
   defaultBlock, moduleIsPackage,
   -- *LPVM Encoding types
-  EncodedLPVM(..), ModuleIndex, makeEncodedLPVM
+  EncodedLPVM(..), makeEncodedLPVM
   ) where
 
 import           Config (magicVersion, wordSize, objectExtension,
@@ -329,7 +329,6 @@ data CompilerState = Compiler {
   errorState :: Bool,            -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
-  recentlyLoaded :: [ModSpec],   -- ^record recently loaded modules
   unchangedMods :: Set ModSpec   -- ^record mods that are loaded from object
                                  --  and unchanged.
 }
@@ -341,7 +340,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp
-                        (Compiler opts "" [] False Map.empty [] [] Set.empty)
+                        (Compiler opts "" [] False Map.empty [] Set.empty)
 
 
 -- |Apply some transformation function to the compiler state.
@@ -564,6 +563,7 @@ enterModule source modspec rootMod params = do
     oldMod <- getLoadingModule modspec
     when (isJust oldMod)
       $ shouldnt $ "enterModule " ++ showModSpec modspec ++ " already exists"
+    logAST $ "Entering module " ++ showModSpec modspec
     absSource <- liftIO $ makeAbsolute source
     modify (\comp -> let newMod = emptyModule
                                   { modOrigin        = absSource
@@ -603,7 +603,6 @@ exitModule = do
               ++ " with imports:\n        "
               ++ intercalate "\n        "
                  [showUse 20 mod dep | (mod,dep) <- imports]
-    modify (\comp -> comp { recentlyLoaded = currMod:recentlyLoaded comp })
     reexitModule
 
 
@@ -2946,15 +2945,8 @@ makeBold s = "\x1b[1m" ++ s ++ "\x1b[0m"
 
 ------------------------------ Module Encoding Types -----------------------
 
-data EncodedLPVM = EncodedLPVM ModuleIndex [Module]
+data EncodedLPVM = EncodedLPVM [Module]
                    deriving (Generic)
 
-
--- XXX unused
-type ModuleIndex = [(ModSpec, FilePath)]
-
 makeEncodedLPVM :: [Module] -> EncodedLPVM
-makeEncodedLPVM ms =
-    let makeIndex m = (modSpec m, takeDirectory $ modOrigin m)
-        index = List.map makeIndex ms
-    in  EncodedLPVM index ms
+makeEncodedLPVM = EncodedLPVM

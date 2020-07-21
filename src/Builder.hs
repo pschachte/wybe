@@ -1,5 +1,5 @@
 --  File     : Builder.hs
---  Author   : Peter Schachte, Modified by Zed(Zijun) Chen.
+--  Author   : Peter Schachte, Zed(Zijun) Chen.
 --  Purpose  : Handles compilation at the module level.
 --  Copyright: (c) 2012-2015 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
@@ -279,11 +279,8 @@ loadAllNeededModules :: Bool   -- ^Force compilation of this module
               -> [FilePath]    -- ^Directories to look in
               -> Compiler [(ModSpec, [ModSpec])]
 loadAllNeededModules force rootMod possDirs = do
-    loadModuleIfNeeded force rootMod possDirs
+    mods <- loadModuleIfNeeded force rootMod possDirs
     stopOnError $ "loading module: " ++ showModSpec rootMod
-
-    mods <- gets recentlyLoaded
-    updateCompiler (\st -> st {recentlyLoaded = []})
 
     if List.null mods
     then return []
@@ -297,9 +294,8 @@ loadAllNeededModules force rootMod possDirs = do
         let concatMapM f l = fmap concat (mapM f l)
         -- handle dependencies of recently loaded modules
         concatMapM (\m -> do
-            reenterModule m
             imports <- getModuleImplementationField (keys . modImports)
-            reexitModule
+                        `inModule` m
             
             logBuild $ "handle imports: " ++ showModSpecs imports ++ " in "
                         ++ showModSpec m
@@ -315,7 +311,7 @@ loadAllNeededModules force rootMod possDirs = do
 loadModuleIfNeeded :: Bool    -- ^Force compilation of this module
               -> ModSpec       -- ^Module name
               -> [FilePath]    -- ^Directories to look in
-              -> Compiler ()
+              -> Compiler [ModSpec] -- ^Return newly loaded module
 loadModuleIfNeeded force modspec possDirs = do
     logBuild $ "Loading " ++ showModSpec modspec
                ++ " with library directories " ++ intercalate ", " possDirs
@@ -328,29 +324,31 @@ loadModuleIfNeeded force modspec possDirs = do
         (if isNothing maybemod then "not yet" else "already") ++
         " loaded"
     if isJust maybemod
-        then return () -- already loaded:  nothing more to do
+        then return [] -- already loaded:  nothing more to do
         else do
         -- XXX the "modSrc" might be describing the parent mod of "modspec".
         -- We doesn't handle that correctly for now.
         modSrc <- moduleSources modspec possDirs
         logBuild $ show modSrc
         case modSrc of
-            NoSource ->
+            NoSource -> do
                 Error <!> "Could not find source for module " ++
                             showModSpec modspec
                             ++ "\nin directories:\n    "
                             ++ intercalate "\n    " possDirs
+                return []
 
             -- only object file exists
             ModuleSource Nothing (Just objfile) Nothing Nothing -> do
                 loaded <- loadModuleFromObjFile modspec objfile
-                unless loaded $ do
+                when (List.null loaded) $ do
                     -- if extraction failed, it is uncrecoverable now
                     let err = "Object file " ++ objfile ++
                                 " yielded no LPVM modules for " ++
                                 showModSpec modspec ++ "."
                     Error <!> "No other options to pursue."
                     Error <!> err
+                return loaded
 
             ModuleSource (Just srcfile) Nothing Nothing Nothing ->
                 -- only source file exists
@@ -365,35 +363,42 @@ loadModuleIfNeeded force modspec possDirs = do
                     loadModuleFromSrcFile modspec srcfile
                 else do
                     loaded <- loadModuleFromObjFile modspec objfile
-                    unless loaded $ do
+                    if List.null loaded
+                    then do
                         -- Loading failed, fallback on source building
                         logBuild $ "Falling back on building " ++
                             showModSpec modspec
                         loadModuleFromSrcFile modspec srcfile
+                    else return loaded
 
             ModuleSource Nothing Nothing (Just dir) _ -> do
                 -- directory exists:  rebuild contents if necessary
                 logBuild $ "Modname for directory: " ++ showModSpec modspec
                 buildDirectory dir modspec
+                return [modspec]
 
             -- Error cases:
-            ModuleSource (Just srcfile) Nothing (Just dir) _ ->
+            ModuleSource (Just srcfile) Nothing (Just dir) _ -> do
                 clash "Directory" dir "source file" srcfile
+                return []
 
-            ModuleSource (Just srcfile) Nothing _ (Just archive) ->
+            ModuleSource (Just srcfile) Nothing _ (Just archive) -> do
                 clash "Archive" archive "source file" srcfile
+                return []
 
-            ModuleSource Nothing (Just objfile) (Just dir) _ ->
+            ModuleSource Nothing (Just objfile) (Just dir) _ -> do
                 clash "Directory" dir "object file" objfile
+                return []
 
-            ModuleSource Nothing (Just objfile) _ (Just archive) ->
+            ModuleSource Nothing (Just objfile) _ (Just archive) -> do
                 clash "Archive" archive "object file" objfile
+                return []
 
             _ -> shouldnt "inconsistent file existence"
 
 
--- |Actually load the module from source code.
-loadModuleFromSrcFile :: ModSpec -> FilePath -> Compiler ()
+-- |Actually load the module from source code. Return a list of loaded modules.
+loadModuleFromSrcFile :: ModSpec -> FilePath -> Compiler [ModSpec]
 loadModuleFromSrcFile mspec srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
     -- let parseTree = parse tokens
@@ -433,8 +438,9 @@ buildDirectory dir dirmod = do
 
 
 -- |Compile a file module given the parsed source file contents.
+-- Return a list mod that just compiled
 compileParseTree :: FilePath -> ModSpec -> Maybe [Ident] -> [Item]
-        -> Compiler ()
+        -> Compiler [ModSpec]
 compileParseTree source modspec params items = do
     logBuild $ "===> Compiling module parse tree: " ++ showModSpec modspec
     enterModule source modspec (Just modspec) params
@@ -454,17 +460,19 @@ compileParseTree source modspec params items = do
     -- relationship explicitly before doing any compilation.
     Normalise.normalise items
     stopOnError $ "preliminary processing of module " ++ showModSpec modspec
+    subMods <- Map.elems <$> getModuleImplementationField modSubmods
     exitModule
     logBuild $ "<=== finished Compiling module parse tree"
             ++ showModSpec modspec
+    return (modspec:subMods)
 
 
 -- | Load all serialised modules present in the LPVM section of the object
--- file. The returned boolean flag indicates whether this was successful. A
--- False flag is returned in the scenarios:
+-- file. The returned list contains modules loaded from the object file.
+-- A Empty list is returned in the scenarios:
 -- o Extraction failed
 -- o Extracted modules didn't contain the `required` Module.
-loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler Bool
+loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler [ModSpec]
 loadModuleFromObjFile required objfile = do
     logBuild $ "=== ??? Trying to load LPVM Module(s) from " ++ objfile
     extracted <- loadLPVMFromObjFile objfile [required]
@@ -472,7 +480,7 @@ loadModuleFromObjFile required objfile = do
     then do
         logBuild $ "xxx Failed extraction of LPVM Modules from object file "
             ++ objfile
-        return False
+        return []
     else do
         logBuild $ "=== >>> Extracted Module bytes from " ++ objfile
         logBuild $ "=== >>> Found modules: "
@@ -484,30 +492,29 @@ loadModuleFromObjFile required objfile = do
                 modSpec m == required) extracted
 
         -- Check if the `required` modspec is in the extracted ones.
-        if List.length requiredMods == 1
-        then do
-            let requiredMod = head requiredMods
-            -- don't need to worried about root mod, it will be overridden
-            enterModule objfile required Nothing Nothing
-            updateModule (\m -> requiredMod {modOrigin = modOrigin m})
-            -- inserts sub modules
-            mapM_ (\mod -> do
-                let spec = modSpec mod
-                enterModule objfile spec Nothing Nothing
-                updateModule (\m -> mod {modOrigin = modOrigin m})
+        case requiredMods of
+            [requiredMod] -> do
+                -- don't need to worried about root mod, it will be overridden
+                enterModule objfile required Nothing Nothing
+                updateModule (\m -> requiredMod {modOrigin = modOrigin m})
+                -- inserts sub modules
+                mapM_ (\mod -> do
+                    let spec = modSpec mod
+                    enterModule objfile spec Nothing Nothing
+                    updateModule (\m -> mod {modOrigin = modOrigin m})
+                    exitModule
+                    ) subMods
                 exitModule
-                ) subMods
-            exitModule
-            -- mark mods as unchanged
-            updateCompiler (\st ->
-                let unchanged = List.map modSpec extracted
-                        |> Set.fromList |> Set.union (unchangedMods st)
-                in st {unchangedMods = unchanged})
-            return True
-        else
-            -- The required modspec was not part of the extracted
-            -- Return false and try for building
-            return False
+                -- mark mods as unchanged
+                updateCompiler (\st ->
+                    let unchanged = List.map modSpec extracted
+                            |> Set.fromList |> Set.union (unchangedMods st)
+                    in st {unchangedMods = unchanged})
+                return $ List.map modSpec extracted
+            _ ->
+                -- The required modspec was not part of the extracted
+                -- Return false and try for building
+                return []
 
 
 -- |Extract all the LPVM modules from the specified object file.
@@ -621,13 +628,13 @@ prepareToCompileModSCC modSCC = do
                 then
                     Error <!> "Source: " ++ src ++ " has been changed during "
                         ++ "the compilation."
-                else
-                    loadModuleFromSrcFile rootM src
+                else do
+                    _ <- loadModuleFromSrcFile rootM src
+                    return ()
             else Error <!>
                     "Object file: " ++ obj ++ " contains outdated modules: " ++
                     showModSpecs ms ++ ". Could not find source to rebuild it."
             ) (Map.toList modsGroupByRoot)
-        updateCompiler (\st -> st {recentlyLoaded = []})
 
 
 -- |Actually compile a list of modules that form an SCC in the module
