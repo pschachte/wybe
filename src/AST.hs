@@ -6,6 +6,7 @@
 --           : LICENSE in the root directory of this project.
 
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE LambdaCase #-}
 
 -- |The abstract syntax tree, and supporting types and functions.
 --  This includes the parse tree, as well as the AST types, which
@@ -602,7 +603,7 @@ exitModule = do
     logAST $ "Exiting module " ++ showModSpec currMod
               ++ " with imports:\n        "
               ++ intercalate "\n        "
-                 [showUse 20 mod dep | (mod,dep) <- imports]
+                 [showUse 20 mod dep | (mod, (dep, _)) <- imports]
     reexitModule
 
 
@@ -856,13 +857,13 @@ addImport :: ModSpec -> ImportSpec -> Compiler ()
 addImport modspec imports = do
     modspec' <- resolveModuleM modspec
     updateImplementation
-      (updateModImports
-       (\moddeps ->
-         let imports' =
-                 case Map.lookup modspec' moddeps of
-                     Nothing -> imports
-                     Just imports'' -> combineImportSpecs imports'' imports
-         in Map.insert modspec' imports' moddeps))
+        (updateModImports
+            (Map.alter (\case
+                Nothing ->
+                    Just (imports, Nothing)
+                Just (imports', hash) ->
+                    Just (combineImportSpecs imports' imports, hash)
+            ) modspec'))
     when (isNothing $ importPublic imports) $
       updateInterface Public (updateDependencies (Set.insert modspec))
 
@@ -1009,6 +1010,8 @@ data Module = Module {
   modSpec :: ModSpec,              -- ^The module path name
   modParams :: Maybe [Ident],      -- ^The type parameters, if a type
   modInterface :: ModuleInterface, -- ^The public face of this module
+  modInterfaceHash :: InterfaceHash,
+                                   -- ^Hash of the "modInterface" above 
   modImplementation :: Maybe ModuleImplementation,
                                    -- ^the module's implementation
   procCount :: Int,                -- ^a counter for gensym-ed proc names
@@ -1028,6 +1031,7 @@ emptyModule = Module
     -- , modConstants      = 0
     -- , modNonConstants   = 0
     , modInterface      = emptyInterface
+    , modInterfaceHash  = Nothing
     , modImplementation = Just emptyImplementation
     , procCount         = 0
     , stmtDecls         = []
@@ -1124,6 +1128,11 @@ updateModInterface :: (ModuleInterface -> ModuleInterface) ->
 updateModInterface fn =
     updateModule (\mod -> mod { modInterface = fn $ modInterface mod })
 
+
+-- Hash of the "ModuleInterface"
+type InterfaceHash = Maybe String
+
+
 -- |Holds everything needed to compile code that uses a module
 data ModuleInterface = ModuleInterface {
     pubTypes :: Map Ident (TypeSpec,Maybe TypeRepresentation),
@@ -1174,7 +1183,8 @@ updateDependencies fn modint = modint {dependencies = fn $ dependencies modint}
 -- |Holds everything needed to compile the module itself
 data ModuleImplementation = ModuleImplementation {
     modPragmas   :: Set Pragma,               -- ^pragmas for this module
-    modImports   :: Map ModSpec ImportSpec,   -- ^This module's imports
+    modImports   :: Map ModSpec (ImportSpec, InterfaceHash),
+                                              -- ^This module's imports
     modSubmods   :: Map Ident ModSpec,        -- ^This module's submodules
     modTypes     :: Map Ident TypeDef,        -- ^Types defined by this module
     modResources :: Map Ident ResourceDef,    -- ^Resources defined by this mod
@@ -1198,8 +1208,9 @@ emptyImplementation =
 -- These functions hack around Haskell's terrible setter syntax
 
 -- |Update the dependencies of a module implementation.
-updateModImports :: (Map ModSpec ImportSpec -> Map ModSpec ImportSpec) ->
-                   ModuleImplementation -> ModuleImplementation
+updateModImports :: (Map ModSpec (ImportSpec, InterfaceHash)
+                    -> Map ModSpec (ImportSpec, InterfaceHash))
+                    -> ModuleImplementation -> ModuleImplementation
 updateModImports fn modimp = modimp {modImports = fn $ modImports modimp}
 
 -- |Update the map of submodules of a module implementation.
@@ -1336,8 +1347,8 @@ combineImportPart (Just set1) (Just set2) = Just (set1 `Set.union` set2)
 
 -- |Actually import into the current module.  The ImportSpec says what
 -- to import.
-doImport :: ModSpec -> ImportSpec -> Compiler ()
-doImport mod imports = do
+doImport :: ModSpec -> (ImportSpec, InterfaceHash) -> Compiler ()
+doImport mod (imports, _) = do
     currMod <- getModuleSpec
     impl <- getModuleImplementationField id
     logAST $ "Handle importation from " ++ showModSpec mod ++

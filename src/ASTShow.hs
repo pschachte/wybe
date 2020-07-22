@@ -44,7 +44,7 @@ instance Show Module where
                  "\n  imports         : " ++
                  intercalate "\n                    "
                  [showUse 20 mod dep |
-                  (mod,dep) <- Map.assocs $ modImports impl] ++
+                  (mod,(dep,_)) <- Map.assocs $ modImports impl] ++
                  -- "\n  vis types       : " ++
                  -- (fillLines indent 20 80 $
                  --  showSetMapItems $ modKnownTypes impl) ++

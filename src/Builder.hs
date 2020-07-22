@@ -563,12 +563,39 @@ compileModBottomUpPass orderedSCCs = do
 
 
 -- |Return whether the given SCC is needed for compilation.
--- XXX the current approach is incorrect. We need to consider changes of their
--- dependency. Related: https://github.com/pschachte/wybe/issues/66
+-- We consider a SCC can be skipped for compilation if and only if:
+--   1. All mods in the SCC are already compiled.
+--   2. For all imports of mods in the SCC, the recorded interface hash matches
+--      the current interface hash.
 isCompileNeeded :: [ModSpec] -> Compiler Bool
 isCompileNeeded modSCC = do
     unchanged <- gets unchangedMods
-    return $ not $ List.all (`Set.member` unchanged) modSCC
+    if List.all (`Set.member` unchanged) modSCC
+    then do
+        upToDate <- List.and <$> mapM (\m -> do
+            imports <- getModuleImplementationField modImports `inModule` m 
+            List.and <$> mapM (\(m', (_, hash)) ->
+                if isNothing hash
+                then do 
+                    logBuild $ "mod: " ++ showModSpec m ++ " imports: "
+                        ++ showModSpec m' ++ " with empty hash"
+                    return False
+                else do
+                    hash' <- getModule modInterfaceHash `inModule` m'
+                    if hash' == hash
+                    then
+                        return True
+                    else do
+                        logBuild $ "mod: " ++ showModSpec m ++ " imports: "
+                            ++ showModSpec m' ++ " with hash: " ++ show hash
+                            ++ " but the current hash is: " ++ show hash'
+                        return False
+                ) (Map.toList imports)
+            ) modSCC
+        return $ not upToDate
+    else do
+        logBuild "SCC contains uncompiled module"
+        return True -- has un-compiled module
 
 
 -- |Make sure all mods in the given SCC are un-compiled. For compiled module,
