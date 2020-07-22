@@ -32,7 +32,7 @@ module AST (
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
   placedApply, placedApply1, placedApplyM, makeMessage, updatePlacedM,
   -- *AST types
-  Module(..), ModuleInterface(..), ModuleImplementation(..),
+  Module(..), ModuleInterface(..), ModuleImplementation(..), InterfaceHash,
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules,
   enterModule, reenterModule, exitModule, reexitModule, inModule,

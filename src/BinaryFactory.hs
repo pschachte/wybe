@@ -144,3 +144,6 @@ sha1 = hashlazy
 
 hashItems :: [Item] -> String
 hashItems = show . sha1 . encode
+
+hashInterface :: ModuleInterface -> InterfaceHash
+hashInterface = Just . show . sha1 . encode

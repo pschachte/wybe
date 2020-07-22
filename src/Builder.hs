@@ -748,7 +748,33 @@ compileModSCC mspecs = do
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs .
     --                         fromJust . modImplementation))
-    return ()
+    mapM_ updateInterfaceHash mspecs
+    mapM_ updateImportsInterfaceHash mspecs
+
+
+
+
+updateInterfaceHash mspec = do
+    reenterModule mspec
+    interface <- getModule modInterface
+    let hash = hashInterface interface
+    updateModule (\m -> m {modInterfaceHash = hash})
+    reexitModule 
+
+
+updateImportsInterfaceHash mspec = do
+    reenterModule mspec
+    updateModImplementationM (\imp -> do
+        let importsList = modImports imp |> Map.toAscList
+        importsList' <- mapM (\(m, (spec, _)) -> do
+            hash <- getModule modInterfaceHash `inModule` m
+            return (m, (spec, hash))
+            ) importsList
+        let imports = Map.fromDistinctAscList importsList'
+        return $ imp {modImports = imports}
+        )
+    reexitModule 
+
 
 -- | Filter for avoiding the standard library modules
 isStdLib :: ModSpec -> Bool
