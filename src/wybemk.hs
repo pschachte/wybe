@@ -24,7 +24,7 @@ main :: IO ()
 main = do
     (opts, files) <- handleCmdline
     catchAny
-      (runCompiler opts (buildTargets opts files))
+      (runCompiler opts (buildTargets files))
       -- if there's an exception, print to stdout
       -- XXX should probably go to stderr; but for now logging goes there
       (\e -> do
@@ -39,4 +39,4 @@ catchAny = Control.Exception.catch
 
 testFile :: String -> IO ()
 testFile file =
-    runCompiler defaultOptions (buildTargets defaultOptions [file])
+    runCompiler defaultOptions (buildTargets [file])

@@ -212,17 +212,17 @@ import qualified LLVM.AST              as LLVMAST
 ------------------------ Handling dependencies ------------------------
 
 -- |Build the specified targets with the specified options.
-buildTargets :: Options -> [FilePath] -> Compiler ()
-buildTargets opts targets = do
-    mapM_ (buildTarget opts) targets
+buildTargets :: [FilePath] -> Compiler ()
+buildTargets targets = do
+    mapM_ buildTarget targets
     showMessages
     stopOnError "building outputs"
     logDump FinalDump FinalDump "EVERYTHING"
 
 
 -- |Build a single target
-buildTarget :: Options -> FilePath -> Compiler ()
-buildTarget opts target = do
+buildTarget :: FilePath -> Compiler ()
+buildTarget target = do
     -- Create a clean temp directory for each build
     sysTmpDir <- liftIO getTemporaryDirectory
     tmpDir <- liftIO $ createTempDirectory sysTmpDir "wybe"
@@ -239,7 +239,7 @@ buildTarget opts target = do
             let dir = takeDirectory target
             -- target should be in the working directory, lib dir will be added
             -- later
-            depGraph <- loadAllNeededModules opts [modname] True [dir]
+            depGraph <- loadAllNeededModules [modname] True [dir]
 
             -- topological sort (bottom-up)
             let orderedSCCs = List.map (\(m, ms) -> (m, m, ms)) depGraph
@@ -271,12 +271,12 @@ buildTarget opts target = do
 
 -- |Search and load all needed modules starting from the given "rootMod".
 -- Return a directed graph representing its dependencies.
-loadAllNeededModules :: Options -- ^Compiler options
-              -> ModSpec        -- ^Module name
+loadAllNeededModules :: ModSpec -- ^Module name
               -> Bool           -- ^Whether the provided mod is the final target
               -> [FilePath]     -- ^Directories to look in
               -> Compiler [(ModSpec, [ModSpec])]
-loadAllNeededModules opts rootMod isTarget possDirs = do
+loadAllNeededModules rootMod isTarget possDirs = do
+    opts <- gets options
     let force = optForceAll opts || (optForce opts && isTarget)
     mods <- loadModuleIfNeeded force rootMod possDirs
     stopOnError $ "loading module: " ++ showModSpec rootMod
@@ -298,7 +298,7 @@ loadAllNeededModules opts rootMod isTarget possDirs = do
             logBuild $ "handle imports: " ++ showModSpecs imports ++ " in "
                         ++ showModSpec m
             depGraph <- concatMapM (\importMod ->
-                loadAllNeededModules opts importMod False possDirs') imports
+                loadAllNeededModules importMod False possDirs') imports
 
             return $ (m, imports):depGraph
             ) mods
@@ -511,8 +511,7 @@ loadModuleFromObjFile required objfile = do
                     in st {unchangedMods = unchanged})
                 return $ List.map modSpec extracted
             _ ->
-                -- The required modspec was not part of the extracted
-                -- Return false and try for building
+                -- The required modspec was not part of the extracted, abort.
                 shouldnt $ "Invalid Wybe object file" 
                         ++ "(can't find matching module)" ++ objfile
 
