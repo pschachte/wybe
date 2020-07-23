@@ -753,15 +753,16 @@ compileModSCC mspecs = do
 
 
 
-
+updateInterfaceHash :: ModSpec -> Compiler ()
 updateInterfaceHash mspec = do
     reenterModule mspec
-    interface <- getModule modInterface
+    interface <- getModuleInterface
     let hash = hashInterface interface
     updateModule (\m -> m {modInterfaceHash = hash})
     reexitModule 
 
 
+updateImportsInterfaceHash :: ModSpec -> Compiler ()
 updateImportsInterfaceHash mspec = do
     reenterModule mspec
     updateModImplementationM (\imp -> do
@@ -771,8 +772,7 @@ updateImportsInterfaceHash mspec = do
             return (m, (spec, hash))
             ) importsList
         let imports = Map.fromDistinctAscList importsList'
-        return $ imp {modImports = imports}
-        )
+        return $ imp {modImports = imports})
     reexitModule 
 
 
