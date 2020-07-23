@@ -297,7 +297,7 @@ logLLVMString thisMod =
             logEmit $ TL.unpack llstr
             logEmit $ replicate 80 '-'
        Nothing -> error "No LLVM Module Implementation"
-     _ <- reexitModule
+     reexitModule
      return ()
 
 -- | Pull the LLVMAST representation of the module and generate the LLVM

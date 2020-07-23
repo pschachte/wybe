@@ -56,19 +56,32 @@ generateSpeczVersionInProc def
     | not (procInline def) = do
         let procImp = procImpln def
         let ProcDefPrim caller body analysis speczBodies = procImp
-        speczBodiesList <- mapM (\(ver, sbody) ->
-            case sbody of 
-                Just b -> return (ver, Just b)
-                Nothing -> do
-                    aliasMap <- initAliasMap caller ver
-                    logTransform $ replicate 60 '~'
-                    logTransform $ "Generating specialized version: "
-                            ++ show ver
-                    sbody' <- transformBody caller body (aliasMap, Map.empty)
-                    return (ver, Just sbody')
-                    ) (Map.toAscList speczBodies)
-        let speczBodies' = Map.fromDistinctAscList speczBodiesList
-        return $ def {procImpln = ProcDefPrim caller body analysis speczBodies'}
+        if List.any isNothing (Map.elems speczBodies)
+        then do -- missing required specz versions
+            -- mark the current module as changed
+            mod <- getModuleSpec
+            updateCompiler (\st ->
+                let unchanged = unchangedMods st |> Set.delete mod in
+                    st {unchangedMods = unchanged})
+
+            speczBodiesList <- mapM (\(ver, sbody) ->
+                case sbody of 
+                    Just b -> return (ver, Just b)
+                    Nothing -> do
+                        -- generate the specz version
+                        aliasMap <- initAliasMap caller ver
+                        logTransform $ replicate 60 '~'
+                        logTransform $ "Generating specialized version: "
+                                ++ show ver
+                        sbody' <- transformBody caller body
+                                (aliasMap, Map.empty)
+                        return (ver, Just sbody')
+                        ) (Map.toAscList speczBodies)
+            let speczBodies' = Map.fromDistinctAscList speczBodiesList
+            return $
+                def {procImpln = ProcDefPrim caller body analysis speczBodies'}
+        else
+            return def
 
 generateSpeczVersionInProc def = return def
 
@@ -290,7 +303,7 @@ expandRequiredSpeczVersionsByMod scc thisMod = do
             ) Set.empty procs
             |> Set.toAscList
     logTransform $ "requiredVersions: " ++ show requiredVersions
-    _ <- reexitModule
+    reexitModule
     -- Update each module based on the requirements
     let requiredVersions' = List.map (\((mod, procName, procId), version) ->
             (mod, (procName, (procId, version)))) requiredVersions
@@ -368,7 +381,7 @@ updateRequiredMultiSpeczInMod mod versions = do
                 ) procName procMap
             ) procMap (groupByFst versions)
     updateModImplementation (updateModProcs (const procMap'))
-    _ <- reexitModule
+    reexitModule
     let changed = procMap /= procMap'
     when changed 
             (logTransform $ "new specz requirements in mod: " ++ show mod)
