@@ -214,16 +214,15 @@ import qualified LLVM.AST              as LLVMAST
 -- |Build the specified targets with the specified options.
 buildTargets :: Options -> [FilePath] -> Compiler ()
 buildTargets opts targets = do
-    mapM_ (buildTarget $ optForce opts || optForceAll opts) targets
+    mapM_ (buildTarget opts) targets
     showMessages
     stopOnError "building outputs"
     logDump FinalDump FinalDump "EVERYTHING"
 
 
--- |Build a single target; flag specifies to re-compile even if the
---  target is up-to-date.
-buildTarget :: Bool -> FilePath -> Compiler ()
-buildTarget force target = do
+-- |Build a single target
+buildTarget :: Options -> FilePath -> Compiler ()
+buildTarget opts target = do
     -- Create a clean temp directory for each build
     sysTmpDir <- liftIO getTemporaryDirectory
     tmpDir <- liftIO $ createTempDirectory sysTmpDir "wybe"
@@ -240,7 +239,7 @@ buildTarget force target = do
             let dir = takeDirectory target
             -- target should be in the working directory, lib dir will be added
             -- later
-            depGraph <- loadAllNeededModules force [modname] [dir]
+            depGraph <- loadAllNeededModules opts [modname] True [dir]
 
             -- topological sort (bottom-up)
             let orderedSCCs = List.map (\(m, ms) -> (m, m, ms)) depGraph
@@ -271,25 +270,24 @@ buildTarget force target = do
 
 
 -- |Search and load all needed modules starting from the given "rootMod".
--- For "possDirs" only need to provide the dir containing the "rootMod", lib dir
--- will be added later.
 -- Return a directed graph representing its dependencies.
-loadAllNeededModules :: Bool   -- ^Force compilation of this module
-              -> ModSpec       -- ^Module name
-              -> [FilePath]    -- ^Directories to look in
+loadAllNeededModules :: Options -- ^Compiler options
+              -> ModSpec        -- ^Module name
+              -> Bool           -- ^Whether the provided mod is the final target
+              -> [FilePath]     -- ^Directories to look in
               -> Compiler [(ModSpec, [ModSpec])]
-loadAllNeededModules force rootMod possDirs = do
+loadAllNeededModules opts rootMod isTarget possDirs = do
+    let force = optForceAll opts || (optForce opts && isTarget)
     mods <- loadModuleIfNeeded force rootMod possDirs
     stopOnError $ "loading module: " ++ showModSpec rootMod
 
     if List.null mods
     then return []
     else do
-        -- add lib dir if it's not in "possDirs"
-        libDirs <- gets (optLibDirs . options)
-        let possDirs' = case possDirs of
-                [dir] -> dir:libDirs
-                _     -> possDirs
+        -- add lib dir to the possDirs when moving from target to dependencies
+        let possDirs' = if isTarget
+            then possDirs ++ optLibDirs opts
+            else possDirs
 
         let concatMapM f l = fmap concat (mapM f l)
         -- handle dependencies of recently loaded modules
@@ -300,7 +298,7 @@ loadAllNeededModules force rootMod possDirs = do
             logBuild $ "handle imports: " ++ showModSpecs imports ++ " in "
                         ++ showModSpec m
             depGraph <- concatMapM (\importMod ->
-                loadAllNeededModules force importMod possDirs') imports
+                loadAllNeededModules opts importMod False possDirs') imports
 
             return $ (m, imports):depGraph
             ) mods
@@ -363,6 +361,10 @@ loadModuleIfNeeded force modspec possDirs = do
                     loadModuleFromSrcFile modspec srcfile
                 else do
                     loaded <- loadModuleFromObjFile modspec objfile
+                    -- XXX Currently we don't support fall back to source code.
+                    -- i.e. "loadModuleFromObjFile" never returns an empty list.
+                    -- We should consider to rebuild it from source code if
+                    -- the "wybe object file version" is too old. 
                     if List.null loaded
                     then do
                         -- Loading failed, fallback on source building
@@ -469,9 +471,6 @@ compileParseTree source modspec params items = do
 
 -- | Load all serialised modules present in the LPVM section of the object
 -- file. The returned list contains modules loaded from the object file.
--- A Empty list is returned in the scenarios:
--- o Extraction failed
--- o Extracted modules didn't contain the `required` Module.
 loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler [ModSpec]
 loadModuleFromObjFile required objfile = do
     logBuild $ "=== ??? Trying to load LPVM Module(s) from " ++ objfile
@@ -480,7 +479,7 @@ loadModuleFromObjFile required objfile = do
     then do
         logBuild $ "xxx Failed extraction of LPVM Modules from object file "
             ++ objfile
-        return []
+        shouldnt $ "Invalid Wybe object file " ++ objfile
     else do
         logBuild $ "=== >>> Extracted Module bytes from " ++ objfile
         logBuild $ "=== >>> Found modules: "
@@ -514,7 +513,8 @@ loadModuleFromObjFile required objfile = do
             _ ->
                 -- The required modspec was not part of the extracted
                 -- Return false and try for building
-                return []
+                shouldnt $ "Invalid Wybe object file" 
+                        ++ "(can't find matching module)" ++ objfile
 
 
 -- |Extract all the LPVM modules from the specified object file.
@@ -632,8 +632,8 @@ prepareToCompileModSCC modSCC = do
                     _ <- loadModuleFromSrcFile rootM src
                     return ()
             else Error <!>
-                    "Object file: " ++ obj ++ " contains outdated modules: " ++
-                    showModSpecs ms ++ ". Could not find source to rebuild it."
+                    "Unable to find corresponding source for object: " ++ obj
+                    ++ ". Failed to reload modules:" ++ showModSpecs ms
             ) (Map.toList modsGroupByRoot)
 
 
