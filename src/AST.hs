@@ -1138,6 +1138,10 @@ type InterfaceHash = Maybe String
 
 
 -- |Holds everything needed to compile code that uses a module
+-- XXX Currently, the data in it is never used (except for computing the 
+--     interface hash). We should revise the design of this, and make the
+--     "compileModSCC" in Builder.hs only gets other modules' data from this
+--     instead of extracting directly form "ModuleImplementation".
 data ModuleInterface = ModuleInterface {
     pubTypes :: Map Ident (TypeSpec,Maybe TypeRepresentation),
                                      -- ^The types this module exports

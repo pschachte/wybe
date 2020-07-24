@@ -752,10 +752,15 @@ compileModSCC mspecs = do
     mapM_ updateImportsInterfaceHash mspecs
 
 
-
+-- Update the interface hash of the given module to match the current mod
+-- implementation.
 updateInterfaceHash :: ModSpec -> Compiler ()
 updateInterfaceHash mspec = do
     reenterModule mspec
+    -- update the mod interface based on the current implementation
+    -- XXX For now, mod interface is not used during the "compileModSCC", so 
+    --     we can update it at the end. But that is not desired, plz find
+    --     comments of "ModuleInterface" in AST.hs for more details.
     impl <- trustFromJustM ("unimplemented module " ++ showModSpec mspec)
             getModuleImplementation
     interface <- getModuleInterface
@@ -771,12 +776,15 @@ updateInterfaceHash mspec = do
                 ReexportedProc 
             )) (pubProcs interface)
     updateModInterface (\i -> i {pubProcs = procs})
+    -- re-compute the hash
     interface' <- getModuleInterface
     let hash = hashInterface interface'
     updateModule (\m -> m {modInterfaceHash = hash})
     reexitModule 
 
 
+-- Update the recorded interface hashes of all imports in the given module to
+-- the current values.
 updateImportsInterfaceHash :: ModSpec -> Compiler ()
 updateImportsInterfaceHash mspec = do
     reenterModule mspec
