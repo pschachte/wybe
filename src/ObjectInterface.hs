@@ -15,7 +15,6 @@ import           Data.Binary
 import           Data.Binary.Get
 import           Data.Binary.Put
 import qualified Data.ByteString.Lazy as BL
-import           Data.Hex
 import           Data.Int
 import           Data.List as List
 import           Data.Maybe (isJust)
