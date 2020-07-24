@@ -1159,6 +1159,8 @@ emptyInterface =
     ModuleInterface Map.empty Map.empty Map.empty Map.empty Set.empty
 
 
+-- Describing a public procedure. For a proc that will be inlined, it stores its
+-- "ProcBody" and it stores "ProcAnalysis" otherwise.
 data PubProcInfo
     = Unknown
     | ReexportedProc
