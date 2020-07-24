@@ -756,8 +756,23 @@ compileModSCC mspecs = do
 updateInterfaceHash :: ModSpec -> Compiler ()
 updateInterfaceHash mspec = do
     reenterModule mspec
+    impl <- trustFromJustM ("unimplemented module " ++ showModSpec mspec)
+            getModuleImplementation
     interface <- getModuleInterface
-    let hash = hashInterface interface
+    let procs = Map.map (Map.mapWithKey (\(ProcSpec mod procName procID _) _ ->
+            if mod == mspec
+            then
+                let p = (modProcs impl ! procName) !! procID in
+                let ProcDefPrim proto body analysis _ = procImpln p in
+                if procInline p
+                then InlineProc proto body 
+                else NormalProc proto analysis
+            else
+                ReexportedProc 
+            )) (pubProcs interface)
+    updateModInterface (\i -> i {pubProcs = procs})
+    interface' <- getModuleInterface
+    let hash = hashInterface interface'
     updateModule (\m -> m {modInterfaceHash = hash})
     reexitModule 
 

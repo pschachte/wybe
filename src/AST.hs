@@ -33,7 +33,7 @@ module AST (
   placedApply, placedApply1, placedApplyM, makeMessage, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..), InterfaceHash,
-  PubProcInfo,
+  PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules,
   enterModule, reenterModule, exitModule, reexitModule, inModule,
@@ -1157,6 +1157,7 @@ emptyInterface =
 
 data PubProcInfo
     = Unknown
+    | ReexportedProc
     | InlineProc PrimProto ProcBody
     | NormalProc PrimProto ProcAnalysis
     deriving (Eq, Generic)
