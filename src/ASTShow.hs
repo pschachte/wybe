@@ -36,7 +36,7 @@ instance Show Module where
            "\n  public procs    : " ++
            intercalate "\n                    "
            (List.map show $ Set.toList $ Set.unions $
-            Map.elems $ pubProcs int) ++
+            List.map Map.keysSet $ Map.elems $ pubProcs int) ++
            if isNothing maybeimpl then "\n  implementation not available"
            else let impl = fromJust maybeimpl
                     indent = replicate 20 ' '

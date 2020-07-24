@@ -33,6 +33,7 @@ module AST (
   placedApply, placedApply1, placedApplyM, makeMessage, updatePlacedM,
   -- *AST types
   Module(..), ModuleInterface(..), ModuleImplementation(..), InterfaceHash,
+  PubProcInfo,
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules,
   enterModule, reenterModule, exitModule, reexitModule, inModule,
@@ -893,7 +894,10 @@ addProcDef procDef = do
             known' = Set.insert spec known
         in imp { modProcs = Map.insert name procs' $ modProcs imp,
                  modKnownProcs = Map.insert name known' $ modKnownProcs imp })
-    updateInterface vis (updatePubProcs (mapSetInsert name spec))
+    updateInterface vis (updatePubProcs (Map.alter (\case
+                Nothing -> Just $ Map.singleton spec Unknown
+                Just m  -> Just $ Map.insert spec Unknown m
+        ) name))
     logAST $ "Adding definition of " ++ show spec ++ ":" ++
       showProcDef 4 procDef
     return ()
@@ -1139,7 +1143,7 @@ data ModuleInterface = ModuleInterface {
                                      -- ^The types this module exports
     pubResources :: Map ResourceName ResourceSpec,
                                      -- ^The resources this module exports
-    pubProcs :: Map Ident (Set ProcSpec), -- ^The procs this module exports
+    pubProcs :: Map ProcName (Map ProcSpec PubProcInfo), -- ^The procs this module exports
     pubDependencies :: Map Ident OptPos,
                                     -- ^The other modules this module exports
     dependencies :: Set ModSpec      -- ^The other modules that must be linked
@@ -1149,6 +1153,14 @@ data ModuleInterface = ModuleInterface {
 emptyInterface :: ModuleInterface
 emptyInterface =
     ModuleInterface Map.empty Map.empty Map.empty Map.empty Set.empty
+
+
+data PubProcInfo
+    = Unknown
+    | InlineProc PrimProto ProcBody
+    | NormalProc PrimProto ProcAnalysis
+    deriving (Eq, Generic)
+
 
 -- These functions hack around Haskell's terrible setter syntax
 
@@ -1164,8 +1176,9 @@ updatePubResources :: (Map Ident ResourceSpec -> Map Ident ResourceSpec) ->
 updatePubResources fn modint = modint {pubResources = fn $ pubResources modint}
 
 -- |Update the public procs of a module interface.
-updatePubProcs :: (Map Ident (Set ProcSpec) -> Map Ident (Set ProcSpec)) ->
-                 ModuleInterface -> ModuleInterface
+updatePubProcs :: (Map ProcName (Map ProcSpec PubProcInfo)
+                -> Map ProcName (Map ProcSpec PubProcInfo))
+                -> ModuleInterface -> ModuleInterface
 updatePubProcs fn modint = modint {pubProcs = fn $ pubProcs modint}
 
 -- |Update the public dependencies of a module interface.
@@ -1361,7 +1374,8 @@ doImport mod (imports, _) = do
     let allImports = combineImportPart pubImports $ importPrivate imports
     let importedTypes = importsSelected allImports $ pubTypes fromIFace
     let importedResources = importsSelected allImports $ pubResources fromIFace
-    let importedProcs = importsSelected allImports $ pubProcs fromIFace
+    let importedProcs = Map.map Map.keysSet
+                            $ importsSelected allImports $ pubProcs fromIFace
     logAST $ "    importing types    : "
              ++ intercalate ", " (Map.keys importedTypes)
     logAST $ "    importing resources: "
@@ -1385,7 +1399,7 @@ doImport mod (imports, _) = do
     updateModInterface
       (\i -> i { pubTypes = Map.union (pubTypes i) exportedTypes,
                 pubResources = Map.union (pubResources i) exportedResources,
-                pubProcs = Map.unionWith Set.union (pubProcs i) exportedProcs })
+                pubProcs = Map.unionWith Map.union (pubProcs i) exportedProcs })
     -- Update what's exported from the module
     return ()
 

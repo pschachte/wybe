@@ -61,6 +61,7 @@ instance Binary TypeDef
 instance Binary ImportSpec
 -- Module
 instance Binary Module
+instance Binary PubProcInfo
 instance Binary ModuleInterface
 instance Binary Pragma
 
