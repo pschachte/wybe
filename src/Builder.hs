@@ -171,6 +171,7 @@ import           Callers                   (collectCallers)
 import           Clause                    (compileProc)
 import           Config
 import           Control.Monad
+import           Control.Monad.Extra
 import           Control.Monad.Trans
 import           Control.Monad.Trans.State
 import qualified Data.ByteString.Char8     as BS
@@ -289,7 +290,6 @@ loadAllNeededModules rootMod isTarget possDirs = do
             then possDirs ++ optLibDirs opts
             else possDirs
 
-        let concatMapM f l = fmap concat (mapM f l)
         -- handle dependencies of recently loaded modules
         concatMapM (\m -> do
             imports <- getModuleImplementationField (keys . modImports)
@@ -564,7 +564,7 @@ compileModBottomUpPass orderedSCCs = do
 
 -- |Return whether the given SCC is needed for compilation.
 -- We consider a SCC can be skipped for compilation if and only if:
---   1. All mods in the SCC are already compiled.
+--   1. All mods in the SCC are already compiled, and.
 --   2. For all imports of mods in the SCC, the recorded interface hash matches
 --      the current interface hash.
 isCompileNeeded :: [ModSpec] -> Compiler Bool
@@ -572,9 +572,9 @@ isCompileNeeded modSCC = do
     unchanged <- gets unchangedMods
     if List.all (`Set.member` unchanged) modSCC
     then do
-        upToDate <- List.and <$> mapM (\m -> do
+        upToDate <- andM $ List.map (\m -> do
             imports <- getModuleImplementationField modImports `inModule` m 
-            List.and <$> mapM (\(m', (_, hash)) ->
+            andM $ List.map (\(m', (_, hash)) ->
                 if isNothing hash
                 then do 
                     logBuild $ "mod: " ++ showModSpec m ++ " imports: "
@@ -933,7 +933,7 @@ buildExecutable orderedSCCs targetMod target = do
             multiSpeczTopDownPass (orderedSCCs ++ [mainMod])
 
             ofiles <- emitObjectFilesIfNeeded depends
-            depMods <- catMaybes <$> mapM (getLoadedModule . fst) depends
+            depMods <- mapMaybeM (getLoadedModule . fst) depends
             let foreigns = foreignDependencies depMods
             let allOFiles = tmpMainOFile:(ofiles ++ foreigns)
 

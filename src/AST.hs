@@ -1147,9 +1147,10 @@ data ModuleInterface = ModuleInterface {
                                      -- ^The types this module exports
     pubResources :: Map ResourceName ResourceSpec,
                                      -- ^The resources this module exports
-    pubProcs :: Map ProcName (Map ProcSpec PubProcInfo), -- ^The procs this module exports
+    pubProcs :: ProcDictionary,
+                                     -- ^The procs this module exports
     pubDependencies :: Map Ident OptPos,
-                                    -- ^The other modules this module exports
+                                     -- ^The other modules this module exports
     dependencies :: Set ModSpec      -- ^The other modules that must be linked
     }                               --  in by modules that depend on this one
     deriving (Eq, Generic)
@@ -1159,13 +1160,21 @@ emptyInterface =
     ModuleInterface Map.empty Map.empty Map.empty Map.empty Set.empty
 
 
--- Describing a public procedure. For a proc that will be inlined, it stores its
--- "ProcBody" and it stores "ProcAnalysis" otherwise.
+-- |Holds information describing public procedures of a module.
+type ProcDictionary = Map ProcName (Map ProcSpec PubProcInfo)
+
+
+-- |Describing a public procedure. Should contains all the information needed
+-- for other modules to use the procedure.
 data PubProcInfo
-    = Unknown
-    | ReexportedProc
+    = Unknown          -- ^A placeholder for uncompiled proc
+    | ReexportedProc   -- ^The proc is reexported, should refer to the
+                       -- corresponding module for the info.
     | InlineProc PrimProto ProcBody
+                       -- ^A proc that should be inlined at the call site.
+                       -- Its whole implementation is stored.
     | NormalProc PrimProto ProcAnalysis
+                       -- ^A normal proc, its analysis results are stored.
     deriving (Eq, Generic)
 
 
@@ -1183,8 +1192,8 @@ updatePubResources :: (Map Ident ResourceSpec -> Map Ident ResourceSpec) ->
 updatePubResources fn modint = modint {pubResources = fn $ pubResources modint}
 
 -- |Update the public procs of a module interface.
-updatePubProcs :: (Map ProcName (Map ProcSpec PubProcInfo)
-                -> Map ProcName (Map ProcSpec PubProcInfo))
+updatePubProcs :: (ProcDictionary
+                -> ProcDictionary)
                 -> ModuleInterface -> ModuleInterface
 updatePubProcs fn modint = modint {pubProcs = fn $ pubProcs modint}
 
