@@ -61,6 +61,7 @@ instance Binary TypeDef
 instance Binary ImportSpec
 -- Module
 instance Binary Module
+instance Binary PubProcInfo
 instance Binary ModuleInterface
 instance Binary Pragma
 
@@ -144,3 +145,6 @@ sha1 = hashlazy
 
 hashItems :: [Item] -> String
 hashItems = show . sha1 . encode
+
+hashInterface :: ModuleInterface -> InterfaceHash
+hashInterface = Just . show . sha1 . encode

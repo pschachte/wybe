@@ -36,7 +36,7 @@ instance Show Module where
            "\n  public procs    : " ++
            intercalate "\n                    "
            (List.map show $ Set.toList $ Set.unions $
-            Map.elems $ pubProcs int) ++
+            List.map Map.keysSet $ Map.elems $ pubProcs int) ++
            if isNothing maybeimpl then "\n  implementation not available"
            else let impl = fromJust maybeimpl
                     indent = replicate 20 ' '
@@ -44,7 +44,7 @@ instance Show Module where
                  "\n  imports         : " ++
                  intercalate "\n                    "
                  [showUse 20 mod dep |
-                  (mod,dep) <- Map.assocs $ modImports impl] ++
+                  (mod,(dep,_)) <- Map.assocs $ modImports impl] ++
                  -- "\n  vis types       : " ++
                  -- (fillLines indent 20 80 $
                  --  showSetMapItems $ modKnownTypes impl) ++

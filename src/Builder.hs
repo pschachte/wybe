@@ -171,6 +171,7 @@ import           Callers                   (collectCallers)
 import           Clause                    (compileProc)
 import           Config
 import           Control.Monad
+import           Control.Monad.Extra
 import           Control.Monad.Trans
 import           Control.Monad.Trans.State
 import qualified Data.ByteString.Char8     as BS
@@ -289,7 +290,6 @@ loadAllNeededModules rootMod isTarget possDirs = do
             then possDirs ++ optLibDirs opts
             else possDirs
 
-        let concatMapM f l = fmap concat (mapM f l)
         -- handle dependencies of recently loaded modules
         concatMapM (\m -> do
             imports <- getModuleImplementationField (keys . modImports)
@@ -563,12 +563,39 @@ compileModBottomUpPass orderedSCCs = do
 
 
 -- |Return whether the given SCC is needed for compilation.
--- XXX the current approach is incorrect. We need to consider changes of their
--- dependency. Related: https://github.com/pschachte/wybe/issues/66
+-- We consider a SCC can be skipped for compilation if and only if:
+--   1. All mods in the SCC are already compiled, and.
+--   2. For all imports of mods in the SCC, the recorded interface hash matches
+--      the current interface hash.
 isCompileNeeded :: [ModSpec] -> Compiler Bool
 isCompileNeeded modSCC = do
     unchanged <- gets unchangedMods
-    return $ not $ List.all (`Set.member` unchanged) modSCC
+    if List.all (`Set.member` unchanged) modSCC
+    then do
+        upToDate <- andM $ List.map (\m -> do
+            imports <- getModuleImplementationField modImports `inModule` m 
+            andM $ List.map (\(m', (_, hash)) ->
+                if isNothing hash
+                then do 
+                    logBuild $ "mod: " ++ showModSpec m ++ " imports: "
+                        ++ showModSpec m' ++ " with empty hash"
+                    return False
+                else do
+                    hash' <- getModule modInterfaceHash `inModule` m'
+                    if hash' == hash
+                    then
+                        return True
+                    else do
+                        logBuild $ "mod: " ++ showModSpec m ++ " imports: "
+                            ++ showModSpec m' ++ " with hash: " ++ show hash
+                            ++ " but the current hash is: " ++ show hash'
+                        return False
+                ) (Map.toList imports)
+            ) modSCC
+        return $ not upToDate
+    else do
+        logBuild "SCC contains uncompiled module"
+        return True -- has un-compiled module
 
 
 -- |Make sure all mods in the given SCC are un-compiled. For compiled module,
@@ -721,7 +748,56 @@ compileModSCC mspecs = do
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs .
     --                         fromJust . modImplementation))
-    return ()
+    mapM_ updateInterfaceHash mspecs
+    mapM_ updateImportsInterfaceHash mspecs
+
+
+-- Update the interface hash of the given module to match the current mod
+-- implementation.
+updateInterfaceHash :: ModSpec -> Compiler ()
+updateInterfaceHash mspec = do
+    reenterModule mspec
+    -- update the mod interface based on the current implementation
+    -- XXX For now, mod interface is not used during the "compileModSCC", so 
+    --     we can update it at the end. But that is not desired, plz find
+    --     comments of "ModuleInterface" in AST.hs for more details.
+    impl <- trustFromJustM ("unimplemented module " ++ showModSpec mspec)
+            getModuleImplementation
+    interface <- getModuleInterface
+    let procs = Map.map (Map.mapWithKey (\(ProcSpec mod procName procID _) _ ->
+            if mod == mspec
+            then
+                let p = (modProcs impl ! procName) !! procID in
+                let ProcDefPrim proto body analysis _ = procImpln p in
+                if procInline p
+                then InlineProc proto body 
+                else NormalProc proto analysis
+            else
+                ReexportedProc 
+            )) (pubProcs interface)
+    updateModInterface (\i -> i {pubProcs = procs})
+    -- re-compute the hash
+    interface' <- getModuleInterface
+    let hash = hashInterface interface'
+    updateModule (\m -> m {modInterfaceHash = hash})
+    reexitModule 
+
+
+-- Update the recorded interface hashes of all imports in the given module to
+-- the current values.
+updateImportsInterfaceHash :: ModSpec -> Compiler ()
+updateImportsInterfaceHash mspec = do
+    reenterModule mspec
+    updateModImplementationM (\imp -> do
+        let importsList = modImports imp |> Map.toAscList
+        importsList' <- mapM (\(m, (spec, _)) -> do
+            hash <- getModule modInterfaceHash `inModule` m
+            return (m, (spec, hash))
+            ) importsList
+        let imports = Map.fromDistinctAscList importsList'
+        return $ imp {modImports = imports})
+    reexitModule 
+
 
 -- | Filter for avoiding the standard library modules
 isStdLib :: ModSpec -> Bool
@@ -857,7 +933,7 @@ buildExecutable orderedSCCs targetMod target = do
             multiSpeczTopDownPass (orderedSCCs ++ [mainMod])
 
             ofiles <- emitObjectFilesIfNeeded depends
-            depMods <- catMaybes <$> mapM (getLoadedModule . fst) depends
+            depMods <- mapMaybeM (getLoadedModule . fst) depends
             let foreigns = foreignDependencies depMods
             let allOFiles = tmpMainOFile:(ofiles ++ foreigns)
 
