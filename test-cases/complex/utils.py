@@ -22,16 +22,20 @@ class Context:
         self.out_file = out_file
         self.files_hash = defaultdict(str)
 
-    def write_section(self, section_name: str, data: Optional[str]) -> None:
+    def write_section(self, section_name: str, data: str) -> None:
         self.out_file.write("-" * 70 + "\n")
         self.out_file.write("- " + section_name + "\n")
-        if data:
-            self.out_file.write("-" * 70 + "\n")
-            self.out_file.write(data)
-            self.out_file.write("\n")
+        self.out_file.write("-" * 70 + "\n")
+        self.out_file.write(data)
+        self.out_file.write("\n")
+        self.out_file.write("-" * 70 + "\n\n\n")
+    
+    def write_note(self, note: str) -> None:
+        self.out_file.write("-" * 70 + "\n")
+        self.out_file.write(note + "\n")
         self.out_file.write("-" * 70 + "\n\n\n")
 
-    def write_file(self, filename: str, data: str) -> None:
+    def save_file(self, filename: str, data: str) -> None:
         with open(os.path.join(self.tmp_dir, filename), "w") as f:
             f.write(data)
 
@@ -53,7 +57,7 @@ class Context:
 
     def is_file_changed(self, filename: str, update_hash: bool) -> bool:
         hash = self._get_file_hash(filename)
-        changed = self.files_hash[filename] == hash
+        changed = self.files_hash[filename] != hash
         if changed and update_hash:
             self.files_hash[filename] = hash
         return changed
@@ -82,10 +86,12 @@ class Context:
         args.append(target)
 
         r = subprocess.run(args, timeout=TIMEOUT, check=check,
-                           stdout=PIPE, stderr=STDOUT, cwd=self.tmp_dir)
+                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                           cwd=self.tmp_dir)
         return (r.returncode, r.stdout.decode("utf-8"))
 
     def execute_program(self, exe: str, check: bool, timeout: float = 5.0) -> Tuple[int, str]:
         r = subprocess.run([exe], timeout=timeout, check=check,
-                            stdout=PIPE, stderr=STDOUT, cwd=self.tmp_dir)
+                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                           cwd=self.tmp_dir)
         return (r.returncode, r.stdout.decode("utf-8"))
