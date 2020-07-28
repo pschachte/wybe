@@ -7,3 +7,5 @@
 !*.wybe
 !*.sh
 !*.in
+!*.py
+!.gitignore
