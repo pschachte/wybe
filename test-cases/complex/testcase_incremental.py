@@ -14,7 +14,7 @@ def incremental_test_1(ctx: Context) -> None:
     _ = ctx.wybe_build_target("main", False, False, check=True)
     # first execute
     _, output = ctx.execute_program("./main", check=True)
-    ctx.write_section("first execute", output)
+    ctx.write_section("first execution", output)
     # record current files
     ctx.update_files_hash(["main.o", "top.o", "ca.o", "cb.o", "down.o"])
 
@@ -34,10 +34,16 @@ def incremental_test_1(ctx: Context) -> None:
     # assert not ctx.is_file_changed("main.o", update_hash=True)
     # assert not ctx.is_file_changed("top.o", update_hash=True)
     assert not ctx.is_file_changed("down.o", update_hash=True)
+    _, output = ctx.execute_program("./main", check=True)
+    ctx.write_section("second execution", output)
+
 
     ctx.write_note(
-        "Change a inline proc in down.wybe, final executeable should contain this change.")
-    ctx.save_file("down.o")
+        "Change a inline proc in down.wybe, final executable should contain this change.")
+    ctx.save_file("down.wybe", WYBE_DOWN_2)
+    _ = ctx.wybe_build_target("main", False, False, check=True)
+    _, output = ctx.execute_program("./main", check=True)
+    ctx.write_section("third execution", output)
 
 
 WYBE_MAIN = """
