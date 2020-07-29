@@ -2231,8 +2231,9 @@ isProcProtoArg _ _ = False
 -- |A loop generator (ie, an iterator).  These need to be
 --  generalised, allowing them to be user-defined.
 data Generator
-      = In VarName (Placed Exp)
-      deriving (Eq,Ord,Generic)
+      = In { loopVar :: VarName,  -- ^ The variable holding each value
+             genExp :: Placed Exp -- ^ The generator being looped over
+        } deriving (Eq,Ord,Generic)
 
 -- |A variable name in SSA form, ie, a name and an natural number suffix,
 --  where the suffix is used to specify which assignment defines the value.
@@ -2835,9 +2836,10 @@ showStmt indent (UseResources resources stmts) =
     "use " ++ intercalate ", " (List.map show resources) ++ " in"
     ++ showBody (indent + 4) stmts
     ++ List.replicate indent ' ' ++ "}"
-showStmt _ (Nop) = "nop"
-showStmt indent (For loopVar genExp body) =
-    "for " ++ content loopVar ++ " in " ++ show genExp
+showStmt _ (Nop) = "pass"
+showStmt indent (For generators body) = -- TODO: Test this
+    "for "
+    ++ intercalate ", " [var ++ " in " ++ show gen | (In var gen) <- generators]
     ++ "{\n" ++ showBody (indent+4) body ++ "\n}"
 showStmt _ (Break) = "break"
 showStmt _ (Next) = "next"

@@ -838,7 +838,7 @@ bodyCalls (pstmt:pstmts) detism = do
         UseResources _ nested -> do
           nested' <- bodyCalls nested detism
           return $ nested' ++ rest
-        For loopVar genExp nested -> shouldnt "bodyCalls: flattening left For stmt"
+        For _ nested -> shouldnt "bodyCalls: flattening left For stmt"
         Break -> return rest
         Next ->  return rest
 

@@ -324,28 +324,31 @@ flattenStmt' (Loop body) pos detism = do
 --     let terminalCond = Unplaced $
 --                        Cond (Unplaced test) body [Unplaced Break]
 --     flattenStmt' (Loop [terminalCond]) pos detism
-flattenStmt' for@(For loopVar genExp body) pos detism = do
-    tempGen <- tempVar
-    tempNextGen <- tempVar
+flattenStmt' for@(For generators body) pos detism = do
+    tempGens <- mapM (const tempVar) generators
+    tempNextGens <- mapM (const tempVar) generators
     tempHasNextGen <- tempVar
     logFlatten $ "Generating for " ++ showStmt 4 for
-    [genExp'] <- flattenPExp genExp -- XXX Should check for input only
-    let instr = ForeignCall "llvm" "move" []
-                [genExp', Unplaced $ varSet tempGen]
-    emit pos instr
-    modify (\s -> s {defdVars = Set.insert tempGen $ defdVars s})
-    let nextVal = Unplaced $ ProcCall [] "[|]" Nothing SemiDet False
-               [Unplaced $ Var (content loopVar) ParamOut Ordinary
-               , Unplaced $ Var tempNextGen ParamOut Ordinary
-               , Unplaced $ Var tempGen ParamIn Ordinary
-               , Unplaced $ Var tempHasNextGen ParamOut Ordinary]
-    let terminalCond = Unplaced $ Cond (Unplaced $ TestBool $ varGet tempHasNextGen)
-                       [Unplaced $ ForeignCall "llvm" "move" []
-                        [Unplaced $ varGet tempNextGen, Unplaced $ varSet tempGen]]
-                       [Unplaced Break]
+    -- XXX Should check for input only
+    generators' <- mapM ((head <$>) . flattenPExp . genExp) generators
+    let instrs = zipWith (\g' g -> ForeignCall "llvm" "move" []
+                [g', Unplaced $ varSet $ loopVar g]) generators' generators
+    mapM_ (emit pos) instrs 
+    modify (\s -> s {defdVars = Set.union (Set.fromList tempGens) $ defdVars s})
+    let nextVals = concat $ zipWith3 (\generator tempNextGen tempGen ->
+                [Unplaced $ ProcCall [] "[|]" Nothing SemiDet False
+                    [Unplaced $ Var (loopVar generator) ParamOut Ordinary
+                    , Unplaced $ Var tempNextGen ParamOut Ordinary
+                    , Unplaced $ Var tempGen ParamIn Ordinary]
+                    -- , Unplaced $ Var tempHasNextGen ParamOut Ordinary],
+                Unplaced $ Cond (Unplaced $ TestBool $ varGet tempHasNextGen)
+                    [Unplaced $ ForeignCall "llvm" "move" []
+                    [Unplaced $ varGet tempNextGen, Unplaced $ varSet tempGen]]
+                    [Unplaced Break]
+                ]) generators tempNextGens tempGens
     -- body' <- flattenInner True False detism
     --          (flattenStmts (body ++ [Unplaced Next]) detism)
-    let generated = Loop (nextVal:terminalCond:body)
+    let generated = Loop (nextVals ++ body)
     logFlatten $ "Generated for: " ++ showStmt 4 generated
     emit pos generated
     flattenStmt' generated pos detism
