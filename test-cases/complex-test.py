@@ -13,7 +13,8 @@ def main() -> None:
     failed_cases = []
     new_cases = []
 
-    for test_name, test_file, test_func in utils.TEST_CASES:
+    for test_func_name, test_file, test_func in utils.TEST_CASES:
+        test_name = "{}-{}".format(os.path.splitext(test_file)[0], test_func_name)
         # write an empty wybe file as a placeholder for "update-exp"
         with open("./complex/exp/{}.wybe".format(test_name), "w") as f:
             f.write("# Complex test case: {} File: {}\n".format(

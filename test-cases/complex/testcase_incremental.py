@@ -2,7 +2,7 @@ from complex.utils import *
 
 
 @test_case
-def incremental_test_1(ctx: Context) -> None:
+def case_1(ctx: Context) -> None:
     # dependency graph can be found here: https://github.com/pschachte/wybe/issues/68
     # write codes
     ctx.save_file("main.wybe", WYBE_MAIN)
