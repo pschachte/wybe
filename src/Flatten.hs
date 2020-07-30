@@ -332,15 +332,15 @@ flattenStmt' for@(For generators body) pos detism = do
     -- XXX Should check for input only
     generators' <- mapM ((head <$>) . flattenPExp . genExp) generators
     let instrs = zipWith (\g' g -> ForeignCall "llvm" "move" []
-                [g', Unplaced $ varSet $ loopVar g]) generators' generators
+                [g', Unplaced $ varSet g]) generators' tempGens
     mapM_ (emit pos) instrs 
     modify (\s -> s {defdVars = Set.union (Set.fromList tempGens) $ defdVars s})
     let nextVals = concat $ zipWith3 (\generator tempNextGen tempGen ->
-                [Unplaced $ ProcCall [] "[|]" Nothing SemiDet False
-                    [Unplaced $ Var (loopVar generator) ParamOut Ordinary
-                    , Unplaced $ Var tempNextGen ParamOut Ordinary
-                    , Unplaced $ Var tempGen ParamIn Ordinary]
-                    -- , Unplaced $ Var tempHasNextGen ParamOut Ordinary],
+                [Unplaced $ ProcCall [] "[|]" Nothing Det False
+                             [Unplaced $ Var (loopVar generator) ParamOut Ordinary
+                             , Unplaced $ Var tempNextGen ParamOut Ordinary
+                             , Unplaced $ Var tempGen ParamIn Ordinary
+                             , Unplaced $ Var tempHasNextGen ParamOut Ordinary],
                 Unplaced $ Cond (Unplaced $ TestBool $ varGet tempHasNextGen)
                     [Unplaced $ ForeignCall "llvm" "move" []
                     [Unplaced $ varGet tempNextGen, Unplaced $ varSet tempGen]]

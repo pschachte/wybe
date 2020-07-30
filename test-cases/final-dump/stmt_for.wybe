@@ -1,34 +1,33 @@
-#pub type int_sequence {
-#    pub int_sequence(start:int, stride:int, end_ex:int)
-#    pub def test `[|]`(?first:int, ?rest:int_sequence, sequence:int_sequence) {
-#        int_sequence(?first, ?stride, ?end_ex, sequence)
-#        if {
-#            stride > 0 && first < end_ex :: int_sequence(first + stride, stride, end_ex, ?rest)
-#            | stride < 0 && first > end_ex :: int_sequence(first + stride, stride, end_ex, ?rest)
-#            | otherwise :: ?rest = sequence fail
-#       }
-#    }
-#}
+pub type intlist { pub [] | [|](head:int, tail:intlist) }
 
-#pub def say_hello use !io {
-    #!println("In Hello")
-#}
+?x = [1, 2, 3]
+?y = [4, 5, 6]
+?z = [7, 8]
 
-do {
-    !println("Outer")
-    do {
-        !println("Inner")
-    }
+for i in x | j in y | k in z {
+    !println(i)
+    !println(j)
+    !println(k)
 }
 
-#!say_hello
-
+#?temp1 = x
+#?temp2 = y
 #do {
-#    !println("Running")
-#    for x in int_sequence(0, 1, 5) {
-#        !println(x)
+#    `[|]`(?i, ?temp1, temp1, ?tempHasNextGen)
+#    if {
+#        tempHasNextGen :: ?temp1 = temp1
+#        | otherwise :: break
 #    }
+#    `[|]`(?j, ?temp2, temp2, ?tempHasNextGen)
+#    if {
+#        tempHasNextGen :: ?temp2 = temp2
+#        | otherwise :: break
+#    }
+#
+#    !println(i)
+#    !println(j)
 #}
+
 
 #?temp = y
 #do {
