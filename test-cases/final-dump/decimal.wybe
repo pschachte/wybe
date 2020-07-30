@@ -16,3 +16,5 @@
 !println(v8)
 ?v9 = 5.001e-14
 !println(v9)
+?v10 = -10.0
+!println(v10)
