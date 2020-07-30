@@ -47,8 +47,8 @@ pub type float is 64 bit float {
     pub def -(x:float,y:float):float = foreign llvm fsub(x,y)
     pub def -(?x:float,y:float,z:float) { ?x = foreign llvm fadd(z,y) }
     pub def -(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
-    # pub def -(x:float):float = foreign llvm fsub(0,x)
-    # pub def -(?x:float,y:float) { ?x = foreign llvm fsub(0,y) }
+    pub def -(x:float):float = foreign llvm fsub(0.0,x)
+    pub def -(?x:float,y:float) { ?x = foreign llvm fsub(0.0,y) }
     pub def *(x:float,y:float):float = foreign llvm fmul(x,y)
     pub def /(x:float,y:float):float = foreign llvm fdiv(x,y)
     pub def /=(x:float,y:float):bool = foreign llvm fcmp ne(x,y)
