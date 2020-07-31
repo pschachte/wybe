@@ -451,13 +451,13 @@ mkInput arg@ArgUnneeded{} = arg
 
 
 argExpandedPrim :: Prim -> BodyBuilder Prim
-argExpandedPrim call@(PrimCall pspec args) = do
+argExpandedPrim call@(PrimCall id pspec args) = do
     args' <- mapM expandArg args
     params <- lift $ primProtoParams <$> getProcPrimProto pspec
     unless (sameLength args' params) $
         shouldnt $ "arguments don't match params in call " ++ show call
     args'' <- zipWithM (transformUnneededArg $ zip params args) params args'
-    return $ PrimCall pspec args''
+    return $ PrimCall id pspec args''
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
     return $ simplifyForeign lang nm flags args'
@@ -614,8 +614,8 @@ splitArgsByMode = List.partition ((==FlowIn) . argFlowDirection)
 
 
 canonicalisePrim :: Prim -> Prim
-canonicalisePrim (PrimCall nm args) =
-    PrimCall nm $ List.map (canonicaliseArg . mkInput) args
+canonicalisePrim (PrimCall id nm args) =
+    PrimCall id nm $ List.map (canonicaliseArg . mkInput) args
 canonicalisePrim (PrimForeign lang op flags args) =
     PrimForeign lang op flags $ List.map (canonicaliseArg . mkInput) args
 canonicalisePrim (PrimTest arg) =
@@ -635,7 +635,7 @@ canonicaliseArg (ArgUnneeded dir _)  = ArgUnneeded dir AnyType
 
 
 validateInstr :: Prim -> BodyBuilder ()
-validateInstr i@(PrimCall _ args)        = mapM_ (validateArg i) args
+validateInstr i@(PrimCall _ _ args)        = mapM_ (validateArg i) args
 validateInstr i@(PrimForeign _ _ _ args) = mapM_ (validateArg i) args
 validateInstr (PrimTest _)               = return ()
 

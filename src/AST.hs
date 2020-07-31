@@ -2236,7 +2236,7 @@ instance Show Prim where
     show = showPrim 0
 
 
-type CallSiteID = Int
+type CallSiteID = Maybe Int
 
 -- |The allowed arguments in primitive proc or foreign proc calls,
 --  just variables and constants.
@@ -2267,7 +2267,7 @@ primArgs (PrimTest arg) = [arg]
 
 -- |Returns a list of all arguments to a prim
 replacePrimArgs :: Prim -> [PrimArg] -> Prim
-replacePrimArgs (PrimCall _ pspec _) args = PrimCall pspec args
+replacePrimArgs (PrimCall id pspec _) args = PrimCall id pspec args
 replacePrimArgs (PrimForeign lang nm flags _) args =
     PrimForeign lang nm flags args
 replacePrimArgs (PrimTest _) [arg] = PrimTest arg
@@ -2761,7 +2761,7 @@ showPlacedPrim' ind prim pos =
 showPrim :: Int -> Prim -> String
 showPrim _ (PrimCall id pspec args) =
         show pspec ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
-            ++ " #" ++ show id
+            ++ maybe "" (\x -> " #" ++ show x) id
 showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++
         name ++ (if List.null flags then "" else " " ++ unwords flags) ++

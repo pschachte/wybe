@@ -237,7 +237,7 @@ compileSimpleStmt' :: Stmt -> ClauseComp Prim
 compileSimpleStmt' call@(ProcCall maybeMod name procID _ _ args) = do
     logClause $ "Compiling call " ++ showStmt 4 call
     args' <- mapM (placedApply compileArg) args
-    return $ PrimCall (ProcSpec maybeMod name
+    return $ PrimCall Nothing (ProcSpec maybeMod name
                        (trustFromJust
                        ("compileSimpleStmt' for " ++ showStmt 4 call)
                        procID) Nothing)

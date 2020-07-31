@@ -192,9 +192,9 @@ expandFork var ty bodies = do
 -- fail.
 -- XXX allow this to handle non-primitives with all inputs known by inlining.
 expandPrim :: Prim -> OptPos -> Expander ()
-expandPrim (PrimCall pspec args) pos = do
+expandPrim (PrimCall id pspec args) pos = do
     args' <- mapM expandArg args
-    let call' = PrimCall pspec args'
+    let call' = PrimCall id pspec args'
     logExpansion $ "  Expand call " ++ show call'
     inliningNow <- gets inlining
     if inliningNow

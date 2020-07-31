@@ -166,12 +166,12 @@ transformPrim ((aliasMap, deadCells), prims) prim = do
     let primc = content prim
     
     (primc', deadCells') <- case primc of
-            PrimCall spec args -> do
+            PrimCall id spec args -> do
                 noMultiSpecz <- gets (optNoMultiSpecz . options)
                 spec' <- if noMultiSpecz
                     then return spec
                     else _updatePrimCallForSpecz spec args aliasMap
-                return (PrimCall spec' args, deadCells)
+                return (PrimCall id spec' args, deadCells)
             PrimForeign "lpvm" "mutate" flags args -> do
                 let args' = _updateMutateForAlias aliasMap args
                 return (PrimForeign "lpvm" "mutate" flags args', deadCells)
