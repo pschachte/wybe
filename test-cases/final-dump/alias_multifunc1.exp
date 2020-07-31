@@ -182,20 +182,20 @@ entry:
 
 define external fastcc  {i64, i64} @"alias_multifunc1.replicate1<0>"(i64  %"p1#0")    {
 entry:
-  %"p2#0" = tail call fastcc  i64  @"alias_multifunc1.replicate2<0>"(i64  %"p1#0")  
-  %"p3#0" = tail call fastcc  i64  @"alias_multifunc1.replicate2<0>"(i64  %"p2#0")  
+  %"1$p2#0" = tail call fastcc  i64  @"alias_multifunc1.replicate2<0>"(i64  %"p1#0")  
+  %"1$p3#0" = tail call fastcc  i64  @"alias_multifunc1.replicate2<0>"(i64  %"1$p2#0")  
   %40 = trunc i64 16 to i32  
   %41 = tail call ccc  i8*  @wybe_malloc(i32  %40)  
   %42 = ptrtoint i8* %41 to i64 
   %43 = inttoptr i64 %42 to i8* 
-  %44 = inttoptr i64 %"p2#0" to i8* 
+  %44 = inttoptr i64 %"1$p2#0" to i8* 
   %45 = trunc i64 16 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %43, i8*  %44, i32  %45, i32  8, i1  0)  
   %46 = inttoptr i64 %42 to i64* 
   %47 = getelementptr  i64, i64* %46, i64 0 
   store  i64 22, i64* %47 
   %48 = insertvalue {i64, i64} undef, i64 %42, 0 
-  %49 = insertvalue {i64, i64} %48, i64 %"p3#0", 1 
+  %49 = insertvalue {i64, i64} %48, i64 %"1$p3#0", 1 
   ret {i64, i64} %49 
 }
 
@@ -437,11 +437,11 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"tmp$8#0" = icmp eq i64 %3, %10 
-  br i1 %"tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = icmp eq i64 %3, %10 
+  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = icmp eq i64 %7, %14 
-  br i1 %"tmp$1#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = icmp eq i64 %7, %14 
+  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
@@ -467,11 +467,11 @@ entry:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"tmp$2#0" = icmp eq i64 %17, %24 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = icmp eq i64 %17, %24 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %21, %28 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %21, %28 
+  ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
 }

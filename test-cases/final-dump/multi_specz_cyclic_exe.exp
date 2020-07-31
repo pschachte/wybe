@@ -281,9 +281,9 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"multi_specz_cyclic_lib.foo1<0>"(i64  %"x1#0", i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"n#0")    {
 entry:
-  %"tmp$0#0" = sub   i64 %"n#0", 1 
-  %"tmp$1#0" = icmp slt i64 %"tmp$0#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = sub   i64 %"n#0", 1 
+  %"1$tmp$1#0" = icmp slt i64 %"1$tmp$0#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x1#0", i64  111)  
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x2#0", i64  222)  
@@ -291,16 +291,16 @@ if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4#0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"tmp$0#0")  
+  tail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"1$tmp$0#0")  
   ret void 
 }
 
 
 define external fastcc  void @"multi_specz_cyclic_lib.foo1<0>[bdf2d5e35e]"(i64  %"x1#0", i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"n#0")    {
 entry:
-  %"tmp$0#0" = sub   i64 %"n#0", 1 
-  %"tmp$1#0" = icmp slt i64 %"tmp$0#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = sub   i64 %"n#0", 1 
+  %"1$tmp$1#0" = icmp slt i64 %"1$tmp$0#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x1#0", i64  111)  
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x2#0", i64  222)  
@@ -308,16 +308,16 @@ if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[04d1467a4d]"(i64  %"x4#0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>[af3334e8f6]"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"tmp$0#0")  
+  tail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>[af3334e8f6]"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"1$tmp$0#0")  
   ret void 
 }
 
 
 define external fastcc  void @"multi_specz_cyclic_lib.foo1<0>[0ce1034b00]"(i64  %"x1#0", i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"n#0")    {
 entry:
-  %"tmp$0#0" = sub   i64 %"n#0", 1 
-  %"tmp$1#0" = icmp slt i64 %"tmp$0#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = sub   i64 %"n#0", 1 
+  %"1$tmp$1#0" = icmp slt i64 %"1$tmp$0#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[04d1467a4d]"(i64  %"x1#0", i64  111)  
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[04d1467a4d]"(i64  %"x2#0", i64  222)  
@@ -325,7 +325,7 @@ if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4#0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>[b9f3eabe52]"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"tmp$0#0")  
+  tail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>[b9f3eabe52]"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"1$tmp$0#0")  
   ret void 
 }
 
@@ -507,11 +507,11 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"tmp$8#0" = icmp eq i64 %3, %10 
-  br i1 %"tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = icmp eq i64 %3, %10 
+  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = icmp eq i64 %7, %14 
-  br i1 %"tmp$1#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = icmp eq i64 %7, %14 
+  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
@@ -537,11 +537,11 @@ entry:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"tmp$2#0" = icmp eq i64 %17, %24 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = icmp eq i64 %17, %24 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %21, %28 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %21, %28 
+  ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
 }
@@ -716,9 +716,9 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"multi_specz_cyclic_lib2.foo2<0>"(i64  %"x1#0", i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"n#0")    {
 entry:
-  %"tmp$0#0" = sub   i64 %"n#0", 1 
-  %"tmp$1#0" = icmp slt i64 %"tmp$0#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = sub   i64 %"n#0", 1 
+  %"1$tmp$1#0" = icmp slt i64 %"1$tmp$0#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x1#0", i64  111)  
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x2#0", i64  222)  
@@ -726,16 +726,16 @@ if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4#0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"tmp$0#0")  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"1$tmp$0#0")  
   ret void 
 }
 
 
 define external fastcc  void @"multi_specz_cyclic_lib2.foo2<0>[af3334e8f6]"(i64  %"x1#0", i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"n#0")    {
 entry:
-  %"tmp$0#0" = sub   i64 %"n#0", 1 
-  %"tmp$1#0" = icmp slt i64 %"tmp$0#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = sub   i64 %"n#0", 1 
+  %"1$tmp$1#0" = icmp slt i64 %"1$tmp$0#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x1#0", i64  111)  
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[04d1467a4d]"(i64  %"x2#0", i64  222)  
@@ -743,16 +743,16 @@ if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4#0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>[0ce1034b00]"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"tmp$0#0")  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>[0ce1034b00]"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"1$tmp$0#0")  
   ret void 
 }
 
 
 define external fastcc  void @"multi_specz_cyclic_lib2.foo2<0>[b9f3eabe52]"(i64  %"x1#0", i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"n#0")    {
 entry:
-  %"tmp$0#0" = sub   i64 %"n#0", 1 
-  %"tmp$1#0" = icmp slt i64 %"tmp$0#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = sub   i64 %"n#0", 1 
+  %"1$tmp$1#0" = icmp slt i64 %"1$tmp$0#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[04d1467a4d]"(i64  %"x1#0", i64  111)  
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x2#0", i64  222)  
@@ -760,6 +760,6 @@ if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[04d1467a4d]"(i64  %"x4#0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>[bdf2d5e35e]"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"tmp$0#0")  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>[bdf2d5e35e]"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"1$tmp$0#0")  
   ret void 
 }

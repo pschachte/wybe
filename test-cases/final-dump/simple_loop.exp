@@ -76,11 +76,11 @@ entry:
 
 define external fastcc  {i64, i64, i64} @"simple_loop.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
-  %"c#0" = tail call ccc  i8  @read_char()  
-  %"tmp$1#0" = icmp ne i8 %"c#0", 97 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$c#0" = tail call ccc  i8  @read_char()  
+  %"1$tmp$1#0" = icmp ne i8 %"1$c#0", 97 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
-  tail call ccc  void  @putchar(i8  %"c#0")  
+  tail call ccc  void  @putchar(i8  %"1$c#0")  
   %8 = tail call fastcc  {i64, i64, i64}  @"simple_loop.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")  
   %9 = extractvalue {i64, i64, i64} %8, 0 
   %10 = extractvalue {i64, i64, i64} %8, 1 

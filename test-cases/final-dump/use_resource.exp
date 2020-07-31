@@ -97,24 +97,24 @@ entry:
 
 define external fastcc  i64 @"use_resource.inc_count<0>"(i64  %"count#0")    {
 entry:
-  %"count#1" = add   i64 %"count#0", 1 
-  ret i64 %"count#1" 
+  %"1$count#1" = add   i64 %"count#0", 1 
+  ret i64 %"1$count#1" 
 }
 
 
 define external fastcc  i64 @"use_resource.use_test<0>"(i64  %"count#0")    {
 entry:
-  %"count#1" = add   i64 %"count#0", 1 
-  %"count#2" = add   i64 %"count#1", 1 
-  %"count#3" = add   i64 %"count#2", 1 
-  %"count#4" = add   i64 %"count#3", 1 
+  %"1$count#1" = add   i64 %"count#0", 1 
+  %"1$count#2" = add   i64 %"1$count#1", 1 
+  %"1$count#3" = add   i64 %"1$count#2", 1 
+  %"1$count#4" = add   i64 %"1$count#3", 1 
   %6 = ptrtoint i8* getelementptr inbounds ([18 x i8], [18 x i8]* @use_resource.5, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %6)  
-  tail call ccc  void  @print_int(i64  %"count#4")  
+  tail call ccc  void  @print_int(i64  %"1$count#4")  
   tail call ccc  void  @putchar(i8  10)  
   %8 = ptrtoint i8* getelementptr inbounds ([18 x i8], [18 x i8]* @use_resource.7, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %8)  
-  tail call ccc  void  @print_int(i64  %"count#1")  
+  tail call ccc  void  @print_int(i64  %"1$count#1")  
   tail call ccc  void  @putchar(i8  10)  
-  ret i64 %"count#1" 
+  ret i64 %"1$count#1" 
 }

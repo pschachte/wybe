@@ -171,21 +171,21 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  {i64, i1} @"tests.lookup<0>"(i64  %"key#0", i64  %"map#0")    {
 entry:
-  %"tmp$15#0" = icmp ne i64 %"map#0", 0 
-  br i1 %"tmp$15#0", label %if.then, label %if.else 
+  %"1$tmp$15#0" = icmp ne i64 %"map#0", 0 
+  br i1 %"1$tmp$15#0", label %if.then, label %if.else 
 if.then:
   %1 = add   i64 %"map#0", 8 
   %2 = inttoptr i64 %1 to i64* 
   %3 = getelementptr  i64, i64* %2, i64 0 
   %4 = load  i64, i64* %3 
-  %"tmp$6#0" = icmp eq i64 %"key#0", %4 
-  br i1 %"tmp$6#0", label %if.then1, label %if.else1 
+  %"2$tmp$6#0" = icmp eq i64 %"key#0", %4 
+  br i1 %"2$tmp$6#0", label %if.then1, label %if.else1 
 if.else:
-  br i1 %"tmp$15#0", label %if.then8, label %if.else8 
+  br i1 %"1$tmp$15#0", label %if.then8, label %if.else8 
 if.then1:
-  br i1 %"tmp$15#0", label %if.then2, label %if.else2 
+  br i1 %"1$tmp$15#0", label %if.then2, label %if.else2 
 if.else1:
-  br i1 %"tmp$15#0", label %if.then3, label %if.else3 
+  br i1 %"1$tmp$15#0", label %if.then3, label %if.else3 
 if.then2:
   %5 = add   i64 %"map#0", 16 
   %6 = inttoptr i64 %5 to i64* 
@@ -203,14 +203,14 @@ if.then3:
   %14 = inttoptr i64 %13 to i64* 
   %15 = getelementptr  i64, i64* %14, i64 0 
   %16 = load  i64, i64* %15 
-  %"tmp$9#0" = icmp slt i64 %"key#0", %16 
-  br i1 %"tmp$9#0", label %if.then4, label %if.else4 
+  %"8$tmp$9#0" = icmp slt i64 %"key#0", %16 
+  br i1 %"8$tmp$9#0", label %if.then4, label %if.else4 
 if.else3:
-  br i1 %"tmp$15#0", label %if.then7, label %if.else7 
+  br i1 %"1$tmp$15#0", label %if.then7, label %if.else7 
 if.then4:
-  br i1 %"tmp$15#0", label %if.then5, label %if.else5 
+  br i1 %"1$tmp$15#0", label %if.then5, label %if.else5 
 if.else4:
-  br i1 %"tmp$15#0", label %if.then6, label %if.else6 
+  br i1 %"1$tmp$15#0", label %if.then6, label %if.else6 
 if.then5:
   %17 = inttoptr i64 %"map#0" to i64* 
   %18 = getelementptr  i64, i64* %17, i64 0 
@@ -260,14 +260,14 @@ if.then8:
   %50 = inttoptr i64 %49 to i64* 
   %51 = getelementptr  i64, i64* %50, i64 0 
   %52 = load  i64, i64* %51 
-  %"tmp$9#0" = icmp slt i64 %"key#0", %52 
-  br i1 %"tmp$9#0", label %if.then9, label %if.else9 
+  %"18$tmp$9#0" = icmp slt i64 %"key#0", %52 
+  br i1 %"18$tmp$9#0", label %if.then9, label %if.else9 
 if.else8:
-  br i1 %"tmp$15#0", label %if.then12, label %if.else12 
+  br i1 %"1$tmp$15#0", label %if.then12, label %if.else12 
 if.then9:
-  br i1 %"tmp$15#0", label %if.then10, label %if.else10 
+  br i1 %"1$tmp$15#0", label %if.then10, label %if.else10 
 if.else9:
-  br i1 %"tmp$15#0", label %if.then11, label %if.else11 
+  br i1 %"1$tmp$15#0", label %if.then11, label %if.else11 
 if.then10:
   %53 = inttoptr i64 %"map#0" to i64* 
   %54 = getelementptr  i64, i64* %53, i64 0 
@@ -317,8 +317,8 @@ if.else12:
 
 define external fastcc  i1 @"tests.lt<0>"(i64  %"x#0", i64  %"y#0")    {
 entry:
-  %"tmp$0#0" = icmp slt i64 %"x#0", %"y#0" 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp slt i64 %"x#0", %"y#0" 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   ret i1 1 
 if.else:
@@ -328,15 +328,15 @@ if.else:
 
 define external fastcc  i1 @"tests.lt2<0>"(i64  %"x#0", i64  %"y#0")    {
 entry:
-  %"res#0" = tail call fastcc  i1  @"tests.lt<0>"(i64  %"x#0", i64  %"y#0")  
-  ret i1 %"res#0" 
+  %"1$res#0" = tail call fastcc  i1  @"tests.lt<0>"(i64  %"x#0", i64  %"y#0")  
+  ret i1 %"1$res#0" 
 }
 
 
 define external fastcc  i1 @"tests.lt3<0>"(i64  %"x#0", i64  %"y#0")    {
 entry:
-  %"$$#0" = tail call fastcc  i1  @"tests.lt<0>"(i64  %"y#0", i64  %"x#0")  
-  ret i1 %"$$#0" 
+  %"1$$$#0" = tail call fastcc  i1  @"tests.lt<0>"(i64  %"y#0", i64  %"x#0")  
+  ret i1 %"1$$$#0" 
 }
 --------------------------------------------------
  Module tests.map
@@ -599,8 +599,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"tests.map./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
 if.else:
@@ -610,14 +610,14 @@ if.else:
 
 define external fastcc  i1 @"tests.map.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = icmp eq i64 %"$left#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp eq i64 %"$left#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"2$$$#0" 
 if.else:
-  %"tmp$10#0" = icmp ne i64 %"$left#0", 0 
-  br i1 %"tmp$10#0", label %if.then1, label %if.else1 
+  %"3$tmp$10#0" = icmp ne i64 %"$left#0", 0 
+  br i1 %"3$tmp$10#0", label %if.then1, label %if.else1 
 if.then1:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
@@ -634,8 +634,8 @@ if.then1:
   %13 = inttoptr i64 %12 to i64* 
   %14 = getelementptr  i64, i64* %13, i64 0 
   %15 = load  i64, i64* %14 
-  %"tmp$12#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"tmp$12#0", label %if.then2, label %if.else2 
+  %"4$tmp$12#0" = icmp ne i64 %"$right#0", 0 
+  br i1 %"4$tmp$12#0", label %if.then2, label %if.else2 
 if.else1:
   ret i1 0 
 if.then2:
@@ -654,23 +654,23 @@ if.then2:
   %28 = inttoptr i64 %27 to i64* 
   %29 = getelementptr  i64, i64* %28, i64 0 
   %30 = load  i64, i64* %29 
-  %"tmp$5#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %3, i64  %18)  
-  br i1 %"tmp$5#0", label %if.then3, label %if.else3 
+  %"6$tmp$5#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %3, i64  %18)  
+  br i1 %"6$tmp$5#0", label %if.then3, label %if.else3 
 if.else2:
   ret i1 0 
 if.then3:
-  %"tmp$6#0" = icmp eq i64 %7, %22 
-  br i1 %"tmp$6#0", label %if.then4, label %if.else4 
+  %"8$tmp$6#0" = icmp eq i64 %7, %22 
+  br i1 %"8$tmp$6#0", label %if.then4, label %if.else4 
 if.else3:
   ret i1 0 
 if.then4:
-  %"tmp$7#0" = icmp eq i64 %11, %26 
-  br i1 %"tmp$7#0", label %if.then5, label %if.else5 
+  %"10$tmp$7#0" = icmp eq i64 %11, %26 
+  br i1 %"10$tmp$7#0", label %if.then5, label %if.else5 
 if.else4:
   ret i1 0 
 if.then5:
-  %"$$#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %15, i64  %30)  
-  ret i1 %"$$#0" 
+  %"12$$$#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %15, i64  %30)  
+  ret i1 %"12$$$#0" 
 if.else5:
   ret i1 0 
 }
@@ -684,8 +684,8 @@ entry:
 
 define external fastcc  {i64, i1} @"tests.map.key<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %31 = add   i64 %"$rec#0", 8 
   %32 = inttoptr i64 %31 to i64* 
@@ -703,8 +703,8 @@ if.else:
 
 define external fastcc  {i64, i1} @"tests.map.key<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %39 = trunc i64 32 to i32  
   %40 = tail call ccc  i8*  @wybe_malloc(i32  %39)  
@@ -729,8 +729,8 @@ if.else:
 
 define external fastcc  {i64, i1} @"tests.map.left<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %52 = inttoptr i64 %"$rec#0" to i64* 
   %53 = getelementptr  i64, i64* %52, i64 0 
@@ -747,8 +747,8 @@ if.else:
 
 define external fastcc  {i64, i1} @"tests.map.left<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %59 = trunc i64 32 to i32  
   %60 = tail call ccc  i8*  @wybe_malloc(i32  %59)  
@@ -796,8 +796,8 @@ entry:
 
 define external fastcc  {i64, i64, i64, i64, i1} @"tests.map.node<1>"(i64  %"$#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %85 = inttoptr i64 %"$#0" to i64* 
   %86 = getelementptr  i64, i64* %85, i64 0 
@@ -832,8 +832,8 @@ if.else:
 
 define external fastcc  {i64, i1} @"tests.map.right<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %110 = add   i64 %"$rec#0", 24 
   %111 = inttoptr i64 %110 to i64* 
@@ -851,8 +851,8 @@ if.else:
 
 define external fastcc  {i64, i1} @"tests.map.right<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %118 = trunc i64 32 to i32  
   %119 = tail call ccc  i8*  @wybe_malloc(i32  %118)  
@@ -877,8 +877,8 @@ if.else:
 
 define external fastcc  {i64, i1} @"tests.map.value<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %131 = add   i64 %"$rec#0", 16 
   %132 = inttoptr i64 %131 to i64* 
@@ -896,8 +896,8 @@ if.else:
 
 define external fastcc  {i64, i1} @"tests.map.value<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %139 = trunc i64 32 to i32  
   %140 = tail call ccc  i8*  @wybe_malloc(i32  %139)  

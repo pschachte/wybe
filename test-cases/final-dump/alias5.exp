@@ -130,10 +130,10 @@ entry:
   tail call ccc  void  @print_string(i64  %16)  
   tail call ccc  void  @print_int(i64  2)  
   tail call ccc  void  @putchar(i8  10)  
-  %"tmp$0#0" = add   i64 %"v3#0", 100 
-  %"tmp$2#0" = mul   i64 %"tmp$0#0", 200 
-  %"v4#1" = sdiv exact i64 %"tmp$2#0", 4 
+  %"1$tmp$0#0" = add   i64 %"v3#0", 100 
+  %"1$tmp$2#0" = mul   i64 %"1$tmp$0#0", 200 
+  %"1$v4#1" = sdiv exact i64 %"1$tmp$2#0", 4 
   %17 = insertvalue {i64, i64} undef, i64 %"v1#0", 0 
-  %18 = insertvalue {i64, i64} %17, i64 %"v4#1", 1 
+  %18 = insertvalue {i64, i64} %17, i64 %"1$v4#1", 1 
   ret {i64, i64} %18 
 }

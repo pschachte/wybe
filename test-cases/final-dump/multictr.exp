@@ -232,8 +232,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.card./=<0>"(i6  %"$left#0", i6  %"$right#0")    {
 entry:
-  %"tmp$1#0" = icmp eq i6 %"$left#0", %"$right#0" 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp eq i6 %"$left#0", %"$right#0" 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
 if.else:
@@ -243,28 +243,28 @@ if.else:
 
 define external fastcc  i1 @"multictr.card.=<0>"(i6  %"$left#0", i6  %"$right#0")    {
 entry:
-  %"$$#0" = icmp eq i6 %"$left#0", %"$right#0" 
-  ret i1 %"$$#0" 
+  %"1$$$#0" = icmp eq i6 %"$left#0", %"$right#0" 
+  ret i1 %"1$$$#0" 
 }
 
 
 define external fastcc  i6 @"multictr.card.card<0>"(i2  %"suit#0", i4  %"rank#0")    {
 entry:
   %1 = zext i4 %"rank#0" to i6  
-  %"$temp#1" = shl   i6 %1, 2 
+  %"1$$temp#1" = shl   i6 %1, 2 
   %2 = zext i2 %"suit#0" to i6  
-  %"$#3" = or i6 %"$temp#1", %2 
-  ret i6 %"$#3" 
+  %"1$$#3" = or i6 %"1$$temp#1", %2 
+  ret i6 %"1$$#3" 
 }
 
 
 define external fastcc  {i2, i4} @"multictr.card.card<1>"(i6  %"$#0")    {
 entry:
-  %"$temp2#0" = and i6 %"$#0", 3 
-  %3 = trunc i6 %"$temp2#0" to i2  
-  %"$temp#1" = lshr  i6 %"$#0", 2 
-  %"$temp2#1" = and i6 %"$temp#1", 15 
-  %4 = trunc i6 %"$temp2#1" to i4  
+  %"1$$temp2#0" = and i6 %"$#0", 3 
+  %3 = trunc i6 %"1$$temp2#0" to i2  
+  %"1$$temp#1" = lshr  i6 %"$#0", 2 
+  %"1$$temp2#1" = and i6 %"1$$temp#1", 15 
+  %4 = trunc i6 %"1$$temp2#1" to i4  
   %5 = insertvalue {i2, i4} undef, i2 %3, 0 
   %6 = insertvalue {i2, i4} %5, i4 %4, 1 
   ret {i2, i4} %6 
@@ -273,37 +273,37 @@ entry:
 
 define external fastcc  i4 @"multictr.card.rank<0>"(i6  %"$rec#0")    {
 entry:
-  %"$rec#1" = lshr  i6 %"$rec#0", 2 
-  %"$field#0" = and i6 %"$rec#1", 15 
-  %7 = trunc i6 %"$field#0" to i4  
+  %"1$$rec#1" = lshr  i6 %"$rec#0", 2 
+  %"1$$field#0" = and i6 %"1$$rec#1", 15 
+  %7 = trunc i6 %"1$$field#0" to i4  
   ret i4 %7 
 }
 
 
 define external fastcc  i6 @"multictr.card.rank<1>"(i6  %"$rec#0", i4  %"$field#0")    {
 entry:
-  %"$rec#1" = and i6 %"$rec#0", -61 
+  %"1$$rec#1" = and i6 %"$rec#0", -61 
   %8 = zext i4 %"$field#0" to i6  
-  %"$field#1" = shl   i6 %8, 2 
-  %"$rec#2" = or i6 %"$field#1", %"$rec#1" 
-  ret i6 %"$rec#2" 
+  %"1$$field#1" = shl   i6 %8, 2 
+  %"1$$rec#2" = or i6 %"1$$field#1", %"1$$rec#1" 
+  ret i6 %"1$$rec#2" 
 }
 
 
 define external fastcc  i2 @"multictr.card.suit<0>"(i6  %"$rec#0")    {
 entry:
-  %"$field#0" = and i6 %"$rec#0", 3 
-  %9 = trunc i6 %"$field#0" to i2  
+  %"1$$field#0" = and i6 %"$rec#0", 3 
+  %9 = trunc i6 %"1$$field#0" to i2  
   ret i2 %9 
 }
 
 
 define external fastcc  i6 @"multictr.card.suit<1>"(i6  %"$rec#0", i2  %"$field#0")    {
 entry:
-  %"$rec#1" = and i6 %"$rec#0", -4 
+  %"1$$rec#1" = and i6 %"$rec#0", -4 
   %10 = zext i2 %"$field#0" to i6  
-  %"$rec#2" = or i6 %10, %"$rec#1" 
-  ret i6 %"$rec#2" 
+  %"1$$rec#2" = or i6 %10, %"1$$rec#1" 
+  ret i6 %"1$$rec#2" 
 }
 --------------------------------------------------
  Module multictr.complicated
@@ -647,8 +647,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.complicated./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = tail call fastcc  i1  @"multictr.complicated.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = tail call fastcc  i1  @"multictr.complicated.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
 if.else:
@@ -658,46 +658,46 @@ if.else:
 
 define external fastcc  i1 @"multictr.complicated.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = icmp ult i64 %"$left#0", 4 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp ult i64 %"$left#0", 4 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"2$$$#0" 
 if.else:
-  %"tmp$10#0" = icmp uge i64 %"$left#0", 4 
-  br i1 %"tmp$10#0", label %if.then1, label %if.else1 
+  %"3$tmp$10#0" = icmp uge i64 %"$left#0", 4 
+  br i1 %"3$tmp$10#0", label %if.then1, label %if.else1 
 if.then1:
-  %"tmp$11#0" = and i64 %"$left#0", 7 
-  %"tmp$12#0" = icmp eq i64 %"tmp$11#0", 0 
-  br i1 %"tmp$12#0", label %if.then2, label %if.else2 
+  %"4$tmp$11#0" = and i64 %"$left#0", 7 
+  %"4$tmp$12#0" = icmp eq i64 %"4$tmp$11#0", 0 
+  br i1 %"4$tmp$12#0", label %if.then2, label %if.else2 
 if.else1:
-  br i1 %"tmp$10#0", label %if.then9, label %if.else9 
+  br i1 %"3$tmp$10#0", label %if.then9, label %if.else9 
 if.then2:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %"tmp$14#0" = icmp uge i64 %"$right#0", 4 
-  br i1 %"tmp$14#0", label %if.then3, label %if.else3 
+  %"6$tmp$14#0" = icmp uge i64 %"$right#0", 4 
+  br i1 %"6$tmp$14#0", label %if.then3, label %if.else3 
 if.else2:
-  br i1 %"tmp$10#0", label %if.then5, label %if.else5 
+  br i1 %"3$tmp$10#0", label %if.then5, label %if.else5 
 if.then3:
-  %"tmp$15#0" = and i64 %"$right#0", 7 
-  %"tmp$16#0" = icmp eq i64 %"tmp$15#0", 0 
-  br i1 %"tmp$16#0", label %if.then4, label %if.else4 
+  %"8$tmp$15#0" = and i64 %"$right#0", 7 
+  %"8$tmp$16#0" = icmp eq i64 %"8$tmp$15#0", 0 
+  br i1 %"8$tmp$16#0", label %if.then4, label %if.else4 
 if.else3:
   ret i1 0 
 if.then4:
   %4 = inttoptr i64 %"$right#0" to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
   %6 = load  i64, i64* %5 
-  %"$$#0" = icmp eq i64 %3, %6 
-  ret i1 %"$$#0" 
+  %"10$$$#0" = icmp eq i64 %3, %6 
+  ret i1 %"10$$$#0" 
 if.else4:
   ret i1 0 
 if.then5:
-  %"tmp$15#0" = and i64 %"$left#0", 7 
-  %"tmp$16#0" = icmp eq i64 %"tmp$15#0", 1 
-  br i1 %"tmp$16#0", label %if.then6, label %if.else6 
+  %"12$tmp$15#0" = and i64 %"$left#0", 7 
+  %"12$tmp$16#0" = icmp eq i64 %"12$tmp$15#0", 1 
+  br i1 %"12$tmp$16#0", label %if.then6, label %if.else6 
 if.else5:
   ret i1 0 
 if.then6:
@@ -705,14 +705,14 @@ if.then6:
   %8 = inttoptr i64 %7 to i64* 
   %9 = getelementptr  i64, i64* %8, i64 0 
   %10 = load  i64, i64* %9 
-  %"tmp$18#0" = icmp uge i64 %"$right#0", 4 
-  br i1 %"tmp$18#0", label %if.then7, label %if.else7 
+  %"14$tmp$18#0" = icmp uge i64 %"$right#0", 4 
+  br i1 %"14$tmp$18#0", label %if.then7, label %if.else7 
 if.else6:
   ret i1 0 
 if.then7:
-  %"tmp$19#0" = and i64 %"$right#0", 7 
-  %"tmp$20#0" = icmp eq i64 %"tmp$19#0", 1 
-  br i1 %"tmp$20#0", label %if.then8, label %if.else8 
+  %"16$tmp$19#0" = and i64 %"$right#0", 7 
+  %"16$tmp$20#0" = icmp eq i64 %"16$tmp$19#0", 1 
+  br i1 %"16$tmp$20#0", label %if.then8, label %if.else8 
 if.else7:
   ret i1 0 
 if.then8:
@@ -720,14 +720,14 @@ if.then8:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"$$#0" = icmp eq i64 %10, %14 
-  ret i1 %"$$#0" 
+  %"18$$$#0" = icmp eq i64 %10, %14 
+  ret i1 %"18$$$#0" 
 if.else8:
   ret i1 0 
 if.then9:
-  %"tmp$15#0" = and i64 %"$left#0", 7 
-  %"tmp$16#0" = icmp eq i64 %"tmp$15#0", 1 
-  br i1 %"tmp$16#0", label %if.then10, label %if.else10 
+  %"20$tmp$15#0" = and i64 %"$left#0", 7 
+  %"20$tmp$16#0" = icmp eq i64 %"20$tmp$15#0", 1 
+  br i1 %"20$tmp$16#0", label %if.then10, label %if.else10 
 if.else9:
   ret i1 0 
 if.then10:
@@ -735,14 +735,14 @@ if.then10:
   %16 = inttoptr i64 %15 to i64* 
   %17 = getelementptr  i64, i64* %16, i64 0 
   %18 = load  i64, i64* %17 
-  %"tmp$18#0" = icmp uge i64 %"$right#0", 4 
-  br i1 %"tmp$18#0", label %if.then11, label %if.else11 
+  %"22$tmp$18#0" = icmp uge i64 %"$right#0", 4 
+  br i1 %"22$tmp$18#0", label %if.then11, label %if.else11 
 if.else10:
   ret i1 0 
 if.then11:
-  %"tmp$19#0" = and i64 %"$right#0", 7 
-  %"tmp$20#0" = icmp eq i64 %"tmp$19#0", 1 
-  br i1 %"tmp$20#0", label %if.then12, label %if.else12 
+  %"24$tmp$19#0" = and i64 %"$right#0", 7 
+  %"24$tmp$20#0" = icmp eq i64 %"24$tmp$19#0", 1 
+  br i1 %"24$tmp$20#0", label %if.then12, label %if.else12 
 if.else11:
   ret i1 0 
 if.then12:
@@ -750,8 +750,8 @@ if.then12:
   %20 = inttoptr i64 %19 to i64* 
   %21 = getelementptr  i64, i64* %20, i64 0 
   %22 = load  i64, i64* %21 
-  %"$$#0" = icmp eq i64 %18, %22 
-  ret i1 %"$$#0" 
+  %"26$$$#0" = icmp eq i64 %18, %22 
+  ret i1 %"26$$$#0" 
 if.else12:
   ret i1 0 
 }
@@ -777,12 +777,12 @@ entry:
 
 define external fastcc  {i64, i1} @"multictr.complicated.c01<1>"(i64  %"$#0")    {
 entry:
-  %"tmp$0#0" = icmp uge i64 %"$#0", 4 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp uge i64 %"$#0", 4 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 0 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 0 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %35 = insertvalue {i64, i1} undef, i64 undef, 0 
   %36 = insertvalue {i64, i1} %35, i1 0, 1 
@@ -809,19 +809,19 @@ entry:
   %40 = inttoptr i64 %39 to i64* 
   %41 = getelementptr  i64, i64* %40, i64 0 
   store  i64 %"f02#0", i64* %41 
-  %"$#0" = or i64 %39, 1 
-  ret i64 %"$#0" 
+  %"1$$#0" = or i64 %39, 1 
+  ret i64 %"1$$#0" 
 }
 
 
 define external fastcc  {i64, i1} @"multictr.complicated.c02<1>"(i64  %"$#0")    {
 entry:
-  %"tmp$0#0" = icmp uge i64 %"$#0", 4 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp uge i64 %"$#0", 4 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 1 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %50 = insertvalue {i64, i1} undef, i64 undef, 0 
   %51 = insertvalue {i64, i1} %50, i1 0, 1 
@@ -843,12 +843,12 @@ if.else1:
 
 define external fastcc  {i64, i1} @"multictr.complicated.f01<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = icmp uge i64 %"$rec#0", 4 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp uge i64 %"$rec#0", 4 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$rec#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 0 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 0 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %59 = insertvalue {i64, i1} undef, i64 undef, 0 
   %60 = insertvalue {i64, i1} %59, i1 0, 1 
@@ -869,12 +869,12 @@ if.else1:
 
 define external fastcc  {i64, i1} @"multictr.complicated.f01<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = icmp uge i64 %"$rec#0", 4 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp uge i64 %"$rec#0", 4 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$rec#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 0 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 0 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %73 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
   %74 = insertvalue {i64, i1} %73, i1 0, 1 
@@ -902,12 +902,12 @@ if.else1:
 
 define external fastcc  {i64, i1} @"multictr.complicated.f02<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = icmp uge i64 %"$rec#0", 4 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp uge i64 %"$rec#0", 4 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$rec#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 1 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %83 = insertvalue {i64, i1} undef, i64 undef, 0 
   %84 = insertvalue {i64, i1} %83, i1 0, 1 
@@ -929,12 +929,12 @@ if.else1:
 
 define external fastcc  {i64, i1} @"multictr.complicated.f02<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = icmp uge i64 %"$rec#0", 4 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp uge i64 %"$rec#0", 4 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$rec#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 1 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %99 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
   %100 = insertvalue {i64, i1} %99, i1 0, 1 
@@ -1055,8 +1055,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.length./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
 if.else:
@@ -1066,8 +1066,8 @@ if.else:
 
 define external fastcc  i1 @"multictr.length.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  ret i1 %"$$#0" 
+  %"1$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"1$$$#0" 
 }
 
 
@@ -1232,8 +1232,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.maybe_int./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = tail call fastcc  i1  @"multictr.maybe_int.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = tail call fastcc  i1  @"multictr.maybe_int.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
 if.else:
@@ -1243,28 +1243,28 @@ if.else:
 
 define external fastcc  i1 @"multictr.maybe_int.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = icmp eq i64 %"$left#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp eq i64 %"$left#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"2$$$#0" 
 if.else:
-  %"tmp$7#0" = icmp ne i64 %"$left#0", 0 
-  br i1 %"tmp$7#0", label %if.then1, label %if.else1 
+  %"3$tmp$7#0" = icmp ne i64 %"$left#0", 0 
+  br i1 %"3$tmp$7#0", label %if.then1, label %if.else1 
 if.then1:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %"tmp$9#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"tmp$9#0", label %if.then2, label %if.else2 
+  %"4$tmp$9#0" = icmp ne i64 %"$right#0", 0 
+  br i1 %"4$tmp$9#0", label %if.then2, label %if.else2 
 if.else1:
   ret i1 0 
 if.then2:
   %4 = inttoptr i64 %"$right#0" to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
   %6 = load  i64, i64* %5 
-  %"$$#0" = icmp eq i64 %3, %6 
-  ret i1 %"$$#0" 
+  %"6$$$#0" = icmp eq i64 %3, %6 
+  ret i1 %"6$$$#0" 
 if.else2:
   ret i1 0 
 }
@@ -1284,8 +1284,8 @@ entry:
 
 define external fastcc  {i64, i1} @"multictr.maybe_int.just<1>"(i64  %"$#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %12 = inttoptr i64 %"$#0" to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
@@ -1308,8 +1308,8 @@ entry:
 
 define external fastcc  {i64, i1} @"multictr.maybe_int.value<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %19 = inttoptr i64 %"$rec#0" to i64* 
   %20 = getelementptr  i64, i64* %19, i64 0 
@@ -1326,8 +1326,8 @@ if.else:
 
 define external fastcc  {i64, i1} @"multictr.maybe_int.value<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %26 = trunc i64 8 to i32  
   %27 = tail call ccc  i8*  @wybe_malloc(i32  %26)  
@@ -1546,8 +1546,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.number./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = tail call fastcc  i1  @"multictr.number.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = tail call fastcc  i1  @"multictr.number.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
 if.else:
@@ -1557,25 +1557,25 @@ if.else:
 
 define external fastcc  i1 @"multictr.number.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$9#0" = and i64 %"$left#0", 7 
-  %"tmp$10#0" = icmp eq i64 %"tmp$9#0", 0 
-  br i1 %"tmp$10#0", label %if.then, label %if.else 
+  %"1$tmp$9#0" = and i64 %"$left#0", 7 
+  %"1$tmp$10#0" = icmp eq i64 %"1$tmp$9#0", 0 
+  br i1 %"1$tmp$10#0", label %if.then, label %if.else 
 if.then:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %"tmp$12#0" = and i64 %"$right#0", 7 
-  %"tmp$13#0" = icmp eq i64 %"tmp$12#0", 0 
-  br i1 %"tmp$13#0", label %if.then1, label %if.else1 
+  %"2$tmp$12#0" = and i64 %"$right#0", 7 
+  %"2$tmp$13#0" = icmp eq i64 %"2$tmp$12#0", 0 
+  br i1 %"2$tmp$13#0", label %if.then1, label %if.else1 
 if.else:
-  %"tmp$13#0" = icmp eq i64 %"tmp$9#0", 1 
-  br i1 %"tmp$13#0", label %if.then2, label %if.else2 
+  %"3$tmp$13#0" = icmp eq i64 %"1$tmp$9#0", 1 
+  br i1 %"3$tmp$13#0", label %if.then2, label %if.else2 
 if.then1:
   %4 = inttoptr i64 %"$right#0" to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
   %6 = load  i64, i64* %5 
-  %"$$#0" = icmp eq i64 %3, %6 
-  ret i1 %"$$#0" 
+  %"4$$$#0" = icmp eq i64 %3, %6 
+  ret i1 %"4$$$#0" 
 if.else1:
   ret i1 0 
 if.then2:
@@ -1583,9 +1583,9 @@ if.then2:
   %8 = inttoptr i64 %7 to double* 
   %9 = getelementptr  double, double* %8, i64 0 
   %10 = load  double, double* %9 
-  %"tmp$15#0" = and i64 %"$right#0", 7 
-  %"tmp$16#0" = icmp eq i64 %"tmp$15#0", 1 
-  br i1 %"tmp$16#0", label %if.then3, label %if.else3 
+  %"6$tmp$15#0" = and i64 %"$right#0", 7 
+  %"6$tmp$16#0" = icmp eq i64 %"6$tmp$15#0", 1 
+  br i1 %"6$tmp$16#0", label %if.then3, label %if.else3 
 if.else2:
   ret i1 0 
 if.then3:
@@ -1593,8 +1593,8 @@ if.then3:
   %12 = inttoptr i64 %11 to double* 
   %13 = getelementptr  double, double* %12, i64 0 
   %14 = load  double, double* %13 
-  %"$$#0" = fcmp oeq double %10, %14 
-  ret i1 %"$$#0" 
+  %"8$$$#0" = fcmp oeq double %10, %14 
+  ret i1 %"8$$$#0" 
 if.else3:
   ret i1 0 
 }
@@ -1608,16 +1608,16 @@ entry:
   %18 = inttoptr i64 %17 to double* 
   %19 = getelementptr  double, double* %18, i64 0 
   store  double %"float_value#0", double* %19 
-  %"$#0" = or i64 %17, 1 
-  ret i64 %"$#0" 
+  %"1$$#0" = or i64 %17, 1 
+  ret i64 %"1$$#0" 
 }
 
 
 define external fastcc  {double, i1} @"multictr.number.float<1>"(i64  %"$#0")    {
 entry:
-  %"tmp$0#0" = and i64 %"$#0", 7 
-  %"tmp$1#0" = icmp eq i64 %"tmp$0#0", 1 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = and i64 %"$#0", 7 
+  %"1$tmp$1#0" = icmp eq i64 %"1$tmp$0#0", 1 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   %20 = add   i64 %"$#0", -1 
   %21 = inttoptr i64 %20 to double* 
@@ -1635,9 +1635,9 @@ if.else:
 
 define external fastcc  {double, i1} @"multictr.number.float_value<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = and i64 %"$rec#0", 7 
-  %"tmp$1#0" = icmp eq i64 %"tmp$0#0", 1 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = and i64 %"$rec#0", 7 
+  %"1$tmp$1#0" = icmp eq i64 %"1$tmp$0#0", 1 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   %28 = add   i64 %"$rec#0", -1 
   %29 = inttoptr i64 %28 to double* 
@@ -1655,9 +1655,9 @@ if.else:
 
 define external fastcc  {i64, i1} @"multictr.number.float_value<1>"(i64  %"$rec#0", double  %"$field#0")    {
 entry:
-  %"tmp$0#0" = and i64 %"$rec#0", 7 
-  %"tmp$1#0" = icmp eq i64 %"tmp$0#0", 1 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = and i64 %"$rec#0", 7 
+  %"1$tmp$1#0" = icmp eq i64 %"1$tmp$0#0", 1 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   %36 = trunc i64 8 to i32  
   %37 = tail call ccc  i8*  @wybe_malloc(i32  %36)  
@@ -1695,9 +1695,9 @@ entry:
 
 define external fastcc  {i64, i1} @"multictr.number.int<1>"(i64  %"$#0")    {
 entry:
-  %"tmp$0#0" = and i64 %"$#0", 7 
-  %"tmp$1#0" = icmp eq i64 %"tmp$0#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = and i64 %"$#0", 7 
+  %"1$tmp$1#0" = icmp eq i64 %"1$tmp$0#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   %55 = inttoptr i64 %"$#0" to i64* 
   %56 = getelementptr  i64, i64* %55, i64 0 
@@ -1714,9 +1714,9 @@ if.else:
 
 define external fastcc  {i64, i1} @"multictr.number.int_value<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = and i64 %"$rec#0", 7 
-  %"tmp$1#0" = icmp eq i64 %"tmp$0#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = and i64 %"$rec#0", 7 
+  %"1$tmp$1#0" = icmp eq i64 %"1$tmp$0#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   %62 = inttoptr i64 %"$rec#0" to i64* 
   %63 = getelementptr  i64, i64* %62, i64 0 
@@ -1733,9 +1733,9 @@ if.else:
 
 define external fastcc  {i64, i1} @"multictr.number.int_value<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = and i64 %"$rec#0", 7 
-  %"tmp$1#0" = icmp eq i64 %"tmp$0#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = and i64 %"$rec#0", 7 
+  %"1$tmp$1#0" = icmp eq i64 %"1$tmp$0#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   %69 = trunc i64 8 to i32  
   %70 = tail call ccc  i8*  @wybe_malloc(i32  %69)  
@@ -1832,8 +1832,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.perhaps./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
 if.else:
@@ -1843,8 +1843,8 @@ if.else:
 
 define external fastcc  i1 @"multictr.perhaps.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  ret i1 %"$$#0" 
+  %"1$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"1$$$#0" 
 }
 
 
@@ -2023,8 +2023,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.rank./=<0>"(i4  %"$left#0", i4  %"$right#0")    {
 entry:
-  %"tmp$1#0" = icmp eq i4 %"$left#0", %"$right#0" 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp eq i4 %"$left#0", %"$right#0" 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
 if.else:
@@ -2034,8 +2034,8 @@ if.else:
 
 define external fastcc  i1 @"multictr.rank.=<0>"(i4  %"$left#0", i4  %"$right#0")    {
 entry:
-  %"$$#0" = icmp eq i4 %"$left#0", %"$right#0" 
-  ret i1 %"$$#0" 
+  %"1$$$#0" = icmp eq i4 %"$left#0", %"$right#0" 
+  ret i1 %"1$$$#0" 
 }
 
 
@@ -2501,8 +2501,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.simple./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = tail call fastcc  i1  @"multictr.simple.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = tail call fastcc  i1  @"multictr.simple.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
 if.else:
@@ -2512,46 +2512,46 @@ if.else:
 
 define external fastcc  i1 @"multictr.simple.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = icmp eq i64 %"$left#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp eq i64 %"$left#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"2$$$#0" 
 if.else:
-  %"tmp$11#0" = icmp ne i64 %"$left#0", 0 
-  br i1 %"tmp$11#0", label %if.then1, label %if.else1 
+  %"3$tmp$11#0" = icmp ne i64 %"$left#0", 0 
+  br i1 %"3$tmp$11#0", label %if.then1, label %if.else1 
 if.then1:
-  %"tmp$12#0" = and i64 %"$left#0", 7 
-  %"tmp$13#0" = icmp eq i64 %"tmp$12#0", 0 
-  br i1 %"tmp$13#0", label %if.then2, label %if.else2 
+  %"4$tmp$12#0" = and i64 %"$left#0", 7 
+  %"4$tmp$13#0" = icmp eq i64 %"4$tmp$12#0", 0 
+  br i1 %"4$tmp$13#0", label %if.then2, label %if.else2 
 if.else1:
-  br i1 %"tmp$11#0", label %if.then10, label %if.else10 
+  br i1 %"3$tmp$11#0", label %if.then10, label %if.else10 
 if.then2:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %"tmp$15#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"tmp$15#0", label %if.then3, label %if.else3 
+  %"6$tmp$15#0" = icmp ne i64 %"$right#0", 0 
+  br i1 %"6$tmp$15#0", label %if.then3, label %if.else3 
 if.else2:
-  br i1 %"tmp$11#0", label %if.then5, label %if.else5 
+  br i1 %"3$tmp$11#0", label %if.then5, label %if.else5 
 if.then3:
-  %"tmp$16#0" = and i64 %"$right#0", 7 
-  %"tmp$17#0" = icmp eq i64 %"tmp$16#0", 0 
-  br i1 %"tmp$17#0", label %if.then4, label %if.else4 
+  %"8$tmp$16#0" = and i64 %"$right#0", 7 
+  %"8$tmp$17#0" = icmp eq i64 %"8$tmp$16#0", 0 
+  br i1 %"8$tmp$17#0", label %if.then4, label %if.else4 
 if.else3:
   ret i1 0 
 if.then4:
   %4 = inttoptr i64 %"$right#0" to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
   %6 = load  i64, i64* %5 
-  %"$$#0" = icmp eq i64 %3, %6 
-  ret i1 %"$$#0" 
+  %"10$$$#0" = icmp eq i64 %3, %6 
+  ret i1 %"10$$$#0" 
 if.else4:
   ret i1 0 
 if.then5:
-  %"tmp$16#0" = and i64 %"$left#0", 7 
-  %"tmp$17#0" = icmp eq i64 %"tmp$16#0", 1 
-  br i1 %"tmp$17#0", label %if.then6, label %if.else6 
+  %"12$tmp$16#0" = and i64 %"$left#0", 7 
+  %"12$tmp$17#0" = icmp eq i64 %"12$tmp$16#0", 1 
+  br i1 %"12$tmp$17#0", label %if.then6, label %if.else6 
 if.else5:
   ret i1 0 
 if.then6:
@@ -2563,14 +2563,14 @@ if.then6:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"tmp$19#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"tmp$19#0", label %if.then7, label %if.else7 
+  %"14$tmp$19#0" = icmp ne i64 %"$right#0", 0 
+  br i1 %"14$tmp$19#0", label %if.then7, label %if.else7 
 if.else6:
   ret i1 0 
 if.then7:
-  %"tmp$20#0" = and i64 %"$right#0", 7 
-  %"tmp$21#0" = icmp eq i64 %"tmp$20#0", 1 
-  br i1 %"tmp$21#0", label %if.then8, label %if.else8 
+  %"16$tmp$20#0" = and i64 %"$right#0", 7 
+  %"16$tmp$21#0" = icmp eq i64 %"16$tmp$20#0", 1 
+  br i1 %"16$tmp$21#0", label %if.then8, label %if.else8 
 if.else7:
   ret i1 0 
 if.then8:
@@ -2582,19 +2582,19 @@ if.then8:
   %20 = inttoptr i64 %19 to i64* 
   %21 = getelementptr  i64, i64* %20, i64 0 
   %22 = load  i64, i64* %21 
-  %"tmp$8#0" = icmp eq i64 %10, %18 
-  br i1 %"tmp$8#0", label %if.then9, label %if.else9 
+  %"18$tmp$8#0" = icmp eq i64 %10, %18 
+  br i1 %"18$tmp$8#0", label %if.then9, label %if.else9 
 if.else8:
   ret i1 0 
 if.then9:
-  %"$$#0" = icmp eq i64 %14, %22 
-  ret i1 %"$$#0" 
+  %"20$$$#0" = icmp eq i64 %14, %22 
+  ret i1 %"20$$$#0" 
 if.else9:
   ret i1 0 
 if.then10:
-  %"tmp$16#0" = and i64 %"$left#0", 7 
-  %"tmp$17#0" = icmp eq i64 %"tmp$16#0", 1 
-  br i1 %"tmp$17#0", label %if.then11, label %if.else11 
+  %"22$tmp$16#0" = and i64 %"$left#0", 7 
+  %"22$tmp$17#0" = icmp eq i64 %"22$tmp$16#0", 1 
+  br i1 %"22$tmp$17#0", label %if.then11, label %if.else11 
 if.else10:
   ret i1 0 
 if.then11:
@@ -2606,14 +2606,14 @@ if.then11:
   %28 = inttoptr i64 %27 to i64* 
   %29 = getelementptr  i64, i64* %28, i64 0 
   %30 = load  i64, i64* %29 
-  %"tmp$19#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"tmp$19#0", label %if.then12, label %if.else12 
+  %"24$tmp$19#0" = icmp ne i64 %"$right#0", 0 
+  br i1 %"24$tmp$19#0", label %if.then12, label %if.else12 
 if.else11:
   ret i1 0 
 if.then12:
-  %"tmp$20#0" = and i64 %"$right#0", 7 
-  %"tmp$21#0" = icmp eq i64 %"tmp$20#0", 1 
-  br i1 %"tmp$21#0", label %if.then13, label %if.else13 
+  %"26$tmp$20#0" = and i64 %"$right#0", 7 
+  %"26$tmp$21#0" = icmp eq i64 %"26$tmp$20#0", 1 
+  br i1 %"26$tmp$21#0", label %if.then13, label %if.else13 
 if.else12:
   ret i1 0 
 if.then13:
@@ -2625,13 +2625,13 @@ if.then13:
   %36 = inttoptr i64 %35 to i64* 
   %37 = getelementptr  i64, i64* %36, i64 0 
   %38 = load  i64, i64* %37 
-  %"tmp$8#0" = icmp eq i64 %26, %34 
-  br i1 %"tmp$8#0", label %if.then14, label %if.else14 
+  %"28$tmp$8#0" = icmp eq i64 %26, %34 
+  br i1 %"28$tmp$8#0", label %if.then14, label %if.else14 
 if.else13:
   ret i1 0 
 if.then14:
-  %"$$#0" = icmp eq i64 %30, %38 
-  ret i1 %"$$#0" 
+  %"30$$$#0" = icmp eq i64 %30, %38 
+  ret i1 %"30$$$#0" 
 if.else14:
   ret i1 0 
 }
@@ -2651,12 +2651,12 @@ entry:
 
 define external fastcc  {i64, i1} @"multictr.simple.one<1>"(i64  %"$#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 0 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 0 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %51 = insertvalue {i64, i1} undef, i64 undef, 0 
   %52 = insertvalue {i64, i1} %51, i1 0, 1 
@@ -2677,12 +2677,12 @@ if.else1:
 
 define external fastcc  {i64, i1} @"multictr.simple.one_field<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$rec#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 0 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 0 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %60 = insertvalue {i64, i1} undef, i64 undef, 0 
   %61 = insertvalue {i64, i1} %60, i1 0, 1 
@@ -2703,12 +2703,12 @@ if.else1:
 
 define external fastcc  {i64, i1} @"multictr.simple.one_field<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$rec#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 0 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 0 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %74 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
   %75 = insertvalue {i64, i1} %74, i1 0, 1 
@@ -2746,19 +2746,19 @@ entry:
   %82 = inttoptr i64 %81 to i64* 
   %83 = getelementptr  i64, i64* %82, i64 0 
   store  i64 %"two_field2#0", i64* %83 
-  %"$#0" = or i64 %78, 1 
-  ret i64 %"$#0" 
+  %"1$$#0" = or i64 %78, 1 
+  ret i64 %"1$$#0" 
 }
 
 
 define external fastcc  {i64, i64, i1} @"multictr.simple.two<1>"(i64  %"$#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 1 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %98 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
   %99 = insertvalue {i64, i64, i1} %98, i64 undef, 1 
@@ -2787,12 +2787,12 @@ if.else1:
 
 define external fastcc  {i64, i1} @"multictr.simple.two_field1<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$rec#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 1 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %109 = insertvalue {i64, i1} undef, i64 undef, 0 
   %110 = insertvalue {i64, i1} %109, i1 0, 1 
@@ -2814,12 +2814,12 @@ if.else1:
 
 define external fastcc  {i64, i1} @"multictr.simple.two_field1<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$rec#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 1 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %125 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
   %126 = insertvalue {i64, i1} %125, i1 0, 1 
@@ -2849,12 +2849,12 @@ if.else1:
 
 define external fastcc  {i64, i1} @"multictr.simple.two_field2<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$rec#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 1 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %135 = insertvalue {i64, i1} undef, i64 undef, 0 
   %136 = insertvalue {i64, i1} %135, i1 0, 1 
@@ -2876,12 +2876,12 @@ if.else1:
 
 define external fastcc  {i64, i1} @"multictr.simple.two_field2<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = and i64 %"$rec#0", 7 
-  %"tmp$2#0" = icmp eq i64 %"tmp$1#0", 1 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   %151 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
   %152 = insertvalue {i64, i1} %151, i1 0, 1 
@@ -2994,8 +2994,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.suit./=<0>"(i2  %"$left#0", i2  %"$right#0")    {
 entry:
-  %"tmp$1#0" = icmp eq i2 %"$left#0", %"$right#0" 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp eq i2 %"$left#0", %"$right#0" 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
 if.else:
@@ -3005,8 +3005,8 @@ if.else:
 
 define external fastcc  i1 @"multictr.suit.=<0>"(i2  %"$left#0", i2  %"$right#0")    {
 entry:
-  %"$$#0" = icmp eq i2 %"$left#0", %"$right#0" 
-  ret i1 %"$$#0" 
+  %"1$$$#0" = icmp eq i2 %"$left#0", %"$right#0" 
+  ret i1 %"1$$$#0" 
 }
 
 

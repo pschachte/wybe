@@ -84,8 +84,8 @@ entry:
 
 define external fastcc  i64 @"backwards_assign.backwards_assign<0>"(i64  %"input#0")    {
 entry:
-  %"output#0" = add   i64 %"input#0", 1 
-  ret i64 %"output#0" 
+  %"1$output#0" = add   i64 %"input#0", 1 
+  ret i64 %"1$output#0" 
 }
 
 
@@ -93,11 +93,11 @@ define external fastcc  {i64, i64, i64} @"backwards_assign.gen$1<0>"(i64  %"argc
 entry:
   tail call ccc  void  @print_int(i64  %"i#0")  
   tail call ccc  void  @putchar(i8  10)  
-  %"i#1" = add   i64 %"i#0", 1 
-  %"tmp$1#0" = icmp slt i64 %"i#1", 10 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$i#1" = add   i64 %"i#0", 1 
+  %"1$tmp$1#0" = icmp slt i64 %"1$i#1", 10 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %8 = tail call fastcc  {i64, i64, i64}  @"backwards_assign.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0", i64  %"i#1")  
+  %8 = tail call fastcc  {i64, i64, i64}  @"backwards_assign.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0", i64  %"1$i#1")  
   %9 = extractvalue {i64, i64, i64} %8, 0 
   %10 = extractvalue {i64, i64, i64} %8, 1 
   %11 = extractvalue {i64, i64, i64} %8, 2 

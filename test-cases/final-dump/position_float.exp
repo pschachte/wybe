@@ -162,11 +162,11 @@ entry:
   %12 = inttoptr i64 %11 to double* 
   %13 = getelementptr  double, double* %12, i64 0 
   %14 = load  double, double* %13 
-  %"tmp$8#0" = fcmp oeq double %3, %10 
-  br i1 %"tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = fcmp oeq double %3, %10 
+  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = fcmp oeq double %7, %14 
-  br i1 %"tmp$1#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = fcmp oeq double %7, %14 
+  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
@@ -192,11 +192,11 @@ entry:
   %26 = inttoptr i64 %25 to double* 
   %27 = getelementptr  double, double* %26, i64 0 
   %28 = load  double, double* %27 
-  %"tmp$2#0" = fcmp oeq double %17, %24 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = fcmp oeq double %17, %24 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = fcmp oeq double %21, %28 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = fcmp oeq double %21, %28 
+  ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
 }

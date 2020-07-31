@@ -90,8 +90,8 @@ entry:
   %15 = inttoptr i64 %14 to i64* 
   %16 = getelementptr  i64, i64* %15, i64 0 
   store  i64 0, i64* %16 
-  %"tmp$0#0" = tail call fastcc  i64  @"import.distance<0>"(i64  %3, i64  %11)  
-  tail call ccc  void  @print_int(i64  %"tmp$0#0")  
+  %"1$tmp$0#0" = tail call fastcc  i64  @"import.distance<0>"(i64  %3, i64  %11)  
+  tail call ccc  void  @print_int(i64  %"1$tmp$0#0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -105,8 +105,8 @@ entry:
   %20 = inttoptr i64 %"p1#0" to i64* 
   %21 = getelementptr  i64, i64* %20, i64 0 
   %22 = load  i64, i64* %21 
-  %"tmp$3#0" = sub   i64 %19, %22 
-  %"tmp$2#0" = tail call ccc  i64  @ipow(i64  %"tmp$3#0", i64  2)  
+  %"1$tmp$3#0" = sub   i64 %19, %22 
+  %"1$tmp$2#0" = tail call ccc  i64  @ipow(i64  %"1$tmp$3#0", i64  2)  
   %23 = add   i64 %"p2#0", 8 
   %24 = inttoptr i64 %23 to i64* 
   %25 = getelementptr  i64, i64* %24, i64 0 
@@ -115,11 +115,11 @@ entry:
   %28 = inttoptr i64 %27 to i64* 
   %29 = getelementptr  i64, i64* %28, i64 0 
   %30 = load  i64, i64* %29 
-  %"tmp$7#0" = sub   i64 %26, %30 
-  %"tmp$6#0" = tail call ccc  i64  @ipow(i64  %"tmp$7#0", i64  2)  
-  %"tmp$1#0" = add   i64 %"tmp$2#0", %"tmp$6#0" 
-  %"$#0" = tail call ccc  i64  @isqrt(i64  %"tmp$1#0")  
-  ret i64 %"$#0" 
+  %"1$tmp$7#0" = sub   i64 %26, %30 
+  %"1$tmp$6#0" = tail call ccc  i64  @ipow(i64  %"1$tmp$7#0", i64  2)  
+  %"1$tmp$1#0" = add   i64 %"1$tmp$2#0", %"1$tmp$6#0" 
+  %"1$$#0" = tail call ccc  i64  @isqrt(i64  %"1$tmp$1#0")  
+  ret i64 %"1$$#0" 
 }
 --------------------------------------------------
  Module position
@@ -337,11 +337,11 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"tmp$8#0" = icmp eq i64 %3, %10 
-  br i1 %"tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = icmp eq i64 %3, %10 
+  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = icmp eq i64 %7, %14 
-  br i1 %"tmp$1#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = icmp eq i64 %7, %14 
+  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
@@ -367,11 +367,11 @@ entry:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"tmp$2#0" = icmp eq i64 %17, %24 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = icmp eq i64 %17, %24 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %21, %28 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %21, %28 
+  ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
 }
