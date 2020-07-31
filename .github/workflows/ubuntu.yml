@@ -18,7 +18,7 @@ jobs:
       run: |
         sudo apt-get install clang
         sudo apt-get install libgc-dev
-        sudo apt-get install llvm-6.0
+        sudo apt-get install llvm-9-dev
         sudo apt-get install libtinfo-dev
         sudo apt-get install dwdiff
 
