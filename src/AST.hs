@@ -2227,13 +2227,16 @@ data PrimVarName =
 -- |A primitive statment, including those that can only appear in a
 --  loop.
 data Prim
-     = PrimCall ProcSpec [PrimArg]
+     = PrimCall CallSiteID ProcSpec [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
      | PrimTest PrimArg
      deriving (Eq,Ord,Generic)
 
 instance Show Prim where
     show = showPrim 0
+
+
+type CallSiteID = Int
 
 -- |The allowed arguments in primitive proc or foreign proc calls,
 --  just variables and constants.
@@ -2257,14 +2260,14 @@ data PrimArg
 
 -- |Returns a list of all arguments to a prim
 primArgs :: Prim -> [PrimArg]
-primArgs (PrimCall _ args) = args
+primArgs (PrimCall _ _ args) = args
 primArgs (PrimForeign _ _ _ args) = args
 primArgs (PrimTest arg) = [arg]
 
 
 -- |Returns a list of all arguments to a prim
 replacePrimArgs :: Prim -> [PrimArg] -> Prim
-replacePrimArgs (PrimCall pspec _) args = PrimCall pspec args
+replacePrimArgs (PrimCall _ pspec _) args = PrimCall pspec args
 replacePrimArgs (PrimForeign lang nm flags _) args =
     PrimForeign lang nm flags args
 replacePrimArgs (PrimTest _) [arg] = PrimTest arg
@@ -2756,8 +2759,9 @@ showPlacedPrim' ind prim pos =
 
 -- |Show a single primitive statement.
 showPrim :: Int -> Prim -> String
-showPrim _ (PrimCall pspec args) =
+showPrim _ (PrimCall id pspec args) =
         show pspec ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+            ++ " #" ++ show id
 showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++
         name ++ (if List.null flags then "" else " " ++ unwords flags) ++
