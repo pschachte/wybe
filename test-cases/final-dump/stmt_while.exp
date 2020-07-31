@@ -77,13 +77,13 @@ entry:
 
 define external fastcc  {i64, i64, i64} @"stmt_while.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0", i64  %"n#0")    {
 entry:
-  %"tmp$2#0" = icmp sgt i64 %"n#0", 0 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = icmp sgt i64 %"n#0", 0 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$0#0" = sub   i64 %"n#0", 1 
-  tail call ccc  void  @print_int(i64  %"tmp$0#0")  
+  %"2$tmp$0#0" = sub   i64 %"n#0", 1 
+  tail call ccc  void  @print_int(i64  %"2$tmp$0#0")  
   tail call ccc  void  @putchar(i8  10)  
-  %8 = tail call fastcc  {i64, i64, i64}  @"stmt_while.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0", i64  %"tmp$0#0")  
+  %8 = tail call fastcc  {i64, i64, i64}  @"stmt_while.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0", i64  %"2$tmp$0#0")  
   %9 = extractvalue {i64, i64, i64} %8, 0 
   %10 = extractvalue {i64, i64, i64} %8, 1 
   %11 = extractvalue {i64, i64, i64} %8, 2 

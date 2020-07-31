@@ -149,7 +149,7 @@ entry:
   %22 = ptrtoint i8* getelementptr inbounds ([22 x i8], [22 x i8]* @alias_recursion1.21, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %22)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %11)  
-  %"r#0" = tail call fastcc  i64  @"alias_recursion1.if_test<0>"(i64  %3, i64  %11)  
+  %"1$r#0" = tail call fastcc  i64  @"alias_recursion1.if_test<0>"(i64  %3, i64  %11)  
   %24 = ptrtoint i8* getelementptr inbounds ([58 x i8], [58 x i8]* @alias_recursion1.23, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %24)  
   tail call ccc  void  @putchar(i8  10)  
@@ -164,7 +164,7 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   %32 = ptrtoint i8* getelementptr inbounds ([21 x i8], [21 x i8]* @alias_recursion1.31, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %32)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"r#0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$r#0")  
   %34 = ptrtoint i8* getelementptr inbounds ([18 x i8], [18 x i8]* @alias_recursion1.33, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %34)  
   tail call ccc  void  @putchar(i8  10)  
@@ -183,7 +183,7 @@ entry:
   tail call fastcc  void  @"position.printPosition<0>"(i64  %37)  
   %46 = ptrtoint i8* getelementptr inbounds ([28 x i8], [28 x i8]* @alias_recursion1.45, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %46)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"r#0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$r#0")  
   ret void 
 }
 
@@ -193,11 +193,11 @@ entry:
   %47 = inttoptr i64 %"a#0" to i64* 
   %48 = getelementptr  i64, i64* %47, i64 0 
   %49 = load  i64, i64* %48 
-  %"tmp$1#0" = icmp sgt i64 %49, 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp sgt i64 %49, 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %"r#0" = tail call fastcc  i64  @"alias_recursion1.if_test<0>"(i64  %"b#0", i64  %"a#0")  
-  ret i64 %"r#0" 
+  %"2$r#0" = tail call fastcc  i64  @"alias_recursion1.if_test<0>"(i64  %"b#0", i64  %"a#0")  
+  ret i64 %"2$r#0" 
 if.else:
   ret i64 %"a#0" 
 }
@@ -417,11 +417,11 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"tmp$8#0" = icmp eq i64 %3, %10 
-  br i1 %"tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = icmp eq i64 %3, %10 
+  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = icmp eq i64 %7, %14 
-  br i1 %"tmp$1#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = icmp eq i64 %7, %14 
+  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
@@ -447,11 +447,11 @@ entry:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"tmp$2#0" = icmp eq i64 %17, %24 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = icmp eq i64 %17, %24 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %21, %28 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %21, %28 
+  ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
 }

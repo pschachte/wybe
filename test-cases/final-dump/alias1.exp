@@ -248,7 +248,7 @@ entry:
   %13 = inttoptr i64 %12 to i64* 
   %14 = getelementptr  i64, i64* %13, i64 0 
   store  i64 102, i64* %14 
-  %"p2#0" = tail call fastcc  i64  @"alias1.replicate<0>"(i64  %9)  
+  %"1$p2#0" = tail call fastcc  i64  @"alias1.replicate<0>"(i64  %9)  
   %16 = ptrtoint i8* getelementptr inbounds ([17 x i8], [17 x i8]* @alias1.15, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %16)  
   tail call ccc  void  @putchar(i8  10)  
@@ -257,12 +257,12 @@ entry:
   tail call fastcc  void  @"position.printPosition<0>"(i64  %9)  
   %20 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.19, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %20)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"p2#0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$p2#0")  
   %21 = trunc i64 16 to i32  
   %22 = tail call ccc  i8*  @wybe_malloc(i32  %21)  
   %23 = ptrtoint i8* %22 to i64 
   %24 = inttoptr i64 %23 to i8* 
-  %25 = inttoptr i64 %"p2#0" to i8* 
+  %25 = inttoptr i64 %"1$p2#0" to i8* 
   %26 = trunc i64 16 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %24, i8*  %25, i32  %26, i32  8, i1  0)  
   %27 = inttoptr i64 %23 to i64* 
@@ -293,7 +293,7 @@ entry:
   %41 = inttoptr i64 %40 to i64* 
   %42 = getelementptr  i64, i64* %41, i64 0 
   store  i64 102, i64* %42 
-  %"p2#0" = tail call fastcc  i64  @"alias1.replicate<0>"(i64  %37)  
+  %"1$p2#0" = tail call fastcc  i64  @"alias1.replicate<0>"(i64  %37)  
   %44 = ptrtoint i8* getelementptr inbounds ([17 x i8], [17 x i8]* @alias1.43, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %44)  
   tail call ccc  void  @putchar(i8  10)  
@@ -302,8 +302,8 @@ entry:
   tail call fastcc  void  @"position.printPosition<0>"(i64  %37)  
   %48 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.47, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %48)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"p2#0")  
-  %49 = add   i64 %"p2#0", 8 
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$p2#0")  
+  %49 = add   i64 %"1$p2#0", 8 
   %50 = inttoptr i64 %49 to i64* 
   %51 = getelementptr  i64, i64* %50, i64 0 
   %52 = load  i64, i64* %51 
@@ -338,7 +338,7 @@ entry:
   tail call fastcc  void  @"position.printPosition<0>"(i64  %65)  
   %76 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.75, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %76)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"p2#0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$p2#0")  
   %78 = ptrtoint i8* getelementptr inbounds ([25 x i8], [25 x i8]* @alias1.77, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %78)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %55)  
@@ -358,7 +358,7 @@ entry:
   %85 = inttoptr i64 %84 to i64* 
   %86 = getelementptr  i64, i64* %85, i64 0 
   store  i64 102, i64* %86 
-  %"p2#0" = tail call fastcc  i64  @"alias1.replicate<0>"(i64  %81)  
+  %"1$p2#0" = tail call fastcc  i64  @"alias1.replicate<0>"(i64  %81)  
   %88 = ptrtoint i8* getelementptr inbounds ([17 x i8], [17 x i8]* @alias1.87, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %88)  
   tail call ccc  void  @putchar(i8  10)  
@@ -367,7 +367,7 @@ entry:
   tail call fastcc  void  @"position.printPosition<0>"(i64  %81)  
   %92 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.91, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %92)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"p2#0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$p2#0")  
   %93 = trunc i64 16 to i32  
   %94 = tail call ccc  i8*  @wybe_malloc(i32  %93)  
   %95 = ptrtoint i8* %94 to i64 
@@ -386,7 +386,7 @@ entry:
   tail call fastcc  void  @"position.printPosition<0>"(i64  %95)  
   %106 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.105, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %106)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"p2#0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$p2#0")  
   ret void 
 }
 
@@ -628,11 +628,11 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"tmp$8#0" = icmp eq i64 %3, %10 
-  br i1 %"tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = icmp eq i64 %3, %10 
+  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = icmp eq i64 %7, %14 
-  br i1 %"tmp$1#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = icmp eq i64 %7, %14 
+  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
@@ -658,11 +658,11 @@ entry:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"tmp$2#0" = icmp eq i64 %17, %24 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = icmp eq i64 %17, %24 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %21, %28 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %21, %28 
+  ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
 }

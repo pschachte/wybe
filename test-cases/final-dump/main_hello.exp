@@ -56,8 +56,8 @@ entry:
   %2 = ptrtoint i8* getelementptr inbounds ([14 x i8], [14 x i8]* @main_hello.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
-  %"tmp$0#0" = sub   i64 %"argc#0", 1 
-  tail call ccc  void  @print_int(i64  %"tmp$0#0")  
+  %"1$tmp$0#0" = sub   i64 %"argc#0", 1 
+  tail call ccc  void  @print_int(i64  %"1$tmp$0#0")  
   %4 = ptrtoint i8* getelementptr inbounds ([26 x i8], [26 x i8]* @main_hello.3, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %4)  
   tail call ccc  void  @putchar(i8  10)  

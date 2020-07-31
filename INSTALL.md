@@ -28,10 +28,10 @@ Note that Wybe has been ported to macOS and Linux (Ubuntu) so far.
     brew install bdw-gc
 ```
 
-5.  Install LLVM version 6
+5.  Install LLVM version 9
 
 ```
-    brew install llvm-hs/llvm/llvm-6.0
+    brew install llvm-hs/llvm/llvm-9
 ```
 
 6.  Install dwdiff & gtimeout (for testing)
@@ -67,10 +67,10 @@ Note that this is an experimental support and only has been tested on Ubuntu 18.
      sudo apt-get install libgc-dev
 ```
 
-4.  Install LLVM version 6
+4.  Install LLVM version 9
 
 ```
-    sudo apt-get install llvm-6.0
+    sudo apt-get install llvm-9-dev
 ```
 
 5.  Install libtinfo-dev

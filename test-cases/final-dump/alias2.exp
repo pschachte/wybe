@@ -111,13 +111,13 @@ entry:
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   store  i64 20, i64* %10 
-  %"r#0" = tail call fastcc  i64  @"alias2.pcopy<0>"(i64  %5)  
+  %"1$r#0" = tail call fastcc  i64  @"alias2.pcopy<0>"(i64  %5)  
   %12 = ptrtoint i8* getelementptr inbounds ([26 x i8], [26 x i8]* @alias2.11, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %12)  
   tail call ccc  void  @putchar(i8  10)  
   %14 = ptrtoint i8* getelementptr inbounds ([16 x i8], [16 x i8]* @alias2.13, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %14)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"r#0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$r#0")  
   ret void 
 }
 
@@ -402,11 +402,11 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"tmp$8#0" = icmp eq i64 %3, %10 
-  br i1 %"tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = icmp eq i64 %3, %10 
+  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = icmp eq i64 %7, %14 
-  br i1 %"tmp$1#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = icmp eq i64 %7, %14 
+  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
@@ -432,11 +432,11 @@ entry:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"tmp$2#0" = icmp eq i64 %17, %24 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = icmp eq i64 %17, %24 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %21, %28 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %21, %28 
+  ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
 }

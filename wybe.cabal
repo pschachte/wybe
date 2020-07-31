@@ -20,10 +20,9 @@ executable wybemk
                , filepath >= 1.4.0.0
                , flow
                , haskeline
-               , hex
-               , llvm-hs == 6.3.0
-               , llvm-hs-pure == 6.2.1
-               , llvm-hs-pretty == 0.6.0.0
+               , llvm-hs == 9.0.*
+               , llvm-hs-pure == 9.0.*
+               , llvm-hs-pretty == 0.9.0.*
                , temporary
                , text
                , mtl

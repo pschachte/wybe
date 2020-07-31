@@ -84,27 +84,27 @@ entry:
   tail call ccc  void  @print_string(i64  %"prompt#0")  
   %2 = ptrtoint i8* getelementptr inbounds ([8 x i8], [8 x i8]* @proc_yorn2.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
-  %"response#0" = tail call ccc  i8  @read_char()  
-  %"tmp$0#0" = icmp eq i8 %"response#0", 89 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$response#0" = tail call ccc  i8  @read_char()  
+  %"1$tmp$0#0" = icmp eq i8 %"1$response#0", 89 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   ret i64 1 
 if.else:
-  %"tmp$2#0" = icmp eq i8 %"response#0", 78 
-  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
+  %"3$tmp$2#0" = icmp eq i8 %"1$response#0", 78 
+  br i1 %"3$tmp$2#0", label %if.then1, label %if.else1 
 if.then1:
   ret i64 0 
 if.else1:
   %4 = ptrtoint i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_yorn2.3, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %4)  
   tail call ccc  void  @putchar(i8  10)  
-  %"result#1" = tail call fastcc  i1  @"proc_yorn2.gen$1<0>"(i64  %"prompt#0")  
-  ret i1 %"result#1" 
+  %"5$result#1" = tail call fastcc  i1  @"proc_yorn2.gen$1<0>"(i64  %"prompt#0")  
+  ret i1 %"5$result#1" 
 }
 
 
 define external fastcc  i1 @"proc_yorn2.yorn<0>"(i64  %"prompt#0")    {
 entry:
-  %"result#0" = tail call fastcc  i1  @"proc_yorn2.gen$1<0>"(i64  %"prompt#0")  
-  ret i1 %"result#0" 
+  %"1$result#0" = tail call fastcc  i1  @"proc_yorn2.gen$1<0>"(i64  %"prompt#0")  
+  ret i1 %"1$result#0" 
 }
