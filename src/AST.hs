@@ -6,6 +6,7 @@
 --           : LICENSE in the root directory of this project.
 
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE LambdaCase #-}
 
 -- |The abstract syntax tree, and supporting types and functions.
 --  This includes the parse tree, as well as the AST types, which
@@ -31,7 +32,8 @@ module AST (
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
   placedApply, placedApply1, placedApplyM, makeMessage, updatePlacedM,
   -- *AST types
-  Module(..), ModuleInterface(..), ModuleImplementation(..),
+  Module(..), ModuleInterface(..), ModuleImplementation(..), InterfaceHash,
+  PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules,
   enterModule, reenterModule, exitModule, reexitModule, inModule,
@@ -602,7 +604,7 @@ exitModule = do
     logAST $ "Exiting module " ++ showModSpec currMod
               ++ " with imports:\n        "
               ++ intercalate "\n        "
-                 [showUse 20 mod dep | (mod,dep) <- imports]
+                 [showUse 20 mod dep | (mod, (dep, _)) <- imports]
     reexitModule
 
 
@@ -856,13 +858,13 @@ addImport :: ModSpec -> ImportSpec -> Compiler ()
 addImport modspec imports = do
     modspec' <- resolveModuleM modspec
     updateImplementation
-      (updateModImports
-       (\moddeps ->
-         let imports' =
-                 case Map.lookup modspec' moddeps of
-                     Nothing -> imports
-                     Just imports'' -> combineImportSpecs imports'' imports
-         in Map.insert modspec' imports' moddeps))
+        (updateModImports
+            (Map.alter (\case
+                Nothing ->
+                    Just (imports, Nothing)
+                Just (imports', hash) ->
+                    Just (combineImportSpecs imports' imports, hash)
+            ) modspec'))
     when (isNothing $ importPublic imports) $
       updateInterface Public (updateDependencies (Set.insert modspec))
 
@@ -892,7 +894,10 @@ addProcDef procDef = do
             known' = Set.insert spec known
         in imp { modProcs = Map.insert name procs' $ modProcs imp,
                  modKnownProcs = Map.insert name known' $ modKnownProcs imp })
-    updateInterface vis (updatePubProcs (mapSetInsert name spec))
+    updateInterface vis (updatePubProcs (Map.alter (\case
+                Nothing -> Just $ Map.singleton spec Unknown
+                Just m  -> Just $ Map.insert spec Unknown m
+        ) name))
     logAST $ "Adding definition of " ++ show spec ++ ":" ++
       showProcDef 4 procDef
     return ()
@@ -1009,6 +1014,8 @@ data Module = Module {
   modSpec :: ModSpec,              -- ^The module path name
   modParams :: Maybe [Ident],      -- ^The type parameters, if a type
   modInterface :: ModuleInterface, -- ^The public face of this module
+  modInterfaceHash :: InterfaceHash,
+                                   -- ^Hash of the "modInterface" above 
   modImplementation :: Maybe ModuleImplementation,
                                    -- ^the module's implementation
   procCount :: Int,                -- ^a counter for gensym-ed proc names
@@ -1028,6 +1035,7 @@ emptyModule = Module
     -- , modConstants      = 0
     -- , modNonConstants   = 0
     , modInterface      = emptyInterface
+    , modInterfaceHash  = Nothing
     , modImplementation = Just emptyImplementation
     , procCount         = 0
     , stmtDecls         = []
@@ -1124,15 +1132,25 @@ updateModInterface :: (ModuleInterface -> ModuleInterface) ->
 updateModInterface fn =
     updateModule (\mod -> mod { modInterface = fn $ modInterface mod })
 
+
+-- Hash of the "ModuleInterface"
+type InterfaceHash = Maybe String
+
+
 -- |Holds everything needed to compile code that uses a module
+-- XXX Currently, the data in it is never used (except for computing the 
+--     interface hash). We should revise the design of this, and make the
+--     "compileModSCC" in Builder.hs only gets other modules' data from this
+--     instead of extracting directly form "ModuleImplementation".
 data ModuleInterface = ModuleInterface {
     pubTypes :: Map Ident (TypeSpec,Maybe TypeRepresentation),
                                      -- ^The types this module exports
     pubResources :: Map ResourceName ResourceSpec,
                                      -- ^The resources this module exports
-    pubProcs :: Map Ident (Set ProcSpec), -- ^The procs this module exports
+    pubProcs :: ProcDictionary,
+                                     -- ^The procs this module exports
     pubDependencies :: Map Ident OptPos,
-                                    -- ^The other modules this module exports
+                                     -- ^The other modules this module exports
     dependencies :: Set ModSpec      -- ^The other modules that must be linked
     }                               --  in by modules that depend on this one
     deriving (Eq, Generic)
@@ -1140,6 +1158,25 @@ data ModuleInterface = ModuleInterface {
 emptyInterface :: ModuleInterface
 emptyInterface =
     ModuleInterface Map.empty Map.empty Map.empty Map.empty Set.empty
+
+
+-- |Holds information describing public procedures of a module.
+type ProcDictionary = Map ProcName (Map ProcSpec PubProcInfo)
+
+
+-- |Describing a public procedure. Should contains all the information needed
+-- for other modules to use the procedure.
+data PubProcInfo
+    = Unknown          -- ^A placeholder for uncompiled proc
+    | ReexportedProc   -- ^The proc is reexported, should refer to the
+                       -- corresponding module for the info.
+    | InlineProc PrimProto ProcBody
+                       -- ^A proc that should be inlined at the call site.
+                       -- Its whole implementation is stored.
+    | NormalProc PrimProto ProcAnalysis
+                       -- ^A normal proc, its analysis results are stored.
+    deriving (Eq, Generic)
+
 
 -- These functions hack around Haskell's terrible setter syntax
 
@@ -1155,8 +1192,9 @@ updatePubResources :: (Map Ident ResourceSpec -> Map Ident ResourceSpec) ->
 updatePubResources fn modint = modint {pubResources = fn $ pubResources modint}
 
 -- |Update the public procs of a module interface.
-updatePubProcs :: (Map Ident (Set ProcSpec) -> Map Ident (Set ProcSpec)) ->
-                 ModuleInterface -> ModuleInterface
+updatePubProcs :: (ProcDictionary
+                -> ProcDictionary)
+                -> ModuleInterface -> ModuleInterface
 updatePubProcs fn modint = modint {pubProcs = fn $ pubProcs modint}
 
 -- |Update the public dependencies of a module interface.
@@ -1174,7 +1212,8 @@ updateDependencies fn modint = modint {dependencies = fn $ dependencies modint}
 -- |Holds everything needed to compile the module itself
 data ModuleImplementation = ModuleImplementation {
     modPragmas   :: Set Pragma,               -- ^pragmas for this module
-    modImports   :: Map ModSpec ImportSpec,   -- ^This module's imports
+    modImports   :: Map ModSpec (ImportSpec, InterfaceHash),
+                                              -- ^This module's imports
     modSubmods   :: Map Ident ModSpec,        -- ^This module's submodules
     modTypes     :: Map Ident TypeDef,        -- ^Types defined by this module
     modResources :: Map Ident ResourceDef,    -- ^Resources defined by this mod
@@ -1198,8 +1237,9 @@ emptyImplementation =
 -- These functions hack around Haskell's terrible setter syntax
 
 -- |Update the dependencies of a module implementation.
-updateModImports :: (Map ModSpec ImportSpec -> Map ModSpec ImportSpec) ->
-                   ModuleImplementation -> ModuleImplementation
+updateModImports :: (Map ModSpec (ImportSpec, InterfaceHash)
+                    -> Map ModSpec (ImportSpec, InterfaceHash))
+                    -> ModuleImplementation -> ModuleImplementation
 updateModImports fn modimp = modimp {modImports = fn $ modImports modimp}
 
 -- |Update the map of submodules of a module implementation.
@@ -1336,8 +1376,8 @@ combineImportPart (Just set1) (Just set2) = Just (set1 `Set.union` set2)
 
 -- |Actually import into the current module.  The ImportSpec says what
 -- to import.
-doImport :: ModSpec -> ImportSpec -> Compiler ()
-doImport mod imports = do
+doImport :: ModSpec -> (ImportSpec, InterfaceHash) -> Compiler ()
+doImport mod (imports, _) = do
     currMod <- getModuleSpec
     impl <- getModuleImplementationField id
     logAST $ "Handle importation from " ++ showModSpec mod ++
@@ -1350,7 +1390,8 @@ doImport mod imports = do
     let allImports = combineImportPart pubImports $ importPrivate imports
     let importedTypes = importsSelected allImports $ pubTypes fromIFace
     let importedResources = importsSelected allImports $ pubResources fromIFace
-    let importedProcs = importsSelected allImports $ pubProcs fromIFace
+    let importedProcs = Map.map Map.keysSet
+                            $ importsSelected allImports $ pubProcs fromIFace
     logAST $ "    importing types    : "
              ++ intercalate ", " (Map.keys importedTypes)
     logAST $ "    importing resources: "
@@ -1374,7 +1415,7 @@ doImport mod imports = do
     updateModInterface
       (\i -> i { pubTypes = Map.union (pubTypes i) exportedTypes,
                 pubResources = Map.union (pubResources i) exportedResources,
-                pubProcs = Map.unionWith Set.union (pubProcs i) exportedProcs })
+                pubProcs = Map.unionWith Map.union (pubProcs i) exportedProcs })
     -- Update what's exported from the module
     return ()
 

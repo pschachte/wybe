@@ -18,6 +18,7 @@ import           Builder
 import           Control.Exception
 import           Control.Monad
 import           Options
+import           System.Exit
 
 -- |The main wybe compiler command line.
 main :: IO ()
@@ -30,7 +31,8 @@ main = do
       (\e -> do
              let msg = show e
              when (msg /= "ExitFailure 1") $
-                putStrLn msg)
+                putStrLn msg
+             exitFailure)
 
 
 catchAny :: IO a -> (SomeException -> IO a) -> IO a
