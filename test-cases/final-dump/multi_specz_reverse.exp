@@ -59,15 +59,15 @@ AFTER EVERYTHING:
     foreign lpvm alloc(16:wybe.int, ?tmp$58#0:multi_specz_reverse.intlist)
     foreign lpvm mutate(~tmp$58#0:multi_specz_reverse.intlist, ?tmp$59#0:multi_specz_reverse.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int)
     foreign lpvm mutate(~tmp$59#0:multi_specz_reverse.intlist, ?tmp$60#0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$55#0:multi_specz_reverse.intlist)
-    multi_specz_reverse.list_reverse_helper<0>[04d1467a4d](~tmp$60#0:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?%foo#1:multi_specz_reverse.intlist) @multi_specz_reverse:11:45
-    multi_specz_reverse.list_print<0>(foo#1:multi_specz_reverse.intlist, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @multi_specz_reverse:18:2
+    multi_specz_reverse.list_reverse_helper<0>[04d1467a4d](~tmp$60#0:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?%foo#1:multi_specz_reverse.intlist) #0 @multi_specz_reverse:11:45
+    multi_specz_reverse.list_print<0>(foo#1:multi_specz_reverse.intlist, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @multi_specz_reverse:18:2
     foreign c putchar('\n':wybe.char, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
     foreign c print_string("============================":wybe.string, ~#io#2:wybe.phantom, ?tmp$65#0:wybe.phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$65#0:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
-    multi_specz_reverse.list_reverse_helper<0>(%foo#1:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?%foo#2:multi_specz_reverse.intlist) @multi_specz_reverse:11:45
-    multi_specz_reverse.list_print<0>(~foo#2:multi_specz_reverse.intlist, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @multi_specz_reverse:25:2
+    multi_specz_reverse.list_reverse_helper<0>(%foo#1:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?%foo#2:multi_specz_reverse.intlist) #2 @multi_specz_reverse:11:45
+    multi_specz_reverse.list_print<0>(~foo#2:multi_specz_reverse.intlist, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #3 @multi_specz_reverse:25:2
     foreign c putchar('\n':wybe.char, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @wybe:nn:nn
-    multi_specz_reverse.list_print<0>(~foo#1:multi_specz_reverse.intlist, ~#io#5:wybe.phantom, ?#io#6:wybe.phantom) @multi_specz_reverse:27:2
+    multi_specz_reverse.list_print<0>(~foo#1:multi_specz_reverse.intlist, ~#io#5:wybe.phantom, ?#io#6:wybe.phantom) #4 @multi_specz_reverse:27:2
     foreign c putchar('\n':wybe.char, ~#io#6:wybe.phantom, ?#io#7:wybe.phantom) @wybe:nn:nn
 
 
@@ -85,7 +85,7 @@ list_print > public (4 calls)
         foreign lpvm access(~x#0:multi_specz_reverse.intlist, 8:wybe.int, ?t#0:multi_specz_reverse.intlist)
         foreign c print_int(~h#0:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
         foreign c print_string(" ":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
-        multi_specz_reverse.list_print<0>(~t#0:multi_specz_reverse.intlist, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @multi_specz_reverse:7:10
+        multi_specz_reverse.list_print<0>(~t#0:multi_specz_reverse.intlist, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #0 @multi_specz_reverse:7:10
 
 
 
@@ -93,7 +93,7 @@ list_reverse > public inline (2 calls)
 0: list_reverse(lst#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist):
  AliasPairs: []
  InterestingCallProperties: []
-    multi_specz_reverse.list_reverse_helper<0>(~lst#0:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) @multi_specz_reverse:11:45
+    multi_specz_reverse.list_reverse_helper<0>(~lst#0:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) #0 @multi_specz_reverse:11:45
 
 
 list_reverse_helper > public (2 calls)
@@ -112,7 +112,7 @@ list_reverse_helper > public (2 calls)
         foreign lpvm alloc(16:wybe.int, ?tmp$8#0:multi_specz_reverse.intlist)
         foreign lpvm mutate(~tmp$8#0:multi_specz_reverse.intlist, ?tmp$9#0:multi_specz_reverse.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$9#0:multi_specz_reverse.intlist, ?tmp$10#0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~acc#0:multi_specz_reverse.intlist)
-        multi_specz_reverse.list_reverse_helper<0>(~t#0:multi_specz_reverse.intlist, ~tmp$10#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) @multi_specz_reverse:14:29
+        multi_specz_reverse.list_reverse_helper<0>(~t#0:multi_specz_reverse.intlist, ~tmp$10#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) #0 @multi_specz_reverse:14:29
 
  [04d1467a4d] [NonAliasedParam 0] :
     foreign llvm icmp ne(lst#0:multi_specz_reverse.intlist, 0:wybe.int, ?tmp$5#0:wybe.bool)
@@ -126,7 +126,7 @@ list_reverse_helper > public (2 calls)
         foreign llvm move(~lst#0:multi_specz_reverse.intlist, ?tmp$8#0:multi_specz_reverse.intlist)
         foreign lpvm mutate(~tmp$8#0:multi_specz_reverse.intlist, ?tmp$9#0:multi_specz_reverse.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$9#0:multi_specz_reverse.intlist, ?tmp$10#0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~acc#0:multi_specz_reverse.intlist)
-        multi_specz_reverse.list_reverse_helper<0>[04d1467a4d](~t#0:multi_specz_reverse.intlist, ~tmp$10#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) @multi_specz_reverse:14:29
+        multi_specz_reverse.list_reverse_helper<0>[04d1467a4d](~t#0:multi_specz_reverse.intlist, ~tmp$10#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) #0 @multi_specz_reverse:14:29
 
 
   LLVM code       :
@@ -381,7 +381,7 @@ if.else:
 0: /=($left#0:multi_specz_reverse.intlist, $right#0:multi_specz_reverse.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    multi_specz_reverse.intlist.=<0>(~$left#0:multi_specz_reverse.intlist, ~$right#0:multi_specz_reverse.intlist, ?tmp$1#0:wybe.bool)
+    multi_specz_reverse.intlist.=<0>(~$left#0:multi_specz_reverse.intlist, ~$right#0:multi_specz_reverse.intlist, ?tmp$1#0:wybe.bool) #0
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
@@ -421,7 +421,7 @@ if.else:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
-                    multi_specz_reverse.intlist.=<0>(~$left$tail#0:multi_specz_reverse.intlist, ~$right$tail#0:multi_specz_reverse.intlist, ?$$#0:wybe.bool)
+                    multi_specz_reverse.intlist.=<0>(~$left$tail#0:multi_specz_reverse.intlist, ~$right$tail#0:multi_specz_reverse.intlist, ?$$#0:wybe.bool) #0
 
 
 

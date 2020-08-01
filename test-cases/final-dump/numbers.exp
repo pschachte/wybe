@@ -28,7 +28,7 @@ factorial > public (1 calls)
     case ~tmp$4#0:wybe.bool of
     0:
         foreign llvm sub(n#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:nn:nn
-        numbers.factorial<0>(~tmp$3#0:wybe.int, ?tmp$2#0:wybe.int) @numbers:4:34
+        numbers.factorial<0>(~tmp$3#0:wybe.int, ?tmp$2#0:wybe.int) #0 @numbers:4:34
         foreign llvm mul(~n#0:wybe.int, ~tmp$2#0:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
 
     1:

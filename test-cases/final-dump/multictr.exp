@@ -334,7 +334,7 @@ entry:
 0: /=($left#0:multictr.complicated, $right#0:multictr.complicated, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    multictr.complicated.=<0>(~$left#0:multictr.complicated, ~$right#0:multictr.complicated, ?tmp$1#0:wybe.bool)
+    multictr.complicated.=<0>(~$left#0:multictr.complicated, ~$right#0:multictr.complicated, ?tmp$1#0:wybe.bool) #0
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
@@ -1119,7 +1119,7 @@ entry:
 0: /=($left#0:multictr.maybe_int, $right#0:multictr.maybe_int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    multictr.maybe_int.=<0>(~$left#0:multictr.maybe_int, ~$right#0:multictr.maybe_int, ?tmp$1#0:wybe.bool)
+    multictr.maybe_int.=<0>(~$left#0:multictr.maybe_int, ~$right#0:multictr.maybe_int, ?tmp$1#0:wybe.bool) #0
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
@@ -1372,7 +1372,7 @@ if.else:
 0: /=($left#0:multictr.number, $right#0:multictr.number, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    multictr.number.=<0>(~$left#0:multictr.number, ~$right#0:multictr.number, ?tmp$1#0:wybe.bool)
+    multictr.number.=<0>(~$left#0:multictr.number, ~$right#0:multictr.number, ?tmp$1#0:wybe.bool) #0
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
@@ -2143,7 +2143,7 @@ entry:
 0: /=($left#0:multictr.simple, $right#0:multictr.simple, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    multictr.simple.=<0>(~$left#0:multictr.simple, ~$right#0:multictr.simple, ?tmp$1#0:wybe.bool)
+    multictr.simple.=<0>(~$left#0:multictr.simple, ~$right#0:multictr.simple, ?tmp$1#0:wybe.bool) #0
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)

@@ -18,7 +18,7 @@ AFTER EVERYTHING:
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    alias_cyclic.bar<0>(~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:33:2
+    alias_cyclic.bar<0>(~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @alias_cyclic:33:2
 
 
 bar > public (1 calls)
@@ -28,11 +28,11 @@ bar > public (1 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp$3#0:position.position)
     foreign lpvm mutate(~tmp$3#0:position.position, ?tmp$4#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int)
     foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 900:wybe.int)
-    alias_cyclic.updateX<0>(tmp$0#0:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:25:4
+    alias_cyclic.updateX<0>(tmp$0#0:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @alias_cyclic:25:4
     foreign c print_string("p1(100,900):":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(~tmp$0#0:position.position, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @alias_cyclic:28:4
+    position.printPosition<0>(~tmp$0#0:position.position, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #1 @alias_cyclic:28:4
     foreign c print_string("p2(102,900):":wybe.string, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(~p2#0:position.position, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @alias_cyclic:30:4
+    position.printPosition<0>(~p2#0:position.position, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) #2 @alias_cyclic:30:4
 
 
 updateX > public (2 calls)
@@ -46,7 +46,7 @@ updateX > public (2 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_cyclic.updateY<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:19:16
+        alias_cyclic.updateY<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @alias_cyclic:19:16
 
     1:
         foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:16:24
@@ -59,7 +59,7 @@ updateX > public (2 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_cyclic.updateY<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:19:16
+        alias_cyclic.updateY<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @alias_cyclic:19:16
 
     1:
         foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:16:24
@@ -78,7 +78,7 @@ updateY > public (1 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_cyclic.updateX<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:10:19
+        alias_cyclic.updateX<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @alias_cyclic:10:19
 
     1:
         foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:7:24
@@ -91,7 +91,7 @@ updateY > public (1 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_cyclic.updateX<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:10:19
+        alias_cyclic.updateX<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @alias_cyclic:10:19
 
     1:
         foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:7:24

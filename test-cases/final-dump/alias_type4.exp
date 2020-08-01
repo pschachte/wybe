@@ -42,7 +42,7 @@ AFTER EVERYTHING:
     foreign lpvm alloc(16:wybe.int, ?tmp$9#0:alias_type4.posrec)
     foreign lpvm mutate(~tmp$9#0:alias_type4.posrec, ?tmp$10#0:alias_type4.posrec, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$6#0:alias_type4.position)
     foreign lpvm mutate(~tmp$10#0:alias_type4.posrec, ?tmp$11#0:alias_type4.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int)
-    alias_type4.foo<0>[04d1467a4d](~tmp$11#0:alias_type4.posrec, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_type4:16:2
+    alias_type4.foo<0>[04d1467a4d](~tmp$11#0:alias_type4.posrec, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @alias_type4:16:2
 
 
 foo > public (1 calls)
