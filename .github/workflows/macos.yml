@@ -1,12 +1,18 @@
 name: CI (macOS)
 
+# disabled due to a bug related to restoring from cache
+# Sample: https://github.com/pschachte/wybe/pull/79/checks?check_run_id=935285745
 on:
     push:
-      branches:
-      - master
-    pull_request:
-      branches:
-      - master
+      branches-ignore:
+        - '**'
+# on:
+#     push:
+#       branches:
+#       - master
+#     pull_request:
+#       branches:
+#       - master
 
 jobs:
   build:
