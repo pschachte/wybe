@@ -1652,12 +1652,8 @@ aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 -- For a given specialization version of the current proc, this info should be
 -- enough to compute all specz versions it required. A sample case is
 -- "expandSpeczVersionsAlias" in "Transform.hs".
--- XXX this map is per call site, so the args is included to separate different
--- calls to the same proc. The current approach is not currect, we should give
--- each call site a unique id similar to the tmep variable count in
--- "BodyBuilder" and use it as the key.
 type MultiSpeczDepInfo = 
-        Map (ProcSpec, [PrimArg]) (Set CallSiteProperty)
+        Map CallSiteID (ProcSpec, Set CallSiteProperty)
 
 
 -- |Specific items for "MultiSpeczDepInfo", it describing the information about

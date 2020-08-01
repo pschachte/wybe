@@ -35,7 +35,7 @@ bar > public (1 calls)
 0: bar(p1#0:position.position, ?p3#1:position.position, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: [(p1#0,p3#1)]
  InterestingCallProperties: [InterestingUnaliased 0]
- MultiSpeczDepInfo: [((alias_scc_proc.foo<0>,[~p1#1:position.position,?p2#0:position.position,?p3#1:position.position,~#io#0:wybe.phantom,?#io#1:wybe.phantom]),fromList [NonAliasedParamCond 0 []])]
+ MultiSpeczDepInfo: [(0,(alias_scc_proc.foo<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm access(p1#0:position.position, 8:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp sgt(tmp$0#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
     case ~tmp$3#0:wybe.bool of
@@ -67,7 +67,7 @@ foo > public (2 calls)
 0: foo(p1#0:position.position, ?p2#0:position.position, ?p3#0:position.position, io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: [(p1#0,p2#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
- MultiSpeczDepInfo: [((alias_scc_proc.bar<0>,[~p1#1:position.position,?p3#0:position.position,~#io#0:wybe.phantom,?#io#2:wybe.phantom]),fromList [NonAliasedParamCond 0 []])]
+ MultiSpeczDepInfo: [(0,(alias_scc_proc.bar<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm access(p1#0:position.position, 0:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp sgt(tmp$0#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
     case ~tmp$5#0:wybe.bool of

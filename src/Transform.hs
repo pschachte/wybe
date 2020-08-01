@@ -324,7 +324,7 @@ expandRequiredSpeczVersionsByProcVersion :: ProcAnalysis -> SpeczVersion
 expandRequiredSpeczVersionsByProcVersion procAnalysis callerVersion = 
     let multiSpeczDepInfo = procMultiSpeczDepInfo procAnalysis in
     -- go through dependencies and find matches
-    List.map (\((procSpec, _), items) ->
+    List.map (\(_, (procSpec, items)) ->
             -- Add other expansion here and union the results
             let version = expandSpeczVersionsAlias callerVersion items in
             let ProcSpec mod procName procId _ = procSpec in
