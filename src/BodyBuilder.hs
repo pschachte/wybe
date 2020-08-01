@@ -117,16 +117,18 @@ type BodyBuilder = StateT BodyState Compiler
 
 -- Holds the content of a ProcBody while we're building it.
 data BodyState = BodyState {
-      currBuild   :: [Placed Prim],   -- ^The body we're building, reversed
-      currSubst   :: Substitution,    -- ^variable substitutions to propagate
-      blockDefs   :: Set PrimVarName, -- ^All variables defined in this block
-      forkConsts  :: Set PrimVarName, -- ^Consts in some branches of prev fork
-      outSubst    :: VarSubstitution, -- ^Substitutions for var assignments
-      subExprs    :: ComputedCalls,   -- ^Previously computed calls to reuse
-      failed      :: Bool,            -- ^True if this body always fails
-      tmpCount    :: Int,             -- ^The next temp variable number to use
-      buildState  :: BuildState,      -- ^What state this node is in
-      parent      :: Maybe BodyState  -- ^What comes before/above this
+      currBuild     :: [Placed Prim],   -- ^The body we're building, reversed
+      currSubst     :: Substitution,    -- ^variable substitutions to propagate
+      blockDefs     :: Set PrimVarName, -- ^All variables defined in this block
+      forkConsts    :: Set PrimVarName, -- ^Consts in some branches of prev fork
+      outSubst      :: VarSubstitution, -- ^Substitutions for var assignments
+      subExprs      :: ComputedCalls,   -- ^Previously computed calls to reuse
+      failed        :: Bool,            -- ^True if this body always fails
+      tmpCount      :: Int,             -- ^The next temp variable number to use
+      callSiteCount :: CallSiteID,      -- ^The next callSiteID to use, should
+                                        --  be unique even between branches
+      buildState    :: BuildState,      -- ^What state this node is in
+      parent        :: Maybe BodyState  -- ^What comes before/above this
       } deriving (Eq,Show)
 
 
@@ -148,15 +150,17 @@ data BuildState
 -- | A fresh BodyState with specified temp counter and output var substitution
 initState :: Int -> VarSubstitution -> BodyState
 initState tmp oSubst =
-    BodyState [] Map.empty Set.empty Set.empty oSubst Map.empty False tmp
+    BodyState [] Map.empty Set.empty Set.empty oSubst Map.empty False tmp 0
               Unforked Nothing
 
 
 -- | Set up a BodyState as a new child of the specified BodyState
 childState :: BodyState -> BuildState -> BodyState
 childState st@BodyState{currSubst=iSubst,outSubst=oSubst,subExprs=subs,
-                        tmpCount=tmp, forkConsts=consts} bld =
-    BodyState [] iSubst Set.empty consts oSubst subs False tmp bld $ Just st
+                        tmpCount=tmp, callSiteCount=callSite,
+                        forkConsts=consts} bld =
+    BodyState [] 
+        iSubst Set.empty consts oSubst subs False tmp callSite bld $ Just st
 
 
 -- | A mapping from variables to definite values, in service to constant
@@ -314,7 +318,10 @@ endBranch = do
     (par,st,var,ty,val,fused,bodies) <- gets popParent
     logBuild $ ">>>> >>>> Ending branch "
                ++ show (length bodies) ++ " on " ++ show var
-    put $ par { buildState=Forked var ty val fused (st:bodies) False }
+    put $ par { buildState=Forked var ty val fused (st:bodies) False,
+                -- update callSiteCount of its parent, so it's unique between
+                -- branches
+                callSiteCount=(callSiteCount st) }
     logState
 
 
@@ -364,7 +371,7 @@ instr prim pos = do
         logBuild $ "  Failing branch:  ignoring instruction " ++ show prim
         return ()
       BodyState{failed=False,buildState=Unforked} -> do
-        prim' <- argExpandedPrim prim
+        prim' <- argExpandedPrim prim >>= assignCallSiteID
         logBuild $ "Generating instr " ++ show prim ++ " -> " ++ show prim'
         instr' prim' pos
       _ ->
@@ -464,6 +471,18 @@ argExpandedPrim (PrimForeign lang nm flags args) = do
 argExpandedPrim (PrimTest arg) = do
     arg' <- expandArg arg
     return $ PrimTest arg'
+
+
+-- |Assign an unique callSiteID if the given prim is a PrimCall.
+assignCallSiteID :: Prim -> BodyBuilder Prim
+assignCallSiteID prim =
+    case prim of
+        (PrimCall _ pspec args) -> do
+            callSiteID <- gets callSiteCount
+            modify (\st -> st {callSiteCount = callSiteID + 1})
+            return $ PrimCall (Just callSiteID) pspec args
+        _ ->
+            return prim
 
 
 -- |Replace any arguments corresponding to unneeded parameters with

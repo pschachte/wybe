@@ -54,7 +54,7 @@ module AST (
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
-  SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
+  CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -2227,7 +2227,7 @@ data PrimVarName =
 -- |A primitive statment, including those that can only appear in a
 --  loop.
 data Prim
-     = PrimCall CallSiteID ProcSpec [PrimArg]
+     = PrimCall (Maybe CallSiteID) ProcSpec [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
      | PrimTest PrimArg
      deriving (Eq,Ord,Generic)
@@ -2236,7 +2236,10 @@ instance Show Prim where
     show = showPrim 0
 
 
-type CallSiteID = Maybe Int
+-- |An id for each call site, should be unique within a proc. It's assigned by
+--  "BodyBuilder".
+type CallSiteID = Int
+
 
 -- |The allowed arguments in primitive proc or foreign proc calls,
 --  just variables and constants.
