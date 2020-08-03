@@ -15,7 +15,7 @@ AFTER EVERYTHING:
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    proc_beer.gen$1<0>(99:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @proc_beer:5:5
+    proc_beer.gen$1<0>(99:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @proc_beer:5:5
 
 
 beer99 > public inline (1 calls)

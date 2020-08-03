@@ -153,7 +153,7 @@ lt3 > public inline test (0 calls)
 0: lt3(x#0:wybe.int, y#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    tests.lt<0>(~y#0:wybe.int, ~x#0:wybe.int, ?$$#0:wybe.bool) #0 @tests:11:12
+    tests.lt<0>(~y#0:wybe.int, ~x#0:wybe.int, ?$$#0:wybe.bool) #1 @tests:11:12
 
   LLVM code       :
 

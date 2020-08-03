@@ -5,6 +5,7 @@ AFTER EVERYTHING:
   public types    : 
   public resources: 
   public procs    : call_site_id.<0>
+                    call_site_id.bar<0>
                     call_site_id.foo<0>
   imports         : use wybe
   types           : 
@@ -21,32 +22,39 @@ AFTER EVERYTHING:
     case ~tmp$3#0:wybe.bool of
     0:
         foreign llvm sub(0:wybe.int, ~x#0:wybe.int, ?tmp$1#0:wybe.int) @wybe:nn:nn
-        call_site_id.foo<0>(~tmp$1#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #11 @call_site_id:14:6
+        call_site_id.foo<0>(~tmp$1#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #17 @call_site_id:25:6
         foreign llvm icmp sgt(y#0:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
         case ~tmp$5#0:wybe.bool of
         0:
             foreign llvm sub(0:wybe.int, ~y#0:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
-            call_site_id.foo<0>(~tmp$2#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #16 @call_site_id:18:10
+            call_site_id.foo<0>(~tmp$2#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #18 @call_site_id:25:6
 
         1:
-            call_site_id.foo<0>(~y#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #13 @call_site_id:16:10
+            call_site_id.foo<0>(~y#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #19 @call_site_id:25:6
 
 
     1:
-        call_site_id.foo<0>(~x#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #3 @call_site_id:7:6
+        call_site_id.foo<0>(~x#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #20 @call_site_id:25:6
         foreign llvm icmp sgt(y#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @wybe:nn:nn
         case ~tmp$4#0:wybe.bool of
         0:
             foreign llvm sub(0:wybe.int, ~y#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
-            call_site_id.foo<0>(~tmp$0#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #8 @call_site_id:11:10
+            call_site_id.foo<0>(~tmp$0#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #21 @call_site_id:25:6
 
         1:
-            call_site_id.foo<0>(~y#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #5 @call_site_id:9:10
+            call_site_id.foo<0>(~y#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #22 @call_site_id:25:6
 
 
 
 
-foo > public (9 calls)
+bar > public inline (9 calls)
+0: bar(x#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    call_site_id.foo<0>(~x#0:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @call_site_id:25:6
+
+
+foo > public (1 calls)
 0: foo(x#0:wybe.int, io#0:wybe.phantom, ?io#8:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -137,6 +145,13 @@ if.then2:
 if.else2:
   %"7$tmp$2#0" = sub   i64 0, %"1$y#0" 
   tail call fastcc  void  @"call_site_id.foo<0>"(i64  %"7$tmp$2#0")  
+  ret void 
+}
+
+
+define external fastcc  void @"call_site_id.bar<0>"(i64  %"x#0")    {
+entry:
+  tail call fastcc  void  @"call_site_id.foo<0>"(i64  %"x#0")  
   ret void 
 }
 

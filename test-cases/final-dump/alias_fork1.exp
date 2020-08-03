@@ -25,7 +25,7 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp$17#0:mytree.tree, ?tmp$18#0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 111:wybe.int)
     foreign lpvm mutate(~tmp$18#0:mytree.tree, ?tmp$3#0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree)
     alias_fork1.simpleMerge<0>(~tmp$0#0:mytree.tree, ~tmp$3#0:mytree.tree, ?tmp$6#0:mytree.tree) #6 @alias_fork1:15:6
-    mytree.printTree1<0>(~tmp$6#0:mytree.tree, "{":wybe.string, ?tmp$21#0:wybe.string, ~#io#0:wybe.phantom, ?tmp$22#0:wybe.phantom) #0 @mytree:8:10
+    mytree.printTree1<0>(~tmp$6#0:mytree.tree, "{":wybe.string, ?tmp$21#0:wybe.string, ~#io#0:wybe.phantom, ?tmp$22#0:wybe.phantom) #9 @mytree:8:10
     foreign c print_string("}":wybe.string, ~tmp$22#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
 

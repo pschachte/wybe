@@ -142,7 +142,7 @@ addInstr prim pos = do
             else 
                 return prim
         _ -> return prim
-    lift $ instr prim pos
+    lift $ instr prim' pos
 
 
 -- init a expander state based on the given call site count
@@ -260,7 +260,9 @@ inlineCall proto args body pos = do
     mapM_ (addInputAssign pos) $ zip (primProtoParams proto) args
     logExpansion $ "  Inlining defn: " ++ showBlock 4 body
     expandBody body
-    put saved
+    -- restore the saved state except the "nextCallSiteID"
+    callSiteID <- gets nextCallSiteID
+    put $ saved {nextCallSiteID = callSiteID}
     st <- get
     logExpansion $ "  After inlining:"
     logExpansion $ "    renaming = " ++ show (renaming st)

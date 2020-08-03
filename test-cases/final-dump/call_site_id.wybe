@@ -4,22 +4,26 @@
 
 
 if { x > 0 :: 
-    !foo(x)
+    !bar(x)
     if { y > 0 ::
-        !foo(y)
+        !bar(y)
     | otherwise ::
-        !foo(-y)
+        !bar(-y)
     }
 | otherwise :: 
-    !foo(-x)
+    !bar(-x)
     if { y > 0 ::
-        !foo(y)
+        !bar(y)
     | otherwise ::
-        !foo(-y)
+        !bar(-y)
     }
 }
 
 
+# make use this proc will be inline.
+pub def bar(x: int) use !io {
+    !foo(x)
+}
 
 # make use this proc won't be inlined.
 pub def foo(x: int) use !io {
