@@ -43,7 +43,7 @@ lookup > public test (6 calls)
 
             1:
                 foreign lpvm access(~map#0:tests.map, 24:wybe.int, ?tmp$4#0:tests.map)
-                tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #0 @tests:24:25
+                tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #22 @tests:24:25
 
 
         1:
@@ -57,7 +57,7 @@ lookup > public test (6 calls)
 
                 1:
                     foreign lpvm access(~map#0:tests.map, 24:wybe.int, ?tmp$4#0:tests.map)
-                    tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #1 @tests:24:25
+                    tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #19 @tests:24:25
 
 
             1:
@@ -67,7 +67,7 @@ lookup > public test (6 calls)
 
                 1:
                     foreign lpvm access(~map#0:tests.map, 0:wybe.int, ?tmp$3#0:tests.map)
-                    tests.lookup<0>(~key#0:wybe.int, ~tmp$3#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #2 @tests:23:25
+                    tests.lookup<0>(~key#0:wybe.int, ~tmp$3#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #16 @tests:23:25
 
 
 
@@ -85,7 +85,7 @@ lookup > public test (6 calls)
 
                 1:
                     foreign lpvm access(~map#0:tests.map, 24:wybe.int, ?tmp$4#0:tests.map)
-                    tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #3 @tests:24:25
+                    tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #12 @tests:24:25
 
 
             1:
@@ -99,7 +99,7 @@ lookup > public test (6 calls)
 
                     1:
                         foreign lpvm access(~map#0:tests.map, 24:wybe.int, ?tmp$4#0:tests.map)
-                        tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #4 @tests:24:25
+                        tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #9 @tests:24:25
 
 
                 1:
@@ -109,7 +109,7 @@ lookup > public test (6 calls)
 
                     1:
                         foreign lpvm access(~map#0:tests.map, 0:wybe.int, ?tmp$3#0:tests.map)
-                        tests.lookup<0>(~key#0:wybe.int, ~tmp$3#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #5 @tests:23:25
+                        tests.lookup<0>(~key#0:wybe.int, ~tmp$3#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #6 @tests:23:25
 
 
 
@@ -404,7 +404,7 @@ entry:
                 foreign lpvm access($right#0:tests.map, 8:wybe.int, ?$right$key#0:wybe.int)
                 foreign lpvm access($right#0:tests.map, 16:wybe.int, ?$right$value#0:wybe.int)
                 foreign lpvm access(~$right#0:tests.map, 24:wybe.int, ?$right$right#0:tests.map)
-                tests.map.=<0>(~$left$left#0:tests.map, ~$right$left#0:tests.map, ?tmp$5#0:wybe.bool) #0
+                tests.map.=<0>(~$left$left#0:tests.map, ~$right$left#0:tests.map, ?tmp$5#0:wybe.bool) #2
                 case ~tmp$5#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -422,7 +422,7 @@ entry:
                             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                         1:
-                            tests.map.=<0>(~$left$right#0:tests.map, ~$right$right#0:tests.map, ?$$#0:wybe.bool) #1
+                            tests.map.=<0>(~$left$right#0:tests.map, ~$right$right#0:tests.map, ?$$#0:wybe.bool) #5
 
 
 

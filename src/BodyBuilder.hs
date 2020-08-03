@@ -195,14 +195,16 @@ freshVarName = do
 -- |Run a BodyBuilder monad and extract the final proc body, along with the
 -- final temp variable count and the set of variables used in the body.
 buildBody :: Int -> VarSubstitution -> BodyBuilder a
-          -> Compiler (Int,Set PrimVarName,ProcBody)
+          -> Compiler (a, Int, Set PrimVarName, ProcBody)
 buildBody tmp oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
-    st <- execStateT builder $ initState tmp oSubst
+    -- st <- execStateT builder $ initState tmp oSubst
+    (a, st) <- runStateT builder $ initState tmp oSubst
     logMsg BodyBuilder ">>>> Finished building a proc body"
     logMsg BodyBuilder "     Current state:"
     logMsg BodyBuilder $ fst $ showState 8 st
-    currBody (ProcBody [] NoFork) st
+    (tmp', used, body) <- currBody (ProcBody [] NoFork) st
+    return (a, tmp', used, body)
 
 
 -- |Start a new fork on var of type ty
@@ -476,13 +478,14 @@ argExpandedPrim (PrimTest arg) = do
 -- |Assign an unique callSiteID if the given prim is a PrimCall.
 assignCallSiteID :: Prim -> BodyBuilder Prim
 assignCallSiteID prim =
-    case prim of
-        (PrimCall _ pspec args) -> do
-            callSiteID <- gets callSiteCount
-            modify (\st -> st {callSiteCount = callSiteID + 1})
-            return $ PrimCall (Just callSiteID) pspec args
-        _ ->
-            return prim
+    return prim
+    -- case prim of
+    --     (PrimCall _ pspec args) -> do
+    --         callSiteID <- gets callSiteCount
+    --         modify (\st -> st {callSiteCount = callSiteID + 1})
+    --         return $ PrimCall (Just callSiteID) pspec args
+    --     _ ->
+    --         return prim
 
 
 -- |Replace any arguments corresponding to unneeded parameters with

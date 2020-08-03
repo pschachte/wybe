@@ -47,13 +47,14 @@ type Numbering = Map VarName Int
 -- uses of a variable in the following statement refer to the output
 -- variables of the previous statement.
 data ClauseCompState = ClauseCompState {
-        currVars :: Numbering,   -- ^current var number for each var
-        nextVars :: Numbering    -- ^var numbers after current stmt
+        currVars       :: Numbering,   -- ^current var number for each var
+        nextVars       :: Numbering,   -- ^var numbers after current stmt
+        nextCallSiteID :: CallSiteID   -- ^The next callSiteID to use
         }
 
 
 initClauseComp :: ClauseCompState
-initClauseComp = ClauseCompState Map.empty Map.empty
+initClauseComp = ClauseCompState Map.empty Map.empty 0
 
 
 -- |Get the next versioned name of the specified variable
@@ -83,7 +84,8 @@ getCurrNumbering = gets nextVars
 
 -- |Set both current and next numberings to the specified mapping.
 putNumberings :: Numbering -> ClauseComp ()
-putNumberings numbering = put $ ClauseCompState numbering numbering
+putNumberings numbering = 
+    modify (\st -> st {currVars = numbering, nextVars = numbering})
 
 
 -- |Prepare for the next statement, promoting the final variable
@@ -127,6 +129,7 @@ compileProc proc =
         let params' = case detism of
                          SemiDet -> params ++ [testOutParam]
                          Det     -> params
+        modify (\st -> st {nextCallSiteID = (procCallSiteCount proc)})
         logClause $ "--------------\nCompiling proc " ++ show proto
         mapM_ (nextVar . paramName) $ List.filter (flowsIn . paramFlow) params
         finishStmt
@@ -140,8 +143,10 @@ compileProc proc =
         let params'' = List.map (compileParam startVars endVars) params'
         let proto' = PrimProto (procProtoName proto) params''
         logClause $ "  comparams: " ++ show params''
+        callSiteCount <- gets nextCallSiteID
         return $ proc { procImpln = ProcDefPrim proto' compiled
-                                        emptyProcAnalysis Map.empty}
+                                        emptyProcAnalysis Map.empty,
+                        procCallSiteCount = callSiteCount}
 
 
 
@@ -236,8 +241,10 @@ compileSimpleStmt stmt = do
 compileSimpleStmt' :: Stmt -> ClauseComp Prim
 compileSimpleStmt' call@(ProcCall maybeMod name procID _ _ args) = do
     logClause $ "Compiling call " ++ showStmt 4 call
+    callSiteID <- gets nextCallSiteID
+    modify (\st -> st {nextCallSiteID = callSiteID + 1})
     args' <- mapM (placedApply compileArg) args
-    return $ PrimCall Nothing (ProcSpec maybeMod name
+    return $ PrimCall (Just callSiteID) (ProcSpec maybeMod name
                        (trustFromJust
                        ("compileSimpleStmt' for " ++ showStmt 4 call)
                        procID) Nothing)

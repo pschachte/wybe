@@ -38,8 +38,8 @@ gen$1 > (2 calls)
         foreign llvm move(~io#0:wybe.phantom, ?io#2:wybe.phantom)
 
     1:
-        proc_gcd.mod<0>(~x#0:wybe.int, y#0:wybe.int, ?y#1:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @proc_gcd:16:8
-        proc_gcd.gen$1<0>(~a#0:wybe.int, ~b#0:wybe.int, ~io#1:wybe.phantom, ~y#0:wybe.int, ~y#0:wybe.int, ~y#1:wybe.int, ?r#0:wybe.int, ?io#2:wybe.phantom) #1 @proc_gcd:13:3
+        proc_gcd.mod<0>(~x#0:wybe.int, y#0:wybe.int, ?y#1:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @proc_gcd:16:8
+        proc_gcd.gen$1<0>(~a#0:wybe.int, ~b#0:wybe.int, ~io#1:wybe.phantom, ~y#0:wybe.int, ~y#0:wybe.int, ~y#1:wybe.int, ?r#0:wybe.int, ?io#2:wybe.phantom) #2 @proc_gcd:13:3
 
 
 

@@ -873,7 +873,7 @@ addImport modspec imports = do
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis detism inline proto stmts pos) = do
     let name = procProtoName proto
-    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr
+    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0
                   Map.empty vis detism inline $ initSuperprocSpec vis
     addProcDef procDef
 addProc _ item =
@@ -1519,6 +1519,8 @@ data ProcDef = ProcDef {
     procImpln :: ProcImpln,     -- the actual implementation
     procPos :: OptPos,          -- where this proc is defined
     procTmpCount :: Int,        -- the next temp variable number to use
+    procCallSiteCount :: CallSiteID,
+                                -- the next call site id to use
     procCallers :: Map ProcSpec Int,
                                 -- callers to this proc from this mod in the
                                 -- source code (before inlining) and the
@@ -1649,6 +1651,8 @@ aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 
 
 -- |Infomation about specialization versions the current proc directly uses. 
+-- It's a mapping from call sites to the callee's "ProcSpec" and a set of 
+-- "CallSiteProperty".
 -- For a given specialization version of the current proc, this info should be
 -- enough to compute all specz versions it required. A sample case is
 -- "expandSpeczVersionsAlias" in "Transform.hs".
@@ -2647,7 +2651,8 @@ showProcDefs firstID (def:defs) =
 
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis detism inline sub) =
+showProcDef thisID 
+        procdef@(ProcDef n proto def pos _ _ _ vis detism inline sub) =
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
     ++ visibilityPrefix vis

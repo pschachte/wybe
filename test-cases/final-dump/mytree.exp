@@ -46,10 +46,10 @@ printTree1 > public (3 calls)
         foreign lpvm access(t#0:mytree.tree, 0:wybe.int, ?l#0:mytree.tree)
         foreign lpvm access(t#0:mytree.tree, 8:wybe.int, ?k#0:wybe.int)
         foreign lpvm access(~t#0:mytree.tree, 16:wybe.int, ?r#0:mytree.tree)
-        mytree.printTree1<0>(~l#0:mytree.tree, ~%prefix#0:wybe.string, ?%prefix#1:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @mytree:15:13
+        mytree.printTree1<0>(~l#0:mytree.tree, ~%prefix#0:wybe.string, ?%prefix#1:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @mytree:15:13
         foreign c print_string(~prefix#1:wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
         foreign c print_int(~k#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
-        mytree.printTree1<0>(~r#0:mytree.tree, ", ":wybe.string, ?%prefix#3:wybe.string, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #1 @mytree:19:13
+        mytree.printTree1<0>(~r#0:mytree.tree, ", ":wybe.string, ?%prefix#3:wybe.string, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #4 @mytree:19:13
 
 
   LLVM code       :
@@ -178,7 +178,7 @@ if.else:
                 foreign lpvm access($right#0:mytree.tree, 0:wybe.int, ?$right$left#0:mytree.tree)
                 foreign lpvm access($right#0:mytree.tree, 8:wybe.int, ?$right$key#0:wybe.int)
                 foreign lpvm access(~$right#0:mytree.tree, 16:wybe.int, ?$right$right#0:mytree.tree)
-                mytree.tree.=<0>(~$left$left#0:mytree.tree, ~$right$left#0:mytree.tree, ?tmp$5#0:wybe.bool) #0
+                mytree.tree.=<0>(~$left$left#0:mytree.tree, ~$right$left#0:mytree.tree, ?tmp$5#0:wybe.bool) #2
                 case ~tmp$5#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -190,7 +190,7 @@ if.else:
                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                     1:
-                        mytree.tree.=<0>(~$left$right#0:mytree.tree, ~$right$right#0:mytree.tree, ?$$#0:wybe.bool) #1
+                        mytree.tree.=<0>(~$left$right#0:mytree.tree, ~$right$right#0:mytree.tree, ?$$#0:wybe.bool) #4
 
 
 

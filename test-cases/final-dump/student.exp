@@ -41,7 +41,7 @@ AFTER EVERYTHING:
     foreign lpvm alloc(16:wybe.int, ?tmp$9#0:student.student)
     foreign lpvm mutate(~tmp$9#0:student.student, ?tmp$10#0:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 12345:wybe.int)
     foreign lpvm mutate(~tmp$10#0:student.student, ?tmp$11#0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$6#0:student.course)
-    student.printStudent<0>(~tmp$11#0:student.student, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @student:14:2
+    student.printStudent<0>(~tmp$11#0:student.student, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #2 @student:14:2
 
 
 printStudent > public (1 calls)

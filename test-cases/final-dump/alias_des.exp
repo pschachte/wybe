@@ -27,7 +27,7 @@ foo > public (1 calls)
     alias_des.replicate<0>(?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @alias_des:15:4
     foreign lpvm mutate noalias(~%p2#0:position.position, ?%p2#1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 20000:wybe.int)
     foreign c print_string("--- after x(!p2, 20000) - expect p2(20000,103):":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(~p2#1:position.position, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #1 @alias_des:18:4
+    position.printPosition<0>(~p2#1:position.position, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #3 @alias_des:18:4
 
 
 replicate > public (1 calls)
@@ -46,9 +46,9 @@ replicate > public (1 calls)
     foreign llvm add(~tmp$5#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @wybe:nn:nn
     foreign lpvm mutate noalias(~tmp$1#0:position.position, ?%p2#1:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$4#0:wybe.int)
     foreign c print_string("expect p1(10000,102):":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(~p1#1:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #0 @alias_des:9:4
+    position.printPosition<0>(~p1#1:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #9 @alias_des:9:4
     foreign c print_string("expect p2(101,103):":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(p2#1:position.position, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #1 @alias_des:11:4
+    position.printPosition<0>(p2#1:position.position, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #11 @alias_des:11:4
 
   LLVM code       :
 

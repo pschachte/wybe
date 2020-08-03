@@ -39,7 +39,7 @@ gen$1 > (2 calls)
     1:
         foreign llvm mul(n#0:wybe.int, ~result#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
         foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:nn:nn
-        proc_factorial.gen$1<0>(~tmp$1#0:wybe.int, ~tmp$0#0:wybe.int, ?result#2:wybe.int) #0 @proc_factorial:3:5
+        proc_factorial.gen$1<0>(~tmp$1#0:wybe.int, ~tmp$0#0:wybe.int, ?result#2:wybe.int) #3 @proc_factorial:3:5
 
 
 

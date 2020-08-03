@@ -35,13 +35,15 @@ procExpansion pspec def = do
     logMsg Expansion $ "    initial body: " ++ show (procImpln def)
     let tmp = procTmpCount def
     let (ins,outs) = inputOutputParams proto
-    -- XXX Only body is expanded currently (not specz bodies).
-    (tmp',used,body') <- buildBody tmp (Map.fromSet id outs) $
-                        execStateT (expandBody body) initExpanderState
+    -- Only body is expanded currently (not specz bodies).
+    let st = initExpanderState $ procCallSiteCount def
+    (st', tmp',used,body') <- buildBody tmp (Map.fromSet id outs) $
+                        execStateT (expandBody body) st
     let proto' = proto {primProtoParams = markParamNeededness used ins
                                           <$> primProtoParams proto}
     let def' = def { procImpln = ProcDefPrim proto' body' analysis speczBodies,
-                     procTmpCount = tmp' }
+                     procTmpCount = tmp',
+                     procCallSiteCount = nextCallSiteID st }
     if def /= def'
         then
         logMsg Expansion
@@ -89,11 +91,12 @@ identityRenaming = Map.empty
 ----------------------------------------------------------------
 
 data ExpanderState = Expander {
-    inlining    :: Bool,         -- ^Whether we are currently inlining (and
-                                  --  therefore should not inline calls)
-    renaming    :: Renaming,     -- ^The current variable renaming
-    writeNaming :: Renaming,     -- ^Renaming for new assignments
-    noFork      :: Bool          -- ^There's no fork at the end of this body
+    inlining       :: Bool,      -- ^Whether we are currently inlining (and
+                                 --  therefore should not inline calls)
+    renaming       :: Renaming,  -- ^The current variable renaming
+    writeNaming    :: Renaming,  -- ^Renaming for new assignments
+    noFork         :: Bool,      -- ^There's no fork at the end of this body
+    nextCallSiteID :: CallSiteID -- ^The next callSiteID to use
     }
 
 
@@ -127,12 +130,26 @@ addRenaming var val = do
 
 
 addInstr :: Prim -> OptPos -> Expander ()
-addInstr prim pos = lift $ instr prim pos
+addInstr prim pos = do
+    -- reassign "CallSiteID" if the given prim is inlined from other proc
+    prim' <- case prim of
+        PrimCall _ pspec args -> do
+            inliningNow <- gets inlining
+            if inliningNow
+            then do
+                callSiteID <- gets nextCallSiteID
+                modify (\st -> st {nextCallSiteID = callSiteID + 1})
+                return $ PrimCall (Just callSiteID) pspec args
+            else 
+                return prim
+        _ -> return prim
+    lift $ instr prim pos
 
 
-initExpanderState :: ExpanderState
-initExpanderState =
-    Expander False identityRenaming identityRenaming True
+-- init a expander state based on the given call site count
+initExpanderState :: CallSiteID -> ExpanderState
+initExpanderState callSiteCount =
+    Expander False identityRenaming identityRenaming True callSiteCount
 
 
 ----------------------------------------------------------------
