@@ -21,6 +21,7 @@ import           Data.List     as List
 import           Data.Map      as Map
 import           Data.Set      as Set
 import           Data.Maybe    as Maybe
+import           Data.Tuple.Extra
 import           Flow          ((|>))
 import           Options       (LogSelection (Analysis))
 import           Util
@@ -267,7 +268,7 @@ completeAliasMap caller aliasMap = do
 updateAliasedByPrim :: AliasMapLocal -> Placed Prim -> Compiler AliasMapLocal
 updateAliasedByPrim aliasMap prim =
     case content prim of
-        PrimCall spec args -> do
+        PrimCall _ spec args -> do
             -- | Analyse proc calls
             calleeDef <- getProcDef spec
             let (ProcDefPrim calleeProto _ analysis _) = procImpln calleeDef
@@ -432,7 +433,7 @@ updateMultiSpeczInfoByPrim :: PrimProto
 updateMultiSpeczInfoByPrim proto 
         (aliasMap, interestingCallProperties, multiSpeczDepInfo) prim =
     case content prim of
-        PrimCall spec args -> do
+        PrimCall callSiteID spec args -> do
             calleeDef <- getProcDef spec
             let (ProcDefPrim calleeProto _ analysis _) = procImpln calleeDef
             let interestingPrimCallInfo = List.zip args [0..]
@@ -469,7 +470,7 @@ updateMultiSpeczInfoByPrim proto
                     NonAliasedParamCond calleeParamID requiredParamIDs
                     ) interestingPrimCallInfo
             multiSpeczDepInfo' <- updateMultiSpeczDepInfo multiSpeczDepInfo 
-                    (spec, args) infoItems
+                    callSiteID spec infoItems
             return (interestingCallProperties', multiSpeczDepInfo')
         PrimForeign "lpvm" "mutate" flags args ->
             case args of
@@ -542,19 +543,19 @@ addInterestingUnaliasedParams proto properties params =
 
 
 -- adding new specz version dependency
-updateMultiSpeczDepInfo :: MultiSpeczDepInfo -> (ProcSpec, [PrimArg])
-    -> [CallSiteProperty] -> Compiler MultiSpeczDepInfo
-updateMultiSpeczDepInfo multiSpeczDepInfo primCall items = 
+updateMultiSpeczDepInfo :: MultiSpeczDepInfo -> CallSiteID -> ProcSpec
+        -> [CallSiteProperty] -> Compiler MultiSpeczDepInfo
+updateMultiSpeczDepInfo multiSpeczDepInfo callSiteID pSpec items = 
     if List.null items
     then
         return multiSpeczDepInfo
     else do
-        logAlias $ "Update MultiSpeczDepInfo, primCall: " ++ show primCall
-                ++ " items:" ++ show items
+        logAlias $ "Update MultiSpeczDepInfo, CallSiteID: " ++ show callSiteID
+                ++ " ProcSpec: " ++ show pSpec ++ " items:" ++ show items
         return $ Map.alter (\x ->
-            fromMaybe Set.empty x
-            |> Set.union (Set.fromList items)
-            |> Just) primCall multiSpeczDepInfo
+            fromMaybe (pSpec, Set.empty) x
+            |> second (Set.union (Set.fromList items))
+            |> Just) callSiteID multiSpeczDepInfo
 
 
 ----------------------------------------------------------------

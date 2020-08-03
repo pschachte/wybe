@@ -1010,7 +1010,7 @@ buildMain mainImports =
                                  ResourceFlowSpec
                                      (ResourceSpec ["wybe","io"] "io")
                                      ParamOut]
-    in ProcDef "" proto mainBody Nothing 0 Map.empty
+    in ProcDef "" proto mainBody Nothing 0 0 Map.empty
        Private Det False NoSuperproc
 
 

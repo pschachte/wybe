@@ -54,7 +54,7 @@ module AST (
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
-  SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
+  CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -873,7 +873,7 @@ addImport modspec imports = do
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis detism inline proto stmts pos) = do
     let name = procProtoName proto
-    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr
+    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0
                   Map.empty vis detism inline $ initSuperprocSpec vis
     addProcDef procDef
 addProc _ item =
@@ -1519,6 +1519,8 @@ data ProcDef = ProcDef {
     procImpln :: ProcImpln,     -- the actual implementation
     procPos :: OptPos,          -- where this proc is defined
     procTmpCount :: Int,        -- the next temp variable number to use
+    procCallSiteCount :: CallSiteID,
+                                -- the next call site id to use
     procCallers :: Map ProcSpec Int,
                                 -- callers to this proc from this mod in the
                                 -- source code (before inlining) and the
@@ -1649,15 +1651,13 @@ aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 
 
 -- |Infomation about specialization versions the current proc directly uses. 
+-- It's a mapping from call sites to the callee's "ProcSpec" and a set of 
+-- "CallSiteProperty".
 -- For a given specialization version of the current proc, this info should be
 -- enough to compute all specz versions it required. A sample case is
 -- "expandSpeczVersionsAlias" in "Transform.hs".
--- XXX this map is per call site, so the args is included to separate different
--- calls to the same proc. The current approach is not currect, we should give
--- each call site a unique id similar to the tmep variable count in
--- "BodyBuilder" and use it as the key.
 type MultiSpeczDepInfo = 
-        Map (ProcSpec, [PrimArg]) (Set CallSiteProperty)
+        Map CallSiteID (ProcSpec, Set CallSiteProperty)
 
 
 -- |Specific items for "MultiSpeczDepInfo", it describing the information about
@@ -2227,13 +2227,18 @@ data PrimVarName =
 -- |A primitive statment, including those that can only appear in a
 --  loop.
 data Prim
-     = PrimCall ProcSpec [PrimArg]
+     = PrimCall CallSiteID ProcSpec [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
      | PrimTest PrimArg
      deriving (Eq,Ord,Generic)
 
 instance Show Prim where
     show = showPrim 0
+
+
+-- |An id for each call site, should be unique within a proc.
+type CallSiteID = Int
+
 
 -- |The allowed arguments in primitive proc or foreign proc calls,
 --  just variables and constants.
@@ -2257,14 +2262,14 @@ data PrimArg
 
 -- |Returns a list of all arguments to a prim
 primArgs :: Prim -> [PrimArg]
-primArgs (PrimCall _ args) = args
+primArgs (PrimCall _ _ args) = args
 primArgs (PrimForeign _ _ _ args) = args
 primArgs (PrimTest arg) = [arg]
 
 
 -- |Returns a list of all arguments to a prim
 replacePrimArgs :: Prim -> [PrimArg] -> Prim
-replacePrimArgs (PrimCall pspec _) args = PrimCall pspec args
+replacePrimArgs (PrimCall id pspec _) args = PrimCall id pspec args
 replacePrimArgs (PrimForeign lang nm flags _) args =
     PrimForeign lang nm flags args
 replacePrimArgs (PrimTest _) [arg] = PrimTest arg
@@ -2645,7 +2650,8 @@ showProcDefs firstID (def:defs) =
 
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis detism inline sub) =
+showProcDef thisID 
+        procdef@(ProcDef n proto def pos _ _ _ vis detism inline sub) =
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
     ++ visibilityPrefix vis
@@ -2756,8 +2762,9 @@ showPlacedPrim' ind prim pos =
 
 -- |Show a single primitive statement.
 showPrim :: Int -> Prim -> String
-showPrim _ (PrimCall pspec args) =
+showPrim _ (PrimCall id pspec args) =
         show pspec ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+            ++ " #" ++ show id 
 showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++
         name ++ (if List.null flags then "" else " " ++ unwords flags) ++

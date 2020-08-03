@@ -357,7 +357,7 @@ entry:
     foreign lpvm mutate(~tmp$5#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 222:wybe.int)
     foreign lpvm mutate noalias(~tmp$0#0:position.position, ?%posA#1:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 112:wybe.int)
     foreign c print_string("expect posA(111,112):":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(~posA#1:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @position1:8:2
+    position.printPosition<0>(~posA#1:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #4 @position1:8:2
 
   LLVM code       :
 

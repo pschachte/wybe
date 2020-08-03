@@ -19,9 +19,9 @@ AFTER EVERYTHING:
     foreign lpvm alloc(16:wybe.int, ?tmp$3#0:position.position)
     foreign lpvm mutate(~tmp$3#0:position.position, ?tmp$4#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
     foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
-    alias_mod_param.foo<0>(tmp$0#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_mod_param:10:2
+    alias_mod_param.foo<0>(tmp$0#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @alias_mod_param:10:2
     foreign c print_string("expect p1(10,10):":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(~tmp$0#0:position.position, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @alias_mod_param:12:2
+    position.printPosition<0>(~tmp$0#0:position.position, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #3 @alias_mod_param:12:2
 
 
 foo > public (1 calls)
@@ -30,7 +30,7 @@ foo > public (1 calls)
  InterestingCallProperties: [InterestingUnaliased 0]
     foreign lpvm mutate noalias(~%pa#0:position.position, ?%pa#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 1111:wybe.int)
     foreign c print_string("expect pa(1111,10):":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(~pa#1:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @alias_mod_param:6:6
+    position.printPosition<0>(~pa#1:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #2 @alias_mod_param:6:6
 
   LLVM code       :
 

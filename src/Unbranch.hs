@@ -83,6 +83,8 @@ unbranchProc proc = do
     let proto = procProto proc
     let proc' = proc { procTmpCount = tmpCtr', procImpln = ProcDefSrc body' }
     let tmpCount = procTmpCount proc
+    let newProcs' = List.map 
+            (\p -> p {procCallSiteCount = procCallSiteCount proc})
     mapM_ addProcDef newProcs
     logMsg Unbranch $ "** Unbranched defn:" ++ showProcDef 0 proc' ++ "\n"
     logMsg Unbranch "================================================\n"
@@ -253,7 +255,8 @@ genProc proto stmts = do
     -- let item = ProcDecl Private Det False proto stmts Nothing
     let name = procProtoName proto
     tmpCtr <- gets brTempCtr
-    let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr
+    -- call site count will be refilled later
+    let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr 0
                   Map.empty Private Det False NoSuperproc
     procDef' <- lift $ unbranchProc procDef
     logUnbranch $ "Generating proc:\n" ++ showProcDef 4 procDef'

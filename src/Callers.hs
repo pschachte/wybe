@@ -48,7 +48,7 @@ type CallRec = Map ProcSpec Int
 
 
 noteCall :: ProcSpec -> Bool -> Prim -> CallRec -> CallRec
-noteCall caller final (PrimCall spec _) rec =
+noteCall caller final (PrimCall _ spec _) rec =
   Map.alter (Just . maybe 1 (1+)) spec rec
 noteCall caller final (PrimTest _) rec = rec
 noteCall caller final (PrimForeign _ _ _ _) rec = rec
@@ -114,5 +114,5 @@ localBodyCallees modspec body =
 
 
 localCallees :: ModSpec -> Prim -> [ProcSpec]
-localCallees modspec (PrimCall pspec _) = [pspec]
+localCallees modspec (PrimCall _ pspec _) = [pspec]
 localCallees _ _                        = []

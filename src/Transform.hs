@@ -166,12 +166,12 @@ transformPrim ((aliasMap, deadCells), prims) prim = do
     let primc = content prim
     
     (primc', deadCells') <- case primc of
-            PrimCall spec args -> do
+            PrimCall id spec args -> do
                 noMultiSpecz <- gets (optNoMultiSpecz . options)
                 spec' <- if noMultiSpecz
                     then return spec
                     else _updatePrimCallForSpecz spec args aliasMap
-                return (PrimCall spec' args, deadCells)
+                return (PrimCall id spec' args, deadCells)
             PrimForeign "lpvm" "mutate" flags args -> do
                 let args' = _updateMutateForAlias aliasMap args
                 return (PrimForeign "lpvm" "mutate" flags args', deadCells)
@@ -324,7 +324,7 @@ expandRequiredSpeczVersionsByProcVersion :: ProcAnalysis -> SpeczVersion
 expandRequiredSpeczVersionsByProcVersion procAnalysis callerVersion = 
     let multiSpeczDepInfo = procMultiSpeczDepInfo procAnalysis in
     -- go through dependencies and find matches
-    List.map (\((procSpec, _), items) ->
+    List.map (\(_, (procSpec, items)) ->
             -- Add other expansion here and union the results
             let version = expandSpeczVersionsAlias callerVersion items in
             let ProcSpec mod procName procId _ = procSpec in
