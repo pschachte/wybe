@@ -2227,7 +2227,7 @@ data PrimVarName =
 -- |A primitive statment, including those that can only appear in a
 --  loop.
 data Prim
-     = PrimCall (Maybe CallSiteID) ProcSpec [PrimArg]
+     = PrimCall CallSiteID ProcSpec [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
      | PrimTest PrimArg
      deriving (Eq,Ord,Generic)
@@ -2236,8 +2236,7 @@ instance Show Prim where
     show = showPrim 0
 
 
--- |An id for each call site, should be unique within a proc. It's assigned by
---  "BodyBuilder".
+-- |An id for each call site, should be unique within a proc.
 type CallSiteID = Int
 
 
@@ -2765,7 +2764,7 @@ showPlacedPrim' ind prim pos =
 showPrim :: Int -> Prim -> String
 showPrim _ (PrimCall id pspec args) =
         show pspec ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
-            ++ maybe "" (\x -> " #" ++ show x) id
+            ++ " #" ++ show id 
 showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++
         name ++ (if List.null flags then "" else " " ++ unwords flags) ++

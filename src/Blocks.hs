@@ -520,7 +520,7 @@ codegenForkBody var _ _ =
 -- are position checked with the respective prototype, eliminating arguments
 -- which do not eventually appear in the prototype.
 cgen :: Prim -> Codegen (Maybe Operand)
-cgen prim@(PrimCall _ pspec args) = do
+cgen prim@(PrimCall callSiteID pspec args) = do
     logCodegen $ "Compiling " ++ show prim
     thisMod <- lift getModuleSpec
     fileMod <- lift $ getModule modRootModSpec
@@ -536,7 +536,7 @@ cgen prim@(PrimCall _ pspec args) = do
 
     -- if the call is to an external module, declare it
     unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
-        (addExtern $ PrimCall Nothing pspec filteredArgs)
+        (addExtern $ PrimCall callSiteID pspec filteredArgs)
 
     let (inArgs,outArgs) = partitionArgs filteredArgs
     logCodegen $ "In args = " ++ show inArgs

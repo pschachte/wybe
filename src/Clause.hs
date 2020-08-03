@@ -244,7 +244,7 @@ compileSimpleStmt' call@(ProcCall maybeMod name procID _ _ args) = do
     callSiteID <- gets nextCallSiteID
     modify (\st -> st {nextCallSiteID = callSiteID + 1})
     args' <- mapM (placedApply compileArg) args
-    return $ PrimCall (Just callSiteID) (ProcSpec maybeMod name
+    return $ PrimCall callSiteID (ProcSpec maybeMod name
                        (trustFromJust
                        ("compileSimpleStmt' for " ++ showStmt 4 call)
                        procID) Nothing)

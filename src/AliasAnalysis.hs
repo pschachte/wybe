@@ -469,9 +469,8 @@ updateMultiSpeczInfoByPrim proto
                     in
                     NonAliasedParamCond calleeParamID requiredParamIDs
                     ) interestingPrimCallInfo
-            let callSiteID' = trustFromJust "CallSiteID unassigned" callSiteID
             multiSpeczDepInfo' <- updateMultiSpeczDepInfo multiSpeczDepInfo 
-                    callSiteID' spec infoItems
+                    callSiteID spec infoItems
             return (interestingCallProperties', multiSpeczDepInfo')
         PrimForeign "lpvm" "mutate" flags args ->
             case args of

@@ -35,7 +35,6 @@ procExpansion pspec def = do
     logMsg Expansion $ "    initial body: " ++ show (procImpln def)
     let tmp = procTmpCount def
     let (ins,outs) = inputOutputParams proto
-    -- Only body is expanded currently (not specz bodies).
     let st = initExpanderState $ procCallSiteCount def
     (st', tmp',used,body') <- buildBody tmp (Map.fromSet id outs) $
                         execStateT (expandBody body) st
@@ -139,7 +138,7 @@ addInstr prim pos = do
             then do
                 callSiteID <- gets nextCallSiteID
                 modify (\st -> st {nextCallSiteID = callSiteID + 1})
-                return $ PrimCall (Just callSiteID) pspec args
+                return $ PrimCall callSiteID pspec args
             else 
                 return prim
         _ -> return prim
