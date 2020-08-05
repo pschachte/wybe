@@ -214,12 +214,12 @@ _updateMutateForAlias _ args = args
 
 
 
--- Fix point processor for expanding required specz versions.
+-- Fix point processor for expanding required specz versions in the given mod.
 expandRequiredSpeczVersionsByMod :: [ModSpec] -> ModSpec 
         -> Compiler (Bool, [(String, OptPos)])
 expandRequiredSpeczVersionsByMod scc thisMod = do
     reenterModule thisMod
-    logTransform $ "Expanding required specz versions for:" ++ show thisMod
+    logTransform $ "Expanding required specz versions for: " ++ show thisMod
     -- get proc level SCCs in top-down order
     orderedProcsTopDown <- List.reverse <$> getSccProcs thisMod
 
@@ -242,6 +242,8 @@ expandRequiredSpeczVersionsByMod scc thisMod = do
     return (or changedList, [])
 
 
+-- Expand required specz versions for the given proc SCC until it reaches a
+-- fixpoint. For the SCC, we consider procs without specialization.
 expandRequiredSpeczVersionsByProcSCC :: Set ProcSpec -> SCC ProcSpec
         -> Compiler (Set ProcSpec)
 expandRequiredSpeczVersionsByProcSCC required (AcyclicSCC pspec) = do
@@ -261,7 +263,7 @@ expandRequiredSpeczVersionsByProcSCC required scc@(CyclicSCC pspecs) = do
     else expandRequiredSpeczVersionsByProcSCC required' scc
 
 
-
+-- Expand required specz versions for the given proc.
 expandRequiredSpeczVersionsByProc :: Set ProcSpec -> ProcSpec
         -> Compiler (Set ProcSpec)
 expandRequiredSpeczVersionsByProc required pspec = do
@@ -286,6 +288,8 @@ expandRequiredSpeczVersionsByProc required pspec = do
     return required'
 
 
+-- Whether the two "ProcSpec"s are belong to the same proc without considering
+-- specialization.
 sameBaseProc :: ProcSpec -> ProcSpec -> Bool
 sameBaseProc (ProcSpec mod1 name1 id1 _) (ProcSpec mod2 name2 id2 _) =
     mod1 == mod2 && name1 == name2 && id1 == id2
@@ -293,6 +297,7 @@ sameBaseProc (ProcSpec mod1 name1 id1 _) (ProcSpec mod2 name2 id2 _) =
 
 -- For a given proc and a "SpeczVersion" of it, compute all specialized procs
 -- it required.
+-- Returns a mapping from call site to the actual proc to call.
 -- XXX Add heuristic to select which specializations to use
 expandRequiredSpeczVersionsByProcVersion :: ProcAnalysis -> SpeczVersion
         -> Map CallSiteID ProcSpec

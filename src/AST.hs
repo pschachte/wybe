@@ -1604,8 +1604,11 @@ parameterVarNameToID proto varName =
 -- specialization and should be valid for all call site.
 type SpeczVersion = Set CallProperty
 
+
+-- "SpeczVersion" for the general(standard) version.
 generalVersion :: SpeczVersion
 generalVersion = Set.empty
+
 
 -- |Each one represents some additional information about the specialization.
 data CallProperty
