@@ -868,7 +868,7 @@ callProcInfos pstmt =
         ProcCall m name procId _ _ _ -> do
           procs <- case procId of
               Nothing   -> callTargets m name
-              Just pid -> return [ProcSpec m name pid Nothing]
+              Just pid -> return [ProcSpec m name pid generalVersion]
           defs <- mapM getProcDef procs
           return [ ProcInfo proc typflow detism inResources outResources
                  | (proc,def) <- zip procs defs

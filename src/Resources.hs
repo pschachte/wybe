@@ -154,7 +154,8 @@ transformStmt :: Int -> Stmt -> OptPos -> Compiler ([Placed Stmt], Int)
 transformStmt tmp stmt@(ProcCall m n id detism resourceful args) pos = do
     let procID = trustFromJust "transformStmt" id
     callResources <-
-        procProtoResources . procProto <$> getProcDef (ProcSpec m n procID Nothing)
+        procProtoResources . procProto <$> getProcDef 
+                (ProcSpec m n procID generalVersion)
     unless (resourceful || Set.null callResources)
       $ message Error
         ("Call to resourceful proc without ! resource marker: "

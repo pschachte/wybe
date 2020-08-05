@@ -29,7 +29,8 @@ noteProcCallers :: ModSpec -> ProcName -> [ProcDef] ->
                        Map Ident [ProcDef] -> Map Ident [ProcDef]
 noteProcCallers mod name defs procs =
   List.foldr (\(def,n) ->
-               noteImplnCallers (ProcSpec mod name n Nothing) (procImpln def))
+               noteImplnCallers
+                      (ProcSpec mod name n generalVersion) (procImpln def))
   procs $ zip defs [0..]
 
 noteImplnCallers :: ProcSpec -> ProcImpln ->
@@ -95,7 +96,7 @@ getSccProcs thisMod = do
             nub $ concatMap (localBodyCallees thisMod . procBody) procDefs)
            | (name,procDefs) <- procs,
              (n,def) <- zip [0..] procDefs,
-             let pspec = ProcSpec thisMod name n Nothing
+             let pspec = ProcSpec thisMod name n generalVersion
            ]
   return ordered
 
