@@ -394,7 +394,7 @@ generatorStmt = do
 forStmt :: Parser (Placed Stmt)
 forStmt = do
     pos <- tokenPosition <$> ident "for"
-    generators <- generatorStmt `sepBy` symbol "|"
+    generators <- generatorStmt `sepBy` comma
     body <- betweenB Brace $ many1 stmtParser
     return $ Placed (For generators body) pos
 
