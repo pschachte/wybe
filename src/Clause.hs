@@ -247,7 +247,7 @@ compileSimpleStmt' call@(ProcCall maybeMod name procID _ _ args) = do
     return $ PrimCall callSiteID (ProcSpec maybeMod name
                        (trustFromJust
                        ("compileSimpleStmt' for " ++ showStmt 4 call)
-                       procID) Nothing)
+                       procID) generalVersion)
         args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- mapM (placedApply compileArg) args

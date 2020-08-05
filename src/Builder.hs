@@ -949,6 +949,7 @@ buildExecutable orderedSCCs targetMod target = do
 emitObjectFilesIfNeeded :: [(ModSpec, Bool)] -> Compiler [FilePath]
 emitObjectFilesIfNeeded depends = do
     unchangedSet <- gets unchangedMods
+    logBuild $ "Unchanged Set: " ++ show unchangedSet
     mapM (\(m, _) -> do
         reenterModule m
         -- package (directory mod) won't be included in "depends", no need to

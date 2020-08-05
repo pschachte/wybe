@@ -42,7 +42,7 @@ module AST (
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
-  parameterVarNameToID, SpeczVersion, CallProperty(..),
+  parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis, 
@@ -887,7 +887,7 @@ addProcDef procDef = do
     currMod <- getModuleSpec
     procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
     let procs' = procs ++ [procDef]
-    let spec = ProcSpec currMod name (length procs) Nothing
+    let spec = ProcSpec currMod name (length procs) generalVersion
     updateImplementation
       (\imp ->
         let known = findWithDefault Set.empty name $ modKnownProcs imp
@@ -1604,6 +1604,8 @@ parameterVarNameToID proto varName =
 -- specialization and should be valid for all call site.
 type SpeczVersion = Set CallProperty
 
+generalVersion :: SpeczVersion
+generalVersion = Set.empty
 
 -- |Each one represents some additional information about the specialization.
 data CallProperty
@@ -1907,15 +1909,15 @@ data ProcSpec = ProcSpec {
       procSpecMod :: ModSpec,
       procSpecName :: ProcName,
       procSpecID :: ProcID,
-      procSpeczVersion :: Maybe SpeczVersion}
+      procSpeczVersion :: SpeczVersion}
                 deriving (Eq,Ord,Generic)
 
 instance Show ProcSpec where
     show (ProcSpec mod name pid speczId) =
         showModSpec mod ++ "." ++ name ++ "<" ++ show pid ++ ">"
-                ++ case speczId of 
-                    Nothing -> ""
-                    Just id -> "[" ++ speczVersionToId id ++ "]"
+                ++ if speczId == generalVersion
+                   then ""
+                   else "[" ++ speczVersionToId speczId ++ "]"
 
 -- |An ID for a proc.
 type ProcID = Int

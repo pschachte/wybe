@@ -12,9 +12,11 @@ module Transform (transformProc,
 
 import           AliasAnalysis
 import           AST
+import           Callers       (getSccProcs)
 import           Control.Monad
 import           Control.Monad.Trans.State
 import           Data.Bits     as Bits
+import           Data.Graph
 import           Data.List     as List
 import           Data.Map      as Map
 import           Data.Maybe    as Maybe
@@ -47,43 +49,6 @@ transformProc def
         return def { procImpln = ProcDefPrim caller body' analysis speczBodies}
 
 transformProc def = return def
-
-
--- For the given "ProcDef", generates all specz versions that are required but
--- haven't got generated.
-generateSpeczVersionInProc :: ProcDef -> Compiler ProcDef
-generateSpeczVersionInProc def
-    | not (procInline def) = do
-        let procImp = procImpln def
-        let ProcDefPrim caller body analysis speczBodies = procImp
-        if List.any isNothing (Map.elems speczBodies)
-        then do -- missing required specz versions
-            -- mark the current module as changed
-            mod <- getModuleSpec
-            updateCompiler (\st ->
-                let unchanged = unchangedMods st |> Set.delete mod in
-                    st {unchangedMods = unchanged})
-
-            speczBodiesList <- mapM (\(ver, sbody) ->
-                case sbody of 
-                    Just b -> return (ver, Just b)
-                    Nothing -> do
-                        -- generate the specz version
-                        aliasMap <- initAliasMap caller ver
-                        logTransform $ replicate 60 '~'
-                        logTransform $ "Generating specialized version: "
-                                ++ show ver
-                        sbody' <- transformBody caller body
-                                (aliasMap, Map.empty)
-                        return (ver, Just sbody')
-                        ) (Map.toAscList speczBodies)
-            let speczBodies' = Map.fromDistinctAscList speczBodiesList
-            return $
-                def {procImpln = ProcDefPrim caller body analysis speczBodies'}
-        else
-            return def
-
-generateSpeczVersionInProc def = return def
 
 
 -- init aliasMap based on the given "nonAliasedParams",
@@ -229,7 +194,7 @@ _updatePrimCallForSpecz spec args aliasMap = do
         then spec
         else
             let speczVersion = nonAliasedParamIDs
-                    |> List.map NonAliasedParam |> Set.fromList |> Just
+                    |> List.map NonAliasedParam |> Set.fromList
             in
             spec { procSpeczVersion = speczVersion })
 
@@ -269,43 +234,25 @@ _updateMutateForAlias _ args = args
 --      on given "SpeczVersion".
 
 
+
 -- Fix point processor for expanding required specz versions.
--- XXX This part can be optimized by using "getSccProcs" and tracking the diff
--- between each run.
 expandRequiredSpeczVersionsByMod :: [ModSpec] -> ModSpec 
-        -> Compiler (Bool,[(String,OptPos)])
+        -> Compiler (Bool, [(String, OptPos)])
 expandRequiredSpeczVersionsByMod scc thisMod = do
     reenterModule thisMod
     logTransform $ "Expanding required specz versions for:" ++ show thisMod
-    -- Get all specz versions that required by others
-    procs <- getModuleImplementationField modProcs
-    -- Go through all specz versions in this mod that required by others,
-    -- expand those to find all required versions
-    let requiredVersions = Map.foldlWithKey (\required procName procDefs ->
-            List.foldl (\required (procDef, procId) -> 
-                let (ProcDefPrim _ _ analysis speczBodies) = 
-                        procImpln procDef
-                in
-                -- we always need the non-specialized version
-                let speczVersions = 
-                        Map.keysSet speczBodies
-                        |> Set.insert Set.empty
-                in
-                -- for each specz version, expand it's dependencies
-                Set.foldl (\required version ->
-                    let depMatches = 
-                            expandRequiredSpeczVersionsByProcVersion
-                                analysis version
-                    in
-                        Set.union required depMatches
-                    ) required speczVersions
-                ) required (List.zip procDefs [0..])
-            ) Set.empty procs
-            |> Set.toAscList
+    -- get proc level SCCs in top-down order
+    orderedProcsTopDown <- List.reverse <$> getSccProcs thisMod
+
+    requiredVersions <- Set.toList <$>
+            foldM expandRequiredSpeczVersionsByProcSCC 
+                    Set.empty orderedProcsTopDown
+
     logTransform $ "requiredVersions: " ++ show requiredVersions
     reexitModule
+
     -- Update each module based on the requirements
-    let requiredVersions' = List.map (\((mod, procName, procId), version) ->
+    let requiredVersions' = List.map (\(ProcSpec mod procName procId version) ->
             (mod, (procName, (procId, version)))) requiredVersions
     changedList <- mapM (\(mod, versions) -> do
             changed <- updateRequiredMultiSpeczInMod mod versions
@@ -316,23 +263,68 @@ expandRequiredSpeczVersionsByMod scc thisMod = do
     return (or changedList, [])
 
 
+expandRequiredSpeczVersionsByProcSCC :: Set ProcSpec -> SCC ProcSpec
+        -> Compiler (Set ProcSpec)
+expandRequiredSpeczVersionsByProcSCC required (AcyclicSCC pspec) = do
+    required' <- expandRequiredSpeczVersionsByProc required pspec 
+    -- immediate fixpoint if no mutual dependency
+    return required'
+
+expandRequiredSpeczVersionsByProcSCC required scc@(CyclicSCC pspecs) = do
+    required' <- foldM expandRequiredSpeczVersionsByProc required pspecs
+    -- whether it reaches a fixpoint: is there any newly found required versions
+    -- of procs in the current SCC.
+    let fixpoint = Set.difference required required'
+                    |> Set.toList
+                    |> List.all (\p -> not (List.any (sameBaseProc p) pspecs))
+    if fixpoint
+    then return required'
+    else expandRequiredSpeczVersionsByProcSCC required' scc
+
+
+
+expandRequiredSpeczVersionsByProc :: Set ProcSpec -> ProcSpec
+        -> Compiler (Set ProcSpec)
+expandRequiredSpeczVersionsByProc required pspec = do
+    procDef <- getProcDef pspec
+    let ProcDefPrim _ _ analysis speczBodies = procImpln procDef
+    -- get it's currently existed/required versions
+    let speczVersions = Set.filter (sameBaseProc pspec) required
+                        |> Set.map (\(ProcSpec _ _ _ v) -> v)
+                        |> Set.union (Map.keysSet speczBodies)
+                        -- always need the non-specialized version
+                        |> Set.insert generalVersion
+    let required' = Set.foldl (\required version ->
+            let depMatches = expandRequiredSpeczVersionsByProcVersion
+                                    analysis version
+            in
+            Set.union required depMatches) required speczVersions
+    return required'
+    where
+
+
+sameBaseProc :: ProcSpec -> ProcSpec -> Bool
+sameBaseProc (ProcSpec mod1 name1 id1 _) (ProcSpec mod2 name2 id2 _) =
+    mod1 == mod2 && name1 == name2 && id1 == id2
+
 -- For a given proc and a "SpeczVersion" of it, compute all specialized procs
 -- it required.
 -- XXX Add heuristic to select which specializations to use
 expandRequiredSpeczVersionsByProcVersion :: ProcAnalysis -> SpeczVersion
-        -> Set ((ModSpec, ProcName, Int), SpeczVersion)
+        -> Set ProcSpec
 expandRequiredSpeczVersionsByProcVersion procAnalysis callerVersion = 
     let multiSpeczDepInfo = procMultiSpeczDepInfo procAnalysis in
     -- go through dependencies and find matches
-    List.map (\(_, (procSpec, items)) ->
+    List.foldl (\required (_, (procSpec, items)) ->
             -- Add other expansion here and union the results
             let version = expandSpeczVersionsAlias callerVersion items in
-            let ProcSpec mod procName procId _ = procSpec in
-                ((mod, procName, procId), version)
-            ) (Map.toList multiSpeczDepInfo)
-    -- remove the standard version
-    |> List.filter (not . Set.null . snd)
-    |> Set.fromList
+            -- remove the general version
+            if version == generalVersion
+            then required 
+            else
+                let ProcSpec mod procName procId _ = procSpec in
+                    Set.insert (ProcSpec mod procName procId version) required
+            ) Set.empty (Map.toList multiSpeczDepInfo)
 
 
 -- expand specz versions for global CTGC
@@ -386,6 +378,43 @@ updateRequiredMultiSpeczInMod mod versions = do
     when changed 
             (logTransform $ "new specz requirements in mod: " ++ show mod)
     return changed
+
+
+-- For the given "ProcDef", generates all specz versions that are required but
+-- haven't got generated.
+generateSpeczVersionInProc :: ProcDef -> Compiler ProcDef
+generateSpeczVersionInProc def
+    | not (procInline def) = do
+        let procImp = procImpln def
+        let ProcDefPrim caller body analysis speczBodies = procImp
+        if List.any isNothing (Map.elems speczBodies)
+        then do -- missing required specz versions
+            -- mark the current module as changed
+            mod <- getModuleSpec
+            updateCompiler (\st ->
+                let unchanged = unchangedMods st |> Set.delete mod in
+                    st {unchangedMods = unchanged})
+
+            speczBodiesList <- mapM (\(ver, sbody) ->
+                case sbody of 
+                    Just b -> return (ver, Just b)
+                    Nothing -> do
+                        -- generate the specz version
+                        aliasMap <- initAliasMap caller ver
+                        logTransform $ replicate 60 '~'
+                        logTransform $ "Generating specialized version: "
+                                ++ show ver
+                        sbody' <- transformBody caller body
+                                (aliasMap, Map.empty)
+                        return (ver, Just sbody')
+                        ) (Map.toAscList speczBodies)
+            let speczBodies' = Map.fromDistinctAscList speczBodiesList
+            return $
+                def {procImpln = ProcDefPrim caller body analysis speczBodies'}
+        else
+            return def
+
+generateSpeczVersionInProc def = return def
 
 
 -- Similar to "List.groupBy"
