@@ -256,8 +256,7 @@ expandRequiredSpeczVersionsByProcSCC required scc@(CyclicSCC pspecs) = do
     -- whether it reaches a fixpoint: is there any newly found required versions
     -- of procs in the current SCC.
     let fixpoint = Set.difference required required'
-                    |> Set.toList
-                    |> List.all (\p -> not (List.any (sameBaseProc p) pspecs))
+                    |> all (\p -> not (List.any (sameBaseProc p) pspecs))
     if fixpoint
     then return required'
     else expandRequiredSpeczVersionsByProcSCC required' scc
@@ -271,7 +270,7 @@ expandRequiredSpeczVersionsByProc required pspec = do
     let ProcDefPrim _ _ analysis speczBodies = procImpln procDef
     -- get it's currently existed/required versions
     let speczVersions = Set.filter (sameBaseProc pspec) required
-                        |> Set.map (\(ProcSpec _ _ _ v) -> v)
+                        |> Set.map procSpeczVersion
                         |> Set.union (Map.keysSet speczBodies)
                         -- always need the non-specialized version
                         |> Set.insert generalVersion
@@ -280,8 +279,8 @@ expandRequiredSpeczVersionsByProc required pspec = do
                                     analysis version
                             |> Map.elems
                             -- remove general versions
-                            |> List.filter (\(ProcSpec _ _ _ version) -> 
-                                version /= generalVersion)
+                            |> List.filter 
+                                    ((/= generalVersion) . procSpeczVersion)
                             |> Set.fromList
             in
             Set.union required versions) required speczVersions
