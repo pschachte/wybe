@@ -2,12 +2,23 @@ pub type intlist { pub [] | [|](head:int, tail:intlist) }
 
 ?x = [1, 2, 3]
 ?y = [4, 5, 6]
-?z = [7, 8, 9]
+?z = [7, 8]
 
-for i in x, j in y, k in z {
+# Should print 1\n2\n3\n
+for i in x {
+    !println(i)
+}
+
+# Should print 1\n4\n2\n5\n3\n6\n
+for i in x, j in y {
     !println(i)
     !println(j)
-    !println(k)
+}
+
+# Should print 1\n7\n2\n8\n
+for i in x, j in z {
+    !println(i)
+    !println(j)
 }
 
 #?temp1 = x
