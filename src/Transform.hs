@@ -12,9 +12,11 @@ module Transform (transformProc,
 
 import           AliasAnalysis
 import           AST
+import           Callers       (getSccProcs)
 import           Control.Monad
 import           Control.Monad.Trans.State
 import           Data.Bits     as Bits
+import           Data.Graph
 import           Data.List     as List
 import           Data.Map      as Map
 import           Data.Maybe    as Maybe
@@ -41,36 +43,15 @@ transformProc def
         -- transform the standard body
         -- In this case, all input params are aliased
         inputParams <- protoInputParamNames caller
-        aliasMap <- initAliasMap caller Set.empty
-        body' <- transformBody caller body (aliasMap, Map.empty)
+        aliasMap <- initAliasMap caller generalVersion
+        let callSiteMap = expandRequiredSpeczVersionsByProcVersion 
+                                        analysis generalVersion
+        logTransform $ "callSiteMap: " ++ show callSiteMap
+        body' <- transformBody caller body (aliasMap, Map.empty) callSiteMap
 
         return def { procImpln = ProcDefPrim caller body' analysis speczBodies}
 
 transformProc def = return def
-
-
--- For the given "ProcDef", generates all specz versions that are required but
--- haven't got generated.
-generateSpeczVersionInProc :: ProcDef -> Compiler ProcDef
-generateSpeczVersionInProc def
-    | not (procInline def) = do
-        let procImp = procImpln def
-        let ProcDefPrim caller body analysis speczBodies = procImp
-        speczBodiesList <- mapM (\(ver, sbody) ->
-            case sbody of 
-                Just b -> return (ver, Just b)
-                Nothing -> do
-                    aliasMap <- initAliasMap caller ver
-                    logTransform $ replicate 60 '~'
-                    logTransform $ "Generating specialized version: "
-                            ++ show ver
-                    sbody' <- transformBody caller body (aliasMap, Map.empty)
-                    return (ver, Just sbody')
-                    ) (Map.toAscList speczBodies)
-        let speczBodies' = Map.fromDistinctAscList speczBodiesList
-        return $ def {procImpln = ProcDefPrim caller body analysis speczBodies'}
-
-generateSpeczVersionInProc def = return def
 
 
 -- init aliasMap based on the given "nonAliasedParams",
@@ -95,17 +76,17 @@ initAliasMap proto speczVersion = do
 
 
 transformBody :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells)
-        -> Compiler ProcBody
-transformBody caller body (aliasMap, deadCells) = do
+        -> Map CallSiteID ProcSpec -> Compiler ProcBody
+transformBody caller body (aliasMap, deadCells) callSiteMap = do
     -- (1) Analysis of current caller's prims
     ((aliaseMap', deadCells'), newPrims) <- 
-            transformPrims caller body (aliasMap, deadCells)
+            transformPrims caller body (aliasMap, deadCells) callSiteMap
     -- Update bodyPrims of this procbody
     let body' = body { bodyPrims = newPrims }
 
     -- (2) Analysis of caller's bodyFork
     -- Update body while checking alias incurred by bodyfork
-    transformForks caller body' (aliaseMap', deadCells')
+    transformForks caller body' (aliaseMap', deadCells') callSiteMap
 
     -- XXX run (or re-run) optimizations here since after the transform, there
     -- might be some new opportunities.
@@ -113,20 +94,21 @@ transformBody caller body (aliasMap, deadCells) = do
 
 -- Check alias created by prims of caller proc
 transformPrims :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells) 
+        -> Map CallSiteID ProcSpec
         -> Compiler ((AliasMapLocal, DeadCells), [Placed Prim])
-transformPrims caller body (aliasMap, deadCells) = do
+transformPrims caller body (aliasMap, deadCells) callSiteMap = do
     let prims = bodyPrims body
     -- Transform simple prims:
     logTransform "\nTransform prims (transformPrims):   "
-    foldM transformPrim ((aliasMap, deadCells), []) prims
+    foldM (transformPrim callSiteMap) ((aliasMap, deadCells), []) prims
 
 
 -- Recursively transform forked body's prims
 -- PrimFork only appears at the end of a ProcBody
 -- PrimFork = NoFork | PrimFork {}
 transformForks :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells)
-        -> Compiler ProcBody
-transformForks caller body (aliasMap, deadCells) = do
+        -> Map CallSiteID ProcSpec -> Compiler ProcBody
+transformForks caller body (aliasMap, deadCells) callSiteMap = do
     logTransform "\nTransform forks (transformForks):"
     let fork = bodyFork body
     case fork of
@@ -134,7 +116,8 @@ transformForks caller body (aliasMap, deadCells) = do
             logTransform "Forking:"
             fBodies' <-
                 mapM (\currBody -> 
-                        transformBody caller currBody (aliasMap, deadCells)
+                        transformBody caller currBody
+                                (aliasMap, deadCells) callSiteMap
                 ) fBodies
             return body { bodyFork = fork {forkBodies=fBodies'} }
         NoFork -> do
@@ -144,21 +127,22 @@ transformForks caller body (aliasMap, deadCells) = do
 
 
 -- Build up alias pairs triggerred by proc calls
-transformPrim :: ((AliasMapLocal, DeadCells), [Placed Prim])
+transformPrim :: Map CallSiteID ProcSpec
+        -> ((AliasMapLocal, DeadCells), [Placed Prim])
         -> Placed Prim -> Compiler ((AliasMapLocal, DeadCells), [Placed Prim])
-transformPrim ((aliasMap, deadCells), prims) prim = do
+transformPrim callSiteMap ((aliasMap, deadCells), prims) prim = do
     -- XXX Redundent work here. We should change the current design.
     aliasMap' <- updateAliasedByPrim aliasMap prim
     logTransform $ "\n--- prim:           " ++ show prim
     let primc = content prim
     
     (primc', deadCells') <- case primc of
-            PrimCall spec args -> do
+            PrimCall id spec args -> do
                 noMultiSpecz <- gets (optNoMultiSpecz . options)
-                spec' <- if noMultiSpecz
-                    then return spec
-                    else _updatePrimCallForSpecz spec args aliasMap
-                return (PrimCall spec' args, deadCells)
+                let spec' = if noMultiSpecz
+                    then spec
+                    else Map.findWithDefault spec id callSiteMap
+                return (PrimCall id spec' args, deadCells)
             PrimForeign "lpvm" "mutate" flags args -> do
                 let args' = _updateMutateForAlias aliasMap args
                 return (PrimForeign "lpvm" "mutate" flags args', deadCells)
@@ -192,33 +176,6 @@ transformPrim ((aliasMap, deadCells), prims) prim = do
     prim' <- updatePlacedM (\_ -> return primc') prim
     logTransform $ "--- transformed to: " ++ show prim'
     return ((aliasMap', deadCells'), prims ++ [prim'])
-
-
--- Update PrimCall to make it uses a better specialized version
--- than the general version based on the current [AliasMap]
-_updatePrimCallForSpecz :: ProcSpec -> [PrimArg] -> AliasMapLocal
-        -> Compiler ProcSpec
-_updatePrimCallForSpecz spec args aliasMap = do
-    calleeDef <- getProcDef spec
-    let (ProcDefPrim calleeProto _ analysis _) = procImpln calleeDef
-    let nonAliasedParamIDs = List.filter (\(arg, paramID) ->
-                -- it should be an interesting param of callee
-                Set.member (InterestingUnaliased paramID)
-                        (procInterestingCallProperties analysis)
-                -- it should be an interesting variable
-                && Right [] == isArgVarInteresting aliasMap arg
-                -- if a argument is used more than once,
-                -- then it should be aliased
-                && isArgVarUsedOnceInArgs arg args
-            ) (List.zip args [0..]) |> List.map snd
-    return 
-        (if List.null nonAliasedParamIDs
-        then spec
-        else
-            let speczVersion = nonAliasedParamIDs
-                    |> List.map NonAliasedParam |> Set.fromList |> Just
-            in
-            spec { procSpeczVersion = speczVersion })
 
 
 -- Helper: change mutate destructive flag to true if FlowIn variable is not
@@ -256,43 +213,25 @@ _updateMutateForAlias _ args = args
 --      on given "SpeczVersion".
 
 
--- Fix point processor for expanding required specz versions.
--- XXX This part can be optimized by using "getSccProcs" and tracking the diff
--- between each run.
+
+-- Fix point processor for expanding required specz versions in the given mod.
 expandRequiredSpeczVersionsByMod :: [ModSpec] -> ModSpec 
-        -> Compiler (Bool,[(String,OptPos)])
+        -> Compiler (Bool, [(String, OptPos)])
 expandRequiredSpeczVersionsByMod scc thisMod = do
     reenterModule thisMod
-    logTransform $ "Expanding required specz versions for:" ++ show thisMod
-    -- Get all specz versions that required by others
-    procs <- getModuleImplementationField modProcs
-    -- Go through all specz versions in this mod that required by others,
-    -- expand those to find all required versions
-    let requiredVersions = Map.foldlWithKey (\required procName procDefs ->
-            List.foldl (\required (procDef, procId) -> 
-                let (ProcDefPrim _ _ analysis speczBodies) = 
-                        procImpln procDef
-                in
-                -- we always need the non-specialized version
-                let speczVersions = 
-                        Map.keysSet speczBodies
-                        |> Set.insert Set.empty
-                in
-                -- for each specz version, expand it's dependencies
-                Set.foldl (\required version ->
-                    let depMatches = 
-                            expandRequiredSpeczVersionsByProcVersion
-                                analysis version
-                    in
-                        Set.union required depMatches
-                    ) required speczVersions
-                ) required (List.zip procDefs [0..])
-            ) Set.empty procs
-            |> Set.toAscList
+    logTransform $ "Expanding required specz versions for: " ++ show thisMod
+    -- get proc level SCCs in top-down order
+    orderedProcsTopDown <- List.reverse <$> getSccProcs thisMod
+
+    requiredVersions <- Set.toList <$>
+            foldM expandRequiredSpeczVersionsByProcSCC 
+                    Set.empty orderedProcsTopDown
+
     logTransform $ "requiredVersions: " ++ show requiredVersions
-    _ <- reexitModule
+    reexitModule
+
     -- Update each module based on the requirements
-    let requiredVersions' = List.map (\((mod, procName, procId), version) ->
+    let requiredVersions' = List.map (\(ProcSpec mod procName procId version) ->
             (mod, (procName, (procId, version)))) requiredVersions
     changedList <- mapM (\(mod, versions) -> do
             changed <- updateRequiredMultiSpeczInMod mod versions
@@ -303,23 +242,71 @@ expandRequiredSpeczVersionsByMod scc thisMod = do
     return (or changedList, [])
 
 
+-- Expand required specz versions for the given proc SCC until it reaches a
+-- fixpoint. For the SCC, we consider procs without specialization.
+expandRequiredSpeczVersionsByProcSCC :: Set ProcSpec -> SCC ProcSpec
+        -> Compiler (Set ProcSpec)
+expandRequiredSpeczVersionsByProcSCC required (AcyclicSCC pspec) = do
+    required' <- expandRequiredSpeczVersionsByProc required pspec 
+    -- immediate fixpoint if no mutual dependency
+    return required'
+
+expandRequiredSpeczVersionsByProcSCC required scc@(CyclicSCC pspecs) = do
+    required' <- foldM expandRequiredSpeczVersionsByProc required pspecs
+    -- whether it reaches a fixpoint: is there any newly found required versions
+    -- of procs in the current SCC.
+    let fixpoint = Set.difference required required'
+                    |> all (\p -> not (List.any (sameBaseProc p) pspecs))
+    if fixpoint
+    then return required'
+    else expandRequiredSpeczVersionsByProcSCC required' scc
+
+
+-- Expand required specz versions for the given proc.
+expandRequiredSpeczVersionsByProc :: Set ProcSpec -> ProcSpec
+        -> Compiler (Set ProcSpec)
+expandRequiredSpeczVersionsByProc required pspec = do
+    procDef <- getProcDef pspec
+    let ProcDefPrim _ _ analysis speczBodies = procImpln procDef
+    -- get it's currently existed/required versions
+    let speczVersions = Set.filter (sameBaseProc pspec) required
+                        |> Set.map procSpeczVersion
+                        |> Set.union (Map.keysSet speczBodies)
+                        -- always need the non-specialized version
+                        |> Set.insert generalVersion
+    let required' = Set.foldl (\required version ->
+            let versions = expandRequiredSpeczVersionsByProcVersion
+                                    analysis version
+                            |> Map.elems
+                            -- remove general versions
+                            |> List.filter 
+                                    ((/= generalVersion) . procSpeczVersion)
+                            |> Set.fromList
+            in
+            Set.union required versions) required speczVersions
+    return required'
+
+
+-- Whether the two "ProcSpec"s are belong to the same proc without considering
+-- specialization.
+sameBaseProc :: ProcSpec -> ProcSpec -> Bool
+sameBaseProc (ProcSpec mod1 name1 id1 _) (ProcSpec mod2 name2 id2 _) =
+    mod1 == mod2 && name1 == name2 && id1 == id2
+
+
 -- For a given proc and a "SpeczVersion" of it, compute all specialized procs
 -- it required.
+-- Returns a mapping from call site to the actual proc to call.
 -- XXX Add heuristic to select which specializations to use
 expandRequiredSpeczVersionsByProcVersion :: ProcAnalysis -> SpeczVersion
-        -> Set ((ModSpec, ProcName, Int), SpeczVersion)
+        -> Map CallSiteID ProcSpec
 expandRequiredSpeczVersionsByProcVersion procAnalysis callerVersion = 
-    let multiSpeczDepInfo = procMultiSpeczDepInfo procAnalysis in
-    -- go through dependencies and find matches
-    List.map (\((procSpec, _), items) ->
-            -- Add other expansion here and union the results
-            let version = expandSpeczVersionsAlias callerVersion items in
-            let ProcSpec mod procName procId _ = procSpec in
-                ((mod, procName, procId), version)
-            ) (Map.toList multiSpeczDepInfo)
-    -- remove the standard version
-    |> List.filter (not . Set.null . snd)
-    |> Set.fromList
+    procMultiSpeczDepInfo procAnalysis
+    |> Map.map (\(procSpec, items) -> 
+        -- Add other expansion here and union the results
+        let version = expandSpeczVersionsAlias callerVersion items in
+        let ProcSpec mod procName procId _ = procSpec in
+        (ProcSpec mod procName procId version))
 
 
 -- expand specz versions for global CTGC
@@ -368,11 +355,52 @@ updateRequiredMultiSpeczInMod mod versions = do
                 ) procName procMap
             ) procMap (groupByFst versions)
     updateModImplementation (updateModProcs (const procMap'))
-    _ <- reexitModule
+    reexitModule
     let changed = procMap /= procMap'
     when changed 
             (logTransform $ "new specz requirements in mod: " ++ show mod)
     return changed
+
+
+-- For the given "ProcDef", generates all specz versions that are required but
+-- haven't got generated.
+generateSpeczVersionInProc :: ProcDef -> Compiler ProcDef
+generateSpeczVersionInProc def
+    | not (procInline def) = do
+        let procImp = procImpln def
+        let ProcDefPrim caller body analysis speczBodies = procImp
+        if List.any isNothing (Map.elems speczBodies)
+        then do -- missing required specz versions
+            -- mark the current module as changed
+            mod <- getModuleSpec
+            updateCompiler (\st ->
+                let unchanged = unchangedMods st |> Set.delete mod in
+                    st {unchangedMods = unchanged})
+
+            speczBodiesList <- mapM (\(ver, sbody) ->
+                case sbody of 
+                    Just b -> return (ver, Just b)
+                    Nothing -> do
+                        -- generate the specz version
+                        logTransform $ replicate 60 '~'
+                        logTransform $ "Generating specialized version: "
+                                ++ show ver
+                        aliasMap <- initAliasMap caller ver
+                        let callSiteMap =
+                                expandRequiredSpeczVersionsByProcVersion 
+                                        analysis ver
+                        logTransform $ "callSiteMap: " ++ show callSiteMap
+                        sbody' <- transformBody caller body
+                                (aliasMap, Map.empty) callSiteMap
+                        return (ver, Just sbody')
+                        ) (Map.toAscList speczBodies)
+            let speczBodies' = Map.fromDistinctAscList speczBodiesList
+            return $
+                def {procImpln = ProcDefPrim caller body analysis speczBodies'}
+        else
+            return def
+
+generateSpeczVersionInProc def = return def
 
 
 -- Similar to "List.groupBy"

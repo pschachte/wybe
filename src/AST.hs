@@ -6,6 +6,7 @@
 --           : LICENSE in the root directory of this project.
 
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE LambdaCase #-}
 
 -- |The abstract syntax tree, and supporting types and functions.
 --  This includes the parse tree, as well as the AST types, which
@@ -31,16 +32,17 @@ module AST (
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
   placedApply, placedApply1, placedApplyM, makeMessage, updatePlacedM,
   -- *AST types
-  Module(..), ModuleInterface(..), ModuleImplementation(..),
+  Module(..), ModuleInterface(..), ModuleImplementation(..), InterfaceHash,
+  PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules,
-  enterModule, reenterModule, exitModule, reexitModule, deferModules, inModule,
+  enterModule, reenterModule, exitModule, reexitModule, inModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
-  parameterVarNameToID, SpeczVersion, CallProperty(..),
+  parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis, 
@@ -52,12 +54,11 @@ module AST (
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
-  SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
+  CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
   updateModules, updateImplementations, updateImplementation,
-  getExtractedModuleImpln,
   getModuleImplementationField, getModuleImplementation,
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
@@ -79,7 +80,7 @@ module AST (
   -- *Helper functions
   defaultBlock, moduleIsPackage,
   -- *LPVM Encoding types
-  EncodedLPVM(..), ModuleIndex, makeEncodedLPVM
+  EncodedLPVM(..), makeEncodedLPVM
   ) where
 
 import           Config (magicVersion, wordSize, objectExtension,
@@ -329,10 +330,9 @@ data CompilerState = Compiler {
   msgs :: [(MessageLevel, String)],  -- ^warnings, error messages, and info messages
   errorState :: Bool,            -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
-  loadCount :: Int,              -- ^counter of module load order
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
-  deferred :: [Module],          -- ^modules in the same SCC as the current one
-  extractedMods :: Map ModSpec Module
+  unchangedMods :: Set ModSpec   -- ^record mods that are loaded from object
+                                 --  and unchanged.
 }
 
 -- |The compiler monad is a state transformer monad carrying the
@@ -342,7 +342,7 @@ type Compiler = StateT CompilerState IO
 -- |Run a compiler function from outside the Compiler monad.
 runCompiler :: Options -> Compiler t -> IO t
 runCompiler opts comp = evalStateT comp
-                        (Compiler opts "" [] False Map.empty 0 [] [] Map.empty)
+                        (Compiler opts "" [] False Map.empty [] Set.empty)
 
 
 -- |Apply some transformation function to the compiler state.
@@ -565,18 +565,13 @@ enterModule source modspec rootMod params = do
     oldMod <- getLoadingModule modspec
     when (isJust oldMod)
       $ shouldnt $ "enterModule " ++ showModSpec modspec ++ " already exists"
-    count <- gets ((1+) . loadCount)
-    modify (\comp -> comp { loadCount = count })
     logAST $ "Entering module " ++ showModSpec modspec
-             ++ " with count " ++ show count
     absSource <- liftIO $ makeAbsolute source
     modify (\comp -> let newMod = emptyModule
                                   { modOrigin        = absSource
                                   , modRootModSpec   = rootMod
                                   , modSpec          = modspec
                                   , modParams        = params
-                                  , thisLoadNum      = count
-                                  , minDependencyNum = count
                                   }
                          mods = newMod : underCompilation comp
                      in  comp { underCompilation = mods })
@@ -602,57 +597,26 @@ reenterModule modspec = do
 
 -- |Finish compilation of the current module.  This matches an earlier
 -- call to enterModule.
-exitModule :: Compiler [ModSpec]
+exitModule :: Compiler ()
 exitModule = do
     currMod <- getModuleSpec
     imports <- getModuleImplementationField (Map.assocs . modImports)
     logAST $ "Exiting module " ++ showModSpec currMod
               ++ " with imports:\n        "
               ++ intercalate "\n        "
-                 [showUse 20 mod dep | (mod,dep) <- imports]
-    mod <- reexitModule
-    let num = thisLoadNum mod
-    logAST $ "Exiting module " ++ showModSpec (modSpec mod)
-    logAST $ "    loadNum = " ++ show num ++
-           ", minDependencyNum = " ++ show (minDependencyNum mod)
-    if minDependencyNum mod < num
-      then do
-        logAST $ "not finished with module SCC: deferring module "
-                 ++ showModSpec (modSpec mod)
-        deferModules [mod]
-        return []
-      else do
-        deferred <- gets deferred
-        let (bonus,rest) = span ((==num) . minDependencyNum) deferred
-        logAST $ "finished with module SCC "
-                 ++ showModSpecs (List.map modSpec $ mod:bonus)
-        logAST $ "remaining deferred modules: "
-                 ++ showModSpecs (List.map modSpec rest)
-        modify (\comp -> comp { deferred = rest })
-        return $ List.map modSpec $ mod:bonus
+                 [showUse 20 mod dep | (mod, (dep, _)) <- imports]
+    reexitModule
 
 
 -- |Finish a module reentry, returning to the previous module.  This
 -- matches an earlier call to reenterModule.
-reexitModule :: Compiler Module
+reexitModule :: Compiler ()
 reexitModule = do
     mod <- getModule id
     modify
       (\comp -> comp { underCompilation = List.tail (underCompilation comp) })
     updateModules $ Map.insert (modSpec mod) mod
     logAST $ "Reexiting module " ++ showModSpec (modSpec mod)
-    return mod
-
-
--- |Add the specified module to the list of deferred modules, ie, the
--- modules in the same module dependency SCC as the current one.  This
--- is used for submodules, since they can access stuff in the parent
--- module, and the parent module can access public stuff in submodules.
-deferModules :: [Module] -> Compiler ()
-deferModules mods = do
-    logAST $ "deferred modules "
-             ++ showModSpecs (List.map modSpec mods)
-    modify (\comp -> comp { deferred = mods ++ deferred comp })
 
 
 -- | evaluate expr in the context of module mod.  Ie, reenter mod,
@@ -670,14 +634,19 @@ getDirectory :: Compiler FilePath
 getDirectory = takeDirectory <$> getOrigin
 
 -- |Return the absolute path of the file the module was loaded from.  This may
--- be a source file or an object file.
+-- be a source file or an object file or a directory.
 getOrigin :: Compiler FilePath
 getOrigin = getModule modOrigin
 
 -- |Return the absolute path of the file the source code for the current module
--- *should* be in.  It might not actually be there.
+-- *should* be in.  It might not actually be there. For package, it returns the
+-- path to the directory
 getSource :: Compiler FilePath
-getSource = (-<.> sourceExtension) <$> getOrigin
+getSource = do
+    isPkg <- getModule isPackage
+    if isPkg
+    then getOrigin
+    else (-<.> sourceExtension) <$> getOrigin
 
 -- |Return the module spec of the current module.
 getModuleSpec :: Compiler ModSpec
@@ -711,16 +680,6 @@ getModuleImplementationMaybe fn = do
   case imp of
       Nothing -> return Nothing
       Just imp' -> return $ fn imp'
-
-
-getExtractedModuleImpln :: ModSpec -> Compiler (Maybe ModuleImplementation)
-getExtractedModuleImpln mspec = do
-    maybeMod <- Map.lookup mspec <$> gets extractedMods
-    case maybeMod of
-        Nothing -> return Nothing
-        Just m -> return $ modImplementation m
-
-
 
 
 -- |Add the specified string as a message of the specified severity
@@ -899,36 +858,22 @@ addImport :: ModSpec -> ImportSpec -> Compiler ()
 addImport modspec imports = do
     modspec' <- resolveModuleM modspec
     updateImplementation
-      (updateModImports
-       (\moddeps ->
-         let imports' =
-                 case Map.lookup modspec' moddeps of
-                     Nothing -> imports
-                     Just imports'' -> combineImportSpecs imports'' imports
-         in Map.insert modspec' imports' moddeps))
+        (updateModImports
+            (Map.alter (\case
+                Nothing ->
+                    Just (imports, Nothing)
+                Just (imports', hash) ->
+                    Just (combineImportSpecs imports' imports, hash)
+            ) modspec'))
     when (isNothing $ importPublic imports) $
       updateInterface Public (updateDependencies (Set.insert modspec))
-    maybeMod <- gets (List.find ((==modspec) . modSpec) . underCompilation)
-    currMod <- getModuleSpec
-    logAST $ "Noting import of " ++ showModSpec modspec ++
-           ", " ++ (if isNothing maybeMod then "NOT " else "") ++
-           "currently being loaded, into " ++ showModSpec currMod
-    case maybeMod of
-        Nothing -> return ()  -- not currently loading dependency
-        Just mod' -> do
-            logAST $ "Limiting minDependencyNum to " ++
-                    show (thisLoadNum mod')
-            updateModule (\m -> m { minDependencyNum =
-                                        min (thisLoadNum mod')
-                                            (minDependencyNum m) })
-
 
 
 -- |Add the specified proc definition to the current module.
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis detism inline proto stmts pos) = do
     let name = procProtoName proto
-    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr
+    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0
                   Map.empty vis detism inline $ initSuperprocSpec vis
     addProcDef procDef
 addProc _ item =
@@ -942,14 +887,17 @@ addProcDef procDef = do
     currMod <- getModuleSpec
     procs <- getModuleImplementationField (findWithDefault [] name . modProcs)
     let procs' = procs ++ [procDef]
-    let spec = ProcSpec currMod name (length procs) Nothing
+    let spec = ProcSpec currMod name (length procs) generalVersion
     updateImplementation
       (\imp ->
         let known = findWithDefault Set.empty name $ modKnownProcs imp
             known' = Set.insert spec known
         in imp { modProcs = Map.insert name procs' $ modProcs imp,
                  modKnownProcs = Map.insert name known' $ modKnownProcs imp })
-    updateInterface vis (updatePubProcs (mapSetInsert name spec))
+    updateInterface vis (updatePubProcs (Map.alter (\case
+                Nothing -> Just $ Map.singleton spec Unknown
+                Just m  -> Just $ Map.insert spec Unknown m
+        ) name))
     logAST $ "Adding definition of " ++ show spec ++ ":" ++
       showProcDef 4 procDef
     return ()
@@ -1066,10 +1014,10 @@ data Module = Module {
   modSpec :: ModSpec,              -- ^The module path name
   modParams :: Maybe [Ident],      -- ^The type parameters, if a type
   modInterface :: ModuleInterface, -- ^The public face of this module
+  modInterfaceHash :: InterfaceHash,
+                                   -- ^Hash of the "modInterface" above 
   modImplementation :: Maybe ModuleImplementation,
                                    -- ^the module's implementation
-  thisLoadNum :: Int,              -- ^the loadCount when loading this module
-  minDependencyNum :: Int,         -- ^the smallest loadNum of all dependencies
   procCount :: Int,                -- ^a counter for gensym-ed proc names
   stmtDecls :: [Placed Stmt],      -- ^top-level statements in this module
   itemsHash :: Maybe String        -- ^map of proc name to its hash
@@ -1087,9 +1035,8 @@ emptyModule = Module
     -- , modConstants      = 0
     -- , modNonConstants   = 0
     , modInterface      = emptyInterface
+    , modInterfaceHash  = Nothing
     , modImplementation = Just emptyImplementation
-    , thisLoadNum       = 0
-    , minDependencyNum  = 0
     , procCount         = 0
     , stmtDecls         = []
     , itemsHash         = Nothing
@@ -1185,15 +1132,25 @@ updateModInterface :: (ModuleInterface -> ModuleInterface) ->
 updateModInterface fn =
     updateModule (\mod -> mod { modInterface = fn $ modInterface mod })
 
+
+-- Hash of the "ModuleInterface"
+type InterfaceHash = Maybe String
+
+
 -- |Holds everything needed to compile code that uses a module
+-- XXX Currently, the data in it is never used (except for computing the 
+--     interface hash). We should revise the design of this, and make the
+--     "compileModSCC" in Builder.hs only gets other modules' data from this
+--     instead of extracting directly form "ModuleImplementation".
 data ModuleInterface = ModuleInterface {
     pubTypes :: Map Ident (TypeSpec,Maybe TypeRepresentation),
                                      -- ^The types this module exports
     pubResources :: Map ResourceName ResourceSpec,
                                      -- ^The resources this module exports
-    pubProcs :: Map Ident (Set ProcSpec), -- ^The procs this module exports
+    pubProcs :: ProcDictionary,
+                                     -- ^The procs this module exports
     pubDependencies :: Map Ident OptPos,
-                                    -- ^The other modules this module exports
+                                     -- ^The other modules this module exports
     dependencies :: Set ModSpec      -- ^The other modules that must be linked
     }                               --  in by modules that depend on this one
     deriving (Eq, Generic)
@@ -1201,6 +1158,25 @@ data ModuleInterface = ModuleInterface {
 emptyInterface :: ModuleInterface
 emptyInterface =
     ModuleInterface Map.empty Map.empty Map.empty Map.empty Set.empty
+
+
+-- |Holds information describing public procedures of a module.
+type ProcDictionary = Map ProcName (Map ProcSpec PubProcInfo)
+
+
+-- |Describing a public procedure. Should contains all the information needed
+-- for other modules to use the procedure.
+data PubProcInfo
+    = Unknown          -- ^A placeholder for uncompiled proc
+    | ReexportedProc   -- ^The proc is reexported, should refer to the
+                       -- corresponding module for the info.
+    | InlineProc PrimProto ProcBody
+                       -- ^A proc that should be inlined at the call site.
+                       -- Its whole implementation is stored.
+    | NormalProc PrimProto ProcAnalysis
+                       -- ^A normal proc, its analysis results are stored.
+    deriving (Eq, Generic)
+
 
 -- These functions hack around Haskell's terrible setter syntax
 
@@ -1216,8 +1192,9 @@ updatePubResources :: (Map Ident ResourceSpec -> Map Ident ResourceSpec) ->
 updatePubResources fn modint = modint {pubResources = fn $ pubResources modint}
 
 -- |Update the public procs of a module interface.
-updatePubProcs :: (Map Ident (Set ProcSpec) -> Map Ident (Set ProcSpec)) ->
-                 ModuleInterface -> ModuleInterface
+updatePubProcs :: (ProcDictionary
+                -> ProcDictionary)
+                -> ModuleInterface -> ModuleInterface
 updatePubProcs fn modint = modint {pubProcs = fn $ pubProcs modint}
 
 -- |Update the public dependencies of a module interface.
@@ -1235,7 +1212,8 @@ updateDependencies fn modint = modint {dependencies = fn $ dependencies modint}
 -- |Holds everything needed to compile the module itself
 data ModuleImplementation = ModuleImplementation {
     modPragmas   :: Set Pragma,               -- ^pragmas for this module
-    modImports   :: Map ModSpec ImportSpec,   -- ^This module's imports
+    modImports   :: Map ModSpec (ImportSpec, InterfaceHash),
+                                              -- ^This module's imports
     modSubmods   :: Map Ident ModSpec,        -- ^This module's submodules
     modTypes     :: Map Ident TypeDef,        -- ^Types defined by this module
     modResources :: Map Ident ResourceDef,    -- ^Resources defined by this mod
@@ -1259,8 +1237,9 @@ emptyImplementation =
 -- These functions hack around Haskell's terrible setter syntax
 
 -- |Update the dependencies of a module implementation.
-updateModImports :: (Map ModSpec ImportSpec -> Map ModSpec ImportSpec) ->
-                   ModuleImplementation -> ModuleImplementation
+updateModImports :: (Map ModSpec (ImportSpec, InterfaceHash)
+                    -> Map ModSpec (ImportSpec, InterfaceHash))
+                    -> ModuleImplementation -> ModuleImplementation
 updateModImports fn modimp = modimp {modImports = fn $ modImports modimp}
 
 -- |Update the map of submodules of a module implementation.
@@ -1321,7 +1300,7 @@ lookupTypeRepresentation (TypeSpec modSpecs name _) = do
     reenterModule modSpecs
     maybeImpln <- getModuleImplementation
     modInt <- getModuleInterface
-    _ <- reexitModule
+    reexitModule
     -- Try find the TypeRepresentation in the interface
     let maybeIntMatch = Map.lookup name (pubTypes modInt) >>= snd
     -- Try find the TypeRepresentation in the implementation if not found
@@ -1397,8 +1376,8 @@ combineImportPart (Just set1) (Just set2) = Just (set1 `Set.union` set2)
 
 -- |Actually import into the current module.  The ImportSpec says what
 -- to import.
-doImport :: ModSpec -> ImportSpec -> Compiler ()
-doImport mod imports = do
+doImport :: ModSpec -> (ImportSpec, InterfaceHash) -> Compiler ()
+doImport mod (imports, _) = do
     currMod <- getModuleSpec
     impl <- getModuleImplementationField id
     logAST $ "Handle importation from " ++ showModSpec mod ++
@@ -1411,7 +1390,8 @@ doImport mod imports = do
     let allImports = combineImportPart pubImports $ importPrivate imports
     let importedTypes = importsSelected allImports $ pubTypes fromIFace
     let importedResources = importsSelected allImports $ pubResources fromIFace
-    let importedProcs = importsSelected allImports $ pubProcs fromIFace
+    let importedProcs = Map.map Map.keysSet
+                            $ importsSelected allImports $ pubProcs fromIFace
     logAST $ "    importing types    : "
              ++ intercalate ", " (Map.keys importedTypes)
     logAST $ "    importing resources: "
@@ -1435,7 +1415,7 @@ doImport mod imports = do
     updateModInterface
       (\i -> i { pubTypes = Map.union (pubTypes i) exportedTypes,
                 pubResources = Map.union (pubResources i) exportedResources,
-                pubProcs = Map.unionWith Set.union (pubProcs i) exportedProcs })
+                pubProcs = Map.unionWith Map.union (pubProcs i) exportedProcs })
     -- Update what's exported from the module
     return ()
 
@@ -1539,6 +1519,8 @@ data ProcDef = ProcDef {
     procImpln :: ProcImpln,     -- the actual implementation
     procPos :: OptPos,          -- where this proc is defined
     procTmpCount :: Int,        -- the next temp variable number to use
+    procCallSiteCount :: CallSiteID,
+                                -- the next call site id to use
     procCallers :: Map ProcSpec Int,
                                 -- callers to this proc from this mod in the
                                 -- source code (before inlining) and the
@@ -1623,6 +1605,11 @@ parameterVarNameToID proto varName =
 type SpeczVersion = Set CallProperty
 
 
+-- "SpeczVersion" for the general(standard) version.
+generalVersion :: SpeczVersion
+generalVersion = Set.empty
+
+
 -- |Each one represents some additional information about the specialization.
 data CallProperty
 -- "NonAliasedParam v1" is used for global CTGC, it means that the argument
@@ -1669,15 +1656,13 @@ aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 
 
 -- |Infomation about specialization versions the current proc directly uses. 
+-- It's a mapping from call sites to the callee's "ProcSpec" and a set of 
+-- "CallSiteProperty".
 -- For a given specialization version of the current proc, this info should be
 -- enough to compute all specz versions it required. A sample case is
 -- "expandSpeczVersionsAlias" in "Transform.hs".
--- XXX this map is per call site, so the args is included to separate different
--- calls to the same proc. The current approach is not currect, we should give
--- each call site a unique id similar to the tmep variable count in
--- "BodyBuilder" and use it as the key.
 type MultiSpeczDepInfo = 
-        Map (ProcSpec, [PrimArg]) (Set CallSiteProperty)
+        Map CallSiteID (ProcSpec, Set CallSiteProperty)
 
 
 -- |Specific items for "MultiSpeczDepInfo", it describing the information about
@@ -1927,15 +1912,15 @@ data ProcSpec = ProcSpec {
       procSpecMod :: ModSpec,
       procSpecName :: ProcName,
       procSpecID :: ProcID,
-      procSpeczVersion :: Maybe SpeczVersion}
+      procSpeczVersion :: SpeczVersion}
                 deriving (Eq,Ord,Generic)
 
 instance Show ProcSpec where
     show (ProcSpec mod name pid speczId) =
         showModSpec mod ++ "." ++ name ++ "<" ++ show pid ++ ">"
-                ++ case speczId of 
-                    Nothing -> ""
-                    Just id -> "[" ++ speczVersionToId id ++ "]"
+                ++ if speczId == generalVersion
+                   then ""
+                   else "[" ++ speczVersionToId speczId ++ "]"
 
 -- |An ID for a proc.
 type ProcID = Int
@@ -2250,13 +2235,18 @@ data PrimVarName =
 -- |A primitive statment, including those that can only appear in a
 --  loop.
 data Prim
-     = PrimCall ProcSpec [PrimArg]
+     = PrimCall CallSiteID ProcSpec [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
      | PrimTest PrimArg
      deriving (Eq,Ord,Generic)
 
 instance Show Prim where
     show = showPrim 0
+
+
+-- |An id for each call site, should be unique within a proc.
+type CallSiteID = Int
+
 
 -- |The allowed arguments in primitive proc or foreign proc calls,
 --  just variables and constants.
@@ -2280,14 +2270,14 @@ data PrimArg
 
 -- |Returns a list of all arguments to a prim
 primArgs :: Prim -> [PrimArg]
-primArgs (PrimCall _ args) = args
+primArgs (PrimCall _ _ args) = args
 primArgs (PrimForeign _ _ _ args) = args
 primArgs (PrimTest arg) = [arg]
 
 
 -- |Returns a list of all arguments to a prim
 replacePrimArgs :: Prim -> [PrimArg] -> Prim
-replacePrimArgs (PrimCall pspec _) args = PrimCall pspec args
+replacePrimArgs (PrimCall id pspec _) args = PrimCall id pspec args
 replacePrimArgs (PrimForeign lang nm flags _) args =
     PrimForeign lang nm flags args
 replacePrimArgs (PrimTest _) [arg] = PrimTest arg
@@ -2668,7 +2658,8 @@ showProcDefs firstID (def:defs) =
 
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID procdef@(ProcDef n proto def pos _ _ vis detism inline sub) =
+showProcDef thisID 
+        procdef@(ProcDef n proto def pos _ _ _ vis detism inline sub) =
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
     ++ visibilityPrefix vis
@@ -2779,8 +2770,9 @@ showPlacedPrim' ind prim pos =
 
 -- |Show a single primitive statement.
 showPrim :: Int -> Prim -> String
-showPrim _ (PrimCall pspec args) =
+showPrim _ (PrimCall id pspec args) =
         show pspec ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+            ++ " #" ++ show id 
 showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++
         name ++ (if List.null flags then "" else " " ++ unwords flags) ++
@@ -3011,14 +3003,8 @@ makeBold s = "\x1b[1m" ++ s ++ "\x1b[0m"
 
 ------------------------------ Module Encoding Types -----------------------
 
-data EncodedLPVM = EncodedLPVM ModuleIndex [Module]
+data EncodedLPVM = EncodedLPVM [Module]
                    deriving (Generic)
 
-
-type ModuleIndex = [(ModSpec, FilePath)]
-
 makeEncodedLPVM :: [Module] -> EncodedLPVM
-makeEncodedLPVM ms =
-    let makeIndex m = (modSpec m, takeDirectory $ modOrigin m)
-        index = List.map makeIndex ms
-    in  EncodedLPVM index ms
+makeEncodedLPVM = EncodedLPVM

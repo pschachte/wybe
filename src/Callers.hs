@@ -21,7 +21,7 @@ collectCallers mod = do
   procs <- getModuleImplementationField modProcs
   let procs' = Map.foldrWithKey (noteProcCallers mod) procs procs
   updateImplementation (\imp -> imp {modProcs = procs'})
-  _ <- reexitModule
+  reexitModule
   return ()
 
 
@@ -29,7 +29,8 @@ noteProcCallers :: ModSpec -> ProcName -> [ProcDef] ->
                        Map Ident [ProcDef] -> Map Ident [ProcDef]
 noteProcCallers mod name defs procs =
   List.foldr (\(def,n) ->
-               noteImplnCallers (ProcSpec mod name n Nothing) (procImpln def))
+               noteImplnCallers
+                      (ProcSpec mod name n generalVersion) (procImpln def))
   procs $ zip defs [0..]
 
 noteImplnCallers :: ProcSpec -> ProcImpln ->
@@ -48,7 +49,7 @@ type CallRec = Map ProcSpec Int
 
 
 noteCall :: ProcSpec -> Bool -> Prim -> CallRec -> CallRec
-noteCall caller final (PrimCall spec _) rec =
+noteCall caller final (PrimCall _ spec _) rec =
   Map.alter (Just . maybe 1 (1+)) spec rec
 noteCall caller final (PrimTest _) rec = rec
 noteCall caller final (PrimForeign _ _ _ _) rec = rec
@@ -95,7 +96,7 @@ getSccProcs thisMod = do
             nub $ concatMap (localBodyCallees thisMod . procBody) procDefs)
            | (name,procDefs) <- procs,
              (n,def) <- zip [0..] procDefs,
-             let pspec = ProcSpec thisMod name n Nothing
+             let pspec = ProcSpec thisMod name n generalVersion
            ]
   return ordered
 
@@ -114,5 +115,5 @@ localBodyCallees modspec body =
 
 
 localCallees :: ModSpec -> Prim -> [ProcSpec]
-localCallees modspec (PrimCall pspec _) = [pspec]
+localCallees modspec (PrimCall _ pspec _) = [pspec]
 localCallees _ _                        = []

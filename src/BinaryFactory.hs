@@ -62,6 +62,7 @@ instance Binary TypeDef
 instance Binary ImportSpec
 -- Module
 instance Binary Module
+instance Binary PubProcInfo
 instance Binary ModuleInterface
 instance Binary Pragma
 
@@ -130,7 +131,7 @@ decodeModule required bs = do
 
 
 decodeEncodedLPVM ::  [ModSpec] -> EncodedLPVM -> Compiler [Module]
-decodeEncodedLPVM required (EncodedLPVM _ ms) =
+decodeEncodedLPVM required (EncodedLPVM ms) =
     if List.all (`elem` specs) required
     then return ms
     else return []
@@ -145,3 +146,6 @@ sha1 = hashlazy
 
 hashItems :: [Item] -> String
 hashItems = show . sha1 . encode
+
+hashInterface :: ModuleInterface -> InterfaceHash
+hashInterface = Just . show . sha1 . encode

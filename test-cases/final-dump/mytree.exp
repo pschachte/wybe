@@ -28,7 +28,7 @@ printTree > public inline (0 calls)
 0: printTree(t#0:mytree.tree, io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    mytree.printTree1<0>(~t#0:mytree.tree, "{":wybe.string, ?%prefix#1:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @mytree:8:10
+    mytree.printTree1<0>(~t#0:mytree.tree, "{":wybe.string, ?%prefix#1:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @mytree:8:10
     foreign c print_string("}":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
 
 
@@ -46,10 +46,10 @@ printTree1 > public (3 calls)
         foreign lpvm access(t#0:mytree.tree, 0:wybe.int, ?l#0:mytree.tree)
         foreign lpvm access(t#0:mytree.tree, 8:wybe.int, ?k#0:wybe.int)
         foreign lpvm access(~t#0:mytree.tree, 16:wybe.int, ?r#0:mytree.tree)
-        mytree.printTree1<0>(~l#0:mytree.tree, ~%prefix#0:wybe.string, ?%prefix#1:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @mytree:15:13
+        mytree.printTree1<0>(~l#0:mytree.tree, ~%prefix#0:wybe.string, ?%prefix#1:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @mytree:15:13
         foreign c print_string(~prefix#1:wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
         foreign c print_int(~k#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
-        mytree.printTree1<0>(~r#0:mytree.tree, ", ":wybe.string, ?%prefix#3:wybe.string, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @mytree:19:13
+        mytree.printTree1<0>(~r#0:mytree.tree, ", ":wybe.string, ?%prefix#3:wybe.string, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #4 @mytree:19:13
 
 
   LLVM code       :
@@ -84,7 +84,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 define external fastcc  void @"mytree.printTree<0>"(i64  %"t#0")    {
 entry:
   %2 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @mytree.1, i32 0, i32 0) to i64 
-  %"prefix#1" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %"t#0", i64  %2)  
+  %"1$prefix#1" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %"t#0", i64  %2)  
   %4 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @mytree.3, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %4)  
   ret void 
@@ -93,8 +93,8 @@ entry:
 
 define external fastcc  i64 @"mytree.printTree1<0>"(i64  %"t#0", i64  %"prefix#0")    {
 entry:
-  %"tmp$2#0" = icmp ne i64 %"t#0", 0 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = icmp ne i64 %"t#0", 0 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
   %5 = inttoptr i64 %"t#0" to i64* 
   %6 = getelementptr  i64, i64* %5, i64 0 
@@ -107,12 +107,12 @@ if.then:
   %13 = inttoptr i64 %12 to i64* 
   %14 = getelementptr  i64, i64* %13, i64 0 
   %15 = load  i64, i64* %14 
-  %"prefix#1" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %7, i64  %"prefix#0")  
-  tail call ccc  void  @print_string(i64  %"prefix#1")  
+  %"2$prefix#1" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %7, i64  %"prefix#0")  
+  tail call ccc  void  @print_string(i64  %"2$prefix#1")  
   tail call ccc  void  @print_int(i64  %11)  
   %17 = ptrtoint i8* getelementptr inbounds ([3 x i8], [3 x i8]* @mytree.16, i32 0, i32 0) to i64 
-  %"prefix#3" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %15, i64  %17)  
-  ret i64 %"prefix#3" 
+  %"2$prefix#3" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %15, i64  %17)  
+  ret i64 %"2$prefix#3" 
 if.else:
   ret i64 %"prefix#0" 
 }
@@ -142,7 +142,7 @@ if.else:
 0: /=($left#0:mytree.tree, $right#0:mytree.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    mytree.tree.=<0>(~$left#0:mytree.tree, ~$right#0:mytree.tree, ?tmp$1#0:wybe.bool)
+    mytree.tree.=<0>(~$left#0:mytree.tree, ~$right#0:mytree.tree, ?tmp$1#0:wybe.bool) #0
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
@@ -178,7 +178,7 @@ if.else:
                 foreign lpvm access($right#0:mytree.tree, 0:wybe.int, ?$right$left#0:mytree.tree)
                 foreign lpvm access($right#0:mytree.tree, 8:wybe.int, ?$right$key#0:wybe.int)
                 foreign lpvm access(~$right#0:mytree.tree, 16:wybe.int, ?$right$right#0:mytree.tree)
-                mytree.tree.=<0>(~$left$left#0:mytree.tree, ~$right$left#0:mytree.tree, ?tmp$5#0:wybe.bool)
+                mytree.tree.=<0>(~$left$left#0:mytree.tree, ~$right$left#0:mytree.tree, ?tmp$5#0:wybe.bool) #2
                 case ~tmp$5#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -190,7 +190,7 @@ if.else:
                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                     1:
-                        mytree.tree.=<0>(~$left$right#0:mytree.tree, ~$right$right#0:mytree.tree, ?$$#0:wybe.bool)
+                        mytree.tree.=<0>(~$left$right#0:mytree.tree, ~$right$right#0:mytree.tree, ?$$#0:wybe.bool) #4
 
 
 
@@ -335,8 +335,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"mytree.tree./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = tail call fastcc  i1  @"mytree.tree.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = tail call fastcc  i1  @"mytree.tree.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
 if.else:
@@ -346,14 +346,14 @@ if.else:
 
 define external fastcc  i1 @"mytree.tree.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = icmp eq i64 %"$left#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp eq i64 %"$left#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"2$$$#0" 
 if.else:
-  %"tmp$9#0" = icmp ne i64 %"$left#0", 0 
-  br i1 %"tmp$9#0", label %if.then1, label %if.else1 
+  %"3$tmp$9#0" = icmp ne i64 %"$left#0", 0 
+  br i1 %"3$tmp$9#0", label %if.then1, label %if.else1 
 if.then1:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
@@ -366,8 +366,8 @@ if.then1:
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   %11 = load  i64, i64* %10 
-  %"tmp$11#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"tmp$11#0", label %if.then2, label %if.else2 
+  %"4$tmp$11#0" = icmp ne i64 %"$right#0", 0 
+  br i1 %"4$tmp$11#0", label %if.then2, label %if.else2 
 if.else1:
   ret i1 0 
 if.then2:
@@ -382,18 +382,18 @@ if.then2:
   %20 = inttoptr i64 %19 to i64* 
   %21 = getelementptr  i64, i64* %20, i64 0 
   %22 = load  i64, i64* %21 
-  %"tmp$5#0" = tail call fastcc  i1  @"mytree.tree.=<0>"(i64  %3, i64  %14)  
-  br i1 %"tmp$5#0", label %if.then3, label %if.else3 
+  %"6$tmp$5#0" = tail call fastcc  i1  @"mytree.tree.=<0>"(i64  %3, i64  %14)  
+  br i1 %"6$tmp$5#0", label %if.then3, label %if.else3 
 if.else2:
   ret i1 0 
 if.then3:
-  %"tmp$6#0" = icmp eq i64 %7, %18 
-  br i1 %"tmp$6#0", label %if.then4, label %if.else4 
+  %"8$tmp$6#0" = icmp eq i64 %7, %18 
+  br i1 %"8$tmp$6#0", label %if.then4, label %if.else4 
 if.else3:
   ret i1 0 
 if.then4:
-  %"$$#0" = tail call fastcc  i1  @"mytree.tree.=<0>"(i64  %11, i64  %22)  
-  ret i1 %"$$#0" 
+  %"10$$$#0" = tail call fastcc  i1  @"mytree.tree.=<0>"(i64  %11, i64  %22)  
+  ret i1 %"10$$$#0" 
 if.else4:
   ret i1 0 
 }
@@ -407,8 +407,8 @@ entry:
 
 define external fastcc  {i64, i1} @"mytree.tree.key<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %23 = add   i64 %"$rec#0", 8 
   %24 = inttoptr i64 %23 to i64* 
@@ -426,8 +426,8 @@ if.else:
 
 define external fastcc  {i64, i1} @"mytree.tree.key<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %31 = trunc i64 24 to i32  
   %32 = tail call ccc  i8*  @wybe_malloc(i32  %31)  
@@ -452,8 +452,8 @@ if.else:
 
 define external fastcc  {i64, i1} @"mytree.tree.left<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %44 = inttoptr i64 %"$rec#0" to i64* 
   %45 = getelementptr  i64, i64* %44, i64 0 
@@ -470,8 +470,8 @@ if.else:
 
 define external fastcc  {i64, i1} @"mytree.tree.left<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %51 = trunc i64 24 to i32  
   %52 = tail call ccc  i8*  @wybe_malloc(i32  %51)  
@@ -515,8 +515,8 @@ entry:
 
 define external fastcc  {i64, i64, i64, i1} @"mytree.tree.node<1>"(i64  %"$#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %74 = inttoptr i64 %"$#0" to i64* 
   %75 = getelementptr  i64, i64* %74, i64 0 
@@ -545,8 +545,8 @@ if.else:
 
 define external fastcc  {i64, i1} @"mytree.tree.right<0>"(i64  %"$rec#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %93 = add   i64 %"$rec#0", 16 
   %94 = inttoptr i64 %93 to i64* 
@@ -564,8 +564,8 @@ if.else:
 
 define external fastcc  {i64, i1} @"mytree.tree.right<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %"tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   %101 = trunc i64 24 to i32  
   %102 = tail call ccc  i8*  @wybe_malloc(i32  %101)  

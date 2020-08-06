@@ -71,15 +71,15 @@ entry:
 
 define external fastcc  void @"commonsubexpr.common_subexpr<0>"(i64  %"x#0")    {
 entry:
-  %"tmp$2#0" = add   i64 %"x#0", 1 
-  %"tmp$51#0" = sub   i64 %"x#0", 1 
-  %"tmp$41#0" = mul   i64 %"tmp$2#0", %"tmp$51#0" 
-  %"tmp$0#0" = add   i64 %"tmp$41#0", %"tmp$41#0" 
-  tail call ccc  void  @print_int(i64  %"tmp$0#0")  
+  %"1$tmp$2#0" = add   i64 %"x#0", 1 
+  %"1$tmp$51#0" = sub   i64 %"x#0", 1 
+  %"1$tmp$41#0" = mul   i64 %"1$tmp$2#0", %"1$tmp$51#0" 
+  %"1$tmp$0#0" = add   i64 %"1$tmp$41#0", %"1$tmp$41#0" 
+  tail call ccc  void  @print_int(i64  %"1$tmp$0#0")  
   tail call ccc  void  @putchar(i8  10)  
-  tail call ccc  void  @print_int(i64  %"tmp$0#0")  
+  tail call ccc  void  @print_int(i64  %"1$tmp$0#0")  
   tail call ccc  void  @putchar(i8  10)  
-  tail call ccc  void  @print_int(i64  %"tmp$2#0")  
+  tail call ccc  void  @print_int(i64  %"1$tmp$2#0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

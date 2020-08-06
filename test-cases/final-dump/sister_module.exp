@@ -17,14 +17,14 @@ baz > inline (0 calls)
 0: baz(i#0:wybe.int, ?j#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    sister_module.m1.foo<0>(~i#0:wybe.int, ?j#0:wybe.int) @sister_module:10:26
+    sister_module.m1.foo<0>(~i#0:wybe.int, ?j#0:wybe.int) #0 @sister_module:10:26
 
 
 buzz > inline (0 calls)
 0: buzz(i#0:wybe.int, ?j#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    sister_module.m2.bar<0>(~i#0:wybe.int, ?j#0:wybe.int) @sister_module:12:27
+    sister_module.m2.bar<0>(~i#0:wybe.int, ?j#0:wybe.int) #0 @sister_module:12:27
 
   LLVM code       :
 
@@ -42,15 +42,15 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i64 @"sister_module.baz<0>"(i64  %"i#0")    {
 entry:
-  %"j#0" = tail call fastcc  i64  @"sister_module.m1.foo<0>"(i64  %"i#0")  
-  ret i64 %"j#0" 
+  %"1$j#0" = tail call fastcc  i64  @"sister_module.m1.foo<0>"(i64  %"i#0")  
+  ret i64 %"1$j#0" 
 }
 
 
 define external fastcc  i64 @"sister_module.buzz<0>"(i64  %"i#0")    {
 entry:
-  %"j#0" = tail call fastcc  i64  @"sister_module.m2.bar<0>"(i64  %"i#0")  
-  ret i64 %"j#0" 
+  %"1$j#0" = tail call fastcc  i64  @"sister_module.m2.bar<0>"(i64  %"i#0")  
+  ret i64 %"1$j#0" 
 }
 --------------------------------------------------
  Module sister_module.m1
@@ -86,8 +86,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i64 @"sister_module.m1.foo<0>"(i64  %"i#0")    {
 entry:
-  %"j#0" = add   i64 %"i#0", 1 
-  ret i64 %"j#0" 
+  %"1$j#0" = add   i64 %"i#0", 1 
+  ret i64 %"1$j#0" 
 }
 --------------------------------------------------
  Module sister_module.m2
@@ -106,7 +106,7 @@ bar > public inline (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm add(~i#0:wybe.int, 1:wybe.int, ?k#0:wybe.int) @wybe:nn:nn
-    foreign llvm add(~k#0:wybe.int, 1:wybe.int, ?j#0:wybe.int) @wybe:nn:nn
+    sister_module.m1.foo<0>(~k#0:wybe.int, ?j#0:wybe.int) #2 @sister_module:10:26
 
   LLVM code       :
 
@@ -124,7 +124,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i64 @"sister_module.m2.bar<0>"(i64  %"i#0")    {
 entry:
-  %"k#0" = add   i64 %"i#0", 1 
-  %"j#0" = add   i64 %"k#0", 1 
-  ret i64 %"j#0" 
+  %"1$k#0" = add   i64 %"i#0", 1 
+  %"1$j#0" = tail call fastcc  i64  @"sister_module.m1.foo<0>"(i64  %"1$k#0")  
+  ret i64 %"1$j#0" 
 }

@@ -113,7 +113,7 @@ blockTransformModule thisMod =
        logBlocks $ "*** Translated Module: " ++ showModSpec thisMod
        modRec' <- getModule id
        logWrapWith '-' $ show modRec'
-       _ <- reexitModule
+       reexitModule
        logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
 
 
@@ -520,7 +520,7 @@ codegenForkBody var _ _ =
 -- are position checked with the respective prototype, eliminating arguments
 -- which do not eventually appear in the prototype.
 cgen :: Prim -> Codegen (Maybe Operand)
-cgen prim@(PrimCall pspec args) = do
+cgen prim@(PrimCall callSiteID pspec args) = do
     logCodegen $ "Compiling " ++ show prim
     thisMod <- lift getModuleSpec
     fileMod <- lift $ getModule modRootModSpec
@@ -536,7 +536,7 @@ cgen prim@(PrimCall pspec args) = do
 
     -- if the call is to an external module, declare it
     unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
-        (addExtern $ PrimCall pspec filteredArgs)
+        (addExtern $ PrimCall callSiteID pspec filteredArgs)
 
     let (inArgs,outArgs) = partitionArgs filteredArgs
     logCodegen $ "In args = " ++ show inArgs
@@ -1175,7 +1175,7 @@ declareExtern (PrimForeign otherlang name _ _) =
     shouldnt $ "Don't know how to declare extern foreign function " ++ name
       ++ " in language " ++ otherlang
 
-declareExtern (PrimCall pspec@(ProcSpec m n _ _) args) = do
+declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args) = do
     let (inArgs,outArgs) = partitionArgs args
     retty <- primReturnType outArgs
     fnargs <- mapM makeExArg $ zip [1..] inArgs

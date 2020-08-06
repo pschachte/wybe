@@ -18,7 +18,7 @@ AFTER EVERYTHING:
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    alias_cyclic.bar<0>(~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:33:2
+    alias_cyclic.bar<0>(~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @alias_cyclic:33:2
 
 
 bar > public (1 calls)
@@ -28,25 +28,25 @@ bar > public (1 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp$3#0:position.position)
     foreign lpvm mutate(~tmp$3#0:position.position, ?tmp$4#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int)
     foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 900:wybe.int)
-    alias_cyclic.updateX<0>(tmp$0#0:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:25:4
+    alias_cyclic.updateX<0>(tmp$0#0:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @alias_cyclic:25:4
     foreign c print_string("p1(100,900):":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(~tmp$0#0:position.position, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @alias_cyclic:28:4
+    position.printPosition<0>(~tmp$0#0:position.position, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #3 @alias_cyclic:28:4
     foreign c print_string("p2(102,900):":wybe.string, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(~p2#0:position.position, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @alias_cyclic:30:4
+    position.printPosition<0>(~p2#0:position.position, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) #5 @alias_cyclic:30:4
 
 
 updateX > public (2 calls)
 0: updateX(p1#0:position.position, ?p2#0:position.position, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: [(p1#0,p2#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
- MultiSpeczDepInfo: [((alias_cyclic.updateY<0>,[~p1#1:position.position,?p2#0:position.position,~#io#0:wybe.phantom,?#io#1:wybe.phantom]),fromList [NonAliasedParamCond 0 []])]
+ MultiSpeczDepInfo: [(6,(alias_cyclic.updateY<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm access(p1#0:position.position, 0:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp sgt(tmp$0#0:wybe.int, 101:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
     case ~tmp$3#0:wybe.bool of
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_cyclic.updateY<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:19:16
+        alias_cyclic.updateY<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #6 @alias_cyclic:19:16
 
     1:
         foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:16:24
@@ -59,7 +59,7 @@ updateX > public (2 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_cyclic.updateY<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:19:16
+        alias_cyclic.updateY<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #6 @alias_cyclic:19:16
 
     1:
         foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:16:24
@@ -71,14 +71,14 @@ updateY > public (1 calls)
 0: updateY(p1#0:position.position, ?p2#0:position.position, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: [(p1#0,p2#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
- MultiSpeczDepInfo: [((alias_cyclic.updateX<0>,[~p1#1:position.position,?p2#0:position.position,~#io#0:wybe.phantom,?#io#1:wybe.phantom]),fromList [NonAliasedParamCond 0 []])]
+ MultiSpeczDepInfo: [(6,(alias_cyclic.updateX<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm access(p1#0:position.position, 8:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp sgt(tmp$0#0:wybe.int, 901:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
     case ~tmp$3#0:wybe.bool of
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_cyclic.updateX<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:10:19
+        alias_cyclic.updateX<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #6 @alias_cyclic:10:19
 
     1:
         foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:7:24
@@ -91,7 +91,7 @@ updateY > public (1 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm mutate noalias(~%p1#0:position.position, ?%p1#1:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_cyclic.updateX<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_cyclic:10:19
+        alias_cyclic.updateX<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #6 @alias_cyclic:10:19
 
     1:
         foreign llvm move(~p1#0:position.position, ?p2#0:position.position) @alias_cyclic:7:24
@@ -143,13 +143,13 @@ entry:
   %7 = inttoptr i64 %6 to i64* 
   %8 = getelementptr  i64, i64* %7, i64 0 
   store  i64 900, i64* %8 
-  %"p2#0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>"(i64  %3)  
+  %"1$p2#0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>"(i64  %3)  
   %10 = ptrtoint i8* getelementptr inbounds ([13 x i8], [13 x i8]* @alias_cyclic.9, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %10)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %3)  
   %12 = ptrtoint i8* getelementptr inbounds ([13 x i8], [13 x i8]* @alias_cyclic.11, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %12)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"p2#0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$p2#0")  
   ret void 
 }
 
@@ -159,12 +159,12 @@ entry:
   %13 = inttoptr i64 %"p1#0" to i64* 
   %14 = getelementptr  i64, i64* %13, i64 0 
   %15 = load  i64, i64* %14 
-  %"tmp$3#0" = icmp sgt i64 %15, 101 
-  br i1 %"tmp$3#0", label %if.then, label %if.else 
+  %"1$tmp$3#0" = icmp sgt i64 %15, 101 
+  br i1 %"1$tmp$3#0", label %if.then, label %if.else 
 if.then:
   ret i64 %"p1#0" 
 if.else:
-  %"tmp$2#0" = add   i64 %15, 1 
+  %"3$tmp$2#0" = add   i64 %15, 1 
   %16 = trunc i64 16 to i32  
   %17 = tail call ccc  i8*  @wybe_malloc(i32  %16)  
   %18 = ptrtoint i8* %17 to i64 
@@ -174,9 +174,9 @@ if.else:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %19, i8*  %20, i32  %21, i32  8, i1  0)  
   %22 = inttoptr i64 %18 to i64* 
   %23 = getelementptr  i64, i64* %22, i64 0 
-  store  i64 %"tmp$2#0", i64* %23 
-  %"p2#0" = tail call fastcc  i64  @"alias_cyclic.updateY<0>[04d1467a4d]"(i64  %18)  
-  ret i64 %"p2#0" 
+  store  i64 %"3$tmp$2#0", i64* %23 
+  %"3$p2#0" = tail call fastcc  i64  @"alias_cyclic.updateY<0>[04d1467a4d]"(i64  %18)  
+  ret i64 %"3$p2#0" 
 }
 
 
@@ -185,17 +185,17 @@ entry:
   %24 = inttoptr i64 %"p1#0" to i64* 
   %25 = getelementptr  i64, i64* %24, i64 0 
   %26 = load  i64, i64* %25 
-  %"tmp$3#0" = icmp sgt i64 %26, 101 
-  br i1 %"tmp$3#0", label %if.then, label %if.else 
+  %"1$tmp$3#0" = icmp sgt i64 %26, 101 
+  br i1 %"1$tmp$3#0", label %if.then, label %if.else 
 if.then:
   ret i64 %"p1#0" 
 if.else:
-  %"tmp$2#0" = add   i64 %26, 1 
+  %"3$tmp$2#0" = add   i64 %26, 1 
   %27 = inttoptr i64 %"p1#0" to i64* 
   %28 = getelementptr  i64, i64* %27, i64 0 
-  store  i64 %"tmp$2#0", i64* %28 
-  %"p2#0" = tail call fastcc  i64  @"alias_cyclic.updateY<0>[04d1467a4d]"(i64  %"p1#0")  
-  ret i64 %"p2#0" 
+  store  i64 %"3$tmp$2#0", i64* %28 
+  %"3$p2#0" = tail call fastcc  i64  @"alias_cyclic.updateY<0>[04d1467a4d]"(i64  %"p1#0")  
+  ret i64 %"3$p2#0" 
 }
 
 
@@ -205,12 +205,12 @@ entry:
   %30 = inttoptr i64 %29 to i64* 
   %31 = getelementptr  i64, i64* %30, i64 0 
   %32 = load  i64, i64* %31 
-  %"tmp$3#0" = icmp sgt i64 %32, 901 
-  br i1 %"tmp$3#0", label %if.then, label %if.else 
+  %"1$tmp$3#0" = icmp sgt i64 %32, 901 
+  br i1 %"1$tmp$3#0", label %if.then, label %if.else 
 if.then:
   ret i64 %"p1#0" 
 if.else:
-  %"tmp$2#0" = add   i64 %32, 1 
+  %"3$tmp$2#0" = add   i64 %32, 1 
   %33 = trunc i64 16 to i32  
   %34 = tail call ccc  i8*  @wybe_malloc(i32  %33)  
   %35 = ptrtoint i8* %34 to i64 
@@ -221,9 +221,9 @@ if.else:
   %39 = add   i64 %35, 8 
   %40 = inttoptr i64 %39 to i64* 
   %41 = getelementptr  i64, i64* %40, i64 0 
-  store  i64 %"tmp$2#0", i64* %41 
-  %"p2#0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>[04d1467a4d]"(i64  %35)  
-  ret i64 %"p2#0" 
+  store  i64 %"3$tmp$2#0", i64* %41 
+  %"3$p2#0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>[04d1467a4d]"(i64  %35)  
+  ret i64 %"3$p2#0" 
 }
 
 
@@ -233,18 +233,18 @@ entry:
   %43 = inttoptr i64 %42 to i64* 
   %44 = getelementptr  i64, i64* %43, i64 0 
   %45 = load  i64, i64* %44 
-  %"tmp$3#0" = icmp sgt i64 %45, 901 
-  br i1 %"tmp$3#0", label %if.then, label %if.else 
+  %"1$tmp$3#0" = icmp sgt i64 %45, 901 
+  br i1 %"1$tmp$3#0", label %if.then, label %if.else 
 if.then:
   ret i64 %"p1#0" 
 if.else:
-  %"tmp$2#0" = add   i64 %45, 1 
+  %"3$tmp$2#0" = add   i64 %45, 1 
   %46 = add   i64 %"p1#0", 8 
   %47 = inttoptr i64 %46 to i64* 
   %48 = getelementptr  i64, i64* %47, i64 0 
-  store  i64 %"tmp$2#0", i64* %48 
-  %"p2#0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>[04d1467a4d]"(i64  %"p1#0")  
-  ret i64 %"p2#0" 
+  store  i64 %"3$tmp$2#0", i64* %48 
+  %"3$p2#0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>[04d1467a4d]"(i64  %"p1#0")  
+  ret i64 %"3$p2#0" 
 }
 --------------------------------------------------
  Module position
@@ -462,11 +462,11 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"tmp$8#0" = icmp eq i64 %3, %10 
-  br i1 %"tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = icmp eq i64 %3, %10 
+  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = icmp eq i64 %7, %14 
-  br i1 %"tmp$1#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = icmp eq i64 %7, %14 
+  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
@@ -492,11 +492,11 @@ entry:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"tmp$2#0" = icmp eq i64 %17, %24 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = icmp eq i64 %17, %24 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %21, %28 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %21, %28 
+  ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
 }

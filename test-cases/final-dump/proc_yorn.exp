@@ -15,7 +15,7 @@ AFTER EVERYTHING:
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    proc_yorn.gen$1<0>(~#io#0:wybe.phantom, "Well, yes or no?":wybe.string, ?tmp$2#0:wybe.bool, ?#io#1:wybe.phantom) @proc_yorn:2:8
+    proc_yorn.gen$1<0>(~#io#0:wybe.phantom, "Well, yes or no?":wybe.string, ?tmp$2#0:wybe.bool, ?#io#1:wybe.phantom) #2 @proc_yorn:2:8
     foreign c print_string("false":wybe.string, ~#io#1:wybe.phantom, ?tmp$4#0:wybe.phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
 
@@ -31,12 +31,12 @@ gen$1 > (2 calls)
     foreign llvm icmp ne(response#0:wybe.char, 'Y':wybe.char, ?tmp$10#0:wybe.bool) @wybe:nn:nn
     foreign llvm and(~tmp$10#0:wybe.bool, ~tmp$9#0:wybe.bool, ?tmp$11#0:wybe.bool) @wybe:nn:nn
     foreign llvm xor(~tmp$11#0:wybe.bool, 1:wybe.bool, ?tmp$0#0:wybe.bool) @wybe:nn:nn
-    proc_yorn.is_yes_or_no<0>(~response#0:wybe.char, ?tmp$2#0:wybe.bool) @proc_yorn:6:18
+    proc_yorn.is_yes_or_no<0>(~response#0:wybe.char, ?tmp$2#0:wybe.bool) #4 @proc_yorn:6:18
     case ~tmp$2#0:wybe.bool of
     0:
         foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~#io#3:wybe.phantom, ?tmp$14#0:wybe.phantom) @wybe:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?#io#4:wybe.phantom) @wybe:nn:nn
-        proc_yorn.gen$1<0>(~io#4:wybe.phantom, ~prompt#0:wybe.string, ?result#1:wybe.bool, ?io#5:wybe.phantom) @proc_yorn:2:8
+        proc_yorn.gen$1<0>(~io#4:wybe.phantom, ~prompt#0:wybe.string, ?result#1:wybe.bool, ?io#5:wybe.phantom) #7 @proc_yorn:2:8
 
     1:
         foreign llvm move(~tmp$0#0:wybe.bool, ?result#1:wybe.bool)
@@ -78,7 +78,7 @@ yorn > public inline (1 calls)
 0: yorn(prompt#0:wybe.string, ?result#0:wybe.bool, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    proc_yorn.gen$1<0>(~io#0:wybe.phantom, ~prompt#0:wybe.string, ?result#0:wybe.bool, ?io#1:wybe.phantom) @proc_yorn:2:8
+    proc_yorn.gen$1<0>(~io#0:wybe.phantom, ~prompt#0:wybe.string, ?result#0:wybe.bool, ?io#1:wybe.phantom) #0 @proc_yorn:2:8
 
   LLVM code       :
 
@@ -118,7 +118,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 define external fastcc  void @"proc_yorn.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
   %2 = ptrtoint i8* getelementptr inbounds ([17 x i8], [17 x i8]* @proc_yorn.1, i32 0, i32 0) to i64 
-  %"tmp$2#0" = tail call fastcc  i1  @"proc_yorn.gen$1<0>"(i64  %2)  
+  %"1$tmp$2#0" = tail call fastcc  i1  @"proc_yorn.gen$1<0>"(i64  %2)  
   %4 = ptrtoint i8* getelementptr inbounds ([6 x i8], [6 x i8]* @proc_yorn.3, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %4)  
   tail call ccc  void  @putchar(i8  10)  
@@ -131,50 +131,50 @@ entry:
   tail call ccc  void  @print_string(i64  %"prompt#0")  
   %6 = ptrtoint i8* getelementptr inbounds ([8 x i8], [8 x i8]* @proc_yorn.5, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %6)  
-  %"response#0" = tail call ccc  i8  @read_char()  
-  %"tmp$9#0" = icmp ne i8 %"response#0", 121 
-  %"tmp$10#0" = icmp ne i8 %"response#0", 89 
-  %"tmp$11#0" = and i1 %"tmp$10#0", %"tmp$9#0" 
-  %"tmp$0#0" = xor i1 %"tmp$11#0", 1 
-  %"tmp$2#0" = tail call fastcc  i1  @"proc_yorn.is_yes_or_no<0>"(i8  %"response#0")  
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$response#0" = tail call ccc  i8  @read_char()  
+  %"1$tmp$9#0" = icmp ne i8 %"1$response#0", 121 
+  %"1$tmp$10#0" = icmp ne i8 %"1$response#0", 89 
+  %"1$tmp$11#0" = and i1 %"1$tmp$10#0", %"1$tmp$9#0" 
+  %"1$tmp$0#0" = xor i1 %"1$tmp$11#0", 1 
+  %"1$tmp$2#0" = tail call fastcc  i1  @"proc_yorn.is_yes_or_no<0>"(i8  %"1$response#0")  
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  ret i1 %"tmp$0#0" 
+  ret i1 %"1$tmp$0#0" 
 if.else:
   %8 = ptrtoint i8* getelementptr inbounds ([29 x i8], [29 x i8]* @proc_yorn.7, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %8)  
   tail call ccc  void  @putchar(i8  10)  
-  %"result#1" = tail call fastcc  i1  @"proc_yorn.gen$1<0>"(i64  %"prompt#0")  
-  ret i1 %"result#1" 
+  %"3$result#1" = tail call fastcc  i1  @"proc_yorn.gen$1<0>"(i64  %"prompt#0")  
+  ret i1 %"3$result#1" 
 }
 
 
 define external fastcc  i1 @"proc_yorn.is_yes<0>"(i8  %"ch#0")    {
 entry:
-  %"tmp$2#0" = icmp ne i8 %"ch#0", 121 
-  %"tmp$3#0" = icmp ne i8 %"ch#0", 89 
-  %"tmp$1#0" = and i1 %"tmp$2#0", %"tmp$3#0" 
-  %"$#0" = xor i1 %"tmp$1#0", 1 
-  ret i1 %"$#0" 
+  %"1$tmp$2#0" = icmp ne i8 %"ch#0", 121 
+  %"1$tmp$3#0" = icmp ne i8 %"ch#0", 89 
+  %"1$tmp$1#0" = and i1 %"1$tmp$2#0", %"1$tmp$3#0" 
+  %"1$$#0" = xor i1 %"1$tmp$1#0", 1 
+  ret i1 %"1$$#0" 
 }
 
 
 define external fastcc  i1 @"proc_yorn.is_yes_or_no<0>"(i8  %"ch#0")    {
 entry:
-  %"tmp$6#0" = icmp ne i8 %"ch#0", 121 
-  %"tmp$7#0" = icmp ne i8 %"ch#0", 89 
-  %"tmp$8#0" = and i1 %"tmp$6#0", %"tmp$7#0" 
-  %"tmp$2#0" = xor i1 %"tmp$8#0", 1 
-  %"tmp$3#0" = icmp eq i8 %"ch#0", 110 
-  %"tmp$1#0" = or i1 %"tmp$2#0", %"tmp$3#0" 
-  %"tmp$4#0" = icmp eq i8 %"ch#0", 78 
-  %"$#0" = or i1 %"tmp$1#0", %"tmp$4#0" 
-  ret i1 %"$#0" 
+  %"1$tmp$6#0" = icmp ne i8 %"ch#0", 121 
+  %"1$tmp$7#0" = icmp ne i8 %"ch#0", 89 
+  %"1$tmp$8#0" = and i1 %"1$tmp$6#0", %"1$tmp$7#0" 
+  %"1$tmp$2#0" = xor i1 %"1$tmp$8#0", 1 
+  %"1$tmp$3#0" = icmp eq i8 %"ch#0", 110 
+  %"1$tmp$1#0" = or i1 %"1$tmp$2#0", %"1$tmp$3#0" 
+  %"1$tmp$4#0" = icmp eq i8 %"ch#0", 78 
+  %"1$$#0" = or i1 %"1$tmp$1#0", %"1$tmp$4#0" 
+  ret i1 %"1$$#0" 
 }
 
 
 define external fastcc  i1 @"proc_yorn.yorn<0>"(i64  %"prompt#0")    {
 entry:
-  %"result#0" = tail call fastcc  i1  @"proc_yorn.gen$1<0>"(i64  %"prompt#0")  
-  ret i1 %"result#0" 
+  %"1$result#0" = tail call fastcc  i1  @"proc_yorn.gen$1<0>"(i64  %"prompt#0")  
+  ret i1 %"1$result#0" 
 }

@@ -7,3 +7,6 @@
 !*.wybe
 !*.sh
 !*.in
+!*.py
+!.gitignore
+!*.md

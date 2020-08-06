@@ -189,13 +189,13 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"tmp$8#0" = tail call ccc  i64  @strcmp(i64  %3, i64  %10)  
-  %"tmp$9#0" = icmp eq i64 %"tmp$8#0", 0 
-  br i1 %"tmp$9#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = tail call ccc  i64  @strcmp(i64  %3, i64  %10)  
+  %"1$tmp$9#0" = icmp eq i64 %"1$tmp$8#0", 0 
+  br i1 %"1$tmp$9#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$10#0" = tail call ccc  i64  @strcmp(i64  %7, i64  %14)  
-  %"tmp$1#0" = icmp eq i64 %"tmp$10#0", 0 
-  br i1 %"tmp$1#0", label %if.then1, label %if.else1 
+  %"2$tmp$10#0" = tail call ccc  i64  @strcmp(i64  %7, i64  %14)  
+  %"2$tmp$1#0" = icmp eq i64 %"2$tmp$10#0", 0 
+  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
@@ -221,13 +221,13 @@ entry:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"tmp$8#0" = tail call ccc  i64  @strcmp(i64  %17, i64  %24)  
-  %"tmp$2#0" = icmp eq i64 %"tmp$8#0", 0 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = tail call ccc  i64  @strcmp(i64  %17, i64  %24)  
+  %"1$tmp$2#0" = icmp eq i64 %"1$tmp$8#0", 0 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$11#0" = tail call ccc  i64  @strcmp(i64  %21, i64  %28)  
-  %"$$#0" = icmp eq i64 %"tmp$11#0", 0 
-  ret i1 %"$$#0" 
+  %"2$tmp$11#0" = tail call ccc  i64  @strcmp(i64  %21, i64  %28)  
+  %"2$$$#0" = icmp eq i64 %"2$tmp$11#0", 0 
+  ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
 }

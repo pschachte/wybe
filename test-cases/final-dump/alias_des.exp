@@ -17,17 +17,17 @@ AFTER EVERYTHING:
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    alias_des.foo<0>(~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_des:21:2
+    alias_des.foo<0>(~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @alias_des:21:2
 
 
 foo > public (1 calls)
 0: foo(io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    alias_des.replicate<0>(?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @alias_des:15:4
+    alias_des.replicate<0>(?p2#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @alias_des:15:4
     foreign lpvm mutate noalias(~%p2#0:position.position, ?%p2#1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 20000:wybe.int)
     foreign c print_string("--- after x(!p2, 20000) - expect p2(20000,103):":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(~p2#1:position.position, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @alias_des:18:4
+    position.printPosition<0>(~p2#1:position.position, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #3 @alias_des:18:4
 
 
 replicate > public (1 calls)
@@ -46,9 +46,9 @@ replicate > public (1 calls)
     foreign llvm add(~tmp$5#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @wybe:nn:nn
     foreign lpvm mutate noalias(~tmp$1#0:position.position, ?%p2#1:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$4#0:wybe.int)
     foreign c print_string("expect p1(10000,102):":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(~p1#1:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @alias_des:9:4
+    position.printPosition<0>(~p1#1:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #9 @alias_des:9:4
     foreign c print_string("expect p2(101,103):":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(p2#1:position.position, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @alias_des:11:4
+    position.printPosition<0>(p2#1:position.position, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #11 @alias_des:11:4
 
   LLVM code       :
 
@@ -88,13 +88,13 @@ entry:
 
 define external fastcc  void @"alias_des.foo<0>"()    {
 entry:
-  %"p2#0" = tail call fastcc  i64  @"alias_des.replicate<0>"()  
-  %1 = inttoptr i64 %"p2#0" to i64* 
+  %"1$p2#0" = tail call fastcc  i64  @"alias_des.replicate<0>"()  
+  %1 = inttoptr i64 %"1$p2#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   store  i64 20000, i64* %2 
   %4 = ptrtoint i8* getelementptr inbounds ([48 x i8], [48 x i8]* @alias_des.3, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %4)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"p2#0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$p2#0")  
   ret void 
 }
 
@@ -131,11 +131,11 @@ entry:
   %27 = inttoptr i64 %26 to i64* 
   %28 = getelementptr  i64, i64* %27, i64 0 
   %29 = load  i64, i64* %28 
-  %"tmp$4#0" = add   i64 %29, 1 
+  %"1$tmp$4#0" = add   i64 %29, 1 
   %30 = add   i64 %18, 8 
   %31 = inttoptr i64 %30 to i64* 
   %32 = getelementptr  i64, i64* %31, i64 0 
-  store  i64 %"tmp$4#0", i64* %32 
+  store  i64 %"1$tmp$4#0", i64* %32 
   %34 = ptrtoint i8* getelementptr inbounds ([22 x i8], [22 x i8]* @alias_des.33, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %34)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %7)  
@@ -360,11 +360,11 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"tmp$8#0" = icmp eq i64 %3, %10 
-  br i1 %"tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = icmp eq i64 %3, %10 
+  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = icmp eq i64 %7, %14 
-  br i1 %"tmp$1#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = icmp eq i64 %7, %14 
+  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
@@ -390,11 +390,11 @@ entry:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"tmp$2#0" = icmp eq i64 %17, %24 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = icmp eq i64 %17, %24 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %21, %28 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %21, %28 
+  ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
 }

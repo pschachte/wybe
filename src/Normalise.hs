@@ -102,7 +102,7 @@ normaliseItem (PragmaDecl prag) =
 normaliseSubmodule :: Ident -> Maybe [Ident] -> Visibility -> OptPos ->
                       [Item] -> Compiler ()
 normaliseSubmodule name typeParams vis pos items = do
-    dir <- getDirectory
+    parentOrigin <- getOrigin
     parentModSpec <- getModuleSpec
     let subModSpec = parentModSpec ++ [name]
     logNormalise $ "Normalising submodule " ++ showModSpec subModSpec ++ " {"
@@ -114,7 +114,7 @@ normaliseSubmodule name typeParams vis pos items = do
     alreadyExists <- isJust <$> getLoadingModule subModSpec
     if alreadyExists
       then reenterModule subModSpec
-      else enterModule dir subModSpec (Just parentModSpec) typeParams
+      else enterModule parentOrigin subModSpec (Just parentModSpec) typeParams
     -- submodule always imports parent module
     addImport parentModSpec (importSpec Nothing Private)
     when (isJust typeParams)
@@ -124,19 +124,8 @@ normaliseSubmodule name typeParams vis pos items = do
           in imp { modKnownTypes = Map.insert name set $ modKnownTypes imp })
     normalise items
     if alreadyExists
-      then do
-        reexitModule
-        return ()
-      else do
-        modSpecs <- exitModule
-        unless (List.null modSpecs)
-          $ shouldnt $ "finish normalising submodule left modules to compile: "
-                       ++ showModSpecs modSpecs
-    -- logNormalise $ "Deferring compilation of submodules "
-    --                ++ showModSpecs modSpecs
-    -- mods <- List.map (trustFromJust "lookup submodule after normalising")
-    --         <$> mapM getLoadingModule modSpecs
-    -- deferModules mods
+    then reexitModule
+    else exitModule
     logNormalise $ "Finished normalising submodule " ++ showModSpec subModSpec
     return ()
 

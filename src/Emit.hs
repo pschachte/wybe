@@ -80,7 +80,7 @@ emitAssemblyFile m f = do
         ", with optimisations."
     llmod <- descendentModuleLLVM m
     liftIO $ withOptimisedModule llmod
-        (\mm -> withHostTargetMachine $ \_ ->
+        (\mm -> withHostTargetMachineDefault $ \_ ->
             writeLLVMAssemblyToFile (File f) mm)
 
 
@@ -168,7 +168,7 @@ withModule llmod action =
 -- and write it as an object file.
 makeObjFile :: FilePath -> LLVMAST.Module -> IO ()
 makeObjFile file llmod =
-    withHostTargetMachine $ \tm ->
+    withHostTargetMachineDefault $ \tm ->
         withOptimisedModule llmod $ \m ->
             writeObjectToFile tm (File file) m
 
@@ -198,7 +198,7 @@ makeAssemblyFile :: FilePath -> LLVMAST.Module -> IO ()
 makeAssemblyFile file llmod =
     withContext $ \context ->
         withModuleFromAST context llmod $ \m ->
-            withHostTargetMachine $ \_ ->
+            withHostTargetMachineDefault $ \_ ->
                 writeLLVMAssemblyToFile (File file) m
 
 
@@ -209,7 +209,7 @@ makeWrappedObjFile file llmod modBS = do
     tmpDir <- gets tmpDir
     result <- liftIO $ withContext $ \_ ->
         withModule llmod $ \m -> do
-            withHostTargetMachine $ \tm ->
+            withHostTargetMachineDefault $ \tm ->
                 writeObjectToFile tm (File file) m
             insertLPVMData tmpDir modBS file
     case result of
@@ -297,7 +297,7 @@ logLLVMString thisMod =
             logEmit $ TL.unpack llstr
             logEmit $ replicate 80 '-'
        Nothing -> error "No LLVM Module Implementation"
-     _ <- reexitModule
+     reexitModule
      return ()
 
 -- | Pull the LLVMAST representation of the module and generate the LLVM

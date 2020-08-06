@@ -242,11 +242,11 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"tmp$8#0" = icmp eq i64 %3, %10 
-  br i1 %"tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = icmp eq i64 %3, %10 
+  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = icmp eq i64 %7, %14 
-  br i1 %"tmp$1#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = icmp eq i64 %7, %14 
+  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
@@ -272,11 +272,11 @@ entry:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"tmp$2#0" = icmp eq i64 %17, %24 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = icmp eq i64 %17, %24 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %21, %28 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %21, %28 
+  ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
 }
@@ -432,17 +432,19 @@ entry:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access($left$p#0:alias_type1.position, 0:wybe.int, ?tmp$12#0:wybe.int)
-        foreign lpvm access(~$left$p#0:alias_type1.position, 8:wybe.int, ?tmp$13#0:wybe.int)
-        foreign lpvm access($right$p#0:alias_type1.position, 0:wybe.int, ?tmp$14#0:wybe.int)
-        foreign lpvm access(~$right$p#0:alias_type1.position, 8:wybe.int, ?tmp$15#0:wybe.int)
-        foreign llvm icmp eq(~tmp$12#0:wybe.int, ~tmp$14#0:wybe.int, ?tmp$16#0:wybe.bool) @wybe:nn:nn
-        case ~tmp$16#0:wybe.bool of
+        foreign lpvm access($left$p#0:alias_type1.position, 0:wybe.int, ?tmp$10#0:wybe.int)
+        foreign lpvm access(~$left$p#0:alias_type1.position, 8:wybe.int, ?tmp$11#0:wybe.int)
+        foreign lpvm access($right$p#0:alias_type1.position, 0:wybe.int, ?tmp$12#0:wybe.int)
+        foreign lpvm access(~$right$p#0:alias_type1.position, 8:wybe.int, ?tmp$13#0:wybe.int)
+        foreign llvm icmp eq(~tmp$10#0:wybe.int, ~tmp$12#0:wybe.int, ?tmp$14#0:wybe.bool) @wybe:nn:nn
+        case ~tmp$14#0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(0:wybe.bool, ?tmp$3#0:wybe.bool)
+            foreign llvm move(~tmp$3#0:!wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign llvm icmp eq(~tmp$13#0:wybe.int, ~tmp$15#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp eq(~tmp$11#0:wybe.int, ~tmp$13#0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
+            foreign llvm move(~tmp$3#0:!wybe.bool, ?$$#0:wybe.bool)
 
 
 
@@ -515,8 +517,8 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"tmp$8#0" = icmp eq i64 %3, %10 
-  br i1 %"tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = icmp eq i64 %3, %10 
+  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
 if.then:
   %15 = inttoptr i64 %7 to i64* 
   %16 = getelementptr  i64, i64* %15, i64 0 
@@ -532,13 +534,13 @@ if.then:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"tmp$13#0" = icmp eq i64 %24, %17 
-  br i1 %"tmp$13#0", label %if.then1, label %if.else1 
+  %"2$tmp$13#0" = icmp eq i64 %24, %17 
+  br i1 %"2$tmp$13#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
-  %"tmp$1#0" = icmp eq i64 %21, %28 
-  br i1 %"tmp$1#0", label %if.then2, label %if.else2 
+  %"4$tmp$1#0" = icmp eq i64 %21, %28 
+  br i1 %"4$tmp$1#0", label %if.then2, label %if.else2 
 if.else1:
   ret i1 1 
 if.then2:
@@ -564,8 +566,8 @@ entry:
   %40 = inttoptr i64 %39 to i64* 
   %41 = getelementptr  i64, i64* %40, i64 0 
   %42 = load  i64, i64* %41 
-  %"tmp$2#0" = icmp eq i64 %31, %38 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = icmp eq i64 %31, %38 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
   %43 = inttoptr i64 %35 to i64* 
   %44 = getelementptr  i64, i64* %43, i64 0 
@@ -581,13 +583,13 @@ if.then:
   %54 = inttoptr i64 %53 to i64* 
   %55 = getelementptr  i64, i64* %54, i64 0 
   %56 = load  i64, i64* %55 
-  %"tmp$16#0" = icmp eq i64 %45, %52 
-  br i1 %"tmp$16#0", label %if.then1, label %if.else1 
+  %"2$tmp$14#0" = icmp eq i64 %45, %52 
+  br i1 %"2$tmp$14#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
-  %"$$#0" = icmp eq i64 %49, %56 
-  ret i1 %"$$#0" 
+  %"4$tmp$3#0" = icmp eq i64 %49, %56 
+  ret i1 %"4$tmp$3#0" 
 if.else1:
   ret i1 0 
 }

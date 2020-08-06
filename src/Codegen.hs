@@ -444,7 +444,11 @@ operandType _ = void_t
 -- will be the result type of performing that instruction).
 namedInstr :: Type -> String -> Instruction -> Codegen Operand
 namedInstr ty nm ins = do
-    let ref = Name $ fromString nm
+    -- lpvm allows variables in different forks(blocks) have the same name,
+    -- but llvm doesn't. So the block id is attached to the variable name to
+    -- make it unique.
+    blockId <- idx <$> current
+    let ref = Name $ fromString $ show blockId ++ "$" ++ nm
     addInstr $ ref := ins
     return $ local ty ref
 

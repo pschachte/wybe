@@ -47,8 +47,8 @@ pub type float is 64 bit float {
     pub def -(x:float,y:float):float = foreign llvm fsub(x,y)
     pub def -(?x:float,y:float,z:float) { ?x = foreign llvm fadd(z,y) }
     pub def -(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
-    # pub def -(x:float):float = foreign llvm fsub(0,x)
-    # pub def -(?x:float,y:float) { ?x = foreign llvm fsub(0,y) }
+    pub def -(x:float):float = foreign llvm fsub(0.0,x)
+    pub def -(?x:float,y:float) { ?x = foreign llvm fsub(0.0,y) }
     pub def *(x:float,y:float):float = foreign llvm fmul(x,y)
     pub def /(x:float,y:float):float = foreign llvm fdiv(x,y)
     pub def /=(x:float,y:float):bool = foreign llvm fcmp ne(x,y)
@@ -106,6 +106,8 @@ pub module io {
     }
     pub def println(x:bool) use !io { !print(x) !nl }
     pub def eof:char = foreign lpvm cast(-1)
+
+    pub def malloc_count(?x:int) use !io { foreign c malloc_count(?x,!io) }
 }
 
 pub type phantom {
@@ -138,4 +140,3 @@ pub module command_line {
         ?exit_code = code
     }
 }
-

@@ -18,19 +18,21 @@ import           Builder
 import           Control.Exception
 import           Control.Monad
 import           Options
+import           System.Exit
 
 -- |The main wybe compiler command line.
 main :: IO ()
 main = do
     (opts, files) <- handleCmdline
     catchAny
-      (runCompiler opts (buildTargets opts files))
+      (runCompiler opts (buildTargets files))
       -- if there's an exception, print to stdout
       -- XXX should probably go to stderr; but for now logging goes there
       (\e -> do
              let msg = show e
              when (msg /= "ExitFailure 1") $
-                putStrLn msg)
+                putStrLn msg
+             exitFailure)
 
 
 catchAny :: IO a -> (SomeException -> IO a) -> IO a
@@ -39,4 +41,4 @@ catchAny = Control.Exception.catch
 
 testFile :: String -> IO ()
 testFile file =
-    runCompiler defaultOptions (buildTargets defaultOptions [file])
+    runCompiler defaultOptions (buildTargets [file])

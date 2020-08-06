@@ -215,11 +215,11 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"tmp$8#0" = icmp eq i64 %3, %10 
-  br i1 %"tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = icmp eq i64 %3, %10 
+  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$1#0" = icmp eq i64 %7, %14 
-  br i1 %"tmp$1#0", label %if.then1, label %if.else1 
+  %"2$tmp$1#0" = icmp eq i64 %7, %14 
+  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
@@ -245,11 +245,11 @@ entry:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"tmp$2#0" = icmp eq i64 %17, %24 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$2#0" = icmp eq i64 %17, %24 
+  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %21, %28 
-  ret i1 %"$$#0" 
+  %"2$$$#0" = icmp eq i64 %21, %28 
+  ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
 }
@@ -357,7 +357,7 @@ entry:
     foreign lpvm mutate(~tmp$5#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 222:wybe.int)
     foreign lpvm mutate noalias(~tmp$0#0:position.position, ?%posA#1:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 112:wybe.int)
     foreign c print_string("expect posA(111,112):":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-    position.printPosition<0>(~posA#1:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @position1:8:2
+    position.printPosition<0>(~posA#1:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #4 @position1:8:2
 
   LLVM code       :
 

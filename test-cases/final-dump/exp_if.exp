@@ -16,7 +16,7 @@ AFTER EVERYTHING:
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("expect larger: ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-    exp_if.if_test<0>(3:wybe.int, ?tmp$0#0:wybe.string) @exp_if:5:8
+    exp_if.if_test<0>(3:wybe.int, ?tmp$0#0:wybe.string) #1 @exp_if:5:8
     foreign c print_string(~tmp$0#0:wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
 
 
@@ -63,16 +63,16 @@ define external fastcc  void @"exp_if.<0>"(i64  %"argc#0", i64  %"argv#0", i64  
 entry:
   %2 = ptrtoint i8* getelementptr inbounds ([16 x i8], [16 x i8]* @exp_if.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
-  %"tmp$0#0" = tail call fastcc  i64  @"exp_if.if_test<0>"(i64  3)  
-  tail call ccc  void  @print_string(i64  %"tmp$0#0")  
+  %"1$tmp$0#0" = tail call fastcc  i64  @"exp_if.if_test<0>"(i64  3)  
+  tail call ccc  void  @print_string(i64  %"1$tmp$0#0")  
   ret void 
 }
 
 
 define external fastcc  i64 @"exp_if.if_test<0>"(i64  %"x#0")    {
 entry:
-  %"tmp$1#0" = icmp sgt i64 %"x#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp sgt i64 %"x#0", 0 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   %4 = ptrtoint i8* getelementptr inbounds ([7 x i8], [7 x i8]* @exp_if.3, i32 0, i32 0) to i64 
   ret i64 %4 

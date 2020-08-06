@@ -1,7 +1,7 @@
 name: CI (macOS)
 
-# Disabled, the [brew install llvm-hs/llvm/llvm-6.0] below
-# is way too slow. 
+# disabled due to a bug related to restoring from cache
+# Sample: https://github.com/pschachte/wybe/pull/79/checks?check_run_id=935285745
 on:
     push:
       branches-ignore:
@@ -16,20 +16,44 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-10.15
 
     steps:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
-        brew install haskell-stack
         brew install bdw-gc
-        brew install llvm-hs/llvm/llvm-6.0
+        brew install llvm-hs/llvm/llvm-9
         brew install dwdiff
         brew install coreutils
+
+    # cache Haskell Stack stuff
+    - name: Cache stack global package db
+      uses: actions/cache@v1
+      with:
+        path: ~/.stack
+        key: ${{ runner.os }}-stack-global-${{ hashFiles('stack.yaml') }}-${{ hashFiles('wybe.cabal') }}
+        restore-keys: |
+          ${{ runner.os }}-stack-global-${{ hashFiles('stack.yaml') }}
+        # drop the cache if stack.yaml has been changed
+    - name: Cache stack-installed programs in ~/.local/bin
+      uses: actions/cache@v1
+      with:
+        path: ~/.local/bin
+        key: ${{ runner.os }}-stack-programs-${{ hashFiles('stack.yaml') }}-${{ hashFiles('wybe.cabal') }}
+        restore-keys: |
+          ${{ runner.os }}-stack-programs-${{ hashFiles('stack.yaml') }}
+    - name: Cache .stack-work
+      uses: actions/cache@v1
+      with:
+        path: .stack-work
+        key: ${{ runner.os }}-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('wybe.cabal') }}
+        restore-keys: |
+          ${{ runner.os }}-stack-work-${{ hashFiles('stack.yaml') }}
+
+
     - name: Install & build Haskell Stack dependencies
       run: stack build --only-dependencies
-    #   TODO: cache things above?
     - name: Build
       run: make
     - name: Run tests

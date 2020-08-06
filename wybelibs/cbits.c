@@ -10,6 +10,8 @@
 #include <stdbool.h>
 #include <math.h>
 
+unsigned long long g_malloc_count = 0;
+
 int print_int(int x) {
     return printf("%d", x);
 }
@@ -78,8 +80,10 @@ int isqrt(int x) {
 
 // Boehm GC
 void *wybe_malloc(int size) {
+    g_malloc_count += 1;
     return GC_MALLOC(size);
 }
+
 
 void gc_init() {
     // XXX this is a workaround, more detail can be found here:
@@ -88,3 +92,8 @@ void gc_init() {
     GC_INIT();
 }
 
+
+int malloc_count() {
+    // XXX may overflow
+    return (int)g_malloc_count;
+}

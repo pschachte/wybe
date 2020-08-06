@@ -1,12 +1,4 @@
-pub type position { pub position(x:int, y:int) }
-
-pub def printPosition(pos:position) use !io {
-    !print(" (")
-    !print(pos.x)
-    !print(",")
-    !print(pos.y)
-    !println(")")
-}
+use position
 
 pub def modifyAndPrint(pos:position, v:int) use !io {
     x(!pos, v)
