@@ -184,7 +184,7 @@ transformPrim callSiteMap ((aliasMap, deadCells), prims) prim = do
 _updateMutateForAlias :: AliasMapLocal -> [PrimArg] -> [PrimArg]
 _updateMutateForAlias aliasMap
     args@[fIn, fOut, offset, ArgInt des typ, size, offset2, mem] =
-        if des /= 1 && Right [] == isArgVarInteresting aliasMap fIn
+        if des /= 1 && Right [] == isArgNoneAliased aliasMap fIn
         then [fIn, fOut, offset, ArgInt 1 typ, size, offset2, mem]
         else args
 _updateMutateForAlias _ args = args

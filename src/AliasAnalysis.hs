@@ -9,7 +9,7 @@
 
 module AliasAnalysis (
     AliasMapLocal, AliasMapLocalItem(..), aliasSccBottomUp, currentAliasInfo,
-    isAliasInfoChanged, updateAliasedByPrim, isArgVarInteresting,
+    isAliasInfoChanged, updateAliasedByPrim, isArgNoneAliased,
     isArgVarUsedOnceInArgs, DeadCells, updateDeadCellsByAccessArgs,
     assignDeadCellsByAllocArgs
     ) where
@@ -446,7 +446,7 @@ updateMultiSpeczInfoByPrim proto
                         -- then it should be aliased
                         && isArgVarUsedOnceInArgs arg args)
                     |> Maybe.mapMaybe (\(arg, paramID) ->
-                        case isArgVarInteresting aliasMap arg of
+                        case isArgNoneAliased aliasMap arg of
                             Right requiredParams -> 
                                 Just (arg, paramID, requiredParams)
                             Left () ->
@@ -480,7 +480,7 @@ updateMultiSpeczInfoByPrim proto
                     if des /= 1
                     then
                         -- mutate only happens on struct(address)
-                        case isArgVarInteresting aliasMap fIn of
+                        case isArgNoneAliased aliasMap fIn of
                         Right requiredParams -> do
                             logAlias $ "Found interesting params: " 
                                     ++ show requiredParams
@@ -498,15 +498,15 @@ updateMultiSpeczInfoByPrim proto
         _ -> return (interestingCallProperties, multiSpeczDepInfo)
 
 
--- we consider a variable is interesting when it isn't aliased and not used
--- after this point. Note that it doesn't check whether the given "PrimArg"
--- is a pointer.
--- It returns "Right requiredParams" if it's interesting.
+-- It returns "Right requiredParams" if the given "PrimArg" isn't aliased and 
+-- isn't used after this point.
 -- "requiredParams" is a list of params that needs to be non-aliased to make
 -- the given "PrimArg" actually interesting (Caused by "MaybeAliasByParam").
+-- A special case that it returns "Right []" for "ArgInt", because "ArgInt" can
+-- be used for struct tags.
 -- It returns "Left ()" in other cases.
-isArgVarInteresting :: AliasMapLocal -> PrimArg -> Either () [PrimVarName]
-isArgVarInteresting aliasMap ArgVar{argVarName=varName, argVarFinal=final} =
+isArgNoneAliased :: AliasMapLocal -> PrimArg -> Either () [PrimVarName]
+isArgNoneAliased aliasMap ArgVar{argVarName=varName, argVarFinal=final} =
     let items = connectedItemsInDS (LiveVar varName) aliasMap |> Set.toList in
     let requiredParams = 
             Maybe.mapMaybe (\case
@@ -520,7 +520,8 @@ isArgVarInteresting aliasMap ArgVar{argVarName=varName, argVarFinal=final} =
         Right requiredParams
     else
         Left ()
-isArgVarInteresting _ _ = Left ()
+isArgNoneAliased _ (ArgInt _ _) = Right []
+isArgNoneAliased _ _ = Left ()
 
 
 -- return True if the given arg is only used once in given list of arg.
@@ -618,7 +619,7 @@ updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
     rep <- lookupTypeRepresentation ty
     if rep == Just Address
     then
-        case isArgVarInteresting aliasMap struct of
+        case isArgNoneAliased aliasMap struct of
             Right requiredParams -> do 
                 logAlias $ "Found new dead cell: " ++ show varName 
                         ++ " type:" ++ show ty ++ " requiredParams:"
