@@ -12,7 +12,7 @@ the LLVM instructions.
 
 * `foreign lpvm mutate(`*struct:type*, `?`*struct2:type*,
                         *offset:*`int`, *destructive*:`bool`,
-                        *size:`int`, *start_offset:*`int`, *member:type2*`)`  
+                        *size*:`int`, *start_offset*:`int`, *member:type2*`)`  
    *struct2* is the same as *struct*, except that it has *member*, with type
    *type2*, at *struct* + *offset*.  The start of the
    structure is actually *start_offset* bytes before *struct* in memory, and the
