@@ -9,7 +9,7 @@
 
 module AliasAnalysis (
     AliasMapLocal, AliasMapLocalItem(..), aliasSccBottomUp, currentAliasInfo,
-    isAliasInfoChanged, updateAliasedByPrim, isArgNoneAliased,
+    isAliasInfoChanged, updateAliasedByPrim, isArgUnaliased,
     isArgVarUsedOnceInArgs, DeadCells, updateDeadCellsByAccessArgs,
     assignDeadCellsByAllocArgs
     ) where
@@ -446,11 +446,8 @@ updateMultiSpeczInfoByPrim proto
                         -- then it should be aliased
                         && isArgVarUsedOnceInArgs arg args)
                     |> Maybe.mapMaybe (\(arg, paramID) ->
-                        case isArgNoneAliased aliasMap arg of
-                            Right requiredParams -> 
-                                Just (arg, paramID, requiredParams)
-                            Left () ->
-                                Nothing)
+                        fmap (\requiredParams -> (arg, paramID, requiredParams))
+                            (isArgUnaliased aliasMap arg))
             logAlias $ "interestingPrimCallInfo: " 
                     ++ show interestingPrimCallInfo
             -- update interesting params
@@ -480,8 +477,8 @@ updateMultiSpeczInfoByPrim proto
                     if des /= 1
                     then
                         -- mutate only happens on struct(address)
-                        case isArgNoneAliased aliasMap fIn of
-                        Right requiredParams -> do
+                        case isArgUnaliased aliasMap fIn of
+                        Just requiredParams -> do
                             logAlias $ "Found interesting params: " 
                                     ++ show requiredParams
                             let interestingCallProperties' = 
@@ -489,7 +486,7 @@ updateMultiSpeczInfoByPrim proto
                                         interestingCallProperties requiredParams
                             return
                                 (interestingCallProperties', multiSpeczDepInfo)
-                        Left () ->
+                        Nothing ->
                             return 
                                 (interestingCallProperties, multiSpeczDepInfo) 
                     else return (interestingCallProperties, multiSpeczDepInfo)
@@ -498,15 +495,15 @@ updateMultiSpeczInfoByPrim proto
         _ -> return (interestingCallProperties, multiSpeczDepInfo)
 
 
--- It returns "Right requiredParams" if the given "PrimArg" isn't aliased and 
+-- It returns "Just requiredParams" if the given "PrimArg" isn't aliased and 
 -- isn't used after this point.
 -- "requiredParams" is a list of params that needs to be non-aliased to make
 -- the given "PrimArg" actually interesting (Caused by "MaybeAliasByParam").
--- A special case is that it returns "Right []" for "ArgInt", because "ArgInt"
+-- A special case is that it returns "Just []" for "ArgInt", because "ArgInt"
 -- can be used for struct tags.
--- It returns "Left ()" in other cases.
-isArgNoneAliased :: AliasMapLocal -> PrimArg -> Either () [PrimVarName]
-isArgNoneAliased aliasMap ArgVar{argVarName=varName, argVarFinal=final} =
+-- It returns "Nothing" in other cases.
+isArgUnaliased :: AliasMapLocal -> PrimArg -> Maybe [PrimVarName]
+isArgUnaliased aliasMap ArgVar{argVarName=varName, argVarFinal=final} =
     let items = connectedItemsInDS (LiveVar varName) aliasMap |> Set.toList in
     let requiredParams = 
             Maybe.mapMaybe (\case
@@ -517,11 +514,11 @@ isArgNoneAliased aliasMap ArgVar{argVarName=varName, argVarFinal=final} =
     -- only "MaybeAliasByParam" is allowed
     if final && sameLength items requiredParams
     then
-        Right requiredParams
+        Just requiredParams
     else
-        Left ()
-isArgNoneAliased _ (ArgInt _ _) = Right []
-isArgNoneAliased _ _ = Left ()
+        Nothing
+isArgUnaliased _ (ArgInt _ _) = Just []
+isArgUnaliased _ _ = Nothing
 
 
 -- return True if the given arg is only used once in given list of arg.
@@ -619,8 +616,8 @@ updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
     rep <- lookupTypeRepresentation ty
     if rep == Just Address
     then
-        case isArgNoneAliased aliasMap struct of
-            Right requiredParams -> do 
+        case isArgUnaliased aliasMap struct of
+            Just requiredParams -> do 
                 logAlias $ "Found new dead cell: " ++ show varName 
                         ++ " type:" ++ show ty ++ " requiredParams:"
                         ++ show requiredParams
@@ -629,7 +626,7 @@ updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
                     (case x of 
                         Nothing -> [newCell]
                         Just cells -> newCell:cells) |> Just) ty deadCells
-            Left () ->
+            Nothing ->
                 return deadCells
     else 
         return deadCells
