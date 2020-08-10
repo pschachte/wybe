@@ -502,8 +502,8 @@ updateMultiSpeczInfoByPrim proto
 -- isn't used after this point.
 -- "requiredParams" is a list of params that needs to be non-aliased to make
 -- the given "PrimArg" actually interesting (Caused by "MaybeAliasByParam").
--- A special case that it returns "Right []" for "ArgInt", because "ArgInt" can
--- be used for struct tags.
+-- A special case is that it returns "Right []" for "ArgInt", because "ArgInt"
+-- can be used for struct tags.
 -- It returns "Left ()" in other cases.
 isArgNoneAliased :: AliasMapLocal -> PrimArg -> Either () [PrimVarName]
 isArgNoneAliased aliasMap ArgVar{argVarName=varName, argVarFinal=final} =
