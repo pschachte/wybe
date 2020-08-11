@@ -7,8 +7,10 @@ the LLVM instructions.
    Allocate (at least) *size* bytes of memory and store the address in
    *struct*, which has its specified type.
 
-* `foreign lpvm access(`*struct:type*, *offset:*`int`, `?`*member:type2*`)`  
-   Access the field of type *type2* at address *struct* + *offset*.
+* `foreign lpvm access(`*struct:type*, *offset:*`int`, `*size:*`int`,
+                       `?`*member:type2*`)`  
+   Access the field of type *type2* at address *struct* + *offset*. The size of
+   the structure is *size* bytes.
 
 * `foreign lpvm mutate(`*struct:type*, `?`*struct2:type*,
                         *offset:*`int`, *destructive*:`bool`,

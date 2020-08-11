@@ -568,8 +568,11 @@ updateMultiSpeczDepInfo multiSpeczDepInfo callSiteID pSpec items =
 --
 -- The transform part can be found in "Transform.hs".
 
--- XXX reuse cells that are different types but has the same size.
+-- XXX currently it relies on the size arg of the access instruction. Another
+--       way (much more flexible) to do it is introducing some lpvm instructions
+--       that do nothing and only provide information for the compiler.
 -- XXX call "GC_free" on large unused dead cells.
+--       (according to https://github.com/ivmai/bdwgc, > 8 bytes)
 -- XXX we'd like this analysis to detect structures that are dead aside from
 --       later access instructions, which could be moved earlier to allow the
 --       structure to be reused.
