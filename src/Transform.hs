@@ -157,18 +157,18 @@ transformPrim callSiteMap ((aliasMap, deadCells), prims) prim = do
                 let primc' = case result of 
                         Nothing -> primc
                         Just (selectedCell, []) -> 
-                            -- replace "alloc" with "move" by reusing the 
+                            -- replace "alloc" with "move/cast" by reusing the 
                             -- "selectedCell".
                             let [_, varOut] = args in
-                            let varIn = 
-                                    varOut {argVarName = selectedCell,
-                                            argVarFlow = FlowIn,
-                                            argVarFinal = True}
-                            in
-                            PrimForeign "llvm" "move" [] [varIn, varOut]
+                            -- Be aware that this will make the previous final
+                            -- flag of "selectedCell" outdated.
+                            (if argType selectedCell == argType varOut
+                            then PrimForeign "llvm" "move"
+                            else PrimForeign "lpvm" "cast")
+                                    [] [selectedCell, varOut]
                         _ -> shouldnt "invalid aliasMap for transform"
                 when (Maybe.isJust result) $ 
-                        logTransform "replacing [alloc] with [move]."
+                        logTransform "replacing [alloc] with [move/cast]."
                 return (primc', deadCells')
             -- default case
             _ -> return (primc, deadCells)

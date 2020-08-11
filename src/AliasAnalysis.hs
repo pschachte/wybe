@@ -46,13 +46,13 @@ data AliasMapLocalItem
 type AliasMapLocal = DisjointSet AliasMapLocalItem
 
 
--- For each type, record all reusable cells, more on this can be found under
+-- For each size, record all reusable cells, more on this can be found under
 -- the "Dead Memory Cell Analysis" section below.
--- Each reusable cell is recorded as "(varName, requiredParams)"". "varName" is
--- the name of the variable that can be reused and requiredParams is a list of 
--- parameters that need to be non-aliased before reusing that cell (caused by
--- "MaybeAliasByParam").
-type DeadCells = Map TypeSpec [(PrimVarName, [PrimVarName])]
+-- Each reusable cell is recorded as "(var, requiredParams)"". "var" is the
+-- variable (copy from it's last access) that can be reused and requiredParams
+-- is a list of parameters that need to be non-aliased before reusing that cell
+-- (caused by "MaybeAliasByParam").
+type DeadCells = Map Int [(PrimArg, [PrimVarName])]
 
 
 -- Intermediate data structure used during the analysis
@@ -610,26 +610,21 @@ updateDeadCellsByPrim proto (aliasMap, interestingCallProperties, deadCells)
 updateDeadCellsByAccessArgs :: (AliasMapLocal, DeadCells) -> [PrimArg]
         -> Compiler DeadCells
 updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
-    -- [struct:type, offset:int, ?member:type2]
-    let [struct, _, _, _] = primArgs
-    let ArgVar{argVarName=varName, argVarType=ty} = struct
-    rep <- lookupTypeRepresentation ty
-    if rep == Just Address
-    then
-        case isArgUnaliased aliasMap struct of
-            Just requiredParams -> do 
-                logAlias $ "Found new dead cell: " ++ show varName 
-                        ++ " type:" ++ show ty ++ " requiredParams:"
-                        ++ show requiredParams
-                let newCell = (varName, requiredParams)
-                return $ Map.alter (\x ->
-                    (case x of 
-                        Nothing -> [newCell]
-                        Just cells -> newCell:cells) |> Just) ty deadCells
-            Nothing ->
-                return deadCells
-    else 
-        return deadCells
+    -- [struct:type, offset:int, size:int, ?member:type2]
+    let [struct@ArgVar{argVarName=varName}, _, ArgInt size _, _] = primArgs
+    let size' = fromInteger size
+    case isArgUnaliased aliasMap struct of
+        Just requiredParams -> do 
+            logAlias $ "Found new dead cell: " ++ show varName 
+                    ++ " size:" ++ show size' ++ " requiredParams:"
+                    ++ show requiredParams
+            let newCell = (struct, requiredParams)
+            return $ Map.alter (\x ->
+                (case x of 
+                    Nothing -> [newCell]
+                    Just cells -> newCell:cells) |> Just) size' deadCells
+        Nothing ->
+            return deadCells
 
 
 -- Try to assign a dead cell to reuse for the given "alloc" instruction.
@@ -640,12 +635,12 @@ updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
 -- "MaybeAliasByParam"). Note that this always tries to assigned a cell with
 -- empty "requiredParams" first.
 assignDeadCellsByAllocArgs :: DeadCells -> [PrimArg] 
-        -> (Maybe (PrimVarName, [PrimVarName]), DeadCells)
+        -> (Maybe (PrimArg, [PrimVarName]), DeadCells)
 assignDeadCellsByAllocArgs deadCells primArgs =
     -- [size:int, ?struct:type]
-    let [_, struct] = primArgs in
-    let ArgVar{argVarName=varName, argVarType=ty} = struct in
-    case Map.lookup ty deadCells of 
+    let [ArgInt size _, struct] = primArgs in
+    let size' = fromInteger size in
+    case Map.lookup size' deadCells of 
         Just cells -> 
             let assigned = 
                     -- try to select one without "requiredParams".
@@ -670,6 +665,6 @@ assignDeadCellsByAllocArgs deadCells primArgs =
                                 |> Set.fromList |> Set.toList
                     in
                     let cells' = List.delete x cells in
-                    let deadCells' = Map.insert ty cells' deadCells in
+                    let deadCells' = Map.insert size' cells' deadCells in
                     (Just (fst x, requiredParams), deadCells')
         Nothing    -> (Nothing, deadCells)
