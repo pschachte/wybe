@@ -611,7 +611,7 @@ updateDeadCellsByAccessArgs :: (AliasMapLocal, DeadCells) -> [PrimArg]
         -> Compiler DeadCells
 updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
     -- [struct:type, offset:int, ?member:type2]
-    let [struct, _, _] = primArgs
+    let [struct, _, _, _] = primArgs
     let ArgVar{argVarName=varName, argVarType=ty} = struct
     rep <- lookupTypeRepresentation ty
     if rep == Just Address

@@ -557,8 +557,9 @@ instrConsequences' :: Prim -> Compiler [(Prim,[PrimArg])]
 instrConsequences' (PrimForeign "lpvm" "cast" flags [a1,a2]) =
     return [(PrimForeign "lpvm" "cast" flags [a2], [a1])]
 -- XXX this doesn't handle mutate to other fields leaving value unchanged
-instrConsequences' (PrimForeign "lpvm" "mutate" [] [_,addr,offset,_,_,_,val]) =
-    return [(PrimForeign "lpvm" "access" [] [addr,offset], [val])]
+instrConsequences'
+    (PrimForeign "lpvm" "mutate" [] [_,addr,offset,_,size,_,val]) =
+    return [(PrimForeign "lpvm" "access" [] [addr,offset,size], [val])]
 instrConsequences' (PrimForeign "llvm" "add" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "sub" flags [a3,a2], [a1]),
             (PrimForeign "llvm" "sub" flags [a3,a1], [a2]),

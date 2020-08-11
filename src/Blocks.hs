@@ -712,7 +712,7 @@ cgenLPVM "alloc" [] args@[sizeArg,addrArg] = do
               shouldnt $ "alloc instruction with " ++ show (length inputs)
                          ++ " inputs"
 
-cgenLPVM "access" [] args@[addrArg,offsetArg,val] = do
+cgenLPVM "access" [] args@[addrArg,offsetArg,_,val] = do
           logCodegen $ "lpvm access " ++ show addrArg ++ " " ++ show offsetArg
                  ++ " " ++ show val
           baseAddr <- cgenArg addrArg

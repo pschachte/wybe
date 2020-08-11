@@ -472,7 +472,7 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
       return (Address,
               constructorItems ctorName typeSpec fields size tag tagLimit pos
               ++ deconstructorItems ctorName typeSpec numConsts numNonConsts
-                 tag tagLimit pos fields
+                 tag tagLimit pos fields size
               ++ concatMap
                  (getterSetterItems vis typeSpec pos numConsts numNonConsts
                   ptrCount size tag tagLimit)
@@ -584,9 +584,9 @@ constructorItems ctorName typeSpec fields size tag tagLimit pos =
 
 -- |Generate deconstructor code for a non-const constructor
 deconstructorItems :: Ident -> TypeSpec -> Int -> Int -> Int -> Int -> OptPos
-                   -> [(Ident,TypeSpec,TypeRepresentation,Int)] -> [Item]
+                   -> [(Ident,TypeSpec,TypeRepresentation,Int)] -> Int -> [Item]
 deconstructorItems ctorName typeSpec numConsts numNonConsts tag tagLimit
-                   pos fields =
+                   pos fields size =
     let flowType = Implicit pos
         detism = if numConsts + numNonConsts > 1 then SemiDet else Det
     in [ProcDecl Public detism True
@@ -601,6 +601,7 @@ deconstructorItems ctorName typeSpec numConsts numNonConsts tag tagLimit
                               (Unplaced $ ForeignCall "lpvm" "access" []
                                [Unplaced $ Var "$" ParamIn flowType,
                                 Unplaced $ iVal (aligned - tag),
+                                Unplaced $ iVal size,
                                 Unplaced $ Var var ParamOut flowType]))
             fields)
         pos]
@@ -635,6 +636,7 @@ tagCheck numConsts numNonConsts tag tagLimit varName =
            if tag > tagLimit
            then [Unplaced $ ForeignCall "lpvm" "access" []
                  [Unplaced $ varGet varName,
+                  Unplaced $ iVal 0,
                   Unplaced $ iVal 0,
                   Unplaced $ varSet "$tag"],
                  comparison "eq" (varGet "$tag") (iVal tag)]
@@ -673,6 +675,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
          [Unplaced $ ForeignCall "lpvm" "access" []
           [Unplaced $ varGet "$rec",
            Unplaced $ iVal (offset - tag),
+           Unplaced $ iVal size,
            Unplaced $ varSet "$"]])
         pos,
         -- The setter:
