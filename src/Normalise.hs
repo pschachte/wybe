@@ -595,7 +595,7 @@ deconstructorItems ctorName typeSpec numConsts numNonConsts tag tagLimit
           ++ [Param "$" typeSpec ParamIn Ordinary])
          Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag tagLimit "$"]
+        ([tagCheck numConsts numNonConsts tag tagLimit (Just size) "$"]
          -- Code to fetch all the fields
          ++ List.map (\(var,_,_,aligned) ->
                               (Unplaced $ ForeignCall "lpvm" "access" []
@@ -610,8 +610,8 @@ deconstructorItems ctorName typeSpec numConsts numNonConsts tag tagLimit
 -- |Generate the needed Test statements to check that the tag of the value
 --  of the specified variable matches the specified tag.  If not checking
 --  is necessary, just generate a Nop, rather than a true test.
-tagCheck :: Int -> Int -> Int -> Int -> Ident -> Placed Stmt
-tagCheck numConsts numNonConsts tag tagLimit varName =
+tagCheck :: Int -> Int -> Int -> Int -> Maybe Int -> Ident -> Placed Stmt
+tagCheck numConsts numNonConsts tag tagLimit size varName =
     -- If there are any constant constructors, be sure it's not one of them
     let tests =
           (case numConsts of
@@ -637,7 +637,8 @@ tagCheck numConsts numNonConsts tag tagLimit varName =
            then [Unplaced $ ForeignCall "lpvm" "access" []
                  [Unplaced $ varGet varName,
                   Unplaced $ iVal 0,
-                  Unplaced $ iVal 0,
+                  Unplaced $ iVal $ trustFromJust
+                             "unboxed type shouldn't have a secondary tag" size,
                   Unplaced $ varSet "$tag"],
                  comparison "eq" (varGet "$tag") (iVal tag)]
            else [])
@@ -669,7 +670,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
                           Param "$" fieldtype ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag tagLimit "$rec"]
+        ([tagCheck numConsts numNonConsts tag tagLimit (Just size) "$rec"]
          ++
         -- Code to access the selected field
          [Unplaced $ ForeignCall "lpvm" "access" []
@@ -683,7 +684,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
         (ProcProto field [Param "$rec" rectype ParamInOut Ordinary,
                           Param "$field" fieldtype ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag tagLimit "$rec"]
+        ([tagCheck numConsts numNonConsts tag tagLimit (Just size) "$rec"]
          ++
         -- Code to mutate the selected field
          [Unplaced $ ForeignCall "lpvm" "mutate" flags
@@ -765,7 +766,7 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
           ++ [Param "$" recType ParamIn Ordinary])
          Set.empty)
          -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag (wordSizeBytes-1) "$"]
+        ([tagCheck numConsts numNonConsts tag (wordSizeBytes-1) Nothing "$"]
          -- Code to fetch all the fields
          ++ List.concatMap
             (\(var,fieldType,shift,sz) ->
@@ -801,7 +802,7 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
         (ProcProto field [Param "$rec" recType ParamIn Ordinary,
                           Param "$" fieldType ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag (wordSizeBytes-1) "$rec"]
+        ([tagCheck numConsts numNonConsts tag (wordSizeBytes-1) Nothing "$rec"]
          ++
         -- Code to access the selected field
          [Unplaced $ ForeignCall "llvm" "lshr" []
@@ -823,7 +824,7 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
         (ProcProto field [Param "$rec" recType ParamInOut Ordinary,
                           Param "$field" fieldType ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag (wordSizeBytes-1) "$rec"]
+        ([tagCheck numConsts numNonConsts tag (wordSizeBytes-1) Nothing "$rec"]
          ++
         -- Code to mutate the selected field by masking out the current
         -- value, shifting the new value into place and bitwise or-ing it
