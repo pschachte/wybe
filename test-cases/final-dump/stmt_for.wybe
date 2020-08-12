@@ -1,61 +1,36 @@
 pub type intlist { pub [] | [|](head:int, tail:intlist) }
 
-?x = [1, 2, 3]
-?y = [4, 5, 6]
-?z = [7, 8]
+pub def single_generator() use !io {
+    ?x = [1, 2, 3]
 
-# Should print 1\n2\n3\n
-for i in x {
-    !println(i)
+    for i in x {
+        !println(i)
+    }
 }
 
-# Should print 1\n4\n2\n5\n3\n6\n
-for i in x, j in y {
-    !println(i)
-    !println(j)
+!single_generator()
+
+pub def multiple_generator() use !io {
+    ?x = [1, 2, 3]
+    ?y = [4, 5, 6]
+
+    for i in x, j in y {
+        !println(i)
+        !println(j)
+    }
 }
 
-# Should print 1\n7\n2\n8\n
-for i in x, j in z {
-    !println(i)
-    !println(j)
+!multiple_generator()
+
+pub def shortest_generator_termination() use !io {
+    ?x = [1, 2, 3, 4]
+    ?y = [4, 5]
+
+    for i in x, j in y {
+        !println(i)
+        !println(j)
+    }
 }
 
-#?temp1 = x
-#?temp2 = y
-#do {
-#    `[|]`(?i, ?temp1, temp1, ?tempHasNextGen)
-#    if {
-#        tempHasNextGen :: ?temp1 = temp1
-#        | otherwise :: break
-#    }
-#    `[|]`(?j, ?temp2, temp2, ?tempHasNextGen)
-#    if {
-#        tempHasNextGen :: ?temp2 = temp2
-#        | otherwise :: break
-#    }
-#
-#    !println(i)
-#    !println(j)
-#}
-
-
-#?temp = y
-#do {
-#    `[|]`(?v, ?temp3, temp, ?temp2)
-#    if {
-#        temp2                    :: ?temp = temp3
-#        | otherwise              :: break
-#    }
-#    !println(v)
-#}
-
-#?temp = y
-#do {
-#    if {
-#        `[|]`(?v, ?temp, temp) :: true
-#        | otherwise :: ?v = v break
-#    }
-#    !println(v)
-#}
+!shortest_generator_termination()
 
