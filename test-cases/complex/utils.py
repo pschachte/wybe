@@ -29,7 +29,7 @@ class Context:
         self.out_file.write(data)
         self.out_file.write("\n")
         self.out_file.write("-" * 70 + "\n\n\n")
-    
+
     def write_note(self, note: str) -> None:
         self.out_file.write("-" * 70 + "\n")
         self.out_file.write(note + "\n")
@@ -38,6 +38,9 @@ class Context:
     def save_file(self, filename: str, data: str) -> None:
         with open(os.path.join(self.tmp_dir, filename), "w") as f:
             f.write(data)
+    
+    def delete_file(self, filename: str) -> None:
+        os.remove(os.path.join(self.tmp_dir, filename))
 
     def _get_file_hash(self, filename: str) -> str:
         BUF_SIZE = 65536
@@ -62,15 +65,17 @@ class Context:
             self.files_hash[filename] = hash
         return changed
 
-    def wybe_build_target(self, target: str, force_all: bool, final_dump: bool, check: bool) -> Tuple[int, str]:
+    def wybe_build_target(self, target: str, force_all: bool, final_dump: bool,
+            check: bool, no_multi_specz: bool = False) -> Tuple[int, str]:
         """
         Args:
-            target (str):      Name of the target
-            final_dump (bool): A flag used to log the final dump
-            force_all (bool):  force-all flag of wybe
-            check (bool):      If check is true, and the process exits with a
-                               non-zero exit code, a CalledProcessError exception
-                               will be raised.
+            target (str):         Name of the target
+            final_dump (bool):    A flag used to log the final dump
+            force_all (bool):     force-all flag of wybe
+            check (bool):         If check is true, and the process exits with a
+                                  non-zero exit code, a CalledProcessError
+                                  exception will be raised.
+            no_multi_specz(bool): Disable multiple specialization
 
         Returns:
             exit code and outputs (stdin && stdout)
@@ -83,15 +88,27 @@ class Context:
             args.append("--log=FinalDump")
         if force_all:
             args.append("--force-all")
+        if no_multi_specz:
+            args.append("--no-multi-specz")
         args.append(target)
 
-        r = subprocess.run(args, timeout=TIMEOUT, check=check,
+        r = subprocess.run(args, timeout=TIMEOUT,
                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                            cwd=self.tmp_dir)
+        if check:
+            if r.returncode != 0:
+                self.write_section("ERROR OUTPUT", r.stdout.decode("utf-8"))
+                r.check_returncode()
+
         return (r.returncode, r.stdout.decode("utf-8"))
 
-    def execute_program(self, exe: str, check: bool, timeout: float = 5.0) -> Tuple[int, str]:
-        r = subprocess.run([exe], timeout=timeout, check=check,
+    def execute_program(self, exe: str, check: bool,
+            timeout: float = 5.0) -> Tuple[int, str]:
+        r = subprocess.run([exe], timeout=timeout,
                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                            cwd=self.tmp_dir)
+        if check:
+            if r.returncode != 0:
+                self.write_section("ERROR OUTPUT", r.stdout.decode("utf-8"))
+                r.check_returncode()
         return (r.returncode, r.stdout.decode("utf-8"))

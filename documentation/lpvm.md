@@ -12,11 +12,15 @@ the LLVM instructions.
 
 * `foreign lpvm mutate(`*struct:type*, `?`*struct2:type*,
                         *offset:*`int`, *destructive*:`bool`,
-                        *size:`int`, *start_offset:*`int`, *member:type2*`)`  
+                        *size*:`int`, *start_offset*:`int`, *member:type2*`)`  
    *struct2* is the same as *struct*, except that it has *member*, with type
    *type2*, at *struct* + *offset*.  The start of the
    structure is actually *start_offset* bytes before *struct* in memory, and the
    size of the structure is *size* bytes.
+   The intention of the *start_offset* is to handle tagged pointers:  a tagged
+   pointer will appear to point *start_offset* bytes past the start of the
+   actual structure in memory; subtracting this will allow the start of the
+   structure to be found, so it can be copied.
    If *destructive* is `true`, then this instruction is permitted to
    perform the operation destructively, making *struct2* the same address
    as *struct*.
