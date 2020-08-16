@@ -2757,19 +2757,19 @@ showStmt _ (ForeignCall lang name flags args) =
 showStmt _ (TestBool test) =
     "testbool " ++ show test
 showStmt indent (And stmts) =
-    intercalate (" and\n" ++ replicate indent' ' ')
+    intercalate ("\n" ++ replicate indent ' ' ++ "&& ")
     (List.map (showStmt indent' . content) stmts) ++
     ")"
     where indent' = indent + 4
 showStmt indent (Or stmts) =
     "(   " ++
-    intercalate (" or\n" ++ replicate indent' ' ')
+    intercalate ("\n" ++ replicate indent ' ' ++ "|| ")
         (List.map (showStmt indent' . content) stmts) ++
     ")"
     where indent' = indent + 4
 showStmt indent (Not stmt) =
-    "not(" ++ showStmt indent' (content stmt) ++ ")"
-    where indent' = indent + 4
+    "~(" ++ showStmt indent' (content stmt) ++ ")"
+    where indent' = indent + 2
 showStmt indent (Cond condstmt thn els genVars) =
     "if {" ++ showStmt (indent+4) (content condstmt) ++ "}::\n"
     ++ showBody (indent+4) thn

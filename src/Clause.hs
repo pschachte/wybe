@@ -95,7 +95,7 @@ finishStmt = getCurrNumbering >>= putNumberings
 
 -- |Return a list of prims to complete a proc body.  For a SemiDet body
 -- that hasn't already had $$ assigned a value, this will assign it
--- False; otherwise it'll be empty.
+-- True; otherwise it'll be empty.
 closingStmts :: Determinism -> ClauseComp [Placed Prim]
 closingStmts Det = return []
 closingStmts SemiDet = do
@@ -173,6 +173,21 @@ compileBody stmts params detism = do
               tstStmt ->
                 shouldnt $ "CompileBody of Cond with non-simple test:\n"
                            ++ show tstStmt
+        call@(ProcCall maybeMod name procID SemiDet _ args)
+          | detism == SemiDet -> do
+          logClause $ "Compiling SemiDet tail call " ++ showStmt 4 call
+          args' <- mapM (placedApply compileArg) args
+          front <- mapM compileSimpleStmt $ init stmts
+          let final' = Unplaced
+                       $ PrimCall (ProcSpec maybeMod name
+                                   (trustFromJust
+                                    ("compileBody for " ++ showStmt 4 call)
+                                     procID) Nothing)
+                         (args' ++
+                          [ArgVar (PrimVarName "$$" 0) boolType False FlowOut
+                           (Implicit Nothing) False])
+          return $ ProcBody (front++[final']) NoFork
+
         _ -> do
           prims <- mapM compileSimpleStmt stmts
           end <- closingStmts detism
