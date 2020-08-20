@@ -587,6 +587,7 @@ deconstructorItems :: Ident -> TypeSpec -> Int -> Int -> Int -> Int -> OptPos
                    -> [(Ident,TypeSpec,TypeRepresentation,Int)] -> [Item]
 deconstructorItems ctorName typeSpec numConsts numNonConsts tag tagLimit
                    pos fields =
+    let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
     let flowType = Implicit pos
         detism = if numConsts + numNonConsts > 1 then SemiDet else Det
     in [ProcDecl Public detism True
@@ -600,7 +601,7 @@ deconstructorItems ctorName typeSpec numConsts numNonConsts tag tagLimit
          ++ List.map (\(var,_,_,aligned) ->
                               (Unplaced $ ForeignCall "lpvm" "access" []
                                [Unplaced $ Var "$" ParamIn flowType,
-                                Unplaced $ iVal (aligned - tag),
+                                Unplaced $ iVal (aligned - startOffset),
                                 Unplaced $ Var var ParamOut flowType]))
             fields)
         pos]
@@ -611,6 +612,7 @@ deconstructorItems ctorName typeSpec numConsts numNonConsts tag tagLimit
 --  is necessary, just generate a Nop, rather than a true test.
 tagCheck :: Int -> Int -> Int -> Int -> Ident -> Placed Stmt
 tagCheck numConsts numNonConsts tag tagLimit varName =
+    let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
     -- If there are any constant constructors, be sure it's not one of them
     let tests =
           (case numConsts of
@@ -635,7 +637,7 @@ tagCheck numConsts numNonConsts tag tagLimit varName =
            if tag > tagLimit
            then [Unplaced $ ForeignCall "lpvm" "access" []
                  [Unplaced $ varGet varName,
-                  Unplaced $ iVal 0,
+                  Unplaced $ iVal (0 - startOffset),
                   Unplaced $ varSet "$tag"],
                  comparison "eq" (varGet "$tag") (iVal tag)]
            else [])
@@ -656,6 +658,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
                   tag tagLimit (field,fieldtype,rep,offset) =
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
+    let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
     let detism = if numConsts + numNonConsts == 1 then Det else SemiDet
         -- Set the "noalias" flag when all other fields (exclude the one
         -- that is being changed) in this struct aren't [Address].
@@ -672,7 +675,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
         -- Code to access the selected field
          [Unplaced $ ForeignCall "lpvm" "access" []
           [Unplaced $ varGet "$rec",
-           Unplaced $ iVal (offset - tag),
+           Unplaced $ iVal (offset - startOffset),
            Unplaced $ varSet "$"]])
         pos,
         -- The setter:
@@ -686,10 +689,10 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
          [Unplaced $ ForeignCall "lpvm" "mutate" flags
           [Unplaced $ Typed (Var "$rec" ParamInOut $ Implicit pos)
                       rectype False,
-           Unplaced $ iVal (offset - tag),
+           Unplaced $ iVal (offset - startOffset),
            Unplaced $ iVal 0,    -- May be changed to 1 by CTGC transform
            Unplaced $ iVal size,
-           Unplaced $ iVal tag,
+           Unplaced $ iVal startOffset,
            Unplaced $ varGet "$field"]])
         pos]
 
