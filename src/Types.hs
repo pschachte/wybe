@@ -1610,16 +1610,19 @@ checkLPVMArgs "alloc" _ [sz,struct] stmt pos typing =
       typing
 checkLPVMArgs "alloc" _ args stmt pos typing =
     typeError (ReasonForeignArity "alloc" (length args) 2 pos) typing
-checkLPVMArgs "access" _ [struct,offset,size,val] stmt pos typing =
+checkLPVMArgs "access" _ [struct,offset,size,startOffset,val] stmt pos typing =
     reportErrorUnless (ReasonForeignArgRep "access" 1 struct "address" pos)
     (struct == Address)
     $ reportErrorUnless (ReasonForeignArgRep "access" 2 offset "integer" pos)
       (integerTypeRep offset)
-    $ reportErrorUnless (ReasonForeignArgRep "access" 3 size "integer" pos)
+    $ reportErrorUnless
+      (ReasonForeignArgRep "access" 3 startOffset "integer" pos)
+      (integerTypeRep startOffset)
+    $ reportErrorUnless (ReasonForeignArgRep "access" 4 size "integer" pos)
       (integerTypeRep size)
     typing
 checkLPVMArgs "access" _ args stmt pos typing =
-    typeError (ReasonForeignArity "access" (length args) 4 pos) typing
+    typeError (ReasonForeignArity "access" (length args) 5 pos) typing
 checkLPVMArgs "mutate" _ [old,new,offset,destr,sz,start,val] stmt pos typing =
     reportErrorUnless (ReasonForeignArgRep "mutate" 1 old "address" pos)
     (old == Address)

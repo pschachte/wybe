@@ -614,7 +614,7 @@ updateDeadCellsByAccessArgs :: (AliasMapLocal, DeadCells) -> [PrimArg]
         -> Compiler DeadCells
 updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
     -- [struct:type, offset:int, size:int, ?member:type2]
-    let [struct@ArgVar{argVarName=varName}, _, ArgInt size _, _] = primArgs
+    let [struct@ArgVar{argVarName=varName}, _, ArgInt size _, _, _] = primArgs
     let size' = fromInteger size
     case isArgUnaliased aliasMap struct of
         Just requiredParams -> do 

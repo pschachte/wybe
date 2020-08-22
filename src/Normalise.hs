@@ -603,6 +603,7 @@ deconstructorItems ctorName typeSpec numConsts numNonConsts tag tagLimit
                                [Unplaced $ Var "$" ParamIn flowType,
                                 Unplaced $ iVal (aligned - startOffset),
                                 Unplaced $ iVal size,
+                                Unplaced $ iVal startOffset,
                                 Unplaced $ Var var ParamOut flowType]))
             fields)
         pos]
@@ -641,6 +642,7 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
                   Unplaced $ iVal (0 - startOffset),
                   Unplaced $ iVal $ trustFromJust
                              "unboxed type shouldn't have a secondary tag" size,
+                  Unplaced $ iVal startOffset,
                   Unplaced $ varSet "$tag"],
                  comparison "eq" (varGet "$tag") (iVal tag)]
            else [])
@@ -680,6 +682,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
           [Unplaced $ varGet "$rec",
            Unplaced $ iVal (offset - startOffset),
            Unplaced $ iVal size,
+           Unplaced $ iVal startOffset,
            Unplaced $ varSet "$"]])
         pos,
         -- The setter:
