@@ -81,10 +81,10 @@ entry:
 0: /=($left#0:person4.person, $right#0:person4.person, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:person4.person, 0:wybe.int, 16:wybe.int, ?tmp$4#0:wybe.string)
-    foreign lpvm access(~$left#0:person4.person, 8:wybe.int, 16:wybe.int, ?tmp$5#0:wybe.string)
-    foreign lpvm access($right#0:person4.person, 0:wybe.int, 16:wybe.int, ?tmp$6#0:wybe.string)
-    foreign lpvm access(~$right#0:person4.person, 8:wybe.int, 16:wybe.int, ?tmp$7#0:wybe.string)
+    foreign lpvm access($left#0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.string)
+    foreign lpvm access(~$left#0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.string)
+    foreign lpvm access($right#0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.string)
+    foreign lpvm access(~$right#0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$7#0:wybe.string)
     foreign c strcmp(~tmp$4#0:wybe.string, ~tmp$6#0:wybe.string, ?tmp$8#0:wybe.int) @wybe:nn:nn
     foreign llvm icmp eq(~tmp$8#0:wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool) @wybe:nn:nn
     case ~tmp$9#0:wybe.bool of
@@ -108,10 +108,10 @@ entry:
 0: =($left#0:person4.person, $right#0:person4.person, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:person4.person, 0:wybe.int, 16:wybe.int, ?$left$firstname#0:wybe.string)
-    foreign lpvm access(~$left#0:person4.person, 8:wybe.int, 16:wybe.int, ?$left$lastname#0:wybe.string)
-    foreign lpvm access($right#0:person4.person, 0:wybe.int, 16:wybe.int, ?$right$firstname#0:wybe.string)
-    foreign lpvm access(~$right#0:person4.person, 8:wybe.int, 16:wybe.int, ?$right$lastname#0:wybe.string)
+    foreign lpvm access($left#0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$firstname#0:wybe.string)
+    foreign lpvm access(~$left#0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$lastname#0:wybe.string)
+    foreign lpvm access($right#0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$firstname#0:wybe.string)
+    foreign lpvm access(~$right#0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$lastname#0:wybe.string)
     foreign c strcmp(~$left$firstname#0:wybe.string, ~$right$firstname#0:wybe.string, ?tmp$8#0:wybe.int) @wybe:nn:nn
     foreign llvm icmp eq(~tmp$8#0:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
     case ~tmp$2#0:wybe.bool of
@@ -128,7 +128,7 @@ firstname > public inline (0 calls)
 0: firstname($rec#0:person4.person, ?$#0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:person4.person, 0:wybe.int, 16:wybe.int, ?$#0:wybe.string)
+    foreign lpvm access(~$rec#0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.string)
 firstname > public inline (0 calls)
 1: firstname($rec#0:person4.person, ?$rec#1:person4.person, $field#0:wybe.string):
  AliasPairs: []
@@ -140,7 +140,7 @@ lastname > public inline (0 calls)
 0: lastname($rec#0:person4.person, ?$#0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:person4.person, 8:wybe.int, 16:wybe.int, ?$#0:wybe.string)
+    foreign lpvm access(~$rec#0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.string)
 lastname > public inline (0 calls)
 1: lastname($rec#0:person4.person, ?$rec#1:person4.person, $field#0:wybe.string):
  AliasPairs: []
@@ -159,8 +159,8 @@ person > public inline (4 calls)
 1: person(?firstname#0:wybe.string, ?lastname#0:wybe.string, $#0:person4.person):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($#0:person4.person, 0:wybe.int, 16:wybe.int, ?firstname#0:wybe.string)
-    foreign lpvm access(~$#0:person4.person, 8:wybe.int, 16:wybe.int, ?lastname#0:wybe.string)
+    foreign lpvm access($#0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname#0:wybe.string)
+    foreign lpvm access(~$#0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname#0:wybe.string)
 
   LLVM code       :
 

@@ -367,7 +367,7 @@ entry:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
-                    foreign lpvm access(~$left#0:multictr.complicated, -1:wybe.int, 8:wybe.int, ?$left$f02#0:wybe.int)
+                    foreign lpvm access(~$left#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$left$f02#0:wybe.int)
                     foreign llvm icmp uge($right#0:multictr.complicated, 4:wybe.int, ?tmp$18#0:wybe.bool)
                     case ~tmp$18#0:wybe.bool of
                     0:
@@ -381,7 +381,7 @@ entry:
                             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                         1:
-                            foreign lpvm access(~$right#0:multictr.complicated, -1:wybe.int, 8:wybe.int, ?$right$f02#0:wybe.int)
+                            foreign lpvm access(~$right#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$right$f02#0:wybe.int)
                             foreign llvm icmp eq(~$left$f02#0:wybe.int, ~$right$f02#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
@@ -405,7 +405,7 @@ entry:
                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                     1:
-                        foreign lpvm access(~$left#0:multictr.complicated, -1:wybe.int, 8:wybe.int, ?$left$f02#0:wybe.int)
+                        foreign lpvm access(~$left#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$left$f02#0:wybe.int)
                         foreign llvm icmp uge($right#0:multictr.complicated, 4:wybe.int, ?tmp$18#0:wybe.bool)
                         case ~tmp$18#0:wybe.bool of
                         0:
@@ -419,7 +419,7 @@ entry:
                                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                             1:
-                                foreign lpvm access(~$right#0:multictr.complicated, -1:wybe.int, 8:wybe.int, ?$right$f02#0:wybe.int)
+                                foreign lpvm access(~$right#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$right$f02#0:wybe.int)
                                 foreign llvm icmp eq(~$left$f02#0:wybe.int, ~$right$f02#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
@@ -427,7 +427,7 @@ entry:
 
 
             1:
-                foreign lpvm access(~$left#0:multictr.complicated, 0:wybe.int, 8:wybe.int, ?$left$f01#0:wybe.int)
+                foreign lpvm access(~$left#0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$f01#0:wybe.int)
                 foreign llvm icmp uge($right#0:multictr.complicated, 4:wybe.int, ?tmp$14#0:wybe.bool)
                 case ~tmp$14#0:wybe.bool of
                 0:
@@ -441,7 +441,7 @@ entry:
                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                     1:
-                        foreign lpvm access(~$right#0:multictr.complicated, 0:wybe.int, 8:wybe.int, ?$right$f01#0:wybe.int)
+                        foreign lpvm access(~$right#0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$f01#0:wybe.int)
                         foreign llvm icmp eq(~$left$f01#0:wybe.int, ~$right$f01#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
@@ -483,7 +483,7 @@ c01 > public inline test (7 calls)
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access(~$#0:multictr.complicated, 0:wybe.int, 8:wybe.int, ?f01#0:wybe.int)
+            foreign lpvm access(~$#0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?f01#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -513,7 +513,7 @@ c02 > public inline test (5 calls)
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access(~$#0:multictr.complicated, -1:wybe.int, 8:wybe.int, ?f02#0:wybe.int)
+            foreign lpvm access(~$#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?f02#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -536,7 +536,7 @@ f01 > public inline test (0 calls)
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access(~$rec#0:multictr.complicated, 0:wybe.int, 8:wybe.int, ?$#0:wybe.int)
+            foreign lpvm access(~$rec#0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -582,7 +582,7 @@ f02 > public inline test (0 calls)
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access(~$rec#0:multictr.complicated, -1:wybe.int, 8:wybe.int, ?$#0:wybe.int)
+            foreign lpvm access(~$rec#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -1144,14 +1144,14 @@ entry:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access(~$left#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, ?$left$value#0:wybe.int)
+            foreign lpvm access(~$left#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$value#0:wybe.int)
             foreign llvm icmp ne($right#0:multictr.maybe_int, 0:wybe.int, ?tmp$9#0:wybe.bool)
             case ~tmp$9#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
             1:
-                foreign lpvm access(~$right#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, ?$right$value#0:wybe.int)
+                foreign lpvm access(~$right#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$value#0:wybe.int)
                 foreign llvm icmp eq(~$left$value#0:wybe.int, ~$right$value#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
@@ -1177,7 +1177,7 @@ just > public inline test (5 calls)
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access(~$#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, ?value#0:wybe.int)
+        foreign lpvm access(~$#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?value#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -1199,7 +1199,7 @@ value > public inline test (0 calls)
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access(~$rec#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, ?$#0:wybe.int)
+        foreign lpvm access(~$rec#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 value > public inline test (0 calls)
@@ -1397,7 +1397,7 @@ if.else:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access(~$left#0:multictr.number, -1:wybe.int, 8:wybe.int, ?$left$float_value#0:wybe.float)
+            foreign lpvm access(~$left#0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$left$float_value#0:wybe.float)
             foreign llvm and($right#0:multictr.number, 7:wybe.int, ?tmp$15#0:wybe.int)
             foreign llvm icmp eq(~tmp$15#0:wybe.int, 1:wybe.int, ?tmp$16#0:wybe.bool)
             case ~tmp$16#0:wybe.bool of
@@ -1405,13 +1405,13 @@ if.else:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
             1:
-                foreign lpvm access(~$right#0:multictr.number, -1:wybe.int, 8:wybe.int, ?$right$float_value#0:wybe.float)
+                foreign lpvm access(~$right#0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$right$float_value#0:wybe.float)
                 foreign llvm fcmp eq(~$left$float_value#0:wybe.float, ~$right$float_value#0:wybe.float, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
 
     1:
-        foreign lpvm access(~$left#0:multictr.number, 0:wybe.int, 8:wybe.int, ?$left$int_value#0:wybe.int)
+        foreign lpvm access(~$left#0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$int_value#0:wybe.int)
         foreign llvm and($right#0:multictr.number, 7:wybe.int, ?tmp$12#0:wybe.int)
         foreign llvm icmp eq(~tmp$12#0:wybe.int, 0:wybe.int, ?tmp$13#0:wybe.bool)
         case ~tmp$13#0:wybe.bool of
@@ -1419,7 +1419,7 @@ if.else:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access(~$right#0:multictr.number, 0:wybe.int, 8:wybe.int, ?$right$int_value#0:wybe.int)
+            foreign lpvm access(~$right#0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$int_value#0:wybe.int)
             foreign llvm icmp eq(~$left$int_value#0:wybe.int, ~$right$int_value#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
@@ -1443,7 +1443,7 @@ float > public inline test (5 calls)
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access(~$#0:multictr.number, -1:wybe.int, 8:wybe.int, ?float_value#0:wybe.float)
+        foreign lpvm access(~$#0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?float_value#0:wybe.float)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -1459,7 +1459,7 @@ float_value > public inline test (0 calls)
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access(~$rec#0:multictr.number, -1:wybe.int, 8:wybe.int, ?$#0:wybe.float)
+        foreign lpvm access(~$rec#0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$#0:wybe.float)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 float_value > public inline test (0 calls)
@@ -1496,7 +1496,7 @@ int > public inline test (7 calls)
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access(~$#0:multictr.number, 0:wybe.int, 8:wybe.int, ?int_value#0:wybe.int)
+        foreign lpvm access(~$#0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?int_value#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -1512,7 +1512,7 @@ int_value > public inline test (0 calls)
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access(~$rec#0:multictr.number, 0:wybe.int, 8:wybe.int, ?$#0:wybe.int)
+        foreign lpvm access(~$rec#0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 int_value > public inline test (0 calls)
@@ -2178,8 +2178,8 @@ entry:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
-                    foreign lpvm access($left#0:multictr.simple, -1:wybe.int, 16:wybe.int, ?$left$two_field1#0:wybe.int)
-                    foreign lpvm access(~$left#0:multictr.simple, 7:wybe.int, 16:wybe.int, ?$left$two_field2#0:wybe.int)
+                    foreign lpvm access($left#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?$left$two_field1#0:wybe.int)
+                    foreign lpvm access(~$left#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?$left$two_field2#0:wybe.int)
                     foreign llvm icmp ne($right#0:multictr.simple, 0:wybe.int, ?tmp$19#0:wybe.bool)
                     case ~tmp$19#0:wybe.bool of
                     0:
@@ -2193,8 +2193,8 @@ entry:
                             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                         1:
-                            foreign lpvm access($right#0:multictr.simple, -1:wybe.int, 16:wybe.int, ?$right$two_field1#0:wybe.int)
-                            foreign lpvm access(~$right#0:multictr.simple, 7:wybe.int, 16:wybe.int, ?$right$two_field2#0:wybe.int)
+                            foreign lpvm access($right#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?$right$two_field1#0:wybe.int)
+                            foreign lpvm access(~$right#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?$right$two_field2#0:wybe.int)
                             foreign llvm icmp eq(~$left$two_field1#0:wybe.int, ~$right$two_field1#0:wybe.int, ?tmp$8#0:wybe.bool) @wybe:nn:nn
                             case ~tmp$8#0:wybe.bool of
                             0:
@@ -2225,8 +2225,8 @@ entry:
                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                     1:
-                        foreign lpvm access($left#0:multictr.simple, -1:wybe.int, 16:wybe.int, ?$left$two_field1#0:wybe.int)
-                        foreign lpvm access(~$left#0:multictr.simple, 7:wybe.int, 16:wybe.int, ?$left$two_field2#0:wybe.int)
+                        foreign lpvm access($left#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?$left$two_field1#0:wybe.int)
+                        foreign lpvm access(~$left#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?$left$two_field2#0:wybe.int)
                         foreign llvm icmp ne($right#0:multictr.simple, 0:wybe.int, ?tmp$19#0:wybe.bool)
                         case ~tmp$19#0:wybe.bool of
                         0:
@@ -2240,8 +2240,8 @@ entry:
                                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                             1:
-                                foreign lpvm access($right#0:multictr.simple, -1:wybe.int, 16:wybe.int, ?$right$two_field1#0:wybe.int)
-                                foreign lpvm access(~$right#0:multictr.simple, 7:wybe.int, 16:wybe.int, ?$right$two_field2#0:wybe.int)
+                                foreign lpvm access($right#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?$right$two_field1#0:wybe.int)
+                                foreign lpvm access(~$right#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?$right$two_field2#0:wybe.int)
                                 foreign llvm icmp eq(~$left$two_field1#0:wybe.int, ~$right$two_field1#0:wybe.int, ?tmp$8#0:wybe.bool) @wybe:nn:nn
                                 case ~tmp$8#0:wybe.bool of
                                 0:
@@ -2256,7 +2256,7 @@ entry:
 
 
             1:
-                foreign lpvm access(~$left#0:multictr.simple, 0:wybe.int, 8:wybe.int, ?$left$one_field#0:wybe.int)
+                foreign lpvm access(~$left#0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$one_field#0:wybe.int)
                 foreign llvm icmp ne($right#0:multictr.simple, 0:wybe.int, ?tmp$15#0:wybe.bool)
                 case ~tmp$15#0:wybe.bool of
                 0:
@@ -2270,7 +2270,7 @@ entry:
                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                     1:
-                        foreign lpvm access(~$right#0:multictr.simple, 0:wybe.int, 8:wybe.int, ?$right$one_field#0:wybe.int)
+                        foreign lpvm access(~$right#0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$one_field#0:wybe.int)
                         foreign llvm icmp eq(~$left$one_field#0:wybe.int, ~$right$one_field#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
@@ -2305,7 +2305,7 @@ one > public inline test (8 calls)
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access(~$#0:multictr.simple, 0:wybe.int, 8:wybe.int, ?one_field#0:wybe.int)
+            foreign lpvm access(~$#0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?one_field#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -2328,7 +2328,7 @@ one_field > public inline test (0 calls)
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access(~$rec#0:multictr.simple, 0:wybe.int, 8:wybe.int, ?$#0:wybe.int)
+            foreign lpvm access(~$rec#0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -2382,8 +2382,8 @@ two > public inline test (7 calls)
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access($#0:multictr.simple, -1:wybe.int, 16:wybe.int, ?two_field1#0:wybe.int)
-            foreign lpvm access(~$#0:multictr.simple, 7:wybe.int, 16:wybe.int, ?two_field2#0:wybe.int)
+            foreign lpvm access($#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?two_field1#0:wybe.int)
+            foreign lpvm access(~$#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?two_field2#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -2406,7 +2406,7 @@ two_field1 > public inline test (0 calls)
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access(~$rec#0:multictr.simple, -1:wybe.int, 16:wybe.int, ?$#0:wybe.int)
+            foreign lpvm access(~$rec#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?$#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -2452,7 +2452,7 @@ two_field2 > public inline test (0 calls)
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access(~$rec#0:multictr.simple, 7:wybe.int, 16:wybe.int, ?$#0:wybe.int)
+            foreign lpvm access(~$rec#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?$#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
