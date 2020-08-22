@@ -102,7 +102,7 @@ bar > public (1 calls)
 
         1:
             foreign lpvm access(~x#0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a#0:wybe.int)
-            foreign llvm move(~x#0:dead_cell_size.t, ?tmp$7#0:dead_cell_size.t)
+            foreign llvm sub(~x#0:dead_cell_size.t, 0:wybe.int, ?tmp$7#0:dead_cell_size.t)
             foreign lpvm mutate(~tmp$7#0:dead_cell_size.t, ?tmp$8#0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a#0:wybe.int)
             foreign llvm or(~tmp$8#0:dead_cell_size.t, 2:wybe.int, ?x#1:dead_cell_size.t)
 
@@ -150,7 +150,7 @@ diff_type > public (1 calls)
 
         1:
             foreign lpvm access(~x#0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a#0:wybe.int)
-            foreign lpvm cast(~x#0:dead_cell_size.t, ?tmp$9#0:dead_cell_size.t2)
+            foreign llvm sub(~x#0:dead_cell_size.t, 0:wybe.int, ?tmp$9#0:dead_cell_size.t2)
             foreign lpvm mutate(~tmp$9#0:dead_cell_size.t2, ?y#0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a#0:wybe.int)
 
 
@@ -522,10 +522,11 @@ if.then1:
   %24 = inttoptr i64 %"x#0" to i64* 
   %25 = getelementptr  i64, i64* %24, i64 0 
   %26 = load  i64, i64* %25 
-  %27 = inttoptr i64 %"x#0" to i64* 
+  %"4$tmp$7#0" = sub   i64 %"x#0", 0 
+  %27 = inttoptr i64 %"4$tmp$7#0" to i64* 
   %28 = getelementptr  i64, i64* %27, i64 0 
   store  i64 %26, i64* %28 
-  %"4$x#1" = or i64 %"x#0", 2 
+  %"4$x#1" = or i64 %"4$tmp$7#0", 2 
   ret i64 %"4$x#1" 
 if.else1:
   ret i64 %"x#0" 
@@ -590,10 +591,11 @@ if.then1:
   %47 = inttoptr i64 %"x#0" to i64* 
   %48 = getelementptr  i64, i64* %47, i64 0 
   %49 = load  i64, i64* %48 
-  %50 = inttoptr i64 %"x#0" to i64* 
+  %"4$tmp$9#0" = sub   i64 %"x#0", 0 
+  %50 = inttoptr i64 %"4$tmp$9#0" to i64* 
   %51 = getelementptr  i64, i64* %50, i64 0 
   store  i64 %49, i64* %51 
-  ret i64 %"x#0" 
+  ret i64 %"4$tmp$9#0" 
 if.else1:
   %52 = trunc i64 8 to i32  
   %53 = tail call ccc  i8*  @wybe_malloc(i32  %52)  

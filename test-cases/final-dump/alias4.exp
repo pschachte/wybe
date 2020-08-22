@@ -56,7 +56,7 @@ replicate1 > public (1 calls)
     foreign c print_int(~tmp$1#0:wybe.int, ~#io#1:wybe.phantom, ?tmp$14#0:wybe.phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
     foreign lpvm access(~p1#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.int)
-    foreign llvm move(~tmp$0#0:position.position, ?tmp$18#0:position.position)
+    foreign llvm sub(~tmp$0#0:position.position, 0:wybe.int, ?tmp$18#0:position.position)
     foreign lpvm mutate(~tmp$18#0:position.position, ?tmp$19#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:wybe.int)
     foreign lpvm mutate(~tmp$19#0:position.position, ?p2#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int)
 
@@ -175,14 +175,15 @@ entry:
   %36 = inttoptr i64 %"p1#0" to i64* 
   %37 = getelementptr  i64, i64* %36, i64 0 
   %38 = load  i64, i64* %37 
-  %39 = inttoptr i64 %25 to i64* 
+  %"1$tmp$18#0" = sub   i64 %25, 0 
+  %39 = inttoptr i64 %"1$tmp$18#0" to i64* 
   %40 = getelementptr  i64, i64* %39, i64 0 
   store  i64 %38, i64* %40 
-  %41 = add   i64 %25, 8 
+  %41 = add   i64 %"1$tmp$18#0", 8 
   %42 = inttoptr i64 %41 to i64* 
   %43 = getelementptr  i64, i64* %42, i64 0 
   store  i64 200, i64* %43 
-  ret i64 %25 
+  ret i64 %"1$tmp$18#0" 
 }
 --------------------------------------------------
  Module position

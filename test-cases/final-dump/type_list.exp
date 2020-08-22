@@ -76,7 +76,7 @@ AFTER EVERYTHING:
         foreign lpvm access(x#0:type_list.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~x#0:type_list.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:type_list.intlist)
         type_list.++<0>[04d1467a4d](~t#0:type_list.intlist, ~y#0:type_list.intlist, ?tmp$2#0:type_list.intlist) #1 @type_list:5:13
-        foreign llvm move(~x#0:type_list.intlist, ?tmp$8#0:type_list.intlist)
+        foreign llvm sub(~x#0:type_list.intlist, 0:wybe.int, ?tmp$8#0:type_list.intlist)
         foreign lpvm mutate(~tmp$8#0:type_list.intlist, ?tmp$9#0:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$9#0:type_list.intlist, ?$#0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:type_list.intlist)
 
@@ -215,14 +215,15 @@ if.then:
   %61 = getelementptr  i64, i64* %60, i64 0 
   %62 = load  i64, i64* %61 
   %"2$tmp$2#0" = tail call fastcc  i64  @"type_list.++<0>[04d1467a4d]"(i64  %62, i64  %"y#0")  
-  %63 = inttoptr i64 %"x#0" to i64* 
+  %"2$tmp$8#0" = sub   i64 %"x#0", 0 
+  %63 = inttoptr i64 %"2$tmp$8#0" to i64* 
   %64 = getelementptr  i64, i64* %63, i64 0 
   store  i64 %58, i64* %64 
-  %65 = add   i64 %"x#0", 8 
+  %65 = add   i64 %"2$tmp$8#0", 8 
   %66 = inttoptr i64 %65 to i64* 
   %67 = getelementptr  i64, i64* %66, i64 0 
   store  i64 %"2$tmp$2#0", i64* %67 
-  ret i64 %"x#0" 
+  ret i64 %"2$tmp$8#0" 
 if.else:
   ret i64 %"y#0" 
 }

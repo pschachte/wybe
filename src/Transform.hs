@@ -156,19 +156,18 @@ transformPrim callSiteMap ((aliasMap, deadCells), prims) prim = do
                         assignDeadCellsByAllocArgs deadCells args
                 let primc' = case result of 
                         Nothing -> primc
-                        Just (selectedCell, []) -> 
-                            -- replace "alloc" with "move/cast" by reusing the 
-                            -- "selectedCell".
+                        Just ((selectedCell, startOffset), []) -> 
+                            -- avoid "alloc" by reusing the "selectedCell".
                             let [_, varOut] = args in
                             -- Be aware that this will make the previous final
                             -- flag of "selectedCell" outdated.
-                            (if argType selectedCell == argType varOut
-                            then PrimForeign "llvm" "move"
-                            else PrimForeign "lpvm" "cast")
-                                    [] [selectedCell, varOut]
+                            -- TODO: we should consider using BodyBuilder for
+                            -- the transform.
+                            PrimForeign "llvm" "sub" []
+                                    [selectedCell, startOffset, varOut]
                         _ -> shouldnt "invalid aliasMap for transform"
                 when (Maybe.isJust result) $ 
-                        logTransform "replacing [alloc] with [move/cast]."
+                        logTransform "avoid using [alloc]."
                 return (primc', deadCells')
             -- default case
             _ -> return (primc, deadCells)

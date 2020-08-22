@@ -48,11 +48,11 @@ type AliasMapLocal = DisjointSet AliasMapLocalItem
 
 -- For each size, record all reusable cells, more on this can be found under
 -- the "Dead Memory Cell Analysis" section below.
--- Each reusable cell is recorded as "(var, requiredParams)"". "var" is the
--- variable (copy from it's last access) that can be reused and requiredParams
--- is a list of parameters that need to be non-aliased before reusing that cell
--- (caused by "MaybeAliasByParam").
-type DeadCells = Map Int [(PrimArg, [PrimVarName])]
+-- Each reusable cell is recorded as "((var, startOffset), requiredParams)".
+-- "var" is the variable (copy from it's last access) that can be reused 
+-- and requiredParams is a list of parameters that need to be non-aliased
+-- before reusing that cell (caused by "MaybeAliasByParam").
+type DeadCells = Map Int [((PrimArg, PrimArg), [PrimVarName])]
 
 
 -- Intermediate data structure used during the analysis
@@ -614,14 +614,15 @@ updateDeadCellsByAccessArgs :: (AliasMapLocal, DeadCells) -> [PrimArg]
         -> Compiler DeadCells
 updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
     -- [struct:type, offset:int, size:int, ?member:type2]
-    let [struct@ArgVar{argVarName=varName}, _, ArgInt size _, _, _] = primArgs
+    let [struct@ArgVar{argVarName=varName}, _,
+            ArgInt size _, startOffset, _] = primArgs
     let size' = fromInteger size
     case isArgUnaliased aliasMap struct of
         Just requiredParams -> do 
             logAlias $ "Found new dead cell: " ++ show varName 
                     ++ " size:" ++ show size' ++ " requiredParams:"
                     ++ show requiredParams
-            let newCell = (struct, requiredParams)
+            let newCell = ((struct, startOffset), requiredParams)
             return $ Map.alter (\x ->
                 (case x of 
                     Nothing -> [newCell]
@@ -633,12 +634,12 @@ updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
 -- Try to assign a dead cell to reuse for the given "alloc" instruction.
 -- It returns "(result, deadCells)". "result" is "Nothing" when there isn't a
 -- suitable dead cell to reuse. Otherwise, result is 
--- "Just (selectedCell, requiredParams)". "requiredParams" contains parameters
--- that need to be non-aliased before reusing the "selectedCell" (Caused by
--- "MaybeAliasByParam"). Note that this always tries to assigned a cell with
--- empty "requiredParams" first.
+-- "Just ((selectedCell, startOffset), requiredParams)". "requiredParams"
+-- contains parameters that need to be non-aliased before reusing the
+-- "selectedCell" (Caused by "MaybeAliasByParam"). Note that this always tries
+-- to assigned a cell with empty "requiredParams" first.
 assignDeadCellsByAllocArgs :: DeadCells -> [PrimArg] 
-        -> (Maybe (PrimArg, [PrimVarName]), DeadCells)
+        -> (Maybe ((PrimArg, PrimArg), [PrimVarName]), DeadCells)
 assignDeadCellsByAllocArgs deadCells primArgs =
     -- [size:int, ?struct:type]
     let [ArgInt size _, struct] = primArgs in
