@@ -1,0 +1,82 @@
+pub type t { pub
+       c01(f01:int)
+     | c02
+     | c03(f03:int)
+     | c04(f04:int)
+     | c05(f05:int)
+     | c06(f06:int)
+     | c07(f07:int)
+     | c08(f08_a:int, f08_b:int, f08_c:float)
+     | c09(f09:int)
+     | c10
+}
+
+pub def print_t(x: t) use !io {
+    if { c01(?a) = x ::
+        !print("c01(")
+        !print(a)
+        !print(")")
+    | c02 = x ::
+        !print("c02")
+    | c03(?a) = x ::
+        !print("c03(")
+        !print(a)
+        !print(")")
+    | c04(?a) = x ::
+        !print("c04(")
+        !print(a)
+        !print(")")
+    | c05(?a) = x ::
+        !print("c05(")
+        !print(a)
+        !print(")")
+    | c06(?a) = x ::
+        !print("c06(")
+        !print(a)
+        !print(")")
+    | c07(?a) = x ::
+        !print("c07(")
+        !print(a)
+        !print(")")
+    | c08(?a, ?b, ?c) = x ::
+        !print("c08(")
+        !print(a)
+        !print(", ")
+        !print(b)
+        !print(", ")
+        !print(c)
+        !print(")")
+    | c09(?a) = x ::
+        !print("c09(")
+        !print(a)
+        !print(")")
+    | c10 = x ::
+        !print("c10")
+    }
+    !nl
+}
+
+
+?x = c09(100)
+!print_t(x)
+?y = x
+if { f09(!x, 99) ::
+    !print_t(x)
+    !print_t(y)
+}
+
+# XXX the code below doesn't work for now, because the dead cell reusing can't
+# handle the case where constructors of the same type have different size.
+# Will be fixed later.
+
+# if { c09(?a) = x ::
+#     ?x = c08(1, a, 0.5)
+#     !print_t(x)
+#     !print_t(y)
+# }
+# ?x = c01(6)
+# ?y = c02
+# ?z = c10
+# !print_t(x)
+# !print_t(y)
+# !print_t(z)
