@@ -1,14 +1,13 @@
+
 pub type t { pub
        c01(f01:int)
-     | c02
+     | c02(f02:int)
      | c03(f03:int)
      | c04(f04:int)
      | c05(f05:int)
      | c06(f06:int)
      | c07(f07:int)
      | c08(f08_a:int, f08_b:int, f08_c:float)
-     | c09(f09:int)
-     | c10
 }
 
 pub def print_t(x: t) use !io {
@@ -16,8 +15,10 @@ pub def print_t(x: t) use !io {
         !print("c01(")
         !print(a)
         !print(")")
-    | c02 = x ::
-        !print("c02")
+    | c02(?a) = x ::
+        !print("c03(")
+        !print(a)
+        !print(")")
     | c03(?a) = x ::
         !print("c03(")
         !print(a)
@@ -46,33 +47,6 @@ pub def print_t(x: t) use !io {
         !print(", ")
         !print(c)
         !print(")")
-    | c09(?a) = x ::
-        !print("c09(")
-        !print(a)
-        !print(")")
-    | c10 = x ::
-        !print("c10")
     }
     !nl
 }
-
-
-?x = c09(100)
-!print_t(x)
-?y = x
-if { f09(!x, 99) ::
-    !print_t(x)
-    !print_t(y)
-}
-
-if { c09(?a) = x ::
-    ?x = c08(1, a, 0.5)
-    !print_t(x)
-    !print_t(y)
-}
-?x = c01(6)
-?y = c02
-?z = c10
-!print_t(x)
-!print_t(y)
-!print_t(z)
