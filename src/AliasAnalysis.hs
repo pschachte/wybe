@@ -613,22 +613,25 @@ updateDeadCellsByPrim proto (aliasMap, interestingCallProperties, deadCells)
 updateDeadCellsByAccessArgs :: (AliasMapLocal, DeadCells) -> [PrimArg]
         -> Compiler DeadCells
 updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
-    -- [struct:type, offset:int, size:int, ?member:type2]
-    let [struct@ArgVar{argVarName=varName}, _,
-            ArgInt size _, startOffset, _] = primArgs
-    let size' = fromInteger size
-    case isArgUnaliased aliasMap struct of
-        Just requiredParams -> do 
-            logAlias $ "Found new dead cell: " ++ show varName 
-                    ++ " size:" ++ show size' ++ " requiredParams:"
-                    ++ show requiredParams
-            let newCell = ((struct, startOffset), requiredParams)
-            return $ Map.alter (\x ->
-                (case x of 
-                    Nothing -> [newCell]
-                    Just cells -> newCell:cells) |> Just) size' deadCells
-        Nothing ->
-            return deadCells
+    -- [struct:type, offset:int, size:int, startOffset:int, ?member:type2]
+    let [struct@ArgVar{argVarName=varName}, _, size, startOffset, _] = primArgs
+    case size of
+        ArgInt size _ -> 
+            let size' = fromInteger size in
+            case isArgUnaliased aliasMap struct of
+                Just requiredParams -> do 
+                    logAlias $ "Found new dead cell: " ++ show varName 
+                            ++ " size:" ++ show size' ++ " requiredParams:"
+                            ++ show requiredParams
+                    let newCell = ((struct, startOffset), requiredParams)
+                    return $ Map.alter (\x ->
+                        (case x of 
+                            Nothing -> [newCell]
+                            Just cells -> newCell:cells) |> Just)
+                                    size' deadCells
+                Nothing ->
+                    return deadCells
+        _ -> return deadCells
 
 
 -- Try to assign a dead cell to reuse for the given "alloc" instruction.
