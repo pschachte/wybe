@@ -7,13 +7,13 @@
 --
 --  This code transforms loops into fresh recursive procs, and ensures
 --  that all conditionals are the last statements in their respective
---  bodies.  Note that conditionals can be nested, but at the end of
---  the conditional, they must return to the caller.  This is handled
---  by introducing a fresh proc for any code that follows the
---  conditional.  The reason for this transformation is that a later
---  pass will convert to a logic programming form which implements
---  conditionals with separate clauses, each of which returns on
---  completion.
+--  bodies. Note that conditionals can be nested, but at the end of
+--  the conditional, they must return to the caller. This is handled
+--  by introducing a fresh continuation proc for any code that follows
+--  the conditional. The reason for this transformation is that a
+--  later pass will convert to a logic programming form which
+--  implements conditionals with separate clauses, each of which
+--  returns on completion.
 --
 --  Loops are a little more complicated.  do a b end c d would be
 --  transformed into next1, where next1 is defined as def next1: a b
@@ -65,17 +65,18 @@ import Options (LogSelection(Unbranch))
 
 
 -- |Transform away all loops, and all conditionals other than as the
---  final statement in their block.  Transform all semidet code into
---  conditional code that ends with a TestBool.  Transform away all
---  conjunctions, disjunctions, and negations.  After this, all bodies
---  comprise a sequence of ProcCall, ForeignCall, TestBool, Cond, and
---  Nop statements.  Furthermore,  Cond statements can only be the final
---  Stmt in a body, the condition of a Cond can only be a single TestBool
---  statement, and TestBool statements can only appear as the
---  condition of a Cond, or, in the case of a SemiDet proc, as the final
---  statement of a proc body.  Every SemiDet proc body must end with a
---  TestBool, or a tail call to a SemiDet proc, or a fork each of whose
---  branches satisfies this constraint.
+--  final statement in their block. Transform all semidet code into
+--  conditional code that ends with a TestBool or a call to a semidet
+--  proc. Transform all conjunctions, disjunctions, and
+--  negations into conditionals. After this, all bodies comprise a sequence of ProcCall,
+--  ForeignCall, TestBool, Cond, and Nop statements. Furthermore, Cond
+--  statements can only be the final Stmt in a body, the condition of
+--  a Cond can only be a single TestBool statement, and TestBool
+--  statements can only appear as the condition of a Cond, or, in the
+--  case of a SemiDet proc, as the final statement of a proc body.
+--  Every SemiDet proc body must end with a TestBool, or a tail call
+--  to a SemiDet proc, or a fork each of whose branches satisfies this
+--  constraint.
 
 unbranchProc :: ProcDef -> Compiler ProcDef
 unbranchProc = unbranchProc' Nothing
@@ -304,7 +305,7 @@ unbranchStmt SemiDet stmt@(ProcCall md name procID SemiDet _ args) pos stmts =
     logUnbranch $ "#Converted SemiDet proc call" ++ show stmt
     logUnbranch $ "#To: " ++ showBody 4 result
     return result
-unbranchStmt detism stmt@(ProcCall _ _ _ _ False args) pos stmts = do
+unbranchStmt detism stmt@(ProcCall _ _ _ Det False args) pos stmts = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
     defArgs args
     leaveStmtAsIs detism stmt pos stmts
