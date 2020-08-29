@@ -1,0 +1,62 @@
+pub type t { pub ta | tb(tb1:int) | tc(tc1:int, tc2:int, tc3:int) | td(td1:int) }
+pub type t2 { pub t2a | t2b(a:int) }
+
+pub def print_t(x: t) use !io {
+    if { ta = x ::
+        !print("ta")
+    | tb(?a) = x ::
+        !print("tb(")
+        !print(a)
+        !print(")")
+    | tc(?a, ?b, ?c) = x ::
+        !print("tc(")
+        !print(a)
+        !print(",")
+        !print(b)
+        !print(",")
+        !print(c)
+        !print(")")
+    | td(?a) = x ::
+        !print("td(")
+        !print(a)
+        !print(")")
+    }
+    !nl
+}
+
+pub def print_t2(x: t2) use !io {
+    if { t2a = x ::
+        !print("t2a")
+    | t2b(?a) = x ::
+        !print("t2b(")
+        !print(a)
+        !print(")")
+    }
+    !nl
+}
+
+# x shouldn't be interesting
+pub def foo(!x:t) {
+    if { tb(?a) = x ::
+        ?x = tc(a, 2, 3)
+    }
+}
+
+# x should be interesting
+pub def bar(!x:t) {
+    if { tb(?a) = x ::
+        ?x = td(a)
+    }
+}
+
+pub def diff_type(x:t, ?y:t2) {
+    if { tb(?a) = x ::
+        ?y = t2b(a)
+    | otherwise ::
+        ?y = t2b(-1)
+    }
+}
+
+!print_t(foo(tb(9)))
+!print_t(bar(tb(9)))
+!print_t2(diff_type(tb(9)))

@@ -712,7 +712,7 @@ cgenLPVM "alloc" [] args@[sizeArg,addrArg] = do
               shouldnt $ "alloc instruction with " ++ show (length inputs)
                          ++ " inputs"
 
-cgenLPVM "access" [] args@[addrArg,offsetArg,val] = do
+cgenLPVM "access" [] args@[addrArg,offsetArg,_,_,val] = do
           logCodegen $ "lpvm access " ++ show addrArg ++ " " ++ show offsetArg
                  ++ " " ++ show val
           baseAddr <- cgenArg addrArg
@@ -725,34 +725,37 @@ cgenLPVM "access" [] args@[addrArg,offsetArg,val] = do
           return $ Just op
 
 cgenLPVM "mutate" flags
-    [addrArg, outArg, offsetArg, ArgInt 0 intTy, sizeArg, tagArg, valArg] = do
+    [addrArg, outArg, offsetArg, ArgInt 0 intTy, sizeArg, startOffsetArg,
+        valArg] = do
          -- Non-destructive case:  copy structure before mutating
           logCodegen $ "lpvm mutate " ++ show addrArg
                        ++ " " ++ show outArg
                        ++ " " ++ show offsetArg ++ " *nondestructive*"
                        ++ " " ++ show sizeArg
-                       ++ " " ++ show tagArg
+                       ++ " " ++ show startOffsetArg
                        ++ " " ++ show valArg
           -- First copy the structure
           outRep <- lift $ typeRep $ argType addrArg
           let outTy = repLLVMType outRep
-          op <- gcAllocate sizeArg outTy
-          assign (pullName outArg) op outRep
+          allocAddr <- gcAllocate sizeArg outTy
+          outAddr <- offsetAddr allocAddr iadd startOffsetArg
+          assign (pullName outArg) outAddr outRep
           taggedAddr <- cgenArg addrArg
-          baseAddr <- offsetAddr taggedAddr isub tagArg
-          callMemCpy op baseAddr sizeArg
+          baseAddr <- offsetAddr taggedAddr isub startOffsetArg
+          callMemCpy allocAddr baseAddr sizeArg
           -- Now destructively mutate the copy
           cgenLPVM "mutate" flags
-            [outArg, outArg, offsetArg, ArgInt 1 intTy, sizeArg, tagArg,
+            [outArg, outArg, offsetArg, ArgInt 1 intTy, sizeArg, startOffsetArg,
              valArg]
 cgenLPVM "mutate" _
-    [addrArg, outArg, offsetArg, (ArgInt 1 _), sizeArg, tagArg, valArg] = do
+    [addrArg, outArg, offsetArg, (ArgInt 1 _), sizeArg, startOffsetArg,
+        valArg] = do
          -- Destructive case:  just mutate
           logCodegen $ "lpvm mutate " ++ show addrArg
                        ++ " " ++ show outArg
                        ++ " " ++ show offsetArg ++ " *destructive*"
                        ++ " " ++ show sizeArg
-                       ++ " " ++ show tagArg
+                       ++ " " ++ show startOffsetArg
                        ++ " " ++ show valArg
           baseAddr <- cgenArg addrArg
           gcMutate baseAddr offsetArg valArg
