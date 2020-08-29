@@ -68,8 +68,6 @@ pub def using_until use !io {
     }
 }
 
-!using_until
-
 pub def using_when use !io {
     ?x = [1, 2, 3, 4]
 
@@ -88,8 +86,48 @@ pub def using_unless use !io {
     }
 }
 
-#    int_sequence(start: int, stride: int, end: int)
-#
-#    def [|](?head: int, ?next: int_sequence, current: int_sequence, ?has_next: bool) {
-#    }
-#}
+pub type int_sequence {
+    pub int_sequence(start: int, stride: int, end: int)
+
+    pub def test `[|]`(?value: int, ?rest: int_sequence, current: int_sequence) {
+        int_sequence(?s, ?st, ?en, current)
+
+        if {
+            st < 0 :: (s > en)
+            | otherwise :: (s < en)
+        }
+
+        ?value = s
+        ?rest = int_sequence(s + st, st, en)
+    }
+}
+
+pub def xrange(start: int, stride: int, end: int): int_sequence =
+    int_sequence(start, stride, end)
+
+pub def irange(start: int, stride: int, end: int): int_sequence =
+    int_sequence(start, stride, if stride < 0 then end - 1 else end+1)
+
+pub def using_xrange use !io {
+    for i in xrange(1, 1, 10) {
+        !println(i)
+    }
+}
+
+pub def using_xrange_reverse use !io {
+    for i in xrange(10, -1, 1) {
+        !println(i)
+    }
+}
+
+pub def using_irange use !io {
+    for i in irange(1, 1, 10) {
+        !println(i)
+    }
+}
+
+pub def using_irange_reverse use !io {
+    for i in irange(10, -1, 1) {
+        !println(i)
+    }
+}
