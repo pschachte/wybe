@@ -202,14 +202,14 @@ entry:
     foreign lpvm access(~$left#0:student.course, 8:wybe.int, ?$left$name#0:wybe.string)
     foreign lpvm access($right#0:student.course, 0:wybe.int, ?$right$code#0:wybe.int)
     foreign lpvm access(~$right#0:student.course, 8:wybe.int, ?$right$name#0:wybe.string)
-    foreign llvm icmp eq(~$left$code#0:wybe.int, ~$right$code#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
-    case ~tmp$2#0:wybe.bool of
+    foreign llvm icmp eq(~$left$code#0:wybe.int, ~$right$code#0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign c strcmp(~$left$name#0:wybe.string, ~$right$name#0:wybe.string, ?tmp$10#0:wybe.int) @wybe:nn:nn
-        foreign llvm icmp eq(~tmp$10#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+        foreign c strcmp(~$left$name#0:wybe.string, ~$right$name#0:wybe.string, ?tmp$9#0:wybe.int) @wybe:nn:nn
+        foreign llvm icmp eq(~tmp$9#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
 
@@ -312,11 +312,11 @@ entry:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"tmp$2#0" = icmp eq i64 %17, %24 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"tmp$1#0" = icmp eq i64 %17, %24 
+  br i1 %"tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$10#0" = tail call ccc  i64  @strcmp(i64  %21, i64  %28)  
-  %"$$#0" = icmp eq i64 %"tmp$10#0", 0 
+  %"tmp$9#0" = tail call ccc  i64  @strcmp(i64  %21, i64  %28)  
+  %"$$#0" = icmp eq i64 %"tmp$9#0", 0 
   ret i1 %"$$#0" 
 if.else:
   ret i1 0 
@@ -462,24 +462,24 @@ entry:
     foreign lpvm access(~$left#0:student.student, 8:wybe.int, ?$left$major#0:student.course)
     foreign lpvm access($right#0:student.student, 0:wybe.int, ?$right$id#0:wybe.int)
     foreign lpvm access(~$right#0:student.student, 8:wybe.int, ?$right$major#0:student.course)
-    foreign llvm icmp eq(~$left$id#0:wybe.int, ~$right$id#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
-    case ~tmp$2#0:wybe.bool of
+    foreign llvm icmp eq(~$left$id#0:wybe.int, ~$right$id#0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access($left$major#0:student.course, 0:wybe.int, ?tmp$12#0:wybe.int)
-        foreign lpvm access(~$left$major#0:student.course, 8:wybe.int, ?tmp$13#0:wybe.string)
-        foreign lpvm access($right$major#0:student.course, 0:wybe.int, ?tmp$14#0:wybe.int)
-        foreign lpvm access(~$right$major#0:student.course, 8:wybe.int, ?tmp$15#0:wybe.string)
-        foreign llvm icmp eq(~tmp$12#0:wybe.int, ~tmp$14#0:wybe.int, ?tmp$16#0:wybe.bool) @wybe:nn:nn
-        case ~tmp$16#0:wybe.bool of
+        foreign lpvm access($left$major#0:student.course, 0:wybe.int, ?tmp$10#0:wybe.int)
+        foreign lpvm access(~$left$major#0:student.course, 8:wybe.int, ?tmp$11#0:wybe.string)
+        foreign lpvm access($right$major#0:student.course, 0:wybe.int, ?tmp$12#0:wybe.int)
+        foreign lpvm access(~$right$major#0:student.course, 8:wybe.int, ?tmp$13#0:wybe.string)
+        foreign llvm icmp eq(~tmp$10#0:wybe.int, ~tmp$12#0:wybe.int, ?tmp$14#0:wybe.bool) @wybe:nn:nn
+        case ~tmp$14#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign c strcmp(~tmp$13#0:wybe.string, ~tmp$15#0:wybe.string, ?tmp$24#0:wybe.int) @wybe:nn:nn
-            wybe.int.=<0>(~tmp$24#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+            foreign c strcmp(~tmp$11#0:wybe.string, ~tmp$13#0:wybe.string, ?tmp$22#0:wybe.int) @wybe:nn:nn
+            wybe.int.=<0>(~tmp$22#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
 
@@ -605,8 +605,8 @@ entry:
   %40 = inttoptr i64 %39 to i64* 
   %41 = getelementptr  i64, i64* %40, i64 0 
   %42 = load  i64, i64* %41 
-  %"tmp$2#0" = icmp eq i64 %31, %38 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"tmp$1#0" = icmp eq i64 %31, %38 
+  br i1 %"tmp$1#0", label %if.then, label %if.else 
 if.then:
   %43 = inttoptr i64 %35 to i64* 
   %44 = getelementptr  i64, i64* %43, i64 0 
@@ -622,13 +622,13 @@ if.then:
   %54 = inttoptr i64 %53 to i64* 
   %55 = getelementptr  i64, i64* %54, i64 0 
   %56 = load  i64, i64* %55 
-  %"tmp$16#0" = icmp eq i64 %45, %52 
-  br i1 %"tmp$16#0", label %if.then1, label %if.else1 
+  %"tmp$14#0" = icmp eq i64 %45, %52 
+  br i1 %"tmp$14#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
-  %"tmp$24#0" = tail call ccc  i64  @strcmp(i64  %49, i64  %56)  
-  %"$$#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %"tmp$24#0", i64  0)  
+  %"tmp$22#0" = tail call ccc  i64  @strcmp(i64  %49, i64  %56)  
+  %"$$#0" = tail call fastcc  i1  @"wybe.int.=<0>"(i64  %"tmp$22#0", i64  0)  
   ret i1 %"$$#0" 
 if.else1:
   ret i1 0 

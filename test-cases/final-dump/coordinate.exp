@@ -175,14 +175,14 @@ entry:
     foreign lpvm access($right#0:coordinate.Coordinate, 0:wybe.int, ?$right$x#0:wybe.int)
     foreign lpvm access($right#0:coordinate.Coordinate, 8:wybe.int, ?$right$y#0:wybe.int)
     foreign lpvm access(~$right#0:coordinate.Coordinate, 16:wybe.int, ?$right$z#0:wybe.int)
-    foreign llvm icmp eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
-    case ~tmp$2#0:wybe.bool of
+    foreign llvm icmp eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
-        case ~tmp$3#0:wybe.bool of
+        foreign llvm icmp eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
+        case ~tmp$2#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
@@ -322,11 +322,11 @@ entry:
   %42 = inttoptr i64 %41 to i64* 
   %43 = getelementptr  i64, i64* %42, i64 0 
   %44 = load  i64, i64* %43 
-  %"tmp$2#0" = icmp eq i64 %25, %36 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"tmp$1#0" = icmp eq i64 %25, %36 
+  br i1 %"tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$3#0" = icmp eq i64 %29, %40 
-  br i1 %"tmp$3#0", label %if.then1, label %if.else1 
+  %"tmp$2#0" = icmp eq i64 %29, %40 
+  br i1 %"tmp$2#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:

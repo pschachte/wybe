@@ -78,8 +78,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
     foreign lpvm access(~$left#0:position_float.position, 8:wybe.int, ?$left$y#0:wybe.float)
     foreign lpvm access($right#0:position_float.position, 0:wybe.int, ?$right$x#0:wybe.float)
     foreign lpvm access(~$right#0:position_float.position, 8:wybe.int, ?$right$y#0:wybe.float)
-    foreign llvm fcmp eq(~$left$x#0:wybe.float, ~$right$x#0:wybe.float, ?tmp$2#0:wybe.bool) @wybe:nn:nn
-    case ~tmp$2#0:wybe.bool of
+    foreign llvm fcmp eq(~$left$x#0:wybe.float, ~$right$x#0:wybe.float, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
@@ -183,8 +183,8 @@ entry:
   %26 = inttoptr i64 %25 to double* 
   %27 = getelementptr  double, double* %26, i64 0 
   %28 = load  double, double* %27 
-  %"tmp$2#0" = fcmp oeq double %17, %24 
-  br i1 %"tmp$2#0", label %if.then, label %if.else 
+  %"tmp$1#0" = fcmp oeq double %17, %24 
+  br i1 %"tmp$1#0", label %if.then, label %if.else 
 if.then:
   %"$$#0" = fcmp oeq double %21, %28 
   ret i1 %"$$#0" 

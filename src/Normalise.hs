@@ -934,7 +934,7 @@ equalityBody consts [] _ = ([equalityConsts consts],True)
 equalityBody consts nonconsts _ =
     -- decide whether $left is const or non const, and handle accordingly
     ([Unplaced $ Cond (comparison "uge"
-                         (lpvmCastExp (varGet "$left") intType)
+                         (castTo (varGet "$left") intType)
                          (iVal $ length consts))
                 [equalityNonconsts (content <$> nonconsts) (List.null consts)]
                 [equalityConsts consts]

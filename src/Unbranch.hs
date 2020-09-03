@@ -223,9 +223,9 @@ newProcName = lift genProcName
 
 
 -- |Create, unbranch, and record a new proc with the specified proto and body.
-genProc :: Maybe LoopInfo -> ProcProto -> Determinism
-        -> [Placed Stmt] -> [Placed Stmt] -> Unbrancher ()
-genProc loopinfo proto detism stmts alt = do
+genProc :: Maybe LoopInfo -> ProcProto -> Determinism -> [Placed Stmt]
+        -> Unbrancher ()
+genProc loopinfo proto detism stmts = do
     let name = procProtoName proto
     tmpCtr <- gets brTempCtr
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr
@@ -415,7 +415,11 @@ unbranchStmt detism (Cond tstStmt thn els exitVars) pos stmts alt =
       let exitVars' = trustFromJust "unbranching Cond without exitVars" exitVars
       stmts' <- maybeFactorContinuation detism exitVars' stmts alt
       let thn' = thn ++ stmts'
-      els' <- maybeFactorContinuation detism exitVars' (els ++ stmts') alt
+      -- let els' = els ++ stmts'
+      -- els' <- maybeFactorContinuation detism exitVars' (els ++ stmts') alt
+      els' <- unbranchStmts detism (els ++ stmts') alt
+      -- XXX Not right:  this fails from thn' to els', when it should fail
+      -- to alt
       placedApply (unbranchStmt SemiDet) tstStmt thn' els'
 unbranchStmt detism (Loop body exitVars) pos stmts alt = do
     let exitVars' = trustFromJust "unbranching Loop without exitVars" exitVars
@@ -860,9 +864,10 @@ factorContinuationProc inVars pos detism stmts alt = do
       ++ " continuation proc "
       ++ pname ++ ":"
       ++ showBody 4 stmts
+    stmts' <- unbranchStmts detism stmts alt
     proto <- newProcProto pname inVars
     loopinfo <- gets brLoopInfo
-    genProc loopinfo proto detism stmts alt
+    genProc loopinfo proto detism stmts'
     newProcCall pname inVars pos detism
 
 
@@ -878,10 +883,11 @@ factorLoopProc break inVars pos detism stmts alt = do
       ++ " loop proc "
       ++ pname ++ ":"
       ++ showBody 4 stmts
+    stmts' <- unbranchStmts detism stmts alt
     proto <- newProcProto pname inVars
     next <- newProcCall pname inVars pos detism
     let loopinfo = Just (LoopInfo next break)
-    genProc loopinfo proto detism stmts alt
+    genProc loopinfo proto detism stmts'
     return next
 
 varExp :: FlowDirection -> VarName -> TypeSpec -> Placed Exp
