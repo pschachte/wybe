@@ -320,6 +320,59 @@ compileModSCC, which does the following:
 
 **Purpose**: Turn loops and conditionals into separate procedures
 
+This code transforms loops into fresh recursive procs, and ensures
+that all conditionals are the last statements in their respective
+bodies. Note that conditionals can be nested, but at the end of
+the conditional, they must return to the caller. This is handled
+by introducing a fresh continuation proc for any code that follows
+the conditional. The reason for this transformation is that a
+later pass will convert to a logic programming form which
+implements conditionals with separate clauses, each of which
+returns on completion.
+
+Loops are a little more complicated.  do {a b} c d would be
+transformed into next1, where next1 is defined as def next1 {a b
+next1}, and break1 is defined as def break1 {c d}.  Then Next
+and Break are handled so that they cancel all the following code
+in their clause body.  For example, Next a b would be transformed
+to just next1, where next1 is the next procedure for that loop.
+Similarly Break a b would be transformed to just break1, where
+break1 is the break procedure for that loop.  Inside a loop, a
+conditional must be handled specially, to support breaking out of
+the loop.  Inside a loop, if {a:: b | otherwise:: c} d e would be
+transformed to a call to gen1, where gen2 is defined as def gen2
+{d e}, and gen1 is defined as def gen1 {a:: b gen2 | otherwise::
+c gen2}.  So for example do {a if {b:: Break} c} d e would be
+transformed into next1, which is defined as def next1 {a gen1},
+gen1 is defined as def gen1 {b:: break1 | otherwise:: gen2},
+gen2 is defined as def gen2 {c next1}, and break1 is defined as def
+break1 {d e}.
+
+The tricky part of all this is handling the arguments to these
+generated procedures.  For each generated procedure, the input
+parameters must be a superset of the variables used in the body of
+the procedure, and must be a subset of the variables defined prior
+to the generated call.  Similarly, the output parameters must be a
+a subset of the variables defined in the generated procedure, and
+must be superset of the variables that will be used following the
+generated call.  Ideally, we would make these the *smallest* sets
+satifying these constraints, but later compiler passes remove
+- unnecessary parameters, so instead we go with the largest such
+sets.  This is determined by the type/mode checker, which already
+keeps track of variables known to be defined at each program point.
+
+This code also eliminates other Wybe language features, such as
+transforming SemiDet procs into Det procs with a Boolean output
+param.  Following unbranching, code will be compiled to LPVM
+form by the Clause module; this requires a much simplified input
+AST form with the following requirements:
+  * All procs, and all proc calls, are Det.
+  * All statements but the last in a body are either ProcCalls
+    or ForeignCalls or Nops.
+  * The final statement in a body can be any of these same
+    statement types, or a Cond whose condition is a single
+    TestBool, and whose branches are bodies satisfying these
+    same conditions.
 
 ## Util
 

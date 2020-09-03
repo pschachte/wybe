@@ -1475,8 +1475,10 @@ modecheckStmt m name defPos typing delayed assigned detism
     logTypes $ "Mode checking loop " ++ show stmt
     (stmts', assigned', errs') <-
       modecheckStmts m name defPos typing [] assigned detism stmts
+    logTypes $ "Assigned by loop: " ++ show assigned'
     let break = breakVars assigned'
     let vars = Map.fromSet (`varType` typing) <$> break
+    logTypes $ "Loop exit vars: " ++ show vars
     return ([maybePlace (Loop stmts' vars) pos],
             delayed, assigned', errs')
 -- XXX Need to implement these:
@@ -1511,11 +1513,14 @@ modecheckStmt m name defPos typing delayed assigned detism
 -- modecheckStmt m name defPos typing delayed assigned detism
 --     stmt@(For gen stmts) pos = nyi "mode checking For"
 modecheckStmt m name defPos typing delayed assigned detism
-    Break pos = return ([maybePlace Break pos],delayed,
-                        Impossible $ assignedVars assigned,[])
+    Break pos = do
+    logTypes $ "Mode checking break with assigned=" ++ show assigned
+    return ([maybePlace Break pos],delayed,
+             Impossible $ assignedVars assigned,[])
 modecheckStmt m name defPos typing delayed assigned detism
-    Next pos = return ([maybePlace Next pos],delayed,
-                        Impossible Nothing,[])
+    Next pos = do
+    logTypes $ "Mode checking continue with assigned=" ++ show assigned
+    return ([maybePlace Next pos],delayed,Impossible (breakVars assigned),[])
 
 
 selectMode :: [ProcInfo] -> [(FlowDirection,Bool,Maybe VarName)]
@@ -1774,11 +1779,15 @@ checkStmtTyped name pos (Or stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (Not stmt) _ppos =
     placedApply (checkStmtTyped name pos) stmt
-checkStmtTyped name pos (Cond tst thenstmts elsestmts _) _ppos = do
+checkStmtTyped name pos stmt@(Cond tst thenstmts elsestmts exitVars) _ppos = do
+    when (isNothing exitVars) $
+         shouldnt $ "exit vars of conditional undetermined: " ++ showStmt 4 stmt
     placedApply (checkStmtTyped name pos) tst
     mapM_ (placedApply (checkStmtTyped name pos)) thenstmts
     mapM_ (placedApply (checkStmtTyped name pos)) elsestmts
-checkStmtTyped name pos (Loop stmts _) _ppos =
+checkStmtTyped name pos stmt@(Loop stmts exitVars) _ppos = do
+    when (isNothing exitVars) $
+         shouldnt $ "exit vars of loop undetermined: " ++ showStmt 4 stmt
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (UseResources _ stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts

@@ -22,8 +22,8 @@ gen$1 > (2 calls)
  AliasPairs: []
  AliasMultiSpeczInfo: []
     foreign c read_char(?c#0:wybe.char, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$1#0:wybe.bool) @wybe:nn:nn
-    case ~tmp$1#0:wybe.bool of
+    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$0#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(~argc#0:wybe.int, ?argc#1:wybe.int)
         foreign llvm move(~argv#0:wybe.int, ?argv#1:wybe.int)
@@ -77,8 +77,8 @@ entry:
 define external fastcc  {i64, i64, i64} @"simple_loop.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
   %"c#0" = tail call ccc  i8  @read_char()  
-  %"tmp$1#0" = icmp ne i8 %"c#0", 97 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"tmp$0#0" = icmp ne i8 %"c#0", 97 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
 if.then:
   tail call ccc  void  @putchar(i8  %"c#0")  
   %8 = tail call fastcc  {i64, i64, i64}  @"simple_loop.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")  

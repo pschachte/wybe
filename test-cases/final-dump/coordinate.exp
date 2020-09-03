@@ -137,41 +137,35 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:coordinate.Coordinate, $right#0:coordinate.Coordinate, ?$$#0:wybe.bool):
  AliasPairs: []
  AliasMultiSpeczInfo: []
-    foreign lpvm access($left#0:coordinate.Coordinate, 0:wybe.int, ?tmp$4#0:wybe.int)
-    foreign lpvm access($left#0:coordinate.Coordinate, 8:wybe.int, ?tmp$5#0:wybe.int)
-    foreign lpvm access(~$left#0:coordinate.Coordinate, 16:wybe.int, ?tmp$6#0:wybe.int)
-    foreign lpvm access($right#0:coordinate.Coordinate, 0:wybe.int, ?tmp$7#0:wybe.int)
-    foreign lpvm access($right#0:coordinate.Coordinate, 8:wybe.int, ?tmp$8#0:wybe.int)
-    foreign lpvm access(~$right#0:coordinate.Coordinate, 16:wybe.int, ?tmp$9#0:wybe.int)
-    foreign llvm icmp eq(~tmp$4#0:wybe.int, ~tmp$7#0:wybe.int, ?tmp$10#0:wybe.bool) @wybe:nn:nn
-    case ~tmp$10#0:wybe.bool of
+    foreign lpvm access($left#0:coordinate.Coordinate, 0:wybe.int, ?tmp$3#0:wybe.int)
+    foreign lpvm access($left#0:coordinate.Coordinate, 8:wybe.int, ?tmp$4#0:wybe.int)
+    foreign lpvm access(~$left#0:coordinate.Coordinate, 16:wybe.int, ?tmp$5#0:wybe.int)
+    foreign lpvm access($right#0:coordinate.Coordinate, 0:wybe.int, ?tmp$6#0:wybe.int)
+    foreign lpvm access($right#0:coordinate.Coordinate, 8:wybe.int, ?tmp$7#0:wybe.int)
+    foreign lpvm access(~$right#0:coordinate.Coordinate, 16:wybe.int, ?tmp$8#0:wybe.int)
+    foreign llvm icmp eq(~tmp$3#0:wybe.int, ~tmp$6#0:wybe.int, ?tmp$9#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$9#0:wybe.bool of
     0:
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm icmp eq(~tmp$5#0:wybe.int, ~tmp$8#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:nn:nn
-        case ~tmp$11#0:wybe.bool of
+        foreign llvm icmp eq(~tmp$4#0:wybe.int, ~tmp$7#0:wybe.int, ?tmp$10#0:wybe.bool) @wybe:nn:nn
+        case ~tmp$10#0:wybe.bool of
         0:
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign llvm icmp eq(~tmp$6#0:wybe.int, ~tmp$9#0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
-            case ~tmp$1#0:wybe.bool of
-            0:
-                foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-            1:
-                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm icmp eq(~tmp$5#0:wybe.int, ~tmp$8#0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
+            foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
 
 
-
-= > public inline test (9 calls)
+= > public inline (10 calls)
 0: =($left#0:coordinate.Coordinate, $right#0:coordinate.Coordinate, ?$$#0:wybe.bool):
  AliasPairs: []
  AliasMultiSpeczInfo: []
@@ -206,7 +200,7 @@ Coordinate > public inline (0 calls)
     foreign lpvm mutate(~%$rec#0:coordinate.Coordinate, ?%$rec#1:coordinate.Coordinate, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~x#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:coordinate.Coordinate, ?%$rec#2:coordinate.Coordinate, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~y#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:coordinate.Coordinate, ?%$#0:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~z#0:wybe.int)
-Coordinate > public inline (6 calls)
+Coordinate > public inline (10 calls)
 1: Coordinate(?x#0:wybe.int, ?y#0:wybe.int, ?z#0:wybe.int, $#0:coordinate.Coordinate):
  AliasPairs: []
  AliasMultiSpeczInfo: []
@@ -288,21 +282,18 @@ entry:
   %20 = inttoptr i64 %19 to i64* 
   %21 = getelementptr  i64, i64* %20, i64 0 
   %22 = load  i64, i64* %21 
-  %"tmp$10#0" = icmp eq i64 %3, %14 
-  br i1 %"tmp$10#0", label %if.then, label %if.else 
+  %"tmp$9#0" = icmp eq i64 %3, %14 
+  br i1 %"tmp$9#0", label %if.then, label %if.else 
 if.then:
-  %"tmp$11#0" = icmp eq i64 %7, %18 
-  br i1 %"tmp$11#0", label %if.then1, label %if.else1 
+  %"tmp$10#0" = icmp eq i64 %7, %18 
+  br i1 %"tmp$10#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 1 
 if.then1:
-  %"tmp$1#0" = icmp eq i64 %11, %22 
-  br i1 %"tmp$1#0", label %if.then2, label %if.else2 
+  %"tmp$0#0" = icmp eq i64 %11, %22 
+  %"$$#0" = xor i1 %"tmp$0#0", 1 
+  ret i1 %"$$#0" 
 if.else1:
-  ret i1 1 
-if.then2:
-  ret i1 0 
-if.else2:
   ret i1 1 
 }
 

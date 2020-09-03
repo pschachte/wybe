@@ -120,30 +120,27 @@ evalClauseComp clcomp =
 compileProc :: ProcDef -> Compiler ProcDef
 compileProc proc =
     evalClauseComp $ do
-        let detism = procDetism proc
+        unless (procDetism proc == Det)
+          $ shouldnt $ "SemiDet proc left by unbranching:  "
+                       ++ showProcDef 4 proc
         let ProcDefSrc body = procImpln proc
         let proto = procProto proc
         let params = procProtoParams proto
-        let params' = case detism of
-                         SemiDet -> params ++ [testOutParam]
-                         Det     -> params
         logClause $ "--------------\nCompiling proc " ++ show proto
         mapM_ (nextVar . paramName) $ List.filter (flowsIn . paramFlow) params
         finishStmt
         startVars <- getCurrNumbering
-        compiled <- compileBody body params' detism
+        compiled <- compileBody body params Det
         logClause $ "Compiled to:"  ++ showBlock 4 compiled
         endVars <- getCurrNumbering
         logClause $ "  startVars: " ++ show startVars
         logClause $ "  endVars  : " ++ show endVars
         logClause $ "  params   : " ++ show params
-        let params'' = List.map (compileParam startVars endVars) params'
-        let proto' = PrimProto (procProtoName proto) params''
-        logClause $ "  comparams: " ++ show params''
-        return $ proc { procImpln = ProcDefPrim proto' compiled
-                                        (ProcAnalysis emptyDS emptyAliasMultiSpeczInfo)
-                                        Map.empty}
-
+        let params' = List.map (compileParam startVars endVars) params
+        let proto' = PrimProto (procProtoName proto) params'
+        logClause $ "  comparams: " ++ show params'
+        let ans = ProcAnalysis emptyDS emptyAliasMultiSpeczInfo
+        return $ proc { procImpln = ProcDefPrim proto' compiled ans Map.empty }
 
 
 -- |Compile a proc body to LPVM form. By the time we get here, the form of the

@@ -5,6 +5,7 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 --
+-- BEGIN MAJOR DOC
 --  This code transforms loops into fresh recursive procs, and ensures
 --  that all conditionals are the last statements in their respective
 --  bodies. Note that conditionals can be nested, but at the end of
@@ -15,23 +16,23 @@
 --  implements conditionals with separate clauses, each of which
 --  returns on completion.
 --
---  Loops are a little more complicated.  do a b end c d would be
---  transformed into next1, where next1 is defined as def next1: a b
---  next1 end, and break1 is defined as def break1 c d end.  Then Next
+--  Loops are a little more complicated.  do {a b} c d would be
+--  transformed into next1, where next1 is defined as def next1 {a b
+--  next1}, and break1 is defined as def break1 {c d}.  Then Next
 --  and Break are handled so that they cancel all the following code
 --  in their clause body.  For example, Next a b would be transformed
 --  to just next1, where next1 is the next procedure for that loop.
 --  Similarly Break a b would be transformed to just break1, where
 --  break1 is the break procedure for that loop.  Inside a loop, a
 --  conditional must be handled specially, to support breaking out of
---  the loop.  Inside a loop, if a: b else: c end d would be
---  transformed to a call to gen1, where gen2 is defined as def gen2:
---  d end, and gen1 is defined as def gen1: guard a 1 b gen2 guard a 0
---  c gen2 end.  So for example do a if b: Break end c end d would be
---  transformed into next1, which is defined as def next1 a gen1 end,
---  gen1 is defined as def gen1 guard b 1 break1  guard b 0 gen2 end,
---  gen2 is defined as def gen2 c next1, and break1 is defined as def
---  break1 d end.
+--  the loop.  Inside a loop, if {a:: b | otherwise:: c} d e would be
+--  transformed to a call to gen1, where gen2 is defined as def gen2
+--  {d e}, and gen1 is defined as def gen1 {a:: b gen2 | otherwise::
+--  c gen2}.  So for example do {a if {b:: Break} c} d e would be
+--  transformed into next1, which is defined as def next1 {a gen1},
+--  gen1 is defined as def gen1 {b:: break1 | otherwise:: gen2},
+--  gen2 is defined as def gen2 {c next1}, and break1 is defined as def
+--  break1 {d e}.
 --
 --  The tricky part of all this is handling the arguments to these
 --  generated procedures.  For each generated procedure, the input
@@ -45,6 +46,20 @@
 --- unnecessary parameters, so instead we go with the largest such
 --  sets.  This is determined by the type/mode checker, which already
 --  keeps track of variables known to be defined at each program point.
+--
+--  This code also eliminates other Wybe language features, such as
+--  transforming SemiDet procs into Det procs with a Boolean output
+--  param.  Following unbranching, code will be compiled to LPVM
+--  form by the Clause module; this requires a much simplified input
+--  AST form with the following requirements:
+--    * All procs, and all proc calls, are Det.
+--    * All statements but the last in a body are either ProcCalls
+--      or ForeignCalls or Nops.
+--    * The final statement in a body can be any of these same
+--      statement types, or a Cond whose condition is a single
+--      TestBool, and whose branches are bodies satisfying these
+--      same conditions.
+-- END MAJOR DOC
 ----------------------------------------------------------------
 
 {-# LANGUAGE OverloadedStrings #-}
@@ -90,29 +105,61 @@ unbranchProc' loopinfo proc = do
     let detism = procDetism proc
     let tmpCtr = procTmpCount proc
     let params = procProtoParams $ procProto proc
-    (body',tmpCtr',newProcs) <- unbranchBody loopinfo tmpCtr params detism body
     let proto = procProto proc
-    let proc' = proc { procTmpCount = tmpCtr', procImpln = ProcDefSrc body' }
-    let tmpCount = procTmpCount proc
-    mapM_ addProcDef newProcs
+    let params = procProtoParams proto
+    let params' = (selectDetism id (++ [testOutParam]) detism) params
+    let alt = selectDetism [] [Unplaced $ TestBool boolFalse] detism
+    let stmts = selectDetism body (body++[Unplaced $ TestBool boolTrue]) detism
+    let proto' = proto {procProtoParams = params'}
+    (body',tmpCtr',newProcs) <-
+        unbranchBody loopinfo tmpCtr params detism stmts alt
+    let proc' = proc { procProto = proto'
+                     , procDetism = Det
+                     , procImpln = ProcDefSrc body'
+                     , procTmpCount = tmpCtr'}
     logMsg Unbranch $ "** Unbranched defn:" ++ showProcDef 0 proc' ++ "\n"
     logMsg Unbranch "================================================\n"
+    mapM_ addProcDef newProcs
     return proc'
 
 
 -- |Eliminate loops and ensure that Conds only appear as the final
 --  statement of a body.
 unbranchBody :: Maybe LoopInfo -> Int -> [Param] -> Determinism
-             -> [Placed Stmt] -> Compiler ([Placed Stmt],Int,[ProcDef])
-unbranchBody loopinfo tmpCtr params detism body = do
+             -> [Placed Stmt] -> [Placed Stmt]
+             -> Compiler ([Placed Stmt],Int,[ProcDef])
+unbranchBody loopinfo tmpCtr params detism body alt = do
     let unbrancher = initUnbrancherState loopinfo tmpCtr params
     let outparams =  brOutParams unbrancher
     let outvars = brOutArgs unbrancher
     let stmts = body
     logMsg Unbranch $ "** Unbranching with output params:" ++ show outparams
     logMsg Unbranch $ "** Unbranching with output args:" ++ show outvars
-    (stmts',st) <- runStateT (unbranchStmts detism stmts) unbrancher
+    (stmts',st) <- runStateT (unbranchStmts detism stmts alt) unbrancher
     return (stmts',brTempCtr st, brNewDefs st)
+
+
+----------------------------------------------------------------
+--                 Converting SemiDet procs to Det
+----------------------------------------------------------------
+
+
+-- |The name we give to the local variable holding the result of a
+-- test (SemiDet) proc when we convert to a Det one.
+testVarName :: Ident
+testVarName = "$$"
+
+-- |A synthetic output parameter carrying the test result
+testOutParam :: Param
+testOutParam = Param testVarName boolType ParamOut $ Implicit Nothing
+
+-- |The output exp we use to hold the success/failure of a test proc.
+testOutExp :: Exp
+testOutExp = boolVarSet testVarName
+
+-- -- |The input exp we use to hold the success/failure of a test proc.
+-- testInExp :: Exp
+-- testInExp = boolVarGet testVarName
 
 
 ----------------------------------------------------------------
@@ -129,20 +176,13 @@ data UnbrancherState = Unbrancher {
     brTempCtr    :: Int,          -- ^Number of next temp variable to make
     brOutParams  :: [Param],      -- ^Output arguments for generated procs
     brOutArgs    :: [Placed Exp], -- ^Output arguments for call to gen procs
-    brNewDefs    :: [ProcDef]     -- ^Generated auxilliary procedures
+    brNewDefs    :: [ProcDef]     -- ^Generated unbranched auxilliary procedures
     }
 
 
 data LoopInfo = LoopInfo {
-    -- loopExitVars :: Maybe VarDict, -- ^Variables available at all breaks seen,
-    --                               --  or Nothing if no breaks seen yet
-    -- loopTerminated :: Bool,       -- ^Whether code so far included a Break or
-    --                               --  Next, which terminate execution
     loopNext :: Placed Stmt,      -- ^Call to make for a Next
     loopBreak :: [Placed Stmt]    -- ^Code to execute for a Break
-    -- loopInit :: [Placed Stmt],    -- ^code to initialise before entering loop
-    -- loopTerm :: [Placed Stmt]}    -- ^code to wrap up after leaving loop
-    --                               --  currently loopInit, loopTerm are unused
     } deriving (Eq)
 
 
@@ -183,16 +223,16 @@ newProcName = lift genProcName
 
 
 -- |Create, unbranch, and record a new proc with the specified proto and body.
-genProc :: Maybe LoopInfo -> ProcProto -> Determinism -> [Placed Stmt]
-        -> Unbrancher ()
-genProc loopinfo proto detism stmts = do
+genProc :: Maybe LoopInfo -> ProcProto -> Determinism
+        -> [Placed Stmt] -> [Placed Stmt] -> Unbrancher ()
+genProc loopinfo proto detism stmts alt = do
     let name = procProtoName proto
     tmpCtr <- gets brTempCtr
-    loopinfo' <- maybe (gets brLoopInfo) (return . Just) loopinfo
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr
                   Map.empty Private detism False NoSuperproc
     logUnbranch $ "Unbranching fresh " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
+    loopinfo' <- maybe (gets brLoopInfo) (return . Just) loopinfo
     procDef' <- lift $ unbranchProc' loopinfo' procDef
     logUnbranch $ "Unbranched generated " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
@@ -230,22 +270,39 @@ getLoopNext = do
 
 
 ----------------------------------------------------------------
---                 Unbranching Det statement sequences
+--                 Unbranching statement sequences
+--
+-- We handle unbranch sequences as conjunctions inside conditionals:  if
+-- each statement succeeds, we carry on to the next, otherwise we execute
+-- the alternative statement sequence.  The alternative sequence has
+-- already been unbranched.  Any Det statement is guaranteed to
+-- succeed, so we don't need a conditional for it.
 ----------------------------------------------------------------
 
--- | 'Unbranch' a list of statements.
-unbranchStmts :: Determinism -> [Placed Stmt] -> Unbrancher [Placed Stmt]
-unbranchStmts Det [] = return []
-unbranchStmts SemiDet [] = return [succeedTest]
-unbranchStmts detism (stmt:stmts) = do
+-- | 'Unbranch' a list of statements
+unbranchStmts :: Determinism -> [Placed Stmt] -> [Placed Stmt]
+              -> Unbrancher [Placed Stmt]
+unbranchStmts detism [] _ = do
+    logUnbranch $ "Unbranching an empty "
+                  ++ selectDetism "Det" "SemiDet" detism
+                  ++ " body"
+    return []
+unbranchStmts detism (stmt:stmts) alt = do
     vars <- gets brVars
     logUnbranch $ "unbranching (" ++ show detism ++ ") stmt"
         ++ "\n    " ++ showStmt 4 (content stmt)
-        ++ "\n  (" ++ show detism ++ ") with vars " ++ show vars
-    placedApply (unbranchStmt detism) stmt stmts
+        ++ "\n  with vars " ++ show vars
+    placedApply (unbranchStmt detism) stmt stmts alt
 
 
--- | 'Unbranch' a single Det statement, along with all the following statements.
+-- | 'Unbranch' a single statement, along with all the following
+--   statements. This also considers the determinism of the context, the
+--   sense of any tests, and the alternative code. If the result of a test
+--   statement is the same as sense, then execution proceeds to the
+--   following statements, otherwise it proceeds to the alternative
+--   sequence.  Both the following statements and the alternative
+--   statements need to be unbranched.
+--
 --   This transforms loops into calls to freshly generated procedures that
 --   implement not only the loops themselves, but all following code. That
 --   is, rather than returning at the loop exit(s), the generated procs
@@ -284,109 +341,118 @@ unbranchStmts detism (stmt:stmts) = do
 --   code and unneeded input and output arguments, we don't bother to try
 --   to optimise these things here.
 --
-unbranchStmt :: Determinism -> Stmt -> OptPos -> [Placed Stmt]
-             -> Unbrancher [Placed Stmt]
-unbranchStmt _ stmt@(ProcCall _ _ _ _ True args) pos _ =
+unbranchStmt :: Determinism -> Stmt -> OptPos
+             -> [Placed Stmt] -> [Placed Stmt] -> Unbrancher [Placed Stmt]
+unbranchStmt _ stmt@(ProcCall _ _ _ _ True args) _ _ _ =
     shouldnt $ "Resources should have been handled before unbranching: "
                ++ showStmt 4 stmt
-unbranchStmt Det stmt@(ProcCall md name procID SemiDet _ args) pos stmts =
+unbranchStmt Det stmt@(ProcCall _ _ _ SemiDet _ _) _ _ _ =
     shouldnt $ "Semidet proc call " ++ show stmt ++ " in a Det context"
-unbranchStmt SemiDet stmt@(ProcCall md name procID SemiDet _ args) pos stmts =
-  do
+unbranchStmt SemiDet stmt@(ProcCall md name procID SemiDet _ args) pos
+             stmts alt = do
     logUnbranch $ "converting SemiDet proc call" ++ show stmt
-    testVarName <- tempVar
-    let args' = args ++ [Unplaced (boolVarSet testVarName)]
+    testResultVar <- tempVar
+    let args' = args ++ [Unplaced (boolVarSet testResultVar)]
     defArgs args'
-    let testStmt = TestBool $ varGet testVarName
-    stmts' <- unbranchStmts SemiDet stmts
+    stmts' <- unbranchStmts SemiDet stmts alt
+    alt' <- unbranchStmts SemiDet alt []
     vars <- gets brVars
+    logUnbranch $ "mkCond " ++ show (boolVarGet testResultVar)
+                  ++ showBody 4 stmts' ++ "\nelse"
+                  ++ showBody 4 alt'
     let result = maybePlace (ProcCall md name procID Det False args') pos
-                 : mkCond (maybePlace testStmt pos) pos stmts' [failTest] vars
+                 : mkCond (boolVarGet testResultVar) pos stmts' alt' vars
     logUnbranch $ "#Converted SemiDet proc call" ++ show stmt
     logUnbranch $ "#To: " ++ showBody 4 result
     return result
-unbranchStmt detism stmt@(ProcCall _ _ _ Det False args) pos stmts = do
+unbranchStmt detism stmt@(ProcCall _ _ _ Det _ args) pos stmts alt = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
     defArgs args
-    leaveStmtAsIs detism stmt pos stmts
-unbranchStmt detism stmt@(ForeignCall _ _ _ args) pos stmts = do
+    leaveStmtAsIs detism stmt pos stmts alt
+unbranchStmt detism stmt@(ForeignCall _ _ _ args) pos stmts alt = do
     logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
     defArgs args
-    leaveStmtAsIs detism stmt pos stmts
-unbranchStmt detism stmt@(TestBool val) pos stmts =
+    leaveStmtAsIs detism stmt pos stmts alt
+unbranchStmt detism stmt@(TestBool val) pos stmts alt =
     ifSemiDet detism (showStmt 4 stmt ++ " in a Det context")
     $ if List.null stmts
       then do
         logUnbranch $ "Unbranching a final primitive test " ++ show stmt
-        return [maybePlace stmt pos]
+        return [move val testOutExp]
       else do
         logUnbranch $ "Unbranching a non-final primitive test " ++ show stmt
-        stmts' <- unbranchStmts SemiDet stmts
+        stmts' <- unbranchStmts SemiDet stmts alt
+        alt' <- unbranchStmts SemiDet alt []
         vars <- gets brVars
-        let result = mkCond (maybePlace stmt pos) Nothing stmts' [failTest] vars
+        logUnbranch $ "mkCond " ++ show val
+                      ++ showBody 4 stmts' ++ "\nelse"
+                      ++ showBody 4 alt
+        let result = mkCond val Nothing stmts' alt' vars
         logUnbranch $ "#Unbranched non-final primitive test " ++ show stmt
         logUnbranch $ "#To: " ++ showBody 4 result
         return result
-unbranchStmt detism stmt@(And conj) pos stmts =
+unbranchStmt detism stmt@(And conj) pos stmts alt =
     ifSemiDet detism ("Conjunction in a Det context: " ++ show stmt)
     -- XXX might want to report if conj doesn't contain any tests
-    $ unbranchStmts SemiDet $ conj ++ stmts
-unbranchStmt Det stmt@(Or _) _ _ =
+    $ unbranchStmts SemiDet (conj ++ stmts) alt
+unbranchStmt Det stmt@(Or _) _ _ _ =
     shouldnt $ "Disjunction in a Det context: " ++ show stmt
-unbranchStmt SemiDet (Or []) _ stmts = return [failTest]
-unbranchStmt SemiDet (Or (disj:disjs)) pos stmts = do
-    logUnbranch "Unbranching disjunction"
-    vars <- gets brVars
-    unbranchCond SemiDet  disj [succeedTest] [Unplaced $ Or disjs] pos
-                 vars stmts
-unbranchStmt detism stmt@(Not tst) pos stmts =
+unbranchStmt SemiDet (Or []) _ _ alt = return alt -- probably unused
+unbranchStmt SemiDet (Or [single]) _ stmts alt =
+    placedApply (unbranchStmt SemiDet) single stmts alt
+unbranchStmt SemiDet (Or disjs) pos stmts alt =
+    unbranchDisjunction disjs  pos stmts alt
+unbranchStmt detism stmt@(Not tst) pos stmts alt =
     ifSemiDet detism ("Negation in a Det context: " ++ show stmt)
     $ do
         logUnbranch "Unbranching negation"
-        vars <- gets brVars
-        unbranchCond SemiDet tst [failTest] [succeedTest] pos vars stmts
-unbranchStmt detism (Cond tstStmt thn els exitVars) pos stmts =
+        stmts' <- unbranchStmts SemiDet stmts alt
+        placedApply (unbranchStmt SemiDet) tst alt stmts'
+unbranchStmt detism (Cond tstStmt thn els exitVars) pos stmts alt =
     if detStmt $ content tstStmt
-    then (tstStmt:) <$> unbranchStmts detism (thn ++ stmts)
+    then (tstStmt:) <$> unbranchStmts detism (thn ++ stmts) alt
     else do
       let exitVars' = trustFromJust "unbranching Cond without exitVars" exitVars
-      unbranchCond detism tstStmt thn els pos exitVars' stmts
-unbranchStmt detism (Loop body exitVars) pos stmts = do
+      stmts' <- maybeFactorContinuation detism exitVars' stmts alt
+      let thn' = thn ++ stmts'
+      els' <- maybeFactorContinuation detism exitVars' (els ++ stmts') alt
+      placedApply (unbranchStmt SemiDet) tstStmt thn' els'
+unbranchStmt detism (Loop body exitVars) pos stmts alt = do
     let exitVars' = trustFromJust "unbranching Loop without exitVars" exitVars
     logUnbranch $ "Handling loop:" ++ showBody 4 body
     beforeVars <- gets brVars
     logUnbranch $ "  with exit vars " ++ show exitVars'
-    brk <- maybeFactorContinuation stmts exitVars' detism
-    logUnbranch $ "Generated break " ++ showBody 4 brk
-    next <- factorLoopProc brk beforeVars pos detism body
+    brk <- maybeFactorContinuation detism exitVars' stmts alt
+    logUnbranch $ "Generated break: " ++ showBody 4 brk
+    next <- factorLoopProc brk beforeVars pos detism body alt
     logUnbranch $ "Generated next " ++ showStmt 4 (content next)
     logUnbranch "Finished handling loop"
     return [next]
-unbranchStmt _ (UseResources _ _) _ _ =
+unbranchStmt _ (UseResources _ _) _ _ _ =
     shouldnt "resource handling should have removed use ... in statements"
 -- unbranchStmt Det (For _ _) _ _ =
 --     shouldnt "flattening should have removed For statements"
-unbranchStmt detism Nop _ stmts = do
+unbranchStmt detism Nop _ stmts alt = do
     logUnbranch "Unbranching a Nop"
-    unbranchStmts detism stmts         -- might as well filter out Nops
-unbranchStmt _ Break _ _ = do
+    unbranchStmts detism stmts alt         -- might as well filter out Nops
+unbranchStmt _ Break _ _ _ = do
     logUnbranch "Unbranching a Break"
     brk <- getLoopBreak
     logUnbranch $ "Current break = " ++ showBody 4 brk
     return brk
-unbranchStmt _ Next _ _ = do
+unbranchStmt _ Next _ _ _ = do
     logUnbranch "Unbranching a Next"
-    -- resetTerminated True
     nxt <- getLoopNext
     logUnbranch $ "Current next proc = " ++ showStmt 4 (content nxt)
     return [nxt]
 
 
 -- |Emit the supplied statement, and process the remaining statements.
-leaveStmtAsIs :: Determinism -> Stmt -> OptPos -> [Placed Stmt]
-              -> Unbrancher [Placed Stmt]
-leaveStmtAsIs detism stmt pos stmts = do
-    stmts' <- unbranchStmts detism stmts
+leaveStmtAsIs :: Determinism -> Stmt -> OptPos
+              -> [Placed Stmt] -> [Placed Stmt] -> Unbrancher [Placed Stmt]
+leaveStmtAsIs detism stmt pos stmts alt = do
+    logUnbranch $ "Leaving stmt as is: " ++ showStmt 4 stmt
+    stmts' <- unbranchStmts detism stmts alt
     return $ maybePlace stmt pos:stmts'
 
 
@@ -396,98 +462,120 @@ ifSemiDet Det msg _ = shouldnt msg
 ifSemiDet SemiDet _ code = code
 
 
-unbranchCond :: Determinism -> Placed Stmt -> [Placed Stmt] -> [Placed Stmt]
-             -> OptPos -> VarDict -> [Placed Stmt] -> Unbrancher [Placed Stmt]
-unbranchCond detism tstStmt thn els pos exitVars stmts = do
-    logUnbranch $ "Unbranching a conditional in " ++ show detism ++ " context:"
-    logUnbranch $ showStmt 8 $ content tstStmt
-    beforeVars <- gets brVars
-    setVars exitVars
-    cont <- maybeFactorContinuation stmts exitVars detism
-    setVars beforeVars
-    logUnbranch $ "Vars before test: " ++ show beforeVars
-    tstStmt' <- placedApply (unbranchStmt SemiDet) tstStmt []
-    beforeThenVars <- gets brVars
-    logUnbranch "Unbranched condition:"
-    logUnbranch $ showBody 8 tstStmt'
-    logUnbranch $ "Unbranching then branch with vars: " ++ show beforeThenVars
-    thn' <- unbranchStmts detism $ thn ++ cont
-    logUnbranch $ "Unbranching else branch with vars: " ++ show beforeThenVars
-    setVars beforeVars
-    els' <- unbranchStmts detism $ els ++ cont
-    genStmt <- buildCond tstStmt' thn' beforeVars els' beforeVars pos
-               exitVars detism
-    logUnbranch $ "Conditional unbranched to " ++ showBody 4 genStmt
-    return genStmt
-
--- | Build code equivalent to Cond tsts thn els at source position pos,
---   where tsts, thn, and els have already been unbranched, so they are
---   simplified.  That means it can only contain Det ProcCalls, ForeignCalls,
---   TestBools, and Conds whose conditions are single non-constant TestBools.
---   It must also return code that satisfies this same constraint.
-buildCond :: [Placed Stmt] -> [Placed Stmt] -> VarDict -> [Placed Stmt]
-          -> VarDict -> OptPos -> VarDict -> Determinism
-          -> Unbrancher [Placed Stmt]
-buildCond tsts thn thnVars els elsVars pos exitVars detism = do
-    -- Work out how many calls to thn and els will be needed
-    -- let repeats = countRepeats . content <$> tsts
-    -- let thnCount = sum $ fst <$> repeats
-    -- let elsCount = sum $ snd <$> repeats
-    -- Generate fresh procs for the then and else branches if necessary
-    thn' <- maybeFactorContinuation thn thnVars detism
-    els' <- maybeFactorContinuation els elsVars detism
-    buildCond' tsts thn' els' pos exitVars detism
+unbranchDisjunction :: [Placed Stmt] -> OptPos -> [Placed Stmt] -> [Placed Stmt]
+                    -> Unbrancher [Placed Stmt]
+unbranchDisjunction disjs pos stmts alt = nyi "Disjunction"
 
 
-buildCond' :: [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt] -> OptPos
-           -> VarDict -> Determinism -> Unbrancher [Placed Stmt]
-buildCond' [] thn _els _pos _vars _detism = return thn
-buildCond' (stmt:stmts) thn els exitVars pos detism =
-    placedApply buildCond'' stmt stmts thn els exitVars pos detism
+-- unbranchCond :: Determinism -> Placed Stmt -> [Placed Stmt] -> [Placed Stmt]
+--              -> OptPos -> VarDict -> [Placed Stmt] -> Unbrancher [Placed Stmt]
+-- unbranchCond detism tstStmt thn els pos exitVars stmts = do
+--     logUnbranch $ "Unbranching a conditional in " ++ show detism ++ " context:"
+--     logUnbranch $ showStmt 8 $ content tstStmt
+--     beforeVars <- gets brVars
+--     setVars exitVars
+--     cont <- maybeFactorContinuation detism exitVars stmts alt
+--     setVars beforeVars
+--     logUnbranch $ "Vars before test: " ++ show beforeVars
+--     tstStmt' <- placedApply (unbranchStmt SemiDet) tstStmt []
+--     beforeThenVars <- gets brVars
+--     logUnbranch "Unbranched condition:"
+--     logUnbranch $ showBody 8 tstStmt'
+--     logUnbranch $ "Unbranching then branch with vars: " ++ show beforeThenVars
+--     thn' <- unbranchStmts detism $ thn ++ cont
+--     logUnbranch $ "Unbranching else branch with vars: " ++ show beforeThenVars
+--     setVars beforeVars
+--     els' <- unbranchStmts detism $ els ++ cont
+--     genStmt <- buildCond tstStmt' thn' beforeVars els' beforeVars pos
+--                exitVars detism
+--     logUnbranch $ "Conditional unbranched to " ++ showBody 4 genStmt
+--     return genStmt
+
+-- -- | Build code equivalent to Cond tsts thn els at source position pos,
+-- --   where tsts, thn, and els have already been unbranched, so they are
+-- --   simplified.  That means it can only contain Det ProcCalls, ForeignCalls,
+-- --   TestBools, and Conds whose conditions are single non-constant TestBools.
+-- --   It must also return code that satisfies this same constraint.
+-- buildCond :: [Placed Stmt] -> [Placed Stmt] -> VarDict -> [Placed Stmt]
+--           -> VarDict -> OptPos -> VarDict -> Determinism
+--           -> Unbrancher [Placed Stmt]
+-- buildCond tsts thn thnVars els elsVars pos exitVars detism = do
+--     -- Work out how many calls to thn and els will be needed
+--     -- let repeats = countRepeats . content <$> tsts
+--     -- let thnCount = sum $ fst <$> repeats
+--     -- let elsCount = sum $ snd <$> repeats
+--     -- Generate fresh procs for the then and else branches if necessary
+--     thn' <- maybeFactorContinuation detism thnVars thn
+--     els' <- maybeFactorContinuation detism elsVars els
+--     buildCond' tsts thn' els' pos exitVars detism
 
 
-buildCond'' :: Stmt -> OptPos -> [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt]
-            -> OptPos -> VarDict -> Determinism -> Unbrancher [Placed Stmt]
-buildCond'' stmt@(ProcCall _ _ _ Det _ _) pos stmts thn els condPos exitVars
-            detism =
-    (maybePlace stmt pos:) <$> buildCond' stmts thn els condPos exitVars detism
-buildCond'' stmt@(ProcCall _ _ _ SemiDet _ _) pos stmts thn els condPos _ _ =
-    shouldnt $ "Should have transformed SemiDet calls before buildCond "
-               ++ show stmt
-buildCond'' stmt@ForeignCall{} pos stmts thn els condPos exitVars detism =
-    (maybePlace stmt pos:) <$> buildCond' stmts thn els condPos exitVars detism
-buildCond'' stmt@(TestBool (Typed (IntValue 1) _ _)) pos stmts thn els
-            condPos exitVars detism =
-    buildCond' stmts thn els condPos exitVars detism
-buildCond'' stmt@(TestBool (Typed (IntValue 0) _ _)) _ _ _ els _ _ _ =
-    return els
-buildCond'' stmt@TestBool{} pos stmts thn els condPos exitVars detism = do
-    thn' <- buildCond' stmts thn els condPos exitVars detism
-    return $ mkCond (maybePlace stmt pos) condPos thn' els exitVars
-buildCond'' stmt@(Cond tst thn' els' vars) pos stmts thn els condPos exitVars
-            detism = do
-    let vars' = trustFromJust "buildCond'' given Cond with no vars" vars
-    stmts' <- maybeFactorContinuation stmts vars' detism
-    -- XXX performance bug:  should preprocess stmts into a single call
-    thn'' <- buildCond' (thn'++stmts') thn els condPos exitVars detism
-    els'' <- buildCond' (els'++stmts') thn els condPos exitVars detism
-    logUnbranch $ "Creating Cond with test = " ++ show tst
-    logUnbranch $ "                   then = " ++ showBody 26 thn''
-    logUnbranch $ "                   else = " ++ showBody 26 els''
-    return $ mkCond tst pos thn'' els'' exitVars
-buildCond'' stmt _ _ _ _ _ _ _ =
-    shouldnt $ "Statement should have been eliminated before buildCond'': "
-               ++ show stmt
+-- buildCond' :: [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt] -> OptPos
+--            -> VarDict -> Determinism -> Unbrancher [Placed Stmt]
+-- buildCond' [] thn _els _pos _vars _detism = return thn
+-- buildCond' (stmt:stmts) thn els exitVars pos detism =
+--     placedApply buildCond'' stmt stmts thn els exitVars pos detism
+
+
+-- buildCond'' :: Stmt -> OptPos -> [Placed Stmt] -> [Placed Stmt] -> [Placed Stmt]
+--             -> OptPos -> VarDict -> Determinism -> Unbrancher [Placed Stmt]
+-- buildCond'' stmt@(ProcCall _ _ _ Det _ _) pos stmts thn els condPos exitVars
+--             detism =
+--     (maybePlace stmt pos:) <$> buildCond' stmts thn els condPos exitVars detism
+-- buildCond'' stmt@(ProcCall _ _ _ SemiDet _ _) pos stmts thn els condPos _ _ =
+--     shouldnt $ "Should have transformed SemiDet calls before buildCond "
+--                ++ show stmt
+-- buildCond'' stmt@ForeignCall{} pos stmts thn els condPos exitVars detism =
+--     (maybePlace stmt pos:) <$> buildCond' stmts thn els condPos exitVars detism
+-- buildCond'' stmt@(TestBool (Typed (IntValue 1) _ _)) pos stmts thn els
+--             condPos exitVars detism =
+--     buildCond' stmts thn els condPos exitVars detism
+-- buildCond'' stmt@(TestBool (Typed (IntValue 0) _ _)) _ _ _ els _ _ _ =
+--     return els
+-- buildCond'' stmt@TestBool{} pos stmts thn els condPos exitVars detism = do
+--     thn' <- buildCond' stmts thn els condPos exitVars detism
+--     return $ mkCond (maybePlace stmt pos) condPos thn' els exitVars
+-- buildCond'' stmt@(Cond tst thn' els' vars) pos stmts thn els condPos exitVars
+--             detism = do
+--     let vars' = trustFromJust "buildCond'' given Cond with no vars" vars
+--     stmts' <- maybeFactorContinuation detism vars' stmts
+--     -- XXX performance bug:  should preprocess stmts into a single call
+--     thn'' <- buildCond' (thn'++stmts') thn els condPos exitVars detism
+--     els'' <- buildCond' (els'++stmts') thn els condPos exitVars detism
+--     logUnbranch $ "Creating Cond with test = " ++ show tst
+--     logUnbranch $ "                   then = " ++ showBody 26 thn''
+--     logUnbranch $ "                   else = " ++ showBody 26 els''
+--     return $ mkCond tst pos thn'' els'' exitVars
+-- buildCond'' stmt _ _ _ _ _ _ _ =
+--     shouldnt $ "Statement should have been eliminated before buildCond'': "
+--                ++ show stmt
 
 
 -- | Create a Cond statement, unless it can be simplified away.
-mkCond :: Placed Stmt -> OptPos -> [Placed Stmt] -> [Placed Stmt] -> VarDict
+mkCond :: Exp -> OptPos -> [Placed Stmt] -> [Placed Stmt] -> VarDict
        -> [Placed Stmt]
-mkCond test pos thn els vars
+mkCond (IntValue 0) pos thn els vars = els
+mkCond (Typed (IntValue 0) _ _) pos thn els vars = els
+mkCond (IntValue 1) pos thn els vars = thn
+mkCond (Typed (IntValue 1) _ _) pos thn els vars = thn
+mkCond exp pos thn els vars
   | thn == els = thn
   | thn == [succeedTest] && els == [failTest] = [test]
-  -- XXX Need exit vars below
-  | otherwise  = [maybePlace (Cond test thn els $ Just vars) pos]
+  | otherwise =
+    case (thn,els) of
+      ([Unplaced (ForeignCall "llvm" "move" [] [thnSrc, thnDest])],
+       [Unplaced (ForeignCall "llvm" "move" [] [elsSrc, elsDest])])
+        | thnDest == elsDest ->
+          let thnSrcContent = content thnSrc
+              elsSrcContent = content elsSrc
+              dest = content thnDest
+          in [if thnSrcContent == boolTrue && elsSrcContent == boolFalse
+              then move exp dest
+              else if thnSrcContent == boolFalse && elsSrcContent == boolTrue
+                   then boolNegate exp dest
+                   else maybePlace (Cond test thn els $ Just vars) pos]
+      _ -> [maybePlace (Cond test thn els $ Just vars) pos]
+  where test = Unplaced $ TestBool exp
 
 
 ----------------------------------------------------------------
@@ -670,13 +758,14 @@ mkCond test pos thn els vars
 -- |Convert a list of the final statements of a proc body into a short list of
 -- statements by turning them into a fresh proc if necessary.  The resulting
 -- statement list will have been unbranched.
-maybeFactorContinuation :: [Placed Stmt] -> VarDict -> Determinism
-                -> Unbrancher [Placed Stmt]
-maybeFactorContinuation stmts vars detism = do
+maybeFactorContinuation :: Determinism -> VarDict -> [Placed Stmt]
+                        -> [Placed Stmt] -> Unbrancher [Placed Stmt]
+maybeFactorContinuation detism vars stmts alt = do
     -- XXX need better heuristic:  stmts must also be flat
+    logUnbranch $ "Maybe factor continuation: " ++ showBody 4 stmts
     if length stmts <= 2
-      then unbranchStmts detism stmts
-      else (:[]) <$> factorContinuationProc vars Nothing detism stmts
+      then unbranchStmts detism stmts alt
+      else (:[]) <$> factorContinuationProc vars Nothing detism stmts alt
 
 
 
@@ -762,20 +851,18 @@ outputVars = List.foldr (ifIsVarDef Map.insert id  . content)
 --  unbranched as the output list for the generated proc, this can only be used
 --  for the final code for a proc.  The fresh proc will be recorded and will be
 --  unbranched later.
-factorContinuationProc :: VarDict -> OptPos -> Determinism -> [Placed Stmt]
-                -> Unbrancher (Placed Stmt)
-factorContinuationProc inVars pos detism stmts = do
+factorContinuationProc :: VarDict -> OptPos -> Determinism
+                 -> [Placed Stmt] -> [Placed Stmt] -> Unbrancher (Placed Stmt)
+factorContinuationProc inVars pos detism stmts alt = do
     pname <- newProcName
     logUnbranch $ "Factoring "
-      ++ case detism of
-           SemiDet -> "SemiDet"
-           Det     -> "Det"
+      ++ selectDetism "Det" "SemiDet" detism
       ++ " continuation proc "
       ++ pname ++ ":"
       ++ showBody 4 stmts
     proto <- newProcProto pname inVars
     loopinfo <- gets brLoopInfo
-    genProc loopinfo proto detism stmts
+    genProc loopinfo proto detism stmts alt
     newProcCall pname inVars pos detism
 
 
@@ -783,20 +870,18 @@ factorContinuationProc inVars pos detism stmts = do
 --  as inputs, and all the output params of the proc we're unbranching as
 --  outputs.  Then return a call to this proc with the same inputs and outputs.
 factorLoopProc :: [Placed Stmt] -> VarDict -> OptPos -> Determinism
-               -> [Placed Stmt] -> Unbrancher (Placed Stmt)
-factorLoopProc break inVars pos detism stmts = do
+               -> [Placed Stmt] -> [Placed Stmt] -> Unbrancher (Placed Stmt)
+factorLoopProc break inVars pos detism stmts alt = do
     pname <- newProcName
     logUnbranch $ "Factoring "
-      ++ case detism of
-           SemiDet -> "SemiDet"
-           Det     -> "Det"
+      ++ selectDetism "Det" "SemiDet" detism
       ++ " loop proc "
       ++ pname ++ ":"
       ++ showBody 4 stmts
     proto <- newProcProto pname inVars
     next <- newProcCall pname inVars pos detism
     let loopinfo = Just (LoopInfo next break)
-    genProc loopinfo proto detism stmts
+    genProc loopinfo proto detism stmts alt
     return next
 
 varExp :: FlowDirection -> VarName -> TypeSpec -> Placed Exp
@@ -821,3 +906,9 @@ newProcProto name inVars = do
                     | (v,ty) <- Map.toList inVars]
     outParams <- gets brOutParams
     return $ ProcProto name (inParams ++ outParams) Set.empty
+
+
+-- |Return the first value when the detism is Det, the second otherwise
+selectDetism :: a -> a -> Determinism -> a
+selectDetism det _  Det = det
+selectDetism _ semi SemiDet = semi

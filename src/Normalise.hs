@@ -933,11 +933,11 @@ equalityBody _ _ (Bits _) = ([simpleEqualityTest],True)
 equalityBody consts [] _ = ([equalityConsts consts],True)
 equalityBody consts nonconsts _ =
     -- decide whether $left is const or non const, and handle accordingly
-    ([Unplaced $ Cond (comparison "ult"
+    ([Unplaced $ Cond (comparison "uge"
                          (lpvmCastExp (varGet "$left") intType)
                          (iVal $ length consts))
-                [equalityConsts consts]
                 [equalityNonconsts (content <$> nonconsts) (List.null consts)]
+                [equalityConsts consts]
                 Nothing],
      -- Decide to inline if only 1 non-const constructor, no non-const
      -- constructors (so not recursive), and at most 4 fields
