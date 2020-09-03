@@ -94,7 +94,6 @@ data FlattenerState = Flattener {
     prefixStmts :: [Placed Stmt],   -- ^Code to be generated earlier, reversed
                                     -- (used for loop initialisation)
     flattened   :: [Placed Stmt],   -- ^Flattened code generated, reversed
-    -- postponed   :: [Placed Stmt],   -- ^Code to be generated later
     tempCtr     :: Int,             -- ^Temp variable counter
     currPos     :: OptPos,          -- ^Position of current statement
     stmtDefs    :: Set VarName,     -- ^Variables defined by this statement
