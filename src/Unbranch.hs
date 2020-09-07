@@ -479,8 +479,6 @@ mkCond True (IntValue 1) pos thn els vars = thn
 mkCond True (Typed (IntValue 1) _ _) pos thn els vars = thn
 mkCond True exp pos thn els vars
   | thn == els = thn
-    -- XXX is this redundant?
-  | thn == [succeedTest] && els == [failTest] = [test]
   | otherwise =
     case (thn,els) of
       ([Unplaced (ForeignCall "llvm" "move" [] [thnSrc, thnDest])],
