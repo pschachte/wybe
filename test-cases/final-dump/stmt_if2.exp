@@ -42,12 +42,19 @@ AFTER EVERYTHING:
 
 
 
+gen$1 > inline (3 calls)
+0: gen$1([k#0:wybe.int], [key#0:wybe.int], [l#0:stmt_if2.tree], [r#0:stmt_if2.tree], tmp$4#0:wybe.bool, [tree#0:stmt_if2.tree], ?$#0:wybe.bool):
+ AliasPairs: []
+ AliasMultiSpeczInfo: []
+    foreign llvm move(~tmp$4#0:wybe.bool, ?$#0:wybe.bool) @stmt_if2:5:5
+
+
 lookup > public (5 calls)
 0: lookup(key#0:wybe.int, tree#0:stmt_if2.tree, ?$#0:wybe.bool):
  AliasPairs: []
  AliasMultiSpeczInfo: []
-    stmt_if2.tree.=<0>(tree#0:stmt_if2.tree, 0:stmt_if2.tree, ?tmp$10#0:wybe.bool) @stmt_if2:6:8
-    case ~tmp$10#0:wybe.bool of
+    stmt_if2.tree.=<0>(tree#0:stmt_if2.tree, 0:stmt_if2.tree, ?tmp$13#0:wybe.bool) @stmt_if2:6:8
+    case ~tmp$13#0:wybe.bool of
     0:
         foreign llvm icmp ne(tree#0:stmt_if2.tree, 0:wybe.int, ?tmp$15#0:wybe.bool)
         case ~tmp$15#0:wybe.bool of
@@ -58,11 +65,11 @@ lookup > public (5 calls)
             foreign lpvm access(tree#0:stmt_if2.tree, 0:wybe.int, ?l#0:stmt_if2.tree)
             foreign lpvm access(tree#0:stmt_if2.tree, 8:wybe.int, ?k#0:wybe.int)
             foreign lpvm access(~tree#0:stmt_if2.tree, 16:wybe.int, ?r#0:stmt_if2.tree)
-            foreign llvm icmp eq(k#0:wybe.int, key#0:wybe.int, ?tmp$12#0:wybe.bool) @wybe:nn:nn
-            case ~tmp$12#0:wybe.bool of
+            foreign llvm icmp eq(k#0:wybe.int, key#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:nn:nn
+            case ~tmp$11#0:wybe.bool of
             0:
-                foreign llvm icmp sgt(~k#0:wybe.int, key#0:wybe.int, ?tmp$13#0:wybe.bool) @wybe:nn:nn
-                case ~tmp$13#0:wybe.bool of
+                foreign llvm icmp sgt(~k#0:wybe.int, key#0:wybe.int, ?tmp$10#0:wybe.bool) @wybe:nn:nn
+                case ~tmp$10#0:wybe.bool of
                 0:
                     stmt_if2.lookup<0>(~key#0:wybe.int, ~r#0:stmt_if2.tree, ?$#0:wybe.bool) @stmt_if2:10:14
 
@@ -126,10 +133,16 @@ if.else:
 }
 
 
+define external fastcc  i1 @"stmt_if2.gen$1<0>"(i1  %"tmp$4#0")    {
+entry:
+  ret i1 %"tmp$4#0" 
+}
+
+
 define external fastcc  i1 @"stmt_if2.lookup<0>"(i64  %"key#0", i64  %"tree#0")    {
 entry:
-  %"tmp$10#0" = tail call fastcc  i1  @"stmt_if2.tree.=<0>"(i64  %"tree#0", i64  0)  
-  br i1 %"tmp$10#0", label %if.then, label %if.else 
+  %"tmp$13#0" = tail call fastcc  i1  @"stmt_if2.tree.=<0>"(i64  %"tree#0", i64  0)  
+  br i1 %"tmp$13#0", label %if.then, label %if.else 
 if.then:
   ret i1 0 
 if.else:
@@ -147,15 +160,15 @@ if.then1:
   %22 = inttoptr i64 %21 to i64* 
   %23 = getelementptr  i64, i64* %22, i64 0 
   %24 = load  i64, i64* %23 
-  %"tmp$12#0" = icmp eq i64 %20, %"key#0" 
-  br i1 %"tmp$12#0", label %if.then2, label %if.else2 
+  %"tmp$11#0" = icmp eq i64 %20, %"key#0" 
+  br i1 %"tmp$11#0", label %if.then2, label %if.else2 
 if.else1:
   ret i1 0 
 if.then2:
   ret i1 1 
 if.else2:
-  %"tmp$13#0" = icmp sgt i64 %20, %"key#0" 
-  br i1 %"tmp$13#0", label %if.then3, label %if.else3 
+  %"tmp$10#0" = icmp sgt i64 %20, %"key#0" 
+  br i1 %"tmp$10#0", label %if.then3, label %if.else3 
 if.then3:
   %"$#0" = tail call fastcc  i1  @"stmt_if2.lookup<0>"(i64  %"key#0", i64  %16)  
   ret i1 %"$#0" 
@@ -185,66 +198,52 @@ if.else3:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:stmt_if2.tree, $right#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  AliasMultiSpeczInfo: []
-    stmt_if2.tree.=<0>(~$left#0:stmt_if2.tree, ~$right#0:stmt_if2.tree, ?tmp$1#0:wybe.bool)
-    case ~tmp$1#0:wybe.bool of
-    0:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+    stmt_if2.tree.=<0>(~$left#0:stmt_if2.tree, ~$right#0:stmt_if2.tree, ?tmp$0#0:wybe.bool)
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-
-= > public test (9 calls)
+= > public (10 calls)
 0: =($left#0:stmt_if2.tree, $right#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  AliasMultiSpeczInfo: []
-    foreign lpvm cast($left#0:stmt_if2.tree, ?tmp$0#0:!wybe.int)
-    foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
-    case ~tmp$1#0:wybe.bool of
+    foreign llvm icmp ne($left#0:!wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
     0:
-        foreign llvm icmp ne($left#0:stmt_if2.tree, 0:wybe.int, ?tmp$9#0:wybe.bool)
-        case ~tmp$9#0:wybe.bool of
+        foreign llvm icmp eq(~$left#0:stmt_if2.tree, ~$right#0:stmt_if2.tree, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access($left#0:stmt_if2.tree, 0:wybe.int, ?$left$left#0:stmt_if2.tree)
+        foreign lpvm access($left#0:stmt_if2.tree, 8:wybe.int, ?$left$key#0:wybe.int)
+        foreign lpvm access(~$left#0:stmt_if2.tree, 16:wybe.int, ?$left$right#0:stmt_if2.tree)
+        foreign llvm icmp ne($right#0:stmt_if2.tree, 0:wybe.int, ?tmp$10#0:wybe.bool)
+        case ~tmp$10#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access($left#0:stmt_if2.tree, 0:wybe.int, ?$left$left#0:stmt_if2.tree)
-            foreign lpvm access($left#0:stmt_if2.tree, 8:wybe.int, ?$left$key#0:wybe.int)
-            foreign lpvm access(~$left#0:stmt_if2.tree, 16:wybe.int, ?$left$right#0:stmt_if2.tree)
-            foreign llvm icmp ne($right#0:stmt_if2.tree, 0:wybe.int, ?tmp$11#0:wybe.bool)
-            case ~tmp$11#0:wybe.bool of
+            foreign lpvm access($right#0:stmt_if2.tree, 0:wybe.int, ?$right$left#0:stmt_if2.tree)
+            foreign lpvm access($right#0:stmt_if2.tree, 8:wybe.int, ?$right$key#0:wybe.int)
+            foreign lpvm access(~$right#0:stmt_if2.tree, 16:wybe.int, ?$right$right#0:stmt_if2.tree)
+            stmt_if2.tree.=<0>(~$left$left#0:stmt_if2.tree, ~$right$left#0:stmt_if2.tree, ?tmp$4#0:wybe.bool)
+            case ~tmp$4#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
             1:
-                foreign lpvm access($right#0:stmt_if2.tree, 0:wybe.int, ?$right$left#0:stmt_if2.tree)
-                foreign lpvm access($right#0:stmt_if2.tree, 8:wybe.int, ?$right$key#0:wybe.int)
-                foreign lpvm access(~$right#0:stmt_if2.tree, 16:wybe.int, ?$right$right#0:stmt_if2.tree)
-                stmt_if2.tree.=<0>(~$left$left#0:stmt_if2.tree, ~$right$left#0:stmt_if2.tree, ?tmp$5#0:wybe.bool)
+                foreign llvm icmp eq(~$left$key#0:wybe.int, ~$right$key#0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
                 case ~tmp$5#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
-                    foreign llvm icmp eq(~$left$key#0:wybe.int, ~$right$key#0:wybe.int, ?tmp$6#0:wybe.bool) @wybe:nn:nn
-                    case ~tmp$6#0:wybe.bool of
-                    0:
-                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                    1:
-                        stmt_if2.tree.=<0>(~$left$right#0:stmt_if2.tree, ~$right$right#0:stmt_if2.tree, ?$$#0:wybe.bool)
+                    stmt_if2.tree.=<0>(~$left$right#0:stmt_if2.tree, ~$right$right#0:stmt_if2.tree, ?$$#0:wybe.bool)
 
 
 
-
-
-    1:
-        foreign llvm icmp eq(~$left#0:stmt_if2.tree, ~$right#0:stmt_if2.tree, ?$$#0:wybe.bool)
 
 
 
@@ -255,7 +254,7 @@ empty > public inline (0 calls)
     foreign llvm move(0:stmt_if2.tree, ?$#0:stmt_if2.tree)
 
 
-key > public inline test (0 calls)
+key > public inline (0 calls)
 0: key($rec#0:stmt_if2.tree, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  AliasMultiSpeczInfo: []
@@ -268,7 +267,7 @@ key > public inline test (0 calls)
         foreign lpvm access(~$rec#0:stmt_if2.tree, 8:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-key > public inline test (0 calls)
+key > public inline (0 calls)
 1: key($rec#0:stmt_if2.tree, ?$rec#1:stmt_if2.tree, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  AliasMultiSpeczInfo: []
@@ -284,7 +283,7 @@ key > public inline test (0 calls)
 
 
 
-left > public inline test (0 calls)
+left > public inline (0 calls)
 0: left($rec#0:stmt_if2.tree, ?$#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  AliasMultiSpeczInfo: []
@@ -297,7 +296,7 @@ left > public inline test (0 calls)
         foreign lpvm access(~$rec#0:stmt_if2.tree, 0:wybe.int, ?$#0:stmt_if2.tree)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-left > public inline test (0 calls)
+left > public inline (0 calls)
 1: left($rec#0:stmt_if2.tree, ?$rec#1:stmt_if2.tree, $field#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  AliasMultiSpeczInfo: []
@@ -321,7 +320,7 @@ node > public inline (0 calls)
     foreign lpvm mutate(~%$rec#0:stmt_if2.tree, ?%$rec#1:stmt_if2.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~left#0:stmt_if2.tree)
     foreign lpvm mutate(~%$rec#1:stmt_if2.tree, ?%$rec#2:stmt_if2.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~key#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:stmt_if2.tree, ?%$#0:stmt_if2.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right#0:stmt_if2.tree)
-node > public inline test (9 calls)
+node > public inline (16 calls)
 1: node(?left#0:stmt_if2.tree, ?key#0:wybe.int, ?right#0:stmt_if2.tree, $#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  AliasMultiSpeczInfo: []
@@ -338,7 +337,7 @@ node > public inline test (9 calls)
 
 
 
-right > public inline test (0 calls)
+right > public inline (0 calls)
 0: right($rec#0:stmt_if2.tree, ?$#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  AliasMultiSpeczInfo: []
@@ -351,7 +350,7 @@ right > public inline test (0 calls)
         foreign lpvm access(~$rec#0:stmt_if2.tree, 16:wybe.int, ?$#0:stmt_if2.tree)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-right > public inline test (0 calls)
+right > public inline (0 calls)
 1: right($rec#0:stmt_if2.tree, ?$rec#1:stmt_if2.tree, $field#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  AliasMultiSpeczInfo: []
@@ -382,26 +381,17 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"stmt_if2.tree./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = tail call fastcc  i1  @"stmt_if2.tree.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
-if.then:
-  ret i1 0 
-if.else:
-  ret i1 1 
+  %"tmp$0#0" = tail call fastcc  i1  @"stmt_if2.tree.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"$$#0" = xor i1 %"tmp$0#0", 1 
+  ret i1 %"$$#0" 
 }
 
 
 define external fastcc  i1 @"stmt_if2.tree.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"tmp$1#0" = icmp eq i64 %"$left#0", 0 
-  br i1 %"tmp$1#0", label %if.then, label %if.else 
+  %"tmp$0#0" = icmp ne i64 %"$left#0", 0 
+  br i1 %"tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  ret i1 %"$$#0" 
-if.else:
-  %"tmp$9#0" = icmp ne i64 %"$left#0", 0 
-  br i1 %"tmp$9#0", label %if.then1, label %if.else1 
-if.then1:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
@@ -413,11 +403,12 @@ if.then1:
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   %11 = load  i64, i64* %10 
-  %"tmp$11#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"tmp$11#0", label %if.then2, label %if.else2 
-if.else1:
-  ret i1 0 
-if.then2:
+  %"tmp$10#0" = icmp ne i64 %"$right#0", 0 
+  br i1 %"tmp$10#0", label %if.then1, label %if.else1 
+if.else:
+  %"$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"$$#0" 
+if.then1:
   %12 = inttoptr i64 %"$right#0" to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
@@ -429,19 +420,19 @@ if.then2:
   %20 = inttoptr i64 %19 to i64* 
   %21 = getelementptr  i64, i64* %20, i64 0 
   %22 = load  i64, i64* %21 
-  %"tmp$5#0" = tail call fastcc  i1  @"stmt_if2.tree.=<0>"(i64  %3, i64  %14)  
+  %"tmp$4#0" = tail call fastcc  i1  @"stmt_if2.tree.=<0>"(i64  %3, i64  %14)  
+  br i1 %"tmp$4#0", label %if.then2, label %if.else2 
+if.else1:
+  ret i1 0 
+if.then2:
+  %"tmp$5#0" = icmp eq i64 %7, %18 
   br i1 %"tmp$5#0", label %if.then3, label %if.else3 
 if.else2:
   ret i1 0 
 if.then3:
-  %"tmp$6#0" = icmp eq i64 %7, %18 
-  br i1 %"tmp$6#0", label %if.then4, label %if.else4 
-if.else3:
-  ret i1 0 
-if.then4:
   %"$$#0" = tail call fastcc  i1  @"stmt_if2.tree.=<0>"(i64  %11, i64  %22)  
   ret i1 %"$$#0" 
-if.else4:
+if.else3:
   ret i1 0 
 }
 
