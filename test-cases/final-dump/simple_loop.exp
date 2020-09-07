@@ -35,12 +35,6 @@ gen$1 > (2 calls)
         simple_loop.gen$1<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, ~io#2:wybe.phantom, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#3:wybe.phantom) @simple_loop:1:1
 
 
-
-gen$2 > inline (1 calls)
-0: gen$2(argc#0:wybe.int, argv#0:wybe.int, [c#0:wybe.char], exit_code#0:wybe.int, io#0:wybe.phantom, [?argc#0:wybe.int], [?argv#0:wybe.int], [?exit_code#0:wybe.int], [?io#0:wybe.phantom]):
- AliasPairs: []
- AliasMultiSpeczInfo: []
-
   LLVM code       :
 
 ; ModuleID = 'simple_loop'

@@ -392,13 +392,16 @@ unbranchStmt detism stmt@(TestBool val) pos stmts alt sense = do
 unbranchStmt detism stmt@(And conj) pos stmts alt sense =
     ifSemiDet detism ("Conjunction in a Det context: " ++ show stmt)
     -- XXX might want to report if conj doesn't contain any tests
-    $ unbranchStmts SemiDet (conj ++ stmts) alt sense
+    $ do
+      logUnbranch $ "Unbranching conjunction " ++ show stmt
+      unbranchStmts SemiDet (conj ++ stmts) alt sense
 unbranchStmt detism stmt@(Or disjs) _ stmts alt sense = do
     ifSemiDet detism ("Disjunction in a Det context: " ++ show stmt)
     $ do
       -- XXX Need to also include variables defined in all disjuncts; should
       -- be determined in mode checker
       vars <- gets brVars
+      logUnbranch $ "Unbranching disjunction " ++ show stmt
       stmts' <- maybeFactorContinuation SemiDet vars stmts alt sense
       unbranchStmts SemiDet disjs stmts' (not sense)
 unbranchStmt detism stmt@(Not tst) pos stmts alt sense =
@@ -561,6 +564,7 @@ mkCond True (IntValue 1) pos thn els vars = thn
 mkCond True (Typed (IntValue 1) _ _) pos thn els vars = thn
 mkCond True exp pos thn els vars
   | thn == els = thn
+    -- XXX is this redundant?
   | thn == [succeedTest] && els == [failTest] = [test]
   | otherwise =
     case (thn,els) of
@@ -882,10 +886,13 @@ factorLoopProc break inVars pos detism stmts alt sense = do
       ++ " loop proc "
       ++ pname ++ ":"
       ++ showBody 4 stmts
-    stmts' <- unbranchStmts detism stmts alt sense
-    proto <- newProcProto pname inVars
     next <- newProcCall pname inVars pos detism
     let loopinfo = Just (LoopInfo next break)
+    oldLoopinfo <- gets brLoopInfo
+    modify (\s -> s { brLoopInfo = loopinfo })
+    stmts' <- unbranchStmts detism stmts alt sense
+    modify (\s -> s { brLoopInfo = oldLoopinfo })
+    proto <- newProcProto pname inVars
     genProc loopinfo proto detism stmts'
     return next
 
