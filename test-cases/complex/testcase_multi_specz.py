@@ -1,6 +1,7 @@
 from complex.utils import *
 
 
+# Multiple specialization and CTGC with dead cell reusing
 @test_case
 def int_list(ctx: Context) -> None:
     ctx.save_file("int_list.wybe", WYBE_INT_LIST)
@@ -237,4 +238,112 @@ def test_int_list(x:int_list, y:int_list, z:int_list) use !io {
 !print(" ** malloc count of test(non-aliased): ")
 !println(mc_test_not_aliased)
 
+"""
+
+
+# Multiple specialization and CTGC with destructive mutate instruction
+@test_case
+def drone(ctx: Context) -> None:
+    ctx.save_file("drone.wybe", WYBE_DRONE)
+    # build & execute without multiple specialization
+    _ = ctx.wybe_build_target("drone", False, False,
+                              check=True, no_multi_specz=True)
+    _, output = ctx.execute_program("./drone", check=True, input=WYBE_DRONE_IN)
+    ctx.write_section("build & execute without multiple specialization", output)
+
+    # build & execute with multiple specialization
+    _,final_dump = ctx.wybe_build_target("drone", force_all=True,
+                                         final_dump=True, check=True)
+    _, output = ctx.execute_program("./drone", check=True, input=WYBE_DRONE_IN)
+    ctx.write_section("build & execute with multiple specialization", output)
+    ctx.write_section("final dump (with multiple specialization)", final_dump)
+
+
+WYBE_DRONE = r"""
+type drone_info { pub drone_info(x:int, y:int, z:int, count:int) }
+
+def drone_init():drone_info = drone_info(0, 0, 0, 0)
+
+def print_info(d:drone_info) use !io {
+    !print("(")
+    !print(x(d))
+    !print(", ")
+    !print(y(d))
+    !print(", ")
+    !print(z(d))
+    !print(") #")
+    !print(count(d))
+    !nl
+}
+
+def do_action(!d:drone_info, action:char, ?success:bool) {
+    ?success = true
+    if { action = 'n' ::
+        y(!d, y(d)-1)
+    | action = 's' ::
+        y(!d, y(d)+1)
+    | action = 'w' ::
+        x(!d, x(d)-1)
+    | action = 'e' ::
+        x(!d, x(d)+1)
+    | action = 'u' ::
+        z(!d, z(d)+1)
+    | action = 'd' ::
+        z(!d, z(d)-1)
+    | otherwise ::
+        ?success = false
+    }
+    if { success ::
+        count(!d, count(d)+1)
+    }
+}
+
+def loop(d:drone_info, ch:char) use !io {
+    if { ch /= ' ' && ch /= '\n' ::
+        if { ch = 'p' ::
+            !print_info(d)
+        | otherwise ::
+            do_action(!d, ch, ?success)
+            if { success = false ::
+                !println("invalid action!")
+            }
+        }
+    }
+    !read(?ch:char)
+    if { ch /= eof ::
+        !loop(d, ch)
+    }
+}
+
+?d = drone_init()
+!read(?ch:char)
+if { ch /= eof ::
+    !loop(d, ch)
+}
+!malloc_count(?mc)
+!print("** malloc count: ")
+!println(mc)
+
+# XXX: does not work due to https://github.com/pschachte/wybe/issues/87
+# ?d = drone_init()
+# do {
+#     !read(?ch:char)
+#     until ch = eof
+#     if { ch /= ' ' && ch /= '\n' ::
+#         if { ch = 'p' ::
+#             !print_info(d)
+#         | otherwise ::
+#             do_action(!d, ch, ?success)
+#             if { success = false ::
+#                 !println("invalid action!")
+#             }
+#         }
+#     }
+# }
+"""
+
+WYBE_DRONE_IN = """
+p
+uuuuewunwundwensssneuudwnuwnsnuddwndunwusnnwewwenssdddweusdsenddndenwsnudueuuuewwddenneedsdsuedusnwu
+p
 """
