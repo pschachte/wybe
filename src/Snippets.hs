@@ -5,13 +5,18 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-module Snippets (intType, intCast, boolType, boolCast, phantomType,
-                 varSet, varGet, varGetSet,
+module Snippets (intType, intCast, boolType, boolCast, boolTrue, boolFalse,
+                 boolBool, phantomType, varSet, varGet, varGetSet,
                  boolVarSet, boolVarGet, intVarSet, intVarGet, castTo,
-                lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
-                comparison, succeedTest, failTest, succeedIfSemiDet) where
+                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
+                 boolNegate, comparison, succeedTest, failTest,
+                 succeedIfSemiDet) where
 
 import AST
+
+-- |An expression to cast a value to the specified type
+castTo :: Exp -> TypeSpec -> Exp
+castTo exp typ = Typed exp typ True
 
 -- |The int type
 intType :: TypeSpec
@@ -19,7 +24,7 @@ intType = TypeSpec ["wybe"] "int" []
 
 -- |Cast an expr to the int type
 intCast :: Exp -> Exp
-intCast exp = Typed exp intType True
+intCast exp = castTo exp intType
 
 -- |The bool type
 boolType :: TypeSpec
@@ -27,7 +32,19 @@ boolType = TypeSpec ["wybe"] "bool" []
 
 -- |Cast an expr to the bool type
 boolCast :: Exp -> Exp
-boolCast exp = Typed exp boolType True
+boolCast exp = castTo exp boolType
+
+-- |True as a bool Exp
+boolTrue :: Exp
+boolTrue = boolCast $ iVal 1
+
+-- |False as a bool Exp
+boolFalse :: Exp
+boolFalse = boolCast $ iVal 0
+
+-- |Return an expression holding value of a Haskell Bool
+boolBool :: Bool -> Exp
+boolBool bool = boolCast $ iVal $ if bool then 1 else 0
 
 -- | The phantom type
 phantomType :: TypeSpec
@@ -61,10 +78,6 @@ intVarSet name = Typed (varSet name) intType False
 intVarGet :: Ident -> Exp
 intVarGet name = Typed (varGet name) intType False
 
--- |An expression to cast a value to the specified type
-castTo :: Exp -> TypeSpec -> Exp
-castTo exp typ = Typed exp typ True
-
 -- |An unplaced statement to cast a value into fresh variable
 lpvmCast :: Exp -> Ident -> TypeSpec -> Placed Stmt
 lpvmCast from to totype =
@@ -86,11 +99,26 @@ lpvmCastToVar from to =
 iVal :: Integral a => a -> Exp
 iVal v = IntValue $ fromIntegral v
 
--- |An unplaced instruction to move a value to a variable
+-- |An instruction to move a value to a variable
 move :: Exp -> Exp -> Placed Stmt
 move src dest =
     Unplaced $ ForeignCall "llvm" "move" [] [Unplaced src, Unplaced dest]
 
+-- |An instruction to negate a bool value to a variable.  We optimise negation
+-- of constant values.
+boolNegate :: Exp -> Exp -> Placed Stmt
+boolNegate (IntValue 0) dest = move boolTrue dest
+boolNegate (IntValue 1) dest = move boolFalse dest
+boolNegate (Typed (IntValue 0) _ _) dest = move boolTrue dest
+boolNegate (Typed (IntValue 1) _ _) dest = move boolFalse dest
+boolNegate src@(Typed _ ty _) dest =
+    Unplaced $ ForeignCall "llvm" "xor" []
+               [Unplaced src, Unplaced $ castTo (iVal 1) ty, Unplaced dest]
+boolNegate src dest =
+    Unplaced $ ForeignCall "llvm" "xor" []
+               [Unplaced src, Unplaced $ boolCast $ iVal 1, Unplaced dest]
+
+-- |A primitive move instruction
 primMove :: PrimArg -> PrimArg -> Prim
 primMove src dest =
   PrimForeign "llvm" "move" [] [src, dest]

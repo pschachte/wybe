@@ -174,33 +174,28 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:student.course, $right#0:student.course, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.int)
-    foreign lpvm access(~$left#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.string)
-    foreign lpvm access($right#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.int)
-    foreign lpvm access(~$right#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$7#0:wybe.string)
-    foreign llvm icmp eq(~tmp$4#0:wybe.int, ~tmp$6#0:wybe.int, ?tmp$8#0:wybe.bool) @wybe:nn:nn
-    case ~tmp$8#0:wybe.bool of
+    foreign lpvm access($left#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.int)
+    foreign lpvm access(~$left#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.string)
+    foreign lpvm access($right#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.int)
+    foreign lpvm access(~$right#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.string)
+    foreign llvm icmp eq(~tmp$3#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$7#0:wybe.bool of
     0:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
+        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign c strcmp(~tmp$5#0:wybe.string, ~tmp$7#0:wybe.string, ?tmp$9#0:wybe.int) @wybe:nn:nn
-        foreign llvm icmp eq(~tmp$9#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
-        case ~tmp$1#0:wybe.bool of
-        0:
-            foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-        1:
-            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign c strcmp(~tmp$4#0:wybe.string, ~tmp$6#0:wybe.string, ?tmp$8#0:wybe.int) @wybe:nn:nn
+        foreign llvm icmp eq(~tmp$8#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
+        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
 
-
-= > public inline test (6 calls)
+= > public inline (5 calls)
 0: =($left#0:student.course, $right#0:student.course, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -208,14 +203,14 @@ entry:
     foreign lpvm access(~$left#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$name#0:wybe.string)
     foreign lpvm access($right#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$code#0:wybe.int)
     foreign lpvm access(~$right#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$name#0:wybe.string)
-    foreign llvm icmp eq(~$left$code#0:wybe.int, ~$right$code#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
-    case ~tmp$2#0:wybe.bool of
+    foreign llvm icmp eq(~$left$code#0:wybe.int, ~$right$code#0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign c strcmp(~$left$name#0:wybe.string, ~$right$name#0:wybe.string, ?tmp$10#0:wybe.int) @wybe:nn:nn
-        foreign llvm icmp eq(~tmp$10#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+        foreign c strcmp(~$left$name#0:wybe.string, ~$right$name#0:wybe.string, ?tmp$9#0:wybe.int) @wybe:nn:nn
+        foreign llvm icmp eq(~tmp$9#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
 
@@ -238,7 +233,7 @@ course > public inline (0 calls)
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!student.course)
     foreign lpvm mutate(~%$rec#0:student.course, ?%$rec#1:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~code#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:student.course, ?%$#0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~name#0:wybe.string)
-course > public inline (4 calls)
+course > public inline (6 calls)
 1: course(?code#0:wybe.int, ?name#0:wybe.string, $#0:student.course):
  AliasPairs: []
  InterestingCallProperties: []
@@ -290,18 +285,16 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"1$tmp$8#0" = icmp eq i64 %3, %10 
-  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$7#0" = icmp eq i64 %3, %10 
+  br i1 %"1$tmp$7#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$9#0" = tail call ccc  i64  @strcmp(i64  %7, i64  %14)  
-  %"2$tmp$1#0" = icmp eq i64 %"2$tmp$9#0", 0 
-  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
+  %"2$tmp$8#0" = tail call ccc  i64  @strcmp(i64  %7, i64  %14)  
+  %"2$tmp$0#0" = icmp eq i64 %"2$tmp$8#0", 0 
+  %"2$$$#0" = xor i1 %"2$tmp$0#0", 1 
+  ret i1 %"2$$$#0" 
 if.else:
-  ret i1 1 
-if.then1:
-  ret i1 0 
-if.else1:
-  ret i1 1 
+  %"3$$$#0" = xor i1 0, 1 
+  ret i1 %"3$$$#0" 
 }
 
 
@@ -321,11 +314,11 @@ entry:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"1$tmp$2#0" = icmp eq i64 %17, %24 
-  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp eq i64 %17, %24 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$10#0" = tail call ccc  i64  @strcmp(i64  %21, i64  %28)  
-  %"2$$$#0" = icmp eq i64 %"2$tmp$10#0", 0 
+  %"2$tmp$9#0" = tail call ccc  i64  @strcmp(i64  %21, i64  %28)  
+  %"2$$$#0" = icmp eq i64 %"2$tmp$9#0", 0 
   ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
@@ -432,44 +425,40 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:student.student, $right#0:student.student, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.int)
-    foreign lpvm access(~$left#0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:student.course)
-    foreign lpvm access($right#0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.int)
-    foreign lpvm access(~$right#0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$7#0:student.course)
-    foreign llvm icmp eq(~tmp$4#0:wybe.int, ~tmp$6#0:wybe.int, ?tmp$8#0:wybe.bool) @wybe:nn:nn
-    case ~tmp$8#0:wybe.bool of
+    foreign lpvm access($left#0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.int)
+    foreign lpvm access(~$left#0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:student.course)
+    foreign lpvm access($right#0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.int)
+    foreign lpvm access(~$right#0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:student.course)
+    foreign llvm icmp eq(~tmp$3#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$7#0:wybe.bool of
     0:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
+        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access(tmp$5#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$9#0:wybe.int)
-        foreign lpvm access(~tmp$5#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$10#0:wybe.string)
-        foreign lpvm access(tmp$7#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$11#0:wybe.int)
-        foreign lpvm access(~tmp$7#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$12#0:wybe.string)
-        foreign llvm icmp eq(~tmp$11#0:wybe.int, ~tmp$9#0:wybe.int, ?tmp$13#0:wybe.bool) @wybe:nn:nn
-        case ~tmp$13#0:wybe.bool of
+        foreign lpvm access(tmp$4#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$8#0:wybe.int)
+        foreign lpvm access(~tmp$4#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$9#0:wybe.string)
+        foreign lpvm access(tmp$6#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$10#0:wybe.int)
+        foreign lpvm access(~tmp$6#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$11#0:wybe.string)
+        foreign llvm icmp eq(~tmp$10#0:wybe.int, ~tmp$8#0:wybe.int, ?tmp$12#0:wybe.bool) @wybe:nn:nn
+        case ~tmp$12#0:wybe.bool of
         0:
-            foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
+            foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign c strcmp(~tmp$10#0:wybe.string, ~tmp$12#0:wybe.string, ?tmp$14#0:wybe.int) @wybe:nn:nn
-            foreign llvm icmp eq(~tmp$14#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
-            case ~tmp$1#0:wybe.bool of
-            0:
-                foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-            1:
-                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign c strcmp(~tmp$9#0:wybe.string, ~tmp$11#0:wybe.string, ?tmp$13#0:wybe.int) @wybe:nn:nn
+            foreign llvm icmp eq(~tmp$13#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
+            foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
 
 
-
-= > public inline test (6 calls)
+= > public inline (5 calls)
 0: =($left#0:student.student, $right#0:student.student, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -477,26 +466,26 @@ entry:
     foreign lpvm access(~$left#0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$major#0:student.course)
     foreign lpvm access($right#0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$id#0:wybe.int)
     foreign lpvm access(~$right#0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$major#0:student.course)
-    foreign llvm icmp eq(~$left$id#0:wybe.int, ~$right$id#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
-    case ~tmp$2#0:wybe.bool of
+    foreign llvm icmp eq(~$left$id#0:wybe.int, ~$right$id#0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access($left$major#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$10#0:wybe.int)
-        foreign lpvm access(~$left$major#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$11#0:wybe.string)
-        foreign lpvm access($right$major#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$12#0:wybe.int)
-        foreign lpvm access(~$right$major#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$13#0:wybe.string)
-        foreign llvm icmp eq(~tmp$10#0:wybe.int, ~tmp$12#0:wybe.int, ?tmp$14#0:wybe.bool) @wybe:nn:nn
-        case ~tmp$14#0:wybe.bool of
+        foreign lpvm access($left$major#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$9#0:wybe.int)
+        foreign lpvm access(~$left$major#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$10#0:wybe.string)
+        foreign lpvm access($right$major#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$11#0:wybe.int)
+        foreign lpvm access(~$right$major#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$12#0:wybe.string)
+        foreign llvm icmp eq(~tmp$11#0:wybe.int, ~tmp$9#0:wybe.int, ?tmp$13#0:wybe.bool) @wybe:nn:nn
+        case ~tmp$13#0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?tmp$3#0:wybe.bool)
-            foreign llvm move(~tmp$3#0:!wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(0:wybe.bool, ?tmp$2#0:wybe.bool)
+            foreign llvm move(~tmp$2#0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign c strcmp(~tmp$11#0:wybe.string, ~tmp$13#0:wybe.string, ?tmp$15#0:wybe.int) @wybe:nn:nn
-            foreign llvm icmp eq(~tmp$15#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
-            foreign llvm move(~tmp$3#0:!wybe.bool, ?$$#0:wybe.bool)
+            foreign c strcmp(~tmp$10#0:wybe.string, ~tmp$12#0:wybe.string, ?tmp$14#0:wybe.int) @wybe:nn:nn
+            foreign llvm icmp eq(~tmp$14#0:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
+            foreign llvm move(~tmp$2#0:wybe.bool, ?$$#0:wybe.bool)
 
 
 
@@ -532,7 +521,7 @@ student > public inline (0 calls)
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!student.student)
     foreign lpvm mutate(~%$rec#0:student.student, ?%$rec#1:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~id#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:student.student, ?%$#0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~major#0:student.course)
-student > public inline (4 calls)
+student > public inline (6 calls)
 1: student(?id#0:wybe.int, ?major#0:student.course, $#0:student.student):
  AliasPairs: []
  InterestingCallProperties: []
@@ -572,8 +561,8 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"1$tmp$8#0" = icmp eq i64 %3, %10 
-  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$7#0" = icmp eq i64 %3, %10 
+  br i1 %"1$tmp$7#0", label %if.then, label %if.else 
 if.then:
   %15 = inttoptr i64 %7 to i64* 
   %16 = getelementptr  i64, i64* %15, i64 0 
@@ -589,20 +578,19 @@ if.then:
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   %28 = load  i64, i64* %27 
-  %"2$tmp$13#0" = icmp eq i64 %24, %17 
-  br i1 %"2$tmp$13#0", label %if.then1, label %if.else1 
+  %"2$tmp$12#0" = icmp eq i64 %24, %17 
+  br i1 %"2$tmp$12#0", label %if.then1, label %if.else1 
 if.else:
-  ret i1 1 
+  %"3$$$#0" = xor i1 0, 1 
+  ret i1 %"3$$$#0" 
 if.then1:
-  %"4$tmp$14#0" = tail call ccc  i64  @strcmp(i64  %21, i64  %28)  
-  %"4$tmp$1#0" = icmp eq i64 %"4$tmp$14#0", 0 
-  br i1 %"4$tmp$1#0", label %if.then2, label %if.else2 
+  %"4$tmp$13#0" = tail call ccc  i64  @strcmp(i64  %21, i64  %28)  
+  %"4$tmp$0#0" = icmp eq i64 %"4$tmp$13#0", 0 
+  %"4$$$#0" = xor i1 %"4$tmp$0#0", 1 
+  ret i1 %"4$$$#0" 
 if.else1:
-  ret i1 1 
-if.then2:
-  ret i1 0 
-if.else2:
-  ret i1 1 
+  %"5$$$#0" = xor i1 0, 1 
+  ret i1 %"5$$$#0" 
 }
 
 
@@ -622,8 +610,8 @@ entry:
   %40 = inttoptr i64 %39 to i64* 
   %41 = getelementptr  i64, i64* %40, i64 0 
   %42 = load  i64, i64* %41 
-  %"1$tmp$2#0" = icmp eq i64 %31, %38 
-  br i1 %"1$tmp$2#0", label %if.then, label %if.else 
+  %"1$tmp$1#0" = icmp eq i64 %31, %38 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
   %43 = inttoptr i64 %35 to i64* 
   %44 = getelementptr  i64, i64* %43, i64 0 
@@ -639,14 +627,14 @@ if.then:
   %54 = inttoptr i64 %53 to i64* 
   %55 = getelementptr  i64, i64* %54, i64 0 
   %56 = load  i64, i64* %55 
-  %"2$tmp$14#0" = icmp eq i64 %45, %52 
-  br i1 %"2$tmp$14#0", label %if.then1, label %if.else1 
+  %"2$tmp$13#0" = icmp eq i64 %52, %45 
+  br i1 %"2$tmp$13#0", label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
-  %"4$tmp$15#0" = tail call ccc  i64  @strcmp(i64  %49, i64  %56)  
-  %"4$tmp$3#0" = icmp eq i64 %"4$tmp$15#0", 0 
-  ret i1 %"4$tmp$3#0" 
+  %"4$tmp$14#0" = tail call ccc  i64  @strcmp(i64  %49, i64  %56)  
+  %"4$tmp$2#0" = icmp eq i64 %"4$tmp$14#0", 0 
+  ret i1 %"4$tmp$2#0" 
 if.else1:
   ret i1 0 
 }

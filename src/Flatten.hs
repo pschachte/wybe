@@ -94,7 +94,6 @@ data FlattenerState = Flattener {
     prefixStmts :: [Placed Stmt],   -- ^Code to be generated earlier, reversed
                                     -- (used for loop initialisation)
     flattened   :: [Placed Stmt],   -- ^Flattened code generated, reversed
-    -- postponed   :: [Placed Stmt],   -- ^Code to be generated later
     tempCtr     :: Int,             -- ^Temp variable counter
     currPos     :: OptPos,          -- ^Position of current statement
     stmtDefs    :: Set VarName,     -- ^Variables defined by this statement
@@ -278,7 +277,7 @@ flattenStmt' (ForeignCall lang name flags args) pos _ = do
 --     to be retained between condition and then branch, but forgotten for
 --     the else branch.  Also note that 'transparent' arg to flattenInner is
 --     always False
-flattenStmt' (Cond tstStmt thn els) pos detism = do
+flattenStmt' (Cond tstStmt thn els defVars) pos detism = do
     defined <- gets defdVars
     -- expand tstStmts, allowing defined vars to propagate to then branch
     tstStmt' <- seqToStmt <$> flattenInner False True SemiDet
@@ -287,7 +286,7 @@ flattenStmt' (Cond tstStmt thn els) pos detism = do
     -- for else branch, put defined vars back as they were before condition 
     modify (\s -> s {defdVars = defined})
     els' <- flattenInner False False detism (flattenStmts els detism)
-    emit pos $ Cond tstStmt' thn' els'
+    emit pos $ Cond tstStmt' thn' els' defVars
 flattenStmt' stmt@(TestBool _) pos SemiDet = emit pos stmt
 flattenStmt' (TestBool expr) _pos Det =
     shouldnt $ "TestBool " ++ show expr ++ " in Det context"
@@ -296,10 +295,10 @@ flattenStmt' (And tsts) pos SemiDet = do
     emit pos $ And tsts'
 flattenStmt' stmt@And{} _pos Det =
     shouldnt $ "And in a Det context: " ++ showStmt 4 stmt
-flattenStmt' (Or tsts) pos SemiDet = do
+flattenStmt' (Or tsts vars) pos SemiDet = do
     tsts' <- flattenInner False True SemiDet (flattenStmts tsts SemiDet)
-    emit pos $ Or tsts'
-flattenStmt' (Or tstStmts) _pos Det =
+    emit pos $ Or tsts' vars
+flattenStmt' (Or tstStmts _) _pos Det =
     shouldnt $ "Or in a Det context: " ++ showBody 4 tstStmts
 flattenStmt' (Not tstStmt) pos SemiDet = do
     tstStmt' <- seqToStmt <$> flattenInner False True SemiDet
@@ -307,10 +306,10 @@ flattenStmt' (Not tstStmt) pos SemiDet = do
     emit pos $ Not tstStmt'
 flattenStmt' (Not tstStmt) _pos Det =
     shouldnt $ "negation in a Det context: " ++ show tstStmt
-flattenStmt' (Loop body) pos detism = do
+flattenStmt' (Loop body defVars) pos detism = do
     body' <- flattenInner True False detism
              (flattenStmts (body ++ [Unplaced Next]) detism)
-    emit pos $ Loop body'
+    emit pos $ Loop body' defVars
 flattenStmt' (UseResources res body) pos detism = do
     defined <- gets defdVars
     body' <- flattenInner False True detism (flattenStmts body detism)
@@ -434,7 +433,8 @@ flattenExp (CondExp cond thn els) ty cast pos = do
                  [maybePlace (ForeignCall "llvm" "move" []
                               [typeAndPlace (content els) ty cast (place els),
                                Unplaced $ Var resultName ParamOut flowType])
-                  pos])
+                  pos]
+                Nothing)
         pos Det
     return $ [maybePlace (Var resultName ParamIn flowType) pos]
 flattenExp (Fncall maybeMod name exps) ty cast pos = do

@@ -97,7 +97,7 @@ finishStmt = getCurrNumbering >>= putNumberings
 
 -- |Return a list of prims to complete a proc body.  For a SemiDet body
 -- that hasn't already had $$ assigned a value, this will assign it
--- False; otherwise it'll be empty.
+-- True; otherwise it'll be empty.
 closingStmts :: Determinism -> ClauseComp [Placed Prim]
 closingStmts Det = return []
 closingStmts SemiDet = do
@@ -122,27 +122,26 @@ evalClauseComp clcomp =
 compileProc :: ProcDef -> Compiler ProcDef
 compileProc proc =
     evalClauseComp $ do
-        let detism = procDetism proc
+        unless (procDetism proc == Det)
+          $ shouldnt $ "SemiDet proc left by unbranching:  "
+                       ++ showProcDef 4 proc
         let ProcDefSrc body = procImpln proc
         let proto = procProto proc
         let params = procProtoParams proto
-        let params' = case detism of
-                         SemiDet -> params ++ [testOutParam]
-                         Det     -> params
         modify (\st -> st {nextCallSiteID = (procCallSiteCount proc)})
         logClause $ "--------------\nCompiling proc " ++ show proto
         mapM_ (nextVar . paramName) $ List.filter (flowsIn . paramFlow) params
         finishStmt
         startVars <- getCurrNumbering
-        compiled <- compileBody body params' detism
+        compiled <- compileBody body params Det
         logClause $ "Compiled to:"  ++ showBlock 4 compiled
         endVars <- getCurrNumbering
         logClause $ "  startVars: " ++ show startVars
         logClause $ "  endVars  : " ++ show endVars
         logClause $ "  params   : " ++ show params
-        let params'' = List.map (compileParam startVars endVars) params'
-        let proto' = PrimProto (procProtoName proto) params''
-        logClause $ "  comparams: " ++ show params''
+        let params' = List.map (compileParam startVars endVars) params
+        let proto' = PrimProto (procProtoName proto) params'
+        logClause $ "  comparams: " ++ show params'
         callSiteCount <- gets nextCallSiteID
         return $ proc { procImpln = ProcDefPrim proto' compiled
                                         emptyProcAnalysis Map.empty,
@@ -169,7 +168,7 @@ compileBody stmts params detism = do
     logClause $ "Compiling body:" ++ showBody 4 stmts
     let final = last stmts
     case content final of
-        Cond tst thn els ->
+        Cond tst thn els _ ->
           case content tst of
               TestBool var -> do
                 front <- mapM compileSimpleStmt $ init stmts
@@ -177,6 +176,24 @@ compileBody stmts params detism = do
               tstStmt ->
                 shouldnt $ "CompileBody of Cond with non-simple test:\n"
                            ++ show tstStmt
+        -- XXX There shouldn't be any semidet code here any more
+        call@(ProcCall maybeMod name procID SemiDet _ args)
+          | detism == SemiDet -> do
+          logClause $ "Compiling SemiDet tail call " ++ showStmt 4 call
+          args' <- mapM (placedApply compileArg) args
+          front <- mapM compileSimpleStmt $ init stmts
+          callSiteID <- gets nextCallSiteID
+          let final' = Unplaced
+                       $ PrimCall callSiteID
+                         (ProcSpec maybeMod name
+                                   (trustFromJust
+                                    ("compileBody for " ++ showStmt 4 call)
+                                     procID) generalVersion)
+                         (args' ++
+                          [ArgVar (PrimVarName "$$" 0) boolType False FlowOut
+                           (Implicit Nothing) False])
+          return $ ProcBody (front++[final']) NoFork
+
         _ -> do
           prims <- mapM compileSimpleStmt stmts
           end <- closingStmts detism
