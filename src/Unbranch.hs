@@ -500,12 +500,22 @@ mkCond True exp pos thn els vars
 maybeFactorContinuation :: Determinism -> VarDict -> [Placed Stmt]
                         -> [Placed Stmt] -> Bool -> Unbrancher [Placed Stmt]
 maybeFactorContinuation detism vars stmts alt sense = do
-    -- XXX need better heuristic:  stmts must also be flat
-    -- XXX Also only factor when continuation will be used multiple times
     logUnbranch $ "Maybe factor continuation: " ++ showBody 4 stmts
-    if length stmts <= 2
+    if length stmts <= 2 && all flatStmt (content <$> stmts)
       then unbranchStmts detism stmts alt sense
       else (:[]) <$> factorContinuationProc vars Nothing detism stmts alt sense
+
+
+-- |Test that a statement is not compound
+flatStmt :: Stmt -> Bool
+flatStmt ProcCall{}    = True
+flatStmt ForeignCall{} = True
+flatStmt Nop           = True
+flatStmt TestBool{}    = True
+flatStmt (Not stmt)    = flatStmt $ content stmt
+flatStmt Break         = True
+flatStmt Next          = True
+flatStmt _             = False
 
 
 -- |A symbol table containing all input parameters
