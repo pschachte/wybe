@@ -172,28 +172,29 @@ transformStmt tmp stmt@(TestBool var) pos =
 transformStmt tmp (And stmts) pos = do
     (stmts',tmp') <- transformBody tmp stmts
     return ([maybePlace (And stmts') pos], tmp')
-transformStmt tmp (Or []) pos =
+transformStmt tmp (Or [] _) pos =
     return ([failTest], tmp)
-transformStmt tmp (Or [stmt]) pos = do
+transformStmt tmp (Or [stmt] _) pos = do
     placedApplyM (transformStmt tmp) stmt
-transformStmt tmp (Or (stmt:stmts)) pos = do
+transformStmt tmp (Or (stmt:stmts) vars) pos = do
     (stmt',tmp')  <- placedApplyM (transformStmt tmp) stmt
-    (stmt'',tmp'') <- transformStmt tmp' (Or stmts) pos
-    return ([maybePlace (Or $ [(makeSingleStmt stmt'),(makeSingleStmt stmt'')])
+    (stmt'',tmp'') <- transformStmt tmp' (Or stmts vars) pos
+    return ([maybePlace (Or [(makeSingleStmt stmt'),(makeSingleStmt stmt'')] vars)
               pos], tmp'')
 transformStmt tmp (Not stmt) pos = do
     (stmt',tmp') <- placedApplyM (transformStmt tmp) stmt
     return ([maybePlace (Not $ makeSingleStmt stmt') pos], tmp')
 transformStmt tmp Nop _ =
     return ([], tmp)
-transformStmt tmp (Cond test thn els) pos = do
+transformStmt tmp (Cond test thn els defVars) pos = do
     (test',tmp1) <- placedApplyM (transformStmt tmp) test
     (thn',tmp2) <- transformBody tmp1 thn
     (els',tmp3) <- transformBody tmp2 els
-    return ([maybePlace (Cond (Unplaced $ And test') thn' els') pos], tmp3)
-transformStmt tmp (Loop body) pos = do
+    return ([maybePlace (Cond (Unplaced $ And test') thn' els' defVars) pos],
+            tmp3)
+transformStmt tmp (Loop body defVars) pos = do
     (body',tmp') <- transformBody tmp body
-    return ([maybePlace (Loop body') pos], tmp')
+    return ([maybePlace (Loop body' defVars) pos], tmp')
 transformStmt tmp (For generators body) pos = do
     (body', tmp') <- transformBody tmp body
     return ([maybePlace (For generators body') pos], tmp')

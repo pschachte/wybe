@@ -18,13 +18,13 @@ AFTER EVERYTHING:
  InterestingCallProperties: []
     foreign c read_int(?x#0:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
     foreign c read_int(?y#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
-    foreign llvm icmp sgt(x#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
-    case ~tmp$3#0:wybe.bool of
+    foreign llvm icmp sgt(x#0:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm sub(0:wybe.int, ~x#0:wybe.int, ?tmp$1#0:wybe.int) @wybe:nn:nn
         call_site_id.foo<0>(~tmp$1#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #17 @call_site_id:25:6
-        foreign llvm icmp sgt(y#0:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
-        case ~tmp$5#0:wybe.bool of
+        foreign llvm icmp sgt(y#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @wybe:nn:nn
+        case ~tmp$4#0:wybe.bool of
         0:
             foreign llvm sub(0:wybe.int, ~y#0:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
             call_site_id.foo<0>(~tmp$2#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #18 @call_site_id:25:6
@@ -35,8 +35,8 @@ AFTER EVERYTHING:
 
     1:
         call_site_id.foo<0>(~x#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #20 @call_site_id:25:6
-        foreign llvm icmp sgt(y#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @wybe:nn:nn
-        case ~tmp$4#0:wybe.bool of
+        foreign llvm icmp sgt(y#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
+        case ~tmp$3#0:wybe.bool of
         0:
             foreign llvm sub(0:wybe.int, ~y#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
             call_site_id.foo<0>(~tmp$0#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #21 @call_site_id:25:6
@@ -121,17 +121,17 @@ define external fastcc  void @"call_site_id.<0>"(i64  %"argc#0", i64  %"argv#0",
 entry:
   %"1$x#0" = tail call ccc  i64  @read_int()  
   %"1$y#0" = tail call ccc  i64  @read_int()  
-  %"1$tmp$3#0" = icmp sgt i64 %"1$x#0", 0 
-  br i1 %"1$tmp$3#0", label %if.then, label %if.else 
+  %"1$tmp$5#0" = icmp sgt i64 %"1$x#0", 0 
+  br i1 %"1$tmp$5#0", label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"call_site_id.foo<0>"(i64  %"1$x#0")  
-  %"2$tmp$4#0" = icmp sgt i64 %"1$y#0", 0 
-  br i1 %"2$tmp$4#0", label %if.then1, label %if.else1 
+  %"2$tmp$3#0" = icmp sgt i64 %"1$y#0", 0 
+  br i1 %"2$tmp$3#0", label %if.then1, label %if.else1 
 if.else:
   %"3$tmp$1#0" = sub   i64 0, %"1$x#0" 
   tail call fastcc  void  @"call_site_id.foo<0>"(i64  %"3$tmp$1#0")  
-  %"3$tmp$5#0" = icmp sgt i64 %"1$y#0", 0 
-  br i1 %"3$tmp$5#0", label %if.then2, label %if.else2 
+  %"3$tmp$4#0" = icmp sgt i64 %"1$y#0", 0 
+  br i1 %"3$tmp$4#0", label %if.then2, label %if.else2 
 if.then1:
   tail call fastcc  void  @"call_site_id.foo<0>"(i64  %"1$y#0")  
   ret void 

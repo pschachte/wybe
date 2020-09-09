@@ -94,7 +94,6 @@ data FlattenerState = Flattener {
     prefixStmts :: [Placed Stmt],   -- ^Code to be generated earlier, reversed
                                     -- (used for loop initialisation)
     flattened   :: [Placed Stmt],   -- ^Flattened code generated, reversed
-    -- postponed   :: [Placed Stmt],   -- ^Code to be generated later
     tempCtr     :: Int,             -- ^Temp variable counter
     currPos     :: OptPos,          -- ^Position of current statement
     stmtDefs    :: Set VarName,     -- ^Variables defined by this statement
@@ -208,14 +207,6 @@ flattenStmt stmt pos detism = do
 
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
--- XXX This doesn't seem to apply
--- flattenStmt' stmt@(ProcCall [] "phantom" _ Det _ [arg]) pos _ = do
---     -- Convert unary call to phantom with output var to move instr
---     let instr = ForeignCall "llvm" "move" []
---                 [Unplaced $ Typed (IntValue 0) (TypeSpec [] "phantom" []) True,
---                  arg]
---     logFlatten $ "   Converting ProcCall " ++ show stmt ++ " to " ++ show instr
---     emit pos instr
 flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
     let arg1content = content arg1
     let arg2content = content arg2
@@ -251,6 +242,10 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
       _ -> do
         -- Must be a mode error:  both sides want to bind variables
         lift $ message Error "Cannot generate bindings on both sides of '='" pos
+flattenStmt' stmt@(ProcCall [] "break" _ _ _ []) pos _ =
+    emit pos Break
+flattenStmt' stmt@(ProcCall [] "next" _ _ _ []) pos _ =
+    emit pos Next
 flattenStmt' stmt@(ProcCall [] name _ _ _ []) pos _ = do
     defined <- gets defdVars
     -- Convert call to no-arg proc to a bool variable test if there's a
@@ -278,7 +273,7 @@ flattenStmt' (ForeignCall lang name flags args) pos _ = do
 --     to be retained between condition and then branch, but forgotten for
 --     the else branch.  Also note that 'transparent' arg to flattenInner is
 --     always False
-flattenStmt' (Cond tstStmt thn els) pos detism = do
+flattenStmt' (Cond tstStmt thn els defVars) pos detism = do
     defined <- gets defdVars
     -- expand tstStmts, allowing defined vars to propagate to then branch
     tstStmt' <- seqToStmt <$> flattenInner False True SemiDet
@@ -287,7 +282,7 @@ flattenStmt' (Cond tstStmt thn els) pos detism = do
     -- for else branch, put defined vars back as they were before condition 
     modify (\s -> s {defdVars = defined})
     els' <- flattenInner False False detism (flattenStmts els detism)
-    emit pos $ Cond tstStmt' thn' els'
+    emit pos $ Cond tstStmt' thn' els' defVars
 flattenStmt' stmt@(TestBool _) pos SemiDet = emit pos stmt
 flattenStmt' (TestBool expr) _pos Det =
     shouldnt $ "TestBool " ++ show expr ++ " in Det context"
@@ -296,10 +291,10 @@ flattenStmt' (And tsts) pos SemiDet = do
     emit pos $ And tsts'
 flattenStmt' stmt@And{} _pos Det =
     shouldnt $ "And in a Det context: " ++ showStmt 4 stmt
-flattenStmt' (Or tsts) pos SemiDet = do
+flattenStmt' (Or tsts vars) pos SemiDet = do
     tsts' <- flattenInner False True SemiDet (flattenStmts tsts SemiDet)
-    emit pos $ Or tsts'
-flattenStmt' (Or tstStmts) _pos Det =
+    emit pos $ Or tsts' vars
+flattenStmt' (Or tstStmts _) _pos Det =
     shouldnt $ "Or in a Det context: " ++ showBody 4 tstStmts
 flattenStmt' (Not tstStmt) pos SemiDet = do
     tstStmt' <- seqToStmt <$> flattenInner False True SemiDet
@@ -307,51 +302,68 @@ flattenStmt' (Not tstStmt) pos SemiDet = do
     emit pos $ Not tstStmt'
 flattenStmt' (Not tstStmt) _pos Det =
     shouldnt $ "negation in a Det context: " ++ show tstStmt
-flattenStmt' (Loop body) pos detism = do
+flattenStmt' (Loop body defVars) pos detism = do
     body' <- flattenInner True False detism
              (flattenStmts (body ++ [Unplaced Next]) detism)
-    emit pos $ Loop body'
--- flattenStmt' (For loopVar genExp body) pos detism = do
---     tempGen <- tempVar
---     [genExp'] <- flattenPExp genExp -- XXX Should check for input only
---     let instr = ForeignCall "llvm" "move" []
---                 [genExp', Unplaced $ Var tempGen ParamOut Ordinary]
---     emit pos instr
---     let test = ProcCall [] "[|]" Nothing SemiDet False
---                [Unplaced $ Var (content loopVar) ParamOut Ordinary
---                , Unplaced $ Var tempGen ParamOut Ordinary
---                , Unplaced $ Var tempGen ParamIn Ordinary]
---     let terminalCond = Unplaced $
---                        Cond (Unplaced test) body [Unplaced Break]
---     flattenStmt' (Loop [terminalCond]) pos detism
+    emit pos $ Loop body' defVars
 flattenStmt' for@(For generators body) pos detism = do
-    tempGens <- mapM (const tempVar) generators
-    tempNextGens <- mapM (const tempVar) generators
-    tempHasNextGen <- tempVar
-    logFlatten $ "Generating for " ++ showStmt 4 for
-    -- XXX Should check for input only
-    generators' <- mapM ((head <$>) . flattenPExp . genExp) generators
-    let instrs = zipWith (\g' g -> ForeignCall "llvm" "move" []
-                [g', Unplaced $ varSet g]) generators' tempGens
-    mapM_ (emit pos) instrs 
-    modify (\s -> s {defdVars = Set.union (Set.fromList tempGens) $ defdVars s})
-    let nextVals = concat $ zipWith3 (\generator tempNextGen tempGen ->
-                [Unplaced $ ProcCall [] "[|]" Nothing Det False
-                             [Unplaced $ Var (loopVar generator) ParamOut Ordinary
-                             , Unplaced $ Var tempNextGen ParamOut Ordinary
-                             , Unplaced $ Var tempGen ParamIn Ordinary
-                             , Unplaced $ Var tempHasNextGen ParamOut Ordinary],
-                Unplaced $ Cond (Unplaced $ TestBool $ varGet tempHasNextGen)
-                    [Unplaced $ ForeignCall "llvm" "move" []
-                    [Unplaced $ varGet tempNextGen, Unplaced $ varSet tempGen]]
-                    [Unplaced Break]
-                ]) generators tempNextGens tempGens
-    -- body' <- flattenInner True False detism
-    --          (flattenStmts (body ++ [Unplaced Next]) detism)
-    let generated = Loop (nextVals ++ body)
-    logFlatten $ "Generated for: " ++ showStmt 4 generated
-    emit pos generated
-    flattenStmt' generated pos detism
+  tempGens <- mapM (const tempVar) generators
+  tempNextGens <- mapM (const tempVar) generators
+  tempHasNextGen <- tempVar
+  logFlatten $ "Generating for " ++ showStmt 4 for
+  -- XXX Should check for input only
+  generators' <- mapM ((head <$>) . flattenPExp . genExp) generators
+  let instrs =
+        zipWith
+          ( \g' g ->
+              ForeignCall
+                "llvm"
+                "move"
+                []
+                [g', Unplaced $ varSet g]
+          )
+          generators'
+          tempGens
+  mapM_ (emit pos) instrs
+  modify (\s -> s {defdVars = Set.union (Set.fromList tempGens) $ defdVars s})
+  let nextVals =
+        concat $
+          zipWith3
+            ( \generator tempNextGen tempGen ->
+                [ Unplaced $
+                    ProcCall
+                      []
+                      "[|]"
+                      Nothing
+                      Det
+                      False
+                      [ Unplaced $ Var (loopVar generator) ParamOut Ordinary,
+                        Unplaced $ Var tempNextGen ParamOut Ordinary,
+                        Unplaced $ Var tempGen ParamIn Ordinary,
+                        Unplaced $ Var tempHasNextGen ParamOut Ordinary
+                      ],
+                  Unplaced $
+                    Cond
+                      (Unplaced $ TestBool $ varGet tempHasNextGen)
+                      [ Unplaced $
+                          ForeignCall
+                            "llvm"
+                            "move"
+                            []
+                            [Unplaced $ varGet tempNextGen, Unplaced $ varSet tempGen]
+                      ]
+                      [Unplaced Break]
+                ]
+            )
+            generators
+            tempNextGens
+            tempGens
+  -- body' <- flattenInner True False detism
+  --          (flattenStmts (body ++ [Unplaced Next]) detism)
+  let generated = Loop (nextVals ++ body)
+  logFlatten $ "Generated for: " ++ showStmt 4 generated
+  emit pos generated
+  flattenStmt' generated pos detism
 flattenStmt' (UseResources res body) pos detism = do
     defined <- gets defdVars
     body' <- flattenInner False True detism (flattenStmts body detism)
@@ -475,7 +487,8 @@ flattenExp (CondExp cond thn els) ty cast pos = do
                  [maybePlace (ForeignCall "llvm" "move" []
                               [typeAndPlace (content els) ty cast (place els),
                                Unplaced $ Var resultName ParamOut flowType])
-                  pos])
+                  pos]
+                Nothing)
         pos Det
     return $ [maybePlace (Var resultName ParamIn flowType) pos]
 flattenExp (Fncall maybeMod name exps) ty cast pos = do

@@ -149,21 +149,15 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:multictr.card, $right#0:multictr.card, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp eq(~$left#0:multictr.card, ~$right#0:multictr.card, ?tmp$1#0:wybe.bool)
-    case ~tmp$1#0:wybe.bool of
-    0:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+    foreign llvm icmp eq(~$left#0:multictr.card, ~$right#0:multictr.card, ?tmp$0#0:wybe.bool)
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-
-= > public inline test (3 calls)
+= > public inline (1 calls)
 0: =($left#0:multictr.card, $right#0:multictr.card, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -232,12 +226,9 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.card./=<0>"(i6  %"$left#0", i6  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = icmp eq i6 %"$left#0", %"$right#0" 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
-if.then:
-  ret i1 0 
-if.else:
-  ret i1 1 
+  %"1$tmp$0#0" = icmp eq i6 %"$left#0", %"$right#0" 
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }
 
 
@@ -330,126 +321,74 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:multictr.complicated, $right#0:multictr.complicated, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    multictr.complicated.=<0>(~$left#0:multictr.complicated, ~$right#0:multictr.complicated, ?tmp$1#0:wybe.bool) #0
-    case ~tmp$1#0:wybe.bool of
-    0:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+    multictr.complicated.=<0>(~$left#0:multictr.complicated, ~$right#0:multictr.complicated, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-
-= > public test (5 calls)
+= > public (3 calls)
 0: =($left#0:multictr.complicated, $right#0:multictr.complicated, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm cast($left#0:multictr.complicated, ?tmp$0#0:!wybe.int)
-    foreign llvm icmp ult(~tmp$0#0:!wybe.int, 4:wybe.int, ?tmp$1#0:wybe.bool)
-    case ~tmp$1#0:wybe.bool of
+    foreign llvm icmp uge($left#0:!wybe.int, 4:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
     0:
-        foreign llvm icmp uge($left#0:multictr.complicated, 4:wybe.int, ?tmp$10#0:wybe.bool)
-        case tmp$10#0:wybe.bool of
+        foreign llvm icmp eq(~$left#0:multictr.complicated, ~$right#0:multictr.complicated, ?$$#0:wybe.bool)
+
+    1:
+        foreign llvm and($left#0:multictr.complicated, 7:wybe.int, ?tmp$10#0:wybe.int)
+        foreign llvm icmp eq(tmp$10#0:wybe.int, 0:wybe.int, ?tmp$11#0:wybe.bool)
+        case ~tmp$11#0:wybe.bool of
         0:
-            case ~tmp$10#0:wybe.bool of
+            foreign llvm icmp eq(~tmp$10#0:wybe.int, 1:wybe.int, ?tmp$15#0:wybe.bool)
+            case ~tmp$15#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
             1:
-                foreign llvm and($left#0:multictr.complicated, 7:wybe.int, ?tmp$15#0:wybe.int)
-                foreign llvm icmp eq(~tmp$15#0:wybe.int, 1:wybe.int, ?tmp$16#0:wybe.bool)
-                case ~tmp$16#0:wybe.bool of
+                foreign lpvm access(~$left#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$left$f02#0:wybe.int)
+                foreign llvm icmp uge($right#0:multictr.complicated, 4:wybe.int, ?tmp$17#0:wybe.bool)
+                case ~tmp$17#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
-                    foreign lpvm access(~$left#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$left$f02#0:wybe.int)
-                    foreign llvm icmp uge($right#0:multictr.complicated, 4:wybe.int, ?tmp$18#0:wybe.bool)
-                    case ~tmp$18#0:wybe.bool of
+                    foreign llvm and($right#0:multictr.complicated, 7:wybe.int, ?tmp$18#0:wybe.int)
+                    foreign llvm icmp eq(~tmp$18#0:wybe.int, 1:wybe.int, ?tmp$19#0:wybe.bool)
+                    case ~tmp$19#0:wybe.bool of
                     0:
                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                     1:
-                        foreign llvm and($right#0:multictr.complicated, 7:wybe.int, ?tmp$19#0:wybe.int)
-                        foreign llvm icmp eq(~tmp$19#0:wybe.int, 1:wybe.int, ?tmp$20#0:wybe.bool)
-                        case ~tmp$20#0:wybe.bool of
-                        0:
-                            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                        1:
-                            foreign lpvm access(~$right#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$right$f02#0:wybe.int)
-                            foreign llvm icmp eq(~$left$f02#0:wybe.int, ~$right$f02#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
-
+                        foreign lpvm access(~$right#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$right$f02#0:wybe.int)
+                        foreign llvm icmp eq(~$left$f02#0:wybe.int, ~$right$f02#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
 
 
         1:
-            foreign llvm and($left#0:multictr.complicated, 7:wybe.int, ?tmp$11#0:wybe.int)
-            foreign llvm icmp eq(~tmp$11#0:wybe.int, 0:wybe.int, ?tmp$12#0:wybe.bool)
-            case ~tmp$12#0:wybe.bool of
+            foreign lpvm access(~$left#0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$f01#0:wybe.int)
+            foreign llvm icmp uge($right#0:multictr.complicated, 4:wybe.int, ?tmp$13#0:wybe.bool)
+            case ~tmp$13#0:wybe.bool of
             0:
-                case ~tmp$10#0:wybe.bool of
-                0:
-                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                1:
-                    foreign llvm and($left#0:multictr.complicated, 7:wybe.int, ?tmp$15#0:wybe.int)
-                    foreign llvm icmp eq(~tmp$15#0:wybe.int, 1:wybe.int, ?tmp$16#0:wybe.bool)
-                    case ~tmp$16#0:wybe.bool of
-                    0:
-                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                    1:
-                        foreign lpvm access(~$left#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$left$f02#0:wybe.int)
-                        foreign llvm icmp uge($right#0:multictr.complicated, 4:wybe.int, ?tmp$18#0:wybe.bool)
-                        case ~tmp$18#0:wybe.bool of
-                        0:
-                            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                        1:
-                            foreign llvm and($right#0:multictr.complicated, 7:wybe.int, ?tmp$19#0:wybe.int)
-                            foreign llvm icmp eq(~tmp$19#0:wybe.int, 1:wybe.int, ?tmp$20#0:wybe.bool)
-                            case ~tmp$20#0:wybe.bool of
-                            0:
-                                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                            1:
-                                foreign lpvm access(~$right#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$right$f02#0:wybe.int)
-                                foreign llvm icmp eq(~$left$f02#0:wybe.int, ~$right$f02#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
-
-
-
-
+                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
             1:
-                foreign lpvm access(~$left#0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$f01#0:wybe.int)
-                foreign llvm icmp uge($right#0:multictr.complicated, 4:wybe.int, ?tmp$14#0:wybe.bool)
-                case ~tmp$14#0:wybe.bool of
+                foreign llvm and($right#0:multictr.complicated, 7:wybe.int, ?tmp$14#0:wybe.int)
+                foreign llvm icmp eq(~tmp$14#0:wybe.int, 0:wybe.int, ?tmp$15#0:wybe.bool)
+                case ~tmp$15#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
-                    foreign llvm and($right#0:multictr.complicated, 7:wybe.int, ?tmp$15#0:wybe.int)
-                    foreign llvm icmp eq(~tmp$15#0:wybe.int, 0:wybe.int, ?tmp$16#0:wybe.bool)
-                    case ~tmp$16#0:wybe.bool of
-                    0:
-                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                    1:
-                        foreign lpvm access(~$right#0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$f01#0:wybe.int)
-                        foreign llvm icmp eq(~$left$f01#0:wybe.int, ~$right$f01#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                    foreign lpvm access(~$right#0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$f01#0:wybe.int)
+                    foreign llvm icmp eq(~$left$f01#0:wybe.int, ~$right$f01#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
 
-
-
-    1:
-        foreign llvm icmp eq(~$left#0:multictr.complicated, ~$right#0:multictr.complicated, ?$$#0:wybe.bool)
 
 
 
@@ -466,7 +405,7 @@ c01 > public inline (0 calls)
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.complicated)
     foreign lpvm mutate(~%$rec#0:multictr.complicated, ?%$#0:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01#0:wybe.int)
-c01 > public inline test (7 calls)
+c01 > public inline (10 calls)
 1: c01(?f01#0:wybe.int, $#0:multictr.complicated, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -496,7 +435,7 @@ c02 > public inline (0 calls)
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.complicated)
     foreign lpvm mutate(~%$rec#0:multictr.complicated, ?%$rec#1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f02#0:wybe.int)
     foreign llvm or(~$rec#1, 1:wybe.int, ?$#0:multictr.complicated)
-c02 > public inline test (5 calls)
+c02 > public inline (5 calls)
 1: c02(?f02#0:wybe.int, $#0:multictr.complicated, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -519,7 +458,7 @@ c02 > public inline test (5 calls)
 
 
 
-f01 > public inline test (0 calls)
+f01 > public inline (0 calls)
 0: f01($rec#0:multictr.complicated, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -540,7 +479,7 @@ f01 > public inline test (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-f01 > public inline test (0 calls)
+f01 > public inline (0 calls)
 1: f01($rec#0:multictr.complicated, ?$rec#1:multictr.complicated, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -565,7 +504,7 @@ f01 > public inline test (0 calls)
 
 
 
-f02 > public inline test (0 calls)
+f02 > public inline (0 calls)
 0: f02($rec#0:multictr.complicated, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -586,7 +525,7 @@ f02 > public inline test (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-f02 > public inline test (0 calls)
+f02 > public inline (0 calls)
 1: f02($rec#0:multictr.complicated, ?$rec#1:multictr.complicated, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -647,112 +586,69 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.complicated./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = tail call fastcc  i1  @"multictr.complicated.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
-if.then:
-  ret i1 0 
-if.else:
-  ret i1 1 
+  %"1$tmp$0#0" = tail call fastcc  i1  @"multictr.complicated.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }
 
 
 define external fastcc  i1 @"multictr.complicated.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = icmp ult i64 %"$left#0", 4 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp uge i64 %"$left#0", 4 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  ret i1 %"2$$$#0" 
+  %"2$tmp$10#0" = and i64 %"$left#0", 7 
+  %"2$tmp$11#0" = icmp eq i64 %"2$tmp$10#0", 0 
+  br i1 %"2$tmp$11#0", label %if.then1, label %if.else1 
 if.else:
-  %"3$tmp$10#0" = icmp uge i64 %"$left#0", 4 
-  br i1 %"3$tmp$10#0", label %if.then1, label %if.else1 
+  %"3$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"3$$$#0" 
 if.then1:
-  %"4$tmp$11#0" = and i64 %"$left#0", 7 
-  %"4$tmp$12#0" = icmp eq i64 %"4$tmp$11#0", 0 
-  br i1 %"4$tmp$12#0", label %if.then2, label %if.else2 
-if.else1:
-  br i1 %"3$tmp$10#0", label %if.then9, label %if.else9 
-if.then2:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %"6$tmp$14#0" = icmp uge i64 %"$right#0", 4 
-  br i1 %"6$tmp$14#0", label %if.then3, label %if.else3 
+  %"4$tmp$13#0" = icmp uge i64 %"$right#0", 4 
+  br i1 %"4$tmp$13#0", label %if.then2, label %if.else2 
+if.else1:
+  %"5$tmp$15#0" = icmp eq i64 %"2$tmp$10#0", 1 
+  br i1 %"5$tmp$15#0", label %if.then4, label %if.else4 
+if.then2:
+  %"6$tmp$14#0" = and i64 %"$right#0", 7 
+  %"6$tmp$15#0" = icmp eq i64 %"6$tmp$14#0", 0 
+  br i1 %"6$tmp$15#0", label %if.then3, label %if.else3 
 if.else2:
-  br i1 %"3$tmp$10#0", label %if.then5, label %if.else5 
-if.then3:
-  %"8$tmp$15#0" = and i64 %"$right#0", 7 
-  %"8$tmp$16#0" = icmp eq i64 %"8$tmp$15#0", 0 
-  br i1 %"8$tmp$16#0", label %if.then4, label %if.else4 
-if.else3:
   ret i1 0 
-if.then4:
+if.then3:
   %4 = inttoptr i64 %"$right#0" to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
   %6 = load  i64, i64* %5 
-  %"10$$$#0" = icmp eq i64 %3, %6 
-  ret i1 %"10$$$#0" 
-if.else4:
+  %"8$$$#0" = icmp eq i64 %3, %6 
+  ret i1 %"8$$$#0" 
+if.else3:
   ret i1 0 
-if.then5:
-  %"12$tmp$15#0" = and i64 %"$left#0", 7 
-  %"12$tmp$16#0" = icmp eq i64 %"12$tmp$15#0", 1 
-  br i1 %"12$tmp$16#0", label %if.then6, label %if.else6 
-if.else5:
-  ret i1 0 
-if.then6:
+if.then4:
   %7 = add   i64 %"$left#0", -1 
   %8 = inttoptr i64 %7 to i64* 
   %9 = getelementptr  i64, i64* %8, i64 0 
   %10 = load  i64, i64* %9 
-  %"14$tmp$18#0" = icmp uge i64 %"$right#0", 4 
-  br i1 %"14$tmp$18#0", label %if.then7, label %if.else7 
-if.else6:
+  %"10$tmp$17#0" = icmp uge i64 %"$right#0", 4 
+  br i1 %"10$tmp$17#0", label %if.then5, label %if.else5 
+if.else4:
   ret i1 0 
-if.then7:
-  %"16$tmp$19#0" = and i64 %"$right#0", 7 
-  %"16$tmp$20#0" = icmp eq i64 %"16$tmp$19#0", 1 
-  br i1 %"16$tmp$20#0", label %if.then8, label %if.else8 
-if.else7:
+if.then5:
+  %"12$tmp$18#0" = and i64 %"$right#0", 7 
+  %"12$tmp$19#0" = icmp eq i64 %"12$tmp$18#0", 1 
+  br i1 %"12$tmp$19#0", label %if.then6, label %if.else6 
+if.else5:
   ret i1 0 
-if.then8:
+if.then6:
   %11 = add   i64 %"$right#0", -1 
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"18$$$#0" = icmp eq i64 %10, %14 
-  ret i1 %"18$$$#0" 
-if.else8:
-  ret i1 0 
-if.then9:
-  %"20$tmp$15#0" = and i64 %"$left#0", 7 
-  %"20$tmp$16#0" = icmp eq i64 %"20$tmp$15#0", 1 
-  br i1 %"20$tmp$16#0", label %if.then10, label %if.else10 
-if.else9:
-  ret i1 0 
-if.then10:
-  %15 = add   i64 %"$left#0", -1 
-  %16 = inttoptr i64 %15 to i64* 
-  %17 = getelementptr  i64, i64* %16, i64 0 
-  %18 = load  i64, i64* %17 
-  %"22$tmp$18#0" = icmp uge i64 %"$right#0", 4 
-  br i1 %"22$tmp$18#0", label %if.then11, label %if.else11 
-if.else10:
-  ret i1 0 
-if.then11:
-  %"24$tmp$19#0" = and i64 %"$right#0", 7 
-  %"24$tmp$20#0" = icmp eq i64 %"24$tmp$19#0", 1 
-  br i1 %"24$tmp$20#0", label %if.then12, label %if.else12 
-if.else11:
-  ret i1 0 
-if.then12:
-  %19 = add   i64 %"$right#0", -1 
-  %20 = inttoptr i64 %19 to i64* 
-  %21 = getelementptr  i64, i64* %20, i64 0 
-  %22 = load  i64, i64* %21 
-  %"26$$$#0" = icmp eq i64 %18, %22 
-  ret i1 %"26$$$#0" 
-if.else12:
+  %"14$$$#0" = icmp eq i64 %10, %14 
+  ret i1 %"14$$$#0" 
+if.else6:
   ret i1 0 
 }
 
@@ -765,13 +661,13 @@ entry:
 
 define external fastcc  i64 @"multictr.complicated.c01<0>"(i64  %"f01#0")    {
 entry:
-  %23 = trunc i64 8 to i32  
-  %24 = tail call ccc  i8*  @wybe_malloc(i32  %23)  
-  %25 = ptrtoint i8* %24 to i64 
-  %26 = inttoptr i64 %25 to i64* 
-  %27 = getelementptr  i64, i64* %26, i64 0 
-  store  i64 %"f01#0", i64* %27 
-  ret i64 %25 
+  %15 = trunc i64 8 to i32  
+  %16 = tail call ccc  i8*  @wybe_malloc(i32  %15)  
+  %17 = ptrtoint i8* %16 to i64 
+  %18 = inttoptr i64 %17 to i64* 
+  %19 = getelementptr  i64, i64* %18, i64 0 
+  store  i64 %"f01#0", i64* %19 
+  ret i64 %17 
 }
 
 
@@ -784,32 +680,32 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 0 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %35 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %36 = insertvalue {i64, i1} %35, i1 0, 1 
-  ret {i64, i1} %36 
+  %27 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %28 = insertvalue {i64, i1} %27, i1 0, 1 
+  ret {i64, i1} %28 
 if.then1:
-  %28 = inttoptr i64 %"$#0" to i64* 
-  %29 = getelementptr  i64, i64* %28, i64 0 
-  %30 = load  i64, i64* %29 
-  %31 = insertvalue {i64, i1} undef, i64 %30, 0 
-  %32 = insertvalue {i64, i1} %31, i1 1, 1 
-  ret {i64, i1} %32 
+  %20 = inttoptr i64 %"$#0" to i64* 
+  %21 = getelementptr  i64, i64* %20, i64 0 
+  %22 = load  i64, i64* %21 
+  %23 = insertvalue {i64, i1} undef, i64 %22, 0 
+  %24 = insertvalue {i64, i1} %23, i1 1, 1 
+  ret {i64, i1} %24 
 if.else1:
-  %33 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %34 = insertvalue {i64, i1} %33, i1 0, 1 
-  ret {i64, i1} %34 
+  %25 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %26 = insertvalue {i64, i1} %25, i1 0, 1 
+  ret {i64, i1} %26 
 }
 
 
 define external fastcc  i64 @"multictr.complicated.c02<0>"(i64  %"f02#0")    {
 entry:
-  %37 = trunc i64 8 to i32  
-  %38 = tail call ccc  i8*  @wybe_malloc(i32  %37)  
-  %39 = ptrtoint i8* %38 to i64 
-  %40 = inttoptr i64 %39 to i64* 
-  %41 = getelementptr  i64, i64* %40, i64 0 
-  store  i64 %"f02#0", i64* %41 
-  %"1$$#0" = or i64 %39, 1 
+  %29 = trunc i64 8 to i32  
+  %30 = tail call ccc  i8*  @wybe_malloc(i32  %29)  
+  %31 = ptrtoint i8* %30 to i64 
+  %32 = inttoptr i64 %31 to i64* 
+  %33 = getelementptr  i64, i64* %32, i64 0 
+  store  i64 %"f02#0", i64* %33 
+  %"1$$#0" = or i64 %31, 1 
   ret i64 %"1$$#0" 
 }
 
@@ -823,21 +719,21 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %50 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %51 = insertvalue {i64, i1} %50, i1 0, 1 
-  ret {i64, i1} %51 
+  %42 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %43 = insertvalue {i64, i1} %42, i1 0, 1 
+  ret {i64, i1} %43 
 if.then1:
-  %42 = add   i64 %"$#0", -1 
-  %43 = inttoptr i64 %42 to i64* 
-  %44 = getelementptr  i64, i64* %43, i64 0 
-  %45 = load  i64, i64* %44 
-  %46 = insertvalue {i64, i1} undef, i64 %45, 0 
-  %47 = insertvalue {i64, i1} %46, i1 1, 1 
-  ret {i64, i1} %47 
+  %34 = add   i64 %"$#0", -1 
+  %35 = inttoptr i64 %34 to i64* 
+  %36 = getelementptr  i64, i64* %35, i64 0 
+  %37 = load  i64, i64* %36 
+  %38 = insertvalue {i64, i1} undef, i64 %37, 0 
+  %39 = insertvalue {i64, i1} %38, i1 1, 1 
+  ret {i64, i1} %39 
 if.else1:
-  %48 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %49 = insertvalue {i64, i1} %48, i1 0, 1 
-  ret {i64, i1} %49 
+  %40 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %41 = insertvalue {i64, i1} %40, i1 0, 1 
+  ret {i64, i1} %41 
 }
 
 
@@ -850,20 +746,20 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 0 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %59 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %60 = insertvalue {i64, i1} %59, i1 0, 1 
-  ret {i64, i1} %60 
+  %51 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %52 = insertvalue {i64, i1} %51, i1 0, 1 
+  ret {i64, i1} %52 
 if.then1:
-  %52 = inttoptr i64 %"$rec#0" to i64* 
-  %53 = getelementptr  i64, i64* %52, i64 0 
-  %54 = load  i64, i64* %53 
-  %55 = insertvalue {i64, i1} undef, i64 %54, 0 
-  %56 = insertvalue {i64, i1} %55, i1 1, 1 
-  ret {i64, i1} %56 
+  %44 = inttoptr i64 %"$rec#0" to i64* 
+  %45 = getelementptr  i64, i64* %44, i64 0 
+  %46 = load  i64, i64* %45 
+  %47 = insertvalue {i64, i1} undef, i64 %46, 0 
+  %48 = insertvalue {i64, i1} %47, i1 1, 1 
+  ret {i64, i1} %48 
 if.else1:
-  %57 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %58 = insertvalue {i64, i1} %57, i1 0, 1 
-  ret {i64, i1} %58 
+  %49 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %50 = insertvalue {i64, i1} %49, i1 0, 1 
+  ret {i64, i1} %50 
 }
 
 
@@ -876,27 +772,27 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 0 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %73 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
-  %74 = insertvalue {i64, i1} %73, i1 0, 1 
-  ret {i64, i1} %74 
+  %65 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %66 = insertvalue {i64, i1} %65, i1 0, 1 
+  ret {i64, i1} %66 
 if.then1:
-  %61 = trunc i64 8 to i32  
-  %62 = tail call ccc  i8*  @wybe_malloc(i32  %61)  
-  %63 = ptrtoint i8* %62 to i64 
-  %64 = inttoptr i64 %63 to i8* 
-  %65 = inttoptr i64 %"$rec#0" to i8* 
-  %66 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %64, i8*  %65, i32  %66, i32  8, i1  0)  
-  %67 = inttoptr i64 %63 to i64* 
-  %68 = getelementptr  i64, i64* %67, i64 0 
-  store  i64 %"$field#0", i64* %68 
-  %69 = insertvalue {i64, i1} undef, i64 %63, 0 
-  %70 = insertvalue {i64, i1} %69, i1 1, 1 
-  ret {i64, i1} %70 
+  %53 = trunc i64 8 to i32  
+  %54 = tail call ccc  i8*  @wybe_malloc(i32  %53)  
+  %55 = ptrtoint i8* %54 to i64 
+  %56 = inttoptr i64 %55 to i8* 
+  %57 = inttoptr i64 %"$rec#0" to i8* 
+  %58 = trunc i64 8 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %56, i8*  %57, i32  %58, i32  8, i1  0)  
+  %59 = inttoptr i64 %55 to i64* 
+  %60 = getelementptr  i64, i64* %59, i64 0 
+  store  i64 %"$field#0", i64* %60 
+  %61 = insertvalue {i64, i1} undef, i64 %55, 0 
+  %62 = insertvalue {i64, i1} %61, i1 1, 1 
+  ret {i64, i1} %62 
 if.else1:
-  %71 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
-  %72 = insertvalue {i64, i1} %71, i1 0, 1 
-  ret {i64, i1} %72 
+  %63 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %64 = insertvalue {i64, i1} %63, i1 0, 1 
+  ret {i64, i1} %64 
 }
 
 
@@ -909,21 +805,21 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %83 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %84 = insertvalue {i64, i1} %83, i1 0, 1 
-  ret {i64, i1} %84 
+  %75 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %76 = insertvalue {i64, i1} %75, i1 0, 1 
+  ret {i64, i1} %76 
 if.then1:
-  %75 = add   i64 %"$rec#0", -1 
-  %76 = inttoptr i64 %75 to i64* 
-  %77 = getelementptr  i64, i64* %76, i64 0 
-  %78 = load  i64, i64* %77 
-  %79 = insertvalue {i64, i1} undef, i64 %78, 0 
-  %80 = insertvalue {i64, i1} %79, i1 1, 1 
-  ret {i64, i1} %80 
+  %67 = add   i64 %"$rec#0", -1 
+  %68 = inttoptr i64 %67 to i64* 
+  %69 = getelementptr  i64, i64* %68, i64 0 
+  %70 = load  i64, i64* %69 
+  %71 = insertvalue {i64, i1} undef, i64 %70, 0 
+  %72 = insertvalue {i64, i1} %71, i1 1, 1 
+  ret {i64, i1} %72 
 if.else1:
-  %81 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %82 = insertvalue {i64, i1} %81, i1 0, 1 
-  ret {i64, i1} %82 
+  %73 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %74 = insertvalue {i64, i1} %73, i1 0, 1 
+  ret {i64, i1} %74 
 }
 
 
@@ -936,30 +832,30 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %100 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
-  %101 = insertvalue {i64, i1} %100, i1 0, 1 
-  ret {i64, i1} %101 
+  %92 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %93 = insertvalue {i64, i1} %92, i1 0, 1 
+  ret {i64, i1} %93 
 if.then1:
-  %85 = trunc i64 8 to i32  
-  %86 = tail call ccc  i8*  @wybe_malloc(i32  %85)  
-  %87 = ptrtoint i8* %86 to i64 
-  %88 = add   i64 %87, 1 
-  %89 = sub   i64 %"$rec#0", 1 
-  %90 = inttoptr i64 %87 to i8* 
-  %91 = inttoptr i64 %89 to i8* 
-  %92 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %90, i8*  %91, i32  %92, i32  8, i1  0)  
-  %93 = add   i64 %88, -1 
-  %94 = inttoptr i64 %93 to i64* 
-  %95 = getelementptr  i64, i64* %94, i64 0 
-  store  i64 %"$field#0", i64* %95 
-  %96 = insertvalue {i64, i1} undef, i64 %88, 0 
-  %97 = insertvalue {i64, i1} %96, i1 1, 1 
-  ret {i64, i1} %97 
+  %77 = trunc i64 8 to i32  
+  %78 = tail call ccc  i8*  @wybe_malloc(i32  %77)  
+  %79 = ptrtoint i8* %78 to i64 
+  %80 = add   i64 %79, 1 
+  %81 = sub   i64 %"$rec#0", 1 
+  %82 = inttoptr i64 %79 to i8* 
+  %83 = inttoptr i64 %81 to i8* 
+  %84 = trunc i64 8 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %82, i8*  %83, i32  %84, i32  8, i1  0)  
+  %85 = add   i64 %80, -1 
+  %86 = inttoptr i64 %85 to i64* 
+  %87 = getelementptr  i64, i64* %86, i64 0 
+  store  i64 %"$field#0", i64* %87 
+  %88 = insertvalue {i64, i1} undef, i64 %80, 0 
+  %89 = insertvalue {i64, i1} %88, i1 1, 1 
+  ret {i64, i1} %89 
 if.else1:
-  %98 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
-  %99 = insertvalue {i64, i1} %98, i1 0, 1 
-  ret {i64, i1} %99 
+  %90 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %91 = insertvalue {i64, i1} %90, i1 0, 1 
+  ret {i64, i1} %91 
 }
 
 
@@ -996,21 +892,15 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:multictr.length, $right#0:multictr.length, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp eq(~$left#0:multictr.length, ~$right#0:multictr.length, ?tmp$1#0:wybe.bool)
-    case ~tmp$1#0:wybe.bool of
-    0:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+    foreign llvm icmp eq(~$left#0:multictr.length, ~$right#0:multictr.length, ?tmp$0#0:wybe.bool)
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-
-= > public inline test (3 calls)
+= > public inline (1 calls)
 0: =($left#0:multictr.length, $right#0:multictr.length, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1056,12 +946,9 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.length./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
-if.then:
-  ret i1 0 
-if.else:
-  ret i1 1 
+  %"1$tmp$0#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }
 
 
@@ -1116,48 +1003,34 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:multictr.maybe_int, $right#0:multictr.maybe_int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    multictr.maybe_int.=<0>(~$left#0:multictr.maybe_int, ~$right#0:multictr.maybe_int, ?tmp$1#0:wybe.bool) #0
-    case ~tmp$1#0:wybe.bool of
-    0:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+    multictr.maybe_int.=<0>(~$left#0:multictr.maybe_int, ~$right#0:multictr.maybe_int, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-
-= > public test (4 calls)
+= > public (2 calls)
 0: =($left#0:multictr.maybe_int, $right#0:multictr.maybe_int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm cast($left#0:multictr.maybe_int, ?tmp$0#0:!wybe.int)
-    foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
-    case ~tmp$1#0:wybe.bool of
+    foreign llvm icmp ne($left#0:!wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
     0:
-        foreign llvm icmp ne($left#0:multictr.maybe_int, 0:wybe.int, ?tmp$7#0:wybe.bool)
-        case ~tmp$7#0:wybe.bool of
+        foreign llvm icmp eq(~$left#0:multictr.maybe_int, ~$right#0:multictr.maybe_int, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access(~$left#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$value#0:wybe.int)
+        foreign llvm icmp ne($right#0:multictr.maybe_int, 0:wybe.int, ?tmp$8#0:wybe.bool)
+        case ~tmp$8#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access(~$left#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$value#0:wybe.int)
-            foreign llvm icmp ne($right#0:multictr.maybe_int, 0:wybe.int, ?tmp$9#0:wybe.bool)
-            case ~tmp$9#0:wybe.bool of
-            0:
-                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign lpvm access(~$right#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$value#0:wybe.int)
+            foreign llvm icmp eq(~$left$value#0:wybe.int, ~$right$value#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
-            1:
-                foreign lpvm access(~$right#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$value#0:wybe.int)
-                foreign llvm icmp eq(~$left$value#0:wybe.int, ~$right$value#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
-
-
-
-    1:
-        foreign llvm icmp eq(~$left#0:multictr.maybe_int, ~$right#0:multictr.maybe_int, ?$$#0:wybe.bool)
 
 
 
@@ -1167,7 +1040,7 @@ just > public inline (0 calls)
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.maybe_int)
     foreign lpvm mutate(~%$rec#0:multictr.maybe_int, ?%$#0:multictr.maybe_int, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value#0:wybe.int)
-just > public inline test (5 calls)
+just > public inline (8 calls)
 1: just(?value#0:wybe.int, $#0:multictr.maybe_int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1189,7 +1062,7 @@ nothing > public inline (0 calls)
     foreign llvm move(0:multictr.maybe_int, ?$#0:multictr.maybe_int)
 
 
-value > public inline test (0 calls)
+value > public inline (0 calls)
 0: value($rec#0:multictr.maybe_int, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1202,7 +1075,7 @@ value > public inline test (0 calls)
         foreign lpvm access(~$rec#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-value > public inline test (0 calls)
+value > public inline (0 calls)
 1: value($rec#0:multictr.maybe_int, ?$rec#1:multictr.maybe_int, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1233,40 +1106,32 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.maybe_int./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = tail call fastcc  i1  @"multictr.maybe_int.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
-if.then:
-  ret i1 0 
-if.else:
-  ret i1 1 
+  %"1$tmp$0#0" = tail call fastcc  i1  @"multictr.maybe_int.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }
 
 
 define external fastcc  i1 @"multictr.maybe_int.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = icmp eq i64 %"$left#0", 0 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$left#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  ret i1 %"2$$$#0" 
-if.else:
-  %"3$tmp$7#0" = icmp ne i64 %"$left#0", 0 
-  br i1 %"3$tmp$7#0", label %if.then1, label %if.else1 
-if.then1:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %"4$tmp$9#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"4$tmp$9#0", label %if.then2, label %if.else2 
-if.else1:
-  ret i1 0 
-if.then2:
+  %"2$tmp$8#0" = icmp ne i64 %"$right#0", 0 
+  br i1 %"2$tmp$8#0", label %if.then1, label %if.else1 
+if.else:
+  %"3$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"3$$$#0" 
+if.then1:
   %4 = inttoptr i64 %"$right#0" to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
   %6 = load  i64, i64* %5 
-  %"6$$$#0" = icmp eq i64 %3, %6 
-  ret i1 %"6$$$#0" 
-if.else2:
+  %"4$$$#0" = icmp eq i64 %3, %6 
+  ret i1 %"4$$$#0" 
+if.else1:
   ret i1 0 
 }
 
@@ -1369,38 +1234,32 @@ if.else:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:multictr.number, $right#0:multictr.number, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    multictr.number.=<0>(~$left#0:multictr.number, ~$right#0:multictr.number, ?tmp$1#0:wybe.bool) #0
-    case ~tmp$1#0:wybe.bool of
-    0:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+    multictr.number.=<0>(~$left#0:multictr.number, ~$right#0:multictr.number, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-
-= > public test (5 calls)
+= > public (3 calls)
 0: =($left#0:multictr.number, $right#0:multictr.number, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm and($left#0:multictr.number, 7:wybe.int, ?tmp$9#0:wybe.int)
-    foreign llvm icmp eq(tmp$9#0:wybe.int, 0:wybe.int, ?tmp$10#0:wybe.bool)
-    case ~tmp$10#0:wybe.bool of
+    foreign llvm and($left#0:multictr.number, 7:wybe.int, ?tmp$8#0:wybe.int)
+    foreign llvm icmp eq(tmp$8#0:wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
+    case ~tmp$9#0:wybe.bool of
     0:
-        foreign llvm icmp eq(~tmp$9#0:wybe.int, 1:wybe.int, ?tmp$13#0:wybe.bool)
-        case ~tmp$13#0:wybe.bool of
+        foreign llvm icmp eq(~tmp$8#0:wybe.int, 1:wybe.int, ?tmp$12#0:wybe.bool)
+        case ~tmp$12#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
             foreign lpvm access(~$left#0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$left$float_value#0:wybe.float)
-            foreign llvm and($right#0:multictr.number, 7:wybe.int, ?tmp$15#0:wybe.int)
-            foreign llvm icmp eq(~tmp$15#0:wybe.int, 1:wybe.int, ?tmp$16#0:wybe.bool)
-            case ~tmp$16#0:wybe.bool of
+            foreign llvm and($right#0:multictr.number, 7:wybe.int, ?tmp$14#0:wybe.int)
+            foreign llvm icmp eq(~tmp$14#0:wybe.int, 1:wybe.int, ?tmp$15#0:wybe.bool)
+            case ~tmp$15#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
@@ -1412,9 +1271,9 @@ if.else:
 
     1:
         foreign lpvm access(~$left#0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$int_value#0:wybe.int)
-        foreign llvm and($right#0:multictr.number, 7:wybe.int, ?tmp$12#0:wybe.int)
-        foreign llvm icmp eq(~tmp$12#0:wybe.int, 0:wybe.int, ?tmp$13#0:wybe.bool)
-        case ~tmp$13#0:wybe.bool of
+        foreign llvm and($right#0:multictr.number, 7:wybe.int, ?tmp$11#0:wybe.int)
+        foreign llvm icmp eq(~tmp$11#0:wybe.int, 0:wybe.int, ?tmp$12#0:wybe.bool)
+        case ~tmp$12#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
@@ -1432,7 +1291,7 @@ float > public inline (0 calls)
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.number)
     foreign lpvm mutate(~%$rec#0:multictr.number, ?%$rec#1:multictr.number, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~float_value#0:wybe.float)
     foreign llvm or(~$rec#1, 1:wybe.int, ?$#0:multictr.number)
-float > public inline test (5 calls)
+float > public inline (5 calls)
 1: float(?float_value#0:wybe.float, $#0:multictr.number, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1448,7 +1307,7 @@ float > public inline test (5 calls)
 
 
 
-float_value > public inline test (0 calls)
+float_value > public inline (0 calls)
 0: float_value($rec#0:multictr.number, ?$#0:wybe.float, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1462,7 +1321,7 @@ float_value > public inline test (0 calls)
         foreign lpvm access(~$rec#0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$#0:wybe.float)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-float_value > public inline test (0 calls)
+float_value > public inline (0 calls)
 1: float_value($rec#0:multictr.number, ?$rec#1:multictr.number, $field#0:wybe.float, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1485,7 +1344,7 @@ int > public inline (0 calls)
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.number)
     foreign lpvm mutate(~%$rec#0:multictr.number, ?%$#0:multictr.number, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~int_value#0:wybe.int)
-int > public inline test (7 calls)
+int > public inline (10 calls)
 1: int(?int_value#0:wybe.int, $#0:multictr.number, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1501,7 +1360,7 @@ int > public inline test (7 calls)
 
 
 
-int_value > public inline test (0 calls)
+int_value > public inline (0 calls)
 0: int_value($rec#0:multictr.number, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1515,7 +1374,7 @@ int_value > public inline test (0 calls)
         foreign lpvm access(~$rec#0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-int_value > public inline test (0 calls)
+int_value > public inline (0 calls)
 1: int_value($rec#0:multictr.number, ?$rec#1:multictr.number, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1547,30 +1406,27 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.number./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = tail call fastcc  i1  @"multictr.number.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
-if.then:
-  ret i1 0 
-if.else:
-  ret i1 1 
+  %"1$tmp$0#0" = tail call fastcc  i1  @"multictr.number.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }
 
 
 define external fastcc  i1 @"multictr.number.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"1$tmp$9#0" = and i64 %"$left#0", 7 
-  %"1$tmp$10#0" = icmp eq i64 %"1$tmp$9#0", 0 
-  br i1 %"1$tmp$10#0", label %if.then, label %if.else 
+  %"1$tmp$8#0" = and i64 %"$left#0", 7 
+  %"1$tmp$9#0" = icmp eq i64 %"1$tmp$8#0", 0 
+  br i1 %"1$tmp$9#0", label %if.then, label %if.else 
 if.then:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %"2$tmp$12#0" = and i64 %"$right#0", 7 
-  %"2$tmp$13#0" = icmp eq i64 %"2$tmp$12#0", 0 
-  br i1 %"2$tmp$13#0", label %if.then1, label %if.else1 
+  %"2$tmp$11#0" = and i64 %"$right#0", 7 
+  %"2$tmp$12#0" = icmp eq i64 %"2$tmp$11#0", 0 
+  br i1 %"2$tmp$12#0", label %if.then1, label %if.else1 
 if.else:
-  %"3$tmp$13#0" = icmp eq i64 %"1$tmp$9#0", 1 
-  br i1 %"3$tmp$13#0", label %if.then2, label %if.else2 
+  %"3$tmp$12#0" = icmp eq i64 %"1$tmp$8#0", 1 
+  br i1 %"3$tmp$12#0", label %if.then2, label %if.else2 
 if.then1:
   %4 = inttoptr i64 %"$right#0" to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
@@ -1584,9 +1440,9 @@ if.then2:
   %8 = inttoptr i64 %7 to double* 
   %9 = getelementptr  double, double* %8, i64 0 
   %10 = load  double, double* %9 
-  %"6$tmp$15#0" = and i64 %"$right#0", 7 
-  %"6$tmp$16#0" = icmp eq i64 %"6$tmp$15#0", 1 
-  br i1 %"6$tmp$16#0", label %if.then3, label %if.else3 
+  %"6$tmp$14#0" = and i64 %"$right#0", 7 
+  %"6$tmp$15#0" = icmp eq i64 %"6$tmp$14#0", 1 
+  br i1 %"6$tmp$15#0", label %if.then3, label %if.else3 
 if.else2:
   ret i1 0 
 if.then3:
@@ -1774,21 +1630,15 @@ if.else:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:multictr.perhaps, $right#0:multictr.perhaps, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp eq(~$left#0:multictr.perhaps, ~$right#0:multictr.perhaps, ?tmp$1#0:wybe.bool)
-    case ~tmp$1#0:wybe.bool of
-    0:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+    foreign llvm icmp eq(~$left#0:multictr.perhaps, ~$right#0:multictr.perhaps, ?tmp$0#0:wybe.bool)
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-
-= > public inline test (3 calls)
+= > public inline (1 calls)
 0: =($left#0:multictr.perhaps, $right#0:multictr.perhaps, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1834,12 +1684,9 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.perhaps./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
-if.then:
-  ret i1 0 
-if.else:
-  ret i1 1 
+  %"1$tmp$0#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }
 
 
@@ -1898,21 +1745,15 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:multictr.rank, $right#0:multictr.rank, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp eq(~$left#0:multictr.rank, ~$right#0:multictr.rank, ?tmp$1#0:wybe.bool)
-    case ~tmp$1#0:wybe.bool of
-    0:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+    foreign llvm icmp eq(~$left#0:multictr.rank, ~$right#0:multictr.rank, ?tmp$0#0:wybe.bool)
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-
-= > public inline test (3 calls)
+= > public inline (1 calls)
 0: =($left#0:multictr.rank, $right#0:multictr.rank, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2025,12 +1866,9 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.rank./=<0>"(i4  %"$left#0", i4  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = icmp eq i4 %"$left#0", %"$right#0" 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
-if.then:
-  ret i1 0 
-if.else:
-  ret i1 1 
+  %"1$tmp$0#0" = icmp eq i4 %"$left#0", %"$right#0" 
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }
 
 
@@ -2141,144 +1979,83 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:multictr.simple, $right#0:multictr.simple, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    multictr.simple.=<0>(~$left#0:multictr.simple, ~$right#0:multictr.simple, ?tmp$1#0:wybe.bool) #0
-    case ~tmp$1#0:wybe.bool of
-    0:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+    multictr.simple.=<0>(~$left#0:multictr.simple, ~$right#0:multictr.simple, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-
-= > public test (7 calls)
+= > public (5 calls)
 0: =($left#0:multictr.simple, $right#0:multictr.simple, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm cast($left#0:multictr.simple, ?tmp$0#0:!wybe.int)
-    foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
-    case ~tmp$1#0:wybe.bool of
+    foreign llvm icmp ne($left#0:!wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
     0:
-        foreign llvm icmp ne($left#0:multictr.simple, 0:wybe.int, ?tmp$11#0:wybe.bool)
-        case tmp$11#0:wybe.bool of
+        foreign llvm icmp eq(~$left#0:multictr.simple, ~$right#0:multictr.simple, ?$$#0:wybe.bool)
+
+    1:
+        foreign llvm and($left#0:multictr.simple, 7:wybe.int, ?tmp$11#0:wybe.int)
+        foreign llvm icmp eq(tmp$11#0:wybe.int, 0:wybe.int, ?tmp$12#0:wybe.bool)
+        case ~tmp$12#0:wybe.bool of
         0:
-            case ~tmp$11#0:wybe.bool of
+            foreign llvm icmp eq(~tmp$11#0:wybe.int, 1:wybe.int, ?tmp$16#0:wybe.bool)
+            case ~tmp$16#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
             1:
-                foreign llvm and($left#0:multictr.simple, 7:wybe.int, ?tmp$16#0:wybe.int)
-                foreign llvm icmp eq(~tmp$16#0:wybe.int, 1:wybe.int, ?tmp$17#0:wybe.bool)
-                case ~tmp$17#0:wybe.bool of
+                foreign lpvm access($left#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?$left$two_field1#0:wybe.int)
+                foreign lpvm access(~$left#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?$left$two_field2#0:wybe.int)
+                foreign llvm icmp ne($right#0:multictr.simple, 0:wybe.int, ?tmp$18#0:wybe.bool)
+                case ~tmp$18#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
-                    foreign lpvm access($left#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?$left$two_field1#0:wybe.int)
-                    foreign lpvm access(~$left#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?$left$two_field2#0:wybe.int)
-                    foreign llvm icmp ne($right#0:multictr.simple, 0:wybe.int, ?tmp$19#0:wybe.bool)
-                    case ~tmp$19#0:wybe.bool of
+                    foreign llvm and($right#0:multictr.simple, 7:wybe.int, ?tmp$19#0:wybe.int)
+                    foreign llvm icmp eq(~tmp$19#0:wybe.int, 1:wybe.int, ?tmp$20#0:wybe.bool)
+                    case ~tmp$20#0:wybe.bool of
                     0:
                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                     1:
-                        foreign llvm and($right#0:multictr.simple, 7:wybe.int, ?tmp$20#0:wybe.int)
-                        foreign llvm icmp eq(~tmp$20#0:wybe.int, 1:wybe.int, ?tmp$21#0:wybe.bool)
-                        case ~tmp$21#0:wybe.bool of
+                        foreign lpvm access($right#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?$right$two_field1#0:wybe.int)
+                        foreign lpvm access(~$right#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?$right$two_field2#0:wybe.int)
+                        foreign llvm icmp eq(~$left$two_field1#0:wybe.int, ~$right$two_field1#0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
+                        case ~tmp$5#0:wybe.bool of
                         0:
                             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                         1:
-                            foreign lpvm access($right#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?$right$two_field1#0:wybe.int)
-                            foreign lpvm access(~$right#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?$right$two_field2#0:wybe.int)
-                            foreign llvm icmp eq(~$left$two_field1#0:wybe.int, ~$right$two_field1#0:wybe.int, ?tmp$8#0:wybe.bool) @wybe:nn:nn
-                            case ~tmp$8#0:wybe.bool of
-                            0:
-                                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                            1:
-                                foreign llvm icmp eq(~$left$two_field2#0:wybe.int, ~$right$two_field2#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
-
+                            foreign llvm icmp eq(~$left$two_field2#0:wybe.int, ~$right$two_field2#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
 
 
 
         1:
-            foreign llvm and($left#0:multictr.simple, 7:wybe.int, ?tmp$12#0:wybe.int)
-            foreign llvm icmp eq(~tmp$12#0:wybe.int, 0:wybe.int, ?tmp$13#0:wybe.bool)
-            case ~tmp$13#0:wybe.bool of
+            foreign lpvm access(~$left#0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$one_field#0:wybe.int)
+            foreign llvm icmp ne($right#0:multictr.simple, 0:wybe.int, ?tmp$14#0:wybe.bool)
+            case ~tmp$14#0:wybe.bool of
             0:
-                case ~tmp$11#0:wybe.bool of
-                0:
-                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                1:
-                    foreign llvm and($left#0:multictr.simple, 7:wybe.int, ?tmp$16#0:wybe.int)
-                    foreign llvm icmp eq(~tmp$16#0:wybe.int, 1:wybe.int, ?tmp$17#0:wybe.bool)
-                    case ~tmp$17#0:wybe.bool of
-                    0:
-                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                    1:
-                        foreign lpvm access($left#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?$left$two_field1#0:wybe.int)
-                        foreign lpvm access(~$left#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?$left$two_field2#0:wybe.int)
-                        foreign llvm icmp ne($right#0:multictr.simple, 0:wybe.int, ?tmp$19#0:wybe.bool)
-                        case ~tmp$19#0:wybe.bool of
-                        0:
-                            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                        1:
-                            foreign llvm and($right#0:multictr.simple, 7:wybe.int, ?tmp$20#0:wybe.int)
-                            foreign llvm icmp eq(~tmp$20#0:wybe.int, 1:wybe.int, ?tmp$21#0:wybe.bool)
-                            case ~tmp$21#0:wybe.bool of
-                            0:
-                                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                            1:
-                                foreign lpvm access($right#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?$right$two_field1#0:wybe.int)
-                                foreign lpvm access(~$right#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?$right$two_field2#0:wybe.int)
-                                foreign llvm icmp eq(~$left$two_field1#0:wybe.int, ~$right$two_field1#0:wybe.int, ?tmp$8#0:wybe.bool) @wybe:nn:nn
-                                case ~tmp$8#0:wybe.bool of
-                                0:
-                                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                                1:
-                                    foreign llvm icmp eq(~$left$two_field2#0:wybe.int, ~$right$two_field2#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
-
-
-
-
-
+                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
             1:
-                foreign lpvm access(~$left#0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$one_field#0:wybe.int)
-                foreign llvm icmp ne($right#0:multictr.simple, 0:wybe.int, ?tmp$15#0:wybe.bool)
-                case ~tmp$15#0:wybe.bool of
+                foreign llvm and($right#0:multictr.simple, 7:wybe.int, ?tmp$15#0:wybe.int)
+                foreign llvm icmp eq(~tmp$15#0:wybe.int, 0:wybe.int, ?tmp$16#0:wybe.bool)
+                case ~tmp$16#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
-                    foreign llvm and($right#0:multictr.simple, 7:wybe.int, ?tmp$16#0:wybe.int)
-                    foreign llvm icmp eq(~tmp$16#0:wybe.int, 0:wybe.int, ?tmp$17#0:wybe.bool)
-                    case ~tmp$17#0:wybe.bool of
-                    0:
-                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                    1:
-                        foreign lpvm access(~$right#0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$one_field#0:wybe.int)
-                        foreign llvm icmp eq(~$left$one_field#0:wybe.int, ~$right$one_field#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                    foreign lpvm access(~$right#0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$one_field#0:wybe.int)
+                    foreign llvm icmp eq(~$left$one_field#0:wybe.int, ~$right$one_field#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
 
-
-
-    1:
-        foreign llvm icmp eq(~$left#0:multictr.simple, ~$right#0:multictr.simple, ?$$#0:wybe.bool)
 
 
 
@@ -2288,7 +2065,7 @@ one > public inline (0 calls)
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.simple)
     foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$#0:multictr.simple, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~one_field#0:wybe.int)
-one > public inline test (8 calls)
+one > public inline (11 calls)
 1: one(?one_field#0:wybe.int, $#0:multictr.simple, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2311,7 +2088,7 @@ one > public inline test (8 calls)
 
 
 
-one_field > public inline test (0 calls)
+one_field > public inline (0 calls)
 0: one_field($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2332,7 +2109,7 @@ one_field > public inline test (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-one_field > public inline test (0 calls)
+one_field > public inline (0 calls)
 1: one_field($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2365,7 +2142,7 @@ two > public inline (0 calls)
     foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$rec#1:multictr.simple, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~two_field1#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:multictr.simple, ?%$rec#2:multictr.simple, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~two_field2#0:wybe.int)
     foreign llvm or(~$rec#2, 1:wybe.int, ?$#0:multictr.simple)
-two > public inline test (7 calls)
+two > public inline (7 calls)
 1: two(?two_field1#0:wybe.int, ?two_field2#0:wybe.int, $#0:multictr.simple, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2389,7 +2166,7 @@ two > public inline test (7 calls)
 
 
 
-two_field1 > public inline test (0 calls)
+two_field1 > public inline (0 calls)
 0: two_field1($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2410,7 +2187,7 @@ two_field1 > public inline test (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-two_field1 > public inline test (0 calls)
+two_field1 > public inline (0 calls)
 1: two_field1($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2435,7 +2212,7 @@ two_field1 > public inline test (0 calls)
 
 
 
-two_field2 > public inline test (0 calls)
+two_field2 > public inline (0 calls)
 0: two_field2($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2456,7 +2233,7 @@ two_field2 > public inline test (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-two_field2 > public inline test (0 calls)
+two_field2 > public inline (0 calls)
 1: two_field2($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2503,60 +2280,47 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.simple./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = tail call fastcc  i1  @"multictr.simple.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
-if.then:
-  ret i1 0 
-if.else:
-  ret i1 1 
+  %"1$tmp$0#0" = tail call fastcc  i1  @"multictr.simple.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }
 
 
 define external fastcc  i1 @"multictr.simple.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = icmp eq i64 %"$left#0", 0 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$left#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  ret i1 %"2$$$#0" 
+  %"2$tmp$11#0" = and i64 %"$left#0", 7 
+  %"2$tmp$12#0" = icmp eq i64 %"2$tmp$11#0", 0 
+  br i1 %"2$tmp$12#0", label %if.then1, label %if.else1 
 if.else:
-  %"3$tmp$11#0" = icmp ne i64 %"$left#0", 0 
-  br i1 %"3$tmp$11#0", label %if.then1, label %if.else1 
+  %"3$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"3$$$#0" 
 if.then1:
-  %"4$tmp$12#0" = and i64 %"$left#0", 7 
-  %"4$tmp$13#0" = icmp eq i64 %"4$tmp$12#0", 0 
-  br i1 %"4$tmp$13#0", label %if.then2, label %if.else2 
-if.else1:
-  br i1 %"3$tmp$11#0", label %if.then10, label %if.else10 
-if.then2:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %"6$tmp$15#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"6$tmp$15#0", label %if.then3, label %if.else3 
+  %"4$tmp$14#0" = icmp ne i64 %"$right#0", 0 
+  br i1 %"4$tmp$14#0", label %if.then2, label %if.else2 
+if.else1:
+  %"5$tmp$16#0" = icmp eq i64 %"2$tmp$11#0", 1 
+  br i1 %"5$tmp$16#0", label %if.then4, label %if.else4 
+if.then2:
+  %"6$tmp$15#0" = and i64 %"$right#0", 7 
+  %"6$tmp$16#0" = icmp eq i64 %"6$tmp$15#0", 0 
+  br i1 %"6$tmp$16#0", label %if.then3, label %if.else3 
 if.else2:
-  br i1 %"3$tmp$11#0", label %if.then5, label %if.else5 
-if.then3:
-  %"8$tmp$16#0" = and i64 %"$right#0", 7 
-  %"8$tmp$17#0" = icmp eq i64 %"8$tmp$16#0", 0 
-  br i1 %"8$tmp$17#0", label %if.then4, label %if.else4 
-if.else3:
   ret i1 0 
-if.then4:
+if.then3:
   %4 = inttoptr i64 %"$right#0" to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
   %6 = load  i64, i64* %5 
-  %"10$$$#0" = icmp eq i64 %3, %6 
-  ret i1 %"10$$$#0" 
-if.else4:
+  %"8$$$#0" = icmp eq i64 %3, %6 
+  ret i1 %"8$$$#0" 
+if.else3:
   ret i1 0 
-if.then5:
-  %"12$tmp$16#0" = and i64 %"$left#0", 7 
-  %"12$tmp$17#0" = icmp eq i64 %"12$tmp$16#0", 1 
-  br i1 %"12$tmp$17#0", label %if.then6, label %if.else6 
-if.else5:
-  ret i1 0 
-if.then6:
+if.then4:
   %7 = add   i64 %"$left#0", -1 
   %8 = inttoptr i64 %7 to i64* 
   %9 = getelementptr  i64, i64* %8, i64 0 
@@ -2565,17 +2329,17 @@ if.then6:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"14$tmp$19#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"14$tmp$19#0", label %if.then7, label %if.else7 
-if.else6:
+  %"10$tmp$18#0" = icmp ne i64 %"$right#0", 0 
+  br i1 %"10$tmp$18#0", label %if.then5, label %if.else5 
+if.else4:
   ret i1 0 
-if.then7:
-  %"16$tmp$20#0" = and i64 %"$right#0", 7 
-  %"16$tmp$21#0" = icmp eq i64 %"16$tmp$20#0", 1 
-  br i1 %"16$tmp$21#0", label %if.then8, label %if.else8 
-if.else7:
+if.then5:
+  %"12$tmp$19#0" = and i64 %"$right#0", 7 
+  %"12$tmp$20#0" = icmp eq i64 %"12$tmp$19#0", 1 
+  br i1 %"12$tmp$20#0", label %if.then6, label %if.else6 
+if.else5:
   ret i1 0 
-if.then8:
+if.then6:
   %15 = add   i64 %"$right#0", -1 
   %16 = inttoptr i64 %15 to i64* 
   %17 = getelementptr  i64, i64* %16, i64 0 
@@ -2584,70 +2348,27 @@ if.then8:
   %20 = inttoptr i64 %19 to i64* 
   %21 = getelementptr  i64, i64* %20, i64 0 
   %22 = load  i64, i64* %21 
-  %"18$tmp$8#0" = icmp eq i64 %10, %18 
-  br i1 %"18$tmp$8#0", label %if.then9, label %if.else9 
-if.else8:
+  %"14$tmp$5#0" = icmp eq i64 %10, %18 
+  br i1 %"14$tmp$5#0", label %if.then7, label %if.else7 
+if.else6:
   ret i1 0 
-if.then9:
-  %"20$$$#0" = icmp eq i64 %14, %22 
-  ret i1 %"20$$$#0" 
-if.else9:
-  ret i1 0 
-if.then10:
-  %"22$tmp$16#0" = and i64 %"$left#0", 7 
-  %"22$tmp$17#0" = icmp eq i64 %"22$tmp$16#0", 1 
-  br i1 %"22$tmp$17#0", label %if.then11, label %if.else11 
-if.else10:
-  ret i1 0 
-if.then11:
-  %23 = add   i64 %"$left#0", -1 
-  %24 = inttoptr i64 %23 to i64* 
-  %25 = getelementptr  i64, i64* %24, i64 0 
-  %26 = load  i64, i64* %25 
-  %27 = add   i64 %"$left#0", 7 
-  %28 = inttoptr i64 %27 to i64* 
-  %29 = getelementptr  i64, i64* %28, i64 0 
-  %30 = load  i64, i64* %29 
-  %"24$tmp$19#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"24$tmp$19#0", label %if.then12, label %if.else12 
-if.else11:
-  ret i1 0 
-if.then12:
-  %"26$tmp$20#0" = and i64 %"$right#0", 7 
-  %"26$tmp$21#0" = icmp eq i64 %"26$tmp$20#0", 1 
-  br i1 %"26$tmp$21#0", label %if.then13, label %if.else13 
-if.else12:
-  ret i1 0 
-if.then13:
-  %31 = add   i64 %"$right#0", -1 
-  %32 = inttoptr i64 %31 to i64* 
-  %33 = getelementptr  i64, i64* %32, i64 0 
-  %34 = load  i64, i64* %33 
-  %35 = add   i64 %"$right#0", 7 
-  %36 = inttoptr i64 %35 to i64* 
-  %37 = getelementptr  i64, i64* %36, i64 0 
-  %38 = load  i64, i64* %37 
-  %"28$tmp$8#0" = icmp eq i64 %26, %34 
-  br i1 %"28$tmp$8#0", label %if.then14, label %if.else14 
-if.else13:
-  ret i1 0 
-if.then14:
-  %"30$$$#0" = icmp eq i64 %30, %38 
-  ret i1 %"30$$$#0" 
-if.else14:
+if.then7:
+  %"16$$$#0" = icmp eq i64 %14, %22 
+  ret i1 %"16$$$#0" 
+if.else7:
   ret i1 0 
 }
 
 
 define external fastcc  i64 @"multictr.simple.one<0>"(i64  %"one_field#0")    {
 entry:
-  %39 = trunc i64 8 to i32  
-  %40 = tail call ccc  i8*  @wybe_malloc(i32  %39)  
-  %41 = ptrtoint i8* %40 to i64 
-  %42 = inttoptr i64 %41 to i64* 
-  %43 = getelementptr  i64, i64* %42, i64 0 
-  store  i64 %"one_field#0", i64* %43 
-  ret i64 %41 
+  %23 = trunc i64 8 to i32  
+  %24 = tail call ccc  i8*  @wybe_malloc(i32  %23)  
+  %25 = ptrtoint i8* %24 to i64 
+  %26 = inttoptr i64 %25 to i64* 
+  %27 = getelementptr  i64, i64* %26, i64 0 
+  store  i64 %"one_field#0", i64* %27 
+  ret i64 %25 
 }
 
 
@@ -2660,20 +2381,20 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 0 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %51 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %52 = insertvalue {i64, i1} %51, i1 0, 1 
-  ret {i64, i1} %52 
+  %35 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %36 = insertvalue {i64, i1} %35, i1 0, 1 
+  ret {i64, i1} %36 
 if.then1:
-  %44 = inttoptr i64 %"$#0" to i64* 
-  %45 = getelementptr  i64, i64* %44, i64 0 
-  %46 = load  i64, i64* %45 
-  %47 = insertvalue {i64, i1} undef, i64 %46, 0 
-  %48 = insertvalue {i64, i1} %47, i1 1, 1 
-  ret {i64, i1} %48 
+  %28 = inttoptr i64 %"$#0" to i64* 
+  %29 = getelementptr  i64, i64* %28, i64 0 
+  %30 = load  i64, i64* %29 
+  %31 = insertvalue {i64, i1} undef, i64 %30, 0 
+  %32 = insertvalue {i64, i1} %31, i1 1, 1 
+  ret {i64, i1} %32 
 if.else1:
-  %49 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %50 = insertvalue {i64, i1} %49, i1 0, 1 
-  ret {i64, i1} %50 
+  %33 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %34 = insertvalue {i64, i1} %33, i1 0, 1 
+  ret {i64, i1} %34 
 }
 
 
@@ -2686,20 +2407,20 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 0 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %60 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %61 = insertvalue {i64, i1} %60, i1 0, 1 
-  ret {i64, i1} %61 
+  %44 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %45 = insertvalue {i64, i1} %44, i1 0, 1 
+  ret {i64, i1} %45 
 if.then1:
-  %53 = inttoptr i64 %"$rec#0" to i64* 
-  %54 = getelementptr  i64, i64* %53, i64 0 
-  %55 = load  i64, i64* %54 
-  %56 = insertvalue {i64, i1} undef, i64 %55, 0 
-  %57 = insertvalue {i64, i1} %56, i1 1, 1 
-  ret {i64, i1} %57 
+  %37 = inttoptr i64 %"$rec#0" to i64* 
+  %38 = getelementptr  i64, i64* %37, i64 0 
+  %39 = load  i64, i64* %38 
+  %40 = insertvalue {i64, i1} undef, i64 %39, 0 
+  %41 = insertvalue {i64, i1} %40, i1 1, 1 
+  ret {i64, i1} %41 
 if.else1:
-  %58 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %59 = insertvalue {i64, i1} %58, i1 0, 1 
-  ret {i64, i1} %59 
+  %42 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %43 = insertvalue {i64, i1} %42, i1 0, 1 
+  ret {i64, i1} %43 
 }
 
 
@@ -2712,43 +2433,43 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 0 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %74 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
-  %75 = insertvalue {i64, i1} %74, i1 0, 1 
-  ret {i64, i1} %75 
+  %58 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %59 = insertvalue {i64, i1} %58, i1 0, 1 
+  ret {i64, i1} %59 
 if.then1:
-  %62 = trunc i64 8 to i32  
-  %63 = tail call ccc  i8*  @wybe_malloc(i32  %62)  
-  %64 = ptrtoint i8* %63 to i64 
-  %65 = inttoptr i64 %64 to i8* 
-  %66 = inttoptr i64 %"$rec#0" to i8* 
-  %67 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %65, i8*  %66, i32  %67, i32  8, i1  0)  
-  %68 = inttoptr i64 %64 to i64* 
-  %69 = getelementptr  i64, i64* %68, i64 0 
-  store  i64 %"$field#0", i64* %69 
-  %70 = insertvalue {i64, i1} undef, i64 %64, 0 
-  %71 = insertvalue {i64, i1} %70, i1 1, 1 
-  ret {i64, i1} %71 
+  %46 = trunc i64 8 to i32  
+  %47 = tail call ccc  i8*  @wybe_malloc(i32  %46)  
+  %48 = ptrtoint i8* %47 to i64 
+  %49 = inttoptr i64 %48 to i8* 
+  %50 = inttoptr i64 %"$rec#0" to i8* 
+  %51 = trunc i64 8 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %49, i8*  %50, i32  %51, i32  8, i1  0)  
+  %52 = inttoptr i64 %48 to i64* 
+  %53 = getelementptr  i64, i64* %52, i64 0 
+  store  i64 %"$field#0", i64* %53 
+  %54 = insertvalue {i64, i1} undef, i64 %48, 0 
+  %55 = insertvalue {i64, i1} %54, i1 1, 1 
+  ret {i64, i1} %55 
 if.else1:
-  %72 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
-  %73 = insertvalue {i64, i1} %72, i1 0, 1 
-  ret {i64, i1} %73 
+  %56 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %57 = insertvalue {i64, i1} %56, i1 0, 1 
+  ret {i64, i1} %57 
 }
 
 
 define external fastcc  i64 @"multictr.simple.two<0>"(i64  %"two_field1#0", i64  %"two_field2#0")    {
 entry:
-  %76 = trunc i64 16 to i32  
-  %77 = tail call ccc  i8*  @wybe_malloc(i32  %76)  
-  %78 = ptrtoint i8* %77 to i64 
-  %79 = inttoptr i64 %78 to i64* 
-  %80 = getelementptr  i64, i64* %79, i64 0 
-  store  i64 %"two_field1#0", i64* %80 
-  %81 = add   i64 %78, 8 
-  %82 = inttoptr i64 %81 to i64* 
-  %83 = getelementptr  i64, i64* %82, i64 0 
-  store  i64 %"two_field2#0", i64* %83 
-  %"1$$#0" = or i64 %78, 1 
+  %60 = trunc i64 16 to i32  
+  %61 = tail call ccc  i8*  @wybe_malloc(i32  %60)  
+  %62 = ptrtoint i8* %61 to i64 
+  %63 = inttoptr i64 %62 to i64* 
+  %64 = getelementptr  i64, i64* %63, i64 0 
+  store  i64 %"two_field1#0", i64* %64 
+  %65 = add   i64 %62, 8 
+  %66 = inttoptr i64 %65 to i64* 
+  %67 = getelementptr  i64, i64* %66, i64 0 
+  store  i64 %"two_field2#0", i64* %67 
+  %"1$$#0" = or i64 %62, 1 
   ret i64 %"1$$#0" 
 }
 
@@ -2762,28 +2483,28 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %98 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
-  %99 = insertvalue {i64, i64, i1} %98, i64 undef, 1 
-  %100 = insertvalue {i64, i64, i1} %99, i1 0, 2 
-  ret {i64, i64, i1} %100 
+  %82 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
+  %83 = insertvalue {i64, i64, i1} %82, i64 undef, 1 
+  %84 = insertvalue {i64, i64, i1} %83, i1 0, 2 
+  ret {i64, i64, i1} %84 
 if.then1:
-  %84 = add   i64 %"$#0", -1 
-  %85 = inttoptr i64 %84 to i64* 
-  %86 = getelementptr  i64, i64* %85, i64 0 
-  %87 = load  i64, i64* %86 
-  %88 = add   i64 %"$#0", 7 
-  %89 = inttoptr i64 %88 to i64* 
-  %90 = getelementptr  i64, i64* %89, i64 0 
-  %91 = load  i64, i64* %90 
-  %92 = insertvalue {i64, i64, i1} undef, i64 %87, 0 
-  %93 = insertvalue {i64, i64, i1} %92, i64 %91, 1 
-  %94 = insertvalue {i64, i64, i1} %93, i1 1, 2 
-  ret {i64, i64, i1} %94 
+  %68 = add   i64 %"$#0", -1 
+  %69 = inttoptr i64 %68 to i64* 
+  %70 = getelementptr  i64, i64* %69, i64 0 
+  %71 = load  i64, i64* %70 
+  %72 = add   i64 %"$#0", 7 
+  %73 = inttoptr i64 %72 to i64* 
+  %74 = getelementptr  i64, i64* %73, i64 0 
+  %75 = load  i64, i64* %74 
+  %76 = insertvalue {i64, i64, i1} undef, i64 %71, 0 
+  %77 = insertvalue {i64, i64, i1} %76, i64 %75, 1 
+  %78 = insertvalue {i64, i64, i1} %77, i1 1, 2 
+  ret {i64, i64, i1} %78 
 if.else1:
-  %95 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
-  %96 = insertvalue {i64, i64, i1} %95, i64 undef, 1 
-  %97 = insertvalue {i64, i64, i1} %96, i1 0, 2 
-  ret {i64, i64, i1} %97 
+  %79 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
+  %80 = insertvalue {i64, i64, i1} %79, i64 undef, 1 
+  %81 = insertvalue {i64, i64, i1} %80, i1 0, 2 
+  ret {i64, i64, i1} %81 
 }
 
 
@@ -2796,21 +2517,21 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %109 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %110 = insertvalue {i64, i1} %109, i1 0, 1 
-  ret {i64, i1} %110 
+  %93 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %94 = insertvalue {i64, i1} %93, i1 0, 1 
+  ret {i64, i1} %94 
 if.then1:
-  %101 = add   i64 %"$rec#0", -1 
-  %102 = inttoptr i64 %101 to i64* 
-  %103 = getelementptr  i64, i64* %102, i64 0 
-  %104 = load  i64, i64* %103 
-  %105 = insertvalue {i64, i1} undef, i64 %104, 0 
-  %106 = insertvalue {i64, i1} %105, i1 1, 1 
-  ret {i64, i1} %106 
+  %85 = add   i64 %"$rec#0", -1 
+  %86 = inttoptr i64 %85 to i64* 
+  %87 = getelementptr  i64, i64* %86, i64 0 
+  %88 = load  i64, i64* %87 
+  %89 = insertvalue {i64, i1} undef, i64 %88, 0 
+  %90 = insertvalue {i64, i1} %89, i1 1, 1 
+  ret {i64, i1} %90 
 if.else1:
-  %107 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %108 = insertvalue {i64, i1} %107, i1 0, 1 
-  ret {i64, i1} %108 
+  %91 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %92 = insertvalue {i64, i1} %91, i1 0, 1 
+  ret {i64, i1} %92 
 }
 
 
@@ -2823,30 +2544,30 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %126 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
-  %127 = insertvalue {i64, i1} %126, i1 0, 1 
-  ret {i64, i1} %127 
+  %110 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %111 = insertvalue {i64, i1} %110, i1 0, 1 
+  ret {i64, i1} %111 
 if.then1:
-  %111 = trunc i64 16 to i32  
-  %112 = tail call ccc  i8*  @wybe_malloc(i32  %111)  
-  %113 = ptrtoint i8* %112 to i64 
-  %114 = add   i64 %113, 1 
-  %115 = sub   i64 %"$rec#0", 1 
-  %116 = inttoptr i64 %113 to i8* 
-  %117 = inttoptr i64 %115 to i8* 
-  %118 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %116, i8*  %117, i32  %118, i32  8, i1  0)  
-  %119 = add   i64 %114, -1 
-  %120 = inttoptr i64 %119 to i64* 
-  %121 = getelementptr  i64, i64* %120, i64 0 
-  store  i64 %"$field#0", i64* %121 
-  %122 = insertvalue {i64, i1} undef, i64 %114, 0 
-  %123 = insertvalue {i64, i1} %122, i1 1, 1 
-  ret {i64, i1} %123 
+  %95 = trunc i64 16 to i32  
+  %96 = tail call ccc  i8*  @wybe_malloc(i32  %95)  
+  %97 = ptrtoint i8* %96 to i64 
+  %98 = add   i64 %97, 1 
+  %99 = sub   i64 %"$rec#0", 1 
+  %100 = inttoptr i64 %97 to i8* 
+  %101 = inttoptr i64 %99 to i8* 
+  %102 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %100, i8*  %101, i32  %102, i32  8, i1  0)  
+  %103 = add   i64 %98, -1 
+  %104 = inttoptr i64 %103 to i64* 
+  %105 = getelementptr  i64, i64* %104, i64 0 
+  store  i64 %"$field#0", i64* %105 
+  %106 = insertvalue {i64, i1} undef, i64 %98, 0 
+  %107 = insertvalue {i64, i1} %106, i1 1, 1 
+  ret {i64, i1} %107 
 if.else1:
-  %124 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
-  %125 = insertvalue {i64, i1} %124, i1 0, 1 
-  ret {i64, i1} %125 
+  %108 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %109 = insertvalue {i64, i1} %108, i1 0, 1 
+  ret {i64, i1} %109 
 }
 
 
@@ -2859,21 +2580,21 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %136 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %137 = insertvalue {i64, i1} %136, i1 0, 1 
-  ret {i64, i1} %137 
+  %120 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %121 = insertvalue {i64, i1} %120, i1 0, 1 
+  ret {i64, i1} %121 
 if.then1:
-  %128 = add   i64 %"$rec#0", 7 
-  %129 = inttoptr i64 %128 to i64* 
-  %130 = getelementptr  i64, i64* %129, i64 0 
-  %131 = load  i64, i64* %130 
-  %132 = insertvalue {i64, i1} undef, i64 %131, 0 
-  %133 = insertvalue {i64, i1} %132, i1 1, 1 
-  ret {i64, i1} %133 
+  %112 = add   i64 %"$rec#0", 7 
+  %113 = inttoptr i64 %112 to i64* 
+  %114 = getelementptr  i64, i64* %113, i64 0 
+  %115 = load  i64, i64* %114 
+  %116 = insertvalue {i64, i1} undef, i64 %115, 0 
+  %117 = insertvalue {i64, i1} %116, i1 1, 1 
+  ret {i64, i1} %117 
 if.else1:
-  %134 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %135 = insertvalue {i64, i1} %134, i1 0, 1 
-  ret {i64, i1} %135 
+  %118 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %119 = insertvalue {i64, i1} %118, i1 0, 1 
+  ret {i64, i1} %119 
 }
 
 
@@ -2886,30 +2607,30 @@ if.then:
   %"2$tmp$2#0" = icmp eq i64 %"2$tmp$1#0", 1 
   br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %153 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
-  %154 = insertvalue {i64, i1} %153, i1 0, 1 
-  ret {i64, i1} %154 
+  %137 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %138 = insertvalue {i64, i1} %137, i1 0, 1 
+  ret {i64, i1} %138 
 if.then1:
-  %138 = trunc i64 16 to i32  
-  %139 = tail call ccc  i8*  @wybe_malloc(i32  %138)  
-  %140 = ptrtoint i8* %139 to i64 
-  %141 = add   i64 %140, 1 
-  %142 = sub   i64 %"$rec#0", 1 
-  %143 = inttoptr i64 %140 to i8* 
-  %144 = inttoptr i64 %142 to i8* 
-  %145 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %143, i8*  %144, i32  %145, i32  8, i1  0)  
-  %146 = add   i64 %141, 7 
-  %147 = inttoptr i64 %146 to i64* 
-  %148 = getelementptr  i64, i64* %147, i64 0 
-  store  i64 %"$field#0", i64* %148 
-  %149 = insertvalue {i64, i1} undef, i64 %141, 0 
-  %150 = insertvalue {i64, i1} %149, i1 1, 1 
-  ret {i64, i1} %150 
+  %122 = trunc i64 16 to i32  
+  %123 = tail call ccc  i8*  @wybe_malloc(i32  %122)  
+  %124 = ptrtoint i8* %123 to i64 
+  %125 = add   i64 %124, 1 
+  %126 = sub   i64 %"$rec#0", 1 
+  %127 = inttoptr i64 %124 to i8* 
+  %128 = inttoptr i64 %126 to i8* 
+  %129 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %127, i8*  %128, i32  %129, i32  8, i1  0)  
+  %130 = add   i64 %125, 7 
+  %131 = inttoptr i64 %130 to i64* 
+  %132 = getelementptr  i64, i64* %131, i64 0 
+  store  i64 %"$field#0", i64* %132 
+  %133 = insertvalue {i64, i1} undef, i64 %125, 0 
+  %134 = insertvalue {i64, i1} %133, i1 1, 1 
+  ret {i64, i1} %134 
 if.else1:
-  %151 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
-  %152 = insertvalue {i64, i1} %151, i1 0, 1 
-  ret {i64, i1} %152 
+  %135 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %136 = insertvalue {i64, i1} %135, i1 0, 1 
+  ret {i64, i1} %136 
 }
 
 
@@ -2934,21 +2655,15 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:multictr.suit, $right#0:multictr.suit, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp eq(~$left#0:multictr.suit, ~$right#0:multictr.suit, ?tmp$1#0:wybe.bool)
-    case ~tmp$1#0:wybe.bool of
-    0:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+    foreign llvm icmp eq(~$left#0:multictr.suit, ~$right#0:multictr.suit, ?tmp$0#0:wybe.bool)
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-
-= > public inline test (3 calls)
+= > public inline (1 calls)
 0: =($left#0:multictr.suit, $right#0:multictr.suit, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2998,12 +2713,9 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"multictr.suit./=<0>"(i2  %"$left#0", i2  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = icmp eq i2 %"$left#0", %"$right#0" 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
-if.then:
-  ret i1 0 
-if.else:
-  ret i1 1 
+  %"1$tmp$0#0" = icmp eq i2 %"$left#0", %"$right#0" 
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }
 
 
@@ -3050,14 +2762,14 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=([$left#0:multictr.unit], [$right#0:multictr.unit], ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public inline test (3 calls)
+= > public inline (1 calls)
 0: =([$left#0:multictr.unit], [$right#0:multictr.unit], ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

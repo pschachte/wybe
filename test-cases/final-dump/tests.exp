@@ -28,7 +28,7 @@ AFTER EVERYTHING:
   submodules      : tests.map
   procs           : 
 
-lookup > public test (6 calls)
+lookup > public (6 calls)
 0: lookup(key#0:wybe.int, map#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -48,8 +48,8 @@ lookup > public test (6 calls)
 
         1:
             foreign lpvm access(map#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.int)
-            foreign llvm icmp slt(key#0:wybe.int, ~tmp$2#0:wybe.int, ?tmp$9#0:wybe.bool) @wybe:nn:nn
-            case ~tmp$9#0:wybe.bool of
+            foreign llvm icmp slt(key#0:wybe.int, ~tmp$2#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:nn:nn
+            case ~tmp$11#0:wybe.bool of
             0:
                 case ~tmp$15#0:wybe.bool of
                 0:
@@ -74,8 +74,8 @@ lookup > public test (6 calls)
 
     1:
         foreign lpvm access(map#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
-        foreign llvm icmp eq(key#0:wybe.int, ~tmp$0#0:wybe.int, ?tmp$6#0:wybe.bool) @wybe:nn:nn
-        case ~tmp$6#0:wybe.bool of
+        foreign llvm icmp eq(key#0:wybe.int, ~tmp$0#0:wybe.int, ?tmp$13#0:wybe.bool) @wybe:nn:nn
+        case ~tmp$13#0:wybe.bool of
         0:
             case tmp$15#0:wybe.bool of
             0:
@@ -90,8 +90,8 @@ lookup > public test (6 calls)
 
             1:
                 foreign lpvm access(map#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.int)
-                foreign llvm icmp slt(key#0:wybe.int, ~tmp$2#0:wybe.int, ?tmp$9#0:wybe.bool) @wybe:nn:nn
-                case ~tmp$9#0:wybe.bool of
+                foreign llvm icmp slt(key#0:wybe.int, ~tmp$2#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:nn:nn
+                case ~tmp$11#0:wybe.bool of
                 0:
                     case ~tmp$15#0:wybe.bool of
                     0:
@@ -128,17 +128,17 @@ lookup > public test (6 calls)
 
 
 
-lt > public test (1 calls)
+lt > public (1 calls)
 0: lt(x#0:wybe.int, y#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp slt(~x#0:wybe.int, ~y#0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
-    case ~tmp$0#0:wybe.bool of
+    foreign llvm icmp slt(~x#0:wybe.int, ~y#0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
+    case ~tmp$3#0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool) @tests:6:34
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool) @tests:6:19
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
 
@@ -149,7 +149,7 @@ lt2 > public inline (1 calls)
     tests.lt<0>(~x#0:wybe.int, ~y#0:wybe.int, ?res#0:wybe.bool) #0 @tests:11:12
 
 
-lt3 > public inline test (0 calls)
+lt3 > public inline (0 calls)
 0: lt3(x#0:wybe.int, y#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -178,8 +178,8 @@ if.then:
   %2 = inttoptr i64 %1 to i64* 
   %3 = getelementptr  i64, i64* %2, i64 0 
   %4 = load  i64, i64* %3 
-  %"2$tmp$6#0" = icmp eq i64 %"key#0", %4 
-  br i1 %"2$tmp$6#0", label %if.then1, label %if.else1 
+  %"2$tmp$13#0" = icmp eq i64 %"key#0", %4 
+  br i1 %"2$tmp$13#0", label %if.then1, label %if.else1 
 if.else:
   br i1 %"1$tmp$15#0", label %if.then8, label %if.else8 
 if.then1:
@@ -203,8 +203,8 @@ if.then3:
   %14 = inttoptr i64 %13 to i64* 
   %15 = getelementptr  i64, i64* %14, i64 0 
   %16 = load  i64, i64* %15 
-  %"8$tmp$9#0" = icmp slt i64 %"key#0", %16 
-  br i1 %"8$tmp$9#0", label %if.then4, label %if.else4 
+  %"8$tmp$11#0" = icmp slt i64 %"key#0", %16 
+  br i1 %"8$tmp$11#0", label %if.then4, label %if.else4 
 if.else3:
   br i1 %"1$tmp$15#0", label %if.then7, label %if.else7 
 if.then4:
@@ -260,8 +260,8 @@ if.then8:
   %50 = inttoptr i64 %49 to i64* 
   %51 = getelementptr  i64, i64* %50, i64 0 
   %52 = load  i64, i64* %51 
-  %"18$tmp$9#0" = icmp slt i64 %"key#0", %52 
-  br i1 %"18$tmp$9#0", label %if.then9, label %if.else9 
+  %"18$tmp$11#0" = icmp slt i64 %"key#0", %52 
+  br i1 %"18$tmp$11#0", label %if.then9, label %if.else9 
 if.else8:
   br i1 %"1$tmp$15#0", label %if.then12, label %if.else12 
 if.then9:
@@ -317,8 +317,8 @@ if.else12:
 
 define external fastcc  i1 @"tests.lt<0>"(i64  %"x#0", i64  %"y#0")    {
 entry:
-  %"1$tmp$0#0" = icmp slt i64 %"x#0", %"y#0" 
-  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$3#0" = icmp slt i64 %"x#0", %"y#0" 
+  br i1 %"1$tmp$3#0", label %if.then, label %if.else 
 if.then:
   ret i1 1 
 if.else:
@@ -362,75 +362,61 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:tests.map, $right#0:tests.map, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    tests.map.=<0>(~$left#0:tests.map, ~$right#0:tests.map, ?tmp$1#0:wybe.bool) #0
-    case ~tmp$1#0:wybe.bool of
-    0:
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+    tests.map.=<0>(~$left#0:tests.map, ~$right#0:tests.map, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-
-= > public test (13 calls)
+= > public (17 calls)
 0: =($left#0:tests.map, $right#0:tests.map, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm cast($left#0:tests.map, ?tmp$0#0:!wybe.int)
-    foreign llvm icmp eq(~tmp$0#0:!wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
-    case ~tmp$1#0:wybe.bool of
+    foreign llvm icmp ne($left#0:!wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
+    case ~tmp$0#0:wybe.bool of
     0:
-        foreign llvm icmp ne($left#0:tests.map, 0:wybe.int, ?tmp$10#0:wybe.bool)
-        case ~tmp$10#0:wybe.bool of
+        foreign llvm icmp eq(~$left#0:tests.map, ~$right#0:tests.map, ?$$#0:wybe.bool)
+
+    1:
+        foreign lpvm access($left#0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$left#0:tests.map)
+        foreign lpvm access($left#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$key#0:wybe.int)
+        foreign lpvm access($left#0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$value#0:wybe.int)
+        foreign lpvm access(~$left#0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$right#0:tests.map)
+        foreign llvm icmp ne($right#0:tests.map, 0:wybe.int, ?tmp$11#0:wybe.bool)
+        case ~tmp$11#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign lpvm access($left#0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$left#0:tests.map)
-            foreign lpvm access($left#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$key#0:wybe.int)
-            foreign lpvm access($left#0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$value#0:wybe.int)
-            foreign lpvm access(~$left#0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$right#0:tests.map)
-            foreign llvm icmp ne($right#0:tests.map, 0:wybe.int, ?tmp$12#0:wybe.bool)
-            case ~tmp$12#0:wybe.bool of
+            foreign lpvm access($right#0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$left#0:tests.map)
+            foreign lpvm access($right#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$key#0:wybe.int)
+            foreign lpvm access($right#0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$value#0:wybe.int)
+            foreign lpvm access(~$right#0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$right#0:tests.map)
+            tests.map.=<0>(~$left$left#0:tests.map, ~$right$left#0:tests.map, ?tmp$4#0:wybe.bool) #2
+            case ~tmp$4#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
             1:
-                foreign lpvm access($right#0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$left#0:tests.map)
-                foreign lpvm access($right#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$key#0:wybe.int)
-                foreign lpvm access($right#0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$value#0:wybe.int)
-                foreign lpvm access(~$right#0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$right#0:tests.map)
-                tests.map.=<0>(~$left$left#0:tests.map, ~$right$left#0:tests.map, ?tmp$5#0:wybe.bool) #2
+                foreign llvm icmp eq(~$left$key#0:wybe.int, ~$right$key#0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
                 case ~tmp$5#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
-                    foreign llvm icmp eq(~$left$key#0:wybe.int, ~$right$key#0:wybe.int, ?tmp$6#0:wybe.bool) @wybe:nn:nn
+                    foreign llvm icmp eq(~$left$value#0:wybe.int, ~$right$value#0:wybe.int, ?tmp$6#0:wybe.bool) @wybe:nn:nn
                     case ~tmp$6#0:wybe.bool of
                     0:
                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                     1:
-                        foreign llvm icmp eq(~$left$value#0:wybe.int, ~$right$value#0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:nn:nn
-                        case ~tmp$7#0:wybe.bool of
-                        0:
-                            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-                        1:
-                            tests.map.=<0>(~$left$right#0:tests.map, ~$right$right#0:tests.map, ?$$#0:wybe.bool) #5
+                        tests.map.=<0>(~$left$right#0:tests.map, ~$right$right#0:tests.map, ?$$#0:wybe.bool) #5
 
 
 
 
-
-
-    1:
-        foreign llvm icmp eq(~$left#0:tests.map, ~$right#0:tests.map, ?$$#0:wybe.bool)
 
 
 
@@ -441,7 +427,7 @@ empty > public inline (0 calls)
     foreign llvm move(0:tests.map, ?$#0:tests.map)
 
 
-key > public inline test (0 calls)
+key > public inline (0 calls)
 0: key($rec#0:tests.map, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -454,7 +440,7 @@ key > public inline test (0 calls)
         foreign lpvm access(~$rec#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-key > public inline test (0 calls)
+key > public inline (0 calls)
 1: key($rec#0:tests.map, ?$rec#1:tests.map, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -470,7 +456,7 @@ key > public inline test (0 calls)
 
 
 
-left > public inline test (0 calls)
+left > public inline (0 calls)
 0: left($rec#0:tests.map, ?$#0:tests.map, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -483,7 +469,7 @@ left > public inline test (0 calls)
         foreign lpvm access(~$rec#0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:tests.map)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-left > public inline test (0 calls)
+left > public inline (0 calls)
 1: left($rec#0:tests.map, ?$rec#1:tests.map, $field#0:tests.map, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -508,7 +494,7 @@ node > public inline (0 calls)
     foreign lpvm mutate(~%$rec#1:tests.map, ?%$rec#2:tests.map, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~key#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:tests.map, ?%$rec#3:tests.map, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~value#0:wybe.int)
     foreign lpvm mutate(~%$rec#3:tests.map, ?%$#0:tests.map, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~right#0:tests.map)
-node > public inline test (11 calls)
+node > public inline (20 calls)
 1: node(?left#0:tests.map, ?key#0:wybe.int, ?value#0:wybe.int, ?right#0:tests.map, $#0:tests.map, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -526,7 +512,7 @@ node > public inline test (11 calls)
 
 
 
-right > public inline test (0 calls)
+right > public inline (0 calls)
 0: right($rec#0:tests.map, ?$#0:tests.map, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -539,7 +525,7 @@ right > public inline test (0 calls)
         foreign lpvm access(~$rec#0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:tests.map)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-right > public inline test (0 calls)
+right > public inline (0 calls)
 1: right($rec#0:tests.map, ?$rec#1:tests.map, $field#0:tests.map, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -555,7 +541,7 @@ right > public inline test (0 calls)
 
 
 
-value > public inline test (0 calls)
+value > public inline (0 calls)
 0: value($rec#0:tests.map, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -568,7 +554,7 @@ value > public inline test (0 calls)
         foreign lpvm access(~$rec#0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-value > public inline test (0 calls)
+value > public inline (0 calls)
 1: value($rec#0:tests.map, ?$rec#1:tests.map, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -599,26 +585,17 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i1 @"tests.map./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
-if.then:
-  ret i1 0 
-if.else:
-  ret i1 1 
+  %"1$tmp$0#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }
 
 
 define external fastcc  i1 @"tests.map.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
-  %"1$tmp$1#0" = icmp eq i64 %"$left#0", 0 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1$tmp$0#0" = icmp ne i64 %"$left#0", 0 
+  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  ret i1 %"2$$$#0" 
-if.else:
-  %"3$tmp$10#0" = icmp ne i64 %"$left#0", 0 
-  br i1 %"3$tmp$10#0", label %if.then1, label %if.else1 
-if.then1:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
@@ -634,11 +611,12 @@ if.then1:
   %13 = inttoptr i64 %12 to i64* 
   %14 = getelementptr  i64, i64* %13, i64 0 
   %15 = load  i64, i64* %14 
-  %"4$tmp$12#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"4$tmp$12#0", label %if.then2, label %if.else2 
-if.else1:
-  ret i1 0 
-if.then2:
+  %"2$tmp$11#0" = icmp ne i64 %"$right#0", 0 
+  br i1 %"2$tmp$11#0", label %if.then1, label %if.else1 
+if.else:
+  %"3$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
+  ret i1 %"3$$$#0" 
+if.then1:
   %16 = inttoptr i64 %"$right#0" to i64* 
   %17 = getelementptr  i64, i64* %16, i64 0 
   %18 = load  i64, i64* %17 
@@ -654,24 +632,24 @@ if.then2:
   %28 = inttoptr i64 %27 to i64* 
   %29 = getelementptr  i64, i64* %28, i64 0 
   %30 = load  i64, i64* %29 
-  %"6$tmp$5#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %3, i64  %18)  
+  %"4$tmp$4#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %3, i64  %18)  
+  br i1 %"4$tmp$4#0", label %if.then2, label %if.else2 
+if.else1:
+  ret i1 0 
+if.then2:
+  %"6$tmp$5#0" = icmp eq i64 %7, %22 
   br i1 %"6$tmp$5#0", label %if.then3, label %if.else3 
 if.else2:
   ret i1 0 
 if.then3:
-  %"8$tmp$6#0" = icmp eq i64 %7, %22 
+  %"8$tmp$6#0" = icmp eq i64 %11, %26 
   br i1 %"8$tmp$6#0", label %if.then4, label %if.else4 
 if.else3:
   ret i1 0 
 if.then4:
-  %"10$tmp$7#0" = icmp eq i64 %11, %26 
-  br i1 %"10$tmp$7#0", label %if.then5, label %if.else5 
+  %"10$$$#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %15, i64  %30)  
+  ret i1 %"10$$$#0" 
 if.else4:
-  ret i1 0 
-if.then5:
-  %"12$$$#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %15, i64  %30)  
-  ret i1 %"12$$$#0" 
-if.else5:
   ret i1 0 
 }
 

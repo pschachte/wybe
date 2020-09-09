@@ -382,7 +382,7 @@ doStmt :: Parser (Placed Stmt)
 doStmt = do
     pos <- tokenPosition <$> ident "do"
     body <- betweenB Brace $ many1 stmtParser
-    return $ Placed (Loop body) pos
+    return $ Placed (Loop body Nothing) pos
 
 -- Generator parser -- var in expr
 generatorStmt :: Parser Generator
@@ -403,7 +403,7 @@ whileStmt :: Parser (Placed Stmt)
 whileStmt = do
     pos <- tokenPosition <$> ident "while"
     cond <- testStmt
-    return $ Placed (Cond cond [Unplaced Nop] [Unplaced Break]) pos
+    return $ Placed (Cond cond [Unplaced Nop] [Unplaced Break] Nothing) pos
 
 breakStmt :: Parser (Placed Stmt)
 breakStmt = do
@@ -420,20 +420,20 @@ untilStmt :: Parser (Placed Stmt)
 untilStmt = do
     pos <- tokenPosition <$> ident "until"
     e <- testStmt
-    return $ Placed (Cond e [Unplaced Break] [Unplaced Nop]) pos
+    return $ Placed (Cond e [Unplaced Break] [Unplaced Nop] Nothing) pos
 
 
 unlessStmt :: Parser (Placed Stmt)
 unlessStmt = do
     pos <- tokenPosition <$> ident "unless"
     e <- testStmt
-    return $ Placed (Cond e [Unplaced Next] [Unplaced Nop]) pos
+    return $ Placed (Cond e [Unplaced Next] [Unplaced Nop] Nothing) pos
 
 whenStmt :: Parser (Placed Stmt)
 whenStmt = do
     pos <- tokenPosition <$> ident "when"
     e <- testStmt
-    return $ Placed (Cond e [Unplaced Nop] [Unplaced Next]) pos
+    return $ Placed (Cond e [Unplaced Nop] [Unplaced Next] Nothing) pos
 
 
 -- | If statement parser.
@@ -442,7 +442,7 @@ ifStmtParser = do
     pos <- tokenPosition <$> ident "if"
     cases <- betweenB Brace $ ifCaseParser `sepBy` symbol "|"
     let final = List.foldr (\(cond, body) rest ->
-                           [Unplaced (Cond cond body rest)]) [] cases
+                           [Unplaced (Cond cond body rest Nothing)]) [] cases
     case final of
       []     -> unexpected "if cases statement structure."
       (hd:_) -> return $ Placed (content hd) pos

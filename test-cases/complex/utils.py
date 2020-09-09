@@ -103,8 +103,11 @@ class Context:
         return (r.returncode, r.stdout.decode("utf-8"))
 
     def execute_program(self, exe: str, check: bool,
+            input: Optional[str] = None,
             timeout: float = 5.0) -> Tuple[int, str]:
-        r = subprocess.run([exe], timeout=timeout,
+        if input:
+            input = input.encode("utf-8")
+        r = subprocess.run([exe], timeout=timeout, input=input,
                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                            cwd=self.tmp_dir)
         if check:

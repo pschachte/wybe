@@ -20,12 +20,12 @@ gen$1 > (2 calls)
     foreign llvm icmp eq(response#0:wybe.char, 'Y':wybe.char, ?tmp$0#0:wybe.bool) @wybe:nn:nn
     case ~tmp$0#0:wybe.bool of
     0:
-        foreign llvm icmp eq(~response#0:wybe.char, 'N':wybe.char, ?tmp$2#0:wybe.bool) @wybe:nn:nn
-        case ~tmp$2#0:wybe.bool of
+        foreign llvm icmp eq(~response#0:wybe.char, 'N':wybe.char, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+        case ~tmp$1#0:wybe.bool of
         0:
-            foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~#io#3:wybe.phantom, ?tmp$14#0:wybe.phantom) @wybe:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?#io#4:wybe.phantom) @wybe:nn:nn
-            proc_yorn2.gen$1<0>(~io#4:wybe.phantom, ~prompt#0:wybe.string, ?result#1:wybe.bool, ?io#5:wybe.phantom) #8 @proc_yorn2:2:5
+            foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~#io#3:wybe.phantom, ?tmp$13#0:wybe.phantom) @wybe:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp$13#0:wybe.phantom, ?#io#4:wybe.phantom) @wybe:nn:nn
+            proc_yorn2.gen$1<0>(~io#4:wybe.phantom, ~prompt#0:wybe.string, ?result#1:wybe.bool, ?io#5:wybe.phantom) #6 @proc_yorn2:2:5
 
         1:
             foreign llvm move(0:wybe.int, ?result#1:wybe.bool)
@@ -36,12 +36,6 @@ gen$1 > (2 calls)
         foreign llvm move(1:wybe.int, ?result#1:wybe.bool)
         foreign llvm move(~io#3:wybe.phantom, ?io#5:wybe.phantom)
 
-
-
-gen$2 > inline (2 calls)
-0: gen$2(io#0:wybe.phantom, [prompt#0:wybe.string], [response#0:wybe.char], result#0:wybe.bool, [tmp$0#0:wybe.bool], [?result#0:wybe.bool], [?io#0:wybe.phantom]):
- AliasPairs: []
- InterestingCallProperties: []
 
 
 yorn > public inline (0 calls)
@@ -90,8 +84,8 @@ entry:
 if.then:
   ret i64 1 
 if.else:
-  %"3$tmp$2#0" = icmp eq i8 %"1$response#0", 78 
-  br i1 %"3$tmp$2#0", label %if.then1, label %if.else1 
+  %"3$tmp$1#0" = icmp eq i8 %"1$response#0", 78 
+  br i1 %"3$tmp$1#0", label %if.then1, label %if.else1 
 if.then1:
   ret i64 0 
 if.else1:

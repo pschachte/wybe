@@ -456,7 +456,8 @@ argExpandedPrim call@(PrimCall id pspec args) = do
     args' <- mapM expandArg args
     params <- lift $ primProtoParams <$> getProcPrimProto pspec
     unless (sameLength args' params) $
-        shouldnt $ "arguments don't match params in call " ++ show call
+        shouldnt $ "arguments in call " ++ show call
+                   ++ " don't match params " ++ show params
     args'' <- zipWithM (transformUnneededArg $ zip params args) params args'
     return $ PrimCall id pspec args''
 argExpandedPrim (PrimForeign lang nm flags args) = do
