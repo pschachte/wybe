@@ -75,10 +75,7 @@ flattenBody :: [Placed Stmt] -> Set VarName -> Determinism
 flattenBody stmts varSet detism = do
     finalState <- execStateT (flattenStmts stmts detism)
                   $ initFlattenerState varSet
-    return (List.reverse (prefixStmts finalState) ++ 
-            List.reverse (flattened finalState),
-            -- ++ postponed finalState,
-            tempCtr finalState)
+    return (List.reverse (flattened finalState), tempCtr finalState)
 
 
 -- |The Flattener monad is a state transformer monad carrying the 
@@ -91,8 +88,6 @@ type Flattener = StateT FlattenerState Compiler
 ----------------------------------------------------------------
 
 data FlattenerState = Flattener {
-    prefixStmts :: [Placed Stmt],   -- ^Code to be generated earlier, reversed
-                                    -- (used for loop initialisation)
     flattened   :: [Placed Stmt],   -- ^Flattened code generated, reversed
     tempCtr     :: Int,             -- ^Temp variable counter
     currPos     :: OptPos,          -- ^Position of current statement
@@ -104,8 +99,7 @@ data FlattenerState = Flattener {
 
 
 initFlattenerState :: Set VarName -> FlattenerState
-initFlattenerState varSet = 
-    Flattener [] [] 0 Nothing Set.empty varSet
+initFlattenerState varSet = Flattener [] 0 Nothing Set.empty varSet
 
 
 emit :: OptPos -> Stmt -> Flattener ()
@@ -113,14 +107,6 @@ emit pos stmt = do
     logFlatten $ "-- Emitting:  " ++ showStmt 14 stmt
     stmts <- gets flattened
     modify (\s -> s { flattened = maybePlace stmt pos:stmts })
-
-
--- | Add an initialisation statement to the list of initialisations
---   XXX This will be needed for for loops, but is not used yet
-saveInit :: OptPos -> Stmt -> Flattener ()
-saveInit pos stmt = do
-    stmts <- gets prefixStmts
-    modify (\s -> s { prefixStmts = maybePlace stmt pos:stmts })
 
 
 -- |Return a fresh variable name.
@@ -143,20 +129,13 @@ flattenInner isLoop transparent detism inner = do
     (_,innerState) <-
         lift (runStateT inner
               (initFlattenerState (defdVars oldState)) {
-                    tempCtr = tempCtr oldState,
-                    prefixStmts = if isLoop then [] else prefixStmts oldState})
-    logFlatten $ "-- Prefix:\n" ++ showBody 4 (prefixStmts innerState)
+                    tempCtr = tempCtr oldState})
     logFlatten $ "-- Flattened:" ++ showBody 4 (List.reverse
                                                 $ flattened innerState)
-    -- logFlatten $ "-- Postponed:\n" ++ 
-    --   showBody 4 (postponed innerState)
     if transparent
       then put $ oldState { tempCtr = tempCtr innerState,
                             defdVars = defdVars innerState }
       else put $ oldState { tempCtr = tempCtr innerState }
-    if isLoop
-      then flattenStmts (prefixStmts innerState) detism
-      else modify (\s -> s { prefixStmts = prefixStmts innerState })
     return $ List.reverse $ flattened innerState
 
 
@@ -192,7 +171,7 @@ noteVarMention name dir = do
 --  whose determinism is as specified.
 flattenStmts :: [Placed Stmt] -> Determinism -> Flattener ()
 flattenStmts stmts detism = 
-    mapM_ (\pstmt -> flattenStmt (content pstmt) (place pstmt) detism) stmts
+    mapM_ (\pstmt -> placedApply flattenStmt pstmt detism) stmts
 
 
 flattenStmt :: Stmt -> OptPos -> Determinism -> Flattener ()
@@ -204,6 +183,8 @@ flattenStmt stmt pos detism = do
       " with defined vars " ++ show defd
     flattenStmt' stmt pos detism
     modify (\s -> s { defdVars = defdVars s `Set.union` stmtDefs s })
+    defd' <- gets defdVars
+    logFlatten $ "Final defined vars: " ++ show defd
 
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
@@ -279,9 +260,12 @@ flattenStmt' (Cond tstStmt thn els defVars) pos detism = do
     tstStmt' <- seqToStmt <$> flattenInner False True SemiDet
                 (placedApply flattenStmt tstStmt SemiDet)
     thn' <- flattenInner False False detism (flattenStmts thn detism)
-    -- for else branch, put defined vars back as they were before condition 
+    thnDefs <- gets stmtDefs
+    -- for else branch, put defined vars back as they were before condition
     modify (\s -> s {defdVars = defined})
     els' <- flattenInner False False detism (flattenStmts els detism)
+    elsDefs <- gets stmtDefs
+    modify (\s -> s {stmtDefs = thnDefs `Set.union` elsDefs})
     emit pos $ Cond tstStmt' thn' els' defVars
 flattenStmt' stmt@(TestBool _) pos SemiDet = emit pos stmt
 flattenStmt' (TestBool expr) _pos Det =
@@ -387,6 +371,7 @@ flattenExp expr@(StringValue _) ty cast pos =
     return [typeAndPlace expr ty cast pos]
 flattenExp expr@(CharValue _) ty cast pos =
     return [typeAndPlace expr ty cast pos]
+-- XXX This shouldn't be needed anymore
 flattenExp (Var "phantom" ParamIn _ ) _ _ pos =
     return [typeAndPlace (IntValue 0) (TypeSpec [] "phantom" []) True pos]
 flattenExp expr@(Var name dir flowType) ty cast pos = do
