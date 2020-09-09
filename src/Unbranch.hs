@@ -501,7 +501,7 @@ maybeFactorContinuation :: Determinism -> VarDict -> [Placed Stmt]
                         -> [Placed Stmt] -> Bool -> Unbrancher [Placed Stmt]
 maybeFactorContinuation detism vars stmts alt sense = do
     logUnbranch $ "Maybe factor continuation: " ++ showBody 4 stmts
-    if length stmts <= 2 && all flatStmt (content <$> stmts)
+    if length stmts <= 2 && all (flatStmt . content) stmts
       then unbranchStmts detism stmts alt sense
       else (:[]) <$> factorContinuationProc vars Nothing detism stmts alt sense
 
