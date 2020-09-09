@@ -223,20 +223,17 @@ newProcName = lift genProcName
 
 
 -- |Create, unbranch, and record a new proc with the specified proto and body.
-genProc :: Maybe LoopInfo -> ProcProto -> Determinism -> [Placed Stmt]
-        -> Unbrancher ()
-genProc loopinfo proto detism stmts = do
+genProc :: ProcProto -> Determinism -> [Placed Stmt] -> Unbrancher ()
+genProc proto detism stmts = do
     let name = procProtoName proto
     tmpCtr <- gets brTempCtr
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr
                   Map.empty Private detism False NoSuperproc
-    logUnbranch $ "Unbranching fresh " ++ show detism ++ " proc:"
+    logUnbranch $ "Generating fresh " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
-    loopinfo' <- maybe (gets brLoopInfo) (return . Just) loopinfo
-    procDef' <- lift $ unbranchProc' loopinfo' procDef
     logUnbranch $ "Unbranched generated " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
-    modify (\s -> s { brNewDefs = procDef':brNewDefs s })
+    modify (\s -> s { brNewDefs = procDef:brNewDefs s })
 
 
 -- |Return a fresh variable name.
@@ -401,8 +398,11 @@ unbranchStmt detism stmt@(Or disjs) _ stmts alt sense = do
       -- be determined in mode checker
       vars <- gets brVars
       logUnbranch $ "Unbranching disjunction " ++ show stmt
+      logUnbranch $ "Following disjunction: " ++ showBody 4 stmts
+      logUnbranch $ "Disjunction alternative: " ++ showBody 4 alt
       stmts' <- maybeFactorContinuation SemiDet vars stmts alt sense
-      unbranchStmts SemiDet disjs stmts' (not sense)
+      logUnbranch $ "Disjunction successor: " ++ showBody 4 stmts'
+      unbranchStmts SemiDet (disjs ++ alt) stmts' (not sense)
 unbranchStmt detism stmt@(Not tst) pos stmts alt sense =
     ifSemiDet detism ("Negation in a Det context: " ++ show stmt)
     $ do
@@ -421,8 +421,8 @@ unbranchStmt detism (Cond tstStmt thn els exitVars) pos stmts alt sense =
 unbranchStmt detism (Loop body exitVars) pos stmts alt sense = do
     let exitVars' = trustFromJust "unbranching Loop without exitVars" exitVars
     logUnbranch $ "Handling loop:" ++ showBody 4 body
-    beforeVars <- gets brVars
     logUnbranch $ "  with exit vars " ++ show exitVars'
+    beforeVars <- gets brVars
     brk <- maybeFactorContinuation detism exitVars' stmts alt sense
     logUnbranch $ "Generated break: " ++ showBody 4 brk
     next <- factorLoopProc brk beforeVars pos detism body alt sense
@@ -502,6 +502,7 @@ maybeFactorContinuation :: Determinism -> VarDict -> [Placed Stmt]
                         -> [Placed Stmt] -> Bool -> Unbrancher [Placed Stmt]
 maybeFactorContinuation detism vars stmts alt sense = do
     -- XXX need better heuristic:  stmts must also be flat
+    -- XXX Also only factor when continuation will be used multiple times
     logUnbranch $ "Maybe factor continuation: " ++ showBody 4 stmts
     if length stmts <= 2
       then unbranchStmts detism stmts alt sense
@@ -565,8 +566,7 @@ factorContinuationProc inVars pos detism stmts alt sense = do
       ++ showBody 4 stmts
     stmts' <- unbranchStmts detism stmts alt sense
     proto <- newProcProto pname inVars
-    loopinfo <- gets brLoopInfo
-    genProc loopinfo proto detism stmts'
+    genProc proto detism stmts'
     newProcCall pname inVars pos detism
 
 
@@ -583,6 +583,7 @@ factorLoopProc break inVars pos detism stmts alt sense = do
       ++ " loop proc "
       ++ pname ++ ":"
       ++ showBody 4 stmts
+      ++ "\nLoop input vars = " ++ show inVars
     next <- newProcCall pname inVars pos detism
     let loopinfo = Just (LoopInfo next break)
     oldLoopinfo <- gets brLoopInfo
@@ -590,7 +591,7 @@ factorLoopProc break inVars pos detism stmts alt sense = do
     stmts' <- unbranchStmts detism stmts alt sense
     modify (\s -> s { brLoopInfo = oldLoopinfo })
     proto <- newProcProto pname inVars
-    genProc loopinfo proto detism stmts'
+    genProc proto detism stmts'
     return next
 
 varExp :: FlowDirection -> VarName -> TypeSpec -> Placed Exp
