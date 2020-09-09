@@ -295,10 +295,10 @@ flattenStmt' (And tsts) pos SemiDet = do
     emit pos $ And tsts'
 flattenStmt' stmt@And{} _pos Det =
     shouldnt $ "And in a Det context: " ++ showStmt 4 stmt
-flattenStmt' (Or tsts) pos SemiDet = do
+flattenStmt' (Or tsts vars) pos SemiDet = do
     tsts' <- flattenInner False True SemiDet (flattenStmts tsts SemiDet)
-    emit pos $ Or tsts'
-flattenStmt' (Or tstStmts) _pos Det =
+    emit pos $ Or tsts' vars
+flattenStmt' (Or tstStmts _) _pos Det =
     shouldnt $ "Or in a Det context: " ++ showBody 4 tstStmts
 flattenStmt' (Not tstStmt) pos SemiDet = do
     tstStmt' <- seqToStmt <$> flattenInner False True SemiDet

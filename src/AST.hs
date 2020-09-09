@@ -1789,7 +1789,7 @@ foldProcCalls' fn comb val (And stmts) ss =
     foldProcCalls fn comb
       (foldProcCalls fn comb val stmts)
       ss
-foldProcCalls' fn comb val (Or stmts) ss =
+foldProcCalls' fn comb val (Or stmts _) ss =
     foldProcCalls fn comb
       (foldProcCalls fn comb val stmts)
       ss
@@ -2045,11 +2045,12 @@ data Stmt
 
      -- |A test that succeeds iff the expression is true
      | TestBool Exp
-     -- |A test that fails iff all the enclosed tests fail; enclosed
+     -- |A test that succeeds iff all of the enclosed tests succeed
      | And [Placed Stmt]
-     -- |A test that fails iff all the enclosed tests fail; enclosed
-     | Or [Placed Stmt]
-     -- |A test that fails iff the enclosed test succeeds
+     -- |A test that succeeds iff any of the enclosed tests succeed; the VarDict
+     -- indicates the variables defined after all disjuncts
+     | Or [Placed Stmt] (Maybe VarDict)
+     -- |A test that succeeds iff the enclosed test fails
      | Not (Placed Stmt)
 
      -- |A loop body; the loop is controlled by Breaks and Nexts.  The VarDict
@@ -2072,7 +2073,7 @@ detStmt (ProcCall _ _ _ SemiDet _ _) = False
 detStmt (TestBool _) = False
 detStmt (Cond _ thn els _) = all detStmt $ List.map content $ thn++els
 detStmt (And list) = all detStmt $ List.map content list
-detStmt (Or list) = all detStmt $ List.map content list
+detStmt (Or list _) = all detStmt $ List.map content list
 detStmt (Not _) = False
 detStmt _ = True
 
@@ -2327,7 +2328,7 @@ argFlowDescription FlowOut = "output"
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
 expToStmt (Fncall [] "&&" args) = And $ List.map (fmap expToStmt) args
-expToStmt (Fncall [] "||"  args) = Or  $ List.map (fmap expToStmt) args
+expToStmt (Fncall [] "||"  args) = Or (List.map (fmap expToStmt) args) Nothing
 expToStmt (Fncall [] "~" [arg]) = Not $ fmap expToStmt arg
 expToStmt (Fncall [] "~" args) = shouldnt $ "non-unary 'not' " ++ show args
 expToStmt (Fncall maybeMod name args) =
@@ -2761,11 +2762,11 @@ showStmt indent (And stmts) =
     (List.map (showStmt indent' . content) stmts) ++
     ")"
     where indent' = indent + 4
-showStmt indent (Or stmts) =
+showStmt indent (Or stmts genVars) =
     "(   " ++
     intercalate ("\n" ++ replicate indent ' ' ++ "|| ")
         (List.map (showStmt indent' . content) stmts) ++
-    ")"
+    ")" ++ maybe "" ((" -> "++) . show) genVars
     where indent' = indent + 4
 showStmt indent (Not stmt) =
     "~(" ++ showStmt indent' (content stmt) ++ ")"

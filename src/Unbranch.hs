@@ -112,7 +112,7 @@ unbranchProc' loopinfo proc = do
     let stmts = selectDetism body (body++[move boolTrue testOutExp]) detism
     let proto' = proto {procProtoParams = params'}
     (body',tmpCtr',newProcs) <-
-        unbranchBody loopinfo tmpCtr params detism stmts alt
+        unbranchBody loopinfo tmpCtr params' detism stmts alt
     let proc' = proc { procProto = proto'
                      , procDetism = Det
                      , procImpln = ProcDefSrc body'
@@ -391,16 +391,15 @@ unbranchStmt detism stmt@(And conj) pos stmts alt sense =
     $ do
       logUnbranch $ "Unbranching conjunction " ++ show stmt
       unbranchStmts SemiDet (conj ++ stmts) alt sense
-unbranchStmt detism stmt@(Or disjs) _ stmts alt sense = do
+unbranchStmt detism stmt@(Or disjs exitVars) _ stmts alt sense = do
     ifSemiDet detism ("Disjunction in a Det context: " ++ show stmt)
     $ do
-      -- XXX Need to also include variables defined in all disjuncts; should
-      -- be determined in mode checker
-      vars <- gets brVars
+      let exitVars' = trustFromJust "unbranching Disjunction without exitVars"
+                      exitVars
       logUnbranch $ "Unbranching disjunction " ++ show stmt
       logUnbranch $ "Following disjunction: " ++ showBody 4 stmts
       logUnbranch $ "Disjunction alternative: " ++ showBody 4 alt
-      stmts' <- maybeFactorContinuation SemiDet vars stmts alt sense
+      stmts' <- maybeFactorContinuation SemiDet exitVars' stmts alt sense
       logUnbranch $ "Disjunction successor: " ++ showBody 4 stmts'
       unbranchStmts SemiDet (disjs ++ alt) stmts' (not sense)
 unbranchStmt detism stmt@(Not tst) pos stmts alt sense =
@@ -606,7 +605,6 @@ newProcCall name inVars pos detism = do
     currMod <- lift getModuleSpec
     let call = ProcCall currMod name (Just 0) detism False (inArgs ++ outArgs)
     logUnbranch $ "Generating call: " ++ showStmt 4 call
-    -- XXX must handle semidet calls
     return $ maybePlace call pos
 
 
