@@ -207,14 +207,6 @@ flattenStmt stmt pos detism = do
 
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
--- XXX This doesn't seem to apply
--- flattenStmt' stmt@(ProcCall [] "phantom" _ Det _ [arg]) pos _ = do
---     -- Convert unary call to phantom with output var to move instr
---     let instr = ForeignCall "llvm" "move" []
---                 [Unplaced $ Typed (IntValue 0) (TypeSpec [] "phantom" []) True,
---                  arg]
---     logFlatten $ "   Converting ProcCall " ++ show stmt ++ " to " ++ show instr
---     emit pos instr
 flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
     let arg1content = content arg1
     let arg2content = content arg2
@@ -250,6 +242,10 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
       _ -> do
         -- Must be a mode error:  both sides want to bind variables
         lift $ message Error "Cannot generate bindings on both sides of '='" pos
+flattenStmt' stmt@(ProcCall [] "break" _ _ _ []) pos _ =
+    emit pos Break
+flattenStmt' stmt@(ProcCall [] "next" _ _ _ []) pos _ =
+    emit pos Next
 flattenStmt' stmt@(ProcCall [] name _ _ _ []) pos _ = do
     defined <- gets defdVars
     -- Convert call to no-arg proc to a bool variable test if there's a
