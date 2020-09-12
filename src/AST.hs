@@ -49,7 +49,7 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
-  foldProcCalls, foldBodyPrims, foldBodyDistrib,
+  foldStmts, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp, expOutputs, pexpListOutputs,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
@@ -1802,55 +1802,63 @@ defaultBlock :: LLBlock
 defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 
 
--- |Fold over a list of Placed Stmts applying the fn to each ProcCall, and
--- applying comb, which must be associative, to combine results.  Results
--- are combined in a right-associative way, with the initial val on the right.
-foldProcCalls :: (ModSpec -> Ident -> Maybe Int -> Determinism -> Bool
-                  -> [Placed Exp] -> a) ->
-                 (a -> a -> a) -> a -> [Placed Stmt] -> a
-foldProcCalls _fn _comb val [] = val
-foldProcCalls fn comb val (s:ss) = foldProcCalls' fn comb val (content s) ss
+-- |Fold over a list of statements in a pre-order left-to-right traversal.
+foldStmts :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Stmt] -> a
+foldStmts _sfn _efn val [] = val
+foldStmts sfn efn val (s:ss) =
+    foldStmts sfn efn (foldStmt sfn efn (sfn val stmt) stmt) ss
+  where stmt = content s
 
-foldProcCalls' :: (ModSpec -> Ident -> Maybe Int -> Determinism -> Bool
-                   -> [Placed Exp] -> a) ->
-                 (a -> a -> a) -> a -> Stmt -> [Placed Stmt] -> a
-foldProcCalls' fn comb val (ProcCall m name procID detism res args) ss =
-    foldProcCalls fn comb (comb val $ fn m name procID detism res args) ss
-foldProcCalls' fn comb val ForeignCall{} ss =
-    foldProcCalls fn comb val ss
-foldProcCalls' fn comb val (Cond tst thn els _) ss =
-    foldProcCalls' fn comb
-      (foldProcCalls fn comb
-        (foldProcCalls fn comb val els)
-          thn)
-      (content tst)
-      ss
-foldProcCalls' fn comb val (And stmts) ss =
-    foldProcCalls fn comb
-      (foldProcCalls fn comb val stmts)
-      ss
-foldProcCalls' fn comb val (Or stmts _) ss =
-    foldProcCalls fn comb
-      (foldProcCalls fn comb val stmts)
-      ss
-foldProcCalls' fn comb val (Not stmt) ss =
-    foldProcCalls' fn comb val
-      (content stmt)
-      ss
-foldProcCalls' fn comb val TestBool{} ss =
-    foldProcCalls fn comb val ss
-foldProcCalls' fn comb val Nop ss =
-    foldProcCalls fn comb val ss
-foldProcCalls' fn comb val (Loop body _) ss =
-    foldProcCalls fn comb (foldProcCalls fn comb val body) ss
-foldProcCalls' fn comb val (UseResources _ body) ss =
-    foldProcCalls fn comb (foldProcCalls fn comb val body) ss
--- foldProcCalls' fn comb val For{} ss =
---     foldProcCalls fn comb val ss
-foldProcCalls' fn comb val Break ss =
-    foldProcCalls fn comb val ss
-foldProcCalls' fn comb val Next ss =
-    foldProcCalls fn comb val ss
+-- |Fold over all the statements nested within the given statement,
+-- but not the statement itself, in a pre-order left-to-right traversal.
+foldStmt :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Stmt -> a
+foldStmt sfn efn val (ProcCall _ _ _ _ _ args) =
+    foldExps sfn efn val args
+foldStmt sfn efn val (ForeignCall _ _ _ args) =
+    foldExps sfn efn val args
+foldStmt sfn efn val (Cond tst thn els _) =
+    let val2 = foldStmt sfn efn val $ content tst
+        val3 = foldStmts sfn efn val2 thn
+    in         foldStmts sfn efn val3 els
+foldStmt sfn efn val (And stmts) = foldStmts sfn efn val stmts
+foldStmt sfn efn val (Or stmts _) = foldStmts sfn efn val stmts
+foldStmt sfn efn val (Not negated) = foldStmt sfn efn val $ content negated
+foldStmt sfn efn val (TestBool exp) = foldExp sfn efn val exp
+foldStmt _   _   val Nop = val
+foldStmt sfn efn val (Loop body _) = foldStmts sfn efn val body
+foldStmt sfn efn val (UseResources _ body) = foldStmts sfn efn val body
+-- foldStmt sfn efn val For{} =
+--     foldStmts sfn efn val ss
+foldStmt _   _   val Break = val
+foldStmt _   _   val Next = val
+
+
+-- |Fold over a list of expressions in a pre-order left-to-right traversal.
+foldExps :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Exp] -> a
+foldExps _   _   val [] = val
+foldExps sfn efn val (e:es) =
+    foldExps sfn efn (foldExp sfn efn (efn val exp) exp) es
+  where exp = content e
+
+
+-- |Fold over all the subexpressions of the given expression, but not the
+-- expression itself, in a pre-order left-to-right traversal.
+foldExp :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Exp -> a
+foldExp _   _    val IntValue{}    = val
+foldExp _   _    val FloatValue{}  = val
+foldExp _   _    val StringValue{} = val
+foldExp _   _    val CharValue{}   = val
+foldExp _   _    val Var{}         = val
+foldExp sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
+foldExp sfn efn val (Where stmts exp) =
+    let val1 = foldStmts sfn efn val stmts
+    in  foldExp sfn efn val1 $content exp
+foldExp sfn efn val (CondExp stmt e1 e2) =
+    let val1 = foldStmt sfn efn val $ content stmt
+        val2 = foldExp sfn efn val1 $ content e1
+    in         foldExp sfn efn val2 $ content e2
+foldExp sfn efn val (Fncall _ _ exps) = foldExps sfn efn val exps
+foldExp sfn efn val (ForeignFn _ _ _ exps) = foldExps sfn efn val exps
 
 
 -- |Fold over a ProcBody applying the primFn to each Prim, and

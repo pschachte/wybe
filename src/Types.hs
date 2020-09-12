@@ -91,8 +91,8 @@ checkDeclIfPublic pname ppos public ty =
 
 
 -- |Type check a single module.  Since all public procs/functions must have
--- their types fully declared, no fixed across modules is needed.  Our type
--- inference is flow sensitive, that is, types from from callers to callees, but
+-- their types fully declared, no fixpoint across modules is needed.  Our type
+-- inference is flow sensitive, that is, types flow from callees to callers, but
 -- not vice versa.  Therefore we analyse bottom-up by intra-module potential
 -- call graph SCCs.  Type and mode inference are responsible for resolving
 -- overloading, which means that the SCCs inferred at this point include all
@@ -105,7 +105,8 @@ typeCheckMod thisMod = do
     let ordered =
             stronglyConnComp
             [(name, name,
-              nub $ concatMap (localBodyProcs thisMod . procImpln) procDefs)
+              Set.elems $ Set.unions
+              $ List.map (localBodyProcs thisMod . procImpln) procDefs)
              | (name,procDefs) <- procs]
     logTypes $ "**** Strongly connected components:\n" ++
       intercalate "\n"
@@ -460,17 +461,16 @@ meetTypes ty1 ty2
     | otherwise                 = InvalidType
 
 
-localBodyProcs :: ModSpec -> ProcImpln -> [Ident]
+localBodyProcs :: ModSpec -> ProcImpln -> Set Ident
 localBodyProcs thisMod (ProcDefSrc body) =
-    foldProcCalls (localCalls thisMod) (++) [] body
+    foldStmts (localCalls thisMod) const Set.empty body
 localBodyProcs thisMod (ProcDefPrim _ _ _ _) =
     shouldnt "Type checking compiled code"
 
-localCalls :: ModSpec -> ModSpec -> Ident -> Maybe Int -> Determinism
-           -> Bool -> [Placed Exp] -> [Ident]
-localCalls thisMod m name _ _ _ _
-  | List.null m || m == thisMod = [name]
-localCalls _ _ _ _ _ _ _ = []
+localCalls :: ModSpec -> Set Ident -> Stmt -> Set Ident
+localCalls thisMod idents (ProcCall m name _ _ _ _)
+  | List.null m || m == thisMod = Set.insert name idents
+localCalls _ idents _ = idents
 
 
 expType :: Typing -> Placed Exp -> Compiler TypeSpec
