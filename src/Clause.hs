@@ -99,8 +99,10 @@ finishStmt = getCurrNumbering >>= putNumberings
 -- that hasn't already had $$ assigned a value, this will assign it
 -- True; otherwise it'll be empty.
 closingStmts :: Determinism -> ClauseComp [Placed Prim]
-closingStmts Det = return []
-closingStmts SemiDet = do
+closingStmts Terminal = return []
+closingStmts Failure  = return []
+closingStmts Det      = return []
+closingStmts SemiDet  = do
     tested <- Map.member "$$" <$> getCurrNumbering
     return $ if tested
              then []

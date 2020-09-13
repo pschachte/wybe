@@ -923,7 +923,8 @@ visibility = option Private (ident "pub" *> return Public)
 
 -- | Terminal for determinism.
 determinism :: Parser Determinism
-determinism = option Det (ident "test" *> return SemiDet)
+determinism = option Det (ident "test" *> return SemiDet
+                          <|> ident "terminal" *> return Terminal)
 
 
 -- | Wybe keywords to exclude from identitfier tokens conditionally.

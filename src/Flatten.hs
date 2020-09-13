@@ -275,8 +275,8 @@ flattenStmt' (ForeignCall "llvm" "test" flags args) pos SemiDet = do
                $ Typed (Var resultName ParamOut $ Implicit pos) boolType False
     emit pos $ ForeignCall "llvm" "icmp" flags $ args' ++ [vSet]
     emit pos $ TestBool $ varGet resultName
-flattenStmt' stmt@(ForeignCall "llvm" "test" _ _) _ Det =
-    shouldnt $ "llvm test in Det context: " ++ show stmt
+flattenStmt' stmt@(ForeignCall "llvm" "test" _ _) _ detism | detism < SemiDet =
+    shouldnt $ "llvm test in " ++ show detism ++ " context: " ++ show stmt
 flattenStmt' (ForeignCall lang name flags args) pos _ = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
@@ -291,24 +291,24 @@ flattenStmt' (Cond tstStmt thn els defVars) pos detism = do
     els' <- flattenInner False False detism (flattenStmts els detism)
     emit pos $ Cond tstStmt' thn' els' defVars
 flattenStmt' stmt@(TestBool _) pos SemiDet = emit pos stmt
-flattenStmt' (TestBool expr) _pos Det =
-    shouldnt $ "TestBool " ++ show expr ++ " in Det context"
+flattenStmt' (TestBool expr) _pos detism =
+    shouldnt $ "TestBool " ++ show expr ++ " in " ++ show detism ++ " context"
 flattenStmt' (And tsts) pos SemiDet = do
     tsts' <- flattenInner False True SemiDet (flattenStmts tsts SemiDet)
     emit pos $ And tsts'
-flattenStmt' stmt@And{} _pos Det =
-    shouldnt $ "And in a Det context: " ++ showStmt 4 stmt
+flattenStmt' stmt@And{} _pos detism =
+    shouldnt $ "And in a " ++ show detism ++ " context"
 flattenStmt' (Or tsts vars) pos SemiDet = do
     tsts' <- flattenInner False True SemiDet (flattenStmts tsts SemiDet)
     emit pos $ Or tsts' vars
-flattenStmt' (Or tstStmts _) _pos Det =
-    shouldnt $ "Or in a Det context: " ++ showBody 4 tstStmts
+flattenStmt' (Or tstStmts _) _pos detism =
+    shouldnt $ "Or in a " ++ show detism ++ " context"
 flattenStmt' (Not tstStmt) pos SemiDet = do
     tstStmt' <- seqToStmt <$> flattenInner False True SemiDet
                 (placedApply flattenStmt tstStmt SemiDet)
     emit pos $ Not tstStmt'
-flattenStmt' (Not tstStmt) _pos Det =
-    shouldnt $ "negation in a Det context: " ++ show tstStmt
+flattenStmt' (Not tstStmt) _pos detism =
+    shouldnt $ "negation in a " ++ show detism ++ " context"
 flattenStmt' (Loop body defVars) pos detism = do
     body' <- flattenInner True False detism
              (flattenStmts (body ++ [Unplaced Next]) detism)
@@ -343,9 +343,9 @@ flattenStmt' (UseResources res body) pos detism = do
 --                    Unplaced Break]
 --               ) pos detism
 --         _ -> shouldnt "Generator expression producing unexpected vars"
-flattenStmt' Nop pos detism = emit pos Nop
-flattenStmt' Break pos detism = emit pos Break
-flattenStmt' Next pos detism = emit pos Next
+flattenStmt' Nop pos _ = emit pos Nop
+flattenStmt' Break pos _ = emit pos Break
+flattenStmt' Next pos _ = emit pos Next
 
 
 ----------------------------------------------------------------

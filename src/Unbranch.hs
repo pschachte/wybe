@@ -284,9 +284,7 @@ getLoopNext = do
 unbranchStmts :: Determinism -> [Placed Stmt] -> [Placed Stmt] -> Bool
               -> Unbrancher [Placed Stmt]
 unbranchStmts detism [] _ sense = do
-    logUnbranch $ "Unbranching an empty "
-                  ++ selectDetism "Det" "SemiDet" detism
-                  ++ " body"
+    logUnbranch $ "Unbranching an empty " ++ show detism ++ " body"
     return []
 unbranchStmts detism (stmt:stmts) alt sense = do
     vars <- gets brVars
@@ -347,11 +345,15 @@ unbranchStmts detism (stmt:stmts) alt sense = do
 --
 unbranchStmt :: Determinism -> Stmt -> OptPos -> [Placed Stmt] -> [Placed Stmt]
              -> Bool -> Unbrancher [Placed Stmt]
+unbranchStmt detism _ _ _ _ _ | detism == Terminal || detism == Failure =
+    shouldnt $ "Invalid calling context in unbranching: " ++ show detism
 unbranchStmt _ stmt@(ProcCall _ _ _ _ True args) _ _ _ _ =
     shouldnt $ "Resources should have been handled before unbranching: "
                ++ showStmt 4 stmt
-unbranchStmt Det stmt@(ProcCall _ _ _ SemiDet _ _) _ _ _ _ =
-    shouldnt $ "Semidet proc call " ++ show stmt ++ " in a Det context"
+unbranchStmt context stmt@(ProcCall _ _ _ detism _ _) _ _ _ _
+  | context < detism
+  = shouldnt $ show detism ++ " proc call " ++ show stmt
+               ++ " in a " ++ show context ++ " context"
 unbranchStmt SemiDet stmt@(ProcCall md name procID SemiDet _ args) pos
              stmts alt sense = do
     logUnbranch $ "converting SemiDet proc call" ++ show stmt
@@ -369,10 +371,15 @@ unbranchStmt SemiDet stmt@(ProcCall md name procID SemiDet _ args) pos
     logUnbranch $ "#Converted SemiDet proc call" ++ show stmt
     logUnbranch $ "#To: " ++ showBody 4 result
     return result
-unbranchStmt detism stmt@(ProcCall _ _ _ Det _ args) pos stmts alt sense = do
+unbranchStmt detism stmt@(ProcCall _ _ _ calldetism _ args) pos stmts alt
+             sense = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
     defArgs args
-    leaveStmtAsIs detism stmt pos stmts alt sense
+    case calldetism of
+      Terminal -> return [maybePlace stmt pos] -- no execution after Terminal
+      Failure  -> return [maybePlace stmt pos] -- no execution after Terminal
+      Det      -> leaveStmtAsIs detism stmt pos stmts alt sense
+      SemiDet  -> shouldnt "SemiDet case already covered!"
 unbranchStmt detism stmt@(ForeignCall _ _ _ args) pos stmts alt sense = do
     logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
     defArgs args
@@ -463,8 +470,8 @@ leaveStmtAsIs detism stmt pos stmts alt sense = do
 
 -- | Execute the given code if semi-deterministic; otherwise report an error
 ifSemiDet :: Determinism -> String -> Unbrancher a -> Unbrancher a
-ifSemiDet Det msg _ = shouldnt msg
 ifSemiDet SemiDet _ code = code
+ifSemiDet _ msg _ = shouldnt msg
 
 
 unbranchDisjunction :: [Placed Stmt] -> OptPos -> [Placed Stmt] -> [Placed Stmt]
@@ -572,11 +579,8 @@ factorContinuationProc :: VarDict -> OptPos -> Determinism
                        -> Unbrancher (Placed Stmt)
 factorContinuationProc inVars pos detism stmts alt sense = do
     pname <- newProcName
-    logUnbranch $ "Factoring "
-      ++ selectDetism "Det" "SemiDet" detism
-      ++ " continuation proc "
-      ++ pname ++ ":"
-      ++ showBody 4 stmts
+    logUnbranch $ "Factoring " ++ show detism ++ " continuation proc "
+                  ++ pname ++ ":" ++ showBody 4 stmts
     stmts' <- unbranchStmts detism stmts alt sense
     proto <- newProcProto pname inVars
     genProc proto detism stmts'
@@ -591,12 +595,9 @@ factorLoopProc :: [Placed Stmt] -> VarDict -> OptPos -> Determinism
                -> Unbrancher (Placed Stmt)
 factorLoopProc break inVars pos detism stmts alt sense = do
     pname <- newProcName
-    logUnbranch $ "Factoring "
-      ++ selectDetism "Det" "SemiDet" detism
-      ++ " loop proc "
-      ++ pname ++ ":"
-      ++ showBody 4 stmts
-      ++ "\nLoop input vars = " ++ show inVars
+    logUnbranch $ "Factoring " ++ show detism ++ " loop proc "
+                  ++ pname ++ ":" ++ showBody 4 stmts
+                  ++ "\nLoop input vars = " ++ show inVars
     next <- newProcCall pname inVars pos detism
     let loopinfo = Just (LoopInfo next break)
     oldLoopinfo <- gets brLoopInfo
@@ -630,7 +631,7 @@ newProcProto name inVars = do
     return $ ProcProto name (inParams ++ outParams) Set.empty
 
 
--- |Return the first value when the detism is Det, the second otherwise
+-- |Return the second value when the detism is SemiDet, otherwise the second.
 selectDetism :: a -> a -> Determinism -> a
-selectDetism det _  Det = det
 selectDetism _ semi SemiDet = semi
+selectDetism det _  _ = det

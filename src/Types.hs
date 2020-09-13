@@ -639,21 +639,21 @@ procInfoTypes call = typeFlowType <$> procInfoArgs call
 -- |Check if ProcInfo is for a proc with a single Bool output as last arg,
 --  and if so, return Just the ProcInfo for the equivalent test proc
 boolFnToTest :: ProcInfo -> Maybe ProcInfo
-boolFnToTest ProcInfo{procInfoDetism=SemiDet} = Nothing
 boolFnToTest pinfo@ProcInfo{procInfoDetism=Det, procInfoArgs=args}
     | List.null args = Nothing
     | last args == TypeFlow boolType ParamOut =
         Just $ pinfo {procInfoArgs=init args, procInfoDetism=SemiDet}
     | otherwise = Nothing
+boolFnToTest _ = Nothing
 
 
 -- |Check if ProcInfo is for a test proc, and if so, return a ProcInfo for
 --  the Det proc with a single Bool output as last arg
 testToBoolFn :: ProcInfo -> Maybe ProcInfo
-testToBoolFn ProcInfo{procInfoDetism=Det} = Nothing
 testToBoolFn pinfo@ProcInfo{procInfoDetism=SemiDet, procInfoArgs=args}
     = Just $ pinfo {procInfoDetism=Det
                    ,procInfoArgs=args ++ [TypeFlow boolType ParamOut]}
+testToBoolFn _ = Nothing
 
 
 -- |A single call statement together with the determinism context in which

@@ -140,7 +140,7 @@ data Item
 data Visibility = Public | Private
                   deriving (Eq, Show, Generic)
 
-data Determinism = Det | SemiDet
+data Determinism = Terminal | Failure | Det | SemiDet
                   deriving (Eq, Ord, Show, Generic)
 -- Ordering for Determinism is significant. If x is a the Determinism of a
 -- calling context and y is the Determinism of the called proc and x < y means
@@ -149,8 +149,10 @@ data Determinism = Det | SemiDet
 
 
 determinismName :: Determinism -> String
-determinismName Det = "ordinary"
-determinismName SemiDet = "test"
+determinismName Terminal = "terminal"
+determinismName Failure  = "failing"
+determinismName Det      = "ordinary"
+determinismName SemiDet  = "test"
 
 
 -- | Internal representation of data
@@ -2613,8 +2615,10 @@ visibilityPrefix Private = ""
 
 -- |How to show a determinism.
 determinismPrefix :: Determinism -> String
-determinismPrefix SemiDet = "test "
-determinismPrefix Det = ""
+determinismPrefix Terminal = "terminal "
+determinismPrefix Failure  = "test " -- XXX do we want something more specific?
+determinismPrefix SemiDet  = "test "
+determinismPrefix Det      = ""
 
 
 -- |How to show an import or use declaration.
