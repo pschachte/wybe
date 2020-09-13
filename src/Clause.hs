@@ -278,7 +278,11 @@ compileSimpleStmt' stmt =
 
 
 compileArg :: Exp -> OptPos -> ClauseComp PrimArg
-compileArg = compileArg' AnyType False
+compileArg exp pos = do
+    logClause $ "Compiling expression " ++ show exp
+    arg <- compileArg' AnyType False exp pos
+    logClause $ "Expression compiled to " ++ show arg
+    return arg
 
 compileArg' :: TypeSpec -> Bool -> Exp -> OptPos -> ClauseComp PrimArg
 compileArg' typ _ (IntValue int) _ = return $ ArgInt int typ

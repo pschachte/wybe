@@ -49,7 +49,7 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
-  foldStmts, foldBodyPrims, foldBodyDistrib,
+  foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp, expOutputs, pexpListOutputs,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
@@ -76,7 +76,8 @@ module AST (
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showMaybeSourcePos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
-  maybeShow, showMessages, stopOnError, logMsg, whenLogging2, whenLogging,
+  showVarDict, maybeShow, showMessages, stopOnError,
+  logMsg, whenLogging2, whenLogging,
   -- *Helper functions
   defaultBlock, moduleIsPackage,
   -- *LPVM Encoding types
@@ -1803,62 +1804,81 @@ defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 
 
 -- |Fold over a list of statements in a pre-order left-to-right traversal.
+-- Takes two folding functions, one for statements and one for expressions.
 foldStmts :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Stmt] -> a
-foldStmts _sfn _efn val [] = val
-foldStmts sfn efn val (s:ss) =
-    foldStmts sfn efn (foldStmt sfn efn (sfn val stmt) stmt) ss
-  where stmt = content s
+foldStmts sfn efn val stmts =
+    List.foldl (\val pstmt -> foldStmt sfn efn val $ content pstmt) val stmts
+
+
+-- |Fold over the specified statement and all the statements nested within it,
+-- in a pre-order left-to-right traversal. Takes two folding functions, one for
+-- statements and one for expressions.
+foldStmt :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Stmt -> a
+foldStmt sfn efn val stmt = foldStmt' sfn efn (sfn val stmt) stmt
+
 
 -- |Fold over all the statements nested within the given statement,
 -- but not the statement itself, in a pre-order left-to-right traversal.
-foldStmt :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Stmt -> a
-foldStmt sfn efn val (ProcCall _ _ _ _ _ args) =
+-- Takes two folding functions, one for statements and one for expressions.
+foldStmt' :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Stmt -> a
+-- foldStmt' _ _ _ stmt
+--   | unsafePerformIO $ do
+--       putStrLn $ "#### foldStmt' " ++ showStmt 4 stmt
+--       return False
+--   = error "Woops!"
+foldStmt' sfn efn val (ProcCall _ _ _ _ _ args) =
     foldExps sfn efn val args
-foldStmt sfn efn val (ForeignCall _ _ _ args) =
+foldStmt' sfn efn val (ForeignCall _ _ _ args) =
     foldExps sfn efn val args
-foldStmt sfn efn val (Cond tst thn els _) =
-    let val2 = foldStmt sfn efn val $ content tst
-        val3 = foldStmts sfn efn val2 thn
-    in         foldStmts sfn efn val3 els
-foldStmt sfn efn val (And stmts) = foldStmts sfn efn val stmts
-foldStmt sfn efn val (Or stmts _) = foldStmts sfn efn val stmts
-foldStmt sfn efn val (Not negated) = foldStmt sfn efn val $ content negated
-foldStmt sfn efn val (TestBool exp) = foldExp sfn efn val exp
-foldStmt _   _   val Nop = val
-foldStmt sfn efn val (Loop body _) = foldStmts sfn efn val body
-foldStmt sfn efn val (UseResources _ body) = foldStmts sfn efn val body
--- foldStmt sfn efn val For{} =
+foldStmt' sfn efn val (Cond tst thn els _) = val4
+    where val2 = foldStmt sfn efn val $ content tst
+          val3 = foldStmts sfn efn val2 thn
+          val4 = foldStmts sfn efn val3 els
+foldStmt' sfn efn val (And stmts) = foldStmts sfn efn val stmts
+foldStmt' sfn efn val (Or stmts _) = foldStmts sfn efn val stmts
+foldStmt' sfn efn val (Not negated) = foldStmt sfn efn val $ content negated
+foldStmt' sfn efn val (TestBool exp) = foldExp sfn efn val exp
+foldStmt' _   _   val Nop = val
+foldStmt' sfn efn val (Loop body _) = foldStmts sfn efn val body
+foldStmt' sfn efn val (UseResources _ body) = foldStmts sfn efn val body
+-- foldStmt' sfn efn val For{} =
 --     foldStmts sfn efn val ss
-foldStmt _   _   val Break = val
-foldStmt _   _   val Next = val
+foldStmt' _   _   val Break = val
+foldStmt' _   _   val Next = val
 
 
 -- |Fold over a list of expressions in a pre-order left-to-right traversal.
+-- Takes two folding functions, one for statements and one for expressions.
 foldExps :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Exp] -> a
-foldExps _   _   val [] = val
-foldExps sfn efn val (e:es) =
-    foldExps sfn efn (foldExp sfn efn (efn val exp) exp) es
-  where exp = content e
+foldExps sfn efn val exps =
+  List.foldl (\val pexp -> foldExp sfn efn val $ content pexp) val exps
+
+
+-- |Fold over an expression and all its subexpressions, in a pre-order
+-- left-to-right traversal.  Takes two folding functions, one for statements and
+-- one for expressions.
+foldExp :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Exp -> a
+foldExp sfn efn val exp = foldExp' sfn efn (efn val exp) exp
 
 
 -- |Fold over all the subexpressions of the given expression, but not the
 -- expression itself, in a pre-order left-to-right traversal.
-foldExp :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Exp -> a
-foldExp _   _    val IntValue{}    = val
-foldExp _   _    val FloatValue{}  = val
-foldExp _   _    val StringValue{} = val
-foldExp _   _    val CharValue{}   = val
-foldExp _   _    val Var{}         = val
-foldExp sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
-foldExp sfn efn val (Where stmts exp) =
+-- Takes two folding functions, one for statements and one for expressions.
+foldExp' _   _    val IntValue{}     = val
+foldExp' _   _    val FloatValue{}   = val
+foldExp' _   _    val StringValue{}  = val
+foldExp' _   _    val CharValue{}    = val
+foldExp' _   _    val Var{}          = val
+foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
+foldExp' sfn efn val (Where stmts exp) =
     let val1 = foldStmts sfn efn val stmts
     in  foldExp sfn efn val1 $content exp
-foldExp sfn efn val (CondExp stmt e1 e2) =
+foldExp' sfn efn val (CondExp stmt e1 e2) =
     let val1 = foldStmt sfn efn val $ content stmt
         val2 = foldExp sfn efn val1 $ content e1
     in         foldExp sfn efn val2 $ content e2
-foldExp sfn efn val (Fncall _ _ exps) = foldExps sfn efn val exps
-foldExp sfn efn val (ForeignFn _ _ _ exps) = foldExps sfn efn val exps
+foldExp' sfn efn val (Fncall _ _ exps) = foldExps sfn efn val exps
+foldExp' sfn efn val (ForeignFn _ _ _ exps) = foldExps sfn efn val exps
 
 
 -- |Fold over a ProcBody applying the primFn to each Prim, and
@@ -2821,7 +2841,7 @@ showStmt indent (Or stmts genVars) =
     "(   " ++
     intercalate ("\n" ++ replicate indent ' ' ++ "|| ")
         (List.map (showStmt indent' . content) stmts) ++
-    ")" ++ maybe "" ((" -> "++) . show) genVars
+    ")" ++ maybe "" ((" -> "++) . showVarDict) genVars
     where indent' = indent + 4
 showStmt indent (Not stmt) =
     "~(" ++ showStmt indent' (content stmt) ++ ")"
@@ -2832,11 +2852,11 @@ showStmt indent (Cond condstmt thn els genVars) =
     ++ startLine indent ++ "else::"
     ++ showBody (indent+4) els ++ "\n"
     ++ startLine indent ++ "}"
-    ++ maybe "" ((" -> "++) . show) genVars
+    ++ maybe "" ((" -> "++) . showVarDict) genVars
 showStmt indent (Loop lstmts genVars) =
     "do {" ++  showBody (indent + 4) lstmts
     ++ startLine indent ++ "}"
-    ++ maybe "" ((" -> "++) . show) genVars
+    ++ maybe "" ((" -> "++) . showVarDict) genVars
 showStmt indent (UseResources resources stmts) =
     "use " ++ intercalate ", " (List.map show resources) ++ " in"
     ++ showBody (indent + 4) stmts
@@ -2888,6 +2908,14 @@ instance Show Exp where
     ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
   show (Typed exp typ cast) =
       show exp ++ showTypeSuffix typ cast
+
+
+showVarDict :: VarDict -> String
+showVarDict dict =
+    "{"
+    ++ intercalate ", "
+       (List.map (\(v,t) -> v ++ ":" ++ show t) $ Map.toList dict)
+    ++ "}"
 
 
 -- |maybeShow pre maybe post
