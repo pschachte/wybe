@@ -16,7 +16,8 @@
 module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
-  Determinism(..), determinismName,
+  Determinism(..), determinismLEQ, determinismMeet, determinismJoin,
+  determinismName,
   TypeProto(..), TypeSpec(..), TypeRef(..), VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
@@ -140,14 +141,36 @@ data Item
 data Visibility = Public | Private
                   deriving (Eq, Show, Generic)
 
+
+-- |Determinism describes whether a statement can succeed or fail if execution
+-- reaches a given program point.  Det means it will definitely succeed, Failure
+-- means it will definitely fail, SemiDet means it could either succeed or fail,
+-- and Terminal means it won't do either (so execution will not reach that
+-- point).  This values form a lattice, with Terminal at the bottom, SemiDet at
+-- the top, and Failure and Det incomparable values between them.
 data Determinism = Terminal | Failure | Det | SemiDet
                   deriving (Eq, Ord, Show, Generic)
--- Ordering for Determinism is significant. If x is a the Determinism of a
--- calling context and y is the Determinism of the called proc and x < y means
--- there's a determinism error. This will continue to hold when we add a NonDet
--- determism after SemiDet.
 
 
+-- |Partial order comparison for Determinism.
+determinismLEQ :: Determinism -> Determinism -> Bool
+determinismLEQ Failure Det = False
+determinismLEQ det1 det2 = det1 <= det2
+
+
+-- |Lattice meet for Determinism.
+determinismMeet Failure Det = Terminal
+determinismMeet Det Failure = Terminal
+determinismMeet det1 det2 = min det1 det2
+
+
+-- |Lattice join for Determinism.
+determinismJoin Failure Det = SemiDet
+determinismJoin Det Failure = SemiDet
+determinismJoin det1 det2 = max det1 det2
+
+
+-- |A suitable printable name for each determinism.
 determinismName :: Determinism -> String
 determinismName Terminal = "terminal"
 determinismName Failure  = "failing"
@@ -2427,15 +2450,21 @@ procCallToExp stmt =
 -- and ParamInOut exprs as not assigning anything, because it does not
 -- *freshly* assign a variable (ie, it's already assigned).
 expOutputs :: Exp -> Set VarName
-expOutputs (Typed expr _ _) = expOutputs expr
+expOutputs (IntValue _) = Set.empty
+expOutputs (FloatValue _) = Set.empty
+expOutputs (StringValue _) = Set.empty
+expOutputs (CharValue _) = Set.empty
 expOutputs (Var name flow _) =
     if flow == ParamOut then Set.singleton name else Set.empty
-expOutputs (Fncall _ _ args) = pexpListOutputs args
+expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
-expOutputs _ = Set.empty
+expOutputs (Fncall _ _ args) = pexpListOutputs args
+expOutputs (ForeignFn _ _ _ args) = pexpListOutputs args
 
 
+-- |Return the set of variables that will definitely be freshly assigned by
+-- the specified list of placed expressions.
 pexpListOutputs :: [Placed Exp] -> Set VarName
 pexpListOutputs = List.foldr (Set.union . expOutputs . content) Set.empty
 

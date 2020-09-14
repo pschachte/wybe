@@ -170,7 +170,7 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Public proc with some undeclared types
                | ReasonEqual Exp Exp OptPos
                    -- ^Expression types should be equal
-               | ReasonDeterminism ProcSpec Determinism OptPos
+               | ReasonDeterminism ProcSpec Determinism Determinism OptPos
                    -- ^Calling a semidet proc in a det context
                | ReasonForeignLanguage String String OptPos
                    -- ^Foreign call with bogus language
@@ -260,10 +260,10 @@ instance Show TypeError where
         "Expressions must have compatible types:\n    "
         ++ show exp1 ++ "\n    "
         ++ show exp2
-    show (ReasonDeterminism proc detism pos) =
+    show (ReasonDeterminism proc procDetism contextDetism pos) =
         makeMessage pos $
-        "Calling " ++ determinismName detism ++ " proc "
-        ++ show proc ++ " in a det context"
+        "Calling " ++ determinismName procDetism ++ " proc "
+        ++ show proc ++ " in a " ++ determinismName contextDetism ++ " context"
     show (ReasonForeignLanguage lang instr pos) =
         makeMessage pos $
         "Foreign call '" ++ instr ++ "' with unknown language '" ++ lang ++ "'"
@@ -1289,18 +1289,17 @@ modecheckStmts m name pos typing delayed assigned detism (pstmt:pstmts) = do
     (pstmt',delayed',assigned', errs') <-
       placedApply (modecheckStmt m name pos typing delayed assigned detism)
         pstmt
-    let assigned'' = assigned'
     logTypes $ "New errors   = " ++ show errs'
-    logTypes $ "Now assigned = " ++ show assigned''
+    logTypes $ "Now assigned = " ++ show assigned'
     logTypes $ "Now delayed  = " ++ show delayed'
     let (doNow,delayed'')
             = List.partition
               (Set.null . (`missingBindings` assigned') . fst)
               delayed'
-    (pstmts',assigned''', errs) <-
-      modecheckStmts m name pos typing delayed'' assigned'' detism
+    (pstmts',assigned'', errs) <-
+      modecheckStmts m name pos typing delayed'' assigned' detism
         ((snd <$> doNow) ++ pstmts)
-    return (pstmt'++pstmts',assigned''', errs'++errs)
+    return (pstmt'++pstmts',assigned'', errs'++errs)
 
 
 -- |Mode check a single statement, returning a list of moded statements,
@@ -1368,8 +1367,10 @@ modecheckStmt m name defPos typing delayed assigned detism
                   let detismErrs =
                         -- XXX Should postpone the error until we see if we can
                         -- work out that the test is certain to succeed
-                        [ReasonDeterminism (procInfoProc match) matchDetism pos
-                        | detism < matchDetism]
+                        [ReasonDeterminism (procInfoProc match)
+                         matchDetism detism pos
+                        | detism == Det
+                          && not (matchDetism `determinismLEQ` detism)]
                   let undefResErrs =
                         [ReasonResourceUnavail name res pos
                         | res <- Set.toList

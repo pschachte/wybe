@@ -345,14 +345,12 @@ unbranchStmts detism (stmt:stmts) alt sense = do
 --
 unbranchStmt :: Determinism -> Stmt -> OptPos -> [Placed Stmt] -> [Placed Stmt]
              -> Bool -> Unbrancher [Placed Stmt]
-unbranchStmt detism _ _ _ _ _ | detism == Terminal || detism == Failure =
-    shouldnt $ "Invalid calling context in unbranching: " ++ show detism
 unbranchStmt _ stmt@(ProcCall _ _ _ _ True args) _ _ _ _ =
     shouldnt $ "Resources should have been handled before unbranching: "
                ++ showStmt 4 stmt
-unbranchStmt context stmt@(ProcCall _ _ _ detism _ _) _ _ _ _
-  | context < detism
-  = shouldnt $ show detism ++ " proc call " ++ show stmt
+unbranchStmt context stmt@(ProcCall _ _ _ SemiDet _ _) _ _ _ _
+  | context < SemiDet
+  = shouldnt $ "SemiDet proc call " ++ show stmt
                ++ " in a " ++ show context ++ " context"
 unbranchStmt SemiDet stmt@(ProcCall md name procID SemiDet _ args) pos
              stmts alt sense = do
