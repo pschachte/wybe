@@ -12,8 +12,11 @@ module Transform (transformProc,
 
 import           AliasAnalysis
 import           AST
+import           BodyBuilder
 import           Callers       (getSccProcs)
 import           Control.Monad
+import           Control.Monad.Trans
+                               (lift)
 import           Control.Monad.Trans.State
 import           Data.Bits     as Bits
 import           Data.Graph
@@ -21,6 +24,7 @@ import           Data.List     as List
 import           Data.Map      as Map
 import           Data.Maybe    as Maybe
 import           Data.Set      as Set
+import           Expansion     (inputOutputParams)
 import           Flow          ((|>))
 import           Options       (LogSelection (Transform), optNoMultiSpecz)
 import           Util
@@ -35,21 +39,32 @@ import           Util
 transformProc :: ProcDef -> Compiler ProcDef
 transformProc def
     | not (procInline def) = do
-        let (ProcDefPrim caller body analysis speczBodies) = procImpln def
+        let (ProcDefPrim proto body analysis speczBodies) = procImpln def
         logTransform $ replicate 60 '~'
-        logTransform $ show caller
+        logTransform $ show proto
         logTransform $ replicate 60 '~'
 
         -- transform the standard body
         -- In this case, all input params are aliased
-        inputParams <- protoInputParamNames caller
-        aliasMap <- initAliasMap caller generalVersion
+        inputParams <- protoInputParamNames proto
+        aliasMap <- initAliasMap proto generalVersion
         let callSiteMap = expandRequiredSpeczVersionsByProcVersion 
                                         analysis generalVersion
         logTransform $ "callSiteMap: " ++ show callSiteMap
-        body' <- transformBody caller body (aliasMap, Map.empty) callSiteMap
+        -- body' <- transformBody caller body (aliasMap, Map.empty) callSiteMap
+        
+        let (ins,outs) = inputOutputParams proto
+        let tmp = procTmpCount def
+        (_, tmp',used,body') <- buildBody tmp (Map.fromSet id outs) $
+                    transformBody proto body (aliasMap, Map.empty) callSiteMap
+        logTransform $ "~=~" ++ show body'
+        unless (tmp==tmp')
+                            $ shouldnt "changed tmp count in transform"
+        let def' = def {
+                    procImpln = ProcDefPrim proto body' analysis speczBodies}
 
-        return def { procImpln = ProcDefPrim caller body' analysis speczBodies}
+        return def'
+        -- return def { procImpln = ProcDefPrim proto body' analysis speczBodies}
 
 transformProc def = return def
 
@@ -76,17 +91,15 @@ initAliasMap proto speczVersion = do
 
 
 transformBody :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells)
-        -> Map CallSiteID ProcSpec -> Compiler ProcBody
+        -> Map CallSiteID ProcSpec -> BodyBuilder ()
 transformBody caller body (aliasMap, deadCells) callSiteMap = do
     -- (1) Analysis of current caller's prims
-    ((aliaseMap', deadCells'), newPrims) <- 
+    (aliaseMap', deadCells') <- 
             transformPrims caller body (aliasMap, deadCells) callSiteMap
-    -- Update bodyPrims of this procbody
-    let body' = body { bodyPrims = newPrims }
 
     -- (2) Analysis of caller's bodyFork
     -- Update body while checking alias incurred by bodyfork
-    transformForks caller body' (aliaseMap', deadCells') callSiteMap
+    transformForks caller body (aliaseMap', deadCells') callSiteMap
 
     -- XXX run (or re-run) optimizations here since after the transform, there
     -- might be some new opportunities.
@@ -95,50 +108,51 @@ transformBody caller body (aliasMap, deadCells) callSiteMap = do
 -- Check alias created by prims of caller proc
 transformPrims :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells) 
         -> Map CallSiteID ProcSpec
-        -> Compiler ((AliasMapLocal, DeadCells), [Placed Prim])
+        -> BodyBuilder (AliasMapLocal, DeadCells)
 transformPrims caller body (aliasMap, deadCells) callSiteMap = do
     let prims = bodyPrims body
     -- Transform simple prims:
-    logTransform "\nTransform prims (transformPrims):   "
-    foldM (transformPrim callSiteMap) ((aliasMap, deadCells), []) prims
+    lift $ logTransform "\nTransform prims (transformPrims):   "
+    foldM (transformPrim callSiteMap) (aliasMap, deadCells) prims
 
 
 -- Recursively transform forked body's prims
 -- PrimFork only appears at the end of a ProcBody
 -- PrimFork = NoFork | PrimFork {}
 transformForks :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells)
-        -> Map CallSiteID ProcSpec -> Compiler ProcBody
+        -> Map CallSiteID ProcSpec -> BodyBuilder ()
 transformForks caller body (aliasMap, deadCells) callSiteMap = do
-    logTransform "\nTransform forks (transformForks):"
+    lift $ logTransform "\nTransform forks (transformForks):"
     let fork = bodyFork body
     case fork of
-        PrimFork _ _ _ fBodies -> do
-            logTransform "Forking:"
-            fBodies' <-
-                mapM (\currBody -> 
-                        transformBody caller currBody
+        PrimFork var ty _ fBodies -> do
+            buildFork var ty
+            lift $ logTransform "Forking:"
+            mapM_ (\currBody -> do
+                    beginBranch
+                    transformBody caller currBody
                                 (aliasMap, deadCells) callSiteMap
+                    endBranch
                 ) fBodies
-            return body { bodyFork = fork {forkBodies=fBodies'} }
+            completeFork
         NoFork -> do
             -- NoFork: transform prims done
-            logTransform "No fork."
-            return body
+            lift $ logTransform "No fork."
 
 
 -- Build up alias pairs triggerred by proc calls
 transformPrim :: Map CallSiteID ProcSpec
-        -> ((AliasMapLocal, DeadCells), [Placed Prim])
-        -> Placed Prim -> Compiler ((AliasMapLocal, DeadCells), [Placed Prim])
-transformPrim callSiteMap ((aliasMap, deadCells), prims) prim = do
+        -> (AliasMapLocal, DeadCells) -> Placed Prim
+        -> BodyBuilder (AliasMapLocal, DeadCells)
+transformPrim callSiteMap (aliasMap, deadCells) prim = do
     -- XXX Redundent work here. We should change the current design.
-    aliasMap' <- updateAliasedByPrim aliasMap prim
-    logTransform $ "\n--- prim:           " ++ show prim
+    aliasMap' <- lift $ updateAliasedByPrim aliasMap prim
+    lift $ logTransform $ "\n--- prim:           " ++ show prim
     let primc = content prim
-    
+
     (primc', deadCells') <- case primc of
             PrimCall id spec args -> do
-                noMultiSpecz <- gets (optNoMultiSpecz . options)
+                noMultiSpecz <- lift $ gets (optNoMultiSpecz . options)
                 let spec' = if noMultiSpecz
                     then spec
                     else Map.findWithDefault spec id callSiteMap
@@ -149,7 +163,7 @@ transformPrim callSiteMap ((aliasMap, deadCells), prims) prim = do
             -- dead cell transform
             PrimForeign "lpvm" "access" _ args -> do
                 deadCells' 
-                    <- updateDeadCellsByAccessArgs (aliasMap, deadCells) args
+                    <- lift $ updateDeadCellsByAccessArgs (aliasMap, deadCells) args
                 return (primc, deadCells')
             PrimForeign "lpvm" "alloc" _ args  -> do
                 let (result, deadCells') = 
@@ -167,14 +181,15 @@ transformPrim callSiteMap ((aliasMap, deadCells), prims) prim = do
                                     [selectedCell, startOffset, varOut]
                         _ -> shouldnt "invalid aliasMap for transform"
                 when (Maybe.isJust result) $ 
-                        logTransform "avoid using [alloc]."
+                        lift $ logTransform "avoid using [alloc]."
                 return (primc', deadCells')
             -- default case
             _ -> return (primc, deadCells)
     
-    prim' <- updatePlacedM (\_ -> return primc') prim
-    logTransform $ "--- transformed to: " ++ show prim'
-    return ((aliasMap', deadCells'), prims ++ [prim'])
+    let pos = place prim
+    lift $ logTransform $ "--- transformed to: " ++ show (maybePlace primc' pos)
+    instr primc' pos
+    return (aliasMap', deadCells')
 
 
 -- Helper: change mutate destructive flag to true if FlowIn variable is not
@@ -367,7 +382,7 @@ generateSpeczVersionInProc :: ProcDef -> Compiler ProcDef
 generateSpeczVersionInProc def
     | not (procInline def) = do
         let procImp = procImpln def
-        let ProcDefPrim caller body analysis speczBodies = procImp
+        let ProcDefPrim proto body analysis speczBodies = procImp
         if List.any isNothing (Map.elems speczBodies)
         then do -- missing required specz versions
             -- mark the current module as changed
@@ -375,6 +390,8 @@ generateSpeczVersionInProc def
             updateCompiler (\st ->
                 let unchanged = unchangedMods st |> Set.delete mod in
                     st {unchangedMods = unchanged})
+            let tmp = procTmpCount def
+            let (ins,outs) = inputOutputParams proto
 
             speczBodiesList <- mapM (\(ver, sbody) ->
                 case sbody of 
@@ -384,18 +401,24 @@ generateSpeczVersionInProc def
                         logTransform $ replicate 60 '~'
                         logTransform $ "Generating specialized version: "
                                 ++ show ver
-                        aliasMap <- initAliasMap caller ver
+                        aliasMap <- initAliasMap proto ver
                         let callSiteMap =
                                 expandRequiredSpeczVersionsByProcVersion 
                                         analysis ver
                         logTransform $ "callSiteMap: " ++ show callSiteMap
-                        sbody' <- transformBody caller body
-                                (aliasMap, Map.empty) callSiteMap
+
+                        (_, tmp', _, sbody') <- buildBody tmp (Map.fromSet id outs) $
+                                transformBody proto body (aliasMap, Map.empty)
+                                        callSiteMap
+                        
+                        unless (tmp==tmp')
+                            $ shouldnt "changed tmp count in transform"
+    
                         return (ver, Just sbody')
                         ) (Map.toAscList speczBodies)
             let speczBodies' = Map.fromDistinctAscList speczBodiesList
             return $
-                def {procImpln = ProcDefPrim caller body analysis speczBodies'}
+                def {procImpln = ProcDefPrim proto body analysis speczBodies'}
         else
             return def
 

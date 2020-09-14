@@ -12,7 +12,7 @@
 --  This code is used bottom-up, ie, callees are expanded before
 --  their callers, so it does not need to recursively expand calls.
 
-module Expansion (procExpansion) where
+module Expansion (procExpansion, inputOutputParams) where
 
 import           AST
 import           BodyBuilder

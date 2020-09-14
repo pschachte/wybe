@@ -37,11 +37,10 @@ AFTER EVERYTHING:
 
     1:
         foreign lpvm access(~tmp$0#0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?l#0:mytree.tree)
-        foreign llvm move(0:mytree.tree, ?r#0:mytree.tree)
         foreign lpvm alloc(24:wybe.int, ?tmp$27#0:mytree.tree)
         foreign lpvm mutate(~tmp$27#0:mytree.tree, ?tmp$28#0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~l#0:mytree.tree)
         foreign lpvm mutate(~tmp$28#0:mytree.tree, ?tmp$29#0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int)
-        foreign lpvm mutate(~tmp$29#0:mytree.tree, ?tmp$4#0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~r#0:mytree.tree)
+        foreign lpvm mutate(~tmp$29#0:mytree.tree, ?tmp$4#0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree)
         foreign llvm move(argc#0:wybe.int, ?argc#1:wybe.int)
         foreign llvm move(argv#0:wybe.int, ?argv#1:wybe.int)
         foreign llvm move(exit_code#0:wybe.int, ?exit_code#1:wybe.int)

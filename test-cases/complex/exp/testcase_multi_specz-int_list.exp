@@ -891,10 +891,9 @@ extend > public (3 calls)
 
     1:
         foreign lpvm access(lst1#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
-        foreign lpvm access(~lst1#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
+        foreign lpvm access(lst1#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
         int_list.extend<0>[04d1467a4d](~t#0:int_list.int_list, ~lst2#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #1 @int_list:44:35
-        foreign llvm sub(~lst1#0:int_list.int_list, 0:wybe.int, ?tmp$8#0:int_list.int_list)
-        foreign lpvm mutate(~tmp$8#0:int_list.int_list, ?tmp$9#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
+        foreign lpvm mutate(~lst1#0:int_list.int_list, ?tmp$9#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$9#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:int_list.int_list)
 
 
@@ -974,7 +973,7 @@ greater > (3 calls)
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
-        foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
+        foreign lpvm access(lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
         foreign llvm icmp sge(h#0:wybe.int, v#0:wybe.int, ?tmp$6#0:wybe.bool) @wybe:34:36
         case ~tmp$6#0:wybe.bool of
         0:
@@ -982,8 +981,7 @@ greater > (3 calls)
 
         1:
             int_list.greater<0>[04d1467a4d](~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:136:18
-            foreign llvm sub(~lst#0:int_list.int_list, 0:wybe.int, ?tmp$14#0:int_list.int_list)
-            foreign lpvm mutate(~tmp$14#0:int_list.int_list, ?tmp$15#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
+            foreign lpvm mutate(~lst#0:int_list.int_list, ?tmp$15#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
             foreign lpvm mutate(~tmp$15#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:int_list.int_list)
 
 
@@ -1199,9 +1197,8 @@ reverse_helper > (2 calls)
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
-        foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        foreign llvm sub(~lst#0:int_list.int_list, 0:wybe.int, ?tmp$8#0:int_list.int_list)
-        foreign lpvm mutate(~tmp$8#0:int_list.int_list, ?tmp$9#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
+        foreign lpvm access(lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
+        foreign lpvm mutate(~lst#0:int_list.int_list, ?tmp$9#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$9#0:int_list.int_list, ?tmp$10#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~acc#0:int_list.int_list)
         int_list.reverse_helper<0>[04d1467a4d](~t#0:int_list.int_list, ~tmp$10#0:int_list.int_list, ?$#0:int_list.int_list) #2 @int_list:147:29
 
@@ -1237,13 +1234,12 @@ sort > public (2 calls)
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
-        foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
+        foreign lpvm access(lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
         int_list.lesser<0>(t#0:int_list.int_list, h#0:wybe.int, ?tmp$3#0:int_list.int_list) #1 @int_list:116:21
         int_list.sort<0>[04d1467a4d](~tmp$3#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #2 @int_list:116:16
         int_list.greater<0>[04d1467a4d](~t#0:int_list.int_list, h#0:wybe.int, ?tmp$6#0:int_list.int_list) #3 @int_list:116:46
         int_list.sort<0>[04d1467a4d](~tmp$6#0:int_list.int_list, ?tmp$5#0:int_list.int_list) #4 @int_list:116:41
-        foreign llvm sub(~lst#0:int_list.int_list, 0:wybe.int, ?tmp$13#0:int_list.int_list)
-        foreign lpvm mutate(~tmp$13#0:int_list.int_list, ?tmp$14#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
+        foreign lpvm mutate(~lst#0:int_list.int_list, ?tmp$14#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$14#0:int_list.int_list, ?tmp$15#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$5#0:int_list.int_list)
         int_list.extend<0>[04d1467a4d](~tmp$2#0:int_list.int_list, ~tmp$15#0:int_list.int_list, ?$#0:int_list.int_list) #6 @int_list:116:9
 
@@ -1369,15 +1365,14 @@ if.then:
   %44 = getelementptr  i64, i64* %43, i64 0 
   %45 = load  i64, i64* %44 
   %"2$tmp$2#0" = tail call fastcc  i64  @"int_list.extend<0>[04d1467a4d]"(i64  %45, i64  %"lst2#0")  
-  %"2$tmp$8#0" = sub   i64 %"lst1#0", 0 
-  %46 = inttoptr i64 %"2$tmp$8#0" to i64* 
+  %46 = inttoptr i64 %"lst1#0" to i64* 
   %47 = getelementptr  i64, i64* %46, i64 0 
   store  i64 %41, i64* %47 
-  %48 = add   i64 %"2$tmp$8#0", 8 
+  %48 = add   i64 %"lst1#0", 8 
   %49 = inttoptr i64 %48 to i64* 
   %50 = getelementptr  i64, i64* %49, i64 0 
   store  i64 %"2$tmp$2#0", i64* %50 
-  ret i64 %"2$tmp$8#0" 
+  ret i64 %"lst1#0" 
 if.else:
   ret i64 %"lst2#0" 
 }
@@ -1487,15 +1482,14 @@ if.else:
   ret i64 0 
 if.then1:
   %"4$tmp$3#0" = tail call fastcc  i64  @"int_list.greater<0>[04d1467a4d]"(i64  %80, i64  %"v#0")  
-  %"4$tmp$14#0" = sub   i64 %"lst#0", 0 
-  %81 = inttoptr i64 %"4$tmp$14#0" to i64* 
+  %81 = inttoptr i64 %"lst#0" to i64* 
   %82 = getelementptr  i64, i64* %81, i64 0 
   store  i64 %76, i64* %82 
-  %83 = add   i64 %"4$tmp$14#0", 8 
+  %83 = add   i64 %"lst#0", 8 
   %84 = inttoptr i64 %83 to i64* 
   %85 = getelementptr  i64, i64* %84, i64 0 
   store  i64 %"4$tmp$3#0", i64* %85 
-  ret i64 %"4$tmp$14#0" 
+  ret i64 %"lst#0" 
 if.else1:
   %"5$$#0" = tail call fastcc  i64  @"int_list.greater<0>[04d1467a4d]"(i64  %80, i64  %"v#0")  
   ret i64 %"5$$#0" 
@@ -1769,15 +1763,14 @@ if.then:
   %187 = inttoptr i64 %186 to i64* 
   %188 = getelementptr  i64, i64* %187, i64 0 
   %189 = load  i64, i64* %188 
-  %"2$tmp$8#0" = sub   i64 %"lst#0", 0 
-  %190 = inttoptr i64 %"2$tmp$8#0" to i64* 
+  %190 = inttoptr i64 %"lst#0" to i64* 
   %191 = getelementptr  i64, i64* %190, i64 0 
   store  i64 %185, i64* %191 
-  %192 = add   i64 %"2$tmp$8#0", 8 
+  %192 = add   i64 %"lst#0", 8 
   %193 = inttoptr i64 %192 to i64* 
   %194 = getelementptr  i64, i64* %193, i64 0 
   store  i64 %"acc#0", i64* %194 
-  %"2$$#0" = tail call fastcc  i64  @"int_list.reverse_helper<0>[04d1467a4d]"(i64  %189, i64  %"2$tmp$8#0")  
+  %"2$$#0" = tail call fastcc  i64  @"int_list.reverse_helper<0>[04d1467a4d]"(i64  %189, i64  %"lst#0")  
   ret i64 %"2$$#0" 
 if.else:
   ret i64 %"acc#0" 
@@ -1833,15 +1826,14 @@ if.then:
   %"2$tmp$2#0" = tail call fastcc  i64  @"int_list.sort<0>[04d1467a4d]"(i64  %"2$tmp$3#0")  
   %"2$tmp$6#0" = tail call fastcc  i64  @"int_list.greater<0>[04d1467a4d]"(i64  %216, i64  %212)  
   %"2$tmp$5#0" = tail call fastcc  i64  @"int_list.sort<0>[04d1467a4d]"(i64  %"2$tmp$6#0")  
-  %"2$tmp$13#0" = sub   i64 %"lst#0", 0 
-  %217 = inttoptr i64 %"2$tmp$13#0" to i64* 
+  %217 = inttoptr i64 %"lst#0" to i64* 
   %218 = getelementptr  i64, i64* %217, i64 0 
   store  i64 %212, i64* %218 
-  %219 = add   i64 %"2$tmp$13#0", 8 
+  %219 = add   i64 %"lst#0", 8 
   %220 = inttoptr i64 %219 to i64* 
   %221 = getelementptr  i64, i64* %220, i64 0 
   store  i64 %"2$tmp$5#0", i64* %221 
-  %"2$$#0" = tail call fastcc  i64  @"int_list.extend<0>[04d1467a4d]"(i64  %"2$tmp$2#0", i64  %"2$tmp$13#0")  
+  %"2$$#0" = tail call fastcc  i64  @"int_list.extend<0>[04d1467a4d]"(i64  %"2$tmp$2#0", i64  %"lst#0")  
   ret i64 %"2$$#0" 
 if.else:
   ret i64 0 
