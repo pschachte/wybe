@@ -20,7 +20,7 @@ def int_list(ctx: Context) -> None:
     ctx.write_section("final dump (with multiple specialization)", final_dump)
 
 
-WYBE_INT_LIST = """
+WYBE_INT_LIST = r"""
 # contains the def of a int list and some helper functions
 # (similar to the python list)
 pub type int_list { pub [] | [|](head:int, tail:int_list) }
@@ -43,6 +43,9 @@ pub def println(x:int_list) use !io {
 
 # Returns an `int_list`, starting from `start`, and increments by `step`,
 # and stops before `stop`
+# XXX: there is a performance degradation.
+# See issue: https://github.com/pschachte/wybe/issues/87
+# and https://github.com/pschachte/wybe/issues/90
 pub def range(start:int, stop:int, step:int, ?result:int_list) {
     ?result = []
     do {

@@ -98,13 +98,12 @@ blockTransformModule thisMod =
 
        --------------------------------------------------
        -- Name mangling
-       let emptyFilter = List.filter (not . emptyProc)
        let mangledProcs = concat $ mangleProcs <$> procs
 
        --------------------------------------------------
        -- Translate
        procBlocks <- evalTranslation 0 $
-         mapM (translateProc allProtos) $ emptyFilter mangledProcs
+         mapM (translateProc allProtos) mangledProcs
        let procBlocks' = List.concat procBlocks
        --------------------------------------------------
        -- Init LLVM Module and fill it
@@ -192,14 +191,6 @@ isStdLib (m:_) = m == "wybe"
 
 
 
--- | Predicate to test for procedure definition with an empty body.
-emptyProc :: ProcDef -> Bool
-emptyProc p = case procImpln p of
-  ProcDefSrc pps       -> List.null pps
-  ProcDefPrim _ body _ _ -> List.null $ bodyPrims body
-
-
-
 -- | Translate a ProcDef whose procImpln field is of the type ProcDefPrim, to
 -- ProcDefBlocks (LLVM form). Each ProcDef is converted into a Global
 -- Definition in a LLVM Module by translating it's primitives.  Translated
@@ -246,7 +237,7 @@ translateProc modProtos proc = do
     return blocks'
 
 
--- Helper for [translateProc]. Translate the given [ProcBody] 
+-- Helper for `translateProc`. Translate the given `ProcBody` 
 -- (A specialized version of a procedure).
 _translateProcImpl :: [PrimProto] -> PrimProto -> ProcBody -> Word 
                                 -> Compiler (ProcDefBlock, Word)
