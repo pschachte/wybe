@@ -17,7 +17,7 @@ module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
   Determinism(..), determinismLEQ, determinismMeet, determinismJoin,
-  determinismName,
+  determinismSeq, determinismTerminal, determinismName,
   TypeProto(..), TypeSpec(..), TypeRef(..), VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
@@ -158,16 +158,38 @@ determinismLEQ Failure Det = False
 determinismLEQ det1 det2 = det1 <= det2
 
 
--- |Lattice meet for Determinism.
+-- |Lattice meet for Determinism.  Probably not needed
+determinismMeet :: Determinism -> Determinism -> Determinism
 determinismMeet Failure Det = Terminal
 determinismMeet Det Failure = Terminal
 determinismMeet det1 det2 = min det1 det2
 
 
 -- |Lattice join for Determinism.
+determinismJoin :: Determinism -> Determinism -> Determinism
 determinismJoin Failure Det = SemiDet
 determinismJoin Det Failure = SemiDet
 determinismJoin det1 det2 = max det1 det2
+
+
+-- |Determinism for ordered sequence of steps.  This is not the same as meet or
+-- join, because nothing will be executed after a Failure, even a Terminal.
+-- This operation is associative.
+determinismSeq :: Determinism -> Determinism -> Determinism
+determinismSeq Terminal _        = Terminal
+determinismSeq Failure  _        = Failure
+determinismSeq _        Terminal = Terminal
+determinismSeq _        Failure  = Failure
+determinismSeq det1     det2     = max det1 det2
+
+
+-- |Does this determinism reflect a state that will definitely not continue to
+-- the next statement?
+determinismTerminal :: Determinism -> Bool
+determinismTerminal Terminal = True
+determinismTerminal Failure  = True
+determinismTerminal Det      = False
+determinismTerminal SemiDet  = False
 
 
 -- |A suitable printable name for each determinism.
@@ -180,10 +202,10 @@ determinismName SemiDet  = "test"
 
 -- | Internal representation of data
 data TypeRepresentation
-    = Address           -- * A pointer; occupies wordSize bits
-    | Bits Int          -- * An unsigned integer representation
-    | Signed Int        -- * A signed integer representation
-    | Floating Int      -- * A floating point representation
+    = Address           -- ^ A pointer; occupies wordSize bits
+    | Bits Int          -- ^ An unsigned integer representation
+    | Signed Int        -- ^ A signed integer representation
+    | Floating Int      -- ^ A floating point representation
     deriving (Eq, Ord, Generic)
 
 
