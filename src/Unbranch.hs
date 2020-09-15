@@ -117,7 +117,6 @@ unbranchProc' loopinfo proc = do
     (body',tmpCtr',newProcs) <-
         unbranchBody loopinfo tmpCtr params' detism stmts alt
     let proc' = proc { procProto = proto'
-                     , procDetism = Det
                      , procImpln = ProcDefSrc body'
                      , procTmpCount = tmpCtr'}
     logMsg Unbranch $ "** Unbranched defn:" ++ showProcDef 0 proc' ++ "\n"
@@ -251,9 +250,7 @@ tempVar = do
 -- |Log a message, if we are logging unbrancher activity.
 logUnbranch :: String -> Unbrancher ()
 logUnbranch s = do
-    -- dryrun <- isDryRun
     lift $ logMsg Unbranch s
-      -- $ (if dryrun then "dryrun: " else "actual: ") ++ s
 
 
 -- |Return the current loop break statement(s)

@@ -124,9 +124,6 @@ evalClauseComp clcomp =
 compileProc :: ProcDef -> Compiler ProcDef
 compileProc proc =
     evalClauseComp $ do
-        unless (procDetism proc == Det)
-          $ shouldnt $ "SemiDet proc left by unbranching:  "
-                       ++ showProcDef 4 proc
         let ProcDefSrc body = procImpln proc
         let proto = procProto proc
         let params = procProtoParams proto

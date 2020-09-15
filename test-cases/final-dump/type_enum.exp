@@ -47,7 +47,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public inline test (0 calls)
 0: /=($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -55,7 +55,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public inline (1 calls)
+= > public inline test (1 calls)
 0: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

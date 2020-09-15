@@ -166,7 +166,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public inline test (0 calls)
 0: /=($left#0:alias_type4.position, $right#0:alias_type4.position, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -186,7 +186,7 @@ entry:
 
 
 
-= > public inline (5 calls)
+= > public inline test (5 calls)
 0: =($left#0:alias_type4.position, $right#0:alias_type4.position, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -410,7 +410,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public inline test (0 calls)
 0: /=($left#0:alias_type4.posrec, $right#0:alias_type4.posrec, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -442,7 +442,7 @@ entry:
 
 
 
-= > public inline (5 calls)
+= > public inline test (5 calls)
 0: =($left#0:alias_type4.posrec, $right#0:alias_type4.posrec, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
