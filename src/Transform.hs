@@ -18,13 +18,11 @@ import           Control.Monad
 import           Control.Monad.Trans
                                (lift)
 import           Control.Monad.Trans.State
-import           Data.Bits     as Bits
-import           Data.Graph
+import           Data.Graph    (SCC(..))
 import           Data.List     as List
 import           Data.Map      as Map
 import           Data.Maybe    as Maybe
 import           Data.Set      as Set
-import           Expansion     (inputOutputParams)
 import           Flow          ((|>))
 import           Options       (LogSelection (Transform), optNoMultiSpecz)
 import           Util
@@ -40,31 +38,8 @@ transformProc :: ProcDef -> Compiler ProcDef
 transformProc def
     | not (procInline def) = do
         let (ProcDefPrim proto body analysis speczBodies) = procImpln def
-        logTransform $ replicate 60 '~'
-        logTransform $ show proto
-        logTransform $ replicate 60 '~'
-
-        -- transform the standard body
-        -- In this case, all input params are aliased
-        inputParams <- protoInputParamNames proto
-        aliasMap <- initAliasMap proto generalVersion
-        let callSiteMap = expandRequiredSpeczVersionsByProcVersion 
-                                        analysis generalVersion
-        logTransform $ "callSiteMap: " ++ show callSiteMap
-        -- body' <- transformBody caller body (aliasMap, Map.empty) callSiteMap
-        
-        let (ins,outs) = inputOutputParams proto
-        let tmp = procTmpCount def
-        (_, tmp',used,body') <- buildBody tmp (Map.fromSet id outs) $
-                    transformBody proto body (aliasMap, Map.empty) callSiteMap
-        logTransform $ "~=~" ++ show body'
-        unless (tmp==tmp')
-                            $ shouldnt "changed tmp count in transform"
-        let def' = def {
-                    procImpln = ProcDefPrim proto body' analysis speczBodies}
-
-        return def'
-        -- return def { procImpln = ProcDefPrim proto body' analysis speczBodies}
+        body' <- transformProcBody def generalVersion
+        return def {procImpln = ProcDefPrim proto body' analysis speczBodies}
 
 transformProc def = return def
 
@@ -90,6 +65,35 @@ initAliasMap proto speczVersion = do
             ) emptyDS inputParams 
 
 
+-- transform a proc based on a given specialized version, and return the body
+-- of that specialization.
+transformProcBody :: ProcDef -> SpeczVersion -> Compiler ProcBody
+transformProcBody procDef speczVersion = do
+    when (procInline procDef) $ shouldnt "transforming an inline proc"
+
+    let (ProcDefPrim proto body analysis speczBodies) = procImpln procDef
+    logTransform $ replicate 60 '~'
+    logTransform $ show proto
+    logTransform $ "[" ++ show (speczVersionToId speczVersion) ++ "] :"
+                    ++ show speczVersion
+    logTransform $ replicate 60 '~'
+
+    aliasMap <- initAliasMap proto speczVersion
+    let callSiteMap =
+            expandRequiredSpeczVersionsByProcVersion analysis speczVersion
+    logTransform $ "callSiteMap: " ++ show callSiteMap
+
+    let outVarSubs = primProtoParams proto
+                    |> List.filter ((==FlowOut) . primParamFlow)
+                    |> List.map primParamName |> List.map (\x -> (x,x))
+                    |> Map.fromList
+    let tmp = procTmpCount procDef
+    (_, tmp', _, body') <- buildBody tmp outVarSubs $
+                transformBody proto body (aliasMap, Map.empty) callSiteMap
+    unless (tmp==tmp') $ shouldnt "tmp count changed in transform"
+    return body'
+
+
 transformBody :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells)
         -> Map CallSiteID ProcSpec -> BodyBuilder ()
 transformBody caller body (aliasMap, deadCells) callSiteMap = do
@@ -100,9 +104,6 @@ transformBody caller body (aliasMap, deadCells) callSiteMap = do
     -- (2) Analysis of caller's bodyFork
     -- Update body while checking alias incurred by bodyfork
     transformForks caller body (aliaseMap', deadCells') callSiteMap
-
-    -- XXX run (or re-run) optimizations here since after the transform, there
-    -- might be some new opportunities.
 
 
 -- Check alias created by prims of caller proc
@@ -390,30 +391,13 @@ generateSpeczVersionInProc def
             updateCompiler (\st ->
                 let unchanged = unchangedMods st |> Set.delete mod in
                     st {unchangedMods = unchanged})
-            let tmp = procTmpCount def
-            let (ins,outs) = inputOutputParams proto
 
             speczBodiesList <- mapM (\(ver, sbody) ->
                 case sbody of 
                     Just b -> return (ver, Just b)
                     Nothing -> do
                         -- generate the specz version
-                        logTransform $ replicate 60 '~'
-                        logTransform $ "Generating specialized version: "
-                                ++ show ver
-                        aliasMap <- initAliasMap proto ver
-                        let callSiteMap =
-                                expandRequiredSpeczVersionsByProcVersion 
-                                        analysis ver
-                        logTransform $ "callSiteMap: " ++ show callSiteMap
-
-                        (_, tmp', _, sbody') <- buildBody tmp (Map.fromSet id outs) $
-                                transformBody proto body (aliasMap, Map.empty)
-                                        callSiteMap
-                        
-                        unless (tmp==tmp')
-                            $ shouldnt "changed tmp count in transform"
-    
+                        sbody' <- transformProcBody def ver
                         return (ver, Just sbody')
                         ) (Map.toAscList speczBodies)
             let speczBodies' = Map.fromDistinctAscList speczBodiesList
