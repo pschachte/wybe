@@ -20,7 +20,6 @@ import Data.List as List
 import Data.Set as Set
 import Data.Maybe
 import Data.Bits
-import Control.Applicative
 import Control.Monad
 import Control.Monad.Extra (whenJust)
 import Control.Monad.Trans (lift)

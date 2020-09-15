@@ -12,7 +12,7 @@
 --  This code is used bottom-up, ie, callees are expanded before
 --  their callers, so it does not need to recursively expand calls.
 
-module Expansion (procExpansion, inputOutputParams) where
+module Expansion (procExpansion) where
 
 import           AST
 import           BodyBuilder
@@ -23,7 +23,6 @@ import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Set                  as Set
 import           Options                   (LogSelection (Expansion))
-import           Util
 
 
 -- | Expand the supplied ProcDef, inlining as desired.
