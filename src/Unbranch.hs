@@ -214,8 +214,18 @@ defIfVar _ _ = return ()
 
 
 -- |Record the specified dictionary as the current dictionary.
-setVars :: VarDict -> Unbrancher ()
-setVars vs = modify (\s -> s { brVars = vs })
+setVars :: VarDict -> Unbrancher (VarDict)
+setVars vars = do
+    oldVars <- gets brVars
+    modify (\s -> s { brVars = vars })
+    return oldVars
+
+
+-- |Execute an unbrancher with brVars temporarily set as specified
+withVars :: VarDict -> Unbrancher a -> Unbrancher a
+withVars vars unbrancher = do
+    oldVars <- setVars vars
+    unbrancher <* setVars oldVars
 
 
 -- |Generate a fresh proc name that does not collide with any proc in the
@@ -418,8 +428,7 @@ unbranchStmt detism (Cond tstStmt thn els exitVars) pos stmts alt sense =
     then (tstStmt:) <$> unbranchStmts detism (thn ++ stmts) alt sense
     else do
       let exitVars' = trustFromJust "unbranching Cond without exitVars" exitVars
-      stmts' <- unbranchStmts detism stmts alt sense
-      stmts'' <- maybeFactorContinuation detism exitVars' stmts' alt sense
+      stmts'' <- maybeFactorContinuation detism exitVars' stmts alt sense
       thn' <- unbranchStmts detism (thn ++ stmts'') alt sense
       els' <- unbranchStmts detism (els ++ stmts'') alt sense
       placedApply (unbranchStmt SemiDet) tstStmt thn' els' True
@@ -500,6 +509,7 @@ mkCond True exp pos thn els vars
       _ -> [maybePlace (Cond test thn els $ Just vars) pos]
   where test = Unplaced $ TestBool exp
 
+
 -- |Convert a list of the final statements of a proc body into a short list of
 -- statements by turning them into a fresh proc if necessary.  The resulting
 -- statement list will have been unbranched.
@@ -507,9 +517,12 @@ maybeFactorContinuation :: Determinism -> VarDict -> [Placed Stmt]
                         -> [Placed Stmt] -> Bool -> Unbrancher [Placed Stmt]
 maybeFactorContinuation detism vars stmts alt sense = do
     logUnbranch $ "Maybe factor continuation: " ++ showBody 4 stmts
-    if length stmts <= 2 && all (flatStmt . content) stmts
-      then unbranchStmts detism stmts alt sense
-      else (:[]) <$> factorContinuationProc vars Nothing detism stmts alt sense
+    logUnbranch $ "  with brVars: " ++ showVarDict vars
+    withVars vars
+      $ if length stmts <= 2 && all (flatStmt . content) stmts
+        then unbranchStmts detism stmts alt sense
+        else (:[]) <$> factorContinuationProc vars Nothing detism
+                                              stmts alt sense
 
 
 -- |Test that a statement is not compound
@@ -597,7 +610,7 @@ factorLoopProc break inVars pos detism stmts alt sense = do
     let loopinfo = Just (LoopInfo next break)
     oldLoopinfo <- gets brLoopInfo
     modify (\s -> s { brLoopInfo = loopinfo })
-    stmts' <- unbranchStmts detism stmts alt sense
+    stmts' <- withVars inVars $ unbranchStmts detism stmts alt sense
     modify (\s -> s { brLoopInfo = oldLoopinfo })
     proto <- newProcProto pname inVars
     genProc proto detism stmts'
