@@ -77,7 +77,7 @@ module AST (
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showMaybeSourcePos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
-  showVarDict, maybeShow, showMessages, stopOnError,
+  showVarDict, showVarMap, maybeShow, showMessages, stopOnError,
   logMsg, whenLogging2, whenLogging,
   -- *Helper functions
   defaultBlock, moduleIsPackage,
@@ -1574,7 +1574,8 @@ data ProcDef = ProcDef {
                                 -- source code (before inlining) and the
                                 -- count of calls for each caller
     procVis :: Visibility,      -- what modules should be able to see this?
-    procDetism :: Determinism,  -- how many results this proc returns
+    procDetism :: Determinism,  -- can this proc succeed or fail?
+    -- procDeclDetism :: Determinism, -- proc's initially declared determinism
     procInline :: Bool,         -- should we inline calls to this proc?
     procSuperproc :: SuperprocSpec
                                 -- the proc this should be part of, if any
@@ -2966,7 +2967,11 @@ instance Show Exp where
 
 
 showVarDict :: VarDict -> String
-showVarDict dict =
+showVarDict = showVarMap
+
+
+showVarMap :: Show a => Map VarName a -> String
+showVarMap dict =
     "{"
     ++ intercalate ", "
        (List.map (\(v,t) -> v ++ ":" ++ show t) $ Map.toList dict)

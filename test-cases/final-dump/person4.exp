@@ -77,7 +77,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:person4.person, $right#0:person4.person, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -99,7 +99,7 @@ entry:
 
 
 
-= > public inline test (5 calls)
+= > public inline (5 calls)
 0: =($left#0:person4.person, $right#0:person4.person, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

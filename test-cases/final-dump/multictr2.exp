@@ -419,7 +419,7 @@ if.else7:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:multictr2.t, $right#0:multictr2.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -427,7 +427,7 @@ if.else7:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public test (14 calls)
+= > public (14 calls)
 0: =($left#0:multictr2.t, $right#0:multictr2.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -595,7 +595,7 @@ c01 > public inline (0 calls)
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr2.t)
     foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$#0:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01#0:wybe.int)
-c01 > public inline test (24 calls)
+c01 > public inline (24 calls)
 1: c01(?f01#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -618,7 +618,7 @@ c02 > public inline (0 calls)
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr2.t)
     foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f02#0:wybe.int)
     foreign llvm or(~$rec#1, 1:wybe.int, ?$#0:multictr2.t)
-c02 > public inline test (19 calls)
+c02 > public inline (19 calls)
 1: c02(?f02#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -641,7 +641,7 @@ c03 > public inline (0 calls)
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr2.t)
     foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f03#0:wybe.int)
     foreign llvm or(~$rec#1, 2:wybe.int, ?$#0:multictr2.t)
-c03 > public inline test (17 calls)
+c03 > public inline (17 calls)
 1: c03(?f03#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -664,7 +664,7 @@ c04 > public inline (0 calls)
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr2.t)
     foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f04#0:wybe.int)
     foreign llvm or(~$rec#1, 3:wybe.int, ?$#0:multictr2.t)
-c04 > public inline test (15 calls)
+c04 > public inline (15 calls)
 1: c04(?f04#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -687,7 +687,7 @@ c05 > public inline (0 calls)
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr2.t)
     foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f05#0:wybe.int)
     foreign llvm or(~$rec#1, 4:wybe.int, ?$#0:multictr2.t)
-c05 > public inline test (13 calls)
+c05 > public inline (13 calls)
 1: c05(?f05#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -710,7 +710,7 @@ c06 > public inline (0 calls)
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr2.t)
     foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f06#0:wybe.int)
     foreign llvm or(~$rec#1, 5:wybe.int, ?$#0:multictr2.t)
-c06 > public inline test (11 calls)
+c06 > public inline (11 calls)
 1: c06(?f06#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -733,7 +733,7 @@ c07 > public inline (0 calls)
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr2.t)
     foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f07#0:wybe.int)
     foreign llvm or(~$rec#1, 6:wybe.int, ?$#0:multictr2.t)
-c07 > public inline test (9 calls)
+c07 > public inline (9 calls)
 1: c07(?f07#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -758,7 +758,7 @@ c08 > public inline (0 calls)
     foreign lpvm mutate(~%$rec#1:multictr2.t, ?%$rec#2:multictr2.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_b#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:multictr2.t, ?%$rec#3:multictr2.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_c#0:wybe.float)
     foreign llvm or(~$rec#3, 7:wybe.int, ?$#0:multictr2.t)
-c08 > public inline test (9 calls)
+c08 > public inline (9 calls)
 1: c08(?f08_a#0:wybe.int, ?f08_b#0:wybe.int, ?f08_c#0:wybe.float, $#0:multictr2.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -776,7 +776,7 @@ c08 > public inline test (9 calls)
 
 
 
-f01 > public inline test (0 calls)
+f01 > public inline (0 calls)
 0: f01($rec#0:multictr2.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -790,7 +790,7 @@ f01 > public inline test (0 calls)
         foreign lpvm access(~$rec#0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-f01 > public inline test (0 calls)
+f01 > public inline (0 calls)
 1: f01($rec#0:multictr2.t, ?$rec#1:multictr2.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -807,7 +807,7 @@ f01 > public inline test (0 calls)
 
 
 
-f02 > public inline test (0 calls)
+f02 > public inline (0 calls)
 0: f02($rec#0:multictr2.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -821,7 +821,7 @@ f02 > public inline test (0 calls)
         foreign lpvm access(~$rec#0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-f02 > public inline test (0 calls)
+f02 > public inline (0 calls)
 1: f02($rec#0:multictr2.t, ?$rec#1:multictr2.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -838,7 +838,7 @@ f02 > public inline test (0 calls)
 
 
 
-f03 > public inline test (0 calls)
+f03 > public inline (0 calls)
 0: f03($rec#0:multictr2.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -852,7 +852,7 @@ f03 > public inline test (0 calls)
         foreign lpvm access(~$rec#0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-f03 > public inline test (0 calls)
+f03 > public inline (0 calls)
 1: f03($rec#0:multictr2.t, ?$rec#1:multictr2.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -869,7 +869,7 @@ f03 > public inline test (0 calls)
 
 
 
-f04 > public inline test (0 calls)
+f04 > public inline (0 calls)
 0: f04($rec#0:multictr2.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -883,7 +883,7 @@ f04 > public inline test (0 calls)
         foreign lpvm access(~$rec#0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-f04 > public inline test (0 calls)
+f04 > public inline (0 calls)
 1: f04($rec#0:multictr2.t, ?$rec#1:multictr2.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -900,7 +900,7 @@ f04 > public inline test (0 calls)
 
 
 
-f05 > public inline test (0 calls)
+f05 > public inline (0 calls)
 0: f05($rec#0:multictr2.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -914,7 +914,7 @@ f05 > public inline test (0 calls)
         foreign lpvm access(~$rec#0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-f05 > public inline test (0 calls)
+f05 > public inline (0 calls)
 1: f05($rec#0:multictr2.t, ?$rec#1:multictr2.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -931,7 +931,7 @@ f05 > public inline test (0 calls)
 
 
 
-f06 > public inline test (0 calls)
+f06 > public inline (0 calls)
 0: f06($rec#0:multictr2.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -945,7 +945,7 @@ f06 > public inline test (0 calls)
         foreign lpvm access(~$rec#0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-f06 > public inline test (0 calls)
+f06 > public inline (0 calls)
 1: f06($rec#0:multictr2.t, ?$rec#1:multictr2.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -962,7 +962,7 @@ f06 > public inline test (0 calls)
 
 
 
-f07 > public inline test (0 calls)
+f07 > public inline (0 calls)
 0: f07($rec#0:multictr2.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -976,7 +976,7 @@ f07 > public inline test (0 calls)
         foreign lpvm access(~$rec#0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-f07 > public inline test (0 calls)
+f07 > public inline (0 calls)
 1: f07($rec#0:multictr2.t, ?$rec#1:multictr2.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -993,7 +993,7 @@ f07 > public inline test (0 calls)
 
 
 
-f08_a > public inline test (0 calls)
+f08_a > public inline (0 calls)
 0: f08_a($rec#0:multictr2.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1007,7 +1007,7 @@ f08_a > public inline test (0 calls)
         foreign lpvm access(~$rec#0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-f08_a > public inline test (0 calls)
+f08_a > public inline (0 calls)
 1: f08_a($rec#0:multictr2.t, ?$rec#1:multictr2.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1024,7 +1024,7 @@ f08_a > public inline test (0 calls)
 
 
 
-f08_b > public inline test (0 calls)
+f08_b > public inline (0 calls)
 0: f08_b($rec#0:multictr2.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1038,7 +1038,7 @@ f08_b > public inline test (0 calls)
         foreign lpvm access(~$rec#0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-f08_b > public inline test (0 calls)
+f08_b > public inline (0 calls)
 1: f08_b($rec#0:multictr2.t, ?$rec#1:multictr2.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1055,7 +1055,7 @@ f08_b > public inline test (0 calls)
 
 
 
-f08_c > public inline test (0 calls)
+f08_c > public inline (0 calls)
 0: f08_c($rec#0:multictr2.t, ?$#0:wybe.float, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1069,7 +1069,7 @@ f08_c > public inline test (0 calls)
         foreign lpvm access(~$rec#0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?$#0:wybe.float)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-f08_c > public inline test (0 calls)
+f08_c > public inline (0 calls)
 1: f08_c($rec#0:multictr2.t, ?$rec#1:multictr2.t, $field#0:wybe.float, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

@@ -106,9 +106,6 @@ unbranchProc' loopinfo proc = do
     let tmpCtr = procTmpCount proc
     let params = procProtoParams $ procProto proc
     let proto = procProto proc
-    -- XXX From merge conflict:  this was unused
-    -- let newProcs' = List.map
-    --         (\p -> p {procCallSiteCount = procCallSiteCount proc})
     let params = procProtoParams proto
     let params' = (selectDetism id (++ [testOutParam]) detism) params
     let alt = selectDetism [] [move boolFalse testOutExp] detism
@@ -117,6 +114,7 @@ unbranchProc' loopinfo proc = do
     (body',tmpCtr',newProcs) <-
         unbranchBody loopinfo tmpCtr params' detism stmts alt
     let proc' = proc { procProto = proto'
+                     , procDetism = selectDetism detism Det detism
                      , procImpln = ProcDefSrc body'
                      , procTmpCount = tmpCtr'}
     logMsg Unbranch $ "** Unbranched defn:" ++ showProcDef 0 proc' ++ "\n"

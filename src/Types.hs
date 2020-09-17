@@ -314,7 +314,15 @@ data Typing = Typing {
                   typingDict::Map VarName TypeRef,
                   typingErrs::[TypeError]
                   }
-            deriving (Show,Eq,Ord)
+            deriving (Eq,Ord)
+
+instance Show Typing where
+  show (Typing dict errs) =
+    "Typing " ++ showVarMap dict
+    ++ if List.null errs
+       then " with no errors"
+       else " with errors: " ++ show errs
+
 
 -- |The empty typing, assigning every var the type AnyType.
 initTyping :: Typing

@@ -277,7 +277,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:list_loop.intlist, $right#0:list_loop.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -285,7 +285,7 @@ entry:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public test (5 calls)
+= > public (5 calls)
 0: =($left#0:list_loop.intlist, $right#0:list_loop.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -331,7 +331,7 @@ entry:
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!list_loop.intlist)
     foreign lpvm mutate(~%$rec#0:list_loop.intlist, ?%$rec#1:list_loop.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:list_loop.intlist, ?%$#0:list_loop.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:list_loop.intlist)
-[|] > public inline test (12 calls)
+[|] > public inline (12 calls)
 1: [|](?head#0:wybe.int, ?tail#0:list_loop.intlist, $#0:list_loop.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -347,7 +347,7 @@ entry:
 
 
 
-head > public inline test (0 calls)
+head > public inline (0 calls)
 0: head($rec#0:list_loop.intlist, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -360,7 +360,7 @@ head > public inline test (0 calls)
         foreign lpvm access(~$rec#0:list_loop.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-head > public inline test (0 calls)
+head > public inline (0 calls)
 1: head($rec#0:list_loop.intlist, ?$rec#1:list_loop.intlist, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -376,7 +376,7 @@ head > public inline test (0 calls)
 
 
 
-tail > public inline test (0 calls)
+tail > public inline (0 calls)
 0: tail($rec#0:list_loop.intlist, ?$#0:list_loop.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -389,7 +389,7 @@ tail > public inline test (0 calls)
         foreign lpvm access(~$rec#0:list_loop.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:list_loop.intlist)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-tail > public inline test (0 calls)
+tail > public inline (0 calls)
 1: tail($rec#0:list_loop.intlist, ?$rec#1:list_loop.intlist, $field#0:list_loop.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

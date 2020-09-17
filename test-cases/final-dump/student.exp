@@ -174,7 +174,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:student.course, $right#0:student.course, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -195,7 +195,7 @@ entry:
 
 
 
-= > public inline test (5 calls)
+= > public inline (5 calls)
 0: =($left#0:student.course, $right#0:student.course, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -425,7 +425,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:student.student, $right#0:student.student, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -458,7 +458,7 @@ entry:
 
 
 
-= > public inline test (5 calls)
+= > public inline (5 calls)
 0: =($left#0:student.student, $right#0:student.student, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

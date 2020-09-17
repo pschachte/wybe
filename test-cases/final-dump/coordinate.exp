@@ -137,7 +137,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline test (0 calls)
+/= > public inline (0 calls)
 0: /=($left#0:coordinate.Coordinate, $right#0:coordinate.Coordinate, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -167,7 +167,7 @@ entry:
 
 
 
-= > public inline test (10 calls)
+= > public inline (10 calls)
 0: =($left#0:coordinate.Coordinate, $right#0:coordinate.Coordinate, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
