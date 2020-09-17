@@ -20,7 +20,7 @@ def int_list(ctx: Context) -> None:
     ctx.write_section("final dump (with multiple specialization)", final_dump)
 
 
-WYBE_INT_LIST = """
+WYBE_INT_LIST = r"""
 # contains the def of a int list and some helper functions
 # (similar to the python list)
 pub type int_list { pub [] | [|](head:int, tail:int_list) }
@@ -43,16 +43,28 @@ pub def println(x:int_list) use !io {
 
 # Returns an `int_list`, starting from `start`, and increments by `step`,
 # and stops before `stop`
+# XXX: The code below does not work due to issue: https://github.com/pschachte/wybe/issues/87
+# pub def range(start:int, stop:int, step:int, ?result:int_list) {
+#     ?result = []
+#     do {
+#         while start < stop
+#         ?result = [start | result]
+#         ?start = start + step
+#     }
+#     reverse(!result)
+# }
 pub def range(start:int, stop:int, step:int, ?result:int_list) {
     ?result = []
-    do {
-        while start < stop
-        ?result = [start | result]
-        ?start = start + step
-    }
+    range_loop(start, stop, step, !result)
     reverse(!result)
 }
 
+pub def range_loop(start:int, stop:int, step:int, !result:int_list) {
+    if { start < stop ::
+        ?result = [start | result]
+        range_loop(start+step, stop, step, !result)
+    }
+}
 
 # Add an item to the end of the list.
 pub def append(lst:int_list, v: int):int_list = extend(lst, [v])

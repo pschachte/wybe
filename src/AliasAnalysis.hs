@@ -279,21 +279,19 @@ updateAliasedByPrim aliasMap prim =
             let paramArgMap = mapParamToArgVar calleeProto args
             -- calleeArgsAliasMap is the alias map of actual arguments passed
             -- into callee
+            logAlias $ "args: " ++ show args
+            logAlias $ "paramArgMap: " ++ show paramArgMap
             let calleeArgsAliases = 
-                    mapDS (\x -> 
-                        case Map.lookup x paramArgMap of 
-                            -- XXX verify this part. Better to use
-                            -- "shouldnt" if that is really the case.
-                            -- Currently some tests (eg. "alias_fork1")
-                            -- reach this path.
-                            Nothing -> x -- shouldn't happen
-                            Just y -> y
-                    ) calleeParamAliases
-            let calleeArgsAliases' = mapDS LiveVar calleeArgsAliases
-            combined <- aliasedArgsInPrimCall calleeArgsAliases' aliasMap args
-            logAlias $ "calleeArgsAliases:" ++ show calleeArgsAliases
-            logAlias $ "current aliasMap: " ++ show aliasMap
-            logAlias $ "combined:         " ++ show combined
+                    mapDS (\x -> Map.lookup x paramArgMap) calleeParamAliases
+                    -- filter out aliases of constant args
+                    -- (caused by constant constructor)
+                    |> filterDS isJust
+                    |> mapDS (\x -> LiveVar (fromJust x))
+            combined <- aliasedArgsInPrimCall calleeArgsAliases aliasMap args
+            logAlias $ "calleeParamAliases: " ++ show calleeParamAliases
+            logAlias $ "calleeArgsAliases:  " ++ show calleeArgsAliases
+            logAlias $ "current aliasMap:   " ++ show aliasMap
+            logAlias $ "combined:           " ++ show combined
             return combined
         _ -> do
             -- | Analyse simple prims
