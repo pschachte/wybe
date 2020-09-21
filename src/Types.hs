@@ -1126,9 +1126,11 @@ joinState (BindingState detism1 boundVars1 breakVars1)
 
 -- | Add some bindings to a BindingState
 addBindings :: Set VarName -> BindingState -> BindingState
-addBindings vars st@(BindingState detism boundVars breakVars)
-  | detism == Terminal || detism == Failure  =  st  -- XXX error case?
-  | detism == Det || detism == SemiDet =
+addBindings vars st@(BindingState Terminal boundVars breakVars) = st
+addBindings vars st@(BindingState Failure  boundVars breakVars) = st
+addBindings vars st@(BindingState Det      boundVars breakVars) =
+    BindingState Det ((vars `Set.union`) <$> boundVars) breakVars
+addBindings vars st@(BindingState SemiDet  boundVars breakVars) =
     BindingState Det ((vars `Set.union`) <$> boundVars) breakVars
 
 
