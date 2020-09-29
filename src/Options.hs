@@ -34,6 +34,7 @@ data Options = Options{
     , optNoLLVMOpt    :: Bool     -- ^Don't run the LLVM optimisation passes
     , optNoMultiSpecz :: Bool     -- ^Disable multiple specializatio
     , optVerbose      :: Bool     -- ^Be verbose in compiler output
+    , optNoFont       :: Bool     -- ^Disable ISO font change codes in messages
     } deriving Show
 
 
@@ -50,6 +51,7 @@ defaultOptions     = Options
  , optNoLLVMOpt    = False
  , optNoMultiSpecz = False 
  , optVerbose      = False
+ , optNoFont       = False
  }
 
 -- |All compiler features we may want to log
@@ -133,6 +135,9 @@ options =
  , Option ['v']     ["verbose"]
      (NoArg (\opts -> opts { optVerbose = True }))
      "dump verbose messages after compilation"
+     , Option ['n'] ["no-fonts"]
+     (NoArg (\opts -> opts { optNoFont = True }))
+     "disable font highlighting in messages"
  ]
 
 
