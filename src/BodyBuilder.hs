@@ -1043,8 +1043,10 @@ data BkwdBuilderState = BkwdBuilderState {
 
 
 rebuildBody :: BodyState -> BkwdBuilder ()
+rebuildBody st@BodyState{parent=Just par} =
+    shouldnt $ "Body parent left by fusion: " ++ fst (showState 4 par)
 rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
-                         buildState=bldst, parent=par} = do
+                         buildState=bldst, parent=Nothing} = do
     usedLater <- gets bkwdUsedLater
     following <- gets bkwdFollowing
     logBkwd $ "Rebuilding body:" ++ fst (showState 8 st)
@@ -1086,7 +1088,6 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
     mapM_ (placedApply (bkwdBuildStmt defs)) prims
     finalUsedLater <- gets bkwdUsedLater
     logBkwd $ "Finished rebuild with usedLater = " ++ show finalUsedLater
-    maybe nop rebuildBody par
 
 
 -- |Select the element of bods specified by num
