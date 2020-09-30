@@ -354,9 +354,6 @@ definiteVariableValue var = do
         ArgVar{} -> return Nothing -- variable (unknown) result
         _ -> return $ Just arg
 
-buildPrims :: BodyState -> BodyBuilder a -> Compiler (a,BodyState)
-buildPrims st builder = runStateT builder st
-
 
 -- |Add an instruction to the current body, after applying the current
 --  substitution. If it's a move instruction, add it to the current
@@ -370,6 +367,8 @@ instr prim pos = do
         return ()
       BodyState{failed=False,buildState=Unforked} -> do
         prim' <- argExpandedPrim prim
+        outNaming <- gets outSubst
+        logBuild $ "With outSubst " ++ simpleShowMap outNaming
         logBuild $ "Generating instr " ++ show prim ++ " -> " ++ show prim'
         instr' prim' pos
       _ ->
@@ -385,6 +384,8 @@ instr' prim@(PrimForeign "llvm" "move" []
       shouldnt "move instruction with wrong flow"
     outVar <- gets (Map.findWithDefault var var . outSubst)
     addSubst outVar val
+    -- XXX since we're recording the subst, so this instr will be removed later,
+    -- can we just not generate it?
     rawInstr prim pos
     recordVarSet argvar
 --     this is a bit of a hack to work around not threading a heap
@@ -396,10 +397,12 @@ instr' prim@(PrimForeign "llvm" "move" []
 --     the only problem that needs fixing.  We don't want to fix this
 --     by threading a heap through, because it's fine to reorder calls
 --     to alloc.
+-- XXX can we git rid of this special case by making lpvm alloc "impure"?
 instr' prim@(PrimForeign "lpvm" "alloc" [] [_,argvar]) pos = do
     logBuild "  Leaving alloc alone"
     rawInstr prim pos
     recordVarSet argvar
+-- XXX can we get rid of this pseudo-instruction?
 instr' prim@(PrimForeign "lpvm" "cast" []
              [from, to@ArgVar{argVarName=var, argVarFlow=flow}]) pos
   = do
@@ -691,6 +694,9 @@ expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowIn} = do
     maybe (return arg) expandArg var'
 expandArg (ArgVar var typ coerce FlowOut ftype lst) = do
     var' <- gets (Map.findWithDefault var var . outSubst)
+    when (var /= var')
+      $ logBuild $ "Replaced output variable " ++ show var
+                   ++ " with " ++ show var'
     return $ ArgVar var' typ coerce FlowOut ftype lst
 expandArg arg = return arg
 
@@ -945,10 +951,12 @@ addBodyContinuation :: BodyState -> BodyState -> Compiler BodyState
 addBodyContinuation _ next@BodyState{parent=Just _} =
     shouldnt $ "addBodyContinuation with non-singular second argument:"
                ++ fst (showState 4 next)
-addBodyContinuation prev@BodyState{buildState=Unforked} next = do
+addBodyContinuation prev@BodyState{buildState=Unforked, currBuild=bld,
+                                   currSubst=subst, blockDefs=defs,
+                                   outSubst=osubst} next = do
     logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
     logMsg BodyBuilder $ "... after unforked body:" ++ fst (showState 4 prev)
-    addSelectedContinuation (currBuild prev) (currSubst prev) next
+    addSelectedContinuation bld subst defs osubst next
 addBodyContinuation prev@BodyState{buildState=Forked{}} next = do
     logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
     logMsg BodyBuilder $ "... after forked body:" ++ fst (showState 4 prev)
@@ -960,34 +968,43 @@ addBodyContinuation prev@BodyState{buildState=Forked{}} next = do
 -- | Add the appropriate branch(es) to follow the specified list of prims, which
 -- includes both the prims of the previous unforked body and the unforked part
 -- of the following 
-addSelectedContinuation :: [Placed Prim] -> Substitution -> BodyState
-                        -> Compiler BodyState
+addSelectedContinuation :: [Placed Prim] -> Substitution -> Set PrimVarName
+                        -> VarSubstitution -> BodyState -> Compiler BodyState
                         -- XXX Must merge subst with currSubst of st
-addSelectedContinuation prevPrims subst st@BodyState{buildState=Unforked} = do
-    let subst' = Map.union (currSubst st) subst
+addSelectedContinuation prevPrims subst defs osubst
+                        st@BodyState{buildState=Unforked} = do
+    let subst'  = Map.union (currSubst st) subst
+    let defs'   = Set.union (blockDefs st) defs
+    let oSubst' = Map.union (outSubst st)  osubst
     let st' = st { currBuild = currBuild st ++ prevPrims
-                 , currSubst = subst' }
+                 , currSubst = subst'
+                 , blockDefs = defs'
+                 , outSubst  = oSubst' }
     logMsg BodyBuilder $ "Adding unforked continuation produces:"
                          ++ fst (showState 4 st')
     return st'
-addSelectedContinuation prevPrims subst st@BodyState{buildState=bst@Forked{}} =
+addSelectedContinuation prevPrims subst defs osubst
+                        st@BodyState{buildState=bst@Forked{}} = do
+    let subst'  = Map.union (currSubst st) subst
+    let defs'   = Set.union (blockDefs st) defs
+    let osubst' = Map.union (outSubst st)  osubst
     case selectedBranch subst bst of
         Nothing -> do
-            let subst' = Map.union (currSubst st) subst
             bst <- fuseBranches $ buildState st
             let st' = st { currBuild  = currBuild st ++ prevPrims
                          , currSubst  = subst'
+                         , blockDefs  = defs'
+                         , outSubst   = osubst'
                          , buildState = bst }
             logMsg BodyBuilder $ "No fork selection possible, producing:"
                          ++ fst (showState 4 st')
             return st'
         Just branchNum -> do
             let selectedBranch = revSelectElt branchNum $ bodies bst
-            let subst' = Map.union (currSubst st) subst
             logMsg BodyBuilder $ "Selected branch " ++ show branchNum
             selectedBranch' <- fuseBodies selectedBranch
             addSelectedContinuation (currBuild st ++ prevPrims)
-                                    subst' selectedBranch'
+                                    subst' defs' osubst' selectedBranch'
 
 
 -- |Given a variable substitution, determine which branch will be selected,
@@ -1052,9 +1069,6 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
     logBkwd $ "Rebuilding body:" ++ fst (showState 8 st)
               ++ "\nwith currSubst = " ++ simpleShowMap subst
               ++ "\n     usedLater = " ++ simpleShowSet usedLater
-    -- First see if we can prune away a later fork based on the switch variable
-    -- XXX shouldn't be needed anymore
-    -- pruneBody subst
     case bldst of
       Unforked -> nop
       Forked{complete=False} ->
@@ -1075,7 +1089,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
                   then Just usedLaters
                   else Nothing
             logBkwd $ "Switch on " ++ show var
-                      ++ " with usedLater " ++ show usedLater''
+                      ++ " with usedLater " ++ simpleShowSet usedLater''
             logBkwd $ "branchesUsedLater = "
                       ++ show branchesUsedLater
             let lastUse = Set.notMember var usedLater''
@@ -1111,43 +1125,14 @@ rebuildBranch subst bod = do
     lift $ execStateT (rebuildBody bod) bkwdSt
 
 
--- |Prune the specified ProcBody according to the variable bindings of
--- subst, eliminating any forks whose selection is forced by the bindings.
--- XXX This is weak.  First, it should prune forks recursively, and second,
--- the returned used var set should only include the bodies that are not
--- pruned.  But to do that, ProcBody needs to track used variables, or else
--- we have to recompute it from scratch.
-pruneBody :: Substitution -> BkwdBuilder ()
-pruneBody subst = do
-    body <- gets bkwdFollowing
-    logBkwd $ "Trying to prune body" ++ showBlock 4 body
-    logBkwd $ "... with subst = " ++ simpleShowMap subst
-    case bodyFork body of
-      PrimFork{forkVar=var, forkBodies=bods} -> do
-        case Map.lookup var subst of
-          Just (ArgInt num _) -> do
-            used0 <- gets bkwdUsedLater
-            used <- maybe used0 (revSelectElt num) <$> gets bkwdBranchesUsedLater
-            logBkwd $ "pruneBody successful:  selecting branch " ++ show num
-            logBkwd $ "usedLater set to " ++ show used
-            let prevBody = selectElt num bods
-            let prims = bodyPrims body
-            let newBody = prevBody { bodyPrims = prims ++ bodyPrims prevBody }
-            logBkwd $ "New body = " ++ showBlock 4 newBody
-            modify $ \st -> st { bkwdUsedLater = used, bkwdFollowing = newBody }
-          _ -> do
-            logBkwd "Can't prune body: fork value not determined"
-            return ()
-      _ -> do
-        logBkwd "Can't prune body:  no fork"
-        return ()
-
-
 bkwdBuildStmt :: Set PrimVarName -> Prim -> OptPos -> BkwdBuilder ()
 bkwdBuildStmt defs prim pos = do
     usedLater <- gets bkwdUsedLater
+    renaming <- gets bkwdRenaming
     logBkwd $ "  Rebuilding prim: " ++ show prim
-              ++ "\n    with usedLater = " ++ show usedLater
+              ++ "\n    with usedLater   = " ++ show usedLater
+              ++ "\n    and bkwdRenaming = " ++ simpleShowMap renaming
+              ++ "\n    and defs         = " ++ simpleShowSet defs
     let args = primArgs prim
     args' <- mapM renameArg args
     logBkwd $ "    renamed args = " ++ show args'
@@ -1161,16 +1146,17 @@ bkwdBuildStmt defs prim pos = do
         let (ins, outs) = splitArgsByMode $ List.filter argIsVar args'
         -- Filter out instructions that produce no needed outputs
         -- XXX Must not filter out impure instructions
-        when (any (`Set.member` usedLater)
-              $ argVarName <$> outs) $ do
+        when (any (`Set.member` usedLater) $ argVarName <$> outs) $ do
+          -- XXX Careful:  probably shouldn't mark last use of variable passed
+          -- as input argument more than once in the call
           let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args'
           logBkwd $ "    updated prim = " ++ show prim'
           let inVars = argVarName <$> ins
           let usedLater' = List.foldr Set.insert usedLater inVars
           st@BkwdBuilderState{bkwdFollowing=bd@ProcBody{bodyPrims=prims}} <- get
           put $ st { bkwdFollowing =
-                       bd { bodyPrims = maybePlace prim' pos:prims },
-                     bkwdUsedLater = usedLater' }
+                       bd { bodyPrims     = maybePlace prim' pos:prims },
+                            bkwdUsedLater = usedLater' }
 
 
 renameArg :: PrimArg -> BkwdBuilder PrimArg
@@ -1212,7 +1198,7 @@ logState = do
 -- start by showing the parent, then we show the current state.
 showState :: Int -> BodyState -> (String,Int)
 showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
-                           blockDefs=defed, forkConsts=consts,
+                           blockDefs=defs, forkConsts=consts,
                            currSubst=substs} =
     let (str  ,indent')   = maybe ("",indent)
                             (mapFst (++ (startLine indent ++ "----------")) 
@@ -1223,10 +1209,8 @@ showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
         sets              = if List.null revPrims
                             then ""
                             else startLine indent
-                                 ++ "# Retargetable assignments: {"
-                                 ++ intercalate ", " (List.map show $
-                                                      Set.toList defed)
-                                 ++ "}"
+                                 ++ "# Vars defined: "
+                                 ++ simpleShowSet defs
         suffix            = case bld of
                               Forked{} ->
                                 startLine indent
