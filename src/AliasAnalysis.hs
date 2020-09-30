@@ -442,7 +442,7 @@ updateMultiSpeczInfoByPrim proto
                                 (procInterestingCallProperties analysis)
                         -- if a argument is used more than once,
                         -- then it should be aliased
-                        && isArgVarUsedOnceInArgs arg args)
+                        && isArgVarUsedOnceInArgs arg args calleeProto)
                     |> Maybe.mapMaybe (\(arg, paramID) ->
                         fmap (\requiredParams -> (arg, paramID, requiredParams))
                             (isArgUnaliased aliasMap arg))
@@ -520,14 +520,21 @@ isArgUnaliased _ _ = Nothing
 
 
 -- return True if the given arg is only used once in given list of arg.
+-- Unneeded params are ignored.
 -- no need to worry about output var since it's in SSA form. 
-isArgVarUsedOnceInArgs :: PrimArg -> [PrimArg] -> Bool
-isArgVarUsedOnceInArgs ArgVar{argVarName=varName} args =
-    List.filter (\case
-        ArgVar{argVarName=varName'} -> varName == varName'
-        _ -> False) args
+isArgVarUsedOnceInArgs :: PrimArg -> [PrimArg] -> PrimProto -> Bool
+isArgVarUsedOnceInArgs ArgVar{argVarName=varName} args calleeProto =
+    let isParamNeeded p = 
+            not (paramInfoUnneeded (primParamInfo p))
+    in
+    List.zip args (primProtoParams calleeProto)
+    |> List.filter (\case
+            (ArgVar{argVarName=varName'}, param)
+                -> varName == varName' && isParamNeeded param
+            _
+                -> False)
     |> List.length |> (== 1)
-isArgVarUsedOnceInArgs _ _ = True -- we don't care about constant value
+isArgVarUsedOnceInArgs _ _ _ = True -- we don't care about constant value
 
 
 -- adding interesting unaliased params
