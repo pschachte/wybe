@@ -396,11 +396,11 @@ buildOutputOp params = do
     logCodegen $ "Built outputs from symbol table: " ++ show outputs
 
     case outputs of
-        -- * No valid output
+        -- No valid output
         []       -> return Nothing
-        -- * single output case
+        -- single output case
         [single] -> return $ Just single
-        -- * multiple output case
+        -- multiple output case
         _        -> Just <$> structPack outputs
 
 -- | Pack operands into a structure through a sequence of insertvalue
@@ -1034,7 +1034,7 @@ llvmMapBinop :: Map String
                  TypeFamily, TypeRepresentation -> TypeRepresentation)
 llvmMapBinop =
     Map.fromList [
-            -- * Integer arithmetic
+            -- Integer arithmetic
             ("add",  (iadd, IntFamily, id)),
             ("sub",  (isub, IntFamily, id)),
             ("mul",  (imul, IntFamily, id)),
@@ -1042,7 +1042,7 @@ llvmMapBinop =
             ("sdiv", (sdiv, IntFamily, id)),
             ("urem", (urem, IntFamily, id)),
             ("srem", (srem, IntFamily, id)),
-            -- * Integer comparisions
+            -- Integer comparisions
             ("icmp eq",  (icmp IP.EQ,  IntFamily, const $ Bits 1)),
             ("icmp ne",  (icmp IP.NE,  IntFamily, const $ Bits 1)),
             ("icmp ugt", (icmp IP.UGT, IntFamily, const $ Bits 1)),
@@ -1053,7 +1053,7 @@ llvmMapBinop =
             ("icmp sge", (icmp IP.SGE, IntFamily, const $ Bits 1)),
             ("icmp slt", (icmp IP.SLT, IntFamily, const $ Bits 1)),
             ("icmp sle", (icmp IP.SLE, IntFamily, const $ Bits 1)),
-            -- * Bitwise operations
+            -- Bitwise operations
             ("shl",  (shl,  IntFamily, id)),
             ("lshr", (lshr, IntFamily, id)),
             ("ashr", (ashr, IntFamily, id)),
@@ -1061,13 +1061,13 @@ llvmMapBinop =
             ("and",  (lAnd, IntFamily, id)),
             ("xor",  (lXor, IntFamily, id)),
 
-            -- * Floating point arithmetic
+            -- Floating point arithmetic
             ("fadd", (fadd, FloatFamily, id)),
             ("fsub", (fsub, FloatFamily, id)),
             ("fmul", (fmul, FloatFamily, id)),
             ("fdiv", (fdiv, FloatFamily, id)),
             ("frem", (frem, FloatFamily, id)),
-            -- * Floating point comparisions
+            -- Floating point comparisions
             ("fcmp eq",  (fcmp FP.OEQ, FloatFamily, const $ Bits 1)),
             ("fcmp ne",  (fcmp FP.ONE, FloatFamily, const $ Bits 1)),
             ("fcmp slt", (fcmp FP.OLT, FloatFamily, const $ Bits 1)),
@@ -1126,7 +1126,7 @@ repLLVMType (Floating b)   = shouldnt $ "unknown floating point width "
 
 
 ------------------------------------------------------------------------------
--- -- * Creating LLVM AST module from global definitions                    --
+-- -- Creating LLVM AST module from global definitions                    --
 ------------------------------------------------------------------------------
 
 -- | Initialize and fill a new LLVMAST.Module with the translated
@@ -1294,7 +1294,7 @@ addUniqueDefinitions (LLVMAST.Module n fn l t ds) defs =
 -- Memory Interface                                                          --
 -------------------------------------------------------------------------------
 
--- * $ functions
+-- $ functions
 
 -- | Call "wybe_malloc" from external C shared lib. Returns an i8* pointer.
 -- XXX What will be the type of 'size' we pass to extern C's malloc?

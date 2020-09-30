@@ -63,7 +63,7 @@ type AnalysisInfo =
 -- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
 aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
 aliasSccBottomUp (AcyclicSCC single) = do
-    _ <- aliasProcBottomUp single -- ^immediate fixpoint if no mutual dependency
+    _ <- aliasProcBottomUp single -- immediate fixpoint if no mutual dependency
     return ()
 -- | Gather all flags (indicating if any proc alias information changed or not)
 --     by comparing transitive closure of the (key, value) pairs of the map;
@@ -131,7 +131,7 @@ aliasProcBottomUp pspec = do
     logAlias $ "old: " ++ show oldAliasInfo
     logAlias $ "new: " ++ show newAliasInfo
     return $ isAliasInfoChanged oldAliasInfo newAliasInfo
-    -- ^XXX wrong way to do this. Need to change type signatures of a bunch of
+    -- XXX wrong way to do this. Need to change type signatures of a bunch of
     -- functions start from aliasProcDef which is called by updateProcDefM
 
 
@@ -249,7 +249,7 @@ completeAliasMap caller aliasMap = do
     -- and singletons
     realParams <- Set.fromList . (primParamName <$>)
                     <$> protoRealParams caller
-    -- ^realParams is a list of formal params of this caller
+    -- realParams is a list of formal params of this caller
     let aliasMap' = filterDS (\x -> case x of 
                             MaybeAliasByParam _ -> True
                             _ -> False) aliasMap
@@ -269,7 +269,7 @@ updateAliasedByPrim :: AliasMapLocal -> Placed Prim -> Compiler AliasMapLocal
 updateAliasedByPrim aliasMap prim =
     case content prim of
         PrimCall _ spec args -> do
-            -- | Analyse proc calls
+            -- Analyse proc calls
             calleeDef <- getProcDef spec
             let (ProcDefPrim calleeProto _ analysis _) = procImpln calleeDef
             let calleeParamAliases = procArgAliasMap analysis
@@ -279,24 +279,22 @@ updateAliasedByPrim aliasMap prim =
             let paramArgMap = mapParamToArgVar calleeProto args
             -- calleeArgsAliasMap is the alias map of actual arguments passed
             -- into callee
+            logAlias $ "args: " ++ show args
+            logAlias $ "paramArgMap: " ++ show paramArgMap
             let calleeArgsAliases = 
-                    mapDS (\x -> 
-                        case Map.lookup x paramArgMap of 
-                            -- XXX verify this part. Better to use
-                            -- "shouldnt" if that is really the case.
-                            -- Currently some tests (eg. "alias_fork1")
-                            -- reach this path.
-                            Nothing -> x -- shouldn't happen
-                            Just y -> y
-                    ) calleeParamAliases
-            let calleeArgsAliases' = mapDS LiveVar calleeArgsAliases
-            combined <- aliasedArgsInPrimCall calleeArgsAliases' aliasMap args
-            logAlias $ "calleeArgsAliases:" ++ show calleeArgsAliases
-            logAlias $ "current aliasMap: " ++ show aliasMap
-            logAlias $ "combined:         " ++ show combined
+                    mapDS (\x -> Map.lookup x paramArgMap) calleeParamAliases
+                    -- filter out aliases of constant args
+                    -- (caused by constant constructor)
+                    |> filterDS isJust
+                    |> mapDS (\x -> LiveVar (fromJust x))
+            combined <- aliasedArgsInPrimCall calleeArgsAliases aliasMap args
+            logAlias $ "calleeParamAliases: " ++ show calleeParamAliases
+            logAlias $ "calleeArgsAliases:  " ++ show calleeArgsAliases
+            logAlias $ "current aliasMap:   " ++ show aliasMap
+            logAlias $ "combined:           " ++ show combined
             return combined
         _ -> do
-            -- | Analyse simple prims
+            -- Analyse simple prims
             logAlias $ "--- simple prim:  " ++ show prim
             let prim' = content prim
             maybeAliasedVariables <- maybeAliasPrimArgs prim'
@@ -444,7 +442,7 @@ updateMultiSpeczInfoByPrim proto
                                 (procInterestingCallProperties analysis)
                         -- if a argument is used more than once,
                         -- then it should be aliased
-                        && isArgVarUsedOnceInArgs arg args)
+                        && isArgVarUsedOnceInArgs arg args calleeProto)
                     |> Maybe.mapMaybe (\(arg, paramID) ->
                         fmap (\requiredParams -> (arg, paramID, requiredParams))
                             (isArgUnaliased aliasMap arg))
@@ -522,14 +520,21 @@ isArgUnaliased _ _ = Nothing
 
 
 -- return True if the given arg is only used once in given list of arg.
+-- Unneeded params are ignored.
 -- no need to worry about output var since it's in SSA form. 
-isArgVarUsedOnceInArgs :: PrimArg -> [PrimArg] -> Bool
-isArgVarUsedOnceInArgs ArgVar{argVarName=varName} args =
-    List.filter (\case
-        ArgVar{argVarName=varName'} -> varName == varName'
-        _ -> False) args
+isArgVarUsedOnceInArgs :: PrimArg -> [PrimArg] -> PrimProto -> Bool
+isArgVarUsedOnceInArgs ArgVar{argVarName=varName} args calleeProto =
+    let isParamNeeded p = 
+            not (paramInfoUnneeded (primParamInfo p))
+    in
+    List.zip args (primProtoParams calleeProto)
+    |> List.filter (\case
+            (ArgVar{argVarName=varName'}, param)
+                -> varName == varName' && isParamNeeded param
+            _
+                -> False)
     |> List.length |> (== 1)
-isArgVarUsedOnceInArgs _ _ = True -- we don't care about constant value
+isArgVarUsedOnceInArgs _ _ _ = True -- we don't care about constant value
 
 
 -- adding interesting unaliased params

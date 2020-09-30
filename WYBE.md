@@ -419,6 +419,15 @@ if { x < 0     :: !println("negative")
 
 
 
+## `terminal` procedures
+A procedure is considered to be *terminal* if a call to it will never return (it
+will neither succeed nor fail). For example, the `exit` and `error` procedures
+are `terminal`, as is any infinite loop. A procedure can be declared to be
+terminal by following the `def` keyword with `terminal` in its declaration. The
+Wybe compiler will verify that procedures declared `terminal` will indeed not
+return.
+
+
 ## Iteration statements
 
 Iteration is specified with the `do` statement, of the form:

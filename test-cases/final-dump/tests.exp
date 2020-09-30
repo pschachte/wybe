@@ -35,27 +35,27 @@ lookup > public (6 calls)
     foreign llvm icmp ne(map#0:tests.map, 0:wybe.int, ?tmp$15#0:wybe.bool)
     case ~tmp$15#0:wybe.bool of
     0:
-        foreign lpvm access(map#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.int)
-        foreign llvm icmp slt(key#0:wybe.int, ~tmp$2#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:nn:nn
-        case ~tmp$11#0:wybe.bool of
-        0:
-            foreign lpvm access(~map#0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$4#0:tests.map)
-            tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #19 @tests:24:25
-
-        1:
-            foreign lpvm access(~map#0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$3#0:tests.map)
-            tests.lookup<0>(~key#0:wybe.int, ~tmp$3#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #16 @tests:23:25
-
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign lpvm access(~map#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
-        foreign llvm icmp eq(~key#0:wybe.int, ~tmp$0#0:wybe.int, ?tmp$13#0:wybe.bool) @wybe:nn:nn
+        foreign lpvm access(map#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
+        foreign llvm icmp eq(key#0:wybe.int, tmp$0#0:wybe.int, ?tmp$13#0:wybe.bool) @wybe:nn:nn
         case ~tmp$13#0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm icmp slt(key#0:wybe.int, ~tmp$0#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:nn:nn
+            case ~tmp$11#0:wybe.bool of
+            0:
+                foreign lpvm access(~map#0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$4#0:tests.map)
+                tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #9 @tests:24:25
+
+            1:
+                foreign lpvm access(~map#0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$3#0:tests.map)
+                tests.lookup<0>(~key#0:wybe.int, ~tmp$3#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #6 @tests:23:25
+
 
         1:
-            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign lpvm access(~map#0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?result#0:wybe.int)
+            foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
 
@@ -113,41 +113,41 @@ if.then:
   %"2$tmp$13#0" = icmp eq i64 %"key#0", %4 
   br i1 %"2$tmp$13#0", label %if.then1, label %if.else1 
 if.else:
-  %9 = add   i64 %"map#0", 8 
-  %10 = inttoptr i64 %9 to i64* 
-  %11 = getelementptr  i64, i64* %10, i64 0 
-  %12 = load  i64, i64* %11 
-  %"3$tmp$11#0" = icmp slt i64 %"key#0", %12 
-  br i1 %"3$tmp$11#0", label %if.then2, label %if.else2 
-if.then1:
-  %5 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %6 = insertvalue {i64, i1} %5, i1 0, 1 
-  ret {i64, i1} %6 
-if.else1:
-  %7 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %8 = insertvalue {i64, i1} %7, i1 0, 1 
-  ret {i64, i1} %8 
-if.then2:
-  %13 = inttoptr i64 %"map#0" to i64* 
-  %14 = getelementptr  i64, i64* %13, i64 0 
-  %15 = load  i64, i64* %14 
-  %16 = tail call fastcc  {i64, i1}  @"tests.lookup<0>"(i64  %"key#0", i64  %15)  
-  %17 = extractvalue {i64, i1} %16, 0 
-  %18 = extractvalue {i64, i1} %16, 1 
-  %19 = insertvalue {i64, i1} undef, i64 %17, 0 
-  %20 = insertvalue {i64, i1} %19, i1 %18, 1 
-  ret {i64, i1} %20 
-if.else2:
-  %21 = add   i64 %"map#0", 24 
-  %22 = inttoptr i64 %21 to i64* 
-  %23 = getelementptr  i64, i64* %22, i64 0 
-  %24 = load  i64, i64* %23 
-  %25 = tail call fastcc  {i64, i1}  @"tests.lookup<0>"(i64  %"key#0", i64  %24)  
-  %26 = extractvalue {i64, i1} %25, 0 
-  %27 = extractvalue {i64, i1} %25, 1 
-  %28 = insertvalue {i64, i1} undef, i64 %26, 0 
-  %29 = insertvalue {i64, i1} %28, i1 %27, 1 
+  %28 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %29 = insertvalue {i64, i1} %28, i1 0, 1 
   ret {i64, i1} %29 
+if.then1:
+  %5 = add   i64 %"map#0", 16 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = getelementptr  i64, i64* %6, i64 0 
+  %8 = load  i64, i64* %7 
+  %9 = insertvalue {i64, i1} undef, i64 %8, 0 
+  %10 = insertvalue {i64, i1} %9, i1 1, 1 
+  ret {i64, i1} %10 
+if.else1:
+  %"5$tmp$11#0" = icmp slt i64 %"key#0", %4 
+  br i1 %"5$tmp$11#0", label %if.then2, label %if.else2 
+if.then2:
+  %11 = inttoptr i64 %"map#0" to i64* 
+  %12 = getelementptr  i64, i64* %11, i64 0 
+  %13 = load  i64, i64* %12 
+  %14 = tail call fastcc  {i64, i1}  @"tests.lookup<0>"(i64  %"key#0", i64  %13)  
+  %15 = extractvalue {i64, i1} %14, 0 
+  %16 = extractvalue {i64, i1} %14, 1 
+  %17 = insertvalue {i64, i1} undef, i64 %15, 0 
+  %18 = insertvalue {i64, i1} %17, i1 %16, 1 
+  ret {i64, i1} %18 
+if.else2:
+  %19 = add   i64 %"map#0", 24 
+  %20 = inttoptr i64 %19 to i64* 
+  %21 = getelementptr  i64, i64* %20, i64 0 
+  %22 = load  i64, i64* %21 
+  %23 = tail call fastcc  {i64, i1}  @"tests.lookup<0>"(i64  %"key#0", i64  %22)  
+  %24 = extractvalue {i64, i1} %23, 0 
+  %25 = extractvalue {i64, i1} %23, 1 
+  %26 = insertvalue {i64, i1} undef, i64 %24, 0 
+  %27 = insertvalue {i64, i1} %26, i1 %25, 1 
+  ret {i64, i1} %27 
 }
 
 

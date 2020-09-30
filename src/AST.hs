@@ -16,7 +16,8 @@
 module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
-  Determinism(..), determinismName,
+  Determinism(..), determinismLEQ, determinismMeet, determinismJoin,
+  determinismSeq, determinismTerminal, determinismName,
   TypeProto(..), TypeSpec(..), TypeRef(..), VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
@@ -49,7 +50,7 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, TypeDef(..), ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
-  foldProcCalls, foldBodyPrims, foldBodyDistrib,
+  foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp, expOutputs, pexpListOutputs,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
@@ -76,7 +77,9 @@ module AST (
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showMaybeSourcePos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
-  maybeShow, showMessages, stopOnError, logMsg, whenLogging2, whenLogging,
+  showVarDict, showVarMap, simpleShowMap, simpleShowSet,
+  maybeShow, showMessages, stopOnError,
+  logMsg, whenLogging2, whenLogging,
   -- *Helper functions
   defaultBlock, moduleIsPackage,
   -- *LPVM Encoding types
@@ -139,25 +142,71 @@ data Item
 data Visibility = Public | Private
                   deriving (Eq, Show, Generic)
 
-data Determinism = Det | SemiDet
+
+-- |Determinism describes whether a statement can succeed or fail if execution
+-- reaches a given program point.  Det means it will definitely succeed, Failure
+-- means it will definitely fail, SemiDet means it could either succeed or fail,
+-- and Terminal means it won't do either (so execution will not reach that
+-- point).  This values form a lattice, with Terminal at the bottom, SemiDet at
+-- the top, and Failure and Det incomparable values between them.
+data Determinism = Terminal | Failure | Det | SemiDet
                   deriving (Eq, Ord, Show, Generic)
--- Ordering for Determinism is significant. If x is a the Determinism of a
--- calling context and y is the Determinism of the called proc and x < y means
--- there's a determinism error. This will continue to hold when we add a NonDet
--- determism after SemiDet.
 
 
+-- |Partial order comparison for Determinism.
+determinismLEQ :: Determinism -> Determinism -> Bool
+determinismLEQ Failure Det = False
+determinismLEQ det1 det2 = det1 <= det2
+
+
+-- |Lattice meet for Determinism.  Probably not needed
+determinismMeet :: Determinism -> Determinism -> Determinism
+determinismMeet Failure Det = Terminal
+determinismMeet Det Failure = Terminal
+determinismMeet det1 det2 = min det1 det2
+
+
+-- |Lattice join for Determinism.
+determinismJoin :: Determinism -> Determinism -> Determinism
+determinismJoin Failure Det = SemiDet
+determinismJoin Det Failure = SemiDet
+determinismJoin det1 det2 = max det1 det2
+
+
+-- |Determinism for ordered sequence of steps.  This is not the same as meet or
+-- join, because nothing will be executed after a Failure, even a Terminal.
+-- This operation is associative.
+determinismSeq :: Determinism -> Determinism -> Determinism
+determinismSeq Terminal _        = Terminal
+determinismSeq Failure  _        = Failure
+determinismSeq _        Terminal = Terminal
+determinismSeq _        Failure  = Failure
+determinismSeq det1     det2     = max det1 det2
+
+
+-- |Does this determinism reflect a state that will definitely not continue to
+-- the next statement?
+determinismTerminal :: Determinism -> Bool
+determinismTerminal Terminal = True
+determinismTerminal Failure  = True
+determinismTerminal Det      = False
+determinismTerminal SemiDet  = False
+
+
+-- |A suitable printable name for each determinism.
 determinismName :: Determinism -> String
-determinismName Det = "ordinary"
-determinismName SemiDet = "test"
+determinismName Terminal = "terminal"
+determinismName Failure  = "failing"
+determinismName Det      = "ordinary"
+determinismName SemiDet  = "test"
 
 
 -- | Internal representation of data
 data TypeRepresentation
-    = Address           -- * A pointer; occupies wordSize bits
-    | Bits Int          -- * An unsigned integer representation
-    | Signed Int        -- * A signed integer representation
-    | Floating Int      -- * A floating point representation
+    = Address           -- ^ A pointer; occupies wordSize bits
+    | Bits Int          -- ^ An unsigned integer representation
+    | Signed Int        -- ^ A signed integer representation
+    | Floating Int      -- ^ A floating point representation
     deriving (Eq, Ord, Generic)
 
 
@@ -1526,7 +1575,8 @@ data ProcDef = ProcDef {
                                 -- source code (before inlining) and the
                                 -- count of calls for each caller
     procVis :: Visibility,      -- what modules should be able to see this?
-    procDetism :: Determinism,  -- how many results this proc returns
+    procDetism :: Determinism,  -- can this proc succeed or fail?
+    -- procDeclDetism :: Determinism, -- proc's initially declared determinism
     procInline :: Bool,         -- should we inline calls to this proc?
     procSuperproc :: SuperprocSpec
                                 -- the proc this should be part of, if any
@@ -1802,55 +1852,82 @@ defaultBlock :: LLBlock
 defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 
 
--- |Fold over a list of Placed Stmts applying the fn to each ProcCall, and
--- applying comb, which must be associative, to combine results.  Results
--- are combined in a right-associative way, with the initial val on the right.
-foldProcCalls :: (ModSpec -> Ident -> Maybe Int -> Determinism -> Bool
-                  -> [Placed Exp] -> a) ->
-                 (a -> a -> a) -> a -> [Placed Stmt] -> a
-foldProcCalls _fn _comb val [] = val
-foldProcCalls fn comb val (s:ss) = foldProcCalls' fn comb val (content s) ss
+-- |Fold over a list of statements in a pre-order left-to-right traversal.
+-- Takes two folding functions, one for statements and one for expressions.
+foldStmts :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Stmt] -> a
+foldStmts sfn efn val stmts =
+    List.foldl (\val pstmt -> foldStmt sfn efn val $ content pstmt) val stmts
 
-foldProcCalls' :: (ModSpec -> Ident -> Maybe Int -> Determinism -> Bool
-                   -> [Placed Exp] -> a) ->
-                 (a -> a -> a) -> a -> Stmt -> [Placed Stmt] -> a
-foldProcCalls' fn comb val (ProcCall m name procID detism res args) ss =
-    foldProcCalls fn comb (comb val $ fn m name procID detism res args) ss
-foldProcCalls' fn comb val ForeignCall{} ss =
-    foldProcCalls fn comb val ss
-foldProcCalls' fn comb val (Cond tst thn els _) ss =
-    foldProcCalls' fn comb
-      (foldProcCalls fn comb
-        (foldProcCalls fn comb val els)
-          thn)
-      (content tst)
-      ss
-foldProcCalls' fn comb val (And stmts) ss =
-    foldProcCalls fn comb
-      (foldProcCalls fn comb val stmts)
-      ss
-foldProcCalls' fn comb val (Or stmts _) ss =
-    foldProcCalls fn comb
-      (foldProcCalls fn comb val stmts)
-      ss
-foldProcCalls' fn comb val (Not stmt) ss =
-    foldProcCalls' fn comb val
-      (content stmt)
-      ss
-foldProcCalls' fn comb val TestBool{} ss =
-    foldProcCalls fn comb val ss
-foldProcCalls' fn comb val Nop ss =
-    foldProcCalls fn comb val ss
-foldProcCalls' fn comb val (Loop body _) ss =
-    foldProcCalls fn comb (foldProcCalls fn comb val body) ss
-foldProcCalls' fn comb val (UseResources _ body) ss =
-    foldProcCalls fn comb (foldProcCalls fn comb val body) ss
--- foldProcCalls' fn comb val For{} ss =
---     foldProcCalls fn comb val ss
-foldProcCalls' fn comb val Break ss =
-    foldProcCalls fn comb val ss
-foldProcCalls' fn comb val Next ss =
-    foldProcCalls fn comb val ss
+
+-- |Fold over the specified statement and all the statements nested within it,
+-- in a pre-order left-to-right traversal. Takes two folding functions, one for
+-- statements and one for expressions.
+foldStmt :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Stmt -> a
+foldStmt sfn efn val stmt = foldStmt' sfn efn (sfn val stmt) stmt
+
+
+-- |Fold over all the statements nested within the given statement,
+-- but not the statement itself, in a pre-order left-to-right traversal.
+-- Takes two folding functions, one for statements and one for expressions.
+foldStmt' :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Stmt -> a
+-- foldStmt' _ _ _ stmt
+--   | unsafePerformIO $ do
+--       putStrLn $ "#### foldStmt' " ++ showStmt 4 stmt
+--       return False
+--   = error "Woops!"
+foldStmt' sfn efn val (ProcCall _ _ _ _ _ args) =
+    foldExps sfn efn val args
+foldStmt' sfn efn val (ForeignCall _ _ _ args) =
+    foldExps sfn efn val args
+foldStmt' sfn efn val (Cond tst thn els _) = val4
+    where val2 = foldStmt sfn efn val $ content tst
+          val3 = foldStmts sfn efn val2 thn
+          val4 = foldStmts sfn efn val3 els
+foldStmt' sfn efn val (And stmts) = foldStmts sfn efn val stmts
+foldStmt' sfn efn val (Or stmts _) = foldStmts sfn efn val stmts
+foldStmt' sfn efn val (Not negated) = foldStmt sfn efn val $ content negated
+foldStmt' sfn efn val (TestBool exp) = foldExp sfn efn val exp
+foldStmt' _   _   val Nop = val
+foldStmt' sfn efn val (Loop body _) = foldStmts sfn efn val body
+foldStmt' sfn efn val (UseResources _ body) = foldStmts sfn efn val body
+-- foldStmt' sfn efn val For{} =
+--     foldStmts sfn efn val ss
+foldStmt' _   _   val Break = val
+foldStmt' _   _   val Next = val
+
+
+-- |Fold over a list of expressions in a pre-order left-to-right traversal.
+-- Takes two folding functions, one for statements and one for expressions.
+foldExps :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Exp] -> a
+foldExps sfn efn val exps =
+  List.foldl (\val pexp -> foldExp sfn efn val $ content pexp) val exps
+
+
+-- |Fold over an expression and all its subexpressions, in a pre-order
+-- left-to-right traversal.  Takes two folding functions, one for statements and
+-- one for expressions.
+foldExp :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Exp -> a
+foldExp sfn efn val exp = foldExp' sfn efn (efn val exp) exp
+
+
+-- |Fold over all the subexpressions of the given expression, but not the
+-- expression itself, in a pre-order left-to-right traversal.
+-- Takes two folding functions, one for statements and one for expressions.
+foldExp' _   _    val IntValue{}     = val
+foldExp' _   _    val FloatValue{}   = val
+foldExp' _   _    val StringValue{}  = val
+foldExp' _   _    val CharValue{}    = val
+foldExp' _   _    val Var{}          = val
+foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
+foldExp' sfn efn val (Where stmts exp) =
+    let val1 = foldStmts sfn efn val stmts
+    in  foldExp sfn efn val1 $content exp
+foldExp' sfn efn val (CondExp stmt e1 e2) =
+    let val1 = foldStmt sfn efn val $ content stmt
+        val2 = foldExp sfn efn val1 $ content e1
+    in         foldExp sfn efn val2 $ content e2
+foldExp' sfn efn val (Fncall _ _ exps) = foldExps sfn efn val exps
+foldExp' sfn efn val (ForeignFn _ _ _ exps) = foldExps sfn efn val exps
 
 
 -- |Fold over a ProcBody applying the primFn to each Prim, and
@@ -2397,15 +2474,21 @@ procCallToExp stmt =
 -- and ParamInOut exprs as not assigning anything, because it does not
 -- *freshly* assign a variable (ie, it's already assigned).
 expOutputs :: Exp -> Set VarName
-expOutputs (Typed expr _ _) = expOutputs expr
+expOutputs (IntValue _) = Set.empty
+expOutputs (FloatValue _) = Set.empty
+expOutputs (StringValue _) = Set.empty
+expOutputs (CharValue _) = Set.empty
 expOutputs (Var name flow _) =
     if flow == ParamOut then Set.singleton name else Set.empty
-expOutputs (Fncall _ _ args) = pexpListOutputs args
+expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
-expOutputs _ = Set.empty
+expOutputs (Fncall _ _ args) = pexpListOutputs args
+expOutputs (ForeignFn _ _ _ args) = pexpListOutputs args
 
 
+-- |Return the set of variables that will definitely be freshly assigned by
+-- the specified list of placed expressions.
 pexpListOutputs :: [Placed Exp] -> Set VarName
 pexpListOutputs = List.foldr (Set.union . expOutputs . content) Set.empty
 
@@ -2585,8 +2668,10 @@ visibilityPrefix Private = ""
 
 -- |How to show a determinism.
 determinismPrefix :: Determinism -> String
-determinismPrefix SemiDet = "test "
-determinismPrefix Det = ""
+determinismPrefix Terminal = "terminal "
+determinismPrefix Failure  = "test " -- XXX do we want something more specific?
+determinismPrefix SemiDet  = "test "
+determinismPrefix Det      = ""
 
 
 -- |How to show an import or use declaration.
@@ -2813,7 +2898,7 @@ showStmt indent (Or stmts genVars) =
     "(   " ++
     intercalate ("\n" ++ replicate indent ' ' ++ "|| ")
         (List.map (showStmt indent' . content) stmts) ++
-    ")" ++ maybe "" ((" -> "++) . show) genVars
+    ")" ++ maybe "" ((" -> "++) . showVarDict) genVars
     where indent' = indent + 4
 showStmt indent (Not stmt) =
     "~(" ++ showStmt indent' (content stmt) ++ ")"
@@ -2824,11 +2909,11 @@ showStmt indent (Cond condstmt thn els genVars) =
     ++ startLine indent ++ "else::"
     ++ showBody (indent+4) els ++ "\n"
     ++ startLine indent ++ "}"
-    ++ maybe "" ((" -> "++) . show) genVars
+    ++ maybe "" ((" -> "++) . showVarDict) genVars
 showStmt indent (Loop lstmts genVars) =
     "do {" ++  showBody (indent + 4) lstmts
     ++ startLine indent ++ "}"
-    ++ maybe "" ((" -> "++) . show) genVars
+    ++ maybe "" ((" -> "++) . showVarDict) genVars
 showStmt indent (UseResources resources stmts) =
     "use " ++ intercalate ", " (List.map show resources) ++ " in"
     ++ showBody (indent + 4) stmts
@@ -2880,6 +2965,35 @@ instance Show Exp where
     ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
   show (Typed exp typ cast) =
       show exp ++ showTypeSuffix typ cast
+
+
+-- |Show a readable version of a VarDict
+showVarDict :: VarDict -> String
+showVarDict = showVarMap
+
+-- |Show a readable version of a Map from variable names to showable things
+showVarMap :: Show a => Map VarName a -> String
+showVarMap dict =
+    "{"
+    ++ intercalate ", "
+       (List.map (\(v,t) -> v ++ "::" ++ show t) $ Map.toList dict)
+    ++ "}"
+
+-- |Show a readable version of a Map of showable things
+simpleShowMap :: (Show a, Show b) => Map a b -> String
+simpleShowMap dict =
+    "{"
+    ++ intercalate ", "
+       (List.map (\(v,t) -> show v ++ "::" ++ show t) $ Map.toList dict)
+    ++ "}"
+
+
+-- |Show a readable version of a Map of showable things
+simpleShowSet :: Show a => Set a -> String
+simpleShowSet s =
+    "{"
+    ++ intercalate ", " (List.map show $ Set.toList s)
+    ++ "}"
 
 
 -- |maybeShow pre maybe post
@@ -2993,14 +3107,16 @@ logMsg :: LogSelection    -- ^ The aspect of the compiler being logged,
           -> String       -- ^ The log message
           -> Compiler ()  -- ^ Works in the Compiler monad
 logMsg selector msg = do
-    let prefix = (makeBold $ show selector) ++ ": "
+    prefix <- makeBold $ show selector ++ ": "
     whenLogging selector $
       liftIO $ hPutStrLn stderr (prefix ++ List.intercalate ('\n':prefix) (lines msg))
 
 -- | Appends a ISO/IEC 6429 code to the given string to print it bold
 -- in a terminal output.
-makeBold :: String -> String
-makeBold s = "\x1b[1m" ++ s ++ "\x1b[0m"
+makeBold :: String -> Compiler String
+makeBold s = do
+    noBold <- gets $ optNoFont . options
+    return $ if noBold then s else "\x1b[1m" ++ s ++ "\x1b[0m"
 
 
 ------------------------------ Module Encoding Types -----------------------

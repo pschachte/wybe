@@ -1,0 +1,14 @@
+pub type intlist { pub [] | [|](head:int, tail:intlist) }
+
+?x = [1,2,3]
+?l = x
+do {while (l = [?h | ?l])
+    !println(h)
+    ?l2 = x
+    do {while (l2 = [?h2 | ?l2])
+        !print("    ")
+        !print(h)
+        !print(" ")
+        !println(h2)
+    }
+}
