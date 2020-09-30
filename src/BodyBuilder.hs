@@ -21,7 +21,6 @@ import Data.Set as Set
 import Data.Maybe
 import Data.Tuple.HT (mapFst)
 import Data.Bits
-import Control.Applicative
 import Control.Monad
 import Control.Monad.Extra (whenJust)
 import Control.Monad.Trans (lift)
@@ -569,6 +568,13 @@ instrConsequences'
     (PrimForeign "lpvm" "mutate" [] [_,addr,offset,_,size,startOffset,val]) =
     return [(PrimForeign "lpvm" "access" []
             [addr,offset,size,startOffset], [val])]
+-- XXX handle flags
+instrConsequences'
+    (PrimForeign "lpvm" "access" [] [struct,offset,size,startOffset,val]) =
+    return [(PrimForeign "lpvm" "mutate" []
+            [struct,offset,ArgInt 1 intType,size,startOffset, val], [struct]),
+            (PrimForeign "lpvm" "mutate" []
+            [struct,offset,ArgInt 0 intType,size,startOffset, val], [struct])]
 instrConsequences' (PrimForeign "llvm" "add" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "sub" flags [a3,a2], [a1]),
             (PrimForeign "llvm" "sub" flags [a3,a1], [a2]),

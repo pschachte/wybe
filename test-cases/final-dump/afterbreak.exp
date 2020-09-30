@@ -24,8 +24,8 @@ gen$1 > (2 calls)
     foreign llvm icmp sgt(x#0:wybe.int, 10:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
-        foreign llvm add(x#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
-        afterbreak.gen$2<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, ~io#0:wybe.phantom, ~tmp$0#0:wybe.int, ~x#0:wybe.int, ~tmp$0#0:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom) #3
+        foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
+        afterbreak.gen$2<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, ~io#0:wybe.phantom, _:wybe.int, _:wybe.int, ~tmp$0#0:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom) #3
 
     1:
         foreign llvm move(~argc#0:wybe.int, ?argc#1:wybe.int)

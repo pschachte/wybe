@@ -121,11 +121,8 @@ list_reverse_helper > public (2 calls)
         foreign llvm move(~acc#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) @multi_specz_reverse:13:5
 
     1:
-        foreign lpvm access(lst#0:multi_specz_reverse.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
-        foreign lpvm access(~lst#0:multi_specz_reverse.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:multi_specz_reverse.intlist)
-        foreign llvm sub(~lst#0:multi_specz_reverse.intlist, 0:wybe.int, ?tmp$8#0:multi_specz_reverse.intlist)
-        foreign lpvm mutate(~tmp$8#0:multi_specz_reverse.intlist, ?tmp$9#0:multi_specz_reverse.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
-        foreign lpvm mutate(~tmp$9#0:multi_specz_reverse.intlist, ?tmp$10#0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~acc#0:multi_specz_reverse.intlist)
+        foreign lpvm access(lst#0:multi_specz_reverse.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:multi_specz_reverse.intlist)
+        foreign lpvm mutate(~lst#0:multi_specz_reverse.intlist, ?tmp$10#0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~acc#0:multi_specz_reverse.intlist)
         multi_specz_reverse.list_reverse_helper<0>[04d1467a4d](~t#0:multi_specz_reverse.intlist, ~tmp$10#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) #2 @multi_specz_reverse:14:29
 
 
@@ -338,22 +335,15 @@ entry:
   %"1$tmp$5#0" = icmp ne i64 %"lst#0", 0 
   br i1 %"1$tmp$5#0", label %if.then, label %if.else 
 if.then:
-  %107 = inttoptr i64 %"lst#0" to i64* 
-  %108 = getelementptr  i64, i64* %107, i64 0 
-  %109 = load  i64, i64* %108 
-  %110 = add   i64 %"lst#0", 8 
-  %111 = inttoptr i64 %110 to i64* 
-  %112 = getelementptr  i64, i64* %111, i64 0 
-  %113 = load  i64, i64* %112 
-  %"2$tmp$8#0" = sub   i64 %"lst#0", 0 
-  %114 = inttoptr i64 %"2$tmp$8#0" to i64* 
-  %115 = getelementptr  i64, i64* %114, i64 0 
-  store  i64 %109, i64* %115 
-  %116 = add   i64 %"2$tmp$8#0", 8 
-  %117 = inttoptr i64 %116 to i64* 
-  %118 = getelementptr  i64, i64* %117, i64 0 
-  store  i64 %"acc#0", i64* %118 
-  %"2$$#0" = tail call fastcc  i64  @"multi_specz_reverse.list_reverse_helper<0>[04d1467a4d]"(i64  %113, i64  %"2$tmp$8#0")  
+  %107 = add   i64 %"lst#0", 8 
+  %108 = inttoptr i64 %107 to i64* 
+  %109 = getelementptr  i64, i64* %108, i64 0 
+  %110 = load  i64, i64* %109 
+  %111 = add   i64 %"lst#0", 8 
+  %112 = inttoptr i64 %111 to i64* 
+  %113 = getelementptr  i64, i64* %112, i64 0 
+  store  i64 %"acc#0", i64* %113 
+  %"2$$#0" = tail call fastcc  i64  @"multi_specz_reverse.list_reverse_helper<0>[04d1467a4d]"(i64  %110, i64  %"lst#0")  
   ret i64 %"2$$#0" 
 if.else:
   ret i64 %"acc#0" 
