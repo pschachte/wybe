@@ -167,7 +167,7 @@ entry:
 
 
 
-= > public inline (10 calls)
+= > public inline (1 calls)
 0: =($left#0:coordinate.Coordinate, $right#0:coordinate.Coordinate, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

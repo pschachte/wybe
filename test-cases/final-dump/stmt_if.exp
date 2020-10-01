@@ -235,7 +235,7 @@ if.else2:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public (10 calls)
+= > public (7 calls)
 0: =($left#0:stmt_if.tree, $right#0:stmt_if.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

@@ -1572,11 +1572,13 @@ data ProcDef = ProcDef {
                                 -- the next call site id to use
     procCallers :: Map ProcSpec Int,
                                 -- callers to this proc from this mod in the
-                                -- source code (before inlining) and the
-                                -- count of calls for each caller
+                                -- source code (before inlining) and the count
+                                -- of calls for each caller
+                                -- XXX We never actually use this map, we just
+                                -- add up the call counts, so we might as well
+                                -- keep just a count
     procVis :: Visibility,      -- what modules should be able to see this?
-    procDetism :: Determinism,  -- can this proc succeed or fail?
-    -- procDeclDetism :: Determinism, -- proc's initially declared determinism
+    procDetism :: Determinism,  -- can this proc fail?
     procInline :: Bool,         -- should we inline calls to this proc?
     procSuperproc :: SuperprocSpec
                                 -- the proc this should be part of, if any

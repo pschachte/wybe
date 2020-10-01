@@ -262,7 +262,7 @@ if.else:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public (5 calls)
+= > public (2 calls)
 0: =($left#0:type_list.intlist, $right#0:type_list.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

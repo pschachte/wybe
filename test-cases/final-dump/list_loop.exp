@@ -285,7 +285,7 @@ entry:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public (5 calls)
+= > public (2 calls)
 0: =($left#0:list_loop.intlist, $right#0:list_loop.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

@@ -167,7 +167,7 @@ entry:
 
 
 
-= > public inline (5 calls)
+= > public inline (1 calls)
 0: =($left#0:alias_type2.position, $right#0:alias_type2.position, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -423,7 +423,7 @@ entry:
 
 
 
-= > public inline (5 calls)
+= > public inline (1 calls)
 0: =($left#0:alias_type2.posrec, $right#0:alias_type2.posrec, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

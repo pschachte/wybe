@@ -102,7 +102,7 @@ AFTER BUILDING MAIN:
   resources       : 
   procs           : 
 
-*main* > inline (1 calls)
+*main* > inline (0 calls)
 0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -352,7 +352,7 @@ pop > public (1 calls)
 
 
 
-print > public (3 calls)
+print > public (2 calls)
 0: print(x#0:int_list.int_list, io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -512,7 +512,7 @@ LLVM code       : None
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public (5 calls)
+= > public (2 calls)
 0: =($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -753,7 +753,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > inline (1 calls)
+*main* > inline (0 calls)
 0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1103,7 +1103,7 @@ pop > public (1 calls)
 
 
 
-print > public (3 calls)
+print > public (2 calls)
 0: print(x#0:int_list.int_list, io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1955,7 +1955,7 @@ if.else:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public (5 calls)
+= > public (2 calls)
 0: =($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

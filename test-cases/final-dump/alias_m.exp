@@ -508,7 +508,7 @@ entry:
 
 
 
-= > public inline (5 calls)
+= > public inline (1 calls)
 0: =($left#0:position.position, $right#0:position.position, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

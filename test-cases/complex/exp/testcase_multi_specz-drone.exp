@@ -34,7 +34,7 @@ AFTER BUILDING MAIN:
   resources       : 
   procs           : 
 
-*main* > inline (1 calls)
+*main* > inline (0 calls)
 0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -350,7 +350,7 @@ LLVM code       : None
 
 
 
-= > public inline (17 calls)
+= > public inline (1 calls)
 0: =($left#0:drone.drone_info, $right#0:drone.drone_info, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -467,7 +467,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > inline (1 calls)
+*main* > inline (0 calls)
 0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1590,7 +1590,7 @@ entry:
 
 
 
-= > public inline (17 calls)
+= > public inline (1 calls)
 0: =($left#0:drone.drone_info, $right#0:drone.drone_info, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

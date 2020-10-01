@@ -329,7 +329,7 @@ entry:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public (3 calls)
+= > public (1 calls)
 0: =($left#0:multictr.complicated, $right#0:multictr.complicated, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1011,7 +1011,7 @@ entry:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public (2 calls)
+= > public (1 calls)
 0: =($left#0:multictr.maybe_int, $right#0:multictr.maybe_int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1242,7 +1242,7 @@ if.else:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public (3 calls)
+= > public (1 calls)
 0: =($left#0:multictr.number, $right#0:multictr.number, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1987,7 +1987,7 @@ entry:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public (5 calls)
+= > public (1 calls)
 0: =($left#0:multictr.simple, $right#0:multictr.simple, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

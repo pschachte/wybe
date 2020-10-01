@@ -646,7 +646,7 @@ if.else1:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public (9 calls)
+= > public (1 calls)
 0: =($left#0:dead_cell_size.t, $right#0:dead_cell_size.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1695,7 +1695,7 @@ if.else1:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public (2 calls)
+= > public (1 calls)
 0: =($left#0:dead_cell_size.t2, $right#0:dead_cell_size.t2, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
