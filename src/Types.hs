@@ -257,9 +257,7 @@ instance Show TypeError where
         "Public definition of '" ++ name ++ "' with some undeclared types."
     show (ReasonEqual exp1 exp2 pos) =
         makeMessage pos $
-        "Expressions must have compatible types:\n    "
-        ++ show exp1 ++ "\n    "
-        ++ show exp2
+        "Type of " ++ show exp2 ++ " incompatible with " ++ show exp1
     show (ReasonDeterminism proc procDetism contextDetism pos) =
         makeMessage pos $
         "Calling " ++ determinismName procDetism ++ " proc "
@@ -1520,7 +1518,7 @@ unifyExprTypes pos a1 a2 typing = do
                 logTypes $ "constraining var " ++ show toVar
                            ++ " to type " ++ show ty
                 return $ constrainVarType
-                         (shouldnt $ "type error in move: " ++ show call)
+                         (ReasonEqual a1Content (content a2) (place a2))
                          toVar ty typing'
 
 
