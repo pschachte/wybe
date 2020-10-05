@@ -47,13 +47,12 @@ import Control.Monad.Trans (lift,liftIO)
 ----------------------------------------------------------------
 
 flattenProcDecl :: Item -> Compiler (Item,Int)
-flattenProcDecl (ProcDecl vis detism inline 
-                 proto@ProcProto{procProtoParams=params}
-                 stmts pos) = do
+flattenProcDecl (ProcDecl vis mods proto stmts pos) = do
+    let params = procProtoParams proto
     logMsg Flatten $ "** Flattening "
-           ++ (if inline then "inline " else "")
-           ++ show detism ++ " proc "
-           ++ show proto ++ ":" ++ showBody 4 stmts
+           ++ "def "
+           ++ showProcModifiers mods
+           ++ show proto ++ " {" ++ showBody 4 stmts ++ "}"
     let proto' = proto {procProtoParams = concatMap flattenParam params}
               -- flattenProto proto detism
     let inParams = Set.fromList $
@@ -64,8 +63,8 @@ flattenProcDecl (ProcDecl vis detism inline
                    Set.filter (flowsIn . resourceFlowFlow) $
                    procProtoResources proto'
     (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` inResources)
-                       detism
-    return (ProcDecl vis detism inline proto' stmts' pos,tmpCtr)
+                       (modifierDetism mods)
+    return (ProcDecl vis mods proto' stmts' pos,tmpCtr)
 flattenProcDecl _ =
     shouldnt "flattening a non-proc item"
 

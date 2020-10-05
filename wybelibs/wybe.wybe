@@ -12,7 +12,7 @@ pub type bool { pub false | true
     pub def /=(x:bool,y:bool):bool = foreign llvm icmp ne(x,y)
     pub def otherwise { } # not a test, empty body, so always true
     pub def succeed { } # always succeed
-    pub def test fail { false } # always fail (compiler will optimise)
+    pub def {test} fail { false } # always fail (compiler will optimise)
 }
 
 
@@ -141,12 +141,12 @@ pub module command_line {
     }
 
     # Exit right away with the specified code (0 = successful termination).
-    pub def terminal exit(code:int) {
+    pub def {terminal} exit(code:int) {
         foreign c exit terminal(code)
     }
 
     # Print an error message and abort the computation.
-    pub def terminal error(message:string) {
+    pub def {terminal} error(message:string) {
         foreign c error_exit terminal(message)
     }
 }

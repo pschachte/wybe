@@ -72,6 +72,7 @@ module AST (
   addImport, doImport, addType, lookupType, publicType,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource,
+  ProcModifiers(..), detModifiers, setInline, setDetism, showProcModifiers,
   addProc, addProcDef, lookupProc, publicProc,
   refersTo, callTargets,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
@@ -130,9 +131,8 @@ data Item
      | ImportForeignLib [Ident] OptPos
      | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
        -- The Bool in the next two indicates whether inlining is forced
-     | FuncDecl Visibility Determinism Bool
-       ProcProto TypeSpec (Placed Exp) OptPos
-     | ProcDecl Visibility Determinism Bool ProcProto [Placed Stmt] OptPos
+     | FuncDecl Visibility ProcModifiers ProcProto TypeSpec (Placed Exp) OptPos
+     | ProcDecl Visibility ProcModifiers ProcProto [Placed Stmt] OptPos
      -- | CtorDecl Visibility ProcProto OptPos
      | StmtDecl Stmt OptPos
      | PragmaDecl Pragma
@@ -196,7 +196,7 @@ determinismTerminal SemiDet  = False
 -- |A suitable printable name for each determinism.
 determinismName :: Determinism -> String
 determinismName Terminal = "terminal"
-determinismName Failure  = "failing"
+determinismName Failure  = "failure"
 determinismName Det      = "ordinary"
 determinismName SemiDet  = "test"
 
@@ -918,10 +918,53 @@ addImport modspec imports = do
       updateInterface Public (updateDependencies (Set.insert modspec))
 
 
+-- | Represent any user-declared or inferred properties of a proc.
+-- XXX the list of unknown and conflicting modifiers shouldn't be needed,
+-- but to get rid of them, the parser needs to be able to report errors.
+data ProcModifiers = ProcModifiers {
+    modifierDetism::Determinism,   -- ^ The proc determinism
+    modifierInline::Bool,          -- ^ Aggresively inline this proc?
+    modifierUnknown::[String],     -- ^ Unknown modifiers specified
+    modifierConflict::[String]     -- ^ Modifiers that conflict with others
+} deriving (Eq, Show, Generic)
+
+
+detModifiers :: ProcModifiers
+detModifiers = ProcModifiers Det False [] []
+
+
+setInline :: Bool -> ProcModifiers -> ProcModifiers
+setInline inline mods = mods {modifierInline=inline}
+
+
+setDetism :: Determinism -> ProcModifiers -> ProcModifiers
+setDetism detism mods = mods {modifierDetism=detism}
+
+
+-- | How to display ProcModifiers
+showProcModifiers :: ProcModifiers -> String
+showProcModifiers (ProcModifiers Det False _ _) = ""
+showProcModifiers (ProcModifiers Det True _ _) = "{inline} "
+showProcModifiers (ProcModifiers detism inline _ _) =
+    "{" ++ determinismName detism ++ (if inline then ",inline" else "") ++ "} "
+
+
 -- |Add the specified proc definition to the current module.
 addProc :: Int -> Item -> Compiler ()
-addProc tmpCtr (ProcDecl vis detism inline proto stmts pos) = do
+addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
+    let ProcModifiers detism inline unknown conflict = mods
+    mapM_ (\m -> message Error 
+                ("Unknown proc modifier '" ++ m
+                 ++ "' in declaration of " ++ name)
+                 pos)
+           unknown
+    mapM_ (\m -> message Error 
+                ("Proc modifier '" ++ m
+                 ++ "' conflicts with earlier modifier in declaration of "
+                 ++ name)
+                 pos)
+           conflict
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0
                   Map.empty vis detism inline $ initSuperprocSpec vis
     addProcDef procDef
@@ -2610,18 +2653,18 @@ instance Show Item where
     visibilityPrefix vis ++ "resource " ++ name ++ ":" ++ show typ
     ++ maybeShow " = " init " "
     ++ showMaybeSourcePos pos
-  show (FuncDecl vis detism inline proto typ exp pos) =
+  show (FuncDecl vis modifiers proto typ exp pos) =
     visibilityPrefix vis
-    ++ determinismPrefix detism
-    ++ (if inline then "inline " else "")
-    ++ "func " ++ show proto ++ ":" ++ show typ
+    ++ "def "
+    ++ showProcModifiers modifiers
+    ++ show proto ++ ":" ++ show typ
     ++ showMaybeSourcePos pos
     ++ " = " ++ show exp
-  show (ProcDecl vis detism inline proto stmts pos) =
+  show (ProcDecl vis modifiers proto stmts pos) =
     visibilityPrefix vis
-    ++ determinismPrefix detism
-    ++ (if inline then "inline " else "")
-    ++ "proc " ++ show proto
+    ++ "def "
+    ++ showProcModifiers modifiers
+    ++ show proto
     ++ showMaybeSourcePos pos
     ++ " {"
     ++ showBody 4 stmts
@@ -2666,14 +2709,6 @@ maybeModPrefix modSpec =
 visibilityPrefix :: Visibility -> String
 visibilityPrefix Public = "public "
 visibilityPrefix Private = ""
-
-
--- |How to show a determinism.
-determinismPrefix :: Determinism -> String
-determinismPrefix Terminal = "terminal "
-determinismPrefix Failure  = "test " -- XXX do we want something more specific?
-determinismPrefix SemiDet  = "test "
-determinismPrefix Det      = ""
 
 
 -- |How to show an import or use declaration.
@@ -2755,7 +2790,7 @@ showProcDef thisID
     ++ (if n == "" then "*main*" else n) ++ " > "
     ++ visibilityPrefix vis
     ++ (if inline then "inline " else "")
-    ++ determinismPrefix detism
+    ++ (if detism == Det then "" else determinismName detism ++ " ")
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
     ++ "\n"
@@ -2880,8 +2915,7 @@ instance Show PrimVarName where
 -- |Show a single statement.
 showStmt :: Int -> Stmt -> String
 showStmt _ (ProcCall maybeMod name procID detism resourceful args) =
-    determinismPrefix detism
-    ++ (if resourceful then "!" else "")
+    (if resourceful then "!" else "")
     ++ maybeModPrefix maybeMod
     ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
