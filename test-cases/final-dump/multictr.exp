@@ -149,7 +149,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:multictr.card, $right#0:multictr.card, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -157,20 +157,20 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public inline (1 calls)
+= > public {inline} (1 calls)
 0: =($left#0:multictr.card, $right#0:multictr.card, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp eq(~$left#0:multictr.card, ~$right#0:multictr.card, ?$$#0:wybe.bool)
 
 
-card > public inline (0 calls)
+card > public {inline} (0 calls)
 0: card(suit#0:multictr.suit, rank#0:multictr.rank, ?$#3:multictr.card):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm shl(~rank#0:!multictr.card, 2:multictr.card, ?$temp#1:multictr.card)
     foreign llvm or(~$temp#1:multictr.card, ~suit#0:!multictr.card, ?$#3:multictr.card)
-card > public inline (0 calls)
+card > public {inline} (0 calls)
 1: card(?suit#0:multictr.suit, ?rank#0:multictr.rank, $#0:multictr.card):
  AliasPairs: []
  InterestingCallProperties: []
@@ -181,14 +181,14 @@ card > public inline (0 calls)
     foreign lpvm cast(~$temp2#1:multictr.card, ?rank#0:multictr.rank)
 
 
-rank > public inline (0 calls)
+rank > public {inline} (0 calls)
 0: rank($rec#0:multictr.card, ?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm lshr(~$rec#0:multictr.card, 2:multictr.card, ?$rec#1:multictr.card)
     foreign llvm and(~$rec#1:multictr.card, 15:multictr.card, ?$field#0:multictr.card)
     foreign lpvm cast(~$field#0:multictr.card, ?$#0:multictr.rank)
-rank > public inline (0 calls)
+rank > public {inline} (0 calls)
 1: rank($rec#0:multictr.card, ?$rec#2:multictr.card, $field#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
@@ -197,13 +197,13 @@ rank > public inline (0 calls)
     foreign llvm or(~$field#1:multictr.card, ~$rec#1:multictr.card, ?$rec#2:multictr.card)
 
 
-suit > public inline (0 calls)
+suit > public {inline} (0 calls)
 0: suit($rec#0:multictr.card, ?$#0:multictr.suit):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm and(~$rec#0:multictr.card, 3:multictr.card, ?$field#0:multictr.card)
     foreign lpvm cast(~$field#0:multictr.card, ?$#0:multictr.suit)
-suit > public inline (0 calls)
+suit > public {inline} (0 calls)
 1: suit($rec#0:multictr.card, ?$rec#2:multictr.card, $field#0:multictr.suit):
  AliasPairs: []
  InterestingCallProperties: []
@@ -321,7 +321,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:multictr.complicated, $right#0:multictr.complicated, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -392,20 +392,20 @@ entry:
 
 
 
-autumn > public inline (0 calls)
+autumn > public {inline} (0 calls)
 0: autumn(?$#0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(3:multictr.complicated, ?$#0:multictr.complicated)
 
 
-c01 > public inline (0 calls)
+c01 > public {inline} (0 calls)
 0: c01(f01#0:wybe.int, ?$#0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.complicated)
     foreign lpvm mutate(~%$rec#0:multictr.complicated, ?%$#0:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01#0:wybe.int)
-c01 > public inline (10 calls)
+c01 > public {inline} (10 calls)
 1: c01(?f01#0:wybe.int, $#0:multictr.complicated, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -428,14 +428,14 @@ c01 > public inline (10 calls)
 
 
 
-c02 > public inline (0 calls)
+c02 > public {inline} (0 calls)
 0: c02(f02#0:wybe.int, ?$#0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.complicated)
     foreign lpvm mutate(~%$rec#0:multictr.complicated, ?%$rec#1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f02#0:wybe.int)
     foreign llvm or(~$rec#1, 1:wybe.int, ?$#0:multictr.complicated)
-c02 > public inline (5 calls)
+c02 > public {inline} (5 calls)
 1: c02(?f02#0:wybe.int, $#0:multictr.complicated, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -458,7 +458,7 @@ c02 > public inline (5 calls)
 
 
 
-f01 > public inline (0 calls)
+f01 > public {inline} (0 calls)
 0: f01($rec#0:multictr.complicated, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -479,7 +479,7 @@ f01 > public inline (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-f01 > public inline (0 calls)
+f01 > public {inline} (0 calls)
 1: f01($rec#0:multictr.complicated, ?$rec#1:multictr.complicated, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -504,7 +504,7 @@ f01 > public inline (0 calls)
 
 
 
-f02 > public inline (0 calls)
+f02 > public {inline} (0 calls)
 0: f02($rec#0:multictr.complicated, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -525,7 +525,7 @@ f02 > public inline (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-f02 > public inline (0 calls)
+f02 > public {inline} (0 calls)
 1: f02($rec#0:multictr.complicated, ?$rec#1:multictr.complicated, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -550,21 +550,21 @@ f02 > public inline (0 calls)
 
 
 
-spring > public inline (0 calls)
+spring > public {inline} (0 calls)
 0: spring(?$#0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(1:multictr.complicated, ?$#0:multictr.complicated)
 
 
-summer > public inline (0 calls)
+summer > public {inline} (0 calls)
 0: summer(?$#0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(2:multictr.complicated, ?$#0:multictr.complicated)
 
 
-winter > public inline (0 calls)
+winter > public {inline} (0 calls)
 0: winter(?$#0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
@@ -892,7 +892,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:multictr.length, $right#0:multictr.length, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -900,31 +900,31 @@ entry:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public inline (1 calls)
+= > public {inline} (1 calls)
 0: =($left#0:multictr.length, $right#0:multictr.length, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp eq(~$left#0:multictr.length, ~$right#0:multictr.length, ?$$#0:wybe.bool)
 
 
-metres > public inline (0 calls)
+metres > public {inline} (0 calls)
 0: metres(value#0:wybe.float, ?$#2:multictr.length):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(~value#0:!multictr.length, ?$#2:multictr.length)
-metres > public inline (0 calls)
+metres > public {inline} (0 calls)
 1: metres(?value#0:wybe.float, $#0:multictr.length):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm cast(~$#0:multictr.length, ?value#0:wybe.float)
 
 
-value > public inline (0 calls)
+value > public {inline} (0 calls)
 0: value($rec#0:multictr.length, ?$#0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm cast(~$rec#0:multictr.length, ?$#0:wybe.float)
-value > public inline (0 calls)
+value > public {inline} (0 calls)
 1: value([$rec#0:multictr.length], ?$rec#2:multictr.length, $field#0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1003,7 +1003,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:multictr.maybe_int, $right#0:multictr.maybe_int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1034,13 +1034,13 @@ entry:
 
 
 
-just > public inline (0 calls)
+just > public {inline} (0 calls)
 0: just(value#0:wybe.int, ?$#0:multictr.maybe_int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.maybe_int)
     foreign lpvm mutate(~%$rec#0:multictr.maybe_int, ?%$#0:multictr.maybe_int, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value#0:wybe.int)
-just > public inline (8 calls)
+just > public {inline} (8 calls)
 1: just(?value#0:wybe.int, $#0:multictr.maybe_int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1055,14 +1055,14 @@ just > public inline (8 calls)
 
 
 
-nothing > public inline (0 calls)
+nothing > public {inline} (0 calls)
 0: nothing(?$#0:multictr.maybe_int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:multictr.maybe_int, ?$#0:multictr.maybe_int)
 
 
-value > public inline (0 calls)
+value > public {inline} (0 calls)
 0: value($rec#0:multictr.maybe_int, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1075,7 +1075,7 @@ value > public inline (0 calls)
         foreign lpvm access(~$rec#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-value > public inline (0 calls)
+value > public {inline} (0 calls)
 1: value($rec#0:multictr.maybe_int, ?$rec#1:multictr.maybe_int, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1234,7 +1234,7 @@ if.else:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:multictr.number, $right#0:multictr.number, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1284,14 +1284,14 @@ if.else:
 
 
 
-float > public inline (0 calls)
+float > public {inline} (0 calls)
 0: float(float_value#0:wybe.float, ?$#0:multictr.number):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.number)
     foreign lpvm mutate(~%$rec#0:multictr.number, ?%$rec#1:multictr.number, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~float_value#0:wybe.float)
     foreign llvm or(~$rec#1, 1:wybe.int, ?$#0:multictr.number)
-float > public inline (5 calls)
+float > public {inline} (5 calls)
 1: float(?float_value#0:wybe.float, $#0:multictr.number, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1307,7 +1307,7 @@ float > public inline (5 calls)
 
 
 
-float_value > public inline (0 calls)
+float_value > public {inline} (0 calls)
 0: float_value($rec#0:multictr.number, ?$#0:wybe.float, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1321,7 +1321,7 @@ float_value > public inline (0 calls)
         foreign lpvm access(~$rec#0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$#0:wybe.float)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-float_value > public inline (0 calls)
+float_value > public {inline} (0 calls)
 1: float_value($rec#0:multictr.number, ?$rec#1:multictr.number, $field#0:wybe.float, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1338,13 +1338,13 @@ float_value > public inline (0 calls)
 
 
 
-int > public inline (0 calls)
+int > public {inline} (0 calls)
 0: int(int_value#0:wybe.int, ?$#0:multictr.number):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.number)
     foreign lpvm mutate(~%$rec#0:multictr.number, ?%$#0:multictr.number, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~int_value#0:wybe.int)
-int > public inline (10 calls)
+int > public {inline} (10 calls)
 1: int(?int_value#0:wybe.int, $#0:multictr.number, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1360,7 +1360,7 @@ int > public inline (10 calls)
 
 
 
-int_value > public inline (0 calls)
+int_value > public {inline} (0 calls)
 0: int_value($rec#0:multictr.number, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1374,7 +1374,7 @@ int_value > public inline (0 calls)
         foreign lpvm access(~$rec#0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-int_value > public inline (0 calls)
+int_value > public {inline} (0 calls)
 1: int_value($rec#0:multictr.number, ?$rec#1:multictr.number, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1630,7 +1630,7 @@ if.else:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:multictr.perhaps, $right#0:multictr.perhaps, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1638,31 +1638,31 @@ if.else:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public inline (1 calls)
+= > public {inline} (1 calls)
 0: =($left#0:multictr.perhaps, $right#0:multictr.perhaps, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp eq(~$left#0:multictr.perhaps, ~$right#0:multictr.perhaps, ?$$#0:wybe.bool)
 
 
-content > public inline (0 calls)
+content > public {inline} (0 calls)
 0: content($rec#0:multictr.perhaps, ?$#0:multictr.maybe_int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm cast(~$rec#0:multictr.perhaps, ?$#0:multictr.maybe_int)
-content > public inline (0 calls)
+content > public {inline} (0 calls)
 1: content([$rec#0:multictr.perhaps], ?$rec#2:multictr.perhaps, $field#0:multictr.maybe_int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(~$field#0:!multictr.perhaps, ?$rec#2:multictr.perhaps)
 
 
-perhaps > public inline (0 calls)
+perhaps > public {inline} (0 calls)
 0: perhaps(content#0:multictr.maybe_int, ?$#2:multictr.perhaps):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(~content#0:!multictr.perhaps, ?$#2:multictr.perhaps)
-perhaps > public inline (0 calls)
+perhaps > public {inline} (0 calls)
 1: perhaps(?content#0:multictr.maybe_int, $#0:multictr.perhaps):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1745,7 +1745,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:multictr.rank, $right#0:multictr.rank, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1753,98 +1753,98 @@ entry:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public inline (1 calls)
+= > public {inline} (1 calls)
 0: =($left#0:multictr.rank, $right#0:multictr.rank, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp eq(~$left#0:multictr.rank, ~$right#0:multictr.rank, ?$$#0:wybe.bool)
 
 
-ace > public inline (0 calls)
+ace > public {inline} (0 calls)
 0: ace(?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(12:multictr.rank, ?$#0:multictr.rank)
 
 
-jack > public inline (0 calls)
+jack > public {inline} (0 calls)
 0: jack(?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(9:multictr.rank, ?$#0:multictr.rank)
 
 
-king > public inline (0 calls)
+king > public {inline} (0 calls)
 0: king(?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(11:multictr.rank, ?$#0:multictr.rank)
 
 
-queen > public inline (0 calls)
+queen > public {inline} (0 calls)
 0: queen(?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(10:multictr.rank, ?$#0:multictr.rank)
 
 
-r10 > public inline (0 calls)
+r10 > public {inline} (0 calls)
 0: r10(?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(8:multictr.rank, ?$#0:multictr.rank)
 
 
-r2 > public inline (0 calls)
+r2 > public {inline} (0 calls)
 0: r2(?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:multictr.rank, ?$#0:multictr.rank)
 
 
-r3 > public inline (0 calls)
+r3 > public {inline} (0 calls)
 0: r3(?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(1:multictr.rank, ?$#0:multictr.rank)
 
 
-r4 > public inline (0 calls)
+r4 > public {inline} (0 calls)
 0: r4(?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(2:multictr.rank, ?$#0:multictr.rank)
 
 
-r5 > public inline (0 calls)
+r5 > public {inline} (0 calls)
 0: r5(?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(3:multictr.rank, ?$#0:multictr.rank)
 
 
-r6 > public inline (0 calls)
+r6 > public {inline} (0 calls)
 0: r6(?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(4:multictr.rank, ?$#0:multictr.rank)
 
 
-r7 > public inline (0 calls)
+r7 > public {inline} (0 calls)
 0: r7(?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(5:multictr.rank, ?$#0:multictr.rank)
 
 
-r8 > public inline (0 calls)
+r8 > public {inline} (0 calls)
 0: r8(?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(6:multictr.rank, ?$#0:multictr.rank)
 
 
-r9 > public inline (0 calls)
+r9 > public {inline} (0 calls)
 0: r9(?$#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1979,7 +1979,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:multictr.simple, $right#0:multictr.simple, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2059,13 +2059,13 @@ entry:
 
 
 
-one > public inline (0 calls)
+one > public {inline} (0 calls)
 0: one(one_field#0:wybe.int, ?$#0:multictr.simple):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!multictr.simple)
     foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$#0:multictr.simple, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~one_field#0:wybe.int)
-one > public inline (11 calls)
+one > public {inline} (11 calls)
 1: one(?one_field#0:wybe.int, $#0:multictr.simple, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2088,7 +2088,7 @@ one > public inline (11 calls)
 
 
 
-one_field > public inline (0 calls)
+one_field > public {inline} (0 calls)
 0: one_field($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2109,7 +2109,7 @@ one_field > public inline (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-one_field > public inline (0 calls)
+one_field > public {inline} (0 calls)
 1: one_field($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2134,7 +2134,7 @@ one_field > public inline (0 calls)
 
 
 
-two > public inline (0 calls)
+two > public {inline} (0 calls)
 0: two(two_field1#0:wybe.int, two_field2#0:wybe.int, ?$#0:multictr.simple):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2142,7 +2142,7 @@ two > public inline (0 calls)
     foreign lpvm mutate(~%$rec#0:multictr.simple, ?%$rec#1:multictr.simple, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~two_field1#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:multictr.simple, ?%$rec#2:multictr.simple, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~two_field2#0:wybe.int)
     foreign llvm or(~$rec#2, 1:wybe.int, ?$#0:multictr.simple)
-two > public inline (7 calls)
+two > public {inline} (7 calls)
 1: two(?two_field1#0:wybe.int, ?two_field2#0:wybe.int, $#0:multictr.simple, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2166,7 +2166,7 @@ two > public inline (7 calls)
 
 
 
-two_field1 > public inline (0 calls)
+two_field1 > public {inline} (0 calls)
 0: two_field1($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2187,7 +2187,7 @@ two_field1 > public inline (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-two_field1 > public inline (0 calls)
+two_field1 > public {inline} (0 calls)
 1: two_field1($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2212,7 +2212,7 @@ two_field1 > public inline (0 calls)
 
 
 
-two_field2 > public inline (0 calls)
+two_field2 > public {inline} (0 calls)
 0: two_field2($rec#0:multictr.simple, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2233,7 +2233,7 @@ two_field2 > public inline (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-two_field2 > public inline (0 calls)
+two_field2 > public {inline} (0 calls)
 1: two_field2($rec#0:multictr.simple, ?$rec#1:multictr.simple, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2258,7 +2258,7 @@ two_field2 > public inline (0 calls)
 
 
 
-zero > public inline (0 calls)
+zero > public {inline} (0 calls)
 0: zero(?$#0:multictr.simple):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2655,7 +2655,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:multictr.suit, $right#0:multictr.suit, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2663,35 +2663,35 @@ entry:
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public inline (1 calls)
+= > public {inline} (1 calls)
 0: =($left#0:multictr.suit, $right#0:multictr.suit, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp eq(~$left#0:multictr.suit, ~$right#0:multictr.suit, ?$$#0:wybe.bool)
 
 
-clubs > public inline (0 calls)
+clubs > public {inline} (0 calls)
 0: clubs(?$#0:multictr.suit):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:multictr.suit, ?$#0:multictr.suit)
 
 
-diamonds > public inline (0 calls)
+diamonds > public {inline} (0 calls)
 0: diamonds(?$#0:multictr.suit):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(1:multictr.suit, ?$#0:multictr.suit)
 
 
-hearts > public inline (0 calls)
+hearts > public {inline} (0 calls)
 0: hearts(?$#0:multictr.suit):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(2:multictr.suit, ?$#0:multictr.suit)
 
 
-spades > public inline (0 calls)
+spades > public {inline} (0 calls)
 0: spades(?$#0:multictr.suit):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2762,21 +2762,21 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=([$left#0:multictr.unit], [$right#0:multictr.unit], ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public inline (1 calls)
+= > public {inline} (1 calls)
 0: =([$left#0:multictr.unit], [$right#0:multictr.unit], ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-unit > public inline (0 calls)
+unit > public {inline} (0 calls)
 0: unit(?$#0:multictr.unit):
  AliasPairs: []
  InterestingCallProperties: []

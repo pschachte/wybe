@@ -11,7 +11,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public inline (0 calls)
+*main* > public {inline} (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -69,7 +69,7 @@ entry:
   resources       : 
   procs           : 
 
-*main* > public inline (0 calls)
+*main* > public {inline} (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -93,7 +93,7 @@ factorial > public (1 calls)
 
 
 
-toCelsius > public inline (0 calls)
+toCelsius > public {inline} (0 calls)
 0: toCelsius(f#0:wybe.float, ?$#0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []

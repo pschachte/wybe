@@ -89,7 +89,7 @@ list_print > public (4 calls)
 
 
 
-list_reverse > public inline (2 calls)
+list_reverse > public {inline} (2 calls)
 0: list_reverse(lst#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist):
  AliasPairs: []
  InterestingCallProperties: []
@@ -368,7 +368,7 @@ if.else:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:multi_specz_reverse.intlist, $right#0:multi_specz_reverse.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -408,21 +408,21 @@ if.else:
 
 
 
-[] > public inline (0 calls)
+[] > public {inline} (0 calls)
 0: [](?$#0:multi_specz_reverse.intlist):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist)
 
 
-[|] > public inline (0 calls)
+[|] > public {inline} (0 calls)
 0: [|](head#0:wybe.int, tail#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!multi_specz_reverse.intlist)
     foreign lpvm mutate(~%$rec#0:multi_specz_reverse.intlist, ?%$rec#1:multi_specz_reverse.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:multi_specz_reverse.intlist, ?%$#0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:multi_specz_reverse.intlist)
-[|] > public inline (12 calls)
+[|] > public {inline} (12 calls)
 1: [|](?head#0:wybe.int, ?tail#0:multi_specz_reverse.intlist, $#0:multi_specz_reverse.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -438,7 +438,7 @@ if.else:
 
 
 
-head > public inline (0 calls)
+head > public {inline} (0 calls)
 0: head($rec#0:multi_specz_reverse.intlist, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -451,7 +451,7 @@ head > public inline (0 calls)
         foreign lpvm access(~$rec#0:multi_specz_reverse.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-head > public inline (0 calls)
+head > public {inline} (0 calls)
 1: head($rec#0:multi_specz_reverse.intlist, ?$rec#1:multi_specz_reverse.intlist, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -467,7 +467,7 @@ head > public inline (0 calls)
 
 
 
-tail > public inline (0 calls)
+tail > public {inline} (0 calls)
 0: tail($rec#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -480,7 +480,7 @@ tail > public inline (0 calls)
         foreign lpvm access(~$rec#0:multi_specz_reverse.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:multi_specz_reverse.intlist)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-tail > public inline (0 calls)
+tail > public {inline} (0 calls)
 1: tail($rec#0:multi_specz_reverse.intlist, ?$rec#1:multi_specz_reverse.intlist, $field#0:multi_specz_reverse.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

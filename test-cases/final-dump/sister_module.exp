@@ -13,14 +13,14 @@ AFTER EVERYTHING:
   submodules      : sister_module.m1, sister_module.m2
   procs           : 
 
-baz > inline (0 calls)
+baz > {inline} (0 calls)
 0: baz(i#0:wybe.int, ?j#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     sister_module.m1.foo<0>(~i#0:wybe.int, ?j#0:wybe.int) #0 @sister_module:10:26
 
 
-buzz > inline (0 calls)
+buzz > {inline} (0 calls)
 0: buzz(i#0:wybe.int, ?j#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
@@ -64,7 +64,7 @@ entry:
   resources       : 
   procs           : 
 
-foo > public inline (0 calls)
+foo > public {inline} (0 calls)
 0: foo(i#0:wybe.int, ?j#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
@@ -101,7 +101,7 @@ entry:
   resources       : 
   procs           : 
 
-bar > public inline (0 calls)
+bar > public {inline} (0 calls)
 0: bar(i#0:wybe.int, ?j#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []

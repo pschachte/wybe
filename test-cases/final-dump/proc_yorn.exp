@@ -11,7 +11,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public inline (0 calls)
+*main* > public {inline} (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -44,7 +44,7 @@ gen$1 > (2 calls)
 
 
 
-is_yes > inline (4 calls)
+is_yes > {inline} (4 calls)
 0: is_yes(ch#0:wybe.char, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -68,7 +68,7 @@ is_yes_or_no > (3 calls)
     foreign llvm or(~tmp$1#0:wybe.bool, ~tmp$4#0:wybe.bool, ?$#0:wybe.bool) @wybe:nn:nn
 
 
-yorn > public inline (1 calls)
+yorn > public {inline} (1 calls)
 0: yorn(prompt#0:wybe.string, ?result#0:wybe.bool, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []

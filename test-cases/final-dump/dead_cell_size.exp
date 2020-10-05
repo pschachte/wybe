@@ -638,7 +638,7 @@ if.else1:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:dead_cell_size.t, $right#0:dead_cell_size.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -751,20 +751,20 @@ if.else1:
 
 
 
-ta > public inline (0 calls)
+ta > public {inline} (0 calls)
 0: ta(?$#0:dead_cell_size.t):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:dead_cell_size.t, ?$#0:dead_cell_size.t)
 
 
-tb > public inline (0 calls)
+tb > public {inline} (0 calls)
 0: tb(tb1#0:wybe.int, ?$#0:dead_cell_size.t):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!dead_cell_size.t)
     foreign lpvm mutate(~%$rec#0:dead_cell_size.t, ?%$#0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~tb1#0:wybe.int)
-tb > public inline (14 calls)
+tb > public {inline} (14 calls)
 1: tb(?tb1#0:wybe.int, $#0:dead_cell_size.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -787,7 +787,7 @@ tb > public inline (14 calls)
 
 
 
-tb1 > public inline (0 calls)
+tb1 > public {inline} (0 calls)
 0: tb1($rec#0:dead_cell_size.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -808,7 +808,7 @@ tb1 > public inline (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-tb1 > public inline (0 calls)
+tb1 > public {inline} (0 calls)
 1: tb1($rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -833,7 +833,7 @@ tb1 > public inline (0 calls)
 
 
 
-tc > public inline (0 calls)
+tc > public {inline} (0 calls)
 0: tc(tc1#0:wybe.int, tc2#0:wybe.int, tc3#0:wybe.int, ?$#0:dead_cell_size.t):
  AliasPairs: []
  InterestingCallProperties: []
@@ -842,7 +842,7 @@ tc > public inline (0 calls)
     foreign lpvm mutate(~%$rec#1:dead_cell_size.t, ?%$rec#2:dead_cell_size.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tc2#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:dead_cell_size.t, ?%$rec#3:dead_cell_size.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tc3#0:wybe.int)
     foreign llvm or(~$rec#3, 1:wybe.int, ?$#0:dead_cell_size.t)
-tc > public inline (11 calls)
+tc > public {inline} (11 calls)
 1: tc(?tc1#0:wybe.int, ?tc2#0:wybe.int, ?tc3#0:wybe.int, $#0:dead_cell_size.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -867,7 +867,7 @@ tc > public inline (11 calls)
 
 
 
-tc1 > public inline (0 calls)
+tc1 > public {inline} (0 calls)
 0: tc1($rec#0:dead_cell_size.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -888,7 +888,7 @@ tc1 > public inline (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-tc1 > public inline (0 calls)
+tc1 > public {inline} (0 calls)
 1: tc1($rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -913,7 +913,7 @@ tc1 > public inline (0 calls)
 
 
 
-tc2 > public inline (0 calls)
+tc2 > public {inline} (0 calls)
 0: tc2($rec#0:dead_cell_size.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -934,7 +934,7 @@ tc2 > public inline (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-tc2 > public inline (0 calls)
+tc2 > public {inline} (0 calls)
 1: tc2($rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -959,7 +959,7 @@ tc2 > public inline (0 calls)
 
 
 
-tc3 > public inline (0 calls)
+tc3 > public {inline} (0 calls)
 0: tc3($rec#0:dead_cell_size.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -980,7 +980,7 @@ tc3 > public inline (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-tc3 > public inline (0 calls)
+tc3 > public {inline} (0 calls)
 1: tc3($rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1005,14 +1005,14 @@ tc3 > public inline (0 calls)
 
 
 
-td > public inline (0 calls)
+td > public {inline} (0 calls)
 0: td(td1#0:wybe.int, ?$#0:dead_cell_size.t):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!dead_cell_size.t)
     foreign lpvm mutate(~%$rec#0:dead_cell_size.t, ?%$rec#1:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~td1#0:wybe.int)
     foreign llvm or(~$rec#1, 2:wybe.int, ?$#0:dead_cell_size.t)
-td > public inline (5 calls)
+td > public {inline} (5 calls)
 1: td(?td1#0:wybe.int, $#0:dead_cell_size.t, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1035,7 +1035,7 @@ td > public inline (5 calls)
 
 
 
-td1 > public inline (0 calls)
+td1 > public {inline} (0 calls)
 0: td1($rec#0:dead_cell_size.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1056,7 +1056,7 @@ td1 > public inline (0 calls)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
-td1 > public inline (0 calls)
+td1 > public {inline} (0 calls)
 1: td1($rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1687,7 +1687,7 @@ if.else1:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:dead_cell_size.t2, $right#0:dead_cell_size.t2, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1718,7 +1718,7 @@ if.else1:
 
 
 
-a > public inline (0 calls)
+a > public {inline} (0 calls)
 0: a($rec#0:dead_cell_size.t2, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1731,7 +1731,7 @@ a > public inline (0 calls)
         foreign lpvm access(~$rec#0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-a > public inline (0 calls)
+a > public {inline} (0 calls)
 1: a($rec#0:dead_cell_size.t2, ?$rec#1:dead_cell_size.t2, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1747,20 +1747,20 @@ a > public inline (0 calls)
 
 
 
-t2a > public inline (0 calls)
+t2a > public {inline} (0 calls)
 0: t2a(?$#0:dead_cell_size.t2):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:dead_cell_size.t2, ?$#0:dead_cell_size.t2)
 
 
-t2b > public inline (0 calls)
+t2b > public {inline} (0 calls)
 0: t2b(a#0:wybe.int, ?$#0:dead_cell_size.t2):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:!dead_cell_size.t2)
     foreign lpvm mutate(~%$rec#0:dead_cell_size.t2, ?%$#0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a#0:wybe.int)
-t2b > public inline (8 calls)
+t2b > public {inline} (8 calls)
 1: t2b(?a#0:wybe.int, $#0:dead_cell_size.t2, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

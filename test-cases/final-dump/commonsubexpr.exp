@@ -22,7 +22,7 @@ AFTER EVERYTHING:
     foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
 
 
-common_subexpr > inline (1 calls)
+common_subexpr > {inline} (1 calls)
 0: common_subexpr(x#0:wybe.int, io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []

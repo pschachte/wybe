@@ -56,7 +56,7 @@ gen$1 > (2 calls)
 
 
 
-gen$2 > inline (1 calls)
+gen$2 > {inline} (1 calls)
 0: gen$2(argc#0:wybe.int, argv#0:wybe.int, exit_code#0:wybe.int, h#0:wybe.int, io#0:wybe.phantom, l#0:list_loop.intlist, tmp$0#0:list_loop.intlist, tmp$1#0:list_loop.intlist, tmp$2#0:list_loop.intlist, tmp$3#0:list_loop.intlist, x#0:list_loop.intlist, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -81,7 +81,7 @@ gen$3 > (2 calls)
 
 
 
-gen$4 > inline (1 calls)
+gen$4 > {inline} (1 calls)
 0: gen$4(argc#0:wybe.int, argv#0:wybe.int, exit_code#0:wybe.int, h#0:wybe.int, h2#0:wybe.int, io#0:wybe.phantom, l#0:list_loop.intlist, l2#0:list_loop.intlist, tmp$0#0:list_loop.intlist, tmp$1#0:list_loop.intlist, tmp$2#0:list_loop.intlist, tmp$3#0:list_loop.intlist, x#0:list_loop.intlist, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -277,7 +277,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:list_loop.intlist, $right#0:list_loop.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -317,21 +317,21 @@ entry:
 
 
 
-[] > public inline (0 calls)
+[] > public {inline} (0 calls)
 0: [](?$#0:list_loop.intlist):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:list_loop.intlist, ?$#0:list_loop.intlist)
 
 
-[|] > public inline (0 calls)
+[|] > public {inline} (0 calls)
 0: [|](head#0:wybe.int, tail#0:list_loop.intlist, ?$#0:list_loop.intlist):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!list_loop.intlist)
     foreign lpvm mutate(~%$rec#0:list_loop.intlist, ?%$rec#1:list_loop.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:list_loop.intlist, ?%$#0:list_loop.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:list_loop.intlist)
-[|] > public inline (12 calls)
+[|] > public {inline} (12 calls)
 1: [|](?head#0:wybe.int, ?tail#0:list_loop.intlist, $#0:list_loop.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -347,7 +347,7 @@ entry:
 
 
 
-head > public inline (0 calls)
+head > public {inline} (0 calls)
 0: head($rec#0:list_loop.intlist, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -360,7 +360,7 @@ head > public inline (0 calls)
         foreign lpvm access(~$rec#0:list_loop.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-head > public inline (0 calls)
+head > public {inline} (0 calls)
 1: head($rec#0:list_loop.intlist, ?$rec#1:list_loop.intlist, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -376,7 +376,7 @@ head > public inline (0 calls)
 
 
 
-tail > public inline (0 calls)
+tail > public {inline} (0 calls)
 0: tail($rec#0:list_loop.intlist, ?$#0:list_loop.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -389,7 +389,7 @@ tail > public inline (0 calls)
         foreign lpvm access(~$rec#0:list_loop.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:list_loop.intlist)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-tail > public inline (0 calls)
+tail > public {inline} (0 calls)
 1: tail($rec#0:list_loop.intlist, ?$rec#1:list_loop.intlist, $field#0:list_loop.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

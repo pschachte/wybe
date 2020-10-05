@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-foo > public inline (0 calls)
+foo > public {inline} (0 calls)
 0: foo(v#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -56,7 +56,7 @@ entry:
   submodules      : import_in_sub_mod_main.sub
   procs           : 
 
-*main* > public inline (0 calls)
+*main* > public {inline} (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -102,7 +102,7 @@ entry:
   resources       : 
   procs           : 
 
-bar > public inline (0 calls)
+bar > public {inline} (0 calls)
 0: bar(v#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []

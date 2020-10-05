@@ -11,14 +11,14 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-double > public inline (2 calls)
+double > public {inline} (2 calls)
 0: double(a#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
 
 
-quadruple > public inline (0 calls)
+quadruple > public {inline} (0 calls)
 0: quadruple(a#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []

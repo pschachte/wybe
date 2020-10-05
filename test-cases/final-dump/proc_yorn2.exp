@@ -38,7 +38,7 @@ gen$1 > (2 calls)
 
 
 
-yorn > public inline (0 calls)
+yorn > public {inline} (0 calls)
 0: yorn(prompt#0:wybe.string, ?result#0:wybe.bool, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []

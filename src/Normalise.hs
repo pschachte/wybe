@@ -927,12 +927,12 @@ isTestProc _ _ _ = False
 --   than two arguments or there are no const constructors.
 --
 equalityBody :: [Placed ProcProto] -> [Placed ProcProto] -> TypeRepresentation
-             -> ([Placed Stmt],Bool)
+             -> ([Placed Stmt],Inlining)
 -- Special case for phantom (void) types
-equalityBody _ _ (Bits 0) = ([succeedTest], True)
+equalityBody _ _ (Bits 0) = ([succeedTest], Inline)
 equalityBody [] [] _ = shouldnt "trying to generate = test with no constructors"
-equalityBody _ _ (Bits _) = ([simpleEqualityTest],True)
-equalityBody consts [] _ = ([equalityConsts consts],True)
+equalityBody _ _ (Bits _) = ([simpleEqualityTest],Inline)
+equalityBody consts [] _ = ([equalityConsts consts],Inline)
 equalityBody consts nonconsts _ =
     -- decide whether $left is const or non const, and handle accordingly
     ([Unplaced $ Cond (comparison "uge"
@@ -944,8 +944,9 @@ equalityBody consts nonconsts _ =
      -- Decide to inline if only 1 non-const constructor, no non-const
      -- constructors (so not recursive), and at most 4 fields
      case List.map content nonconsts of
-         [ProcProto _ params _ ] -> length params <= 4 && List.null consts
-         _ -> False
+         [ProcProto _ params _ ] | length params <= 4 && List.null consts ->
+              Inline
+         _ -> MayInline
         )
 
 
@@ -1013,11 +1014,11 @@ equalityField param =
 
 
 inlineModifier :: Determinism -> ProcModifiers
-inlineModifier detism = setInline True $ setDetism detism detModifiers
+inlineModifier detism = setInline Inline $ setDetism detism detModifiers
 
 
 inlineDetModifiers :: ProcModifiers
-inlineDetModifiers = setInline True detModifiers
+inlineDetModifiers = setInline Inline detModifiers
 
 
 inlineSemiDetModifiers :: ProcModifiers

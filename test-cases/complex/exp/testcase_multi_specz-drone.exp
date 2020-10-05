@@ -34,7 +34,7 @@ AFTER BUILDING MAIN:
   resources       : 
   procs           : 
 
-*main* > inline (0 calls)
+*main* > {inline} (0 calls)
 0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -173,7 +173,7 @@ drone_init > (3 calls)
     foreign lpvm mutate(~tmp$8#0:drone.drone_info, ?$#0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int)
 
 
-gen$1 > inline (2 calls)
+gen$1 > {inline} (2 calls)
 0: gen$1(argc#0:wybe.int, argv#0:wybe.int, [ch#0:wybe.char], [d#0:drone.drone_info], exit_code#0:wybe.int, io#0:wybe.phantom, [tmp$0#0:drone.drone_info], [?argc#0:wybe.int], [?argv#0:wybe.int], [?exit_code#0:wybe.int], ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -267,7 +267,7 @@ loop > (2 calls)
 
 
 
-print_info > inline (1 calls)
+print_info > {inline} (1 calls)
 0: print_info(d#0:drone.drone_info, io#0:wybe.phantom, ?io#9:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -310,7 +310,7 @@ LLVM code       : None
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:drone.drone_info, $right#0:drone.drone_info, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -350,7 +350,7 @@ LLVM code       : None
 
 
 
-= > public inline (1 calls)
+= > public {inline} (1 calls)
 0: =($left#0:drone.drone_info, $right#0:drone.drone_info, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -386,19 +386,19 @@ LLVM code       : None
 
 
 
-count > public inline (0 calls)
+count > public {inline} (0 calls)
 0: count($rec#0:drone.drone_info, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-count > public inline (0 calls)
+count > public {inline} (0 calls)
 1: count($rec#0:drone.drone_info, ?$rec#1:drone.drone_info, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm mutate noalias(~%$rec#0:drone.drone_info, ?%$rec#1:drone.drone_info, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
-drone_info > public inline (0 calls)
+drone_info > public {inline} (0 calls)
 0: drone_info(x#0:wybe.int, y#0:wybe.int, z#0:wybe.int, count#0:wybe.int, ?$#0:drone.drone_info):
  AliasPairs: []
  InterestingCallProperties: []
@@ -407,7 +407,7 @@ drone_info > public inline (0 calls)
     foreign lpvm mutate(~%$rec#1:drone.drone_info, ?%$rec#2:drone.drone_info, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~y#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:drone.drone_info, ?%$rec#3:drone.drone_info, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~z#0:wybe.int)
     foreign lpvm mutate(~%$rec#3:drone.drone_info, ?%$#0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~count#0:wybe.int)
-drone_info > public inline (14 calls)
+drone_info > public {inline} (14 calls)
 1: drone_info(?x#0:wybe.int, ?y#0:wybe.int, ?z#0:wybe.int, ?count#0:wybe.int, $#0:drone.drone_info):
  AliasPairs: []
  InterestingCallProperties: []
@@ -417,36 +417,36 @@ drone_info > public inline (14 calls)
     foreign lpvm access(~$#0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?count#0:wybe.int)
 
 
-x > public inline (0 calls)
+x > public {inline} (0 calls)
 0: x($rec#0:drone.drone_info, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-x > public inline (0 calls)
+x > public {inline} (0 calls)
 1: x($rec#0:drone.drone_info, ?$rec#1:drone.drone_info, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm mutate noalias(~%$rec#0:drone.drone_info, ?%$rec#1:drone.drone_info, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
-y > public inline (0 calls)
+y > public {inline} (0 calls)
 0: y($rec#0:drone.drone_info, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-y > public inline (0 calls)
+y > public {inline} (0 calls)
 1: y($rec#0:drone.drone_info, ?$rec#1:drone.drone_info, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm mutate noalias(~%$rec#0:drone.drone_info, ?%$rec#1:drone.drone_info, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
-z > public inline (0 calls)
+z > public {inline} (0 calls)
 0: z($rec#0:drone.drone_info, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-z > public inline (0 calls)
+z > public {inline} (0 calls)
 1: z($rec#0:drone.drone_info, ?$rec#1:drone.drone_info, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
@@ -467,7 +467,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > inline (0 calls)
+*main* > {inline} (0 calls)
 0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -702,7 +702,7 @@ drone_init > (3 calls)
     foreign lpvm mutate(~tmp$8#0:drone.drone_info, ?$#0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int)
 
 
-gen$1 > inline (2 calls)
+gen$1 > {inline} (2 calls)
 0: gen$1(argc#0:wybe.int, argv#0:wybe.int, [ch#0:wybe.char], [d#0:drone.drone_info], exit_code#0:wybe.int, io#0:wybe.phantom, [tmp$0#0:drone.drone_info], [?argc#0:wybe.int], [?argv#0:wybe.int], [?exit_code#0:wybe.int], ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -863,7 +863,7 @@ loop > (2 calls)
 
 
 
-print_info > inline (1 calls)
+print_info > {inline} (1 calls)
 0: print_info(d#0:drone.drone_info, io#0:wybe.phantom, ?io#9:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1550,7 +1550,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:drone.drone_info, $right#0:drone.drone_info, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1590,7 +1590,7 @@ entry:
 
 
 
-= > public inline (1 calls)
+= > public {inline} (1 calls)
 0: =($left#0:drone.drone_info, $right#0:drone.drone_info, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1626,19 +1626,19 @@ entry:
 
 
 
-count > public inline (0 calls)
+count > public {inline} (0 calls)
 0: count($rec#0:drone.drone_info, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-count > public inline (0 calls)
+count > public {inline} (0 calls)
 1: count($rec#0:drone.drone_info, ?$rec#1:drone.drone_info, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm mutate noalias(~%$rec#0:drone.drone_info, ?%$rec#1:drone.drone_info, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
-drone_info > public inline (0 calls)
+drone_info > public {inline} (0 calls)
 0: drone_info(x#0:wybe.int, y#0:wybe.int, z#0:wybe.int, count#0:wybe.int, ?$#0:drone.drone_info):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1647,7 +1647,7 @@ drone_info > public inline (0 calls)
     foreign lpvm mutate(~%$rec#1:drone.drone_info, ?%$rec#2:drone.drone_info, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~y#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:drone.drone_info, ?%$rec#3:drone.drone_info, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~z#0:wybe.int)
     foreign lpvm mutate(~%$rec#3:drone.drone_info, ?%$#0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~count#0:wybe.int)
-drone_info > public inline (14 calls)
+drone_info > public {inline} (14 calls)
 1: drone_info(?x#0:wybe.int, ?y#0:wybe.int, ?z#0:wybe.int, ?count#0:wybe.int, $#0:drone.drone_info):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1657,36 +1657,36 @@ drone_info > public inline (14 calls)
     foreign lpvm access(~$#0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?count#0:wybe.int)
 
 
-x > public inline (0 calls)
+x > public {inline} (0 calls)
 0: x($rec#0:drone.drone_info, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-x > public inline (0 calls)
+x > public {inline} (0 calls)
 1: x($rec#0:drone.drone_info, ?$rec#1:drone.drone_info, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm mutate noalias(~%$rec#0:drone.drone_info, ?%$rec#1:drone.drone_info, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
-y > public inline (0 calls)
+y > public {inline} (0 calls)
 0: y($rec#0:drone.drone_info, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-y > public inline (0 calls)
+y > public {inline} (0 calls)
 1: y($rec#0:drone.drone_info, ?$rec#1:drone.drone_info, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm mutate noalias(~%$rec#0:drone.drone_info, ?%$rec#1:drone.drone_info, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
-z > public inline (0 calls)
+z > public {inline} (0 calls)
 0: z($rec#0:drone.drone_info, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-z > public inline (0 calls)
+z > public {inline} (0 calls)
 1: z($rec#0:drone.drone_info, ?$rec#1:drone.drone_info, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []

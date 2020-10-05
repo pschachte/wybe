@@ -108,7 +108,7 @@ decideInlining def
     -- Inline procs where benefit >= cost and private procs with only one use
     if benefit >= cost
        || procCallCount def <= 1 && procVis def == Private
-    then return $ def { procInline = True }
+    then return $ def { procInlining = Inline }
     else return def
     where ProcDefPrim proto body _ _ = procImpln def
 decideInlining def = return def

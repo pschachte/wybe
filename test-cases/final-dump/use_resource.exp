@@ -23,14 +23,14 @@ AFTER EVERYTHING:
     foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
 
 
-inc_count > inline (4 calls)
+inc_count > {inline} (4 calls)
 0: inc_count(count#0:wybe.int, ?count#1:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm add(~count#0:wybe.int, 1:wybe.int, ?count#1:wybe.int) @wybe:nn:nn
 
 
-use_test > inline (1 calls)
+use_test > {inline} (1 calls)
 0: use_test(count#0:wybe.int, ?count#5:wybe.int, io#0:wybe.phantom, ?io#4:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []

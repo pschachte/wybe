@@ -28,7 +28,7 @@ AFTER EVERYTHING:
     foreign c print_int(3:wybe.int, ~#io#6:wybe.phantom, ?#io#7:wybe.phantom) @wybe:nn:nn
 
 
-foreign_add > inline (1 calls)
+foreign_add > {inline} (1 calls)
 0: foreign_add(?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []

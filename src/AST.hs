@@ -41,7 +41,7 @@ module AST (
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, ProcImpln(..), ProcDef(..), procCallCount,
+  ModSpec, ProcImpln(..), ProcDef(..), procInline, procCallCount,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
   speczVersionToId, SpeczProcBodies,
@@ -72,7 +72,8 @@ module AST (
   addImport, doImport, addType, lookupType, publicType,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource,
-  ProcModifiers(..), detModifiers, setInline, setDetism, showProcModifiers,
+  ProcModifiers(..), detModifiers, setDetism, setInline, setPurity,
+  showProcModifiers, Inlining(..), Purity(..),
   addProc, addProcDef, lookupProc, publicProc,
   refersTo, callTargets,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
@@ -197,7 +198,7 @@ determinismTerminal SemiDet  = False
 determinismName :: Determinism -> String
 determinismName Terminal = "terminal"
 determinismName Failure  = "failure"
-determinismName Det      = "ordinary"
+determinismName Det      = ""
 determinismName SemiDet  = "test"
 
 
@@ -923,37 +924,70 @@ addImport modspec imports = do
 -- but to get rid of them, the parser needs to be able to report errors.
 data ProcModifiers = ProcModifiers {
     modifierDetism::Determinism,   -- ^ The proc determinism
-    modifierInline::Bool,          -- ^ Aggresively inline this proc?
+    modifierInline::Inlining,          -- ^ Aggresively inline this proc?
+    modifierPurity::Purity,          -- ^ Don't assume purity when optimising
     modifierUnknown::[String],     -- ^ Unknown modifiers specified
     modifierConflict::[String]     -- ^ Modifiers that conflict with others
-} deriving (Eq, Show, Generic)
+} deriving (Eq, Generic)
 
 
+data Inlining = Inline | MayInline | NoInline
+    deriving (Eq, Ord, Generic)
+
+
+-- | The printable modifier name for a purity, as specified by the user.
+inliningName :: Inlining -> String
+inliningName Inline     = "inline"
+inliningName MayInline  = ""
+inliningName NoInline   = "noinline"
+
+
+data Purity = PromisedPure | Pure | Impure
+    deriving (Eq, Ord, Generic)
+
+
+-- | The printable modifier name for a purity, as specified by the user.
+purityName :: Purity -> String
+purityName PromisedPure = "pure"
+purityName Pure         = ""
+purityName Impure       = "impure"
+
+
+-- | The default Det, non-inlined, pure ProcModifiers.
 detModifiers :: ProcModifiers
-detModifiers = ProcModifiers Det False [] []
+detModifiers = ProcModifiers Det MayInline Pure [] []
 
 
-setInline :: Bool -> ProcModifiers -> ProcModifiers
-setInline inline mods = mods {modifierInline=inline}
-
-
+-- | Set the modifierDetism attribute of a ProcModifiers.
 setDetism :: Determinism -> ProcModifiers -> ProcModifiers
 setDetism detism mods = mods {modifierDetism=detism}
 
 
+-- | Set the modifierInline attribute of a ProcModifiers.
+setInline :: Inlining -> ProcModifiers -> ProcModifiers
+setInline inlining mods = mods {modifierInline=inlining}
+
+
+-- | Set the modifierPurity attribute of a ProcModifiers.
+setPurity :: Purity -> ProcModifiers -> ProcModifiers
+setPurity purity mods = mods {modifierPurity=purity}
+
+
 -- | How to display ProcModifiers
 showProcModifiers :: ProcModifiers -> String
-showProcModifiers (ProcModifiers Det False _ _) = ""
-showProcModifiers (ProcModifiers Det True _ _) = "{inline} "
-showProcModifiers (ProcModifiers detism inline _ _) =
-    "{" ++ determinismName detism ++ (if inline then ",inline" else "") ++ "} "
+showProcModifiers (ProcModifiers Det MayInline Pure _ _) = ""
+showProcModifiers (ProcModifiers detism inlining purity _ _) =
+    "{" ++ intercalate "," (List.filter (not . List.null) [d,i,p]) ++ "} "
+    where d = determinismName detism
+          i = inliningName inlining
+          p = purityName purity
 
 
 -- |Add the specified proc definition to the current module.
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
-    let ProcModifiers detism inline unknown conflict = mods
+    let ProcModifiers detism inlining purity unknown conflict = mods
     mapM_ (\m -> message Error 
                 ("Unknown proc modifier '" ++ m
                  ++ "' in declaration of " ++ name)
@@ -966,7 +1000,7 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
                  pos)
            conflict
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0
-                  Map.empty vis detism inline $ initSuperprocSpec vis
+                  Map.empty vis detism inlining purity $ initSuperprocSpec vis
     addProcDef procDef
 addProc _ item =
     shouldnt $ "addProc given non-Proc item " ++ show item
@@ -1606,27 +1640,35 @@ data ResourceImpln =
 --  normalised to a list of primitives, and an optional source
 --  position.
 data ProcDef = ProcDef {
-    procName :: Ident,          -- the proc's name
-    procProto :: ProcProto,     -- the proc's prototype
-    procImpln :: ProcImpln,     -- the actual implementation
-    procPos :: OptPos,          -- where this proc is defined
-    procTmpCount :: Int,        -- the next temp variable number to use
+    procName :: Ident,          -- ^the proc's name
+    procProto :: ProcProto,     -- ^the proc's prototype
+    procImpln :: ProcImpln,     -- ^the actual implementation
+    procPos :: OptPos,          -- ^where this proc is defined
+    procTmpCount :: Int,        -- ^the next temp variable number to use
     procCallSiteCount :: CallSiteID,
-                                -- the next call site id to use
+                                -- ^the next call site id to use
     procCallers :: Map ProcSpec Int,
-                                -- callers to this proc from this mod in the
+                                -- ^callers to this proc from this mod in the
                                 -- source code (before inlining) and the count
                                 -- of calls for each caller
                                 -- XXX We never actually use this map, we just
                                 -- add up the call counts, so we might as well
                                 -- keep just a count
-    procVis :: Visibility,      -- what modules should be able to see this?
-    procDetism :: Determinism,  -- can this proc fail?
-    procInline :: Bool,         -- should we inline calls to this proc?
+    procVis :: Visibility,      -- ^what modules should be able to see this?
+    procDetism :: Determinism,  -- ^can this proc fail?
+    procInlining :: Inlining,   -- ^should we inline calls to this proc?
+    procPurity :: Purity,       -- ^ Is this proc pure?
     procSuperproc :: SuperprocSpec
-                                -- the proc this should be part of, if any
+                                -- ^the proc this should be part of, if any
 }
              deriving (Eq, Generic)
+
+
+-- |Whether this proc should definitely be inlined, either because the user said
+-- to, or because we inferred it would be a good idea.
+procInline :: ProcDef -> Bool
+procInline = (==Inline) . procInlining
+
 
 procCallCount :: ProcDef -> Int
 procCallCount proc = Map.foldr (+) 0 $ procCallers proc
@@ -1642,9 +1684,9 @@ procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 --  this proc is public, or we have seen calls from multiple callers, or in
 --  positions.
 data SuperprocSpec
-    = NoSuperproc             -- Cannot be a subproc
-    | AnySuperproc            -- Could be a subproc of any proc
-    | SuperprocIs ProcSpec    -- May only be a subproc of specified proc
+    = NoSuperproc             -- ^Cannot be a subproc
+    | AnySuperproc            -- ^Could be a subproc of any proc
+    | SuperprocIs ProcSpec    -- ^May only be a subproc of specified proc
     deriving (Eq, Show, Generic)
 
 
@@ -2785,12 +2827,11 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID 
-        procdef@(ProcDef n proto def pos _ _ _ vis detism inline sub) =
+        procdef@(ProcDef n proto def pos _ _ _ vis detism inline purity sub) =
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
     ++ visibilityPrefix vis
-    ++ (if inline then "inline " else "")
-    ++ (if detism == Det then "" else determinismName detism ++ " ")
+    ++ showProcModifiers (ProcModifiers detism inline purity [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
     ++ "\n"

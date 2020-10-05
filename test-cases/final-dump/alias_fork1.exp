@@ -30,7 +30,7 @@ AFTER EVERYTHING:
     foreign c putchar('\n':wybe.char, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
 
 
-gen$1 > inline (2 calls)
+gen$1 > {inline} (2 calls)
 0: gen$1([k1#0:wybe.int], [k2#0:wybe.int], [l1#0:mytree.tree], [l2#0:mytree.tree], [r1#0:mytree.tree], [r2#0:mytree.tree], [tl#0:mytree.tree], tmp$2#0:mytree.tree, [tr#0:mytree.tree], ?$#0:mytree.tree):
  AliasPairs: []
  InterestingCallProperties: []
@@ -271,7 +271,7 @@ if.else2:
   submodules      : mytree.tree
   procs           : 
 
-printTree > public inline (0 calls)
+printTree > public {inline} (0 calls)
 0: printTree(t#0:mytree.tree, io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -385,7 +385,7 @@ if.else:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:mytree.tree, $right#0:mytree.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -434,14 +434,14 @@ if.else:
 
 
 
-empty > public inline (0 calls)
+empty > public {inline} (0 calls)
 0: empty(?$#0:mytree.tree):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:mytree.tree, ?$#0:mytree.tree)
 
 
-key > public inline (0 calls)
+key > public {inline} (0 calls)
 0: key($rec#0:mytree.tree, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -454,7 +454,7 @@ key > public inline (0 calls)
         foreign lpvm access(~$rec#0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-key > public inline (0 calls)
+key > public {inline} (0 calls)
 1: key($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -470,7 +470,7 @@ key > public inline (0 calls)
 
 
 
-left > public inline (0 calls)
+left > public {inline} (0 calls)
 0: left($rec#0:mytree.tree, ?$#0:mytree.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -483,7 +483,7 @@ left > public inline (0 calls)
         foreign lpvm access(~$rec#0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$#0:mytree.tree)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-left > public inline (0 calls)
+left > public {inline} (0 calls)
 1: left($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:mytree.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -499,7 +499,7 @@ left > public inline (0 calls)
 
 
 
-node > public inline (0 calls)
+node > public {inline} (0 calls)
 0: node(left#0:mytree.tree, key#0:wybe.int, right#0:mytree.tree, ?$#0:mytree.tree):
  AliasPairs: []
  InterestingCallProperties: []
@@ -507,7 +507,7 @@ node > public inline (0 calls)
     foreign lpvm mutate(~%$rec#0:mytree.tree, ?%$rec#1:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~left#0:mytree.tree)
     foreign lpvm mutate(~%$rec#1:mytree.tree, ?%$rec#2:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~key#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:mytree.tree, ?%$#0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right#0:mytree.tree)
-node > public inline (16 calls)
+node > public {inline} (16 calls)
 1: node(?left#0:mytree.tree, ?key#0:wybe.int, ?right#0:mytree.tree, $#0:mytree.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -524,7 +524,7 @@ node > public inline (16 calls)
 
 
 
-right > public inline (0 calls)
+right > public {inline} (0 calls)
 0: right($rec#0:mytree.tree, ?$#0:mytree.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -537,7 +537,7 @@ right > public inline (0 calls)
         foreign lpvm access(~$rec#0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$#0:mytree.tree)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-right > public inline (0 calls)
+right > public {inline} (0 calls)
 1: right($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:mytree.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

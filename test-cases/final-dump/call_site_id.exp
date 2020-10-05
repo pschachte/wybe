@@ -47,7 +47,7 @@ AFTER EVERYTHING:
 
 
 
-bar > public inline (9 calls)
+bar > public {inline} (9 calls)
 0: bar(x#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []

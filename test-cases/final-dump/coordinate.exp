@@ -41,7 +41,7 @@ AFTER EVERYTHING:
     foreign c putchar('\n':wybe.char, ~tmp$25#0:wybe.phantom, ?#io#4:wybe.phantom) @wybe:nn:nn
 
 
-fcopy > public inline (1 calls)
+fcopy > public {inline} (1 calls)
 0: fcopy(crd1#0:coordinate.Coordinate, ?$#0:coordinate.Coordinate):
  AliasPairs: []
  InterestingCallProperties: []
@@ -137,7 +137,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:coordinate.Coordinate, $right#0:coordinate.Coordinate, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -167,7 +167,7 @@ entry:
 
 
 
-= > public inline (1 calls)
+= > public {inline} (1 calls)
 0: =($left#0:coordinate.Coordinate, $right#0:coordinate.Coordinate, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -194,7 +194,7 @@ entry:
 
 
 
-Coordinate > public inline (0 calls)
+Coordinate > public {inline} (0 calls)
 0: Coordinate(x#0:wybe.int, y#0:wybe.int, z#0:wybe.int, ?$#0:coordinate.Coordinate):
  AliasPairs: []
  InterestingCallProperties: []
@@ -202,7 +202,7 @@ Coordinate > public inline (0 calls)
     foreign lpvm mutate(~%$rec#0:coordinate.Coordinate, ?%$rec#1:coordinate.Coordinate, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~x#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:coordinate.Coordinate, ?%$rec#2:coordinate.Coordinate, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~y#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:coordinate.Coordinate, ?%$#0:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~z#0:wybe.int)
-Coordinate > public inline (10 calls)
+Coordinate > public {inline} (10 calls)
 1: Coordinate(?x#0:wybe.int, ?y#0:wybe.int, ?z#0:wybe.int, $#0:coordinate.Coordinate):
  AliasPairs: []
  InterestingCallProperties: []
@@ -211,36 +211,36 @@ Coordinate > public inline (10 calls)
     foreign lpvm access(~$#0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?z#0:wybe.int)
 
 
-x > public inline (0 calls)
+x > public {inline} (0 calls)
 0: x($rec#0:coordinate.Coordinate, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-x > public inline (0 calls)
+x > public {inline} (0 calls)
 1: x($rec#0:coordinate.Coordinate, ?$rec#1:coordinate.Coordinate, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm mutate noalias(~%$rec#0:coordinate.Coordinate, ?%$rec#1:coordinate.Coordinate, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
-y > public inline (0 calls)
+y > public {inline} (0 calls)
 0: y($rec#0:coordinate.Coordinate, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-y > public inline (0 calls)
+y > public {inline} (0 calls)
 1: y($rec#0:coordinate.Coordinate, ?$rec#1:coordinate.Coordinate, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm mutate noalias(~%$rec#0:coordinate.Coordinate, ?%$rec#1:coordinate.Coordinate, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
-z > public inline (0 calls)
+z > public {inline} (0 calls)
 0: z($rec#0:coordinate.Coordinate, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-z > public inline (0 calls)
+z > public {inline} (0 calls)
 1: z($rec#0:coordinate.Coordinate, ?$rec#1:coordinate.Coordinate, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []

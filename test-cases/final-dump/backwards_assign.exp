@@ -10,14 +10,14 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public inline (0 calls)
+*main* > public {inline} (0 calls)
 0: (argc#0:wybe.int, ?argc#1:wybe.int, argv#0:wybe.int, ?argv#1:wybe.int, exit_code#0:wybe.int, ?exit_code#1:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     backwards_assign.gen$1<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, 0:wybe.int, ~io#0:wybe.phantom, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom) #0 @backwards_assign:6:1
 
 
-backwards_assign > inline (3 calls)
+backwards_assign > {inline} (3 calls)
 0: backwards_assign(?output#0:wybe.int, input#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []

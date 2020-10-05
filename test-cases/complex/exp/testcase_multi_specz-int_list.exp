@@ -102,7 +102,7 @@ AFTER BUILDING MAIN:
   resources       : 
   procs           : 
 
-*main* > inline (0 calls)
+*main* > {inline} (0 calls)
 0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -201,7 +201,7 @@ extend > public (3 calls)
 
 
 
-gen$1 > inline (2 calls)
+gen$1 > {inline} (2 calls)
 0: gen$1([h#0:wybe.int], [lst#0:int_list.int_list], [t#0:int_list.int_list], tmp$2#0:wybe.int, tmp$3#0:wybe.int, [x#0:wybe.int], ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
@@ -235,7 +235,7 @@ greater > (3 calls)
 
 
 
-index > public inline (0 calls)
+index > public {inline} (0 calls)
 0: index(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
@@ -370,7 +370,7 @@ print > public (2 calls)
 
 
 
-println > public inline (0 calls)
+println > public {inline} (0 calls)
 0: println(x#0:int_list.int_list, io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -432,7 +432,7 @@ remove > public (1 calls)
 
 
 
-reverse > public inline (1 calls)
+reverse > public {inline} (1 calls)
 0: reverse(lst#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
@@ -504,7 +504,7 @@ LLVM code       : None
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -544,21 +544,21 @@ LLVM code       : None
 
 
 
-[] > public inline (0 calls)
+[] > public {inline} (0 calls)
 0: [](?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list)
 
 
-[|] > public inline (0 calls)
+[|] > public {inline} (0 calls)
 0: [|](head#0:wybe.int, tail#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!int_list.int_list)
     foreign lpvm mutate(~%$rec#0:int_list.int_list, ?%$rec#1:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:int_list.int_list, ?%$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:int_list.int_list)
-[|] > public inline (12 calls)
+[|] > public {inline} (12 calls)
 1: [|](?head#0:wybe.int, ?tail#0:int_list.int_list, $#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -574,7 +574,7 @@ LLVM code       : None
 
 
 
-head > public inline (0 calls)
+head > public {inline} (0 calls)
 0: head($rec#0:int_list.int_list, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -587,7 +587,7 @@ head > public inline (0 calls)
         foreign lpvm access(~$rec#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-head > public inline (0 calls)
+head > public {inline} (0 calls)
 1: head($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -603,7 +603,7 @@ head > public inline (0 calls)
 
 
 
-tail > public inline (0 calls)
+tail > public {inline} (0 calls)
 0: tail($rec#0:int_list.int_list, ?$#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -616,7 +616,7 @@ tail > public inline (0 calls)
         foreign lpvm access(~$rec#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:int_list.int_list)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-tail > public inline (0 calls)
+tail > public {inline} (0 calls)
 1: tail($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -753,7 +753,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > inline (0 calls)
+*main* > {inline} (0 calls)
 0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -892,7 +892,7 @@ extend > public (3 calls)
 
 
 
-gen$1 > inline (2 calls)
+gen$1 > {inline} (2 calls)
 0: gen$1([h#0:wybe.int], [lst#0:int_list.int_list], [t#0:int_list.int_list], tmp$2#0:wybe.int, tmp$3#0:wybe.int, [x#0:wybe.int], ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
@@ -945,7 +945,7 @@ greater > (3 calls)
 
 
 
-index > public inline (0 calls)
+index > public {inline} (0 calls)
 0: index(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1121,7 +1121,7 @@ print > public (2 calls)
 
 
 
-println > public inline (0 calls)
+println > public {inline} (0 calls)
 0: println(x#0:int_list.int_list, io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1202,7 +1202,7 @@ remove > public (1 calls)
 
 
 
-reverse > public inline (1 calls)
+reverse > public {inline} (1 calls)
 0: reverse(lst#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1947,7 +1947,7 @@ if.else:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -1987,21 +1987,21 @@ if.else:
 
 
 
-[] > public inline (0 calls)
+[] > public {inline} (0 calls)
 0: [](?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list)
 
 
-[|] > public inline (0 calls)
+[|] > public {inline} (0 calls)
 0: [|](head#0:wybe.int, tail#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!int_list.int_list)
     foreign lpvm mutate(~%$rec#0:int_list.int_list, ?%$rec#1:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:int_list.int_list, ?%$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:int_list.int_list)
-[|] > public inline (12 calls)
+[|] > public {inline} (12 calls)
 1: [|](?head#0:wybe.int, ?tail#0:int_list.int_list, $#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2017,7 +2017,7 @@ if.else:
 
 
 
-head > public inline (0 calls)
+head > public {inline} (0 calls)
 0: head($rec#0:int_list.int_list, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2030,7 +2030,7 @@ head > public inline (0 calls)
         foreign lpvm access(~$rec#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-head > public inline (0 calls)
+head > public {inline} (0 calls)
 1: head($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2046,7 +2046,7 @@ head > public inline (0 calls)
 
 
 
-tail > public inline (0 calls)
+tail > public {inline} (0 calls)
 0: tail($rec#0:int_list.int_list, ?$#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -2059,7 +2059,7 @@ tail > public inline (0 calls)
         foreign lpvm access(~$rec#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:int_list.int_list)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
-tail > public inline (0 calls)
+tail > public {inline} (0 calls)
 1: tail($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []

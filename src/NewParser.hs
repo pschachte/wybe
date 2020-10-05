@@ -269,17 +269,20 @@ funcProtoParser = do
 -- location of the list of modifiers.
 processProcModifiers :: [String] -> ProcModifiers
 processProcModifiers =
-    List.foldl processProcModifier $ ProcModifiers Det False [] []
+    List.foldl processProcModifier $ ProcModifiers Det MayInline Pure [] []
 
 
 processProcModifier :: ProcModifiers -> String -> ProcModifiers
-processProcModifier mods "inline" = mods {modifierInline=True}
-processProcModifier mods "test"     = updateModsDetism mods "test" SemiDet
-processProcModifier mods "partial"  = updateModsDetism mods "partial" SemiDet
-processProcModifier mods "failure"  = updateModsDetism mods "failure" Failure
-processProcModifier mods "terminal" = updateModsDetism mods "terminal" Terminal
-processProcModifier mods modName    =
-    mods {modifierUnknown=modName:modifierUnknown mods}
+processProcModifier ms "test"     = updateModsDetism   ms "test" SemiDet
+processProcModifier ms "partial"  = updateModsDetism   ms "partial" SemiDet
+processProcModifier ms "failure"  = updateModsDetism   ms "failure" Failure
+processProcModifier ms "terminal" = updateModsDetism   ms "terminal" Terminal
+processProcModifier ms "inline"   = updateModsInlining ms "inline" Inline
+processProcModifier ms "noinline" = updateModsInlining ms "noinline" NoInline
+processProcModifier ms "pure"     = updateModsPurity   ms "pure" PromisedPure
+processProcModifier ms "impure"   = updateModsPurity   ms "impure" Impure
+processProcModifier ms modName    =
+    ms {modifierUnknown=modName:modifierUnknown ms}
     
 
 
@@ -290,6 +293,28 @@ updateModsDetism :: ProcModifiers -> String -> Determinism -> ProcModifiers
 updateModsDetism mods@ProcModifiers{modifierDetism=Det} _ detism =
     mods {modifierDetism=detism}
 updateModsDetism mods modName detism =
+    mods {modifierConflict=modName:modifierConflict mods}
+
+
+-- | Update the ProcModifiers to specify the given inlining, which was specified
+-- with the given identifier.  Since MayInline is the default, and can't be
+-- explicitly specified, it's alway OK to change from MayInline to something
+-- else.
+updateModsInlining :: ProcModifiers -> String -> Inlining -> ProcModifiers
+updateModsInlining mods@ProcModifiers{modifierInline=MayInline} _ inlining =
+    mods {modifierInline=inlining}
+updateModsInlining mods modName inlining =
+    mods {modifierConflict=modName:modifierConflict mods}
+
+
+-- | Update the ProcModifiers to specify the given purity, which was specified
+-- with the given identifier.  Since Pure is the default, and can't be
+-- explicitly specified, it's alway OK to change from Pure to something
+-- else.
+updateModsPurity :: ProcModifiers -> String -> Purity -> ProcModifiers
+updateModsPurity mods@ProcModifiers{modifierPurity=Pure} _ purity =
+    mods {modifierPurity=purity}
+updateModsPurity mods modName purity =
     mods {modifierConflict=modName:modifierConflict mods}
 
 

@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-chain > inline (0 calls)
+chain > {inline} (0 calls)
 0: chain(?z#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []

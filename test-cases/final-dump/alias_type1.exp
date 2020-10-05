@@ -131,7 +131,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:alias_type1.position, $right#0:alias_type1.position, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -151,7 +151,7 @@ entry:
 
 
 
-= > public inline (1 calls)
+= > public {inline} (1 calls)
 0: =($left#0:alias_type1.position, $right#0:alias_type1.position, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -169,14 +169,14 @@ entry:
 
 
 
-position > public inline (0 calls)
+position > public {inline} (0 calls)
 0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:alias_type1.position):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!alias_type1.position)
     foreign lpvm mutate(~%$rec#0:alias_type1.position, ?%$rec#1:alias_type1.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:alias_type1.position, ?%$#0:alias_type1.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y#0:wybe.int)
-position > public inline (6 calls)
+position > public {inline} (6 calls)
 1: position(?x#0:wybe.int, ?y#0:wybe.int, $#0:alias_type1.position):
  AliasPairs: []
  InterestingCallProperties: []
@@ -184,24 +184,24 @@ position > public inline (6 calls)
     foreign lpvm access(~$#0:alias_type1.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y#0:wybe.int)
 
 
-x > public inline (0 calls)
+x > public {inline} (0 calls)
 0: x($rec#0:alias_type1.position, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:alias_type1.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-x > public inline (0 calls)
+x > public {inline} (0 calls)
 1: x($rec#0:alias_type1.position, ?$rec#1:alias_type1.position, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm mutate noalias(~%$rec#0:alias_type1.position, ?%$rec#1:alias_type1.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
-y > public inline (0 calls)
+y > public {inline} (0 calls)
 0: y($rec#0:alias_type1.position, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:alias_type1.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-y > public inline (0 calls)
+y > public {inline} (0 calls)
 1: y($rec#0:alias_type1.position, ?$rec#1:alias_type1.position, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
@@ -375,7 +375,7 @@ entry:
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:alias_type1.posrec, $right#0:alias_type1.posrec, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -407,7 +407,7 @@ entry:
 
 
 
-= > public inline (1 calls)
+= > public {inline} (1 calls)
 0: =($left#0:alias_type1.posrec, $right#0:alias_type1.posrec, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
@@ -436,38 +436,38 @@ entry:
 
 
 
-a > public inline (0 calls)
+a > public {inline} (0 calls)
 0: a($rec#0:alias_type1.posrec, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:alias_type1.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-a > public inline (0 calls)
+a > public {inline} (0 calls)
 1: a($rec#0:alias_type1.posrec, ?$rec#1:alias_type1.posrec, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm mutate(~%$rec#0:alias_type1.posrec, ?%$rec#1:alias_type1.posrec, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
-p > public inline (0 calls)
+p > public {inline} (0 calls)
 0: p($rec#0:alias_type1.posrec, ?$#0:alias_type1.position):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:alias_type1.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:alias_type1.position)
-p > public inline (0 calls)
+p > public {inline} (0 calls)
 1: p($rec#0:alias_type1.posrec, ?$rec#1:alias_type1.posrec, $field#0:alias_type1.position):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm mutate noalias(~%$rec#0:alias_type1.posrec, ?%$rec#1:alias_type1.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:alias_type1.position)
 
 
-posrec > public inline (0 calls)
+posrec > public {inline} (0 calls)
 0: posrec(a#0:wybe.int, p#0:alias_type1.position, ?$#0:alias_type1.posrec):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!alias_type1.posrec)
     foreign lpvm mutate(~%$rec#0:alias_type1.posrec, ?%$rec#1:alias_type1.posrec, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~a#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:alias_type1.posrec, ?%$#0:alias_type1.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~p#0:alias_type1.position)
-posrec > public inline (6 calls)
+posrec > public {inline} (6 calls)
 1: posrec(?a#0:wybe.int, ?p#0:alias_type1.position, $#0:alias_type1.posrec):
  AliasPairs: []
  InterestingCallProperties: []
