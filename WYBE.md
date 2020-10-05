@@ -360,30 +360,35 @@ actually replace the second statement with
 ?z = a
 ```
 
-## Tests
+## Tests and partial functions
 
 Some procedure and function calls are *tests*.  This means that instead
 of returning whatever outputs they ordinarily produce, they can *fail*,
-in which case they do not produce their usual output(s).  You can think
-of a test function as a partial function, and a test procedure as one
-that can throw a special *failure* exception.
+in which case they do not produce their usual output(s).  Functions
+that may fail to produce a result are also known as *partial* functions.
 
 Test procedures and functions must be explicitly declared by inserting
-the keyword `test` after the `def` keyword.
+the modifier `test`, enclosed within curley braces, after the `def` keyword.
+You can also use the modifier `partial` in place of `test`.  For example:
+
+```
+def {test} even_number(num:int) { ... }
+def {partial} lookup(key:int, table:map) = ...
+```
 
 Calls to test procedures and functions are only permitted in two
 contexts:  in a conditional, described [below](#conditionals),
 or in the definition of a test procedure.
 
-Any procedure or function call can become a test if an input is provided
+Any procedure or function call can also become a test if an input is provided
 where an output argument is expected.  In this case, the call is made
 producing the output, and then the output is compared for equality with
 supplied input.  Equality `=` with two input arguments is a test, so
 these two calls are equivalent tests:
 
 ```
-add(x, y, xy)
-xy = add(x, y)
+add(x, y, ?xy)
+?xy = add(x, y)
 ```
 
 
@@ -423,7 +428,7 @@ if { x < 0     :: !println("negative")
 A procedure is considered to be *terminal* if a call to it will never return (it
 will neither succeed nor fail). For example, the `exit` and `error` procedures
 are `terminal`, as is any infinite loop. A procedure can be declared to be
-terminal by following the `def` keyword with `terminal` in its declaration. The
+terminal by following the `def` keyword with `{terminal}` in its declaration. The
 Wybe compiler will verify that procedures declared `terminal` will indeed not
 return.
 
