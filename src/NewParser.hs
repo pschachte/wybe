@@ -777,7 +777,7 @@ foreignExp = do
     pos <- tokenPosition <$> ident "foreign"
     group <- identString
     fname <- content <$> funcNamePlaced
-    flags <- option [] (identString `sepBy` comma)
+    flags <- many identString
     args <- argListParser
     return $ Placed (ForeignFn group fname flags args) pos
 

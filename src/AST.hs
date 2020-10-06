@@ -41,7 +41,7 @@ module AST (
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, ProcImpln(..), ProcDef(..), procInline, procCallCount,
+  ModSpec, ProcImpln(..), ProcDef(..), procInline, procCallCount, primImpure,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
   speczVersionToId, SpeczProcBodies,
@@ -1670,8 +1670,20 @@ procInline :: ProcDef -> Bool
 procInline = (==Inline) . procInlining
 
 
+-- | How many static calls to this proc from the same module have we seen?  This
+-- won't be correct for public procs.
 procCallCount :: ProcDef -> Int
 procCallCount proc = Map.foldr (+) 0 $ procCallers proc
+
+
+-- | Is the specified Prim impure?
+primImpure :: Prim -> Compiler Bool
+primImpure (PrimCall _ pspec _) = do
+    def <- getProcDef pspec
+    return $ Impure == procPurity def
+primImpure (PrimForeign _ _ tags _) =
+    return $ "impure" `elem` tags
+primImpure (PrimTest _) = return False
 
 
 -- |LLVM block structure allows many blocks per procedure, where blocks can

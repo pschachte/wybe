@@ -1,0 +1,8 @@
+!println("should print this")
+my_error("should print this error message")
+!println("shouldn't print this")
+
+def {terminal,impure} my_error(msg:string) {
+    foreign c puts impure(msg)
+    foreign c exit terminal impure(1)
+}

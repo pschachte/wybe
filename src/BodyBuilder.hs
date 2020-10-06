@@ -669,9 +669,6 @@ validateArg instr (ArgUnneeded _ ty)  = validateType ty instr
 validateType :: TypeSpec -> Prim -> BodyBuilder ()
 validateType InvalidType instr =
     shouldnt $ "InvalidType in argument of " ++ show instr
--- XXX AnyType is now a valid type treated as a word type
--- validateType AnyType instr =
---     shouldnt $ "AnyType in argument of " ++ show instr
 validateType _ instr = return ()
 
 
@@ -1150,9 +1147,9 @@ bkwdBuildStmt defs prim pos = do
                                             $ bkwdRenaming s })
       _ -> do
         let (ins, outs) = splitArgsByMode $ List.filter argIsVar args'
-        -- Filter out instructions that produce no needed outputs
-        -- XXX Must not filter out impure instructions
-        when (any (`Set.member` usedLater) $ argVarName <$> outs) $ do
+        -- Filter out pure  instructions that produce no needed outputs
+        impure <- lift $ primImpure prim
+        when (impure || any (`Set.member` usedLater) (argVarName <$> outs)) $ do
           -- XXX Careful:  probably shouldn't mark last use of variable passed
           -- as input argument more than once in the call
           let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args'
