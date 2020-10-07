@@ -1043,6 +1043,7 @@ currBody body st = do
     return (tmpCount st, bkwdUsedLater st', bkwdFollowing st')
 
 
+-- |Another monad, this one for rebuilding a proc body bottom-up.
 type BkwdBuilder = StateT BkwdBuilderState Compiler
 
 -- |BkwdBuilderState is used to store context info while building a ProcBody
@@ -1059,7 +1060,6 @@ data BkwdBuilderState = BkwdBuilderState {
       bkwdTmpCount  :: Int,              -- ^Highest temporary variable number
       bkwdFollowing :: ProcBody          -- ^Code to come later
       } deriving (Eq,Show)
-
 
 
 rebuildBody :: BodyState -> BkwdBuilder ()
@@ -1147,7 +1147,7 @@ bkwdBuildStmt defs prim pos = do
                                             $ bkwdRenaming s })
       _ -> do
         let (ins, outs) = splitArgsByMode $ List.filter argIsVar args'
-        -- Filter out pure  instructions that produce no needed outputs
+        -- Filter out pure instructions that produce no needed outputs
         impure <- lift $ primImpure prim
         when (impure || any (`Set.member` usedLater) (argVarName <$> outs)) $ do
           -- XXX Careful:  probably shouldn't mark last use of variable passed
