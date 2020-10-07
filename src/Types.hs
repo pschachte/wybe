@@ -91,8 +91,8 @@ checkDeclIfPublic pname ppos public ty =
 
 
 -- |Type check a single module.  Since all public procs/functions must have
--- their types fully declared, no fixed across modules is needed.  Our type
--- inference is flow sensitive, that is, types from from callers to callees, but
+-- their types fully declared, no fixpoint across modules is needed.  Our type
+-- inference is flow sensitive, that is, types flow from callees to callers, but
 -- not vice versa.  Therefore we analyse bottom-up by intra-module potential
 -- call graph SCCs.  Type and mode inference are responsible for resolving
 -- overloading, which means that the SCCs inferred at this point include all
@@ -105,7 +105,8 @@ typeCheckMod thisMod = do
     let ordered =
             stronglyConnComp
             [(name, name,
-              nub $ concatMap (localBodyProcs thisMod . procImpln) procDefs)
+              Set.elems $ Set.unions
+              $ List.map (localBodyProcs thisMod . procImpln) procDefs)
              | (name,procDefs) <- procs]
     logTypes $ "**** Strongly connected components:\n" ++
       intercalate "\n"
@@ -169,7 +170,7 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Public proc with some undeclared types
                | ReasonEqual Exp Exp OptPos
                    -- ^Expression types should be equal
-               | ReasonDeterminism ProcSpec Determinism OptPos
+               | ReasonDeterminism ProcSpec Determinism Determinism OptPos
                    -- ^Calling a semidet proc in a det context
                | ReasonForeignLanguage String String OptPos
                    -- ^Foreign call with bogus language
@@ -259,10 +260,10 @@ instance Show TypeError where
         "Expressions must have compatible types:\n    "
         ++ show exp1 ++ "\n    "
         ++ show exp2
-    show (ReasonDeterminism proc detism pos) =
+    show (ReasonDeterminism proc procDetism contextDetism pos) =
         makeMessage pos $
-        "Calling " ++ determinismName detism ++ " proc "
-        ++ show proc ++ " in a det context"
+        "Calling " ++ determinismName procDetism ++ " proc "
+        ++ show proc ++ " in a " ++ determinismName contextDetism ++ " context"
     show (ReasonForeignLanguage lang instr pos) =
         makeMessage pos $
         "Foreign call '" ++ instr ++ "' with unknown language '" ++ lang ++ "'"
@@ -313,7 +314,15 @@ data Typing = Typing {
                   typingDict::Map VarName TypeRef,
                   typingErrs::[TypeError]
                   }
-            deriving (Show,Eq,Ord)
+            deriving (Eq,Ord)
+
+instance Show Typing where
+  show (Typing dict errs) =
+    "Typing " ++ showVarMap dict
+    ++ if List.null errs
+       then " with no errors"
+       else " with errors: " ++ show errs
+
 
 -- |The empty typing, assigning every var the type AnyType.
 initTyping :: Typing
@@ -460,17 +469,16 @@ meetTypes ty1 ty2
     | otherwise                 = InvalidType
 
 
-localBodyProcs :: ModSpec -> ProcImpln -> [Ident]
+localBodyProcs :: ModSpec -> ProcImpln -> Set Ident
 localBodyProcs thisMod (ProcDefSrc body) =
-    foldProcCalls (localCalls thisMod) (++) [] body
+    foldStmts (localCalls thisMod) const Set.empty body
 localBodyProcs thisMod (ProcDefPrim _ _ _ _) =
     shouldnt "Type checking compiled code"
 
-localCalls :: ModSpec -> ModSpec -> Ident -> Maybe Int -> Determinism
-           -> Bool -> [Placed Exp] -> [Ident]
-localCalls thisMod m name _ _ _ _
-  | List.null m || m == thisMod = [name]
-localCalls _ _ _ _ _ _ _ = []
+localCalls :: ModSpec -> Set Ident -> Stmt -> Set Ident
+localCalls thisMod idents (ProcCall m name _ _ _ _)
+  | List.null m || m == thisMod = Set.insert name idents
+localCalls _ idents _ = idents
 
 
 expType :: Typing -> Placed Exp -> Compiler TypeSpec
@@ -639,21 +647,21 @@ procInfoTypes call = typeFlowType <$> procInfoArgs call
 -- |Check if ProcInfo is for a proc with a single Bool output as last arg,
 --  and if so, return Just the ProcInfo for the equivalent test proc
 boolFnToTest :: ProcInfo -> Maybe ProcInfo
-boolFnToTest ProcInfo{procInfoDetism=SemiDet} = Nothing
 boolFnToTest pinfo@ProcInfo{procInfoDetism=Det, procInfoArgs=args}
     | List.null args = Nothing
     | last args == TypeFlow boolType ParamOut =
         Just $ pinfo {procInfoArgs=init args, procInfoDetism=SemiDet}
     | otherwise = Nothing
+boolFnToTest _ = Nothing
 
 
 -- |Check if ProcInfo is for a test proc, and if so, return a ProcInfo for
 --  the Det proc with a single Bool output as last arg
 testToBoolFn :: ProcInfo -> Maybe ProcInfo
-testToBoolFn ProcInfo{procInfoDetism=Det} = Nothing
 testToBoolFn pinfo@ProcInfo{procInfoDetism=SemiDet, procInfoArgs=args}
     = Just $ pinfo {procInfoDetism=Det
                    ,procInfoArgs=args ++ [TypeFlow boolType ParamOut]}
+testToBoolFn _ = Nothing
 
 
 -- |A single call statement together with the determinism context in which
@@ -1025,26 +1033,22 @@ matchTypeList' callee pos callArgTypes calleeInfo =
 -- | A binding state reflects whether execution will reach a given program
 -- point, if so, whether execution can succeed or fail, and if it can reach
 -- there in success, the set of variables that will definitely be defined
--- (bound). It also tracks the set of variables that will reach the loop exit
--- point, if any. These binding states form a lattice, where definitely
--- unreachable (Impossible) is the bottom element, definite success (Succeeding)
--- and definite failure (Failing) are greater, and possible success/possible
--- failure (Possible) is the top element. These reflect whether or not success
--- is possible, with the bottom element indicating that neither success nor
--- failure is possible, the top indicating that both are possible, and the other
--- two indicating that exactly one is possible. The Impossible binding state
--- arises after a Next or Break statement.  The set of variables defined at all
--- loop exits is represented as a Maybe (Set VarName), with Nothing indicating
--- that no loop exits have been seen and Just set means that some exits have
--- been seen and the specified set is the intersection of the sets of defined
--- variables at all exits.
+-- (bound).  It comprises a determinism, the set of variables that will
+-- definitely be bound at that program point, and the set of variables that
+-- will definitely reach the loop exit point.  For both sets of variables,
+-- Nothing indicates the universal set.
 
-data BindingState                                    -- Execution:
-    = Impossible (Maybe (Set VarName))               -- ^ will not reach here
-    | Failing (Maybe (Set VarName))                  -- ^ will fail
-    | Succeeding (Set VarName) (Maybe (Set VarName)) -- ^ will succeed
-    | Possible (Set VarName) (Maybe (Set VarName))   -- ^ may succeed or fail
-  deriving (Eq)
+data BindingState = BindingState {
+        bindingDetism    :: Determinism,
+        bindingVars      :: Maybe (Set VarName),
+        bindingBreakVars :: Maybe (Set VarName)
+        }
+  --                                   -- Execution:
+  --   = Impossible (Maybe (Set VarName))               -- ^ will not reach here
+  --   | Failing (Maybe (Set VarName))                  -- ^ will fail
+  --   | Succeeding (Set VarName) (Maybe (Set VarName)) -- ^ will succeed
+  --   | Possible (Set VarName) (Maybe (Set VarName))   -- ^ may succeed or fail
+  -- deriving (Eq)
 
 
 -- | Nicely show a set, given the supplied fn to show each element
@@ -1061,40 +1065,25 @@ showMaybeSet f (Just set) = showSet f set
 
 
 instance Show BindingState where
-    show (Impossible mset) =
-        "impossible, break set = " ++ showMaybeSet id mset
-    show (Failing mset) = "failing, break set = " ++ showMaybeSet id mset
-    show (Possible set mset) =
-        "test, binding " ++ showSet id set
-        ++ "; break set = " ++ showMaybeSet id mset
-    show (Succeeding set mset) =
-        "succeeding, binding " ++ showSet id set
-        ++ "; break set = " ++ showMaybeSet id mset
+    show (BindingState detism boundVars breakVars) =
+      determinismName detism ++ " computation binding "
+      ++ showMaybeSet id boundVars ++ ", break set = "
+      ++ showMaybeSet id breakVars
 
 
 -- | Is this binding state guaranteed to succeed?
 mustSucceed :: BindingState -> Bool
-mustSucceed Succeeding{} = True
-mustSucceed _            = False
+mustSucceed = (==Det) . bindingDetism
 
 
 -- | Is this binding state guaranteed to fail?
 mustFail :: BindingState -> Bool
-mustFail Failing{} = True
-mustFail _         = False
+mustFail = (==Failure) . bindingDetism
 
 
 -- | Initial BindingState with nothing bound and no breaks seen
 initBindingState :: BindingState
-initBindingState = Succeeding Set.empty Nothing
-
-
--- | Get set of variables definitely bound at every break; Nothing if none seen.
-breakVars :: BindingState -> Maybe (Set VarName)
-breakVars (Impossible mset)   = mset
-breakVars (Failing mset)      = mset
-breakVars (Succeeding _ mset) = mset
-breakVars (Possible _ mset)   = mset
+initBindingState = BindingState Det (Just Set.empty) Nothing
 
 
 -- | The intersection of two Maybe (Set a), where Nothing denotes the universal
@@ -1108,38 +1097,12 @@ intersectMaybeSets (Just mset1) (Just mset2) =
 
 -- | the join of two BindingStates.
 joinState :: BindingState -> BindingState -> BindingState
-joinState (Impossible mset1) (Impossible mset2) =
-    Impossible $ mset1 `intersectMaybeSets` mset2
-joinState (Impossible mset1) (Failing mset2) =
-    Failing $ mset1 `intersectMaybeSets` mset2
-joinState (Impossible mset1) (Succeeding set mset2) =
-    Succeeding set $ mset1 `intersectMaybeSets` mset2
-joinState (Impossible mset1) (Possible set mset2) =
-    Possible set $ mset1 `intersectMaybeSets` mset2
-joinState (Failing mset1) (Impossible mset2) =
-    Failing $ mset1 `intersectMaybeSets` mset2
-joinState (Failing mset1) (Failing mset2) =
-    Failing $ mset1 `intersectMaybeSets` mset2
-joinState (Failing mset1) (Succeeding set mset2) =
-    Possible set $ mset1 `intersectMaybeSets` mset2
-joinState (Failing mset1) (Possible set mset2) =
-    Possible set $ mset1 `intersectMaybeSets` mset2
-joinState (Succeeding set mset1) (Impossible mset2) =
-    Succeeding set $ mset1 `intersectMaybeSets` mset2
-joinState (Succeeding set mset1) (Failing mset2) =
-    Possible set $ mset1 `intersectMaybeSets` mset2
-joinState (Succeeding set1 mset1) (Succeeding set2 mset2) =
-    Succeeding (set1 `Set.intersection` set2) $ mset1 `intersectMaybeSets` mset2
-joinState (Succeeding set1 mset1) (Possible set2 mset2) =
-    Possible (set1 `Set.intersection` set2) $ mset1 `intersectMaybeSets` mset2
-joinState (Possible set mset1) (Impossible mset2) =
-    Possible set $ mset1 `intersectMaybeSets` mset2
-joinState (Possible set mset1) (Failing mset2) =
-    Possible set $ mset1 `intersectMaybeSets` mset2
-joinState (Possible set1 mset1) (Succeeding set2 mset2) =
-    Possible (set1 `Set.intersection` set2) $ mset1 `intersectMaybeSets` mset2
-joinState (Possible set1 mset1) (Possible set2 mset2) =
-    Possible (set1 `Set.intersection` set2) $ mset1 `intersectMaybeSets` mset2
+joinState (BindingState detism1 boundVars1 breakVars1)
+          (BindingState detism2 boundVars2 breakVars2) =
+          (BindingState detism  boundVars  breakVars )
+  where detism = determinismJoin detism1 detism2
+        breakVars = breakVars1 `intersectMaybeSets` breakVars2
+        boundVars = boundVars1 `intersectMaybeSets` boundVars2
 
 
 -- -- | the meet of two BindingStates.
@@ -1157,67 +1120,65 @@ joinState (Possible set1 mset1) (Possible set2 mset2) =
 -- meetState (Succeeding vars1) (Possible vars2) =
 --     Succeeding $ vars1 `Set.union` vars2
 -- meetState (Possible vars1) (Succeeding vars2) =
---     Succeeding $ vars1 `Set.union` vars2
--- meetState (Possible vars1) (Possible vars2) =
+--     Succeeding $ vars1 `Set.union` vars2-- meetState (Possible vars1) (Possible vars2) =
 --     Possible $ vars1 `Set.union` vars2
 
 
 -- | Add some bindings to a BindingState
 addBindings :: Set VarName -> BindingState -> BindingState
-addBindings _ st@Impossible{} = st     -- XXX error case?
-addBindings set st@Failing{} = st      -- XXX error case?
-addBindings set1 (Succeeding set2 mset) =
-    Succeeding (set1 `Set.union` set2) mset
-addBindings set1 (Possible set2 mset) =
-    Possible (set1 `Set.union` set2) mset
-
-
+addBindings vars st@(BindingState detism boundVars breakVars)
+  | detism == Terminal || detism == Failure  =  st  -- XXX error case?
+  | detism == Det || detism == SemiDet =
+    BindingState Det ((vars `Set.union`) <$> boundVars) breakVars
 
 
 -- | Returns the deterministic version of the specified binding state.
 forceDet :: BindingState -> BindingState
-forceDet (Possible set mset) = Succeeding set mset
-forceDet (Failing mset)      = Impossible mset
-forceDet st@Impossible{}     = st
-forceDet st@Succeeding{}     = st
+forceDet  (BindingState detism boundVars breakVars) =
+    BindingState (detism `determinismMeet` Det) boundVars breakVars
 
 
 -- | Returns the definitely failing version of the specified binding state.
 forceFailure :: BindingState -> BindingState
-forceFailure (Possible _ mset)   = Failing mset
-forceFailure (Succeeding _ mset) = Failing mset
-forceFailure st@Impossible{}     = st
-forceFailure st@Failing{}        = st
+forceFailure (BindingState detism boundVars breakVars) =
+    BindingState (detism `determinismMeet` Failure) (Just Set.empty) breakVars
 
 
--- | Returns the join of the binding state and the binding state corresponding
--- to the specified determinism.
-joinDeterminism :: Determinism -> BindingState -> BindingState
-joinDeterminism SemiDet (Succeeding set mset) = Possible set mset
-joinDeterminism _       st                    = st
+-- | Returns the binding state after a statement with the specified determinism that
+--   definitely binds the specified variables.
+bindingStateSeq :: Determinism -> Set VarName -> BindingState -> BindingState
+bindingStateSeq detism2 outputs (BindingState detism1 boundVars1 breakVars1) =
+    BindingState detism boundVars breakVars1
+  where detism = detism1 `determinismSeq` detism2
+        boundVars = if determinismTerminal detism 
+                    then Nothing
+                    else (outputs `Set.union`) <$> boundVars1
+
+
+-- | Returns the binding state after a statement with the specified determinism that
+--   definitely binds the specified variables.
+bindingStateAfterNext :: BindingState -> BindingState
+bindingStateAfterNext (BindingState _ boundVars breakVars) =
+    BindingState Terminal Nothing breakVars
+
+
+-- | Returns the binding state after a statement with the specified determinism that
+--   definitely binds the specified variables.
+bindingStateAfterBreak :: BindingState -> BindingState
+bindingStateAfterBreak (BindingState _ boundVars breakVars) =
+    BindingState Terminal Nothing $ boundVars `intersectMaybeSets` breakVars
 
 
 -- | which of a set of expected bindings will be unbound if execution reach this
 -- binding state
 missingBindings :: Set VarName -> BindingState -> Set VarName
-missingBindings _ Impossible{}           = Set.empty  -- unreachable
-missingBindings _ Failing{}              = Set.empty  -- unreachable
-missingBindings set1 (Possible set2 _)   = set1 Set.\\ set2
-missingBindings set1 (Succeeding set2 _) = set1 Set.\\ set2
-
-
--- | The definitely assigned variables if execution reaches this binding state.
--- Again here Nothing means the universal set of variables.
-assignedVars :: BindingState -> Maybe (Set VarName)
-assignedVars Impossible{}       = Nothing
-assignedVars Failing{}          = Nothing
-assignedVars (Succeeding set _) = Just set
-assignedVars (Possible set _)   = Just set
+missingBindings vars (BindingState _ boundVars _) =
+  maybe Set.empty (vars Set.\\) boundVars
 
 
 -- | Is the specified variable defined in the specified binding state?
 assignedIn :: VarName -> BindingState -> Bool
-assignedIn var bstate = maybe True (var `elem`) $ assignedVars bstate
+assignedIn var bstate = maybe True (var `elem`) $ bindingVars bstate
 
 
 -- |Match up the argument modes of a call with the available parameter
@@ -1289,18 +1250,17 @@ modecheckStmts m name pos typing delayed assigned detism (pstmt:pstmts) = do
     (pstmt',delayed',assigned', errs') <-
       placedApply (modecheckStmt m name pos typing delayed assigned detism)
         pstmt
-    let assigned'' = assigned'
     logTypes $ "New errors   = " ++ show errs'
-    logTypes $ "Now assigned = " ++ show assigned''
+    logTypes $ "Now assigned = " ++ show assigned'
     logTypes $ "Now delayed  = " ++ show delayed'
     let (doNow,delayed'')
             = List.partition
               (Set.null . (`missingBindings` assigned') . fst)
               delayed'
-    (pstmts',assigned''', errs) <-
-      modecheckStmts m name pos typing delayed'' assigned'' detism
+    (pstmts',assigned'', errs) <-
+      modecheckStmts m name pos typing delayed'' assigned' detism
         ((snd <$> doNow) ++ pstmts)
-    return (pstmt'++pstmts',assigned''', errs'++errs)
+    return (pstmt'++pstmts',assigned'', errs'++errs)
 
 
 -- |Mode check a single statement, returning a list of moded statements,
@@ -1368,8 +1328,10 @@ modecheckStmt m name defPos typing delayed assigned detism
                   let detismErrs =
                         -- XXX Should postpone the error until we see if we can
                         -- work out that the test is certain to succeed
-                        [ReasonDeterminism (procInfoProc match) matchDetism pos
-                        | detism < matchDetism]
+                        [ReasonDeterminism (procInfoProc match)
+                         matchDetism detism pos
+                        | detism == Det
+                          && not (matchDetism `determinismLEQ` detism)]
                   let undefResErrs =
                         [ReasonResourceUnavail name res pos
                         | res <- Set.toList
@@ -1383,9 +1345,9 @@ modecheckStmt m name defPos typing delayed assigned detism
                               (Just $ procSpecID matchProc)
                               matchDetism resourceful args'
                   let assigned' =
-                        joinDeterminism matchDetism
-                        $ addBindings (pexpListOutputs args')
-                        $ addBindings (procInfoOutRes match) assigned
+                        bindingStateSeq matchDetism
+                        ((pexpListOutputs args') `Set.union` (pexpListOutputs args'))
+                        assigned
                   return ([maybePlace stmt' pos],delayed,assigned',
                           detismErrs++undefResErrs)
                 [] -> if List.any (delayModeMatch actualModes) modeMatches
@@ -1432,7 +1394,6 @@ modecheckStmt m name defPos typing delayed assigned detism
       placedApplyM (modecheckStmt m name defPos typing delayed assigned SemiDet)
       tstStmt
     logTypes $ "Assigned by test: " ++ show assigned1
-    -- XXX must use definite version of assigned1 below:
     (thnStmts', assigned2, errs2) <-
       modecheckStmts m name defPos typing []
       (forceDet assigned1) detism thnStmts
@@ -1451,7 +1412,7 @@ modecheckStmt m name defPos typing delayed assigned detism
       else do
         let finalAssigned = assigned2 `joinState` assigned3
         logTypes $ "Assigned by conditional: " ++ show finalAssigned
-        let vars = Map.fromSet (`varType` typing) <$> assignedVars finalAssigned
+        let vars = Map.fromSet (`varType` typing) <$> bindingVars finalAssigned
         return
           ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts' vars)
             pos],
@@ -1469,14 +1430,14 @@ modecheckStmt m name defPos typing delayed assigned detism
       Just (IntValue 1) -> return ([maybePlace Nop pos],
                                    delayed, assigned, [])
       _                  -> return (exp', delayed,
-                                    joinDeterminism SemiDet assigned, [])
+                                    bindingStateSeq SemiDet Set.empty assigned, [])
 modecheckStmt m name defPos typing delayed assigned detism
     stmt@(Loop stmts _) pos = do
     logTypes $ "Mode checking loop " ++ show stmt
     (stmts', assigned', errs') <-
       modecheckStmts m name defPos typing [] assigned detism stmts
     logTypes $ "Assigned by loop: " ++ show assigned'
-    let break = breakVars assigned'
+    let break = bindingBreakVars assigned'
     let vars = Map.fromSet (`varType` typing) <$> break
     logTypes $ "Loop exit vars: " ++ show vars
     return ([maybePlace (Loop stmts' vars) pos],
@@ -1502,7 +1463,7 @@ modecheckStmt m name defPos typing delayed assigned detism
     -- XXX must mode check individually and join the resulting states
     (stmts', assigned', errs') <-
       modecheckStmts m name defPos typing [] assigned detism stmts
-    let vars = Map.fromSet (`varType` typing) <$> assignedVars assigned'
+    let vars = Map.fromSet (`varType` typing) <$> bindingVars assigned'
     return ([maybePlace (Or stmts' vars) pos], delayed,
             assigned', errs')
 modecheckStmt m name defPos typing delayed assigned detism
@@ -1517,12 +1478,11 @@ modecheckStmt m name defPos typing delayed assigned detism
 modecheckStmt m name defPos typing delayed assigned detism
     Break pos = do
     logTypes $ "Mode checking break with assigned=" ++ show assigned
-    return ([maybePlace Break pos],delayed,
-             Impossible $ assignedVars assigned,[])
+    return ([maybePlace Break pos],delayed,bindingStateAfterBreak assigned,[])
 modecheckStmt m name defPos typing delayed assigned detism
     Next pos = do
     logTypes $ "Mode checking continue with assigned=" ++ show assigned
-    return ([maybePlace Next pos],delayed,Impossible (breakVars assigned),[])
+    return ([maybePlace Next pos],delayed,bindingStateAfterNext assigned,[])
 
 
 selectMode :: [ProcInfo] -> [(FlowDirection,Bool,Maybe VarName)]

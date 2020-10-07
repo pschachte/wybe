@@ -1,0 +1,12 @@
+# Test case for issue #52:  variable assigned in non-break alternative
+# of a conditional is recognised as being defined by the conditional.
+
+?x = 1
+do {
+    if {
+      x > 10    :: break
+    | otherwise :: ?y = x + 1
+    }
+    ?x = y
+    !println(x)
+}

@@ -387,7 +387,7 @@ doStmt = do
 -- Generator parser -- var in expr
 generatorStmt :: Parser Generator
 generatorStmt = do
-    loopVar <- content <$> identButNot keywords <* ident "in"
+    loopVar <- outParam <* ident "in"
     In loopVar <$> expParser
 
 -- for var1 in gen1, var2 in gen2 {}
@@ -942,7 +942,8 @@ visibility = option Private (ident "pub" *> return Public)
 
 -- | Terminal for determinism.
 determinism :: Parser Determinism
-determinism = option Det (ident "test" *> return SemiDet)
+determinism = option Det (ident "test" *> return SemiDet
+                          <|> ident "terminal" *> return Terminal)
 
 
 -- | Wybe keywords to exclude from identitfier tokens conditionally.

@@ -97,3 +97,9 @@ int malloc_count() {
     // XXX may overflow
     return (int)g_malloc_count;
 }
+
+
+void error_exit(char *message) {
+    fprintf( stderr, "%s\n", message);
+    exit(1);
+}

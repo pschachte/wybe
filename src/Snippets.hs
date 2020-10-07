@@ -137,8 +137,10 @@ succeedTest = Unplaced $ TestBool $ castTo (iVal 1) boolType
 
 -- |In a SemiDet context, generates code to succeed, otherwise generates no code
 succeedIfSemiDet :: Determinism -> [Placed Stmt]
-succeedIfSemiDet Det     = []
-succeedIfSemiDet SemiDet = [succeedTest]
+succeedIfSemiDet Terminal = []
+succeedIfSemiDet Failure  = []
+succeedIfSemiDet Det      = []
+succeedIfSemiDet SemiDet  = [succeedTest]
 
 
 -- |A TestBool statement that always fails
