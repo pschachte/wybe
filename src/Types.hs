@@ -260,8 +260,8 @@ instance Show TypeError where
         "Type of " ++ show exp2 ++ " incompatible with " ++ show exp1
     show (ReasonDeterminism proc procDetism contextDetism pos) =
         makeMessage pos $
-        "Calling " ++ determinismName procDetism ++ " proc "
-        ++ show proc ++ " in a " ++ determinismName contextDetism ++ " context"
+        "Calling " ++ determinismFullName procDetism ++ " proc "
+        ++ show proc ++ " in a " ++ determinismFullName contextDetism ++ " context"
     show (ReasonForeignLanguage lang instr pos) =
         makeMessage pos $
         "Foreign call '" ++ instr ++ "' with unknown language '" ++ lang ++ "'"
@@ -1064,10 +1064,15 @@ showMaybeSet f (Just set) = showSet f set
 
 instance Show BindingState where
     show (BindingState detism boundVars breakVars) =
-      determinismName detism ++ " computation binding "
+      determinismFullName detism ++ " computation binding "
       ++ showMaybeSet id boundVars ++ ", break set = "
       ++ showMaybeSet id breakVars
 
+
+-- | A determinism name suitable for user messages
+determinismFullName :: Determinism -> String
+determinismFullName Det = "normal (total)"
+determinismFullName detism = determinismName detism
 
 -- | Is this binding state guaranteed to succeed?
 mustSucceed :: BindingState -> Bool
