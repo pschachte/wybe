@@ -41,7 +41,7 @@ module AST (
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, ProcImpln(..), ProcDef(..), procInline, procCallCount, primImpure,
+  ModSpec, ProcImpln(..), ProcDef(..), procInline, procCallCount, primPurity,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
   speczVersionToId, SpeczProcBodies,
@@ -942,7 +942,11 @@ inliningName MayInline  = ""
 inliningName NoInline   = "noinline"
 
 
-data Purity = PromisedPure | Pure | Impure
+-- | The Wybe purity system.
+data Purity = PromisedPure  -- ^The proc is pure despite having impure parts
+            | Pure          -- ^The proc is pure, and so are its parts
+            | Semipure      -- ^The proc is not pure, but callers can be pure 
+            | Impure        -- ^The proc is impure and makes its callers so
     deriving (Eq, Ord, Generic)
 
 
@@ -950,6 +954,7 @@ data Purity = PromisedPure | Pure | Impure
 purityName :: Purity -> String
 purityName PromisedPure = "pure"
 purityName Pure         = ""
+purityName Semipure     = "semipure"
 purityName Impure       = "impure"
 
 
@@ -1676,15 +1681,20 @@ procCallCount :: ProcDef -> Int
 procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 
 
--- | Is the specified Prim impure?
-primImpure :: Prim -> Compiler Bool
-primImpure (PrimCall _ pspec _) = do
+-- | Is the specified Prim fully (contagiously) impure?
+primPurity :: Prim -> Compiler Purity
+primPurity (PrimCall _ pspec _) = do
     def <- getProcDef pspec
-    return $ Impure == procPurity def
-primImpure (PrimForeign _ _ tags _) =
-    return $ "impure" `elem` tags
-primImpure (PrimTest _) = return False
+    return $ procPurity def
+primPurity (PrimForeign _ _ tags _) =
+    return $ List.foldl purityTag Pure tags
+primPurity (PrimTest _) = return Pure
 
+purityTag :: Purity -> String -> Purity
+purityTag _ "impure"   = Impure
+purityTag _ "semipure" = Semipure
+purityTag _ "pure"     = PromisedPure
+purityTag purity _     = purity
 
 -- |LLVM block structure allows many blocks per procedure, where blocks can
 --  jump to one another in complex ways.  When converting our LPVM format
