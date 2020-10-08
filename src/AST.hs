@@ -1681,7 +1681,7 @@ procCallCount :: ProcDef -> Int
 procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 
 
--- | Is the specified Prim fully (contagiously) impure?
+-- | What is the purity of the given Prim?
 primPurity :: Prim -> Compiler Purity
 primPurity (PrimCall _ pspec _) = do
     def <- getProcDef pspec

@@ -280,6 +280,7 @@ processProcModifier ms "terminal" = updateModsDetism   ms "terminal" Terminal
 processProcModifier ms "inline"   = updateModsInlining ms "inline" Inline
 processProcModifier ms "noinline" = updateModsInlining ms "noinline" NoInline
 processProcModifier ms "pure"     = updateModsPurity   ms "pure" PromisedPure
+processProcModifier ms "semipure" = updateModsPurity   ms "semipure" Semipure
 processProcModifier ms "impure"   = updateModsPurity   ms "impure" Impure
 processProcModifier ms modName    =
     ms {modifierUnknown=modName:modifierUnknown ms}
