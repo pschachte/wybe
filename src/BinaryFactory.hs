@@ -67,7 +67,7 @@ instance Binary Pragma
 
 instance Binary ProcModifiers
 instance Binary Inlining
-instance Binary Purity
+instance Binary Impurity
 instance Binary Item
 instance Binary TypeProto
 instance Binary TypeImpln

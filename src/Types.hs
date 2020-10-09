@@ -171,7 +171,9 @@ data TypeError = ReasonParam ProcName Int OptPos
                | ReasonEqual Exp Exp OptPos
                    -- ^Expression types should be equal
                | ReasonDeterminism ProcSpec Determinism Determinism OptPos
-                   -- ^Calling a semidet proc in a det context
+                   -- ^Calling a proc in a more deterministic context
+               | ReasonPurity String Impurity Impurity OptPos
+                   -- ^Calling a proc or foreign in a more pure context
                | ReasonForeignLanguage String String OptPos
                    -- ^Foreign call with bogus language
                | ReasonForeignArgType String Int OptPos
@@ -258,10 +260,14 @@ instance Show TypeError where
     show (ReasonEqual exp1 exp2 pos) =
         makeMessage pos $
         "Type of " ++ show exp2 ++ " incompatible with " ++ show exp1
-    show (ReasonDeterminism proc procDetism contextDetism pos) =
+    show (ReasonDeterminism proc stmtDetism contextDetism pos) =
         makeMessage pos $
-        "Calling " ++ determinismFullName procDetism ++ " proc "
+        "Calling " ++ determinismFullName stmtDetism ++ " proc "
         ++ show proc ++ " in a " ++ determinismFullName contextDetism ++ " context"
+    show (ReasonPurity descrip stmtPurity contextPurity pos) =
+        makeMessage pos $
+        "Calling " ++ impurityFullName stmtPurity ++ " " ++descrip
+        ++ " in a " ++ impurityFullName contextPurity ++ " context"
     show (ReasonForeignLanguage lang instr pos) =
         makeMessage pos $
         "Foreign call '" ++ instr ++ "' with unknown language '" ++ lang ++ "'"
@@ -630,11 +636,12 @@ typecheckProcDecls m name = do
 
 -- |An individual proc, its formal parameter types and modes, and determinism
 data ProcInfo = ProcInfo {
-  procInfoProc  :: ProcSpec,
-  procInfoArgs  :: [TypeFlow],
-  procInfoDetism:: Determinism,
-  procInfoInRes :: Set ResourceName,
-  procInfoOutRes:: Set ResourceName
+  procInfoProc    :: ProcSpec,
+  procInfoArgs    :: [TypeFlow],
+  procInfoDetism  :: Determinism,
+  procInfoImpurity:: Impurity,
+  procInfoInRes   :: Set ResourceName,
+  procInfoOutRes  :: Set ResourceName
   } deriving (Eq,Show)
 
 
@@ -729,11 +736,8 @@ typecheckProcDecl m pdef = do
                           Set.map (resourceName . resourceFlowRes)
                           $ Set.filter (flowsIn . resourceFlowFlow) resources
                     let initialised
-                               -- XXX should not be necessary
-                               -- "phantom" is always defined (as nothing)
-                            = addBindings
-                              (inParams `Set.union` inResources)
-                              initBindingState
+                            = addBindings (inParams `Set.union` inResources)
+                              $ initBindingState pdef
                     logTypes $ "Initialised vars: " ++ show initialised
                     (def',assigned,modeErrs0) <-
                       modecheckStmts m name pos typing [] initialised detism def
@@ -876,7 +880,7 @@ callProcInfos pstmt =
               Nothing   -> callTargets m name
               Just pid -> return [ProcSpec m name pid generalVersion]
           defs <- mapM getProcDef procs
-          return [ ProcInfo proc typflow detism inResources outResources
+          return [ ProcInfo proc typflow detism imp inResources outResources
                  | (proc,def) <- zip procs defs
                  , let params = procProtoParams $ procProto def
                  , let (resourceParams,realParams) =
@@ -889,6 +893,7 @@ callProcInfos pstmt =
                          Set.fromList $ paramName <$>
                          List.filter (flowsOut . paramFlow) resourceParams
                  , let detism = procDetism def
+                 , let imp = procImpurity def
                  ]
         stmt ->
           shouldnt $ "callProcInfos with non-call statement "
@@ -1026,7 +1031,25 @@ matchTypeList' callee pos callArgTypes calleeInfo =
 
 ----------------------------------------------------------------
 --                            Mode Checking
+--
+-- Once type checking is complete and a unique type for each variable is
+-- determined, we select the proc invoked at each call, and check that the code
+-- is mode-correct, determinism-correct, and Impurity-correct.  Rather than
+-- inferring mode, determinism, and Impurity, and then reporting errors where they
+-- conflict with the declarations, our approach to checking these things is, as
+-- much as possible, to point out the call that violates the declared
+-- characteristics.  This is possible because mode, determinism, and Impurity must
+-- be declared, and because most of these things are non-decreasing over
+-- statement sequences.  For example, code that is SemiDet will not meet a call
+-- that will suddenly make the statement sequence Det, nor will Impure code meet
+-- a call that makes it Pure.  That means we can check code by simply reporting
+-- the first call that violates the declared characteristic.  The exception to
+-- this is that code that is Det or SemiDet does become Failure or Terminal by
+-- meeting a call that is; we handle this by keeping track of whether or not a
+-- sequence has included a Failure or Terminal call, and reporting if this
+-- aspect was violated at the end of the sequence.
 ----------------------------------------------------------------
+
 
 -- | A binding state reflects whether execution will reach a given program
 -- point, if so, whether execution can succeed or fail, and if it can reach
@@ -1038,15 +1061,10 @@ matchTypeList' callee pos callArgTypes calleeInfo =
 
 data BindingState = BindingState {
         bindingDetism    :: Determinism,
+        bindingImpurity  :: Impurity,
         bindingVars      :: Maybe (Set VarName),
         bindingBreakVars :: Maybe (Set VarName)
         }
-  --                                   -- Execution:
-  --   = Impossible (Maybe (Set VarName))               -- ^ will not reach here
-  --   | Failing (Maybe (Set VarName))                  -- ^ will fail
-  --   | Succeeding (Set VarName) (Maybe (Set VarName)) -- ^ will succeed
-  --   | Possible (Set VarName) (Maybe (Set VarName))   -- ^ may succeed or fail
-  -- deriving (Eq)
 
 
 -- | Nicely show a set, given the supplied fn to show each element
@@ -1063,10 +1081,17 @@ showMaybeSet f (Just set) = showSet f set
 
 
 instance Show BindingState where
-    show (BindingState detism boundVars breakVars) =
-      determinismFullName detism ++ " computation binding "
-      ++ showMaybeSet id boundVars ++ ", break set = "
-      ++ showMaybeSet id breakVars
+    show (BindingState detism impurity boundVars breakVars) =
+        impurityFullName impurity ++ " "
+        ++ determinismFullName detism ++ " computation binding "
+        ++ showMaybeSet id boundVars ++ ", break set = "
+        ++ showMaybeSet id breakVars
+
+
+impurityFullName :: Impurity -> String
+impurityFullName Pure = "pure"
+impurityFullName PromisedPure = "promised pure"
+impurityFullName impurity = impurityName impurity
 
 
 -- | A determinism name suitable for user messages
@@ -1085,8 +1110,10 @@ mustFail = (==Failure) . bindingDetism
 
 
 -- | Initial BindingState with nothing bound and no breaks seen
-initBindingState :: BindingState
-initBindingState = BindingState Det (Just Set.empty) Nothing
+initBindingState :: ProcDef -> BindingState
+initBindingState pdef =
+    BindingState Det impurity (Just Set.empty) Nothing
+    where impurity = expectedImpurity $ procImpurity pdef
 
 
 -- | The intersection of two Maybe (Set a), where Nothing denotes the universal
@@ -1100,85 +1127,69 @@ intersectMaybeSets (Just mset1) (Just mset2) =
 
 -- | the join of two BindingStates.
 joinState :: BindingState -> BindingState -> BindingState
-joinState (BindingState detism1 boundVars1 breakVars1)
-          (BindingState detism2 boundVars2 breakVars2) =
-          (BindingState detism  boundVars  breakVars )
-  where detism = determinismJoin detism1 detism2
+joinState (BindingState detism1 impurity1 boundVars1 breakVars1)
+          (BindingState detism2 impurity2 boundVars2 breakVars2) =
+          (BindingState detism  impurity  boundVars  breakVars )
+  where detism    = determinismJoin detism1 detism2
+        impurity    = max impurity1 impurity2
         breakVars = breakVars1 `intersectMaybeSets` breakVars2
         boundVars = boundVars1 `intersectMaybeSets` boundVars2
 
 
--- -- | the meet of two BindingStates.
--- meetState :: BindingState -> BindingState -> BindingState
--- meetState (Impossible set1) (Impossible set2) =
---   Impossible $ set1 `Set.union` set2
--- meetState st1@Impossible{} _ = st1
--- meetState _ st2@Impossible{} = st2
--- meetState Failing (Succeeding set2) = Impossible set2
--- meetState (Succeeding set1) Failing = Impossible set1
--- meetState Failing _ = Failing
--- meetState _ Failing = Failing
--- meetState (Succeeding vars1) (Succeeding vars2) =
---     Succeeding $ vars1 `Set.union` vars2
--- meetState (Succeeding vars1) (Possible vars2) =
---     Succeeding $ vars1 `Set.union` vars2
--- meetState (Possible vars1) (Succeeding vars2) =
---     Succeeding $ vars1 `Set.union` vars2-- meetState (Possible vars1) (Possible vars2) =
---     Possible $ vars1 `Set.union` vars2
-
-
 -- | Add some bindings to a BindingState
 addBindings :: Set VarName -> BindingState -> BindingState
-addBindings vars st@(BindingState Terminal boundVars breakVars) = st
-addBindings vars st@(BindingState Failure  boundVars breakVars) = st
-addBindings vars st@(BindingState Det      boundVars breakVars) =
-    BindingState Det ((vars `Set.union`) <$> boundVars) breakVars
-addBindings vars st@(BindingState SemiDet  boundVars breakVars) =
-    BindingState Det ((vars `Set.union`) <$> boundVars) breakVars
+addBindings vars st@BindingState{bindingDetism=Terminal} = st
+addBindings vars st@BindingState{bindingDetism=Failure}  = st
+addBindings vars st@BindingState{bindingDetism=Det} =
+    st {bindingVars=(vars `Set.union`) <$> bindingVars st}
+addBindings vars st@BindingState{bindingDetism=SemiDet} =
+    -- Was:  BindingState Det ((vars `Set.union`) <$> boundVars) breakVars: always force Det?
+    st {bindingVars=(vars `Set.union`) <$> bindingVars st}
 
 
 -- | Returns the deterministic version of the specified binding state.
 forceDet :: BindingState -> BindingState
-forceDet  (BindingState detism boundVars breakVars) =
-    BindingState (detism `determinismMeet` Det) boundVars breakVars
+forceDet st =
+    st {bindingDetism = bindingDetism st `determinismMeet` Det}
 
 
 -- | Returns the definitely failing version of the specified binding state.
 forceFailure :: BindingState -> BindingState
-forceFailure (BindingState detism boundVars breakVars) =
-    BindingState (detism `determinismMeet` Failure) (Just Set.empty) breakVars
+forceFailure st =
+        st {bindingDetism = bindingDetism st `determinismMeet` Failure}
 
 
 -- | Returns the binding state after a statement with the specified determinism that
 --   definitely binds the specified variables.
-bindingStateSeq :: Determinism -> Set VarName -> BindingState -> BindingState
-bindingStateSeq detism2 outputs (BindingState detism1 boundVars1 breakVars1) =
-    BindingState detism boundVars breakVars1
-  where detism = detism1 `determinismSeq` detism2
-        boundVars = if determinismTerminal detism 
-                    then Nothing
-                    else (outputs `Set.union`) <$> boundVars1
+bindingStateSeq :: Determinism -> Impurity -> Set VarName -> BindingState
+                -> BindingState
+bindingStateSeq stmtDetism impurity outputs st =
+    st {bindingDetism=detism', bindingImpurity=impurity', bindingVars=vars'}
+  where detism' = bindingDetism st `determinismSeq` stmtDetism
+        impurity' = bindingImpurity st `impuritySeq` impurity
+        vars'   = if determinismTerminal $ bindingDetism st 
+                  then Nothing
+                  else (outputs `Set.union`) <$> bindingVars st
 
 
 -- | Returns the binding state after a statement with the specified determinism that
 --   definitely binds the specified variables.
 bindingStateAfterNext :: BindingState -> BindingState
-bindingStateAfterNext (BindingState _ boundVars breakVars) =
-    BindingState Terminal Nothing breakVars
+bindingStateAfterNext st = st {bindingDetism=Terminal, bindingVars=Nothing}
 
 
 -- | Returns the binding state after a statement with the specified determinism that
 --   definitely binds the specified variables.
 bindingStateAfterBreak :: BindingState -> BindingState
-bindingStateAfterBreak (BindingState _ boundVars breakVars) =
-    BindingState Terminal Nothing $ boundVars `intersectMaybeSets` breakVars
+bindingStateAfterBreak st =
+    st {bindingDetism=Terminal, bindingVars=Nothing, bindingBreakVars=bvars}
+    where bvars = bindingVars st `intersectMaybeSets` bindingBreakVars st
 
 
 -- | which of a set of expected bindings will be unbound if execution reach this
 -- binding state
 missingBindings :: Set VarName -> BindingState -> Set VarName
-missingBindings vars (BindingState _ boundVars _) =
-  maybe Set.empty (vars Set.\\) boundVars
+missingBindings vars st = maybe Set.empty (vars Set.\\) $ bindingVars st
 
 
 -- | Is the specified variable defined in the specified binding state?
@@ -1311,8 +1322,7 @@ modecheckStmt m name defPos typing delayed assigned detism
             logTypes $ "Unpreventable mode errors: " ++ show flowErrs
             return ([],delayed,assigned,flowErrs)
         else do
-            let typeMatches
-                    = catOKs
+            let typeMatches = catOKs
                       $ List.map
                         (matchTypeList name cname pos actualTypes detism)
                         callInfos
@@ -1330,31 +1340,31 @@ modecheckStmt m name defPos typing delayed assigned detism
                 (match:_) -> do
                   let matchProc = procInfoProc match
                   let matchDetism = procInfoDetism match
-                  let detismErrs =
-                        -- XXX Should postpone the error until we see if we can
-                        -- work out that the test is certain to succeed
-                        [ReasonDeterminism (procInfoProc match)
-                         matchDetism detism pos
-                        | detism == Det
-                          && not (matchDetism `determinismLEQ` detism)]
-                  let undefResErrs =
-                        [ReasonResourceUnavail name res pos
-                        | res <- Set.toList
-                                 $ missingBindings
-                                   (procInfoInRes match) assigned
-                        ]
+                  let matchImpurity = procInfoImpurity match
+                  let impurity = bindingImpurity assigned
                   let args' = List.zipWith setPExpTypeFlow
                               (procInfoArgs match) args
                   let stmt' = ProcCall (procSpecMod matchProc)
                               (procSpecName matchProc)
                               (Just $ procSpecID matchProc)
                               matchDetism resourceful args'
+                  let errs =
+                        -- XXX Should postpone detism errors until we see if we
+                        -- can work out if the test is certain to succeed.
+                        -- Perhaps add mutual exclusion inference to the mode
+                        -- checker.
+                        [ReasonDeterminism matchProc matchDetism detism pos
+                        | not (matchDetism `determinismLEQ` detism)]
+                        ++ [ReasonPurity ("proc " ++ show matchProc)
+                            matchImpurity impurity pos
+                           | not (matchImpurity <= impurity)]
+                        ++ [ReasonResourceUnavail name res pos
+                           | res <- Set.toList
+                              $ missingBindings (procInfoInRes match) assigned]
                   let assigned' =
-                        bindingStateSeq matchDetism
-                        ((pexpListOutputs args') `Set.union` (pexpListOutputs args'))
-                        assigned
-                  return ([maybePlace stmt' pos],delayed,assigned',
-                          detismErrs++undefResErrs)
+                        bindingStateSeq matchDetism matchImpurity
+                        (pexpListOutputs args') assigned
+                  return ([maybePlace stmt' pos],delayed,assigned',errs)
                 [] -> if List.any (delayModeMatch actualModes) modeMatches
                       then do
                         logTypes $ "delaying call: " ++ ": " ++ show stmt
@@ -1373,7 +1383,7 @@ modecheckStmt m name defPos typing delayed assigned detism
     logTypes $ "    with assigned " ++ show assigned
     actualTypes <- mapM (expType typing) args
     let actualModes = List.map (expMode assigned) args
-    let flowErrs = [ReasonArgFlow cname num pos
+    let flowErrs = [ReasonArgFlow ("foreign " ++ lang ++ " " ++ cname) num pos
                    | ((mode,avail,_yy),num) <- zip actualModes [1..]
                    , not avail && mode == ParamIn]
     if not $ List.null flowErrs -- Using undefined var as input?
@@ -1383,12 +1393,17 @@ modecheckStmt m name defPos typing delayed assigned detism
         else do
             let typeflows = List.zipWith TypeFlow actualTypes
                             $ sel1 <$> actualModes
+            let actualImpurity = flagsImpurity flags
+            let impurity = bindingImpurity assigned
+            let errs = [ReasonPurity ("foreign " ++ cname)
+                        actualImpurity impurity pos
+                       | not (actualImpurity <= impurity)]
             let args' = List.zipWith setPExpTypeFlow typeflows args
             let stmt' = ForeignCall lang cname flags args'
             let assigned' = pexpListOutputs args'
             logTypes $ "New instr = " ++ show stmt'
             return ([maybePlace stmt' pos],delayed,
-                    addBindings assigned' assigned,[])
+                    addBindings assigned' assigned,errs)
 modecheckStmt _ _ _ _ delayed assigned _ Nop pos = do
     logTypes $ "Mode checking Nop"
     return ([maybePlace Nop pos], delayed, assigned,[])
@@ -1435,7 +1450,8 @@ modecheckStmt m name defPos typing delayed assigned detism
       Just (IntValue 1) -> return ([maybePlace Nop pos],
                                    delayed, assigned, [])
       _                  -> return (exp', delayed,
-                                    bindingStateSeq SemiDet Set.empty assigned, [])
+                                    bindingStateSeq SemiDet Pure Set.empty 
+                                    assigned, [])
 modecheckStmt m name defPos typing delayed assigned detism
     stmt@(Loop stmts _) pos = do
     logTypes $ "Mode checking loop " ++ show stmt

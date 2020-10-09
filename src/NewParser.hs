@@ -279,9 +279,9 @@ processProcModifier ms "failure"  = updateModsDetism   ms "failure" Failure
 processProcModifier ms "terminal" = updateModsDetism   ms "terminal" Terminal
 processProcModifier ms "inline"   = updateModsInlining ms "inline" Inline
 processProcModifier ms "noinline" = updateModsInlining ms "noinline" NoInline
-processProcModifier ms "pure"     = updateModsPurity   ms "pure" PromisedPure
-processProcModifier ms "semipure" = updateModsPurity   ms "semipure" Semipure
-processProcModifier ms "impure"   = updateModsPurity   ms "impure" Impure
+processProcModifier ms "pure"     = updateModsImpurity   ms "pure" PromisedPure
+processProcModifier ms "semipure" = updateModsImpurity   ms "semipure" Semipure
+processProcModifier ms "impure"   = updateModsImpurity   ms "impure" Impure
 processProcModifier ms modName    =
     ms {modifierUnknown=modName:modifierUnknown ms}
     
@@ -308,14 +308,14 @@ updateModsInlining mods modName inlining =
     mods {modifierConflict=modName:modifierConflict mods}
 
 
--- | Update the ProcModifiers to specify the given purity, which was specified
+-- | Update the ProcModifiers to specify the given Impurity, which was specified
 -- with the given identifier.  Since Pure is the default, and can't be
 -- explicitly specified, it's alway OK to change from Pure to something
 -- else.
-updateModsPurity :: ProcModifiers -> String -> Purity -> ProcModifiers
-updateModsPurity mods@ProcModifiers{modifierPurity=Pure} _ purity =
-    mods {modifierPurity=purity}
-updateModsPurity mods modName purity =
+updateModsImpurity :: ProcModifiers -> String -> Impurity -> ProcModifiers
+updateModsImpurity mods@ProcModifiers{modifierImpurity=Pure} _ impurity =
+    mods {modifierImpurity=impurity}
+updateModsImpurity mods modName _ =
     mods {modifierConflict=modName:modifierConflict mods}
 
 

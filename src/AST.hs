@@ -18,6 +18,8 @@ module AST (
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
   Determinism(..), determinismLEQ, determinismMeet, determinismJoin,
   determinismSeq, determinismTerminal, determinismName,
+  impurityName, impuritySeq, expectedImpurity,
+  inliningName,
   TypeProto(..), TypeSpec(..), TypeRef(..), VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
@@ -41,7 +43,8 @@ module AST (
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, ProcImpln(..), ProcDef(..), procInline, procCallCount, primPurity,
+  ModSpec, ProcImpln(..), ProcDef(..), procInline, procCallCount,
+  primImpurity, flagsImpurity,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
   speczVersionToId, SpeczProcBodies,
@@ -72,8 +75,8 @@ module AST (
   addImport, doImport, addType, lookupType, publicType,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource,
-  ProcModifiers(..), detModifiers, setDetism, setInline, setPurity,
-  showProcModifiers, Inlining(..), Purity(..),
+  ProcModifiers(..), detModifiers, setDetism, setInline, setImpurity,
+  showProcModifiers, Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc,
   refersTo, callTargets,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
@@ -925,7 +928,7 @@ addImport modspec imports = do
 data ProcModifiers = ProcModifiers {
     modifierDetism::Determinism,   -- ^ The proc determinism
     modifierInline::Inlining,          -- ^ Aggresively inline this proc?
-    modifierPurity::Purity,          -- ^ Don't assume purity when optimising
+    modifierImpurity::Impurity,          -- ^ Don't assume purity when optimising
     modifierUnknown::[String],     -- ^ Unknown modifiers specified
     modifierConflict::[String]     -- ^ Modifiers that conflict with others
 } deriving (Eq, Generic)
@@ -935,27 +938,40 @@ data Inlining = Inline | MayInline | NoInline
     deriving (Eq, Ord, Generic)
 
 
--- | The printable modifier name for a purity, as specified by the user.
+-- | The printable modifier name for a Impurity, as specified by the user.
 inliningName :: Inlining -> String
 inliningName Inline     = "inline"
 inliningName MayInline  = ""
 inliningName NoInline   = "noinline"
 
 
--- | The Wybe purity system.
-data Purity = PromisedPure  -- ^The proc is pure despite having impure parts
-            | Pure          -- ^The proc is pure, and so are its parts
-            | Semipure      -- ^The proc is not pure, but callers can be pure 
-            | Impure        -- ^The proc is impure and makes its callers so
-    deriving (Eq, Ord, Generic)
+-- | The Wybe impurity system.
+data Impurity = PromisedPure  -- ^The proc is pure despite having impure parts
+              | Pure          -- ^The proc is pure, and so are its parts
+              | Semipure      -- ^The proc is not pure, but callers can be pure 
+              | Impure        -- ^The proc is impure and makes its callers so
+    deriving (Eq, Ord, Show, Generic)
 
 
 -- | The printable modifier name for a purity, as specified by the user.
-purityName :: Purity -> String
-purityName PromisedPure = "pure"
-purityName Pure         = ""
-purityName Semipure     = "semipure"
-purityName Impure       = "impure"
+impurityName :: Impurity -> String
+impurityName PromisedPure = "pure"
+impurityName Pure         = ""
+impurityName Semipure     = "semipure"
+impurityName Impure       = "impure"
+
+
+-- | The Impurity of a sequence of two statements with the specified purities.
+impuritySeq :: Impurity -> Impurity -> Impurity
+impuritySeq = max
+
+
+-- | Given a proc with the specified declared Impurity, the greatest p
+expectedImpurity :: Impurity -> Impurity
+expectedImpurity PromisedPure = Impure  -- If proc is promised pure,
+                                        -- definition is allowed to be impure
+expectedImpurity Pure = Semipure        -- Semipure is OK for pure procs
+expectedImpurity _ = Impure             -- Otherwise, OK for defn to be impure
 
 
 -- | The default Det, non-inlined, pure ProcModifiers.
@@ -973,26 +989,26 @@ setInline :: Inlining -> ProcModifiers -> ProcModifiers
 setInline inlining mods = mods {modifierInline=inlining}
 
 
--- | Set the modifierPurity attribute of a ProcModifiers.
-setPurity :: Purity -> ProcModifiers -> ProcModifiers
-setPurity purity mods = mods {modifierPurity=purity}
+-- | Set the modifierImpurity attribute of a ProcModifiers.
+setImpurity :: Impurity -> ProcModifiers -> ProcModifiers
+setImpurity impurity mods = mods {modifierImpurity=impurity}
 
 
 -- | How to display ProcModifiers
 showProcModifiers :: ProcModifiers -> String
 showProcModifiers (ProcModifiers Det MayInline Pure _ _) = ""
-showProcModifiers (ProcModifiers detism inlining purity _ _) =
+showProcModifiers (ProcModifiers detism inlining impurity _ _) =
     "{" ++ intercalate "," (List.filter (not . List.null) [d,i,p]) ++ "} "
     where d = determinismName detism
           i = inliningName inlining
-          p = purityName purity
+          p = impurityName impurity
 
 
 -- |Add the specified proc definition to the current module.
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
-    let ProcModifiers detism inlining purity unknown conflict = mods
+    let ProcModifiers detism inlining impurity unknown conflict = mods
     mapM_ (\m -> message Error 
                 ("Unknown proc modifier '" ++ m
                  ++ "' in declaration of " ++ name)
@@ -1005,7 +1021,7 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
                  pos)
            conflict
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0
-                  Map.empty vis detism inlining purity $ initSuperprocSpec vis
+                  Map.empty vis detism inlining impurity $ initSuperprocSpec vis
     addProcDef procDef
 addProc _ item =
     shouldnt $ "addProc given non-Proc item " ++ show item
@@ -1662,7 +1678,7 @@ data ProcDef = ProcDef {
     procVis :: Visibility,      -- ^what modules should be able to see this?
     procDetism :: Determinism,  -- ^can this proc fail?
     procInlining :: Inlining,   -- ^should we inline calls to this proc?
-    procPurity :: Purity,       -- ^ Is this proc pure?
+    procImpurity :: Impurity,       -- ^ Is this proc pure?
     procSuperproc :: SuperprocSpec
                                 -- ^the proc this should be part of, if any
 }
@@ -1681,20 +1697,27 @@ procCallCount :: ProcDef -> Int
 procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 
 
--- | What is the purity of the given Prim?
-primPurity :: Prim -> Compiler Purity
-primPurity (PrimCall _ pspec _) = do
+-- | What is the Impurity of the given Prim?
+primImpurity :: Prim -> Compiler Impurity
+primImpurity (PrimCall _ pspec _) = do
     def <- getProcDef pspec
-    return $ procPurity def
-primPurity (PrimForeign _ _ tags _) =
-    return $ List.foldl purityTag Pure tags
-primPurity (PrimTest _) = return Pure
+    return $ procImpurity def
+primImpurity (PrimForeign _ _ flags _) =
+    return $ flagsImpurity flags
+primImpurity (PrimTest _) = return Pure
 
-purityTag :: Purity -> String -> Purity
-purityTag _ "impure"   = Impure
-purityTag _ "semipure" = Semipure
-purityTag _ "pure"     = PromisedPure
-purityTag purity _     = purity
+
+-- | Return the impurity level specified by the given foriegn flags list
+flagsImpurity :: [String] -> Impurity
+flagsImpurity = List.foldl flagImpurity Pure
+
+
+-- | Gather the impurity of a flag
+flagImpurity :: Impurity -> String -> Impurity
+flagImpurity _ "impure"   = Impure
+flagImpurity _ "semipure" = Semipure
+flagImpurity _ "pure"     = PromisedPure
+flagImpurity impurity _   = impurity
 
 -- |LLVM block structure allows many blocks per procedure, where blocks can
 --  jump to one another in complex ways.  When converting our LPVM format
@@ -2849,11 +2872,11 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID 
-        procdef@(ProcDef n proto def pos _ _ _ vis detism inline purity sub) =
+        procdef@(ProcDef n proto def pos _ _ _ vis detism inline impurity sub) =
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
     ++ visibilityPrefix vis
-    ++ showProcModifiers (ProcModifiers detism inline purity [] [])
+    ++ showProcModifiers (ProcModifiers detism inline impurity [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
     ++ "\n"

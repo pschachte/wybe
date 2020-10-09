@@ -1148,7 +1148,7 @@ bkwdBuildStmt defs prim pos = do
       _ -> do
         let (ins, outs) = splitArgsByMode $ List.filter argIsVar args'
         -- Filter out pure instructions that produce no needed outputs
-        purity <- lift $ primPurity prim
+        purity <- lift $ primImpurity prim
         when ( purity > Pure 
              || any (`Set.member` usedLater) (argVarName <$> outs)) $ do
           -- XXX Careful:  probably shouldn't mark last use of variable passed
