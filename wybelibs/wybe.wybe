@@ -8,8 +8,8 @@ pub type bool { pub false | true
     pub def `&&`(p:bool, q:bool):bool = foreign llvm and(p,q)
     pub def `||`(p:bool, q:bool):bool = foreign llvm or(p,q)
     pub def `~`(p:bool):bool = foreign llvm xor(p,true)
-    pub def =(x:bool, y:bool):bool = foreign llvm icmp eq(x,y)
-    pub def /=(x:bool,y:bool):bool = foreign llvm icmp ne(x,y)
+    pub def =(x:bool, y:bool):bool = foreign llvm icmp_eq(x,y)
+    pub def /=(x:bool,y:bool):bool = foreign llvm icmp_ne(x,y)
     pub def otherwise { } # not a test, empty body, so always true
     pub def succeed { } # always succeed
     pub def {test} fail { false } # always fail (compiler will optimise)
@@ -27,12 +27,12 @@ pub type int is signed {
     pub def -(?x:int,y:int) { ?x = foreign llvm sub(0,y) }
     pub def *(x:int,y:int):int = foreign llvm mul(x,y)
     pub def /(x:int,y:int):int = foreign llvm sdiv(x,y)
-    pub def /=(x:int,y:int):bool = foreign llvm icmp ne(x,y)
-    pub def <(x:int,y:int):bool = foreign llvm icmp slt(x,y)
-    pub def <=(x:int,y:int):bool = foreign llvm icmp sle(x,y)
-    pub def >(x:int,y:int):bool = foreign llvm icmp sgt(x,y)
-    pub def >=(x:int,y:int):bool = foreign llvm icmp sge(x,y)
-    pub def =(x:int, y:int):bool = foreign llvm icmp eq(x,y)
+    pub def /=(x:int,y:int):bool = foreign llvm icmp_ne(x,y)
+    pub def <(x:int,y:int):bool = foreign llvm icmp_slt(x,y)
+    pub def <=(x:int,y:int):bool = foreign llvm icmp_sle(x,y)
+    pub def >(x:int,y:int):bool = foreign llvm icmp_sgt(x,y)
+    pub def >=(x:int,y:int):bool = foreign llvm icmp_sge(x,y)
+    pub def =(x:int, y:int):bool = foreign llvm icmp_eq(x,y)
     pub def sqrt(x:int):int = foreign c isqrt(x)
     pub def power(x:int,y:int):int = foreign c ipow(x,y)
     pub def incr(!x:int) { ?x = x + 1 }
@@ -51,12 +51,12 @@ pub type float is 64 bit float {
     pub def -(?x:float,y:float) { ?x = foreign llvm fsub(0.0,y) }
     pub def *(x:float,y:float):float = foreign llvm fmul(x,y)
     pub def /(x:float,y:float):float = foreign llvm fdiv(x,y)
-    pub def /=(x:float,y:float):bool = foreign llvm fcmp ne(x,y)
-    pub def <(x:float,y:float):bool = foreign llvm fcmp slt(x,y)
-    pub def <=(x:float,y:float):bool = foreign llvm fcmp sle(x,y)
-    pub def >(x:float,y:float):bool = foreign llvm fcmp sgt(x,y)
-    pub def >=(x:float,y:float):bool = foreign llvm fcmp sge(x,y)
-    pub def =(x:float, y:float):bool = foreign llvm fcmp eq(x,y)
+    pub def /=(x:float,y:float):bool = foreign llvm fcmp_ne(x,y)
+    pub def <(x:float,y:float):bool = foreign llvm fcmp_slt(x,y)
+    pub def <=(x:float,y:float):bool = foreign llvm fcmp_sle(x,y)
+    pub def >(x:float,y:float):bool = foreign llvm fcmp_sgt(x,y)
+    pub def >=(x:float,y:float):bool = foreign llvm fcmp_sge(x,y)
+    pub def =(x:float, y:float):bool = foreign llvm fcmp_eq(x,y)
     pub def sqrt(x:float):float = foreign c sqrt(x)
     pub def power(x:float,y:float):float = foreign c pow(x,y)
 }
@@ -75,8 +75,8 @@ pub type string is address {
 
 
 pub type char is 8 bit unsigned {
-    pub def =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
-    pub def /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
+    pub def =(x:char, y:char):bool = foreign llvm icmp_eq(x,y)
+    pub def /=(x:char,y:char):bool = foreign llvm icmp_ne(x,y)
 }
 
 

@@ -1606,11 +1606,10 @@ validateForeignCall "llvm" "move" _ argReps stmt pos typing =
     return $ typeError (ReasonForeignArity "move" (length argReps) 2 pos) typing
 validateForeignCall "llvm" name flags argReps stmt pos typing = do
     let arity = length argReps
-    let opName = intercalate " " (name:flags)
     return $
       case argReps of
         [inRep1,inRep2,outRep] ->
-          case Map.lookup opName llvmMapBinop of
+          case Map.lookup name llvmMapBinop of
              Just (_,fam,outTy) ->
                reportErrorUnless (ReasonWrongFamily name 1 fam pos)
                (fam == typeFamily inRep1)
@@ -1620,22 +1619,22 @@ validateForeignCall "llvm" name flags argReps stmt pos typing = do
                  (compatibleReps inRep1 inRep2)
                typing
              Nothing ->
-               if isJust $ Map.lookup opName llvmMapUnop
+               if isJust $ Map.lookup name llvmMapUnop
                then typeError (ReasonForeignArity name arity 2 pos) typing
                else typeError (ReasonBadForeign "llvm" name pos) typing
         [inRep,outRep] ->
-          case Map.lookup opName llvmMapUnop of
+          case Map.lookup name llvmMapUnop of
              Just (_,famIn,famOut) ->
                reportErrorUnless (ReasonWrongFamily name 1 famIn pos)
                (famIn == typeFamily inRep)
                typing
              Nothing ->
-               if isJust $ Map.lookup opName llvmMapBinop
+               if isJust $ Map.lookup name llvmMapBinop
                then typeError (ReasonForeignArity name arity 3 pos) typing
                else typeError (ReasonBadForeign "llvm" name pos) typing
-        _ -> if isJust $ Map.lookup opName llvmMapBinop
+        _ -> if isJust $ Map.lookup name llvmMapBinop
              then typeError (ReasonForeignArity name arity 3 pos) typing
-             else if isJust $ Map.lookup opName llvmMapUnop
+             else if isJust $ Map.lookup name llvmMapUnop
                   then typeError (ReasonForeignArity name arity 2 pos) typing
                   else typeError (ReasonBadForeign "llvm" name pos) typing
 validateForeignCall "lpvm" name flags argReps stmt pos typing =

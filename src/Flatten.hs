@@ -267,15 +267,6 @@ flattenStmt' (ProcCall maybeMod name procID detism res args) pos _ = do
     logFlatten "   call is Det"
     args' <- flattenStmtArgs args pos
     emit pos $ ProcCall maybeMod name procID detism res args'
-flattenStmt' (ForeignCall "llvm" "test" flags args) pos SemiDet = do
-    args' <- flattenStmtArgs args pos
-    resultName <- tempVar
-    let vSet = Unplaced
-               $ Typed (Var resultName ParamOut $ Implicit pos) boolType False
-    emit pos $ ForeignCall "llvm" "icmp" flags $ args' ++ [vSet]
-    emit pos $ TestBool $ varGet resultName
-flattenStmt' stmt@(ForeignCall "llvm" "test" _ _) _ detism | detism < SemiDet =
-    shouldnt $ "llvm test in " ++ show detism ++ " context: " ++ show stmt
 flattenStmt' (ForeignCall lang name flags args) pos _ = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
@@ -289,7 +280,12 @@ flattenStmt' (Cond tstStmt thn els defVars) pos detism = do
     thn' <- flattenInner False False detism (flattenStmts thn detism)
     els' <- flattenInner False False detism (flattenStmts els detism)
     emit pos $ Cond tstStmt' thn' els' defVars
-flattenStmt' stmt@(TestBool _) pos SemiDet = emit pos stmt
+flattenStmt' (TestBool expr) pos SemiDet = do
+    exprs' <- flattenPExp $ Unplaced expr
+    case exprs' of
+        [Unplaced expr'] -> emit pos $ TestBool expr'
+        _ -> shouldnt $ "Flatten expr " ++ show expr
+                        ++ " produced " ++ show exprs'
 flattenStmt' (TestBool expr) _pos detism =
     shouldnt $ "TestBool " ++ show expr ++ " in " ++ show detism ++ " context"
 flattenStmt' (And tsts) pos SemiDet = do

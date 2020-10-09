@@ -529,7 +529,6 @@ alignOffset offset alignment =
 
 
 -- |Generate constructor code for a non-const constructor
---  XXX generalise to generate unboxed constructors
 constructorItems :: ProcName -> TypeSpec
                  -> [(VarName,TypeSpec,TypeRepresentation,Int)]
                  -> Int -> Int -> Int -> OptPos -> [Item]
@@ -615,7 +614,7 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
     let tests =
           (case numConsts of
                0 -> []
-               _ -> [comparison "uge"
+               _ -> [comparison "icmp_uge"
                      (varGet varName)
                      (intCast $ iVal numConsts)]
            ++
@@ -623,7 +622,7 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
            -- it's the right one
            (case numNonConsts of
                1 -> []  -- Nothing to do if it's the only non-const constructor
-               _ -> [comparison "eq"
+               _ -> [comparison "icmp_eq"
                      (intCast $ ForeignFn "llvm" "and" []
                       [Unplaced $ varGet varName,
                        Unplaced $ iVal tagMask])
@@ -640,7 +639,7 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
                              "unboxed type shouldn't have a secondary tag" size,
                   Unplaced $ iVal startOffset,
                   Unplaced $ varSet "$tag"],
-                 comparison "eq" (varGet "$tag") (iVal tag)]
+                 comparison "icmp_eq" (varGet "$tag") (iVal tag)]
            else [])
 
     in if List.null tests
@@ -935,7 +934,7 @@ equalityBody _ _ (Bits _) = ([simpleEqualityTest],Inline)
 equalityBody consts [] _ = ([equalityConsts consts],Inline)
 equalityBody consts nonconsts _ =
     -- decide whether $left is const or non const, and handle accordingly
-    ([Unplaced $ Cond (comparison "uge"
+    ([Unplaced $ Cond (comparison "icmp_uge"
                          (castTo (varGet "$left") intType)
                          (iVal $ length consts))
                 [equalityNonconsts (content <$> nonconsts) (List.null consts)]
@@ -959,7 +958,7 @@ equalityConsts _  = simpleEqualityTest
 
 -- |An equality test that just compares $left and $right for identity
 simpleEqualityTest :: Placed Stmt
-simpleEqualityTest = comparison "eq" (varGet "$left") (varGet "$right")
+simpleEqualityTest = comparison "icmp_eq" (varGet "$left") (varGet "$right")
 
 
 -- |Return code to check that two values are equal when the first is known

@@ -593,26 +593,26 @@ instrConsequences' (PrimForeign "llvm" "and" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "and" flags [a2,a1], [a3])]
 instrConsequences' (PrimForeign "llvm" "or" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "or" flags [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["eq"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["eq"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["ne"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["ne"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["slt"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["sgt"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["sgt"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["slt"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["ult"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["ugt"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["ugt"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["ult"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["sle"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["sge"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["sge"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["sle"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["ule"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["uge"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["uge"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["ule"] [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_eq" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_eq" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_ne" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_ne" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_slt" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_sgt" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_sgt" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_slt" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_ult" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_ugt" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_ugt" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_ult" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_sle" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_sge" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_sge" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_sle" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_ule" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_uge" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_uge" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_ule" flags [a2,a1], [a3])]
 instrConsequences' _ = return []
 
 
@@ -802,70 +802,70 @@ simplifyOp "ashr" _ [arg, ArgInt 0 _, output] =
 simplifyOp "lshr" _ [arg, ArgInt 0 _, output] =
   primMove arg output
 -- Integer comparisons, including special handling of unsigned comparison to 0
-simplifyOp "icmp" ["eq"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_eq" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1==n2) output
-simplifyOp "icmp" ["eq"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["eq"] [arg2, arg1, output]
-simplifyOp "icmp" ["ne"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_eq" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_eq" flags [arg2, arg1, output]
+simplifyOp "icmp_ne" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1/=n2) output
-simplifyOp "icmp" ["ne"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["ne"] [arg2, arg1, output]
-simplifyOp "icmp" ["slt"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_ne" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_ne" flags [arg2, arg1, output]
+simplifyOp "icmp_slt" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1<n2) output
-simplifyOp "icmp" ["slt"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["sgt"] [arg2, arg1, output]
-simplifyOp "icmp" ["sle"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_slt" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_sgt" flags [arg2, arg1, output]
+simplifyOp "icmp_sle" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1<=n2) output
-simplifyOp "icmp" ["sle"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["sge"] [arg2, arg1, output]
-simplifyOp "icmp" ["sgt"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_sle" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_sge" flags [arg2, arg1, output]
+simplifyOp "icmp_sgt" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1>n2) output
-simplifyOp "icmp" ["sgt"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["slt"] [arg2, arg1, output]
-simplifyOp "icmp" ["sge"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_sgt" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_slt" flags [arg2, arg1, output]
+simplifyOp "icmp_sge" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1>=n2) output
-simplifyOp "icmp" ["sge"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["sle"] [arg2, arg1, output]
-simplifyOp "icmp" ["ult"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_sge" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_sle" flags [arg2, arg1, output]
+simplifyOp "icmp_ult" _ [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
   in primMove (boolConstant $ n1'<n2') output
-simplifyOp "icmp" ["ult"] [_, ArgInt 0 _, output] = -- nothing is < 0
+simplifyOp "icmp_ult" _ [_, ArgInt 0 _, output] = -- nothing is < 0
   primMove (ArgInt 0 boolType) output
-simplifyOp "icmp" ["ult"] [a1, ArgInt 1 ty, output] = -- only 0 is < 1
-  PrimForeign "llvm" "icmp" ["eq"] [a1,ArgInt 0 ty,output]
-simplifyOp "icmp" ["ult"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["ugt"] [arg2, arg1, output]
-simplifyOp "icmp" ["ule"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_ult" flags [a1, ArgInt 1 ty, output] = -- only 0 is < 1
+  PrimForeign "llvm" "icmp_eq" flags [a1,ArgInt 0 ty,output]
+simplifyOp "icmp_ult" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_ugt" flags [arg2, arg1, output]
+simplifyOp "icmp_ule" _ [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
   in primMove (boolConstant $ n1'<=n2') output
-simplifyOp "icmp" ["ule"] [ArgInt 0 _, _, output] = -- 0 is <= everything
+simplifyOp "icmp_ule" _ [ArgInt 0 _, _, output] = -- 0 is <= everything
   primMove (ArgInt 1 boolType) output
-simplifyOp "icmp" ["ule"] [ArgInt 1 ty, a2, output] = -- 1 is <= all but 0
-  PrimForeign "llvm" "icmp" ["ne"] [ArgInt 0 ty,a2,output]
-simplifyOp "icmp" ["ule"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["uge"] [arg2, arg1, output]
-simplifyOp "icmp" ["ugt"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_ule" flags [ArgInt 1 ty, a2, output] = -- 1 is <= all but 0
+  PrimForeign "llvm" "icmp_ne" flags [ArgInt 0 ty,a2,output]
+simplifyOp "icmp_ule" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_uge" flags [arg2, arg1, output]
+simplifyOp "icmp_ugt" _ [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
   in primMove (boolConstant $ n1'>n2') output
-simplifyOp "icmp" ["ugt"] [ArgInt 0 _, _, output] = -- 0 is > nothing
+simplifyOp "icmp_ugt" _ [ArgInt 0 _, _, output] = -- 0 is > nothing
   primMove (ArgInt 0 boolType) output
-simplifyOp "icmp" ["ugt"] [ArgInt 1 ty, a2, output] = -- 1 is > only 0
-  PrimForeign "llvm" "icmp" ["eq"] [ArgInt 0 ty,a2,output]
-simplifyOp "icmp" ["ugt"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["ult"] [arg2, arg1, output]
-simplifyOp "icmp" ["uge"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_ugt" flags [ArgInt 1 ty, a2, output] = -- 1 is > only 0
+  PrimForeign "llvm" "icmp_eq" flags [ArgInt 0 ty,a2,output]
+simplifyOp "icmp_ugt" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_ult" flags [arg2, arg1, output]
+simplifyOp "icmp_uge" _ [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
   in primMove (boolConstant $ n1'>=n2') output
-simplifyOp "icmp" ["uge"] [_, ArgInt 0 _, output] = -- everything is >= 0
+simplifyOp "icmp_uge" _ [_, ArgInt 0 _, output] = -- everything is >= 0
   primMove (ArgInt 1 boolType) output
-simplifyOp "icmp" ["uge"] [a1, ArgInt 1 ty, output] = -- all but 0 is >= 1
-  PrimForeign "llvm" "icmp" ["ne"] [a1,ArgInt 0 ty,output]
-simplifyOp "icmp" ["uge"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["ule"] [arg2, arg1, output]
+simplifyOp "icmp_uge" flags [a1, ArgInt 1 ty, output] = -- all but 0 is >= 1
+  PrimForeign "llvm" "icmp_ne" flags [a1,ArgInt 0 ty,output]
+simplifyOp "icmp_uge" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_ule" flags [arg2, arg1, output]
 -- Float ops
 simplifyOp "fadd" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
   primMove (ArgFloat (n1+n2) ty) output
@@ -889,17 +889,17 @@ simplifyOp "fdiv" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
 simplifyOp "fdiv" _ [arg, ArgFloat 1 _, output] =
   primMove arg output
 -- Float comparisons
-simplifyOp "fcmp" ["eq"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_eq" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1==n2) output
-simplifyOp "fcmp" ["ne"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_ne" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1/=n2) output
-simplifyOp "fcmp" ["slt"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_slt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1<n2) output
-simplifyOp "fcmp" ["sle"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_sle" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1<=n2) output
-simplifyOp "fcmp" ["sgt"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_sgt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1>n2) output
-simplifyOp "fcmp" ["sge"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_sge" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1>=n2) output
 simplifyOp name flags args = PrimForeign "llvm" name flags args
 

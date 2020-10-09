@@ -1043,16 +1043,16 @@ llvmMapBinop =
             ("urem", (urem, IntFamily, id)),
             ("srem", (srem, IntFamily, id)),
             -- Integer comparisions
-            ("icmp eq",  (icmp IP.EQ,  IntFamily, const $ Bits 1)),
-            ("icmp ne",  (icmp IP.NE,  IntFamily, const $ Bits 1)),
-            ("icmp ugt", (icmp IP.UGT, IntFamily, const $ Bits 1)),
-            ("icmp uge", (icmp IP.UGE, IntFamily, const $ Bits 1)),
-            ("icmp ult", (icmp IP.ULT, IntFamily, const $ Bits 1)),
-            ("icmp ule", (icmp IP.ULE, IntFamily, const $ Bits 1)),
-            ("icmp sgt", (icmp IP.SGT, IntFamily, const $ Bits 1)),
-            ("icmp sge", (icmp IP.SGE, IntFamily, const $ Bits 1)),
-            ("icmp slt", (icmp IP.SLT, IntFamily, const $ Bits 1)),
-            ("icmp sle", (icmp IP.SLE, IntFamily, const $ Bits 1)),
+            ("icmp_eq",  (icmp IP.EQ,  IntFamily, const $ Bits 1)),
+            ("icmp_ne",  (icmp IP.NE,  IntFamily, const $ Bits 1)),
+            ("icmp_ugt", (icmp IP.UGT, IntFamily, const $ Bits 1)),
+            ("icmp_uge", (icmp IP.UGE, IntFamily, const $ Bits 1)),
+            ("icmp_ult", (icmp IP.ULT, IntFamily, const $ Bits 1)),
+            ("icmp_ule", (icmp IP.ULE, IntFamily, const $ Bits 1)),
+            ("icmp_sgt", (icmp IP.SGT, IntFamily, const $ Bits 1)),
+            ("icmp_sge", (icmp IP.SGE, IntFamily, const $ Bits 1)),
+            ("icmp_slt", (icmp IP.SLT, IntFamily, const $ Bits 1)),
+            ("icmp_sle", (icmp IP.SLE, IntFamily, const $ Bits 1)),
             -- Bitwise operations
             ("shl",  (shl,  IntFamily, id)),
             ("lshr", (lshr, IntFamily, id)),
@@ -1068,12 +1068,12 @@ llvmMapBinop =
             ("fdiv", (fdiv, FloatFamily, id)),
             ("frem", (frem, FloatFamily, id)),
             -- Floating point comparisions
-            ("fcmp eq",  (fcmp FP.OEQ, FloatFamily, const $ Bits 1)),
-            ("fcmp ne",  (fcmp FP.ONE, FloatFamily, const $ Bits 1)),
-            ("fcmp slt", (fcmp FP.OLT, FloatFamily, const $ Bits 1)),
-            ("fcmp sle", (fcmp FP.OLE, FloatFamily, const $ Bits 1)),
-            ("fcmp sgt", (fcmp FP.OGT, FloatFamily, const $ Bits 1)),
-            ("fcmp sge", (fcmp FP.OGE, FloatFamily, const $ Bits 1))
+            ("fcmp_eq",  (fcmp FP.OEQ, FloatFamily, const $ Bits 1)),
+            ("fcmp_ne",  (fcmp FP.ONE, FloatFamily, const $ Bits 1)),
+            ("fcmp_slt", (fcmp FP.OLT, FloatFamily, const $ Bits 1)),
+            ("fcmp_sle", (fcmp FP.OLE, FloatFamily, const $ Bits 1)),
+            ("fcmp_sgt", (fcmp FP.OGT, FloatFamily, const $ Bits 1)),
+            ("fcmp_sge", (fcmp FP.OGE, FloatFamily, const $ Bits 1))
            ]
 
 -- | A map of unary llvm operations wrapped in the 'Codegen' module.
