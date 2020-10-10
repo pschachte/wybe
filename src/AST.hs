@@ -1678,7 +1678,7 @@ data ProcDef = ProcDef {
     procVis :: Visibility,      -- ^what modules should be able to see this?
     procDetism :: Determinism,  -- ^can this proc fail?
     procInlining :: Inlining,   -- ^should we inline calls to this proc?
-    procImpurity :: Impurity,       -- ^ Is this proc pure?
+    procImpurity :: Impurity,   -- ^ Is this proc pure?
     procSuperproc :: SuperprocSpec
                                 -- ^the proc this should be part of, if any
 }
