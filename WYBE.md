@@ -794,16 +794,145 @@ If you wish to include other modifiers along with one of these, include them all
 
 ### Foreign interface
 
+
+#### Foreign types
+
 To be documented....
+
 
 #### Calling C code
 
-To be documented....
+To call C code from Wybe, use the `foreign` construct.
+This is a very low-level interface, and performs no sanity checking, so be careful to get the call right.
+
+The form of a C function call is:
+
+> `foreign c` *function*(*arg*, *arg*, ...)
+
+Note that, like other Wybe calls, foreign calls are assumed to be pure.  If your foreign call is performing some kind of interaction with the outside world, it should use the `io` resource, to ensure that the call is performed correctly.  This is actually quite simple:  the `io` state is simply eliminated by the compiler when it is passed in a foreign call, so you can simply pass it into and out of a foreign call, and it will vanish as the call happens, and reappear on return from the call.  For example, the `print` proc for the `char` type in the standard library is defined this way:
+
+```
+pub def print(x:char) use !io { foreign c putchar(x, !io) }
+```
+
+To improve the safety of the interface, it is recommended to define a separate Wybe proc to make each foreign call, as shown above.  This will allow the Wybe type checker to ensure the type safety of your calls, as long as your foreign call is type correct.
+
+If your foreign call is not for communication with the outside world, then you may wish to include a purity modifier to prevent the compiler from eliminating it.  For example, the `exit` proc in the standard library is implemented as follows:
+
+```
+pub def {terminal,semipure} exit(code:int) {
+    foreign c {terminal,semipure} exit(code)
+}
+```
+
+(`terminal` here means that `exit` will never return to the caller; this improves Wybe's analysis of code that calls `exit`.)
 
 #### Using LLVM instructions
 
-To be documented....
+The lowest-level interface is to raw LLVM instructions.  These have a functional style, although you use the procedural style if you prefer.  For example, instead of
 
-#### Using Wybe memory management primitives
+```
+?x2 = foreign llvm add(x, 1)
+```
+you can write
+```
+foreign llvm add(x, 1, ?x2)
+```
+
+For more detail on the behaviour of these operations, please consult the [LLVM documentation](https://llvm.org/docs/).
+
+
+##### Integer operations
+
+In the following, all inputs and outputs listed as `int` can in fact be any integer type:  signed or unsigned, and any number of bits of precision.  However, all `int` inputs and outputs must be the same number of bits of precision.  All `bool` outputs may be any 1-bit integer type.
+
+
+- foreign llvm add(arg1:int, arg2:int):int  
+Integer addition
+- foreign llvm sub(arg1:int, arg2:int):int  
+Integer subtraction
+- foreign llvm mul(arg1:int, arg2:int):int   
+Integer multiplication
+- foreign llvm div(arg1:int, arg2:int):int  
+unsigned integer division
+- foreign llvm sdiv(arg1:int, arg2:int):int  
+Signed integer division
+- foreign llvm urem(arg1:int, arg2:int):int  
+unsigned integer remainder
+- foreign llvm srem(arg1:int, arg2:int):int  
+Signed integer remainder
+- foreign llvm icmp_eq(arg1:int, arg2:int):bool  
+Integer equality
+- foreign llvm icmp_ne(arg1:int, arg2:int):bool  
+Integer disequality
+- foreign llvm icmp_ugt(arg1:int, arg2:int):bool  
+Integer unsigned strictly greater
+- foreign llvm icmp_uge(arg1:int, arg2:int):bool  
+Integer unsigned greater or equal
+- foreign llvm icmp_ult(arg1:int, arg2:int):bool  
+Integer unsigned strictly less
+- foreign llvm icmp_ule(arg1:int, arg2:int):bool  
+Integer unsigned less or equal
+- foreign llvm icmp_sgt(arg1:int, arg2:int):bool  
+Integer unsigned strictly greater
+- foreign llvm icmp_sge(arg1:int, arg2:int):bool  
+Integer signed greater or equal
+- foreign llvm icmp_slt(arg1:int, arg2:int):bool  
+Integer signed strictly less
+- foreign llvm icmp_sle(arg1:int, arg2:int):bool  
+Integer signed less or equal
+- foreign llvm shl(arg1:int, arg2:int):int  
+Left shift
+- foreign llvm lshr(arg1:int, arg2:int):int  
+Logical right shift (shift zeros in at right)
+- foreign llvm ashr(arg1:int, arg2:int):int  
+Arithmetic right shift (copy sign bit at right)
+- foreign llvm or(arg1:int, arg2:int):int  
+Bitwise or
+- foreign llvm and(arg1:int, arg2:int):int  
+Bitwise and
+- foreign llvm xor(arg1:int, arg2:int):int  
+Bitwise exclusive or
+
+##### Floating point operations
+
+Similar to above, all inputs and outputs listed as `float` can be any legal LLVM floating point type:  16, 32, 64, or 128 bits.  Again, in a single instruction, all the `float` inputs and outputs must be the same bit width.
+
+- foreign llvm fadd(arg1:float, arg2:float):float  
+Floating point addition
+- foreign llvm fsub(arg1:float, arg2:float):float  
+Floating point subtraction
+- foreign llvm fmul(arg1:float, arg2:float):float  
+Floating point multiplication
+- foreign llvm fdiv(arg1:float, arg2:float):float  
+Floating point division
+- foreign llvm frem(arg1:float, arg2:float):float  
+Floating point remainder
+- foreign llvm fcmp_eq(arg1:float, arg2:float):bool  
+Floating point equality
+- foreign llvm fcmp_ne(arg1:float, arg2:float):bool  
+Floating point disequality
+- foreign llvm fcmp_slt(arg1:float, arg2:float):bool  
+Floating point (signed) strictly less
+- foreign llvm fcmp_sle(arg1:float, arg2:float):bool  
+Floating point (signed) less or equal
+- foreign llvm fcmp_sgt(arg1:float, arg2:float):bool  
+Floating point (signed) strictly greater
+- foreign llvm fcmp_sge(arg1:float, arg2:float):bool  
+Floating point (signed) greater or equal
+
+##### Integer/floating point conversion
+
+- foreign llvm uitofp(arg1:int):float  
+Convert unsigned integer to float
+- foreign llvm sitofp(arg1:int):float  
+Convert signed integer to float
+- foreign llvm fptoui(arg1:float):int  
+Convert float to unsigned integer
+- foreign llvm fptosi(arg1:float):int  
+Convert float to signed integer
+
+
+#### Wybe low-level memory management primitives
 
 To be documented....
