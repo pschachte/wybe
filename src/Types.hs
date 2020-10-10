@@ -170,8 +170,10 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Public proc with some undeclared types
                | ReasonEqual Exp Exp OptPos
                    -- ^Expression types should be equal
-               | ReasonDeterminism ProcSpec Determinism Determinism OptPos
+               | ReasonDeterminism String Determinism Determinism OptPos
                    -- ^Calling a proc in a more deterministic context
+               | ReasonWeakDetism String Determinism Determinism OptPos
+                   -- ^Actual determinism of proc body weaker than declared
                | ReasonPurity String Impurity Impurity OptPos
                    -- ^Calling a proc or foreign in a more pure context
                | ReasonForeignLanguage String String OptPos
@@ -260,11 +262,13 @@ instance Show TypeError where
     show (ReasonEqual exp1 exp2 pos) =
         makeMessage pos $
         "Type of " ++ show exp2 ++ " incompatible with " ++ show exp1
-    show (ReasonDeterminism proc stmtDetism contextDetism pos) =
+    show (ReasonDeterminism name stmtDetism contextDetism pos) =
         makeMessage pos $
-        "Calling " ++ determinismFullName stmtDetism ++ " proc "
-        ++ show proc ++ " in a " ++ determinismFullName contextDetism
-        ++ " context"
+        "Calling " ++ determinismFullName stmtDetism ++ " " ++ name
+        ++ " in a " ++ determinismFullName contextDetism ++ " context"
+    show (ReasonWeakDetism name actualDetism expectedDetism pos) =
+        makeMessage pos $ name ++ " has " ++ determinismFullName actualDetism
+        ++ " determinism, but declared " ++ determinismFullName expectedDetism
     show (ReasonPurity descrip stmtPurity contextPurity pos) =
         makeMessage pos $
         "Calling " ++ impurityFullName stmtPurity ++ " " ++ descrip
@@ -1001,7 +1005,7 @@ matchTypeList caller callee pos callArgTypes detismContext calleeInfo
     | sameLength callArgTypes args
     = matchTypeList' callee pos callArgTypes calleeInfo
     -- Handle case of SemiDet context call to bool function as a proc call
-    | detismContext == SemiDet && isJust testInfo
+    | isJust testInfo
       && sameLength callArgTypes (procInfoArgs calleeInfo')
     = matchTypeList' callee pos callArgTypes calleeInfo'
     -- Handle case of reified test call
@@ -1238,18 +1242,20 @@ overloadErr StmtTypings{typingStmt=call,typingArgsTypes=candidates} =
     ReasonOverload (procInfoProc <$> candidates) $ place call
 
 
--- |Given type assignments to variables, resolve modes in a proc body,
---  building a revised, properly moded body, or indicate a mode error.
---  This must handle several cases:
+-- |Given type assignments to variables, resolve modes in a proc body, building
+--  a revised, properly moded body, or indicate a mode error. This must handle
+--  several cases:
 --  * Flow direction for function calls are unspecified; they must be assigned,
 --    and may need to be delayed if the use appears before the definition.
---  * Test statements must be handled, determining which stmts in a test
---    context are actually tests, and reporting an error for tests outside
---    a test context
+--  * Test statements must be handled, determining which stmts in a test context
+--    are actually tests, and reporting an error for tests outside a test
+--    context
 --  * Implied modes:  in a test context, allow in mode where out mode is
---    expected by assigning a fresh temp variable and generating an =
---    test of the variable against the in value.
+--    expected by assigning a fresh temp variable and generating an = test of
+--    the variable against the in value.
 --  * Handle in-out call mode where an out-only argument is expected.
+--  * Reaching the end of a Terminal or Failure statement sequence with a weaker
+--    determinism.
 --  This code threads a set of assigned variables through, which starts as
 --  the set of in parameter names.  It also threads through a list of
 --  statements postponed because an unknown flow variable is not assigned yet.
@@ -1257,11 +1263,12 @@ modecheckStmts :: ModSpec -> ProcName -> OptPos -> Typing
                  -> [(Set VarName,Placed Stmt)] -> BindingState -> Determinism
                  -> [Placed Stmt]
                  -> Compiler ([Placed Stmt], BindingState, [TypeError])
-modecheckStmts _ _ _ _ delayed assigned _ []
-    | List.null delayed = return ([],assigned,[])
-    | otherwise =
+modecheckStmts _ name pos _ delayed assigned detism []
+    | not $ List.null delayed = 
         shouldnt $ "modecheckStmts reached end of body with delayed stmts:\n"
                    ++ show delayed
+    | otherwise = return ([],assigned,detismCheck name pos detism
+                                      $ bindingDetism assigned)
 modecheckStmts m name pos typing delayed assigned detism (pstmt:pstmts) = do
     logTypes $ "Mode check stmt " ++ showStmt 16 (content pstmt)
     (pstmt',delayed',assigned', errs') <-
@@ -1282,7 +1289,7 @@ modecheckStmts m name pos typing delayed assigned detism (pstmt:pstmts) = do
 
 -- |Mode check a single statement, returning a list of moded statements,
 --  plus a list of delayed statements, a set of variables bound by this
---  statement, and a list of type (mode) errors.
+--  statement, and a list of errors.
 --
 --  We select a mode as follows:
 --    0.  If some input arguments are not assigned, report an uninitialised
@@ -1303,6 +1310,7 @@ modecheckStmts m name pos typing delayed assigned detism (pstmt:pstmts) = do
 --
 --    In case there are multiple modes that match one of those criteria,
 --    select the first that matches.
+
 modecheckStmt :: ModSpec -> ProcName -> OptPos -> Typing
                  -> [(Set VarName,Placed Stmt)] -> BindingState -> Determinism
                  -> Stmt -> OptPos
@@ -1349,15 +1357,16 @@ modecheckStmt m name defPos typing delayed assigned detism
                               (procSpecName matchProc)
                               (Just $ procSpecID matchProc)
                               matchDetism resourceful args'
+                  let procIdent = "proc " ++ show matchProc
                   let errs =
                         -- XXX Should postpone detism errors until we see if we
                         -- can work out if the test is certain to succeed.
                         -- Perhaps add mutual exclusion inference to the mode
                         -- checker.
-                        [ReasonDeterminism matchProc matchDetism detism pos
-                        | not (matchDetism `determinismLEQ` detism)]
-                        ++ [ReasonPurity ("proc " ++ show matchProc)
-                            matchImpurity impurity pos
+                        [ReasonDeterminism procIdent matchDetism detism pos
+                        | Det `determinismLEQ` detism
+                          && not (matchDetism `determinismLEQ` detism)]
+                        ++ [ReasonPurity procIdent matchImpurity impurity pos
                            | not (matchImpurity <= impurity)]
                         ++ [ReasonResourceUnavail name res pos
                            | res <- Set.toList
@@ -1396,15 +1405,21 @@ modecheckStmt m name defPos typing delayed assigned detism
                             $ sel1 <$> actualModes
             let actualImpurity = flagsImpurity flags
             let impurity = bindingImpurity assigned
-            let errs = [ReasonPurity ("foreign " ++ cname)
-                        actualImpurity impurity pos
-                       | not (actualImpurity <= impurity)]
+            let stmtDetism = flagsDetism flags
+            let foreignIdent = "foreign " ++ cname
+            let errs = [ReasonDeterminism foreignIdent stmtDetism detism pos
+                       | Det `determinismLEQ` detism
+                         && not (stmtDetism `determinismLEQ` detism)]
+                       ++ [ReasonPurity foreignIdent actualImpurity impurity pos
+                          | not (actualImpurity <= impurity)]
             let args' = List.zipWith setPExpTypeFlow typeflows args
             let stmt' = ForeignCall lang cname flags args'
-            let assigned' = pexpListOutputs args'
+            let vars = pexpListOutputs args'
+            let nextDetism = determinismSeq (bindingDetism assigned) stmtDetism
+            let assigned' = assigned {bindingDetism=nextDetism}
             logTypes $ "New instr = " ++ show stmt'
             return ([maybePlace stmt' pos],delayed,
-                    addBindings assigned' assigned,errs)
+                    bindingStateSeq stmtDetism impurity vars assigned,errs)
 modecheckStmt _ _ _ _ delayed assigned _ Nop pos = do
     logTypes $ "Mode checking Nop"
     return ([maybePlace Nop pos], delayed, assigned,[])
@@ -1464,7 +1479,6 @@ modecheckStmt m name defPos typing delayed assigned detism
     logTypes $ "Loop exit vars: " ++ show vars
     return ([maybePlace (Loop stmts' vars) pos],
             delayed, assigned', errs')
--- XXX Need to implement these:
 modecheckStmt m name defPos typing delayed assigned detism
     stmt@(UseResources resources stmts) pos = do
     logTypes $ "Mode checking use ... in stmt " ++ show stmt
@@ -1505,6 +1519,14 @@ modecheckStmt m name defPos typing delayed assigned detism
     Next pos = do
     logTypes $ "Mode checking continue with assigned=" ++ show assigned
     return ([maybePlace Next pos],delayed,bindingStateAfterNext assigned,[])
+
+-- |Return a list of error messages for too weak a determinism at the end of a
+-- statement sequence.
+detismCheck :: ProcName -> OptPos -> Determinism -> Determinism -> [TypeError]
+detismCheck name pos expectedDetism actualDetism
+    | actualDetism `determinismLEQ` expectedDetism = []
+    | Det `determinismLEQ` expectedDetism = []
+    | otherwise = [ReasonWeakDetism name actualDetism expectedDetism pos]
 
 
 selectMode :: [ProcInfo] -> [(FlowDirection,Bool,Maybe VarName)]

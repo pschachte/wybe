@@ -44,7 +44,7 @@ module AST (
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, ProcImpln(..), ProcDef(..), procInline, procCallCount,
-  primImpurity, flagsImpurity,
+  primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
   speczVersionToId, SpeczProcBodies,
@@ -1718,6 +1718,21 @@ flagImpurity _ "impure"   = Impure
 flagImpurity _ "semipure" = Semipure
 flagImpurity _ "pure"     = PromisedPure
 flagImpurity impurity _   = impurity
+
+
+-- | Return the impurity level specified by the given foriegn flags list
+flagsDetism :: [String] -> Determinism
+flagsDetism = List.foldl flagDetism Det
+
+
+-- | Gather the Determinism of a flag
+flagDetism :: Determinism  -> String -> Determinism 
+flagDetism _ "terminal" = Terminal
+flagDetism _ "failure"  = Failure
+flagDetism _ "det"      = Det
+flagDetism _ "semidet"  = SemiDet
+flagDetism detism _     = detism
+
 
 -- |LLVM block structure allows many blocks per procedure, where blocks can
 --  jump to one another in complex ways.  When converting our LPVM format

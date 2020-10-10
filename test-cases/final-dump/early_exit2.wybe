@@ -4,5 +4,5 @@ my_exit(1)
 
 
 def {terminal} my_exit(code:int) {
-    foreign c exit(code)
+    foreign c {terminal,semipure} exit(code)
 }
