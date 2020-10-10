@@ -784,10 +784,10 @@ The Wybe compiler optimises your code in some situations by replacing a proc cal
 
 If you wish to have finer control, you can do this by placing one of these two modifiers between curly braces between `def` and the procedure or function name:
 
-- `inline`
+- `inline`  
 force inlining of calls to this proc
 
-- `noinline`
+- `noinline`  
 prevent inlining of calls to this proc
 
 If you wish to include other modifiers along with one of these, include them all between the braces, in any order, separated by commas.
