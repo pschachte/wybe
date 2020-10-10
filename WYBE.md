@@ -753,27 +753,27 @@ To support such cases, the Wybe compiler provides a *purity* system, allowing yo
 
 Wybe supports the following three levels of purity:
 
-    *pure*
-    : the default purity level.  An ordinary call, subject to omission or reordering.
+    - *pure*  
+    the default purity level.  An ordinary call, subject to omission or reordering.
 
-    *impure*
-    : an impure call that should not be reordered or omitted.  Impure procs must be declared to be so, and in general, a proc that calls an impure proc must itself be impure.
+    - *impure*  
+    an impure call that should not be reordered or omitted.  Impure procs must be declared to be so, and in general, a proc that calls an impure proc must itself be impure.
 
-    *semipure*
-    : a proc that behaves as impure itself, and will not be reordered or omitted, however its impurity is not "contagious".  It may be called from an ordinary, pure proc without that proc becoming impure.
+    - *semipure*  
+    a proc that behaves as impure itself, and will not be reordered or omitted, however its impurity is not "contagious".  It may be called from an ordinary, pure proc without that proc becoming impure.
 
 In the absence of any declaration of impurity, your procedures and functions will be assumed to be pure.  An ordinary pure proc can call a semipure proc, but if it calls an impure proc, the compiler will report an error.  You can specify that your proc is pure despite calling impure procs by explicitly promising that it is pure.
 
 Purity is managed by including one of the following modifiers, between curly braces, in the proc declaration, between the `def` keyword and the procedure or function name:
 
-    `pure`
+    - `pure`  
     : promise that the proc is pure, despite calling impure procs.
 
-    `semipure`
-    : specify that the proc is effectively impure, meaning that calls to it are not subject to normal optimisations, but that its callers are not rendered impure by calling it.
+    - `semipure`  
+    specify that the proc is effectively impure, meaning that calls to it are not subject to normal optimisations, but that its callers are not rendered impure by calling it.
 
-    `impure`
-    : the proc is impure, so calls to it are not subject to normal optimisations, and its callers should also be considered impure unless explicitly promised to be pure with a `pure` modifier.
+    - `impure`  
+    the proc is impure, so calls to it are not subject to normal optimisations, and its callers should also be considered impure unless explicitly promised to be pure with a `pure` modifier.
 
 If you wish to include other modifiers along with one of these, include them all between the braces, in any order, separated by commas.
 
@@ -784,11 +784,11 @@ The Wybe compiler optimises your code in some situations by replacing a proc cal
 
 If you wish to have finer control, you can do this by placing one of these two modifiers between curly braces between `def` and the procedure or function name:
 
-    `inline`
-    : force inlining of calls to this proc
+    - `inline`
+    force inlining of calls to this proc
 
-    `noinline`
-    : prevent inlining of calls to this proc
+    - `noinline`
+    prevent inlining of calls to this proc
 
 If you wish to include other modifiers along with one of these, include them all between the braces, in any order, separated by commas.
 
