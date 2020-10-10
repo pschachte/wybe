@@ -305,7 +305,7 @@ entry:
     foreign lpvm access(~$left#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.string)
     foreign lpvm access($right#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.int)
     foreign lpvm access(~$right#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.string)
-    foreign llvm icmp eq(~tmp$3#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_eq(~tmp$3#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:nn:nn
     case ~tmp$7#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
@@ -313,7 +313,7 @@ entry:
 
     1:
         foreign c strcmp(~tmp$4#0:wybe.string, ~tmp$6#0:wybe.string, ?tmp$8#0:wybe.int) @wybe:nn:nn
-        foreign llvm icmp eq(~tmp$8#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp_eq(~tmp$8#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
         foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -326,14 +326,14 @@ entry:
     foreign lpvm access(~$left#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$name#0:wybe.string)
     foreign lpvm access($right#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$code#0:wybe.int)
     foreign lpvm access(~$right#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$name#0:wybe.string)
-    foreign llvm icmp eq(~$left$code#0:wybe.int, ~$right$code#0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_eq(~$left$code#0:wybe.int, ~$right$code#0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
         foreign c strcmp(~$left$name#0:wybe.string, ~$right$name#0:wybe.string, ?tmp$9#0:wybe.int) @wybe:nn:nn
-        foreign llvm icmp eq(~tmp$9#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp_eq(~tmp$9#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
 
@@ -556,7 +556,7 @@ entry:
     foreign lpvm access(~$left#0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:student.course)
     foreign lpvm access($right#0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.int)
     foreign lpvm access(~$right#0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:student.course)
-    foreign llvm icmp eq(~tmp$3#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_eq(~tmp$3#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$7#0:wybe.bool) @wybe:nn:nn
     case ~tmp$7#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
@@ -567,7 +567,7 @@ entry:
         foreign lpvm access(~tmp$4#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$9#0:wybe.string)
         foreign lpvm access(tmp$6#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$10#0:wybe.int)
         foreign lpvm access(~tmp$6#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$11#0:wybe.string)
-        foreign llvm icmp eq(~tmp$10#0:wybe.int, ~tmp$8#0:wybe.int, ?tmp$12#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp_eq(~tmp$10#0:wybe.int, ~tmp$8#0:wybe.int, ?tmp$12#0:wybe.bool) @wybe:nn:nn
         case ~tmp$12#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
@@ -575,7 +575,7 @@ entry:
 
         1:
             foreign c strcmp(~tmp$9#0:wybe.string, ~tmp$11#0:wybe.string, ?tmp$13#0:wybe.int) @wybe:nn:nn
-            foreign llvm icmp eq(~tmp$13#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp_eq(~tmp$13#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
             foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -589,7 +589,7 @@ entry:
     foreign lpvm access(~$left#0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$major#0:student.course)
     foreign lpvm access($right#0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$id#0:wybe.int)
     foreign lpvm access(~$right#0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$major#0:student.course)
-    foreign llvm icmp eq(~$left$id#0:wybe.int, ~$right$id#0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_eq(~$left$id#0:wybe.int, ~$right$id#0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -599,14 +599,14 @@ entry:
         foreign lpvm access(~$left$major#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$10#0:wybe.string)
         foreign lpvm access($right$major#0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$11#0:wybe.int)
         foreign lpvm access(~$right$major#0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$12#0:wybe.string)
-        foreign llvm icmp eq(~tmp$11#0:wybe.int, ~tmp$9#0:wybe.int, ?tmp$13#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp_eq(~tmp$11#0:wybe.int, ~tmp$9#0:wybe.int, ?tmp$13#0:wybe.bool) @wybe:nn:nn
         case ~tmp$13#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
             foreign c strcmp(~tmp$10#0:wybe.string, ~tmp$12#0:wybe.string, ?tmp$14#0:wybe.int) @wybe:nn:nn
-            foreign llvm icmp eq(~tmp$14#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp_eq(~tmp$14#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
 

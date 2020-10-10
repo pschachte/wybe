@@ -263,11 +263,12 @@ instance Show TypeError where
     show (ReasonDeterminism proc stmtDetism contextDetism pos) =
         makeMessage pos $
         "Calling " ++ determinismFullName stmtDetism ++ " proc "
-        ++ show proc ++ " in a " ++ determinismFullName contextDetism ++ " context"
+        ++ show proc ++ " in a " ++ determinismFullName contextDetism
+        ++ " context"
     show (ReasonPurity descrip stmtPurity contextPurity pos) =
         makeMessage pos $
-        "Calling " ++ impurityFullName stmtPurity ++ " " ++descrip
-        ++ " in a " ++ impurityFullName contextPurity ++ " context"
+        "Calling " ++ impurityFullName stmtPurity ++ " " ++ descrip
+        ++ ", expecting at least " ++ impurityFullName contextPurity
     show (ReasonForeignLanguage lang instr pos) =
         makeMessage pos $
         "Foreign call '" ++ instr ++ "' with unknown language '" ++ lang ++ "'"

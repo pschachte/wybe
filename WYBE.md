@@ -376,9 +376,9 @@ def {test} even_number(num:int) { ... }
 def {partial} lookup(key:int, table:map) = ...
 ```
 
-Calls to test procedures and functions are only permitted in two
+Calls to test (partial) procedures and functions are only permitted in two
 contexts:  in a conditional, described [below](#conditionals),
-or in the definition of a test procedure.
+or in the definition of a test/partial procedure or function.
 
 Any procedure or function call can also become a test if an input is provided
 where an output argument is expected.  In this case, the call is made
@@ -398,7 +398,7 @@ Wybe's conditional construct has the form:
 
 > `if` `{` *cases* `}`
 
-where *cases* is one more more case, separated by vertical bar characters (`|`).
+where *cases* is one more more cases, separated by vertical bar characters (`|`).
 Each case takes the form:
 
 > *test* `::` *statements*
@@ -602,7 +602,7 @@ type tree { empty | node(left:tree, value:int, right:tree) }
 ```
 then it may be used as follows:
 ```
-def test member(elt:int, tree:tree) {
+def {test} member(elt:int, tree:tree) {
     if { node(?left, ?value, ?right) = tree ::
             if { elt = value:: succeed
                | elt < value:: member(elt, left)
@@ -741,5 +741,69 @@ condition that will be returned to the operating system at the termination of
 the program.
 
 ## Low-level features (foreign interface)
+
+### Purity
+
+Wybe code is mostly purely logical, and the Wybe compiler takes advantage of
+this.  For example, if none of the outputs of a proc call are actually used, the compiler will eliminate the call.  A proc call may also be omitted if a proc call has previously been made with the same inputs, with the compiler assuming the output(s) will be identical.  The compiler may also reorder calls however it likes, as long as all the inputs to a proc are available when the proc is called.  As long as your code is purely logical, all of these optimisations and more are perfectly safe.
+
+However, occasionally it is important that the compiler not perform such optimisations.  For example, the `exit` command has no outputs, it is only executed for its effect (terminating the program prematurely).  In some cases, purely logical Wybe procs can be written based on impure building blocks, particularly when interfacing to code written in conventional languages.
+
+To support such cases, the Wybe compiler provides a *purity* system, allowing you to declare the purity of your procedures and functions, which tells the Wybe compiler (and other programmers) to treat them more carefully.
+
+Wybe supports the following three levels of purity:
+
+    *pure*
+    : the default purity level.  An ordinary call, subject to omission or reordering.
+
+    *impure*
+    : an impure call that should not be reordered or omitted.  Impure procs must be declared to be so, and in general, a proc that calls an impure proc must itself be impure.
+
+    *semipure*
+    : a proc that behaves as impure itself, and will not be reordered or omitted, however its impurity is not "contagious".  It may be called from an ordinary, pure proc without that proc becoming impure.
+
+In the absence of any declaration of impurity, your procedures and functions will be assumed to be pure.  An ordinary pure proc can call a semipure proc, but if it calls an impure proc, the compiler will report an error.  You can specify that your proc is pure despite calling impure procs by explicitly promising that it is pure.
+
+Purity is managed by including one of the following modifiers, between curly braces, in the proc declaration, between the `def` keyword and the procedure or function name:
+
+    `pure`
+    : promise that the proc is pure, despite calling impure procs.
+
+    `semipure`
+    : specify that the proc is effectively impure, meaning that calls to it are not subject to normal optimisations, but that its callers are not rendered impure by calling it.
+
+    `impure`
+    : the proc is impure, so calls to it are not subject to normal optimisations, and its callers should also be considered impure unless explicitly promised to be pure with a `pure` modifier.
+
+If you wish to include other modifiers along with one of these, include them all between the braces, in any order, separated by commas.
+
+
+### Inlining
+
+The Wybe compiler optimises your code in some situations by replacing a proc call with its definition, while being careful not to change the meaning of the program.  The compiler uses heuristics to determine when to do this, and for the most part it is not something you need to think about.
+
+If you wish to have finer control, you can do this by placing one of these two modifiers between curly braces between `def` and the procedure or function name:
+
+    `inline`
+    : force inlining of calls to this proc
+
+    `noinline`
+    : prevent inlining of calls to this proc
+
+If you wish to include other modifiers along with one of these, include them all between the braces, in any order, separated by commas.
+
+### Foreign interface
+
+To be documented....
+
+#### Calling C code
+
+To be documented....
+
+#### Using LLVM instructions
+
+To be documented....
+
+#### Using Wybe memory management primitives
 
 To be documented....

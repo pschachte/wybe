@@ -3,6 +3,6 @@ my_error("should print this error message")
 !println("shouldn't print this")
 
 def {terminal,semipure} my_error(msg:string) {
-    foreign c puts impure(msg)
-    foreign c exit terminal semipure(1)
+    foreign c {impure} puts(msg)
+    foreign c {terminal,semipure} exit(1)
 }

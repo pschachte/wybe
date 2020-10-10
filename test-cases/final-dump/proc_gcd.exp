@@ -31,7 +31,7 @@ gen$1 > (2 calls)
 0: gen$1(a#0:wybe.int, b#0:wybe.int, io#0:wybe.phantom, t#0:wybe.int, x#0:wybe.int, y#0:wybe.int, ?r#0:wybe.int, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp ne(y#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_ne(y#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(~x#0:wybe.int, ?r#0:wybe.int) @proc_gcd:19:3

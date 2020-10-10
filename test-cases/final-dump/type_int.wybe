@@ -7,10 +7,10 @@ pub type myint is signed {
     pub def -(x:myint,?y:myint,z:myint) { ?y = foreign llvm sub(z,x) }
     pub def *(x:myint,y:myint):myint = foreign llvm mul(x,y)
     pub def /(x:myint,y:myint):myint = foreign llvm sdiv(x,y)
-    pub def =(x:myint,y:myint):bool = foreign llvm icmp eq(x,y)
-    pub def /=(x:myint,y:myint):bool = foreign llvm icmp ne(x,y)
-    pub def <(x:myint,y:myint):bool = foreign llvm icmp slt(x,y)
-    pub def <=(x:myint,y:myint):bool = foreign llvm icmp sle(x,y)
-    pub def >(x:myint,y:myint):bool = foreign llvm icmp sgt(x,y)
-    pub def >=(x:myint,y:myint):bool = foreign llvm icmp sge(x,y)
+    pub def =(x:myint,y:myint):bool = foreign llvm icmp_eq(x,y)
+    pub def /=(x:myint,y:myint):bool = foreign llvm icmp_ne(x,y)
+    pub def <(x:myint,y:myint):bool = foreign llvm icmp_slt(x,y)
+    pub def <=(x:myint,y:myint):bool = foreign llvm icmp_sle(x,y)
+    pub def >(x:myint,y:myint):bool = foreign llvm icmp_sgt(x,y)
+    pub def >=(x:myint,y:myint):bool = foreign llvm icmp_sge(x,y)
 }

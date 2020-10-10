@@ -14,13 +14,13 @@ nested_if > public (0 calls)
 0: nested_if(i#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp eq(i#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_eq(i#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
     case ~tmp$3#0:wybe.bool of
     0:
-        foreign llvm icmp eq(i#0:wybe.int, 1001:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp_eq(i#0:wybe.int, 1001:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
         case ~tmp$2#0:wybe.bool of
         0:
-            foreign llvm icmp eq(~i#0:wybe.int, 2:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp_eq(~i#0:wybe.int, 2:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
             case ~tmp$1#0:wybe.bool of
             0:
                 foreign c print_string("other":wybe.string, ~#io#0:wybe.phantom, ?tmp$12#0:wybe.phantom) @wybe:nn:nn

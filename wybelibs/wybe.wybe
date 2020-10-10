@@ -142,11 +142,11 @@ pub module command_line {
 
     # Exit right away with the specified code (0 = successful termination).
     pub def {terminal,semipure} exit(code:int) {
-        foreign c exit terminal semipure(code)
+        foreign c {terminal,semipure} exit(code)
     }
 
     # Print an error message and abort the computation.
     pub def {terminal,semipure} error(message:string) {
-        foreign c error_exit terminal semipure(message)
+        foreign c {terminal,semipure} error_exit(message)
     }
 }

@@ -22,7 +22,7 @@ gen$1 > (2 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign c read_char(?c#0:wybe.char, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-    foreign llvm icmp ne(c#0:wybe.char, 'a':wybe.char, ?tmp$0#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_ne(c#0:wybe.char, 'a':wybe.char, ?tmp$0#0:wybe.bool) @wybe:nn:nn
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(~argc#0:wybe.int, ?argc#1:wybe.int)

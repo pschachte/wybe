@@ -86,7 +86,7 @@ entry:
     foreign lpvm access($right#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.string)
     foreign lpvm access(~$right#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.string)
     foreign c strcmp(~tmp$3#0:wybe.string, ~tmp$5#0:wybe.string, ?tmp$7#0:wybe.int) @wybe:nn:nn
-    foreign llvm icmp eq(~tmp$7#0:wybe.int, 0:wybe.int, ?tmp$8#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_eq(~tmp$7#0:wybe.int, 0:wybe.int, ?tmp$8#0:wybe.bool) @wybe:nn:nn
     case ~tmp$8#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
@@ -94,7 +94,7 @@ entry:
 
     1:
         foreign c strcmp(~tmp$4#0:wybe.string, ~tmp$6#0:wybe.string, ?tmp$9#0:wybe.int) @wybe:nn:nn
-        foreign llvm icmp eq(~tmp$9#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp_eq(~tmp$9#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
         foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -108,14 +108,14 @@ entry:
     foreign lpvm access($right#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$firstname#0:wybe.string)
     foreign lpvm access(~$right#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$lastname#0:wybe.string)
     foreign c strcmp(~$left$firstname#0:wybe.string, ~$right$firstname#0:wybe.string, ?tmp$7#0:wybe.int) @wybe:nn:nn
-    foreign llvm icmp eq(~tmp$7#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_eq(~tmp$7#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
         foreign c strcmp(~$left$lastname#0:wybe.string, ~$right$lastname#0:wybe.string, ?tmp$10#0:wybe.int) @wybe:nn:nn
-        foreign llvm icmp eq(~tmp$10#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp_eq(~tmp$10#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
 
 
 

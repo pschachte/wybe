@@ -1,0 +1,7 @@
+# test cases for purity errors
+
+pub def not_really_pure:int = something_impure
+
+pub def {impure} something_impure:int = 42
+
+pub def also_not_pure:int = foreign llvm {impure} mul(6:int, 7:int)

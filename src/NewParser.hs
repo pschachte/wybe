@@ -215,7 +215,7 @@ fromUseItemParser v = do
 procOrFuncItemParser :: Visibility -> Parser Item
 procOrFuncItemParser vis = do
     pos <- tokenPosition <$> ident "def"
-    modifiers <- option [] $ betweenB Brace (identString `sepBy` comma)
+    modifiers <- modifierList
     -- det <- determinism
     name <- funcNamePlaced <?> "no keywords"
     params <- option [] $ betweenB Paren (procParamParser `sepBy` comma)
@@ -262,6 +262,11 @@ funcProtoParser = do
     rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
     return $ maybePlace (ProcProto (content pName) params $fromList rs)
              (place pName)
+
+
+-- |Parse an optional list of identifiers enclosed in braces
+modifierList :: Parser [Ident]
+modifierList = option [] $ betweenB Brace (identString `sepBy` comma)
 
 
 -- | Extract a ProcModifiers from a list of identifiers.  If the Bool is False,
@@ -777,8 +782,8 @@ foreignExp :: Parser (Placed Exp)
 foreignExp = do
     pos <- tokenPosition <$> ident "foreign"
     group <- identString
+    flags <- modifierList
     fname <- content <$> funcNamePlaced
-    flags <- many identString
     args <- argListParser
     return $ Placed (ForeignFn group fname flags args) pos
 

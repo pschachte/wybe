@@ -27,8 +27,8 @@ gen$1 > (2 calls)
     foreign c print_string(prompt#0:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
     foreign c print_string(" (y/n) ":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
     foreign c read_char(?response#0:wybe.char, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
-    foreign llvm icmp ne(response#0:wybe.char, 'y':wybe.char, ?tmp$8#0:wybe.bool) @wybe:nn:nn
-    foreign llvm icmp ne(response#0:wybe.char, 'Y':wybe.char, ?tmp$9#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_ne(response#0:wybe.char, 'y':wybe.char, ?tmp$8#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_ne(response#0:wybe.char, 'Y':wybe.char, ?tmp$9#0:wybe.bool) @wybe:nn:nn
     foreign llvm and(~tmp$8#0:wybe.bool, ~tmp$9#0:wybe.bool, ?tmp$10#0:wybe.bool) @wybe:nn:nn
     foreign llvm xor(~tmp$10#0:wybe.bool, 1:wybe.bool, ?tmp$0#0:wybe.bool) @wybe:nn:nn
     proc_yorn.is_yes_or_no<0>(~response#0:wybe.char, ?tmp$1#0:wybe.bool) #4 @proc_yorn:6:18
@@ -48,8 +48,8 @@ is_yes > {inline} (4 calls)
 0: is_yes(ch#0:wybe.char, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp ne(ch#0:wybe.char, 'y':wybe.char, ?tmp$2#0:wybe.bool) @wybe:nn:nn
-    foreign llvm icmp ne(~ch#0:wybe.char, 'Y':wybe.char, ?tmp$3#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_ne(ch#0:wybe.char, 'y':wybe.char, ?tmp$2#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_ne(~ch#0:wybe.char, 'Y':wybe.char, ?tmp$3#0:wybe.bool) @wybe:nn:nn
     foreign llvm and(~tmp$2#0:wybe.bool, ~tmp$3#0:wybe.bool, ?tmp$1#0:wybe.bool) @wybe:nn:nn
     foreign llvm xor(~tmp$1#0:wybe.bool, 1:wybe.bool, ?$#0:wybe.bool) @wybe:nn:nn
 
@@ -58,13 +58,13 @@ is_yes_or_no > (3 calls)
 0: is_yes_or_no(ch#0:wybe.char, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp ne(ch#0:wybe.char, 'y':wybe.char, ?tmp$6#0:wybe.bool) @wybe:nn:nn
-    foreign llvm icmp ne(ch#0:wybe.char, 'Y':wybe.char, ?tmp$7#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_ne(ch#0:wybe.char, 'y':wybe.char, ?tmp$6#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_ne(ch#0:wybe.char, 'Y':wybe.char, ?tmp$7#0:wybe.bool) @wybe:nn:nn
     foreign llvm and(~tmp$6#0:wybe.bool, ~tmp$7#0:wybe.bool, ?tmp$8#0:wybe.bool) @wybe:nn:nn
     foreign llvm xor(~tmp$8#0:wybe.bool, 1:wybe.bool, ?tmp$2#0:wybe.bool) @wybe:nn:nn
-    foreign llvm icmp eq(ch#0:wybe.char, 'n':wybe.char, ?tmp$3#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_eq(ch#0:wybe.char, 'n':wybe.char, ?tmp$3#0:wybe.bool) @wybe:nn:nn
     foreign llvm or(~tmp$2#0:wybe.bool, ~tmp$3#0:wybe.bool, ?tmp$1#0:wybe.bool) @wybe:nn:nn
-    foreign llvm icmp eq(~ch#0:wybe.char, 'N':wybe.char, ?tmp$4#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_eq(~ch#0:wybe.char, 'N':wybe.char, ?tmp$4#0:wybe.bool) @wybe:nn:nn
     foreign llvm or(~tmp$1#0:wybe.bool, ~tmp$4#0:wybe.bool, ?$#0:wybe.bool) @wybe:nn:nn
 
 
