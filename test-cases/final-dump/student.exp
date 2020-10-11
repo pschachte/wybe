@@ -250,7 +250,7 @@ name > public {inline} (0 calls)
 1: name($rec#0:student.course, ?$rec#1:student.course, $field#0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate noalias(~%$rec#0:student.course, ?%$rec#1:student.course, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
+    foreign lpvm {noalias} mutate(~%$rec#0:student.course, ?%$rec#1:student.course, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
 
   LLVM code       :
 
@@ -509,7 +509,7 @@ major > public {inline} (0 calls)
 1: major($rec#0:student.student, ?$rec#1:student.student, $field#0:student.course):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate noalias(~%$rec#0:student.student, ?%$rec#1:student.student, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:student.course)
+    foreign lpvm {noalias} mutate(~%$rec#0:student.student, ?%$rec#1:student.student, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:student.course)
 
 
 student > public {inline} (0 calls)

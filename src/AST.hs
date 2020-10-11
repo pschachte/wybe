@@ -996,12 +996,18 @@ setImpurity impurity mods = mods {modifierImpurity=impurity}
 
 -- | How to display ProcModifiers
 showProcModifiers :: ProcModifiers -> String
-showProcModifiers (ProcModifiers Det MayInline Pure _ _) = ""
 showProcModifiers (ProcModifiers detism inlining impurity _ _) =
-    "{" ++ intercalate "," (List.filter (not . List.null) [d,i,p]) ++ "} "
+    showFlags $ List.filter (not . List.null) [d,i,p]
     where d = determinismName detism
           i = inliningName inlining
           p = impurityName impurity
+
+
+-- | Display a list of strings separated by commas and surrounded with braces
+-- and followed by a space, or nothing if the list is empty.
+showFlags :: [String] -> String
+showFlags [] = ""
+showFlags flags = "{" ++ intercalate "," flags ++ "} "
 
 
 -- |Add the specified proc definition to the current module.
@@ -3001,8 +3007,7 @@ showPrim _ (PrimCall id pspec args) =
         show pspec ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
             ++ " #" ++ show id 
 showPrim _ (PrimForeign lang name flags args) =
-        "foreign " ++ lang ++ " " ++
-        name ++ (if List.null flags then "" else " " ++ unwords flags) ++
+        "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
         "(" ++ intercalate ", " (List.map show args) ++ ")"
 showPrim _ (PrimTest arg) =
         "test " ++ show arg
@@ -3021,8 +3026,7 @@ showStmt _ (ProcCall maybeMod name procID detism resourceful args) =
     ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
     name ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
 showStmt _ (ForeignCall lang name flags args) =
-    "foreign " ++ lang ++ " " ++ name ++
-    (if List.null flags then "" else " " ++ unwords flags) ++
+    "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
     "(" ++ intercalate ", " (List.map show args) ++ ")"
 showStmt _ (TestBool test) =
     "testbool " ++ show test

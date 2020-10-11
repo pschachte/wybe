@@ -41,7 +41,7 @@ AFTER EVERYTHING:
     position.printPosition<0>(r#0:position.position, ~#io#12:wybe.phantom, ?#io#13:wybe.phantom) #17 @alias_recursion1:34:2
     foreign c print_string("--- modify pa.x: ":wybe.string, ~#io#13:wybe.phantom, ?tmp$36#0:wybe.phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$36#0:wybe.phantom, ?#io#14:wybe.phantom) @wybe:nn:nn
-    foreign lpvm mutate noalias(~tmp$0#0:position.position, ?%pa#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, -1000:wybe.int)
+    foreign lpvm {noalias} mutate(~tmp$0#0:position.position, ?%pa#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, -1000:wybe.int)
     foreign c print_string("expect pa(-1000,101):":wybe.string, ~#io#14:wybe.phantom, ?#io#15:wybe.phantom) @wybe:nn:nn
     position.printPosition<0>(~pa#1:position.position, ~#io#15:wybe.phantom, ?#io#16:wybe.phantom) #22 @alias_recursion1:39:2
     foreign c print_string("expect r still (-200,-201):":wybe.string, ~#io#16:wybe.phantom, ?#io#17:wybe.phantom) @wybe:nn:nn
@@ -368,7 +368,7 @@ x > public {inline} (0 calls)
 1: x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate noalias(~%$rec#0:position.position, ?%$rec#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm {noalias} mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 y > public {inline} (0 calls)
@@ -380,7 +380,7 @@ y > public {inline} (0 calls)
 1: y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate noalias(~%$rec#0:position.position, ?%$rec#1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm {noalias} mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
   LLVM code       :
 

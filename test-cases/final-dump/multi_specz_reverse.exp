@@ -491,7 +491,7 @@ tail > public {inline} (0 calls)
         foreign llvm move(~$rec#0:multi_specz_reverse.intlist, ?$rec#1:multi_specz_reverse.intlist)
 
     1:
-        foreign lpvm mutate noalias(~%$rec#0:multi_specz_reverse.intlist, ?%$rec#1:multi_specz_reverse.intlist, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:multi_specz_reverse.intlist)
+        foreign lpvm {noalias} mutate(~%$rec#0:multi_specz_reverse.intlist, ?%$rec#1:multi_specz_reverse.intlist, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:multi_specz_reverse.intlist)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 

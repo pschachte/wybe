@@ -293,7 +293,7 @@ tail > public {inline} (0 calls)
         foreign llvm move(~$rec#0:int_list.int_list, ?$rec#1:int_list.int_list)
 
     1:
-        foreign lpvm mutate noalias(~%$rec#0:int_list.int_list, ?%$rec#1:int_list.int_list, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:int_list.int_list)
+        foreign lpvm {noalias} mutate(~%$rec#0:int_list.int_list, ?%$rec#1:int_list.int_list, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:int_list.int_list)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 

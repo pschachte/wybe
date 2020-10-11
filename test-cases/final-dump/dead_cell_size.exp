@@ -827,7 +827,7 @@ tb1 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t)
 
         1:
-            foreign lpvm mutate noalias(~%$rec#0:dead_cell_size.t, ?%$rec#1:dead_cell_size.t, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+            foreign lpvm {noalias} mutate(~%$rec#0:dead_cell_size.t, ?%$rec#1:dead_cell_size.t, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -907,7 +907,7 @@ tc1 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t)
 
         1:
-            foreign lpvm mutate noalias(~%$rec#0:dead_cell_size.t, ?%$rec#1:dead_cell_size.t, -1:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
+            foreign lpvm {noalias} mutate(~%$rec#0:dead_cell_size.t, ?%$rec#1:dead_cell_size.t, -1:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -953,7 +953,7 @@ tc2 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t)
 
         1:
-            foreign lpvm mutate noalias(~%$rec#0:dead_cell_size.t, ?%$rec#1:dead_cell_size.t, 7:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
+            foreign lpvm {noalias} mutate(~%$rec#0:dead_cell_size.t, ?%$rec#1:dead_cell_size.t, 7:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -999,7 +999,7 @@ tc3 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t)
 
         1:
-            foreign lpvm mutate noalias(~%$rec#0:dead_cell_size.t, ?%$rec#1:dead_cell_size.t, 15:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
+            foreign lpvm {noalias} mutate(~%$rec#0:dead_cell_size.t, ?%$rec#1:dead_cell_size.t, 15:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -1075,7 +1075,7 @@ td1 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t)
 
         1:
-            foreign lpvm mutate noalias(~%$rec#0:dead_cell_size.t, ?%$rec#1:dead_cell_size.t, -2:wybe.int, 0:wybe.int, 8:wybe.int, 2:wybe.int, ~$field#0:wybe.int)
+            foreign lpvm {noalias} mutate(~%$rec#0:dead_cell_size.t, ?%$rec#1:dead_cell_size.t, -2:wybe.int, 0:wybe.int, 8:wybe.int, 2:wybe.int, ~$field#0:wybe.int)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -1742,7 +1742,7 @@ a > public {inline} (0 calls)
         foreign llvm move(~$rec#0:dead_cell_size.t2, ?$rec#1:dead_cell_size.t2)
 
     1:
-        foreign lpvm mutate noalias(~%$rec#0:dead_cell_size.t2, ?%$rec#1:dead_cell_size.t2, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm {noalias} mutate(~%$rec#0:dead_cell_size.t2, ?%$rec#1:dead_cell_size.t2, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
