@@ -176,6 +176,8 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Actual determinism of proc body weaker than declared
                | ReasonPurity String Impurity Impurity OptPos
                    -- ^Calling a proc or foreign in a more pure context
+               | ReasonLooksPure ProcName Impurity OptPos
+                   -- ^Calling a not-pure proc without ! marker
                | ReasonForeignLanguage String String OptPos
                    -- ^Foreign call with bogus language
                | ReasonForeignArgType String Int OptPos
@@ -273,6 +275,10 @@ instance Show TypeError where
         makeMessage pos $
         "Calling " ++ impurityFullName stmtPurity ++ " " ++ descrip
         ++ ", expecting at least " ++ impurityFullName contextPurity
+    show (ReasonLooksPure name impurity pos) =
+        makeMessage pos $
+        "Calling " ++ impurityFullName impurity ++ " proc " ++ name
+        ++ " without ! non-purity marker"
     show (ReasonForeignLanguage lang instr pos) =
         makeMessage pos $
         "Foreign call '" ++ instr ++ "' with unknown language '" ++ lang ++ "'"
@@ -1368,6 +1374,8 @@ modecheckStmt m name defPos typing delayed assigned detism
                           && not (matchDetism `determinismLEQ` detism)]
                         ++ [ReasonPurity procIdent matchImpurity impurity pos
                            | not (matchImpurity <= impurity)]
+                        ++ [ReasonLooksPure (show matchProc) matchImpurity pos
+                           | matchImpurity > Pure && not resourceful]
                         ++ [ReasonResourceUnavail name res pos
                            | res <- Set.toList
                               $ missingBindings (procInfoInRes match) assigned]

@@ -145,9 +145,9 @@ pub module logging {
     pub def {semipure} logmsg(x:char) { foreign c {impure} log_char(x) }
     pub def {semipure} logmsg(x:string) { foreign c {impure} log_string(x) }
     pub def {semipure} logmsg(x:bool) {
-       logmsg(if x then "true" else "false")
+       !logmsg(if x then "true" else "false")
     }
-    pub def {semipure} lognl { logmsg('\n') }
+    pub def {semipure} lognl { !logmsg('\n') }
 }
 
 

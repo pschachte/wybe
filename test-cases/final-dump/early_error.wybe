@@ -1,5 +1,5 @@
 !println("should print this")
-my_error("should print this error message")
+!my_error("should print this error message")
 !println("shouldn't print this")
 
 def {terminal,semipure} my_error(msg:string) {

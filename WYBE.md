@@ -775,6 +775,12 @@ specify that the proc is effectively impure, meaning that calls to it are not su
 - `impure`  
 the proc is impure, so calls to it are not subject to normal optimisations, and its callers should also be considered impure unless explicitly promised to be pure with a `pure` modifier.
 
+Any call to an `impure` or `semipure` proc must be preceded with the `!` annotation, as if it were a call to a proc that used resources.  This reminds the reader that the call is not pure, and that they must be careful when reading or modifying the code.  For example, to prematurely exit the program, you can insert the following proc call:
+
+```
+!exit(1)
+```
+
 If you wish to include other modifiers along with one of these, include them all between the braces, in any order, separated by commas.
 
 
