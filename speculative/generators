@@ -1,0 +1,51 @@
+# Wybe generators are nondeterministic procs that can be used in for loops.
+
+
+pub type int_seq = { int_seq(low:int, step:int, high:int) }
+
+pub def {generator} ?i:int in seq:int_seq) {
+    low(seq) <= high(seq)
+    { ?i = low(seq)
+    | low(!seq) += step(seq)
+      ?i in seq
+    }
+}
+
+
+pub type list(t) { [] | [head:t | tail:list(t)] }
+
+pub def {generator} ?elt:t in list:list(t) {
+    { ?elt = head(list)
+    | ?elt in tail(list)
+    }
+}
+
+
+pub def {test} elt:t in list:list(t) {
+    {   elt = head(list)
+    ||  elt in tail(list)
+    }
+}
+
+
+pub type tree(t) { empty | node(left:tree(t), label:t, right:tree(t)) }
+
+pub def {generator} tree_elt(?elt:t, ?depth:int, tree:tree(t)) {
+    tree = node(?left, ?label, ?right)
+    {   tree_elt(?elt, ?depth1, left)
+        ?depth = depth1 + 1
+    |   ?elt = label
+        ?depth = 0
+    |   tree_elt(?elt, ?depth1, right)
+        ?depth = depth1 + 1
+    }
+}
+
+# equivalent alternative
+pub def {generator} tree_elt(?elt:t, ?depth:int, tree:tree(t)) {
+    {   tree_elt(?elt, ?depth - 1, left(tree))
+    |   ?elt = label(tree)
+        ?depth = 0
+    |   tree_elt(?elt, ?depth - 1, right(tree))
+    }
+}
