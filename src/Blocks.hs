@@ -1038,7 +1038,7 @@ llvmMapBinop =
             ("add",  (iadd, IntFamily, id)),
             ("sub",  (isub, IntFamily, id)),
             ("mul",  (imul, IntFamily, id)),
-            ("div",  (idiv, IntFamily, id)),
+            ("udiv", (idiv, IntFamily, id)),
             ("sdiv", (sdiv, IntFamily, id)),
             ("urem", (urem, IntFamily, id)),
             ("srem", (srem, IntFamily, id)),

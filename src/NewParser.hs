@@ -634,7 +634,7 @@ completeOperatorTable =
     , [ binary "^" AssocLeft ]
     , [ binary "*"   AssocLeft
       , binary "/"   AssocLeft
-      , binary "mod" AssocLeft
+      , binary "%"   AssocLeft
       ]
     , [ binary "+" AssocLeft
       , binary "-" AssocLeft

@@ -853,7 +853,7 @@ Integer addition
 Integer subtraction
 - foreign llvm mul(arg1:int, arg2:int):int   
 Integer multiplication
-- foreign llvm div(arg1:int, arg2:int):int  
+- foreign llvm udiv(arg1:int, arg2:int):int  
 unsigned integer division
 - foreign llvm sdiv(arg1:int, arg2:int):int  
 Signed integer division
