@@ -24,6 +24,22 @@ int print_string(const char *s) {
     return printf("%s", s);
 }
 
+int log_int(int x) {
+  return fprintf(stderr, "%d", x);
+}
+
+int log_float(double x) {
+  return fprintf(stderr, "%f", x);
+}
+
+int log_string(const char *s) {
+  return fprintf(stderr, "%s", s);
+}
+
+int log_char(const char c) {
+  return fprintf(stderr, "%c", c);
+}
+
 int read_char() {
     int ch;
     ch = getchar();
