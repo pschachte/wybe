@@ -41,6 +41,34 @@ pub type int is signed {
 }
 
 
+pub type count is unsigned {
+    pub def +(x:count,y:count):count = foreign llvm add(x,y)
+    pub def {partial} +(?x:count,y:count,z:count) {
+        (z >= y)
+        ?x = foreign llvm sub(z,y)
+    }
+    pub def {partial} +(x:count,?y:count,z:count) {
+        (z >= x)
+        ?y = foreign llvm sub(z,x)
+    }
+    pub def {partial} -(x:count,y:count):count =
+        foreign llvm sub(x,y) where { (y >= x) }
+    pub def -(?x:count,y:count,z:count) { ?x = foreign llvm add(z,y) }
+    pub def -(x:count,?y:count,z:count) { ?y = foreign llvm sub(z,x) }
+    pub def *(x:count,y:count):count = foreign llvm mul(x,y)
+    pub def /(x:count,y:count):count = foreign llvm udiv(x,y)
+    pub def %(x:count,y:count):count = foreign llvm urem(x,y)
+    pub def /=(x:count,y:count):bool = foreign llvm icmp_ne(x,y)
+    pub def <(x:count,y:count):bool = foreign llvm icmp_slt(x,y)
+    pub def <=(x:count,y:count):bool = foreign llvm icmp_sle(x,y)
+    pub def >(x:count,y:count):bool = foreign llvm icmp_sgt(x,y)
+    pub def >=(x:count,y:count):bool = foreign llvm icmp_sge(x,y)
+    pub def =(x:count, y:count):bool = foreign llvm icmp_eq(x,y)
+    pub def incr(!x:count) { ?x = x + 1:count }
+    pub def {partial} decr(!x:count) { ?x = x - 1:count }
+}
+
+
 pub type float is 64 bit float {
     pub def +(x:float,y:float):float = foreign llvm fadd(x,y)
     pub def +(?x:float,y:float,z:float) { ?x = foreign llvm fsub(z,y) }
