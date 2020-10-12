@@ -59,10 +59,10 @@ pub type count is unsigned {
     pub def /(x:count,y:count):count = foreign llvm udiv(x,y)
     pub def %(x:count,y:count):count = foreign llvm urem(x,y)
     pub def /=(x:count,y:count):bool = foreign llvm icmp_ne(x,y)
-    pub def <(x:count,y:count):bool = foreign llvm icmp_slt(x,y)
-    pub def <=(x:count,y:count):bool = foreign llvm icmp_sle(x,y)
-    pub def >(x:count,y:count):bool = foreign llvm icmp_sgt(x,y)
-    pub def >=(x:count,y:count):bool = foreign llvm icmp_sge(x,y)
+    pub def <(x:count,y:count):bool = foreign llvm icmp_ult(x,y)
+    pub def <=(x:count,y:count):bool = foreign llvm icmp_ule(x,y)
+    pub def >(x:count,y:count):bool = foreign llvm icmp_ugt(x,y)
+    pub def >=(x:count,y:count):bool = foreign llvm icmp_uge(x,y)
     pub def =(x:count, y:count):bool = foreign llvm icmp_eq(x,y)
     pub def incr(!x:count) { ?x = x + 1:count }
     pub def {partial} decr(!x:count) { ?x = x - 1:count }
