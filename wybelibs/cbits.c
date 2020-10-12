@@ -7,13 +7,14 @@
 #include <gc.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <math.h>
 
 unsigned long long g_malloc_count = 0;
 
 int64_t print_int(int64_t x) {
-    return (int64_t)printf("%ld", x);
+    return (int64_t)printf("%"PRId64, x);
 }
 
 int64_t print_float(double x) {
@@ -25,7 +26,7 @@ int64_t print_string(const char *s) {
 }
 
 int64_t log_int(int64_t x) {
-  return (int64_t)fprintf(stderr, "%ld", x);
+  return (int64_t)fprintf(stderr, "%"PRId64, x);
 }
 
 int64_t log_float(double x) {
@@ -42,13 +43,13 @@ int64_t log_char(const char c) {
 
 int64_t read_char() {
     int64_t ch;
-    ch = getchar();
+    ch = (int64_t)getchar();
     return ch;
 }
 
 int64_t read_int() {
     int64_t x;
-    scanf("%ld", &x);
+    scanf("%"PRId64, &x);
     return x;
 }
 
