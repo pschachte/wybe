@@ -1,0 +1,16 @@
+def test_read_int() use !io{
+    !read(?a:int)
+    !read(?b:int)
+    !print("a = ") !println(a)
+    !print("b = ") !println(b)
+    !print("a + b = ") !println(a+b)
+    !print("a - b = ") !println(a-b)
+    if { a > b ::
+        !println("a > b")
+    | otherwise ::
+        !println("a <= b")
+    }
+}
+
+!test_read_int()
+!test_read_int()
