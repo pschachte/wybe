@@ -186,6 +186,8 @@ transformStmt tmp (Not stmt) pos = do
     return ([maybePlace (Not $ makeSingleStmt stmt') pos], tmp')
 transformStmt tmp Nop _ =
     return ([], tmp)
+transformStmt tmp Fail pos =
+    return ([maybePlace Fail pos], tmp)
 transformStmt tmp (Cond test thn els defVars) pos = do
     (test',tmp1) <- placedApplyM (transformStmt tmp) test
     (thn',tmp2) <- transformBody tmp1 thn

@@ -16,8 +16,9 @@
 module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
-  Determinism(..), determinismLEQ, determinismMeet, determinismJoin,
-  determinismSeq, determinismTerminal, determinismName,
+  Determinism(..), determinismLEQ, determinismJoin,
+  determinismFail, determinismSucceed,
+  determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
   TypeProto(..), TypeSpec(..), TypeRef(..), VarDict, TypeImpln(..),
@@ -163,11 +164,27 @@ determinismLEQ Failure Det = False
 determinismLEQ det1 det2 = det1 <= det2
 
 
--- |Lattice meet for Determinism.  Probably not needed
-determinismMeet :: Determinism -> Determinism -> Determinism
-determinismMeet Failure Det = Terminal
-determinismMeet Det Failure = Terminal
-determinismMeet det1 det2 = min det1 det2
+-- -- |Lattice meet for Determinism.  Probably not needed
+-- determinismMeet :: Determinism -> Determinism -> Determinism
+-- determinismMeet Failure Det = Terminal
+-- determinismMeet Det Failure = Terminal
+-- determinismMeet det1 det2 = min det1 det2
+
+
+-- |Force the specified determinism to succeed, if it is reachable.
+determinismSucceed :: Determinism -> Determinism
+determinismSucceed Terminal = Terminal
+determinismSucceed Failure  = Det
+determinismSucceed Det      = Det
+determinismSucceed SemiDet  = Det
+
+
+-- |Force the specified determinism to fail, if it is reachable.
+determinismFail  :: Determinism -> Determinism
+determinismFail  Terminal = Terminal
+determinismFail  Failure  = Failure
+determinismFail  Det      = Failure
+determinismFail  SemiDet  = Failure
 
 
 -- |Lattice join for Determinism.
@@ -188,19 +205,19 @@ determinismSeq _        Failure  = Failure
 determinismSeq det1     det2     = max det1 det2
 
 
--- |Does this determinism reflect a state that will definitely not continue to
--- the next statement?
-determinismTerminal :: Determinism -> Bool
-determinismTerminal Terminal = True
-determinismTerminal Failure  = True
-determinismTerminal Det      = False
-determinismTerminal SemiDet  = False
+-- |Does this determinism reflect a state that could continue to the next
+-- statement?
+determinismProceding :: Determinism -> Bool
+determinismProceding Terminal = False
+determinismProceding Failure  = False
+determinismProceding Det      = True
+determinismProceding SemiDet  = True
 
 
 -- |A suitable printable name for each determinism.
 determinismName :: Determinism -> String
 determinismName Terminal = "terminal"
-determinismName Failure  = "failure"
+determinismName Failure  = "failing"
 determinismName Det      = ""
 determinismName SemiDet  = "test"
 
@@ -1734,7 +1751,7 @@ flagsDetism = List.foldl flagDetism Det
 -- | Gather the Determinism of a flag
 flagDetism :: Determinism  -> String -> Determinism 
 flagDetism _ "terminal" = Terminal
-flagDetism _ "failure"  = Failure
+flagDetism _ "failing"  = Failure
 flagDetism _ "det"      = Det
 flagDetism _ "semidet"  = SemiDet
 flagDetism detism _     = detism
@@ -2041,6 +2058,7 @@ foldStmt' sfn efn val (Or stmts _) = foldStmts sfn efn val stmts
 foldStmt' sfn efn val (Not negated) = foldStmt sfn efn val $ content negated
 foldStmt' sfn efn val (TestBool exp) = foldExp sfn efn val exp
 foldStmt' _   _   val Nop = val
+foldStmt' _   _   val Fail = val
 foldStmt' sfn efn val (Loop body _) = foldStmts sfn efn val body
 foldStmt' sfn efn val (UseResources _ body) = foldStmts sfn efn val body
 -- foldStmt' sfn efn val For{} =
@@ -2298,8 +2316,10 @@ data Stmt
      | ForeignCall Ident Ident [Ident] [Placed Exp]
      -- |Do nothing (and succeed)
      | Nop
+     -- |Do nothing (and succeed)
+     | Fail
 
-     -- After unbranching, this con only appear as the last Stmt in a body.
+     -- After unbranching, this can only appear as the last Stmt in a body.
 
      -- |A conditional; execute the first (SemiDet) Stmt; if it succeeds,
      --  execute the second Stmts, else execute the third.  The VarDict
@@ -3060,6 +3080,7 @@ showStmt indent (UseResources resources stmts) =
     ++ showBody (indent + 4) stmts
     ++ startLine indent ++ "}"
 showStmt _ (Nop) = "nop"
+showStmt _ (Fail) = "fail"
 -- showStmt _ (For itr gen) =
 --     "for " ++ show itr ++ " in " ++ show gen
 showStmt _ (Break) = "break"

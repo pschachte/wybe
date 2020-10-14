@@ -448,6 +448,9 @@ unbranchStmt _ (UseResources _ _) _ _ _ _ =
 unbranchStmt detism Nop _ stmts alt sense = do
     logUnbranch "Unbranching a Nop"
     unbranchStmts detism stmts alt sense     -- might as well filter out Nops
+unbranchStmt detism Fail pos stmts alt sense = do
+    logUnbranch "Unbranching a Fail"
+    return [maybePlace Fail pos] -- no execution after Fail
 unbranchStmt _ Break _ _ _ _ = do
     logUnbranch "Unbranching a Break"
     brk <- getLoopBreak

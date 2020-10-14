@@ -846,6 +846,7 @@ bodyCalls (pstmt:pstmts) detism = do
         Or stmts _ -> bodyCalls stmts detism
         Not stmt -> bodyCalls [stmt] detism
         Nop -> return rest
+        Fail -> return rest
         Cond cond thn els _ -> do
           -- modify $ constrainVarType (ReasonCond pos)
           --          (expVar $ content expr) boolType
@@ -1154,20 +1155,20 @@ addBindings vars st@BindingState{bindingDetism=Failure}  = st
 addBindings vars st@BindingState{bindingDetism=Det} =
     st {bindingVars=(vars `Set.union`) <$> bindingVars st}
 addBindings vars st@BindingState{bindingDetism=SemiDet} =
-    -- Was:  BindingState Det ((vars `Set.union`) <$> boundVars) breakVars: always force Det?
     st {bindingVars=(vars `Set.union`) <$> bindingVars st}
 
 
 -- | Returns the deterministic version of the specified binding state.
 forceDet :: BindingState -> BindingState
 forceDet st =
-    st {bindingDetism = bindingDetism st `determinismMeet` Det}
+    st {bindingDetism = determinismSucceed $ bindingDetism st}
 
 
 -- | Returns the definitely failing version of the specified binding state.
 forceFailure :: BindingState -> BindingState
 forceFailure st =
-        st {bindingDetism = bindingDetism st `determinismMeet` Failure}
+        st {bindingVars = Nothing,
+            bindingDetism = determinismFail $ bindingDetism st}
 
 
 -- | Returns the binding state after a statement with the specified determinism that
@@ -1178,19 +1179,19 @@ bindingStateSeq stmtDetism impurity outputs st =
     st {bindingDetism=detism', bindingImpurity=impurity', bindingVars=vars'}
   where detism' = bindingDetism st `determinismSeq` stmtDetism
         impurity' = bindingImpurity st `impuritySeq` impurity
-        vars'   = if determinismTerminal $ bindingDetism st 
-                  then Nothing
-                  else (outputs `Set.union`) <$> bindingVars st
+        vars'   = if determinismProceding detism' 
+                  then (outputs `Set.union`) <$> bindingVars st
+                  else Nothing
 
 
--- | Returns the binding state after a statement with the specified determinism that
---   definitely binds the specified variables.
+-- | Returns the binding state after a next statement entered in the specified
+-- binding state.
 bindingStateAfterNext :: BindingState -> BindingState
 bindingStateAfterNext st = st {bindingDetism=Terminal, bindingVars=Nothing}
 
 
--- | Returns the binding state after a statement with the specified determinism that
---   definitely binds the specified variables.
+-- | Returns the binding state after a break statement entered in the specified
+-- binding state.
 bindingStateAfterBreak :: BindingState -> BindingState
 bindingStateAfterBreak st =
     st {bindingDetism=Terminal, bindingVars=Nothing, bindingBreakVars=bvars}
@@ -1431,6 +1432,9 @@ modecheckStmt m name defPos typing delayed assigned detism
 modecheckStmt _ _ _ _ delayed assigned _ Nop pos = do
     logTypes $ "Mode checking Nop"
     return ([maybePlace Nop pos], delayed, assigned,[])
+modecheckStmt _ _ _ _ delayed assigned _ Fail pos = do
+    logTypes $ "Mode checking Fail"
+    return ([maybePlace Fail pos], delayed, forceFailure assigned,[])
 modecheckStmt m name defPos typing delayed assigned detism
     stmt@(Cond tstStmt thnStmts elsStmts _) pos = do
     logTypes $ "Mode checking conditional " ++ show stmt
@@ -1817,6 +1821,7 @@ checkStmtTyped name pos (UseResources _ stmts) _ppos =
 --     checkExpTyped name pos ("for generator" ++ showMaybeSourcePos ppos) $
 --                   content itr
 checkStmtTyped _ _ Nop _ = return ()
+checkStmtTyped _ _ Fail _ = return ()
 checkStmtTyped _ _ Break _ = return ()
 checkStmtTyped _ _ Next _ = return ()
 

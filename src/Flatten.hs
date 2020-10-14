@@ -252,6 +252,8 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
       _ -> do
         -- Must be a mode error:  both sides want to bind variables
         lift $ message Error "Cannot generate bindings on both sides of '='" pos
+flattenStmt' stmt@(ProcCall [] "fail" _ _ _ []) pos _ =
+    emit pos Fail
 flattenStmt' stmt@(ProcCall [] "break" _ _ _ []) pos _ =
     emit pos Break
 flattenStmt' stmt@(ProcCall [] "next" _ _ _ []) pos _ =
@@ -339,6 +341,7 @@ flattenStmt' (UseResources res body) pos detism = do
 --               ) pos detism
 --         _ -> shouldnt "Generator expression producing unexpected vars"
 flattenStmt' Nop pos _ = emit pos Nop
+flattenStmt' Fail pos _ = emit pos Fail
 flattenStmt' Break pos _ = emit pos Break
 flattenStmt' Next pos _ = emit pos Next
 
